@@ -78,6 +78,9 @@
 #
 #   Mark C. Miller, Thu Feb 22 08:04:47 PST 2007
 #   Fixed problem correctly posting fact of skipped test due to no changes
+#
+#   Mark C. Miller, Sat Feb 24 13:16:15 PST 2007
+#   Exclude files in 'lost+found' dir from checksum change testing
 #--------------------------------------------------------------------------------
 
 umask 002
@@ -179,7 +182,7 @@ cd /view/silo_VOBowner_test/data_vobs/Silo
 # First, see if we even need to run the tests
 #
 cleartool ls -recurse -view -short | grep -v md5sums_last.txt | xargs -n 1 rm -rf 2>/dev/null
-find . -type f \! -name "md5sums*.txt" -exec md5sum {} \; | grep -v .mvfs_ 1>md5sums_current.txt 2>&1
+find . -type f \! -name "md5sums*.txt" -exec md5sum {} \; | grep -v .mvfs_ | grep -v 'lost+found' 1>md5sums_current.txt 2>&1
 if test -e md5sums_last.txt; then
     if test "`diff md5sums_last.txt md5sums_current.txt`" = ""; then
         todaysDir=`waitForTodaysDir`
