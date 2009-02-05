@@ -2474,7 +2474,41 @@ db_hdf5_comprd(DBfile_hdf5 *dbfile, char *name, int ignore_force_single)
     return retval;
 }
 
-
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_fullname
+ *
+ * Purpose:     Given the current working directory name, the parent object
+ *              name as passed by the Silo library client and the child
+ *              object name as stored in the parent object, determine the
+ *              absolute, full path name of the child object.
+ *
+ * Return:      Success:     fully resolved full path name of child object
+ *
+ *              Failure:     0 
+ *-------------------------------------------------------------------------
+ */
+PRIVATE char * 
+db_hdf5_resolvename(DBfile *_dbfile,
+                    const char *parent_objname,
+                    const char *child_objname)
+{
+    static char cwgname[4096];
+    static char result[4096];
+    char *parent_objdirname;
+    char *parent_fullname;
+    char *child_fullname;
+
+    db_hdf5_GetDir(_dbfile, cwgname);
+    parent_objdirname = db_dirname(parent_objname);
+    parent_fullname = db_join_path(cwgname, parent_objdirname);
+    child_fullname = db_join_path(parent_fullname, child_objname);
+    strcpy(result, child_fullname);
+    free(parent_objdirname);
+    free(parent_fullname);
+    free(child_fullname);
+    return result;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_fullname
  *
@@ -4917,6 +4951,8 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
  *  Thomas R. Treadway, Fri Jul  7 12:44:38 PDT 2006
  *  Added support for DBOPT_REFERENCE in Curves
  *
+ *   Mark C. Miller, Thu Sep  7 10:50:55 PDT 2006
+ *   Added use of db_hdf5_resolvename for retrieval of x-data object
  *-------------------------------------------------------------------------
  */
 CALLBACK DBcurve *
@@ -4959,7 +4995,8 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
         if (NULL==(cu=DBAllocCurve())) return NULL;
         cu->npts = m.npts;
         cu->guihide = m.guihide;
-        if ((cu->datatype = db_hdf5_GetVarType(_dbfile, m.xvarname)) < 0)
+        if ((cu->datatype = db_hdf5_GetVarType(_dbfile, 
+                                db_hdf5_resolvename(_dbfile, name, m.xvarname))) < 0)
             cu->datatype = DB_FLOAT;
         if (cu->datatype == DB_DOUBLE && force_single_g)
             cu->datatype = DB_FLOAT;
@@ -5115,6 +5152,11 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
  *
  * Programmer:  Mark C. Miller 
  *              Wednesday, September 7, 2005 
+ *
+ * Modifications:
+ *
+ *   Mark C. Miller, Thu Sep  7 10:50:55 PDT 2006
+ *   Added use of db_hdf5_resolvename for retrieval of subobjects
  *-------------------------------------------------------------------------
  */
 CALLBACK DBcsgmesh *
@@ -5195,7 +5237,8 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
             csgm->coeffs = db_hdf5_comprd(dbfile, m.coeffs, 0);
 
         if ((m.zonel_name[0] && (SILO_Globals.dataReadMask & DBCSGMZonelist)))
-            csgm->zones = db_hdf5_GetCSGZonelist(_dbfile, m.zonel_name);
+            csgm->zones = db_hdf5_GetCSGZonelist(_dbfile, 
+                              db_hdf5_resolvename(_dbfile, name, m.zonel_name));
 
         H5Tclose(o);
     } CLEANUP {
@@ -6605,6 +6648,10 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
  *              Mark C. Miller, Thu Jul 29 11:26:24 PDT 2004
  *              Made it set datatype correctly.
  *              Added support for dataReadMask
+ *
+ *              Mark C. Miller, Thu Sep  7 10:50:55 PDT 2006
+ *              Added use of db_hdf5_resolvename for retrieval of
+ *              sub-objects.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBucdmesh *
@@ -6687,11 +6734,13 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
 
         /* Read face, zone, and edge lists */
         if (m.facelist[0] && (SILO_Globals.dataReadMask & DBUMFacelist)) {
-            um->faces = db_hdf5_GetFacelist(_dbfile, m.facelist);
+            um->faces = db_hdf5_GetFacelist(_dbfile,
+                            db_hdf5_resolvename(_dbfile, name, m.facelist));
         }
         if (m.zonelist[0] && (SILO_Globals.dataReadMask & DBUMZonelist)) {
             calledFromGetUcdmesh = 1;
-            um->zones = db_hdf5_GetZonelist(_dbfile, m.zonelist);
+            um->zones = db_hdf5_GetZonelist(_dbfile, 
+                            db_hdf5_resolvename(_dbfile, name, m.zonelist));
             calledFromGetUcdmesh = 0;
 
             /*----------------------------------------------------------*/
@@ -6707,7 +6756,8 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
             }
         }
         if (m.phzonelist[0] && (SILO_Globals.dataReadMask & DBUMZonelist)) {
-            um->phzones = db_hdf5_GetPHZonelist(_dbfile, m.phzonelist);
+            um->phzones = db_hdf5_GetPHZonelist(_dbfile, 
+                              db_hdf5_resolvename(_dbfile, name, m.phzonelist));
         }
         um->edges = NULL;                               /*FIXME*/
 

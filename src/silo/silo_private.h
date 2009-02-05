@@ -731,6 +731,21 @@ typedef struct SILO_Globals_t {
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 
+struct db_PathnameComponentTag
+{  char                            *name;
+   struct db_PathnameComponentTag *prevComponent;
+   struct db_PathnameComponentTag *nextComponent;
+};
+
+typedef struct db_PathnameComponentTag   db_PathnameComponent;
+
+struct db_PathnameTag
+{  db_PathnameComponent *firstComponent;
+   db_PathnameComponent *lastComponent;
+};
+
+typedef struct db_PathnameTag            db_Pathname;
+
 /*
  * Private functions.
  */
@@ -782,6 +797,16 @@ INTERNAL void db_StringArrayToStringList(const char *const *const, int, char **,
 INTERNAL char ** db_StringListToStringArray(char *, int);
 INTERNAL void db_DriverTypeAndSubtype(int driver, int *type, int *subtype);
 
+INTERNAL char *db_absoluteOf_path ( const char *cwg, const char *pathname );
+INTERNAL char *db_basename ( const char *pathname );
+INTERNAL char *db_dirname ( const char *pathname );
+INTERNAL int   db_isAbsolute_path ( const char *pathname );
+INTERNAL int   db_isRelative_path ( const char *pathname );
+INTERNAL char *db_join_path ( const char *a, const char *b );
+INTERNAL char *db_normalize_path ( const char *p );
+INTERNAL int   db_relative_path ( char *pathname );
+INTERNAL char *db_unsplit_path ( const db_Pathname *p );
+INTERNAL db_Pathname *db_split_path ( const char *pathname );
 
 char   *safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/

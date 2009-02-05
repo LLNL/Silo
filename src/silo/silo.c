@@ -9845,72 +9845,14 @@ db_ResetGlobalData_Defvars (void) {
  *
  *    Mark C. Miller, June 22, 2004 
  *
+ * Modifications:
+ *    Mark C. Miller, Thu Sep  7 10:50:55 PDT 2006
+ *    Made it just use Jim Reus' new basename routine.
  *--------------------------------------------------------------------*/
 INTERNAL const char *
 db_FullName2BaseName(const char *path)
 {
-   static char StaticStringBuf[1024];
-
-   if (path == 0)
-   {
-       strcpy(StaticStringBuf, ".");
-       return StaticStringBuf;
-   }
-   else if (*path == '\0')
-   {
-       strcpy(StaticStringBuf, ".");
-       return StaticStringBuf;
-   }
-   else
-   {
-       /*
-        * Find the end of path string.
-        */
-       int i, j, k, n = 0;
-       while ((path[n] != '\0') && (n < 1024))
-           n++;
-
-       /*
-        * Deal with strings that are too large.
-        */
-       if (n == 1024)
-       {
-           strcpy(StaticStringBuf, ".");
-           return StaticStringBuf;
-       }
-
-       /*
-        * Backup, skipping over all trailing '/' chars.
-        */
-       j = n-1;
-       while ((j >= 0) && (path[j] == '/'))
-           j--;
-
-       /*
-        * Deal with strings consisting of all '/' chars.
-        */
-       if (j == -1)
-       {
-           strcpy(StaticStringBuf, "/");
-           return StaticStringBuf;
-       }
-
-       /*
-        * Backup to just after the next '/' char.
-        */
-       i = j-1;
-       while ((i >= 0) && (path[i] != '/'))
-           i--;
-       i++;
-
-       /*
-        * Build the return string.
-        */
-       for (k = 0; k < j - i + 1; k++)
-           StaticStringBuf[k] = path[i+k];
-       StaticStringBuf[k] = '\0';
-       return StaticStringBuf;
-   }
+   return db_basename(path);
 }
 
 /*----------------------------------------------------------------------
@@ -10028,3 +9970,611 @@ db_DriverTypeAndSubtype(int driver, int *type, int *subtype)
     if (type) *type = theType;
     if (subtype) *subtype = theSubtype;
 }
+
+/*
+ *
+ * The following data structures and functions for manipulating
+ * character strings representing pathnames was originally written
+ * by James F. Reus as part of the DSL Library. It was extracted from
+ * DSL and adapted, slightly, for use in the Silo library by Mark C. Miller
+ *
+ * BEGIN CODE FROM JIM REUS' DSL {
+ *
+ */
+
+char *db_absoluteOf_path (const char *cwg,
+                          const char *pathname)
+{  char *result;
+
+   if (0 < strlen(pathname))
+   {  if (db_isAbsolute_path(pathname))
+          result = STRDUP(pathname);
+      else
+          result = db_join_path(cwg,pathname);
+   }
+   return result;
+}
+
+/*-------------------------------------------------------------------------- - -
+|
+|   Description: This function returns a string representing the basename part
+|                of the given pathname (stripping off the parent path).  Note
+|                that special cases arise...
+|
+|                    pathname == 0            Return value is 0.
+|                    pathname == "/"            Return value is "/".
+|                    pathname == "/base"        Return value is "base".
+|                    pathname == "base"         Return value is "base".
+|                    pathname == "path/base"    Return value is "base".
+|
+|   Return:      A pointer to a NULL-terminated string is returned when this
+|                function is successful.  Note that this string is constructed
+|                from allocated dynamic memory, it is up to the caller to
+|                release this string when it is no longer needed.  A 0
+|                pointer is returned on error.
+|
++-----------------------------------------------------------------------------*/
+
+char *db_basename ( const char *pathname )
+{  char *result;
+
+   result = 0;
+   {  if (0 < strlen(pathname))
+      {  if (pathname && (strcmp(pathname,"/") == 0))
+            result = STRDUP("/");
+         else
+         {  int i;
+
+            for (i=(int)strlen(pathname)-1; 0<=i; --i)
+               if (pathname[i] == '/')
+               {  result = STRDUP(&(pathname[i+1]));
+                  goto theExit;
+               }
+            result = STRDUP(pathname);
+         }
+      }
+   }
+theExit:
+   return result;
+}
+
+/*-------------------------------------------------------------------------- - -
+|
+|   Description: This function is used to release all storage associated
+|                with the given pathname component list.  Such a pathname
+|                component list is typically derived from a NULL-terminated
+|                string using the db_split_path() function.
+|
+|   Return:      A 0 pointer is always returned.
+|
++-----------------------------------------------------------------------------*/
+
+db_Pathname *db_cleanup_path ( db_Pathname *p )
+{  
+   {  if (p != 0)
+      {  while (p->firstComponent != 0)
+         {  db_PathnameComponent *c;
+
+            c                                  = p->firstComponent;
+            p->firstComponent                  = c->nextComponent;
+            if (c->nextComponent == 0)
+               p->lastComponent                = 0;
+            else
+               c->nextComponent->prevComponent = 0;
+            if (c->name != 0)
+            {  free(c->name);
+               c->name                         = 0;
+            }
+            c->prevComponent                   = 0;
+            c->nextComponent                   = 0;
+            free(c);
+         }
+         free(p);
+         p = 0;
+      }
+   }
+   return p;
+}
+
+/*-------------------------------------------------------------------------- - -
+|
+|   Description: This function returns a string representing the dirname part
+|                of the given pathname (stripping off the parent path).  Note
+|                that special cases arise...
+|
+|                    pathname == 0            Return value is 0.
+|                    pathname == "/"            Return value is "".
+|                    pathname == "/base"        Return value is "/".
+|                    pathname == "base"         Return value is ".".
+|                    pathname == "path/base"    Return value is "path".
+|
+|   Return:      A pointer to a NULL-terminated string is returned when this
+|                function is successful.  Note that this string is constructed
+|                from allocated dynamic memory, it is up to the caller to
+|                release this string when it is no longer needed.  A 0
+|                pointer is returned on error.
+|
++-----------------------------------------------------------------------------*/
+
+char *db_dirname ( const char *pathname )
+{  char *result;
+
+   result = 0;
+   {  if (0 < strlen(pathname))
+      {  if (pathname && (strcmp(pathname,"/") == 0))
+            result = STRDUP("");
+         else
+         {  int  i;
+            char tmp[32767];
+
+            strcpy(tmp,pathname);
+            for (i=(int)strlen(tmp)-1; 0<=i; --i)
+               if (tmp[i] == '/')
+               {  if (i == 0)
+                     tmp[1] = '\0';
+                  else
+                     tmp[i] = '\0';
+                  result = STRDUP(tmp);
+                  goto theExit;
+               }
+            result = STRDUP(".");
+         }
+      }
+   }
+theExit:
+   return result;
+}
+
+/*-------------------------------------------------------------------------- - -
+|
+|   Description: This function is used to determine if the given pathname
+|                is an absolute pathname.  Note that this is really just a
+|                test for a leading '/'.
+|
+|   Return:      A value of TRUE is returned when the function is
+|                successful, otherwise a value of FALSE is returned.
+|
++-----------------------------------------------------------------------------*/
+
+int db_isAbsolute_path ( const char *pathname )
+{  int result;
+
+   result = FALSE;
+   if (0 < strlen(pathname))
+      if (pathname[0] == '/')
+         result = TRUE;
+   return result;
+}
+
+/*-------------------------------------------------------------------------- - -
+|
+|   Description: This function is used to determine if the given pathname is an
+|                relative pathname.  Note that this is really just a test for a
+|                leading '/'.
+|
+|   Return:      A value of TRUE is returned when the function is
+|                successful, otherwise a value of FALSE is returned.
++-----------------------------------------------------------------------------*/
+
+int db_isRelative_path ( const char *pathname )
+{  int result;
+
+   result = FALSE;
+   if (0 < strlen(pathname))
+      if (pathname[0] != '/')
+         result = TRUE;
+   return result;
+}
+
+/*-------------------------------------------------------------------------- - -
+|
+|   Description: This function joins the two given pathname components to form
+|                a new pathname.  The result is normalized to deal properly
+|                with absolute pathnames, `.' and `..' components.  For
+|                example: joining "abc/def" and "../xyz/123" would result
+|                in "abc/xyz/123".  Note that joining "abc/123" and "/xyz"
+|                will yield "/xyz" since the second part is an absolute
+|                path. Note that the first operand, a, is treated as the
+|                "root" for any '.' or '..' in operand b.
+|
+|   Return:      A pointer to a NULL-terminated string is returned when this
+|                function is successful.  Note that this string is constructed
+|                from allocated dynamic memory, it is up to the caller to
+|                release this string when it is no longer needed.  A 0
+|                pointer is returned on error.
+|
++-----------------------------------------------------------------------------*/
+
+char *db_join_path ( const char *a,
+                     const char *b )
+{  char       *result;
+   char *tmp;
+
+   if (strlen(b) == 0)
+      result = db_normalize_path(a);
+   else if (strlen(a) == 0)
+      result = db_normalize_path(b);
+   else if (db_isAbsolute_path(b))
+      result = db_normalize_path(b);
+   else
+   {  db_Pathname *Pa;
+
+      tmp = 0;
+      if ((Pa=db_split_path(a)) != 0)
+      {  db_Pathname *Pb;
+
+         if ((Pb=db_split_path(b)) != 0)
+         {  db_Pathname *t;
+
+            if ((t=(db_Pathname *)malloc(sizeof(db_Pathname))) != 0)
+            {  db_PathnameComponent *c;
+               int          ok;
+
+               t->firstComponent = 0;
+               t->lastComponent  = 0;
+               ok                = TRUE;
+               c                 = Pa->firstComponent;
+               while (c != 0)
+               {  db_PathnameComponent *k;
+
+                  if ((k=(db_PathnameComponent *)malloc(sizeof(db_PathnameComponent))) != 0)
+                  {  if (c->name != 0)
+                        k->name                         = STRDUP(c->name);
+                     else
+                        k->name                         = 0;
+                     k->prevComponent                   = t->lastComponent;
+                     k->nextComponent                   = 0;
+                     if (t->lastComponent == 0)
+                        t->firstComponent               = k;
+                     else
+                        t->lastComponent->nextComponent = k;
+                     t->lastComponent                   = k;
+                  }
+                  else
+                  {  ok = FALSE;
+                     break;
+                  }
+                  c = c->nextComponent;
+               }
+               if (ok)
+               {  c = Pb->firstComponent;
+                  while (c != 0)
+                  {  db_PathnameComponent *k;
+
+                     if ((k=(db_PathnameComponent *)malloc(sizeof(db_PathnameComponent))) != 0)
+                     {  if (c->name != 0)
+                           k->name                         = STRDUP(c->name);
+                        else
+                           k->name                         = 0;
+                        k->prevComponent                   = t->lastComponent;
+                        k->nextComponent                   = 0;
+                        if (t->lastComponent == 0)
+                           t->firstComponent               = k;
+                        else
+                           t->lastComponent->nextComponent = k;
+                        t->lastComponent                   = k;
+                     }
+                     else
+                     {  ok = FALSE;
+                        break;
+                     }
+                     c = c->nextComponent;
+                  }
+                  if (ok)
+                     tmp = db_unsplit_path(t);
+               }
+               t = db_cleanup_path(t);
+            }
+            Pb = db_cleanup_path(Pb);
+         }
+         Pa = db_cleanup_path(Pa);
+      }
+   }
+   if (tmp != 0)
+   {
+      result = db_normalize_path(tmp);
+      free(tmp);
+   }
+   else
+      result = 0;
+   return result;
+}
+
+/*-------------------------------------------------------------------------- - -
+|
+|   Description: This function is used to normalize the given pathname, dealing
+|                with dots, double-dots and such.
+|
+|                This function resolves:
+|
+|                    - double slashes (such as abc//123)
+|                    - trailing slashes (such as abc/)
+|                    - embedded single dots (such as abc/./123) except for
+|                      some leading dots.
+|                    - name-double dot sets (such as abc/../123)
+|
+|   Return:      A pointer to a NULL-terminated string is returned when this
+|                function is successful.  Note that this string is constructed
+|                from allocated dynamic memory, it is up to the caller to
+|                release this string when it is no longer needed.  A 0
+|                pointer is returned on error.
+|
++-----------------------------------------------------------------------------*/
+
+char *db_normalize_path ( const char *pathname )
+{  char *result;
+
+   result = 0;
+   if (0 < strlen(pathname))
+   {  db_Pathname *p;
+
+        /*--------------------------------------
+        |
+        |   Break into separate components...
+        |
+        +-------------------------------------*/
+
+      if ((p=(db_split_path(pathname))) != 0)
+      {  db_PathnameComponent *c;
+
+        /*--------------------------------------
+        |
+        |   Eliminate . components
+        |
+        +-------------------------------------*/
+
+         c = p->firstComponent;
+         while (c != 0)
+         {  if (c != p->firstComponent)
+            {  if (c->name && (strcmp(c->name,".") == 0))
+               {  db_PathnameComponent *cc;
+
+                  cc                                 = c->nextComponent;
+                  if (c->prevComponent == 0)
+                     p->firstComponent               = c->nextComponent;
+                  else
+                     c->prevComponent->nextComponent = c->nextComponent;
+                  if (c->nextComponent == 0)
+                     p->lastComponent                = c->prevComponent;
+                  else
+                     c->nextComponent->prevComponent = c->prevComponent;
+                  free(c->name);
+                  c->name                            = 0;
+                  c->prevComponent                   = 0;
+                  c->nextComponent                   = 0;
+                  free(c);
+                  c                                  = cc;
+               }
+               else
+                  c = c->nextComponent;
+            }
+            else
+               c = c->nextComponent;
+         }
+
+        /*--------------------------------------
+        |
+        |   Eliminate .. components, note
+        |   that this process is a little
+        |   tougher then the . case, this
+        |   is due to things like ../../a/b
+        |
+        +-------------------------------------*/
+
+tryAgain:c = p->firstComponent;
+         while (c != 0)
+         {  if (c->name && (strcmp(c->name,"..") == 0))
+            {  db_PathnameComponent *k;
+
+               if ((k=c->prevComponent) != 0)
+               {  if (k->name != 0 && strcmp(k->name,"..") != 0)
+                  {
+                     if (k->prevComponent == 0)
+                        p->firstComponent                   = k->nextComponent;
+                     else
+                        k->prevComponent->nextComponent     = k->nextComponent;
+                     if (k->nextComponent == 0)
+                        p->lastComponent                    = k->prevComponent;
+                     else
+                        k->nextComponent->prevComponent     = k->prevComponent;
+                     if (k->name != 0)
+                        free(k->name);
+                     k->name                                = 0;
+                     k->prevComponent                       = 0;
+                     k->nextComponent                       = 0;
+                     free(k);
+                     k                                      = 0;
+                     if (c->prevComponent == 0)
+                        p->firstComponent                   = c->nextComponent;
+                     else
+                        c->prevComponent->nextComponent     = c->nextComponent;
+                     if (c->nextComponent == 0)
+                        p->lastComponent                    = c->prevComponent;
+                     else
+                        c->nextComponent->prevComponent     = c->prevComponent;
+                     if (c->name != 0)
+                        free(c->name);
+                     c->name                                = 0;
+                     c->prevComponent                       = 0;
+                     c->nextComponent                       = 0;
+                     free(c);
+                     c                                      = 0;
+                     goto tryAgain;
+                  }
+               }
+            }
+            c = c->nextComponent;
+         }
+
+        /*--------------------------------------
+        |
+        |   Rejoin components into a string...
+        |
+        +-------------------------------------*/
+
+         result = db_unsplit_path(p);
+         p      = db_cleanup_path(p);
+      }
+   }
+   return result;
+}
+
+static db_Pathname *makePathname ( void )
+{  db_Pathname *p;
+
+   if ((p=(db_Pathname *)malloc(sizeof(db_Pathname))) != 0)
+   {  p->firstComponent = 0;
+      p->lastComponent  = 0;
+   }
+   return p;
+}
+
+static db_Pathname *appendComponent ( db_Pathname *p, char *s )
+{  if (p == 0)
+      p = makePathname();
+   if (p != 0)
+   {  db_PathnameComponent *c;
+
+      if ((c=(db_PathnameComponent *)malloc(sizeof(db_PathnameComponent))) != 0)
+      {  c->name                            = STRDUP(s);
+         c->prevComponent                   = p->lastComponent;
+         c->nextComponent                   = 0;
+         if (p->lastComponent == 0)
+            p->firstComponent               = c;
+         else
+            p->lastComponent->nextComponent = c;
+         p->lastComponent                   = c;
+      }
+   }
+   return p;
+}
+
+/*-------------------------------------------------------------------------- - -
+|
+|   Description: This function splits a given pathname into its components.
+|                The split is generally made at the embedded slashes (/),
+|                forming a linked list of pathname components.  For example
+|                the pathname "abc/def/123/xyz" has four components: "abc",
+|                "def", "123", and "xyz".  Note that the list of components
+|                returned by this function is formed using allocated dynamic
+|                memory and should be released using the db_cleanup_path()
+|                function when it is no longer needed.  This function is
+|                intended for internal use by DSL only.
+|
+|   Return:      A pointer to the first component of a list of pathname
+|                components is returned when this function succeeds, otherwise
+|                a 0 pointer is returned.
+|
++-----------------------------------------------------------------------------*/
+
+db_Pathname *db_split_path ( const char *pathname )
+{  db_Pathname *result;
+
+   result = 0;
+   if (0 < strlen(pathname))
+   {  if ((result=makePathname()) != 0)
+      {  int  L;
+         int  state;
+         char tmp[32767];
+
+         L      = 0;
+         tmp[L] = '\0';
+         state  = 0;
+         for (;;)
+         {  char c;
+
+            c = *pathname;
+            switch (state)
+            { case 0: switch (c)
+                      { case '\0': goto done;
+                        case '/':  result        = appendComponent(result,0);
+                                   state         = 1;
+                                   break;
+                        default:   L             = 0;
+                                   tmp[L]        = c;
+                                   L            += 1;
+                                   tmp[L]        = '\0';
+                                   state         = 2;
+                                   break;
+                      }
+                      break;
+              case 1: switch (c)
+                      { case '\0': goto done;
+                        case '/':  state         = 1;
+                                   break;
+                        default:   L             = 0;
+                                   tmp[L]        = c;
+                                   L            += 1;
+                                   tmp[L]        = '\0';
+                                   state         = 2;
+                                   break;
+                      }
+                      break;
+              case 2: switch (c)
+                      { case '\0': result        = appendComponent(result,tmp);
+                                   goto done;
+                        case '/':  result        = appendComponent(result,tmp);
+                                   state         = 1;
+                                   break;
+                        default:   tmp[L]        = c;
+                                   L            += 1;
+                                   tmp[L]        = '\0';
+                                   state         = 2;
+                                   break;
+                      }
+                      break;
+            }
+            pathname += 1;
+         }
+done:    ;
+      }
+   }
+   return result;
+}
+
+/*------------------------------------------------------------------------------
+|
+|   Description: This function forms a pathname string from a linked set of
+|                pathname components.  Note that this function is intended for
+|                internal use by DSL only.
+|
++-----------------------------------------------------------------------------*/
+
+char *db_unsplit_path ( const db_Pathname *p )
+{  char *result;
+
+   result = 0;
+   if (p != 0)
+   {  db_PathnameComponent *c;
+      int          first;
+      int          slashed;
+      static char  tmp[4096];
+
+      first   = TRUE;
+      slashed = FALSE;
+      c       = p->firstComponent;
+      while (c != 0)
+      {
+         if ((c->name == 0) || (strlen(c->name) == 0))
+         {  strcpy(tmp,"/");
+            slashed = TRUE;
+         }
+         else
+         {  if ((!slashed) && (!first))
+            {  strcat(tmp,"/");
+               slashed = TRUE;
+            }
+            strcat(tmp,c->name);
+            slashed = FALSE;
+         }
+         first = FALSE;
+         c     = c->nextComponent;
+      }
+      result = STRDUP(tmp);
+   }
+   return result;
+}
+
+/*
+ * END CODE FROM JIM REUS' DSL }
+ */
