@@ -27,6 +27,10 @@
 #
 #   Mark C. Miller, Wed Aug 23 08:50:08 PDT 2006
 #   Added PATH stuff
+#
+#   Mark C. Miller, Thu Aug 24 13:54:00 PDT 2006
+#   Added error thresholds to runtest for VisIt's tests. Added code to
+#   skipp tests if no changes
 #--------------------------------------------------------------------------------
 
 umask 002
@@ -35,14 +39,14 @@ parMake="-j 4"
 tmpRoot="/gscratch/silo_test"
 tmpInstall="$tmpRoot/silo"
 logrecipients="miller treadway"
-curDate=`date +%Y-%m-%d-%p%I%M`
 dateBase=`date +%Y-%m-%d`
+now=`date`
 PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/data_vobs/VisIt/clearcase_bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
 export PATH
 
 #
 # Check current error status and, if set, log the given error
-# checkAndLogError <error-flag> <subject-text> <optional-file|text-containing-details> <exit-if-fatal>
+# ifErrorSendMessage <error-flag> <subject-text> <optional file|text containing details> <exit-if-fatal>
 #
 ifErrorSendMessage() {
     if test "$1" != "0" && test "$1" != ""; then
@@ -50,13 +54,17 @@ ifErrorSendMessage() {
         cat > mailmsg << EOF
 From: silo@lists.llnl.gov
 Subject: $2
-There was an error during Silo's automatic test run
+This is a message from Silo's automatic test run
 EOF
         if test -n "$3"; then
             if test -e $3; then
+	        echo "##################################################" >> mailmsg
                 cat $3 >> mailmsg
+	        echo "##################################################" >> mailmsg
             else
+	        echo "##################################################" >> mailmsg
                 echo "$3" >> mailmsg
+	        echo "##################################################" >> mailmsg
             fi
         fi
         for user in $logrecipients; do
@@ -75,13 +83,31 @@ EOF
 }
 
 #
+# First, see if we even need to run the tests
+#
+find . -type f \! -name "md5sums*.txt" -exec md5sum {} \; 1>md5sums_current.txt 2>&1
+if test -e md5sums_last.txt; then
+    if test "`diff md5sums_last.txt md5sums_current.txt`" = ""; then
+        ifErrorSendMessage 1 "Silo tests skipped. No changes since last run" "" 1
+    else
+        chmod 660 md5sums_last.txt 1>/dev/null 2>&1
+        mv -f md5sums_current.txt md5sums_last.txt 1>/dev/null 2>&1
+        chmod 440 md5sums_last.txt 1>/dev/null 2>&1
+    fi
+else
+    mv -f md5sums_current.txt md5sums_last.txt 1>/dev/null 2>&1
+    chmod 440 md5sums_last.txt 1>/dev/null 2>&1
+fi
+
+#
 # Configure silo library and make clean
 #
 cleartool startview silo_VOBowner_test  1> /dev/null 2>&1
 cd /view/silo_VOBowner_test/data_vobs/Silo
-rm -rf autom4te.cache config.cache config.status buildlog configlog checklog
-rm -rf /gscratch/silo_test
-mkdir /gscratch/silo_test
+rm -f autom4te.cache config.cache config.status buildlog configlog checklog 1>/dev/null 2>&1
+rm -rf $tmpRoot 1>/dev/null 2>&1
+mkdir $tmpRoot 1>/dev/null 2>&1
+chmod 775 $tmpRoot 1>/dev/null 2>&1
 ./configure --prefix=$tmpInstall --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib 1>configlog 2>&1
 $useMake clean 1>/dev/null 2>&1
 uncleanedFiles=`find . -regex '.*\.o$' | grep -v -e '_pure_p9_c0_'`
@@ -109,10 +135,11 @@ cp checklog $tmpRoot
 $useMake install 1>/dev/null 2>&1
 cleartool startview visit_VOBowner_testsilo  1> /dev/null 2>&1
 cd /view/visit_VOBowner_testsilo/data_vobs/VisIt
-./configure --with-silo_include=$tmpInstall/include --with-silo_library=$tmpInstall/lib --enable-parallel
-ifErrorSendMessage $? "Failed to configure VisIt" config.log 1
+./configure --with-silo_include=$tmpInstall/include --with-silo_library=$tmpInstall/lib --enable-parallel 1>configlog 2>&1
+cat config.log >> configlog
+ifErrorSendMessage $? "Failed to configure VisIt" configlog 1
 cd data
-clearmake clean
+clearmake clean 1>/dev/null 2>&1
 clearmake test 1>makedatalog 2>&1
 ifErrorSendMessage $? "Failed to make VisIt's Silo/PDB data" makedatalog 1
 cd ..
@@ -143,14 +170,18 @@ cat scores.txt | sort -r -n -k 2 > sorted_scores.txt
 tenPercent=`expr $pyidx / 10`
 testsToRun=`head -n $tenPercent sorted_scores.txt | cut -d' ' -f1`
 rm -f datafiles.txt scores.txt sorted_scores.txt
-./runtest -notrackmem -q $testsToRun
+
+#
+# Run selected VisIt tests for both PDB and HDF5 data
+#
+./runtest -notrackmem -q -minor-error 8 -major-error 20 $testsToRun
 cp html/index.html $tmpRoot/index_pdb.html
 cd ../data
 rm -f makedatalog
 clearmake testh5 1>makedatalog 2>&1
 ifErrorSendMessage $? "Failed to make VisIt's Silo/HDF5data" makedatalog 1
 cd ../test
-./runtest -m hdf5 -notrackmem -q $testsToRun
+./runtest -m hdf5 -notrackmem -q -minor-error 8 -major-error 20 $testsToRun
 cp html/index.html $tmpRoot/index_hdf5.html
 
 #
@@ -164,9 +195,9 @@ cd /view/silo_VOBowner_test/data_vobs/Silo
 #
 htmlFile="index.html"
 rm -f $htmlFile
-echo "<html><head><title>Silo Regression Results - $curDate</title></head>" >> $htmlFile
+echo "<html><head><title>Silo Regression Results - $now</title></head>" >> $htmlFile
 echo "<body bgcolor=\"#a0a0f0\">"                                    >> $htmlFile
-echo "<H1>Results of Silo Regression Test - $curDate</H1>"   >> $htmlFile
+echo "<H1>Results of Silo Regression Test - $now</H1>"   >> $htmlFile
 echo "<table border>"                                                >> $htmlFile
 echo " <tr>"                                                         >> $htmlFile
 echo "  <td><b><i>Caregory</b></i></td>"                             >> $htmlFile
@@ -244,12 +275,9 @@ todaysBase=`basename $todaysDir`
 ssh visit@hoth -x "mkdir $todaysDir/silo"
 scp $htmlFile visit@hoth:$todaysDir/silo/.
 if test $anyerror -eq 0; then
-    ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\"$todaysBase/silo\">silo</a></b></td><td align=center bgcolor=#00ff00><b>PASSED</b></td><td align=center><i>$curDate</i></td></tr>\" /home/visit/public_html/index.html"
+    ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\"$todaysBase/silo\">silo</a></b></td><td align=center bgcolor=#00ff00><b>PASSED</b></td><td align=center><i>$now</i></td></tr>\" /home/visit/public_html/index.html"
+    ifErrorSendMessage 1 "Silo Passed nightly tests" "" 0 
 else
-    ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\"$todaysBase/silo\">silo</a></b></td><td align=center bgcolor=#ff0000><b>FAILED</b></td><td align=center><i>$curDate</i></td></tr>\" /home/visit/public_html/index.html"
+    ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\"$todaysBase/silo\">silo</a></b></td><td align=center bgcolor=#ff0000><b>FAILED</b></td><td align=center><i>$now</i></td></tr>\" /home/visit/public_html/index.html"
+    ifErrorSendMessage 1 "Silo Failed nightly tests" "" 0 
 fi
-
-#
-# Send final result message
-#
-ifErrorSendMessage $anyerror "Failed nightly tests" "" 0 

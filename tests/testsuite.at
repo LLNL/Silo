@@ -1,140 +1,156 @@
 #!/bin/sh
-# Testsuite for silo
+# Testsuite for silo PDB files
 AT_INIT(silo)
-AT_SETUP(array test)
-AT_CHECK(array,,ignore)
+AT_COPYRIGHT([This work was produced at the University of California,
+Lawrence Livermore National Laboratory (UC LLNL) under contract
+no. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
+(DOE) and The Regents of the University of California (University) for
+the operation of UC LLNL. The rights of the Federal Government are
+reserved under Contract 48 subject to the restrictions agreed upon by
+the DOE and University as allowed under DOE Acquisition Letter 97-1.])
+AT_SETUP(array)
+AT_CHECK(array,,[ignore])
 AT_CLEANUP
-AT_SETUP(extface test)
+AT_SETUP(extface)
 AT_CHECK(extface)
 AT_CLEANUP
-AT_SETUP(multi_test test)
-AT_CHECK(multi_test,,ignore)
+AT_SETUP(multi_test)
+AT_CHECK(multi_test,,[ignore])
 AT_CLEANUP
-AT_SETUP(partial_io test)
-AT_CHECK(partial_io,,ignore)
+AT_SETUP(partial_io)
+AT_CHECK(partial_io,,[ignore])
 AT_CLEANUP
-AT_SETUP(point test)
-AT_CHECK(point,,ignore)
+AT_SETUP(point)
+AT_CHECK(point,,[ignore])
 AT_CLEANUP
-#AT_SETUP(group_test test)
-#AT_CHECK(group_test)   # requires arguments
-#AT_CLEANUP
-#AT_SETUP(listtypes test)
-#AT_CHECK(listtypes)   # FAILING AUTOTEST
-#AT_CLEANUP
-AT_SETUP(simple test)
-AT_CHECK(simple,,ignore)
+AT_SETUP(simple)
+AT_CHECK(simple,,[ignore])
 AT_CLEANUP
-AT_SETUP(ucd test)
-AT_CHECK(ucd,,ignore)
+AT_SETUP(ucd)
+AT_CHECK(ucd,,[ignore])
 AT_CLEANUP
-AT_SETUP(ucdsamp3 test)
-AT_CHECK(ucdsamp3,,ignore)
+AT_SETUP(ucdsamp3)
+AT_CHECK(ucdsamp3,,[ignore])
 AT_CLEANUP
-AT_SETUP(testall test)
-AT_CHECK(testall,,ignore)
+AT_SETUP(testall -small)
+AT_CHECK(testall -small,,[ignore])
 AT_CLEANUP
-AT_SETUP(alltypes test)
-AT_CHECK(alltypes,,ignore)
+AT_SETUP(testall -medium)
+AT_CHECK(testall -medium,,[ignore])
 AT_CLEANUP
-AT_SETUP(obj test)
-AT_CHECK(obj,,ignore)
+AT_SETUP(testall -large)
+AT_CHECK(testall -large,,[ignore])
 AT_CLEANUP
-AT_SETUP(onehex test)
-AT_CHECK(onehex,,ignore)
+AT_SETUP(testall -large -fortran)
+AT_CHECK(testall -large -fortran,,[ignore])
 AT_CLEANUP
-AT_SETUP(oneprism test)
-AT_CHECK(oneprism,,ignore)
+AT_SETUP(obj)
+AT_CHECK(obj,,[ignore])
 AT_CLEANUP
-AT_SETUP(onepyramid test)
-AT_CHECK(onepyramid,,ignore)
+AT_SETUP(onehex)
+AT_CHECK(onehex,,[ignore])
 AT_CLEANUP
-AT_SETUP(onetet test)
-AT_CHECK(onetet,,ignore)
+AT_SETUP(oneprism)
+AT_CHECK(oneprism,,[ignore])
 AT_CLEANUP
-AT_SETUP(TestReadMask test)
-AT_CHECK(TestReadMask,,ignore)   # probably want a data directory
+AT_SETUP(onepyramid)
+AT_CHECK(onepyramid,,[ignore])
 AT_CLEANUP
-AT_SETUP(subhex test)
-AT_CHECK(subhex,,ignore)
+AT_SETUP(onetet)
+AT_CHECK(onetet,,[ignore])
 AT_CLEANUP
-AT_SETUP(twohex test)
-AT_CHECK(twohex,,ignore)
+AT_SETUP(subhex)
+AT_CHECK(subhex,,[ignore])
 AT_CLEANUP
-AT_SETUP(multispec test)
-AT_CHECK(multispec,,ignore)
+AT_SETUP(TestReadMask)
+AT_CHECK(TestReadMask,,[ignore])   # probably want a data directory
 AT_CLEANUP
-AT_SETUP(specmix test)
-AT_CHECK(specmix,,ignore)
+AT_SETUP(twohex)
+AT_CHECK(twohex,,[ignore])
 AT_CLEANUP
-#AT_SETUP(testpdb test)
-#AT_CHECK(testpdb)   # Fails with: Error writing group.
-#AT_CLEANUP
-AT_SETUP(sami test)
-AT_CHECK(sami,,ignore)
+AT_SETUP(multispec)
+AT_CHECK(multispec,,[ignore])
 AT_CLEANUP
-AT_SETUP(spec test)
-AT_CHECK(spec,,ignore)
+AT_SETUP(sami)
+AT_CHECK(sami,,[ignore])
 AT_CLEANUP
-#AT_SETUP(cpz1plt test)
+AT_SETUP(specmix)
+AT_CHECK(specmix,,[ignore])
+AT_CLEANUP
+AT_SETUP(spec)
+AT_CHECK(spec,,[ignore])
+AT_CLEANUP
+#AT_SETUP(cpz1plt)
 #AT_CHECK(cpz1plt)   # Fails with: Missing input file "z1plt", cannot continue.
 #AT_CLEANUP
-#AT_SETUP(merge_block test)
-#AT_CHECK(merge_block) # requires arguments
+#AT_SETUP(group_test)
+#AT_CHECK(group_test)   # requires arguments
 #AT_CLEANUP
-#AT_SETUP(resample test)
-#AT_CHECK(resample) # mpi test, mpirun
+#AT_SETUP(listtypes)
+#AT_CHECK(listtypes)   # wants arguments
 #AT_CLEANUP
-AT_SETUP(mat3d_3across test)
-AT_CHECK(mat3d_3across)
+AT_SETUP(alltypes)
+AT_CHECK(alltypes,,[ignore])
 AT_CLEANUP
-AT_SETUP(ucd1d test)
-AT_CHECK(ucd1d)
-AT_CLEANUP
-AT_SETUP(wave test)
+AT_SETUP(wave)
 AT_CHECK(wave)
 AT_CLEANUP
-AT_SETUP(multi_file test)
-AT_CHECK(multi_file,,ignore)
+AT_SETUP(multi_file)
+AT_CHECK(multi_file,,[ignore])
 AT_CLEANUP
-AT_SETUP(polyzl test)
-AT_CHECK(polyzl,,ignore)
+AT_SETUP(polyzl)
+AT_CHECK(polyzl,,[ignore])
 AT_CLEANUP
-AT_SETUP(csg test)
-AT_CHECK(csg,,ignore)
+AT_SETUP(csg)
+AT_CHECK(csg,,[ignore])
 AT_CLEANUP
-AT_SETUP(mmadjacency test)
+AT_SETUP(mmadjacency)
 AT_CHECK(mmadjacency)
 AT_CLEANUP
-#AT_SETUP(largefile test)
+#AT_SETUP(largefile)
 #AT_CHECK(largefile)  # 2GByte file!
 #AT_CLEANUP
-AT_SETUP(dir test)
-AT_CHECK(dir,,ignore,ignore)
+#AT_SETUP(testpdb)
+#AT_CHECK(testpdb)   # Fails with: Error writing group.
+#AT_CLEANUP
+#AT_SETUP(merge_block)
+#AT_CHECK(merge_block) # requires arguments
+#AT_CLEANUP
+#AT_SETUP(resample)
+#AT_CHECK(resample) # mpi test, mpirun
+#AT_CLEANUP
+AT_SETUP(mat3d_3across)
+AT_CHECK(mat3d_3across)
 AT_CLEANUP
-AT_SETUP(quad test)
-AT_CHECK(quad,,ignore)
+AT_SETUP(ucd1d)
+AT_CHECK(ucd1d)
+AT_CLEANUP
+AT_SETUP(dir)
+AT_CHECK(dir,,[ignore],[ignore])
+AT_CLEANUP
+AT_SETUP(quad)
+AT_CHECK(quad,,[ignore])
 AT_CLEANUP
 # For some reason pgf77 writes to stderr upon termination
 # arrayf77: dumped core under pgf77 DBFortranAccessPointer: Invalid argument
-#AT_SETUP(arrayf77 test)
-#AT_CHECK(arrayf77,,ignore,ignore)   
+#AT_SETUP(arrayf77)
+#AT_CHECK(arrayf77,,[ignore],[ignore])   
 #AT_CLEANUP
-AT_SETUP(curvef77 test)
-AT_CHECK(curvef77,,ignore,ignore)
+AT_SETUP(curvef77)
+AT_CHECK(curvef77,,[ignore],[ignore])
 AT_CLEANUP
-AT_SETUP(matf77 test)
-AT_CHECK(matf77,,ignore,ignore)
+AT_SETUP(matf77)
+AT_CHECK(matf77,,[ignore],[ignore])
 AT_CLEANUP
-AT_SETUP(pointf77 test)
-AT_CHECK(pointf77,,ignore,ignore)
+AT_SETUP(pointf77)
+AT_CHECK(pointf77,,[ignore],[ignore])
 AT_CLEANUP
-AT_SETUP(quadf77 test)
-AT_CHECK(quadf77,,ignore,ignore)
+AT_SETUP(quadf77)
+AT_CHECK(quadf77,,[ignore],[ignore])
 AT_CLEANUP
-AT_SETUP(testallf77 test)
-AT_CHECK(testallf77,,ignore,ignore)
+AT_SETUP(testallf77)
+AT_CHECK(testallf77,,[ignore],[ignore])
 AT_CLEANUP
-AT_SETUP(ucdf77 test)
-AT_CHECK(ucdf77,,ignore,ignore)
+AT_SETUP(ucdf77)
+AT_CHECK(ucdf77,,[ignore],[ignore])
 AT_CLEANUP
