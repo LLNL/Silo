@@ -1347,6 +1347,7 @@ DBFreeCSGZonelist(DBcsgzonelist *list)
     FREE(list->leftids);
     FREE(list->rightids);
     FREE(list->xform);
+    FREE(list->zonelist);
     FREE(list->zonenames);
     FREE(list->regnames);
 
