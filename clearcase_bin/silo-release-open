@@ -137,8 +137,8 @@ function hothfinal() {
     umask 002
     cd $TOPDIR/$VERSION/test/linux_rhel3-gcc-3.2.3
     for FILE in $BININSTALLS
-    do if [[ -e /misc/gapps/Linux/bin/$FILE ]] ; then
-          rm -f /misc/gapps/Linux/bin/$FILE
+    do if [[ -e /misc/gapps/Linux/bin/\$FILE ]] ; then
+          rm -f /misc/gapps/Linux/bin/\$FILE
        fi
     done
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
@@ -149,27 +149,27 @@ function hothfinal() {
     export PATH LD_LIBRARY_PATH
     gmake bindir=/misc/gapps/Linux/bin install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /misc/gapps/Linux/bin/$FILE
-       chgrp visit /misc/gapps/Linux/bin/$FILE
+    do chmod a+r,ug+w,a+X /misc/gapps/Linux/bin/\$FILE
+       chgrp visit /misc/gapps/Linux/bin/\$FILE
     done
     for ARCHDIR in "linux_rhel3-gcc-3.2.3" "linux_rhel3-pgc-6.2" \
         "linux_rhel3-icc-9.1"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        fi
        ln -s $TOPDIR/hdfview/linux/hdfview \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
     for ARCHDIR in "linux_rhel3-pgc-6.2" "linux_rhel3-icc-9.1"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
        fi
        ln -s $TOPDIR/$VERSION/linux_rhel3-gcc-3.2.3/bin/silex \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
     done
 EOF
 }
@@ -177,8 +177,8 @@ function hothclean() {
     ssh hoth "/bin/bash" << EOF >> linux_rhel3-gcc-3.2.3.log 2>&1
     for ARCHDIR in "linux_rhel3-gcc-3.2.3" "linux_rhel3-pgc-6.2" \
         "linux_rhel3-icc-9.1"
-    do if [[ -d $TOPDIR/$VERSION/test/$ARCHDIR ]] ; then
-          rm -rf $TOPDIR/$VERSION/test/$ARCHDIR
+    do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
+          rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
     done
 EOF
@@ -237,8 +237,8 @@ function sunspotfinal() {
     umask 002
     cd $TOPDIR/$VERSION/test/sunos_57
     for FILE in $BININSTALLS
-    do if [[ -e /misc/gapps/SunOS/bin/$FILE ]] ; then
-          rm -f /misc/gapps/SunOS/bin/$FILE
+    do if [[ -e /misc/gapps/SunOS/bin/\$FILE ]] ; then
+          rm -f /misc/gapps/SunOS/bin/\$FILE
        fi
     done
     PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:\
@@ -247,8 +247,8 @@ function sunspotfinal() {
     export PATH LD_LIBRARY_PATH
     gmake bindir=/misc/gapps/SunOS/bin install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /misc/gapps/SunOS/bin/$FILE
-       chgrp visit /misc/gapps/SunOS/bin/$FILE
+    do chmod a+r,ug+w,a+X /misc/gapps/SunOS/bin/\$FILE
+       chgrp visit /misc/gapps/SunOS/bin/\$FILE
     done
     ln -s $TOPDIR/$VERSION/sunos_57/bin/silex \
        $TOPDIR/$VERSION/sunos_57-cc-5.2/bin/silex
@@ -258,7 +258,7 @@ EOF
 function sunspotclean() {
     ssh sunspot "/bin/bash" << EOF >> sunos_57.log 2>&1
     for ARCHDIR in "sunos_57" "sunos_57-cc-5.2"
-    do rm -rf $TOPDIR/$VERSION/test/$ARCHDIR
+    do rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
     done
 EOF
 }
@@ -305,16 +305,16 @@ function treadfinal() {
     umask 002
     cd $TOPDIR/$VERSION/test/i386-apple-darwin8-gcc-4.0.1
     for FILE in $BININSTALLS
-    do if [[ -e /misc/gapps/Darwin/bin/$FILE ]] ; then
-          rm -f /misc/gapps/Darwin/bin/$FILE
+    do if [[ -e /misc/gapps/Darwin/bin/\$FILE ]] ; then
+          rm -f /misc/gapps/Darwin/bin/\$FILE
        fi
     done
     PATH=/bin:/usr/bin:/usr/X11R6/bin:/sbin:/usr/sbin
     export PATH
     make bindir=/misc/gapps/Darwin/bin install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /misc/gapps/Darwin/bin/$FILE
-       chgrp visit /misc/gapps/Darwin/bin/$FILE
+    do chmod a+r,ug+w,a+X /misc/gapps/Darwin/bin/\$FILE
+       chgrp visit /misc/gapps/Darwin/bin/\$FILE
     done
     ln -s $TOPDIR/hdfview/MacOSX-i386/hdfview/HDFView.app \
        $TOPDIR/$VERSION/linux_rhel3-icc-9.1/bin/HDFView.app
@@ -425,8 +425,8 @@ function upfinal() {
     for ARCHDIR in "aix_5_64" "aix_5_64_fed" "aix_5_ll"
     do
        for FILE in $BININSTALLS
-       do if [[ -e /usr/gapps/bin/$ARCHDIR/$FILE ]] ; then
-             rm -f /usr/gapps/bin/$ARCHDIR/$FILE
+       do if [[ -e /usr/gapps/bin/\$ARCHDIR/\$FILE ]] ; then
+             rm -f /usr/gapps/bin/\$ARCHDIR/\$FILE
           fi
        done
        PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:\
@@ -435,35 +435,35 @@ function upfinal() {
        export PATH OBJECT_MODE
        gmake bindir=/usr/gapps/bin/$ARCHDIR install-exec
        for FILE in $BININSTALLS
-       do chmod a+r,ug+w,a+X /usr/gapps/bin/$ARCHDIR/$FILE
-          chgrp visit /usr/gapps/bin/$ARCHDIR/$FILE
+       do chmod a+r,ug+w,a+X /usr/gapps/bin/\$ARCHDIR/\$FILE
+          chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
        done
     done
     for ARCHDIR in "aix_5_ll" "aix_5_64_fed" "aix_5_ll-gcc" "aix_5_64_fed-gcc"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        fi
        ln -s $TOPDIR/hdfview/AIX/hdfview \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
     for ARCHDIR in "aix_5_ll" "aix_5_ll-gcc" "aix_5_64_fed-gcc"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
        fi
        ln -s $TOPDIR/$VERSION/aix_5_64_fed/bin/silex \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
     done
 EOF
 }
 function upclean() {
     ssh ${lcun}@up "/bin/bash" << EOF >> aix_5_64_fed.log 2>&1
     for ARCHDIR in "aix_5_ll" "aix_5_64_fed" "aix_5_ll-gcc" "aix_5_64_fed-gcc"
-    do if [[ -d $TOPDIR/$VERSION/test/$ARCHDIR ]] ; then
-          rm -rf $TOPDIR/$VERSION/test/$ARCHDIR
+    do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
+          rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
     done
 EOF
@@ -555,8 +555,8 @@ function pengrafinal() {
     umask 002
     cd $TOPDIR/$VERSION/test/chaos_3_x86_elan3
     for FILE in $BININSTALLS
-    do if [[ -e /usr/gapps/bin/chaos_3_x86_elan3/$FILE ]] ; then
-          rm -f /usr/gapps/bin/chaos_3_x86_elan3/$FILE
+    do if [[ -e /usr/gapps/bin/chaos_3_x86_elan3/\$FILE ]] ; then
+          rm -f /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
        fi
     done
     PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
@@ -564,34 +564,34 @@ function pengrafinal() {
     export PATH
     gmake bindir=/usr/gapps/bin/chaos_3_x86_elan3 install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /usr/gapps/bin/chaos_3_x86_elan3/$FILE
-       chgrp visit /usr/gapps/bin/chaos_3_x86_elan3/$FILE
+    do chmod a+r,ug+w,a+X /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
+       chgrp visit /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
     done
     for ARCHDIR in "chaos_3_x86_elan3" "chaos_3_x86_elan3-icc"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        fi
        ln -s $TOPDIR/hdfview/Linux/hdfview \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
     for ARCHDIR in "chaos_3_x86_elan3-icc"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
        fi
        ln -s $TOPDIR/$VERSION/chaos_3_x86_elan3/bin/silex \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
     done
 EOF
 }
 function pengraclean() {
     ssh ${lcun}@pengra "/bin/bash" << EOF >> chaos_3_x86_elan3.log 2>&1
     for ARCHDIR in "chaos_3_x86_elan3" "chaos_3_x86_elan3-icc"
-    do if [[ -d $TOPDIR/$VERSION/test/$ARCHDIR ]] ; then
-          rm -rf $TOPDIR/$VERSION/test/$ARCHDIR
+    do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
+          rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
     done
 EOF
@@ -645,40 +645,40 @@ function yanafinal() {
     do
        for FILE in $BININSTALLS
        do
-          if [[ -e /usr/gapps/bin/$ARCHDIR/$FILE ]] ; then
-             rm -f /usr/gapps/bin/$ARCHDIR/$FILE
+          if [[ -e /usr/gapps/bin/\$ARCHDIR/\$FILE ]] ; then
+             rm -f /usr/gapps/bin/\$ARCHDIR/\$FILE
           fi
-          ln -s $TOPDIR/$VERSION/chaos_3_x86_64/bin/$FILE \
-             /usr/gapps/bin/$ARCHDIR/$FILE
-          chmod a+r,ug+w,a+X /usr/gapps/bin/$ARCHDIR/$FILE
-          chgrp visit /usr/gapps/bin/$ARCHDIR/$FILE
+          ln -s $TOPDIR/$VERSION/chaos_3_x86_64/bin/\$FILE \
+             /usr/gapps/bin/\$ARCHDIR/\$FILE
+          chmod a+r,ug+w,a+X /usr/gapps/bin/\$ARCHDIR/\$FILE
+          chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
        done
-       if [[ -e /usr/gapps/bin/$ARCHDIR/hdfview ]] ; then
-          rm -f /usr/gapps/bin/$ARCHDIR/hdfview
+       if [[ -e /usr/gapps/bin/\$ARCHDIR/hdfview ]] ; then
+          rm -f /usr/gapps/bin/\$ARCHDIR/hdfview
        fi
        ln -s $TOPDIR/hdfview/linux64amd/hdfview \
-          /usr/gapps/bin/$ARCHDIR/hdfview
-       chgrp visit /usr/gapps/bin/$ARCHDIR/hdfview
+          /usr/gapps/bin/\$ARCHDIR/hdfview
+       chgrp visit /usr/gapps/bin/\$ARCHDIR/hdfview
     done
     for ARCHDIR in "chaos_3_x86_64" "chaos_3_x86_64-icc" \
         "chaos_3_x86_64-pc-2.4" "chaos_3_x86_64-pgc-6.2"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        fi
        ln -s $TOPDIR/hdfview/linux64amd/hdfview \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
     for ARCHDIR in "chaos_3_x86_64-icc" "chaos_3_x86_64-pc-2.4" \
        "chaos_3_x86_64-pgc-6.2"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
        fi
        ln -s $TOPDIR/$VERSION/chaos_3_x86_64/bin/silex \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
     done
 EOF
 }
@@ -686,8 +686,8 @@ function yanaclean() {
     ssh ${lcun}@yana "/bin/bash" << EOF >> chaos_3_x86_64 2>&1
     for ARCHDIR in "chaos_3_x86_64" "chaos_3_x86_64-icc" \
         "chaos_3_x86_64-pc-2.4" "chaos_3_x86_64-pgc-6.2"
-    do if [[ -d $TOPDIR/$VERSION/test/$ARCHDIR ]] ; then
-          rm -rf $TOPDIR/$VERSION/test/$ARCHDIR
+    do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
+          rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
     done
 EOF
@@ -773,43 +773,43 @@ function thunderfinal() {
     for ARCHDIR in "chaos_3_ia64" "chaos_3_ia64_elan4"
     do
        for FILE in $BININSTALLS
-       do if [[ -e /usr/gapps/bin/$ARCHDIR/$FILE ]] ; then
-             rm -f /usr/gapps/bin/$ARCHDIR/$FILE
+       do if [[ -e /usr/gapps/bin/\$ARCHDIR/\$FILE ]] ; then
+             rm -f /usr/gapps/bin/\$ARCHDIR/\$FILE
           fi
        done
        PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin
        export PATH
-       gmake bindir=/usr/gapps/bin/$ARCHDIR install-exec
+       gmake bindir=/usr/gapps/bin/\$ARCHDIR install-exec
        for FILE in $BININSTALLS
-       do chmod a+r,ug+w,a+X /usr/gapps/bin/$ARCHDIR/$FILE
-          chgrp visit /usr/gapps/bin/$ARCHDIR/$FILE
+       do chmod a+r,ug+w,a+X /usr/gapps/bin/\$ARCHDIR/\$FILE
+          chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
        done
     done
 #   for ARCHDIR in "chaos_3_ia64-gcc-3.4.4" "chaos_3_ia64-icc"
-#   do if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview ]] ; then
-#         rm -rf $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+#   do if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
+#         rm -rf $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
 #      fi
 #      ln -s $TOPDIR/hdfview/linuxia64/hdfview \
-#         $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
-#      chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/hdfview
+#         $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
+#      chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
 #   done
     for ARCHDIR in "chaos_3_ia64-icc"
     do
-       if [[ -e $TOPDIR/$VERSION/$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
        fi
        ln -s $TOPDIR/$VERSION/chaos_3_ia64-gcc-3.4.4/bin/silex \
-          $TOPDIR/$VERSION/$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/$ARCHDIR/bin/silex
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
     done
 EOF
 }
 function thunderclean() {
     ssh ${lcun}@thunder "/bin/bash" << EOF >> chaos_3_ia64-gcc-3.4.4.log 2>&1
     for ARCHDIR in "chaos_3_ia64-gcc-3.4.4" "chaos_3_ia64-icc"
-    do if [[ -d $TOPDIR/$VERSION/test/$ARCHDIR ]] ; then
-          rm -rf $TOPDIR/$VERSION/test/$ARCHDIR
+    do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
+          rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
     done
 EOF
@@ -857,8 +857,8 @@ function quadfinal() {
     umask 002
     cd $TOPDIR/$VERSION/test/irix_6.5_n32
     for FILE in $BININSTALLS
-    do if [[ -e /usr/gapps/bin/irix_6.5_64/$FILE ]] ; then
-          rm -f /usr/gapps/bin/irix_6.5_64/$FILE
+    do if [[ -e /usr/gapps/bin/irix_6.5_64/\$FILE ]] ; then
+          rm -f /usr/gapps/bin/irix_6.5_64/\$FILE
        fi
     done
     PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin
@@ -868,8 +868,8 @@ $LD_LIBRARY_PATH
     export PATH LD_LIBRARY_PATH PARALLEL
     gmake bindir=/usr/gapps/bin/irix_6.5_64 install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /usr/gapps/bin/irix_6.5_64/$FILE
-       chgrp visit /usr/gapps/bin/irix_6.5_64/$FILE
+    do chmod a+r,ug+w,a+X /usr/gapps/bin/irix_6.5_64/\$FILE
+       chgrp visit /usr/gapps/bin/irix_6.5_64/\$FILE
     done
     if [[ -d $TOPDIR/$VERSION/irix_6.5_64/bin ]] ; then
        ln -s $TOPDIR/$VERSION/irix_6.5_n32/bin \
@@ -878,10 +878,10 @@ $LD_LIBRARY_PATH
        chgrp visit $TOPDIR/$VERSION/irix_6.5_64/bin
     else
        for FILE in $BININSTALLS
-       do ln -s $TOPDIR/$VERSION/irix_6.5_n32/bin/$FILE \
-          $TOPDIR/$VERSION/irix_6.5_64/bin/$FILE
-          chmod a+r,ug+w,a+X $TOPDIR/$VERSION/irix_6.5_64/bin/$FILE
-          chgrp visit $TOPDIR/$VERSION/irix_6.5_64/bin/$FILE
+       do ln -s $TOPDIR/$VERSION/irix_6.5_n32/bin/\$FILE \
+          $TOPDIR/$VERSION/irix_6.5_64/bin/\$FILE
+          chmod a+r,ug+w,a+X $TOPDIR/$VERSION/irix_6.5_64/bin/\$FILE
+          chgrp visit $TOPDIR/$VERSION/irix_6.5_64/bin/\$FILE
        done
     fi
 EOF
@@ -889,8 +889,8 @@ EOF
 function quadclean() {
     ssh ${lcun}@quad "/bin/ksh" << EOF >> irix_6.5_n32.log 2>&1
     for ARCHDIR in "irix_6.5_n32" "irix_6.5_64"
-    do if [[ -d $TOPDIR/$VERSION/test/$ARCHDIR ]] ; then
-          rm -rf $TOPDIR/$VERSION/test/$ARCHDIR
+    do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
+          rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
     done
 EOF
@@ -945,7 +945,7 @@ PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
 #    cd $TOPDIR/$VERSION/test/sles_9_ppc64
 #    gmake bindir=/usr/gapps/bin/sles_9_ppc64 install-exec
 #    for FILE in $BININSTALLS
-#    do chmod -R g+w /usr/gapps/bin/sles_9_ppc64/$FILE
+#    do chmod -R g+w /usr/gapps/bin/sles_9_ppc64/\$FILE
 #    done
 #EOF
 #}

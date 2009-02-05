@@ -202,7 +202,7 @@ purple64gcc() {
     HOSTS=$lcun@purple
     ARCH="aix_5_64_fed-gcc"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
-CFLAGS=-maix64 LDFLAGS=-maix64 AR=\"ar -X64\""
+CFLAGS=\"-maix64 -mminimal-toc\" LDFLAGS=-maix64 AR=\"ar -X64\""
     MAKEOPTS="-i"
     export HOSTS ARCH CONFOPTS MAKEOPTS
     stdbuild \
@@ -216,7 +216,7 @@ purple32gcc() {
     HOSTS=$lcun@purple
     ARCH="aix_5_ll-gcc"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
-CFLAGS=-maix32 LDFLAGS=-maix32 AR=\"ar -X32\""
+CFLAGS=\"-maix32 -mminimal-toc\" LDFLAGS=-maix32 AR=\"ar -X32\""
     MAKEOPTS="-i"
     export HOSTS ARCH CONFOPTS MAKEOPTS
     stdbuild \
