@@ -1861,7 +1861,11 @@ int db_hdf5_set_compression(void)
        return (-1);
     }
     for (i=0; i<nfilters; i++) {           
-        filtn = H5Pget_filter(P_ckcrprops,(unsigned)i,0,0,0,0,0,NULL);
+#if defined H5_WANT_H5_V1_6_COMPAT || (H5_VERS_MAJOR == 1 && H5_VERS_MINOR < 8)
+            filtn = H5Pget_filter(P_ckcrprops,(unsigned)i,0,0,0,0,0);
+#else
+            filtn = H5Pget_filter(P_ckcrprops,(unsigned)i,0,0,0,0,0,NULL);
+#endif
         if (H5Z_FILTER_DEFLATE==filtn)     
             have_gzip = TRUE;
         if (H5Z_FILTER_SZIP==filtn)     
