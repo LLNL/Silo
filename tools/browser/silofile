@@ -29,9 +29,9 @@ rm -f $tmpMagicFile
 # two entries for big and small endian. Tabs in these strings
 # are required.
 #
-echo "0	string	!<<PDB:II>>!	Portable Database (PDB) File" >> $tmpMagicFile
-echo "0	long	=0x46444889	Hierarchical Data Format (HDF) file" >> $tmpMagicFile
-echo "0	long	=0x28484446	Hierarchical Data Format (HDF) file" >> $tmpMagicFile
+echo "0		string		\!<<PDB:II>>\!		Portable Database (PDB) File" >> $tmpMagicFile
+echo "0		long		=0x46444889		Hierarchical Data Format (HDF) file" >> $tmpMagicFile
+echo "0		long		=0x28484446		Hierarchical Data Format (HDF) file" >> $tmpMagicFile
 
 if test -e /usr/share/magic; then
     cat /usr/share/magic >> $tmpMagicFile
@@ -41,6 +41,6 @@ fi
 # the file command as a bad habit of printing on stderr a message
 # indicating that a different magic file is being used and then
 # giving that file's name. We filter it from the output here.
-file -m $tmpMagicFile $* 2>1 | grep -v $tmpMagicFile
+file -m $tmpMagicFile $* 2>&1 | grep -v $tmpMagicFile
 
 rm -f $tmpMagicFile
