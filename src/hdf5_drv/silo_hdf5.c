@@ -5543,7 +5543,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
         }
         for (i=0; i<nvars; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nvals, (void*)vars[i],
-                m.vals[i]/*out*/, friendly_name(vname, "_vals%d", &i));
+                m.vals[i]/*out*/, friendly_name(varnames[i], "_data", 0));
         }
 
         /* Build header in memory */
@@ -6434,10 +6434,10 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         }
         for (i=0; i<nvars; i++) {
             db_hdf5_compwr(dbfile, datatype, ndims, dims, vars[i],
-                m.value[i]/*out*/, friendly_name(name, "_vals%d",&i));
+                m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0));
             if (mixvars && mixvars[i] && mixlen>0) {
                 db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mixvars[i],
-                    m.mixed_value[i]/*out*/, friendly_name(name, "_mixvals%d",&i));
+                    m.mixed_value[i]/*out*/, friendly_name(varnames[i], "_mix", 0));
             }
         }
         
@@ -7119,10 +7119,10 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         }
         for (i=0; i<nvars; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nels, vars[i],
-                m.value[i]/*out*/, friendly_name(name, "_vals%d", &i));
+                m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0));
             if (mixvars && mixvars[i] && mixlen>0) {
                 db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mixvars[i],
-                    m.mixed_value[i]/*out*/, friendly_name(name, "_mixvals%d", &i));
+                    m.mixed_value[i]/*out*/, friendly_name(varnames[i], "_mix", 0));
             }
         }
         
@@ -7335,7 +7335,7 @@ db_hdf5_PutFacelist(DBfile *_dbfile, char *name, int nfaces, int ndims,
         }
         if (ntypes && types) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nfaces, types,
-                m.types/*out*/, friendly_name(name, "_nfaces", 0));
+                m.types/*out*/, friendly_name(name, "_types", 0));
         }
         if (zoneno) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nfaces, zoneno,
@@ -9373,7 +9373,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
             db_StringArrayToStringList((const char**) _mm._matnames,
                 _mm._nmatnos, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
-                m.material_names/*out*/, friendly_name(name,"_matnames", 0));
+                m.material_names/*out*/, friendly_name(name,"_material_names", 0));
             FREE(tmp);
         }
 
@@ -10016,7 +10016,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* Write raw data arrays */
         for (i=0; i<nvars; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nels, vars[i],
-                m.data[i]/*out*/, friendly_name(name, "_vals%d", &i));
+                m.data[i]/*out*/, friendly_name(name, nvars==1?"_data":"%d_data", &i));
         }
 
         /* Build header in memory */
@@ -10208,7 +10208,7 @@ db_hdf5_PutCompoundarray(DBfile *_dbfile, char *name, char *elmtnames[],
 
         /* Write raw data arrays */
         db_hdf5_compwr(dbfile, datatype, 1, &nvalues, values, m.values,
-            friendly_name(name, "_vals", 0));
+            friendly_name(name, "_values", 0));
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.elemnames,
             friendly_name(name, "_elemnames", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nelmts, elmtlen, m.elemlengths,
