@@ -82,8 +82,8 @@ extern "C" {
 #define SILO_VERS_TAG @SILO_VERS_TAG@
 
 /* Useful macro for comparing Silo versions */
-#define SILO_VERSION_GE(Maj,Min,Rel)  \
-        (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_REL>=Rel)) || \
+#define SILO_VERSION_GE(Maj,Min,Pat)  \
+        (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_PAT>=Pat)) || \
          ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) || \
          (SILO_VERS_MAJ>Maj))
 
