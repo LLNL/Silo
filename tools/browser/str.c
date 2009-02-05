@@ -202,94 +202,103 @@ str_dest (obj_t _self) {
  * Modifications:
  *              Robb Matzke, 2000-10-19
  *              Understands formats of `b16', `b8', and `b2'.
+ *
+ *              Mark C. Miller, 03Jun08
+ *              Made it properly handle strings longer than size of buf.
+ *              Made it properly use truncate variable to control behavior.
  *-------------------------------------------------------------------------
  */
 void
 str_doprnt (out_t *f, char *fmt, char *s)
 {
     char        buf[1024], c;
-    int         at, i, j;
+    int         at, i, j, n, maxn;
     unsigned    mask;
-
-    buf[0] = '\0';
 
     if (!s) {
         out_puts(f, "(null)");
         return;
     }
-   
-    for (i=at=0; s[i]; i++) {
-        if (at+5>=sizeof(buf)) {
-            buf[at++] = '.';
-            buf[at++] = '.';
-            buf[at++] = '.';
-            buf[at] = '\0';
-            break;
-        }
 
-        switch ((c=s[i])) {
-        case '\\':
-            buf[at++] = c;
-            buf[at++] = c;
-            break;
+    i = 0;
+    n = strlen(s);
+    maxn = sym_bi_true("truncate");
+    if (maxn <= 1) maxn = n;
+    while (i < n && i < maxn)
+    {
+       buf[0] = '\0';
+       for (at=0; i < n && i < maxn && s[i]; i++) {
+           if (at+2>=sizeof(buf)) {
+               buf[at] = '\0';
+               break;
+           }
 
-        case '\b':
-            /* `b' is a valid hexadecimal digit */
-            if (!strcmp(fmt, "b16")) {
-                sprintf(buf+at, "\\%02x", (unsigned char)c);
-                at += strlen(buf+at);
-            } else {
-                buf[at++] = '\\';
-                buf[at++] = 'b';
-            }
-            break;
+           switch ((c=s[i])) {
+           case '\\':
+               buf[at++] = c;
+               buf[at++] = c;
+               break;
 
-        case '\n':
-            buf[at++] = '\\';
-            buf[at++] = 'n';
-            break;
+           case '\b':
+               /* `b' is a valid hexadecimal digit */
+               if (!strcmp(fmt, "b16")) {
+                   sprintf(buf+at, "\\%02x", (unsigned char)c);
+                   at += strlen(buf+at);
+               } else {
+                   buf[at++] = '\\';
+                   buf[at++] = 'b';
+               }
+               break;
 
-        case '\r':
-            buf[at++] = '\\';
-            buf[at++] = 'r';
-            break;
+           case '\n':
+               buf[at++] = '\\';
+               buf[at++] = 'n';
+               break;
 
-        case '\t':
-            buf[at++] = '\\';
-            buf[at++] = 't';
-            break;
+           case '\r':
+               buf[at++] = '\\';
+               buf[at++] = 'r';
+               break;
 
-        case '"':
-            buf[at++] = '\\';
-            buf[at++] = '"';
-            break;
-         
-        default:
-            if (c>=' ' && c<='~') {
-                buf[at++] = c;
-            } else if (!strcmp(fmt, "b16")) {
-                sprintf(buf+at, "\\%02x", (unsigned char)c);
-                at += strlen(buf+at);
-            } else if (!strcmp(fmt, "b2")) {
-                buf[at++] = '\\';
-                for (j=0, mask=0x80; j<8; j++, mask>>=1) {
-                    buf[at++] = (unsigned)c & mask ? '1':'0';
-                }
-            } else {
-                /*default is octal*/
-                sprintf(buf+at, "\\%03o", (unsigned char)c);
-                at += strlen(buf+at);
-            }
-            break;
-        }
+           case '\t':
+               buf[at++] = '\\';
+               buf[at++] = 't';
+               break;
+
+           case '"':
+               buf[at++] = '\\';
+               buf[at++] = '"';
+               break;
+            
+           default:
+               if (c>=' ' && c<='~') {
+                   buf[at++] = c;
+               } else if (!strcmp(fmt, "b16")) {
+                   sprintf(buf+at, "\\%02x", (unsigned char)c);
+                   at += strlen(buf+at);
+               } else if (!strcmp(fmt, "b2")) {
+                   buf[at++] = '\\';
+                   for (j=0, mask=0x80; j<8; j++, mask>>=1) {
+                       buf[at++] = (unsigned)c & mask ? '1':'0';
+                   }
+               } else {
+                   /*default is octal*/
+                   sprintf(buf+at, "\\%03o", (unsigned char)c);
+                   at += strlen(buf+at);
+               }
+               break;
+           }
+       }
+
+       buf[at] = '\0';
+       if (!strcmp(fmt, "b16") || !strcmp(fmt, "b8") || !strcmp(fmt, "b2")) {
+           fmt = "\"%s\"";
+       }
+       
+       out_printf(f, fmt, buf);
+       out_nl(f);
+
     }
-
-    buf[at] = '\0';
-    if (!strcmp(fmt, "b16") || !strcmp(fmt, "b8") || !strcmp(fmt, "b2")) {
-        fmt = "\"%s\"";
-    }
-    
-    out_printf(f, fmt, buf);
 }
    
 
