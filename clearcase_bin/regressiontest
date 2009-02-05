@@ -31,6 +31,9 @@
 #   Mark C. Miller, Thu Aug 24 13:54:00 PDT 2006
 #   Added error thresholds to runtest for VisIt's tests. Added code to
 #   skipp tests if no changes
+#
+#   Mark C. Miller, Thu Aug 31 15:50:10 PDT 2006
+#   Fixed problem including view-private files in checksum checks
 #--------------------------------------------------------------------------------
 
 umask 002
@@ -82,9 +85,17 @@ EOF
     fi
 }
 
+
+#
+# Start up the test view, cd there, remove old test install point
+#
+cleartool startview silo_VOBowner_test  1> /dev/null 2>&1
+cd /view/silo_VOBowner_test/data_vobs/Silo
+
 #
 # First, see if we even need to run the tests
 #
+cleartool ls -recurse -view -short | xargs -n 1 rm -rf
 find . -type f \! -name "md5sums*.txt" -exec md5sum {} \; 1>md5sums_current.txt 2>&1
 if test -e md5sums_last.txt; then
     if test "`diff md5sums_last.txt md5sums_current.txt`" = ""; then
@@ -102,9 +113,6 @@ fi
 #
 # Configure silo library and make clean
 #
-cleartool startview silo_VOBowner_test  1> /dev/null 2>&1
-cd /view/silo_VOBowner_test/data_vobs/Silo
-rm -f autom4te.cache config.cache config.status buildlog configlog checklog 1>/dev/null 2>&1
 rm -rf $tmpRoot 1>/dev/null 2>&1
 mkdir $tmpRoot 1>/dev/null 2>&1
 chmod 775 $tmpRoot 1>/dev/null 2>&1
