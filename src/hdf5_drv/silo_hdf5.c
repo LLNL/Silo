@@ -9832,6 +9832,10 @@ db_hdf5_GetCompoundarray(DBfile *_dbfile, char *name)
  *   Made it return DB_VARIABLE for any inquiry where it couldn't
  *   get actual variable type from the object
  *
+ *   Mark C. Miller, Mon Jul 17 18:07:57 PDT 2006
+ *   Improved fix, above, for inquries on "/.silo/#000XXXX" datasets
+ *   for silex
+ *
  *-------------------------------------------------------------------------
  */
 CALLBACK DBObjectType
@@ -9847,11 +9851,13 @@ db_hdf5_InqVarType(DBfile *_dbfile, char *name)
         /* Open object */
         if ((o=H5Topen(dbfile->cwg, name))<0) {
             if ((o=H5Gopen(dbfile->cwg, name))<0) {
-                db_perror(name, E_NOTFOUND, me);
-                UNWIND();
+                _objtype = DB_VARIABLE;
             }
-            _objtype = DB_DIR;
-            H5Gclose(o);
+            else
+            {
+                _objtype = DB_DIR;
+                H5Gclose(o);
+            }
         }
         else
         {
