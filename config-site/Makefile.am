@@ -61,12 +61,12 @@ EXTRA_DIST = \
  pengra.conf \
  pengra0.conf \
  pengra1.conf \
+ pengra2.conf \
+ pengra3.conf \
  pengra12.conf \
  pengra13.conf \
  pengra14.conf \
  pengra15.conf \
- pengra2.conf \
- pengra3.conf \
  prism1.conf \
  prism2.conf \
  purple.conf \
@@ -84,6 +84,7 @@ EXTRA_DIST = \
  rhea0.conf \
  rhea32.conf \
  rhea512.conf \
+ rhea544.conf \
  sandia_paragon \
  sasn100.conf \
  sphere.conf \

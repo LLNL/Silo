@@ -45,6 +45,6 @@ for advertising or product endorsement purposes.
  * the SILO-Unknown source files, but not to the application.
  */
 
-#include <silo_private.h>
+#include "silo_private.h"
 
 #endif /* !SILO_UNKNOWN_H */

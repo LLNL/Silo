@@ -49,6 +49,7 @@ for advertising or product endorsement purposes.
  * Normally, programs cannot tell if a particular driver is defined by just
  * including silo.h.  To determine if a driver is defined, include this file.
  */
+#include "config.h" /* Included for driver tests */
 #include "silo.h"
 
 /*
@@ -63,7 +64,6 @@ for advertising or product endorsement purposes.
 #undef DB_HDF5
 
 /* Now set up the real driver definitions. */
-#include <config.h> /* Included for driver tests */
 #ifdef HAVE_NETCDF_DRIVER
 #  define DB_NETCDF
 #endif

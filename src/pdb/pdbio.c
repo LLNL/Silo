@@ -6,8 +6,11 @@
  * Software Release #92-0043
  *
  */
+#include "config.h"
+#if HAVE_STDARG_H
 #include <stdarg.h>
-#include <pdb.h>
+#endif
+#include "pdb.h"
 
 static char 	Pbuffer[LRG_TXT_BUFFER];
 

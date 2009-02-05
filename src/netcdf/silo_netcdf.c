@@ -39,9 +39,9 @@ for advertising or product endorsement purposes.
  * driver since the NetCDF interface is frozen.
  */
 
-#include <silo_netcdf_private.h>
+#include "silo_netcdf_private.h"
 #undef DEREF
-#include <pdb.h>
+#include "pdb.h"
 #undef DEREF
 
 static SO_Object *_to;

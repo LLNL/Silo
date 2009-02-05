@@ -7,9 +7,12 @@
  *
  *
  */
+#include "config.h"
 #include <score.h>
 #include <limits.h>
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 
 typedef union u_mem_header mem_header;
 typedef struct s_mem_descriptor mem_descriptor;

@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/bash
 #######################################################################
 #
 # build-3rdparty-open - Build and install 3rd party libraries.
@@ -9,21 +9,33 @@
 # Usage:
 #     build-3rdparty-open
 #
+# This script will build and install szip-2.1 and hdf5-1.6.1 libraries.
+# To change or upgrade szip or hdf5 release:
+# 1) untar the szip/hdf5 distribution in /usr/gapps/silo/szip/src/ or
+# /usr/gapps/silo/hdf5/src/. This should be done on both the BDivision
+# and LC /usr/gapps directories.
+# 2) change the value of the variable SZIPRELEASE or HDF5RELEASE
+# to be the release number
+# 3) run ./build-3rdparty-open
+#
 # Modifications:
+# Thomas R. Treadway, Fri Dec  7 16:03:39 PST 2007
+# Added hdfonly commnad option, will skip the szip build.
 #
 #######################################################################
 #
-BDTOPDIR="/usr/gapps/silo"
-LCTOPDIR="/usr/gapps/silo"
-#LCTOPDIR="/nfs/tmp0/$USER"
+TOPDIR="/usr/gapps/silo"
 SZIPRELEASE=2.1
 HDF5RELEASE=1.6.6
 QTRELEASE=3.3.8
 lcun=$USER
-export BDTOPDIR LCTOPDIR
+skipszip="no"
+MAKE="gmake"
+MAKEOPTS=""
+export TOPDIR MAKE MAKEOPTS SZIPRELEASE HDF5RELEASE QTRELEASE lcun skipszip
 
 usage() {
-  printf "Usage: %s [-lc-username <lc-username>] [all|hoth|sunspot|up|yana|thunder|pengra|quad|tread]" $0
+  printf "Usage: %s [-lc-username <lc-username>] [hdf5only] [all|hoth|sunspot|up|yana|thunder|pengra|quad|tread]" $0
   printf "\n"
   printf "Silo 3rd party library installing script. Assumes a tarball exist in\n"
   printf "/usr/gapps/silo/szip/src/szip-$SZIPRELEASE, and\n"
@@ -32,54 +44,33 @@ usage() {
   printf "You may want to run this script from the LC network.\n"
 }
 
-bbuild() {
+stdbuild() {
     ssh ${HOSTS} "/bin/sh" << EOF > ${ARCH}.log 2>&1 &
     $*
     umask 002
-    mkdir $BDTOPDIR/szip/src/$ARCH
-    cd $BDTOPDIR/szip/src/$ARCH
-    $BDTOPDIR/szip/src/szip-$SZIPRELEASE/configure $CONFOPTS \
-    --prefix=$BDTOPDIR/szip/$SZIPRELEASE/$ARCH \
+    if [ "$skipszip" = "no" ] ; then
+      mkdir $TOPDIR/szip/src/$ARCH
+      cd $TOPDIR/szip/src/$ARCH
+      $TOPDIR/szip/src/szip-$SZIPRELEASE/configure $CONFOPTS \
+      --prefix=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
+      --disable-shared
+      $MAKE $MAKEOPTS install
+      chmod -R a+r,ug+w,a+X $TOPDIR/szip/$SZIPRELEASE/$ARCH
+      chgrp -R visit $TOPDIR/szip/$SZIPRELEASE/$ARCH
+      cd $TOPDIR/szip/src
+      rm -rf $TOPDIR/szip/src/$ARCH
+    fi
+    mkdir $TOPDIR/hdf5/src/$ARCH
+    cd $TOPDIR/hdf5/src/$ARCH
+    $TOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
+    --prefix=$TOPDIR/hdf5/$HDF5RELEASE/$ARCH \
+    --with-szlib=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
     --disable-shared
-    gmake install
-    chmod -R g+w $BDTOPDIR/szip/$SZIPRELEASE/$ARCH
-    cd $BDTOPDIR/szip/src
-    rm -rf $BDTOPDIR/szip/src/$ARCH
-    mkdir $BDTOPDIR/hdf5/src/$ARCH
-    cd $BDTOPDIR/hdf5/src/$ARCH
-    $BDTOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
-    --prefix=$BDTOPDIR/hdf5/$HDF5RELEASE/$ARCH \
-    --with-szlib=$BDTOPDIR/szip/$SZIPRELEASE/$ARCH \
-    --disable-shared
-    gmake -j 4 install
-    chmod -R g+w $BDTOPDIR/hdf5/$HDF5RELEASE/$ARCH
-    cd $BDTOPDIR/hdf5/src
-    rm -rf $BDTOPDIR/hdf5/src/$ARCH
-EOF
-}
-stdbuild() {
-    ssh ${lcun}@${HOSTS} "/bin/sh" << EOF > ${ARCH}.log 2>&1 &
-    $*
-    umask 002
-    mkdir $BDTOPDIR/szip/src/$ARCH
-    cd $BDTOPDIR/szip/src/$ARCH
-    $BDTOPDIR/szip/src/szip-$SZIPRELEASE/configure $CONFOPTS \
-    --prefix=$BDTOPDIR/szip/$SZIPRELEASE/$ARCH \
-    --disable-shared
-    gmake install
-    chmod -R g+w $BDTOPDIR/szip/$SZIPRELEASE/$ARCH
-    cd $BDTOPDIR/szip/src
-#   rm -rf $BDTOPDIR/szip/src/$ARCH
-    mkdir $BDTOPDIR/hdf5/src/$ARCH
-    cd $BDTOPDIR/hdf5/src/$ARCH
-    $BDTOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
-    --prefix=$BDTOPDIR/hdf5/$HDF5RELEASE/$ARCH \
-    --with-szlib=$BDTOPDIR/szip/$SZIPRELEASE/$ARCH \
-    --disable-shared
-    gmake -j 4 install
-    chmod -R g+w $BDTOPDIR/hdf5/$HDF5RELEASE/$ARCH
-    cd $BDTOPDIR/hdf5/src
-#   rm -rf $BDTOPDIR/hdf5/src/$ARCH
+    $MAKE $MAKEOPTS -j 4 install
+    chmod -R a+r,ug+w,a+X $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
+    chgrp -R visit $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
+    cd $TOPDIR/hdf5/src
+    rm -rf $TOPDIR/hdf5/src/$ARCH
 EOF
 }
 hoth() {
@@ -94,7 +85,7 @@ hothgcc() {
 CXXFLAGS=\"-fPIC -O2\" FFLAGS=-Wno-globals F77FLAGS=-Wno-globals \
 FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
 /usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:\
 /usr/security/bin" \
@@ -108,7 +99,7 @@ hothpgc() {
     CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
 CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
 /sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.2/bin" \
     "LM_LICENSE_FILE=/usr/local/flexlm/licenses/license.dat:\
@@ -122,7 +113,7 @@ hothicc() {
     CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/sbin:\
 /usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/intel/cc/current/bin:\
 /usr/local/intel/fc/current/bin:/usr/local/intel/idb/current/bin" \
@@ -145,7 +136,7 @@ sunspotgcc() {
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:\
 /opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin" \
     "LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib" \
@@ -157,7 +148,7 @@ sunspotcc() {
     ARCH="sparc-sun-solaris-cc-5.2"
     CONFOPTS="CC=c89 CXX=CC FC=f77 F77=f77"
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:\
 /opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin" \
     "LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib" \
@@ -167,9 +158,10 @@ sunspotcc() {
 tread() {
     HOSTS="tread"
     ARCH="i386-apple-darwin8-gcc-4.0.1"
-    CONFOPTS="CC=gcc CXX=g++"
-    export HOSTS ARCH CONFOPTS
-    bbuild \
+    CONFOPTS="CC=gcc CXX=g++ FC=\"\" F77=\"\""
+    MAKE=make
+    export HOSTS ARCH CONFOPTS MAKE
+    stdbuild \
     "PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/X11R6/bin" \
     "export PATH"
 }
@@ -181,55 +173,55 @@ up() {
     upgcc32
 }
 up64() {
-    HOSTS=up
+    HOSTS=${lcun}@up
     ARCH="aix_5_64_fed"
-    OBJECT_MODE=64
-    CONFOPTS="CC=xlc CXX=xlC FC=xlf F77=xlf"
+    CONFOPTS="CC=xlc CXX=xlC FC=xlf F77=xlf \
+CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\""
     export HOSTS ARCH CONFOPTS
-    export OBJECT_MODE HOSTS ARCH CONFOPTS
     stdbuild \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:\
 /usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "OBJECT_MODE=64" \
+    "export PATH OBJECT_MODE"
 }
 #
 up32() {
-    HOSTS=up
+    HOSTS=${lcun}@up
     ARCH="aix_5_ll"
-    OBJECT_MODE=32
-    CONFOPTS="CC=xlc CXX=xlC FC=xlf F77=xlf"
+    CONFOPTS="CC=xlc CXX=xlC FC=xlf F77=xlf \
+CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\""
     export HOSTS ARCH CONFOPTS
-    export OBJECT_MODE HOSTS ARCH CONFOPTS
     stdbuild \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:\
 /usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "OBJECT_MODE=32" \
+    "export PATH OBJECT_MODE"
 }
 #
 upgcc64() {
-    HOSTS=up
+    HOSTS=${lcun}@up
     ARCH="aix_5_64_fed-gcc"
-    OBJECT_MODE=64
-    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77"
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
+CFLAGS=-maix64 LDFLAGS=-maix64 AR=\"ar -X64\""
     export HOSTS ARCH CONFOPTS
-    export OBJECT_MODE HOSTS ARCH CONFOPTS
     stdbuild \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:\
 /usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "OBJECT_MODE=64" \
+    "export PATH OBJECT_MODE"
 }
 #
 upgcc32() {
-    HOSTS=up
+    HOSTS=${lcun}@up
     ARCH="aix_5_ll-gcc"
-    OBJECT_MODE=32
-    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77"
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
+CFLAGS=-maix32 LDFLAGS=-maix32 AR=\"ar -X32\""
     export HOSTS ARCH CONFOPTS
-    export OBJECT_MODE HOSTS ARCH CONFOPTS
     stdbuild \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:\
 /usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "OBJECT_MODE=32" \
+    "export PATH OBJECT_MODE"
 }
 
 pengra() {
@@ -237,7 +229,7 @@ pengra() {
     pengraicc
 }
 pengragcc() {
-    HOSTS=pengra
+    HOSTS=${lcun}@pengra
     ARCH=chaos_3_x86_elan3
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
@@ -248,7 +240,7 @@ pengragcc() {
 }
 #
 pengraicc() {
-    HOSTS=pengra
+    HOSTS=${lcun}@pengra
     ARCH=chaos_3_x86_elan3-icc
     CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
@@ -256,7 +248,10 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC"
     stdbuild \
     "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:\
 /usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
+    "INTEL_LICENSE_FILE=${INTEL_LICENSE_FILE}:\
+/usr/local/intel/compiler100_025/licenses:/opt/intel/licenses" \
+    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 #
 yana() {
@@ -266,7 +261,7 @@ yana() {
     yanapgc
 }
 yanagcc() {
-    HOSTS=yana
+    HOSTS=${lcun}@yana
     ARCH=chaos_3_x86_64-gcc-3.4.4
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
@@ -278,22 +273,22 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 }
 #
 yanaicc() {
-    HOSTS=yana
-    ARCH=chaos_3_x86_64-icc-9.1
+    HOSTS=${lcun}@yana
+    ARCH=chaos_3_x86_64-icc-10.0
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler91_64/bin:/usr/local/bin:/bin:/usr/bin:\
+    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
-  "INTEL_LICENSE_FILE=/usr/local/intel/compiler91_64/licenses:\
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
+    "INTEL_LICENSE_FILE=/usr/local/intel/compiler100_025/licenses:\
 /opt/intel/licenses" \
-    "LM_LICENSE_FILE=/usr/local/etc/license.client" \
-    "export PATH INTEL_LICENSE_FILE LM_LICENSE_FILE"
+    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 #
 yanapc() {
-    HOSTS=yana
+    HOSTS=${lcun}@yana
     ARCH=chaos_3_x86_64-pc-2.4
     CONFOPTS="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
@@ -308,7 +303,7 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC"
 }
 #
 yanapgc() {
-    HOSTS=yana
+    HOSTS=${lcun}@yana
     ARCH=chaos_3_x86_64-pgc-6.2
   CONFOPTS=" CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
@@ -325,7 +320,7 @@ thunder() {
     thundericc
 }
 thundergcc() {
-    HOSTS=thunder
+    HOSTS=${lcun}@thunder
     ARCH=chaos_3_ia64-gcc-3.4.4
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
@@ -336,15 +331,18 @@ thundergcc() {
 }
 #
 thundericc() {
-    HOSTS=thunder
-    ARCH=chaos_3_ia64-icc-9.1
+    HOSTS=${lcun}@thunder
+    ARCH=chaos_3_ia64-icc-10.0
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
+    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
+    "INTEL_LICENSE_FILE=/usr/local/intel/compiler100_025/licenses:\
+/opt/intel/licenses" \
+    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 
 quad() {
@@ -352,8 +350,9 @@ quad() {
     quad64
 }
 quad32() {
-    HOSTS=quad
+    HOSTS=${lcun}@quad
     ARCH=irix_6.5_n32
+    CONFOPTS="LDFLAGS=-n32 CFLAGS=-n32 MAKE=$MAKE"
     export HOSTS ARCH CONFOPTS
     stdbuild \
     "PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin" \
@@ -364,11 +363,11 @@ $LD_LIBRARY_PATH" \
 }
 #
 quad64() {
-    HOSTS=quad
+    HOSTS=${lcun}@quad
     ARCH=irix_6.5_64
-    CONFOPTS="CC=\"cc -64\" CXX=\"CC -64\" FC=\"f77 -64\" \
-LDFLAGS=-64 CFLAGS=\"O2 -c99\""
-    export HOSTS ARCH CONFOPTS
+    CONFOPTS="LDFLAGS=-64 CFLAGS=-64 MAKE=$MAKE"
+    MAKEOPTS="-i"
+    export HOSTS ARCH CONFOPTS MAKEOPTS
     stdbuild \
     "PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin" \
     "PARALLEL=4" \
@@ -398,6 +397,12 @@ else
  while [ "$*" != "" ]
  do
   case $1 in
+    hdf*|-hdf*)
+      skipszip="yes"
+      shift;;
+    skip*|-skip*)
+      skipszip="yes"
+      shift;;
     all|-a*)
       hoth
       sunspot

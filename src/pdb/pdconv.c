@@ -6,8 +6,8 @@
  *
  */
 #include <limits.h>
-#include <pdb.h>
-#include <pdform.h>
+#include "pdb.h"
+#include "pdform.h"
 
 #define ONES_COMP_NEG(n, nb, incr)                                           \
     {if (nb == 8*sizeof(long))                                               \

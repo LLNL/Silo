@@ -35,8 +35,8 @@ for advertising or product endorsement purposes.
 */
 
 #define NO_CALLBACKS
-#include <silo_netcdf_private.h>
-#include <table.h>
+#include "silo_netcdf_private.h"
+#include "table.h"
 
 DirTable      *dirTable[MAX_SILO];
 DimTable      *dimTable[MAX_SILO];

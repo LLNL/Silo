@@ -34,7 +34,7 @@ for advertising or product endorsement purposes.
 
 */
 
-#include <silo_taurus_private.h>
+#include "silo_taurus_private.h"
 #define MAKE_N  DONT_USE_THIS--use ALLOC_N instead
 
 /*-------------------------------------------------------------------------

@@ -1,5 +1,5 @@
-#include <config.h> /* For HAVE_MEMMOVE test. */
-#include <score.h>
+#include "config.h" /* For HAVE_MEMMOVE test. */
+#include "score.h"
 
 
 /*-------------------------------------------------------------------------

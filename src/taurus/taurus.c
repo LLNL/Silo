@@ -44,11 +44,19 @@ for advertising or product endorsement purposes.
  */
 
 #define NO_CALLBACKS
-#include <silo_taurus_private.h>
+#include "config.h"
+#include "silo_taurus_private.h"
 
+#if HAVE_FCNTL_H
 #include <fcntl.h>              /*open */
+#endif
+#if HAVE_SYS_FCNTL_H
+#include <sys/fcntl.h>              /*open */
+#endif
 #include <math.h>               /*sqrt, acos */
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>           /*stat */
+#endif
 #include <ctype.h>		/*isspace */
 
 #define MAXBUF 100000

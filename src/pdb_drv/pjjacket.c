@@ -1,6 +1,6 @@
 
 #define NO_CALLBACKS
-#include <silo_pdb_private.h>
+#include "silo_pdb_private.h"
 
 /*
   Module Name                                                pjjacket.c

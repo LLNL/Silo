@@ -47,7 +47,9 @@ for advertising or product endorsement purposes.
 #include <stdlib.h> /*for malloc,calloc,realloc, etc */
 #endif
 #include <setjmp.h> /*for unwind_protect(), etc */
+#if HAVE_STRING_H
 #include <string.h> /*for STR_BEGINSWITH, etc */
+#endif
 #if defined(_WIN32)
 #include <silo_win32_compatibility.h>
 #else

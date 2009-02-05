@@ -335,8 +335,6 @@ m4_define(SILO_TIME, 14:17:56)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
-dnl Configuration command invocation
-AC_SUBST([CONFIG_CMD]) CONFIG_CMD="$0 $@"
 
 AC_PREREQ(2.60)
 AC_REVISION($Id$)dnl
@@ -389,6 +387,9 @@ AC_SUBST([SILO_VERS_MIN]) SILO_VERS_MIN="`echo SILO_VERSION | cut -d'.' -f2 | cu
 AC_SUBST([SILO_VERS_PAT]) SILO_VERS_PAT="`echo SILO_VERSION | cut -d'.' -f3 | cut -d'-' -f1`"
 AC_SUBST([SILO_VERS_PRE]) SILO_VERS_PRE="`echo SILO_VERSION | grep pre | cut -d'-' -f2 | cut -d'e' -f2`"
 AC_SUBST([SILO_VERS_TAG]) SILO_VERS_TAG="`echo Silo_version SILO_VERSION | sed -e 's/ /_/' -e 's/\./_/g' -e 's/-/_/g'`"
+
+dnl Configuration command invocation
+AC_SUBST([CONFIG_CMD]) CONFIG_CMD="`echo $0 $ac_configure_args`"
 
 dnl Configuration date
 AC_SUBST([CONFIG_DATE]) CONFIG_DATE="`date`"
@@ -647,7 +648,15 @@ elif test "X$UseHexzip" = "Xno"; then
     HEXZIP=""
     UsingHexzip="no"
 else
-    if test "$DEFAULT_HEXZIP" != "" ; then
+    if test -z "$DEFAULT_HEXZIP" ; then
+      AC_MSG_RESULT(defaulting to no)
+      HEXZIP=""
+      UsingHexzip="no"
+    elif test "$DEFAULT_HEXZIP" = "YES" ; then
+      AC_MSG_RESULT(defaulting to yes)
+      HEXZIP="hexzip"
+      UsingHexzip="yes"
+    elif test "$DEFAULT_HEXZIP" = "yes" ; then
       AC_MSG_RESULT(defaulting to yes)
       HEXZIP="hexzip"
       UsingHexzip="yes"
@@ -675,7 +684,15 @@ elif test "X$UseLocal" = "Xno"; then
     LOCAL=""
     UsingLocal="no"
 else
-    if test "$DEFAULT_LOCAL" != "" ; then
+    if test -z "$DEFAULT_LOCAL" ; then
+      AC_MSG_RESULT(defaulting to no)
+      LOCAL=""
+      UsingLocal="no"
+    elif test "$DEFAULT_LOCAL" = "YES" ; then
+      AC_MSG_RESULT(defaulting to yes)
+      LOCAL="local"
+      UsingLocal="yes"
+    elif test "$DEFAULT_LOCAL" = "yes" ; then
       AC_MSG_RESULT(defaulting to yes)
       LOCAL="local"
       UsingLocal="yes"
@@ -704,12 +721,18 @@ elif test "$UsingFortran" = "no"; then
     AC_MSG_RESULT(no)
     USEFORTRAN=""
 else
-    if test "$DEFAULT_FORTRAN" != "" ; then
+    if test -z "$DEFAULT_FORTRAN" ; then
       AC_MSG_RESULT(defaulting to yes)
       USEFORTRAN="yes"
-    else
+    elif test "$DEFAULT_FORTRAN" = "NO" ; then
       AC_MSG_RESULT(defaulting to no)
       USEFORTRAN=""
+    elif test "$DEFAULT_FORTRAN" = "no" ; then
+      AC_MSG_RESULT(defaulting to no)
+      USEFORTRAN=""
+    else
+      AC_MSG_RESULT(defaulting to yes)
+      USEFORTRAN="yes"
     fi
 fi
 AC_SUBST(USEFORTRAN)
@@ -797,20 +820,30 @@ dnl Checks for header files.
 dnl
 dnl If we don't have these header files, we can't continue.
 dnl
-AC_CHECK_HEADERS(sys/time.h stdarg.h sys/stat.h, ,
+AC_CHECK_HEADERS([sys/time.h stdarg.h sys/stat.h], [],
 AC_MSG_ERROR([$0 wasn't able to find a necessary header file
 (see above).  Please rectify this and rerun configure.
 See the file INSTALL_FAQ in this directory for possible reasons
 this might have happened.]))
 
+AC_CHECK_HEADERS([fcntl.h])
+AC_CHECK_HEADERS([sys/fcntl.h])
+if test ! "$ac_cv_header_fcntl_h"="yes" && test ! "$ac_cv_header_sys_fcntl_h"="yes" ; then
+AC_MSG_ERROR([$0 wasn't able to find a necessary fcntl.h or
+sys/fcntl.h header file.
+Please rectify this and rerun configure.
+See the file INSTALL_FAQ in this directory for possible reasons
+this might have happened.])
+fi
+
 dnl
 dnl Check for header files that we can do without.
 dnl Only needed by browser
-AC_CHECK_HEADERS(fnmatch.h)
+AC_CHECK_HEADERS([fnmatch.h])
 dnl Only needed by silock
-AC_CHECK_HEADERS(ieeefp.h)
+AC_CHECK_HEADERS([ieeefp.h])
 dnl a few systems define O_RDONLY here
-AC_CHECK_HEADERS(fcntl.h sys/fcntl.h sys/types.h unistd.h)
+AC_CHECK_HEADERS([sys/types.h unistd.h])
 dnl
 AC_HEADER_STDC
 
@@ -865,7 +898,7 @@ dnl
 dnl Check for library functions that can work around, or that we have
 dnl replacements for.
 dnl
-AC_CHECK_FUNCS(memmove fnmatch isnan fpclass strerror)
+AC_CHECK_FUNCS([memmove fnmatch isnan fpclass strerror])
 
 dnl
 dnl On Paragon/TeraFLOP systems there are "buggy" versions of
@@ -1053,7 +1086,7 @@ if test -n "$HDF5_DRV"; then
    saved_CPPFLAGS="$CPPFLAGS"
    saved_LDFLAGS="$LDFLAGS"
    saved_LIBS="$LIBS"
-   AC_ARG_WITH(hdf5,
+   AC_ARG_WITH([hdf5],
            [  --with-hdf5=INC,LIB     Location of HDF5 header and library],
 	   ,
 	   withval="default")
@@ -1178,7 +1211,7 @@ if test -n "$HDF5_DRV"; then
          CPPFLAGS="$saved_CPPFLAGS"
          LDFLAGS="$saved_LDFLAGS"
          AC_CHECKING(if lack of zlib caused tests for hdf5 to fail) 
-         AC_ARG_WITH(zlib,
+         AC_ARG_WITH([zlib],
                  [  --with-zlib=INC,LIB     Use the GNU zlib compression],
                      ,withval=yes)
          if test "no" = "$withval"; then
@@ -1307,21 +1340,161 @@ dnl search for the required Qt
     fi
     AC_MSG_CHECKING(for Qt)
 #   autoconf-archive-2006-08-20/htmldoc/bnv_have_qt.html
-    BNV_HAVE_QT
+#   BNV_HAVE_QT
 #   gw_CHECK_QT
-    if test "$have_qt" = no; then
-        AC_MSG_RESULT(Qt not found - Silex disabled)
-        SILEX=""
-    else
-        AC_MSG_RESULT(Qt found - Silex enabled)
-        UsingSilex="yes"
-        UsingQt="yes"
-        SILEX="silex"
+  AC_ARG_WITH([Qt-dir],
+    AC_HELP_STRING([--with-Qt-dir=DIR],
+                          [DIR is equal to $QTDIR if you have followed the
+                          installation instructions of Trolltech. Header
+                          files are in DIR/include, binary utilities are
+                          in DIR/bin. The library is in DIR/lib, unless
+                          --with-Qt-lib-dir is also set.]))
+  AC_ARG_WITH([Qt-include-dir],
+    AC_HELP_STRING([--with-Qt-include-dir=DIR],
+                          [Qt header files are in DIR]))
+  AC_ARG_WITH([Qt-bin-dir],
+    AC_HELP_STRING([--with-Qt-bin-dir=DIR],
+                          [Qt utilities such as moc and uic are in DIR]))
+  AC_ARG_WITH([Qt-lib-dir],
+    AC_HELP_STRING([--with-Qt-lib-dir=DIR],
+                          [The Qt library is in DIR]))
+  AC_ARG_WITH([Qt-lib],
+    AC_HELP_STRING([--with-Qt-lib=LIB],
+                          [Use -lLIB to link with the Qt library]))
+  if test x"$with_Qt_dir" = x"no" ||
+     test x"$with_Qt_include_dir" = x"no" ||
+     test x"$with_Qt_bin_dir" = x"no" ||
+     test x"$with_Qt_lib_dir" = x"no" ||
+     test x"$with_Qt_lib" = x"no"; then
+    # user disabled Qt. Leave cache alone.
+    have_qt="no"
+  else
+    # "yes" is a bogus option
+    if test x"$with_Qt_dir" = xyes; then
+      with_Qt_dir=
     fi
+    if test x"$with_Qt_include_dir" = xyes; then
+      with_Qt_include_dir=
+    fi
+    if test x"$with_Qt_bin_dir" = xyes; then
+      with_Qt_bin_dir=
+    fi  
+    if test x"$with_Qt_lib_dir" = xyes; then
+      with_Qt_lib_dir=
+    fi  
+    if test x"$with_Qt_lib" = xyes; then
+      with_Qt_lib=
+    fi  
+    # No Qt unless we discover otherwise
+    have_qt=no
+    # Check whether we are requested to link with a specific version
+    if test x"$with_Qt_lib" != x; then 
+      qt_lib="$with_Qt_lib" 
+    fi    
+    # Check whether we were supplied with an answer already
+    if test x"$with_Qt_dir" != x; then
+       have_qt=yes
+       QT_CXXFLAGS=-I$with_Qt_dir/include
+       QT_DIR=$with_Qt_dir
+       QT_UIC=$with_Qt_dir/bin/uic 
+       QT_MOC=$with_Qt_dir/bin/moc
+       if test x"$qt_lib" = x; then
+          qt_lib="`ls $with_Qt_dir/lib/libqt* | sed -n 1p |
+                     sed s@$with_Qt_dir/lib/lib@@ | [sed s@[.].*@@]`"
+       fi
+       case $host_os in
+        darwin* | rhapsody*)
+          QT_LIBS="-L$with_Qt_dir/lib -l$qt_lib"
+          ;;
+        aix*)
+          QT_LIBS="-L$with_Qt_dir/lib -l$qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXt -lXi $X_EXTRA_LIBS"
+          ;;
+        *)
+          QT_LIBS="-L$with_Qt_dir/lib -l$qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
+          ;;
+       esac
+       if test x"$qt_lib" = xqt-mt; then
+        QT_CXXFLAGS="$QT_CXXFLAGS -DQT_THREAD_SUPPORT"
+       fi
+    elif test x"$QTDIR" != x; then
+       have_qt=yes
+       QT_CXXFLAGS=-I$QTDIR/include
+       QT_DIR=$QTDIR
+       QT_UIC=$QTDIR/bin/uic 
+       QT_MOC=$QTDIR/bin/moc
+       if test x"$qt_lib" = x; then
+          qt_lib="`ls $QTDIR/lib/libqt* | sed -n 1p |
+                     sed s@$QTDIR/lib/lib@@ | [sed s@[.].*@@]`"
+       fi
+       case $host_os in
+        darwin* | rhapsody*)
+          QT_LIBS="-L$QTDIR/lib -l$qt_lib"
+          ;;
+        aix*)
+          QT_LIBS="-L$QTDIR/lib -l$qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXt -lXi $X_EXTRA_LIBS"
+          ;;
+        *)
+          QT_LIBS="-L$QTDIR/lib -l$qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
+          ;;
+       esac
+       if test x"$qt_lib" = xqt-mt; then
+        QT_CXXFLAGS="$QT_CXXFLAGS -DQT_THREAD_SUPPORT"
+       fi
+    else
+       if test x"$with_Qt_include_dir" != x; then
+          QT_CXXFLAGS="-I$with_Qt_include_dir"
+       fi
+       if test x"$with_Qt_bin_dir" != x; then
+          QT_UIC=$with_Qt_bin_dir/uic 
+          QT_MOC=$with_Qt_bin_dir/moc
+       fi
+       if test x"$with_Qt_lib_dir" != x; then
+          QT_LIBS="-L$with_Qt_lib_dir"
+       fi
+       if test x"$with_Qt_lib" != x; then
+          QT_LIBS="$QT_LIBS -l$with_Qt_lib"
+       fi
+    fi
+    if test x"QT_CXXFLAGS" = x ||
+       test x"$QT_MOC" = x ||
+       test x"$QT_LIBS" = x ; then
+       have_qt=no
+    else
+       have_qt=yes
+    fi
+  fi
+  if test "$have_qt" = no; then
+     # Qt was not found
+     have_qt=no
+     QT_CXXFLAGS=
+     QT_DIR=
+     QT_LIBS=
+     QT_UIC=
+     QT_MOC=
+     AC_MSG_RESULT(Qt not found - Silex disabled)
+     SILEX=""
+  else
+     AC_MSG_RESULT([$have_qt:
+           QT_CXXFLAGS=$QT_CXXFLAGS
+           QT_DIR=$QT_DIR
+           QT_LIBS=$QT_LIBS
+           QT_UIC=$QT_UIC
+           QT_MOC=$QT_MOC])
+     AC_MSG_CHECKING(for silex)
+     AC_MSG_RESULT(enabled)
+     UsingSilex="yes"
+     UsingQt="yes"
+     SILEX="silex"
+  fi
 else
    AC_MSG_CHECKING(for silex)
    AC_MSG_RESULT(disabled)
 fi
+AC_SUBST(QT_CXXFLAGS)
+AC_SUBST(QT_DIR)
+AC_SUBST(QT_LIBS)
+AC_SUBST(QT_UIC)
+AC_SUBST(QT_MOC)
 AC_SUBST(UsingSilex)
 AC_SUBST(UsingQt)
 AC_SUBST(SILEX)
@@ -1394,6 +1567,7 @@ AM_CONDITIONAL(HEXZIP_NEEDED, test -n "$HEXZIP")
 AM_CONDITIONAL(LOCAL_NEEDED, test -n "$LOCAL")
 AC_CONFIG_FILES([
             Makefile
+            SiloWindows/Makefile
             clearcase_bin/Makefile
             config/Makefile
             config-site/Makefile

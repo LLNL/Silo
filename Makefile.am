@@ -52,7 +52,7 @@ MAINTAINERCLEANFILES = Makefile.in\
 ## We need `.' in SUBDIRS because we want `check' to build `.' first.
 SUBDIRS = . src tools tests
 DIST_SUBDIRS = . config config-site \
-  clearcase_bin docs src tests tools
+  clearcase_bin docs src tests tools SiloWindows
 
 help: config/make.help
 	cat $(srcdir)/config/make.help

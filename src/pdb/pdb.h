@@ -11,7 +11,7 @@
 
 #include <setjmp.h> /* For the setjmp/long structure jmp_buf. */
 #include <stdio.h>
-#include <score.h> /* For type definitions */ 
+#include "score.h" /* For type definitions */ 
 
 /* The MAXLINE macro is defined in score.h and taken from stdio.h's */
 /* FILENAME_MAX.  HP's is only 14, so correct that here. */

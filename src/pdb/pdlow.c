@@ -9,12 +9,16 @@
  *      Robb Matzke, 17 Apr 1997
  *      Includes config.h for the HAVE_F*_POINTER feature test results.
  */
+#include "config.h"
+#if HAVE_STDARG_H
 #include <stdarg.h>
+#endif
 #if !defined(_WIN32)
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <pdb.h>
-#include <config.h>
+#endif
+#include "pdb.h"
 
 /* These prototypes are only included if we can't get them any other place.
  * We need them for their pointers, below.

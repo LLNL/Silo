@@ -45,8 +45,8 @@ for advertising or product endorsement purposes.
  * the SILO-Taurus source files, but not to the application.
  */
 
-#include <silo_private.h>
-#include <taurus.h>
+#include "silo_private.h"
+#include "taurus.h"
 
 /*
  * The private version of the DBfile structure is defined here.

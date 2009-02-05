@@ -15,13 +15,17 @@
  *
  */
 
-#include <config.h> /* For a possible redefinition of setjmp/longjmp. */
+#include "config.h" /* For a possible redefinition of setjmp/longjmp. */
+#if HAVE_STDARG_H
 #include <stdarg.h>
+#endif
 #if !defined(_WIN32)
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#endif
 #include <assert.h>
-#include <pdb.h>
+#include "pdb.h"
 
 
 /*

@@ -41,7 +41,7 @@ for advertising or product endorsement purposes.
  * Support for writing filters.
  */
 
-#include <silo_private.h>
+#include "silo_private.h"
 
 /*-------------------------------------------------------------------------
  * Obtain the file id number to be used as an index into local filter tables.

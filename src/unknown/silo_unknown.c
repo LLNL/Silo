@@ -38,7 +38,7 @@ for advertising or product endorsement purposes.
  * Driver for opening an as-yet-undetermined-type database.
  */
 
-#include <silo_unknown_private.h>
+#include "silo_unknown_private.h"
 
 /*-------------------------------------------------------------------------
  * Function:    db_unk_Open

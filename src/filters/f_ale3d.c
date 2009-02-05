@@ -39,8 +39,8 @@ for advertising or product endorsement purposes.
  */
 #include <assert.h>
 #include <math.h>
-#include <silo_private.h>
-#include <filter.h>
+#include "silo_private.h"
+#include "filter.h"
 
 #if 0
 #define MAXBUF          100000

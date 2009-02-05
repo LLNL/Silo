@@ -45,7 +45,7 @@ for advertising or product endorsement purposes.
  * SILO-DEBUG source files, but not to the application.
  */
 
-#include <silo_private.h>
+#include "silo_private.h"
 
 typedef struct DBfile_debug {
     DBfile_pub     pub;

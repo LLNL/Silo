@@ -45,8 +45,8 @@ for advertising or product endorsement purposes.
  * the SILO-NetCDF source files, but not to the application.
  */
 
-#include <pdb.h>
-#include <silo_private.h>
+#include "pdb.h"
+#include "silo_private.h"
 
 /*
  * The private version of the DBfile structure is defined here.
@@ -256,7 +256,7 @@ CALLBACK int db_cdf_NewToc(DBfile *);
  * Private functions...
  *-------------------------------------------------------------------------
  */
-#include <table.h>
+#include "table.h"
 
 /*netcdf.c */
 extern int silo_Attach(PDBfile *);

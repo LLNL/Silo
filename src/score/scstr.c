@@ -5,8 +5,8 @@
  * Software Release #92-0043
  *
  */
-#include <score.h>
 #include <ctype.h>
+#include "score.h"
 
 #define MBASE 32
 

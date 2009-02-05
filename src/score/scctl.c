@@ -6,9 +6,9 @@
  *
  */
 
+#include "config.h" /* For the pointer checks. */
 #include <time.h>
-#include <config.h> /* For the pointer checks. */
-#include <score.h>
+#include "score.h"
 
 /* Prototypes for other external functions. */
 extern char *ctime(const time_t *);

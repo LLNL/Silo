@@ -5,11 +5,13 @@
  * Software Release #92-0043
  *
  */
-#include <config.h> /* For a possible redefinition of setjmp/longjmp */
+#include "config.h" /* For a possible redefinition of setjmp/longjmp */
 #if !defined(_WIN32)
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <pdb.h>
+#endif
+#include "pdb.h"
 
 #define DONE         1
 #define LEAF         2

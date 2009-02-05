@@ -9,23 +9,38 @@
 # Usage:
 #     build-3rdparty-closed
 #
+# This script will build and install szip-2.1 and hdf5-1.6.1 libraries.
+# To change or upgrade szip or hdf5 release:
+# 1) untar the szip/hdf5 distribution in /usr/gapps/silo/szip/src/ or
+# /usr/gapps/silo/hdf5/src/. This should be done on both the BDivision
+# and LC /usr/gapps directories.
+# 2) change the value of the variable SZIPRELEASE or HDF5RELEASE
+# to be the release number
+# 3) run ./build-3rdparty-closed in both the BDivision and then the LC
+# servers
+#
 # Modifications:
+# Thomas R. Treadway, Fri Dec  7 16:03:39 PST 2007
+# Added hdfonly commnad option, will skip the szip build.
+# Added bservers and lcservers for B Division or LC server build.
 #
 #######################################################################
 #
-BDTOPDIR="/usr/gapps/silo"
-LCTOPDIR="/usr/gapps/silo"
-#LCTOPDIR="/nfs/tmp0/$USER"
+TOPDIR="/usr/gapps/silo"
 SZIPRELEASE=2.1
 HDF5RELEASE=1.6.6
 QTRELEASE=3.3.8
 lcun=$USER
 bdun=$USER
 bdhost="vader"
-export BDTOPDIR LCTOPDIR
+skipszip="no"
+MAKE=gmake
+MAKEOPTS=""
+export TOPDIR MAKE MAKEOPTS SZIPRELEASE HDF5RELEASE QTRELEASE
+export lcun bdun bdhost skipszip
 
 usage() {
-  printf "Usage: %s [-lc-username <lc-username>] [-bdiv-username <username>] [-bdiv-host <hostname>] [all|localhost|sunset|purple|uv|gauss|lilac|rhea|bgl]" $0
+  printf "Usage: %s [-lc-username <lc-username>] [-bdiv-username <username>] [-bdiv-host <hostname>] [hdf5only] [all|localhost|sunset|purple|uv|gauss|lilac|rhea|bgl]" $0
   printf "\n"
   printf "Silo 3rd party library installing script. Assumes a tarball exist in\n"
   printf "/usr/gapps/silo/szip/src/szip-$SZIPRELEASE, and\n"
@@ -34,54 +49,33 @@ usage() {
   printf "You may want to run this script from the LC network.\n"
 }
 
-bbuild() {
-    ssh ${bdun}@${HOSTS} "/bin/sh" << EOF > ${ARCH}.log 2>&1 &
-    $*
-    umask 002
-    mkdir $BDTOPDIR/szip/src/$ARCH
-    cd $BDTOPDIR/szip/src/$ARCH
-    $BDTOPDIR/szip/src/szip-$SZIPRELEASE/configure $CONFOPTS \
-    --prefix=$BDTOPDIR/szip/$SZIPRELEASE/$ARCH \
-    --disable-shared
-    gmake install
-    chmod -R g+w $BDTOPDIR/szip/$SZIPRELEASE/$ARCH
-    cd $BDTOPDIR/szip/src
-    rm -rf $BDTOPDIR/szip/src/$ARCH
-    mkdir $BDTOPDIR/hdf5/src/$ARCH
-    cd $BDTOPDIR/hdf5/src/$ARCH
-    $BDTOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
-    --prefix=$BDTOPDIR/hdf5/$HDF5RELEASE/$ARCH \
-    --with-szlib=$BDTOPDIR/szip/$SZIPRELEASE/$ARCH \
-    --disable-shared
-    gmake -j 4 install
-    chmod -R g+w $BDTOPDIR/hdf5/$HDF5RELEASE/$ARCH
-    cd $BDTOPDIR/hdf5/src
-    rm -rf $BDTOPDIR/hdf5/src/$ARCH
-EOF
-}
 stdbuild() {
-    ssh ${lcun}@${HOSTS} "/bin/sh" << EOF > ${ARCH}.log 2>&1 &
+    ssh ${HOSTS} "/bin/sh" << EOF > ${ARCH}.log 2>&1 &
     $*
     umask 002
-    mkdir $BDTOPDIR/szip/src/$ARCH
-    cd $BDTOPDIR/szip/src/$ARCH
-    $BDTOPDIR/szip/src/szip-$SZIPRELEASE/configure $CONFOPTS \
-    --prefix=$BDTOPDIR/szip/$SZIPRELEASE/$ARCH \
+    if [ "skipszip" = "no" ] ; then
+      mkdir $TOPDIR/szip/src/$ARCH
+      cd $TOPDIR/szip/src/$ARCH
+      $TOPDIR/szip/src/szip-$SZIPRELEASE/configure $CONFOPTS \
+      --prefix=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
+      --disable-shared
+      $MAKE $MAKEOPTS install
+      chmod -R a+r,ug+w,a+X $TOPDIR/szip/$SZIPRELEASE/$ARCH
+      chgrp -R visit $TOPDIR/szip/$SZIPRELEASE/$ARCH
+      cd $TOPDIR/szip/src
+      rm -rf $TOPDIR/szip/src/$ARCH
+    fi
+    mkdir $TOPDIR/hdf5/src/$ARCH
+    cd $TOPDIR/hdf5/src/$ARCH
+    $TOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
+    --prefix=$TOPDIR/hdf5/$HDF5RELEASE/$ARCH \
+    --with-szlib=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
     --disable-shared
-    gmake install
-    chmod -R g+w $BDTOPDIR/szip/$SZIPRELEASE/$ARCH
-    cd $BDTOPDIR/szip/src
-#   rm -rf $BDTOPDIR/szip/src/$ARCH
-    mkdir $BDTOPDIR/hdf5/src/$ARCH
-    cd $BDTOPDIR/hdf5/src/$ARCH
-    $BDTOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
-    --prefix=$BDTOPDIR/hdf5/$HDF5RELEASE/$ARCH \
-    --with-szlib=$BDTOPDIR/szip/$SZIPRELEASE/$ARCH \
-    --disable-shared
-    gmake -j 4 install
-    chmod -R g+w $BDTOPDIR/hdf5/$HDF5RELEASE/$ARCH
-    cd $BDTOPDIR/hdf5/src
-#   rm -rf $BDTOPDIR/hdf5/src/$ARCH
+    $MAKE $MAKEOPTS -j 4 install
+    chmod -R a+r,ug+w,a+X $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
+    chgrp -R visit $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
+    cd $TOPDIR/hdf5/src
+    rm -rf $TOPDIR/hdf5/src/$ARCH
 EOF
 }
 localhost() {
@@ -90,13 +84,13 @@ localhost() {
     localhosticc
 }
 localhostgcc() {
-    HOSTS="${bdhost}"
+    HOSTS="$bdun@${bdhost}"
     ARCH="i386-pc-linux-gcc-3.2.3"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=\"-fPIC -O2\" \
 CXXFLAGS=\"-fPIC -O2\" FFLAGS=-Wno-globals F77FLAGS=-Wno-globals \
 FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
 /usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:\
 /usr/security/bin" \
@@ -105,12 +99,12 @@ FCFLAGS=-Wno-globals"
 }
 #
 localhostpgc() {
-    HOSTS="${bdhost}"
+    HOSTS="$bdun@${bdhost}"
     ARCH="i386-pc-linux-pgc-6.2"
     CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
 CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
 /sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.2/bin:\
 /usr/security/bin" \
@@ -121,12 +115,12 @@ CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
 }
 #
 localhosticc() {
-    HOSTS="${bdhost}"
+    HOSTS="$bdun@${bdhost}"
     ARCH="i386-pc-linux-icc-8.1"
     CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
 /usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:\
 /usr/local/pgi/linux86/6.0/bin:/usr/security/bin:\
@@ -144,12 +138,12 @@ sunset() {
     sunsetcc
 }
 sunsetgcc() {
-    HOSTS=sunset
+    HOSTS=$bdun@sunset
     ARCH="sparc-sun-solaris-gcc-2.95"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:\
 /opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin" \
     "LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib" \
@@ -157,11 +151,11 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 }
 #
 sunsetcc() {
-    HOSTS=sunset
+    HOSTS=$bdun@sunset
     ARCH="sparc-sun-solaris-cc-5.2"
     CONFOPTS="CC=c89 CXX=CC FC=f77 F77=f77"
     export HOSTS ARCH CONFOPTS
-    bbuild \
+    stdbuild \
     "PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:\
 /opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin" \
     "LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib" \
@@ -175,29 +169,29 @@ purple() {
     purple32gcc
 }
 purple64() {
-    HOSTS=purple
+    HOSTS=$lcun@purple
     ARCH="aix_5_64_fed"
-    OBJECT_MODE=64
-    CONFOPTS="CC=xlc CXX=xlC FC=xlf F77=xlf"
+    CONFOPTS="CC=xlc CXX=xlC FC=xlf F77=xlf \
+CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\""
     export HOSTS ARCH CONFOPTS
-    export OBJECT_MODE HOSTS ARCH CONFOPTS
     stdbuild \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:\
 /usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "OBJECT_MODE=64" \
+    "export PATH OBJECT_MODE"
 }
 #
 purple32() {
-    HOSTS=purple
+    HOSTS=$lcun@purple
     ARCH="aix_5_ll"
-    OBJECT_MODE=32
-    CONFOPTS="CC=xlc CXX=xlC FC=xlf F77=xlf"
+    CONFOPTS="CC=xlc CXX=xlC FC=xlf F77=xlf \
+CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\""
     export HOSTS ARCH CONFOPTS
-    export OBJECT_MODE HOSTS ARCH CONFOPTS
     stdbuild \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:\
 /usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "OBJECT_MODE=32" \
+    "export PATH OBJECT_MODE"
 }
 #
 purplegcc() {
@@ -205,29 +199,31 @@ purplegcc() {
   purplegcc64
 }
 purple64gcc() {
-    HOSTS=purple
+    HOSTS=$lcun@purple
     ARCH="aix_5_64_fed-gcc"
-    OBJECT_MODE=64
-    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77"
-    export HOSTS ARCH CONFOPTS
-    export OBJECT_MODE HOSTS ARCH CONFOPTS
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
+CFLAGS=-maix64 LDFLAGS=-maix64 AR=\"ar -X64\""
+    MAKEOPTS="-i"
+    export HOSTS ARCH CONFOPTS MAKEOPTS
     stdbuild \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:\
 /usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "OBJECT_MODE=64" \
+    "export PATH OBJECT_MODE"
 }
 #
 purple32gcc() {
-    HOSTS=purple
+    HOSTS=$lcun@purple
     ARCH="aix_5_ll-gcc"
-    OBJECT_MODE=32
-    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77"
-    export HOSTS ARCH CONFOPTS
-    export OBJECT_MODE HOSTS ARCH CONFOPTS
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
+CFLAGS=-maix32 LDFLAGS=-maix32 AR=\"ar -X32\""
+    MAKEOPTS="-i"
+    export HOSTS ARCH CONFOPTS MAKEOPTS
     stdbuild \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:\
 /usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "OBJECT_MODE=32" \
+    "export PATH OBJECT_MODE"
 }
 
 lilac() {
@@ -235,7 +231,7 @@ lilac() {
     lilacicc
 }
 lilacgcc() {
-    HOSTS=lilac
+    HOSTS=$lcun@lilac
     ARCH=chaos_3_x86_elan3
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
@@ -246,15 +242,18 @@ lilacgcc() {
 }
 #
 lilacicc() {
-    HOSTS=lilac
+    HOSTS=$lcun@lilac
     ARCH=chaos_3_x86_elan3-icc
     CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:\
+    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:\
 /usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
+    "INTEL_LICENSE_FILE=${INTEL_LICENSE_FILE}:\
+/usr/local/intel/compiler100_025/licenses:/opt/intel/licenses" \
+    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 #
 gauss() {
@@ -262,7 +261,7 @@ gauss() {
     gaussicc
 }
 gaussgcc() {
-    HOSTS=gauss
+    HOSTS=$lcun@gauss
     ARCH=chaos_3_x86_64_ib-gcc
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
@@ -273,15 +272,18 @@ gaussgcc() {
 }
 #
 gaussicc() {
-    HOSTS=gauss
+    HOSTS=$lcun@gauss
     ARCH=chaos_3_x86_64_ib-icc
     CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:\
+    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:\
 /usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
+    "INTEL_LICENSE_FILE=${INTEL_LICENSE_FILE}:\
+/usr/local/intel/compiler100_025/licenses:/opt/intel/licenses" \
+    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 #
 rhea() {
@@ -291,7 +293,7 @@ rhea() {
     rheapgc
 }
 rheagcc() {
-    HOSTS=rhea
+    HOSTS=$lcun@rhea
     ARCH=chaos_3_x86_64-gcc-3.4.4
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
@@ -303,23 +305,22 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 }
 #
 rheaicc() {
-    HOSTS=rhea
-    ARCH=chaos_3_x86_64-icc-9.1
+    HOSTS=$lcun@rhea
+    ARCH=chaos_3_x86_64-icc-10.0
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler91_64/bin:/usr/local/bin:/bin:/usr/bin:\
+    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
-  "INTEL_LICENSE_FILE=/usr/local/intel/compiler91_64/licenses:\
-/opt/intel/licenses" \
-    "LM_LICENSE_FILE=/usr/local/etc/license.client" \
-    "export PATH INTEL_LICENSE_FILE LM_LICENSE_FILE" \
-    ". /usr/local/intel/compiler91/bin/iccvars.sh"
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
+    "INTEL_LICENSE_FILE=${INTEL_LICENSE_FILE}:\
+/usr/local/intel/compiler100_025/licenses:/opt/intel/licenses" \
+    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 #
 rheapc() {
-    HOSTS=rhea
+    HOSTS=$lcun@rhea
     ARCH=chaos_3_x86_64-pc-2.4
     CONFOPTS="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
@@ -334,7 +335,7 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC"
 }
 #
 rheapgc() {
-    HOSTS=rhea
+    HOSTS=$lcun@rhea
     ARCH=chaos_3_x86_64-pgc-6.2
   CONFOPTS=" CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
@@ -347,7 +348,7 @@ rheapgc() {
 }
 #
 bgl() {
-    HOSTS=bgl
+    HOSTS=$lcun@bgl
     ARCH=sles_9_ppc64
     CONFOPTS="CC=mpxlc"
     export HOSTS ARCH CONFOPTS
@@ -380,7 +381,6 @@ if [ $# -lt 1 ] ; then
   localhost
   sunset
   purple
-  uv
   gauss 
   lilac
   rhea
@@ -389,11 +389,28 @@ else
  while [ "$*" != "" ]
  do 
   case $1 in
+    bser*|-bser*)
+      localhost
+      sunset
+      shift;;
+    lcser*|-lcser*)
+      purple
+      uv
+      gauss 
+      lilac
+      rhea
+      bgl
+      shift;;
+    hdf*|-hdf*)
+      skipszip="yes"
+      shift;;
+    skip*|-skip*)
+      skipszip="yes"
+      shift;;
     all|-a*)
       localhost
       sunset
       purple
-      uv
       gauss 
       lilac
       rhea

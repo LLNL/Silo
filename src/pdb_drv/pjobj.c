@@ -1,6 +1,6 @@
 #define NEED_SCORE_MM
 #define NO_CALLBACKS
-#include <silo_pdb_private.h>
+#include "silo_pdb_private.h"
 
 /*-------------------------------------------------------------------------
  * Global private variables.

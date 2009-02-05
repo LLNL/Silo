@@ -22,7 +22,9 @@
  */
 #include <errno.h>
 #include <assert.h>
+#if HAVE_STRING_H
 #include <string.h>
+#endif
 #if HAVE_STDLIB_H
 #include <stdlib.h> /*missing from silo header files*/
 #endif

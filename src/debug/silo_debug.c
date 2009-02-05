@@ -38,7 +38,7 @@ for advertising or product endorsement purposes.
  * Debug device driver just for debugging.  Output is to a text file and
  * is not meant to be re-read.  Most routines return an error status.
  */
-#include <silo_debug_private.h>
+#include "silo_debug_private.h"
 
 /*-------------------------------------------------------------------------
  * Function:    db_debug_close
