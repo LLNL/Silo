@@ -399,7 +399,7 @@ DBVariableNameValid(const char *s)
 
     p = strchr(s,':');
     if (p == NULL)
-        p = (char*)s;
+        p = (char *)s;
     else
         p++;    /* Move one character past the ':'. */
 

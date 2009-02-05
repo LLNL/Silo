@@ -38,7 +38,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @FORTRAN_NEEDED_TRUE@am__append_1 = silo_f.c
-@FORTRAN_NEEDED_TRUE@am__append_2 = silo_f.c
+@FORTRAN_NEEDED_TRUE@am__append_2 = silo_f.h
 subdir = src/silo
 DIST_COMMON = $(am__noinst_HEADERS_DIST) $(include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -80,7 +80,7 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(includedir)"
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 am__noinst_HEADERS_DIST = silo_drivers.h silo_private.h \
-	silo_win32_compatibility.h silo_f.c
+	silo_win32_compatibility.h silo_f.h
 HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags

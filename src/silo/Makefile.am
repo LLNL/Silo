@@ -7,7 +7,7 @@ EXTRAFILES =
 EXTRAINCS =
 if FORTRAN_NEEDED
  EXTRAFILES += silo_f.c
- EXTRAINCS += silo_f.c
+ EXTRAINCS += silo_f.h
 endif
 
 EXTRA_DIST = \

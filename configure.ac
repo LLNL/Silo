@@ -305,6 +305,14 @@ dnl
 dnl     Thomas R. Treadway, Mon Jul 23 10:32:06 PDT 2007
 dnl     Added support for Peter Lindstrom's compression algorthims.
 dnl
+dnl     Thomas R. Treadway, Tue Oct 23 11:47:22 PDT 2007
+dnl     Corrected HDF5 checking when szip present.
+dnl     New pre-release.
+dnl
+dnl     Thomas R. Treadway, Thu Oct 25 16:32:40 PDT 2007
+dnl     Using environment variable to over SZLIB, HDF5, SILEX, QT, 
+dnl     Fortran, and readline.
+dnl
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -314,8 +322,8 @@ dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
 m4_define(SILO_VERSION, 4.6-pre8)
-m4_define(SILO_DATE, 2007/10/17)
-m4_define(SILO_TIME, 16:28:53)
+m4_define(SILO_DATE, 2007/10/30)
+m4_define(SILO_TIME, 14:44:35)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
@@ -397,7 +405,7 @@ if test -f "$file"; then
     . $file
     AC_MSG_RESULT([$file])
 else
-    hname="`hostname | cut -f2- -d.`"
+    hname="`hostname | cut -f1 -d.`"
     file=$srcdir/config-site/$hname.conf
     if test -f "$file"; then
         . $file
@@ -610,11 +618,13 @@ AC_MSG_CHECKING(if we should build silo's silex GUI browser)
 AC_ARG_ENABLE(silex,
 AC_HELP_STRING([--enable-silex], 
   [build the silex browser @<:@default=no@:>@]),
-              UseSilex="$enable_silex", UseSilex=no)
+              UseSilex="$enable_silex", UseSilex=default)
 if test "X$UseSilex" = "Xyes"; then
     AC_MSG_RESULT(yes)
-else
+elif test "X$UseSilex" = "Xno"; then
     AC_MSG_RESULT(no)
+else
+    AC_MSG_RESULT(default)
 fi
 
 dnl enable hexzip compression algorithm
@@ -622,15 +632,25 @@ AC_MSG_CHECKING(if we want the hexzip compression algorithm)
 AC_ARG_ENABLE(hexzip,
 AC_HELP_STRING([--enable-hexzip], 
   [build with the hexzip compression algorithm @<:@default=no@:>@]),
-              UseHexzip="$enable_hexzip", UseHexzip=no)
+              UseHexzip="$enable_hexzip", UseHexzip=default)
 if test "X$UseHexzip" = "Xyes"; then
     AC_MSG_RESULT(yes)
     HEXZIP="hexzip"
     UsingHexzip="yes"
-else
+elif test "X$UseHexzip" = "Xno"; then
     AC_MSG_RESULT(no)
     HEXZIP=""
     UsingHexzip="no"
+else
+    if test "$DEFAULT_HEXZIP" != "" ; then
+      AC_MSG_RESULT(defaulting to yes)
+      HEXZIP="hexzip"
+      UsingHexzip="yes"
+    else
+      AC_MSG_RESULT(defaulting to no)
+      HEXZIP=""
+      UsingHexzip="no"
+    fi
 fi
 AC_SUBST(HEXZIP)
 AC_SUBST(UsingHexzip)
@@ -640,15 +660,25 @@ AC_MSG_CHECKING(if we want the local compression algorithm)
 AC_ARG_ENABLE(local,
 AC_HELP_STRING([--enable-local], 
   [build with the local compression algorithm @<:@default=no@:>@]),
-              UseLocal="$enable_local", UseLocal=no)
+              UseLocal="$enable_local", UseLocal=default)
 if test "X$UseLocal" = "Xyes"; then
     AC_MSG_RESULT(yes)
     LOCAL="local"
     UsingLocal="yes"
-else
+elif test "X$UseLocal" = "Xno"; then
     AC_MSG_RESULT(no)
     LOCAL=""
     UsingLocal="no"
+else
+    if test "$DEFAULT_LOCAL" != "" ; then
+      AC_MSG_RESULT(defaulting to yes)
+      LOCAL="local"
+      UsingLocal="yes"
+    else
+      AC_MSG_RESULT(defaulting to no)
+      LOCAL=""
+      UsingLocal="no"
+    fi
 fi
 AC_SUBST(LOCAL)
 AC_SUBST(UsingLocal)
@@ -661,13 +691,21 @@ AC_ARG_ENABLE(fortran,
         AC_HELP_STRING([--enable-fortran],
             [compile Fortran examples @<:@default=no@:>@]),
         UsingFortran="$enable_fortran",
-        UsingFortran=no)
+        UsingFortran=default)
 if test "$UsingFortran" = "yes"; then
     AC_MSG_RESULT(yes)
     USEFORTRAN="yes"
-else
+elif test "$UsingFortran" = "no"; then
     AC_MSG_RESULT(no)
     USEFORTRAN=""
+else
+    if test "$DEFAULT_FORTRAN" != "" ; then
+      AC_MSG_RESULT(defaulting to yes)
+      USEFORTRAN="yes"
+    else
+      AC_MSG_RESULT(defaulting to no)
+      USEFORTRAN=""
+    fi
 fi
 AC_SUBST(USEFORTRAN)
 
@@ -888,15 +926,64 @@ AC_ARG_WITH([szlib],
             [AC_HELP_STRING([--with-szlib=DIR],
                             [Use szlib library for external szlib I/O
                              filter [default=no]])],,
-            withval=no)
+            withval=default)
 
 case $withval in
+  default)
+    HAVE_SZLIB="no"
+    if test "$DEFAULT_SZIP" != "" ; then
+      LDFLAGS="$LDFLAGS -L$DEFAULT_SZIP/lib"
+      LIBS="$LIBS -lsz"
+      HAVE_SZLIB="yes"
+      szlib_lib="$DEFAULT_SZIP/lib"
+    fi
+    if test "$DEFAULT_SZIP_LIB" != "" ; then
+      LDFLAGS="$LDFLAGS -L$DEFAULT_SZIP_LIB"
+      LIBS="$LIBS -lsz"
+      HAVE_SZLIB="yes"
+      szlib_lib="$DEFAULT_SZIP_LIB"
+    fi
+    if test "$DEFAULT_SZIP_LIBDIR" != "" ; then
+      LDFLAGS="$LDFLAGS -L$DEFAULT_SZIP_LIBDIR"
+      LIBS="$LIBS -lsz"
+      HAVE_SZLIB="yes"
+      szlib_lib="$DEFAULT_SZIP_LIBDIR"
+    fi
+    if test "$HAVE_SZLIB" = "yes" ; then
+      AC_MSG_CHECKING([default szlib path provided])
+      AC_MSG_RESULT([$szlib_lib])
+    else
+      AC_MSG_CHECKING([for szlib])
+      AC_MSG_RESULT([suppressed])
+    fi
+    ;;
   yes)
-    HAVE_SZLIB="yes"
-    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],, [unset HAVE_SZLIB])
-
-    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find szlib library])
+    HAVE_SZLIB="no"
+    if test "$DEFAULT_SZIP" != "" ; then
+      LDFLAGS="$LDFLAGS -L$DEFAULT_SZIP/lib"
+      LIBS="$LIBS -lsz"
+      HAVE_SZLIB="yes"
+      szlib_lib="$DEFAULT_SZIP/lib"
+    fi
+    if test "$DEFAULT_SZIP_LIB" != "" ; then
+      LDFLAGS="$LDFLAGS -L$DEFAULT_SZIP_LIB"
+      LIBS="$LIBS -lsz"
+      HAVE_SZLIB="yes"
+      szlib_lib="$DEFAULT_SZIP_LIB"
+    fi
+    if test "$DEFAULT_SZIP_LIBDIR" != "" ; then
+      LDFLAGS="$LDFLAGS -L$DEFAULT_SZIP_LIBDIR"
+      LIBS="$LIBS -lsz"
+      HAVE_SZLIB="yes"
+      szlib_lib="$DEFAULT_SZIP_LIBDIR"
+    fi
+    if test "$HAVE_SZLIB" = "yes" ; then
+      AC_MSG_CHECKING([using szlib path provided])
+      AC_MSG_RESULT([$szlib_lib])
+    else
+      AC_MSG_ERROR([expect to find szlib environment variables])
+      AC_MSG_CHECKING([for szlib])
+      AC_MSG_RESULT([suppressed])
     fi
     ;;
   no)
@@ -966,11 +1053,80 @@ if test -n "$HDF5_DRV"; then
    AC_ARG_WITH(hdf5,
            [  --with-hdf5=INC,LIB     Location of HDF5 header and library],
 	   ,
-	   withval="no")
+	   withval="default")
    if test "$withval" = "no" ; then
       AC_MSG_CHECKING(for hdf5)
       AC_MSG_RESULT(suppressed)
       HDF5_DRV=""
+   elif test "$withval" = "default" ; then
+      if test "$DEFAULT_HDF5" != "" ; then
+         CPPFLAGS="$CPPFLAGS -I$DEFAULT_HDF5/include"
+         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5/lib"
+         LIBS="$LIBS -lhdf5 -lz"
+         hdf5_inc=$DEFAULT_HDF5/include
+         hdf5_lib=$DEFAULT_HDF5/lib
+         hdf5_explicit=true
+      fi
+      if test "$DEFAULT_HDF5_LIB" != "" ; then
+         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5_LIB"
+         LIBS="$LIBS -lhdf5 -lz"
+         hdf5_lib=$DEFAULT_HDF5_LIB
+         hdf5_explicit=true
+      fi
+      if test "$DEFAULT_HDF5_LIBDIR" != "" ; then
+         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5_LIBDIR"
+         LIBS="$LIBS -lhdf5 -lz"
+         hdf5_lib=$DEFAULT_HDF5_LIBDIR
+         hdf5_explicit=true
+      fi
+      if test "$DEFAULT_HDF5_INCLUDE" != "" ; then
+         CPPFLAGS="$CPPFLAGS -I$DEFAULT_HDF5_INCLUDE"
+         hdf5_inc=$DEFAULT_HDF5_INCLUDE
+         hdf5_explicit=true
+      fi
+      if test -d "$hdf5_lib"; then
+         AC_MSG_CHECKING([using default hdf5 path provided])
+         AC_MSG_RESULT([$hdf5_lib])
+      else
+         AC_MSG_CHECKING(for hdf5)
+         AC_MSG_RESULT(suppressed)
+         HDF5_DRV=""
+      fi
+   elif test "$withval" = "yes" ; then
+      if test "$DEFAULT_HDF5" != "" ; then
+         CPPFLAGS="$CPPFLAGS -I$DEFAULT_HDF5/include"
+         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5/lib"
+         LIBS="$LIBS -lhdf5 -lz"
+         hdf5_inc=$DEFAULT_HDF5/include
+         hdf5_lib=$DEFAULT_HDF5/lib
+         hdf5_explicit=true
+      fi
+      if test "$DEFAULT_HDF5_LIB" != "" ; then
+         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5_LIB"
+         LIBS="$LIBS -lhdf5 -lz"
+         hdf5_lib=$DEFAULT_HDF5_LIB
+         hdf5_explicit=true
+      fi
+      if test "$DEFAULT_HDF5_LIBDIR" != "" ; then
+         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5_LIBDIR"
+         LIBS="$LIBS -lhdf5 -lz"
+         hdf5_lib=$DEFAULT_HDF5_LIBDIR
+         hdf5_explicit=true
+      fi
+      if test "$DEFAULT_HDF5_INCLUDE" != "" ; then
+         CPPFLAGS="$CPPFLAGS -I$DEFAULT_HDF5_INCLUDE"
+         hdf5_inc=$DEFAULT_HDF5_INCLUDE
+         hdf5_explicit=true
+      fi
+      if test -d "$hdf5_lib"; then
+         AC_MSG_CHECKING([using hdf5 path provided])
+         AC_MSG_RESULT([$hdf5_lib])
+      else
+         AC_MSG_ERROR([expected to find hdf5 environment variables])
+         AC_MSG_CHECKING(for hdf5)
+         AC_MSG_RESULT(suppressed)
+         HDF5_DRV=""
+      fi
    else
       AC_CHECKING(for hdf5 and supporting libraries)
       hdf5_inc="`echo $withval |cut -f1 -d,`"
@@ -986,7 +1142,11 @@ if test -n "$HDF5_DRV"; then
       if test "$withval" != "yes" && test -n "$hdf5_lib"; then
 	 hdf5_explicit=true
          if test -d "$hdf5_lib"; then
-            LDFLAGS="-L$hdf5_lib $LDFLAGS"
+            if test -n "$szlib_lib"; then
+               LDFLAGS="-L$hdf5_lib -L$szlib_lib $LDFLAGS"
+            else
+               LDFLAGS="-L$hdf5_lib $LDFLAGS"
+            fi
          else
             AC_MSG_ERROR(problem with directory specified for hdf5 library)
          fi
@@ -994,8 +1154,12 @@ if test -n "$HDF5_DRV"; then
       notfound=""
       AC_CHECK_HEADERS(hdf5.h,,notfound="hdf5.h")
       tmp_LIBS="$LIBS"
-###   LIBS="$hdf5_lib/libhdf5.a $LIBS"
-      LIBS="-lhdf5 $LIBS"
+      if test -n "$szlib_lib"; then
+###      LIBS="$hdf5_lib/libhdf5.a $LIBS"
+         LIBS="-lhdf5 -lsz $LIBS"
+      else
+         LIBS="-lhdf5 $LIBS"
+      fi
       AC_CHECK_FUNC(H5open,[AC_DEFINE(HAVE_LIBHDF5,1,[using HDF5])],notfound="$notfound libhdf5.a")
       if test -n "$notfound"; then
          LIBS="$tmp_LIBS"
@@ -1063,7 +1227,7 @@ Please see INSTALL_FAQ for possible causes.])
             fi
             if test -n "$hdf5_lib"; then
                if test -n "$szlib_lib"; then
-                  LDFLAGS="-L$hdf5_lib -L$szlib_lib -lsz $LDFLAGS"
+                  LDFLAGS="-L$hdf5_lib -L$szlib_lib $LDFLAGS"
                else
                   LDFLAGS="-L$hdf5_lib $LDFLAGS"
                fi
@@ -1073,8 +1237,12 @@ Please see INSTALL_FAQ for possible causes.])
             tmp_LIBS="$LIBS"
             AC_CHECK_LIB(hdf5,H5open,,notfound="$notfound libhdf5.a")
             if test "$notfound" = ""; then
-###            LIBS="$hdf5_lib/libhdf5.a $tmp_LIBS"
-               LIBS="-lhdf5 $tmp_LIBS"
+               if test -n "$szlib_lib"; then
+###               LIBS="$hdf5_lib/libhdf5.a $tmp_LIBS"
+                  LIBS="-lhdf5 -lsz $tmp_LIBS"
+               else
+                  LIBS="-lhdf5 $tmp_LIBS"
+               fi
             fi
             if test -n "$notfound"; then
                CPPFLAGS="$saved_CPPFLAGS"
@@ -1121,9 +1289,18 @@ dnl If Silex is desired then Qt is required
 dnl
 UsingSilex="no"
 UsingQt="no"
-if test "X$UseSilex" = "Xyes"; then
+if (( test "X$UseSilex" = "Xyes" ) || 
+  ( test "$QTDIR" != "" && test "X$UseSilex" = "Xdefault" )) ; then
 dnl search for the required Qt
-   AC_MSG_CHECKING(for Qt)
+    
+    if test "X$UseSilex" = "Xdefault" ; then
+       AC_MSG_CHECKING([default Qt path provided])
+       AC_MSG_RESULT([$QTDIR])
+    elif test -d "$QTDIR"; then
+       AC_MSG_CHECKING([using Qt path provided])
+       AC_MSG_RESULT([$QTDIR])
+    fi
+    AC_MSG_CHECKING(for Qt)
 #   autoconf-archive-2006-08-20/htmldoc/bnv_have_qt.html
     BNV_HAVE_QT
 #   gw_CHECK_QT
@@ -1136,6 +1313,9 @@ dnl search for the required Qt
         UsingQt="yes"
         SILEX="silex"
     fi
+else
+   AC_MSG_CHECKING(for silex)
+   AC_MSG_RESULT(disabled)
 fi
 AC_SUBST(UsingSilex)
 AC_SUBST(UsingQt)

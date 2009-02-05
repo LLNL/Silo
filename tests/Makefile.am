@@ -11,7 +11,8 @@ EXTRA_DIST= \
  testsuitef77.at \
  testsuitef77 \
  testsuitehdf5.at \
- testsuitehdf5
+ testsuitehdf5 \
+ pmpio_silo_test_mesh.c
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te

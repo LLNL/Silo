@@ -127,7 +127,7 @@
       parameter (SILO_VERS_MAJ             = 4              )
       parameter (SILO_VERS_MIN             = 6              )
       parameter (SILO_VERS_PAT             = 0              )
-      parameter (SILO_VERS_PRE             = 7              )
+      parameter (SILO_VERS_PRE             = 8              )
       parameter (DB_NETCDF                 = 0              )
       parameter (DB_PDB                    = 2              )
       parameter (DB_TAURUS                 = 3              )

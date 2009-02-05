@@ -67,6 +67,9 @@ for advertising or product endorsement purposes.
 
 #define Min(A,B) (((A)<(B))?(A):(B))
 #define Max(A,B) (((A)<(B))?(B):(A))
+#ifndef M_PI        /* yea, Solaris 5 */
+#define M_PI        3.14159265358979323846264338327950288   /* pi */
+#endif
 
 /* Local function prototypes */
 static void     fill_rect2d_bkgr(int matlist[], int nx, int ny, int matno);

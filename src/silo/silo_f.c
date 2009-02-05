@@ -4542,7 +4542,7 @@ DBPUTGRPLMAP_FC (int *dbid, FCD_DB map_name, int *lmap_name,
     DBfile     *dbfile ;
     DBoptlist  *optlist ;
     char       *map_nm = NULL;
-    int       **segment_data = 0;;
+    int       **segment_data = 0;
     void      **segment_fracs = 0;
     int         i;
 
