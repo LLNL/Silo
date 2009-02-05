@@ -10183,6 +10183,11 @@ int db_isRelative_path ( const char *pathname )
 |                release this string when it is no longer needed.  A 0
 |                pointer is returned on error.
 |
+|   Modifications:
+|
+|     Mark C. Miller, Wed Oct 18 08:41:33 PDT 2006
+|     Fixed bug where result was set at top of function but then uninitialized
+|     tmp was tested at end causing result to be set to zero
 +-----------------------------------------------------------------------------*/
 
 char *db_join_path ( const char *a,
@@ -10191,11 +10196,11 @@ char *db_join_path ( const char *a,
    char *tmp;
 
    if (strlen(b) == 0)
-      result = db_normalize_path(a);
+      return db_normalize_path(a);
    else if (strlen(a) == 0)
-      result = db_normalize_path(b);
+      return db_normalize_path(b);
    else if (db_isAbsolute_path(b))
-      result = db_normalize_path(b);
+      return db_normalize_path(b);
    else
    {  db_Pathname *Pa;
 
@@ -10459,7 +10464,7 @@ static db_Pathname *appendComponent ( db_Pathname *p, char *s )
 |                returned by this function is formed using allocated dynamic
 |                memory and should be released using the db_cleanup_path()
 |                function when it is no longer needed.  This function is
-|                intended for internal use by DSL only.
+|                intended for internal use only.
 |
 |   Return:      A pointer to the first component of a list of pathname
 |                components is returned when this function succeeds, otherwise
@@ -10536,7 +10541,7 @@ done:    ;
 |
 |   Description: This function forms a pathname string from a linked set of
 |                pathname components.  Note that this function is intended for
-|                internal use by DSL only.
+|                internal use only.
 |
 +-----------------------------------------------------------------------------*/
 

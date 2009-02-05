@@ -10107,6 +10107,9 @@ db_hdf5_InqVarType(DBfile *_dbfile, char *name)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Tue Oct 17 08:16:13 PDT 2006
+ *   Made it try either "meshid" or "meshname" data members
+ *
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -10114,51 +10117,61 @@ db_hdf5_InqMeshName(DBfile *_dbfile, char *name, char *meshname/*out*/)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_InqMeshName";
-    char                s[1024];
-    hid_t               o=-1, attr=-1, type=-1, str_type=-1;
+    int                  pass;
 
-    PROTECT {
-        /* Describe memory */
-        if ((str_type=H5Tcopy(H5T_C_S1))<0 ||
-            H5Tset_size(str_type, sizeof s)<0 ||
-            (type=H5Tcreate(H5T_COMPOUND, sizeof s))<0 ||
-            db_hdf5_put_cmemb(type, "meshid", 0, 0, NULL, str_type)<0) {
-            db_perror(name, E_CALLFAIL, me);
-            UNWIND();
-        }
+    for (pass = 0; pass < 2; pass++)
+    {
+        char   s[1024];
+        hid_t  o=-1, attr=-1, type=-1, str_type=-1;
 
-        /* Open variable */
-        if ((o=H5Topen(dbfile->cwg, name))<0 ||
-            (attr=H5Aopen_name(o, "silo"))<0) {
-            db_perror(name, E_NOTFOUND, me);
-            UNWIND();
-        }
+        PROTECT {
+            /* Describe memory */
+            if ((str_type=H5Tcopy(H5T_C_S1))<0 ||
+                H5Tset_size(str_type, sizeof s)<0 ||
+                (type=H5Tcreate(H5T_COMPOUND, sizeof s))<0 ||
+                db_hdf5_put_cmemb(type, pass==0?"meshid":"meshname",
+                                  0, 0, NULL, str_type)<0) {
+                db_perror(name, E_CALLFAIL, me);
+                UNWIND();
+            }
 
-        /*
-         * Read "silo" attribute. If the read fails it's probably because
-         * there is no "meshid" field in the attribute, in which case we
-         * haven't opened a mesh variable and we should fail.
-         */
-        if (H5Aread(attr, type, s)<0) {
-            db_perror(name, E_CALLFAIL, me);
-            UNWIND();
-        }
+            /* Open variable */
+            if ((o=H5Topen(dbfile->cwg, name))<0 ||
+                (attr=H5Aopen_name(o, "silo"))<0) {
+                db_perror(name, E_NOTFOUND, me);
+                UNWIND();
+            }
+
+            /*
+             * Read "silo" attribute. If the read fails it's probably because
+             * there is no "meshid" field in the attribute, in which case we
+             * haven't opened a mesh variable and we should fail.
+             */
+            s[0] = '\0';
+            if (H5Aread(attr, type, s)<0) {
+                db_perror(name, E_CALLFAIL, me);
+                UNWIND();
+            }
         
-        /* Copy result to output buffer and release resources */
-        strcpy(meshname, s);
-        H5Aclose(attr);
-        H5Tclose(type);
-        H5Tclose(str_type);
-        H5Tclose(o);
-        
-    } CLEANUP {
-        H5E_BEGIN_TRY {
+            /* Copy result to output buffer and release resources */
+            strcpy(meshname, s);
             H5Aclose(attr);
             H5Tclose(type);
             H5Tclose(str_type);
             H5Tclose(o);
-        } H5E_END_TRY;
-    } END_PROTECT;
+
+        } CLEANUP {
+            H5E_BEGIN_TRY {
+                H5Aclose(attr);
+                H5Tclose(type);
+                H5Tclose(str_type);
+                H5Tclose(o);
+            } H5E_END_TRY;
+        } END_PROTECT;
+
+        if (s[0] != '\0')
+            break;
+    }
     return 0;
 }
 

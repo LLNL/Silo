@@ -301,7 +301,7 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 4.6.0b)
+m4_define(SILO_VERSION, 4.6-pre3)
 m4_define(SILO_DATE, 2006/10/10)
 m4_define(SILO_TIME, 13:34:00)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])

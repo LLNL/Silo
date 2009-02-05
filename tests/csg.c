@@ -39,6 +39,7 @@ for advertising or product endorsement purposes.
 #include "silo.h"
 
 static void build_csg(DBfile *dbfile, char *name);
+static int hadError = 0;
 
 int
 main(int argc, char *argv[])
@@ -66,7 +67,7 @@ main(int argc, char *argv[])
     build_csg(dbfile, "csgmesh");
     DBClose(dbfile);
 
-    return 0;
+    return hadError;
 }
 
 static void
@@ -149,5 +150,26 @@ build_csg(DBfile *dbfile, char *name)
             DB_ZONECENT, 0);
 
         DBGetCsgvar(dbfile, "var1");
+    }
+
+    /* test DBInqMeshname */
+    {
+        char meshName[256];
+        if (DBInqMeshname(dbfile, "var1", meshName) != 0)
+        {
+            printf("Error inquiring mesh name\n");
+            hadError = 1;
+        }
+        else
+        {
+            printf("Got \"%s\" as name of mesh for variable \"var1\"\n", meshName);
+        }
+    }
+
+    {
+        const char *parent = "/";
+        const char *child = "/facelist";
+        char *result = db_join_path(parent, child);
+        printf("Got \"%s\" for result\n", result);
     }
 }

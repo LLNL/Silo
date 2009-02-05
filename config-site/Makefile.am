@@ -12,10 +12,17 @@ EXTRA_DIST = \
  OSF1.conf \
  README \
  SunOS.conf \
- bgl15.conf \
- bgl16.conf \
- bgl17.conf \
- bgl18.conf \
+ bgl1.conf \
+ bgl2.conf \
+ bgl3.conf \
+ bgl4.conf \
+ bgl5.conf \
+ bgl6.conf \
+ bgl7.conf \
+ bgl8.conf \
+ bgl9.conf \
+ bgl10.conf \
+ bgl11.conf \
  fc0.llnl.gov.conf \
  fhp.conf \
  gps.conf \
