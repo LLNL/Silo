@@ -623,10 +623,7 @@ function pengragcc() {
     ARCH="chaos_3_x86_elan3"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
-    build \
-    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
-/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    build 
 }
 
 function pengraicc() {
@@ -640,13 +637,7 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-silex \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_elan3-icc \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3-icc/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3-icc/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
-    build2 \
-    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:\
-/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
-    "INTEL_LICENSE_FILE=${INTEL_LICENSE_FILE}:\
-/usr/local/intel/compiler100_025/licenses:/opt/intel/licenses" \
-    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
+    build2 
 }
 
 function yana() {

@@ -278,7 +278,7 @@ pengragcc() {
     export HOSTS ARCH CONFOPTS
     stdbuild \
     "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
-/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
+/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin" \
     "export PATH"
 }
 #
@@ -289,11 +289,11 @@ pengraicc() {
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:\
-/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
+    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:\
+/usr/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin" \
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler91/lib" \
     "INTEL_LICENSE_FILE=${INTEL_LICENSE_FILE}:\
-/usr/local/intel/compiler100_025/licenses:/opt/intel/licenses" \
+/usr/local/intel/compiler91/licenses:/opt/intel/licenses" \
     "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 #
