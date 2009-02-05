@@ -329,7 +329,7 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 4.6.2-pre1)
+m4_define(SILO_VERSION, 4.6.2-pre2)
 m4_define(SILO_DATE, 2007/11/28)
 m4_define(SILO_TIME, 14:17:56)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
@@ -1597,6 +1597,12 @@ if test -n "$HDF5_DRV"; then
 else
   AC_CONFIG_FILES([src/libsilo.settings])
 fi
+CC_FULLPATH=`which $CC`
+CXX_FULLPATH=`which $CXX`
+FC_FULLPATH=`which $FC`
+AC_SUBST(CC_FULLPATH)
+AC_SUBST(CXX_FULLPATH)
+AC_SUBST(FC_FULLPATH)
 AC_OUTPUT
 dnl ----------------------------------------------------------------------
 dnl Print out a summary of what we are going to build.

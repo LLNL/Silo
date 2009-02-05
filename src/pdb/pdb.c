@@ -1637,7 +1637,7 @@ _lite_PD_defent (PDBfile *file, char *name, char *outtype, long number,
 #endif /* PDB_WRITE */
 
 /*-------------------------------------------------------------------------
- * Function:    _lite_PD_entry_number
+ * Function:    lite_PD_entry_number
  *
  * Purpose:     Query entry number        
  *
@@ -1645,12 +1645,12 @@ _lite_PD_defent (PDBfile *file, char *name, char *outtype, long number,
  *
  *-------------------------------------------------------------------------
  */
-int _lite_PD_entry_number(syment* entry) {
+int lite_PD_entry_number(syment* entry) {
     return (PD_entry_number(entry));
 }
 
 /*-------------------------------------------------------------------------
- * Function:    _lite_PD_get_file_length
+ * Function:    lite_PD_get_file_length
  *
  * Purpose:     Return current file size 
  *
@@ -1658,7 +1658,7 @@ int _lite_PD_entry_number(syment* entry) {
  *
  *-------------------------------------------------------------------------
  */
-long  _lite_PD_get_file_length(PDBfile *file) {
+long  lite_PD_get_file_length(PDBfile *file) {
     off_t caddr, flen;
 
     caddr = io_tell(file->stream);
@@ -1671,7 +1671,7 @@ long  _lite_PD_get_file_length(PDBfile *file) {
 }
 
 /*-------------------------------------------------------------------------
- * Function:    _lite_PD_append_alt
+ * Function:    lite_PD_append_alt
  *
  * Purpose:      - append a new block of data to an existing entry
  *               - NOTE: VR must be a pointer to an object with the type
@@ -1684,14 +1684,14 @@ long  _lite_PD_get_file_length(PDBfile *file) {
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
-int _lite_PD_append_alt(PDBfile *file, char *name, void *vr, int nd, long *ind) {
+int lite_PD_append_alt(PDBfile *file, char *name, void *vr, int nd, long *ind) {
   _append_flag = TRUE;
   return(lite_PD_write_as_alt(file, name, NULL, NULL, vr, nd, ind));
 }
 #endif /* PDB_WRITE */
 
 /*-------------------------------------------------------------------------
- * Function:    _lite_PD_set_major_order
+ * Function:    lite_PD_set_major_order
  *
  * Purpose:     Set major storage order.
  *
@@ -1702,7 +1702,7 @@ int _lite_PD_append_alt(PDBfile *file, char *name, void *vr, int nd, long *ind) 
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
-void _lite_PD_set_major_order( PDBfile* file, int type) {
+void lite_PD_set_major_order( PDBfile* file, int type) {
   PD_set_major_order( file, type ) ;
 }
 #endif /* PDB_WRITE */
