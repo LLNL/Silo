@@ -1,0 +1,1344 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="7.10"
+	Name="silex"
+	ProjectGUID="{3D443B05-403C-4907-8F50-DC396DB6BB23}"
+	SccProjectName=""
+	SccLocalPath="">
+	<Platforms>
+		<Platform
+			Name="Win32"/>
+	</Platforms>
+	<Configurations>
+		<Configuration
+			Name="DLLwithHDF5 Debug|Win32"
+			OutputDirectory=".\Debug"
+			IntermediateDirectory=".\Debug"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\tools\silex;..\..\src\silo;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Debug\silex.pch"
+				AssemblerListingLocation=".\Debug\"
+				ObjectFile=".\Debug\"
+				ProgramDataBaseFileName=".\Debug\"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="QtCore4.lib QtGui4.lib silohdf5.lib"
+				OutputFile=".\Debug\silex.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Debug"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile=".\Debug\silex.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Debug\silex.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\runsilexmoc.bat"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions=""
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="DLLwithHDF5 Release|Win32"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\tools\silex;..\..\src\silo;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Release\silex.pch"
+				AssemblerListingLocation=".\Release\"
+				ObjectFile=".\Release\"
+				ProgramDataBaseFileName=".\Release\"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="QtCore4.lib QtGui4.lib silohdf5.lib"
+				OutputFile=".\Release\silex.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Release"
+				ProgramDatabaseFile=".\Release\silex.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release\silex.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\runsilexmoc.bat"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="DLL Debug|Win32"
+			OutputDirectory=".\Debug"
+			IntermediateDirectory=".\Debug"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\tools\silex;..\..\src\silo;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Debug\silex.pch"
+				AssemblerListingLocation=".\Debug\"
+				ObjectFile=".\Debug\"
+				ProgramDataBaseFileName=".\Debug\"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="QtCore4.lib QtGui4.lib silo.lib"
+				OutputFile=".\Debug\silex.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Debug"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile=".\Debug\silex.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Debug\silex.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\runsilexmoc.bat"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions=""
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="DLL Release|Win32"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\tools\silex;..\..\src\silo;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Release\silex.pch"
+				AssemblerListingLocation=".\Release\"
+				ObjectFile=".\Release\"
+				ProgramDataBaseFileName=".\Release\"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="QtCore4.lib QtGui4.lib silo.lib"
+				OutputFile=".\Release\silex.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Release"
+				ProgramDatabaseFile=".\Release\silex.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release\silex.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\runsilexmoc.bat"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="StaticLibwithHDF5 Release|Win32"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\tools\silex;..\..\src\silo;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Release\silex.pch"
+				AssemblerListingLocation=".\Release\"
+				ObjectFile=".\Release\"
+				ProgramDataBaseFileName=".\Release\"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="QtCore4.lib QtGui4.lib silohdf5.lib"
+				OutputFile=".\Release\silex.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Release"
+				ProgramDatabaseFile=".\Release\silex.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release\silex.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\runsilexmoc.bat"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="StaticLibwithHDF5 Debug|Win32"
+			OutputDirectory=".\Debug"
+			IntermediateDirectory=".\Debug"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\tools\silex;..\..\src\silo;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Debug\silex.pch"
+				AssemblerListingLocation=".\Debug\"
+				ObjectFile=".\Debug\"
+				ProgramDataBaseFileName=".\Debug\"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="QtCore4.lib QtGui4.lib silohdf5.lib"
+				OutputFile=".\Debug\silex.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Debug"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile=".\Debug\silex.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Debug\silex.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\runsilexmoc.bat"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="StaticLib Release|Win32"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\tools\silex;..\..\src\silo;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Release\silex.pch"
+				AssemblerListingLocation=".\Release\"
+				ObjectFile=".\Release\"
+				ProgramDataBaseFileName=".\Release\"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="QtCore4.lib QtGui4.lib silo.lib"
+				OutputFile=".\Release\silex.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Release"
+				ProgramDatabaseFile=".\Release\silex.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release\silex.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\runsilexmoc.bat"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="StaticLib Debug|Win32"
+			OutputDirectory=".\Debug"
+			IntermediateDirectory=".\Debug"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\tools\silex;..\..\src\silo;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\Debug\silex.pch"
+				AssemblerListingLocation=".\Debug\"
+				ObjectFile=".\Debug\"
+				ProgramDataBaseFileName=".\Debug\"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="QtCore4.lib QtGui4.lib silo.lib"
+				OutputFile=".\Debug\silex.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Debug"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile=".\Debug\silex.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Debug\silex.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="..\runsilexmoc.bat"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="moc"
+			Filter="">
+			<File
+				RelativePath="..\..\tools\silex\Explorer_moc.cpp">
+				<FileConfiguration
+					Name="DLLwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\tools\silex\SiloArrayView_moc.cpp">
+				<FileConfiguration
+					Name="DLLwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\tools\silex\SiloDirTreeView_moc.cpp">
+				<FileConfiguration
+					Name="DLLwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\tools\silex\SiloDirView_moc.cpp">
+				<FileConfiguration
+					Name="DLLwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\tools\silex\SiloObjectView_moc.cpp">
+				<FileConfiguration
+					Name="DLLwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\tools\silex\SiloValueView_moc.cpp">
+				<FileConfiguration
+					Name="DLLwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\tools\silex\SiloView_moc.cpp">
+				<FileConfiguration
+					Name="DLLwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLLwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLibwithHDF5 Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="StaticLib Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<File
+			RelativePath="..\..\tools\silex\Explorer.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\tools\silex\main.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\resources\silex.rc">
+		</File>
+		<File
+			RelativePath="..\..\tools\silex\SiloArrayView.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\tools\silex\SiloDirTreeView.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\tools\silex\SiloDirView.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\tools\silex\SiloFile.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\tools\silex\SiloObjectView.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\tools\silex\SiloValueView.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\..\tools\silex\SiloView.cpp">
+			<FileConfiguration
+				Name="DLLwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLLwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="DLL Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLibwithHDF5 Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Release|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="StaticLib Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+			</FileConfiguration>
+		</File>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>
