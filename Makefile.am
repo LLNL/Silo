@@ -43,7 +43,7 @@ ACLOCAL_AMFLAGS = -I config
 
 noinst_HEADERS = config.h
 
-#EXTRA_DIST = CHANGELOG README nopoe
+EXTRA_DIST = COPYRIGHT FAQ
 
 MAINTAINERCLEANFILES = Makefile.in\
  aclocal.m4\
@@ -51,7 +51,7 @@ MAINTAINERCLEANFILES = Makefile.in\
 
 ## We need `.' in SUBDIRS because we want `check' to build `.' first.
 SUBDIRS = . src tools tests
-DIST_SUBDIRS = . config \
+DIST_SUBDIRS = . config config-site \
   clearcase_bin docs src tests tools
 
 help: config/make.help

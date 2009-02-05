@@ -1,0 +1,55 @@
+#!/bin/csh -f
+
+# Make a temporary directory and cd into it.
+mkdir tmpsilodir
+cd tmpsilodir
+
+# Unzip the SiloWindows tar file in the current directory
+cp ../silo/SiloWindows.tar .
+tar xvf SiloWindows.tar > /dev/null
+
+# Copy certain header files into the SiloWindows/include directory.
+# The SiloWindows directory already contains config.h and pdform.h which
+# has platform related information but it needs the rest of these directories
+# to build Silo.
+cp ../silo/debug/silo_debug_private.h      SiloWindows/include
+cp ../silo/pdb/pdb.h                       SiloWindows/include
+cp ../silo/pdb_drv/silo_pdb_private.h      SiloWindows/include
+cp ../silo/score/score.h                   SiloWindows/include
+cp ../silo/silo/silo.h                     SiloWindows/include
+cp ../silo/silo/silo_drivers.h             SiloWindows/include
+cp ../silo/silo/silo_f.h                   SiloWindows/include
+cp ../silo/silo/silo_private.h             SiloWindows/include
+cp ../silo/silo/silo_win32_compatibility.h SiloWindows/include
+cp ../silo/swat/swat.h                     SiloWindows/include
+cp ../silo/unknown/silo_unknown_private.h  SiloWindows/include
+
+# Create a silo directory and copy the parts that we will build in
+# the Windows version of Silo.
+mkdir silo
+mkdir silo/debug
+cp ../silo/debug/*.c   silo/debug
+mkdir silo/pdb
+cp ../silo/pdb/*.c     silo/pdb
+mkdir silo/pdb_drv
+cp ../silo/pdb_drv/*.c silo/pdb_drv
+mkdir silo/score
+cp ../silo/score/*.c   silo/score
+mkdir silo/silo
+cp ../silo/silo/*.c    silo/silo
+mkdir silo/swat
+cp ../silo/swat/*.c    silo/swat
+mkdir silo/unknown
+cp ../silo/unknown/*.c silo/unknown
+
+# Create a tar file that has the SiloWindows and silo directories in it.
+tar cf winsilo.tar SiloWindows silo
+gzip winsilo.tar
+
+# Move the tar file to the top directory and remove the tmp directory.
+mv winsilo.tar.gz ..
+cd ..
+rm -rf tmpsilodir
+
+# Tell the user
+echo "The pieces of Silo needed to build on Windows have been placed in winsilo.tar.gz"

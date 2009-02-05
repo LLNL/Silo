@@ -66,6 +66,9 @@ BROWSER_NEEDED_TRUE = @BROWSER_NEEDED_TRUE@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CONFIG_CMD = @CONFIG_CMD@
+CONFIG_DATE = @CONFIG_DATE@
+CONFIG_USER = @CONFIG_USER@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -147,6 +150,18 @@ TAURUS = @TAURUS@
 TAURUS_NEEDED_FALSE = @TAURUS_NEEDED_FALSE@
 TAURUS_NEEDED_TRUE = @TAURUS_NEEDED_TRUE@
 USEFORTRAN = @USEFORTRAN@
+Using64bits = @Using64bits@
+UsingBrowser = @UsingBrowser@
+UsingCxx = @UsingCxx@
+UsingFortran = @UsingFortran@
+UsingHDF5 = @UsingHDF5@
+UsingOpt = @UsingOpt@
+UsingPython = @UsingPython@
+UsingReadline = @UsingReadline@
+UsingShared = @UsingShared@
+UsingSilex = @UsingSilex@
+UsingSrcDir = @UsingSrcDir@
+UsingStatic = @UsingStatic@
 VERSION = @VERSION@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
@@ -206,20 +221,9 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 EXTRA_DIST = \
- branchfiles \
- lockbug.script \
- locknew.script \
- makebug \
- makenew \
- mkman \
- package \
- set-version-number \
- silo-dist \
+ regressiontest \
+ silo-release-closed \
  silo-release-open \
- _target \
- target.c \
- unlockbug.script \
- unlocknew.script \
  winsilo-dist
 
 all: all-am

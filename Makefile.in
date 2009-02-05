@@ -127,6 +127,9 @@ BROWSER_NEEDED_TRUE = @BROWSER_NEEDED_TRUE@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CONFIG_CMD = @CONFIG_CMD@
+CONFIG_DATE = @CONFIG_DATE@
+CONFIG_USER = @CONFIG_USER@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -208,6 +211,18 @@ TAURUS = @TAURUS@
 TAURUS_NEEDED_FALSE = @TAURUS_NEEDED_FALSE@
 TAURUS_NEEDED_TRUE = @TAURUS_NEEDED_TRUE@
 USEFORTRAN = @USEFORTRAN@
+Using64bits = @Using64bits@
+UsingBrowser = @UsingBrowser@
+UsingCxx = @UsingCxx@
+UsingFortran = @UsingFortran@
+UsingHDF5 = @UsingHDF5@
+UsingOpt = @UsingOpt@
+UsingPython = @UsingPython@
+UsingReadline = @UsingReadline@
+UsingShared = @UsingShared@
+UsingSilex = @UsingSilex@
+UsingSrcDir = @UsingSrcDir@
+UsingStatic = @UsingStatic@
 VERSION = @VERSION@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
@@ -268,14 +283,13 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 ACLOCAL_AMFLAGS = -I config
 noinst_HEADERS = config.h
-
-#EXTRA_DIST = CHANGELOG README nopoe
+EXTRA_DIST = COPYRIGHT FAQ
 MAINTAINERCLEANFILES = Makefile.in\
  aclocal.m4\
  configure
 
 SUBDIRS = . src tools tests
-DIST_SUBDIRS = . config \
+DIST_SUBDIRS = . config config-site \
   clearcase_bin docs src tests tools
 
 all: config.h
@@ -478,7 +492,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/config
+	$(mkdir_p) $(distdir)/config $(distdir)/src
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

@@ -5,7 +5,7 @@ FILELIST="\
 ./config/compile ./config/config.guess ./config/config.h.in \
 ./config/config.sub ./config/depcomp ./config/install-sh \
 ./config/ltmain.sh ./config/missing \
-./clearcase_bin/Makefile.in \
+./config-site/Makefile.in ./clearcase_bin/Makefile.in \
 ./docs/Makefile.in ./config/Makefile.in ./tools/browser/Makefile.in \
 ./tools/silock/Makefile.in ./tools/python/Makefile.in \
 ./tools/Makefile.in ./tests/Makefile.in ./src/debug/Makefile.in \
@@ -14,8 +14,9 @@ FILELIST="\
 ./src/taurus/Makefile.in ./src/unknown/Makefile.in \
 ./src/pdb/Makefile.in ./src/pdb_drv/Makefile.in \
 ./src/score/Makefile.in ./src/hdf5_drv/Makefile.in \
-./src/Makefile.in ./Makefile.in ./configure \
-./tests/package.m4 ./tests/testsuite"
+./src/Makefile.in ./src/Silo.settings.in \
+./Makefile.in ./configure \
+./tests/package.m4 ./tests/testsuite ./tests/testsuitef77 ./tests/testsuitehdf5"
 HOST=`/usr/gapps/silo/autotools/bin/config.guess`
 AUTOTOOLS=/usr/gapps/silo/autotools/$HOST/bin
 CT="/usr/atria/bin/cleartool"

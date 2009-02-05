@@ -25,10 +25,12 @@ SUBDIRS = score pdb swat silo debug \
 $(DRIVER_DIRS) unknown filters .
 DIST_SUBDIRS = . debug filters hdf5_drv netcdf \
 pdb pdb_drv score silo swat taurus unknown
+MAKESETTINGS = make.settings
 
 if HDF5_DRV_NEEDED
+  SETTINGSFILE=libsiloh5.settings
   lib_LTLIBRARIES = libsiloh5.la
-  libsiloh5_la_SOURCES =
+  libsiloh5_la_SOURCES = siloh5_version.c
   libsiloh5_la_LIBADD = \
    score/libsilo_score.la \
    pdb/libsilo_pdb.la \
@@ -40,8 +42,9 @@ if HDF5_DRV_NEEDED
    filters/libsilo_filters.la 
   libsiloh5_la_LDFLAGS = -avoid-version
 else
+  SETTINGSFILE=libsilo.settings
   lib_LTLIBRARIES = libsilo.la
-  libsilo_la_SOURCES =
+  libsilo_la_SOURCES = silo_version.c
   libsilo_la_LIBADD = \
    score/libsilo_score.la \
    pdb/libsilo_pdb.la \
@@ -53,3 +56,31 @@ else
    filters/libsilo_filters.la 
   libsilo_la_LDFLAGS = -avoid-version
 endif
+
+BUILT_SOURCES = $(MAKESETTINGS)
+$(MAKESETTINGS): Makefile
+	@echo "\"Makefile Summary\\\\n\"" | \
+		sed 's|\\\\|\\|'> $(MAKESETTINGS); \
+	echo "\"Compile command:         $(COMPILE) \\\\n\"" | \
+		sed 's|\\\\|\\|'>> $(MAKESETTINGS); \
+	echo "\"Libtool command:         $(LTCOMPILE) \\\\n\"" | \
+		sed 's|\\\\|\\|'>> $(MAKESETTINGS);\
+	echo "\"Link command:            $(LINK) $(LIBS) \\\\n\"" | \
+		sed 's|\\\\|\\|'>> $(MAKESETTINGS); \
+	if test -f $(SETTINGSFILE); then \
+	  cat $(MAKESETTINGS) >> $(SETTINGSFILE); fi
+
+install-data-local:
+	@test -z "$(libdir)" || $(mkdir_p) "$(DESTDIR)$(libdir)"; \
+	if test -f $(SETTINGSFILE); then \
+	  cat $(SETTINGSFILE) | sed 's|\\n||' | \
+		sed 's|"||g' > $(SETTINGSFILE).tmp; \
+	  $(INSTALL) $(SETTINGSFILE).tmp $(DESTDIR)$(libdir)/$(SETTINGSFILE); \
+          rm -f $(SETTINGSFILE).tmp; \
+        fi
+
+uninstall-local:
+	@rm -f $(DESTDIR)$(libdir)/$(SETTINGSFILE)
+
+clean-local:
+	-rm -f $(MAKESETTINGS)

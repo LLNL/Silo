@@ -287,6 +287,12 @@ dnl
 dnl     Thomas Treadway, Wed Sep 13 12:45:01 PDT 2006
 dnl     Changed defaults: fortran compiler, optimization, and largefiles.
 dnl
+dnl     Thomas Treadway, Fri Oct  6 13:50:01 PDT 2006
+dnl     re-enabled config-site files, added version information file
+dnl     src/libsilo.settings or src/libsiloh5.settings, changed version
+dnl     back to 4.6 (expect 5.0 after re-factoring of the driver code into
+dnl     an abstract I/O layer.
+dnl
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -295,14 +301,14 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 5.0.0)
-m4_define(SILO_DATE, 2006/09/13)
-m4_define(SILO_TIME, 12:47:00)
+m4_define(SILO_VERSION, 4.6.0b)
+m4_define(SILO_DATE, 2006/10/10)
+m4_define(SILO_TIME, 13:34:00)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
 
-AC_PREREQ(2.59)
+AC_PREREQ(2.60)
 AC_REVISION($Id$)dnl
 AC_INIT(SILO_NAME, SILO_VERSION, SILO_BUGS, SILO_NAME)
 AC_CONFIG_SRCDIR([src/silo/silo.h])
@@ -320,7 +326,7 @@ dnl the wrong versions of autoconf and automake, these files will be
 dnl rebuilt with the wrong versions and bad things can happen.
 dnl Also, Clearcase doesn't preserve dependencies between timestamps
 dnl when doing (group) checkin's, so extra care is needed to manually
-dnl verify timestamps (see, FAQ) so that Makefiles doenn't think rebuilding 
+dnl verify timestamps (see, FAQ) so that Makefiles doesn't think rebuilding 
 dnl needs to occur when it doesn't.
 dnl Developers should './configure --enable-maintainer-mode' to turn on
 dnl rebuild rules.
@@ -339,6 +345,8 @@ dnl Change the default prefix (/usr/local) to `pwd`
 dnl Set prefix default (install directory) to a directory in the build area.
 dnl This allows multiple src-dir builds within one host.
 AC_PREFIX_DEFAULT("SILO_TOP_SRC_DIR")
+UsingSrcDir="SILO_TOP_SRC_DIR"
+AC_SUBST([UsingSrcDir])
 
 # Turn off shared libraries by default, since build process takes longer.
 AC_DISABLE_SHARED
@@ -352,35 +360,124 @@ AC_MSG_CHECKING(what version the package is)
 #AC_DEFINE_UNQUOTED(VERSION,"$VERSION")
 AC_MSG_RESULT(SILO_VERSION)
 
-# Load the OS configuration file if present.
-###AC_MSG_CHECKING(for OS configuration file)
-###site_conf=config-site/`uname`.conf
-###if test -r $site_conf; then
-###    AC_MSG_RESULT($site_conf)
-###    . $site_conf
-###else
-###    AC_MSG_RESULT(none found)
-###fi
+dnl Configuration date
+AC_SUBST([CONFIG_DATE]) CONFIG_DATE="`date`"
 
-# Load the site configuration file if present.
-# Also check for hostnames where the first field is a node name.
-###AC_MSG_CHECKING(for site configuration file)
-###site_conf=config-site/`hostname`.conf
-###if test -r $site_conf; then
-###   AC_MSG_RESULT($site_conf)
-###   . $site_conf
-###else
-###   site_conf=config-site/`hostname | cut -f2- -d.`.conf
-###   if test -r $site_conf; then
-###      AC_MSG_RESULT($site_conf)
-###      . $site_conf
-###   else
-###      AC_MSG_RESULT(none found)
-###   fi
-###fi
+dnl User doing the configuration
+AC_SUBST([CONFIG_USER]) CONFIG_USER="`whoami`@`hostname`"
+if test -n "$ORGANIZATION"; then
+  CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
+fi
+
+dnl Configuration command
+AC_SUBST([CONFIG_CMD]) CONFIG_CMD="$*"
+
+dnl ----------------------------------------------------------------------
+
+dnl Source any special site-specific file
+hname="`hostname`"
+file=$srcdir/config-site/$hname.conf
+AC_MSG_CHECKING([for site config host file])
+if test -f "$file"; then
+    . $file
+    AC_MSG_RESULT([$file])
+else
+    hname="`hostname | cut -f2- -d.`"
+    file=$srcdir/config-site/$hname.conf
+    if test -f "$file"; then
+        . $file
+        AC_MSG_RESULT([$file])
+    else
+        AC_MSG_RESULT([no])
+    fi
+fi
+
+dnl Source any special files that we need.  These files normally aren't
+dnl present but can be used by the maintainers to fine tune things like
+dnl turning on debug or profiling flags for the compiler.  The search order
+dnl is:
+dnl
+dnl     CPU-VENDOR-OS
+dnl     VENDOR-OS
+dnl     CPU-OS
+dnl     CPU-VENDOR
+dnl     OS
+dnl     VENDOR
+dnl     CPU
+dnl     uname
+dnl
+dnl If the `OS' ends with a version number then remove it. For instance,
+dnl `freebsd3.1' would become `freebsd'
+case $host_os in
+  aix4.*)
+    host_os_novers=aix4.x
+    ;;
+  aix5.*)
+    host_os_novers=aix5.x
+    ;;
+  freebsd*)
+    host_os_novers=freebsd
+    ;;
+  irix5.*)
+    host_os_novers=irix5.x
+    ;;
+  irix6.*)
+    host_os_novers=irix6.x
+    ;;
+  osf4.*)
+    host_os_novers=osf4.x
+    ;;
+  osf5.*)
+    host_os_novers=osf5.x
+    ;;
+  solaris2.*)
+    host_os_novers=solaris2.x
+    ;;
+  *)
+    host_os_novers=$host_os
+    ;;
+esac
+
+uname="`uname`"
+host_config="none"
+for f in $host_cpu-$host_vendor-$host_os \
+         $host_cpu-$host_vendor-$host_os_novers \
+         $host_vendor-$host_os \
+         $host_vendor-$host_os_novers \
+         $host_cpu-$host_os \
+         $host_cpu-$host_os_novers \
+         $host_cpu-$host_vendor \
+         $host_os \
+         $host_os_novers \
+         $host_vendor \
+         $host_cpu \
+         $uname; do
+  AC_MSG_CHECKING([for config-site $f])
+  if test -f "$srcdir/config-site/$f.conf"; then
+    host_config=$srcdir/config-site/$f.conf
+    AC_MSG_RESULT([found])
+    break
+  fi
+  AC_MSG_RESULT([no])
+done
+if test "X$host_config" != "Xnone"; then
+  . $host_config
+fi
+
 # This F77 stuff is still embeaded in libtools, it should go away
-F77=$FC
-FFLAGS=$FCFLASG
+# If F77 is set, and FC isn't, then set FC to whatever F77 was set to.
+if test "${F77+set}" = set -a "${FC+set}" != set; then
+  FC=$F77
+  if test "${FFLAGS+set}" = set -a "${FCFLAGSset}" != set; then
+    FCFLAGS=$FFLAGS
+  fi
+fi
+if test "${FC+set}" = set -a "${F77set}" != set; then
+  F77=$FC
+  if test "${FCFLAGS+set}" = set -a "${FFLAGSset}" != set; then
+    FFLAGS=$FCFLAGS
+  fi
+fi
 
 dnl C optimization flags
 AC_ARG_ENABLE(optimization,
@@ -482,12 +579,15 @@ AC_ARG_ENABLE(browser,
 if test "X$BuildBrowser" = "Xyes"; then
     AC_MSG_RESULT(yes)
     BROWSER="browser"
+    UsingBrowser="yes"
 else
     AC_MSG_RESULT(no)
     BROWSER=""
+    UsingBrowser="no"
     detect_readline=no
 fi
 AC_SUBST(BROWSER)
+AC_SUBST(UsingBrowser)
 
 
 dnl enable the silex broswer
@@ -533,6 +633,7 @@ if test -n "$USEFORTRAN"; then
     AC_FC_LIBRARY_LDFLAGS
     AC_FC_WRAPPERS
 fi
+AC_SUBST(UsingFortran)
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 AC_ISC_POSIX
@@ -560,13 +661,18 @@ if test "X$USING_DEBUG" = Xno; then
 # use contributed GNU m4 macro library provided see:
 #   autoconf-archive-2006-06-04/htmldoc/ax_cc_maxopt.html
    AX_CC_MAXOPT
+   UsingOpt="yes"
    AC_MSG_RESULT(enabled)
 else
+   UsingOpt="no"
    AC_MSG_RESULT(disabled)
 fi
+AC_SUBST(UsingOpt)
+
 dnl
 # Default to large file support
-AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE")
+AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"; Using64bits=yes, Using64bits=no)
+AC_SUBST(Using64bits)
 #
 # Use size of off64_t to determine which form of stat() calls to make 
 #
@@ -745,6 +851,7 @@ esac
 # inform the user has gone wrong and what to do.
 #
 
+UsingHDF5="no"
 if test -n "$HDF5_DRV"; then
    saved_CPPFLAGS="$CPPFLAGS"
    saved_LDFLAGS="$LDFLAGS"
@@ -878,24 +985,30 @@ fi # if test -n "$HDF5_DRV"
 
 # Check to see if the results of the above tests found the HDF5 libraries
 if test -n "$HDF5_DRV"; then
+    UsingHDF5="yes"
     AC_DEFINE(HAVE_HDF5_DRIVER,1,[Support for HDF5])
 else
    LIBS="$saved_LIBS"
 fi
+AC_SUBST(UsingHDF5)
 
 dnl
+UsingReadline="no"
 if test "X$detect_readline" = Xyes; then
 # use contributed GNU m4 macro library provided see:
 #   autoconf-archive-2006-06-04/htmldoc/vl_lib_readline.html
    VL_LIB_READLINE
+   UsingReadline="yes"
 else
    AC_MSG_CHECKING(for readline)
    AC_MSG_RESULT(disabled)
 fi
+AC_SUBST(UsingReadline)
 
 dnl
 dnl If Silex is desired then Qt is required
 dnl
+UsingSilex="no"
 if test "X$UseSilex" = "Xyes"; then
 dnl search for the required Qt
    AC_MSG_CHECKING(for Qt)
@@ -903,14 +1016,14 @@ dnl search for the required Qt
     BNV_HAVE_QT
     if test "X$have_qt" = "Xyes"; then
         AC_MSG_RESULT(Qt found - Silex enabled)
-        enable_silex=yes
+        UsingSilex="yes"
         SILEX="silex"
     else
         AC_MSG_RESULT(Qt not found - Silex disabled)
-        enable_silex=no
         SILEX=""
     fi
 fi
+AC_SUBST(UsingSilex)
 AC_SUBST(SILEX)
 
 dnl
@@ -919,6 +1032,8 @@ dnl provided macro, which will generate the following
 dnl variables: python_PYTHON, pkgpython_PYTHON, 
 dnl pyexecdir_PYTHON, and pkgpyexecdir_PYTHON.
 dnl
+UsingPython="no"
+UsingCxx="no"
 if test -n "$PYTHONMODULE"; then
    AM_PATH_PYTHON(2.1,, :)
 # Check for Python include path
@@ -932,9 +1047,24 @@ if test -n "$PYTHONMODULE"; then
       fi
       PYTHON_CPPFLAGS=$python_path
    fi
+   UsingPython="yes"
+   UsingCxx="yes"
    AC_MSG_RESULT([$PYTHON_CPPFLAGS])
    AC_SUBST([PYTHON_CPPFLAGS])
 fi
+AC_SUBST(UsingPython)
+AC_SUBST(UsingCxx)
+
+UsingShared="no"
+if test "$enable_shared" = yes; then
+   UsingShared="yes"
+fi
+AC_SUBST(UsingShared)
+UsingStatic="no"
+if test "$enable_static" = yes; then
+   UsingStatic="yes"
+fi
+AC_SUBST(UsingStatic)
 
 dnl Determine how to compile MPI
 # skip for now
@@ -951,9 +1081,11 @@ AM_CONDITIONAL(BROWSER_NEEDED, test -n "$BROWSER")
 AM_CONDITIONAL(PYTHON_NEEDED, test -n "$PYTHONMODULE")
 AM_CONDITIONAL(FORTRAN_NEEDED, test -n "$USEFORTRAN")
 AM_CONDITIONAL(SILEX_NEEDED, test -n "$SILEX")
-AC_CONFIG_FILES([Makefile
+AC_CONFIG_FILES([
+            Makefile
             clearcase_bin/Makefile
             config/Makefile
+            config-site/Makefile
             docs/Makefile
             src/Makefile
             src/score/Makefile
@@ -972,4 +1104,18 @@ AC_CONFIG_FILES([Makefile
             tools/browser/Makefile
             tools/python/Makefile
             tools/silock/Makefile])
+if test -n "$HDF5_DRV"; then
+  AC_CONFIG_FILES([src/libsiloh5.settings])
+else
+  AC_CONFIG_FILES([src/libsilo.settings])
+fi
 AC_OUTPUT
+dnl ----------------------------------------------------------------------
+dnl Print out a summary of what we are going to build.
+dnl   
+echo;echo
+if test -n "$HDF5_DRV"; then
+  cat src/libsiloh5.settings | sed 's|\\n||' | sed 's|"||g'
+else
+  cat src/libsilo.settings | sed 's|\\n||' | sed 's|"||g'
+fi

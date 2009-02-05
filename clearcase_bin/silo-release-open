@@ -48,7 +48,6 @@ hoth() {
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3 \
-    --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/linux_rhel3_gcc_3.2.3/$VERSION install; \
@@ -77,7 +76,6 @@ hothpgc() {
     ../$TOPSRCDIR/configure \
     CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
-    --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION install; \
@@ -108,7 +106,6 @@ hothicc() {
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.0 \
-    --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check; make install; \
     make prefix=$BDTOPDIR/linux_rhel3_icc_9.0/$VERSION install; \
@@ -137,7 +134,6 @@ sunspot() {
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/sunos_57 \
-    --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/lib; \
     make -j 4 check; make install; \
     make prefix=$BDTOPDIR/sunos_57/$VERSION install; \
@@ -167,7 +163,6 @@ sunspotcc() {
     CC=c89 CXX=CC FC=f77 \
     LDFLAGS=-L/usr/local/lib \
     --prefix=$BDTOPDIR/$VERSION/sunos_57_cc_5.2 \
-    --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/sunos_57_cc_5.2/$VERSION install; \
@@ -188,27 +183,19 @@ berg() {
 berg32() {
   ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
-    export PATH; \
+    OBJECT_MODE=32; \
+    export PATH OBJECT_MODE; \
     rm -rf aix_5_ll; \
     mkdir aix_5_ll; \
     cd aix_5_ll; \
     ../$TOPSRCDIR/configure \
-    CC='xlc -q32' CXX='xlC -q32' FC='xlf -q32' \
-    LDFLAGS=-q32 AR='ar -X 32' \
-    CFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
-    CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
     --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
     --without-readline --without-hdf5; \
     make check && make install; \
     make prefix=$BDTOPDIR/aix_5_ll/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
-    CC='xlc -q32' CXX='xlC -q32' FC='xlf -q32' \
-    LDFLAGS=-q32 AR='ar -X 32' \
-    CFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
-    CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
     --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
-    --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial.32/include,/usr/local/hdf5/hdf5-1.6.5/serial.32/lib; \
     make check; make install; \
     make prefix=$BDTOPDIR/aix_5_ll/$VERSION install; \
@@ -221,15 +208,12 @@ berg32() {
 berg64() {
   ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
-    export PATH; \
+    OBJECT_MODE=64; \
+    export PATH OBJECT_MODE; \
     rm -rf aix_5_64_fed; \
     mkdir aix_5_64_fed; \
     cd aix_5_64_fed; \
     ../$TOPSRCDIR/configure \
-    CC='xlc -q64' CXX='xlC -q64' FC='xlf -q64' \
-    LDFLAGS=-q64 AR='ar -X 64' \
-    CFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
-    CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
     PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
     --without-readline --without-hdf5; \
@@ -237,13 +221,8 @@ berg64() {
     make prefix=$BDTOPDIR/aix_5_64_fed/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
-    CC='xlc -q64' CXX='xlC -q64' FC='xlf -q64' \
-    LDFLAGS=-q64 AR='ar -X 64' \
-    CFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
-    CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
     PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
-    --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make check; make install; \
     make prefix=$BDTOPDIR/aix_5_64_fed/$VERSION install; \
@@ -264,7 +243,6 @@ gps() {
     mkdir tru64_5; \
     cd tru64_5; \
     ../$TOPSRCDIR/configure \
-    CC=gcc-3.4.1 CXX=g++-3.4.1 FC=g77-3.4.1 F77=g77-3.4.1 \
     --prefix=$LCTOPDIR/$VERSION/tru64_5 \
     --without-readline --without-hdf5; \
     gmake -j 4 check ; gmake install; \
@@ -272,7 +250,6 @@ gps() {
     gmake clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/tru64_5 \
-    --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     gmake -j 4 check ; gmake install; \
     gmake prefix=$BDTOPDIR/tru64_5/$VERSION install; \
@@ -297,8 +274,8 @@ gpscc() {
     gmake prefix=$BDTOPDIR/tru64_5_cc/$VERSION install; \
     gmake clean; \
     ../$TOPSRCDIR/configure \
+    CC=c89 CXX=cxx FC=f77 F77=f77 \
     --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
-    --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     gmake -j 4 check ; gmake install; \
     gmake prefix=$BDTOPDIR/tru64_5_cc/$VERSION install; \
@@ -324,7 +301,6 @@ pengra() {
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
-    --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial_gcc/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/chaos_3_x86_elan3/$VERSION install; \
@@ -354,7 +330,6 @@ thundergcc() {
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
-    --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION install; \
@@ -382,7 +357,6 @@ thundericc() {
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
-    --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/chaos_3_ia64_elan4/icc/$VERSION install; \
@@ -409,9 +383,6 @@ quad32() {
     mkdir irix_6.5_n32; \
     cd irix_6.5_n32; \
     ../$TOPSRCDIR/configure \
-    CC='cc -n32' CXX='CC -n32' FC='f77 -n32' \
-    LDFLAGS=-n32 \
-    CFLAGS='-O2 -c99' \
     PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_n32 \
     --without-readline --without-hdf5; \
@@ -419,12 +390,8 @@ quad32() {
     gmake prefix=$BDTOPDIR/irix_6.5_n32/$VERSION install; \
     gmake clean; \
     ../$TOPSRCDIR/configure \
-    CC='cc -n32' CXX='CC -n32' FC='f77 -n32' \
-    LDFLAGS=-n32 \
-    CFLAGS='-O2 -c99' \
     PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_n32 \
-    --without-readline \
     --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_n32/include,/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_n32/lib; \
     gmake -j 4 check && gmake install; \
     gmake prefix=$BDTOPDIR/irix_6.5_n32/$VERSION install; \
@@ -456,7 +423,6 @@ quad64() {
     CFLAGS='-O2 -c99' \
     PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_64 \
-    --without-readline \
     --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_64/include,/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_64/lib; \
     gmake -j 4 check && gmake install; \
     gmake prefix=$BDTOPDIR/irix_6.5_64/$VERSION install; \
@@ -492,20 +458,17 @@ ubgl() {
     ../$TOPSRCDIR/configure \
     CC='xlc' \
     --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
-    --without-readline \
     --with-hdf5=/usr/local/tools/hdf5/hdf5-1.6.5/serial_frontend/include,/usr/local/tools/hdf5/hdf5-1.6.5/serial_frontend/lib; \
     make -j 4 install;\
     make prefix=$LCTOPDIR/sles_9_ppc64/$VERSION install;\
     make clean; \
     ../$TOPSRCDIR/configure \
-    CC='mpxlc' ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
     --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
     --disable-browser --without-readline --without-hdf5; \
     make -j 4 install;\
     make prefix=$LCTOPDIR/sles_9_ppc64/$VERSION install;\
     make clean; \
     ../$TOPSRCDIR/configure \
-    CC='mpxlc' ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
     --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
     --disable-browser --without-readline \
     --with-hdf5=/usr/local/tools/hdf5/hdf5-1.6.5/serial/include,/usr/local/tools/hdf5/hdf5-1.6.5/serial/lib; \

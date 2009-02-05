@@ -1,5 +1,16 @@
-This directory contains examples of site configuration files.  To
-quote from the autoconf manual:
+This directory contains examples of site configuration files.  
+The selection order of the configure files is:
+`hostname`.conf
+CPU-VENDOR-OS.conf
+VENDOR-OS.conf
+CPU-OS.conf
+CPU-VENDOR.conf
+OS.conf
+VENDOR.conf
+CPU.conf
+`uname`.conf
+
+To quote from the autoconf manual:
 
     If the environment variable `CONFIG_SITE' is set,
     `configure' uses its value as the name of a shell script

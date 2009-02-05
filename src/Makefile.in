@@ -49,14 +49,15 @@ host_triplet = @host@
 @TAURUS_NEEDED_TRUE@am__append_7 = taurus
 @TAURUS_NEEDED_TRUE@am__append_8 = taurus/libsilo_taurus.la
 subdir = src
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/libsilo.settings.in $(srcdir)/libsiloh5.settings.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = libsiloh5.settings libsilo.settings
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -81,7 +82,8 @@ am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 @HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_5) \
 @HDF5_DRV_NEEDED_FALSE@	unknown/libsilo_unknown.la \
 @HDF5_DRV_NEEDED_FALSE@	filters/libsilo_filters.la
-am_libsilo_la_OBJECTS =
+am__libsilo_la_SOURCES_DIST = silo_version.c
+@HDF5_DRV_NEEDED_FALSE@am_libsilo_la_OBJECTS = silo_version.lo
 libsilo_la_OBJECTS = $(am_libsilo_la_OBJECTS)
 @HDF5_DRV_NEEDED_FALSE@am_libsilo_la_rpath = -rpath $(libdir)
 @HDF5_DRV_NEEDED_TRUE@libsiloh5_la_DEPENDENCIES =  \
@@ -92,10 +94,13 @@ libsilo_la_OBJECTS = $(am_libsilo_la_OBJECTS)
 @HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_5) \
 @HDF5_DRV_NEEDED_TRUE@	unknown/libsilo_unknown.la \
 @HDF5_DRV_NEEDED_TRUE@	filters/libsilo_filters.la
-am_libsiloh5_la_OBJECTS =
+am__libsiloh5_la_SOURCES_DIST = siloh5_version.c
+@HDF5_DRV_NEEDED_TRUE@am_libsiloh5_la_OBJECTS = siloh5_version.lo
 libsiloh5_la_OBJECTS = $(am_libsiloh5_la_OBJECTS)
 @HDF5_DRV_NEEDED_TRUE@am_libsiloh5_la_rpath = -rpath $(libdir)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
+am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
@@ -105,7 +110,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libsilo_la_SOURCES) $(libsiloh5_la_SOURCES)
-DIST_SOURCES = $(libsilo_la_SOURCES) $(libsiloh5_la_SOURCES)
+DIST_SOURCES = $(am__libsilo_la_SOURCES_DIST) \
+	$(am__libsiloh5_la_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -130,6 +136,9 @@ BROWSER_NEEDED_TRUE = @BROWSER_NEEDED_TRUE@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CONFIG_CMD = @CONFIG_CMD@
+CONFIG_DATE = @CONFIG_DATE@
+CONFIG_USER = @CONFIG_USER@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -211,6 +220,18 @@ TAURUS = @TAURUS@
 TAURUS_NEEDED_FALSE = @TAURUS_NEEDED_FALSE@
 TAURUS_NEEDED_TRUE = @TAURUS_NEEDED_TRUE@
 USEFORTRAN = @USEFORTRAN@
+Using64bits = @Using64bits@
+UsingBrowser = @UsingBrowser@
+UsingCxx = @UsingCxx@
+UsingFortran = @UsingFortran@
+UsingHDF5 = @UsingHDF5@
+UsingOpt = @UsingOpt@
+UsingPython = @UsingPython@
+UsingReadline = @UsingReadline@
+UsingShared = @UsingShared@
+UsingSilex = @UsingSilex@
+UsingSrcDir = @UsingSrcDir@
+UsingStatic = @UsingStatic@
 VERSION = @VERSION@
 XMKMF = @XMKMF@
 X_CFLAGS = @X_CFLAGS@
@@ -279,9 +300,12 @@ $(DRIVER_DIRS) unknown filters .
 DIST_SUBDIRS = . debug filters hdf5_drv netcdf \
 pdb pdb_drv score silo swat taurus unknown
 
+MAKESETTINGS = make.settings
+@HDF5_DRV_NEEDED_FALSE@SETTINGSFILE = libsilo.settings
+@HDF5_DRV_NEEDED_TRUE@SETTINGSFILE = libsiloh5.settings
 @HDF5_DRV_NEEDED_FALSE@lib_LTLIBRARIES = libsilo.la
 @HDF5_DRV_NEEDED_TRUE@lib_LTLIBRARIES = libsiloh5.la
-@HDF5_DRV_NEEDED_TRUE@libsiloh5_la_SOURCES = 
+@HDF5_DRV_NEEDED_TRUE@libsiloh5_la_SOURCES = siloh5_version.c
 @HDF5_DRV_NEEDED_TRUE@libsiloh5_la_LIBADD = \
 @HDF5_DRV_NEEDED_TRUE@   score/libsilo_score.la \
 @HDF5_DRV_NEEDED_TRUE@   pdb/libsilo_pdb.la \
@@ -293,7 +317,7 @@ pdb pdb_drv score silo swat taurus unknown
 @HDF5_DRV_NEEDED_TRUE@   filters/libsilo_filters.la 
 
 @HDF5_DRV_NEEDED_TRUE@libsiloh5_la_LDFLAGS = -avoid-version
-@HDF5_DRV_NEEDED_FALSE@libsilo_la_SOURCES = 
+@HDF5_DRV_NEEDED_FALSE@libsilo_la_SOURCES = silo_version.c
 @HDF5_DRV_NEEDED_FALSE@libsilo_la_LIBADD = \
 @HDF5_DRV_NEEDED_FALSE@   score/libsilo_score.la \
 @HDF5_DRV_NEEDED_FALSE@   pdb/libsilo_pdb.la \
@@ -305,9 +329,12 @@ pdb pdb_drv score silo swat taurus unknown
 @HDF5_DRV_NEEDED_FALSE@   filters/libsilo_filters.la 
 
 @HDF5_DRV_NEEDED_FALSE@libsilo_la_LDFLAGS = -avoid-version
-all: all-recursive
+BUILT_SOURCES = $(MAKESETTINGS)
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
+.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -337,6 +364,10 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+libsiloh5.settings: $(top_builddir)/config.status $(srcdir)/libsiloh5.settings.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+libsilo.settings: $(top_builddir)/config.status $(srcdir)/libsilo.settings.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(libdir)" || $(mkdir_p) "$(DESTDIR)$(libdir)"
@@ -374,6 +405,30 @@ mostlyclean-compile:
 
 distclean-compile:
 	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_version.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/siloh5_version.Plo@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -560,14 +615,16 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-recursive
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 all-am: Makefile $(LTLIBRARIES)
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
-install: install-recursive
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
 uninstall: uninstall-recursive
@@ -591,12 +648,14 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-recursive
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
 	mostlyclean-am
 
 distclean: distclean-recursive
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -611,7 +670,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am:
+install-data-am: install-data-local
 
 install-exec-am: install-libLTLIBRARIES
 
@@ -622,6 +681,7 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -638,25 +698,52 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
 	clean clean-generic clean-libLTLIBRARIES clean-libtool \
-	clean-recursive ctags ctags-recursive distclean \
+	clean-local clean-recursive ctags ctags-recursive distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-recursive distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-libLTLIBRARIES install-man \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	maintainer-clean-recursive mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
-	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-info-am uninstall-libLTLIBRARIES
+	install-data-am install-data-local install-exec \
+	install-exec-am install-info install-info-am \
+	install-libLTLIBRARIES install-man install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic maintainer-clean-recursive \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-local
 
+$(MAKESETTINGS): Makefile
+	@echo "\"Makefile Summary\\\\n\"" | \
+		sed 's|\\\\|\\|'> $(MAKESETTINGS); \
+	echo "\"Compile command:         $(COMPILE) \\\\n\"" | \
+		sed 's|\\\\|\\|'>> $(MAKESETTINGS); \
+	echo "\"Libtool command:         $(LTCOMPILE) \\\\n\"" | \
+		sed 's|\\\\|\\|'>> $(MAKESETTINGS);\
+	echo "\"Link command:            $(LINK) $(LIBS) \\\\n\"" | \
+		sed 's|\\\\|\\|'>> $(MAKESETTINGS); \
+	if test -f $(SETTINGSFILE); then \
+	  cat $(MAKESETTINGS) >> $(SETTINGSFILE); fi
+
+install-data-local:
+	@test -z "$(libdir)" || $(mkdir_p) "$(DESTDIR)$(libdir)"; \
+	if test -f $(SETTINGSFILE); then \
+	  cat $(SETTINGSFILE) | sed 's|\\n||' | \
+		sed 's|"||g' > $(SETTINGSFILE).tmp; \
+	  $(INSTALL) $(SETTINGSFILE).tmp $(DESTDIR)$(libdir)/$(SETTINGSFILE); \
+          rm -f $(SETTINGSFILE).tmp; \
+        fi
+
+uninstall-local:
+	@rm -f $(DESTDIR)$(libdir)/$(SETTINGSFILE)
+
+clean-local:
+	-rm -f $(MAKESETTINGS)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
