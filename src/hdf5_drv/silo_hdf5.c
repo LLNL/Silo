@@ -22,6 +22,7 @@
  */
 #include <errno.h>
 #include <assert.h>
+#include <string.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h> /*missing from silo header files*/
 #endif
@@ -640,6 +641,41 @@ static hid_t    P_ckrdprops = -1;
 INTERNAL void
 suppress_set_but_not_used_warning(const void *ptr)
 {}
+
+INTERNAL const char *
+friendly_name(const char *base_name, const char *fmtstr, const void *val)
+{
+    static char retval[1024];
+    static char totfmtstr[1024];
+    char typechar;
+    int i, flen;
+
+    if (SILO_Globals.enableFriendlyHDF5Names == FALSE)
+        return 0;
+
+    if (fmtstr == 0)
+        return base_name;
+
+    sprintf(totfmtstr, "%s%s", base_name, fmtstr);
+    if (val == 0)
+        return totfmtstr;
+
+    flen = strlen(fmtstr);
+    for (i = 0; i < flen; i++)
+    {
+        if (fmtstr[i] == '%')
+           break;
+    }
+    typechar = i+1 < flen ? fmtstr[i+1] : '\0';
+    switch (typechar)
+    {
+        case 'd': sprintf(retval, totfmtstr, *((const int*) val)); break; 
+        case 's': sprintf(retval, totfmtstr, *((const char*) val)); break;
+        case 'f': sprintf(retval, totfmtstr, *((const float*) val)); break;
+        default: return totfmtstr;
+    }
+    return retval;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -2452,11 +2488,14 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
  *   Made it permit buf to be NULL in which case it will only create the
  *   dataset but not attempt to write to it. Also, made it return hid_t of
  *   created dataset.
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Added support for friendly hdf5 dataset names (as soft links)
  *-------------------------------------------------------------------------
  */
 PRIVATE int
 db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
-               void *buf, char *name/*in,out*/)
+               void *buf, char *name/*in,out*/, const char *fname)
 {
     static char *me = "db_hdf5_compwr";
     hid_t       dset=-1, mtype=-1, ftype=-1, space=-1i, P_props;
@@ -2519,6 +2558,8 @@ db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
             }
+            if (SILO_Globals.enableFriendlyHDF5Names && fname)
+                H5Glink(dbfile->cwg, H5G_LINK_SOFT, name, fname);
         }
         if (buf && H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, buf)<0) {
             db_perror(name, E_CALLFAIL, me);
@@ -4074,6 +4115,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
  * Programmer:  Robb Matzke, 2001-02-06
  *
  * Modifications:
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -4087,7 +4130,8 @@ db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char *compname,
     int         datatype = db_GetDatatypeID(dataname);
     
     for (i=0; i<rank; i++) size[i] = _size[i];
-    db_hdf5_compwr(dbfile, datatype, rank, size, (void*)data, varname);
+    db_hdf5_compwr(dbfile, datatype, rank, size, (void*)data, varname,
+        friendly_name(obj->name, varname, 0));
     DBAddVarComponent(obj, compname, varname);
     return 0;
 }
@@ -5045,6 +5089,8 @@ db_hdf5_GetObject(DBfile *_dbfile, char *name)
  *  Mark C. Miller, Mon Jul 31 17:57:29 PDT 2006
  *  Eliminated use of db_hdf5_fullname for xvarname and yvarname
  *
+ *  Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *  Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -5078,7 +5124,8 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
         /* Write X and Y arrays if supplied */
         strcpy(m.xvarname, OPT(_cu._varname[0]));
         if (xvals) {
-            db_hdf5_compwr(dbfile, dtype, 1, &npts, xvals, m.xvarname/*out*/);
+            db_hdf5_compwr(dbfile, dtype, 1, &npts, xvals, m.xvarname/*out*/,
+                friendly_name(name, "_xvals", 0));
         } else if (!_cu._varname[0] && !_cu._reference) {
             db_perror("one of xvals or xvarname must be specified",
                       E_BADARGS, me);
@@ -5087,7 +5134,8 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
 
         strcpy(m.yvarname, OPT(_cu._varname[1])); 
         if (yvals) {
-            db_hdf5_compwr(dbfile, dtype, 1, &npts, yvals, m.yvarname/*out*/);
+            db_hdf5_compwr(dbfile, dtype, 1, &npts, yvals, m.yvarname/*out*/,
+                friendly_name(name, "_yvals", 0));
         } else if (!_cu._varname[1] && !_cu._reference) {
             db_perror("one of yvals or yvarname must be specified",
                       E_BADARGS, me);
@@ -5243,6 +5291,9 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Mon Jul 31 17:57:29 PDT 2006
  *   Eliminated use of db_hdf5_fullname for zonel_name
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -5272,12 +5323,12 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_csgm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_csgm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_csgm._time), "time", 0);
         }
         if (_csgm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_csgm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_csgm._dtime), "dtime", 0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_csgm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_csgm._cycle), "cycle", 0);
 
         m.min_extents[0] = extents[0];
         m.min_extents[1] = extents[1];
@@ -5286,10 +5337,13 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
         m.max_extents[1] = extents[4];
         m.max_extents[2] = extents[5];
 
-        db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)typeflags,m.typeflags/*out*/);
+        db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)typeflags,m.typeflags/*out*/,
+            friendly_name(name, "_typeflags", 0));
         if (bndids)
-            db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)bndids,m.bndids/*out*/);
-        db_hdf5_compwr(dbfile,datatype,1,&lcoeffs,(void*)coeffs,m.coeffs/*out*/);
+            db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)bndids,m.bndids/*out*/,
+                friendly_name(name, "_bndids", 0));
+        db_hdf5_compwr(dbfile,datatype,1,&lcoeffs,(void*)coeffs,m.coeffs/*out*/,
+            friendly_name(name, "_coeffs", 0));
 
         /* Build csgmesh header in memory */
         m.ndims = ndims;
@@ -5457,6 +5511,10 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
  * Programmer:  Mark C. Miller 
  *              Wednesday, September 7, 2005 
  *
+ * Modifications:
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -5485,7 +5543,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
         }
         for (i=0; i<nvars; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nvals, (void*)vars[i],
-                           m.vals[i]/*out*/);
+                m.vals[i]/*out*/, friendly_name(vname, "_vals%d", &i));
         }
 
         /* Build header in memory */
@@ -5635,6 +5693,11 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, const char *name)
  *
  * Programmer:  Mark C. Miller 
  *              Wednesday, September 7, 2005 
+ *
+ * Modifications:
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -5660,23 +5723,23 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, const char *name, int nregs,
         
         /* Write variable arrays */
         db_hdf5_compwr(dbfile, DB_INT, 1, &nregs, (void*)typeflags,
-                       m.typeflags/*out*/);
+            m.typeflags/*out*/, friendly_name(name, "_typeflags",0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nregs, (void*)leftids,
-                       m.leftids/*out*/);
+            m.leftids/*out*/, friendly_name(name, "_leftids",0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nregs, (void*)rightids,
-                       m.rightids/*out*/);
+            m.rightids/*out*/, friendly_name(name, "_rightids",0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, (void*)zonelist,
-                       m.zonelist/*out*/);
+            m.zonelist/*out*/, friendly_name(name, "_zonelist",0));
         if (xforms && lxforms > 0) {
             db_hdf5_compwr(dbfile, datatype, 1, &lxforms, (void*)xforms,
-                           m.xform/*out*/);
+                m.xform/*out*/, friendly_name(name, "_xforms",0));
         }
 
         if (_csgzl._regnames) {
             int len; char *tmp;
             db_StringArrayToStringList((const char**) _csgzl._regnames, nregs, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
-                           m.regnames/*out*/);
+                m.regnames/*out*/, friendly_name(name, "_regnames",0));
             FREE(tmp);
         }
 
@@ -5684,7 +5747,7 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, const char *name, int nregs,
             int len; char *tmp;
             db_StringArrayToStringList((const char**) _csgzl._zonenames, nzones, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
-                           m.zonenames/*out*/);
+                m.zonenames/*out*/, friendly_name(name, "_zonenames",0));
             FREE(tmp);
         }
 
@@ -5829,6 +5892,10 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name)
  * Programmer:  Mark C. Miller 
  *              Tuesday, September 6, 2005 
  *
+ * Modifications:
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -5868,18 +5935,22 @@ db_hdf5_PutDefvars(DBfile *_dbfile, const char *name, int ndefs,
     PROTECT {
 
         db_StringArrayToStringList(names, ndefs, &s, &len);
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.names/*out*/);
+        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.names/*out*/,
+            friendly_name(name, "_names",0));
         FREE(s);
 
-        db_hdf5_compwr(dbfile, DB_INT, 1, &ndefs, (void*)types, m.types/*out*/);
+        db_hdf5_compwr(dbfile, DB_INT, 1, &ndefs, (void*)types, m.types/*out*/,
+            friendly_name(name, "_types",0));
 
         db_StringArrayToStringList(defns, ndefs, &s, &len);
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.defns/*out*/);
+        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.defns/*out*/,
+            friendly_name(name, "_defns",0));
         FREE(s);
 
         if (guihide)
         {
-            db_hdf5_compwr(dbfile, DB_INT, 1, &ndefs, (void*)guihide, m.guihides/*out*/);
+            db_hdf5_compwr(dbfile, DB_INT, 1, &ndefs, (void*)guihide, m.guihides/*out*/,
+                friendly_name(name, "_guihids",0));
             free(guihide);
         }
 
@@ -6011,6 +6082,8 @@ db_hdf5_GetDefvars(DBfile *_dbfile, const char *name)
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6051,12 +6124,12 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_qm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_qm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_qm._time), "time", 0);
         }
         if (_qm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_qm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_qm._dtime), "dtime", 0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_qm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_qm._cycle), "cycle", 0);
 
         /*
          * Number of zones and nodes. We have to do this because
@@ -6098,12 +6171,12 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
         if (DB_COLLINEAR==coordtype) {
             for (i=0; i<ndims; i++) {
                 db_hdf5_compwr(dbfile, datatype, 1, dims+i, coords[i],
-                               m.coord[i]/*out*/);
+                    m.coord[i]/*out*/, friendly_name(name, "_coord%d",&i));
             }
         } else {
             for (i=0; i<ndims; i++) {
                 db_hdf5_compwr(dbfile, datatype, ndims, dims, coords[i],
-                               m.coord[i]/*out*/);
+                    m.coord[i]/*out*/, friendly_name(name, "_coord%d",&i));
             }
         }
         
@@ -6302,6 +6375,8 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6345,12 +6420,12 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_qm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_qm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_qm._time), "time",0);
         }
         if (_qm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_qm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_qm._dtime), "dtime",0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_qm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_qm._cycle), "cycle",0);
 
         /* Write variable arrays: vars[] and mixvars[] */
         if (nvars>MAX_VARS) {
@@ -6359,10 +6434,10 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         }
         for (i=0; i<nvars; i++) {
             db_hdf5_compwr(dbfile, datatype, ndims, dims, vars[i],
-                           m.value[i]/*out*/);
+                m.value[i]/*out*/, friendly_name(name, "_vals%d",&i));
             if (mixvars && mixvars[i] && mixlen>0) {
                 db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mixvars[i],
-                               m.mixed_value[i]/*out*/);
+                    m.mixed_value[i]/*out*/, friendly_name(name, "_mixvals%d",&i));
             }
         }
         
@@ -6564,6 +6639,8 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Mon Jul 31 17:43:52 PDT 2006
  *   Removed use of fullname for zonelist, facelist, phzonelist options
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6603,12 +6680,12 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_um._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time",0);
         }
         if (_um._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime",0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle",0);
 
         /* Obtain extents as doubles */
         if (DB_DOUBLE==datatype) {
@@ -6627,10 +6704,10 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         /* Write variable arrays: coords[], gnodeno[] */
         for (i=0; i<ndims; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nnodes, coords[i],
-                           m.coord[i]/*out*/);
+                m.coord[i]/*out*/, friendly_name(name, "_coord%d", &i));
         }
         db_hdf5_compwr(dbfile, DB_INT, 1, &nnodes, _um._gnodeno,
-                       m.gnodeno/*out*/);
+            m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0));
         
         /* Build ucdmesh header in memory */
         m.ndims = ndims;
@@ -6708,7 +6785,9 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
  *   Eliminated use of db_hdf5_fullname for zlname, flname and added
  *   possible optional ph_zlname which was mistakenly left out in the
  *   initial implementation.
- *   
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6764,12 +6843,12 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_um._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time",0);
         }
         if (_um._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime",0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle",0);
 
         /* Build header in memory -- most fields are already initialized */
         m.ndims = _um._ndims;
@@ -6987,6 +7066,8 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
  *   Brad Whitlock, Wed Jan 18 15:17:15 PST 2006 
  *   Added ascii_labels.
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -7024,12 +7105,12 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_um._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time",0);
         }
         if (_um._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime",0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle",0);
 
         /* Write variable arrays: vars[], mixvars[] */
         if (nvars>MAX_VARS) {
@@ -7038,10 +7119,10 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         }
         for (i=0; i<nvars; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nels, vars[i],
-                           m.value[i]/*out*/);
+                m.value[i]/*out*/, friendly_name(name, "_vals%d", &i));
             if (mixvars && mixvars[i] && mixlen>0) {
                 db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mixvars[i],
-                               m.mixed_value[i]/*out*/);
+                    m.mixed_value[i]/*out*/, friendly_name(name, "_mixvals%d", &i));
             }
         }
         
@@ -7221,6 +7302,8 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char *name)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -7238,25 +7321,25 @@ db_hdf5_PutFacelist(DBfile *_dbfile, char *name, int nfaces, int ndims,
         /* Write variable arrays */
         if (lnodelist) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &lnodelist, nodelist,
-                           m.nodelist/*out*/);
+                m.nodelist/*out*/, friendly_name(name, "_nodelist", 0));
         }
         if (3==ndims) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapecnt,
-                           m.shapecnt/*out*/);
+                m.shapecnt/*out*/, friendly_name(name, "_shapecnt", 0));
             db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapesize,
-                           m.shapesize/*out*/);
+                m.shapesize/*out*/, friendly_name(name, "_shapesize", 0));
         }
         if (ntypes && typelist) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &ntypes, typelist,
-                           m.typelist/*out*/);
+                m.typelist/*out*/, friendly_name(name, "_typelist", 0));
         }
         if (ntypes && types) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nfaces, types,
-                           m.types/*out*/);
+                m.types/*out*/, friendly_name(name, "_nfaces", 0));
         }
         if (zoneno) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nfaces, zoneno,
-                           m.zoneno/*out*/);
+                m.zoneno/*out*/, friendly_name(name, "_zoneno", 0));
         }
         
         /* Build header in memory */
@@ -7422,6 +7505,9 @@ db_hdf5_PutZonelist(DBfile *_dbfile, char *name, int nzones, int ndims,
  *              Robb Matzke, 1999-07-13
  *              Added an option list argument to duplicate changes to the
  *              PDB driver. Added gzoneno property.
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -7442,15 +7528,15 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
         
         /* Write variable arrays */
         db_hdf5_compwr(dbfile, DB_INT, 1, &lnodelist, nodelist,
-                       m.nodelist/*out*/);
+            m.nodelist/*out*/, friendly_name(name,"_nodelist", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapecnt,
-                       m.shapecnt/*out*/);
+            m.shapecnt/*out*/, friendly_name(name,"_shapecnt", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapesize,
-                       m.shapesize/*out*/);
+            m.shapesize/*out*/, friendly_name(name,"_shapesize", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapetype,
-                       m.shapetype/*out*/);
+            m.shapetype/*out*/, friendly_name(name,"_shapetype", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, _uzl._gzoneno,
-                       m.gzoneno/*out*/);
+            m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
 
         /* Build header in memory */
         m.ndims = ndims;
@@ -7499,6 +7585,9 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
  *              Robb Matzke, 1999-07-13
  *              Added an option list argument to duplicate changes to the
  *              PDB driver. Added gzoneno property.
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -7520,17 +7609,17 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
         
         /* Write variable arrays */
         db_hdf5_compwr(dbfile, DB_INT, 1, &nfaces, nodecnt,
-                       m.nodecnt/*out*/);
+            m.nodecnt/*out*/, friendly_name(name,"_nodecnt", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &lnodelist, nodelist,
-                       m.nodelist/*out*/);
+            m.nodelist/*out*/, friendly_name(name,"_nodelist", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nfaces, extface,
-                       m.extface/*out*/);
+            m.extface/*out*/, friendly_name(name,"_extface", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, facecnt,
-                       m.facecnt/*out*/);
+            m.facecnt/*out*/, friendly_name(name,"_facecnt", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &lfacelist, facelist,
-                       m.facelist/*out*/);
+            m.facelist/*out*/, friendly_name(name,"_facelist", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, _uzl._gzoneno,
-                       m.gzoneno/*out*/);
+            m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
 
         /* Build header in memory */
         m.nfaces = nfaces;
@@ -7775,6 +7864,9 @@ db_hdf5_GetPHZonelist(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, August 9, 2004
  *   Added code to output optional material names
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -7797,31 +7889,33 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
 
         /* Write raw data arrays */
         db_hdf5_compwr(dbfile, DB_INT, 1, &nels, matlist,
-                       m.matlist/*out*/);
+            m.matlist/*out*/, friendly_name(name,"_matlist", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nmat, matnos,
-                       m.matnos/*out*/);
+            m.matnos/*out*/, friendly_name(name,"_matnos", 0));
         if (mixlen>0) {
             db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mix_vf,
-                           m.mix_vf/*out*/);
+                m.mix_vf/*out*/, friendly_name(name,"_mix_vf", 0));
             db_hdf5_compwr(dbfile, DB_INT, 1, &mixlen, mix_next,
-                           m.mix_next/*out*/);
+                m.mix_next/*out*/, friendly_name(name,"_mix_next", 0));
             db_hdf5_compwr(dbfile, DB_INT, 1, &mixlen, mix_mat,
-                           m.mix_mat/*out*/);
+                m.mix_mat/*out*/, friendly_name(name,"_mix_mat", 0));
             db_hdf5_compwr(dbfile, DB_INT, 1, &mixlen, mix_zone,
-                           m.mix_zone/*out*/);
+                m.mix_zone/*out*/, friendly_name(name,"_mix_zone", 0));
         }
 
         if (_ma._matnames != NULL) {
             int len;
             db_StringArrayToStringList((const char**)_ma._matnames, nmat, &s, &len);
-            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
+                friendly_name(name, "_matnames", 0));
             FREE(s);
         }
 
         if (_ma._matcolors != NULL) {
             int len;
             db_StringArrayToStringList((const char **)_ma._matcolors, nmat, &s, &len);
-            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matcolors/*out*/);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matcolors/*out*/,
+                friendly_name(name,"_matcolors", 0));
             FREE(s);
         }
         
@@ -8007,6 +8101,9 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char *name)
  *              Robb Matzke, 1999-07-13
  *              Removed the `origin' property to duplicate changes made to
  *              the PDB driver.
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -8026,12 +8123,14 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
 
         /* Write raw data arrays */
         for (i=0, nels=1; i<ndims; i++) nels *= dims[i];
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nels, speclist, m.speclist/*out*/);
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nmat, nmatspec, m.nmatspec/*out*/);
+        db_hdf5_compwr(dbfile, DB_INT, 1, &nels, speclist, m.speclist/*out*/,
+            friendly_name(name,"_speclist", 0));
+        db_hdf5_compwr(dbfile, DB_INT, 1, &nmat, nmatspec, m.nmatspec/*out*/,
+            friendly_name(name,"_nmatspec", 0));
         db_hdf5_compwr(dbfile, datatype, 1, &nspecies_mf, species_mf,
-                       m.species_mf/*out*/);
+            m.species_mf/*out*/, friendly_name(name,"_species_mf", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &mixlen, mix_speclist,
-                       m.mix_speclist/*out*/);
+            m.mix_speclist/*out*/, friendly_name(name,"_mix_speclist", 0));
         
         /* Build header in memory */
         m.ndims = ndims;
@@ -8191,6 +8290,8 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -8212,12 +8313,12 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_mm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
         }
         if (_mm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
 
         /*
          * Create a character string which is a semi-colon separated list of
@@ -8234,33 +8335,33 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
         
         /* Write raw data arrays */
         db_hdf5_compwr(dbfile, DB_INT, 1, &nmesh, meshtypes,
-                       m.meshtypes/*out*/);
+            m.meshtypes/*out*/, friendly_name(name,"_meshtypes", 0));
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
-                       m.meshnames/*out*/);
+            m.meshnames/*out*/, friendly_name(name,"_meshnames", 0));
         if (_mm._extents && _mm._extentssize) {
             int sizes[2];
             sizes[0] = nmesh;
             sizes[1] = _mm._extentssize;
             db_hdf5_compwr(dbfile, DB_DOUBLE, 2, sizes, _mm._extents,
-                           m.extents/*out*/);
+                m.extents/*out*/, friendly_name(name,"_extents",0));
         }
         if (_mm._zonecounts) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nmesh, _mm._zonecounts,
-                           m.zonecounts/*out*/);
+                m.zonecounts/*out*/, friendly_name(name,"_zoneconts",0));
         }
         if (_mm._has_external_zones) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nmesh, _mm._has_external_zones,
-                           m.has_external_zones/*out*/);
+                m.has_external_zones/*out*/, friendly_name(name,"_has_external_zones",0));
         }
         if (_mm._lgroupings > 0 && _mm._groupings != NULL) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._lgroupings, _mm._groupings,
-                           m.groupings/*out*/);
+                m.groupings/*out*/, friendly_name(name,"_groupings",0));
         }
         if (_mm._lgroupings > 0 && _mm._groupnames != NULL) {
            db_StringArrayToStringList((const char **)_mm._groupnames, 
                            _mm._lgroupings, &t, &len);
            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, t,
-                           m.groupnames/*out*/);
+                m.groupnames/*out*/, friendly_name(name,"_groupnames",0));
            FREE(t);
         }
         
@@ -8425,6 +8526,10 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
  * Programmer:  Mark C. Miller 
  *              Thursday, September 8, 2005 
  *
+ * Modifcations:
+ *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -8502,25 +8607,25 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
                lneighbors += nneighbors[i];
 
            db_hdf5_compwr(dbfile, DB_INT, 1, &nmesh, (void*)meshtypes,
-               m.meshtypes/*out*/);
+               m.meshtypes/*out*/, friendly_name(name, "_meshtypes",0));
            db_hdf5_compwr(dbfile, DB_INT, 1, &nmesh, (void*)nneighbors,
-               m.nneighbors/*out*/);
+               m.nneighbors/*out*/, friendly_name(name,"_nneighbots",0));
            db_hdf5_compwr(dbfile, DB_INT, 1, &lneighbors, (void*)neighbors,
-               m.neighbors/*out*/);
+               m.neighbors/*out*/, friendly_name(name,"_neighbors",0));
            if (back)
            {
                db_hdf5_compwr(dbfile, DB_INT, 1, &lneighbors, (void*)back,
-                   m.back/*out*/);
+                   m.back/*out*/, friendly_name(name,"_back",0));
            }
            if (lnodelists)
            {
                db_hdf5_compwr(dbfile, DB_INT, 1, &lneighbors, (void*)lnodelists,
-                   m.lnodelists/*out*/);
+                   m.lnodelists/*out*/, friendly_name(name,"_lnodelists",0));
            }
            if (lzonelists)
            {
                db_hdf5_compwr(dbfile, DB_INT, 1, &lneighbors, (void*)lzonelists,
-                   m.lzonelists/*out*/);
+                   m.lzonelists/*out*/, friendly_name(name,"_lzonelists",0));
            }
 
            /* All object components up to here are invariant and *should*
@@ -8539,7 +8644,7 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
                /* reserve space for the nodelists array in the file */
                /* negative rank means to reserve space */
                if (db_hdf5_compwr(dbfile, DB_INT, -1, &len, NULL,
-                                  m.nodelists/*out*/)<0) {
+                       m.nodelists/*out*/, friendly_name(name,"_nodelists",0))<0) {
                   return db_perror ("db_hdf5_compwr", E_CALLFAIL, me) ;
                }
            }
@@ -8555,7 +8660,7 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
                /* reserve space for the zonelists array in the file */
                /* negative rank means to reserve space */
                if (db_hdf5_compwr(dbfile, DB_INT, -1, &len, NULL,
-                                  m.zonelists/*out*/)<0) {
+                       m.zonelists/*out*/, friendly_name(name, "_zonelists",0))<0) {
                   return db_perror ("db_hdf5_compwr", E_CALLFAIL, me) ;
                }
            }
@@ -8563,12 +8668,12 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
            /* hack to maintain backward compatibility with pdb driver */
            len = 1;
            if (_mm._time_set == TRUE) {
-               db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time");
+               db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
            }
            if (_mm._dtime_set == TRUE) {
-               db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime");
+               db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
            }
-           db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle");
+           db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
 
            /* Write meta data to file */
            STRUCT(DBmultimeshadj) {
@@ -8972,6 +9077,8 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -8993,12 +9100,12 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_mm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
         }
         if (_mm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
 
         /*
          * Create a character string which is a semi-colon separated list of
@@ -9015,15 +9122,15 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         
         /* Write raw data arrays */
         db_hdf5_compwr(dbfile, DB_INT, 1, &nvars, vartypes,
-                       m.vartypes/*out*/);
+            m.vartypes/*out*/, friendly_name(name, "_vartypes", 0));
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
-                       m.varnames/*out*/);
+            m.varnames/*out*/, friendly_name(name, "_varnames", 0));
         if (_mm._extents && _mm._extentssize) {
             int sizes[2];
             sizes[0] = nvars;
             sizes[1] = _mm._extentssize;
             db_hdf5_compwr(dbfile, DB_DOUBLE, 2, sizes, _mm._extents,
-                           m.extents/*out*/);
+                m.extents/*out*/, friendly_name(name, "_extents", 0));
         }
         
         /* Initialize meta data */
@@ -9214,12 +9321,12 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_mm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
         }
         if (_mm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
 
         /*
          * Create a character string which is a semi-colon separated list of
@@ -9235,29 +9342,30 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         len++; /*count null*/
 
         /* Write raw data arrays */
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/);
+        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
+            friendly_name(name, "_matnames", 0));
         if (_mm._matnos && _mm._nmatnos > 0) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._nmatnos, _mm._matnos,
-                           m.matnos/*out*/);
+                m.matnos/*out*/, friendly_name(name,"_matnos", 0));
         }
         if (_mm._mixlens) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nmats, _mm._mixlens,
-                           m.mixlens/*out*/);
+                m.mixlens/*out*/, friendly_name(name,"_mixlens", 0));
         }
         if (_mm._matcounts && _mm._matlists) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nmats, _mm._matcounts,
-                           m.matcounts/*out*/);
+                m.matcounts/*out*/, friendly_name(name,"_matcounts", 0));
             for (i=len=0; i<nmats; i++)
                len += _mm._matcounts[i];
             db_hdf5_compwr(dbfile, DB_INT, 1, &len, _mm._matlists,
-                           m.matlists/*out*/);
+                m.matlists/*out*/, friendly_name(name,"_matlists", 0));
         }
         if (_mm._matcolors && _mm._nmatnos > 0) {
             int len; char *tmp;
             db_StringArrayToStringList((const char**) _mm._matcolors,
                 _mm._nmatnos, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
-                           m.mat_colors/*out*/);
+                m.mat_colors/*out*/, friendly_name(name,"_matcolors", 0));
             FREE(tmp);
         }
         if (_mm._matnames && _mm._nmatnos > 0) {
@@ -9265,7 +9373,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
             db_StringArrayToStringList((const char**) _mm._matnames,
                 _mm._nmatnos, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
-                           m.material_names/*out*/);
+                m.material_names/*out*/, friendly_name(name,"_matnames", 0));
             FREE(tmp);
         }
 
@@ -9443,6 +9551,8 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -9463,12 +9573,12 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_mm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
         }
         if (_mm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
 
         /*
          * Create a character string which is a semi-colon separated list of
@@ -9484,10 +9594,11 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
         len++; /*count null*/
 
         /* Write raw data arrays */
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/);
+        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
+            friendly_name(name, "_specnames", 0));
         if (_mm._nmat>0 && _mm._nmatspec) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._nmat, _mm._nmatspec,
-                           m.nmatspec/*out*/);
+                m.nmatspec/*out*/, friendly_name(name, "_nmatspec", 0));
         }
 
         /* Initialize meta data */
@@ -9634,6 +9745,8 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -9665,17 +9778,17 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, float *coords[],
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_pm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_pm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_pm._time), "time", 0);
         }
         if (_pm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_pm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_pm._dtime), "dtime", 0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_pm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_pm._cycle), "cycle", 0);
 
         /* Write raw data arrays */
         for (i=0; i<ndims; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nels, coords[i],
-                           m.coord[i]/*out*/);
+                m.coord[i]/*out*/, friendly_name(name, "_coord%d", &i));
         }
 
         /* Find the mesh extents from the coordinate arrays */
@@ -9696,7 +9809,7 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, float *coords[],
         /* Global node numbers */
         if (_pm._gnodeno)
             db_hdf5_compwr(dbfile, DB_INT, 1, &nels, _pm._gnodeno,
-                           m.gnodeno/*out*/);
+                m.gnodeno/*out*/, friendly_name(name, "_gnodeno", 0));
 
         /* Build header in memory */
         m.ndims = ndims;
@@ -9866,6 +9979,8 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -9891,17 +10006,17 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_pm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_pm._time), "time");
+            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_pm._time), "time", 0);
         }
         if (_pm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_pm._dtime), "dtime");
+            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_pm._dtime), "dtime", 0);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_pm._cycle), "cycle");
+        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_pm._cycle), "cycle", 0);
 
         /* Write raw data arrays */
         for (i=0; i<nvars; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nels, vars[i],
-                           m.data[i]/*out*/);
+                m.data[i]/*out*/, friendly_name(name, "_vals%d", &i));
         }
 
         /* Build header in memory */
@@ -10061,6 +10176,8 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
+ *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -10090,9 +10207,12 @@ db_hdf5_PutCompoundarray(DBfile *_dbfile, char *name, char *elmtnames[],
         len++; /*count null*/
 
         /* Write raw data arrays */
-        db_hdf5_compwr(dbfile, datatype, 1, &nvalues, values, m.values);
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.elemnames);
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nelmts, elmtlen, m.elemlengths);
+        db_hdf5_compwr(dbfile, datatype, 1, &nvalues, values, m.values,
+            friendly_name(name, "_vals", 0));
+        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.elemnames,
+            friendly_name(name, "_elemnames", 0));
+        db_hdf5_compwr(dbfile, DB_INT, 1, &nelmts, elmtlen, m.elemlengths,
+            friendly_name(name, "_elemlengths", 0));
 
         /* Initialize meta data */
         m.nelems = nelmts;

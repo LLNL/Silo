@@ -22,27 +22,29 @@
       external dbaddcaopt, dbaddccmp, dbaddcopt, dbadddopt, dbaddicmp
       external dbaddiopt, dbaddrcmp, dbaddropt, dbcalcfl, dbclose
       external dbcreate, dbfgetca, dbfreeobject, dbfreeoptlist
-      external dbget2dstrlen, dbgetca, dbgetcksums, dbgetcurve
-      external dbgetovrwrt, dbgetqv1, dbinqca, dbinqfile, dbinqlen
-      external dbmkdir, dbmkobject, dbmkoptlist, dbopen, dbputca
-      external dbputcurve, dbputdefvars, dbputfl, dbputmat, dbputmmat
-      external dbputmmesh, dbputmsp, dbputmvar, dbputpm, dbputpv1
-      external dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl, dbputzl2
-      external dbrdvar, dbrdvarslice, dbset2dstrlen, dbsetcksums
-      external dbsetdir, dbsetdirid, dbsetovrwrt, dbshowerrors, dbwrite
+      external dbget2dstrlen, dbgetca, dbgetcksums, dbgetcompress
+      external dbgetcurve, dbgethdfnms, dbgetovrwrt, dbgetqv1, dbinqca
+      external dbinqfile, dbinqlen, dbmkdir, dbmkobject, dbmkoptlist
+      external dbopen, dbputca, dbputcurve, dbputdefvars, dbputfl
+      external dbputmat, dbputmmat, dbputmmesh, dbputmsp, dbputmvar
+      external dbputpm, dbputpv1, dbputqm, dbputqv1, dbputum, dbputuv1
+      external dbputzl, dbputzl2, dbrdvar, dbrdvarslice, dbset2dstrlen
+      external dbsetcksums, dbsetcompress, dbsetdir, dbsetdirid
+      external dbsethdfnms, dbsetovrwrt, dbshowerrors, dbwrite
       external dbwriteslice, dbwrtfl
 
       integer  dbaddcaopt, dbaddccmp, dbaddcopt, dbadddopt, dbaddicmp
       integer  dbaddiopt, dbaddrcmp, dbaddropt, dbcalcfl, dbclose
       integer  dbcreate, dbfgetca, dbfreeobject, dbfreeoptlist
-      integer  dbget2dstrlen, dbgetca, dbgetcksums, dbgetcurve
-      integer  dbgetovrwrt, dbgetqv1, dbinqca, dbinqfile, dbinqlen
-      integer  dbmkdir, dbmkobject, dbmkoptlist, dbopen, dbputca
-      integer  dbputcurve, dbputdefvars, dbputfl, dbputmat, dbputmmat
-      integer  dbputmmesh, dbputmsp, dbputmvar, dbputpm, dbputpv1
-      integer  dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl, dbputzl2
-      integer  dbrdvar, dbrdvarslice, dbset2dstrlen, dbsetcksums
-      integer  dbsetdir, dbsetdirid, dbsetovrwrt, dbshowerrors, dbwrite
+      integer  dbget2dstrlen, dbgetca, dbgetcksums, dbgetcompress
+      integer  dbgetcurve, dbgethdfnms, dbgetovrwrt, dbgetqv1, dbinqca
+      integer  dbinqfile, dbinqlen, dbmkdir, dbmkobject, dbmkoptlist
+      integer  dbopen, dbputca, dbputcurve, dbputdefvars, dbputfl
+      integer  dbputmat, dbputmmat, dbputmmesh, dbputmsp, dbputmvar
+      integer  dbputpm, dbputpv1, dbputqm, dbputqv1, dbputum, dbputuv1
+      integer  dbputzl, dbputzl2, dbrdvar, dbrdvarslice, dbset2dstrlen
+      integer  dbsetcksums, dbsetcompress, dbsetdir, dbsetdirid
+      integer  dbsethdfnms, dbsetovrwrt, dbshowerrors, dbwrite
       integer  dbwriteslice, dbwrtfl
 
 

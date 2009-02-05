@@ -159,7 +159,8 @@ SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
     FALSE, /* enableChecksums */
-    FALSE  /* enableCompression */
+    FALSE, /* enableCompression */
+    FALSE  /* enableFriendlyHDF5Names */
 };
 SILO_Compression_t SILO_Compression = {
     "\0" 
@@ -2185,6 +2186,30 @@ PUBLIC char *
 DBGetCompression()
 {
     return SILO_Compression.parameters;
+}
+
+/*----------------------------------------------------------------------
+ * Routine:  DBSetFriendlyHDF5Names
+ *
+ * Purpose:  Set flag to create friendly HDF5 dataset names 
+ *
+ * Programmer:  Mark C. Miller, Thu Apr 19 15:17:05 PDT 2007 
+ *
+ * Description:  Sets flag for HDF5 driver to control production of
+ * friendly dataset names. Returns value of old setting.
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBSetFriendlyHDF5Names(int enable)
+{
+    int oldEnable = SILO_Globals.enableFriendlyHDF5Names;
+    SILO_Globals.enableFriendlyHDF5Names = enable;
+    return oldEnable;
+}
+
+PUBLIC int 
+DBGetFriendlyHDF5Names()
+{
+    return SILO_Globals.enableFriendlyHDF5Names;
 }
 
 /*----------------------------------------------------------------------

@@ -336,6 +336,7 @@ main(int argc, char *argv[])
     char           filename[256], *file_ext=".pdb";
     int            i;
     int            dochecks = FALSE;
+    int            hdfriendly = FALSE;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -357,12 +358,17 @@ main(int argc, char *argv[])
             file_ext = ".h5";
         } else if (!strcmp(argv[i], "check")) {
             dochecks = TRUE;
+        } else if (!strcmp(argv[i], "hdf-friendly")) {
+            hdfriendly = TRUE;
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
 
     DBSetEnableChecksums(dochecks);
+    if (driver == DB_HDF5 || driver == DB_HDF5_SEC2 ||
+        driver == DB_HDF5_STDIO || driver == DB_HDF5_CORE)
+        DBSetFriendlyHDF5Names(hdfriendly);
 
     /*
      * Create the multi-block rectilinear 2d mesh.

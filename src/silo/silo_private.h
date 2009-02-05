@@ -737,6 +737,7 @@ typedef struct SILO_Globals_t {
     int allowOverwrites;
     int enableChecksums;
     int enableCompression;
+    int enableFriendlyHDF5Names;
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 

@@ -1433,6 +1433,8 @@ SILO_API extern int      DBSetEnableChecksums(int enable);
 SILO_API extern int      DBGetEnableChecksums(void);
 SILO_API extern int      DBSetCompression(const char *);
 SILO_API extern char    *DBGetCompression(void);
+SILO_API extern int      DBSetFriendlyHDF5Names(int enable);
+SILO_API extern int      DBGetFriendlyHDF5Names(void);
 SILO_API extern char    *DBVersion(void);
 SILO_API extern void     DBShowErrors(int, void (*)(char *));
 SILO_API extern char    *DBErrString(void);

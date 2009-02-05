@@ -3818,3 +3818,49 @@ F_DBGETCOMPRESS(FCD_DB cvalue, int *lcvalue)
 
     return(0);
 }
+
+/*-------------------------------------------------------------------------
+ * Routine                                                  F_DBSETHDFNMS
+ *
+ * Purpose: set value for flag controlling friendly hdf5 names 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Thu Apr 19 19:26:11 PDT 2007 
+ *-------------------------------------------------------------------------*/
+FORTRAN
+F_DBSETHDFNMS(int *enable)
+{
+    API_BEGIN("dbsethdfnms", int, -1) {
+        API_RETURN(DBSetFriendlyHDF5Names(*enable));
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*-------------------------------------------------------------------------
+ * Routine                                                  F_DBGETHDFNMS
+ *
+ * Purpose: Get value for flag controlling friendly hdf5 names 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Thu Apr 19 19:26:11 PDT 2007 
+ *-------------------------------------------------------------------------*/
+FORTRAN
+F_DBGETHDFNMS()
+{
+    API_BEGIN("dbgethdfnms", int, -1) {
+        API_RETURN(DBGetFriendlyHDF5Names());
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}

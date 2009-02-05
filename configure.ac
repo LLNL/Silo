@@ -310,9 +310,9 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 4.6-pre3)
-m4_define(SILO_DATE, 2006/10/10)
-m4_define(SILO_TIME, 13:34:00)
+m4_define(SILO_VERSION, 4.6-pre4)
+m4_define(SILO_DATE, 2007/04/19)
+m4_define(SILO_TIME, 19:38:16)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)

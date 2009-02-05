@@ -108,6 +108,8 @@ for advertising or product endorsement purposes.
 #define F_DBGETCKSUMS   F77_ID(dbgetcksums_,dbgetcksums,DBGETCKSUMS)
 #define F_DBSETCOMPRESS F77_ID(dbsetcompress_,dbsetcompress,DBSETCOMPRESS)
 #define F_DBGETCOMPRESS F77_ID(dbgetcompress_,dbgetcompress,DBGETCOMPRESS)
+#define F_DBSETHDFNMS   F77_ID(dbsethdfnms_,dbsethdfnms,DBSETHDFNMS)
+#define F_DBGETHDFNMS   F77_ID(dbgethdfnms_,dbgethdfnms,DBGETHDFNMS)
 
 void    *DBFortranAccessPointer(int value);
 
