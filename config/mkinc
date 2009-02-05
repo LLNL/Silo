@@ -86,6 +86,9 @@ $0 = shift @ARGV;
 #   of Fortran 77 style comments.  Sean also changed a couple of lines
 #   to eliminate a run time warning.
 #
+#   Mark C. Miller, Thu Nov  2 14:30:00 PST 2006
+#   Made it handle SILO_VERS_... symbols
+#
 #########################################################################
 
 
@@ -98,10 +101,18 @@ local($brace_level) = 0;
 ### Gather the info...
 while (<>) {
     next if (/NO_FORTRAN_DEFINE/);
-    if (/^#[ \t]*define[ \t]+((DB|SDX)(OPT|CSG)?_\w+)[ \t]+([^ \t\n]*)/) {
+    if (/^#[ \t]*define[ \t]+((SILO_VERS|DB|SDX)(OPT|CSG)?_\w+)[ \t]+([^ \t\n]*)/) {
         local ($name, $value) = ($1, $4);
         $sdx=1 if ($name=~/^SDX/);
         $name =~ s/^SDX_//;
+	if ($name eq "SILO_VERS_TAG")
+	{
+	    next;
+	}
+	if ($value eq "")
+	{
+	    $value = 0;
+	}
         if (/FORTRAN STRING/)
         {
             push (@strings, join(':',$name,$value));

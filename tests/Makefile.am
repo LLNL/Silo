@@ -42,7 +42,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
-      mmadjacency largefile
+      mmadjacency largefile version
 
 dir_SOURCES = \
  dir.c \
@@ -88,7 +88,8 @@ check_PROGRAMS = \
  mmadjacency \
  largefile \
  dir \
- quad 
+ quad \
+ version
 if FORTRAN_NEEDED
   TESTSUITE += $(srcdir)/testsuitef77
   PROGS += $(F77PROGS)
@@ -113,7 +114,7 @@ endif
  listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
  oneprism onepyramid onetet TestReadMask subhex twohex multispec \
  specmix testpdb sami spec cpz1plt merge_block mat3d_3across \
- ucd1d wave multi_file polyzl csg  mmadjacency  largefile 
+ ucd1d wave multi_file polyzl csg  mmadjacency  largefile version
 
 all-local:
 	@echo

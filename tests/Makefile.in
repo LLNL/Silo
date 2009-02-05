@@ -50,7 +50,8 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	cpz1plt$(EXEEXT) merge_block$(EXEEXT) mat3d_3across$(EXEEXT) \
 	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) mmadjacency$(EXEEXT) \
-	largefile$(EXEEXT) dir$(EXEEXT) quad$(EXEEXT) $(am__EXEEXT_2)
+	largefile$(EXEEXT) dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
+	$(am__EXEEXT_2)
 @FORTRAN_NEEDED_TRUE@am__append_2 = $(srcdir)/testsuitef77
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(F77PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_4 = $(F77PROGS)
@@ -286,6 +287,11 @@ ucdsamp3_OBJECTS = ucdsamp3.$(OBJEXT)
 ucdsamp3_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@ucdsamp3_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@ucdsamp3_DEPENDENCIES = ../src/libsiloh5.la
+version_SOURCES = version.c
+version_OBJECTS = version.$(OBJEXT)
+version_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@version_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@version_DEPENDENCIES = ../src/libsiloh5.la
 wave_SOURCES = wave.c
 wave_OBJECTS = wave.$(OBJEXT)
 wave_LDADD = $(LDADD)
@@ -317,7 +323,7 @@ SOURCES = TestReadMask.c alltypes.c array.c $(arrayf77_SOURCES) \
 	polyzl.c $(quad_SOURCES) $(quadf77_SOURCES) sami.c simple.c \
 	spec.c specmix.c subhex.c testall.c $(testallf77_SOURCES) \
 	testpdb.c twohex.c ucd.c ucd1d.c $(ucdf77_SOURCES) ucdsamp3.c \
-	wave.c
+	version.c wave.c
 DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	$(am__arrayf77_SOURCES_DIST) cpz1plt.c csg.c \
 	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) extface.c \
@@ -329,7 +335,7 @@ DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	$(am__quadf77_SOURCES_DIST) sami.c simple.c spec.c specmix.c \
 	subhex.c testall.c $(am__testallf77_SOURCES_DIST) testpdb.c \
 	twohex.c ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c \
-	wave.c
+	version.c wave.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -427,6 +433,11 @@ SHELL = @SHELL@
 SILEX = @SILEX@
 SILEX_NEEDED_FALSE = @SILEX_NEEDED_FALSE@
 SILEX_NEEDED_TRUE = @SILEX_NEEDED_TRUE@
+SILO_VERS_MAJ = @SILO_VERS_MAJ@
+SILO_VERS_MIN = @SILO_VERS_MIN@
+SILO_VERS_PAT = @SILO_VERS_PAT@
+SILO_VERS_PRE = @SILO_VERS_PRE@
+SILO_VERS_TAG = @SILO_VERS_TAG@
 STRIP = @STRIP@
 TAURUS = @TAURUS@
 TAURUS_NEEDED_FALSE = @TAURUS_NEEDED_FALSE@
@@ -536,7 +547,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
-	csg mmadjacency largefile $(am__append_3)
+	csg mmadjacency largefile version $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -728,6 +739,9 @@ ucdf77$(EXEEXT): $(ucdf77_OBJECTS) $(ucdf77_DEPENDENCIES)
 ucdsamp3$(EXEEXT): $(ucdsamp3_OBJECTS) $(ucdsamp3_DEPENDENCIES) 
 	@rm -f ucdsamp3$(EXEEXT)
 	$(LINK) $(ucdsamp3_LDFLAGS) $(ucdsamp3_OBJECTS) $(ucdsamp3_LDADD) $(LIBS)
+version$(EXEEXT): $(version_OBJECTS) $(version_DEPENDENCIES) 
+	@rm -f version$(EXEEXT)
+	$(LINK) $(version_LDFLAGS) $(version_OBJECTS) $(version_LDADD) $(LIBS)
 wave$(EXEEXT): $(wave_OBJECTS) $(wave_DEPENDENCIES) 
 	@rm -f wave$(EXEEXT)
 	$(LINK) $(wave_LDFLAGS) $(wave_OBJECTS) $(wave_LDADD) $(LIBS)
@@ -776,6 +790,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucd1d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucdsamp3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wave.Po@am__quote@
 
 .c.o:
@@ -1020,7 +1035,7 @@ uninstall-am:
 # listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
 # oneprism onepyramid onetet TestReadMask subhex twohex multispec \
 # specmix testpdb sami spec cpz1plt merge_block mat3d_3across \
-# ucd1d wave multi_file polyzl csg  mmadjacency  largefile 
+# ucd1d wave multi_file polyzl csg  mmadjacency  largefile version
 
 all-local:
 	@echo

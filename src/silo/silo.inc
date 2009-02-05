@@ -106,9 +106,14 @@
       integer  DB_ZONETYPE_HEX, DB_ZONETYPE_POLYGON
       integer  DB_ZONETYPE_POLYHEDRON, DB_ZONETYPE_PRISM
       integer  DB_ZONETYPE_PYRAMID, DB_ZONETYPE_QUAD, DB_ZONETYPE_TET
-      integer  DB_ZONETYPE_TRIANGLE
+      integer  DB_ZONETYPE_TRIANGLE, SILO_VERS_MAJ, SILO_VERS_MIN
+      integer  SILO_VERS_PAT, SILO_VERS_PRE
       character*12  DB_F77NULLSTRING
 
+      parameter (SILO_VERS_MAJ             = 4              )
+      parameter (SILO_VERS_MIN             = 6              )
+      parameter (SILO_VERS_PAT             = 0              )
+      parameter (SILO_VERS_PRE             = 3              )
       parameter (DB_NETCDF                 = 0              )
       parameter (DB_PDB                    = 2              )
       parameter (DB_TAURUS                 = 3              )

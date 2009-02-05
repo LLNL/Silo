@@ -173,18 +173,4 @@ build_csg(DBfile *dbfile, char *name)
         char *result = db_join_path(parent, child);
         printf("Got \"%s\" for result\n", result);
     }
-
-    /* test version macro */
-#if SILO_VERSION_GE(4,6,0)
-    printf("This version of Silo is greater than or equal to 4.6.0\n");
-#else
-    printf("This version of Silo is NOT greater than or equal to 4.6.0\n");
-#endif
-
-#if SILO_VERSION_GE(7,5,2)
-    printf("This version of Silo is greater than or equal to 7.5.2\n");
-#else
-    printf("This version of Silo is NOT greater than or equal to 7.5.2\n");
-#endif
-
 }

@@ -318,7 +318,7 @@ AC_SUBST([CONFIG_CMD]) CONFIG_CMD="$0 $@"
 AC_PREREQ(2.60)
 AC_REVISION($Id$)dnl
 AC_INIT(SILO_NAME, SILO_VERSION, SILO_BUGS, SILO_NAME)
-AC_CONFIG_SRCDIR([src/silo/silo.h])
+AC_CONFIG_SRCDIR([src/silo/silo.h.in])
 AC_CONFIG_AUX_DIR(config)
 dnl AM_INIT_AUTOMAKE takes a list of options that should be applied to
 dnl every Makefile.am when automake is run.
@@ -364,11 +364,11 @@ AC_CANONICAL_HOST
 # Grab the version number
 AC_MSG_CHECKING(what version the package is)
 AC_MSG_RESULT(SILO_VERSION)
-AC_DEFINE_UNQUOTED(SILO_VERS_MAJ,`echo SILO_VERSION | cut -d'.' -f1`,[Silo major version number])
-AC_DEFINE_UNQUOTED(SILO_VERS_MIN,`echo SILO_VERSION | cut -d'.' -f2 | cut -d'-' -f1`,[Silo minor version number])
-AC_DEFINE_UNQUOTED(SILO_VERS_PAT,`echo SILO_VERSION | cut -d'.' -f3 | cut -d'-' -f1`,[Silo patch version number])
-AC_DEFINE_UNQUOTED(SILO_VERS_PRE,`echo SILO_VERSION | grep pre | cut -d'-' -f2 | cut -d'e' -f2`,[Silo pre-release version number])
-AC_DEFINE_UNQUOTED(SILO_VERS_TAG,Silo_version_`echo SILO_VERSION | sed -e 's/\./_/g' -e 's/-/_/g'`,[Silo compile time version symbol])
+AC_SUBST([SILO_VERS_MAJ]) SILO_VERS_MAJ="`echo SILO_VERSION | cut -d'.' -f1`"
+AC_SUBST([SILO_VERS_MIN]) SILO_VERS_MIN="`echo SILO_VERSION | cut -d'.' -f2 | cut -d'-' -f1`"
+AC_SUBST([SILO_VERS_PAT]) SILO_VERS_PAT="`echo SILO_VERSION | cut -d'.' -f3 | cut -d'-' -f1`"
+AC_SUBST([SILO_VERS_PRE]) SILO_VERS_PRE="`echo SILO_VERSION | grep pre | cut -d'-' -f2 | cut -d'e' -f2`"
+AC_SUBST([SILO_VERS_TAG]) SILO_VERS_TAG="`echo Silo_version SILO_VERSION | sed -e 's/ /_/' -e 's/\./_/g' -e 's/-/_/g'`"
 
 dnl Configuration date
 AC_SUBST([CONFIG_DATE]) CONFIG_DATE="`date`"
@@ -1104,6 +1104,7 @@ AC_CONFIG_FILES([
             src/pdb/Makefile
             src/swat/Makefile
 	    src/silo/Makefile
+	    src/silo/silo.h
             src/debug/Makefile
             src/netcdf/Makefile
             src/pdb_drv/Makefile
@@ -1132,8 +1133,3 @@ if test -n "$HDF5_DRV"; then
 else
   cat src/libsilo.settings | sed 's|\\n||' | sed 's|"||g'
 fi
-dnl ----------------------------------------------------------------------
-dnl obtain silo version symbols and put in separate header file
-dnl
-rm -f src/silo/silo_version.h
-grep '^#define SILO_VERS_' config.h > src/silo/silo_version.h

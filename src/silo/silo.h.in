@@ -52,20 +52,33 @@ for advertising or product endorsement purposes.
 #ifndef SILO_H
 #define SILO_H
 
-/* include just the version symbols */
-#include <silo_version.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdio.h>
+
+/* Major release number of silo library. */
+#define SILO_VERS_MAJ @SILO_VERS_MAJ@
+
+/* Minor release number of silo library. */
+#define SILO_VERS_MIN @SILO_VERS_MIN@
+
+/* Patch release number of silo library.  Can be empty. */
+#define SILO_VERS_PAT @SILO_VERS_PAT@
+
+/* Pre-release release number of silo library.  Can be empty. */
+#define SILO_VERS_PRE @SILO_VERS_PRE@
+
+/* The symbol Silo uses to enforce link-time
+   header/object version compatibility */
+#define SILO_VERS_TAG @SILO_VERS_TAG@
 
 /* Useful macro for comparing Silo versions */
 #define SILO_VERSION_GE(Maj,Min,Rel)  \
         (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_REL>=Rel)) || \
          ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) || \
          (SILO_VERS_MAJ>Maj))
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <stdio.h>
 
 /*-------------------------------------------------------------------------
  * Drivers.  This is a list of every driver that a user could use.  Not all of

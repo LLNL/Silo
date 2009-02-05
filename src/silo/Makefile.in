@@ -39,14 +39,15 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = src/silo
 DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/silo.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = silo.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_silo_la_LIBADD =
 am__objects_1 = alloc.lo extface.lo silo.lo silo_f.lo
@@ -171,6 +172,11 @@ SHELL = @SHELL@
 SILEX = @SILEX@
 SILEX_NEEDED_FALSE = @SILEX_NEEDED_FALSE@
 SILEX_NEEDED_TRUE = @SILEX_NEEDED_TRUE@
+SILO_VERS_MAJ = @SILO_VERS_MAJ@
+SILO_VERS_MIN = @SILO_VERS_MIN@
+SILO_VERS_PAT = @SILO_VERS_PAT@
+SILO_VERS_PRE = @SILO_VERS_PRE@
+SILO_VERS_TAG = @SILO_VERS_TAG@
 STRIP = @STRIP@
 TAURUS = @TAURUS@
 TAURUS_NEEDED_FALSE = @TAURUS_NEEDED_FALSE@
@@ -254,7 +260,6 @@ EXTRA_DIST = \
 
 include_HEADERS = \
  silo.h \
- silo_version.h \
  silo.inc 
 
 noinst_HEADERS = \
@@ -305,6 +310,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+silo.h: $(top_builddir)/config.status $(srcdir)/silo.h.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
