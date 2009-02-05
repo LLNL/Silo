@@ -1,137 +1,14 @@
 #!/bin/sh
 #set -x
-FILELIST="\
-./aclocal.m4 \
-./config/compile ./config/config.guess ./config/config.h.in \
-./config/config.sub ./config/depcomp ./config/install-sh \
-./config/ltmain.sh ./config/missing \
-./config-site/Makefile.in ./clearcase_bin/Makefile.in \
-./docs/Makefile.in ./config/Makefile.in \
-./tools/browser/Makefile.in \
-./tools/silock/Makefile.in ./tools/silex/Makefile.in \
-./tools/python/Makefile.in ./tools/Makefile.in \
-./tests/Makefile.in \
-./src/Makefile.in ./src/debug/Makefile.in \
-./src/filters/Makefile.in ./src/netcdf/Makefile.in \
-./src/silo/Makefile.in \
-./src/taurus/Makefile.in ./src/unknown/Makefile.in \
-./src/pdb/Makefile.in ./src/pdb_drv/Makefile.in \
-./src/score/Makefile.in ./src/hdf5_drv/Makefile.in \
-./src/hzip/Makefile.in ./src/fpzip/Makefile.in \
-./SiloWindows/Makefile.in ./Makefile.in ./configure"
-FILELIST3="./tests/testsuite"
-FILELIST2="./tests/package.m4"
-FILELIST1="./src/silo/silo.inc"
 HOST=`/usr/gapps/silo/autotools/bin/config.guess`
 AUTOTOOLS=/usr/gapps/silo/autotools/$HOST/bin
-CT="/usr/atria/bin/cleartool"
-CHECK=no  # don't do checkin and checkout by default
-help () {
-  printf "Usage: %s [-c|-o|-i|-h] [-d] Comment"
-$0
-  printf "\n"
-  printf "Silo reconfigure script. This runs GNU autotools to rebuild\n"
-  printf "configure, Makefile.in, config.h, etc., optionally checkout/in\n"
-  printf "from clearcase the changed files.\n"
-  printf "Options are:\n"
-  printf "   -c  perform a clearcase checkout, autoreconf, and checkin.\n"
-  printf "   -o  perform only a clearcase checkout then quit.\n"
-  printf "   -i  perform only a clearcase checkin then quit.\n"
-  printf "   -h  print this help message.\n"
-  printf "   -d  turn on debugging.\n"
-}
-do_checkout()
-{
-for file in $FILELIST $FILELIST1 $FILELIST2 $FILELIST3
-do
-  $CT co -c "" $file
-done
-}
-do_checkin()
-{
-for file in $FILELIST
-do
-  $CT ci -c "$COMMENT" $file || $CT unco -rm $file
-done
-sleep 1
-for file in $FILELIST1
-do
-  modfile=`ls -t ./src/silo/silo.h ./src/silo/silo_f.h $file | \
-     head -n 1 | grep $file`
-  if test "$file" = "$modfile" ; then
-    $CT ci -c "$COMMENT" $file || $CT unco -rm $file
-  else
-    $CT ci -c "$COMMENT-required checkin for tests/Makefile rule" -ident $file 
-  fi
-done
-for file in $FILELIST2
-do
-  modfile=`ls -t ./configure.ac $file | head -n 1 | grep $file`
-  if test "$file" = "$modfile" ; then
-    $CT ci -c "$COMMENT" $file || $CT unco -rm $file
-  else
-    $CT ci -c "$COMMENT-required checkin for tests/Makefile rule" -ident $file 
-  fi
-done
-sleep 1
-for file in $FILELIST3
-do
-  modfile=`ls -t "$file".at $file | head -n 1 | grep $file`
-  if test "$file" = "$modfile" ; then
-    $CT ci -c "$COMMENT" $file || $CT unco -rm $file
-  else
-    $CT ci -c "$COMMENT-required checkin for tests/Makefile rule" -ident $file 
-  fi
-done
-}
 # somewhat of a hack
 if test -x configure.ac ; then
   echo "must be in the same directory as ./configure to run this script"
   exit 1
 fi
-case $1 in
-    -c|-check) 
-        shift
-        if [ $# -lt 1 ] ; then
-          echo "must provide a checkin comment"
-          exit 2
-        fi
-        COMMENT="$*" 
-        CHECK=yes ;;
-    -o|-co) 
-        do_checkout
-        exit;;
-    -i|-ci) 
-        shift
-        if [ $# -lt 1 ] ; then
-          echo "must provide a checkin comment"
-          exit 2
-        fi
-        COMMENT="$*" 
-        do_checkin
-        exit;;
-    -h|-help) 
-        help
-        exit;;
-    -d|-debug) 
-        set -xv
-        shift;;
-esac
-
-if test "CHECK" = "yes" ; then
-  do_checkout
+if test "`which autoreconf`" != $AUTOTOOLS/autoreconf; then
+  echo "make sure your path is set to the correct version of autotools"
+  exit 1
 fi
-##rm -Rf INSTALL aclocal.m4 configure autom4te.cache 
-##cp /usr/apps/autoconf/2.59/share/autoconf/INSTALL INSTALL
-##cp /usr/apps/libtool/1.5/share/aclocal/libtool.m4 aclocal.m4
-##cp /usr/apps/libtool/1.5/share/aclocal/libtool.m4 config/acinclude.m4
-#libtoolize --force --copy
-#aclocal -I config
-#autoheader --force --include=config
-#automake --add-missing --copy --force-missing --foreign 
-#autoconf --include=config
 $AUTOTOOLS/autoreconf -vif
-##$HOME/i686-pc-linux-gnu/bin/autoreconf -vif
-if test "CHECK" = "yes" ; then
-  do_checkin
-fi
