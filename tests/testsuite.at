@@ -6,11 +6,11 @@ the U.S. Department of Energy by
 Lawrence Livermore National Laboratory 
 in part under Contract W-7405-Eng-48 and 
 in part under Contract DE-AC52-07NA27344.])
-AT_SETUP(extface)
-AT_CHECK(extface)
-AT_CLEANUP
 AT_SETUP(point)
 AT_CHECK(point,,[ignore])
+AT_CLEANUP
+AT_SETUP(extface)
+AT_CHECK(extface)
 AT_CLEANUP
 AT_SETUP(testall -small)
 AT_CHECK(testall -small,,[ignore])

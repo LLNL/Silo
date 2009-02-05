@@ -57,8 +57,10 @@ c...............................................................................
 
       program main
 
+      implicit none
       include "silo.inc"
 
+      integer  buildquad
       integer  dbid, meshid, err
       integer  iarr(20)
       real*8   darr(20)

@@ -38,6 +38,7 @@
 #ifndef SILODIRVIEW_H
 #define SILODIRVIEW_H
 
+#include <qobject.h>
 #include <qlistview.h>
 class SiloDir;
 

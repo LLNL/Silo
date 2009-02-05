@@ -38,6 +38,7 @@
 #ifndef SILOARRAYVIEW_H
 #define SILOARRAYVIEW_H
 
+#include <qobject.h>
 #include <qmainwindow.h>
 class SiloFile;
 class QListBox;

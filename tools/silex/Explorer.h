@@ -38,6 +38,7 @@
 #ifndef EXPLORER_H
 #define EXPLORER_H
 
+#include <qobject.h>
 #include <qmainwindow.h>
 
 class SiloView;

@@ -114,7 +114,7 @@ for advertising or product endorsement purposes.
 #define DBGETDEPWARN_FC  FC_FUNC (dbgetdepwarn,DBgETDEPWARN)
 #define DBPUTCSGM_FC     FC_FUNC (dbputcsgm,DBPUTCSGM)
 #define DBPUTCSGZL_FC    FC_FUNC (dbputcsgzl,DBPUTCSGZL)
-#define DBPUTCSGV1_FC    FC_FUNC (dbputcsgv,DBPUTCSGV)
+#define DBPUTCSGV_FC     FC_FUNC (dbputcsgv,DBPUTCSGV)
 #define DBMKMRGTREE_FC   FC_FUNC (dbmkmrgtree,DBMKMRGTREE)
 #define DBFREEMRGTREE_FC FC_FUNC (dbfreemrgtree,DBFREEMRGTREE)
 #define DBADDREGION_FC   FC_FUNC (dbaddregion,DBADDREGION)

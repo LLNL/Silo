@@ -324,15 +324,12 @@ dnl
 dnl --------------------------------------------------------------------------
 
 dnl
-dnl Configuration header stuff...
-dnl NOTE: Don't forget to change the version number here when we do a
-dnl release!!!
+dnl The esyscmd macro invokation allows us to keep version number in
+dnl VERSION file and just re-generate configure instead of having to
+dnl also checkout and edit configure.ac
 dnl
+m4_define(SILO_VERSION, m4_esyscmd([cat VERSION | tr -d '\n']))
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 4.6.2-pre2)
-m4_define(SILO_DATE, 2007/11/28)
-m4_define(SILO_TIME, 14:17:56)
-m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
 

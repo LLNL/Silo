@@ -38,6 +38,7 @@
 #ifndef SILOVALUEVIEW_H
 #define SILOVALUEVIEW_H
 
+#include <qobject.h>
 #include <qmainwindow.h>
 class SiloFile;
 

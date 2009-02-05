@@ -44,7 +44,9 @@ c
 c---------------------------------------------------------------------
       program main
 
+      implicit none
       include "silo.inc"
+      integer builducd
       integer  dbid, meshid, err
 
 

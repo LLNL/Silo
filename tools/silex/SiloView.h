@@ -38,6 +38,7 @@
 #ifndef SILOVIEW_H
 #define SILOVIEW_H
 
+#include <qobject.h>
 #include <qlistview.h>
 #include <qsplitter.h>
 #include <qmainwindow.h>

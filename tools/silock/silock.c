@@ -38,7 +38,8 @@
  *        Initial Implementation
  *-------------------------------------------------------------------------
  */
-#include <config.h>     /*MeshTV configuration record*/
+#include <config.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
