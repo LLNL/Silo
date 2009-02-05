@@ -1518,7 +1518,7 @@ stc_silo_types (void) {
    } ESTRUCT;
 
 
-   STRUCT (browser_DBmultimat) {
+   STRUCT (DBmultimat) {
       COMP (id,                 "primitive 'int'");
       COMP (nmats,              "primitive 'int'");
       COMP (ngroups,            "primitive 'int'");
@@ -1537,9 +1537,13 @@ stc_silo_types (void) {
       COMP (nmatnos,            "primitive 'int'");
       COMP (matnos,
             "pointer (array 'self.nmatnos' (primitive 'int'))");
+      COMP (material_names,
+            "pointer (array 'self.nmatnos' (primitive 'string'))");
+      COMP (matcolors,
+            "pointer (array 'self.nmatnos' (primitive 'string'))");
    } ESTRUCT;
 
-   STRUCT (browser_DBmultimatspecies) {
+   STRUCT (DBmultimatspecies) {
       COMP (id,                 "primitive 'int'");
       COMP (nspec,              "primitive 'int'");
       COMP (ngroups,            "primitive 'int'");

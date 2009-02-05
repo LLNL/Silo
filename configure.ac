@@ -316,6 +316,12 @@ the DOE and University as allowed under DOE Acquisition Letter 97-1.])
 # using autotest
 AC_CONFIG_TESTDIR(tests)
 
+dnl Change the default prefix (/usr/local) to `pwd`
+AC_PREFIX_DEFAULT("SILO_TOP_SRC_DIR")
+
+# Turn off shared libraries by default, since build process takes longer.
+AC_DISABLE_SHARED
+
 dnl Determine the host type
 AC_CANONICAL_HOST
 
@@ -352,23 +358,14 @@ AC_MSG_RESULT(SILO_VERSION)
 ###   fi
 ###fi
 
-AC_MSG_CHECKING(for srcdir)
-AC_MSG_RESULT($srcdir)
-AC_MSG_CHECKING(for ac_srcdir)
-AC_MSG_RESULT($ac_srcdir)
-AC_MSG_CHECKING(for ac_top_srcdir)
-AC_MSG_RESULT($ac_top_srcdir)
-AC_MSG_CHECKING(for ac_top_builddir)
-AC_MSG_RESULT($ac_top_builddir)
-# Check for silo.  We can't continue if we don't have SILO.
-AC_MSG_CHECKING(for silo)
-if test -d $srcdir/src/silo; then
-    AC_MSG_RESULT(found)
-else
-    AC_MSG_RESULT(not found)
-    AC_MSG_ERROR([The build process cannot continue without SILO.  Check to see
-that the silo directory exists and rerun 'configure'.])
-fi
+dnl compile for debugging
+AC_ARG_ENABLE(debug,
+AC_HELP_STRING([--enable-debug], [compile for debugging.]),
+[case "${enableval}" in
+  yes) USING_DEBUG="yes";;
+  no)  USING_DEBUG="no";;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+esac],[USING_DEBUG="no"])
 
 # Check for the netcdf driver.
 AC_MSG_CHECKING(for silo's netcdf driver)
@@ -507,7 +504,15 @@ fi
 AC_CHECK_SIZEOF(off64_t)
 
 # Turn on C optimization flags
-AX_CC_MAXOPT
+if test "X$USING_DEBUG" = Xno; then
+# use contributed GNU m4 macro library provided see:
+#   autoconf-archive-2006-06-04/htmldoc/ax_cc_maxopt.html
+   AX_CC_MAXOPT
+else
+   AC_MSG_CHECKING(compiler optimization)
+   AC_MSG_RESULT(disabled)
+fi
+dnl
 # Default to large file support
 AC_SYS_LARGEFILE
 
@@ -690,8 +695,9 @@ if test -n "$HDF5_DRV"; then
    saved_LIBS="$LIBS"
    AC_ARG_WITH(hdf5,
            [  --with-hdf5=INC,LIB     Location of HDF5 header and library],
-               ,withval=yes)
-   if test "no" = "$withval"; then
+	   ,
+	   withval="no")
+   if test "$withval" = "no" ; then
       AC_MSG_CHECKING(for hdf5)
       AC_MSG_RESULT(suppressed)
       HDF5_DRV=""

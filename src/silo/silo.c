@@ -2816,6 +2816,8 @@ DBOpenReal(const char *name, int type, int mode)
     char           ascii[16];
     DBfile        *dbfile;
     int            fileid, i;
+    int            origtype = type;
+    int            subtype = 0;
 #if SIZEOF_OFF64_T > 4
     struct stat64    filestate;
 #else
@@ -2825,6 +2827,10 @@ DBOpenReal(const char *name, int type, int mode)
     API_BEGIN("DBOpen", DBfile *, NULL) {
         if (!name)
             API_ERROR(NULL, E_NOFILE);
+
+        /* deal with extended driver type specifications */
+        db_DriverTypeAndSubtype(origtype, &type, &subtype);
+
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
             API_ERROR(ascii, E_BADFTYPE);
@@ -2920,7 +2926,7 @@ DBOpenReal(const char *name, int type, int mode)
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)
             API_ERROR((char *)name, E_MAXOPEN);
-        if (NULL == (dbfile = (DBOpenCB[type]) ((char *)name, mode)))
+        if (NULL == (dbfile = (DBOpenCB[type]) ((char *)name, mode, subtype)))
         {
             _db_fstatus[fileid] = 0;
             API_RETURN(NULL);
@@ -2988,6 +2994,8 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     char           ascii[16];
     DBfile        *dbfile;
     int            fileid, i, n;
+    int            origtype = type;
+    int            subtype = 0;
 #if SIZEOF_OFF64_T > 4
     struct stat64    filestate;
 #else
@@ -2997,6 +3005,10 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     API_BEGIN("DBCreate", DBfile *, NULL) {
         if (!name)
             API_ERROR(NULL, E_NOFILE);
+
+        /* deal with extended driver type specifications */
+        db_DriverTypeAndSubtype(origtype, &type, &subtype);
+
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
             API_ERROR(ascii, E_BADFTYPE);
@@ -3018,7 +3030,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)
             API_ERROR((char *)name, E_MAXOPEN);
-        dbfile = ((DBCreateCB[type]) ((char *)name, mode, target,
+        dbfile = ((DBCreateCB[type]) ((char *)name, mode, target, subtype,
                                       (char *)info));
         if (!dbfile)
         {
@@ -8515,6 +8527,8 @@ UM_CalcExtents(float *coord_arrays[], int datatype, int ndims, int nnodes,
  *    Thomas R. Treadway, Thu Jul 20 11:06:27 PDT 2006
  *    Added lgroupings, groupings, and groupnames to multimesh options.
  *
+ *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *    Added DBOPT_MATCOLORS, DBOPT_MATNAMES options to multimesh
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -8620,11 +8634,11 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         break;
 
                     case DBOPT_MATNAMES:
-                        _ma._matnames = optlist->values[i];
+                        _ma._matnames = (char **) optlist->values[i];
                         break;
 
                     case DBOPT_MATCOLORS:
-                        _ma._matcolors = optlist->values[i];
+                        _ma._matcolors = (char **) optlist->values[i];
                         break;
 
                     case DBOPT_HIDE_FROM_GUI:
@@ -9130,6 +9144,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_GROUPINGNAMES:
                         _mm._groupnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_MATCOLORS:
+                        _mm._matcolors = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_MATNAMES:
+                        _mm._matnames = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -9949,4 +9971,41 @@ db_StringListToStringArray(char *strList, int n)
         }
     }
     return retval;
+}
+
+/*----------------------------------------------------------------------
+ * Purpose
+ *
+ *    Break an extend driver id into type and subtype 
+ *
+ * Programmer
+ *
+ *    Mark C. Miller, July 31, 2006 
+ *
+ *--------------------------------------------------------------------*/
+INTERNAL void 
+db_DriverTypeAndSubtype(int driver, int *type, int *subtype)
+{
+    int theType = driver;
+    int theSubtype = 0;
+
+    if (driver > DB_NFORMATS)
+    {
+        int highNibble = (driver & 0x0000FF00) >> 8;
+
+        /* HDF5 driver uses values 1-5 */
+        if (highNibble >= 1 && highNibble <=5)
+        {
+            /* the subtype is primarily for the */
+            theSubtype = (driver & 0x7FFFFF00) >> 8;
+            theType = DB_HDF5;
+        }
+        else
+        {
+            theType = DB_UNKNOWN;
+        }
+    }
+
+    if (type) *type = theType;
+    if (subtype) *subtype = theSubtype;
 }

@@ -6,12 +6,18 @@ EXTRA_DIST= \
  package.m4 \
  pdbcmp.csh \
  testsuite.at \
- testsuite
+ testsuite \
+ testsuiteh5.at \
+ testsuiteh5
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-TESTSUITE = $(srcdir)/testsuite
+if HDF5_DRV_NEEDED
+  TESTSUITE = $(srcdir)/testsuiteh5
+else
+  TESTSUITE = $(srcdir)/testsuite
+endif
 
 # paths look at install directories before sources
 AM_CPPFLAGS = \
@@ -141,8 +147,14 @@ check-local: $(TESTSUITE) $(PROGS)
 clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
+	rm -f testsuiteh5.log
+	rm -rf testsuiteh5.dir
 
-$(TESTSUITE): $(srcdir)/testsuite.at
+testsuite: $(srcdir)/testsuite.at
+	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
+	mv $@.tmp $@
+
+testsuiteh5: $(srcdir)/testsuiteh5.at
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	mv $@.tmp $@
 

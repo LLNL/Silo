@@ -727,6 +727,7 @@ PACKAGE_STRING='silo 5.0.0b'
 PACKAGE_BUGREPORT='visit-help@llnl.gov'
 
 ac_unique_file="src/silo/silo.h"
+ac_default_prefix="`pwd`"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -1500,11 +1501,12 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
+  --enable-shared[=PKGS]  build shared libraries [default=no]
+  --enable-debug          compile for debugging.
   --enable-pythonmodule   build python module [default=no]
   --enable-browser        build browser [default=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
-  --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
@@ -2481,6 +2483,35 @@ ac_config_commands="$ac_config_commands tests/atconfig"
 
 
 
+
+
+# Turn off shared libraries by default, since build process takes longer.
+# Check whether --enable-shared was given.
+if test "${enable_shared+set}" = set; then
+  enableval=$enable_shared; p=${PACKAGE-default}
+    case $enableval in
+    yes) enable_shared=yes ;;
+    no) enable_shared=no ;;
+    *)
+      enable_shared=no
+      # Look at the argument we got.  We use all the common list separators.
+      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      for pkg in $enableval; do
+	IFS="$lt_save_ifs"
+	if test "X$pkg" = "X$p"; then
+	  enable_shared=yes
+	fi
+      done
+      IFS="$lt_save_ifs"
+      ;;
+    esac
+else
+  enable_shared=no
+fi
+
+
+
+
 # Make sure we can run config.sub.
 $SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
   { { echo "$as_me:$LINENO: error: cannot run $SHELL $ac_aux_dir/config.sub" >&5
@@ -2600,37 +2631,19 @@ echo "${ECHO_T}5.0.0b" >&6; }
 ###   fi
 ###fi
 
-{ echo "$as_me:$LINENO: checking for srcdir" >&5
-echo $ECHO_N "checking for srcdir... $ECHO_C" >&6; }
-{ echo "$as_me:$LINENO: result: $srcdir" >&5
-echo "${ECHO_T}$srcdir" >&6; }
-{ echo "$as_me:$LINENO: checking for ac_srcdir" >&5
-echo $ECHO_N "checking for ac_srcdir... $ECHO_C" >&6; }
-{ echo "$as_me:$LINENO: result: $ac_srcdir" >&5
-echo "${ECHO_T}$ac_srcdir" >&6; }
-{ echo "$as_me:$LINENO: checking for ac_top_srcdir" >&5
-echo $ECHO_N "checking for ac_top_srcdir... $ECHO_C" >&6; }
-{ echo "$as_me:$LINENO: result: $ac_top_srcdir" >&5
-echo "${ECHO_T}$ac_top_srcdir" >&6; }
-{ echo "$as_me:$LINENO: checking for ac_top_builddir" >&5
-echo $ECHO_N "checking for ac_top_builddir... $ECHO_C" >&6; }
-{ echo "$as_me:$LINENO: result: $ac_top_builddir" >&5
-echo "${ECHO_T}$ac_top_builddir" >&6; }
-# Check for silo.  We can't continue if we don't have SILO.
-{ echo "$as_me:$LINENO: checking for silo" >&5
-echo $ECHO_N "checking for silo... $ECHO_C" >&6; }
-if test -d $srcdir/src/silo; then
-    { echo "$as_me:$LINENO: result: found" >&5
-echo "${ECHO_T}found" >&6; }
+# Check whether --enable-debug was given.
+if test "${enable_debug+set}" = set; then
+  enableval=$enable_debug; case "${enableval}" in
+  yes) USING_DEBUG="yes";;
+  no)  USING_DEBUG="no";;
+  *) { { echo "$as_me:$LINENO: error: bad value ${enableval} for --enable-debug" >&5
+echo "$as_me: error: bad value ${enableval} for --enable-debug" >&2;}
+   { (exit 1); exit 1; }; } ;;
+esac
 else
-    { echo "$as_me:$LINENO: result: not found" >&5
-echo "${ECHO_T}not found" >&6; }
-    { { echo "$as_me:$LINENO: error: The build process cannot continue without SILO.  Check to see
-that the silo directory exists and rerun 'configure'." >&5
-echo "$as_me: error: The build process cannot continue without SILO.  Check to see
-that the silo directory exists and rerun 'configure'." >&2;}
-   { (exit 1); exit 1; }; }
+  USING_DEBUG="no"
 fi
+
 
 # Check for the netcdf driver.
 { echo "$as_me:$LINENO: checking for silo's netcdf driver" >&5
@@ -5353,30 +5366,6 @@ echo "${ECHO_T}no" >&6; }
   SET_MAKE="MAKE=${MAKE-make}"
 fi
 
-# Check whether --enable-shared was given.
-if test "${enable_shared+set}" = set; then
-  enableval=$enable_shared; p=${PACKAGE-default}
-    case $enableval in
-    yes) enable_shared=yes ;;
-    no) enable_shared=no ;;
-    *)
-      enable_shared=no
-      # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
-      for pkg in $enableval; do
-	IFS="$lt_save_ifs"
-	if test "X$pkg" = "X$p"; then
-	  enable_shared=yes
-	fi
-      done
-      IFS="$lt_save_ifs"
-      ;;
-    esac
-else
-  enable_shared=yes
-fi
-
-
 # Check whether --enable-static was given.
 if test "${enable_static+set}" = set; then
   enableval=$enable_static; p=${PACKAGE-default}
@@ -6066,7 +6055,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6069 "configure"' > conftest.$ac_ext
+  echo '#line 6058 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7937,11 +7926,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7940: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7929: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7944: \$? = $ac_status" >&5
+   echo "$as_me:7933: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8205,11 +8194,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8208: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8197: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8212: \$? = $ac_status" >&5
+   echo "$as_me:8201: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8309,11 +8298,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8312: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8301: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8316: \$? = $ac_status" >&5
+   echo "$as_me:8305: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10761,7 +10750,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10764 "configure"
+#line 10753 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10861,7 +10850,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10864 "configure"
+#line 10853 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13229,11 +13218,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13232: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13221: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13236: \$? = $ac_status" >&5
+   echo "$as_me:13225: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13333,11 +13322,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13336: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13325: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13340: \$? = $ac_status" >&5
+   echo "$as_me:13329: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14903,11 +14892,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14906: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14895: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14910: \$? = $ac_status" >&5
+   echo "$as_me:14899: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15007,11 +14996,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15010: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14999: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15014: \$? = $ac_status" >&5
+   echo "$as_me:15003: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17237,11 +17226,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17240: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17229: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17244: \$? = $ac_status" >&5
+   echo "$as_me:17233: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17505,11 +17494,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17508: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17497: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17512: \$? = $ac_status" >&5
+   echo "$as_me:17501: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17609,11 +17598,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17612: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17601: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17616: \$? = $ac_status" >&5
+   echo "$as_me:17605: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21986,6 +21975,9 @@ _ACEOF
 
 
 # Turn on C optimization flags
+if test "X$USING_DEBUG" = Xno; then
+# use contributed GNU m4 macro library provided see:
+#   autoconf-archive-2006-06-04/htmldoc/ax_cc_maxopt.html
 
 { echo "$as_me:$LINENO: checking for C compiler vendor" >&5
 echo $ECHO_N "checking for C compiler vendor... $ECHO_C" >&6; }
@@ -23418,6 +23410,12 @@ fi
 
 fi
 
+else
+   { echo "$as_me:$LINENO: checking compiler optimization" >&5
+echo $ECHO_N "checking compiler optimization... $ECHO_C" >&6; }
+   { echo "$as_me:$LINENO: result: disabled" >&5
+echo "${ECHO_T}disabled" >&6; }
+fi
 # Default to large file support
 # Check whether --enable-largefile was given.
 if test "${enable_largefile+set}" = set; then
@@ -26012,10 +26010,10 @@ if test -n "$HDF5_DRV"; then
 if test "${with_hdf5+set}" = set; then
   withval=$with_hdf5;
 else
-  withval=yes
+  withval="no"
 fi
 
-   if test "no" = "$withval"; then
+   if test "$withval" = "no" ; then
       { echo "$as_me:$LINENO: checking for hdf5" >&5
 echo $ECHO_N "checking for hdf5... $ECHO_C" >&6; }
       { echo "$as_me:$LINENO: result: suppressed" >&5

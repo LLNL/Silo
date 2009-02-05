@@ -207,7 +207,7 @@ get_next_int (void)
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 PUBLIC DBfile *
-db_taur_Open(char *name, int mode)
+db_taur_Open(char *name, int mode, int subtype)
 {
     TAURUSfile    *taurus;
     DBfile_taur   *dbfile;

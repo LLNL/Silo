@@ -667,6 +667,8 @@ struct _mm {
     int            _lgroupings;
     int            *_groupings;
     char           **_groupnames;
+    char           **_matcolors;
+    char           **_matnames;
 };
 
 /*
@@ -776,6 +778,8 @@ INTERNAL int db_ResetGlobalData_Defvars(void);
 INTERNAL const char *db_FullName2BaseName(const char *);
 INTERNAL void db_StringArrayToStringList(const char *const *const, int, char **, int*);
 INTERNAL char ** db_StringListToStringArray(char *, int);
+INTERNAL void db_DriverTypeAndSubtype(int driver, int *type, int *subtype);
+
 
 char   *safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/

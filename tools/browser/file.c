@@ -665,133 +665,6 @@ browser_DBSaveObject (obj_t _self, char *unused, void *mem, obj_t type) {
 
 
 /*-------------------------------------------------------------------------
- * Function:    browser_DBGetMultimat
- *
- * Purpose:     Major hack to deal with nmatnos/matnos components of a 
- *              multi-mat object in a way that works for *both* HDF5 and
- *              PDB drivers *without* introducing either API changes or
- *              file format changes. The problem is that when matnos was
- *              introduced as a DBOption for DBPutMultimat, it was *not*
- *              made part of a DBMultimat object. So, the only way to
- *              get at this information in browser is through low-level
- *              PDB-like syntax, which doesn't work on HDF5. So, rather
- *              than change the Silo API (e.g. change the DBMultimat
- *              object) or change the way Silo uses HDF5 so it is more
- *              PDB-like in how it handles low-level variables, I have
- *              introduced this hack into browser. What this method does
- *              is fake browser into using an agumented DBMultimat object
- *              as its representation for the object instead of the one
- *              Silo returns. That way, in browser, at least it will
- *              appear as though a DBMultimat object contains nmatnos
- *              and matnos members even if in Silo it does not.
- *
- * Return:      browser_DBMultimat 
- *
- * Programmer:  Mark C. Miller 
- *              April 21, 2005 
- *
- * Modifications:
- *
- *   Mark C. Miller, Tue Apr  4 13:16:44 PDT 2006
- *   Replaced calloc with malloc, struct copy with member assignments
- *   Eliminated 'else' part of 'if (nmatnos_p)'
- *-------------------------------------------------------------------------
- */
-static browser_DBmultimat *
-browser_DBGetMultimat(DBfile *file, char *name)
-{
-    DBmultimat *mmat = 0;
-    browser_DBmultimat *bmmat;
-    int *nmatnos_p = 0, *matnos_p = 0;
-
-    mmat = DBGetMultimat(file, name);
-    if (!mmat) return NULL;
-
-    bmmat = (browser_DBmultimat*) malloc(sizeof(browser_DBmultimat));
-    bmmat->id = mmat->id;
-    bmmat->nmats = mmat->nmats;
-    bmmat->ngroups = mmat->ngroups;
-    bmmat->matnames = mmat->matnames;
-    bmmat->blockorigin = mmat->blockorigin;
-    bmmat->grouporigin = mmat->grouporigin;
-    bmmat->mixlens = mmat->mixlens;
-    bmmat->matcounts = mmat->matcounts;
-    bmmat->matlists = mmat->matlists;
-    bmmat->guihide = mmat->guihide;
-    bmmat->nmatnos = 0;
-    bmmat->matnos = 0;
-
-    nmatnos_p = DBGetComponent(file,name,"nmatnos");
-    if (nmatnos_p)
-    {
-        bmmat->nmatnos = *nmatnos_p;
-        free(nmatnos_p);
-        matnos_p = DBGetComponent(file,name,"matnos");
-        if (matnos_p)
-            bmmat->matnos = matnos_p;
-        else
-            bmmat->matnos = 0; 
-    }
-
-    return bmmat;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    browser_DBGetMultimatspecies
- *
- * Purpose:     Major hack to deal with nmatspec component of a 
- *              multi-mat-species object. See note above.
- *
- * Return:      browser_DBMultimatspecies
- *
- * Programmer:  Mark C. Miller 
- *              April 21, 2005 
- *
- * Modifications:
- *
- *   Mark C. Miller, Tue Apr  4 13:16:44 PDT 2006
- *   Replaced calloc with malloc, struct copy with member assignments
- *   Eliminated 'else' part of 'if (nmat_p)'
- *-------------------------------------------------------------------------
- */
-static browser_DBmultimatspecies *
-browser_DBGetMultimatspecies(DBfile *file, char *name)
-{
-    DBmultimatspecies *mmspec = 0;
-    browser_DBmultimatspecies *bmmspec;
-    int *nmat_p = 0, *nmatspec_p = 0;
-
-    mmspec = DBGetMultimatspecies(file, name);
-    if (!mmspec) return NULL;
-
-    bmmspec = (browser_DBmultimatspecies*) malloc(sizeof(browser_DBmultimatspecies));
-
-    bmmspec->id = mmspec->id;
-    bmmspec->nspec = mmspec->nspec;
-    bmmspec->ngroups = mmspec->ngroups;
-    bmmspec->specnames = mmspec->specnames;
-    bmmspec->blockorigin = mmspec->blockorigin;
-    bmmspec->grouporigin = mmspec->grouporigin;
-    bmmspec->guihide = mmspec->guihide;
-    bmmspec->nmat = 0;
-    bmmspec->nmatspec = 0; 
-
-    nmat_p = DBGetComponent(file,name,"nmat");
-    if (nmat_p)
-    {
-        bmmspec->nmat = *nmat_p;
-        free(nmat_p);
-        nmatspec_p = DBGetComponent(file,name,"nmatspec");
-        if (nmatspec_p)
-            bmmspec->nmatspec = nmatspec_p;
-        else
-            bmmspec->nmatspec = 0;
-    }
-
-    return bmmspec;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    browser_DBGetMultimeshadj
  *
  * Purpose:     Deal with non-standard get-API for DBmultimeshadj objects 
@@ -1319,23 +1192,7 @@ browser_DBFreeMultivar (void *mem, obj_t type) {
 static void
 browser_DBFreeMultimat (void *mem, obj_t type) {
 
-   browser_DBmultimat *bmmat = (browser_DBmultimat*) mem;
-
-   if (bmmat->matnos)
-       free(bmmat->matnos);
-   if (bmmat->mixlens)
-       free(bmmat->mixlens);
-   if (bmmat->matcounts)
-       free(bmmat->matcounts);
-   if (bmmat->matlists)
-       free(bmmat->matlists);
-   if (bmmat->matnames)
-   {
-      int i;
-      for (i = 0; i < bmmat->nmats; i++)
-          free(bmmat->matnames[i]);
-      free(bmmat->matnames);
-   }
+   DBFreeMultimat((DBmultimat*) mem);
 }
 
 
@@ -1357,17 +1214,7 @@ browser_DBFreeMultimat (void *mem, obj_t type) {
 static void
 browser_DBFreeMultimatspecies (void *mem, obj_t type) {
 
-   browser_DBmultimatspecies *bmmspec = (browser_DBmultimatspecies*) mem;
-
-   if (bmmspec->nmatspec)
-       free(bmmspec->nmatspec);
-   if (bmmspec->specnames)
-   {
-      int i;
-      for (i = 0; i < bmmspec->nspec; i++)
-          free(bmmspec->specnames[i]);
-      free(bmmspec->specnames);
-   } 
+   DBFreeMultimatspecies((DBmultimatspecies*) mem);
 }
 
 
@@ -2039,20 +1886,20 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
 
     for (i=0; i<toc->nmultimat; i++) {
         if (!strcmp(toc->multimat_names[i], base)) {
-            loadfunc = (void*(*)(DBfile*,char*))browser_DBGetMultimat;
+            loadfunc = (void*(*)(DBfile*,char*))DBGetMultimat;
             savefunc = NULL;
             freefunc = browser_DBFreeMultimat;
-            typename = "browser_DBmultimat";
+            typename = "DBmultimat";
             goto done;
         }
     }
 
     for (i=0; i<toc->nmultimatspecies; i++) {
         if (!strcmp(toc->multimatspecies_names[i], base)) {
-            loadfunc = (void*(*)(DBfile*,char*))browser_DBGetMultimatspecies;
+            loadfunc = (void*(*)(DBfile*,char*))DBGetMultimatspecies;
             savefunc = NULL;
             freefunc = browser_DBFreeMultimatspecies;
-            typename = "browser_DBmultimatspecies";
+            typename = "DBmultimatspecies";
             goto done;
         }
     }

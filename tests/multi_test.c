@@ -345,6 +345,16 @@ main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "DB_HDF5")) {
             driver = DB_HDF5;
             file_ext = ".h5";
+        } else if (!strcmp(argv[i], "DB_HDF5_SEC2")) {
+            driver = DB_HDF5_SEC2;
+            file_ext = ".h5";
+        } else if (!strcmp(argv[i], "DB_HDF5_STDIO")) {
+            driver = DB_HDF5_STDIO;
+            file_ext = ".h5";
+        } else if (!strcmp(argv[i], "DB_HDF5_CORE")) {
+            int inc = 512 << 11;
+            driver = inc | DB_HDF5_CORE;
+            file_ext = ".h5";
         } else if (!strcmp(argv[i], "check")) {
             dochecks = TRUE;
         } else {
@@ -503,6 +513,8 @@ main(int argc, char *argv[])
  *    Jeremy Meredith, Tue Oct  4 12:28:35 PDT 2005
  *    Renamed defvar types to avoid namespace collision.
  *
+ *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *    Added additional material object with material names and colors 
  *------------------------------------------------------------------------*/
 int
 build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
@@ -746,12 +758,29 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     extentssize = 0;
     SET_OPTIONS(extentssize,NULL,NULL,mixlens,matcounts,tmpList,NULL);
     if (meshtype != DB_POINTMESH)
+    {
         if (DBPutMultimat(dbfile, "mat1", nblocks, matnames, optlist) == -1)
         {
             DBFreeOptlist(optlist);
             fprintf(stderr, "Error creating multi material\n");
             return (-1);
         }                              /* if */
+
+        /* add material names and colors option to this one */
+        if (1)
+        {
+            char *colors[3] = {"yellow","cyan","black"};
+            char *matrnames[3] = {"outer","middle","inner"};
+            DBAddOption(optlist, DBOPT_MATCOLORS, colors);
+            DBAddOption(optlist, DBOPT_MATNAMES, matrnames);
+            if (DBPutMultimat(dbfile, "mat2", nblocks, matnames, optlist) == -1)
+            {
+                DBFreeOptlist(optlist);
+                fprintf(stderr, "Error creating multi material\n");
+                return (-1);
+            }                              /* if */
+        }
+    }
     free(tmpList);
     DBFreeOptlist(optlist);
 

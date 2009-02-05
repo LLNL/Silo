@@ -66,11 +66,16 @@ extern "C" {
 #define DB_NETCDF 0
 #define DB_PDB 2
 #define DB_TAURUS 3
-#define DB_SDX 4
 #define DB_UNKNOWN 5
 #define DB_DEBUG 6
-#define DB_HDF5 7
-#define DB_EXODUS 9
+#define DB_HDF5 7            /* equivalent to DB_HDF5_SEC2 */
+
+/* special driver ids to affect which Virtual File Driver HDF5 uses */
+#define DB_HDF5_SEC2   0x00000100  /* section 2 I/O (open/read/write/close) */
+#define DB_HDF5_STDIO  0x00000200  /* stdio (fopen/fread/fwrite/fclose) */
+#define DB_HDF5_CORE   0x00000300  /* file in memory. MSbits specify alloc. inc. */
+#define DB_HDF5_MPIO   0x00000400  /* use MPI-IO on MPI_COMM_SELF */
+#define DB_HDF5_MPIOP  0x00000500  /* use MPI for any messaging, sec 2 for I/O */
 
 #define NO_FORTRAN_DEFINE       /*mkinc ignores these lines. */
 
@@ -633,13 +638,17 @@ typedef struct {
     int            id;          /* Identifier for this object  */
     int            nmats;       /* Number of materials   */
     int            ngroups;     /* Number of block groups in mesh */
-    char         **matnames;    /* Material names   */
+    char         **matnames;    /* names of constiuent DBmaterial objects */
     int            blockorigin; /* Origin (0 or 1) of block numbers */
     int            grouporigin; /* Origin (0 or 1) of group numbers */
     int           *mixlens;     /* array of mixlen values in each mat */
     int           *matcounts;   /* counts of unique materials in each block */
     int           *matlists;    /* list of materials in each block */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    int            nmatnos;     /* global number of materials over all pieces */
+    int           *matnos;      /* global list of material numbers */
+    char         **matcolors;   /* optional colors for materials */
+    char         **material_names; /* optional names of the materials */
 } DBmultimat;
 
 /*-------------------------------------------------------------------------
@@ -654,6 +663,8 @@ typedef struct {
     int            blockorigin; /* Origin (0 or 1) of block numbers */
     int            grouporigin; /* Origin (0 or 1) of group numbers */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    int            nmat;        /* equiv. to nmatnos of a DBmultimat */
+    int           *nmatspec;    /* equiv. to matnos of a DBmultimat */
 } DBmultimatspecies;
 
 /*----------------------------------------------------------------------
@@ -1564,8 +1575,8 @@ SILO_API extern int     db_errno;        /*error number of last error */
 SILO_API extern char    db_errfunc[];    /*name of erring function */
 
 #ifndef DB_MAIN
-SILO_API extern DBfile *(*DBOpenCB[])(const char *, int);
-SILO_API extern DBfile *(*DBCreateCB[])(const char *, int, int, const char *);
+SILO_API extern DBfile *(*DBOpenCB[])(const char *, int, int);
+SILO_API extern DBfile *(*DBCreateCB[])(const char *, int, int, int, const char *);
 SILO_API extern int     (*DBFSingleCB[])(int);
 #endif
 

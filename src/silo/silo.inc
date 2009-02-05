@@ -83,21 +83,23 @@
       integer  DB_COLLINEAR, DB_COLMAJOR, DB_CRAY, DB_CSGMESH, DB_CSGVAR
       integer  DB_CSGZONELIST, DB_CURVE, DB_CURVILINEAR, DB_CYLINDRICAL
       integer  DB_DEBUG, DB_DEFVARS, DB_DIR, DB_DOUBLE, DB_EDGELIST
-      integer  DB_EXODUS, DB_F77NULL, DB_FACECENT, DB_FACELIST, DB_FLOAT
-      integer  DB_HDF5, DB_INT, DB_INTEL, DB_INVALID_OBJECT, DB_LOCAL
-      integer  DB_LONG, DB_MATERIAL, DB_MATSPECIES, DB_MULTIBLOCKMESH
-      integer  DB_MULTIBLOCKVAR, DB_MULTIMAT, DB_MULTIMATSPECIES
-      integer  DB_MULTIMESH, DB_MULTIMESHADJ, DB_MULTIVAR, DB_NETCDF
-      integer  DB_NFILES, DB_NFILTERS, DB_NOCLOBBER, DB_NODECENT
-      integer  DB_NONCOLLINEAR, DB_NONE, DB_NOTCENT, DB_NOTYPE
-      integer  DB_NUMERICAL, DB_OFF, DB_ON, DB_OTHER, DB_PDB
-      integer  DB_PHZONELIST, DB_POINTMESH, DB_POINTVAR, DB_QUADMESH
-      integer  DB_QUADVAR, DB_QUAD_CURV, DB_QUAD_RECT, DB_READ
-      integer  DB_RECTILINEAR, DB_RESUME, DB_ROWMAJOR, DB_RS6000, DB_SDX
-      integer  DB_SGI, DB_SHORT, DB_SPHERICAL, DB_SUN3, DB_SUN4
-      integer  DB_SUSPEND, DB_TAURUS, DB_TOP, DB_UCDMESH, DB_UCDVAR
-      integer  DB_UNKNOWN, DB_USERDEF, DB_VARIABLE, DB_VARTYPE_ARRAY
-      integer  DB_VARTYPE_LABEL, DB_VARTYPE_MATERIAL, DB_VARTYPE_SCALAR
+      integer  DB_F77NULL, DB_FACECENT, DB_FACELIST, DB_FLOAT, DB_HDF5
+      integer  DB_HDF5_CORE, DB_HDF5_MPIO, DB_HDF5_MPIOP, DB_HDF5_SEC2
+      integer  DB_HDF5_STDIO, DB_INT, DB_INTEL, DB_INVALID_OBJECT
+      integer  DB_LOCAL, DB_LONG, DB_MATERIAL, DB_MATSPECIES
+      integer  DB_MULTIBLOCKMESH, DB_MULTIBLOCKVAR, DB_MULTIMAT
+      integer  DB_MULTIMATSPECIES, DB_MULTIMESH, DB_MULTIMESHADJ
+      integer  DB_MULTIVAR, DB_NETCDF, DB_NFILES, DB_NFILTERS
+      integer  DB_NOCLOBBER, DB_NODECENT, DB_NONCOLLINEAR, DB_NONE
+      integer  DB_NOTCENT, DB_NOTYPE, DB_NUMERICAL, DB_OFF, DB_ON
+      integer  DB_OTHER, DB_PDB, DB_PHZONELIST, DB_POINTMESH
+      integer  DB_POINTVAR, DB_QUADMESH, DB_QUADVAR, DB_QUAD_CURV
+      integer  DB_QUAD_RECT, DB_READ, DB_RECTILINEAR, DB_RESUME
+      integer  DB_ROWMAJOR, DB_RS6000, DB_SGI, DB_SHORT, DB_SPHERICAL
+      integer  DB_SUN3, DB_SUN4, DB_SUSPEND, DB_TAURUS, DB_TOP
+      integer  DB_UCDMESH, DB_UCDVAR, DB_UNKNOWN, DB_USERDEF
+      integer  DB_VARIABLE, DB_VARTYPE_ARRAY, DB_VARTYPE_LABEL
+      integer  DB_VARTYPE_MATERIAL, DB_VARTYPE_SCALAR
       integer  DB_VARTYPE_SPECIES, DB_VARTYPE_SYMTENSOR
       integer  DB_VARTYPE_TENSOR, DB_VARTYPE_VECTOR, DB_VOLUME
       integer  DB_ZONECENT, DB_ZONELIST, DB_ZONETYPE_BEAM
@@ -110,11 +112,14 @@
       parameter (DB_NETCDF                 = 0              )
       parameter (DB_PDB                    = 2              )
       parameter (DB_TAURUS                 = 3              )
-      parameter (DB_SDX                    = 4              )
       parameter (DB_UNKNOWN                = 5              )
       parameter (DB_DEBUG                  = 6              )
       parameter (DB_HDF5                   = 7              )
-      parameter (DB_EXODUS                 = 9              )
+      parameter (DB_HDF5_SEC2              = 0x00000100     )
+      parameter (DB_HDF5_STDIO             = 0x00000200     )
+      parameter (DB_HDF5_CORE              = 0x00000300     )
+      parameter (DB_HDF5_MPIO              = 0x00000400     )
+      parameter (DB_HDF5_MPIOP             = 0x00000500     )
       parameter (DB_NFILES                 = 256            )
       parameter (DB_NFILTERS               = 32             )
       parameter (DB_INVALID_OBJECT         = -1             )

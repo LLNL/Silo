@@ -538,6 +538,10 @@ DBFreeMultivar (DBmultivar *mv)
  *     Sean Ahern, Fri Jun 21 10:56:49 PDT 1996
  *     Freed a pointer we were forgetting about.
  *
+ *     Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *     Added code to deal with material_names, matcolors and other
+ *     stuff that has been added in past several years
+ *
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultimat (DBmultimat *mat)
@@ -550,8 +554,24 @@ DBFreeMultimat (DBmultimat *mat)
      for (i = 0; i < mat->nmats; i++) {
           FREE(mat->matnames[i]);
      }
-
      FREE(mat->matnames);
+     if (mat->material_names)
+     {
+         for (i = 0; i < mat->nmatnos; i++)
+             FREE(mat->material_names[i]);
+         FREE(mat->material_names);
+     }
+     if (mat->matcolors)
+     {
+         for (i = 0; i < mat->nmatnos; i++)
+             FREE(mat->matcolors[i]);
+         FREE(mat->matcolors);
+     }
+
+     FREE(mat->mixlens);
+     FREE(mat->matcounts);
+     FREE(mat->matlists);
+     FREE(mat->matnos);
      FREE(mat);
 }
 
@@ -568,6 +588,9 @@ DBFreeMultimat (DBmultimat *mat)
  *
  *  Modifications
  *
+ *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *    Added code to free nmatspec
+ *
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultimatspecies (DBmultimatspecies *spec)
@@ -580,8 +603,9 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
      for (i = 0; i < spec->nspec; i++) {
           FREE(spec->specnames[i]);
      }
-
      FREE(spec->specnames);
+
+     FREE(spec->nmatspec);
      FREE(spec);
 }
 

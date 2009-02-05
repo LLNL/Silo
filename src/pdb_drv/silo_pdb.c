@@ -299,7 +299,7 @@ db_pdb_close(DBfile *_dbfile)
  *    Reformatted whitespace.
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
-db_pdb_Open(char *name, int mode)
+db_pdb_Open(char *name, int mode, int subtype)
 {
     PDBfile        *pdb;
     DBfile_pdb     *dbfile;
@@ -392,7 +392,7 @@ db_pdb_Open(char *name, int mode)
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 INTERNAL DBfile *
-db_pdb_Create (char *name, int mode, int target, char *finfo)
+db_pdb_Create (char *name, int mode, int target, int subtype, char *finfo)
 {
     DBfile_pdb     *dbfile;
     static char    *me = "db_pdb_create";
@@ -2510,10 +2510,13 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
  *    Sean Ahern, Wed Jun 14 17:20:55 PDT 2000
  *    Added a check to make sure the object is the right type.
  *
- *      Mark C. Miller, Wed Feb  2 07:59:53 PST 2005
- *      Moved DBAlloc call to after PJ_GetObject. Added automatic
- *      var for PJ_GetObject to read into. Added check for return
- *      value of PJ_GetObject.
+ *    Mark C. Miller, Wed Feb  2 07:59:53 PST 2005
+ *    Moved DBAlloc call to after PJ_GetObject. Added automatic
+ *    var for PJ_GetObject to read into. Added check for return
+ *    value of PJ_GetObject.
+ *
+ *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *    Added material_names and matcolors as well as nmatnos and matnos
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultimat *
 db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
@@ -2523,6 +2526,7 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
    int            ncomps, type;
    int            i;
    char          *tmpnames=NULL, *s=NULL, *name=NULL, tmp[256];
+   char          *tmpmatcolors=NULL, *tmpmaterial_names=NULL;
    char           error[256];
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
@@ -2536,7 +2540,6 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
       DBmultimat tmpmt;
       memset(&tmpmt, 0, sizeof(DBmultimat));
 
-
       /* Read multi-block object */
       INIT_OBJ(&tmp_obj);
       DEFINE_OBJ("nmats", &tmpmt.nmats, DB_INT);
@@ -2544,10 +2547,14 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("ngroups", &tmpmt.ngroups, DB_INT);
       DEFINE_OBJ("blockorigin", &tmpmt.blockorigin, DB_INT);
       DEFINE_OBJ("grouporigin", &tmpmt.grouporigin, DB_INT);
+      DEFINE_OBJ("nmatnos", &tmpmt.nmatnos, DB_INT);
+      DEFALL_OBJ("matnos", &tmpmt.matnos, DB_INT);
       DEFALL_OBJ("mixlens", &tmpmt.mixlens, DB_INT);
       DEFALL_OBJ("matcounts", &tmpmt.matcounts, DB_INT);
       DEFALL_OBJ("matlists", &tmpmt.matlists, DB_INT);
       DEFINE_OBJ("guihide", &tmpmt.guihide, DB_INT);
+      DEFALL_OBJ("material_names", &tmpmaterial_names, DB_CHAR);
+      DEFALL_OBJ("matcolors", &tmpmatcolors, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -2587,6 +2594,19 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
          }
          FREE(tmpnames);
       }
+
+      if (tmpmaterial_names && mt->nmatnos > 0)
+      {
+          mt->material_names = db_StringListToStringArray(tmpmaterial_names,
+                                                          mt->nmatnos);
+          FREE(tmpmaterial_names);
+      }
+      if (tmpmatcolors && mt->nmatnos > 0)
+      {
+          mt->matcolors = db_StringListToStringArray(tmpmatcolors,
+                                                     mt->nmatnos);
+          FREE(tmpmatcolors);
+      }
    }
 
    return (mt);
@@ -2612,10 +2632,13 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
  *    Sean Ahern, Wed Jun 14 17:21:18 PDT 2000
  *    Added a check to make sure the object is the right type.
  *
- *      Mark C. Miller, Wed Feb  2 07:59:53 PST 2005
- *      Moved DBAlloc call to after PJ_GetObject. Added automatic
- *      var for PJ_GetObject to read into. Added check for return
- *      value of PJ_GetObject.
+ *    Mark C. Miller, Wed Feb  2 07:59:53 PST 2005
+ *    Moved DBAlloc call to after PJ_GetObject. Added automatic
+ *    var for PJ_GetObject to read into. Added check for return
+ *    value of PJ_GetObject.
+ *
+ *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *    Added nmat and nmatspec
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultimatspecies *
 db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
@@ -2638,7 +2661,6 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
       DBmultimatspecies tmpmms;
       memset(&tmpmms, 0, sizeof(DBmultimatspecies));
 
-
       /* Read multi-block object */
       INIT_OBJ(&tmp_obj);
       DEFINE_OBJ("nspec", &tmpmms.nspec, DB_INT);
@@ -2647,6 +2669,8 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("blockorigin", &tmpmms.blockorigin, DB_INT);
       DEFINE_OBJ("grouporigin", &tmpmms.grouporigin, DB_INT);
       DEFINE_OBJ("guihide", &tmpmms.guihide, DB_INT);
+      DEFINE_OBJ("nmat", &tmpmms.nmat, DB_INT);
+      DEFALL_OBJ("nmatspec", &tmpmms.nmatspec, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -6177,6 +6201,8 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
  *    Fixed bug where there was an assumption that the string is
  *    NULL terminated.
  *
+ *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *    Added matnames and matcolors options
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -6196,7 +6222,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMAT, 14);
+   obj = DBMakeObject(name, DB_MULTIMAT, 16);
    DBAddIntComponent(obj, "nmats", nmats);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -6283,6 +6309,30 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
          count[0] += _mm._matcounts[i];
       DBWriteComponent(dbfile, obj, "matlists", name, "integer", _mm._matlists,
                        1, count);
+   }
+
+   /*-------------------------------------------------------------
+    *  Add the DBOPT_MATNAMES option if present
+    *-------------------------------------------------------------*/
+   if (_mm._matnames && _mm._nmatnos > 0) {
+      int len; long llen; char *tmpstr = 0;
+      db_StringArrayToStringList((const char**) _mm._matnames, _mm._nmatnos,
+          &tmpstr, &len);
+      llen = (long) len;
+      DBWriteComponent(dbfile, obj, "material_names", name, "char", tmpstr, 1, &llen);
+      FREE(tmpstr);
+   }
+
+   /*-------------------------------------------------------------
+    *  Add the DBOPT_MATCOLORS option if present
+    *-------------------------------------------------------------*/
+   if (_mm._matcolors && _mm._nmatnos > 0) {
+      int len; long llen; char *tmpstr = 0;
+      db_StringArrayToStringList((const char**) _mm._matcolors, _mm._nmatnos,
+          &tmpstr, &len);
+      llen = (long) len;
+      DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
+      FREE(tmpstr);
    }
 
    /*-------------------------------------------------------------

@@ -1,6 +1,7 @@
 Silo Development FAQ
 --------------------
-1) Some file timestamps become an issue, because of the ClearCase file
+1) make errors
+   Some file timestamps become an issue, because of the ClearCase file
    write protection on non-checkedout files, there will be errors in
    the build because of these make dependencies. Most of these files
    can be created manually, by looking at the creating scripts in the
@@ -16,3 +17,74 @@ Silo Development FAQ
    src/silo/silo.inc > src/silo/silo.h
    src/silo/silo.inc > src/silo/silo_f.h
   
+2) Distributions 
+   Automake generates rules to provide archives of Silo for distributions 
+   in various formats. Their targets are: 
+       dist-bzip2   Generate a bzip2 tar archive of the distribution. 
+                    bzip2 archives are frequently smaller than gzipped 
+                    archives. 
+       dist-gzip    Generate a gzip tar archive of the distribution. 
+       dist-shar    Generate a shar archive of the distribution. 
+       dist-zip     Generate a zip archive of the distribution. 
+       dist-tarZ    Generate a compressed tar archive of the distribution. 
+   The rule "dist" by default executes the dist-gzip target. The files is 
+   named based on the PACKAGE and VERSION variables, and the gzip'd tar
+   file is named "PACKAGE-VERSION.tar.gz". PACKAGE is defined as "silo"
+   in configure.ac, along with VERSION. VERSION is release specific usually
+   defined as something like "5.0.0". The archive will be extracted into
+   the directory "PACKAGE-VERSION".
+   To override the default naming and create a distribution "test-test"
+   do something like:
+      make PACKAGE="test" VERSION="test" dist
+
+3) Installs
+   By default, `make install' will install all the files in `/usr/local/bin',
+   `/usr/local/lib' etc.  You can specify an installation prefix other than
+   `/usr/local' using `--prefix', for instance `--prefix=$HOME'.
+   Alternatively, You run the normal build procedure until you get to the 
+   install target: 
+      ./configure 
+      make 
+   Instead of calling 'make install' you can add a DESTDIR flag which will 
+   prepend the normal PREFIX (must be an absolute directory name), like
+   follows: 
+      make DESTDIR=`pwd` install 
+   This will install all the files (libraries, includes, binaries) at the 
+   level of the current directory. 
+   Automake generates separate install-data and install-exec rules, in case 
+   the installer is installing on multiple machines that share directory 
+   structure--hese targets allow the machine-independent parts to be 
+   installed only once. install-exec installs platform-dependent files, 
+   and install-data installs platform-independent files. The install target 
+   depends on both of these targets. 
+   Variables using the standard directory prefixes "data", "info", "man",
+   "include", "oldinclude", "pkgdata", or "pkginclude" are installed by
+   install-data. 
+   Variables using the standard directory prefixes "bin", "sbin", "libexec",
+   "sysconf", "localstate", "lib", or "pkglib" are installed by install-exec. 
+
+4) clearmake
+   Clearmake has it's own idea of computing dependencies, it is pretty much
+   a special file system tracking all of the reads, writes, etc, and feeding
+   that information back into clearmake.
+   Automake on the otherhand, not nearly as complex an application, generates
+   dependencies as a side effect of complation.
+   Clearmake doesn't follow the automake defined dependencies.
+   Clearmake's dependency tracking does appear to function in parallel with
+   the current silo automake configuration.
+   To use clearmake:
+   1) you must put the current autotools binaries in your PATH: 
+      PATH=/usr/gapps/silo/autotools/i686-pc-linux-gnu:$PATH
+   2) checkout all of the autotools generated files:
+      config/bootstrap -co
+
+5) Configure
+   Variables not defined in a site shell script can be set in the environment
+   passed to configure.  However, some packages may run configure again during
+   the build, and the customized values of these variables may be lost. In
+   order to avoid this problem, you should set them in the configure command
+   line, using "VAR=value". For example: 
+      ./configure CC=/usr/local/pgi/linux86/6.0/bin/pgcc
+   causes the specified Portland Group C to be used as the C compiler.
+   Run "./configure --help" for details on some of the pertinent environment
+   variables.

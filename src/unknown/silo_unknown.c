@@ -82,11 +82,11 @@ for advertising or product endorsement purposes.
  *     Mark Miller, Thu Mar 25 17:54:02 PST 1999
  *     Added DMF driver
  *
+ *     Mark C. Miller, Tue Aug  1 10:35:32 PDT 2006
+ *     Added subtype arg. Eliminated exudos. Moved HDF5 to second place.
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
-db_unk_Open(name, mode)
-    char          *name;
-    int            mode;
+db_unk_Open(char *name, int mode, int subtype)
 {
     DBfile        *opened = NULL;
     int            type;
@@ -94,14 +94,14 @@ db_unk_Open(name, mode)
     char           tried[256], ascii[16];
 
     /* Hierarchy defined as:
-     *      DB_PDB, DB_NETCDF, DB_TAURUS, DB_DEBUG, DB_HDF5, DB_EXODUS
+     *      DB_PDB, DB_HDF5, DB_NETCDF, DB_TAURUS, DB_DEBUG
      * The reason we specify them as numbers instead of DB_WHATEVER is
      * that the driver might not be defined in silo.h.
      */
-    static int     hierarchy[] = { 2, 0, 3, 6, 7, 9 };
-    static char *  hierarchy_names[] = { "PDB", "NetCDF", "Taurus", "debug",
-                                         "HDF5", "Exodus" };
-    static int     nhiers = 6;
+    static int     hierarchy[] = { 2, 7, 0, 3, 6 };
+    static char *  hierarchy_names[] = { "PDB", "HDF5", "NetCDF", "Taurus",
+                                         "debug" };
+    static int     nhiers = sizeof(hierarchy) / sizeof(hierarchy[0]);
 
     /*
      * If the file is read-only but the access mode calls for read/write,
@@ -124,7 +124,7 @@ db_unk_Open(name, mode)
         sprintf(ascii, " %s", hierarchy_names[type]);
         strcat(tried, ascii);
         PROTECT {
-            opened = (DBOpenCB[hierarchy[type]]) (name, mode);
+            opened = (DBOpenCB[hierarchy[type]]) (name, mode, subtype);
         }
         CLEANUP {
             CANCEL_UNWIND;

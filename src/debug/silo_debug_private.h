@@ -58,7 +58,7 @@ CALLBACK int db_debug_Filters(DBfile *, FILE *);
 CALLBACK int db_debug_PutCompoundarray(DBfile *, char *, char **, int *,
                                        int, void *, int, int, DBoptlist *);
 
-INTERNAL DBfile *db_debug_create(char *, int, int, char *);
-INTERNAL DBfile *db_debug_open(char *, int);
+INTERNAL DBfile *db_debug_create(char *, int, int, int, char *);
+INTERNAL DBfile *db_debug_open(char *, int, int);
 
 #endif /* !DEBUG_PRIVATE_H */

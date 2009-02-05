@@ -387,37 +387,6 @@ typedef struct DBdirectory {
 } DBdirectory;
 
 /*
- * We define our own DBmultimat object to deal with nmatnos/matnos hack
- */
-typedef struct browser_DBmultimat {
-    int            id;          /* from silo.h DBmultimat */ 
-    int            nmats;       /* from silo.h DBmultimat */
-    int            ngroups;     /* from silo.h DBmultimat */
-    char         **matnames;    /* from silo.h DBmultimat */
-    int            blockorigin; /* from silo.h DBmultimat */
-    int            grouporigin; /* from silo.h DBmultimat */
-    int           *mixlens;     /* from silo.h DBmultimat */
-    int           *matcounts;   /* from silo.h DBmultimat */
-    int           *matlists;    /* from silo.h DBmultimat */
-    int            nmatnos;     /* new member added for browser */
-    int           *matnos;      /* new member added for browser */
-    int            guihide;     /* from silo.h DBmultimat */
-} browser_DBmultimat;
-
-typedef struct browser_DBmultimatspecies {
-    int            id;          /* from silo.h DBmultimatspec */
-    int            nspec;       /* from silo.h DBmultimatspec */
-    int            ngroups;     /* from silo.h DBmultimatspec */
-    char         **specnames;   /* from silo.h DBmultimatspec */
-    int            blockorigin; /* from silo.h DBmultimatspec */
-    int            grouporigin; /* from silo.h DBmultimatspec */
-    int            nmat;        /* new member added for browser */
-    int           *nmatspec;    /* new member added for browser */
-    int            guihide;     /* from silo.h DBmultimatspec */
-} browser_DBmultimatspecies;
-
-
-/*
  * The strtok(3) function isn't reentrant.  We have our own that is.
  * The third argument is this struct which holds all the state info.
  */

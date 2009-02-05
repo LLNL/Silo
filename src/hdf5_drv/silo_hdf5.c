@@ -394,6 +394,8 @@ typedef struct DBmultimat_mt {
     char                matcounts[256];
     char                matlists[256];
     int                 nmatnos;
+    char                material_names[256];
+    char                mat_colors[256];
 } DBmultimat_mt;
 static hid_t    DBmultimat_mt5;
 
@@ -1210,6 +1212,8 @@ db_hdf5_init(void)
         MEMBER_S(str256,        matcounts);
         MEMBER_S(str256,        matlists);
         MEMBER_S(int,           nmatnos);
+        MEMBER_S(str256,        material_names);
+        MEMBER_S(str256,        mat_colors);
     } DEFINE;
 
     STRUCT(DBmultimatspecies) {
@@ -2620,6 +2624,51 @@ db_hdf5_ForceSingle(int status)
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_file_accprops 
+ *
+ * Purpose:     Create file access property lists 
+ *
+ * Programmer:  Mark C. Miller, Aug 1, 2006 
+ *-------------------------------------------------------------------------
+ */
+INTERNAL hid_t 
+db_hdf5_file_accprops(int subtype)
+{
+    hid_t retval = -1;
+    int vfd = subtype & 0x00000007;
+    int inc = ((subtype & 0x7FFFFFF8) >> 3) * 1024;
+
+    /* default properties */
+    retval = H5Pcreate(H5P_FILE_ACCESS);
+
+    /* this property makes it so closing the file automatically closes
+       all open objects in the file. This is just in case the HDF5
+       driver is failing to close some object */
+    H5Pset_fclose_degree(retval, H5F_CLOSE_STRONG);
+
+    switch (vfd)
+    {
+        case 0: break; /* this is the default case */
+        case 1: H5Pset_fapl_sec2(retval); break;
+        case 2: H5Pset_fapl_stdio(retval); break;
+        case 3: H5Pset_fapl_core(retval, inc, TRUE); break;
+#ifdef PARALLEL
+        case 4:
+        {
+            MPI_Info info;
+            MPI_Info_create(&info);
+            H5Pset_fapl_mpio(retval, MPI_COMM_SELF, info);
+            MPI_Info_free(&info);
+            break;
+        }
+        case 5: H5Pset_fapl_mpiposix(retval, MPI_COMM_SELF); break;
+#endif
+    }
+
+    return retval;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_finish_open
@@ -2853,10 +2902,10 @@ db_hdf5_initiate_close(DBfile *_dbfile)
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
-db_hdf5_Open(char *name, int mode)
+db_hdf5_Open(char *name, int mode, int subtype)
 {
     DBfile_hdf5 *dbfile=NULL;
-    hid_t       fid=-1;
+    hid_t       fid=-1, faprops=-1;
     unsigned    hmode;
     static char *me = "db_hdf5_Open";
 
@@ -2874,11 +2923,15 @@ db_hdf5_Open(char *name, int mode)
             UNWIND();
         }
 
+        faprops = db_hdf5_file_accprops(subtype); 
+
         /* Open existing hdf5 file */
-        if ((fid=H5Fopen(name, hmode, H5P_DEFAULT))<0) {
+        if ((fid=H5Fopen(name, hmode, faprops))<0) {
+            H5Pclose(faprops);
             db_perror(name, E_NOFILE, me);
             UNWIND();
         }
+        H5Pclose(faprops);
 
         /* Create silo file struct */
         if (NULL==(dbfile=calloc(1, sizeof(DBfile_hdf5)))) {
@@ -2927,15 +2980,17 @@ db_hdf5_Open(char *name, int mode)
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
-db_hdf5_Create(char *name, int mode, int target, char *finfo)
+db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
 {
     DBfile_hdf5 *dbfile=NULL;
-    hid_t       fid=-1;
+    hid_t       fid=-1, faprops=-1;
     static char *me = "db_hdf5_Create";
 
     PROTECT {
         /* Turn off error messages from the hdf5 library */
         H5Eset_auto(NULL, NULL);
+
+        faprops = db_hdf5_file_accprops(subtype);
 
         /* Create or open hdf5 file */
         if (DB_CLOBBER==mode) {
@@ -2945,19 +3000,23 @@ db_hdf5_Create(char *name, int mode, int target, char *finfo)
              * of '1' for istore_k */
             hid_t fcprops = H5Pcreate(H5P_FILE_CREATE);
             H5Pset_istore_k(fcprops, 1);
-            fid = H5Fcreate(name, H5F_ACC_TRUNC, fcprops, H5P_DEFAULT);
+            fid = H5Fcreate(name, H5F_ACC_TRUNC, fcprops, faprops);
             H5Pclose(fcprops);
             H5Glink(fid, H5G_LINK_HARD, "/", ".."); /*don't care if fails*/
         } else if (DB_NOCLOBBER==mode) {
-            fid = H5Fopen(name, H5F_ACC_RDWR, H5P_DEFAULT);
+            fid = H5Fopen(name, H5F_ACC_RDWR, faprops);
         } else {
+            H5Pclose(faprops);
             db_perror("mode", E_BADARGS, me);
             UNWIND();
         }
         if (fid<0) {
+            H5Pclose(faprops);
             db_perror(name, E_NOFILE, me);
             UNWIND();
         }
+
+        H5Pclose(faprops);
 
         /* Create silo file struct */
         if (NULL==(dbfile=calloc(1, sizeof(DBfile_hdf5)))) {
@@ -4751,6 +4810,9 @@ db_hdf5_GetObject(DBfile *_dbfile, char *name)
  *  Thomas R. Treadway, Fri Jul  7 12:44:38 PDT 2006
  *  Added support for DBOPT_REFERENCE in Curves
  *
+ *  Mark C. Miller, Mon Jul 31 17:57:29 PDT 2006
+ *  Eliminated use of db_hdf5_fullname for xvarname and yvarname
+ *
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -4782,13 +4844,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
             UNWIND();
         }
         /* Write X and Y arrays if supplied */
-        if (_cu._varname[0]) {
-            if (db_hdf5_fullname(dbfile, _cu._varname[0],
-                                 m.xvarname/*out*/)<0) {
-                db_perror(_cu._varname[0], E_CALLFAIL, me);
-                UNWIND();
-            }
-        }
+        strcpy(m.xvarname, OPT(_cu._varname[0]));
         if (xvals) {
             db_hdf5_compwr(dbfile, dtype, 1, &npts, xvals, m.xvarname/*out*/);
         } else if (!_cu._varname[0] && !_cu._reference) {
@@ -4797,13 +4853,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
             UNWIND();
         }
 
-        if (_cu._varname[1]) {
-            if (db_hdf5_fullname(dbfile, _cu._varname[1],
-                                 m.yvarname/*out*/)<0) {
-                db_perror(_cu._varname[1], E_CALLFAIL, me);
-                UNWIND();
-            }
-        }
+        strcpy(m.yvarname, OPT(_cu._varname[1])); 
         if (yvals) {
             db_hdf5_compwr(dbfile, dtype, 1, &npts, yvals, m.yvarname/*out*/);
         } else if (!_cu._varname[1] && !_cu._reference) {
@@ -4954,6 +5004,10 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
  * Programmer:  Mark C. Miller 
  *              Tuesday, September 6, 2005 
  *
+ * Modifications:
+ *
+ *   Mark C. Miller, Mon Jul 31 17:57:29 PDT 2006
+ *   Eliminated use of db_hdf5_fullname for zonel_name
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -5017,7 +5071,7 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
         m.dtime = _csgm._dtime_set ? _csgm._dtime : 0;
         m.nbounds = nbounds;
         m.lcoeffs = lcoeffs;
-        db_hdf5_fullname(dbfile, (char*)zonel_name, m.zonel_name/*out*/);
+        strcpy(m.zonel_name, zonel_name);
 
         /* Build csgmesh header in file */
         STRUCT(DBcsgmesh) {
@@ -6266,6 +6320,9 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Mon Jul 31 17:43:52 PDT 2006
+ *   Removed use of fullname for zonelist, facelist, phzonelist options
+ *
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6348,9 +6405,9 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         m.dtime = _um._dtime;
         m.group_no = _um._group_no;
         m.guihide = _um._guihide;
-        db_hdf5_fullname(dbfile, flname, m.facelist/*out*/);
-        db_hdf5_fullname(dbfile, zlname, m.zonelist/*out*/);
-        db_hdf5_fullname(dbfile, _um._phzl_name, m.phzonelist/*out*/);
+        strcpy(m.zonelist, zlname);
+        strcpy(m.facelist, OPT(flname));
+        strcpy(m.phzonelist, OPT(_um._phzl_name));
         for (i=0; i<ndims; i++) {
             strcpy(m.label[i], OPT(_um._labels[i]));
             strcpy(m.units[i], OPT(_um._units[i]));
@@ -6364,7 +6421,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
             if (m.facetype)     MEMBER_S(int, facetype);
             if (m.cycle)        MEMBER_S(int, cycle);
             if (m.coord_sys)    MEMBER_S(int, coord_sys);
-            if (m.topo_dim)    MEMBER_S(int, topo_dim);
+            if (m.topo_dim)     MEMBER_S(int, topo_dim);
             if (m.planar)       MEMBER_S(int, planar);
             if (m.origin)       MEMBER_S(int, origin);
             if (m.group_no)     MEMBER_S(int, group_no);
@@ -6406,6 +6463,11 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Mon Jul 31 17:57:29 PDT 2006
+ *   Eliminated use of db_hdf5_fullname for zlname, flname and added
+ *   possible optional ph_zlname which was mistakenly left out in the
+ *   initial implementation.
+ *   
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6481,8 +6543,9 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
         m.time = _um._time;
         m.dtime = _um._dtime;
         m.guihide = _um._guihide;
-        db_hdf5_fullname(dbfile, flname, m.facelist/*out*/);
-        db_hdf5_fullname(dbfile, zlname, m.zonelist/*out*/);
+        strcpy(m.zonelist, zlname);
+        strcpy(m.facelist, OPT(flname));
+        strcpy(m.phzonelist, OPT(_um._phzl_name));
         for (i=0; i<m.ndims; i++) {
             strcpy(m.label[i], OPT(_um._labels[i]));
             strcpy(m.units[i], OPT(_um._units[i]));
@@ -6496,7 +6559,7 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
             if (m.facetype)     MEMBER_S(int, facetype);
             if (m.cycle)        MEMBER_S(int, cycle);
             if (m.coord_sys)    MEMBER_S(int, coord_sys);
-            if (m.topo_dim)    MEMBER_S(int, topo_dim);
+            if (m.topo_dim)     MEMBER_S(int, topo_dim);
             if (m.planar)       MEMBER_S(int, planar);
             if (m.origin)       MEMBER_S(int, origin);
             if (m.guihide)      MEMBER_S(int, guihide);
@@ -8875,6 +8938,8 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Mon Feb 14 20:16:50 PST 2005
  *   Added Hack to make HDF5 driver deal with cycle/time same as PDB driver
  *
+ *   Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *   Added material names and matcolors options
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -8917,7 +8982,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
 
         /* Write raw data arrays */
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/);
-        if (_mm._matnos && _mm._nmatnos) {
+        if (_mm._matnos && _mm._nmatnos > 0) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._nmatnos, _mm._matnos,
                            m.matnos/*out*/);
         }
@@ -8932,6 +8997,22 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
                len += _mm._matcounts[i];
             db_hdf5_compwr(dbfile, DB_INT, 1, &len, _mm._matlists,
                            m.matlists/*out*/);
+        }
+        if (_mm._matcolors && _mm._nmatnos > 0) {
+            int len; char *tmp;
+            db_StringArrayToStringList((const char**) _mm._matcolors,
+                _mm._nmatnos, &tmp, &len);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
+                           m.mat_colors/*out*/);
+            FREE(tmp);
+        }
+        if (_mm._matnames && _mm._nmatnos > 0) {
+            int len; char *tmp;
+            db_StringArrayToStringList((const char**) _mm._matnames,
+                _mm._nmatnos, &tmp, &len);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
+                           m.material_names/*out*/);
+            FREE(tmp);
         }
 
         /* Initialize meta data */
@@ -8961,6 +9042,8 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
             MEMBER_S(str(m.matlists), matlists);
             if (m.nmatnos)      MEMBER_S(int, nmatnos);
             if (m.guihide)      MEMBER_S(int, guihide);
+            MEMBER_S(str(m.material_names), material_names);
+            MEMBER_S(str(m.mat_colors), mat_colors);
         } OUTPUT(dbfile, DB_MULTIMAT, name, &m);
 
         /* Free resources */
@@ -8989,6 +9072,10 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
  *              Robb Matzke, 1999-07-13
  *              Added `ngroups', `blockorigin', and `grouporigin' to
  *              duplicate changes to the PDB driver.
+ *
+ *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
+ *    Added material names and material colors options as well as nmatnos
+ *    and matnos
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimat *
@@ -9035,16 +9122,30 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
         mm->blockorigin = m.blockorigin;
         mm->grouporigin = m.grouporigin;
         mm->guihide = m.guihide;
+        mm->nmatnos = m.nmatnos;
 
         /* Read the raw data */
         mm->mixlens = db_hdf5_comprd(dbfile, m.mixlens, 1);
         mm->matcounts = db_hdf5_comprd(dbfile, m.matcounts, 1);
         mm->matlists = db_hdf5_comprd(dbfile, m.matlists, 1);
+        mm->matnos = db_hdf5_comprd(dbfile, m.matnos, 1);
         mm->matnames = calloc(m.nmats, sizeof(char*));
         s = db_hdf5_comprd(dbfile, m.matnames, 1);
         for (i=0; i<m.nmats; i++) {
             char *tok = strtok(i?NULL:s, ";");
             mm->matnames[i] = STRDUP(tok);
+        }
+        if (m.nmatnos > 0) {
+            char *tmpmaterial_names = db_hdf5_comprd(dbfile, m.material_names, 1);
+            char *tmpmat_colors = db_hdf5_comprd(dbfile, m.mat_colors, 1);
+            if (tmpmaterial_names)
+                mm->material_names = db_StringListToStringArray(tmpmaterial_names,
+                                                                m.nmatnos);
+            if (tmpmat_colors)
+                mm->matcolors = db_StringListToStringArray(tmpmat_colors,
+                                                            m.nmatnos);
+            FREE(tmpmaterial_names);
+            FREE(tmpmat_colors);
         }
         
         H5Tclose(o);
@@ -10001,7 +10102,7 @@ db_hdf5_InqMeshName(DBfile *_dbfile, char *name, char *meshname/*out*/)
 #else
 /* Stub for when we don't have hdf5 */
 INTERNAL DBfile *
-db_hdf5_Open(char *name, int mode)
+db_hdf5_Open(char *name, int mode, int subtype)
 {
     db_perror(name, E_NOTIMP, "db_hdf5_Open");
     return NULL;
@@ -10009,7 +10110,7 @@ db_hdf5_Open(char *name, int mode)
 
 /* Stub for when we don't have hdf5 */
 INTERNAL DBfile *
-db_hdf5_Create(char *name, int mode, int target, char *finfo)
+db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
 {
     db_perror(name, E_NOTIMP, "db_hdf5_Create");
     return NULL;

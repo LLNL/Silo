@@ -190,7 +190,7 @@ db_cdf_Close(DBfile *_dbfile)
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 INTERNAL DBfile *
-db_cdf_Open(char *name, int mode)
+db_cdf_Open(char *name, int mode, int subtype)
 {
     char          *me = "db_cdf_Open";
     int            cdf;

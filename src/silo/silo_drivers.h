@@ -57,12 +57,10 @@ for advertising or product endorsement purposes.
  */
 #undef DB_NETCDF
 #undef DB_PDB
-#undef DB_SDX
 #undef DB_TAURUS
 #undef DB_UNKNOWN
 #undef DB_DEBUG
 #undef DB_HDF5
-#undef DB_EXODUS
 
 /* Now set up the real driver definitions. */
 #include <config.h> /* Included for driver tests */
@@ -72,9 +70,6 @@ for advertising or product endorsement purposes.
 #ifdef HAVE_PDB_DRIVER
 #  define DB_PDB
 #endif
-#ifdef HAVE_SDX_DRIVER
-#  define DB_SDX
-#endif
 #ifdef HAVE_TAURUS_DRIVER
 #  define DB_TAURUS
 #endif
@@ -82,9 +77,6 @@ for advertising or product endorsement purposes.
 #define DB_DEBUG
 #ifdef HAVE_HDF5_DRIVER
 #  define DB_HDF5
-#endif
-#ifdef HAVE_EXODUS_DRIVER
-#  define DB_EXODUS
 #endif
 
 /*-------------------------------------------------------------------------
@@ -113,7 +105,7 @@ for advertising or product endorsement purposes.
 #define DB_NETCDF_CREATE   NULL
 #define DB_NETCDF_FSINGLE  db_cdf_ForceSingle
 
-extern DBfile *db_cdf_Open(char *, int);
+extern DBfile *db_cdf_Open(char *, int, int);
 extern int db_cdf_ForceSingle(int);
 
 #else
@@ -131,8 +123,8 @@ extern int db_cdf_ForceSingle(int);
 #define DB_PDB_CREATE      db_pdb_Create
 #define DB_PDB_FSINGLE     db_pdb_ForceSingle
 
-extern DBfile *db_pdb_Open(char *, int);
-extern DBfile *db_pdb_Create(char *, int, int, char *);
+extern DBfile *db_pdb_Open(char *, int, int);
+extern DBfile *db_pdb_Create(char *, int, int, int, char *);
 extern int db_pdb_ForceSingle(int);
 
 #else
@@ -148,28 +140,12 @@ extern int db_pdb_ForceSingle(int);
 #define DB_TAURUS_CREATE   NULL
 #define DB_TAURUS_FSINGLE  NULL
 
-extern DBfile *db_taur_Open(char *, int);
+extern DBfile *db_taur_Open(char *, int, int);
 
 #else
 #define DB_TAURUS_OPEN     NULL
 #define DB_TAURUS_CREATE   NULL
 #define DB_TAURUS_FSINGLE  NULL
-#endif
-
-#ifdef DB_SDX
-#undef  DB_SDX
-#define DB_SDX       4
-#define DB_SDX_OPEN        db_sdx_Open
-#define DB_SDX_CREATE      NULL
-#define DB_SDX_FSINGLE     NULL
-
-extern DBfile *db_sdx_Open(char *, int);
-extern int SDXID(DBfile *);
-
-#else
-#define DB_SDX_OPEN        NULL
-#define DB_SDX_CREATE      NULL
-#define DB_SDX_FSINGLE     NULL
 #endif
 
 #ifdef DB_UNKNOWN               /*For opening files of unknown type */
@@ -179,7 +155,7 @@ extern int SDXID(DBfile *);
 #define DB_UNKNOWN_CREATE  NULL
 #define DB_UNKNOWN_FSINGLE NULL
 
-extern DBfile *db_unk_Open(char *, int);
+extern DBfile *db_unk_Open(char *, int, int);
 
 #else
 #define DB_UNKNOWN_OPEN    NULL
@@ -194,8 +170,8 @@ extern DBfile *db_unk_Open(char *, int);
 #define DB_DEBUG_CREATE    db_debug_create
 #define DB_DEBUG_FSINGLE   NULL
 
-extern DBfile *db_debug_open(char *, int);
-extern DBfile *db_debug_create(char *, int, int, char *);
+extern DBfile *db_debug_open(char *, int, int);
+extern DBfile *db_debug_create(char *, int, int, int, char *);
 
 #else
 #define DB_DEBUG_OPEN      NULL
@@ -210,32 +186,14 @@ extern DBfile *db_debug_create(char *, int, int, char *);
 #define DB_HDF5_CREATE     db_hdf5_Create
 #define DB_HDF5_FSINGLE    db_hdf5_ForceSingle
 
-extern DBfile *db_hdf5_Open(char*, int);
-extern DBfile *db_hdf5_Create(char*, int, int, char*);
+extern DBfile *db_hdf5_Open(char*, int, int);
+extern DBfile *db_hdf5_Create(char*, int, int, int, char*);
 extern int db_hdf5_ForceSingle(int);
 
 #else
 #define DB_HDF5_OPEN       NULL
 #define DB_HDF5_CREATE     NULL
 #define DB_HDF5_FSINGLE    NULL
-#endif
-
-/*slot 8 unused */
-
-#ifdef DB_EXODUS
-#undef DB_EXODUS
-#define DB_EXODUS          9
-#define DB_EXODUS_OPEN     db_exodus_Open
-#define DB_EXODUS_CREATE   NULL
-#define DB_EXODUS_FSINGLE  NULL
-
-extern DBfile *db_exodus_Open(char*, int);
-extern DBfile *db_exodus_Create(char*, int, int, char*);
-
-#else
-#define DB_EXODUS_OPEN     NULL
-#define DB_EXODUS_CREATE   NULL
-#define DB_EXODUS_FSINGLE  NULL
 #endif
 
 /*
@@ -254,40 +212,40 @@ extern DBfile *db_exodus_Create(char*, int, int, char*);
  *-------------------------------------------------------------------------
  */
 #define DBOPENCB        {DB_NETCDF_OPEN,        \
-                         NULL,                  /*reserved*/\
+                         NULL,                  /*unused*/\
                          DB_PDB_OPEN,           \
                          DB_TAURUS_OPEN,        \
-                         DB_SDX_OPEN,           \
+                         NULL,                  /*unused*/\
                          DB_UNKNOWN_OPEN,       \
                          DB_DEBUG_OPEN,         \
                          DB_HDF5_OPEN,          \
                          NULL,                  /*unused*/\
-                         DB_EXODUS_OPEN}
+                         NULL}                  /*unused*/
 
 #define DBCREATECB      {DB_NETCDF_CREATE,      \
-                         NULL,                  /*reserved*/\
+                         NULL,                  /*unused*/\
                          DB_PDB_CREATE,         \
                          DB_TAURUS_CREATE,      \
-                         DB_SDX_CREATE,         \
+                         NULL,                  /*unused*/\
                          DB_UNKNOWN_CREATE,     \
                          DB_DEBUG_CREATE,       \
                          DB_HDF5_CREATE,        \
                          NULL,                  /*unused*/\
-                         DB_EXODUS_CREATE}
+                         NULL}                  /*unused*/
 
 #define DBFSINGLECB     {DB_NETCDF_FSINGLE,     \
-                         NULL,                  /*reserved*/\
+                         NULL,                  /*unused*/\
                          DB_PDB_FSINGLE,        \
                          DB_TAURUS_FSINGLE,     \
-                         DB_SDX_FSINGLE,        \
+                         NULL,                  /*unused*/\
                          DB_UNKNOWN_FSINGLE,    \
                          DB_DEBUG_FSINGLE,      \
                          DB_HDF5_FSINGLE,       \
                          NULL,                  /*unused*/\
-                         DB_EXODUS_FSINGLE}
+                         NULL}                  /*unused*/
 
-DBfile *(*DBOpenCB[DB_NFORMATS]) (char *, int) = DBOPENCB;
-DBfile *(*DBCreateCB[DB_NFORMATS]) (char *, int, int, char *) = DBCREATECB;
+DBfile *(*DBOpenCB[DB_NFORMATS]) (char *, int, int) = DBOPENCB;
+DBfile *(*DBCreateCB[DB_NFORMATS]) (char *, int, int, int, char *) = DBCREATECB;
 int     (*DBFSingleCB[DB_NFORMATS]) (int) = DBFSINGLECB;
 #endif /* DB_MAIN */
 
