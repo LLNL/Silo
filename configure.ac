@@ -288,6 +288,8 @@ dnl --------------------------------------------------------------------------
 
 dnl
 dnl Configuration header stuff...
+dnl NOTE: Don't forget to change the version number here when we do a
+dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
 m4_define(SILO_VERSION, 5.0.0b)
@@ -302,9 +304,23 @@ AC_REVISION($Id$)dnl
 AC_INIT(SILO_NAME, SILO_VERSION, SILO_BUGS, SILO_NAME)
 AC_CONFIG_SRCDIR([src/silo/silo.h])
 AC_CONFIG_AUX_DIR(config)
+dnl AM_INIT_AUTOMAKE takes a list of options that should be applied to
+dnl every Makefile.am when automake is run.
 AM_INIT_AUTOMAKE([1.9 foreign no-installinfo no-installman no-texinfo.tex])
 
 AC_CONFIG_HEADER([config.h:config/config.h.in])
+dnl AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
+dnl for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
+dnl is *not* included here, these files will be rebuilt if out of date.
+dnl This is a problem because if users try to build on a machine with
+dnl the wrong versions of autoconf and automake, these files will be
+dnl rebuilt with the wrong versions and bad things can happen.
+dnl Also, Clearcase doesn't preserve dependencies between timestamps
+dnl when doing (group) checkin's, so extra care is needed to manually
+dnl verify timestamps (see, FAQ) so that Makefiles doenn't think rebuilding 
+dnl needs to occur when it doesn't.
+dnl Developers should './configure --enable-maintainer-mode' to turn on
+dnl rebuild rules.
 AM_MAINTAINER_MODE
 AC_COPYRIGHT([This work was produced at the University of California,
 Lawrence Livermore National Laboratory (UC LLNL) under contract
@@ -317,6 +333,8 @@ the DOE and University as allowed under DOE Acquisition Letter 97-1.])
 AC_CONFIG_TESTDIR(tests)
 
 dnl Change the default prefix (/usr/local) to `pwd`
+dnl Set prefix default (install directory) to a directory in the build area.
+dnl This allows multiple src-dir builds within one host.
 AC_PREFIX_DEFAULT("SILO_TOP_SRC_DIR")
 
 # Turn off shared libraries by default, since build process takes longer.

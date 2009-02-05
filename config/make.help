@@ -1,3 +1,34 @@
+Make help
+You can run make from any directory.  However, running in a
+subdirectory only knows how to build things in that directory and
+below.  However, all makefiles know when their target depends on
+something outside the local directory tree:
+
+  $ cd test
+  $ make
+  make: *** No rule to make target ../src/libsilo.a
+
+The Makefiles understand the the same influential environment varibles as
+'configure':
+  CC          C compiler command
+  CFLAGS      C compiler flags
+  LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
+              nonstandard directory <lib dir>
+  CPPFLAGS    C/C++ preprocessor flags, e.g. -I<include dir> if you have
+              headers in a nonstandard directory <include dir>
+  FC          Fortran compiler command
+  FCFLAGS     Fortran compiler flags
+  CXX         C++ compiler command
+  CXXFLAGS    C++ compiler flags
+  CXXCPP      C++ preprocessor
+  CPP         C preprocessor
+  F77         Fortran 77 compiler command
+  FFLAGS      Fortran 77 compiler flags
+These can be used to override the 'configure' defined choices:
+  $ make CC=icc CXX=icc FC=ifort
+  $ make CC="purify CC" CFLAGS=""-log-file=pure.log -append-logfile=yes"
+  $ make CC='xlc -q64' CXX='xlC -q64' FC='xlf -q64' LDFLAGS=-q64 AR='ar -X 64'
+         
 Standard Targets for Users 
 
 Makefiles contain the following GNU Coding Standardstargets (liberally copied 

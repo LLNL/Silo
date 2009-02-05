@@ -34,6 +34,9 @@
 #
 #   Mark C. Miller, Thu Aug 31 15:50:10 PDT 2006
 #   Fixed problem including view-private files in checksum checks
+#
+#   Mark C. Miller, Tue Sep  5 12:36:16 PDT 2006
+#   Redirected some command error output to /dev/null
 #--------------------------------------------------------------------------------
 
 umask 002
@@ -85,7 +88,6 @@ EOF
     fi
 }
 
-
 #
 # Start up the test view, cd there, remove old test install point
 #
@@ -95,8 +97,8 @@ cd /view/silo_VOBowner_test/data_vobs/Silo
 #
 # First, see if we even need to run the tests
 #
-cleartool ls -recurse -view -short | xargs -n 1 rm -rf
-find . -type f \! -name "md5sums*.txt" -exec md5sum {} \; 1>md5sums_current.txt 2>&1
+cleartool ls -recurse -view -short | grep -v md5sums_last.txt | xargs -n 1 rm -rf 2>/dev/null
+find . -type f \! -name "md5sums*.txt" -exec md5sum {} \; | grep -v .mvfs_ 1>md5sums_current.txt 2>&1
 if test -e md5sums_last.txt; then
     if test "`diff md5sums_last.txt md5sums_current.txt`" = ""; then
         ifErrorSendMessage 1 "Silo tests skipped. No changes since last run" "" 1
@@ -273,7 +275,7 @@ echo "</html>"    >> $htmlFile
 todaysDir=`ls -d /home/visit/public_html/${dateBase}*`
 while test "$todaysDir" = ""; do
    sleep 600
-   todaysDir=`ls -d /home/visit/public_html/${dateBase}*`
+   todaysDir=`ls -d /home/visit/public_html/${dateBase}* 2>/dev/null`
 done
 todaysBase=`basename $todaysDir`
 
