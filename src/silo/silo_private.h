@@ -398,6 +398,9 @@ typedef struct context_t {
 #ifdef _INCLUDE_HPUX_SOURCE     /* HPUX */
 #define F77_ID(x_, x, X)  x
 #endif
+#if defined(__powerpc)
+#define F77_ID(x_, x, X)  x
+#endif
 #ifndef F77_ID
 #define F77_ID(x_, x, X)  x_
 #endif

@@ -2739,12 +2739,17 @@ DBErrFunc(void)
  *
  * Programmer:  Hank Childs
  *              Tue Oct 17 14:08:45 PDT 2000
+ *
+ * Modifications:
+ *
+ *   Mark C. Miller, Tue Oct 24 12:39:31 PDT 2006
+ *   Changed to use SILO_VSTRING
  *-------------------------------------------------------------------------*/
 PUBLIC char *
 DBVersion(void)
 {
     static char version[256];
-    strcpy(version, VERSION);
+    strcpy(version, SILO_VSTRING);
 
     return version;
 }

@@ -1347,7 +1347,7 @@ SILO_API extern DBfile  *DBCreateReal(const char *, int, int, const char *, int)
 SILO_API extern int      DBInqFileReal(const char *);
 
 #define SILO_VSTRING_NAME "_silolibinfo"
-#define SILO_VSTRING PACKAGE_STRING
+#define SILO_VSTRING PACKAGE_VERSION
 SILO_API extern int SILO_VERS_TAG;
 #define CheckVersion SILO_VERS_TAG = 1
 
