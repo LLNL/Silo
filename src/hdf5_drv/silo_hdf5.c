@@ -45,7 +45,7 @@
 #define LINKGRP         "/.silo/"       /*name of link group            */
 #define MAX_VARS        8               /*max vars per DB*var object    */
 #define OPTDUP(S)       ((S)&&*(S)?strdup(S):NULL)
-#define BASEDUP(S)       ((S)&&*(S)?strdup(db_FullName2BaseName(S)):NULL)
+#define BASEDUP(S)       ((S)&&*(S)?db_FullName2BaseName(S):NULL)
 #define ALIGN(ADDR,N)   (((ADDR)+(N)-1)&~((N)-1))
 
 /* to encode the version of the hdf5 library in any silo executable */

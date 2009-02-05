@@ -32,6 +32,7 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/score \
  -I$(srcdir)/../src/silo
 quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
+TestReadMask_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 
 HDF5PROGS=compression grab

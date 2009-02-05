@@ -69,7 +69,7 @@ am__EXEEXT_3 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
 	testallf77$(EXEEXT)
 @FORTRAN_NEEDED_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
 TestReadMask_SOURCES = TestReadMask.c
-TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
+TestReadMask_OBJECTS = TestReadMask-TestReadMask.$(OBJEXT)
 TestReadMask_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@TestReadMask_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@TestReadMask_DEPENDENCIES = ../src/libsiloh5.la
@@ -557,6 +557,7 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/silo
 
 quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
+TestReadMask_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 HDF5PROGS = compression grab
 F77PROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
@@ -786,7 +787,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-TestReadMask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alltypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Po@am__quote@
@@ -850,6 +851,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+TestReadMask-TestReadMask.o: TestReadMask.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT TestReadMask-TestReadMask.o -MD -MP -MF $(DEPDIR)/TestReadMask-TestReadMask.Tpo -c -o TestReadMask-TestReadMask.o `test -f 'TestReadMask.c' || echo '$(srcdir)/'`TestReadMask.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/TestReadMask-TestReadMask.Tpo $(DEPDIR)/TestReadMask-TestReadMask.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='TestReadMask.c' object='TestReadMask-TestReadMask.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o TestReadMask-TestReadMask.o `test -f 'TestReadMask.c' || echo '$(srcdir)/'`TestReadMask.c
+
+TestReadMask-TestReadMask.obj: TestReadMask.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT TestReadMask-TestReadMask.obj -MD -MP -MF $(DEPDIR)/TestReadMask-TestReadMask.Tpo -c -o TestReadMask-TestReadMask.obj `if test -f 'TestReadMask.c'; then $(CYGPATH_W) 'TestReadMask.c'; else $(CYGPATH_W) '$(srcdir)/TestReadMask.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/TestReadMask-TestReadMask.Tpo $(DEPDIR)/TestReadMask-TestReadMask.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='TestReadMask.c' object='TestReadMask-TestReadMask.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o TestReadMask-TestReadMask.obj `if test -f 'TestReadMask.c'; then $(CYGPATH_W) 'TestReadMask.c'; else $(CYGPATH_W) '$(srcdir)/TestReadMask.c'; fi`
 
 quad-quad.o: quad.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(quad_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT quad-quad.o -MD -MP -MF $(DEPDIR)/quad-quad.Tpo -c -o quad-quad.o `test -f 'quad.c' || echo '$(srcdir)/'`quad.c

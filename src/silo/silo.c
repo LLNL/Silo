@@ -10442,7 +10442,7 @@ db_ResetGlobalData_Mrgtree (void) {
  *    Mark C. Miller, Thu Sep  7 10:50:55 PDT 2006
  *    Made it just use Jim Reus' new basename routine.
  *--------------------------------------------------------------------*/
-INTERNAL const char *
+INTERNAL char *
 db_FullName2BaseName(const char *path)
 {
    return db_basename(path);
@@ -12017,11 +12017,11 @@ DBSetCwr(DBmrgtree *tree, const char *path)
 }
 
 PUBLIC const char *
-DBGetCwg(DBmrgtree *tree)
+DBGetCwr(DBmrgtree *tree)
 {
     const char *retval = NULL;
 
-    API_BEGIN("DBGetCwg", const char *, NULL)
+    API_BEGIN("DBGetCwr", const char *, NULL)
     {
         if (tree == 0)
             API_ERROR("tree", E_BADARGS);

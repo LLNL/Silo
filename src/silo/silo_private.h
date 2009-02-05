@@ -806,7 +806,7 @@ INTERNAL int db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones);
 INTERNAL int db_ResetGlobalData_Ucdzonelist (void);
 INTERNAL int db_ResetGlobalData_MultiMesh (void);
 INTERNAL int db_ResetGlobalData_Defvars(void);
-INTERNAL const char *db_FullName2BaseName(const char *);
+INTERNAL char *db_FullName2BaseName(const char *);
 INTERNAL void db_StringArrayToStringList(char**, int, char **, int*);
 INTERNAL char ** db_StringListToStringArray(char *, int);
 INTERNAL void db_DriverTypeAndSubtype(int driver, int *type, int *subtype);
