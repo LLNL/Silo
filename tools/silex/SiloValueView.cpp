@@ -39,6 +39,7 @@
 #include <SiloFile.h>
 #include <qlabel.h>
 #include <iostream>
+#include <cstdlib>
 using std::cerr;
 
 // ----------------------------------------------------------------------------

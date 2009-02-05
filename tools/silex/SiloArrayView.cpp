@@ -40,6 +40,7 @@
 #include <qlistbox.h>
 #include <qapplication.h>
 #include <iostream>
+#include <cstdlib>
 using std::cerr;
 
 // ----------------------------------------------------------------------------

@@ -24,14 +24,14 @@
       external dbaddropt, dbcalcfl, dbclose, dbcreate, dberrno, dbfgetca
       external dbfreemrgtree, dbfreeobject, dbfreeoptlist, dbget2dstrlen
       external dbgetca, dbgetcksums, dbgetcompress, dbgetcurve
-      external dbgetdepwarn, dbgethdfnms, dbgetovrwrt, dbgetqv1, dbgmrgv
-      external dbinqca, dbinqfile, dbinqlen, dbmkdir, dbmkmrgtree
-      external dbmkobject, dbmkoptlist, dbmkptr, dbopen, dbpmrgv
-      external dbputca, dbputcsgm, dbputcsgv, dbputcsgzl, dbputcurve
-      external dbputdefvars, dbputfl, dbputgrplmap, dbputmat, dbputmmat
-      external dbputmmesh, dbputmrgtree, dbputmsp, dbputmvar, dbputpm
-      external dbputpv1, dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl
-      external dbputzl2, dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
+      external dbgetdepwarn, dbgethdfnms, dbgetovrwrt, dbgetqv1, dbinqca
+      external dbinqfile, dbinqlen, dbmkdir, dbmkmrgtree, dbmkobject
+      external dbmkoptlist, dbmkptr, dbopen, dbpmrgv, dbputca, dbputcsgm
+      external dbputcsgv, dbputcsgzl, dbputcurve, dbputdefvars, dbputfl
+      external dbputgrplmap, dbputmat, dbputmmat, dbputmmesh
+      external dbputmrgtree, dbputmsp, dbputmvar, dbputpm, dbputpv1
+      external dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl, dbputzl2
+      external dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
       external dbsetcksums, dbsetcompress, dbsetcwr, dbsetdepwarn
       external dbsetdir, dbsetdirid, dbsethdfnms, dbsetovrwrt
       external dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
@@ -41,14 +41,14 @@
       integer  dbaddropt, dbcalcfl, dbclose, dbcreate, dberrno, dbfgetca
       integer  dbfreemrgtree, dbfreeobject, dbfreeoptlist, dbget2dstrlen
       integer  dbgetca, dbgetcksums, dbgetcompress, dbgetcurve
-      integer  dbgetdepwarn, dbgethdfnms, dbgetovrwrt, dbgetqv1, dbgmrgv
-      integer  dbinqca, dbinqfile, dbinqlen, dbmkdir, dbmkmrgtree
-      integer  dbmkobject, dbmkoptlist, dbmkptr, dbopen, dbpmrgv
-      integer  dbputca, dbputcsgm, dbputcsgv, dbputcsgzl, dbputcurve
-      integer  dbputdefvars, dbputfl, dbputgrplmap, dbputmat, dbputmmat
-      integer  dbputmmesh, dbputmrgtree, dbputmsp, dbputmvar, dbputpm
-      integer  dbputpv1, dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl
-      integer  dbputzl2, dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
+      integer  dbgetdepwarn, dbgethdfnms, dbgetovrwrt, dbgetqv1, dbinqca
+      integer  dbinqfile, dbinqlen, dbmkdir, dbmkmrgtree, dbmkobject
+      integer  dbmkoptlist, dbmkptr, dbopen, dbpmrgv, dbputca, dbputcsgm
+      integer  dbputcsgv, dbputcsgzl, dbputcurve, dbputdefvars, dbputfl
+      integer  dbputgrplmap, dbputmat, dbputmmat, dbputmmesh
+      integer  dbputmrgtree, dbputmsp, dbputmvar, dbputpm, dbputpv1
+      integer  dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl, dbputzl2
+      integer  dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
       integer  dbsetcksums, dbsetcompress, dbsetcwr, dbsetdepwarn
       integer  dbsetdir, dbsetdirid, dbsethdfnms, dbsetovrwrt
       integer  dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
@@ -127,8 +127,8 @@
 
       parameter (SILO_VERS_MAJ             = 4              )
       parameter (SILO_VERS_MIN             = 6              )
-      parameter (SILO_VERS_PAT             = 1              )
-      parameter (SILO_VERS_PRE             = 0              )
+      parameter (SILO_VERS_PAT             = 2              )
+      parameter (SILO_VERS_PRE             = 2              )
       parameter (DB_NETCDF                 = 0              )
       parameter (DB_PDB                    = 2              )
       parameter (DB_TAURUS                 = 3              )

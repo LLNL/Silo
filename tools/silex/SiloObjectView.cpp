@@ -41,6 +41,7 @@
 #include <qmessagebox.h>
 #include <iostream>
 #include <string>
+#include <cstdlib>
 
 // ----------------------------------------------------------------------------
 //                            Object View Window

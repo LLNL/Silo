@@ -4657,7 +4657,7 @@ DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                 DBPUTCSGV1_FC
+ * Routine                                                 DBPUTCSGV_FC
  *
  * Purpose: Write csg variable to the silo file
  *
@@ -4680,7 +4680,7 @@ DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *--------------------------------------------------------------------*/
 FORTRAN
-DBPUTCSGV1_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
+DBPUTCSGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
     int *lmeshname, int *data_ids, int *nvals, int *datatype,
     int *centering, int *optlist_id, int *status)
 {
@@ -4691,7 +4691,7 @@ DBPUTCSGV1_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
     void      **data = NULL;
     int         i;
 
-    API_BEGIN ("dbputcsgv1", int, -1) {
+    API_BEGIN ("dbputcsgv", int, -1) {
         if (*name<=0)
             API_ERROR ("name", E_BADARGS) ;
         if (*meshname<=0)
