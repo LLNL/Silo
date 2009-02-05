@@ -17,6 +17,9 @@ AT_CLEANUP
 AT_SETUP(multi_test DB_HDF5)
 AT_CHECK(multi_test DB_HDF5,,[ignore])
 AT_CLEANUP
+AT_SETUP(checksums)
+AT_CHECK(checksums,,[ignore])
+AT_CLEANUP
 AT_SETUP(partial_io DB_HDF5)
 AT_CHECK(partial_io DB_HDF5,,[ignore])
 AT_CLEANUP

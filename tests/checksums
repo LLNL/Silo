@@ -1,0 +1,90 @@
+#!/bin/sh
+
+#
+# Orient ourselves for autotools test stuff
+# (script is written assuming where at top-level test dir)
+#
+pushd ../..
+
+# -----------------------------------------------------------------------------
+# Test checksumming capability in silo by generating checksummed data
+# file, copying it, corrupting the copy and then diffing it with browser
+# against the original with and without checksumming turned on during
+# the diff
+#
+# Programmer: Mark C. Miller
+# Creation:   February 20, 2007
+#
+# -----------------------------------------------------------------------------
+
+#
+# Create data with checksums (only on HDF5 driver) and save files
+#
+./multi_test DB_HDF5 check 1>/dev/null 2>&1
+rm -rf h5_check_files
+mkdir h5_check_files
+mv *.h5 h5_check_files/.
+
+#
+# Create data without checksums
+#
+./multi_test DB_HDF5 1>/dev/null 2>&1
+
+#
+# Determine the offset of an hdf5 dataset in the silo file.
+# We do this because we can't indescriminently corrupt the file.
+# Silo's checksumming is done only on the dataset objects in
+# the file. So, we have to make sure that we corrupt a dataset.
+# We do this using octal dump (od) and looking for some numbers
+# we expect in a silo object (domain_23/fl)
+#
+offset=`od -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | grep '167         179         323         311' | cut -d' ' -f1`
+offset=`echo $offset | cut -d' ' -f1`
+size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
+
+#
+# Make a file of 4 integer zeros
+#
+rm -f zeros
+i=0
+/bin/echo -n -e '\000' > zeros
+while test $i -lt 15; do
+    /bin/echo -n -e '\000' >> zeros
+    i=`expr $i + 1`
+done
+
+#
+# Corrupt a checksumed file by splicing together the first
+# part of the original file with the 4 integer zeros (above)
+# and the last part of the file (minus the part we've zeroed)
+#
+rm -f multi_ucd3d_corrupt.h5
+head -c $offset h5_check_files/multi_ucd3d.h5 > multi_ucd3d_corrupt.h5
+cat zeros >> multi_ucd3d_corrupt.h5
+leftover=`expr $size - $offset - 16`
+tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
+
+#
+# Now, run browser with checksumming turned on and make sure we
+# detect a checksumming error
+#
+result=0
+brOut=`../tools/browser/browser -q -c -e diff multi_ucd3d.h5 multi_ucd3d_corrupt.h5 2>&1`
+if test -z "`echo $brOut | grep 'Checksum failure'`"; then
+    result=1
+fi
+
+brOut=`../tools/browser/browser -q -e diff multi_ucd3d.h5 multi_ucd3d_corrupt.h5`
+if test -z "`echo $brOut | grep 'block35.fl1'`"; then
+    result=1
+fi
+
+#
+# Cleanup
+#
+rm -rf h5_check_files
+rm -f zeros
+rm -f multi_ucd3d_corrupt.h5
+popd
+
+exit $result 

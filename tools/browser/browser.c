@@ -1070,7 +1070,7 @@ process_switches(switches_t *switches)
     }
 
     if ((sw=switch_find(switches, "--checksums")) && sw->seen) {
-        sym_bi_set("checksums", sw->lexeme, NULL, NULL);
+        sym_bi_set("checksums", "1", NULL, NULL);
     }
     
 }

@@ -29781,6 +29781,105 @@ echo "${ECHO_T}$have_qt" >&6; }
 
 
 
+  #### Being paranoid:
+  if test x"$have_qt" = xyes; then
+    { echo "$as_me:$LINENO: checking correct functioning of Qt installation" >&5
+echo $ECHO_N "checking correct functioning of Qt installation... $ECHO_C" >&6; }
+    if test "${bnv_cv_qt_test_result+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+      cat > bnv_qt_test.h << EOF
+#include <qobject.h>
+class Test : public QObject
+{
+Q_OBJECT
+public:
+  Test() {}
+  ~Test() {}
+public slots:
+  void receive() {}
+signals:
+  void send();
+};
+EOF
+
+      cat > bnv_qt_main.$ac_ext << EOF
+#include "bnv_qt_test.h"
+#include <qapplication.h>
+int main( int argc, char **argv )
+{
+  QApplication app( argc, argv );
+  Test t;
+  QObject::connect( &t, SIGNAL(send()), &t, SLOT(receive()) );
+}
+EOF
+
+      bnv_cv_qt_test_result="failure"
+      bnv_try_1="$QT_MOC bnv_qt_test.h -o moc_bnv_qt_test.$ac_ext >/dev/null 2>/dev/null"
+      { (eval echo "$as_me:$LINENO: \"$bnv_try_1\"") >&5
+  (eval $bnv_try_1) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }
+      if test x"$ac_status" != x0; then
+        echo "$bnv_err_1" >&5
+        echo "configure: could not run $QT_MOC on:" >&5
+        cat bnv_qt_test.h >&5
+      else
+        bnv_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_bnv_qt_test.o moc_bnv_qt_test.$ac_ext >/dev/null 2>/dev/null"
+        { (eval echo "$as_me:$LINENO: \"$bnv_try_2\"") >&5
+  (eval $bnv_try_2) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }
+        if test x"$ac_status" != x0; then
+          echo "$bnv_err_2" >&5
+          echo "configure: could not compile:" >&5
+          cat moc_bnv_qt_test.$ac_ext >&5
+        else
+          bnv_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o bnv_qt_main.o bnv_qt_main.$ac_ext >/dev/null 2>/dev/null"
+          { (eval echo "$as_me:$LINENO: \"$bnv_try_3\"") >&5
+  (eval $bnv_try_3) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }
+          if test x"$ac_status" != x0; then
+            echo "$bnv_err_3" >&5
+            echo "configure: could not compile:" >&5
+            cat bnv_qt_main.$ac_ext >&5
+          else
+            bnv_try_4="$CXX $QT_LIBS $LIBS -o bnv_qt_main bnv_qt_main.o moc_bnv_qt_test.o >/dev/null 2>/dev/null"
+            { (eval echo "$as_me:$LINENO: \"$bnv_try_4\"") >&5
+  (eval $bnv_try_4) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }
+            if test x"$ac_status" != x0; then
+              echo "$bnv_err_4" >&5
+            else
+              bnv_cv_qt_test_result="success"
+            fi
+          fi
+        fi
+      fi
+
+fi
+    { echo "$as_me:$LINENO: result: $bnv_cv_qt_test_result" >&5
+echo "${ECHO_T}$bnv_cv_qt_test_result" >&6; };
+    if test x"$bnv_cv_qt_test_result" = "xfailure"; then
+      { { echo "$as_me:$LINENO: error: Failed to find matching components of a complete
+                  Qt installation. Try using more options,
+                  see ./configure --help." >&5
+echo "$as_me: error: Failed to find matching components of a complete
+                  Qt installation. Try using more options,
+                  see ./configure --help." >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+    rm -f bnv_qt_test.h moc_bnv_qt_test.$ac_ext moc_bnv_qt_test.o \
+          bnv_qt_main.$ac_ext bnv_qt_main.o bnv_qt_main
+  fi
 
 #   gw_CHECK_QT
     if test "$have_qt" = no; then
