@@ -48,10 +48,12 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = silo.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_silo_la_LIBADD =
-am__libsilo_silo_la_SOURCES_DIST = alloc.c extface.c silo.c silo_f.c
+am__libsilo_silo_la_SOURCES_DIST = alloc.c extface.c silo.c silo_ns.c \
+	silo_f.c
 @FORTRAN_NEEDED_TRUE@am__objects_1 = silo_f.lo
 am__objects_2 = $(am__objects_1)
-am__objects_3 = alloc.lo extface.lo silo.lo $(am__objects_2)
+am__objects_3 = alloc.lo extface.lo silo.lo silo_ns.lo \
+	$(am__objects_2)
 am_libsilo_silo_la_OBJECTS = $(am__objects_3)
 libsilo_silo_la_OBJECTS = $(am_libsilo_silo_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
@@ -258,6 +260,7 @@ FILES = \
  alloc.c \
  extface.c \
  silo.c  \
+ silo_ns.c \
  $(EXTRAFILES)
 
 BUILT_SOURCES = silo.inc
@@ -320,6 +323,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_f.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_ns.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

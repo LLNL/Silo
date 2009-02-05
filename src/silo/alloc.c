@@ -1763,3 +1763,44 @@ DBFreeMrgvar(DBmrgvar *mrgv)
 
     FREE(mrgv);
 }
+
+PUBLIC void
+DBFreeNamescheme(DBnamescheme *ns)
+{
+    int i;
+
+    /* Always free up the old name scheme and clear it out */
+    FREE(ns->fmt);
+    FREE(ns->fmtptrs);
+    for (i = 0; i < DB_MAX_EXPSTRS; i++)
+        FREE(ns->embedstrs[i]);
+    for (i = 0; i < ns->ncspecs; i++)
+        FREE(ns->exprstrs[i]);
+    FREE(ns->exprstrs);
+    for (i = 0; i < ns->narrefs; i++)
+    {
+        FREE(ns->arrnames[i]);
+        /*FREE(ns->arrvals[i]); user allocates these */
+    }
+    FREE(ns->arrnames);
+    FREE(ns->arrvals);
+    FREE(ns);
+}
+
+PUBLIC DBnamescheme *
+DBAllocNamescheme()
+{
+    DBnamescheme *ns;
+
+    API_BEGIN("DBAllocNamescheme", DBnamescheme*, NULL) {
+        if (NULL == (ns = ALLOC(DBnamescheme)))
+            API_ERROR(NULL, E_NOMEM);
+
+        /* Initialize all memory to zero. */
+        memset(ns, 0, sizeof(DBnamescheme));
+
+    }
+    API_END;
+
+    return (ns);
+}

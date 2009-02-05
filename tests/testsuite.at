@@ -16,6 +16,9 @@ This version of Silo is NOT greater than or equal to 90.5.2
 )
 AT_CHECK($VALGRIND version $DB_HDF5,,expout,ignore)
 AT_CLEANUP
+AT_SETUP(namescheme)
+AT_CHECK($VALGRIND namescheme,,ignore)
+AT_CLEANUP
 AT_SETUP(point)
 AT_CHECK($VALGRIND point $DB_HDF5,,ignore)
 AT_CLEANUP

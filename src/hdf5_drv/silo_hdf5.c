@@ -1022,7 +1022,7 @@ FreeNodelists(DBfile_hdf5 *dbfile, const char *meshname) {}
    Created:    July, 2008
 */
 
-#define MAX_NODELIST_INFOS 32
+#define MAX_NODELIST_INFOS 32 
 typedef struct _zlInfo {
     DBfile_hdf5 *db5file;
     char *meshname;
@@ -1072,7 +1072,7 @@ LookupNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname)
  Part of registering a nodelist is to first check to see if we don't already
  have one. So, we call LookupNodelist as a first step.
 */
-static int 
+static void 
 RegisterNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname,
     int ntopodims, int nzones, int origin, const int *nodelist)
 {
@@ -1081,9 +1081,9 @@ RegisterNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname,
     int lnodelist = (1<<ntopodims) * nzones;
     int snodelist = lnodelist * sizeof(int);
     char fullname[256], fullmname[256];
-    
+
     if (LookupNodelist(dbfile, zlname, meshname))
-        return 0;
+        return;
 
     if (zlname)
         db_hdf5_fullname(dbfile, (char*) zlname, fullname);
@@ -1092,6 +1092,7 @@ RegisterNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname,
 
     zl->ndims = ntopodims;
     zl->nzones = nzones;
+    zl->nshapes = 1;
     zl->origin = origin;
     zl->shapecnt = malloc(sizeof(int));
     zl->shapecnt[0] = nzones;
@@ -1106,10 +1107,10 @@ RegisterNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname,
     for (i = 0; i < MAX_NODELIST_INFOS; i++)
     {
         if (keptNodelistInfos[i].zl == 0)
-        break;
+            break;
     }
     if (i == MAX_NODELIST_INFOS)
-        return 0;
+        return;
 
     keptNodelistInfos[i].db5file = dbfile;
     if (zlname)
@@ -1133,7 +1134,7 @@ AddMeshnameToNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshn
     {
         if (keptNodelistInfos[i].zl && (keptNodelistInfos[i].db5file == dbfile))
         {
-            if (keptNodelistInfos[i].zlname &&
+            if (keptNodelistInfos[i].zlname && !keptNodelistInfos[i].meshname &&
                 strcmp(fullzlname, keptNodelistInfos[i].zlname) == 0)
             {
                 keptNodelistInfos[i].meshname = STRDUP(fullmname);

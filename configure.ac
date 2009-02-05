@@ -373,8 +373,22 @@ dnl Set prefix default (install directory) to a directory in the build area.
 dnl This allows multiple src-dir builds within one host.
 AC_PREFIX_DEFAULT("SILO_TOP_SRC_DIR")
 
-# Turn off shared libraries by default, since build process takes longer.
-AC_DISABLE_SHARED
+dnl
+dnl Handle the python module right away to determine if we need shared libs.
+dnl Ordinarily, we default to static libs
+dnl
+PYTHONMODULE=$DEFAULT_PYTHONMODULE
+AC_ARG_ENABLE(pythonmodule,
+    AS_HELP_STRING([--enable-pythonmodule],[build python module @<:@default=no@:>@]),
+    if test "$enable_pythonmodule" = "yes"; then
+        PYTHONMODULE="python"
+    fi)
+AC_SUBST(PYTHONMODULE)
+if test -n "$PYTHONMODULE"; then
+    AC_ENABLE_SHARED
+else
+    AC_DISABLE_SHARED
+fi
 
 dnl Determine the host type
 AC_CANONICAL_HOST
@@ -515,13 +529,13 @@ fi
 #
 
 dnl handle fortran compiler.
+FORTRAN=$DEFAULT_FORTRAN
 AC_ARG_ENABLE(fortran,
     AC_HELP_STRING([--enable-fortran],
         [compile Fortran interface to Silo @<:@default=yes@:>@]),
     if test "$enable_fortran" = "no" ; then
         FORTRAN=""
-    fi,
-    FORTRAN=$DEFAULT_FORTRAN)
+    fi)
 AC_SUBST(FORTRAN)
 
 # Check for programs.
@@ -582,39 +596,28 @@ AC_ARG_WITH(readline,
     detect_readline=$default_detect_readline)
 
 dnl
-dnl handle the python module.
-dnl
-AC_ARG_ENABLE(pythonmodule,
-    AS_HELP_STRING([--enable-pythonmodule],[build python module @<:@default=no@:>@]),
-    if test "$enable_pythonmodule" = "yes"; then
-        PYTHONMODULE="python"
-    fi,
-    PYTHONMODULE=$DEFAULT_PYTONMODULE)
-AC_SUBST(PYTHONMODULE)
-
-dnl
 dnl handle browser.
 dnl
+BROWSER=$DEFAULT_BROWSER
 AC_ARG_ENABLE(browser,
     AC_HELP_STRING([--enable-browser],
         [build browser @<:@default=yes@:>@]),
     if test "$enable_browser" = "no"; then
         BROWSER=""
-    fi,
-    BROWSER=$DEFAULT_BROWSER)
+    fi)
 if test -n "$BROWSER"; then
     detect_readline=yes
 fi
 AC_SUBST(BROWSER)
 
 dnl handle silex
+SILEX=$DEFAULT_SILEX
 AC_ARG_ENABLE(silex,
     AC_HELP_STRING([--enable-silex], 
         [build the silex browser @<:@default=no@:>@]),
-    if test "$enable_silex" = "yes"; then
-        SILEX="silex"
-    fi,
-    SILEX=$DEFAULT_SILEX)
+    if test "$enable_silex" = "no"; then
+        SILEX=""
+    fi)
 AC_SUBST(SILEX)
 
 dnl Handle explicit request for libz
@@ -641,13 +644,13 @@ elif test -n "$with_zlib" && test "$with_zlib" != yes; then
 fi
 
 dnl handle Peter Lindstrom's hzip compression stuff 
+HZIP=$DEFAULT_HZIP
 AC_ARG_ENABLE(hzip,
     AC_HELP_STRING([--enable-hzip], 
         [enable Lindstrom hex/quad mesh compression @<:@default=yes@:>@]),
     if test "$enable_hzip" = "no"; then
         HZIP=""
-    fi,
-    HZIP=$DEFAULT_HZIP)
+    fi)
 AC_SUBST(HZIP)
 
 dnl hzip does better with zlib if available. It may have been
@@ -669,13 +672,13 @@ if test -n "$HZIP" && test "$with_zlib" != no; then
 fi
 
 dnl enable Peter Lindstrom's fpzip compression stuff 
+FPZIP=$DEFAULT_FPZIP
 AC_ARG_ENABLE(fpzip,
     AC_HELP_STRING([--enable-fpzip], 
         [enable Lindstrom float 1,2,3D array compression @<:@default=yes@:>@]),
     if test "$enable_fpzip" = "no"; then
         FPZIP=""
-    fi,
-    FPZIP=$DEFAULT_FPZIP)
+    fi)
 AC_SUBST(FPZIP)
 if test -n "$FPZIP"; then
     AC_DEFINE(HAVE_FPZIP,1,[Support for Lindstrom float array compression])

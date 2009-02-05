@@ -46,7 +46,8 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
 	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
-	quad$(EXEEXT) version$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4)
+	quad$(EXEEXT) version$(EXEEXT) namescheme$(EXEEXT) \
+	$(am__EXEEXT_2) $(am__EXEEXT_4)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
@@ -171,6 +172,11 @@ multispec_OBJECTS = multispec.$(OBJEXT)
 multispec_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@multispec_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@multispec_DEPENDENCIES = ../src/libsiloh5.la
+namescheme_SOURCES = namescheme.c
+namescheme_OBJECTS = namescheme.$(OBJEXT)
+namescheme_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@namescheme_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@namescheme_DEPENDENCIES = ../src/libsiloh5.la
 obj_SOURCES = obj.c
 obj_OBJECTS = obj.$(OBJEXT)
 obj_LDADD = $(LDADD)
@@ -354,6 +360,7 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
 	$(nodist_EXTRA_multi_test_SOURCES) multi_test.c \
 	$(nodist_EXTRA_multispec_SOURCES) multispec.c \
+	$(nodist_EXTRA_namescheme_SOURCES) namescheme.c \
 	$(nodist_EXTRA_obj_SOURCES) obj.c \
 	$(nodist_EXTRA_onehex_SOURCES) onehex.c \
 	$(nodist_EXTRA_oneprism_SOURCES) oneprism.c \
@@ -386,10 +393,11 @@ DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	extface.c $(am__grab_SOURCES_DIST) group_test.c largefile.c \
 	listtypes.c mat3d_3across.c $(am__matf77_SOURCES_DIST) \
 	merge_block.c mmadjacency.c multi_file.c multi_test.c \
-	multispec.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
-	partial_io.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
-	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) $(rocket_SOURCES) \
-	sami.c simple.c spec.c specmix.c subhex.c testall.c \
+	multispec.c namescheme.c obj.c onehex.c oneprism.c \
+	onepyramid.c onetet.c partial_io.c point.c \
+	$(am__pointf77_SOURCES_DIST) polyzl.c $(quad_SOURCES) \
+	$(am__quadf77_SOURCES_DIST) $(rocket_SOURCES) sami.c simple.c \
+	spec.c specmix.c subhex.c testall.c \
 	$(am__testallf77_SOURCES_DIST) testpdb.c twohex.c ucd.c \
 	ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
 ETAGS = etags
@@ -593,8 +601,8 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
-	csg rocket mmadjacency largefile version $(am__append_1) \
-	$(am__append_3)
+	csg rocket mmadjacency largefile version namescheme \
+	$(am__append_1) $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -652,6 +660,7 @@ rocket_SOURCES = \
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_dir_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_quad_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_version_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_namescheme_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arrayf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_curvef77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_matf77_SOURCES = dummy.cxx
@@ -782,6 +791,9 @@ multi_test$(EXEEXT): $(multi_test_OBJECTS) $(multi_test_DEPENDENCIES)
 multispec$(EXEEXT): $(multispec_OBJECTS) $(multispec_DEPENDENCIES) 
 	@rm -f multispec$(EXEEXT)
 	$(CXXLINK) $(multispec_OBJECTS) $(multispec_LDADD) $(LIBS)
+namescheme$(EXEEXT): $(namescheme_OBJECTS) $(namescheme_DEPENDENCIES) 
+	@rm -f namescheme$(EXEEXT)
+	$(CXXLINK) $(namescheme_OBJECTS) $(namescheme_LDADD) $(LIBS)
 obj$(EXEEXT): $(obj_OBJECTS) $(obj_DEPENDENCIES) 
 	@rm -f obj$(EXEEXT)
 	$(CXXLINK) $(obj_OBJECTS) $(obj_LDADD) $(LIBS)
@@ -890,6 +902,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multi_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multi_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multispec.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/namescheme.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/obj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onehex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oneprism.Po@am__quote@

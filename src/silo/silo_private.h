@@ -777,7 +777,7 @@ INTERNAL int db_FreeToc (DBfile *);
 INTERNAL int db_GetMachDataSize (int);
 INTERNAL int DBGetObjtypeTag (char *);
 INTERNAL char *DBGetObjtypeName (int);
-INTERNAL char *db_strndup (char *, int);
+INTERNAL char *db_strndup (const char *, int);
 INTERNAL char *db_GetDatatypeString (int);
 INTERNAL int db_GetDatatypeID (char *);
 INTERNAL int db_perror (const char *, int, char *);

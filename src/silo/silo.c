@@ -394,7 +394,7 @@ db_strerror(int errorno)
  *
  *---------------------------------------------------------------------*/
 INTERNAL char *
-db_strndup(char *string, int len)
+db_strndup(const char *string, int len)
 {
     char          *out = NULL;
     char          *me = "strndup";

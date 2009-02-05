@@ -31,6 +31,7 @@ FILES = \
  alloc.c \
  extface.c \
  silo.c  \
+ silo_ns.c \
  $(EXTRAFILES)
 
 BUILT_SOURCES = silo.inc

@@ -52,7 +52,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
-      rocket mmadjacency largefile version
+      rocket mmadjacency largefile version namescheme
 
 dir_SOURCES = \
  dir.c \
@@ -102,7 +102,8 @@ check_PROGRAMS = \
  largefile \
  dir \
  quad \
- version 
+ version \
+ namescheme
 
 # Deal with need to use c++ linker whenever we've got C++
 # sources compiled with the silo library and the fact that
@@ -150,6 +151,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_dir_SOURCES = dummy.cxx
  nodist_EXTRA_quad_SOURCES = dummy.cxx
  nodist_EXTRA_version_SOURCES = dummy.cxx
+ nodist_EXTRA_namescheme_SOURCES = dummy.cxx
  nodist_EXTRA_arrayf77_SOURCES = dummy.cxx
  nodist_EXTRA_curvef77_SOURCES = dummy.cxx
  nodist_EXTRA_matf77_SOURCES = dummy.cxx

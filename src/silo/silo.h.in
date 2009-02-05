@@ -1341,6 +1341,25 @@ typedef struct _DBgroupelmap {
     int fracs_data_type;
 } DBgroupelmap;
 
+#if !defined(DB_MAX_EXPSTRS)
+#define DB_MAX_EXPSTRS 8
+#endif
+
+typedef struct _DBnamescheme
+{
+    char *fmt;              /* orig. format string */
+    const char **fmtptrs;   /* ptrs into first (printf) part of fmt for each conversion spec. */
+    int fmtlen;             /* len of first part of fmt */
+    int ncspecs;            /* # of conversion specs in first part of fmt */
+    char delim;             /* delimiter char used for parts of fmt */
+    int nembed;             /* number of last embedded string encountered */
+    char *embedstrs[DB_MAX_EXPSTRS]; /* ptrs to copies of embedded strings */
+    int narrefs;            /* number of array refs in conversion specs */
+    char **arrnames;        /* array names used by array refs */
+    const int **arrvals;    /* pointer to actual array data assoc. with each name */
+    char **exprstrs;        /* expressions to be evaluated for each conv. spec. */
+} DBnamescheme;
+
 typedef struct DBfile *___DUMMY_TYPE;  /* Satisfy ANSI scope rules */
 
 /*
@@ -1564,6 +1583,7 @@ SILO_API extern DBedgelist *DBAllocEdgelist(void);
 SILO_API extern DBfacelist *DBAllocFacelist(void);
 SILO_API extern DBmaterial *DBAllocMaterial(void);
 SILO_API extern DBmatspecies *DBAllocMatspecies(void);
+SILO_API extern DBnamescheme *DBAllocNamescheme(void);
 
 SILO_API extern void     DBFreeMatspecies(DBmatspecies *);
 SILO_API extern void     DBFreeMaterial(DBmaterial *);
@@ -1590,6 +1610,7 @@ SILO_API extern void     DBFreeMultimat(DBmultimat *);
 SILO_API extern void     DBFreeMultimatspecies(DBmultimatspecies *);
 SILO_API extern void     DBFreeCompoundarray(DBcompoundarray *);
 SILO_API extern void     DBFreeCurve(DBcurve *);
+SILO_API extern void     DBFreeNamescheme(DBnamescheme *);
 
 SILO_API extern long     DBSetDataReadMask(long);
 SILO_API extern long     DBGetDataReadMask(void);
@@ -1827,6 +1848,9 @@ SILO_API extern char *safe_strdup(const char *s);
 SILO_API double randf (double rmin, double rmax);
 
 SILO_API extern int      DBFreeCompressionResources(DBfile *dbfile, const char *meshname);
+
+SILO_API extern DBnamescheme *DBMakeNamescheme(const char *fmt, ...);
+SILO_API const char *DBGetName(DBnamescheme *ns, int natnum);
 
 /*-------------------------------------------------------------------------
  * Public global variables.
