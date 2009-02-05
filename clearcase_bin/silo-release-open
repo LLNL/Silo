@@ -23,6 +23,11 @@
 #    Thomas R. Treadway, Thu Dec 27 14:06:40 PST 2007
 #    reformatted, added -final, -clean options.
 #
+#    Mark C. Miller, Thu Feb  5 11:55:56 PST 2009
+#    Fixed bgl builds by explicitly requesting HDF5-1.6.6 and
+#    building a blrts_xlc version of libz. Also moved $CONFOPTS to
+#    end of configure args so that caller can use $CONFOPTS to override
+#    the default behavior of build() and/or build2() functions.
 #######################################################################
 #
 function usage() {
@@ -86,9 +91,9 @@ function build() {
     $MAKE $MAKEOPTS clean
 
     ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip --enable-legacy-datatyped-pointers \
---prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+--prefix=$TOPDIR/$VERSION/$ARCH --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib \
+$CONFOPTS
     test $? != 0 && return
     $MAKE $MAKEOPTS
     test $? != 0 && return
@@ -104,9 +109,9 @@ function build() {
     $MAKE $MAKEOPTS clean
 
     ../$TOPSRCDIR/configure \
---prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+--prefix=$TOPDIR/$VERSION/$ARCH --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib \
+$CONFOPTS
     test $? != 0 && return
     $MAKE $MAKEOPTS
     if [ $? = 0 && "$DOCHECK" = "yes" ] ; then
@@ -123,9 +128,9 @@ function build() {
     $MAKE $MAKEOPTS clean
 
     ../$TOPSRCDIR/configure --enable-pythonmodule --enable-shared \
---prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+--prefix=$TOPDIR/$VERSION/$ARCH --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib \
+$CONFOPTS
     test $? != 0 && return
     $MAKE $MAKEOPTS
     if [ $? = 0 && "$DOCHECK" = "yes" ] ; then
@@ -160,7 +165,7 @@ function build2() {
     cd $TOPDIR/$VERSION/test/$ARCH
     ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip --enable-legacy-datatyped-pointers \
 --prefix=$TOPDIR/$VERSION/$ARCH \
---disable-browser --disable-silex --without-hdf5 --without-szlib $CONFOPTS
+--disable-browser --disable-silex --without-hdf5 --without-szlib $CONFOPTS2
     test $? != 0 && return
     $MAKE $MAKEOPTS
     test $? != 0 && return
@@ -171,9 +176,9 @@ function build2() {
     $MAKE $MAKEOPTS clean
 
     ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip --enable-legacy-datatyped-pointers \
---prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2 \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+--prefix=$TOPDIR/$VERSION/$ARCH --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib \
+$CONFOPTS2
     test $? != 0 && return
     $MAKE $MAKEOPTS
     test $? != 0 && return
@@ -189,9 +194,9 @@ function build2() {
     $MAKE $MAKEOPTS clean
 
     ../$TOPSRCDIR/configure \
---prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2 \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+--prefix=$TOPDIR/$VERSION/$ARCH --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib \
+$CONFOPTS2
     test $? != 0 && return
     $MAKE $MAKEOPTS
     if [ $? = 0 && "$DOCHECK" = "yes" ] ; then
@@ -208,9 +213,9 @@ function build2() {
     $MAKE $MAKEOPTS clean
 
     ../$TOPSRCDIR/configure --enable-pythonmodule --enable-shared \
---prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2 \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+--prefix=$TOPDIR/$VERSION/$ARCH --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib \
+$CONFOPTS2
     test $? != 0 && return
     $MAKE $MAKEOPTS
     if [ $? = 0 && "$DOCHECK" = "yes" ] ; then
@@ -786,21 +791,25 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
 
 function ubgl() {
     HOSTS="${lcun}@ubgl"
-    ARCH="sles_9_ppc64_blrts_xlc"
+    ARCH="sles_9_ppc64"
     CONFOPTS="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlc FC=blrts_xlf \
     CXX=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlC \
     ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
+    CPPFLAGS=-I/usr/gapps/silo/zlib/1.2.3/sles_9_ppc64-blrts_xlc/include \
+    LDFLAGS=\"-L/usr/gapps/silo/zlib/1.2.3/sles_9_ppc64-blrts_xlc/lib -lz\" \
     CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
     CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" "
     CONFOPTS2="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlc FC=blrts_xlf \
     CXX=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlC \
     ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
+    CPPFLAGS=-I/usr/gapps/silo/zlib/1.2.3/sles_9_ppc64-blrts_xlc/include \
+    LDFLAGS=\"-L/usr/gapps/silo/zlib/1.2.3/sles_9_ppc64-blrts_xlc/lib -lz\" \
     CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
     CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
     --disable-silex --disable-browser --without-readline \
-    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
-    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
+    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/sles_9_ppc64-blrts_xlc \
+    --with-hdf5=/usr/gapps/silo/hdf5/1.6.6/sles_9_ppc64-blrts_xlc/include,\
+/usr/gapps/silo/hdf5/1.6.6/sles_9_ppc64-blrts_xlc/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
     build2 \
     "PATH=/opt/ibmcmp/vacpp/bg/8.0/bin:/opt/ibmcmp/xlf/bg/10.1/bin:/usr/local/bin:\
@@ -817,9 +826,10 @@ function ubgl() {
     ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
     CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
     CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
-    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
-    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
+    --disable-silex \
+    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/sles_9_ppc64-xlc \
+    --with-hdf5=/usr/gapps/silo/hdf5/1.6.6/sles_9_ppc64-xlc/include,\
+/usr/gapps/silo/hdf5/1.6.6/sles_9_ppc64-xlc/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
     build2 \
     "PATH=/opt/ibmcmp/vacpp/bg/8.0/bin:/opt/ibmcmp/xlf/bg/10.1/bin:/usr/local/bin:\
