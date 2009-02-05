@@ -1464,6 +1464,11 @@ stc_silo_types (void) {
             "pointer (array 'self.nblocks' (primitive 'int'))");
       COMP (has_external_zones,
             "pointer (array 'self.nblocks' (primitive 'int'))");
+      COMP (lgroupings,        "primitive 'int'");
+      COMP (groupings,
+            "pointer (array 'self.lgroupings' (primitive 'int'))");
+      COMP (groupnames,
+            "pointer (array 'self.lgroupings' (primitive 'string'))");
    } ESTRUCT;
 
    STRUCT (DBmultimeshadj) {

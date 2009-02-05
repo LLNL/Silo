@@ -8512,6 +8512,9 @@ UM_CalcExtents(float *coord_arrays[], int datatype, int ndims, int nnodes,
  *    Thomas R. Treadway, Thu Jul  6 17:05:24 PDT 2006
  *    Added reference to curve options.
  *
+ *    Thomas R. Treadway, Thu Jul 20 11:06:27 PDT 2006
+ *    Added lgroupings, groupings, and groupnames to multimesh options.
+ *
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -9115,6 +9118,18 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_HIDE_FROM_GUI:
                         _mm._guihide = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_GROUPINGS_SIZE:
+                        _mm._lgroupings = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_GROUPINGS:
+                        _mm._groupings = (int *) optlist->values[i];
+                        break;
+
+                    case DBOPT_GROUPINGNAMES:
+                        _mm._groupnames = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -9736,6 +9751,10 @@ db_ResetGlobalData_Ucdzonelist (void) {
  *
  *    Mark C. Miller, Mon Jun 21 18:06:36 PDT 2004
  *    Moved from silo_pdb.c to public place where any driver can call
+ *
+ *    Thomas R. Treadway, Thu Jul 20 11:06:27 PDT 2006
+ *    Added _lgroupings, _groupings, and _groupnames.
+ *
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_MultiMesh (void) {
@@ -9757,6 +9776,9 @@ db_ResetGlobalData_MultiMesh (void) {
    _mm._matcounts = NULL;
    _mm._matlists = NULL;
    _mm._has_external_zones = NULL;
+   _mm._lgroupings = 0;
+   _mm._groupings = NULL;
+   _mm._groupnames = NULL;
    return 0;
 }
 

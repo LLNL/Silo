@@ -441,6 +441,14 @@ DBFreeMultimesh(DBmultimesh *msh)
         FREE(msh->meshnames[i]);
     }
 
+    if (msh->groupnames)
+    {
+        for(i=0;i<msh->lgroupings;i++)
+            FREE(msh->groupnames[i]);
+        FREE(msh->groupnames);
+    }
+    if (msh->groupings)
+        FREE(msh->groupings);
     FREE(msh->meshids);
     FREE(msh->meshnames);
     FREE(msh->meshtypes);

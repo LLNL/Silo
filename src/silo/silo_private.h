@@ -664,6 +664,9 @@ struct _mm {
     int            *_matlists;
     int            *_has_external_zones;
     int            _guihide;
+    int            _lgroupings;
+    int            *_groupings;
+    char           **_groupnames;
 };
 
 /*

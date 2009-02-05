@@ -257,6 +257,10 @@ typedef enum {
 #define DBOPT_HIDE_FROM_GUI     311
 #define DBOPT_TOPO_DIM          312 /* TOPOlogical DIMension */
 #define DBOPT_REFERENCE         313 /* reference object */
+#define DBOPT_GROUPINGS_SIZE    314 /* size of grouping array */
+#define DBOPT_GROUPINGS         315 /* groupings array */
+#define DBOPT_GROUPINGNAMES     316 /* array of size determined by 
+                                       number of groups of names of groups. */
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -574,6 +578,9 @@ typedef struct {
     int           *zonecounts;  /* array of zone counts for each block */
     int           *has_external_zones;  /* external flags for each block */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    int            lgroupings;  /* size of groupings array */
+    int            *groupings;  /* Array of mesh-ids, group-ids, and counts */
+    char          **groupnames; /* Array of group-names for groupings  */
 } DBmultimesh;
 
 /*----------------------------------------------------------------------------

@@ -2112,6 +2112,10 @@ pdb_getvarinfo (PDBfile *pdbfile,
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *    Thomas R. Treadway, Thu Jul 20 13:34:57 PDT 2006
+ *    Added lgroupings, groupings, and groupnames options.
+ *
  *--------------------------------------------------------------------*/
 CALLBACK DBmultimesh *
 db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
@@ -2121,6 +2125,7 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
    int            ncomps, type;
    int            i;
    char          *tmpnames, delim[2], *s, *name, tmp[256];
+   char          *tmpgnames = NULL;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultimesh";
@@ -2149,6 +2154,9 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("extents", &tmpmm.extents, DB_DOUBLE);
       DEFALL_OBJ("zonecounts", &tmpmm.zonecounts, DB_INT);
       DEFALL_OBJ("has_external_zones", &tmpmm.has_external_zones, DB_INT);
+      DEFINE_OBJ("lgroupings", &tmpmm.lgroupings, DB_INT);
+      DEFALL_OBJ("groupings", &tmpmm.groupings, DB_INT);
+      DEFALL_OBJ("groupnames", &tmpgnames, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -2159,13 +2167,13 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       CHECK_TYPE(typestring, DB_MULTIMESH, objname);
 
       /*----------------------------------------
-       *  Internally, the meshnames are stored
-       *  in a single character string as a
-       *  delimited set of names. Here we break
+       *  Internally, the meshnames and groupings 
+       *  iare stored in a single character string 
+       *  as a delimited set of names. Here we break
        *  them into separate names.
        *----------------------------------------*/
 
-      if (tmpnames != NULL && mm->nblocks > 0) {
+      if ((tmpnames != NULL) && (mm->nblocks > 0)) {
          mm->meshnames = ALLOC_N(char *, mm->nblocks);
 
          delim[0] = tmpnames[0];
@@ -2186,6 +2194,10 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
             }
          }
          FREE(tmpnames);
+      }
+      if ((tmpgnames != NULL) && (mm->lgroupings > 0)) {
+         mm->groupnames = db_StringListToStringArray(tmpgnames, mm->lgroupings);
+         FREE(tmpgnames);
       }
    }
 
@@ -5574,6 +5586,9 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
  *    Fixed bug where there was an assumption that the string is
  *    NULL terminated.
  *
+ *    Thomas R. Treadway, Thu Jul 20 13:34:57 PDT 2006
+ *    Added lgroupings, groupings, and groupnames options.
+ *
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -5585,6 +5600,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    long           count[3];
    DBobject      *obj;
    char          *tmp = NULL, *cur = NULL;
+   char          *gtmp = NULL;
 
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
@@ -5594,7 +5610,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMESH, 14);
+   obj = DBMakeObject(name, DB_MULTIMESH, 18);
    DBAddIntComponent(obj, "nblocks", nmesh);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -5668,8 +5684,8 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    if (_mm._zonecounts != NULL) {
 
       count[0] = nmesh;
-      DBWriteComponent(dbfile, obj, "zonecounts", name, "integer", _mm._zonecounts,
-                       1, count);
+      DBWriteComponent(dbfile, obj, "zonecounts", name, "integer", 
+                       _mm._zonecounts, 1, count);
    }
 
    /*-------------------------------------------------------------
@@ -5678,10 +5694,28 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    if (_mm._has_external_zones != NULL) {
 
       count[0] = nmesh;
-      DBWriteComponent(dbfile, obj, "has_external_zones", name, "integer", _mm._has_external_zones,
-                       1, count);
+      DBWriteComponent(dbfile, obj, "has_external_zones", name, "integer", 
+                       _mm._has_external_zones, 1, count);
    }
+   /*-------------------------------------------------------------
+    *  Add the DBOPT_GROUP* options if present.
+    *-------------------------------------------------------------*/
+   if (_mm._lgroupings > 0)
+      DBAddIntComponent(obj, "lgroupings", _mm._lgroupings);
+   if ((_mm._lgroupings  > 0) && (_mm._groupnames != NULL)) {
+      db_StringArrayToStringList((const char **) _mm._groupnames, 
+                    _mm._lgroupings, &gtmp, &len);
 
+      count[0] = len;
+      DBWriteComponent(dbfile, obj, "groupnames", name, "char",
+                    gtmp, 1, count);
+      FREE(gtmp);
+   }
+   if ((_mm._lgroupings  > 0) && (_mm._groupings != NULL)) {
+      count[0] = _mm._lgroupings;
+      DBWriteComponent(dbfile, obj, "groupings", name, "integer",
+                    _mm._groupings, 1, count);
+   }
 
    /*-------------------------------------------------------------
     *  Write multi-mesh object to SILO file.

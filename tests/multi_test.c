@@ -541,6 +541,33 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     double         *tmpExtents;
 
     /* 
+     * Initialize a simple grouping
+     */
+    int             ngroupings;
+    int             groupings[9];
+    char          **groupingnames = NULL;
+    ngroupings = 9;            /* number of elements in the grouping arrays */
+    groupings[0] = 5;          /* number of elements in this group */
+    groupings[1] = 0;
+    groupings[2] = 1;
+    groupings[3] = 2;
+    groupings[4] = 3;
+    groupings[5] = 4;
+    groupings[6] = 2;          /* number of elements in next group */
+    groupings[7] = 5;
+    groupings[8] = 6;
+    groupingnames = (char**)malloc(sizeof(char*)*ngroupings);
+    groupingnames[0] = safe_strdup("First Grouping");
+    groupingnames[1] = safe_strdup("Zero");
+    groupingnames[2] = safe_strdup("One");
+    groupingnames[3] = safe_strdup("Two");
+    groupingnames[4] = safe_strdup("Three");
+    groupingnames[5] = safe_strdup("Four");
+    groupingnames[6] = safe_strdup("Second Grouping");
+    groupingnames[7] = safe_strdup("Five");
+    groupingnames[8] = safe_strdup("Six");
+
+    /* 
      * Initialize the names and create the directories for the blocks.
      */
 
@@ -637,6 +664,9 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
        }
     }
     SET_OPTIONS(extentssize,tmpExtents,zonecounts,NULL,NULL,NULL,has_external_zones);
+    DBAddOption(optlist, DBOPT_GROUPINGS_SIZE, &ngroupings);
+    DBAddOption(optlist, DBOPT_GROUPINGS, groupings);
+    DBAddOption(optlist, DBOPT_GROUPINGNAMES, groupingnames);
     if (DBPutMultimesh(dbfile, "mesh1", nblocks,
                        meshnames, meshtypes, optlist) == -1)
     {
@@ -645,6 +675,13 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         free(tmpExtents);
         return (-1);
     }                                  /* if */
+    DBClearOption(optlist, DBOPT_GROUPINGS_SIZE);
+    DBClearOption(optlist, DBOPT_GROUPINGS);
+    DBClearOption(optlist, DBOPT_GROUPINGNAMES);
+    
+    for (i = 0; i < ngroupings; i++)
+        FREE(groupingnames[i]);
+    FREE(groupingnames);
 
     /* test hidding a multimesh */
     DBAddOption(optlist, DBOPT_HIDE_FROM_GUI, &one);

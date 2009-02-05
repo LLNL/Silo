@@ -61,7 +61,8 @@
       integer  DBCSG_XFORM, DBOPT_ALIGN, DBOPT_ASCII_LABEL
       integer  DBOPT_BASEINDEX, DBOPT_BLOCKORIGIN, DBOPT_BNDNAMES
       integer  DBOPT_COORDSYS, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_EXTENTS
-      integer  DBOPT_EXTENTS_SIZE, DBOPT_FACETYPE, DBOPT_GROUPNUM
+      integer  DBOPT_EXTENTS_SIZE, DBOPT_FACETYPE, DBOPT_GROUPINGNAMES
+      integer  DBOPT_GROUPINGS, DBOPT_GROUPINGS_SIZE, DBOPT_GROUPNUM
       integer  DBOPT_GROUPORIGIN, DBOPT_HAS_EXTERNAL_ZONES
       integer  DBOPT_HIDE_FROM_GUI, DBOPT_HI_OFFSET, DBOPT_LABEL
       integer  DBOPT_LO_OFFSET, DBOPT_MAJORORDER, DBOPT_MATCOLORS
@@ -214,6 +215,9 @@
       parameter (DBOPT_HIDE_FROM_GUI       = 311            )
       parameter (DBOPT_TOPO_DIM            = 312            )
       parameter (DBOPT_REFERENCE           = 313            )
+      parameter (DBOPT_GROUPINGS_SIZE      = 314            )
+      parameter (DBOPT_GROUPINGS           = 315            )
+      parameter (DBOPT_GROUPINGNAMES       = 316            )
       parameter (DB_TOP                    = 0              )
       parameter (DB_NONE                   = 1              )
       parameter (DB_ALL                    = 2              )

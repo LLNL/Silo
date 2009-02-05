@@ -340,6 +340,9 @@ typedef struct DBmultimesh_mt {
     char                extents[256];
     char                zonecounts[256];
     char                has_external_zones[256];
+    int                 lgroupings;
+    char                groupings[256];
+    char                groupnames[256];
 } DBmultimesh_mt;
 static hid_t    DBmultimesh_mt5;
 
@@ -1156,6 +1159,9 @@ db_hdf5_init(void)
         MEMBER_S(str256,        extents);
         MEMBER_S(str256,        zonecounts);
         MEMBER_S(str256,        has_external_zones);
+        MEMBER_S(int,           lgroupings);
+        MEMBER_S(str256,        groupings);
+        MEMBER_S(str256,        groupnames);
     } DEFINE;
 
     STRUCT(DBmultimeshadj) {
@@ -7866,6 +7872,7 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
     DBmultimesh_mt      m;
     int                 i, len;
     char                *s=NULL;
+    char                *t=NULL;
     
     memset(&m, 0, sizeof m);
     PROTECT {
@@ -7916,6 +7923,17 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
             db_hdf5_compwr(dbfile, DB_INT, 1, &nmesh, _mm._has_external_zones,
                            m.has_external_zones/*out*/);
         }
+        if (_mm._lgroupings > 0 && _mm._groupings != NULL) {
+            db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._lgroupings, _mm._groupings,
+                           m.groupings/*out*/);
+        }
+        if (_mm._lgroupings > 0 && _mm._groupnames != NULL) {
+           db_StringArrayToStringList((const char **)_mm._groupnames, 
+                           _mm._lgroupings, &t, &len);
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, t,
+                           m.groupnames/*out*/);
+           FREE(t);
+        }
         
         /* Initialize meta data */
         m.nblocks = nmesh;
@@ -7927,6 +7945,7 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
         m.grouporigin = _mm._grouporigin;
         m.extentssize = _mm._extentssize;
         m.guihide = _mm._guihide;
+        m.lgroupings = _mm._lgroupings;
 
         /* Write meta data to file */
         STRUCT(DBmultimesh) {
@@ -7944,6 +7963,9 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
             MEMBER_S(str(m.extents), extents);
             MEMBER_S(str(m.zonecounts), zonecounts);
             MEMBER_S(str(m.has_external_zones), has_external_zones);
+            if (m.lgroupings)   MEMBER_S(int, lgroupings);
+            MEMBER_S(str(m.groupings), groupings);
+            MEMBER_S(str(m.groupnames), groupnames);
         } OUTPUT(dbfile, DB_MULTIMESH, name, &m);
 
         /* Free resources */
@@ -7991,6 +8013,7 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
     DBmultimesh_mt      m;
     DBmultimesh         *mm=NULL;
     char                *s=NULL;
+    char                *t=NULL;
 
     PROTECT {
         /* Open object and make sure it's a multimesh */
@@ -8026,6 +8049,7 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
         mm->grouporigin = m.grouporigin;
         mm->extentssize = m.extentssize;
         mm->guihide = m.guihide;
+        mm->lgroupings = m.lgroupings;
 
         /* Read the raw data */
         if (mm->extentssize>0)
@@ -8039,6 +8063,10 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
             char *tok = strtok(i?NULL:s, ";");
             mm->meshnames[i] = STRDUP(tok);
         }
+        mm->groupings =  db_hdf5_comprd(dbfile, m.groupings, 1);
+        t = db_hdf5_comprd(dbfile, m.groupnames, 1);
+        if (t) mm->groupnames = db_StringListToStringArray(t, mm->lgroupings);
+        FREE(t);
         
         H5Tclose(o);
         FREE(s);
@@ -8049,6 +8077,7 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
             H5Tclose(o);
         } H5E_END_TRY;
         DBFreeMultimesh(mm);
+        FREE(t);
         FREE(s);
     } END_PROTECT;
     return mm;
