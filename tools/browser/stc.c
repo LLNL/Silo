@@ -1377,6 +1377,10 @@ stc_offset (obj_t _self, obj_t comp) {
  *  
  *  Robb Matzke, Thu Jul 15 12:40:37 EDT 1999
  *  Added `gnodeno' and `nodeno' properties to the DBucdmesh type.
+ *  
+ *  Thomas R. Treadway, Fri Jul  7 12:44:38 PDT 2006
+ *  Added support for DBOPT_REFERENCE in Curves
+ *  
  *-------------------------------------------------------------------------
  */
 void
@@ -1408,6 +1412,7 @@ stc_silo_types (void) {
       COMP (xunits,             "primitive 'string'");
       COMP (yunits,             "primitive 'string'");
       COMP (npts,               "primitive 'int'");
+      COMP (reference,          "primitive 'string'");
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (x,

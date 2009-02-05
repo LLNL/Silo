@@ -3137,6 +3137,8 @@ build_curve (DBfile *dbfile, int driver)
     * curve.
     */
    DBPutCurve (dbfile, "coscurve", NULL, y[1], DB_FLOAT, 20, opts) ;
+   DBAddOption (opts, DBOPT_REFERENCE, "sincurve") ;
+   DBPutCurve (dbfile, "sincurv1", NULL, NULL, DB_FLOAT, 20, opts);
    DBFreeOptlist (opts) ;
 }
 

@@ -3,7 +3,7 @@
  */
 
 #define NEED_SCORE_MM
-#include <silo_pdb_private.h>
+#include "silo_pdb_private.h"
 
 /* File-wide modifications:
  *      Sean Ahern, Fri Aug  1 13:23:38 PDT 1997
@@ -1799,6 +1799,9 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char *array_name)
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *      Thomas R. Treadway, Fri Jul  7 11:43:41 PDT 2006
+ *      Added DBOPT_REFERENCE support.
  *-------------------------------------------------------------------------*/
 CALLBACK DBcurve *
 db_pdb_GetCurve (DBfile *_dbfile, char *name)
@@ -1821,7 +1824,8 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
    DEFALL_OBJ ("ylabel",   &tmpcu.ylabel,   DB_CHAR) ;
    DEFALL_OBJ ("xunits",   &tmpcu.xunits,   DB_CHAR) ;
    DEFALL_OBJ ("yunits",   &tmpcu.yunits,   DB_CHAR) ;
-   DEFALL_OBJ ("guihide",  &tmpcu.guihide,  DB_INT) ;
+   DEFALL_OBJ ("reference",&tmpcu.reference,DB_CHAR) ;
+   DEFINE_OBJ ("guihide",  &tmpcu.guihide,  DB_INT) ;
    if (PJ_GetObject (dbfile->pdb, name, &tmp_obj, &type)<0)
        return NULL ;
    if (NULL == (cu = DBAllocCurve ())) return NULL ;
@@ -1843,10 +1847,18 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
     */
    if (SILO_Globals.dataReadMask & DBCurveArrays)
    {
-       INIT_OBJ (&tmp_obj) ;
-       DEFALL_OBJ ("xvals", &cu->x, cu->datatype) ;
-       DEFALL_OBJ ("yvals", &cu->y, cu->datatype) ;
-       PJ_GetObject (dbfile->pdb, name, &tmp_obj, NULL) ;
+      if (cu->reference && (cu->x || cu->y)) {
+         db_perror ("x and y not NULL", E_BADARGS, me) ;
+         return NULL ;
+      } else if (cu->reference) {
+         cu->x = NULL;
+         cu->y = NULL;
+      } else {
+         INIT_OBJ (&tmp_obj) ;
+         DEFALL_OBJ ("xvals", &cu->x, cu->datatype) ;
+         DEFALL_OBJ ("yvals", &cu->y, cu->datatype) ;
+         PJ_GetObject (dbfile->pdb, name, &tmp_obj, NULL) ;
+      }
    }
 
    cu->id = 0 ;
@@ -5005,6 +5017,9 @@ db_pdb_PutCompoundarray (DBfile    *_dbfile,     /*pointer to open file  */
  *              May 15, 1996
  *
  * Modifications:
+ *
+ *      Thomas R. Treadway, Fri Jul  7 11:43:41 PDT 2006
+ *      Added DBOPT_REFERENCE support.
  *-------------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -5021,7 +5036,7 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
     * them with any values specified in the options list.
     */
    db_InitCurve (opts) ;
-   obj = DBMakeObject (name, DB_CURVE, 16) ;
+   obj = DBMakeObject (name, DB_CURVE, 18) ;
 
    /*
     * Write the X and Y arrays.  If the user specified a variable
@@ -5032,27 +5047,39 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
     * Y values array must be the null pointer!
     */
    dtype_s = db_GetDatatypeString (dtype) ;
+   if (_cu._reference && (xvals || yvals)) {
+      return db_perror ("vals argument can not be used with reference option",
+                        E_BADARGS, me) ;
+   }
    if (_cu._varname[0]) {
       if (xvals) {
          return db_perror ("xvals argument specified with xvarname option",
                            E_BADARGS, me) ;
-      }
-      DBAddVarComponent (obj, "xvals", _cu._varname[0]) ;
+      } else if (!_cu._varname[0]) {
+         DBAddVarComponent (obj, "xvals", _cu._varname[0]) ;
+      } 
    } else {
-      if (!xvals) return db_perror ("xvals", E_BADARGS, me) ;
-      DBWriteComponent (_dbfile, obj, "xvals", name, dtype_s,
+      if (!xvals && !_cu._reference) {
+         return db_perror ("xvals", E_BADARGS, me) ;
+      } else if (xvals && !_cu._reference) {
+         DBWriteComponent (_dbfile, obj, "xvals", name, dtype_s,
                         xvals, 1, &lnpts);
+      }
    }
    if (_cu._varname[1]) {
       if (yvals) {
          return db_perror ("yvals argument specified with yvarname option",
                            E_BADARGS, me) ;
+      } else if (!_cu._varname[1]) {
+         DBAddVarComponent (obj, "yvals", _cu._varname[1]) ;
       }
-      DBAddVarComponent (obj, "yvals", _cu._varname[1]) ;
    } else {
-      if (!yvals) return db_perror ("yvals", E_BADARGS, me) ;
-      DBWriteComponent (_dbfile, obj, "yvals", name, dtype_s,
+      if (!yvals && !_cu._reference) {
+         return db_perror ("yvals", E_BADARGS, me) ;
+      } else if (yvals && !_cu._reference) {
+         DBWriteComponent (_dbfile, obj, "yvals", name, dtype_s,
                         yvals, 1, &lnpts);
+      }
    }
    FREE (dtype_s) ;
 
@@ -5068,6 +5095,7 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
    if (_cu._varname[1]) DBAddStrComponent (obj, "yvarname", _cu._varname[1]) ;
    if (_cu._labels[1])  DBAddStrComponent (obj, "ylabel",   _cu._labels[1]) ;
    if (_cu._units[1])   DBAddStrComponent (obj, "yunits",   _cu._units[1]) ;
+   if (_cu._reference)  DBAddStrComponent (obj, "reference",_cu._reference) ;
    if (_cu._guihide)    DBAddIntComponent (obj, "guihide",  _cu._guihide);
    DBWriteObject (_dbfile, obj, TRUE) ;
    DBFreeObject(obj);

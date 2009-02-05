@@ -8,8 +8,8 @@
 #ifndef SILO_PDB_PRIVATE_H
 #define SILO_PDB_PRIVATE_H
 
-#include <pdb.h>
-#include <silo_private.h>
+#include "pdb.h"
+#include "silo_private.h"
 
 /*
  * The private version of the DBfile structure is defined here.

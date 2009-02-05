@@ -21,8 +21,10 @@
  *
  */
 #include <assert.h>
+#if HAVE_STDLIB_H
 #include <stdlib.h> /*missing from silo header files*/
-#include <silo_hdf5_private.h>
+#endif
+#include "silo_hdf5_private.h"
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 
 /* Defining these to check overhead of PROTECT */
@@ -75,6 +77,7 @@ typedef struct DBcurve_mt {
     char                ylabel[256];
     char                xunits[256];
     char                yunits[256];
+    char                reference[256];
 } DBcurve_mt;
 static hid_t DBcurve_mt5 = -1;
 
@@ -904,6 +907,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        ylabel);
         MEMBER_S(str256,        xunits);
         MEMBER_S(str256,        yunits);
+        MEMBER_S(str256,        reference);
     } DEFINE;
 
     STRUCT(DBcsgmesh) {
@@ -4723,6 +4727,9 @@ db_hdf5_GetObject(DBfile *_dbfile, char *name)
  *
  * Modifications:
  *
+ *  Thomas R. Treadway, Fri Jul  7 12:44:38 PDT 2006
+ *  Added support for DBOPT_REFERENCE in Curves
+ *
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -4748,6 +4755,11 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
             UNWIND();
         }
 
+        if (_cu._reference && (xvals || yvals)) {
+            db_perror("xvals and yvals can not be defined with DBOPT_REFERENCE",
+                      E_BADARGS, me);
+            UNWIND();
+        }
         /* Write X and Y arrays if supplied */
         if (_cu._varname[0]) {
             if (db_hdf5_fullname(dbfile, _cu._varname[0],
@@ -4758,7 +4770,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
         }
         if (xvals) {
             db_hdf5_compwr(dbfile, dtype, 1, &npts, xvals, m.xvarname/*out*/);
-        } else if (!_cu._varname[0]) {
+        } else if (!_cu._varname[0] && !_cu._reference) {
             db_perror("one of xvals or xvarname must be specified",
                       E_BADARGS, me);
             UNWIND();
@@ -4773,7 +4785,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
         }
         if (yvals) {
             db_hdf5_compwr(dbfile, dtype, 1, &npts, yvals, m.yvarname/*out*/);
-        } else if (!_cu._varname[1]) {
+        } else if (!_cu._varname[1] && !_cu._reference) {
             db_perror("one of yvals or yvarname must be specified",
                       E_BADARGS, me);
             UNWIND();
@@ -4787,6 +4799,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
         strcpy(m.ylabel, OPT(_cu._labels[1]));
         strcpy(m.xunits, OPT(_cu._units[0]));
         strcpy(m.yunits, OPT(_cu._units[1]));
+        strcpy(m.reference, OPT(_cu._reference));
 
         /* Write curve header to file */
         STRUCT(DBcurve) {
@@ -4799,6 +4812,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
             MEMBER_S(str(_cu._labels[1]), ylabel);
             MEMBER_S(str(_cu._units[0]), xunits);
             MEMBER_S(str(_cu._units[1]), yunits);
+            MEMBER_S(str(_cu._reference), reference);
         } OUTPUT(dbfile, DB_CURVE, name, &m);
 
     } CLEANUP {
@@ -4824,6 +4838,9 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
  *
  *   Mark C. Miller, Thu Jul 29 11:26:24 PDT 2004
  *   Made it set datatype correctly. Added support for dataReadMask
+ *
+ *  Thomas R. Treadway, Fri Jul  7 12:44:38 PDT 2006
+ *  Added support for DBOPT_REFERENCE in Curves
  *
  *-------------------------------------------------------------------------
  */
@@ -4878,12 +4895,18 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
         cu->ylabel = OPTDUP(m.ylabel);
         cu->xunits = OPTDUP(m.xunits);
         cu->yunits = OPTDUP(m.yunits);
+        cu->reference = OPTDUP(m.reference);
         
         /* Read X and Y data */
         if (SILO_Globals.dataReadMask & DBCurveArrays)
         {
-            cu->x = db_hdf5_comprd(dbfile, m.xvarname, 0);
-            cu->y = db_hdf5_comprd(dbfile, m.yvarname, 0);
+            if (cu->reference) {
+                cu->x = NULL;
+                cu->y = NULL;
+            } else {
+                cu->x = db_hdf5_comprd(dbfile, m.xvarname, 0);
+                cu->y = db_hdf5_comprd(dbfile, m.yvarname, 0);
+            }
         }
         H5Tclose(o);
         

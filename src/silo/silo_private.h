@@ -42,17 +42,23 @@ for advertising or product endorsement purposes.
 #ifndef SILO_PRIVATE_H
 #define SILO_PRIVATE_H
 
-#include <config.h> /*silo configuration settings */
+#include "config.h" /*silo configuration settings */
+#if HAVE_STDLIB_H
 #include <stdlib.h> /*for malloc,calloc,realloc, etc */
+#endif
 #include <setjmp.h> /*for unwind_protect(), etc */
 #include <string.h> /*for STR_BEGINSWITH, etc */
 #if defined(_WIN32)
 #include <silo_win32_compatibility.h>
 #else
+#if HAVE_UNISTD_H
 #include <unistd.h> /*for access() F_OK, R_OK */
 #endif
+#endif
+#if HAVE_LIMITS_H
 #include <limits.h> /*for determining machine type for F77_ID */
-#include <silo.h>
+#endif
+#include "silo.h"
 
 /*
  * File status, maintained by DBOpen, DBCreate, and DBClose.
@@ -231,26 +237,26 @@ typedef struct context_t {
 }                                                                             \
    API_BEGIN(M,T,R)
 
-#define API_BEGIN(M,T,R) {						      \
-                        char    *me = M ;				      \
-                        static int     jstat ;				      \
-                        static context_t *jold ;			      \
-                        DBfile  *jdbfile = NULL ;			      \
-                        T jrv = R ;					      \
+#define API_BEGIN(M,T,R) {                                                    \
+                        char    *me = M ;                                     \
+                        static int     jstat ;                                \
+                        static context_t *jold ;                              \
+                        DBfile  *jdbfile = NULL ;                             \
+                        T jrv = R ;                                           \
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
-			if (DBDebugAPI>0) {				      \
-			   write (DBDebugAPI, M, strlen(M));		      \
-			   write (DBDebugAPI, "\n", 1);			      \
-			}						      \
-                        if (!Jstk){					      \
-                           jstk_push() ;				      \
-                           if (setjmp(Jstk->jbuf)) {			      \
-                              while (Jstk) jstk_pop () ;		      \
-                              db_perror ("", db_errno, me) ;		      \
-                              return R ;				      \
-                           }						      \
-                           jstat = 1 ;					      \
+                        if (DBDebugAPI>0) {                                   \
+                           write (DBDebugAPI, M, strlen(M));                  \
+                           write (DBDebugAPI, "\n", 1);                       \
+                        }                                                     \
+                        if (!Jstk){                                           \
+                           jstk_push() ;                                      \
+                           if (setjmp(Jstk->jbuf)) {                          \
+                              while (Jstk) jstk_pop () ;                      \
+                              db_perror ("", db_errno, me) ;                  \
+                              return R ;                                      \
+                           }                                                  \
+                           jstat = 1 ;                                        \
                         }
 
 #define API_DEPRECATE2(M,T,R,NM)                                              \
@@ -265,35 +271,35 @@ typedef struct context_t {
 }                                                                             \
    API_BEGIN2(M,T,R,NM)
 
-#define API_BEGIN2(M,T,R,NM) {						      \
-                        char    *me = M ;				      \
-                        static int     jstat ;				      \
-                        static context_t *jold ;			      \
-                        DBfile  *jdbfile = dbfile ;			      \
-                        T jrv = R ;					      \
+#define API_BEGIN2(M,T,R,NM) {                                                \
+                        char    *me = M ;                                     \
+                        static int     jstat ;                                \
+                        static context_t *jold ;                              \
+                        DBfile  *jdbfile = dbfile ;                           \
+                        T jrv = R ;                                           \
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
-			if (DBDebugAPI>0) {				      \
-			   write (DBDebugAPI, M, strlen(M));		      \
-			   write (DBDebugAPI, "\n", 1);			      \
-			}						      \
-                        if (!Jstk){					      \
-                           jstk_push() ;				      \
-                           if (setjmp(Jstk->jbuf)) {			      \
-                              if (jold) {				      \
-                                 context_restore (jdbfile, jold) ;	      \
-                              }						      \
-                              while (Jstk) jstk_pop () ;		      \
-                              db_perror ("", db_errno, me) ;		      \
-                              return R ;				      \
-                           }						      \
-                           jstat = 1 ;					      \
-                           if (NM && jdbfile && !jdbfile->pub.pathok) {	      \
-                              char *jr ;				      \
+                        if (DBDebugAPI>0) {                                   \
+                           write (DBDebugAPI, M, strlen(M));                  \
+                           write (DBDebugAPI, "\n", 1);                       \
+                        }                                                     \
+                        if (!Jstk){                                           \
+                           jstk_push() ;                                      \
+                           if (setjmp(Jstk->jbuf)) {                          \
+                              if (jold) {                                     \
+                                 context_restore (jdbfile, jold) ;            \
+                              }                                               \
+                              while (Jstk) jstk_pop () ;                      \
+                              db_perror ("", db_errno, me) ;                  \
+                              return R ;                                      \
+                           }                                                  \
+                           jstat = 1 ;                                        \
+                           if (NM && jdbfile && !jdbfile->pub.pathok) {       \
+                              char *jr ;                                      \
                               jold = context_switch (jdbfile,(char *)NM,&jr) ;\
-                              if (!jold) longjmp (Jstk->jbuf, -1) ;	      \
-                              NM = jr ;					      \
-                           }						      \
+                              if (!jold) longjmp (Jstk->jbuf, -1) ;           \
+                              NM = jr ;                                       \
+                           }                                                  \
                         }
 
 #define API_END         if (jold) context_restore (jdbfile, jold) ;     \
@@ -317,7 +323,7 @@ typedef struct context_t {
                         }
 
 #define PROTECT         {jstk_push();if(!setjmp(Jstk->jbuf)){
-#define UNWIND()	longjmp(Jstk->jbuf,-1)
+#define UNWIND()        longjmp(Jstk->jbuf,-1)
 #define CLEANUP         jstk_pop();}else{int jcan=0;
 #define END_PROTECT     jstk_pop();if(!jcan&&Jstk)longjmp(Jstk->jbuf,-1);}}
 #define CANCEL_UNWIND   jcan=1
@@ -340,8 +346,8 @@ typedef struct context_t {
 #define OOPS            -1                /*DONT CHANGE THIS */
 #define OKAY            0                 /*DONT CHANGE THIS */
 #define MAXDIMS_VARWRITE 7
-#define OVER_WRITE	0x0001		  /*overwrite DBobject */
-#define FREE_MEM	0x0002		  /*free DBobject memory */
+#define OVER_WRITE      0x0001            /*overwrite DBobject */
+#define FREE_MEM        0x0002            /*free DBobject memory */
 #define NELMTS(X)       (sizeof(X)/sizeof(X[0]))  /*Number of elements */
 
 #define STR_EQUAL(S1,S2) (!strcmp((S1),(S2)))
@@ -664,11 +670,12 @@ struct _mm {
  * Global data for curves.
  */
 struct _cu {
-   char		*_label ;
-   char		*_varname[2] ;
-   char		*_labels[2] ;
-   char		*_units[2] ;
+   char         *_label ;
+   char         *_varname[2] ;
+   char         *_labels[2] ;
+   char         *_units[2] ;
     int          _guihide;
+   char         *_reference ;
 };
 
 /*

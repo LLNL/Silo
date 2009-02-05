@@ -14,11 +14,11 @@
 #ifndef SILO_HDF5_PRIVATE_H
 #define SILO_HDF5_PRIVATE_H
 #include <config.h>
-#include <silo_private.h>
-#include <silo_drivers.h>
+#include "silo_private.h"
+#include "silo_drivers.h"
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define NDSETTAB        30
 

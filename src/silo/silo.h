@@ -256,6 +256,7 @@ typedef enum {
 #define DBOPT_ZONENAMES         310
 #define DBOPT_HIDE_FROM_GUI     311
 #define DBOPT_TOPO_DIM          312 /* TOPOlogical DIMension */
+#define DBOPT_REFERENCE         313 /* reference object */
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -511,6 +512,7 @@ typedef struct {
     float         *y;           /* Range  values for curve */
     int            npts;        /* Number of points in curve */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char          *reference;   /* Label to reference object */
 } DBcurve;
 
 typedef struct {

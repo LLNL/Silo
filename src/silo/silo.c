@@ -50,13 +50,15 @@ for advertising or product endorsement purposes.
  */
 
 /* Private SILO functions.  */
-#include <config.h> /* For a possible redefinition of setjmp/longjmp.
+#include "config.h" /* For a possible redefinition of setjmp/longjmp.
                        Also for SDX driver detection.  */
 #include <stdio.h>
 #include <assert.h>
 #include <float.h>
 #include <math.h>
+#if HAVE_STDLIB_H
 #include <stdlib.h>         /* For abort(). */
+#endif
 #if !defined(_WIN32)
 #include <sys/file.h>       /* For R_OK and F_OK definitions. */
 #endif
@@ -65,14 +67,18 @@ for advertising or product endorsement purposes.
 #if !defined(_WIN32)
 #include <sys/errno.h>      /* For errno definitions. */
 #endif
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 #include <ctype.h>          /* For isalnum */
 
 /* DB_MAIN must be defined before including silo_private.h. */
 #define DB_MAIN
-#include <silo_private.h>
-#include <silo_drivers.h>
+#include "silo_private.h"
+#include "silo_drivers.h"
 
 #define FALSE   0
 #define TRUE    1
@@ -8503,6 +8509,9 @@ UM_CalcExtents(float *coord_arrays[], int datatype, int ndims, int nnodes,
  *    Thomas R. Treadway, Wed Jun 28 10:31:45 PDT 2006
  *    Added topo_dim to ucdmesh.
  *
+ *    Thomas R. Treadway, Thu Jul  6 17:05:24 PDT 2006
+ *    Added reference to curve options.
+ *
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -9150,6 +9159,10 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_HIDE_FROM_GUI:
                         _cu._guihide = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_REFERENCE:
+                        _cu._reference = (char *)optlist->values[i];
                         break;
 
                     default:

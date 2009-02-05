@@ -49,7 +49,7 @@ for advertising or product endorsement purposes.
  * Normally, programs cannot tell if a particular driver is defined by just
  * including silo.h.  To determine if a driver is defined, include this file.
  */
-#include <silo.h>
+#include "silo.h"
 
 /*
  * Get rid of the driver definitions from silo.h so that we can define the
