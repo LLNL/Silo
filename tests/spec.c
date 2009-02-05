@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include <silo.h>
-#include <swat.h>
 #include <math.h>
 #include <stdlib.h>
+#include "silo.h"
 
 #define NX 10                   /* Number of zones in x direction */
 #define NY 3                   /* Number of zones in y direction */

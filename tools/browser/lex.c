@@ -48,10 +48,10 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <config.h>     /*MeshTV configuration record*/
+#include "config.h"     /*MeshTV configuration record*/
 
 #include <assert.h>
-#include <browser.h>
+#include "browser.h"
 #include <ctype.h>
 #include <errno.h>
 #ifdef HAVE_LIBREADLINE
@@ -79,9 +79,12 @@ extern int read_history ();
 #  endif /* defined(HAVE_READLINE_HISTORY_H) */
   /* no history */
 #endif /* HAVE_READLINE_HISTORY */
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#include <swat.h>
+#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif /* HAVE_SYS_STAT_H */
 
 #define LEX_PROMPT      "> "
 #define LEX_PROMPT2     "...> "

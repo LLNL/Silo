@@ -56,11 +56,10 @@ for advertising or product endorsement purposes.
  *
  */
 
-#include <silo.h>
-#include <swat.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include "silo.h"
 
 #define false   0
 #define true    1
@@ -70,6 +69,8 @@ for advertising or product endorsement purposes.
 #ifndef M_PI        /* yea, Solaris 5 */
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #endif
+#define  ALLOC_N(x,n)     (x *) calloc (n, sizeof (x))
+#define  FREE(x)          if ( (x) != NULL) {free(x);(x)=NULL;}
 
 /* Local function prototypes */
 static void     fill_rect2d_bkgr(int matlist[], int nx, int ny, int matno);

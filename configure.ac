@@ -313,6 +313,14 @@ dnl     Thomas R. Treadway, Thu Oct 25 16:32:40 PDT 2007
 dnl     Using environment variable to over SZLIB, HDF5, SILEX, QT, 
 dnl     Fortran, and readline.
 dnl
+dnl     Thomas R. Treadway, Thu Oct 25 16:32:40 PDT 2007
+dnl     Changed release, and auspices statement
+dnl
+dnl     Thomas R. Treadway, Wed Nov 28 14:17:56 PST 2007
+dnl     Changed release to 4.6.1
+dnl     Added check for sys/stat.h
+dnl     Removed src/swat directory
+dnl
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -321,9 +329,9 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 4.6)
-m4_define(SILO_DATE, 2007/10/30)
-m4_define(SILO_TIME, 14:44:35)
+m4_define(SILO_VERSION, 4.6.1)
+m4_define(SILO_DATE, 2007/11/28)
+m4_define(SILO_TIME, 14:17:56)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
@@ -353,13 +361,10 @@ dnl needs to occur when it doesn't.
 dnl Developers should './configure --enable-maintainer-mode' to turn on
 dnl rebuild rules.
 AM_MAINTAINER_MODE
-AC_COPYRIGHT([This work was produced at the University of California,
-Lawrence Livermore National Laboratory (UC LLNL) under contract
-no. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
-(DOE) and The Regents of the University of California (University) for
-the operation of UC LLNL. The rights of the Federal Government are
-reserved under Contract 48 subject to the restrictions agreed upon by
-the DOE and University as allowed under DOE Acquisition Letter 97-1.])
+AC_COPYRIGHT([This work was performed under the auspices of the 
+U.S. Department of Energy by Lawrence Livermore National Laboratory 
+in part under Contract W-7405-Eng-48 and in part under 
+Contract DE-AC52-07NA27344.])
 # using autotest
 AC_CONFIG_TESTDIR(tests)
 
@@ -790,13 +795,9 @@ AC_PROG_INSTALL
 dnl
 dnl Checks for header files.
 dnl
-AC_HEADER_STDC
-AC_HEADER_TIME
-
-dnl
 dnl If we don't have these header files, we can't continue.
 dnl
-AC_CHECK_HEADERS(sys/time.h stdarg.h, ,
+AC_CHECK_HEADERS(sys/time.h stdarg.h sys/stat.h, ,
 AC_MSG_ERROR([$0 wasn't able to find a necessary header file
 (see above).  Please rectify this and rerun configure.
 See the file INSTALL_FAQ in this directory for possible reasons
@@ -810,6 +811,8 @@ dnl Only needed by silock
 AC_CHECK_HEADERS(ieeefp.h)
 dnl a few systems define O_RDONLY here
 AC_CHECK_HEADERS(fcntl.h sys/fcntl.h sys/types.h unistd.h)
+dnl
+AC_HEADER_STDC
 
 dnl
 dnl Check for various functions in the STDIO header files.
@@ -1398,7 +1401,6 @@ AC_CONFIG_FILES([
             src/Makefile
             src/score/Makefile
             src/pdb/Makefile
-            src/swat/Makefile
 	    src/silo/Makefile
 	    src/silo/silo.h
             src/debug/Makefile

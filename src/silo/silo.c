@@ -12212,3 +12212,82 @@ DBGetMrgvar(DBfile *dbfile, const char *name)
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
+/**********************************************************************
+ *
+ * Purpose: Provide a strdup command which correctly handles
+ *          a NULL string.
+ *
+ * Programmer: Sean Ahern
+ * Date: April 1999
+ *
+ * Input arguments:                                               
+ *    s             The string to copy.
+ *  
+ * Global variables:
+ *    None
+ *      
+ * Local variables:
+ *    retval        The new string, with memory allocated.
+ *      
+ * Assumptions and Comments:
+ *
+ * Modifications:
+ *
+ *    Lisa J. Roberts, Tue Jul 27 12:44:57 PDT 1999
+ *    Modified the function so it returns the string.
+ *  
+ *    Jeremy Meredith, Tue Aug 31 13:41:29 PDT 1999
+ *    Made it handle 0-length strings correctly.
+ *  
+ *       Thomas R. Treadway, Wed Nov 28 15:25:53 PST 2007
+ *       Moved from src/swat/sw_string.c
+ *
+ ***********************************************************************/
+char *  
+safe_strdup(const char *s)
+{
+    char *retval = NULL;
+    
+    if (!s) 
+        return NULL;
+            
+    retval = (char*)malloc(sizeof(char)*(strlen(s)+1));
+    strcpy(retval,s);
+    retval[strlen(s)] = '\0';
+        
+    return(retval);
+}
+/*-------------------------------------------------------------------------
+ * Function:    randf
+ * 
+ * Purpose:     Generates random numbers between RMIN (inclusive) and
+ *              RMAX (exclusive).  RMIN should be smaller than RMAX.
+ * 
+ * Return:      A pseudo-random number
+ * 
+ * Programmer:  Robb Matzke
+ *              robb@callisto.nuance.mdn.com
+ *              Jul  9, 1996
+ * 
+ * Modifications:
+ *       Thomas R. Treadway, Wed Nov 28 15:25:53 PST 2007
+ *       Moved from src/swat/randf.c
+ *
+ *-------------------------------------------------------------------------
+ */
+double
+randf(rmin, rmax)
+    double          rmin;
+    double          rmax;
+{   
+    unsigned long   acc;
+    static double   divisor = 0;
+
+    if (divisor < 1)
+        divisor = pow(2.0, 30);
+
+    rmax -= rmin;
+    acc = ((rand() & 0x7fff) << 15) | (rand() & 0x7fff);
+
+    return (rmax * (acc / divisor) + rmin);
+}

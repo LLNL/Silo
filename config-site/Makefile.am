@@ -12,6 +12,16 @@ EXTRA_DIST = \
  OSF1.conf \
  README \
  SunOS.conf \
+ alc1.conf \
+ alc2.conf \
+ atlas0.conf \
+ atlas1088.conf \
+ atlas1120.conf \
+ atlas32.conf \
+ atlas512.conf \
+ atlas544.conf \
+ atlas576.conf \
+ atlas608.conf \
  bgl1.conf \
  bgl10.conf \
  bgl11.conf \
@@ -30,11 +40,6 @@ EXTRA_DIST = \
  gauss1.conf \
  gauss2.conf \
  gauss3.conf \
- gps.conf \
- gps01.conf \
- gps02.conf \
- gps15.conf \
- gps16.conf \
  hoth.conf \
  janus.conf \
  kickit.conf \
@@ -54,6 +59,15 @@ EXTRA_DIST = \
  naboo.conf \
  pengra.conf \
  pengra0.conf \
+ pengra1.conf \
+ pengra12.conf \
+ pengra13.conf \
+ pengra14.conf \
+ pengra15.conf \
+ pengra2.conf \
+ pengra3.conf \
+ prism1.conf \
+ prism2.conf \
  purple.conf \
  purple1441.conf \
  purple1442.conf \
@@ -73,6 +87,7 @@ EXTRA_DIST = \
  sandia_paragon \
  sasn100.conf \
  sphere.llnl.gov.conf \
+ sunburn.conf \
  sunset.conf \
  sunspot.conf \
  t3d \
@@ -83,7 +98,6 @@ EXTRA_DIST = \
  thunder1.conf \
  thunder2.conf \
  thunder3.conf \
- tidalwave.conf \
  ubgl.conf \
  um.conf \
  um006.conf \

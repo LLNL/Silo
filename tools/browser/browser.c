@@ -56,10 +56,10 @@
  *      Modified readline definitions to support new configure macro.
  *-------------------------------------------------------------------------
  */
-#include <config.h>     /*MeshTV configuration record*/
+#include "config.h"     /*MeshTV configuration record*/
 
 #include <assert.h>
-#include <browser.h>
+#include "browser.h"
 #include <ctype.h>
 #include <pwd.h>
 #include <math.h>
@@ -89,9 +89,12 @@ extern int read_history ();
   /* no history */
 #endif /* HAVE_READLINE_HISTORY */
 #include <signal.h>
-#include <swat.h>
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif /* HAVE_SYS_STAT_H */
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 
 const char *arg0;               /*argv[0]                               */
 int     Verbosity=1;            /*0=none, 1=normal, 2=more              */

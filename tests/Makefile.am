@@ -30,8 +30,7 @@ AM_CPPFLAGS = \
  -I$(includedir) \
  -I$(srcdir)/../src/pdb \
  -I$(srcdir)/../src/score \
- -I$(srcdir)/../src/silo \
- -I$(srcdir)/../src/swat
+ -I$(srcdir)/../src/silo
 quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 

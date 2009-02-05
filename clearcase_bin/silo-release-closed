@@ -263,7 +263,7 @@ purple64() {
     mkdir aix_5_64_fed
     cd aix_5_64_fed
     ../$TOPSRCDIR/configure \
-    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.5 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
     gmake
@@ -337,7 +337,7 @@ purplegcc64() {
     ../$TOPSRCDIR/configure \
     CC=gcc CXX=g++ FC=g77 F77=g77 \
     FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
-    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.5 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed-gcc \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
     gmake
@@ -346,7 +346,7 @@ purplegcc64() {
     ../$TOPSRCDIR/configure \
     CC=gcc CXX=g++ FC=g77 F77=g77 \
     FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
-    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.5 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed-gcc \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/aix_5_64_fed-gcc \
     --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/aix_5_64_fed-gcc/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/aix_5_64_fed-gcc/lib
@@ -408,7 +408,7 @@ uv64() {
     mkdir aix_5_64_fed
     cd aix_5_64_fed
     ../$TOPSRCDIR/configure \
-    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.5 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
     make
@@ -473,7 +473,7 @@ uvgcc64() {
     ../$TOPSRCDIR/configure \
     CC=gcc CXX=g++ FC=g77 F77=g77 \
     FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
-    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.5 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed-gcc \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
     make

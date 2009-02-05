@@ -13,7 +13,7 @@ FILELIST="\
 ./tests/Makefile.in \
 ./src/Makefile.in ./src/debug/Makefile.in \
 ./src/filters/Makefile.in ./src/netcdf/Makefile.in \
-./src/silo/Makefile.in ./src/swat/Makefile.in \
+./src/silo/Makefile.in \
 ./src/taurus/Makefile.in ./src/unknown/Makefile.in \
 ./src/pdb/Makefile.in ./src/pdb_drv/Makefile.in \
 ./src/score/Makefile.in ./src/hdf5_drv/Makefile.in \

@@ -34,8 +34,6 @@ for advertising or product endorsement purposes.
 
 */
 
-#include <silo.h>
-#include <swat.h>
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
@@ -43,10 +41,11 @@ for advertising or product endorsement purposes.
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include "silo.h"
 
-#include <config.h>
+#include "config.h"
 #ifdef HAVE_HDF5_H
-#include <hdf5.h>
+#include "hdf5.h"
 #endif
 
 
@@ -87,6 +86,9 @@ for advertising or product endorsement purposes.
 #define ARRAY1_DIM1 4
 #undef ARRAY1_RANK
 #define ARRAY1_RANK 1
+
+#define  ALLOC_N(x,n)     (x *) calloc (n, sizeof (x))
+#define  FREE(x)          if ( (x) != NULL) {free(x);(x)=NULL;}
 
 int
 main(int argc, char *argv[])

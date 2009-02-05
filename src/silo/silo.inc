@@ -107,13 +107,14 @@
       integer  DB_NOCLOBBER, DB_NODECENT, DB_NONCOLLINEAR, DB_NONE
       integer  DB_NOTCENT, DB_NOTYPE, DB_NUMERICAL, DB_OFF, DB_ON
       integer  DB_OTHER, DB_PDB, DB_PHZONELIST, DB_POINTMESH
-      integer  DB_POINTVAR, DB_POSTORDER, DB_PREORDER, DB_QUADMESH
-      integer  DB_QUADVAR, DB_QUAD_CURV, DB_QUAD_RECT, DB_READ
-      integer  DB_RECTILINEAR, DB_RESUME, DB_ROWMAJOR, DB_RS6000, DB_SGI
-      integer  DB_SHORT, DB_SPHERICAL, DB_SUN3, DB_SUN4, DB_SUSPEND
-      integer  DB_TAURUS, DB_TOP, DB_UCDMESH, DB_UCDVAR, DB_UNKNOWN
-      integer  DB_USERDEF, DB_VARIABLE, DB_VARTYPE_ARRAY
-      integer  DB_VARTYPE_LABEL, DB_VARTYPE_MATERIAL, DB_VARTYPE_SCALAR
+      integer  DB_POINTVAR, DB_POSTORDER, DB_PREORDER, DB_QUADCURV
+      integer  DB_QUADMESH, DB_QUADRECT, DB_QUADVAR, DB_QUAD_CURV
+      integer  DB_QUAD_RECT, DB_READ, DB_RECTILINEAR, DB_RESUME
+      integer  DB_ROWMAJOR, DB_RS6000, DB_SGI, DB_SHORT, DB_SPHERICAL
+      integer  DB_SUN3, DB_SUN4, DB_SUSPEND, DB_TAURUS, DB_TOP
+      integer  DB_UCDMESH, DB_UCDVAR, DB_UNKNOWN, DB_USERDEF
+      integer  DB_VARIABLE, DB_VARTYPE_ARRAY, DB_VARTYPE_LABEL
+      integer  DB_VARTYPE_MATERIAL, DB_VARTYPE_SCALAR
       integer  DB_VARTYPE_SPECIES, DB_VARTYPE_SYMTENSOR
       integer  DB_VARTYPE_TENSOR, DB_VARTYPE_VECTOR, DB_VOLUME
       integer  DB_ZONECENT, DB_ZONELIST, DB_ZONETYPE_BEAM
@@ -126,8 +127,8 @@
 
       parameter (SILO_VERS_MAJ             = 4              )
       parameter (SILO_VERS_MIN             = 6              )
-      parameter (SILO_VERS_PAT             = 0              )
-      parameter (SILO_VERS_PRE             = 8              )
+      parameter (SILO_VERS_PAT             = 1              )
+      parameter (SILO_VERS_PRE             = 0              )
       parameter (DB_NETCDF                 = 0              )
       parameter (DB_PDB                    = 2              )
       parameter (DB_TAURUS                 = 3              )
@@ -141,7 +142,13 @@
       parameter (DB_HDF5_MPIOP             = 1280           )
       parameter (DB_NFILES                 = 256            )
       parameter (DB_NFILTERS               = 32             )
+      parameter (DB_COLLINEAR              = 130            )
+      parameter (DB_NONCOLLINEAR           = 131            )
+      parameter (DB_QUAD_RECT              = DB_COLLINEAR   )
+      parameter (DB_QUAD_CURV              = DB_NONCOLLINEAR)
       parameter (DB_INVALID_OBJECT         = -1             )
+      parameter (DB_QUADRECT               = DB_QUAD_RECT   )
+      parameter (DB_QUADCURV               = DB_QUAD_CURV   )
       parameter (DB_QUADMESH               = 500            )
       parameter (DB_QUADVAR                = 501            )
       parameter (DB_UCDMESH                = 510            )
@@ -264,10 +271,6 @@
       parameter (DB_RESUME                 = 5              )
       parameter (DB_ROWMAJOR               = 0              )
       parameter (DB_COLMAJOR               = 1              )
-      parameter (DB_COLLINEAR              = 130            )
-      parameter (DB_NONCOLLINEAR           = 131            )
-      parameter (DB_QUAD_RECT              = DB_COLLINEAR   )
-      parameter (DB_QUAD_CURV              = DB_NONCOLLINEAR)
       parameter (DB_NOTCENT                = 0              )
       parameter (DB_NODECENT               = 110            )
       parameter (DB_ZONECENT               = 111            )

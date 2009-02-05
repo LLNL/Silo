@@ -29,10 +29,10 @@ if LOCAL_NEEDED
 DRIVER_DIRS += local
 DRIVER_LIBS += local/libsilo_local.la
 endif
-SUBDIRS = score pdb swat silo debug \
+SUBDIRS = score pdb silo debug \
 $(DRIVER_DIRS) unknown filters .
 DIST_SUBDIRS = . debug filters hdf5_drv hexzip local netcdf \
-pdb pdb_drv score silo swat taurus unknown
+pdb pdb_drv score silo taurus unknown
 MAKESETTINGS = make.settings
 
 if HDF5_DRV_NEEDED
@@ -42,7 +42,6 @@ if HDF5_DRV_NEEDED
   libsiloh5_la_LIBADD = \
    score/libsilo_score.la \
    pdb/libsilo_pdb.la \
-   swat/libsilo_swat.la \
    silo/libsilo_silo.la \
    debug/libsilo_debug.la \
    $(DRIVER_LIBS) \
@@ -56,7 +55,6 @@ else
   libsilo_la_LIBADD = \
    score/libsilo_score.la \
    pdb/libsilo_pdb.la \
-   swat/libsilo_swat.la \
    silo/libsilo_silo.la \
    debug/libsilo_debug.la \
    $(DRIVER_LIBS) \

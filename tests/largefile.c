@@ -43,7 +43,9 @@ for advertising or product endorsement purposes.
 #include <unistd.h>
 
 #define ONE_MEG 1048576
-
+#ifndef M_PI        /* yea, Solaris 5 */
+#define M_PI        3.14159265358979323846264338327950288   /* pi */
+#endif
 
 static void
 build_curve (DBfile *dbfile, int driver)

@@ -5,13 +5,11 @@
 # This test suite is free software; the Free Software Foundation gives
 # unlimited permission to copy, distribute and modify it.
 #
-# This work was produced at the University of California,
-# Lawrence Livermore National Laboratory (UC LLNL) under contract
-# no. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
-# (DOE) and The Regents of the University of California (University) for
-# the operation of UC LLNL. The rights of the Federal Government are
-# reserved under Contract 48 subject to the restrictions agreed upon by
-# the DOE and University as allowed under DOE Acquisition Letter 97-1.
+# This work was performed under the auspices of
+# the U.S. Department of Energy by
+# Lawrence Livermore National Laboratory
+# in part under Contract W-7405-Eng-48 and
+# in part under Contract DE-AC52-07NA27344.
 ## --------------------- ##
 ## M4sh Initialization.  ##
 ## --------------------- ##
@@ -634,13 +632,13 @@ at_groups_all=' 1 2 3 4 5 6 7'
 # numerical order.
 at_format='?'
 # Description of all the test groups.
-at_help_all="1;testsuitef77.at:14;arrayf77;;
-2;testsuitef77.at:17;curvef77;;
-3;testsuitef77.at:20;matf77;;
-4;testsuitef77.at:23;pointf77;;
-5;testsuitef77.at:26;quadf77;;
-6;testsuitef77.at:29;testallf77;;
-7;testsuitef77.at:32;ucdf77;;
+at_help_all="1;testsuitef77.at:12;arrayf77;;
+2;testsuitef77.at:15;curvef77;;
+3;testsuitef77.at:18;matf77;;
+4;testsuitef77.at:21;pointf77;;
+5;testsuitef77.at:24;quadf77;;
+6;testsuitef77.at:27;testallf77;;
+7;testsuitef77.at:30;ucdf77;;
 "
 
 at_prev=
@@ -864,7 +862,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF
-silo 4.6-pre8 test suite: silo Fortran API test groups:
+silo 4.6 test suite: silo Fortran API test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -888,7 +886,7 @@ _ATEOF
   exit 0
 fi
 if $at_version_p; then
-  echo "$as_me (silo 4.6-pre8)"
+  echo "$as_me (silo 4.6)"
   cat <<\_ACEOF
 
 Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -896,13 +894,11 @@ Foundation, Inc.
 This test suite is free software; the Free Software Foundation gives
 unlimited permission to copy, distribute and modify it.
 
-This work was produced at the University of California,
-Lawrence Livermore National Laboratory (UC LLNL) under contract
-no. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
-(DOE) and The Regents of the University of California (University) for
-the operation of UC LLNL. The rights of the Federal Government are
-reserved under Contract 48 subject to the restrictions agreed upon by
-the DOE and University as allowed under DOE Acquisition Letter 97-1.
+This work was performed under the auspices of
+the U.S. Department of Energy by
+Lawrence Livermore National Laboratory
+in part under Contract W-7405-Eng-48 and
+in part under Contract DE-AC52-07NA27344.
 _ACEOF
   exit 0
 fi
@@ -979,15 +975,15 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 cat <<\_ASBOX
-## ------------------------------------------- ##
-## silo 4.6-pre8 test suite: silo Fortran API. ##
-## ------------------------------------------- ##
+## -------------------------------------- ##
+## silo 4.6 test suite: silo Fortran API. ##
+## -------------------------------------- ##
 _ASBOX
 {
   cat <<\_ASBOX
-## ------------------------------------------- ##
-## silo 4.6-pre8 test suite: silo Fortran API. ##
-## ------------------------------------------- ##
+## -------------------------------------- ##
+## silo 4.6 test suite: silo Fortran API. ##
+## -------------------------------------- ##
 _ASBOX
   echo
 
@@ -1224,19 +1220,19 @@ echo "$as_me: error: cannot create directory $as_dir" >&2;}
   fi
 
   case $at_group in
-  1 ) # 1. testsuitef77.at:14: arrayf77
-    at_setup_line='testsuitef77.at:14'
+  1 ) # 1. testsuitef77.at:12: arrayf77
+    at_setup_line='testsuitef77.at:12'
     at_desc="arrayf77"
     $at_quiet $ECHO_N "  1: arrayf77                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "1. testsuitef77.at:14: testing ..."
+      echo "1. testsuitef77.at:12: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitef77.at:15: arrayf77"
-echo testsuitef77.at:15 >"$at_check_line_file"
+echo "$at_srcdir/testsuitef77.at:13: arrayf77"
+echo testsuitef77.at:13 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1259,7 +1255,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitef77.at:15: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitef77.at:13: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1277,19 +1273,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  2 ) # 2. testsuitef77.at:17: curvef77
-    at_setup_line='testsuitef77.at:17'
+  2 ) # 2. testsuitef77.at:15: curvef77
+    at_setup_line='testsuitef77.at:15'
     at_desc="curvef77"
     $at_quiet $ECHO_N "  2: curvef77                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "2. testsuitef77.at:17: testing ..."
+      echo "2. testsuitef77.at:15: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitef77.at:18: curvef77"
-echo testsuitef77.at:18 >"$at_check_line_file"
+echo "$at_srcdir/testsuitef77.at:16: curvef77"
+echo testsuitef77.at:16 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1312,7 +1308,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitef77.at:18: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitef77.at:16: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1330,19 +1326,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  3 ) # 3. testsuitef77.at:20: matf77
-    at_setup_line='testsuitef77.at:20'
+  3 ) # 3. testsuitef77.at:18: matf77
+    at_setup_line='testsuitef77.at:18'
     at_desc="matf77"
     $at_quiet $ECHO_N "  3: matf77                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "3. testsuitef77.at:20: testing ..."
+      echo "3. testsuitef77.at:18: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitef77.at:21: matf77"
-echo testsuitef77.at:21 >"$at_check_line_file"
+echo "$at_srcdir/testsuitef77.at:19: matf77"
+echo testsuitef77.at:19 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1365,7 +1361,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitef77.at:21: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitef77.at:19: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1383,19 +1379,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  4 ) # 4. testsuitef77.at:23: pointf77
-    at_setup_line='testsuitef77.at:23'
+  4 ) # 4. testsuitef77.at:21: pointf77
+    at_setup_line='testsuitef77.at:21'
     at_desc="pointf77"
     $at_quiet $ECHO_N "  4: pointf77                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "4. testsuitef77.at:23: testing ..."
+      echo "4. testsuitef77.at:21: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitef77.at:24: pointf77"
-echo testsuitef77.at:24 >"$at_check_line_file"
+echo "$at_srcdir/testsuitef77.at:22: pointf77"
+echo testsuitef77.at:22 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1418,7 +1414,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitef77.at:24: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitef77.at:22: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1436,19 +1432,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  5 ) # 5. testsuitef77.at:26: quadf77
-    at_setup_line='testsuitef77.at:26'
+  5 ) # 5. testsuitef77.at:24: quadf77
+    at_setup_line='testsuitef77.at:24'
     at_desc="quadf77"
     $at_quiet $ECHO_N "  5: quadf77                                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "5. testsuitef77.at:26: testing ..."
+      echo "5. testsuitef77.at:24: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitef77.at:27: quadf77"
-echo testsuitef77.at:27 >"$at_check_line_file"
+echo "$at_srcdir/testsuitef77.at:25: quadf77"
+echo testsuitef77.at:25 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1471,7 +1467,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitef77.at:27: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitef77.at:25: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1489,19 +1485,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  6 ) # 6. testsuitef77.at:29: testallf77
-    at_setup_line='testsuitef77.at:29'
+  6 ) # 6. testsuitef77.at:27: testallf77
+    at_setup_line='testsuitef77.at:27'
     at_desc="testallf77"
     $at_quiet $ECHO_N "  6: testallf77                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "6. testsuitef77.at:29: testing ..."
+      echo "6. testsuitef77.at:27: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitef77.at:30: testallf77"
-echo testsuitef77.at:30 >"$at_check_line_file"
+echo "$at_srcdir/testsuitef77.at:28: testallf77"
+echo testsuitef77.at:28 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1524,7 +1520,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitef77.at:30: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitef77.at:28: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1542,19 +1538,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  7 ) # 7. testsuitef77.at:32: ucdf77
-    at_setup_line='testsuitef77.at:32'
+  7 ) # 7. testsuitef77.at:30: ucdf77
+    at_setup_line='testsuitef77.at:30'
     at_desc="ucdf77"
     $at_quiet $ECHO_N "  7: ucdf77                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "7. testsuitef77.at:32: testing ..."
+      echo "7. testsuitef77.at:30: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitef77.at:33: ucdf77"
-echo testsuitef77.at:33 >"$at_check_line_file"
+echo "$at_srcdir/testsuitef77.at:31: ucdf77"
+echo testsuitef77.at:31 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1577,7 +1573,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitef77.at:33: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitef77.at:31: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1885,7 +1881,7 @@ _ASBOX
   echo "Please send \`${at_testdir+${at_testdir}/}$as_me.log' and all information you think might help:"
   echo
   echo "   To: <visit-help@llnl.gov>"
-  echo "   Subject: [silo 4.6-pre8] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
+  echo "   Subject: [silo 4.6] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
   echo
   if test $at_debug_p = false; then
     echo

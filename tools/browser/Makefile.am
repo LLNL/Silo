@@ -11,9 +11,8 @@ endif
 info_TEXINFOS = browser.texi
 
 AM_CPPFLAGS = \
- -I$(includedir) \
- -I$(top_srcdir)/src/swat \
  -I$(top_srcdir)/src/silo \
+ -I$(includedir) \
  -DPUBLIC_INIT_FILE=\"$(includedir)/browser_rc\"
 
 EXTRA_DIST = \

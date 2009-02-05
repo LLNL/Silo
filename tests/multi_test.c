@@ -32,14 +32,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <silo.h>
-#include <swat.h>
+#include "silo.h"
 
 #define MAXBLOCKS       100           /* maximum number of blocks in an object   */
 #define MAXNUMVARS      10            /* maximum number of vars to output */
 #define STRLEN          60
 #define MIXMAX          20000       /* Maximum length of the mixed arrays */
 #define MAXMATNO        3
+
+#define ALLOC_N(T,N)            ((T*)((N)>0?calloc((size_t)(N),sizeof(T)):0))
+#define FREE(M)         if(M){free(M);(M)=NULL;}
+#ifndef MAX
+#define MAX(X,Y)        ((X)>(Y)?(X):(Y))
+#define MIN(X,Y)        ((X)<(Y)?(X):(Y))
+#endif
 
 #define SET_OPTIONS(ES,EX,ZCNTS,MLEN,MCNTS,MLISTS,HASEXT)   \
     if (optlist) DBFreeOptlist(optlist);                    \

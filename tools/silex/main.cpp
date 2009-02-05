@@ -35,16 +35,16 @@
 *
 *****************************************************************************/
 
-#include <qapplication.h>
-#include <Explorer.h>
+#include "qapplication.h"
+#include "Explorer.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #ifndef Q_WS_MACX
-#include <qwindowsstyle.h>
+#include "qwindowsstyle.h"
 #endif
-#include <qfiledialog.h>
-#include <qstring.h>
+#include "qfiledialog.h"
+#include "qstring.h"
 #include <iostream>
 
 // ****************************************************************************

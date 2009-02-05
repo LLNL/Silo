@@ -36,7 +36,9 @@
          }                                                                    \
       }                                                                       \
    }
-
+#ifndef M_PI        /* yea, Solaris 5 */
+#define M_PI        3.14159265358979323846264338327950288   /* pi */
+#endif
 #define RAD(deg)    M_PI*(deg/180.0)
 
 

@@ -37,6 +37,7 @@ BUILT_SOURCES = silo.inc
 DISTCLEANFILES = silo_version.h
 
 # built if it doesn't exit, could cause problem with VPATH
+# be extra careful about check-in time-stamps! silo.inc MUST be the oldest.
 silo.inc: silo.h.in silo_f.h
-	if test ! -e silo.inc; then \
+	if test ! -e $@; then \
 	  cat $(srcdir)/silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; fi
