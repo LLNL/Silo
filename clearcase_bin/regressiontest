@@ -159,12 +159,12 @@ htmlCiteMostRecentSiloDir () {
 #
 waitForTodaysDir () {
     todaysDir=`ls -d /home/visit/public_html/${dateBase}* 2>/dev/null`
-    theHour=`date +%l`
+    theHour=`date +%k`
     theHour=`expr $theHour + 12`
     while test "$todaysDir" = ""; do
         sleep 600
         todaysDir=`ls -d /home/visit/public_html/${dateBase}* 2>/dev/null`
-        if test `date +%l` -gt $theHour; then
+        if test `date +%k` -gt $theHour; then
             ifErrorSendMessage 1 "Silo tests stopped waiting for today's dir" "" 1
 	fi
     done
