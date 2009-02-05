@@ -176,10 +176,22 @@ extern "C" {
 #endif
 #endif
 
+/* Definitions for COORD_TYPE */
+/* Placed before DBObjectType enum because the
+   DB_QUAD_CURV and DB_QUAD_RECT symbols are
+   sometimes used as DBObjectType */
+
+#define  DB_COLLINEAR           130
+#define  DB_NONCOLLINEAR        131
+#define  DB_QUAD_RECT           DB_COLLINEAR
+#define  DB_QUAD_CURV           DB_NONCOLLINEAR
+
 /* Objects that can be stored in a data file */
 typedef enum {
     DB_INVALID_OBJECT= -1,       /*causes enum to be signed, do not remove,
                                    space before minus sign necessary for lint*/
+    DB_QUADRECT = DB_QUAD_RECT,
+    DB_QUADCURV = DB_QUAD_CURV,
     DB_QUADMESH=500,
     DB_QUADVAR=501,
     DB_UCDMESH=510,
@@ -349,12 +361,6 @@ typedef enum {
 /* Definitions for MAJOR_ORDER */
 #define  DB_ROWMAJOR            0
 #define  DB_COLMAJOR            1
-
-/* Definitions for COORD_TYPE */
-#define  DB_COLLINEAR           130
-#define  DB_NONCOLLINEAR        131
-#define  DB_QUAD_RECT           DB_COLLINEAR
-#define  DB_QUAD_CURV           DB_NONCOLLINEAR
 
 /* Definitions for CENTERING */
 #define  DB_NOTCENT             0

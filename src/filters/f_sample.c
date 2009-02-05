@@ -357,7 +357,7 @@ f_debug_NewToc(dbfile)
     printf("%s: DBNewToc (dbfile=0x%lx)\n",
            f_debug_name[id], (unsigned long)dbfile);
     printf("%*s: dbfile->pub.toc = 0x%lx\n",
-           strlen(f_debug_name[id]), "",
+           (int)strlen(f_debug_name[id]), "",
            (unsigned long)(dbfile->pub.toc));
 
     retval = FILTER_CALL(f_debug_cb[id].newtoc, (dbfile), -1, me);

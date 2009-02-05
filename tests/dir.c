@@ -35,6 +35,10 @@ for advertising or product endorsement purposes.
 */
 
 #include "silo.h"
+extern int build_quad(DBfile *dbfile, char *name);
+extern int build_ucd(DBfile *dbfile, char *name);
+extern int build_ucd_tri(DBfile *dbfile, char *name);
+
 
 
 /*-------------------------------------------------------------------------

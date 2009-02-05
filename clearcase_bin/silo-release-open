@@ -10,12 +10,15 @@
 #    silo-release-open version
 #
 # Modifications:
-# Thomas R. Treadway, Wed Oct  3 13:48:15 PDT 2007
-# Removed gps, added up
-# Added build of silex, and included szip
+#    Thomas R. Treadway, Wed Oct  3 13:48:15 PDT 2007
+#    Removed gps, added up
+#    Added build of silex, and included szip
 #
 #    Thomas R. Treadway, Fri Nov  2 16:17:59 PDT 2007
 #    Tunning for release 4.6
+#   
+#    Thomas R. Treadway, Wed Nov 14 12:54:37 PST 2007
+#    Corrected some of the pathc issues.
 #   
 #######################################################################
 #
@@ -51,8 +54,7 @@ hoth() {
 }
 
 hothgcc() {
-  ssh hoth << EOF > hoth.log 2>&1 &
-#!/bin/sh
+  ssh hoth "/bin/sh" << EOF > hoth.log 2>&1 &
     cd $BDTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/security/bin
@@ -81,8 +83,7 @@ hothgcc() {
 EOF
 }
 hothpgc() {
-  ssh hoth << EOF > hothpgc.log 2>&1 &
-  #!bin/sh -c 
+  ssh hoth "/bin/sh" << EOF > hothpgc.log 2>&1 &
   cd $BDTOPDIR/$VERSION/test
   umask 002
   PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.2/bin
@@ -110,8 +111,7 @@ hothpgc() {
 EOF
 }
 hothicc() {
-  ssh hoth << EOF > hothicc.log 2>&1 &
-  #!/bin/sh -c
+  ssh hoth "/bin/sh" << EOF > hothicc.log 2>&1 &
   cd $BDTOPDIR/$VERSION/test
   umask 002
   PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/intel/cc/current/bin:/usr/local/intel/fc/current/bin:/usr/local/intel/idb/current/bin
@@ -149,8 +149,7 @@ sunspot() {
 sunspotgcc() {
 # testsuite fails with bus error on "spec"
 # weird truncated PATH via ssh
-    ssh sunspot << EOF > sunspot.log 2>&1 &
-    #!/bin/sh -c
+    ssh sunspot "/bin/sh" << EOF > sunspot.log 2>&1 &
     cd $BDTOPDIR/$VERSION/test;
     umask 002
     PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin
@@ -182,8 +181,7 @@ EOF
 }
 sunspotcc() {
 # weird truncated PATH via ssh
-    ssh sunspot << EOF > sunspotcc.log 2>&1 &
-    #!/bin/sh -c
+    ssh sunspot "bin/sh" << EOF > sunspotcc.log 2>&1 &
     cd $BDTOPDIR/$VERSION/test;
     umask 002
     PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin
@@ -222,8 +220,7 @@ berg() {
   berg64
 }
 berg32() {
-    ssh ${lcun}@newberg << EOF > berg32.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@newberg "/bin/sh" << EOF > berg32.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin
@@ -250,8 +247,7 @@ berg32() {
 EOF
 }
 berg64() {
-    ssh ${lcun}@newberg << EOF > berg64.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@newberg "/bin/sh" << EOF > berg64.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin
@@ -286,8 +282,7 @@ berggcc() {
   berggcc32
 }
 berggcc32() {
-    ssh ${lcun}@newberg << EOF > berggcc32.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@newberg "/bin/sh" << EOF > berggcc32.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin
@@ -314,8 +309,7 @@ berggcc32() {
 EOF
 }
 berggcc64() {
-    ssh ${lcun}@newberg << EOF > berggcc64.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@newberg "/bin/sh" << EOF > berggcc64.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin
@@ -354,8 +348,7 @@ up() {
   upgcc
 }
 up32() {
-    ssh ${lcun}@up << EOF > up32.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@up "/bin/sh" << EOF > up32.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin
@@ -381,8 +374,7 @@ up32() {
 EOF
 }
 up64() {
-    ssh ${lcun}@up << EOF > up64.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@up "/bin/sh" << EOF > up64.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin
@@ -421,8 +413,7 @@ upgcc() {
   upgcc64
 }
 upgcc32() {
-    ssh ${lcun}@up << EOF > upgcc32.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@up "/bin/sh" << EOF > upgcc32.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin
@@ -453,8 +444,7 @@ upgcc32() {
 EOF
 }
 upgcc64() {
-    ssh ${lcun}@up << EOF > upgcc64.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@up "/bin/sh" << EOF > upgcc64.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin
@@ -490,8 +480,7 @@ EOF
 gps() {
 # the default g++ has bugs 
 # problems with g77 floating exception during testsuite of quadf77 & ucdf77
-    ssh ${lcun}@gps << EOF > gps.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@gps "/bin/sh" << EOF > gps.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin
@@ -516,8 +505,7 @@ gps() {
 EOF
 }
 gpscc() {
-    ssh ${lcun}@gps << EOF > gpscc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@gps "/bin/sh" << EOF > gpscc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin
@@ -548,8 +536,7 @@ pengra() {
 }
     
 pengragcc() {
-    ssh ${lcun}@pengra << EOF > pengragcc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@pengra "/bin/sh" << EOF > pengragcc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin
@@ -576,8 +563,7 @@ EOF
 }
     
 pengraicc() {
-    ssh ${lcun}@pengra << EOF > pengraicc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@pengra "/bin/sh" << EOF > pengraicc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin
@@ -617,8 +603,7 @@ yana() {
   yanapsc
 }
 yanagcc() {
-    ssh ${lcun}@yana << EOF > yanagcc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@yana "/bin/sh" << EOF > yanagcc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin
@@ -628,7 +613,7 @@ yanagcc() {
     cd chaos_3_x86_64
     ../$TOPSRCDIR/configure \
     FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
-    CC=gcc CXX=g++ FC=f77 \
+    CC=gcc CXX=g++ FC=g77 F77=g77 \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64 \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
@@ -636,8 +621,8 @@ yanagcc() {
     make install
     make clean
     ../$TOPSRCDIR/configure \
+    CC=gcc CXX=g++ FC=g77 F77=g77 \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
-    CC=gcc CXX=g++ FC=f77 \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64
     make -j 4 check
     make install
@@ -646,8 +631,7 @@ EOF
 }
     
 yanaicc() {
-    ssh ${lcun}@yana << EOF > yanaicc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@yana "/bin/sh" << EOF > yanaicc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/intel/compiler91_64/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin
@@ -658,7 +642,7 @@ yanaicc() {
     mkdir chaos_3_x86_64-icc
     cd chaos_3_x86_64-icc
     ../$TOPSRCDIR/configure \
-    CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
+    CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
@@ -666,7 +650,7 @@ yanaicc() {
     make install
     make clean
     ../$TOPSRCDIR/configure \
-    CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
+    CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --enable-silex \
@@ -675,20 +659,29 @@ yanaicc() {
     --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_64-icc/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_64-icc/lib
     make -j 4 check
     make install
-    gmake bindir=/usr/gapps/bin/chaos_3_x86_64 install-exec
-    gmake bindir=/usr/gapps/bin/chaos_3_x86_64_elan4 install-exec
-    gmake bindir=/usr/gapps/bin/chaos_3_x86_64_ib install-exec
+#   gmake bindir=/usr/gapps/bin/chaos_3_x86_64 install-exec
+#   gmake bindir=/usr/gapps/bin/chaos_3_x86_64_elan4 install-exec
+#   gmake bindir=/usr/gapps/bin/chaos_3_x86_64_ib install-exec
     chmod -R g+w $BDTOPDIR/$VERSION/chaos_3_x86_64-icc
     for FILE in $BININSTALLS
-    do chmod -R g+w /usr/gapps/bin/chaos_3_x86_64/$FILE
+    do 
+       rm -f /usr/gapps/bin/chaos_3_x86_64/$FILE
+       rm -f /usr/gapps/bin/chaos_3_x86_64_elan4/$FILE
+       rm -f /usr/gapps/bin/chaos_3_x86_64_ib/$FILE
+       ln -s $LCTOPDIR/$VERSION/chaos_3_x86_64-icc/bin/$FILE \
+          /usr/gapps/bin/chaos_3_x86_64/$FILE
+       ln -s $LCTOPDIR/$VERSION/chaos_3_x86_64-icc/bin/$FILE \
+          /usr/gapps/bin/chaos_3_x86_64_elan4/$FILE
+       ln -s $LCTOPDIR/$VERSION/chaos_3_x86_64-icc/bin/$FILE \
+          /usr/gapps/bin/chaos_3_x86_64_ib/$FILE
+       chmod -R g+w /usr/gapps/bin/chaos_3_x86_64/$FILE
        chmod -R g+w /usr/gapps/bin/chaos_3_x86_64_elan4/$FILE
        chmod -R g+w /usr/gapps/bin/chaos_3_x86_64_ib/$FILE
     done
 EOF
 }
 yanapsc() {
-    ssh ${lcun}@yana << EOF > yanapsc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@yana "/bin/sh" << EOF > yanapsc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/global/tools/RSI/bin:/usr/local/tools/pathscale/pathscale-2.4/bin2:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin
@@ -699,7 +692,7 @@ yanapsc() {
     mkdir chaos_3_x86_64-pc-2.4
     cd chaos_3_x86_64-pc-2.4
     ../$TOPSRCDIR/configure \
-    CC=pathcc CXX=pathCC FC=pathf90 \
+    CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-pc-2.4 \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
@@ -707,17 +700,20 @@ yanapsc() {
     make install
     make clean
     ../$TOPSRCDIR/configure \
-    CC=pathcc CXX=pathCC FC=pathf90 \
+    CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
-    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-pc-2.4
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-pc-2.4 --disable-silex \
+    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_ia64-pc-2.4 \
+    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_ia64-pc-2.4/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_ia64-pc-2.4/lib
     make -j 4 check
     make install
+    ln -s $LCTOPDIR/$VERSION/chaos_3_x86_64/bin/silex \
+       $LCTOPDIR/$VERSION/chaos_3_x86_64-pc-2.4/bin/silex
     chmod -R g+w $BDTOPDIR/$VERSION/chaos_3_x86_64-pc-2.4
 EOF
 }
 yanapgc() {
-    ssh ${lcun}@yana << EOF > yanapgc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@yana "/bin/sh" << EOF > yanapgc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/global/tools/RSI/bin:/usr/local/tools/pgi6.23/linux86-64/6.2/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin
@@ -737,9 +733,13 @@ yanapgc() {
     ../$TOPSRCDIR/configure \
     CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
     CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
-    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-pgc-6.2
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-pgc-6.2 --disable-silex \
+    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_ia64-pgc-6.2 \
+    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_ia64-pgc-6.2/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_ia64-pgc-6.2/lib
     make -j 4 check
     make install
+    ln -s $LCTOPDIR/$VERSION/chaos_3_x86_64/bin/silex \
+       $LCTOPDIR/$VERSION/chaos_3_x86_64-pc-2.4/bin/silex
     chmod -R g+w $BDTOPDIR/$VERSION/chaos_3_x86_64-pgc-6.2
 EOF
 }
@@ -749,8 +749,7 @@ thunder() {
   thundericc
 }
 thundergcc() {
-    ssh ${lcun}@thunder << EOF > thundergcc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@thunder "/bin/sh" << EOF > thundergcc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin
@@ -774,8 +773,7 @@ thundergcc() {
 EOF
 }
 thundericc() {
-    ssh ${lcun}@thunder << EOF > thundericc.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@thunder "/bin/sh" << EOF > thundericc.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin
@@ -820,8 +818,7 @@ quad() {
   quad64
 }
 quad32() {
-    ssh ${lcun}@quad << EOF > quad32.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@quad "/bin/sh" << EOF > quad32.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin
@@ -855,8 +852,7 @@ quad32() {
 EOF
 }
 quad64() {
-    ssh ${lcun}@quad << EOF > quad64.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@quad "/bin/sh" << EOF > quad64.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin
@@ -881,8 +877,7 @@ EOF
 }
     
 ubgl() {
-    ssh ${lcun}@ubgl << EOF > ubgl.log 2>&1 &
-    #!/bin/sh -c
+    ssh ${lcun}@ubgl "/bin/sh" << EOF > ubgl.log 2>&1 &
     cd $LCTOPDIR/$VERSION/test
     umask 002
     PATH=/opt/ibmcmp/vac/7.0/bin:/opt/ibmcmp/xlf/9.1/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin

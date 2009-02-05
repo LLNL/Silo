@@ -113,7 +113,7 @@ main(int argc, char *argv[])
        } else if (!strcmp(argv[i], "readonly")) {
           readonly = 1;
        } else if (!strcmp(argv[i], "help")) {
-          printf("Usage: %s [compress [\"METHOD=...\"]|single|verbose|readonly]\n");
+          printf("Usage: %s [compress [\"METHOD=...\"]|single|verbose|readonly]\n",argv[0]);
           printf("Where: compress - enables compression, followed by compression information string\n");
           printf("                  default is compress \"METHOD=GZIP LEVEL=1\"\n");
           printf("       single   - writes data as floats not doubles\n");
@@ -129,10 +129,10 @@ main(int argc, char *argv[])
 
     if (verbose)
     {
-       printf("sizeof(off_t) = %d\n", sizeof(off_t));
-       printf("sizeof(fpos_t) = %d\n", sizeof(fpos_t));
-       printf("sizeof(size_t) = %d\n", sizeof(size_t));
-       printf("sizeof(ssize_t) = %d\n", sizeof(ssize_t));
+       printf("sizeof(off_t) = %zu\n", sizeof(off_t));
+       printf("sizeof(fpos_t) = %zu\n", sizeof(fpos_t));
+       printf("sizeof(size_t) = %zu\n", sizeof(size_t));
+       printf("sizeof(ssize_t) = %zu\n", sizeof(ssize_t));
     }
     
     DBShowErrors(DB_TOP, NULL);

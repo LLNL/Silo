@@ -1969,8 +1969,9 @@ f_ale3d_GetUcdvar(dbfile, name)
      */
     types = ALLOC_N(int, ndeps);
     for (i = 0, s = work; i < ndeps; i++, s = NULL) {
+        int ale3d_filter_internal_error = 1;
         t = strtok(s, ":");
-        assert("ale3d filter internal error" && t != NULL);
+        assert(ale3d_filter_internal_error && t != NULL);
         s_data[i] = ALLOC_N(char, strlen(t) + 6);
 
         sprintf(s_data[i], "%s_data", t);

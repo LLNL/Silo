@@ -4369,7 +4369,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
         }
 
         if (db_hdf5_hdrwr(dbfile, obj->name, mtype, ftype, object,
-                          DBGetObjtypeTag(obj->type))<0) {
+                          (DBObjectType) DBGetObjtypeTag(obj->type))<0) {
             UNWIND();
         }
         H5Tclose(mtype);
@@ -6548,7 +6548,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
             MEMBER_R(str(m.label[_j]), label, ndims);
             MEMBER_R(str(m.units[_j]), units, ndims);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
-        } OUTPUT(dbfile, coordtype == DB_COLLINEAR ? DB_QUAD_RECT : DB_QUAD_CURV, name, &m);
+        } OUTPUT(dbfile, coordtype == DB_COLLINEAR ? DB_QUADRECT : DB_QUADCURV, name, &m);
 
     } CLEANUP {
         /*void*/

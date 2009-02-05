@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #define ALLOC(T)                ((T*)calloc((size_t)1,sizeof(T)))
 #define ALLOC_N(T,N)            ((T*)calloc((size_t)(N),sizeof(T)))

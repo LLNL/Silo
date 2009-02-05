@@ -1626,11 +1626,12 @@ db_cdf_InqVarType(DBfile *_dbfile, char *varname)
      *  Convert ascii name into SILO object id.
      */
     if ((objid = silonetcdf_ncobjid(dbfile->cdf, varname)) < 0) {
-        return db_perror("silonetcdf_ncobjid", E_CALLFAIL, me);
+        db_perror("silonetcdf_ncobjid", E_CALLFAIL, me);
+        return DB_INVALID_OBJECT;
     }
     silonetcdf_ncobjinq(dbfile->cdf, objid, NULL, &type, &ncomps);
 
-    return(type);
+    return((DBObjectType)type);
 }
 
 /*-------------------------------------------------------------------------

@@ -589,7 +589,7 @@ V_diff (int argc, obj_t argv[])
         if (DIFF_REP_ALL==DiffOpt.report && DiffOpt.two_column) {
             sprintf(header+strlen(header), "%-*s%-*s%*s%s\n",
                     OUT_LTMAR, "Object", OUT_COL2-OUT_LTMAR, a_name,
-                    strlen(DIFF_SEPARATOR), "", b_name);
+                    (int)strlen(DIFF_SEPARATOR), "", b_name);
             OUT_STDOUT->rtmargin = 0; /*don't split long lines*/
         } else {
             sprintf(header+strlen(header), "Differences between %s and %s\n",

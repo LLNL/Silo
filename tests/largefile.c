@@ -126,10 +126,10 @@ main(int argc, char *argv[])
         }
     }
 
-    printf("sizeof(off_t) = %d\n", sizeof(off_t));
-    printf("sizeof(fpos_t) = %d\n", sizeof(fpos_t));
-    printf("sizeof(size_t) = %d\n", sizeof(size_t));
-    printf("sizeof(ssize_t) = %d\n", sizeof(ssize_t));
+    printf("sizeof(off_t) = %zu\n", sizeof(off_t));
+    printf("sizeof(fpos_t) = %zu\n", sizeof(fpos_t));
+    printf("sizeof(size_t) = %zu\n", sizeof(size_t));
+    printf("sizeof(ssize_t) = %zu\n", sizeof(ssize_t));
     
     DBShowErrors(DB_TOP, NULL);
     DBForceSingle(1);

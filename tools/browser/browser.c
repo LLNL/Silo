@@ -1220,7 +1220,7 @@ main(int argc, char *argv[])
     /* We have our own readline completion function that tries to complete
      * object names instead of the standard completion function that tries
      * to complete file names. */
-    rl_completion_entry_function = browser_rl_obj_generator;
+    rl_completion_entry_function = (char *(*)(const char *, int)) browser_rl_obj_generator;
 #endif /*HAVE_READLINE_READLINE_H && HAVE_LIBREADLINE*/
 
 #if defined(HAVE_READLINE_HISTORY_H) && defined(HAVE_READLINE_HISTORY)
