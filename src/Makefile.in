@@ -48,6 +48,10 @@ host_triplet = @host@
 @HDF5_DRV_NEEDED_TRUE@am__append_6 = hdf5_drv/libsilo_hdf5_drv.la
 @TAURUS_NEEDED_TRUE@am__append_7 = taurus
 @TAURUS_NEEDED_TRUE@am__append_8 = taurus/libsilo_taurus.la
+@HEXZIP_NEEDED_TRUE@am__append_9 = hexzip
+@HEXZIP_NEEDED_TRUE@am__append_10 = hexzip/libsilo_hexzip.la
+@LOCAL_NEEDED_TRUE@am__append_11 = local
+@LOCAL_NEEDED_TRUE@am__append_12 = local/libsilo_local.la
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libsilo.settings.in $(srcdir)/libsiloh5.settings.in
@@ -72,15 +76,17 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 @HDF5_DRV_NEEDED_TRUE@am__DEPENDENCIES_3 =  \
 @HDF5_DRV_NEEDED_TRUE@	hdf5_drv/libsilo_hdf5_drv.la
 @TAURUS_NEEDED_TRUE@am__DEPENDENCIES_4 = taurus/libsilo_taurus.la
-am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+@HEXZIP_NEEDED_TRUE@am__DEPENDENCIES_5 = hexzip/libsilo_hexzip.la
+@LOCAL_NEEDED_TRUE@am__DEPENDENCIES_6 = local/libsilo_local.la
+am__DEPENDENCIES_7 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
-	hexzip/libsilo_hexzip.la local/libsilo_local.la
+	$(am__DEPENDENCIES_5) $(am__DEPENDENCIES_6)
 @HDF5_DRV_NEEDED_FALSE@libsilo_la_DEPENDENCIES =  \
 @HDF5_DRV_NEEDED_FALSE@	score/libsilo_score.la \
 @HDF5_DRV_NEEDED_FALSE@	pdb/libsilo_pdb.la swat/libsilo_swat.la \
 @HDF5_DRV_NEEDED_FALSE@	silo/libsilo_silo.la \
 @HDF5_DRV_NEEDED_FALSE@	debug/libsilo_debug.la \
-@HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_5) \
+@HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_7) \
 @HDF5_DRV_NEEDED_FALSE@	unknown/libsilo_unknown.la \
 @HDF5_DRV_NEEDED_FALSE@	filters/libsilo_filters.la
 am__libsilo_la_SOURCES_DIST = silo_version.c
@@ -92,7 +98,7 @@ libsilo_la_OBJECTS = $(am_libsilo_la_OBJECTS)
 @HDF5_DRV_NEEDED_TRUE@	pdb/libsilo_pdb.la swat/libsilo_swat.la \
 @HDF5_DRV_NEEDED_TRUE@	silo/libsilo_silo.la \
 @HDF5_DRV_NEEDED_TRUE@	debug/libsilo_debug.la \
-@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_5) \
+@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_7) \
 @HDF5_DRV_NEEDED_TRUE@	unknown/libsilo_unknown.la \
 @HDF5_DRV_NEEDED_TRUE@	filters/libsilo_filters.la
 am__libsiloh5_la_SOURCES_DIST = siloh5_version.c
@@ -167,6 +173,9 @@ GREP = @GREP@
 HDF5_DRV = @HDF5_DRV@
 HDF5_DRV_NEEDED_FALSE = @HDF5_DRV_NEEDED_FALSE@
 HDF5_DRV_NEEDED_TRUE = @HDF5_DRV_NEEDED_TRUE@
+HEXZIP = @HEXZIP@
+HEXZIP_NEEDED_FALSE = @HEXZIP_NEEDED_FALSE@
+HEXZIP_NEEDED_TRUE = @HEXZIP_NEEDED_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -176,6 +185,9 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
+LOCAL = @LOCAL@
+LOCAL_NEEDED_FALSE = @LOCAL_NEEDED_FALSE@
+LOCAL_NEEDED_TRUE = @LOCAL_NEEDED_TRUE@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
@@ -233,6 +245,8 @@ UsingBrowser = @UsingBrowser@
 UsingCxx = @UsingCxx@
 UsingFortran = @UsingFortran@
 UsingHDF5 = @UsingHDF5@
+UsingHexzip = @UsingHexzip@
+UsingLocal = @UsingLocal@
 UsingOpt = @UsingOpt@
 UsingPython = @UsingPython@
 UsingQt = @UsingQt@
@@ -301,10 +315,9 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 DRIVER_DIRS = $(am__append_1) $(am__append_3) $(am__append_5) \
-	$(am__append_7) hexzip local
+	$(am__append_7) $(am__append_9) $(am__append_11)
 DRIVER_LIBS = $(am__append_2) $(am__append_4) $(am__append_6) \
-	$(am__append_8) hexzip/libsilo_hexzip.la \
-	local/libsilo_local.la
+	$(am__append_8) $(am__append_10) $(am__append_12)
 SUBDIRS = score pdb swat silo debug \
 $(DRIVER_DIRS) unknown filters .
 

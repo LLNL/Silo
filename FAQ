@@ -128,3 +128,10 @@ Silo Development FAQ
    causes the specified Portland Group C to be used as the C compiler.
    Run "./configure --help" for details on some of the pertinent environment
    variables.
+   Other examples:
+     ./configure --prefix=/usr/gapps/silo/4.5.1-pre4/i386-pc-linux-gcc-3.2.3 \
+     --with-szlib=/usr/gapps/silo/szip/2.0/i386-pc-linux-gcc-3.2.3 \
+     --with-hdf5=/usr/gapps/silo/hdf5/1.8.0-beta3/i386-pc-linux-gcc-3.2.3/\
+include,/usr/gapps/silo/hdf5/1.8.0-beta3/i386-pc-linux-gcc-3.2.3/lib \
+     --enable-silex \
+     --with-Qt-dir=/usr/gapps/silo/qt/3.3.8/i386-pc-linux-gcc-3.2.3 

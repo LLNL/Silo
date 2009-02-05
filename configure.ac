@@ -617,6 +617,42 @@ else
     AC_MSG_RESULT(no)
 fi
 
+dnl enable hexzip compression algorithm
+AC_MSG_CHECKING(if we want the hexzip compression algorithm)
+AC_ARG_ENABLE(hexzip,
+AC_HELP_STRING([--enable-hexzip], 
+  [build with the hexzip compression algorithm @<:@default=no@:>@]),
+              UseHexzip="$enable_hexzip", UseHexzip=no)
+if test "X$UseHexzip" = "Xyes"; then
+    AC_MSG_RESULT(yes)
+    HEXZIP="hexzip"
+    UsingHexzip="yes"
+else
+    AC_MSG_RESULT(no)
+    HEXZIP=""
+    UsingHexzip="no"
+fi
+AC_SUBST(HEXZIP)
+AC_SUBST(UsingHexzip)
+
+dnl enable local compression algorithm
+AC_MSG_CHECKING(if we want the local compression algorithm)
+AC_ARG_ENABLE(local,
+AC_HELP_STRING([--enable-local], 
+  [build with the local compression algorithm @<:@default=no@:>@]),
+              UseLocal="$enable_local", UseLocal=no)
+if test "X$UseLocal" = "Xyes"; then
+    AC_MSG_RESULT(yes)
+    LOCAL="local"
+    UsingLocal="yes"
+else
+    AC_MSG_RESULT(no)
+    LOCAL=""
+    UsingLocal="no"
+fi
+AC_SUBST(LOCAL)
+AC_SUBST(UsingLocal)
+
 dnl
 dnl Check if we should use the fortran compiler.
 dnl
@@ -1163,8 +1199,8 @@ AM_CONDITIONAL(BROWSER_NEEDED, test -n "$BROWSER")
 AM_CONDITIONAL(PYTHON_NEEDED, test -n "$PYTHONMODULE")
 AM_CONDITIONAL(FORTRAN_NEEDED, test -n "$USEFORTRAN")
 AM_CONDITIONAL(SILEX_NEEDED, test -n "$SILEX")
-#AM_CONDITIONAL(HEXZIP_NEEDED, test -n "$HEXZIP")
-#AM_CONDITIONAL(LOCAL_NEEDED, test -n "$LOCAL")
+AM_CONDITIONAL(HEXZIP_NEEDED, test -n "$HEXZIP")
+AM_CONDITIONAL(LOCAL_NEEDED, test -n "$LOCAL")
 AC_CONFIG_FILES([
             Makefile
             clearcase_bin/Makefile
