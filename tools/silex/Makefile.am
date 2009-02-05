@@ -1,7 +1,8 @@
 ## Procss this file with automake to create Makefile.in
 
 bin_PROGRAMS = silex
-silex_SOURCES = $(FILES) $(FILES_MOC)
+silex_SOURCES = $(FILES)
+nodist_silex_SOURCES = $(FILES_MOC)
 if HDF5_DRV_NEEDED
   silex_LDADD = ../../src/libsiloh5.la $(QT_LIBS)
 else
