@@ -38,8 +38,9 @@
 #include "SiloArrayView.h"
 #include <SiloFile.h>
 #include <qlistbox.h>
-#include <silexstream.h>
 #include <qapplication.h>
+#include <iostream>
+using std::cerr;
 
 // ----------------------------------------------------------------------------
 //                            Array View

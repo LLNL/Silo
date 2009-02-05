@@ -724,13 +724,20 @@ V_dot (int argc, obj_t argv[]) {
  *
  *      Thomas R. Treadway, Tue Jun 27 13:59:21 PDT 2006
  *      Added HAVE_STRERROR wrapper
+ *
+ *      Thomas R. Treadway, Thu Mar  1 09:37:31 PST 2007
+ *      Corrected write history logic
+ *
  *-------------------------------------------------------------------------
  */
 obj_t
 V_exit (int argc, obj_t argv[]) {
 
 #if defined(HAVE_READLINE_HISTORY_H) && defined(HISTORY_FILE) && defined(HAVE_READLINE_HISTORY)
-   if (HistoryFile[0] && write_history (HistoryFile)) {
+   if (HistoryFile[0] && write_history (HistoryFile)) 
+      ;
+   else
+   {
 #ifdef HAVE_STRERROR
       out_errorn ("command history not saved in %s (%s)",
                   HistoryFile, strerror(errno));

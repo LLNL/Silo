@@ -131,7 +131,8 @@ PUBLIC char   *_db_err_list[] =
     "File lacks write permission",            /*21 */
     "Invalid variable name - only alphanumeric and `_'", /* 22 */
     "Overwrite not allowed. See DBSetAllowOverwrites()", /* 23 */
-    "Checksum failure."                       /* 24 */
+    "Checksum failure.",                      /* 24 */
+    "Compression failure."                    /* 25 */
 };
 
 INTERNAL int   _db_err_level = DB_TOP;  /*what errors to issue (default) */
@@ -157,7 +158,11 @@ struct _dv     _dv;
 SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
-    FALSE  /* enableChecksums */
+    FALSE, /* enableChecksums */
+    FALSE  /* enableCompression */
+};
+SILO_Compression_t SILO_Compression = {
+    "\0" 
 };
 
 /*-------------------------------------------------------------------------
@@ -2144,6 +2149,42 @@ PUBLIC int
 DBGetEnableChecksums()
 {
     return SILO_Globals.enableChecksums;
+}
+
+/*----------------------------------------------------------------------
+ * Routine:  DBSetCompression
+ *
+ * Purpose:  Set and return the enable Compression flags 
+ *
+ * Programmer:  Thomas R. Treadway, Wed Feb 28 11:36:34 PST 2007
+ *
+ * Description:  This routine enters the compression method information.
+ *--------------------------------------------------------------------*/
+PUBLIC int 
+DBSetCompression(const char *s)
+{
+    int oldEnable;
+    API_BEGIN("DBSetCompression", int, -1) {
+        oldEnable = SILO_Globals.enableCompression;
+        SILO_Globals.enableCompression = TRUE;
+        if (s && !*s) {
+            SILO_Compression.parameters = ALLOC_N(char, 12);
+            strcpy(SILO_Compression.parameters, "METHOD=GZIP");
+        }   
+        else if (s) {
+            SILO_Compression.parameters =ALLOC_N(char,strlen(s)+1);
+            strcpy(SILO_Compression.parameters, s);
+        }
+   
+        API_RETURN(oldEnable);
+    }
+    API_END_NOPOP;
+}
+
+PUBLIC char * 
+DBGetCompression()
+{
+    return SILO_Compression.parameters;
 }
 
 /*----------------------------------------------------------------------

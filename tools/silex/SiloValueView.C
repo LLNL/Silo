@@ -38,7 +38,8 @@
 #include "SiloValueView.h"
 #include <SiloFile.h>
 #include <qlabel.h>
-#include <silexstream.h>
+#include <iostream>
+using std::cerr;
 
 // ----------------------------------------------------------------------------
 //                            Value View

@@ -894,6 +894,8 @@ UsingOpt
 Using64bits
 OS_RULE
 UsingHDF5
+USE_FILTER_SZIP
+UsingSZLIB
 UsingReadline
 XMKMF
 X_CFLAGS
@@ -922,6 +924,7 @@ UsingPython
 UsingCxx
 UsingShared
 UsingStatic
+BUNDLE_TARGET
 NETCDF_NEEDED_TRUE
 NETCDF_NEEDED_FALSE
 PDB_DRV_NEEDED_TRUE
@@ -1571,6 +1574,8 @@ Optional Packages:
                           instead of guessing
   --with-hdf5=INC,LIB     Location of HDF5 header and library
   --with-zlib=INC,LIB     Use the GNU zlib compression
+  --with-szlib=DIR        Use szlib library for external szlib I/O filter
+                          [default=no]
   --with-x                use the X Window System
   --with-Qt-dir=DIR       DIR is equal to $QTDIR if you have followed the
                           installation instructions of Trolltech. Header
@@ -7156,7 +7161,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7159 "configure"' > conftest.$ac_ext
+  echo '#line 7164 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9043,11 +9048,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9046: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9051: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9050: \$? = $ac_status" >&5
+   echo "$as_me:9055: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9311,11 +9316,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9314: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9319: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9318: \$? = $ac_status" >&5
+   echo "$as_me:9323: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9415,11 +9420,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9418: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9423: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9422: \$? = $ac_status" >&5
+   echo "$as_me:9427: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11939,7 +11944,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11942 "configure"
+#line 11947 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12039,7 +12044,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12042 "configure"
+#line 12047 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14423,11 +14428,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14426: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14431: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14430: \$? = $ac_status" >&5
+   echo "$as_me:14435: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14527,11 +14532,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14530: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14535: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14534: \$? = $ac_status" >&5
+   echo "$as_me:14539: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16097,11 +16102,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16100: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16105: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16104: \$? = $ac_status" >&5
+   echo "$as_me:16109: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16201,11 +16206,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16204: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16209: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16208: \$? = $ac_status" >&5
+   echo "$as_me:16213: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18431,11 +18436,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18434: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18439: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18438: \$? = $ac_status" >&5
+   echo "$as_me:18443: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18699,11 +18704,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18702: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18707: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18706: \$? = $ac_status" >&5
+   echo "$as_me:18711: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18803,11 +18808,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18806: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18811: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18810: \$? = $ac_status" >&5
+   echo "$as_me:18815: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -26897,6 +26902,254 @@ else
 fi
 
 
+UsingSZLIB="no"
+ USE_FILTER_SZIP="no"
+
+# Check whether --with-szlib was given.
+if test "${with_szlib+set}" = set; then
+  withval=$with_szlib;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_SZLIB="yes"
+
+{ echo "$as_me:$LINENO: checking for SZ_BufftoBuffCompress in -lsz" >&5
+echo $ECHO_N "checking for SZ_BufftoBuffCompress in -lsz... $ECHO_C" >&6; }
+if test "${ac_cv_lib_sz_SZ_BufftoBuffCompress+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsz  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SZ_BufftoBuffCompress ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return SZ_BufftoBuffCompress ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_sz_SZ_BufftoBuffCompress=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_sz_SZ_BufftoBuffCompress=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_sz_SZ_BufftoBuffCompress" >&5
+echo "${ECHO_T}$ac_cv_lib_sz_SZ_BufftoBuffCompress" >&6; }
+if test $ac_cv_lib_sz_SZ_BufftoBuffCompress = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSZ 1
+_ACEOF
+
+  LIBS="-lsz $LIBS"
+
+else
+  unset HAVE_SZLIB
+fi
+
+
+    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      { { echo "$as_me:$LINENO: error: couldn't find szlib library" >&5
+echo "$as_me: error: couldn't find szlib library" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    ;;
+  no)
+    HAVE_SZLIB="no"
+    { echo "$as_me:$LINENO: checking for szlib" >&5
+echo $ECHO_N "checking for szlib... $ECHO_C" >&6; }
+    { echo "$as_me:$LINENO: result: suppressed" >&5
+echo "${ECHO_T}suppressed" >&6; }
+    ;;
+  *)
+    HAVE_SZLIB="yes"
+    case "$withval" in
+      *)
+        if test -n "$withval"; then
+          szlib_lib="$withval/lib"
+        fi
+        ;;
+    esac
+    if test -n "$szlib_lib"; then
+      LDFLAGS="$LDFLAGS -L$szlib_lib"
+    fi
+
+
+{ echo "$as_me:$LINENO: checking for SZ_BufftoBuffCompress in -lsz" >&5
+echo $ECHO_N "checking for SZ_BufftoBuffCompress in -lsz... $ECHO_C" >&6; }
+if test "${ac_cv_lib_sz_SZ_BufftoBuffCompress+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsz  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SZ_BufftoBuffCompress ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return SZ_BufftoBuffCompress ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag" || test ! -s conftest.err'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_sz_SZ_BufftoBuffCompress=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_sz_SZ_BufftoBuffCompress=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_sz_SZ_BufftoBuffCompress" >&5
+echo "${ECHO_T}$ac_cv_lib_sz_SZ_BufftoBuffCompress" >&6; }
+if test $ac_cv_lib_sz_SZ_BufftoBuffCompress = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSZ 1
+_ACEOF
+
+  LIBS="-lsz $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB
+fi
+
+
+    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      { { echo "$as_me:$LINENO: error: couldn't find szlib library" >&5
+echo "$as_me: error: couldn't find szlib library" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    ;;
+esac
+if test -z "$HAVE_SZLIB"; then
+    UsingSZLIB="yes"
+fi
+
+
 UsingReadline="no"
 if test "X$detect_readline" = Xyes; then
 # use contributed GNU m4 macro library provided see:
@@ -30120,6 +30373,15 @@ fi
 # skip for now
 #ACX_MPI
 
+# Create a bundle target for Darwin
+BUNDLE_TARGET=""
+case $host_os in
+  darwin*)
+    BUNDLE_TARGET="silo.app"
+    ;;
+esac
+
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -31178,6 +31440,8 @@ UsingOpt!$UsingOpt$ac_delim
 Using64bits!$Using64bits$ac_delim
 OS_RULE!$OS_RULE$ac_delim
 UsingHDF5!$UsingHDF5$ac_delim
+USE_FILTER_SZIP!$USE_FILTER_SZIP$ac_delim
+UsingSZLIB!$UsingSZLIB$ac_delim
 UsingReadline!$UsingReadline$ac_delim
 XMKMF!$XMKMF$ac_delim
 X_CFLAGS!$X_CFLAGS$ac_delim
@@ -31206,6 +31470,7 @@ UsingPython!$UsingPython$ac_delim
 UsingCxx!$UsingCxx$ac_delim
 UsingShared!$UsingShared$ac_delim
 UsingStatic!$UsingStatic$ac_delim
+BUNDLE_TARGET!$BUNDLE_TARGET$ac_delim
 NETCDF_NEEDED_TRUE!$NETCDF_NEEDED_TRUE$ac_delim
 NETCDF_NEEDED_FALSE!$NETCDF_NEEDED_FALSE$ac_delim
 PDB_DRV_NEEDED_TRUE!$PDB_DRV_NEEDED_TRUE$ac_delim
@@ -31226,7 +31491,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 79; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 82; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

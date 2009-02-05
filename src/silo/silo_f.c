@@ -3723,3 +3723,98 @@ F_DBGETCKSUMS()
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
+/*----------------------------------------------------------------------
+ * Routine                                               F_DBSETCOMPRESS
+ *
+ * Purpose
+ *     Set the compression information.
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Warning
+ *     THIS FUNCTION CAUSES A MEMORY LEAK. The temporary string,
+ *     cval, is never freed.  It is put in the optlist instead.
+ *
+ * Returns
+ *
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Thomas R. Treadway, Tue Feb 27 14:10:03 PST 2007
+ *
+ *
+ *
+ *
+ * Modifications
+ *
+ *
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBSETCOMPRESS(FCD_DB cvalue, int *lcvalue)
+{
+    char          *cval = NULL;
+    DBoptlist     *optlist = NULL;
+
+    API_BEGIN("dbsetcompression", int, -1) {
+        if (*lcvalue <= 0)
+            API_ERROR("lcvalue", E_BADARGS);
+
+        /*------------------------------
+         *  Duplicate all ascii strings.
+         *-----------------------------*/
+        if (strcmp(cvalue, DB_F77NULLSTRING) == 0)
+            API_ERROR("cvalue", E_BADARGS);
+        cval = SW_strndup(cvalue, *lcvalue);
+
+        API_RETURN(DBSetCompression(cval));
+    }
+    API_END;
+
+    return(0);
+}
+/*----------------------------------------------------------------------
+ * Routine                                               F_DBGETCOMPRESS
+ *
+ * Purpose
+ *     Get the compression information.
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Warning
+ *     THIS FUNCTION CAUSES A MEMORY LEAK. The temporary string,
+ *     cval, is never freed.  It is put in the optlist instead.
+ *
+ * Returns
+ *
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Thomas R. Treadway, Tue Feb 27 14:10:03 PST 2007
+ *
+ *
+ *
+ *
+ * Modifications
+ *
+ *
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBGETCOMPRESS(FCD_DB cvalue, int *lcvalue)
+{
+    char          *cval = NULL;
+
+    API_BEGIN("dbgetcompression", int, -1) {
+        if (*lcvalue <= 0)
+            API_ERROR("lcvalue", E_BADARGS);
+
+        cval = DBGetCompression();
+        cvalue = SW_strndup(cval, *lcvalue);
+
+        API_RETURN(0);
+    }
+    API_END;
+
+    return(0);
+}

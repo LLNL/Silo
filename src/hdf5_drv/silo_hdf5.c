@@ -20,6 +20,7 @@
  *   now restart from it. Added dataReadMask functionality
  *
  */
+#include <errno.h>
 #include <assert.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h> /*missing from silo header files*/
@@ -494,8 +495,8 @@ static hid_t    T_double = -1;
 static hid_t    T_str256 = -1;
 static hid_t    SCALAR = -1;
 static hid_t    P_crprops = -1;
-static hid_t    P_rdprops = -1;
 static hid_t    P_ckcrprops = -1;
+static hid_t    P_rdprops = -1;
 static hid_t    P_ckrdprops = -1;
 
 #define OPT(V)          ((V)?(V):"")
@@ -894,9 +895,9 @@ db_hdf5_init(void)
     T_str256 = H5Tcopy(H5T_C_S1);       /*this is never freed!*/
     H5Tset_size(T_str256, 256);
 
-    /* property lists necessary to support checksumming */
     P_ckcrprops = H5Pcreate(H5P_DATASET_CREATE); /* never freed */
-    H5Pset_fletcher32(P_ckcrprops);
+    if (SILO_Globals.enableChecksums)
+       H5Pset_fletcher32(P_ckcrprops);
 
     /* for H5Dread calls, H5P_DEFAULT results in *enabled*
        checksums. So, we build the DISabled version here. */
@@ -1511,6 +1512,9 @@ db_hdf5_InitCallbacks(DBfile *_dbfile, int target)
  *              Thursday, February 11, 1999
  *
  * Modifications:
+ *    Thomas R. Treadway, Wed Mar  7 09:59:27 PST 2007
+ *    Changed hs_offset from hssize_t to hsize_t
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -1520,7 +1524,7 @@ build_fspace(hid_t dset, int ndims, int *offset, int *length, int *stride,
 {
     hid_t       fspace = -1;
     int         i;
-    hssize_t    hs_offset[H5S_MAX_RANK];
+    hsize_t    hs_offset[H5S_MAX_RANK];
     hsize_t     hs_count[H5S_MAX_RANK], hs_stride[H5S_MAX_RANK];
     
     if (ndims>H5S_MAX_RANK) return -1;
@@ -1782,6 +1786,201 @@ hdf2hdf_type(hid_t ftype)
     return mtype;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_set_compression
+ *
+ * Purpose:     Set the HDF5 compression properties.
+ *
+ * Bugs:        
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Thomas R. Treadway, Tue Feb 27 15:27:11 PST 2007
+ *
+ * Modifications:
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+int db_hdf5_set_compression(void)
+{
+    static char *me = "db_hdf5_set_compression";
+    char *ptr;
+    char chararray[8];
+    char *check;
+    int level, block, stat, nfilters;
+    int have_gzip, have_szip, i;
+    H5Z_filter_t filtn;
+    unsigned int filter_config_flags;
+/* Check what filters already exist */
+    have_gzip = FALSE;
+    have_szip = FALSE;
+    if ((nfilters = H5Pget_nfilters(P_ckcrprops))<0)
+    {
+       db_perror("H5Pget_nfilters", E_CALLFAIL, me);
+       return (-1);
+    }
+    for (i=0; i<nfilters; i++) {           
+        filtn = H5Pget_filter(P_ckcrprops,(unsigned)i,0,0,0,0,0);
+        if (H5Z_FILTER_DEFLATE==filtn)     
+            have_gzip = TRUE;
+        else if (H5Z_FILTER_SZIP==filtn)     
+            have_szip = TRUE;
+    }
+/* Select the compression algorthm */
+    if ((ptr=strcasestr(SILO_Compression.parameters, "METHOD=GZIP")) != NULL) 
+    {
+     if (have_gzip == FALSE)
+     {
+       if ((ptr=strcasestr(SILO_Compression.parameters, "LEVEL=")) != NULL)
+       {
+          (void)strncpy(chararray, ptr+6, 1); 
+          level = (int) strtol(chararray, &check, 10);
+          if ((chararray != check) && (level >= 0) && (level <=9))
+          {
+             if (H5Pset_deflate(P_ckcrprops, level) < 0)
+             {
+                db_perror("H5Pset_deflate", E_CALLFAIL, me);
+                return (-1);
+             }
+          }
+          else
+          {
+             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+             return (-1);
+          }
+       }
+       else
+       {
+          if (H5Pset_deflate(P_ckcrprops, 1) < 0)
+          {
+             db_perror("H5Pset_deflate", E_CALLFAIL, me);
+             return (-1);
+          }
+       }
+     }
+    }
+#ifdef H5_HAVE_FILTER_SZIP
+    else if ((ptr=strcasestr(SILO_Compression.parameters,"METHOD=SZIP"))!=NULL)
+    {
+     if (have_szip == FALSE)
+     {
+       filtn = H5Z_FILTER_SZIP;
+       if (H5Zget_filter_info(filtn, &filter_config_flags)<0)
+       {
+          db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+          return (-1);
+       }
+       if ((filter_config_flags &
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED))==
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED))
+       {
+          if ((ptr=strcasestr(SILO_Compression.parameters, "BLOCK=")) != NULL)
+          {
+             (void)strncpy(chararray, ptr+6, 2); 
+             block = (int) strtol(chararray, &check, 10);
+             if ((chararray != check) && (block >= 0) && (block <=32))
+             { 
+                if (strcasestr(SILO_Compression.parameters, "MASK=EC") != NULL)
+                {
+                   if (H5Pset_szip(P_ckcrprops, H5_SZIP_EC_OPTION_MASK,block)<0)
+                   {
+                      db_perror("H5Pset_szip", E_CALLFAIL, me);
+                      return (-1);
+                   }
+                }
+                else if(strcasestr(SILO_Compression.parameters,"MASK=NN")!=NULL)
+                {
+                   if (H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK,block)<0)
+                   {
+                      db_perror("H5Pset_szip", E_CALLFAIL, me);
+                      return (-1);
+                   }
+                }
+                else
+                {
+                   if (H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK,block)<0)
+                   {
+                      db_perror("H5Pset_szip", E_CALLFAIL, me);
+                      return (-1);
+                   }
+                }
+             }
+             else
+             {
+                db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+                return (-1);
+             }
+          }
+          else
+             if (H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK, 4) < 0)
+             {
+                db_perror("H5Pset_szip", E_CALLFAIL, me);
+                return (-1);
+             }
+       }
+     }
+    }
+#endif
+    else
+    {
+       db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+       return (-1);
+    }
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_set_properties
+ *
+ * Purpose:     Set the HDF5 properties.
+ *
+ * Bugs:        
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Thomas R. Treadway, Tue Mar  6 14:23:50 PST 2007
+ *
+ * Modifications:
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+int db_hdf5_set_properties(int rank, hsize_t size[])
+{
+    static char *me = "db_hdf5_set_properties";
+    P_crprops = H5P_DEFAULT;
+    if (SILO_Globals.enableChecksums && 
+        !SILO_Globals.enableCompression)
+    {
+        H5Pset_chunk(P_ckcrprops, rank, size);
+        P_crprops = P_ckcrprops;
+    }
+    else if (SILO_Globals.enableChecksums && 
+        SILO_Globals.enableCompression)
+    {
+        H5Pset_chunk(P_ckcrprops, rank, size);
+        if (db_hdf5_set_compression()<0) {
+            db_perror("db_hdf5_set_compression", E_CALLFAIL, me);
+            return(-1);
+        }
+        P_crprops = P_ckcrprops;
+    }
+    else if (SILO_Globals.enableCompression)
+    {
+        H5Pset_chunk(P_ckcrprops, rank, size);
+        if (db_hdf5_set_compression()<0) {
+            db_perror("db_hdf5_set_compression", E_CALLFAIL, me);
+            return(-1);
+        }
+        P_crprops = P_ckcrprops;
+    }
+    return 0;
+}
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_get_comp_var 
  *
@@ -2260,7 +2459,7 @@ db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
                void *buf, char *name/*in,out*/)
 {
     static char *me = "db_hdf5_compwr";
-    hid_t       dset=-1, mtype=-1, ftype=-1, space=-1;
+    hid_t       dset=-1, mtype=-1, ftype=-1, space=-1i, P_props;
     int         i, nels;
     hsize_t     size[8];
     int         alloc = 0;
@@ -2301,12 +2500,10 @@ db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
         }
-
-        P_crprops = H5P_DEFAULT;
-        if (SILO_Globals.enableChecksums)
-        {
-            H5Pset_chunk(P_ckcrprops, rank, size);
-            P_crprops = P_ckcrprops;
+ 
+        if (db_hdf5_set_properties(rank, size) < 0 ) {
+            db_perror("db_hdf5_set_properties", E_CALLFAIL, me);
+            UNWIND();
         }
 
         if ((!strcmp(name,"time") && dtype == DB_FLOAT && rank == 1 && _size[0] == 1) ||
@@ -4452,7 +4649,7 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
 {
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile;
    static char  *me = "db_hdf5_Write";
-   hid_t        mtype=-1, ftype=-1, space=-1, dset=-1;
+   hid_t        mtype=-1, ftype=-1, space=-1, dset=-1, P_props;
    hsize_t      ds_size[H5S_MAX_RANK];
    int          i;
 
@@ -4493,11 +4690,9 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
                UNWIND();
            }
 
-           P_crprops = H5P_DEFAULT;
-           if (SILO_Globals.enableChecksums)
-           {
-               H5Pset_chunk(P_ckcrprops, ndims, ds_size);
-               P_crprops = P_ckcrprops;
+           if (db_hdf5_set_properties(ndims, ds_size) < 0 ) {
+               db_perror("db_hdf5_set_properties", E_CALLFAIL, me);
+               UNWIND();
            }
 
            /* Create dataset if it doesn't already exist */
@@ -4553,6 +4748,7 @@ db_hdf5_WriteSlice(DBfile *_dbfile, char *vname, void *values, int dtype,
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile ;
    static char  *me = "db_hdf5_WriteSlice" ;
    hid_t        mtype=-1, ftype=-1, fspace=-1, mspace=-1, dset=-1;
+   hid_t        P_props;
    hsize_t      ds_size[H5S_MAX_RANK];
    int          i;
 
@@ -4592,11 +4788,9 @@ db_hdf5_WriteSlice(DBfile *_dbfile, char *vname, void *values, int dtype,
                UNWIND();
            }
 
-           P_crprops = H5P_DEFAULT;
-           if (SILO_Globals.enableChecksums)
-           {
-               H5Pset_chunk(P_ckcrprops, ndims, ds_size);
-               P_crprops = P_ckcrprops;
+           if (db_hdf5_set_properties(ndims, ds_size) < 0 ) {
+               db_perror("db_hdf5_set_properties", E_CALLFAIL, me);
+               UNWIND();
            }
 
            if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, fspace,

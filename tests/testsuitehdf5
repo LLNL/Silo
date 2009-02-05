@@ -613,7 +613,7 @@ at_times_file=$at_suite_dir/at-times
 # List of the tested programs.
 at_tested=''
 # List of the all the test groups.
-at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31'
+at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
@@ -650,6 +650,7 @@ at_help_all='1;testsuitehdf5.at:11;array DB_HDF5;;
 29;testsuitehdf5.at:109;mmadjacency DB_HDF5;;
 30;testsuitehdf5.at:115;dir DB_HDF5;;
 31;testsuitehdf5.at:118;quad DB_HDF5;;
+32;testsuitehdf5.at:121;compression DB_HDF5 compress;;
 '
 
 at_prev=
@@ -2862,6 +2863,59 @@ case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
    *) echo "$at_srcdir/testsuitehdf5.at:119: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  32 ) # 32. testsuitehdf5.at:121: compression DB_HDF5 compress
+    at_setup_line='testsuitehdf5.at:121'
+    at_desc='compression DB_HDF5 compress'
+    $at_quiet $ECHO_N " 32: compression DB_HDF5 compress                 $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "32. testsuitehdf5.at:121: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuitehdf5.at:122: compression DB_HDF5 compress"
+echo testsuitehdf5.at:122 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    at_trace_this=yes
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; compression DB_HDF5 compress ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; compression DB_HDF5 compress ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuitehdf5.at:122: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then

@@ -726,11 +726,17 @@ typedef struct filter_t {
     int            (*open) (DBfile *, char *);
 } filter_t;
 
+typedef struct SILO_Compression_t {
+   char         *parameters;
+} SILO_Compression_t;
+extern SILO_Compression_t SILO_Compression;
+
 /* Namespace struct for Silo's global variables */
 typedef struct SILO_Globals_t {
     long dataReadMask;
     int allowOverwrites;
     int enableChecksums;
+    int enableCompression;
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 

@@ -298,6 +298,10 @@ dnl     Added AC_DEFINE_UNQUOTED calls to create compile-time symbols for
 dnl     Silo's version information. Added code at end to put this into
 dnl     a separate 'config_vers.h' file
 dnl
+dnl     Thomas R. Treadway, Thu Mar 15 12:19:56 PDT 2007
+dnl     Added hooks for building Macintosh application bundle
+dnl     Added szlib support
+dnl
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -1000,6 +1004,60 @@ else
 fi
 AC_SUBST(UsingHDF5)
 
+dnl ----------------------------------------------------------------------
+dnl Is the szlib present? It has a library
+dnl `-lsz' and their locations might be specified with the `--with-szlib'
+dnl command-line switch. The value is a root directory contain the lib 
+dnl directory.
+dnl
+UsingSZLIB="no"
+AC_SUBST(USE_FILTER_SZIP) USE_FILTER_SZIP="no"
+AC_ARG_WITH([szlib],
+            [AC_HELP_STRING([--with-szlib=DIR],
+                            [Use szlib library for external szlib I/O
+                             filter [default=no]])],,
+            withval=no)
+
+case $withval in
+  yes)
+    HAVE_SZLIB="yes"
+    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],, [unset HAVE_SZLIB])
+
+    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find szlib library])
+    fi
+    ;;
+  no)
+    HAVE_SZLIB="no"
+    AC_MSG_CHECKING([for szlib])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_SZLIB="yes"
+    case "$withval" in
+      *)
+        if test -n "$withval"; then
+          szlib_lib="$withval/lib"
+        fi
+        ;;
+    esac
+    if test -n "$szlib_lib"; then
+      LDFLAGS="$LDFLAGS -L$szlib_lib"
+    fi
+
+    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
+                 [LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB])
+
+    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find szlib library])
+    fi
+    ;;
+esac
+if test -z "$HAVE_SZLIB"; then
+    UsingSZLIB="yes"
+fi
+AC_SUBST(UsingSZLIB)
+
 dnl
 UsingReadline="no"
 if test "X$detect_readline" = Xyes; then
@@ -1081,6 +1139,15 @@ AC_SUBST(UsingStatic)
 dnl Determine how to compile MPI
 # skip for now
 #ACX_MPI
+
+# Create a bundle target for Darwin
+BUNDLE_TARGET=""
+case $host_os in
+  darwin*)
+    BUNDLE_TARGET="silo.app"
+    ;;
+esac
+AC_SUBST(BUNDLE_TARGET)
 
 AC_CACHE_SAVE
 

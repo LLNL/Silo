@@ -131,3 +131,6 @@ AT_CLEANUP
 AT_SETUP(quad)
 AT_CHECK(quad,,[ignore])
 AT_CLEANUP
+AT_SETUP(compression DB_PDB)
+AT_CHECK(compression DB_PDB,,[ignore])
+AT_CLEANUP

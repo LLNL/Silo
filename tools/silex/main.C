@@ -38,7 +38,6 @@
 #include <qapplication.h>
 #include <Explorer.h>
 
-#include <silexstream.h>
 #include <stdlib.h>
 
 #ifndef Q_WS_MACX
@@ -46,6 +45,8 @@
 #endif
 #include <qfiledialog.h>
 #include <qstring.h>
+#include <iostream>
+using std::cerr;
 
 // ****************************************************************************
 //  Main Function: main()  

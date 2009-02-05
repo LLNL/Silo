@@ -389,6 +389,9 @@ db_pdb_Open(char *name, int mode, int subtype)
  *
  *    Jeremy Meredith, Wed Oct 25 16:16:59 PDT 2000
  *    Added DB_INTEL so we had a little-endian target.
+ *
+ *    Thomas R. Treadway, Wed Feb 28 11:36:34 PST 2007
+ *    Checked for compression option.
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 INTERNAL DBfile *
@@ -402,6 +405,12 @@ db_pdb_Create (char *name, int mode, int target, int subtype, char *finfo)
         db_perror(name, E_NOTIMP, "no checksums in PDB driver");
         return NULL;
     }
+    if (SILO_Globals.enableCompression)
+    {
+        db_perror(name, E_NOTIMP, "no compression in PDB driver");
+        return NULL;
+    }
+
 
     /*
      * The target type.

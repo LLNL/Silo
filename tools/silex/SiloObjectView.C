@@ -39,7 +39,8 @@
 #include <SiloFile.h>
 #include <qapplication.h>
 #include <qmessagebox.h>
-#include <silexstream.h>
+#include <iostream>
+using std::cerr;
 
 // ----------------------------------------------------------------------------
 //                            Object View Window

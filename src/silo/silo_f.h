@@ -106,6 +106,8 @@ for advertising or product endorsement purposes.
 #define F_DBGETOVRWRT   F77_ID(dbgetovrwrt_,dbgetovrwrt,DBGETOVRWRT)
 #define F_DBSETCKSUMS   F77_ID(dbsetcksums_,dbsetcksums,DBSETCKSUMS)
 #define F_DBGETCKSUMS   F77_ID(dbgetcksums_,dbgetcksums,DBGETCKSUMS)
+#define F_DBSETCOMPRESS F77_ID(dbsetcompress_,dbsetcompress,DBSETCOMPRESS)
+#define F_DBGETCOMPRESS F77_ID(dbgetcompress_,dbgetcompress,DBGETCOMPRESS)
 
 void    *DBFortranAccessPointer(int value);
 

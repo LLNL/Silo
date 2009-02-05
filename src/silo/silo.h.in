@@ -324,6 +324,7 @@ typedef enum {
 #define     E_INVALIDNAME 22    /* Variable name is invalid */
 #define     E_NOOVERWRITE 23    /*Overwrite not permitted */
 #define     E_CHECKSUM  24      /*Checksum failed */
+#define     E_COMPRESSION  25   /*Compression failed */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
@@ -1430,6 +1431,8 @@ SILO_API extern int      DBSetAllowOverwrites(int allow);
 SILO_API extern int      DBGetAllowOverwrites(void);
 SILO_API extern int      DBSetEnableChecksums(int enable);
 SILO_API extern int      DBGetEnableChecksums(void);
+SILO_API extern int      DBSetCompression(const char *);
+SILO_API extern char    *DBGetCompression(void);
 SILO_API extern char    *DBVersion(void);
 SILO_API extern void     DBShowErrors(int, void (*)(char *));
 SILO_API extern char    *DBErrString(void);

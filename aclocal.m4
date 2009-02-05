@@ -11,68 +11,31 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-#
-# SYNOPSIS
-#
-#   AX_CC_MAXOPT
-#
-# DESCRIPTION
-#
-#   Try to turn on "good" C optimization flags for various compilers
-#   and architectures, for some definition of "good". (In our case,
-#   good for FFTW and hopefully for other scientific codes. Modify as
-#   needed.)
-#
-#   The user can override the flags by setting the CFLAGS environment
-#   variable. The user can also specify --enable-portable-binary in
-#   order to disable any optimization flags that might result in a
-#   binary that only runs on the host architecture.
-#
-#   Note also that the flags assume that ANSI C aliasing rules are
-#   followed by the code (e.g. for gcc's -fstrict-aliasing), and that
-#   floating-point computations can be re-ordered as needed.
-#
-#   Requires macros: AX_CHECK_COMPILER_FLAGS, AX_COMPILER_VENDOR,
-#   AX_GCC_ARCHFLAG, AX_GCC_X86_CPUID.
-#
-# LAST MODIFICATION
-#
-#   2005-05-30
-#
-# COPYLEFT
-#
-#   Copyright (c) 2005 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2005 Matteo Frigo
-#
-#   This program is free software; you can redistribute it and/or
-#   modify it under the terms of the GNU General Public License as
-#   published by the Free Software Foundation; either version 2 of the
-#   License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#   General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#   02111-1307, USA.
-#
-#   As a special exception, the respective Autoconf Macro's copyright
-#   owner gives unlimited permission to copy, distribute and modify the
-#   configure scripts that are the output of Autoconf when processing
-#   the Macro. You need not follow the terms of the GNU General Public
-#   License when using or distributing such scripts, even though
-#   portions of the text of the Macro appear in them. The GNU General
-#   Public License (GPL) does govern all other use of the material that
-#   constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the
-#   Autoconf Macro released by the Autoconf Macro Archive. When you
-#   make and distribute a modified version of the Autoconf Macro, you
-#   may extend this special exception to the GPL to apply to your
-#   modified version as well.
+dnl @synopsis AX_CC_MAXOPT
+dnl
+dnl @summary turn on optimization flags for the C compiler
+dnl
+dnl Try to turn on "good" C optimization flags for various compilers
+dnl and architectures, for some definition of "good". (In our case,
+dnl good for FFTW and hopefully for other scientific codes. Modify as
+dnl needed.)
+dnl
+dnl The user can override the flags by setting the CFLAGS environment
+dnl variable. The user can also specify --enable-portable-binary in
+dnl order to disable any optimization flags that might result in a
+dnl binary that only runs on the host architecture.
+dnl
+dnl Note also that the flags assume that ANSI C aliasing rules are
+dnl followed by the code (e.g. for gcc's -fstrict-aliasing), and that
+dnl floating-point computations can be re-ordered as needed.
+dnl
+dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_COMPILER_VENDOR,
+dnl AX_GCC_ARCHFLAG, AX_GCC_X86_CPUID.
+dnl
+dnl @category C
+dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 
 AC_DEFUN([AX_CC_MAXOPT],
 [
@@ -196,58 +159,21 @@ if test "$ac_test_CFLAGS" != "set"; then
 fi
 ])
 
-#
-# SYNOPSIS
-#
-#   AX_CHECK_COMPILER_FLAGS(FLAGS, [ACTION-SUCCESS], [ACTION-FAILURE])
-#
-# DESCRIPTION
-#
-#   Check whether the given compiler FLAGS work with the current
-#   language's compiler, or whether they give an error. (Warnings,
-#   however, are ignored.)
-#
-#   ACTION-SUCCESS/ACTION-FAILURE are shell commands to execute on
-#   success/failure.
-#
-# LAST MODIFICATION
-#
-#   2005-05-30
-#
-# COPYLEFT
-#
-#   Copyright (c) 2005 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2005 Matteo Frigo
-#
-#   This program is free software; you can redistribute it and/or
-#   modify it under the terms of the GNU General Public License as
-#   published by the Free Software Foundation; either version 2 of the
-#   License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#   General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#   02111-1307, USA.
-#
-#   As a special exception, the respective Autoconf Macro's copyright
-#   owner gives unlimited permission to copy, distribute and modify the
-#   configure scripts that are the output of Autoconf when processing
-#   the Macro. You need not follow the terms of the GNU General Public
-#   License when using or distributing such scripts, even though
-#   portions of the text of the Macro appear in them. The GNU General
-#   Public License (GPL) does govern all other use of the material that
-#   constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the
-#   Autoconf Macro released by the Autoconf Macro Archive. When you
-#   make and distribute a modified version of the Autoconf Macro, you
-#   may extend this special exception to the GPL to apply to your
-#   modified version as well.
+dnl @synopsis AX_CHECK_COMPILER_FLAGS(FLAGS, [ACTION-SUCCESS], [ACTION-FAILURE])
+dnl
+dnl @summary check whether FLAGS are accepted by the compiler
+dnl
+dnl Check whether the given compiler FLAGS work with the current
+dnl language's compiler, or whether they give an error. (Warnings,
+dnl however, are ignored.)
+dnl
+dnl ACTION-SUCCESS/ACTION-FAILURE are shell commands to execute on
+dnl success/failure.
+dnl
+dnl @category Misc
+dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 
 AC_DEFUN([AX_CHECK_COMPILER_FLAGS],
 [AC_PREREQ(2.59) dnl for _AC_LANG_PREFIX
@@ -276,57 +202,21 @@ else
 fi
 ])dnl AX_CHECK_COMPILER_FLAGS
 
-#
-# SYNOPSIS
-#
-#   AX_COMPILER_VENDOR
-#
-# DESCRIPTION
-#
-#   Determine the vendor of the C/C++ compiler, e.g., gnu, intel, ibm,
-#   sun, hp, borland, comeau, dec, cray, kai, lcc, metrowerks, sgi,
-#   microsoft, watcom, etc. The vendor is returned in the cache
-#   variable $ax_cv_c_compiler_vendor for C and
-#   $ax_cv_cxx_compiler_vendor for C++.
-#
-# LAST MODIFICATION
-#
-#   2005-05-30
-#
-# COPYLEFT
-#
-#   Copyright (c) 2005 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2005 Matteo Frigo
-#
-#   This program is free software; you can redistribute it and/or
-#   modify it under the terms of the GNU General Public License as
-#   published by the Free Software Foundation; either version 2 of the
-#   License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#   General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#   02111-1307, USA.
-#
-#   As a special exception, the respective Autoconf Macro's copyright
-#   owner gives unlimited permission to copy, distribute and modify the
-#   configure scripts that are the output of Autoconf when processing
-#   the Macro. You need not follow the terms of the GNU General Public
-#   License when using or distributing such scripts, even though
-#   portions of the text of the Macro appear in them. The GNU General
-#   Public License (GPL) does govern all other use of the material that
-#   constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the
-#   Autoconf Macro released by the Autoconf Macro Archive. When you
-#   make and distribute a modified version of the Autoconf Macro, you
-#   may extend this special exception to the GPL to apply to your
-#   modified version as well.
+dnl @synopsis AX_COMPILER_VENDOR
+dnl
+dnl @summary find the vendor (gnu, intel, etc.) of the C/C++ compiler
+dnl
+dnl Determine the vendor of the C/C++ compiler, e.g., gnu, intel, ibm,
+dnl sun, hp, borland, comeau, dec, cray, kai, lcc, metrowerks, sgi,
+dnl microsoft, watcom, etc. The vendor is returned in the cache
+dnl variable $ax_cv_c_compiler_vendor for C and
+dnl $ax_cv_cxx_compiler_vendor for C++.
+dnl
+dnl @category C
+dnl @category Cxx
+dnl @author Steven G. Johnson <stevenj@alum.mit.edu> with Matteo Frigo
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 
 AC_DEFUN([AX_COMPILER_VENDOR],
 [
@@ -344,78 +234,41 @@ AC_CACHE_CHECK([for _AC_LANG compiler vendor], ax_cv_[]_AC_LANG_ABBREV[]_compile
  ])
 ])
 
-#
-# SYNOPSIS
-#
-#   AX_GCC_ARCHFLAG([PORTABLE?], [ACTION-SUCCESS], [ACTION-FAILURE])
-#
-# DESCRIPTION
-#
-#   This macro tries to guess the "native" arch corresponding to the
-#   target architecture for use with gcc's -march=arch or -mtune=arch
-#   flags. If found, the cache variable $ax_cv_gcc_archflag is set to
-#   this flag and ACTION-SUCCESS is executed; otherwise
-#   $ax_cv_gcc_archflag is is set to "unknown" and ACTION-FAILURE is
-#   executed. The default ACTION-SUCCESS is to add $ax_cv_gcc_archflag
-#   to the end of $CFLAGS.
-#
-#   PORTABLE? should be either [yes] (default) or [no]. In the former
-#   case, the flag is set to -mtune (or equivalent) so that the
-#   architecture is only used for tuning, but the instruction set used
-#   is still portable. In the latter case, the flag is set to -march
-#   (or equivalent) so that architecture-specific instructions are
-#   enabled.
-#
-#   The user can specify --with-gcc-arch=<arch> in order to override
-#   the macro's choice of architecture, or --without-gcc-arch to
-#   disable this.
-#
-#   When cross-compiling, or if $CC is not gcc, then ACTION-FAILURE is
-#   called unless the user specified --with-gcc-arch manually.
-#
-#   Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
-#
-#   (The main emphasis here is on recent CPUs, on the principle that
-#   doing high-performance computing on old hardware is uncommon.)
-#
-# LAST MODIFICATION
-#
-#   2006-01-04
-#
-# COPYLEFT
-#
-#   Copyright (c) 2006 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2006 Matteo Frigo
-#
-#   This program is free software; you can redistribute it and/or
-#   modify it under the terms of the GNU General Public License as
-#   published by the Free Software Foundation; either version 2 of the
-#   License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#   General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#   02111-1307, USA.
-#
-#   As a special exception, the respective Autoconf Macro's copyright
-#   owner gives unlimited permission to copy, distribute and modify the
-#   configure scripts that are the output of Autoconf when processing
-#   the Macro. You need not follow the terms of the GNU General Public
-#   License when using or distributing such scripts, even though
-#   portions of the text of the Macro appear in them. The GNU General
-#   Public License (GPL) does govern all other use of the material that
-#   constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the
-#   Autoconf Macro released by the Autoconf Macro Archive. When you
-#   make and distribute a modified version of the Autoconf Macro, you
-#   may extend this special exception to the GPL to apply to your
-#   modified version as well.
+dnl @synopsis AX_GCC_ARCHFLAG([PORTABLE?], [ACTION-SUCCESS], [ACTION-FAILURE])
+dnl
+dnl @summary find target architecture name for gcc -march/-mtune flags
+dnl
+dnl This macro tries to guess the "native" arch corresponding to the
+dnl target architecture for use with gcc's -march=arch or -mtune=arch
+dnl flags. If found, the cache variable $ax_cv_gcc_archflag is set to
+dnl this flag and ACTION-SUCCESS is executed; otherwise
+dnl $ax_cv_gcc_archflag is is set to "unknown" and ACTION-FAILURE is
+dnl executed. The default ACTION-SUCCESS is to add $ax_cv_gcc_archflag
+dnl to the end of $CFLAGS.
+dnl
+dnl PORTABLE? should be either [yes] (default) or [no]. In the former
+dnl case, the flag is set to -mtune (or equivalent) so that the
+dnl architecture is only used for tuning, but the instruction set used
+dnl is still portable. In the latter case, the flag is set to -march
+dnl (or equivalent) so that architecture-specific instructions are
+dnl enabled.
+dnl
+dnl The user can specify --with-gcc-arch=<arch> in order to override
+dnl the macro's choice of architecture, or --without-gcc-arch to
+dnl disable this.
+dnl
+dnl When cross-compiling, or if $CC is not gcc, then ACTION-FAILURE is
+dnl called unless the user specified --with-gcc-arch manually.
+dnl
+dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
+dnl
+dnl (The main emphasis here is on recent CPUs, on the principle that
+dnl doing high-performance computing on old hardware is uncommon.)
+dnl
+dnl @category Misc
+dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
+dnl @version 2006-01-04
+dnl @license GPLWithACException
 
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -566,67 +419,30 @@ else
 fi
 ])
 
-#
-# SYNOPSIS
-#
-#   AX_GCC_X86_CPUID(OP)
-#
-# DESCRIPTION
-#
-#   On Pentium and later x86 processors, with gcc or a compiler that
-#   has a compatible syntax for inline assembly instructions, run a
-#   small program that executes the cpuid instruction with input OP.
-#   This can be used to detect the CPU type.
-#
-#   On output, the values of the eax, ebx, ecx, and edx registers are
-#   stored as hexadecimal strings as "eax:ebx:ecx:edx" in the cache
-#   variable ax_cv_gcc_x86_cpuid_OP.
-#
-#   If the cpuid instruction fails (because you are running a
-#   cross-compiler, or because you are not using gcc, or because you
-#   are on a processor that doesn't have this instruction),
-#   ax_cv_gcc_x86_cpuid_OP is set to the string "unknown".
-#
-#   This macro mainly exists to be used in AX_GCC_ARCHFLAG.
-#
-# LAST MODIFICATION
-#
-#   2005-05-30
-#
-# COPYLEFT
-#
-#   Copyright (c) 2005 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2005 Matteo Frigo
-#
-#   This program is free software; you can redistribute it and/or
-#   modify it under the terms of the GNU General Public License as
-#   published by the Free Software Foundation; either version 2 of the
-#   License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#   General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-#   02111-1307, USA.
-#
-#   As a special exception, the respective Autoconf Macro's copyright
-#   owner gives unlimited permission to copy, distribute and modify the
-#   configure scripts that are the output of Autoconf when processing
-#   the Macro. You need not follow the terms of the GNU General Public
-#   License when using or distributing such scripts, even though
-#   portions of the text of the Macro appear in them. The GNU General
-#   Public License (GPL) does govern all other use of the material that
-#   constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the
-#   Autoconf Macro released by the Autoconf Macro Archive. When you
-#   make and distribute a modified version of the Autoconf Macro, you
-#   may extend this special exception to the GPL to apply to your
-#   modified version as well.
+dnl @synopsis AX_GCC_X86_CPUID(OP)
+dnl
+dnl @summary run x86 cpuid instruction OP using gcc inline assembler
+dnl
+dnl On Pentium and later x86 processors, with gcc or a compiler that
+dnl has a compatible syntax for inline assembly instructions, run a
+dnl small program that executes the cpuid instruction with input OP.
+dnl This can be used to detect the CPU type.
+dnl
+dnl On output, the values of the eax, ebx, ecx, and edx registers are
+dnl stored as hexadecimal strings as "eax:ebx:ecx:edx" in the cache
+dnl variable ax_cv_gcc_x86_cpuid_OP.
+dnl
+dnl If the cpuid instruction fails (because you are running a
+dnl cross-compiler, or because you are not using gcc, or because you
+dnl are on a processor that doesn't have this instruction),
+dnl ax_cv_gcc_x86_cpuid_OP is set to the string "unknown".
+dnl
+dnl This macro mainly exists to be used in AX_GCC_ARCHFLAG.
+dnl
+dnl @category Misc
+dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 
 AC_DEFUN([AX_GCC_X86_CPUID],
 [AC_REQUIRE([AC_PROG_CC])
@@ -649,97 +465,87 @@ AC_CACHE_CHECK(for x86 cpuid $1 output, ax_cv_gcc_x86_cpuid_$1,
 AC_LANG_POP([C])
 ])
 
-#
-# SYNOPSIS
-#
-#   BNV_HAVE_QT [--with-Qt-dir=DIR] [--with-Qt-lib-dir=DIR] [--with-Qt-lib=LIB]
-#   BNV_HAVE_QT [--with-Qt-include-dir=DIR] [--with-Qt-bin-dir=DIR] [--with-Qt-lib-dir=DIR] [--with-Qt-lib=LIB]
-#
-# DESCRIPTION
-#
-#   Searches common directories for Qt include files, libraries and Qt
-#   binary utilities. The macro supports several different versions of
-#   the Qt framework being installed on the same machine. Without
-#   options, the macro is designed to look for the latest library,
-#   i.e., the highest definition of QT_VERSION in qglobal.h. By use of
-#   one or more options a different library may be selected. There are
-#   two different sets of options. Both sets contain the option
-#   --with-Qt-lib=LIB which can be used to force the use of a
-#   particular version of the library file when more than one are
-#   available. LIB must be in the form as it would appear behind the
-#   "-l" option to the compiler. Examples for LIB would be "qt-mt" for
-#   the multi-threaded version and "qt" for the regular version. In
-#   addition to this, the first set consists of an option
-#   --with-Qt-dir=DIR which can be used when the installation conforms
-#   to Trolltech's standard installation, which means that header files
-#   are in DIR/include, binary utilities are in DIR/bin and the library
-#   is in DIR/lib. The second set of options can be used to indicate
-#   individual locations for the header files, the binary utilities and
-#   the library file, in addition to the specific version of the
-#   library file.
-#
-#   The following shell variable is set to either "yes" or "no":
-#
-#     have_qt
-#
-#   Additionally, the following variables are exported:
-#
-#     QT_CXXFLAGS
-#     QT_LIBS
-#     QT_MOC
-#     QT_UIC
-#     QT_DIR
-#
-#   which respectively contain an "-I" flag pointing to the Qt include
-#   directory (and "-DQT_THREAD_SUPPORT" when LIB is "qt-mt"), link
-#   flags necessary to link with Qt and X, the name of the meta object
-#   compiler and the user interface compiler both with full path, and
-#   finaly the variable QTDIR as Trolltech likes to see it defined (if
-#   possible).
-#
-#   Example lines for Makefile.in:
-#
-#     CXXFLAGS = @QT_CXXFLAGS@
-#     MOC      = @QT_MOC@
-#
-#   After the variables have been set, a trial compile and link is
-#   performed to check the correct functioning of the meta object
-#   compiler. This test may fail when the different detected elements
-#   stem from different releases of the Qt framework. In that case, an
-#   error message is emitted and configure stops.
-#
-#   No common variables such as $LIBS or $CFLAGS are polluted.
-#
-#   Options:
-#
-#   --with-Qt-dir=DIR: DIR is equal to $QTDIR if you have followed the
-#   installation instructions of Trolltech. Header files are in
-#   DIR/include, binary utilities are in DIR/bin and the library is in
-#   DIR/lib.
-#
-#   --with-Qt-include-dir=DIR: Qt header files are in DIR.
-#
-#   --with-Qt-bin-dir=DIR: Qt utilities such as moc and uic are in DIR.
-#
-#   --with-Qt-lib-dir=DIR: The Qt library is in DIR.
-#
-#   --with-Qt-lib=LIB: Use -lLIB to link with the Qt library.
-#
-#   If some option "=no" or, equivalently, a --without-Qt-* version is
-#   given in stead of a --with-Qt-*, "have_qt" is set to "no" and the
-#   other variables are set to the empty string.
-#
-# LAST MODIFICATION
-#
-#   2006-03-12
-#
-# COPYLEFT
-#
-#   Copyright (c) 2006 Bastiaan Veelo <Bastiaan@Veelo.net>
-#
-#   Copying and distribution of this file, with or without
-#   modification, are permitted in any medium without royalty provided
-#   the copyright notice and this notice are preserved.
+dnl @synopsis BNV_HAVE_QT [--with-Qt-dir=DIR] [--with-Qt-lib-dir=DIR] [--with-Qt-lib=LIB]
+dnl @synopsis BNV_HAVE_QT [--with-Qt-include-dir=DIR] [--with-Qt-bin-dir=DIR] [--with-Qt-lib-dir=DIR] [--with-Qt-lib=LIB]
+dnl
+dnl @summary Search for Trolltech's Qt GUI framework.
+dnl
+dnl Searches common directories for Qt include files, libraries and Qt
+dnl binary utilities. The macro supports several different versions of
+dnl the Qt framework being installed on the same machine. Without
+dnl options, the macro is designed to look for the latest library,
+dnl i.e., the highest definition of QT_VERSION in qglobal.h. By use of
+dnl one or more options a different library may be selected. There are
+dnl two different sets of options. Both sets contain the option
+dnl --with-Qt-lib=LIB which can be used to force the use of a
+dnl particular version of the library file when more than one are
+dnl available. LIB must be in the form as it would appear behind the
+dnl "-l" option to the compiler. Examples for LIB would be "qt-mt" for
+dnl the multi-threaded version and "qt" for the regular version. In
+dnl addition to this, the first set consists of an option
+dnl --with-Qt-dir=DIR which can be used when the installation conforms
+dnl to Trolltech's standard installation, which means that header files
+dnl are in DIR/include, binary utilities are in DIR/bin and the library
+dnl is in DIR/lib. The second set of options can be used to indicate
+dnl individual locations for the header files, the binary utilities and
+dnl the library file, in addition to the specific version of the
+dnl library file.
+dnl
+dnl The following shell variable is set to either "yes" or "no":
+dnl
+dnl   have_qt
+dnl
+dnl Additionally, the following variables are exported:
+dnl
+dnl   QT_CXXFLAGS
+dnl   QT_LIBS
+dnl   QT_MOC
+dnl   QT_UIC
+dnl   QT_DIR
+dnl
+dnl which respectively contain an "-I" flag pointing to the Qt include
+dnl directory (and "-DQT_THREAD_SUPPORT" when LIB is "qt-mt"), link
+dnl flags necessary to link with Qt and X, the name of the meta object
+dnl compiler and the user interface compiler both with full path, and
+dnl finaly the variable QTDIR as Trolltech likes to see it defined (if
+dnl possible).
+dnl
+dnl Example lines for Makefile.in:
+dnl
+dnl   CXXFLAGS = @QT_CXXFLAGS@
+dnl   MOC      = @QT_MOC@
+dnl
+dnl After the variables have been set, a trial compile and link is
+dnl performed to check the correct functioning of the meta object
+dnl compiler. This test may fail when the different detected elements
+dnl stem from different releases of the Qt framework. In that case, an
+dnl error message is emitted and configure stops.
+dnl
+dnl No common variables such as $LIBS or $CFLAGS are polluted.
+dnl
+dnl Options:
+dnl
+dnl --with-Qt-dir=DIR: DIR is equal to $QTDIR if you have followed the
+dnl installation instructions of Trolltech. Header files are in
+dnl DIR/include, binary utilities are in DIR/bin and the library is in
+dnl DIR/lib.
+dnl
+dnl --with-Qt-include-dir=DIR: Qt header files are in DIR.
+dnl
+dnl --with-Qt-bin-dir=DIR: Qt utilities such as moc and uic are in DIR.
+dnl
+dnl --with-Qt-lib-dir=DIR: The Qt library is in DIR.
+dnl
+dnl --with-Qt-lib=LIB: Use -lLIB to link with the Qt library.
+dnl
+dnl If some option "=no" or, equivalently, a --without-Qt-* version is
+dnl given in stead of a --with-Qt-*, "have_qt" is set to "no" and the
+dnl other variables are set to the empty string.
+dnl
+dnl @category InstalledPackages
+dnl @author Bastiaan Veelo <Bastiaan@Veelo.net>
+dnl @version 2006-03-12
+dnl @license AllPermissive
 
 dnl Copyright (C) 2001, 2002, 2003, 2005, 2006 Bastiaan Veelo
 
@@ -919,80 +725,6 @@ AC_DEFUN([BNV_HAVE_QT],
   AC_SUBST(QT_UIC)
   AC_SUBST(QT_MOC)
 
-  #### Being paranoid:
-  if test x"$have_qt" = xyes; then
-    AC_MSG_CHECKING(correct functioning of Qt installation)
-    AC_CACHE_VAL(bnv_cv_qt_test_result,
-    [
-      cat > bnv_qt_test.h << EOF
-#include <qobject.h>
-class Test : public QObject
-{
-Q_OBJECT
-public:
-  Test() {}
-  ~Test() {}
-public slots:
-  void receive() {}
-signals:
-  void send();
-};
-EOF
-
-      cat > bnv_qt_main.$ac_ext << EOF
-#include "bnv_qt_test.h"
-#include <qapplication.h>
-int main( int argc, char **argv )
-{
-  QApplication app( argc, argv );
-  Test t;
-  QObject::connect( &t, SIGNAL(send()), &t, SLOT(receive()) );
-}
-EOF
-
-      bnv_cv_qt_test_result="failure"
-      bnv_try_1="$QT_MOC bnv_qt_test.h -o moc_bnv_qt_test.$ac_ext >/dev/null 2>/dev/null"
-      AC_TRY_EVAL(bnv_try_1)
-      if test x"$ac_status" != x0; then
-        echo "$bnv_err_1" >&AC_FD_CC
-        echo "configure: could not run $QT_MOC on:" >&AC_FD_CC
-        cat bnv_qt_test.h >&AC_FD_CC
-      else
-        bnv_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_bnv_qt_test.o moc_bnv_qt_test.$ac_ext >/dev/null 2>/dev/null"
-        AC_TRY_EVAL(bnv_try_2)
-        if test x"$ac_status" != x0; then
-          echo "$bnv_err_2" >&AC_FD_CC
-          echo "configure: could not compile:" >&AC_FD_CC
-          cat moc_bnv_qt_test.$ac_ext >&AC_FD_CC
-        else
-          bnv_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o bnv_qt_main.o bnv_qt_main.$ac_ext >/dev/null 2>/dev/null"
-          AC_TRY_EVAL(bnv_try_3)
-          if test x"$ac_status" != x0; then
-            echo "$bnv_err_3" >&AC_FD_CC
-            echo "configure: could not compile:" >&AC_FD_CC
-            cat bnv_qt_main.$ac_ext >&AC_FD_CC
-          else
-            bnv_try_4="$CXX $QT_LIBS $LIBS -o bnv_qt_main bnv_qt_main.o moc_bnv_qt_test.o >/dev/null 2>/dev/null"
-            AC_TRY_EVAL(bnv_try_4)
-            if test x"$ac_status" != x0; then
-              echo "$bnv_err_4" >&AC_FD_CC
-            else
-              bnv_cv_qt_test_result="success"
-            fi
-          fi
-        fi
-      fi
-    ])dnl AC_CACHE_VAL bnv_cv_qt_test_result
-    AC_MSG_RESULT([$bnv_cv_qt_test_result]);
-    if test x"$bnv_cv_qt_test_result" = "xfailure"; then
-      AC_MSG_ERROR([Failed to find matching components of a complete
-                  Qt installation. Try using more options,
-                  see ./configure --help.])
-    fi
-
-    rm -f bnv_qt_test.h moc_bnv_qt_test.$ac_ext moc_bnv_qt_test.o \
-          bnv_qt_main.$ac_ext bnv_qt_main.o bnv_qt_main
-  fi
 ])
 
 dnl Internal subroutine of BNV_HAVE_QT
@@ -7550,67 +7282,55 @@ SED=$lt_cv_path_SED
 AC_MSG_RESULT([$SED])
 ])
 
-#
-# SYNOPSIS
-#
-#   VL_LIB_READLINE
-#
-# DESCRIPTION
-#
-#   Searches for a readline compatible library. If found, defines
-#   `HAVE_LIBREADLINE'. If the found library has the `add_history'
-#   function, sets also `HAVE_READLINE_HISTORY'. Also checks for the
-#   locations of the necessary include files and sets `HAVE_READLINE_H'
-#   or `HAVE_READLINE_READLINE_H' and `HAVE_READLINE_HISTORY_H' or
-#   'HAVE_HISTORY_H' if the corresponding include files exists.
-#
-#   The libraries that may be readline compatible are `libedit',
-#   `libeditline' and `libreadline'. Sometimes we need to link a
-#   termcap library for readline to work, this macro tests these cases
-#   too by trying to link with `libtermcap', `libcurses' or
-#   `libncurses' before giving up.
-#
-#   Here is an example of how to use the information provided by this
-#   macro to perform the necessary includes or declarations in a C
-#   file:
-#
-#     #ifdef HAVE_LIBREADLINE
-#     #  if defined(HAVE_READLINE_READLINE_H)
-#     #    include <readline/readline.h>
-#     #  elif defined(HAVE_READLINE_H)
-#     #    include <readline.h>
-#     #  else /* !defined(HAVE_READLINE_H) */
-#     extern char *readline ();
-#     #  endif /* !defined(HAVE_READLINE_H) */
-#     char *cmdline = NULL;
-#     #else /* !defined(HAVE_READLINE_READLINE_H) */
-#       /* no readline */
-#     #endif /* HAVE_LIBREADLINE */
-#
-#     #ifdef HAVE_READLINE_HISTORY
-#     #  if defined(HAVE_READLINE_HISTORY_H)
-#     #    include <readline/history.h>
-#     #  elif defined(HAVE_HISTORY_H)
-#     #    include <history.h>
-#     #  else /* !defined(HAVE_HISTORY_H) */
-#     extern void add_history ();
-#     extern int write_history ();
-#     extern int read_history ();
-#     #  endif /* defined(HAVE_READLINE_HISTORY_H) */
-#       /* no history */
-#     #endif /* HAVE_READLINE_HISTORY */
-#
-# LAST MODIFICATION
-#
-#   2002-04-04
-#
-# COPYLEFT
-#
-#   Copyright (c) 2002 Ville Laurikari <vl@iki.fi>
-#
-#   Copying and distribution of this file, with or without
-#   modification, are permitted in any medium without royalty provided
-#   the copyright notice and this notice are preserved.
+dnl @synopsis VL_LIB_READLINE
+dnl
+dnl Searches for a readline compatible library. If found, defines
+dnl `HAVE_LIBREADLINE'. If the found library has the `add_history'
+dnl function, sets also `HAVE_READLINE_HISTORY'. Also checks for the
+dnl locations of the necessary include files and sets `HAVE_READLINE_H'
+dnl or `HAVE_READLINE_READLINE_H' and `HAVE_READLINE_HISTORY_H' or
+dnl 'HAVE_HISTORY_H' if the corresponding include files exists.
+dnl
+dnl The libraries that may be readline compatible are `libedit',
+dnl `libeditline' and `libreadline'. Sometimes we need to link a
+dnl termcap library for readline to work, this macro tests these cases
+dnl too by trying to link with `libtermcap', `libcurses' or
+dnl `libncurses' before giving up.
+dnl
+dnl Here is an example of how to use the information provided by this
+dnl macro to perform the necessary includes or declarations in a C
+dnl file:
+dnl
+dnl   #ifdef HAVE_LIBREADLINE
+dnl   #  if defined(HAVE_READLINE_READLINE_H)
+dnl   #    include <readline/readline.h>
+dnl   #  elif defined(HAVE_READLINE_H)
+dnl   #    include <readline.h>
+dnl   #  else /* !defined(HAVE_READLINE_H) */
+dnl   extern char *readline ();
+dnl   #  endif /* !defined(HAVE_READLINE_H) */
+dnl   char *cmdline = NULL;
+dnl   #else /* !defined(HAVE_READLINE_READLINE_H) */
+dnl     /* no readline */
+dnl   #endif /* HAVE_LIBREADLINE */
+dnl
+dnl   #ifdef HAVE_READLINE_HISTORY
+dnl   #  if defined(HAVE_READLINE_HISTORY_H)
+dnl   #    include <readline/history.h>
+dnl   #  elif defined(HAVE_HISTORY_H)
+dnl   #    include <history.h>
+dnl   #  else /* !defined(HAVE_HISTORY_H) */
+dnl   extern void add_history ();
+dnl   extern int write_history ();
+dnl   extern int read_history ();
+dnl   #  endif /* defined(HAVE_READLINE_HISTORY_H) */
+dnl     /* no history */
+dnl   #endif /* HAVE_READLINE_HISTORY */
+dnl
+dnl @category InstalledPackages
+dnl @author Ville Laurikari <vl@iki.fi>
+dnl @version 2002-04-04
+dnl @license AllPermissive
 
 AC_DEFUN([VL_LIB_READLINE], [
   AC_CACHE_CHECK([for a readline compatible library],
