@@ -37,6 +37,27 @@
 #
 #   Mark C. Miller, Tue Sep  5 12:36:16 PDT 2006
 #   Redirected some command error output to /dev/null
+#
+#   Mark C. Miller, Wed Feb  7 22:34:32 PST 2007
+#   Fixed build of visit's data so visit gets built before its data
+#   Made it build visit with -J 3 (3 processors)
+#
+#   Mark C. Miller, Thu Feb  8 08:23:39 PST 2007
+#   Added PATH=...;export PATH lines to just after each ct startview command
+#   so that we get the right path each time we start a new view
+#   changed min/max-error tolerances flags to runtest to pix/avg-diff to
+#   confirm to new argument format.
+#
+#   Mark C. Miller, Thu Feb  8 11:26:01 PST 2007
+#   Changed HTML output to include visit's html output dir. Fixed problems
+#   with incorrect reporting of top-level pass/fail.
+#
+#   Mark C. Miller, Thu Feb  8 16:13:18 PST 2007
+#   Added '-m silo,optimized' to VisIt's runtest
+#
+#   Mark C. Miller, Fri Feb  9 08:33:36 PST 2007
+#   Added backslash chars to quotes surrounding href in code that inserts
+#   a line into visit account's top-level index.html
 #--------------------------------------------------------------------------------
 
 umask 002
@@ -141,21 +162,23 @@ cp checklog $tmpRoot
 
 #
 # Ok, now build VisIt with this Silo
+# Note, lack of CXXFLAGS=-g makes this an optimized build
 #
 $useMake install 1>/dev/null 2>&1
 cleartool startview visit_VOBowner_testsilo  1> /dev/null 2>&1
 cd /view/visit_VOBowner_testsilo/data_vobs/VisIt
+PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/data_vobs/VisIt/clearcase_bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
+export PATH
 ./configure --with-silo_include=$tmpInstall/include --with-silo_library=$tmpInstall/lib --enable-parallel 1>configlog 2>&1
 cat config.log >> configlog
 ifErrorSendMessage $? "Failed to configure VisIt" configlog 1
+clearmake -J 3 1>buildlog 2>&1
+ifErrorSendMessage $? "Failed to build VisIt" buildlog 1
 cd data
 clearmake clean 1>/dev/null 2>&1
 clearmake test 1>makedatalog 2>&1
 ifErrorSendMessage $? "Failed to make VisIt's Silo/PDB data" makedatalog 1
-cd ..
-clearmake 1>buildlog 2>&1
-ifErrorSendMessage $? "Failed to build VisIt" buildlog 1
-cd test
+cd ../test
 
 #
 # Examine VisIt's test .py files and find "best" 10% to run
@@ -183,91 +206,115 @@ rm -f datafiles.txt scores.txt sorted_scores.txt
 
 #
 # Run selected VisIt tests for both PDB and HDF5 data
+# Note: since its an optimized build, use non-zero error tolerances 
+# Note: We also need to tell runtest this is an optimized run to
+# get the correct diffing behavior
 #
-./runtest -notrackmem -q -minor-error 8 -major-error 20 $testsToRun
-cp html/index.html $tmpRoot/index_pdb.html
+./runtest -m silo,optimized -notrackmem -q -pixdiff 10 -avgdiff 10 $testsToRun
+siloVisItPDBStatus=$?
+cp -R html html_pdb 1>/dev/null 2>&1
+chgrp -R visit html_pdb 1>/dev/null 2>&1
+chmod -R g+rwX html_pdb 1>/dev/null 2>&1
+tar cf - html_pdb | gzip > $tmpRoot/html_pdb.tar.gz
+rm -rf html_pdb
 cd ../data
 rm -f makedatalog
 clearmake testh5 1>makedatalog 2>&1
 ifErrorSendMessage $? "Failed to make VisIt's Silo/HDF5data" makedatalog 1
 cd ../test
-./runtest -m hdf5 -notrackmem -q -minor-error 8 -major-error 20 $testsToRun
-cp html/index.html $tmpRoot/index_hdf5.html
+./runtest -m hdf5,silo,optimized -notrackmem -q -pixdiff 10 -avgdiff 10 $testsToRun
+siloVisItHDF5Status=$?
+cp -R html html_hdf5 1>/dev/null 2>&1
+chgrp -R visit html_hdf5 1>/dev/null 2>&1
+chmod -R g+rwX html_hdf5 1>/dev/null 2>&1
+tar cf - html_hdf5 | gzip > $tmpRoot/html_hdf5.tar.gz
+rm -rf html_hdf5
 
 #
 # Back to silo vob
 #
 cleartool startview silo_VOBowner_test  1> /dev/null 2>&1
 cd /view/silo_VOBowner_test/data_vobs/Silo
+PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/data_vobs/VisIt/clearcase_bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
+export PATH
 
 #
-# Construct HTML header
+# Construct HTML for results from silo library tests
 #
-htmlFile="index.html"
-rm -f $htmlFile
-echo "<html><head><title>Silo Regression Results - $now</title></head>" >> $htmlFile
-echo "<body bgcolor=\"#a0a0f0\">"                                    >> $htmlFile
-echo "<H1>Results of Silo Regression Test - $now</H1>"   >> $htmlFile
-echo "<table border>"                                                >> $htmlFile
-echo " <tr>"                                                         >> $htmlFile
-echo "  <td><b><i>Caregory</b></i></td>"                             >> $htmlFile
-echo "  <td><b><i>Test Case</b></i></td>"                            >> $htmlFile
-echo "  <td><b><i>Status</b></i></td>"                               >> $htmlFile
-echo " </tr>"                                                        >> $htmlFile
-echo ""                                                              >> $htmlFile
+siloHtmlFile="silo_index.html"
+rm -f $siloHtmlFile
+echo "<html><head><title>Silo Library Results - $now</title></head>" >> $siloHtmlFile
+echo "<body bgcolor=\"#a0a0f0\">"                                    >> $siloHtmlFile
+echo "<H1>Results of Silo Library Tests - $now</H1>"                 >> $siloHtmlFile
+echo "<table border>"                                                >> $siloHtmlFile
+echo " <tr>"                                                         >> $siloHtmlFile
+echo "  <td><b><i>Test Case</b></i></td>"                            >> $siloHtmlFile
+echo "  <td><b><i>Status</b></i></td>"                               >> $siloHtmlFile
+echo " </tr>"                                                        >> $siloHtmlFile
+echo ""                                                              >> $siloHtmlFile
 
-#
-# Digest checklog file and produce html
-#
 testNames=`cat ${tmpRoot}/checklog| grep -e "^ *[0-9]*:" | cut -d':' -f2 | cut -d' ' -f1-10 | sed "s/  /%%/" | sed "s/ /~/g" | cut -d'%' -f1`
 testStats=`cat ${tmpRoot}/checklog| grep -e "^ *[0-9]*:" | cut -d':' -f2 | cut -d' ' -f11- | sed "s/ /~/g"`
 testidx=1
 anyerror=0
-echo " <tr>"                                                             >> $htmlFile
-echo "  <td><b><i>Silo's Tests</b></i></td>"                             >> $htmlFile
-echo " </tr>"                                                            >> $htmlFile
 for tname in $testNames; do
     theName=`echo $testNames | cut -d' ' -f$testidx | sed "s/~/ /g"`
     theStat=`echo $testStats | cut -d' ' -f$testidx | sed "s/~/ /g"`
-    echo " <tr>"                                                         >> $htmlFile
-    echo "  <td></td><td><b><i>$theName</b></i></td>"                    >> $htmlFile
+    echo " <tr>"                                                         >> $siloHtmlFile
+    echo " <td><b><i>$theName</b></i></td>"                              >> $siloHtmlFile
     if test "`echo $theStat | grep ok`" != ""; then
-        echo "  <td bgcolor="#00ff00"><b><i>Succeeded</b></i></td>"      >> $htmlFile
+        echo "  <td bgcolor="#00ff00"><b><i>Succeeded</b></i></td>"      >> $siloHtmlFile
     else
-        echo "  <td bgcolor="#ff0000"><b><i>Failed</b></i></td>"         >> $htmlFile
+        echo "  <td bgcolor="#ff0000"><b><i>Unacceptable</b></i></td>"   >> $siloHtmlFile
 	anyerror=1
     fi
-    echo " </tr>"                                                        >> $htmlFile
+    echo " </tr>"                                                        >> $siloHtmlFile
     testidx=`expr $testidx + 1`
 done
 
-#
-# Digest VisIt test results (in index.html)
-#
-echo " <tr>"                                                             >> $htmlFile
-echo "  <td><b><i>VisIt's Tests on Silo/PDB</b></i></td>"                >> $htmlFile
-echo " </tr>"                                                            >> $htmlFile
-rm -f sedcmds.txt
-echo "s/<td align=center><a href=\([-._a-zA-Z0-9]*\)>/<tr><td><\/td><td align=center>/" >> sedcmds.txt
-echo "s/td align=center bgcolor=\(.*\)/td align=center bgcolor=\1<\/tr>/" >> sedcmds.txt
-cat ${tmpRoot}/index_pdb.html | grep '<td align=center' | sed -f sedcmds.txt >> $htmlFile 
-if test "`grep Failed ${tmpRoot}/index_pdb.html`" != ""; then
-    anyerror=1
-fi
-echo " <tr>"                                                             >> $htmlFile
-echo "  <td><b><i>VisIt's Tests on Silo/HDF5</b></i></td>"               >> $htmlFile
-echo " </tr>"                                                            >> $htmlFile
-cat ${tmpRoot}/index_hdf5.html | grep '<td align=center' | sed -f sedcmds.txt >> $htmlFile 
-rm -f sedcmds.txt
-if test "`grep Failed ${tmpRoot}/index_hdf5.html`" != ""; then
-    anyerror=1
-fi
+echo "</table>"   >> $siloHtmlFile
+echo "</html>"    >> $siloHtmlFile
 
 #
-# Finish off the html file
+# Construct top-level HTML file for this round of silo tests
 #
-echo "</table>"   >> $htmlFile
-echo "</html>"    >> $htmlFile
+topHtmlFile="index.html"
+rm -f $topHtmlFile
+echo "<html><head><title>Silo Regression Results - $now</title></head>" >> $topHtmlFile
+echo "<body bgcolor=\"#a0a0f0\">"                                       >> $topHtmlFile
+echo "<H1>Results of Silo Regression Tests - $now</H1>"                 >> $topHtmlFile
+echo "<table border>"                                                >> $topHtmlFile
+echo " <tr>"                                                         >> $topHtmlFile
+echo "  <td><b><i>Test</b></i></td>"                                 >> $topHtmlFile
+echo "  <td><b><i>Status</b></i></td>"                               >> $topHtmlFile
+echo " </tr>"                                                        >> $topHtmlFile
+echo ""                                                              >> $topHtmlFile
+echo " <tr>"                                                         >> $topHtmlFile
+echo " <td><b><i>Silo Library</b></i></td>"                          >> $topHtmlFile
+if test $anyerror -ne 0; then
+    echo "  <td bgcolor="#ff0000"><b><i><a href="$siloHtmlFile">Failed</a></b></i></td>"   >> $topHtmlFile
+else
+    echo "  <td bgcolor="#00ff00"><b><i><a href="$siloHtmlFile">Succeeded</a></b></i></td>"      >> $topHtmlFile
+fi
+echo " </tr>"                                                        >> $topHtmlFile
+echo " <tr>"                                                         >> $topHtmlFile
+echo " <td><b><i>VisIt Tests on Silo/PDB</b></i></td>"               >> $topHtmlFile
+if test $siloVisItPDBStatus -ne 0; then
+    echo "  <td bgcolor="#ff0000"><b><i><a href="html_pdb/index.html">Failed</a></b></i></td>"   >> $topHtmlFile
+else
+    echo "  <td bgcolor="#00ff00"><b><i><a href="html_pdb/index.html">Succeeded</a></b></i></td>"      >> $topHtmlFile
+fi
+echo " </tr>"                                                        >> $topHtmlFile
+echo " <tr>"                                                         >> $topHtmlFile
+echo " <td><b><i>VisIt Tests on Silo/HDF5</b></i></td>"              >> $topHtmlFile
+if test $siloVisItHDF5Status -ne 0; then
+    echo "  <td bgcolor="#ff0000"><b><i><a href="html_hdf5/index.html">Failed</a></b></i></td>"   >> $topHtmlFile
+else
+    echo "  <td bgcolor="#00ff00"><b><i><a href="html_hdf5/index.html">Succeeded</a></b></i></td>"      >> $topHtmlFile
+fi
+echo " </tr>"                                                        >> $topHtmlFile
+echo "</table>"   >> $topHtmlFile
+echo "</html>"    >> $topHtmlFile
 
 #
 # Wait until we have today's dir to copy into
@@ -283,11 +330,20 @@ todaysBase=`basename $todaysDir`
 # Copy results to visit's public directory and update main index.html
 #
 ssh visit@hoth -x "mkdir $todaysDir/silo"
-scp $htmlFile visit@hoth:$todaysDir/silo/.
-if test $anyerror -eq 0; then
-    ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\"$todaysBase/silo\">silo</a></b></td><td align=center bgcolor=#00ff00><b>PASSED</b></td><td align=center><i>$now</i></td></tr>\" /home/visit/public_html/index.html"
+scp $siloHtmlFile $topHtmlFile $tmpRoot/html_pdb.tar.gz $tmpRoot/html_hdf5.tar.gz visit@hoth:$todaysDir/silo/.
+ssh visit@hoth -x "cd $todaysDir/silo ; gunzip < html_pdb.tar.gz | tar xf -"
+ssh visit@hoth -x "cd $todaysDir/silo ; gunzip < html_hdf5.tar.gz | tar xf -"
+
+#
+# Update visit account's top-level public html file
+# Note: 3 backslash chars ('\') needed before quotes surrounding
+# href so that VisIt's html generation code won't miss this
+# line that we're adding when it re-scans the file
+#
+if test $anyerror -eq 0 && test $siloVisItPDBStatus -eq 0 && test $siloVisItHDF5Status -eq 0; then
+    ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\\\"$todaysBase/silo\\\">silo</a></b></td><td align=center bgcolor=#00ff00><b>PASSED</b></td><td align=center><i>$now</i></td></tr>\" /home/visit/public_html/index.html"
     ifErrorSendMessage 1 "Silo Passed nightly tests" "" 0 
 else
-    ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\"$todaysBase/silo\">silo</a></b></td><td align=center bgcolor=#ff0000><b>FAILED</b></td><td align=center><i>$now</i></td></tr>\" /home/visit/public_html/index.html"
+    ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\\\"$todaysBase/silo\\\">silo</a></b></td><td align=center bgcolor=#ff0000><b>FAILED</b></td><td align=center><i>$now</i></td></tr>\" /home/visit/public_html/index.html"
     ifErrorSendMessage 1 "Silo Failed nightly tests" "" 0 
 fi
