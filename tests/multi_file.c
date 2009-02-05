@@ -54,12 +54,12 @@ main(int argc, char *argv[])
         if (!strcmp(argv[i], "DB_PDB"))
         {
             driver = DB_PDB;
-            file_ext = ".pdb";
+            file_ext = "pdb";
         }
         else if (!strcmp(argv[i], "DB_HDF5"))
         {
             driver = DB_HDF5;
-            file_ext = ".h5";
+            file_ext = "h5";
         }
         else
         {
@@ -851,29 +851,8 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
             DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
                       zoneno, &fshapesize, &fshapecnt, 1, NULL, NULL, 0);
 
-        /* 
-         * Output the zonelist.  This is being done at the object
-         * level to add the hi_offset option which can't be output
-         * with the DBPutZonelist routine.
-         */
-        obj = DBMakeObject("zl1", DB_ZONELIST, 10);
-
-        DBAddIntComponent(obj, "ndims", 3);
-        DBAddIntComponent(obj, "nzones", nzones);
-        DBAddIntComponent(obj, "nshapes", 1);
-        DBAddIntComponent(obj, "lnodelist", lzonelist);
-        DBAddIntComponent(obj, "origin", 0);
-        DBAddIntComponent(obj, "hi_offset", hi_off);
-        DBAddVarComponent(obj, "nodelist", "zl1_nodelist");
-        DBAddVarComponent(obj, "shapecnt", "zl1_shapecnt");
-        DBAddVarComponent(obj, "shapesize", "zl1_shapesize");
-
-        DBWriteObject(dbfile, obj, 0);
-        DBFreeObject(obj);
-
-        DBWrite(dbfile, "zl1_nodelist", zonelist, &lzonelist, 1, DB_INT);
-        DBWrite(dbfile, "zl1_shapecnt", &zshapecnt, &one, 1, DB_INT);
-        DBWrite(dbfile, "zl1_shapesize", &zshapesize, &one, 1, DB_INT);
+        DBPutZonelist2(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
+            0, hi_off, &zshapetype, &zshapesize, &zshapecnt, 1, 0);
 
         /* 
          * Output the rest of the mesh and variables.

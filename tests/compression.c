@@ -40,12 +40,15 @@ for advertising or product endorsement purposes.
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#if !defined(_WIN32)
 #include <sys/time.h>
+#endif
 #include <unistd.h>
 #include <stdlib.h>
 
 #define ONE_MEG 1048576
-#define INTERATE 500
+#define INTERATE 50
 
 /*-------------------------------------------------------------------------
  * Function:        main
@@ -83,16 +86,19 @@ main(int argc, char *argv[])
     char           tmpname[64];
     int            k1, k2;
     DBfile        *dbfile;
-    struct timeval tim;
+#if !defined(_WIN32)
+    struct         timeval tim;
+#endif
     struct stat    buffer;
     off_t          fsize;
     double         t1, t2;
+    int            has_loss = 0;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
        if (!strcmp(argv[i], "DB_PDB")) {
-          driver = DB_PDB;
-          filename = "compression.pdb";
+          fprintf(stderr, "This test only supported on HDF5 driver\n");
+          exit(1);
        } else if (!strcmp(argv[i], "DB_HDF5")) {
           driver = DB_HDF5;
           filename = "compression.h5";
@@ -104,12 +110,28 @@ main(int argc, char *argv[])
           }
           else
             DBSetCompression("METHOD=GZIP");
-       } else if (!strcmp(argv[i], "compressz")) {
+       } else if (!strcmp(argv[i], "szip")) {
           DBSetCompression("METHOD=SZIP");
+       } else if (!strcmp(argv[i], "gzip")) {
+          DBSetCompression("METHOD=GZIP");
+       } else if (!strcmp(argv[i], "fpzip")) {
+          DBSetCompression("METHOD=FPZIP");
        } else if (!strcmp(argv[i], "single")) {
           usefloat = 1;
        } else if (!strcmp(argv[i], "verbose")) {
           verbose = 1;
+       } else if (!strcmp(argv[i], "lossy1")) {
+          DBSetCompression("METHOD=FPZIP LOSS=1");
+          has_loss = 1;
+       } else if (!strcmp(argv[i], "lossy2")) {
+          DBSetCompression("METHOD=FPZIP LOSS=2");
+          has_loss = 1;
+       } else if (!strcmp(argv[i], "lossy3")) {
+          DBSetCompression("METHOD=FPZIP LOSS=3");
+          has_loss = 1;
+       } else if (!strcmp(argv[i], "minratio1000")) {
+          DBSetCompression("ERRMODE=FAIL MINRATIO=1000 METHOD=FPZIP");
+          has_loss = 1;
        } else if (!strcmp(argv[i], "readonly")) {
           readonly = 1;
        } else if (!strcmp(argv[i], "help")) {
@@ -119,23 +141,12 @@ main(int argc, char *argv[])
           printf("       single   - writes data as floats not doubles\n");
           printf("       verbose  - displays more feedback\n");
           printf("       readonly - checks an existing file (used for cross platform test)\n");
-          printf("       DB_PDB   - enable PDB driver, which doesn't do compression\n");
           printf("       DB_HDF5  - enable HDF5 driver, the default\n");
           return (0);
        } else {
           fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
        }
     }
-
-    if (verbose)
-    {
-       printf("sizeof(off_t) = %zu\n", sizeof(off_t));
-       printf("sizeof(fpos_t) = %zu\n", sizeof(fpos_t));
-       printf("sizeof(size_t) = %zu\n", sizeof(size_t));
-       printf("sizeof(ssize_t) = %zu\n", sizeof(ssize_t));
-    }
-    
-    DBShowErrors(DB_TOP, NULL);
 
     if (!readonly)
     {
@@ -146,8 +157,10 @@ main(int argc, char *argv[])
          printf("Creating file: `%s'\n", filename);
       dbfile = DBCreate(filename, 0, DB_LOCAL, "Compression Test", driver);
 
+#if !defined(_WIN32)
       gettimeofday(&tim, NULL);
       t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+#endif
       if (usefloat)
       {
          for (j = 0; j < INTERATE; j++)
@@ -161,7 +174,11 @@ main(int argc, char *argv[])
             for (i = 0; i < fdims[0]; i++)
                fval[i] = (float) fdims[0] * j + i;
 
-            DBWrite(dbfile, tmpname, fval, fdims, ndims, DB_FLOAT);
+            if (DBWrite(dbfile, tmpname, fval, fdims, ndims, DB_FLOAT) < 0)
+            {
+                nerrors++;
+                break;
+            }
          }
       }
       else
@@ -177,15 +194,21 @@ main(int argc, char *argv[])
             for (i = 0; i < ddims[0]; i++)
                dval[i] = (double) ddims[0] * j + i;
 
-            DBWrite(dbfile, tmpname, dval, ddims, ndims, DB_DOUBLE);
+            if (DBWrite(dbfile, tmpname, dval, ddims, ndims, DB_DOUBLE) < 0)
+            {
+                nerrors++;
+                break;
+            }
          }
       }
+#if !defined(_WIN32)
       gettimeofday(&tim, NULL);
       t2=tim.tv_sec+(tim.tv_usec/1000000.0);
       stat(filename, &buffer);
       fsize = buffer.st_size;
       printf("Write took %.6lf seconds and %.6g bytes/second\n", 
          t2-t1,fsize/(t2-t1));
+#endif
 
       DBClose(dbfile);
     }
@@ -194,6 +217,9 @@ main(int argc, char *argv[])
       stat(filename, &buffer);
       fsize = buffer.st_size;
     }
+
+    if (nerrors)
+        return nerrors;
 
     /*
      * Now try opening the file again and verify the simple
@@ -209,8 +235,10 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+#if !defined(_WIN32)
     gettimeofday(&tim, NULL);
     t1=tim.tv_sec+(tim.tv_usec/1000000.0);
+#endif
     if (usefloat)
     {
        for (j = 0; j < INTERATE; j++)
@@ -223,20 +251,20 @@ main(int argc, char *argv[])
 
           if (DBReadVar(dbfile, tmpname, frval) < 0)
           {
-             nerrors++;
-             if (nerrors < 10) printf("DBReadVar for \"%s\" failed\n", tmpname);
-             if (nerrors > 10) printf("Further errors will be suppressed\n");
+             if (!has_loss) nerrors++;
+             if (!has_loss && nerrors <= 10) printf("DBReadVar for \"%s\" failed\n", tmpname);
+             if (!has_loss && nerrors == 10) printf("Further errors will be suppressed\n");
           }
           for (i = 0; i < fdims[0]; i++)
           {
              fval[i] = (float) fdims[0] * j + i;
              if (fval[i] != frval[i])
              {
-                nerrors++;
-                if (nerrors < 10) 
+                if (!has_loss) nerrors++;
+                if (!has_loss && nerrors <= 10) 
                     printf("Read error in \"%s\" at position %04d. Expected %f, got %f\n",
                     tmpname, i, fval[i], frval[i]);
-                if (nerrors > 10) printf("Further errors will be suppressed\n");
+                if (!has_loss && nerrors == 10) printf("Further errors will be suppressed\n");
                 break;
              }
           }
@@ -254,29 +282,31 @@ main(int argc, char *argv[])
 
           if (DBReadVar(dbfile, tmpname, drval) < 0)
           {
-             nerrors++;
-             if (nerrors < 10) printf("DBReadVar for \"%s\" failed\n", tmpname);
-             if (nerrors > 10) printf("Further errors will be suppressed\n");
+             if (!has_loss) nerrors++;
+             if (!has_loss && nerrors <= 10) printf("DBReadVar for \"%s\" failed\n", tmpname);
+             if (!has_loss && nerrors == 10) printf("Further errors will be suppressed\n");
           }
           for (i = 0; i < ddims[0]; i++)
           {
              dval[i] = (double) ddims[0] * j + i;
              if (dval[i] != drval[i])
              {
-                nerrors++;
-                if (nerrors < 10) 
+                if (!has_loss) nerrors++;
+                if (!has_loss && nerrors <= 10) 
                     printf("Read error in \"%s\" at position %04d. Expected %f, got %f\n",
                     tmpname, i, dval[i], drval[i]);
-                if (nerrors > 10) printf("Further errors will be suppressed\n");
+                if (!has_loss && nerrors == 10) printf("Further errors will be suppressed\n");
                 break;
              }
           }
        }
     }
+#if !defined(_WIN32)
     gettimeofday(&tim, NULL);
     t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("Read took %.6lf seconds and %.6g bytes/second\n", 
        t2-t1,fsize/(t2-t1));
+#endif
     DBClose(dbfile);
 
     return nerrors;

@@ -42,7 +42,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(install_sh) -d
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
@@ -71,7 +71,16 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(browser_SOURCES)
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(browser_SOURCES) $(nodist_EXTRA_browser_SOURCES)
 DIST_SOURCES = $(browser_SOURCES)
 INFO_DEPS = $(srcdir)/browser.info
 TEXINFO_TEX = $(top_srcdir)/config/texinfo.tex
@@ -134,9 +143,11 @@ FCFLAGS = @FCFLAGS@
 FCLIBS = @FCLIBS@
 FC_FULLPATH = @FC_FULLPATH@
 FFLAGS = @FFLAGS@
+FORTRAN = @FORTRAN@
+FPZIP = @FPZIP@
 GREP = @GREP@
 HDF5_DRV = @HDF5_DRV@
-HEXZIP = @HEXZIP@
+HZIP = @HZIP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -147,7 +158,6 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
-LOCAL = @LOCAL@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -188,25 +198,8 @@ SILO_VERS_PRE = @SILO_VERS_PRE@
 SILO_VERS_TAG = @SILO_VERS_TAG@
 STRIP = @STRIP@
 TAURUS = @TAURUS@
-USEFORTRAN = @USEFORTRAN@
-USE_FILTER_SZIP = @USE_FILTER_SZIP@
-Using64bits = @Using64bits@
-UsingBrowser = @UsingBrowser@
-UsingCxx = @UsingCxx@
-UsingFortran = @UsingFortran@
-UsingHDF5 = @UsingHDF5@
-UsingHexzip = @UsingHexzip@
-UsingLocal = @UsingLocal@
-UsingOpt = @UsingOpt@
-UsingPython = @UsingPython@
-UsingQt = @UsingQt@
-UsingReadline = @UsingReadline@
-UsingSZLIB = @UsingSZLIB@
-UsingShared = @UsingShared@
-UsingSilex = @UsingSilex@
-UsingSrcDir = @UsingSrcDir@
-UsingStatic = @UsingStatic@
 VERSION = @VERSION@
+ZLIB = @ZLIB@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -268,6 +261,8 @@ dist_bin_SCRIPTS = \
  silofile
 
 browser_SOURCES = $(FILES)
+@FPZIP_NEEDED_TRUE@@HDF5_DRV_NEEDED_TRUE@nodist_EXTRA_browser_SOURCES = dummy.cxx
+@HDF5_DRV_NEEDED_TRUE@@HZIP_NEEDED_TRUE@nodist_EXTRA_browser_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_FALSE@browser_LDADD = ../../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@browser_LDADD = ../../src/libsiloh5.la
 info_TEXINFOS = browser.texi
@@ -307,7 +302,7 @@ FILES = \
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .dvi .html .info .lo .o .obj .pdf .ps .texi
+.SUFFIXES: .c .cxx .dvi .html .info .lo .o .obj .pdf .ps .texi
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -367,7 +362,7 @@ clean-binPROGRAMS:
 	done
 browser$(EXEEXT): $(browser_OBJECTS) $(browser_DEPENDENCIES) 
 	@rm -f browser$(EXEEXT)
-	$(LINK) $(browser_OBJECTS) $(browser_LDADD) $(LIBS)
+	$(CXXLINK) $(browser_OBJECTS) $(browser_LDADD) $(LIBS)
 install-dist_binSCRIPTS: $(dist_bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -398,6 +393,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/browser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cons.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/func.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lex.Po@am__quote@
@@ -434,6 +430,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+.cxx.o:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cxx.obj:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cxx.lo:
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -844,6 +861,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 	uninstall-dvi-am uninstall-html-am uninstall-info-am \
 	uninstall-pdf-am uninstall-ps-am
 
+@HDF5_DRV_NEEDED_TRUE@@HZIP_NEEDED_TRUE@  # Dummy C++ source to cause C++ linking.
+@FPZIP_NEEDED_TRUE@@HDF5_DRV_NEEDED_TRUE@  # Dummy C++ source to cause C++ linking.
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

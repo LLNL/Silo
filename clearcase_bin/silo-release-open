@@ -26,7 +26,7 @@
 #######################################################################
 #
 function usage() {
-  printf "Usage: %s version [-lc-username <lc-username>] [-check-install | -no-install | -final | -clean] {all|hoth|sunspot|up|yana|thunder|pengra|quad|tread}" $0
+  printf "Usage: %s version [-lc-username <lc-username>] [-check-install | -no-install | -final | -clean] {all|hoth|up|yana|thunder|pengra|quad|tread}" $0
   printf "\n"
   printf "Build options\n"
   printf "                  -- default, runs make install\n"
@@ -42,11 +42,11 @@ function usage() {
   printf "all-bdiv       -- tries to build on both BDiv host only\n"
   printf "{hostopt}      -- host, host list or host option list, such as:\n"
   printf "               hoth, hothgcc, hothicc, hothpgc, yana, yanagcc,\n"
-  printf "               yanapgc, yanaicc, yanapsc, sunspot, sunspotcc,\n"
+  printf "               yanapgc, yanaicc, yanapsc\n"
   printf "               thunder, thundericc, pengra, pengraicc, pengragcc,\n"
   printf "               all, all-lc, all-bd, etc.\n"
   printf "{host}         -- host name or host name list, such as:\n"
-  printf "               hoth, yana, sunup, thunder, pengra, quad, tread,\n"
+  printf "               hoth, yana, thunder, pengra, quad, tread,\n"
   printf "               all, all-lc, all-bd\n"
   printf "\n"
   printf "Silo release installing script. Assumes a tarball exist in\n"
@@ -72,25 +72,41 @@ function build() {
     mkdir $TOPDIR/$VERSION/test/$ARCH
     ls -l $TOPDIR/$VERSION/test
     cd $TOPDIR/$VERSION/test/$ARCH
-    ../$TOPSRCDIR/configure \
+    ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip \
 --prefix=$TOPDIR/$VERSION/$ARCH \
 --disable-browser --disable-silex --without-hdf5 --without-szlib $CONFOPTS
     $MAKE $MAKEOPTS
-    if [ "$DOCHECK" = "yes" ] ; then
-       $MAKE $MAKEOPTS check && $MAKE $MAKEOPTS install
-    elif [ "$DOINSTALL" = "yes" ] ; then
-       $MAKE $MAKEOPTS install
-    fi
     chmod -R g+w $TOPDIR/$VERSION/$ARCH
     $MAKE $MAKEOPTS clean
-    ../$TOPSRCDIR/configure \
---prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS
+    ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip \
+--prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
     $MAKE $MAKEOPTS
     if [ "$DOCHECK" = "yes" ] ; then
-       $MAKE $MAKEOPTS check && $MAKE $MAKEOPTS install
+       $MAKE $MAKEOPTS check TESTARGS="-k \!large" && $MAKE $MAKEOPTS install
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
+    mv $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/lib_saved
+    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
+    chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
+    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
+    chgrp -R visit $TOPDIR/$VERSION/$ARCH
+    $MAKE $MAKEOPTS clean
+    ../$TOPSRCDIR/configure --disable-hzip --enable-pythonmodule --enable-shared \
+--prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+    $MAKE $MAKEOPTS
+    if [ "$DOCHECK" = "yes" ] ; then
+       $MAKE $MAKEOPTS check TESTARGS="-k compression -k python" && $MAKE $MAKEOPTS install
+    elif [ "$DOINSTALL" = "yes" ] ; then
+       $MAKE $MAKEOPTS install
+    fi
+    mv $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/solib
+    mv $TOPDIR/$VERSION/$ARCH/lib_saved $TOPDIR/$VERSION/$ARCH/lib
+    mv $TOPDIR/$VERSION/$ARCH/solib/libsiloh5.a $TOPDIR/$VERSION/$ARCH/lib/libsiloxx.a
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
@@ -105,25 +121,41 @@ function build2() {
     rm -rf $TOPDIR/$VERSION/test/$ARCH
     mkdir $TOPDIR/$VERSION/test/$ARCH
     cd $TOPDIR/$VERSION/test/$ARCH
-    ../$TOPSRCDIR/configure \
+    ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip \
 --prefix=$TOPDIR/$VERSION/$ARCH \
 --disable-browser --disable-silex --without-hdf5 --without-szlib $CONFOPTS
     $MAKE $MAKEOPTS
-    if [ "$DOCHECK" = "yes" ] ; then
-       $MAKE $MAKEOPTS check && $MAKE $MAKEOPTS install
-    elif [ "$DOINSTALL" = "yes" ] ; then
-       $MAKE $MAKEOPTS install
-    fi
     chmod -R g+w $TOPDIR/$VERSION/$ARCH
     $MAKE $MAKEOPTS clean
-    ../$TOPSRCDIR/configure \
---prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2
+    ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip \
+--prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2 \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
     $MAKE $MAKEOPTS
     if [ "$DOCHECK" = "yes" ] ; then
-       $MAKE $MAKEOPTS check && $MAKE $MAKEOPTS install
+       $MAKE $MAKEOPTS check TESTARGS="-k \!large" && $MAKE $MAKEOPTS install
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
+    mv $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/lib_saved
+    mv $TOPDIR/$VERSION/$ARCH/bin $TOPDIR/$VERSION/$ARCH/bin_saved
+    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
+    chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
+    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
+    chgrp -R visit $TOPDIR/$VERSION/$ARCH
+    ../$TOPSRCDIR/configure --disable-hzip --enable-pythonmodule --enable-shared \
+--prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2 \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+    $MAKE $MAKEOPTS
+    if [ "$DOCHECK" = "yes" ] ; then
+       $MAKE $MAKEOPTS check TESTARGS="-k compression -k python" && $MAKE $MAKEOPTS install
+    elif [ "$DOINSTALL" = "yes" ] ; then
+       $MAKE $MAKEOPTS install
+    fi
+    mv $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/solib
+    mv $TOPDIR/$VERSION/$ARCH/lib_saved $TOPDIR/$VERSION/$ARCH/lib
+    mv $TOPDIR/$VERSION/$ARCH/solib/libsiloh5.a $TOPDIR/$VERSION/$ARCH/lib/libsiloxx.a
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
@@ -137,7 +169,7 @@ function sidious() {
 
 sidiousgcc() {
     HOSTS="sidious"
-    ARCH="x86_64-linux-el5-gcc-4.2.1"
+    ARCH="x86_64_Linux_el5xen"
     CONFOPTS="FC=g77 F77=g77 \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
@@ -155,9 +187,9 @@ function hoth() {
     hothicc
 }
 function hothfinal() {
-    ssh hoth "/bin/bash" << EOF >> linux_rhel3-gcc-3.2.3.log 2>&1
+    ssh hoth "/bin/bash" << EOF >> i686_Linux_ELsmp.log 2>&1
     umask 002
-    cd $TOPDIR/$VERSION/test/linux_rhel3-gcc-3.2.3
+    cd $TOPDIR/$VERSION/test/i686_Linux_ELsmp
     for FILE in $BININSTALLS
     do if [[ -e /misc/gapps/Linux/bin/\$FILE ]] ; then
           rm -f /misc/gapps/Linux/bin/\$FILE
@@ -174,8 +206,8 @@ function hothfinal() {
     do chmod a+r,ug+w,a+X /misc/gapps/Linux/bin/\$FILE
        chgrp visit /misc/gapps/Linux/bin/\$FILE
     done
-    for ARCHDIR in "linux_rhel3-gcc-3.2.3" "linux_rhel3-pgc-6.2" \
-        "linux_rhel3-icc-9.1"
+    for ARCHDIR in "i686_Linux_ELsmp" "i686_Linux_ELsmp_pgcc" \
+        "i686_Linux_ELsmp_icc"
     do
        if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
           rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
@@ -184,21 +216,21 @@ function hothfinal() {
           $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
-    for ARCHDIR in "linux_rhel3-pgc-6.2" "linux_rhel3-icc-9.1"
+    for ARCHDIR in "i686_Linux_ELsmp_pgcc" "i686_Linux_ELsmp_icc"
     do
-       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin ]] ; then
+          rm -rf $TOPDIR/$VERSION/\$ARCHDIR/bin
        fi
-       ln -s $TOPDIR/$VERSION/linux_rhel3-gcc-3.2.3/bin/silex \
-          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       ln -s $TOPDIR/$VERSION/i686_Linux_ELsmp/bin \
+          $TOPDIR/$VERSION/\$ARCHDIR/bin
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR
     done
 EOF
 }
 function hothclean() {
     ssh hoth "/bin/bash" << EOF >> linux_rhel3-gcc-3.2.3.log 2>&1
-    for ARCHDIR in "linux_rhel3-gcc-3.2.3" "linux_rhel3-pgc-6.2" \
-        "linux_rhel3-icc-9.1"
+    for ARCHDIR in "i686_Linux_ELsmp" "i686_Linux_ELsmp_pgcc" \
+        "i686_Linux_ELsmp_icc" "i686_Linux_ELsmp_pathcc"
     do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
           rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
@@ -208,7 +240,7 @@ EOF
 
 function hothgcc() {
     HOSTS="hoth"
-    ARCH="linux_rhel3-gcc-3.2.3"
+    ARCH="i686_Linux_ELsmp"
     CONFOPTS="FC=g77 F77=g77 \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
@@ -221,8 +253,8 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 }
 function hothpgc() {
     HOSTS="hoth"
-    ARCH="linux_rhel3-pgc-6.2"
-    CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" LDFLAGS=-lstdc++ \
+    ARCH="i686_Linux_ELsmp_pgcc"
+    CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" F77=\"pgf77 -g77libs\" LDFLAGS=-lstdc++ \
 --disable-silex"
     export HOSTS ARCH CONFOPTS
     build \
@@ -234,8 +266,8 @@ function hothpgc() {
 }
 function hothicc() {
     HOSTS="hoth"
-    ARCH="linux_rhel3-icc-9.1"
-    CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ --disable-silex"
+    ARCH="i686_Linux_ELsmp_icc"
+    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ --disable-silex"
     export HOSTS ARCH CONFOPTS
     build \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/sbin:\
@@ -254,9 +286,9 @@ function sunspot() {
   sunspotcc
 }
 function sunspotfinal() {
-    ssh sunspot "/bin/bash" << EOF >> sunos_57.log 2>&1
+    ssh sunspot "/bin/bash" << EOF >> sparc_SunOS_57.log 2>&1
     umask 002
-    cd $TOPDIR/$VERSION/test/sunos_57
+    cd $TOPDIR/$VERSION/test/sparc_SunOS_57
     for FILE in $BININSTALLS
     do if [[ -e /misc/gapps/SunOS/bin/\$FILE ]] ; then
           rm -f /misc/gapps/SunOS/bin/\$FILE
@@ -271,21 +303,21 @@ function sunspotfinal() {
     do chmod a+r,ug+w,a+X /misc/gapps/SunOS/bin/\$FILE
        chgrp visit /misc/gapps/SunOS/bin/\$FILE
     done
-    ln -s $TOPDIR/$VERSION/sunos_57/bin/silex \
-       $TOPDIR/$VERSION/sunos_57-cc-5.2/bin/silex
-    chgrp visit $TOPDIR/$VERSION/sunos_57-cc-5.2/bin/silex
+    ln -s $TOPDIR/$VERSION/sparc_SunOS_57/bin/silex \
+       $TOPDIR/$VERSION/sparc_SunOS_57_gcc/bin/silex
+    chgrp visit $TOPDIR/$VERSION/sparc_SunOS_57_gcc/bin/silex
 EOF
 }
 function sunspotclean() {
     ssh sunspot "/bin/bash" << EOF >> sunos_57.log 2>&1
-    for ARCHDIR in "sunos_57" "sunos_57-cc-5.2"
+    for ARCHDIR in "sparc_SunOS_57" "sparc_SunOS_57_cc"
     do rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
     done
 EOF
 }
 function sunspotgcc() {
     HOSTS="sunspot"
-    ARCH="sunos_57"
+    ARCH="sparc_SunOS_57_gcc"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     CONFOPTS2="CC=gcc CXX=g++ FC=g77 F77=g77 --enable-silex \
@@ -306,7 +338,7 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
 }
 function sunspotcc() {
     HOSTS="sunspot"
-    ARCH="sunos_57-cc-5.2"
+    ARCH="sparc_SunOS_57"
     CONFOPTS="CC=cc CXX=CC FC=f77 F77=f77 LDFLAGS=-L/usr/local/lib"
     CONFOPTS2="CC=cc CXX=CC FC=f77 F77=f77 \
 LDFLAGS=-L/usr/local/lib --disable-silex --without-readline \
@@ -408,7 +440,7 @@ function tread() {
 #}
 #function berggcc32() {
 #    HOSTS="${lcun}@newberg"
-#    ARCH="aix_5_ll-gcc"
+#    ARCH="aix_5_ll_gcc"
 #    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77"
 #    CONFOPTS2="CC=gcc CXX=g++ FC=g77 F77=g77 \
 #--disable-silex --enable-fortran \
@@ -422,7 +454,7 @@ function tread() {
 #}
 #function berggcc64() {
 #    HOSTS="${lcun}@newberg"
-#    ARCH="aix_5_64_fed-gcc"
+#    ARCH="aix_5_64_fed_gcc"
 #    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77"
 #    export HOSTS ARCH CONFOPTS
 #    build \
@@ -460,7 +492,7 @@ function upfinal() {
           chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
        done
     done
-    for ARCHDIR in "aix_5_ll" "aix_5_64_fed" "aix_5_ll-gcc" "aix_5_64_fed-gcc"
+    for ARCHDIR in "aix_5_ll" "aix_5_64_fed" "aix_5_ll_gcc" "aix_5_64_fed_gcc"
     do
        if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
           rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
@@ -469,20 +501,20 @@ function upfinal() {
           $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
-    for ARCHDIR in "aix_5_ll" "aix_5_ll-gcc" "aix_5_64_fed-gcc"
+    for ARCHDIR in "aix_5_ll" "aix_5_ll_gcc" "aix_5_64_fed_gcc"
     do
-       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin ]] ; then
+          rm -rf $TOPDIR/$VERSION/\$ARCHDIR/bin
        fi
-       ln -s $TOPDIR/$VERSION/aix_5_64_fed/bin/silex \
-          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       ln -s $TOPDIR/$VERSION/aix_5_64_fed/bin \
+          $TOPDIR/$VERSION/\$ARCHDIR/bin
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin
     done
 EOF
 }
 function upclean() {
     ssh ${lcun}@up "/bin/bash" << EOF >> aix_5_64_fed.log 2>&1
-    for ARCHDIR in "aix_5_ll" "aix_5_64_fed" "aix_5_ll-gcc" "aix_5_64_fed-gcc"
+    for ARCHDIR in "aix_5_ll" "aix_5_64_fed" "aix_5_ll_gcc" "aix_5_64_fed_gcc"
     do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
           rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
@@ -492,12 +524,13 @@ EOF
 function up32() {
     HOSTS="${lcun}@up"
     ARCH="aix_5_ll"
-    CONFOPTS="CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\" --disable-silex"
-    CONFOPTS2="CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\" --disable-silex \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/aix_5_ll \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/aix_5_ll/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/aix_5_ll/lib"
-    export HOSTS ARCH CONFOPTS CONFOPTS2
+    CONFOPTS="CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\" FC=xlf F77=xlf --disable-silex --enable-hzip"
+    CONFOPTS2="CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\" FC=xlf F77=xlf --disable-silex  --enable-hzip \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
+    MAKEOPTS=""
+    export HOSTS ARCH CONFOPTS CONFOPTS2 MAKEOPTS
     build2 \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:\
 /usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
@@ -507,13 +540,14 @@ function up32() {
 function up64() {
     HOSTS="${lcun}@up"
     ARCH="aix_5_64_fed"
-    CONFOPTS="CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\" "
-    CONFOPTS2="CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\" --enable-silex \
---with-Qt-include-dir=/usr/gapps/silo/qt/3.3.8/aix_5_64_fed/include \
---with-Qt-bin-dir=/usr/gapps/silo/qt/3.3.8/aix_5_64_fed/bin \
---with-Qt-lib-dir=/usr/gapps/silo/qt/3.3.8/aix_5_64_fed/lib \
+    CONFOPTS="CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\" FC=xlf F77=xlf --enable-hzip "
+    CONFOPTS2="CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\" FC=xlf F77=xlf --enable-silex -enable-hzip \
+--with-Qt-include-dir=/usr/gapps/silo/qt/3.3.8/$ARCH/include \
+--with-Qt-bin-dir=/usr/gapps/silo/qt/3.3.8/$ARCH/bin \
+--with-Qt-lib-dir=/usr/gapps/silo/qt/3.3.8/$ARCH/lib \
 --with-Qt-lib=\"qt-mt -lSM -lICE  -L/usr/X11R6/lib -lX11 -lXext -lXt -lXi\""
-    export HOSTS ARCH CONFOPTS CONFOPTS2
+    MAKEOPTS=""
+    export HOSTS ARCH CONFOPTS CONFOPTS2 MAKEOPTS
     build2 \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:\
 /usr/local/scripts:/usr/apps/bin:/usr/gapps/bin" \
@@ -529,16 +563,16 @@ function upgcc() {
 }
 function upgcc32() {
     HOSTS="${lcun}@up"
-    ARCH="aix_5_ll-gcc"
+    ARCH="aix_5_ll_gcc"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
-CFLAGS=\"-maix32 -mminimal-toc\" CXXFLAGS=\"-maix32 -mminimal-toc\" \
+CFLAGS=\"-maix32\" CXXFLAGS=\"-maix32\" \
 LDFLAGS=-maix32 AR=\"ar -X32\""
     CONFOPTS2="CC=gcc CXX=g++ FC=g77 F77=g77 \
-CFLAGS=\"-maix32 -mminimal-toc\" CXXFLAGS=\"-maix32 -mminimal-toc\" \
+CFLAGS=\"-maix32\" CXXFLAGS=\"-maix32\" \
 LDFLAGS=-maix32 AR=\"ar -X32\" --disable-silex \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/aix_5_ll-gcc \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/aix_5_ll-gcc/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/aix_5_ll-gcc/lib"
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH\
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
     build2 \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:\
@@ -548,16 +582,16 @@ LDFLAGS=-maix32 AR=\"ar -X32\" --disable-silex \
 }
 function upgcc64() {
     HOSTS="${lcun}@up"
-    ARCH="aix_5_64_fed-gcc"
+    ARCH="aix_5_64_fed_gcc"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
-CFLAGS=\"-maix64 -mminimal-toc\" CXXFLAGS=\"-maix64 -mminimal-toc\" \
+CFLAGS=\"-maix64\" CXXFLAGS=\"-maix64\" \
 LDFLAGS=-maix64 AR=\"ar -X64\""
     CONFOPTS2="CC=gcc CXX=g++ FC=g77 F77=g77 \
-CFLAGS=\"-maix64 -mminimal-toc\" CXXFLAGS=\"-maix64 -mminimal-toc\" \
+CFLAGS=\"-maix64\" CXXFLAGS=\"-maix64\" \
 LDFLAGS=-maix64 AR=\"ar -X64\" \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/aix_5_64_fed-gcc \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/aix_5_64_fed-gcc/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/aix_5_64_fed-gcc/lib"
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
     build2 \
     "PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:\
@@ -588,7 +622,7 @@ function pengrafinal() {
     do chmod a+r,ug+w,a+X /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
        chgrp visit /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
     done
-    for ARCHDIR in "chaos_3_x86_elan3" "chaos_3_x86_elan3-icc"
+    for ARCHDIR in "chaos_3_x86_elan3" "chaos_3_x86_elan3_icc"
     do
        if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
           rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
@@ -597,20 +631,20 @@ function pengrafinal() {
           $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
-    for ARCHDIR in "chaos_3_x86_elan3-icc"
+    for ARCHDIR in "chaos_3_x86_elan3_icc"
     do
-       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin ]] ; then
+          rm -rf $TOPDIR/$VERSION/\$ARCHDIR/bin
        fi
-       ln -s $TOPDIR/$VERSION/chaos_3_x86_elan3/bin/silex \
-          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       ln -s $TOPDIR/$VERSION/chaos_3_x86_elan3/bin \
+          $TOPDIR/$VERSION/\$ARCHDIR/bin
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin
     done
 EOF
 }
 function pengraclean() {
     ssh ${lcun}@pengra "/bin/bash" << EOF >> chaos_3_x86_elan3.log 2>&1
-    for ARCHDIR in "chaos_3_x86_elan3" "chaos_3_x86_elan3-icc"
+    for ARCHDIR in "chaos_3_x86_elan3" "chaos_3_x86_elan3_icc"
     do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
           rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
@@ -622,21 +656,23 @@ function pengragcc() {
     HOSTS="${lcun}@pengra"
     ARCH="chaos_3_x86_elan3"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
-    export HOSTS ARCH CONFOPTS
+    LD_PRELOAD=libstdc++.so.5
+    export HOSTS ARCH CONFOPTS LD_PRELOAD
     build 
 }
 
 function pengraicc() {
     HOSTS="${lcun}@pengra"
-    ARCH="chaos_3_x86_elan3-icc"
-    CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
+    ARCH="chaos_3_x86_elan3_icc"
+    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
-    CONFOPTS2="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
+    CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-silex \
---with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_x86_elan3-icc \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_elan3-icc \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3-icc/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3-icc/lib"
-    export HOSTS ARCH CONFOPTS CONFOPTS2
+--with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/$ARCH \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
+    LD_PRELOAD=libstdc++.so.5
+    export HOSTS ARCH CONFOPTS CONFOPTS2 LD_PRELOAD
     build2 
 }
 
@@ -647,20 +683,21 @@ function yana() {
   yanapsc
 }
 function yanafinal() {
-    ssh ${lcun}@yana "/bin/bash" << EOF >> chaos_3_x86_64 2>&1
+    ssh ${lcun}@yana "/bin/bash" << EOF >> chaos_4_x86_64.log 2>&1
+    set -x
     umask 002
-#   cd $TOPDIR/$VERSION/test/chaos_3_x86_64
-#   gmake bindir=/usr/gapps/bin/chaos_3_x86_64 install-exec
-#   gmake bindir=/usr/gapps/bin/chaos_3_x86_64_elan4 install-exec
-#   gmake bindir=/usr/gapps/bin/chaos_3_x86_64_ib install-exec
-    for ARCHDIR in "chaos_3_x86_64" "chaos_3_x86_64_elan4" "chaos_3_x86_64_ib"
+#   cd $TOPDIR/$VERSION/test/chaos_4_x86_64
+#   gmake bindir=/usr/gapps/bin/chaos_4_x86_64 install-exec
+#   gmake bindir=/usr/gapps/bin/chaos_4_x86_64_elan4 install-exec
+#   gmake bindir=/usr/gapps/bin/chaos_4_x86_64_ib install-exec
+    for ARCHDIR in "chaos_4_x86_64" "chaos_4_x86_64_ib"
     do
        for FILE in $BININSTALLS
        do
           if [[ -e /usr/gapps/bin/\$ARCHDIR/\$FILE ]] ; then
              rm -f /usr/gapps/bin/\$ARCHDIR/\$FILE
           fi
-          ln -s $TOPDIR/$VERSION/chaos_3_x86_64/bin/\$FILE \
+          ln -s $TOPDIR/$VERSION/chaos_4_x86_64/bin/\$FILE \
              /usr/gapps/bin/\$ARCHDIR/\$FILE
           chmod a+r,ug+w,a+X /usr/gapps/bin/\$ARCHDIR/\$FILE
           chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
@@ -672,8 +709,8 @@ function yanafinal() {
           /usr/gapps/bin/\$ARCHDIR/hdfview
        chgrp visit /usr/gapps/bin/\$ARCHDIR/hdfview
     done
-    for ARCHDIR in "chaos_3_x86_64" "chaos_3_x86_64-icc" \
-        "chaos_3_x86_64-pc-2.4" "chaos_3_x86_64-pgc-6.2"
+    for ARCHDIR in "chaos_4_x86_64" "chaos_4_x86_64_icc" \
+        "chaos_4_x86_64_pathcc" "chaos_4_x86_64_pgcc"
     do
        if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
           rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
@@ -682,22 +719,22 @@ function yanafinal() {
           $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
-    for ARCHDIR in "chaos_3_x86_64-icc" "chaos_3_x86_64-pc-2.4" \
-       "chaos_3_x86_64-pgc-6.2"
+    for ARCHDIR in "chaos_4_x86_64" "chaos_4_x86_64_pathcc" \
+       "chaos_4_x86_64_pgcc"
     do
-       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin ]] ; then
+          rm -rf $TOPDIR/$VERSION/\$ARCHDIR/bin
        fi
-       ln -s $TOPDIR/$VERSION/chaos_3_x86_64/bin/silex \
-          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       ln -s $TOPDIR/$VERSION/chaos_4_x86_64_icc/bin \
+          $TOPDIR/$VERSION/\$ARCHDIR/bin
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin
     done
 EOF
 }
 function yanaclean() {
-    ssh ${lcun}@yana "/bin/bash" << EOF >> chaos_3_x86_64 2>&1
-    for ARCHDIR in "chaos_3_x86_64" "chaos_3_x86_64-icc" \
-        "chaos_3_x86_64-pc-2.4" "chaos_3_x86_64-pgc-6.2"
+    ssh ${lcun}@yana "/bin/bash" << EOF >> chaos_4_x86_64.log 2>&1
+    for ARCHDIR in "chaos_4_x86_64" "chaos_4_x86_64_icc" \
+        "chaos_4_x86_64_pathcc" "chaos_4_x86_64_pgcc"
     do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
           rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
@@ -706,9 +743,9 @@ EOF
 }
 function yanagcc() {
     HOSTS="${lcun}@yana"
-    ARCH="chaos_3_x86_64"
+    ARCH="chaos_4_x86_64"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
-FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
+FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals --enable-silex"
     export HOSTS ARCH CONFOPTS
     build \
     "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
@@ -718,27 +755,23 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 
 function yanaicc() {
     HOSTS="${lcun}@yana"
-    ARCH="chaos_3_x86_64-icc"
+    ARCH="chaos_4_x86_64_icc"
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-silex \
---with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_x86_64-icc \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_64-icc-10.0 \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_64-icc-10.0/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_64-icc-10.0/lib"
+--with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/$ARCH \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
     build2 \
-    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
-/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
-    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
-    "INTEL_LICENSE_FILE=${INTEL_LICENSE_FILE}:\
-/usr/local/intel/compiler100_025/licenses:/opt/intel/licenses" \
-    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
+    "LD_LIBRARY_PATH=/usr/local/tools/icc/lib" \
+    "export LD_LIBRARY_PATH"
 }
 function yanapsc() {
     HOSTS="${lcun}@yana"
-    ARCH="chaos_3_x86_64-pc-2.4"
+    ARCH="chaos_4_x86_64_pathcc"
     CONFOPTS="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     CONFOPTS2="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
@@ -757,34 +790,29 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
 }
 function yanapgc() {
     HOSTS="${lcun}@yana"
-    ARCH="chaos_3_x86_64-pgc-6.2"
-    CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
-CFLAGS=-fPIC CXXFLAGS=-fPIC"
-    CONFOPTS2="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
-CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex --disable-silex \
+    ARCH="chaos_4_x86_64_pgcc"
+    CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" F77=\"pgf77 -g77libs\" \
+CFLAGS=-fPIC CXXFLAGS=-fPIC LDFLAGS=/usr/local/tools/pgi-7.0.6/linux86-64/7.0-6/lib/pgfmain.o"
+    CONFOPTS2="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" F77=\"pgf77 -g77libs\" \
+CFLAGS=-fPIC CXXFLAGS=-fPIC  LDFLAGS=/usr/local/tools/pgi-7.0.6/linux86-64/7.0-6/lib/pgfmain.o --disable-silex \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
 /usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
-    build2 \
-    "PATH=/usr/global/tools/RSI/bin:\
-/usr/local/tools/pgi6.23/linux86-64/6.2/bin:/usr/local/bin:/bin:/usr/bin:\
-/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
-    "LM_LICENSE_FILE=/usr/local/etc/license.client" \
-    "export PATH LM_LICENSE_FILE"
+    build2
 }
 
-function ocfport() {
-  ocfportgcc
-  ocfporticc
-  ocfportpgc
-  ocfportpsc
+function prism() {
+  prismgcc
+  prismicc
+  prismpgc
+  prismpsc
 }
-function ocfportfinal() {
-    ssh ${lcun}@ocfport "/bin/bash" << EOF >> chaos_4_x86_64_ib 2>&1
+function prismfinal() {
+    ssh ${lcun}@prism "/bin/bash" << EOF >> chaos_4_x86_64_ib.log 2>&1
     umask 002
-    for ARCHDIR in "chaos_4_x86_64_ib" "chaos_4_x86_64_ib-icc" \
-        "chaos_4_x86_64_ib-pc" "chaos_4_x86_64_ib-pgc"
+    for ARCHDIR in "chaos_4_x86_64_ib" "chaos_4_x86_64_ib_icc" \
+        "chaos_4_x86_64_ib_pathcc" "chaos_4_x86_64_ib_pgcc"
     do
        if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
           rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
@@ -793,30 +821,30 @@ function ocfportfinal() {
           $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
        chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
     done
-    for ARCHDIR in "chaos_4_x86_64_ib-icc" "chaos_4_x86_64_ib-pc" \
-       "chaos_4_x86_64_ib-pgc"
+    for ARCHDIR in "chaos_4_x86_64_ib_icc" "chaos_4_x86_64_ib_pathcc" \
+       "chaos_4_x86_64_ib_pgcc"
     do
-       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin ]] ; then
+          rm -rf $TOPDIR/$VERSION/\$ARCHDIR/bin
        fi
-       ln -s $TOPDIR/$VERSION/chaos_4_x86_64_ib/bin/silex \
-          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       ln -s $TOPDIR/$VERSION/chaos_4_x86_64_ib/bin \
+          $TOPDIR/$VERSION/\$ARCHDIR/bin
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin
     done
 EOF
 }
-function ocfportclean() {
-    ssh ${lcun}@ocfport "/bin/bash" << EOF >> chaos_4_x86_64_ib 2>&1
-    for ARCHDIR in "chaos_4_x86_64_ib" "chaos_4_x86_64_ib-icc" \
-        "chaos_4_x86_64_ib-pc" "chaos_4_x86_64_ib-pgc"
+function prismclean() {
+    ssh ${lcun}@prism "/bin/bash" << EOF >> chaos_4_x86_64_ib.log 2>&1
+    for ARCHDIR in "chaos_4_x86_64_ib" "chaos_4_x86_64_ib_icc" \
+        "chaos_4_x86_64_ib_pathcc" "chaos_4_x86_64_ib_pgcc"
     do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
           rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
     done
 EOF
 }
-function ocfportgcc() {
-    HOSTS="${lcun}@ocfport"
+function prismgcc() {
+    HOSTS="${lcun}@prism"
     ARCH="chaos_4_x86_64_ib"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
@@ -827,9 +855,9 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     "export PATH"
 }
 
-function ocfporticc() {
-    HOSTS="${lcun}@ocfport"
-    ARCH="chaos_4_x86_64_ib-icc"
+function prismicc() {
+    HOSTS="${lcun}@prism"
+    ARCH="chaos_4_x86_64_ib_icc"
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
@@ -843,9 +871,9 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
 /usr/bin/X11:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
     "export PATH"
 }
-function ocfportpsc() {
-    HOSTS="${lcun}@ocfport"
-    ARCH="chaos_4_x86_64_ib-pc"
+function prismpsc() {
+    HOSTS="${lcun}@prism"
+    ARCH="chaos_4_x86_64_ib_pathcc"
     CONFOPTS="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     CONFOPTS2="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
@@ -862,13 +890,13 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
     "PATHSCALE_SUBSCRIPTION_DAEMON=license1ocf.llnl.gov" \
     "export PATH LM_LICENSE_FILE PATHSCALE_SUBSCRIPTION_DAEMON"
 }
-function ocfportpgc() {
-    HOSTS="${lcun}@ocfport"
-    ARCH="chaos_4_x86_64_ib-pgc"
-    CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
+function prismpgc() {
+    HOSTS="${lcun}@prism"
+    ARCH="chaos_4_x86_64_ib_pgcc"
+    CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" F77=\"pgf77 -g77libs\" \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
-    CONFOPTS2="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
-CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex --disable-silex \
+    CONFOPTS2="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" F77=\"pgf77 -g77libs\" \
+CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
 /usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
@@ -886,9 +914,9 @@ function thunder() {
   thundericc
 }
 function thunderfinal() {
-    ssh ${lcun}@thunder "/bin/bash" << EOF >> chaos_3_ia64-gcc-3.4.4.log 2>&1
+    ssh ${lcun}@thunder "/bin/bash" << EOF >> chaos_3_ia64_elan4.log 2>&1
     umask 002
-    cd $TOPDIR/$VERSION/test/chaos_3_ia64-gcc-3.4.4
+    cd $TOPDIR/$VERSION/test/chaos_3_ia64
     for ARCHDIR in "chaos_3_ia64" "chaos_3_ia64_elan4"
     do
        for FILE in $BININSTALLS
@@ -905,7 +933,7 @@ function thunderfinal() {
           chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
        done
     done
-#   for ARCHDIR in "chaos_3_ia64-gcc-3.4.4" "chaos_3_ia64-icc"
+#   for ARCHDIR in "chaos_3_ia64" "chaos_3_ia64_icc"
 #   do if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
 #         rm -rf $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
 #      fi
@@ -913,20 +941,20 @@ function thunderfinal() {
 #         $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
 #      chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
 #   done
-    for ARCHDIR in "chaos_3_ia64-icc"
+    for ARCHDIR in "chaos_3_ia64_icc"
     do
-       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
-          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin ]] ; then
+          rm -rf $TOPDIR/$VERSION/\$ARCHDIR/bin
        fi
-       ln -s $TOPDIR/$VERSION/chaos_3_ia64-gcc-3.4.4/bin/silex \
-          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
-       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       ln -s $TOPDIR/$VERSION/chaos_3_ia64/bin \
+          $TOPDIR/$VERSION/\$ARCHDIR/bin
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin
     done
 EOF
 }
 function thunderclean() {
-    ssh ${lcun}@thunder "/bin/bash" << EOF >> chaos_3_ia64-gcc-3.4.4.log 2>&1
-    for ARCHDIR in "chaos_3_ia64-gcc-3.4.4" "chaos_3_ia64-icc"
+    ssh ${lcun}@thunder "/bin/bash" << EOF >> chaos_3_ia64.log 2>&1
+    for ARCHDIR in "chaos_3_ia64" "chaos_3_ia64_icc"
     do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
           rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
        fi
@@ -935,33 +963,35 @@ EOF
 }
 function thundergcc() {
     HOSTS="${lcun}@thunder"
-    ARCH="chaos_3_ia64-gcc-3.4.4"
-    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
+    ARCH="chaos_3_ia64_elan4"
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-silex"
     export HOSTS ARCH CONFOPTS
     build \
     "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "export PATH"
+    "LD_PRELOAD=libstdc++.so.5" \
+    "export PATH LD_PRELOAD"
 }
 function thundericc() {
     HOSTS="${lcun}@thunder"
-    ARCH="chaos_3_ia64-icc-10.0"
+    ARCH="chaos_3_ia64_elan4_icc"
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
-    CONFOPTS2="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
+    CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-silex \
---with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_ia64-icc \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_ia64-icc-10.0 \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_ia64-icc-10.0/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_ia64-icc-10.0/lib"
+--with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/$ARCH \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
     build \
-    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
+    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib:$LD_LIBRARY_PATH" \
-    "INTEL_LICENSE_FILE=/usr/local/intel/compiler100_025/licenses:\
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler91/lib:$LD_LIBRARY_PATH" \
+    "INTEL_LICENSE_FILE=/usr/local/intel/compiler91/licenses:\
 /opt/intel/licenses" \
-    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
+    "LD_PRELOAD=libstdc++.so.5" \
+    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE LD_PRELOAD"
 }
 
 function quad() {
@@ -981,7 +1011,7 @@ function quadfinal() {
        fi
     done
     PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin
-    LD_LIBRARY_PATH=/usr/gapps/silo/qt/$QTRELEASE/irix_6.5-gcc-3.3/lib:\
+    LD_LIBRARY_PATH=/usr/gapps/silo/qt/$QTRELEASE/$ARCH/lib:\
 $LD_LIBRARY_PATH
     PARALLEL=4
     export PATH LD_LIBRARY_PATH PARALLEL
@@ -1022,15 +1052,15 @@ LDFLAGS=-n32 CFLAGS=\"-O2 -c99\" \
 PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1"
     CONFOPTS2="CC=\"cc -n32\" CXX=\"CC -n32\" FC=\"f77 -n32\" \
 LDFLAGS=-n32 CFLAGS=\"-O2 -c99\" --enable-silex \
---with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/irix_6.5-gcc-3.3 \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/irix_6.5_n32 \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/irix_6.5_n32/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/irix_6.5_n32/lib"
+--with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/$ARCH \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
     SSHSHELL="/bin/ksh"
     export HOSTS ARCH CONFOPTS CONFOPTS2 SSHSHELL
     build2 \
     "PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin" \
-    "LD_LIBRARY_PATH=/usr/gapps/silo/qt/$QTRELEASE/irix_6.5-gcc-3.3/lib:\
+    "LD_LIBRARY_PATH=/usr/gapps/silo/qt/$QTRELEASE/$ARCH/lib:\
 $LD_LIBRARY_PATH" \
     "PARALLEL=4" \
     "export PATH LD_LIBRARY_PATH PARALLEL"
@@ -1058,7 +1088,7 @@ PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
 
 function ubgl() {
     HOSTS="${lcun}@ubgl"
-    ARCH="sles_9_ppc64-blrts_xlc"
+    ARCH="sles_9_ppc64_blrts_xlc"
     CONFOPTS="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlc FC=blrts_xlf \
     CXX=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlC \
     ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
@@ -1078,7 +1108,7 @@ function ubgl() {
     "PATH=/opt/ibmcmp/vacpp/bg/8.0/bin:/opt/ibmcmp/xlf/bg/10.1/bin:/usr/local/bin:\
 /bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
     "export PATH"
-    ARCH="sles_9_ppc64-xlc"
+    ARCH="sles_9_ppc64_xlc"
     CONFOPTS="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/xlc FC=xlf \
     CXX=/opt/ibmcmp/vacpp/bg/8.0/bin/xlC \
     ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
@@ -1103,10 +1133,10 @@ function ubgl() {
 TOPDIR="/usr/gapps/silo"
 SSHSHELL="/bin/bash"
 SZIPRELEASE=2.1
-HDF5RELEASE=1.6.6
+HDF5RELEASE=1.8.1
 QTRELEASE=3.3.8
 lcun=$USER
-BININSTALLS="browser silex silock silodiff"
+BININSTALLS="browser silex silock silodiff silofile"
 declare -i i
 declare -af list
 MAKE="gmake"
@@ -1130,7 +1160,7 @@ TARFILE="silo-$VERSION.tar.gz"
 TOPSRCDIR="silo-$VERSION"
 
 if (( $# < 1 )) ; then
-    list=("hoth" "sunspot" "up" "thunder" "pengra" "yana" "ocfport" "quad")
+    list=("hoth" "up" "thunder" "pengra" "yana" "prism" "quad")
     DOBDIV="yes";DOLC="yes"
 else
  i=0
@@ -1142,25 +1172,23 @@ else
       list[i]="thunder" ; i=i+1
       list[i]="pengra" ; i=i+1
       list[i]="yana" ; i=i+1
-      list[i]="ocfport" ; i=i+1
+      list[i]="prism" ; i=i+1
       list[i]="quad" ; i=i+1
       DOLC="yes"
       shift;;
     all-bd*|-all-bd*)
       list[i]="sidious" ; i=i+1
       list[i]="hoth" ; i=i+1
-      list[i]="sunspot" ; i=i+1
       DOBDIV="yes"
       shift;;
     all|-a*)
       list[i]="sidious" ; i=i+1
       list[i]="hoth" ; i=i+1
-      list[i]="sunspot" ; i=i+1
       list[i]="up" ; i=i+1
       list[i]="thunder" ; i=i+1
       list[i]="pengra" ; i=i+1
       list[i]="yana" ; i=i+1
-      list[i]="ocfport" ; i=i+1
+      list[i]="prism" ; i=i+1
       list[i]="quad" ; i=i+1
       list[i]="ubgl" ; i=i+1
       DOBDIV="yes";DOLC="yes"
@@ -1257,24 +1285,24 @@ else
       list[i]="yana" ; i=i+1
       DOLC="yes"
       shift;;
-    ocfport*pgc)
-      list[i]="ocfportpgc" ; i=i+1
+    prism*pgc)
+      list[i]="prismpgc" ; i=i+1
       DOLC="yes"
       shift;;
-    ocfport*psc)
-      list[i]="ocfportpsc" ; i=i+1
+    prism*psc)
+      list[i]="prismpsc" ; i=i+1
       DOLC="yes"
       shift;;
-    ocfport*icc)
-      list[i]="ocfporticc" ; i=i+1
+    prism*icc)
+      list[i]="prismicc" ; i=i+1
       DOLC="yes"
       shift;;
-    ocfport*gcc)
-      list[i]="ocfportgcc" ; i=i+1
+    prism*gcc)
+      list[i]="prismgcc" ; i=i+1
       DOLC="yes"
       shift;;
-    ocfport*)
-      list[i]="ocfport" ; i=i+1
+    prism*)
+      list[i]="prism" ; i=i+1
       DOLC="yes"
       shift;;
     pen*icc|-pe*icc)

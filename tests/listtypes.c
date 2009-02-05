@@ -44,143 +44,6 @@ for advertising or product endorsement purposes.
 /* Prototypes */
 void PrintFileComponentTypes(char *);
 void PrintObjectComponentsType(DBfile *, char *, char *);
-char *IntToTypename(int);
-
-/*********************************************************************
- *
- * Purpose: Main function for listtypes.c. This function iterates
- *          over the command line arguments and supplies them to
- *          a function that prints the component types for a file.
- *          This program tests the DBGetComponentType function.
- *
- * Programmer: Brad Whitlock
- * Date:       Thu Jan 20 13:05:37 PST 2000
- *
- * Input Arguments:
- *     argc : The number of command line arguments.
- *     argv : An array containing the command line arguments.
- *
- * Modifications:
- *     Thomas R. Treadway, Thu Jul  5 16:33:38 PDT 2007
- *     Chaneged main's return type to int, to stop gcc-4.x whining.
- *
- ********************************************************************/
-
-int
-main(int argc, char *argv[])
-{
-    int i;
-
-    if(argc < 2)
-    {
-        printf("Usage: listtypes filename [filename ...]\n");
-        exit(0);
-    }
-
-    /* Print the types for components in the specified files. */
-    for(i = 1; i < argc; i++)
-        PrintFileComponentTypes(argv[i]);
-}
-
-/*********************************************************************
- *
- * Purpose: Reads the specified file and prints out the types of all
- *          of its components.
- *
- * Programmer: Brad Whitlock
- * Date:       Thu Jan 20 12:21:36 PDT 2000
- *
- * Input Arguments:
- *     filename : The path and name the file we want to print out.
- *
- * Modifications:
- *
- ********************************************************************/
-
-void
-PrintFileComponentTypes(char *filename)
-{
-    int    i, j, ndirs, nobj = 0;
-    char   topdir[200], **dir_names = NULL;
-    DBfile *dbfile = NULL;
-    DBtoc  *dbtoc = NULL;
-
-    /* Open the data file. Return if it cannot be read. */
-    if((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) == NULL)
-    {
-        printf("File: %s\n    <could not be opened>\n\n", filename);
-        return;
-    }
-
-    /* Read the file's table of contents. */
-    if((dbtoc = DBGetToc(dbfile)) == NULL)
-    {
-        printf("File: %s\n    <could not read TOC>\n\n", filename);
-        DBClose(dbfile);
-        return;
-    }
-
-    printf("File: %s\n", filename);
-
-    /* Print the objects in the top directory. */
-    if(dbtoc->nobj > 0)
-    {
-        nobj = dbtoc->nobj;
-        /* Print the objects in the Toc. */
-        for(i = 0; i < dbtoc->nobj; i++)
-            PrintObjectComponentsType(dbfile, dbtoc->obj_names[i], "    ");
-    }
-
-    /* Print objects in subdirectories one level down. */
-    ndirs = dbtoc->ndir;
-    if(ndirs > 0)
-    {
-        /* Make a list of all the directory names since the list
-         * in the TOC will change as we change directories.
-         */
-        DBGetDir(dbfile, topdir);
-        dir_names = ALLOC_N(char *, ndirs);
-        for(i = 0; i < ndirs; i++)
-        {
-            dir_names[i] = ALLOC_N(char, 1+strlen(dbtoc->dir_names[i]+
-                                   strlen(topdir)));
-            sprintf(dir_names[i], "%s%s", topdir, dbtoc->dir_names[i]);
-        }
-
-        /* Search each directory for objects. */
-        for(j = 0; j < ndirs; j++)
-        {
-            /* Change directories and get the TOC. */
-            DBSetDir(dbfile, dir_names[j]);
-            dbtoc = DBGetToc(dbfile);
-
-            if(dbtoc->nobj == 0)
-                printf("    Directory: %s\n        <directory contains "
-                       "no objects>\n\n", dir_names[j]);
-            else
-            {
-                printf("    Directory: %s\n", dir_names[j]);
-
-                /* Print the objects in the Toc. */
-                nobj += dbtoc->nobj;
-                for(i = 0; i < dbtoc->nobj; i++)
-                    PrintObjectComponentsType(dbfile, dbtoc->obj_names[i],
-                                              "        ");
-            }
-        }
-
-        /* Free the directory list. */
-        for(i = 0; i < ndirs; i++)
-            FREE(dir_names[i]);
-        FREE(dir_names);
-    }
-
-    if(nobj == 0)
-        printf("    <file contains no objects>\n\n");
-
-    /* Close the file. */
-    DBClose(dbfile);
-}
 
 /*********************************************************************
  *
@@ -229,6 +92,179 @@ IntToTypename(int type)
     }
 
     return retval;
+}
+
+/*********************************************************************
+ *
+ * Purpose: Main function for listtypes.c. This function iterates
+ *          over the command line arguments and supplies them to
+ *          a function that prints the component types for a file.
+ *          This program tests the DBGetComponentType function.
+ *
+ * Programmer: Brad Whitlock
+ * Date:       Thu Jan 20 13:05:37 PST 2000
+ *
+ * Input Arguments:
+ *     argc : The number of command line arguments.
+ *     argv : An array containing the command line arguments.
+ *
+ * Modifications:
+ *     Thomas R. Treadway, Thu Jul  5 16:33:38 PDT 2007
+ *     Chaneged main's return type to int, to stop gcc-4.x whining.
+ *
+ ********************************************************************/
+
+int
+main(int argc, char *argv[])
+{
+    int i;
+
+    if(argc < 2)
+    {
+        printf("Usage: listtypes filename [filename ...]\n");
+        exit(0);
+    }
+
+    /* Print the types for components in the specified files. */
+    for(i = 1; i < argc; i++)
+        PrintFileComponentTypes(argv[i]);
+    
+    return 0;
+}
+
+/*********************************************************************
+ *
+ * Purpose: Macroize code that processes entries in the TOC.
+ *
+ * The last 'S' argument to the macro is used to handle plural or
+ * singular form of specification of toc data members.
+ *
+ * Programmer: Mark C. Miller
+ * Date:       June 19, 2008 
+ *
+ ********************************************************************/
+#define PRINT_OBJS(theFile, theToc, theClass, Indent, S)        \
+    nobjs += theToc->n ## theClass ## S;                                \
+    for (i = 0; i < theToc->n ## theClass ## S; i++)            \
+        PrintObjectComponentsType(theFile, theToc->theClass ## _names[i], Indent);
+
+int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
+{
+    int i, j, nobjs;
+    char indent[1024];
+    int ndirs = dbtoc->ndir;
+
+    /* compute an indent */
+    for (i = 0; i < depth * 3; i++)
+        indent[i] = ' ';
+    indent[i] = '\0';
+
+    /* descend into subdirs, first */
+    if(ndirs > 0)
+    {
+        /* Make a list of all the directory names since the list
+         * in the TOC will change as we change directories.
+         */
+        char currentdir[1024];
+        char **dir_names = ALLOC_N(char *, ndirs);
+        DBGetDir(dbfile, currentdir);
+        for(i = 0; i < ndirs; i++)
+        {
+            dir_names[i] = ALLOC_N(char, 1+strlen(dbtoc->dir_names[i]+
+                                   strlen(currentdir)));
+            sprintf(dir_names[i], "%s%s", currentdir, dbtoc->dir_names[i]);
+        }
+
+        /* Search each directory for objects. */
+        for(j = 0; j < ndirs; j++)
+        {
+            /* Change directories and get the TOC. */
+            DBtoc *current_dbtoc;
+            DBSetDir(dbfile, dir_names[j]);
+            current_dbtoc = DBGetToc(dbfile);
+            printf("%sDirectory: %s\n", indent, dir_names[j]);
+            if (ProcessCurrentDirectory(dbfile, current_dbtoc, depth+1) <= 0)
+                printf("%s<directory contains no objects>\n\n", indent);
+        }
+
+        /* Free the directory list. */
+        for(i = 0; i < ndirs; i++)
+            FREE(dir_names[i]);
+        FREE(dir_names);
+    }
+
+    /* Print the objects in the top directory. */
+    nobjs = ndirs; 
+    PRINT_OBJS(dbfile, dbtoc, obj, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, defvars, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, array, indent, s);
+    PRINT_OBJS(dbfile, dbtoc, curve, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, ptmesh, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, ptvar, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, qmesh, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, qvar, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, ucdmesh, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, ucdvar, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, csgmesh, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, csgvar, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, mat, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, matspecies, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, multimesh, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, multimeshadj, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, multivar, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, multimat, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, multimatspecies, indent, /*void*/);
+    PRINT_OBJS(dbfile, dbtoc, mrgtree, indent, s);
+    PRINT_OBJS(dbfile, dbtoc, mrgvar, indent, s);
+    PRINT_OBJS(dbfile, dbtoc, groupelmap, indent, s);
+    return nobjs;
+}
+
+/*********************************************************************
+ *
+ * Purpose: Reads the specified file and prints out the types of all
+ *          of its components.
+ *
+ * Programmer: Brad Whitlock
+ * Date:       Thu Jan 20 12:21:36 PDT 2000
+ *
+ * Input Arguments:
+ *     filename : The path and name the file we want to print out.
+ *
+ * Modifications:
+ *
+ ********************************************************************/
+
+void
+PrintFileComponentTypes(char *filename)
+{
+    int    i, j, ndirs, nobj = 0;
+    char   topdir[200], **dir_names = NULL;
+    DBfile *dbfile = NULL;
+    DBtoc  *dbtoc = NULL;
+
+    /* Open the data file. Return if it cannot be read. */
+    if((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) == NULL)
+    {
+        printf("File: %s\n    <could not be opened>\n\n", filename);
+        return;
+    }
+
+    /* Read the file's table of contents. */
+    if((dbtoc = DBGetToc(dbfile)) == NULL)
+    {
+        printf("File: %s\n    <could not read TOC>\n\n", filename);
+        DBClose(dbfile);
+        return;
+    }
+
+    printf("File: %s\n", filename);
+
+    if (ProcessCurrentDirectory(dbfile, dbtoc, 0) <= 0)
+        printf("<file contains no objects>\n\n");
+
+    /* Close the file. */
+    DBClose(dbfile);
 }
 
 /*********************************************************************

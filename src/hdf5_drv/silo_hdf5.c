@@ -20,6 +20,13 @@
  *   now restart from it. Added dataReadMask functionality
  *
  */
+/* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
+   in this file uses version 1.6 of the HDF5 API. This is harmless for
+   versions of HDF5 before 1.8 and ensures correct compilation with
+   version 1.8 and thereafter. When, and if, the HDF5 code in this file
+   is explicitly upgraded to the 1.8 API, this symbol should be removed. */
+#define H5_USE_16_API
+
 #include <errno.h>
 #include <assert.h>
 #if HAVE_STRING_H
@@ -31,6 +38,132 @@
 #include "silo_hdf5_private.h"
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 
+/* set this to non-zero to prmit HDF5 to generate error tracing
+   messages */
+#define DEBUG_HDF5 0
+
+/* HZIP node order permuation vector construction
+   To construct a permutation vector. Work backwards
+   from the highest numbered node on the canonical
+   element, finding its cooresponding node number on
+   the source element. Put the resulting number in
+   the highest nibble of the unsigned word for the
+   permutation vector. Then, move to the next highest
+   numbered node on the canonical element, repeating
+   all these steps to arrive at a value for the next
+   highest order nibble in the word. 3D example...
+  
+       3-------2       2-------3
+      /|      /|      /|      /|
+     4-------5 |     6-------7 |
+     | |     | | --> | |     | |
+     | 0-----|-1     | 0-----|-1
+     |/      |/      |/      |/
+     7-------6       4-------5
+  
+     source data     canonical
+     ordering        ordering
+
+             0x54672310
+
+   2D example...
+       (Note the zone on the left is also Silo/VisIt
+        node order for a quad)
+
+       1-------2       2-------3
+       |       |       |       |
+       |       |       |       |
+       |       | -->   |       |
+       0-------3       0-------1
+
+            0x00002130
+
+  HZIP Compression integration overview...
+
+  HZIP is a unique among compression algorithms in that it is 
+  capabable of exploiting mesh structure in order to improve
+  performance. However, this means that the compressor needs 
+  to maintain information on the mesh connectivity in order to
+  compress any variables defined on the mesh. Other compressors
+  operate either on raw byte streams or, maybe, multidimensional
+  integer and floating point arrays. FPZIP does that for example.
+  But, to use HZIP, Silo needs to maintain a cache of recently
+  used nodelists. Since Silo imposes no order on how objects are
+  written or read, if the writer doen't write in the correct order,
+  things will fail. During read, however, the silo library can
+  ensure tha all information necessary to decompress is available
+  when necessary. 
+
+  The design here attempts to localize as much of the compression
+  know how to an HDF5 'filter.' It is best if the compressor is
+  properly integrated with HDF5 using HDF5's filter architecture.
+  This is substantially easier for generic compressors because
+  there isn't any information other than the data stream required
+  to compress or decompress. That is not true for HZIP compression.
+  The HDF5 filter that implements HZIP compression,
+  db_hdf5_hzip_filter_op, must exploit a lot of information apart
+  from the actual data stream it is compressing or decompressing.
+  This extra information is managed in db_hdf5_hzip_params. In
+  a handful of places in the driver, we've had to add code to
+  manage HZIP compression information so that the compressor will
+  have all the information it needs. These places are the
+  PrepareForXXXCompression|Decompression methods.
+
+  There are a number of issues...
+  a) HZIP compresses only node-centered data, not zone-centerd.
+  b) HZIP compresses only 2D quad meshes or 3D hex meshes.
+  c) HZIP is designed for unstructured grid. To use it on structured
+     grid, we create a fictitious nodelist at will.
+  d) The silo client must call DBFreeResources (which happens
+     automatically on DBClose) to free up stored nodelists
+     used by HZIP. It is best if the client operate in such a
+     way that reads or writes for all variables of a mesh
+     occur shortly after the mesh itself and that the client
+     does not iterate through a slew of meshes and then the
+     variables for those meshes.
+  e) To use HZIP, you need to give it a buffer to place the
+     compressed result it. But, you can't allocate such a 
+     buffer without knowing size. So, we take the approach
+     of having a min. compression ratio and allocating a
+     (possibly too large) buffer for HZIP to compress into.
+     If HZIP cannot compress into this size, it fails and
+     we skip the compression. If it can, HDF5 ultimately
+     writes only the compressed bytes. Same is true for FPZIP.
+  f) To use HDF5 filters, the datasets must be 'chunked.'
+     With chunked datasets, HDF5 essentially makes a copy
+     of the data on write effecting performance and memory
+     usage.
+  g) Silo supports data read masks. If you attempt to read
+     a mesh without reading its zonelist and the zonelist
+     (and mesh) are compressed, then the result will fail
+     (presently in unpredictable ways) because HZIP needs
+     the nodelist in order to decompress.
+  h) In integrating compression, we have to take care that
+     new calls introduced to support compression that ALWAYS
+     happen (whether we are compressing or not) do not 
+     negatively affect performance of the 'old' Silo.
+     An example is in PrepareForUcdvarDecompression.
+  f) Silex cannot browse HZIP compressed objects because it
+     does not operate at the correct level of abstraction. 
+     It uses DBGetObject calls only. 
+
+*/
+
+/* For Lindstrom compression libs */
+#define DB_HDF5_HZIP_ID (H5Z_FILTER_RESERVED+1)
+#define DB_HDF5_FPZIP_ID (H5Z_FILTER_RESERVED+2)
+#ifdef HAVE_HZIP
+#include <hzip.h>
+#ifdef HAVE_LIBZ
+static struct HZMCODECzlib db_hdf5_hzip_zlib_codec_params;
+#endif
+static struct HZMCODECbase db_hdf5_hzip_base_codec_params;
+static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)), ((unsigned) (0x65217430))};
+#endif
+#ifdef HAVE_FPZIP
+#include <fpzip.h>
+#endif
+
 /* Defining these to check overhead of PROTECT */
 #if 0
 #   define PROTECT      if(1)
@@ -38,6 +171,10 @@
 #   define END_PROTECT  /*void*/
 #   define UNWIND()     abort()
 #endif
+
+#define COMPRESSION_ERRMODE_FALLBACK 0
+#define COMPRESSION_ERRMODE_FAIL     1
+#define ALLOW_MESH_COMPRESSION 0x00000001
 
 #define FALSE           0
 #define TRUE            1
@@ -48,21 +185,29 @@
 #define BASEDUP(S)       ((S)&&*(S)?db_FullName2BaseName(S):NULL)
 #define ALIGN(ADDR,N)   (((ADDR)+(N)-1)&~((N)-1))
 
+/* useful macro for comparing HDF5 versions */
+#define HDF5_VERSION_GE(Maj,Min,Rel)  \
+        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+         (H5_VERS_MAJOR>Maj))
+
 /* to encode the version of the hdf5 library in any silo executable */
 char SILO_built_with_H5_lib_vers_info_g[] = "SILO built with "
-#if (H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4 && H5_VERS_RELEASE>=2) || \
-    (H5_VERS_MAJOR>=1 && H5_VERS_MINOR>4) || \
-    (H5_VERS_MAJOR>1)
+#if HDF5_VERSION_GE(1,4,2)
 H5_VERS_INFO;
 #else
 "HDF5 library: Version 1.4.1 or earlier";
 #endif
 
+/* some necessary forward declarations */
+PRIVATE int db_hdf5_fullname(DBfile_hdf5 *dbfile, char *name, char *full);
+PRIVATE int hdf2silo_type(hid_t type);
+
 /* Use `float' for all memory floating point values? */
 static int              force_single_g;
 
 /* used to control behavior of GetZonelist */
-static int              calledFromGetUcdmesh = 0;
+static const char      *calledFromGetUcdmesh = 0;
 
 /* Struct used when building the CWD name */
 typedef struct silo_hdf5_comp_t {
@@ -719,6 +864,694 @@ INTERNAL void
 suppress_set_but_not_used_warning(const void *ptr)
 {}
 
+#ifdef HAVE_FPZIP
+
+/* The following section of code are HDF5 filters to implement FPZIP
+   compression algorithms
+
+   Programmer: Mark C. Miller
+   Created:    July, 2008
+*/
+
+typedef struct db_hdf5_fpzip_params_t {
+    int                 loss; /* set by client call to DBSetCompression() */
+    int                 isfp;
+    int                 dp;
+    int                 totsize1d;
+    int                 ndims;
+    int                 dims[10];
+} db_hdf5_fpzip_params_t;
+static db_hdf5_fpzip_params_t db_hdf5_fpzip_params;
+
+static herr_t
+db_hdf5_fpzip_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+{
+    return 1;
+#if 0
+    /* This code should work but HDF5 doesn't like being told '0'
+     * for certain cases. So, let it pass and handle it in the
+     * actual filter operation by skipping non-float data there. */
+    if (H5Tget_class(type_id) != H5T_FLOAT)
+        return 0;
+    return 1;
+#endif
+}
+
+static herr_t
+db_hdf5_fpzip_set_local(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+{
+    int i;
+    hsize_t dims[10] = {1,1,1,1,1,1,1,1,1,1}, maxdims[10];
+    db_hdf5_fpzip_params.dp = H5Tget_size(type_id) > sizeof(float) ? 1 : 0;
+    db_hdf5_fpzip_params.totsize1d = (int) H5Sget_simple_extent_npoints(space_id);
+    db_hdf5_fpzip_params.isfp = H5Tget_class(type_id) == H5T_FLOAT;
+    db_hdf5_fpzip_params.ndims = H5Sget_simple_extent_ndims(space_id);
+    H5Sget_simple_extent_dims(space_id, dims, maxdims);
+    for (i = 0; i < db_hdf5_fpzip_params.ndims; i++)
+        db_hdf5_fpzip_params.dims[i] = (int) dims[i];
+    return 1;
+}
+
+static size_t
+db_hdf5_fpzip_filter_op(unsigned int flags, size_t cd_nelmts,
+    const unsigned int cd_values[], size_t nbytes,
+    size_t *buf_size, void **buf)
+{
+    size_t early_retval = 0;
+
+    if (flags & H5Z_FLAG_REVERSE) /* read case */
+    {
+        int prec, dp;
+        unsigned nx, ny, nz, nf;
+        int new_buf_size;
+        void *uncbuf;
+
+        /* first, decode fpzip's header */
+        fpzip_memory_read(*buf, 0, &prec, &dp, &nx, &ny, &nz, &nf); 
+        new_buf_size = nx * ny * nz * nf * (dp ? sizeof(double) : sizeof(float));
+        if (new_buf_size <= 0)
+           return early_retval;
+
+        /* allocate space and do the decompression */
+        uncbuf = malloc(new_buf_size);
+        if (!fpzip_memory_read(*buf, uncbuf, &prec, &dp, &nx, &ny, &nz, &nf))
+        {
+            free(uncbuf);
+            return early_retval;
+        }
+
+        free(*buf);
+        *buf = uncbuf;
+        *buf_size = new_buf_size;
+        return new_buf_size;
+    }
+    else /* write case */
+    {
+        unsigned char *cbuf;
+        int max_outbytes, outbytes, prec;
+
+        /* We'll only compress floating point data here, not integer data */
+        if (!db_hdf5_fpzip_params.isfp)
+            return 0;
+
+        /* We can't operate in place like HDF5 wants. But, thats ok.
+         * Next, we can't easily predict compressed size but we need
+         * to allocate a buffer to compress into. Fortunately, fpzip
+         * will try to compress into any sized buffer we pass and
+         * fail if it cannot. So, we decide here what is the minimum
+         * compression we want, allocate a buffer of that size and
+         * try to compress into it. If it fails, we return the right
+         * stuff to HDF5 and do not compress */
+        
+        max_outbytes = nbytes / SILO_Compression.minratio;
+        cbuf = (unsigned char *) malloc(max_outbytes);        
+
+        /* full precision */
+        prec = 8 * (db_hdf5_fpzip_params.dp ? sizeof(double) : sizeof(float));
+        
+        /* precision with loss factored in */
+        prec = (prec * (4 - db_hdf5_fpzip_params.loss)) / 4;
+
+        if (db_hdf5_fpzip_params.ndims == 1 || db_hdf5_fpzip_params.ndims > 3)
+        {
+            outbytes = fpzip_memory_write(cbuf, max_outbytes, *buf,
+                    &prec, db_hdf5_fpzip_params.dp,
+                    db_hdf5_fpzip_params.totsize1d, 1, 1, 1);
+        }
+        else if (db_hdf5_fpzip_params.ndims == 2)
+            outbytes = fpzip_memory_write(cbuf, max_outbytes, *buf,
+                    &prec, db_hdf5_fpzip_params.dp,
+                    db_hdf5_fpzip_params.dims[0],
+                    db_hdf5_fpzip_params.dims[1], 1, 1);
+        else
+        {
+            outbytes = fpzip_memory_write(cbuf, max_outbytes, *buf,
+                    &prec, db_hdf5_fpzip_params.dp,
+                    db_hdf5_fpzip_params.dims[0],
+                    db_hdf5_fpzip_params.dims[1],
+                    db_hdf5_fpzip_params.dims[2], 1);
+        }
+
+        /* If fpzip failed in any way, it returns zero */
+        if (outbytes == 0)
+        {
+            free(cbuf);
+            return early_retval;
+        }
+
+        /* We had a success. So, free old buffer and return new values */
+        free(*buf);
+        *buf = cbuf;
+        *buf_size = max_outbytes;
+        return outbytes;
+    }
+}
+static H5Z_class_t db_hdf5_fpzip_class;
+#endif
+
+#ifndef HAVE_HZIP
+/*ARGSUSED*/
+static void
+FreeNodelists(DBfile_hdf5 *dbfile, const char *meshname) {}
+#else
+
+/* The following section of code is used to mange caching of nodelists
+   to support HZIP compression.
+
+   Programmer: Mark C. Miller
+   Created:    July, 2008
+*/
+
+#define MAX_NODELIST_INFOS 32
+typedef struct _zlInfo {
+    DBfile_hdf5 *db5file;
+    char *meshname;
+    char *zlname;
+    DBzonelist *zl;
+} zlInfo_t;
+static zlInfo_t keptNodelistInfos[MAX_NODELIST_INFOS];
+
+/*
+   We can lookup a nodelist either by its name or the name of the mesh that
+   uses it. The preference is to use the name of the zonelist itself.
+*/
+static const DBzonelist*
+LookupNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname)
+{
+    int i;
+    char fullmname[256];
+    char fullzlname[256];
+    if (zlname)
+        db_hdf5_fullname(dbfile, (char*) zlname, fullzlname);
+    if (meshname)
+        db_hdf5_fullname(dbfile, (char*) meshname, fullmname);
+    for (i = 0; i < MAX_NODELIST_INFOS; i++)
+    {
+        if (keptNodelistInfos[i].zl && (keptNodelistInfos[i].db5file == dbfile))
+        {
+            if (zlname && keptNodelistInfos[i].zlname &&
+                (strcmp(fullzlname, keptNodelistInfos[i].zlname) == 0))
+            {
+                if (meshname && !keptNodelistInfos[i].meshname)
+                    keptNodelistInfos[i].meshname = STRDUP(fullmname);
+                return keptNodelistInfos[i].zl;
+            }
+            if (meshname && keptNodelistInfos[i].meshname &&
+                (strcmp(fullmname, keptNodelistInfos[i].meshname) == 0))
+            {
+                if (zlname && !keptNodelistInfos[i].zlname)
+                    keptNodelistInfos[i].zlname = STRDUP(fullzlname);
+                return keptNodelistInfos[i].zl;
+            }
+        }
+    }
+    return 0;
+}
+
+/*
+ Part of registering a nodelist is to first check to see if we don't already
+ have one. So, we call LookupNodelist as a first step.
+*/
+static int 
+RegisterNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname,
+    int ntopodims, int nzones, int origin, const int *nodelist)
+{
+    DBzonelist *zl = DBAllocZonelist();
+    int i;
+    int lnodelist = (1<<ntopodims) * nzones;
+    int snodelist = lnodelist * sizeof(int);
+    char fullname[256], fullmname[256];
+    
+    if (LookupNodelist(dbfile, zlname, meshname))
+        return 0;
+
+    if (zlname)
+        db_hdf5_fullname(dbfile, (char*) zlname, fullname);
+    if (meshname)
+        db_hdf5_fullname(dbfile, (char*) meshname, fullmname);
+
+    zl->ndims = ntopodims;
+    zl->nzones = nzones;
+    zl->origin = origin;
+    zl->shapecnt = malloc(sizeof(int));
+    zl->shapecnt[0] = nzones;
+    zl->shapetype = malloc(sizeof(int));
+    zl->shapetype[0] = ntopodims == 2 ? DB_ZONETYPE_QUAD : DB_ZONETYPE_HEX;
+    zl->shapesize = malloc(sizeof(int));
+    zl->shapesize[0] = (1 << ntopodims); 
+    zl->lnodelist = lnodelist;
+    zl->nodelist = malloc(snodelist);
+    memcpy(zl->nodelist, nodelist, snodelist);
+
+    for (i = 0; i < MAX_NODELIST_INFOS; i++)
+    {
+        if (keptNodelistInfos[i].zl == 0)
+        break;
+    }
+    if (i == MAX_NODELIST_INFOS)
+        return 0;
+
+    keptNodelistInfos[i].db5file = dbfile;
+    if (zlname)
+        keptNodelistInfos[i].zlname = STRDUP(fullname);
+    if (meshname)
+        keptNodelistInfos[i].meshname = STRDUP(fullmname);
+    keptNodelistInfos[i].zl = zl;
+}
+
+static void
+AddMeshnameToNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname)
+{
+    int i;
+    char fullmname[256];
+    char fullzlname[256];
+
+    db_hdf5_fullname(dbfile, (char*) zlname, fullzlname);
+    db_hdf5_fullname(dbfile, (char*) meshname, fullmname);
+
+    for (i = 0; i < MAX_NODELIST_INFOS; i++)
+    {
+        if (keptNodelistInfos[i].zl && (keptNodelistInfos[i].db5file == dbfile))
+        {
+            if (keptNodelistInfos[i].zlname &&
+                strcmp(fullzlname, keptNodelistInfos[i].zlname) == 0)
+            {
+                keptNodelistInfos[i].meshname = STRDUP(fullmname);
+                break;
+            }
+        }
+    }
+}
+
+static void
+FreeNodelists(DBfile_hdf5 *dbfile, const char *meshname)
+{
+    int i;
+    if (dbfile) /* clear all for a given file */
+    {
+        for (i = 0; i < MAX_NODELIST_INFOS; i++)
+        {
+            if (keptNodelistInfos[i].zl && (keptNodelistInfos[i].db5file == dbfile))
+            {
+                FREE(keptNodelistInfos[i].meshname);
+                FREE(keptNodelistInfos[i].zlname);
+                DBFreeZonelist(keptNodelistInfos[i].zl);
+                memset(&keptNodelistInfos[i], 0x0, sizeof(keptNodelistInfos[i]));
+            }
+        }
+    }
+    else if (meshname) /* clear all for a given mesh */
+    {
+        char fullmname[256];
+        db_hdf5_fullname(dbfile, (char*) meshname, fullmname);
+
+        for (i = 0; i < MAX_NODELIST_INFOS; i++)
+        {
+            if (keptNodelistInfos[i].zl && keptNodelistInfos[i].meshname &&
+                (strcmp(fullmname, keptNodelistInfos[i].meshname) == 0))
+            {
+                FREE(keptNodelistInfos[i].meshname);
+                FREE(keptNodelistInfos[i].zlname);
+                DBFreeZonelist(keptNodelistInfos[i].zl);
+                memset(&keptNodelistInfos[i], 0x0, sizeof(keptNodelistInfos[i]));
+            }
+        }
+    }
+    else /* clear everything that is non-empty */
+    {
+        for (i = 0; i < MAX_NODELIST_INFOS; i++)
+        {
+            if (keptNodelistInfos[i].zl)
+            {
+                FREE(keptNodelistInfos[i].meshname);
+                FREE(keptNodelistInfos[i].zlname);
+                DBFreeZonelist(keptNodelistInfos[i].zl);
+                memset(&keptNodelistInfos[i], 0x0, sizeof(keptNodelistInfos[i]));
+            }
+        }
+    }
+}
+
+/* The following section of code are HDF5 filters to implement FPZIP
+   compression algorithms
+
+   Programmer: Mark C. Miller
+   Created:    July, 2008
+*/
+
+static HZtype silo2hztype(int silo_type)
+{
+    switch (silo_type)
+    {
+        case DB_CHAR: return hzUCHAR;
+        case DB_SHORT: return hzUSHORT;
+        case DB_INT: return hzINT;
+        case DB_FLOAT: return hzFLOAT;
+        case DB_DOUBLE: return hzDOUBLE;
+    }
+    return hzUCHAR;
+}
+
+static int hztype2silo(HZtype hztype)
+{
+    switch (hztype)
+    {
+        case hzUCHAR: return DB_CHAR;
+        case hzUSHORT: return DB_SHORT;
+        case hzINT: return DB_INT;
+        case hzFLOAT: return DB_FLOAT;
+        case hzDOUBLE: return DB_DOUBLE;
+    }
+    return DB_CHAR;
+}
+
+static int sizeof_hztype(HZtype hztype)
+{
+    switch (hztype)
+    {
+        case hzUCHAR: return sizeof(unsigned char);
+        case hzUSHORT: return sizeof(unsigned short);
+        case hzINT: return sizeof(int);
+        case hzFLOAT: return sizeof(float);
+        case hzDOUBLE: return sizeof(double);
+    }
+    return sizeof(double);
+}
+
+typedef struct db_hdf5_hzip_params_t {
+    /* these items set DBSetCompression call */
+    unsigned            codec;
+    const void         *params;
+
+    /* these items set by hdf5 driver as needed. */
+    int                 iszl;
+    const char         *zlname;
+    const char         *meshname;
+    DBfile_hdf5        *dbfile;
+    int                 zlorigin;
+    int                 isquad;
+
+    /* these items set by hdf5 filter's set_local method */
+    int                 totsize1d;
+    int                 ndims;
+    int                 dims[10];
+    HZtype              hztype;
+} db_hdf5_hzip_params_t;
+static db_hdf5_hzip_params_t db_hdf5_hzip_params;
+
+static void
+db_hdf5_hzip_clear_params()
+{
+    unsigned tmpcodec = db_hdf5_hzip_params.codec;
+    const void *tmpparams = db_hdf5_hzip_params.params;
+    memset(&db_hdf5_hzip_params, 0, sizeof(db_hdf5_hzip_params));
+    db_hdf5_hzip_params.codec = tmpcodec;
+    db_hdf5_hzip_params.params = tmpparams;
+}
+
+static herr_t
+db_hdf5_hzip_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+{
+    /* see not above regarding fpzip */
+    return 1;
+}
+
+static herr_t
+db_hdf5_hzip_set_local(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+{
+    int i;
+    hsize_t dims[10] = {1,1,1,1,1,1,1,1,1,1}, maxdims[10];
+    db_hdf5_hzip_params.hztype = silo2hztype(hdf2silo_type(type_id));
+    db_hdf5_hzip_params.totsize1d = (int) H5Sget_simple_extent_npoints(space_id);
+    db_hdf5_hzip_params.ndims = H5Sget_simple_extent_ndims(space_id);
+    H5Sget_simple_extent_dims(space_id, dims, maxdims);
+    for (i = 0; i < db_hdf5_hzip_params.ndims; i++)
+        db_hdf5_hzip_params.dims[i] = (int) dims[i];
+    return 1;
+}
+
+static size_t
+db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
+    const unsigned int cd_values[], size_t nbytes,
+    size_t *buf_size, void **buf)
+{
+    int early_retval = 0;
+
+    if (flags & H5Z_FLAG_REVERSE) /* read case */
+    {
+        if (db_hdf5_hzip_params.iszl) /* ucd mesh zonelist */
+        {
+            HZMstream *stream;
+            int ndims = 0, nzones = 0, nread;
+            int *nodelist = 0;
+            int new_buf_size;
+
+            /* To query stream for ndims, we need to specify a permutation
+               which may be wrong. So, we open, query, close and re-open. */
+            stream = hzip_mesh_open_mem(*buf, nbytes, 0);
+            if (stream == 0) return early_retval;
+
+            ndims = hzip_mesh_dimensions(stream);
+            if (ndims < 2 || ndims > 3) return early_retval;
+            hzip_mesh_close(stream);
+
+            /* Ok, no re-open the stream with correct permutation */
+            stream = hzip_mesh_open_mem(*buf, nbytes, SILO_HZIP_PERMUTATION[ndims]);
+            if (stream == 0) return early_retval;
+
+            ndims = hzip_mesh_dimensions(stream);
+            if (ndims < 2 || ndims > 3) return early_retval;
+
+            nzones = hzip_mesh_cells(stream);
+            if (nzones < 0) return early_retval;
+
+            new_buf_size = (1<<ndims) * nzones * sizeof(int);
+            nodelist = (int *) malloc(new_buf_size);
+            if (nodelist == 0) return early_retval;
+
+            nread = hzip_mesh_read(stream, nodelist, nzones);
+            if (nread != nzones)
+            {
+                free(nodelist);
+                return early_retval;
+            }
+            hzip_mesh_close(stream);
+
+            RegisterNodelist(db_hdf5_hzip_params.dbfile, db_hdf5_hzip_params.zlname,
+                db_hdf5_hzip_params.meshname, ndims, nzones,
+                db_hdf5_hzip_params.zlorigin, nodelist);
+
+            free(*buf);
+            *buf = (void*) nodelist;
+            *buf_size = new_buf_size; 
+            return new_buf_size;
+        }
+        else /* ucd or quad mesh node-centered (not zone-centered) variables */
+        {
+            HZNstream *stream;
+            int i, ndims, nnodes, nread, nzones;
+            void *var = 0;
+            int new_buf_size, hztype;
+            int *nodelist;
+            int perm, origin;
+
+            /* To query stream for ndims, we need to specify a permutation
+               which may be wrong. So, we open, query, close and re-open. */
+            stream = hzip_node_open_mem(*buf, nbytes, 0, 0);
+            if (stream == 0) return early_retval;
+
+            ndims = hzip_node_dimensions(stream);
+            if (ndims < 2 || ndims > 3) return early_retval;
+            hzip_node_close(stream);
+
+            if (db_hdf5_hzip_params.isquad)
+            {
+                nzones = 1;
+                for (i = 0; i < db_hdf5_hzip_params.ndims; i++)
+                    nzones *= (db_hdf5_hzip_params.dims[i]-1);
+
+                nodelist = (int *) malloc((1<<ndims) * nzones * sizeof(int));
+                if (nodelist == 0) return early_retval;
+                perm = hzip_mesh_construct(nodelist, (unsigned) ndims,
+                    (const unsigned *) db_hdf5_hzip_params.dims, 0);
+
+                origin = 0;
+            }
+            else
+            {
+                const DBzonelist *zl = LookupNodelist(db_hdf5_hzip_params.dbfile,
+                    db_hdf5_hzip_params.zlname, db_hdf5_hzip_params.meshname);
+                if (zl == 0 || zl->nodelist == 0)
+                    return early_retval;
+                nodelist = zl->nodelist;
+                nzones = zl->nzones;
+                origin = zl->origin;
+                perm = SILO_HZIP_PERMUTATION[ndims];
+            }
+
+            /* Ok, now open with correct permutation */
+            stream = hzip_node_open_mem(*buf, nbytes, perm, origin);
+            if (stream == 0) return early_retval;
+
+            ndims = hzip_node_dimensions(stream);
+            if (ndims < 2 || ndims > 3) return early_retval;
+
+            nnodes = hzip_node_count(stream);
+            if (nnodes < 0) return early_retval;
+
+            hztype = hzip_node_type(stream);
+            if (hztype < 0) return early_retval;
+
+            new_buf_size = nnodes * sizeof_hztype(hztype);
+            var = malloc(new_buf_size);
+            if (var == 0) return early_retval;
+
+            nread = hzip_node_read(stream, var, nodelist, nzones);
+            if (nread != nnodes)
+            {
+                if (db_hdf5_hzip_params.isquad)
+                    free(nodelist);
+                free(var);
+                return early_retval;
+            }
+            hzip_node_close(stream);
+
+            if (db_hdf5_hzip_params.isquad)
+                free(nodelist);
+            free(*buf);
+            *buf = var;
+            *buf_size = new_buf_size; 
+            return new_buf_size;
+        }
+    }
+    else /* write case */
+    {
+        if (db_hdf5_hzip_params.iszl) /* ucd mesh zonelist */
+        {
+            int outbytes, ntopo, nzones;
+            size_t max_outbytes;
+            HZMstream* stream;
+            unsigned char *buffer = 0;
+
+            const DBzonelist *zl = LookupNodelist(db_hdf5_hzip_params.dbfile,
+                db_hdf5_hzip_params.zlname, db_hdf5_hzip_params.meshname);
+            if (zl == 0 || zl->nodelist == 0) return early_retval;
+            ntopo = zl->ndims;
+            nzones = zl->nzones;
+
+            max_outbytes = ((1<<ntopo) * nzones * sizeof(int)) / SILO_Compression.minratio;
+            buffer = (unsigned char *) malloc(max_outbytes);
+            if (buffer == 0) return early_retval;
+
+            stream = hzip_mesh_create_mem(buffer, max_outbytes, SILO_HZIP_PERMUTATION[ntopo],
+                ntopo, nzones, db_hdf5_hzip_params.codec, db_hdf5_hzip_params.params);
+
+            if (stream == 0)
+            {
+                free(buffer); 
+                return early_retval;
+            }
+
+            if (hzip_mesh_write(stream, *buf, nzones) < 0)
+            {
+                hzip_mesh_close(stream);
+                free(buffer); 
+                return early_retval;
+            }
+
+            if ((outbytes = hzip_mesh_close(stream)) < 0)
+            {
+                free(buffer); 
+                return early_retval;
+            }
+
+            free(*buf);
+            *buf = buffer;
+            *buf_size = max_outbytes;
+            return outbytes;
+        }
+        else /* ucd or quad mesh coords or nodal variables */
+        {
+            int i, outbytes, nbytes;
+            size_t max_outbytes;
+            HZNstream* stream;
+            unsigned char *buffer = 0;
+            int *nodelist;
+            int ndims, origin, nzones, perm;
+
+            /* Find the nodelist for this write */
+            if (db_hdf5_hzip_params.isquad)
+            {
+                ndims = db_hdf5_hzip_params.ndims;
+                origin = 0;
+                nzones = 1;
+                for (i = 0; i < ndims; i++)
+                    nzones *= (db_hdf5_hzip_params.dims[i]-1);
+                nodelist = (int *) malloc((1<<ndims) * nzones * sizeof(int));
+                if (nodelist == 0) return early_retval;
+                perm = hzip_mesh_construct(nodelist, (unsigned) ndims,
+                    (const unsigned int *) db_hdf5_hzip_params.dims, 0);
+            }
+            else
+            {
+                const DBzonelist *zl = LookupNodelist(db_hdf5_hzip_params.dbfile,
+                                          db_hdf5_hzip_params.zlname,
+                                          db_hdf5_hzip_params.meshname);
+                if (zl == 0 || zl->nodelist == 0) return early_retval;
+                nodelist = zl->nodelist;
+                ndims = zl->ndims;
+                origin = zl->origin;
+                nzones = zl->nzones;
+                perm = SILO_HZIP_PERMUTATION[ndims];
+            }
+
+            max_outbytes = (db_hdf5_hzip_params.totsize1d *
+                           sizeof_hztype(db_hdf5_hzip_params.hztype)) / SILO_Compression.minratio;
+            buffer = (unsigned char *) malloc(max_outbytes);
+            if (buffer == 0) return early_retval;
+
+            stream = hzip_node_create_mem(buffer, max_outbytes, perm,
+                origin, ndims, db_hdf5_hzip_params.totsize1d, db_hdf5_hzip_params.hztype,
+                db_hdf5_hzip_params.codec, 0);
+
+            if (stream == 0)
+            {
+                if (db_hdf5_hzip_params.isquad)
+                    free(nodelist);
+                free(buffer);
+                return early_retval;
+            }
+
+            if (hzip_node_write(stream, *buf, nodelist, nzones) < 0)
+            {
+                hzip_node_close(stream);
+                if (db_hdf5_hzip_params.isquad)
+                    free(nodelist);
+                free(buffer);
+                return early_retval;
+            }
+
+            if ((outbytes = hzip_node_close(stream)) < 0)
+            {
+                if (db_hdf5_hzip_params.isquad)
+                    free(nodelist);
+                free(buffer);
+                return early_retval;
+            }
+
+            /* We had a success. So, free old buffer and return new values */
+            if (db_hdf5_hzip_params.isquad)
+                free(nodelist);
+            free(*buf);
+            *buf = buffer;
+            *buf_size = max_outbytes;
+            return outbytes;
+        }
+    }
+}
+static H5Z_class_t db_hdf5_hzip_class;
+#endif
+
 INTERNAL const char *
 friendly_name(const char *base_name, const char *fmtstr, const void *val)
 {
@@ -930,6 +1763,10 @@ T_str(char *s)
  * Programmer:  Mark C. Miller 
  *              Tuesday, May 2, 2006 
  *
+ * Modifications:
+ *
+ *   Mark C. Miller, Thu Jul 17 23:11:41 PDT 2008
+ *   Added code to detect compression errors.
  *-------------------------------------------------------------------------
  */
 PRIVATE herr_t
@@ -937,8 +1774,15 @@ silo_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
 {
     int *silo_error_code_p = (int *) client_data;
 
+    /* Note that error code can be overwritten by later strstr
+       comparisons. Where both checksum and compression errors
+       occur, we declare it a compression error. */
     if (strstr(err_desc->desc, "letcher32") != 0)
         *silo_error_code_p = E_CHECKSUM;
+    if (strstr(err_desc->desc, "zip") != 0)
+        *silo_error_code_p = E_COMPRESSION;
+    if (strstr(err_desc->desc, "Lindstrom-") != 0)
+        *silo_error_code_p = E_COMPRESSION;
 
     return 0;
 }
@@ -992,7 +1836,9 @@ db_hdf5_init(void)
     if (ncalls++) return;               /*already initialized*/
 
     /* Turn off error messages from the hdf5 library */
+#if DEBUG_HDF5 == 0
     H5Eset_auto(NULL, NULL);
+#endif
 
     /* Define a scalar data space */
     SCALAR = H5Screate(H5S_SCALAR);
@@ -1016,6 +1862,55 @@ db_hdf5_init(void)
        checksums. So, we build the DISabled version here. */
     P_ckrdprops = H5Pcreate(H5P_DATASET_XFER);   /* never freed */
     H5Pset_edc_check(P_ckrdprops, H5Z_DISABLE_EDC);
+
+#ifdef HAVE_FPZIP
+    db_hdf5_fpzip_params.loss = 0;
+#if HDF5_VERSION_GE(1,8,0)
+    db_hdf5_fpzip_class.version = H5Z_CLASS_T_VERS;
+    db_hdf5_fpzip_class.encoder_present = 1;
+    db_hdf5_fpzip_class.decoder_present = 1;
+#endif
+    db_hdf5_fpzip_class.id = DB_HDF5_FPZIP_ID;
+    db_hdf5_fpzip_class.name = "Lindstrom-fpzip";
+    db_hdf5_fpzip_class.can_apply = db_hdf5_fpzip_can_apply;
+    db_hdf5_fpzip_class.set_local = db_hdf5_fpzip_set_local;
+    db_hdf5_fpzip_class.filter = db_hdf5_fpzip_filter_op;
+    H5Zregister(&db_hdf5_fpzip_class);
+#endif
+
+#ifdef HAVE_HZIP
+
+#ifdef HAVE_LIBZ
+    db_hdf5_hzip_zlib_codec_params = hzm_codec_zlib;
+#endif
+    db_hdf5_hzip_base_codec_params = hzm_codec_base;
+
+#ifdef HAVE_LIBZ
+    db_hdf5_hzip_params.codec = HZM_CODEC_ZLIB;
+    db_hdf5_hzip_params.params = &db_hdf5_hzip_zlib_codec_params;
+    ((struct HZMCODECzlib *) db_hdf5_hzip_params.params)->bits = 12;
+#else
+    db_hdf5_hzip_params.codec = HZM_CODEC_BASE;
+    db_hdf5_hzip_params.params = &db_hdf5_hzip_base_codec_params;
+    ((struct HZMCODECbase *) db_hdf5_hzip_params.params)->bits = 12;
+#endif
+
+#if HDF5_VERSION_GE(1,8,0)
+    db_hdf5_hzip_class.version = H5Z_CLASS_T_VERS;
+    db_hdf5_hzip_class.encoder_present = 1;
+    db_hdf5_hzip_class.decoder_present = 1;
+#endif
+    db_hdf5_hzip_class.id = DB_HDF5_HZIP_ID;
+    db_hdf5_hzip_class.name = "Lindstrom-hzip";
+    db_hdf5_hzip_class.can_apply = db_hdf5_hzip_can_apply;
+    db_hdf5_hzip_class.set_local = db_hdf5_hzip_set_local;
+    db_hdf5_hzip_class.filter = db_hdf5_hzip_filter_op;
+
+    H5Zregister(&db_hdf5_hzip_class);
+    /* Initialize support data structures for hzip */
+    memset(keptNodelistInfos, 0x0, sizeof(keptNodelistInfos));
+
+#endif
 
     /* Define compound data types */
     STRUCT(DBcurve) {
@@ -1575,6 +2470,7 @@ db_hdf5_InitCallbacks(DBfile *_dbfile, int target)
     dbfile->pub.newtoc = db_hdf5_NewToc;
     dbfile->pub.cdid = NULL;            /*DBSetDirID() not supported    */
     dbfile->pub.mkdir = db_hdf5_MkDir;
+    dbfile->pub.cpdir = db_hdf5_CpDir;
 
     /* Variable inquiries */
     dbfile->pub.exist = db_hdf5_InqVarExists;
@@ -1680,6 +2576,8 @@ db_hdf5_InitCallbacks(DBfile *_dbfile, int target)
     /* mrgvar functions */
     dbfile->pub.g_mrgv = db_hdf5_GetMrgvar;
     dbfile->pub.p_mrgv = db_hdf5_PutMrgvar;
+
+    dbfile->pub.free_z = db_hdf5_FreeCompressionResources;
 }
 
 
@@ -1996,30 +2894,35 @@ hdf2hdf_type(hid_t ftype)
  *
  * Modifications:
  *
- *
+ *   Mark C. Miller, Thu Jul 17 15:00:46 PDT 2008
+ *   Added globals for minimum compression ratio and error mode.
+ *   Added support for HZIP and FPZIP. Added flags to control whether
+ *   HZIP compression filter gets added or not.
  *-------------------------------------------------------------------------
  */
-int db_hdf5_set_compression(void)
+int db_hdf5_set_compression(int flags)
 {
     static char *me = "db_hdf5_set_compression";
     char *ptr;
-    char chararray[8];
+    char chararray[32];
     char *check;
     int level, block, stat, nfilters;
     int nbits, prec;
-    int have_gzip, have_szip, i;
+    int have_gzip, have_szip, have_fpzip, have_hzip, i;
     H5Z_filter_t filtn;
     unsigned int filter_config_flags;
 /* Check what filters already exist */
     have_gzip = FALSE;
     have_szip = FALSE;
+    have_fpzip = FALSE;
+    have_hzip = FALSE;
     if ((nfilters = H5Pget_nfilters(P_ckcrprops))<0)
     {
        db_perror("H5Pget_nfilters", E_CALLFAIL, me);
        return (-1);
     }
     for (i=0; i<nfilters; i++) {           
-#if defined H5_WANT_H5_V1_6_COMPAT || (H5_VERS_MAJOR == 1 && H5_VERS_MINOR < 8)
+#if defined H5_USE_16_API || (H5_VERS_MAJOR == 1 && H5_VERS_MINOR < 8)
             filtn = H5Pget_filter(P_ckcrprops,(unsigned)i,0,0,0,0,0);
 #else
             filtn = H5Pget_filter(P_ckcrprops,(unsigned)i,0,0,0,0,0,NULL);
@@ -2028,7 +2931,42 @@ int db_hdf5_set_compression(void)
             have_gzip = TRUE;
         if (H5Z_FILTER_SZIP==filtn)     
             have_szip = TRUE;
+        if (DB_HDF5_FPZIP_ID==filtn)
+            have_fpzip = TRUE;
+        if (DB_HDF5_HZIP_ID==filtn)
+            have_hzip = TRUE;
     }
+/* Handle some global compression parameters */
+    if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+       "ERRMODE=")) != (char *)NULL) 
+    {
+        (void)strncpy(chararray, ptr+8, 4); 
+        chararray[4] = '\0';
+        if (strcmp(chararray, "FALL") == 0)
+            SILO_Compression.errmode = COMPRESSION_ERRMODE_FALLBACK;
+        else if (strcmp(chararray, "FAIL") == 0)
+            SILO_Compression.errmode = COMPRESSION_ERRMODE_FAIL;
+        else
+        {
+            db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+            return (-1);
+        }
+    }
+    if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+       "MINRATIO=")) != (char *)NULL) 
+    {
+        float mcr;
+        (void)strncpy(chararray, ptr+9, 5); 
+        mcr = (float) strtod(chararray, &check);
+        if (mcr > 1.0)
+            SILO_Compression.minratio = mcr;
+        else
+        {
+            db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+            return (-1);
+        }
+    }
+
 /* Select the compression algorthm */
     if ((ptr=(char *)strstr(SILO_Compression.parameters, 
        "METHOD=GZIP")) != (char *)NULL) 
@@ -2135,88 +3073,98 @@ int db_hdf5_set_compression(void)
        }  /* if (have_szip == FALSE) */
     }
 #endif
-/**#ifdef HAVE_LINDSTROM**/
+#ifdef HAVE_HZIP
     else if ((ptr=(char *)strstr(SILO_Compression.parameters, 
-       "METHOD=MESH")) != (char *)NULL) 
+       "METHOD=HZIP")) != (char *)NULL) 
     {
-       if ((ptr=(char *)strstr(SILO_Compression.parameters, 
-          "BITS=")) != (char *)NULL)
+       if (have_hzip == FALSE && (flags & ALLOW_MESH_COMPRESSION))
        {
-          (void)strncpy(chararray, ptr+5, 2); 
-          nbits = (int) strtol(chararray, &check, 10);
-          if ((chararray != check) && (nbits >= 0) && (nbits <=64))
-          {
-             ;
-          }
-          else
-          {
-             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
-             return (-1);
-          }
+           if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+              "CODEC=")) != (char *)NULL)
+           {
+              (void)strncpy(chararray, ptr+6, 4); 
+              chararray[4] = '\0';
+#ifdef HAVE_LIBZ
+              if (strcmp(chararray, "zlib") == 0)
+              {
+                  db_hdf5_hzip_params.codec = HZM_CODEC_ZLIB;
+                  db_hdf5_hzip_params.params = &hzm_codec_zlib;
+              }
+              else
+#endif
+              if (strcmp(chararray, "base") == 0)
+              {
+                  db_hdf5_hzip_params.codec = HZM_CODEC_BASE;
+                  db_hdf5_hzip_params.params = &hzm_codec_base;
+              }
+              else
+              {
+                  db_perror("hzip codec not recongized", E_COMPRESSION, me);
+                  return (-1);
+              }
+           }
+           if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+              "BITS=")) != (char *)NULL)
+           {
+              (void)strncpy(chararray, ptr+5, 2); 
+              nbits = (int) strtol(chararray, &check, 10);
+              if ((chararray != check) && (nbits >= 0) && (nbits <=64))
+              {
+#ifdef HAVE_LIBZ
+                  if (db_hdf5_hzip_params.codec == HZM_CODEC_ZLIB)
+                      ((struct HZMCODECzlib *) db_hdf5_hzip_params.params)->bits = nbits;
+                  else
+#endif
+                  if (db_hdf5_hzip_params.codec == HZM_CODEC_BASE)
+                      ((struct HZMCODECbase *) db_hdf5_hzip_params.params)->bits = nbits;
+              }
+              else
+              {
+                 db_perror("invalid nbits for hzip", E_COMPRESSION, me);
+                 return (-1);
+              }
+           }
+
+           if (H5Pset_filter(P_ckcrprops, DB_HDF5_HZIP_ID,
+                   SILO_Compression.errmode ? 0 : H5Z_FLAG_OPTIONAL, 0, 0)<0)
+           {
+               db_perror("hzip filter setup", E_CALLFAIL, me);
+               return (-1);
+           }
        }
-       else
-          nbits=12;
-       if ((ptr=(char *)strstr(SILO_Compression.parameters, 
-          "PREC=")) != (char *)NULL)
-       {
-          (void)strncpy(chararray, ptr+5, 2); 
-          prec = (int) strtol(chararray, &check, 10);
-          if ((chararray != check) && (prec >= 0) && (prec <=64))
-          {
-             ;
-          }
-          else
-          {
-             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
-             return (-1);
-          }
-       }
-       else
-          prec=64;
     }
+#endif
+#ifdef HAVE_FPZIP
     else if ((ptr=(char *)strstr(SILO_Compression.parameters, 
-       "METHOD=HEXZIP")) != (char *)NULL) 
+       "METHOD=FPZIP")) != (char *)NULL) 
     {
-       if ((ptr=(char *)strstr(SILO_Compression.parameters, 
-          "BITS=")) != (char *)NULL)
+       if (have_fpzip == FALSE)
        {
-          (void)strncpy(chararray, ptr+5, 2); 
-          nbits = (int) strtol(chararray, &check, 10);
-          if ((chararray != check) && (nbits >= 0) && (nbits <=64))
+          if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+             "LOSS=")) != (char *)NULL)
           {
-             ;
+             (void)strncpy(chararray, ptr+5, 2); 
+             prec = (int) strtol(chararray, &check, 10);
+             if ((chararray != check) && (prec >= 0) && (prec <=3))
+             {
+                db_hdf5_fpzip_params.loss = prec;
+             }
+             else
+             {
+                db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+                return (-1);
+             }
           }
-          else
+
+          if (H5Pset_filter(P_ckcrprops, DB_HDF5_FPZIP_ID,
+                  SILO_Compression.errmode ? 0 : H5Z_FLAG_OPTIONAL, 0, 0)<0)
           {
-             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
-             return (-1);
+              db_perror("H5Pset_filter", E_CALLFAIL, me);
+              return (-1);
           }
        }
-       else
-          nbits=12;
     }
-    else if ((ptr=(char *)strstr(SILO_Compression.parameters, 
-       "METHOD=LOCAL")) != (char *)NULL) 
-    {
-       if ((ptr=(char *)strstr(SILO_Compression.parameters, 
-          "PREC=")) != (char *)NULL)
-       {
-          (void)strncpy(chararray, ptr+5, 2); 
-          prec = (int) strtol(chararray, &check, 10);
-          if ((chararray != check) && (prec >= 0) && (prec <=64))
-          {
-             ;
-          }
-          else
-          {
-             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
-             return (-1);
-          }
-       }
-       else
-          prec=64;
-    }
-/**#endif**/
+#endif
     else
     {
        db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
@@ -2257,7 +3205,7 @@ int db_hdf5_set_properties(int rank, hsize_t size[])
         SILO_Globals.enableCompression)
     {
         H5Pset_chunk(P_ckcrprops, rank, size);
-        if (db_hdf5_set_compression()<0) {
+        if (db_hdf5_set_compression(0)<0) {
             db_perror("db_hdf5_set_compression", E_CALLFAIL, me);
             return(-1);
         }
@@ -2266,7 +3214,7 @@ int db_hdf5_set_properties(int rank, hsize_t size[])
     else if (SILO_Globals.enableCompression)
     {
         H5Pset_chunk(P_ckcrprops, rank, size);
-        if (db_hdf5_set_compression()<0) {
+        if (db_hdf5_set_compression(0)<0) {
             db_perror("db_hdf5_set_compression", E_CALLFAIL, me);
             return(-1);
         }
@@ -2760,11 +3708,17 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Added support for friendly hdf5 dataset names (as soft links)
+ *
+ *   Mark C. Miller, Tue Jul 15 22:37:31 PDT 2008
+ *   Added 'z' to name and compressionFlags argument to provide control
+ *   over mesh-level compresion algorithms. The older (non-z) method 
+ *   remains as a stub that simply calls this one with zero for flags.
  *-------------------------------------------------------------------------
  */
 PRIVATE int
-db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
-               void *buf, char *name/*in,out*/, const char *fname)
+db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
+               void *buf, char *name/*in,out*/, const char *fname,
+               int compressionFlags)
 {
     static char *me = "db_hdf5_compwr";
     hid_t       dset=-1, mtype=-1, ftype=-1, space=-1, P_props;
@@ -2784,6 +3738,7 @@ db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
         *name = '\0';
         return 0;
     }
+
     PROTECT {
         /* Obtain a unique name for the dataset or use the name supplied */
         if (!*name) {
@@ -2813,6 +3768,14 @@ db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
             db_perror("db_hdf5_set_properties", E_CALLFAIL, me);
             UNWIND();
         }
+        if (SILO_Globals.enableCompression && compressionFlags)
+        {
+            if (db_hdf5_set_compression(compressionFlags)<0)
+            {
+                db_perror("db_hdf5_set_compression", E_CALLFAIL, me);
+                UNWIND();
+            }
+        }
 
         if ((!strcmp(name,"time") && dtype == DB_FLOAT && rank == 1 && _size[0] == 1) ||
             (!strcmp(name,"dtime") && dtype == DB_DOUBLE && rank == 1 && _size[0] == 1) ||
@@ -2839,6 +3802,24 @@ db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
         H5Dclose(dset);
         H5Sclose(space);
 
+        /* remove any mesh specific filters if we have 'em */
+        if (SILO_Globals.enableCompression && compressionFlags)
+        {
+            int i;
+            for (i=0; i<H5Pget_nfilters(P_crprops); i++)
+            {
+#if defined H5_USE_16_API || (H5_VERS_MAJOR == 1 && H5_VERS_MINOR < 8)
+                if (H5Pget_filter(P_crprops,(unsigned)i,0,0,0,0,0) == DB_HDF5_HZIP_ID)
+#else
+                if (H5Pget_filter(P_crprops,(unsigned)i,0,0,0,0,0,NULL) == DB_HDF5_HZIP_ID)
+#endif
+                {
+                    H5Premove_filter(P_crprops, DB_HDF5_HZIP_ID);
+                    break;
+                }
+            }
+        }
+
     } CLEANUP {
         H5E_BEGIN_TRY {
             H5Dclose(dset);
@@ -2846,6 +3827,83 @@ db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
         } H5E_END_TRY;
     } END_PROTECT;
     return dset; 
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_compwr
+ *
+ * Purpose:     Creates a new dataset in the link group without compression.
+ *
+ * Return:      Success:        >=0
+ *
+ *              Failure:        -1
+ *
+ * Created: Mark C. Miller, Thu Jul 17 15:03:55 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+PRIVATE int
+db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
+               void *buf, char *name/*in,out*/, const char *fname)
+{
+    return db_hdf5_compwrz(dbfile, dtype, rank, _size, buf, name, fname, 0);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_compckz
+ *
+ * Purpose:     Check if a dataset is compressed with HZIP 
+ *
+ * Return:      Success:        >=0
+ *
+ *              Failure:        -1
+ *
+ * Created: Mark C. Miller, Thu Jul 17 15:03:55 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+PRIVATE int 
+db_hdf5_compckz(DBfile_hdf5 *dbfile, char *name)
+{
+    int retval = 0;
+    int i;
+    hid_t d, plist;
+    static char *me = "db_hdf5_compzkz";
+
+    PROTECT {
+        if (name && *name) {
+            if ((d=H5Dopen(dbfile->cwg, name))<0) {
+                db_perror(name, E_NOTFOUND, me);
+                UNWIND();
+            }
+            if ((plist=H5Dget_create_plist(d))<0) {
+                db_perror(name, E_CALLFAIL, me);
+                UNWIND();
+            }
+
+            for (i=0; i<H5Pget_nfilters(plist); i++)
+            {
+                char name[256];
+#if defined H5_USE_16_API || (H5_VERS_MAJOR == 1 && H5_VERS_MINOR < 8)
+                H5Pget_filter(plist,(unsigned)i,0,0,0,sizeof(name),name);
+#else
+                H5Pget_filter(plist,(unsigned)i,0,0,0,sizeof(name),name,NULL);
+#endif
+                if (strstr(name, "Lindstrom-hzip"))
+                {
+                    retval = 1;
+                    break;
+                }
+            }
+        }
+        H5Dclose(d);
+        H5Tclose(plist);
+    } CLEANUP {
+        H5E_BEGIN_TRY {
+            H5Dclose(d);
+            H5Tclose(plist);
+        } H5E_END_TRY;
+    } END_PROTECT;
+
+    return retval;
 }
 
 
@@ -3457,7 +4515,9 @@ db_hdf5_Open(char *name, int mode, int subtype)
 
     PROTECT {
         /* Turn off error messages from the hdf5 library */
+#if DEBUG_HDF5 == 0
         H5Eset_auto(NULL, NULL);
+#endif
 
         /* File access mode */
         if (DB_READ==mode) {
@@ -3539,7 +4599,9 @@ db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
 
     PROTECT {
         /* Turn off error messages from the hdf5 library */
+#if DEBUG_HDF5 == 0
         H5Eset_auto(NULL, NULL);
+#endif
 
         faprops = db_hdf5_file_accprops(subtype);
 
@@ -3611,6 +4673,8 @@ db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
  *              Thursday, February 11, 1999
  *
  * Modifications:
+ *   Mark C. Miller, Thu Jul 17 15:05:16 PDT 2008
+ *   Added call to FreeNodelists for this file.
  *
  *-------------------------------------------------------------------------
  */
@@ -3620,6 +4684,7 @@ db_hdf5_Close(DBfile *_dbfile)
    DBfile_hdf5    *dbfile = (DBfile_hdf5*)_dbfile;
 
    if (dbfile) {
+       FreeNodelists(dbfile, 0);
        /* Free the private parts of the file */
        if (db_hdf5_initiate_close((DBfile*)dbfile)<0) return -1;
        if (H5Fclose(dbfile->fid)<0) return -1;
@@ -3885,6 +4950,244 @@ db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/)
         for (i=0; i<=ncomps && (size_t)i<NELMTS(comp); i++) {
             if (comp->name) free(comp->name);
         }
+    } END_PROTECT;
+
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    copy_dir 
+ *
+ * Purpose:     Support, recursive function, for CpDir using HDF5's
+ *              H5Giterate method.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Mark C. Miller, Wed Aug  6 18:29:53 PDT 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+typedef struct copy_dir_data_t {
+    DBfile *dstFile;
+} copy_dir_data_t;
+
+static herr_t 
+copy_dir(hid_t grp, const char *name, void *op_data)
+{
+    H5G_stat_t          sb;
+    hid_t               obj;
+    int                 objtype = -1;
+    static char         *me = "copy_dir";
+    copy_dir_data_t *cp_data = (copy_dir_data_t *)op_data;
+    DBfile_hdf5 *dstfile = (DBfile_hdf5*)cp_data->dstFile;
+
+    if (H5Gget_objinfo(grp, name, TRUE, &sb)<0) return -1;
+    switch (sb.type) {
+    case H5G_GROUP:
+        /*
+         * Any group which has a `..' entry is a silo directory. The `..'
+         * names do not appear in the silo table of contents.
+         */
+        if (!strcmp(name, "..") || (obj=H5Gopen(grp, name))<0) break;
+        H5E_BEGIN_TRY {
+            if (H5Gget_objinfo(obj, "..", FALSE, NULL)>=0) objtype = DB_DIR;
+        } H5E_END_TRY;
+        H5Gclose(obj);
+
+        if (objtype == DB_DIR)
+        {
+            db_hdf5_MkDir(cp_data->dstFile, (char*) name);
+            db_hdf5_SetDir(cp_data->dstFile, (char*) name);
+
+            /* recurse on the members of this group */
+            H5Giterate(grp, name, 0, copy_dir, op_data);
+
+            db_hdf5_SetDir(cp_data->dstFile, "..");
+        }
+
+        break;
+
+    case H5G_TYPE:
+    {
+        hid_t       o=-1, attr=-1, atype=-1, s1024=-1;
+        char        *file_value=NULL, *mem_value=NULL, *bkg=NULL, bigname[1024];
+        DBObjectType objtype;
+        int         _objtype, nmembs, i;
+        DBobject    *obj=NULL;
+        size_t      asize, nelmts, msize;
+
+        /* Open the object as a named data type */
+        if ((o=H5Topen(grp, name))<0) {
+            db_perror(name, E_NOTFOUND, me);
+            UNWIND();
+        }
+
+        /* Open the `silo_type' attribute and read it */
+        if ((attr=H5Aopen_name(o, "silo_type"))<0 ||
+            H5Aread(attr, H5T_NATIVE_INT, &_objtype)<0 ||
+            H5Aclose(attr)<0) {
+            db_perror(name, E_CALLFAIL, me);
+            UNWIND();
+        }
+        objtype = (DBObjectType)_objtype;
+        
+        /*
+         * Open the `silo' attribute (all silo objects have one), retrieve
+         * its data type (a single-level H5T_COMPOUND type), and read the
+         * attribute.
+         */
+        if ((attr=H5Aopen_name(o, "silo"))<0 ||
+            (atype=H5Aget_type(attr))<0) {
+            db_perror(name, E_CALLFAIL, me);
+            UNWIND();
+        }
+        asize = H5Tget_size(atype);
+        msize = MAX(asize, 3*1024);
+        if (NULL==(file_value=malloc(asize)) ||
+            NULL==(mem_value=malloc(msize)) ||
+            NULL==(bkg=malloc(msize))) {
+            db_perror(name, E_NOMEM, me);
+            UNWIND();
+        }
+        if (H5Aread(attr, atype, file_value)<0) {
+            db_perror(name, E_CALLFAIL, me);
+            UNWIND();
+        }
+        nmembs = H5Tget_nmembers(atype);
+
+        s1024 = H5Tcopy(H5T_C_S1);
+        H5Tset_size(s1024, 1024);
+        for (i=0; i<nmembs; i++) {
+            int ndims, j, memb_size[4];
+            hid_t member_type = db_hdf5_get_cmemb(atype, i, &ndims, memb_size);
+            
+            if (H5Tget_class(member_type) == H5T_STRING)
+            {
+                /* build up an in-memory rep that is akin to a struct
+                 * with just this one member */
+                char *memname = H5Tget_member_name(atype, i);
+                size_t offset = H5Tget_member_offset(atype, i);
+                hid_t mtype = H5Tcreate(H5T_COMPOUND, msize);
+                for (nelmts=1, j=0; j<ndims; j++) nelmts *= memb_size[j];
+                db_hdf5_put_cmemb(mtype, memname, 0, ndims, memb_size, s1024);
+
+                /* use hdf5's type conversion func to extract this one member's
+                   data into 'mem_value' */
+                memcpy(mem_value, file_value, H5Tget_size(atype));
+                H5Tconvert(atype, mtype, 1, mem_value, bkg, H5P_DEFAULT);
+
+                /* if its one of the special datasets, copy it and update
+                   the attribute to refer to the copy in the new file */
+                if (strncmp(mem_value, "/.silo/#", 8) == 0)
+                {
+                    /* get unique name for this dataset in dst file */
+                    char cname[8];
+                    db_hdf5_compname(dstfile, cname);
+
+#if HDF5_VERSION_GE(1,8,0)
+                    /* copy this dataset to /.silo dir in dst file */
+                    H5Ocopy(grp, mem_value, dstfile->link, cname, H5P_DEFAULT, H5P_DEFAULT);
+#endif
+                    /* update this attribute's entry with name for this dataset */
+                    sprintf(file_value+offset, "%s%s", LINKGRP, cname);
+                }
+
+                free(memname);
+                H5Tclose(mtype);
+            }
+
+            /* Release member resources */
+            H5Tclose(member_type);
+        }
+
+        /* write the header for this silo object */
+        db_hdf5_hdrwr(dstfile, (char *)name, atype, atype, file_value, objtype);
+
+        /* Cleanup */
+        H5Tclose(atype);
+        H5Tclose(s1024);
+        H5Aclose(attr);
+        H5Tclose(o);
+        free(file_value);
+        free(mem_value);
+        free(bkg);
+
+        break;
+    }
+
+    case H5G_DATASET:
+#if HDF5_VERSION_GE(1,8,0)
+        H5Ocopy(grp, name, dstfile->cwg, name, H5P_DEFAULT, H5P_DEFAULT);
+#endif
+        break;
+
+    default:
+        /*ignore*/
+        break;
+    }
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_CpDir
+ *
+ * Purpose:     Copy a directory hierarchy from one file to another. 
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Mark C. Miller, Wed Aug  6 18:29:53 PDT 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+CALLBACK int
+db_hdf5_CpDir(DBfile *_dbfile, const char *srcDir,
+    DBfile *dstFile, const char *dstDir)
+{
+    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
+    DBfile_hdf5 *dstfile = (DBfile_hdf5*)dstFile;
+    static char *me = "db_hdf5_CpDir";
+    hid_t srcdir_id;
+    copy_dir_data_t cp_data;
+    char dstcwg[256], srccwg[256];
+
+    srccwg[0] = '\0';
+    dstcwg[0] = '\0';
+
+#if !HDF5_VERSION_GE(1,8,0)
+    db_perror("Requires HDF5-1.8 or later", E_CALLFAIL, me);
+    return -1;
+#endif
+
+    PROTECT {
+
+        /* Save current dirs for both src and dst files */
+        db_hdf5_GetDir(_dbfile, srccwg);
+        db_hdf5_GetDir(dstFile, dstcwg);
+
+        /* Next, make destination directory and cd into it */
+        db_hdf5_MkDir(dstFile, (char*)dstDir);
+        db_hdf5_SetDir(dstFile, (char*)dstDir);
+
+        /* Enter the recursion to make copy the directory */
+        cp_data.dstFile = dstFile;
+        H5Giterate(dbfile->cwg, srcDir, 0, copy_dir, &cp_data);
+
+        /* Restore current dirs for src and dst files */
+        db_hdf5_SetDir(_dbfile, srccwg);
+        db_hdf5_SetDir(dstFile, dstcwg);
+
+    } CLEANUP {
+        H5E_BEGIN_TRY {
+            if (srccwg[0] != '\0')
+                db_hdf5_SetDir(_dbfile, srccwg);
+            if (dstcwg[0] != '\0')
+                db_hdf5_SetDir(dstFile, dstcwg);
+            H5Gclose(srcdir_id);
+        } H5E_END_TRY;
     } END_PROTECT;
 
     return 0;
@@ -4376,9 +5679,11 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
         }
         H5Tclose(mtype);
         H5Tclose(ftype);
+        if (object) free(object);
     } CLEANUP {
         H5Tclose(mtype);
         H5Tclose(ftype);
+        if (object) free(object);
     } END_PROTECT;
     return 0;
 }
@@ -4975,8 +6280,9 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
 {
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile;
    static char  *me = "db_hdf5_Write";
-   hid_t        mtype=-1, ftype=-1, space=-1, dset=-1, P_props;
+   hid_t        mtype=-1, ftype=-1, space=-1, dset=-1, dset_type=-1;
    hsize_t      ds_size[H5S_MAX_RANK];
+   H5T_class_t  fclass, mclass;
    int          i;
 
    PROTECT {
@@ -5029,6 +6335,23 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
            }
        }
        
+#if HDF5_VERSION_GE(1,8,0)
+       /* Do an additional explicit check for compatibile data types.
+          This was NOT necessary prior to 1.8. But, 1.8 now permits
+          writes of int data to float dataset, for example. */
+       if ((dset_type = H5Dget_type(dset))<0 ||
+           (fclass = H5Tget_class(dset_type))<0 ||
+           (mclass = H5Tget_class(mtype))<0 ||
+           (H5Tclose(dset_type))<0) {
+           db_perror(vname, E_CALLFAIL, me);
+           UNWIND();
+       }
+       if (mclass != fclass) {
+           db_perror(vname, E_CALLFAIL, me);
+           UNWIND();
+       }
+#endif
+
        /* Write data */
        if (H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, var)<0) {
            db_perror(vname, E_CALLFAIL, me);
@@ -5042,6 +6365,7 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
        H5E_BEGIN_TRY {
            H5Dclose(dset);
            H5Sclose(space);
+           H5Tclose(dset_type);
        } H5E_END_TRY;
    } END_PROTECT;
    
@@ -6379,6 +7703,31 @@ db_hdf5_GetDefvars(DBfile *_dbfile, const char *name)
     return defv;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForQuadmeshCompression
+ *
+ * Purpose:     Does some small work to prepare for possible mesh
+ *              compression 
+ *
+ * Return:      Success:        ALLOW_MESH_COMPRESSION 
+ *
+ *              Failure:        0 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static int PrepareForQuadmeshCompression()
+{
+    if (SILO_Globals.enableCompression == 0) return 0;
+
+#ifdef HAVE_HZIP
+    db_hdf5_hzip_clear_params();
+    db_hdf5_hzip_params.isquad = 1;
+    return ALLOW_MESH_COMPRESSION;
+#endif
+    return 0;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_PutQuadmesh
@@ -6405,6 +7754,11 @@ db_hdf5_GetDefvars(DBfile *_dbfile, const char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Jul 17 15:07:49 PDT 2008
+ *   Added call to prepare for mesh compression. Changed call for
+ *   non-collinear coordinate case to use db_hdf5_compwrz to support
+ *   possible compression.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6417,6 +7771,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
     static char         *me = "db_hdf5_PutQuadmesh";
     int                 i,len;
     DBquadmesh_mt       m;
+    int                 compressionFlags;
 
     FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
@@ -6487,6 +7842,8 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
             m.min_index[i] = _qm._minindex[i];
             m.max_index[i] = _qm._maxindex_n[i];
         }
+
+        compressionFlags = PrepareForQuadmeshCompression();
         
         /* Write coordinate arrays */
         if (DB_COLLINEAR==coordtype) {
@@ -6496,8 +7853,9 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
             }
         } else {
             for (i=0; i<ndims; i++) {
-                db_hdf5_compwr(dbfile, datatype, ndims, dims, coords[i],
-                    m.coord[i]/*out*/, friendly_name(name, "_coord%d",&i));
+                db_hdf5_compwrz(dbfile, datatype, ndims, dims, coords[i],
+                    m.coord[i]/*out*/, friendly_name(name, "_coord%d",&i),
+                    compressionFlags);
             }
         }
         
@@ -6558,6 +7916,31 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForQuadmeshDeompression
+ *
+ * Purpose:     Does some small work to prepare for possible mesh
+ *              decompression 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static void
+PrepareForQuadmeshDecompression(DBfile_hdf5 *dbfile, const char *meshname,
+    const DBquadmesh *qm)
+{
+#ifdef HAVE_HZIP
+    int i;
+    db_hdf5_hzip_clear_params();
+    db_hdf5_hzip_params.dbfile = dbfile;
+    db_hdf5_hzip_params.isquad = 1;
+    db_hdf5_hzip_params.meshname = meshname;
+    db_hdf5_hzip_params.ndims = qm->ndims;
+    for (i = 0; i < qm->ndims; i++)
+        db_hdf5_hzip_params.dims[i] = qm->dims[i];
+#endif
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_GetQuadmesh
@@ -6578,6 +7961,9 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
  *
  *              Mark C. Miller, Thu Jul 29 11:26:24 PDT 2004
  *              Added support for dataReadMask
+ *
+ *              Mark C. Miller, Thu Jul 17 15:09:51 PDT 2008
+ *              Added call to prepare for mesh decompression.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBquadmesh *
@@ -6660,11 +8046,16 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char *name)
             qm->base_index[i] = m.baseindex[i];
             qm->stride[i] = stride;
             stride *= qm->dims[i];
+        }
 
-            /* Read coordinate arrays */
+        PrepareForQuadmeshDecompression(dbfile, name, qm);
+
+        /* Read coordinate arrays */
+        for (i=0; i<qm->ndims; i++) {
             if (SILO_Globals.dataReadMask & DBQMCoords)
                 qm->coords[i] = db_hdf5_comprd(dbfile, m.coord[i], 0);
         }
+
         H5Tclose(o);
         
     } CLEANUP {
@@ -6676,6 +8067,34 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char *name)
     } END_PROTECT;
 
     return qm;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForQuadvarCompression
+ *
+ * Purpose:     Does some small work to prepare for possible quadvar 
+ *              compression 
+ *
+ * Return:      Success:        ALLOW_MESH_COMPRESSION 
+ *
+ *              Failure:        0 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static int
+PrepareForQuadvarCompression(int centering, int datatype)
+{
+    if (SILO_Globals.enableCompression == 0) return 0;
+    if (centering == DB_ZONECENT) return 0;
+
+#ifdef HAVE_HZIP
+    db_hdf5_hzip_clear_params();
+    db_hdf5_hzip_params.isquad = 1;
+    return ALLOW_MESH_COMPRESSION;
+#endif
+    return 0;
+
 }
 
 
@@ -6701,6 +8120,10 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Jul 17 15:10:50 PDT 2008
+ *   Added call to prepare for compression. Changed call to write variable
+ *   data to comprdz to support possible comporession. 
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6715,6 +8138,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
     char                *s = 0;
     DBquadvar_mt        m;
     int                 i, nels, len;
+    int                 compressionFlags;
 
     FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
@@ -6752,14 +8176,17 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         }
         db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_qm._cycle), "cycle",0);
 
+        compressionFlags = PrepareForQuadvarCompression(centering, datatype);
+
         /* Write variable arrays: vars[] and mixvars[] */
         if (nvars>MAX_VARS) {
             db_perror("too many variables", E_BADARGS, me);
             UNWIND();
         }
         for (i=0; i<nvars; i++) {
-            db_hdf5_compwr(dbfile, datatype, ndims, dims, vars[i],
-                m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0));
+            db_hdf5_compwrz(dbfile, datatype, ndims, dims, vars[i],
+                m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0),
+                compressionFlags);
             if (mixvars && mixvars[i] && mixlen>0) {
                 db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mixvars[i],
                     m.mixed_value[i]/*out*/, friendly_name(varnames[i], "_mix", 0));
@@ -6829,10 +8256,37 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             MEMBER_S(str(m.region_pnames), region_pnames);
         } OUTPUT(dbfile, DB_QUADVAR, name, &m);
         
+        FREE(_qm._meshname);
     } CLEANUP {
+        FREE(_qm._meshname);
         /*void*/
     } END_PROTECT;
     return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForQuadvarDecompression
+ *
+ * Purpose:     Does some small work to prepare for possible quadvar 
+ *              decompression 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static void
+PrepareForQuadvarDecompression(DBfile_hdf5 *dbfile, const char *varname,
+    const DBquadvar *qv)
+{
+#ifdef HAVE_HZIP
+    int i;
+    db_hdf5_hzip_clear_params();
+    db_hdf5_hzip_params.dbfile = dbfile;
+    db_hdf5_hzip_params.isquad = 1;
+    db_hdf5_hzip_params.meshname = qv->meshname;
+    db_hdf5_hzip_params.ndims = qv->ndims;
+    for (i = 0; i < qv->ndims; i++)
+        db_hdf5_hzip_params.dims[i] = qv->dims[i];
+#endif
 }
 
 
@@ -6852,6 +8306,9 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
  *
  *   Mark C. Miller, Thu Jul 29 11:26:24 PDT 2004
  *   Made it set datatype correctly. Added support for dataReadMask
+ *
+ *   Mark C. Miller, Thu Jul 17 15:13:57 PDT 2008
+ *   Added to call to prepare for possible decompression.
  *
  *-------------------------------------------------------------------------
  */
@@ -6922,6 +8379,8 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
             qv->align[i] = m.align[i];
         }
 
+        PrepareForQuadvarDecompression(dbfile, name, qv);
+
         /* Read the raw data */
         if (m.nvals>MAX_VARS) {
             db_perror(name, E_CALLFAIL, me);
@@ -6956,6 +8415,38 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
     return qv;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForUcdmeshCompression
+ *
+ * Purpose:     Does some small work to prepare for possible mesh
+ *              compression 
+ *
+ * Return:      Success:        ALLOW_MESH_COMPRESSION 
+ *
+ *              Failure:        0 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static int PrepareForUcdmeshCompression(DBfile_hdf5 *dbfile,
+    const char *meshname, const char *zlname)
+{
+    if (SILO_Globals.enableCompression == 0) return 0;
+
+#ifdef HAVE_HZIP
+    if (LookupNodelist(dbfile, zlname, meshname) != 0)
+    {
+        db_hdf5_hzip_clear_params();
+        db_hdf5_hzip_params.dbfile = dbfile;
+        db_hdf5_hzip_params.zlname = zlname;
+        db_hdf5_hzip_params.meshname = meshname;
+        AddMeshnameToNodelist(dbfile, zlname, meshname);
+        return ALLOW_MESH_COMPRESSION;
+    }
+#endif
+    return 0;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_PutUcdmesh
@@ -6982,6 +8473,10 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Jul 17 15:14:44 PDT 2008
+ *   Added call to prepare for possible compression. Changed calls that
+ *   write coordinates and gnodeno to use compwrz
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -6993,7 +8488,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutUcdmesh";
     DBucdmesh_mt        m;
-    int                 i, len;
+    int                 i, len, compressionFlags;
 
     memset(&_um, 0, sizeof _um);
     memset(&m, 0, sizeof m);
@@ -7017,6 +8512,10 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         _um._use_specmf = DB_OFF;
         _um._group_no = -1;
         db_ProcessOptlist(DB_UCDMESH, optlist);
+
+        /* Prepare for possible compression of coords/gnodeno */
+        compressionFlags = PrepareForUcdmeshCompression(dbfile,
+            name, zlname); 
 
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
@@ -7044,11 +8543,13 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         
         /* Write variable arrays: coords[], gnodeno[] */
         for (i=0; i<ndims; i++) {
-            db_hdf5_compwr(dbfile, datatype, 1, &nnodes, coords[i],
-                m.coord[i]/*out*/, friendly_name(name, "_coord%d", &i));
+            db_hdf5_compwrz(dbfile, datatype, 1, &nnodes, coords[i],
+                m.coord[i]/*out*/, friendly_name(name, "_coord%d", &i), 
+                compressionFlags);
         }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nnodes, _um._gnodeno,
-            m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0));
+        db_hdf5_compwrz(dbfile, DB_INT, 1, &nnodes, _um._gnodeno,
+            m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0),
+            compressionFlags);
         
         /* Build ucdmesh header in memory */
         m.ndims = ndims;
@@ -7253,6 +8754,27 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForUcdmeshDecompression
+ *
+ * Purpose:     Does some small work to prepare for possible mesh
+ *              decompression 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static void
+PrepareForUcdmeshDecompression(DBfile_hdf5 *dbfile, const char *meshname,
+    const char *zlname)
+{
+#ifdef HAVE_HZIP
+    db_hdf5_hzip_clear_params();
+    db_hdf5_hzip_params.dbfile = dbfile;
+    db_hdf5_hzip_params.meshname = meshname;
+    db_hdf5_hzip_params.zlname = zlname;
+#endif
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_GetUcdmesh
@@ -7278,6 +8800,11 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
  *              Mark C. Miller, Thu Sep  7 10:50:55 PDT 2006
  *              Added use of db_hdf5_resolvename for retrieval of
  *              sub-objects.
+ *
+ *              Mark C. Miller, Thu Jul 17 15:16:13 PDT 2008
+ *              Added support for decompression. Needed to change order
+ *              of operations to read zonelist first as that is the 
+ *              bootstrap HZIP needs to decompress anything.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBucdmesh *
@@ -7351,23 +8878,17 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
         um->tv_connectivity = m.tv_connectivity;
         um->disjoint_mode = m.disjoint_mode;
 
-        /* Read the raw data */
-        if (SILO_Globals.dataReadMask & DBUMCoords)
-        {
-            for (i=0; i<m.ndims; i++) {
-                um->coords[i] = db_hdf5_comprd(dbfile, m.coord[i], 0);
-            }
-        }
-        if (SILO_Globals.dataReadMask & DBUMGlobNodeNo)
-            um->gnodeno = db_hdf5_comprd(dbfile, m.gnodeno, 1);
+        /* We have a problem with data read mask and compression. If 
+           masks says not to read zonelist but the zonelist is actually
+           compressed, we're gonna need it to complete the mesh read.
+           So, we need a cheap way to ask if the zonelist is compressed
+           and hope it is cheap enough that always asking that question
+           won't present performance problems. For now, we are just
+           going to let it fail. */
 
-        /* Read face, zone, and edge lists */
-        if (m.facelist[0] && (SILO_Globals.dataReadMask & DBUMFacelist)) {
-            um->faces = db_hdf5_GetFacelist(_dbfile,
-                            db_hdf5_resolvename(_dbfile, name, m.facelist));
-        }
+        /* For compression's sake, read the zonelist first */
         if (m.zonelist[0] && (SILO_Globals.dataReadMask & DBUMZonelist)) {
-            calledFromGetUcdmesh = 1;
+            calledFromGetUcdmesh = um->name;
             um->zones = db_hdf5_GetZonelist(_dbfile, 
                             db_hdf5_resolvename(_dbfile, name, m.zonelist));
             calledFromGetUcdmesh = 0;
@@ -7384,6 +8905,25 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
                 db_SplitShapelist (um);
             }
         }
+
+        /* Prepare for possible ucdmesh decompression */
+        PrepareForUcdmeshDecompression(dbfile, name, m.zonelist);
+
+        /* Read the raw data */
+        if (SILO_Globals.dataReadMask & DBUMCoords)
+        {
+            for (i=0; i<m.ndims; i++) {
+                um->coords[i] = db_hdf5_comprd(dbfile, m.coord[i], 0);
+            }
+        }
+        if (SILO_Globals.dataReadMask & DBUMGlobNodeNo)
+            um->gnodeno = db_hdf5_comprd(dbfile, m.gnodeno, 1);
+
+        /* Read face, zone, and edge lists */
+        if (m.facelist[0] && (SILO_Globals.dataReadMask & DBUMFacelist)) {
+            um->faces = db_hdf5_GetFacelist(_dbfile,
+                            db_hdf5_resolvename(_dbfile, name, m.facelist));
+        }
         if (m.phzonelist[0] && (SILO_Globals.dataReadMask & DBUMZonelist)) {
             um->phzones = db_hdf5_GetPHZonelist(_dbfile, 
                               db_hdf5_resolvename(_dbfile, name, m.phzonelist));
@@ -7399,6 +8939,37 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
     } END_PROTECT;
 
     return um;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForUcdvarCompression
+ *
+ * Purpose:     Does some small work to prepare for possible ucdvar 
+ *              compression 
+ *
+ * Return:      Success:        ALLOW_MESH_COMPRESSION 
+ *
+ *              Failure:        0 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static int
+PrepareForUcdvarCompression(DBfile_hdf5 *dbfile, const char *varname,
+    const char *meshname, int datatype, int centering)
+{
+    if (SILO_Globals.enableCompression == 0) return 0;
+
+#ifdef HAVE_HZIP
+    if (centering == DB_NODECENT)
+    {
+        db_hdf5_hzip_clear_params();
+        db_hdf5_hzip_params.meshname = meshname;
+        db_hdf5_hzip_params.dbfile = dbfile;
+        return ALLOW_MESH_COMPRESSION;
+    }
+#endif
+    return 0;
 }
 
 
@@ -7424,6 +8995,10 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ * 
+ *   Mark C. Miller, Thu Jul 17 15:17:51 PDT 2008
+ *   Added call to prepare for compression. Changed call to write data
+ *   to use compwrz.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -7438,6 +9013,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
     char                *s = 0;
     DBucdvar_mt         m;
     int                 i, saved_ndims, saved_nnodes, saved_nzones, len;
+    int                 compressionFlags;
 
     memset(&m, 0, sizeof m);
 
@@ -7459,6 +9035,10 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         strcpy(_um._meshname, meshname);
         db_ProcessOptlist(DB_UCDMESH, optlist); /*yes, UCDMESH*/
 
+        /* Prepare for possible compression of ucdvars */
+        compressionFlags = PrepareForUcdvarCompression(dbfile, name, meshname,
+            datatype, centering);
+
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_um._time_set == TRUE) {
@@ -7475,8 +9055,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             UNWIND();
         }
         for (i=0; i<nvars; i++) {
-            db_hdf5_compwr(dbfile, datatype, 1, &nels, vars[i],
-                m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0));
+            db_hdf5_compwrz(dbfile, datatype, 1, &nels, vars[i],
+                m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0), compressionFlags);
             if (mixvars && mixvars[i] && mixlen>0) {
                 db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mixvars[i],
                     m.mixed_value[i]/*out*/, friendly_name(varnames[i], "_mix", 0));
@@ -7543,6 +9123,66 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForUcdvarDecompression
+ *
+ * Purpose:     Does some small work to prepare for possible ucdvar 
+ *              decompression 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *
+ *     We assume here that looking up the nodelist is cheaper than
+ *     checking if the values are compressed, so we perform that
+ *     operation first. Reason being is that checking if the 
+ *     dataset is compressed may involve disk I/O. Looking up
+ *     the nodelist is a bunch of string and pointer compars.
+ *     But, that operation is always performed!!!
+ *-------------------------------------------------------------------------
+ */
+static void
+PrepareForUcdvarDecompression(DBfile *_dbfile, const char *varname,
+    const char *meshname, char valnames[MAX_VARS][256], int nvals)
+{
+
+#ifdef HAVE_HZIP
+
+    /* We have to have read the mesh zonelist first,
+       if we don't already have it. */
+    if (LookupNodelist((DBfile_hdf5*)_dbfile, 0, meshname) == 0)
+    {
+        /* See if we even have compressed data to begin with */
+        int i, haveCompressed = 0;
+        for (i=0; i<nvals && !haveCompressed; i++)
+            haveCompressed = db_hdf5_compckz((DBfile_hdf5*)_dbfile, (char*) valnames[i]);
+
+        if (haveCompressed)
+        {
+            long currentMask = DBGetDataReadMask();
+            DBucdmesh *um;
+            DBSetDataReadMask(DBUMZonelist|DBZonelistInfo);
+            um = db_hdf5_GetUcdmesh(_dbfile, (char*) meshname);
+
+            /* Note that if for some reason the zl was not compressed, then
+               getting it via the above GetUcdmesh call won't register it.
+               Also, registering an already existing zonelist has no effect.
+               So, as a precaution, we register the zonelist here, too.
+               And, since we know the meshname here also, that will get
+               added to the registered zonelist if it already exists. */
+            RegisterNodelist((DBfile_hdf5*)_dbfile, 0, meshname,
+                um->zones->ndims, um->zones->nzones, um->zones->origin,
+                um->zones->nodelist);
+            DBSetDataReadMask(currentMask);
+            DBFreeUcdmesh(um);
+        }
+    }
+
+    db_hdf5_hzip_clear_params();
+    db_hdf5_hzip_params.dbfile = (DBfile_hdf5*)_dbfile;
+    db_hdf5_hzip_params.meshname = meshname;
+
+#endif
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_GetUcdvar
@@ -7564,6 +9204,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
  *   Brad Whitlock, Wed Jan 18 15:17:48 PST 2006
  *   Added ascii_labels.
  *
+ *   Mark C. Miller, Thu Jul 17 15:19:14 PDT 2008
+ *   Added call to prepare for possible decompression.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBucdvar *
@@ -7625,6 +9267,9 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char *name)
         uv->use_specmf = m.use_specmf;
         uv->ascii_labels = m.ascii_labels;
         uv->guihide = m.guihide;
+
+        /* If var is compressed, we need to do some work to decompress it */
+        PrepareForUcdvarDecompression(_dbfile, name, uv->meshname, m.value, m.nvals);
 
         /* Read the raw data */
         if (m.nvals>MAX_VARS) {
@@ -7833,6 +9478,75 @@ db_hdf5_GetFacelist(DBfile *_dbfile, char *name)
     return fl;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForZonelistCompression
+ *
+ * Purpose:     Does some small work to prepare for possible zonelist 
+ *              compression 
+ *
+ * Return:      Success:        ALLOW_MESH_COMPRESSION 
+ *
+ *              Failure:        0 
+ *
+ * HZIP supports only 2D quad meshes and 3D hex meshes.
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static int
+PrepareForZonelistCompression(DBfile_hdf5 *dbfile, const char *name,
+    int origin, int nshapes, const int *shapetype, const int *shapecnt,
+    const int *nodelist)
+{
+    int i;
+    int ntopo = 0;
+    int zncnt = shapecnt[0];
+
+    if (nshapes == 0) return 0;
+    if (SILO_Globals.enableCompression == 0) return 0;
+
+#ifdef HAVE_HZIP
+
+    /* hzip supports only quad/hex meshes */
+    if (shapetype[0] == DB_ZONETYPE_QUAD)
+    {
+        ntopo = 2;
+        for (i = 1; i < nshapes; i++)
+        {
+            zncnt += shapecnt[i];
+            if (shapetype[i] != DB_ZONETYPE_QUAD)
+                return 0;
+        }
+    }
+    else if (shapetype[0] == DB_ZONETYPE_HEX)
+    {
+        ntopo = 3;
+        for (i = 1; i < nshapes; i++)
+        {
+            zncnt += shapecnt[i];
+            if (shapetype[i] != DB_ZONETYPE_HEX)
+                return 0;
+        }
+    }
+    else
+    {
+        return 0;
+    }
+
+    db_hdf5_hzip_clear_params();
+    db_hdf5_hzip_params.iszl = 1;
+    db_hdf5_hzip_params.zlname = name;
+    db_hdf5_hzip_params.dbfile = dbfile;
+    RegisterNodelist(dbfile, name, 0, ntopo, zncnt, origin, nodelist);
+    return ALLOW_MESH_COMPRESSION;
+
+#else
+
+    return 0;
+
+#endif
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_PutZonelist
@@ -7881,6 +9595,10 @@ db_hdf5_PutZonelist(DBfile *_dbfile, char *name, int nzones, int ndims,
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Jul 17 15:20:31 PDT 2008
+ *   Added code to prepare for possible compression. Changed call to
+ *   write nodelist to use compwrz.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -7892,18 +9610,21 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBzonelist_mt       m;
+    int                 compressionFlags;
 
     memset(&m, 0, sizeof m);
     PROTECT {
         /* Set global options */
         memset(&_uzl, 0, sizeof _uzl);
         db_ProcessOptlist(DB_ZONELIST, optlist);
-/**#ifdef LINDSTROM **/
 
-/***#endif ***/        
-        /* Write variable arrays */
-        db_hdf5_compwr(dbfile, DB_INT, 1, &lnodelist, nodelist,
-            m.nodelist/*out*/, friendly_name(name,"_nodelist", 0));
+        /* Prepare for possible compression of zonelist */
+        compressionFlags = PrepareForZonelistCompression(dbfile,
+            name, origin, nshapes, shapetype, shapecnt, nodelist);
+
+        /* Write variable arrays (currently only support compression of nodelist) */
+        db_hdf5_compwrz(dbfile, DB_INT, 1, &lnodelist, nodelist,
+            m.nodelist/*out*/, friendly_name(name,"_nodelist", 0), compressionFlags);
         db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapecnt,
             m.shapecnt/*out*/, friendly_name(name,"_shapecnt", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapesize,
@@ -8028,6 +9749,29 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    PrepareForZonelistDecompression
+ *
+ * Purpose:     Does some small work to prepare for possible zonelist 
+ *              de compression 
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 17 15:07:21 PDT 2008
+ *-------------------------------------------------------------------------
+ */
+static void
+PrepareForZonelistDecompression(DBfile_hdf5* dbfile, const char *zlname,
+    const char *meshname, int origin)
+{
+#ifdef HAVE_HZIP
+    db_hdf5_hzip_clear_params();
+    db_hdf5_hzip_params.dbfile = dbfile;
+    db_hdf5_hzip_params.iszl = 1;
+    db_hdf5_hzip_params.zlname = zlname;
+    db_hdf5_hzip_params.meshname = meshname;
+    db_hdf5_hzip_params.zlorigin = origin;
+#endif
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_GetZonelist
@@ -8050,6 +9794,9 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
  *              Made it behave identically to PDB driver (for better or
  *              worse) when called from GetUcdmesh. Added support for
  *              dataReadMask
+ *
+ *              Mark C. Miller, Thu Jul 17 15:21:35 PDT 2008
+ *              Added code to prepare for possible zonelist decompression.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBzonelist *
@@ -8107,6 +9854,10 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char *name)
             zl->min_index = 0;
             zl->max_index = 0;
         }
+
+        /* Prepare for possible zonelist decompression */
+        PrepareForZonelistDecompression(dbfile, name,
+            calledFromGetUcdmesh, zl->origin);
 
         /* Read the raw data */
         if (SILO_Globals.dataReadMask & DBZonelistInfo)
@@ -11831,7 +13582,6 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
         mrgv = (DBmrgvar *) calloc(1,sizeof(DBmrgvar));
         mrgv->name = BASEDUP(name);
         mrgv->mrgt_name = OPTDUP(m.mrgt_name);
-        printf("setting mrgv->mrgt_name =\"%s\'\n", mrgv->mrgt_name);
         mrgv->nregns = m.nregns;
         mrgv->ncomps = m.ncomps;
         if ((mrgv->datatype = db_hdf5_GetVarType(_dbfile, m.data[0])) < 0)
@@ -11868,6 +13618,13 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
     } END_PROTECT;
 
     return mrgv;
+}
+
+CALLBACK int 
+db_hdf5_FreeCompressionResources(DBfile *_dbfile, const char *meshname)
+{
+    FreeNodelists((DBfile_hdf5*)_dbfile, meshname);
+    return 0;
 }
 
 #else

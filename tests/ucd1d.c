@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main()
+int main(int argc, char **argv)
 {
     float x[1000],y[1000],z[1000];
     float *coords[3];
@@ -34,7 +34,21 @@ int main()
     float nval[1000];
 
     DBfile *db;
-    int i,j;
+    int i,j, driver = DB_PDB;
+    char          *filename = "ucd1d.pdb";
+
+    for (i=1; i<argc; i++) {
+        if (!strcmp(argv[i], "DB_PDB")) {
+            driver = DB_PDB;
+            filename = "ucd1d.pdb";
+        } else if (!strcmp(argv[i], "DB_HDF5")) {
+            driver = DB_HDF5;
+            filename = "ucd1d.h5";
+        } else {
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
+    }
+
 
     /* Create the coordinate arrays and the nodal variable */
     for (i=0; i<30; i++)
@@ -78,8 +92,8 @@ int main()
 
 
     /* Write out the mesh */
-    db = DBCreate("ucd1d.pdb", DB_CLOBBER, DB_LOCAL,
-                  "UCD mesh test", DB_PDB);
+    db = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
+                  "UCD mesh test", driver);
 
 
     DBPutUcdmesh(db,"mesh",3,

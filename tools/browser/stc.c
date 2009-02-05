@@ -684,6 +684,9 @@ stc_walk2_DBdirectory (obj_t _a, void *a_mem, obj_t _b, void *b_mem,
         /* Diff the files */
         retval = obj_diff(a_file, b_file);
 
+        DBFreeCompressionResources(file_file(a_file),0);
+        DBFreeCompressionResources(file_file(b_file),0);
+
         /* Reset cwds */
         status = DBSetDir(file_file(a_file), a_cwd);
         assert(status>=0);

@@ -20,23 +20,30 @@
 #define MAX(X,Y)      ((X)>(Y)?(X):(Y))
 #endif
 
-void CopyFile (char *fileName, char *meshFileName);
+void CopyFile (char *fileName, char *meshFileName, int driver);
 void GetFileList (char *baseName, char ***files, int *nFiles);
 void ListSort (char **list, int n);
 
 main (int argc, char **argv)
 {
-    int       i;
+    int       i, driver = DB_PDB;
     int       nFiles;
     char    **files=NULL;
 
     /*
      * Check the execute line arguments.
      */
-    if (argc != 3)
+    if (argc != 3 && argc != 4)
     {
-        printf ("usage: merge_blocks basename meshfilename\n");
+        printf ("usage: merge_blocks basename meshfilename [DB_HDF5 | DB_PDB]\n");
         exit (1);
+    }
+    if (argc == 4)
+    {
+        if (!strcmp(argv[3], "DB_PDB"))
+            driver = DB_PDB;
+        else if (!strcmp(argv[3], "DB_HDF5"))
+            driver = DB_HDF5;
     }
     printf ("Using base %s. Mesh file name %s\n", argv[1], argv[2]);
 
@@ -66,12 +73,12 @@ main (int argc, char **argv)
 
     for (i = 0; i < nFiles; i++)
     {
-        CopyFile (files[i], argv[2]);
+        CopyFile (files[i], argv[2], driver);
     }
 }
 
 void
-CopyFile (char *fileName, char *meshFileName)
+CopyFile (char *fileName, char *meshFileName, int driver)
 {
     int       i, j, k, l;
     int       cycle;
@@ -145,7 +152,7 @@ CopyFile (char *fileName, char *meshFileName)
      */
     sprintf (tmpstr, "%s.silo", fileName);
     dbfile3 = DBCreate (tmpstr, DB_CLOBBER, DB_LOCAL,
-                        "ball impacting plate", DB_PDB);
+                        "merged blocks", driver);
 
     /*
      * Write out _meshtvinfo.

@@ -39,7 +39,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(install_sh) -d
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
@@ -61,7 +61,16 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(silock_SOURCES)
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+SOURCES = $(silock_SOURCES) $(nodist_EXTRA_silock_SOURCES)
 DIST_SOURCES = $(silock_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -104,9 +113,11 @@ FCFLAGS = @FCFLAGS@
 FCLIBS = @FCLIBS@
 FC_FULLPATH = @FC_FULLPATH@
 FFLAGS = @FFLAGS@
+FORTRAN = @FORTRAN@
+FPZIP = @FPZIP@
 GREP = @GREP@
 HDF5_DRV = @HDF5_DRV@
-HEXZIP = @HEXZIP@
+HZIP = @HZIP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -117,7 +128,6 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
-LOCAL = @LOCAL@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -158,25 +168,8 @@ SILO_VERS_PRE = @SILO_VERS_PRE@
 SILO_VERS_TAG = @SILO_VERS_TAG@
 STRIP = @STRIP@
 TAURUS = @TAURUS@
-USEFORTRAN = @USEFORTRAN@
-USE_FILTER_SZIP = @USE_FILTER_SZIP@
-Using64bits = @Using64bits@
-UsingBrowser = @UsingBrowser@
-UsingCxx = @UsingCxx@
-UsingFortran = @UsingFortran@
-UsingHDF5 = @UsingHDF5@
-UsingHexzip = @UsingHexzip@
-UsingLocal = @UsingLocal@
-UsingOpt = @UsingOpt@
-UsingPython = @UsingPython@
-UsingQt = @UsingQt@
-UsingReadline = @UsingReadline@
-UsingSZLIB = @UsingSZLIB@
-UsingShared = @UsingShared@
-UsingSilex = @UsingSilex@
-UsingSrcDir = @UsingSrcDir@
-UsingStatic = @UsingStatic@
 VERSION = @VERSION@
+ZLIB = @ZLIB@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -234,13 +227,15 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 silock_SOURCES = silock.c
+@FPZIP_NEEDED_TRUE@@HDF5_DRV_NEEDED_TRUE@nodist_EXTRA_silock_SOURCES = dummy.cxx
+@HDF5_DRV_NEEDED_TRUE@@HZIP_NEEDED_TRUE@nodist_EXTRA_silock_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_FALSE@silock_LDADD = ../../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@silock_LDADD = ../../src/libsiloh5.la
 AM_CPPFLAGS = -I$(includedir) -I$(top_srcdir)/src/silo
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .cxx .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -300,7 +295,7 @@ clean-binPROGRAMS:
 	done
 silock$(EXEEXT): $(silock_OBJECTS) $(silock_DEPENDENCIES) 
 	@rm -f silock$(EXEEXT)
-	$(LINK) $(silock_OBJECTS) $(silock_LDADD) $(LIBS)
+	$(CXXLINK) $(silock_OBJECTS) $(silock_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -308,6 +303,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silock.Po@am__quote@
 
 .c.o:
@@ -330,6 +326,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+.cxx.o:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cxx.obj:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cxx.lo:
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -516,6 +533,8 @@ uninstall-am: uninstall-binPROGRAMS
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
+@HDF5_DRV_NEEDED_TRUE@@HZIP_NEEDED_TRUE@  # Dummy C++ source to cause C++ linking.
+@FPZIP_NEEDED_TRUE@@HDF5_DRV_NEEDED_TRUE@  # Dummy C++ source to cause C++ linking.
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

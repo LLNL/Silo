@@ -356,6 +356,8 @@ typedef enum {
 #define     E_CHECKSUM  24      /*Checksum failed */
 #define     E_COMPRESSION  25   /*Compression failed */
 #define     E_GRABBED   26      /*Low level driver enabled */
+#define     E_NOTREG    27      /*The dbfile pointer is not resitered. */
+#define     E_CONCURRENT 28     /*File is opened multiply and not all read-only. */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
@@ -1496,6 +1498,9 @@ typedef struct DBfile_pub {
                              int nregns, char **reg_pnames,
                              int datatype, void **data, DBoptlist *opts);
     DBmrgvar      *(*g_mrgv)(struct DBfile *dbfile, const char *name);
+    int            (*free_z)(struct DBfile *, const char *);
+    int            (*cpdir)(struct DBfile *, const char *,
+                            struct DBfile *, const char *);
 
 } DBfile_pub;
 
@@ -1602,6 +1607,7 @@ SILO_API extern void    *DBGrabDriver(DBfile *);
 SILO_API extern int      DBUngrabDriver(DBfile *, const void *);
 SILO_API extern int      DBGetDriverType(const DBfile *);
 SILO_API extern int      DBGetDriverTypeFromPath(const char *);
+SILO_API extern char    *DBJoinPath(const char *, const char *);
 SILO_API extern char    *DBVersion(void);
 SILO_API extern void     DBShowErrors(int, void (*)(char *));
 SILO_API extern char    *DBErrString(void);
@@ -1644,6 +1650,8 @@ SILO_API extern int      DBSetDir(DBfile *, const char *);
 SILO_API extern int      DBSetDirID(DBfile *, int);
 SILO_API extern int      DBListDir(DBfile *, char **, int);
 SILO_API extern int      DBMkDir(DBfile *, const char *);
+SILO_API extern int      DBCpDir(DBfile *dbfile, const char *srcDir,
+                             DBfile *dstFile, const char *dstDir);
 
 #define DBMkdir DBMkDir
 SILO_API extern int      DBReadAtt(DBfile *, const char *, const char *, void *);
@@ -1817,6 +1825,8 @@ SILO_API extern void     DBFortranRemovePointer(int value);
 SILO_API extern int      DBVariableNameValid(const char *s);
 SILO_API extern char *safe_strdup(const char *s);
 SILO_API double randf (double rmin, double rmax);
+
+SILO_API extern int      DBFreeCompressionResources(DBfile *dbfile, const char *meshname);
 
 /*-------------------------------------------------------------------------
  * Public global variables.

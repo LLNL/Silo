@@ -1,0 +1,77 @@
+#!/bin/sh -x
+
+# -----------------------------------------------------------------------------
+# Test interversion file format compatibility of HDF5
+#
+# Programmer: Mark C. Miller
+# Creation:   July 21, 2008
+#
+# -----------------------------------------------------------------------------
+
+difffiles () {
+    for df in multi_*.h5; do
+        bf=`basename $df .h5`
+        # do a diff on the files
+        rm -f testxvers.out
+        $topDir/../tools/browser/browser -q -e diff $df $topDir/xvers_data/${bf}_$1 1>testxvers.out 2>&1
+        if test `wc -l testxvers.out | tr -s ' ' | cut -d' ' -f2` -gt 20; then
+            return 1
+            break
+        fi
+    done
+}
+
+# Diddle the the directory because Autotest is not at all designed to handle
+# tests the way this one was written
+if test -n "$1"; then
+    topDir=$1
+    if test -e $topDir/../../multi_test; then
+        topDir=$1/../..
+    fi
+else
+    topDir=.
+fi
+
+#
+# Create data with no special features 
+#
+$topDir/multi_test DB_HDF5 1>/dev/null 2>&1
+
+#
+# Figure out minor version num of HDF5 used to create the current data
+#
+vmin=`$topDir/../tools/browser/browser -e _hdf5libinfo multi_ucd3d.h5 2>/dev/null | grep hdf5 | cut -d'-' -f2 | cut -d'.' -f2`
+if test $vmin -eq 6; then
+    vtest=8
+elif test $vmin -eq 8; then
+    vtest=6
+else
+    echo "Did not find expected hdf5 minor version number"
+    exit 1
+fi
+
+#
+# Uncompress and untar data files from specific versions of HDF5
+#
+which bunzip2 1>/dev/null 2>&1
+test $? -eq 0 || exit 1
+bunzip2 < $topDir/xvers_data.tar.bz2 | tar xf -
+
+#
+# Now, run browser and make sure we don't get any errors in the diff
+#
+result=0
+test $result -gt 0 || difffiles v1${vtest}.h5
+result=$?
+test $result -gt 0 || difffiles v1${vtest}ck.h5
+result=$?
+test $result -gt 0 || difffiles v1${vtest}fpz.h5
+result=$?
+
+#
+# Cleanup
+#
+rm -f testxvers.out
+rm -rf $topDir/xvers_data
+
+exit $result 

@@ -1,0 +1,64 @@
+#!/bin/sh
+
+# -----------------------------------------------------------------------------
+# Test hzip compression capability in silo by generating compressed data
+# file, copying it, re-generating w/o compression and then diffing it with
+# browser against the original.
+#
+# Programmer: Mark C. Miller
+# Creation:   July 21, 2008
+#
+# -----------------------------------------------------------------------------
+
+# Diddle the the directory because Autotest is not at all designed to handle
+# tests the way this one was written
+if test -n "$1"; then
+    topDir=$1
+    if test -e $topDir/../../multi_test; then
+        topDir=$1/../..
+    fi
+else
+    topDir=.
+fi
+
+#
+# Create data with compression (only on HDF5 driver) and save files
+#
+$topDir/multi_test DB_HDF5 hzip 1>/dev/null 2>&1
+rm -rf h5_hzip_files
+mkdir h5_hzip_files
+mv *.h5 h5_hzip_files/.
+
+#
+# Create data without compression 
+#
+$topDir/multi_test DB_HDF5 1>/dev/null 2>&1
+
+#
+# Now, run browser and make sure we don't get any errors in the diff
+#
+result=0
+for df in multi_*.h5; do
+    # confirm compressed files are smaller
+    hzip_file_size=`ls -l h5_hzip_files/$df | tr -s ' ' | cut -d' ' -f5`
+    orig_file_size=`ls -l $df | tr -s ' ' | cut -d' ' -f5`
+    if test ! $hzip_file_size -lt $orig_file_size; then
+        result=1
+        break
+    fi
+    # do a diff on the files
+    rm -f testhzip.out
+    $topDir/../tools/browser/browser -q -e diff $df h5_hzip_files/$df 1>testhzip.out 2>&1
+    if test `wc -l testhzip.out | tr -s ' ' | cut -d' ' -f2` -gt 0; then
+        result=1
+        break
+    fi
+done
+
+#
+# Cleanup
+#
+rm -rf h5_hzip_files
+rm -f testhzip.out
+
+exit $result 

@@ -40,7 +40,7 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(install_sh) -d
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -125,9 +125,11 @@ FCFLAGS = @FCFLAGS@
 FCLIBS = @FCLIBS@
 FC_FULLPATH = @FC_FULLPATH@
 FFLAGS = @FFLAGS@
+FORTRAN = @FORTRAN@
+FPZIP = @FPZIP@
 GREP = @GREP@
 HDF5_DRV = @HDF5_DRV@
-HEXZIP = @HEXZIP@
+HZIP = @HZIP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -138,7 +140,6 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
-LOCAL = @LOCAL@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -179,25 +180,8 @@ SILO_VERS_PRE = @SILO_VERS_PRE@
 SILO_VERS_TAG = @SILO_VERS_TAG@
 STRIP = @STRIP@
 TAURUS = @TAURUS@
-USEFORTRAN = @USEFORTRAN@
-USE_FILTER_SZIP = @USE_FILTER_SZIP@
-Using64bits = @Using64bits@
-UsingBrowser = @UsingBrowser@
-UsingCxx = @UsingCxx@
-UsingFortran = @UsingFortran@
-UsingHDF5 = @UsingHDF5@
-UsingHexzip = @UsingHexzip@
-UsingLocal = @UsingLocal@
-UsingOpt = @UsingOpt@
-UsingPython = @UsingPython@
-UsingQt = @UsingQt@
-UsingReadline = @UsingReadline@
-UsingSZLIB = @UsingSZLIB@
-UsingShared = @UsingShared@
-UsingSilex = @UsingSilex@
-UsingSrcDir = @UsingSrcDir@
-UsingStatic = @UsingStatic@
 VERSION = @VERSION@
+ZLIB = @ZLIB@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -260,11 +244,6 @@ Silo_la_LDFLAGS = -module -avoid-version
 @HDF5_DRV_NEEDED_FALSE@Silo_la_LIBADD = ../../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@Silo_la_LIBADD = ../../src/libsiloh5.la
 AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(includedir) -I$(top_srcdir)/src/silo
-EXTRA_DIST = \
- test_error.py \
- test_read.py \
- test_write.py
-
 noinst_HEADERS = \
  pydbfile.h \
  pydbtoc.h \

@@ -98,7 +98,7 @@ static int              calculate_2D_intersect(Cell_t *, double, double *,
 static void             calc_ucdextents(DBucdvar **, float *, float *, int);
 static void             copy_triangle(Triangle_t *, Triangle_t *);
 static void 		check_ucdVars(void);
-static DBfile 		*create_file(char *, DBquadmesh *);
+static DBfile 		*create_file(char *, DBquadmesh *, int);
 static int 	     	get_crossing(int, int, int);
 static DBucdmesh	**get_mmeshes(char **);
 static DBucdmesh	**get_smeshes(DBtoc *);
@@ -112,7 +112,7 @@ static void             orient_triangle(Triangle_t *);
 static void  		process_vars(float *, float, float, 
                                      DBquadmesh *, DBquadvar *);
 static void		quit_me(int);
-static void  		resample(char **);
+static void  		resample(char **, int);
 static void 		set_extents(float*);
 static void             rasterize_cell(Cell_t *, double, float, float, 
                                        DBquadmesh *, DBquadvar *, float *);
@@ -133,7 +133,7 @@ static void 		setup_zone_value(Cell_t *, DBucdvar **, int, int);
 int main(int argc, char **argv)
 {
 
-  int i;
+  int i, driver = DB_PDB;
 
   /* Start up MPI */
   MPI_Init(&argc, &argv);
@@ -164,7 +164,10 @@ int main(int argc, char **argv)
           fprintf(stderr, "\t-s - sequential mode \n");
           quit_me(1);
         }
- 
+      else if (!strcmp(argv[i], "DB_PDB"))
+          driver = DB_PDB;
+      else if (!strcmp(argv[i], "DB_HDF5"))
+         driver = DB_HDF5;
     } /* end of for loop */
   } /* end of if */
   else if (argc != 3)
@@ -200,9 +203,9 @@ int main(int argc, char **argv)
    */
 
   if (parallel_mode == res_TRUE)
-    resample(argv);
+    resample(argv, driver);
   else if (my_rank == 0)
-    resample(argv);
+    resample(argv, driver);
 
   /* Shutdown Program */
   MPI_Finalize();
@@ -250,7 +253,7 @@ void quit_me(int exit_val)
  */
 
 static
-void resample(char **argv)
+void resample(char **argv, int driver)
 {
 
   int 			i,j;
@@ -324,7 +327,7 @@ void resample(char **argv)
    * Create output file
    */
    if ( my_rank == 0 )
-     destfile = create_file(argv[2], qMesh);
+     destfile = create_file(argv[2], qMesh, driver);
 
   /*
    * Setup the variables for the multimesh 
@@ -464,12 +467,12 @@ void resample(char **argv)
  *---------------------------------------------------------------------------
  */
 static
-DBfile *create_file(char *filename, DBquadmesh *qm)
+DBfile *create_file(char *filename, DBquadmesh *qm, driver)
 {
   static DBfile *output_file = NULL;
   int i;
 
-  output_file = DBCreate(filename, 0, DB_LOCAL, NULL, DB_PDB);
+  output_file = DBCreate(filename, 0, DB_LOCAL, NULL, driver);
 
   if (output_file == NULL)
   {

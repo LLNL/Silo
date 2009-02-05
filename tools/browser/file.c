@@ -2345,6 +2345,10 @@ file_diff (obj_t a, obj_t b)
     btoc = browser_DBGetToc(bfile, &bn, sort_toc_by_name);
     assert ((!an || atoc) && (!bn || btoc));
 
+    /* Free any compression resources */
+    DBFreeCompressionResources(afile, 0);
+    DBFreeCompressionResources(bfile, 0);
+
     /* We may need to know our cwd below. */
     DBGetDir(afile, a_cwd);
     if (strcmp(a_cwd,"/")) strcat(a_cwd, "/");

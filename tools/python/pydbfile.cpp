@@ -47,6 +47,14 @@ static PyObject *DBfile_DBGetToc(PyObject *self, PyObject *args)
 //  Programmer:  Jeremy Meredith
 //  Creation:    July 12, 2005
 //
+//  Modifications:
+//
+//    Mark C. Miller, Tue Aug  5 11:04:14 PDT 2008
+//    I modifed case where we're returning a string valued variable to strip
+//    off the trailing null character. The PyString_FromStringAndSize method
+//    was being given a length argument that included the trailing null and
+//    the result was a bit if an odd string in python.
+//
 // ****************************************************************************
 static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
 {
@@ -90,7 +98,12 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
             if (len == 1)
                 return PyInt_FromLong(*((char*)var));
             else
+            {
+                // strip trailing null if one exists
+                char *p = (char *) var;
+                if (p[len-1] == '\0') len--;
                 return PyString_FromStringAndSize((char*)var, len);
+            }
           default:
             SiloErrorFunc("Unknown variable type.");
             return NULL;
@@ -420,9 +433,9 @@ static struct PyMethodDef DBfile_methods[] = {
 //  Creation:    July 12, 2005
 //
 // ****************************************************************************
-static PyObject *DBfile_dealloc(PyObject *self)
+static void DBfile_dealloc(PyObject *self)
 {
-    PyMem_DEL(self);
+    PyObject_Del(self);
 }
 
 // ****************************************************************************
@@ -438,7 +451,7 @@ static PyObject *DBfile_dealloc(PyObject *self)
 //  Creation:    July 12, 2005
 //
 // ****************************************************************************
-static void *DBfile_as_string(PyObject *self, char *s)
+static void DBfile_as_string(PyObject *self, char *s)
 {
     DBfileObject *obj = (DBfileObject*)self;
     if (obj->db)

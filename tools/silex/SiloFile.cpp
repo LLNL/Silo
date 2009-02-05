@@ -66,6 +66,7 @@ SiloDir::SiloDir(DBfile *db, const QString &name_, const QString &path_)
     name = name_;
     path = path_;
 
+    DBFreeCompressionResources(db,0);
     DBSetDir(db, (char*)path.latin1());
     DBtoc *toc = DBGetToc(db);
 

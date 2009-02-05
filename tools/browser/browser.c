@@ -58,6 +58,7 @@
  */
 #include "config.h"     /*MeshTV configuration record*/
 
+#include <stdio.h>
 #include <assert.h>
 #include "browser.h"
 #include <ctype.h>
@@ -1201,6 +1202,12 @@ bad_switch(const char *fmt, ...)
  *
  *      Robb Matzke, 2000-10-19
  *      Added `--obase' command-line switch.
+ *
+ *      Mark C. Miller, Tue Jul 22 17:49:15 PDT 2008
+ *      Added call to setlinebuf on stdout. This is to prevent situations
+ *      where a client shell using i/o-redirection of stderr into stdout
+ *      (e.g. '2>&1') results in browser output lines getting 'interrupted'
+ *      with lines from stderr.
  *-------------------------------------------------------------------------
  */
 int
@@ -1218,6 +1225,11 @@ main(int argc, char *argv[])
     struct sigaction action;
     
     arg0 = argv[0]; /*global executable name*/
+
+    /* We want stdout line buffered to prevent possible redirection
+       from client shells (e.g. 2>&1) from having stderr cause
+       breaks in lines in stdout */
+    setlinebuf(stdout);
 
 #if defined(HAVE_READLINE_READLINE_H) && defined(HAVE_LIBREADLINE)
     /* We have our own readline completion function that tries to complete

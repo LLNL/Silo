@@ -7,6 +7,14 @@ dist_bin_SCRIPTS = \
 
 browser_SOURCES = $(FILES)
 if HDF5_DRV_NEEDED
+if HZIP_NEEDED
+  # Dummy C++ source to cause C++ linking.
+  nodist_EXTRA_browser_SOURCES = dummy.cxx
+endif
+if FPZIP_NEEDED
+  # Dummy C++ source to cause C++ linking.
+  nodist_EXTRA_browser_SOURCES = dummy.cxx
+endif
   browser_LDADD = ../../src/libsiloh5.la
 else
   browser_LDADD = ../../src/libsilo.la

@@ -272,6 +272,8 @@ main(int argc, char *argv[])
     }
     if (nnumbers!=3) usage(argv[0]);
 
+    DBSetDeprecateWarnings(0);
+
     /*
      * Create the multi-group rectilinear 3d mesh.
      */
@@ -1309,38 +1311,25 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
          * level to add the hi_offset option which can't be output
          * with the DBPutZonelist routine.
          */
-        if (dbfile->pub.type == DB_PDB) {
-            obj = DBMakeObject("zl1", DB_ZONELIST, 10);
+        obj = DBMakeObject("zl1", DB_ZONELIST, 10);
 
-            DBAddIntComponent(obj, "ndims", 3);
-            DBAddIntComponent(obj, "nzones", nzones);
-            DBAddIntComponent(obj, "nshapes", 1);
-            DBAddIntComponent(obj, "lnodelist", lzonelist);
-            DBAddIntComponent(obj, "origin", zoneorigin);
-            DBAddIntComponent(obj, "hi_offset", hi_off);
-            DBAddVarComponent(obj, "nodelist", "zl1_nodelist");
-            DBAddVarComponent(obj, "shapecnt", "zl1_shapecnt");
-            DBAddVarComponent(obj, "shapesize", "zl1_shapesize");
-            DBAddVarComponent(obj, "gzoneno", "zl1_gzoneno");
+        DBAddIntComponent(obj, "ndims", 3);
+        DBAddIntComponent(obj, "nzones", nzones);
+        DBAddIntComponent(obj, "nshapes", 1);
+        DBAddIntComponent(obj, "lnodelist", lzonelist);
+        DBAddIntComponent(obj, "origin", zoneorigin);
+        DBAddIntComponent(obj, "hi_offset", hi_off);
+        DBAddVarComponent(obj, "nodelist", "zl1_nodelist");
+        DBAddVarComponent(obj, "shapecnt", "zl1_shapecnt");
+        DBAddVarComponent(obj, "shapesize", "zl1_shapesize");
+        DBAddVarComponent(obj, "gzoneno", "zl1_gzoneno");
 
-            DBWriteObject(dbfile, obj, 0);
-            DBFreeObject(obj);
-        } else {
-            /* Using DBMakeObject() to do the work of DBPutZonelist() is a
-             * bad idea! It depends on the application knowing the
-             * implementation details of the file driver (that's probably
-             * why a DBobject has a `pdb_names' component ;-) In any case,
-             * other drivers only allow DBMakeObject() to build
-             * user-defined objects that are unrelated to predefined Silo
-             * objects. */
-            fprintf(stderr, "invalid use of DBMakeObject() at %s, line %d\n",
-                    __FILE__, __LINE__);
-        }
+        DBWriteObject(dbfile, obj, 0);
+        DBFreeObject(obj);
         DBWrite (dbfile, "zl1_nodelist", zonelist, &lzonelist, 1, DB_INT);
         DBWrite (dbfile, "zl1_shapecnt", &zshapecnt, &one, 1, DB_INT);
         DBWrite (dbfile, "zl1_shapesize", &zshapesize, &one, 1, DB_INT);
         DBWrite (dbfile, "zl1_gzoneno", globalzone, &nzones, 1, DB_INT);
-
 
         /*
          * Output the rest of the mesh and variables.

@@ -106,6 +106,8 @@ for advertising or product endorsement purposes.
 int SILO_VERS_TAG = 0;
 
 /* specify versions which are backward compatible with the current */
+int Silo_version_4_6 = 0;
+int Silo_version_4_6_1 = 0;
 
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
 PUBLIC int     db_errno = 0;    /*last error number                     */
@@ -137,8 +139,10 @@ PUBLIC char   *_db_err_list[] =
     "Invalid variable name - only alphanumeric and `_'", /* 22 */
     "Overwrite not allowed. See DBSetAllowOverwrites()", /* 23 */
     "Checksum failure.",                      /* 24 */
-    "Compression failure."                    /* 25 */
-    "Grab driver enabled."                    /* 26 */
+    "Compression failure.",                   /* 25 */
+    "Grab driver enabled.",                   /* 26 */
+    "File was closed or never opened/created."/* 27 */
+    "File multiply opened and all not read-only." /* 28 */
 };
 
 static char *no_hdf5_driver_msg =
@@ -155,7 +159,40 @@ INTERNAL int   _db_err_level = DB_TOP;  /*what errors to issue (default) */
 INTERNAL void  (*_db_err_func)(char *);  /*how to issue errors  */
 INTERNAL jstk_t *Jstk = NULL;   /*error jump stack  */
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
+typedef struct reg_status_t {
+    DBfile *f;
+    unsigned int n;
+    int w;
+} reg_status_t;
+PRIVATE reg_status_t _db_regstatus[DB_NFILES] = /* DB_NFILES triples of zeros */
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 PRIVATE filter_t _db_filter[DB_NFILTERS];
+const static char *api_dummy = 0;
+PRIVATE int db_isregistered_file(DBfile *dbfile, const char *name);
 
 /* Global structures for option lists.  */
 struct _ma     _ma;
@@ -182,7 +219,9 @@ SILO_Globals_t SILO_Globals = {
     3      /* maxDeprecateWarnings */
 };
 SILO_Compression_t SILO_Compression = {
-    "\0" 
+    "\0",
+    2.0, /* min compression ratio */
+    0,   /* fallback */
 };
 
 INTERNAL int
@@ -276,7 +315,17 @@ db_perror(const char *s, int errorno, char *fname)
      * the indicated error handling routine.
      */
     if (_db_err_func) {
-        _db_err_func((char*)s);
+        int len;
+        char better_s[1024];
+        better_s[0]='\0';
+        if (fname && *fname)
+            snprintf(better_s, sizeof(better_s), "%s: ", fname);
+        len = strlen(better_s);
+        snprintf(better_s+len, sizeof(better_s)-len, "%s", db_strerror(errorno));
+        len = strlen(better_s);
+        if (s && *s)
+            snprintf(better_s+len, sizeof(better_s)-len, ": %s", s);
+        _db_err_func((char*)better_s);
     }
     else {
         if (fname && *fname)
@@ -584,7 +633,6 @@ db_GetDatatypeString(int type)
 INTERNAL DBfile *
 db_close(DBfile *dbfile)
 {
-
     if (dbfile) {
         db_FreeToc(dbfile);
         FREE(dbfile->pub.name);
@@ -1924,6 +1972,150 @@ db_get_fileid ( int flags )
 }
 
 /*-------------------------------------------------------------------------
+  Function: bjhash 
+
+  Purpose: Hash a variable length stream of bytes into a 32-bit value.
+
+  Programmer: By Bob Jenkins, 1996.  bob_jenkins@burtleburtle.net.
+
+  You may use this code any way you wish, private, educational, or
+  commercial.  It's free. However, do NOT use for cryptographic purposes.
+
+  See http://burtleburtle.net/bob/hash/evahash.html
+ *-------------------------------------------------------------------------*/
+
+#define bjhash_mix(a,b,c) \
+{ \
+  a -= b; a -= c; a ^= (c>>13); \
+  b -= c; b -= a; b ^= (a<<8); \
+  c -= a; c -= b; c ^= (b>>13); \
+  a -= b; a -= c; a ^= (c>>12);  \
+  b -= c; b -= a; b ^= (a<<16); \
+  c -= a; c -= b; c ^= (b>>5); \
+  a -= b; a -= c; a ^= (c>>3);  \
+  b -= c; b -= a; b ^= (a<<10); \
+  c -= a; c -= b; c ^= (b>>15); \
+}
+
+static unsigned int bjhash(register const unsigned char *k)
+{
+   register unsigned int a,b,c,len;
+
+   int length = strlen(k);
+   len = length; 
+   a = b = 0x9e3779b9;
+   c = 0xDeadBeef;
+
+   while (len >= 12)
+   {
+      a += (k[0] +((unsigned int)k[1]<<8) +((unsigned int)k[2]<<16) +((unsigned int)k[3]<<24));
+      b += (k[4] +((unsigned int)k[5]<<8) +((unsigned int)k[6]<<16) +((unsigned int)k[7]<<24));
+      c += (k[8] +((unsigned int)k[9]<<8) +((unsigned int)k[10]<<16)+((unsigned int)k[11]<<24));
+      bjhash_mix(a,b,c);
+      k += 12; len -= 12;
+   }
+
+   c += length;
+
+   switch(len)
+   {
+      case 11: c+=((unsigned int)k[10]<<24);
+      case 10: c+=((unsigned int)k[9]<<16);
+      case 9 : c+=((unsigned int)k[8]<<8);
+      case 8 : b+=((unsigned int)k[7]<<24);
+      case 7 : b+=((unsigned int)k[6]<<16);
+      case 6 : b+=((unsigned int)k[5]<<8);
+      case 5 : b+=k[4];
+      case 4 : a+=((unsigned int)k[3]<<24);
+      case 3 : a+=((unsigned int)k[2]<<16);
+      case 2 : a+=((unsigned int)k[1]<<8);
+      case 1 : a+=k[0];
+   }
+
+   bjhash_mix(a,b,c);
+
+   return c;
+}
+
+/*-------------------------------------------------------------------------
+ * Functions:   db_register_file, db_unregister_file, db_isregistered_file
+ *
+ * Purpose:     Maintain list of files returned by DBCreate/DBOpen as well
+ *              as closed by DBClose in order to detect possible operation
+ *              on closed files.
+ *
+ * Return:      -1 if file limit exceeded. Otherwise [0..DB_NFILES-1]
+ *              representing position in fixed size list. 
+ *
+ * Programmer:  Mark C. Miller, Wed Jul 23 00:14:00 PDT 2008
+ *
+ *-------------------------------------------------------------------------*/
+PRIVATE int 
+db_register_file(DBfile *dbfile, const char *name, int writeable)
+{
+    int i;
+    for (i = 0; i < DB_NFILES; i++)
+    {
+        if (_db_regstatus[i].f == 0)
+        {
+            _db_regstatus[i].f = dbfile;
+            _db_regstatus[i].n = bjhash(name); 
+            _db_regstatus[i].w = writeable;
+            return i;
+        }
+    }
+    return -1;
+}
+
+PRIVATE int 
+db_unregister_file(DBfile *dbfile)
+{
+    int i;
+    for (i = 0; i < DB_NFILES; i++)
+    {
+        if (_db_regstatus[i].f == dbfile)
+        {
+            int j;
+            _db_regstatus[i].f = 0;
+            for (j = i; (_db_regstatus[j+1].f != 0) && (j < DB_NFILES-1); j++)
+            {
+                _db_regstatus[j].f = _db_regstatus[j+1].f;
+                _db_regstatus[j].n = _db_regstatus[j+1].n;
+                _db_regstatus[j].w = _db_regstatus[j+1].w;
+            }
+            _db_regstatus[j].f = 0;
+            return i;
+        }
+    }
+    return -1;
+}
+
+PRIVATE int
+db_isregistered_file(DBfile *dbfile, const char *name)
+{
+    int i;
+    if (dbfile)
+    {
+        for (i = 0; i < DB_NFILES; i++)
+        {
+            if (_db_regstatus[i].f == dbfile)
+                return i;
+        }
+    }
+    else if (name)
+    {
+        unsigned n = bjhash(name);
+        for (i = 0; i < DB_NFILES; i++)
+        {
+            if (_db_regstatus[i].f != 0 &&
+                _db_regstatus[i].n == n)
+                return i;
+        }
+    }
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    db_filter_install
  *
  * Purpose:     Install the database-requested filters, calling the filter
@@ -2286,6 +2478,23 @@ DBGetCompression()
     return SILO_Compression.parameters;
 }
 
+PUBLIC int
+DBFreeCompressionResources(DBfile *dbfile, const char *meshname)
+{
+    int retval = 0;
+
+    API_BEGIN2("DBFreeCompressionResources", int, -1, api_dummy) {
+
+        if (!dbfile->pub.free_z)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+        retval = ((dbfile->pub.free_z) (dbfile, (char *)meshname));
+
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+
 /*----------------------------------------------------------------------
  * Routine:  DBSetFriendlyHDF5Names
  *
@@ -2421,6 +2630,23 @@ DBGetDriverTypeFromPath(const char *path)
    if (strstr(buf, "HDF"))
       return 7; /* can't use DB_HDF5 here. */
    return DB_UNKNOWN;
+}
+
+/*----------------------------------------------------------------------
+ * Routine:  DBJoinPath
+ *
+ * Purpose:  Given paths with possible relative naming, combine them
+ *           into a single absolute path. 
+ *
+ * Programmer:  Mark C. Miller, July 20, 2008 
+ *--------------------------------------------------------------------*/
+PUBLIC char * 
+DBJoinPath(const char *first, const char *second)
+{
+    API_BEGIN("DBJoinPath", char *, NULL) {
+        API_RETURN(db_join_path(first, second));
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
 /*----------------------------------------------------------------------
@@ -3120,6 +3346,9 @@ DBVersion(void)
  *
  *    Thomas R. Treadway, Tue Jun 27 13:59:21 PDT 2006
  *    Added HAVE_STRERROR wrappers
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Added code to register the returned file pointer
  *------------------------------------------------------------------------- */
 PUBLIC DBfile *
 DBOpenReal(const char *name, int type, int mode)
@@ -3141,6 +3370,15 @@ DBOpenReal(const char *name, int type, int mode)
 
         /* deal with extended driver type specifications */
         db_DriverTypeAndSubtype(origtype, &type, &subtype);
+
+        /* Check if file is already opened. If so, none can
+           have it opened for write, including this new one */ 
+        i = db_isregistered_file(0, name);
+        if (i != -1)
+        {
+            if (_db_regstatus[i].w != 0 || mode != DB_READ)
+                API_ERROR(name, E_CONCURRENT);
+        }
 
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
@@ -3243,6 +3481,7 @@ DBOpenReal(const char *name, int type, int mode)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
+        db_register_file(dbfile, name, mode!=DB_READ);
 
 #ifdef DB_SDX
         if (type != DB_SDX)
@@ -3301,6 +3540,9 @@ DBOpenReal(const char *name, int type, int mode)
  *
  *    Mark C. Miller, Mon Nov 19 10:45:05 PST 2007
  *    Added hdf5 driver warning.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Added code to register the returned file pointer
  *-------------------------------------------------------------------------*/
 PUBLIC DBfile *
 DBCreateReal(const char *name, int mode, int target, const char *info, int type)
@@ -3322,6 +3564,14 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
 
         /* deal with extended driver type specifications */
         db_DriverTypeAndSubtype(origtype, &type, &subtype);
+
+        /* Check if file is already opened. If so, none can
+           have it opened for write, including this new one */
+        i = db_isregistered_file(0, name);
+        if (i != -1)
+        {
+            API_ERROR(name, E_CONCURRENT);
+        }
 
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
@@ -3359,6 +3609,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
+        db_register_file(dbfile, name, 1);
 
         /*
          * Install filters.  First all `init' routines, then the specified
@@ -3406,23 +3657,28 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
  *    Eric Brugger, Mon Jul 10 07:42:24 PDT 1995
  *    I moved the reseting of _db_fstatus to before the return statement,
  *    so that the instruction would get executed.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
+ *    Added code to UNregister the given file pointer.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBClose(DBfile *file)
+DBClose(DBfile *dbfile)
 {
     int            id;
     int            retval;
 
-    API_BEGIN("DBClose", int, -1) {
-        if (!file)
+    API_BEGIN2("DBClose", int, -1, api_dummy) {
+        if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
-        if (NULL == file->pub.close)
-            API_ERROR(file->pub.name, E_NOTIMP);
-        id = file->pub.fileid;
+        if (NULL == dbfile->pub.close)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+        id = dbfile->pub.fileid;
         if (id >= 0 && id < DB_NFILES)
             _db_fstatus[id] = 0;
 
-        retval = (file->pub.close) (file);
+        db_unregister_file(dbfile);
+        retval = (dbfile->pub.close) (dbfile);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -3894,18 +4150,21 @@ DBGetOption(DBoptlist *optlist, int option)
  * Modifications:
  *    Eric Brugger, Fri Jan 27 08:23:43 PST 1995
  *    I changed the interface and function of the routine.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC DBtoc  *
-DBGetToc(DBfile *file)
+DBGetToc(DBfile *dbfile)
 {
-    API_BEGIN("DBGetToc", DBtoc *, NULL) {
+    API_BEGIN2("DBGetToc", DBtoc *, NULL, api_dummy) {
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR("", E_GRABBED) ; 
-        if (!file)
+        if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
 
-        DBNewToc(file);
-        API_RETURN(file->pub.toc);
+        DBNewToc(dbfile);
+        API_RETURN(dbfile->pub.toc);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
@@ -3925,13 +4184,16 @@ DBGetToc(DBfile *file)
  * Modifications:
  *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
  *    Added a check for variable name validity.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC DBObjectType
 DBInqVarType(DBfile *dbfile, const char *varname)
 {
     DBObjectType retval;
 
-    API_BEGIN("DBInqVarType", DBObjectType, DB_INVALID_OBJECT) {
+    API_BEGIN2("DBInqVarType", DBObjectType, DB_INVALID_OBJECT, api_dummy) {
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR("", E_GRABBED) ; 
         if (!dbfile)
@@ -4076,13 +4338,16 @@ DBGetAtt(DBfile *dbfile, const char *varname, const char *attname)
  *
  *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
  *    Made the error messages a little better.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *--------------------------------------------------------------------*/
 PUBLIC void   *
 DBGetComponent(DBfile *dbfile, const char *objname, const char *compname)
 {
     void *retval = NULL;
 
-    API_BEGIN("DBGetComponent", void *, NULL) {
+    API_BEGIN2("DBGetComponent", void *, NULL, api_dummy) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -4120,6 +4385,8 @@ DBGetComponent(DBfile *dbfile, const char *objname, const char *compname)
  *
  *  Modified
  *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *--------------------------------------------------------------------*/
 
 PUBLIC int
@@ -4127,7 +4394,7 @@ DBGetComponentType(DBfile *dbfile, const char *objname, const char *compname)
 {
     int retval = DB_NOTYPE;
 
-    API_BEGIN("DBGetComponentType", int, DB_NOTYPE) {
+    API_BEGIN2("DBGetComponentType", int, DB_NOTYPE, api_dummy) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -4159,13 +4426,16 @@ DBGetComponentType(DBfile *dbfile, const char *objname, const char *compname)
  *
  *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *    I replaced API_END with API_END_NOPOP.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *--------------------------------------------------------------------*/
 PUBLIC int
 DBGetDir(DBfile *dbfile, char *path)
 {
     int retval;
 
-    API_BEGIN("DBGetDir", int, -1) {
+    API_BEGIN2("DBGetDir", int, -1, api_dummy) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -4205,6 +4475,9 @@ DBGetDir(DBfile *dbfile, char *path)
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBSetDir(DBfile *dbfile, const char *path)
@@ -4212,7 +4485,7 @@ DBSetDir(DBfile *dbfile, const char *path)
     char           tmp[256];
     int retval;
 
-    API_BEGIN("DBSetDir", int, -1) {
+    API_BEGIN2("DBSetDir", int, -1, api_dummy) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -4350,13 +4623,16 @@ DBListDir(DBfile *dbfile, char *argv[], int argc)
  *              Tue Mar  7 10:51:58 EST 1995
  *
  * Modifications:
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBFilters(DBfile *dbfile, FILE *stream)
 {
     int retval;
 
-    API_BEGIN("DBFilters", int, -1) {
+    API_BEGIN2("DBFilters", int, -1, api_dummy) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -4396,13 +4672,16 @@ DBFilters(DBfile *dbfile, FILE *stream)
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBMkDir(DBfile *dbfile, const char *name)
 {
     int retval;
 
-    API_BEGIN("DBMkDir", int, -1) {
+    API_BEGIN2("DBMkDir", int, -1, api_dummy) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -4415,6 +4694,50 @@ DBMkDir(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.mkdir) (dbfile, (char *)name);
+        db_FreeToc(dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    DBCpDir
+ *
+ * Purpose:     Copies a directory tree from one file to another
+ *
+ * Return:      Success:        directory ID
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Mark C. Miller, Wed Aug  6 15:14:33 PDT 2008
+ *
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBCpDir(DBfile *dbfile, const char *srcDir,
+        DBfile *dstFile, const char *dstDir)
+{
+    int retval;
+
+    API_BEGIN2("DBCpDir", int, -1, api_dummy) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (!dstFile)
+            API_ERROR(NULL, E_NOFILE);
+        if (db_isregistered_file(dstFile,0)==-1)
+            API_ERROR(NULL, E_NOTREG);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR(NULL, E_GRABBED) ; 
+        if (!srcDir || !*srcDir)
+            API_ERROR("source directory name", E_BADARGS);
+        if (!dstDir || !*dstDir)
+            API_ERROR("destination directory name", E_BADARGS);
+        if (db_VariableNameValid((char *)dstDir) == 0)
+            API_ERROR("destination directory name", E_INVALIDNAME);
+        if (!dbfile->pub.cpdir)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.cpdir) (dbfile, srcDir, dstFile, dstDir);
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -4444,23 +4767,26 @@ DBMkDir(DBfile *dbfile, const char *name)
  *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
  *    Completely reformatted the code so a human can read it.  Made the error
  *    messages a little better.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBChangeObject (DBfile *file, DBobject *obj)
+DBChangeObject (DBfile *dbfile, DBobject *obj)
 {
     int             retval;
 
-    API_BEGIN("DBChangeObject", int, -1)
+    API_BEGIN2("DBChangeObject", int, -1, api_dummy)
     {
-        if (!file)
+        if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR("DBChangeObject", E_GRABBED) ; 
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
-        if (!file->pub.c_obj)
-            API_ERROR(file->pub.name, E_NOTIMP);
-        retval = (file->pub.c_obj) (file, obj, OVER_WRITE);
+        if (!dbfile->pub.c_obj)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+        retval = (dbfile->pub.c_obj) (dbfile, obj, OVER_WRITE);
         API_RETURN(retval);
     }
     API_END_NOPOP;                     /* BEWARE: If API_RETURN is removed 
@@ -4493,26 +4819,29 @@ DBChangeObject (DBfile *file, DBobject *obj)
  *
  *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
  *    Made the error messages a little better.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBWriteObject(DBfile *file, DBobject *obj, int freemem)
+DBWriteObject(DBfile *dbfile, DBobject *obj, int freemem)
 {
     int retval;
 
-    API_BEGIN("DBWriteObject", int, -1)
+    API_BEGIN2("DBWriteObject", int, -1, api_dummy)
     {
-        if (!file)
+        if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR("DBWriteObject", E_GRABBED) ; 
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(file, obj->name))
+        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, obj->name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (!file->pub.w_obj)
-            API_ERROR(file->pub.name, E_NOTIMP);
+        if (!dbfile->pub.w_obj)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (file->pub.w_obj) (file, obj, freemem?FREE_MEM:0);
+        retval = (dbfile->pub.w_obj) (dbfile, obj, freemem?FREE_MEM:0);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -4537,23 +4866,26 @@ DBWriteObject(DBfile *file, DBobject *obj, int freemem)
  *
  *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
  *    Made the error messages a little better.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC DBobject *
-DBGetObject (DBfile *file, const char *objname)
+DBGetObject (DBfile *dbfile, const char *objname)
 {
     DBobject       *retval = NULL;
 
-    API_BEGIN("DBGetObject", DBobject *, NULL)
+    API_BEGIN2("DBGetObject", DBobject *, NULL, api_dummy)
     {
-        if (!file)
+        if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR("DBGetObject", E_GRABBED) ; 
         if (!objname)
             API_ERROR("object name", E_BADARGS);
-        if (!file->pub.g_obj)
-            API_ERROR(file->pub.name, E_NOTIMP);
-        retval = (file->pub.g_obj) (file, (char *)objname);
+        if (!dbfile->pub.g_obj)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+        retval = (dbfile->pub.g_obj) (dbfile, (char *)objname);
         API_RETURN(retval);
     }
     API_END_NOPOP;                     /* BEWARE:  If API_RETURN above is
@@ -4591,17 +4923,20 @@ DBGetObject (DBfile *file, const char *objname)
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBWriteComponent(DBfile *file, DBobject *obj, const char *comp_name,
+DBWriteComponent(DBfile *dbfile, DBobject *obj, const char *comp_name,
                  const char *prefix, const char *datatype, const void *var, int nd,
                  long *count)
 {
     int retval;
     int nvals, i;
 
-    API_BEGIN("DBWriteComponent", int, -1) {
-        if (!file)
+    API_BEGIN2("DBWriteComponent", int, -1, api_dummy) {
+        if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR("DBWriteComponent", E_GRABBED) ; 
@@ -4611,7 +4946,7 @@ DBWriteComponent(DBfile *file, DBobject *obj, const char *comp_name,
             API_ERROR("component name", E_BADARGS);
         if (db_VariableNameValid((char *)comp_name) == 0)
             API_ERROR("component name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(file, obj->name))
+        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, obj->name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (!prefix || !*prefix)
             API_ERROR("prefix", E_BADARGS);
@@ -4635,13 +4970,13 @@ DBWriteComponent(DBfile *file, DBobject *obj, const char *comp_name,
         if (obj->ncomponents >= obj->maxcomponents) {
             API_ERROR("ncomponents", E_BADARGS);
         }
-        if (!file->pub.w_comp)
-            API_ERROR(file->pub.name, E_NOTIMP);
+        if (!dbfile->pub.w_comp)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (file->pub.w_comp) (file, obj, (char *)comp_name,
+        retval = (dbfile->pub.w_comp) (dbfile, obj, (char *)comp_name,
                                      (char *)prefix, (char *)datatype, var,
                                      nd, count);
-        db_FreeToc(file);
+        db_FreeToc(dbfile);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */

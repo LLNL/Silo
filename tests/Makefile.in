@@ -47,19 +47,17 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
 	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
 	quad$(EXEEXT) version$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4)
-@HDF5_DRV_NEEDED_TRUE@am__append_1 = $(srcdir)/testsuitehdf5
+@HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
-@HDF5_DRV_NEEDED_TRUE@am__append_3 = $(HDF5PROGS)
-@FORTRAN_NEEDED_TRUE@am__append_4 = $(srcdir)/testsuitef77
-@FORTRAN_NEEDED_TRUE@am__append_5 = $(F77PROGS)
-@FORTRAN_NEEDED_TRUE@am__append_6 = $(F77PROGS)
+@FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
+@FORTRAN_NEEDED_TRUE@am__append_4 = $(FCPROGS)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(install_sh) -d
+mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 am__EXEEXT_1 = compression$(EXEEXT) grab$(EXEEXT)
@@ -336,17 +334,52 @@ F77LD = $(F77)
 F77LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(F77LD) $(AM_FFLAGS) $(FFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = TestReadMask.c alltypes.c array.c $(arrayf77_SOURCES) \
-	$(compression_SOURCES) cpz1plt.c csg.c $(curvef77_SOURCES) \
-	$(dir_SOURCES) extface.c $(grab_SOURCES) group_test.c \
-	largefile.c listtypes.c mat3d_3across.c $(matf77_SOURCES) \
-	merge_block.c mmadjacency.c multi_file.c multi_test.c \
-	multispec.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
-	partial_io.c point.c $(pointf77_SOURCES) polyzl.c \
-	$(quad_SOURCES) $(quadf77_SOURCES) $(rocket_SOURCES) sami.c \
-	simple.c spec.c specmix.c subhex.c testall.c \
-	$(testallf77_SOURCES) testpdb.c twohex.c ucd.c ucd1d.c \
-	$(ucdf77_SOURCES) ucdsamp3.c version.c wave.c
+SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
+	$(nodist_EXTRA_alltypes_SOURCES) alltypes.c \
+	$(nodist_EXTRA_array_SOURCES) array.c $(arrayf77_SOURCES) \
+	$(nodist_EXTRA_arrayf77_SOURCES) $(compression_SOURCES) \
+	$(nodist_EXTRA_compression_SOURCES) \
+	$(nodist_EXTRA_cpz1plt_SOURCES) cpz1plt.c \
+	$(nodist_EXTRA_csg_SOURCES) csg.c $(curvef77_SOURCES) \
+	$(nodist_EXTRA_curvef77_SOURCES) $(dir_SOURCES) \
+	$(nodist_EXTRA_dir_SOURCES) $(nodist_EXTRA_extface_SOURCES) \
+	extface.c $(grab_SOURCES) $(nodist_EXTRA_grab_SOURCES) \
+	$(nodist_EXTRA_group_test_SOURCES) group_test.c \
+	$(nodist_EXTRA_largefile_SOURCES) largefile.c \
+	$(nodist_EXTRA_listtypes_SOURCES) listtypes.c \
+	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
+	$(matf77_SOURCES) $(nodist_EXTRA_matf77_SOURCES) \
+	$(nodist_EXTRA_merge_block_SOURCES) merge_block.c \
+	$(nodist_EXTRA_mmadjacency_SOURCES) mmadjacency.c \
+	$(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
+	$(nodist_EXTRA_multi_test_SOURCES) multi_test.c \
+	$(nodist_EXTRA_multispec_SOURCES) multispec.c \
+	$(nodist_EXTRA_obj_SOURCES) obj.c \
+	$(nodist_EXTRA_onehex_SOURCES) onehex.c \
+	$(nodist_EXTRA_oneprism_SOURCES) oneprism.c \
+	$(nodist_EXTRA_onepyramid_SOURCES) onepyramid.c \
+	$(nodist_EXTRA_onetet_SOURCES) onetet.c \
+	$(nodist_EXTRA_partial_io_SOURCES) partial_io.c \
+	$(nodist_EXTRA_point_SOURCES) point.c $(pointf77_SOURCES) \
+	$(nodist_EXTRA_pointf77_SOURCES) \
+	$(nodist_EXTRA_polyzl_SOURCES) polyzl.c $(quad_SOURCES) \
+	$(nodist_EXTRA_quad_SOURCES) $(quadf77_SOURCES) \
+	$(nodist_EXTRA_quadf77_SOURCES) $(rocket_SOURCES) \
+	$(nodist_EXTRA_rocket_SOURCES) $(nodist_EXTRA_sami_SOURCES) \
+	sami.c $(nodist_EXTRA_simple_SOURCES) simple.c \
+	$(nodist_EXTRA_spec_SOURCES) spec.c \
+	$(nodist_EXTRA_specmix_SOURCES) specmix.c \
+	$(nodist_EXTRA_subhex_SOURCES) subhex.c \
+	$(nodist_EXTRA_testall_SOURCES) testall.c \
+	$(testallf77_SOURCES) $(nodist_EXTRA_testallf77_SOURCES) \
+	$(nodist_EXTRA_testpdb_SOURCES) testpdb.c \
+	$(nodist_EXTRA_twohex_SOURCES) twohex.c \
+	$(nodist_EXTRA_ucd_SOURCES) ucd.c \
+	$(nodist_EXTRA_ucd1d_SOURCES) ucd1d.c $(ucdf77_SOURCES) \
+	$(nodist_EXTRA_ucdf77_SOURCES) \
+	$(nodist_EXTRA_ucdsamp3_SOURCES) ucdsamp3.c \
+	$(nodist_EXTRA_version_SOURCES) version.c \
+	$(nodist_EXTRA_wave_SOURCES) wave.c
 DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
 	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
@@ -400,9 +433,11 @@ FCFLAGS = @FCFLAGS@
 FCLIBS = @FCLIBS@
 FC_FULLPATH = @FC_FULLPATH@
 FFLAGS = @FFLAGS@
+FORTRAN = @FORTRAN@
+FPZIP = @FPZIP@
 GREP = @GREP@
 HDF5_DRV = @HDF5_DRV@
-HEXZIP = @HEXZIP@
+HZIP = @HZIP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -413,7 +448,6 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
-LOCAL = @LOCAL@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -454,25 +488,8 @@ SILO_VERS_PRE = @SILO_VERS_PRE@
 SILO_VERS_TAG = @SILO_VERS_TAG@
 STRIP = @STRIP@
 TAURUS = @TAURUS@
-USEFORTRAN = @USEFORTRAN@
-USE_FILTER_SZIP = @USE_FILTER_SZIP@
-Using64bits = @Using64bits@
-UsingBrowser = @UsingBrowser@
-UsingCxx = @UsingCxx@
-UsingFortran = @UsingFortran@
-UsingHDF5 = @UsingHDF5@
-UsingHexzip = @UsingHexzip@
-UsingLocal = @UsingLocal@
-UsingOpt = @UsingOpt@
-UsingPython = @UsingPython@
-UsingQt = @UsingQt@
-UsingReadline = @UsingReadline@
-UsingSZLIB = @UsingSZLIB@
-UsingShared = @UsingShared@
-UsingSilex = @UsingSilex@
-UsingSrcDir = @UsingSrcDir@
-UsingStatic = @UsingStatic@
 VERSION = @VERSION@
+ZLIB = @ZLIB@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -530,22 +547,33 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = \
- exectests.csh \
  package.m4 \
  pdbcmp.csh \
  testsuite.at \
  testsuite \
- testsuitef77.at \
- testsuitef77 \
- testsuitehdf5.at \
- testsuitehdf5 \
+ pmpio_hdf5_test.c \
+ pmpio_silo_test_mesh.c \
+ $(check_SCRIPTS) \
+ $(check_DATA)
+
+
+# Note: use top entry in check_SCRIPTS as sole target to
+# copy all scripts and data in one rule
+check_SCRIPTS = \
  checksums \
- pmpio_silo_test_mesh.c
+ testhzip \
+ testxvers \
+ test_error.py \
+ test_read.py \
+ test_write.py
+
+check_DATA = \
+ xvers_data.tar.bz2
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-TESTSUITE = $(srcdir)/testsuite $(am__append_1) $(am__append_4)
+TESTSUITE = $(srcdir)/testsuite
 @HDF5_DRV_NEEDED_FALSE@LDADD = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@LDADD = ../src/libsiloh5.la
 
@@ -556,17 +584,17 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/score \
  -I$(srcdir)/../src/silo
 
-quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
-TestReadMask_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
+quad_CPPFLAGS = $(AM_CPPFLAGS)
+TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 HDF5PROGS = compression grab
-F77PROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
+FCPROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
-	csg rocket mmadjacency largefile version $(am__append_2) \
-	$(am__append_5)
+	csg rocket mmadjacency largefile version $(am__append_1) \
+	$(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -578,10 +606,65 @@ quad_SOURCES = \
 rocket_SOURCES = \
  rocket.cpp
 
+
+# Deal with need to use c++ linker whenever we've got C++
+# sources compiled with the silo library and the fact that
+# Automake/gmake won't let me just say LINK=$(CXXLINK). 
+# This is a hack to force c++ linkage when we have
+# c++ code compiled into Silo. I got this hack from
+# automake manaual.
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_array_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_extface_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_multi_test_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_partial_io_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_point_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_group_test_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_listtypes_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_simple_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ucd_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ucdsamp3_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testall_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_alltypes_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_obj_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_onehex_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_oneprism_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_onepyramid_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_onetet_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_TestReadMask_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_subhex_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_twohex_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_multispec_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_specmix_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testpdb_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_sami_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_spec_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_merge_block_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_mat3d_3across_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ucd1d_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_wave_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_multi_file_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_polyzl_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_csg_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_rocket_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_mmadjacency_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_largefile_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_dir_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_quad_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_version_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arrayf77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_curvef77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_matf77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_pointf77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_quadf77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ucdf77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testallf77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_compression_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_grab_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
-@HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD) 
+@HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
-@HDF5_DRV_NEEDED_TRUE@grab_LDADD = $(LDADD) 
+@HDF5_DRV_NEEDED_TRUE@grab_LDADD = $(LDADD)
 @FORTRAN_NEEDED_TRUE@arrayf77_SOURCES = arrayf77.f
 @FORTRAN_NEEDED_TRUE@arrayf77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@curvef77_SOURCES = curvef77.f
@@ -599,7 +682,7 @@ rocket_SOURCES = \
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cpp .f .lo .o .obj
+.SUFFIXES: .c .cpp .cxx .f .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -638,148 +721,148 @@ clean-checkPROGRAMS:
 	done
 TestReadMask$(EXEEXT): $(TestReadMask_OBJECTS) $(TestReadMask_DEPENDENCIES) 
 	@rm -f TestReadMask$(EXEEXT)
-	$(LINK) $(TestReadMask_OBJECTS) $(TestReadMask_LDADD) $(LIBS)
+	$(CXXLINK) $(TestReadMask_OBJECTS) $(TestReadMask_LDADD) $(LIBS)
 alltypes$(EXEEXT): $(alltypes_OBJECTS) $(alltypes_DEPENDENCIES) 
 	@rm -f alltypes$(EXEEXT)
-	$(LINK) $(alltypes_OBJECTS) $(alltypes_LDADD) $(LIBS)
+	$(CXXLINK) $(alltypes_OBJECTS) $(alltypes_LDADD) $(LIBS)
 array$(EXEEXT): $(array_OBJECTS) $(array_DEPENDENCIES) 
 	@rm -f array$(EXEEXT)
-	$(LINK) $(array_OBJECTS) $(array_LDADD) $(LIBS)
+	$(CXXLINK) $(array_OBJECTS) $(array_LDADD) $(LIBS)
 arrayf77$(EXEEXT): $(arrayf77_OBJECTS) $(arrayf77_DEPENDENCIES) 
 	@rm -f arrayf77$(EXEEXT)
-	$(F77LINK) $(arrayf77_OBJECTS) $(arrayf77_LDADD) $(LIBS)
+	$(CXXLINK) $(arrayf77_OBJECTS) $(arrayf77_LDADD) $(LIBS)
 compression$(EXEEXT): $(compression_OBJECTS) $(compression_DEPENDENCIES) 
 	@rm -f compression$(EXEEXT)
-	$(LINK) $(compression_OBJECTS) $(compression_LDADD) $(LIBS)
+	$(CXXLINK) $(compression_OBJECTS) $(compression_LDADD) $(LIBS)
 cpz1plt$(EXEEXT): $(cpz1plt_OBJECTS) $(cpz1plt_DEPENDENCIES) 
 	@rm -f cpz1plt$(EXEEXT)
-	$(LINK) $(cpz1plt_OBJECTS) $(cpz1plt_LDADD) $(LIBS)
+	$(CXXLINK) $(cpz1plt_OBJECTS) $(cpz1plt_LDADD) $(LIBS)
 csg$(EXEEXT): $(csg_OBJECTS) $(csg_DEPENDENCIES) 
 	@rm -f csg$(EXEEXT)
-	$(LINK) $(csg_OBJECTS) $(csg_LDADD) $(LIBS)
+	$(CXXLINK) $(csg_OBJECTS) $(csg_LDADD) $(LIBS)
 curvef77$(EXEEXT): $(curvef77_OBJECTS) $(curvef77_DEPENDENCIES) 
 	@rm -f curvef77$(EXEEXT)
-	$(F77LINK) $(curvef77_OBJECTS) $(curvef77_LDADD) $(LIBS)
+	$(CXXLINK) $(curvef77_OBJECTS) $(curvef77_LDADD) $(LIBS)
 dir$(EXEEXT): $(dir_OBJECTS) $(dir_DEPENDENCIES) 
 	@rm -f dir$(EXEEXT)
-	$(LINK) $(dir_OBJECTS) $(dir_LDADD) $(LIBS)
+	$(CXXLINK) $(dir_OBJECTS) $(dir_LDADD) $(LIBS)
 extface$(EXEEXT): $(extface_OBJECTS) $(extface_DEPENDENCIES) 
 	@rm -f extface$(EXEEXT)
-	$(LINK) $(extface_OBJECTS) $(extface_LDADD) $(LIBS)
+	$(CXXLINK) $(extface_OBJECTS) $(extface_LDADD) $(LIBS)
 grab$(EXEEXT): $(grab_OBJECTS) $(grab_DEPENDENCIES) 
 	@rm -f grab$(EXEEXT)
-	$(LINK) $(grab_OBJECTS) $(grab_LDADD) $(LIBS)
+	$(CXXLINK) $(grab_OBJECTS) $(grab_LDADD) $(LIBS)
 group_test$(EXEEXT): $(group_test_OBJECTS) $(group_test_DEPENDENCIES) 
 	@rm -f group_test$(EXEEXT)
-	$(LINK) $(group_test_OBJECTS) $(group_test_LDADD) $(LIBS)
+	$(CXXLINK) $(group_test_OBJECTS) $(group_test_LDADD) $(LIBS)
 largefile$(EXEEXT): $(largefile_OBJECTS) $(largefile_DEPENDENCIES) 
 	@rm -f largefile$(EXEEXT)
-	$(LINK) $(largefile_OBJECTS) $(largefile_LDADD) $(LIBS)
+	$(CXXLINK) $(largefile_OBJECTS) $(largefile_LDADD) $(LIBS)
 listtypes$(EXEEXT): $(listtypes_OBJECTS) $(listtypes_DEPENDENCIES) 
 	@rm -f listtypes$(EXEEXT)
-	$(LINK) $(listtypes_OBJECTS) $(listtypes_LDADD) $(LIBS)
+	$(CXXLINK) $(listtypes_OBJECTS) $(listtypes_LDADD) $(LIBS)
 mat3d_3across$(EXEEXT): $(mat3d_3across_OBJECTS) $(mat3d_3across_DEPENDENCIES) 
 	@rm -f mat3d_3across$(EXEEXT)
-	$(LINK) $(mat3d_3across_OBJECTS) $(mat3d_3across_LDADD) $(LIBS)
+	$(CXXLINK) $(mat3d_3across_OBJECTS) $(mat3d_3across_LDADD) $(LIBS)
 matf77$(EXEEXT): $(matf77_OBJECTS) $(matf77_DEPENDENCIES) 
 	@rm -f matf77$(EXEEXT)
-	$(F77LINK) $(matf77_OBJECTS) $(matf77_LDADD) $(LIBS)
+	$(CXXLINK) $(matf77_OBJECTS) $(matf77_LDADD) $(LIBS)
 merge_block$(EXEEXT): $(merge_block_OBJECTS) $(merge_block_DEPENDENCIES) 
 	@rm -f merge_block$(EXEEXT)
-	$(LINK) $(merge_block_OBJECTS) $(merge_block_LDADD) $(LIBS)
+	$(CXXLINK) $(merge_block_OBJECTS) $(merge_block_LDADD) $(LIBS)
 mmadjacency$(EXEEXT): $(mmadjacency_OBJECTS) $(mmadjacency_DEPENDENCIES) 
 	@rm -f mmadjacency$(EXEEXT)
-	$(LINK) $(mmadjacency_OBJECTS) $(mmadjacency_LDADD) $(LIBS)
+	$(CXXLINK) $(mmadjacency_OBJECTS) $(mmadjacency_LDADD) $(LIBS)
 multi_file$(EXEEXT): $(multi_file_OBJECTS) $(multi_file_DEPENDENCIES) 
 	@rm -f multi_file$(EXEEXT)
-	$(LINK) $(multi_file_OBJECTS) $(multi_file_LDADD) $(LIBS)
+	$(CXXLINK) $(multi_file_OBJECTS) $(multi_file_LDADD) $(LIBS)
 multi_test$(EXEEXT): $(multi_test_OBJECTS) $(multi_test_DEPENDENCIES) 
 	@rm -f multi_test$(EXEEXT)
-	$(LINK) $(multi_test_OBJECTS) $(multi_test_LDADD) $(LIBS)
+	$(CXXLINK) $(multi_test_OBJECTS) $(multi_test_LDADD) $(LIBS)
 multispec$(EXEEXT): $(multispec_OBJECTS) $(multispec_DEPENDENCIES) 
 	@rm -f multispec$(EXEEXT)
-	$(LINK) $(multispec_OBJECTS) $(multispec_LDADD) $(LIBS)
+	$(CXXLINK) $(multispec_OBJECTS) $(multispec_LDADD) $(LIBS)
 obj$(EXEEXT): $(obj_OBJECTS) $(obj_DEPENDENCIES) 
 	@rm -f obj$(EXEEXT)
-	$(LINK) $(obj_OBJECTS) $(obj_LDADD) $(LIBS)
+	$(CXXLINK) $(obj_OBJECTS) $(obj_LDADD) $(LIBS)
 onehex$(EXEEXT): $(onehex_OBJECTS) $(onehex_DEPENDENCIES) 
 	@rm -f onehex$(EXEEXT)
-	$(LINK) $(onehex_OBJECTS) $(onehex_LDADD) $(LIBS)
+	$(CXXLINK) $(onehex_OBJECTS) $(onehex_LDADD) $(LIBS)
 oneprism$(EXEEXT): $(oneprism_OBJECTS) $(oneprism_DEPENDENCIES) 
 	@rm -f oneprism$(EXEEXT)
-	$(LINK) $(oneprism_OBJECTS) $(oneprism_LDADD) $(LIBS)
+	$(CXXLINK) $(oneprism_OBJECTS) $(oneprism_LDADD) $(LIBS)
 onepyramid$(EXEEXT): $(onepyramid_OBJECTS) $(onepyramid_DEPENDENCIES) 
 	@rm -f onepyramid$(EXEEXT)
-	$(LINK) $(onepyramid_OBJECTS) $(onepyramid_LDADD) $(LIBS)
+	$(CXXLINK) $(onepyramid_OBJECTS) $(onepyramid_LDADD) $(LIBS)
 onetet$(EXEEXT): $(onetet_OBJECTS) $(onetet_DEPENDENCIES) 
 	@rm -f onetet$(EXEEXT)
-	$(LINK) $(onetet_OBJECTS) $(onetet_LDADD) $(LIBS)
+	$(CXXLINK) $(onetet_OBJECTS) $(onetet_LDADD) $(LIBS)
 partial_io$(EXEEXT): $(partial_io_OBJECTS) $(partial_io_DEPENDENCIES) 
 	@rm -f partial_io$(EXEEXT)
-	$(LINK) $(partial_io_OBJECTS) $(partial_io_LDADD) $(LIBS)
+	$(CXXLINK) $(partial_io_OBJECTS) $(partial_io_LDADD) $(LIBS)
 point$(EXEEXT): $(point_OBJECTS) $(point_DEPENDENCIES) 
 	@rm -f point$(EXEEXT)
-	$(LINK) $(point_OBJECTS) $(point_LDADD) $(LIBS)
+	$(CXXLINK) $(point_OBJECTS) $(point_LDADD) $(LIBS)
 pointf77$(EXEEXT): $(pointf77_OBJECTS) $(pointf77_DEPENDENCIES) 
 	@rm -f pointf77$(EXEEXT)
-	$(F77LINK) $(pointf77_OBJECTS) $(pointf77_LDADD) $(LIBS)
+	$(CXXLINK) $(pointf77_OBJECTS) $(pointf77_LDADD) $(LIBS)
 polyzl$(EXEEXT): $(polyzl_OBJECTS) $(polyzl_DEPENDENCIES) 
 	@rm -f polyzl$(EXEEXT)
-	$(LINK) $(polyzl_OBJECTS) $(polyzl_LDADD) $(LIBS)
+	$(CXXLINK) $(polyzl_OBJECTS) $(polyzl_LDADD) $(LIBS)
 quad$(EXEEXT): $(quad_OBJECTS) $(quad_DEPENDENCIES) 
 	@rm -f quad$(EXEEXT)
-	$(LINK) $(quad_OBJECTS) $(quad_LDADD) $(LIBS)
+	$(CXXLINK) $(quad_OBJECTS) $(quad_LDADD) $(LIBS)
 quadf77$(EXEEXT): $(quadf77_OBJECTS) $(quadf77_DEPENDENCIES) 
 	@rm -f quadf77$(EXEEXT)
-	$(F77LINK) $(quadf77_OBJECTS) $(quadf77_LDADD) $(LIBS)
+	$(CXXLINK) $(quadf77_OBJECTS) $(quadf77_LDADD) $(LIBS)
 rocket$(EXEEXT): $(rocket_OBJECTS) $(rocket_DEPENDENCIES) 
 	@rm -f rocket$(EXEEXT)
 	$(CXXLINK) $(rocket_OBJECTS) $(rocket_LDADD) $(LIBS)
 sami$(EXEEXT): $(sami_OBJECTS) $(sami_DEPENDENCIES) 
 	@rm -f sami$(EXEEXT)
-	$(LINK) $(sami_OBJECTS) $(sami_LDADD) $(LIBS)
+	$(CXXLINK) $(sami_OBJECTS) $(sami_LDADD) $(LIBS)
 simple$(EXEEXT): $(simple_OBJECTS) $(simple_DEPENDENCIES) 
 	@rm -f simple$(EXEEXT)
-	$(LINK) $(simple_OBJECTS) $(simple_LDADD) $(LIBS)
+	$(CXXLINK) $(simple_OBJECTS) $(simple_LDADD) $(LIBS)
 spec$(EXEEXT): $(spec_OBJECTS) $(spec_DEPENDENCIES) 
 	@rm -f spec$(EXEEXT)
-	$(LINK) $(spec_OBJECTS) $(spec_LDADD) $(LIBS)
+	$(CXXLINK) $(spec_OBJECTS) $(spec_LDADD) $(LIBS)
 specmix$(EXEEXT): $(specmix_OBJECTS) $(specmix_DEPENDENCIES) 
 	@rm -f specmix$(EXEEXT)
-	$(LINK) $(specmix_OBJECTS) $(specmix_LDADD) $(LIBS)
+	$(CXXLINK) $(specmix_OBJECTS) $(specmix_LDADD) $(LIBS)
 subhex$(EXEEXT): $(subhex_OBJECTS) $(subhex_DEPENDENCIES) 
 	@rm -f subhex$(EXEEXT)
-	$(LINK) $(subhex_OBJECTS) $(subhex_LDADD) $(LIBS)
+	$(CXXLINK) $(subhex_OBJECTS) $(subhex_LDADD) $(LIBS)
 testall$(EXEEXT): $(testall_OBJECTS) $(testall_DEPENDENCIES) 
 	@rm -f testall$(EXEEXT)
-	$(LINK) $(testall_OBJECTS) $(testall_LDADD) $(LIBS)
+	$(CXXLINK) $(testall_OBJECTS) $(testall_LDADD) $(LIBS)
 testallf77$(EXEEXT): $(testallf77_OBJECTS) $(testallf77_DEPENDENCIES) 
 	@rm -f testallf77$(EXEEXT)
-	$(F77LINK) $(testallf77_OBJECTS) $(testallf77_LDADD) $(LIBS)
+	$(CXXLINK) $(testallf77_OBJECTS) $(testallf77_LDADD) $(LIBS)
 testpdb$(EXEEXT): $(testpdb_OBJECTS) $(testpdb_DEPENDENCIES) 
 	@rm -f testpdb$(EXEEXT)
-	$(LINK) $(testpdb_OBJECTS) $(testpdb_LDADD) $(LIBS)
+	$(CXXLINK) $(testpdb_OBJECTS) $(testpdb_LDADD) $(LIBS)
 twohex$(EXEEXT): $(twohex_OBJECTS) $(twohex_DEPENDENCIES) 
 	@rm -f twohex$(EXEEXT)
-	$(LINK) $(twohex_OBJECTS) $(twohex_LDADD) $(LIBS)
+	$(CXXLINK) $(twohex_OBJECTS) $(twohex_LDADD) $(LIBS)
 ucd$(EXEEXT): $(ucd_OBJECTS) $(ucd_DEPENDENCIES) 
 	@rm -f ucd$(EXEEXT)
-	$(LINK) $(ucd_OBJECTS) $(ucd_LDADD) $(LIBS)
+	$(CXXLINK) $(ucd_OBJECTS) $(ucd_LDADD) $(LIBS)
 ucd1d$(EXEEXT): $(ucd1d_OBJECTS) $(ucd1d_DEPENDENCIES) 
 	@rm -f ucd1d$(EXEEXT)
-	$(LINK) $(ucd1d_OBJECTS) $(ucd1d_LDADD) $(LIBS)
+	$(CXXLINK) $(ucd1d_OBJECTS) $(ucd1d_LDADD) $(LIBS)
 ucdf77$(EXEEXT): $(ucdf77_OBJECTS) $(ucdf77_DEPENDENCIES) 
 	@rm -f ucdf77$(EXEEXT)
-	$(F77LINK) $(ucdf77_OBJECTS) $(ucdf77_LDADD) $(LIBS)
+	$(CXXLINK) $(ucdf77_OBJECTS) $(ucdf77_LDADD) $(LIBS)
 ucdsamp3$(EXEEXT): $(ucdsamp3_OBJECTS) $(ucdsamp3_DEPENDENCIES) 
 	@rm -f ucdsamp3$(EXEEXT)
-	$(LINK) $(ucdsamp3_OBJECTS) $(ucdsamp3_LDADD) $(LIBS)
+	$(CXXLINK) $(ucdsamp3_OBJECTS) $(ucdsamp3_LDADD) $(LIBS)
 version$(EXEEXT): $(version_OBJECTS) $(version_DEPENDENCIES) 
 	@rm -f version$(EXEEXT)
-	$(LINK) $(version_OBJECTS) $(version_LDADD) $(LIBS)
+	$(CXXLINK) $(version_OBJECTS) $(version_LDADD) $(LIBS)
 wave$(EXEEXT): $(wave_OBJECTS) $(wave_DEPENDENCIES) 
 	@rm -f wave$(EXEEXT)
-	$(LINK) $(wave_OBJECTS) $(wave_LDADD) $(LIBS)
+	$(CXXLINK) $(wave_OBJECTS) $(wave_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -788,12 +871,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-TestReadMask.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alltypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpz1plt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dir.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group_test.Po@am__quote@
@@ -813,6 +898,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partial_io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polyzl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-quad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-testlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket.Po@am__quote@
@@ -915,6 +1001,55 @@ quad-testlib.obj: testlib.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
+TestReadMask-dummy.o: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TestReadMask-dummy.o -MD -MP -MF $(DEPDIR)/TestReadMask-dummy.Tpo -c -o TestReadMask-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/TestReadMask-dummy.Tpo $(DEPDIR)/TestReadMask-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='TestReadMask-dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TestReadMask-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+
+TestReadMask-dummy.obj: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TestReadMask-dummy.obj -MD -MP -MF $(DEPDIR)/TestReadMask-dummy.Tpo -c -o TestReadMask-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/TestReadMask-dummy.Tpo $(DEPDIR)/TestReadMask-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='TestReadMask-dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TestReadMask-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+
+quad-dummy.o: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(quad_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quad-dummy.o -MD -MP -MF $(DEPDIR)/quad-dummy.Tpo -c -o quad-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/quad-dummy.Tpo $(DEPDIR)/quad-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='quad-dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(quad_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quad-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+
+quad-dummy.obj: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(quad_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quad-dummy.obj -MD -MP -MF $(DEPDIR)/quad-dummy.Tpo -c -o quad-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/quad-dummy.Tpo $(DEPDIR)/quad-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='quad-dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(quad_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quad-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+
+.cxx.o:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cxx.obj:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cxx.lo:
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
 .f.o:
 	$(F77COMPILE) -c -o $@ $<
 
@@ -1005,7 +1140,8 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS) \
+	  $(check_DATA)
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
 all-am: Makefile all-local
@@ -1111,12 +1247,6 @@ uninstall-am:
 	tags uninstall uninstall-am
 
 
-#TESTS = array extface multi_test partial_io point group_test \
-# listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
-# oneprism onepyramid onetet TestReadMask subhex twohex multispec \
-# specmix testpdb sami spec cpz1plt merge_block mat3d_3across \
-# ucd1d wave multi_file polyzl csg rocket mmadjacency  largefile version 
-
 all-local:
 	@echo
 	@if (fmt</dev/null)>/dev/null 2>&1;then fmt="fmt -70";else fmt=cat;fi;\
@@ -1128,29 +1258,28 @@ all-local:
 	   $$fmt | sed 's/^/NOTICE: /'
 	@echo
 
-# autotest targets
+#
+# Autotest targets.
+# Since we run testsuite multiple times in different 'modes', we
+# need some extra logic to contatentate all the results into a
+# single, final testsuite.log. Also, it is possible for TESTARGS
+# to somehow override DB_HDF5= and PYTHON= in these test inokations.
+#
 check-local: $(TESTSUITE) $(PROGS)
-	list='$(TESTSUITE)'; for file in $$list; do \
-	  $(SHELL) $$file; \
-	done
+	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) $(TESTARGS)
+	@if test -e testsuite.log; then \
+	    cp testsuite.log testsuite.log.pdb ; \
+	fi
+@HDF5_DRV_NEEDED_TRUE@	$(SHELL) $(srcdir)/testsuite DB_HDF5=DB_HDF5 PYTHON=$(PYTHON) $(TESTARGS)
+@HDF5_DRV_NEEDED_TRUE@	@if test -e testsuite.log.pdb -a -e testsuite.log; then \
+@HDF5_DRV_NEEDED_TRUE@	    cat testsuite.log.pdb >> testsuite.log ; \
+@HDF5_DRV_NEEDED_TRUE@	fi
 
 clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
-	rm -f testsuitef77.log
-	rm -rf testsuitef77.dir
-	rm -f testsuitehdf5.log
-	rm -rf testsuitehdf5.dir
 
 testsuite: $(srcdir)/testsuite.at
-	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
-	-mv -f $@.tmp $@
-
-testsuitef77: $(srcdir)/testsuitef77.at
-	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
-	-mv -f $@.tmp $@
-
-testsuitehdf5: $(srcdir)/testsuitehdf5.at
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	-mv -f $@.tmp $@
 
@@ -1176,6 +1305,17 @@ resample.lo: resample.c
 	$(LIBTOOL) --tag=CC --mode=compile $(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o $@ $<
 
 tests: $(PROGS)
+
+# Single rule to capture anything put into check_DATA or check_SCRIPTS
+# this assumes the only action necessary to create is a copy
+checksums: copy_cksd
+copy_cksd:
+	@for f in $(check_SCRIPTS) $(check_DATA); do \
+	    if test ! -e $$f ; then \
+	        cp $(srcdir)/$$f . ;\
+	    fi ;\
+	done
+	touch $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

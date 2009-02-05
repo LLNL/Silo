@@ -45,6 +45,12 @@ for advertising or product endorsement purposes.
 
 #include "config.h"
 #ifdef HAVE_HDF5_H
+/* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
+   in this file uses version 1.6 of the HDF5 API. This is harmless for
+   versions of HDF5 before 1.8 and ensures correct compilation with
+   version 1.8 and thereafter. When, and if, the HDF5 code in this file
+   is explicitly upgraded to the 1.8 API, this symbol should be removed. */
+#define H5_USE_16_API
 #include "hdf5.h"
 #endif
 
@@ -122,8 +128,8 @@ main(int argc, char *argv[])
     /* Parse command-line */
     for (i=1; i<argc; i++) {
        if (!strcmp(argv[i], "DB_PDB")) {
-          driver = DB_PDB;
-          filename = "grab.pdb";
+          fprintf(stderr, "This test only supported on HDF5 driver\n");
+          exit(1);
        } else if (!strcmp(argv[i], "DB_HDF5")) {
           driver = DB_HDF5;
           filename = "grab.h5";

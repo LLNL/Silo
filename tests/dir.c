@@ -42,17 +42,17 @@ extern int build_ucd_tri(DBfile *dbfile, char *name);
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	
+ * Purpose:     
  *
- * Return:	0
+ * Return:      0
  *
- * Programmer:	
+ * Programmer:  
  *
  * Modifications:
- * 	Robb Matzke, 1999-04-09
- *	Added argument parsing to control the driver which is used.
+ *      Robb Matzke, 1999-04-09
+ *      Added argument parsing to control the driver which is used.
  *
  *-------------------------------------------------------------------------
  */
@@ -62,25 +62,27 @@ main(int argc, char *argv[])
     int            meshid, diridq, diridu, diridt, dbid;
     int            meshtypes[3], mmid, nmesh;
     char          *meshnames[3], original_dir[128];
-    DBfile        *dbfile;
-    char	  *filename = "dir.pdb";
-    int		   i, driver = DB_PDB;
+    DBfile        *dbfile, *dbfile2, *dbfile3, *dbfile4, *dbfile5;
+    char          *filename = "dir.pdb";
+    char          *filename2 = "dir2.pdb";
+    int            i, driver = DB_PDB;
 
     DBShowErrors(DB_ALL, NULL);
 
     for (i=1; i<argc; i++) {
-	if (!strcmp(argv[i], "DB_PDB")) {
-	    driver = DB_PDB;
-	    filename = "dir.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
-	    filename = "dir.h5";
-	} else {
-	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
-	}
+        if (!strcmp(argv[i], "DB_PDB")) {
+            driver = DB_PDB;
+            filename = "dir.pdb";
+            filename2 = "dir2.pdb";
+        } else if (!strcmp(argv[i], "DB_HDF5")) {
+            driver = DB_HDF5;
+            filename = "dir.h5";
+            filename2 = "dir2.h5";
+        } else {
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
     }
     
-
     dbfile = DBCreate(filename, 0, DB_LOCAL, "dir test file", driver);
     printf("Creating file: '%s'...\n", filename);
 
@@ -92,6 +94,16 @@ main(int argc, char *argv[])
 
     DBSetDir(dbfile, "/quad_dir");
     meshid = build_quad(dbfile, "quadmesh");
+    DBMkdir(dbfile, "quad_subdir1");
+    DBSetDir(dbfile, "quad_subdir1");
+    build_quad(dbfile, "quadmesh");
+    DBMkdir(dbfile, "quad_subdir2");
+    DBSetDir(dbfile, "quad_subdir2");
+    build_quad(dbfile, "quadmesh");
+    DBSetDir(dbfile, "../..");
+    DBMkdir(dbfile, "quad_subdir3");
+    DBSetDir(dbfile, "quad_subdir3");
+    build_quad(dbfile, "quadmesh");
 
     meshtypes[0] = DB_QUAD_RECT;
     meshnames[0] = "/quad_dir/quadmesh";
@@ -120,21 +132,36 @@ main(int argc, char *argv[])
     DBClose(dbfile);
 
     dbfile = DBOpen(filename, driver, DB_READ);
-    printf("Opening file: '%s'...\n", filename);
+    dbfile2 = DBCreate(filename2, 0, DB_LOCAL, "dir test file", driver);
 
-    printf("\nDirectory: /quad_dir\n");
-    DBSetDir(dbfile, "/quad_dir");
-    DBListDir(dbfile, 0, 0);
-
-    printf("\nDirectory: /ucd_dir\n");
-    DBSetDir(dbfile, "/ucd_dir");
-    DBListDir(dbfile, 0, 0);
-
-    printf("\nDirectory: /tri_dir\n");
-    DBSetDir(dbfile, "/tri_dir");
-    DBListDir(dbfile, 0, 0);
+    if (driver == DB_HDF5)
+        DBCpDir(dbfile, "quad_dir/quad_subdir1", dbfile2, "gorfo");
 
     DBClose(dbfile);
+    DBClose(dbfile2);
+
+    dbfile = DBOpen(filename, driver, DB_READ);
+    dbfile2 = DBOpen(filename2, driver, DB_APPEND);
+
+    if (driver == DB_HDF5)
+        DBCpDir(dbfile, "ucd_dir", dbfile2, "gorfo/foobar");
+
+    /* this should be ok becase we're opening for read */
+    dbfile3 = DBOpen(filename, driver, DB_READ);
+    DBClose(dbfile3);
+
+    /* this should fail because file is open for write */
+    dbfile4 = DBOpen(filename2, driver, DB_READ);
+    if (dbfile4 != 0 || db_errno != E_CONCURRENT)
+        exit(1);
+
+    /* this should fail because filename is already open */
+    dbfile5 = DBOpen(filename, driver, DB_APPEND);
+    if (dbfile5 != 0 || db_errno != E_CONCURRENT)
+        exit(1);
+
+    DBClose(dbfile);
+    DBClose(dbfile2);
 
     return 0;
 }

@@ -38,7 +38,6 @@ for advertising or product endorsement purposes.
 #include <string.h>     /* For strcmp() */
 #include "silo.h"
 
-char *db_join_path ( const char *a, const char *b );
 static void build_csg(DBfile *dbfile, char *name);
 static int hadError = 0;
 
@@ -171,7 +170,7 @@ build_csg(DBfile *dbfile, char *name)
     {
         const char *parent = "/";
         const char *child = "/facelist";
-        char *result = db_join_path(parent, child);
+        char *result = DBJoinPath(parent, child);
         printf("Got \"%s\" for result\n", result);
     }
 }

@@ -34,6 +34,10 @@
 
 #include "silo.h"
 
+#define NX 30
+#define NY 40
+#define NZ 30
+
 #define MAXBLOCKS       100           /* maximum number of blocks in an object   */
 #define MAXNUMVARS      10            /* maximum number of vars to output */
 #define STRLEN          60
@@ -79,6 +83,7 @@ int has_external_zones[MAXBLOCKS];
 int matcounts[MAXBLOCKS];
 int matlists[MAXBLOCKS][MAXMATNO+1];
 int driver = DB_PDB;
+int check_early_close = FALSE;
 
 int           build_multi(DBfile *, int, int, int, int, int, int, int);
 
@@ -364,15 +369,26 @@ main(int argc, char *argv[])
             int inc = 512 << 11;
             driver = inc | DB_HDF5_CORE;
             file_ext = ".h5";
+        } else if (!strcmp(argv[i], "hzip")) {
+            DBSetCompression("ERRMODE=FAIL METHOD=HZIP");
+        } else if (!strcmp(argv[i], "fpzip")) {
+            DBSetCompression("METHOD=FPZIP LOSS=3");
+        } else if (!strcmp(argv[i], "fpziplossless")) {
+            DBSetCompression("METHOD=FPZIP");
+        } else if (!strcmp(argv[i], "earlyclose")) {
+            check_early_close = TRUE;
         } else if (!strcmp(argv[i], "check")) {
             dochecks = TRUE;
         } else if (!strcmp(argv[i], "hdf-friendly")) {
             hdfriendly = TRUE;
+        } else if (!strcmp(argv[i], "hdf-friendly-hard")) {
+            hdfriendly = 2;
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
 
+    DBShowErrors(DB_TOP, NULL);
     DBSetEnableChecksums(dochecks);
     if (driver == DB_HDF5 || driver == DB_HDF5_SEC2 ||
         driver == DB_HDF5_STDIO || driver == DB_HDF5_CORE)
@@ -632,6 +648,10 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         }                              /* if */
     }                                  /* for */
 
+    /* test behavior when file is closed prematurely */
+    if (check_early_close)
+        DBClose(dbfile);
+
     /* create the blocks */
 
     switch (meshtype)
@@ -854,12 +874,6 @@ void
 build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                    int nblocks_x, int nblocks_y)
 {
-#undef NX
-#define NX 30
-#undef NY
-#define NY 40
-#undef NZ
-#define NZ 30
     int             cycle;
     float           time;
     double          dtime;
@@ -1224,6 +1238,14 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
         DBFreeOptlist(optlist);
 
+        /*
+         * Test explicit call to free compression resources for a mesh
+         */
+        if (driver == DB_HDF5 && block % 6 == 0)
+            DBFreeCompressionResources(dbfile,0);        /* all mesh case */
+        else if (driver == DB_HDF5 && block % 2 == 0)
+            DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
+
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
@@ -1499,6 +1521,14 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
         DBFreeOptlist(optlist);
 
+        /*
+         * Test explicit call to free compression resources for a mesh
+         */
+        if (driver == DB_HDF5 && block % 6 == 0)
+            DBFreeCompressionResources(dbfile,0);        /* all mesh case */
+        else if (driver == DB_HDF5 && block % 2 == 0)
+            DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
+
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
@@ -1695,6 +1725,14 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
         DBFreeOptlist(optlist);
 
+        /*
+         * Test explicit call to free compression resources for a mesh
+         */
+        if (driver == DB_HDF5 && block % 6 == 0)
+            DBFreeCompressionResources(dbfile,0);        /* all mesh case */
+        else if (driver == DB_HDF5 && block % 2 == 0)
+            DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
+
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
@@ -1764,8 +1802,6 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             mix_next[MIXMAX], mix_mat[MIXMAX], mix_zone[MIXMAX];
     float           mix_vf[MIXMAX];
 
-    DBoptlist      *optlist = NULL;
-
     int             i, j, k;
     float           xave, yave, zave;
     float           xcenter, ycenter, zcenter;
@@ -1784,6 +1820,8 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             mixlen2;
     int             mix_next2[MIXMAX], mix_mat2[MIXMAX], mix_zone2[MIXMAX];
     float           mix_vf2[MIXMAX];
+
+    DBoptlist      *optlist;
 
     /* 
      * Create the mesh.
@@ -2045,6 +2083,14 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
         DBFreeOptlist(optlist);
 
+        /*
+         * Test explicit call to free compression resources for a mesh
+         */
+        if (driver == DB_HDF5 && block % 6 == 0)
+            DBFreeCompressionResources(dbfile,0);        /* all mesh case */
+        else if (driver == DB_HDF5 && block % 2 == 0)
+            DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
+
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
@@ -2093,12 +2139,6 @@ void
 build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                   int nblocks_x, int nblocks_y, int nblocks_z)
 {
-#undef  NX
-#define NX 30
-#undef  NY
-#define NY 40
-#undef  NZ
-#define NZ 30
 
     int             cycle;
     float           time;
@@ -2232,7 +2272,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
      */
     fill_rect3d_bkgr(matlist, NX, NY, NZ, 1);
 
-    for (i = 0; i < NY; i++)
+    for (i = 0; i < NX + NY + NZ; i++)
     {
         xstrip[i] = (float)i;
         ystrip[i] = (float)i;
@@ -2463,29 +2503,8 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
                       zoneno, &fshapesize, &fshapecnt, 1, NULL, NULL, 0);
 
-        /* 
-         * Output the zonelist.  This is being done at the object
-         * level to add the hi_offset option which can't be output
-         * with the DBPutZonelist routine.
-         */
-        obj = DBMakeObject("zl1", DB_ZONELIST, 20);
-
-        DBAddIntComponent(obj, "ndims", 3);
-        DBAddIntComponent(obj, "nzones", nzones);
-        DBAddIntComponent(obj, "nshapes", 1);
-        DBAddIntComponent(obj, "lnodelist", lzonelist);
-        DBAddIntComponent(obj, "origin", 0);
-        DBAddIntComponent(obj, "hi_offset", hi_off);
-        DBAddVarComponent(obj, "nodelist", "zl1_nodelist");
-        DBAddVarComponent(obj, "shapecnt", "zl1_shapecnt");
-        DBAddVarComponent(obj, "shapesize", "zl1_shapesize");
-
-        DBWriteObject(dbfile, obj, 0);
-        DBFreeObject(obj);
-
-        DBWrite(dbfile, "zl1_nodelist", zonelist, &lzonelist, 1, DB_INT);
-        DBWrite(dbfile, "zl1_shapecnt", &zshapecnt, &one, 1, DB_INT);
-        DBWrite(dbfile, "zl1_shapesize", &zshapesize, &one, 1, DB_INT);
+        DBPutZonelist2(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
+            0, hi_off, &zshapetype, &zshapesize, &zshapecnt, 1, 0);
 
         /* 
          * Output the rest of the mesh and variables.
@@ -2540,6 +2559,14 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
         DBFreeOptlist(optlist);
 
+        /*
+         * Test explicit call to free compression resources for a mesh
+         */
+        if (driver == DB_HDF5 && block % 6 == 0)
+            DBFreeCompressionResources(dbfile,0);        /* all mesh case */
+        else if (driver == DB_HDF5 && block % 2 == 0)
+            DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
+
         if (DBSetDir(dbfile, "..") == -1)
         {
             fprintf(stderr, "Could not return to base directory\n");
@@ -2578,13 +2605,6 @@ void
 build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                    int nblocks_x, int nblocks_y, int nblocks_z)
 {
-#undef  NX
-#define NX 30
-#undef  NY
-#define NY 40
-#undef  NZ
-#define NZ 30
-
     int             cycle;
     float           time;
     double          dtime;
@@ -2901,6 +2921,14 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                       mix_vf, mixlen, DB_FLOAT, optlist);
 
         DBFreeOptlist(optlist);
+
+        /*
+         * Test explicit call to free compression resources for a mesh
+         */
+        if (driver == DB_HDF5 && block % 6 == 0)
+            DBFreeCompressionResources(dbfile,0);        /* all mesh case */
+        else if (driver == DB_HDF5 && block % 2 == 0)
+            DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
         {

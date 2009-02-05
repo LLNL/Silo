@@ -276,6 +276,11 @@ typedef struct context_t {
                         T jrv = R ;                                           \
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
+                        if (db_isregistered_file(dbfile,0) == -1)             \
+                        {                                                     \
+                            db_perror("", E_NOTREG, me);                      \
+                            return R;                                         \
+                        }                                                     \
                         if (DBDebugAPI>0) {                                   \
                            write (DBDebugAPI, M, strlen(M));                  \
                            write (DBDebugAPI, "\n", 1);                       \
@@ -729,6 +734,8 @@ typedef struct filter_t {
 
 typedef struct SILO_Compression_t {
    char         *parameters;
+   float         minratio;
+   int           errmode;
 } SILO_Compression_t;
 extern SILO_Compression_t SILO_Compression;
 

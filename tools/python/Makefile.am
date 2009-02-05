@@ -11,15 +11,11 @@ endif
 
 AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(includedir) -I$(top_srcdir)/src/silo
 
-EXTRA_DIST = \
- test_error.py \
- test_read.py \
- test_write.py
-
 noinst_HEADERS = \
  pydbfile.h \
  pydbtoc.h \
  pysilo.h 
+
 FILES = \
  pydbfile.cpp \
  pydbtoc.cpp \

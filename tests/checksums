@@ -11,10 +11,21 @@
 #
 # -----------------------------------------------------------------------------
 
+# Diddle the the directory because Autotest is not at all designed to handle
+# tests the way this one was written
+if test -n "$1"; then
+    topDir=$1
+    if test -e $topDir/../../multi_test; then
+        topDir=$1/../..
+    fi
+else
+    topDir=.
+fi
+
 #
 # Create data with checksums (only on HDF5 driver) and save files
 #
-./multi_test DB_HDF5 check 1>/dev/null 2>&1
+$topDir/multi_test DB_HDF5 check 1>/dev/null 2>&1
 rm -rf h5_check_files
 mkdir h5_check_files
 mv *.h5 h5_check_files/.
@@ -22,7 +33,7 @@ mv *.h5 h5_check_files/.
 #
 # Create data without checksums
 #
-./multi_test DB_HDF5 1>/dev/null 2>&1
+$topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 
 #
 # Determine the offset of an hdf5 dataset in the silo file.
@@ -63,13 +74,18 @@ tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 # detect a checksumming error
 #
 result=0
-brOut=`../tools/browser/browser -q -c -e diff multi_ucd3d.h5 multi_ucd3d_corrupt.h5 2>&1`
+brOut=`$topDir/../tools/browser/browser -q -c -e diff multi_ucd3d.h5 multi_ucd3d_corrupt.h5 2>&1`
 if test -z "`echo $brOut | grep 'Checksum failure'`"; then
     result=1
 fi
 
-brOut=`../tools/browser/browser -q -e diff multi_ucd3d.h5 multi_ucd3d_corrupt.h5`
-if test -z "`echo $brOut | grep 'block35.fl1'`"; then
+#
+# Now, run browser with checksumming not turned on and make sure
+# we just see a diff in the file
+#
+brOut=`$topDir/../tools/browser/browser -q -e diff multi_ucd3d.h5 multi_ucd3d_corrupt.h5`
+# Just look for a large output of characters
+if test ${#brOut} -lt 250; then
     result=1
 fi
 
@@ -79,6 +95,5 @@ fi
 rm -rf h5_check_files
 rm -f zeros
 rm -f multi_ucd3d_corrupt.h5
-popd
 
 exit $result 

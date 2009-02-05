@@ -13,6 +13,7 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <string.h>
 
 typedef union u_mem_header mem_header;
 typedef struct s_mem_descriptor mem_descriptor;
@@ -743,7 +744,8 @@ lite_SC_firsttok (char *s, char *delim) {
        * Copy the remainder down into the original string
        * GOTCHA: this should be replaced by MEMMOVE (ANSI standard C function)
        */
-      strcpy(s, r);
+      /*strcpy(s, r);*/
+      memmove(s, r, strlen(r)+1);
 
       /*
        * Copy the token in the space left over.

@@ -321,6 +321,11 @@ dnl     Changed release to 4.6.1
 dnl     Added check for sys/stat.h
 dnl     Removed src/swat directory
 dnl
+dnl     Mark C. Miller, Wed Jul  2 09:08:13 PDT 2008
+dnl     Isolated version information to VERSION file, though configure
+dnl     still needs to get re-generated with each new version.
+dnl     Removed slew of extraneous refs to 'UsingXXX' variables.
+dnl
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -367,8 +372,6 @@ dnl Change the default prefix (/usr/local) to `pwd`
 dnl Set prefix default (install directory) to a directory in the build area.
 dnl This allows multiple src-dir builds within one host.
 AC_PREFIX_DEFAULT("SILO_TOP_SRC_DIR")
-UsingSrcDir="SILO_TOP_SRC_DIR"
-AC_SUBST([UsingSrcDir])
 
 # Turn off shared libraries by default, since build process takes longer.
 AC_DISABLE_SHARED
@@ -400,19 +403,32 @@ fi
 
 dnl ----------------------------------------------------------------------
 
+dnl
+dnl Specify default settings for various options. These may be overridden
+dnl in site-specific config files. Empty string means feature is disabled
+dnl while non-empty string means it is enabled.
+dnl
+DEFAULT_PYTHONMODULE=""
+DEFAULT_BROWSER="browser"
+DEFAULT_SILEX="silex"
+DEFAULT_HZIP="hzip"
+DEFAULT_FPZIP="fpzip"
+DEFAULT_FORTRAN="fortran"
+default_detect_readline="yes"
+
 dnl Source any special site-specific file
 hname="`hostname`"
 file=$srcdir/config-site/$hname.conf
 AC_MSG_CHECKING([for site config host file])
 if test -f "$file"; then
     . $file
-    AC_MSG_RESULT([$file])
+    AC_MSG_RESULT(found [$file])
 else
     hname="`hostname | cut -f1 -d.`"
     file=$srcdir/config-site/$hname.conf
     if test -f "$file"; then
         . $file
-        AC_MSG_RESULT([$file])
+        AC_MSG_RESULT(found [$file])
     else
         AC_MSG_RESULT([no])
     fi
@@ -490,78 +506,68 @@ if test "X$host_config" != "Xnone"; then
   . $host_config
 fi
 
-# This F77 stuff is still embeaded in libtools, it should go away
-# If F77 is set, and FC isn't, then set FC to whatever F77 was set to.
-if test "${F77+set}" = set -a "${FC+set}" != set; then
-  FC=$F77
-  if test "${FFLAGS+set}" = set -a "${FCFLAGSset}" != set; then
-    FCFLAGS=$FFLAGS
-  fi
+#
+# MCM -- 22Jul08. I don't know why we're mixing FC and F77 stuf here.
+# According to autoconf web pages, we should probably use one or the
+# other but not both. Also, given that silo_f.h uses FC_FUNC macro,
+# I don't see how we can get by using F77. So, it is removed and we're
+# using only FC.
+#
+
+dnl handle fortran compiler.
+AC_ARG_ENABLE(fortran,
+    AC_HELP_STRING([--enable-fortran],
+        [compile Fortran interface to Silo @<:@default=yes@:>@]),
+    if test "$enable_fortran" = "no" ; then
+        FORTRAN=""
+    fi,
+    FORTRAN=$DEFAULT_FORTRAN)
+AC_SUBST(FORTRAN)
+
+# Check for programs.
+# We shouldn't depend on too many!
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_CPP
+if test -n "$FORTRAN"; then
+    AC_PROG_FC
+    AC_FC_LIBRARY_LDFLAGS
+    AC_FC_WRAPPERS
 fi
-if test "${FC+set}" = set -a "${F77set}" != set; then
-  F77=$FC
-  if test "${FCFLAGS+set}" = set -a "${FFLAGSset}" != set; then
-    FFLAGS=$FCFLAGS
-  fi
-fi
+AC_PROG_MAKE_SET
+AC_PROG_LIBTOOL
+AC_ISC_POSIX
+# save the cache so far
+AC_CACHE_SAVE
 
 dnl C optimization flags
 AC_ARG_ENABLE(optimization,
-AC_HELP_STRING([--enable-optimization], 
-  [compile with optimization @<:@default=no@:>@]),
-[case "${enableval}" in
-  yes) USING_DEBUG="no";;
-  no)  USING_DEBUG="yes";;
-  *) AC_MSG_ERROR(bad value ${enableval} for --enable-optimization) ;;
-esac],[USING_DEBUG="yes"])
+    AC_HELP_STRING([--enable-optimization], 
+        [compile with optimization @<:@default=no@:>@]),
+    [case "${enableval}" in
+        yes) USING_DEBUG="no";;
+        no)  USING_DEBUG="yes";;
+        *) AC_MSG_ERROR(bad value ${enableval} for --enable-optimization) ;;
+    esac],
+    [USING_DEBUG="yes"])
 
-# Check for the netcdf driver.
-AC_MSG_CHECKING(for silo's netcdf driver)
-if test -d $srcdir/src/netcdf; then
-    AC_MSG_RESULT(found)
-    AC_DEFINE(HAVE_NETCDF_DRIVER,1,[Support for NetCDF])
-    NETCDF="netcdf"
-else
-    AC_MSG_RESULT(not found - SILO will not have NETCDF)
-    NETCDF=""
-fi
+dnl we don't need to check for netcdf driver. It is always there.
+NETCDF="netcdf"
+AC_DEFINE(HAVE_NETCDF_DRIVER,1,[Support for NetCDF])
 AC_SUBST(NETCDF)
 
-# Check for the pdb driver.
-AC_MSG_CHECKING(for silo's pdb driver)
-if test -d $srcdir/src/pdb_drv; then
-    AC_MSG_RESULT(found)
-    AC_DEFINE(HAVE_PDB_DRIVER,1,[Support for PDB])
-    PDB_DRV="pdb_drv"
-else
-    AC_MSG_RESULT(not found - SILO will not have PDB)
-    PDB_DRV=""
-fi
+dnl we don't need to check for pdb driver. It is always there. 
+PDB_DRV="pdb_drv"
+AC_DEFINE(HAVE_PDB_DRIVER,1,[Support for PDB])
 AC_SUBST(PDB_DRV)
 
-# Check for the taurus driver.
-AC_MSG_CHECKING(for silo's taurus driver)
-if test -d $srcdir/src/taurus; then
-    AC_MSG_RESULT(found)
-    AC_DEFINE(HAVE_TAURUS_DRIVER,1,[Support for Taurus])
-    TAURUS="taurus"
-else
-    AC_MSG_RESULT(not found - SILO will not have TAURUS)
-    TAURUS=""
-fi
+dnl we don't need to check for taurus driver. It is always there.
+TAURUS="taurus"
+AC_DEFINE(HAVE_TAURUS_DRIVER,1,[Support for Taurus])
 AC_SUBST(TAURUS)
 
-dnl
-dnl Check for the hdf5 driver.
-dnl
-AC_MSG_CHECKING(for silo's hdf5 driver)
-if test -d $srcdir/src/hdf5_drv; then
-    AC_MSG_RESULT(found)
-    HDF5_DRV="hdf5_drv"
-else
-    AC_MSG_RESULT(not found - SILO will not have HDF5)
-    HDF5_DRV=""
-fi
+dnl we don't need to check for hdf5 driver. It is always there.
+HDF5_DRV="hdf5_drv"
 AC_SUBST(HDF5_DRV)
 
 # Some sites have the GNU readline header files and libraries installed
@@ -570,189 +576,110 @@ AC_SUBST(HDF5_DRV)
 # it does allow the user to prevent the GNU readline files from being
 # detected.
 AC_ARG_WITH(readline,
-	AC_HELP_STRING([--with-readline],
-            [enable detection of GNU readline @<:@default=yes@:>@]),
-	detect_readline=$withval,
-	detect_readline=yes)
+    AC_HELP_STRING([--with-readline],
+        [enable detection of GNU readline @<:@default=yes@:>@]),
+    detect_readline=$withval,
+    detect_readline=$default_detect_readline)
 
 dnl
-dnl Check if we should build python module.
+dnl handle the python module.
 dnl
-AC_MSG_CHECKING(if we should build python module)
 AC_ARG_ENABLE(pythonmodule,
-        AC_HELP_STRING([--enable-pythonmodule],
-            [build python module @<:@default=no@:>@]),
-        BuildPythonmodule="$enable_pythonmodule",
-        BuildPythonmodule=no)
-if test "$BuildPythonmodule" = "yes"; then
-    AC_MSG_RESULT(yes)
-    PYTHONMODULE=python
-else
-    AC_MSG_RESULT(no)
-    PYTHONMODULE=""
-fi
+    AS_HELP_STRING([--enable-pythonmodule],[build python module @<:@default=no@:>@]),
+    if test "$enable_pythonmodule" = "yes"; then
+        PYTHONMODULE="python"
+    fi,
+    PYTHONMODULE=$DEFAULT_PYTONMODULE)
 AC_SUBST(PYTHONMODULE)
 
 dnl
-dnl Check if we should build browser.
+dnl handle browser.
 dnl
-AC_MSG_CHECKING(if we should build silo's command line browser)
 AC_ARG_ENABLE(browser,
-        AC_HELP_STRING([--enable-browser],
-            [build browser @<:@default=yes@:>@]),
-        BuildBrowser="$enable_browser",
-        BuildBrowser=yes)
-if test "X$BuildBrowser" = "Xyes"; then
-    AC_MSG_RESULT(yes)
-    BROWSER="browser"
-    UsingBrowser="yes"
-else
-    AC_MSG_RESULT(no)
-    BROWSER=""
-    UsingBrowser="no"
-    detect_readline=no
+    AC_HELP_STRING([--enable-browser],
+        [build browser @<:@default=yes@:>@]),
+    if test "$enable_browser" = "no"; then
+        BROWSER=""
+    fi,
+    BROWSER=$DEFAULT_BROWSER)
+if test -n "$BROWSER"; then
+    detect_readline=yes
 fi
 AC_SUBST(BROWSER)
-AC_SUBST(UsingBrowser)
 
-
-dnl enable the silex broswer
-AC_MSG_CHECKING(if we should build silo's silex GUI browser)
+dnl handle silex
 AC_ARG_ENABLE(silex,
-AC_HELP_STRING([--enable-silex], 
-  [build the silex browser @<:@default=no@:>@]),
-              UseSilex="$enable_silex", UseSilex=default)
-if test "X$UseSilex" = "Xyes"; then
-    AC_MSG_RESULT(yes)
-elif test "X$UseSilex" = "Xno"; then
-    AC_MSG_RESULT(no)
-else
-    AC_MSG_RESULT(default)
-fi
+    AC_HELP_STRING([--enable-silex], 
+        [build the silex browser @<:@default=no@:>@]),
+    if test "$enable_silex" = "yes"; then
+        SILEX="silex"
+    fi,
+    SILEX=$DEFAULT_SILEX)
+AC_SUBST(SILEX)
 
-dnl enable hexzip compression algorithm
-AC_MSG_CHECKING(if we want the hexzip compression algorithm)
-AC_ARG_ENABLE(hexzip,
-AC_HELP_STRING([--enable-hexzip], 
-  [build with the hexzip compression algorithm @<:@default=no@:>@]),
-              UseHexzip="$enable_hexzip", UseHexzip=default)
-if test "X$UseHexzip" = "Xyes"; then
-    AC_MSG_RESULT(yes)
-    HEXZIP="hexzip"
-    UsingHexzip="yes"
-elif test "X$UseHexzip" = "Xno"; then
-    AC_MSG_RESULT(no)
-    HEXZIP=""
-    UsingHexzip="no"
-else
-    if test -z "$DEFAULT_HEXZIP" ; then
-      AC_MSG_RESULT(defaulting to no)
-      HEXZIP=""
-      UsingHexzip="no"
-    elif test "$DEFAULT_HEXZIP" = "YES" ; then
-      AC_MSG_RESULT(defaulting to yes)
-      HEXZIP="hexzip"
-      UsingHexzip="yes"
-    elif test "$DEFAULT_HEXZIP" = "yes" ; then
-      AC_MSG_RESULT(defaulting to yes)
-      HEXZIP="hexzip"
-      UsingHexzip="yes"
-    else
-      AC_MSG_RESULT(defaulting to no)
-      HEXZIP=""
-      UsingHexzip="no"
+dnl Handle explicit request for libz
+AC_ARG_WITH(zlib, [  --with-zlib=INC,DIR     Use the GNU zlib compression @<:@default=yes@:>@])
+if test "$with_zlib" = no; then
+    AC_DEFINE(HAVE_ZLIB_H,0)
+    AC_DEFINE(HAVE_LIBZ,0)
+    ZLIB=""
+elif test -n "$with_zlib" && test "$with_zlib" != yes; then
+    ZLIB_INCDIR="`echo $with_zlib |cut -f1 -d,`"
+    if test ! -f $ZLIB_INCDIR/zlib.h; then
+        AC_MSG_ERROR(problem with directory specified for zlib includes)
     fi
-fi
-AC_SUBST(HEXZIP)
-AC_SUBST(UsingHexzip)
-
-dnl enable local compression algorithm
-AC_MSG_CHECKING(if we want the local compression algorithm)
-AC_ARG_ENABLE(local,
-AC_HELP_STRING([--enable-local], 
-  [build with the local compression algorithm @<:@default=no@:>@]),
-              UseLocal="$enable_local", UseLocal=default)
-if test "X$UseLocal" = "Xyes"; then
-    AC_MSG_RESULT(yes)
-    LOCAL="local"
-    UsingLocal="yes"
-elif test "X$UseLocal" = "Xno"; then
-    AC_MSG_RESULT(no)
-    LOCAL=""
-    UsingLocal="no"
-else
-    if test -z "$DEFAULT_LOCAL" ; then
-      AC_MSG_RESULT(defaulting to no)
-      LOCAL=""
-      UsingLocal="no"
-    elif test "$DEFAULT_LOCAL" = "YES" ; then
-      AC_MSG_RESULT(defaulting to yes)
-      LOCAL="local"
-      UsingLocal="yes"
-    elif test "$DEFAULT_LOCAL" = "yes" ; then
-      AC_MSG_RESULT(defaulting to yes)
-      LOCAL="local"
-      UsingLocal="yes"
-    else
-      AC_MSG_RESULT(defaulting to no)
-      LOCAL=""
-      UsingLocal="no"
+    ZLIB_LIBDIR="`echo $with_zlib | cut -f2 -d, -s`"
+    if test ! -f $ZLIB_LIBDIR/libz.a && test ! -f $ZLIB_LIBDIR/libz.so; then
+        AC_MSG_ERROR(problem with directory specified for zlib libs)
     fi
+    CPPFLAGS="$CPPFLAGS -I$ZLIB_INCDIR"
+    LDFLAGS="$LDFLAGS -L$ZLIB_LIBDIR"
+    LIBS="$LIBS -lz"
+    AC_DEFINE(HAVE_ZLIB_H,1)
+    AC_DEFINE(HAVE_LIBZ,1)
+    ZLIB="zlib"
 fi
-AC_SUBST(LOCAL)
-AC_SUBST(UsingLocal)
 
-dnl
-dnl Check if we should use the fortran compiler.
-dnl
-AC_MSG_CHECKING(if we want Fortran)
-AC_ARG_ENABLE(fortran,
-        AC_HELP_STRING([--enable-fortran],
-            [compile Fortran interface to Silo @<:@default=no@:>@]),
-        UsingFortran="$enable_fortran",
-        UsingFortran=default)
-if test "$UsingFortran" = "yes"; then
-    AC_MSG_RESULT(yes)
-    USEFORTRAN="yes"
-elif test "$UsingFortran" = "no"; then
-    AC_MSG_RESULT(no)
-    USEFORTRAN=""
-else
-    if test -z "$DEFAULT_FORTRAN" ; then
-      AC_MSG_RESULT(defaulting to yes)
-      USEFORTRAN="yes"
-    elif test "$DEFAULT_FORTRAN" = "NO" ; then
-      AC_MSG_RESULT(defaulting to no)
-      USEFORTRAN=""
-    elif test "$DEFAULT_FORTRAN" = "no" ; then
-      AC_MSG_RESULT(defaulting to no)
-      USEFORTRAN=""
-    else
-      AC_MSG_RESULT(defaulting to yes)
-      USEFORTRAN="yes"
+dnl handle Peter Lindstrom's hzip compression stuff 
+AC_ARG_ENABLE(hzip,
+    AC_HELP_STRING([--enable-hzip], 
+        [enable Lindstrom hex/quad mesh compression @<:@default=yes@:>@]),
+    if test "$enable_hzip" = "no"; then
+        HZIP=""
+    fi,
+    HZIP=$DEFAULT_HZIP)
+AC_SUBST(HZIP)
+
+dnl hzip does better with zlib if available. It may have been
+dnl explicitly turned off, above. If not, Assume we have both
+dnl header & lib. Turn it off if not.
+if test -n "$HZIP" && test "$with_zlib" != no; then
+    AC_DEFINE(HAVE_HZIP,1,[Support for Lindstrom hex/quad mesh compression])
+    ZLIB="zlib"
+    AC_CHECK_HEADERS(zlib.h,have_zlib_h="yes")
+    if test -n "$have_zlib_h"; then
+        AC_CHECK_LIB(z, inflateEnd)
+        if test -z "`echo $LIBS | tr ' ' '\n' | grep -x -e '-lz'`"; then
+            AC_DEFINE(HAVE_ZLIB_H,0)
+            AC_DEFINE(HAVE_LIBZ,0)
+            ZLIB=""
+        fi
     fi
+    AC_SUBST(ZLIB)
 fi
-AC_SUBST(USEFORTRAN)
 
-# Check for programs.
-# We shouldn't depend on too many!
-AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_CPP
-if test -n "$USEFORTRAN"; then
-    AC_PROG_FC
-# this too
-    AC_PROG_F77
-# Fortran portability
-    AC_FC_LIBRARY_LDFLAGS
-    AC_FC_WRAPPERS
+dnl enable Peter Lindstrom's fpzip compression stuff 
+AC_ARG_ENABLE(fpzip,
+    AC_HELP_STRING([--enable-fpzip], 
+        [enable Lindstrom float 1,2,3D array compression @<:@default=yes@:>@]),
+    if test "$enable_fpzip" = "no"; then
+        FPZIP=""
+    fi,
+    FPZIP=$DEFAULT_FPZIP)
+AC_SUBST(FPZIP)
+if test -n "$FPZIP"; then
+    AC_DEFINE(HAVE_FPZIP,1,[Support for Lindstrom float array compression])
 fi
-AC_SUBST(UsingFortran)
-AC_PROG_MAKE_SET
-AC_PROG_LIBTOOL
-AC_ISC_POSIX
-# save the cache so far
-AC_CACHE_SAVE
 
 # Obsolute
 # Add an option for disabling the stat checks.
@@ -775,19 +702,27 @@ if test "X$USING_DEBUG" = Xno; then
 # use contributed GNU m4 macro library provided see:
 #   autoconf-archive-2006-06-04/htmldoc/ax_cc_maxopt.html
    AX_CC_MAXOPT
-   UsingOpt="yes"
    AC_MSG_RESULT(enabled)
 else
-   UsingOpt="no"
    AC_MSG_RESULT(disabled)
 fi
-AC_SUBST(UsingOpt)
 
 dnl
-# Default to large file support
-AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"; Using64bits=yes, Using64bits=no)
-AC_SUBST(Using64bits)
 #
+# MCM: I have no idea what good the following line does. I think
+# all compilers accept the -D argument and any string following
+# it is an argument to the -D argument. So, I think this is
+# just totally bogus!
+# Default to large file support
+AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE";)
+AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement",CFLAGS="$CFLAGS -Wdeclaration-after-statement";)
+
+#
+# Note: regardless of what the stuff above regarding large file support
+# appears to do, the following test is the one that affects Silo's
+# knowledge and support for large files. It may be that the result of
+# the sizeof check is dependent on whether -D_LARGEFILE64_SOURCE is
+# defined on the command line to the compiler though.
 # Use size of off64_t to determine which form of stat() calls to make 
 #
 AC_CHECK_SIZEOF(off64_t)
@@ -924,7 +859,9 @@ LIBS="$LIBS $LIBM"
 
 dnl
 dnl We only need to check for -ldl if we're on SunOS.
-dnl
+dnl MCM -- 10Jul08: No idea why we're doing dl checks twice here. But, 
+dnl I made the second ones in the case statement first check to see if
+dnl dl was already defined.
 AC_MSG_CHECKING(for Linux/SunOS and -ldl)
 if test "`uname 2>/dev/null`" = "Linux" || test "`uname 2>/dev/null`" = "SunOS"; then
     AC_CHECK_LIB(dl, main,   LIBS="-ldl $LIBS")
@@ -936,12 +873,16 @@ case "${host}" in
    AC_CHECK_LIB(nsl, main, LIBS="-lnsl $LIBS")
    ;;
   sparc-sun-solaris2*)
-   AC_CHECK_LIB(dl, main,   LIBS="-ldl $LIBS")
+   if test -z "`echo $LIBS | tr ' ' '\n' | grep -x -e '-ldl'`"; then
+     AC_CHECK_LIB(dl, main,   LIBS="-ldl $LIBS")
+   fi
    AC_CHECK_LIB(socket, main, LIBS="-lsocket $LIBS")
    AC_CHECK_LIB(nsl, main, LIBS="-lnsl $LIBS")
    ;;
   *-*-linux-gnu)
-   AC_CHECK_LIB(dl, main,   LIBS="-ldl $LIBS")
+   if test -z "`echo $LIBS | tr ' ' '\n' | grep -x -e '-ldl'`"; then
+     AC_CHECK_LIB(dl, main,   LIBS="-ldl $LIBS")
+   fi
    ;;
   *)
    ;;
@@ -953,8 +894,6 @@ dnl `-lsz' and their locations might be specified with the `--with-szlib'
 dnl command-line switch. The value is a root directory contain the lib 
 dnl directory.
 dnl
-UsingSZLIB="no"
-AC_SUBST(USE_FILTER_SZIP) USE_FILTER_SZIP="no"
 AC_ARG_WITH([szlib],
             [AC_HELP_STRING([--with-szlib=DIR],
                             [Use szlib library for external szlib I/O
@@ -1045,10 +984,6 @@ case $withval in
     fi
     ;;
 esac
-if test -z "$HAVE_SZLIB"; then
-    UsingSZLIB="yes"
-fi
-AC_SUBST(UsingSZLIB)
 
 # Is HDF5 present (it's needed for the silo/hdf5 driver for pmesh/alec SAMI
 # files larger than 2GB until SAF is in place)?  Normally check for
@@ -1078,7 +1013,6 @@ AC_SUBST(UsingSZLIB)
 # inform the user has gone wrong and what to do.
 #
 
-UsingHDF5="no"
 if test -n "$HDF5_DRV"; then
    saved_CPPFLAGS="$CPPFLAGS"
    saved_LDFLAGS="$LDFLAGS"
@@ -1202,29 +1136,32 @@ if test -n "$HDF5_DRV"; then
       #
       # If the above tests did NOT find headers and lib for
       # hdf5, it could be due to zlib, so now test for zlib
+      # MCM -- July, 2008: This code now looks completely useless
+      # It is supposed to attempt to check if '-lz' is needed to
+      # link with HDF5. However, it doesn't appear to do any of
+      # that and had a useless embedded AC_ARG_WITH in it which
+      # I removed and replaced all instances of 'withval' to the
+      # with variable the code needs, with_zlib
       #
       if test -n "$notfound"; then
          # reset the compile and link flags
          CPPFLAGS="$saved_CPPFLAGS"
          LDFLAGS="$saved_LDFLAGS"
          AC_CHECKING(if lack of zlib caused tests for hdf5 to fail) 
-         AC_ARG_WITH([zlib],
-                 [  --with-zlib=INC,LIB     Use the GNU zlib compression],
-                     ,withval=yes)
-         if test "no" = "$withval"; then
+         if test "no" = "$with_zlib"; then
             AC_MSG_CHECKING(for zlib)
             AC_MSG_RESULT(suppressed)
          else
-            zlib_inc="`echo $withval |cut -f1 -d,`"
-            if test "$withval" != "yes" && test -n "$zlib_inc"; then
+            zlib_inc="`echo $with_zlibval |cut -f1 -d,`"
+            if test "$with_zlibval" != "yes" && test -n "$zlib_inc"; then
                if test -d "$zlib_inc"; then
                   CPPFLAGS="-I$zlib_inc $CPPFLAGS"
                else
                   AC_MSG_ERROR(problem with directory specified for zlib includes)
                fi
             fi
-            zlib_lib="`echo $withval |cut -f2 -d, -s`"
-            if test "$withval" != "yes" && test -n "$zlib_lib"; then
+            zlib_lib="`echo $with_zlibval |cut -f2 -d, -s`"
+            if test "$with_zlibval" != "yes" && test -n "$zlib_lib"; then
                if test -d "$zlib_lib"; then
                   LDFLAGS="-L$zlib_lib $LDFLAGS"
                else
@@ -1232,8 +1169,13 @@ if test -n "$HDF5_DRV"; then
                fi
             fi
 	    notfound=""
-            AC_CHECK_HEADERS(zlib.h,,notfound="zlib.h")
-            AC_CHECK_LIB(z,compress2,,notfound="$notfound libz.a")
+            dnl MCM -- 11Jul08: Here, we only need zlib to link with hdf5,
+            dnl not to compile anything in Silo. Why we're checking for
+            dnl headers here, I do not know.
+            if test -z "`echo $LIBS | tr ' ' '\n' | grep -x -e '-lz'`"; then
+                AC_CHECK_HEADERS(zlib.h,,notfound="zlib.h")
+                AC_CHECK_LIB(z,compress2,,notfound="$notfound libz.a")
+            fi
          fi
          #
          # If libz was not found, the failure of hdf5 must be something else.
@@ -1299,65 +1241,54 @@ fi # if test -n "$HDF5_DRV"
 
 # Check to see if the results of the above tests found the HDF5 libraries
 if test -n "$HDF5_DRV"; then
-    UsingHDF5="yes"
+    # Short-term hack to deal with bogus code above (too complex) 
+    # putting -lsz AHEAD of -lhdf5 in libs
+    if test "$HAVE_SZLIB" = "yes"; then
+        LIBS="$LIBS -lsz"
+    fi
     AC_DEFINE(HAVE_HDF5_DRIVER,1,[Support for HDF5])
 else
    LIBS="$saved_LIBS"
 fi
-AC_SUBST(UsingHDF5)
 
 dnl
-UsingReadline="no"
 if test "X$detect_readline" = Xyes; then
 # use contributed GNU m4 macro library provided see:
 #   autoconf-archive-2006-06-04/htmldoc/vl_lib_readline.html
    VL_LIB_READLINE
-   UsingReadline="yes"
 else
    AC_MSG_CHECKING(for readline)
    AC_MSG_RESULT(disabled)
 fi
-AC_SUBST(UsingReadline)
 
-dnl
-dnl If Silex is desired then Qt is required
-dnl
-UsingSilex="no"
-UsingQt="no"
-if (( test "X$UseSilex" = "Xyes" ) || 
-  ( test "$QTDIR" != "" && test "X$UseSilex" = "Xdefault" )) ; then
-dnl search for the required Qt
-    
-    if test "X$UseSilex" = "Xdefault" ; then
-       AC_MSG_CHECKING([default Qt path provided])
-       AC_MSG_RESULT([$QTDIR])
-    elif test -d "$QTDIR"; then
-       AC_MSG_CHECKING([using Qt path provided])
-       AC_MSG_RESULT([$QTDIR])
-    fi
-    AC_MSG_CHECKING(for Qt)
 #   autoconf-archive-2006-08-20/htmldoc/bnv_have_qt.html
 #   BNV_HAVE_QT
 #   gw_CHECK_QT
-  AC_ARG_WITH([Qt-dir],
+AC_ARG_WITH([Qt-dir],
     AC_HELP_STRING([--with-Qt-dir=DIR],
                           [DIR is equal to $QTDIR if you have followed the
                           installation instructions of Trolltech. Header
                           files are in DIR/include, binary utilities are
                           in DIR/bin. The library is in DIR/lib, unless
                           --with-Qt-lib-dir is also set.]))
-  AC_ARG_WITH([Qt-include-dir],
+
+AC_ARG_WITH([Qt-include-dir],
     AC_HELP_STRING([--with-Qt-include-dir=DIR],
                           [Qt header files are in DIR]))
-  AC_ARG_WITH([Qt-bin-dir],
+AC_ARG_WITH([Qt-bin-dir],
     AC_HELP_STRING([--with-Qt-bin-dir=DIR],
                           [Qt utilities such as moc and uic are in DIR]))
-  AC_ARG_WITH([Qt-lib-dir],
+AC_ARG_WITH([Qt-lib-dir],
     AC_HELP_STRING([--with-Qt-lib-dir=DIR],
                           [The Qt library is in DIR]))
-  AC_ARG_WITH([Qt-lib],
+AC_ARG_WITH([Qt-lib],
     AC_HELP_STRING([--with-Qt-lib=LIB],
                           [Use -lLIB to link with the Qt library]))
+
+if test -n "$SILEX"; then 
+
+  AC_MSG_CHECKING(for Qt)
+
   if test x"$with_Qt_dir" = x"no" ||
      test x"$with_Qt_include_dir" = x"no" ||
      test x"$with_Qt_bin_dir" = x"no" ||
@@ -1468,8 +1399,9 @@ dnl search for the required Qt
      QT_LIBS=
      QT_UIC=
      QT_MOC=
-     AC_MSG_RESULT(Qt not found - Silex disabled)
+     AC_MSG_RESULT(not found - Silex disabled)
      SILEX=""
+     AC_SUBST(SILEX)
   else
      AC_MSG_RESULT([$have_qt:
            QT_CXXFLAGS=$QT_CXXFLAGS
@@ -1477,24 +1409,13 @@ dnl search for the required Qt
            QT_LIBS=$QT_LIBS
            QT_UIC=$QT_UIC
            QT_MOC=$QT_MOC])
-     AC_MSG_CHECKING(for silex)
-     AC_MSG_RESULT(enabled)
-     UsingSilex="yes"
-     UsingQt="yes"
-     SILEX="silex"
   fi
-else
-   AC_MSG_CHECKING(for silex)
-   AC_MSG_RESULT(disabled)
+  AC_SUBST(QT_CXXFLAGS)
+  AC_SUBST(QT_DIR)
+  AC_SUBST(QT_LIBS)
+  AC_SUBST(QT_UIC)
+  AC_SUBST(QT_MOC)
 fi
-AC_SUBST(QT_CXXFLAGS)
-AC_SUBST(QT_DIR)
-AC_SUBST(QT_LIBS)
-AC_SUBST(QT_UIC)
-AC_SUBST(QT_MOC)
-AC_SUBST(UsingSilex)
-AC_SUBST(UsingQt)
-AC_SUBST(SILEX)
 
 dnl
 dnl Check for a python installation using the Automake 
@@ -1502,8 +1423,6 @@ dnl provided macro, which will generate the following
 dnl variables: python_PYTHON, pkgpython_PYTHON, 
 dnl pyexecdir_PYTHON, and pkgpyexecdir_PYTHON.
 dnl
-UsingPython="no"
-UsingCxx="no"
 if test -n "$PYTHONMODULE"; then
    AM_PATH_PYTHON(2.1,, :)
 # Check for Python include path
@@ -1517,24 +1436,9 @@ if test -n "$PYTHONMODULE"; then
       fi
       PYTHON_CPPFLAGS=$python_path
    fi
-   UsingPython="yes"
-   UsingCxx="yes"
    AC_MSG_RESULT([$PYTHON_CPPFLAGS])
    AC_SUBST([PYTHON_CPPFLAGS])
 fi
-AC_SUBST(UsingPython)
-AC_SUBST(UsingCxx)
-
-UsingShared="no"
-if test "$enable_shared" = yes; then
-   UsingShared="yes"
-fi
-AC_SUBST(UsingShared)
-UsingStatic="no"
-if test "$enable_static" = yes; then
-   UsingStatic="yes"
-fi
-AC_SUBST(UsingStatic)
 
 dnl Determine how to compile MPI
 # skip for now
@@ -1558,10 +1462,12 @@ AM_CONDITIONAL(TAURUS_NEEDED, test -n "$TAURUS")
 AM_CONDITIONAL(HDF5_DRV_NEEDED, test -n "$HDF5_DRV")
 AM_CONDITIONAL(BROWSER_NEEDED, test -n "$BROWSER")
 AM_CONDITIONAL(PYTHON_NEEDED, test -n "$PYTHONMODULE")
-AM_CONDITIONAL(FORTRAN_NEEDED, test -n "$USEFORTRAN")
+AM_CONDITIONAL(FORTRAN_NEEDED, test -n "$FORTRAN")
 AM_CONDITIONAL(SILEX_NEEDED, test -n "$SILEX")
-AM_CONDITIONAL(HEXZIP_NEEDED, test -n "$HEXZIP")
-AM_CONDITIONAL(LOCAL_NEEDED, test -n "$LOCAL")
+AM_CONDITIONAL(HZIP_NEEDED, test -n "$HZIP")
+AM_CONDITIONAL(FPZIP_NEEDED, test -n "$FPZIP")
+AM_CONDITIONAL(ZLIB_AVAILABLE, test -n "$ZLIB")
+AM_CONDITIONAL(CXX_LINK_NEEDED, test "$enable_shared" = "no" -a \( -n "$FPZIP" -o -n "$HZIP" \))
 AC_CONFIG_FILES([
             Makefile
             SiloWindows/Makefile
@@ -1581,8 +1487,8 @@ AC_CONFIG_FILES([
             src/taurus/Makefile
             src/unknown/Makefile
             src/filters/Makefile
-            src/hexzip/Makefile
-            src/local/Makefile
+            src/hzip/Makefile
+            src/fpzip/Makefile
             tests/Makefile
             tools/Makefile
             tools/browser/Makefile
@@ -1594,9 +1500,18 @@ if test -n "$HDF5_DRV"; then
 else
   AC_CONFIG_FILES([src/libsilo.settings])
 fi
-CC_FULLPATH=`which $CC`
-CXX_FULLPATH=`which $CXX`
-FC_FULLPATH=`which $FC`
+CC_FULLPATH=""
+if test -n "$CC"; then
+    CC_FULLPATH=`which $CC`
+fi
+CXX_FULLPATH=""
+if test -n "$CXX"; then
+    CXX_FULLPATH=`which $CXX`
+fi
+FC_FULLPATH=""
+if test -n "$FC"; then
+    FC_FULLPATH=`which $FC`
+fi
 AC_SUBST(CC_FULLPATH)
 AC_SUBST(CXX_FULLPATH)
 AC_SUBST(FC_FULLPATH)

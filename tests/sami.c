@@ -252,6 +252,7 @@ test_read_all(DBfile *dbfile)
 	puts("        DBReadVar() failed");
 	nerrors++;
     } else {
+        printf("checking read of first 4d_float\n");
 	for (i=0; i<TEST_NELMTS; i++) {
 	    if (fdata_g[i]!=fdata_in[i]) {
 		printf("        failed at i=%d: out=%g, in=%g\n",
@@ -393,6 +394,7 @@ test_get_all(DBfile *dbfile)
 	puts("        DBGetVar() failed");
 	nerrors++;
     } else {
+        printf("testing DBGetVar of 4d_float\n");
 	for (i=0; i<TEST_NELMTS; i++) {
 	    if (fdata_g[i]!=fdata_in[i]) {
 		printf("        failed at i=%d: out=%g, in=%g\n",

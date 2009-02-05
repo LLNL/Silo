@@ -41,6 +41,9 @@
 /* System provides fprintf prototypes */
 #undef HAVE_FPRINTF_POINTER
 
+/* Support for Lindstrom float array compression */
+#undef HAVE_FPZIP
+
 /* System provides fread prototypes */
 #undef HAVE_FREAD_POINTER
 
@@ -61,6 +64,9 @@
 
 /* Define to 1 if you have the <history.h> header file. */
 #undef HAVE_HISTORY_H
+
+/* Support for Lindstrom hex/quad mesh compression */
+#undef HAVE_HZIP
 
 /* Define to 1 if you have the <ieeefp.h> header file. */
 #undef HAVE_IEEEFP_H

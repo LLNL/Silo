@@ -6,6 +6,7 @@
  *
  */
 #include "pdb.h"
+#include <string.h>
 
 
 /*-------------------------------------------------------------------------
@@ -99,6 +100,8 @@ lite_PD_cd (PDBfile *file, char *dirname) {
  *    Eric Brugger, Thu Dec 10 11:38:43 PST 1998
  *    I moved a free to be inside a loop to eliminate a memory leak.
  *
+ *    Mark Miller, Wed Jun 11 16:42:09 PDT 2008
+ *    Fixed valgrind error of src/dst overlap in strcpy
  *-------------------------------------------------------------------------
  */
 char **
@@ -180,7 +183,7 @@ lite_PD_ls (PDBfile *file, char *path, char *type, int *num) {
    for (pass = 1; pass <= 2; pass++) {
       if (pass == 2) {
 	 if (has_dirs && (strchr(pattern + 1, '/') == NULL)) {
-	    strcpy(pattern, pattern + 1);
+            memmove(pattern, pattern+1, strlen(pattern+1)+1);
 	 } else {
 	    break;
 	 }

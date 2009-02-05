@@ -6435,19 +6435,21 @@ db_pdb_PutMultimeshadj (DBfile *_dbfile, const char *name, int nmesh,
                        nneighbors, 1, count);
 
       count[0] = lneighbors;
-      DBWriteComponent(_dbfile, obj, "neighbors", name, "integer",
-                       neighbors, 1, count);
-      if (back) {
-          DBWriteComponent(_dbfile, obj, "back", name, "integer",
-                           back, 1, count);
-      }
-      if (lnodelists) {
-          DBWriteComponent(_dbfile, obj, "lnodelists", name, "integer",
-                           lnodelists, 1, count);
-      }
-      if (lzonelists) {
-          DBWriteComponent(_dbfile, obj, "lzonelists", name, "integer",
-                           lzonelists, 1, count);
+      if (count[0] > 0) {
+          DBWriteComponent(_dbfile, obj, "neighbors", name, "integer",
+                           neighbors, 1, count);
+          if (back) {
+              DBWriteComponent(_dbfile, obj, "back", name, "integer",
+                               back, 1, count);
+          }
+          if (lnodelists) {
+              DBWriteComponent(_dbfile, obj, "lnodelists", name, "integer",
+                               lnodelists, 1, count);
+          }
+          if (lzonelists) {
+              DBWriteComponent(_dbfile, obj, "lzonelists", name, "integer",
+                               lzonelists, 1, count);
+          }
       }
 
       /* All object components up to here are invariant and *should*
@@ -6461,20 +6463,22 @@ db_pdb_PutMultimeshadj (DBfile *_dbfile, const char *name, int nmesh,
           len = 0;
           for (i = 0; i < lneighbors; i++)
               len += lnodelists[i];
-          DBAddIntComponent(obj, "totlnodelists", len);
 
-          /* reserve space for the nodelists array in the file */
-          count[0] = 0;
-          count[1] = len - 1;
-          db_mkname(dbfile->pdb, (char*)name, "nodelists", tmpn);
-          if (!lite_PD_defent_alt (dbfile->pdb, tmpn, "integer", 1, count)) {
-             return db_perror ("PD_defent_alt", E_CALLFAIL, me) ;
+          if (len > 0) {
+              DBAddIntComponent(obj, "totlnodelists", len);
+
+              /* reserve space for the nodelists array in the file */
+              count[0] = 0;
+              count[1] = len - 1;
+              db_mkname(dbfile->pdb, (char*)name, "nodelists", tmpn);
+              if (!lite_PD_defent_alt (dbfile->pdb, tmpn, "integer", 1, count)) {
+                 return db_perror ("PD_defent_alt", E_CALLFAIL, me) ;
+              }
+
+              /* add the nodelists array to this object */
+              DBAddVarComponent(obj, "nodelists", tmpn);
           }
-
-          /* add the nodelists array to this object */
-          DBAddVarComponent(obj, "nodelists", tmpn);
       }
-
 
       if (zonelists) {
 
@@ -6482,18 +6486,21 @@ db_pdb_PutMultimeshadj (DBfile *_dbfile, const char *name, int nmesh,
           len = 0;
           for (i = 0; i < lneighbors; i++)
               len += lzonelists[i];
-          DBAddIntComponent(obj, "totlzonelists", len);
 
-          /* reserve space for the nodelists array in the file */
-          count[0] = 0;
-          count[1] = len - 1;
-          db_mkname(dbfile->pdb, (char*)name, "zonelists", tmpn);
-          if (!lite_PD_defent_alt (dbfile->pdb, tmpn, "integer", 1, count)) {
-             return db_perror ("PD_defent_alt", E_CALLFAIL, me) ;
+          if (len > 0) {
+              DBAddIntComponent(obj, "totlzonelists", len);
+
+              /* reserve space for the nodelists array in the file */
+              count[0] = 0;
+              count[1] = len - 1;
+              db_mkname(dbfile->pdb, (char*)name, "zonelists", tmpn);
+              if (!lite_PD_defent_alt (dbfile->pdb, tmpn, "integer", 1, count)) {
+                 return db_perror ("PD_defent_alt", E_CALLFAIL, me) ;
+              }
+
+              /* add the nodelists array to this object */
+              DBAddVarComponent(obj, "zonelists", tmpn);
           }
-
-          /* add the nodelists array to this object */
-          DBAddVarComponent(obj, "zonelists", tmpn);
       }
 
       /* Ok, finally, create the object in the file */
@@ -9595,6 +9602,8 @@ db_InitUcd (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
     * version.
     *-----------------------------------------------------*/
    count[0] = ndims;
+   if (count[0] <= 0)
+      return 0;
 
    /*------------------------------------------------------
     * Assume that if there is a file in the meshname, that 

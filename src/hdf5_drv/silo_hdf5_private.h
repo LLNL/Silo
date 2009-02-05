@@ -53,6 +53,8 @@ CALLBACK int db_hdf5_Filters(DBfile *_dbfile, FILE *stream);
 CALLBACK int db_hdf5_MkDir(DBfile *_dbfile, char *name);
 CALLBACK int db_hdf5_SetDir(DBfile *_dbfile, char *name);
 CALLBACK int db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/);
+CALLBACK int db_hdf5_CpDir(DBfile *_dbfile, const char *srcDir,
+                           DBfile *dstFile, const char *dstDir);
 CALLBACK int db_hdf5_NewToc(DBfile *_dbfile);
 
 /* Variable inquiries */
@@ -255,6 +257,9 @@ CALLBACK int db_hdf5_PutMrgvar(DBfile *dbfile, const char *name,
                              int nregns, char **reg_pnames,
                              int datatype, void **data, DBoptlist *opts);
 CALLBACK DBmrgvar *db_hdf5_GetMrgvar(DBfile *dbfile, const char *name);
+
+CALLBACK int db_hdf5_FreeCompressionResources(DBfile *_dbfile,
+                 const char *meshname);
 
 #endif /* !NO_CALLBACKS */
 

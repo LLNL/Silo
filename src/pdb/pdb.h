@@ -522,6 +522,9 @@ extern int		_lite_PD_unp_bits (char*,char*,int,int,int,int,long,
 SILO_API extern int     lite_PD_entry_number(syment*);
 SILO_API extern long    lite_PD_get_file_length(PDBfile *file);
 
+extern char            *lite_PD_SYMENT_S;
+extern char            *lite_PD_DEFSTR_S;
+
 #ifdef PDB_WRITE
 SILO_API extern int	lite_PD_mkdir (PDBfile*,char*);
 SILO_API extern int	lite_PD_write (PDBfile*,char*,char*,byte*);

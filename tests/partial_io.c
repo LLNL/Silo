@@ -28,7 +28,7 @@ static char	*Expected ;	/*expected error message*/
 static void
 err_handler (char *mesg) {
 
-   int		ok = !strcmp(mesg,Expected) ;
+   int		ok = strstr(mesg,Expected) != 0;
    
    printf ("Got error%s: %s: %s: %s\n",
 	   ok?"[OK]":"", DBErrFunc(), DBErrString(), mesg) ;

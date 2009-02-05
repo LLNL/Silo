@@ -61,27 +61,42 @@ for advertising or product endorsement purposes.
 
 #define A  1.
 
-void WriteFile(double t, int cycle);
+void WriteFile(double t, int cycle, int driver);
 
 int
 main(int argc, char *argv[])
 {
-    int       i;
+    int       i, driver = DB_PDB;
     double    time;
     int       cycle;
+
+    for (i=1; i<argc; i++) {
+        if (!strcmp(argv[i], "DB_PDB")) {
+            driver = DB_PDB;
+        } else if (!strcmp(argv[i], "DB_HDF5")) {
+            driver = DB_HDF5;
+        } else if (!strcmp(argv[i], "hzip")) {
+            DBSetCompression("METHOD=HZIP");
+        } else if (!strcmp(argv[i], "fpzip")) {
+            DBSetCompression("METHOD=FPZIP");
+        } else {
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
+    }
+
 
     for (i = 0; i < NT + 1; i++)
     {
         time = T0 + ((double)i / (double)NT) * DT;
         cycle = i * 10;
-        WriteFile (time, cycle);
+        WriteFile (time, cycle, driver);
     }
 
     return 0;
 }
 
 void
-WriteFile(double time, int cycle)
+WriteFile(double time, int cycle, int driver)
 {
     int       i, j, k;
     char      *coordnames[3]={"x", "y", "z"};
@@ -139,7 +154,7 @@ WriteFile(double time, int cycle)
      */
     sprintf(filename, "wave%.4d.silo", cycle);
 
-    dbfile = DBCreate(filename, 0, DB_LOCAL, "The Wave", DB_PDB);
+    dbfile = DBCreate(filename, 0, DB_LOCAL, "The Wave", driver);
 
     optList = DBMakeOptlist(10);
     DBAddOption(optList, DBOPT_DTIME, &time);

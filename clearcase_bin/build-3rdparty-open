@@ -26,7 +26,7 @@
 #
 TOPDIR="/usr/gapps/silo"
 SZIPRELEASE=2.1
-HDF5RELEASE=1.6.6
+HDF5RELEASE=1.8.1
 QTRELEASE=3.3.8
 lcun=$USER
 skipszip="no"
@@ -35,7 +35,7 @@ MAKEOPTS=""
 export TOPDIR MAKE MAKEOPTS SZIPRELEASE HDF5RELEASE QTRELEASE lcun skipszip
 
 usage() {
-  printf "Usage: %s [-lc-username <lc-username>] [hdf5only] [all|hoth|sunspot|up|yana|ocfport|thunder|pengra|quad|tread|ubgl]" $0
+  printf "Usage: %s [-lc-username <lc-username>] [hdf5only] [all|hoth|up|yana|prism|thunder|pengra|quad|ubgl]" $0
   printf "\n"
   printf "Silo 3rd party library installing script. Assumes a tarball exist in\n"
   printf "/usr/gapps/silo/szip/src/szip-$SZIPRELEASE, and\n"
@@ -44,6 +44,7 @@ usage() {
   printf "You may want to run this script from the LC network.\n"
 }
 
+#    --disable-shared --with-default-api-version=v16 --enable-production
 stdbuild() {
     ssh ${HOSTS} "/bin/sh" << EOF > ${ARCH}.log 2>&1 &
     $*
@@ -67,7 +68,7 @@ stdbuild() {
     $TOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
     --prefix=$TOPDIR/hdf5/$HDF5RELEASE/$ARCH \
     --with-szlib=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
-    --disable-shared
+    --disable-shared --enable-production
     if [ "$POSTCONFCMDS" != "" ] ; then
         echo "prevent an empty if-clause" > /dev/null 
         $POSTCONFCMDS
@@ -76,7 +77,7 @@ stdbuild() {
     chmod -R a+rX,ug+w $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
     chgrp -R visit $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
     cd $TOPDIR/hdf5/src
-    rm -rf $TOPDIR/hdf5/src/$ARCH
+#    rm -rf $TOPDIR/hdf5/src/$ARCH
 EOF
 }
 
@@ -103,7 +104,7 @@ stdbuild_nobg() {
     $TOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
     --prefix=$TOPDIR/hdf5/$HDF5RELEASE/$ARCH \
     --with-szlib=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
-    --disable-shared
+    --disable-shared --enable-production
     if [ "$POSTCONFCMDS" != "" ] ; then
         echo "prevent an empty if-clause" > /dev/null 
         $POSTCONFCMDS
@@ -123,7 +124,7 @@ hoth() {
 }
 hothgcc() {
     HOSTS="hoth"
-    ARCH="i386-pc-linux-gcc-3.2.3"
+    ARCH="i686_Linux_ELsmp"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=\"-fPIC -O2\" \
 CXXFLAGS=\"-fPIC -O2\" FFLAGS=-Wno-globals F77FLAGS=-Wno-globals \
 FCFLAGS=-Wno-globals"
@@ -138,7 +139,7 @@ FCFLAGS=-Wno-globals"
 #
 hothpgc() {
     HOSTS="hoth"
-    ARCH="i386-pc-linux-pgc-6.2"
+    ARCH="i686_Linux_ELsmp_pgcc"
     CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
 CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
     export HOSTS ARCH CONFOPTS
@@ -152,7 +153,7 @@ CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
 #
 hothicc() {
     HOSTS="hoth"
-    ARCH="i386-pc-linux-icc-9.1"
+    ARCH="i686_Linux_ELsmp_icc"
     CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
     export HOSTS ARCH CONFOPTS
@@ -175,7 +176,7 @@ sunspot() {
 }
 sunspotgcc() {
     HOSTS=sunspot
-    ARCH="sparc-sun-solaris-gcc-2.95"
+    ARCH="sparc_SunOS_57_gcc"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
@@ -188,7 +189,7 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 #
 sunspotcc() {
     HOSTS=sunspot
-    ARCH="sparc-sun-solaris-cc-5.2"
+    ARCH="sparc_SunOS_57"
     CONFOPTS="CC=c89 CXX=CC FC=f77 F77=f77"
     export HOSTS ARCH CONFOPTS
     stdbuild \
@@ -197,7 +198,22 @@ sunspotcc() {
     "LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib" \
     "export PATH LD_LIBRARY_PATH"
 }
-#
+
+sidious() {
+    HOSTS="sidious"
+    ARCH="x86_64_Linux_el5xen"
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=\"-fPIC -O2\" \
+CXXFLAGS=\"-fPIC -O2\" FFLAGS=-Wno-globals F77FLAGS=-Wno-globals \
+FCFLAGS=-Wno-globals"
+    export HOSTS ARCH CONFOPTS
+    stdbuild \
+    "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
+/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:\
+/usr/security/bin" \
+    "LD_LIBRARY_PATH=/usr/lib:/lib" \
+    "export PATH LD_LIBRARY_PATH"
+}
+
 tread() {
     HOSTS="tread"
     ARCH="i386-apple-darwin8-gcc-4.0.1"
@@ -243,7 +259,7 @@ CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\""
 #
 upgcc64() {
     HOSTS=${lcun}@up
-    ARCH="aix_5_64_fed-gcc"
+    ARCH="aix_5_64_fed_gcc"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
 CFLAGS=-maix64 LDFLAGS=-maix64 AR=\"ar -X64\""
     export HOSTS ARCH CONFOPTS
@@ -256,7 +272,7 @@ CFLAGS=-maix64 LDFLAGS=-maix64 AR=\"ar -X64\""
 #
 upgcc32() {
     HOSTS=${lcun}@up
-    ARCH="aix_5_ll-gcc"
+    ARCH="aix_5_ll_gcc"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
 CFLAGS=-maix32 LDFLAGS=-maix32 AR=\"ar -X32\""
     export HOSTS ARCH CONFOPTS
@@ -284,7 +300,7 @@ pengragcc() {
 #
 pengraicc() {
     HOSTS=${lcun}@pengra
-    ARCH=chaos_3_x86_elan3-icc
+    ARCH=chaos_3_x86_elan3_icc
     CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
@@ -305,7 +321,7 @@ yana() {
 }
 yanagcc() {
     HOSTS=${lcun}@yana
-    ARCH=chaos_3_x86_64-gcc-3.4.4
+    ARCH=chaos_4_x86_64
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
@@ -317,22 +333,22 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 #
 yanaicc() {
     HOSTS=${lcun}@yana
-    ARCH=chaos_3_x86_64-icc-10.0
+    ARCH=chaos_4_x86_64_icc
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
+    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
-    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
-    "INTEL_LICENSE_FILE=/usr/local/intel/compiler100_025/licenses:\
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler91/lib" \
+    "INTEL_LICENSE_FILE=/usr/local/intel/compiler91/licenses:\
 /opt/intel/licenses" \
     "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 #
 yanapc() {
     HOSTS=${lcun}@yana
-    ARCH=chaos_3_x86_64-pc-2.4
+    ARCH=chaos_4_x86_64_pathcc
     CONFOPTS="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
@@ -347,7 +363,7 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC"
 #
 yanapgc() {
     HOSTS=${lcun}@yana
-    ARCH=chaos_3_x86_64-pgc-6.2
+    ARCH=chaos_3_x86_64_pgcc
   CONFOPTS=" CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
@@ -358,14 +374,14 @@ yanapgc() {
     "export PATH LM_LICENSE_FILE"
 }
 #
-ocfport() {
-    ocfportgcc
-    ocfporticc
-    ocfportpc
-    ocfportpgc
+prism() {
+    prismgcc
+    prismicc
+    prismpc
+    prismpgc
 }
-ocfportgcc() {
-    HOSTS=${lcun}@ocfport
+prismgcc() {
+    HOSTS=${lcun}@prism
     ARCH=chaos_4_x86_64_ib
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
@@ -376,39 +392,33 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     "export PATH"
 }
 #
-ocfporticc() {
-    HOSTS=${lcun}@ocfport
-    ARCH=chaos_4_x86_64_ib-icc
+prismicc() {
+    HOSTS=${lcun}@prism
+    ARCH=chaos_4_x86_64_ib_icc
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
+    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
-    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
-    "INTEL_LICENSE_FILE=/usr/local/intel/compiler100_025/licenses:\
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler91/lib" \
+    "INTEL_LICENSE_FILE=/usr/local/intel/compiler91/licenses:\
 /opt/intel/licenses" \
     "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
 #
-ocfportpc() {
-    HOSTS=${lcun}@ocfport
-    ARCH=chaos_4_x86_64_ib-pc
+prismpc() {
+    HOSTS=${lcun}@prism
+    ARCH=chaos_4_x86_64_ib_pathcc
     CONFOPTS="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
-    stdbuild \
-    "PATH=/usr/global/tools/RSI/bin:\
-/usr/local/tools/pathscale/pathscale-2.4/bin2:/usr/local/bin:/bin:/usr/bin:\
-/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
-    "LM_LICENSE_FILE=/usr/local/etc/license.client" \
-    "PATHSCALE_SUBSCRIPTION_DAEMON=license1ocf.llnl.gov" \
-    "export PATH LM_LICENSE_FILE PATHSCALE_SUBSCRIPTION_DAEMON"
+    stdbuild
 }
 #
-ocfportpgc() {
-    HOSTS=${lcun}@ocfport
-    ARCH=chaos_4_x86_64_ib-pgc
+prismpgc() {
+    HOSTS=${lcun}@prism
+    ARCH=chaos_4_x86_64_ib_pgcc
   CONFOPTS=" CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
@@ -425,7 +435,7 @@ thunder() {
 }
 thundergcc() {
     HOSTS=${lcun}@thunder
-    ARCH=chaos_3_ia64-gcc-3.4.4
+    ARCH=chaos_3_ia64_elan4
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
@@ -436,15 +446,15 @@ thundergcc() {
 #
 thundericc() {
     HOSTS=${lcun}@thunder
-    ARCH=chaos_3_ia64-icc-10.0
+    ARCH=chaos_3_ia64_elan4_icc
     CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     export HOSTS ARCH CONFOPTS
     stdbuild \
-    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
+    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
 /usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
-    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
-    "INTEL_LICENSE_FILE=/usr/local/intel/compiler100_025/licenses:\
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler91/lib" \
+    "INTEL_LICENSE_FILE=/usr/local/intel/compiler91/licenses:\
 /opt/intel/licenses" \
     "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
 }
@@ -532,14 +542,14 @@ if [ "$1" = "-lc-username" ] ; then
    shift 2
 fi
 
-if [ $# -lt 1 ] ; then
+# disable the 'automatic' mode of setting which hosts get built
+if false ; then
     hoth
-    sunspot
+    sidious
     up
     thunder
     pengra
     yana
-    ocfport
     quad
     ubgl
 else
@@ -554,12 +564,11 @@ else
       shift;;
     all|-a*)
       hoth
-      sunspot
+      sidious
       up
       thunder
       pengra
       yana
-      ocfport
       quad
       ubgl
       shift;;
@@ -583,6 +592,9 @@ else
       shift;;
     sun*|-sun*)
       sunspot
+      shift;;
+    sidious)
+      sidious
       shift;;
     upgcc32|-up*gcc32)
       upgcc32
@@ -626,20 +638,20 @@ else
     yana*|-ya*)
       yana
       shift;;
-    ocfport*pgc)
-      ocfportpgc
+    prism*pgc)
+      prismpgc
       shift;;
-    ocfport*pc)
-      ocfportpc
+    prism*pc)
+      prismpc
       shift;;
-    ocfport*icc)
-      ocfporticc
+    prism*icc)
+      prismicc
       shift;;
-    ocfport*gcc)
-      ocfportgcc
+    prism*gcc)
+      prismgcc
       shift;;
-    ocfport*)
-      ocfport
+    prism*)
+      prism
       shift;;
     pen*icc|-pe*icc)
       pengraicc

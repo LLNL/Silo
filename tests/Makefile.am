@@ -3,22 +3,33 @@
 # 
 
 EXTRA_DIST= \
- exectests.csh \
  package.m4 \
  pdbcmp.csh \
  testsuite.at \
  testsuite \
- testsuitef77.at \
- testsuitef77 \
- testsuitehdf5.at \
- testsuitehdf5 \
+ pmpio_hdf5_test.c \
+ pmpio_silo_test_mesh.c \
+ $(check_SCRIPTS) \
+ $(check_DATA)
+
+# Note: use top entry in check_SCRIPTS as sole target to
+# copy all scripts and data in one rule
+check_SCRIPTS= \
  checksums \
- pmpio_silo_test_mesh.c
+ testhzip \
+ testxvers \
+ test_error.py \
+ test_read.py \
+ test_write.py
+
+check_DATA= \
+ xvers_data.tar.bz2
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 TESTSUITE = $(srcdir)/testsuite
+
 if HDF5_DRV_NEEDED
   LDADD = ../src/libsiloh5.la
 else
@@ -31,12 +42,12 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/pdb \
  -I$(srcdir)/../src/score \
  -I$(srcdir)/../src/silo
-quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
-TestReadMask_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
+quad_CPPFLAGS = $(AM_CPPFLAGS)
+TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 
 HDF5PROGS=compression grab
-F77PROGS= arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
+FCPROGS= arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
@@ -93,20 +104,75 @@ check_PROGRAMS = \
  quad \
  version 
 
+# Deal with need to use c++ linker whenever we've got C++
+# sources compiled with the silo library and the fact that
+# Automake/gmake won't let me just say LINK=$(CXXLINK). 
+# This is a hack to force c++ linkage when we have
+# c++ code compiled into Silo. I got this hack from
+# automake manaual.
+if CXX_LINK_NEEDED
+ nodist_EXTRA_array_SOURCES = dummy.cxx
+ nodist_EXTRA_extface_SOURCES = dummy.cxx
+ nodist_EXTRA_multi_test_SOURCES = dummy.cxx
+ nodist_EXTRA_partial_io_SOURCES = dummy.cxx
+ nodist_EXTRA_point_SOURCES = dummy.cxx
+ nodist_EXTRA_group_test_SOURCES = dummy.cxx
+ nodist_EXTRA_listtypes_SOURCES = dummy.cxx
+ nodist_EXTRA_simple_SOURCES = dummy.cxx
+ nodist_EXTRA_ucd_SOURCES = dummy.cxx
+ nodist_EXTRA_ucdsamp3_SOURCES = dummy.cxx
+ nodist_EXTRA_testall_SOURCES = dummy.cxx
+ nodist_EXTRA_alltypes_SOURCES = dummy.cxx
+ nodist_EXTRA_obj_SOURCES = dummy.cxx
+ nodist_EXTRA_onehex_SOURCES = dummy.cxx
+ nodist_EXTRA_oneprism_SOURCES = dummy.cxx
+ nodist_EXTRA_onepyramid_SOURCES = dummy.cxx
+ nodist_EXTRA_onetet_SOURCES = dummy.cxx
+ nodist_EXTRA_TestReadMask_SOURCES = dummy.cxx
+ nodist_EXTRA_subhex_SOURCES = dummy.cxx
+ nodist_EXTRA_twohex_SOURCES = dummy.cxx
+ nodist_EXTRA_multispec_SOURCES = dummy.cxx
+ nodist_EXTRA_specmix_SOURCES = dummy.cxx
+ nodist_EXTRA_testpdb_SOURCES = dummy.cxx
+ nodist_EXTRA_sami_SOURCES = dummy.cxx
+ nodist_EXTRA_spec_SOURCES = dummy.cxx
+ nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx
+ nodist_EXTRA_merge_block_SOURCES = dummy.cxx
+ nodist_EXTRA_mat3d_3across_SOURCES = dummy.cxx
+ nodist_EXTRA_ucd1d_SOURCES = dummy.cxx
+ nodist_EXTRA_wave_SOURCES = dummy.cxx
+ nodist_EXTRA_multi_file_SOURCES = dummy.cxx
+ nodist_EXTRA_polyzl_SOURCES = dummy.cxx
+ nodist_EXTRA_csg_SOURCES = dummy.cxx
+ nodist_EXTRA_rocket_SOURCES = dummy.cxx
+ nodist_EXTRA_mmadjacency_SOURCES = dummy.cxx
+ nodist_EXTRA_largefile_SOURCES = dummy.cxx
+ nodist_EXTRA_dir_SOURCES = dummy.cxx
+ nodist_EXTRA_quad_SOURCES = dummy.cxx
+ nodist_EXTRA_version_SOURCES = dummy.cxx
+ nodist_EXTRA_arrayf77_SOURCES = dummy.cxx
+ nodist_EXTRA_curvef77_SOURCES = dummy.cxx
+ nodist_EXTRA_matf77_SOURCES = dummy.cxx
+ nodist_EXTRA_pointf77_SOURCES = dummy.cxx
+ nodist_EXTRA_quadf77_SOURCES = dummy.cxx
+ nodist_EXTRA_ucdf77_SOURCES = dummy.cxx
+ nodist_EXTRA_testallf77_SOURCES = dummy.cxx
+ nodist_EXTRA_compression_SOURCES = dummy.cxx
+ nodist_EXTRA_grab_SOURCES = dummy.cxx
+endif
+
 if HDF5_DRV_NEEDED
-  TESTSUITE += $(srcdir)/testsuitehdf5
   PROGS += $(HDF5PROGS)
   check_PROGRAMS += $(HDF5PROGS)
   compression_SOURCES = compression.c
-  compression_LDADD = $(LDADD) 
+  compression_LDADD = $(LDADD)
   grab_SOURCES = grab.c
-  grab_LDADD = $(LDADD) 
+  grab_LDADD = $(LDADD)
 endif
 
 if FORTRAN_NEEDED
-  TESTSUITE += $(srcdir)/testsuitef77
-  PROGS += $(F77PROGS)
-  check_PROGRAMS += $(F77PROGS)
+  PROGS += $(FCPROGS)
+  check_PROGRAMS += $(FCPROGS)
   arrayf77_SOURCES = arrayf77.f
   arrayf77_LDADD = $(LDADD) $(FCLIBS)
   curvef77_SOURCES = curvef77.f
@@ -123,12 +189,6 @@ if FORTRAN_NEEDED
   testallf77_LDADD = $(LDADD) $(FCLIBS)
 endif
 
-#TESTS = array extface multi_test partial_io point group_test \
- listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
- oneprism onepyramid onetet TestReadMask subhex twohex multispec \
- specmix testpdb sami spec cpz1plt merge_block mat3d_3across \
- ucd1d wave multi_file polyzl csg rocket mmadjacency  largefile version 
-
 all-local:
 	@echo
 	@if (fmt</dev/null)>/dev/null 2>&1;then fmt="fmt -70";else fmt=cat;fi;\
@@ -140,29 +200,30 @@ all-local:
 	   $$fmt | sed 's/^/NOTICE: /'
 	@echo
 
-# autotest targets
+#
+# Autotest targets.
+# Since we run testsuite multiple times in different 'modes', we
+# need some extra logic to contatentate all the results into a
+# single, final testsuite.log. Also, it is possible for TESTARGS
+# to somehow override DB_HDF5= and PYTHON= in these test inokations.
+#
 check-local: $(TESTSUITE) $(PROGS)
-	list='$(TESTSUITE)'; for file in $$list; do \
-	  $(SHELL) $$file; \
-	done
+	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) $(TESTARGS)
+	@if test -e testsuite.log; then \
+	    cp testsuite.log testsuite.log.pdb ; \
+	fi
+if HDF5_DRV_NEEDED
+	$(SHELL) $(srcdir)/testsuite DB_HDF5=DB_HDF5 PYTHON=$(PYTHON) $(TESTARGS)
+	@if test -e testsuite.log.pdb -a -e testsuite.log; then \
+	    cat testsuite.log.pdb >> testsuite.log ; \
+	fi
+endif
 
 clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
-	rm -f testsuitef77.log
-	rm -rf testsuitef77.dir
-	rm -f testsuitehdf5.log
-	rm -rf testsuitehdf5.dir
 
 testsuite: $(srcdir)/testsuite.at
-	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
-	-mv -f $@.tmp $@
-
-testsuitef77: $(srcdir)/testsuitef77.at
-	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
-	-mv -f $@.tmp $@
-
-testsuitehdf5: $(srcdir)/testsuitehdf5.at
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	-mv -f $@.tmp $@
 
@@ -188,3 +249,14 @@ resample.lo: resample.c
 	$(LIBTOOL) --tag=CC --mode=compile $(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o $@ $<
 
 tests: $(PROGS)
+
+# Single rule to capture anything put into check_DATA or check_SCRIPTS
+# this assumes the only action necessary to create is a copy
+checksums: copy_cksd
+copy_cksd:
+	@for f in $(check_SCRIPTS) $(check_DATA); do \
+	    if test ! -e $$f ; then \
+	        cp $(srcdir)/$$f . ;\
+	    fi ;\
+	done
+	touch $@

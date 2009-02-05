@@ -13,7 +13,7 @@
  */
 
 int
-main()
+main(int argc, char **argv)
 {
      int       i, j;
      int       ndir;
@@ -32,6 +32,21 @@ main()
      int       ione = 1;
      int       ithree = 3;
      int       ithirtyfour = 34;
+
+     int            driver = DB_PDB;
+     char          *filename = "z1plt.pdb";
+
+     for (i=1; i<argc; i++) {
+         if (!strcmp(argv[i], "DB_PDB")) {
+             driver = DB_PDB;
+             filename = "z1plt.pdb";
+         } else if (!strcmp(argv[i], "DB_HDF5")) {
+             driver = DB_HDF5;
+             filename = "z1plt.h5";
+         } else {
+             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+         }
+     }
 
      /*
       * Don't abort if the input file is not found.
@@ -69,8 +84,8 @@ main()
      /*
       * Open the new file.
       */
-     dbfile2 = DBCreate ("z1plt.silo", DB_CLOBBER, DB_LOCAL,
-                         "ball impacting plate", DB_PDB);
+     dbfile2 = DBCreate (filename, DB_CLOBBER, DB_LOCAL,
+                         "ball impacting plate", driver);
 
      /*
       * Read the hex mesh.

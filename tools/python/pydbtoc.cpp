@@ -1,7 +1,7 @@
 #include "pydbtoc.h"
 
 // ****************************************************************************
-//  Method:  DBtoc_as_string
+//  Method:  DBtoc_dealloc
 //
 //  Purpose:
 //    Convert the DBtocObject to a string representation.
@@ -15,7 +15,7 @@
 // ****************************************************************************
 static PyObject *DBtoc_dealloc(PyObject *self)
 {
-    PyMem_DEL(self);
+    PyObject_Del(self);
 }
 
 // ****************************************************************************
@@ -31,39 +31,57 @@ static PyObject *DBtoc_dealloc(PyObject *self)
 //  Creation:    July 12, 2005
 //
 // ****************************************************************************
-static void DBtoc_as_string(PyObject *self, char *s)
+static int DBtoc_as_string(PyObject *self, char *s)
 {
     DBtocObject *obj = (DBtocObject*)self;
     DBtoc *toc = obj->toc;
+    const char *sep = ", ";
+    const char *term = ")\n";
+    char tmp[1000];
+    int len = 0;
 
-    strcpy(s, "");
-    char tmp[100];
+    if (s) strcpy(s, "");
 
     sprintf(tmp, "nvar = %d\n", toc->nvar);
-    strcat(s, tmp);
+    len += strlen(tmp);
+    if (s) strcat(s, tmp);
 
     sprintf(tmp, "var_names = (");
-    strcat(s, tmp);
+    len += strlen(tmp);
+    if (s) strcat(s, tmp);
     for (int i=0; i<toc->nvar; i++)
     {
-        strcat(s, toc->var_names[i]);
+        len += strlen(toc->var_names[i]);
+        if (s) strcat(s, toc->var_names[i]);
         if (i < toc->nvar-1)
-            strcat(s, ", ");
+        {
+            len += strlen(sep);
+            if (s) strcat(s, sep);
+        }
     }
-    strcat(s, ")\n");
+    len += strlen(term);
+    if (s) strcat(s, term);
 
     sprintf(tmp, "ndir = %d\n", toc->ndir);
-    strcat(s, tmp);
+    len += strlen(tmp);
+    if (s) strcat(s, tmp);
 
     sprintf(tmp, "dir_names = (");
-    strcat(s, tmp);
+    len += strlen(tmp);
+    if (s) strcat(s, tmp);
     for (int i=0; i<toc->ndir; i++)
     {
-        strcat(s, toc->dir_names[i]);
+        len += strlen(toc->dir_names[i]);
+        if (s) strcat(s, toc->dir_names[i]);
         if (i < toc->ndir-1)
-            strcat(s, ", ");
+        {
+            len += strlen(sep);
+            if (s) strcat(s, sep);
+        }
     }
-    strcat(s, ")\n");
+    len += strlen(term);
+    if (s) strcat(s, term);
+    return len;
 }
 
 // ****************************************************************************
@@ -81,9 +99,13 @@ static void DBtoc_as_string(PyObject *self, char *s)
 // ****************************************************************************
 static PyObject *DBtoc_str(PyObject *self)
 {
-    char str[1000];
+    PyObject *retval;
+    int len = DBtoc_as_string(self, 0);
+    char *str = new char[len]; 
     DBtoc_as_string(self, str);
-    return PyString_FromString(str);
+    retval = PyString_FromString(str);
+    delete [] str;
+    return retval; 
 }
 
 // ****************************************************************************
@@ -103,9 +125,11 @@ static PyObject *DBtoc_str(PyObject *self)
 static int DBtoc_print(PyObject *self, FILE *fp, int flags)
 {
     DBtocObject *obj = (DBtocObject*)self;
-    char str[1000];
+    int len = DBtoc_as_string(self, 0);
+    char *str = new char[len]; 
     DBtoc_as_string(self, str);
     fprintf(fp, str);
+    delete [] str;
     return 0;
 }
 

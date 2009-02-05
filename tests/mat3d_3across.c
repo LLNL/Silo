@@ -72,11 +72,24 @@ int     dims[3];
 /*--------------------*/
 /*    Main Program    */
 /*--------------------*/
-int main() {
-  DBfile *db;
+int main(int argc, char **argv) {
+    DBfile *db;
+    int            i, driver = DB_PDB;
+    char          *filename = "csg.pdb";
+    char  *coordnames[3];
+    float *coord[3];
 
-  char  *coordnames[3];
-  float *coord[3];
+    for (i=1; i<argc; i++) {
+        if (!strcmp(argv[i], "DB_PDB")) {
+            driver = DB_PDB;
+            filename = "mat3d_3across.pdb";
+        } else if (!strcmp(argv[i], "DB_HDF5")) {
+            driver = DB_HDF5;
+            filename = "mat3d_3across.h5";
+        } else {
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
+    }
 
   coordnames[0]=strdup("x");
   coordnames[1]=strdup("y");
@@ -90,8 +103,8 @@ int main() {
   dims[1]=ny;
   dims[2]=nz;
 
-  db=DBCreate("mat3d_3across.silo", DB_CLOBBER, DB_LOCAL,
-              "Mixed zone 3d test", DB_PDB);
+  db=DBCreate(filename, DB_CLOBBER, DB_LOCAL,
+              "Mixed zone 3d test", driver);
 
   DBPutQuadmesh(db, "mesh", coordnames, coord, dims, 3, 
                 DB_FLOAT, DB_NONCOLLINEAR, NULL);

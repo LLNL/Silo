@@ -110,16 +110,16 @@ main(int argc, char *argv[])
     int            i, j, ndims=1, dims[]={ONE_MEG/sizeof(float)};
     float          val[ONE_MEG/sizeof(float)];
     float          rval[ONE_MEG/sizeof(float)];
-    int            cnt, driver=DB_PDB;
-    char          *filename="largefile.pdb";
+    int            cnt, driver=DB_HDF5;
+    char          *filename="largefile.h5";
     int            k1, k2;
     DBfile        *dbfile;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
         if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
-            filename = "largefile.pdb";
+            fprintf(stderr, "This test only supported on HDF5 driver\n");
+            exit(1);
         } else if (!strcmp(argv[i], "DB_HDF5")) {
             driver = DB_HDF5;
             filename = "largefile.h5";
@@ -128,11 +128,6 @@ main(int argc, char *argv[])
         }
     }
 
-    printf("sizeof(off_t) = %zu\n", sizeof(off_t));
-    printf("sizeof(fpos_t) = %zu\n", sizeof(fpos_t));
-    printf("sizeof(size_t) = %zu\n", sizeof(size_t));
-    printf("sizeof(ssize_t) = %zu\n", sizeof(ssize_t));
-    
     DBShowErrors(DB_TOP, NULL);
     DBForceSingle(1);
 

@@ -112,6 +112,23 @@ _lite_PD_rl_pdb (PDBfile *file) {
 
    if (file->type != NULL) SFREE(file->type);
 
+   if (lite_LAST != NULL) SFREE(lite_LAST);
+
+   if (lite_PD_DEFSTR_S != NULL) SFREE(lite_PD_DEFSTR_S);
+   lite_PD_DEFSTR_S = NULL;
+
+   if (lite_PD_SYMENT_S != NULL) SFREE(lite_PD_SYMENT_S);
+   lite_PD_SYMENT_S = NULL;
+
+   if (lite_io_close_hook == (PFfclose) _lite_PD_pio_close)
+      lite_io_close_hook = (PFfclose) fclose;
+
+   if (lite_io_seek_hook == (PFfseek) _lite_PD_pio_seek)
+      lite_io_seek_hook = (PFfseek) fseek;
+
+   if (lite_io_printf_hook == (PFfprintf) _lite_PD_pio_printf)
+      lite_io_printf_hook = (PFfprintf) fprintf;
+
    SFREE(file->name);
    SFREE(file);
 }

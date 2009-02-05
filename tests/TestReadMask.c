@@ -8,16 +8,11 @@
  *   cc -o ts -I/usr/local/silo/4.2/irix64/n32/include 
  *      -L/usr/local/silo/4.2/irix64/n32/lib -DNEW_SILO TestSilo.c -lsilo -lm
  * 
- * Note that the -DNEW_SILO should be removed if you want to see what would
- * happen without using the read masks.
- *
  * Programmer: Brad Whitlock
  * Date:       Thu May 17 13:00:50 PST 2001
  *
  */
-#ifdef NEW_SILO
 void    printMask(FILE * fp, long mask);
-#endif
 int     test_readmat(DBfile * dbfile, const char *testName, long mask);
 int     test_readpointmesh(DBfile * dbfile, long mask);
 int     test_readpointvar(DBfile * dbfile, long mask);
@@ -34,21 +29,28 @@ void    printMaterial(const char *routine, DBmaterial * mat);
 void    printTimes(int *ms);
 
 /* Variables to hold time data. */
-struct timeb start_time;
-struct timeb end_time;
+#if !defined(_WIN32)
+struct timeval start_time;
+struct timeval end_time;
+#endif
 
 int
 main(int argc, char *argv[])
 {
+    int i, driver = DB_PDB;
     DBfile *dbfile = NULL;
     int     ms[33];
-    char   *files[] = { "./rect2d.pdb",
+    char   *pdbfiles[] = { "./rect2d.pdb",
         "./point2d.pdb",
         "./globe.pdb"
     };
+    char   *h5files[] = { "./rect2d.h5",
+        "./point2d.h5",
+        "./globe.h5"
+    };
+    char **files = pdbfiles;
     int maskindex = 0;
 
-#ifdef NEW_SILO
     /* Set the masks used for the tests. */
     long    mask[] = {
         DBAll,
@@ -92,6 +94,18 @@ main(int argc, char *argv[])
         DBNone,
     };
 
+    for (i=1; i<argc; i++) {
+        if (!strcmp(argv[i], "DB_PDB")) {
+            driver = DB_PDB;
+            files = pdbfiles;
+        } else if (!strcmp(argv[i], "DB_HDF5")) {
+            driver = DB_HDF5;
+            files = h5files;
+        } else {
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
+    }
+
     printf("NOTE: The times listed here do not take any caching into\n");
     printf("account.  Thus, the first time listed in each section may be\n");
     printf("extraordinarily large.  For an accurate timing test, this cache\n");
@@ -99,16 +113,6 @@ main(int argc, char *argv[])
 
     printMask(stdout, DBGetDataReadMask());
     printf("\n\n");
-#else
-    long    mask[24];
-
-    {
-        int     i;
-
-        for (i = 0; i < 23; ++i)
-            mask[i] = 0L;
-    }
-#endif
 
     /**************************************************************************
      *
@@ -290,12 +294,10 @@ test_readmat(DBfile * dbfile, const char *testName, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("%s: ", testName);
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the material list and print the material struct. */
     mat = DBGetMaterial(dbfile, "mat1");
     ms = ElapsedTime();
@@ -346,12 +348,10 @@ test_readpointmesh(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("test_readpointmesh: ");
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the material list and print the material struct. */
     pmesh = DBGetPointmesh(dbfile, "dir1/pmesh");
     ms = ElapsedTime();
@@ -387,12 +387,10 @@ test_readpointvar(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("test_readpointvar: ");
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the material list and print the material struct. */
     mvar = DBGetPointvar(dbfile, "dir1/d");
     ms = ElapsedTime();
@@ -408,10 +406,8 @@ test_readpointvar(DBfile * dbfile, long mask)
         fprintf(stderr, "test_readpointvar: mvar = NULL!\n");
     }
 
-#ifdef NEW_SILO
     /* This check gets us around a crash! */
     if (mask != DBNone)
-#endif
         DBFreeMeshvar(mvar);
 
     /* Return how many milliseconds since the call to ResetTime. */
@@ -427,12 +423,10 @@ test_readquadmesh(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("test_readquadmesh: ");
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the quad mesh and print the quadmesh struct. */
     qmesh = DBGetQuadmesh(dbfile, "quadmesh2d");
     ms = ElapsedTime();
@@ -468,12 +462,10 @@ test_readquadvar(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("test_readquadvar: ");
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the quad var and print the struct. */
     qvar = DBGetQuadvar(dbfile, "d");
     ms = ElapsedTime();
@@ -489,10 +481,8 @@ test_readquadvar(DBfile * dbfile, long mask)
         fprintf(stderr, "test_readquadvar: qvar = NULL!\n");
     }
 
-#ifdef NEW_SILO
     /* This check gets us around a crash! */
     if (mask != DBNone)
-#endif
         DBFreeQuadvar(qvar);
 
     /* Return how many milliseconds since the call to ResetTime. */
@@ -508,12 +498,10 @@ test_readucdmesh(DBfile * dbfile, const char *testName, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("%s: ", testName);
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the ucd mesh and print out the struct. */
     umesh = DBGetUcdmesh(dbfile, "mesh1");
     ms = ElapsedTime();
@@ -553,12 +541,10 @@ test_readucdvar(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("test_readucdvar: ");
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the quad var and print the struct. */
     uvar = DBGetUcdvar(dbfile, "u");
     ms = ElapsedTime();
@@ -574,10 +560,8 @@ test_readucdvar(DBfile * dbfile, long mask)
         fprintf(stderr, "test_readucdvar: uvar = NULL!\n");
     }
 
-#ifdef NEW_SILO
     /* This check gets us around a crash! */
     if (mask != DBNone)
-#endif
         DBFreeUcdvar(uvar);
 
     /* Return how many milliseconds since the call to ResetTime. */
@@ -593,12 +577,10 @@ test_readfacelist(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("test_readfacelist: ");
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the face list and print the struct. */
     fl = DBGetFacelist(dbfile, "fl");
     ms = ElapsedTime();
@@ -635,12 +617,10 @@ test_readzonelist(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-#ifdef NEW_SILO
     DBSetDataReadMask(mask);
     printf("test_readzonelist: ");
     printMask(stdout, DBGetDataReadMask());
     printf("\n");
-#endif
     /* Read the face list and print the struct. */
     zl = DBGetZonelist(dbfile, "zl");
     ms = ElapsedTime();
@@ -669,8 +649,10 @@ test_readzonelist(DBfile * dbfile, long mask)
 void
 ResetTime(void)
 {
+#if !defined(_WIN32)
     /* Get the start time */
-    ftime(&start_time);
+    gettimeofday(&start_time,0);
+#endif
 }
 
 int
@@ -678,22 +660,26 @@ ElapsedTime(void)
 {
     int     ms;
 
+#if !defined(_WIN32)
     /* Get the end time */
-    ftime(&end_time);
+    gettimeofday(&end_time,0);
 
     /* Figure out how many milliseconds the rendering took. */
-    ms = (int)difftime(end_time.time, start_time.time);
+    ms = (int)difftime(end_time.tv_sec, start_time.tv_sec);
     if (ms == 0)
-        ms = end_time.millitm - start_time.millitm;
+        ms = end_time.tv_usec - start_time.tv_usec;
     else
-        ms = ((ms - 1) * 1000) + (1000 - start_time.millitm) +
-            end_time.millitm;
+        ms = ((ms - 1) * 1000000) + (1000000 - start_time.tv_usec) +
+            end_time.tv_usec;
 
     /* Copy the end time into the start time. */
-    memcpy((void *)&start_time, (void *)&end_time, sizeof(struct timeb));
+    memcpy((void *)&start_time, (void *)&end_time, sizeof(struct timeval));
 
     /* Return how many milliseconds it took to render. */
     return ms;
+#else
+    return 1000;
+#endif
 }
 
 void
@@ -741,7 +727,6 @@ printTimes(int *ms)
     printf("Read zonelist (none):  %d ms.\n", ms[i++]);
 }
 
-#ifdef NEW_SILO
 void
 printMask(FILE * fp, long mask)
 {
@@ -770,4 +755,3 @@ printMask(FILE * fp, long mask)
     }
     fprintf(fp, "};");
 }
-#endif
