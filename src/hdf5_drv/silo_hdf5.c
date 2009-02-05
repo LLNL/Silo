@@ -312,6 +312,7 @@ typedef struct DBmaterial_mt {
     int                 major_order;
     int                 datatype;
     int                 dims[3];
+    int                 allowmat0;
     int                 guihide;
     char                meshid[256];
     char                matlist[256];
@@ -387,6 +388,7 @@ typedef struct DBmultimat_mt {
     int                 grouporigin;
     float               time;
     double              dtime;
+    int                 allowmat0;
     int                 guihide;
     char                matnames[256];
     char                matnos[256];
@@ -1134,6 +1136,7 @@ db_hdf5_init(void)
         MEMBER_S(int,           major_order);
         MEMBER_S(int,           datatype);
         MEMBER_3(int,           dims);
+        MEMBER_S(int,           allowmat0);
         MEMBER_S(int,           guihide);
         MEMBER_S(str256,        meshid);
         MEMBER_S(str256,        matlist);
@@ -1205,6 +1208,7 @@ db_hdf5_init(void)
         MEMBER_S(int,           grouporigin);
         MEMBER_S(float,         time);
         MEMBER_S(double,        dtime);
+        MEMBER_S(int,           allowmat0);
         MEMBER_S(int,           guihide);
         MEMBER_S(str256,        matnames);
         MEMBER_S(str256,        matnos);
@@ -7583,6 +7587,7 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
         m.mixlen = mixlen;
         m.origin = _ma._origin;
         m.major_order = _ma._majororder;
+        m.allowmat0 = _ma._allowmat0;
         m.guihide = _ma._guihide;
         m.datatype = (DB_FLOAT==datatype || DB_DOUBLE==datatype)?0:datatype;
         strcpy(m.meshid, OPT(mname));
@@ -7598,6 +7603,7 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
             if (m.origin)       MEMBER_S(int, origin);
             if (m.major_order)  MEMBER_S(int, major_order);
             if (m.datatype)     MEMBER_S(int, datatype);
+            if (m.allowmat0)    MEMBER_S(int, allowmat0);
             if (m.guihide)      MEMBER_S(int, guihide);
             MEMBER_3(int, dims);
             MEMBER_S(str(m.meshid), meshid);
@@ -7686,6 +7692,7 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char *name)
         ma->ndims = m.ndims;
         ma->origin = m.origin;
         ma->major_order = m.major_order;
+        ma->allowmat0 = m.allowmat0;
         ma->guihide = m.guihide;
         ma->nmat = m.nmat;
         ma->mixlen = m.mixlen;
@@ -8940,6 +8947,9 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *   Added material names and matcolors options
+ *
+ *   Thoamas R. Treadway, Tue Aug 15 14:05:59 PDT 2006
+ *   Added DBOPT_ALLOWMAT0
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -9024,6 +9034,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         m.blockorigin = _mm._blockorigin;
         m.grouporigin = _mm._grouporigin;
         m.nmatnos = _mm._nmatnos;
+        m.allowmat0 = _mm._allowmat0;
         m.guihide = _mm._guihide;
 
         /* Write meta data to file */
@@ -9041,6 +9052,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
             MEMBER_S(str(m.matcounts), matcounts);
             MEMBER_S(str(m.matlists), matlists);
             if (m.nmatnos)      MEMBER_S(int, nmatnos);
+            if (m.allowmat0)    MEMBER_S(int, allowmat0);
             if (m.guihide)      MEMBER_S(int, guihide);
             MEMBER_S(str(m.material_names), material_names);
             MEMBER_S(str(m.mat_colors), mat_colors);
@@ -9121,6 +9133,7 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
         mm->ngroups = m.ngroups;
         mm->blockorigin = m.blockorigin;
         mm->grouporigin = m.grouporigin;
+        mm->allowmat0 = m.allowmat0;
         mm->guihide = m.guihide;
         mm->nmatnos = m.nmatnos;
 

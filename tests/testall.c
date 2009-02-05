@@ -358,6 +358,7 @@ build_rect2d(DBfile * dbfile, int size, int order)
     char **matnames = NULL;
     char **matcolors = NULL;
 
+    int            one = 1;
     int            i, j;
     double         xave, yave;
     double         xcenter, ycenter;
@@ -579,7 +580,7 @@ build_rect2d(DBfile * dbfile, int size, int order)
              "vel vector {u,v};speed scalar sqrt(u*u+v*v)",
              &i, 1, DB_CHAR);
 
-    optlist = DBMakeOptlist(10);
+    optlist = DBMakeOptlist(15);
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
@@ -587,6 +588,7 @@ build_rect2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
     DBAddOption(optlist, DBOPT_XUNITS, "cm");
     DBAddOption(optlist, DBOPT_YUNITS, "cm");
+    DBAddOption(optlist, DBOPT_ALLOWMAT0, &one);
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
     DBAddOption(optlist, DBOPT_MATCOLORS, matcolors);
 #if 0

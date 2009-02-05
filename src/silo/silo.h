@@ -71,11 +71,11 @@ extern "C" {
 #define DB_HDF5 7            /* equivalent to DB_HDF5_SEC2 */
 
 /* special driver ids to affect which Virtual File Driver HDF5 uses */
-#define DB_HDF5_SEC2   0x00000100  /* section 2 I/O (open/read/write/close) */
-#define DB_HDF5_STDIO  0x00000200  /* stdio (fopen/fread/fwrite/fclose) */
-#define DB_HDF5_CORE   0x00000300  /* file in memory. MSbits specify alloc. inc. */
-#define DB_HDF5_MPIO   0x00000400  /* use MPI-IO on MPI_COMM_SELF */
-#define DB_HDF5_MPIOP  0x00000500  /* use MPI for any messaging, sec 2 for I/O */
+#define DB_HDF5_SEC2   256  /* section 2 I/O (open/read/write/close) */
+#define DB_HDF5_STDIO  512  /* stdio (fopen/fread/fwrite/fclose) */
+#define DB_HDF5_CORE   768  /* file in memory. MSbits specify alloc. inc. */
+#define DB_HDF5_MPIO   1024  /* use MPI-IO on MPI_COMM_SELF */
+#define DB_HDF5_MPIOP  1280  /* use MPI for any messaging, sec 2 for I/O */
 
 #define NO_FORTRAN_DEFINE       /*mkinc ignores these lines. */
 
@@ -266,6 +266,7 @@ typedef enum {
 #define DBOPT_GROUPINGS         315 /* groupings array */
 #define DBOPT_GROUPINGNAMES     316 /* array of size determined by 
                                        number of groups of names of groups. */
+#define DBOPT_ALLOWMAT0         317 /* Turn off material numer "0" warnings*/
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -649,6 +650,7 @@ typedef struct {
     int           *matnos;      /* global list of material numbers */
     char         **matcolors;   /* optional colors for materials */
     char         **material_names; /* optional names of the materials */
+    int            allowmat0;   /* Flag to allow material "0" */
 } DBmultimat;
 
 /*-------------------------------------------------------------------------
@@ -1001,6 +1003,7 @@ typedef struct {
 
     char         **matcolors;   /* Array of material colors */
     char          *meshname;    /* Name of associated mesh */
+    int            allowmat0;   /* Flag to allow material "0" */
     int            guihide;     /* Flag to hide from post-processor's GUI */
 } DBmaterial;
 

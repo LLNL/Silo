@@ -8529,6 +8529,9 @@ UM_CalcExtents(float *coord_arrays[], int datatype, int ndims, int nnodes,
  *
  *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *    Added DBOPT_MATCOLORS, DBOPT_MATNAMES options to multimesh
+ *
+ *    Thomas R. Treadway, Tue Aug 15 14:05:59 PDT 2006
+ *    Added DBOPT_ALLOWMAT0
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -8639,6 +8642,10 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_MATCOLORS:
                         _ma._matcolors = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_ALLOWMAT0:
+                        _ma._allowmat0 = DEREF(int, optlist->values[i]);
                         break;
 
                     case DBOPT_HIDE_FROM_GUI:
@@ -9152,6 +9159,10 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_MATNAMES:
                         _mm._matnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_ALLOWMAT0:
+                        _mm._allowmat0 = DEREF(int, optlist->values[i]);
                         break;
 
                     default:

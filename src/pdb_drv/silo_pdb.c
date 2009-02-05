@@ -1500,6 +1500,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     DEFINE_OBJ("major_order", &tmpmm.major_order, DB_INT);
     DEFINE_OBJ("origin",      &tmpmm.origin,      DB_INT);
     DEFALL_OBJ("meshid",      &tmpmm.meshname,    DB_CHAR);
+    DEFINE_OBJ("allowmat0",   &tmpmm.allowmat0,   DB_INT);
     DEFINE_OBJ("guihide",     &tmpmm.guihide,     DB_INT);
 
     DEFINE_OBJ("nmat",        &tmpmm.nmat,        DB_INT);
@@ -5391,6 +5392,8 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
    DBAddIntComponent(obj, "origin", _ma._origin);
    DBAddIntComponent(obj, "major_order", _ma._majororder);
    DBAddIntComponent(obj, "datatype", datatype);
+   if (_ma._allowmat0)
+      DBAddIntComponent(obj, "allowmat0", _ma._allowmat0);
    if (_ma._guihide)
       DBAddIntComponent(obj, "guihide", _ma._guihide);
 
@@ -6227,6 +6230,8 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
    DBAddIntComponent(obj, "grouporigin", _mm._grouporigin);
+   if (_mm._allowmat0)
+      DBAddIntComponent(obj, "allowmat0", _mm._allowmat0);
    if (_mm._guihide)
       DBAddIntComponent(obj, "guihide", _mm._guihide);
 

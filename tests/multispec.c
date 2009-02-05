@@ -307,7 +307,7 @@ build_dbfile(DBfile *dbfile)
 
     for (block = 0; block < nblocks_x * nblocks_y; block++)
     {
-        fprintf(stderr, "\t%s\n", dirnames[block]);
+        fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /*
          * Now extract the data for this block. 
@@ -498,7 +498,7 @@ main(int argc, char *argv[]) {
     /*
      * Create the multi-block curvilinear 2d mesh.
      */
-    fprintf(stderr, "creating %s\n", filename);
+    fprintf(stdout, "creating %s\n", filename);
     if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                          "multi-block curvilinear 2d test file", driver))
         == NULL)

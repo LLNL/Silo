@@ -416,6 +416,7 @@ struct _ma {
     int            _majororder;
     char         **_matnames;
     char         **_matcolors;
+    int            _allowmat0;
     int            _guihide;
 };
 
@@ -663,6 +664,7 @@ struct _mm {
     int            *_matcounts;
     int            *_matlists;
     int            *_has_external_zones;
+    int            _allowmat0;
     int            _guihide;
     int            _lgroupings;
     int            *_groupings;

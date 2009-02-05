@@ -368,7 +368,7 @@ main(int argc, char *argv[])
      * Create the multi-block rectilinear 2d mesh.
      */
     sprintf(filename, "multi_rect2d%s", file_ext);
-    fprintf(stderr, "creating %s\n", filename);
+    fprintf(stdout, "creating %s\n", filename);
     if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                          "multi-block rectilinear 2d test file", driver))
         == NULL)
@@ -386,7 +386,7 @@ main(int argc, char *argv[])
      * Create the multi-block curvilinear 2d mesh.
      */
     sprintf(filename, "multi_curv2d%s", file_ext);
-    fprintf(stderr, "creating %s\n", filename);
+    fprintf(stdout, "creating %s\n", filename);
     if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                          "multi-block curvilinear 2d test file", driver))
         == NULL)
@@ -404,7 +404,7 @@ main(int argc, char *argv[])
      * Create the multi-block point 2d mesh.
      */
     sprintf(filename, "multi_point2d%s", file_ext);
-    fprintf(stderr, "creating %s\n", filename);
+    fprintf(stdout, "creating %s\n", filename);
     if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                            "multi-block point 2d test file", driver))
         == NULL)
@@ -422,7 +422,7 @@ main(int argc, char *argv[])
      * Create the multi-block rectilinear 3d mesh.
      */
     sprintf(filename, "multi_rect3d%s", file_ext);
-    fprintf(stderr, "creating %s\n", filename);
+    fprintf(stdout, "creating %s\n", filename);
     if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                          "multi-block rectilinear 3d test file", driver))
         == NULL)
@@ -440,7 +440,7 @@ main(int argc, char *argv[])
      * Create the multi-block curvilinear 3d mesh.
      */
     sprintf(filename, "multi_curv3d%s", file_ext);
-    fprintf(stderr, "creating %s\n", filename);
+    fprintf(stdout, "creating %s\n", filename);
     if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                          "multi-block curvilinear 3d test file", driver))
         == NULL)
@@ -458,7 +458,7 @@ main(int argc, char *argv[])
      * Create the multi-block ucd 3d mesh.
      */
     sprintf(filename, "multi_ucd3d%s", file_ext);
-    fprintf(stderr, "creating %s\n", filename);
+    fprintf(stdout, "creating %s\n", filename);
     if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                            "multi-block ucd 3d test file", driver))
         == NULL)
@@ -766,6 +766,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
             return (-1);
         }                              /* if */
 
+        DBAddOption(optlist, DBOPT_ALLOWMAT0, &one);
         /* add material names and colors option to this one */
         if (1)
         {
@@ -1112,7 +1113,7 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y; block++)
     {
-        fprintf(stderr, "\t%s\n", dirnames[block]);
+        fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /*
          * Now extract the data for this block.
@@ -1411,7 +1412,7 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y; block++)
     {
-        fprintf(stderr, "\t%s\n", dirnames[block]);
+        fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
          * Now extract the data for this block.
@@ -1615,7 +1616,7 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y; block++)
     {
-        fprintf(stderr, "\t%s\n", dirnames[block]);
+        fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
          * Now extract the data for this block.
@@ -1904,7 +1905,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
     {
-        fprintf(stderr, "\t%s\n", dirnames[block]);
+        fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
          * Now extract the data for this block.
@@ -2279,7 +2280,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
     {
-        fprintf(stderr, "\t%s\n", dirnames[block]);
+        fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
          * Now extract the data for this block.
@@ -2792,7 +2793,7 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     for (block = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
     {
-        fprintf(stderr, "\t%s\n", dirnames[block]);
+        fprintf(stdout, "\t%s\n", dirnames[block]);
 
         /* 
          * Now extract the data for this block.

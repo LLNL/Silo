@@ -625,7 +625,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         filenum = block / ((nblocks_x * nblocks_y * nblocks_z) / NFILES);
         sprintf(filename, "%s%d.%s", basename, filenum, file_ext);
 
-        fprintf(stderr, "\t%s:%s\n", filename, dirname);
+        fprintf(stdout, "\t%s:%s\n", filename, dirname);
 
         /* 
          * Now extract the data for this block.

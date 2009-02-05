@@ -193,7 +193,7 @@ c-----------------------------------------------------------------------
       real           mix_vf(900)
 
       integer        optlistid
-      integer        flid
+      integer        flid, one
 
       integer        i, j, k
       integer        iz
@@ -319,9 +319,10 @@ c     Write out the variables.
 c
       cycle = 48
       time = 4.8
+      one = 1
 
       ierr = dbset2dstrlen(1024)
-      ierr = dbmkoptlist(5, optlistid)                  ! Create the option list
+      ierr = dbmkoptlist(10, optlistid)                  ! Create the option list
       ierr = dbaddiopt  (optlistid, DBOPT_CYCLE, cycle) ! Add integer opt
       ierr = dbaddropt  (optlistid, DBOPT_TIME, time)   ! Add real opt
 
@@ -352,6 +353,7 @@ c
       err = dbputuv1 (dbid, "w", 1, "mesh1", 5, w, nnodes, DB_F77NULL,
      .                0, DB_FLOAT, DB_NODECENT, optlistid, ierr)
 
+      ierr = dbaddropt  (optlistid, DBOPT_ALLOWMAT0, one)
       mnames(1) = "Ear Wax"
       mnames(2) = "Drool"
       mnames(3) = "Vaporware"

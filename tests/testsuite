@@ -605,46 +605,49 @@ at_times_file=$at_suite_dir/at-times
 # List of the tested programs.
 at_tested=''
 # List of the all the test groups.
-at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34'
+at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
 at_format='??'
 # Description of all the test groups.
-at_help_all='1;testsuite.at:4;silo array test;;
-2;testsuite.at:7;silo extface test;;
-3;testsuite.at:13;silo partial_io test;;
-4;testsuite.at:16;silo point test;;
-5;testsuite.at:25;silo simple test;;
-6;testsuite.at:28;silo ucd test;;
-7;testsuite.at:31;silo ucdsamp3 test;;
-8;testsuite.at:34;silo testall test;;
-9;testsuite.at:37;silo alltypes test;;
-10;testsuite.at:40;silo obj test;;
-11;testsuite.at:43;silo onehex test;;
-12;testsuite.at:46;silo oneprism test;;
-13;testsuite.at:49;silo onepyramid test;;
-14;testsuite.at:52;silo onetet test;;
-15;testsuite.at:55;silo TestReadMask test;;
-16;testsuite.at:58;silo subhex test;;
-17;testsuite.at:61;silo twohex test;;
-18;testsuite.at:67;silo specmix test;;
-19;testsuite.at:73;silo sami test;;
-20;testsuite.at:76;silo spec test;;
-21;testsuite.at:88;silo mat3d_3across test;;
-22;testsuite.at:91;silo ucd1d test;;
-23;testsuite.at:94;silo wave test;;
-24;testsuite.at:100;silo polyzl test;;
-25;testsuite.at:103;silo csg test;;
-26;testsuite.at:106;silo mmadjacency test;;
-27;testsuite.at:112;silo dir test;;
-28;testsuite.at:115;silo quad test;;
-29;testsuite.at:123;silo curvef77 test;;
-30;testsuite.at:126;silo matf77 test;;
-31;testsuite.at:129;silo pointf77 test;;
-32;testsuite.at:132;silo quadf77 test;;
-33;testsuite.at:135;silo testallf77 test;;
-34;testsuite.at:138;silo ucdf77 test;;
+at_help_all='1;testsuite.at:4;array test;;
+2;testsuite.at:7;extface test;;
+3;testsuite.at:10;multi_test test;;
+4;testsuite.at:13;partial_io test;;
+5;testsuite.at:16;point test;;
+6;testsuite.at:25;simple test;;
+7;testsuite.at:28;ucd test;;
+8;testsuite.at:31;ucdsamp3 test;;
+9;testsuite.at:34;testall test;;
+10;testsuite.at:37;alltypes test;;
+11;testsuite.at:40;obj test;;
+12;testsuite.at:43;onehex test;;
+13;testsuite.at:46;oneprism test;;
+14;testsuite.at:49;onepyramid test;;
+15;testsuite.at:52;onetet test;;
+16;testsuite.at:55;TestReadMask test;;
+17;testsuite.at:58;subhex test;;
+18;testsuite.at:61;twohex test;;
+19;testsuite.at:64;multispec test;;
+20;testsuite.at:67;specmix test;;
+21;testsuite.at:73;sami test;;
+22;testsuite.at:76;spec test;;
+23;testsuite.at:88;mat3d_3across test;;
+24;testsuite.at:91;ucd1d test;;
+25;testsuite.at:94;wave test;;
+26;testsuite.at:97;multi_file test;;
+27;testsuite.at:100;polyzl test;;
+28;testsuite.at:103;csg test;;
+29;testsuite.at:106;mmadjacency test;;
+30;testsuite.at:112;dir test;;
+31;testsuite.at:115;quad test;;
+32;testsuite.at:123;curvef77 test;;
+33;testsuite.at:126;matf77 test;;
+34;testsuite.at:129;pointf77 test;;
+35;testsuite.at:132;quadf77 test;;
+36;testsuite.at:135;testallf77 test;;
+37;testsuite.at:138;ucdf77 test;;
 '
 
 at_prev=
@@ -1220,10 +1223,10 @@ echo "$as_me: error: cannot create directory $as_dir" >&2;}
   fi
 
   case $at_group in
-  1 ) # 1. testsuite.at:4: silo array test
+  1 ) # 1. testsuite.at:4: array test
     at_setup_line='testsuite.at:4'
-    at_desc='silo array test'
-    $at_quiet $ECHO_N "  1: silo array test                              $ECHO_C"
+    at_desc='array test'
+    $at_quiet $ECHO_N "  1: array test                                   $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1273,10 +1276,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  2 ) # 2. testsuite.at:7: silo extface test
+  2 ) # 2. testsuite.at:7: extface test
     at_setup_line='testsuite.at:7'
-    at_desc='silo extface test'
-    $at_quiet $ECHO_N "  2: silo extface test                            $ECHO_C"
+    at_desc='extface test'
+    $at_quiet $ECHO_N "  2: extface test                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1326,14 +1329,67 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  3 ) # 3. testsuite.at:13: silo partial_io test
-    at_setup_line='testsuite.at:13'
-    at_desc='silo partial_io test'
-    $at_quiet $ECHO_N "  3: silo partial_io test                         $ECHO_C"
+  3 ) # 3. testsuite.at:10: multi_test test
+    at_setup_line='testsuite.at:10'
+    at_desc='multi_test test'
+    $at_quiet $ECHO_N "  3: multi_test test                              $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "3. testsuite.at:13: testing ..."
+      echo "3. testsuite.at:10: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:11: multi_test"
+echo testsuite.at:11 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    at_trace_this=yes
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; multi_test ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; multi_test ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:11: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  4 ) # 4. testsuite.at:13: partial_io test
+    at_setup_line='testsuite.at:13'
+    at_desc='partial_io test'
+    $at_quiet $ECHO_N "  4: partial_io test                              $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "4. testsuite.at:13: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1379,14 +1435,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  4 ) # 4. testsuite.at:16: silo point test
+  5 ) # 5. testsuite.at:16: point test
     at_setup_line='testsuite.at:16'
-    at_desc='silo point test'
-    $at_quiet $ECHO_N "  4: silo point test                              $ECHO_C"
+    at_desc='point test'
+    $at_quiet $ECHO_N "  5: point test                                   $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "4. testsuite.at:16: testing ..."
+      echo "5. testsuite.at:16: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1432,14 +1488,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  5 ) # 5. testsuite.at:25: silo simple test
+  6 ) # 6. testsuite.at:25: simple test
     at_setup_line='testsuite.at:25'
-    at_desc='silo simple test'
-    $at_quiet $ECHO_N "  5: silo simple test                             $ECHO_C"
+    at_desc='simple test'
+    $at_quiet $ECHO_N "  6: simple test                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "5. testsuite.at:25: testing ..."
+      echo "6. testsuite.at:25: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1485,14 +1541,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  6 ) # 6. testsuite.at:28: silo ucd test
+  7 ) # 7. testsuite.at:28: ucd test
     at_setup_line='testsuite.at:28'
-    at_desc='silo ucd test'
-    $at_quiet $ECHO_N "  6: silo ucd test                                $ECHO_C"
+    at_desc='ucd test'
+    $at_quiet $ECHO_N "  7: ucd test                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "6. testsuite.at:28: testing ..."
+      echo "7. testsuite.at:28: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1538,14 +1594,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  7 ) # 7. testsuite.at:31: silo ucdsamp3 test
+  8 ) # 8. testsuite.at:31: ucdsamp3 test
     at_setup_line='testsuite.at:31'
-    at_desc='silo ucdsamp3 test'
-    $at_quiet $ECHO_N "  7: silo ucdsamp3 test                           $ECHO_C"
+    at_desc='ucdsamp3 test'
+    $at_quiet $ECHO_N "  8: ucdsamp3 test                                $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "7. testsuite.at:31: testing ..."
+      echo "8. testsuite.at:31: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1591,14 +1647,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  8 ) # 8. testsuite.at:34: silo testall test
+  9 ) # 9. testsuite.at:34: testall test
     at_setup_line='testsuite.at:34'
-    at_desc='silo testall test'
-    $at_quiet $ECHO_N "  8: silo testall test                            $ECHO_C"
+    at_desc='testall test'
+    $at_quiet $ECHO_N "  9: testall test                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "8. testsuite.at:34: testing ..."
+      echo "9. testsuite.at:34: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1644,14 +1700,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  9 ) # 9. testsuite.at:37: silo alltypes test
+  10 ) # 10. testsuite.at:37: alltypes test
     at_setup_line='testsuite.at:37'
-    at_desc='silo alltypes test'
-    $at_quiet $ECHO_N "  9: silo alltypes test                           $ECHO_C"
+    at_desc='alltypes test'
+    $at_quiet $ECHO_N " 10: alltypes test                                $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "9. testsuite.at:37: testing ..."
+      echo "10. testsuite.at:37: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1697,14 +1753,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  10 ) # 10. testsuite.at:40: silo obj test
+  11 ) # 11. testsuite.at:40: obj test
     at_setup_line='testsuite.at:40'
-    at_desc='silo obj test'
-    $at_quiet $ECHO_N " 10: silo obj test                                $ECHO_C"
+    at_desc='obj test'
+    $at_quiet $ECHO_N " 11: obj test                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "10. testsuite.at:40: testing ..."
+      echo "11. testsuite.at:40: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1750,14 +1806,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  11 ) # 11. testsuite.at:43: silo onehex test
+  12 ) # 12. testsuite.at:43: onehex test
     at_setup_line='testsuite.at:43'
-    at_desc='silo onehex test'
-    $at_quiet $ECHO_N " 11: silo onehex test                             $ECHO_C"
+    at_desc='onehex test'
+    $at_quiet $ECHO_N " 12: onehex test                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "11. testsuite.at:43: testing ..."
+      echo "12. testsuite.at:43: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1803,14 +1859,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  12 ) # 12. testsuite.at:46: silo oneprism test
+  13 ) # 13. testsuite.at:46: oneprism test
     at_setup_line='testsuite.at:46'
-    at_desc='silo oneprism test'
-    $at_quiet $ECHO_N " 12: silo oneprism test                           $ECHO_C"
+    at_desc='oneprism test'
+    $at_quiet $ECHO_N " 13: oneprism test                                $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "12. testsuite.at:46: testing ..."
+      echo "13. testsuite.at:46: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1856,14 +1912,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  13 ) # 13. testsuite.at:49: silo onepyramid test
+  14 ) # 14. testsuite.at:49: onepyramid test
     at_setup_line='testsuite.at:49'
-    at_desc='silo onepyramid test'
-    $at_quiet $ECHO_N " 13: silo onepyramid test                         $ECHO_C"
+    at_desc='onepyramid test'
+    $at_quiet $ECHO_N " 14: onepyramid test                              $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "13. testsuite.at:49: testing ..."
+      echo "14. testsuite.at:49: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1909,14 +1965,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  14 ) # 14. testsuite.at:52: silo onetet test
+  15 ) # 15. testsuite.at:52: onetet test
     at_setup_line='testsuite.at:52'
-    at_desc='silo onetet test'
-    $at_quiet $ECHO_N " 14: silo onetet test                             $ECHO_C"
+    at_desc='onetet test'
+    $at_quiet $ECHO_N " 15: onetet test                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "14. testsuite.at:52: testing ..."
+      echo "15. testsuite.at:52: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -1962,14 +2018,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  15 ) # 15. testsuite.at:55: silo TestReadMask test
+  16 ) # 16. testsuite.at:55: TestReadMask test
     at_setup_line='testsuite.at:55'
-    at_desc='silo TestReadMask test'
-    $at_quiet $ECHO_N " 15: silo TestReadMask test                       $ECHO_C"
+    at_desc='TestReadMask test'
+    $at_quiet $ECHO_N " 16: TestReadMask test                            $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "15. testsuite.at:55: testing ..."
+      echo "16. testsuite.at:55: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2015,14 +2071,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  16 ) # 16. testsuite.at:58: silo subhex test
+  17 ) # 17. testsuite.at:58: subhex test
     at_setup_line='testsuite.at:58'
-    at_desc='silo subhex test'
-    $at_quiet $ECHO_N " 16: silo subhex test                             $ECHO_C"
+    at_desc='subhex test'
+    $at_quiet $ECHO_N " 17: subhex test                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "16. testsuite.at:58: testing ..."
+      echo "17. testsuite.at:58: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2068,14 +2124,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  17 ) # 17. testsuite.at:61: silo twohex test
+  18 ) # 18. testsuite.at:61: twohex test
     at_setup_line='testsuite.at:61'
-    at_desc='silo twohex test'
-    $at_quiet $ECHO_N " 17: silo twohex test                             $ECHO_C"
+    at_desc='twohex test'
+    $at_quiet $ECHO_N " 18: twohex test                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "17. testsuite.at:61: testing ..."
+      echo "18. testsuite.at:61: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2121,14 +2177,67 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  18 ) # 18. testsuite.at:67: silo specmix test
-    at_setup_line='testsuite.at:67'
-    at_desc='silo specmix test'
-    $at_quiet $ECHO_N " 18: silo specmix test                            $ECHO_C"
+  19 ) # 19. testsuite.at:64: multispec test
+    at_setup_line='testsuite.at:64'
+    at_desc='multispec test'
+    $at_quiet $ECHO_N " 19: multispec test                               $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "18. testsuite.at:67: testing ..."
+      echo "19. testsuite.at:64: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:65: multispec"
+echo testsuite.at:65 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    at_trace_this=yes
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; multispec ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; multispec ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:65: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  20 ) # 20. testsuite.at:67: specmix test
+    at_setup_line='testsuite.at:67'
+    at_desc='specmix test'
+    $at_quiet $ECHO_N " 20: specmix test                                 $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "20. testsuite.at:67: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2174,14 +2283,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  19 ) # 19. testsuite.at:73: silo sami test
+  21 ) # 21. testsuite.at:73: sami test
     at_setup_line='testsuite.at:73'
-    at_desc='silo sami test'
-    $at_quiet $ECHO_N " 19: silo sami test                               $ECHO_C"
+    at_desc='sami test'
+    $at_quiet $ECHO_N " 21: sami test                                    $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "19. testsuite.at:73: testing ..."
+      echo "21. testsuite.at:73: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2227,14 +2336,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  20 ) # 20. testsuite.at:76: silo spec test
+  22 ) # 22. testsuite.at:76: spec test
     at_setup_line='testsuite.at:76'
-    at_desc='silo spec test'
-    $at_quiet $ECHO_N " 20: silo spec test                               $ECHO_C"
+    at_desc='spec test'
+    $at_quiet $ECHO_N " 22: spec test                                    $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "20. testsuite.at:76: testing ..."
+      echo "22. testsuite.at:76: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2280,14 +2389,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  21 ) # 21. testsuite.at:88: silo mat3d_3across test
+  23 ) # 23. testsuite.at:88: mat3d_3across test
     at_setup_line='testsuite.at:88'
-    at_desc='silo mat3d_3across test'
-    $at_quiet $ECHO_N " 21: silo mat3d_3across test                      $ECHO_C"
+    at_desc='mat3d_3across test'
+    $at_quiet $ECHO_N " 23: mat3d_3across test                           $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "21. testsuite.at:88: testing ..."
+      echo "23. testsuite.at:88: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2333,14 +2442,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  22 ) # 22. testsuite.at:91: silo ucd1d test
+  24 ) # 24. testsuite.at:91: ucd1d test
     at_setup_line='testsuite.at:91'
-    at_desc='silo ucd1d test'
-    $at_quiet $ECHO_N " 22: silo ucd1d test                              $ECHO_C"
+    at_desc='ucd1d test'
+    $at_quiet $ECHO_N " 24: ucd1d test                                   $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "22. testsuite.at:91: testing ..."
+      echo "24. testsuite.at:91: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2386,14 +2495,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  23 ) # 23. testsuite.at:94: silo wave test
+  25 ) # 25. testsuite.at:94: wave test
     at_setup_line='testsuite.at:94'
-    at_desc='silo wave test'
-    $at_quiet $ECHO_N " 23: silo wave test                               $ECHO_C"
+    at_desc='wave test'
+    $at_quiet $ECHO_N " 25: wave test                                    $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "23. testsuite.at:94: testing ..."
+      echo "25. testsuite.at:94: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2439,14 +2548,67 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  24 ) # 24. testsuite.at:100: silo polyzl test
-    at_setup_line='testsuite.at:100'
-    at_desc='silo polyzl test'
-    $at_quiet $ECHO_N " 24: silo polyzl test                             $ECHO_C"
+  26 ) # 26. testsuite.at:97: multi_file test
+    at_setup_line='testsuite.at:97'
+    at_desc='multi_file test'
+    $at_quiet $ECHO_N " 26: multi_file test                              $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "24. testsuite.at:100: testing ..."
+      echo "26. testsuite.at:97: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:98: multi_file"
+echo testsuite.at:98 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    at_trace_this=yes
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; multi_file ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; multi_file ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:98: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  27 ) # 27. testsuite.at:100: polyzl test
+    at_setup_line='testsuite.at:100'
+    at_desc='polyzl test'
+    $at_quiet $ECHO_N " 27: polyzl test                                  $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "27. testsuite.at:100: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2492,14 +2654,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  25 ) # 25. testsuite.at:103: silo csg test
+  28 ) # 28. testsuite.at:103: csg test
     at_setup_line='testsuite.at:103'
-    at_desc='silo csg test'
-    $at_quiet $ECHO_N " 25: silo csg test                                $ECHO_C"
+    at_desc='csg test'
+    $at_quiet $ECHO_N " 28: csg test                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "25. testsuite.at:103: testing ..."
+      echo "28. testsuite.at:103: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2545,14 +2707,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  26 ) # 26. testsuite.at:106: silo mmadjacency test
+  29 ) # 29. testsuite.at:106: mmadjacency test
     at_setup_line='testsuite.at:106'
-    at_desc='silo mmadjacency test'
-    $at_quiet $ECHO_N " 26: silo mmadjacency test                        $ECHO_C"
+    at_desc='mmadjacency test'
+    $at_quiet $ECHO_N " 29: mmadjacency test                             $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "26. testsuite.at:106: testing ..."
+      echo "29. testsuite.at:106: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2598,14 +2760,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  27 ) # 27. testsuite.at:112: silo dir test
+  30 ) # 30. testsuite.at:112: dir test
     at_setup_line='testsuite.at:112'
-    at_desc='silo dir test'
-    $at_quiet $ECHO_N " 27: silo dir test                                $ECHO_C"
+    at_desc='dir test'
+    $at_quiet $ECHO_N " 30: dir test                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "27. testsuite.at:112: testing ..."
+      echo "30. testsuite.at:112: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2651,14 +2813,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  28 ) # 28. testsuite.at:115: silo quad test
+  31 ) # 31. testsuite.at:115: quad test
     at_setup_line='testsuite.at:115'
-    at_desc='silo quad test'
-    $at_quiet $ECHO_N " 28: silo quad test                               $ECHO_C"
+    at_desc='quad test'
+    $at_quiet $ECHO_N " 31: quad test                                    $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "28. testsuite.at:115: testing ..."
+      echo "31. testsuite.at:115: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2704,14 +2866,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  29 ) # 29. testsuite.at:123: silo curvef77 test
+  32 ) # 32. testsuite.at:123: curvef77 test
     at_setup_line='testsuite.at:123'
-    at_desc='silo curvef77 test'
-    $at_quiet $ECHO_N " 29: silo curvef77 test                           $ECHO_C"
+    at_desc='curvef77 test'
+    $at_quiet $ECHO_N " 32: curvef77 test                                $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "29. testsuite.at:123: testing ..."
+      echo "32. testsuite.at:123: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2757,14 +2919,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  30 ) # 30. testsuite.at:126: silo matf77 test
+  33 ) # 33. testsuite.at:126: matf77 test
     at_setup_line='testsuite.at:126'
-    at_desc='silo matf77 test'
-    $at_quiet $ECHO_N " 30: silo matf77 test                             $ECHO_C"
+    at_desc='matf77 test'
+    $at_quiet $ECHO_N " 33: matf77 test                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "30. testsuite.at:126: testing ..."
+      echo "33. testsuite.at:126: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2810,14 +2972,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  31 ) # 31. testsuite.at:129: silo pointf77 test
+  34 ) # 34. testsuite.at:129: pointf77 test
     at_setup_line='testsuite.at:129'
-    at_desc='silo pointf77 test'
-    $at_quiet $ECHO_N " 31: silo pointf77 test                           $ECHO_C"
+    at_desc='pointf77 test'
+    $at_quiet $ECHO_N " 34: pointf77 test                                $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "31. testsuite.at:129: testing ..."
+      echo "34. testsuite.at:129: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2863,14 +3025,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  32 ) # 32. testsuite.at:132: silo quadf77 test
+  35 ) # 35. testsuite.at:132: quadf77 test
     at_setup_line='testsuite.at:132'
-    at_desc='silo quadf77 test'
-    $at_quiet $ECHO_N " 32: silo quadf77 test                            $ECHO_C"
+    at_desc='quadf77 test'
+    $at_quiet $ECHO_N " 35: quadf77 test                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "32. testsuite.at:132: testing ..."
+      echo "35. testsuite.at:132: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2916,14 +3078,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  33 ) # 33. testsuite.at:135: silo testallf77 test
+  36 ) # 36. testsuite.at:135: testallf77 test
     at_setup_line='testsuite.at:135'
-    at_desc='silo testallf77 test'
-    $at_quiet $ECHO_N " 33: silo testallf77 test                         $ECHO_C"
+    at_desc='testallf77 test'
+    $at_quiet $ECHO_N " 36: testallf77 test                              $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "33. testsuite.at:135: testing ..."
+      echo "36. testsuite.at:135: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -2969,14 +3131,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  34 ) # 34. testsuite.at:138: silo ucdf77 test
+  37 ) # 37. testsuite.at:138: ucdf77 test
     at_setup_line='testsuite.at:138'
-    at_desc='silo ucdf77 test'
-    $at_quiet $ECHO_N " 34: silo ucdf77 test                             $ECHO_C"
+    at_desc='ucdf77 test'
+    $at_quiet $ECHO_N " 37: ucdf77 test                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "34. testsuite.at:138: testing ..."
+      echo "37. testsuite.at:138: testing ..."
       $at_traceon
 
 $at_traceoff

@@ -1522,6 +1522,8 @@ stc_silo_types (void) {
       COMP (id,                 "primitive 'int'");
       COMP (nmats,              "primitive 'int'");
       COMP (ngroups,            "primitive 'int'");
+      COMP (allowmat0,          "primitive 'int'");
+      IOASSOC (PA_BOOLEAN);
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (matnames,
@@ -1973,6 +1975,8 @@ stc_silo_types (void) {
             "pointer (array 'self.nmat' (primitive 'string'))");
       COMP (matcolors,
             "pointer (array 'self.nmat' (primitive 'string'))");
+      COMP (allowmat0,          "primitive 'int'");
+      IOASSOC (PA_BOOLEAN);
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (matlist,
