@@ -241,10 +241,16 @@ typedef struct context_t {
                         char    *me = M ;                                     \
                         static int     jstat ;                                \
                         static context_t *jold ;                              \
-                        DBfile  *jdbfile = NULL ;                             \
+                        DBfile  *jdbfile = NULL ;                           \
                         T jrv = R ;                                           \
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
+                        if (jdbfile) {                                        \
+                           if (jdbfile->pub.Grab && jdbfile->pub.Grab == TRUE)\
+                           {                                                  \
+                              API_ERROR("", E_GRABBED) ;                      \
+                           }                                                  \
+                        }                                                     \
                         if (DBDebugAPI>0) {                                   \
                            write (DBDebugAPI, M, strlen(M));                  \
                            write (DBDebugAPI, "\n", 1);                       \
@@ -279,6 +285,12 @@ typedef struct context_t {
                         T jrv = R ;                                           \
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
+                        if (jdbfile) {                                        \
+                           if (jdbfile->pub.Grab && jdbfile->pub.Grab == TRUE)\
+                           {                                                  \
+                              API_ERROR("", E_GRABBED) ;                      \
+                           }                                                  \
+                        }                                                     \
                         if (DBDebugAPI>0) {                                   \
                            write (DBDebugAPI, M, strlen(M));                  \
                            write (DBDebugAPI, "\n", 1);                       \

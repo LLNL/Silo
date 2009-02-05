@@ -83,9 +83,6 @@ for advertising or product endorsement purposes.
 #include "silo_private.h"
 #include "silo_drivers.h"
 
-#define FALSE   0
-#define TRUE    1
-
 /* The Silo_version_* variable is used to guarantee that code can't include
  * one version of silo.h and link with a different version of libsilo.a.  This
  * variable's name must change with every version of Silo.
@@ -133,6 +130,7 @@ PUBLIC char   *_db_err_list[] =
     "Overwrite not allowed. See DBSetAllowOverwrites()", /* 23 */
     "Checksum failure.",                      /* 24 */
     "Compression failure."                    /* 25 */
+    "Grab driver enabled."                    /* 26 */
 };
 
 INTERNAL int   _db_err_level = DB_TOP;  /*what errors to issue (default) */
@@ -160,7 +158,7 @@ SILO_Globals_t SILO_Globals = {
     TRUE,  /* allowOverwrites */
     FALSE, /* enableChecksums */
     FALSE, /* enableCompression */
-    FALSE  /* enableFriendlyHDF5Names */
+    FALSE, /* enableFriendlyHDF5Names */
 };
 SILO_Compression_t SILO_Compression = {
     "\0" 
@@ -740,7 +738,6 @@ db_FreeToc(DBfile *dbfile)
             FREE(toc->csgmesh_names);
         }
     }
-
     if (toc->ncsgvar > 0) {
         if (toc->csgvar_names) {
             for (i = 0; i < toc->ncsgvar; i++) {
@@ -2210,6 +2207,101 @@ PUBLIC int
 DBGetFriendlyHDF5Names()
 {
     return SILO_Globals.enableFriendlyHDF5Names;
+}
+
+/*----------------------------------------------------------------------
+ * Routine:  DBGrabDriver
+ *
+ * Purpose:  Set and return the low level driver file handle
+ *
+ * Programmer:  Thomas R. Treadway, Tue May 29 15:52:19 PDT 2007
+ *
+ * Description:  This routine returns a ponter to the driver-native
+ * file handle.
+ *--------------------------------------------------------------------*/
+PUBLIC void * 
+DBGrabDriver(DBfile *file)
+{
+    void *rtn=(void *)-1;
+    if (file) {
+       if (file->pub.GrabId > 0) {
+          file->pub.Grab = TRUE;
+          rtn = (void *) file->pub.GrabId;
+       }
+    }
+    return rtn;
+}
+/*----------------------------------------------------------------------
+ * Routine:  DBGetDriverType
+ *
+ * Purpose:  Return the drive type 
+ *
+ * Programmer:  Thomas R. Treadway, Thu Jun  7 13:19:48 PDT 2007
+ *
+ * Description:  This routine returns a the driver type
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBGetDriverType(const DBfile *file)
+{
+    if (file) {
+       return file->pub.type;
+    }
+    return -1;
+}
+
+/*----------------------------------------------------------------------
+ * Routine:  DBGetDriverTypeFromPath
+ *
+ * Purpose:  Return the drive type 
+ *
+ * Programmer:  Thomas R. Treadway, Tue Jul  3 15:24:58 PDT 2007
+ *
+ * Description:  This routine returns a the driver type
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBGetDriverTypeFromPath(const char *path)
+{
+   char buf[8];
+   int fd;
+   int nbytes;
+   int flags = O_RDONLY;
+   if ((fd = open(path, flags)) < 0) {
+      printf("cannot open `%s'\n", path);
+      return -1;
+   }
+   if ((nbytes = read(fd, (char *)buf, 8)) == -1) {
+      printf("cannot read `%s'\n", path);
+      return -1;
+   }
+   if (nbytes <= 5) {
+      printf("cannot read `%s' buffer too small\n", path);
+      return -1;
+   }
+   (void) close(fd);
+   if (strstr(buf, "PDB"))
+      return DB_PDB;
+   if (strstr(buf, "HDF"))
+      return DB_HDF5;
+    return -1;
+}
+
+/*----------------------------------------------------------------------
+ * Routine:  DBUngrabDriver
+ *
+ * Purpose:  Return control of the low level driver
+ *
+ * Programmer:  Thomas R. Treadway, Thu Jun  7 13:19:48 PDT 2007
+ *
+ * Description:  This routine returns a the driver-native type
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBUngrabDriver(DBfile *file, const void *driver_handle)
+{
+    if (file) {
+       file->pub.Grab = FALSE;
+       return file->pub.type;
+    }
+    return -1;
 }
 
 /*----------------------------------------------------------------------

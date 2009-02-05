@@ -1417,6 +1417,7 @@ db_hdf5_InitCallbacks(DBfile *_dbfile, int target)
 
     /* Properties of the driver */
     dbfile->pub.pathok = TRUE;
+    dbfile->pub.Grab = FALSE;
 
     /* File operations */
     dbfile->pub.close = db_hdf5_Close;
@@ -1866,11 +1867,13 @@ int db_hdf5_set_compression(void)
             have_szip = TRUE;
     }
 /* Select the compression algorthm */
-    if ((ptr=strcasestr(SILO_Compression.parameters, "METHOD=GZIP")) != NULL) 
+    if ((ptr=(char *)strcasestr(SILO_Compression.parameters, "METHOD=GZIP")) != 
+       (char *)NULL) 
     {
      if (have_gzip == FALSE)
      {
-       if ((ptr=strcasestr(SILO_Compression.parameters, "LEVEL=")) != NULL)
+       if ((ptr=(char *)strcasestr(SILO_Compression.parameters, "LEVEL=")) != 
+          (char *)NULL)
        {
           (void)strncpy(chararray, ptr+6, 1); 
           level = (int) strtol(chararray, &check, 10);
@@ -3216,6 +3219,8 @@ db_hdf5_Open(char *name, int mode, int subtype)
         }
         dbfile->pub.name = STRDUP(name);
         dbfile->pub.type = DB_HDF5;
+        dbfile->pub.Grab = FALSE;
+        dbfile->pub.GrabId = (void *)fid;
         dbfile->fid = fid;
         db_hdf5_finish_open((DBfile*)dbfile);
         
@@ -3301,6 +3306,8 @@ db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
         }
         dbfile->pub.name = STRDUP(name);
         dbfile->pub.type = DB_HDF5;
+        dbfile->pub.Grab = FALSE;
+        dbfile->pub.GrabId = (void *)fid;
         dbfile->fid = fid;
         db_hdf5_finish_create((DBfile*)dbfile, target, finfo);
 
@@ -3344,6 +3351,7 @@ db_hdf5_Close(DBfile *_dbfile)
        /* Free the private parts of the file */
        if (db_hdf5_initiate_close((DBfile*)dbfile)<0) return -1;
        if (H5Fclose(dbfile->fid)<0) return -1;
+       dbfile->pub.GrabId = -1;
        dbfile->fid = -1;
 
        /* Free the public parts of the file */

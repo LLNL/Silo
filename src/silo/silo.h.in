@@ -58,6 +58,13 @@ extern "C" {
 
 #include <stdio.h>
 
+#ifndef FALSE
+#define FALSE   0
+#endif
+#ifndef TRUE
+#define TRUE    1
+#endif
+
 /* Major release number of silo library. */
 #define SILO_VERS_MAJ @SILO_VERS_MAJ@
 
@@ -325,6 +332,7 @@ typedef enum {
 #define     E_NOOVERWRITE 23    /*Overwrite not permitted */
 #define     E_CHECKSUM  24      /*Checksum failed */
 #define     E_COMPRESSION  25   /*Compression failed */
+#define     E_GRABBED   26      /*Low level driver enabled */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
@@ -1211,6 +1219,8 @@ typedef struct DBfile_pub {
     int            dirid;       /*directory ID    */
     int            fileid;      /*unique file id [0,DB_NFILES-1] */
     int            pathok;      /*driver handles paths in names */
+    int            Grab;        /*drive has access to low-level interface */
+    void          *GrabId;      /*pointer to low-level driver descriptor */
 
     /* Public Methods */
     int            (*close)(struct DBfile *);
@@ -1435,6 +1445,10 @@ SILO_API extern int      DBSetCompression(const char *);
 SILO_API extern char    *DBGetCompression(void);
 SILO_API extern int      DBSetFriendlyHDF5Names(int enable);
 SILO_API extern int      DBGetFriendlyHDF5Names(void);
+SILO_API extern void    *DBGrabDriver(DBfile *);
+SILO_API extern int      DBUngrabDriver(DBfile *, const void *);
+SILO_API extern int      DBGetDriverType(const DBfile *);
+SILO_API extern int      DBGetDriverTypeFromPath(const char *);
 SILO_API extern char    *DBVersion(void);
 SILO_API extern void     DBShowErrors(int, void (*)(char *));
 SILO_API extern char    *DBErrString(void);

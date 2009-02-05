@@ -121,3 +121,6 @@ AT_CLEANUP
 AT_SETUP(compression DB_HDF5 compress)
 AT_CHECK(compression DB_HDF5 compress,,[ignore])
 AT_CLEANUP
+AT_SETUP(grab DB_HDF5)
+AT_CHECK(grab DB_HDF5,,[ignore])
+AT_CLEANUP
