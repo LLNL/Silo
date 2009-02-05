@@ -32,7 +32,7 @@ lcun=$USER
 BININSTALLS="browser silex silock silodiff"
 
 usage() {
-  printf "Usage: %s version [-lc-username <lc-username>] [all|hoth|sunspot|up|yana|thunder|pengra|quad|bgl]" $0
+  printf "Usage: %s version [-lc-username <lc-username>] [all|hoth|sunspot|up|yana|thunder|pengra|quad|bgl|tread]" $0
   printf "\n"
   printf "Silo release installing script. Assumes a tarball exist in\n"
   printf "current directory, named something like silo-\$1.tar.gz.\n"
@@ -209,6 +209,30 @@ sunspotcc() {
     ln -s $BDTOPDIR/$VERSION/sunos_57/bin/silex \
        $BDTOPDIR/$VERSION/sunos_57-cc-5.2/bin/silex
     chmod -R g+w $BDTOPDIR/$VERSION/sunos_57-cc-5.2
+EOF
+}
+#
+tread() {
+  ssh tread "/bin/sh" << EOF > tread.log 2>&1 &
+    cd $BDTOPDIR/$VERSION/test
+    umask 002
+    PATH=/bin:/usr/bin:/usr/X11R6/bin:/sbin:/usr/sbin
+    rm -rf i386-apple-darwin8-gcc-4.0.1
+    mkdir i386-apple-darwin8-gcc-4.0.1
+    cd i386-apple-darwin8-gcc-4.0.1
+    ../$TOPSRCDIR/configure \
+    --prefix=$BDTOPDIR/$VERSION/i386-apple-darwin8-gcc-4.0.1 \
+    --disable-browser --disable-silex --without-hdf5 --without-szlib
+    make -j 4 install
+    make clean
+    ../$TOPSRCDIR/configure \
+    --prefix=$BDTOPDIR/$VERSION/i386-apple-darwin8-gcc-4.0.1
+    make -j 4 check
+    make install
+    chmod -R g+w $BDTOPDIR/$VERSION/i386-apple-darwin8-gcc-4.0.1
+    for FILE in $BININSTALLS
+    do chmod -R g+w /misc/gapps/Darwin/bin/$FILE
+    done
 EOF
 }
 
@@ -1057,6 +1081,9 @@ else
       shift;;
     ubgl|-ubgl)
       ubgl
+      shift;;
+    tread|-tread)
+      tread
       shift;;
     sh*|-sh*)
       shar

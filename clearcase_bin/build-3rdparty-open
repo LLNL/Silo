@@ -23,7 +23,7 @@ lcun=$USER
 export BDTOPDIR LCTOPDIR
 
 usage() {
-  printf "Usage: %s [-lc-username <lc-username>] [all|hoth|sunspot|up|yana|thunder|pengra|quad]" $0
+  printf "Usage: %s [-lc-username <lc-username>] [all|hoth|sunspot|up|yana|thunder|pengra|quad|tread]" $0
   printf "\n"
   printf "Silo 3rd party library installing script. Assumes a tarball exist in\n"
   printf "/usr/gapps/silo/szip/src/szip-$SZIPRELEASE, and\n"
@@ -89,7 +89,7 @@ hoth() {
 }
 hothgcc() {
     HOSTS="hoth"
-    ARCH="linux_rhel3-gcc-3.2.3"
+    ARCH="i386-pc-linux-gcc-3.2.3"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=\"-fPIC -O2\" \
 CXXFLAGS=\"-fPIC -O2\" FFLAGS=-Wno-globals F77FLAGS=-Wno-globals \
 FCFLAGS=-Wno-globals"
@@ -104,7 +104,7 @@ FCFLAGS=-Wno-globals"
 #
 hothpgc() {
     HOSTS="hoth"
-    ARCH="linux_rhel3-pgc-6.2"
+    ARCH="i386-pc-linux-pgc-6.2"
     CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
 CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
     export HOSTS ARCH CONFOPTS
@@ -118,7 +118,7 @@ CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
 #
 hothicc() {
     HOSTS="hoth"
-    ARCH="linux_rhel3-icc-9.1"
+    ARCH="i386-pc-linux-icc-9.1"
     CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=\"-fPIC -O2\" CXXFLAGS=\"-fPIC -O2\""
     export HOSTS ARCH CONFOPTS
@@ -141,7 +141,7 @@ sunspot() {
 }
 sunspotgcc() {
     HOSTS=sunspot
-    ARCH="sunos_57"
+    ARCH="sparc-sun-solaris-gcc-2.95"
     CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 \
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
@@ -154,7 +154,7 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 #
 sunspotcc() {
     HOSTS=sunspot
-    ARCH="sunos_57-cc-5.2"
+    ARCH="sparc-sun-solaris-cc-5.2"
     CONFOPTS="CC=c89 CXX=CC FC=f77 F77=f77"
     export HOSTS ARCH CONFOPTS
     bbuild \
@@ -162,6 +162,16 @@ sunspotcc() {
 /opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin" \
     "LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib" \
     "export PATH LD_LIBRARY_PATH"
+}
+#
+tread() {
+    HOSTS="tread"
+    ARCH="i386-apple-darwin8-gcc-4.0.1"
+    CONFOPTS="CC=gcc CXX=g++"
+    export HOSTS ARCH CONFOPTS
+    bbuild \
+    "PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/X11R6/bin" \
+    "export PATH"
 }
 
 up() {
@@ -477,6 +487,9 @@ else
       shift;;
     quad|-quad)
       quad
+      shift;;
+    tread|-tread)
+      tread
       shift;;
     sh*|-sh*)
       shar

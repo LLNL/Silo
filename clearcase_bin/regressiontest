@@ -81,6 +81,9 @@
 #
 #   Mark C. Miller, Sat Feb 24 13:16:15 PST 2007
 #   Exclude files in 'lost+found' dir from checksum change testing
+#
+#   Mark C. Miller, Tue Dec  4 07:12:44 PST 2007
+#   Modified to use temporary nersc test install in /gscratch
 #--------------------------------------------------------------------------------
 
 umask 002
@@ -91,7 +94,7 @@ tmpInstall="$tmpRoot/silo"
 logrecipients="miller treadway"
 dateBase=`date +%Y-%m-%d`
 now=`date`
-PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/data_vobs/VisIt/clearcase_bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
+PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
 export PATH
 
 #
@@ -208,7 +211,7 @@ fi
 rm -rf $tmpRoot 1>/dev/null 2>&1
 mkdir $tmpRoot 1>/dev/null 2>&1
 chmod 775 $tmpRoot 1>/dev/null 2>&1
-./configure --prefix=$tmpInstall --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib 1>configlog 2>&1
+./configure --prefix=$tmpInstall --with-hdf5=/usr/gapps/silo/hdf5/1.6.6/linux_rhel3-gcc-3.2.3/include,/usr/gapps/silo/hdf5/1.6.6/linux_rhel3-gcc-3.2.3/lib --with-szlib=/misc/gapps/silo/szip/2.1/linux_rhel3-gcc-3.2.3/include,/misc/gapps/silo/szip/2.1/linux_rhel3-gcc-3.2.3/lib 1>configlog --with-Qt-dir=/misc/gapps/silo/qt/3.3.8/i386-pc-linux-gcc-3.2.3 2>&1
 $useMake clean 1>/dev/null 2>&1
 uncleanedFiles=`find . -regex '.*\.o$' | grep -v -e '_pure_p9_c0_'`
 ifErrorSendMessage "$uncleanedFiles" "'make clean' missed some files" $uncleanedFiles 0
@@ -231,23 +234,28 @@ cp checklog $tmpRoot
 
 #
 # Ok, now build VisIt with this Silo
-# Note, lack of CXXFLAGS=-g makes this an optimized build
 #
 $useMake install 1>/dev/null 2>&1
-cleartool startview visit_VOBowner_testsilo  1> /dev/null 2>&1
-cd /view/visit_VOBowner_testsilo/data_vobs/VisIt
-PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/data_vobs/VisIt/clearcase_bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
+cd /gscratch/miller/silo_visit_test/trunk/src
+PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
 export PATH
-./configure --with-silo_include=$tmpInstall/include --with-silo_library=$tmpInstall/lib --enable-parallel 1>configlog 2>&1
+env CXXFLAGS=-g MAKE=gmake ./configure --with-silo_include=$tmpInstall/include --with-silo_library=$tmpInstall/lib --with-hdf5=/usr/gapps/silo/hdf5/1.6.6/linux_rhel3-gcc-3.2.3/include,/usr/gapps/silo/hdf5/1.6.6/linux_rhel3-gcc-3.2.3/lib --with-szip=/misc/gapps/silo/szip/2.1/linux_rhel3-gcc-3.2.3/include,/misc/gapps/silo/szip/2.1/linux_rhel3-gcc-3.2.3/lib --enable-parallel 1>configlog 2>&1
 cat config.log >> configlog
 ifErrorSendMessage $? "Failed to configure VisIt" configlog 1
-clearmake -J 3 1>buildlog 2>&1
+gmake -j 3 1>buildlog 2>&1
 ifErrorSendMessage $? "Failed to build VisIt" buildlog 1
+# short term fix for repo src tree changes
+sed -i -e 's|../src/exe/visitconvert_ser|../exe/visitconvert_ser|' data/Makefile
+sed -i -e 's|../src/bin/visitconvert|../bin/visitconvert|' data/Makefile
 cd data
-clearmake clean 1>/dev/null 2>&1
-clearmake test 1>makedatalog 2>&1
+gmake clean 1>/dev/null 2>&1
+gmake test 1>makedatalog 2>&1
 ifErrorSendMessage $? "Failed to make VisIt's Silo/PDB data" makedatalog 1
 cd ../test
+# short term fix for repo src tree changes
+sed -i -e 's|^exepath="../src/bin/visit"|exepath="../bin/visit"|' runtest
+sed -i -e 's|^#  CLARGS: -cli -s ../src/bin/visitdiff.py \(.*\)|#  CLARGS: -cli -s ../bin/visitdiff.py \1|' tests/databases/diff.py
+rm -f ~miller/.visit/linux-intel/plugins/databases/*.so
 
 #
 # Examine VisIt's test .py files and find "best" 10% to run
@@ -288,7 +296,7 @@ tar cf - html_pdb | gzip > $tmpRoot/html_pdb.tar.gz
 rm -rf html_pdb
 cd ../data
 rm -f makedatalog
-clearmake testh5 1>makedatalog 2>&1
+gmake testh5 1>makedatalog 2>&1
 ifErrorSendMessage $? "Failed to make VisIt's Silo/HDF5data" makedatalog 1
 cd ../test
 ./runtest -m hdf5,silo,optimized -notrackmem -q -pixdiff 10 -avgdiff 10 $testsToRun
@@ -302,9 +310,8 @@ rm -rf html_hdf5
 #
 # Back to silo vob
 #
-cleartool startview silo_VOBowner_test  1> /dev/null 2>&1
 cd /view/silo_VOBowner_test/data_vobs/Silo
-PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/data_vobs/VisIt/clearcase_bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
+PATH=/misc/gapps/mpich/1.2.4/Linux/serial/64/debug/bin:/home/visit/bin:/home/visit/clearcase_bin:/usr/atria/bin:/usr/security/bin:/sbin:/usr/sbin:/usr/bsd:/usr/local/bin:/usr/bin:/bin:/etc:/usr/bin/X11:/usr/local/X11:/usr/etc:/usr/lib:/usr/atria/bin:/usr/ccs/bin:/usr/SUNWspro/bin:.
 export PATH
 
 #

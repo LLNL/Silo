@@ -5,6 +5,7 @@
  
 EXTRA_DIST = \
  AIX.conf \
+ Darwin.conf \
  HP-UX.conf \
  IRIX.conf \
  IRIX64.conf \
@@ -74,7 +75,6 @@ EXTRA_DIST = \
  purple1443.conf \
  purple1444.conf \
  quad.conf \
- quad.llnl.gov.conf \
  queen.conf \
  queen1.conf \
  queen2.conf \
@@ -86,11 +86,11 @@ EXTRA_DIST = \
  rhea512.conf \
  sandia_paragon \
  sasn100.conf \
- sphere.llnl.gov.conf \
+ sphere.conf \
  sunburn.conf \
  sunset.conf \
  sunspot.conf \
- t3d \
+ t3d.conf \
  tc.conf \
  tc127.conf \
  thunder.conf \
@@ -98,6 +98,7 @@ EXTRA_DIST = \
  thunder1.conf \
  thunder2.conf \
  thunder3.conf \
+ tread.conf \
  ubgl.conf \
  um.conf \
  um006.conf \
