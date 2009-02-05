@@ -17,6 +17,7 @@ FILELIST="\
 ./src/taurus/Makefile.in ./src/unknown/Makefile.in \
 ./src/pdb/Makefile.in ./src/pdb_drv/Makefile.in \
 ./src/score/Makefile.in ./src/hdf5_drv/Makefile.in \
+./src/hexzip/Makefile.in ./src/local/Makefile.in \
 ./Makefile.in ./configure"
 FILELIST3="./tests/testsuite ./tests/testsuitef77 ./tests/testsuitehdf5"
 FILELIST2="./tests/package.m4"

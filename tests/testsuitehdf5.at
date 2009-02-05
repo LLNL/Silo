@@ -75,9 +75,8 @@ AT_SETUP(multispec DB_HDF5)
 AT_CHECK(multispec DB_HDF5,,[ignore])
 AT_CLEANUP
 AT_SETUP(sami DB_HDF5)
-AT_CHECK(sami DB_HDF5,,[ignore],[[DBWrite: Invalid argument: ndims
+AT_CHECK(sami DB_HDF5,1,[ignore],[[DBWrite: Invalid argument: ndims
 DBWrite: Invalid argument: dims
-DBWrite: Low-level function call failed: 4d_float
 ]])
 AT_CLEANUP
 AT_SETUP(specmix DB_HDF5)
@@ -122,6 +121,6 @@ AT_SETUP(compression DB_HDF5 compress)
 AT_CHECK(compression DB_HDF5 compress,,[ignore])
 AT_CLEANUP
 AT_SETUP(grab DB_HDF5)
-AT_CHECK(grab DB_HDF5,,[ignore],[[DBWrite: Error 26
+AT_CHECK(grab DB_HDF5,,[ignore],[[DBWrite: Error 26: DBWrite
 ]])
 AT_CLEANUP

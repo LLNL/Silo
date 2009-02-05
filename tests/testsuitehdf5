@@ -642,16 +642,16 @@ at_help_all='1;testsuitehdf5.at:11;array DB_HDF5;;
 21;testsuitehdf5.at:71;twohex DB_HDF5;;
 22;testsuitehdf5.at:74;multispec DB_HDF5;;
 23;testsuitehdf5.at:77;sami DB_HDF5;;
-24;testsuitehdf5.at:83;specmix DB_HDF5;;
-25;testsuitehdf5.at:86;spec DB_HDF5;;
-26;testsuitehdf5.at:97;alltypes DB_HDF5;;
-27;testsuitehdf5.at:100;multi_file DB_HDF5;;
-28;testsuitehdf5.at:106;csg DB_HDF5;;
-29;testsuitehdf5.at:109;mmadjacency DB_HDF5;;
-30;testsuitehdf5.at:115;dir DB_HDF5;;
-31;testsuitehdf5.at:118;quad DB_HDF5;;
-32;testsuitehdf5.at:121;compression DB_HDF5 compress;;
-33;testsuitehdf5.at:124;grab DB_HDF5;;
+24;testsuitehdf5.at:82;specmix DB_HDF5;;
+25;testsuitehdf5.at:85;spec DB_HDF5;;
+26;testsuitehdf5.at:96;alltypes DB_HDF5;;
+27;testsuitehdf5.at:99;multi_file DB_HDF5;;
+28;testsuitehdf5.at:105;csg DB_HDF5;;
+29;testsuitehdf5.at:108;mmadjacency DB_HDF5;;
+30;testsuitehdf5.at:114;dir DB_HDF5;;
+31;testsuitehdf5.at:117;quad DB_HDF5;;
+32;testsuitehdf5.at:120;compression DB_HDF5 compress;;
+33;testsuitehdf5.at:123;grab DB_HDF5;;
 '
 
 at_prev=
@@ -2412,8 +2412,8 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:81: sami DB_HDF5"
-echo testsuitehdf5.at:81 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:80: sami DB_HDF5"
+echo testsuitehdf5.at:80 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2433,13 +2433,12 @@ fi
 at_failed=false
 echo >>"$at_stderr"; echo "DBWrite: Invalid argument: ndims
 DBWrite: Invalid argument: dims
-DBWrite: Low-level function call failed: 4d_float
 " | $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:81: exit code was $at_status, expected 0"
+   1) ;;
+   *) echo "$at_srcdir/testsuitehdf5.at:80: exit code was $at_status, expected 1"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2457,19 +2456,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  24 ) # 24. testsuitehdf5.at:83: specmix DB_HDF5
-    at_setup_line='testsuitehdf5.at:83'
+  24 ) # 24. testsuitehdf5.at:82: specmix DB_HDF5
+    at_setup_line='testsuitehdf5.at:82'
     at_desc='specmix DB_HDF5'
     $at_quiet $ECHO_N " 24: specmix DB_HDF5                              $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "24. testsuitehdf5.at:83: testing ..."
+      echo "24. testsuitehdf5.at:82: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:84: specmix DB_HDF5"
-echo testsuitehdf5.at:84 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:83: specmix DB_HDF5"
+echo testsuitehdf5.at:83 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2492,7 +2491,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:84: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:83: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2510,19 +2509,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  25 ) # 25. testsuitehdf5.at:86: spec DB_HDF5
-    at_setup_line='testsuitehdf5.at:86'
+  25 ) # 25. testsuitehdf5.at:85: spec DB_HDF5
+    at_setup_line='testsuitehdf5.at:85'
     at_desc='spec DB_HDF5'
     $at_quiet $ECHO_N " 25: spec DB_HDF5                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "25. testsuitehdf5.at:86: testing ..."
+      echo "25. testsuitehdf5.at:85: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:87: spec DB_HDF5"
-echo testsuitehdf5.at:87 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:86: spec DB_HDF5"
+echo testsuitehdf5.at:86 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2545,7 +2544,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:87: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:86: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2563,19 +2562,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  26 ) # 26. testsuitehdf5.at:97: alltypes DB_HDF5
-    at_setup_line='testsuitehdf5.at:97'
+  26 ) # 26. testsuitehdf5.at:96: alltypes DB_HDF5
+    at_setup_line='testsuitehdf5.at:96'
     at_desc='alltypes DB_HDF5'
     $at_quiet $ECHO_N " 26: alltypes DB_HDF5                             $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "26. testsuitehdf5.at:97: testing ..."
+      echo "26. testsuitehdf5.at:96: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:98: alltypes DB_HDF5"
-echo testsuitehdf5.at:98 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:97: alltypes DB_HDF5"
+echo testsuitehdf5.at:97 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2598,7 +2597,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:98: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:97: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2616,19 +2615,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  27 ) # 27. testsuitehdf5.at:100: multi_file DB_HDF5
-    at_setup_line='testsuitehdf5.at:100'
+  27 ) # 27. testsuitehdf5.at:99: multi_file DB_HDF5
+    at_setup_line='testsuitehdf5.at:99'
     at_desc='multi_file DB_HDF5'
     $at_quiet $ECHO_N " 27: multi_file DB_HDF5                           $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "27. testsuitehdf5.at:100: testing ..."
+      echo "27. testsuitehdf5.at:99: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:101: multi_file DB_HDF5"
-echo testsuitehdf5.at:101 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:100: multi_file DB_HDF5"
+echo testsuitehdf5.at:100 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2651,7 +2650,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:101: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:100: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2669,19 +2668,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  28 ) # 28. testsuitehdf5.at:106: csg DB_HDF5
-    at_setup_line='testsuitehdf5.at:106'
+  28 ) # 28. testsuitehdf5.at:105: csg DB_HDF5
+    at_setup_line='testsuitehdf5.at:105'
     at_desc='csg DB_HDF5'
     $at_quiet $ECHO_N " 28: csg DB_HDF5                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "28. testsuitehdf5.at:106: testing ..."
+      echo "28. testsuitehdf5.at:105: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:107: csg DB_HDF5"
-echo testsuitehdf5.at:107 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:106: csg DB_HDF5"
+echo testsuitehdf5.at:106 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2704,7 +2703,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:107: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:106: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2722,19 +2721,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  29 ) # 29. testsuitehdf5.at:109: mmadjacency DB_HDF5
-    at_setup_line='testsuitehdf5.at:109'
+  29 ) # 29. testsuitehdf5.at:108: mmadjacency DB_HDF5
+    at_setup_line='testsuitehdf5.at:108'
     at_desc='mmadjacency DB_HDF5'
     $at_quiet $ECHO_N " 29: mmadjacency DB_HDF5                          $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "29. testsuitehdf5.at:109: testing ..."
+      echo "29. testsuitehdf5.at:108: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:110: mmadjacency DB_HDF5"
-echo testsuitehdf5.at:110 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:109: mmadjacency DB_HDF5"
+echo testsuitehdf5.at:109 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2757,7 +2756,7 @@ $at_diff "$at_devnull" "$at_stdout" || at_failed=:
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:110: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:109: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2775,19 +2774,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  30 ) # 30. testsuitehdf5.at:115: dir DB_HDF5
-    at_setup_line='testsuitehdf5.at:115'
+  30 ) # 30. testsuitehdf5.at:114: dir DB_HDF5
+    at_setup_line='testsuitehdf5.at:114'
     at_desc='dir DB_HDF5'
     $at_quiet $ECHO_N " 30: dir DB_HDF5                                  $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "30. testsuitehdf5.at:115: testing ..."
+      echo "30. testsuitehdf5.at:114: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:116: dir DB_HDF5"
-echo testsuitehdf5.at:116 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:115: dir DB_HDF5"
+echo testsuitehdf5.at:115 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2810,7 +2809,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:116: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:115: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2828,19 +2827,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  31 ) # 31. testsuitehdf5.at:118: quad DB_HDF5
-    at_setup_line='testsuitehdf5.at:118'
+  31 ) # 31. testsuitehdf5.at:117: quad DB_HDF5
+    at_setup_line='testsuitehdf5.at:117'
     at_desc='quad DB_HDF5'
     $at_quiet $ECHO_N " 31: quad DB_HDF5                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "31. testsuitehdf5.at:118: testing ..."
+      echo "31. testsuitehdf5.at:117: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:119: quad DB_HDF5"
-echo testsuitehdf5.at:119 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:118: quad DB_HDF5"
+echo testsuitehdf5.at:118 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2863,7 +2862,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:119: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:118: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2881,19 +2880,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  32 ) # 32. testsuitehdf5.at:121: compression DB_HDF5 compress
-    at_setup_line='testsuitehdf5.at:121'
+  32 ) # 32. testsuitehdf5.at:120: compression DB_HDF5 compress
+    at_setup_line='testsuitehdf5.at:120'
     at_desc='compression DB_HDF5 compress'
     $at_quiet $ECHO_N " 32: compression DB_HDF5 compress                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "32. testsuitehdf5.at:121: testing ..."
+      echo "32. testsuitehdf5.at:120: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:122: compression DB_HDF5 compress"
-echo testsuitehdf5.at:122 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:121: compression DB_HDF5 compress"
+echo testsuitehdf5.at:121 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2916,7 +2915,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:122: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:121: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2934,19 +2933,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  33 ) # 33. testsuitehdf5.at:124: grab DB_HDF5
-    at_setup_line='testsuitehdf5.at:124'
+  33 ) # 33. testsuitehdf5.at:123: grab DB_HDF5
+    at_setup_line='testsuitehdf5.at:123'
     at_desc='grab DB_HDF5'
     $at_quiet $ECHO_N " 33: grab DB_HDF5                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "33. testsuitehdf5.at:124: testing ..."
+      echo "33. testsuitehdf5.at:123: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:126: grab DB_HDF5"
-echo testsuitehdf5.at:126 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:125: grab DB_HDF5"
+echo testsuitehdf5.at:125 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2964,13 +2963,13 @@ else
 fi
 
 at_failed=false
-echo >>"$at_stderr"; echo "DBWrite: Error 26
+echo >>"$at_stderr"; echo "DBWrite: Error 26: DBWrite
 " | $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:126: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:125: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then

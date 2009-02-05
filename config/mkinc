@@ -3,7 +3,7 @@
 
 lines=`cat $0 | wc -l`
 lines=`expr $lines - 10`
-tail -$lines $0 > /tmp/visitperl$$
+tail -n $lines $0 > /tmp/visitperl$$
 echo "__END__" >> /tmp/visitperl$$
 echo "$0 $*" >> /tmp/visitperl$$
 exec perl /tmp/visitperl$$ $0 ${1+"$@"}
