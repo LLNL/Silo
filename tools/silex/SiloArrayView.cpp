@@ -37,8 +37,7 @@
 
 #include "SiloArrayView.h"
 #include <SiloFile.h>
-#include <qlistbox.h>
-#include <qapplication.h>
+#include <QListWidget>
 #include <iostream>
 #include <cstdlib>
 using std::cerr;
@@ -65,14 +64,17 @@ using std::cerr;
 //    Jeremy Meredith, Wed Oct 13 20:32:56 PDT 2004
 //    Split on spaces, semicolons, or by length depending on a heuristic
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                                          QWidget *p)
-    : QMainWindow(p, n), silo(s), name(n)
+    : QMainWindow(p), silo(s), name(n)
 {
-    setCaption(QString("Array: ")+name);
+    setWindowTitle(QString("Array: ")+name);
 
-    lb = new QListBox(this, "ArrayList");
+    lb = new QListWidget(this);
     setCentralWidget(lb);
 
     void *var = silo->GetVar(name);
@@ -118,7 +120,7 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                 sprintf(str, "%-4d: type ???", i);
                 break;
             }
-            lb->insertItem(str);
+            lb->addItem(str);
         }
     }
     else
@@ -154,7 +156,7 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                 {
                     p++;
                     *p = '\0';
-                    lb->insertItem(str);
+                    lb->addItem(str);
                     p = str;
                     tmplen = 0;
                 }
@@ -167,7 +169,7 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
             if (p != str)
             {
                 *p = '\0';
-                lb->insertItem(str);
+                lb->addItem(str);
             }
             delete[] str;
         }
@@ -195,7 +197,7 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                     if (p != str)
                     {
                         *p = '\0';
-                        lb->insertItem(str);
+                        lb->addItem(str);
                     }
                     p = str;
                 }
@@ -207,39 +209,11 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
             if (p != str)
             {
                 *p = '\0';
-                lb->insertItem(str);
+                lb->addItem(str);
             }
             delete[] str;
         }
     }
 
     free(var);
-}
-
-// ****************************************************************************
-//  Method:  SiloArrayViewWindow::sizeHint
-//
-//  Purpose:
-//    Suggest a good size for the view
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    November 12, 2001
-//
-// ****************************************************************************
-QSize
-SiloArrayViewWindow::sizeHint() const
-{
-    QSize size = QMainWindow::sizeHint();
-    if (lb->count() == 0)
-        return size;
-
-    size.setHeight(QMIN(QMAX(size.height(),
-                             lb->itemHeight() * (lb->count()+2)),
-                        QApplication::desktop()->height() * 7/8));
-    if (!size.isValid())
-        size.setWidth(150);
-    else
-        size.setWidth(QMAX(150, size.width()));
-
-    return size;
 }

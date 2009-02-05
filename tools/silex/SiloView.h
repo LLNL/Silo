@@ -38,10 +38,8 @@
 #ifndef SILOVIEW_H
 #define SILOVIEW_H
 
-#include <qobject.h>
-#include <qlistview.h>
-#include <qsplitter.h>
-#include <qmainwindow.h>
+#include <QSplitter>
+#include <QTreeWidget>
 class SiloFile;
 
 class SiloDirTreeView;
@@ -61,12 +59,15 @@ class SiloDirView;
 //    Mark C. Miller, Thu Jul 20 15:45:55 PDT 2006
 //    Added HasSiloFile
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 class SiloView : public QSplitter
 {
     Q_OBJECT
   public:
-    SiloView(const QString &file, QWidget *p, const QString &n);
+    SiloView(const QString &file, QWidget *p);
     virtual ~SiloView();
     void Set(const QString &file);
     bool HasSiloFile() const { return silo != 0; };
@@ -75,8 +76,8 @@ class SiloView : public QSplitter
    void ShowObject(const QString &name);
    void ShowVariable(const QString &name);
    void ShowUnknown(const QString &name);
-   void ShowItem(QListViewItem *i);
-   void SetDir(QListViewItem *i);
+   void ShowItem(QTreeWidgetItem *i, int);
+   void SetDir(QTreeWidgetItem *i, QTreeWidgetItem*);
 
   private:
     SiloFile *silo;

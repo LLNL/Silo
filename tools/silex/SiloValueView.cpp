@@ -37,7 +37,7 @@
 
 #include "SiloValueView.h"
 #include <SiloFile.h>
-#include <qlabel.h>
+#include <QLabel>
 #include <iostream>
 #include <cstdlib>
 using std::cerr;
@@ -56,13 +56,16 @@ using std::cerr;
 //    Mark Miller, Tue 23 Mar 11:19:13 PDT 2004
 //    Added call to free memory from the Silo DBGetVar call.
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 SiloValueViewWindow::SiloValueViewWindow(SiloFile *s, const QString &n, QWidget *p)
-    : QMainWindow(p, n), silo(s), name(n)
+    : QMainWindow(p), silo(s), name(n)
 {
-    setCaption(QString("Value: ")+name);
+    setWindowTitle(QString("Value: ")+name);
 
-    QLabel *l = new QLabel(this, "ValueList");
+    QLabel *l = new QLabel(this);
     setCentralWidget(l);
 
     void *var = silo->GetVar(name);

@@ -215,6 +215,8 @@ db_pdb_InitCallbacks ( DBfile *dbfile )
     dbfile->pub.p_grplm = db_pdb_PutGroupelmap;
     dbfile->pub.p_mrgv = db_pdb_PutMrgvar;
 #endif
+
+    dbfile->pub.free_z = db_pdb_FreeCompressionResources;
 }
 
 /*-------------------------------------------------------------------------
@@ -5149,6 +5151,22 @@ db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
    mrgv->name = STRDUP(objname);
 
    return (mrgv);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                              db_pdb_FreeCompressionResources 
+ *
+ *  Purpose: Implement this method to quite error messages from top
+ *           top-level api. This is better than just NOT generating
+ *           those messages at the top-level because that would make
+ *           the choice for all drivers.
+ *
+ *  Programmer: Mark C. Miller, Tue Dec  2 09:59:20 PST 2008
+ *--------------------------------------------------------------------*/
+CALLBACK int
+db_pdb_FreeCompressionResources(DBfile *_dbfile, const char *meshname)
+{
+    return 0;
 }
 
 /*----------------------------------------------------------------------

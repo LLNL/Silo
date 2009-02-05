@@ -38,8 +38,7 @@
 #ifndef SILOVALUEVIEW_H
 #define SILOVALUEVIEW_H
 
-#include <qobject.h>
-#include <qmainwindow.h>
+#include <QMainWindow>
 class SiloFile;
 
 // ****************************************************************************
@@ -50,6 +49,10 @@ class SiloFile;
 //
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
+//
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
 //
 // ****************************************************************************
 class SiloValueViewWindow : public QMainWindow

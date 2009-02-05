@@ -41,24 +41,6 @@ for advertising or product endorsement purposes.
 int
 main(int argc, char *argv[])
 {
-    DBfile        *dbfile;
-    int            i, driver = DB_PDB;
-    char          *filename = "csg.pdb";
-
-    DBShowErrors(DB_ALL, NULL);
-
-    for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
-            filename = "csg.pdb";
-        } else if (!strcmp(argv[i], "DB_HDF5")) {
-            driver = DB_HDF5;
-            filename = "csg.h5";
-        } else {
-            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
-        }
-    }
-    
     printf("This is version \"%s\" of the Silo library\n", DBVersion());
 
     /* test version macro */
@@ -76,4 +58,3 @@ main(int argc, char *argv[])
 
     return 0;
 }
-

@@ -42,8 +42,9 @@
 #include <SiloValueView.h>
 #include <SiloArrayView.h>
 #include <SiloObjectView.h>
-#include <qheader.h>
-#include <qmessagebox.h>
+#include <QHeaderView>
+#include <QMessageBox>
+#include <iostream>
 
 // ----------------------------------------------------------------------------
 //                            Silo View
@@ -63,9 +64,12 @@
 //    Mark C. Miller, Thu Jul 20 15:45:55 PDT 2006
 //    Made it more graceful on failure to open silo
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
-SiloView::SiloView(const QString &file, QWidget *p, const QString &n)
-    : QSplitter(p, n)
+SiloView::SiloView(const QString &file, QWidget *p)
+    : QSplitter(p)
 {
     silo        = new SiloFile(file);
     if (!silo->IsOpen())
@@ -77,19 +81,19 @@ SiloView::SiloView(const QString &file, QWidget *p, const QString &n)
     }
     else
     {
-        dirTreeView = new SiloDirTreeView(silo, this, "DirTreeView");
-        dirView     = new SiloDirView(this, "DirView");
+        dirTreeView = new SiloDirTreeView(silo, this);
+        dirView     = new SiloDirView(this);
 
-        connect(dirTreeView, SIGNAL(currentChanged(QListViewItem*)),
-                this,        SLOT(SetDir(QListViewItem*)));
-        connect(dirView,     SIGNAL(doubleClicked(QListViewItem*)),
-                this,        SLOT(ShowItem(QListViewItem*)));
+        connect(dirTreeView, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
+                this,        SLOT(SetDir(QTreeWidgetItem*,QTreeWidgetItem*)));
+        connect(dirView,     SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+                this,        SLOT(ShowItem(QTreeWidgetItem*,int)));
 
         dirTreeView->OpenRootDir();
         dirView->Set(silo->root);
 
-        dirTreeView->header()->setResizeEnabled(false);
-        dirView->header()->setResizeEnabled(false);
+        dirTreeView->header()->setResizeMode(QHeaderView::Interactive);
+        dirView->header()->setResizeMode(QHeaderView::Interactive);
     }
 }
 
@@ -129,6 +133,9 @@ SiloView::~SiloView()
 //    Mark C. Miller, Thu Jul 20 15:45:55 PDT 2006
 //    Made it more graceful if Silo failed to open
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 void
 SiloView::Set(const QString &file)
@@ -144,7 +151,7 @@ SiloView::Set(const QString &file)
     {
         dirTreeView->Set(silo);
         dirTreeView->OpenRootDir();
-        dirView->ChangeDir(dirTreeView->firstChild());
+        dirView->ChangeDir(dirTreeView->topLevelItem(0));
     }
 }
 
@@ -157,11 +164,16 @@ SiloView::Set(const QString &file)
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 void
-SiloView::SetDir(QListViewItem *i)
+SiloView::SetDir(QTreeWidgetItem *i, QTreeWidgetItem*)
 {
-    dirView->ChangeDir(i);
+    if (i)
+        dirView->ChangeDir(i);
 }
 
 // ****************************************************************************
@@ -180,12 +192,12 @@ SiloView::ShowVariable(const QString &name)
     int len = silo->GetVarLength(name);
     if (len == 1)
     {
-        SiloValueViewWindow *vv = new SiloValueViewWindow(silo, name, NULL);
+        SiloValueViewWindow *vv = new SiloValueViewWindow(silo, name, this);
         vv->show();
     }
     else
     {
-        SiloArrayViewWindow *av = new SiloArrayViewWindow(silo, name, NULL);
+        SiloArrayViewWindow *av = new SiloArrayViewWindow(silo, name, this);
         av->show();
         av->resize(av->sizeHint());
     }
@@ -204,7 +216,7 @@ SiloView::ShowVariable(const QString &name)
 void
 SiloView::ShowObject(const QString &name)
 {
-    SiloObjectViewWindow *ov = new SiloObjectViewWindow(silo, name, NULL);
+    SiloObjectViewWindow *ov = new SiloObjectViewWindow(silo, name, this);
     connect(ov,   SIGNAL(showRequested(const QString&)),
             this, SLOT(ShowUnknown(const QString&)));
     ov->show();
@@ -250,14 +262,18 @@ SiloView::ShowUnknown(const QString &name)
 //  Method:  SiloView::ShowItem
 //
 //  Purpose:
-//    Wrapper for ShowUnknown appropriate for a QListViewItem callback.
+//    Wrapper for ShowUnknown appropriate for a QTreeWidgetItem callback.
 //
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 void
-SiloView::ShowItem(QListViewItem *i)
+SiloView::ShowItem(QTreeWidgetItem *i, int)
 {
     SiloDirViewItem *item = (SiloDirViewItem*)i;
     if (!item->dir)

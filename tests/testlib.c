@@ -247,6 +247,7 @@ build_quad3(DBfile *dbfile, char *name)
     for (i = 0; i < zdims[0] * zdims[1] * zdims[2]; i++)
         d[i] = (float)i *.2;
 
+    for (i=0;i<200; i++)
     (void)DBPutQuadvar1(dbfile, "d", name, d, zdims, ndims,
                         NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
 
@@ -256,8 +257,9 @@ build_quad3(DBfile *dbfile, char *name)
         w[i] = (float)i *.1;
     }
 
+    for (i=0;i<200; i++)
     (void)DBPutQuadvar1(dbfile, "ucomp", name, u, dims, ndims,
-                        NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+                        NULL, 0, DB_FLOAT, DB_NODECENT, 0);
     (void)DBPutQuadvar1(dbfile, "vcomp", name, v, dims, ndims,
                         NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
     (void)DBPutQuadvar1(dbfile, "wcomp", name, w, dims, ndims,

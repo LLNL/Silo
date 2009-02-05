@@ -38,8 +38,7 @@
 #ifndef EXPLORER_H
 #define EXPLORER_H
 
-#include <qobject.h>
-#include <qmainwindow.h>
+#include <QMainWindow>
 
 class SiloView;
 
@@ -56,12 +55,15 @@ class SiloView;
 //    Mark C. Miller, Thu Jul 20 15:45:55 PDT 2006
 //    Added HasSiloView()
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 class Explorer : public QMainWindow
 {
     Q_OBJECT
   public:
-    Explorer(const QString &file, QWidget *p, const QString &n);
+    Explorer(const QString &file, QWidget *p);
     virtual ~Explorer();
     bool HasSiloView() const { return view != 0; };
   public slots:

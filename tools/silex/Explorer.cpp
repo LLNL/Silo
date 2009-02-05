@@ -38,10 +38,9 @@
 #include "Explorer.h"
 #include <SiloView.h>
 
-#include <qpopupmenu.h>
-#include <qmenubar.h>
-#include <qfiledialog.h>
-#include <qapplication.h>
+#include <QMenuBar>
+#include <QFileDialog>
+#include <QApplication>
 
 // ****************************************************************************
 //  Constructor: Explorer::Explorer
@@ -53,12 +52,14 @@
 //    Mark C. Miller, Thu Jul 20 15:45:55 PDT 2006
 //    Made it deal with failure to construct SiloView
 //  
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
-Explorer::Explorer(const QString &file, QWidget *p, const QString &n)
-    : QMainWindow(p,n)
+Explorer::Explorer(const QString &file, QWidget *p)
+    : QMainWindow(p)
 {
-    view = new SiloView(file,
-                        this, "SiloView");
+    view = new SiloView(file, this);
     if (!view->HasSiloFile())
     {
         delete view;
@@ -67,13 +68,12 @@ Explorer::Explorer(const QString &file, QWidget *p, const QString &n)
     else
     {
         setCentralWidget(view);
-        setCaption("Explorer: "+file);
+        setWindowTitle("Explorer: "+file);
 
-        QPopupMenu *filemenu = new QPopupMenu( this );
-        menuBar()->insertItem(tr("&File"),filemenu);
-        filemenu->insertItem( "&Open",  this, SLOT(open()),  CTRL+Key_O );
-        filemenu->insertSeparator();
-        filemenu->insertItem( "E&xit", this, SLOT(close()),  CTRL+Key_X );
+        QMenu *filemenu = menuBar()->addMenu("&File");
+        filemenu->addAction( "&Open",  this, SLOT(open()),  tr("Ctrl+O") );
+        filemenu->addSeparator();
+        filemenu->addAction( "E&xit", this, SLOT(close()),  tr("Ctrl+X") );
     }
 }
 
@@ -106,18 +106,20 @@ Explorer::~Explorer()
 //    Jeremy Meredith, Mon May 17 11:50:08 PDT 2004
 //    Change the window caption when opening a new file.
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 void
 Explorer::open()
 {
     QString file = 
-        QFileDialog::getOpenFileName(QString(),
+        QFileDialog::getOpenFileName(this,"Open file...","",
                                      "Silo files (*.silo *.root *.pdb);;"
-                                     "All files (*)",
-                                     NULL, "SiloOpen", "Open file...");
+                                     "All files (*)");
     if (file.isNull())
         return;
 
-    setCaption("Explorer: "+file);
+    setWindowTitle("Explorer: "+file);
     view->Set(file);
 }

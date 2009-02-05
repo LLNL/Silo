@@ -4,9 +4,9 @@ bin_PROGRAMS = silex
 silex_SOURCES = $(FILES)
 nodist_silex_SOURCES = $(FILES_MOC)
 if HDF5_DRV_NEEDED
-  silex_LDADD = ../../src/libsiloh5.la $(QT_LIBS)
+  silex_LDADD = ../../src/libsiloh5.la $(QT_LDFLAGS) $(QT_LIBS)
 else
-  silex_LDADD = ../../src/libsilo.la $(QT_LIBS)
+  silex_LDADD = ../../src/libsilo.la $(QT_LDFLAGS) $(QT_LIBS)
 endif
 
 EXTRA_DIST = \

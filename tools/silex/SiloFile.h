@@ -39,7 +39,7 @@
 #define SILOFILE_H
 
 #include <silo.h>
-#include <qstring.h>
+#include <QString>
 #include <vector>
 using std::vector;
 
@@ -59,6 +59,10 @@ using std::vector;
 //
 //    Mark C. Miller, Thu Nov  3 16:59:41 PST 2005
 //    Added support for multimesh adjacency object
+//
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 class SiloDir
 {
@@ -105,6 +109,9 @@ class SiloDir
 //  Modifications:
 //    Mark C. Miller, Thu Jul 20 15:45:55 PDT 2006
 //    Added IsOpen()
+//
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
 //
 // ****************************************************************************
 class SiloFile

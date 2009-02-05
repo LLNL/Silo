@@ -37,8 +37,7 @@
 
 #include "SiloObjectView.h"
 #include <SiloFile.h>
-#include <qapplication.h>
-#include <qmessagebox.h>
+#include <QMessageBox>
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -53,16 +52,20 @@
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 SiloObjectViewWindow::SiloObjectViewWindow(SiloFile *s, const QString &n, QWidget *p)
-    : QMainWindow(p, n), silo(s), name(n)
+    : QMainWindow(p), silo(s), name(n)
 {
-    setCaption(QString("Object: ")+name);
+    setWindowTitle(QString("Object: ")+name);
 
     SiloObjectView *ov = new SiloObjectView(silo,name,this);
     setCentralWidget(ov);
-    connect(ov,   SIGNAL(doubleClicked(QListViewItem*)),
-            this, SLOT(ShowItem(QListViewItem*)));
+    connect(ov,   SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+            this, SLOT(ShowItem(QTreeWidgetItem*,int)));
 }
 
 // ****************************************************************************
@@ -74,9 +77,13 @@ SiloObjectViewWindow::SiloObjectViewWindow(SiloFile *s, const QString &n, QWidge
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 void
-SiloObjectViewWindow::ShowItem(QListViewItem *i)
+SiloObjectViewWindow::ShowItem(QTreeWidgetItem *i, int)
 {
     if (i->text(1) == "var")
         emit showRequested(i->text(2));
@@ -105,15 +112,19 @@ SiloObjectViewWindow::ShowItem(QListViewItem *i)
 //    Mark C. Miller, Tue Nov  6 16:08:19 PST 2007
 //    Fixed compiler warning.
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
-    : QListView(p, n), silo(s), name(n)
+    : QTreeWidget(p), silo(s), name(n)
 {
-    setSorting(-1);
+    //setSorting(-1);
     setAllColumnsShowFocus(true);
-    addColumn("Component");
-    addColumn("Type");
-    addColumn("Value");
+    setColumnCount(3);
+    headerItem()->setText(0,"Component");
+    headerItem()->setText(1,"Type");
+    headerItem()->setText(2,"Value");
 
     DBobject *object = silo->GetObject(name);
     if (!object)
@@ -123,7 +134,6 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
         return;
     }
 
-    QListViewItem *lastItem = NULL;
     for (int i=0; i<object->ncomponents; i++)
     {
         QString compname = object->comp_names[i];
@@ -131,7 +141,13 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
         void *comp = silo->GetComponent(name, compname);
         if (!comp)
         {
-            std::cerr << "ERROR: DBGetComponent failed for object '"<<name<<"', component '"<<compname<<"'"<<std::endl;
+            const char *asciiname = name.toAscii();
+            const char *asciicomp = compname.toAscii();
+            std::cerr << "ERROR: DBGetComponent failed for object '"
+                      << asciiname
+                      <<"', component '"
+                      << asciicomp
+                      <<std::endl;
             continue;
         }
         int   type = silo->GetComponentType(name, compname);
@@ -173,11 +189,11 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
             break;
           default:
             typestr = "var";
-            std::string valStr = pdbname.latin1();
-            if (pdbname.find("'<s>") == 0)
+            std::string valStr = std::string(pdbname.toAscii());
+            if (pdbname.indexOf("'<s>") == 0)
             {
                 int len = pdbname.length();
-                valStr = std::string(pdbname.latin1(),4,len-5);
+                valStr = std::string((const char*)(pdbname.toAscii()),4,len-5);
             }
             sprintf(value, "%s", valStr.c_str());
             break;
@@ -235,47 +251,11 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
                 if (ival == DB_NOTYPE)       strcat(value, " (DB_NOTYPE)");
             }
         }
-        if (lastItem)
-            lastItem = new QListViewItem(this,
-                                         lastItem,
-                                         object->comp_names[i],
-                                         typestr,
-                                         value);
-        else
-            lastItem = new QListViewItem(this,
-                                         object->comp_names[i],
-                                         typestr,
-                                         value);
+        QStringList sl;
+        sl << object->comp_names[i] << typestr << value;
+        new QTreeWidgetItem(this, sl);
     }
 
     total_items = object->ncomponents;
     DBFreeObject(object);
 }
-
-// ****************************************************************************
-//  Method:  SiloObjectView::sizeHint
-//
-//  Purpose:
-//    Suggest a good size for the view.
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    November 12, 2001
-//
-// ****************************************************************************
-QSize
-SiloObjectView::sizeHint() const
-{
-    QSize size = QListView::sizeHint();
-    if (total_items == 0 || firstChild() == 0)
-        return size;
-
-    size.setHeight(QMIN(QMAX(size.height(),
-                             firstChild()->height() * (total_items+2)),
-                        QApplication::desktop()->height() * 7/8));
-    if (!size.isValid())
-        size.setWidth(200);
-
-    return size;
-}
-
-

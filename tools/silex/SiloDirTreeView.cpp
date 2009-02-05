@@ -37,8 +37,7 @@
 
 #include "SiloDirTreeView.h"
 #include <SiloFile.h>
-#include <qpixmap.h>
-#include <qapplication.h>
+#include <QPixmap>
 
 #include "folder.xpm"
 
@@ -48,18 +47,22 @@
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
-SiloDirTreeView::SiloDirTreeView(SiloFile *s, QWidget *p, const QString &n)
-    : QListView(p,n), silo(s)
+SiloDirTreeView::SiloDirTreeView(SiloFile *s, QWidget *p)
+    : QTreeWidget(p), silo(s)
 {
     folder_pixmap = new QPixmap(folder_xpm);
  
-    addColumn("Contents");
-    //setRootIsDecorated(true);
+    setColumnCount(1);
+    headerItem()->setText(0,"Contents");
 
     total_items = 0;
-    QListViewItem *root = AddDir(silo->root, NULL);
-    root->setOpen(true);
+    QTreeWidgetItem *root = AddDir(silo->root, NULL);
+    root->setExpanded(true);
 }
 
 // ****************************************************************************
@@ -71,19 +74,23 @@ SiloDirTreeView::SiloDirTreeView(SiloFile *s, QWidget *p, const QString &n)
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
-QListViewItem *
-SiloDirTreeView::AddDir(SiloDir *d, QListViewItem *parent)
+QTreeWidgetItem *
+SiloDirTreeView::AddDir(SiloDir *d, QTreeWidgetItem *parent)
 {
     total_items++;
 
-    QListViewItem *item;
+    QTreeWidgetItem *item;
     if (!parent)
         item = new SiloDirTreeViewItem(d, this, d->name);
     else
         item = new SiloDirTreeViewItem(d, parent, d->name);
 
-    item->setPixmap(0,*folder_pixmap);
+    item->setIcon(0,*folder_pixmap);
     for (int i=0; i<d->subdir.size(); i++)
         AddDir(d->subdir[i], item);
 
@@ -103,6 +110,9 @@ SiloDirTreeView::AddDir(SiloDir *d, QListViewItem *parent)
 //    Jeremy Meredith, Tue Oct 12 20:52:16 PDT 2004
 //    Set the internal silo file to the new file.
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 void
 SiloDirTreeView::Set(SiloFile *s)
@@ -110,8 +120,8 @@ SiloDirTreeView::Set(SiloFile *s)
     silo = s;
     clear();
     total_items = 0;
-    QListViewItem *root = AddDir(silo->root, NULL);
-    root->setOpen(true);
+    QTreeWidgetItem *root = AddDir(silo->root, NULL);
+    root->setExpanded(true);
 }
 
 // ****************************************************************************
@@ -123,11 +133,15 @@ SiloDirTreeView::Set(SiloFile *s)
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 void
 SiloDirTreeView::OpenRootDir()
 {
-    setSelected(firstChild(), true);
+    setCurrentItem(topLevelItem(0));
 }
 
 // ****************************************************************************
@@ -139,37 +153,15 @@ SiloDirTreeView::OpenRootDir()
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 void
 SiloDirTreeView::resizeEvent(QResizeEvent *re)
 {
-    QListView::resizeEvent(re);
+    QTreeWidget::resizeEvent(re);
     setColumnWidth(0, width() - 4);
-}
-
-// ****************************************************************************
-//  Method:  SiloDirTreeView::sizeHint
-//
-//  Purpose:
-//    Suggest a good size for the view.
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    November 12, 2001
-//
-// ****************************************************************************
-QSize
-SiloDirTreeView::sizeHint() const
-{
-    QSize size = QListView::sizeHint();
-    if (total_items == 0 || firstChild() == 0)
-        return size;
-
-    size.setHeight(QMIN(QMAX(size.height(),
-                             firstChild()->height() * (total_items+2)),
-                        QApplication::desktop()->height() * 7/8));
-    if (!size.isValid())
-        size.setWidth(200);
-
-    return size;
 }
 

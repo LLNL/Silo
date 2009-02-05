@@ -38,10 +38,9 @@
 #ifndef SILOARRAYVIEW_H
 #define SILOARRAYVIEW_H
 
-#include <qobject.h>
-#include <qmainwindow.h>
+#include <QMainWindow>
 class SiloFile;
-class QListBox;
+class QListWidget;
 
 // ****************************************************************************
 //  Class:  SiloArrayViewWindow
@@ -52,16 +51,18 @@ class QListBox;
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 class SiloArrayViewWindow : public QMainWindow
 {
     Q_OBJECT
   public:
     SiloArrayViewWindow(SiloFile *s, const QString &n, QWidget *p);
-
-    virtual QSize sizeHint() const;
   private:
-    QListBox *lb;
+    QListWidget *lb;
     SiloFile *silo;
     QString   name;
 };

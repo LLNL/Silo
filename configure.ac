@@ -1264,161 +1264,123 @@ else
    AC_MSG_RESULT(disabled)
 fi
 
-#   autoconf-archive-2006-08-20/htmldoc/bnv_have_qt.html
-#   BNV_HAVE_QT
-#   gw_CHECK_QT
-AC_ARG_WITH([Qt-dir],
-    AC_HELP_STRING([--with-Qt-dir=DIR],
-                          [DIR is equal to $QTDIR if you have followed the
-                          installation instructions of Trolltech. Header
-                          files are in DIR/include, binary utilities are
-                          in DIR/bin. The library is in DIR/lib, unless
-                          --with-Qt-lib-dir is also set.]))
-
-AC_ARG_WITH([Qt-include-dir],
-    AC_HELP_STRING([--with-Qt-include-dir=DIR],
-                          [Qt header files are in DIR]))
-AC_ARG_WITH([Qt-bin-dir],
-    AC_HELP_STRING([--with-Qt-bin-dir=DIR],
-                          [Qt utilities such as moc and uic are in DIR]))
-AC_ARG_WITH([Qt-lib-dir],
-    AC_HELP_STRING([--with-Qt-lib-dir=DIR],
-                          [The Qt library is in DIR]))
-AC_ARG_WITH([Qt-lib],
-    AC_HELP_STRING([--with-Qt-lib=LIB],
-                          [Use -lLIB to link with the Qt library]))
-
-if test -n "$SILEX"; then 
-
-  AC_MSG_CHECKING(for Qt)
-
-  if test x"$with_Qt_dir" = x"no" ||
-     test x"$with_Qt_include_dir" = x"no" ||
-     test x"$with_Qt_bin_dir" = x"no" ||
-     test x"$with_Qt_lib_dir" = x"no" ||
-     test x"$with_Qt_lib" = x"no"; then
-    # user disabled Qt. Leave cache alone.
-    have_qt="no"
-  else
-    # "yes" is a bogus option
-    if test x"$with_Qt_dir" = xyes; then
-      with_Qt_dir=
+AC_ARG_WITH(qt,
+    AC_HELP_STRING([--with-qt],[specify top-level Qt directory @<:@default=yes@:>@]),
+    if test $withval != yes; then
+        QTDIR=$withval
     fi
-    if test x"$with_Qt_include_dir" = xyes; then
-      with_Qt_include_dir=
+    )
+AC_ARG_WITH(qt-bin,
+    AC_HELP_STRING([--with-qt-bin],[specify Qt bin directory]),
+    if test $withval != yes; then
+        QT_BIN=$withval
     fi
-    if test x"$with_Qt_bin_dir" = xyes; then
-      with_Qt_bin_dir=
-    fi  
-    if test x"$with_Qt_lib_dir" = xyes; then
-      with_Qt_lib_dir=
-    fi  
-    if test x"$with_Qt_lib" = xyes; then
-      with_Qt_lib=
-    fi  
-    # No Qt unless we discover otherwise
-    have_qt=no
-    # Check whether we are requested to link with a specific version
-    if test x"$with_Qt_lib" != x; then 
-      qt_lib="$with_Qt_lib" 
-    fi    
-    # Check whether we were supplied with an answer already
-    if test x"$with_Qt_dir" != x; then
-       have_qt=yes
-       QT_CXXFLAGS=-I$with_Qt_dir/include
-       QT_DIR=$with_Qt_dir
-       QT_UIC=$with_Qt_dir/bin/uic 
-       QT_MOC=$with_Qt_dir/bin/moc
-       if test x"$qt_lib" = x; then
-          qt_lib="`ls $with_Qt_dir/lib/libqt* | sed -n 1p |
-                     sed s@$with_Qt_dir/lib/lib@@ | [sed s@[.].*@@]`"
+    )
+AC_ARG_WITH(qt-include,
+    AC_HELP_STRING([--with-qt-include],[specify Qt include directory]),
+    if test $withval != yes; then
+        QT_INCLUDE=$withval
+    fi
+    )
+AC_ARG_WITH(qt-lib,
+    AC_HELP_STRING([--with-qt-lib],[specify Qt lib directory]),
+    if test $withval != yes; then
+        QT_LIB=$withval
+    fi
+    )
+
+dnl
+dnl If silex is enabled, look for a supported version of Qt.
+dnl This QT logic is taken from VisIt's configure.in.
+dnl
+if test -n "$SILEX"; then
+
+    if test -z "$QT_BIN" || test -z "$QT_INCLUDE" || test -z "$QT_LIB"; then
+        if test -z "QTDIR"; then
+            AC_MSG_ERROR([The QT_BIN, QT_INCLUDE and QT_LIB environment variables must be set in order to find Qt])
+        else
+            QT_BIN="$QTDIR/bin"
+            QT_INCLUDE="$QTDIR/include"
+            QT_LIB="$QTDIR/lib"
+        fi
+    fi
+    AC_MSG_CHECKING(for supported Qt version)
+    QtVersion=""
+    QtVersion2=""
+    consumeCount=-1
+    toks=`$QT_BIN/qmake --version`
+    for tok in $toks; do
+        if test "$tok" == "Qt"; then
+            consumeCount=2
+        fi
+        if test $consumeCount == 0; then
+            QtVersion2=$tok
+            break
+        else
+            consumeCount=$((consumeCount-1))
+        fi
+    done
+    
+    ## Check for supported versions of Qt.
+    for ver in  4.4.0 4.4.1 4.4.2 4.4.3 4.4.4 4.4.5 \
+                4.5.0 4.5.1 4.5.2 4.5.3 4.5.4 4.5.5 \
+                4.6.0 4.6.1 4.6.2 4.6.3 4.6.4 4.6.5 ; do
+       if test "$QtVersion2" == "$ver"; then
+           QtVersion=$ver
+           break
        fi
-       case $host_os in
-        darwin* | rhapsody*)
-          QT_LIBS="-L$with_Qt_dir/lib -l$qt_lib"
-          ;;
-        aix*)
-          QT_LIBS="-L$with_Qt_dir/lib -l$qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXt -lXi $X_EXTRA_LIBS"
-          ;;
-        *)
-          QT_LIBS="-L$with_Qt_dir/lib -l$qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-          ;;
-       esac
-       if test x"$qt_lib" = xqt-mt; then
-        QT_CXXFLAGS="$QT_CXXFLAGS -DQT_THREAD_SUPPORT"
-       fi
-    elif test x"$QTDIR" != x; then
-       have_qt=yes
-       QT_CXXFLAGS=-I$QTDIR/include
-       QT_DIR=$QTDIR
-       QT_UIC=$QTDIR/bin/uic 
-       QT_MOC=$QTDIR/bin/moc
-       if test x"$qt_lib" = x; then
-          qt_lib="`ls $QTDIR/lib/libqt* | sed -n 1p |
-                     sed s@$QTDIR/lib/lib@@ | [sed s@[.].*@@]`"
-       fi
-       case $host_os in
-        darwin* | rhapsody*)
-          QT_LIBS="-L$QTDIR/lib -l$qt_lib"
-          ;;
-        aix*)
-          QT_LIBS="-L$QTDIR/lib -l$qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXt -lXi $X_EXTRA_LIBS"
-          ;;
-        *)
-          QT_LIBS="-L$QTDIR/lib -l$qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-          ;;
-       esac
-       if test x"$qt_lib" = xqt-mt; then
-        QT_CXXFLAGS="$QT_CXXFLAGS -DQT_THREAD_SUPPORT"
-       fi
+    done
+    
+    if test -z "$QtVersion"; then
+        AC_MSG_ERROR([  Sorry, but you need Qt version 4.4.0 or higher to compile VisIt. ])
     else
-       if test x"$with_Qt_include_dir" != x; then
-          QT_CXXFLAGS="-I$with_Qt_include_dir"
-       fi
-       if test x"$with_Qt_bin_dir" != x; then
-          QT_UIC=$with_Qt_bin_dir/uic 
-          QT_MOC=$with_Qt_bin_dir/moc
-       fi
-       if test x"$with_Qt_lib_dir" != x; then
-          QT_LIBS="-L$with_Qt_lib_dir"
-       fi
-       if test x"$with_Qt_lib" != x; then
-          QT_LIBS="$QT_LIBS -l$with_Qt_lib"
-       fi
+        AC_MSG_RESULT(Qt $QtVersion in $QT_INCLUDE)
     fi
-    if test x"QT_CXXFLAGS" = x ||
-       test x"$QT_MOC" = x ||
-       test x"$QT_LIBS" = x ; then
-       have_qt=no
-    else
-       have_qt=yes
+    
+    # Set the Qt bin,include,lib directories
+    AC_SUBST(QT_BIN)
+    AC_SUBST(QT_INCLUDE)
+    AC_SUBST(QT_LIB)
+    
+    # Set platform-specific options
+    if test "$UNAME" = "Darwin"; then
+        QT_LDFLAGS="-F$""(QT_LIB) -L$""(QT_LIB)"
+    
+        QT_CORE=QtCore.framework
+        QT_CORE_LIB="-framework QtCore"
+        
+        QT_GUI=QtGui.framework
+        QT_GUI_LIB="-framework QtGui"
+    
+    else 
+        QT_LDFLAGS="-L$""(QT_LIB)"
+    
+        QT_CORE=libQtCore.so
+        QT_CORE_LIB=-lQtCore
+    
+        QT_GUI=libQtGui.so
+        QT_GUI_LIB=-lQtGui
+    
     fi
-  fi
-  if test "$have_qt" = no; then
-     # Qt was not found
-     have_qt=no
-     QT_CXXFLAGS=
-     QT_DIR=
-     QT_LIBS=
-     QT_UIC=
-     QT_MOC=
-     AC_MSG_RESULT(not found - Silex disabled)
-     SILEX=""
-     AC_SUBST(SILEX)
-  else
-     AC_MSG_RESULT([$have_qt:
-           QT_CXXFLAGS=$QT_CXXFLAGS
-           QT_DIR=$QT_DIR
-           QT_LIBS=$QT_LIBS
-           QT_UIC=$QT_UIC
-           QT_MOC=$QT_MOC])
-  fi
-  AC_SUBST(QT_CXXFLAGS)
-  AC_SUBST(QT_DIR)
-  AC_SUBST(QT_LIBS)
-  AC_SUBST(QT_UIC)
-  AC_SUBST(QT_MOC)
-fi
+    AC_SUBST(QT_LDFLAGS)
+    
+    # Qt libraries
+    QT_LIBS="$""(QT_CORE_LIB) $""(QT_GUI_LIB)"
+    AC_SUBST(QT_LIBS)
+    AC_SUBST(QT_CORE)
+    AC_SUBST(QT_CORE_LIB)
+    AC_SUBST(QT_GUI)
+    AC_SUBST(QT_GUI_LIB)
+    
+    # Include path
+    QT_CXXFLAGS="-I$""(QT_INCLUDE) -I$""(QT_INCLUDE)/Qt -I$""(QT_INCLUDE)/QtCore -I$""(QT_INCLUDE)/QtGui"
+    AC_SUBST(QT_CXXFLAGS)
+    
+    # Path to moc
+    QT_MOC="$""(QT_BIN)/moc"
+    AC_SUBST(QT_MOC)
+
+fi dnl if test -n "$SILEX"; then
 
 dnl
 dnl Check for a python installation using the Automake 

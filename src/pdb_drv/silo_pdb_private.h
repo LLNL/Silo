@@ -119,6 +119,8 @@ CALLBACK int db_pdb_Filters (DBfile *, FILE *);
 CALLBACK int db_pdb_NewToc (DBfile *);
 CALLBACK int db_pdb_GetComponentNames (DBfile *, char *, char ***, char ***);
 
+CALLBACK int db_pdb_FreeCompressionResources(DBfile *_dbfile, const char *meshname);
+
 PRIVATE int db_pdb_getobjinfo (PDBfile *, char *, char *, int *);
 PRIVATE int db_pdb_getvarinfo (PDBfile *, char *, char *, int *, int *, int);
 

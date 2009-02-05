@@ -64,6 +64,9 @@
 //    Mark C. Miller, Thu Jul 20 15:45:55 PDT 2006
 //    Made it more graceful on failure to open file
 //
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
 
 int main( int argc, char **argv )
@@ -76,7 +79,7 @@ int main( int argc, char **argv )
     Explorer *w = 0;
     if (argc > 1)
     {
-        w = new Explorer(argv[1], NULL, "Explorer");
+        w = new Explorer(argv[1], NULL);
         if (!w->HasSiloView())
         {
             delete w;
@@ -88,16 +91,14 @@ int main( int argc, char **argv )
     if (!w)
     {
         QString file =
-            QFileDialog::getOpenFileName(QString(),
+            QFileDialog::getOpenFileName(NULL, "Open file....", "",
                                          "Silo files (*.silo *.root *.pdb);;"
-                                         "All files (*)",
-                                         NULL, "SiloOpen", "Open file...");
+                                         "All files (*)");
         if (file.isNull())
             return 0;
-        w = new Explorer(file, NULL, "Explorer");
+        w = new Explorer(file, NULL);
     }
 
-    a.setMainWidget(w);
     w->show();
 
     return a.exec();

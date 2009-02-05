@@ -38,8 +38,7 @@
 #ifndef SILODIRTREEVIEW_H
 #define SILODIRTREEVIEW_H
 
-#include <qobject.h>
-#include <qlistview.h>
+#include <QTreeWidget>
 class SiloFile;
 class SiloDir;
 
@@ -52,16 +51,20 @@ class SiloDir;
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
-class SiloDirTreeViewItem : public QListViewItem
+class SiloDirTreeViewItem : public QTreeWidgetItem
 {
   public:
     SiloDir *dir;
 
-    SiloDirTreeViewItem(SiloDir *d, QListView *lv, const QString &n)
-        : QListViewItem(lv,n), dir(d) { };
-    SiloDirTreeViewItem(SiloDir *d, QListViewItem *li, const QString &n) 
-        : QListViewItem(li,n), dir(d) { };
+    SiloDirTreeViewItem(SiloDir *d, QTreeWidget *lv, const QString &n)
+        : QTreeWidgetItem(lv,QStringList(n)), dir(d) { };
+    SiloDirTreeViewItem(SiloDir *d, QTreeWidgetItem *li, const QString &n) 
+        : QTreeWidgetItem(li,QStringList(n)), dir(d) { };
 };
 
 // ****************************************************************************
@@ -73,16 +76,18 @@ class SiloDirTreeViewItem : public QListViewItem
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
-class SiloDirTreeView : public QListView
+class SiloDirTreeView : public QTreeWidget
 {
     Q_OBJECT
   public:
-    SiloDirTreeView(SiloFile *s, QWidget *p, const QString &n);
+    SiloDirTreeView(SiloFile *s, QWidget *p);
     void Set(SiloFile *s);
     void OpenRootDir();
-
-    virtual QSize sizeHint() const;
 
   protected:
     virtual void resizeEvent(QResizeEvent *re);
@@ -92,7 +97,7 @@ class SiloDirTreeView : public QListView
     SiloFile *silo;
     QPixmap *folder_pixmap;
 
-    QListViewItem *AddDir(SiloDir *d, QListViewItem *parent);
+    QTreeWidgetItem *AddDir(SiloDir *d, QTreeWidgetItem *parent);
 };
 
 #endif

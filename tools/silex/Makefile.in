@@ -60,8 +60,10 @@ nodist_silex_OBJECTS = $(am__objects_2)
 silex_OBJECTS = $(am_silex_OBJECTS) $(nodist_silex_OBJECTS)
 am__DEPENDENCIES_1 =
 @HDF5_DRV_NEEDED_FALSE@silex_DEPENDENCIES = ../../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_1) \
 @HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_1)
 @HDF5_DRV_NEEDED_TRUE@silex_DEPENDENCIES = ../../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_1) \
 @HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -157,11 +159,17 @@ PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
+QT_BIN = @QT_BIN@
+QT_CORE = @QT_CORE@
+QT_CORE_LIB = @QT_CORE_LIB@
 QT_CXXFLAGS = @QT_CXXFLAGS@
-QT_DIR = @QT_DIR@
+QT_GUI = @QT_GUI@
+QT_GUI_LIB = @QT_GUI_LIB@
+QT_INCLUDE = @QT_INCLUDE@
+QT_LDFLAGS = @QT_LDFLAGS@
+QT_LIB = @QT_LIB@
 QT_LIBS = @QT_LIBS@
 QT_MOC = @QT_MOC@
-QT_UIC = @QT_UIC@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -234,8 +242,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 silex_SOURCES = $(FILES)
 nodist_silex_SOURCES = $(FILES_MOC)
-@HDF5_DRV_NEEDED_FALSE@silex_LDADD = ../../src/libsilo.la $(QT_LIBS)
-@HDF5_DRV_NEEDED_TRUE@silex_LDADD = ../../src/libsiloh5.la $(QT_LIBS)
+@HDF5_DRV_NEEDED_FALSE@silex_LDADD = ../../src/libsilo.la $(QT_LDFLAGS) $(QT_LIBS)
+@HDF5_DRV_NEEDED_TRUE@silex_LDADD = ../../src/libsiloh5.la $(QT_LDFLAGS) $(QT_LIBS)
 EXTRA_DIST = \
  array.xpm \
  curve.xpm \

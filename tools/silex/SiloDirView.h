@@ -38,8 +38,7 @@
 #ifndef SILODIRVIEW_H
 #define SILODIRVIEW_H
 
-#include <qobject.h>
-#include <qlistview.h>
+#include <QTreeWidget>
 class SiloDir;
 
 // ****************************************************************************
@@ -51,17 +50,21 @@ class SiloDir;
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
-class SiloDirViewItem : public QListViewItem
+class SiloDirViewItem : public QTreeWidgetItem
 {
   public:
     SiloDir *dir;
     QString  name;
 
-    SiloDirViewItem(SiloDir *d, QListView *lv, const QString &n)
-        : QListViewItem(lv,n), dir(d), name(n) { };
-    SiloDirViewItem(SiloDir *d, QListViewItem *li, const QString &n) 
-        : QListViewItem(li,n), dir(d), name(n) { };
+    SiloDirViewItem(SiloDir *d, QTreeWidget *lv, const QString &n)
+        : QTreeWidgetItem(lv,QStringList(n)), dir(d), name(n) { };
+    SiloDirViewItem(SiloDir *d, QTreeWidgetItem *li, const QString &n) 
+        : QTreeWidgetItem(li,QStringList(n)), dir(d), name(n) { };
 };
 
 // ****************************************************************************
@@ -73,19 +76,21 @@ class SiloDirViewItem : public QListViewItem
 //  Programmer:  Jeremy Meredith
 //  Creation:    November 12, 2001
 //
+//  Modifications:
+//    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
+//    Ported to Qt4.
+//
 // ****************************************************************************
-class SiloDirView : public QListView
+class SiloDirView : public QTreeWidget
 {
     Q_OBJECT
   public:
-    SiloDirView(QWidget *p, const QString &n);
+    SiloDirView(QWidget *p);
 
     void Set(SiloDir *d);
 
-    virtual QSize sizeHint() const;
-
   public slots:
-    void ChangeDir(QListViewItem *i);
+    void ChangeDir(QTreeWidgetItem *i);
 
   protected:
     virtual void resizeEvent(QResizeEvent *re);
