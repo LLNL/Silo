@@ -42,9 +42,9 @@ main(int argc, char *argv[])
 {
     DBfile *dbfile = NULL;
     int     ms[33];
-    char   *files[] = { "/usr/gapps/meshtv/data/rect2d.silo",
-        "/usr/gapps/meshtv/data/point2d.silo",
-        "/usr/gapps/meshtv/data/globe.silo"
+    char   *files[] = { "./rect2d.pdb",
+        "./point2d.pdb",
+        "./globe.pdb"
     };
     int maskindex = 0;
 

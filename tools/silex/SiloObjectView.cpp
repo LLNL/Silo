@@ -40,6 +40,7 @@
 #include <qapplication.h>
 #include <qmessagebox.h>
 #include <iostream>
+#include <string>
 
 // ----------------------------------------------------------------------------
 //                            Object View Window

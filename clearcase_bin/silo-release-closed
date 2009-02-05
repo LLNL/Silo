@@ -81,28 +81,30 @@ function build() {
     rm -rf $TOPDIR/$VERSION/test/$ARCH
     mkdir $TOPDIR/$VERSION/test/$ARCH
     cd $TOPDIR/$VERSION/test/$ARCH
+    unsetenv QTDIR
     ../$TOPSRCDIR/configure \
 --prefix=$TOPDIR/$VERSION/$ARCH \
 --disable-browser --disable-silex --without-hdf5 --without-szlib $CONFOPTS
     $MAKE $MAKEOPTS
-    if [ "$DOCHECKS" = "yes" ] ; then
+    if [ "$DOCHECK" = "yes" ] ; then
        $MAKE $MAKEOPTS check && $MAKE $MAKEOPTS install
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
     $MAKE $MAKEOPTS clean
     chmod -R g+w $TOPDIR/$VERSION/$ARCH
+    unsetenv QTDIR
     ../$TOPSRCDIR/configure \
 --prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS
     $MAKE $MAKEOPTS
-    if [ "$DOCHECKS" = "yes" ] ; then
+    if [ "$DOCHECK" = "yes" ] ; then
        $MAKE $MAKEOPTS check && $MAKE $MAKEOPTS install
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
-    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
+    chmod -R a+rX,ug+w $TOPDIR/$VERSION/test/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
-    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
+    chmod -R a+rX,ug+w $TOPDIR/$VERSION/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/$ARCH
 EOF
 }
@@ -113,36 +115,38 @@ function build2() {
     rm -rf $TOPDIR/$VERSION/test/$ARCH
     mkdir $TOPDIR/$VERSION/test/$ARCH
     cd $TOPDIR/$VERSION/test/$ARCH
+    unsetenv QTDIR
     ../$TOPSRCDIR/configure \
 --prefix=$TOPDIR/$VERSION/$ARCH \
 --disable-browser --disable-silex --without-hdf5 --without-szlib $CONFOPTS
     $MAKE $MAKEOPTS
-    if [ "$DOCHECKS" = "yes" ] ; then
+    if [ "$DOCHECK" = "yes" ] ; then
        $MAKE $MAKEOPTS check && $MAKE $MAKEOPTS install
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
     $MAKE $MAKEOPTS clean
     chmod -R g+w $TOPDIR/$VERSION/$ARCH
+    unsetenv QTDIR
     ../$TOPSRCDIR/configure \
 --prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2
     $MAKE $MAKEOPTS
-    if [ "$DOCHECKS" = "yes" ] ; then
+    if [ "$DOCHECK" = "yes" ] ; then
        $MAKE $MAKEOPTS check && $MAKE $MAKEOPTS install
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
-    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
+    chmod -R a+rX,ug+w $TOPDIR/$VERSION/test/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
-    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
+    chmod -R a+rX,ug+w $TOPDIR/$VERSION/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/$ARCH
 EOF
 }
 
 function localhost() {
   localhostgcc
-  localhostpgc
-  localhosticc
+#  localhostpgc - fails to find include file float.h during compile
+#  localhosticc - fails to find libstdc++_shared during configure
 }
 function localhostfinal() {
     ssh ${bdun}@${bdhost} "/bin/bash" << EOF >> linux_rhel3-gcc-3.2.3.log 2>&1
@@ -159,7 +163,7 @@ function localhostfinal() {
     export PATH LD_LIBRARY_PATH
     gmake bindir=/misc/gapps/Linux/bin install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /misc/gapps/Linux/bin/\$FILE
+    do chmod a+rX,ug+w /misc/gapps/Linux/bin/\$FILE
        chgrp visit /misc/gapps/Linux/bin/\$FILE
     done
     for ARCHDIR in "linux_rhel3-gcc-3.2.3" "linux_rhel3-pgc-4.0" \
@@ -198,7 +202,7 @@ function localhostgcc() {
     HOSTS="${bdun}@${bdhost}"
     ARCH="linux_rhel3-gcc-3.2.3"
     CONFOPTS="FC=g77 F77=g77 \
-FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
+    FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals LDFLAGS=-L/usr/X11R6/lib"
     export HOSTS ARCH CONFOPTS
     build \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
@@ -210,8 +214,7 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 function localhostpgc() {
     HOSTS="${bdun}@${bdhost}"
     ARCH="linux_rhel3-pgc-4.0"
-    CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" LDFLAGS=-lstdc++ \
---disable-silex"
+    CONFOPTS="CC=pgcc CXX=pgCC FC=pgf77 --disable-silex"
     export HOSTS ARCH CONFOPTS
     build \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
@@ -224,7 +227,7 @@ function localhostpgc() {
 function localhosticc() {
     HOSTS="${bdun}@${bdhost}"
     ARCH="linux_rhel3-icc-8.1"
-    CONFOPTS="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ --disable-silex"
+    CONFOPTS="CC=icc CXX=icpc FC=ifort LDFLAGS=-lstdc++ --disable-silex"
     export HOSTS ARCH CONFOPTS
     build \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
@@ -257,7 +260,7 @@ function sunsetfinal() {
     export PATH LD_LIBRARY_PATH
     gmake bindir=/misc/gapps/SunOS/bin install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /misc/gapps/SunOS/bin/\$FILE
+    do chmod a+rX,ug+w /misc/gapps/SunOS/bin/\$FILE
        chgrp visit /misc/gapps/SunOS/bin/\$FILE
     done
     ln -s $TOPDIR/$VERSION/sunos_57/bin/silex \
@@ -265,7 +268,7 @@ function sunsetfinal() {
     chgrp visit $TOPDIR/$VERSION/sunos_57-cc-5.2/bin/silex
 EOF
 }
-function sunspotclean() {
+function sunsetclean() {
     ssh sunset "/bin/bash" << EOF >> sunos_57.log 2>&1
     for ARCHDIR in "sunos_57" "sunos_57-cc-5.2"
     do rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
@@ -276,8 +279,9 @@ function sunsetgcc() {
     HOSTS="sunset"
     ARCH="sunos_57"
     CONFOPTS="FC=g77 F77=g77 \
-FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
-    export HOSTS ARCH CONFOPTS
+    FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
+    MAKE="make"
+    export HOSTS ARCH CONFOPTS MAKE
     build \
     "PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:\
 /opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin" \
@@ -288,13 +292,14 @@ function sunsetcc() {
     HOSTS="sunset"
     ARCH="sunos_57-cc-5.2"
     CONFOPTS="FC=g77 F77=g77 \
-FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
-    CONFOPTS="CC=c89 CXX=CC FC=f77 \
+    FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
+    CONFOPTS2="CC=cc CXX=CC FC=f77 \
 LDFLAGS=-L/usr/local/lib --disable-silex --without-readline \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/sparc-sun-solaris-cc-5.2 \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/sparc-sun-solaris-cc-5.2/include,\
 /usr/gapps/silo/hdf5/$HDF5RELEASE/sparc-sun-solaris-cc-5.2/lib"
-    export HOSTS ARCH CONFOPTS CONFOPTS2
+    MAKE="make"
+    export HOSTS ARCH CONFOPTS CONFOPTS2 MAKE
     build2 \
     "PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:\
 /opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin" \
@@ -309,7 +314,7 @@ function macosfinal() {
     export PATH
     make bindir=/misc/gapps/Darwin/bin install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /misc/gapps/Darwin/bin/\$FILE
+    do chmod a+rX,ug+w /misc/gapps/Darwin/bin/\$FILE
        chgrp visit /misc/gapps/Darwin/bin/\$FILE
     done
     ln -s $TOPDIR/hdfview/MacOSX-i386/hdfview/HDFView.app \
@@ -360,7 +365,7 @@ function purplefinal() {
        for FILE in $BININSTALLS
        do
           if [[ -e /usr/gapps/bin/\$ARCHDIR/\$FILE ]] ; then
-             chmod a+r,ug+w,a+X /usr/gapps/bin/\$ARCHDIR/\$FILE
+             chmod a+rX,ug+w /usr/gapps/bin/\$ARCHDIR/\$FILE
              chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
           fi
        done
@@ -498,7 +503,7 @@ function lilacfinal() {
     for FILE in $BININSTALLS
     do
        if [[ -e /usr/gapps/bin/chaos_3_x86_elan3/\$FILE ]] ; then
-          chmod a+r,ug+w,a+X /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
+          chmod a+rX,ug+w /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
           chgrp visit /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
        fi
     done
@@ -539,7 +544,8 @@ EOF
 function lilacgcc() {
     HOSTS="${lcun}@lilac"
     ARCH="chaos_3_x86_elan3"
-    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC"
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
+        FFLAGS=\"-fno-second-underscore -Wno-globals\" "
     export HOSTS ARCH CONFOPTS
     build \
     "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
@@ -583,7 +589,7 @@ function gaussfinal() {
 #   done
 #   gmake bindir=/usr/gapps/bin/chaos_3_x86_elan3 install-exec
 #   for FILE in $BININSTALLS
-#   do chmod a+r,ug+w,a+X /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
+#   do chmod a+rX,ug+w /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
 #      chgrp visit /usr/gapps/bin/chaos_3_x86_elan3/\$FILE
 #   done
     for ARCHDIR in "chaos_3_x86_64_ib-gcc" "chaos_3_x86_64_ib-icc"
@@ -623,8 +629,7 @@ function gaussgcc() {
 FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
     export HOSTS ARCH CONFOPTS
     build \
-    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
-/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
+    "PATH=/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin" \
     "export PATH"
 }
 
@@ -635,13 +640,13 @@ function gaussicc() {
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
     CONFOPTS2="CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-silex \
---with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_x86_64_ib-icc \
---with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_64_ib-icc \
---with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_64_ib-icc/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_64_ib-icc/lib"
+--with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/$ARCH \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
     export HOSTS ARCH CONFOPTS CONFOPTS2
     build2 \
-    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:\ 
+    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:\
 /usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
     "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
     "INTEL_LICENSE_FILE=${INTEL_LICENSE_FILE}:\
@@ -672,7 +677,7 @@ function rheafinal() {
           if [[ -d /usr/gapps/bin/\$ARCHDIR ]] ; then
              ln -s $TOPDIR/$VERSION/chaos_3_x86_64/bin/\$FILE \
                 /usr/gapps/bin/\$ARCHDIR/\$FILE
-             chmod a+r,ug+w,a+X /usr/gapps/bin/\$ARCHDIR/\$FILE
+             chmod a+rX,ug+w /usr/gapps/bin/\$ARCHDIR/\$FILE
              chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
           fi
        done
@@ -808,7 +813,7 @@ function thunderfinal() {
        export PATH
        gmake bindir=/usr/gapps/bin/\$ARCHDIR install-exec
        for FILE in $BININSTALLS
-       do chmod a+r,ug+w,a+X /usr/gapps/bin/\$ARCHDIR/\$FILE
+       do chmod a+rX,ug+w /usr/gapps/bin/\$ARCHDIR/\$FILE
           chgrp visit /usr/gapps/bin/\$ARCHDIR/\$FILE
        done
     done
@@ -894,13 +899,13 @@ $LD_LIBRARY_PATH
     export PATH LD_LIBRARY_PATH PARALLEL
     gmake bindir=/usr/gapps/bin/irix_6.5_64 install-exec
     for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /usr/gapps/bin/irix_6.5_64/\$FILE
+    do chmod a+rX,ug+w /usr/gapps/bin/irix_6.5_64/\$FILE
        chgrp visit /usr/gapps/bin/irix_6.5_64/\$FILE
     done
     for FILE in $BININSTALLS
     do ln -s $TOPDIR/$VERSION/irix_6.5_n32/bin/\$FILE \
        $TOPDIR/$VERSION/irix_6.5_64/bin/\$FILE
-       chmod a+r,ug+w,a+X $TOPDIR/$VERSION/irix_6.5_64/bin/\$FILE
+       chmod a+rX,ug+w $TOPDIR/$VERSION/irix_6.5_64/bin/\$FILE
        chgrp visit $TOPDIR/$VERSION/irix_6.5_64/bin/\$FILE
     done
 EOF
@@ -954,62 +959,48 @@ PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     "export PATH PARALLEL"
 }
 
-function bglfinal() {
-    ssh ${lcun}@bgl "/bin/bash" << EOF
-    umask 002
-    cd $TOPDIR/$VERSION/test/sles_9_ppc64
-    gmake bindir=/usr/gapps/bin/sles_9_ppc64 install-exec
-    for FILE in $BININSTALLS
-    do chmod a+r,ug+w,a+X /usr/gapps/bin/sles_9_ppc64/\$FILE
-       chgrp visit /usr/gapps/bin/sles_9_ppc64/\$FILE
-    done
-EOF
-}
-function bglclean() {
-    ssh ${lcun}@bgl "/bin/bash" << EOF
-    rm -rf $TOPDIR/$VERSION/test/sles_9_ppc64
-EOF
-}
 function bgl() {
-  ssh ${lcun}@bgl "/bin/bash" << EOF > bgl.log 2>&1 &
-    cd $TOPDIR/$VERSION/test
-    umask 002
-    PATH=/opt/ibmcmp/vac/bg/8.0/bin:/opt/ibmcmp/xlf/bg/10.1/bin:\
-/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:\
-/usr/gapps/bin
-    export PATH
-    rm -rf sles_9_ppc64
-    mkdir sles_9_ppc64
-    cd sles_9_ppc64
-    ../$TOPSRCDIR/configure \
-    CC='xlc' FC="" F77="" \
-    --prefix=$TOPDIR/$VERSION/sles_9_ppc64 \
-    --without-readline --disable-fortran \
-    --with-hdf5=/usr/local/tools/hdf5/hdf5-1.6.5/serial_frontend/include,\
-/usr/local/tools/hdf5/hdf5-1.6.5/serial_frontend/lib
-    gmake install
-    gmake clean
-    ../$TOPSRCDIR/configure \
-    CC='mpxlc' FC="" F77="" ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
-    --prefix=$TOPDIR/$VERSION/sles_9_ppc64 \
-    --disable-browser --without-readline --disable-fortran --without-hdf5
-    gmake install
-    gmake clean
-    ../$TOPSRCDIR/configure \
-    CC='mpxlc' FC="" F77="" ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
-    --prefix=$TOPDIR/$VERSION/sles_9_ppc64 \
-    --disable-browser --without-readline --disable-fortran \
-    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/sles_9_ppc64 \
-    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/sles_9_ppc64/include,\
-/usr/gapps/silo/hdf5/$HDF5RELEASE/sles_9_ppc64/lib
-    gmake install
-    gmake bindir=/usr/gapps/bin/sles_9_ppc64 install-exec
-    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/sles_9_ppc64
-    chgrp -R visit $TOPDIR/$VERSION/sles_9_ppc64
-    chmod -R a+r,ug+w,a+X /usr/gapps/bin/sles_9_ppc64
-    chgrp -R visit /usr/gapps/bin/sles_9_ppc64
-    make clean
-EOF
+    HOSTS="${lcun}@bgl"
+    ARCH="sles_9_ppc64-blrts_xlc"
+    CONFOPTS="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlc FC=blrts_xlf \
+    CXX=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlC \
+    ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
+    CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+    CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" "
+    CONFOPTS2="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlc FC=blrts_xlf \
+    CXX=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlC \
+    ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
+    CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+    CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+    --disable-silex --disable-browser --without-readline \
+    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
+    export HOSTS ARCH CONFOPTS CONFOPTS2
+    build2 \
+    "PATH=/opt/ibmcmp/vacpp/bg/8.0/bin:/opt/ibmcmp/xlf/bg/10.1/bin:/usr/local/bin:\
+/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
+    "export PATH"
+    ARCH="sles_9_ppc64-xlc"
+    CONFOPTS="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/xlc FC=xlf \
+    CXX=/opt/ibmcmp/vacpp/bg/8.0/bin/xlC \
+    ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
+    CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+    CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" "
+    CONFOPTS2="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/xlc FC=xlf \
+    CXX=/opt/ibmcmp/vacpp/bg/8.0/bin/xlC \
+    ac_cv_type_off64_t=yes ac_cv_sizeof_off64_t=8 \
+    CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+    CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+    --enable-silex --with-Qt-dir=/usr/local/tools/qt/3.3.2-g++ \
+    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
+    export HOSTS ARCH CONFOPTS CONFOPTS2
+    build2 \
+    "PATH=/opt/ibmcmp/vacpp/bg/8.0/bin:/opt/ibmcmp/xlf/bg/10.1/bin:/usr/local/bin:\
+/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
+    "export PATH"
 }
 
 TOPDIR="/usr/gapps/silo"
@@ -1035,11 +1026,6 @@ DOLC="no"
 if (( $# < 1 )) ; then
   usage
   exit 2
-fi
-GROUPNAME=`id -gn`
-if [[ "$GROUPNAME" != "visit" ]] ; then
-   echo "You must be in the \"visit\" group to run $0. Do \"newgrp visit\"."
-   exit 2
 fi
 umask 002
 VERSION=$1

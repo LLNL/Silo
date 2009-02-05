@@ -10153,6 +10153,9 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Jan 17 21:41:52 PST 2008
+ *   Fixed missing origin member
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -10247,6 +10250,7 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, float *coords[],
             if (m.max_index)    MEMBER_S(int, max_index);
             if (m.group_no)     MEMBER_S(int, group_no);
             if (m.guihide)      MEMBER_S(int, guihide);
+            if (m.origin)       MEMBER_S(int, origin);
             MEMBER_3(double, min_extents);
             MEMBER_3(double, max_extents);
             MEMBER_R(str(m.coord[_j]), coord, ndims);
@@ -10281,6 +10285,9 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, float *coords[],
  *
  *              Mark C. Miller, Thu Jul 29 11:26:24 PDT 2004
  *              Made it set datatype correctly. Added support for dataReadMask
+ *
+ *              Mark C. Miller, Thu Jan 17 21:41:52 PST 2008
+ *              Fixed missing origin member
  *-------------------------------------------------------------------------
  */
 CALLBACK DBpointmesh *
@@ -10333,6 +10340,7 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
         pm->nels = m.nels;
         pm->group_no = m.group_no;
         pm->guihide = m.guihide;
+        pm->origin = m.origin;
         pm->mrgtree_name = OPTDUP(m.mrgtree_name);
         for (i=0; i<m.ndims; i++) {
             pm->units[i] = OPTDUP(m.units[i]);

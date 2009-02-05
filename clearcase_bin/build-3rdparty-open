@@ -35,7 +35,7 @@ MAKEOPTS=""
 export TOPDIR MAKE MAKEOPTS SZIPRELEASE HDF5RELEASE QTRELEASE lcun skipszip
 
 usage() {
-  printf "Usage: %s [-lc-username <lc-username>] [hdf5only] [all|hoth|sunspot|up|yana|thunder|pengra|quad|tread]" $0
+  printf "Usage: %s [-lc-username <lc-username>] [hdf5only] [all|hoth|sunspot|up|yana|thunder|pengra|quad|tread|ubgl]" $0
   printf "\n"
   printf "Silo 3rd party library installing script. Assumes a tarball exist in\n"
   printf "/usr/gapps/silo/szip/src/szip-$SZIPRELEASE, and\n"
@@ -47,6 +47,8 @@ usage() {
 stdbuild() {
     ssh ${HOSTS} "/bin/sh" << EOF > ${ARCH}.log 2>&1 &
     $*
+    unalias cp
+    unset noclobber
     umask 002
     if [ "$skipszip" = "no" ] ; then
       mkdir $TOPDIR/szip/src/$ARCH
@@ -55,7 +57,7 @@ stdbuild() {
       --prefix=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
       --disable-shared
       $MAKE $MAKEOPTS install
-      chmod -R a+r,ug+w,a+X $TOPDIR/szip/$SZIPRELEASE/$ARCH
+      chmod -R a+rX,ug+w $TOPDIR/szip/$SZIPRELEASE/$ARCH
       chgrp -R visit $TOPDIR/szip/$SZIPRELEASE/$ARCH
       cd $TOPDIR/szip/src
       rm -rf $TOPDIR/szip/src/$ARCH
@@ -66,13 +68,54 @@ stdbuild() {
     --prefix=$TOPDIR/hdf5/$HDF5RELEASE/$ARCH \
     --with-szlib=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
     --disable-shared
+    if [ "$POSTCONFCMDS" != "" ] ; then
+        echo "prevent an empty if-clause" > /dev/null 
+        $POSTCONFCMDS
+    fi
     $MAKE $MAKEOPTS -j 4 install
-    chmod -R a+r,ug+w,a+X $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
+    chmod -R a+rX,ug+w $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
     chgrp -R visit $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
     cd $TOPDIR/hdf5/src
     rm -rf $TOPDIR/hdf5/src/$ARCH
 EOF
 }
+
+stdbuild_nobg() {
+    ssh ${HOSTS} "/bin/sh" << EOF > ${ARCH}.log 2>&1
+    $*
+    unalias cp
+    unset noclobber
+    umask 002
+    if [ "$skipszip" = "no" ] ; then
+      mkdir $TOPDIR/szip/src/$ARCH
+      cd $TOPDIR/szip/src/$ARCH
+      $TOPDIR/szip/src/szip-$SZIPRELEASE/configure $CONFOPTS \
+      --prefix=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
+      --disable-shared
+      $MAKE $MAKEOPTS install
+      chmod -R a+rX,ug+w $TOPDIR/szip/$SZIPRELEASE/$ARCH
+      chgrp -R visit $TOPDIR/szip/$SZIPRELEASE/$ARCH
+      cd $TOPDIR/szip/src
+      rm -rf $TOPDIR/szip/src/$ARCH
+    fi
+    mkdir $TOPDIR/hdf5/src/$ARCH
+    cd $TOPDIR/hdf5/src/$ARCH
+    $TOPDIR/hdf5/src/hdf5-$HDF5RELEASE/configure $CONFOPTS \
+    --prefix=$TOPDIR/hdf5/$HDF5RELEASE/$ARCH \
+    --with-szlib=$TOPDIR/szip/$SZIPRELEASE/$ARCH \
+    --disable-shared
+    if [ "$POSTCONFCMDS" != "" ] ; then
+        echo "prevent an empty if-clause" > /dev/null 
+        $POSTCONFCMDS
+    fi
+    $MAKE $MAKEOPTS -j 4 install
+    chmod -R a+rX,ug+w $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
+    chgrp -R visit $TOPDIR/hdf5/$HDF5RELEASE/$ARCH
+    cd $TOPDIR/hdf5/src
+#    rm -rf $TOPDIR/hdf5/src/$ARCH
+EOF
+}
+
 hoth() {
     hothgcc
     hothpgc
@@ -374,11 +417,54 @@ quad64() {
     "export PATH PARALLEL"
 }
 
-GROUPNAME=`id -gn`
-if [ "$GROUPNAME" != "visit" ] ; then
-   echo "You must be in the \"visit\" group to run $0. Do \"newgrp visit\"."
-   exit 2
-fi
+ubgl() {
+    ubglxlc
+    ubglblrts_xlc
+    rm -rf $TOPDIR/hdf5/src/sles_9_ppc64*
+}
+
+ubglxlc() {
+    HOSTS=${lcun}@ubgl
+    ARCH=sles_9_ppc64-xlc
+    CONFOPTS="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/xlc FC=xlf \
+    CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+    CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" "
+    export HOSTS ARCH CONFOPTS
+    stdbuild_nobg \
+    "PATH=/opt/ibmcmp/vacpp/bg/8.0/bin:/opt/ibmcmp/xlf/bg/10.1/bin:/usr/local/bin:\
+/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
+    "export PATH"
+    if [ "`hostname`" = "ubgl" ] ; then
+        cp -f $TOPDIR/hdf5/src/$ARCH/src/H5Tinit.c $TOPDIR/hdf5/src/.
+    else
+        ssh ${lcun}@ubgl "cp -f --reply=yes $TOPDIR/hdf5/src/$ARCH/src/H5Tinit.c $TOPDIR/hdf5/src/."
+    fi
+}
+
+ubglblrts_xlc() {
+    HOSTS=${lcun}@ubgl
+    ARCH=sles_9_ppc64-blrts_xlc
+    POSTCONFCMDS="cp -f --reply=yes $TOPDIR/hdf5/src/H5Tinit.c $TOPDIR/hdf5/src/$ARCH/src/."
+    if [ "`hostname`" = "ubgl" ] ; then
+        CONFOPTS="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlc FC=blrts_xlf \
+        CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+        CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+        `grep ^ac_cv_sizeof $TOPDIR/hdf5/src/sles_9_ppc64-xlc/config.log | tr '\n' ' ' ` \
+        --disable-stream-vfd"
+    else
+        CONFOPTS="CC=/opt/ibmcmp/vacpp/bg/8.0/bin/blrts_xlc FC=blrts_xlf \
+        CFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+        CXXFLAGS=\"-O -qlanglvl=extended -qmaxmem=64000\" \
+        `ssh ${lcun}@ubgl \"grep ^ac_cv_sizeof $TOPDIR/hdf5/src/sles_9_ppc64-xlc/config.log | tr '\n' ' '\"` \
+        --disable-stream-vfd"
+    fi
+    export HOSTS ARCH CONFOPTS POSTCONFCMDS
+    stdbuild_nobg \
+    "PATH=/opt/ibmcmp/vacpp/bg/8.0/bin:/opt/ibmcmp/xlf/bg/10.1/bin:/usr/local/bin:\
+/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
+    "export PATH"
+}
+
 umask 002
 if [ "$1" = "-lc-username" ] ; then
    lcun=$2
@@ -393,6 +479,7 @@ if [ $# -lt 1 ] ; then
     pengra
     yana
     quad
+    ubgl
 else
  while [ "$*" != "" ]
  do
@@ -411,6 +498,7 @@ else
       pengra
       yana
       quad
+      ubgl
       shift;;
     hothgcc|-hothgcc)
       hothgcc
@@ -492,6 +580,9 @@ else
       shift;;
     quad|-quad)
       quad
+      shift;;
+    ubgl|-ubgl)
+      ubgl
       shift;;
     tread|-tread)
       tread
