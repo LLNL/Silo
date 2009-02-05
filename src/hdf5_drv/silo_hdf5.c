@@ -10665,6 +10665,10 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Sat Oct 18 08:22:18 PDT 2008
+ *   Added patch from Sean Ahern where the write of the zonelists was
+ *   actually referring to the nodelists array.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -10908,7 +10912,7 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
                }
 
                /* Write data */
-               if (H5Dwrite(zldset, mtype, mspace, fspace, H5P_DEFAULT, nodelists[i])<0) {
+               if (H5Dwrite(zldset, mtype, mspace, fspace, H5P_DEFAULT, zonelists[i])<0) {
                    db_perror("partial write", E_CALLFAIL, me);
                    UNWIND();
                }

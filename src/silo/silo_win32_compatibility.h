@@ -6,6 +6,8 @@
 #include <sys\types.h>
 #include <sys\stat.h>
 
+#define snprintf _snprintf
+
 #define write  _write
 #define read   _read
 
