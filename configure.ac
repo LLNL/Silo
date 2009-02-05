@@ -1062,7 +1062,11 @@ Please see INSTALL_FAQ for possible causes.])
                CPPFLAGS="-I$hdf5_inc $CPPFLAGS"
             fi
             if test -n "$hdf5_lib"; then
-               LDFLAGS="-L$hdf5_lib $LDFLAGS"
+               if test -n "$szlib_lib"; then
+                  LDFLAGS="-L$hdf5_lib -L$szlib_lib -lsz $LDFLAGS"
+               else
+                  LDFLAGS="-L$hdf5_lib $LDFLAGS"
+               fi
             fi
 	    notfound=""
             AC_CHECK_HEADERS(hdf5.h,,notfound="hdf5.h")

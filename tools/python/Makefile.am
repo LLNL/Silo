@@ -3,6 +3,11 @@
 lib_LTLIBRARIES = Silo.la
 Silo_la_SOURCES = $(FILES)
 Silo_la_LDFLAGS = -module -avoid-version
+if HDF5_DRV_NEEDED
+  Silo_la_LIBADD = ../../src/libsiloh5.la
+else
+  Silo_la_LIBADD = ../../src/libsilo.la
+endif
 
 AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(includedir) -I$(top_srcdir)/src/silo
 
@@ -16,9 +21,9 @@ noinst_HEADERS = \
  pydbtoc.h \
  pysilo.h 
 FILES = \
- pydbfile.C \
- pydbtoc.C \
- pysilo.C \
+ pydbfile.cpp \
+ pydbtoc.cpp \
+ pysilo.cpp \
  pydbfile.h \
  pydbtoc.h \
  pysilo.h 
