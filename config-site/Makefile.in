@@ -295,6 +295,7 @@ EXTRA_DIST = \
  rhea544.conf \
  sandia_paragon \
  sasn100.conf \
+ sidious.conf \
  sphere.conf \
  sunburn.conf \
  sunset.conf \

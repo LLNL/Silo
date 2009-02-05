@@ -131,6 +131,24 @@ function build2() {
 EOF
 }
 
+function sidious() {
+    sidiousgcc
+}
+
+sidiousgcc() {
+    HOSTS="sidious"
+    ARCH="x86_64-linux-el5-gcc-4.2.1"
+    CONFOPTS="FC=g77 F77=g77 \
+FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
+    export HOSTS ARCH CONFOPTS
+    build \
+    "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:\
+/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:\
+/usr/security/bin" \
+    "LD_LIBRARY_PATH=/usr/lib:/lib" \
+    "export PATH LD_LIBRARY_PATH"
+}
+
 function hoth() {
     hothgcc
     hothpgc
@@ -1030,11 +1048,13 @@ else
       DOLC="yes"
       shift;;
     all-bd*|-all-bd*)
+      list[i]="sidious" ; i=i+1
       list[i]="hoth" ; i=i+1
       list[i]="sunspot" ; i=i+1
       DOBDIV="yes"
       shift;;
     all|-a*)
+      list[i]="sidious" ; i=i+1
       list[i]="hoth" ; i=i+1
       list[i]="sunspot" ; i=i+1
       list[i]="up" ; i=i+1
@@ -1044,6 +1064,10 @@ else
       list[i]="quad" ; i=i+1
       list[i]="ubgl" ; i=i+1
       DOBDIV="yes";DOLC="yes"
+      shift;;
+    sidiousgcc|-sidiousgcc)
+      list[i]="sidiousgcc" ; i=i+1
+      DOBDIV="yes"
       shift;;
     hothgcc|-hothgcc)
       list[i]="hothgcc" ; i=i+1
@@ -1055,6 +1079,10 @@ else
       shift;;
     hothicc|-hothicc)
       list[i]="hothicc" ; i=i+1
+      DOBDIV="yes"
+      shift;;
+    sidious|-sid*)
+      list[i]="sidious" ; i=i+1
       DOBDIV="yes"
       shift;;
     hoth|-ho*)
@@ -1254,12 +1282,7 @@ else
       fi
       chgrp visit $TOPDIR/$VERSION
       chmod a+rX,u+w,o-w,g+s $TOPDIR/$VERSION
-      hostname
-      echo "got here 1"
-      ls $TOPDIR/$VERSION
       if [ ! -d $TOPDIR/$VERSION/test ] ; then
-         hostname
-         echo "got here 2"
          mkdir $TOPDIR/$VERSION/test
          chgrp visit $TOPDIR/$VERSION/test
          chmod a+rX,ug+w $TOPDIR/$VERSION/test
