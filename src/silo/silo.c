@@ -11791,7 +11791,8 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
         if (NULL == (tnode = ALLOC(DBmrgtnode)))
             API_ERROR(NULL, E_NOMEM);
         memset(tnode, 0, sizeof(DBmrgtnode));
-        if (NULL == (tnode->children = ALLOC_N(DBmrgtnode*, max_descendents))) {
+        if (NULL == (tnode->children = ALLOC_N(DBmrgtnode*, max_descendents)) &&
+            max_descendents) {
             API_ERROR(NULL, E_NOMEM);
         }
         if (nsegs > 0)

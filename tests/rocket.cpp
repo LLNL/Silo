@@ -1028,7 +1028,7 @@ main(int argc, char **argv)
 {
     FILE *outfile;
     DBfile *dbfile;
-    int driver = DB_HDF5;
+    int driver = DB_PDB;
 
 #if 0
     {

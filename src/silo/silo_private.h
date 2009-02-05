@@ -358,9 +358,9 @@ typedef struct context_t {
  * management (malloc, calloc, realloc, strdup, free...).
  */
 #define ALLOC(T)                ((T*)calloc((size_t)1,sizeof(T)))
-#define ALLOC_N(T,N)            ((T*)calloc((size_t)(N),sizeof(T)))
+#define ALLOC_N(T,N)            ((T*)((N)>0?calloc((size_t)(N),sizeof(T)):0))
 #define REALLOC(P,T,N)  REALLOC_N((P),(T),(N))
-#define REALLOC_N(P,T,N)        ((T*)realloc((P),(size_t)((N)*sizeof(T))))
+#define REALLOC_N(P,T,N)        ((T*)((N)>0?realloc((P),(size_t)((N)*sizeof(T))):0))
 #define FREE(M)         if(M){free(M);(M)=NULL;}
 #define STRDUP(S)               safe_strdup((S))
 #define STRNDUP(S,N)            db_strndup((S),(N))

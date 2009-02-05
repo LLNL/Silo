@@ -112,9 +112,9 @@ AT_CLEANUP
 AT_SETUP(mmadjacency DB_HDF5)
 AT_CHECK(mmadjacency DB_HDF5)
 AT_CLEANUP
-AT_SETUP(largefile DB_HDF5)
-AT_CHECK(largefile DB_HDF5,,[ignore])
-AT_CLEANUP
+#AT_SETUP(largefile DB_HDF5)
+#AT_CHECK(largefile DB_HDF5,,[ignore])
+#AT_CLEANUP
 AT_SETUP(dir DB_HDF5)
 AT_CHECK(dir DB_HDF5,,[ignore],[ignore])
 AT_CLEANUP

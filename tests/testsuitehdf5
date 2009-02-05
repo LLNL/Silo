@@ -628,7 +628,7 @@ at_times_file=$at_suite_dir/at-times
 # List of the tested programs.
 at_tested=''
 # List of the all the test groups.
-at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36'
+at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
@@ -665,11 +665,10 @@ at_help_all="1;testsuitehdf5.at:11;array DB_HDF5;;
 29;testsuitehdf5.at:106;csg DB_HDF5;;
 30;testsuitehdf5.at:109;rocket DB_HDF5;;
 31;testsuitehdf5.at:112;mmadjacency DB_HDF5;;
-32;testsuitehdf5.at:115;largefile DB_HDF5;;
-33;testsuitehdf5.at:118;dir DB_HDF5;;
-34;testsuitehdf5.at:121;quad DB_HDF5;;
-35;testsuitehdf5.at:124;compression DB_HDF5 compress;;
-36;testsuitehdf5.at:127;grab DB_HDF5;;
+32;testsuitehdf5.at:118;dir DB_HDF5;;
+33;testsuitehdf5.at:121;quad DB_HDF5;;
+34;testsuitehdf5.at:124;compression DB_HDF5 compress;;
+35;testsuitehdf5.at:127;grab DB_HDF5;;
 "
 
 at_prev=
@@ -2899,67 +2898,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  32 ) # 32. testsuitehdf5.at:115: largefile DB_HDF5
-    at_setup_line='testsuitehdf5.at:115'
-    at_desc="largefile DB_HDF5"
-    $at_quiet $ECHO_N " 32: largefile DB_HDF5                              $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "32. testsuitehdf5.at:115: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:116: largefile DB_HDF5"
-echo testsuitehdf5.at:116 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    at_trace_this=yes
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; largefile DB_HDF5 ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; largefile DB_HDF5 ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:116: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  33 ) # 33. testsuitehdf5.at:118: dir DB_HDF5
+  32 ) # 32. testsuitehdf5.at:118: dir DB_HDF5
     at_setup_line='testsuitehdf5.at:118'
     at_desc="dir DB_HDF5"
-    $at_quiet $ECHO_N " 33: dir DB_HDF5                                    $ECHO_C"
+    $at_quiet $ECHO_N " 32: dir DB_HDF5                                    $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "33. testsuitehdf5.at:118: testing ..."
+      echo "32. testsuitehdf5.at:118: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -3005,14 +2951,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  34 ) # 34. testsuitehdf5.at:121: quad DB_HDF5
+  33 ) # 33. testsuitehdf5.at:121: quad DB_HDF5
     at_setup_line='testsuitehdf5.at:121'
     at_desc="quad DB_HDF5"
-    $at_quiet $ECHO_N " 34: quad DB_HDF5                                   $ECHO_C"
+    $at_quiet $ECHO_N " 33: quad DB_HDF5                                   $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "34. testsuitehdf5.at:121: testing ..."
+      echo "33. testsuitehdf5.at:121: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -3058,14 +3004,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  35 ) # 35. testsuitehdf5.at:124: compression DB_HDF5 compress
+  34 ) # 34. testsuitehdf5.at:124: compression DB_HDF5 compress
     at_setup_line='testsuitehdf5.at:124'
     at_desc="compression DB_HDF5 compress"
-    $at_quiet $ECHO_N " 35: compression DB_HDF5 compress                   $ECHO_C"
+    $at_quiet $ECHO_N " 34: compression DB_HDF5 compress                   $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "35. testsuitehdf5.at:124: testing ..."
+      echo "34. testsuitehdf5.at:124: testing ..."
       $at_traceon
 
 $at_traceoff
@@ -3111,14 +3057,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  36 ) # 36. testsuitehdf5.at:127: grab DB_HDF5
+  35 ) # 35. testsuitehdf5.at:127: grab DB_HDF5
     at_setup_line='testsuitehdf5.at:127'
     at_desc="grab DB_HDF5"
-    $at_quiet $ECHO_N " 36: grab DB_HDF5                                   $ECHO_C"
+    $at_quiet $ECHO_N " 35: grab DB_HDF5                                   $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "36. testsuitehdf5.at:127: testing ..."
+      echo "35. testsuitehdf5.at:127: testing ..."
       $at_traceon
 
 $at_traceoff

@@ -61,12 +61,16 @@ hothgcc() {
     rm -rf linux_rhel3-gcc-3.2.3
     mkdir linux_rhel3-gcc-3.2.3
     cd linux_rhel3-gcc-3.2.3
-    ../$TOPSRCDIR/configure FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals FC=g77 F77=g77 \
+    ../$TOPSRCDIR/configure \
+    FC=g77 F77=g77 \
+    FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3 \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
     make -j 4 install
     make clean
     ../$TOPSRCDIR/configure \
+    FC=g77 F77=g77 \
+    FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3
     make -j 4 check
     make install
@@ -120,7 +124,7 @@ hothicc() {
     cd linux_rhel3-icc-9.1
     . /usr/local/intel/compiler90/bin/iccvars.sh
     ../$TOPSRCDIR/configure \
-    CC=icc CXX=icc FC=ifort \
+    CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3-icc-9.1 \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
     make -j 4 check
@@ -156,12 +160,16 @@ sunspotgcc() {
     mkdir sunos_57
     cd sunos_57
     ../$TOPSRCDIR/configure \
+    FC=g77 F77=g77 \
+    FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
     --prefix=$BDTOPDIR/$VERSION/sunos_57 \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
     make -j 4 check
     make install
     make clean
     ../$TOPSRCDIR/configure \
+    FC=g77 F77=g77 \
+    FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals \
     --prefix=$BDTOPDIR/$VERSION/sunos_57
     make -j 4 check
     make install
@@ -424,6 +432,7 @@ upgcc32() {
     mkdir aix_5_ll-gcc
     cd aix_5_ll-gcc
     ../$TOPSRCDIR/configure \
+    CFLAGS=-mminimal-toc CXXFLAGS=-mminimal-toc \
     CC=gcc CXX=g++ FC=g77 F77=g77 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_ll-gcc \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
@@ -431,6 +440,7 @@ upgcc32() {
     gmake install
     gmake clean
     ../$TOPSRCDIR/configure \
+    CFLAGS=-mminimal-toc CXXFLAGS=-mminimal-toc \
     CC=gcc CXX=g++ FC=g77 F77=g77 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_ll-gcc --disable-silex \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/aix_5_ll-gcc \
@@ -454,6 +464,7 @@ upgcc64() {
     mkdir aix_5_64_fed-gcc
     cd aix_5_64_fed-gcc
     ../$TOPSRCDIR/configure \
+    CFLAGS=-mminimal-toc CXXFLAGS=-mminimal-toc \
     CC=gcc CXX=g++ FC=g77 F77=g77 \
     PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed-gcc \
@@ -462,6 +473,7 @@ upgcc64() {
     gmake install
     gmake clean
     ../$TOPSRCDIR/configure \
+    CFLAGS=-mminimal-toc CXXFLAGS=-mminimal-toc \
     CC=gcc CXX=g++ FC=g77 F77=g77 \
     PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed-gcc \
@@ -574,7 +586,7 @@ pengraicc() {
     mkdir chaos_3_x86_elan3-icc
     cd chaos_3_x86_elan3-icc
     ../$TOPSRCDIR/configure \
-    CC=icc CXX=icc FC=ifort \
+    CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3-icc \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
@@ -582,7 +594,7 @@ pengraicc() {
     make install
     make clean
     ../$TOPSRCDIR/configure \
-    CC=icc CXX=icc FC=ifort \
+    CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3-icc --enable-silex \
     --with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_x86_elan3-icc \
@@ -646,7 +658,7 @@ yanaicc() {
     mkdir chaos_3_x86_64-icc
     cd chaos_3_x86_64-icc
     ../$TOPSRCDIR/configure \
-    CC=icc CXX=icc FC=ifort \
+    CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
@@ -654,8 +666,8 @@ yanaicc() {
     make install
     make clean
     ../$TOPSRCDIR/configure \
+    CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
-    CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --enable-silex \
     --with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_x86_64-icc \
@@ -687,7 +699,7 @@ yanapsc() {
     mkdir chaos_3_x86_64-pc-2.4
     cd chaos_3_x86_64-pc-2.4
     ../$TOPSRCDIR/configure \
-    CC=pathcc CXX=pathCC FC=path90 \
+    CC=pathcc CXX=pathCC FC=pathf90 \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-pc-2.4 \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
@@ -695,7 +707,7 @@ yanapsc() {
     make install
     make clean
     ../$TOPSRCDIR/configure \
-    CC=pathcc CXX=pathCC FC=path90 \
+    CC=pathcc CXX=pathCC FC=pathf90 \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-pc-2.4
     make -j 4 check
@@ -774,7 +786,7 @@ thundericc() {
     . /usr/local/intel/compiler91/bin/iccvars.sh
     ../$TOPSRCDIR/configure \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
-    CC=icc CXX=icc FC=ifort F77=ifort \
+    CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64-icc \
     --disable-browser --disable-silex --without-hdf5 --without-szlib
     make -j 4 check
@@ -782,7 +794,7 @@ thundericc() {
     make clean
     ../$TOPSRCDIR/configure \
     CFLAGS=-fPIC CXXFLAGS=-fPIC \
-    CC=icc CXX=icc FC=ifort \
+    CC=icc CXX=icc FC=ifort LDFLAGS=-lstdc++ \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64-icc \
     --enable-silex \
     --with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_ia64-icc \

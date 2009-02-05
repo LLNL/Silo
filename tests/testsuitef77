@@ -16,7 +16,8 @@
 ## M4sh Initialization.  ##
 ## --------------------- ##
 
-# Be Bourne compatible
+# Be more Bourne compatible
+DUALCASE=1; export DUALCASE # for MKS sh
 if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
   emulate sh
   NULLCMD=:
@@ -25,10 +26,13 @@ if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
   alias -g '${1+"$@"}'='"$@"'
   setopt NO_GLOB_SUBST
 else
-  case `(set -o) 2>/dev/null` in *posix*) set -o posix;; esac
+  case `(set -o) 2>/dev/null` in
+  *posix*) set -o posix ;;
+esac
+
 fi
-BIN_SH=xpg4; export BIN_SH # for Tru64
-DUALCASE=1; export DUALCASE # for MKS sh
+
+
 
 
 # PATH needs CR
@@ -221,7 +225,7 @@ test \$exitcode = 0) || { (exit 1); exit 1; }
 else
   as_candidate_shells=
     as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in /usr/bin/posix$PATH_SEPARATOR/bin$PATH_SEPARATOR/usr/bin$PATH_SEPARATOR$PATH
+for as_dir in /bin$PATH_SEPARATOR/usr/bin$PATH_SEPARATOR$PATH
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
@@ -239,7 +243,6 @@ IFS=$as_save_IFS
 	 # Try only shells that exist, to save several forks.
 	 if { test -f "$as_shell" || test -f "$as_shell.exe"; } &&
 		{ ("$as_shell") 2> /dev/null <<\_ASEOF
-# Be Bourne compatible
 if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
   emulate sh
   NULLCMD=:
@@ -248,10 +251,12 @@ if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
   alias -g '${1+"$@"}'='"$@"'
   setopt NO_GLOB_SUBST
 else
-  case `(set -o) 2>/dev/null` in *posix*) set -o posix;; esac
+  case `(set -o) 2>/dev/null` in
+  *posix*) set -o posix ;;
+esac
+
 fi
-BIN_SH=xpg4; export BIN_SH # for Tru64
-DUALCASE=1; export DUALCASE # for MKS sh
+
 
 :
 _ASEOF
@@ -259,7 +264,6 @@ _ASEOF
   CONFIG_SHELL=$as_shell
 	       as_have_required=yes
 	       if { "$as_shell" 2> /dev/null <<\_ASEOF
-# Be Bourne compatible
 if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
   emulate sh
   NULLCMD=:
@@ -268,10 +272,12 @@ if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
   alias -g '${1+"$@"}'='"$@"'
   setopt NO_GLOB_SUBST
 else
-  case `(set -o) 2>/dev/null` in *posix*) set -o posix;; esac
+  case `(set -o) 2>/dev/null` in
+  *posix*) set -o posix ;;
+esac
+
 fi
-BIN_SH=xpg4; export BIN_SH # for Tru64
-DUALCASE=1; export DUALCASE # for MKS sh
+
 
 :
 (as_func_return () {
@@ -518,19 +524,28 @@ else
   as_mkdir_p=false
 fi
 
-# Find out whether ``test -x'' works.  Don't use a zero-byte file, as
-# systems may use methods other than mode bits to determine executability.
-cat >conf$$.file <<_ASEOF
-#! /bin/sh
-exit 0
-_ASEOF
-chmod +x conf$$.file
-if test -x conf$$.file >/dev/null 2>&1; then
-  as_executable_p="test -x"
+if test -x / >/dev/null 2>&1; then
+  as_test_x='test -x'
 else
-  as_executable_p=:
+  if ls -dL / >/dev/null 2>&1; then
+    as_ls_L_option=L
+  else
+    as_ls_L_option=
+  fi
+  as_test_x='
+    eval sh -c '\''
+      if test -d "$1"; then
+        test -d "$1/.";
+      else
+	case $1 in
+        -*)set "./$1";;
+	esac;
+	case `ls -ld'$as_ls_L_option' "$1" 2>/dev/null` in
+	???[sx]*):;;*)false;;esac;fi
+    '\'' sh
+  '
 fi
-rm -f conf$$.file
+as_executable_p=$as_test_x
 
 # Sed expression to map a string onto a valid CPP name.
 as_tr_cpp="eval sed 'y%*$as_cr_letters%P$as_cr_LETTERS%;s%[^_$as_cr_alnum]%_%g'"
@@ -619,14 +634,14 @@ at_groups_all=' 1 2 3 4 5 6 7'
 # numerical order.
 at_format='?'
 # Description of all the test groups.
-at_help_all='1;testsuitef77.at:14;arrayf77;;
+at_help_all="1;testsuitef77.at:14;arrayf77;;
 2;testsuitef77.at:17;curvef77;;
 3;testsuitef77.at:20;matf77;;
 4;testsuitef77.at:23;pointf77;;
 5;testsuitef77.at:26;quadf77;;
 6;testsuitef77.at:29;testallf77;;
 7;testsuitef77.at:32;ucdf77;;
-'
+"
 
 at_prev=
 for at_option
@@ -849,7 +864,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF
-silo 5.0.0b test suite: silo Fortran API test groups:
+silo 4.6-pre8 test suite: silo Fortran API test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -873,7 +888,7 @@ _ATEOF
   exit 0
 fi
 if $at_version_p; then
-  echo "$as_me (silo 5.0.0b)"
+  echo "$as_me (silo 4.6-pre8)"
   cat <<\_ACEOF
 
 Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -964,15 +979,15 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 cat <<\_ASBOX
-## ----------------------------------------- ##
-## silo 5.0.0b test suite: silo Fortran API. ##
-## ----------------------------------------- ##
+## ------------------------------------------- ##
+## silo 4.6-pre8 test suite: silo Fortran API. ##
+## ------------------------------------------- ##
 _ASBOX
 {
   cat <<\_ASBOX
-## ----------------------------------------- ##
-## silo 5.0.0b test suite: silo Fortran API. ##
-## ----------------------------------------- ##
+## ------------------------------------------- ##
+## silo 4.6-pre8 test suite: silo Fortran API. ##
+## ------------------------------------------- ##
 _ASBOX
   echo
 
@@ -1211,8 +1226,8 @@ echo "$as_me: error: cannot create directory $as_dir" >&2;}
   case $at_group in
   1 ) # 1. testsuitef77.at:14: arrayf77
     at_setup_line='testsuitef77.at:14'
-    at_desc='arrayf77'
-    $at_quiet $ECHO_N "  1: arrayf77                                     $ECHO_C"
+    at_desc="arrayf77"
+    $at_quiet $ECHO_N "  1: arrayf77                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1264,8 +1279,8 @@ $at_traceon
 
   2 ) # 2. testsuitef77.at:17: curvef77
     at_setup_line='testsuitef77.at:17'
-    at_desc='curvef77'
-    $at_quiet $ECHO_N "  2: curvef77                                     $ECHO_C"
+    at_desc="curvef77"
+    $at_quiet $ECHO_N "  2: curvef77                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1317,8 +1332,8 @@ $at_traceon
 
   3 ) # 3. testsuitef77.at:20: matf77
     at_setup_line='testsuitef77.at:20'
-    at_desc='matf77'
-    $at_quiet $ECHO_N "  3: matf77                                       $ECHO_C"
+    at_desc="matf77"
+    $at_quiet $ECHO_N "  3: matf77                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1370,8 +1385,8 @@ $at_traceon
 
   4 ) # 4. testsuitef77.at:23: pointf77
     at_setup_line='testsuitef77.at:23'
-    at_desc='pointf77'
-    $at_quiet $ECHO_N "  4: pointf77                                     $ECHO_C"
+    at_desc="pointf77"
+    $at_quiet $ECHO_N "  4: pointf77                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1423,8 +1438,8 @@ $at_traceon
 
   5 ) # 5. testsuitef77.at:26: quadf77
     at_setup_line='testsuitef77.at:26'
-    at_desc='quadf77'
-    $at_quiet $ECHO_N "  5: quadf77                                      $ECHO_C"
+    at_desc="quadf77"
+    $at_quiet $ECHO_N "  5: quadf77                                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1476,8 +1491,8 @@ $at_traceon
 
   6 ) # 6. testsuitef77.at:29: testallf77
     at_setup_line='testsuitef77.at:29'
-    at_desc='testallf77'
-    $at_quiet $ECHO_N "  6: testallf77                                   $ECHO_C"
+    at_desc="testallf77"
+    $at_quiet $ECHO_N "  6: testallf77                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1529,8 +1544,8 @@ $at_traceon
 
   7 ) # 7. testsuitef77.at:32: ucdf77
     at_setup_line='testsuitef77.at:32'
-    at_desc='ucdf77'
-    $at_quiet $ECHO_N "  7: ucdf77                                       $ECHO_C"
+    at_desc="ucdf77"
+    $at_quiet $ECHO_N "  7: ucdf77                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1870,7 +1885,7 @@ _ASBOX
   echo "Please send \`${at_testdir+${at_testdir}/}$as_me.log' and all information you think might help:"
   echo
   echo "   To: <visit-help@llnl.gov>"
-  echo "   Subject: [silo 5.0.0b] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
+  echo "   Subject: [silo 4.6-pre8] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
   echo
   if test $at_debug_p = false; then
     echo
