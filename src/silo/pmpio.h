@@ -236,6 +236,7 @@ PMPIO_Init(
     int commSize, rankInComm;
     int groupSize, numGroupsWithExtraProc, commSplit,
         groupRank, rankInGroup, procBeforeMe, procAfterMe;
+    PMPIO_baton_t *ret = 0;
 
     procBeforeMe = -1;
     procAfterMe = -1;
@@ -267,7 +268,7 @@ PMPIO_Init(
     if (createCb == 0 || openCb == 0 || closeCb == 0)
         return 0;
 
-    PMPIO_baton_t *ret = (PMPIO_baton_t *) malloc(sizeof(PMPIO_baton_t));
+    ret = (PMPIO_baton_t *) malloc(sizeof(PMPIO_baton_t));
     ret->ioMode = ioMode;
     ret->commSize = commSize;
     ret->rankInComm = rankInComm;
@@ -435,12 +436,22 @@ PMPIO_RankInGroup(const PMPIO_baton_t *Bat, int rankInComm)
  * Audience:    Public
  * Chapter:     Callbacks
  * Purpose:     Impliment the create callback
+ *
+ * Description: The caller can specify which Silo driver to use by passing
+ * a void pointer to the driver specification as the userData argument. If
+ * that pointer is NULL or the value to which it points is not a known
+ * driver type (DB_HDF5 or DB_PDB), it is set to DB_PDB driver as that is
+ * guarenteed to exist in any Silo implmentation.
  *-----------------------------------------------------------------------------
  */
 static void *
 PMPIO_DefaultCreate(const char *fname, const char *nsname, void *userData)
 {
-    DBfile *siloFile = DBCreate(fname, DB_CLOBBER, DB_LOCAL, "PMPIO_DefaultCreate", DB_PDB);
+    DBfile *siloFile;
+    int driver = userData ? *((int*) userData) : DB_PDB;
+    if (driver != DB_PDB && driver != DB_HDF5)
+        driver = DB_PDB;
+    siloFile = DBCreate(fname, DB_CLOBBER, DB_LOCAL, "PMPIO_DefaultCreate", driver);
     if (siloFile)
     {
         DBMkDir(siloFile, nsname);

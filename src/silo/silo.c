@@ -3544,6 +3544,9 @@ DBOpenReal(const char *name, int type, int mode)
  *
  *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
  *    Added code to register the returned file pointer
+ *
+ *    Mark C. Miller, Mon Nov 17 19:04:39 PST 2008
+ *    Added code to check to see if name is a directory.
  *-------------------------------------------------------------------------*/
 PUBLIC DBfile *
 DBCreateReal(const char *name, int mode, int target, const char *info, int type)
@@ -3580,12 +3583,19 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
         }
 
 #if SIZEOF_OFF64_T > 4
-        if ((stat64(name, &filestate) == 0)  /* Success - File exists */
+        if (stat64(name, &filestate) == 0)  /* Success - File exists */
 #else
-        if ((stat(name, &filestate) == 0)  /* Success - File exists */
+        if (stat(name, &filestate) == 0)  /* Success - File exists */
 #endif
-            &&(mode == DB_NOCLOBBER)) {
-            API_ERROR((char *)name, E_FEXIST);
+        {
+            if (mode == DB_NOCLOBBER)
+            {
+                API_ERROR((char *)name, E_FEXIST);
+            }
+            if ((filestate.st_mode & S_IFDIR) != 0)
+            {
+                API_ERROR((char *)name, E_FILEISDIR);
+            }
         }
 
         if (!DBCreateCB[type]) {

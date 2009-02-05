@@ -1584,6 +1584,7 @@ SILO_API extern DBfacelist *DBAllocFacelist(void);
 SILO_API extern DBmaterial *DBAllocMaterial(void);
 SILO_API extern DBmatspecies *DBAllocMatspecies(void);
 SILO_API extern DBnamescheme *DBAllocNamescheme(void);
+SILO_API extern DBgroupelmap *DBAllocGroupelmap(int, DBdatatype);
 
 SILO_API extern void     DBFreeMatspecies(DBmatspecies *);
 SILO_API extern void     DBFreeMaterial(DBmaterial *);

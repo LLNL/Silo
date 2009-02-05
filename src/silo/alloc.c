@@ -1804,3 +1804,57 @@ DBAllocNamescheme()
 
     return (ns);
 }
+
+PUBLIC DBgroupelmap *
+DBAllocGroupelmap(int num_segs, DBdatatype frac_type)
+{
+    DBgroupelmap *gm;
+
+    API_BEGIN("DBAllocGroupelmap", DBgroupelmap*, NULL) {
+        if (NULL == (gm = ALLOC(DBgroupelmap)))
+            API_ERROR(NULL, E_NOMEM);
+
+        /* Initialize all memory to zero. */
+        memset(gm, 0, sizeof(DBgroupelmap));
+
+        /* initialize all the arrays */
+        gm->num_segments = num_segs;
+        gm->groupel_types = ALLOC_N(int, num_segs);
+        gm->segment_lengths = ALLOC_N(int, num_segs);
+        gm->segment_ids = ALLOC_N(int, num_segs);
+        gm->segment_data = ALLOC_N(int *, num_segs);
+        switch (frac_type)
+        {
+            case DB_CHAR:
+                gm->segment_fracs = (void**) ALLOC_N(char*, num_segs);
+                break;
+            case DB_INT:
+                gm->segment_fracs = (void**) ALLOC_N(int*, num_segs);
+                break;
+            case DB_SHORT:
+                gm->segment_fracs = (void**) ALLOC_N(short*, num_segs);
+                break;
+            case DB_LONG:
+                gm->segment_fracs = (void**) ALLOC_N(long*, num_segs);
+                break;
+            case DB_FLOAT:
+                gm->segment_fracs = (void**) ALLOC_N(float*, num_segs);
+                break;
+            case DB_DOUBLE:
+                gm->segment_fracs = (void**) ALLOC_N(double*, num_segs);
+                break;
+        }
+
+        if (!gm->groupel_types || ! gm->segment_lengths ||
+            !gm->segment_ids || !gm->segment_data ||
+            (frac_type != DB_NOTYPE && !gm->segment_fracs))
+        {
+            DBFreeGroupelmap(gm);
+            API_ERROR(NULL, E_NOMEM);
+        }
+    }
+
+    API_END;
+
+    return (gm);
+}

@@ -8861,6 +8861,11 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
  *
  *      Mark C. Miller, Wed Oct 10 10:25:53 PDT 2007
  *
+ *  Modifications:
+ *
+ *      Mark C. Miller, Mon Nov 17 19:02:58 PST 2008
+ *      Fixed output of src_mesh_name
+ *
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 /* ARGSUSED */
@@ -9041,10 +9046,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     }
 
     DBAddIntComponent(obj, "src_mesh_type", tree->src_mesh_type);
-    if (tree->src_mesh_name)
-        DBAddStrComponent(obj, "src_mesh_name", tree->src_mesh_name);
-    else
-        DBAddStrComponent(obj, "src_mesh_name", "");
+    DBAddStrComponent(obj, "src_mesh_name", mesh_name);
     DBAddIntComponent(obj, "type_info_bits", tree->type_info_bits);
     DBAddIntComponent(obj, "num_nodes", tree->num_nodes);
     DBAddIntComponent(obj, "root", tree->root->walk_order);

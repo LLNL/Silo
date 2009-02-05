@@ -12995,8 +12995,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
 
         /* Build header in memory */
         m.src_mesh_type = tree->src_mesh_type;
-        if (tree->src_mesh_name)
-            strcpy(m.src_mesh_name, OPT(tree->src_mesh_name));
+        strcpy(m.src_mesh_name, OPT(mesh_name));
         m.type_info_bits = tree->type_info_bits;
         m.num_nodes = tree->num_nodes;
         m.root = tree->root->walk_order;

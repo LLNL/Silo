@@ -1,21 +1,24 @@
 #include <mpi.h>
-#include <pmpio.h>
 #include <silo.h>
+#include <pmpio.h>
 #include <string.h>
 #include <stdlib.h>
 
-void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size);
+void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
+    const char *file_ext);
 
 
 /*-----------------------------------------------------------------------------
  * Purpose:     Impliment the create callback to initialize pmpio
  *              Will create the silo file and the 'first' directory (namespace)
- *              in it.
+ *              in it. The driver type (DB_PDB or DB_HDF5) is passed as user
+ *              data; a void pointer to the driver determined in main.
  *-----------------------------------------------------------------------------
  */
 void *CreateSiloFile(const char *fname, const char *nsname, void *userData)
 {
-    DBfile *siloFile = DBCreate(fname, DB_CLOBBER, DB_LOCAL, "pmpio testing", DB_PDB);
+    int driver = *((int*) userData);
+    DBfile *siloFile = DBCreate(fname, DB_CLOBBER, DB_LOCAL, "pmpio testing", driver);
     if (siloFile)
     {
         DBMkDir(siloFile, nsname);
@@ -30,7 +33,8 @@ void *CreateSiloFile(const char *fname, const char *nsname, void *userData)
  *              directory or, for read, just cd into the right directory.
  *-----------------------------------------------------------------------------
  */
-void *OpenSiloFile(const char *fname, const char *nsname, PMPIO_iomode_t ioMode, void *userData)
+void *OpenSiloFile(const char *fname, const char *nsname, PMPIO_iomode_t ioMode,
+    void *userData)
 {
     DBfile *siloFile = DBOpen(fname, DB_UNKNOWN,
         ioMode == PMPIO_WRITE ? DB_APPEND : DB_READ);
@@ -73,31 +77,60 @@ void CloseSiloFile(void *file, void *userData)
 int main(int argc, char **argv)
 {
     int size, rank;
-    int numGroups = 3;
+    int numGroups = -1;
+    int driver = DB_PDB;
     DBfile *siloFile;
+    char *file_ext = "pdb";
     char fileName[256], nsName[256];
     int i, j, dims[2], ndims = 2;
     char *coordnames[2], *varnames[2];
     float *x, *y, *coords[2], *vars[2];
     float *vx, *vy;
     float *temp;
+    PMPIO_baton_t *bat; 
 
-    /* specify the number of Silo files to create */
-    if (argc >= 2)
-        numGroups = atoi(argv[1]);
+    /* specify the number of Silo files to create and driver */
+    for (i = 1; i < argc; i++)
+    {
+        if (!strcmp(argv[i], "DB_HDF5"))
+        {
+            driver = DB_HDF5;
+            file_ext = "h5";
+        }
+        else if (strtol(argv[i], 0, 10) > 0)
+        {
+            numGroups = strtol(argv[i], 0, 10);
+        }
+        else
+        {
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
+    }
 
     /* standard MPI initialization stuff */
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (rank == 0)
+    {
+        if (numGroups < 0)
+            numGroups = 3; 
+    }
 
-    /* initialize PMPIO */
-    PMPIO_baton_t *bat = PMPIO_Init(numGroups, PMPIO_WRITE, MPI_COMM_WORLD, 1,
-        CreateSiloFile, OpenSiloFile, CloseSiloFile, 0);
+    /* Ensure all procs agree on numGroups, driver and file_ext */
+    MPI_Bcast(&numGroups, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&driver, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (driver == DB_HDF5)
+        file_ext = "h5";
 
-    /* construct names for the silo files and the directories in them */
-    sprintf(fileName, "silo_%03d", bat->groupRank);
-    sprintf(nsName, "domain_%03d", bat->rankInComm);
+    /* Initialize PMPIO, pass a pointer to the driver type as the
+       user data. */
+    bat = PMPIO_Init(numGroups, PMPIO_WRITE, MPI_COMM_WORLD, 1,
+        CreateSiloFile, OpenSiloFile, CloseSiloFile, &driver);
+
+    /* Construct names for the silo files and the directories in them */
+    sprintf(fileName, "silo_%03d.%s", PMPIO_GroupRank(bat, rank), file_ext);
+    sprintf(nsName, "domain_%03d", rank);
 
     /* Wait for write access to the file. All processors call this.
      * Some processors (the first in each group) return immediately
@@ -106,13 +139,7 @@ int main(int argc, char **argv)
      * the group when that processor calls "HandOffBaton" */
     siloFile = (DBfile *) PMPIO_WaitForBaton(bat, fileName, nsName);
 
-    /*
-     *
-     * BEGIN THIS PROCESSOR'S LOCAL WORK ON A SILO FILE
-     *
-     */
-
-    /* Do some work to construct the mesh for this processor. */
+    /* Do some work to construct the mesh data for this processor. */
     dims[0] = 2;
     dims[1] = size;
     coordnames[0] = "xcoords";
@@ -126,7 +153,7 @@ int main(int argc, char **argv)
     coords[0] = x;
     coords[1] = y;
 
-    /* Do some work to create some simple variables on this mesh */
+    /* Do some work to create some simple variable data for this processor. */
     vx = (float *) malloc(2 * size * sizeof(float));
     vy = (float *) malloc(2 * size * sizeof(float));
     for (j = 0; j < size; j++)
@@ -141,7 +168,13 @@ int main(int argc, char **argv)
     for (i = 0; i < size; i++)
         temp[i] = (float) i * rank;
 
-    /* this processor's local work on the file */
+    /*
+     *
+     * BEGIN THIS PROCESSOR'S LOCAL WORK ON A SILO FILE
+     *
+     */
+
+    /* This processor's local work on the file */
     DBPutQuadmesh(siloFile, "qmesh", coordnames, coords, dims, ndims,
         DB_FLOAT, DB_COLLINEAR, 0);
     free(x);
@@ -172,7 +205,7 @@ int main(int argc, char **argv)
 
     /* If this is the 'root' processor, also write Silo's multi-XXX objects */
     if (rank == 0)
-        WriteMultiXXXObjects(siloFile, bat, size);
+        WriteMultiXXXObjects(siloFile, bat, size, file_ext);
 
     /* Hand off the baton to the next processor. This winds up closing
      * the file so that the next processor that opens it can be assured
@@ -189,7 +222,8 @@ int main(int argc, char **argv)
 }
 
 
-void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size)
+void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
+    const char *file_ext)
 {
     int i;
     char **meshBlockNames = (char **) malloc(size * sizeof(char*));
@@ -218,9 +252,12 @@ void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size)
         else
         {
             /* this mesh block is another file */ 
-            sprintf(meshBlockNames[i], "silo_%03d:/domain_%03d/qmesh", groupRank, i);
-            sprintf(velBlockNames[i], "silo_%03d:/domain_%03d/velocity", groupRank, i);
-            sprintf(tempBlockNames[i], "silo_%03d:/domain_%03d/temp", groupRank, i);
+            sprintf(meshBlockNames[i], "silo_%03d.%s:/domain_%03d/qmesh",
+                groupRank, file_ext, i);
+            sprintf(velBlockNames[i], "silo_%03d.%s:/domain_%03d/velocity",
+                groupRank, file_ext, i);
+            sprintf(tempBlockNames[i], "silo_%03d.%s:/domain_%03d/temp",
+                groupRank, file_ext, i);
         }
         blockTypes[i] = DB_QUADMESH;
         varTypes[i] = DB_QUADVAR;

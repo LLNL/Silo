@@ -34,6 +34,10 @@ for advertising or product endorsement purposes.
 
 */
 
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "silo.h"
 extern int build_quad(DBfile *dbfile, char *name);
 extern int build_ucd(DBfile *dbfile, char *name);
@@ -163,60 +167,19 @@ main(int argc, char *argv[])
     DBClose(dbfile);
     DBClose(dbfile2);
 
+    /* test attempt to DBCreate a file without clobbering it and
+       for which the path is really a dir in the host filesystem */
+    unlink("dir-test-foo");
+    mkdir("dir-test-foo", 0777);
+    dbfile2 = DBCreate("dir-test-foo", DB_NOCLOBBER, DB_LOCAL, "dir test file", driver);
+    unlink("dir-test-foo");
+    if (dbfile2 != 0)
+        exit(1);
+    mkdir("dir-test-foo", 0777);
+    dbfile2 = DBCreate("dir-test-foo", DB_CLOBBER, DB_LOCAL, "dir test file", driver);
+    unlink("dir-test-foo");
+    if (dbfile2 != 0)
+        exit(1);
+
     return 0;
 }
-
-/*||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
- * ||||||||||||||                                                   |||||
- * ||||||||||||||    Test Module for testing option list processing |||||
- * ||||||||||||||                                                   |||||
- * ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
- */
-/* #define TEST */
-#ifdef TEST
-test2()
-{
-    double         t;
-    int            c, cs, ft, hi[3], lo[3], major, nd, ns, or, pl;
-    float          align[3];
-    char          *labels[3], *units[3];
-    DBfile        *dbfile;
-    DBoptlist     *optlist;
-
-    /* Assign some values */
-    t = 9.;
-    ns = 3;
-    or = 1;
-    pl = 19;
-    c = 99;
-    cs = DB_SPHERICAL;
-    ft = DB_CURVILINEAR;
-    major = 1;
-    nd = 2;
-    align[0] = .5;
-    align[1] = .6;
-    align[2] = .7;
-    hi[0] = 1;
-    hi[1] = 2;
-    lo[0] = 3;
-    lo[1] = 4;
-    labels[0] = "label0";
-    labels[1] = "label1";
-    units[0] = "cm";
-    units[1] = "cm**2";
-
-    optlist = DBMakeOptlist(20);
-    DBAddOption(optlist, DBOPT_COORDSYS, (void *)&cs);
-    DBAddOption(optlist, DBOPT_CYCLE, (void *)&c);
-    DBAddOption(optlist, DBOPT_HI_OFFSET, (void *)hi);
-    DBAddOption(optlist, DBOPT_UNITS, (void *)units);
-
-    /*
-     *  Initialize global data, then process options.
-     */
-    _ndims = nd;
-    db_ResetGlobals();
-    db_AssignGlobals(optlist);
-}
-
-#endif
