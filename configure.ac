@@ -312,6 +312,8 @@ m4_define(SILO_TIME, 13:34:00)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
+dnl Configuration command invocation
+AC_SUBST([CONFIG_CMD]) CONFIG_CMD="$0 $@"
 
 AC_PREREQ(2.60)
 AC_REVISION($Id$)dnl
@@ -377,8 +379,6 @@ if test -n "$ORGANIZATION"; then
   CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
 fi
 
-dnl Configuration command
-AC_SUBST([CONFIG_CMD]) CONFIG_CMD="$*"
 
 dnl ----------------------------------------------------------------------
 
@@ -1017,21 +1017,25 @@ dnl
 dnl If Silex is desired then Qt is required
 dnl
 UsingSilex="no"
+UsingQt="no"
 if test "X$UseSilex" = "Xyes"; then
 dnl search for the required Qt
    AC_MSG_CHECKING(for Qt)
 #   autoconf-archive-2006-08-20/htmldoc/bnv_have_qt.html
     BNV_HAVE_QT
-    if test "X$have_qt" = "Xyes"; then
-        AC_MSG_RESULT(Qt found - Silex enabled)
-        UsingSilex="yes"
-        SILEX="silex"
-    else
+#   gw_CHECK_QT
+    if test "$have_qt" = no; then
         AC_MSG_RESULT(Qt not found - Silex disabled)
         SILEX=""
+    else
+        AC_MSG_RESULT(Qt found - Silex enabled)
+        UsingSilex="yes"
+        UsingQt="yes"
+        SILEX="silex"
     fi
 fi
 AC_SUBST(UsingSilex)
+AC_SUBST(UsingQt)
 AC_SUBST(SILEX)
 
 dnl
@@ -1111,6 +1115,7 @@ AC_CONFIG_FILES([
             tools/Makefile
             tools/browser/Makefile
             tools/python/Makefile
+            tools/silex/Makefile
             tools/silock/Makefile])
 if test -n "$HDF5_DRV"; then
   AC_CONFIG_FILES([src/libsiloh5.settings])

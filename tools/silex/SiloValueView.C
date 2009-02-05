@@ -38,7 +38,7 @@
 #include "SiloValueView.h"
 #include <SiloFile.h>
 #include <qlabel.h>
-#include <visitstream.h>
+#include <silexstream.h>
 
 // ----------------------------------------------------------------------------
 //                            Value View

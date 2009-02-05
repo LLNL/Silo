@@ -38,7 +38,7 @@
 #include "SiloArrayView.h"
 #include <SiloFile.h>
 #include <qlistbox.h>
-#include <visitstream.h>
+#include <silexstream.h>
 #include <qapplication.h>
 
 // ----------------------------------------------------------------------------

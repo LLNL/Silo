@@ -41,6 +41,7 @@ build_triplet = @build@
 host_triplet = @host@
 @BROWSER_NEEDED_TRUE@am__append_1 = browser silock
 @PYTHON_NEEDED_TRUE@am__append_2 = python
+@SILEX_NEEDED_TRUE@am__append_3 = silex
 subdir = tools
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -167,6 +168,7 @@ UsingFortran = @UsingFortran@
 UsingHDF5 = @UsingHDF5@
 UsingOpt = @UsingOpt@
 UsingPython = @UsingPython@
+UsingQt = @UsingQt@
 UsingReadline = @UsingReadline@
 UsingShared = @UsingShared@
 UsingSilex = @UsingSilex@
@@ -230,7 +232,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-TOOLS_DIR = $(am__append_1) $(am__append_2)
+TOOLS_DIR = $(am__append_1) $(am__append_2) $(am__append_3)
 SUBDIRS = \
  . \
  $(TOOLS_DIR)
@@ -239,6 +241,7 @@ DIST_SUBDIRS = \
  . \
  browser \
  python \
+ silex \
  silock
 
 all: all-recursive

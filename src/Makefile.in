@@ -227,6 +227,7 @@ UsingFortran = @UsingFortran@
 UsingHDF5 = @UsingHDF5@
 UsingOpt = @UsingOpt@
 UsingPython = @UsingPython@
+UsingQt = @UsingQt@
 UsingReadline = @UsingReadline@
 UsingShared = @UsingShared@
 UsingSilex = @UsingSilex@

@@ -6,17 +6,21 @@ FILELIST="\
 ./config/config.sub ./config/depcomp ./config/install-sh \
 ./config/ltmain.sh ./config/missing \
 ./config-site/Makefile.in ./clearcase_bin/Makefile.in \
-./docs/Makefile.in ./config/Makefile.in ./tools/browser/Makefile.in \
-./tools/silock/Makefile.in ./tools/python/Makefile.in \
-./tools/Makefile.in ./tests/Makefile.in ./src/debug/Makefile.in \
+./docs/Makefile.in ./config/Makefile.in \
+./tools/browser/Makefile.in \
+./tools/silock/Makefile.in ./tools/silex/Makefile.in \
+./tools/python/Makefile.in ./tools/Makefile.in \
+./tests/Makefile.in \
+./src/Makefile.in ./src/debug/Makefile.in \
 ./src/filters/Makefile.in ./src/netcdf/Makefile.in \
 ./src/silo/Makefile.in ./src/swat/Makefile.in \
 ./src/taurus/Makefile.in ./src/unknown/Makefile.in \
 ./src/pdb/Makefile.in ./src/pdb_drv/Makefile.in \
 ./src/score/Makefile.in ./src/hdf5_drv/Makefile.in \
-./src/Makefile.in ./src/Silo.settings.in \
-./Makefile.in ./configure \
-./tests/package.m4 ./tests/testsuite ./tests/testsuitef77 ./tests/testsuitehdf5"
+./Makefile.in ./configure"
+FILELIST3="./tests/testsuite ./tests/testsuitef77 ./tests/testsuitehdf5"
+FILELIST2="./tests/package.m4"
+FILELIST1="./src/silo/silo.inc"
 HOST=`/usr/gapps/silo/autotools/bin/config.guess`
 AUTOTOOLS=/usr/gapps/silo/autotools/$HOST/bin
 CT="/usr/atria/bin/cleartool"
@@ -37,7 +41,7 @@ $0
 }
 do_checkout()
 {
-for file in $FILELIST
+for file in $FILELIST $FILELIST1 $FILELIST2 $FILELIST3
 do
   $CT co -c "" $file
 done
@@ -47,6 +51,36 @@ do_checkin()
 for file in $FILELIST
 do
   $CT ci -c "$COMMENT" $file || $CT unco -rm $file
+done
+sleep 1
+for file in $FILELIST1
+do
+  modfile=`ls -t ./src/silo/silo.h ./src/silo/silo_f.h $file | \
+     head -n 1 | grep $file`
+  if test "$file" = "$modfile" ; then
+    $CT ci -c "$COMMENT" $file || $CT unco -rm $file
+  else
+    $CT ci -c "$COMMENT-required checkin for tests/Makefile rule" -ident $file 
+  fi
+done
+for file in $FILELIST2
+do
+  modfile=`ls -t ./configure.ac $file | head -n 1 | grep $file`
+  if test "$file" = "$modfile" ; then
+    $CT ci -c "$COMMENT" $file || $CT unco -rm $file
+  else
+    $CT ci -c "$COMMENT-required checkin for tests/Makefile rule" -ident $file 
+  fi
+done
+sleep 1
+for file in $FILELIST3
+do
+  modfile=`ls -t "$file".at $file | head -n 1 | grep $file`
+  if test "$file" = "$modfile" ; then
+    $CT ci -c "$COMMENT" $file || $CT unco -rm $file
+  else
+    $CT ci -c "$COMMENT-required checkin for tests/Makefile rule" -ident $file 
+  fi
 done
 }
 # somewhat of a hack
@@ -83,7 +117,7 @@ case $1 in
         shift;;
 esac
 
-if [ "CHECK" = "yes" ] ; then
+if test "CHECK" = "yes" ; then
   do_checkout
 fi
 ##rm -Rf INSTALL aclocal.m4 configure autom4te.cache 
@@ -97,6 +131,6 @@ fi
 #autoconf --include=config
 $AUTOTOOLS/autoreconf -vif
 ##$HOME/i686-pc-linux-gnu/bin/autoreconf -vif
-if [ "CHECK" = "yes" ] ; then
+if test "CHECK" = "yes" ; then
   do_checkin
 fi

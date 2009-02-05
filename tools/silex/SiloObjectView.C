@@ -39,7 +39,7 @@
 #include <SiloFile.h>
 #include <qapplication.h>
 #include <qmessagebox.h>
-#include <visitstream.h>
+#include <silexstream.h>
 
 // ----------------------------------------------------------------------------
 //                            Object View Window

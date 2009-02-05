@@ -23,8 +23,9 @@ FILES = \
  silo_f.c
 
 BUILT_SOURCES = silo.inc
+DISTCLEANFILES = silo_version.h
 
-# build if it doesn't exit
+# built if it doesn't exit, could cause problem with VPATH
 silo.inc: silo.h silo_f.h
 	if test ! -e silo.inc; then \
 	  cat $(srcdir)/silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; \

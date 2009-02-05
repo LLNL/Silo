@@ -10,6 +10,9 @@ endif
 if PYTHON_NEEDED
 TOOLS_DIR += python
 endif
+if SILEX_NEEDED
+TOOLS_DIR += silex
+endif
 SUBDIRS = \
  . \
  $(TOOLS_DIR)
@@ -17,4 +20,5 @@ DIST_SUBDIRS = \
  . \
  browser \
  python \
+ silex \
  silock

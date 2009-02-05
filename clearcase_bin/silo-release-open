@@ -42,12 +42,14 @@ hoth() {
     cd linux_rhel3_gcc_3.2.3; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3 \
-    --without-readline --without-hdf5; \
+    --disable-browser; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/linux_rhel3_gcc_3.2.3/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3 \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/linux_rhel3_gcc_3.2.3 \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/linux_rhel3_gcc_3.2.3/$VERSION install; \
@@ -58,7 +60,7 @@ hoth() {
     \")" > hoth.log 2>&1
 }
 hothpgc() {
-  ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+  ssh -f naboo "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.0/bin:/usr/security/bin; \
     LD_LIBRARY_PATH=/usr/lib:/lib:/usr/local/pgi/linux86/6.0/lib; \
     LM_LICENSE_FILE=/usr/local/flexlm/licenses/license.dat:7496@genesse.llnl.gov:7127@corona.llnl.gov; \
@@ -69,13 +71,15 @@ hothpgc() {
     ../$TOPSRCDIR/configure \
     CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
-    --without-readline --without-hdf5; \
+    --disable-browser; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/linux_rhel3_gcc_3.2.3 \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION install; \
@@ -86,7 +90,7 @@ hothpgc() {
     \")" > hohtpgc.log 2>&1
 }
 hothicc() {
-  ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+  ssh -f naboo "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.0/bin:/usr/security/bin:/usr/local/intel/compiler90/bin; \
     LD_LIBRARY_PATH=/usr/lib:/lib:/usr/local/intel/compiler90/lib; \
     INTEL_LICENSE_FILE=7127@corona.llnl.gov; \
@@ -99,13 +103,15 @@ hothicc() {
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.0 \
-    --without-readline --without-hdf5; \
+    --disable-browser; \
     make -j 4 check; make install; \
     make prefix=$BDTOPDIR/linux_rhel3_icc_9.0/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.0 \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/linux_rhel3_gcc_3.2.3 \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check; make install; \
     make prefix=$BDTOPDIR/linux_rhel3_icc_9.0/$VERSION install; \
@@ -128,12 +134,14 @@ sunspot() {
     cd sunos_57; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/sunos_57 \
-    --without-readline --without-hdf5; \
+    --disable-browser; \
     make -j 4 check; make install; \
     make prefix=$BDTOPDIR/sunos_57/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/sunos_57 \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/solaris_gcc_3.2 \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/lib; \
     make -j 4 check; make install; \
     make prefix=$BDTOPDIR/sunos_57/$VERSION install; \
@@ -155,7 +163,7 @@ sunspotcc() {
     ../$TOPSRCDIR/configure \
     CC=c89 CXX=CC FC=f77 \
     --prefix=$BDTOPDIR/$VERSION/sunos_57_cc_5.2 \
-    --without-readline --without-hdf5; \
+    --disable-browser; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/sunos_57_cc_5.2/$VERSION install; \
     make clean; \
@@ -163,6 +171,8 @@ sunspotcc() {
     CC=c89 CXX=CC FC=f77 \
     LDFLAGS=-L/usr/local/lib \
     --prefix=$BDTOPDIR/$VERSION/sunos_57_cc_5.2 \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/solaris_gcc_3.2 \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/lib; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/sunos_57_cc_5.2/$VERSION install; \
@@ -190,18 +200,26 @@ berg32() {
     cd aix_5_ll; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
-    --without-readline --without-hdf5; \
-    make check && make install; \
-    make prefix=$BDTOPDIR/aix_5_ll/$VERSION install; \
+    --disable-browser; \
+    make check; make install; \
+    make prefix=$LCTOPDIR/aix_5_ll/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial.32/include,/usr/local/hdf5/hdf5-1.6.5/serial.32/lib; \
     make check; make install; \
-    make prefix=$BDTOPDIR/aix_5_ll/$VERSION install; \
-    rm -f $LCTOPDIR/$VERSION/aix_5_ll/lib/Silo.a; \
+    make prefix=$LCTOPDIR/aix_5_ll/$VERSION install; \
+    make clean; \
+    OBJECT_MODE=64; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
+    --disable-browser --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/aix_5_xlc_64 \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    make; cd tools/silex; make install; \
+    make prefix=$LCTOPDIR/aix_5_ll/$VERSION install; \
+    cd ../..; \
     chmod -R g+w $LCTOPDIR/$VERSION/aix_5_ll; \
-    rm -f $LCTOPDIR/aix_5_ll/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/aix_5_ll/$VERSION; \
      \") >newberg32.log 2>&1"
 }
@@ -216,21 +234,99 @@ berg64() {
     ../$TOPSRCDIR/configure \
     PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
-    --without-readline --without-hdf5; \
+    --disable-browser; \
     make check && make install; \
-    make prefix=$BDTOPDIR/aix_5_64_fed/$VERSION install; \
+    make prefix=$LCTOPDIR/aix_5_64_fed/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
-    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/aix_5_xlc_64 \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make check; make install; \
-    make prefix=$BDTOPDIR/aix_5_64_fed/$VERSION install; \
-    rm -f $LCTOPDIR/$VERSION/aix_5_64_fed/lib/Silo.a; \
+    make prefix=$LCTOPDIR/aix_5_64_fed/$VERSION install; \
     chmod -R g+w $LCTOPDIR/$VERSION/aix_5_64_fed; \
-    rm -f $LCTOPDIR/aix_5_64_fed/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/aix_5_64_fed/$VERSION; \
      \") >newberg64.log 2>&1"
+}
+
+berggcc() {
+# use gmake for parallel seems to hang
+# 32-bit and 64-bit compiles
+  berggcc32
+  berggcc64
+}
+berggcc32() {
+  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
+    OBJECT_MODE=32; \
+    export PATH OBJECT_MODE; \
+    rm -rf aix_5_ll_gcc; \
+    mkdir aix_5_ll_gcc; \
+    cd aix_5_ll_gcc; \
+    ../$TOPSRCDIR/configure \
+    CC=gcc CXX=g++ FC=g77 F77=g77 \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_ll_gcc \
+    --disable-browser; \
+    make check; make install; \
+    make prefix=$LCTOPDIR/aix_5_ll_gcc/$VERSION install; \
+    make clean; \
+    ../$TOPSRCDIR/configure \
+    CC=gcc CXX=g++ FC=g77 F77=g77 \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_ll_gcc \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial.32/include,/usr/local/hdf5/hdf5-1.6.5/serial.32/lib; \
+    make check; make install; \
+    make prefix=$LCTOPDIR/aix_5_ll_gcc/$VERSION install; \
+    make clean; \
+    OBJECT_MODE=64; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
+    --disable-browser --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/aix_5_xlc_64 \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    make; cd tools/silex; make install; \
+    make prefix=$LCTOPDIR/aix_5_ll/$VERSION install; \
+    cd ../..; \
+    chmod -R g+w $LCTOPDIR/$VERSION/aix_5_ll_gcc; \
+    chmod -R g+w $LCTOPDIR/aix_5_ll_gcc/$VERSION; \
+     \") >newberggcc32.log 2>&1"
+}
+berggcc64() {
+  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
+    OBJECT_MODE=64; \
+    export PATH OBJECT_MODE; \
+    rm -rf aix_5_64_fed_gcc; \
+    mkdir aix_5_64_fed_gcc; \
+    cd aix_5_64_fed_gcc; \
+    ../$TOPSRCDIR/configure \
+    CC=gcc CXX=g++ FC=g77 F77=g77 \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed_gcc \
+    --disable-browser; \
+    make check; make install; \
+    make prefix=$LCTOPDIR/aix_5_64_fed_gcc/$VERSION install; \
+    make clean; \
+    ../$TOPSRCDIR/configure \
+    CC=gcc CXX=g++ FC=g77 F77=g77 \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed_gcc \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    make check; make install; \
+    make prefix=$LCTOPDIR/aix_5_64_fed_gcc/$VERSION install; \
+    make clean; \
+    OBJECT_MODE=64; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
+    --disable-browser --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/aix_5_xlc_64 \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    make; cd tools/silex; make install; \
+    make prefix=$LCTOPDIR/aix_5_ll/$VERSION install; \
+    cd ../..; \
+    chmod -R g+w $LCTOPDIR/$VERSION/aix_5_64_fed_gcc; \
+    chmod -R g+w $LCTOPDIR/aix_5_64_fed_gcc/$VERSION; \
+     \") >newberggcc64.log 2>&1"
 }
 
 gps() {
@@ -244,18 +340,18 @@ gps() {
     cd tru64_5; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/tru64_5 \
-    --without-readline --without-hdf5; \
+    --disable-browser; \
     gmake -j 4 check ; gmake install; \
-    gmake prefix=$BDTOPDIR/tru64_5/$VERSION install; \
+    gmake prefix=$LCTOPDIR/tru64_5/$VERSION install; \
     gmake clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/tru64_5 \
+    --without-readline --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/tru64_5_gcc_3.3.3 \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     gmake -j 4 check ; gmake install; \
-    gmake prefix=$BDTOPDIR/tru64_5/$VERSION install; \
-    rm -f $LCTOPDIR/$VERSION/tru64_5/lib/Silo.a; \
+    gmake prefix=$LCTOPDIR/tru64_5/$VERSION install; \
     chmod -R g+w $LCTOPDIR/$VERSION/tru64_5; \
-    rm -f $LCTOPDIR/tru64_5/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/tru64_5/$VERSION; \
     \") > gps.log 2>&1"
 }
@@ -269,19 +365,38 @@ gpscc() {
     ../$TOPSRCDIR/configure \
     CC=c89 CXX=cxx FC=f77 F77=f77 \
     --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
-    --without-readline --without-hdf5; \
+    \") > gps.log 2>&1"
+}
+gpscc() {
+  ssh -f gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf tru64_5_cc; \
+    mkdir tru64_5_cc; \
+    cd tru64_5_cc; \
+    ../$TOPSRCDIR/configure \
+    CC=c89 CXX=cxx FC=f77 F77=f77 \
+    --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
+    --disable-browser; \
     gmake -j 4 check ; gmake install; \
-    gmake prefix=$BDTOPDIR/tru64_5_cc/$VERSION install; \
+    gmake prefix=$LCTOPDIR/tru64_5_cc/$VERSION install; \
     gmake clean; \
     ../$TOPSRCDIR/configure \
     CC=c89 CXX=cxx FC=f77 F77=f77 \
     --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     gmake -j 4 check ; gmake install; \
-    gmake prefix=$BDTOPDIR/tru64_5_cc/$VERSION install; \
-    rm -f $LCTOPDIR/$VERSION/tru64_5_cc/lib/Silo.a; \
+    gmake prefix=$LCTOPDIR/tru64_5_cc/$VERSION install; \
+    gmake clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
+    --disable-browser --without-readline --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/tru64_5_gcc_3.3.3 \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    gmake -j 4; cd tools/silex; gmake install; \
+    gmake prefix=$LCTOPDIR/tru64_5_cc/$VERSION install; \
+    cd ../../; \
     chmod -R g+w $LCTOPDIR/$VERSION/tru64_5_cc; \
-    rm -f $LCTOPDIR/tru64_5_cc/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/tru64_5_cc/$VERSION; \
     \") > gpscc.log 2>&1"
 }
@@ -295,20 +410,111 @@ pengra() {
     cd chaos_3_x86_elan3; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
-    --without-readline --without-hdf5; \
+    --disable-browser; \
     make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_x86_elan3/$VERSION install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_elan3/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/chaos_3_x86_elan3_gcc_3.2.3 \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial_gcc/lib; \
     make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_x86_elan3/$VERSION install; \
-    rm -f $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/Silo.a; \
+    make prefix=$LCTOPDIR/chaos_3_x86_elan3/$VERSION install; \
     chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_elan3; \
-    rm -f $LCTOPDIR/chaos_3_x86_elan3/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/chaos_3_x86_elan3/$VERSION; \
     \") > pengra.log 2>&1"
+}
+    
+pengraicc() {
+  ssh -f pengra "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf chaos_3_x86_elan3_icc; \
+    mkdir chaos_3_x86_elan3_icc; \
+    cd chaos_3_x86_elan3_icc; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3_icc \
+    --disable-browser; \
+    make -j 4 check; make install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_elan3_icc/$VERSION install; \
+    make clean; \
+    ../$TOPSRCDIR/configure \
+    CC=icc CXX=icc FC=ifort \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3_icc \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial_gcc/lib; \
+    make -j 4 check; make install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_elan3_icc/$VERSION install; \
+    make clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3_icc \
+    --disable-browser --without-readline --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/chaos_3_x86_elan3_gcc_3.2.3 \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial_gcc/lib; \
+    make -j 4; cd tools/silex;make install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_elan3_icc/$VERSION install; \
+    cd ../..; \
+    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_elan3_icc; \
+    chmod -R g+w $LCTOPDIR/chaos_3_x86_elan3_icc/$VERSION; \
+    \") > pengraicc.log 2>&1"
+}
+    
+yana() {
+  ssh -f yana "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf chaos_3_x86_64; \
+    mkdir chaos_3_x86_64; \
+    cd chaos_3_x86_64; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64 \
+    --disable-browser; \
+    make -j 4 check && make install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_64/$VERSION install; \
+    make clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64 \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/chaos_3_x86_64_ib_gcc_3.4.4 \
+    --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/chaos_3_x86_64_ib_gcc_3.4.4/include,/usr/gapps/visit/hdf5/1.6.5/chaos_3_x86_64_ib_gcc_3.4.4/lib; \
+    make -j 4 check && make install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_64/$VERSION install; \
+    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_64; \
+    chmod -R g+w $LCTOPDIR/chaos_3_x86_64/$VERSION; \
+    \") > yana.log 2>&1"
+}
+    
+yanaicc() {
+  ssh -f yana "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf chaos_3_x86_lan3_icc; \
+    mkdir chaos_3_x86_64_icc; \
+    cd chaos_3_x86_64_icc; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_icc \
+    --disable-browser; \
+    make -j 4 check; make install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_64_icc/$VERSION install; \
+    make clean; \
+    ../$TOPSRCDIR/configure \
+    CC=icc CXX=icc FC=ifort \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_icc \
+    --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/chaos_3_x86_64_ib_gcc_3.4.4/include,/usr/gapps/visit/hdf5/1.6.5/chaos_3_x86_64_ib_gcc_3.4.4/lib; \
+    make -j 4 check; make install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_64_icc/$VERSION install; \
+    make clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_icc \
+    --disable-browser --without-readline --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/chaos_3_x86_64_ib_gcc_3.4.4 \
+    --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/chaos_3_x86_64_ib_gcc_3.4.4/include,/usr/gapps/visit/hdf5/1.6.5/chaos_3_x86_64_ib_gcc_3.4.4/lib; \
+    make -j 4; cd tools/silex;make install; \
+    make prefix=$LCTOPDIR/chaos_3_x86_64_icc/$VERSION install; \
+    cd ../..; \
+    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_64_icc; \
+    chmod -R g+w $LCTOPDIR/chaos_3_x86_64_icc/$VERSION; \
+    \") > yanaicc.log 2>&1"
 }
     
 thunder() {
@@ -324,15 +530,17 @@ thundergcc() {
     cd chaos_3_ia64_elan4; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
-    --without-readline --without-hdf5; \
-    make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION install; \
+    --disable-browser; \
+    make -j 4 check; make install; \
+    make prefix=$LCTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/chaos_3_ia64_elan4_gcc_3.2.3 \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
-    make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION install; \
+    make -j 4 check; make install; \
+    make prefix=$LCTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION install; \
     rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc; \
     rm -f $LCTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION/lib/Silo.a; \
@@ -350,16 +558,18 @@ thundericc() {
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
-    --without-readline --without-hdf5; \
-    make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_ia64_elan4/icc/$VERSION install; \
+    --disable-browser; \
+    make -j 4 check; make install; \
+    make prefix=$LCTOPDIR/chaos_3_ia64_elan4/icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/chaos_3_ia64_elan4_gcc_3.2.3 \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
-    make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_ia64_elan4/icc/$VERSION install; \
+    make -j 4 check; make install; \
+    make prefix=$LCTOPDIR/chaos_3_ia64_elan4/icc/$VERSION install; \
     rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc; \
     rm -f $LCTOPDIR/chaos_3_ia64_elan4/icc/$VERSION/lib/Silo.a; \
@@ -371,8 +581,8 @@ quad() {
 # not using gcc
 # IRIX make doesn't support VPATH
 # 32-bit and 64-bit compiles
-  quad32
   quad64
+  quad32
 }
 quad32() {
   ssh -f quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
@@ -385,18 +595,22 @@ quad32() {
     ../$TOPSRCDIR/configure \
     PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_n32 \
-    --without-readline --without-hdf5; \
-    gmake -j 4 check && gmake install; \
-    gmake prefix=$BDTOPDIR/irix_6.5_n32/$VERSION install; \
+    --disable-browser; \
+    gmake -j 4 check; gmake install; \
+    gmake prefix=$LCTOPDIR/irix_6.5_n32/$VERSION install; \
     gmake clean; \
     ../$TOPSRCDIR/configure \
     PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_n32 \
     --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_n32/include,/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_n32/lib; \
-    gmake -j 4 check && gmake install; \
-    gmake prefix=$BDTOPDIR/irix_6.5_n32/$VERSION install; \
+    gmake -j 4 check; gmake install; \
+    gmake prefix=$LCTOPDIR/irix_6.5_n32/$VERSION install; \
     chmod -R g+w $LCTOPDIR/$VERSION/irix_6.5_n32; \
     chmod -R g+w $LCTOPDIR/irix_6.5_n32/$VERSION; \
+    ln -s $LCTOPDIR/$VERSION/irix_6.5_64/bin/silex \
+       $LCTOPDIR/$VERSION/irix_6.5_n32/bin/silex; \
+    ln -s $LCTOPDIR/irix_6.5_64/$VERSION/bin/silex \
+       $LCTOPDIR/irix_6.5_n32/$VERSION/bin/silex; \
      \") >quad32.log 2>&1"
 }
 quad64() {
@@ -413,9 +627,9 @@ quad64() {
     CFLAGS='-O2 -c99' \
     PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_64 \
-    --without-readline --without-hdf5; \
-    gmake -j 4 check && gmake install; \
-    gmake prefix=$BDTOPDIR/irix_6.5_64/$VERSION install; \
+    --disable-browser; \
+    gmake -j 4 check; gmake install; \
+    gmake prefix=$LCTOPDIR/irix_6.5_64/$VERSION install; \
     gmake clean; \
     ../$TOPSRCDIR/configure \
     CC='cc -64' CXX='CC -64' FC='f77 -64' \
@@ -423,9 +637,11 @@ quad64() {
     CFLAGS='-O2 -c99' \
     PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_64 \
+    --enable-silex \
+    --with-Qt-dir=/usr/gapps/visit/qt/3.3.2/irix64_cc_7.41_64 \
     --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_64/include,/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_64/lib; \
-    gmake -j 4 check && gmake install; \
-    gmake prefix=$BDTOPDIR/irix_6.5_64/$VERSION install; \
+    gmake -j 4 check; gmake install; \
+    gmake prefix=$LCTOPDIR/irix_6.5_64/$VERSION install; \
     rm -f $LCTOPDIR/$VERSION/irix_6.5_64/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/$VERSION/irix_6.5_64; \
     rm -f $LCTOPDIR/irix_6.5_64/$VERSION/lib/Silo.a; \
@@ -433,21 +649,6 @@ quad64() {
      \") >quad64.log 2>&1"
 }
     
-ubgltest() {
-  ssh -f ubgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
-    PATH=/opt/ibmcmp/vacpp/7.0/bin:/opt/ibmcmp/xlf/9.1/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
-    export PATH; \
-    rm -rf sles_9_ppc64; \
-    mkdir sles_9_ppc64; \
-    cd sles_9_ppc64; \
-    ../$TOPSRCDIR/configure \
-    CC='xlc' CXX='xlC' FC='fort77' \
-    --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
-    --without-readline --without-hdf5; \
-    make -j 4 CC='blrts_xlc' CXX='blrts_xlC' FC='blrts_fort77' install; \
-    chmod -R g+w $LCTOPDIR/$VERSION/sles_9_ppc64; \
-    \") > ubgltest.log 2>&1"
-}
 ubgl() {
   ssh -f ubgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/opt/ibmcmp/vac/7.0/bin:/opt/ibmcmp/xlf/9.1/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
@@ -464,13 +665,13 @@ ubgl() {
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
-    --disable-browser --without-readline --without-hdf5; \
+    --disable-browser; \
     make -j 4 install;\
     make prefix=$LCTOPDIR/sles_9_ppc64/$VERSION install;\
     make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
-    --disable-browser --without-readline \
+    --disable-browser \
     --with-hdf5=/usr/local/tools/hdf5/hdf5-1.6.5/serial/include,/usr/local/tools/hdf5/hdf5-1.6.5/serial/lib; \
     make -j 4 install; \
     make prefix=$LCTOPDIR/sles_9_ppc64/$VERSION install; \
@@ -537,8 +738,14 @@ else
     sun*|-sun*)
       sunspot
       shift;;
+    berggcc|-be*gcc|new*gcc|-new*gcc)
+      berggcc
+      shift;;
     berg32|-be*32|new*32|-new*32)
       berg32
+      shift;;
+    berggcc64|-be*gcc64|new*gcc64|-new*gcc64)
+      berggcc64
       shift;;
     berg64|-be*64|new*64|-new*64)
       berg64
@@ -561,20 +768,14 @@ else
     thun*|-th*)
       thunder
       shift;;
+    pen*icc|-pe*icc)
+      pengraicc
+      shift;;
     pen*|-pe*)
-      pengra
-      shift;;
-    quad32|-quad32)
-      quad32
-      shift;;
-    quad64|-quad64)
       quad64
       shift;;
     quad|-quad)
       quad
-      shift;;
-    ubgltest|-ubgltest)
-      ubgltest
       shift;;
     ubgl|-ubgl)
       ubgl

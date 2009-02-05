@@ -34,71 +34,46 @@
 * DAMAGE.
 *
 *****************************************************************************/
-
-#include <qapplication.h>
-#include <Explorer.h>
-
-#include <silexstream.h>
-#include <stdlib.h>
-
-#ifndef Q_WS_MACX
-#include <qwindowsstyle.h>
-#endif
-#include <qfiledialog.h>
-#include <qstring.h>
-
 // ****************************************************************************
-//  Main Function: main()  
 //
-//  Purpose:
-//    initialize and start the main window
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    April 10, 2001
-//
-//  Modifications:
-//    Brad Whitlock, Wed Oct 1 16:55:08 PST 2003
-//    I prevented the application from getting the Windows style when we're
-//    on MacOS X.
-//
-//    Mark C. Miller, Thu Jul 20 15:45:55 PDT 2006
-//    Made it more graceful on failure to open file
+// Based on Visit/common/utilities/visitstream.h
 //
 // ****************************************************************************
 
-int main( int argc, char **argv )
-{
-    QApplication::setColorSpec(QApplication::ManyColor);
-    QApplication a(argc, argv);
-#ifndef Q_WS_MACX
-    a.setStyle(new QWindowsStyle);
+#ifndef SILEX_STREAM_H
+#define SILEX_STREAM_H
+
+#if defined(_WIN32) && defined(USING_MSVC6)
+// We're on Windows using the Microsoft VC++ 6.0 compiler. We need to 
+// include the .h versions of iostream and fstream.
+
+#include <iostream.h>
+#include <fstream.h>
+#include <strstrea.h>
+
+#else
+// Include iostream and some using statements.
+#include <iostream>
+
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::ios;
+using std::ostream;
+using std::streambuf;
+
+// Include fstream and some using statements.
+#include <fstream>
+
+using std::ifstream;
+using std::istream;
+using std::ofstream;
+using std::streampos;
+
+// Include strstream and some using statements.
+#include <strstream>
+
+using std::ostrstream;
 #endif
-    Explorer *w = 0;
-    if (argc > 1)
-    {
-        w = new Explorer(argv[1], NULL, "Explorer");
-        if (!w->HasSiloView())
-        {
-            delete w;
-            w = 0;
-            cerr << "Unable to open file \"" << argv[1] << "\"" << endl;
-        }
-    }
 
-    if (!w)
-    {
-        QString file =
-            QFileDialog::getOpenFileName(QString(),
-                                         "Silo files (*.silo *.root *.pdb);;"
-                                         "All files (*)",
-                                         NULL, "SiloOpen", "Open file...");
-        if (file.isNull())
-            return 0;
-        w = new Explorer(file, NULL, "Explorer");
-    }
-
-    a.setMainWidget(w);
-    w->show();
-
-    return a.exec();
-}
+#endif
