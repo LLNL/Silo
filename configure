@@ -2648,10 +2648,33 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 # Grab the version number
 { echo "$as_me:$LINENO: checking what version the package is" >&5
 echo $ECHO_N "checking what version the package is... $ECHO_C" >&6; }
-#VERSION=`cat VERSION`
-#AC_DEFINE_UNQUOTED(VERSION,"$VERSION")
 { echo "$as_me:$LINENO: result: 4.6-pre3" >&5
 echo "${ECHO_T}4.6-pre3" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define SILO_VERS_MAJ `echo 4.6-pre3 | cut -d'.' -f1`
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define SILO_VERS_MIN `echo 4.6-pre3 | cut -d'.' -f2 | cut -d'-' -f1`
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define SILO_VERS_PAT `echo 4.6-pre3 | cut -d'.' -f3 | cut -d'-' -f1`
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define SILO_VERS_PRE `echo 4.6-pre3 | grep pre | cut -d'-' -f2 | cut -d'e' -f2`
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define SILO_VERS_TAG Silo_version_`echo 4.6-pre3 | sed -e 's/\./_/g' -e 's/-/_/g'`
+_ACEOF
+
 
  CONFIG_DATE="`date`"
 
@@ -7148,7 +7171,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7151 "configure"' > conftest.$ac_ext
+  echo '#line 7174 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9035,11 +9058,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9038: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9061: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9042: \$? = $ac_status" >&5
+   echo "$as_me:9065: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9303,11 +9326,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9306: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9329: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9310: \$? = $ac_status" >&5
+   echo "$as_me:9333: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9407,11 +9430,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9410: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9433: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9414: \$? = $ac_status" >&5
+   echo "$as_me:9437: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11931,7 +11954,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11934 "configure"
+#line 11957 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12031,7 +12054,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12034 "configure"
+#line 12057 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14415,11 +14438,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14418: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14441: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14422: \$? = $ac_status" >&5
+   echo "$as_me:14445: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14519,11 +14542,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14522: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14545: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14526: \$? = $ac_status" >&5
+   echo "$as_me:14549: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16089,11 +16112,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16092: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16115: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16096: \$? = $ac_status" >&5
+   echo "$as_me:16119: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16193,11 +16216,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16196: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16219: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16200: \$? = $ac_status" >&5
+   echo "$as_me:16223: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18423,11 +18446,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18426: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18449: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18430: \$? = $ac_status" >&5
+   echo "$as_me:18453: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18691,11 +18714,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18694: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18717: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18698: \$? = $ac_status" >&5
+   echo "$as_me:18721: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18795,11 +18818,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18798: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18821: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18802: \$? = $ac_status" >&5
+   echo "$as_me:18825: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -31826,3 +31849,5 @@ if test -n "$HDF5_DRV"; then
 else
   cat src/libsilo.settings | sed 's|\\n||' | sed 's|"||g'
 fi
+rm -f src/silo/silo_version.h
+grep '^#define SILO_VERS_' config.h > src/silo/silo_version.h

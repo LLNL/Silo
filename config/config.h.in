@@ -164,6 +164,21 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Silo major version number */
+#undef SILO_VERS_MAJ
+
+/* Silo minor version number */
+#undef SILO_VERS_MIN
+
+/* Silo patch version number */
+#undef SILO_VERS_PAT
+
+/* Silo pre-release version number */
+#undef SILO_VERS_PRE
+
+/* Silo compile time version symbol */
+#undef SILO_VERS_TAG
+
 /* The size of `off64_t', as computed by sizeof. */
 #undef SIZEOF_OFF64_T
 

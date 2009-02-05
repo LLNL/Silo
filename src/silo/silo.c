@@ -92,11 +92,9 @@ for advertising or product endorsement purposes.
  * for development with clearmake, since that would make silo.h be a
  * view-private file.  Thus, any object that depends on silo.h would be
  * invalid as a wink-in candidate.  */
-int SILO_VERSION = 0;
+int SILO_VERS_TAG = 0;
 
 /* specify versions which are backward compatible with the current */
-int Silo_version_4_5_1_cksum = 0;
-int Silo_version_4_5 = 0;
 
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
 PUBLIC int     db_errno = 0;    /*last error number                     */

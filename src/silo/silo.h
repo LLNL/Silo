@@ -51,6 +51,16 @@ for advertising or product endorsement purposes.
  */
 #ifndef SILO_H
 #define SILO_H
+
+/* include just the version symbols */
+#include <silo_version.h>
+
+/* Useful macro for comparing Silo versions */
+#define SILO_VERSION_GE(Maj,Min,Rel)  \
+        (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_REL>=Rel)) || \
+         ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) || \
+         (SILO_VERS_MAJ>Maj))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1338,9 +1348,8 @@ SILO_API extern int      DBInqFileReal(const char *);
 
 #define SILO_VSTRING_NAME "_silolibinfo"
 #define SILO_VSTRING PACKAGE_STRING
-#define SILO_VERSION Silo_version_4_5_1
-SILO_API extern int SILO_VERSION;
-#define CheckVersion SILO_VERSION = 1
+SILO_API extern int SILO_VERS_TAG;
+#define CheckVersion SILO_VERS_TAG = 1
 
 #define DBOpen(name, target, mode) \
     (CheckVersion, DBOpenReal(name, target, mode))

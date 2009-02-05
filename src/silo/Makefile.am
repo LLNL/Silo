@@ -8,6 +8,7 @@ EXTRA_DIST = \
 
 include_HEADERS = \
  silo.h \
+ silo_version.h \
  silo.inc 
 noinst_HEADERS = \
  silo_drivers.h \

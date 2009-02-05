@@ -293,6 +293,11 @@ dnl     src/libsilo.settings or src/libsiloh5.settings, changed version
 dnl     back to 4.6 (expect 5.0 after re-factoring of the driver code into
 dnl     an abstract I/O layer.
 dnl
+dnl     Mark C. Miller, Wed Oct 18 17:36:59 PDT 2006
+dnl     Added AC_DEFINE_UNQUOTED calls to create compile-time symbols for
+dnl     Silo's version information. Added code at end to put this into
+dnl     a separate 'config_vers.h' file
+dnl
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -356,9 +361,12 @@ AC_CANONICAL_HOST
 
 # Grab the version number
 AC_MSG_CHECKING(what version the package is)
-#VERSION=`cat VERSION`
-#AC_DEFINE_UNQUOTED(VERSION,"$VERSION")
 AC_MSG_RESULT(SILO_VERSION)
+AC_DEFINE_UNQUOTED(SILO_VERS_MAJ,`echo SILO_VERSION | cut -d'.' -f1`,[Silo major version number])
+AC_DEFINE_UNQUOTED(SILO_VERS_MIN,`echo SILO_VERSION | cut -d'.' -f2 | cut -d'-' -f1`,[Silo minor version number])
+AC_DEFINE_UNQUOTED(SILO_VERS_PAT,`echo SILO_VERSION | cut -d'.' -f3 | cut -d'-' -f1`,[Silo patch version number])
+AC_DEFINE_UNQUOTED(SILO_VERS_PRE,`echo SILO_VERSION | grep pre | cut -d'-' -f2 | cut -d'e' -f2`,[Silo pre-release version number])
+AC_DEFINE_UNQUOTED(SILO_VERS_TAG,Silo_version_`echo SILO_VERSION | sed -e 's/\./_/g' -e 's/-/_/g'`,[Silo compile time version symbol])
 
 dnl Configuration date
 AC_SUBST([CONFIG_DATE]) CONFIG_DATE="`date`"
@@ -1119,3 +1127,8 @@ if test -n "$HDF5_DRV"; then
 else
   cat src/libsilo.settings | sed 's|\\n||' | sed 's|"||g'
 fi
+dnl ----------------------------------------------------------------------
+dnl obtain silo version symbols and put in separate header file
+dnl
+rm -f src/silo/silo_version.h
+grep '^#define SILO_VERS_' config.h > src/silo/silo_version.h
