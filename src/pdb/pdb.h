@@ -518,6 +518,10 @@ extern long		_lite_PD_str_size (memdes*,HASHTAB*);
 extern int		_lite_PD_unp_bits (char*,char*,int,int,int,int,long,
 					   long);
 
+/* added 26Feb08 as per request from Burl Hall */
+extern int              _lite_PD_entry_number(syment*);
+extern long             _lite_PD_get_file_length(PDBfile *file);
+
 #ifdef PDB_WRITE
 SILO_API extern int	lite_PD_mkdir (PDBfile*,char*);
 SILO_API extern int	lite_PD_write (PDBfile*,char*,char*,byte*);
@@ -549,6 +553,10 @@ extern int		_lite_PD_rev_chrt (PDBfile*);
 extern void		_lite_PD_wr_prim_extras (FILE*,HASHTAB*,int,int);
 SILO_API extern syment 	*lite_PD_defent_alt (PDBfile*,char*,char*,int,long*);
 extern syment		*_lite_PD_defent (PDBfile*,char*,char*,long,dimdes*);
+
+/* added 26Feb08 as per request from Burl Hall */
+extern int              _lite_PD_append_alt(PDBfile*,char*,void*,int,long*);
+extern void             _lite_PD_set_major_order(PDBfile*,int);
 #endif /* PDB_WRITE */
    
 #endif /* !_PDB_H */

@@ -644,7 +644,7 @@ at_help_all="1;testsuitehdf5.at:8;array DB_HDF5;;
 11;testsuitehdf5.at:38;testall DB_HDF5 -small;;
 12;testsuitehdf5.at:41;testall DB_HDF5 -medium;;
 13;testsuitehdf5.at:44;testall DB_HDF5 -large;;
-14;testsuitehdf5.at:47;testall DB_HDF5 -large -fortran;;
+14;testsuitehdf5.at:47;testall DB_HDF5 -small -fortran;;
 15;testsuitehdf5.at:50;obj DB_HDF5;;
 16;testsuitehdf5.at:53;onehex DB_HDF5;;
 17;testsuitehdf5.at:56;oneprism DB_HDF5;;
@@ -889,7 +889,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF
-silo 4.6.1 test suite: silo HDF5 files test groups:
+silo 4.6.1-pre2 test suite: silo HDF5 files test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -913,7 +913,7 @@ _ATEOF
   exit 0
 fi
 if $at_version_p; then
-  echo "$as_me (silo 4.6.1)"
+  echo "$as_me (silo 4.6.1-pre2)"
   cat <<\_ACEOF
 
 Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -1001,15 +1001,15 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 cat <<\_ASBOX
-## --------------------------------------- ##
-## silo 4.6.1 test suite: silo HDF5 files. ##
-## --------------------------------------- ##
+## -------------------------------------------- ##
+## silo 4.6.1-pre2 test suite: silo HDF5 files. ##
+## -------------------------------------------- ##
 _ASBOX
 {
   cat <<\_ASBOX
-## --------------------------------------- ##
-## silo 4.6.1 test suite: silo HDF5 files. ##
-## --------------------------------------- ##
+## -------------------------------------------- ##
+## silo 4.6.1-pre2 test suite: silo HDF5 files. ##
+## -------------------------------------------- ##
 _ASBOX
   echo
 
@@ -1935,10 +1935,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  14 ) # 14. testsuitehdf5.at:47: testall DB_HDF5 -large -fortran
+  14 ) # 14. testsuitehdf5.at:47: testall DB_HDF5 -small -fortran
     at_setup_line='testsuitehdf5.at:47'
-    at_desc="testall DB_HDF5 -large -fortran"
-    $at_quiet $ECHO_N " 14: testall DB_HDF5 -large -fortran                $ECHO_C"
+    at_desc="testall DB_HDF5 -small -fortran"
+    $at_quiet $ECHO_N " 14: testall DB_HDF5 -small -fortran                $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -1946,7 +1946,7 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:48: testall DB_HDF5 -large -fortran"
+echo "$at_srcdir/testsuitehdf5.at:48: testall DB_HDF5 -small -fortran"
 echo testsuitehdf5.at:48 >"$at_check_line_file"
 
 at_trace_this=
@@ -1955,12 +1955,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; testall DB_HDF5 -large -fortran ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; testall DB_HDF5 -small -fortran ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; testall DB_HDF5 -large -fortran ) >"$at_stdout" 2>"$at_stderr"
+    ( :; testall DB_HDF5 -small -fortran ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3395,7 +3395,7 @@ _ASBOX
   echo "Please send \`${at_testdir+${at_testdir}/}$as_me.log' and all information you think might help:"
   echo
   echo "   To: <visit-help@llnl.gov>"
-  echo "   Subject: [silo 4.6.1] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
+  echo "   Subject: [silo 4.6.1-pre2] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
   echo
   if test $at_debug_p = false; then
     echo

@@ -45,8 +45,8 @@ AT_CLEANUP
 AT_SETUP(testall -large)
 AT_CHECK(testall -large,,[ignore])
 AT_CLEANUP
-AT_SETUP(testall -large -fortran)
-AT_CHECK(testall -large -fortran,,[ignore])
+AT_SETUP(testall -small -fortran)
+AT_CHECK(testall -small -fortran,,[ignore])
 AT_CLEANUP
 AT_SETUP(obj)
 AT_CHECK(obj,,[ignore])

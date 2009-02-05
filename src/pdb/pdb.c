@@ -1635,3 +1635,74 @@ _lite_PD_defent (PDBfile *file, char *name, char *outtype, long number,
    return ep;
 }
 #endif /* PDB_WRITE */
+
+/*-------------------------------------------------------------------------
+ * Function:    _lite_PD_entry_number
+ *
+ * Purpose:     Query entry number        
+ *
+ * Programmer:  Adapted from PACT, Burl Hall, 26Feb08
+ *
+ *-------------------------------------------------------------------------
+ */
+int _lite_PD_entry_number(syment* entry) {
+    return (PD_entry_number(entry));
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    _lite_PD_get_file_length
+ *
+ * Purpose:     Return current file size 
+ *
+ * Programmer:  Adapted from PACT, Mark C. Miller, 26Feb08
+ *
+ *-------------------------------------------------------------------------
+ */
+long  _lite_PD_get_file_length(PDBfile *file) {
+    off_t caddr, flen;
+
+    caddr = io_tell(file->stream);
+    io_seek(file->stream, 0, SEEK_END);
+
+    flen = io_tell(file->stream);
+    io_seek(file->stream, caddr, SEEK_SET);
+
+    return((long)flen);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    _lite_PD_append_alt
+ *
+ * Purpose:      - append a new block of data to an existing entry
+ *               - NOTE: VR must be a pointer to an object with the type
+ *               - of the existing entry
+ *
+ * Return:      void
+ *
+ * Programmer:  Adapted from PACT, Burl Hall, 26Feb08
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef PDB_WRITE
+int _lite_PD_append_alt(PDBfile *file, char *name, void *vr, int nd, long *ind) {
+  _append_flag = TRUE;
+  return(lite_PD_write_as_alt(file, name, NULL, NULL, vr, nd, ind));
+}
+#endif /* PDB_WRITE */
+
+/*-------------------------------------------------------------------------
+ * Function:    _lite_PD_set_major_order
+ *
+ * Purpose:     Set major storage order.
+ *
+ * Return:      void
+ *
+ * Programmer:  Adapted from PACT, Burl Hall, 26Feb08
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef PDB_WRITE
+void _lite_PD_set_major_order( PDBfile* file, int type) {
+  PD_set_major_order( file, type ) ;
+}
+#endif /* PDB_WRITE */

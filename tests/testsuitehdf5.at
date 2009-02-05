@@ -44,8 +44,8 @@ AT_CLEANUP
 AT_SETUP(testall DB_HDF5 -large)
 AT_CHECK(testall DB_HDF5 -large,,[ignore])
 AT_CLEANUP
-AT_SETUP(testall DB_HDF5 -large -fortran)
-AT_CHECK(testall DB_HDF5 -large -fortran,,[ignore])
+AT_SETUP(testall DB_HDF5 -small -fortran)
+AT_CHECK(testall DB_HDF5 -small -fortran,,[ignore])
 AT_CLEANUP
 AT_SETUP(obj DB_HDF5)
 AT_CHECK(obj DB_HDF5,,[ignore])

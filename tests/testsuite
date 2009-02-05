@@ -644,7 +644,7 @@ at_help_all="1;testsuite.at:9;extface;;
 10;testsuite.at:39;ucdsamp3;;
 11;testsuite.at:42;testall -medium;;
 12;testsuite.at:45;testall -large;;
-13;testsuite.at:48;testall -large -fortran;;
+13;testsuite.at:48;testall -small -fortran;;
 14;testsuite.at:51;obj;;
 15;testsuite.at:54;onehex;;
 16;testsuite.at:57;oneprism;;
@@ -890,7 +890,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF
-silo 4.6.1 test suite: silo PDB files test groups:
+silo 4.6.1-pre2 test suite: silo PDB files test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -914,7 +914,7 @@ _ATEOF
   exit 0
 fi
 if $at_version_p; then
-  echo "$as_me (silo 4.6.1)"
+  echo "$as_me (silo 4.6.1-pre2)"
   cat <<\_ACEOF
 
 Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -1003,15 +1003,15 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 cat <<\_ASBOX
-## -------------------------------------- ##
-## silo 4.6.1 test suite: silo PDB files. ##
-## -------------------------------------- ##
+## ------------------------------------------- ##
+## silo 4.6.1-pre2 test suite: silo PDB files. ##
+## ------------------------------------------- ##
 _ASBOX
 {
   cat <<\_ASBOX
-## -------------------------------------- ##
-## silo 4.6.1 test suite: silo PDB files. ##
-## -------------------------------------- ##
+## ------------------------------------------- ##
+## silo 4.6.1-pre2 test suite: silo PDB files. ##
+## ------------------------------------------- ##
 _ASBOX
   echo
 
@@ -1995,10 +1995,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  13 ) # 13. testsuite.at:48: testall -large -fortran
+  13 ) # 13. testsuite.at:48: testall -small -fortran
     at_setup_line='testsuite.at:48'
-    at_desc="testall -large -fortran"
-    $at_quiet $ECHO_N " 13: testall -large -fortran                        $ECHO_C"
+    at_desc="testall -small -fortran"
+    $at_quiet $ECHO_N " 13: testall -small -fortran                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -2006,7 +2006,7 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:49: testall -large -fortran"
+echo "$at_srcdir/testsuite.at:49: testall -small -fortran"
 echo testsuite.at:49 >"$at_check_line_file"
 
 at_trace_this=
@@ -2015,12 +2015,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; testall -large -fortran ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; testall -small -fortran ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; testall -large -fortran ) >"$at_stdout" 2>"$at_stderr"
+    ( :; testall -small -fortran ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3504,7 +3504,7 @@ _ASBOX
   echo "Please send \`${at_testdir+${at_testdir}/}$as_me.log' and all information you think might help:"
   echo
   echo "   To: <visit-help@llnl.gov>"
-  echo "   Subject: [silo 4.6.1] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
+  echo "   Subject: [silo 4.6.1-pre2] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
   echo
   if test $at_debug_p = false; then
     echo

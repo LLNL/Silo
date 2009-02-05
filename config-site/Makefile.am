@@ -15,6 +15,7 @@ EXTRA_DIST = \
  SunOS.conf \
  alc1.conf \
  alc2.conf \
+ alderaan.conf \
  atlas0.conf \
  atlas1088.conf \
  atlas1120.conf \
