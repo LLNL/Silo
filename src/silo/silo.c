@@ -9993,6 +9993,10 @@ db_StringListToStringArray(char *strList, int n)
  *
  *    Mark C. Miller, July 31, 2006 
  *
+ * Modifications:
+ *  Mark C. Miller, Mon Aug 21 23:14:29 PDT 2006
+ *  Made code that references DB_HDF5 conditionally compiled
+ *
  *--------------------------------------------------------------------*/
 INTERNAL void 
 db_DriverTypeAndSubtype(int driver, int *type, int *subtype)
@@ -10007,9 +10011,13 @@ db_DriverTypeAndSubtype(int driver, int *type, int *subtype)
         /* HDF5 driver uses values 1-5 */
         if (highNibble >= 1 && highNibble <=5)
         {
-            /* the subtype is primarily for the */
+            /* the subtype is primarily for the core driver */
             theSubtype = (driver & 0x7FFFFF00) >> 8;
+#ifdef DB_HDF5
             theType = DB_HDF5;
+#else
+            theType = DB_UNKNOWN;
+#endif
         }
         else
         {

@@ -1,5 +1,6 @@
 ## Procss this file with automake to create Makefile.in
 # making use of the autotest features in autoconf
+#
 
 EXTRA_DIST= \
  exectests.csh \
@@ -7,14 +8,14 @@ EXTRA_DIST= \
  pdbcmp.csh \
  testsuite.at \
  testsuite \
- testsuiteh5.at \
- testsuiteh5
+ testsuitehdf5.at \
+ testsuitehdf5
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 if HDF5_DRV_NEEDED
-  TESTSUITE = $(srcdir)/testsuiteh5
+  TESTSUITE = $(srcdir)/testsuitehdf5
 else
   TESTSUITE = $(srcdir)/testsuite
 endif
@@ -147,16 +148,16 @@ check-local: $(TESTSUITE) $(PROGS)
 clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
-	rm -f testsuiteh5.log
-	rm -rf testsuiteh5.dir
+	rm -f testsuitehdf5.log
+	rm -rf testsuitehdf5.dir
 
 testsuite: $(srcdir)/testsuite.at
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
-	mv $@.tmp $@
+	-mv -f $@.tmp $@
 
-testsuiteh5: $(srcdir)/testsuiteh5.at
+testsuitehdf5: $(srcdir)/testsuitehdf5.at
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
-	mv $@.tmp $@
+	-mv -f $@.tmp $@
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	{					\
