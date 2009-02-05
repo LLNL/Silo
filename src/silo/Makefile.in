@@ -37,8 +37,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@FORTRAN_NEEDED_TRUE@am__append_1 = silo_f.c
+@FORTRAN_NEEDED_TRUE@am__append_2 = silo_f.c
 subdir = src/silo
-DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+DIST_COMMON = $(am__noinst_HEADERS_DIST) $(include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/silo.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -50,8 +52,11 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = silo.h
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_silo_la_LIBADD =
-am__objects_1 = alloc.lo extface.lo silo.lo silo_f.lo
-am_libsilo_silo_la_OBJECTS = $(am__objects_1)
+am__libsilo_silo_la_SOURCES_DIST = alloc.c extface.c silo.c silo_f.c
+@FORTRAN_NEEDED_TRUE@am__objects_1 = silo_f.lo
+am__objects_2 = $(am__objects_1)
+am__objects_3 = alloc.lo extface.lo silo.lo $(am__objects_2)
+am_libsilo_silo_la_OBJECTS = $(am__objects_3)
 libsilo_silo_la_OBJECTS = $(am_libsilo_silo_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -65,7 +70,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libsilo_silo_la_SOURCES)
-DIST_SOURCES = $(libsilo_silo_la_SOURCES)
+DIST_SOURCES = $(am__libsilo_silo_la_SOURCES_DIST)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -74,6 +79,8 @@ am__vpath_adj = case $$p in \
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(includedir)"
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
+am__noinst_HEADERS_DIST = silo_drivers.h silo_private.h \
+	silo_win32_compatibility.h silo_f.c
 HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -266,27 +273,32 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LTLIBRARIES = libsilo_silo.la
 libsilo_silo_la_SOURCES = $(FILES)
+EXTRAFILES = $(am__append_1)
+EXTRAINCS = $(am__append_2)
 EXTRA_DIST = \
- silo_fcb.c 
+ silo_fcb.c \
+ silo_f.h \
+ silo_f.c \
+ silo.h.in
 
 include_HEADERS = \
  silo.h \
- silo.inc 
+ silo.inc
 
 noinst_HEADERS = \
  silo_drivers.h \
- silo_f.h \
  silo_private.h \
- silo_win32_compatibility.h
+ silo_win32_compatibility.h \
+ $(EXTRAINCS)
 
 FILES = \
  alloc.c \
  extface.c \
- silo.c \
- silo_f.c
+ silo.c  \
+ $(EXTRAFILES)
 
 BUILT_SOURCES = silo.inc
-DISTCLEANFILES = silo_version.h silo.inc
+DISTCLEANFILES = silo_version.h
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -570,10 +582,9 @@ uninstall-am: uninstall-includeHEADERS
 
 
 # built if it doesn't exit, could cause problem with VPATH
-silo.inc: silo.h silo_f.h
+silo.inc: silo.h.in silo_f.h
 	if test ! -e silo.inc; then \
-	  cat $(srcdir)/silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; \
-	fi
+	  cat $(srcdir)/silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; fi
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

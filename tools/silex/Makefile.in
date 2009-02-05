@@ -301,24 +301,24 @@ noinst_HEADERS = \
  SiloFile.h 
 
 FILES = \
- Explorer.C \
- SiloView.C \
- SiloDirView.C \
- SiloDirTreeView.C \
- SiloArrayView.C \
- SiloValueView.C \
- SiloObjectView.C \
- SiloFile.C \
- main.C 
+ Explorer.cpp \
+ SiloView.cpp \
+ SiloDirView.cpp \
+ SiloDirTreeView.cpp \
+ SiloArrayView.cpp \
+ SiloValueView.cpp \
+ SiloObjectView.cpp \
+ SiloFile.cpp \
+ main.cpp 
 
 FILES_MOC = \
- Explorer_moc.C \
- SiloView_moc.C \
- SiloDirView_moc.C \
- SiloDirTreeView_moc.C \
- SiloArrayView_moc.C \
- SiloValueView_moc.C \
- SiloObjectView_moc.C
+ Explorer_moc.cpp \
+ SiloView_moc.cpp \
+ SiloDirView_moc.cpp \
+ SiloDirTreeView_moc.cpp \
+ SiloArrayView_moc.cpp \
+ SiloValueView_moc.cpp \
+ SiloObjectView_moc.cpp
 
 BUILT_SOURCES = $(FILES_MOC)
 CLEANFILES = $(FILES_MOC)
@@ -326,7 +326,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .C .lo .o .obj
+.SUFFIXES: .cpp .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -411,21 +411,21 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SiloView_moc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
-.C.o:
+.cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
 
-.C.obj:
+.cpp.obj:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-.C.lo:
+.cpp.lo:
 @am__fastdepCXX_TRUE@	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
@@ -617,7 +617,7 @@ uninstall-am: uninstall-binPROGRAMS
 	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
 
-%_moc.C: %.h
+%_moc.cpp: %.h
 	$(QT_MOC) -o $@ $<
 
 install-exec-hook: $(BUNDLE_TARGET)

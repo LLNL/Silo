@@ -613,7 +613,7 @@ at_times_file=$at_suite_dir/at-times
 # List of the tested programs.
 at_tested=''
 # List of the all the test groups.
-at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34'
+at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
@@ -648,11 +648,12 @@ at_help_all='1;testsuite.at:11;array;;
 27;testsuite.at:98;multi_file;;
 28;testsuite.at:101;polyzl;;
 29;testsuite.at:104;csg;;
-30;testsuite.at:107;mmadjacency;;
-31;testsuite.at:122;mat3d_3across;;
-32;testsuite.at:125;ucd1d;;
-33;testsuite.at:128;dir;;
-34;testsuite.at:131;quad;;
+30;testsuite.at:107;rocket;;
+31;testsuite.at:110;mmadjacency;;
+32;testsuite.at:125;mat3d_3across;;
+33;testsuite.at:128;ucd1d;;
+34;testsuite.at:131;dir;;
+35;testsuite.at:134;quad;;
 '
 
 at_prev=
@@ -876,7 +877,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF
-silo 4.6-pre4 test suite: silo PDB files test groups:
+silo 4.6-pre5 test suite: silo PDB files test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -900,7 +901,7 @@ _ATEOF
   exit 0
 fi
 if $at_version_p; then
-  echo "$as_me (silo 4.6-pre4)"
+  echo "$as_me (silo 4.6-pre5)"
   cat <<\_ACEOF
 
 Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -992,13 +993,13 @@ exec 5>>"$at_suite_log"
 # Banners and logs.
 cat <<\_ASBOX
 ## ----------------------------------------- ##
-## silo 4.6-pre4 test suite: silo PDB files. ##
+## silo 4.6-pre5 test suite: silo PDB files. ##
 ## ----------------------------------------- ##
 _ASBOX
 {
   cat <<\_ASBOX
 ## ----------------------------------------- ##
-## silo 4.6-pre4 test suite: silo PDB files. ##
+## silo 4.6-pre5 test suite: silo PDB files. ##
 ## ----------------------------------------- ##
 _ASBOX
   echo
@@ -2773,10 +2774,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  30 ) # 30. testsuite.at:107: mmadjacency
+  30 ) # 30. testsuite.at:107: rocket
     at_setup_line='testsuite.at:107'
-    at_desc='mmadjacency'
-    $at_quiet $ECHO_N " 30: mmadjacency                                  $ECHO_C"
+    at_desc='rocket'
+    $at_quiet $ECHO_N " 30: rocket                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -2784,8 +2785,61 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:108: mmadjacency"
+echo "$at_srcdir/testsuite.at:108: rocket -driver DB_PDB"
 echo testsuite.at:108 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    at_trace_this=yes
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; rocket -driver DB_PDB ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; rocket -driver DB_PDB ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:108: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  31 ) # 31. testsuite.at:110: mmadjacency
+    at_setup_line='testsuite.at:110'
+    at_desc='mmadjacency'
+    $at_quiet $ECHO_N " 31: mmadjacency                                  $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "31. testsuite.at:110: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:111: mmadjacency"
+echo testsuite.at:111 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2808,7 +2862,7 @@ $at_diff "$at_devnull" "$at_stdout" || at_failed=:
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:108: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:111: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2826,19 +2880,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  31 ) # 31. testsuite.at:122: mat3d_3across
-    at_setup_line='testsuite.at:122'
+  32 ) # 32. testsuite.at:125: mat3d_3across
+    at_setup_line='testsuite.at:125'
     at_desc='mat3d_3across'
-    $at_quiet $ECHO_N " 31: mat3d_3across                                $ECHO_C"
+    $at_quiet $ECHO_N " 32: mat3d_3across                                $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "31. testsuite.at:122: testing ..."
+      echo "32. testsuite.at:125: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:123: mat3d_3across"
-echo testsuite.at:123 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:126: mat3d_3across"
+echo testsuite.at:126 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2852,59 +2906,6 @@ if test -n "$at_trace_this"; then
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
     ( :; mat3d_3across ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-$at_diff "$at_devnull" "$at_stdout" || at_failed=:
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:123: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  32 ) # 32. testsuite.at:125: ucd1d
-    at_setup_line='testsuite.at:125'
-    at_desc='ucd1d'
-    $at_quiet $ECHO_N " 32: ucd1d                                        $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "32. testsuite.at:125: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:126: ucd1d"
-echo testsuite.at:126 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    at_trace_this=yes
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; ucd1d ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; ucd1d ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2932,10 +2933,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  33 ) # 33. testsuite.at:128: dir
+  33 ) # 33. testsuite.at:128: ucd1d
     at_setup_line='testsuite.at:128'
-    at_desc='dir'
-    $at_quiet $ECHO_N " 33: dir                                          $ECHO_C"
+    at_desc='ucd1d'
+    $at_quiet $ECHO_N " 33: ucd1d                                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -2943,8 +2944,61 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:129: dir"
+echo "$at_srcdir/testsuite.at:129: ucd1d"
 echo testsuite.at:129 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    at_trace_this=yes
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; ucd1d ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; ucd1d ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+$at_diff "$at_devnull" "$at_stdout" || at_failed=:
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:129: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  34 ) # 34. testsuite.at:131: dir
+    at_setup_line='testsuite.at:131'
+    at_desc='dir'
+    $at_quiet $ECHO_N " 34: dir                                          $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "34. testsuite.at:131: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:132: dir"
+echo testsuite.at:132 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2967,7 +3021,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:129: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:132: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2985,19 +3039,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  34 ) # 34. testsuite.at:131: quad
-    at_setup_line='testsuite.at:131'
+  35 ) # 35. testsuite.at:134: quad
+    at_setup_line='testsuite.at:134'
     at_desc='quad'
-    $at_quiet $ECHO_N " 34: quad                                         $ECHO_C"
+    $at_quiet $ECHO_N " 35: quad                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "34. testsuite.at:131: testing ..."
+      echo "35. testsuite.at:134: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:132: quad"
-echo testsuite.at:132 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:135: quad"
+echo testsuite.at:135 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -3020,7 +3074,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:132: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:135: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -3328,7 +3382,7 @@ _ASBOX
   echo "Please send \`${at_testdir+${at_testdir}/}$as_me.log' and all information you think might help:"
   echo
   echo "   To: <visit-help@llnl.gov>"
-  echo "   Subject: [silo 4.6-pre4] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
+  echo "   Subject: [silo 4.6-pre5] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
   echo
   if test $at_debug_p = false; then
     echo

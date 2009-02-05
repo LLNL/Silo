@@ -456,9 +456,9 @@ typedef enum {
 #define DBCSG_SWEEP             2131230720 /* 0x7F080000 */
 
 /* definitions for MRG Tree traversal flags */
-#define DB_PREORDER             0x00000001 
-#define DB_POSTORDER            0x00000002
-#define DB_FROMCWR              0x00000004 
+#define DB_PREORDER                      1 /* 0x00000001 */
+#define DB_POSTORDER                     2 /* 0x00000002 */
+#define DB_FROMCWR                       4 /* 0x00000004 */
 
 /* Miscellaneous constants */
 #define     DB_F77NULL  (-99)   /*Fortran NULL pointer      */

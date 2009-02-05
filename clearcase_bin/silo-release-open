@@ -41,28 +41,28 @@ hoth() {
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/security/bin; \
     LD_LIBRARY_PATH=/usr/lib:/lib; \
     export PATH LD_LIBRARY_PATH; \
-    rm -rf linux_rhel3-gcc_3.2.3; \
-    mkdir linux_rhel3-gcc_3.2.3; \
-    cd linux_rhel3-gcc_3.2.3; \
+    rm -rf linux_rhel3-gcc-3.2.3; \
+    mkdir linux_rhel3-gcc-3.2.3; \
+    cd linux_rhel3-gcc-3.2.3; \
     ../$TOPSRCDIR/configure \
-    --prefix=$BDTOPDIR/$VERSION/linux_rhel3-gcc_3.2.3 \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3 \
     --disable-browser; \
     make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/linux_rhel3-gcc_3.2.3/$VERSION install; \
+    make prefix=$BDTOPDIR/linux_rhel3-gcc-3.2.3/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
-    --prefix=$BDTOPDIR/$VERSION/linux_rhel3-gcc_3.2.3 \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3 \
     --enable-silex \
     --with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/i386-pc-linux-gcc-3.2.3 \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/i386-pc-linux-gcc-3.2.3 \
     --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/i386-pc-linux-gcc-3.2.3/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/i386-pc-linux-gcc-3.2.3/lib; \
     make -j 4 && make install; \
-    make prefix=$BDTOPDIR/linux_rhel3-gcc_3.2.3/$VERSION install; \
+    make prefix=$BDTOPDIR/linux_rhel3-gcc-3.2.3/$VERSION install; \
     gmake bindir=/misc/gapps/Linux/bin install-exec; \
-    rm -f $BDTOPDIR/$VERSION/linux_rhel3-gcc_3.2.3/lib/Silo.a; \
-    rm -f $BDTOPDIR/linux_rhel3-gcc_3.2.3/$VERSION/lib/Silo.a; \
-    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3-gcc_3.2.3; \
-    chmod -R g+w $BDTOPDIR/linux_rhel3-gcc_3.2.3/$VERSION; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3/lib/Silo.a; \
+    rm -f $BDTOPDIR/linux_rhel3-gcc-3.2.3/$VERSION/lib/Silo.a; \
+    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3; \
+    chmod -R g+w $BDTOPDIR/linux_rhel3-gcc-3.2.3/$VERSION; \
     \")" > hoth.log 2>&1
 }
 hothpgc() {
@@ -71,32 +71,32 @@ hothpgc() {
     LD_LIBRARY_PATH=/usr/lib:/lib:/usr/local/pgi/linux86/6.0/lib; \
     LM_LICENSE_FILE=/usr/local/flexlm/licenses/license.dat:7496@genesse.llnl.gov:7127@corona.llnl.gov; \
     export PATH LD_LIBRARY_PATH LM_LICENSE_FILE; \
-    rm -rf linux_rhel3_pgc_6.0; \
-    mkdir linux_rhel3_pgc_6.0; \
-    cd linux_rhel3_pgc_6.0; \
+    rm -rf linux_rhel3-pgc-6.0; \
+    mkdir linux_rhel3-pgc-6.0; \
+    cd linux_rhel3-pgc-6.0; \
     ../$TOPSRCDIR/configure \
     CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
-    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3-pgc-6.0 \
     --disable-browser; \
     make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION install; \
+    make prefix=$BDTOPDIR/linux_rhel3-pgc-6.0/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
-    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3-pgc-6.0 \
     --disable-silex \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/i386-pc-linux-gcc-3.2.3 \
     --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/i386-pc-linux-gcc-3.2.3/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/i386-pc-linux-gcc-3.2.3/lib; \
     make -j 4 && make install; \
-    make prefix=$BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION install; \
-    rm -f $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/Silo.a; \
-    rm -f $BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION/lib/Silo.a; \
-    ln -s $BDTOPDIR/$VERSION/linux_rhel3-gcc_3.2.3/bin/silex \
-       $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/bin/silex; \
-    ln -s $BDTOPDIR/$VERSION/linux_rhel3-gcc_3.2.3/bin/silex \
-       $BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION/bin/silex; \
-    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0; \
-    chmod -R g+w $BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION; \
+    make prefix=$BDTOPDIR/linux_rhel3-pgc-6.0/$VERSION install; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3-pgc-6.0/lib/Silo.a; \
+    rm -f $BDTOPDIR/linux_rhel3-pgc-6.0/$VERSION/lib/Silo.a; \
+    ln -s $BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3/bin/silex \
+       $BDTOPDIR/$VERSION/linux_rhel3-pgc-6.0/bin/silex; \
+    ln -s $BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3/bin/silex \
+       $BDTOPDIR/linux_rhel3-pgc-6.0/$VERSION/bin/silex; \
+    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3-pgc-6.0; \
+    chmod -R g+w $BDTOPDIR/linux_rhel3-pgc-6.0/$VERSION; \
     \")" > hohtpgc.log 2>&1
 }
 hothicc() {
@@ -106,33 +106,33 @@ hothicc() {
     INTEL_LICENSE_FILE=7127@corona.llnl.gov; \
     LM_LICENSE_FILE=/usr/local/flexlm/licenses/license.dat:7496@genesse.llnl.gov:7127@corona.llnl.gov; \
     export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE LM_LICENSE_FILE; \
-    rm -rf linux_rhel3_icc_9.0; \
-    mkdir linux_rhel3_icc_9.0; \
-    cd linux_rhel3_icc_9.0; \
+    rm -rf linux_rhel3-icc-9.0; \
+    mkdir linux_rhel3-icc-9.0; \
+    cd linux_rhel3-icc-9.0; \
     . /usr/local/intel/compiler90/bin/iccvars.sh; \
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
-    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.0 \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3-icc-9.0 \
     --disable-browser; \
     make -j 4 check; make install; \
-    make prefix=$BDTOPDIR/linux_rhel3_icc_9.0/$VERSION install; \
+    make prefix=$BDTOPDIR/linux_rhel3-icc-9.0/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
-    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.0 \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3-icc-9.0 \
     --disable-silex \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/i386-pc-linux-gcc-3.2.3 \
     --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/i386-pc-linux-gcc-3.2.3/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/i386-pc-linux-gcc-3.2.3/lib; \
     make -j 4 ; make install; \
-    make prefix=$BDTOPDIR/linux_rhel3_icc_9.0/$VERSION install; \
-    rm -f $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/Silo.a; \
-    rm -f $BDTOPDIR/linux_rhel3_icc_9.0/$VERSION/lib/Silo.a; \
-    ln -s $BDTOPDIR/$VERSION/linux_rhel3-gcc_3.2.3/bin/silex \
-       $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/bin/silex; \
-    ln -s $BDTOPDIR/$VERSION/linux_rhel3-gcc_3.2.3/bin/silex \
-       $BDTOPDIR/linux_rhel3_icc_9.0/$VERSION/bin/silex; \
-    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0; \
-    chmod -R g+w $BDTOPDIR/linux_rhel3_icc_9.0/$VERSION; \
+    make prefix=$BDTOPDIR/linux_rhel3-icc-9.0/$VERSION install; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3-icc-9.0/lib/Silo.a; \
+    rm -f $BDTOPDIR/linux_rhel3-icc-9.0/$VERSION/lib/Silo.a; \
+    ln -s $BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3/bin/silex \
+       $BDTOPDIR/$VERSION/linux_rhel3-icc-9.0/bin/silex; \
+    ln -s $BDTOPDIR/$VERSION/linux_rhel3-gcc-3.2.3/bin/silex \
+       $BDTOPDIR/linux_rhel3-icc-9.0/$VERSION/bin/silex; \
+    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3-icc-9.0; \
+    chmod -R g+w $BDTOPDIR/linux_rhel3-icc-9.0/$VERSION; \
     \")" > hohticc.log 2>&1
 }
     
@@ -173,33 +173,33 @@ sunspotcc() {
     PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin; \
     LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib; \
     export PATH LD_LIBRARY_PATH; \
-    rm -rf sunos_57_cc_5.2; \
-    mkdir sunos_57_cc_5.2; \
-    cd sunos_57_cc_5.2; \
+    rm -rf sunos_57-cc-5.2; \
+    mkdir sunos_57-cc-5.2; \
+    cd sunos_57-cc-5.2; \
     ../$TOPSRCDIR/configure \
     CC=c89 CXX=CC FC=f77 \
-    --prefix=$BDTOPDIR/$VERSION/sunos_57_cc_5.2 \
+    --prefix=$BDTOPDIR/$VERSION/sunos_57-cc-5.2 \
     --disable-browser; \
     gmake -j 4 check && gmake install; \
-    gmake prefix=$BDTOPDIR/sunos_57_cc_5.2/$VERSION install; \
+    gmake prefix=$BDTOPDIR/sunos_57-cc-5.2/$VERSION install; \
     gmake clean; \
     ../$TOPSRCDIR/configure \
     CC=c89 CXX=CC FC=f77 \
     LDFLAGS=-L/usr/local/lib \
-    --prefix=$BDTOPDIR/$VERSION/sunos_57_cc_5.2 \
+    --prefix=$BDTOPDIR/$VERSION/sunos_57-cc-5.2 \
     --disable-silex --without-readline \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/sparc-sun-solaris-cc-5.2 \
     --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/sparc-sun-solaris-cc-5.2/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/sparc-sun-solaris-cc-5.2/lib; \
     gmake -j 4 && gmake install; \
-    gmake prefix=$BDTOPDIR/sunos_57_cc_5.2/$VERSION install; \
+    gmake prefix=$BDTOPDIR/sunos_57-cc-5.2/$VERSION install; \
     ln -s $BDTOPDIR/$VERSION/sunos_57/bin/silex \
-       $BDTOPDIR/$VERSION/sunos_57_cc_5.2/bin/silex; \
+       $BDTOPDIR/$VERSION/sunos_57-cc-5.2/bin/silex; \
     ln -s $BDTOPDIR/$VERSION/sunos_57/bin/silex \
-       $BDTOPDIR/sunos_57_cc_5.2/$VERSION/bin/silex; \
-    rm -f $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/Silo.a; \
-    chmod -R g+w $BDTOPDIR/$VERSION/sunos_57_cc_5.2; \
-    rm -f $BDTOPDIR/sunos_57_cc_5.2/$VERSION/lib/Silo.a; \
-    chmod -R g+w $BDTOPDIR/sunos_57_cc_5.2/$VERSION; \
+       $BDTOPDIR/sunos_57-cc-5.2/$VERSION/bin/silex; \
+    rm -f $BDTOPDIR/$VERSION/sunos_57-cc-5.2/lib/Silo.a; \
+    chmod -R g+w $BDTOPDIR/$VERSION/sunos_57-cc-5.2; \
+    rm -f $BDTOPDIR/sunos_57-cc-5.2/$VERSION/lib/Silo.a; \
+    chmod -R g+w $BDTOPDIR/sunos_57-cc-5.2/$VERSION; \
     \")" > sunspotcc.log 2>&1
 }
 
@@ -612,8 +612,8 @@ pengraicc() {
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3-icc \
-    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_elan3_icc \
-    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3_icc/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3_icc/lib; \
+    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_elan3-icc \
+    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3-icc/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3-icc/lib; \
     make -j 4 ; make install; \
     make prefix=$LCTOPDIR/chaos_3_x86_elan3-icc/$VERSION install; \
     make clean; \
@@ -621,9 +621,9 @@ pengraicc() {
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3-icc \
     --disable-browser --without-readline --enable-silex \
-    --with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_x86_elan3_icc \
-    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_elan3_icc \
-    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3_icc/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3_icc/lib; \
+    --with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_x86_elan3-icc \
+    --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_elan3-icc \
+    --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3-icc/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/chaos_3_x86_elan3-icc/lib; \
     make -j 4; cd tools/silex;make install; \
     make prefix=$LCTOPDIR/chaos_3_x86_elan3-icc/$VERSION install; \
     gmake bindir=/usr/gapps/bin/chaos_3_x86_elan3 install-exec; \

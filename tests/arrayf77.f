@@ -101,7 +101,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
 
       g_nvalues = 0
-      do i=0,100
+      do i=1,100
          g_values(i) = 0
       enddo
       err = dbfgetca (dbid, "carray", 6, g_values, g_nvalues)

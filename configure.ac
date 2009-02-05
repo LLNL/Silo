@@ -313,9 +313,9 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 4.6-pre5)
-m4_define(SILO_DATE, 2007/09/27)
-m4_define(SILO_TIME, 15:06:03)
+m4_define(SILO_VERSION, 4.6-pre6)
+m4_define(SILO_DATE, 2007/10/17)
+m4_define(SILO_TIME, 16:28:53)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)

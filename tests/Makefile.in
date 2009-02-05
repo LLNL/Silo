@@ -48,9 +48,9 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	specmix$(EXEEXT) testpdb$(EXEEXT) sami$(EXEEXT) spec$(EXEEXT) \
 	cpz1plt$(EXEEXT) merge_block$(EXEEXT) mat3d_3across$(EXEEXT) \
 	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
-	polyzl$(EXEEXT) csg$(EXEEXT) mmadjacency$(EXEEXT) \
-	largefile$(EXEEXT) dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4)
+	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
+	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
+	quad$(EXEEXT) version$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(srcdir)/testsuitehdf5
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_3 = $(HDF5PROGS)
@@ -235,6 +235,11 @@ am__quadf77_SOURCES_DIST = quadf77.f
 quadf77_OBJECTS = $(am_quadf77_OBJECTS)
 @FORTRAN_NEEDED_TRUE@quadf77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
+am_rocket_OBJECTS = rocket.$(OBJEXT)
+rocket_OBJECTS = $(am_rocket_OBJECTS)
+rocket_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@rocket_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@rocket_DEPENDENCIES = ../src/libsiloh5.la
 sami_SOURCES = sami.c
 sami_OBJECTS = sami.$(OBJEXT)
 sami_LDADD = $(LDADD)
@@ -321,6 +326,14 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 F77COMPILE = $(F77) $(AM_FFLAGS) $(FFLAGS)
 LTF77COMPILE = $(LIBTOOL) --tag=F77 --mode=compile $(F77) $(AM_FFLAGS) \
 	$(FFLAGS)
@@ -334,10 +347,10 @@ SOURCES = TestReadMask.c alltypes.c array.c $(arrayf77_SOURCES) \
 	merge_block.c mmadjacency.c multi_file.c multi_test.c \
 	multispec.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
 	partial_io.c point.c $(pointf77_SOURCES) polyzl.c \
-	$(quad_SOURCES) $(quadf77_SOURCES) sami.c simple.c spec.c \
-	specmix.c subhex.c testall.c $(testallf77_SOURCES) testpdb.c \
-	twohex.c ucd.c ucd1d.c $(ucdf77_SOURCES) ucdsamp3.c version.c \
-	wave.c
+	$(quad_SOURCES) $(quadf77_SOURCES) $(rocket_SOURCES) sami.c \
+	simple.c spec.c specmix.c subhex.c testall.c \
+	$(testallf77_SOURCES) testpdb.c twohex.c ucd.c ucd1d.c \
+	$(ucdf77_SOURCES) ucdsamp3.c version.c wave.c
 DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
 	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
@@ -346,8 +359,8 @@ DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	merge_block.c mmadjacency.c multi_file.c multi_test.c \
 	multispec.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
 	partial_io.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
-	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) sami.c simple.c \
-	spec.c specmix.c subhex.c testall.c \
+	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) $(rocket_SOURCES) \
+	sami.c simple.c spec.c specmix.c subhex.c testall.c \
 	$(am__testallf77_SOURCES_DIST) testpdb.c twohex.c ucd.c \
 	ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
 ETAGS = etags
@@ -573,7 +586,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
-	csg mmadjacency largefile version $(am__append_2) \
+	csg rocket mmadjacency largefile version $(am__append_2) \
 	$(am__append_5)
 dir_SOURCES = \
  dir.c \
@@ -582,6 +595,9 @@ dir_SOURCES = \
 quad_SOURCES = \
  quad.c \
  testlib.c
+
+rocket_SOURCES = \
+ rocket.cpp
 
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD) 
@@ -604,7 +620,7 @@ quad_SOURCES = \
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .f .lo .o .obj
+.SUFFIXES: .c .cpp .f .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -737,6 +753,9 @@ quad$(EXEEXT): $(quad_OBJECTS) $(quad_DEPENDENCIES)
 quadf77$(EXEEXT): $(quadf77_OBJECTS) $(quadf77_DEPENDENCIES) 
 	@rm -f quadf77$(EXEEXT)
 	$(F77LINK) $(quadf77_LDFLAGS) $(quadf77_OBJECTS) $(quadf77_LDADD) $(LIBS)
+rocket$(EXEEXT): $(rocket_OBJECTS) $(rocket_DEPENDENCIES) 
+	@rm -f rocket$(EXEEXT)
+	$(CXXLINK) $(rocket_LDFLAGS) $(rocket_OBJECTS) $(rocket_LDADD) $(LIBS)
 sami$(EXEEXT): $(sami_OBJECTS) $(sami_DEPENDENCIES) 
 	@rm -f sami$(EXEEXT)
 	$(LINK) $(sami_LDFLAGS) $(sami_OBJECTS) $(sami_LDADD) $(LIBS)
@@ -817,6 +836,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polyzl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-quad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-testlib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sami.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spec.Po@am__quote@
@@ -880,6 +900,27 @@ quad-testlib.obj: testlib.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='testlib.c' object='quad-testlib.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(quad_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o quad-testlib.obj `if test -f 'testlib.c'; then $(CYGPATH_W) 'testlib.c'; else $(CYGPATH_W) '$(srcdir)/testlib.c'; fi`
+
+.cpp.o:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 .f.o:
 	$(F77COMPILE) -c -o $@ $<
@@ -1074,7 +1115,7 @@ uninstall-am:
 # listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
 # oneprism onepyramid onetet TestReadMask subhex twohex multispec \
 # specmix testpdb sami spec cpz1plt merge_block mat3d_3across \
-# ucd1d wave multi_file polyzl csg  mmadjacency  largefile version 
+# ucd1d wave multi_file polyzl csg rocket mmadjacency  largefile version 
 
 all-local:
 	@echo

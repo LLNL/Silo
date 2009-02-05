@@ -105,6 +105,9 @@ AT_CLEANUP
 AT_SETUP(csg DB_HDF5)
 AT_CHECK(csg DB_HDF5,,[ignore])
 AT_CLEANUP
+AT_SETUP(rocket DB_HDF5)
+AT_CHECK(rocket -driver DB_HDF5,,[ignore])
+AT_CLEANUP
 AT_SETUP(mmadjacency DB_HDF5)
 AT_CHECK(mmadjacency DB_HDF5)
 AT_CLEANUP

@@ -3,29 +3,39 @@
 noinst_LTLIBRARIES = libsilo_silo.la
 libsilo_silo_la_SOURCES = $(FILES)
 
+EXTRAFILES =
+EXTRAINCS =
+if FORTRAN_NEEDED
+ EXTRAFILES += silo_f.c
+ EXTRAINCS += silo_f.c
+endif
+
 EXTRA_DIST = \
- silo_fcb.c 
+ silo_fcb.c \
+ silo_f.h \
+ silo_f.c \
+ silo.h.in
 
 include_HEADERS = \
  silo.h \
- silo.inc 
+ silo.inc
+
 noinst_HEADERS = \
  silo_drivers.h \
- silo_f.h \
  silo_private.h \
- silo_win32_compatibility.h
+ silo_win32_compatibility.h \
+ $(EXTRAINCS)
 
 FILES = \
  alloc.c \
  extface.c \
- silo.c \
- silo_f.c
+ silo.c  \
+ $(EXTRAFILES)
 
 BUILT_SOURCES = silo.inc
-DISTCLEANFILES = silo_version.h silo.inc
+DISTCLEANFILES = silo_version.h
 
 # built if it doesn't exit, could cause problem with VPATH
-silo.inc: silo.h silo_f.h
+silo.inc: silo.h.in silo_f.h
 	if test ! -e silo.inc; then \
-	  cat $(srcdir)/silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; \
-	fi
+	  cat $(srcdir)/silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; fi

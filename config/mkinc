@@ -95,6 +95,9 @@ $0 = shift @ARGV;
 #   Mark C. Miller, Thu Nov  2 14:30:00 PST 2006
 #   Made it handle SILO_VERS_... symbols
 #
+#   Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+#   Modfied to handle new Fortran name-mangling 
+#
 #########################################################################
 
 
@@ -127,7 +130,7 @@ while (<>) {
         }
     }
 
-    if (/^#[ \t]*define[ \t]+\w+[ \t]+F77_ID\([ \t]*\w+[ \t,]+(\w+)/) {
+    if (/^#[ \t]*define[ \t]+\w+[ \t]+FC_FUNC[ \t]*\([ \t]*(\w+)[ \t,]+\w+/) {
         push (@functions, $1);
     }
 

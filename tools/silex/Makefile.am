@@ -36,26 +36,26 @@ noinst_HEADERS = \
  SiloFile.h 
 
 FILES = \
- Explorer.C \
- SiloView.C \
- SiloDirView.C \
- SiloDirTreeView.C \
- SiloArrayView.C \
- SiloValueView.C \
- SiloObjectView.C \
- SiloFile.C \
- main.C 
+ Explorer.cpp \
+ SiloView.cpp \
+ SiloDirView.cpp \
+ SiloDirTreeView.cpp \
+ SiloArrayView.cpp \
+ SiloValueView.cpp \
+ SiloObjectView.cpp \
+ SiloFile.cpp \
+ main.cpp 
 
 FILES_MOC = \
- Explorer_moc.C \
- SiloView_moc.C \
- SiloDirView_moc.C \
- SiloDirTreeView_moc.C \
- SiloArrayView_moc.C \
- SiloValueView_moc.C \
- SiloObjectView_moc.C
+ Explorer_moc.cpp \
+ SiloView_moc.cpp \
+ SiloDirView_moc.cpp \
+ SiloDirTreeView_moc.cpp \
+ SiloArrayView_moc.cpp \
+ SiloValueView_moc.cpp \
+ SiloObjectView_moc.cpp
  
-%_moc.C: %.h
+%_moc.cpp: %.h
 	$(QT_MOC) -o $@ $<
 
 BUILT_SOURCES = $(FILES_MOC)

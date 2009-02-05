@@ -39,7 +39,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
-      mmadjacency largefile version
+      rocket mmadjacency largefile version
 
 dir_SOURCES = \
  dir.c \
@@ -47,6 +47,8 @@ dir_SOURCES = \
 quad_SOURCES = \
  quad.c \
  testlib.c
+rocket_SOURCES = \
+ rocket.cpp
 
 check_PROGRAMS = \
  array \
@@ -82,6 +84,7 @@ check_PROGRAMS = \
  multi_file \
  polyzl \
  csg \
+ rocket \
  mmadjacency \
  largefile \
  dir \
@@ -122,7 +125,7 @@ endif
  listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
  oneprism onepyramid onetet TestReadMask subhex twohex multispec \
  specmix testpdb sami spec cpz1plt merge_block mat3d_3across \
- ucd1d wave multi_file polyzl csg  mmadjacency  largefile version 
+ ucd1d wave multi_file polyzl csg rocket mmadjacency  largefile version 
 
 all-local:
 	@echo

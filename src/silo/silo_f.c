@@ -218,20 +218,20 @@ DBFortranRemovePointer (int value)
 }
 
 FORTRAN
-F_DBALLOCPTR(void *p)
+DBALLOCPTR_FC (void *p)
 {
     return DBFortranAllocPointer(p);
 }
 
 FORTRAN
-F_DBRMPTR(int *pid)
+DBRMPTR_FC (int *pid)
 {
     DBFortranRemovePointer(*pid);
     return 0;
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                   F_DBADDIOPT
+ * Routine                                                  DBADDIOPT_FC
  *
  * Purpose
  *     Add an integer option to the given option list.
@@ -246,9 +246,12 @@ F_DBRMPTR(int *pid)
  *     Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *     I replaced API_END with API_END_NOPOP.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBADDIOPT(int *optlist_id, int *option, int *ivalue)
+DBADDIOPT_FC (int *optlist_id, int *option, int *ivalue)
 {
     DBoptlist     *optlist = NULL;
 
@@ -269,7 +272,7 @@ F_DBADDIOPT(int *optlist_id, int *option, int *ivalue)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                   F_DBADDROPT
+ * Routine                                                  DBADDROPT_FC
  *
  * Purpose
  *     Add a real option to the given option list.
@@ -284,9 +287,12 @@ F_DBADDIOPT(int *optlist_id, int *option, int *ivalue)
  *     Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *     I replaced API_END with API_END_NOPOP.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBADDROPT(int *optlist_id, int *option, float *rvalue)
+DBADDROPT_FC (int *optlist_id, int *option, float *rvalue)
 {
     DBoptlist     *optlist = NULL;
 
@@ -307,7 +313,7 @@ F_DBADDROPT(int *optlist_id, int *option, float *rvalue)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                   F_DBADDDOPT
+ * Routine                                                  DBADDDOPT_FC
  *
  * Purpose
  *     Add a double precision option to the given option list.
@@ -322,9 +328,12 @@ F_DBADDROPT(int *optlist_id, int *option, float *rvalue)
  *     Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *     I replaced API_END with API_END_NOPOP.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBADDDOPT(int *optlist_id, int *option, double *dvalue)
+DBADDDOPT_FC (int *optlist_id, int *option, double *dvalue)
 {
     DBoptlist     *optlist = NULL;
 
@@ -345,7 +354,7 @@ F_DBADDDOPT(int *optlist_id, int *option, double *dvalue)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                   F_DBADDCOPT
+ * Routine                                                  DBADDCOPT_FC
  *
  * Purpose
  *     Add a character option to the given option list.
@@ -374,9 +383,12 @@ F_DBADDDOPT(int *optlist_id, int *option, double *dvalue)
  *     causing the option value to always be NULL, causing the routine
  *     to never work.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBADDCOPT(int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
+DBADDCOPT_FC (int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
 {
     char          *cval = NULL;
     DBoptlist     *optlist = NULL;
@@ -412,7 +424,7 @@ F_DBADDCOPT(int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
     return(0);
 }
 /*-------------------------------------------------------------------------
- * Routine                                                     F_DBADDCAOPT
+ * Routine                                                    DBADDCAOPT_FC
  * 
  * Purpose
  *     Add a character array option to the given option list.
@@ -430,11 +442,14 @@ F_DBADDCOPT(int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
  *
  * Modifications
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *
  *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBADDCAOPT(int *optlist_id, int *option,
+DBADDCAOPT_FC (int *optlist_id, int *option,
              int *nval, FCD_DB cvalue, int *lcvalue)
 {
     char          **cval = NULL;
@@ -480,7 +495,7 @@ F_DBADDCAOPT(int *optlist_id, int *option,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                 F_DBMKOPTLIST
+ * Routine                                                DBMKOPTLIST_FC
  *
  * Purpose
  *     Create an option list and return its identifier.
@@ -495,9 +510,12 @@ F_DBADDCAOPT(int *optlist_id, int *option,
  *     Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *     I replaced API_END with API_END_NOPOP.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBMKOPTLIST(int *maxopts, int *optlist_id)
+DBMKOPTLIST_FC (int *maxopts, int *optlist_id)
 {
     DBoptlist     *optlist = NULL;
 
@@ -514,7 +532,7 @@ F_DBMKOPTLIST(int *maxopts, int *optlist_id)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                               F_DBFREEOPTLIST
+ * Routine                                              DBFREEOPTLIST_FC
  *
  * Purpose
  *     Free an option list.
@@ -529,9 +547,12 @@ F_DBMKOPTLIST(int *maxopts, int *optlist_id)
  *     Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *     I replaced API_END with API_END_NOPOP.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBFREEOPTLIST(int *optlist_id)
+DBFREEOPTLIST_FC (int *optlist_id)
 {
     int            err;
     DBoptlist     *optlist = NULL;
@@ -547,7 +568,7 @@ F_DBFREEOPTLIST(int *optlist_id)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                    F_DBPUTMAT
+ * Routine                                                   DBPUTMAT_FC
  *
  * Purpose
  *     Write a material data object into the given SILO file.
@@ -574,9 +595,13 @@ F_DBFREEOPTLIST(int *optlist_id)
  *     Added a DBoptlist lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTMAT(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
+DBPUTMAT_FC (int *dbid, FCD_DB name,
+           int *lname, FCD_DB meshname, int *lmeshname,
            int *nmat, int *matnos, int *matlist, int *dims, int *ndims,
            int *mix_next, int *mix_mat, int *mix_zone, float *mix_vf,
            int *mixlen, int *datatype, int *optlist_id, int *status)
@@ -634,7 +659,7 @@ F_DBPUTMAT(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                    F_DBPUTMSP
+ * Routine                                                   DBPUTMSP_FC
  *
  * Purpose
  *     Write a material species data object into the given SILO file.
@@ -657,9 +682,12 @@ F_DBPUTMAT(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTMSP(int *dbid, FCD_DB name, int *lname, FCD_DB matname, int *lmatname,
+DBPUTMSP_FC (int *dbid, FCD_DB name, int *lname, FCD_DB matname, int *lmatname,
            int *nmat, int *nmatspec, int *speclist, int *dims, int *ndims,
            int *nspecies_mf, float *species_mf, int *mix_speclist, int *mixlen,
            int *datatype, int *optlist_id, int *status)
@@ -710,7 +738,7 @@ F_DBPUTMSP(int *dbid, FCD_DB name, int *lname, FCD_DB matname, int *lmatname,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                    F_DBCALCFL
+ * Routine                                                   DBCALCFL_FC
  *
  * Programmer
  *     Jeffery W. Long, NSSD-B
@@ -751,9 +779,12 @@ F_DBPUTMSP(int *dbid, FCD_DB name, int *lname, FCD_DB matname, int *lmatname,
  *     the facelist pointer in the global DBFortranPointers
  *     array.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBCALCFL(int *znodelist, int *nnodes, int *origin, int *zshapesize,
+DBCALCFL_FC (int *znodelist, int *nnodes, int *origin, int *zshapesize,
            int *zshapecnt, int *nzshapes, int *matlist, int *bnd_method,
            int *object_id)
 {
@@ -772,7 +803,7 @@ F_DBCALCFL(int *znodelist, int *nnodes, int *origin, int *zshapesize,
 }
 
 /*-------------------------------------------------------------------------
- * Routinex                                                       F_DBCLOSE
+ * Routinex                                                      DBCLOSE_FC
  *
  * Purpose
  *     Close a database.
@@ -800,9 +831,12 @@ F_DBCALCFL(int *znodelist, int *nnodes, int *origin, int *zshapesize,
  *     DBFortranRemovePointer to clear a DBfile* from the
  *     global array.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBCLOSE(int *dbid)
+DBCLOSE_FC (int *dbid)
 {
     int            status;
     DBfile        *dbfile = NULL;
@@ -817,7 +851,7 @@ F_DBCLOSE(int *dbid)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                       F_DBCREATE
+ * Routine                                                      DBCREATE_FC
  *
  * Purpose
  *     Create a new database.
@@ -844,9 +878,12 @@ F_DBCLOSE(int *dbid)
  *     Added a DBFortranAllocPointer call to put the DBfile*
  *     in a global array.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBCREATE(FCD_DB pathname, int *lpathname, int *mode, int *target,
+DBCREATE_FC (FCD_DB pathname, int *lpathname, int *mode, int *target,
            FCD_DB fileinfo, int *lfileinfo, int *filetype, int *dbid)
 {
     char          *path = NULL, *finfo = NULL;
@@ -894,7 +931,7 @@ F_DBCREATE(FCD_DB pathname, int *lpathname, int *mode, int *target,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                       F_DBINQLEN
+ * Routine                                                      DBINQLEN_FC
  *
  * Purpose
  *     Returns the number of elements of the requested variable.
@@ -921,9 +958,12 @@ F_DBCREATE(FCD_DB pathname, int *lpathname, int *mode, int *target,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBINQLEN(int *dbid, FCD_DB varname, int *lvarname, int *len)
+DBINQLEN_FC (int *dbid, FCD_DB varname, int *lvarname, int *len)
 {
     char          *varnm = NULL;
     DBfile        *dbfile = NULL;
@@ -963,7 +1003,7 @@ F_DBINQLEN(int *dbid, FCD_DB varname, int *lvarname, int *len)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBMKDIR
+ * Routine                                                       DBMKDIR_FC
  *
  * Purpose
  *     Creates a new directory.
@@ -990,9 +1030,12 @@ F_DBINQLEN(int *dbid, FCD_DB varname, int *lvarname, int *len)
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBMKDIR(int *dbid, FCD_DB dirname, int *ldirname, int *status)
+DBMKDIR_FC (int *dbid, FCD_DB dirname, int *ldirname, int *status)
 {
     char          *dir = NULL;
     DBfile        *dbfile = NULL;
@@ -1030,7 +1073,7 @@ F_DBMKDIR(int *dbid, FCD_DB dirname, int *ldirname, int *status)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                         F_DBOPEN
+ * Routine                                                        DBOPEN_FC
  *
  * Purpose
  *     Open an existing database
@@ -1060,9 +1103,12 @@ F_DBMKDIR(int *dbid, FCD_DB dirname, int *ldirname, int *status)
  *     Sean Ahern, Wed Jan 17 17:06:07 PST 1996
  *     Added the mode parameter.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBOPEN(FCD_DB pathname, int *lpathname, int *type, int *mode, int *dbid)
+DBOPEN_FC (FCD_DB pathname, int *lpathname, int *type, int *mode, int *dbid)
 {
     char          *path = NULL;
     DBfile        *dbfile = NULL;
@@ -1099,7 +1145,7 @@ F_DBOPEN(FCD_DB pathname, int *lpathname, int *type, int *mode, int *dbid)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBPUTFL
+ * Routine                                                       DBPUTFL_FC
  *
  * Purpose
  *     Write a facelist object into the database.
@@ -1129,9 +1175,12 @@ F_DBOPEN(FCD_DB pathname, int *lpathname, int *type, int *mode, int *dbid)
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTFL(int *dbid, FCD_DB name, int *lname, int *nfaces, int *ndims,
+DBPUTFL_FC (int *dbid, FCD_DB name, int *lname, int *nfaces, int *ndims,
           int *nodelist, int *lnodelist, int *origin, int *zoneno,
           int *shapesize, int *shapecnt, int *nshapes, int *types,
           int *typelist, int *ntypes, int *status)
@@ -1178,7 +1227,7 @@ F_DBPUTFL(int *dbid, FCD_DB name, int *lname, int *nfaces, int *ndims,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBWRTFL
+ * Routine                                                       DBWRTFL_FC
  *
  * Purpose
  *     Write a facelist object into the database.
@@ -1195,9 +1244,12 @@ F_DBPUTFL(int *dbid, FCD_DB name, int *lname, int *nfaces, int *ndims,
  *
  * Modifications
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBWRTFL(int *dbid, FCD_DB name, int *lname, int *object_id, int *status)
+DBWRTFL_FC (int *dbid, FCD_DB name, int *lname, int *object_id, int *status)
 {
     DBfile        *dbfile = NULL;
     DBfacelist    *fl = NULL;
@@ -1245,7 +1297,7 @@ F_DBWRTFL(int *dbid, FCD_DB name, int *lname, int *object_id, int *status)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                     F_DBPUTMMESH
+ * Routine                                                    DBPUTMMESH_FC
  *
  * Purpose
  *     Writes a multi-block mesh object into the open database.
@@ -1272,9 +1324,12 @@ F_DBWRTFL(int *dbid, FCD_DB name, int *lname, int *object_id, int *status)
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTMMESH(int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
+DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
              int *lmeshnames, int *meshtypes, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -1345,7 +1400,7 @@ F_DBPUTMMESH(int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                   F_DBPUTDEFVARS
+ * Routine                                                  DBPUTDEFVARS_FC
  *
  * Purpose
  *     Writes a defvars object into the open database.
@@ -1360,9 +1415,12 @@ F_DBPUTMMESH(int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
  *     Mark C. Miller 
  *     October 12, 2005
  *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTDEFVARS(int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
+DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
              int *lnames, int *types, FCD_DB defns, int *ldefns,
              int *optlist_id, int *status)
 {
@@ -1460,7 +1518,7 @@ F_DBPUTDEFVARS(int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                      F_DBPUTMVAR
+ * Routine                                                     DBPUTMVAR_FC
  *
  * Purpose
  *     Writes a multi-block variable object into the open database.
@@ -1490,9 +1548,12 @@ F_DBPUTDEFVARS(int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
  *     Sean Ahern, Wed Apr 15 11:37:28 PDT 1998
  *     Made the routine work.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTMVAR(int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
+DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
             int *lvarnames, int *vartypes, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -1560,7 +1621,7 @@ F_DBPUTMVAR(int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                      F_DBPUTMMAT
+ * Routine                                                     DBPUTMMAT_FC
  *
  * Purpose
  *     Writes a multi-block material object into the open file.
@@ -1577,9 +1638,12 @@ F_DBPUTMVAR(int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
  *
  * Modifications
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTMMAT(int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
+DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
             int *lmatnames, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -1649,7 +1713,7 @@ F_DBPUTMMAT(int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBPUTPM
+ * Routine                                                       DBPUTPM_FC
  *
  * Purpose
  *     Writes a point-mesh object to the database.
@@ -1676,9 +1740,12 @@ F_DBPUTMMAT(int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTPM(int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
+DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
           float *z, int *nels, int *datatype, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -1719,7 +1786,7 @@ F_DBPUTPM(int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                       F_DBPUTPV1
+ * Routine                                                      DBPUTPV1_FC
  *
  * Purpose
  *     Write a scalar point variable object into the database.
@@ -1746,9 +1813,13 @@ F_DBPUTPM(int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTPV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
+DBPUTPV1_FC (int *dbid, FCD_DB name,
+           int *lname, FCD_DB meshname, int *lmeshname,
            float *var, int *nels, int *datatype, int *optlist_id, int *status)
 {
     char          *nm = NULL, *mnm = NULL;
@@ -1805,7 +1876,7 @@ F_DBPUTPV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBPUTQM
+ * Routine                                                       DBPUTQM_FC
  *
  * Purpose
  *     Write a quadmesh object into the database.
@@ -1833,9 +1904,12 @@ F_DBPUTPV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTQM(int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
+DBPUTQM_FC (int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
           FCD_DB yname, int *lyname, FCD_DB zname, int *lzname, float *x,
           float *y, float *z, int *dims, int *ndims, int *datatype,
           int *coordtype, int *optlist_id, int *status)
@@ -1939,7 +2013,7 @@ F_DBPUTQM(int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                       F_DBPUTQV1
+ * Routine                                                      DBPUTQV1_FC
  *
  * Purpose
  *     Write a single quad variable object to the database.
@@ -1966,9 +2040,13 @@ F_DBPUTQM(int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTQV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
+DBPUTQV1_FC (int *dbid, FCD_DB name,
+           int *lname, FCD_DB meshname, int *lmeshname,
            float *var, int *dims, int *ndims, float *mixvar, int *mixlen,
            int *datatype, int *centering, int *optlist_id, int *status)
 {
@@ -2023,7 +2101,7 @@ F_DBPUTQV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBPUTUM
+ * Routine                                                       DBPUTUM_FC
  *
  * Purpose
  *     Write a UCD mesh object into the database.
@@ -2050,9 +2128,12 @@ F_DBPUTQV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTUM(int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
+DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
           float *z, FCD_DB xname, int *lxname, FCD_DB yname, int *lyname,
           FCD_DB zname, int *lzname, int *datatype, int *nnodes, int *nzones,
           FCD_DB zlname, int *lzlname, FCD_DB flname, int *lflname,
@@ -2187,7 +2268,7 @@ F_DBPUTUM(int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                       F_DBPUTUV1
+ * Routine                                                      DBPUTUV1_FC
  *
  * Purpose
  *     Write one UCD variable object to the database.
@@ -2214,9 +2295,13 @@ F_DBPUTUM(int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTUV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
+DBPUTUV1_FC (int *dbid, FCD_DB name,
+           int *lname, FCD_DB meshname, int *lmeshname,
            float *var, int *nels, float *mixvar, int *mixlen, int *datatype,
            int *centering, int *optlist_id, int *status)
 {
@@ -2270,7 +2355,7 @@ F_DBPUTUV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBPUTZL
+ * Routine                                                       DBPUTZL_FC
  *
  * Purpose
  *     Write a zonelist object do the database.
@@ -2297,9 +2382,12 @@ F_DBPUTUV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname, int *lmeshname,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTZL(int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
+DBPUTZL_FC (int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
           int *nodelist, int *lnodelist, int *origin, int *shapesize,
           int *shapecnt, int *nshapes, int *status)
 {
@@ -2335,7 +2423,7 @@ F_DBPUTZL(int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBPUTZL2
+ * Routine                                                      DBPUTZL2_FC
  *
  * Purpose
  *     Write a zonelist object do the database.
@@ -2350,10 +2438,13 @@ F_DBPUTZL(int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
  *     Mark C. Miller
  *     July 19, 2005
  *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 
 FORTRAN
-F_DBPUTZL2(int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
+DBPUTZL2_FC (int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
           int *nodelist, int *lnodelist, int *origin, int *lo_offset,
           int *hi_offset, int *shapetype, int *shapesize,
           int *shapecnt, int *nshapes, int *optlist_id, int *status)
@@ -2394,7 +2485,7 @@ F_DBPUTZL2(int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBRDVAR
+ * Routine                                                       DBRDVAR_FC
  *
  * Purpose
  *     Read a simple variable from the database.
@@ -2421,9 +2512,12 @@ F_DBPUTZL2(int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBRDVAR(int *dbid, FCD_DB varname, int *lvarname, void *ptr)
+DBRDVAR_FC (int *dbid, FCD_DB varname, int *lvarname, void *ptr)
 {
     int            iret;
     char          *varnm = NULL;
@@ -2457,7 +2551,7 @@ F_DBRDVAR(int *dbid, FCD_DB varname, int *lvarname, void *ptr)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                   F_DBRDVARSLICE
+ * Routine                                                  DBRDVARSLICE_FC
  *
  * Purpose
  *     Read a slice of a simple variable from the database.
@@ -2484,9 +2578,12 @@ F_DBRDVAR(int *dbid, FCD_DB varname, int *lvarname, void *ptr)
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBRDVARSLICE(int *dbid, FCD_DB varname, int *lvarname, int *offset,
+DBRDVARSLICE_FC (int *dbid, FCD_DB varname, int *lvarname, int *offset,
                int *length, int *stride, int *ndims, void *ptr)
 {
     int            i;
@@ -2545,10 +2642,13 @@ F_DBRDVARSLICE(int *dbid, FCD_DB varname, int *lvarname, int *offset,
  *
  * Modifications:
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------
  */
 FORTRAN
-F_DBWRITESLICE(int *dbid, FCD_DB varname, int *lvarname, void *values,
+DBWRITESLICE_FC (int *dbid, FCD_DB varname, int *lvarname, void *values,
                int *datatype, int *offset, int *length, int *stride,
                int *dims, int *ndims)
 {
@@ -2591,7 +2691,7 @@ F_DBWRITESLICE(int *dbid, FCD_DB varname, int *lvarname, void *values,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                       F_DBSETDIR
+ * Routine                                                      DBSETDIR_FC
  *
  * Purpose
  *     Set the current directory within the database
@@ -2618,9 +2718,12 @@ F_DBWRITESLICE(int *dbid, FCD_DB varname, int *lvarname, void *values,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBSETDIR(int *dbid, FCD_DB pathname, int *lpathname)
+DBSETDIR_FC (int *dbid, FCD_DB pathname, int *lpathname)
 {
     int            err;
     char          *path = NULL;
@@ -2658,7 +2761,7 @@ F_DBSETDIR(int *dbid, FCD_DB pathname, int *lpathname)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                     F_DBSETDIRID
+ * Routine                                                    DBSETDIRID_FC
  *
  * Purpose
  *     Set the current directory by ID within the database.
@@ -2681,9 +2784,12 @@ F_DBSETDIR(int *dbid, FCD_DB pathname, int *lpathname)
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBSETDIRID(int *dbid, int *dirid)
+DBSETDIRID_FC (int *dbid, int *dirid)
 {
     DBfile        *dbfile = NULL;
 
@@ -2695,7 +2801,7 @@ F_DBSETDIRID(int *dbid, int *dirid)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                   F_DBSHOWERRORS
+ * Routine                                                  DBSHOWERRORS_FC
  *
  * Purpose
  *     Same as DBShowErrors except function pointers cannot be
@@ -2714,9 +2820,12 @@ F_DBSETDIRID(int *dbid, int *dirid)
  *
  * Modifications
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBSHOWERRORS(int *mode)
+DBSHOWERRORS_FC (int *mode)
 {
     DBShowErrors(*mode, NULL);
 
@@ -2724,7 +2833,7 @@ F_DBSHOWERRORS(int *mode)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBWRITE
+ * Routine                                                       DBWRITE_FC
  *
  * Purpose
  *     Write a simple variable to the database
@@ -2751,9 +2860,12 @@ F_DBSHOWERRORS(int *mode)
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBWRITE(int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
+DBWRITE_FC (int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
           int *ndims, int *datatype)
 {
     char          *varnm = NULL;
@@ -2788,7 +2900,7 @@ F_DBWRITE(int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBPUTCA
+ * Routine                                                       DBPUTCA_FC
  *
  * Purpose
  *     Write a compound array object into the given SILO file.
@@ -2818,9 +2930,12 @@ F_DBWRITE(int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTCA(int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
+DBPUTCA_FC (int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
           int *elengths, int *nelems, float *values, int *datatype,
           int *optlist_id, int *status)
 {
@@ -2887,7 +3002,7 @@ F_DBPUTCA(int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBGETCA
+ * Routine                                                       DBGETCA_FC
  *
  * Purpose
  *     Retrieve a compound array object from the file. The
@@ -2908,7 +3023,7 @@ F_DBPUTCA(int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
  *     matzke@viper, Wed Oct 26 11:15:02 PDT 1994
  *     The following parameters may be null pointers, in which case
  *     this function doesn't do anything with them.  This is used by
- *     the F_DBFGETCA and F_DBINQCA functions.
+ *     the DBFGETCAFC and DBINQCA_FC functions.
  *
  *         enames, lenames, elengths, datatype
  *
@@ -2923,9 +3038,12 @@ F_DBPUTCA(int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBGETCA(int *dbid, FCD_DB _name, int *lname, int *width, FCD_DB enames,
+DBGETCA_FC (int *dbid, FCD_DB _name, int *lname, int *width, FCD_DB enames,
           int *elengths, int *nelems, float *values, int *nvalues,
           int *datatype)
 {
@@ -3007,10 +3125,10 @@ F_DBGETCA(int *dbid, FCD_DB _name, int *lname, int *width, FCD_DB enames,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                       F_DBFGETCA
+ * Routine                                                      DBFGETCA_FC
  *
  * Purpose
- *     Same as F_DBGETCA except not so many parameters.  Similar
+ *     Same as DBGETCA_FC except not so many parameters.  Similar
  *     to DBFgetCompoundarray, except return vector is through
  *     a previously allocated parameter.
  *
@@ -3032,9 +3150,12 @@ F_DBGETCA(int *dbid, FCD_DB _name, int *lname, int *width, FCD_DB enames,
  *     I added support for the _fcd fortran character
  *     array descriptor.  This is only a Cray thing.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBFGETCA(int *dbid, FCD_DB _name, int *lname, float *values, int *nvalues)
+DBFGETCA_FC (int *dbid, FCD_DB _name, int *lname, float *values, int *nvalues)
 {
     API_BEGIN("dbfgetca", int, -1) {
 #if CRAY
@@ -3042,11 +3163,11 @@ F_DBFGETCA(int *dbid, FCD_DB _name, int *lname, float *values, int *nvalues)
         
         fstring = _cptofcd(DB_F77NULLSTRING, strlen(DB_F77NULLSTRING));
 
-        API_RETURN(F_DBGETCA(dbid, _name, lname,
+        API_RETURN(DBGETCA_FC (dbid, _name, lname,
                              NULL, fstring, NULL, NULL,
                              values, nvalues, NULL));
 #else
-        API_RETURN(F_DBGETCA(dbid, _name, lname,
+        API_RETURN(DBGETCA_FC (dbid, _name, lname,
                              NULL, NULL, NULL, NULL,
                              values, nvalues, NULL));
 #endif
@@ -3055,7 +3176,7 @@ F_DBFGETCA(int *dbid, FCD_DB _name, int *lname, float *values, int *nvalues)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    F_DBPUTCURVE
+ * Function:    DBPUTCURVE_FC
  *
  * Purpose: Write a curve object into the given PDB file.
  *
@@ -3069,10 +3190,13 @@ F_DBFGETCA(int *dbid, FCD_DB _name, int *lname, float *values, int *nvalues)
  *
  * Modifications:
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------
  */
 FORTRAN
-F_DBPUTCURVE (int *dbid, FCD_DB _name, int *lname, float *xvals, float *yvals,
+DBPUTCURVE_FC (int *dbid, FCD_DB _name, int *lname, float *xvals, float *yvals,
               int *datatype, int *npts, int *optlist_id, int *status)
 {
 
@@ -3109,7 +3233,7 @@ F_DBPUTCURVE (int *dbid, FCD_DB _name, int *lname, float *xvals, float *yvals,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    F_DBGETCURVE
+ * Function:    DBGETCURVE_FC
  *
  * Purpose: Reads a curve from a PDB file.  The caller supplies the
  *      output buffers for the x and y values but specifies how
@@ -3127,10 +3251,13 @@ F_DBPUTCURVE (int *dbid, FCD_DB _name, int *lname, float *xvals, float *yvals,
  *
  * Modifications:
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------
  */
 FORTRAN
-F_DBGETCURVE (int *dbid, FCD_DB _name, int *lname, int *maxpts, float *xvals,
+DBGETCURVE_FC (int *dbid, FCD_DB _name, int *lname, int *maxpts, float *xvals,
               float *yvals, int *datatype, int *npts)
 {
 
@@ -3187,7 +3314,7 @@ F_DBGETCURVE (int *dbid, FCD_DB _name, int *lname, int *maxpts, float *xvals,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                        F_DBINQCA
+ * Routine                                                       DBINQCA_FC
  *
  * Purpose
  *     Inquire compound array object attributes.
@@ -3214,9 +3341,12 @@ F_DBGETCURVE (int *dbid, FCD_DB _name, int *lname, int *maxpts, float *xvals,
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBINQCA(int *dbid, FCD_DB _name, int *lname, int *maxwidth, int *nelems,
+DBINQCA_FC (int *dbid, FCD_DB _name, int *lname, int *maxwidth, int *nelems,
           int *nvalues, int *datatype)
 {
     DBfile        *dbfile = NULL;
@@ -3284,9 +3414,12 @@ F_DBINQCA(int *dbid, FCD_DB _name, int *lname, int *maxwidth, int *nelems,
  *     Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *     I replaced API_END with API_END_NOPOP.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBADDICMP(int *obj_id, char *compname, int *val)
+DBADDICMP_FC (int *obj_id, char *compname, int *val)
 {
     DBobject      *object = NULL;
 
@@ -3298,7 +3431,7 @@ F_DBADDICMP(int *obj_id, char *compname, int *val)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                     DBADDRCMP
+ * Routine                                                  DBADDRCMP_FC
  *
  * Purpose
  *     Add a real compname to the given compname list.
@@ -3317,9 +3450,12 @@ F_DBADDICMP(int *obj_id, char *compname, int *val)
  *     Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *     I replaced API_END with API_END_NOPOP.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBADDRCMP(int *object_id, char *compname, float *val)
+DBADDRCMP_FC (int *object_id, char *compname, float *val)
 {
     DBobject      *object = NULL;
 
@@ -3331,7 +3467,7 @@ F_DBADDRCMP(int *object_id, char *compname, float *val)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                     DBADDCCMP
+ * Routine                                                  DBADDCCMP_FC
  *
  * Purpose
  *     Add a character component to the given comp list.
@@ -3357,9 +3493,12 @@ F_DBADDRCMP(int *object_id, char *compname, float *val)
  *     I removed the return statement at the end of the routine which
  *     can never be reached.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBADDCCMP(int *object_id, char *compname, char *val)
+DBADDCCMP_FC (int *object_id, char *compname, char *val)
 {
     DBobject      *object = NULL;
 
@@ -3371,7 +3510,7 @@ F_DBADDCCMP(int *object_id, char *compname, char *val)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                    DBMKOBJECT
+ * Routine                                                 DBMKOBJECT_FC
  *
  * Purpose
  *     Create an component list and return its identifier.
@@ -3396,9 +3535,12 @@ F_DBADDCCMP(int *object_id, char *compname, char *val)
  *     Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *     I replaced API_END with API_END_NOPOP.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBMKOBJECT(int *maxcomponents, int *object_id)
+DBMKOBJECT_FC (int *maxcomponents, int *object_id)
 {
     API_BEGIN("dbmkobject", int, -1) {
         if (*maxcomponents <= 0)
@@ -3411,7 +3553,7 @@ F_DBMKOBJECT(int *maxcomponents, int *object_id)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                  DBFREEOBJECT
+ * Routine                                               DBFREEOBJECT_FC
  *
  * Purpose
  *     Free an object list.
@@ -3430,11 +3572,14 @@ F_DBMKOBJECT(int *maxcomponents, int *object_id)
  *     I replaced API_END with API_END_NOPOP.
  *
  *     Eric Brugger, Wed Mar  8 09:11:28 PST 1995
- *     I corrected the name from DBFREEOBJECT to F_DBFREEOBJECT.
+ *     I corrected the name from DBFREEOBJECT to DBFREEOBJECT_FC.
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBFREEOBJECT(int *object_id)
+DBFREEOBJECT_FC (int *object_id)
 {
     DBobject      *obj = NULL;
 
@@ -3447,7 +3592,7 @@ F_DBFREEOBJECT(int *object_id)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                       F_DBGETQV1
+ * Routine                                                      DBGETQV1_FC
  *
  * Purpose
  *     Read a quadrilateral variable from the database.
@@ -3474,9 +3619,12 @@ F_DBFREEOBJECT(int *object_id)
  *     Added a DBfile lookup in a global array using
  *     DBFortranAccessPointer.
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBGETQV1(int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
+DBGETQV1_FC (int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
            int *ndims, void *mixvar, int *mixlen, int *datatype, int *centering)
 {
     char           tmpstr[64];
@@ -3544,7 +3692,7 @@ F_DBGETQV1(int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                      F_DBINQFILE
+ * Routine                                                     DBINQFILE_FC
  *
  * Purpose
  *     Tests to see if the filename specified is a Silo file.
@@ -3561,9 +3709,12 @@ F_DBGETQV1(int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
  *
  * Modifications
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBINQFILE(FCD_DB pathname, int *lpathname, int *is_file)
+DBINQFILE_FC (FCD_DB pathname, int *lpathname, int *is_file)
 {
     char          *path = NULL;
 
@@ -3589,7 +3740,7 @@ F_DBINQFILE(FCD_DB pathname, int *lpathname, int *is_file)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                  F_DBSET2DSTRLEN
+ * Routine                                                 DBSET2DSTRLEN_FC
  *
  * Purpose
  *     Set the 2D string length used for a 2D arrays of strings in fortran
@@ -3604,9 +3755,15 @@ F_DBINQFILE(FCD_DB pathname, int *lpathname, int *is_file)
  * Programmer
  *     Mark C. Miller 
  *     Thu Jul 28 10:41:14 PDT 2005 
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBSET2DSTRLEN(int *len)
+DBSET2DSTRLEN_FC (int *len)
 {
     int old = fortran2DStrLen;
     API_BEGIN("dbset2dstrlen", int, -1) {
@@ -3617,7 +3774,7 @@ F_DBSET2DSTRLEN(int *len)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                  F_DBGET2DSTRLEN
+ * Routine                                                 DBGET2DSTRLEN_FC
  *
  * Purpose
  *     Get the 2D string length used for a 2D arrays of strings in fortran
@@ -3632,9 +3789,15 @@ F_DBSET2DSTRLEN(int *len)
  * Programmer
  *     Mark C. Miller 
  *     Thu Jul 28 10:41:14 PDT 2005 
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBGET2DSTRLEN()
+DBGET2DSTRLEN_FC ()
 {
     API_BEGIN("dbget2dstrlen", int, -1) {
         API_RETURN(fortran2DStrLen);
@@ -3643,7 +3806,7 @@ F_DBGET2DSTRLEN()
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                    F_DBSETOVRWRT
+ * Routine                                                   DBSETOVRWRT_FC
  *
  * Purpose: set value for flag controlling overwrite
  *
@@ -3656,9 +3819,15 @@ F_DBGET2DSTRLEN()
  * Programmer
  *     Mark C. Miller 
  *     Mon May  1 15:50:09 PDT 2006 
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBSETOVRWRT(int *allow)
+DBSETOVRWRT_FC (int *allow)
 {
     API_BEGIN("dbsetovrwrt", int, -1) {
         API_RETURN(DBSetAllowOverwrites(*allow));
@@ -3667,7 +3836,7 @@ F_DBSETOVRWRT(int *allow)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                    F_DBGETOVRWRT
+ * Routine                                                   DBGETOVRWRT_FC
  *
  * Purpose: Get value for flag controlling overwrite
  *
@@ -3680,9 +3849,15 @@ F_DBSETOVRWRT(int *allow)
  * Programmer
  *     Mark C. Miller 
  *     Mon May  1 15:50:09 PDT 2006 
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBGETOVRWRT()
+DBGETOVRWRT_FC ()
 {
     API_BEGIN("dbgetovrwrt", int, -1) {
         API_RETURN(DBGetAllowOverwrites());
@@ -3691,7 +3866,7 @@ F_DBGETOVRWRT()
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                    F_DBSETCKSUMS
+ * Routine                                                   DBSETCKSUMS_FC
  *
  * Purpose: set value for flag controlling checksums 
  *
@@ -3704,9 +3879,15 @@ F_DBGETOVRWRT()
  * Programmer
  *     Mark C. Miller 
  *     Mon May  1 15:50:09 PDT 2006 
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBSETCKSUMS(int *enable)
+DBSETCKSUMS_FC (int *enable)
 {
     API_BEGIN("dbsetcksums", int, -1) {
         API_RETURN(DBSetEnableChecksums(*enable));
@@ -3715,7 +3896,7 @@ F_DBSETCKSUMS(int *enable)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                    F_DBGETCKSUMS
+ * Routine                                                   DBGETCKSUMS_FC
  *
  * Purpose: Get value for flag controlling checksums
  *
@@ -3728,9 +3909,15 @@ F_DBSETCKSUMS(int *enable)
  * Programmer
  *     Mark C. Miller 
  *     Mon May  1 15:50:09 PDT 2006 
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBGETCKSUMS()
+DBGETCKSUMS_FC ()
 {
     API_BEGIN("dbgetcksums", int, -1) {
         API_RETURN(DBGetEnableChecksums());
@@ -3738,7 +3925,7 @@ F_DBGETCKSUMS()
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 /*----------------------------------------------------------------------
- * Routine                                               F_DBSETCOMPRESS
+ * Routine                                              DBSETCOMPRESS_FC
  *
  * Purpose
  *     Set the compression information.
@@ -3762,10 +3949,13 @@ F_DBGETCKSUMS()
  *
  * Modifications
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBSETCOMPRESS(FCD_DB cvalue, int *lcvalue)
+DBSETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
 {
     char          *cval = NULL;
     DBoptlist     *optlist = NULL;
@@ -3788,7 +3978,7 @@ F_DBSETCOMPRESS(FCD_DB cvalue, int *lcvalue)
     return(0);
 }
 /*----------------------------------------------------------------------
- * Routine                                               F_DBGETCOMPRESS
+ * Routine                                              DBGETCOMPRESS_FC
  *
  * Purpose
  *     Get the compression information.
@@ -3812,10 +4002,13 @@ F_DBSETCOMPRESS(FCD_DB cvalue, int *lcvalue)
  *
  * Modifications
  *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *
  *
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBGETCOMPRESS(FCD_DB cvalue, int *lcvalue)
+DBGETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
 {
     char          *cval = NULL;
 
@@ -3834,7 +4027,7 @@ F_DBGETCOMPRESS(FCD_DB cvalue, int *lcvalue)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                  F_DBSETHDFNMS
+ * Routine                                                   DBSETHDFNMS_FC
  *
  * Purpose: set value for flag controlling friendly hdf5 names 
  *
@@ -3846,9 +4039,15 @@ F_DBGETCOMPRESS(FCD_DB cvalue, int *lcvalue)
  *
  * Programmer
  *     Mark C. Miller, Thu Apr 19 19:26:11 PDT 2007 
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBSETHDFNMS(int *enable)
+DBSETHDFNMS_FC (int *enable)
 {
     API_BEGIN("dbsethdfnms", int, -1) {
         API_RETURN(DBSetFriendlyHDF5Names(*enable));
@@ -3857,7 +4056,7 @@ F_DBSETHDFNMS(int *enable)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                  F_DBGETHDFNMS
+ * Routine                                                   DBGETHDFNMS_FC
  *
  * Purpose: Get value for flag controlling friendly hdf5 names 
  *
@@ -3869,9 +4068,15 @@ F_DBSETHDFNMS(int *enable)
  *
  * Programmer
  *     Mark C. Miller, Thu Apr 19 19:26:11 PDT 2007 
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBGETHDFNMS()
+DBGETHDFNMS_FC ()
 {
     API_BEGIN("dbgethdfnms", int, -1) {
         API_RETURN(DBGetFriendlyHDF5Names());
@@ -3880,7 +4085,7 @@ F_DBGETHDFNMS()
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                  F_DBSETDEPWARN
+ * Routine                                                  DBSETDEPWARN_FC
  *
  * Purpose: set maximum deprecation warnings issued by silo lib 
  *
@@ -3894,7 +4099,7 @@ F_DBGETHDFNMS()
  *     Mark C. Miller, Thu Oct 11 20:56:41 PDT 2007
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBSETDEPWARN(int *max_count)
+DBSETDEPWARN_FC (int *max_count)
 {
     API_BEGIN("dbsetdepwarn", int, -1) {
         API_RETURN(DBSetDeprecateWarnings(*max_count));
@@ -3903,7 +4108,7 @@ F_DBSETDEPWARN(int *max_count)
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                  F_DBGETDEPWARN
+ * Routine                                                  DBGETDEPWARN_FC
  *
  * Purpose: Get max. number of deprecation warnings issued by Silo lib 
  *
@@ -3917,7 +4122,7 @@ F_DBSETDEPWARN(int *max_count)
  *     Mark C. Miller, Thu Oct 11 20:56:41 PDT 2007
  *-------------------------------------------------------------------------*/
 FORTRAN
-F_DBGETDEPWARN()
+DBGETDEPWARN_FC ()
 {
     API_BEGIN("dbgetdepwarn", int, -1) {
         API_RETURN(DBGetDeprecateWarnings());
@@ -3926,7 +4131,7 @@ F_DBGETDEPWARN()
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                 F_DBMKMRGTREE
+ * Routine                                                DBMKMRGTREE_FC
  *
  * Purpose
  *     Create an mrgtree and return its identifier.
@@ -3939,9 +4144,15 @@ F_DBGETDEPWARN()
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBMKMRGTREE(int *source_mesh_type, int *type_info_bits,
+DBMKMRGTREE_FC (int *source_mesh_type, int *type_info_bits,
     int *max_root_descendents, int *optlist_id, int *tree_id)
 {
     DBmrgtree *tree = NULL;
@@ -3960,7 +4171,7 @@ F_DBMKMRGTREE(int *source_mesh_type, int *type_info_bits,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                               F_DBFREEMRGTREE
+ * Routine                                              DBFREEMRGTREE_FC
  *
  * Purpose
  *     Free an mrg tree.
@@ -3973,9 +4184,15 @@ F_DBMKMRGTREE(int *source_mesh_type, int *type_info_bits,
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBFREEMRGTREE(int *tree_id)
+DBFREEMRGTREE_FC (int *tree_id)
 {
     DBmrgtree     *tree= NULL;
 
@@ -3990,7 +4207,7 @@ F_DBFREEMRGTREE(int *tree_id)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                   DBADDREGION
+ * Routine                                                DBADDREGION_FC
  *
  * Purpose
  *     Add a region to an mrg tree 
@@ -4003,9 +4220,15 @@ F_DBFREEMRGTREE(int *tree_id)
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBADDREGION(int *tree_id, FCD_DB region_name, int *lregion_name,
+DBADDREGION_FC (int *tree_id, FCD_DB region_name, int *lregion_name,
     int *type_info_bits, int *max_descendents, FCD_DB maps_name,
     int *lmaps_name, int *nsegs, int *seg_ids, int *seg_sizes,
     int *seg_types, int *optlist_id, int *status)
@@ -4061,7 +4284,7 @@ F_DBADDREGION(int *tree_id, FCD_DB region_name, int *lregion_name,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                   DBSETCWR
+ * Routine                                                   DBSETCWR_FC
  *
  * Purpose
  *     Set current working region of an mrg tree 
@@ -4074,9 +4297,15 @@ F_DBADDREGION(int *tree_id, FCD_DB region_name, int *lregion_name,
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBSETCWR(int *tree_id, FCD_DB path, int *lpath)
+DBSETCWR_FC (int *tree_id, FCD_DB path, int *lpath)
 {
     DBmrgtree *tree = NULL;
     char *path_nm = NULL;
@@ -4111,7 +4340,7 @@ F_DBSETCWR(int *tree_id, FCD_DB path, int *lpath)
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                  DBPUTMRGTREE
+ * Routine                                               DBPUTMRGTREE_FC
  *
  * Purpose
  *     Write mrg tree to a file 
@@ -4124,9 +4353,15 @@ F_DBSETCWR(int *tree_id, FCD_DB path, int *lpath)
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTMRGTREE(int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
+DBPUTMRGTREE_FC (int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
     FCD_DB mesh_name, int *lmesh_name, int *tree_id, int *optlist_id,
     int *status)
 {
@@ -4178,7 +4413,7 @@ F_DBPUTMRGTREE(int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                  DBPUTGRPLMAP
+ * Routine                                               DBPUTGRPLMAP_FC
  *
  * Purpose
  *     Set current working region of an mrg tree 
@@ -4197,9 +4432,15 @@ F_DBPUTMRGTREE(int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTGRPLMAP(int *dbid, FCD_DB map_name, int *lmap_name,
+DBPUTGRPLMAP_FC (int *dbid, FCD_DB map_name, int *lmap_name,
     int *num_segments, int *groupel_types, int *segment_lengths,
     int *segment_ids, int *segment_data_ids, int *segment_fracs_ids,
     int *fracs_data_type, int *optlist_id, int *status)
@@ -4257,7 +4498,7 @@ F_DBPUTGRPLMAP(int *dbid, FCD_DB map_name, int *lmap_name,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                  DBPUTCSGM
+ * Routine                                                  DBPUTCSGM_FC
  *
  * Purpose: Write csg mesh to the silo file
  *
@@ -4271,7 +4512,7 @@ F_DBPUTGRPLMAP(int *dbid, FCD_DB map_name, int *lmap_name,
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTCSGM(int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
+DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
     const int *typeflags, const int *bndids, const void *coeffs,
     int *lcoeffs, int *datatype, const double *extents, FCD_DB zlname,
     int *lzlname, int *optlist_id, int *status) 
@@ -4310,7 +4551,7 @@ F_DBPUTCSGM(int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
             zl_nm  = SW_strndup(zlname, *lzlname);
 #endif
 
-        *status = DBPutCsgm(dbfile, nm, *ndims, *nbounds, typeflags,
+        *status = DBPutCsgmesh(dbfile, nm, *ndims, *nbounds, typeflags,
             bndids, coeffs, *lcoeffs, *datatype, extents, zl_nm, optlist);
 
         FREE(nm);
@@ -4322,7 +4563,7 @@ F_DBPUTCSGM(int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                  DBPUTCSGV
+ * Routine                                                  DBPUTCSGV_FC
  *
  * Purpose: Write csg variable to the silo file
  *
@@ -4336,7 +4577,7 @@ F_DBPUTCSGM(int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTCSGV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
+DBPUTCSGV1_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
     int *lmeshname, void *var_data, int *nvals, int *datatype,
     int *centering, int *optlist_id, int *status)
 {
@@ -4374,7 +4615,7 @@ F_DBPUTCSGV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
             m_nm  = SW_strndup(meshname, *lmeshname);
 #endif
 
-        *status = DBPutCsgm(dbfile, nm, m_nm, 1, &nm, &var_data, *nvals,
+        *status = DBPutCsgvar(dbfile, nm, m_nm, 1, &nm, &var_data, *nvals,
             *datatype, *centering, optlist);
 
         FREE(nm);
@@ -4386,7 +4627,7 @@ F_DBPUTCSGV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                  DBPUTCSGZL
+ * Routine                                                 DBPUTCSGZL_FC
  *
  * Purpose: Write csg zonelist to the silo file
  *
@@ -4400,7 +4641,7 @@ F_DBPUTCSGV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *--------------------------------------------------------------------*/
 FORTRAN
-F_DBPUTCSGZL(int *dbid, FCD_DB name, int *lname, int *nregs,
+DBPUTCSGZL_FC (int *dbid, FCD_DB name, int *lname, int *nregs,
     const int *typeflags, const int *leftids, const int *rightids,
     const void *xforms, int *lxforms, int *datatype, int *nzones,
     const int *zonelist, int *optlist_id, int *status) 
