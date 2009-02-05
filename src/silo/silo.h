@@ -255,6 +255,7 @@ typedef enum {
 #define DBOPT_REGNAMES          309
 #define DBOPT_ZONENAMES         310
 #define DBOPT_HIDE_FROM_GUI     311
+#define DBOPT_TOPO_DIM          312 /* TOPOlogical DIMension */
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -789,6 +790,7 @@ typedef struct {
     char          *name;        /* Name associated with mesh */
     int            cycle;       /* Problem cycle number */
     int            coord_sys;   /* Coordinate system */
+    int            topo_dim;    /* Topological dimensions */
     char          *units[3];    /* Units for variable, e.g, 'mm/ms' */
     char          *labels[3];   /* Label associated with each dimension */
 

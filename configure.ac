@@ -280,15 +280,19 @@ dnl     Currently using autoreconfig via config/bootstrap to use
 dnl     autoheaders, libtoolize, aclocal, automake, autoconf, and
 dnl     autotest.
 dnl
+dnl     Thomas Treadway, Mon Jun 26 13:06:39 PDT 2006
+dnl     The building of tools/python is conditional and performed only on
+dnl     explicit request.
+dnl
 dnl --------------------------------------------------------------------------
 
 dnl
 dnl Configuration header stuff...
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 5.0.0a)
-m4_define(SILO_DATE, 2006/06/01)
-m4_define(SILO_TIME, 13:11:00)
+m4_define(SILO_VERSION, 5.0.0b)
+m4_define(SILO_DATE, 2006/06/26)
+m4_define(SILO_TIME, 13:10:00)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
@@ -301,6 +305,7 @@ AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([1.9 foreign no-installinfo no-installman no-texinfo.tex])
 
 AC_CONFIG_HEADER([config.h:config/config.h.in])
+AM_MAINTAINER_MODE
 AC_COPYRIGHT([This work was produced at the University of California,
 Lawrence Livermore National Laboratory (UC LLNL) under contract
 no. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
@@ -313,13 +318,6 @@ AC_CONFIG_TESTDIR(tests)
 
 dnl Determine the host type
 AC_CANONICAL_HOST
-AM_MAINTAINER_MODE
-
-### Init the tflops_override variable.
-tflops_override=no
-
-### Init the ubgl_override variable.
-ubgl_override=no
 
 # Grab the version number
 AC_MSG_CHECKING(what version the package is)
@@ -427,24 +425,41 @@ AC_SUBST(HDF5_DRV)
 # it does allow the user to prevent the GNU readline files from being
 # detected.
 AC_ARG_WITH(readline,
-	AC_HELP_STRING([--without-readline],
-            [disable detection of GNU readline]),
+	AC_HELP_STRING([--with-readline],
+            [enable detection of GNU readline @<:@default=yes@:>@]),
 	detect_readline=$withval,
 	detect_readline=yes)
+
+dnl
+dnl Check if we should build python module.
+dnl
+AC_MSG_CHECKING(if we should build python module)
+AC_ARG_ENABLE(pythonmodule,
+        AC_HELP_STRING([--enable-pythonmodule],
+            [build python module @<:@default=no@:>@]),
+        BuildPythonmodule="$enable_pythonmodule",
+        BuildPythonmodule=no)
+if test "$BuildPythonmodule" = "yes"; then
+    AC_MSG_RESULT(yes)
+    PYTHONMODULE=python
+else
+    AC_MSG_RESULT(no)
+    PYTHONMODULE=""
+fi
+AC_SUBST(PYTHONMODULE)
 
 dnl
 dnl Check if we should build browser.
 dnl
 AC_MSG_CHECKING(if we should build silo's browser)
 AC_ARG_ENABLE(browser,
-        AC_HELP_STRING([--disable-browser],
-            [do not build browser]),
+        AC_HELP_STRING([--enable-browser],
+            [build browser @<:@default=yes@:>@]),
         BuildBrowser="$enable_browser",
         BuildBrowser=yes)
 if test "X$BuildBrowser" = "Xyes"; then
     AC_MSG_RESULT(yes)
     BROWSER="browser"
-    AC_CHECK_HEADERS(fnmatch.h)
 else
     AC_MSG_RESULT(no)
     BROWSER=""
@@ -525,17 +540,16 @@ AC_HEADER_TIME
 dnl
 dnl If we don't have these header files, we can't continue.
 dnl
-AC_CHECK_HEADERS(fcntl.h limits.h sys/time.h sys/types.h unistd.h stdarg.h,
-                 ,
+AC_CHECK_HEADERS(fcntl.h limits.h sys/time.h sys/types.h unistd.h stdarg.h, ,
 AC_MSG_ERROR([$0 wasn't able to find a necessary header file
 (see above).  Please rectify this and rerun configure.
 See the file INSTALL_FAQ in this directory for possible reasons
-this might have happened.]
-            )
-                )
+this might have happened.]))
 
 dnl
 dnl Check for header files that we can do without.
+dnl Only needed by browser
+AC_CHECK_HEADERS(fnmatch.h)
 dnl Only needed by silock
 AC_CHECK_HEADERS(ieeefp.h)
 
@@ -587,24 +601,10 @@ do
 done
 
 dnl
-dnl If tflops_override is 'no' then do the following checks.
-dnl
-if test 'no' = $tflops_override; then
-    dnl
-    dnl Check for library functions.  If we don't have one, we can't continue.
-    dnl
-    AC_CHECK_FUNCS(select strerror,
-                   ,
-                   AC_MSG_ERROR([$0 wasn't able to find a necessary library
-                                function (see above).])
-                  )
-fi
-
-dnl
 dnl Check for library functions that can work around, or that we have
 dnl replacements for.
 dnl
-AC_CHECK_FUNCS(memmove atexit fnmatch isnan fpclass)
+AC_CHECK_FUNCS(memmove fnmatch isnan fpclass strerror)
 
 dnl
 dnl On Paragon/TeraFLOP systems there are "buggy" versions of
@@ -688,7 +688,6 @@ if test -n "$HDF5_DRV"; then
    saved_CPPFLAGS="$CPPFLAGS"
    saved_LDFLAGS="$LDFLAGS"
    saved_LIBS="$LIBS"
-   AC_CHECKING(for hdf5 and supporting libraries)
    AC_ARG_WITH(hdf5,
            [  --with-hdf5=INC,LIB     Location of HDF5 header and library],
                ,withval=yes)
@@ -697,6 +696,7 @@ if test -n "$HDF5_DRV"; then
       AC_MSG_RESULT(suppressed)
       HDF5_DRV=""
    else
+      AC_CHECKING(for hdf5 and supporting libraries)
       hdf5_inc="`echo $withval |cut -f1 -d,`"
       if test "$withval" != "yes" && test -n "$hdf5_inc"; then
 	 hdf5_explicit=true
@@ -830,31 +830,32 @@ else
    AC_MSG_CHECKING(for readline)
    AC_MSG_RESULT(disabled)
 fi
-
-dnl Determine how to compile MPI
-# skip for now
-#ACX_MPI
-
 dnl
 dnl Check for a python installation using the Automake 
 dnl provided macro, which will generate the following
 dnl variables: python_PYTHON, pkgpython_PYTHON, 
 dnl pyexecdir_PYTHON, and pkgpyexecdir_PYTHON.
 dnl
-AM_PATH_PYTHON(2.2,, :)
+if test -n "$PYTHONMODULE"; then
+   AM_PATH_PYTHON(2.1,, :)
 # Check for Python include path
 #
-AC_MSG_CHECKING([for Python include path])
-if test -z "$PYTHON_CPPFLAGS"; then
-    python_path=`$PYTHON -c "import distutils.sysconfig; \
-        print distutils.sysconfig.get_python_inc();"`
-    if test -n "${python_path}"; then
-        python_path="-I$python_path"
-    fi
-    PYTHON_CPPFLAGS=$python_path
+   AC_MSG_CHECKING([for Python include path])
+   if test -z "$PYTHON_CPPFLAGS"; then
+      python_path=`$PYTHON -c "import distutils.sysconfig; \
+         print distutils.sysconfig.get_python_inc();"`
+      if test -n "${python_path}"; then
+         python_path="-I$python_path"
+      fi
+      PYTHON_CPPFLAGS=$python_path
+   fi
+   AC_MSG_RESULT([$PYTHON_CPPFLAGS])
+   AC_SUBST([PYTHON_CPPFLAGS])
 fi
-AC_MSG_RESULT([$PYTHON_CPPFLAGS])
-AC_SUBST([PYTHON_CPPFLAGS])
+
+dnl Determine how to compile MPI
+# skip for now
+#ACX_MPI
 
 AC_CACHE_SAVE
 
@@ -864,6 +865,7 @@ AM_CONDITIONAL(PDB_DRV_NEEDED, test -n "$PDB_DRV")
 AM_CONDITIONAL(TAURUS_NEEDED, test -n "$TAURUS")
 AM_CONDITIONAL(HDF5_DRV_NEEDED, test -n "$HDF5_DRV")
 AM_CONDITIONAL(BROWSER_NEEDED, test -n "$BROWSER")
+AM_CONDITIONAL(PYTHON_NEEDED, test -n "$PYTHONMODULE")
 AC_CONFIG_FILES([Makefile
             clearcase_bin/Makefile
             config/Makefile

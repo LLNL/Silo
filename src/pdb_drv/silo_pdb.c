@@ -3270,6 +3270,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
    DEFINE_OBJ("dtime", &tmpum.dtime, DB_DOUBLE);
    DEFINE_OBJ("datatype", &tmpum.datatype, DB_INT);
    DEFINE_OBJ("coord_sys", &tmpum.coord_sys, DB_INT);
+   DEFINE_OBJ("topo_dim", &tmpum.topo_dim, DB_INT);
    DEFINE_OBJ("ndims", &tmpum.ndims, DB_INT);
    DEFINE_OBJ("nnodes", &tmpum.nnodes, DB_INT);
    DEFINE_OBJ("origin", &tmpum.origin, DB_INT);
@@ -7497,6 +7498,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    DBAddIntComponent(obj, "facetype", _um._facetype);
    DBAddIntComponent(obj, "cycle", _um._cycle);
    DBAddIntComponent(obj, "coord_sys", _um._coordsys);
+   DBAddIntComponent(obj, "topo_dim", _um._topo_dim);
    DBAddIntComponent(obj, "planar", _um._planar);
    DBAddIntComponent(obj, "origin", _um._origin);
    DBAddIntComponent(obj, "datatype", datatype);
@@ -7663,6 +7665,7 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
    DBAddIntComponent(obj, "facetype", _um._facetype);
    DBAddIntComponent(obj, "cycle", _um._cycle);
    DBAddIntComponent(obj, "coord_sys", _um._coordsys);
+   DBAddIntComponent(obj, "topo_dim", _um._topo_dim);
    DBAddIntComponent(obj, "planar", _um._planar);
    DBAddIntComponent(obj, "origin", _um._origin);
    DBAddIntComponent(obj, "datatype", datatype);

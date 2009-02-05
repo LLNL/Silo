@@ -992,6 +992,7 @@ build_ucd2d(DBfile * dbfile, int size, int order)
     int             cycle;
     float           time;
     double          dtime;
+    int             td;
     float          *coords[2];
     int             dims[1];
     float           x[13], y[13];
@@ -1022,6 +1023,7 @@ build_ucd2d(DBfile * dbfile, int size, int order)
     nnodes = 13;
     nzones = 12;
 
+    td = 2;
     /* Set up the coordinates */
 
     x[0] = 0.0;     y[0] = 2.0;
@@ -1226,6 +1228,7 @@ build_ucd2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
+    DBAddOption(optlist, DBOPT_TOPO_DIM, (void *)&td);
     DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
     DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
     DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
@@ -2078,6 +2081,7 @@ build_ucd3d(DBfile * dbfile, int size, int order)
     int            cycle;
     float          time;
     double         dtime;
+    int            td;
     float         *coords[3];
     float          x[2646], y[2646], z[2646];
     double         Xmin,Ymin,Zmin;
@@ -2138,6 +2142,8 @@ build_ucd3d(DBfile * dbfile, int size, int order)
     lzonelist = (20 * 20 * 5) * 8;
     zshapecnt = nzones;
     zshapesize = 8;
+
+    td = 3;
 
     dh = 20. / 20.;
     dtheta = (180. / 20.) * (3.1415926 / 180.);
@@ -2417,6 +2423,7 @@ build_ucd3d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
+    DBAddOption(optlist, DBOPT_TOPO_DIM, (void *)&td);
     DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
     DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
     DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");

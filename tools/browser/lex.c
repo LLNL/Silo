@@ -112,6 +112,9 @@ extern FILE *fdopen(int, const char *);
  *
  *              Robb Matzke, 2000-07-10
  *              Sets LEX_STDIN if unset.
+ *
+ *      Thomas R. Treadway, Tue Jun 27 13:59:21 PDT 2006
+ *      Added HAVE_STRERROR wrapper
  *-------------------------------------------------------------------------
  */
 lex_t *
@@ -123,8 +126,13 @@ lex_open(const char *fname)
 
     /* Check the file */
     if (stat(fname, &sb)<0) {
+#ifdef HAVE_STRERROR
         out_errorn("lex_open: cannot open file `%s' (%s)",
                    fname, strerror(errno));
+#else
+        out_errorn("lex_open: cannot open file `%s' (errno=%d)",
+                   fname, errno);
+#endif
         return NULL;
     }
     if (!S_ISREG(sb.st_mode)) {
@@ -135,8 +143,13 @@ lex_open(const char *fname)
 
     /* Open the stream */
     if (NULL==(stream=fopen(fname, "r"))) {
+#ifdef HAVE_STRERROR
         out_errorn("lex_open: cannot open file `%s' (%s)",
                    fname, strerror(errno));
+#else
+        out_errorn("lex_open: cannot open file `%s' (errno=%d)",
+                   fname, errno);
+#endif
         return NULL;
     }
 
@@ -165,6 +178,9 @@ lex_open(const char *fname)
  * Modifications:
  *              Robb Matzke, 2000-07-10
  *              Sets LEX_STDIN if unset.
+ *
+ *      Thomas R. Treadway, Tue Jun 27 13:59:21 PDT 2006
+ *      Added HAVE_STRERROR wrapper
  *-------------------------------------------------------------------------
  */
 lex_t *
@@ -174,8 +190,12 @@ lex_stream(FILE *stream)
 
     assert (f);
     if (NULL==(f->f=fdopen(fileno(stream), "r"))) {
+#ifdef HAVE_STRERROR
         out_errorn ("lex_stream: cannot reopen stream (%s)",
                     strerror(errno));
+#else
+        out_errorn ("lex_stream: cannot reopen stream (errno=%d)", errno);
+#endif
         free(f);
         return NULL;
     }

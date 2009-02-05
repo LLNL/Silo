@@ -3,8 +3,8 @@
 bin_PROGRAMS = silock
 silock_SOURCES = silock.c
 if HDF5_DRV_NEEDED
-  silock_LDADD = -L$(libdir) -L../../src -lsiloh5
+  silock_LDADD = ../../src/libsiloh5.la
 else
-  silock_LDADD = -L$(libdir) -L../../src -lsilo
+  silock_LDADD = ../../src/libsilo.la
 endif
 AM_CPPFLAGS = -I$(includedir) -I$(top_srcdir)/src/silo

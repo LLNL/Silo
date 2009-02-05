@@ -21,12 +21,12 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/silo \
  -I$(srcdir)/../src/swat
 quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
-AM_FFLAGS = -I$(includedir) -I../src/silo
+AM_FFLAGS = $(AM_CPPFLAGS)
 
 if HDF5_DRV_NEEDED
-  LDADD = -L$(libdir) -L../src -lsiloh5
+  LDADD = ../src/libsiloh5.la
 else
-  LDADD = -L$(libdir) -L../src -lsilo
+  LDADD = ../src/libsilo.la
 endif
 
 PROGS=array dir extface multi_test partial_io point quad simple ucd \

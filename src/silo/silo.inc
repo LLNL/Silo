@@ -22,24 +22,26 @@
       external dbaddccmp, dbaddcopt, dbadddopt, dbaddicmp, dbaddiopt
       external dbaddrcmp, dbaddropt, dbcalcfl, dbclose, dbcreate
       external dbfgetca, dbfreeobject, dbfreeoptlist, dbget2dstrlen
-      external dbgetca, dbgetcurve, dbgetqv1, dbinqca, dbinqfile
-      external dbinqlen, dbmkdir, dbmkobject, dbmkoptlist, dbopen
-      external dbputca, dbputcurve, dbputdefvars, dbputfl, dbputmat
-      external dbputmmat, dbputmmesh, dbputmsp, dbputmvar, dbputpm
-      external dbputpv1, dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl
-      external dbputzl2, dbrdvar, dbrdvarslice, dbset2dstrlen, dbsetdir
-      external dbsetdirid, dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
+      external dbgetca, dbgetcksums, dbgetcurve, dbgetovrwrt, dbgetqv1
+      external dbinqca, dbinqfile, dbinqlen, dbmkdir, dbmkobject
+      external dbmkoptlist, dbopen, dbputca, dbputcurve, dbputdefvars
+      external dbputfl, dbputmat, dbputmmat, dbputmmesh, dbputmsp
+      external dbputmvar, dbputpm, dbputpv1, dbputqm, dbputqv1, dbputum
+      external dbputuv1, dbputzl, dbputzl2, dbrdvar, dbrdvarslice
+      external dbset2dstrlen, dbsetcksums, dbsetdir, dbsetdirid
+      external dbsetovrwrt, dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
 
       integer  dbaddccmp, dbaddcopt, dbadddopt, dbaddicmp, dbaddiopt
       integer  dbaddrcmp, dbaddropt, dbcalcfl, dbclose, dbcreate
       integer  dbfgetca, dbfreeobject, dbfreeoptlist, dbget2dstrlen
-      integer  dbgetca, dbgetcurve, dbgetqv1, dbinqca, dbinqfile
-      integer  dbinqlen, dbmkdir, dbmkobject, dbmkoptlist, dbopen
-      integer  dbputca, dbputcurve, dbputdefvars, dbputfl, dbputmat
-      integer  dbputmmat, dbputmmesh, dbputmsp, dbputmvar, dbputpm
-      integer  dbputpv1, dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl
-      integer  dbputzl2, dbrdvar, dbrdvarslice, dbset2dstrlen, dbsetdir
-      integer  dbsetdirid, dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
+      integer  dbgetca, dbgetcksums, dbgetcurve, dbgetovrwrt, dbgetqv1
+      integer  dbinqca, dbinqfile, dbinqlen, dbmkdir, dbmkobject
+      integer  dbmkoptlist, dbopen, dbputca, dbputcurve, dbputdefvars
+      integer  dbputfl, dbputmat, dbputmmat, dbputmmesh, dbputmsp
+      integer  dbputmvar, dbputpm, dbputpv1, dbputqm, dbputqv1, dbputum
+      integer  dbputuv1, dbputzl, dbputzl2, dbrdvar, dbrdvarslice
+      integer  dbset2dstrlen, dbsetcksums, dbsetdir, dbsetdirid
+      integer  dbsetovrwrt, dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
 
 
 !...Parameters.
@@ -68,18 +70,19 @@
       integer  DBOPT_NGROUPS, DBOPT_NMAT, DBOPT_NMATNOS, DBOPT_NMATSPEC
       integer  DBOPT_NODENUM, DBOPT_NSPACE, DBOPT_ORIGIN
       integer  DBOPT_PHZONELIST, DBOPT_PLANAR, DBOPT_REGNAMES
-      integer  DBOPT_TIME, DBOPT_UNITS, DBOPT_USESPECMF, DBOPT_XLABEL
-      integer  DBOPT_XUNITS, DBOPT_XVARNAME, DBOPT_YLABEL, DBOPT_YUNITS
-      integer  DBOPT_YVARNAME, DBOPT_ZLABEL, DBOPT_ZONECOUNTS
-      integer  DBOPT_ZONENAMES, DBOPT_ZONENUM, DBOPT_ZUNITS
-      integer  DBOPT_ZVARNAME, DB_ABORT, DB_ALL, DB_APPEND, DB_AREA
-      integer  DB_ARRAY, DB_BNDCENT, DB_CARTESIAN, DB_CHAR, DB_CLOBBER
-      integer  DB_COLLINEAR, DB_COLMAJOR, DB_CRAY, DB_CSGMESH, DB_CSGVAR
-      integer  DB_CSGZONELIST, DB_CURVE, DB_CURVILINEAR, DB_CYLINDRICAL
-      integer  DB_DEBUG, DB_DEFVARS, DB_DIR, DB_DOUBLE, DB_EDGELIST
-      integer  DB_EXODUS, DB_F77NULL, DB_FACECENT, DB_FACELIST, DB_FLOAT
-      integer  DB_HDF5, DB_INT, DB_INTEL, DB_INVALID_OBJECT, DB_LOCAL
-      integer  DB_LONG, DB_MATERIAL, DB_MATSPECIES, DB_MULTIBLOCKMESH
+      integer  DBOPT_TIME, DBOPT_TOPO_DIM, DBOPT_UNITS, DBOPT_USESPECMF
+      integer  DBOPT_XLABEL, DBOPT_XUNITS, DBOPT_XVARNAME, DBOPT_YLABEL
+      integer  DBOPT_YUNITS, DBOPT_YVARNAME, DBOPT_ZLABEL
+      integer  DBOPT_ZONECOUNTS, DBOPT_ZONENAMES, DBOPT_ZONENUM
+      integer  DBOPT_ZUNITS, DBOPT_ZVARNAME, DB_ABORT, DB_ALL, DB_APPEND
+      integer  DB_AREA, DB_ARRAY, DB_BNDCENT, DB_CARTESIAN, DB_CHAR
+      integer  DB_CLOBBER, DB_COLLINEAR, DB_COLMAJOR, DB_CRAY
+      integer  DB_CSGMESH, DB_CSGVAR, DB_CSGZONELIST, DB_CURVE
+      integer  DB_CURVILINEAR, DB_CYLINDRICAL, DB_DEBUG, DB_DEFVARS
+      integer  DB_DIR, DB_DOUBLE, DB_EDGELIST, DB_EXODUS, DB_F77NULL
+      integer  DB_FACECENT, DB_FACELIST, DB_FLOAT, DB_HDF5, DB_INT
+      integer  DB_INTEL, DB_INVALID_OBJECT, DB_LOCAL, DB_LONG
+      integer  DB_MATERIAL, DB_MATSPECIES, DB_MULTIBLOCKMESH
       integer  DB_MULTIBLOCKVAR, DB_MULTIMAT, DB_MULTIMATSPECIES
       integer  DB_MULTIMESH, DB_MULTIMESHADJ, DB_MULTIVAR, DB_NETCDF
       integer  DB_NFILES, DB_NFILTERS, DB_NOCLOBBER, DB_NODECENT
@@ -209,6 +212,7 @@
       parameter (DBOPT_REGNAMES            = 309            )
       parameter (DBOPT_ZONENAMES           = 310            )
       parameter (DBOPT_HIDE_FROM_GUI       = 311            )
+      parameter (DBOPT_TOPO_DIM            = 312            )
       parameter (DB_TOP                    = 0              )
       parameter (DB_NONE                   = 1              )
       parameter (DB_ALL                    = 2              )

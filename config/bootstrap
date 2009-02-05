@@ -1,6 +1,7 @@
 #!/bin/sh
 #set -x
-FILELIST="./configure ./libtool ./aclocal.m4 \
+FILELIST="\
+./aclocal.m4 \
 ./config/compile ./config/config.guess ./config/config.h.in \
 ./config/config.sub ./config/depcomp ./config/install-sh \
 ./config/ltmain.sh ./config/missing \
@@ -13,7 +14,7 @@ FILELIST="./configure ./libtool ./aclocal.m4 \
 ./src/taurus/Makefile.in ./src/unknown/Makefile.in \
 ./src/pdb/Makefile.in ./src/pdb_drv/Makefile.in \
 ./src/score/Makefile.in ./src/hdf5_drv/Makefile.in \
-./src/Makefile.in ./Makefile.in \
+./src/Makefile.in ./Makefile.in ./configure \
 ./tests/package.m4 ./tests/testsuite"
 HOST=`/usr/gapps/silo/autotools/bin/config.guess`
 AUTOTOOLS=/usr/gapps/silo/autotools/$HOST/bin
@@ -94,6 +95,7 @@ fi
 #automake --add-missing --copy --force-missing --foreign 
 #autoconf --include=config
 $AUTOTOOLS/autoreconf -vif
+##$HOME/i686-pc-linux-gnu/bin/autoreconf -vif
 if [ "CHECK" = "yes" ] ; then
   do_checkin
 fi

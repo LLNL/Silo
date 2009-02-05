@@ -722,6 +722,8 @@ V_dot (int argc, obj_t argv[]) {
  *      Sean Ahern, Fri Feb 28 14:12:58 PST 1997
  *      Added a check for the readline library.
  *
+ *      Thomas R. Treadway, Tue Jun 27 13:59:21 PDT 2006
+ *      Added HAVE_STRERROR wrapper
  *-------------------------------------------------------------------------
  */
 obj_t
@@ -729,8 +731,13 @@ V_exit (int argc, obj_t argv[]) {
 
 #if defined(HAVE_READLINE_HISTORY_H) && defined(HISTORY_FILE) && defined(HAVE_READLINE_HISTORY)
    if (HistoryFile[0] && write_history (HistoryFile)) {
+#ifdef HAVE_STRERROR
       out_errorn ("command history not saved in %s (%s)",
                   HistoryFile, strerror(errno));
+#else
+      out_errorn ("command history not saved in %s (errno=%d)",
+                  HistoryFile, errno);
+#endif
    }
 #endif
 
@@ -1910,6 +1917,9 @@ V_quote (int argc, obj_t argv[]) {
  *      Robb Matzke, 3 Feb 1997
  *      Cleaned up error messages.
  *
+ *      Thomas R. Treadway, Tue Jun 27 13:59:21 PDT 2006
+ *      Added HAVE_STRERROR wrapper
+ *
  *-------------------------------------------------------------------------
  */
 obj_t
@@ -1933,8 +1943,13 @@ V_redirect (int argc, obj_t argv[]) {
       return NIL;
    }
    if (NULL==(f=fopen(fname, fmode))) {
+#ifdef HAVE_STRERROR
       out_errorn ("Redirect: cannot open `%s' (%s)",
                   fname, strerror(errno));
+#else
+      out_errorn ("Redirect: cannot open `%s' (errno=%d)",
+                  fname, errno);
+#endif
       return NIL;
    }
 

@@ -3,13 +3,16 @@
 #
 ## Process this file with automake to create Makefile.in
 
-BROWSER_DIR =
+TOOLS_DIR =
 if BROWSER_NEEDED
-BROWSER_DIR += browser python silock
+TOOLS_DIR += browser silock
+endif
+if PYTHON_NEEDED
+TOOLS_DIR += python
 endif
 SUBDIRS = \
  . \
- $(BROWSER_DIR)
+ $(TOOLS_DIR)
 DIST_SUBDIRS = \
  . \
  browser \

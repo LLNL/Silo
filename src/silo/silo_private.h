@@ -545,6 +545,7 @@ struct _um {
     int            _hi_offset_set;
     int            _lo_offset_set;
     int            _coordsys;
+    int            _topo_dim;
     int            _facetype;
     int            _ndims;
     int            _nspace;

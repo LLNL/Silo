@@ -105,7 +105,7 @@ main (int argc, char *argv[])
 test2()
 {
     double         t;
-    int            c, cs, ft, hi[3], lo[3], major, nd, ns, or, pl;
+    int            c, cs, td, ft, hi[3], lo[3], major, nd, ns, or, pl;
     float          align[3];
     char          *labels[3], *units[3];
     DBfile        *dbfile;
@@ -118,6 +118,7 @@ test2()
     pl = 19;
     c = 99;
     cs = DB_SPHERICAL;
+    td = 1;
     ft = DB_CURVILINEAR;
     major = 1;
     nd = 2;
@@ -135,6 +136,7 @@ test2()
 
     optlist = DBMakeOptlist(20);
     DBAddOption(optlist, DBOPT_COORDSYS, (void *)&cs);
+    DBAddOption(optlist, DBOPT_TOPO_DIM, (void *)&td);
     DBAddOption(optlist, DBOPT_CYCLE, (void *)&c);
     DBAddOption(optlist, DBOPT_HI_OFFSET, (void *)hi);
     DBAddOption(optlist, DBOPT_UNITS, (void *)units);

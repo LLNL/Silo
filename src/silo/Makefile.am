@@ -7,8 +7,7 @@ EXTRA_DIST = \
  silo_fcb.c 
 
 include_HEADERS = \
- silo.h
-nodist_include_HEADERS = \
+ silo.h \
  silo.inc 
 noinst_HEADERS = \
  silo_drivers.h \
@@ -23,11 +22,9 @@ FILES = \
  silo_f.c
 
 BUILT_SOURCES = silo.inc
-CLEANFILES = silo.inc
 
+# build if it doesn't exit
 silo.inc: silo.h silo_f.h
-	if test -e silo.inc; then \
-	  rm -f silo.inc; \
-	fi; \
-	set -x ;\
-	cat $(srcdir)/silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@
+	if test ! -e silo.inc; then \
+	  cat $(srcdir)/silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; \
+	fi

@@ -20,7 +20,7 @@ LCTOPDIR="/usr/gapps/silo"
 #LCTOPDIR="/nfs/tmp0/$USER"
 
 usage() {
-  printf "Usage: %s version [all|hoth|sunspot|berg|gps|thunder|pengra]" $0
+  printf "Usage: %s version [all|hoth|sunspot|berg|gps|thunder|pengra|quad|bgl]" $0
   printf "\n"
   printf "Silo release installing script. Assumes a tarball exist in\n"
   printf "current directory, called silo-$VERSION.tar.gz.\n"
@@ -30,6 +30,7 @@ usage() {
   printf "  2) untar\n"
   printf "  3) start remote scripts on the target machines that\n"
   printf "     perform a configure, make check, followed by a make install\n"
+  printf "Log files are stored at $HOME/HOSTNAME.log\n"
 }
 hoth() {
   ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
@@ -41,16 +42,16 @@ hoth() {
     cd linux_rhel3_gcc_3.2.3; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3 \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     make -j 4 check && make install; make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3 \
-    --enable-shared-python --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check && make install; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/Silo.a; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/libsilo.so; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/libsiloh5.so; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/Silo.a; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/libsilo.so; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/libsiloh5.so; \
     chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3; \
     \")" > hoth.log 2>&1
 }
@@ -65,17 +66,17 @@ hothpgc() {
     ../$TOPSRCDIR/configure \
     CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     make -j 4 check && make install; make clean; \
     ../$TOPSRCDIR/configure \
     CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
-    --enable-shared-python --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check && make install; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/Silo.a; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/libsilo.so; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/libsiloh5.so; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/Silo.a; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/libsilo.so; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/libsiloh5.so; \
     chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0; \
     \")" > hohtpgc.log 2>&1
 }
@@ -91,22 +92,23 @@ hothicc() {
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.0 \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     make -j 4 check && make install; make clean; \
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.03 \
-    --enable-shared-python --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
     make -j 4 check && make install; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/Silo.a; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/libsilo.so; \
-    rm $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/libsiloh5.so; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/Silo.a; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/libsilo.so; \
+    rm -f $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/libsiloh5.so; \
     chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0; \
     \")" > hoht.log 2>&1
 }
     
 sunspot() {
+# testsuite fails with bus error on "spec"
 # weird truncated PATH via ssh
   ssh -f sunspot "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin; \
@@ -117,16 +119,16 @@ sunspot() {
     cd sunos_57; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/sunos_57 \
-    --enable-shared-python --without-readline --without-hdf5; \
-    make -j 4 check && make install; make clean; \
+    --disable-shared --without-readline --without-hdf5; \
+    make -j 4 check; make install; make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$BDTOPDIR/$VERSION/sunos_57 \
     --disable-shared --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/lib; \
-    make -j 4 check && make install; \
-    rm $BDTOPDIR/$VERSION/sunos_57/lib/Silo.a; \
-    rm $BDTOPDIR/$VERSION/sunos_57/lib/libsilo.so; \
-    rm $BDTOPDIR/$VERSION/sunos_57/lib/libsiloh5.so; \
+    make -j 4 check; make install; \
+    rm -f $BDTOPDIR/$VERSION/sunos_57/lib/Silo.a; \
+    rm -f $BDTOPDIR/$VERSION/sunos_57/lib/libsilo.so; \
+    rm -f $BDTOPDIR/$VERSION/sunos_57/lib/libsiloh5.so; \
     chmod -R g+w $BDTOPDIR/$VERSION/sunos_57; \
     \")" > sunspot.log 2>&1
 }
@@ -142,7 +144,7 @@ sunspotcc() {
     ../$TOPSRCDIR/configure \
     CC=c89 CXX=CC FC=f77 \
     --prefix=$BDTOPDIR/$VERSION/sunos_57_cc_5.2 \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     make -j 4 check && make install; make clean; \
     ../$TOPSRCDIR/configure \
     CC=c89 CXX=CC FC=f77 \
@@ -151,9 +153,9 @@ sunspotcc() {
     --disable-shared --without-readline \
     --with-hdf5=/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/lib; \
     make -j 4 check && make install; \
-    rm $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/Silo.a; \
-    rm $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/libsilo.so; \
-    rm $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/libsiloh5.so; \
+    rm -f $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/Silo.a; \
+    rm -f $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/libsilo.so; \
+    rm -f $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/libsiloh5.so; \
     chmod -R g+w $BDTOPDIR/$VERSION/sunos_57_cc_5.2; \
     \")" > sunspotcc.log 2>&1
 }
@@ -209,7 +211,7 @@ berg64() {
     CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
     PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
-    --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     make check && make install; make clean; \
     ../$TOPSRCDIR/configure \
     CC='xlc -q64' CXX='xlC -q64' FC='xlf -q64' \
@@ -218,7 +220,7 @@ berg64() {
     CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
     PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
     --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
-    --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make check; make install; \
     rm -f $LCTOPDIR/$VERSION/aix_5_64_fed/lib/Silo.a; \
@@ -240,16 +242,16 @@ gps() {
     ../$TOPSRCDIR/configure \
     CC=gcc-3.4.1 CXX=g++-3.4.1 FC=g77-3.4.1 F77=g77-3.4.1 \
     --prefix=$LCTOPDIR/$VERSION/tru64_5 \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     gmake -j 4 check ; gmake install; gmake clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/tru64_5 \
-    --enable-shared-python --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     gmake -j 4 check ; gmake install; \
-    rm $LCTOPDIR/$VERSION/tru64_5/lib/Silo.a; \
-    rm $LCTOPDIR/$VERSION/tru64_5/lib/libsilo.so; \
-    rm $LCTOPDIR/$VERSION/tru64_5/lib/libsiloh5.so; \
+    rm -f $LCTOPDIR/$VERSION/tru64_5/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/tru64_5/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/tru64_5/lib/libsiloh5.so; \
     chmod -R g+w $LCTOPDIR/$VERSION/tru64_5; \
     \") > gps.log 2>&1"
 }
@@ -263,16 +265,16 @@ gpscc() {
     ../$TOPSRCDIR/configure \
     CC=c89 CXX=cxx FC=f77 F77=f77 \
     --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     gmake -j 4 check ; gmake install; gmake clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
-    --enable-shared-python --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     gmake -j 4 check ; gmake install; \
-    rm $LCTOPDIR/$VERSION/tru64_5_cc/lib/Silo.a; \
-    rm $LCTOPDIR/$VERSION/tru64_5_cc/lib/libsilo.so; \
-    rm $LCTOPDIR/$VERSION/tru64_5_cc/lib/libsiloh5.so; \
+    rm -f $LCTOPDIR/$VERSION/tru64_5_cc/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/tru64_5_cc/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/tru64_5_cc/lib/libsiloh5.so; \
     chmod -R g+w $LCTOPDIR/$VERSION/tru64_5_cc; \
     \") > gpscc.log 2>&1"
 }
@@ -286,16 +288,16 @@ pengra() {
     cd chaos_3_x86_elan3; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     make -j 4 check && make install; make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
-    --enable-shared-python --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial_gcc/lib; \
     make -j 4 check && make install; \
-    rm $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/Silo.a; \
-    rm $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/libsilo.so; \
-    rm $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/libsiloh5.so; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/libsiloh5.so; \
     chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_elan3; \
     \") > pengra.log 2>&1"
 }
@@ -313,16 +315,16 @@ thundergcc() {
     cd chaos_3_ia64_elan4; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     make -j 4 check && make install; make clean; \
     ../$TOPSRCDIR/configure \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
-    --enable-shared-python --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make -j 4 check && make install; \
-    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/Silo.a; \
-    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/libsilo.so; \
-    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/libsiloh5.so; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/libsiloh5.so; \
     chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc; \
     \") > thundergcc.log 2>&1"
 }
@@ -337,17 +339,17 @@ thundericc() {
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
-    --enable-shared-python --without-readline --without-hdf5; \
+    --disable-shared --without-readline --without-hdf5; \
     make -j 4 check && make install; make clean; \
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
-    --enable-shared-python --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make -j 4 check && make install; \
-    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/Silo.a; \
-    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/libsilo.so; \
-    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/libsiloh5.so; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/libsiloh5.so; \
     chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc; \
     \") > thundericc.log 2>&1"
 }
@@ -373,19 +375,101 @@ quad32() {
     CFLAGS='-O2 -c99' \
     PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_n32 \
-    --without-readline --without-hdf5; \
-    gmake check && gmake install; gmake clean; \
+    --disable-shared --without-readline --without-hdf5; \
+    gmake -j 4 check && gmake install; gmake clean; \
     ../$TOPSRCDIR/configure \
+    CC='cc -n32' CXX='CC -n32' FC='f77 -n32' \
+    LDFLAGS=-n32 \
+    CFLAGS='-O2 -c99' \
+    PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
     --prefix=$LCTOPDIR/$VERSION/irix_6.5_n32 \
-    --without-readline \
+    --disable-shared --without-readline \
     --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_n32/include,/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_n32/lib; \
-    gmake check; gmake install; \
+    gmake -j 4 check && gmake install; \
     rm -f $LCTOPDIR/$VERSION/irix_6.5_n32/lib/Silo.a; \
     rm -f $LCTOPDIR/$VERSION/irix_6.5_n32/lib/libsilo.so; \
     rm -f $LCTOPDIR/$VERSION/irix_6.5_n32/lib/libsiloh5.so; \
     chmod -R g+w $LCTOPDIR/$VERSION/irix_6.5_n32; \
      \") >quad32.log 2>&1"
 }
+quad64() {
+  ssh -f quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin; \
+    PARALLEL=4; \
+    export PATH PARALLEL; \
+    rm -rf irix_6.5_64; \
+    mkdir irix_6.5_64; \
+    cd irix_6.5_64; \
+    ../$TOPSRCDIR/configure \
+    CC='cc -64' CXX='CC -64' FC='f77 -64' \
+    LDFLAGS=-64 \
+    CFLAGS='-O2 -c99' \
+    PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
+    --prefix=$LCTOPDIR/$VERSION/irix_6.5_64 \
+    --disable-shared --without-readline --without-hdf5; \
+    gmake -j 4 check && gmake install; gmake clean; \
+    ../$TOPSRCDIR/configure \
+    CC='cc -64' CXX='CC -64' FC='f77 -64' \
+    LDFLAGS=-64 \
+    CFLAGS='-O2 -c99' \
+    PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
+    --prefix=$LCTOPDIR/$VERSION/irix_6.5_64 \
+    --disable-shared --without-readline \
+    --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_64/include,/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_64/lib; \
+    gmake -j 4 check && gmake install; \
+    rm -f $LCTOPDIR/$VERSION/irix_6.5_64/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/irix_6.5_64/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/irix_6.5_64/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/irix_6.5_64; \
+     \") >quad64.log 2>&1"
+}
+    
+ubgltest() {
+  ssh -f ubgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/opt/ibmcmp/vacpp/7.0/bin:/opt/ibmcmp/xlf/9.1/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf sles_9_ppc64; \
+    mkdir sles_9_ppc64; \
+    cd sles_9_ppc64; \
+    ../$TOPSRCDIR/configure \
+    CC='blrts_xlc' CXX='blrts_xlC' FC='blrts_fort77' \
+    --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
+    --disable-shared --without-readline --without-hdf5; \
+    make -j 4 CC='blrts_xlc' CXX='blrts_xlC' FC='blrts_fort77' install; \
+    chmod -R g+w $LCTOPDIR/$VERSION/sles_9_ppc64; \
+    \") > ubgltest.log 2>&1"
+}
+ubgl() {
+  ssh -f ubgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/opt/ibmcmp/vacpp/7.0/bin:/opt/ibmcmp/xlf/9.1/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf sles_9_ppc64; \
+    mkdir sles_9_ppc64; \
+    cd sles_9_ppc64; \
+    ../$TOPSRCDIR/configure \
+    CC='xlc' CXX='xlC' FC='fort77' \
+    --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
+    --disable-shared --without-readline \
+    --with-hdf5=/usr/local/tools/hdf5/hdf5-1.6.5/serial_frontend/include,/usr/local/tools/hdf5/hdf5-1.6.5/serial_frontend/lib; \
+    make -j 4 check; make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    CC='blrts_xlc' CXX='blrts_xlC' FC='blrts_xlf' \
+    --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
+    --disable-browser --disable-shared --without-readline --without-hdf5; \
+    make -j 4 install; make clean; \
+    ../$TOPSRCDIR/configure \
+    CC='blrts_xlc' CXX='blrts_xlC' FC='blrts_xlf' \
+    --prefix=$LCTOPDIR/$VERSION/sles_9_ppc64 \
+    --disable-browser --disable-shared --without-readline \
+    --with-hdf5=/usr/local/tools/hdf5/hdf5-1.6.5/serial/include,/usr/local/tools/hdf5/hdf5-1.6.5/serial/lib; \
+    make -j 4 install; \
+    rm -f $LCTOPDIR/$VERSION/sles_9_ppc64/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/sles_9_ppc64/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/sles_9_ppc64/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/sles_9_ppc64; \
+    \") > ubgl.log 2>&1"
+}
+
 if [ $# -lt 1 ] ; then
   usage
   exit 2
@@ -412,6 +496,8 @@ if [ $# -lt 1 ] ; then
   gps
   thunder
   pengra
+  quad
+  ubgl
 else
  while [ "$*" != "" ]
  do
@@ -423,6 +509,8 @@ else
       gps
       thunder
       pengra
+      quad
+      ubgl
       shift;;
     hothpgc|-hothpgc)
       hothpgc
@@ -465,6 +553,21 @@ else
       shift;;
     pen*|-pe*)
       pengra
+      shift;;
+    quad32|-quad32)
+      quad32
+      shift;;
+    quad64|-quad64)
+      quad64
+      shift;;
+    quad|-quad)
+      quad
+      shift;;
+    ubgltest|-ubgltest)
+      ubgltest
+      shift;;
+    ubgl|-ubgl)
+      ubgl
       shift;;
     sh*|-sh*)
       shar

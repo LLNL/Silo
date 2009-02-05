@@ -17,9 +17,6 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
 
-/* Define to 1 if you have the `atexit' function. */
-#undef HAVE_ATEXIT
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -113,9 +110,6 @@
 /* Define to 1 if you have the <readline/readline.h> header file. */
 #undef HAVE_READLINE_READLINE_H
 
-/* Define to 1 if you have the `select' function. */
-#undef HAVE_SELECT
-
 /* System provides setvbuf prototypes */
 #undef HAVE_SETVBUF_POINTER
 
@@ -173,7 +167,7 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* The size of a `off64_t', as computed by sizeof. */
+/* The size of `off64_t', as computed by sizeof. */
 #undef SIZEOF_OFF64_T
 
 /* Define to 1 if you have the ANSI C header files. */

@@ -41,8 +41,12 @@
  * Modifications:       
  *              Robb Matzke, 2000-06-01
  *              Added const qualifiers to formal arguments.
+ *
+ *              Thomas R. Treadway, Tue Jun 27 14:19:57 PDT 2006
+ *              Added config.h for HAVE_STRERROR wrapper
  *-------------------------------------------------------------------------
  */
+#include "config.h"
 #include <assert.h>
 #include <browser.h>
 #include <ctype.h>
@@ -1167,6 +1171,9 @@ out_reset (out_t *f) {
  *
  * Modifications:
  *
+ *              Thomas R. Treadway, Tue Jun 27 14:19:57 PDT 2006
+ *              Added HAVE_STRERROR wrapper
+ *
  *-------------------------------------------------------------------------
  */
 out_t *
@@ -1176,8 +1183,12 @@ out_stream (FILE *stream) {
 
    assert (f);
    if (NULL==(f->f=fdopen(fileno(stream), "w"))) {
+#ifdef HAVE_STRERROR
       out_errorn ("out_stream: cannot reopen stream (%s)",
                   strerror (errno));
+#else
+      out_errorn ("out_stream: cannot reopen stream (errno=%d)", errno);
+#endif
       free (f);
       return NULL;
    }

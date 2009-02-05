@@ -2800,6 +2800,9 @@ DBVersion(void)
  *
  *    Mark C. Miller, Wed Feb 23 08:51:35 PST 2005
  *    Added code to reset _db_fstatus slot to 0 if open fails
+ *
+ *    Thomas R. Treadway, Tue Jun 27 13:59:21 PDT 2006
+ *    Added HAVE_STRERROR wrappers
  *------------------------------------------------------------------------- */
 PUBLIC DBfile *
 DBOpenReal(const char *name, int type, int mode)
@@ -2868,13 +2871,25 @@ DBOpenReal(const char *name, int type, int mode)
                       case ENAMETOOLONG: printf("ENAMETOOLONG\n"); break;
                       case ENOTDIR:      printf("ENOTDIR\n");      break;
 #ifdef EOVERFLOW
-                      case EOVERFLOW:    printf("EOVERFLOW: \"%s\"\n", strerror(errno));
+                      case EOVERFLOW:    
+#ifdef HAVE_STRERROR
+                                         printf("EOVERFLOW: \"%s\"\n", 
+                                            strerror(errno));
+#else
+                                         printf("EOVERFLOW: errno=%d\n", errno);
+#endif
                                          printf("Silo may need to be re-compiled with "
                                                 "Large File Support (LFS)\n");
                                          break;
 #endif
-                      default:           printf("\"%s\"\n",
-                                            strerror(errno));      break;
+                      default:           
+#ifdef HAVE_STRERROR
+                                         printf("\"%s\"\n",
+                                            strerror(errno));
+#else
+                                         printf("errno=%d\n", errno);
+#endif
+                                         break;
                     }
                     API_ERROR((char *)name, E_SYSTEMERR);
                 }
@@ -8485,6 +8500,9 @@ UM_CalcExtents(float *coord_arrays[], int datatype, int ndims, int nnodes,
  *    Brad Whitlock, Wed Jan 18 15:36:55 PST 2006
  *    Added ascii_labels for ucdvars.
  *
+ *    Thomas R. Treadway, Wed Jun 28 10:31:45 PDT 2006
+ *    Added topo_dim to ucdmesh.
+ *
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -8864,6 +8882,10 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_COORDSYS:
                         _um._coordsys = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_TOPO_DIM:
+                        _um._topo_dim = DEREF(int, optlist->values[i]);
                         break;
 
                     case DBOPT_FACETYPE:
@@ -9621,12 +9643,16 @@ db_ResetGlobalData_Curve (void) {
  *     Brad Whitlock, Wed Jan 18 15:38:39 PST 2006
  *     Added _ascii_labels.
  *
+ *     Thomas R. Treadway, Wed Jun 28 10:31:45 PDT 2006
+ *     Added _topo_dim..
+ *
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones) {
 
    memset(&_um, 0, sizeof(_um));
    _um._coordsys = DB_OTHER;
+   _um._topo_dim = ndims;
    _um._facetype = DB_RECTILINEAR;
    _um._ndims = ndims;
    _um._nnodes = nnodes;

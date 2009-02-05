@@ -1810,6 +1810,7 @@ stc_silo_types (void) {
       COMP (dtime,              "primitive 'double'");
       COMP (coord_sys,          "primitive 'int'");
       IOASSOC (PA_COORDSYS);
+      COMP (topo_dim,           "primitive 'int'");
       COMP (ndims,              "primitive 'int'");
       COMP (nnodes,             "primitive 'int'");
       COMP (origin,             "primitive 'int'");

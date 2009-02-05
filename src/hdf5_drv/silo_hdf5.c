@@ -210,6 +210,7 @@ typedef struct DBucdmesh_mt {
     int                 facetype;
     int                 cycle;
     int                 coord_sys;
+    int                 topo_dim;
     int                 planar;
     int                 origin;
     int                 group_no;
@@ -1031,6 +1032,7 @@ db_hdf5_init(void)
         MEMBER_S(int,           facetype);
         MEMBER_S(int,           cycle);
         MEMBER_S(int,           coord_sys);
+        MEMBER_S(int,           topo_dim);
         MEMBER_S(int,           planar);
         MEMBER_S(int,           origin);
         MEMBER_S(int,           group_no);
@@ -6246,6 +6248,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         /* Set global options */
         strcpy(_um._meshname, name);
         _um._coordsys = DB_OTHER;
+        _um._topo_dim = ndims;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = ndims;
         _um._nnodes = nnodes;
@@ -6293,6 +6296,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         m.nzones = nzones;
         m.facetype = _um._facetype;
         m.coord_sys = _um._coordsys;
+        m.topo_dim = _um._topo_dim;
         m.planar = _um._planar;
         m.origin = _um._origin;
         m.cycle = _um._cycle;
@@ -6316,6 +6320,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
             if (m.facetype)     MEMBER_S(int, facetype);
             if (m.cycle)        MEMBER_S(int, cycle);
             if (m.coord_sys)    MEMBER_S(int, coord_sys);
+            if (m.topo_dim)    MEMBER_S(int, topo_dim);
             if (m.planar)       MEMBER_S(int, planar);
             if (m.origin)       MEMBER_S(int, origin);
             if (m.group_no)     MEMBER_S(int, group_no);
@@ -6399,6 +6404,7 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
         /* Set global options */
         strcpy(_um._meshname, name);
         _um._coordsys = DB_OTHER;
+        _um._topo_dim = m.ndims;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = m.ndims;
         _um._nnodes = m.nnodes;
@@ -6425,6 +6431,7 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
         m.facetype = _um._facetype;
         m.cycle = _um._cycle;
         m.coord_sys = _um._coordsys;
+        m.topo_dim = _um._topo_dim;
         m.planar = _um._planar;
         m.origin = _um._origin;
         m.time = _um._time;
@@ -6445,6 +6452,7 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
             if (m.facetype)     MEMBER_S(int, facetype);
             if (m.cycle)        MEMBER_S(int, cycle);
             if (m.coord_sys)    MEMBER_S(int, coord_sys);
+            if (m.topo_dim)    MEMBER_S(int, topo_dim);
             if (m.planar)       MEMBER_S(int, planar);
             if (m.origin)       MEMBER_S(int, origin);
             if (m.guihide)      MEMBER_S(int, guihide);
@@ -6529,6 +6537,7 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
         um->name = BASEDUP(name);
         um->cycle = m.cycle;
         um->coord_sys = m.coord_sys;
+        um->topo_dim = m.topo_dim;
         if ((um->datatype = db_hdf5_GetVarType(_dbfile, m.coord[0])) < 0)
             um->datatype = DB_FLOAT;
         if (um->datatype == DB_DOUBLE && force_single_g)
@@ -6646,6 +6655,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         saved_nzones = _um._nzones;
         memset(&_um, 0, sizeof _um);
         _um._coordsys = DB_OTHER;
+        _um._topo_dim = saved_ndims;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = saved_ndims;
         _um._nnodes = saved_nnodes;

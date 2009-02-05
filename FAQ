@@ -1,0 +1,18 @@
+Silo Development FAQ
+--------------------
+1) Some file timestamps become an issue, because of the ClearCase file
+   write protection on non-checkedout files, there will be errors in
+   the build because of these make dependencies. Most of these files
+   can be created manually, by looking at the creating scripts in the
+   Makefiles. (useful command: force a timestamp update "ct ci -ident")
+   make sure that the timestamps of:
+   - Autoreconf files, just make sure of the ClearCase checkin order
+   ./configure       > ./configure.ac
+   */Makefile.in     > */Makefile.am
+   - Targets in tests, used by autotest (i.e., make check)
+   tests/package.m4  > ./configure.ac
+   tests/testsuite   > tests/testsuite.at
+   - Target in src/silo/Makefile,
+   src/silo/silo.inc > src/silo/silo.h
+   src/silo/silo.inc > src/silo/silo_f.h
+  

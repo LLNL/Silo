@@ -4,9 +4,9 @@ bin_PROGRAMS = browser
 dist_bin_SCRIPTS = silodiff
 browser_SOURCES = $(FILES)
 if HDF5_DRV_NEEDED
-  browser_LDADD = -L$(libdir) -L../../src -lsiloh5
+  browser_LDADD = ../../src/libsiloh5.la
 else
-  browser_LDADD = -L$(libdir) -L../../src -lsilo
+  browser_LDADD = ../../src/libsilo.la
 endif
 info_TEXINFOS = browser.texi
 
