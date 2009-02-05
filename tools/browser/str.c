@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1996   The Regents of the University of California.
+ * Copyright (c) 1996 - 2009   The Regents of the University of California.
  *                      All rights reserved.
  *
  * This work was produced at the University of California,  Lawrence Liver-
@@ -206,6 +206,11 @@ str_dest (obj_t _self) {
  *              Mark C. Miller, 03Jun08
  *              Made it properly handle strings longer than size of buf.
  *              Made it properly use truncate variable to control behavior.
+ *
+ *    Mark C. Miller, Wed Jan 14 10:13:50 PST 2009
+ *    Eliminated extraneous blank line being output from browser as well
+ *    as line breaking occuring on arrays of strings by removing out_nl
+ *    call and using out_puts for string output and out_printf otherwise.
  *-------------------------------------------------------------------------
  */
 void
@@ -291,13 +296,10 @@ str_doprnt (out_t *f, char *fmt, char *s)
        }
 
        buf[at] = '\0';
-       if (!strcmp(fmt, "b16") || !strcmp(fmt, "b8") || !strcmp(fmt, "b2")) {
-           fmt = "\"%s\"";
-       }
-       
-       out_printf(f, fmt, buf);
-       out_nl(f);
-
+       if (!strcmp(fmt, "b16") || !strcmp(fmt, "b8") || !strcmp(fmt, "b2"))
+           out_puts(f, buf);
+       else
+           out_printf(f, fmt, buf);
     }
 }
    

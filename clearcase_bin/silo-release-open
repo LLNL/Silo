@@ -72,13 +72,33 @@ function build() {
     mkdir $TOPDIR/$VERSION/test/$ARCH
     ls -l $TOPDIR/$VERSION/test
     cd $TOPDIR/$VERSION/test/$ARCH
+
     ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip \
 --prefix=$TOPDIR/$VERSION/$ARCH \
 --disable-browser --disable-silex --without-hdf5 --without-szlib $CONFOPTS
     $MAKE $MAKEOPTS
+    if [ "$DOINSTALL" = "yes" ] ; then
+       $MAKE $MAKEOPTS install
+    fi
     chmod -R g+w $TOPDIR/$VERSION/$ARCH
     $MAKE $MAKEOPTS clean
+
     ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip \
+--prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+    $MAKE $MAKEOPTS
+    if [ "$DOINSTALL" = "yes" ] ; then
+       $MAKE $MAKEOPTS install
+    fi
+    mv $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a.saved
+    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
+    chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
+    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
+    chgrp -R visit $TOPDIR/$VERSION/$ARCH
+    $MAKE $MAKEOPTS clean
+
+    ../$TOPSRCDIR/configure \
 --prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
@@ -88,13 +108,14 @@ function build() {
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
-    mv $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/lib_saved
+    mv $TOPDIR/$VERSION/$ARCH/bin $TOPDIR/$VERSION/$ARCH/bin.saved
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/$ARCH
     $MAKE $MAKEOPTS clean
-    ../$TOPSRCDIR/configure --disable-hzip --enable-pythonmodule --enable-shared \
+
+    ../$TOPSRCDIR/configure --enable-pythonmodule --enable-shared \
 --prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
@@ -104,9 +125,14 @@ function build() {
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
-    mv $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/solib
-    mv $TOPDIR/$VERSION/$ARCH/lib_saved $TOPDIR/$VERSION/$ARCH/lib
-    mv $TOPDIR/$VERSION/$ARCH/solib/libsiloh5.a $TOPDIR/$VERSION/$ARCH/lib/libsiloxx.a
+    cp -R $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/libso
+    rm -f $TOPDIR/$VERSION/$ARCH/libso/{*.settings,*.la,*.a}
+    rm -f $TOPDIR/$VERSION/$ARCH/libso/libsiloh5.a.saved
+    mv $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a $TOPDIR/$VERSION/$ARCH/lib/libsiloxx.a
+    mv $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a.saved $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a
+    rm -f $TOPDIR/$VERSION/$ARCH/lib/*.so
+    rm -rf $TOPDIR/$VERSION/$ARCH/bin
+    mv $TOPDIR/$VERSION/$ARCH/bin.saved $TOPDIR/$VERSION/$ARCH/bin
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
@@ -125,9 +151,28 @@ function build2() {
 --prefix=$TOPDIR/$VERSION/$ARCH \
 --disable-browser --disable-silex --without-hdf5 --without-szlib $CONFOPTS
     $MAKE $MAKEOPTS
+    if [ "$DOINSTALL" = "yes" ] ; then
+       $MAKE $MAKEOPTS install
+    fi
     chmod -R g+w $TOPDIR/$VERSION/$ARCH
     $MAKE $MAKEOPTS clean
+
     ../$TOPSRCDIR/configure --disable-hzip --disable-fpzip \
+--prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2 \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
+    $MAKE $MAKEOPTS
+    if [ "$DOINSTALL" = "yes" ] ; then
+       $MAKE $MAKEOPTS install
+    fi
+    mv $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a.saved
+    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
+    chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
+    chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
+    chgrp -R visit $TOPDIR/$VERSION/$ARCH
+    $MAKE $MAKEOPTS clean
+
+    ../$TOPSRCDIR/configure \
 --prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2 \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
@@ -137,13 +182,14 @@ function build2() {
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
-    mv $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/lib_saved
-    mv $TOPDIR/$VERSION/$ARCH/bin $TOPDIR/$VERSION/$ARCH/bin_saved
+    mv $TOPDIR/$VERSION/$ARCH/bin $TOPDIR/$VERSION/$ARCH/bin.saved
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/$ARCH
-    ../$TOPSRCDIR/configure --disable-hzip --enable-pythonmodule --enable-shared \
+    $MAKE $MAKEOPTS clean
+
+    ../$TOPSRCDIR/configure --enable-pythonmodule --enable-shared \
 --prefix=$TOPDIR/$VERSION/$ARCH $CONFOPTS2 \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib
@@ -153,9 +199,14 @@ function build2() {
     elif [ "$DOINSTALL" = "yes" ] ; then
        $MAKE $MAKEOPTS install
     fi
-    mv $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/solib
-    mv $TOPDIR/$VERSION/$ARCH/lib_saved $TOPDIR/$VERSION/$ARCH/lib
-    mv $TOPDIR/$VERSION/$ARCH/solib/libsiloh5.a $TOPDIR/$VERSION/$ARCH/lib/libsiloxx.a
+    cp -R $TOPDIR/$VERSION/$ARCH/lib $TOPDIR/$VERSION/$ARCH/libso
+    rm -f $TOPDIR/$VERSION/$ARCH/libso/{*.settings,*.la,*.a}
+    rm -f $TOPDIR/$VERSION/$ARCH/libso/libsiloh5.a.saved
+    mv $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a $TOPDIR/$VERSION/$ARCH/lib/libsiloxx.a
+    mv $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a.saved $TOPDIR/$VERSION/$ARCH/lib/libsiloh5.a
+    rm -f $TOPDIR/$VERSION/$ARCH/lib/*.so
+    rm -rf $TOPDIR/$VERSION/$ARCH/bin
+    mv $TOPDIR/$VERSION/$ARCH/bin.saved $TOPDIR/$VERSION/$ARCH/bin
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/test/$ARCH
     chgrp -R visit $TOPDIR/$VERSION/test/$ARCH
     chmod -R a+r,ug+w,a+X $TOPDIR/$VERSION/$ARCH
@@ -524,8 +575,8 @@ EOF
 function up32() {
     HOSTS="${lcun}@up"
     ARCH="aix_5_ll"
-    CONFOPTS="CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\" FC=xlf F77=xlf --disable-silex --enable-hzip"
-    CONFOPTS2="CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\" FC=xlf F77=xlf --disable-silex  --enable-hzip \
+    CONFOPTS="CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\" FC=xlf F77=xlf --disable-silex"
+    CONFOPTS2="CFLAGS=-q32 LDFLAGS=-q32 AR=\"ar -X32\" FC=xlf F77=xlf --disable-silex \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
 /usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
@@ -540,8 +591,8 @@ function up32() {
 function up64() {
     HOSTS="${lcun}@up"
     ARCH="aix_5_64_fed"
-    CONFOPTS="CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\" FC=xlf F77=xlf --enable-hzip "
-    CONFOPTS2="CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\" FC=xlf F77=xlf --enable-silex -enable-hzip \
+    CONFOPTS="CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\" FC=xlf F77=xlf "
+    CONFOPTS2="CFLAGS=-q64 LDFLAGS=-q64 AR=\"ar -X64\" FC=xlf F77=xlf --enable-silex \
 --with-Qt-include-dir=/usr/gapps/silo/qt/3.3.8/$ARCH/include \
 --with-Qt-bin-dir=/usr/gapps/silo/qt/3.3.8/$ARCH/bin \
 --with-Qt-lib-dir=/usr/gapps/silo/qt/3.3.8/$ARCH/lib \

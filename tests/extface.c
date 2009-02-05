@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 1995
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -1820,6 +1820,7 @@ main(int argc, char *argv[])
 
 
     DBSetDeprecateWarnings(0);
+    printf("Creating test file \"%s\".\n", filename);
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                       "unstructured mesh of globe", driver);
 

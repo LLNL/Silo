@@ -1,6 +1,122 @@
 #!/bin/sh
 
-##
-## Difference the files by running browser with the difference option.
-##
-browser -l 3 -r -e diff $*
+# ----------------------------------------------------------------------------
+# Purpose: Difference two silo files and/or directories containing silo files 
+#
+# Programmer: Mark C. Miller
+# Creation:   January 21, 2009
+#
+# ----------------------------------------------------------------------------
+#
+
+#
+# Handle Command Line Arguments
+#
+tmpDir=$TMPDIR
+if test -z "$tmpDir"; then
+    if test -d /usr/tmp; then
+       tmpDir=/usr/tmp
+    elif test -d /tmp; then
+       tmpDir=/tmp
+    else
+       tmpDir=`(cd ~; pwd -P)`
+    fi
+fi
+optError=0
+browserOpts=""
+arg1=
+arg2=
+recurse=0
+verbose=0
+for options
+do
+   case $1 in
+      "")
+         # handle empty argument
+         ;;
+      -help)
+         optError=1
+         shift
+         ;;
+      -recurse)
+         recurse=1
+         shift
+         ;;
+      -verbose)
+         verbose=1
+         shift
+         ;;
+      *)
+         if test -e $1; then
+             if test -z "$arg1"; then
+                 arg1=$1
+             else
+                 arg2=$1
+             fi
+         else
+             browserOpts="$browserOpts $1"
+         fi
+         shift
+         ;;
+   esac
+done
+
+if test "$optError" = "1"; then
+    echo "Usage:  $0 <file|dir> <file|dir>"
+    echo "If both arguments are files, $0 will attempt to diff the files."
+    echo ""
+    echo "If one argument is a file and the other a directory, then $0 will attempt"
+    echo "to diff the given file with a file by the same name in the given directory."
+    echo ""
+    echo "If both arguments are directories, $0 will descend into each directory"
+    echo "(recursively if '-recurse' is specified)  finding files whose names differ"
+    echo "ONLY in the first component of their paths and attempt to diff them."
+    echo ""
+    echo "$0 uses Silo's browser tool to do its work. In turn, browser supports a"
+    echo "number of additional options. Thus, any arguments to $0 which are neither"
+    echo "files nor directories are treated as arguments to browser itself. For some"
+    echo "options to browser like the '-f FILE' option, use the '--file=<FILE>'"
+    echo "variant instead. By default, $0 will invoke browser with args"
+    echo "'-l 3 -r -e diff'. The available options to browser are..."
+    echo ""
+    browser --help 2>&1 | grep -v SWITCHES
+    exit 1
+fi
+
+if test -d $arg1 -a -d $arg2; then # both are dirs
+    for f in $arg1/*; do
+        if test -d $f; then
+            df=`echo $f | rev | cut -d'/' -f1 | rev`
+            if test $recurse = 1; then
+                if test -d $arg2/$df; then
+                    if test $verbose = 1; then
+                        echo "Processing directory \"$df\"..."
+                        $0 -recurse -verbose $browserOpts $f $arg2/$df
+                    else
+                        $0 -recurse $browserOpts $f $arg2/$df
+                    fi
+                else
+                    test $verbose = 1 && echo "Directory \"$df\" does not exist in \"$arg2\", skipping it."
+                fi
+            else
+                test $verbose = 1 && echo "\"$df\" is a directory, skipping it. Use -recurse to process directories."
+            fi
+        else
+            bf=`basename $f`
+            if test -e $arg2/$bf; then
+                test $verbose = 1 && echo "Processing file \"$bf\"..."
+                browser -l 3 -r $browserOpts -e diff $f $arg2/$bf
+            else
+                test $verbose = 1 && echo "File \"$bf\" does not exist in \"$arg2\", skipping it."
+            fi
+        fi
+    done
+elif test -d $arg1 -o -d $arg2; then # one is dir
+    if test -d $arg1; then
+        browser -l 3 -r $browserOpts -e diff $arg1/$arg2 $arg2
+    else
+        browser -l 3 -r $browserOpts -e diff $arg1 $arg2/$arg1
+    fi
+else # neither are dirs
+    browser -l 3 -r $browserOpts -e diff $arg1 $arg2
+fi

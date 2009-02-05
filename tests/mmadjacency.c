@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1999 - 2005 
+                           Copyright (c) 1999 - 2009 
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -59,7 +59,7 @@ main(int argc, char *argv[])
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
-    
+    printf("Creating test file: \"%s\".\n", filename); 
     dbfile = DBCreate(filename, 0, DB_LOCAL, "multi-mesh adjacency test file", driver);
 
     /* this is a really basic test of DBPutMultimeshadj. It tests only that

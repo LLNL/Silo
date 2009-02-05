@@ -1463,6 +1463,10 @@ db_pdb_GetAtt (DBfile *_dbfile, char *varname, char *attname)
  *
  *    Lisa J. Roberts, Tue Nov 23 09:39:49 PST 1999
  *    Changed strdup to safe_strdup.
+ *
+ *    Mark C. Miller, Wed Jan 21 13:52:10 PST 2009
+ *    Removed #if 0 conditional compilation of PJ_rel_group call to fix
+ *    a leak.
  *-------------------------------------------------------------------------*/
 CALLBACK DBobject *
 db_pdb_GetObject (DBfile *_file, char *name)
@@ -1491,12 +1495,7 @@ db_pdb_GetObject (DBfile *_file, char *name)
       obj->pdb_names[i] = safe_strdup (group->pdb_names[i]);
    }
 
-#if 0
-   /*
-    * The PJ_rel_group causes things to break!
-    */
    PJ_rel_group (group);
-#endif
 
    return obj;
 }
@@ -2218,6 +2217,7 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("mrgtree_name", &tmpmm.mrgtree_name, DB_CHAR);
       DEFINE_OBJ("tv_connectivity", &tmpmm.tv_connectivity, DB_INT);
       DEFINE_OBJ("disjoint_mode", &tmpmm.disjoint_mode, DB_INT);
+      DEFINE_OBJ("topo_dim", &tmpmm.topo_dim, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -2226,6 +2226,15 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       *mm = tmpmm;
 
       CHECK_TYPE(typestring, DB_MULTIMESH, objname);
+
+      /* The value we store to the file for 'topo_dim' member is
+         designed such that zero indicates a value that was NOT
+         specified in the file. Since zero is a valid topological
+         dimension, when we store topo_dim to a file, we always
+         add 1. So, we have to subtract it here. This was implemented
+         for multimeshes in 4.7 and so is handled correctly for
+         them in all cases. */
+       mm->topo_dim = mm->topo_dim - 1;
 
       /*----------------------------------------
        *  Internally, the meshnames and groupings 
@@ -3458,6 +3467,17 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
 
    um->id = 0;
    um->name = STRDUP(meshname);
+
+   /* The value we store to the file for 'topo_dim' member is
+      designed such that zero indicates a value that was NOT
+      specified in the file. Since zero is a valid topological
+      dimension, when we store topo_dim to a file, we always
+      add 1. So, we have to subtract it here. However, this
+      data member was not being handled correctly in files
+      versions before 4.7. So, for older files, if topo_dim
+      is non-zero we just pass it without alteration. */
+   if (!DBFileVersionGE(_dbfile,4,5,1) || DBFileVersionGE(_dbfile, 4,7,0))
+       um->topo_dim = um->topo_dim - 1;
 
    /* Read facelist, zonelist, and edgelist */
 
@@ -5354,13 +5374,16 @@ db_pdb_WriteSlice (DBfile *_dbfile, char *vname, void *values, int dtype,
            i<ndims && dimensions;
            i++, dimensions=dimensions->next) {
          if (0!=dimensions->index_min) {
+            FREE(dtype_s);
             return db_perror ("index_min!=0", E_BADARGS, me) ;
          }
          if (dimensions->number!=dims[i]) {
+            FREE(dtype_s);
             return db_perror ("dims", E_BADARGS, me) ;
          }
       }
       if (i!=ndims) {
+         FREE(dtype_s);
          return db_perror ("ndims", E_BADARGS, me) ;
       }
    } else {
@@ -5385,12 +5408,15 @@ db_pdb_WriteSlice (DBfile *_dbfile, char *vname, void *values, int dtype,
     */
    for (i=0; i<ndims; i++) {
       if (offset[i]<0 || offset[i]>=dims[i]) {
+         FREE(dtype_s);
          return db_perror ("offset", E_BADARGS, me) ;
       }
       if (length[i]<=0 || length[i]>dims[i]) {
+         FREE(dtype_s);
          return db_perror ("length", E_BADARGS, me) ;
       }
       if (offset[i]+length[i]>dims[i]) {
+         FREE(dtype_s);
          return db_perror ("offset+length", E_BADARGS, me) ;
       }
    }
@@ -6180,6 +6206,8 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
       DBAddIntComponent(obj, "tv_connectivity", _mm._tv_connectivity);
    if (_mm._disjoint_mode)
       DBAddIntComponent(obj, "disjoint_mode", _mm._disjoint_mode);
+   if (_mm._topo_dim > 0)
+      DBAddIntComponent(obj, "topo_dim", _mm._topo_dim);
 
    /*-------------------------------------------------------------
     *  Define and write variables before adding them to object.
@@ -8220,7 +8248,8 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    DBAddIntComponent(obj, "facetype", _um._facetype);
    DBAddIntComponent(obj, "cycle", _um._cycle);
    DBAddIntComponent(obj, "coord_sys", _um._coordsys);
-   DBAddIntComponent(obj, "topo_dim", _um._topo_dim);
+   if (_um._topo_dim > 0)
+      DBAddIntComponent(obj, "topo_dim", _um._topo_dim);
    DBAddIntComponent(obj, "planar", _um._planar);
    DBAddIntComponent(obj, "origin", _um._origin);
    DBAddIntComponent(obj, "datatype", datatype);
@@ -8396,7 +8425,8 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
    DBAddIntComponent(obj, "facetype", _um._facetype);
    DBAddIntComponent(obj, "cycle", _um._cycle);
    DBAddIntComponent(obj, "coord_sys", _um._coordsys);
-   DBAddIntComponent(obj, "topo_dim", _um._topo_dim);
+   if (_um._topo_dim > 0)
+      DBAddIntComponent(obj, "topo_dim", _um._topo_dim);
    DBAddIntComponent(obj, "planar", _um._planar);
    DBAddIntComponent(obj, "origin", _um._origin);
    DBAddIntComponent(obj, "datatype", datatype);

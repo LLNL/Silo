@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 2000
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -104,14 +104,16 @@ build_curve (DBfile *dbfile, int driver)
  *
  *-------------------------------------------------------------------------
  */
+int            dims[]={ONE_MEG/sizeof(float)};
+float          val[ONE_MEG/sizeof(float)];
+float          rval[ONE_MEG/sizeof(float)];
+
 int
 main(int argc, char *argv[])
 {
     
     int            nerrors = 0;
-    int            i, j, ndims=1, dims[]={ONE_MEG/sizeof(float)};
-    float          val[ONE_MEG/sizeof(float)];
-    float          rval[ONE_MEG/sizeof(float)];
+    int            i, j, ndims=1; 
     int            cnt, driver=DB_HDF5;
     char          *filename="largefile.h5";
     int            k1, k2;

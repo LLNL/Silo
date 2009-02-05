@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 2001
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -153,7 +153,7 @@ WriteFile(double time, int cycle, int driver)
      * Create a file that contains the mesh and variable.
      */
     sprintf(filename, "wave%.4d.silo", cycle);
-
+    printf("Creating test file \"%s\".\n", filename);
     dbfile = DBCreate(filename, 0, DB_LOCAL, "The Wave", driver);
 
     optList = DBMakeOptlist(10);

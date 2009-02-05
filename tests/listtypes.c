@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 2000
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -244,7 +244,7 @@ PrintFileComponentTypes(char *filename)
     DBtoc  *dbtoc = NULL;
 
     /* Open the data file. Return if it cannot be read. */
-    if((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) == NULL)
+    if((dbfile = DBOpen(filename, DB_PDB, DB_READ)) == NULL)
     {
         printf("File: %s\n    <could not be opened>\n\n", filename);
         return;

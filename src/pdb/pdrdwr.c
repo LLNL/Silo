@@ -275,6 +275,8 @@ _lite_PD_hyper_read (PDBfile *file, char *name, char *outtype,
  *    Sean Ahern, Wed Jul 14 14:03:01 PDT 2004
  *    Don't flush if the file has been opened as "read only".
  *
+ *    Kathleen Bonnell, Thu Jan  8 17:40:36 PST 2009
+ *    Fixed UMR for litype by adding initialization.
  *-------------------------------------------------------------------------
  */
 long
@@ -284,7 +286,7 @@ _lite_PD_rd_syment (PDBfile *file, syment *ep, char *outtype, byte *vr) {
    int dst, vif, size, boffs, readonly;
    long i, n, nitems, bytepitem, addr, eaddr, nrd;
    long flag;
-   char bf[MAXLINE], *pv, *litype, *lotype, *svr, **lvr;
+   char bf[MAXLINE], *pv, *litype=NULL, *lotype, *svr, **lvr;
    symblock *sp;
    symindir iloc;
    defstr *dp;
@@ -1273,6 +1275,8 @@ _PD_compute_hyper_strides (PDBfile *file, char *ind, dimdes *dims, int *pnd) {
  *
  * Modifications:
  *
+ *  Mark C. Miller, Wed Jan 21 18:03:08 PST 2009
+ *  Silenced valgrind errors by fixing overlapping strcpy.
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
@@ -1286,6 +1290,7 @@ _lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, byte *vr,
    dimdes *dims;
    dimind *pi;
 
+   memset(s, 0, sizeof(s));
    dims = PD_entry_dimensions(ep);
    strcpy(s, name);
    c = s[strlen(s)-1];
@@ -1300,7 +1305,17 @@ _lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, byte *vr,
    }
 
    expr = lite_SC_lasttok(s, "[]()");
-   strcpy(s, expr);
+   if (s + strlen(expr) + 1 >= expr)
+   {
+       int i;
+       for (i=0; expr[i] != 0; i++)
+           s[i] = expr[i];
+       s[i] = 0;
+   }
+   else
+   {
+       strcpy(s, expr);
+   }
 
    pi = _PD_compute_hyper_strides(file, s, dims, &nd);
    if (pi == NULL) {

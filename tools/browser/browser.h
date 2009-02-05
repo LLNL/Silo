@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1996   The Regents of the University of California.
+ * Copyright (c) 1996 - 2009   The Regents of the University of California.
  *                      All rights reserved.
  *
  * This work was produced at the University of California,  Lawrence Liver-
@@ -600,6 +600,7 @@ extern prim_assoc_t PA_CENTERING[];
 extern prim_assoc_t PA_DEFVARTYPE[];
 extern prim_assoc_t PA_BOUNDARYTYPE[];
 extern prim_assoc_t PA_REGIONOP[];
+extern prim_assoc_t PA_TOPODIM[];
 
 obj_t prim_set_io_assoc (obj_t, prim_assoc_t*);
 DBdatatype prim_silotype (obj_t);

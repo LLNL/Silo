@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1996   The Regents of the University of California.
+ * Copyright (c) 1996 - 2009   The Regents of the University of California.
  *                      All rights reserved.
  *
  * This work was produced at the University of California,  Lawrence Liver-
@@ -274,6 +274,15 @@ prim_assoc_t    PA_BOUNDARYTYPE[] = {
    {DBCSG_TRI_3P,           "TRI_3P"},
    {DBCSG_QUAD_4P,          "QUAD_4P"},
    {0,                      NULL}};
+
+prim_assoc_t PA_TOPODIM[] = {
+   {PA_NAME,                                    "topological dimension"},
+   {-1,        "not specified"},
+   { 0,        "0"},
+   { 1,        "1"},
+   { 2,        "2"},
+   { 3,        "3"},
+};
 
 
 /*-------------------------------------------------------------------------

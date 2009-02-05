@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 2002
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -44,7 +44,7 @@ for advertising or product endorsement purposes.
  * WARNING: The `#define' statements in this file are used when
  *      generating the Fortran include file `silo.inc'.  Any
  *     such symbol that should not be an integer parameter
- *     in the Fortran include file should have the symbol
+ *     in the Fortran include file should have the text 
  *     `NO_FORTRAN_DEFINE' on the same line.  #define statements
  *     that define macros (or any value not beginning with
  *     one of [a-zA-Z0-9_]) are ignored.
@@ -72,9 +72,9 @@ extern "C" {
    doubley subscripted variants will have only a single star. Rest
    assured they are still treated as doubley subscripted in the
    implementation. */
-#define DB_DTPTR  @SILO_DTYPPTR@
-#define DB_DTPTR1 @SILO_DTYPPTR1@
-#define DB_DTPTR2 @SILO_DTYPPTR2@
+#define DB_DTPTR  @SILO_DTYPPTR@  /* NO_FORTRAN_DEFINE */
+#define DB_DTPTR1 @SILO_DTYPPTR1@ /* NO_FORTRAN_DEFINE */
+#define DB_DTPTR2 @SILO_DTYPPTR2@ /* NO_FORTRAN_DEFINE */
 
 #include <stdio.h>
 
@@ -85,14 +85,19 @@ extern "C" {
 #define TRUE    1
 #endif
 
+/* In the definitions for different parts of the version number, below,
+   we use leading '0x0' to deal with possible blank minor and/or patch
+   version number but still allow base-10, numeric comparison in the GE
+   macro. */
+
 /* Major release number of silo library. */
 #define SILO_VERS_MAJ @SILO_VERS_MAJ@
 
-/* Minor release number of silo library. */
-#define SILO_VERS_MIN @SILO_VERS_MIN@
+/* Minor release number of silo library. Can be empty. */
+#define SILO_VERS_MIN 0x0@SILO_VERS_MIN@
 
 /* Patch release number of silo library.  Can be empty. */
-#define SILO_VERS_PAT @SILO_VERS_PAT@
+#define SILO_VERS_PAT 0x0@SILO_VERS_PAT@
 
 /* Pre-release release number of silo library.  Can be empty. */
 #define SILO_VERS_PRE @SILO_VERS_PRE@
@@ -103,8 +108,8 @@ extern "C" {
 
 /* Useful macro for comparing Silo versions (and DB_ alias) */
 #define SILO_VERSION_GE(Maj,Min,Pat)  \
-        (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_PAT>=Pat)) || \
-         ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) || \
+        (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==0x0 ## Min) && (SILO_VERS_PAT>=0x0 ## Pat)) || \
+         ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>0x0 ## Min)) || \
          (SILO_VERS_MAJ>Maj))
 #define DB_VERSION_GE(Maj,Min,Pat) SILO_VERSION_GE(Maj,Min,Pat)
 
@@ -128,8 +133,6 @@ extern "C" {
 #define DB_HDF5_MPIO   1024  /* use MPI-IO on MPI_COMM_SELF */
 #define DB_HDF5_MPIOP  1280  /* use MPI for any messaging, sec 2 for I/O */
 
-#define NO_FORTRAN_DEFINE       /*mkinc ignores these lines. */
-
 /*-------------------------------------------------------------------------
  * Other library-wide constants.
  *-------------------------------------------------------------------------*/
@@ -147,7 +150,12 @@ extern "C" {
 
 /* The following identifiers are for use with the DBDataReadMask() call.  They
  * specify what portions of the data beyond the metadata is allocated
- * and read.  */
+ * and read.  Note that since these values are only necessary when reading
+ * and since the Fortran interface is primarily a write interface, it is not
+ * necessary for these symbols to appear in the silo.inc file. However, the
+ * reason they DO NOT APPEAR there inspite of the fact that DO NOT HAVE the
+ * 'NO_FORTRAN_DEFINE' text appearing on each line is that the mkinc script
+ * requires an underscore in the symbol name for it to appear in silo.inc. */
 #define DBAll                0xffffffff
 #define DBNone               0x00000000
 #define DBCalc               0x00000001
@@ -428,8 +436,7 @@ typedef enum {
 #define DB_VARTYPE_LABEL                207
 
 /* Definitions for CSG boundary types 
-   Designed so low-order 16 bits are unused
-   and can be included in silo.inc for Fortran 
+   Designed so low-order 16 bits are unused.
 
    The last few characters of the symbol are intended
    to indicate the representational form of the surface type
@@ -446,57 +453,57 @@ typedef enum {
    K = arbitrary integer
    F = planar face defined by point-normal pair (6 values)
    */
-#define DBCSG_QUADRIC_G         16777216   /* 0x01000000 */
-#define DBCSG_SPHERE_PR         33619968   /* 0x02010000 */
-#define DBCSG_ELLIPSOID_PRRR    33685504   /* 0x02020000 */
-#define DBCSG_PLANE_G           50331648   /* 0x03000000 */
-#define DBCSG_PLANE_X           50397184   /* 0x03010000 */
-#define DBCSG_PLANE_Y           50462720   /* 0x03020000 */
-#define DBCSG_PLANE_Z           50528256   /* 0x03030000 */
-#define DBCSG_PLANE_PN          50593792   /* 0x03040000 */
-#define DBCSG_PLANE_PPP         50659328   /* 0x03050000 */
-#define DBCSG_CYLINDER_PNLR     67108864   /* 0x04000000 */
-#define DBCSG_CYLINDER_PPR      67174400   /* 0x04010000 */
-#define DBCSG_BOX_XYZXYZ        83886080   /* 0x05000000 */
-#define DBCSG_CONE_PNLA         100663296  /* 0x06000000 */
-#define DBCSG_CONE_PPA          100728832  /* 0x06010000 */
-#define DBCSG_POLYHEDRON_KF     117440512  /* 0x07000000 */
-#define DBCSG_HEX_6F            117506048  /* 0x07010000 */
-#define DBCSG_TET_4F            117571584  /* 0x07020000 */
-#define DBCSG_PYRAMID_5F        117637120  /* 0x07030000 */
-#define DBCSG_PRISM_5F          117702656  /* 0x07040000 */
+#define DBCSG_QUADRIC_G         0x01000000
+#define DBCSG_SPHERE_PR         0x02010000
+#define DBCSG_ELLIPSOID_PRRR    0x02020000
+#define DBCSG_PLANE_G           0x03000000
+#define DBCSG_PLANE_X           0x03010000
+#define DBCSG_PLANE_Y           0x03020000
+#define DBCSG_PLANE_Z           0x03030000
+#define DBCSG_PLANE_PN          0x03040000
+#define DBCSG_PLANE_PPP         0x03050000
+#define DBCSG_CYLINDER_PNLR     0x04000000
+#define DBCSG_CYLINDER_PPR      0x04010000
+#define DBCSG_BOX_XYZXYZ        0x05000000
+#define DBCSG_CONE_PNLA         0x06000000
+#define DBCSG_CONE_PPA          0x06010000
+#define DBCSG_POLYHEDRON_KF     0x07000000
+#define DBCSG_HEX_6F            0x07010000
+#define DBCSG_TET_4F            0x07020000
+#define DBCSG_PYRAMID_5F        0x07030000
+#define DBCSG_PRISM_5F          0x07040000
 
 /* Definitions for 2D CSG boundary types */
-#define DBCSG_QUADRATIC_G       134217728  /* 0x08000000 */
-#define DBCSG_CIRCLE_PR         150994944  /* 0x09000000 */
-#define DBCSG_ELLIPSE_PRR       151060480  /* 0x09010000 */
-#define DBCSG_LINE_G            167772160  /* 0x0A000000 */
-#define DBCSG_LINE_X            167837696  /* 0x0A010000 */
-#define DBCSG_LINE_Y            167903232  /* 0x0A020000 */
-#define DBCSG_LINE_PN           167968768  /* 0x0A030000 */
-#define DBCSG_LINE_PP           168034304  /* 0x0A040000 */
-#define DBCSG_BOX_XYXY          184549376  /* 0x0B000000 */
-#define DBCSG_ANGLE_PNLA        201326592  /* 0x0C000000 */
-#define DBCSG_ANGLE_PPA         201392128  /* 0x0C010000 */
-#define DBCSG_POLYGON_KP        218103808  /* 0x0D000000 */
-#define DBCSG_TRI_3P            218169344  /* 0x0D010000 */
-#define DBCSG_QUAD_4P           218234880  /* 0x0D020000 */
+#define DBCSG_QUADRATIC_G       0x08000000
+#define DBCSG_CIRCLE_PR         0x09000000
+#define DBCSG_ELLIPSE_PRR       0x09010000
+#define DBCSG_LINE_G            0x0A000000
+#define DBCSG_LINE_X            0x0A010000
+#define DBCSG_LINE_Y            0x0A020000
+#define DBCSG_LINE_PN           0x0A030000
+#define DBCSG_LINE_PP           0x0A040000
+#define DBCSG_BOX_XYXY          0x0B000000
+#define DBCSG_ANGLE_PNLA        0x0C000000
+#define DBCSG_ANGLE_PPA         0x0C010000
+#define DBCSG_POLYGON_KP        0x0D000000
+#define DBCSG_TRI_3P            0x0D010000
+#define DBCSG_QUAD_4P           0x0D020000
 
 /* Definitions for CSG Region operators */
-#define DBCSG_INNER             2130706432 /* 0x7F000000 */
-#define DBCSG_OUTER             2130771968 /* 0x7F010000 */
-#define DBCSG_ON                2130837504 /* 0x7F020000 */
-#define DBCSG_UNION             2130903040 /* 0x7F030000 */
-#define DBCSG_INTERSECT         2130968576 /* 0x7F040000 */
-#define DBCSG_DIFF              2131034112 /* 0x7F050000 */
-#define DBCSG_COMPLIMENT        2131099648 /* 0x7F060000 */
-#define DBCSG_XFORM             2131165184 /* 0x7F070000 */
-#define DBCSG_SWEEP             2131230720 /* 0x7F080000 */
+#define DBCSG_INNER             0x7F000000
+#define DBCSG_OUTER             0x7F010000
+#define DBCSG_ON                0x7F020000
+#define DBCSG_UNION             0x7F030000
+#define DBCSG_INTERSECT         0x7F040000
+#define DBCSG_DIFF              0x7F050000
+#define DBCSG_COMPLIMENT        0x7F060000
+#define DBCSG_XFORM             0x7F070000
+#define DBCSG_SWEEP             0x7F080000
 
 /* definitions for MRG Tree traversal flags */
-#define DB_PREORDER                      1 /* 0x00000001 */
-#define DB_POSTORDER                     2 /* 0x00000002 */
-#define DB_FROMCWR                       4 /* 0x00000004 */
+#define DB_PREORDER             0x00000001
+#define DB_POSTORDER            0x00000002
+#define DB_FROMCWR              0x00000004
 
 /* Miscellaneous constants */
 #define     DB_F77NULL  (-99)   /*Fortran NULL pointer      */
@@ -680,9 +687,10 @@ typedef struct {
     int            lgroupings;  /* size of groupings array */
     int            *groupings;  /* Array of mesh-ids, group-ids, and counts */
     char          **groupnames; /* Array of group-names for groupings  */
-    char          *mrgtree_name; /* optional name of assoc. mrgtree object */
+    char          *mrgtree_name;/* optional name of assoc. mrgtree object */
     int            tv_connectivity;
     int            disjoint_mode;
+    int            topo_dim;    /* Topological dimension; max of all blocks. */ 
 } DBmultimesh;
 
 /*----------------------------------------------------------------------------
@@ -913,7 +921,7 @@ typedef struct {
     char          *name;        /* Name associated with mesh */
     int            cycle;       /* Problem cycle number */
     int            coord_sys;   /* Coordinate system */
-    int            topo_dim;    /* Topological dimensions */
+    int            topo_dim;    /* Topological dimension. */ 
     char          *units[3];    /* Units for variable, e.g, 'mm/ms' */
     char          *labels[3];   /* Label associated with each dimension */
 
@@ -1362,8 +1370,8 @@ typedef struct _DBgroupelmap {
     int fracs_data_type;
 } DBgroupelmap;
 
-#if !defined(DB_MAX_EXPSTRS)
-#define DB_MAX_EXPSTRS 8
+#if !defined(DB_MAX_EXPSTRS) /* NO_FORTRAN_DEFINE */
+#define DB_MAX_EXPSTRS 8 /* NO_FORTRAN_DEFINE */
 #endif
 
 typedef struct _DBnamescheme
@@ -1398,6 +1406,7 @@ typedef struct DBfile_pub {
     int            pathok;      /*driver handles paths in names */
     int            Grab;        /*drive has access to low-level interface */
     void          *GrabId;      /*pointer to low-level driver descriptor */
+    char          *file_lib_version; /* version of lib file was created with */
 
     /* Public Methods */
     int            (*close)(struct DBfile *);
@@ -1652,6 +1661,9 @@ SILO_API extern int      DBGetDriverType(const DBfile *);
 SILO_API extern int      DBGetDriverTypeFromPath(const char *);
 SILO_API extern char    *DBJoinPath(const char *, const char *);
 SILO_API extern char    *DBVersion(void);
+SILO_API extern int      DBVersionGE(int Maj, int Min, int Pat);
+SILO_API extern char    *DBFileVersion(DBfile *dbfile);
+SILO_API extern int      DBFileVersionGE(DBfile *dbfile, int Maj, int Min, int Pat);
 SILO_API extern void     DBShowErrors(int, void (*)(char *));
 SILO_API extern char    *DBErrString(void);
 SILO_API extern char    *DBErrFunc(void);

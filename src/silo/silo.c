@@ -1,5 +1,5 @@
 /*
-                           Copyright 1991 - 2002
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -105,11 +105,14 @@ for advertising or product endorsement purposes.
  * invalid as a wink-in candidate.  */
 int SILO_VERS_TAG = 0;
 
-/* specify versions which are backward compatible with the current */
-int Silo_version_4_6 = 0;
-int Silo_version_4_6_1 = 0;
-int Silo_version_4_6_2 = 0;
+/* Specify versions which are backward compatible with the current. */
+/* No lines of  the form 'int Silo_version_Maj_Min_Pat = 0;' below
+   here indicates that this version is not backwards compatible with
+   any previous versions.*/
 
+
+
+/* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
 PUBLIC int     db_errno = 0;    /*last error number                     */
 PUBLIC char    db_errfunc[64];  /*name of erring function               */
@@ -3268,7 +3271,7 @@ DBErrFunc(void)
 /*-------------------------------------------------------------------------
  * Function:    DBVersion
  *
- * Purpose:     Return the version number as a string.
+ * Purpose:     Return the version number of the library as a string.
  *
  * Returns:     ptr to version number
  *
@@ -3287,6 +3290,134 @@ DBVersion(void)
     strcpy(version, SILO_VSTRING);
 
     return version;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBVersionGE
+ *
+ * Purpose:     Return whether or not the version of the library is greater
+ *              than or equal to the version specified by Maj, Min, Pat.
+ *              This is a run-time equiv. of the SILO_VERSION_GE macro.
+ *
+ * Returns:     integer indicating if true (1) or false (0) 
+ *
+ * Programmer:  Mark C. Miller, Mon Jan 12 20:59:30 PST 2009
+ *-------------------------------------------------------------------------*/
+PUBLIC int 
+DBVersionGE(int Maj, int Min, int Pat)
+{
+    if (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_PAT>=Pat)) ||
+         ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) ||
+         (SILO_VERS_MAJ>Maj))
+        return 1;
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBFileVersion
+ *
+ * Purpose:     Return the version number of the library that created the
+ *              given file as a string.
+ *
+ * Returns:     ptr to version number
+ *
+ * Programmer:  Mark C. Miller, Mon Jan 12 20:59:30 PST 2009
+ *-------------------------------------------------------------------------*/
+PUBLIC char *
+DBFileVersion(DBfile *dbfile)
+{
+    static char version[256];
+    if (dbfile->pub.file_lib_version)
+        strcpy(version, dbfile->pub.file_lib_version);
+    else
+        strcpy(version, "unknown; 4.5 or older");
+    return version;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBFileVersionGE
+ *
+ * Purpose:     Return whether or not the given file was created with a 
+ *              version of the library greater than or equal to the
+ *              version specified by Maj, Min, Pat 
+ *
+ * Returns:     1 if file version is greather than or equal to Maj/Min/Pat
+ *              0 if file version is less than Maj/Min/Pat
+ *             -1 if unable to determine.
+ *
+ * Programmer:  Mark C. Miller, Mon Jan 12 20:59:30 PST 2009
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBFileVersionGE(DBfile *dbfile, int Maj, int Min, int Pat)
+{
+    int retval = -1;
+    int fileMaj = -1, fileMin = -1, filePat = -1;
+    char *version = STRDUP(DBFileVersion(dbfile));
+
+    if (strncmp(version, "unknown", 7) == 0)
+    {
+        /* We started maintaining library version information in the file
+           in version 4.5.1. So, if it is 'unknown', we can return something
+           useful ONLY if the version we're comparing against is 4.5.1 or
+           greater. */
+        if ((Maj==4 && Min==5 && Pat>=1) ||
+            (Maj==4 && Min>5) ||
+            (Maj>4))
+            retval = 0;
+    }
+    else
+    {
+        int val;
+        char *token;
+
+        errno = 0;
+        token = strtok(version, ".");
+        val = strtol(token, 0, 10);
+        if (token != 0 && val != 0 && errno == 0)
+        {
+            fileMaj = val;
+            token = strtok(0, ".");
+            if (token)
+                val = strtol(token, 0, 10);
+            if (token != 0 && val != 0 && errno == 0)
+            {
+                fileMin = val;
+                token = strtok(0, ".");
+                if (token)
+                    val = strtol(token, 0, 10);
+                if (token != 0 && val != 0 && errno == 0)
+                    filePat = val;
+            }
+        }
+
+        if (fileMaj != -1 && fileMin != -1 && filePat != -1)
+        {
+            if ((fileMaj==Maj && fileMin==Min && filePat>=Pat) ||
+                (fileMaj==Maj && fileMin>Min) ||
+                (fileMaj>Maj))
+                retval = 1;
+            else
+                retval = 0;
+        }
+        else if (fileMaj != -1 && fileMin != -1)
+        {
+            if ((fileMaj==Maj && fileMin>=Min) ||
+                (fileMaj>Maj))
+                retval = 1;
+            else
+                retval = 0;
+        }
+        else if (fileMaj != -1)
+        {
+            if (fileMaj>=Maj)
+                retval = 1;
+            else
+                retval = 0;
+        }
+    }
+
+    free(version);
+    return retval;
 }
 
 /*-------------------------------------------------------------------------
@@ -3350,6 +3481,9 @@ DBVersion(void)
  *
  *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
  *    Added code to register the returned file pointer
+ *
+ *    Mark C. Miller, Mon Jan 12 20:50:41 PST 2009
+ *    Removed DB_SDX conditionally compiled code blocks.
  *------------------------------------------------------------------------- */
 PUBLIC DBfile *
 DBOpenReal(const char *name, int type, int mode)
@@ -3395,84 +3529,77 @@ DBOpenReal(const char *name, int type, int mode)
             API_ERROR(ascii, E_NOTIMP);
         }
 
-#ifdef DB_SDX
-        if (type != DB_SDX)
+        /****************************************************/
+        /* Check to make sure the file exists and has the   */
+        /* correct permissions.                             */
+        /****************************************************/
+#if SIZEOF_OFF64_T > 4
+        if (stat64(name, &filestate) != 0)
+#else
+        if (stat(name, &filestate) != 0)
+#endif
         {
-#endif
-            /****************************************************/
-            /* Check to make sure the file exists and has the   */
-            /* correct permissions.                             */
-            /****************************************************/
-#if SIZEOF_OFF64_T > 4
-            if (stat64(name, &filestate) != 0)
-#else
-            if (stat(name, &filestate) != 0)
-#endif
+            if( errno == ENOENT )
             {
-                if( errno == ENOENT )
-                {
-                    /********************************/
-                    /* File doesn't exist.          */
-                    /********************************/
-                    API_ERROR((char *)name, E_NOFILE);
-                }
-                else
-                {
-                    /********************************/
-                    /* System level error occured.  */
-                    /********************************/
+                /********************************/
+                /* File doesn't exist.          */
+                /********************************/
+                API_ERROR((char *)name, E_NOFILE);
+            }
+            else
+            {
+                /********************************/
+                /* System level error occured.  */
+                /********************************/
 #if SIZEOF_OFF64_T > 4
-                    printf("stat64() failed with error: ");
+                printf("stat64() failed with error: ");
 #else
-                    printf("stat() failed with error: ");
+                printf("stat() failed with error: ");
 #endif
-                    switch (errno)
-                    {
-                      case EACCES:       printf("EACCES\n");       break;
-                      case EBADF:        printf("EBADF\n");        break;
-                      case ENAMETOOLONG: printf("ENAMETOOLONG\n"); break;
-                      case ENOTDIR:      printf("ENOTDIR\n");      break;
+                switch (errno)
+                {
+                  case EACCES:       printf("EACCES\n");       break;
+                  case EBADF:        printf("EBADF\n");        break;
+                  case ENAMETOOLONG: printf("ENAMETOOLONG\n"); break;
+                  case ENOTDIR:      printf("ENOTDIR\n");      break;
 #ifdef EOVERFLOW
-                      case EOVERFLOW:    
+                  case EOVERFLOW:    
 #ifdef HAVE_STRERROR
-                                         printf("EOVERFLOW: \"%s\"\n", 
-                                            strerror(errno));
+                                     printf("EOVERFLOW: \"%s\"\n", 
+                                        strerror(errno));
 #else
-                                         printf("EOVERFLOW: errno=%d\n", errno);
+                                     printf("EOVERFLOW: errno=%d\n", errno);
 #endif
-                                         printf("Silo may need to be re-compiled with "
-                                                "Large File Support (LFS)\n");
-                                         break;
+                                     printf("Silo may need to be re-compiled with "
+                                            "Large File Support (LFS)\n");
+                                     break;
 #endif
-                      default:           
+                  default:           
 #ifdef HAVE_STRERROR
-                                         printf("\"%s\"\n",
-                                            strerror(errno));
+                                     printf("\"%s\"\n",
+                                        strerror(errno));
 #else
-                                         printf("errno=%d\n", errno);
+                                     printf("errno=%d\n", errno);
 #endif
-                                         break;
-                    }
-                    API_ERROR((char *)name, E_SYSTEMERR);
+                                     break;
                 }
+                API_ERROR((char *)name, E_SYSTEMERR);
             }
-            if( ( filestate.st_mode & S_IFDIR ) != 0 )
-            {
-                /************************************/
-                /* File is actually a directory.    */
-                /************************************/
-                API_ERROR((char *)name, E_FILEISDIR);
-            }
-            if( ( filestate.st_mode & S_IREAD ) == 0 )
-            {
-                /****************************************/
-                /* File is missing read permissions.    */
-                /****************************************/
-                API_ERROR((char *)name, E_FILENOREAD);
-            }
-#ifdef DB_SDX
         }
-#endif
+        if( ( filestate.st_mode & S_IFDIR ) != 0 )
+        {
+            /************************************/
+            /* File is actually a directory.    */
+            /************************************/
+            API_ERROR((char *)name, E_FILEISDIR);
+        }
+        if( ( filestate.st_mode & S_IREAD ) == 0 )
+        {
+            /****************************************/
+            /* File is missing read permissions.    */
+            /****************************************/
+            API_ERROR((char *)name, E_FILENOREAD);
+        }
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)
             API_ERROR((char *)name, E_MAXOPEN);
@@ -3484,23 +3611,18 @@ DBOpenReal(const char *name, int type, int mode)
         dbfile->pub.fileid = fileid;
         db_register_file(dbfile, name, mode!=DB_READ);
 
-#ifdef DB_SDX
-        if (type != DB_SDX)
-        {
-#endif
-            /*
-             * Install filters.  First, all `init' filters, then the
-             * specified filters.
-             */
-            for (i = 0; i < DB_NFILTERS; i++) {
-                if (_db_filter[i].name && _db_filter[i].init) {
-                    (void)(_db_filter[i].init) (dbfile, _db_filter[i].name);
-                }
+        /*
+         * Install filters.  First, all `init' filters, then the
+         * specified filters.
+         */
+        for (i = 0; i < DB_NFILTERS; i++) {
+            if (_db_filter[i].name && _db_filter[i].init) {
+                (void)(_db_filter[i].init) (dbfile, _db_filter[i].name);
             }
-            db_filter_install(dbfile);
-#ifdef DB_SDX
         }
-#endif
+        db_filter_install(dbfile);
+        if (DBInqVarExists(dbfile, SILO_VSTRING_NAME))
+            dbfile->pub.file_lib_version = DBGetVar(dbfile, SILO_VSTRING_NAME);
 
         API_RETURN(dbfile);
     }
@@ -3636,6 +3758,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
         /* write silo library version information to the file */
         n = strlen(SILO_VSTRING)+1;
         DBWrite(dbfile, SILO_VSTRING_NAME, SILO_VSTRING, &n, 1, DB_CHAR);
+        dbfile->pub.file_lib_version = STRDUP(SILO_VSTRING);
 
         API_RETURN(dbfile);
     }
@@ -3688,6 +3811,8 @@ DBClose(DBfile *dbfile)
         if (id >= 0 && id < DB_NFILES)
             _db_fstatus[id] = 0;
 
+        if (dbfile->pub.file_lib_version)
+            free(dbfile->pub.file_lib_version);
         db_unregister_file(dbfile);
         retval = (dbfile->pub.close) (dbfile);
         API_RETURN(retval);
@@ -9778,7 +9903,12 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         break;
 
                     case DBOPT_TOPO_DIM:
-                        _um._topo_dim = DEREF(int, optlist->values[i]);
+                        /* The value of '_topo_dim' member is designed such
+                           that a value of zero (which can be a valid topological
+                           dimension specified by a caller) represents the
+                           NOT SET value. So, we always add 1 to whatever the
+                           caller gives us. */
+                        _um._topo_dim = DEREF(int, optlist->values[i])+1;
                         break;
 
                     case DBOPT_FACETYPE:
@@ -10069,6 +10199,15 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_DISJOINT_MODE:
                         _mm._disjoint_mode = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_TOPO_DIM:
+                        /* The value of '_topo_dim' member is designed such
+                           that a value of zero (which can be a valid topological
+                           dimension specified by a caller) represents the
+                           NOT SET value. So, we always add 1 to whatever the
+                           caller gives us. */
+                        _mm._topo_dim = DEREF(int, optlist->values[i])+1;
                         break;
 
                     default:
@@ -10457,19 +10596,18 @@ db_SplitShapelist (DBucdmesh *um)
  *  Programmer
  *
  *    Mark C. Miller, Wed Aug  3 14:39:03 PDT 2005
+ *
+ *  Modifications:
+ *    Mark C. Miller, Mon Jan 12 16:29:19 PST 2009
+ *    Removed explicit setting of data members already handled
+ *    correctly by memset to zero.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_Csgmesh () {
 
    memset(&_csgm, 0, sizeof(_csgm));
    _csgm._use_specmf = DB_OFF;
-   _csgm._time_set = FALSE;
-   _csgm._dtime_set = FALSE;
-   _csgm._hi_offset_set = FALSE;
-   _csgm._lo_offset_set = FALSE;
    _csgm._group_no = -1;
-   _csgm._mrgtree_name = NULL;
-   _csgm._region_pnames = NULL;
 
    return 0;
 }
@@ -10499,6 +10637,10 @@ db_ResetGlobalData_Csgmesh () {
  *
  *    Mark C. Miller, Mon Jun 21 18:06:36 PDT 2004
  *    Moved from silo_pdb.c to public place where any driver can call
+ *
+ *    Mark C. Miller, Mon Jan 12 16:29:19 PST 2009
+ *    Removed explicit setting of data members already handled
+ *    correctly by memset to zero.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_PointMesh (int ndims) {
@@ -10506,11 +10648,7 @@ db_ResetGlobalData_PointMesh (int ndims) {
    memset(&_pm, 0, sizeof(_pm));
    _pm._ndims = ndims;
    _pm._nspace = ndims;
-   _pm._time_set = FALSE;
-   _pm._dtime_set = FALSE;
    _pm._group_no = -1;
-   _pm._mrgtree_name = NULL;
-   _pm._region_pnames = NULL;
    return 0;
 }
 
@@ -10549,6 +10687,10 @@ db_ResetGlobalData_PointMesh (int ndims) {
  *
  *    Mark C. Miller, Mon Jun 21 18:06:36 PDT 2004
  *    Moved from silo_pdb.c to public place where any driver can call
+ *
+ *    Mark C. Miller, Mon Jan 12 16:29:19 PST 2009
+ *    Removed explicit setting of data members already handled
+ *    correctly by memset to zero.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_QuadMesh (int ndims) {
@@ -10563,19 +10705,7 @@ db_ResetGlobalData_QuadMesh (int ndims) {
    _qm._nspace = ndims;
    _qm._planar = DB_AREA;
    _qm._use_specmf = DB_OFF;
-   _qm._time_set = FALSE;
-   _qm._dtime_set = FALSE;
-   _qm._ascii_labels = FALSE;
-   for (i = 0; i < 3; i++)
-   {
-      _qm._lo_offset[i] = 0;
-      _qm._hi_offset[i] = 0;
-      _qm._baseindex[i] = 0;
-   }
-   _qm._baseindex_set = 0;
    _qm._group_no = -1;
-   _qm._mrgtree_name = NULL;
-   _qm._region_pnames = NULL;
 
    return 0;
 }
@@ -10643,27 +10773,24 @@ db_ResetGlobalData_Curve (void) {
  *
  *     Mark C. Miller, Tue Jan  6 22:12:43 PST 2009
  *     Made default value for topo_dim to be NOT SET (-1).
+ *
+ *     Mark C. Miller, Mon Jan 12 16:26:08 PST 2009
+ *     Replaced 'topo_dim' with 'tdim_plus1', removed it from being
+ *     explicitly set. Likewise, removed explicit setting of other
+ *     entries that are already correctly handled by memset to zero.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones) {
 
    memset(&_um, 0, sizeof(_um));
    _um._coordsys = DB_OTHER;
-   _um._topo_dim = -1;
    _um._facetype = DB_RECTILINEAR;
    _um._ndims = ndims;
    _um._nnodes = nnodes;
    _um._nzones = nzones;
    _um._planar = DB_OTHER;
    _um._use_specmf = DB_OFF;
-   _um._ascii_labels = FALSE;
-   _um._time_set = FALSE;
-   _um._dtime_set = FALSE;
-   _um._hi_offset_set = FALSE;
-   _um._lo_offset_set = FALSE;
    _um._group_no = -1;
-   _um._mrgtree_name = NULL;
-   _um._region_pnames = NULL;
 
    return 0;
 }
@@ -10726,34 +10853,17 @@ db_ResetGlobalData_Ucdzonelist (void) {
  *    Thomas R. Treadway, Thu Jul 20 11:06:27 PDT 2006
  *    Added _lgroupings, _groupings, and _groupnames.
  *
+ *    Mark C. Miller, Mon Jan 12 16:28:18 PST 2009
+ *    Removed explicit setting of members already correctly handled
+ *    by memset to zero.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_MultiMesh (void) {
    memset(&_mm, 0, sizeof(_mm));
-   _mm._time_set = FALSE;
-   _mm._dtime_set = FALSE;
-   _mm._matnos = NULL;
    _mm._nmatnos = -1;
-   _mm._matname = NULL;
    _mm._nmat = -1;
-   _mm._nmatspec = NULL;
    _mm._blockorigin = 1;
    _mm._grouporigin = 1;
-   _mm._ngroups = 0;
-   _mm._extentssize = 0.;
-   _mm._extents = NULL;
-   _mm._zonecounts = NULL;
-   _mm._mixlens = NULL;
-   _mm._matcounts = NULL;
-   _mm._matlists = NULL;
-   _mm._has_external_zones = NULL;
-   _mm._lgroupings = 0;
-   _mm._groupings = NULL;
-   _mm._groupnames = NULL;
-   _mm._mrgtree_name = NULL;
-   _mm._region_pnames = NULL;
-   _mm._mmesh_name = NULL;
-   _mm._tensor_rank = 0;
    return 0;
 }
 

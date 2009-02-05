@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2006, The Regents of the University of California
+* Copyright (c) 2000 - 2009, The Regents of the University of California
 * Produced at the Lawrence Livermore National Laboratory
 * All rights reserved.
 *
@@ -36,6 +36,7 @@
 *****************************************************************************/
 
 #include <silo.h>
+#include <string.h>
 
 int main()
 {

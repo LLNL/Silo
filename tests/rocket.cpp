@@ -1,6 +1,6 @@
 /*****************************************************************************
 *
-* Copyright (c) 2000 - 2006, The Regents of the University of California
+* Copyright (c) 2000 - 2009, The Regents of the University of California
 * Produced at the Lawrence Livermore National Laboratory
 * All rights reserved.
 *
@@ -1095,6 +1095,7 @@ main(int argc, char **argv)
     build_body();
 
     /* create the file */
+    printf("Creating test file: \"rocket.silo\".\n");
     dbfile = DBCreate("rocket.silo", DB_CLOBBER, DB_LOCAL,
                       "3D mesh with many interesting subsets", driver);
 

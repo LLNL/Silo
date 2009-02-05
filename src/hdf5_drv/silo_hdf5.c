@@ -506,6 +506,7 @@ typedef struct DBmultimesh_mt {
     char                mrgtree_name[256];
     int                 tv_connectivity;
     int                 disjoint_mode;
+    int                 topo_dim;
 } DBmultimesh_mt;
 static hid_t    DBmultimesh_mt5;
 
@@ -2190,6 +2191,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        mrgtree_name);
         MEMBER_S(int,           tv_connectivity);
         MEMBER_S(int,           disjoint_mode);
+        MEMBER_S(int,           topo_dim);
     } DEFINE;
 
     STRUCT(DBmultimeshadj) {
@@ -5294,6 +5296,11 @@ db_hdf5_GetComponent(DBfile *_dbfile, char *objname, char *compname)
  *   and logic to just return data type when requested and avoid 
  *   actual read of data
  *
+ *   Mark C. Miller, Wed Jan 21 16:03:02 PST 2009
+ *   Added logic to deal with components that are vectors of tuples 
+ *   but where DBGetObject flattens these tuples into groups of related
+ *   scalars with digits appended to their names. This fixes a problem
+ *   in silex displaying these vector-based components.
  *-------------------------------------------------------------------------
  */
 CALLBACK void *
@@ -5303,7 +5310,8 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_GetComponent";
     hid_t       o=-1, attr=-1, atype=-1, ftype=-1, mtype=-1, dset=-1;
-    int         datatype, mno, n, ndims, i, dim[3], mult;
+    int         datatype, mno, n, ndims, i, dim[3], mult, complen, mnof=-1, mnofidx=-1;
+    char        *mnofname=0;
     void        *retval=NULL;
     
     PROTECT {
@@ -5331,11 +5339,31 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
                 free(memb_name);
                 break;
             }
+
+            /* If we didn't get a match but the last char is a digit, then
+               it might be a funky component named by adding a digit to an
+               existing component name by a preceding DBGetObject() call */ 
+            complen = strlen(compname);
+            while (57 >= compname[complen-1] && compname[complen-1] >= 48)
+                complen--;
+            if (57 >= compname[complen] && compname[complen] >= 48)
+            {
+                if (memb_name && !strncmp(memb_name, compname, complen))
+                {
+                    mnof = mno;
+                    mnofidx = strtol(&compname[complen], 0, 0) - 1;
+                    mnofname = STRDUP(memb_name);
+                }
+            }
             if (memb_name) free(memb_name);
         }
         if (mno>=n) {
-            db_perror(compname, E_NOTFOUND, me);
-            UNWIND();
+            if (mnof == -1)
+            {
+                db_perror(compname, E_NOTFOUND, me);
+                UNWIND();
+            }
+            mno = mnof;
         }
 
         /* Get the datatype and multiplicity for the component */
@@ -5401,13 +5429,31 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
 
                 /* Build the hdf5 data type to read */
                 mtype = H5Tcreate(H5T_COMPOUND, mult * db_GetMachDataSize(datatype));
-                db_hdf5_put_cmemb(mtype, compname, 0, ndims, dim,
-                                  hdf2hdf_type(ftype));
+                if (mnof != -1 && mnofidx != -1 & mnofname != 0)
+                    db_hdf5_put_cmemb(mtype, mnofname, 0, ndims, dim, hdf2hdf_type(ftype));
+                else
+                    db_hdf5_put_cmemb(mtype, compname, 0, ndims, dim, hdf2hdf_type(ftype));
 
                 /* Read the data into the output buffer */
                 if (H5Aread(attr, mtype, retval)<0) {
                     db_perror(compname, E_CALLFAIL, me);
                     UNWIND();
+                }
+
+                /* Handle the case where we got a match on member name modulo trailing
+                   digits (which really represent an index into the member) */
+                if (mnof != -1 && mnofidx != -1 & mnofname != 0)
+                {
+                    void *newretval;
+                    char *pretval = (char *) retval + mnofidx * db_GetMachDataSize(datatype);
+                    if (NULL==(newretval=calloc(1, db_GetMachDataSize(datatype)))) {
+                        db_perror(mnofname, E_CALLFAIL, me);
+                        UNWIND();
+                    }
+                    memcpy(newretval, pretval, db_GetMachDataSize(datatype));
+                    free(retval);
+                    free(mnofname);
+                    retval = newretval;
                 }
             }
             else
@@ -5417,6 +5463,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
         }
         
         /* Release objects */
+        if (mnofname) free(mnofname);
         H5Tclose(o);
         H5Aclose(attr);
         H5Tclose(atype);
@@ -5428,6 +5475,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
             free(retval);
             retval = NULL;
         }
+        if (mnofname) free(mnofname);
         H5Tclose(o);
         H5Aclose(attr);
         H5Tclose(atype);
@@ -8508,7 +8556,6 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         /* Set global options */
         strcpy(_um._meshname, name);
         _um._coordsys = DB_OTHER;
-        _um._topo_dim = ndims;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = ndims;
         _um._nnodes = nnodes;
@@ -8683,7 +8730,6 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
         /* Set global options */
         strcpy(_um._meshname, name);
         _um._coordsys = DB_OTHER;
-        _um._topo_dim = m.ndims;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = m.ndims;
         _um._nnodes = m.nnodes;
@@ -8854,6 +8900,16 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
         um->cycle = m.cycle;
         um->coord_sys = m.coord_sys;
         um->topo_dim = m.topo_dim;
+        /* The value we store to the file for 'topo_dim' member is
+           designed such that zero indicates a value that was NOT
+           specified in the file. Since zero is a valid topological
+           dimension, when we store topo_dim to a file, we always
+           add 1. So, we have to subtract it here. However, this
+           data member was not being handled correctly in files
+           versions before 4.7. So, for older files, if topo_dim
+           is non-zero we just pass it without alteration. */
+        if (!DBFileVersionGE(_dbfile,4,5,1) || DBFileVersionGE(_dbfile, 4,7,0))
+            um->topo_dim = um->topo_dim - 1;
         if ((um->datatype = db_hdf5_GetVarType(_dbfile, m.coord[0])) < 0)
             um->datatype = DB_FLOAT;
         if (um->datatype == DB_DOUBLE && force_single_g)
@@ -10511,6 +10567,7 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
         m.lgroupings = _mm._lgroupings;
         m.tv_connectivity = _mm._tv_connectivity;
         m.disjoint_mode = _mm._disjoint_mode;
+        m.topo_dim = _mm._topo_dim;
         strcpy(m.mrgtree_name, OPT(_mm._mrgtree_name));
 
         /* Write meta data to file */
@@ -10535,6 +10592,7 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
             if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
             if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
+            if (m.topo_dim)     MEMBER_S(int, topo_dim);
         } OUTPUT(dbfile, DB_MULTIMESH, name, &m);
 
         /* Free resources */
@@ -10622,6 +10680,14 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
         mm->mrgtree_name = OPTDUP(m.mrgtree_name);
         mm->tv_connectivity = m.tv_connectivity;
         mm->disjoint_mode = m.disjoint_mode;
+        /* The value we store to the file for 'topo_dim' member is
+           designed such that zero indicates a value that was NOT
+           specified in the file. Since zero is a valid topological
+           dimension, when we store topo_dim to a file, we always
+           add 1. So, we have to subtract it here. This was implemented
+           for multimeshes in 4.7 and so is handled correctly for
+           them in all cases. */
+        mm->topo_dim = m.topo_dim - 1;
 
         /* Read the raw data */
         if (mm->extentssize>0)

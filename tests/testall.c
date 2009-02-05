@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 2006
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -1029,6 +1029,7 @@ build_ucd2d(DBfile * dbfile, int size, int order)
 
     int             i;
     char            buf[256];
+    int             topo_dim;
 
     /* Create the mesh */
     coords[0] = x;
@@ -1238,7 +1239,7 @@ build_ucd2d(DBfile * dbfile, int size, int order)
     i = strlen(buf);
     DBWrite(dbfile, "_meshtv_defvars", buf, &i, 1, DB_CHAR);
 
-    optlist = DBMakeOptlist(11);
+    optlist = DBMakeOptlist(12);
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
@@ -1250,6 +1251,8 @@ build_ucd2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_YUNITS, "cm");
     DBAddOption(optlist, DBOPT_ZUNITS, "cm");
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
+    topo_dim = 2;
+    DBAddOption(optlist, DBOPT_TOPO_DIM, &topo_dim);
 
     /* Write out the mesh */
     DBSetDeprecateWarnings(0);

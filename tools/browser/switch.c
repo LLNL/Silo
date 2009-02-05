@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 2000   The Regents of the University of California.
+ * Copyright (c) 2000 - 2009   The Regents of the University of California.
  *                      All rights reserved.
  *
  * This work was produced at the University of California,  Lawrence Liver-

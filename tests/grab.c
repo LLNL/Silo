@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 2000
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -199,9 +199,9 @@ main(int argc, char *argv[])
     DBPutQuadmesh(dbfile, "mesh", coordnames, coords, dims, ndims,
         DB_FLOAT, DB_NONCOLLINEAR, NULL);
     DBPutQuadvar1(dbfile, "foo", "mesh", var, dims, ndims,
-                             NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
+                             NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
     DBPutQuadvar1(dbfile, "bar", "mesh", var, dims, ndims,
-                             NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
+                             NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
 
 #ifdef HAVE_HDF5_H
   {

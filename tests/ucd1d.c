@@ -92,6 +92,7 @@ int main(int argc, char **argv)
 
 
     /* Write out the mesh */
+    printf("Creating test file: \"%s\".\n", filename);
     db = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                   "UCD mesh test", driver);
 

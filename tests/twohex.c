@@ -223,7 +223,9 @@ main(int argc, char *argv[])
           printf("%d ", mesh->faces->nodelist[i]);
        printf("\n");
 
+       DBFreeUcdmesh(mesh);
     }
+    DBClose(dbfile);
 
     return (0);
 }

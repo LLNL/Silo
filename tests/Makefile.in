@@ -570,6 +570,11 @@ EXTRA_DIST = \
  testsuite \
  pmpio_hdf5_test.c \
  pmpio_silo_test_mesh.c \
+ add_amr_mrgtree.c \
+ amr3d.silo \
+ amr2d.silo \
+ amr2d_mesh_config.xml \
+ amr3d_mesh_config.xml \
  $(check_SCRIPTS) \
  $(check_DATA)
 
@@ -585,7 +590,8 @@ check_SCRIPTS = \
  test_write.py
 
 check_DATA = \
- xvers_data.tar.bz2
+ xvers_data.tar.bz2 \
+ pion0244.silo
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te

@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 1999
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -838,6 +838,8 @@ db_cdf_GetComponent(DBfile *_dbfile, char *objname, char *compname)
  *    Mark C. Miller, Wed Feb  2 07:59:53 PST 2005
  *    Initialized mm 
  *
+ *    Mark C. Miller, Mon Jan 12 17:28:42 PST 2009
+ *    Handle topo_dim member correctly.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimesh *
@@ -874,6 +876,13 @@ db_cdf_GetMultimesh(DBfile *_dbfile, char *objname)
         DEFALL_OBJ("meshdirs", &mm->dirids, DB_INT);
 
         SO_GetObject(dbid, objid, &tmp_obj);
+
+        /* The value we store to the file for 'topo_dim' member is
+           designed such that zero indicates a value that was NOT
+           specified in the file. Since zero is a valid topological
+           dimension, when we store topo_dim to a file, we always
+           add 1. So, we have to subtract it here. */
+        mm->topo_dim = mm->topo_dim - 1;
 
         /*----------------------------------------
          *  Internally, the meshnames are stored
@@ -1264,6 +1273,8 @@ db_cdf_GetQuadvar(DBfile *_dbfile, char *objname)
  *    Sean Ahern, Fri Aug  3 13:15:49 PDT 2001
  *    Added support for the read mask stuff.
  *
+ *    Mark C. Miller, Mon Jan 12 17:29:05 PST 2009
+ *    Handle topo_dim member correctly.
  *-------------------------------------------------------------------------*/
 CALLBACK DBucdmesh *
 db_cdf_GetUcdmesh(DBfile *_dbfile, char *meshname)
@@ -1324,6 +1335,13 @@ db_cdf_GetUcdmesh(DBfile *_dbfile, char *meshname)
     um->id = objid;
     um->name = STRDUP(meshname);
     um->datatype = DB_FLOAT;
+
+    /* The value we store to the file for 'topo_dim' member is
+       designed such that zero indicates a value that was NOT
+       specified in the file. Since zero is a valid topological
+       dimension, when we store topo_dim to a file, we always
+       add 1. So, we have to subtract it here. */
+    um->topo_dim = um->topo_dim - 1;
 
     /* Read facelist, zonelist, and edgelist */
 

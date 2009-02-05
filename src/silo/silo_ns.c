@@ -256,6 +256,7 @@ EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
             case ':': return vc ? vl : vr; 
         }
     }
+    return 0;
 }
 
 PUBLIC DBnamescheme *
@@ -267,7 +268,7 @@ DBMakeNamescheme(const char *fmt, ...)
 
     /* We have nothing to do for a null or empty format string */
     if (fmt == 0 || *fmt == '\0')
-        return;
+        return 0;
 
     /* Start by allocating an empty name scheme */
     rv = DBAllocNamescheme();

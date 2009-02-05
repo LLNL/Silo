@@ -1,7 +1,7 @@
 #!/bin/csh -f
 ########################################################################
 #
-#                            Copyright 1991 - 1995
+#                            Copyright (c) 1991 - 2009
 #                 The Regents of the University of California.
 #                             All rights reserved.
 #

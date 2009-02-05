@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1996   The Regents of the University of California.
+ * Copyright (c) 1996 - 2009   The Regents of the University of California.
  *                      All rights reserved.
  *
  * This work was produced at the University of California,  Lawrence Liver-
@@ -1963,6 +1963,7 @@ stc_silo_types (void) {
       COMP (coord_sys,          "primitive 'int'");
       IOASSOC (PA_COORDSYS);
       COMP (topo_dim,           "primitive 'int'");
+      IOASSOC (PA_TOPODIM);
       COMP (ndims,              "primitive 'int'");
       COMP (nnodes,             "primitive 'int'");
       COMP (origin,             "primitive 'int'");

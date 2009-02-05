@@ -1,6 +1,6 @@
 /*
 
-                           Copyright 1991 - 1999
+                           Copyright (c) 1991 - 2009
                 The Regents of the University of California.
                             All rights reserved.
 
@@ -671,6 +671,7 @@ struct _mm {
     int             _tensor_rank;
     int             _tv_connectivity;
     int             _disjoint_mode;
+    int             _topo_dim;
 };
 
 /*

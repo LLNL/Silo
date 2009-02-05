@@ -433,6 +433,7 @@ PJ_GetComponentType (PDBfile *file, char *objname, char *compname)
           db_perror("PJ_GetObject", E_CALLFAIL, me);
           return DB_NOTYPE;
        }
+       FREE(result);
    }
 
    /* If there is now cached group information (and there should be)

@@ -310,6 +310,8 @@ main (int argc, char *argv[]) {
    }
       
    
+   DBClose(db);
+
    printf ("test passed, but check `%s' anyway with the browser.\n",
 	   filename) ;
    return 0 ;
