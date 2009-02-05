@@ -1,7 +1,10 @@
 ## Procss this file with automake to create Makefile.in
 
 bin_PROGRAMS = browser
-dist_bin_SCRIPTS = silodiff
+dist_bin_SCRIPTS = \
+ silodiff \
+ silofile
+
 browser_SOURCES = $(FILES)
 if HDF5_DRV_NEEDED
   browser_LDADD = ../../src/libsiloh5.la

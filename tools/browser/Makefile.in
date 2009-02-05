@@ -263,7 +263,10 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_bin_SCRIPTS = silodiff
+dist_bin_SCRIPTS = \
+ silodiff \
+ silofile
+
 browser_SOURCES = $(FILES)
 @HDF5_DRV_NEEDED_FALSE@browser_LDADD = ../../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@browser_LDADD = ../../src/libsiloh5.la

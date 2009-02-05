@@ -4657,7 +4657,7 @@ DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
 }
 
 /*----------------------------------------------------------------------
- * Routine                                                  DBPUTCSGV_FC
+ * Routine                                                 DBPUTCSGV1_FC
  *
  * Purpose: Write csg variable to the silo file
  *

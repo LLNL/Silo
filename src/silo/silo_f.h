@@ -114,7 +114,7 @@ for advertising or product endorsement purposes.
 #define DBGETDEPWARN_FC  FC_FUNC (dbgetdepwarn,DBgETDEPWARN)
 #define DBPUTCSGM_FC     FC_FUNC (dbputcsgm,DBPUTCSGM)
 #define DBPUTCSGZL_FC    FC_FUNC (dbputcsgzl,DBPUTCSGZL)
-#define DBPUTCSGV_FC     FC_FUNC (dbputcsgv,DBPUTCSGV)
+#define DBPUTCSGV1_FC    FC_FUNC (dbputcsgv1,DBPUTCSGV1)
 #define DBMKMRGTREE_FC   FC_FUNC (dbmkmrgtree,DBMKMRGTREE)
 #define DBFREEMRGTREE_FC FC_FUNC (dbfreemrgtree,DBFREEMRGTREE)
 #define DBADDREGION_FC   FC_FUNC (dbaddregion,DBADDREGION)
@@ -125,7 +125,6 @@ for advertising or product endorsement purposes.
 #define DBMKPTR_FC       FC_FUNC (dbmkptr,DBMKPTR)
 #define DBRMPTR_FC       FC_FUNC (dbrmptr,DBRMPTR)
 #define DBPMRGV_FC       FC_FUNC (dbpmrgv,DBPMRGV)
-#define DBGMRGV_FC       FC_FUNC (dbgmrgv,DBGMRGV)
 #define DBERRNO_FC       FC_FUNC (dberrno, DBERRNO)
 
 void    *DBFortranAccessPointer(int value);
