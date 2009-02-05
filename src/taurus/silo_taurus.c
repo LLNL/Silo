@@ -94,7 +94,7 @@ db_taur_InitCallbacks (DBfile *dbfile)
     dbfile->pub.r_var = db_taur_ReadVar;
     dbfile->pub.newtoc = db_taur_NewToc;
     dbfile->pub.module = db_taur_Filters;
-    dbfile->pub.inqvartype = db_taur_InqVartype;
+    dbfile->pub.inqvartype = (DBObjectType(*)(struct DBfile *, char*)) db_taur_InqVartype;
 }
 
 /*-------------------------------------------------------------------------

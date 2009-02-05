@@ -1,11 +1,5 @@
 #!/bin/sh
 
-#
-# Orient ourselves for autotools test stuff
-# (script is written assuming where at top-level test dir)
-#
-pushd ../..
-
 # -----------------------------------------------------------------------------
 # Test checksumming capability in silo by generating checksummed data
 # file, copying it, corrupting the copy and then diffing it with browser

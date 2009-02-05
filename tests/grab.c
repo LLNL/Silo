@@ -34,8 +34,8 @@ for advertising or product endorsement purposes.
 
 */
 
-#include "silo.h"               /*include public silo           */
-
+#include <silo.h>
+#include <swat.h>
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
@@ -103,7 +103,7 @@ main(int argc, char *argv[])
     float          xcoord[(NX+1)*(NY+1)*(NZ+1)];
     float          ycoord[(NX+1)*(NY+1)*(NZ+1)];
     float          zcoord[(NX+1)*(NY+1)*(NZ+1)];
-    float          var[(NX+1)*(NY+1)*(NZ+1)];
+    float         *var;
     float          widths[3];
 
 #ifdef HAVE_HDF5_H
@@ -114,6 +114,8 @@ main(int argc, char *argv[])
     int wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
     int type;
 #endif
+
+    var = ALLOC_N(float, (NX+1)*(NY+1)*(NZ+1));
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -183,16 +185,20 @@ main(int argc, char *argv[])
 
     DBPutQuadmesh(dbfile, "mesh", coordnames, coords, dims, ndims,
         DB_FLOAT, DB_NONCOLLINEAR, NULL);
-    DBPutQuadvar1(dbfile, "foo", "mesh", (float*) var, dims, ndims,
+    DBPutQuadvar1(dbfile, "foo", "mesh", var, dims, ndims,
                              NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
-    DBPutQuadvar1(dbfile, "bar", "mesh", (float*) var, dims, ndims,
+    DBPutQuadvar1(dbfile, "bar", "mesh", var, dims, ndims,
                              NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
 
 #ifdef HAVE_HDF5_H
+  {
     /*
      * grab the HDF5 file handle
      */
-    hid_t silo_h5id = (hid_t)DBGrabDriver(dbfile);
+    hid_t dset;
+    hid_t h5Grp;
+    hid_t silo_h5id = *((hid_t*)DBGrabDriver(dbfile));
+
     /*
      * This call will fail with E_GRABBED
      */
@@ -204,7 +210,7 @@ main(int argc, char *argv[])
      * Make a separate name space for driver-native work using
      * driver-native interface
      */
-    hid_t h5Grp = H5Gcreate(silo_h5id, "hdf5_native_data", 0);
+    h5Grp = H5Gcreate(silo_h5id, "hdf5_native_data", 0);
 
     /* Allocate and initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
@@ -217,7 +223,7 @@ main(int argc, char *argv[])
     /*
      * Create and write a dataset in this group
      */
-    hid_t dset = H5Dcreate(h5Grp, "dataset", tid1, sid1, H5P_DEFAULT);
+    dset = H5Dcreate(h5Grp, "dataset", tid1, sid1, H5P_DEFAULT);
     H5Dwrite(dset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, var);
     H5Dclose(dset);
     /* Close datatype */
@@ -233,12 +239,13 @@ main(int argc, char *argv[])
     /*
      * Return control of native API to Silo
      */
-    type = DBUngrabDriver(dbfile, (void *)silo_h5id);
+    type = DBUngrabDriver(dbfile, (void *)&silo_h5id);
     if (type != driver)
     {
        printf("Wrong drive type returned from Ungrab\n");
        return 1;
     }
+  }
 #endif
 
     /*

@@ -46,7 +46,6 @@
 #include <qfiledialog.h>
 #include <qstring.h>
 #include <iostream>
-using std::cerr;
 
 // ****************************************************************************
 //  Main Function: main()  
@@ -82,7 +81,7 @@ int main( int argc, char **argv )
         {
             delete w;
             w = 0;
-            cerr << "Unable to open file \"" << argv[1] << "\"" << endl;
+            std::cerr << "Unable to open file \"" << argv[1] << "\"" << std::endl;
         }
     }
 

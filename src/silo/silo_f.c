@@ -1499,8 +1499,8 @@ DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
         /*----------------------------------------
          *  Invoke the C function to do the work.
          *---------------------------------------*/
-        *status = DBPutDefvars(dbfile, nm, *ndefs, (const char **) nms,
-                                 types, (const char **) defs, optlists);
+        *status = DBPutDefvars(dbfile, nm, *ndefs, nms, types, defs,
+                      optlists);
 
         for (i = 0; i < *ndefs; i++)
         {
@@ -4364,7 +4364,7 @@ DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
             indx += fortran2DStrLen;
         }
 
-        *status = DBAddRegionArray(tree, *nregn, (const char**) regn_nms,
+        *status = DBAddRegionArray(tree, *nregn, regn_nms,
             *type_info_bits, maps_nm, *nsegs, seg_ids, seg_sizes,
              seg_types, optlist);
 
@@ -4724,8 +4724,8 @@ DBPUTCSGV1_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
         for (i = 0; i < *nvals; i++)
             data[i] = DBFortranAccessPointer(data_ids[i]);
 
-        *status = DBPutCsgvar(dbfile, nm, m_nm, 1, (const char **)&nm,
-            (const void **)data, *nvals, *datatype, *centering, optlist);
+        *status = DBPutCsgvar(dbfile, nm, m_nm, 1, &nm,
+            data, *nvals, *datatype, *centering, optlist);
 
         FREE(nm);
         FREE(m_nm);
@@ -4905,8 +4905,8 @@ DBPMRGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB tname, int *ltname,
         /*----------------------------------------
          *  Invoke the C function to do the work.
          *---------------------------------------*/
-        *status = DBPutMrgvar(dbfile, nm, tnm, *ncomps, (const char **) compnms,
-            *nregns, (const char **) regnnms, *datatype, data, optlist);
+        *status = DBPutMrgvar(dbfile, nm, tnm, *ncomps, compnms,
+            *nregns, regnnms, *datatype, data, optlist);
 
         for (i = 0; i < *ncomps; i++)
             FREE(compnms[i]);

@@ -3490,7 +3490,7 @@ DBPause(DBfile *file)
 {
     int retval;
 
-    API_DEPRECATE("DBPause", int, -1, 4,6,0) {
+    API_DEPRECATE("DBPause", int, -1, 4,6,"") {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
         if (NULL == file->pub.pause)
@@ -3526,7 +3526,7 @@ DBContinue(DBfile *file)
 {
     int retval;
 
-    API_DEPRECATE("DBContinue", int, -1, 4,6,0) {
+    API_DEPRECATE("DBContinue", int, -1, 4,6,"") {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
         if (NULL == file->pub.cont)
@@ -3998,7 +3998,7 @@ DBGetAtt(DBfile *dbfile, const char *varname, const char *attname)
 {
     void *retval = NULL;
 
-    API_DEPRECATE2("DBGetAtt", void *, NULL, varname, 4,6,0) {
+    API_DEPRECATE2("DBGetAtt", void *, NULL, varname, 4,6,"") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (!varname || !*varname)
@@ -4804,7 +4804,7 @@ DBReadAtt(DBfile *dbfile, const char *vname, const char *aname, void *results)
 {
     int retval;
 
-    API_DEPRECATE2("DBReadAtt", int, -1, vname, 4,6,0) {
+    API_DEPRECATE2("DBReadAtt", int, -1, vname, 4,6,"") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -6432,7 +6432,7 @@ DBPutCurve (DBfile *dbfile, const char *name, void *xvals, void *yvals,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutDefvars (DBfile *dbfile, const char *name, int ndefs,
-              const char *names[], const int *types, const char *defns[],
+              char *names[], const int *types, char *defns[],
               DBoptlist *opts[])
 {
     int retval;
@@ -6817,8 +6817,8 @@ PUBLIC int
 DBPutMultimeshadj(DBfile *dbfile, const char *name, int nmesh,
                   const int *meshtypes, const int *nneighbors,
                   const int *neighbors, const int *back,
-                  const int *lnodelists, const int *nodelists[],
-                  const int *lzonelists, const int *zonelists[],
+                  const int *lnodelists, int *nodelists[],
+                  const int *lzonelists, int *zonelists[],
                   DBoptlist *optlist)
 {
     int retval;
@@ -8075,7 +8075,7 @@ DBGetCSGZonelist(DBfile *dbfile, const char *name)
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
-            int nvars, const char *varnames[], const void *vars[],
+            int nvars, char *varnames[], void *vars[],
             int nvals, int datatype, int centering, DBoptlist *optlist)
 {
     int retval;
@@ -9914,7 +9914,7 @@ DBGetComponentNames(DBfile *dbfile, const char *objname,
 {
     int retval;
 
-    API_DEPRECATE2("DBGetComponentNames", int, -1, objname, 4,6,0)
+    API_DEPRECATE2("DBGetComponentNames", int, -1, objname, 4,6,"")
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
@@ -10447,7 +10447,7 @@ db_FullName2BaseName(const char *path)
  *
  *--------------------------------------------------------------------*/
 INTERNAL void 
-db_StringArrayToStringList(const char *const *const strArray, int n,
+db_StringArrayToStringList(char **strArray, int n,
                            char **strList, int *m)
 {
     int i, len;
@@ -10521,6 +10521,7 @@ db_StringListToStringArray(char *strList, int n)
     {
         add1 = 1;
         n = 1;
+        i = 0;
         while (strList[i] != '\0')
         {
             if (strList[i] == ';')
@@ -10567,7 +10568,7 @@ db_StringListToStringArray(char *strList, int n)
  *
  *--------------------------------------------------------------------*/
 INTERNAL void 
-db_IntArrayToIntList(const int *const *const intArrays, int nArrays,
+db_IntArrayToIntList(int **intArrays, int nArrays,
 const int *const lenArrays, int **intList, int *m)
 {
     int i,j,n;
@@ -11608,10 +11609,10 @@ void DBPrintMrgtree(DBmrgtnode *tnode, int walk_order, void *data)
     fprintf(f, "%*s         narray = %d\n", level, "", tnode->narray);
     if (tnode->narray > 0)
     {
-        if (tnode->names[1] != 0)
+        if (tnode->names[1] != (char *) 0)
         {
-            fprintf(f, "%*s          names = ...\n", level, "");
             int j;
+            fprintf(f, "%*s          names = ...\n", level, "");
             for (j = 0; j < tnode->narray; j++)
                 fprintf(f, "%*s                  \"%s\"\n", level, "", tnode->names[j]);
         }
@@ -11725,6 +11726,7 @@ DBMakeMrgtree(int source_mesh_type, int type_info_bits,
             API_ERROR("max_root_descendents", E_BADARGS);
         if (NULL == (tree = ALLOC(DBmrgtree)))
             API_ERROR(NULL, E_NOMEM);
+        memset(tree, 0, sizeof(DBmrgtree));
         if (NULL == (root = ALLOC(DBmrgtnode)))
             API_ERROR(NULL, E_NOMEM);
         memset(root, 0, sizeof(DBmrgtnode));
@@ -11857,7 +11859,7 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
 
 PUBLIC int
 DBAddRegionArray(DBmrgtree *tree, int nregns,
-    const char **regn_names, int type_info_bits,
+    char **regn_names, int type_info_bits,
     const char *maps_name, int nsegs, int *seg_ids,
     int *seg_lens, int *seg_types, DBoptlist *opts)
 {
@@ -12129,7 +12131,7 @@ DBGetGroupelmap(DBfile *dbfile, const char *name)
 
 PUBLIC int
 DBPutMrgvar(DBfile *dbfile, const char *name, const char *mrgt_name,
-    int ncomps, const char **compnames, int nregns, const char **reg_pnames,
+    int ncomps, char **compnames, int nregns, char **reg_pnames,
     int datatype, void **data, DBoptlist *opts)
 {
     int retval;

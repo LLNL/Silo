@@ -689,7 +689,7 @@ dnl
 AC_MSG_CHECKING(if we want Fortran)
 AC_ARG_ENABLE(fortran,
         AC_HELP_STRING([--enable-fortran],
-            [compile Fortran examples @<:@default=no@:>@]),
+            [compile Fortran interface to Silo @<:@default=no@:>@]),
         UsingFortran="$enable_fortran",
         UsingFortran=default)
 if test "$UsingFortran" = "yes"; then
@@ -1087,6 +1087,8 @@ if test -n "$HDF5_DRV"; then
       if test -d "$hdf5_lib"; then
          AC_MSG_CHECKING([using default hdf5 path provided])
          AC_MSG_RESULT([$hdf5_lib])
+         AC_DEFINE(HAVE_HDF5_H,1,[hdf5 header file])
+         AC_DEFINE(HAVE_LIBHDF5,1,[hdf5 library])
       else
          AC_MSG_CHECKING(for hdf5)
          AC_MSG_RESULT(suppressed)

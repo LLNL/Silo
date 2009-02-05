@@ -2785,7 +2785,7 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:108: rocket -driver DB_PDB"
+echo "$at_srcdir/testsuite.at:108: rocket"
 echo testsuite.at:108 >"$at_check_line_file"
 
 at_trace_this=
@@ -2794,12 +2794,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; rocket -driver DB_PDB ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; rocket ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; rocket -driver DB_PDB ) >"$at_stdout" 2>"$at_stderr"
+    ( :; rocket ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 

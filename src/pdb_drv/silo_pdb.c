@@ -3128,7 +3128,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
     DEFINE_OBJ("min_extents", tmpqm.min_extents, DB_FLOAT);
     DEFINE_OBJ("max_extents", tmpqm.max_extents, DB_FLOAT);
     DEFINE_OBJ("baseindex", tmpqm.base_index, DB_INT);
-    DEFINE_OBJ("guihide", tmpqm.guihide, DB_INT);
+    DEFINE_OBJ("guihide", &tmpqm.guihide, DB_INT);
     DEFALL_OBJ("mrgtree_name", &tmpqm.mrgtree_name, DB_CHAR);
 
     /* The type passed here to PJ_GetObject is NULL because quadmeshes can have
@@ -4798,6 +4798,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    FREE(type);
 
    tree = (DBmrgtree *) calloc(1,sizeof(DBmrgtree));
+   memset(tree, 0, sizeof(DBmrgtree));
    *tree = tmptree;
    tree->root = 0;
    tree->cwr = 0;
@@ -5012,8 +5013,8 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, const char *name)
     n = 0;
     for (i = 0; i < gm->num_segments; i++)
     {
-        gm->segment_data[i] = 0;
         int sl = gm->segment_lengths[i];
+        gm->segment_data[i] = 0;
         if (sl > 0)
         {
             gm->segment_data[i] = (int*) malloc(sl * sizeof(int));
@@ -5670,8 +5671,8 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
 #ifdef PDB_WRITE
 CALLBACK int
 db_pdb_PutDefvars (DBfile *dbfile, const char *name, int ndefs,
-                     const char *names[], const int types[],
-                     const char *defns[], DBoptlist *optlists[]) {
+                     char *names[], const int types[],
+                     char *defns[], DBoptlist *optlists[]) {
 
    int            i, len;
    long           count[1];
@@ -5953,7 +5954,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
    if (_ma._matnames != NULL)
    {
       int len; long llen; char *tmpstr = 0;
-      db_StringArrayToStringList((const char**) _ma._matnames, nmat, &tmpstr, &len);
+      db_StringArrayToStringList(_ma._matnames, nmat, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matnames", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -5961,7 +5962,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
    if (_ma._matcolors != NULL)
    {
       int len; long llen; char *tmpstr = 0;
-      db_StringArrayToStringList((const char **) _ma._matcolors, nmat, &tmpstr, &len);
+      db_StringArrayToStringList(_ma._matcolors, nmat, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -6249,7 +6250,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    if (_mm._lgroupings > 0)
       DBAddIntComponent(obj, "lgroupings", _mm._lgroupings);
    if ((_mm._lgroupings  > 0) && (_mm._groupnames != NULL)) {
-      db_StringArrayToStringList((const char **) _mm._groupnames, 
+      db_StringArrayToStringList(_mm._groupnames, 
                     _mm._lgroupings, &gtmp, &len);
 
       count[0] = len;
@@ -6295,8 +6296,8 @@ CALLBACK int
 db_pdb_PutMultimeshadj (DBfile *_dbfile, const char *name, int nmesh,
                   const int *meshtypes, const int *nneighbors,
                   const int *neighbors, const int *back,
-                  const int *lnodelists, const int *nodelists[],
-                  const int *lzonelists, const int *zonelists[],
+                  const int *lnodelists, int *nodelists[],
+                  const int *lzonelists, int *zonelists[],
                   DBoptlist *optlist) {
 
 
@@ -6609,7 +6610,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    if (_mm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList((const char**)_mm._region_pnames, -1, &s, &len);
+        db_StringArrayToStringList(_mm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -6854,7 +6855,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
     *-------------------------------------------------------------*/
    if (_mm._matnames && _mm._nmatnos > 0) {
       int len; long llen; char *tmpstr = 0;
-      db_StringArrayToStringList((const char**) _mm._matnames, _mm._nmatnos,
+      db_StringArrayToStringList(_mm._matnames, _mm._nmatnos,
           &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "material_names", name, "char", tmpstr, 1, &llen);
@@ -6866,7 +6867,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
     *-------------------------------------------------------------*/
    if (_mm._matcolors && _mm._nmatnos > 0) {
       int len; long llen; char *tmpstr = 0;
-      db_StringArrayToStringList((const char**) _mm._matcolors, _mm._nmatnos,
+      db_StringArrayToStringList(_mm._matcolors, _mm._nmatnos,
           &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
@@ -7319,7 +7320,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
    if (_pm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList((const char**)_pm._region_pnames, -1, &s, &len);
+        db_StringArrayToStringList(_pm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -7705,7 +7706,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    if (_qm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList((const char**)_qm._region_pnames, -1, &s, &len);
+        db_StringArrayToStringList(_qm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -7872,7 +7873,7 @@ db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
 #ifdef PDB_WRITE
 CALLBACK int
 db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
-                  int nvars, const char *varnames[], const void *vars[],
+                  int nvars, char *varnames[], void *vars[],
                   int nels, int datatype, int centering,
                   DBoptlist *optlist) {
 
@@ -7975,7 +7976,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
    if (_csgm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList((const char**)_csgm._region_pnames, -1, &s, &len);
+        db_StringArrayToStringList(_csgm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -8050,7 +8051,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
    if (_csgzl._regnames)
    {
        int len; char *tmp;
-       db_StringArrayToStringList((const char**) _csgzl._regnames, nregs, &tmp, &len);
+       db_StringArrayToStringList(_csgzl._regnames, nregs, &tmp, &len);
        count[0] = len;
        DBWriteComponent(dbfile, obj, "regnames", name, "char",
                         tmp, 1, count);
@@ -8060,7 +8061,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
    if (_csgzl._zonenames)
    {
        int len; char *tmp;
-       db_StringArrayToStringList((const char**) _csgzl._zonenames, nzones, &tmp, &len);
+       db_StringArrayToStringList(_csgzl._zonenames, nzones, &tmp, &len);
        count[0] = len;
        DBWriteComponent(dbfile, obj, "zonenames", name, "char",
                         tmp, 1, count);
@@ -8601,7 +8602,7 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    if (_um._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList((const char**)_um._region_pnames, -1, &s, &len);
+        db_StringArrayToStringList(_um._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -8907,7 +8908,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
 
     /* output all the node names as one long dataset */
     s = 0;
-    db_StringArrayToStringList((const char**)strArray, num_nodes, &s, &len);
+    db_StringArrayToStringList(strArray, num_nodes, &s, &len);
     count = len;
     DBWriteComponent(dbfile, obj, "name", name, "char", s, 1, &count);
     FREE(s);
@@ -8949,7 +8950,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     if (n > 0)
     {
         s = 0;
-        db_StringArrayToStringList((const char**)strArray, n, &s, &len);
+        db_StringArrayToStringList(strArray, n, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "names", name, "char", s, 1, &count);
         FREE(s);
@@ -8962,7 +8963,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
         strArray[i] = ltree[i]->maps_name;
     s = 0;
     len = 0;
-    db_StringArrayToStringList((const char**)strArray, num_nodes, &s, &len);
+    db_StringArrayToStringList(strArray, num_nodes, &s, &len);
     count = len;
     DBWriteComponent(dbfile, obj, "maps_name", name, "char", s, 1, &count);
     FREE(s);
@@ -9018,7 +9019,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     {
         s = 0;
         len = 0;
-        db_StringArrayToStringList((const char**)_mrgt._mrgvar_onames, -1, &s, &len);
+        db_StringArrayToStringList(_mrgt._mrgvar_onames, -1, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "mrgvar_onames", name, "char", s, 1, &count);
         FREE(s);
@@ -9028,7 +9029,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     {
         s = 0;
         len = 0;
-        db_StringArrayToStringList((const char**)_mrgt._mrgvar_rnames, -1, &s, &len);
+        db_StringArrayToStringList(_mrgt._mrgvar_rnames, -1, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "mrgvar_rnames", name, "char", s, 1, &count);
         FREE(s);
@@ -9188,8 +9189,8 @@ db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
 #ifdef PDB_WRITE
 CALLBACK int
 db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
-    int ncomps, const char **compnames,
-    int nregns, const char **reg_pnames,
+    int ncomps, char **compnames,
+    int nregns, char **reg_pnames,
     int datatype, void **data, DBoptlist *optlist)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -9232,13 +9233,13 @@ db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
 
    if (compnames)
    {
-       db_StringArrayToStringList((const char**)compnames, nregns, &s, &len);
+       db_StringArrayToStringList(compnames, nregns, &s, &len);
        llen = len;
        DBWriteComponent(_dbfile, obj, "compnames", name, "char", s, 1, &llen);
        FREE(s);
    }
 
-   db_StringArrayToStringList((const char**)reg_pnames, nregns, &s, &len);
+   db_StringArrayToStringList(reg_pnames, nregns, &s, &len);
    llen = len;
    DBWriteComponent(_dbfile, obj, "reg_pnames", name, "char", s, 1, &llen);
    FREE(s);

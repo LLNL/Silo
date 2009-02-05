@@ -131,8 +131,8 @@ CALLBACK int db_pdb_PutCompoundarray (DBfile *, char *, char **, int *,
 				      int, void *, int, int, DBoptlist *);
 CALLBACK int db_pdb_PutCurve (DBfile *, char *, void *, void *, int, int,
 			      DBoptlist *);
-CALLBACK int db_pdb_PutDefvars(DBfile *, const char *, int, const char **,
-                               const int *, const char **, DBoptlist **);
+CALLBACK int db_pdb_PutDefvars(DBfile *, const char *, int, char **,
+                               const int *, char **, DBoptlist **);
 CALLBACK int db_pdb_PutFacelist (DBfile *, char *, int, int, int *, int,
 				 int, int *, int *, int *, int, int *,
 				 int *, int);
@@ -146,7 +146,7 @@ CALLBACK int db_pdb_PutMultimesh (DBfile *, char *, int, char **, int *,
 				  DBoptlist *);
 CALLBACK int db_pdb_PutMultimeshadj (DBfile *, const char *, int, const int *,
                                const int *, const int *, const int *, const int *,
-                               const int **, const int *, const int **,
+                               int **, const int *, int **,
                                DBoptlist *optlist);
 CALLBACK int db_pdb_PutMultivar (DBfile *, char *, int, char **, int *,
 				 DBoptlist *);
@@ -177,7 +177,7 @@ CALLBACK int db_pdb_PutCsgmesh (DBfile *, const char *, int, int,
                                 const void *, int, int, const double *,
                                 const char *, DBoptlist *);
 CALLBACK int db_pdb_PutCsgvar (DBfile *, const char *, const char *, int,
-                               const char *varnames[], const void *vars[],
+                               char **varnames, void **vars,
                                int, int, int, DBoptlist *);
 CALLBACK int db_pdb_PutZonelist (DBfile *, char *, int, int, int *, int,
 				 int, int *, int *, int);
@@ -202,8 +202,8 @@ CALLBACK int db_pdb_PutGroupelmap(DBfile *_dbfile, const char *map_name,
                                   int fracs_data_type, DBoptlist *opts);
 CALLBACK int db_pdb_PutMrgvar(DBfile *dbfile, const char *name,
                              const char *mrgt_name,
-                             int ncomps, const char **compnames,
-                             int nregns, const char **reg_pnames,
+                             int ncomps, char **compnames,
+                             int nregns, char **reg_pnames,
                              int datatype, void **data, DBoptlist *opts);
 CALLBACK DBmrgvar *db_pdb_GetMrgvar(DBfile *dbfile, const char *name);
 

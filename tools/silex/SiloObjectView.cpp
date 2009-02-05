@@ -40,7 +40,6 @@
 #include <qapplication.h>
 #include <qmessagebox.h>
 #include <iostream>
-using std::cerr;
 
 // ----------------------------------------------------------------------------
 //                            Object View Window
@@ -101,6 +100,9 @@ SiloObjectViewWindow::ShowItem(QListViewItem *i)
 //    Jeremy Meredith, Wed May 11 12:42:12 PDT 2005
 //    Show an error message if we get an invalid object.
 //
+//    Mark C. Miller, Tue Nov  6 16:08:19 PST 2007
+//    Fixed compiler warning.
+//
 // ****************************************************************************
 SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
     : QListView(p, n), silo(s), name(n)
@@ -127,7 +129,7 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
         void *comp = silo->GetComponent(name, compname);
         if (!comp)
         {
-            cerr << "ERROR: DBGetComponent failed for object '"<<name<<"', component '"<<compname<<"'"<<endl;
+            std::cerr << "ERROR: DBGetComponent failed for object '"<<name<<"', component '"<<compname<<"'"<<std::endl;
             continue;
         }
         int   type = silo->GetComponentType(name, compname);

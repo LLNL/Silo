@@ -228,7 +228,7 @@ typedef struct context_t {
    if (ncalls < SILO_Globals.maxDeprecateWarnings) {                          \
       fprintf(stderr, "Silo warning %d of %d: \"%s\" was deprecated in version %d.%d.\n", \
           ncalls+1, SILO_Globals.maxDeprecateWarnings, M,Maj,Min);            \
-      if (Alt)                                                                \
+      if (strlen(Alt) > 0)                                                                \
           fprintf(stderr, "Use \"%s\" instead\n", Alt);                       \
       fprintf(stderr, "Use DBSetDeprecateWarnings(0) to disable this message.\n");    \
       fflush(stderr);                                                         \
@@ -796,6 +796,7 @@ INTERNAL int db_ProcessOptlist (int, DBoptlist *);
 INTERNAL int db_VariableNameValid(char *);
 INTERNAL int db_SplitShapelist (DBucdmesh *um);
 INTERNAL int db_ResetGlobalData_Csgmesh ();
+INTERNAL int db_ResetGlobalData_Mrgtree();
 INTERNAL int db_ResetGlobalData_PointMesh (int ndims);
 INTERNAL int db_ResetGlobalData_QuadMesh (int ndims);
 INTERNAL void db_ResetGlobalData_Curve (void);
@@ -804,10 +805,10 @@ INTERNAL int db_ResetGlobalData_Ucdzonelist (void);
 INTERNAL int db_ResetGlobalData_MultiMesh (void);
 INTERNAL int db_ResetGlobalData_Defvars(void);
 INTERNAL const char *db_FullName2BaseName(const char *);
-INTERNAL void db_StringArrayToStringList(const char *const *const, int, char **, int*);
+INTERNAL void db_StringArrayToStringList(char**, int, char **, int*);
 INTERNAL char ** db_StringListToStringArray(char *, int);
 INTERNAL void db_DriverTypeAndSubtype(int driver, int *type, int *subtype);
-INTERNAL void db_IntArrayToIntList(const int *const *const, int, const int *const, int**, int *);
+INTERNAL void db_IntArrayToIntList(int**, int, const int *const, int**, int *);
 INTERNAL int ** db_IntListToIntArray(const int *const, int, const int *const);
 
 INTERNAL char *db_absoluteOf_path ( const char *cwg, const char *pathname );

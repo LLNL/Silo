@@ -68,7 +68,7 @@ build_curve (DBfile *dbfile, int driver)
    DBAddOption (opts, DBOPT_XUNITS, "radians") ;
 
    /*
-    * Write the `sincurve' curve. The hdf5 driver allows the user to specify
+    * Write the 'sincurve' curve. The hdf5 driver allows the user to specify
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
@@ -77,7 +77,7 @@ build_curve (DBfile *dbfile, int driver)
    if (DB_HDF5!=driver) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
 
    /*
-    * Write the `coscurve' curve. It shares x values with the `sincurve'
+    * Write the 'coscurve' curve. It shares x values with the 'sincurve'
     * curve.
     */
    DBPutCurve (dbfile, "coscurve", NULL, y[1], DB_FLOAT, 20, opts) ;
@@ -122,7 +122,7 @@ main(int argc, char *argv[])
             driver = DB_HDF5;
             filename = "largefile.h5";
         } else {
-            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+            fprintf(stderr, "%s: ignored argument '%s'\n", argv[0], argv[i]);
         }
     }
 
@@ -137,7 +137,7 @@ main(int argc, char *argv[])
     /*
      * Create a file that contains a simple variables.
      */
-    printf("Creating file: `%s'\n", filename);
+    printf("Creating file: '%s'\n", filename);
     dbfile = DBCreate(filename, 0, DB_LOCAL, "Simple Test", driver);
 
     for (j = 0; j < 2500; j++)
@@ -166,7 +166,7 @@ main(int argc, char *argv[])
      * Now try opening the file again and reading the simple
      * variable.
      */
-    printf("Reopening `%s'\n", filename);
+    printf("Reopening '%s'\n", filename);
     dbfile = DBOpen(filename, driver, DB_READ);
 
     if (dbfile == 0)
@@ -191,7 +191,7 @@ main(int argc, char *argv[])
         {
             nerrors++;
             if (nerrors < 10) printf("DBReadVar for \"%s\" failed\n", tmpname);
-            if (nerrors > 10) printf("Further errors will be suppressed\n");
+            if (nerrors == 10) printf("Further errors will be suppressed\n");
         }
 
         for (i = 0; i < dims[0]; i++)
@@ -202,7 +202,7 @@ main(int argc, char *argv[])
                 nerrors++;
                 if (nerrors < 10) printf("Read error in \"%s\" at position %04d. Expected %f, got %f\n",
                                           tmpname, i, val[i], rval[i]);
-                if (nerrors > 10) printf("Further errors will be suppressed\n");
+                if (nerrors == 10) printf("Further errors will be suppressed\n");
                 break;
             }
         }

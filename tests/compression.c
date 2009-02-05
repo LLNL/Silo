@@ -97,7 +97,7 @@ main(int argc, char *argv[])
           driver = DB_HDF5;
           filename = "compression.h5";
        } else if (!strcmp(argv[i], "compress")) {
-          if ((i+1<argc) && ((ptr=strcasestr(argv[i+1], "METHOD=")) != NULL))
+          if ((i+1<argc) && ((ptr=strstr(argv[i+1], "METHOD=")) != NULL))
           {
             DBSetCompression(argv[i+1]);
             i++;

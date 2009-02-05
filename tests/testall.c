@@ -2493,7 +2493,7 @@ build_ucd3d(DBfile * dbfile, int size, int order)
                     &nzones, 1, nspecmf, specmf, mix_speclist, mixlen, 
                     DB_FLOAT, optlist);
 
-    vars[0] = ascii;
+    vars[0] = (float*) ascii;
     varnames[0] = var6name;
     DBAddOption(optlist, DBOPT_ASCII_LABEL, &onvalue);
     DBPutUcdvar(dbfile, var6name, meshname, 1, varnames, vars, nnodes, NULL,

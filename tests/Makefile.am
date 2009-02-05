@@ -1,6 +1,6 @@
 ## Procss this file with automake to create Makefile.in
 # making use of the autotest features in autoconf
-#
+# 
 
 EXTRA_DIST= \
  exectests.csh \
@@ -12,6 +12,7 @@ EXTRA_DIST= \
  testsuitef77 \
  testsuitehdf5.at \
  testsuitehdf5 \
+ checksums \
  pmpio_silo_test_mesh.c
 
 DISTCLEANFILES = atconfig

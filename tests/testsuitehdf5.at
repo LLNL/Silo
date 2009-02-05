@@ -75,8 +75,9 @@ AT_SETUP(multispec DB_HDF5)
 AT_CHECK(multispec DB_HDF5,,[ignore])
 AT_CLEANUP
 AT_SETUP(sami DB_HDF5)
-AT_CHECK(sami DB_HDF5,1,[ignore],[[DBWrite: Invalid argument: ndims
+AT_CHECK(sami DB_HDF5,,[ignore],[[DBWrite: Invalid argument: ndims
 DBWrite: Invalid argument: dims
+DBWrite: Low-level function call failed: 4d_float
 ]])
 AT_CLEANUP
 AT_SETUP(specmix DB_HDF5)
@@ -99,21 +100,21 @@ AT_CLEANUP
 AT_SETUP(multi_file DB_HDF5)
 AT_CHECK(multi_file DB_HDF5,,[ignore]) 
 AT_CLEANUP
-#AT_SETUP(polyzl DB_HDF5)
-#AT_CHECK(polyzl DB_HDF5,,[ignore])
-#AT_CLEANUP
+AT_SETUP(polyzl DB_HDF5)
+AT_CHECK(polyzl DB_HDF5,,[ignore])
+AT_CLEANUP
 AT_SETUP(csg DB_HDF5)
 AT_CHECK(csg DB_HDF5,,[ignore])
 AT_CLEANUP
 AT_SETUP(rocket DB_HDF5)
-AT_CHECK(rocket -driver DB_HDF5,,[ignore])
+AT_CHECK(rocket,,[ignore])
 AT_CLEANUP
 AT_SETUP(mmadjacency DB_HDF5)
 AT_CHECK(mmadjacency DB_HDF5)
 AT_CLEANUP
-#AT_SETUP(largefile DB_HDF5)
-#AT_CHECK(largefile DB_HDF5)  # 2GByte file!
-#AT_CLEANUP
+AT_SETUP(largefile DB_HDF5)
+AT_CHECK(largefile DB_HDF5,,[ignore])
+AT_CLEANUP
 AT_SETUP(dir DB_HDF5)
 AT_CHECK(dir DB_HDF5,,[ignore],[ignore])
 AT_CLEANUP

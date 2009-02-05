@@ -35,11 +35,16 @@
 *
 *****************************************************************************/
 
+#ifdef __sgi    /* IRIX C++ bug */
 #include <math.h>
-#include <stdlib.h>
-#include <map.h>
-#include <vector.h>
-#include <string.h>
+#else
+#include <cmath>
+#endif
+#include <cstdio>
+#include <cstdlib>
+#include <map>
+#include <vector>
+#include <string>
 
 #include <silo.h>
 
@@ -194,7 +199,7 @@ static DBmrgtree *topTree;
 // to build here. A color value less than zero indicates the
 // latter.
 //
-int write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
+void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
     const char *const dirname)
 {
     int i, j, k;
@@ -778,8 +783,8 @@ void write_top_mrgtree(DBfile *dbfile)
         int c1[] = {1, 2, 3, 4};
 	int c2[] = {20, 40, 60, 80};
 	void *vals[] ={(void*)c1,(void*)c2};
-	const char *parent_name = "/assembly/nose/mirvs";
-	const char *reg_names[] = {parent_name, 0, 0, 0};
+	char *parent_name = "/assembly/nose/mirvs";
+	char *reg_names[] = {parent_name, 0, 0, 0};
 	DBPutMrgvar(dbfile, "some_ints", "mrg_tree", 2, 0, 4, reg_names, DB_INT, vals, 0);
     }
 
@@ -1049,28 +1054,17 @@ main(int argc, char **argv)
     int j, i = 1;
     while (i < argc)
     {
-        if (strcmp(argv[i], "-driver") == 0)
+        if (strcmp(argv[i], "DB_HDF5") == 0)
         {
-            i++;
-
-            if (strcmp(argv[i], "DB_HDF5") == 0)
-            {
-                driver = DB_HDF5;
-            }
-            else if (strcmp(argv[i], "DB_PDB") == 0)
-            {
-                driver = DB_PDB;
-            }
-            else
-            {
-               fprintf(stderr,"Uncrecognized driver name \"%s\"\n",
-                   argv[i]);
-               exit(-1);
-            }
+            driver = DB_HDF5;
+        }
+        else if (strcmp(argv[i], "DB_PDB") == 0)
+        {
+            driver = DB_PDB;
         }
         else
         {
-            fprintf(stderr,"Uncrecognized command line option \"%s\"\n",
+            fprintf(stderr,"Uncrecognized driver name \"%s\"\n",
                 argv[i]);
             exit(-1);
         }
@@ -1135,4 +1129,5 @@ main(int argc, char **argv)
     DBFreeGroupelmap(map);
 
     DBClose(dbfile);
+    return 0;
 }

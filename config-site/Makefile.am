@@ -9,9 +9,6 @@ EXTRA_DIST = \
  IRIX.conf \
  IRIX64.conf \
  Linux.conf \
- Makefile \
- Makefile.am \
- Makefile.in \
  OSF1.conf \
  README \
  SunOS.conf \
@@ -26,6 +23,7 @@ EXTRA_DIST = \
  bgl7.conf \
  bgl8.conf \
  bgl9.conf \
+ delenn.conf \
  fhp.conf \
  gauss.conf \
  gauss0.conf \
@@ -33,19 +31,45 @@ EXTRA_DIST = \
  gauss2.conf \
  gauss3.conf \
  gps.conf \
+ gps01.conf \
+ gps02.conf \
+ gps15.conf \
+ gps16.conf \
  hoth.conf \
  janus.conf \
  kickit.conf \
+ lilac.conf \
+ lilac0.conf \
+ lilac1.conf \
+ lilac2.conf \
+ lilac3.conf \
+ localhost.conf \
+ minos.conf \
+ minos0.conf \
+ minos32.conf \
+ minos512.conf \
+ minos544.conf \
+ minos576.conf \
+ minos608.conf \
  naboo.conf \
  pengra.conf \
  pengra0.conf \
  purple.conf \
+ purple1441.conf \
+ purple1442.conf \
+ purple1443.conf \
+ purple1444.conf \
  quad.conf \
  quad.llnl.gov.conf \
- rhe32.conf \
- rhe512.conf \
+ queen.conf \
+ queen1.conf \
+ queen2.conf \
+ queen3.conf \
+ queen4.conf \
  rhea.conf \
  rhea0.conf \
+ rhea32.conf \
+ rhea512.conf \
  sandia_paragon \
  sasn100.conf \
  sphere.llnl.gov.conf \
@@ -61,12 +85,15 @@ EXTRA_DIST = \
  thunder3.conf \
  tidalwave.conf \
  ubgl.conf \
+ um.conf \
+ um006.conf \
  up.conf \
  up038.conf \
  up039.conf \
  up041.conf \
  uv.conf \
  uv006.conf \
+ vader.conf \
  x86_64.conf \
  yana.conf \
  yana1.conf \

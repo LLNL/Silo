@@ -106,7 +106,7 @@ CALLBACK int db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
                                 DBoptlist *optlist);
 CALLBACK DBcsgmesh *db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name);
 CALLBACK int db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
-                               int nvars, const char *varnames[], const void *vars[],
+                               int nvars, char *varnames[], void *vars[],
                                int nvals, int datatype, int centering, DBoptlist *optlist);
 CALLBACK DBcsgvar *db_hdf5_GetCsgvar(DBfile *_dbfile, const char *name);
 CALLBACK int db_hdf5_PutCSGZonelist(DBfile *_dbfile, const char *name, int nregs,
@@ -118,8 +118,8 @@ CALLBACK DBcsgzonelist *db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name
 
 /* Defvars */
 CALLBACK int db_hdf5_PutDefvars(DBfile *dbfile, const char *name, int ndefs,
-                                const char *names[], const int *types,
-                                const char *defns[], DBoptlist *opts[]);
+                                char *names[], const int *types,
+                                char *defns[], DBoptlist *opts[]);
 CALLBACK DBdefvars *db_hdf5_GetDefvars(DBfile *_dbfile, const char *name);
 
 /* Quadmeshes */
@@ -210,8 +210,8 @@ CALLBACK int db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
 CALLBACK int db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
                                      const int *meshtypes, const int *nneighbors,
                                      const int *neighbors, const int *back,
-                                     const int *lnodelists, const int *nodelists[],
-                                     const int *lzonelists, const int *zonelists[],
+                                     const int *lnodelists, int *nodelists[],
+                                     const int *lzonelists, int *zonelists[],
                                      DBoptlist *optlist);
 CALLBACK DBmultimesh *db_hdf5_GetMultimesh(DBfile *_dbfile, char *name);
 CALLBACK DBmultimeshadj *db_hdf5_GetMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
@@ -251,8 +251,8 @@ CALLBACK DBgroupelmap *db_hdf5_GetGroupelmap(DBfile *dbfile, const char *name);
 /* mrgvars */
 CALLBACK int db_hdf5_PutMrgvar(DBfile *dbfile, const char *name,
                              const char *mrgt_name,
-                             int ncomps, const char **compnames,
-                             int nregns, const char **reg_pnames,
+                             int ncomps, char **compnames,
+                             int nregns, char **reg_pnames,
                              int datatype, void **data, DBoptlist *opts);
 CALLBACK DBmrgvar *db_hdf5_GetMrgvar(DBfile *dbfile, const char *name);
 

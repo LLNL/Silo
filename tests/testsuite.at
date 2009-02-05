@@ -105,7 +105,7 @@ AT_SETUP(csg)
 AT_CHECK(csg,,[ignore])
 AT_CLEANUP
 AT_SETUP(rocket)
-AT_CHECK(rocket -driver DB_PDB,,[ignore])
+AT_CHECK(rocket,,[ignore])
 AT_CLEANUP
 AT_SETUP(mmadjacency)
 AT_CHECK(mmadjacency)

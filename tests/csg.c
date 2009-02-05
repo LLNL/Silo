@@ -139,12 +139,12 @@ build_csg(DBfile *dbfile, char *name)
 
     /* output a csg variable */
     {
-        double *pv[1];
+        void *pv[1];
         double var1_data[] = {3.14159267, 2.0};
         char *pname[1];
         char name1[] = "var1";
 
-        pv[0] = var1_data;
+        pv[0] = (void*) var1_data;
         pname[0] = name1;
 
         DBPutCsgvar(dbfile, "var1", "csgmesh", 1, pname, pv, 2, DB_DOUBLE,

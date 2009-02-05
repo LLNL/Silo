@@ -553,9 +553,9 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     char            dirnames[MAXBLOCKS][STRLEN];
 
     DBoptlist      *optlist = NULL;
-    const int       one = 1;
-    const int       scalar_rank = DB_VARTYPE_SCALAR;
-    const char *const mmesh_name = "mesh1";
+    int             one = 1;
+    int             scalar_rank = DB_VARTYPE_SCALAR;
+    char           *mmesh_name = "mesh1";
 
     int             nblocks = nblocks_x * nblocks_y * nblocks_z;
     int             extentssize;
