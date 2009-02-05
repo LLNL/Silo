@@ -16,6 +16,10 @@
 #include <hdf5.h>
 #endif
 
+#ifdef WIN32
+#include <string.h>
+#endif
+
 #define TEST_NELMTS	(1*720)		/*multiple of 6!		*/
 
 

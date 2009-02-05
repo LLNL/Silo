@@ -91,7 +91,7 @@ SiloDirTreeView::AddDir(SiloDir *d, QTreeWidgetItem *parent)
         item = new SiloDirTreeViewItem(d, parent, d->name);
 
     item->setIcon(0,*folder_pixmap);
-    for (int i=0; i<d->subdir.size(); i++)
+    for (unsigned int i=0; i<d->subdir.size(); i++)
         AddDir(d->subdir[i], item);
 
     return item;

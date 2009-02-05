@@ -133,7 +133,7 @@ SiloDir::SiloDir(DBfile *db, const QString &name_, const QString &path_)
     for (i=0; i<toc->ndir; i++)
         dir.push_back(toc->dir_names[i]);
 
-    for (i=0; i<dir.size(); i++)
+    for (unsigned int i=0; i<dir.size(); i++)
     {
         if (name == "/")
             subdir.push_back(new SiloDir(db, dir[i], path + dir[i]));
@@ -151,7 +151,7 @@ SiloDir::SiloDir(DBfile *db, const QString &name_, const QString &path_)
 // ****************************************************************************
 SiloDir::~SiloDir()
 {
-    for (int i=0; i<subdir.size(); i++)
+    for (unsigned int i=0; i<subdir.size(); i++)
     {
         delete subdir[i];
     }

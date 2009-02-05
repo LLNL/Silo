@@ -62,6 +62,10 @@ for advertising or product endorsement purposes.
 
 #include <math.h>
 #include <stdlib.h>
+#ifdef WIN32
+#include <stdio.h>
+#include <io.h>
+#endif
 #include <string.h>
 #include "silo.h"
 

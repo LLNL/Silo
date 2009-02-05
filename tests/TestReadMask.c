@@ -2,6 +2,8 @@
 #include <silo.h>
 #ifndef WIN32
 #include <sys/time.h>
+#else
+#include <string.h>
 #endif
 #include <sys/timeb.h>
 

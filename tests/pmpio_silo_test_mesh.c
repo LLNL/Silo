@@ -72,6 +72,18 @@ void CloseSiloFile(void *file, void *userData)
  * file can be visualized, in parallel, in VisIt by opening the 'root' file
  * named "silo_000". Note that PMPIO's role is merely to coordinate and
  * manage access to the silo file(s) that get created.
+ *
+ * By default, this example will use Silo's PDB driver. However, if you pass
+ * "DB_HDF5" anywhere on the command line, it will use the HDF5 driver. Any
+ * integer appearing on the command line is taken to be the total number of
+ * files.
+ *
+ * An example of how you would invoke this example is...
+ *
+ *     mpirun -np 17 pmpio_silo_test_mesh 3 DB_HDF5     
+ *
+ * which would run on 17 processors, creating a 17x17 mesh but writing it to
+ * 3 files using the HDF5 driver.
  *-----------------------------------------------------------------------------
  */
 int main(int argc, char **argv)

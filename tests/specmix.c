@@ -21,8 +21,12 @@
 #define MAXSPEC 5
 
 #define NEW(t,n)   (t*)calloc(n,sizeof(t))
+#ifndef min
 #define min(a,b)   ((a)<(b) ? (a) : (b))
+#endif
+#ifndef max
 #define max(a,b)   ((a)>(b) ? (a) : (b))
+#endif
 #define lim(a,l,h) (max(min((a),(h)),(l)))
 #define lim01(a)   (lim((a),0,1))
 

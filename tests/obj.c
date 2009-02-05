@@ -37,6 +37,9 @@ for advertising or product endorsement purposes.
 #include "silo.h"
 #include <math.h>
 #include <stdlib.h>
+#ifdef WIN32
+#include <string.h>
+#endif
 
 static void build_objs(DBfile *dbfile);
 

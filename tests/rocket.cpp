@@ -203,7 +203,7 @@ static DBmrgtree *topTree;
 void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
     const char *const dirname)
 {
-    int i, j, k;
+    int j, k;
 
     vector<int> tmpcnt;
     vector<int> tmpsize;
@@ -236,7 +236,7 @@ void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
             bool useThisZone = false;
             if (color < 0)
             {
-                for (int jj = 0; jj < colist.size(); jj++)
+                for (unsigned int jj = 0; jj < colist.size(); jj++)
                 {
                     if (gzoneid == colist[jj])
                     {
@@ -289,7 +289,7 @@ void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
     // Initialize local field headers
     //
     vector<field_t> fields_l(fields_g.size());
-    for (i = 0; i < fields_g.size(); i++)
+    for (unsigned int i = 0; i < fields_g.size(); i++)
     {
         fields_l[i] = fields_g[i];
         int nvals = fields_l[i].cent == DB_NODECENT ? nlnodes : nlzones;
@@ -316,7 +316,7 @@ void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
         tyvals[lnit->second] = yvals_g[lnit->first];
         tzvals[lnit->second] = zvals_g[lnit->first];
 
-        for (i = 0; i < fields_l.size(); i++)
+        for (unsigned int i = 0; i < fields_l.size(); i++)
         {
             if (fields_l[i].cent != DB_NODECENT)
                 continue;
@@ -345,7 +345,7 @@ void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
     //
     // Build zone-centered fields (including materials)
     //
-    for (i = 0; i < fields_l.size(); i++)
+    for (unsigned int i = 0; i < fields_l.size(); i++)
     {
         if (fields_l[i].cent != DB_ZONECENT)
             continue;
@@ -379,7 +379,7 @@ void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
     //
     // Convert global node numbers in nodelist_l to local
     //
-    for (i = 0; i < nodelist_l.size(); i++)
+    for (unsigned int i = 0; i < nodelist_l.size(); i++)
         nodelist_l[i] = g2lnode[nodelist_l[i]];
 
     // make and set the local dir
@@ -844,7 +844,7 @@ void write_block_mrgtree(DBfile *dbfile, int proc_id)
     /* get list of zones on this domain */
     vector<int> matzones[5];
     vector<int> asszones[16];
-    for (i = 0; i < procid_g.size(); i++)
+    for (unsigned int i = 0; i < procid_g.size(); i++)
     {
         if (procid_g[i] == proc_id)
         {

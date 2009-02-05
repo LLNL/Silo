@@ -696,6 +696,7 @@ GetFileList (char *baseName, char ***filesOut, int *nFilesOut)
      * Read the current directory.
      */
     nFiles = 0;
+    nFileMax = 128;
     files = ALLOC_N (char *, nFileMax);
 #ifndef WIN32
     for (dp = readdir (dirp); dp != NULL; dp = readdir (dirp))

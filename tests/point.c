@@ -37,6 +37,9 @@ for advertising or product endorsement purposes.
 #include "silo.h"
 #include <math.h>
 #include <stdlib.h>
+#ifdef WIN32
+#include <string.h>
+#endif
 
 #ifndef PI
 #  define PI    3.141592653589793238
@@ -62,7 +65,9 @@ static void build_point(DBfile *dbfile, char *name, int N, int dims);
 static void build_defvars(DBfile *dbfile, int dims);
 
 /* Other functions */
+#ifndef randf
 extern double randf(double rmin, double rmax);
+#endif
 
 
 /*-------------------------------------------------------------------------

@@ -36,6 +36,9 @@ for advertising or product endorsement purposes.
 
 #include "silo.h"               /*include public silo           */
 
+#ifdef WIN32
+#include <stdlib.h>
+#endif
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>

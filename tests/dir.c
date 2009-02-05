@@ -35,6 +35,10 @@ for advertising or product endorsement purposes.
 */
 #ifndef WIN32
 #include <unistd.h>
+#else
+#include <direct.h>
+#include <stdlib.h>
+#include <string.h>
 #endif
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -171,12 +175,20 @@ main(int argc, char *argv[])
     /* test attempt to DBCreate a file without clobbering it and
        for which the path is really a dir in the host filesystem */
     unlink("dir-test-foo");
+#ifndef WIN32
     mkdir("dir-test-foo", 0777);
+#else
+    mkdir("dir-test-foo");
+#endif
     dbfile2 = DBCreate("dir-test-foo", DB_NOCLOBBER, DB_LOCAL, "dir test file", driver);
     unlink("dir-test-foo");
     if (dbfile2 != 0)
         exit(1);
+#ifndef WIN32
     mkdir("dir-test-foo", 0777);
+#else
+    mkdir("dir-test-foo");
+#endif
     dbfile2 = DBCreate("dir-test-foo", DB_CLOBBER, DB_LOCAL, "dir test file", driver);
     unlink("dir-test-foo");
     if (dbfile2 != 0)
