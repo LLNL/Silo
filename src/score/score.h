@@ -29,7 +29,9 @@
 /* Macros used for exporting symbols on Win32 systems. */
 #ifndef SILO_API
 #ifdef _WIN32
+#ifndef HAVE_MEMMOVE
 #define HAVE_MEMMOVE
+#endif
 /* Make Silo a DLL by default. */
 #ifdef SILO_STATIC_LIBRARY
 #define SILO_API

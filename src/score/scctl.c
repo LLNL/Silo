@@ -11,7 +11,9 @@
 #include "score.h"
 
 /* Prototypes for other external functions. */
+#ifndef WIN32
 extern char *ctime(const time_t *);
+#endif
 
 int	*lite_LAST ;
 int	lite_SC_c_sp_alloc ;
@@ -63,7 +65,7 @@ PFftell   lite_io_tell_hook    = (PFftell)   ftell;
 PFfwrite  lite_io_write_hook   = (PFfwrite)  fwrite;
 
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	lite_SC_regx_match
  *
@@ -128,7 +130,7 @@ lite_SC_regx_match (char *s, char *patt) {
    else return(FALSE);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	lite_SC_date
  *
