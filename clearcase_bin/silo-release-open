@@ -1014,6 +1014,7 @@ BININSTALLS="browser silex silock silodiff"
 declare -i i
 declare -af list
 MAKE="gmake"
+#MAKEOPTS="-s LIBTOOLFLAGS=--silent"   # low noise
 MAKEOPTS="-j 4"
 DOINSTALL="yes"
 DOCHECK="no"
