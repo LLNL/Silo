@@ -47,6 +47,9 @@ for advertising or product endorsement purposes.
  *
  *  Brad Whitlock, Mon Apr 8 15:17:17 PST 2002
  *  Changed some headers to allow compilation under windows.
+ *
+ *  Thomas R. Treadway, Fri Jan  5 13:46:26 PST 2007
+ *  Added backward compatible symbols
  */
 
 /* Private SILO functions.  */
@@ -95,6 +98,9 @@ for advertising or product endorsement purposes.
 int SILO_VERS_TAG = 0;
 
 /* specify versions which are backward compatible with the current */
+int Silo_version_4_5_1_cksum = 0;
+int Silo_version_4_5_1 = 0;
+int Silo_version_4_5 = 0;
 
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
 PUBLIC int     db_errno = 0;    /*last error number                     */

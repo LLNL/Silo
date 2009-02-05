@@ -275,7 +275,7 @@ FILES = \
  silo_f.c
 
 BUILT_SOURCES = silo.inc
-DISTCLEANFILES = silo_version.h
+DISTCLEANFILES = silo_version.h silo.inc
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

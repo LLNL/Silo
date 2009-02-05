@@ -55,12 +55,13 @@ am__objects_1 = Explorer.$(OBJEXT) SiloView.$(OBJEXT) \
 	SiloDirView.$(OBJEXT) SiloDirTreeView.$(OBJEXT) \
 	SiloArrayView.$(OBJEXT) SiloValueView.$(OBJEXT) \
 	SiloObjectView.$(OBJEXT) SiloFile.$(OBJEXT) main.$(OBJEXT)
+am_silex_OBJECTS = $(am__objects_1)
 am__objects_2 = Explorer_moc.$(OBJEXT) SiloView_moc.$(OBJEXT) \
 	SiloDirView_moc.$(OBJEXT) SiloDirTreeView_moc.$(OBJEXT) \
 	SiloArrayView_moc.$(OBJEXT) SiloValueView_moc.$(OBJEXT) \
 	SiloObjectView_moc.$(OBJEXT)
-am_silex_OBJECTS = $(am__objects_1) $(am__objects_2)
-silex_OBJECTS = $(am_silex_OBJECTS)
+nodist_silex_OBJECTS = $(am__objects_2)
+silex_OBJECTS = $(am_silex_OBJECTS) $(nodist_silex_OBJECTS)
 am__DEPENDENCIES_1 =
 @HDF5_DRV_NEEDED_FALSE@silex_DEPENDENCIES = ../../src/libsilo.la \
 @HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_1)
@@ -77,7 +78,7 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(silex_SOURCES)
+SOURCES = $(silex_SOURCES) $(nodist_silex_SOURCES)
 DIST_SOURCES = $(silex_SOURCES)
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
@@ -177,6 +178,11 @@ SHELL = @SHELL@
 SILEX = @SILEX@
 SILEX_NEEDED_FALSE = @SILEX_NEEDED_FALSE@
 SILEX_NEEDED_TRUE = @SILEX_NEEDED_TRUE@
+SILO_VERS_MAJ = @SILO_VERS_MAJ@
+SILO_VERS_MIN = @SILO_VERS_MIN@
+SILO_VERS_PAT = @SILO_VERS_PAT@
+SILO_VERS_PRE = @SILO_VERS_PRE@
+SILO_VERS_TAG = @SILO_VERS_TAG@
 STRIP = @STRIP@
 TAURUS = @TAURUS@
 TAURUS_NEEDED_FALSE = @TAURUS_NEEDED_FALSE@
@@ -253,7 +259,8 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-silex_SOURCES = $(FILES) $(FILES_MOC)
+silex_SOURCES = $(FILES)
+nodist_silex_SOURCES = $(FILES_MOC)
 @HDF5_DRV_NEEDED_FALSE@silex_LDADD = ../../src/libsilo.la $(QT_LIBS)
 @HDF5_DRV_NEEDED_TRUE@silex_LDADD = ../../src/libsiloh5.la $(QT_LIBS)
 EXTRA_DIST = \

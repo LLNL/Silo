@@ -22,7 +22,7 @@ FILES = \
  silo_f.c
 
 BUILT_SOURCES = silo.inc
-DISTCLEANFILES = silo_version.h
+DISTCLEANFILES = silo_version.h silo.inc
 
 # built if it doesn't exit, could cause problem with VPATH
 silo.inc: silo.h silo_f.h
