@@ -35,7 +35,7 @@ MAKEOPTS=""
 export TOPDIR MAKE MAKEOPTS SZIPRELEASE HDF5RELEASE QTRELEASE lcun skipszip
 
 usage() {
-  printf "Usage: %s [-lc-username <lc-username>] [hdf5only] [all|hoth|sunspot|up|yana|thunder|pengra|quad|tread|ubgl]" $0
+  printf "Usage: %s [-lc-username <lc-username>] [hdf5only] [all|hoth|sunspot|up|yana|ocfport|thunder|pengra|quad|tread|ubgl]" $0
   printf "\n"
   printf "Silo 3rd party library installing script. Assumes a tarball exist in\n"
   printf "/usr/gapps/silo/szip/src/szip-$SZIPRELEASE, and\n"
@@ -358,6 +358,67 @@ yanapgc() {
     "export PATH LM_LICENSE_FILE"
 }
 #
+ocfport() {
+    ocfportgcc
+    ocfporticc
+    ocfportpc
+    ocfportpgc
+}
+ocfportgcc() {
+    HOSTS=${lcun}@ocfport
+    ARCH=chaos_4_x86_64_ib
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
+FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
+    export HOSTS ARCH CONFOPTS
+    stdbuild \
+    "PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:\
+/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
+    "export PATH"
+}
+#
+ocfporticc() {
+    HOSTS=${lcun}@ocfport
+    ARCH=chaos_4_x86_64_ib-icc
+    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
+CFLAGS=-fPIC CXXFLAGS=-fPIC"
+    export HOSTS ARCH CONFOPTS
+    stdbuild \
+    "PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:\
+/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
+    "LD_LIBRARY_PATH=/usr/local/intel/compiler100_025/lib" \
+    "INTEL_LICENSE_FILE=/usr/local/intel/compiler100_025/licenses:\
+/opt/intel/licenses" \
+    "export PATH LD_LIBRARY_PATH INTEL_LICENSE_FILE"
+}
+#
+ocfportpc() {
+    HOSTS=${lcun}@ocfport
+    ARCH=chaos_4_x86_64_ib-pc
+    CONFOPTS="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
+CFLAGS=-fPIC CXXFLAGS=-fPIC"
+    export HOSTS ARCH CONFOPTS
+    stdbuild \
+    "PATH=/usr/global/tools/RSI/bin:\
+/usr/local/tools/pathscale/pathscale-2.4/bin2:/usr/local/bin:/bin:/usr/bin:\
+/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
+    "LM_LICENSE_FILE=/usr/local/etc/license.client" \
+    "PATHSCALE_SUBSCRIPTION_DAEMON=license1ocf.llnl.gov" \
+    "export PATH LM_LICENSE_FILE PATHSCALE_SUBSCRIPTION_DAEMON"
+}
+#
+ocfportpgc() {
+    HOSTS=${lcun}@ocfport
+    ARCH=chaos_4_x86_64_ib-pgc
+  CONFOPTS=" CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" CFLAGS=-fPIC CXXFLAGS=-fPIC"
+    export HOSTS ARCH CONFOPTS
+    stdbuild \
+    "PATH=/usr/global/tools/RSI/bin:\
+/usr/local/tools/pgi6.23/linux86-64/6.2/bin:/usr/local/bin:/bin:/usr/bin:\
+/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
+    "LM_LICENSE_FILE=/usr/local/etc/license.client" \
+    "export PATH LM_LICENSE_FILE"
+}
+#
 thunder() {
     thundergcc
     thundericc
@@ -478,6 +539,7 @@ if [ $# -lt 1 ] ; then
     thunder
     pengra
     yana
+    ocfport
     quad
     ubgl
 else
@@ -497,6 +559,7 @@ else
       thunder
       pengra
       yana
+      ocfport
       quad
       ubgl
       shift;;
@@ -562,6 +625,21 @@ else
       shift;;
     yana*|-ya*)
       yana
+      shift;;
+    ocfport*pgc)
+      ocfportpgc
+      shift;;
+    ocfport*pc)
+      ocfportpc
+      shift;;
+    ocfport*icc)
+      ocfporticc
+      shift;;
+    ocfport*gcc)
+      ocfportgcc
+      shift;;
+    ocfport*)
+      ocfport
       shift;;
     pen*icc|-pe*icc)
       pengraicc

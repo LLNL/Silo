@@ -117,4 +117,5 @@ EXTRA_DIST = \
  yana2.conf \
  yana3.conf \
  yana4.conf \
- zeus.conf 
+ zeus.conf \
+ zeus279.conf

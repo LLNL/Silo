@@ -783,6 +783,113 @@ CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex --disable-silex \
     "export PATH LM_LICENSE_FILE"
 }
 
+function ocfport() {
+  ocfportgcc
+  ocfporticc
+  ocfportpgc
+  ocfportpsc
+}
+function ocfportfinal() {
+    ssh ${lcun}@ocfport "/bin/bash" << EOF >> chaos_4_x86_64_ib 2>&1
+    umask 002
+    for ARCHDIR in "chaos_4_x86_64_ib" "chaos_4_x86_64_ib-icc" \
+        "chaos_4_x86_64_ib-pc" "chaos_4_x86_64_ib-pgc"
+    do
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
+       fi
+       ln -s $TOPDIR/hdfview/linux64amd/hdfview \
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/hdfview
+    done
+    for ARCHDIR in "chaos_4_x86_64_ib-icc" "chaos_4_x86_64_ib-pc" \
+       "chaos_4_x86_64_ib-pgc"
+    do
+       if [[ -e $TOPDIR/$VERSION/\$ARCHDIR/bin/silex ]] ; then
+          rm -f $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       fi
+       ln -s $TOPDIR/$VERSION/chaos_4_x86_64_ib/bin/silex \
+          $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+       chgrp visit $TOPDIR/$VERSION/\$ARCHDIR/bin/silex
+    done
+EOF
+}
+function ocfportclean() {
+    ssh ${lcun}@ocfport "/bin/bash" << EOF >> chaos_4_x86_64_ib 2>&1
+    for ARCHDIR in "chaos_4_x86_64_ib" "chaos_4_x86_64_ib-icc" \
+        "chaos_4_x86_64_ib-pc" "chaos_4_x86_64_ib-pgc"
+    do if [[ -d $TOPDIR/$VERSION/test/\$ARCHDIR ]] ; then
+          rm -rf $TOPDIR/$VERSION/test/\$ARCHDIR
+       fi
+    done
+EOF
+}
+function ocfportgcc() {
+    HOSTS="${lcun}@ocfport"
+    ARCH="chaos_4_x86_64_ib"
+    CONFOPTS="CC=gcc CXX=g++ FC=g77 F77=g77 CFLAGS=-fPIC CXXFLAGS=-fPIC \
+FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
+    export HOSTS ARCH CONFOPTS
+    build \
+    "PATH=/usr/local/bin:/bin:/usr/bin:\
+/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin" \
+    "export PATH"
+}
+
+function ocfporticc() {
+    HOSTS="${lcun}@ocfport"
+    ARCH="chaos_4_x86_64_ib-icc"
+    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
+CFLAGS=-fPIC CXXFLAGS=-fPIC"
+    CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
+CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib" \
+    export HOSTS ARCH CONFOPTS CONFOPTS2
+    build2 \
+    "PATH=/usr/local/bin:/bin:/usr/bin:\
+/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
+    "export PATH"
+}
+function ocfportpsc() {
+    HOSTS="${lcun}@ocfport"
+    ARCH="chaos_4_x86_64_ib-pc"
+    CONFOPTS="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
+CFLAGS=-fPIC CXXFLAGS=-fPIC"
+    CONFOPTS2="CC=pathcc CXX=pathCC FC=pathf90 F77=pathf90 \
+CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
+    export HOSTS ARCH CONFOPTS CONFOPTS2
+    build2 \
+    "PATH=/usr/global/tools/RSI/bin:\
+/usr/local/bin:/bin:/usr/bin:\
+/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
+    "LM_LICENSE_FILE=/usr/local/etc/license.client" \
+    "PATHSCALE_SUBSCRIPTION_DAEMON=license1ocf.llnl.gov" \
+    "export PATH LM_LICENSE_FILE PATHSCALE_SUBSCRIPTION_DAEMON"
+}
+function ocfportpgc() {
+    HOSTS="${lcun}@ocfport"
+    ARCH="chaos_4_x86_64_ib-pgc"
+    CONFOPTS="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
+CFLAGS=-fPIC CXXFLAGS=-fPIC"
+    CONFOPTS2="CC=pgcc CXX=pgCC FC=\"pgf77 -g77libs\" \
+CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex --disable-silex \
+--with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
+--with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
+/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/lib"
+    export HOSTS ARCH CONFOPTS CONFOPTS2
+    build2 \
+    "PATH=/usr/global/tools/RSI/bin:\
+/usr/local/bin:/bin:/usr/bin:\
+/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin:/usr/kerberos/bin" \
+    "LM_LICENSE_FILE=/usr/local/etc/license.client" \
+    "export PATH LM_LICENSE_FILE"
+}
+
 function thunder() {
   thundergcc
   thundericc
@@ -1032,7 +1139,7 @@ TARFILE="silo-$VERSION.tar.gz"
 TOPSRCDIR="silo-$VERSION"
 
 if (( $# < 1 )) ; then
-    list=("hoth" "sunspot" "up" "thunder" "pengra" "yana" "quad")
+    list=("hoth" "sunspot" "up" "thunder" "pengra" "yana" "ocfport" "quad")
     DOBDIV="yes";DOLC="yes"
 else
  i=0
@@ -1044,6 +1151,7 @@ else
       list[i]="thunder" ; i=i+1
       list[i]="pengra" ; i=i+1
       list[i]="yana" ; i=i+1
+      list[i]="ocfport" ; i=i+1
       list[i]="quad" ; i=i+1
       DOLC="yes"
       shift;;
@@ -1061,6 +1169,7 @@ else
       list[i]="thunder" ; i=i+1
       list[i]="pengra" ; i=i+1
       list[i]="yana" ; i=i+1
+      list[i]="ocfport" ; i=i+1
       list[i]="quad" ; i=i+1
       list[i]="ubgl" ; i=i+1
       DOBDIV="yes";DOLC="yes"
@@ -1155,6 +1264,26 @@ else
       shift;;
     yana*|-ya*)
       list[i]="yana" ; i=i+1
+      DOLC="yes"
+      shift;;
+    ocfport*pgc)
+      list[i]="ocfportpgc" ; i=i+1
+      DOLC="yes"
+      shift;;
+    ocfport*psc)
+      list[i]="ocfportpsc" ; i=i+1
+      DOLC="yes"
+      shift;;
+    ocfport*icc)
+      list[i]="ocfporticc" ; i=i+1
+      DOLC="yes"
+      shift;;
+    ocfport*gcc)
+      list[i]="ocfportgcc" ; i=i+1
+      DOLC="yes"
+      shift;;
+    ocfport*)
+      list[i]="ocfport" ; i=i+1
       DOLC="yes"
       shift;;
     pen*icc|-pe*icc)
