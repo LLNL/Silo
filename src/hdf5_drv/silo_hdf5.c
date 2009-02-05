@@ -12880,7 +12880,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
             {
                 if (ltree[i]->narray > 0)
                 {
-                    if (ltree[i]->names[1] != 0)
+                    if (strchr(ltree[i]->names[0], '%') == 0)
                     {
                         for (j = 0; j < ltree[i]->narray; j++)
                         {
@@ -12922,13 +12922,13 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
 
         tot_segs = 0;
         for (i = 0; i < num_nodes; i++)
-            tot_segs += ltree[i]->nsegs;
+            tot_segs += ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1);
 
         /* linearize and output map segment id data */
         intArray = (int *) malloc(tot_segs * sizeof(int));
         n = 0;
         for (i = 0; i < num_nodes; i++)
-            for (j = 0; j < ltree[i]->nsegs; j++)
+            for (j = 0; j < ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1); j++)
                 intArray[n++] = ltree[i]->seg_ids[j];
         db_hdf5_compwr(dbfile, DB_INT, 1, &tot_segs, intArray,
             m.n_seg_ids/*out*/, friendly_name(name,"_seg_ids", 0));
@@ -12938,7 +12938,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
         intArray = (int *) malloc(tot_segs * sizeof(int));
         n = 0;
         for (i = 0; i < num_nodes; i++)
-            for (j = 0; j < ltree[i]->nsegs; j++)
+            for (j = 0; j < ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1); j++)
                 intArray[n++] = ltree[i]->seg_lens[j];
         db_hdf5_compwr(dbfile, DB_INT, 1, &tot_segs, intArray,
             m.n_seg_lens/*out*/, friendly_name(name,"_seg_lens", 0));
@@ -12948,7 +12948,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
         intArray = (int *) malloc(tot_segs * sizeof(int));
         n = 0;
         for (i = 0; i < num_nodes; i++)
-            for (j = 0; j < ltree[i]->nsegs; j++)
+            for (j = 0; j < ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1); j++)
                 intArray[n++] = ltree[i]->seg_types[j];
         db_hdf5_compwr(dbfile, DB_INT, 1, &tot_segs, intArray,
             m.n_seg_types/*out*/, friendly_name(name,"_seg_types", 0));
@@ -13104,39 +13104,26 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
 
         /* read the node 'names' member */
         s = db_hdf5_comprd(dbfile, m.n_names, 1);
-        for (pass = 0; s && pass < 2; pass++)
+        if (s)
         {
-            if (pass == 1)
-            {
-                if (n == 0)
-                    break;
-                strArray = db_StringListToStringArray(s, n);
-            }
+            strArray = db_StringListToStringArray(s, -1);
             n = 0;
             for (i = 0; i < num_nodes; i++)
             {
-                if (ltree[i]->narray > 0)
+                if (ltree[i]->narray == 0)
+                    continue;
+
+                if (strchr(strArray[n], '%') == 0)
                 {
-                    if (strchr(strArray[n], '%') == 0)
-                    {
-                        if (pass == 1)
-                            ltree[i]->names = (char**) malloc(ltree[i]->narray * sizeof(char*)); 
-                        for (j = 0; j < ltree[i]->narray; j++)
-                        {
-                            if (pass == 1)
-                                ltree[i]->names[j] = strArray[n];
-                            n++;
-                        }
-                    }
-                    else
-                    {
-                        if (pass == 1)
-                        {
-                            ltree[i]->names = (char**) malloc(1 * sizeof(char*)); 
-                            ltree[i]->names[0] = strArray[n];
-                        }
-                        n++;
-                    }
+                    ltree[i]->names = (char**) malloc(ltree[i]->narray * sizeof(char*));
+                    for (j = 0; j < ltree[i]->narray; j++, n++)
+                        ltree[i]->names[j] = strArray[n];
+                }
+                else
+                {
+                    ltree[i]->names = (char**) malloc(1 * sizeof(char*));
+                    ltree[i]->names[0] = strArray[n];
+                    n++;
                 }
             }
         }
@@ -13156,7 +13143,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
         n = 0;
         for (i = 0; i < num_nodes; i++)
         {
-            int ns = ltree[i]->nsegs;
+            int ns = ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1);
             if (ns > 0)
             {
                 ltree[i]->seg_ids = (int*) malloc(ns * sizeof(int));
@@ -13171,7 +13158,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
         n = 0;
         for (i = 0; i < num_nodes; i++)
         {
-            int ns = ltree[i]->nsegs;
+            int ns = ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1);
             if (ns > 0)
             {
                 ltree[i]->seg_lens = (int*) malloc(ns * sizeof(int));
@@ -13186,7 +13173,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
         n = 0;
         for (i = 0; i < num_nodes; i++)
         {
-            int ns = ltree[i]->nsegs;
+            int ns = ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1);
             if (ns > 0)
             {
                 ltree[i]->seg_types = (int*) malloc(ns * sizeof(int));
@@ -13262,8 +13249,9 @@ db_hdf5_PutGroupelmap(DBfile *_dbfile, const char *name,
             m.groupel_types/*out*/, friendly_name(name,"_groupel_types", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &num_segments, segment_lengths,
             m.segment_lengths/*out*/, friendly_name(name,"_segment_lengths", 0));
-        db_hdf5_compwr(dbfile, DB_INT, 1, &num_segments, segment_ids,
-            m.segment_ids/*out*/, friendly_name(name,"_segment_ids", 0));
+        if (segment_ids)
+            db_hdf5_compwr(dbfile, DB_INT, 1, &num_segments, segment_ids,
+                m.segment_ids/*out*/, friendly_name(name,"_segment_ids", 0));
 
         tot_len = 0;
         for (i = 0; i < num_segments; i++)
@@ -13478,7 +13466,7 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutMrgvar";
     char                *s = 0;
-    int                 i, len;
+    int                 i, len, nstrs;
     DBmrgvar_mt         m;
 
     memset(&m, 0, sizeof m);
@@ -13496,15 +13484,18 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
             char tmpname[256];
             const char *p = tmpname;
             if (compnames)
-                p = compnames[i];
+                sprintf(tmpname, "%s_%s", name, compnames[i]);
             else
-                sprintf(tmpname, "%s_%03d", name, i);
+                sprintf(tmpname, "%s_comp%d", name, i);
             db_hdf5_compwr(dbfile, datatype, 1, &nregns, data[i],
                 m.data[i]/*out*/, friendly_name(p, "_data", 0));
         }
 
         /* output reg_pnames */
-        db_StringArrayToStringList(reg_pnames, nregns, &s, &len);
+        nstrs = nregns;
+        if (strchr(reg_pnames[0], '%') != 0)
+            nstrs = 1;
+        db_StringArrayToStringList(reg_pnames, nstrs, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.reg_pnames/*out*/,
                 friendly_name(name, "_reg_pnames", 0));
         FREE(s);
@@ -13604,7 +13595,7 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.reg_pnames, 1);
-        if (s) mrgv->reg_pnames = db_StringListToStringArray(s, m.nregns);
+        if (s) mrgv->reg_pnames = db_StringListToStringArray(s, -1);
         FREE(s);
 
         H5Tclose(o);

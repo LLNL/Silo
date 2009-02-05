@@ -11889,7 +11889,7 @@ DBFreeMrgnode(DBmrgtnode *tnode, int walk_order, void *data)
     FREE(tnode->name);
     if (tnode->narray > 0)
     {
-        if (tnode->names[1] != 0)
+        if (strchr(tnode->names[0], '%') == 0)
         {
             int i;
             for (i = 0; i < tnode->narray; i++)
@@ -11964,7 +11964,7 @@ void DBPrintMrgtree(DBmrgtnode *tnode, int walk_order, void *data)
     fprintf(f, "%*s         narray = %d\n", level, "", tnode->narray);
     if (tnode->narray > 0)
     {
-        if (tnode->names[1] != (char *) 0)
+        if (strchr(tnode->names[0], '%') == 0)
         {
             int j;
             fprintf(f, "%*s          names = ...\n", level, "");
@@ -11984,7 +11984,7 @@ void DBPrintMrgtree(DBmrgtnode *tnode, int walk_order, void *data)
     {
         int j;
         fprintf(f, "%*s       segments =     ids   |   lens   |   types\n", level, "");
-        for (j = 0; j < tnode->nsegs; j++)
+        for (j = 0; j < tnode->nsegs*(tnode->narray?tnode->narray:1); j++)
             fprintf(f, "%*s                  %.10d|%.10d|%.10d\n", level, "",
                 tnode->seg_ids[j], tnode->seg_lens[j], tnode->seg_types[j]);
 
@@ -12228,7 +12228,7 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
             API_ERROR("tree pointer", E_BADARGS);
         if (nregns <= 0)
             API_ERROR("nregns", E_BADARGS);
-        if (tree->cwr->num_children + nregns >= tree->cwr->max_children) {
+        if (tree->cwr->num_children + nregns > tree->cwr->max_children) {
             API_ERROR("exceeded max_descendents", E_BADARGS);
         }
         if (NULL == (tnode = ALLOC(DBmrgtnode)))
@@ -12251,7 +12251,7 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
         /* update client data data */
         tnode->name = 0;
         tnode->narray = nregns;
-        if (regn_names[1] == 0)
+        if (strchr(regn_names[0], '%') != 0)
         {
             if (NULL == (tnode->names = ALLOC_N(char*, 1))) {
                 API_ERROR(NULL, E_NOMEM);
@@ -12275,17 +12275,17 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
         if (nsegs > 0)
         {
 
-            if (NULL == (tnode->seg_ids = ALLOC_N(int, nsegs))) {
+            if (NULL == (tnode->seg_ids = ALLOC_N(int, nsegs*nregns))) {
                 API_ERROR(NULL, E_NOMEM);
             }
-            if (NULL == (tnode->seg_lens = ALLOC_N(int, nsegs))) {
+            if (NULL == (tnode->seg_lens = ALLOC_N(int, nsegs*nregns))) {
                 API_ERROR(NULL, E_NOMEM);
             }
-            if (NULL == (tnode->seg_types = ALLOC_N(int, nsegs))) {
+            if (NULL == (tnode->seg_types = ALLOC_N(int, nsegs*nregns))) {
                 API_ERROR(NULL, E_NOMEM);
             }
 
-            for (i = 0; i < nsegs; i++)
+            for (i = 0; i < nsegs*nregns; i++)
             {
                 tnode->seg_ids[i] = seg_ids[i];
                 tnode->seg_lens[i] = seg_lens[i]; 
@@ -12447,8 +12447,6 @@ DBPutGroupelmap(DBfile *dbfile, const char *name,
             API_ERROR("groupel_types", E_BADARGS);
         if (!segment_lengths)
             API_ERROR("segment_lengths", E_BADARGS);
-        if (!segment_ids)
-            API_ERROR("segment_ids", E_BADARGS);
         if (!segment_data)
             API_ERROR("segment_data", E_BADARGS);
         if (!dbfile->pub.p_grplm)

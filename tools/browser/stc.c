@@ -2100,7 +2100,7 @@ stc_silo_types (void) {
       COMP (compnames,
             "pointer (array 'self.ncomps' (primitive 'string'))");
       COMP (reg_pnames,
-            "pointer (array 'self.nregns' (primitive 'string'))");
+            "pointer (array '1' (primitive 'string'))");
       COMP (data,
             "pointer (array 'self.ncomps' (pointer "
             "(array 'self.nregns' (primitive 'self.datatype'))))");

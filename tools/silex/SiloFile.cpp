@@ -60,13 +60,22 @@
 //    Mark C. Miller, Thu Nov  3 16:59:41 PST 2005
 //    Made it able to compile with different versions of Silo
 //
+//    Mark C. Miller, Tue Oct  7 21:22:04 PDT 2008
+//    Quieted frequent warnings of DBFreeCompression not being implemented.
+//    This can be a common situation.
 // ****************************************************************************
 SiloDir::SiloDir(DBfile *db, const QString &name_, const QString &path_)
 {
     name = name_;
     path = path_;
+    static bool canCallFreeCompression[20] = {true, true, true, true, true,
+                                              true, true, true, true, true,
+                                              true, true, true, true, true,
+                                              true, true, true, true, true};
 
-    DBFreeCompressionResources(db,0);
+    int drt = DBGetDriverType(db);
+    if (canCallFreeCompression[drt] && DBFreeCompressionResources(db,0) == -1)
+        canCallFreeCompression[drt] = false;
     DBSetDir(db, (char*)path.latin1());
     DBtoc *toc = DBGetToc(db);
 

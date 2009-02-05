@@ -4836,39 +4836,26 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("names", &s, DB_CHAR);
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
-   for (pass = 0; s && pass < 2; pass++)
+   if (s)
    {
-       if (pass == 1)
-       {
-           if (n == 0)
-               break;
-           strArray = db_StringListToStringArray(s, n);
-       }
+       strArray = db_StringListToStringArray(s, -1);
        n = 0;
        for (i = 0; i < num_nodes; i++)
        {
-           if (ltree[i]->narray > 0)
+           if (ltree[i]->narray == 0)
+               continue;
+
+           if (strchr(strArray[n], '%') == 0)
            {
-               if (strchr(strArray[n], '%') == 0)
-               {
-                   if (pass == 1)
-                       ltree[i]->names = (char**) malloc(ltree[i]->narray * sizeof(char*));
-                   for (j = 0; j < ltree[i]->narray; j++)
-                   {
-                       if (pass == 1)
-                           ltree[i]->names[j] = strArray[n];
-                       n++;
-                   }
-               }
-               else
-               {
-                   if (pass == 1)
-                   {
-                       ltree[i]->names = (char**) malloc(1 * sizeof(char*));
-                       ltree[i]->names[0] = strArray[n];
-                   }
-                   n++;
-               }
+               ltree[i]->names = (char**) malloc(ltree[i]->narray * sizeof(char*));
+               for (j = 0; j < ltree[i]->narray; j++, n++)
+                   ltree[i]->names[j] = strArray[n];
+           }
+           else
+           {
+               ltree[i]->names = (char**) malloc(1 * sizeof(char*));
+               ltree[i]->names[0] = strArray[n];
+               n++;
            }
        }
    }
@@ -4892,7 +4879,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    n = 0;
    for (i = 0; i < num_nodes; i++)
    {
-       int ns = ltree[i]->nsegs;
+       int ns = ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1);
        if (ns > 0)
        {
            ltree[i]->seg_ids = (int*) malloc(ns * sizeof(int));
@@ -4909,7 +4896,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    n = 0;
    for (i = 0; i < num_nodes; i++)
    {
-       int ns = ltree[i]->nsegs;
+       int ns = ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1);
        if (ns > 0)
        {
            ltree[i]->seg_lens = (int*) malloc(ns * sizeof(int));
@@ -4926,7 +4913,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    n = 0;
    for (i = 0; i < num_nodes; i++)
    {
-       int ns = ltree[i]->nsegs;
+       int ns = ltree[i]->nsegs*(ltree[i]->narray?ltree[i]->narray:1);
        if (ns > 0)
        {
            ltree[i]->seg_types = (int*) malloc(ns * sizeof(int));
@@ -5144,7 +5131,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
 
    if (rpnames != NULL)
    {
-      mrgv->reg_pnames = db_StringListToStringArray(rpnames, mrgv->nregns);
+      mrgv->reg_pnames = db_StringListToStringArray(rpnames, -1);
       FREE(rpnames);
    }
 
@@ -8936,7 +8923,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
         {
             if (ltree[i]->narray > 0)
             {
-                if (ltree[i]->names[1] != 0)
+                if (strchr(ltree[i]->names[0], '%') == 0)
                 {
                     for (j = 0; j < ltree[i]->narray; j++)
                     {
@@ -8978,14 +8965,14 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
 
     tot_segs = 0;
     for (i = 0; i < num_nodes; i++)
-        tot_segs += ltree[i]->nsegs;
+        tot_segs += ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1);
     count = tot_segs;
 
     /* linearize and output map segment id data */
     intArray = (int *) malloc(tot_segs * sizeof(int));
     n = 0;
     for (i = 0; i < num_nodes; i++)
-        for (j = 0; j < ltree[i]->nsegs; j++)
+        for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
             intArray[n++] = ltree[i]->seg_ids[j];
     DBWriteComponent(dbfile, obj, "seg_ids", name, "integer", intArray, 1, &count);
     FREE(intArray);
@@ -8994,7 +8981,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     intArray = (int *) malloc(tot_segs * sizeof(int));
     n = 0;
     for (i = 0; i < num_nodes; i++)
-        for (j = 0; j < ltree[i]->nsegs; j++)
+        for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
             intArray[n++] = ltree[i]->seg_lens[j];
     DBWriteComponent(dbfile, obj, "seg_lens", name, "integer", intArray, 1, &count);
     FREE(intArray);
@@ -9003,7 +8990,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     intArray = (int *) malloc(tot_segs * sizeof(int));
     n = 0;
     for (i = 0; i < num_nodes; i++)
-        for (j = 0; j < ltree[i]->nsegs; j++)
+        for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
             intArray[n++] = ltree[i]->seg_types[j];
     DBWriteComponent(dbfile, obj, "seg_types", name, "integer", intArray, 1, &count);
     FREE(intArray);
@@ -9102,8 +9089,9 @@ db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
                     groupel_types, 1, &count);
    DBWriteComponent(dbfile, obj, "segment_lengths", name, "integer",
                     segment_lengths, 1, &count);
-   DBWriteComponent(dbfile, obj, "segment_ids", name, "integer",
-                    segment_ids, 1, &count);
+   if (segment_ids)
+       DBWriteComponent(dbfile, obj, "segment_ids", name, "integer",
+                        segment_ids, 1, &count);
 
    tot_len = 0;
    for (i = 0; i < num_segments; i++)
@@ -9201,7 +9189,7 @@ db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
     int datatype, void **data, DBoptlist *optlist)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
-   int            i;
+   int            i, nstrs;
    char *s=0; int len=0; long llen;
    DBobject      *obj;
    char          *suffix, *datatype_str, tmp1[256], tmp2[256];
@@ -9220,12 +9208,17 @@ db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
    llen = nregns;
    for (i = 0; i < ncomps; i++) {
       char tmp3[256];
-      sprintf(tmp3, "%s_comp%d", name, i);
 
       if (compnames && compnames[i])
-          db_mkname(dbfile->pdb, (char*)compnames[i], suffix, tmp2);
-      else
+      {
+          sprintf(tmp3, "%s_%s", name, compnames[i]);
           db_mkname(dbfile->pdb, tmp3, suffix, tmp2);
+      }
+      else
+      {
+          sprintf(tmp3, "%s_comp%d", name, i);
+          db_mkname(dbfile->pdb, tmp3, suffix, tmp2);
+      }
       PJ_write_len(dbfile->pdb, tmp2, datatype_str, data[i],
                    1, &llen);
 
@@ -9240,13 +9233,16 @@ db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
 
    if (compnames)
    {
-       db_StringArrayToStringList(compnames, nregns, &s, &len);
+       db_StringArrayToStringList(compnames, ncomps, &s, &len);
        llen = len;
        DBWriteComponent(_dbfile, obj, "compnames", name, "char", s, 1, &llen);
        FREE(s);
    }
 
-   db_StringArrayToStringList(reg_pnames, nregns, &s, &len);
+   nstrs = nregns;
+   if (strchr(reg_pnames[0], '%') != 0)
+       nstrs = 1;
+   db_StringArrayToStringList(reg_pnames, nstrs, &s, &len);
    llen = len;
    DBWriteComponent(_dbfile, obj, "reg_pnames", name, "char", s, 1, &llen);
    FREE(s);
