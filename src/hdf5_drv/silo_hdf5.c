@@ -1848,6 +1848,7 @@ int db_hdf5_set_compression(void)
     char chararray[8];
     char *check;
     int level, block, stat, nfilters;
+    int nbits, prec;
     int have_gzip, have_szip, i;
     H5Z_filter_t filtn;
     unsigned int filter_config_flags;
@@ -1860,91 +1861,29 @@ int db_hdf5_set_compression(void)
        return (-1);
     }
     for (i=0; i<nfilters; i++) {           
-        filtn = H5Pget_filter(P_ckcrprops,(unsigned)i,0,0,0,0,0);
+        filtn = H5Pget_filter(P_ckcrprops,(unsigned)i,0,0,0,0,0,NULL);
         if (H5Z_FILTER_DEFLATE==filtn)     
             have_gzip = TRUE;
-        else if (H5Z_FILTER_SZIP==filtn)     
+        if (H5Z_FILTER_SZIP==filtn)     
             have_szip = TRUE;
     }
 /* Select the compression algorthm */
-    if ((ptr=(char *)strcasestr(SILO_Compression.parameters, "METHOD=GZIP")) != 
-       (char *)NULL) 
+    if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+       "METHOD=GZIP")) != (char *)NULL) 
     {
-     if (have_gzip == FALSE)
-     {
-       if ((ptr=(char *)strcasestr(SILO_Compression.parameters, "LEVEL=")) != 
-          (char *)NULL)
+       if (have_gzip == FALSE)
        {
-          (void)strncpy(chararray, ptr+6, 1); 
-          level = (int) strtol(chararray, &check, 10);
-          if ((chararray != check) && (level >= 0) && (level <=9))
+          if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+             "LEVEL=")) != (char *)NULL)
           {
-             if (H5Pset_deflate(P_ckcrprops, level) < 0)
+             (void)strncpy(chararray, ptr+6, 1); 
+             level = (int) strtol(chararray, &check, 10);
+             if ((chararray != check) && (level >= 0) && (level <=9))
              {
-                db_perror("H5Pset_deflate", E_CALLFAIL, me);
-                return (-1);
-             }
-          }
-          else
-          {
-             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
-             return (-1);
-          }
-       }
-       else
-       {
-          if (H5Pset_deflate(P_ckcrprops, 1) < 0)
-          {
-             db_perror("H5Pset_deflate", E_CALLFAIL, me);
-             return (-1);
-          }
-       }
-     }
-    }
-#ifdef H5_HAVE_FILTER_SZIP
-    else if ((ptr=strcasestr(SILO_Compression.parameters,"METHOD=SZIP"))!=NULL)
-    {
-     if (have_szip == FALSE)
-     {
-       filtn = H5Z_FILTER_SZIP;
-       if (H5Zget_filter_info(filtn, &filter_config_flags)<0)
-       {
-          db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
-          return (-1);
-       }
-       if ((filter_config_flags &
-          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED))==
-          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED))
-       {
-          if ((ptr=strcasestr(SILO_Compression.parameters, "BLOCK=")) != NULL)
-          {
-             (void)strncpy(chararray, ptr+6, 2); 
-             block = (int) strtol(chararray, &check, 10);
-             if ((chararray != check) && (block >= 0) && (block <=32))
-             { 
-                if (strcasestr(SILO_Compression.parameters, "MASK=EC") != NULL)
+                if (H5Pset_deflate(P_ckcrprops, level) < 0)
                 {
-                   if (H5Pset_szip(P_ckcrprops, H5_SZIP_EC_OPTION_MASK,block)<0)
-                   {
-                      db_perror("H5Pset_szip", E_CALLFAIL, me);
-                      return (-1);
-                   }
-                }
-                else if(strcasestr(SILO_Compression.parameters,"MASK=NN")!=NULL)
-                {
-                   if (H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK,block)<0)
-                   {
-                      db_perror("H5Pset_szip", E_CALLFAIL, me);
-                      return (-1);
-                   }
-                }
-                else
-                {
-                   if (H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK,block)<0)
-                   {
-                      db_perror("H5Pset_szip", E_CALLFAIL, me);
-                      return (-1);
-                   }
+                   db_perror("H5Pset_deflate", E_CALLFAIL, me);
+                   return (-1);
                 }
              }
              else
@@ -1954,15 +1893,168 @@ int db_hdf5_set_compression(void)
              }
           }
           else
-             if (H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK, 4) < 0)
+          {
+             if (H5Pset_deflate(P_ckcrprops, 1) < 0)
              {
-                db_perror("H5Pset_szip", E_CALLFAIL, me);
+                db_perror("H5Pset_deflate", E_CALLFAIL, me);
                 return (-1);
              }
-       }
-     }
+          }
+       }  /* if (have_gzip == FALSE) */
+    }
+#ifdef H5_HAVE_FILTER_SZIP
+    else if ((ptr=(char *)strcasestr(SILO_Compression.parameters,
+       "METHOD=SZIP"))!=(char *)NULL)
+    {
+       if (have_szip == FALSE)
+       {
+          filtn = H5Z_FILTER_SZIP;
+          if (H5Zget_filter_info(filtn, &filter_config_flags)<0)
+          {
+             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+             return (-1);
+          }
+          if ((filter_config_flags &
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED))==
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED))
+          {
+             if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+                "BLOCK=")) != (char *)NULL)
+             {
+                (void)strncpy(chararray, ptr+6, 2); 
+                block = (int) strtol(chararray, &check, 10);
+                if ((chararray != check) && (block >= 0) && (block <=32))
+                { 
+                   if (strcasestr(SILO_Compression.parameters, 
+                      "MASK=EC") != NULL)
+                   {
+                      if (H5Pset_szip(P_ckcrprops, 
+                         H5_SZIP_EC_OPTION_MASK,block)<0)
+                      {
+                         db_perror("H5Pset_szip", E_CALLFAIL, me);
+                         return (-1);
+                      }
+                   }
+                   else if(strcasestr(SILO_Compression.parameters,
+                      "MASK=NN")!=NULL)
+                   {
+                      if (H5Pset_szip(P_ckcrprops, 
+                         H5_SZIP_NN_OPTION_MASK,block)<0)
+                      {
+                         db_perror("H5Pset_szip", E_CALLFAIL, me);
+                         return (-1);
+                      }
+                   }
+                   else
+                   {
+                      if (H5Pset_szip(P_ckcrprops, 
+                         H5_SZIP_NN_OPTION_MASK, block)<0)
+                      {
+                         db_perror("H5Pset_szip", E_CALLFAIL, me);
+                         return (-1);
+                      }
+                   }
+                }
+                else
+                {
+                   db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+                   return (-1);
+                }
+             }
+             else
+             {
+                if (H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK, 4) < 0)
+                {
+                   db_perror("H5Pset_szip", E_CALLFAIL, me);
+                   return (-1);
+                }
+             }
+          }  /* if ((filter_config_flags & */
+       }  /* if (have_szip == FALSE) */
     }
 #endif
+/**#ifdef HAVE_LINDSTROM**/
+    else if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+       "METHOD=MESH")) != (char *)NULL) 
+    {
+       if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+          "BITS=")) != (char *)NULL)
+       {
+          (void)strncpy(chararray, ptr+5, 2); 
+          nbits = (int) strtol(chararray, &check, 10);
+          if ((chararray != check) && (nbits >= 0) && (nbits <=64))
+          {
+             ;
+          }
+          else
+          {
+             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+             return (-1);
+          }
+       }
+       else
+          nbits=12;
+       if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+          "PREC=")) != (char *)NULL)
+       {
+          (void)strncpy(chararray, ptr+5, 2); 
+          prec = (int) strtol(chararray, &check, 10);
+          if ((chararray != check) && (prec >= 0) && (prec <=64))
+          {
+             ;
+          }
+          else
+          {
+             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+             return (-1);
+          }
+       }
+       else
+          prec=64;
+    }
+    else if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+       "METHOD=HEXZIP")) != (char *)NULL) 
+    {
+       if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+          "BITS=")) != (char *)NULL)
+       {
+          (void)strncpy(chararray, ptr+5, 2); 
+          nbits = (int) strtol(chararray, &check, 10);
+          if ((chararray != check) && (nbits >= 0) && (nbits <=64))
+          {
+             ;
+          }
+          else
+          {
+             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+             return (-1);
+          }
+       }
+       else
+          nbits=12;
+    }
+    else if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+       "METHOD=LOCAL")) != (char *)NULL) 
+    {
+       if ((ptr=(char *)strcasestr(SILO_Compression.parameters, 
+          "PREC=")) != (char *)NULL)
+       {
+          (void)strncpy(chararray, ptr+5, 2); 
+          prec = (int) strtol(chararray, &check, 10);
+          if ((chararray != check) && (prec >= 0) && (prec <=64))
+          {
+             ;
+          }
+          else
+          {
+             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+             return (-1);
+          }
+       }
+       else
+          prec=64;
+    }
+/**#endif**/
     else
     {
        db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
@@ -3351,6 +3443,7 @@ db_hdf5_Close(DBfile *_dbfile)
        /* Free the private parts of the file */
        if (db_hdf5_initiate_close((DBfile*)dbfile)<0) return -1;
        if (H5Fclose(dbfile->fid)<0) return -1;
+       dbfile->pub.Grab = FALSE;
        dbfile->pub.GrabId = -1;
        dbfile->fid = -1;
 
@@ -7533,7 +7626,9 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
         /* Set global options */
         memset(&_uzl, 0, sizeof _uzl);
         db_ProcessOptlist(DB_ZONELIST, optlist);
-        
+/**#ifdef LINDSTROM **/
+
+/***#endif ***/        
         /* Write variable arrays */
         db_hdf5_compwr(dbfile, DB_INT, 1, &lnodelist, nodelist,
             m.nodelist/*out*/, friendly_name(name,"_nodelist", 0));

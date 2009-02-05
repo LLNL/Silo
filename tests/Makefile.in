@@ -38,7 +38,6 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@HDF5_DRV_NEEDED_TRUE@am__append_1 = $(srcdir)/testsuitehdf5
 check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	partial_io$(EXEEXT) point$(EXEEXT) group_test$(EXEEXT) \
 	listtypes$(EXEEXT) simple$(EXEEXT) ucd$(EXEEXT) \
@@ -51,10 +50,13 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) mmadjacency$(EXEEXT) \
 	largefile$(EXEEXT) dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_3)
-@FORTRAN_NEEDED_TRUE@am__append_2 = $(srcdir)/testsuitef77
-@FORTRAN_NEEDED_TRUE@am__append_3 = $(F77PROGS)
-@FORTRAN_NEEDED_TRUE@am__append_4 = $(F77PROGS)
+	$(am__EXEEXT_2) $(am__EXEEXT_4)
+@HDF5_DRV_NEEDED_TRUE@am__append_1 = $(srcdir)/testsuitehdf5
+@HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
+@HDF5_DRV_NEEDED_TRUE@am__append_3 = $(HDF5PROGS)
+@FORTRAN_NEEDED_TRUE@am__append_4 = $(srcdir)/testsuitef77
+@FORTRAN_NEEDED_TRUE@am__append_5 = $(F77PROGS)
+@FORTRAN_NEEDED_TRUE@am__append_6 = $(F77PROGS)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -64,11 +66,12 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-@HDF5_DRV_NEEDED_TRUE@am__EXEEXT_1 = compress$(EXEEXT) grab$(EXEEXT)
-am__EXEEXT_2 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
+am__EXEEXT_1 = compression$(EXEEXT) grab$(EXEEXT)
+@HDF5_DRV_NEEDED_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
+am__EXEEXT_3 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
 	pointf77$(EXEEXT) quadf77$(EXEEXT) ucdf77$(EXEEXT) \
 	testallf77$(EXEEXT)
-@FORTRAN_NEEDED_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2)
+@FORTRAN_NEEDED_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
 TestReadMask_LDADD = $(LDADD)
@@ -92,11 +95,11 @@ arrayf77_OBJECTS = $(am_arrayf77_OBJECTS)
 am__DEPENDENCIES_2 =
 @FORTRAN_NEEDED_TRUE@arrayf77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
-compress_SOURCES = compress.c
-compress_OBJECTS = compress.$(OBJEXT)
-compress_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@compress_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@compress_DEPENDENCIES = ../src/libsiloh5.la
+am__compression_SOURCES_DIST = compression.c
+@HDF5_DRV_NEEDED_TRUE@am_compression_OBJECTS = compression.$(OBJEXT)
+compression_OBJECTS = $(am_compression_OBJECTS)
+@HDF5_DRV_NEEDED_TRUE@compression_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
 cpz1plt_SOURCES = cpz1plt.c
 cpz1plt_OBJECTS = cpz1plt.$(OBJEXT)
 cpz1plt_LDADD = $(LDADD)
@@ -122,11 +125,10 @@ extface_OBJECTS = extface.$(OBJEXT)
 extface_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@extface_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@extface_DEPENDENCIES = ../src/libsiloh5.la
-grab_SOURCES = grab.c
-grab_OBJECTS = grab.$(OBJEXT)
-grab_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@grab_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@grab_DEPENDENCIES = ../src/libsiloh5.la
+am__grab_SOURCES_DIST = grab.c
+@HDF5_DRV_NEEDED_TRUE@am_grab_OBJECTS = grab.$(OBJEXT)
+grab_OBJECTS = $(am_grab_OBJECTS)
+@HDF5_DRV_NEEDED_TRUE@grab_DEPENDENCIES = $(am__DEPENDENCIES_1)
 group_test_SOURCES = group_test.c
 group_test_OBJECTS = group_test.$(OBJEXT)
 group_test_LDADD = $(LDADD)
@@ -326,27 +328,28 @@ F77LD = $(F77)
 F77LINK = $(LIBTOOL) --tag=F77 --mode=link $(F77LD) $(AM_FFLAGS) \
 	$(FFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = TestReadMask.c alltypes.c array.c $(arrayf77_SOURCES) \
-	compress.c cpz1plt.c csg.c $(curvef77_SOURCES) $(dir_SOURCES) \
-	extface.c grab.c group_test.c largefile.c listtypes.c \
-	mat3d_3across.c $(matf77_SOURCES) merge_block.c mmadjacency.c \
-	multi_file.c multi_test.c multispec.c obj.c onehex.c \
-	oneprism.c onepyramid.c onetet.c partial_io.c point.c \
-	$(pointf77_SOURCES) polyzl.c $(quad_SOURCES) \
-	$(quadf77_SOURCES) sami.c simple.c spec.c specmix.c subhex.c \
-	testall.c $(testallf77_SOURCES) testpdb.c twohex.c ucd.c \
-	ucd1d.c $(ucdf77_SOURCES) ucdsamp3.c version.c wave.c
+	$(compression_SOURCES) cpz1plt.c csg.c $(curvef77_SOURCES) \
+	$(dir_SOURCES) extface.c $(grab_SOURCES) group_test.c \
+	largefile.c listtypes.c mat3d_3across.c $(matf77_SOURCES) \
+	merge_block.c mmadjacency.c multi_file.c multi_test.c \
+	multispec.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
+	partial_io.c point.c $(pointf77_SOURCES) polyzl.c \
+	$(quad_SOURCES) $(quadf77_SOURCES) sami.c simple.c spec.c \
+	specmix.c subhex.c testall.c $(testallf77_SOURCES) testpdb.c \
+	twohex.c ucd.c ucd1d.c $(ucdf77_SOURCES) ucdsamp3.c version.c \
+	wave.c
 DIST_SOURCES = TestReadMask.c alltypes.c array.c \
-	$(am__arrayf77_SOURCES_DIST) compress.c cpz1plt.c csg.c \
-	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) extface.c grab.c \
-	group_test.c largefile.c listtypes.c mat3d_3across.c \
-	$(am__matf77_SOURCES_DIST) merge_block.c mmadjacency.c \
-	multi_file.c multi_test.c multispec.c obj.c onehex.c \
-	oneprism.c onepyramid.c onetet.c partial_io.c point.c \
-	$(am__pointf77_SOURCES_DIST) polyzl.c $(quad_SOURCES) \
-	$(am__quadf77_SOURCES_DIST) sami.c simple.c spec.c specmix.c \
-	subhex.c testall.c $(am__testallf77_SOURCES_DIST) testpdb.c \
-	twohex.c ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c \
-	version.c wave.c
+	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
+	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
+	extface.c $(am__grab_SOURCES_DIST) group_test.c largefile.c \
+	listtypes.c mat3d_3across.c $(am__matf77_SOURCES_DIST) \
+	merge_block.c mmadjacency.c multi_file.c multi_test.c \
+	multispec.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
+	partial_io.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
+	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) sami.c simple.c \
+	spec.c specmix.c subhex.c testall.c \
+	$(am__testallf77_SOURCES_DIST) testpdb.c twohex.c ucd.c \
+	ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -542,7 +545,9 @@ EXTRA_DIST = \
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-TESTSUITE = $(srcdir)/testsuite $(am__append_1) $(am__append_2)
+TESTSUITE = $(srcdir)/testsuite $(am__append_1) $(am__append_4)
+@HDF5_DRV_NEEDED_FALSE@LDADD = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@LDADD = ../src/libsiloh5.la
 
 # paths look at install directories before sources
 AM_CPPFLAGS = \
@@ -554,17 +559,14 @@ AM_CPPFLAGS = \
 
 quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
-@HDF5_DRV_NEEDED_FALSE@LDADD = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@LDADD = ../src/libsiloh5.la
-@HDF5_DRV_NEEDED_FALSE@HDFONLYPROGS = 
-@HDF5_DRV_NEEDED_TRUE@HDFONLYPROGS = compress grab
+HDF5PROGS = compression grab
 F77PROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
-	csg mmadjacency largefile version $(HDFONLYPROGS) \
-	$(am__append_3)
+	csg mmadjacency largefile version $(am__append_2) \
+	$(am__append_5)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -573,6 +575,10 @@ quad_SOURCES = \
  quad.c \
  testlib.c
 
+@HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
+@HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD) 
+@HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
+@HDF5_DRV_NEEDED_TRUE@grab_LDADD = $(LDADD) 
 @FORTRAN_NEEDED_TRUE@arrayf77_SOURCES = arrayf77.f
 @FORTRAN_NEEDED_TRUE@arrayf77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@curvef77_SOURCES = curvef77.f
@@ -639,9 +645,9 @@ array$(EXEEXT): $(array_OBJECTS) $(array_DEPENDENCIES)
 arrayf77$(EXEEXT): $(arrayf77_OBJECTS) $(arrayf77_DEPENDENCIES) 
 	@rm -f arrayf77$(EXEEXT)
 	$(F77LINK) $(arrayf77_LDFLAGS) $(arrayf77_OBJECTS) $(arrayf77_LDADD) $(LIBS)
-compress$(EXEEXT): $(compress_OBJECTS) $(compress_DEPENDENCIES) 
-	@rm -f compress$(EXEEXT)
-	$(LINK) $(compress_LDFLAGS) $(compress_OBJECTS) $(compress_LDADD) $(LIBS)
+compression$(EXEEXT): $(compression_OBJECTS) $(compression_DEPENDENCIES) 
+	@rm -f compression$(EXEEXT)
+	$(LINK) $(compression_LDFLAGS) $(compression_OBJECTS) $(compression_LDADD) $(LIBS)
 cpz1plt$(EXEEXT): $(cpz1plt_OBJECTS) $(cpz1plt_DEPENDENCIES) 
 	@rm -f cpz1plt$(EXEEXT)
 	$(LINK) $(cpz1plt_LDFLAGS) $(cpz1plt_OBJECTS) $(cpz1plt_LDADD) $(LIBS)
@@ -778,7 +784,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alltypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compress.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpz1plt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dir.Po@am__quote@
@@ -1060,8 +1066,7 @@ uninstall-am:
 # listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
 # oneprism onepyramid onetet TestReadMask subhex twohex multispec \
 # specmix testpdb sami spec cpz1plt merge_block mat3d_3across \
-# ucd1d wave multi_file polyzl csg  mmadjacency  largefile version \
-# $(HDFONLYPROGS)
+# ucd1d wave multi_file polyzl csg  mmadjacency  largefile version 
 
 all-local:
 	@echo

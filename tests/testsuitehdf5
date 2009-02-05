@@ -1424,12 +1424,12 @@ else
 fi
 
 at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:21: exit code was $at_status, expected 0"
+   1) ;;
+   *) echo "$at_srcdir/testsuitehdf5.at:21: exit code was $at_status, expected 1"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -2945,8 +2945,8 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuitehdf5.at:125: grab DB_HDF5"
-echo testsuitehdf5.at:125 >"$at_check_line_file"
+echo "$at_srcdir/testsuitehdf5.at:126: grab DB_HDF5"
+echo testsuitehdf5.at:126 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -2964,12 +2964,13 @@ else
 fi
 
 at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo >>"$at_stderr"; echo "DBWrite: Error 26
+" | $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuitehdf5.at:125: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuitehdf5.at:126: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then

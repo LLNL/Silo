@@ -61,10 +61,12 @@ char *IntToTypename(int);
  *     argv : An array containing the command line arguments.
  *
  * Modifications:
+ *     Thomas R. Treadway, Thu Jul  5 16:33:38 PDT 2007
+ *     Chaneged main's return type to int, to stop gcc-4.x whining.
  *
  ********************************************************************/
 
-void
+int
 main(int argc, char *argv[])
 {
     int i;

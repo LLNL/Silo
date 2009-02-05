@@ -159,6 +159,7 @@ SILO_Globals_t SILO_Globals = {
     FALSE, /* enableChecksums */
     FALSE, /* enableCompression */
     FALSE, /* enableFriendlyHDF5Names */
+    FALSE  /* enableGrabDriver */
 };
 SILO_Compression_t SILO_Compression = {
     "\0" 
@@ -2162,21 +2163,18 @@ PUBLIC int
 DBSetCompression(const char *s)
 {
     int oldEnable;
-    API_BEGIN("DBSetCompression", int, -1) {
-        oldEnable = SILO_Globals.enableCompression;
-        SILO_Globals.enableCompression = TRUE;
-        if (s && !*s) {
-            SILO_Compression.parameters = ALLOC_N(char, 12);
-            strcpy(SILO_Compression.parameters, "METHOD=GZIP");
-        }   
-        else if (s) {
-            SILO_Compression.parameters =ALLOC_N(char,strlen(s)+1);
-            strcpy(SILO_Compression.parameters, s);
-        }
-   
-        API_RETURN(oldEnable);
+    oldEnable = SILO_Globals.enableCompression;
+    SILO_Globals.enableCompression = TRUE;
+    if (s && !*s) {
+        SILO_Compression.parameters = ALLOC_N(char, 12);
+        strcpy(SILO_Compression.parameters, "METHOD=GZIP");
+    }   
+    else if (s) {
+        SILO_Compression.parameters =ALLOC_N(char,strlen(s)+1);
+        strcpy(SILO_Compression.parameters, s);
     }
-    API_END_NOPOP;
+   
+    return(oldEnable);
 }
 
 PUBLIC char * 
@@ -2222,10 +2220,10 @@ DBGetFriendlyHDF5Names()
 PUBLIC void * 
 DBGrabDriver(DBfile *file)
 {
-    void *rtn=(void *)-1;
+    void *rtn=(void *) DB_UNKNOWN;
     if (file) {
        if (file->pub.GrabId > 0) {
-          file->pub.Grab = TRUE;
+          SILO_Globals.enableGrabDriver = TRUE;
           rtn = (void *) file->pub.GrabId;
        }
     }
@@ -2246,7 +2244,7 @@ DBGetDriverType(const DBfile *file)
     if (file) {
        return file->pub.type;
     }
-    return -1;
+    return DB_UNKNOWN;
 }
 
 /*----------------------------------------------------------------------
@@ -2257,6 +2255,12 @@ DBGetDriverType(const DBfile *file)
  * Programmer:  Thomas R. Treadway, Tue Jul  3 15:24:58 PDT 2007
  *
  * Description:  This routine returns a the driver type
+ *
+ * Modifications:
+ *
+ * Thomas R. Treadway, Thu Jul  5 11:57:03 PDT 2007
+ * DB_HDR5 is conditional
+ *
  *--------------------------------------------------------------------*/
 PUBLIC int
 DBGetDriverTypeFromPath(const char *path)
@@ -2280,9 +2284,11 @@ DBGetDriverTypeFromPath(const char *path)
    (void) close(fd);
    if (strstr(buf, "PDB"))
       return DB_PDB;
+#ifdef DB_HDF5
    if (strstr(buf, "HDF"))
       return DB_HDF5;
-    return -1;
+#endif
+   return DB_UNKNOWN;
 }
 
 /*----------------------------------------------------------------------
@@ -2298,10 +2304,10 @@ PUBLIC int
 DBUngrabDriver(DBfile *file, const void *driver_handle)
 {
     if (file) {
-       file->pub.Grab = FALSE;
+       SILO_Globals.enableGrabDriver = FALSE;
        return file->pub.type;
     }
-    return -1;
+    return DB_UNKNOWN;
 }
 
 /*----------------------------------------------------------------------
@@ -3745,6 +3751,8 @@ PUBLIC DBtoc  *
 DBGetToc(DBfile *file)
 {
     API_BEGIN("DBGetToc", DBtoc *, NULL) {
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("", E_GRABBED) ; 
         if (!file)
             API_ERROR(NULL, E_NOFILE);
 
@@ -3776,6 +3784,8 @@ DBInqVarType(DBfile *dbfile, const char *varname)
     DBObjectType retval;
 
     API_BEGIN("DBInqVarType", DBObjectType, DB_INVALID_OBJECT) {
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("", E_GRABBED) ; 
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (!varname || !*varname)
@@ -3819,6 +3829,8 @@ DBNewToc(DBfile *dbfile)
     API_BEGIN("DBNewToc", int, -1) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("", E_GRABBED) ; 
         if (!dbfile->pub.newtoc)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
         if (dbfile->pub.toc)
@@ -3925,6 +3937,8 @@ DBGetComponent(DBfile *dbfile, const char *objname, const char *compname)
     API_BEGIN("DBGetComponent", void *, NULL) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetComponent", E_GRABBED) ; 
         if (!objname || !*objname)
             API_ERROR("object name", E_BADARGS);
         if (!compname || !*compname)
@@ -3968,6 +3982,8 @@ DBGetComponentType(DBfile *dbfile, const char *objname, const char *compname)
     API_BEGIN("DBGetComponentType", int, DB_NOTYPE) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("", E_GRABBED) ; 
         if (!objname || !*objname)
             API_ERROR("object name", E_BADARGS);
         if (!compname || !*compname)
@@ -4004,6 +4020,8 @@ DBGetDir(DBfile *dbfile, char *path)
     API_BEGIN("DBGetDir", int, -1) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetDir", E_GRABBED) ; 
         if (!path)
             API_ERROR("path", E_BADARGS);
         if (!dbfile->pub.g_dir)
@@ -4049,6 +4067,8 @@ DBSetDir(DBfile *dbfile, const char *path)
     API_BEGIN("DBSetDir", int, -1) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBSetDir", E_GRABBED) ; 
         if (!path || !*path)
             API_ERROR("path", E_BADARGS);
         if (STR_EQUAL(path, "."))
@@ -4101,6 +4121,8 @@ DBSetDirID(DBfile *dbfile, int dirid)
     API_BEGIN("DBSetDirID", int, -1) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBSetDirID", E_GRABBED) ; 
         if (!dbfile->pub.toc) {
             API_ERROR("missing table of contents", E_BADARGS);
         }
@@ -4150,6 +4172,8 @@ DBListDir(DBfile *dbfile, char *argv[], int argc)
     API_DEPRECATE("DBListDir", int, -1) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBListDir", E_GRABBED) ; 
         DBNewToc(dbfile);
         if (!dbfile->pub.toc)
             API_ERROR("no table of contents", E_INTERNAL);
@@ -4187,6 +4211,8 @@ DBFilters(DBfile *dbfile, FILE *stream)
     API_BEGIN("DBFilters", int, -1) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBFilters", E_GRABBED) ; 
         if (!stream)
             stream = stdout;
         if (!dbfile->pub.module)
@@ -4231,6 +4257,8 @@ DBMkDir(DBfile *dbfile, const char *name)
     API_BEGIN("DBMkDir", int, -1) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBMkDir", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("directory name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -4278,6 +4306,8 @@ DBChangeObject (DBfile *file, DBobject *obj)
     {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBChangeObject", E_GRABBED) ; 
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
         if (!file->pub.c_obj)
@@ -4325,6 +4355,8 @@ DBWriteObject(DBfile *file, DBobject *obj, int freemem)
     {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBWriteObject", E_GRABBED) ; 
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(file, obj->name))
@@ -4367,6 +4399,8 @@ DBGetObject (DBfile *file, const char *objname)
     {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetObject", E_GRABBED) ; 
         if (!objname)
             API_ERROR("object name", E_BADARGS);
         if (!file->pub.g_obj)
@@ -4421,6 +4455,8 @@ DBWriteComponent(DBfile *file, DBobject *obj, const char *comp_name,
     API_BEGIN("DBWriteComponent", int, -1) {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBWriteComponent", E_GRABBED) ; 
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
         if (!comp_name || !*comp_name)
@@ -4501,6 +4537,8 @@ DBWrite(DBfile *dbfile, const char *vname, void *var, int *dims, int ndims,
     API_BEGIN2("DBWrite", int, -1, vname) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBWrite", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("variable name", E_BADARGS);
         if (db_VariableNameValid((char *)vname) == 0)
@@ -4567,6 +4605,8 @@ DBWriteSlice (DBfile *dbfile, const char *vname, void *values, int dtype,
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBWriteSlice", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("variable name", E_BADARGS);
         if (db_VariableNameValid((char *)vname) == 0)
@@ -4637,6 +4677,8 @@ DBReadAtt(DBfile *dbfile, const char *vname, const char *aname, void *results)
     API_DEPRECATE2("DBReadAtt", int, -1, vname) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBReadAtt", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("variable name", E_BADARGS);
         if (!aname || !*aname)
@@ -4680,6 +4722,8 @@ DBGetCompoundarray(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetCompoundarray", DBcompoundarray *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetCompoundarray", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("array name", E_BADARGS);
         if (NULL == dbfile->pub.g_ca)
@@ -4717,6 +4761,8 @@ DBGetCurve (DBfile *dbfile, const char *name)
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetCurve", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("curve name", E_BADARGS);
         if (NULL == dbfile->pub.g_cu)
@@ -4750,6 +4796,8 @@ DBGetDefvars (DBfile *dbfile, const char *name)
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetDefvars", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("defvars name", E_BADARGS);
         if (NULL == dbfile->pub.g_defv)
@@ -4789,6 +4837,8 @@ DBGetMaterial(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetMaterial", DBmaterial *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMaterial", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("material name", E_BADARGS);
         if (!dbfile->pub.g_ma)
@@ -4843,6 +4893,8 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetMatspecies", DBmatspecies *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMatspecies", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("material species name", E_BADARGS);
         if (!dbfile->pub.g_ms)
@@ -4886,6 +4938,8 @@ DBGetMultimesh(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetMultimesh", DBmultimesh *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMultimesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimesh name", E_BADARGS);
         if (!dbfile->pub.g_mm)
@@ -4921,6 +4975,8 @@ DBGetMultimeshadj(DBfile *dbfile, const char *name, int nmesh,
     API_BEGIN2("DBGetMultimeshadj", DBmultimeshadj *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMultimeshadj", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimesh name", E_BADARGS);
         if (!dbfile->pub.g_mmadj)
@@ -4966,6 +5022,8 @@ DBGetMultivar(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetMultivar", DBmultivar *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMultivar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multivar name", E_BADARGS);
         if (!dbfile->pub.g_mv)
@@ -5006,6 +5064,8 @@ DBGetMultimat(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetMultimat", DBmultimat *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMultimat", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimat name", E_BADARGS);
         if (!dbfile->pub.g_mt)
@@ -5046,6 +5106,8 @@ DBGetMultimatspecies(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetMultimatspecies", DBmultimatspecies *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMultimatspecies", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimatspecies name", E_BADARGS);
         if (!dbfile->pub.g_mms)
@@ -5088,6 +5150,8 @@ DBGetPointmesh(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetPointmesh", DBpointmesh *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetPointmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("pointmesh name", E_BADARGS);
         if (!dbfile->pub.g_pm)
@@ -5130,6 +5194,8 @@ DBGetPointvar(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetPointvar", DBmeshvar *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetPointvar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("pointvar name", E_BADARGS);
         if (!dbfile->pub.g_pv)
@@ -5177,6 +5243,8 @@ DBGetQuadmesh(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetQuadmesh", DBquadmesh *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetQuadmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("quadmesh name", E_BADARGS);
         if (!dbfile->pub.g_qm)
@@ -5256,6 +5324,8 @@ DBGetQuadvar(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetQuadvar", DBquadvar *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetQuadvar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("quadvar name", E_BADARGS);
         if (!dbfile->pub.g_qv)
@@ -5291,6 +5361,8 @@ DBGetQuadvar1 (DBfile *dbfile, const char *varname, float *var, int *dims,
     DBquadvar     *qv = NULL;
 
     API_BEGIN2 ("DBGetQuadvar1", int, -1, varname) {
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetQuadvar1", E_GRABBED) ; 
         if (NULL == (qv = DBGetQuadvar (dbfile, varname)))
             API_ERROR ("DBGetQuadvar1", E_CALLFAIL);
 
@@ -5446,6 +5518,8 @@ DBGetUcdmesh(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetUcdmesh", DBucdmesh *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetUcdmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("UCDmesh name", E_BADARGS);
         if (!dbfile->pub.g_um)
@@ -5523,6 +5597,8 @@ DBGetUcdvar(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetUcdvar", DBucdvar *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetUcdvar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("UCDvar name", E_BADARGS);
         if (!dbfile->pub.g_uv)
@@ -5564,6 +5640,8 @@ DBGetFacelist(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetFacelist", DBfacelist *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetFacelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("facelist name", E_BADARGS);
         if (!dbfile->pub.g_fl)
@@ -5605,6 +5683,8 @@ DBGetZonelist(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetZonelist", DBzonelist *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
         if (!dbfile->pub.g_zl)
@@ -5637,6 +5717,8 @@ DBGetPHZonelist(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetPHZonelist", DBphzonelist *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetPHZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
         if (!dbfile->pub.g_phzl)
@@ -5676,6 +5758,8 @@ DBGetVar(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetVar", void *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetVar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("variable name", E_BADARGS);
         if (!dbfile->pub.g_var)
@@ -5718,6 +5802,8 @@ DBReadVar(DBfile *dbfile, const char *name, void *result)
     API_BEGIN2("DBReadVar", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBReadVar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("variable name", E_BADARGS);
         if (!result)
@@ -5758,6 +5844,8 @@ DBReadVar1(DBfile *dbfile, const char *vname, int offset, void *result)
     API_BEGIN2("DBReadVar1", int, -1, vname) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBReadVar1", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("variable name", E_BADARGS);
         if (!result)
@@ -5800,6 +5888,8 @@ DBReadVarSlice(DBfile *dbfile, const char *name, int *offset, int *length,
     API_BEGIN2("DBReadVarSlice", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBReadVarSlice", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("variable name", E_BADARGS);
         if (!offset)
@@ -5849,6 +5939,8 @@ DBGetVarByteLength(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetVarByteLength", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetVarByteLength", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("variable name", E_BADARGS);
         if (!dbfile->pub.g_varbl)
@@ -5887,6 +5979,8 @@ DBGetVarLength(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetVarLength", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetVarLength", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("variable name", E_BADARGS);
         if (!dbfile->pub.g_varlen)
@@ -5928,6 +6022,8 @@ DBGetVarDims(DBfile *dbfile, const char *name, int maxdims, int *dims)
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetVarDims", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("variable name", E_BADARGS);
         if (maxdims <= 0)
@@ -5971,6 +6067,8 @@ DBGetVarType(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetVarType", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetVarType", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("variable name", E_BADARGS);
         if (!dbfile->pub.g_vartype)
@@ -6013,6 +6111,8 @@ DBInqMeshname(DBfile *dbfile, const char *vname, const char *mname)
     API_BEGIN2("DBInqMeshname", int, -1, vname) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBInqMeshname", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("variable name", E_BADARGS);
         if (!mname)
@@ -6054,6 +6154,8 @@ DBInqMeshtype(DBfile *dbfile, const char *name)
     API_BEGIN2("DBInqMeshtype", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBInqMeshtype", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("mesh name", E_BADARGS);
         if (!dbfile->pub.i_meshtype)
@@ -6100,6 +6202,8 @@ DBPutCompoundarray(DBfile *dbfile, const char *name, char **elemnames,
     API_BEGIN2("DBPutCompoundarray", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutCompoundarray", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("array name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6162,6 +6266,8 @@ DBPutCurve (DBfile *dbfile, const char *name, void *xvals, void *yvals,
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutCurve", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("curve name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6205,6 +6311,8 @@ DBPutDefvars (DBfile *dbfile, const char *name, int ndefs,
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutDefvars", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("defvars name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6270,6 +6378,8 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
     API_BEGIN2("DBPutFacelist", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutFacelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("facelist name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6351,6 +6461,8 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
     API_BEGIN2("DBPutMaterial", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMaterial", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("material name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6448,6 +6560,8 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
     API_BEGIN2("DBPutMatspecies", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMatspecies", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("matspecies name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6526,6 +6640,8 @@ DBPutMultimesh(DBfile *dbfile, const char *name, int nmesh,
     API_BEGIN2("DBPutMultimesh", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMultimesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimesh name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6580,6 +6696,8 @@ DBPutMultimeshadj(DBfile *dbfile, const char *name, int nmesh,
     API_BEGIN2("DBPutMultimeshadj", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMultimeshadj", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimeshadj name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6643,6 +6761,8 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
     API_BEGIN2("DBPutMultivar", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMultivar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multivar name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6697,6 +6817,8 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
     API_BEGIN2("DBPutMultimat", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMultimat", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimat name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6749,6 +6871,8 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
     API_BEGIN2("DBPutMultimatspecies", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMultimatspecies", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimatspecies name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6805,6 +6929,8 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, float *coords[],
     API_BEGIN2("DBPutPointmesh", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutPointmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("pointmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -6863,6 +6989,8 @@ DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
     API_BEGIN2("DBPutPointvar", int, -1, vname) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutPointvar", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("pointvar name", E_BADARGS);
         if (db_VariableNameValid((char *)vname) == 0)
@@ -6971,6 +7099,8 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
     API_BEGIN2("DBPutQuadmesh", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutQuadmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("quadmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7035,6 +7165,8 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
     API_BEGIN2("DBPutQuadvar", int, -1, vname) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutQuadvar", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("quadvar name", E_BADARGS);
         if (db_VariableNameValid((char *)vname) == 0)
@@ -7155,6 +7287,8 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
     API_BEGIN2("DBPutUcdmesh", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutUcdmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("UCDmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7213,6 +7347,8 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
     API_BEGIN2("DBPutUcdmesh", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutUcdmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("mesh name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7280,6 +7416,8 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
     API_BEGIN2("DBPutUcdvar", int, -1, vname) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutUcdvar", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("UCDvar name", E_BADARGS);
         if (db_VariableNameValid((char *)vname) == 0)
@@ -7392,6 +7530,8 @@ DBPutZonelist(DBfile *dbfile, const char *name, int nzones, int ndims,
     API_BEGIN2("DBPutZonelist", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7465,6 +7605,8 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
     API_BEGIN2("DBPutZonelist2", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutZonelist2", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7536,6 +7678,8 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
 
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutPHZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7610,6 +7754,8 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
     API_BEGIN2("DBPutCsgmesh", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutCsgmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("CSGmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7668,6 +7814,8 @@ DBGetCsgmesh(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetCsgmesh", DBcsgmesh *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetCsgmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("CSGmesh name", E_BADARGS);
         if (!dbfile->pub.g_csgm)
@@ -7709,6 +7857,8 @@ DBPutCSGZonelist(DBfile *dbfile, const char *name, int nregs,
     API_BEGIN2("DBPutCSGZonelist", int, -1, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutCSGZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7763,6 +7913,8 @@ DBGetCSGZonelist(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetCSGZonelist", DBcsgzonelist *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetCSGZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("CSG zonelist name", E_BADARGS);
         if (!dbfile->pub.g_csgzl)
@@ -7801,6 +7953,8 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
     API_BEGIN2("DBPutCsgvar", int, -1, vname) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutCsgvar", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("CSGvar name", E_BADARGS);
         if (db_VariableNameValid((char *)vname) == 0)
@@ -7862,6 +8016,8 @@ DBGetCsgvar(DBfile *dbfile, const char *name)
     API_BEGIN2("DBGetCsgvar", DBcsgvar *, NULL, name) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetCsgvar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("CSGvar name", E_BADARGS);
         if (!dbfile->pub.g_csgv)
@@ -9454,6 +9610,8 @@ DBInqCompoundarray(DBfile *dbfile, const char *array_name,
     API_BEGIN2("DBInqCompoundarray", int, -1, array_name) {
         if (!array_name || !*array_name)
             API_ERROR("array name", E_BADARGS);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBInqCompoundarray", E_GRABBED) ; 
         if (elemnames)
             *elemnames = NULL;
         if (elemlengths)

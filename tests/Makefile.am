@@ -18,7 +18,9 @@ AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 TESTSUITE = $(srcdir)/testsuite
 if HDF5_DRV_NEEDED
-  TESTSUITE += $(srcdir)/testsuitehdf5
+  LDADD = ../src/libsiloh5.la
+else
+  LDADD = ../src/libsilo.la
 endif
 
 # paths look at install directories before sources
@@ -31,20 +33,13 @@ AM_CPPFLAGS = \
 quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 
-if HDF5_DRV_NEEDED
-  LDADD = ../src/libsiloh5.la
-  HDFONLYPROGS = compress grab
-else
-  LDADD = ../src/libsilo.la
-  HDFONLYPROGS = 
-endif
-
+HDF5PROGS=compression grab
 F77PROGS= arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
-      mmadjacency largefile version $(HDFONLYPROGS)
+      mmadjacency largefile version
 
 dir_SOURCES = \
  dir.c \
@@ -91,8 +86,17 @@ check_PROGRAMS = \
  largefile \
  dir \
  quad \
- version \
- $(HDFONLYPROGS)
+ version 
+
+if HDF5_DRV_NEEDED
+  TESTSUITE += $(srcdir)/testsuitehdf5
+  PROGS += $(HDF5PROGS)
+  check_PROGRAMS += $(HDF5PROGS)
+  compression_SOURCES = compression.c
+  compression_LDADD = $(LDADD) 
+  grab_SOURCES = grab.c
+  grab_LDADD = $(LDADD) 
+endif
 
 if FORTRAN_NEEDED
   TESTSUITE += $(srcdir)/testsuitef77
@@ -118,8 +122,7 @@ endif
  listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
  oneprism onepyramid onetet TestReadMask subhex twohex multispec \
  specmix testpdb sami spec cpz1plt merge_block mat3d_3across \
- ucd1d wave multi_file polyzl csg  mmadjacency  largefile version \
- $(HDFONLYPROGS)
+ ucd1d wave multi_file polyzl csg  mmadjacency  largefile version 
 
 all-local:
 	@echo

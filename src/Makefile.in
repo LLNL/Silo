@@ -73,7 +73,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 @HDF5_DRV_NEEDED_TRUE@	hdf5_drv/libsilo_hdf5_drv.la
 @TAURUS_NEEDED_TRUE@am__DEPENDENCIES_4 = taurus/libsilo_taurus.la
 am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	hexzip/libsilo_hexzip.la local/libsilo_local.la
 @HDF5_DRV_NEEDED_FALSE@libsilo_la_DEPENDENCIES =  \
 @HDF5_DRV_NEEDED_FALSE@	score/libsilo_score.la \
 @HDF5_DRV_NEEDED_FALSE@	pdb/libsilo_pdb.la swat/libsilo_swat.la \
@@ -300,13 +301,14 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 DRIVER_DIRS = $(am__append_1) $(am__append_3) $(am__append_5) \
-	$(am__append_7)
+	$(am__append_7) hexzip local
 DRIVER_LIBS = $(am__append_2) $(am__append_4) $(am__append_6) \
-	$(am__append_8)
+	$(am__append_8) hexzip/libsilo_hexzip.la \
+	local/libsilo_local.la
 SUBDIRS = score pdb swat silo debug \
 $(DRIVER_DIRS) unknown filters .
 
-DIST_SUBDIRS = . debug filters hdf5_drv netcdf \
+DIST_SUBDIRS = . debug filters hdf5_drv hexzip local netcdf \
 pdb pdb_drv score silo swat taurus unknown
 
 MAKESETTINGS = make.settings

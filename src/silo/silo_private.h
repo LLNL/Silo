@@ -245,12 +245,6 @@ typedef struct context_t {
                         T jrv = R ;                                           \
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
-                        if (jdbfile) {                                        \
-                           if (jdbfile->pub.Grab && jdbfile->pub.Grab == TRUE)\
-                           {                                                  \
-                              API_ERROR("", E_GRABBED) ;                      \
-                           }                                                  \
-                        }                                                     \
                         if (DBDebugAPI>0) {                                   \
                            write (DBDebugAPI, M, strlen(M));                  \
                            write (DBDebugAPI, "\n", 1);                       \
@@ -285,12 +279,6 @@ typedef struct context_t {
                         T jrv = R ;                                           \
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
-                        if (jdbfile) {                                        \
-                           if (jdbfile->pub.Grab && jdbfile->pub.Grab == TRUE)\
-                           {                                                  \
-                              API_ERROR("", E_GRABBED) ;                      \
-                           }                                                  \
-                        }                                                     \
                         if (DBDebugAPI>0) {                                   \
                            write (DBDebugAPI, M, strlen(M));                  \
                            write (DBDebugAPI, "\n", 1);                       \
@@ -750,6 +738,7 @@ typedef struct SILO_Globals_t {
     int enableChecksums;
     int enableCompression;
     int enableFriendlyHDF5Names;
+    int enableGrabDriver;
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 

@@ -613,7 +613,7 @@ at_times_file=$at_suite_dir/at-times
 # List of the tested programs.
 at_tested=''
 # List of the all the test groups.
-at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35'
+at_groups_all=' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
@@ -653,7 +653,6 @@ at_help_all='1;testsuite.at:11;array;;
 32;testsuite.at:125;ucd1d;;
 33;testsuite.at:128;dir;;
 34;testsuite.at:131;quad;;
-35;testsuite.at:134;compression DB_PDB;;
 '
 
 at_prev=
@@ -877,7 +876,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF
-silo 4.6-pre3 test suite: silo PDB files test groups:
+silo 4.6-pre4 test suite: silo PDB files test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -901,7 +900,7 @@ _ATEOF
   exit 0
 fi
 if $at_version_p; then
-  echo "$as_me (silo 4.6-pre3)"
+  echo "$as_me (silo 4.6-pre4)"
   cat <<\_ACEOF
 
 Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -993,13 +992,13 @@ exec 5>>"$at_suite_log"
 # Banners and logs.
 cat <<\_ASBOX
 ## ----------------------------------------- ##
-## silo 4.6-pre3 test suite: silo PDB files. ##
+## silo 4.6-pre4 test suite: silo PDB files. ##
 ## ----------------------------------------- ##
 _ASBOX
 {
   cat <<\_ASBOX
 ## ----------------------------------------- ##
-## silo 4.6-pre3 test suite: silo PDB files. ##
+## silo 4.6-pre4 test suite: silo PDB files. ##
 ## ----------------------------------------- ##
 _ASBOX
   echo
@@ -3039,59 +3038,6 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  35 ) # 35. testsuite.at:134: compression DB_PDB
-    at_setup_line='testsuite.at:134'
-    at_desc='compression DB_PDB'
-    $at_quiet $ECHO_N " 35: compression DB_PDB                           $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "35. testsuite.at:134: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:135: compression DB_PDB"
-echo testsuite.at:135 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    at_trace_this=yes
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; compression DB_PDB ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; compression DB_PDB ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:135: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
 
   * )
     echo "$as_me: no such test group: $at_group" >&2
@@ -3382,7 +3328,7 @@ _ASBOX
   echo "Please send \`${at_testdir+${at_testdir}/}$as_me.log' and all information you think might help:"
   echo
   echo "   To: <visit-help@llnl.gov>"
-  echo "   Subject: [silo 4.6-pre3] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
+  echo "   Subject: [silo 4.6-pre4] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
   echo
   if test $at_debug_p = false; then
     echo

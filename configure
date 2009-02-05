@@ -908,9 +908,9 @@ PRTDIAG
 UsingOpt
 Using64bits
 OS_RULE
-UsingHDF5
 USE_FILTER_SZIP
 UsingSZLIB
+UsingHDF5
 UsingReadline
 XMKMF
 X_CFLAGS
@@ -1588,10 +1588,10 @@ Optional Packages:
   --with-tags[=TAGS]      include additional configurations [automatic]
   --with-gcc-arch=<arch>  use architecture <arch> for gcc -march/-mtune,
                           instead of guessing
-  --with-hdf5=INC,LIB     Location of HDF5 header and library
-  --with-zlib=INC,LIB     Use the GNU zlib compression
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
                           [default=no]
+  --with-hdf5=INC,LIB     Location of HDF5 header and library
+  --with-zlib=INC,LIB     Use the GNU zlib compression
   --with-x                use the X Window System
   --with-Qt-dir=DIR       DIR is equal to $QTDIR if you have followed the
                           installation instructions of Trolltech. Header
@@ -24663,6 +24663,222 @@ fi
    ;;
 esac
 
+UsingSZLIB="no"
+ USE_FILTER_SZIP="no"
+
+# Check whether --with-szlib was given.
+if test "${with_szlib+set}" = set; then
+  withval=$with_szlib;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_SZLIB="yes"
+
+{ echo "$as_me:$LINENO: checking for SZ_BufftoBuffCompress in -lsz" >&5
+echo $ECHO_N "checking for SZ_BufftoBuffCompress in -lsz... $ECHO_C" >&6; }
+if test "${ac_cv_lib_sz_SZ_BufftoBuffCompress+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsz  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SZ_BufftoBuffCompress ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return SZ_BufftoBuffCompress ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_sz_SZ_BufftoBuffCompress=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_sz_SZ_BufftoBuffCompress=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_sz_SZ_BufftoBuffCompress" >&5
+echo "${ECHO_T}$ac_cv_lib_sz_SZ_BufftoBuffCompress" >&6; }
+if test $ac_cv_lib_sz_SZ_BufftoBuffCompress = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSZ 1
+_ACEOF
+
+  LIBS="-lsz $LIBS"
+
+else
+  unset HAVE_SZLIB
+fi
+
+
+    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      { { echo "$as_me:$LINENO: error: couldn't find szlib library" >&5
+echo "$as_me: error: couldn't find szlib library" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    ;;
+  no)
+    HAVE_SZLIB="no"
+    { echo "$as_me:$LINENO: checking for szlib" >&5
+echo $ECHO_N "checking for szlib... $ECHO_C" >&6; }
+    { echo "$as_me:$LINENO: result: suppressed" >&5
+echo "${ECHO_T}suppressed" >&6; }
+    ;;
+  *)
+    HAVE_SZLIB="yes"
+    case "$withval" in
+      *)
+        if test -n "$withval"; then
+          szlib_lib="$withval/lib"
+        fi
+        ;;
+    esac
+    if test -n "$szlib_lib"; then
+      LDFLAGS="$LDFLAGS -L$szlib_lib"
+    fi
+
+
+{ echo "$as_me:$LINENO: checking for SZ_BufftoBuffCompress in -lsz" >&5
+echo $ECHO_N "checking for SZ_BufftoBuffCompress in -lsz... $ECHO_C" >&6; }
+if test "${ac_cv_lib_sz_SZ_BufftoBuffCompress+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsz  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SZ_BufftoBuffCompress ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return SZ_BufftoBuffCompress ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_sz_SZ_BufftoBuffCompress=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_sz_SZ_BufftoBuffCompress=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_sz_SZ_BufftoBuffCompress" >&5
+echo "${ECHO_T}$ac_cv_lib_sz_SZ_BufftoBuffCompress" >&6; }
+if test $ac_cv_lib_sz_SZ_BufftoBuffCompress = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSZ 1
+_ACEOF
+
+  LIBS="-lsz $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB
+fi
+
+
+    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      { { echo "$as_me:$LINENO: error: couldn't find szlib library" >&5
+echo "$as_me: error: couldn't find szlib library" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    ;;
+esac
+if test -z "$HAVE_SZLIB"; then
+    UsingSZLIB="yes"
+fi
+
+
 # Is HDF5 present (it's needed for the silo/hdf5 driver for pmesh/alec SAMI
 # files larger than 2GB until SAF is in place)?  Normally check for
 # hdf5.h and libhdf5.a but skip the test if `--without-hdf5' is specified.
@@ -25564,222 +25780,6 @@ _ACEOF
 
 else
    LIBS="$saved_LIBS"
-fi
-
-
-UsingSZLIB="no"
- USE_FILTER_SZIP="no"
-
-# Check whether --with-szlib was given.
-if test "${with_szlib+set}" = set; then
-  withval=$with_szlib;
-else
-  withval=no
-fi
-
-
-case $withval in
-  yes)
-    HAVE_SZLIB="yes"
-
-{ echo "$as_me:$LINENO: checking for SZ_BufftoBuffCompress in -lsz" >&5
-echo $ECHO_N "checking for SZ_BufftoBuffCompress in -lsz... $ECHO_C" >&6; }
-if test "${ac_cv_lib_sz_SZ_BufftoBuffCompress+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lsz  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char SZ_BufftoBuffCompress ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return SZ_BufftoBuffCompress ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_sz_SZ_BufftoBuffCompress=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_sz_SZ_BufftoBuffCompress=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_sz_SZ_BufftoBuffCompress" >&5
-echo "${ECHO_T}$ac_cv_lib_sz_SZ_BufftoBuffCompress" >&6; }
-if test $ac_cv_lib_sz_SZ_BufftoBuffCompress = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBSZ 1
-_ACEOF
-
-  LIBS="-lsz $LIBS"
-
-else
-  unset HAVE_SZLIB
-fi
-
-
-    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      { { echo "$as_me:$LINENO: error: couldn't find szlib library" >&5
-echo "$as_me: error: couldn't find szlib library" >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    ;;
-  no)
-    HAVE_SZLIB="no"
-    { echo "$as_me:$LINENO: checking for szlib" >&5
-echo $ECHO_N "checking for szlib... $ECHO_C" >&6; }
-    { echo "$as_me:$LINENO: result: suppressed" >&5
-echo "${ECHO_T}suppressed" >&6; }
-    ;;
-  *)
-    HAVE_SZLIB="yes"
-    case "$withval" in
-      *)
-        if test -n "$withval"; then
-          szlib_lib="$withval/lib"
-        fi
-        ;;
-    esac
-    if test -n "$szlib_lib"; then
-      LDFLAGS="$LDFLAGS -L$szlib_lib"
-    fi
-
-
-{ echo "$as_me:$LINENO: checking for SZ_BufftoBuffCompress in -lsz" >&5
-echo $ECHO_N "checking for SZ_BufftoBuffCompress in -lsz... $ECHO_C" >&6; }
-if test "${ac_cv_lib_sz_SZ_BufftoBuffCompress+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lsz  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char SZ_BufftoBuffCompress ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return SZ_BufftoBuffCompress ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_sz_SZ_BufftoBuffCompress=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_sz_SZ_BufftoBuffCompress=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_sz_SZ_BufftoBuffCompress" >&5
-echo "${ECHO_T}$ac_cv_lib_sz_SZ_BufftoBuffCompress" >&6; }
-if test $ac_cv_lib_sz_SZ_BufftoBuffCompress = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBSZ 1
-_ACEOF
-
-  LIBS="-lsz $LIBS"
-
-else
-  LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB
-fi
-
-
-    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      { { echo "$as_me:$LINENO: error: couldn't find szlib library" >&5
-echo "$as_me: error: couldn't find szlib library" >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    ;;
-esac
-if test -z "$HAVE_SZLIB"; then
-    UsingSZLIB="yes"
 fi
 
 
@@ -28653,7 +28653,9 @@ else
   SILEX_NEEDED_FALSE=
 fi
 
-ac_config_files="$ac_config_files Makefile clearcase_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/swat/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile"
+#AM_CONDITIONAL(HEXZIP_NEEDED, test -n "$HEXZIP")
+#AM_CONDITIONAL(LOCAL_NEEDED, test -n "$LOCAL")
+ac_config_files="$ac_config_files Makefile clearcase_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/swat/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile src/hexzip/Makefile src/local/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile"
 
 if test -n "$HDF5_DRV"; then
   ac_config_files="$ac_config_files src/libsiloh5.settings"
@@ -29329,6 +29331,8 @@ do
     "src/taurus/Makefile") CONFIG_FILES="$CONFIG_FILES src/taurus/Makefile" ;;
     "src/unknown/Makefile") CONFIG_FILES="$CONFIG_FILES src/unknown/Makefile" ;;
     "src/filters/Makefile") CONFIG_FILES="$CONFIG_FILES src/filters/Makefile" ;;
+    "src/hexzip/Makefile") CONFIG_FILES="$CONFIG_FILES src/hexzip/Makefile" ;;
+    "src/local/Makefile") CONFIG_FILES="$CONFIG_FILES src/local/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tools/Makefile") CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
     "tools/browser/Makefile") CONFIG_FILES="$CONFIG_FILES tools/browser/Makefile" ;;
@@ -29569,9 +29573,9 @@ PRTDIAG!$PRTDIAG$ac_delim
 UsingOpt!$UsingOpt$ac_delim
 Using64bits!$Using64bits$ac_delim
 OS_RULE!$OS_RULE$ac_delim
-UsingHDF5!$UsingHDF5$ac_delim
 USE_FILTER_SZIP!$USE_FILTER_SZIP$ac_delim
 UsingSZLIB!$UsingSZLIB$ac_delim
+UsingHDF5!$UsingHDF5$ac_delim
 UsingReadline!$UsingReadline$ac_delim
 XMKMF!$XMKMF$ac_delim
 X_CFLAGS!$X_CFLAGS$ac_delim

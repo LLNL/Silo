@@ -21,9 +21,17 @@ if TAURUS_NEEDED
 DRIVER_DIRS += taurus
 DRIVER_LIBS += taurus/libsilo_taurus.la
 endif
+##if HEXZIP_NEEDED
+DRIVER_DIRS += hexzip
+DRIVER_LIBS += hexzip/libsilo_hexzip.la
+##endif
+##if LOCAL_NEEDED
+DRIVER_DIRS += local
+DRIVER_LIBS += local/libsilo_local.la
+##endif
 SUBDIRS = score pdb swat silo debug \
 $(DRIVER_DIRS) unknown filters .
-DIST_SUBDIRS = . debug filters hdf5_drv netcdf \
+DIST_SUBDIRS = . debug filters hdf5_drv hexzip local netcdf \
 pdb pdb_drv score silo swat taurus unknown
 MAKESETTINGS = make.settings
 
