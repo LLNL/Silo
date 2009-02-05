@@ -55,6 +55,7 @@ for advertising or product endorsement purposes.
 #define F_DBADDROPT     F77_ID(dbaddropt_,dbaddropt,DBADDROPT)
 #define F_DBADDDOPT     F77_ID(dbadddopt_,dbadddopt,DBADDDOPT)
 #define F_DBADDCOPT     F77_ID(dbaddcopt_,dbaddcopt,DBADDCOPT)
+#define F_DBADDCAOPT     F77_ID(dbaddcaopt_,dbaddcaopt,DBADDCAOPT)
 #define F_DBMKOPTLIST   F77_ID(dbmkoptlist_,dbmkoptlist,DBMKOPTLIST)
 #define F_DBFREEOPTLIST F77_ID(dbfreeoptlist_,dbfreeoptlist,DBFREEOPTLIST)
 #define F_DBPUTMAT      F77_ID(dbputmat_,dbputmat,DBPUTMAT)

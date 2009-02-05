@@ -51,7 +51,7 @@ char SILO_built_with_H5_lib_vers_info_g[] = "SILO built with "
     (H5_VERS_MAJOR>1)
 H5_VERS_INFO;
 #else
-"HDF5 library: Version 1.4.1 or later";
+"HDF5 library: Version 1.4.1 or earlier";
 #endif
 
 /* Use `float' for all memory floating point values? */
@@ -2723,6 +2723,8 @@ db_hdf5_finish_create(DBfile *_dbfile, int target, char *finfo)
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_finish_create";
     hid_t       attr=-1;
+    int         size;
+    char        hdf5VString[32];
     
     PROTECT {
         /* Open root group as CWG */
@@ -2754,12 +2756,25 @@ db_hdf5_finish_create(DBfile *_dbfile, int target, char *finfo)
 
         if (finfo) {
             /* Write file info as a variable in the file */
-            int size = strlen(finfo)+1;
+            size = strlen(finfo)+1;
             if (db_hdf5_Write(_dbfile, "_fileinfo", finfo, &size, 1,
                               DB_CHAR)<0) {
                 db_perror("fileinfo", E_CALLFAIL, me);
                 UNWIND();
             }
+        }
+
+        /*
+         * Write HDF5 library version information to the file 
+         */
+        sprintf(hdf5VString, "hdf5-%d.%d.%d%s%s", H5_VERS_MAJOR,
+            H5_VERS_MINOR, H5_VERS_RELEASE,
+            strlen(H5_VERS_SUBRELEASE) ? "-" : "", H5_VERS_SUBRELEASE);
+        size = strlen(hdf5VString)+1;
+        if (db_hdf5_Write(_dbfile, "_hdf5libinfo", hdf5VString, &size, 1,
+                              DB_CHAR)<0) {
+                db_perror("_hdf5libinfo", E_CALLFAIL, me);
+                UNWIND();
         }
 
     } CLEANUP {

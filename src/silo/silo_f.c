@@ -398,6 +398,73 @@ F_DBADDCOPT(int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
 
     return(0);
 }
+/*-------------------------------------------------------------------------
+ * Routine                                                     F_DBADDCAOPT
+ * 
+ * Purpose
+ *     Add a character array option to the given option list.
+ *     
+ * Notes
+ *     This function was built to be called from Fortran.
+ *     Start of "#ifdef CRAY" deprecation.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Thomas R. Treadway
+ *     Tue Jul 25 11:04:37 PDT 2006
+ *
+ * Modifications
+ *
+ *
+ *
+ *-------------------------------------------------------------------------*/
+FORTRAN
+F_DBADDCAOPT(int *optlist_id, int *option,
+             int *nval, FCD_DB cvalue, int *lcvalue)
+{
+    char          **cval = NULL;
+    char          *names = NULL;
+    DBoptlist     *optlist = NULL;
+    int           indx, i;
+
+    API_BEGIN("dbaddaopt", int, -1) {
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+        if (!optlist)
+            API_ERROR("optlist_id", E_BADARGS);
+
+        if (strcmp(cvalue, DB_F77NULLSTRING) == 0)
+            names = NULL;
+        else
+            names = cvalue;
+
+        if (*nval <= 0)
+            API_ERROR("nval", E_BADARGS);
+        cval = ALLOC_N(char *, *nval);
+
+        for (indx = 0, i = 0; i < *nval; i++) {
+            if (lcvalue[i] < 0)
+                API_ERROR("lcvalue", E_BADARGS);
+            cval[i] = SW_strndup(&names[indx], lcvalue[i]);
+            indx += fortran2DStrLen;
+        }
+        optlist->options[optlist->numopts] = *option;
+        optlist->values[optlist->numopts] = cval;
+        optlist->numopts++;
+
+/*** Can't free this memory without removing the data! ***/
+/***
+        for (i = 0; i < *nval; i++)
+            FREE(cval[i]);
+        FREE(cval);
+ ***/
+
+    }
+    API_END;
+
+    return(0);
+}
 
 /*----------------------------------------------------------------------
  * Routine                                                 F_DBMKOPTLIST

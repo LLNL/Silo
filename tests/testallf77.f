@@ -203,7 +203,10 @@ c-----------------------------------------------------------------------
       real           h, dh
       real           dist
 
-c
+      character*1024 mnames(3)
+      integer        lmnames(3)
+      character*1024 colors(3)
+      integer        lcolors(3)
 c     Create the mesh.
 c
       ndims = 3
@@ -317,7 +320,8 @@ c
       cycle = 48
       time = 4.8
 
-      ierr = dbmkoptlist(3, optlistid)                  ! Create the option list
+      ierr = dbset2dstrlen(1024)
+      ierr = dbmkoptlist(5, optlistid)                  ! Create the option list
       ierr = dbaddiopt  (optlistid, DBOPT_CYCLE, cycle) ! Add integer opt
       ierr = dbaddropt  (optlistid, DBOPT_TIME, time)   ! Add real opt
 
@@ -347,6 +351,23 @@ c
 
       err = dbputuv1 (dbid, "w", 1, "mesh1", 5, w, nnodes, DB_F77NULL,
      .                0, DB_FLOAT, DB_NODECENT, optlistid, ierr)
+
+      mnames(1) = "Ear Wax"
+      mnames(2) = "Drool"
+      mnames(3) = "Vaporware"
+      lmnames(1) = 7 
+      lmnames(2) = 5 
+      lmnames(3) = 9
+      ierr = dbaddcaopt  (optlistid, DBOPT_MATNAMES,
+     .                nmats, mnames, lmnames)
+      colors(1) = "Green"
+      colors(2) = "Red"
+      colors(3) = "Baby Blue"
+      lcolors(1) = 5
+      lcolors(2) = 3
+      lcolors(3) = 9 
+      ierr = dbaddcaopt  (optlistid, DBOPT_MATCOLORS,
+     .                nmats, colors, lcolors)
 
       err = dbputmat (dbid, "mat1", 4, "mesh1", 5, nmats, matnos,
      .                matlist, nzones, 1, mix_next, mix_mat,
