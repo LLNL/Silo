@@ -1,0 +1,190 @@
+#!/usr/local/bin/perl
+
+# This script locks the bugfix branch to the current user so that no one else
+# can modify the bugfix branch.  This is useful for doing merges.
+
+sub dieout
+{
+    my ($val, $msg) = @_;
+
+    if ($msg =~ /\n$/)
+    {
+        warn $msg;
+    } else {
+        warn "$msg: $!\n";
+    }
+    exit $val;
+}
+
+$user = shift;
+
+# Get the name of the bugfix branch.
+open(NB,"/home/meshtv/current_release_branch");
+($full_current_release_branch) = (<NB> =~ /^(\S+)\s+(\S+)/);
+close(NB);
+($current_release_branch) = ($full_current_release_branch =~ m|^/main/(.*)$|);
+$HumanName = $current_release_branch;
+$HumanName = "bugfix" if ($current_release_branch eq "");
+$BranchName = $current_release_branch;
+$BranchName = "main" if ($current_release_branch eq "");
+
+# Print out some help
+sub help
+{
+    print <<"EOF";
+USAGE: lockbug -ls | -help
+    -ls         Lists any lock on the "$HumanName" branch.
+    -help       Prints this help message.
+    -nospin     Doesn't attempt to poll for the lock.
+EOF
+}
+
+# Process the options including error checking on the options.
+require "newgetopt.pl";
+&NGetOpt("ls","help","nospin");
+
+if ($opt_help)
+{
+    &help();
+    exit(0);
+}
+
+if ($opt_ls)
+{
+    $opt_list = 1;
+}
+
+# The options are alright.  Now check to see who we are.
+# We have to be meshtv.
+$cleartool = "/usr/atria/bin/cleartool";
+$who = `/usr/local/bin/whoami`;
+chop($who);
+
+# We must be meshtv to have this stuff work.
+if ($who ne "meshtv")
+{
+    # We're not meshtv, so either we're not setuid or we didn't use ssh.
+    print STDERR <<"EOF";
+Who is \"$who\".  It should be \"meshtv\".
+This script is not set up correctly.  Contact
+Sean Ahern (ahern\@llnl.gov) to see if he can figure out why.
+EOF
+    exit(-1);
+}
+
+# Make sure that we have a path into the VOB.
+print STDERR "Checking lock status...\n";
+$view = `$cleartool lsview 'meshtv_VOBowner_bug'`;
+if ($view !~ /^\*/)
+{
+    #system("$cleartool endview meshtv_VOBowner_bug");
+    $status = system("$cleartool startview meshtv_VOBowner_bug");
+    $status /= 256;
+    dieout(-2,"Unable to start the meshtv_VOBowner_bug view.\n") if ($status != 0);
+}
+$status = chdir("/view/meshtv_VOBowner_bug/MeshTV_vob");
+dieout(-2,"Unable to chdir to the MeshTV VOB ($status).\n") if ($status != 1);
+
+# Get the status of any lock that exists.
+$lock_owner = "";
+$users = "";
+$users = `$cleartool lslock -fmt "%c" brtype:$BranchName`;
+chop($users);
+($lock_owner) = ($users =~ /^Locked except for users: (\w*)/);
+$MULTILINE_MATCHING = 1;
+$comment = $users;
+$comment =~ s/^Locked except for users:.*//;
+$comment =~ s/^\s*//;
+
+# If we're just listing, output appropriate information.
+if ($opt_list)
+{
+    if ($lock_owner =~ /^\s*$/)
+    {
+        print STDERR "The \"$HumanName\" branch is not locked.\n";
+        exit(0);
+    } else
+    {
+        print STDERR "The \"$HumanName\" branch is locked by $lock_owner.\n";
+        print STDERR "Comment for lock:\n$comment\n";
+        exit(1);
+    }
+}
+
+# Attempt to lock the new release branch.
+
+# If the lock owner is non-null, then it's already locked.
+if ($lock_owner !~ /^\s*$/)
+{
+    if ($lock_owner eq $user)
+    {
+        print STDERR <<"EOF";
+You already have the \"$HumanName\" branch locked.  Your comment:
+$comment.
+EOF
+        exit(2);
+    } else
+    {
+        print STDERR <<"EOF";
+
+The "$HumanName" branch is already locked by $lock_owner.  You may not
+modify the "$HumanName" branch until $lock_owner unlocks it.  If you
+know for sure that $lock_owner is done with the "$HumanName" branch,
+you may forcably remove the lock by calling "unlockbug -force" and then
+locking it yourself.
+
+The comment for ${lock_owner}'s lock is:
+$comment
+
+EOF
+        if ($opt_nospin)
+        {
+            exit(1);
+        } else {
+            print STDERR "Would you like to poll for the lock? [y/(n)]: ";
+            $query = <STDIN>;
+            if ($query =~ /^y/i)
+            {
+                exec("spinlock bug $user");
+            } else {
+                exit(1);
+            }
+        }
+    }
+}
+
+# Everything's fine, let's try and lock the branch.
+print STDERR "Comment for the lock on $HumanName: (\".\" or ^D ends comment)\n";
+$comment = "";
+while(<STDIN>)
+{
+    last if (/^\.$/);
+    $comment .= $_;
+}
+chop($comment);
+
+# Check for a valid comment
+if ($comment =~ /^\s*$/)
+{
+    print STDERR "You need to give a non-blank comment.\n";
+    exit(-3);
+}
+
+# Save the comment in a temp file since it might be long and/or contain
+# shell meta characters.
+open (TMP, "> /tmp/lock_main.$$") || &dieout(-2,"cannot save comment to a temp file");
+print TMP $comment;
+close (TMP);
+
+$status = system("$cleartool lock -cfile /tmp/lock_main.$$ -nusers $user,meshtv brtype:$BranchName");
+system "/bin/rm","-f","/tmp/lock_main.$$";
+$status /= 256;
+if ($status != 0)
+{
+    print STDERR "An error occurred while locking \"$HumanName\": $!\n";
+    exit($status);
+} else
+{
+    print STDERR "Branch \"$HumanName\" locked successfully\n";
+    exit(4);
+}

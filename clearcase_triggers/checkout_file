@@ -1,0 +1,62 @@
+#!/bin/sh
+
+lines=`cat $0 | wc -l`
+lines=`expr $lines - 14`
+tail -$lines $0 > /tmp/runperl$$
+echo "# $0 $*" >> /tmp/runperl$$
+while [ $# -ne 0 ]
+do
+    line=$1
+    shift
+    totline="$totline\`$line"
+done
+exec perl /tmp/runperl$$ $0 $totline
+
+# Perl begins here
+
+unlink($0);
+
+sub strippath
+{
+    local($fullname) = @_;
+
+    $fullname =~ m|^(.*/)?([^/]*)$|;
+    ($path,$file) = ($1,$2);
+    return($file,$path);
+}
+
+($0) = &strippath(shift);
+
+$args = "@ARGV";
+$args =~ s/^.//;
+@ARGV = split('\`',$args);
+
+# Real code begins here
+
+use Env;
+
+$cleartool = "/usr/atria/bin/cleartool";
+
+$checkout_file = shift(@ARGV);
+
+$checkedout_query = `$cleartool desc -fmt \"%Xn\n" $checkout_file`; 
+if ($checkedout_query =~ /CHECKEDOUT/)
+{
+    print <<"EOF";
+    Checking out \"$CLEARCASE_PN\" necessitates checking
+    out \"$checkout_file\" as well.  It's already checked out.
+    Good for you!
+EOF
+
+    exit(0);
+} else
+{
+    print STDERR <<"EOF";
+    Checking out \"$CLEARCASE_PN\" necessitates checking
+    out \"$checkout_file\" as well.  Doing that now...
+EOF
+
+    system("$cleartool checkout -c \"$CLEARCASE_COMMENT\" $checkout_file");
+
+    exit(0);
+}

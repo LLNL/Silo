@@ -1,0 +1,456 @@
+/*
+ * SCHASH.C - routines to manipulate hash tables
+ *          - intended to be a complete module that
+ *          - can be used with any application by defining
+ *          - the struct, hashel, in SCORE.H suitably
+ *
+ * Source Version: 2.0
+ * Software Release #92-0043
+ *
+ */
+#include <score.h>
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_hash
+ *
+ * Purpose:	Compute hash value for string S in a table of SIZE
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+lite_SC_hash (char *s, int size) {
+
+   int hashval;
+
+   for (hashval = 0; *s != '\0'; ) {
+      hashval = (hashval << 1) ^ (*s++);
+   }
+
+   return(abs(hashval) % size);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_lookup
+ *
+ * Purpose:	Lookup S in hash table TABLE.
+ *
+ * Return:	Success:	Ptr to object
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hashel *
+lite_SC_lookup (char *s, HASHTAB *tab) {
+
+   hashel *np, **tb;
+   int sz;
+
+   if (tab == NULL) return(NULL);
+
+   sz = tab->size;
+   tb = tab->table;
+   for (np = tb[lite_SC_hash(s, sz)]; np != NULL; np = np->next) {
+      if (strcmp(s, np->name) == 0) return(np); /* found it */
+   }
+
+   return(NULL); /* not found */
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_def_lookup
+ *
+ * Purpose:	Return a ptr to the object version of LOOKUP.
+ *
+ * Return:	Success:	ptr to the object version of LOOKUP.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+byte *
+lite_SC_def_lookup (char *s, HASHTAB *tab) {
+
+   hashel *np;
+   
+   if (tab == NULL) return(NULL);
+
+   np = lite_SC_lookup(s, tab);
+   if (np != NULL) return(np->def);
+   else return(NULL);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_install
+ *
+ * Purpose:	
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hashel *
+lite_SC_install (char *name, byte *obj, char *type, HASHTAB *tab) {
+
+   return _lite_SC_install (name, obj, type, tab);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	_lite_SC_install
+ *
+ * Purpose:	Install an object in the hash table.  The object type is
+ *		defined in hash.h and is generic to enhance the
+ *		portability of this code.  WARNING: do NOT use litereals
+ *		or volatiles for the type--for efficiency they are
+ *		not strsave'd!!!
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *    Eric Brugger, Tue Dec  8 16:57:20 PST 1998
+ *    Remove unnecessary calls to lite_SC_mark, since reference count now
+ *    set when allocated.  The mark flag is now rendered useless since
+ *    the memory will always be marked when it is allocated.
+ *
+ *    Eric Brugger, Thu Sep 23 10:16:30 PDT 1999
+ *    Remove the mark flag from the argument list.
+ *
+ *-------------------------------------------------------------------------
+ */
+hashel *
+_lite_SC_install (char *name, byte *obj, char *type, HASHTAB *tab) {
+
+   hashel *np, **tb;
+   int hashval, sz;
+
+   sz = tab->size;
+   tb = tab->table;
+   np = lite_SC_lookup(name, tab);
+
+   /*
+    * If not found install it.
+    */
+   if (np == NULL) {
+      np = FMAKE(hashel, "SC_INSTALL:np");
+      if (np == NULL) return(NULL);
+
+      np->name = lite_SC_strsavef(name, "char*:SC_INSTALL:name");
+      if (np->name == NULL) return(NULL);
+
+      hashval     = lite_SC_hash(np->name, sz);
+      np->next    = tb[hashval];
+      tb[hashval] = np;
+      (tab->nelements)++;
+   }
+
+   np->type = type;
+   np->def  = obj;
+
+   return(np);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_hash_rem
+ *
+ * Purpose:	Remove the specified entry from the given hash table.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+lite_SC_hash_rem (char *name, HASHTAB *tab) {
+
+   hashel *np, *nxt, **tb;
+   int sz, i;
+
+   sz = tab->size;
+   tb = tab->table;
+   i  = lite_SC_hash(name, sz);
+   np = tb[i];
+
+   /*
+    * If not found nothing else to do.
+    */
+   if (np == NULL) {
+      return(FALSE);
+   } else {
+      if (strcmp(name, np->name) == 0) {
+	 tb[i] = np->next;
+
+	 /*
+	  * Undo the MARK in SC_install.
+	  */
+	 SFREE(np->def);
+	 SFREE(np->name);
+	 SFREE(np);
+	 (tab->nelements)--;
+	 return(TRUE);
+
+      } else {
+	 /*
+	  * Otherwise search for it.
+	  */
+	 for (; np->next != NULL; np = np->next) {
+	    nxt = np->next;
+	    if (strcmp(name, nxt->name) == 0) {
+	       np->next = nxt->next;
+	       SFREE(nxt->def);
+	       SFREE(nxt->name);
+	       SFREE(nxt);
+	       (tab->nelements)--;
+	       return(TRUE);
+	    }
+	 }
+      }
+   }
+   return(FALSE);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_hash_clr
+ *
+ * Purpose:	Clear the specified hash table.
+ *
+ * Return:	void
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+lite_SC_hash_clr (HASHTAB *tab) {
+
+   int i, sz;
+   hashel **tb, *np, *nxt;
+
+   sz = tab->size;
+   tb = tab->table;
+   for (i = 0; i < sz; i++) {
+      for (np = tb[i]; np != NULL; np = nxt) {
+	 nxt = np->next;
+
+	 /*
+	  * Undo the MARK in SC_install.
+	  */
+	 SFREE(np->def);
+	 SFREE(np->name);
+	 SFREE(np);
+      }
+      tb[i] = NULL;
+   }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_make_hash_table
+ *
+ * Purpose:	Allocate and initialize a hash table of size SZ.
+ *
+ * Return:	Success:	HASHTAB pointer
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+HASHTAB *
+lite_SC_make_hash_table (int sz, int docflag) {
+
+   HASHTAB *tab;
+   hashel **tb;
+   int i;
+
+   /*
+    * Allocate a new hash table.
+    */
+   tab = FMAKE(HASHTAB, "SC_MAKE_HASH_TABLE:tab");
+
+   if (tab == NULL) {
+      printf("\nCannot allocate a new hash table of size %d\n", sz);
+      return(NULL);
+   }
+
+   tb = FMAKE_N(hashel *, sz, "SC_MAKE_HASH_TABLE:tb");
+   if (tb == NULL) return(NULL);
+
+   tab->size      = sz;
+   tab->docp      = docflag;
+   tab->nelements = 0;
+   tab->table     = tb;
+
+   /*
+    * Explicitly NULL the pointers.
+    */
+   for (i = 0; i < sz; i++) tb[i] = NULL;
+
+   return(tab);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_rl_hash_table
+ *
+ * Purpose:	Release a hash table.  Call SC_HASH_CLR first to
+ *		release the contents of the table.
+ *
+ * Return:	void
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+lite_SC_rl_hash_table (HASHTAB *tab) {
+
+   lite_SC_hash_clr(tab);
+
+   SFREE(tab->table);
+   SFREE(tab);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_hash_dump
+ *
+ * Purpose:	Return a array of pointers whose entries point to the
+ *		installed names in the given hash table and are alphabetically
+ *		ordered by strcmp().
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char **
+lite_SC_hash_dump (HASHTAB *tab, char *patt) {
+   
+   return lite_SC_dump_hash (tab, patt, TRUE);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_dump_hash
+ *
+ * Purpose:	Return an array of pointers whose entries point to the
+ *		installed names in the given hash table.
+ *
+ * Return:	Success:	Array of ptrs to entries.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char **
+lite_SC_dump_hash (HASHTAB *tab, char *patt, int sort) {
+
+   hashel *np, **tb;
+   char **lineptr, *name;
+   int i, sz, nlines;
+
+   if (tab == NULL) return(NULL);
+
+   /*
+    * Allocate a list of pointers to the names in the hash table.
+    */
+   lineptr = FMAKE_N(char *, tab->nelements, "SC_HASH_DUMP:lineptr");
+   if (lineptr == NULL) return(NULL);
+
+   /*
+    * Fill in the list of pointers to names in the hash table.
+    */
+   sz = tab->size;
+   tb = tab->table;
+   nlines = 0;
+   for (i = 0; i < sz; i++) {
+      for (np = tb[i]; np != NULL; np = np->next) {
+	 name = np->name;
+	 if (patt == NULL) lineptr[nlines++] = name;
+	 else if (lite_SC_regx_match(name, patt)) lineptr[nlines++] = name;
+      }
+   }
+
+   /*
+    * Check that the number of names found is what is expected.
+    */
+   if (nlines > tab->nelements) return(NULL);
+
+   REMAKE_N(lineptr, char *, nlines + 1);
+   lineptr[nlines] = NULL;
+
+   /*
+    * Sort the names.
+    */
+   if (sort) lite_SC_string_sort(lineptr, nlines);
+
+   /*
+    * Return the list of names.
+    */
+   return(lineptr);
+}

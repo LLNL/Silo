@@ -1,0 +1,54 @@
+README file for SILO-Taurus device driver
+-----------------------------------------
+
+Taurus is a read-only device driver, so calling any of the API functions
+that would normally modify the database will raise an E_NOTIMP (capability
+not implemented) error.  The following API functions will not work with
+this driver:
+
+        C                       Fortran         Reason (see key below)
+        ----------------------------------------------------------------
+        DBCreate                dbcreate        1
+        DBGetAtt                NA               2
+        DBGetCompoundarray      dbgetca            4
+        DBGetCurve              NA                3
+        DBGetMatspecies         dbgetmsp         2
+        DBGetPointmesh          NA               2
+        DBGetPointvar           NA               2
+        DBGetQuadmesh           NA               2
+        DBGetQuadvar            NA               2
+        DBInqCompoundarray      dbinqca            4
+        DBMkDir                 dbmkdir         1
+        DBPutCompoundarray      dbputca         1
+        DBPutFacelist           dbputfl         1
+        DBPutMaterial           dbputmat        1
+        DBPutMatspecies         dbputmsp        1
+        DBPutMultimesh          dbputmmesh      1
+        DBPutMultivar           dbputmvar       1
+        DBPutPointmesh          dbputpm         1
+        DBPutPointvar           NA              1
+        DBPutPointvar1          dbputpv1        1
+        DBPutQuadmesh           dbputqm         1
+        DBPutQuadvar            NA              1
+        DBPutQuadvar1           dbputqv1        1
+        DBPutUcdmesh            dbputum         1
+        DBPutUcdvar             NA              1
+        DBPutUcdvar1            dbputuv1        1
+        DBPutZonelist           dbputzl         1
+        DBReadAtt               NA               2
+        DBReadVar1              NA               2
+        DBSetDirID              dbsetdirid       2
+        DBWrite                 dbwrite         1
+        DBWriteComponent        NA              1
+        ----------------------------------------------------------------
+
+Reasons:
+        1    Not implemented because this API function normally
+             modifies the database.
+
+        2    No known reason for not being implemented.
+
+        3    Not defined yet.
+
+        4    New functionallity added after the SILO-Taurus driver
+             was written.

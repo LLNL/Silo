@@ -1,0 +1,1962 @@
+<HTML>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- Created on May, 3  2006 by texi2html 1.64 -->
+<!-- 
+Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
+            Karl Berry  <karl@freefriends.org>
+            Olaf Bachmann <obachman@mathematik.uni-kl.de>
+            and many others.
+Maintained by: Olaf Bachmann <obachman@mathematik.uni-kl.de>
+Send bugs and suggestions to <texi2html@mathematik.uni-kl.de>
+ 
+-->
+<HEAD>
+<TITLE>Silo Browser User Manual: </TITLE>
+
+<META NAME="description" CONTENT="Silo Browser User Manual: ">
+<META NAME="keywords" CONTENT="Silo Browser User Manual: ">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<META NAME="Generator" CONTENT="texi2html 1.64">
+
+</HEAD>
+
+<BODY LANG="" BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#0000FF" VLINK="#800080" ALINK="#FF0000">
+
+<A NAME="SEC_Top"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1>Silo Browser User Manual</H1></P><P>
+
+This document describes the Silo file browser, an application program
+built on the Silo library for interactive viewing of Silo database
+files.
+</P><P>
+
+<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> 
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC1">Copyright</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Copyright information.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC2">1. The Browser Command Line</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Invoking the browser.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC3">2. Command Syntax</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP"></TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC4">3. Builtin Functions</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP"></TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC5">4. Operators</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Browser operators.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC6">5. Internal Variables</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Controlling the browser personality.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC10">6. Initializing the Browser</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Browser initialization.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC11">7. Editing Database Objects</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Changing the values of objects.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC12">8. Paging</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Long output is paginated.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC13">9. Redirection</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Sending output to a file or command.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC14">10. Interrupts</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Interrupting a long-running command.</TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC15">11. Examples</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">Some simple examples.</TD></TR>
+</TABLE></BLOCKQUOTE>
+<P>
+
+<HR SIZE=1>
+<A NAME="SEC1"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC2"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC2"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<A NAME="Copying"></A>
+<H1> Copyright </H1>
+<!--docid::SEC1::-->
+Copyright (C) 1996-2000 The Regents of the University of California
+<P>
+
+This work was produced at the University of California, Lawrence
+Livermore National Laboratory (UC LLNL) under contract number W-7405-ENG-48
+(Contract 48) between the U.S. Department of Energy (DOE) and The Regents
+of the University of California (University) for the operation of UC LLNL.
+Copyright is reserved to the University for purposes of controlled
+dissemination, commercialization through formal licensing, or other
+disposition under terms of Contract 48; DOE policies, regulations and
+orders; and U.S. statutes.  The rights of the Federal Government are
+reserved under Contract 48 subject to the restrictions agreed upon by
+DOE and University.
+</P><P>
+
+                                DISCLAIMER
+</P><P>
+
+This software was prepared as an account of work sponsored by an agency
+of the United States Government. Neither the United States Government
+nor the University of California nor any of their employees, makes any
+warranty, express or implied, or assumes any liability or responsibility
+for the accuracy, completeness, or usefulness of any information,
+apparatus, product, or process disclosed, or represents that its use
+would not infringe privately owned rights. Reference herein to any
+specific commercial products, process, or service by trade name, trademark,
+manufacturer, or otherwise, does not necessarily constitute or imply its
+endorsement, recommendation, or favoring by the United States Government
+or the University of California. The views and opinions of authors
+expressed herein do not necessarily state or reflect those of the United
+States Government or the University of California, and shall not be used
+for advertising or product endorsement purposes.
+</P><P>
+
+<A NAME="Invocation"></A>
+<HR SIZE="6">
+<A NAME="SEC2"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC1"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC3"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC1"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC3"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 1. The Browser Command Line </H1>
+<!--docid::SEC2::-->
+<P>
+
+The schnauzer is a small terrier with a wiry coat; the browser is a
+utility built on Silo for reading scientific database files.  The
+browser command line is
+</P><P>
+
+<CODE>browser</CODE> <B>[</B><VAR>switches</VAR><B>]</B> <B>[</B><CODE>--</CODE><B>]</B>
+<B>[</B><VAR>files</VAR><B>]...</B>
+</P><P>
+
+The browser recognizes the following command line switches.  Single
+letter switches that don't require an argument can be grouped together
+(so <SAMP>`-l -q'</SAMP> is the same as <SAMP>`-lq'</SAMP>). When a single-letter switch
+takes an argument the argument can appear either immediately after the
+letter or as the next argument such as <SAMP>`-l3'</SAMP> or <SAMP>`-l 3'</SAMP>. Long
+format switches are introduced by double hyphens and if they take an
+argument it must follow an equal sign such as <SAMP>`--eval=exit'</SAMP>.
+Command-line options take effect before the initialization file is read,
+but also override any settings made in that file.
+</P><P>
+
+Invoking the browser with the switch <SAMP>`--help'</SAMP> will show a complete
+list of command-line switches and their descriptions.
+</P><P>
+
+<DL COMPACT>
+<DT><CODE>-A <VAR>tolerance</VAR></CODE>
+<DD><DT><CODE>--absolute=<VAR>tolerance</VAR></CODE>
+<DD>All absolute differencing tolerances are set to <VAR>tolerance</VAR>, a
+floating point number. All variables of the form <SAMP>`$diff_*_abs'</SAMP> are
+set to the specified tolerance.
+<P>
+
+<DT><CODE>-R <VAR>tolerance</VAR></CODE>
+<DD><DT><CODE>--absolute=<VAR>tolerance</VAR></CODE>
+<DD>All relative differencing tolerances are set to <VAR>tolerance</VAR>, a
+floating point number.  All variables of the form <SAMP>`$diff_*_rel'</SAMP> are 
+set to the specified tolerance.
+<P>
+
+<DT><CODE>-V</CODE>
+<DD><DT><CODE>--version</CODE>
+<DD>Prints the browser version number. If no other switches or files are
+specified then the browser will exit after printing the version number.
+<P>
+
+<DT><CODE>-d <VAR>words</VAR></CODE>
+<DD><DT><CODE>--diff=<VAR>words</VAR></CODE>
+<DD>This switch controls the behavior of the <CODE>diff</CODE> function of the
+browser. The <VAR>words</VAR> should be a comma-separated list of key words
+which will be assigned to the <CODE>$diff</CODE> browser variable. See its
+documentation for details.
+<P>
+
+<DT><CODE>-e <VAR>expression</VAR></CODE>
+<DD><DT><CODE>--eval=<VAR>expression</VAR></CODE>
+<DD>The browser expression is evaluated and the result is printed on the
+standard output stream.  More than one expression can be given to the
+browser by using multiple switches.  The expressions will be evaluated
+in the order given after the initialization file is read.  When a
+<SAMP>`-e'</SAMP> switch is present the browser exits after all expressions are
+processed instead of going into interactive mode. If standard output is
+a terminal then the browser pages the output in the normal way (see
+below).  If the interrupt character is pressed when an expression is
+being evaluated, the browser aborts<A NAME="DOCF1" HREF="browser.html#FOOT1">(1)</A>.
+<P>
+
+<DT><CODE>-E <VAR>list</VAR></CODE>
+<DD><DT><CODE>--exclude=<VAR>list</VAR></CODE>
+<DD>The browser <CODE>$exclude</CODE> variable is set to the comma-separated list
+of names and/or datatypes supplied as an argument to this switch. The
+switch may appear more than once. The names in the <CODE>$exclude</CODE> list
+will be excluded from recursive <CODE>diff</CODE> operations. See
+documentation for <CODE>$exclude</CODE> for details.
+<P>
+
+<DT><CODE>-f <VAR>initfile</VAR></CODE>
+<DD><DT><CODE>--file=<VAR>initfile</VAR></CODE>
+<DD>When the browser begins execution it attempts to read the file
+<TT>`.browser_rc'</TT> in the user's home directory.  If that file isn't
+readable then it tries to read a system-wide browser initialization
+file.  The <SAMP>`-f'</SAMP> command line switch causes the browser to try to
+read the specified file instead.  To prevent the browser from reading
+any initialization file, say <SAMP>`-f /dev/null'</SAMP> (internal browser
+variables are still initialized to default values).  The initialization
+file is opened after the database(s) and therefore can contain commands
+that reference the database(s).
+<P>
+
+<DT><CODE>-h</CODE>
+<DD><DT><CODE>--help</CODE>
+<DD>Prints a browser usage message. If this is the only switch and no file
+names are specified then the browser will exit after showing the usage
+message.  The usage message will be paged if printed to a terminal.
+<P>
+
+<DT><CODE>-l <B>[</B><VAR>value</VAR><B>]</B></CODE>
+<DD><DT><CODE>--lowlevel<B>[</B>=<VAR>value</VAR><B>]</B></CODE>
+<DD>This switch assigns an integer value to the <CODE>$lowlevel</CODE> browser
+variable, which causes the browser to load database objects as type
+<CODE>DBobject</CODE> even if the object is some other composite Silo datatype
+like <CODE>DBquadvar</CODE>. If <VAR>value</VAR> is specified then it will be
+assigned to the <CODE>$lowlevel</CODE> variable; otherwise the value <SAMP>`1'</SAMP>
+is assigned.
+<P>
+
+<DT><CODE>-c <B>[</B><VAR>value</VAR><B>]</B></CODE>
+<DD><DT><CODE>--checksums<B>[</B>=<VAR>value</VAR><B>]</B></CODE>
+<DD>This switch assigns an integer value to the <CODE>$checksums</CODE> browser
+variable, which controls browser's use of checksums during read. 
+<P>
+
+<DT><CODE>-n <VAR>lines</VAR></CODE>
+<DD><DT><CODE>--height=<VAR>lines</VAR></CODE>
+<DD>The browser pages interactive output to prevent it from scrolling off
+the top of the screen. It normally decides how tall the window is by
+making <CODE>ioctl</CODE> calls, but this switch can be used to override that
+choice. The setting is valid only until the browser receives a
+<CODE>SIGWINCH</CODE> signal and queries the terminal size.
+<P>
+
+<DT><CODE>-q</CODE>
+<DD><DT><CODE>--quiet</CODE>
+<DD>This option causes the browser to be less verbose than normal. This sets 
+the <CODE>$verbosity</CODE> variable to zero.
+<P>
+
+<DT><CODE>-o</CODE>
+<DD><DT><CODE>--obase=<VAR>format</VAR></CODE>
+<DD>This switch sets the internal variable <CODE>$obase</CODE> to <VAR>format</VAR>,
+which should be <SAMP>`16'</SAMP> for hexadecimal, <SAMP>`8'</SAMP> for octal, <SAMP>`2'</SAMP>
+for binary, or anything else for the default decimal format. It controls
+how integer, floating-point, character, and string data are
+displayed. The default is that these types of data are displayed with a
+type-dependent <CODE>printf</CODE> format string which is user defined (e.g.,
+<CODE>$fmt_int</CODE>).
+<P>
+
+<DT><CODE>-r <B>[</B><VAR>boolean</VAR><B>]</B></CODE>
+<DD><DT><CODE>--rdonly<B>[</B>=<VAR>boolean</VAR><B>]</B></CODE>
+<DD>This option assigns a boolean value to the <CODE>$rdonly</CODE> browser
+variable, which causes the browser to open all subsequent files in
+read-only mode. Files that only have Unix read permission are always
+opened in read-only mode, but the browser issues a warning if the user
+had asked for read-write permission.  If no argument is given for this
+switch then true is assumed. The default if this switch does not appear
+is false.
+<P>
+
+<DT><CODE>-s <B>[</B><VAR>boolean</VAR><B>]</B></CODE>
+<DD><DT><CODE>--single<B>[</B>=<VAR>boolean</VAR><B>]</B></CODE>
+<DD>This option causes the browser to call <CODE>DBForceSingle</CODE> with a value
+of one or zero depending on whether the argument is true or false. If no
+argument is given then it is assumed to be true.  Calling
+<CODE>DBForceSingle</CODE> with a non-zero value causes most drivers to return
+floating point data with the C <CODE>float</CODE> type rather than the default
+<CODE>double</CODE> type.
+<P>
+
+<DT><CODE>-v</CODE>
+<DD><DT><CODE>--verbose</CODE>
+<DD>This option causes the browser to be more verbose than normal. This sets 
+the <CODE>$verbosity</CODE> variable to two.
+<P>
+
+<DT><CODE>-w <VAR>columns</VAR></CODE>
+<DD><DT><CODE>--width=<VAR>columns</VAR></CODE>
+<DD>The browser normally breaks lines to prevent them from wrapping around
+from the right margin to the next line. It decides how many columns are
+appropriate by making <CODE>ioctl</CODE> calls, but this switch overrides that 
+choice.
+<P>
+
+<DT><CODE>--debug<B>[</B>=<VAR>boolean</VAR><B>]</B></CODE>
+<DD>Tells Silo to display the names of the Silo API functions as they are
+called. This switch is probably only useful to those who debug the browser.
+<P>
+
+</DL>
+<P>
+
+If Silo database file names are specified then the files are opened in
+the order specified and associated with file symbols <CODE>$1</CODE>,
+<CODE>$2</CODE>, etc. These are opened before the initialization file is read, 
+which happens before any <CODE>--eval</CODE> statements are executed. However, 
+the command-line options are reevaluated after the initialization file
+is read.
+</P><P>
+
+<A NAME="Syntax"></A>
+<HR SIZE="6">
+<A NAME="SEC3"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC2"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC4"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC2"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC4"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 2. Command Syntax </H1>
+<!--docid::SEC3::-->
+<P>
+
+The browser command syntax is quite simple, consisting of function
+calls, operators, atoms, and lists. Comments begin with a hash mark and
+continue to the end of the line (except in strings). White space is
+generally ignored except as a token separator. Statements can be
+continued across multiple lines, but a backslash must escape the
+linefeed if the partial statement looks syntactically complete.
+</P><P>
+
+A function call is a parenthetical expression where the first element is
+the name of the function and the subsequent elements are the arguments
+to that function.  Most functions evaluate all their arguments but
+others evaluate only some (or none). For example, the <CODE>Assign</CODE>
+function doesn't evaluate its first argument, but rather assignes the
+evaluated second argument to the l-value specified by the first
+argument. The parentheses can be omitted from around the top-level
+function call. Say <SAMP>`help func'</SAMP> (or <SAMP>`(help func)'</SAMP>) for a list
+of all functions.
+</P><P>
+
+Most browser operators are infix, binary operators. They take two
+operands, one on each side of the operator, and call some function which
+is bound to the operator. For example the expression <SAMP>`foo=1'</SAMP> is
+equivalent to <SAMP>`(Assign foo 1)'</SAMP>. The <SAMP>`{}'</SAMP> operator takes any
+number of arguments which appear between the open and close curly
+braces. Say <SAMP>`help operators'</SAMP> for a list of all operators.
+</P><P>
+
+The browser has three types of atoms: strings, numbers, and symbols. A
+string is a sequence of characters enclosed in single or double
+quotes. The normal C escaping mechanism can be used for special
+characters within the string. A single quote has no special significance
+in a double-quoted string and vice versa.  Numbers are positive or
+negative sequences of decimal digits with an optional embedded decimal
+point and trailing exponent. An exponent consists of the letter `e' or
+`E' followed by an optional sign and one or more decimal digits.  A
+symbol is any sequence of alphanumeric characters and may also include
+dollar signs, hyphens, underscores, and various other characters
+(although their use is discouraged).
+</P><P>
+
+A list consists of zero or more atoms or lists enclosed in
+parentheses. Evaluation of the list results in the browser looking up
+the functional value of the first member of the list and calling that
+function with the subsequent list members as arguments. Evaluation of
+the list can be suppressed by using curly braces instead of parentheses
+(e.g., <SAMP>`{1 3 5}'</SAMP> is equivalent to <SAMP>`(Quote 1 3 5)')'</SAMP>.
+</P><P>
+
+The browser reads commands interactively from its standard input. If
+available, the GNU readline library is used allowing the user to edit
+commands as they are entered using Emacs or vi editing commands. To
+quote from the readline library (documentation is available at
+<TT>`http://www.cs.utah.edu/csinfo/texinfo/texinfo.html'</TT>):
+</P><P>
+
+<BLOCKQUOTE>
+Often during an interactive session you type in a long line of text,
+only to notice that the first word on the line is misspelled.  The
+Readline library gives you a set of commands for manipulating the text
+as you type it in, allowing you to just fix your typo, and not forcing
+you to retype the majority of the line.  Using these editing commands,
+you move the cursor to the place that needs correction, and delete or
+insert the text of the corrections.  Then, when you are satisfied with
+the line, you simply press <KBD>RETURN</KBD>.  You do not have to be at the
+end of the line to press <KBD>RETURN</KBD>; the entire line is accepted
+regardless of the location of the cursor within the line.
+</BLOCKQUOTE>
+<P>
+
+The readline library default mode is Emacs.  If you prefer <CODE>vi</CODE> key
+bindings, then create a file called <TT>`.inputrc'</TT> in your home
+directory with the single line <SAMP>`set editing-mode vi'</SAMP>.
+</P><P>
+
+<A NAME="Functions"></A>
+<HR SIZE="6">
+<A NAME="SEC4"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC3"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC5"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC3"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC5"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 3. Builtin Functions </H1>
+<!--docid::SEC4::-->
+<P>
+
+Some of the browser functions have more than one form and are overloaded
+to do various things depending on the number of actual arguments
+supplied. Arguments shown between <SAMP>`['</SAMP> and <SAMP>`]'</SAMP> are optional.
+</P><P>
+
+<DL COMPACT>
+<DT><CODE>array <VAR>dimensions</VAR> <B>...</B> <VAR>basetype</VAR></CODE>
+<DD>Creates a new array datatype. The arguments are the size of the array in 
+each dimension and the datatype of the array elements. The array size
+arguments can be either integers or strings that look like comma- and/or 
+space-separated integers. Browser arrays use C element ordering.
+<P>
+
+<DT><CODE>cd <VAR>dirname</VAR> <B>[</B><VAR>filesym</VAR><B>]</B></CODE>
+<DD>Each file has a current working directory (CWD) which is initially set
+to the root directory (<TT>`/'</TT>). This command will set the CWD to some
+other directory. The first argument is the name of the new CWD. If the
+name contains special characters it should be enclosed in quotes to
+protect it from the parser. If the name is relative (doesn't start with
+a <SAMP>`/'</SAMP>) then the name is looked up with respect to the current
+CWD. The second optional argument is the file or list of files whose CWD
+is being set (default is the file represented by the browser variable
+<SAMP>`$1'</SAMP>).  The <VAR>dirname</VAR> is a string; it is not interpreted by the
+browser and thus a command like <SAMP>`cd $1.domain_0.angle_walls'</SAMP> will
+fail while <SAMP>`cd domain_0/angle_walls $1'</SAMP> would work.
+<P>
+
+<DT><CODE>close <VAR>filesym</VAR> <B>...</B></CODE>
+<DD>Closes the database files associated with the specified file symbols.
+If objects exist in the browser memory which are associated with the
+database then the database will be held open until those objects no
+longer exist, but the file symbol will be freed so another file can
+immediately be associated with that symbol. This command is equivalent
+to <SAMP>`<VAR>filesym</VAR>=nil'</SAMP> (except with extra sanity checks).
+<P>
+
+<DT><CODE>diff <VAR>objects...</VAR></CODE>
+<DD>Calculates the differences between its arguments similar to the Unix
+<CODE>diff</CODE> command. If called with an even number of arguments the
+argument list is split in half and each argument from the first half is
+compared with the corresponding argument of the second half. If called
+with no arguments then the argument list will be the SILO files from the 
+command-line (<SAMP>`$1'</SAMP>, <SAMP>`$2'</SAMP>, <I>etc.</I>).  If called with just one
+argument which is an object from the silo file <SAMP>`$1'</SAMP> then that
+object will be compared to an object with the same name from file
+<SAMP>`$2'</SAMP>.  The behavior is influenced by the <SAMP>`$diff'</SAMP> browser
+variable. In general, if no differences are found then no output is
+produced.
+<P>
+
+<DT><CODE>end</CODE>
+<DD>See <CODE>exit</CODE>.
+<P>
+
+<DT><CODE>exit <B>[</B><VAR>status</VAR><B>]</B></CODE>
+<DD>Exits the browser with the specified <VAR>status</VAR>, an integer constant.
+If no exit status is supplied then zero (success) is assumed. Typing the
+end of file character (usually control-d) at the beginning of a line
+also invokes this command, causing a zero (success) exit.
+<P>
+
+<DT><CODE>file <VAR>filename</VAR></CODE>
+<DD>The Silo database <VAR>filename</VAR> is opened and returned but not
+associated with any symbol.  Therefore, as soon as nothing refers to the
+file, it is closed.  One common use of this function is with the
+<CODE>ls</CODE> or <CODE>diff</CODE> commands which can take file objects as
+arguments.  For instance, the command <SAMP>`ls (file curv2d.pdb)'</SAMP> opens
+the <TT>`curv2d.pdb'</TT> file and lists the root directory and <SAMP>`ls
+(cd dirname (file curv2d.pdb))'</SAMP> lists the contents of the <VAR>dirname</VAR>
+directory of <TT>`curv2d.pdb'</TT>.  The file is open for read-write mode
+unless the <CODE>$rdonly</CODE> browser variable has a non-nil value or the
+file has only read permission.
+<P>
+
+<DT><CODE>help <B>[</B><VAR>topic</VAR><B>]</B> <B>[</B><VAR>docstring</VAR><B>]</B></CODE>
+<DD>Shows documentation for various parts of the browser. When invoked
+without arguments it will display a table of contents of <CODE>help</CODE>
+subcommands. With one argument it will display documentation for a help
+category (e.g., <CODE>help run</CODE>), a browser internal variable (e.g.,
+<CODE>help $diff</CODE>), a function (e.g., <CODE>help diff</CODE>), a command-line
+switch (e.g., <CODE>help --diff</CODE>), an operator (e.g., <CODE>help
+"op="</CODE>), or the documentation string associated with the specified
+symbol. When invoked with a string argument it will print all help
+categories which contain the specified string (e.g., <CODE>help
+"diff"</CODE>). When called with two arguments it assigns the second argument
+as the documentation property of the first argument, which must be a
+symbol or string.
+<P>
+
+<DT><CODE>include <VAR>filename</VAR></CODE>
+<DD>Causes the specified file to be parsed and evaluated. This is often
+useful in user-private initialization files, <TT>`~/.browser_rc'</TT>, where 
+the user wants to augment the actions that would normally happen in the
+system-wide browser initialization file. The user-private file should
+contain the line <SAMP>`include $pubinit'</SAMP>.
+<P>
+
+<DT><CODE>ls <B>[</B><VAR>filesym</VAR><B>]</B> <B>[</B><VAR>objnames</VAR><B>...]</B></CODE>
+<DD>This command lists the contents of the current working directory.  If no
+file is specified then the file associated with <SAMP>`$1'</SAMP> is used. If a
+list of files is specified (e.g., <SAMP>`$*'</SAMP>) then a listing is produced
+for each of those files. If object names are supplied, then only those
+objects are listed.  The object names can include the normal Unix
+filename wild cards <SAMP>`*'</SAMP>, <SAMP>`?'</SAMP>, and <SAMP>`[]'</SAMP> (object names with
+<SAMP>`[]'</SAMP> wild cards require quotes so the <SAMP>`['</SAMP> and <SAMP>`]'</SAMP> are not
+intrepretted as array selectors). Wild card matching is not available if
+the <CODE>fnmatch</CODE> function was not available when the browser was
+compiled.  If a single object name is supplied and that object is a
+directory, then the contents of that directory appear.  An alternative
+(and shorter) way to list the contents of a subdirectory is to type the
+name of the subdirectory on a line by itself (for instance,
+<SAMP>`dir1'</SAMP>).
+<P>
+
+<DT><CODE></CODE>
+<DD>Another way to list a directory is to just type the name of the
+directory at the prompt (you can use <SAMP>`.'</SAMP> as the current working
+directory).  So saying <SAMP>`$2.dir'</SAMP> is the same as saying <SAMP>`ls $2
+dir'</SAMP> and <SAMP>`$2..'</SAMP> is the same as <SAMP>`ls $2'</SAMP> or <SAMP>`ls $2 .'</SAMP>.
+<P>
+
+<DT><CODE>noprint</CODE>
+<DD>See <CODE>print</CODE>.
+<P>
+
+<DT><CODE>open <VAR>filename</VAR> <B>[</B><VAR>filesym</VAR><B>]</B></CODE>
+<DD>The Silo database <VAR>filename</VAR> is opened and associated with the
+specified file symbol.  Any database previously associated with
+<VAR>filesym</VAR> will be closed as soon as all objects associated with that
+file are freed.  If <VAR>filesym</VAR> is omitted then <SAMP>`$1'</SAMP> is used.
+This command is equivalent to <SAMP>`<VAR>filesym</VAR> =
+<VAR>filename</VAR>'</SAMP>. Files are open in read-write mode unless the
+<CODE>$rdonly</CODE> browser variable has a non-nil value or the file has only 
+read permission.
+<P>
+
+<DT><CODE><B>[</B>no<B>]</B>print <VAR>expression</VAR> <B>...</B></CODE>
+<DD>Evaluates the expressions and prints (or suppresses) the result of each
+one.  The <CODE>print</CODE> command is normally not used because the browser
+prints all non-null expressions by default.  However, a <CODE>noprint</CODE>
+can be used to prevent the default output.
+<P>
+
+<DT><CODE>pwd <B>[</B><VAR>filesym</VAR><B>]</B></CODE>
+<DD>Prints the current working directory for the database associated with
+the specified file symbol, list of files, or <SAMP>`$1'</SAMP>. This command
+also prints the name of the database.  This command is usually not used
+because a file symbol appearing by itself causes the database name and
+current working directory to be displayed.
+<P>
+
+<DT><CODE>quit</CODE>
+<DD>See <CODE>exit</CODE>.
+<P>
+
+<DT><CODE>typeof <VAR>expression</VAR></CODE>
+<DD>The type of a Silo expression is printed.  For Silo database objects the
+type which is printed is fully qualified and bound to actual values. In
+contrast, printing the actual named type shows the unbound values.  For
+example, if <SAMP>`d'</SAMP> is a Silo quadvar object, then <SAMP>`typeof d.dims'</SAMP>
+might show <SAMP>`[3] int'</SAMP> while <SAMP>`print DBquadvar.dims'</SAMP> displays
+<SAMP>`[self.ndims] int'</SAMP>.
+<P>
+
+</DL>
+<P>
+
+<A NAME="Operators"></A>
+<HR SIZE="6">
+<A NAME="SEC5"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC4"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC4"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 4. Operators </H1>
+<!--docid::SEC5::-->
+<P>
+
+A browser expression is composed of terms and operators. The following
+operators are supported and overloaded depending on the number and type
+of arguments.
+</P><P>
+
+<DL COMPACT>
+<DT><VAR>symbol <CODE>=</CODE> value</VAR>
+<DD>Assigns a value to a browser internal variable or a database object.  If
+<VAR>symbol</VAR> is an internal variable and <VAR>value</VAR> is the word
+<SAMP>`nil'</SAMP> then the symbol loses its variable value.
+<P>
+
+<DT><VAR>filesym <CODE>.</CODE> varname</VAR>
+<DD>The variable or directory with the name <VAR>varname</VAR> is loaded from the
+database associated with the specified file symbol and the Silo data
+object is returned.  The variable name must be enclosed in quotes unless
+it looks like a symbol and does not conflict with a browser internal
+variable. If <VAR>filesym</VAR> is <SAMP>`$1'</SAMP> and the variable name is not
+enclosed in quotes and is not the name of an internal browser variable,
+then the file symbol and dot can be omitted.  Thus <SAMP>`$1.quadmesh'</SAMP>
+can be written as just <SAMP>`quadmesh'</SAMP>.
+<P>
+
+<DT><VAR>sdo <CODE>.</CODE> fieldname</VAR>
+<DD>If <VAR>sdo</VAR> is some Silo data object which has a structured type, then
+this expression returns a new Silo data object which is the specified
+field of the <VAR>sdo</VAR> structure.  For instance, a quadmesh <SAMP>`qm'</SAMP>
+has a field named <SAMP>`dims'</SAMP> which holds the dimensions of the mesh.
+The expression <SAMP>`qm.dims'</SAMP> returns just the dimensions.
+<P>
+
+<DT><VAR>list <CODE>.</CODE> anything</VAR>
+<DD>If the first argument is a list then the dot operator is applied to each 
+member of the list and the result is a list of the results.
+<P>
+
+<DT><VAR>sdo <CODE>[</CODE> elmtnum <CODE>]</CODE></VAR>
+<DD>If <VAR>sdo</VAR> is some Silo data object which has an array type, then this
+expression returns the single specified element of that array.  The
+first element of an array is number zero.  For instance,
+<SAMP>`qm.dims[0]'</SAMP> returns the size of the first mesh dimension.
+<P>
+
+<DT><VAR>sdo <CODE>[</CODE> min <CODE>:</CODE> max <CODE>]</CODE></VAR>
+<DD>If <VAR>sdo</VAR> is some Silo data object which has an array type, then this
+expression returns a sub-array with elements <VAR>min</VAR> through
+<VAR>max</VAR>, inclusive.  Thus, <SAMP>`qm.dims[0:2]'</SAMP> are the first three
+mesh dimensions.
+<P>
+
+<DT><VAR>sdo <CODE>[</CODE> expr1<CODE>,</CODE> expr2<CODE>,</CODE> ... <CODE>]</CODE></VAR>
+<DD>If <VAR>sdo</VAR> is some Silo data object which has an array type, and
+<VAR>expr</VAR> are element numbers or ranges, then one <VAR>expr</VAR> is applied
+to each array dimension in turn, automatically skipping over pointers.
+For instance, if a quadvar <SAMP>`qv'</SAMP> has a <SAMP>`vals'</SAMP> of type
+<SAMP>`*[2] *[36000] float'</SAMP> then the expression <SAMP>`qv.vals[0,100:199]'</SAMP>
+will be an object consisting of the second 100 values of the first
+variable.  (The expression <SAMP>`qv.vals[0][100:199]'</SAMP> would result in an
+error message because <SAMP>`qv.vals[0]'</SAMP> returns an object with the type
+<SAMP>`[1] *[36000] float'</SAMP> to which is then applied the <SAMP>`[100:199]'</SAMP>
+that is invalid because the array only has one element.)
+<P>
+
+<DT><VAR>expr <CODE>|</CODE> command</VAR>
+<DD>The expression <VAR>expr</VAR> has its output redirected to the shell
+command <VAR>command</VAR>.
+<P>
+
+<DT><VAR>expr <CODE>&#62;</CODE> file</VAR>
+<DD>The expression <VAR>expr</VAR> has its output redirected to the file
+<VAR>file</VAR>, which is created or truncated.
+<P>
+
+<DT><VAR>expr <CODE>&#62;&#62;</CODE> file</VAR>
+<DD>The expression <VAR>expr</VAR> has its output appended to the file
+<VAR>file</VAR>, which is created if it doesn't exist.
+<P>
+
+<DT><VAR><CODE>{</CODE> expressions <CODE>}</CODE></VAR>
+<DD>This operator takes zero or more operands occurring between the curly
+braces (optionally separated by commas) and returns a list of those
+unevaluated operands. If only one operand is given then that operand is
+returned unevluated and not in a list.
+<P>
+
+<DT><VAR>minimum <CODE>:</CODE> maximum</VAR>
+<DD>The range operator is used to construct a range object which represents
+all integers between <VAR>minimum</VAR> and <VAR>maximum</VAR>, inclusive.
+<P>
+
+</DL>
+<P>
+
+<A NAME="Internal Variables"></A>
+<HR SIZE="6">
+<A NAME="SEC6"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC5"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC7"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC5"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC10"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 5. Internal Variables </H1>
+<!--docid::SEC6::-->
+<P>
+
+Certain aspects of the browser can be configured by setting browser
+variables with the <SAMP>`='</SAMP> operator described above.  The current value
+of an internal variable can be displayed by typing the variable's name.
+The variables are initialized with default values when the browser
+starts and may then be overridden by command-line options, the
+initialization file, or interactively. All predefined browser variables
+begin with a dollar sign.
+</P><P>
+
+<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> 
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC7">5.1 Differencing Variables</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP"></TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC8">5.2 Output Variables</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP"></TD></TR>
+<TR><TD ALIGN="left" VALIGN="TOP"><A HREF="browser.html#SEC9">5.3 File Variables</A></TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP"></TD></TR>
+</TABLE></BLOCKQUOTE>
+<P>
+
+<A NAME="Differencing Variables"></A>
+<HR SIZE="6">
+<A NAME="SEC7"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC8"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC10"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H2> 5.1 Differencing Variables </H2>
+<!--docid::SEC7::-->
+<P>
+
+These variables affect the operation of the <CODE>diff</CODE> function.
+</P><P>
+
+<DL COMPACT>
+<DT><CODE>$diff</CODE>
+<DD>This variable's value is a list of symbols which control the details of
+the <CODE>diff</CODE> function. The default is <CODE>$diff = {detail,
+two_column}</CODE>. This variable is set by the <SAMP>`--diff'</SAMP> command-line
+switch.
+<P>
+
+<DL COMPACT>
+<DT><CODE>detail</CODE>
+<DD>This is the default, which causes the <CODE>diff</CODE> function to report all 
+details about detected differences.
+<P>
+
+<DT><CODE>brief</CODE>
+<DD>If this word is present then <CODE>diff</CODE> doesn't actually display any
+data. The output will consist of a single line for each file object
+which differs between file A and file B.  This option allows some
+short circuiting of the work required for the <CODE>detail</CODE> mode.
+<P>
+
+<DT><CODE>summary</CODE>
+<DD>This key word causes <CODE>diff</CODE> to report by a single line of output
+when the two operands of the <CODE>diff</CODE> function are different. No
+output is produced if they are the same. This option allows some short
+circuiting of the work required for the <CODE>brief</CODE> mode.
+<P>
+
+<DT><CODE>ignore_additions</CODE>
+<DD>If this is specified then <CODE>diff</CODE> will not report differences due to
+data appearing in file B but not in file A.
+<P>
+
+<DT><CODE>ignore_deletions</CODE>
+<DD>If this is specified then <CODE>diff</CODE> will not report differences due to 
+data appearing in file A but not in file B.
+<P>
+
+<DT><CODE>two_column</CODE>
+<DD>If this is specified then the output will list differences side-by-side
+instead of one after the other (that is, output will resemble
+<CODE>pdbdiff</CODE> instead of <CODE>diff</CODE>). This setting is only applicable
+for detailed output.
+</DL>
+<P>
+
+<DT><CODE>$exclude</CODE>
+<DD>The <CODE>diff</CODE> function normally recurses into directories and compares 
+the contents of those directories. However, the <CODE>$exclude</CODE> variable 
+can be a list of character strings which specify object names and/or
+types which should be excluded from recursive comparison.  The object
+names may include shell wildcards such as <SAMP>`*'</SAMP>, <SAMP>`?'</SAMP>, and
+<SAMP>`[]'</SAMP>. If a name pattern is relative (doesn't start with a slash) it 
+will be compared to the base name of the objects about to be
+differenced; but if the name pattern is absolute (begins with a slash)
+it will be compared to the full path names of the objects being
+differenced. If the <CODE>$exclude</CODE> string begins with the string
+<SAMP>`type:'</SAMP> then the following part should be one of the object types
+printed by the <CODE>ls</CODE> function.  A difference operation between two
+objects is suppressed if either object matches any of the strings stored 
+in the <CODE>$exclude</CODE> list.
+<P>
+
+For example, to prevent <CODE>diff</CODE> from comparing any objects with the
+base name <SAMP>`cycle'</SAMP>, or any objects whose full name is
+<SAMP>`/VM/typelist'</SAMP>, or any objects whose name ends with <SAMP>`_list'</SAMP>,
+or any object of type <SAMP>`obj'</SAMP> one would issue the following browser
+command:
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; $exclude = {"cycle", "/VM/typelist", "*_list", "type:obj"}
+</pre></td></tr></table></P><P>
+
+or invoke the browser with the switch
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>--exclude='cycle,/VM/typelist,*_list,type:obj'
+</pre></td></tr></table></P><P>
+
+<DT><CODE>$diff_int8_abs</CODE>
+<DD><DT><CODE>$diff_int8_rel</CODE>
+<DD><DT><CODE>$diff_short_abs</CODE>
+<DD><DT><CODE>$diff_short_rel</CODE>
+<DD><DT><CODE>$diff_int_abs</CODE>
+<DD><DT><CODE>$diff_int_rel</CODE>
+<DD><DT><CODE>$diff_long_abs</CODE>
+<DD><DT><CODE>$diff_long_rel</CODE>
+<DD><DT><CODE>$diff_float_abs</CODE>
+<DD><DT><CODE>$diff_float_rel</CODE>
+<DD><DT><CODE>$diff_double_abs</CODE>
+<DD><DT><CODE>$diff_double_rel</CODE>
+<DD>These variables control how the <CODE>diff</CODE> function determines whether
+two numeric values are the same or different. The ones that end with
+<SAMP>`_abs'</SAMP> specify the maximum absolute difference allowed between two
+values <VAR>a</VAR> and <VAR>b</VAR>.  The <CODE>diff</CODE> command considers <VAR>a</VAR>
+and <VAR>b</VAR> to be different if <SAMP>`|<VAR>a</VAR>-<VAR>b</VAR>|&#62;<VAR>abs</VAR>'</SAMP>.
+The variables that end with <SAMP>`_rel'</SAMP> specify the maximum absolute
+difference relative to the mean of two values.  The <CODE>diff</CODE> command
+considers <VAR>a</VAR> and <VAR>b</VAR> to be different if
+<SAMP>`|<VAR>a</VAR>-<VAR>b</VAR>|/|<VAR>a</VAR>+<VAR>b</VAR>| &#62; <VAR>rel</VAR>/2'</SAMP>.
+<P>
+
+If both tests are performed then <VAR>a</VAR> and <VAR>b</VAR> are considered
+different if either test indicates they are different. If an <VAR>abs</VAR> or
+<VAR>rel</VAR> parameter is not defined (or has a non-positive value) then
+the corresponding test is not performed. If neither test is performed
+then an exact comparison is used.
+</P><P>
+
+All <CODE>diff</CODE> variables have a default value of zero and are set by
+the <SAMP>`--absolute'</SAMP> and <SAMP>`--relative'</SAMP> command-line switches.
+</DL>
+<P>
+
+<A NAME="Output Variables"></A>
+<HR SIZE="6">
+<A NAME="SEC8"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC7"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC9"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC10"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H2> 5.2 Output Variables </H2>
+<!--docid::SEC8::-->
+<P>
+
+<DL COMPACT>
+<DT><CODE>$height</CODE>
+<DD>The height of the output terminal in lines. If set to a positive value
+then the browser will pause after each screenful of interactive output
+(redirected output is unaffected by this setting). This variable is set
+by the <SAMP>`--height'</SAMP> command-line switch and is reset whenever the
+browser receives a window size change signal (<CODE>SIGWINCH</CODE>).
+<P>
+
+<DT><CODE>$width</CODE>
+<DD>The width of the output terminal in characters. The browser will try not 
+to print data which would wrap from one line to the next. This variable
+is set by the <SAMP>`--width'</SAMP> command-line switch and is reset whenever
+the browser receives a window size change signal (<CODE>SIGWINCH</CODE>).
+<P>
+
+<DT><CODE>$verbosity</CODE>
+<DD>This variable is set by the <SAMP>`--quiet'</SAMP> and <SAMP>`--verbose'</SAMP>
+switches. The <SAMP>`--quiet'</SAMP> sets it to zero while <SAMP>`--verbose'</SAMP> sets 
+it to two (the default is one). Changing its value at runtime changes
+the amount of chatter produced by the browser.
+<P>
+
+<DT><CODE>$truncate</CODE>
+<DD>If this variable holds a non-negative integer value <VAR>N</VAR>, then the
+browser shows only <VAR>N</VAR> values of each array; otherwise all values of
+an array are displayed. Values which are omitted are indicated by a
+string such as <SAMP>`...(2000 values omitted)...'</SAMP> appearing at the point
+where the values were omitted. Truncation is disabled (all values are
+printed) by setting this variable to nil (its default).
+<P>
+
+<DT><CODE>$trailing</CODE>
+<DD>If this variable holds a positive integer value and <SAMP>`$truncate'</SAMP>
+has a non-negative integer value, then up to <VAR>n</VAR> of the printed
+array values will come from the end of the array rather than the
+beginning. The default value is 50.
+<P>
+
+<DT><CODE>$fmt_double</CODE>
+<DD>This variable holds a <CODE>printf</CODE> format string which is used to
+format C <CODE>double</CODE> values.  The default value is <SAMP>`%1.10g'</SAMP>.
+<P>
+
+<DT><CODE>$fmt_float</CODE>
+<DD>This variable holds a <CODE>printf</CODE> format string which is used to
+format C <CODE>float</CODE> values.  The default value is <SAMP>`%1.5g'</SAMP>.
+<P>
+
+<DT><CODE>$fmt_int</CODE>
+<DD>This variable holds a <CODE>printf</CODE> format string which is used to
+format integer values.  The default value is <SAMP>`%d'</SAMP>.
+<P>
+
+<DT><CODE>$fmt_long</CODE>
+<DD>This variable holds a <CODE>printf</CODE> format string which is used to
+format long integer values.  The default value is <SAMP>`(long)%ld'</SAMP>.
+<P>
+
+<DT><CODE>$fmt_null</CODE>
+<DD>This variable holds a <CODE>printf</CODE> format string which is printed for
+null character strings.  The default value is <SAMP>`(null)'</SAMP>.
+<P>
+
+<DT><CODE>$fmt_int8</CODE>
+<DD>This variable holds a <CODE>printf</CODE> format string which is used to
+format 8-bit integer values.  The default is <SAMP>`(int8)%d'</SAMP> but people
+often like to change it to <SAMP>``%c''</SAMP> to see the ASCII equivalent. Be
+warned that output of non-printable ASCII characters in this manner may
+not work if the terminal emulator interprets them as commands.
+<P>
+
+<DT><CODE>$fmt_short</CODE>
+<DD>This vairable holds a <CODE>printf</CODE> format string which is used to
+format short integer values.  The default value is <SAMP>`(short)%d'</SAMP>.
+<P>
+
+<DT><CODE>$fmt_string</CODE>
+<DD>This variable holds a <CODE>printf</CODE> format string which is used to
+format character string values.  The default value is
+<SAMP>`\"%s\"'</SAMP>.
+<P>
+
+<DT><CODE>$obase Output of primitive data (integer, character, string, and</CODE>
+<DD>floating-point), by default, uses the <CODE>$fmt_</CODE> variables described
+above. However, by setting this variable to 16, 8, or 2 it is possible
+to display primitive data in hexadecimal, octal, or binary format.
+<P>
+
+</DL>
+<P>
+
+<A NAME="File Variables"></A>
+<HR SIZE="6">
+<A NAME="SEC9"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC8"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC10"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC10"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H2> 5.3 File Variables </H2>
+<!--docid::SEC9::-->
+<P>
+
+<DL COMPACT>
+<DT><CODE>$pubinit</CODE>
+<DD>This variable holds the name of the public initialization file and is
+intended to be used as the first argument to the `include' function in a 
+user-private initialization file.
+<P>
+
+<DT><CODE>$lowlevel</CODE>
+<DD>If this variable has any true value (nil, zero, and the empty string are
+considered false), then the browser reads objects as type
+<CODE>DBobject</CODE> even if that object has some other datatype such as
+<CODE>DBquadvar</CODE>.  This variable is set by the <SAMP>`-l'</SAMP> command-line
+option and is useful for debugging the low layers of Silo. The default
+value is zero.
+<P>
+
+If the value is two or higher then the Silo definition of <CODE>DBobject</CODE>
+is used and the values of the <CODE>comp_names</CODE> and <CODE>pdb_names</CODE>
+arrays become part of the object.
+</P><P>
+
+If the value is one or two then the browser translates the Silo
+<CODE>DBobject</CODE> structure into a structure which is more user friendly
+by adding additional members to the object structure. Each member has a
+name from the <CODE>comp_names</CODE> array and a value based on the
+corresponding member of the <CODE>pdb_names</CODE> array<A NAME="DOCF2" HREF="browser.html#FOOT2">(2)</A>.
+</P><P>
+
+<DT><CODE>$checksums</CODE>
+<DD>If this variable has any true value (nil, zero, and the empty string are
+considered false), and the database being read includes checksums, then
+the browser performs checksum checks during read. Note that currently,
+the only Silo driver that supports checksums is the HDF5 driver.
+<P>
+
+If checksum checks are disabled, then if browser encounters corrupt data,
+it will not know it. In particular, if checksums are disabled, the diff
+operator can wind up reporting corrupted data as diffs. If checksums are
+enabled, however, and the database being read includes checksums, then
+browser will report errors when it encounters corrupt data and fail to
+read the associated Silo object. See the associated Silo call 
+<CODE>DBSetEnableChecksums()</CODE> for more information.
+</P><P>
+
+<DT><CODE>$rdonly</CODE>
+<DD>If this variable has any true value (nil, zero, and the empty string are
+considered false), then the browser opens files in read-only mode
+instead of read-write mode.  Editing will not work on a file open for
+reading only.
+</DL>
+<P>
+
+<A NAME="Startup File"></A>
+<HR SIZE="6">
+<A NAME="SEC10"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC9"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC11"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC6"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC11"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 6. Initializing the Browser </H1>
+<!--docid::SEC10::-->
+<P>
+
+When the browser starts, it looks for a file called <TT>`.browser_rc'</TT>
+in the user's home directory or a file called
+<TT>`/usr/local/include/browser_rc'</TT><A NAME="DOCF3" HREF="browser.html#FOOT3">(3)</A>.  However, an
+alternate startup file can be specified with the <SAMP>`--file'</SAMP> browser
+command-line switch.  The browser reads and executes each command found
+in the startup file.
+</P><P>
+
+The startup file should contain an assignment to the
+<CODE>$browser_version</CODE> variable which will be used to check that the
+version of the startup file is appropriate for the browser being
+run. Mismatched version numbers result in a rather verbose warning
+message (provided that the browser was even able to process the startup
+file).
+</P><P>
+
+The <CODE>$browser_version</CODE> number should be assigned some real constant
+like <SAMP>`3.004'</SAMP> where <SAMP>`3'</SAMP> is the browser major version number and
+<SAMP>`004'</SAMP> is the browser minor version number.  To determine what
+version number to specify, invoke the browser as <SAMP>`browser
+--version'</SAMP>.
+</P><P>
+
+<A NAME="Editing"></A>
+<HR SIZE="6">
+<A NAME="SEC11"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC10"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC12"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC10"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC12"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 7. Editing Database Objects </H1>
+<!--docid::SEC11::-->
+<P>
+
+The <SAMP>`='</SAMP> operator can be used to set the value of an internal
+browser variable or to change the value of a database object.  If the
+left hand side of the <SAMP>`='</SAMP> is an internal variable, then the value
+of the internal variable is changed. Otherwise if the left hand side is
+a database object, its value is changed.  Otherwise, a new internal
+variable is created and assigned an initial value.
+</P><P>
+
+The browser can change values for objects of type <CODE>DBobject</CODE> (most
+objects are of this type if the browser is running in low-level mode) or
+objects under the <SAMP>`var(s)'</SAMP> category in a directory listing.
+</P><P>
+
+When changing the value of a string database object like
+<SAMP>`_fileinfo'</SAMP>, the new value will be truncated to the same length as
+the old value because of limitations in the underlying Silo database
+drivers.  This does not apply to string fields of a <CODE>DBobject</CODE>.
+</P><P>
+
+Assigning a scalar value to an array or slice of an array results in all
+selected elements of the array to be set to the same value.  For
+instance, if the type of <SAMP>`u_data'</SAMP> is <SAMP>`[31, 41, 31] float'</SAMP> then
+the statement `u_data[5]=0' sets all elements of "row" five to zero.
+</P><P>
+
+<A NAME="Paging"></A>
+<HR SIZE="6">
+<A NAME="SEC12"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC11"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC13"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC11"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC13"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 8. Paging </H1>
+<!--docid::SEC12::-->
+<P>
+
+The browser keeps track of how many lines of output have been displayed
+for the currently executing command and temporarily pauses that command
+whenever output is about to scroll off the top of the screen.  The
+height and width of the screen is determined by the browser making
+certain <CODE>ioctl</CODE> calls at startup and each time it gets a
+<CODE>SIGWINCH</CODE> signal.  The initial values can be set with
+<SAMP>`--height'</SAMP> and <SAMP>`--width'</SAMP> command-line switches.  If the
+appropriate <CODE>ioctl</CODE> is not available then the values of environment 
+variables <CODE>LINES</CODE> and <CODE>COLUMNS</CODE> will be used. If all else
+fails then the browser uses zero for the number of lines (that is, no
+paging of output) and 80 for the number of columns.
+</P><P>
+
+When the browser pauses the output, the message <SAMP>`more? ('q' to
+quit)'</SAMP> is displayed. The following user responses are recognized:
+</P><P>
+
+<DL COMPACT>
+<DT><B>Quit</B>
+<DD>Cancels the command and returns to the browser prompt. This is
+equivalent to the browser receiving a <CODE>SIGPIPE</CODE> signal.
+<P>
+
+<DT><B>Continue</B>
+<DD>Pressing the EOF key (usually control-<SAMP>`d'</SAMP>) causes the command to
+continue without being paged. Output will simply scroll off the screen).
+<P>
+
+<DT><B>Next Diff</B>
+<DD>Pressing <SAMP>`n'</SAMP> causes output to be suspended until the next file
+difference report or the next non-diff command.
+<P>
+
+<DT><B>Interrupt</B>
+<DD>Pressing the interrupt key (usually control-<SAMP>`c'</SAMP>) causes the command
+to be interrupted as usual.
+</DL>
+<P>
+
+Output redirected to a file or command is not paged.  If the user is not
+satisfied with the limited paging ability of the browser, the output
+from a command can be redirected to the pager of the user's choice using
+output redirection.
+</P><P>
+
+<A NAME="Redirection"></A>
+<HR SIZE="6">
+<A NAME="SEC13"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC12"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC14"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC12"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC14"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 9. Redirection </H1>
+<!--docid::SEC13::-->
+<P>
+
+Output from any browser command can be redirected to a file or shell
+command by appending a redirection character and file name or shell
+command to the end of the command.
+</P><P>
+
+To save the output of a command in a file, destroying the previous
+contents of the file if any, append a <SAMP>`&#62;'</SAMP> and the name of the
+file.  Unless the file name looks like a browser symbol it must be
+enclosed in quotes.  For instance, <SAMP>`quadvar3d &#62; saved'</SAMP> saves the
+value of Silo database variable <SAMP>`quadvar'</SAMP> in a text file named
+<TT>`saved'</TT>.
+</P><P>
+
+To append the output of a command to a file, append a <SAMP>`&#62;&#62;'</SAMP> and the
+file name to the end of the command.  Unless the file name looks like a
+browser symbol it must be enclosed in quotes.  For example, <SAMP>`typeof
+quadvar3d &#62;&#62; saved'</SAMP> appends type information to the <TT>`saved'</TT> file.
+</P><P>
+
+To send the output of a browser command to the standard input of a shell
+command, follow the browser command with a <SAMP>`|'</SAMP> followed by the
+shell command in quotes.  The quotes are not necessary if the shell
+command is a single symbol.  Since paging is disabled when output is to
+a shell command, one way to display a result without paging is to pipe
+the output through the <SAMP>`cat'</SAMP> command like <SAMP>`d | cat'</SAMP>.
+</P><P>
+
+<A NAME="Interrupts"></A>
+<HR SIZE="6">
+<A NAME="SEC14"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC13"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC15"> &gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC13"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC15"> &gt;&gt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 10. Interrupts </H1>
+<!--docid::SEC14::-->
+<P>
+
+Since some commands may require a long time to execute or produce a huge
+amount of output, the user may want to abort the command before it
+finishes.  If the output is paged interactively to the screen then
+pressing <SAMP>`q'</SAMP> at the <SAMP>`more?'</SAMP>  prompt accomplishes
+this.  Otherwise the user can press the interrupt character (usually
+control-c) and the browser command will be immediately terminated and
+the browser will prompt for the next command.  If the interrupt
+character is typed during command input the browser itself terminates.
+</P><P>
+
+If output from a browser command is being piped into a shell command and
+the shell command exits (or closes its standard input) before the
+browser command is finished, the browser command gets the <CODE>SIGPIPE</CODE>
+signal and terminates.
+</P><P>
+
+<A NAME="Examples"></A>
+<HR SIZE="6">
+<A NAME="SEC15"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC14"> &lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC14"> &lt;&lt; </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top"> Up </A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[ &gt;&gt; ]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT"> &nbsp; <TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1> 11. Examples </H1>
+<!--docid::SEC15::-->
+<P>
+
+This chapter contains some sample output from the browser.
+</P><P>
+
+Normally, you will specify the name of a database file on the browser
+command-line<A NAME="DOCF4" HREF="browser.html#FOOT4">(4)</A> like in the following
+example, and sometimes it's convenient to open multiple files at the
+same time.  Each file name listed on the command-line is given an
+identifier like <SAMP>`$1'</SAMP>, <SAMP>`$2'</SAMP>, etc., and most of the browser
+commands operate on file <SAMP>`$1'</SAMP> by default.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>% <B>browser rect3d.pdb</B>
+INFO: opening `rect3d.pdb' as $1
+</pre></td></tr></table></P><P>
+
+The <CODE>ls</CODE> command is similar to the Unix <CODE>ls</CODE> command in that
+it lists the contents of the current working directory.  The heading
+fields on the left of the equal signs apply until the next heading.  The
+headings are the same as those used by MeshTV.  To list the contents of
+some subdirectory, say <SAMP>`ls'</SAMP>, <SAMP>`ls dir1'</SAMP>,
+<SAMP>`print dir1'</SAMP>, or just <SAMP>`dir1'</SAMP>.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>ls</B>
+qmesh(s)          = quadmesh3d            
+
+qvar(s)           = d                      p                     
+                  = t                      u                     
+                  = v                      w                     
+
+mat(s)            = mat1                  
+
+var(s)            = _fileinfo              _meshtv_defvars       
+                  = _meshtvinfo            cycle                 
+                  = d_data                 d_dims                
+                  = d_maxindex             dtime                 
+                  = mat1_dims              mat1_matlist          
+                  = mat1_matnos            mat1_mix_mat          
+                  = mat1_mix_next          mat1_mix_vf           
+                  = mat1_mix_zone          p_data                
+                  = p_dims                 p_maxindex            
+                  = quadmesh3d_align_nodal quadmesh3d_align_zonal
+                  = quadmesh3d_coord0      quadmesh3d_coord1     
+                  = quadmesh3d_coord2      quadmesh3d_dims       
+                  = quadmesh3d_max_extents quadmesh3d_max_index_n
+                  = quadmesh3d_max_index_z quadmesh3d_min_extents
+                  = quadmesh3d_min_index   quadmesh3d_zonedims   
+                  = t_data                 t_dims                
+                  = t_maxindex             time                  
+                  = u_data                 u_dims                
+                  = u_maxindex             v_data                
+                  = v_dims                 v_maxindex            
+                  = w_data                 w_dims                
+                  = w_maxindex            
+</pre></td></tr></table></P><P>
+
+To keep the size of these examples small, we've specified that at most
+50 values should be printed from each array and that 25 of those values
+should be from the end of the array (and the other 25, from the
+beginning).  To truncate everything say <SAMP>`$truncate=0'</SAMP> and to turn
+truncating off say <SAMP>`$truncate=nil'</SAMP>.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>$truncate = 50</B>
+                  = 50
+&#62; <B>$trailing = 25</B>
+                  = 25
+</pre></td></tr></table></P><P>
+
+The user can ask for the type of any object, including types built into
+the browser.  If the object is a structured type (like in this example)
+then the type of each component of that structure is printed.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>typeof d</B>
+                  = struct DBquadvar {
+id                =    +0 int
+name              =    +4 string
+units             =    +8 string
+label             =    +12 string
+cycle             =    +16 int
+time              =    +20 float
+dtime             =    +24 double
+meshid            =    +32 int
+datatype          =    +40 int (DBdatatype)
+nels              =    +44 int
+nvals             =    +48 int
+ndims             =    +52 int
+dims              =    +56 [3] int
+major_order       =    +68 int (array order)
+stride            =    +72 [3] int
+min_index         =    +84 [3] int
+max_index         =    +96 [3] int
+origin            =    +108 int
+align             =    +112 [3] float
+mixlen            =    +128 int
+use_specmf        =    +132 int (on/off)
+mixvals           =    +124 *[1] *[0] float
+vals              =    +36 *[1] *[36000] float
+                  = }
+</pre></td></tr></table></P><P>
+
+An integer following a plus sign indicates that the type corresponds to
+a byte offset from the beginning of the innermost enclosing structure
+or array.
+</P><P>
+
+A <SAMP>`*'</SAMP> means the object is a pointer to whatever type
+follows<A NAME="DOCF5" HREF="browser.html#FOOT5">(5)</A>.
+</P><P>
+
+A list of array dimensions between <SAMP>`['</SAMP> and <SAMP>`]'</SAMP> mean that the
+object is an array and each element of the array is the type that
+follows the <SAMP>`]'</SAMP>.
+</P><P>
+
+The final name is always one of the browser integral types <SAMP>`string'</SAMP>
+(same as the C <SAMP>`char*'</SAMP>), <SAMP>`short'</SAMP>, <SAMP>`int'</SAMP>, <SAMP>`long'</SAMP>,
+<SAMP>`float'</SAMP>, or <SAMP>`double'</SAMP>.  If the integral type name is followed
+by parentheses then the parentheses contain the name of an underlying C
+<SAMP>`enum'</SAMP> type or a set of related C preprocessor constants.
+</P><P>
+
+Some data objects override one or more standard class methods.  Such
+objects will have flags like <SAMP>`__<VAR>flag</VAR>__'</SAMP> which appear inside
+the object type.
+</P><P>
+
+One can also ask for the Silo definition of a named data type like
+<SAMP>`DBquadvar'</SAMP>.  This prints the definition of the Silo
+<SAMP>`DBquadvar'</SAMP> structure which is the same as printed above for the
+type of <SAMP>`d'</SAMP> except that array sizes and some primitive types are
+not bound to actual values yet<A NAME="DOCF6" HREF="browser.html#FOOT6">(6)</A>.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>DBquadvar</B>
+                  = struct DBquadvar {
+id                =    +0 int
+name              =    +4 string
+units             =    +8 string
+label             =    +12 string
+cycle             =    +16 int
+time              =    +20 float
+dtime             =    +24 double
+meshid            =    +32 int
+datatype          =    +40 int (DBdatatype)
+nels              =    +44 int
+nvals             =    +48 int
+ndims             =    +52 int
+dims              =    +56 [self.ndims] int
+major_order       =    +68 int (array order)
+stride            =    +72 [self.ndims] int
+min_index         =    +84 [self.ndims] int
+max_index         =    +96 [self.ndims] int
+origin            =    +108 int
+align             =    +112 [self.ndims] float
+mixlen            =    +128 int
+use_specmf        =    +132 int (on/off)
+mixvals           =    +124 *[self.nvals] *[self.mixlen] 
+mixvals           =    self.datatype
+vals              =    +36 *[self.nvals] *[self.nels] self.datatype
+                  = }
+</pre></td></tr></table></P><P>
+
+Giving just the name of the Silo object is short for <SAMP>`print $1.d'</SAMP>.
+Notice that the <SAMP>`vals'</SAMP> array has been truncated as requested and
+that <VAR>mixvals</VAR> has no value. The subscripts in the labels to the
+left of the equal sign correspond to the first value on that line (an
+entire array in the case of <SAMP>`vals[0]'</SAMP>.
+</P><P>
+
+One can also ask for tye type of a single structure component by typing the
+command <SAMP>`DBquadvar.vals'</SAMP>.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>d</B>
+                  = DBquadvar: struct
+id                =    0
+name              =    "d"
+units             =    (null)
+label             =    (null)
+cycle             =    48
+time              =    4.80000
+dtime             =    4.8000000000
+meshid            =    0
+datatype          =    float
+nels              =    36000
+nvals             =    1
+ndims             =    3
+dims[0]           =    {30, 40, 30}
+major_order       =    row major
+stride[0]         =    {1, 30, 1200}
+min_index[0]      =    {0, 0, 0}
+max_index[0]      =    {29, 39, 29}
+origin            =    0
+align[0]          =    {0.50000, 0.50000, 0.50000}
+mixlen            =    0
+use_specmf        =    off
+mixvals           =    NULL
+vals[0]           =    {{0.83957, 0.82083, 0.80304, 0.78626, 0.77056,
+vals[0, 5]        =    0.75601, 0.74266, 0.73059, 0.71987, 0.71055,
+vals[0, 10]       =    0.70269, 0.69633, 0.69153, 0.68831, 0.68669,
+vals[0, 15]       =    0.68669, 0.68831, 0.69153, 0.69633, 0.70269,
+vals[0, 20]       =    0.71055, 0.71987, 0.73059, 0.74266, 0.75601,
+vals[0, 25]       =    ...(35950 values omitted)..., 0.75601, 
+vals[0, 35976]    =    0.74266, 0.73059, 0.71987, 0.71055, 0.70269, 
+vals[0, 35981]    =    0.69633, 0.69153, 0.68831, 0.68669, 0.68669, 
+vals[0, 35986]    =    0.68831, 0.69153, 0.69633, 0.70269, 0.71055, 
+vals[0, 35991]    =    0.71987, 0.73059, 0.74266, 0.75601, 0.77056, 
+vals[0, 35996]    =    0.78626, 0.80304, 0.82083, 0.83957}}
+</pre></td></tr></table></P><P>
+
+The browser does not attempt to be efficient about loading objects from
+the database into memory since the underlying Silo library makes it
+difficult to do so.  However, if one says <SAMP>`$lowlevel=1'</SAMP> then the
+browser uses lower-level Silo functions to read the file.  As a result,
+less data is moved from disk to memory.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>$lowlevel=1</B>
+                  = 1
+&#62; <B>d</B>
+                  = struct
+name              =    "d"
+type              =    "quadvar"
+meshid            =    "quadmesh"
+align             =    "/quadmesh_align_zonal"
+dims              =    "/d_dims"
+max_index         =    "/d_maxindex"
+value0            =    "/d_data"
+ndims             =    3
+nvals             =    1
+nels              =    36000
+origin            =    0
+datatype          =    19
+mixlen            =    0
+major_order       =    0
+cycle             =    48
+time              =    "/time"
+dtime             =    "/dtime"
+min_index         =    "/quadmesh_min_index"
+use_specmf        =    -1000
+</pre></td></tr></table></P><P>
+
+Now we'll decrease the number of values printed and increase the
+precision that's displayed for <SAMP>`float'</SAMP> values.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>$truncate = 12</B>
+                  = 12
+&#62; <B>$trailing = 6</B>
+                  = 6
+&#62; <B>$fmt_float = "%1.15f"</B>
+                  = "%1.15f"
+&#62; <B>d.vals[0]</B>
+[0]               = {0.839570403099060, 0.820833325386047,
+[2]               = 0.803043246269226, 0.786264479160309,
+[4]               = 0.770563006401062, 0.756006062030792,
+[6]               = ...(35988 values omitted)..., 
+[35994]           = 0.756006062030792, 0.770563066005707, 
+[35996]           = 0.786264479160309, 0.803043246269226, 
+[35998]           = 0.820833325386047, 0.839570462703705}
+</pre></td></tr></table></P><P>
+
+The <SAMP>`diff'</SAMP> command compares two objects and reports differences
+between them.  The output is in groups of differences where the group is
+delimited at the beginning and end by a line of stars.  The first half
+of the group displays (part of) the first argument to <SAMP>`diff'</SAMP> while
+the part of the group after the line of dashes displays (part of) the
+second argument.  Subobjects that differ only partially (<SAMP>`stride'</SAMP> in
+this case) appear separately before those which completely differ.  The
+array truncating parameters apply to each array segment individually.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>diff d p</B>
+***************
+stride[1]         = {30, 1200}
+---------------
+stride[1]         = {31, 1271}
+***************
+***************
+name              = "d"
+nels              = 36000
+dims[0]           = {30, 40, 30}
+max_index[0]      = {29, 39, 29}
+vals[0]           = {{0.839570403099060, 0.820833325386047,
+vals[0, 2]        = 0.803043246269226, 0.786264479160309,
+vals[0, 4]        = 0.770563006401062, 0.756006062030792,
+vals[0, 6]        = ...(35988 values omitted)..., 
+vals[0, 35994]    = 0.756006062030792, 0.770563066005707, 
+vals[0, 35996]    = 0.786264479160309, 0.803043246269226, 
+vals[0, 35998]    = 0.820833325386047, 0.839570462703705}}
+---------------
+name              = "p"
+nels              = 39401
+dims[0]           = {31, 41, 31}
+max_index[0]      = {30, 40, 30}
+vals[0]           = {{1.190943479537964, 1.218125700950623,
+vals[0, 2]        = 1.245107889175415, 1.271674990653992,
+vals[0, 4]        = 1.297584056854248, 1.322565793991089,
+vals[0, 6]        = ...(39389 values omitted)..., 
+vals[0, 39395]    = 0.000000000000000, 0.000000000000000, 
+vals[0, 39397]    = 0.000000000000000, 0.000000000000000, 
+vals[0, 39399]    = 0.000000000000000, 0.000000000000000}}
+***************
+</pre></td></tr></table></P><P>
+
+A compound array is composed of zero or more subarrays.  A subarray can
+be printed by saying something like <SAMP>`carray.b'</SAMP>, but a subarray is
+also printed by saying just <SAMP>`b'</SAMP> as long as <SAMP>`b'</SAMP> is not some
+other type of object and <SAMP>`b'</SAMP> exists in exactly one compound array.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>carray</B>
+                  = struct
+name              =    "carray"
+id                =    0
+nelems            =    3
+nvalues           =    18
+datatype          =    float
+a[0]              =    {0.00000, 0.34185, 0.64252, 0.86576}
+b[0]              =    {0.98468, 0.98496, 0.86656, 0.64374, 0.34335,
+b[5]              =    0.00159}
+c[0]              =    {-0.34036, -0.64130, -0.86496, -0.98441, 
+c[4]              =    -0.98523, -0.86735, -0.64495, -0.34485}
+
+&#62; <B>b</B>
+[0]               = {0.98468, 0.98496, 0.86656, 0.64374, 0.34335, 
+[5]               = 0.00159}
+
+&#62; <B>b[2]</B>
+[2]               = {0.86656}
+</pre></td></tr></table></P><P>
+
+If the file is opened for reading and writing (the default) then
+variables can be given new values.  The new values are written back to
+the file immediately.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>_fileinfo</B>
+                  = "3D rectilinear test file"
+&#62; <B>_fileinfo = "testing"</B>
+                  = "testing"
+&#62; <B>_fileinfo</B>
+                  = "testing"
+</pre></td></tr></table></P><P>
+
+A scalar variable assigned to an array (or slice of an array) sets all
+the elements of that array (or slice) to the specified value.  A list of
+values enclosed in curly braces can be assigned to an array (or slice of
+an array) causing each element of the array (or slice) to be set to one
+of the listed values.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>typeof v_data</B>
+                  = [31, 41, 31] float
+&#62; <B>v_data = 0</B>
+                  = 0
+&#62; <B>v_data[0, 0, 2:4]</B>
+                  = {0, 0, 0}
+&#62; <B>v_data[0, 0, 2:4] = {0.111, 0.222, 0.333}</B>
+                  = {0.111, 0.222, 0.333}
+&#62; <B>v_data</B>
+[0, 0, 0]         = {0, 0, 0.111, 0.222, 0.333, 0, 
+[0, 0, 6]         = ...(39389 values omitted)..., 0, 0, 0,
+[30, 40, 28]      = 0, 0, 0}
+</pre></td></tr></table></P><P>
+
+Pressing control-c during a browser command aborts the command, but
+pressing control-c when the browser is asking for input aborts the
+browser.  It is more polite to press control-d or type <SAMP>`exit'</SAMP>
+instead since this gives the browser a chance to properly close database
+files.
+</P><P>
+
+<TABLE><tr><td>&nbsp;</td><td class=example><pre>&#62; <B>$truncate = nil</B>
+&#62; <B>d &#62;data_file</B>
+<B>control-c</B>
+
+Command aborted.
+&#62; <B>control-c</B>
+%
+</pre></td></tr></table></P><P>
+
+<HR SIZE="6">
+<A NAME="browser.html"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1>Footnotes</H1>
+<H3><A NAME="FOOT1" HREF="browser.html#DOCF1">(1)</A></H3>
+<P>In contrast, pressing the
+interrupt character during an interactive browser command aborts the
+command but not the browser.
+<H3><A NAME="FOOT2" HREF="browser.html#DOCF2">(2)</A></H3>
+<P>Changes
+should not be made to the <CODE>comp_names</CODE> or <CODE>pdb_names</CODE> arrays
+since the Silo <CODE>DBobject</CODE> is regenerated from the user-friendly
+fields before being saved back to the file.
+<H3><A NAME="FOOT3" HREF="browser.html#DOCF3">(3)</A></H3>
+<P>The path name may be
+different depending on how the browser was compiled.
+<H3><A NAME="FOOT4" HREF="browser.html#DOCF4">(4)</A></H3>
+<P>Opening a file on the command line is the same as
+saying <SAMP>`open "rect3d.pdb" $1'</SAMP> interactively.
+<H3><A NAME="FOOT5" HREF="browser.html#DOCF5">(5)</A></H3>
+<P> Whether or not something is a pointer is generally not
+important to using the browser: a 1d array of pointers to 1d arrays of
+integers can be treated like a ragged-edge 2d array of integers.
+<H3><A NAME="FOOT6" HREF="browser.html#DOCF6">(6)</A></H3>
+<P>The word <SAMP>`self'</SAMP> refers to the
+object corresponding to the innermost structure which incloses the
+<SAMP>`self'</SAMP>.
+<HR SIZE=1>
+<A NAME="SEC_Contents"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1>Table of Contents</H1>
+<UL>
+<A NAME="TOC1" HREF="browser.html#SEC1">Copyright</A>
+<BR>
+<A NAME="TOC2" HREF="browser.html#SEC2">1. The Browser Command Line</A>
+<BR>
+<A NAME="TOC3" HREF="browser.html#SEC3">2. Command Syntax</A>
+<BR>
+<A NAME="TOC4" HREF="browser.html#SEC4">3. Builtin Functions</A>
+<BR>
+<A NAME="TOC5" HREF="browser.html#SEC5">4. Operators</A>
+<BR>
+<A NAME="TOC6" HREF="browser.html#SEC6">5. Internal Variables</A>
+<BR>
+<UL>
+<A NAME="TOC7" HREF="browser.html#SEC7">5.1 Differencing Variables</A>
+<BR>
+<A NAME="TOC8" HREF="browser.html#SEC8">5.2 Output Variables</A>
+<BR>
+<A NAME="TOC9" HREF="browser.html#SEC9">5.3 File Variables</A>
+<BR>
+</UL>
+<A NAME="TOC10" HREF="browser.html#SEC10">6. Initializing the Browser</A>
+<BR>
+<A NAME="TOC11" HREF="browser.html#SEC11">7. Editing Database Objects</A>
+<BR>
+<A NAME="TOC12" HREF="browser.html#SEC12">8. Paging</A>
+<BR>
+<A NAME="TOC13" HREF="browser.html#SEC13">9. Redirection</A>
+<BR>
+<A NAME="TOC14" HREF="browser.html#SEC14">10. Interrupts</A>
+<BR>
+<A NAME="TOC15" HREF="browser.html#SEC15">11. Examples</A>
+<BR>
+</UL>
+<HR SIZE=1>
+<A NAME="SEC_OVERVIEW"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1>Short Table of Contents</H1>
+<BLOCKQUOTE>
+<A NAME="TOC1" HREF="browser.html#SEC1">Copyright</A>
+<BR>
+<A NAME="TOC2" HREF="browser.html#SEC2">1. The Browser Command Line</A>
+<BR>
+<A NAME="TOC3" HREF="browser.html#SEC3">2. Command Syntax</A>
+<BR>
+<A NAME="TOC4" HREF="browser.html#SEC4">3. Builtin Functions</A>
+<BR>
+<A NAME="TOC5" HREF="browser.html#SEC5">4. Operators</A>
+<BR>
+<A NAME="TOC6" HREF="browser.html#SEC6">5. Internal Variables</A>
+<BR>
+<A NAME="TOC10" HREF="browser.html#SEC10">6. Initializing the Browser</A>
+<BR>
+<A NAME="TOC11" HREF="browser.html#SEC11">7. Editing Database Objects</A>
+<BR>
+<A NAME="TOC12" HREF="browser.html#SEC12">8. Paging</A>
+<BR>
+<A NAME="TOC13" HREF="browser.html#SEC13">9. Redirection</A>
+<BR>
+<A NAME="TOC14" HREF="browser.html#SEC14">10. Interrupts</A>
+<BR>
+<A NAME="TOC15" HREF="browser.html#SEC15">11. Examples</A>
+<BR>
+
+</BLOCKQUOTE>
+<HR SIZE=1>
+<A NAME="SEC_About"></A>
+<TABLE CELLPADDING=1 CELLSPACING=1 BORDER=0>
+<TR><TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Top">Top</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_Contents">Contents</A>]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[Index]</TD>
+<TD VALIGN="MIDDLE" ALIGN="LEFT">[<A HREF="browser.html#SEC_About"> ? </A>]</TD>
+</TR></TABLE>
+<H1>About this document</H1>
+This document was generated by <I>Mark Miller</I> on <I>May, 3  2006</I>
+using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
+"><I>texi2html</I></A>
+<P></P>  
+The buttons in the navigation panels have the following meaning:
+<P></P>
+<table border = "1">
+<TR>
+<TH> Button </TH>
+<TH> Name </TH>
+<TH> Go to </TH>
+<TH> From 1.2.3 go to</TH>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [ &lt; ] </TD>
+<TD ALIGN="CENTER">
+Back
+</TD>
+<TD>
+previous section in reading order
+</TD>
+<TD>
+1.2.2
+</TD>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [ &gt; ] </TD>
+<TD ALIGN="CENTER">
+Forward
+</TD>
+<TD>
+next section in reading order
+</TD>
+<TD>
+1.2.4
+</TD>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [ &lt;&lt; ] </TD>
+<TD ALIGN="CENTER">
+FastBack
+</TD>
+<TD>
+previous or up-and-previous section 
+</TD>
+<TD>
+1.1
+</TD>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [ Up ] </TD>
+<TD ALIGN="CENTER">
+Up
+</TD>
+<TD>
+up section
+</TD>
+<TD>
+1.2
+</TD>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [ &gt;&gt; ] </TD>
+<TD ALIGN="CENTER">
+FastForward
+</TD>
+<TD>
+next or up-and-next section
+</TD>
+<TD>
+1.3
+</TD>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [Top] </TD>
+<TD ALIGN="CENTER">
+Top
+</TD>
+<TD>
+cover (top) of document
+</TD>
+<TD>
+ &nbsp; 
+</TD>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [Contents] </TD>
+<TD ALIGN="CENTER">
+Contents
+</TD>
+<TD>
+table of contents
+</TD>
+<TD>
+ &nbsp; 
+</TD>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [Index] </TD>
+<TD ALIGN="CENTER">
+Index
+</TD>
+<TD>
+concept index
+</TD>
+<TD>
+ &nbsp; 
+</TD>
+</TR>
+<TR>
+<TD ALIGN="CENTER">
+ [ ? ] </TD>
+<TD ALIGN="CENTER">
+About
+</TD>
+<TD>
+this page
+</TD>
+<TD>
+ &nbsp; 
+</TD>
+</TR>
+</TABLE>
+<P></P>
+where the <STRONG> Example </STRONG> assumes that the current position 
+is at <STRONG> Subsubsection One-Two-Three </STRONG> of a document of 
+the following structure:
+<UL>
+<LI> 1. Section One  </LI>
+<UL>
+<LI>1.1 Subsection One-One</LI>
+<UL>
+<LI> ... </LI>
+</UL>
+<LI>1.2 Subsection One-Two</LI>
+<UL>
+<LI>1.2.1 Subsubsection One-Two-One
+</LI><LI>1.2.2 Subsubsection One-Two-Two
+</LI><LI>1.2.3 Subsubsection One-Two-Three &nbsp; &nbsp; <STRONG>
+&lt;== Current Position </STRONG>
+</LI><LI>1.2.4 Subsubsection One-Two-Four
+</LI></UL>
+<LI>1.3 Subsection One-Three</LI>
+<UL>
+<LI> ... </LI>
+</UL>
+<LI>1.4 Subsection One-Four</LI>
+</UL>
+</UL>
+
+<HR SIZE=1>
+<BR>  
+<FONT SIZE="-1">
+This document was generated
+by <I>Mark Miller</I> on <I>May, 3  2006</I>
+using <A HREF="http://www.mathematik.uni-kl.de/~obachman/Texi2html
+"><I>texi2html</I></A>
+
+</BODY>
+</HTML>

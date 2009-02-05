@@ -1,0 +1,547 @@
+#!/bin/sh
+#-----------------------------------------------------------------------
+#
+# SILO-BUILD-CLOSED - Build the silo distributions on the closed network.
+#
+# Author: Eric Brugger
+# Date:   September 26, 2000
+#
+# Usage:
+#    silo-build-closed -d <distribution>
+#
+#-----------------------------------------------------------------------
+
+test=no
+
+user=`whoami`
+
+#
+# Parse the execute line, providing default values for error checking.
+#
+hitit=true
+sunset=true
+sc=true
+tidalwave=true
+white=true
+lilac=true
+gauss=true
+bgl=false
+
+dist=undefined
+
+#
+# The loop is executed once for each symbol on the execute line.  This means
+# that $1 may be blank for later executions of the loop if any "shift 2"
+# commands are executed.  The variable abc is not used in the loop.
+#
+for abc
+do
+   case $1 in
+      -none)
+         hitit=false
+         sunset=false
+         sc=false
+         tidalwave=false
+         white=false
+         lilac=false
+         gauss=false
+         bgl=false
+         shift
+         ;;
+      -hitit)
+         hitit=false
+         shift
+         ;;
+      +hitit)
+         hitit=true
+         shift
+         ;;
+      -sunset)
+         sunset=false
+         shift
+         ;;
+      +sunset)
+         sunset=true
+         shift
+         ;;
+      -sc)
+         sc=false
+         shift
+         ;;
+      +sc)
+         sc=true
+         shift
+         ;;
+      -tidalwave)
+         tidalwave=false
+         shift
+         ;;
+      +tidalwave)
+         tidalwave=true
+         shift
+         ;;
+      -white)
+         white=false
+         shift
+         ;;
+      +white)
+         white=true
+         shift
+         ;;
+      -lilac)
+         lilac=false
+         shift
+         ;;
+      +lilac)
+         lilac=true
+         shift
+         ;;
+      -gauss)
+         gauss=false
+         shift
+         ;;
+      +gauss)
+         gauss=true
+         shift
+         ;;
+      -bgl)
+         bgl=false
+         shift
+         ;;
+      +bgl)
+         bgl=true
+         shift
+         ;;
+      -d)
+         dist=$2
+         shift 2
+         ;;
+   esac
+done
+
+#
+# Check that both the version and distribution name were provided.
+#
+if [ $dist = undefined ]
+then
+   echo "Usage: -d <distribution>"
+   exit
+fi
+
+#
+# Check that the distribution exists.
+#
+distfile=$dist.sh
+if [ ! -f $distfile ]
+then
+   echo "Distribution file doesn't exist."
+   exit
+fi
+
+#
+# Build on hitit.
+#
+rm -f hitit
+cat <<EOF > hitit
+#!/bin/sh
+if test ! -d /gscratch/$user ; then
+   mkdir /gscratch/$user
+fi
+if test ! -d /gscratch/$user/hitit ; then
+   mkdir /gscratch/$user/hitit
+fi
+rm -rf /gscratch/$user/hitit/silobuild
+mkdir /gscratch/$user/hitit/silobuild
+mv $dist.sh.hitit /gscratch/$user/hitit/silobuild/$dist.sh
+cd /gscratch/$user/hitit/silobuild
+sh $dist.sh > buildlog 2>&1
+mkdir bin include lib
+cd $dist
+env CFLAGS=-O2 ./configure --without-readline --without-exodus --with-hdf5=/usr/gapps/hdf5/1.6.0/Linux/serial/default/optim/include,/usr/gapps/hdf5/1.6.0/Linux/serial/default/optim/lib --disable-static >> ../buildlog 2>&1
+make -j 4 >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsiloh5.a
+mv bin/browser ../bin/browser
+mv bin/silock ../bin/silock
+cp bin/silodiff ../bin/silodiff
+make distclean >> ../buildlog 2>&1
+env CFLAGS=-O2 ./configure --without-readline --without-exodus --without-hdf5 --disable-static >> ../buildlog 2>&1
+make -j 4 >> ../buildlog 2>&1
+cp lib/libsilo.a ../lib/libsilo.a
+cp include/silo.h include/silo.inc include/sdx.h include/sdx.inc ../include
+cd ..
+rm -f resultlog
+ls -l bin include lib >> resultlog 2>&1
+EOF
+
+if [ $hitit = true ]
+then
+   if [ $test = no ]
+   then
+      scp -P 22 hitit hitit:buildsilo_hitit
+      scp -P 22 $dist.sh hitit:$dist.sh.hitit
+      ssh -p 22 hitit "chmod 750 buildsilo_hitit;./buildsilo_hitit" &
+   fi
+fi
+
+#
+# Build on sunset.
+#
+# We are building with debug because there appears to be a compiler bug
+# that prevents setjmp and longjmp from working with optimization.
+#
+rm -f sunset
+cat <<EOF > sunset
+#!/bin/sh
+if test ! -d /export/scratch/$user ; then
+   mkdir /export/scratch/$user
+fi
+if test ! -d /export/scratch/$user/sunset ; then
+   mkdir /export/scratch/$user/sunset
+fi
+rm -rf /export/scratch/$user/sunset/silobuild
+mkdir /export/scratch/$user/sunset/silobuild
+mv $dist.sh.sunset /export/scratch/$user/sunset/silobuild/$dist.sh
+cd /export/scratch/$user/sunset/silobuild
+sh $dist.sh > buildlog 2>&1
+mkdir bin include lib
+cd $dist
+env CFLAGS=-g ./configure --without-readline --without-exodus --with-hdf5=/usr/gapps/hdf5/1.6.0/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.0/SunOS/serial/default/optim/lib >> ../buildlog 2>&1
+make -j 4 >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsiloh5.a
+mv bin/browser ../bin/browser
+mv bin/silock ../bin/silock
+cp bin/silodiff ../bin/silodiff
+make distclean >> ../buildlog 2>&1
+env CFLAGS=-g ./configure --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+make -j 4 >> ../buildlog 2>&1
+cp lib/libsilo.a ../lib/libsilo.a
+cp include/silo.h include/silo.inc include/sdx.h include/sdx.inc ../include
+cd ..
+rm -f resultlog
+ls -l bin include lib >> resultlog 2>&1
+EOF
+
+if [ $sunset = true ]
+then
+   if [ $test = no ]
+   then
+      scp sunset sunset:buildsilo_sunset
+      scp $dist.sh sunset:$dist.sh.sunset
+      ssh sunset "chmod 750 buildsilo_sunset;./buildsilo_sunset" &
+   fi
+fi
+
+#
+# Build on sc.
+#
+rm -f sc
+cat <<EOF > sc
+#!/bin/sh
+if test ! -d /nfs/tmp1/$user ; then
+   mkdir /nfs/tmp1/$user
+fi
+if test ! -d /nfs/tmp1/$user/sc ; then
+   mkdir /nfs/tmp1/$user/sc
+fi
+rm -rf /nfs/tmp1/$user/sc/silobuild
+mkdir /nfs/tmp1/$user/sc/silobuild
+mv $dist.sh.sc /nfs/tmp1/$user/sc/silobuild/$dist.sh
+cd /nfs/tmp1/$user/sc/silobuild
+sh $dist.sh > buildlog 2>&1
+mkdir bin include lib
+cd $dist
+./configure --without-readline --without-exodus --with-hdf5=/usr/local/hdf5/hdf5-1.6.0/serial/include,/usr/local/hdf5/hdf5-1.6.0/serial/lib >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsiloh5.a
+mv bin/browser ../bin/browser
+mv bin/silock ../bin/silock
+cp bin/silodiff ../bin/silodiff
+make distclean >> ../buildlog 2>&1
+./configure --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+cp lib/libsilo.a ../lib/libsilo.a
+cp include/silo.h include/silo.inc include/sdx.h include/sdx.inc ../include
+cd ..
+rm -f resultlog
+ls -l bin include lib > resultlog 2>&1
+EOF
+
+if [ $sc = true ]
+then
+   if [ $test = no ]
+   then
+      scp sc sc1:build_silo_sc
+      scp $dist.sh sc1:$dist.sh.sc
+      ssh sc1 "chmod 750 build_silo_sc;./build_silo_sc" &
+   fi
+fi
+
+#
+# Build on tidalwave.
+#
+rm -f tidalwave
+cat <<EOF > tidalwave
+#!/bin/sh
+if test ! -d /fc/san1/$user ; then
+   mkdir /fc/san1/$user
+fi
+if test ! -d /fc/san1/$user/tidalwave ; then
+   mkdir /fc/san1/$user/tidalwave
+fi
+rm -rf /fc/san1/$user/tidalwave/silobuild
+mkdir /fc/san1/$user/tidalwave/silobuild
+mv $dist.sh.tidalwave /fc/san1/$user/tidalwave/silobuild/$dist.sh
+cd /fc/san1/$user/tidalwave/silobuild
+sh $dist.sh > buildlog 2>&1
+mkdir bin include libo32 libn32 lib64
+cd $dist
+env CC=cc CFLAGS="-O2 -n32" ./configure --disable-sdx --without-readline --without-exodus --with-hdf5=/usr/local/hdf5/hdf5-1.6.0/serial/32/include,/usr/local/hdf5/hdf5-1.6.0/serial/32/lib >> ../buildlog 2>&1
+env PARALLEL=4 make -P >> ../buildlog 2>&1
+mv lib/libsilo.a ../libn32/libsiloh5.a
+make distclean >> ../buildlog 2>&1
+env CC=cc CFLAGS="-O2 -64" ./configure --disable-sdx --without-readline --without-exodus --with-hdf5=/usr/local/hdf5/hdf5-1.6.0/serial/64/include,/usr/local/hdf5/hdf5-1.6.0/serial/64/lib >> ../buildlog 2>&1
+env PARALLEL=4 make -P >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib64/libsiloh5.a
+mv bin/browser ../bin/browser
+mv bin/silock ../bin/silock
+cp bin/silodiff ../bin/silodiff
+make distclean >> ../buildlog 2>&1
+env CC=cc CFLAGS="-O2 -o32" ./configure --disable-sdx --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+env PARALLEL=4 make -P >> ../buildlog 2>&1
+mv lib/libsilo.a ../libo32/libsilo.a
+make distclean >> ../buildlog 2>&1
+env CC=cc CFLAGS="-O2 -n32" ./configure --disable-sdx --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+env PARALLEL=4 make -P >> ../buildlog 2>&1
+mv lib/libsilo.a ../libn32/libsilo.a
+make distclean >> ../buildlog 2>&1
+env CC=cc CFLAGS="-O2 -64" ./configure --disable-sdx --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+env PARALLEL=4 make -P >> ../buildlog 2>&1
+cp lib/libsilo.a ../lib64/libsilo.a
+cp include/silo.h include/silo.inc include/sdx.h include/sdx.inc ../include
+cd ..
+rm -f resultlog
+ls -l bin include libo32 libn32 lib64 > resultlog 2>&1
+EOF
+
+if [ $tidalwave = true ]
+then
+   if [ $test = no ]
+   then
+      scp tidalwave tidalwave:build_silo_tidalwave
+      scp $dist.sh tidalwave:$dist.sh.tidalwave
+      ssh tidalwave "chmod 750 build_silo_tidalwave;./build_silo_tidalwave" &
+   fi
+fi
+
+#
+# Build on white.
+#
+rm -f white
+cat <<EOF > white
+#!/bin/sh
+PATH=/usr/local/bin:$PATH
+if test ! -d /nfs/tmp1/$user ; then
+   mkdir /nfs/tmp1/$user
+fi
+if test ! -d /nfs/tmp1/$user/white ; then
+   mkdir /nfs/tmp1/$user/white
+fi
+rm -rf /nfs/tmp1/$user/white/silobuild
+mkdir /nfs/tmp1/$user/white/silobuild
+mv $dist.sh.white /nfs/tmp1/$user/white/silobuild/$dist.sh
+cd /nfs/tmp1/$user/white/silobuild
+sh $dist.sh > buildlog 2>&1
+mkdir bin include lib
+cd $dist
+env LDFLAGS=-q64 AR="ar -X 64" CFLAGS="-q64 -O2" ./configure --without-readline --without-exodus --with-hdf5=/usr/local/hdf5/hdf5-1.6.0/serial/64/include,/usr/local/hdf5/hdf5-1.6.0/serial/64/lib >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsiloh5.a
+mv bin/browser ../bin/browser
+mv bin/silock ../bin/silock
+cp bin/silodiff ../bin/silodiff
+make distclean >> ../buildlog 2>&1
+mv ../lib/libsiloh5.a lib/libsilo.a
+env LDFLAGS=-q32 AR="ar -X 32" CFLAGS="-q32 -O2" ./configure --without-readline --without-exodus --with-hdf5=/usr/local/hdf5/hdf5-1.6.0/serial/32/include,/usr/local/hdf5/hdf5-1.6.0/serial/32/lib >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsiloh5.a
+make distclean >> ../buildlog 2>&1
+env LDFLAGS=-q64 AR="ar -X 64" CFLAGS="-q64 -O2" ./configure --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsilo.a
+make distclean >> ../buildlog 2>&1
+mv ../lib/libsilo.a lib/libsilo.a
+env LDFLAGS=-q32 AR="ar -X 32" CFLAGS="-q32 -O2" ./configure --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+cp lib/libsilo.a ../lib/libsilo.a
+cp include/silo.h include/silo.inc include/sdx.h include/sdx.inc ../include
+cd ..
+rm -f resultlog
+uname -a > resultlog 2>&1
+ls -l bin include lib >> resultlog 2>&1
+EOF
+
+if [ $white = true ]
+then
+   if [ $test = no ]
+   then
+      scp white white:buildsilo_white
+      scp $dist.sh white:$dist.sh.white
+      ssh white "chmod 750 buildsilo_white;./buildsilo_white" &
+      sleep 4
+   fi
+fi
+
+#
+# Build on lilac.
+#
+rm -f lilac
+cat <<EOF > lilac
+#!/bin/sh
+if test ! -d /usr/tmp/$user ; then
+   mkdir /usr/tmp/$user
+fi
+if test ! -d /usr/tmp/$user/lilac ; then
+   mkdir /usr/tmp/$user/lilac
+fi
+rm -rf /usr/tmp/$user/lilac/silobuild
+mkdir /usr/tmp/$user/lilac/silobuild
+mv $dist.sh.lilac /usr/tmp/$user/lilac/silobuild/$dist.sh
+cd /usr/tmp/$user/lilac/silobuild
+sh $dist.sh > buildlog 2>&1
+mkdir bin include lib
+cd $dist
+env CFLAGS=-O2 ./configure --without-readline --without-exodus --with-hdf5=/usr/local/hdf5/hdf5-1.6.0/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.0/serial_gcc/lib --disable-static >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsiloh5.a
+mv bin/browser ../bin/browser
+mv bin/silock ../bin/silock
+cp bin/silodiff ../bin/silodiff
+make distclean >> ../buildlog 2>&1
+env CFLAGS=-O2 ./configure --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+cp lib/libsilo.a ../lib/libsilo.a
+cp include/silo.h include/silo.inc include/sdx.h include/sdx.inc ../include
+cd ..
+rm -f resultlog
+ls -l bin include lib > resultlog 2>&1
+EOF
+
+if [ $lilac = true ]
+then
+   if [ $test = no ]
+   then
+      scp lilac lilac3:build_silo_lilac
+      scp $dist.sh lilac3:$dist.sh.lilac
+      ssh lilac3 "chmod 750 build_silo_lilac;./build_silo_lilac" &
+   fi
+fi
+
+#
+# Build on gauss.
+#
+rm -f gauss
+cat <<EOF > gauss
+#!/bin/sh
+if test ! -d /usr/tmp/$user ; then
+   mkdir /usr/tmp/$user
+fi
+if test ! -d /usr/tmp/$user/gauss ; then
+   mkdir /usr/tmp/$user/gauss
+fi
+rm -rf /usr/tmp/$user/gauss/silobuild
+mkdir /usr/tmp/$user/gauss/silobuild
+mv $dist.sh.gauss /usr/tmp/$user/gauss/silobuild/$dist.sh
+cd /usr/tmp/$user/gauss/silobuild
+sh $dist.sh > buildlog 2>&1
+mkdir bin include lib
+cd $dist
+env CFLAGS="-O2 -fPIC" ./configure --without-readline --without-exodus --with-hdf5=/usr/gapps/visit/hdf5/1.6.0/chaos_3_x86_64_ib_gcc_3.4.4/include,/usr/gapps/visit/hdf5/1.6.0/chaos_3_x86_64_ib_gcc_3.4.4/lib --disable-static >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsiloh5.a
+mv bin/browser ../bin/browser
+mv bin/silock ../bin/silock
+cp bin/silodiff ../bin/silodiff
+make distclean >> ../buildlog 2>&1
+env CFLAGS="-O2 -fPIC" ./configure --without-readline --without-exodus --without-hdf5 --disable-static >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+cp lib/libsilo.a ../lib/libsilo.a
+cp include/silo.h include/silo.inc include/sdx.h include/sdx.inc ../include
+cd ..
+rm -f resultlog
+uname -a > resultlog 2>&1
+ls -l bin include lib >> resultlog 2>&1
+EOF
+
+if [ $gauss = true ]
+then
+   if [ $test = no ]
+   then
+      scp gauss gauss:buildsilo_gauss
+      scp $dist.sh gauss:$dist.sh.gauss
+      ssh gauss2 "chmod 750 buildsilo_gauss;./buildsilo_gauss" &
+   fi
+fi
+
+#
+# Build on bgl.
+#
+rm -f bgl
+cat <<EOF > bgl
+#!/bin/sh
+if test ! -d /tmp/$user ; then
+   mkdir /tmp/$user
+fi
+if test ! -d /tmp/$user/bgl ; then
+   mkdir /tmp/$user/bgl
+fi
+rm -rf /tmp/$user/bgl/silobuild
+mkdir /tmp/$user/bgl/silobuild
+mv $dist.sh.bgl /tmp/$user/bgl/silobuild/$dist.sh
+cd /tmp/$user/bgl/silobuild
+sh $dist.sh > buildlog 2>&1
+mkdir bin include lib
+cd $dist
+#
+# Note: build the tools for the front end
+# nodes but libs for the back end nodes.
+#
+env CC=gcc CFLAGS="-O2" ./configure --without-readline --without-exodus --with-hdf5=/usr/local/tools/hdf5/hdf5-1.6.4/serial/include,/usr/local/tools/hdf5/hdf5-1.6.4/serial/lib >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv bin/browser ../bin/browser
+mv bin/silock ../bin/silock
+cp bin/silodiff ../bin/silodiff
+cp lib/Silo.so ../lib/
+make distclean >> ../buildlog 2>&1
+env CFLAGS="-O2" ./configure --without-readline --without-exodus --disable-browser --with-hdf5=/usr/local/tools/hdf5/hdf5-1.6.4/serial/include,/usr/local/tools/hdf5/hdf5-1.6.4/serial/lib >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsiloh5.a
+make distclean >> ../buildlog 2>&1
+env CFLAGS="-O2" ./configure --without-readline --without-exodus --without-hdf5 >> ../buildlog 2>&1
+make >> ../buildlog 2>&1
+mv lib/libsilo.a ../lib/libsilo.a
+make distclean >> ../buildlog 2>&1
+cp include/silo.h include/silo.inc include/sdx.h include/sdx.inc ../include
+cd ..
+rm -f resultlog
+uname -a > resultlog 2>&1
+ls -l bin include lib >> resultlog 2>&1
+EOF
+
+if [ $bgl = true ]
+then
+   if [ $test = no ]
+   then
+      scp bgl bgl:buildsilo_bgl
+      scp $dist.sh bgl:$dist.sh.bgl
+      ssh bgl "chmod 750 buildsilo_bgl;./buildsilo_bgl" &
+      sleep 4
+   fi
+fi
+
+#
+# Clean up.
+#
+if [ $test = no ]
+then
+   rm -f hitit sunset sc tidalwave white lilac gauss bgl
+fi

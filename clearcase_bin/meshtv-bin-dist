@@ -1,0 +1,620 @@
+#!/bin/csh -f
+#-----------------------------------------------------------------------
+#
+# MESHTV-BIN-DIST - Build a compressed tar file from the meshtv executable
+#                   built in the dev directory.
+#
+# Author: Eric Brugger
+# Date:   October 31, 1996
+#
+# Usage:
+#    meshtv-bin-dist [-c] [-g] [-os osname] [-nct] [-nd] [-nh] [-nm]
+#                     -md <meshtv_dir> -v <version>
+#
+# Modifications:
+#    Brad Whitlock, Tue Nov 24 9:25:45 PDT 1998
+#    Added logic to package rgb.txt and MPEGTIPS.
+#
+#    Eric Brugger, Fri Jan 29 14:02:34 PST 1999
+#    Modified to better package up for different versions of solaris.
+#
+#    Sean Ahern, Thu Mar 18 17:47:48 PST 1999
+#    Made the script smarter about help.  Also made the usage not tell you 
+#    that "-md" is required.  Made "-nohelp" do the same thing as "-nh".
+#
+#    Eric Brugger, Wed Dec  1 07:54:06 PST 1999
+#    I modified the script to package up meshtv.bdiv.  I also modified the
+#    script to require that mpeg_encode exist on an irix system unless
+#    -np is specified on the execute line.  I also wrapped all operations
+#    on mpeg_encode with if tests so that they would not be performed if
+#    the file didn't exist.  This eliminates superfluous error messages.
+#
+#    Eric Brugger, Fri Jan  7 10:44:59 PST 2000
+#    I prefixed some commands with ./ to handle the case where . was
+#    not the first thing in a user's search path.
+#
+#    Eric Brugger, Sun Mar 26 13:39:46 PST 2000
+#    I removed all references to CRAY computers and UNICOS.
+#
+#    Brad Whitlock, Mon Mar 27 17:00:54 PST 2000
+#    Added support for TFLOPS O/S. Added -os argument.
+#
+#    Eric Brugger, Fri Mar 31 17:18:32 PST 2000
+#    I modified the script to handle the fact that silo/tests/extface
+#    now names its output file "globe.pdb" instead of "globe.silo".
+#
+#    Brad Whitlock, Fri May 19 16:25:11 PST 2000
+#    Changed where rgb.txt comes from.
+#
+#    Eric Brugger, Fri May 26 10:34:01 PDT 2000
+#    I modified the script to distribute silo/tools/browser/browser_help.txt.
+#
+#    Eric Brugger, Fri Jul  7 11:04:12 PDT 2000
+#    I modified the script to handle the new location of the copyright
+#    file.
+#
+#    Eric Brugger, Fri Jul  7 13:14:03 PDT 2000
+#    I modified the script to no longer distribute silo/tools/browser/
+#    browser_help.txt.
+#
+#    Jeremy Meredith, Wed Mar  6 11:18:25 PST 2002
+#    Added support for solaris-x86.
+#
+#-----------------------------------------------------------------------
+
+set Version = NONE
+set ColorTables = "TRUE"
+set DataFiles = "TRUE"
+set HelpFiles = "TRUE"
+set Compress = GZIP
+set MpegEncode = "TRUE"
+set MeshtvDir = .
+set OSGiven = "FALSE"
+
+#
+# Parse the argument list.
+#
+while ($#argv >= 1)
+   switch ($1)
+      case -c:
+               set Compress = COMPRESS
+               breaksw
+      case -g:
+               set Compress = GZIP
+               breaksw
+      case -os:
+               shift
+               set os = $1
+               set OSGiven = TRUE
+               breaksw
+      case -md:
+               shift
+               set MeshtvDir = $1
+               breaksw
+      case -nct:
+               set ColorTables = FALSE
+               breaksw
+      case -nd:
+               set DataFiles = FALSE
+               breaksw
+      case -nh:
+      case -nohelp:
+               set HelpFiles = FALSE
+               breaksw
+      case -nm:
+               set MpegEncode = FALSE
+               breaksw
+      case -v:
+               shift
+               set Version = $1
+               breaksw
+      default:
+               echo " "
+               echo ">>>>>>>>>>  Illegal option $1  <<<<<<<<<<"
+               echo " "
+               breaksw
+   endsw
+   shift
+end
+
+#
+# Determine the operating system.
+#
+if("$OSGiven" == "FALSE") then
+    set os = `/bin/uname -s | tr "[A-Z]" "[a-z]" | tr -d "[0-9]"`
+endif
+
+if ($Version == NONE) then
+   echo "Usage: meshtv-bin-dist [-c] [-g] [-os osname] [-nct] [-nd] [-nh]"
+   echo "                       [-nm] [-md <meshtv_dir>] -v <version>"
+   echo ""
+   echo "       -c              Compress the resultant package."
+   echo "       -g              Gzip the resultant package.  (default)"
+   echo "       -os             Operating system. When specified, it is used to name the resulting package."
+   echo "       -nct            No colortable files."
+   echo "       -nd             No data files."
+   echo "       -nh             No help files."
+   echo "       -nm             No mpeg_encode."
+   echo "       -md dir         Set where to find the distribution."
+   echo "       -v version      Set the version number to use."
+   exit (1)
+endif
+
+#
+# Set up the distribution directory and get rid of any old versions
+#
+rm -rf distribution
+mkdir distribution
+
+#
+# Check that the copyright exists.
+#
+if (! -e $MeshtvDir/COPYRIGHT) then
+   echo " "
+   echo "Error: The file $MeshtvDir/COPYRIGHT does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that the installation instructions exist.
+#
+if (! -e $MeshtvDir/INSTALL_NOTES) then
+   echo " "
+   echo "Error: The file $MeshtvDir/INSTALL_NOTES does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that all the files in the $MeshtvDir/meshtv directory exist.
+#
+if (! -d $MeshtvDir/meshtv) then
+   echo " "
+   echo "Error: The directory $MeshtvDir/meshtv does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/meshtv/MPEGTIPS) then
+   echo " "
+   echo "Error: The file $MeshtvDir/meshtv/MPEGTIPS does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/meshtv/REL_NOTES) then
+   echo " "
+   echo "Error: The file $MeshtvDir/meshtv/REL_NOTES does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/meshtv/Xdef.sgi) then
+   echo " "
+   echo "Error: The file $MeshtvDir/meshtv/Xdef.sgi does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/meshtv/Xdef.sun.bw) then
+   echo " "
+   echo "Error: The file $MeshtvDir/meshtv/Xdef.sun.bw does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/meshtv/Xdef.sun.color) then
+   echo " "
+   echo "Error: The file $MeshtvDir/meshtv/Xdef.sun.color does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/meshtv/meshtv.init) then
+   echo " "
+   echo "Error: The file $MeshtvDir/meshtv/meshtv.init does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/meshtv/meshtvx.init) then
+   echo " "
+   echo "Error: The file $MeshtvDir/meshtv/meshtvx.init does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that the browser files exist.
+#
+if (! -d $MeshtvDir/silo) then
+   echo " "
+   echo "Error: The directory $MeshtvDir/silo does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -d $MeshtvDir/silo/tools) then
+   echo " "
+   echo "Error: The directory $MeshtvDir/silo/tools does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -d $MeshtvDir/silo/tools/browser) then
+   echo " "
+   echo "Error: The directory $MeshtvDir/silo/tools/browser does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/silo/tools/browser/browser.init) then
+   echo " "
+   echo "Error: The file $MeshtvDir/silo/tools/browser/browser.init does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/silo/tools/browser/sample.init) then
+   echo " "
+   echo "Error: The file $MeshtvDir/silo/tools/browser/sample.init does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+if (! -e $MeshtvDir/silo/tools/browser/silodiff.init) then
+   echo " "
+   echo "Error: The file $MeshtvDir/silo/tools/browser/silodiff.init does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that the color tables directory exists.
+#
+if (! -e $MeshtvDir/meshtvx/colortables) then
+   echo " "
+   echo "Error: The directory $MeshtvDir/meshtvx/colortables does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that the silo/tests directory exists so that the data files
+# can be built.
+#
+if (! -e $MeshtvDir/silo/tests) then
+   echo " "
+   echo "Error: The directory $MeshtvDir/silo/tests does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that the help directory exists so that they can be included.
+#
+if (("$HelpFiles" == "TRUE") && (! -e $MeshtvDir/help)) then
+   echo "The directory $MeshtvDir/help does not exist."
+   echo "Distribution will not contain help files."
+   set HelpFiles = "FALSE"
+endif
+
+#
+# Check that the meshtvx initialization files directory exists.
+#
+if (! -e $MeshtvDir/meshtvx/init) then
+   echo " "
+   echo "Error: The directory $MeshtvDir/meshtvx/init does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that mpeg_encode exists if we are running on an irix system.
+#
+if (($MpegEncode == "TRUE") && ($os == "irix") && (! -e $MeshtvDir/bin/mpeg_encode)) then
+   echo " "
+   echo "Error: The file $MeshtvDir/bin/mpeg_encode does not exist."
+   echo "       The distribution will not be built without it.  aborting ..."
+   echo "       To override this behaviour specify -nm on the execute line."
+   echo " "
+   exit (1)
+endif
+
+#
+# Make the directory structure shell.
+#
+mkdir distribution/meshtv
+mkdir distribution/meshtv/aliases
+mkdir distribution/meshtv/bin
+mkdir distribution/meshtv/colortables
+mkdir distribution/meshtv/data
+if ($HelpFiles == "TRUE") then
+    mkdir distribution/meshtv/help
+endif
+mkdir distribution/meshtv/bin/hp-hpux-pa
+mkdir distribution/meshtv/bin/sgi-irix4-mips
+mkdir distribution/meshtv/bin/sgi-irix5-mips
+mkdir distribution/meshtv/bin/sgi-irix6-mips2
+mkdir distribution/meshtv/bin/sun4-sunos4-sparc
+mkdir distribution/meshtv/bin/sun4-sunos5-sparc
+mkdir distribution/meshtv/bin/ibm-aix-pwr
+mkdir distribution/meshtv/bin/dec-osf1-alpha
+mkdir distribution/meshtv/bin/linux
+mkdir distribution/meshtv/bin/intel-tflops-ppro
+mkdir distribution/meshtv/include
+mkdir distribution/meshtv/lib
+
+#
+# Change the permissions on all the directories so that they are correct.
+#
+chmod 755 distribution/meshtv
+chmod 755 distribution/meshtv/aliases
+chmod 755 distribution/meshtv/bin
+chmod 755 distribution/meshtv/colortables
+chmod 755 distribution/meshtv/data
+if ($HelpFiles == "TRUE") then
+    chmod 755 distribution/meshtv/help
+endif
+chmod 755 distribution/meshtv/bin/hp-hpux-pa
+chmod 755 distribution/meshtv/bin/sgi-irix4-mips
+chmod 755 distribution/meshtv/bin/sgi-irix5-mips
+chmod 755 distribution/meshtv/bin/sgi-irix6-mips2
+chmod 755 distribution/meshtv/bin/sun4-sunos4-sparc
+chmod 755 distribution/meshtv/bin/sun4-sunos5-sparc
+chmod 755 distribution/meshtv/bin/ibm-aix-pwr
+chmod 755 distribution/meshtv/bin/dec-osf1-alpha
+chmod 755 distribution/meshtv/bin/linux
+chmod 755 distribution/meshtv/bin/intel-tflops-ppro
+chmod 755 distribution/meshtv/include
+chmod 755 distribution/meshtv/lib
+
+#
+# Copy all the files in the top level directory.
+#
+cp $MeshtvDir/COPYRIGHT      distribution/meshtv/COPYRIGHT
+cp $MeshtvDir/INSTALL_NOTES  distribution/meshtv/INSTALL_NOTES
+
+#
+# Copy all the files in the ../meshtv directory.
+#
+cp $MeshtvDir/meshtv/MPEGTIPS       distribution/meshtv/MPEGTIPS
+cp $MeshtvDir/meshtv/REL_NOTES      distribution/meshtv/REL_NOTES
+cp $MeshtvDir/meshtv/Xdef.sgi       distribution/meshtv/Xdefaults.sgi
+cp $MeshtvDir/meshtv/Xdef.sun.bw    distribution/meshtv/Xdefaults.sun.bw
+cp $MeshtvDir/meshtv/Xdef.sun.color distribution/meshtv/Xdefaults.sun.color
+
+cp $MeshtvDir/meshtv/meshtv.init    distribution/meshtv/bin/meshtv
+cp $MeshtvDir/meshtv/meshtvx.init   distribution/meshtv/bin/meshtvx
+cp $MeshtvDir/bin/movie_generate    distribution/meshtv/bin/movie_generate
+if (($MpegEncode == "TRUE") && (-e $MeshtvDir/bin/mpeg_encode)) then
+   cp $MeshtvDir/bin/mpeg_encode    distribution/meshtv/bin/mpeg_encode
+endif
+cp $MeshtvDir/rgb.txt               distribution/meshtv/rgb.txt
+
+#
+# Copy all the files in the ../silo/tools/browser directory.
+#
+cp $MeshtvDir/silo/tools/browser/browser.init distribution/meshtv/bin/browser
+cp $MeshtvDir/silo/tools/browser/sample.init distribution/meshtv/include/browser_rc
+cp $MeshtvDir/silo/tools/browser/silodiff.init distribution/meshtv/bin/silodiff
+
+#
+# Copy all the files in the ../meshtvx/init directory.
+#
+cp $MeshtvDir/meshtvx/init/meshtv.bdiv distribution/meshtv/aliases/meshtv.bdiv
+cp $MeshtvDir/meshtvx/init/meshtv.cale distribution/meshtv/aliases/meshtv.cale
+cp $MeshtvDir/meshtvx/init/init distribution/meshtv/aliases/init
+
+#
+# Change the permissions on all the files so that they are correct.
+#
+chmod 644 distribution/meshtv/COPYRIGHT
+chmod 644 distribution/meshtv/INSTALL_NOTES
+chmod 644 distribution/meshtv/MPEGTIPS
+chmod 644 distribution/meshtv/REL_NOTES
+chmod 644 distribution/meshtv/Xdefaults.sgi
+chmod 644 distribution/meshtv/Xdefaults.sun.bw
+chmod 644 distribution/meshtv/Xdefaults.sun.color
+chmod 644 distribution/meshtv/rgb.txt
+
+chmod 644 distribution/meshtv/aliases/meshtv.cale
+chmod 644 distribution/meshtv/aliases/init
+
+chmod 755 distribution/meshtv/bin/meshtv
+chmod 755 distribution/meshtv/bin/meshtvx
+chmod 755 distribution/meshtv/bin/movie_generate
+if (-e distribution/meshtv/bin/mpeg_encode) then
+   chmod 755 distribution/meshtv/bin/mpeg_encode
+endif
+
+chmod 755 distribution/meshtv/bin/browser
+chmod 755 distribution/meshtv/bin/silodiff
+
+chmod 644 distribution/meshtv/include/browser_rc
+
+#
+# Copy the color tables.
+#
+if ($ColorTables == "TRUE") then
+   set pwd = `pwd`
+   cd $MeshtvDir/meshtvx/colortables
+   cp * $pwd/distribution/meshtv/colortables
+   chmod 644 $pwd/distribution/meshtv/colortables/*
+   cd $pwd
+endif
+
+#
+# Build the data files and copy them to the data directory.
+#
+if ($DataFiles == "TRUE") then
+   set pwd = `pwd`
+   cd $MeshtvDir/silo/tests
+   make testall
+   ./testall
+   mv rect2d.pdb $pwd/distribution/meshtv/data/rect2d.silo
+   mv curv2d.pdb $pwd/distribution/meshtv/data/curv2d.silo
+   mv ucd2d.pdb  $pwd/distribution/meshtv/data/ucd2d.silo
+   mv rect3d.pdb $pwd/distribution/meshtv/data/rect3d.silo
+   mv curv3d.pdb $pwd/distribution/meshtv/data/curv3d.silo
+   mv ucd3d.pdb  $pwd/distribution/meshtv/data/ucd3d.silo
+   chmod 644 $pwd/distribution/meshtv/data/rect2d.silo
+   chmod 644 $pwd/distribution/meshtv/data/curv2d.silo
+   chmod 644 $pwd/distribution/meshtv/data/ucd2d.silo
+   chmod 644 $pwd/distribution/meshtv/data/rect3d.silo
+   chmod 644 $pwd/distribution/meshtv/data/curv3d.silo
+   chmod 644 $pwd/distribution/meshtv/data/ucd3d.silo
+   make extface
+   ./extface
+   mv globe.pdb $pwd/distribution/meshtv/data/globe.silo
+   chmod 644 $pwd/distribution/meshtv/data/globe.silo
+   make point
+   ./point
+   mv point2d.pdb $pwd/distribution/meshtv/data/point2d.silo
+   chmod 644 $pwd/distribution/meshtv/data/point2d.silo
+   make clean
+   cd $pwd
+endif
+
+#
+# Copy in the help files.
+#
+#
+# Modifications:
+#     Sean Ahern, Wed Mar 17 16:19:21 PST 1999
+#     Made the find commands work.
+if ($HelpFiles == "TRUE") then
+   set pwd = `pwd`
+   cd $MeshtvDir/help
+   find . -print | cpio -pmud $pwd/distribution/meshtv/help
+   cd $pwd/distribution/meshtv/help
+   find . -type d -exec chmod 755 {} \;
+   find . -type f -exec chmod 644 {} \;
+   cd $pwd
+endif
+
+#
+# Find the executables built and copy them to the appropriate bin
+# directory.
+#
+set bindir = distribution/meshtv/bin
+
+#
+# Determine the os version string and hardware os string.
+#
+switch ($os)
+   case hp-ux:
+      echo "Found an HP-UX version of meshtv"
+      set osver = hp
+      set meshtvbindir = hp-hpux-pa
+      breaksw
+
+   case irix:
+      set version = `/bin/uname -r`
+      set osver = irix`expr $version : '\([456]\).*'`
+      if ($osver == irix4) then
+         echo "Found an IRIX 4 version of meshtv"
+         set osver = irix4
+         set meshtvbindir = sgi-irix4-mips
+      endif
+      if ($osver == irix5) then
+         echo "Found an IRIX 5 version of meshtv"
+         set osver = irix5
+         set meshtvbindir = sgi-irix5-mips
+
+         #
+         # Make irix6 be a link to irix5.
+         #
+         ln -s ../sgi-irix5-mips/meshtv$Version distribution/meshtv/bin/sgi-irix6-mips2/meshtv$Version
+         ln -s ../sgi-irix5-mips/meshtvx$Version distribution/meshtv/bin/sgi-irix6-mips2/meshtvx$Version
+      endif
+      if ($osver == irix6) then
+         echo "Found an IRIX 6 version of meshtv"
+         set osver = irix6
+         set meshtvbindir = sgi-irix6-mips2
+      endif
+      breaksw
+
+   case sunos:
+      set mach=`/bin/uname -m`
+      set machver=`expr $mach : '\(sun4\).*'`
+      set version=`/bin/uname -r`
+      if ($mach == i86pc) then
+         echo "Found a Solaris (Intel) version of meshtv"
+         set osver = solaris$version
+         set meshtvbindir = sun4-sunos5-sparc
+      endif
+      if ($mach == dino1) then
+         echo "Found a Solaris version of meshtv"
+         set osver = solaris$version
+         set meshtvbindir = sun4-sunos5-sparc
+      endif
+      if ($machver == sun4) then
+         set osver = sunos`expr $version : '\([45]\).*'`
+         if ($osver == sunos4) then
+            echo "Found a SunOS version of meshtv"
+            set osver = sunos
+            set meshtvbindir = sun4-sunos4-sparc
+         else
+            echo "Found a Solaris version of meshtv"
+            set osver = solaris$version
+            set meshtvbindir = sun4-sunos5-sparc
+         endif
+      endif
+      breaksw
+
+   case aix:
+      echo "Found an AIX version of meshtv"
+      set osver = aix
+      set meshtvbindir = ibm-aix-pwr
+      breaksw
+
+   case osf:
+      echo "Found an OSF1 version of meshtv"
+      set osver = osf1
+      set meshtvbindir = dec-osf1-alpha
+      breaksw
+
+   case linux:
+      echo "Found a Linux version of meshtv"
+      set osver = linux
+      set meshtvbindir = linux
+      breaksw
+
+   case tflops:
+      echo "Found a TFLOPS version of meshtv"
+      set osver = tflops
+      set meshtvbindir = intel-tflops-ppro
+      breaksw
+endsw
+
+#
+# Copy the executables to the distribution.
+#
+cp $MeshtvDir/bin/meshtv  $bindir/$meshtvbindir/meshtv$Version
+cp $MeshtvDir/bin/meshtvx $bindir/$meshtvbindir/meshtvx$Version
+cp $MeshtvDir/bin/browser $bindir/$meshtvbindir/browser$Version
+chmod 755 $bindir/$meshtvbindir/meshtv$Version
+chmod 755 $bindir/$meshtvbindir/meshtvx$Version
+chmod 755 $bindir/$meshtvbindir/browser$Version
+
+#
+# Build the compressed tar file.
+#
+set fname = meshtv`echo $Version | tr "." "_"`.$osver.tar
+
+cd distribution
+if ($Compress == "COMPRESS") then
+   tar cvbf 20 $fname meshtv
+   compress $fname
+   mv $fname.Z ..
+else
+   tar cvbf 20 - meshtv | gzip --best > ../$fname.gz
+endif
+cd ..
+
+#
+# Clean up the temporary directories.
+#
+rm -rf distribution

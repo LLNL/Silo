@@ -1,0 +1,133 @@
+#!/bin/sh
+######################################################################
+#
+# Browser startup script.
+#
+######################################################################
+
+#
+# Determine the location of the browser directory.
+#
+arg0=$0
+mydir=`expr \
+  ${arg0-.}'/' : '\(/\)[^/]*/$' \
+  \| ${arg0-.}'/' : '\(.*[^/]\)//*[^/][^/]*//*$' \
+  \| .`
+
+cdir=`pwd`
+case $mydir in
+/*)
+    thisdir=$mydir
+    ;;
+.)
+    thisdir=$cdir
+    ;;
+*)
+    thisdir=$cdir/$mydir
+    ;;
+esac
+browserdir=`expr \
+  ${thisdir-.}'/' : '\(/\)[^/]*/$' \
+  \| ${thisdir-.}'/' : '\(.*[^/]\)//*[^/][^/]*//*$' \
+  \| .`
+
+TRAP_FPE=
+export TRAP_FPE
+
+SILOBROWSERHELPHOME=$browserdir/lib
+export SILOBROWSERHELPHOME
+
+#
+# Determine the location of the binaries for the machine.
+#
+browserbindir=unsupported
+[ -f /bin/uname ] && {
+   os=`/bin/uname -s | tr "[A-Z]" "[a-z]" | tr -d "[0-9]"`
+   case $os in
+   irix)
+      mach=`/bin/uname -m`
+      machver=mips2
+      case $mach in
+      IP4|IP5|IP6|IP12)
+         machver=mips;;
+      IP17|IP19|IP20|IP22)
+         machver=mips2;;
+      IP25|IP26|IP27|IP28|IP29|IP30|IP31|IP32)
+         machver=mips2;;
+#         Temporary until a mips4 version is created.
+#         machver=mips4;;
+      esac
+      version=`/bin/uname -r`
+      osver=irix`expr $version : '\([456]\).*'`
+      case $osver in
+      irix4)
+         browserbindir=$browserdir/bin/sgi-irix4-mips;;
+      irix5)
+         browserbindir=$browserdir/bin/sgi-irix5-mips;;
+      irix6)
+         browserbindir=$browserdir/bin/sgi-irix6-mips2;;
+      esac
+      ;;
+   sunos)
+      mach=`/bin/uname -m`
+      machver=`expr $mach : '\(sun4\).*'`
+      version=`/bin/uname -r`
+      osver=sunos`expr $version : '\([45]\).*`
+      case $mach in
+      dino1)
+         browserbindir=$browserdir/bin/sun4-sunos5-sparc
+      esac
+      case $machver in
+      sun4|sun4u)
+         browserbindir=$browserdir/bin/sun4-$osver-sparc
+      esac
+      ;;
+   hp-ux)
+      mach=`/bin/uname -m`
+      machver=`expr $mach : '\(9000/[78]\).*'`
+      case $machver in
+      9000/7|9000/8)
+         browserbindir=$browserdir/bin/hp-hpux-pa
+      esac
+      ;;
+   aix)
+      browserbindir=$browserdir/bin/ibm-aix-pwr
+      ;;
+   osf)
+      browserbindir=$browserdir/bin/dec-osf1-alpha
+      ;;
+   linux)
+      browserbindir=$browserdir/bin/linux
+      ;;
+   luke|leia|jedi|sn)
+      browserbindir=$browserdir/bin/unicos
+      ;;
+   esac
+}
+
+if [ $browserbindir = unsupported ]
+then
+   echo "This hardware platform is not supported by browser."
+   exit 1
+fi
+
+[ ! -d $browserbindir ] && {
+   echo "The executables for this hardware platform have not"
+   echo "been installed."
+   exit 1
+}
+
+#
+# Set the names of the browser executable.
+#
+browser_patt='browser4.*'        # Name of GUI executable
+
+#
+# Find the latest (by last modification time) browser executable.
+#
+browser=`/bin/ls -rt $browserbindir/$browser_patt | tail -1`
+
+#
+# Start it up!
+#
+exec $browser -f $browserdir/include/browser_rc "$@"

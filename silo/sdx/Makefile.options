@@ -1,0 +1,4 @@
+.NO_CONFIG_REC: /MeshTV_vob/lib/libsilo.a
+.NO_WINK_IN: /MeshTV_vob/lib/libsilo.a
+.NO_CONFIG_REC: sdxproto.c
+.NO_WINK_IN: sdxproto.c

@@ -1,0 +1,228 @@
+#!/bin/sh
+
+lines=`cat $0 | wc -l`
+lines=`expr $lines - 14`
+tail -$lines $0 > /tmp/runperl$$
+echo "# $0 $*" >> /tmp/runperl$$
+while [ $# -ne 0 ]
+do
+    line=$1
+    shift
+    totline="$totline\`$line"
+done
+exec perl -w /tmp/runperl$$ $0 $totline
+
+# Perl begins here
+
+unlink($0);
+
+sub strippath
+{
+    local($fullname) = @_;
+
+    $fullname =~ m|^(.*/)?([^/]*)$|;
+    ($path,$file) = ($1,$2);
+    return($file,$path);
+}
+
+($0) = &strippath(shift);
+
+$args = "@ARGV";
+$args =~ s/^.//;
+@ARGV = split('\`',$args);
+
+# The real script begins here.
+
+use Env;
+
+$DEBUG = 0;
+
+$USER = $1;
+$cleartool = "/usr/atria/bin/cleartool";
+
+$file = $ENV{'CLEARCASE_PNAME'};
+$branch = $ENV{'CLEARCASE_BRTYPE_NAME'};
+$full = $CLEARCASE_XPNAME;
+($full_branch) = ($full =~ m|\@\@(.*)/\d+$|);
+
+print STDERR "File: $file\n" if ($DEBUG != 0);
+print STDERR "Full: $full\n" if ($DEBUG != 0);
+print STDERR "Branch: $branch\n" if ($DEBUG != 0);
+print STDERR "Full branch: $full_branch\n" if ($DEBUG != 0);
+
+# Find the branch name of the Release branch.  It's either the current branch, 
+# or part of the full branch name.
+if ($branch !~ /Release/)
+{
+    # We've got a branch that's under a release branch.  Get the release 
+    # branch name.
+    print STDERR "We've got a branch that's under a release branch\n" if ($DEBUG != 0);
+    if ($full_branch =~ m|/main/([^/]+)|)
+    {
+        $release_branch = $1;
+    } else
+    {
+        $release_branch = "main";
+    }
+} else {
+    # We've got a release branch.
+    print STDERR "We've got a release branch.\n" if ($DEBUG != 0);
+    $release_branch = "$branch";
+}
+
+print "Release branch: $release_branch\n" if ($DEBUG != 0);
+
+# We need to check if newer work has already been performed on this file.  If
+# it has, abort the operation.  Compare the $release_branch with the 
+# ReleaseBranch attribute.
+
+# Check for a "ReleaseBranch" attribute.
+$release_attr = `$cleartool desc -fmt \"%NS[ReleaseBranch]a" $file@@`;
+$release_attr =~ s/"//g;
+
+# If the attribute exists, and is a branch that is greater than the 
+# $release_branch, fail.
+if ($release_attr ne "")
+{
+    print STDERR "Release attribute: $release_attr\n" if ($DEBUG != 0);
+    ($attr_number) = ($release_attr =~ /Release_([\d\.]*)/);
+    print STDERR "Attribute number: $attr_number\n" if ($DEBUG != 0);
+
+    ($branch_number) = ($release_branch =~ /Release_([\d\.]*)/);
+    print STDERR "Branch number: $branch_number\n" if ((defined($branch_number)) && ($DEBUG != 0));
+
+    if (!defined($attr_number))
+    {
+        print STDERR <<"EOF";
+
+ERROR:  The release number for ReleaseBranch attribute "$release_attr" is not
+defined.  The string "$release_attr" must be of the form "Release_ddd", where
+"ddd" is a release number like "3.4".  Please see the ClearCase administrator
+to see what's wrong.
+
+EOF
+        exit(1);
+    }
+    if (!defined($branch_number))
+    {
+        if ($release_branch eq "main")
+        {
+            print STDERR <<"EOF";
+
+You are trying to check out \"$file\"
+on the bugfix branch.  Unfortunately, new work for Release $attr_number
+has already occurred on this file.  This file may now only
+be modified by new work toward Release $attr_number.  Work
+for the previous release and its bugfixes is no longer allowed.
+
+EOF
+            exit(1);
+        }
+
+        print STDERR <<"EOF";
+
+ERROR:  The release number for release branch "$release_branch" is not defined.
+The string "$release_branch" must be of the form "Release_ddd", where "ddd" is
+a release number like "3.4".  Please see the ClearCase administrator to see
+what's wrong.
+
+EOF
+        exit(1);
+    }
+    if ($attr_number eq 0)
+    {
+        print STDERR <<"EOF";
+
+ERROR:  The release number "$attr_number" has a numeric value of 0.  This is
+not a valid release number.  Please see the ClearCase administrator to see
+what's wrong.
+
+EOF
+        exit(1);
+    }
+    if ($branch_number eq 0)
+    {
+        print STDERR <<"EOF";
+
+ERROR:  The release number "$attr_number" has a numeric value of 0.  This is
+not a valid release number.  Please see the ClearCase administrator to see
+what's wrong.
+
+EOF
+        exit(1);
+    }
+
+    if ($branch_number < $attr_number)
+    {
+        print STDERR <<"EOF";
+
+You are trying to check out \"$file\" on branch
+\"$branch\".  Unfortunately, new work for Release $attr_number has
+already occurred on this file.  This file may now only be modified by new work
+toward Release $attr_number.  Work for Release $branch_number and its
+bugfixes is no longer allowed.
+
+EOF
+        exit(1);
+    }
+
+    print STDERR "Looks like the numbers are okay ($branch_number >= $attr_number).\n" if ($DEBUG != 0);
+}
+
+# Check the SingleBranchName attribute to see if we have permission to use this
+# file at all.
+
+# Check and see if the "SingleBranchName" attribute has been set already.  If
+# it has, abort the current operation.
+$singlebranchname =
+        `$cleartool desc -fmt \"%NS[SingleBranchName]a" $file@@`;
+$singlebranchname =~ s/"//g;
+if ($singlebranchname ne "")
+{
+    $conflicting_user = `$cleartool desc -fmt "%Fu" -type brtype:$singlebranchname`;
+    print STDERR <<"EOF";
+ERROR: File "$file" is already being used on
+branch "$singlebranchname" by $conflicting_user.
+If you really need to work on "$file",
+negotiate with $conflicting_user.
+EOF
+    exit(1);
+}
+
+# Check to make sure the file is not a directory.  If it is, let the
+# operation proceed.
+if (-d $file)
+{
+    # File is a directory.
+    exit(0);
+}
+
+# Things are alright.  If we're not on a release branch, attach the
+# SingleBranchName attribute.
+if ($branch !~ /Release/)
+{
+    $status = system("$cleartool mkattr -replace SingleBranchName \\\"$branch\\\" $file@@");
+    $status /= 256;
+} else {
+    # If we *are* on a release branch, attach the ReleaseBranch attribute, and
+    # either set or delete the OldReleaseBranch attribute.  Let the operation
+    # proceed.
+
+    $status = system $cleartool, "mkattr", "-replace", "ReleaseBranch",
+                     "\"$release_branch\"", "$file@@";
+    $status /= 256;
+    if ($release_attr ne "")
+    {
+        $status = system("$cleartool mkattr -replace OldReleaseBranch \\\"$release_attr\\\" $file@@");
+        $status /= 256;
+    } else {
+        $old_attr = `$cleartool desc -fmt \"%NS[OldReleaseBranch]a" $file@@`;
+        $old_attr =~ s/"//g;
+        if ($old_attr ne "")
+        {
+            $status = system("$cleartool rmattr OldReleaseBranch $file@@");
+            $status /= 256;
+        }
+    }
+}
+exit($status);

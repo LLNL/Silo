@@ -1,0 +1,838 @@
+/*
+ * SCCTLA.C - auxilliary functions for control structure package
+ *          - these should NEVER be modified for a specific application
+ *
+ * Source Version: 2.0
+ * Software Release #92-0043
+ *
+ *
+ */
+#include <score.h>
+#include <limits.h>
+#include <stdlib.h>
+
+typedef union u_mem_header mem_header;
+typedef struct s_mem_descriptor mem_descriptor;
+
+#define SC_MEM_ID       0xF1E2D3C4
+#define UNIT_SIZE_MAX   10
+
+/*
+ * This parameter controls wether small requests for memory go to
+ * the system memory manager or are allocated out of a larger chunks
+ * of memory which score manages.
+ */
+#undef CACHE_SMALL_MEM_REQ
+
+/*
+ * The struct s_mem_descriptor will contain prev and next fields if
+ * NEED_MEM_TRACE is defined and the macros ASSIGN_BLOCK, SAVE_LINKS,
+ * REASSIGN_BLOCK, UNASSIGN_BLOCK and the function lite_SC_realloc() use
+ * these fields.  These machines need this defined: irix, linux.
+ * These machines might get away with not defining this: meiko, solaris,
+ * sun, sun-gnu.
+ */
+#undef NEED_MEM_TRACE
+#ifdef NEED_MEM_TRACE
+
+/*
+ * Use the mem_header struct to force alignment to that of a double
+ * this solves all alignment problems (especially for RISC chips).
+ */
+
+struct s_mem_descriptor {
+   char			*name;
+   long 		id;
+   short 		ref_count;
+   short 		type;
+   long 		length;
+   mem_header 		*prev;
+   mem_header 		*next;
+};
+
+union u_mem_header {
+   mem_descriptor	block;
+   double 		align[3];
+};
+
+static mem_header	*_SC_latest_block ;
+
+#define ASSIGN_BLOCK(space, nb, name) {                                \
+      mem_descriptor *desc;                                            \
+      desc = &space->block;                                            \
+      desc->id        = SC_MEM_ID;                                     \
+      desc->ref_count = 1;                                             \
+      desc->type      = 0;                                             \
+      desc->length    = nb;                                            \
+      desc->name      = name;                                          \
+      if (_SC_latest_block != NULL) {                                  \
+	 mem_header *prev, *next;                                      \
+	 next = _SC_latest_block->block.next;                          \
+	 prev = _SC_latest_block;                                      \
+	 next->block.prev = space;                                     \
+	 prev->block.next = space;                                     \
+	 desc->next = next;                                            \
+	 desc->prev = prev;                                            \
+	 _SC_latest_block = space;                                     \
+      } else {                                                         \
+	 _SC_latest_block             = space;                         \
+	 _SC_latest_block->block.prev = space;                         \
+	 _SC_latest_block->block.next = space;			       \
+      }								       \
+   }
+
+#define SAVE_LINKS(desc) {                                             \
+      prev = desc->prev;                                               \
+      next = desc->next;                                               \
+      if (space == _SC_latest_block) _SC_latest_block = next;          \
+   }
+
+#define REASSIGN_BLOCK(space) {                                        \
+       desc = &space->block;                                           \
+       desc->length = nb;                                              \
+       prev->block.next = space;                                       \
+       next->block.prev = space;				       \
+    }
+
+#define UNASSIGN_BLOCK(desc) {                                         \
+       mem_header *prev, *next;                                        \
+       prev = desc->prev;                                              \
+       next = desc->next;                                              \
+       if (prev == next) _SC_latest_block = NULL;                      \
+       prev->block.next = next;                                        \
+       next->block.prev = prev;                                        \
+       if (space == _SC_latest_block) _SC_latest_block = next;         \
+    }
+
+#else /* NEED_MEM_TRACE */
+
+/*
+ * Use the mem_header struct to force alignment to that of a double
+ * this solves all alignment problems (especially for RISC chips)
+ */
+struct s_mem_descriptor {
+   char			*name;
+   long 		id;
+   short 		ref_count;
+   short 		type;
+   long 		length;
+};
+
+union u_mem_header {
+   mem_descriptor 	block;
+   double 		align[2];
+};
+
+#define ASSIGN_BLOCK(space, nb, name) {                                \
+      mem_descriptor *desc;                                            \
+      desc = &space->block;                                            \
+      desc->id        = SC_MEM_ID;                                     \
+      desc->ref_count = 1;                                             \
+      desc->type      = 0;                                             \
+      desc->length    = nb;                                            \
+      desc->name      = name;					       \
+   }
+
+#define SAVE_LINKS(desc) /*void*/
+
+#define REASSIGN_BLOCK(space) {                                        \
+       desc = &space->block;                                           \
+       desc->length = nb;					       \
+    }
+
+#define UNASSIGN_BLOCK(desc) /*void*/
+
+#endif /* NEED_MEM_TRACE */
+
+#define SCORE_BLOCK_P(desc)                                            \
+    ((desc)->id == SC_MEM_ID)
+
+#define BLOCK_LENGTH(desc)                                             \
+    (desc)->length
+
+#define REF_COUNT(desc)                                                \
+    ((desc)->ref_count)
+
+
+#define EXTRA_WORD_SIZE sizeof(long)
+#define NBITS (8*EXTRA_WORD_SIZE - 4)
+
+#define _SC_REALLOC (*_lite_SC_realloc_hook)
+#define _SC_ALLOC   (*_lite_SC_alloc_hook)
+#define _SC_FREE    (*_lite_SC_free_hook)
+
+#define SC_MEM_COUNT                                                   \
+    lite_SC_c_sp_diff = lite_SC_c_sp_alloc - lite_SC_c_sp_free;        \
+    lite_SC_c_sp_max  = (lite_SC_c_sp_max > lite_SC_c_sp_diff) ?       \
+                   lite_SC_c_sp_max : lite_SC_c_sp_diff
+
+FreeFuncType   		_lite_SC_free_hook    = (FreeFuncType) free;
+ReallocFuncType		_lite_SC_realloc_hook = (ReallocFuncType) realloc;
+MallocFuncType		_lite_SC_alloc_hook   = (MallocFuncType) malloc;
+
+
+#ifdef CACHE_SMALL_MEM_REQ
+static mem_descriptor	 *_SC_free_list[UNIT_SIZE_MAX];
+static char		**_SC_major_block_list ;
+static long		_SC_nx_major_blocks ;
+static long	 	_SC_n_major_blocks ;
+#endif
+
+static long		_SC_max_mem_blocks ;
+static long		_SC_n_mem_blocks ;
+static unsigned long	Sz_max = ( 1L << NBITS) - 1;        /* maximum value */
+static unsigned long	Sz = sizeof(mem_header);  /* size in bytes of header */
+static char		tokbuffer[MAXLINE];  /* used by firsttok and lasttok */
+static int		_SC_zero_space = TRUE;
+static byte *		_SC_prim_alloc (size_t) ;
+static void		_SC_prim_free (byte*,unsigned long) ;
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_alloc
+ *
+ * Purpose:	Add a layer of control over the C level mamory management
+ *		system to store the byte length of allocated spaces.
+ *		A space EXTRA_WORD_SIZE greater than requested is allocated.
+ *		The length in bytes is written into the first EXTRA_WORD_SIZE
+ *		bytes with a 4 bit marker in the high bits and a pointer
+ *		to the next byte is returned.
+ *
+ * Return:	Success:	Ptr to user memory
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+byte *
+lite_SC_alloc (long nitems, long bytepitem, char *name) {
+
+   long nb;
+   unsigned long nbp;
+   mem_header *space;
+
+   nb = nitems*bytepitem;
+
+   if ((nb <= 0) || (nb > Sz_max)) return(NULL);
+
+   nbp = (unsigned long) nb + Sz;
+   space = (mem_header *) _SC_prim_alloc((size_t) nbp);
+
+   if (space != NULL) {
+      ASSIGN_BLOCK(space, nb, name);
+
+      lite_SC_c_sp_alloc += nb;
+      SC_MEM_COUNT;
+    
+      _SC_max_mem_blocks++;
+      _SC_n_mem_blocks++;
+
+      space++;
+
+      /*
+       * Zero out the space.
+       */
+      if (_SC_zero_space) memset(space, 0, nb);
+   }
+
+   return((byte *) space);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_realloc
+ *
+ * Purpose:	Add a layer of control over the C level memory management
+ *		system to store the byte length of allocated spaces.  A
+ *		space EXTRA_WORD_SIZE greater than requested is reallocated.
+ *		The length in bytes is written into the first EXTRA_WORD_SIZE
+ *		bytes with a 4 bit marker in the high bits and a pointer to
+ *		the next byte is returned.  
+ *
+ * Return:	Success:	Ptr to move memory.
+ *
+ *		Failure:	If the maximum size implied by the
+ *				EXTRA_WORD_SIZE-4 is exceeded a NULL
+ *				ptr is returned.
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+byte *
+lite_SC_realloc (byte *p, long nitems, long bytepitem) {
+
+   long nb, ob, db;
+   unsigned long nbp, obp;
+   mem_header *space, *tmp;
+   mem_descriptor *desc;
+
+#ifdef NEED_MEM_TRACE
+   mem_header *prev, *next;
+#endif
+
+   if (p == NULL) return(NULL);
+
+   space = ((mem_header *) p) - 1;
+   desc  = &space->block;
+   if (!SCORE_BLOCK_P(desc)) return(NULL);
+
+   nb  = nitems*bytepitem;
+   nbp = nb + Sz;
+
+   if ((nb <= 0) || (nb > Sz_max)) return(NULL);
+
+   ob = lite_SC_arrlen(p);
+   db = nb - ob;
+    
+   SAVE_LINKS(desc);
+
+   tmp = (mem_header *) _SC_prim_alloc((size_t) nbp);
+   obp = ob + Sz;
+   memcpy(tmp, space, MIN(obp, nbp));
+   _SC_prim_free(space, obp);
+   space = tmp;
+    
+   if (space != NULL) {
+      REASSIGN_BLOCK(space);
+
+      lite_SC_c_sp_alloc += db;
+      SC_MEM_COUNT;
+
+      space++;
+
+      /*
+       * Zero out the new space.
+       */
+      if ((db > 0) && (_SC_zero_space)) memset(((char *) space + ob), 0, db);
+   }
+
+   return((byte *) space);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_free
+ *
+ * Purpose:	The complementary routine for lite_SC_alloc().  Free all
+ *		the space including the counter.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+lite_SC_free (byte *p) {
+
+   mem_header *space;
+   mem_descriptor *desc;
+   unsigned long nbp;
+
+   if (p == NULL) return(TRUE);
+
+   space = ((mem_header *) p) - 1;
+   desc  = &space->block;
+   if (!SCORE_BLOCK_P(desc)) return(FALSE);
+
+   if (REF_COUNT(desc) == UNCOLLECT) return(TRUE);
+
+   if (--REF_COUNT(desc) > 0) return(TRUE);
+
+   nbp = BLOCK_LENGTH(desc) + Sz;
+
+   UNASSIGN_BLOCK(desc);
+
+   lite_SC_c_sp_free += (nbp - Sz);
+   SC_MEM_COUNT;
+
+   if (_SC_zero_space) {
+      memset(space, 0, nbp);
+   } else {
+      desc->name      = NULL;
+      desc->id        = 0L;
+      desc->ref_count = 0;
+      desc->type      = 0;
+      desc->length    = 0L;
+   }
+
+   _SC_prim_free((byte *) space, nbp);
+   _SC_n_mem_blocks--;
+   return(TRUE);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_arrlen
+ *
+ * Purpose:	Return the length of an array which was allocated
+ *		with lite_SC_alloc().
+ *
+ * Return:	Success:	Length of array.
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+long
+lite_SC_arrlen (byte *p) {
+
+   mem_header *space;
+   mem_descriptor *desc;
+   long nb;
+
+   if (p == NULL) return(-1);
+
+   space = ((mem_header *) p) - 1;
+   desc  = &space->block;
+   if (!SCORE_BLOCK_P(desc)) return(-1L);
+
+   nb = BLOCK_LENGTH(desc);
+   if (nb < 0L) return(-1L);
+   else return(nb);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_mark
+ *
+ * Purpose:	Change the reference count by N
+ *
+ * Return:	Success:	New reference count.
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+lite_SC_mark (byte *p, int n) {
+
+   mem_header *space;
+   mem_descriptor *desc;
+
+   if (p == NULL) return(-1);
+
+   space = ((mem_header *) p) - 1;
+   desc  = &space->block;
+   if (!SCORE_BLOCK_P(desc)) return(-1);
+
+   if (REF_COUNT(desc) < UNCOLLECT) REF_COUNT(desc) += n;
+
+   return(REF_COUNT(desc));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_ref_count
+ *
+ * Purpose:	Reference count.
+ *
+ * Return:	Success:	Return the reference count of the given
+ *				object.
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+lite_SC_ref_count (byte *p) {
+
+   mem_header *space;
+   mem_descriptor *desc;
+
+   if (p == NULL) return(-1);
+
+   space = ((mem_header *) p) - 1;
+   desc  = &space->block;
+   if (!SCORE_BLOCK_P(desc)) return(-1);
+
+   return((int) REF_COUNT(desc));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	_SC_prim_alloc
+ *
+ * Purpose:	Memory allocator that manages banks of small chunks
+ *		for efficiency.
+ *
+ * Return:	Success:	Ptr to user memory
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *    Eric Brugger, Thu Dec 10 12:00:55 PST 1998
+ *    I made the caching of small memory chunks depend on a C preprocessor
+ *    variable.
+ *
+ *-------------------------------------------------------------------------
+ */
+static byte *
+_SC_prim_alloc (size_t nbp) {
+
+   byte *p;
+#ifdef CACHE_SMALL_MEM_REQ
+   char *pn;
+   mem_descriptor *md, *ths;
+   size_t tnb;
+   long nb, unsz;
+   int nu, us, ns, i;
+#endif
+
+   if (nbp <= 0) return(NULL);
+
+#ifdef CACHE_SMALL_MEM_REQ
+   nb   = nbp - Sz;
+   unsz = nb >> 3;
+   if (unsz < UNIT_SIZE_MAX) {
+      md = _SC_free_list[unsz];
+      if (md == NULL) {
+	 us = Sz + ((unsz + 1) << 3);
+	 nu = 4096/us;
+	 ns = nu*us;
+	 pn = _SC_ALLOC((size_t) ns);
+
+	 /*
+	  * SC_REMEMBER would be nice but it would also be a recursive
+	  * infinite loop.
+	  */
+	 if (_SC_major_block_list == NULL) {
+	    _SC_nx_major_blocks = 10L;
+	    _SC_n_major_blocks  = 0;
+	    tnb = sizeof(char *)*_SC_nx_major_blocks;
+	    _SC_major_block_list = (char **) _SC_ALLOC(tnb);
+	 }
+
+	 _SC_major_block_list[_SC_n_major_blocks++] = pn;
+
+	 if (_SC_n_major_blocks >= _SC_nx_major_blocks) {
+	    _SC_nx_major_blocks += 10L;
+	    tnb = sizeof(char *)*_SC_nx_major_blocks;
+	    _SC_major_block_list = (char **) _SC_REALLOC(_SC_major_block_list,
+							 tnb);
+	 }
+
+	 md = (mem_descriptor *) pn;
+	 nu--;
+	 for (i = 0; i < nu; i++, pn += us) {
+	    ths       = (mem_descriptor *) pn;
+	    ths->name = (char *) (pn + us);
+	 }
+	 ths       = (mem_descriptor *) pn;
+	 ths->name = NULL;
+      }
+
+      _SC_free_list[unsz] = (mem_descriptor *) (md->name);
+      p = (byte *) md;
+   } else {
+      p = _SC_ALLOC((size_t) nbp);
+   }
+#else
+   p = _SC_ALLOC((size_t) nbp);
+#endif
+
+   return(p);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	_SC_prim_free
+ *
+ * Purpose:	Free small block counterpart to _SC_prim_alloc()
+ *		for efficiency.
+ *
+ * Return:	void
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *    Eric Brugger, Thu Dec 10 12:00:55 PST 1998
+ *    I made the caching of small memory chunks depend on a C preprocessor
+ *    variable.
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static void
+_SC_prim_free (byte *p, unsigned long nbp) {
+
+#ifdef CACHE_SMALL_MEM_REQ
+   mem_descriptor *lst, *ths;
+   unsigned long nb, unsz;
+#endif
+
+   if (p == NULL) return;
+
+#ifdef CACHE_SMALL_MEM_REQ
+   nb   = nbp - Sz;
+   unsz = nb >> 3;
+   if (unsz < UNIT_SIZE_MAX) {
+      ths = (mem_descriptor *) p;
+      lst = _SC_free_list[unsz];
+      ths->name = (char *) lst;
+      _SC_free_list[unsz] = ths;
+   } else {
+      _SC_FREE(p);
+   }
+#else
+   _SC_FREE(p);
+#endif
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_strsavef
+ *
+ * Purpose:	Save string S somewhere.  Remember its name.  Allocate
+ *		one extra character so that firsttok won't kill things
+ *		in the one bad case.
+ *
+ * Return:	Success:	New memory for string.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+lite_SC_strsavef (char *s, char *name) {
+
+   char *p;
+   int sz;
+
+   if (s == NULL) return(NULL);
+
+   sz = strlen(s) + 2;
+   p  = FMAKE_N(char, sz, name);
+   if (p != NULL) strcpy(p, s);
+   else return(NULL);
+
+   return(p);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_strrev
+ *
+ * Purpose:	Copy the string onto itself in reverse order.
+ *
+ * Return:	Success:	The string
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+lite_SC_strrev (char *s) {
+
+   int i;
+   char *t, *p;
+
+   p = s;
+   i = strlen(s) + 1;
+   t = MAKE_N(char, i);
+   if (t == NULL) return(NULL);
+
+   t[--i] = '\0';
+   while (*p) t[--i] = *p++;
+
+   strcpy(s, t);
+   SFREE(t);
+
+   return(s);
+}
+
+/*--------------------------------------------------------------------------*/
+/*                           TOKENIZERS                                     */
+/*--------------------------------------------------------------------------*/
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_firsttok
+ *
+ * Purpose:	Returns a pointer to the first token and points
+ *		S to the next element in the string.
+ *
+ * Return:	Success:	Ptr to first token.
+ *
+ *		Failure:	
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+lite_SC_firsttok (char *s, char *delim) {
+
+   char *t, *r;
+        
+   if (*s == '\0') return(NULL);
+
+   /*
+    * T is the pointer to the token.
+    */
+   for (t = s; strchr(delim, *t) != NULL; t++) {
+      if (*t == '\0') return(NULL);
+   }
+
+   /*
+    * R is the pointer to the remainder.
+    */
+   for (r = t; strchr(delim, *r) == NULL; r++) /*void*/ ;
+
+   /*
+    * If we aren't at the end of the string.
+    */
+   if (*r != '\0') {
+      *r++ = '\0';
+
+      /*
+       * Copy the token into a temporary.
+       */
+      strcpy(tokbuffer, t);
+
+      /*
+       * Copy the remainder down into the original string
+       * GOTCHA: this should be replaced by MEMMOVE (ANSI standard C function)
+       */
+      strcpy(s, r);
+
+      /*
+       * Copy the token in the space left over.
+       */
+      t = s + strlen(s) + 1;
+      strcpy(t, tokbuffer);
+      
+   } else {
+      /*
+       * If we are at the end of the string we may overindex the string
+       * by adding one more character (sigh).
+       */
+      strcpy(tokbuffer, t);
+      *s = '\0';
+      t = s + 1;
+      strcpy(t, tokbuffer);
+   }
+
+   return(t);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	_lite_SC_pr_tok
+ *
+ * Purpose:	Returns a pointer to the first token and points S to
+ *		the next element in the string.
+ *
+ * Return:	Success:	First token in S
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+_lite_SC_pr_tok (char *s, char *delim) {
+
+   int i, j;
+        
+   i = strcspn(s, delim);
+   j = strlen(s);
+   if ((i == 0) && (i != j)) {
+      s++;
+      return(lite_SC_firsttok(s, delim));
+   }
+
+   s[i] = '\0';
+   strcpy(tokbuffer, s);
+
+   /*
+    * Take care of last token in string.
+    */
+   if (i == j) *s = '\0';
+   else strcpy(s, s+i+1);
+
+   s += strlen(s) + 1;
+   strcpy(s, tokbuffer);
+
+   return(s);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	lite_SC_lasttok
+ *
+ * Purpose:	Find last token on a string, return it and the
+ *		preceeding string.
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Adapted from PACT SCORE
+ *		Mar 12, 1996
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+lite_SC_lasttok (char *s, char *delim) {
+
+   char *temp, *r;
+
+   r    = lite_SC_strrev(s);
+   temp = _lite_SC_pr_tok(r, delim);
+   s    = lite_SC_strrev(r);
+
+   return lite_SC_strrev (temp);
+}

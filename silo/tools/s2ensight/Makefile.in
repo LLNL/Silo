@@ -1,0 +1,41 @@
+# Modifications:
+#
+
+## Programs and options...
+@SET_MAKE@
+@VARIABLES@
+
+CPPFLAGS=-I@tmpinc@ @CPPFLAGS@
+
+LIBS=-lsilo @LIBS@
+LIBDEP=$(tmplib)/libsilo.a
+
+## Files...
+SRC=s2ensight.c
+OBJ=$(SRC:.c=.o)
+TARGETS=s2ensight
+
+DISTRIB=
+
+## Standard targets...
+
+all:
+	@echo
+	@if (fmt</dev/null)>/dev/null 2>&1;then fmt="fmt -70";else fmt=cat;fi;\
+	   echo 'The s2ensight tool is not compiled by default.	 To compile it,'\
+	  'run "make s2ensight" from the silo/tools/s2ensight directory.' |\
+	   $$fmt | sed 's/^/NOTICE: /'
+	@echo
+
+s2ensight: s2ensight.o $(LIBDEP)
+	$(CC) $(CFLAGS) -o $@ s2ensight.o $(LDFLAGS) $(LIBS)
+
+clean:
+	$(RM) $(OBJ) $(TARGETS)
+	$(RM) .depend
+
+##
+## Other targets...
+##
+
+@TARGETS@

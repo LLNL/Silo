@@ -1,0 +1,397 @@
+                       Installation Notes for MeshTV
+                       -----------------------------
+
+
+In most cases, you can install MeshTV right away.  Should you need to
+build the code first, please scroll down until you find the section
+"To build MeshTV."
+
+To install MeshTV:
+-----------------
+
+1.  Run the meshtv-install script to install meshtv.  Note that it can
+    create a new distribution directory or update an existing
+    distribution.  This is handled automatically.
+
+        meshtv-install "version" "platform" "directory"
+
+    where
+
+        "version" will be 4.4 for the current distribution.
+
+        "platform" will be one of the following:  aix, hp, irix6,
+        linux, tflops, osf1, or solaris5.7 depending on the machine.
+        The value you use should match with the value found in the name
+        of the accompanying distribution file.
+
+        "directory" is the directory you wish to install meshtv into. 
+        If the directory doesn't exist the script will create it.
+
+    For example
+
+        meshtv-install 4.4 irix6 /usr/local/meshtv
+
+    will install the irix6, 4.4 version of meshtv in the directory
+    "/usr/local/meshtv".  Note that you will need to have the file
+    "meshtv4_4.irix6.tar.gz" present in the current directory for this
+    to function properly.  You can install multiple binaries into the
+    same directory.  For example, you could then execute
+
+        meshtv-install 4.4 osf1 /usr/local/meshtv
+
+    to install the osf1, 4.4 version of meshtv in the same directory.
+    
+2.  If you are running MeshTV on a network that does not have access
+    to the world wide web, you will need to install the html pages on
+    a local web server and change the setting of the "MESHTVURLHOME"
+    environment variable in the meshtv startup script as appropriate. 
+
+    The startup script can be found in the bin directory where you
+    installed meshtv.  For example, if you installed meshtv in the
+    directory "/usr/local/meshtv" then the startup script is named
+    "/usr/local/meshtv/bin/meshtv".
+
+3.  If you are running browser on a network that does not have access
+    to the world wide web, you will need to install the html pages on
+    a local web server and change the setting of the "doc_url" browser
+    variable in the browser startup script as appropriate.  The
+    startup script can be found in the bin directory where you
+    installed meshtv.  For example, if you installed meshtv in the
+    directory "/usr/local/meshtv" then the startup script is named
+    "/usr/local/meshtv/bin/browser".
+
+4.  Add the bin directory below the installation directory
+    (/usr/local/meshtv/bin in our example) to each user's search path. 
+    The best way to do this is to add it to the user's .cshrc file. 
+    The bin directory contains the meshtv script which starts MeshTV. 
+    It can be run on many machines.  The script determines the type of
+    machine it is running on and starts the appropriate executable. 
+    If meshtv were installed in the directory "/usr/local/meshtv",
+    then the following commands would set your search path
+    appropriately.
+
+        cd
+        echo "set path = ($path /usr/local/meshtv/bin)" >> .cshrc
+
+5.  Append the appropriate Xdefaults information onto the end of each
+    MeshTV user's .Xdefaults file.  If meshtv were installed in the
+    directory "/usr/local/meshtv", then the following commands would
+    add the appropriate Xdefaults information.
+
+        cd
+        cat /usr/local/meshtv/Xdefaults.sgi >>! ~/.Xdefaults
+
+You are now finished installing MeshTV.
+
+
+
+
+
+In some cases, you must build MeshTV before installing it.  If such is
+the case, finish this section on building the code, and then return to
+the beginning of this document to install MeshTV.
+
+To build MeshTV:
+---------------
+
+On all platforms MeshTV requires:
+
+        C compiler
+        X Window System include files and libraries
+        Motif include files and libraries
+
+Linux specifically requires at minimum:
+        gcc 2.5.8
+        X11R6 (XFree86 3.1.2)
+        Motif 1.2.4
+
+The following software is also required to build MeshTV:
+
+    DEC ALPHA:  OSF1 V3.2  or later
+    HP:         HPUX 9.0.3 or later
+    IBM RS6000: AIX 2 or later
+    Linux:      Linux 1.2.13
+                libc 4.5.23
+                libm 4.6.27
+    SGI:        Version IRIX 6.5 or later
+                GL include files and libraries (It can build 
+                without the GL include files and libraries but
+                you will not be able to take advantage of the
+                graphics hardware)
+    SUN:        Solaris 5.6
+
+If you do not have the minimum software requirements, you must obtain
+them before you can continue.
+
+1.  Extract the meshtv source distribution.
+
+        /bin/sh meshtv040308.sh
+        cd meshtv040308
+
+2.  Run "configure" as specified for the hardware platform (and OS) that you
+    are running on.  The directions for the unoptimized version give you
+    executables which can be debugged.
+
+    To build meshtv, skip down to the section for the hardware platform (and
+    OS) you are running on.  First you will run "configure" to analyze your
+    operating system and to build the Makefiles.  Then you will run "make" to
+    build MeshTV's executables.  Some of the sections contain steps which could
+    not be automated.
+
+    If you have a machine that is not on the list, you should run configure
+    without any overrides.  If this does not work, you will need to override
+    some of the settings.  If you can not figure out what to override, you can
+    send e-mail to MeshTV@llnl.gov for more assistance.
+
+
+    DEC ALPHA (OSF):
+
+        Optimized and unoptimized version:
+
+            ./configure
+            make
+
+        Optimized and unoptimized parallel version:
+
+            ./configure --enable-parallel
+            make
+ 
+    HP (HP-UX):
+
+        Unoptimized version:
+
+            ./configure \
+                --x-includes="/usr/include/X11R5 /usr/include/Motif1.2" \
+                --x-libraries="/usr/lib/X11R5 /usr/lib/Motif1.2"
+            make
+
+        Optimized version:
+
+            env CFLAGS="-O" \
+                ./configure \
+                --x-includes="/usr/include/X11R5 /usr/include/Motif1.2" \
+                --x-libraries="/usr/lib/X11R5 /usr/lib/Motif1.2"
+            make
+
+    IBM RS6000 (AIX):
+
+        Parallel unoptimized version:
+
+            ./configure --enable-parallel
+            make
+
+        Parallel optimized version:
+
+            env CFLAGS="-O2" ./configure --enable-parallel
+            make
+
+        Scalar unoptimized version:
+
+            ./configure
+            make
+
+        Scalar optimized version:
+
+            env CFLAGS="-O2" ./configure
+            make
+
+    Intel (Linux):
+
+        Linux uses the gcc compiler which is able to make a debugged and 
+        optimized program at the same time.  Thus, there is no distinction 
+        between optimized and unoptimized on Linux.  It's always optimized.
+
+        Pre Linux 6.0:
+
+            To build:
+
+                ./configure
+                make
+
+        Linux 6.0:
+
+            Compiling will not work with some versions of Motif for
+            Red Hat Linux 6.0 since it may generate some unsatisfied
+            externals.  If you are using Metro Link Motif you can
+            download a patch from their ftp site.  A workaround is to
+            add the configure option "--disable-static" which allows
+            for use of dynamic libraries.
+
+            To build:
+
+                ./configure
+                make
+
+            To build with dynamic libraries:
+
+                ./configure --disable-static
+                make
+
+    Intel (TFLOPS O/S, COUGAR):
+
+        These instructions are for building MeshTV so it runs on ASCI Red.
+        The scalar version of MeshTV will only run on the service nodes which
+        run the TFLOPS O/S. The parallel version is a batch version of the MeshTV
+        engine that only runs on the compute nodes. Make sure to build both Scalar
+        and Parallel versions since browser and the GUI do not build in the Parallel
+        case. There are limited debugging utilities on this platform so only the 
+        optimized instructions are given. 
+
+        Scalar optimized version:
+
+            These instructions assume that you are building MeshTV on the Red
+            machine (janus) and *not* its compile server (sasn100).
+
+            env CC="pgcc" ./configure --x-includes=/usr/X11R6/include \
+            --x-libraries=/usr/X11R6/lib
+            make
+        
+        Parallel optimized batch version:
+
+            These instructions are more complex and require that you be logged
+            into the Red machine (janus) and its compile server (sasn100).
+            These instructions are for cross-compiling MeshTV on sasn100 so
+            that it will run on janus' compute nodes. Note that if MeshTV has
+            already been compiled in serial, you should rename ./bin/meshtvx to
+            ./bin/meshtvxs or something along those lines. If you do not do so, 
+            the serial version of meshtvx will be overwritten. You should also 
+            type "make clean" in the Mesa-3.0, silo, spi, and meshtvx directories.
+ 
+            1. Open two shell windows.
+            2. In the first window, log into sasn100.sandia.gov.
+            3. In the second window, log into janus.sandia.gov.
+            4. Uncompress the MeshTV distribution in window 1 (sasn100). 
+            5. Run the configure script in window 2 (janus). Use the following
+               arguments:
+
+               env CC="pgcc" CFLAGS="-DNOTUNIX" MESA_TARGET="cougar" \
+               ./configure --disable-sdx --disable-gui --enable-parallel
+
+            6. We need to run some detect programs in window 2 (janus). This
+               makes sure that we generate some header files correctly since
+               we will cross-compile MeshTV on sasn100. Type the commands listed
+               below.
+
+               6.1 cd silo/pdb; make detect; ./detect >> pdform.h
+               6.2 cd ../../spi; make detect; ./detect
+               6.3 cd ../include; cp config.h config.h.janus; cd ..
+
+            7. Now we want to start cross-compiling MeshTV for the compute nodes.
+               We need to re-run the configure script in window 1 (sasn100).
+               Type the commands listed below.
+
+               7.1 rm config.cache
+               7.2 env CC="cicc" CFLAGS="-DNOTUNIX" MESA_TARGET="cougar" \
+                   ./configure --disable-sdx --disable-gui --disable-browser \
+                   --enable-parallel
+
+            8. When configure is done, restore the config.h file that was
+               generated on janus. Type the following commands in window 1
+               (sasn100).
+
+               8.1 cd include; cp -f config.h.janus config.h; cd ..
+
+            9. Now we can start cross-compiling MeshTV for Red's compute node
+               operating system. Type the following into window 1 (sasn100).
+
+               make
+
+    SGI (IRIX):
+
+        Scalar IRIX 6.5 32 bit versions:
+
+            Unoptimized version:
+
+                env CC="cc" CFLAGS="-o32" ./configure
+                make
+
+            Optimized version:
+
+                env CC="cc" CFLAGS="-O2 -o32" ./configure
+                make
+
+        Parallel IRIX 6.5 64 bit versions:
+
+            Unoptimized version:
+
+                env CC="cc" CFLAGS="-64 -mips4" ./configure --enable-parallel
+                make
+
+            Optimized version:
+
+                env CC="cc" CFLAGS="-O2 -64 -mips4" ./configure \
+                --enable-parallel
+                make
+
+            Note that executables built in this fashion will only run on
+            R10000 and R12000 systems.
+
+        Parallel IRIX 6.5 32 bit versions:
+
+            Unoptimized version:
+
+                env CC="cc" CFLAGS="-n32" ./configure --enable-parallel
+                make
+
+            Optimized version:
+
+                env CC="cc" CFLAGS="-O2 -n32" ./configure --enable-parallel
+                make
+
+            Note that executables built in this fashion will only run on
+            R5000, R10000, and R12000 systems.
+
+        Scalar 64 bit versions:
+
+            Unoptimized version:
+
+                env CC="cc" CFLAGS="-64 -mips4" ./configure
+                make
+
+            Optimized version:
+
+                env CC="cc" CFLAGS="-O2 -64 -mips4" ./configure
+                make
+
+            Note that execubles built in this fashion will only run on
+            R10000 and R12000 systems.
+
+        Scalar unoptimized version:
+
+            ./configure
+            make
+
+        Scalar optimized version:
+
+            env CFLAGS="-O2" ./configure
+            make
+
+    Sun (Solaris):
+
+        Unoptimized version:
+
+            env CC="cc" ./configure --disable-ogl
+
+        Optimized version:
+
+            env CC="cc" CFLAGS="-O" ./configure --disable-ogl
+
+        make
+
+3.  Build the distribution tar file.
+
+        clearcase_bin/meshtv-bin-dist -v 4.4
+
+    If your system does not have gzip installed then you should add
+    "-c" to the execute line of meshtv-bin-dist.  This will cause the
+    script to use the UNIX utility "compress" instead of "gzip".
+
+    This will create a compressed tar file of the meshtv distribution
+    in the manager directory.  Its name will be meshtv4_4.zzz.tar.gz
+    where zzz depends on the hardware platform.  Now that you have the
+    distribution tar file you can proceed back to the beginning of
+    this document where it describes how to install MeshTV.
+
+4.  If things didn't work smoothly and you can't figure out how to
+    modify the configuration so that it builds properly on your system
+    you can send e-mail to MeshTV@llnl.gov for more assistance.

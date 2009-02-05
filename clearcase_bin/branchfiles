@@ -1,0 +1,2 @@
+#!/bin/sh
+cleartool ls -vob_only -recurse | fgrep -v /main/LATEST | fgrep -v -e '-->'

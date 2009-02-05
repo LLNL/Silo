@@ -1,0 +1,25 @@
+
+This directory contains the following informational files:
+
+INSTALL_NOTES:
+
+    This file contains instructions for building or installing MeshTV.
+    It contains instructions for installing a pre-built distribution or
+    building MeshTV on common Unix systems.  This is the file you should
+    start with, and is usually the only file you will need to read.
+
+CONFIGURE_NOTES
+
+    This file contains an overview of configure and describes useful
+    information for developers.  It may also contain useful information
+    if you have problems building MeshTV.
+    
+BUILD_NOTES
+
+    This file contains an overview of the build process and describes
+    useful information for developers.  It may also contain useful
+    information if you have problems building MeshTV.
+
+INSTALL_FAQ
+
+    A MeshTV installation FAQ.

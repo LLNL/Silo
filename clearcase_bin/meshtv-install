@@ -1,0 +1,321 @@
+#!/bin/csh -f
+#-----------------------------------------------------------------------
+#
+# MESHTV_INSTALL - Install a compressed tar file distribution of meshtv
+#                  in an existing directory.
+#
+# Author: Eric Brugger
+# Date:   October 31, 1996
+#
+# Usage
+#    meshtv-install [-g group] [-gw] version platform directory 
+#
+# Notes:
+#    The options must be first.
+#
+# Modifications:
+#    Brad Whitlock, Tue Nov 24 9:25:45 PDT 1998
+#    Added logic to install MPEGTIPS, movie_generate, mpeg_encode and
+#    rgb.txt
+#
+#    Eric Brugger, Fri Aug 27 10:03:27 PDT 1999
+#    I added the -g option which specifies the group ownership to set
+#    for the distribution.
+#
+#    Eric Brugger, Wed Dec  1 07:54:06 PST 1999
+#    I Modified the package to install meshtv.bdiv.  I  also wrapped all
+#    operations on mpeg_encode with if tests so that they would not be
+#    performed if the file didn't exist.  This eliminates superfluous error
+#    messages.
+#
+#    Sean Ahern, Mon Jan 31 17:28:29 PST 2000
+#    Modified to be a little more clear about the passed arguments.
+#
+#    Eric Brugger, Sun Mar 26 13:41:43 PST 2000
+#    I removed all references to CRAY computers and UNICOS.
+#
+#    Brad Whitlock, Mon Mar 27 17:13:17 PST 2000
+#    I added support for the TFLOPS O/S used on the red machine.
+#
+#    Eric Brugger, Fri May 26 10:37:50 PDT 2000
+#    I modified the script to install browser_help.txt.
+#
+#    Eric Brugger, Fri Jul  7 13:15:00 PDT 2000
+#    I modified the script to no longer install browser_help.txt.
+#
+#-----------------------------------------------------------------------
+
+set Compress = COMPRESS
+
+if ($#argv < 3) then
+   echo "Usage: meshtv-install [-g group] [-gw] version platform directory"
+   exit (1)
+endif
+
+if ($#argv >= 7) then
+   echo "Usage: meshtv-install [-g group] [-gw] version platform directory"
+   exit (1)
+endif
+
+set group_ownership = none
+set dir_permission = 755
+set file_permission = 644
+
+set option_found = true
+while ($option_found == true)
+   switch ($1)
+      case -gw:
+         set dir_permission = 775
+         set file_permission = 664
+         shift
+         breaksw
+      case -g:
+         set group_ownership = $2
+         shift
+         shift
+         breaksw
+      default:
+         set option_found = false
+         breaksw
+   endsw
+end
+
+if ($#argv != 3) then
+   echo "Usage: meshtv-install [-g group] [-gw] version platform directory"
+   exit (1)
+endif
+
+set version = $1;
+set base = `echo meshtv$version | tr "." "_"`
+set platform = $2
+set dir = $3
+
+set fname1 = $base.$platform.tar.Z
+if (! -e $fname1) then
+   set Compress = GZIP
+   set fname1 = $base.$platform.tar.gz
+   if (! -e $fname1) then
+      echo "Could not find file containing the distribution."
+      exit (2)
+   endif
+endif
+set fname2 = $base.$platform.tar
+
+#
+# If the directory name is not an absolute path then make it one.
+#
+if (`echo $dir | grep "^/"` == "") then
+   set dir = `pwd`/$dir
+endif
+
+#
+# Set up the distribution directory
+#
+rm -rf distribution
+mkdir distribution
+cp $fname1 distribution
+cd distribution
+if ($Compress == "COMPRESS") then
+   uncompress $fname1
+else
+   gunzip $fname1
+endif
+tar xvbf 20 $fname2
+cd ..
+
+#
+# Create any missing sections of the directory structure shell.
+#
+if (! -e $dir)                       mkdir $dir
+if (! -e $dir/aliases)               mkdir $dir/aliases
+if (! -e $dir/bin)                   mkdir $dir/bin
+if (! -e $dir/colortables)           mkdir $dir/colortables
+if (! -e $dir/data)                  mkdir $dir/data
+if (! -e $dir/help)                  mkdir $dir/help
+if (! -e $dir/include)               mkdir $dir/include
+if (! -e $dir/lib)                   mkdir $dir/lib
+if (! -e $dir/bin/hp-hpux-pa)        mkdir $dir/bin/hp-hpux-pa
+if (! -e $dir/bin/sgi-irix4-mips)    mkdir $dir/bin/sgi-irix4-mips
+if (! -e $dir/bin/sgi-irix5-mips)    mkdir $dir/bin/sgi-irix5-mips
+if (! -e $dir/bin/sgi-irix6-mips2)   mkdir $dir/bin/sgi-irix6-mips2
+if (! -e $dir/bin/sun4-sunos4-sparc) mkdir $dir/bin/sun4-sunos4-sparc
+if (! -e $dir/bin/sun4-sunos5-sparc) mkdir $dir/bin/sun4-sunos5-sparc
+if (! -e $dir/bin/ibm-aix-pwr)       mkdir $dir/bin/ibm-aix-pwr
+if (! -e $dir/bin/dec-osf1-alpha)    mkdir $dir/bin/dec-osf1-alpha
+if (! -e $dir/bin/linux)             mkdir $dir/bin/linux
+if (! -e $dir/bin/intel-tflops-ppro) mkdir $dir/bin/intel-tflops-ppro
+
+#
+# Remove any old files from the installation directory
+#
+if (-e $dir/COPYRIGHT-)           rm $dir/COPYRIGHT-
+if (-e $dir/INSTALL_NOTES-)       rm $dir/INSTALL_NOTES-
+if (-e $dir/MPEGTIPS-)            rm $dir/MPEGTIPS-
+if (-e $dir/REL_NOTES-)           rm $dir/REL_NOTES-
+if (-e $dir/VERSION-)             rm $dir/VERSION-
+if (-e $dir/Xdefaults.sgi-)       rm $dir/Xdefaults.sgi-
+if (-e $dir/Xdefaults.sun.bw-)    rm $dir/Xdefaults.sun.bw-
+if (-e $dir/Xdefaults.sun.color-) rm $dir/Xdefaults.sun.color-
+if (-e $dir/rgb.txt-)             rm $dir/rgb.txt-
+
+if (-e $dir/aliases/cale-)        rm $dir/aliases/cale-
+if (-e $dir/aliases/init-)        rm $dir/aliases/init-
+if (-e $dir/aliases/meshtv.bdiv-) rm $dir/aliases/meshtv.bdiv-
+if (-e $dir/aliases/meshtv.cale-) rm $dir/aliases/meshtv.cale-
+
+if (-e $dir/bin/meshtv-)          rm $dir/bin/meshtv-
+if (-e $dir/bin/meshtvx-)         rm $dir/bin/meshtvx-
+if (-e $dir/bin/movie_generate-)  rm $dir/bin/movie_generate-
+if (-e $dir/bin/mpeg_encode-)     rm $dir/bin/mpeg_encode-
+if (-e $dir/bin/browser-)         rm $dir/bin/browser-
+if (-e $dir/bin/silodiff-)        rm $dir/bin/silodiff-
+
+if (-e $dir/include/browser_rc-)  rm $dir/include/browser_rc-
+
+#
+# Copy any current files to the backup filenames
+#
+if (-e $dir/COPYRIGHT)           mv $dir/COPYRIGHT $dir/COPYRIGHT-
+if (-e $dir/INSTALL_NOTES)       mv $dir/INSTALL_NOTES $dir/INSTALL_NOTES-
+if (-e $dir/MPEGTIPS)            mv $dir/MPEGTIPS $dir/MPEGTIPS-
+if (-e $dir/REL_NOTES)           mv $dir/REL_NOTES $dir/REL_NOTES-
+if (-e $dir/VERSION)             mv $dir/VERSION $dir/VERSION-
+if (-e $dir/Xdefaults.sgi)       mv $dir/Xdefaults.sgi $dir/Xdefaults.sgi-
+if (-e $dir/Xdefaults.sun.bw)    mv $dir/Xdefaults.sun.bw $dir/Xdefaults.sun.bw-
+if (-e $dir/Xdefaults.sun.color) mv $dir/Xdefaults.sun.color $dir/Xdefaults.sun.color-
+if (-e $dir/rgb.txt)             mv $dir/rgb.txt $dir/rgb.txt-
+
+#
+# The cale aliases file used to be named cale.  If it exists move it to its
+# backed up new name (meshtv.cale-).  We then copy the current cale alias
+# file name to the current backed up name.  This will cause the old named
+# file to be clobbered if the alias file exists in both the old and new name,
+# which is ok.
+#
+if (-e $dir/aliases/cale)        mv $dir/aliases/cale $dir/aliases/meshtv.cale-
+if (-e $dir/aliases/init)        mv $dir/aliases/init $dir/aliases/init-
+if (-e $dir/aliases/meshtv.bdiv) mv $dir/aliases/meshtv.bdiv $dir/aliases/meshtv.bdiv-
+if (-e $dir/aliases/meshtv.cale) mv $dir/aliases/meshtv.cale $dir/aliases/meshtv.cale-
+
+if (-e $dir/bin/meshtv)          mv $dir/bin/meshtv $dir/bin/meshtv-
+if (-e $dir/bin/meshtvx)         mv $dir/bin/meshtvx $dir/bin/meshtvx-
+if (-e $dir/bin/movie_generate)  mv $dir/bin/movie_generate $dir/bin/movie_generate-
+if (-e $dir/bin/mpeg_encode)     mv $dir/bin/mpeg_encode $dir/bin/mpeg_encode-
+if (-e $dir/bin/browser)         mv $dir/bin/browser $dir/bin/browser-
+if (-e $dir/bin/silodiff)        mv $dir/bin/silodiff $dir/bin/silodiff-
+
+if (-e $dir/include/browser_rc)  mv $dir/include/browser_rc $dir/include/browser_rc-
+
+#
+# Handle links from irix6 to irix5 directory.  Since irix5 executables
+# run on irix6 systems create links from irix6 to irix5.  If installing
+# irix6 and the links exist then there is a problem in that the irix5
+# executables will get overridden, so we delete them first.
+#
+if ($platform == irix6) then
+   rm -f $dir/bin/sgi-irix6-mips2/meshtv$version
+   rm -f $dir/bin/sgi-irix6-mips2/meshtvx$version
+else
+   if ($platform == irix5) then
+      ln -s ../sgi-irix5-mips/meshtv$version  $dir/bin/sgi-irix6-mips2/meshtv$version
+      ln -s ../sgi-irix5-mips/meshtvx$version $dir/bin/sgi-irix6-mips2/meshtvx$version
+   endif
+endif
+
+#
+# Copy in the new files
+#
+cp distribution/meshtv/COPYRIGHT           $dir/COPYRIGHT
+cp distribution/meshtv/INSTALL_NOTES       $dir/INSTALL_NOTES
+cp distribution/meshtv/MPEGTIPS            $dir/MPEGTIPS
+cp distribution/meshtv/REL_NOTES           $dir/REL_NOTES
+cp distribution/meshtv/Xdefaults.sgi       $dir/Xdefaults.sgi
+cp distribution/meshtv/Xdefaults.sun.bw    $dir/Xdefaults.sun.bw
+cp distribution/meshtv/Xdefaults.sun.color $dir/Xdefaults.sun.color
+cp distribution/meshtv/rgb.txt             $dir/rgb.txt
+
+cp distribution/meshtv/aliases/meshtv.bdiv $dir/aliases/meshtv.bdiv
+cp distribution/meshtv/aliases/meshtv.cale $dir/aliases/meshtv.cale
+cp distribution/meshtv/aliases/init        $dir/aliases/init
+
+cp distribution/meshtv/bin/meshtv          $dir/bin/meshtv
+cp distribution/meshtv/bin/meshtvx         $dir/bin/meshtvx
+cp distribution/meshtv/bin/movie_generate  $dir/bin/movie_generate
+if (-e distribution/meshtv/bin/mpeg_encode) then
+   cp distribution/meshtv/bin/mpeg_encode  $dir/bin/mpeg_encode
+endif
+cp distribution/meshtv/bin/browser         $dir/bin/browser
+cp distribution/meshtv/bin/silodiff        $dir/bin/silodiff
+
+cp distribution/meshtv/include/browser_rc  $dir/include/browser_rc
+
+cp distribution/meshtv/bin/hp-hpux-pa/*        $dir/bin/hp-hpux-pa
+cp distribution/meshtv/bin/sgi-irix4-mips/*    $dir/bin/sgi-irix4-mips
+cp distribution/meshtv/bin/sgi-irix5-mips/*    $dir/bin/sgi-irix5-mips
+cp distribution/meshtv/bin/sgi-irix6-mips2/*   $dir/bin/sgi-irix6-mips2
+cp distribution/meshtv/bin/sun4-sunos4-sparc/* $dir/bin/sun4-sunos4-sparc
+cp distribution/meshtv/bin/sun4-sunos5-sparc/* $dir/bin/sun4-sunos5-sparc
+cp distribution/meshtv/bin/ibm-aix-pwr/*       $dir/bin/ibm-aix-pwr
+cp distribution/meshtv/bin/dec-osf1-alpha/*    $dir/bin/dec-osf1-alpha
+cp distribution/meshtv/bin/linux/*             $dir/bin/linux
+cp distribution/meshtv/bin/intel-tflops-ppro/* $dir/bin/intel-tflops-ppro
+
+cp distribution/meshtv/colortables/*           $dir/colortables
+
+cp distribution/meshtv/data/*                  $dir/data
+
+if (-e distribution/meshtv/help) then
+    cd distribution/meshtv/help
+    find . -print | cpio -pmud $dir/help
+    cd ../../..
+endif
+
+#
+# Set the permissions properly
+#
+chmod $dir_permission $dir
+chmod $file_permission $dir/COPYRIGHT
+chmod $file_permission $dir/INSTALL_NOTES
+chmod $file_permission $dir/MPEGTIPS
+chmod $file_permission $dir/REL_NOTES
+chmod $file_permission $dir/Xdefaults.sgi
+chmod $file_permission $dir/Xdefaults.sun.bw
+chmod $file_permission $dir/Xdefaults.sun.color
+chmod $file_permission $dir/rgb.txt
+
+chmod $dir_permission $dir/aliases
+chmod $file_permission $dir/aliases/*
+
+chmod $dir_permission $dir/bin
+chmod $dir_permission $dir/bin/*
+
+chmod $dir_permission $dir/bin/*/*
+
+chmod $dir_permission $dir/colortables
+chmod $file_permission $dir/colortables/*
+
+chmod $dir_permission $dir/data
+chmod $file_permission $dir/data/*
+rm -f $dir/data/point.silo
+
+chmod $dir_permission $dir/include
+chmod $file_permission $dir/include/*
+
+chmod $dir_permission $dir/lib
+chmod $file_permission $dir/lib/*
+
+chmod $dir_permission $dir/help
+find $dir/help -type d -exec chmod $dir_permission {} \;
+find $dir/help -type f -exec chmod $file_permission {} \;
+
+#
+# Set the group ownership properly
+#
+if ($group_ownership != none) then
+    chgrp -R $group_ownership $dir
+endif
+
+#
+# Clean up the temporary directories.
+#
+rm -rf distribution

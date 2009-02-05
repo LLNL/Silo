@@ -1,0 +1,218 @@
+#!/bin/sh
+#-----------------------------------------------------------------------
+#
+# MESHTV-INSTALL-CLOSED - Install the meshtv distributions on the closed
+#                         network.
+#
+# Author: Eric Brugger
+# Date:   May 15, 2000
+#
+# Usage:
+#    meshtv-install-closed [-public] -v <version>
+#
+#-----------------------------------------------------------------------
+
+test=no
+dir=/XXX
+
+#
+# Parse the execute line, providing default values for error checking.
+#
+warp=true
+oak=true
+y=true
+tidalwave=true
+
+ver=undefined
+
+#
+# The loop is executed once for each symbol on the execute line.  This means
+# that $1 may be blank for later executions of the loop if any "shift 2"
+# commands are executed.  The variable abc is not used in the loop.
+#
+for abc
+do
+   case $1 in
+      -none)
+         warp=false
+         oak=false
+         y=false
+         tidalwave=false
+         shift
+         ;;
+      -warp)
+         warp=false
+         shift
+         ;;
+      +warp)
+         warp=true
+         shift
+         ;;
+      -oak)
+         oak=false
+         shift
+         ;;
+      +oak)
+         oak=true
+         shift
+         ;;
+      -y)
+         y=false
+         shift
+         ;;
+      +y)
+         y=true
+         shift
+         ;;
+      -tidalwave)
+         tidalwave=false
+         shift
+         ;;
+      +tidalwave)
+         tidalwave=true
+         shift
+         ;;
+      -public)
+         dir=
+         shift
+         ;;
+      -v)
+         ver=$2
+         shift 2
+         ;;
+   esac
+done
+
+#
+# Check that both the version and distribution name were provided.
+#
+if [ $ver = undefined ]
+then
+   echo "Usage: [-public] -v <version>"
+   exit
+fi
+
+#
+# Install on warp.
+#
+rm -f warp
+cat <<EOF > warp
+#!/bin/sh
+cd /scratch/brugger
+cd warp/meshtvbuild
+./meshtv-install -g meshtv -gw $ver irix6 /usr/gapps/meshtv$dir > installlog 2>&1
+echo "        install of meshtv on warp"          > resultlog 2>&1
+echo "       ---------------------------"         >> resultlog 2>&1
+echo ""                                           >> resultlog 2>&1
+df -k /usr/gapps/meshtv                           >> resultlog 2>&1
+echo ""                                           >> resultlog 2>&1
+ls -l /usr/gapps/meshtv$dir/bin/sgi-irix6-mips2   >> resultlog 2>&1
+EOF
+
+if [ $warp = true ]
+then
+   if [ $test = no ]
+   then
+      scp -P 22 warp warp:install_meshtv_warp
+      ssh -p 22 warp "chmod 750 install_meshtv_warp;./install_meshtv_warp"
+   fi
+fi
+
+#
+# Install on oak.
+#
+rm -f oak
+cat <<EOF > oak
+#!/bin/sh
+cd /nfs/tmp1/brugger
+cd oak/meshtvbuild
+./meshtv-install -g swat -gw $ver osf1 /usr/gapps/meshtv$dir > installlog 2>&1
+cp meshtvp$ver meshtvxp$ver /usr/gapps/meshtv$dir/bin/dec-osf1-alpha
+cd /usr/gapps/meshtv$dir/bin/dec-osf1-alpha
+chmod 775 *; chgrp swat *
+cd /nfs/tmp1/brugger/oak/meshtvbuild
+echo "        install of meshtv on oak"           > resultlog 2>&1
+echo "       --------------------------"          >> resultlog 2>&1
+echo ""                                           >> resultlog 2>&1
+df -k /usr/gapps/meshtv                           >> resultlog 2>&1
+echo ""                                           >> resultlog 2>&1
+ls -l /usr/gapps/meshtv$dir/bin/dec-osf1-alpha    >> resultlog 2>&1
+EOF
+
+if [ $oak = true ]
+then
+   if [ $test = no ]
+   then
+      scp oak oak:install_meshtv_oak
+      ssh oak "chmod 750 install_meshtv_oak;./install_meshtv_oak"
+   fi
+fi
+
+#
+# Install on y.
+#
+rm -f y
+cat <<EOF > y
+#!/bin/sh
+cd /nfs/tmp1/brugger
+cd y/meshtvbuild
+./meshtv-install -g swat -gw $ver aix /usr/gapps/meshtv$dir > installlog 2>&1
+cp meshtvp$ver meshtvxp$ver /usr/gapps/meshtv$dir/bin/ibm-aix-pwr
+cd /usr/gapps/meshtv$dir/bin/ibm-aix-pwr
+chmod 775 *; chgrp swat *
+cd /nfs/tmp1/brugger/y/meshtvbuild
+echo "        install of meshtv on y"             > resultlog 2>&1
+echo "       ------------------------"            >> resultlog 2>&1
+echo ""                                           >> resultlog 2>&1
+df -k /usr/gapps/meshtv                           >> resultlog 2>&1
+echo ""                                           >> resultlog 2>&1
+ls -l /usr/gapps/meshtv$dir/bin/ibm-aix-pwr       >> resultlog 2>&1
+EOF
+
+if [ $y = true ]
+then
+   if [ $test = no ]
+   then
+      scp y y:install_meshtv_y
+      ssh y "chmod 750 install_meshtv_y;./install_meshtv_y"
+   fi
+fi
+
+#
+# Install on tidalwave.
+#
+rm -f tidalwave
+cat <<EOF > tidalwave
+#!/bin/sh
+cd /fc/san1/brugger
+cd tidalwave/meshtvbuild
+./meshtv-install -g swat -gw $ver irix6 /usr/local/apps/meshtv$dir > installlog 2>&1
+cp meshtvp$ver meshtvxp$ver /usr/local/apps/meshtv$dir/bin/sgi-irix6-mips2
+cd /usr/local/apps/meshtv$dir/bin/sgi-irix6-mips2
+chmod 775 *; chgrp swat *
+cd /fc/san1/brugger/tidalwave/meshtvbuild
+rm -f resultlog
+echo "        install of meshtv on tidalwave"         > resultlog 2>&1
+echo "       --------------------------------"        >> resultlog 2>&1
+echo ""                                               >> resultlog 2>&1
+df -k /usr/local/apps/meshtv                          >> resultlog 2>&1
+echo ""                                               >> resultlog 2>&1
+ls -l /usr/local/apps/meshtv$dir/bin/sgi-irix6-mips2  >> resultlog 2>&1
+EOF
+
+if [ $tidalwave = true ]
+then
+   if [ $test = no ]
+   then
+      scp tidalwave tidalwave:install_meshtv_tidalwave
+      ssh tidalwave "chmod 750 install_meshtv_tidalwave;./install_meshtv_tidalwave"
+   fi
+fi
+
+#
+# Clean up.
+#
+if [ $test = no ]
+then
+   rm warp oak y tidalwave
+fi

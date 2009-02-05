@@ -1,0 +1,44 @@
+#!/bin/sh
+
+lines=`cat $0 | wc -l`
+lines=`expr $lines - 14`
+tail -$lines $0 > /tmp/runperl$$
+echo "# $0 $*" >> /tmp/runperl$$
+while [ $# -ne 0 ]
+do
+    line=$1
+    shift
+    totline="$totline\`$line"
+done
+exec perl /tmp/runperl$$ $0 $totline
+
+unlink($0);
+
+# Perl begins here
+
+sub strippath
+{
+    local($fullname) = @_;
+
+    $fullname =~ m|^(.*/)?([^/]*)$|;
+    ($path,$file) = ($1,$2);
+    return($file,$path);
+}
+
+($0) = &strippath(shift);
+
+$args = "@ARGV";
+$args =~ s/^.//;
+@ARGV = split('\`',$args);
+
+use Env;
+
+# Real code begins here
+
+$checkin_file = shift(@ARGV);
+
+print STDERR <<"EOF";
+    Just a reminder: Did you regenerate the \"$checkin_file\"
+    file? It has to be regenerated since you modified
+    \"$CLEARCASE_PN\".
+EOF

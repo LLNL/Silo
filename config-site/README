@@ -1,0 +1,11 @@
+This directory contains examples of site configuration files.  To
+quote from the autoconf manual:
+
+    If the environment variable `CONFIG_SITE' is set,
+    `configure' uses its value as the name of a shell script
+    to read.  Otherwise, it reads the shell script
+    `PREFIX/share/config.site' if it exists, then
+    `PREFIX/etc/config.site' if it exists.  Thus, settings in
+    machine-specific files override those in
+    machine-independent ones in case of conflict.
+

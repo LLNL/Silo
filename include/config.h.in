@@ -1,0 +1,282 @@
+/* include/config.h.in.  Generated from configure.in by autoheader.  */
+/* Define as _setjmp and _longjmp if they work instead of setjmp and longjmp */
+#undef setjmp
+#undef longjmp
+
+/* Define if the SILO SDX driver is compiled. */
+#undef HAVE_SDX_DRIVER
+
+/* Define if the HDF5 driver is compiled */
+#undef HAVE_HDF5_DRIVER
+
+/* Define if the NetCDF driver is compiled */
+#undef HAVE_NETCDF_DRIVER
+
+/* Define if the PDB driver is compiled */
+#undef HAVE_PDB_DRIVER
+
+/* Define if the TAURUS driver is compiled */
+#undef HAVE_TAURUS_DRIVER
+
+/* Define if the EXODUS driver is compiled */
+#undef HAVE_EXODUS_DRIVER 
+
+/* Define if MPEG is supported */
+#undef MPEG_SUPPORTED
+
+/* Define if you have a pointer to the fclose() function available. */
+#undef HAVE_FCLOSE_POINTER
+
+/* Define if you have a pointer to the fflush() function available. */
+#undef HAVE_FFLUSH_POINTER
+
+/* Define if you have a pointer to the fopen() function available. */
+#undef HAVE_FOPEN_POINTER
+
+/* Define if you have a pointer to the fprintf() function available. */
+#undef HAVE_FPRINTF_POINTER
+
+/* Define if you have a pointer to the fread() function available. */
+#undef HAVE_FREAD_POINTER
+
+/* Define if you have a pointer to the fseek() function available. */
+#undef HAVE_FSEEK_POINTER
+
+/* Define if you have a pointer to the setvbuf() function available. */
+#undef HAVE_SETVBUF_POINTER
+
+/* Define if you have a pointer to the ftell() function available. */
+#undef HAVE_FTELL_POINTER
+
+/* Define if you have a pointer to the fwrite() function available. */
+#undef HAVE_FWRITE_POINTER
+
+/* Define for the VERSION number of the package. */
+#undef VERSION
+
+/* Define to disable the "stat" file system checks. */
+#undef DISABLE_FILESYSTEM_CHECKS
+
+/* Define to 1 if you have the `add_history' function. */
+#undef HAVE_ADD_HISTORY
+
+/* Define to 1 if you have the `atexit' function. */
+#undef HAVE_ATEXIT
+
+/* Define to 1 if you have the `div' function. */
+#undef HAVE_DIV
+
+/* Define to 1 if you have the <exodusII.h> header file. */
+#undef HAVE_EXODUSII_H
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the `fnmatch' function. */
+#undef HAVE_FNMATCH
+
+/* Define to 1 if you have the <fnmatch.h> header file. */
+#undef HAVE_FNMATCH_H
+
+/* Define to 1 if you have the `fpclass' function. */
+#undef HAVE_FPCLASS
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the <hdf5.h> header file. */
+#undef HAVE_HDF5_H
+
+/* Define to 1 if you have the <ieeefp.h> header file. */
+#undef HAVE_IEEEFP_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `isnan' function. */
+#undef HAVE_ISNAN
+
+/* Define to 1 if you have the <jpeglib.h> header file. */
+#undef HAVE_JPEGLIB_H
+
+/* Define to 1 if you have the `hdf5' library (-lhdf5). */
+#undef HAVE_LIBHDF5
+
+/* Define to 1 if you have the `z' library (-lz). */
+#undef HAVE_LIBZ
+
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the `memmove' function. */
+#undef HAVE_MEMMOVE
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `putenv' function. */
+#undef HAVE_PUTENV
+
+/* Define to 1 if you have the `readline' function. */
+#undef HAVE_READLINE
+
+/* Define to 1 if you have the <readline/history.h> header file. */
+#undef HAVE_READLINE_HISTORY_H
+
+/* Define to 1 if you have the <readline/readline.h> header file. */
+#undef HAVE_READLINE_READLINE_H
+
+/* Define to 1 if you have the `select' function. */
+#undef HAVE_SELECT
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strerror' function. */
+#undef HAVE_STRERROR
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <zlib.h> header file. */
+#undef HAVE_ZLIB_H
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* The size of a `boolean', as computed by sizeof. */
+#undef SIZEOF_BOOLEAN
+
+/* The size of a `char', as computed by sizeof. */
+#undef SIZEOF_CHAR
+
+/* The size of a `double', as computed by sizeof. */
+#undef SIZEOF_DOUBLE
+
+/* The size of a `float', as computed by sizeof. */
+#undef SIZEOF_FLOAT
+
+/* The size of a `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of a `int16', as computed by sizeof. */
+#undef SIZEOF_INT16
+
+/* The size of a `int32', as computed by sizeof. */
+#undef SIZEOF_INT32
+
+/* The size of a `int64', as computed by sizeof. */
+#undef SIZEOF_INT64
+
+/* The size of a `int8', as computed by sizeof. */
+#undef SIZEOF_INT8
+
+/* The size of a `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of a `long double', as computed by sizeof. */
+#undef SIZEOF_LONG_DOUBLE
+
+/* The size of a `long float', as computed by sizeof. */
+#undef SIZEOF_LONG_FLOAT
+
+/* The size of a `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
+/* The size of a `off64_t', as computed by sizeof. */
+#undef SIZEOF_OFF64_T
+
+/* The size of a `real32', as computed by sizeof. */
+#undef SIZEOF_REAL32
+
+/* The size of a `real64', as computed by sizeof. */
+#undef SIZEOF_REAL64
+
+/* The size of a `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
+
+/* The size of a `size_t', as computed by sizeof. */
+#undef SIZEOF_SIZE_T
+
+/* The size of a `uint16', as computed by sizeof. */
+#undef SIZEOF_UINT16
+
+/* The size of a `uint32', as computed by sizeof. */
+#undef SIZEOF_UINT32
+
+/* The size of a `uint64', as computed by sizeof. */
+#undef SIZEOF_UINT64
+
+/* The size of a `uint8', as computed by sizeof. */
+#undef SIZEOF_UINT8
+
+/* The size of a `unsigned char', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_CHAR
+
+/* The size of a `unsigned int', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_INT
+
+/* The size of a `unsigned long', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_LONG
+
+/* The size of a `unsigned long long', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_LONG_LONG
+
+/* The size of a `unsigned short', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_SHORT
+
+/* The size of a `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
+
+/* Define to 1 if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef gid_t
+
+/* Define as `__inline' if that's what the C compiler calls it, or to nothing
+   if it is not supported. */
+#undef inline
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef uid_t

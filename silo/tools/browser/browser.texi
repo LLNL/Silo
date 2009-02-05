@@ -1,0 +1,1416 @@
+\input texinfo                                               @c -*- texinfo -*-
+@c ----------------------------------------------------------------------------
+
+@c %**start of header
+@setfilename browser.info
+@settitle Silo Browser User Manual
+@setchapternewpage on
+@c %**end of header
+
+@ifinfo
+This file documents the Silo browser.
+
+Copyright (C) 1997-2000 Regents of the University of California.
+All rights reservered.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries a copyright notice
+identical to this one except for the removal of this paragraph (this
+paragraph not being relevant to the printed manual).
+
+@end ignore
+@end ifinfo
+
+@titlepage
+@title Silo Browser User Manual
+@subtitle @today{}
+@vskip 1in
+
+@author by Robb Matzke
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1997-2000 The Regents of the University of California.
+
+This work was produced at the University of California, Lawrence
+Livermore National Laboratory (UC LLNL) under contract number W-7405-ENG-48
+(Contract 48) between the U.S. Department of Energy (DOE) and The Regents
+of the University of California (University) for the operation of UC LLNL.
+Copyright is reserved to the University for purposes of controlled
+dissemination, commercialization through formal licensing, or other
+disposition under terms of Contract 48; DOE policies, regulations and
+orders; and U.S. statutes.  The rights of the Federal Government are
+reserved under Contract 48 subject to the restrictions agreed upon by
+DOE and University.
+
+                                DISCLAIMER
+
+This software was prepared as an account of work sponsored by an agency
+of the United States Government. Neither the United States Government
+nor the University of California nor any of their employees, makes any
+warranty, express or implied, or assumes any liability or responsibility
+for the accuracy, completeness, or usefulness of any information,
+apparatus, product, or process disclosed, or represents that its use
+would not infringe privately owned rights. Reference herein to any
+specific commercial products, process, or service by trade name, trademark,
+manufacturer, or otherwise, does not necessarily constitute or imply its
+endorsement, recommendation, or favoring by the United States Government
+or the University of California. The views and opinions of authors
+expressed herein do not necessarily state or reflect those of the United
+States Government or the University of California, and shall not be used
+for advertising or product endorsement purposes.
+@end titlepage
+
+@c ===========================================================================
+@c ===========================================================================
+@c ===========================================================================
+@ifinfo
+@node Top, Copying, (dir), (dir)
+@top The Silo Browser User Manual
+
+This document describes the Silo file browser, an application program
+built on the Silo library for interactive viewing of Silo database
+files.
+
+@menu
+* Copying::                     Copyright information.
+* Invocation::                  Invoking the browser.
+* Syntax::                      Command Syntax.
+* Functions::                   Builtin Functions.
+* Operators::                   Browser operators.
+* Internal Variables::          Controlling the browser personality.
+* Startup File::                Browser initialization.
+* Editing::                     Changing the values of objects.
+* Paging::                      Long output is paginated.
+* Redirection::                 Sending output to a file or command.
+* Interrupts::                  Interrupting a long-running command.
+* Examples::                    Some simple examples.
+@end menu
+
+@end ifinfo
+
+@c ===========================================================================
+@c ===========================================================================
+@c ===========================================================================
+@ifinfo
+@node Copying, Invocation, Top, Top
+@unnumbered Copyright
+Copyright @copyright{} 1996-2000 The Regents of the University of California
+
+This work was produced at the University of California, Lawrence
+Livermore National Laboratory (UC LLNL) under contract number W-7405-ENG-48
+(Contract 48) between the U.S. Department of Energy (DOE) and The Regents
+of the University of California (University) for the operation of UC LLNL.
+Copyright is reserved to the University for purposes of controlled
+dissemination, commercialization through formal licensing, or other
+disposition under terms of Contract 48; DOE policies, regulations and
+orders; and U.S. statutes.  The rights of the Federal Government are
+reserved under Contract 48 subject to the restrictions agreed upon by
+DOE and University.
+
+                                DISCLAIMER
+
+This software was prepared as an account of work sponsored by an agency
+of the United States Government. Neither the United States Government
+nor the University of California nor any of their employees, makes any
+warranty, express or implied, or assumes any liability or responsibility
+for the accuracy, completeness, or usefulness of any information,
+apparatus, product, or process disclosed, or represents that its use
+would not infringe privately owned rights. Reference herein to any
+specific commercial products, process, or service by trade name, trademark,
+manufacturer, or otherwise, does not necessarily constitute or imply its
+endorsement, recommendation, or favoring by the United States Government
+or the University of California. The views and opinions of authors
+expressed herein do not necessarily state or reflect those of the United
+States Government or the University of California, and shall not be used
+for advertising or product endorsement purposes.
+@end ifinfo
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Invocation, Syntax, Copying, Top
+@chapter The Browser Command Line
+
+The schnauzer is a small terrier with a wiry coat; the browser is a
+utility built on Silo for reading scientific database files.  The
+browser command line is
+
+@code{browser} @b{[}@var{switches}@b{]} @b{[}@code{--}@b{]}
+@b{[}@var{files}@b{]...}
+
+The browser recognizes the following command line switches.  Single
+letter switches that don't require an argument can be grouped together
+(so @samp{-l -q} is the same as @samp{-lq}). When a single-letter switch
+takes an argument the argument can appear either immediately after the
+letter or as the next argument such as @samp{-l3} or @samp{-l 3}. Long
+format switches are introduced by double hyphens and if they take an
+argument it must follow an equal sign such as @samp{--eval=exit}.
+Command-line options take effect before the initialization file is read,
+but also override any settings made in that file.
+
+Invoking the browser with the switch @samp{--help} will show a complete
+list of command-line switches and their descriptions.
+
+@table @code
+@item -A @var{tolerance}
+@itemx --absolute=@var{tolerance}
+All absolute differencing tolerances are set to @var{tolerance}, a
+floating point number. All variables of the form @samp{$diff_*_abs} are
+set to the specified tolerance.
+
+@item -R @var{tolerance}
+@itemx --absolute=@var{tolerance}
+All relative differencing tolerances are set to @var{tolerance}, a
+floating point number.  All variables of the form @samp{$diff_*_rel} are 
+set to the specified tolerance.
+
+@item -V
+@itemx --version
+Prints the browser version number. If no other switches or files are
+specified then the browser will exit after printing the version number.
+
+@item -d @var{words}
+@itemx --diff=@var{words}
+This switch controls the behavior of the @code{diff} function of the
+browser. The @var{words} should be a comma-separated list of key words
+which will be assigned to the @code{$diff} browser variable. See its
+documentation for details.
+
+@item -e @var{expression}
+@itemx --eval=@var{expression}
+The browser expression is evaluated and the result is printed on the
+standard output stream.  More than one expression can be given to the
+browser by using multiple switches.  The expressions will be evaluated
+in the order given after the initialization file is read.  When a
+@samp{-e} switch is present the browser exits after all expressions are
+processed instead of going into interactive mode. If standard output is
+a terminal then the browser pages the output in the normal way (see
+below).  If the interrupt character is pressed when an expression is
+being evaluated, the browser aborts@footnote{In contrast, pressing the
+interrupt character during an interactive browser command aborts the
+command but not the browser.}.
+
+@item -E @var{list}
+@itemx --exclude=@var{list}
+The browser @code{$exclude} variable is set to the comma-separated list
+of names and/or datatypes supplied as an argument to this switch. The
+switch may appear more than once. The names in the @code{$exclude} list
+will be excluded from recursive @code{diff} operations. See
+documentation for @code{$exclude} for details.
+
+@item -f @var{initfile}
+@itemx --file=@var{initfile}
+When the browser begins execution it attempts to read the file
+@file{.browser_rc} in the user's home directory.  If that file isn't
+readable then it tries to read a system-wide browser initialization
+file.  The @samp{-f} command line switch causes the browser to try to
+read the specified file instead.  To prevent the browser from reading
+any initialization file, say @samp{-f /dev/null} (internal browser
+variables are still initialized to default values).  The initialization
+file is opened after the database(s) and therefore can contain commands
+that reference the database(s).
+
+@item -h
+@itemx --help
+Prints a browser usage message. If this is the only switch and no file
+names are specified then the browser will exit after showing the usage
+message.  The usage message will be paged if printed to a terminal.
+
+@item -l @b{[}@var{value}@b{]}
+@itemx --lowlevel@b{[}=@var{value}@b{]}
+This switch assigns an integer value to the @code{$lowlevel} browser
+variable, which causes the browser to load database objects as type
+@code{DBobject} even if the object is some other composite Silo datatype
+like @code{DBquadvar}. If @var{value} is specified then it will be
+assigned to the @code{$lowlevel} variable; otherwise the value @samp{1}
+is assigned.
+
+@item -c @b{[}@var{value}@b{]}
+@itemx --checksums@b{[}=@var{value}@b{]}
+This switch assigns an integer value to the @code{$checksums} browser
+variable, which controls browser's use of checksums during read. 
+
+@item -n @var{lines}
+@itemx --height=@var{lines}
+The browser pages interactive output to prevent it from scrolling off
+the top of the screen. It normally decides how tall the window is by
+making @code{ioctl} calls, but this switch can be used to override that
+choice. The setting is valid only until the browser receives a
+@code{SIGWINCH} signal and queries the terminal size.
+
+@item -q
+@itemx --quiet
+This option causes the browser to be less verbose than normal. This sets 
+the @code{$verbosity} variable to zero.
+
+@item -o
+@itemx --obase=@var{format}
+This switch sets the internal variable @code{$obase} to @var{format},
+which should be @samp{16} for hexadecimal, @samp{8} for octal, @samp{2}
+for binary, or anything else for the default decimal format. It controls
+how integer, floating-point, character, and string data are
+displayed. The default is that these types of data are displayed with a
+type-dependent @code{printf} format string which is user defined (e.g.,
+@code{$fmt_int}).
+
+@item -r @b{[}@var{boolean}@b{]}
+@itemx --rdonly@b{[}=@var{boolean}@b{]}
+This option assigns a boolean value to the @code{$rdonly} browser
+variable, which causes the browser to open all subsequent files in
+read-only mode. Files that only have Unix read permission are always
+opened in read-only mode, but the browser issues a warning if the user
+had asked for read-write permission.  If no argument is given for this
+switch then true is assumed. The default if this switch does not appear
+is false.
+
+@item -s @b{[}@var{boolean}@b{]}
+@itemx --single@b{[}=@var{boolean}@b{]}
+This option causes the browser to call @code{DBForceSingle} with a value
+of one or zero depending on whether the argument is true or false. If no
+argument is given then it is assumed to be true.  Calling
+@code{DBForceSingle} with a non-zero value causes most drivers to return
+floating point data with the C @code{float} type rather than the default
+@code{double} type.
+
+@item -v
+@itemx --verbose
+This option causes the browser to be more verbose than normal. This sets 
+the @code{$verbosity} variable to two.
+
+@item -w @var{columns}
+@itemx --width=@var{columns}
+The browser normally breaks lines to prevent them from wrapping around
+from the right margin to the next line. It decides how many columns are
+appropriate by making @code{ioctl} calls, but this switch overrides that 
+choice.
+
+@item --debug@b{[}=@var{boolean}@b{]}
+Tells Silo to display the names of the Silo API functions as they are
+called. This switch is probably only useful to those who debug the browser.
+
+@end table
+
+If Silo database file names are specified then the files are opened in
+the order specified and associated with file symbols @code{$1},
+@code{$2}, etc. These are opened before the initialization file is read, 
+which happens before any @code{--eval} statements are executed. However, 
+the command-line options are reevaluated after the initialization file
+is read.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Syntax, Functions, Invocation, Top
+@chapter Command Syntax
+
+The browser command syntax is quite simple, consisting of function
+calls, operators, atoms, and lists. Comments begin with a hash mark and
+continue to the end of the line (except in strings). White space is
+generally ignored except as a token separator. Statements can be
+continued across multiple lines, but a backslash must escape the
+linefeed if the partial statement looks syntactically complete.
+
+A function call is a parenthetical expression where the first element is
+the name of the function and the subsequent elements are the arguments
+to that function.  Most functions evaluate all their arguments but
+others evaluate only some (or none). For example, the @code{Assign}
+function doesn't evaluate its first argument, but rather assignes the
+evaluated second argument to the l-value specified by the first
+argument. The parentheses can be omitted from around the top-level
+function call. Say @samp{help func} (or @samp{(help func)}) for a list
+of all functions.
+
+Most browser operators are infix, binary operators. They take two
+operands, one on each side of the operator, and call some function which
+is bound to the operator. For example the expression @samp{foo=1} is
+equivalent to @samp{(Assign foo 1)}. The @samp{@{@}} operator takes any
+number of arguments which appear between the open and close curly
+braces. Say @samp{help operators} for a list of all operators.
+
+The browser has three types of atoms: strings, numbers, and symbols. A
+string is a sequence of characters enclosed in single or double
+quotes. The normal C escaping mechanism can be used for special
+characters within the string. A single quote has no special significance
+in a double-quoted string and vice versa.  Numbers are positive or
+negative sequences of decimal digits with an optional embedded decimal
+point and trailing exponent. An exponent consists of the letter `e' or
+`E' followed by an optional sign and one or more decimal digits.  A
+symbol is any sequence of alphanumeric characters and may also include
+dollar signs, hyphens, underscores, and various other characters
+(although their use is discouraged).
+
+A list consists of zero or more atoms or lists enclosed in
+parentheses. Evaluation of the list results in the browser looking up
+the functional value of the first member of the list and calling that
+function with the subsequent list members as arguments. Evaluation of
+the list can be suppressed by using curly braces instead of parentheses
+(e.g., @samp{@{1 3 5@}} is equivalent to @samp{(Quote 1 3 5)')}.
+
+The browser reads commands interactively from its standard input. If
+available, the GNU readline library is used allowing the user to edit
+commands as they are entered using Emacs or vi editing commands. To
+quote from the readline library (documentation is available at
+@file{http://www.cs.utah.edu/csinfo/texinfo/texinfo.html}):
+
+@quotation
+Often during an interactive session you type in a long line of text,
+only to notice that the first word on the line is misspelled.  The
+Readline library gives you a set of commands for manipulating the text
+as you type it in, allowing you to just fix your typo, and not forcing
+you to retype the majority of the line.  Using these editing commands,
+you move the cursor to the place that needs correction, and delete or
+insert the text of the corrections.  Then, when you are satisfied with
+the line, you simply press @key{RETURN}.  You do not have to be at the
+end of the line to press @key{RETURN}; the entire line is accepted
+regardless of the location of the cursor within the line.
+@end quotation
+
+The readline library default mode is Emacs.  If you prefer @code{vi} key
+bindings, then create a file called @file{.inputrc} in your home
+directory with the single line @samp{set editing-mode vi}.
+
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Functions, Operators, Syntax, Top
+@chapter Builtin Functions
+
+Some of the browser functions have more than one form and are overloaded
+to do various things depending on the number of actual arguments
+supplied. Arguments shown between @samp{[} and @samp{]} are optional.
+
+@table @code
+@item array @var{dimensions} @b{...} @var{basetype}
+Creates a new array datatype. The arguments are the size of the array in 
+each dimension and the datatype of the array elements. The array size
+arguments can be either integers or strings that look like comma- and/or 
+space-separated integers. Browser arrays use C element ordering.
+
+@item cd @var{dirname} @b{[}@var{filesym}@b{]}
+Each file has a current working directory (CWD) which is initially set
+to the root directory (@file{/}). This command will set the CWD to some
+other directory. The first argument is the name of the new CWD. If the
+name contains special characters it should be enclosed in quotes to
+protect it from the parser. If the name is relative (doesn't start with
+a @samp{/}) then the name is looked up with respect to the current
+CWD. The second optional argument is the file or list of files whose CWD
+is being set (default is the file represented by the browser variable
+@samp{$1}).  The @var{dirname} is a string; it is not interpreted by the
+browser and thus a command like @samp{cd $1.domain_0.angle_walls} will
+fail while @samp{cd domain_0/angle_walls $1} would work.
+
+@item close @var{filesym} @b{...}
+Closes the database files associated with the specified file symbols.
+If objects exist in the browser memory which are associated with the
+database then the database will be held open until those objects no
+longer exist, but the file symbol will be freed so another file can
+immediately be associated with that symbol. This command is equivalent
+to @samp{@var{filesym}=nil} (except with extra sanity checks).
+
+@item diff @var{objects...}
+Calculates the differences between its arguments similar to the Unix
+@code{diff} command. If called with an even number of arguments the
+argument list is split in half and each argument from the first half is
+compared with the corresponding argument of the second half. If called
+with no arguments then the argument list will be the SILO files from the 
+command-line (@samp{$1}, @samp{$2}, @i{etc.}).  If called with just one
+argument which is an object from the silo file @samp{$1} then that
+object will be compared to an object with the same name from file
+@samp{$2}.  The behavior is influenced by the @samp{$diff} browser
+variable. In general, if no differences are found then no output is
+produced.
+
+@item end
+See @code{exit}.
+
+@item exit @b{[}@var{status}@b{]}
+Exits the browser with the specified @var{status}, an integer constant.
+If no exit status is supplied then zero (success) is assumed. Typing the
+end of file character (usually control-d) at the beginning of a line
+also invokes this command, causing a zero (success) exit.
+
+@item file @var{filename}
+The Silo database @var{filename} is opened and returned but not
+associated with any symbol.  Therefore, as soon as nothing refers to the
+file, it is closed.  One common use of this function is with the
+@code{ls} or @code{diff} commands which can take file objects as
+arguments.  For instance, the command @samp{ls (file curv2d.pdb)} opens
+the @file{curv2d.pdb} file and lists the root directory and @samp{ls
+(cd dirname (file curv2d.pdb))} lists the contents of the @var{dirname}
+directory of @file{curv2d.pdb}.  The file is open for read-write mode
+unless the @code{$rdonly} browser variable has a non-nil value or the
+file has only read permission.
+
+@item help @b{[}@var{topic}@b{]} @b{[}@var{docstring}@b{]}
+Shows documentation for various parts of the browser. When invoked
+without arguments it will display a table of contents of @code{help}
+subcommands. With one argument it will display documentation for a help
+category (e.g., @code{help run}), a browser internal variable (e.g.,
+@code{help $diff}), a function (e.g., @code{help diff}), a command-line
+switch (e.g., @code{help --diff}), an operator (e.g., @code{help
+"op="}), or the documentation string associated with the specified
+symbol. When invoked with a string argument it will print all help
+categories which contain the specified string (e.g., @code{help
+"diff"}). When called with two arguments it assigns the second argument
+as the documentation property of the first argument, which must be a
+symbol or string.
+
+@item include @var{filename}
+Causes the specified file to be parsed and evaluated. This is often
+useful in user-private initialization files, @file{~/.browser_rc}, where 
+the user wants to augment the actions that would normally happen in the
+system-wide browser initialization file. The user-private file should
+contain the line @samp{include $pubinit}.
+
+@item ls @b{[}@var{filesym}@b{]} @b{[}@var{objnames}@b{...]}
+This command lists the contents of the current working directory.  If no
+file is specified then the file associated with @samp{$1} is used. If a
+list of files is specified (e.g., @samp{$*}) then a listing is produced
+for each of those files. If object names are supplied, then only those
+objects are listed.  The object names can include the normal Unix
+filename wild cards @samp{*}, @samp{?}, and @samp{[]} (object names with
+@samp{[]} wild cards require quotes so the @samp{[} and @samp{]} are not
+intrepretted as array selectors). Wild card matching is not available if
+the @code{fnmatch} function was not available when the browser was
+compiled.  If a single object name is supplied and that object is a
+directory, then the contents of that directory appear.  An alternative
+(and shorter) way to list the contents of a subdirectory is to type the
+name of the subdirectory on a line by itself (for instance,
+@samp{dir1}).
+
+@item
+Another way to list a directory is to just type the name of the
+directory at the prompt (you can use @samp{.} as the current working
+directory).  So saying @samp{$2.dir} is the same as saying @samp{ls $2
+dir} and @samp{$2..} is the same as @samp{ls $2} or @samp{ls $2 .}.
+
+@item noprint
+See @code{print}.
+
+@item open @var{filename} @b{[}@var{filesym}@b{]}
+The Silo database @var{filename} is opened and associated with the
+specified file symbol.  Any database previously associated with
+@var{filesym} will be closed as soon as all objects associated with that
+file are freed.  If @var{filesym} is omitted then @samp{$1} is used.
+This command is equivalent to @samp{@var{filesym} =
+@var{filename}}. Files are open in read-write mode unless the
+@code{$rdonly} browser variable has a non-nil value or the file has only 
+read permission.
+
+@item @b{[}no@b{]}print @var{expression} @b{...}
+Evaluates the expressions and prints (or suppresses) the result of each
+one.  The @code{print} command is normally not used because the browser
+prints all non-null expressions by default.  However, a @code{noprint}
+can be used to prevent the default output.
+
+@item pwd @b{[}@var{filesym}@b{]}
+Prints the current working directory for the database associated with
+the specified file symbol, list of files, or @samp{$1}. This command
+also prints the name of the database.  This command is usually not used
+because a file symbol appearing by itself causes the database name and
+current working directory to be displayed.
+
+@item quit
+See @code{exit}.
+
+@item typeof @var{expression}
+The type of a Silo expression is printed.  For Silo database objects the
+type which is printed is fully qualified and bound to actual values. In
+contrast, printing the actual named type shows the unbound values.  For
+example, if @samp{d} is a Silo quadvar object, then @samp{typeof d.dims}
+might show @samp{[3] int} while @samp{print DBquadvar.dims} displays
+@samp{[self.ndims] int}.
+
+@end table
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Operators, Internal Variables, Functions, Top
+@chapter Operators
+
+A browser expression is composed of terms and operators. The following
+operators are supported and overloaded depending on the number and type
+of arguments.
+
+@table @var
+@item symbol @code{=} value
+Assigns a value to a browser internal variable or a database object.  If
+@var{symbol} is an internal variable and @var{value} is the word
+@samp{nil} then the symbol loses its variable value.
+
+@item filesym @code{.} varname
+The variable or directory with the name @var{varname} is loaded from the
+database associated with the specified file symbol and the Silo data
+object is returned.  The variable name must be enclosed in quotes unless
+it looks like a symbol and does not conflict with a browser internal
+variable. If @var{filesym} is @samp{$1} and the variable name is not
+enclosed in quotes and is not the name of an internal browser variable,
+then the file symbol and dot can be omitted.  Thus @samp{$1.quadmesh}
+can be written as just @samp{quadmesh}.
+
+@item sdo @code{.} fieldname
+If @var{sdo} is some Silo data object which has a structured type, then
+this expression returns a new Silo data object which is the specified
+field of the @var{sdo} structure.  For instance, a quadmesh @samp{qm}
+has a field named @samp{dims} which holds the dimensions of the mesh.
+The expression @samp{qm.dims} returns just the dimensions.
+
+@item list @code{.} anything
+If the first argument is a list then the dot operator is applied to each 
+member of the list and the result is a list of the results.
+
+@item sdo @code{[} elmtnum @code{]}
+If @var{sdo} is some Silo data object which has an array type, then this
+expression returns the single specified element of that array.  The
+first element of an array is number zero.  For instance,
+@samp{qm.dims[0]} returns the size of the first mesh dimension.
+
+@item sdo @code{[} min @code{:} max @code{]}
+If @var{sdo} is some Silo data object which has an array type, then this
+expression returns a sub-array with elements @var{min} through
+@var{max}, inclusive.  Thus, @samp{qm.dims[0:2]} are the first three
+mesh dimensions.
+
+@item sdo @code{[} expr1@code{,} expr2@code{,} ... @code{]}
+If @var{sdo} is some Silo data object which has an array type, and
+@var{expr} are element numbers or ranges, then one @var{expr} is applied
+to each array dimension in turn, automatically skipping over pointers.
+For instance, if a quadvar @samp{qv} has a @samp{vals} of type
+@samp{*[2] *[36000] float} then the expression @samp{qv.vals[0,100:199]}
+will be an object consisting of the second 100 values of the first
+variable.  (The expression @samp{qv.vals[0][100:199]} would result in an
+error message because @samp{qv.vals[0]} returns an object with the type
+@samp{[1] *[36000] float} to which is then applied the @samp{[100:199]}
+that is invalid because the array only has one element.)
+
+@item expr @code{|} command
+The expression @var{expr} has its output redirected to the shell
+command @var{command}.
+
+@item expr @code{>} file
+The expression @var{expr} has its output redirected to the file
+@var{file}, which is created or truncated.
+
+@item expr @code{>>} file
+The expression @var{expr} has its output appended to the file
+@var{file}, which is created if it doesn't exist.
+
+@item @code{@{} expressions @code{@}}
+This operator takes zero or more operands occurring between the curly
+braces (optionally separated by commas) and returns a list of those
+unevaluated operands. If only one operand is given then that operand is
+returned unevluated and not in a list.
+
+@item minimum @code{:} maximum
+The range operator is used to construct a range object which represents
+all integers between @var{minimum} and @var{maximum}, inclusive.
+
+@end table
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Internal Variables, Startup File, Operators, Top
+@chapter Internal Variables
+
+Certain aspects of the browser can be configured by setting browser
+variables with the @samp{=} operator described above.  The current value
+of an internal variable can be displayed by typing the variable's name.
+The variables are initialized with default values when the browser
+starts and may then be overridden by command-line options, the
+initialization file, or interactively. All predefined browser variables
+begin with a dollar sign.
+
+@menu
+* Differencing Variables::      
+* Output Variables::            
+* File Variables::              
+@end menu
+
+@c ======================================================================
+@node Differencing Variables, Output Variables, Internal Variables, Internal Variables
+@section Differencing Variables
+
+These variables affect the operation of the @code{diff} function.
+
+@table @code
+@item $diff
+This variable's value is a list of symbols which control the details of
+the @code{diff} function. The default is @code{$diff = @{detail,
+two_column@}}. This variable is set by the @samp{--diff} command-line
+switch.
+
+@table @code
+@item detail
+This is the default, which causes the @code{diff} function to report all 
+details about detected differences.
+
+@item brief
+If this word is present then @code{diff} doesn't actually display any
+data. The output will consist of a single line for each file object
+which differs between file A and file B.  This option allows some
+short circuiting of the work required for the @code{detail} mode.
+
+@item summary
+This key word causes @code{diff} to report by a single line of output
+when the two operands of the @code{diff} function are different. No
+output is produced if they are the same. This option allows some short
+circuiting of the work required for the @code{brief} mode.
+
+@item ignore_additions
+If this is specified then @code{diff} will not report differences due to
+data appearing in file B but not in file A.
+
+@item ignore_deletions
+If this is specified then @code{diff} will not report differences due to 
+data appearing in file A but not in file B.
+
+@item two_column
+If this is specified then the output will list differences side-by-side
+instead of one after the other (that is, output will resemble
+@code{pdbdiff} instead of @code{diff}). This setting is only applicable
+for detailed output.
+@end table
+
+@item $exclude
+The @code{diff} function normally recurses into directories and compares 
+the contents of those directories. However, the @code{$exclude} variable 
+can be a list of character strings which specify object names and/or
+types which should be excluded from recursive comparison.  The object
+names may include shell wildcards such as @samp{*}, @samp{?}, and
+@samp{[]}. If a name pattern is relative (doesn't start with a slash) it 
+will be compared to the base name of the objects about to be
+differenced; but if the name pattern is absolute (begins with a slash)
+it will be compared to the full path names of the objects being
+differenced. If the @code{$exclude} string begins with the string
+@samp{type:} then the following part should be one of the object types
+printed by the @code{ls} function.  A difference operation between two
+objects is suppressed if either object matches any of the strings stored 
+in the @code{$exclude} list.
+
+For example, to prevent @code{diff} from comparing any objects with the
+base name @samp{cycle}, or any objects whose full name is
+@samp{/VM/typelist}, or any objects whose name ends with @samp{_list},
+or any object of type @samp{obj} one would issue the following browser
+command:
+
+@example
+> $exclude = @{"cycle", "/VM/typelist", "*_list", "type:obj"@}
+@end example
+
+@noindent
+or invoke the browser with the switch
+@example
+--exclude='cycle,/VM/typelist,*_list,type:obj'
+@end example
+
+
+@item $diff_int8_abs
+@itemx $diff_int8_rel
+@itemx $diff_short_abs
+@itemx $diff_short_rel
+@itemx $diff_int_abs
+@itemx $diff_int_rel
+@itemx $diff_long_abs
+@itemx $diff_long_rel
+@itemx $diff_float_abs
+@itemx $diff_float_rel
+@itemx $diff_double_abs
+@itemx $diff_double_rel
+These variables control how the @code{diff} function determines whether
+two numeric values are the same or different. The ones that end with
+@samp{_abs} specify the maximum absolute difference allowed between two
+values @var{a} and @var{b}.  The @code{diff} command considers @var{a}
+and @var{b} to be different if @samp{|@var{a}-@var{b}|>@var{abs}}.
+The variables that end with @samp{_rel} specify the maximum absolute
+difference relative to the mean of two values.  The @code{diff} command
+considers @var{a} and @var{b} to be different if
+@samp{|@var{a}-@var{b}|/|@var{a}+@var{b}| > @var{rel}/2}.
+
+If both tests are performed then @var{a} and @var{b} are considered
+different if either test indicates they are different. If an @var{abs} or
+@var{rel} parameter is not defined (or has a non-positive value) then
+the corresponding test is not performed. If neither test is performed
+then an exact comparison is used.
+
+All @code{diff} variables have a default value of zero and are set by
+the @samp{--absolute} and @samp{--relative} command-line switches.
+@end table
+
+@c ======================================================================
+@node Output Variables, File Variables, Differencing Variables, Internal Variables
+@section Output Variables
+
+@table @code
+@item $height
+The height of the output terminal in lines. If set to a positive value
+then the browser will pause after each screenful of interactive output
+(redirected output is unaffected by this setting). This variable is set
+by the @samp{--height} command-line switch and is reset whenever the
+browser receives a window size change signal (@code{SIGWINCH}).
+
+@item $width
+The width of the output terminal in characters. The browser will try not 
+to print data which would wrap from one line to the next. This variable
+is set by the @samp{--width} command-line switch and is reset whenever
+the browser receives a window size change signal (@code{SIGWINCH}).
+
+@item $verbosity
+This variable is set by the @samp{--quiet} and @samp{--verbose}
+switches. The @samp{--quiet} sets it to zero while @samp{--verbose} sets 
+it to two (the default is one). Changing its value at runtime changes
+the amount of chatter produced by the browser.
+
+@item $truncate
+If this variable holds a non-negative integer value @var{N}, then the
+browser shows only @var{N} values of each array; otherwise all values of
+an array are displayed. Values which are omitted are indicated by a
+string such as @samp{...(2000 values omitted)...} appearing at the point
+where the values were omitted. Truncation is disabled (all values are
+printed) by setting this variable to nil (its default).
+
+@item $trailing
+If this variable holds a positive integer value and @samp{$truncate}
+has a non-negative integer value, then up to @var{n} of the printed
+array values will come from the end of the array rather than the
+beginning. The default value is 50.
+
+@item $fmt_double
+This variable holds a @code{printf} format string which is used to
+format C @code{double} values.  The default value is @samp{%1.10g}.
+
+@item $fmt_float
+This variable holds a @code{printf} format string which is used to
+format C @code{float} values.  The default value is @samp{%1.5g}.
+
+@item $fmt_int
+This variable holds a @code{printf} format string which is used to
+format integer values.  The default value is @samp{%d}.
+
+@item $fmt_long
+This variable holds a @code{printf} format string which is used to
+format long integer values.  The default value is @samp{(long)%ld}.
+
+@item $fmt_null
+This variable holds a @code{printf} format string which is printed for
+null character strings.  The default value is @samp{(null)}.
+
+@item $fmt_int8
+This variable holds a @code{printf} format string which is used to
+format 8-bit integer values.  The default is @samp{(int8)%d} but people
+often like to change it to @samp{`%c'} to see the ASCII equivalent. Be
+warned that output of non-printable ASCII characters in this manner may
+not work if the terminal emulator interprets them as commands.
+
+@item $fmt_short
+This vairable holds a @code{printf} format string which is used to
+format short integer values.  The default value is @samp{(short)%d}.
+
+@item $fmt_string
+This variable holds a @code{printf} format string which is used to
+format character string values.  The default value is
+@samp{\"%s\"}.
+
+@item $obase Output of primitive data (integer, character, string, and
+floating-point), by default, uses the @code{$fmt_} variables described
+above. However, by setting this variable to 16, 8, or 2 it is possible
+to display primitive data in hexadecimal, octal, or binary format.
+
+@end table
+
+@c ======================================================================
+@node File Variables,  , Output Variables, Internal Variables
+@section File Variables
+
+@table @code
+@item $pubinit
+This variable holds the name of the public initialization file and is
+intended to be used as the first argument to the `include' function in a 
+user-private initialization file.
+
+@item $lowlevel
+If this variable has any true value (nil, zero, and the empty string are
+considered false), then the browser reads objects as type
+@code{DBobject} even if that object has some other datatype such as
+@code{DBquadvar}.  This variable is set by the @samp{-l} command-line
+option and is useful for debugging the low layers of Silo. The default
+value is zero.
+
+If the value is two or higher then the Silo definition of @code{DBobject}
+is used and the values of the @code{comp_names} and @code{pdb_names}
+arrays become part of the object.
+
+If the value is one or two then the browser translates the Silo
+@code{DBobject} structure into a structure which is more user friendly
+by adding additional members to the object structure. Each member has a
+name from the @code{comp_names} array and a value based on the
+corresponding member of the @code{pdb_names} array@footnote{Changes
+should not be made to the @code{comp_names} or @code{pdb_names} arrays
+since the Silo @code{DBobject} is regenerated from the user-friendly
+fields before being saved back to the file.}.
+
+@item $checksums
+If this variable has any true value (nil, zero, and the empty string are
+considered false), and the database being read includes checksums, then
+the browser performs checksum checks during read. Note that currently,
+the only Silo driver that supports checksums is the HDF5 driver.
+
+If checksum checks are disabled, then if browser encounters corrupt data,
+it will not know it. In particular, if checksums are disabled, the diff
+operator can wind up reporting corrupted data as diffs. If checksums are
+enabled, however, and the database being read includes checksums, then
+browser will report errors when it encounters corrupt data and fail to
+read the associated Silo object. See the associated Silo call 
+@code{DBSetEnableChecksums()} for more information.
+
+@item $rdonly
+If this variable has any true value (nil, zero, and the empty string are
+considered false), then the browser opens files in read-only mode
+instead of read-write mode.  Editing will not work on a file open for
+reading only.
+@end table
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Startup File, Editing, Internal Variables, Top
+@chapter Initializing the Browser
+
+When the browser starts, it looks for a file called @file{.browser_rc}
+in the user's home directory or a file called
+@file{/usr/local/include/browser_rc}@footnote{The path name may be
+different depending on how the browser was compiled.}.  However, an
+alternate startup file can be specified with the @samp{--file} browser
+command-line switch.  The browser reads and executes each command found
+in the startup file.
+
+The startup file should contain an assignment to the
+@code{$browser_version} variable which will be used to check that the
+version of the startup file is appropriate for the browser being
+run. Mismatched version numbers result in a rather verbose warning
+message (provided that the browser was even able to process the startup
+file).
+
+The @code{$browser_version} number should be assigned some real constant
+like @samp{3.004} where @samp{3} is the browser major version number and
+@samp{004} is the browser minor version number.  To determine what
+version number to specify, invoke the browser as @samp{browser
+--version}.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Editing, Paging, Startup File, Top
+@chapter Editing Database Objects
+
+The @samp{=} operator can be used to set the value of an internal
+browser variable or to change the value of a database object.  If the
+left hand side of the @samp{=} is an internal variable, then the value
+of the internal variable is changed. Otherwise if the left hand side is
+a database object, its value is changed.  Otherwise, a new internal
+variable is created and assigned an initial value.
+
+The browser can change values for objects of type @code{DBobject} (most
+objects are of this type if the browser is running in low-level mode) or
+objects under the @samp{var(s)} category in a directory listing.
+
+When changing the value of a string database object like
+@samp{_fileinfo}, the new value will be truncated to the same length as
+the old value because of limitations in the underlying Silo database
+drivers.  This does not apply to string fields of a @code{DBobject}.
+
+Assigning a scalar value to an array or slice of an array results in all
+selected elements of the array to be set to the same value.  For
+instance, if the type of @samp{u_data} is @samp{[31, 41, 31] float} then
+the statement `u_data[5]=0' sets all elements of ``row'' five to zero.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Paging, Redirection, Editing, Top
+@chapter Paging
+
+The browser keeps track of how many lines of output have been displayed
+for the currently executing command and temporarily pauses that command
+whenever output is about to scroll off the top of the screen.  The
+height and width of the screen is determined by the browser making
+certain @code{ioctl} calls at startup and each time it gets a
+@code{SIGWINCH} signal.  The initial values can be set with
+@samp{--height} and @samp{--width} command-line switches.  If the
+appropriate @code{ioctl} is not available then the values of environment 
+variables @code{LINES} and @code{COLUMNS} will be used. If all else
+fails then the browser uses zero for the number of lines (that is, no
+paging of output) and 80 for the number of columns.
+
+When the browser pauses the output, the message @samp{more? ('q' to
+quit)} is displayed. The following user responses are recognized:
+
+@table @b
+@item Quit
+Cancels the command and returns to the browser prompt. This is
+equivalent to the browser receiving a @code{SIGPIPE} signal.
+
+@item Continue
+Pressing the EOF key (usually control-@samp{d}) causes the command to
+continue without being paged. Output will simply scroll off the screen).
+
+@item Next Diff
+Pressing @samp{n} causes output to be suspended until the next file
+difference report or the next non-diff command.
+
+@item Interrupt
+Pressing the interrupt key (usually control-@samp{c}) causes the command
+to be interrupted as usual.
+@end table
+
+Output redirected to a file or command is not paged.  If the user is not
+satisfied with the limited paging ability of the browser, the output
+from a command can be redirected to the pager of the user's choice using
+output redirection.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Redirection, Interrupts, Paging, Top
+@chapter Redirection
+
+Output from any browser command can be redirected to a file or shell
+command by appending a redirection character and file name or shell
+command to the end of the command.
+
+To save the output of a command in a file, destroying the previous
+contents of the file if any, append a @samp{>} and the name of the
+file.  Unless the file name looks like a browser symbol it must be
+enclosed in quotes.  For instance, @samp{quadvar3d > saved} saves the
+value of Silo database variable @samp{quadvar} in a text file named
+@file{saved}.
+
+To append the output of a command to a file, append a @samp{>>} and the
+file name to the end of the command.  Unless the file name looks like a
+browser symbol it must be enclosed in quotes.  For example, @samp{typeof
+quadvar3d >> saved} appends type information to the @file{saved} file.
+
+To send the output of a browser command to the standard input of a shell
+command, follow the browser command with a @samp{|} followed by the
+shell command in quotes.  The quotes are not necessary if the shell
+command is a single symbol.  Since paging is disabled when output is to
+a shell command, one way to display a result without paging is to pipe
+the output through the @samp{cat} command like @samp{d | cat}.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Interrupts, Examples, Redirection, Top
+@chapter Interrupts
+
+Since some commands may require a long time to execute or produce a huge
+amount of output, the user may want to abort the command before it
+finishes.  If the output is paged interactively to the screen then
+pressing @samp{q} at the @samp{more?}  prompt accomplishes
+this.  Otherwise the user can press the interrupt character (usually
+control-c) and the browser command will be immediately terminated and
+the browser will prompt for the next command.  If the interrupt
+character is typed during command input the browser itself terminates.
+
+If output from a browser command is being piped into a shell command and
+the shell command exits (or closes its standard input) before the
+browser command is finished, the browser command gets the @code{SIGPIPE}
+signal and terminates.
+
+@c ======================================================================
+@c ======================================================================
+@c ======================================================================
+@node Examples,  , Interrupts, Top
+@chapter Examples
+
+This chapter contains some sample output from the browser.
+
+Normally, you will specify the name of a database file on the browser
+command-line@footnote{Opening a file on the command line is the same as
+saying @samp{open "rect3d.pdb" $1} interactively.} like in the following
+example, and sometimes it's convenient to open multiple files at the
+same time.  Each file name listed on the command-line is given an
+identifier like @samp{$1}, @samp{$2}, etc., and most of the browser
+commands operate on file @samp{$1} by default.
+
+@example
+% @b{browser rect3d.pdb}
+INFO: opening `rect3d.pdb' as $1
+@end example
+
+The @code{ls} command is similar to the Unix @code{ls} command in that
+it lists the contents of the current working directory.  The heading
+fields on the left of the equal signs apply until the next heading.  The
+headings are the same as those used by MeshTV.  To list the contents of
+some subdirectory, say @samp{ls}, @samp{ls dir1},
+@samp{print dir1}, or just @samp{dir1}.
+
+@example
+> @b{ls}
+qmesh(s)          = quadmesh3d            
+
+qvar(s)           = d                      p                     
+                  = t                      u                     
+                  = v                      w                     
+
+mat(s)            = mat1                  
+
+var(s)            = _fileinfo              _meshtv_defvars       
+                  = _meshtvinfo            cycle                 
+                  = d_data                 d_dims                
+                  = d_maxindex             dtime                 
+                  = mat1_dims              mat1_matlist          
+                  = mat1_matnos            mat1_mix_mat          
+                  = mat1_mix_next          mat1_mix_vf           
+                  = mat1_mix_zone          p_data                
+                  = p_dims                 p_maxindex            
+                  = quadmesh3d_align_nodal quadmesh3d_align_zonal
+                  = quadmesh3d_coord0      quadmesh3d_coord1     
+                  = quadmesh3d_coord2      quadmesh3d_dims       
+                  = quadmesh3d_max_extents quadmesh3d_max_index_n
+                  = quadmesh3d_max_index_z quadmesh3d_min_extents
+                  = quadmesh3d_min_index   quadmesh3d_zonedims   
+                  = t_data                 t_dims                
+                  = t_maxindex             time                  
+                  = u_data                 u_dims                
+                  = u_maxindex             v_data                
+                  = v_dims                 v_maxindex            
+                  = w_data                 w_dims                
+                  = w_maxindex            
+@end example
+
+To keep the size of these examples small, we've specified that at most
+50 values should be printed from each array and that 25 of those values
+should be from the end of the array (and the other 25, from the
+beginning).  To truncate everything say @samp{$truncate=0} and to turn
+truncating off say @samp{$truncate=nil}.
+
+@example
+> @b{$truncate = 50}
+                  = 50
+> @b{$trailing = 25}
+                  = 25
+@end example
+
+The user can ask for the type of any object, including types built into
+the browser.  If the object is a structured type (like in this example)
+then the type of each component of that structure is printed.
+
+@example
+> @b{typeof d}
+                  = struct DBquadvar @{
+id                =    +0 int
+name              =    +4 string
+units             =    +8 string
+label             =    +12 string
+cycle             =    +16 int
+time              =    +20 float
+dtime             =    +24 double
+meshid            =    +32 int
+datatype          =    +40 int (DBdatatype)
+nels              =    +44 int
+nvals             =    +48 int
+ndims             =    +52 int
+dims              =    +56 [3] int
+major_order       =    +68 int (array order)
+stride            =    +72 [3] int
+min_index         =    +84 [3] int
+max_index         =    +96 [3] int
+origin            =    +108 int
+align             =    +112 [3] float
+mixlen            =    +128 int
+use_specmf        =    +132 int (on/off)
+mixvals           =    +124 *[1] *[0] float
+vals              =    +36 *[1] *[36000] float
+                  = @}
+@end example
+
+An integer following a plus sign indicates that the type corresponds to
+a byte offset from the beginning of the innermost enclosing structure
+or array.
+
+A @samp{*} means the object is a pointer to whatever type
+follows@footnote{ Whether or not something is a pointer is generally not
+important to using the browser: a 1d array of pointers to 1d arrays of
+integers can be treated like a ragged-edge 2d array of integers.}.
+
+A list of array dimensions between @samp{[} and @samp{]} mean that the
+object is an array and each element of the array is the type that
+follows the @samp{]}.
+
+The final name is always one of the browser integral types @samp{string}
+(same as the C @samp{char*}), @samp{short}, @samp{int}, @samp{long},
+@samp{float}, or @samp{double}.  If the integral type name is followed
+by parentheses then the parentheses contain the name of an underlying C
+@samp{enum} type or a set of related C preprocessor constants.
+
+Some data objects override one or more standard class methods.  Such
+objects will have flags like @samp{__@var{flag}__} which appear inside
+the object type.
+
+One can also ask for the Silo definition of a named data type like
+@samp{DBquadvar}.  This prints the definition of the Silo
+@samp{DBquadvar} structure which is the same as printed above for the
+type of @samp{d} except that array sizes and some primitive types are
+not bound to actual values yet@footnote{The word @samp{self} refers to the
+object corresponding to the innermost structure which incloses the
+@samp{self}.}.
+
+@example
+> @b{DBquadvar}
+                  = struct DBquadvar @{
+id                =    +0 int
+name              =    +4 string
+units             =    +8 string
+label             =    +12 string
+cycle             =    +16 int
+time              =    +20 float
+dtime             =    +24 double
+meshid            =    +32 int
+datatype          =    +40 int (DBdatatype)
+nels              =    +44 int
+nvals             =    +48 int
+ndims             =    +52 int
+dims              =    +56 [self.ndims] int
+major_order       =    +68 int (array order)
+stride            =    +72 [self.ndims] int
+min_index         =    +84 [self.ndims] int
+max_index         =    +96 [self.ndims] int
+origin            =    +108 int
+align             =    +112 [self.ndims] float
+mixlen            =    +128 int
+use_specmf        =    +132 int (on/off)
+mixvals           =    +124 *[self.nvals] *[self.mixlen] 
+mixvals           =    self.datatype
+vals              =    +36 *[self.nvals] *[self.nels] self.datatype
+                  = @}
+@end example
+
+Giving just the name of the Silo object is short for @samp{print $1.d}.
+Notice that the @samp{vals} array has been truncated as requested and
+that @var{mixvals} has no value. The subscripts in the labels to the
+left of the equal sign correspond to the first value on that line (an
+entire array in the case of @samp{vals[0]}.
+
+One can also ask for tye type of a single structure component by typing the
+command @samp{DBquadvar.vals}.
+
+@example
+> @b{d}
+                  = DBquadvar: struct
+id                =    0
+name              =    "d"
+units             =    (null)
+label             =    (null)
+cycle             =    48
+time              =    4.80000
+dtime             =    4.8000000000
+meshid            =    0
+datatype          =    float
+nels              =    36000
+nvals             =    1
+ndims             =    3
+dims[0]           =    @{30, 40, 30@}
+major_order       =    row major
+stride[0]         =    @{1, 30, 1200@}
+min_index[0]      =    @{0, 0, 0@}
+max_index[0]      =    @{29, 39, 29@}
+origin            =    0
+align[0]          =    @{0.50000, 0.50000, 0.50000@}
+mixlen            =    0
+use_specmf        =    off
+mixvals           =    NULL
+vals[0]           =    @{@{0.83957, 0.82083, 0.80304, 0.78626, 0.77056,
+vals[0, 5]        =    0.75601, 0.74266, 0.73059, 0.71987, 0.71055,
+vals[0, 10]       =    0.70269, 0.69633, 0.69153, 0.68831, 0.68669,
+vals[0, 15]       =    0.68669, 0.68831, 0.69153, 0.69633, 0.70269,
+vals[0, 20]       =    0.71055, 0.71987, 0.73059, 0.74266, 0.75601,
+vals[0, 25]       =    ...(35950 values omitted)..., 0.75601, 
+vals[0, 35976]    =    0.74266, 0.73059, 0.71987, 0.71055, 0.70269, 
+vals[0, 35981]    =    0.69633, 0.69153, 0.68831, 0.68669, 0.68669, 
+vals[0, 35986]    =    0.68831, 0.69153, 0.69633, 0.70269, 0.71055, 
+vals[0, 35991]    =    0.71987, 0.73059, 0.74266, 0.75601, 0.77056, 
+vals[0, 35996]    =    0.78626, 0.80304, 0.82083, 0.83957@}@}
+@end example
+
+The browser does not attempt to be efficient about loading objects from
+the database into memory since the underlying Silo library makes it
+difficult to do so.  However, if one says @samp{$lowlevel=1} then the
+browser uses lower-level Silo functions to read the file.  As a result,
+less data is moved from disk to memory.
+
+@example
+> @b{$lowlevel=1}
+                  = 1
+> @b{d}
+                  = struct
+name              =    "d"
+type              =    "quadvar"
+meshid            =    "quadmesh"
+align             =    "/quadmesh_align_zonal"
+dims              =    "/d_dims"
+max_index         =    "/d_maxindex"
+value0            =    "/d_data"
+ndims             =    3
+nvals             =    1
+nels              =    36000
+origin            =    0
+datatype          =    19
+mixlen            =    0
+major_order       =    0
+cycle             =    48
+time              =    "/time"
+dtime             =    "/dtime"
+min_index         =    "/quadmesh_min_index"
+use_specmf        =    -1000
+@end example
+
+Now we'll decrease the number of values printed and increase the
+precision that's displayed for @samp{float} values.
+
+@example
+> @b{$truncate = 12}
+                  = 12
+> @b{$trailing = 6}
+                  = 6
+> @b{$fmt_float = "%1.15f"}
+                  = "%1.15f"
+> @b{d.vals[0]}
+[0]               = @{0.839570403099060, 0.820833325386047,
+[2]               = 0.803043246269226, 0.786264479160309,
+[4]               = 0.770563006401062, 0.756006062030792,
+[6]               = ...(35988 values omitted)..., 
+[35994]           = 0.756006062030792, 0.770563066005707, 
+[35996]           = 0.786264479160309, 0.803043246269226, 
+[35998]           = 0.820833325386047, 0.839570462703705@}
+@end example
+
+The @samp{diff} command compares two objects and reports differences
+between them.  The output is in groups of differences where the group is
+delimited at the beginning and end by a line of stars.  The first half
+of the group displays (part of) the first argument to @samp{diff} while
+the part of the group after the line of dashes displays (part of) the
+second argument.  Subobjects that differ only partially (@samp{stride} in
+this case) appear separately before those which completely differ.  The
+array truncating parameters apply to each array segment individually.
+
+@example
+> @b{diff d p}
+***************
+stride[1]         = @{30, 1200@}
+---------------
+stride[1]         = @{31, 1271@}
+***************
+***************
+name              = "d"
+nels              = 36000
+dims[0]           = @{30, 40, 30@}
+max_index[0]      = @{29, 39, 29@}
+vals[0]           = @{@{0.839570403099060, 0.820833325386047,
+vals[0, 2]        = 0.803043246269226, 0.786264479160309,
+vals[0, 4]        = 0.770563006401062, 0.756006062030792,
+vals[0, 6]        = ...(35988 values omitted)..., 
+vals[0, 35994]    = 0.756006062030792, 0.770563066005707, 
+vals[0, 35996]    = 0.786264479160309, 0.803043246269226, 
+vals[0, 35998]    = 0.820833325386047, 0.839570462703705@}@}
+---------------
+name              = "p"
+nels              = 39401
+dims[0]           = @{31, 41, 31@}
+max_index[0]      = @{30, 40, 30@}
+vals[0]           = @{@{1.190943479537964, 1.218125700950623,
+vals[0, 2]        = 1.245107889175415, 1.271674990653992,
+vals[0, 4]        = 1.297584056854248, 1.322565793991089,
+vals[0, 6]        = ...(39389 values omitted)..., 
+vals[0, 39395]    = 0.000000000000000, 0.000000000000000, 
+vals[0, 39397]    = 0.000000000000000, 0.000000000000000, 
+vals[0, 39399]    = 0.000000000000000, 0.000000000000000@}@}
+***************
+@end example
+
+A compound array is composed of zero or more subarrays.  A subarray can
+be printed by saying something like @samp{carray.b}, but a subarray is
+also printed by saying just @samp{b} as long as @samp{b} is not some
+other type of object and @samp{b} exists in exactly one compound array.
+
+@example
+> @b{carray}
+                  = struct
+name              =    "carray"
+id                =    0
+nelems            =    3
+nvalues           =    18
+datatype          =    float
+a[0]              =    @{0.00000, 0.34185, 0.64252, 0.86576@}
+b[0]              =    @{0.98468, 0.98496, 0.86656, 0.64374, 0.34335,
+b[5]              =    0.00159@}
+c[0]              =    @{-0.34036, -0.64130, -0.86496, -0.98441, 
+c[4]              =    -0.98523, -0.86735, -0.64495, -0.34485@}
+
+> @b{b}
+[0]               = @{0.98468, 0.98496, 0.86656, 0.64374, 0.34335, 
+[5]               = 0.00159@}
+
+> @b{b[2]}
+[2]               = @{0.86656@}
+@end example
+
+If the file is opened for reading and writing (the default) then
+variables can be given new values.  The new values are written back to
+the file immediately.
+
+@example
+> @b{_fileinfo}
+                  = "3D rectilinear test file"
+> @b{_fileinfo = "testing"}
+                  = "testing"
+> @b{_fileinfo}
+                  = "testing"
+@end example
+
+A scalar variable assigned to an array (or slice of an array) sets all
+the elements of that array (or slice) to the specified value.  A list of
+values enclosed in curly braces can be assigned to an array (or slice of
+an array) causing each element of the array (or slice) to be set to one
+of the listed values.
+
+@example
+> @b{typeof v_data}
+                  = [31, 41, 31] float
+> @b{v_data = 0}
+                  = 0
+> @b{v_data[0, 0, 2:4]}
+                  = @{0, 0, 0@}
+> @b{v_data[0, 0, 2:4] = @{0.111, 0.222, 0.333@}}
+                  = @{0.111, 0.222, 0.333@}
+> @b{v_data}
+[0, 0, 0]         = @{0, 0, 0.111, 0.222, 0.333, 0, 
+[0, 0, 6]         = ...(39389 values omitted)..., 0, 0, 0,
+[30, 40, 28]      = 0, 0, 0@}
+@end example
+
+Pressing control-c during a browser command aborts the command, but
+pressing control-c when the browser is asking for input aborts the
+browser.  It is more polite to press control-d or type @samp{exit}
+instead since this gives the browser a chance to properly close database
+files.
+
+@example
+> @b{$truncate = nil}
+> @b{d >data_file}
+@b{control-c}
+
+Command aborted.
+> @b{control-c}
+%
+@end example
+
+
+@bye
+------------------------------------------------------------------------------
+Local Variables:
+compile-command: "texi2dvi browser.texi"
+End:

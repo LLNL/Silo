@@ -1,0 +1,367 @@
+#!/bin/sh
+
+lines=`cat $0 | wc -l`
+lines=`expr $lines - 14`
+tail -$lines $0 > /tmp/runperl$$
+echo "# $0 $*" >> /tmp/runperl$$
+while [ $# -ne 0 ]
+do
+    line=$1
+    shift
+    totline="$totline\`$line"
+done
+exec perl /tmp/runperl$$ $0 $totline
+
+# This script creates a new view that is defined to work on a branch.  It also
+# creates the branch, if it isn't already created.
+
+unlink($0);
+
+# strippath separates a fully-expanded filename into its path and file
+# parts.  If the fully-expanded filename does not have a path componenent, a
+# NULL string is returned as the path.  The returned value is a list with the
+# filename first and the path second, so that you can ignore the path if
+# you like:
+#           ($file) = &strippath($bigname);
+
+sub strippath
+{
+    local($fullname) = @_;
+
+    $fullname =~ m|^(.*/)?([^/]*)$|;
+    ($path,$file) = ($1,$2);
+    return($file,$path);
+}
+
+($0) = &strippath(shift);
+
+$args = "@ARGV";
+$args =~ s/^.//;
+@ARGV = split('\`',$args);
+
+$USAGE = "USAGE: $0 package_name filename1 filename2 ...\n";
+
+# Check the arguments.
+# If none, we need a package name.  We also need files, but we'll deal with
+# that later.
+if (@ARGV == 0)
+{
+    print STDERR "No package file specified.\n";
+    print STDERR $USAGE;
+    exit(-1);
+}
+
+# Do we have any files to package up?
+if (@ARGV == 1)
+{
+    print STDERR "You didn't specify any files to package.\n";
+    print STDERR $USAGE;
+    exit(-1);
+}
+
+$package = shift(@ARGV);
+
+$stdin_files = 0;
+if ($ARGV[0] eq "-")
+{
+    print STDERR "Getting list of files from stdin.\n";
+    $stdin_files = 1;
+}
+
+# We now have a package name.  Package up the files into the temporary file
+# named "package.$$".
+print STDERR "Packaging up and compressing files...";
+open(PACKAGE,"| compress -f > $package.$$") || die "\nCan't create \"$package.$$\": $!\nAborting $0\n";
+
+# Put a bit of code at the beginning that figures out how to run echo without 
+# a newline and how to handle binary values.
+print PACKAGE <<"EOF";
+case "`echo \"\\\\070\"`" in
+    8)  echo_flags="" ;;
+    *)  echo_flags="-e" ;;
+esac
+case "`echo 'x\\c'`" in
+    'x\\c')  echo="echo \$echo_flags -n"  nnl= ;;     # BSD systems
+    x)      echo="echo \$echo_flags"      nnl="\\c" ;; # Sys V systems
+    *)      echo="echo \$echo_flags"      nnl= ;;     # Unknown
+esac
+case "`\$echo \"\\\\0111\"`" in
+    I)  zero="0" ;;
+    *)  zero="" ;;
+esac
+EOF
+
+# Put "package_makedir" in front of all other files since we need it to
+# unarchive files that are in subdirectories.
+print PACKAGE "/bin/cat > package_makedir << 'END_OF_FILE_IN_PACKAGE_END_OF_FILE_IN_PACKAGE'\n";
+print PACKAGE <<'EOF';
+#! /bin/sh
+#
+# This program takes the filename given as the first argument and makes sure
+# that the directories in the path to it exist.
+
+# Get the full name.
+fullname=$1
+
+# Save off the cwd so we can restore to it later.
+curr=`pwd`
+
+# Check if the first character is a '/'.  We need to cd to / in that case.
+root=`echo $fullname | sed -n '/^\//p'`
+if [ -n "$root" ]
+then
+    cd /
+fi
+
+
+# First get rid of the filename, and then turn all '/' into spaces for use in a
+# for loop.
+stripped=`echo $fullname | sed 's/\/[^\/]*$//' | sed 's/\// /g'`;
+
+# Loop through all the directories, making them if needed.
+for dir in $stripped
+do
+    if [ ! -d $dir ]
+    then
+        mkdir $dir
+    fi
+    cd $dir
+done
+
+# Go back to where we came from
+cd $curr
+EOF
+print PACKAGE "END_OF_FILE_IN_PACKAGE_END_OF_FILE_IN_PACKAGE\n";
+
+# Get the list of files and put it into the @files array.
+# Now put the rest of the files in the archive.
+if ($stdin_files == 1)
+{
+    while($line = <>)
+    {
+        foreach $file (split(/\s+/,$line))
+        {
+            push(@files,$file);
+        }
+    }
+} else
+{
+    @files = @ARGV;
+}
+
+$last_dir = undef;
+foreach $file (@files)
+{
+    if (-l "$file")
+    {
+        # The file is a symbolic link.  Get what it points to.
+        $points_to = readlink($file);
+        if ($points_to =~ /^\s*$/)
+        {
+            print STDERR <<"EOF";
+WARNING:  File "$file" is a symbolic link, but I can't tell what it is linked
+WARNING:  to.  It will not be included in the archive.
+EOF
+            next;
+        }
+
+        if ($file =~ m|/|)
+        {
+            print PACKAGE "sh ./package_makedir $file\n";
+        }
+        print PACKAGE "ln -s $points_to $file\n";
+        next;
+    }
+
+    if (-d "$file")
+    {
+        print STDERR <<"EOF";
+
+WARNING:  File "$file" is a directory.  I can't handle those.  List the files
+WARNING:  in the directory instead.
+EOF
+        next;
+    }
+
+    # Pull off the directory and see if we've already created it.
+    ($dir) = ($file =~ m|^(.*)/[^/]*|);
+    if (($dir !~ /^\s*$/) && ($dir ne $last_dir))
+    {
+        print PACKAGE "sh ./package_makedir $file\n";
+        $last_dir = $dir;
+    }
+    print PACKAGE "/bin/cat > $file << 'END_OF_FILE_IN_PACKAGE_END_OF_FILE_IN_PACKAGE'\n";
+
+    # Check to see if the file has NULL characters, or if it doesn't end in a
+    # newline.  If either of those are true, we need to treat it specially.
+    open(FILE,"$file") || die "\nCan't open \"$file\": $!\nAborting $0\n";
+    @file = <FILE>;
+    close(FILE);
+    $special = 0;
+    $lastline = undef;
+    foreach (@file)
+    {
+        if (/\x00/)
+        {
+            $special = 1;
+            last;
+        }
+        $lastline = $_;
+    }
+    if (($special == 0) && ($lastline !~ /\n$/))
+    {
+        $special = 1;
+    }
+
+    # Process the file into the package.
+    if ($special == 1)
+    {
+        # Treat the file specially, since it either has NULL characters that 
+        # normal methods don't like, or it doesn't have a newline, which we 
+        # also have to treat carefully.
+        foreach (@file)
+        {
+            @chars = split(//);
+            foreach $char (@chars)
+            {
+                printf PACKAGE "%3.3o\n",ord($char);
+            }
+        }
+        print PACKAGE "END_OF_FILE_IN_PACKAGE_END_OF_FILE_IN_PACKAGE\n";
+        print PACKAGE <<"EOF";
+cat $file | \
+while read line
+do
+    \$echo "\\\\\$zero\$line\$nnl"
+done > $file.new.new
+mv $file.new.new $file
+EOF
+    } else {
+        foreach (@file)
+        {
+            print PACKAGE;
+        }
+        print PACKAGE "END_OF_FILE_IN_PACKAGE_END_OF_FILE_IN_PACKAGE\n";
+    }
+    print PACKAGE "chmod +x $file\n" if (-x "$file");
+}
+
+# Get rid of the package_makedir program.
+print PACKAGE "rm ./package_makedir\n";
+close(PACKAGE);
+print STDERR "done.\n";
+
+print STDERR "Creating a shell script to wrap around the file...";
+open(SHELL,">$package.sh") || die "\nCan't create temporary file \"$package.sh\".\nAborting $0.\n";
+print SHELL <<"EOF";
+#! /bin/sh
+#
+# This file contains a compressed version of all the code needed to compile
+# and build the $package package.
+#
+# You should only need to run \"$package.sh\" at the UNIX prompt, or
+# \"sh $package.sh\" if the previous command doesn't work.
+#
+# It will create a directory named \"$package\" and extract all of the
+# necessary files into it.  When this completes, you should cd into
+# \"$package\" and read the "README" file in there.  It will describe
+# the steps necessary to configure and build \"$package\" on your system.
+#
+
+debug=0
+if test \"X\$1\" = "X-debug"; then
+    debug=1
+    shift
+fi
+
+# All comments from here down are programmer's comments.
+# We need ourself as stdin, so rerun.
+if test "\$1" != "EXECING"; then
+    if test \$debug = 1; then
+        exec sh \$0 -debug EXECING < \$0
+    else
+        exec sh \$0 EXECING < \$0
+    fi
+fi
+
+# Test how to run echo without a newline.
+case "`echo 'x\\c'`" in
+    'x\\c')  echo="echo -n"  nnl= ;;     # BSD systems
+    x)      echo="echo"     nnl="\\c" ;; # Sys V systems
+    *)      echo="echo"     nnl= ;;     # Unknown
+esac
+
+# Check if the "$package" directory already exists.  If not, create it
+# In any case, cd into there.
+if test -d $package; then
+    echo "Directory \\"$package\\" already exists.  Good."
+else
+    echo "Creating \\"$package\\" directory."
+    mkdir $package
+fi
+cd $package
+
+# Ready to extract
+#
+# The process of extracting is this:  First we walk through the stdin (this
+# file) line by line until we find a line that has "FILE_DATA_BEGINS_HERE".
+# Once that's found, just pass the rest on to zcat to get the text data
+# out.  Then "unshar" that.
+
+# First get to the data.
+if test \$debug = 0; then
+    \$echo "Uncompressing data...\${nnl}"
+fi
+finished=0
+while test \$finished -eq 0; do
+    read input
+    if test "\$input" = "FILE_DATA_BEGINS_HERE"; then
+        finished=1
+    fi
+done
+
+# Then uncompress the data into a temporary file.
+tempname="$package.\$\$"
+zcat > \$tempname
+if test \$debug = 1; then
+    echo Debug option chosen.
+    echo Your data file is in \\\"$package/$package.\$\$\\\".
+    echo Exiting.
+    exit
+fi
+
+# Now run that, getting the files out.
+sh \$tempname
+/bin/rm -f \$tempname
+
+# All done.
+echo "...completed."
+echo "Please read the \\"README\\" file in the \\"$package\\" directory."
+exit 0
+
+FILE_DATA_BEGINS_HERE
+EOF
+close(SHELL);
+
+# Shell script written.  Append the "$package.$$" temporary file to the end of
+# it to make one file for distribution.
+$status = system("cat $package.$$ >> $package.sh");
+$status /= 256;
+if ($status != 0)
+{
+    print STDERR "\nSomething went wrong while contatenating files.\n";
+    print STDERR "Aborting $0.\n";
+    exit(-2);
+}
+
+# Make the "$package.sh" script executable and get rid of the old
+# "$package.$$" file.
+chmod(0700,"$package.sh");
+print STDERR "completed.\nCleaning up...";
+unlink("$package.$$");
+print STDERR <<"EOF";
+done.
+
+Your \"$package\" package is in the file \"$package.sh\",
+ready for distribution.
+EOF

@@ -1,0 +1,201 @@
+README File for SILO-SDX
+------------------------
+
+        Robb Matzke, Thu Dec 15 07:25:25 PST 1994
+
+
+INTRODUCTION
+------------
+
+The SILO-SDX driver allows a client (such as MeshTV) to read data from
+a server (a physics application).  The client reads the data through
+SILO API functions and need not know that that data is coming from the
+SILO-SDX driver.  However, the server writes data with SDX functions
+since the SILO API lacks some of the special control functions for
+communication with the client.
+
+The device independence rewrite did not touch the server side of the
+SDX interface.  However, the client side can no longer be accessed
+directly; all calls must be made through SILO by opening a SILO
+database (DBOpen) and reading objects from the database (DBGet...).
+Some of the old client functions still exist because there is no
+corresponding SILO API function.
+
+
+THE CLIENT INTERFACE (C)
+------------------------
+
+Some of the old names `SDX...' are no longer part of the client API.
+The same functionality is available through the SILO `DB...'
+functions.  For the most part, these functions take the same arguments
+and return the same values as the old `SDX...' functions, except they
+take a DBfile pointer as the first argument (instead of an sdxid) and
+they *always* return an indication of success or failure.  They also
+provide a better error handling mechanism (see DBShowErrors) instead
+of just printing the error to the standard error stream.  Programs using
+the SILO-SDX driver should link with `-lsilo_sdx' and `-lsdx' as well
+as `-lsilo'.
+
+A new function, SDXID, which takes a DBfile* argument and returns the
+SDX ID number, should be used instead of accessing the ID number
+directly.  In fact, it is no longer possible to say:
+
+        sdxid = dbfile->id.sdx ;
+
+since the SDX ID number is private to the SDX driver.  This piece of
+code must be replaced with:
+
+        sdxid = SDXID(dbfile) ;
+
+
+
+
+        Old Name                New Name                Internal Name
+        ---------------------------------------------------------------------
+        SDXGetTOC               db_sdx_GetToc           DBGetToc
+        SDXGetQuadmesh          db_sdx_GetQuadmesh      DBGetQuadmesh
+        SDXGetQuadvar           db_sdx_GetQuadvar       DBGetQuadvar
+        SDXGetMaterial          db_sdx_GetMaterial      DBGetMaterial
+        SDXGetMeshname          db_sdx_InqMeshname      DBInqMeshname
+        SDXGetMeshtype          db_sdx_InqMeshtype      DBInqMeshtype
+        SDXGetMultimesh         db_sdx_GetMultimesh     DBGetMultimesh
+        SDXGetVar               db_sdx_GetVar           DBGetVar
+        SDXOpen                 db_sdx_Open             DBOpen
+        SDXReadVar              db_sdx_ReadVar          DBReadVar
+        SDXGetFacelist          db_sdx_GetFacelist      DBGetFacelist
+        SDXGetZonelist          db_sdx_GetZonelist      DBGetZonelist
+        SDXGetVarLength         db_sdx_GetVarLength     DBGetVarLength
+        SDXGetVarByteLength     db_sdx_GetVarByteLength DBGetVarByteLength
+        SDXGetUcdmesh           db_sdx_GetUcdmesh       DBGetUcdmesh
+        SDXPutQuadvar           NOT IMPLEMENTED         N/A
+
+
+THE SERVER INTERFACE (Fortran) [non-SILO]
+-----------------------------------------
+
+No changes were made to the server interface.  Although similar to
+SILO, this interface is not part of SILO and cannot be accessed
+through SILO.  Server programs not using SILO should link with
+`-lsdx'.
+
+        sdxchar
+        sdxclose
+        sdxerror
+        sdxfloat
+        sdxinteger
+        sdxmmesh
+        sdxnextdata
+        sdxnextevent
+        sdxopen
+        sdxpause
+        sdxtoc
+        sdxputqm
+        sdxputqv
+        sdxputmat
+        sdxputzl
+        sdxputfl
+        sdxputum
+        sdxputuv
+        sdxcalcfl
+
+
+OTHER SDX FUNCTIONS
+-------------------
+
+Some public support functions are in `sdx.c' and are part of the `libsdx.a'
+library.   Some should be moved to another home if they are server- or
+client-specific and others should not have their names in the library,
+perhaps.
+
+
+        SDXCloseControl
+        SDXGetControlType
+        SDXGetControlInfo
+        SDXGetNewDataInfo
+        SDXOpenControl
+        SDXNextEvent
+        SDXConnect
+        SDXContinue
+        SDXPause
+        SDXWait
+        trap_alarm
+        sdx_parse_event
+        sdx_next_int
+        sdx_continue
+        fill_server_struct
+        sdxd_connect
+        server_listen
+        server_accept
+        client_connect
+        report_error
+        close_connection
+        sdx_readvar
+        xdr_SDXarray
+
+
+INTERNAL CHANGES
+----------------
+
+Each SDX function should be in one of these groups:
+
+    * Client functions that are accessed through SILO cannot be
+      accessed directly anymore.  These functions appear in
+      `silo_sdx.c' and are included in the application by defining
+      `DB_SDX' before including `silo.h'.  These functions are stored
+      in `libsilo_sdx.a'.
+
+    * Functions that support the client functions but are not needed
+      elsewhere should be declared static in `silo_sdx.c'
+
+    * Server functions (currently Fortran only) are not part of SILO
+      and should be in `sdx_server.c'.  They will be added to
+      libsdx.a.
+
+    * Support functions and global variables for the server should
+      appear in `sdx_server.c'.  The support functions should be
+      `static'.
+
+    * Remote procedure call code generated by `rpcgen' should be in
+      two files: sdxproto.h and sdxproto.c.  The function prototypes
+      should be removed from sdxproto.h (they should be in sdx.h) and
+      the function `xdr_SDXarray' should be removed from sdxproto.c
+      (it is defined in sdx.c).  The makefile builds these files from
+      `sdxproto.x'.
+
+    * All other functions (support functions for client *and* server)
+      should be defined in `sdx.c' with prototypes in `sdx.h'.  These
+      functions will be added to `libsdx.a'.
+
+
+CURRENT STATUS
+--------------
+
+Some functions in `sdx.c' should be moved to either `silo_sdx.c' or
+`sdx_server.c'.
+
+INSTALLING THE SDX DAEMON
+-------------------------
+
+1) As root modify the file "/usr/spool/cron/crontabs/root".
+
+2) Add the following lines:
+
+#
+# Start up the sdx daemon
+#
+*       *       *       *       *       /usr/local/bin/sdxd &
+
+   after the lines:
+
+#
+# Reorganize file systems
+#
+0       3       *       *       0       if test -x /usr/etc/fsr; then /usr/etc/fsr; fi
+
+
+3) Execute the command:
+
+crontab /usr/spool/cron/crontabs/root
+
+4) After a few minutes check that the process "sdxd" is running.
+

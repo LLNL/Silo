@@ -1,0 +1,187 @@
+#!/usr/local/bin/perl
+
+# This script unlocks the bugfix branch
+
+$user = shift;
+
+# format_array prints out an array in an 'ls' type form.  It basically
+# formats the contents of an array neatly, based on the length of the
+# longest element in the array.
+sub format_array
+{
+    my($stream) = shift(@_);
+    my(@a) = @_;
+    my($max,$col);
+
+    $max = 0;
+
+    foreach (@a)
+    {
+        $max = ($max<length($_))?length($_):$max;
+    }
+
+    $col = 0;
+    foreach (@a)
+    {
+        if ($col+$max >= 75)
+        {
+            print $stream "\n";
+            $col = 0;
+        }
+
+        $col += $max+1;
+        print $stream "$_ ";
+        if (length($_) < $max)
+        {
+            print $stream " " x ($max - length($_));
+        }
+    }
+    print $stream "\n";
+}
+
+# Get the name of the current branch.
+open(NB,"/home/meshtv/current_release_branch");
+($full_current_release_branch,$current_release_label) = (<NB> =~ /^(\S+)\s+(\S+)/);
+close(NB);
+($current_release_branch) = ($full_current_release_branch =~ m|^/main/(.*)$|);
+$HumanName = $current_release_branch;
+$HumanName = "bugfix" if ($current_release_branch eq "");
+$BranchName = $current_release_branch;
+$BranchName = "main" if ($current_release_branch eq "");
+
+# Print out some help
+sub help
+{
+    print STDERR <<"EOF";
+USAGE: unlockbug -force | -help
+    -force      Forcably unlocks the "$HumanName" branch.  This works 
+                even if someone else has it locked.  It also skips the check
+                for CHECKEDOUT files.
+    -help       Prints this help message.
+EOF
+}
+
+# Process the options including error checking on the options.
+require "newgetopt.pl";
+&NGetOpt("force","help");
+
+if ($opt_help)
+{
+    &help();
+    exit(0);
+}
+
+# The options are alright.  Now check to see who we are.
+# We have to be meshtv.
+$cleartool = "/usr/atria/bin/cleartool";
+$who = `/usr/local/bin/whoami`;
+chop($who);
+
+# We must be meshtv to have this stuff work.
+if ($who ne "meshtv")
+{
+    # We're not meshtv, so either we're not setuid or we didn't use ssh.
+    print STDERR <<"EOF";
+This script is not set up correctly.  Contact
+Sean Ahern (ahern\@llnl.gov) to see if he can figure out why.
+EOF
+    exit(-1);
+}
+
+# Make sure that we have a path into the VOB.
+$status = system("$cleartool startview meshtv_VOBowner_bug");
+$status /= 256;
+die "Unable to start the meshtv_VOBowner_bug view.\n" if ($status != 0);
+$status = chdir("/view/meshtv_VOBowner_bug/MeshTV_vob");
+die "Unable to chdir to the MeshTV VOB ($status).\n" if ($status != 1);
+
+# Get the status of any lock that exists.
+$lock_owner = "";
+$users = "";
+$users = `$cleartool lslock -fmt \"%c\" brtype:$BranchName`;
+chop($users);
+($lock_owner) = ($users =~ /^Locked except for users: (\w*)/);
+$* = 1;
+$comment = $users;
+$comment =~ s/^Locked except for users:.*$//;
+$comment =~ s/^\s*//;
+
+# Attempt to unlock the current release branch.
+
+# If the lock owner is empty, then there isn't a lock in effect right
+# now.
+if ($lock_owner =~ /^\s*$/)
+{
+    print STDERR "The \"$HumanName\" branch is not currently locked.\n";
+    exit(0);
+}
+
+# If the lock owner isn't the user, and we aren't doing a "force", then
+# we can't do anything.
+if ($lock_owner !~ /$user/ && !$opt_force)
+{
+    print STDERR <<"EOF";
+
+You do not have permission to unlock the "$HumanName" branch.  Only
+$lock_owner may unlock the "$HumanName" branch.  If you know that
+$lock_owner mistakenly left the "$HumanName" locked, and you wish to
+unlock it, add a "-force" option to this command.  Note that if you do a
+"-force", the check for CHECKEDOUT files will not be performed.
+
+To list the lock on "$HumanName", do a "lockbug -ls".
+EOF
+    exit(-1);
+}
+
+# If we're not forcing, check to see if there are any files checked out
+# on the main branch right now.  If there are, then we can't proceed.
+if (!$opt_force)
+{
+    print STDERR "Looking for CHECKEDOUT files...\n";
+    @checkedout = ();
+    open(LSCO,"$cleartool lsco -r -brtype $BranchName -fmt \"%Xn\n\"|");
+    while(<LSCO>)
+    {
+        if (m|^(\S*)\@\@$full_current_release_branch/CHECKEDOUT|)
+        {
+            $file = $1;
+            $file =~ s|^\./||;
+            $file = "/MeshTV_vob/$file";
+            push(@checkedout,$file);
+        }
+    }
+    close(LSCO);
+    if (@checkedout != 0)
+    {
+        print STDERR <<"EOF";
+
+You have files still checked out on the "$HumanName" branch.  You must
+check these files in before anyone else can see them.  Remember that CHECKEDOUT
+files only appear in your view, not other people's views.  The lock cannot be
+removed until either all of the files are checked in, or you specify a -force
+option.
+
+You may get a list of all files checked out to your view by running the
+command:  cleartool lsco -r -cview
+
+I believe the files that you have checked out on the "$HumanName"
+branch are:
+EOF
+        &format_array(STDERR,@checkedout);
+        exit(-1);
+    } else
+    {
+        print STDERR "No CHECKEDOUT files found.  Good.\n";
+    }
+}
+
+$status = system("$cleartool unlock brtype:$BranchName");
+$status /= 256;
+if ($status != 0)
+{
+    print STDERR "An error occurred while unlocking \"$HumanName\".\n";
+    exit($status);
+} else
+{
+    print STDERR "Branch \"$HumanName\" unlocked successfully.\n";
+}

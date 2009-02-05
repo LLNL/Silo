@@ -1,0 +1,6 @@
+#!/bin/sh
+
+##
+## Difference the files by running browser with the difference option.
+##
+browser -l 3 -r -e diff $*

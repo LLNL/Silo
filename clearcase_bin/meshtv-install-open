@@ -1,0 +1,335 @@
+#!/bin/sh
+#-----------------------------------------------------------------------
+#
+# MESHTV-INSTALL-OPEN - Install the meshtv distributions on the open
+#                       network.
+#
+# Author: Eric Brugger
+# Date:   April 19, 2000
+#
+# Usage:
+#    meshtv-install-open [-public] -v <version>
+#
+#-----------------------------------------------------------------------
+
+test=no
+dir=/XXX
+
+#
+# Parse the execute line, providing default values for error checking.
+#
+hyper=true
+kickit=true
+sunspot=true
+gps=true
+blue=true
+riptide=true
+janus=true
+
+ver=undefined
+
+#
+# The loop is executed once for each symbol on the execute line.  This means
+# that $1 may be blank for later executions of the loop if any "shift 2"
+# commands are executed.  The variable abc is not used in the loop.
+#
+for abc
+do
+   case $1 in
+      -none)
+         hyper=false
+         kickit=false
+         sunspot=false
+         gps=false
+         blue=false
+         riptide=false
+         janus=false
+         shift
+         ;;
+      -hyper)
+         hyper=false
+         shift
+         ;;
+      +hyper)
+         hyper=true
+         shift
+         ;;
+      -kickit)
+         kickit=false
+         shift
+         ;;
+      +kickit)
+         kickit=true
+         shift
+         ;;
+      -sunspot)
+         sunspot=false
+         shift
+         ;;
+      +sunspot)
+         sunspot=true
+         shift
+         ;;
+      -gps)
+         gps=false
+         shift
+         ;;
+      +gps)
+         gps=true
+         shift
+         ;;
+      -blue)
+         blue=false
+         shift
+         ;;
+      +blue)
+         blue=true
+         shift
+         ;;
+      -riptide)
+         riptide=false
+         shift
+         ;;
+      +riptide)
+         riptide=true
+         shift
+         ;;
+      -janus)
+         janus=false
+         shift
+         ;;
+      +janus)
+         janus=true
+         shift
+         ;;
+      -public)
+         dir=
+         shift
+         ;;
+      -v)
+         ver=$2
+         shift 2
+         ;;
+   esac
+done
+
+#
+# Check that both the version and distribution name were provided.
+#
+if [ $ver = undefined ]
+then
+   echo "Usage: [-public] -v <version>"
+   exit
+fi
+
+ver2=`echo $ver | tr "." "_"`
+
+#
+# Install on hyper.
+#
+rm -f hyper
+cat <<EOF > hyper
+#!/bin/sh
+cd /scratch1/brugger/hyper/meshtvbuild
+./meshtv-install -g meshtv -gw $ver irix6 /usr/local/meshtv$dir > installlog 2>&1
+rm -f resultlog
+echo "        install of meshtv on hyper"           > resultlog 2>&1
+echo "       ----------------------------"          >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+df -k /usr/local/meshtv                             >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+ls -l /usr/local/meshtv$dir/bin/sgi-irix6-mips2     >> resultlog 2>&1
+mail brugger1@llnl.gov < resultlog
+EOF
+
+if [ $hyper = true ]
+then
+   if [ $test = no ]
+   then
+      scp hyper hyper:install_meshtv_hyper
+      ssh hyper "chmod 750 install_meshtv_hyper;./install_meshtv_hyper"
+   fi
+fi
+
+#
+# Install on kickit.
+#
+rm -f kickit
+cat <<EOF > kickit
+#!/bin/sh
+cd /usr/tmp/brugger/kickit/meshtvbuild
+./meshtv-install -g swat -gw $ver linux /usr/gapps/meshtv$dir > installlog 2>&1
+rm -f resultlog
+echo "        install of meshtv on kickit"          > resultlog 2>&1
+echo "       -----------------------------"         >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+df -k /usr/gapps/meshtv                             >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+ls -l /usr/gapps/meshtv$dir/bin/linux               >> resultlog 2>&1
+mail brugger1@llnl.gov < resultlog
+EOF
+
+if [ $kickit = true ]
+then
+   if [ $test = no ]
+   then
+      scp kickit kickit:install_meshtv_kickit
+      ssh kickit "chmod 750 install_meshtv_kickit;./install_meshtv_kickit"
+   fi
+fi
+
+#
+# Install on sunspot.
+#
+rm -f sunspot
+cat <<EOF > sunspot
+#!/bin/sh
+cd /export/scratch/brugger/sunspot/meshtvbuild
+./meshtv-install -g swat -gw $ver solaris5.7 /usr/gapps/meshtv$dir > installlog 2>&1
+rm -f resultlog
+echo "        install of meshtv on sunspot"         > resultlog 2>&1
+echo "       ------------------------------"        >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+df -k /usr/gapps/meshtv                             >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+ls -l /usr/gapps/meshtv$dir/bin/sun4-sunos5-sparc   >> resultlog 2>&1
+mail brugger1@llnl.gov < resultlog
+EOF
+
+if [ $sunspot = true ]
+then
+   if [ $test = no ]
+   then
+      scp sunspot sunspot:install_meshtv_sunspot
+      ssh sunspot "chmod 750 install_meshtv_sunspot;./install_meshtv_sunspot"
+   fi
+fi
+
+#
+# Install on gps.
+#
+rm -f gps
+cat <<EOF > gps
+#!/bin/sh
+cd /nfs/tmp1/brugger/gps/meshtvbuild
+./meshtv-install -g swat -gw $ver osf1 /usr/local/apps/meshtv$dir > installlog 2>&1
+cp meshtvp$ver meshtvxp$ver /usr/local/apps/meshtv$dir/bin/dec-osf1-alpha
+cd /usr/local/apps/meshtv$dir/bin/dec-osf1-alpha
+chmod 775 *; chgrp swat *
+cd /nfs/tmp1/brugger/gps/meshtvbuild
+m -f resultlog
+echo "        install of meshtv on gps"             > resultlog 2>&1
+echo "       --------------------------"            >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+df -k /usr/local/apps/meshtv                        >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+ls -l /usr/local/apps/meshtv$dir/bin/dec-osf1-alpha >> resultlog 2>&1
+mail brugger1@llnl.gov < resultlog
+EOF
+
+if [ $gps = true ]
+then
+   if [ $test = no ]
+   then
+      scp gps gps15:install_meshtv_gps
+      ssh gps15 "chmod 750 install_meshtv_gps;./install_meshtv_gps"
+   fi
+fi
+
+#
+# Install on blue.
+#
+rm -f blue
+cat <<EOF > blue
+#!/bin/sh
+cd /nfs/tmp1/brugger/blue/meshtvbuild
+./meshtv-install -g swat -gw $ver aix /usr/local/apps/meshtv$dir > installlog 2>&1
+cp meshtvp$ver meshtvxp$ver /usr/local/apps/meshtv$dir/bin/ibm-aix-pwr
+cd /usr/local/apps/meshtv$dir/bin/ibm-aix-pwr
+chmod 775 *; chgrp swat *
+cd /nfs/tmp1/brugger/blue/meshtvbuild
+rm -f resultlog
+echo "        install of meshtv on blue"            > resultlog 2>&1
+echo "       ---------------------------"           >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+df -k /usr/local/apps/meshtv                        >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+ls -l /usr/local/apps/meshtv$dir/bin/ibm-aix-pwr    >> resultlog 2>&1
+mail brugger1@llnl.gov < resultlog
+EOF
+
+if [ $blue = true ]
+then
+   if [ $test = no ]
+   then
+      scp blue blue:install_meshtv_blue
+      ssh blue "chmod 750 install_meshtv_blue;./install_meshtv_blue"
+   fi
+fi
+
+#
+# Install on riptide.
+#
+rm -f riptide
+cat <<EOF > riptide
+#!/bin/sh
+cd /nfs/tmp1/brugger/riptide/meshtvbuild
+./meshtv-install -g swat -gw $ver irix6 /usr/local/apps/meshtv$dir > installlog 2>&1
+cp meshtvp$ver meshtvxp$ver /usr/local/apps/meshtv$dir/bin/sgi-irix6-mips2
+cd /usr/local/apps/meshtv$dir/bin/sgi-irix6-mips2
+chmod 775 *; chgrp swat *
+cd /nfs/tmp1/brugger/riptide/meshtvbuild
+rm -f resultlog
+echo "        install of meshtv on riptide"         > resultlog 2>&1
+echo "       ------------------------------"        >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+df -k /usr/local/apps/meshtv                        >> resultlog 2>&1
+echo ""                                             >> resultlog 2>&1
+ls -l /usr/local/apps/meshtv$dir/bin/sgi-irix6-mips2 >> resultlog 2>&1
+mail brugger1@llnl.gov < resultlog
+EOF
+
+if [ $riptide = true ]
+then
+   if [ $test = no ]
+   then
+      scp riptide riptide:install_meshtv_riptide
+      ssh riptide "chmod 750 install_meshtv_riptide;./install_meshtv_riptide"
+   fi
+fi
+
+#
+# Install on janus.
+#
+rm -f janus
+cat <<EOF > janus
+#!/bin/sh
+./meshtv-install -g meshtv -gw $ver irix6 /usr/local/apps/meshtv$dir > installlog 2>&1
+rm -f resultlog
+echo "        install of meshtv on janus"             > resultlog 2>&1
+echo "       ----------------------------"            >> resultlog 2>&1
+echo ""                                               >> resultlog 2>&1
+df -k /usr/local/apps/meshtv                          >> resultlog 2>&1
+echo ""                                               >> resultlog 2>&1
+ls -l /usr/local/apps/meshtv$dir/bin/sgi-irix6-mips2  >> resultlog 2>&1
+mail brugger1@llnl.gov < resultlog
+EOF
+
+if [ $janus = true ]
+then
+   if [ $test = no ]
+   then
+      scp janus janus:install_meshtv_janus
+      scp meshtv$ver2.irix6.tar.gz janus:meshtv$ver2.irix6.tar.gz
+      scp meshtv-install janus:meshtv-install
+      ssh janus "chmod 750 install_meshtv_janus;./install_meshtv_janus"
+   fi
+fi
+
+#
+# Clean up.
+#
+if [ $test = no ]
+then
+   rm hyper gps blue riptide kickit sunspot janus
+fi

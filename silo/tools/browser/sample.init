@@ -1,0 +1,444 @@
+## Initialization file for the browser.                      -*-shell-script-*-
+noprint $browser_version = 4.501
+##
+## The browser searches for a startup file named $HOME/.browser_rc,
+## and if that is not found then $prefix/include/browser_rc, where
+## $prefix is set by the --prefix=PREFIX switch of configure, which
+## defaults to /usr/local.  The browser doesn't search if a startup
+## file is specified with the --file browser switch.
+
+## Modifications
+##
+##      Robb Matzke, 29 Jul 1997
+##      Added the `html_browsers' and `trap_sigfpe' variables.
+##
+##      Robb Matzke, 2 Sep 1997
+##      Added variables for the `int8' datatype.
+##
+##      Sean Ahern, Tue Feb  1 13:44:00 PST 2000
+##      Changed how the version number works.
+##
+##      Eric Brugger, Fri May 26 14:39:05 PDT 2000
+##      I removed the setting of html_browsers.
+
+##
+## The browser will treat everything as the SILO DBobject type if
+## $lowlevel is set to a non-zero value.  The default is to treat
+## database objects as higher-level SILO types like DBquadvar.
+##
+#noprint $lowlevel = 0
+
+##
+## Output formats for primitive types.  The format strings are passed
+## directly the the printf(3C) function, so see that man page for
+## details.
+##
+#noprint $fmt_string = "\"%s\""
+#noprint $fmt_null = "(null)"
+#noprint $fmt_int8 = "(int8)%d"
+#noprint $fmt_short = "(short)%d"
+#noprint $fmt_int = "%d"
+#noprint $fmt_long = "(long)%d"
+#noprint $fmt_float = "%1.5g"
+#noprint $fmt_double = "%1.10g"
+
+##
+## Unless this variable is set to 16, 8, or 2 the output of primitive
+## data will use the formats defined above. Otherwise data will be
+## displayed in base-16, base-8, or base-2 using built-in formats.
+##
+#noprint $obase = 16            # Default is unset (decimal)
+
+
+##
+## Large arrays can be truncated when they're displayed so the output
+## isn't so long.  Setting $truncate to an integer value N causes at
+## most N values in each dimension to be displayed.  Setting
+## $trailing to M causes M of the N values to be taken from the end
+## of the array.
+##
+#noprint $truncate = 10000      # Default is unset
+#noprint $trailing = 50         # This many come from the end of the array
+
+##
+## During differencing, the browser allows a certain tolerance to be
+## specified.  Values which are closer than this tolerance are
+## considered equal.  Tolerances are absolute (a difference) or
+## relative (the ratio of difference to mean value).  The --absolute
+## (-A) and --relative (-R) command-line options set all the absolute
+## or relative tolerances to the value given on the browser command line.
+##
+#noprint $diff_int8_abs   = 0
+#noprint $diff_int8_rel   = 0
+#noprint $diff_short_abs  = 0
+#noprint $diff_short_rel  = 0
+#noprint $diff_int_abs    = 0
+#noprint $diff_int_rel    = 0
+#noprint $diff_long_abs   = 0
+#noprint $diff_long_rel   = 0
+#noprint $diff_float_abs  = 0
+#noprint $diff_float_rel  = 0
+#noprint $diff_double_abs = 0
+#noprint $diff_double_rel = 0
+
+##
+## The diff output is controlled by this variable, which should be a
+## string containing comma- and/or space-separated words. The accepted 
+## words are: detail, brief, summary, ignore_additions, ignore_deletions, 
+## and two_column.
+##
+#noprint $diff = "detail,two_column"
+
+##
+## The following constants come from silo.h and can be used when assigning
+## values to silo objects.
+##
+
+# Definitions for MAJOR_ORDER
+noprint DB_ROWMAJOR     = 0
+noprint DB_COLMAJOR     = 1
+
+# Definitions for COORD_TYPE
+noprint DB_COLLINEAR    = 130
+noprint DB_NONCOLLINEAR = 131
+noprint DB_QUAD_RECT    = DB_COLLINEAR
+noprint DB_QUAD_CURV    = DB_NONCOLLINEAR
+
+# Definitions for CENTERING
+noprint DB_NOTCENT      = 0
+noprint DB_NODECENT     = 110
+noprint DB_ZONECENT     = 111
+noprint DB_FACECENT     = 112
+
+# Definitions for COORD_SYSTEM
+noprint DB_CARTESIAN    = 120
+noprint DB_CYLINDRICAL  = 121
+noprint DB_SPHERICAL    = 122
+noprint DB_NUMERICAL    = 123
+noprint DB_OTHER        = 124
+
+# Definitions for ZONE FACE_TYPE
+noprint DB_RECTILINEAR  = 100
+noprint DB_CURVILINEAR  = 101
+
+# Definitions for PLANAR
+noprint DB_AREA         = 140
+noprint DB_VOLUMNE      = 141
+
+# Definitions for flag values
+noprint DB_ON           = 1000
+noprint DB_OFF          = -1000
+
+noprint DB_ZONETYPE_BEAM        = 10
+noprint DB_ZONETYPE_POLYGON     = 20
+noprint DB_ZONETYPE_TRIANGLE    = 23
+noprint DB_ZONETYPE_QUAD        = 24
+noprint DB_ZONETYPE_POLYHEDRON  = 30
+noprint DB_ZONETYPE_TET         = 34
+noprint DB_ZONETYPE_PYRAMID     = 35
+noprint DB_ZONETYPE_PRISM       = 36
+noprint DB_ZONETYPE_HEX         = 38
+
+## Changes since previous version.
+help delta "\
+New since browser 4.102\n\
+=======================\n\
+\n\
+Output of primitive data (integer, floating-point, character, and string) \
+can use a hexadecimal, octal, or binary format. See help on `$obase' or \
+`--obase' for details.\n\
+\n\
+New in browser 4.004\n\
+====================\n\
+\n\
+Two-column diff output.\n\
+The $diff variable understands the word `two_column', which causes diff to \
+produce output with two columns similar to pdbdiff. The first column \
+contains the value from the first operand while the second column contains \
+the corresponding different value from the second operand. This is the \
+default now; if you want the old behavior then set `$diff=detail'.\n\
+\n\
+Diff on file families.\n\
+The diff command can now take any even number of arguments. The argument \
+list is split in half and each argument from the first half of the list is \
+differenced against the corresponding argument from the second half of the \
+list. If called with no arguments then the SILO files from the browser \
+command-line are used.\n\
+\n\
+$diff variable is a word list.\n\
+The $diff variable should have a value which is a list of words instead of \
+a string. If you used to say `$diff=\"brief,ignore_additions\"' you should \
+now say `$diff={brief, ignore_additions}'. The --diff command-line switch \
+has not been changed.\n\
+\n\
+Diff exclusion list.\n\
+The diff function can be prevented from recursively comparing certain objects \
+based on name and/or datatype. See `help $exclude' for details.\n\
+\n\
+Diff single-argument form.\n\
+If the diff function is invoked with just one argument and that argument is \
+an object in the silo file represented by $1, then that object will be \
+compared with an object of the same name in the file represented by $2. This \
+makes a typical diff command for two objects a little easier to type. \
+Example: Instead of saying `diff cycle $2.cycle' you can now say just \
+`diff cycle'.\n\
+\n\
+Multi-file functions and operators.\n\
+Certain functions and operators were extended to operate concurrently on \
+a list of files. For example, `cd domain_0 $*' will change directories in \
+all files which were opened on the browser command-line.  Affected are the \
+`cd', `pwd', and `ls' functions which take `$*' as an argument; the `.' \
+operator which takes `$*' as the left operand.\n\
+\n\
+More output precision.\n\
+The $fmt_float and $fmt_double output formats are now based on FLT_DIG and \
+DBL_DIG from <math.h> or <limits.h>. Therefore floating-point values will \
+be displayed with their full precision, whatever that may be.\n\
+\n\
+Pager cancellation.\n\
+The built-in pager may be canceled for a command's output by pressing \
+control-d at any pager prompt. The remainder of the command's output \
+will scroll without being paged.\n\
+\n\
+\n\
+New in browser 4.003\n\
+====================\n\
+\n\
+Improved `diff' operator.\n\
+The diff operator can perform a brief output and a summary output; it can \
+ignore changes that simply add or delete data; various bugs have been fixed; \
+performance has been improved. Say `help diff' and `help $diff' for details.\n\
+\n\
+Long-format command-line switches.\n\
+These look like GNU-style switches. Invoke the browser with `--help' for a \
+complete list along with documentation or say `help run'.\n\
+\n\
+Better terminal size querying.\n\
+The browser output height and width is monitored using SIGWINCH and various \
+ioctl calls.  See help topics listed by `help \"height\"' and `help \
+\"width\"' for details.\n\
+\n\
+Improved `help' command.\n\
+The old command which displayed web pages was too prone to configuration \
+details (missing/broken web browsers, inaccessible web pages, etc). The \
+command was replaced with a built-in help command which prints documentation \
+associated with various symbols.  Many of these documentation strings are \
+assigned in the browser startup file.\n\
+\n\
+Internal variable names changed.\n\
+All browser special-purpose variables begin with a dollar sign (`$') to \
+reduce the liklihood that the name conflicts with a SILO object. In addition \
+a few new names were added ($diff, $height, $width, etc) and a few were \
+renamed (e.g., `low_level' became `$lowlevel').\n\
+\n\
+Less obtrusive handling of floating-point exceptions.\n\
+The browser prints a warning about floating point exceptions only after one \
+occurs.  In verbose mode the browser will indicate how many exceptions \
+were trapped for each command which produced output.\n\
+\n\
+Lots of minor bugfixes and changes.\n\
+See the ClearCase logs for details."
+
+# Frequently asked questions
+help faq "\
+Q: How do I prevent browser from pausing at each page?\n\
+A: The browser only pages output going to a terminal or psuedoterminal and \
+does not page output going to a file or shell command (this is true for \
+output redirection at the shell level or within the browser).  So the most \
+convenient way to turn off paging for a single browser command is to redirect \
+the command's output through the Unix `cat' command. To turn off paging \
+permanently you can set the $height variable to zero, which can be done \
+in a startup file ($height=0) or from the command-line (--height=0). However, \
+if the browser receives a SIGWINCH signal it will make ioctl() calls to \
+determine the size of the terminal and reset $height to that value.\n\
+\n\
+Q: I don't like the browser's pager. Can I use less or more?\n\
+A: The browser's pager is indeed simple. Output from almost any browser \
+command can be redirected to any shell command, including your favorite \
+pager. Redirection to a shell command happens when the browser command is \
+followed by the pipe symbol (`|'). For example: `print d |less'\n\
+\n\
+Q: I can't seem to print my SILO variable named `1a'\n\
+A: The browser interprets `1a' as an integer `1' followed by the symbol `a' \
+instead of the name of some SILO object. If a SILO object contains special \
+characters that would cause it to be interpretted as something other than a \
+name, then the name can be enclosed in quotes. The dot operator must be used \
+to inform the browser that the string is really an object name.  For \
+instance, if the first file opened on the browser command line contains an \
+object named `1a', then it can be printed by saying `$1.\"1a\"'.\n\
+\n\
+Q: My SILO file contains an object named `$width' but the browser insists \
+on printing `80' as its value.\n\
+A: If a SILO file contains an object with the same name as some browser \
+variable then the browser uses the value stored within the browser instead \
+of the value in the file.  To force interpretation to be the SILO object \
+use the dot operator. For example: `$1.$width'.\n\
+\n\
+Q: When I diff two directories within a file it takes twice as long as when \
+I diff two directories in different files.\n\
+A: This is a limitation of SILO. When two files are used the browser can \
+optimize searches by using the current working directory feature of the \
+SILO file handles. When differencing within a file the browser cannot \
+make this optimization, which results in the SILO API making lots of calls \
+to the underlying PDB/HDF5/etc library to maintain directory state. One \
+possible workaround may be to open the same file twice and perform the \
+difference operation on two separate file handles.\n\
+\n\
+Q: How can I prevent diff from recursively entering directories?\n\
+A: By adding the string \"type:dir\" to the $exclude list. For example: \
+`$exclude={\"type:dir\"}' or on the command-line with `--exclude=type:dir'.\n\
+\n\
+Q: Diff reports that two numbers differ but in the output they look \
+identical. What's happening?\n\
+A: The difference calculation may be using more precision than what is being \
+displayed by the output routines.  There are various ways you could see \
+more digits in the output: you could set one of the $fmt_* variables, or \
+you could tell the browser to output (in hexadecimal, octal, or binary) the \
+bit pattern of the values being compared by setting the $obase variable.\n\
+\n\
+Q: Why doesn't `cd _2.domain_0' work?\n\
+A: The argument to the `cd' function is an implied string and is not \
+interpreted by the browser. You must say `cd domain_0 _2' instead.\n\
+\n\
+Q: The browser truncates my string when I try to assign it to a string \
+variable in a SILO file.\n\
+A: Due to limitations in SILO the browser is unable to assign a longer \
+string value to an existing string variable. The browser will truncate \
+the new value to be the same length as the old value.\
+\n\
+Q: Where does this FAQ come from?\n\
+A: The `help faq' command gets its text from the browser initialization \
+file. You can see the name of this file if you invoke the browser with the \
+--verbose switch."
+
+# Browser syntax
+help syntax "\
+The browser syntax is quite simple, consisting of function calls, \
+operators, atoms, and lists. Comments begin with a hash mark and \
+continue to the end of the line (except in strings). White space \
+is generally ignored except as a token separator. Statements can be \
+continued across multiple lines, but a backslash must escape the linefeed \
+if the partial statement looks syntactically complete.\n\
+\n\
+A function call is a parenthetical expression where the first element \
+is the name of the function and the subsequent elements are the \
+arguments to that function. Most functions evaluate all their arguments \
+but others evaluate only some (or none). For example, the `Assign' \
+function doesn't evaluate its first argument, but rather assignes the \
+evaluated second argument to the l-value specified by the first argument. \
+The parentheses can be omitted from around the top-level function call. \
+Say `help functions' (or `(help functions)') for a list of all functions.\n\
+\n\
+Most browser operators are infix, binary operators. They take two operands, \
+one on each side of the operator, and call some function which is bound to \
+the operator. For example the expression `foo=1' is equivalent to `(Assign \
+foo 1)'. The `{}' operator takes any number of arguments which appear between \
+the open and close curly braces. Say `help operators' for a list of all \
+operators.\n\
+\n\
+The browser has three types of atoms: strings, numbers, and symbols. \
+A string is a sequence of characters enclosed in single or double quotes. \
+The normal C escaping mechanism can be used for special characters within \
+the string. A single quote has no special significance in a double-quoted \
+string and vice versa.  Numbers are positive or negative sequences of \
+decimal digits with an optional embedded decimal point and trailing \
+exponent. An exponent consists of the letter `e' or `E' followed by \
+an optional sign and one or more decimal digits.  A symbol is any sequence \
+of alphanumeric characters and may also include dollar signs, hyphens, \
+underscores, and various other characters (although their use is \
+discouraged).\n\
+\n\
+A list consists of zero or more atoms or lists enclosed in parentheses. \
+Evaluation of the list results in the browser looking up the functional \
+value of the first member of the list and calling that function with the \
+subsequent list members as arguments. Evaluation of the list can be \
+suppressed by using curly braces instead of parentheses (e.g., `{1 3 5}' \
+is equivalent to `(Quote 1 3 5)')."
+
+# Browser output formats
+help formats "\
+The browser uses C printf() format strings to display various types of data. \
+These strings are stored in internal variables that have names like `$fmt_X' \
+where `X' is one of `string', `null', `int8', `short', `int', `long', \
+`float', or `double'.  These formats are not used when hexadecimal, octal, \
+or binary output formats are being used (see $obase)."
+
+# Browser output paging
+help paging "\
+The browser keeps track of how many lines of output have been \
+displayed for the currently executing command and temporarily pauses \
+that command whenever output is about to scroll off the top of the \
+screen. The height and width of the screen can be set by the internal \
+variables $height and $width, which are initialized when the browser \
+starts and when it receives a window size change signal (SIGWINCH). If \
+the required ioctl() calls are not available to the browser then the \
+terminal size can be set with the LINES and COLUMNS environment variables.\n\
+\n\
+When the browser pauses the output, the message `more? ('q' to \
+quit)' is displayed.  If the user presses the `q' key (no return is \
+necessary) or types the interrupt character (usually control-c) then the \
+command is canceled. Pressing Control-d cancels the paging for the \
+remainder of the command (output will simply scroll off the screen). \
+Pressing `n' when viewing output from the `diff' command will cause \
+output to continue with the next difference. Otherwise output continues \
+with the next page's worth.\n\
+\n\
+Output redirected to a file or command is not paged.  If the user is \
+not satisfied with the limited paging ability of the browser, the output \
+from a command can be redirected to the pager of the user's choice using \
+output redirection (see `help redirection')"
+
+
+# Browser output redirection
+help redirection "\
+Output from any browser command can be redirected to a file or shell \
+command by appending a redirection character and file name or shell \
+command to the end of the command.\n\
+\n\
+To save the output of a command in a file, destroying the previous \
+contents of the file if any, append a `>' and the name of the file. \
+Unless the file name looks like a browser symbol it must be enclosed in \
+quotes.  For instance, `quadvar3d > saved' saves the value of Silo \
+database variable `quadvar' in a text file named `saved'.\n\
+\n\
+To append the output of a command to a file, append a `>>' and the \
+file name to the end of the command.  Unless the file name looks like a \
+browser symbol it must be enclosed in quotes.  For example, `typeof \
+quadvar3d >> saved' appends type information to the `saved' file.\n\
+\n\
+To send the output of a browser command to the standard input of a \
+shell command, follow the browser command with a `|' followed by the \
+shell command in quotes.  The quotes are not necessary if the shell \
+command is a single symbol.  Since paging is disabled when output is to \
+a shell command, one way to display a result without paging is to pipe \
+the output through the `cat' command like `d | cat'."
+
+# Interrupting long-running commands
+help interrupts "\
+Since some commands may require a long time to execute or may produce a \
+huge amount of output, the user may want to abort the command before it \
+finishes. If the output is paged interactively to the screen then pressing \
+`q' at the `more?' prompt accomplishes this. Otherwise the user can press \
+the interrupt character (usually control-c) and the browser command will \
+immediately terminate, allowing the browser to prompt for the next command. \
+If the interrupt character arrives during command input then the browser \
+itself will terminate.\n\
+\n\
+If output from a browser command is being piped into a shell command and \
+the shell command exits (or closes its standard input) before the \
+browser command is finished, the browser command gets a SIGPIPE signal \
+and terminates without terminating the browser."
+
+# Traps for the unwary
+help traps "\
+Please report bugs to the MeshTV team (MeshTV@llnl.gov).\n\
+\n\
+A local browser initialization file completely overrides the system \
+initialization file. Users should probably copy-then-modify the system \
+file when creating their own personal init file since the system file \
+contains some of the documentation strings for the `help' command."
+
+
+##
+## End of initialization.
+##

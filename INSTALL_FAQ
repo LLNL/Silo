@@ -1,0 +1,104 @@
+MeshTV installation FAQ
+
+Index of questions
+------------------
+1) What does it mean if `configure' can't find a suitable C compiler?
+2) How do I set my own C compiler?
+3) What does it mean if `configure' can't find "some header file"?
+4) What should I do if my GNU readline is misconfigured?
+5) Why am I getting 'multiply defined' errors for some NetCDF functions
+   when building a Silo client? 
+6) Why doesn't configure find the necessary components for the
+   hdf5 driver?
+
+Questions
+---------
+1) What does it mean if `configure' can't find a suitable C compiler?
+
+   It means that `configure' either wasn't able to find "gcc" or a suitable
+   "cc" wasn't able to be found in your $PATH.  (`configure' will not use
+   /usr/ucb/cc.)  To tell if a C compiler is suitable, `configure' attempts to
+   compile a simple C program.  If it can't compile or link the program, then
+   the C compile isn't suitable.
+
+   One possible reason this would happen is that you are on a SunOS machine and
+   "-ldl" needs to be specified on the link line.  `configure' attempts to
+   detect this, but if it still fails, try this:
+
+       % env LDFLAGS="-ldl" ./configure
+
+2) How do I set my own C compiler?
+
+   You use a method similar to what is discussed in #1, above.  You use the
+   "env" command to set the CC environment variable.  For example, to use the
+   "cc" compiler, you would use this command:
+
+       % env CC="cc" ./configure
+
+3) What does it mean if `configure' can't find "some header file"?
+
+   It means that the C preprocessor can't find certain code definitions that
+   SILO/MeshTV needs to compile.  The most common reason this happens is that
+   you are using a non-ANSI compiler.  We do not support non-ANSI
+   compilers.  Please switch to an ANSI-compliant compiler.
+   
+4) What should I do if my GNU readline is misconfigured?
+
+   We've run across many systems that have the GNU header files and libraries
+   misconfigured.  Our policy is to not detect, correct, or work around
+   misconfigured systems since it's difficult to do in general.  However, if
+   your system has the GNU readline header files or library incorrectly
+   installed and you wish to compile MeshTV without first fixing your system,
+   use the `--without-readline' option to `./configure'.  This causes configure
+   to assume that you don't have the GNU readline support.
+
+5) Why am I getting 'multiply defined' errors for some NetCDF functions
+   when building a Silo client? 
+
+   If you are writing an application that uses (e.g. links to) *both* Silo and
+   NetCDF libraries, you might get output from the linker that looks like...
+
+   ld:
+   lib/libsilo.a(api.o): ncopen: multiply defined
+   lib/libsilo.a(api.o): ncvarid: multiply defined
+   lib/libsilo.a(api.o): ncattinq: multiply defined
+   lib/libsilo.a(api.o): ncattget: multiply defined
+   lib/libsilo.a(api.o): ncclose: multiply defined
+   lib/libsilo.a(api.o): ncvarinq: multiply defined
+   lib/libsilo.a(api.o): ncdiminq: multiply defined
+   lib/libsilo.a(api.o): ncvarget1: multiply defined
+   lib/libsilo.a(api.o): ncvarget: multiply defined
+
+   This is due to the fact that Silo implements its own baby version of the
+   NetCDF interface so that we don't have to carry around the full NetCDF
+   distrubiton wherever we install Silo.
+
+   The easiest solution is to disable Silo's netcdf driver. Don't worry, this
+   driver exists mainly for legacy data and you probably won't need it. 
+   To disable the NetCDF driver, cd to silo's root dir and do a
+   'make distclean'. Then, cd into the 'silo' subdir and remove the netcdf
+   directory with 'rm -rf netcdf'. Then do a configure and a make; configure
+   should report that it did NOT find the netcdf driver. Make will build a new
+   libsilo.a file for you without the netcdf stuff in it.
+
+6) Why doesn't configure find the necessary components for the
+   hdf5 driver?
+
+   Silo's hdf5 driver depends on the hdf5 library. The hdf5 library may, in
+   turn, depend on GNU's libz compression library. Configure does its best
+   to try to find a compatible combination of the hdf5 library and libz.
+   Occasionally, it will not be able to.
+
+   One possibility is that hdf5 is NOT in its standard place. In this case
+   try using the --with-hdf5 option to configure.
+
+   Another possibility is that hdf5 was installed with libz but libz is NOT
+   in a standard place. In this case, try telling configure explicitly where
+   libz is with the --with-zlib option.
+
+   Another possibility is that hdf5 was installed from binaries, not its
+   source distribution. If those binaries were built with libz dependencies
+   and your platform doesn't have libz, then you either need a new hdf5
+   installation or you need to find and install GNU's libz.
+
+END OF QUESTIONS

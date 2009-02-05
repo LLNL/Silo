@@ -1,0 +1,48 @@
+#!/bin/sh
+
+### Purpose:
+#   Prints the names of all the important MeshTV files.
+
+### Programmer:
+#   Robb Matzke
+#   28 Feb 1997
+
+### Modifications
+#   Eric Brugger, Tue Apr 22 07:53:25 PDT 1997
+#   Add help files from ./help directory to the list of files.
+#
+#   Sean Ahern, Fri Aug 29 10:51:57 PDT 1997
+#   Get rid of "echo ./help" from the list of files.  That's taken care of in
+#   meshtv-dist.
+#
+#   Sean Ahern, Mon Sep  8 17:04:54 PDT 1997
+#   Make "mkman" run from an absolute path, rather than searching $PATH.
+#
+#   Jeremy Meredith, Mon Oct 11 12:24:54 PDT 1999
+#   Added Mesa 3.0 to the list.
+#
+#   Jeremy Meredith, Tue Mar  5 14:56:15 PST 2002
+#   Removed Mesa-3.0 and added Mesa-4.1.
+#
+#   Sean Ahern, Mon Apr 22 11:21:13 PDT 2002
+#   Removed unproto.
+
+if [ ! -d meshtvx ]; then
+   echo "invoke $0 from the root of the meshtv source tree" 2>&1
+   exit 1
+fi
+
+PATH="$PATH:./clearcase_bin"
+(
+    ./clearcase_bin/mkman --quiet --norecursive --simple .
+    ./clearcase_bin/mkman --quiet --norecursive --simple ./config-site
+    ./clearcase_bin/mkman --quiet --recursive --simple ./silo
+    ./clearcase_bin/mkman --quiet --recursive --simple ./meshtv
+    ./clearcase_bin/mkman --quiet --recursive --simple ./meshtvx
+    ./clearcase_bin/mkman --quiet --recursive --simple ./spi
+    ./clearcase_bin/mkman --quiet --recursive --simple ./Mesa-4.1
+    ./clearcase_bin/mkman --quiet --recursive --simple ./include
+    ./clearcase_bin/mkman --quiet --recursive --simple ./bin
+    ./clearcase_bin/mkman --quiet --recursive --simple ./lib
+    ./clearcase_bin/mkman --quiet --recursive --simple ./clearcase_bin
+) | sort | uniq
