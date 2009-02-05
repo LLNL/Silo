@@ -9903,15 +9903,28 @@ db_StringArrayToStringList(const char *const *const strArray, int n,
  *
  *    Mark C. Miller, July 20, 2005 
  *
+ * Modfications:
+ *
+ *    Mark C. Miller, Fri Jul 14 23:39:32 PDT 2006
+ *    Fixed problem with empty strings in the input list being skipped
  *--------------------------------------------------------------------*/
 INTERNAL char **
 db_StringListToStringArray(char *strList, int n)
 {
-    int i;
-    char **retval = calloc(n, sizeof(char*));
-    for (i=0; i<n; i++) {
-        char *tok = strtok(i?NULL:strList, ";");
-        retval[i] = STRDUP(tok);
+    int i,l;
+    char **retval = (char**) calloc(n, sizeof(char*));
+    for (i=0, l=0; i<n; i++) {
+        if (strList[l] == ';')
+        {
+            retval[i] = STRDUP("");
+            l += 1;
+        }
+        else
+        {
+            char *tok = strtok(l>i?NULL:strList, ";");
+            retval[i] = STRDUP(tok?tok:"");
+            l += strlen(tok?tok:"")+1;
+        }
     }
     return retval;
 }
