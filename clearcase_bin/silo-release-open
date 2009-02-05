@@ -351,6 +351,41 @@ thundericc() {
     chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc; \
     \") > thundericc.log 2>&1"
 }
+
+quad() {
+# not using gcc
+# IRIX make doesn't support VPATH
+# 32-bit and 64-bit compiles
+  quad32
+  quad64
+}
+quad32() {
+  ssh -f quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin; \
+    PARALLEL=4; \
+    export PATH PARALLEL; \
+    rm -rf irix_6.5_n32; \
+    mkdir irix_6.5_n32; \
+    cd irix_6.5_n32; \
+    ../$TOPSRCDIR/configure \
+    CC='cc -n32' CXX='CC -n32' FC='f77 -n32' \
+    LDFLAGS=-n32 \
+    CFLAGS='-O2 -c99' \
+    PYTHON_CPPFLAGS=-I/usr/freeware/include/python2.1 \
+    --prefix=$LCTOPDIR/$VERSION/irix_6.5_n32 \
+    --without-readline --without-hdf5; \
+    gmake check && gmake install; gmake clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/irix_6.5_n32 \
+    --without-readline \
+    --with-hdf5=/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_n32/include,/usr/gapps/visit/hdf5/1.6.5/irix64_cc_7.41_n32/lib; \
+    gmake check; gmake install; \
+    rm -f $LCTOPDIR/$VERSION/irix_6.5_n32/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/irix_6.5_n32/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/irix_6.5_n32/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/irix_6.5_n32; \
+     \") >quad32.log 2>&1"
+}
 if [ $# -lt 1 ] ; then
   usage
   exit 2
