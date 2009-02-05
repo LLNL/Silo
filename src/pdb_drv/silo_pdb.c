@@ -8331,6 +8331,7 @@ db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
    long           count[3];
    float          a[3];
    char           tmp[1024];
+   char          *p=NULL;
 
    /*--------------------------------------------------
     *  Define number of zones and nodes.
@@ -8343,6 +8344,16 @@ db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
    }
 
    /*--------------------------------------------------
+    *  Process the given option list (this function
+    *  modifies the global variable data based on
+    *  the option values.)
+    *--------------------------------------------------*/
+
+   db_ResetGlobalData_QuadMesh(ndims);
+   db_ProcessOptlist(DB_QUADMESH, optlist);
+   db_build_shared_names_quadmesh(_dbfile, meshname);
+
+   /*--------------------------------------------------
     *  Determine if this directory has already been
     *  initialized for the given mesh. If so, set
     *  the names of the shared variables (e.g., 'dims')
@@ -8353,21 +8364,8 @@ db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
    db_mkname(dbfile->pdb, meshname, "dims", tmp);
 
    if (lite_PD_inquire_entry(dbfile->pdb, tmp, FALSE, NULL) != NULL) {
-      db_ResetGlobalData_QuadMesh(ndims);
-      db_ProcessOptlist(DB_QUADMESH, optlist);
-      db_build_shared_names_quadmesh(_dbfile, meshname);
       return 0;
    }
-
-   /*--------------------------------------------------
-    *  Process the given option list (this function
-    *  modifies the global variable data based on
-    *  the option values.)
-    *--------------------------------------------------*/
-
-   db_ResetGlobalData_QuadMesh(ndims);
-   db_ProcessOptlist(DB_QUADMESH, optlist);
-   db_build_shared_names_quadmesh(_dbfile, meshname);
 
    /*--------------------------------------------------
     *  Assign values to global data.
@@ -8394,23 +8392,27 @@ db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
     *-----------------------------------------------------*/
 
    count[0] = ndims;
-   PJ_write_len(dbfile->pdb, _qm._nm_dims, "integer", dims, 1, count);
-   PJ_write_len(dbfile->pdb, _qm._nm_zones, "integer", _qm._zones,
+   /*  File name contained within meshname */
+   p = strchr(meshname, ':');
+   if (p == NULL) {
+      PJ_write_len(dbfile->pdb, _qm._nm_dims, "integer", dims, 1, count);
+      PJ_write_len(dbfile->pdb, _qm._nm_zones, "integer", _qm._zones,
                 1, count);
-   PJ_write_len(dbfile->pdb, _qm._nm_maxindex_n, "integer",
+      PJ_write_len(dbfile->pdb, _qm._nm_maxindex_n, "integer",
                 _qm._maxindex_n, 1, count);
-   PJ_write_len(dbfile->pdb, _qm._nm_maxindex_z, "integer",
+      PJ_write_len(dbfile->pdb, _qm._nm_maxindex_z, "integer",
                 _qm._maxindex_z, 1, count);
-   PJ_write_len(dbfile->pdb, _qm._nm_minindex, "integer",
+      PJ_write_len(dbfile->pdb, _qm._nm_minindex, "integer",
                 _qm._minindex, 1, count);
-   PJ_write_len(dbfile->pdb, _qm._nm_baseindex, "integer",
+      PJ_write_len(dbfile->pdb, _qm._nm_baseindex, "integer",
                 _qm._baseindex, 1, count);
 
-   a[0] = a[1] = a[2] = 0.5;
-   PJ_write_len(dbfile->pdb, _qm._nm_alignz, "float", a, 1, count);
+      a[0] = a[1] = a[2] = 0.5;
+      PJ_write_len(dbfile->pdb, _qm._nm_alignz, "float", a, 1, count);
 
-   a[0] = a[1] = a[2] = 0.0;
-   PJ_write_len(dbfile->pdb, _qm._nm_alignn, "float", a, 1, count);
+      a[0] = a[1] = a[2] = 0.0;
+      PJ_write_len(dbfile->pdb, _qm._nm_alignn, "float", a, 1, count);
+   }
 
    /*  Write some scalars */
    count[0] = 1L;
@@ -8463,20 +8465,7 @@ db_InitUcd (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
    long           count[3];
    float          a[3];
    char           tmp[256];
-
-   /*--------------------------------------------------
-    *  Determine if this directory has already been
-    *  initialized. Return if it has.
-    *--------------------------------------------------*/
-
-   db_mkname(dbfile->pdb, meshname, "align_zonal", tmp);
-
-   if (lite_PD_inquire_entry(dbfile->pdb, tmp, FALSE, NULL) != NULL) {
-      db_ResetGlobalData_Ucdmesh(ndims, nnodes, nzones);
-      db_ProcessOptlist(DB_UCDMESH, optlist);
-      db_build_shared_names_ucdmesh(_dbfile, meshname);
-      return 0;
-   }
+   char          *p=NULL;
 
    /*--------------------------------------------------
     *  Process the given option list (this function
@@ -8486,6 +8475,17 @@ db_InitUcd (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
    db_ResetGlobalData_Ucdmesh(ndims, nnodes, nzones);
    db_ProcessOptlist(DB_UCDMESH, optlist);
    db_build_shared_names_ucdmesh(_dbfile, meshname);
+
+   /*--------------------------------------------------
+    *  Determine if this directory has already been
+    *  initialized. Return if it has.
+    *--------------------------------------------------*/
+
+   db_mkname(dbfile->pdb, meshname, "align_zonal", tmp);
+
+   if (lite_PD_inquire_entry(dbfile->pdb, tmp, FALSE, NULL) != NULL) {
+      return 0;
+   }
 
    /*--------------------------------------------------
     *  Assign values to global data.
@@ -8500,11 +8500,19 @@ db_InitUcd (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
     *-----------------------------------------------------*/
    count[0] = ndims;
 
-   a[0] = a[1] = a[2] = 0.5;
-   PJ_write_len(dbfile->pdb, _um._nm_alignz, "float", a, 1, count);
-
-   a[0] = a[1] = a[2] = 0.0;
-   PJ_write_len(dbfile->pdb, _um._nm_alignn, "float", a, 1, count);
+   /*------------------------------------------------------
+    * Assume that if there is a file in the meshname, that 
+    * there is possibily another  mesh that may be pointing to,
+    * so we'll use that meshes discriptions.
+    *-----------------------------------------------------*/
+   p = strchr(meshname, ':');
+   if (p == NULL) {
+      a[0] = a[1] = a[2] = 0.5;
+      PJ_write_len(dbfile->pdb, _um._nm_alignz, "float", a, 1, count);
+   
+      a[0] = a[1] = a[2] = 0.0;
+      PJ_write_len(dbfile->pdb, _um._nm_alignn, "float", a, 1, count);
+   }
 
    /*  Write some scalars */
    count[0] = 1L;
