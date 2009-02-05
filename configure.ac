@@ -284,6 +284,9 @@ dnl     Thomas Treadway, Mon Jun 26 13:06:39 PDT 2006
 dnl     The building of tools/python is conditional and performed only on
 dnl     explicit request.
 dnl
+dnl     Thomas Treadway, Wed Sep 13 12:45:01 PDT 2006
+dnl     Changed defaults: fortran compiler, optimization, and largefiles.
+dnl
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -292,9 +295,9 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 5.0.0b)
-m4_define(SILO_DATE, 2006/06/26)
-m4_define(SILO_TIME, 13:10:00)
+m4_define(SILO_VERSION, 5.0.0)
+m4_define(SILO_DATE, 2006/09/13)
+m4_define(SILO_TIME, 12:47:00)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
@@ -375,15 +378,19 @@ AC_MSG_RESULT(SILO_VERSION)
 ###      AC_MSG_RESULT(none found)
 ###   fi
 ###fi
+# This F77 stuff is still embeaded in libtools, it should go away
+F77=$FC
+FFLAGS=$FCFLASG
 
-dnl compile for debugging
-AC_ARG_ENABLE(debug,
-AC_HELP_STRING([--enable-debug], [compile for debugging.]),
+dnl C optimization flags
+AC_ARG_ENABLE(optimization,
+AC_HELP_STRING([--enable-optimization], 
+  [compile with optimization @<:@default=no@:>@]),
 [case "${enableval}" in
-  yes) USING_DEBUG="yes";;
-  no)  USING_DEBUG="no";;
-  *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
-esac],[USING_DEBUG="no"])
+  yes) USING_DEBUG="no";;
+  no)  USING_DEBUG="yes";;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-optimization) ;;
+esac],[USING_DEBUG="yes"])
 
 # Check for the netcdf driver.
 AC_MSG_CHECKING(for silo's netcdf driver)
@@ -466,7 +473,7 @@ AC_SUBST(PYTHONMODULE)
 dnl
 dnl Check if we should build browser.
 dnl
-AC_MSG_CHECKING(if we should build silo's browser)
+AC_MSG_CHECKING(if we should build silo's command line browser)
 AC_ARG_ENABLE(browser,
         AC_HELP_STRING([--enable-browser],
             [build browser @<:@default=yes@:>@]),
@@ -482,57 +489,88 @@ else
 fi
 AC_SUBST(BROWSER)
 
-# This F77 stuff is still embeaded in libtools, it should go away
-F77=$FC
-FFLAGS=$FCFLASG
-# Check for programs.
-# We shouldn't depend on too many!
-AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_FC
-# this too
-AC_PROG_F77
-AC_PROG_CPP
-AC_PROG_MAKE_SET
-AC_PROG_LIBTOOL
-AC_ISC_POSIX
-# Fortran portability
-AC_FC_LIBRARY_LDFLAGS
-AC_FC_WRAPPERS
-# save the cache so far
-AC_CACHE_SAVE
 
-# Add an option for disabling the stat checks.
-AC_MSG_CHECKING(if we should disable filesystem checks)
-AC_ARG_ENABLE(filesystem-checks,
-        AC_HELP_STRING([--disable-filesystem-checks],
-            [build without filesystem checks]),
-        UseStat="$enable_filesystem_checks", 
-        UseStat=yes)
-if test "$UseStat" = "no"; then
+dnl enable the silex broswer
+AC_MSG_CHECKING(if we should build silo's silex GUI browser)
+AC_ARG_ENABLE(silex,
+AC_HELP_STRING([--enable-silex], 
+  [build the silex browser @<:@default=no@:>@]),
+              UseSilex="$enable_silex", UseSilex=no)
+if test "X$UseSilex" = "Xyes"; then
     AC_MSG_RESULT(yes)
-    AC_DEFINE(DISABLE_FILESYSTEM_CHECKS,1,[Disable stat checks])
 else
     AC_MSG_RESULT(no)
 fi
 
-#
-# Use size of off64_t to determine which form of stat() calls to make 
-#
-AC_CHECK_SIZEOF(off64_t)
+dnl
+dnl Check if we should use the fortran compiler.
+dnl
+AC_MSG_CHECKING(if we want Fortran)
+AC_ARG_ENABLE(fortran,
+        AC_HELP_STRING([--enable-fortran],
+            [compile Fortran examples @<:@default=no@:>@]),
+        UsingFortran="$enable_fortran",
+        UsingFortran=no)
+if test "$UsingFortran" = "yes"; then
+    AC_MSG_RESULT(yes)
+    USEFORTRAN="yes"
+else
+    AC_MSG_RESULT(no)
+    USEFORTRAN=""
+fi
+AC_SUBST(USEFORTRAN)
+
+# Check for programs.
+# We shouldn't depend on too many!
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_CPP
+if test -n "$USEFORTRAN"; then
+    AC_PROG_FC
+# this too
+    AC_PROG_F77
+# Fortran portability
+    AC_FC_LIBRARY_LDFLAGS
+    AC_FC_WRAPPERS
+fi
+AC_PROG_MAKE_SET
+AC_PROG_LIBTOOL
+AC_ISC_POSIX
+# save the cache so far
+AC_CACHE_SAVE
+
+# Obsolute
+# Add an option for disabling the stat checks.
+##AC_MSG_CHECKING(if we should disable filesystem checks)
+##AC_ARG_ENABLE(filesystem-checks,
+##        AC_HELP_STRING([--disable-filesystem-checks],
+##            [build without filesystem checks]),
+##        UseStat="$enable_filesystem_checks", 
+##        UseStat=yes)
+##if test "$UseStat" = "no"; then
+##    AC_MSG_RESULT(yes)
+##    AC_DEFINE(DISABLE_FILESYSTEM_CHECKS,1,[Disable stat checks])
+##else
+##    AC_MSG_RESULT(no)
+##fi
 
 # Turn on C optimization flags
+AC_MSG_CHECKING(compiler optimization)
 if test "X$USING_DEBUG" = Xno; then
 # use contributed GNU m4 macro library provided see:
 #   autoconf-archive-2006-06-04/htmldoc/ax_cc_maxopt.html
    AX_CC_MAXOPT
+   AC_MSG_RESULT(enabled)
 else
-   AC_MSG_CHECKING(compiler optimization)
    AC_MSG_RESULT(disabled)
 fi
 dnl
 # Default to large file support
-AC_SYS_LARGEFILE
+AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE")
+#
+# Use size of off64_t to determine which form of stat() calls to make 
+#
+AC_CHECK_SIZEOF(off64_t)
 
 # Check to see if we're running clearmake.
 # If we are, set the build verbosity to 0.  Also, set the
@@ -854,6 +892,27 @@ else
    AC_MSG_CHECKING(for readline)
    AC_MSG_RESULT(disabled)
 fi
+
+dnl
+dnl If Silex is desired then Qt is required
+dnl
+if test "X$UseSilex" = "Xyes"; then
+dnl search for the required Qt
+   AC_MSG_CHECKING(for Qt)
+#   autoconf-archive-2006-08-20/htmldoc/bnv_have_qt.html
+    BNV_HAVE_QT
+    if test "X$have_qt" = "Xyes"; then
+        AC_MSG_RESULT(Qt found - Silex enabled)
+        enable_silex=yes
+        SILEX="silex"
+    else
+        AC_MSG_RESULT(Qt not found - Silex disabled)
+        enable_silex=no
+        SILEX=""
+    fi
+fi
+AC_SUBST(SILEX)
+
 dnl
 dnl Check for a python installation using the Automake 
 dnl provided macro, which will generate the following
@@ -890,6 +949,8 @@ AM_CONDITIONAL(TAURUS_NEEDED, test -n "$TAURUS")
 AM_CONDITIONAL(HDF5_DRV_NEEDED, test -n "$HDF5_DRV")
 AM_CONDITIONAL(BROWSER_NEEDED, test -n "$BROWSER")
 AM_CONDITIONAL(PYTHON_NEEDED, test -n "$PYTHONMODULE")
+AM_CONDITIONAL(FORTRAN_NEEDED, test -n "$USEFORTRAN")
+AM_CONDITIONAL(SILEX_NEEDED, test -n "$SILEX")
 AC_CONFIG_FILES([Makefile
             clearcase_bin/Makefile
             config/Makefile

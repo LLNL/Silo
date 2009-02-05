@@ -1,8 +1,5 @@
 /* config/config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Disable stat checks */
-#undef DISABLE_FILESYSTEM_CHECKS
-
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
 #undef FC_DUMMY_MAIN
@@ -179,11 +176,8 @@
 /* Version number of package */
 #undef VERSION
 
-/* Number of bits in a file offset, on hosts where this is settable. */
-#undef _FILE_OFFSET_BITS
-
-/* Define for large files, on AIX-style hosts. */
-#undef _LARGE_FILES
+/* Define to 1 if the X Window System is missing or not being used. */
+#undef X_DISPLAY_MISSING
 
 /* Override longjmp */
 #undef longjmp

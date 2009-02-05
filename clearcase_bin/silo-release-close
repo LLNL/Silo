@@ -1,13 +1,13 @@
 #!/bin/sh
 #######################################################################
 #
-# silo-release-open - Build and install a tarball on the open network.
+# silo-release-closed - Build and install a tarball on the closed network.
 #
 # Author: Thomas Treadway
-# Date: Thu Jun 15 12:48:17 PDT 2006
+# Date: Wed Sep 13 16:31:51 PDT 2006
 #
 # Usage: 
-#    silo-release-open version
+#    silo-release-closed version
 #
 # Modifications:
 #
@@ -20,7 +20,7 @@ LCTOPDIR="/usr/gapps/silo"
 #LCTOPDIR="/nfs/tmp0/$USER"
 
 usage() {
-  printf "Usage: %s version [all|hoth|sunspot|berg|gps|thunder|pengra|quad|bgl]" $0
+  printf "Usage: %s version [all|hitit|sunset|white|sc|gauss|lilac|tidalwave|bgl]" $0
   printf "\n"
   printf "Silo release installing script. Assumes a tarball exist in\n"
   printf "current directory, called silo-$VERSION.tar.gz.\n"
@@ -32,8 +32,8 @@ usage() {
   printf "     perform a configure, make check, followed by a make install\n"
   printf "Log files are stored at $HOME/HOSTNAME.log\n"
 }
-hoth() {
-  ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+hitit() {
+  ssh -f hitit "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/security/bin; \
     LD_LIBRARY_PATH=/usr/lib:/lib; \
     export PATH LD_LIBRARY_PATH; \
@@ -56,10 +56,10 @@ hoth() {
     rm -f $BDTOPDIR/linux_rhel3_gcc_3.2.3/$VERSION/lib/Silo.a; \
     chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3; \
     chmod -R g+w $BDTOPDIR/linux_rhel3_gcc_3.2.3/$VERSION; \
-    \")" > hoth.log 2>&1
+    \")" > hitit.log 2>&1
 }
-hothpgc() {
-  ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+hititpgc() {
+  ssh -f hitit "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.0/bin:/usr/security/bin; \
     LD_LIBRARY_PATH=/usr/lib:/lib:/usr/local/pgi/linux86/6.0/lib; \
     LM_LICENSE_FILE=/usr/local/flexlm/licenses/license.dat:7496@genesse.llnl.gov:7127@corona.llnl.gov; \
@@ -87,8 +87,8 @@ hothpgc() {
     chmod -R g+w $BDTOPDIR/linux_rhel3_pgc_6.0/$VERSION; \
     \")" > hohtpgc.log 2>&1
 }
-hothicc() {
-  ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+hititicc() {
+  ssh -f hitit "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.0/bin:/usr/security/bin:/usr/local/intel/compiler90/bin; \
     LD_LIBRARY_PATH=/usr/lib:/lib:/usr/local/intel/compiler90/lib; \
     INTEL_LICENSE_FILE=7127@corona.llnl.gov; \
@@ -119,10 +119,10 @@ hothicc() {
     \")" > hohticc.log 2>&1
 }
     
-sunspot() {
+sunset() {
 # testsuite fails with bus error on "spec"
 # weird truncated PATH via ssh
-  ssh -f sunspot "(/bin/sh -c \"cd $BDTOPDIR/test; \
+  ssh -f sunset "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin; \
     LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib; \
     export PATH LD_LIBRARY_PATH; \
@@ -145,11 +145,11 @@ sunspot() {
     chmod -R g+w $BDTOPDIR/$VERSION/sunos_57; \
     rm -f $BDTOPDIR/sunos_57/$VERSION/lib/Silo.a; \
     chmod -R g+w $BDTOPDIR/sunos_57/$VERSION; \
-    \")" > sunspot.log 2>&1
+    \")" > sunset.log 2>&1
 }
-sunspotcc() {
+sunsetcc() {
 # weird truncated PATH via ssh
-  ssh -f sunspot "(/bin/sh -c \"cd $BDTOPDIR/test; \
+  ssh -f sunset "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin; \
     LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib; \
     export PATH LD_LIBRARY_PATH; \
@@ -175,18 +175,18 @@ sunspotcc() {
     chmod -R g+w $BDTOPDIR/$VERSION/sunos_57_cc_5.2; \
     rm -f $BDTOPDIR/sunos_57_cc_5.2/$VERSION/lib/Silo.a; \
     chmod -R g+w $BDTOPDIR/sunos_57_cc_5.2/$VERSION; \
-    \")" > sunspotcc.log 2>&1
+    \")" > sunsetcc.log 2>&1
 }
 
-berg() {
+white() {
 # not using gcc
 # use gmake for parallel seems to hang
 # 32-bit and 64-bit compiles
-  berg32
-  berg64
+  white32
+  white64
 }
-berg32() {
-  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+white32() {
+  ssh -f white "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf aix_5_ll; \
@@ -216,10 +216,10 @@ berg32() {
     chmod -R g+w $LCTOPDIR/$VERSION/aix_5_ll; \
     rm -f $LCTOPDIR/aix_5_ll/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/aix_5_ll/$VERSION; \
-     \") >newberg32.log 2>&1"
+     \") >white32.log 2>&1"
 }
-berg64() {
-  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+white64() {
+  ssh -f white "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf aix_5_64_fed; \
@@ -251,13 +251,13 @@ berg64() {
     chmod -R g+w $LCTOPDIR/$VERSION/aix_5_64_fed; \
     rm -f $LCTOPDIR/aix_5_64_fed/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/aix_5_64_fed/$VERSION; \
-     \") >newberg64.log 2>&1"
+     \") >white64.log 2>&1"
 }
 
-gps() {
+sc() {
 # the default g++ has bugs 
-# problems with g77 floating exception during testsuite of quadf77 & ucdf77
-  ssh -f gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+# problems with g77 floating exception during testsuite of tidalwavef77 & ucdf77
+  ssh -f sc "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf tru64_5; \
@@ -280,10 +280,10 @@ gps() {
     chmod -R g+w $LCTOPDIR/$VERSION/tru64_5; \
     rm -f $LCTOPDIR/tru64_5/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/tru64_5/$VERSION; \
-    \") > gps.log 2>&1"
+    \") > sc.log 2>&1"
 }
-gpscc() {
-  ssh -f gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+sccc() {
+  ssh -f sc "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf tru64_5_cc; \
@@ -306,11 +306,11 @@ gpscc() {
     chmod -R g+w $LCTOPDIR/$VERSION/tru64_5_cc; \
     rm -f $LCTOPDIR/tru64_5_cc/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/tru64_5_cc/$VERSION; \
-    \") > gpscc.log 2>&1"
+    \") > sccc.log 2>&1"
 }
     
-pengra() {
-  ssh -f pengra "(/bin/sh -c \"cd $LCTOPDIR/test; \
+lilac() {
+  ssh -f lilac "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf chaos_3_x86_elan3; \
@@ -332,76 +332,76 @@ pengra() {
     chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_elan3; \
     rm -f $LCTOPDIR/chaos_3_x86_elan3/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/chaos_3_x86_elan3/$VERSION; \
-    \") > pengra.log 2>&1"
+    \") > lilac.log 2>&1"
 }
     
-thunder() {
-  thundergcc
-  thundericc
+gauss() {
+  gaussgcc
+  gaussicc
 }
-thundergcc() {
-  ssh -f thunder "(/bin/sh -c \"cd $LCTOPDIR/test; \
+gaussgcc() {
+  ssh -f gauss "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
-    rm -rf chaos_3_ia64_elan4; \
-    mkdir chaos_3_ia64_elan4; \
-    cd chaos_3_ia64_elan4; \
+    rm -rf chaos_3_x86_64_ib; \
+    mkdir chaos_3_x86_64_ib; \
+    cd chaos_3_x86_64_ib; \
     ../$TOPSRCDIR/configure \
-    --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_ib/gcc \
     --without-readline --without-hdf5; \
     make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION install; \
+    make prefix=$BDTOPDIR/chaos_3_x86_64_ib/gcc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
-    --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_ib/gcc \
     --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION install; \
-    rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/Silo.a; \
-    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc; \
-    rm -f $LCTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION/lib/Silo.a; \
-    chmod -R g+w $LCTOPDIR/chaos_3_ia64_elan4/gcc/$VERSION; \
-    \") > thundergcc.log 2>&1"
+    make prefix=$BDTOPDIR/chaos_3_x86_64_ib/gcc/$VERSION install; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_x86_64_ib/gcc/lib/Silo.a; \
+    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_64_ib/gcc; \
+    rm -f $LCTOPDIR/chaos_3_x86_64_ib/gcc/$VERSION/lib/Silo.a; \
+    chmod -R g+w $LCTOPDIR/chaos_3_x86_64_ib/gcc/$VERSION; \
+    \") > gaussgcc.log 2>&1"
 }
-thundericc() {
-  ssh -f thunder "(/bin/sh -c \"cd $LCTOPDIR/test; \
+gaussicc() {
+  ssh -f gauss "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
-    rm -rf chaos_3_ia64_elan4_icc; \
-    mkdir chaos_3_ia64_elan4_icc; \
-    cd chaos_3_ia64_elan4_icc; \
+    rm -rf chaos_3_x86_64_ib_icc; \
+    mkdir chaos_3_x86_64_ib_icc; \
+    cd chaos_3_x86_64_ib_icc; \
     . /usr/local/intel/compiler91/bin/iccvars.sh; \
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
-    --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_ib/icc \
     --without-readline --without-hdf5; \
     make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_ia64_elan4/icc/$VERSION install; \
+    make prefix=$BDTOPDIR/chaos_3_x86_64_ib/icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
     CC=icc CXX=icc FC=ifort \
-    --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_ib/icc \
     --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
     make -j 4 check && make install; \
-    make prefix=$BDTOPDIR/chaos_3_ia64_elan4/icc/$VERSION install; \
-    rm -f $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/Silo.a; \
-    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc; \
-    rm -f $LCTOPDIR/chaos_3_ia64_elan4/icc/$VERSION/lib/Silo.a; \
-    chmod -R g+w $LCTOPDIR/chaos_3_ia64_elan4/icc/$VERSION; \
-    \") > thundericc.log 2>&1"
+    make prefix=$BDTOPDIR/chaos_3_x86_64_ib/icc/$VERSION install; \
+    rm -f $LCTOPDIR/$VERSION/chaos_3_x86_64_ib/icc/lib/Silo.a; \
+    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_64_ib/icc; \
+    rm -f $LCTOPDIR/chaos_3_x86_64_ib/icc/$VERSION/lib/Silo.a; \
+    chmod -R g+w $LCTOPDIR/chaos_3_x86_64_ib/icc/$VERSION; \
+    \") > gaussicc.log 2>&1"
 }
 
-quad() {
+tidalwave() {
 # not using gcc
 # IRIX make doesn't support VPATH
 # 32-bit and 64-bit compiles
-  quad32
-  quad64
+  tidalwave32
+  tidalwave64
 }
-quad32() {
-  ssh -f quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
+tidalwave32() {
+  ssh -f tidalwave "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin; \
     PARALLEL=4; \
     export PATH PARALLEL; \
@@ -430,10 +430,10 @@ quad32() {
     gmake prefix=$BDTOPDIR/irix_6.5_n32/$VERSION install; \
     chmod -R g+w $LCTOPDIR/$VERSION/irix_6.5_n32; \
     chmod -R g+w $LCTOPDIR/irix_6.5_n32/$VERSION; \
-     \") >quad32.log 2>&1"
+     \") >tidalwave32.log 2>&1"
 }
-quad64() {
-  ssh -f quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
+tidalwave64() {
+  ssh -f tidalwave "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin; \
     PARALLEL=4; \
     export PATH PARALLEL; \
@@ -464,11 +464,11 @@ quad64() {
     chmod -R g+w $LCTOPDIR/$VERSION/irix_6.5_64; \
     rm -f $LCTOPDIR/irix_6.5_64/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/irix_6.5_64/$VERSION; \
-     \") >quad64.log 2>&1"
+     \") >tidalwave64.log 2>&1"
 }
     
-ubgltest() {
-  ssh -f ubgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
+bgltest() {
+  ssh -f bgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/opt/ibmcmp/vacpp/7.0/bin:/opt/ibmcmp/xlf/9.1/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf sles_9_ppc64; \
@@ -480,10 +480,10 @@ ubgltest() {
     --without-readline --without-hdf5; \
     make -j 4 CC='blrts_xlc' CXX='blrts_xlC' FC='blrts_fort77' install; \
     chmod -R g+w $LCTOPDIR/$VERSION/sles_9_ppc64; \
-    \") > ubgltest.log 2>&1"
+    \") > bgltest.log 2>&1"
 }
-ubgl() {
-  ssh -f ubgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
+bgl() {
+  ssh -f bgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/opt/ibmcmp/vac/7.0/bin:/opt/ibmcmp/xlf/9.1/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf sles_9_ppc64; \
@@ -515,7 +515,7 @@ ubgl() {
     chmod -R g+w $LCTOPDIR/$VERSION/sles_9_ppc64; \
     rm -f $LCTOPDIR/sles_9_ppc64/$VERSION/lib/Silo.a; \
     chmod -R g+w $LCTOPDIR/sles_9_ppc64/$VERSION; \
-    \") > ubgl.log 2>&1"
+    \") > bgl.log 2>&1"
 }
 
 if [ $# -lt 1 ] ; then
@@ -527,94 +527,94 @@ shift
 TARFILE="silo-$VERSION.tar.gz"
 TOPSRCDIR="silo-$VERSION"
 if [ -e $TARFILE ] ; then
-  scp $TARFILE hoth:$BDTOPDIR/test
-  scp $TARFILE gps:$LCTOPDIR/test
+  scp $TARFILE hitit:$BDTOPDIR/test
+  scp $TARFILE sc:$LCTOPDIR/test
 
-  ssh hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+  ssh hitit "(/bin/sh -c \"cd $BDTOPDIR/test; \
    gzip -dc $TARFILE|tar xf -\")"
-  ssh gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh sc "(/bin/sh -c \"cd $LCTOPDIR/test; \
    gzip -dc $TARFILE|tar xf -\")"
 fi 
 
 if [ $# -lt 1 ] ; then
-  hoth
-  sunspot
-  berg
-  gps
-  thunder
-  pengra
-  quad
-  ubgl
+  hitit
+  sunset
+  white
+  sc
+  gauss
+  lilac
+  tidalwave
+  bgl
 else
  while [ "$*" != "" ]
  do
   case $1 in
     all|-a*)
-      hoth
-      sunspot
-      berg
-      gps
-      thunder
-      pengra
-      quad
-      ubgl
+      hitit
+      sunset
+      white
+      sc
+      gauss
+      lilac
+      tidalwave
+      bgl
       shift;;
-    hothpgc|-hothpgc)
-      hothpgc
+    hititpgc|-hititpgc)
+      hititpgc
       shift;;
-    hothicc|-hothicc)
-      hothicc
+    hititicc|-hititicc)
+      hititicc
       shift;;
-    hoth|-ho*)
-      hoth
+    hitit|-hi*)
+      hitit
       shift;;
     sun*cc|-sun*cc)
-      sunspotcc
+      sunsetcc
       shift;;
     sun*|-sun*)
-      sunspot
+      sunset
       shift;;
-    berg32|-be*32|new*32|-new*32)
-      berg32
+    white32|-be*32|new*32|-new*32)
+      white32
       shift;;
-    berg64|-be*64|new*64|-new*64)
-      berg64
+    white64|-be*64|new*64|-new*64)
+      white64
       shift;;
-    berg|-be*|new*|-new*)
-      berg
+    white|-be*|new*|-new*)
+      white
       shift;;
-    gpscc|-gpscc)
-      gpscc
+    sccc|-sccc)
+      sccc
       shift;;
-    gps|-gps)
-      gps
+    sc|-sc)
+      sc
       shift;;
-    thun*icc|-th*icc)
-      thundericc
+    gaus*icc|-gs*icc)
+      gaussicc
       shift;;
-    thun*gcc|-th*gcc)
-      thundergcc
+    gaus*gcc|-gs*gcc)
+      gaussgcc
       shift;;
-    thun*|-th*)
-      thunder
+    gaus*|-gs*)
+      gauss
       shift;;
-    pen*|-pe*)
-      pengra
+    lil*|-li*)
+      lilac
       shift;;
-    quad32|-quad32)
-      quad32
+    tidalwave32|-tidalwave32)
+      tidalwave32
       shift;;
-    quad64|-quad64)
-      quad64
+    tidalwave64|-tidalwave64)
+      tidalwave64
       shift;;
-    quad|-quad)
-      quad
+    tidalwave|-tidalwave)
+      tidalwave
       shift;;
-    ubgltest|-ubgltest)
-      ubgltest
+    bgltest|-bgltest)
+      bgltest
       shift;;
-    ubgl|-ubgl)
-      ubgl
+    bgl|-bgl)
+      bgl
       shift;;
     sh*|-sh*)
       shar

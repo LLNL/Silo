@@ -38,6 +38,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@HDF5_DRV_NEEDED_TRUE@am__append_1 = $(srcdir)/testsuitehdf5
 check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	partial_io$(EXEEXT) point$(EXEEXT) group_test$(EXEEXT) \
 	listtypes$(EXEEXT) simple$(EXEEXT) ucd$(EXEEXT) \
@@ -49,10 +50,10 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	cpz1plt$(EXEEXT) merge_block$(EXEEXT) mat3d_3across$(EXEEXT) \
 	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) mmadjacency$(EXEEXT) \
-	largefile$(EXEEXT) dir$(EXEEXT) quad$(EXEEXT) \
-	arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
-	pointf77$(EXEEXT) quadf77$(EXEEXT) ucdf77$(EXEEXT) \
-	testallf77$(EXEEXT)
+	largefile$(EXEEXT) dir$(EXEEXT) quad$(EXEEXT) $(am__EXEEXT_2)
+@FORTRAN_NEEDED_TRUE@am__append_2 = $(srcdir)/testsuitef77
+@FORTRAN_NEEDED_TRUE@am__append_3 = $(F77PROGS)
+@FORTRAN_NEEDED_TRUE@am__append_4 = $(F77PROGS)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -62,6 +63,10 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
+am__EXEEXT_1 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
+	pointf77$(EXEEXT) quadf77$(EXEEXT) ucdf77$(EXEEXT) \
+	testallf77$(EXEEXT)
+@FORTRAN_NEEDED_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
 TestReadMask_LDADD = $(LDADD)
@@ -77,12 +82,14 @@ array_OBJECTS = array.$(OBJEXT)
 array_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@array_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@array_DEPENDENCIES = ../src/libsiloh5.la
-am_arrayf77_OBJECTS = arrayf77.$(OBJEXT)
+am__arrayf77_SOURCES_DIST = arrayf77.f
+@FORTRAN_NEEDED_TRUE@am_arrayf77_OBJECTS = arrayf77.$(OBJEXT)
 arrayf77_OBJECTS = $(am_arrayf77_OBJECTS)
 @HDF5_DRV_NEEDED_FALSE@am__DEPENDENCIES_1 = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@am__DEPENDENCIES_1 = ../src/libsiloh5.la
 am__DEPENDENCIES_2 =
-arrayf77_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+@FORTRAN_NEEDED_TRUE@arrayf77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
 cpz1plt_SOURCES = cpz1plt.c
 cpz1plt_OBJECTS = cpz1plt.$(OBJEXT)
 cpz1plt_LDADD = $(LDADD)
@@ -93,9 +100,11 @@ csg_OBJECTS = csg.$(OBJEXT)
 csg_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@csg_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@csg_DEPENDENCIES = ../src/libsiloh5.la
-am_curvef77_OBJECTS = curvef77.$(OBJEXT)
+am__curvef77_SOURCES_DIST = curvef77.f
+@FORTRAN_NEEDED_TRUE@am_curvef77_OBJECTS = curvef77.$(OBJEXT)
 curvef77_OBJECTS = $(am_curvef77_OBJECTS)
-curvef77_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+@FORTRAN_NEEDED_TRUE@curvef77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
 am_dir_OBJECTS = dir.$(OBJEXT) testlib.$(OBJEXT)
 dir_OBJECTS = $(am_dir_OBJECTS)
 dir_LDADD = $(LDADD)
@@ -127,9 +136,11 @@ mat3d_3across_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@mat3d_3across_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@mat3d_3across_DEPENDENCIES =  \
 @HDF5_DRV_NEEDED_TRUE@	../src/libsiloh5.la
-am_matf77_OBJECTS = matf77.$(OBJEXT)
+am__matf77_SOURCES_DIST = matf77.f
+@FORTRAN_NEEDED_TRUE@am_matf77_OBJECTS = matf77.$(OBJEXT)
 matf77_OBJECTS = $(am_matf77_OBJECTS)
-matf77_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+@FORTRAN_NEEDED_TRUE@matf77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
 merge_block_SOURCES = merge_block.c
 merge_block_OBJECTS = merge_block.$(OBJEXT)
 merge_block_LDADD = $(LDADD)
@@ -190,9 +201,11 @@ point_OBJECTS = point.$(OBJEXT)
 point_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@point_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@point_DEPENDENCIES = ../src/libsiloh5.la
-am_pointf77_OBJECTS = pointf77.$(OBJEXT)
+am__pointf77_SOURCES_DIST = pointf77.f
+@FORTRAN_NEEDED_TRUE@am_pointf77_OBJECTS = pointf77.$(OBJEXT)
 pointf77_OBJECTS = $(am_pointf77_OBJECTS)
-pointf77_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+@FORTRAN_NEEDED_TRUE@pointf77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
 polyzl_SOURCES = polyzl.c
 polyzl_OBJECTS = polyzl.$(OBJEXT)
 polyzl_LDADD = $(LDADD)
@@ -203,9 +216,11 @@ quad_OBJECTS = $(am_quad_OBJECTS)
 quad_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@quad_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@quad_DEPENDENCIES = ../src/libsiloh5.la
-am_quadf77_OBJECTS = quadf77.$(OBJEXT)
+am__quadf77_SOURCES_DIST = quadf77.f
+@FORTRAN_NEEDED_TRUE@am_quadf77_OBJECTS = quadf77.$(OBJEXT)
 quadf77_OBJECTS = $(am_quadf77_OBJECTS)
-quadf77_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+@FORTRAN_NEEDED_TRUE@quadf77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
 sami_SOURCES = sami.c
 sami_OBJECTS = sami.$(OBJEXT)
 sami_LDADD = $(LDADD)
@@ -236,9 +251,11 @@ testall_OBJECTS = testall.$(OBJEXT)
 testall_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@testall_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@testall_DEPENDENCIES = ../src/libsiloh5.la
-am_testallf77_OBJECTS = testallf77.$(OBJEXT)
+am__testallf77_SOURCES_DIST = testallf77.f
+@FORTRAN_NEEDED_TRUE@am_testallf77_OBJECTS = testallf77.$(OBJEXT)
 testallf77_OBJECTS = $(am_testallf77_OBJECTS)
-testallf77_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+@FORTRAN_NEEDED_TRUE@testallf77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
 testpdb_SOURCES = testpdb.c
 testpdb_OBJECTS = testpdb.$(OBJEXT)
 testpdb_LDADD = $(LDADD)
@@ -259,9 +276,11 @@ ucd1d_OBJECTS = ucd1d.$(OBJEXT)
 ucd1d_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@ucd1d_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@ucd1d_DEPENDENCIES = ../src/libsiloh5.la
-am_ucdf77_OBJECTS = ucdf77.$(OBJEXT)
+am__ucdf77_SOURCES_DIST = ucdf77.f
+@FORTRAN_NEEDED_TRUE@am_ucdf77_OBJECTS = ucdf77.$(OBJEXT)
 ucdf77_OBJECTS = $(am_ucdf77_OBJECTS)
-ucdf77_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+@FORTRAN_NEEDED_TRUE@ucdf77_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_2)
 ucdsamp3_SOURCES = ucdsamp3.c
 ucdsamp3_OBJECTS = ucdsamp3.$(OBJEXT)
 ucdsamp3_LDADD = $(LDADD)
@@ -299,15 +318,17 @@ SOURCES = TestReadMask.c alltypes.c array.c $(arrayf77_SOURCES) \
 	spec.c specmix.c subhex.c testall.c $(testallf77_SOURCES) \
 	testpdb.c twohex.c ucd.c ucd1d.c $(ucdf77_SOURCES) ucdsamp3.c \
 	wave.c
-DIST_SOURCES = TestReadMask.c alltypes.c array.c $(arrayf77_SOURCES) \
-	cpz1plt.c csg.c $(curvef77_SOURCES) $(dir_SOURCES) extface.c \
+DIST_SOURCES = TestReadMask.c alltypes.c array.c \
+	$(am__arrayf77_SOURCES_DIST) cpz1plt.c csg.c \
+	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) extface.c \
 	group_test.c largefile.c listtypes.c mat3d_3across.c \
-	$(matf77_SOURCES) merge_block.c mmadjacency.c multi_file.c \
-	multi_test.c multispec.c obj.c onehex.c oneprism.c \
-	onepyramid.c onetet.c partial_io.c point.c $(pointf77_SOURCES) \
-	polyzl.c $(quad_SOURCES) $(quadf77_SOURCES) sami.c simple.c \
-	spec.c specmix.c subhex.c testall.c $(testallf77_SOURCES) \
-	testpdb.c twohex.c ucd.c ucd1d.c $(ucdf77_SOURCES) ucdsamp3.c \
+	$(am__matf77_SOURCES_DIST) merge_block.c mmadjacency.c \
+	multi_file.c multi_test.c multispec.c obj.c onehex.c \
+	oneprism.c onepyramid.c onetet.c partial_io.c point.c \
+	$(am__pointf77_SOURCES_DIST) polyzl.c $(quad_SOURCES) \
+	$(am__quadf77_SOURCES_DIST) sami.c simple.c spec.c specmix.c \
+	subhex.c testall.c $(am__testallf77_SOURCES_DIST) testpdb.c \
+	twohex.c ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c \
 	wave.c
 ETAGS = etags
 CTAGS = ctags
@@ -347,6 +368,8 @@ FC = @FC@
 FCFLAGS = @FCFLAGS@
 FCLIBS = @FCLIBS@
 FFLAGS = @FFLAGS@
+FORTRAN_NEEDED_FALSE = @FORTRAN_NEEDED_FALSE@
+FORTRAN_NEEDED_TRUE = @FORTRAN_NEEDED_TRUE@
 GREP = @GREP@
 HDF5_DRV = @HDF5_DRV@
 HDF5_DRV_NEEDED_FALSE = @HDF5_DRV_NEEDED_FALSE@
@@ -390,14 +413,28 @@ PYTHON_NEEDED_TRUE = @PYTHON_NEEDED_TRUE@
 PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
+QT_CXXFLAGS = @QT_CXXFLAGS@
+QT_DIR = @QT_DIR@
+QT_LIBS = @QT_LIBS@
+QT_MOC = @QT_MOC@
+QT_UIC = @QT_UIC@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SILEX = @SILEX@
+SILEX_NEEDED_FALSE = @SILEX_NEEDED_FALSE@
+SILEX_NEEDED_TRUE = @SILEX_NEEDED_TRUE@
 STRIP = @STRIP@
 TAURUS = @TAURUS@
 TAURUS_NEEDED_FALSE = @TAURUS_NEEDED_FALSE@
 TAURUS_NEEDED_TRUE = @TAURUS_NEEDED_TRUE@
+USEFORTRAN = @USEFORTRAN@
 VERSION = @VERSION@
+XMKMF = @XMKMF@
+X_CFLAGS = @X_CFLAGS@
+X_EXTRA_LIBS = @X_EXTRA_LIBS@
+X_LIBS = @X_LIBS@
+X_PRE_LIBS = @X_PRE_LIBS@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_F77 = @ac_ct_F77@
@@ -456,14 +493,15 @@ EXTRA_DIST = \
  pdbcmp.csh \
  testsuite.at \
  testsuite \
+ testsuitef77.at \
+ testsuitef77 \
  testsuitehdf5.at \
  testsuitehdf5
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
-@HDF5_DRV_NEEDED_FALSE@TESTSUITE = $(srcdir)/testsuite
-@HDF5_DRV_NEEDED_TRUE@TESTSUITE = $(srcdir)/testsuitehdf5
+TESTSUITE = $(srcdir)/testsuite $(am__append_1) $(am__append_2)
 
 # paths look at install directories before sources
 AM_CPPFLAGS = \
@@ -477,13 +515,12 @@ quad_CPPFLAGS = -DNEW_SILO $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 @HDF5_DRV_NEEDED_FALSE@LDADD = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@LDADD = ../src/libsiloh5.la
+F77PROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
-      ucdsamp3 testall arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 \
-      testallf77 obj onehex oneprism onepyramid onetet subhex \
-      TestReadMask twohex multispec sami specmix spec cpz1plt spec \
-      cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
-      mmadjacency largefile
-
+	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
+	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
+	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
+	csg mmadjacency largefile $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -492,48 +529,20 @@ quad_SOURCES = \
  quad.c \
  testlib.c
 
-arrayf77_SOURCES = \
- arrayf77.f
-
-arrayf77_LDADD = \
- $(LDADD) $(FCLIBS)
-
-curvef77_SOURCES = \
- curvef77.f
-
-curvef77_LDADD = \
- $(LDADD) $(FCLIBS)
-
-matf77_SOURCES = \
- matf77.f
-
-matf77_LDADD = \
- $(LDADD) $(FCLIBS)
-
-pointf77_SOURCES = \
- pointf77.f
-
-pointf77_LDADD = \
- $(LDADD) $(FCLIBS)
-
-quadf77_SOURCES = \
- quadf77.f
-
-quadf77_LDADD = \
- $(LDADD) $(FCLIBS)
-
-ucdf77_SOURCES = \
- ucdf77.f
-
-ucdf77_LDADD = \
- $(LDADD) $(FCLIBS)
-
-testallf77_SOURCES = \
- testallf77.f
-
-testallf77_LDADD = \
- $(LDADD) $(FCLIBS)
-
+@FORTRAN_NEEDED_TRUE@arrayf77_SOURCES = arrayf77.f
+@FORTRAN_NEEDED_TRUE@arrayf77_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@curvef77_SOURCES = curvef77.f
+@FORTRAN_NEEDED_TRUE@curvef77_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@matf77_SOURCES = matf77.f
+@FORTRAN_NEEDED_TRUE@matf77_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@pointf77_SOURCES = pointf77.f
+@FORTRAN_NEEDED_TRUE@pointf77_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@quadf77_SOURCES = quadf77.f
+@FORTRAN_NEEDED_TRUE@quadf77_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@ucdf77_SOURCES = ucdf77.f
+@FORTRAN_NEEDED_TRUE@ucdf77_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@testallf77_SOURCES = testallf77.f
+@FORTRAN_NEEDED_TRUE@testallf77_LDADD = $(LDADD) $(FCLIBS)
 all: all-am
 
 .SUFFIXES:
@@ -1010,15 +1019,23 @@ all-local:
 
 # autotest targets
 check-local: $(TESTSUITE) $(PROGS)
-	$(SHELL) $(TESTSUITE)
+	list='$(TESTSUITE)'; for file in $$list; do \
+	  $(SHELL) $$file; \
+	done
 
 clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
+	rm -f testsuitef77.log
+	rm -rf testsuitef77.dir
 	rm -f testsuitehdf5.log
 	rm -rf testsuitehdf5.dir
 
 testsuite: $(srcdir)/testsuite.at
+	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
+	-mv -f $@.tmp $@
+
+testsuitef77: $(srcdir)/testsuitef77.at
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	-mv -f $@.tmp $@
 

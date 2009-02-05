@@ -8,16 +8,17 @@ EXTRA_DIST= \
  pdbcmp.csh \
  testsuite.at \
  testsuite \
+ testsuitef77.at \
+ testsuitef77 \
  testsuitehdf5.at \
  testsuitehdf5
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
+TESTSUITE = $(srcdir)/testsuite
 if HDF5_DRV_NEEDED
-  TESTSUITE = $(srcdir)/testsuitehdf5
-else
-  TESTSUITE = $(srcdir)/testsuite
+  TESTSUITE += $(srcdir)/testsuitehdf5
 endif
 
 # paths look at install directories before sources
@@ -36,9 +37,9 @@ else
   LDADD = ../src/libsilo.la
 endif
 
+F77PROGS= arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
-      ucdsamp3 testall arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 \
-      testallf77 obj onehex oneprism onepyramid onetet subhex \
+      ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       mmadjacency largefile
@@ -49,34 +50,6 @@ dir_SOURCES = \
 quad_SOURCES = \
  quad.c \
  testlib.c
-arrayf77_SOURCES = \
- arrayf77.f
-arrayf77_LDADD = \
- $(LDADD) $(FCLIBS)
-curvef77_SOURCES = \
- curvef77.f
-curvef77_LDADD = \
- $(LDADD) $(FCLIBS)
-matf77_SOURCES = \
- matf77.f
-matf77_LDADD = \
- $(LDADD) $(FCLIBS)
-pointf77_SOURCES = \
- pointf77.f
-pointf77_LDADD = \
- $(LDADD) $(FCLIBS)
-quadf77_SOURCES = \
- quadf77.f
-quadf77_LDADD = \
- $(LDADD) $(FCLIBS)
-ucdf77_SOURCES = \
- ucdf77.f
-ucdf77_LDADD = \
- $(LDADD) $(FCLIBS)
-testallf77_SOURCES = \
- testallf77.f
-testallf77_LDADD = \
- $(LDADD) $(FCLIBS)
 
 check_PROGRAMS = \
  array \
@@ -115,14 +88,26 @@ check_PROGRAMS = \
  mmadjacency \
  largefile \
  dir \
- quad \
- arrayf77 \
- curvef77 \
- matf77 \
- pointf77 \
- quadf77 \
- ucdf77 \
- testallf77
+ quad 
+if FORTRAN_NEEDED
+  TESTSUITE += $(srcdir)/testsuitef77
+  PROGS += $(F77PROGS)
+  check_PROGRAMS += $(F77PROGS)
+  arrayf77_SOURCES = arrayf77.f
+  arrayf77_LDADD = $(LDADD) $(FCLIBS)
+  curvef77_SOURCES = curvef77.f
+  curvef77_LDADD = $(LDADD) $(FCLIBS)
+  matf77_SOURCES = matf77.f
+  matf77_LDADD = $(LDADD) $(FCLIBS)
+  pointf77_SOURCES = pointf77.f
+  pointf77_LDADD = $(LDADD) $(FCLIBS)
+  quadf77_SOURCES = quadf77.f
+  quadf77_LDADD = $(LDADD) $(FCLIBS)
+  ucdf77_SOURCES = ucdf77.f
+  ucdf77_LDADD = $(LDADD) $(FCLIBS)
+  testallf77_SOURCES = testallf77.f
+  testallf77_LDADD = $(LDADD) $(FCLIBS)
+endif
 
 #TESTS = array extface multi_test partial_io point group_test \
  listtypes simple ucd ucdsamp3 testall alltypes obj onehex \
@@ -143,15 +128,23 @@ all-local:
 
 # autotest targets
 check-local: $(TESTSUITE) $(PROGS)
-	$(SHELL) $(TESTSUITE)
+	list='$(TESTSUITE)'; for file in $$list; do \
+	  $(SHELL) $$file; \
+	done
 
 clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
+	rm -f testsuitef77.log
+	rm -rf testsuitef77.dir
 	rm -f testsuitehdf5.log
 	rm -rf testsuitehdf5.dir
 
 testsuite: $(srcdir)/testsuite.at
+	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
+	-mv -f $@.tmp $@
+
+testsuitef77: $(srcdir)/testsuitef77.at
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	-mv -f $@.tmp $@
 

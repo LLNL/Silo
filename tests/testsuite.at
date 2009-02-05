@@ -1,6 +1,6 @@
 #!/bin/sh
 # Testsuite for silo PDB files
-AT_INIT(silo)
+AT_INIT(silo PDB files)
 AT_COPYRIGHT([This work was produced at the University of California,
 Lawrence Livermore National Laboratory (UC LLNL) under contract
 no. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
@@ -130,27 +130,4 @@ AT_CHECK(dir,,[ignore],[ignore])
 AT_CLEANUP
 AT_SETUP(quad)
 AT_CHECK(quad,,[ignore])
-AT_CLEANUP
-# For some reason pgf77 writes to stderr upon termination
-# arrayf77: dumped core under pgf77 DBFortranAccessPointer: Invalid argument
-#AT_SETUP(arrayf77)
-#AT_CHECK(arrayf77,,[ignore],[ignore])   
-#AT_CLEANUP
-AT_SETUP(curvef77)
-AT_CHECK(curvef77,,[ignore],[ignore])
-AT_CLEANUP
-AT_SETUP(matf77)
-AT_CHECK(matf77,,[ignore],[ignore])
-AT_CLEANUP
-AT_SETUP(pointf77)
-AT_CHECK(pointf77,,[ignore],[ignore])
-AT_CLEANUP
-AT_SETUP(quadf77)
-AT_CHECK(quadf77,,[ignore],[ignore])
-AT_CLEANUP
-AT_SETUP(testallf77)
-AT_CHECK(testallf77,,[ignore],[ignore])
-AT_CLEANUP
-AT_SETUP(ucdf77)
-AT_CHECK(ucdf77,,[ignore],[ignore])
 AT_CLEANUP
