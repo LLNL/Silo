@@ -75,6 +75,9 @@
 #
 #   Mark C. Miller, Wed Feb 14 08:39:43 PST 2007
 #   Fixed problem where md5sums were emailed and not differences in sums
+#
+#   Mark C. Miller, Thu Feb 22 08:04:47 PST 2007
+#   Fixed problem correctly posting fact of skipped test due to no changes
 #--------------------------------------------------------------------------------
 
 umask 002
@@ -136,12 +139,13 @@ EOF
 # Function to search visit account's public_html dir and
 # find most recent posting of silo test results
 htmlCiteMostRecentSiloDir () {
-    mruSiloDir=`ls -1td /home/visit/public_html/*/silo | head -n 1 | cut -d'/' -f5`
-    mruSiloFailed=`grep Failed /home/visit/public_html/$mruSiloDir/index.html`
+    mruSiloDir=`ls -1tdF /home/visit/public_html/*/silo | grep -v @$ | head -n 1 | cut -d'/' -f5`
+    mruSiloFailed=`grep Failed /home/visit/public_html/$mruSiloDir/silo/index.html`
+    ssh visit@hoth -x "cd $todaysDir ; ln -s ../$mruSiloDir/silo ."
     if test "$mruSiloFailed" = ""; then
-        ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\\\"$mruSiloDir/silo\\\">silo</a></b></td><td align=center bgcolor=#00ff00><b>SKIPPED</b></td><td align=center><i>PASSED most recent run</i></td></tr>\" /home/visit/public_html/index.html"
+        ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\\\"$todaysBase/silo\\\">silo</a></b></td><td align=center bgcolor=#00ff00><b>SKIPPED</b></td><td align=center><i>PASSED most recent run</i></td></tr>\" /home/visit/public_html/index.html"
     else
-        ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\\\"$mruSiloDir/silo\\\">silo</a></b></td><td align=center bgcolor=#ff0000><b>SKIPPED</b></td><td align=center><i>FAILED most recent run</i></td></tr>\" /home/visit/public_html/index.html"
+        ssh visit@hoth -x "/bin/sed -i \"10 i \<tr><td align=center><b><a href=\\\"$todaysBase/silo\\\">silo</a></b></td><td align=center bgcolor=#ff0000><b>SKIPPED</b></td><td align=center><i>FAILED most recent run</i></td></tr>\" /home/visit/public_html/index.html"
     fi
 }
 
@@ -178,7 +182,8 @@ cleartool ls -recurse -view -short | grep -v md5sums_last.txt | xargs -n 1 rm -r
 find . -type f \! -name "md5sums*.txt" -exec md5sum {} \; | grep -v .mvfs_ 1>md5sums_current.txt 2>&1
 if test -e md5sums_last.txt; then
     if test "`diff md5sums_last.txt md5sums_current.txt`" = ""; then
-        waitForTodaysDir
+        todaysDir=`waitForTodaysDir`
+        todaysBase=`basename $todaysDir`
 	htmlCiteMostRecentSiloDir
         ifErrorSendMessage 1 "Silo tests skipped. No changes since last run" "" 1
     else
