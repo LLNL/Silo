@@ -64,7 +64,17 @@
 #   even when we choose not to run Silo's tests due to lack of any changes
 #   to sources. Made code to wait for an html dir to post to into its own
 #   subroutine.
-
+#
+#   Mark C. Miller, Mon Feb 12 09:42:02 PST 2007
+#   Sort list of VisIt tests by category
+#
+#   Mark C. Miller, Tue Feb 13 09:07:23 PST 2007
+#   Added email log when deciding to re-run due to changes. Removed tarballs
+#   from VisIt test runs after scp'ing them to visit acct. Added logic to
+#   terminate waiting for current dir after 12 hours.
+#
+#   Mark C. Miller, Wed Feb 14 08:39:43 PST 2007
+#   Fixed problem where md5sums were emailed and not differences in sums
 #--------------------------------------------------------------------------------
 
 umask 002
@@ -93,6 +103,8 @@ ifErrorSendMessage() {
 From: silo@lists.llnl.gov
 Subject: $2
 This is a message from Silo's automatic test run
+
+$2
 EOF
         if test -n "$3"; then
             if test -e $3; then
@@ -139,12 +151,17 @@ htmlCiteMostRecentSiloDir () {
 # regression test tools) and return the name of that dir
 #
 waitForTodaysDir () {
-    todaysDir=`ls -d /home/visit/public_html/${dateBase}*`
+    todaysDir=`ls -d /home/visit/public_html/${dateBase}* 2>/dev/null`
+    theHour=`date +%l`
+    theHour=`expr $theHour + 12`
     while test "$todaysDir" = ""; do
         sleep 600
         todaysDir=`ls -d /home/visit/public_html/${dateBase}* 2>/dev/null`
-     done
-     echo $todaysDir
+        if `date +%l` -gt $theHour; then
+            ifErrorSendMessage 1 "Silo tests stopped waiting for today's dir" "" 1
+	fi
+    done
+    echo $todaysDir
 }
 
 #
@@ -165,9 +182,12 @@ if test -e md5sums_last.txt; then
 	htmlCiteMostRecentSiloDir
         ifErrorSendMessage 1 "Silo tests skipped. No changes since last run" "" 1
     else
+        diff md5sums_last.txt md5sums_current.txt 1>md5sums_diffs.txt 2>&1
         chmod 660 md5sums_last.txt 1>/dev/null 2>&1
         mv -f md5sums_current.txt md5sums_last.txt 1>/dev/null 2>&1
         chmod 440 md5sums_last.txt 1>/dev/null 2>&1
+        ifErrorSendMessage 1 "Running silo tests. Changed files listed" md5sums_diffs.txt
+	rm -f md5sums_diffs.txt
     fi
 else
     mv -f md5sums_current.txt md5sums_last.txt 1>/dev/null 2>&1
@@ -242,7 +262,7 @@ for pfile in $pyFiles; do
 done
 cat scores.txt | sort -r -n -k 2 > sorted_scores.txt
 tenPercent=`expr $pyidx / 10`
-testsToRun=`head -n $tenPercent sorted_scores.txt | cut -d' ' -f1`
+testsToRun=`head -n $tenPercent sorted_scores.txt | cut -d' ' -f1 | sort`
 rm -f datafiles.txt scores.txt sorted_scores.txt
 
 #
@@ -365,8 +385,8 @@ todaysBase=`basename $todaysDir`
 #
 ssh visit@hoth -x "mkdir $todaysDir/silo"
 scp $siloHtmlFile $topHtmlFile $tmpRoot/html_pdb.tar.gz $tmpRoot/html_hdf5.tar.gz visit@hoth:$todaysDir/silo/.
-ssh visit@hoth -x "cd $todaysDir/silo ; gunzip < html_pdb.tar.gz | tar xf -"
-ssh visit@hoth -x "cd $todaysDir/silo ; gunzip < html_hdf5.tar.gz | tar xf -"
+ssh visit@hoth -x "cd $todaysDir/silo ; gunzip < html_pdb.tar.gz | tar xf - ; rm -f html_pdb.tar.gz"
+ssh visit@hoth -x "cd $todaysDir/silo ; gunzip < html_hdf5.tar.gz | tar xf - ; rm -f html_hdf5.tar.gz"
 
 #
 # Update visit account's top-level public html file
