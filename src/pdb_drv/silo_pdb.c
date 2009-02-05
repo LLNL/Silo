@@ -4789,8 +4789,8 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    DEFINE_OBJ("root", &root, DB_FLOAT);
    DEFALL_OBJ("src_mesh_name", &tmptree.src_mesh_name, DB_CHAR);
    DEFALL_OBJ("scalars", &intArray, DB_INT);
-   DEFALL_OBJ("mrgvar_onames", &tmptree.mrgvar_onames, DB_CHAR);
-   DEFALL_OBJ("mrgvar_rnames", &tmptree.mrgvar_rnames, DB_CHAR);
+   DEFALL_OBJ("mrgvar_onames", &mrgv_onames, DB_CHAR);
+   DEFALL_OBJ("mrgvar_rnames", &mrgv_rnames, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, &type) < 0)
       return NULL;
@@ -4939,6 +4939,17 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
        }
    }
    FREE(intArray);
+
+   if (mrgv_onames)
+   {
+      tree->mrgvar_onames = db_StringListToStringArray(mrgv_onames, -1);
+      FREE(mrgv_onames);
+   }
+   if (mrgv_rnames)
+   {
+      tree->mrgvar_rnames = db_StringListToStringArray(mrgv_rnames, -1);
+      FREE(mrgv_rnames);
+   }
 
    tree->root = ltree[root];
    tree->cwr = tree->root;

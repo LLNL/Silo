@@ -598,16 +598,125 @@ stc_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
    }
 }
 
+static void
+stc_walk1_outmrgtree(DBmrgtnode *tnode, int walk_order, void *data)
+{
+    walk_t *wdata = (walk_t*) data;
+    out_t *f = wdata->f;
+    int j, level = -1;
+    DBmrgtnode *tmp = tnode;
+
+    /* walk to top to determine level of indentation */
+    while (tmp != 0)
+    {
+        tmp = tmp->parent;
+        level++;
+    }
+    for (j = 0; j < level; j++)
+        out_indent(f);
+
+    /* print this node using special '*' field width specifier */
+    out_printf(f, "name = \"%s\" {", tnode->name);
+    out_nl(f);
+    out_printf(f, "....walk_order = %d", tnode->walk_order);
+    out_nl(f);
+    out_printf(f, "........parent = \"%s\"", tnode->parent?tnode->parent->name:"");
+    out_nl(f);
+    out_printf(f, "........narray = %d", tnode->narray);
+    out_nl(f);
+    if (tnode->narray > 0)
+    {
+        if (strchr(tnode->names[0], '%') == 0)
+        {
+            out_printf(f, ".........names = ...", "");
+            out_nl(f);
+            for (j = 0; j < tnode->narray; j++)
+            {
+                out_printf(f, "....................\"%s\"", tnode->names[j]);
+                out_nl(f);
+            }
+        }
+        else
+        {
+            out_printf(f, "....namescheme = \"%s\"", tnode->names[0]);
+            out_nl(f);
+        }
+    }
+    out_printf(f, "type_info_bits = %d", tnode->type_info_bits);
+    out_nl(f);
+    out_printf(f, "..max_children = %d", tnode->max_children);
+    out_nl(f);
+    out_printf(f, ".....maps_name = \"%s\"", tnode->maps_name?tnode->maps_name:"");
+    out_nl(f);
+    out_printf(f, ".........nsegs = %d", tnode->nsegs);
+    out_nl(f);
+    if (tnode->nsegs > 0)
+    {
+        out_printf(f, "......segments =     ids   |   lens   |   types", "");
+        out_nl(f);
+        for (j = 0; j < tnode->nsegs*(tnode->narray?tnode->narray:1); j++)
+        {
+            out_printf(f, ".................%.10d|%.10d|%.10d", 
+                tnode->seg_ids[j], tnode->seg_lens[j], tnode->seg_types[j]);
+            out_nl(f);
+        }
+    }
+    out_printf(f, "..num_children = %d", tnode->num_children);
+    out_nl(f);
+    if (tnode->num_children > 0)
+    {
+        for (j = 0; j < tnode->num_children && tnode->children[j] != 0; j++)
+        {
+            out_printf(f, ".................\"%s\"", tnode->children[j]->name);
+            out_nl(f);
+        }
+    }
+    out_printf(f, "} \"%s\"", tnode->name);
+    out_nl(f);
+
+    for (j = 0; j < level; j++)
+        out_undent(f);
+}
 
 /*ARGSUSED*/
 static void
 stc_walk1_DBmrgtree(obj_t _self, void *mem, int operation, walk_t *wdata)
 {
    DBmrgtree   *tree = (DBmrgtree*)mem;
+   out_t *f = wdata->f;
+   char **p;
+
 
    assert (WALK_PRINT==operation);
 
-   DBWalkMrgtree(tree, DBPrintMrgtree, stdout, DB_PREORDER);
+   out_printf (f, "mrgtree: \"%s\"", tree->name);
+   out_nl(f);
+   out_printf (f, "src_mesh_name: \"%s\"", tree->src_mesh_name);
+   out_nl(f);
+   out_printf (f, "type_info_bits: %8X", tree->type_info_bits);
+   out_nl(f);
+   out_printf (f, "num_nodes: %d", tree->num_nodes);
+   out_nl(f);
+   p = tree->mrgvar_onames;
+   out_printf (f, "mrgvar_onames: \"%s\"", p ? "" : "none");
+   out_nl(f);
+   while (p && *p)
+   {
+       out_printf (f, "....\"%s\"", *p);
+       out_nl(f);
+       p++;
+   }
+   p = tree->mrgvar_rnames;
+   out_printf (f, "mrgvar_rnames: \"%s\"", p ? "" : "none");
+   out_nl(f);
+   while (p && *p)
+   {
+       out_printf (f, "....\"%s\"", *p);
+       out_nl(f);
+       p++;
+   }
+
+   DBWalkMrgtree(tree, stc_walk1_outmrgtree, wdata, DB_PREORDER);
    return;
 }
 
@@ -2191,17 +2300,4 @@ stc_silo_types (void) {
       COMP (mrgvar_names,
             "pointer (array 'self.nmrgvars' (primitive 'string'))");
    } ESTRUCT;
-
-#if 0
-   STRUCT (DBsil) {
-      COMP (nsets,              "primitive 'int'");
-      COMP (setnames,
-            "pointer (array 'self.nsets' (primitive 'string'))");
-      COMP (nedges,             "primitive 'int'");
-      COMP (edgeheads,
-            "pointer (array 'self.nedges' (primitive 'int'))");
-      COMP (edgetails,
-            "pointer (array 'self.nedges' (primitive 'int'))");
-   } ESTRUCT;
-#endif
 }

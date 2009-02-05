@@ -370,7 +370,7 @@ main(int argc, char *argv[])
             driver = inc | DB_HDF5_CORE;
             file_ext = ".h5";
         } else if (!strcmp(argv[i], "hzip")) {
-            DBSetCompression("ERRMODE=FAIL METHOD=HZIP");
+            DBSetCompression("ERRMODE=FALLBACK METHOD=HZIP");
         } else if (!strcmp(argv[i], "fpzip")) {
             DBSetCompression("METHOD=FPZIP LOSS=3");
         } else if (!strcmp(argv[i], "fpziplossless")) {

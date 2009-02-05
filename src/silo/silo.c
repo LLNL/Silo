@@ -108,6 +108,7 @@ int SILO_VERS_TAG = 0;
 /* specify versions which are backward compatible with the current */
 int Silo_version_4_6 = 0;
 int Silo_version_4_6_1 = 0;
+int Silo_version_4_6_2 = 0;
 
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
 PUBLIC int     db_errno = 0;    /*last error number                     */
