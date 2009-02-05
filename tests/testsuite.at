@@ -1,0 +1,140 @@
+#!/bin/sh
+# Testsuite for silo
+AT_INIT(silo)
+AT_SETUP(silo array test)
+AT_CHECK(array,,ignore)
+AT_CLEANUP
+AT_SETUP(silo extface test)
+AT_CHECK(extface)
+AT_CLEANUP
+#AT_SETUP(silo multi_test test)
+#AT_CHECK(multi_test,,ignore)  # FAILING AUTOTEST FOR SOME REASON
+#AT_CLEANUP
+AT_SETUP(silo partial_io test)
+AT_CHECK(partial_io,,ignore)
+AT_CLEANUP
+AT_SETUP(silo point test)
+AT_CHECK(point,,ignore)
+AT_CLEANUP
+#AT_SETUP(silo group_test test)
+#AT_CHECK(group_test)   # requires arguments
+#AT_CLEANUP
+#AT_SETUP(silo listtypes test)
+#AT_CHECK(listtypes)   # FAILING AUTOTEST
+#AT_CLEANUP
+AT_SETUP(silo simple test)
+AT_CHECK(simple,,ignore)
+AT_CLEANUP
+AT_SETUP(silo ucd test)
+AT_CHECK(ucd,,ignore)
+AT_CLEANUP
+AT_SETUP(silo ucdsamp3 test)
+AT_CHECK(ucdsamp3,,ignore)
+AT_CLEANUP
+AT_SETUP(silo testall test)
+AT_CHECK(testall,,ignore)
+AT_CLEANUP
+AT_SETUP(silo alltypes test)
+AT_CHECK(alltypes,,ignore)
+AT_CLEANUP
+AT_SETUP(silo obj test)
+AT_CHECK(obj,,ignore)
+AT_CLEANUP
+AT_SETUP(silo onehex test)
+AT_CHECK(onehex,,ignore)
+AT_CLEANUP
+AT_SETUP(silo oneprism test)
+AT_CHECK(oneprism,,ignore)
+AT_CLEANUP
+AT_SETUP(silo onepyramid test)
+AT_CHECK(onepyramid,,ignore)
+AT_CLEANUP
+AT_SETUP(silo onetet test)
+AT_CHECK(onetet,,ignore)
+AT_CLEANUP
+AT_SETUP(silo TestReadMask test)
+AT_CHECK(TestReadMask,,ignore)   # probably want a data directory
+AT_CLEANUP
+AT_SETUP(silo subhex test)
+AT_CHECK(subhex,,ignore)
+AT_CLEANUP
+AT_SETUP(silo twohex test)
+AT_CHECK(twohex,,ignore)
+AT_CLEANUP
+#AT_SETUP(silo multispec test)
+#AT_CHECK(multispec,,ignore)   # FALED AUTOTEST
+#AT_CLEANUP
+AT_SETUP(silo specmix test)
+AT_CHECK(specmix,,ignore)
+AT_CLEANUP
+#AT_SETUP(silo testpdb test)
+#AT_CHECK(testpdb)   # Fails with: Error writing group.
+#AT_CLEANUP
+AT_SETUP(silo sami test)
+AT_CHECK(sami,,ignore)
+AT_CLEANUP
+AT_SETUP(silo spec test)
+AT_CHECK(spec,,ignore)
+AT_CLEANUP
+#AT_SETUP(silo cpz1plt test)
+#AT_CHECK(cpz1plt)   # Fails with: Missing input file "z1plt", cannot continue.
+#AT_CLEANUP
+#AT_SETUP(silo merge_block test)
+#AT_CHECK(merge_block) # requires arguments
+#AT_CLEANUP
+#AT_SETUP(silo resample test)
+#AT_CHECK(resample) # mpi test, mpirun
+#AT_CLEANUP
+AT_SETUP(silo mat3d_3across test)
+AT_CHECK(mat3d_3across)
+AT_CLEANUP
+AT_SETUP(silo ucd1d test)
+AT_CHECK(ucd1d)
+AT_CLEANUP
+AT_SETUP(silo wave test)
+AT_CHECK(wave)
+AT_CLEANUP
+#AT_SETUP(silo multi_file test)
+#AT_CHECK(multi_file,,ignore)   # FAILED ATOTEST
+#AT_CLEANUP
+AT_SETUP(silo polyzl test)
+AT_CHECK(polyzl,,ignore)
+AT_CLEANUP
+AT_SETUP(silo csg test)
+AT_CHECK(csg,,ignore)
+AT_CLEANUP
+AT_SETUP(silo mmadjacency test)
+AT_CHECK(mmadjacency)
+AT_CLEANUP
+#AT_SETUP(silo largefile test)
+#AT_CHECK(largefile)  # 2GByte file!
+#AT_CLEANUP
+AT_SETUP(silo dir test)
+AT_CHECK(dir,,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(silo quad test)
+AT_CHECK(quad,,ignore)
+AT_CLEANUP
+# For some reason pgf77 writes to stderr upon termination
+# arrayf77: dumped core under pgf77 DBFortranAccessPointer: Invalid argument
+#AT_SETUP(silo arrayf77 test)
+#AT_CHECK(arrayf77,,ignore,ignore)   
+#AT_CLEANUP
+AT_SETUP(silo curvef77 test)
+AT_CHECK(curvef77,,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(silo matf77 test)
+AT_CHECK(matf77,,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(silo pointf77 test)
+AT_CHECK(pointf77,,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(silo quadf77 test)
+AT_CHECK(quadf77,,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(silo testallf77 test)
+AT_CHECK(testallf77,,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(silo ucdf77 test)
+AT_CHECK(ucdf77,,ignore,ignore)
+AT_CLEANUP

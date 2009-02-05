@@ -1,0 +1,642 @@
+#include "pydbfile.h"
+#include "pydbtoc.h"
+#include "pysilo.h"
+
+// ****************************************************************************
+//  Method:  DBfile_DBGetToc
+//
+//  Purpose:
+//    Encapsulates DBGetToc
+//
+//  Python Arguments:
+//    none
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_DBGetToc(PyObject *self, PyObject *args)
+{
+    DBfileObject *obj = (DBfileObject*)self;
+
+    if (!obj->db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    DBtoc *toc = DBGetToc(obj->db);
+
+    DBtocObject *retval = PyObject_NEW(DBtocObject, &DBtocType);
+    if (retval)
+    {
+        retval->toc = toc;
+    }
+    return (PyObject*)retval;
+}
+
+// ****************************************************************************
+//  Method:  DBfile_DBGetVar
+//
+//  Purpose:
+//    Encapsulates DBGetVar
+//
+//  Python Arguments:
+//    form 1: varname
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
+{
+    DBfile *db = ((DBfileObject*)self)->db;
+
+    if (!db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    char *str;
+    if(!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+
+    int vartype = DBInqVarType(db, str);
+    if (vartype != DB_VARIABLE)
+    {
+        SiloErrorFunc("Only flat variables are supported.");
+        return NULL;
+    }
+
+    int len = DBGetVarLength(db,str);
+    int type = DBGetVarType(db,str);
+    void *var = DBGetVar(db,str);
+    if (len == 1 || type == DB_CHAR)
+    {
+        switch (type)
+        {
+          case DB_INT:
+            return PyInt_FromLong(*((int*)var));
+          case DB_SHORT:
+            return PyInt_FromLong(*((short*)var));
+          case DB_LONG:
+            return PyInt_FromLong(*((long*)var));
+          case DB_FLOAT:
+            return PyFloat_FromDouble(*((float*)var));
+          case DB_DOUBLE:
+            return PyFloat_FromDouble(*((double*)var));
+          case DB_CHAR:
+            if (len == 1)
+                return PyInt_FromLong(*((char*)var));
+            else
+                return PyString_FromStringAndSize((char*)var, len);
+          default:
+            SiloErrorFunc("Unknown variable type.");
+            return NULL;
+        }
+    }
+    else
+    {
+        PyObject *retval = PyTuple_New(len);
+        for (int i=0; i<len; i++)
+        {    
+            PyObject *tmp;
+            switch (type)
+            {
+              case DB_INT:
+                tmp = PyInt_FromLong(((int*)var)[i]);
+                break;
+              case DB_SHORT:
+                tmp = PyInt_FromLong(((short*)var)[i]);
+                break;
+              case DB_LONG:
+                tmp = PyInt_FromLong(((long*)var)[i]);
+                break;
+              case DB_FLOAT:
+                tmp = PyFloat_FromDouble(((float*)var)[i]);
+                break;
+              case DB_DOUBLE:
+                tmp = PyFloat_FromDouble(((double*)var)[i]);
+                break;
+              case DB_CHAR:
+                tmp = PyInt_FromLong(((char*)var)[i]);
+                break;
+              default:
+                SiloErrorFunc("Unknown variable type.");
+                return NULL;
+            }
+            PyTuple_SET_ITEM(retval, i, tmp);
+        }
+        return retval;
+    }
+}
+
+// ****************************************************************************
+//  Method:  DBfile_DBGetVar
+//
+//  Purpose:
+//    Encapsulates DBGetVar
+//
+//  Python Arguments:
+//    form 1: varname, integer
+//    form 2: varname, real
+//    form 3: varname, string
+//    form 4: varname, tuple
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
+{
+    DBfile *db = ((DBfileObject*)self)->db;
+
+    if (!db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    int dims;
+    int err;
+    char *str;
+
+    int ivar;
+    double dvar;
+    char *svar;
+    PyObject *tuple;
+    if (PyArg_ParseTuple(args, "si", &str, &ivar) &&
+        PyArg_ParseTuple(args, "sd", &str, &dvar))
+    {
+        dims = 1;
+        if (ivar == dvar)
+        {
+            err = DBWrite(db, str, &ivar, &dims,1, DB_INT);
+        }
+        else
+        {
+            err = DBWrite(db, str, &dvar, &dims,1, DB_DOUBLE);
+        }
+    }
+    else if (PyArg_ParseTuple(args, "si", &str, &ivar))
+    {
+        dims = 1;
+        err = DBWrite(db, str, &ivar, &dims,1, DB_INT);
+    }
+    else if (PyArg_ParseTuple(args, "sd", &str, &dvar))
+    {
+        dims = 1;
+        err = DBWrite(db, str, &dvar, &dims,1, DB_DOUBLE);
+    }
+    else if (PyArg_ParseTuple(args, "ss", &str, &svar))
+    {
+        dims = strlen(svar);
+        err = DBWrite(db, str, svar, &dims,1, DB_CHAR);
+    }
+    else if (PyArg_ParseTuple(args, "sO", &str, &tuple))
+    {
+        if(!PyTuple_Check(tuple))
+            return NULL;
+
+        int len = PyTuple_Size(tuple);
+        if (len < 1)
+        {
+            PyErr_SetString(PyExc_TypeError, "Tuple must be of size > 0");
+            return NULL;
+        }
+
+        PyObject *item = PyTuple_GET_ITEM(tuple, 0);
+        if (PyInt_Check(item))
+        {
+            int *values = new int[len];
+            for (int i=0; i<len; i++)
+            {
+                item = PyTuple_GET_ITEM(tuple, i);
+                if (PyInt_Check(item))
+                    values[i] = int(PyInt_AS_LONG(PyTuple_GET_ITEM(tuple, i)));
+                else if (PyFloat_Check(item))
+                    values[i] = int(PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(tuple, i)));
+                else
+                {
+                    PyErr_SetString(PyExc_TypeError,
+                                    "Only int or float tuples are supported");
+                    return NULL;
+                }
+            }
+
+            dims = len;
+            err = DBWrite(db, str, values, &len,1, DB_INT);
+        }
+        else if (PyFloat_Check(item))
+        {
+            double *values = new double[len];
+            for (int i=0; i<len; i++)
+            {
+                item = PyTuple_GET_ITEM(tuple, i);
+                if (PyInt_Check(item))
+                    values[i] = double(PyInt_AS_LONG(PyTuple_GET_ITEM(tuple, i)));
+                else if (PyFloat_Check(item))
+                    values[i] = double(PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(tuple, i)));
+                else
+                {
+                    PyErr_SetString(PyExc_TypeError,
+                                    "Only int or float tuples are supported");
+                    return NULL;
+                }
+            }
+
+            dims = len;
+            err = DBWrite(db, str, values, &len,1, DB_DOUBLE);
+        }
+        else
+        {
+            PyErr_SetString(PyExc_TypeError,
+                            "Only int or float tuples are supported");
+            return NULL;
+        }
+    }
+    else
+    {
+        PyErr_SetString(PyExc_TypeError, "Function takes 2 arguments");
+        return NULL;
+    }
+
+    if (err != 0)
+    {
+        PyErr_SetString(PyExc_TypeError, "DBWrite failed");
+        return NULL;
+    }
+    
+    PyErr_Clear();
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+// ****************************************************************************
+//  Method:  DBfile_DBMkDir
+//
+//  Purpose:
+//    Encapsulates DBMkDir
+//
+//  Python Arguments:
+//    form 1: dirname
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_DBMkDir(PyObject *self, PyObject *args)
+{
+    DBfile *db = ((DBfileObject*)self)->db;
+
+    if (!db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    char *str;
+    if(!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+
+    if (DBMkDir(db, str))
+    {
+        SiloErrorFunc("Could not make the directory.");
+        return NULL;
+    }
+    else
+    {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
+// ****************************************************************************
+//  Method:  DBfile_DBSetDir
+//
+//  Purpose:
+//    Encapsulates DBSetDir
+//
+//  Python Arguments:
+//    form 1: dirname
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_DBSetDir(PyObject *self, PyObject *args)
+{
+    DBfile *db = ((DBfileObject*)self)->db;
+
+    if (!db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    char *str;
+    if(!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+
+    if (DBSetDir(db, str))
+    {
+        SiloErrorFunc("Could not change directories.");
+        return NULL;
+    }
+    else
+    {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
+// ****************************************************************************
+//  Method:  DBfile_DBClose
+//
+//  Purpose:
+//    Encapsulates DBClose
+//
+//  Python Arguments:
+//    none
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_DBClose(PyObject *self, PyObject *args)
+{
+    DBfile *db = ((DBfileObject*)self)->db;
+
+    if (!db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    if(!PyArg_ParseTuple(args, ""))
+        return NULL;
+
+    if (DBClose(db))
+    {
+        SiloErrorFunc("Could not close the file.");
+        return NULL;
+    }
+    else
+    {
+        ((DBfileObject*)self)->db = NULL;
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
+// ****************************************************************************
+//  DBfile method definitions  
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static struct PyMethodDef DBfile_methods[] = {
+    {"GetToc", DBfile_DBGetToc, METH_VARARGS},
+    {"GetVar", DBfile_DBGetVar, METH_VARARGS},
+    {"Write", DBfile_DBWrite, METH_VARARGS},
+    {"MkDir", DBfile_DBMkDir, METH_VARARGS},
+    {"SetDir", DBfile_DBSetDir, METH_VARARGS},
+    {"Close", DBfile_DBClose, METH_VARARGS},
+    {NULL, NULL}
+};
+
+// ****************************************************************************
+//  Method:  DBfile_dealloc
+//
+//  Purpose:
+//    Deallocate the object.
+//
+//  Arguments:
+//    none
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_dealloc(PyObject *self)
+{
+    PyMem_DEL(self);
+}
+
+// ****************************************************************************
+//  Method:  DBfile_as_string
+//
+//  Purpose:
+//    Convert the DBfileObject to a string representation.
+//
+//  Arguments:
+//    s          the target string, with space already allocated
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static void *DBfile_as_string(PyObject *self, char *s)
+{
+    DBfileObject *obj = (DBfileObject*)self;
+    if (obj->db)
+        sprintf(s, "<DBfile object, filename='%s'>", obj->db->pub.name);
+    else
+        sprintf(s, "<closed DBfile object>");
+}
+
+// ****************************************************************************
+//  Method:  DBfile_str
+//
+//  Purpose:
+//    Convert the DBfileObject to a PyString
+//
+//  Arguments:
+//    none
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_str(PyObject *self)
+{
+    char str[1000];
+    DBfile_as_string(self, str);
+    return PyString_FromString(str);
+}
+
+// ****************************************************************************
+//  Method:  DBfile_print
+//
+//  Purpose:
+//    Print the DBfileObject into a file as text
+//
+//  Arguments:
+//    fp         the file pointer
+//    flags      (unused)
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static int DBfile_print(PyObject *self, FILE *fp, int flags)
+{
+    char str[1000];
+    DBfile_as_string(self, str);
+    fprintf(fp, str);
+    return 0;
+}
+
+// ****************************************************************************
+//  Method: DBfile_getattr 
+//
+//  Purpose:
+//    Return an attribute by name.  There is only one attribute of a
+//    DBfile, which is its filename.
+//
+//  Arguments:
+//    name       the name of the attribute to return
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static PyObject *DBfile_getattr(PyObject *self, char *name)
+{
+    DBfileObject *obj = (DBfileObject*)self;
+
+    if (!obj->db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    if (!strcmp(name, "filename"))
+    {
+        if (obj->db)
+        {
+            return PyString_FromString(obj->db->pub.name);
+        }
+        else
+        {
+            return PyString_FromString("<closed file>");
+        }
+    }
+
+    return Py_FindMethod(DBfile_methods, self, name);
+}
+
+// ****************************************************************************
+//  Method:  DBfile_compare
+//
+//  Purpose:
+//    Compare two DBfileObjects.
+//
+//  Arguments:
+//    u, v       the objects to compare
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static int DBfile_compare(PyObject *v, PyObject *w)
+{
+    DBfile *a = ((DBfileObject *)v)->db;
+    DBfile *b = ((DBfileObject *)w)->db;
+    return (a<b) ? -1 : ((a==b) ? 0 : +1);
+}
+
+
+// ****************************************************************************
+//  DBfile Python Type Object
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+static char *DBfile_Purpose = "This class wraps a Silo DBfile object.";
+PyTypeObject DBfileType =
+{
+    //
+    // Type header
+    //
+    PyObject_HEAD_INIT(&PyType_Type)
+    0,                                   // ob_size
+    "DBfile",                    // tp_name
+    sizeof(DBfileObject),        // tp_basicsize
+    0,                                   // tp_itemsize
+    //
+    // Standard methods
+    //
+    (destructor)DBfile_dealloc,  // tp_dealloc
+    (printfunc)DBfile_print,     // tp_print
+    (getattrfunc)DBfile_getattr, // tp_getattr
+    0,//(setattrfunc)DBfile_setattr, // tp_setattr -- this object is read-only
+    (cmpfunc)DBfile_compare,     // tp_compare
+    (reprfunc)0,                         // tp_repr
+    //
+    // Type categories
+    //
+    0,                                   // tp_as_number
+    0,                                   // tp_as_sequence
+    0,                                   // tp_as_mapping
+    //
+    // More methods
+    //
+    0,                                   // tp_hash
+    0,                                   // tp_call
+    (reprfunc)DBfile_str,        // tp_str
+    0,                                   // tp_getattro
+    0,                                   // tp_setattro
+    0,                                   // tp_as_buffer
+    Py_TPFLAGS_CHECKTYPES,               // tp_flags
+    DBfile_Purpose,              // tp_doc
+    0,                                   // tp_traverse
+    0,                                   // tp_clear
+    0,                                   // tp_richcompare
+    0                                    // tp_weaklistoffset
+};
+
+// ****************************************************************************
+//  Method:  DBfile_NEW
+//
+//  Purpose:
+//    Allocate and initialize a DBfileObject.
+//
+//  Arguments:
+//    init       the initial value
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+PyObject *DBfile_NEW(DBfile *init)
+{
+    DBfileObject *obj = PyObject_NEW(DBfileObject, &DBfileType);
+    if (obj)
+    {
+        obj->db = init;
+    }
+    return (PyObject*)obj;
+}
+
+// ****************************************************************************
+//  Method:  DBfile_NEW
+//
+//  Purpose:
+//    Allocate and initialize a DBfileObject with default values.
+//
+//  Python Arguments:
+//    none
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    July 12, 2005
+//
+// ****************************************************************************
+PyObject *DBfile_new(PyObject *self, PyObject *args)
+{
+    return DBfile_NEW(NULL);
+}
+

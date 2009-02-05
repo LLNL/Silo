@@ -1,0 +1,132 @@
+#!/bin/sh
+# Do a little magic to run perl from anywhere in your path.
+
+lines=`cat $0 | wc -l`
+lines=`expr $lines - 10`
+tail -$lines $0 > /tmp/siloperl$$
+echo "__END__" >> /tmp/siloperl$$
+echo "$0 $*" >> /tmp/siloperl$$
+exec perl /tmp/siloperl$$ $0 ${1+"$@"}
+
+unlink($0);
+$0 = shift @ARGV;
+
+# This script tars up a "package" for distribution on the net.  It tars up
+# files, compresses them, and wraps them in a Bourne shell script that allows
+# it to self-extract.
+#
+#       USAGE: package_file
+#
+# Programmer: Sean Ahern (ahern@llnl.gov)
+# Creation date: July 31, 1996
+#
+# Modifications:
+#     Sean Ahern, Thu Aug 15 16:09:31 PDT 1996
+#     Since the HP's don't like the B option to tar, use b 20 instead.
+#
+#     Sean Ahern, Thu Aug 15 16:10:29 PDT 1996
+#     /bin/sh on the HP's don't like "chdir", so change it to "cd.
+#
+#     Eric Brugger, Thu Oct 31 09:13:01 PST 1996
+#     I modified it to get the list of files from either the script
+#     meshtv_files or silo_files.  The user can control which list is
+#     used by specifying -meshtv or -silo on the execute line.  The
+#     default is -meshtv.
+#
+#     Eric Brugger, Tue Apr 22 07:57:47 PDT 1997
+#     I modified the routine to reference the package generation scripts
+#     in the clearcase_bin directory.  I modified the script to also
+#     save up the help files.
+#
+#     Sean Ahern, Wed Aug 13 14:47:18 PDT 1997
+#     Completely restructured the script so that it uses the "package" script
+#     directly, rather than trying to do everything on its own.  Also changed
+#     how we parse command line arguments to more of a perly way.
+#
+#     Sean Ahern, Mon Sep  8 16:30:59 PDT 1997
+#     Added running of "mkman" to get the list of files in the "help"
+#     directory.
+#
+#     Sean Ahern, Mon Sep  8 17:01:50 PDT 1997
+#     All of the scripts and such now run with an absolute path rather than
+#     searching $PATH.
+#
+#     Sean Ahern, Tue Sep  9 16:46:28 PDT 1997
+#     Changed the script to use "find" instead of "mkman" to get the list of
+#     files in the "help" directory.
+#
+#     Sean Ahern, Tue Sep 30 14:02:28 PDT 1997
+#     The list of files to be packaged up are now passed to the "package"
+#     script by way of stdin, rather than explicitly listing them on the
+#     command line.  Also, the script now checks to make sure you are running
+#     it from the root of the directory hierarchy.
+#
+#     Sean Ahern, Tue Sep 30 14:17:41 PDT 1997
+#     Changed the script so that it runs perl from your PATH, rather than being
+#     hardcoded.
+#
+#     Sean Ahern, Tue Aug 11 17:06:47 PDT 1998
+#     Changed how we list the files in the help directory.
+#
+#     Sean Ahern, Wed Aug 12 11:19:49 PDT 1998
+#     Added the -nohelp option to exclude the help files.
+#
+#     Thomas Treadway, Tue May 23 16:57:49 PDT 2006
+#     Silo distribution only
+
+require "newgetopt.pl";
+
+$USAGE = "USAGE: $0 [-nohelp] package_file \n";
+
+if (! -d "silo")
+{
+    print STDERR "Invoke $0 from the the root of the source tree.\n";
+    print STDERR $USAGE;
+    exit(-1);
+}
+
+# Parse the argument list.
+&NGetOpt("help","nohelp");
+
+if ($opt_help)
+{
+    print STDERR "USAGE:\n";
+    print STDERR $USAGE;
+    exit(0);
+}
+
+$package = "";
+$filelist = "./clearcase_bin/silo_files";
+$package = shift;
+
+# Check that a package name was specified.
+if ($package eq "")
+{
+    print STDERR "No package file specified.\n";
+    print STDERR $USAGE;
+    exit(-1);
+}
+
+# Get the list of files to tar up.
+print "Getting the list of files to package up.\n";
+@files = `$filelist`;
+grep(chop,@files);
+
+open(FILELIST,">/tmp/silo-dist$$") || die "Can't create file \"/tmp/silo-dist$$\": $!\n";
+print FILELIST "@files\n";
+close(FILELIST);
+
+$status = system("cat /tmp/silo-dist$$ | ./clearcase_bin/package $package -");
+$status /= 256;
+
+if ($status != 0)
+{
+    print STDERR <<"EOF";
+An error occurred while attempting to run "package".  The list of files that
+were meant to be packaged has been left in "/tmp/silo-dist$$".
+EOF
+    exit(-2);
+} else
+{
+    unlink("/tmp/silo-dist$$");
+}

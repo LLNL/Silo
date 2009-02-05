@@ -1,0 +1,114 @@
+Standard Targets for Users 
+
+Makefiles contain the following GNU Coding Standardstargets (liberally copied 
+from GNU Coding Standards): 
+'all'		Compile the entire program. This is the default target. This 
+		target will not rebuild any documentation; files will be made 
+		only when explicitly asked for.  By default, this target will 
+		compile and link with '-g', so that executable programs have 
+		debugging symbols. Users who don't mind being helpless can 
+		strip the executables later if they wish. 
+'install'	Compile the program and copy the executables, libraries, and so
+		on to the file names where they should reside for actual use. 
+		Do not strip Executables are not stripped of debugging symbols
+		when installing them. Devil-may-care users can use the 
+		install-strip target to do that. The install target does not 
+		modify anything in the directory where the program was built, 
+		provided 'make all' has just been done. This is convenient for 
+		building the program under one user name and installing it 
+		under another. 
+		This target creates all the directories in which files are to 
+		be installed, if they don't already exist. This includes the 
+		directories specified to 'configure' as the values of the 
+		variables '--prefix' and '--exec_prefix', as well as all 
+		subdirectories that are needed. 
+'uninstall' 	Delete all the installed files, the copies that the 'install' 
+		target creates.  This rule does not modify the directories 
+		where compilation is done, only the directories where files 
+		are installed. 
+'dist'		Create a distribution tar file for this program. The tar file
+		is set up so that the file names in the tar file starts with
+		'silo', followed by the version number, which is the 
+		subdirectory name which is the package is untarred into.
+		For example, the distribution tar file of silo version 5.40 
+		unpacks into a subdirectory named 'silo-5.40'. The actual 
+		distribution file for silo version 5.40 is called 
+		'silo-5.40.tar.gz'. 
+'clean'		Delete all files from the current directory that are normally 
+		created by building the program. Doesn't delete the files that 
+		record the configuration. Also preserve files that could be 
+		made by building, but normally aren't because the distribution 
+		comes with them. 
+		The following heuristic are used:
+		- If make built it, and it is commonly something that one would
+		  want to rebuild (for instance, a '.o' file), then mostlyclean
+		  will delete it. 
+		- If make built it, then clean will delete it. 
+		- If configure built it, then distclean will delete it. 
+		- If the maintainer built it (for instance, a '.in' file), then
+		  maintainer-clean will delete it. Note: this rule differs from
+		  the GNU Coding Standards.
+'distclean'	Delete all files from the current directory that are created by
+		configuring or building the program. If you have unpacked the 
+		source and built the program without creating any other files, 
+		'make distclean' leaves only the files that were in the 
+		distribution. 
+'check'		Perform self-tests by running the testsuite. The 'make check'
+                will perform a 'make all' followed by a 'make check', building
+                the program(s) before running the testsuite. A 'make install'
+                is not needed.
+'distcheck'	Makes a distribution, then tries to do a VPATH build, run the 
+		test suite, and finally make another tarfile to ensure the 
+		distribution is selfcontained. 'distcheck' also ensures that
+		the 'distclean' rule actually removes all built files.
+		'distcheck' also checks that the uninstall rule works properly,
+		both for ordinary and DESTDIR builds. It does this by invoking
+		'make uninstall', and then it checks the install tree to see if
+		any files are left over.
+'mostlyclean'	Like 'clean', but refrains from deleting libraries, libtool
+		created files..
+'install-strip'	Like install, but strip the executable files while installing 
+		them. 
+		'install-strip' does not strip the executables in the build 
+		directory which are being copied for installation. It only 
+		strip the copies that are installed. 
+'maintainer-clean' 
+		Delete almost everything from the current directory that can be
+		reconstructed with this Makefile. This typically includes 
+		everything deleted by distclean, plus more: C source files 
+		produced by Bison, tags tables, Info files, and so on. 
+		'maintainer-clean' will delete 'configure' which must be 
+		remade using the 'config/bootstrip" script. 
+		The 'maintainer-clean' target is intended to be used by a 
+		maintainer of the package, not by ordinary users. You ill need 
+		special tools to reconstruct some of the files that 
+		'make maintainer-clean' deletes. Since these files are normally
+		included in the distribution, we don't take care to make them
+		easy to reconstruct. If you find you need to unpack the full 
+		distribution again, don't blame us. Note: this rule differs
+		from the GNU Coding Standards. 
+'dist-bzip2'	Generate a bzip2 tar archive of the distribution. bzip2 
+		archives are frequently smaller than the default gzipped 
+		archives. 
+'dist-gzip'	Generate a gzip tar archive of the distribution. This target is
+		the default for 'dist', and 'distcheck'.
+'dist-shar'	Generate a shar archive of the distribution. 
+'dist-zip'	Generate a zip archive of the distribution. 
+'dist-tarZ'	Generate a compressed tar archive of the distribution.
+'distcleancheck'
+		By default, 'distcleancheck' will run 'distclean' and then make
+		sure the build tree has been emptied.
+'distuninstallcheck'
+		By default, 'distuninstallcheck' will run 'make uninstall', 
+		and then it checks the install tree to see if any files are 
+		left over.
+'installcheck'	Perform installation tests (if any). The user must build and 
+		install the program before running the tests.
+'installdirs'	Create the directories where files are installed, and their 
+		parent directories. There is a script called 'mkinstalldirs' 
+		performs this task.
+		This target does not modify the directories where compilation 
+		is done. It does nothing but create installation directories. 
+'TAGS'		Update a tags table for this program. 
+'info'		Generate any Info files needed.
+'dvi'		Generate DVI files for all Texinfo documentation.

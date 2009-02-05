@@ -14,45 +14,9 @@
 
 @SET_MAKE@
 
-# This work  was produced at the  University of California, Lawrence Livermore
-# National Laboratory  (UC LLNL)  under contract no.   W-7405-ENG-48 (Contract
-# 48) between  the U.S.  Department  of Energy (DOE)  and  The Regents  of the
-# University  of   California (University)   for   the operation  of UC  LLNL.
-# The  rights  of  the Federal  Government  are  reserved  under  Contract  48
-# subject  to  the restrictions  agreed  upon  by  the  DOE and  University as
-# allowed under DOE Acquisition Letter 97-1.
-#
-#                                 DISCLAIMER
-#
-# This work  was prepared as  an  account  of work  sponsored by an  agency of
-# the United  States Government. Neither the United  States Government nor the
-# University of California  nor any  of their  employees, makes any  warranty,
-# express or  implied,  or assumes  any  liability  or responsiblity for   the
-# accuracy, completeness,  or   usefullness of   any  information,  apparatus,
-# product, or process disclosed, or represents that its use would not infringe
-# privately   owned  rights. Reference    herein to   any specific  commercial
-# products, process, or service   by trade name, trademark,   manufacturer, or
-# otherwise,  does not    necessarily  constitute or    imply its endorsement,
-# recommendation,  or  favoring by    the  United  States Government  or   the
-# University of California. The views and opinions of authors expressed herein
-# do not necessarily state or reflect those of the United States Government or
-# the University of  California,  and shall not  be  used for  advertising  or
-# product endorsement purposes.
-#
-#                        NOTIFICATION OF COMMERCIAL USE
-#
-# Commercialization  of  this  product is  prohibited  without  notifying  the
-# Department  of  Energy  (DOE)  or  Lawrence  Livermore  National  Laboratory
-# (LLNL).
 #
 # Makefile.am --- automake input file for Silo
 #
-#
-# Modifications:
-#
-#
-#
-##############################################################################
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -60,7 +24,7 @@ VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-top_builddir = .
+top_builddir = ..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
 install_sh_DATA = $(install_sh) -c -m 644
@@ -76,42 +40,81 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = .
-DIST_COMMON = $(am__configure_deps) $(noinst_HEADERS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/config/config.h.in $(top_srcdir)/configure \
-	INSTALL
+@NETCDF_NEEDED_TRUE@am__append_1 = netcdf
+@NETCDF_NEEDED_TRUE@am__append_2 = netcdf/libsilo_netcdf.la
+@PDB_DRV_NEEDED_TRUE@am__append_3 = pdb_drv
+@PDB_DRV_NEEDED_TRUE@am__append_4 = pdb_drv/libsilo_pdb_drv.la
+@HDF5_DRV_NEEDED_TRUE@am__append_5 = hdf5_drv
+@HDF5_DRV_NEEDED_TRUE@am__append_6 = hdf5_drv/libsilo_hdf5_drv.la
+@TAURUS_NEEDED_TRUE@am__append_7 = taurus
+@TAURUS_NEEDED_TRUE@am__append_8 = taurus/libsilo_taurus.la
+subdir = src
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
- configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = config.h
+CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-SOURCES =
-DIST_SOURCES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+@NETCDF_NEEDED_TRUE@am__DEPENDENCIES_1 = netcdf/libsilo_netcdf.la
+@PDB_DRV_NEEDED_TRUE@am__DEPENDENCIES_2 = pdb_drv/libsilo_pdb_drv.la
+@HDF5_DRV_NEEDED_TRUE@am__DEPENDENCIES_3 =  \
+@HDF5_DRV_NEEDED_TRUE@	hdf5_drv/libsilo_hdf5_drv.la
+@TAURUS_NEEDED_TRUE@am__DEPENDENCIES_4 = taurus/libsilo_taurus.la
+am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+@HDF5_DRV_NEEDED_FALSE@libsilo_la_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_FALSE@	score/libsilo_score.la \
+@HDF5_DRV_NEEDED_FALSE@	pdb/libsilo_pdb.la swat/libsilo_swat.la \
+@HDF5_DRV_NEEDED_FALSE@	silo/libsilo_silo.la \
+@HDF5_DRV_NEEDED_FALSE@	debug/libsilo_debug.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_5) \
+@HDF5_DRV_NEEDED_FALSE@	unknown/libsilo_unknown.la \
+@HDF5_DRV_NEEDED_FALSE@	filters/libsilo_filters.la
+am_libsilo_la_OBJECTS =
+libsilo_la_OBJECTS = $(am_libsilo_la_OBJECTS)
+@HDF5_DRV_NEEDED_FALSE@am_libsilo_la_rpath = -rpath $(libdir)
+@HDF5_DRV_NEEDED_TRUE@libsiloh5_la_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_TRUE@	score/libsilo_score.la \
+@HDF5_DRV_NEEDED_TRUE@	pdb/libsilo_pdb.la swat/libsilo_swat.la \
+@HDF5_DRV_NEEDED_TRUE@	silo/libsilo_silo.la \
+@HDF5_DRV_NEEDED_TRUE@	debug/libsilo_debug.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_5) \
+@HDF5_DRV_NEEDED_TRUE@	unknown/libsilo_unknown.la \
+@HDF5_DRV_NEEDED_TRUE@	filters/libsilo_filters.la
+am_libsiloh5_la_OBJECTS =
+libsiloh5_la_OBJECTS = $(am_libsiloh5_la_OBJECTS)
+@HDF5_DRV_NEEDED_TRUE@am_libsiloh5_la_rpath = -rpath $(libdir)
+DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(libsilo_la_SOURCES) $(libsiloh5_la_SOURCES)
+DIST_SOURCES = $(libsilo_la_SOURCES) $(libsiloh5_la_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
 	install-recursive installcheck-recursive installdirs-recursive \
 	pdf-recursive ps-recursive uninstall-info-recursive \
 	uninstall-recursive
-HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-distdir = $(PACKAGE)-$(VERSION)
-top_distdir = $(distdir)
-am__remove_distdir = \
-  { test ! -d $(distdir) \
-    || { find $(distdir) -type d ! -perm -200 -exec chmod u+w {} ';' \
-         && rm -fr $(distdir); }; }
-DIST_ARCHIVES = $(distdir).tar.gz
-GZIP_ENV = --best
-distuninstallcheck_listfiles = find . -type f -print
-distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
@@ -242,72 +245,111 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-ACLOCAL_AMFLAGS = -I config
-noinst_HEADERS = config.h
+DRIVER_DIRS = $(am__append_1) $(am__append_3) $(am__append_5) \
+	$(am__append_7)
+DRIVER_LIBS = $(am__append_2) $(am__append_4) $(am__append_6) \
+	$(am__append_8)
+SUBDIRS = score pdb swat silo debug \
+$(DRIVER_DIRS) unknown filters .
 
-#EXTRA_DIST = CHANGELOG README nopoe
-MAINTAINERCLEANFILES = Makefile.in\
- aclocal.m4\
- configure
+DIST_SUBDIRS = . debug filters hdf5_drv netcdf \
+pdb pdb_drv score silo swat taurus unknown
 
-SUBDIRS = . src tools tests
-DIST_SUBDIRS = . config \
-  clearcase_bin docs src tests tools
+@HDF5_DRV_NEEDED_FALSE@lib_LTLIBRARIES = libsilo.la
+@HDF5_DRV_NEEDED_TRUE@lib_LTLIBRARIES = libsiloh5.la
+@HDF5_DRV_NEEDED_TRUE@libsiloh5_la_SOURCES = 
+@HDF5_DRV_NEEDED_TRUE@libsiloh5_la_LIBADD = \
+@HDF5_DRV_NEEDED_TRUE@   score/libsilo_score.la \
+@HDF5_DRV_NEEDED_TRUE@   pdb/libsilo_pdb.la \
+@HDF5_DRV_NEEDED_TRUE@   swat/libsilo_swat.la \
+@HDF5_DRV_NEEDED_TRUE@   silo/libsilo_silo.la \
+@HDF5_DRV_NEEDED_TRUE@   debug/libsilo_debug.la \
+@HDF5_DRV_NEEDED_TRUE@   $(DRIVER_LIBS) \
+@HDF5_DRV_NEEDED_TRUE@   unknown/libsilo_unknown.la \
+@HDF5_DRV_NEEDED_TRUE@   filters/libsilo_filters.la 
 
-all: config.h
-	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+@HDF5_DRV_NEEDED_TRUE@libsiloh5_la_LDFLAGS = -avoid-version
+@HDF5_DRV_NEEDED_FALSE@libsilo_la_SOURCES = 
+@HDF5_DRV_NEEDED_FALSE@libsilo_la_LIBADD = \
+@HDF5_DRV_NEEDED_FALSE@   score/libsilo_score.la \
+@HDF5_DRV_NEEDED_FALSE@   pdb/libsilo_pdb.la \
+@HDF5_DRV_NEEDED_FALSE@   swat/libsilo_swat.la \
+@HDF5_DRV_NEEDED_FALSE@   silo/libsilo_silo.la \
+@HDF5_DRV_NEEDED_FALSE@   debug/libsilo_debug.la \
+@HDF5_DRV_NEEDED_FALSE@   $(DRIVER_LIBS) \
+@HDF5_DRV_NEEDED_FALSE@   unknown/libsilo_unknown.la \
+@HDF5_DRV_NEEDED_FALSE@   filters/libsilo_filters.la 
+
+@HDF5_DRV_NEEDED_FALSE@libsilo_la_LDFLAGS = -avoid-version
+all: all-recursive
 
 .SUFFIXES:
-am--refresh:
-	@:
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --foreign  src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
-	    echo ' $(SHELL) ./config.status'; \
-	    $(SHELL) ./config.status;; \
+	    cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh;; \
 	  *) \
-	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
-	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
+	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
+	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
 	esac;
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
-	$(SHELL) ./config.status --recheck
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
 $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
-	cd $(srcdir) && $(AUTOCONF)
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
-	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(libdir)" || $(mkdir_p) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
+	  else :; fi; \
+	done
 
-config.h: stamp-h1
-	@if test ! -f $@; then \
-	  rm -f stamp-h1; \
-	  $(MAKE) stamp-h1; \
-	else :; fi
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@set -x; list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
+	done
 
-stamp-h1: $(top_srcdir)/config/config.h.in $(top_builddir)/config.status
-	@rm -f stamp-h1
-	cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(top_srcdir)/config/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
-	cd $(top_srcdir) && $(AUTOHEADER)
-	rm -f stamp-h1
-	touch $@
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
+libsilo.la: $(libsilo_la_OBJECTS) $(libsilo_la_DEPENDENCIES) 
+	$(LINK) $(am_libsilo_la_rpath) $(libsilo_la_LDFLAGS) $(libsilo_la_OBJECTS) $(libsilo_la_LIBADD) $(LIBS)
+libsiloh5.la: $(libsiloh5_la_OBJECTS) $(libsiloh5_la_DEPENDENCIES) 
+	$(LINK) $(am_libsiloh5_la_rpath) $(libsiloh5_la_LDFLAGS) $(libsiloh5_la_OBJECTS) $(libsiloh5_la_LIBADD) $(LIBS)
 
-distclean-hdr:
-	-rm -f config.h stamp-h1
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT)
+
+distclean-compile:
+	-rm -f *.tab.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -452,9 +494,6 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(am__remove_distdir)
-	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/config
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -496,108 +535,14 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
-	-find $(distdir) -type d ! -perm -777 -exec chmod a+rwx {} \; -o \
-	  ! -type d ! -perm -444 -links 1 -exec chmod a+r {} \; -o \
-	  ! -type d ! -perm -400 -exec chmod a+r {} \; -o \
-	  ! -type d ! -perm -444 -exec $(SHELL) $(install_sh) -c -m a+r {} {} \; \
-	|| chmod -R a+r $(distdir)
-dist-gzip: distdir
-	tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
-	$(am__remove_distdir)
-
-dist-bzip2: distdir
-	tardir=$(distdir) && $(am__tar) | bzip2 -9 -c >$(distdir).tar.bz2
-	$(am__remove_distdir)
-
-dist-tarZ: distdir
-	tardir=$(distdir) && $(am__tar) | compress -c >$(distdir).tar.Z
-	$(am__remove_distdir)
-
-dist-shar: distdir
-	shar $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).shar.gz
-	$(am__remove_distdir)
-
-dist-zip: distdir
-	-rm -f $(distdir).zip
-	zip -rq $(distdir).zip $(distdir)
-	$(am__remove_distdir)
-
-dist dist-all: distdir
-	tardir=$(distdir) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
-	$(am__remove_distdir)
-
-# This target untars the dist file and tries a VPATH configuration.  Then
-# it guarantees that the distribution is self-contained by making another
-# tarfile.
-distcheck: dist
-	case '$(DIST_ARCHIVES)' in \
-	*.tar.gz*) \
-	  GZIP=$(GZIP_ENV) gunzip -c $(distdir).tar.gz | $(am__untar) ;;\
-	*.tar.bz2*) \
-	  bunzip2 -c $(distdir).tar.bz2 | $(am__untar) ;;\
-	*.tar.Z*) \
-	  uncompress -c $(distdir).tar.Z | $(am__untar) ;;\
-	*.shar.gz*) \
-	  GZIP=$(GZIP_ENV) gunzip -c $(distdir).shar.gz | unshar ;;\
-	*.zip*) \
-	  unzip $(distdir).zip ;;\
-	esac
-	chmod -R a-w $(distdir); chmod a+w $(distdir)
-	mkdir $(distdir)/_build
-	mkdir $(distdir)/_inst
-	chmod a-w $(distdir)
-	dc_install_base=`$(am__cd) $(distdir)/_inst && pwd | sed -e 's,^[^:\\/]:[\\/],/,'` \
-	  && dc_destdir="$${TMPDIR-/tmp}/am-dc-$$$$/" \
-	  && cd $(distdir)/_build \
-	  && ../configure --srcdir=.. --prefix="$$dc_install_base" \
-	    $(DISTCHECK_CONFIGURE_FLAGS) \
-	  && $(MAKE) $(AM_MAKEFLAGS) \
-	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
-	  && $(MAKE) $(AM_MAKEFLAGS) check \
-	  && $(MAKE) $(AM_MAKEFLAGS) install \
-	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
-	  && $(MAKE) $(AM_MAKEFLAGS) uninstall \
-	  && $(MAKE) $(AM_MAKEFLAGS) distuninstallcheck_dir="$$dc_install_base" \
-	        distuninstallcheck \
-	  && chmod -R a-w "$$dc_install_base" \
-	  && ({ \
-	       (cd ../.. && umask 077 && mkdir "$$dc_destdir") \
-	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" install \
-	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" uninstall \
-	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" \
-	            distuninstallcheck_dir="$$dc_destdir" distuninstallcheck; \
-	      } || { rm -rf "$$dc_destdir"; exit 1; }) \
-	  && rm -rf "$$dc_destdir" \
-	  && $(MAKE) $(AM_MAKEFLAGS) dist \
-	  && rm -rf $(DIST_ARCHIVES) \
-	  && $(MAKE) $(AM_MAKEFLAGS) distcleancheck
-	$(am__remove_distdir)
-	@(echo "$(distdir) archives ready for distribution: "; \
-	  list='$(DIST_ARCHIVES)'; for i in $$list; do echo $$i; done) | \
-	  sed -e '1{h;s/./=/g;p;x;}' -e '$${p;x;}'
-distuninstallcheck:
-	@cd $(distuninstallcheck_dir) \
-	&& test `$(distuninstallcheck_listfiles) | wc -l` -le 1 \
-	   || { echo "ERROR: files left after uninstall:" ; \
-	        if test -n "$(DESTDIR)"; then \
-	          echo "  (check DESTDIR support)"; \
-	        fi ; \
-	        $(distuninstallcheck_listfiles) ; \
-	        exit 1; } >&2
-distcleancheck: distclean
-	@if test '$(srcdir)' = . ; then \
-	  echo "ERROR: distcleancheck can only run from a VPATH build" ; \
-	  exit 1 ; \
-	fi
-	@test `$(distcleancheck_listfiles) | wc -l` -eq 0 \
-	  || { echo "ERROR: files left in build directory after distclean:" ; \
-	       $(distcleancheck_listfiles) ; \
-	       exit 1; } >&2
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(HEADERS) config.h
+all-am: Makefile $(LTLIBRARIES)
 installdirs: installdirs-recursive
 installdirs-am:
+	for dir in "$(DESTDIR)$(libdir)"; do \
+	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
+	done
 install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -622,15 +567,14 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-recursive
-	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic distclean-hdr \
+distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
 
 dvi: dvi-recursive
@@ -645,7 +589,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am:
+install-exec-am: install-libLTLIBRARIES
 
 install-info: install-info-recursive
 
@@ -654,14 +598,13 @@ install-man:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
-	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf $(top_srcdir)/autom4te.cache
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-recursive
 
-mostlyclean-am: mostlyclean-generic mostlyclean-libtool
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-recursive
 
@@ -671,30 +614,25 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-libLTLIBRARIES
 
 uninstall-info: uninstall-info-recursive
 
-.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am am--refresh check \
-	check-am clean clean-generic clean-libtool clean-recursive \
-	ctags ctags-recursive dist dist-all dist-bzip2 dist-gzip \
-	dist-shar dist-tarZ dist-zip distcheck distclean \
-	distclean-generic distclean-hdr distclean-libtool \
-	distclean-recursive distclean-tags distcleancheck distdir \
-	distuninstallcheck dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
+.PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
+	clean clean-generic clean-libLTLIBRARIES clean-libtool \
+	clean-recursive ctags ctags-recursive distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-recursive distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-libLTLIBRARIES install-man \
 	install-strip installcheck installcheck-am installdirs \
 	installdirs-am maintainer-clean maintainer-clean-generic \
-	maintainer-clean-recursive mostlyclean mostlyclean-generic \
-	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am uninstall-info-am
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-info-am uninstall-libLTLIBRARIES
 
-
-help: config/make.help
-	cat $(srcdir)/config/make.help
-
-.PHONY: help
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

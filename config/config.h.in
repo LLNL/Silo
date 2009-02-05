@@ -1,0 +1,198 @@
+/* config/config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Disable stat checks */
+#undef DISABLE_FILESYSTEM_CHECKS
+
+/* Define to dummy `main' function (if any) required to link to the Fortran
+   libraries. */
+#undef FC_DUMMY_MAIN
+
+/* Define if F77 and FC dummy `main' functions are identical. */
+#undef FC_DUMMY_MAIN_EQ_F77
+
+/* Define to a macro mangling the given C identifier (in lower and upper
+   case), which must not contain underscores, for linking with Fortran. */
+#undef FC_FUNC
+
+/* As FC_FUNC, but for C identifiers containing underscores. */
+#undef FC_FUNC_
+
+/* Define to 1 if you have the `atexit' function. */
+#undef HAVE_ATEXIT
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* System provides fclose prototypes */
+#undef HAVE_FCLOSE_POINTER
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* System provides fflush prototypes */
+#undef HAVE_FFLUSH_POINTER
+
+/* Define to 1 if you have the `fnmatch' function. */
+#undef HAVE_FNMATCH
+
+/* Define to 1 if you have the <fnmatch.h> header file. */
+#undef HAVE_FNMATCH_H
+
+/* System provides fopen prototypes */
+#undef HAVE_FOPEN_POINTER
+
+/* Define to 1 if you have the `fpclass' function. */
+#undef HAVE_FPCLASS
+
+/* System provides fprintf prototypes */
+#undef HAVE_FPRINTF_POINTER
+
+/* System provides fread prototypes */
+#undef HAVE_FREAD_POINTER
+
+/* System provides fseek prototypes */
+#undef HAVE_FSEEK_POINTER
+
+/* System provides ftell prototypes */
+#undef HAVE_FTELL_POINTER
+
+/* System provides fwrite prototypes */
+#undef HAVE_FWRITE_POINTER
+
+/* Support for HDF5 */
+#undef HAVE_HDF5_DRIVER
+
+/* Define to 1 if you have the <hdf5.h> header file. */
+#undef HAVE_HDF5_H
+
+/* Define to 1 if you have the <history.h> header file. */
+#undef HAVE_HISTORY_H
+
+/* Define to 1 if you have the <ieeefp.h> header file. */
+#undef HAVE_IEEEFP_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `isnan' function. */
+#undef HAVE_ISNAN
+
+/* Define to 1 if you have the `hdf5' library (-lhdf5). */
+#undef HAVE_LIBHDF5
+
+/* Define if you have a readline compatible library */
+#undef HAVE_LIBREADLINE
+
+/* Define to 1 if you have the `z' library (-lz). */
+#undef HAVE_LIBZ
+
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the `memmove' function. */
+#undef HAVE_MEMMOVE
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Support for NetCDF */
+#undef HAVE_NETCDF_DRIVER
+
+/* Support for PDB */
+#undef HAVE_PDB_DRIVER
+
+/* Define to 1 if you have the <readline.h> header file. */
+#undef HAVE_READLINE_H
+
+/* Define if your readline library has \`add_history' */
+#undef HAVE_READLINE_HISTORY
+
+/* Define to 1 if you have the <readline/history.h> header file. */
+#undef HAVE_READLINE_HISTORY_H
+
+/* Define to 1 if you have the <readline/readline.h> header file. */
+#undef HAVE_READLINE_READLINE_H
+
+/* Define to 1 if you have the `select' function. */
+#undef HAVE_SELECT
+
+/* System provides setvbuf prototypes */
+#undef HAVE_SETVBUF_POINTER
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strerror' function. */
+#undef HAVE_STRERROR
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Support for Taurus */
+#undef HAVE_TAURUS_DRIVER
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <zlib.h> header file. */
+#undef HAVE_ZLIB_H
+
+/* Name of package */
+#undef PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* The size of a `off64_t', as computed by sizeof. */
+#undef SIZEOF_OFF64_T
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
+
+/* Version number of package */
+#undef VERSION
+
+/* Number of bits in a file offset, on hosts where this is settable. */
+#undef _FILE_OFFSET_BITS
+
+/* Define for large files, on AIX-style hosts. */
+#undef _LARGE_FILES
+
+/* Override longjmp */
+#undef longjmp
+
+/* Override setjmp */
+#undef setjmp

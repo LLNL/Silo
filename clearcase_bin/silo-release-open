@@ -1,0 +1,441 @@
+#!/bin/sh
+#######################################################################
+#
+# silo-release-open - Build and install a tarball on the open network.
+#
+# Author: Thomas Treadway
+# Date: Thu Jun 15 12:48:17 PDT 2006
+#
+# Usage: 
+#    silo-release-open version
+#
+# Modifications:
+#
+#
+#
+#######################################################################
+#
+BDTOPDIR="/usr/gapps/silo"
+LCTOPDIR="/usr/gapps/silo"
+#LCTOPDIR="/nfs/tmp0/$USER"
+
+usage() {
+  printf "Usage: %s version [all|hoth|sunspot|berg|gps|thunder|pengra]" $0
+  printf "\n"
+  printf "Silo release installing script. Assumes a tarball exist in\n"
+  printf "current directory, called silo-$VERSION.tar.gz.\n"
+  printf "This script will attempt to:\n"
+  printf "  1) copy tarball to B Div's /usr/gapps/silo/test and\n"
+  printf "     LC's /usr/gapps/silo/test.\n"
+  printf "  2) untar\n"
+  printf "  3) start remote scripts on the target machines that\n"
+  printf "     perform a configure, make check, followed by a make install\n"
+}
+hoth() {
+  ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+    PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/security/bin; \
+    LD_LIBRARY_PATH=/usr/lib:/lib; \
+    export PATH LD_LIBRARY_PATH; \
+    rm -rf linux_rhel3_gcc_3.2.3; \
+    mkdir linux_rhel3_gcc_3.2.3; \
+    cd linux_rhel3_gcc_3.2.3; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3 \
+    --enable-shared-python --without-readline --without-hdf5; \
+    make -j 4 check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3 \
+    --enable-shared-python --without-readline \
+    --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
+    make -j 4 check && make install; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/Silo.a; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/libsilo.so; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3/lib/libsiloh5.so; \
+    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_gcc_3.2.3; \
+    \")" > hoth.log 2>&1
+}
+hothpgc() {
+  ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+    PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.0/bin:/usr/security/bin:/usr/local/intel/compiler90/bin; \
+    LD_LIBRARY_PATH=/usr/lib:/lib:/usr/local/intel/compiler90/lib; \
+    export PATH LD_LIBRARY_PATH; \
+    rm -rf linux_rhel3_pgc_6.0; \
+    mkdir linux_rhel3_pgc_6.0; \
+    cd linux_rhel3_pgc_6.0; \
+    ../$TOPSRCDIR/configure \
+    CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
+    --enable-shared-python --without-readline --without-hdf5; \
+    make -j 4 check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    CC=pgcc CXX=pgCC FC='pgf77 -g77libs' \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0 \
+    --enable-shared-python --without-readline \
+    --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
+    make -j 4 check && make install; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/Silo.a; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/libsilo.so; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0/lib/libsiloh5.so; \
+    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_pgc_6.0; \
+    \")" > hohtpgc.log 2>&1
+}
+hothicc() {
+  ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+    PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/local/pgi/linux86/6.0/bin:/usr/security/bin:/usr/local/intel/compiler90/bin; \
+    LD_LIBRARY_PATH=/usr/lib:/lib:/usr/local/intel/compiler90/lib; \
+    export PATH LD_LIBRARY_PATH; \
+    rm -rf linux_rhel3_icc_9.0; \
+    mkdir linux_rhel3_icc_9.0; \
+    cd linux_rhel3_icc_9.0; \
+    . /usr/local/intel/compiler90/bin/iccvars.sh; \
+    ../$TOPSRCDIR/configure \
+    CC=icc CXX=icc FC=ifort \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.0 \
+    --enable-shared-python --without-readline --without-hdf5; \
+    make -j 4 check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    CC=icc CXX=icc FC=ifort \
+    --prefix=$BDTOPDIR/$VERSION/linux_rhel3_icc_9.03 \
+    --enable-shared-python --without-readline \
+    --with-hdf5=/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/include,/usr/gapps/hdf5/1.6.5/LinuxE3/serial/64/optim/lib; \
+    make -j 4 check && make install; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/Silo.a; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/libsilo.so; \
+    rm $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0/lib/libsiloh5.so; \
+    chmod -R g+w $BDTOPDIR/$VERSION/linux_rhel3_icc_9.0; \
+    \")" > hoht.log 2>&1
+}
+    
+sunspot() {
+# weird truncated PATH via ssh
+  ssh -f sunspot "(/bin/sh -c \"cd $BDTOPDIR/test; \
+    PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin; \
+    LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib; \
+    export PATH LD_LIBRARY_PATH; \
+    rm -rf sunos_57; \
+    mkdir sunos_57; \
+    cd sunos_57; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$BDTOPDIR/$VERSION/sunos_57 \
+    --enable-shared-python --without-readline --without-hdf5; \
+    make -j 4 check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$BDTOPDIR/$VERSION/sunos_57 \
+    --disable-shared --without-readline \
+    --with-hdf5=/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/lib; \
+    make -j 4 check && make install; \
+    rm $BDTOPDIR/$VERSION/sunos_57/lib/Silo.a; \
+    rm $BDTOPDIR/$VERSION/sunos_57/lib/libsilo.so; \
+    rm $BDTOPDIR/$VERSION/sunos_57/lib/libsiloh5.so; \
+    chmod -R g+w $BDTOPDIR/$VERSION/sunos_57; \
+    \")" > sunspot.log 2>&1
+}
+sunspotcc() {
+# weird truncated PATH via ssh
+  ssh -f sunspot "(/bin/sh -c \"cd $BDTOPDIR/test; \
+    PATH=/usr/bin:/bin:/usr/local/apps/bin:/usr/local/bin:/usr/ccs/bin:/opt/SUNWspro/bin:/usr/ucb:/etc:/usr/openwin/bin:/usr/dt/bin:/usr/java/bin; \
+    LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:/lib; \
+    export PATH LD_LIBRARY_PATH; \
+    rm -rf sunos_57_cc_5.2; \
+    mkdir sunos_57_cc_5.2; \
+    cd sunos_57_cc_5.2; \
+    ../$TOPSRCDIR/configure \
+    CC=c89 CXX=CC FC=f77 \
+    --prefix=$BDTOPDIR/$VERSION/sunos_57_cc_5.2 \
+    --enable-shared-python --without-readline --without-hdf5; \
+    make -j 4 check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    CC=c89 CXX=CC FC=f77 \
+    LDFLAGS=-L/usr/local/lib \
+    --prefix=$BDTOPDIR/$VERSION/sunos_57_cc_5.2 \
+    --disable-shared --without-readline \
+    --with-hdf5=/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/include,/usr/gapps/hdf5/1.6.5/SunOS/serial/default/optim/lib; \
+    make -j 4 check && make install; \
+    rm $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/Silo.a; \
+    rm $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/libsilo.so; \
+    rm $BDTOPDIR/$VERSION/sunos_57_cc_5.2/lib/libsiloh5.so; \
+    chmod -R g+w $BDTOPDIR/$VERSION/sunos_57_cc_5.2; \
+    \")" > sunspotcc.log 2>&1
+}
+
+berg() {
+# not using gcc
+# use gmake for parallel seems to hang
+# 32-bit and 64-bit compiles
+  berg32
+  berg64
+}
+berg32() {
+  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf aix_5_ll; \
+    mkdir aix_5_ll; \
+    cd aix_5_ll; \
+    ../$TOPSRCDIR/configure \
+    CC='xlc -q32' CXX='xlC -q32' FC='xlf -q32' \
+    LDFLAGS=-q32 AR='ar -X 32' \
+    CFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
+    CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
+    --disable-shared --without-readline --without-hdf5; \
+    make check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    CC='xlc -q32' CXX='xlC -q32' FC='xlf -q32' \
+    LDFLAGS=-q32 AR='ar -X 32' \
+    CFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
+    CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_ll \
+    --disable-shared --without-readline \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial.32/include,/usr/local/hdf5/hdf5-1.6.5/serial.32/lib; \
+    make check; make install; \
+    rm -f $LCTOPDIR/$VERSION/aix_5_ll/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/aix_5_ll/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/aix_5_ll/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/aix_5_ll; \
+     \") >newberg32.log 2>&1"
+}
+berg64() {
+  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf aix_5_64_fed; \
+    mkdir aix_5_64_fed; \
+    cd aix_5_64_fed; \
+    ../$TOPSRCDIR/configure \
+    CC='xlc -q64' CXX='xlC -q64' FC='xlf -q64' \
+    LDFLAGS=-q64 AR='ar -X 64' \
+    CFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
+    CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
+    --without-readline --without-hdf5; \
+    make check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    CC='xlc -q64' CXX='xlC -q64' FC='xlf -q64' \
+    LDFLAGS=-q64 AR='ar -X 64' \
+    CFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
+    CXXFLAGS='-D_LARGE_FILES -D_ALL_SOURCE -O2' \
+    PYTHON_CPPFLAGS=-I/usr/apps/python64/include/python2.4 \
+    --prefix=$LCTOPDIR/$VERSION/aix_5_64_fed \
+    --without-readline \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    make check; make install; \
+    rm -f $LCTOPDIR/$VERSION/aix_5_64_fed/lib/Silo.a; \
+    rm -f $LCTOPDIR/$VERSION/aix_5_64_fed/lib/libsilo.so; \
+    rm -f $LCTOPDIR/$VERSION/aix_5_64_fed/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/aix_5_64_fed; \
+     \") >newberg64.log 2>&1"
+}
+
+gps() {
+# the default g++ has bugs 
+# problems with g77 floating exception during testsuite of quadf77 & ucdf77
+  ssh -f gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf tru64_5; \
+    mkdir tru64_5; \
+    cd tru64_5; \
+    ../$TOPSRCDIR/configure \
+    CC=gcc-3.4.1 CXX=g++-3.4.1 FC=g77-3.4.1 F77=g77-3.4.1 \
+    --prefix=$LCTOPDIR/$VERSION/tru64_5 \
+    --enable-shared-python --without-readline --without-hdf5; \
+    gmake -j 4 check ; gmake install; gmake clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/tru64_5 \
+    --enable-shared-python --without-readline \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    gmake -j 4 check ; gmake install; \
+    rm $LCTOPDIR/$VERSION/tru64_5/lib/Silo.a; \
+    rm $LCTOPDIR/$VERSION/tru64_5/lib/libsilo.so; \
+    rm $LCTOPDIR/$VERSION/tru64_5/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/tru64_5; \
+    \") > gps.log 2>&1"
+}
+gpscc() {
+  ssh -f gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf tru64_5_cc; \
+    mkdir tru64_5_cc; \
+    cd tru64_5_cc; \
+    ../$TOPSRCDIR/configure \
+    CC=c89 CXX=cxx FC=f77 F77=f77 \
+    --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
+    --enable-shared-python --without-readline --without-hdf5; \
+    gmake -j 4 check ; gmake install; gmake clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/tru64_5_cc \
+    --enable-shared-python --without-readline \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    gmake -j 4 check ; gmake install; \
+    rm $LCTOPDIR/$VERSION/tru64_5_cc/lib/Silo.a; \
+    rm $LCTOPDIR/$VERSION/tru64_5_cc/lib/libsilo.so; \
+    rm $LCTOPDIR/$VERSION/tru64_5_cc/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/tru64_5_cc; \
+    \") > gpscc.log 2>&1"
+}
+    
+pengra() {
+  ssh -f pengra "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf chaos_3_x86_elan3; \
+    mkdir chaos_3_x86_elan3; \
+    cd chaos_3_x86_elan3; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
+    --enable-shared-python --without-readline --without-hdf5; \
+    make -j 4 check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
+    --enable-shared-python --without-readline \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial_gcc/lib; \
+    make -j 4 check && make install; \
+    rm $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/Silo.a; \
+    rm $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/libsilo.so; \
+    rm $LCTOPDIR/$VERSION/chaos_3_x86_elan3/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_x86_elan3; \
+    \") > pengra.log 2>&1"
+}
+    
+thunder() {
+  thundergcc
+  thundericc
+}
+thundergcc() {
+  ssh -f thunder "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf chaos_3_ia64_elan4; \
+    mkdir chaos_3_ia64_elan4; \
+    cd chaos_3_ia64_elan4; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
+    --enable-shared-python --without-readline --without-hdf5; \
+    make -j 4 check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc \
+    --enable-shared-python --without-readline \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    make -j 4 check && make install; \
+    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/Silo.a; \
+    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/libsilo.so; \
+    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/gcc; \
+    \") > thundergcc.log 2>&1"
+}
+thundericc() {
+  ssh -f thunder "(/bin/sh -c \"cd $LCTOPDIR/test; \
+    PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
+    export PATH; \
+    rm -rf chaos_3_ia64_elan4_icc; \
+    mkdir chaos_3_ia64_elan4_icc; \
+    cd chaos_3_ia64_elan4_icc; \
+    . /usr/local/intel/compiler91/bin/iccvars.sh; \
+    ../$TOPSRCDIR/configure \
+    CC=icc CXX=icc FC=ifort \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
+    --enable-shared-python --without-readline --without-hdf5; \
+    make -j 4 check && make install; make clean; \
+    ../$TOPSRCDIR/configure \
+    CC=icc CXX=icc FC=ifort \
+    --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc \
+    --enable-shared-python --without-readline \
+    --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial/include,/usr/local/hdf5/hdf5-1.6.5/serial/lib; \
+    make -j 4 check && make install; \
+    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/Silo.a; \
+    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/libsilo.so; \
+    rm $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc/lib/libsiloh5.so; \
+    chmod -R g+w $LCTOPDIR/$VERSION/chaos_3_ia64_elan4/icc; \
+    \") > thundericc.log 2>&1"
+}
+if [ $# -lt 1 ] ; then
+  usage
+  exit 2
+fi
+VERSION=$1
+shift
+TARFILE="silo-$VERSION.tar.gz"
+DISTDIR="silo-$VERSION"
+TOPSRCDIR="silo-$VERSION"
+if [ -e $TARFILE ] ; then
+  scp $TARFILE hoth:$BDTOPDIR/test
+  scp $TARFILE gps:$LCTOPDIR/test
+
+  ssh hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+   gzip -dc $TARFILE|tar xf -\")"
+  ssh gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+   gzip -dc $TARFILE|tar xf -\")"
+fi 
+
+if [ $# -lt 1 ] ; then
+  hoth
+  sunspot
+  berg
+  gps
+  thunder
+  pengra
+else
+ while [ "$*" != "" ]
+ do
+  case $1 in
+    all|-a*)
+      hoth
+      sunspot
+      berg
+      gps
+      thunder
+      pengra
+      shift;;
+    hothpgc|-hothpgc)
+      hothpgc
+      shift;;
+    hothicc|-hothicc)
+      hothicc
+      shift;;
+    hoth|-ho*)
+      hoth
+      shift;;
+    sun*cc|-sun*cc)
+      sunspotcc
+      shift;;
+    sun*|-sun*)
+      sunspot
+      shift;;
+    berg32|-be*32|new*32|-new*32)
+      berg32
+      shift;;
+    berg64|-be*64|new*64|-new*64)
+      berg64
+      shift;;
+    berg|-be*|new*|-new*)
+      berg
+      shift;;
+    gpscc|-gpscc)
+      gpscc
+      shift;;
+    gps|-gps)
+      gps
+      shift;;
+    thun*icc|-th*icc)
+      thundericc
+      shift;;
+    thun*gcc|-th*gcc)
+      thundergcc
+      shift;;
+    thun*|-th*)
+      thunder
+      shift;;
+    pen*|-pe*)
+      pengra
+      shift;;
+    sh*|-sh*)
+      shar
+      shift;;
+    *)
+      shif;;
+  esac
+ done
+fi
