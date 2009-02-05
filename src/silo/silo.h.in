@@ -56,6 +56,26 @@ for advertising or product endorsement purposes.
 extern "C" {
 #endif
 
+/* Set the base type for datatype'd pointers (that is pointers whose
+   ultimate type is deteremined by an additional 'int datatype' function
+   argument or struct member) as float (legacy) and void (modern). The
+   DB_DTPTR is the base type. The '1' and '2' variants are for singley
+   subscripted and doubley subscripted arrays, respectively. If the
+   definitions of DB_DTPTR below reference 'float', then this silo.h
+   header file was configured with --enable-legacy-datatyped-pointers
+   and it represents the legacy (float) pointers that the silo
+   library has always had since its original writing. If, instead,
+   you see 'void' (the default configuration), then this silo.h header
+   file is using the modern (void) pointers. In that case, note also
+   that because C compiler's often do not handle correctly nor
+   distinguish between a void* and a void**, both the singley and
+   doubley subscripted variants will have only a single star. Rest
+   assured they are still treated as doubley subscripted in the
+   implementation. */
+#define DB_DTPTR  @SILO_DTYPPTR@
+#define DB_DTPTR1 @SILO_DTYPPTR1@
+#define DB_DTPTR2 @SILO_DTYPPTR2@
+
 #include <stdio.h>
 
 #ifndef FALSE
@@ -81,11 +101,12 @@ extern "C" {
    header/object version compatibility */
 #define SILO_VERS_TAG @SILO_VERS_TAG@
 
-/* Useful macro for comparing Silo versions */
+/* Useful macro for comparing Silo versions (and DB_ alias) */
 #define SILO_VERSION_GE(Maj,Min,Pat)  \
         (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_PAT>=Pat)) || \
          ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) || \
          (SILO_VERS_MAJ>Maj))
+#define DB_VERSION_GE(Maj,Min,Pat) SILO_VERSION_GE(Maj,Min,Pat)
 
 /*-------------------------------------------------------------------------
  * Drivers.  This is a list of every driver that a user could use.  Not all of
@@ -589,8 +610,8 @@ typedef struct {
     char          *ylabel;      /* Label for y-axis */
     char          *xunits;      /* Units for domain */
     char          *yunits;      /* Units for range  */
-    float         *x;           /* Domain values for curve */
-    float         *y;           /* Range  values for curve */
+    DB_DTPTR      *x;           /* Domain values for curve */
+    DB_DTPTR      *y;           /* Range  values for curve */
     int            npts;        /* Number of points in curve */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     char          *reference;   /* Label to reference object */
@@ -616,7 +637,7 @@ typedef struct {
     char          *labels[3];   /* Labels for each axis */
     char          *title;       /* Title for curve */
 
-    float         *coords[3];   /* Coordinate values */
+    DB_DTPTR      *coords[3];   /* Coordinate values */
     float          time;        /* Problem time */
     double         dtime;       /* Problem time, double data type */
    /*
@@ -851,7 +872,7 @@ typedef struct {
     int            facetype;    /* Zone face type: rect, curv */
     int            planar;      /* Sentinel: zones represent area or volume? */
 
-    float         *coords[3];   /* Mesh node coordinate ptrs [ndims] */
+    DB_DTPTR      *coords[3];   /* Mesh node coordinate ptrs [ndims] */
     int            datatype;    /* Type of coordinate arrays (double,float) */
     float          time;        /* Problem time */
     double         dtime;       /* Problem time, double data type */
@@ -896,7 +917,7 @@ typedef struct {
     char          *units[3];    /* Units for variable, e.g, 'mm/ms' */
     char          *labels[3];   /* Label associated with each dimension */
 
-    float         *coords[3];   /* Mesh node coordinates */
+    DB_DTPTR      *coords[3];   /* Mesh node coordinates */
     int            datatype;    /* Type of coordinate arrays (double,float) */
     float          time;        /* Problem time */
     double         dtime;       /* Problem time, double data type */
@@ -945,7 +966,7 @@ typedef struct {
     int            cycle;       /* Problem cycle number */
     int            meshid;      /* Identifier for associated mesh (Deprecated Sep2005) */
 
-    float        **vals;        /* Array of pointers to data arrays */
+    DB_DTPTR     **vals;        /* Array of pointers to data arrays */
     int            datatype;    /* Type of data pointed to by 'val' */
     int            nels;        /* Number of elements in each array */
     int            nvals;       /* Number of arrays pointed to by 'vals' */
@@ -968,7 +989,7 @@ typedef struct {
     */
     float          align[6];    /* Centering and alignment per dimension */
 
-    float        **mixvals;     /* nvals ptrs to data arrays for mixed zones */
+    DB_DTPTR     **mixvals;     /* nvals ptrs to data arrays for mixed zones */
     int            mixlen;      /* Num of elmts in each mixed zone data
                                  * array */
 
@@ -994,7 +1015,7 @@ typedef struct {
     double         dtime;       /* Problem time, double data type */
     int            meshid;      /* Identifier for associated mesh (Deprecated Sep2005) */
 
-    float        **vals;        /* Array of pointers to data arrays */
+    DB_DTPTR     **vals;        /* Array of pointers to data arrays */
     int            datatype;    /* Type of data pointed to by 'vals' */
     int            nels;        /* Number of elements in each array */
     int            nvals;       /* Number of arrays pointed to by 'vals' */
@@ -1002,7 +1023,7 @@ typedef struct {
     int            origin;      /* '0' or '1' */
 
     int            centering;   /* Centering within mesh (nodal or zonal) */
-    float        **mixvals;     /* nvals ptrs to data arrays for mixed zones */
+    DB_DTPTR     **mixvals;     /* nvals ptrs to data arrays for mixed zones */
     int            mixlen;      /* Num of elmts in each mixed zone data
                                  * array */
 
@@ -1025,7 +1046,7 @@ typedef struct {
     int            cycle;       /* Problem cycle number */
     int            meshid;      /* Identifier for associated mesh (Deprecated Sep2005) */
 
-    float        **vals;        /* Array of pointers to data arrays */
+    DB_DTPTR     **vals;        /* Array of pointers to data arrays */
     int            datatype;    /* Type of data pointed to by 'val' */
     int            nels;        /* Number of elements in each array */
     int            nvals;       /* Number of arrays pointed to by 'vals' */
@@ -1082,7 +1103,7 @@ typedef struct {
     int           *matlist;     /* Array[nzone] w/ mat. number or mix index */
     int            mixlen;      /* Length of mixed data arrays (mix_xxx) */
     int            datatype;    /* Type of volume-fractions (double,float) */
-    float         *mix_vf;      /* Array [mixlen] of volume fractions */
+    DB_DTPTR      *mix_vf;      /* Array [mixlen] of volume fractions */
     int           *mix_next;    /* Array [mixlen] of mixed data indeces */
     int           *mix_mat;     /* Array [mixlen] of material numbers */
     int           *mix_zone;    /* Array [mixlen] of back pointers to mesh */
@@ -1109,7 +1130,7 @@ typedef struct {
     int            stride[3];   /* Offsts to adjacent elmts in 'speclist'  */
 
     int            nspecies_mf; /* Total number of species mass fractions. */
-    float         *species_mf;  /* Array of length nspecies_mf of mass
+    DB_DTPTR      *species_mf;  /* Array of length nspecies_mf of mass
                                  * frations of the material species. */
     int           *speclist;    /* Zone array of dimensions described by ndims
                                  * and dims.  Each element of the array is an
@@ -1442,10 +1463,10 @@ typedef struct DBfile_pub {
     int            (*p_fl)(struct DBfile *, char *, int, int, int *, int, int,
                            int *, int *, int *, int, int *, int *, int);
     int            (*p_ma)(struct DBfile *, char *, char *, int, int *, int *,
-                           int *, int, int *, int *, int *, float *, int, int,
+                           int *, int, int *, int *, int *, DB_DTPTR1, int, int,
                            DBoptlist *);
     int            (*p_ms)(struct DBfile *, char *, char *, int, int *, int *,
-                           int *, int, int, float *, int *, int, int,
+                           int *, int, int, DB_DTPTR1, int *, int, int,
                            DBoptlist *);
     int            (*p_mm)(struct DBfile *, char *, int, char **, int *,
                            DBoptlist *);
@@ -1453,21 +1474,21 @@ typedef struct DBfile_pub {
                            DBoptlist *);
     int            (*p_mt)(struct DBfile *, char *, int, char **, DBoptlist *);
     int            (*p_mms)(struct DBfile *, char *, int, char **, DBoptlist *);
-    int            (*p_pm)(struct DBfile *, char *, int, float **, int, int,
+    int            (*p_pm)(struct DBfile *, char *, int, DB_DTPTR2, int, int,
                            DBoptlist *);
-    int            (*p_pv)(struct DBfile *, char *, char *, int, float **, int,
+    int            (*p_pv)(struct DBfile *, char *, char *, int, DB_DTPTR2, int,
                            int, DBoptlist *);
-    int            (*p_qm)(struct DBfile *, char *, char **, float **, int *,
+    int            (*p_qm)(struct DBfile *, char *, char **, DB_DTPTR2, int *,
                            int, int, int, DBoptlist *);
     int            (*p_qv)(struct DBfile *, char *, char *, int, char **,
-                           float **, int *, int, float **, int, int, int,
+                           DB_DTPTR2, int *, int, DB_DTPTR2, int, int, int,
                            DBoptlist *);
-    int            (*p_um)(struct DBfile *, char *, int, char **, float **,
+    int            (*p_um)(struct DBfile *, char *, int, char **, DB_DTPTR2,
                            int, int, char *, char *, int, DBoptlist *);
     int            (*p_sm)(struct DBfile *, char *, char *,
                            int, char *, char *, DBoptlist *);
     int            (*p_uv)(struct DBfile *, char *, char *, int, char **,
-                           float **, int, float **, int, int, int,
+                           DB_DTPTR2, int, DB_DTPTR2, int, int, int,
                            DBoptlist *);
     int            (*p_zl)(struct DBfile *, char *, int, int, int *, int, int,
                            int *, int *, int);
@@ -1707,8 +1728,8 @@ SILO_API extern DBpointmesh *DBGetPointmesh(DBfile *, const char *);
 SILO_API extern DBmeshvar *DBGetPointvar(DBfile *, const char *);
 SILO_API extern DBquadmesh *DBGetQuadmesh(DBfile *, const char *);
 SILO_API extern DBquadvar *DBGetQuadvar(DBfile *, const char *);
-SILO_API extern int      DBGetQuadvar1(DBfile *, const char *, float *, int *, int *,
-                              float *, int *, int *, int *);
+SILO_API extern int      DBGetQuadvar1(DBfile *, const char *, DB_DTPTR1, int *, int *,
+                              DB_DTPTR1, int *, int *, int *);
 SILO_API extern int      DBAnnotateUcdmesh(DBucdmesh *);
 SILO_API extern DBucdmesh *DBGetUcdmesh(DBfile *, const char *);
 SILO_API extern DBucdvar *DBGetUcdvar(DBfile *, const char *);
@@ -1738,10 +1759,10 @@ SILO_API extern int      DBPutDefvars (DBfile *, const char *, int, char **,
 SILO_API extern int      DBPutFacelist(DBfile *, const char *, int, int, int *, int, int,
                             int *, int *, int *, int, int *, int *, int);
 SILO_API extern int      DBPutMaterial(DBfile *, const char *, const char *, int, int *, int *,
-                           int *, int, int *, int *, int *, float *, int,
+                           int *, int, int *, int *, int *, DB_DTPTR1, int,
                               int, DBoptlist *);
 SILO_API extern int      DBPutMatspecies(struct DBfile *, const char *, const char *, int, int *,
-                                int *, int *, int, int, float *, int *, int, int,
+                                int *, int *, int, int, DB_DTPTR1, int *, int, int,
                                 DBoptlist *);
 SILO_API extern int      DBPutMultimesh(DBfile *, const char *, int, char **, int *,
                                DBoptlist *);
@@ -1753,25 +1774,25 @@ SILO_API extern int      DBPutMultivar(DBfile *, const char *, int, char **, int
 SILO_API extern int      DBPutMultimat(DBfile *, const char *, int, char **, DBoptlist *);
 SILO_API extern int      DBPutMultimatspecies(DBfile *, const char *, int, char **,
                                      DBoptlist *);
-SILO_API extern int      DBPutPointmesh(DBfile *, const char *, int, float **, int, int,
+SILO_API extern int      DBPutPointmesh(DBfile *, const char *, int, DB_DTPTR2, int, int,
                                DBoptlist *);
-SILO_API extern int      DBPutPointvar(DBfile *, const char *, const char *, int, float **, int,
+SILO_API extern int      DBPutPointvar(DBfile *, const char *, const char *, int, DB_DTPTR2, int,
                               int, DBoptlist *);
-SILO_API extern int      DBPutPointvar1(DBfile *, const char *, const char *, float *, int, int,
+SILO_API extern int      DBPutPointvar1(DBfile *, const char *, const char *, DB_DTPTR1, int, int,
                                DBoptlist *);
-SILO_API extern int      DBPutQuadmesh(DBfile *, const char *, char **, float **, int *, int,
+SILO_API extern int      DBPutQuadmesh(DBfile *, const char *, char **, DB_DTPTR2, int *, int,
                               int, int, DBoptlist *);
-SILO_API extern int      DBPutQuadvar(DBfile *, const char *, const char *, int, char **, float **,
-                             int *, int, float **, int, int, int, DBoptlist *);
-SILO_API extern int      DBPutQuadvar1(DBfile *, const char *, const char *, float *, int *, int,
-                              float *, int, int, int, DBoptlist *);
-SILO_API extern int      DBPutUcdmesh(DBfile *, const char *, int, char **, float **, int,
+SILO_API extern int      DBPutQuadvar(DBfile *, const char *, const char *, int, char **, DB_DTPTR2,
+                             int *, int, DB_DTPTR2, int, int, int, DBoptlist *);
+SILO_API extern int      DBPutQuadvar1(DBfile *, const char *, const char *, DB_DTPTR1, int *, int,
+                              DB_DTPTR1, int, int, int, DBoptlist *);
+SILO_API extern int      DBPutUcdmesh(DBfile *, const char *, int, char **, DB_DTPTR2, int,
                              int, const char *, const char *, int, DBoptlist *);
 SILO_API extern int      DBPutUcdsubmesh(DBfile *, const char *, const char *, int,
                              const char *, const char *, DBoptlist *);
-SILO_API extern int      DBPutUcdvar(DBfile *, const char *, const char *, int, char **, float **,
-                            int, float **, int, int, int, DBoptlist *);
-SILO_API extern int      DBPutUcdvar1(DBfile *, const char *, const char *, float *, int, float *,
+SILO_API extern int      DBPutUcdvar(DBfile *, const char *, const char *, int, char **, DB_DTPTR2,
+                            int, DB_DTPTR2, int, int, int, DBoptlist *);
+SILO_API extern int      DBPutUcdvar1(DBfile *, const char *, const char *, DB_DTPTR1, int, DB_DTPTR1,
                              int, int, int, DBoptlist *);
 SILO_API extern int      DBPutZonelist(DBfile *, const char *, int, int, int *, int, int,
                               int *, int *, int);

@@ -156,7 +156,7 @@ db_cdf_Close(DBfile *_dbfile)
         /*
          * Free the public parts of the file.
          */
-        db_close(_dbfile);
+        silo_db_close(_dbfile);
     }
     return 0;
 }
@@ -1038,7 +1038,7 @@ db_cdf_GetPointvar(DBfile *_dbfile, char *objname)
      */
     if ((mv->nvals > 0) && (SILO_Globals.dataReadMask & DBPVData)) {
         INIT_OBJ(&tmp_obj);
-        mv->vals = ALLOC_N(float *, mv->nvals);
+        mv->vals = ALLOC_N(DB_DTPTR*, mv->nvals);
 
         for (i = 0; i < mv->nvals; i++) {
             DEFALL_OBJ(_valstr[0], &mv->vals[i], DB_FLOAT);
@@ -1212,10 +1212,10 @@ db_cdf_GetQuadvar(DBfile *_dbfile, char *objname)
     if ((qv->nvals > 0) && (SILO_Globals.dataReadMask & DBQVData)) {
         INIT_OBJ(&tmp_obj);
 
-        qv->vals = ALLOC_N(float *, qv->nvals);
+        qv->vals = ALLOC_N(DB_DTPTR*, qv->nvals);
 
         if (qv->mixlen > 0) {
-            qv->mixvals = ALLOC_N(float *, qv->nvals);
+            qv->mixvals = ALLOC_N(DB_DTPTR*, qv->nvals);
         }
         if (qv->datatype == 0) {
             strcpy(tmpstr, objname);
@@ -1464,10 +1464,10 @@ db_cdf_GetUcdvar(DBfile *_dbfile, char *varname)
     if ((uv->nvals > 0) && (SILO_Globals.dataReadMask & DBUVData)) {
         INIT_OBJ(&tmp_obj);
 
-        uv->vals = ALLOC_N(float *, uv->nvals);
+        uv->vals = ALLOC_N(DB_DTPTR*, uv->nvals);
 
         if (uv->mixlen > 0) {
-            uv->mixvals = ALLOC_N(float *, uv->nvals);
+            uv->mixvals = ALLOC_N(DB_DTPTR*, uv->nvals);
         }
 
         for (i = 0; i < uv->nvals; i++) {

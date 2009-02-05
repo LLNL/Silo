@@ -4,8 +4,13 @@
 #include <silo.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifndef WIN32
 #include <dirent.h>
 #include <unistd.h>
+#else
+#include <direct.h>
+#include <shlwapi.h>
+#endif
 #include <stdlib.h>
 
 #define ALLOC(T)                ((T*)calloc((size_t)1,sizeof(T)))
@@ -20,7 +25,7 @@
 #define MAX(X,Y)      ((X)>(Y)?(X):(Y))
 #endif
 
-void CopyFile (char *fileName, char *meshFileName, int driver);
+void MCopyFile (char *fileName, char *meshFileName, int driver);
 void GetFileList (char *baseName, char ***files, int *nFiles);
 void ListSort (char **list, int n);
 
@@ -73,12 +78,12 @@ main (int argc, char **argv)
 
     for (i = 0; i < nFiles; i++)
     {
-        CopyFile (files[i], argv[2], driver);
+        MCopyFile (files[i], argv[2], driver);
     }
 }
 
 void
-CopyFile (char *fileName, char *meshFileName, int driver)
+MCopyFile (char *fileName, char *meshFileName, int driver)
 {
     int       i, j, k, l;
     int       cycle;
@@ -643,6 +648,8 @@ CopyFile (char *fileName, char *meshFileName, int driver)
     DBClose (dbfile3);
 }
 
+
+
 void
 GetFileList (char *baseName, char ***filesOut, int *nFilesOut)
 {
@@ -650,47 +657,73 @@ GetFileList (char *baseName, char ***filesOut, int *nFilesOut)
     int       nFileMax;
     char    **files=NULL;
 
+#ifndef WIN32
     DIR      *dirp=NULL;
     struct dirent  *dp=NULL;
+#else
+    WIN32_FIND_DATA fd;
+    HANDLE dirHandle = INVALID_HANDLE_VALUE;
+#endif
+
     struct stat     buf ;
+
 
     /*
      * Open the directory.
      */
+#ifndef WIN32
     dirp = opendir (".");
     if (dirp == NULL) {
+        printf ("Error opening current directory\n");
+
+
+        *filesOut = NULL;
+        *nFilesOut = 0;
+        return;
+    }
+#else
+    dirHandle = FindFirstFile(".", &fd);
+    if (dirHandle == INVALID_HANDLE_VALUE)
+    {
         printf ("Error opening current directory\n");
         *filesOut = NULL;
         *nFilesOut = 0;
         return;
     }
+#endif
 
     /*
      * Read the current directory.
      */
     nFiles = 0;
-    nFileMax = 128;
     files = ALLOC_N (char *, nFileMax);
-
+#ifndef WIN32
     for (dp = readdir (dirp); dp != NULL; dp = readdir (dirp))
     {
-        if (dp->d_name [0] != '.')
+        char *fName = dp->d_name;
+#else
+    while (FindNextFile(dirHandle, &fd))
+    {
+        char *fName = fd.cFileName;
+#endif
+
+        if (fName [0] != '.')
         {
-            if ((stat (dp->d_name, &buf) == 0) &&
+            if ((stat (fName, &buf) == 0) &&
                 ((buf.st_mode & S_IFDIR) == 0))
             {
                 /*
                  * A file.
                  */
-                if (strncmp (dp->d_name, baseName, strlen (baseName)) == 0)
+                if (strncmp (fName, baseName, strlen (baseName)) == 0)
                 {
                     if (nFiles >= nFileMax)
                     {
                         nFileMax += 64;
                         files = REALLOC_N (files, char *, nFileMax);
                     }
-                    files [nFiles] = ALLOC_N (char, (strlen(dp->d_name)+1));
-                    strcpy (files [nFiles], dp->d_name);
+                    files [nFiles] = ALLOC_N (char, (strlen(fName)+1));
+                    strcpy (files [nFiles], fName);
                     nFiles++;
                 }
             }
@@ -700,7 +733,11 @@ GetFileList (char *baseName, char ***filesOut, int *nFilesOut)
     /*
      * Close the directory.
      */
+#ifndef WIN32
     closedir (dirp);
+#else
+    FindClose(dirHandle);
+#endif
 
     /*
      * Sort the list.

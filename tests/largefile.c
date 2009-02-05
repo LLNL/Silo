@@ -40,7 +40,9 @@ for advertising or product endorsement purposes.
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 
 #define ONE_MEG 1048576
 #ifndef M_PI        /* yea, Solaris 5 */
@@ -94,11 +96,11 @@ build_curve (DBfile *dbfile, int driver)
  *
  * Return:        0
  *
- * Programmer:        
+ * Programmer: Mark C. Miller, sometime in the past
  *
  * Modifications:
- *         Robb Matzke, 1999-04-09
- *        Added argument parsing to control the driver which is used.
+ *     Mark C. Miller, Wed Jan  7 15:14:47 PST 2009
+ *     Added check of return value for DBWrite calls.
  *
  *-------------------------------------------------------------------------
  */
@@ -149,7 +151,11 @@ main(int argc, char *argv[])
         for (i = 0; i < dims[0]; i++)
             val[i] = (float) dims[0] * j + i;
 
-        DBWrite(dbfile, tmpname, val, dims, ndims, DB_FLOAT);
+        if (DBWrite(dbfile, tmpname, val, dims, ndims, DB_FLOAT) != 0)
+        {
+            DBClose(dbfile);
+            exit(1);
+        }
     }
 
    /*
@@ -207,5 +213,5 @@ main(int argc, char *argv[])
 
     DBClose(dbfile);
 
-    return nerrors;
+    exit(nerrors > 0);
 }

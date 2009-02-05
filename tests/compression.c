@@ -43,8 +43,8 @@ for advertising or product endorsement purposes.
 
 #if !defined(_WIN32)
 #include <sys/time.h>
-#endif
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 
 #define ONE_MEG 1048576
@@ -75,11 +75,11 @@ main(int argc, char *argv[])
     int            readonly = 0;
     int            i, j, ndims=1;
     int            fdims[]={ONE_MEG/sizeof(float)};
-    int            ddims[]={ONE_MEG/sizeof(float)};
-    float          fval[ONE_MEG/sizeof(float)];
-    float          frval[ONE_MEG/sizeof(float)];
-    double         dval[ONE_MEG/sizeof(float)];
-    double         drval[ONE_MEG/sizeof(float)];
+    int            ddims[]={ONE_MEG/sizeof(double)};
+    float          *fval;
+    float          *frval;
+    double         *dval;
+    double         *drval;
     int            cnt, driver=DB_HDF5;
     char          *filename="compression.h5";
     char          *ptr;
@@ -147,6 +147,12 @@ main(int argc, char *argv[])
           fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
        }
     }
+
+    /* get some temporary memory */
+    fval = (float*) malloc(ONE_MEG);
+    frval = (float*) malloc(ONE_MEG);
+    dval = (double*) malloc(ONE_MEG);
+    drval = (double*) malloc(ONE_MEG);
 
     if (!readonly)
     {
@@ -308,6 +314,11 @@ main(int argc, char *argv[])
        t2-t1,fsize/(t2-t1));
 #endif
     DBClose(dbfile);
+
+    free(fval);
+    free(frval);
+    free(dval);
+    free(drval);
 
     return nerrors;
 }

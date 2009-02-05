@@ -274,7 +274,7 @@ db_taur_Close (DBfile *_dbfile)
         /*
          * Free the public parts of the file.
          */
-        db_close(_dbfile);
+        silo_db_close(_dbfile);
     }
     return 0;
 }
@@ -835,7 +835,7 @@ db_taur_GetUcdmesh(DBfile *_dbfile, char *mesh_name)
             mesh->coords[i] = ALLOC_N(float, taurus->numnp);
 
             for (j = 0; j < taurus->numnp; j++) {
-                mesh->coords[i][j] = taurus->coords[i][j];
+                ((float**)(mesh->coords))[i][j] = taurus->coords[i][j];
             }
         }
         mesh->min_extents[i] = taurus->min_extents[i];
@@ -1158,8 +1158,8 @@ db_taur_GetUcdvar(DBfile *_dbfile, char *var_name)
 
     if (SILO_Globals.dataReadMask & DBUVData)
     {
-        uv->vals = ALLOC_N(float *, 1);
-        if (taurus_readvar(taurus, var_name, &uv->vals[0], &uv->nels,
+        uv->vals = (DB_DTPTR*) ALLOC_N(float *, 1);
+        if (taurus_readvar(taurus, var_name, &(((float **)(uv->vals))[0]), &uv->nels,
                            &uv->centering, meshname) < 0) {
             db_perror("taurus_readvar", E_CALLFAIL, me);
             FREE(uv->name);
@@ -1183,8 +1183,8 @@ db_taur_GetUcdvar(DBfile *_dbfile, char *var_name)
                     }
                     nhex = j;
 
-                    buf = &(uv->vals[0][taurus->nhex]);
-                    buf2 = &(uv->vals[0][nhex]);
+                    buf = &(((float**)(uv->vals))[0][taurus->nhex]);
+                    buf2 = &(((float**)(uv->vals))[0][nhex]);
                     for (i = 0, j = 0; i < taurus->nshell; i++) {
                         if (taurus->shell_activ [i] != 0) {
                             buf2 [j] = buf [i];

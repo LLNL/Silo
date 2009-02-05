@@ -267,7 +267,7 @@ db_pdb_close(DBfile *_dbfile)
       /*
        * Free the public parts of the file.
        */
-      db_close(_dbfile);
+      silo_db_close(_dbfile);
 
       /* Clear the current object cache. */
       PJ_ClearCache();
@@ -2988,7 +2988,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
    if ((mv->nvals > 0) && (SILO_Globals.dataReadMask & DBPVData)) {
       INIT_OBJ(&tmp_obj);
 
-      mv->vals = ALLOC_N(float *, mv->nvals);
+      mv->vals = ALLOC_N(DB_DTPTR *, mv->nvals);
 
       if (mv->datatype == 0) {
           if(mv->nvals == 1)
@@ -3288,10 +3288,10 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
    if ((qv->nvals > 0) && (SILO_Globals.dataReadMask & DBQVData)) {
       INIT_OBJ(&tmp_obj);
 
-      qv->vals = ALLOC_N(float *, qv->nvals);
+      qv->vals = ALLOC_N(DB_DTPTR *, qv->nvals);
 
       if (qv->mixlen > 0) {
-         qv->mixvals = ALLOC_N(float *, qv->nvals);
+         qv->mixvals = ALLOC_N(DB_DTPTR *, qv->nvals);
       }
 
       if (qv->datatype == 0) {
@@ -3712,10 +3712,10 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
    if ((uv->nvals > 0) && (SILO_Globals.dataReadMask & DBUVData)) {
       INIT_OBJ(&tmp_obj);
 
-      uv->vals = ALLOC_N(float *, uv->nvals);
+      uv->vals = ALLOC_N(DB_DTPTR *, uv->nvals);
 
       if (uv->mixlen > 0) {
-         uv->mixvals = ALLOC_N(float *, uv->nvals);
+         uv->mixvals = ALLOC_N(DB_DTPTR *, uv->nvals);
       }
 
       if (uv->datatype == 0) {
@@ -5897,7 +5897,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
                     int nmat, int matnos[], int matlist[],
                     int dims[], int ndims,
                     int mix_next[], int mix_mat[], int mix_zone[],
-                    float mix_vf[], int mixlen, int datatype,
+                    DB_DTPTR1 mix_vf, int mixlen, int datatype,
                     DBoptlist *optlist)
 {
    int            i, nels;
@@ -6030,7 +6030,7 @@ CALLBACK int
 db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
                       int nmat, int nmatspec[], int speclist[],
                       int dims[], int ndims, int nspecies_mf,
-                      float species_mf[], int mix_speclist[],
+                      DB_DTPTR1 species_mf, int mix_speclist[],
                       int mixlen, int datatype, DBoptlist *optlist) {
 
    long           count[3];
@@ -7080,7 +7080,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
-db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, float *coords[],
+db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
                      int nels, int datatype, DBoptlist *optlist) {
 
    int            i;
@@ -7090,6 +7090,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, float *coords[],
    float          fmin_extents[3], fmax_extents[3];
    double         dmin_extents[3], dmax_extents[3];
    static char   *me = "db_pdb_PutPointmesh";
+   DB_DTPTR     **coords = (DB_DTPTR**) _coords;
 
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
@@ -7265,7 +7266,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, float *coords[],
 #ifdef PDB_WRITE
 CALLBACK int
 db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
-                    float **vars, int nels, int datatype,
+                    DB_DTPTR2 _vars, int nels, int datatype,
                     DBoptlist *optlist) {
 
    int            i;
@@ -7273,6 +7274,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
    DBobject      *obj;
    char          *datatype_str;
    char           tmp[1024];
+   DB_DTPTR     **vars = (DB_DTPTR**) _vars;
 
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
@@ -7408,7 +7410,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
 /* ARGSUSED */
 CALLBACK int
 db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
-                    float *coords[], int dims[], int ndims, int datatype,
+                    DB_DTPTR2 _coords, int dims[], int ndims, int datatype,
                     int coordtype, DBoptlist *optlist)
 {
     int             i;
@@ -7417,6 +7419,7 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
     char           *datatype_str;
     DBobject       *obj;
     char            tmp[1024];
+    DB_DTPTR      **coords = (DB_DTPTR**) _coords;
 
     /* The following is declared as double for worst case. */
     double         min_extents[3], max_extents[3];
@@ -7589,8 +7592,8 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
 #ifdef PDB_WRITE
 CALLBACK int
 db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
-                   char *varnames[], float *vars[], int dims[], int ndims,
-                   float *mixvars[], int mixlen, int datatype, int centering,
+                   char *varnames[], DB_DTPTR2 _vars, int dims[], int ndims,
+                   DB_DTPTR2 _mixvars, int mixlen, int datatype, int centering,
                    DBoptlist *optlist) {
 
    DBfile_pdb   *dbfile = (DBfile_pdb *) _dbfile;
@@ -7600,6 +7603,8 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    static char  *me = "db_pdb_PutQuadvar";
    DBobject     *obj;
    int          maxindex[3] ;
+   DB_DTPTR   **vars = (DB_DTPTR**) _vars;
+   DB_DTPTR   **mixvars = (DB_DTPTR**) _mixvars;
 
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
@@ -8139,7 +8144,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
 /* ARGSUSED */
 CALLBACK int
 db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
-                   float *coords[], int nnodes, int nzones, char *zlname,
+                   DB_DTPTR2 _coords, int nnodes, int nzones, char *zlname,
                    char *flname, int datatype, DBoptlist *optlist) {
 
    int            i;
@@ -8147,6 +8152,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    DBobject      *obj;
    char          *datatype_str;
    char           tmp[256];
+   DB_DTPTR     **coords = (DB_DTPTR**) _coords;
 
    /* Following is declared as double for worst case */
    double         min_extents[3], max_extents[3];
@@ -8499,7 +8505,7 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
 #ifdef PDB_WRITE
 CALLBACK int
 db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
-                  char *varnames[], float *vars[], int nels, float *mixvars[],
+                  char *varnames[], DB_DTPTR2 _vars, int nels, DB_DTPTR2 _mixvars,
                   int mixlen, int datatype, int centering,
                   DBoptlist *optlist) {
 
@@ -8509,6 +8515,8 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    DBobject      *obj;
    char          *suffix, *datatype_str, tmp1[256], tmp2[256];
    static char   *me = "db_pdb_PutUcdvar";
+   DB_DTPTR     **vars = (DB_DTPTR**) _vars;
+   DB_DTPTR     **mixvars = (DB_DTPTR**) _mixvars;
 
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.

@@ -33,8 +33,9 @@ States Government or the University of California, and shall not be used
 for advertising or product endorsement purposes.
 
 */
-
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 

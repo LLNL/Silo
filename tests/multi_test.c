@@ -884,15 +884,15 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     float           x[NX + 1], y[NY + 1];
 
     char           *meshname, *var1name, *var2name, *var3name, *var4name, *matname;
-    float           d[NX * NY], p[NX * NY], u[(NX + 1) * (NY + 1)], v[(NX + 1) * (NY + 1)];
+    float           *d, *p, *u, *v;
 
     int             nmats;
     int             matnos[3];
-    int             matlist[NX * NY];
+    int             *matlist;
     int             dims2[3];
     int             mixlen;
-    int             mix_mat[NX * NY];
-    float           mix_vf[NX * NY];
+    int             *mix_mat;
+    float           *mix_vf;
 
     DBoptlist      *optlist;
     char          **matnames = NULL;
@@ -904,7 +904,7 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     float           dx, dy;
     float           xx[20], yy[20];
     int             cnt;
-    int             itemp[(NX + 1) * (NY + 1)];
+    int             *itemp;
 
     int             block;
     int             delta_x, delta_y;
@@ -912,11 +912,31 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             n_x, n_y;
 
     float           x2[NX + 1], y2[NY + 1];
-    float           d2[NX * NY], p2[NX * NY], u2[(NX + 1) * (NY + 1)], v2[(NX + 1) * (NY + 1)];
-    int             matlist2[NX * NY];
+    float           *d2, *p2, *u2, *v2;
+    int             *matlist2;
     int             mixlen2;
-    int             mix_next2[NX * NY], mix_mat2[NX * NY], mix_zone2[NX * NY];
-    float           mix_vf2[NX * NY];
+    int             *mix_next2, *mix_mat2, *mix_zone2;
+    float           *mix_vf2;
+
+
+    matlist = ALLOC_N(int, NX * NY);
+    mix_mat = ALLOC_N(int, NX * NY);
+    itemp = ALLOC_N(int, (NX + 1) * (NY + 1));
+    matlist2 = ALLOC_N(int, NX * NY);
+    mix_next2 = ALLOC_N(int, NX * NY);
+    mix_mat2 = ALLOC_N(int, NX * NY);
+    mix_zone2 = ALLOC_N(int, NX * NY);
+
+    d = ALLOC_N(float, NX * NY);
+    p = ALLOC_N(float, NX * NY);
+    u = ALLOC_N(float, (NX + 1) * (NY + 1));
+    v = ALLOC_N(float, (NX + 1) * (NY + 1));
+    d2 = ALLOC_N(float, NX * NY);
+    p2 = ALLOC_N(float, NX * NY);
+    u2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    v2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    mix_vf = ALLOC_N(float, NX * NY);
+    mix_vf2 = ALLOC_N(float, NX * NY);
 
     /*
      * Create the mesh.
@@ -1256,6 +1276,24 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         FREE(matnames[i]);
     FREE(matnames);
 
+    FREE(matlist);
+    FREE(mix_mat);
+    FREE(itemp);
+    FREE(matlist2);
+    FREE(mix_next2);
+    FREE(mix_mat2);
+    FREE(mix_zone2);
+
+    FREE(d);
+    FREE(p);
+    FREE(u);
+    FREE(v);
+    FREE(d2);
+    FREE(p2);
+    FREE(u2);
+    FREE(v2);
+    FREE(mix_vf);
+    FREE(mix_vf2);
 }                               /* build_block_rect2d */
 
 /*-------------------------------------------------------------------------
@@ -1293,18 +1331,18 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             ndims;
     int             dims[3], zdims[3];
     float          *coords[3];
-    float           x[(NX + 1) * (NY + 1)], y[(NX + 1) * (NY + 1)];
+    float           *x, *y;
 
     char           *meshname, *var1name, *var2name, *var3name, *var4name, *matname;
-    float           d[NX * NY], p[NX * NY], u[(NX + 1) * (NY + 1)], v[(NX + 1) * (NY + 1)];
+    float           *d, *p, *u, *v;
 
     int             nmats;
     int             matnos[3];
-    int             matlist[NX * NY];
+    int             *matlist;
     int             dims2[3];
     int             mixlen;
-    int             mix_next[NX * NY], mix_mat[NX * NY], mix_zone[NX * NY];
-    float           mix_vf[NX * NY];
+    int             *mix_next, *mix_mat, *mix_zone;
+    float           *mix_vf;
 
     DBoptlist      *optlist = NULL;
 
@@ -1320,9 +1358,29 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             base_x, base_y;
     int             n_x, n_y;
 
-    float           x2[(NX + 1) * (NY + 1)], y2[(NX + 1) * (NY + 1)];
-    float           d2[NX * NY], p2[NX * NY], u2[(NX + 1) * (NY + 1)], v2[(NX + 1) * (NY + 1)];
-    int             matlist2[NX * NY];
+    float           *x2, *y2;
+    float           *d2, *p2, *u2, *v2;
+    int             *matlist2;
+
+    matlist = ALLOC_N(int, NX * NY);
+    mix_next = ALLOC_N(int, NX * NY);
+    mix_mat = ALLOC_N(int, NX * NY);
+    mix_zone = ALLOC_N(int, NX * NY);
+    matlist2 = ALLOC_N(int, NX * NY);
+
+    x2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    y2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    d2 = ALLOC_N(float, NX * NY);
+    p2 = ALLOC_N(float, NX * NY);
+    u2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    v2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    x = ALLOC_N(float, (NX + 1) * (NY + 1));
+    y = ALLOC_N(float, (NX + 1) * (NY + 1));
+    d = ALLOC_N(float, NX * NY);
+    p = ALLOC_N(float, NX * NY);
+    u = ALLOC_N(float, (NX + 1) * (NY + 1));
+    v = ALLOC_N(float, (NX + 1) * (NY + 1));
+    mix_vf = ALLOC_N(float, NX * NY);
 
     /* 
      * Create the mesh.
@@ -1536,6 +1594,25 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         }                              /* if */
     }                                  /* for */
 
+    FREE(matlist);
+    FREE(mix_next);
+    FREE(mix_mat);
+    FREE(mix_zone);
+    FREE(matlist2);
+
+    FREE(x2);
+    FREE(y2);
+    FREE(d2);
+    FREE(p2);
+    FREE(u2);
+    FREE(v2);
+    FREE(x);
+    FREE(y);
+    FREE(d);
+    FREE(p);
+    FREE(u);
+    FREE(v);
+    FREE(mix_vf);
 }                                      /* build_block_curv2d */
 
 /*-------------------------------------------------------------------------
@@ -1562,11 +1639,11 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     float           time;
     double          dtime;
     float          *coords[3];
-    float           x[(NX + 1) * (NY + 1)], y[(NX + 1) * (NY + 1)];
+    float           *x, *y;
 
     char           *meshname, *var1name, *var2name, *var3name, *var4name;
-    float           d[(NX + 1) * (NY + 1)], p[(NX + 1) * (NY + 1)];
-    float           u[(NX + 1) * (NY + 1)], v[(NX + 1) * (NY + 1)];
+    float           *d, *p;
+    float           *u, *v;
 
     DBoptlist      *optlist = NULL;
 
@@ -1583,9 +1660,23 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             npts;
     float          *vars[1];
 
-    float           x2[(NX + 1) * (NY + 1)], y2[(NX + 1) * (NY + 1)];
-    float           d2[(NX + 1) * (NY + 1)], p2[(NX + 1) * (NY + 1)];
-    float           u2[(NX + 1) * (NY + 1)], v2[(NX + 1) * (NY + 1)];
+    float           *x2, *y2;
+    float           *d2, *p2;
+    float           *u2, *v2;
+
+
+    x = ALLOC_N(float, (NX + 1) * (NY + 1));
+    y = ALLOC_N(float, (NX + 1) * (NY + 1));
+    d = ALLOC_N(float, (NX + 1) * (NY + 1));
+    p = ALLOC_N(float, (NX + 1) * (NY + 1));
+    u = ALLOC_N(float, (NX + 1) * (NY + 1));
+    v = ALLOC_N(float, (NX + 1) * (NY + 1));
+    x2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    y2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    d2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    p2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    u2 = ALLOC_N(float, (NX + 1) * (NY + 1));
+    v2 = ALLOC_N(float, (NX + 1) * (NY + 1));
 
     /* 
      * Create the mesh.
@@ -1740,6 +1831,18 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         }                              /* if */
     }                                  /* for */
 
+    FREE(x);
+    FREE(y);
+    FREE(d);
+    FREE(p);
+    FREE(u);
+    FREE(v);
+    FREE(x2);
+    FREE(y2);
+    FREE(d2);
+    FREE(p2);
+    FREE(u2);
+    FREE(v2);
 }                                      /* build_block_point2d */
 
 /*-------------------------------------------------------------------------
@@ -1790,17 +1893,17 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     char           *meshname, *var1name, *var2name, *var3name, *var4name;
     char           *var5name, *matname;
-    float           d[NX * NY * NZ], p[NX * NY * NZ];
-    float           u[(NX + 1) * (NY + 1) * (NZ + 1)], v[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           w[(NX + 1) * (NY + 1) * (NZ + 1)];
+    float           *d, *p;
+    float           *u, *v;
+    float           *w;
 
     int             nmats;
     int             matnos[3];
-    int             matlist[NX * NY * NZ];
+    int             *matlist;
     int             dims2[3];
     int             mixlen;
-    int             mix_next[MIXMAX], mix_mat[MIXMAX], mix_zone[MIXMAX];
-    float           mix_vf[MIXMAX];
+    int             *mix_next, *mix_mat, *mix_zone;
+    float           *mix_vf;
 
     int             i, j, k;
     float           xave, yave, zave;
@@ -1813,15 +1916,37 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             n_x, n_y, n_z;
 
     float           x2[NX + 1], y2[NY + 1], z2[NZ + 1];
-    float           d2[NX * NY * NZ], p2[NX * NY * NZ];
-    float           u2[(NX + 1) * (NY + 1) * (NZ + 1)], v2[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           w2[(NX + 1) * (NY + 1) * (NZ + 1)];
-    int             matlist2[NX * NY * NZ];
+    float           *d2, *p2;
+    float           *u2, *v2;
+    float           *w2;
+    int             *matlist2;
     int             mixlen2;
-    int             mix_next2[MIXMAX], mix_mat2[MIXMAX], mix_zone2[MIXMAX];
-    float           mix_vf2[MIXMAX];
+    int             *mix_next2, *mix_mat2, *mix_zone2;
+    float           *mix_vf2;
 
     DBoptlist      *optlist;
+
+    matlist = ALLOC_N(int, NX * NY * NZ);
+    mix_next = ALLOC_N(int, MIXMAX);
+    mix_mat = ALLOC_N(int, MIXMAX);
+    mix_zone = ALLOC_N(int, MIXMAX);
+    matlist2 = ALLOC_N(int, NX * NY * NZ);
+    mix_next2 = ALLOC_N(int, MIXMAX);
+    mix_mat2 = ALLOC_N(int, MIXMAX);
+    mix_zone2 = ALLOC_N(int, MIXMAX);
+
+    d = ALLOC_N(float, NX * NY * NZ);
+    p = ALLOC_N(float, NX * NY * NZ);
+    u = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    v = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    w = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    mix_vf = ALLOC_N(float, MIXMAX);
+    d2 = ALLOC_N(float, NX * NY * NZ);
+    p2 = ALLOC_N(float, NX * NY * NZ);
+    u2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    v2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    w2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    mix_vf2 = ALLOC_N(float, MIXMAX);
 
     /* 
      * Create the mesh.
@@ -2098,6 +2223,27 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         }                              /* if */
     }                                  /* for */
 
+    FREE(matlist);
+    FREE(mix_next);
+    FREE(mix_mat);
+    FREE(mix_zone);
+    FREE(matlist2);
+    FREE(mix_next2);
+    FREE(mix_mat2);
+    FREE(mix_zone2);
+
+    FREE(d);
+    FREE(p);
+    FREE(u);
+    FREE(v);
+    FREE(w);
+    FREE(mix_vf);
+    FREE(d2);
+    FREE(p2);
+    FREE(u2);
+    FREE(v2);
+    FREE(w2);
+    FREE(mix_vf2);
 }                                      /* build_block_rect3d */
 
 /*-------------------------------------------------------------------------
@@ -2145,29 +2291,26 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     double          dtime;
     char           *coordnames[3];
     float          *coords[3];
-    float           x[(NX + 1) * (NY + 1) * (NZ + 1)], y[(NX + 1) * (NY + 1) * (NZ + 1)],
-                    z[(NX + 1) * (NY + 1) * (NZ + 1)];
+    float           *x, *y, *z;
     int             nfaces, nzones, nnodes;
     int             lfacelist, lzonelist;
     int             fshapesize, fshapecnt, zshapetype, zshapesize, zshapecnt;
-    int             zonelist[16000];
-    int             facelist[10000];
-    int             zoneno[2000];
+    int             *zonelist;
+    int             *facelist;
+    int             *zoneno;
 
     char           *meshname, *var1name, *var2name, *var3name, *var4name;
     char           *var5name, *matname;
     float          *vars[1];
     char           *varnames[1];
-    float           d[(NX + 1) * (NY + 1) * (NZ + 1)], p[(NX + 1) * (NY + 1) * (NZ + 1)],
-                    u[(NX + 1) * (NY + 1) * (NZ + 1)], v[(NX + 1) * (NY + 1) * (NZ + 1)],
-                    w[(NX + 1) * (NY + 1) * (NZ + 1)];
+    float           *d, *p, *u, *v, *w;
 
     int             nmats;
     int             matnos[3];
-    int             matlist[NX * NY * NZ];
+    int             *matlist;
     int             mixlen;
-    int             mix_next[4500], mix_mat[4500], mix_zone[4500];
-    float           mix_vf[4500];
+    int             *mix_next, *mix_mat, *mix_zone;
+    float           *mix_vf;
     float           xstrip[NX + NY + NZ], ystrip[NX + NY + NZ], zstrip[NX + NY + NZ];
 
     int             one = 1;
@@ -2190,9 +2333,9 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             imin, imax, jmin, jmax, kmin, kmax;
     int             nx, ny, nz;
 
-    float           x2[2646], y2[2646], z2[2646];
-    float           d2[2646], p2[2646], u2[2646], v2[2646], w2[2646];
-    int             matlist2[2000], ghost[2000];
+    float           *x2, *y2, *z2;
+    float           *d2, *p2, *u2, *v2, *w2;
+    int             *matlist2, *ghost;
 
     int             nreal;
     int             ighost;
@@ -2200,6 +2343,36 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             hi_off;
 
     DBobject       *obj;
+
+
+    zonelist = ALLOC_N(int, 16000);
+    facelist = ALLOC_N(int, 10000);
+    zoneno = ALLOC_N(int, 2000);
+    matlist = ALLOC_N(int, NX * NY * NZ);
+    mix_next = ALLOC_N(int, 4500);
+    mix_mat = ALLOC_N(int, 4500);
+    mix_zone = ALLOC_N(int, 4500);
+    matlist2 = ALLOC_N(int, 2000);
+    ghost = ALLOC_N(int, 2000);
+
+    x = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    y = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    z = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    d = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    p = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    u = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    v = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    w = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    mix_vf = ALLOC_N(float, 4500);
+    x2 = ALLOC_N(float, 2646);
+    y2 = ALLOC_N(float, 2646);
+    z2 = ALLOC_N(float, 2646);
+    d2 = ALLOC_N(float, 2646);
+    p2 = ALLOC_N(float, 2646);
+    u2 = ALLOC_N(float, 2646);
+    v2 = ALLOC_N(float, 2646);
+    w2 = ALLOC_N(float, 2646);
+
 
     /* 
      * Create the coordinate arrays for the entire mesh.
@@ -2574,6 +2747,34 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         }                              /* if */
     }                                  /* for */
 
+    FREE(zonelist);
+    FREE(facelist);
+    FREE(zoneno);
+    FREE(matlist);
+    FREE(mix_next);
+    FREE(mix_mat);
+    FREE(mix_zone);
+    FREE(matlist2);
+    FREE(ghost);
+
+    FREE(x);
+    FREE(y);
+    FREE(z);
+    FREE(d);
+    FREE(p);
+    FREE(u);
+    FREE(v);
+    FREE(w);
+    FREE(mix_vf);
+    FREE(x2);
+    FREE(y2);
+    FREE(z2);
+    FREE(d2);
+    FREE(p2);
+    FREE(u2);
+    FREE(v2);
+    FREE(w2);
+
 }                                      /* build_block_ucd3d */
 
 /*-------------------------------------------------------------------------
@@ -2611,9 +2812,7 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     char           *coordnames[3];
     float          *coords[3];
 
-    float           x[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           y[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           z[(NX + 1) * (NY + 1) * (NZ + 1)];
+    float          *x, *y, *z;
 
     int             ndims, zdims[3];
     int             dims[3], dims2[3];
@@ -2621,18 +2820,15 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     char           *meshname, *var1name, *var2name, *var3name, *var4name;
     char           *var5name, *matname;
 
-    float           d[NX * NY * NZ], p[NX * NY * NZ];
-    float           u[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           v[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           w[(NX + 1) * (NY + 1) * (NZ + 1)];
+    float          *d, *p, *u, *v, *w;
 
     int             nmats;
     int             matnos[3];
-    int             matlist[NX * NY * NZ];
+    int             *matlist;
     int             mixlen;
-    int             mix_next[NX * NY * NZ], mix_mat[NX * NY * NZ];
-    int             mix_zone[NX * NY * NZ];
-    float           mix_vf[NX * NY * NZ];
+    int             *mix_next, *mix_mat;
+    int             *mix_zone;
+    float           *mix_vf;
 
     DBoptlist      *optlist = NULL;
 
@@ -2651,14 +2847,32 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             base_x, base_y, base_z;
     int             n_x, n_y, n_z;
 
-    float           x2[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           y2[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           z2[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           d2[NX * NY * NZ], p2[NX * NY * NZ];
-    float           u2[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           v2[(NX + 1) * (NY + 1) * (NZ + 1)];
-    float           w2[(NX + 1) * (NY + 1) * (NZ + 1)];
-    int             matlist2[NX * NY * NZ];
+    float          *x2, *y2, *z2, *d2, *p2, *u2, *v2, *w2;
+    int             *matlist2;
+
+    matlist = ALLOC_N(int, NX * NY * NZ);
+    mix_next = ALLOC_N(int, NX * NY * NZ);
+    mix_mat = ALLOC_N(int, NX * NY * NZ);
+    mix_zone = ALLOC_N(int, NX * NY * NZ);
+    matlist2 = ALLOC_N(int, NX * NY * NZ);
+
+    x = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    y = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    z = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    d = ALLOC_N(float, NX * NY * NZ);
+    p = ALLOC_N(float, NX * NY * NZ);
+    u = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    v = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    w = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    mix_vf = ALLOC_N(float, NX * NY * NZ);
+    x2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    y2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    z2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    d2 = ALLOC_N(float, NX * NY * NZ);
+    p2 = ALLOC_N(float, NX * NY * NZ);
+    u2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    v2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
+    w2 = ALLOC_N(float, (NX + 1) * (NY + 1) * (NZ + 1));
 
     /* 
      * Create the mesh.
@@ -2936,5 +3150,29 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             return;
         }                              /* if */
     }                                  /* for */
+
+    FREE(matlist);
+    FREE(mix_next);
+    FREE(mix_mat);
+    FREE(mix_zone);
+    FREE(matlist2);
+
+    FREE(x);
+    FREE(y);
+    FREE(z);
+    FREE(d);
+    FREE(p);
+    FREE(u);
+    FREE(v);
+    FREE(w);
+    FREE(mix_vf);
+    FREE(x2);
+    FREE(y2);
+    FREE(z2);
+    FREE(d2);
+    FREE(p2);
+    FREE(u2);
+    FREE(v2);
+    FREE(w2);
 
 }                                      /* build_block_curv3d */

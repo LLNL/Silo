@@ -38,8 +38,10 @@ for advertising or product endorsement purposes.
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef WIN32
 #include <sys/time.h>
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 #include "silo.h"
 
@@ -106,11 +108,11 @@ main(int argc, char *argv[])
     DBfile        *dbfile;
     char           mesh_command[256];
     int            dims[3];
-    char           *coordnames[3]={"x", "y", "z"};
-    float          *coords[3];
-    float          xcoord[(NX+1)*(NY+1)*(NZ+1)];
-    float          ycoord[(NX+1)*(NY+1)*(NZ+1)];
-    float          zcoord[(NX+1)*(NY+1)*(NZ+1)];
+    char          *coordnames[3]={"x", "y", "z"};
+    float         *coords[3];
+    float         *xcoord;
+    float         *ycoord;
+    float         *zcoord;
     float         *var;
     float          widths[3];
 
@@ -124,6 +126,9 @@ main(int argc, char *argv[])
 #endif
 
     var = ALLOC_N(float, (NX+1)*(NY+1)*(NZ+1));
+    xcoord = ALLOC_N(float, (NX+1)*(NY+1)*(NZ+1));
+    ycoord = ALLOC_N(float, (NX+1)*(NY+1)*(NZ+1));
+    zcoord = ALLOC_N(float, (NX+1)*(NY+1)*(NZ+1));
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -272,5 +277,11 @@ main(int argc, char *argv[])
        type);
        return 1;
     }
+
+    FREE(var);
+    FREE(xcoord);
+    FREE(ycoord);
+    FREE(zcoord);
+
     return 0;
 }

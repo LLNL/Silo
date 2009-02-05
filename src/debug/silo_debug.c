@@ -71,7 +71,7 @@ db_debug_close(DBfile *_dbfile)
     if (dbfile) {
         fprintf(dbfile->file, "Closed.\n");
         fclose(dbfile->file);
-        db_close(_dbfile);
+        silo_db_close(_dbfile);
     }
     return 0;
 }

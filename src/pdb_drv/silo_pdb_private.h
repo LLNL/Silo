@@ -140,9 +140,9 @@ CALLBACK int db_pdb_PutFacelist (DBfile *, char *, int, int, int *, int,
 				 int *, int);
 CALLBACK int db_pdb_PutMaterial (DBfile *, char *, char *, int, int *,
 				 int *, int *, int, int *, int *, int *,
-				 float *, int, int, DBoptlist *);
+				 DB_DTPTR1, int, int, DBoptlist *);
 CALLBACK int db_pdb_PutMatspecies (struct DBfile *, char *, char *, int,
-				   int *, int *, int *, int, int, float *,
+				   int *, int *, int *, int, int, DB_DTPTR1,
 				   int *, int, int, DBoptlist *);
 CALLBACK int db_pdb_PutMultimesh (DBfile *, char *, int, char **, int *,
 				  DBoptlist *);
@@ -156,23 +156,23 @@ CALLBACK int db_pdb_PutMultimat (DBfile *, char *, int, char **,
 				 DBoptlist *);
 CALLBACK int db_pdb_PutMultimatspecies (DBfile *, char *, int, char **,
 					DBoptlist *);
-CALLBACK int db_pdb_PutPointmesh (DBfile *, char *, int, float **, int,
+CALLBACK int db_pdb_PutPointmesh (DBfile *, char *, int, DB_DTPTR2, int,
 				  int, DBoptlist *);
-CALLBACK int db_pdb_PutPointvar (DBfile *, char *, char *, int, float **,
+CALLBACK int db_pdb_PutPointvar (DBfile *, char *, char *, int, DB_DTPTR2,
 				 int, int, DBoptlist *);
-CALLBACK int db_pdb_PutQuadmesh (DBfile *, char *, char **, float **,
+CALLBACK int db_pdb_PutQuadmesh (DBfile *, char *, char **, DB_DTPTR2,
 				 int *, int, int, int, DBoptlist *);
 CALLBACK int db_pdb_PutQuadvar (DBfile *, char *, char *, int, char **,
-				float **, int *, int, float **, int, int,
+				DB_DTPTR2, int *, int, DB_DTPTR2, int, int,
 				int, DBoptlist *);
-CALLBACK int db_pdb_PutUcdmesh (DBfile *, char *, int, char **, float **,
+CALLBACK int db_pdb_PutUcdmesh (DBfile *, char *, int, char **, DB_DTPTR2,
 				int, int, char *, char *, int,
 				DBoptlist *);
 CALLBACK int db_pdb_PutUcdsubmesh (DBfile *, char *, char *,
 				int, char *, char *,
 				DBoptlist *);
 CALLBACK int db_pdb_PutUcdvar (DBfile *, char *, char *, int, char **,
-			       float **, int, float **, int, int, int,
+			       DB_DTPTR2, int, DB_DTPTR2, int, int, int,
 			       DBoptlist *);
 CALLBACK int db_pdb_PutCsgmesh (DBfile *, const char *, int, int,
                                 const int *, const int *,

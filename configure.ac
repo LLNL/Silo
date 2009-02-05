@@ -565,6 +565,22 @@ AC_ARG_ENABLE(optimization,
     esac],
     [USING_DEBUG="yes"])
 
+dnl Conform to legacy API where datatype'd pointers are used
+SILO_DTYPPTR="void"
+SILO_DTYPPTR1="void*"
+SILO_DTYPPTR2="void*"
+AC_ARG_ENABLE(legacy-datatyped-pointers,
+    AC_HELP_STRING([--enable-legacy-datatyped-pointers], 
+        [compile using legacy (float) pointers for datatype'd pointers @<:@default=no@:>@]),
+    if test $enableval = yes; then
+        SILO_DTYPPTR="float"
+        SILO_DTYPPTR1="float*"
+        SILO_DTYPPTR2="float**"
+    fi)
+AC_SUBST(SILO_DTYPPTR)
+AC_SUBST(SILO_DTYPPTR1)
+AC_SUBST(SILO_DTYPPTR2)
+
 dnl we don't need to check for netcdf driver. It is always there.
 NETCDF="netcdf"
 AC_DEFINE(HAVE_NETCDF_DRIVER,1,[Support for NetCDF])

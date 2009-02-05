@@ -4695,7 +4695,7 @@ db_hdf5_Close(DBfile *_dbfile)
        dbfile->fid = -1;
 
        /* Free the public parts of the file */
-       db_close(_dbfile);
+       silo_db_close(_dbfile);
    }
    return 0;
 }
@@ -7765,7 +7765,7 @@ static int PrepareForQuadmeshCompression()
 /*ARGSUSED*/
 CALLBACK int
 db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
-                    float *coords[], int dims[], int ndims, int datatype,
+                    DB_DTPTR2 _coords, int dims[], int ndims, int datatype,
                     int coordtype, DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -7773,6 +7773,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
     int                 i,len;
     DBquadmesh_mt       m;
     int                 compressionFlags;
+    DB_DTPTR          **coords = (DB_DTPTR**) _coords;
 
     FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
@@ -8130,8 +8131,8 @@ PrepareForQuadvarCompression(int centering, int datatype)
 /*ARGSUSED*/
 CALLBACK int
 db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
-                   char *varnames[/*nvars*/], float *vars[/*nvars*/],
-                   int dims[/*ndims*/], int ndims, float *mixvars[/*nvars*/],
+                   char *varnames[/*nvars*/], DB_DTPTR2 _vars,
+                   int dims[/*ndims*/], int ndims, DB_DTPTR2 _mixvars,
                    int mixlen, int datatype, int centering, DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -8140,6 +8141,8 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
     DBquadvar_mt        m;
     int                 i, nels, len;
     int                 compressionFlags;
+    DB_DTPTR          **vars = (DB_DTPTR**) _vars;
+    DB_DTPTR          **mixvars = (DB_DTPTR**) _mixvars;
 
     FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
@@ -8483,13 +8486,14 @@ static int PrepareForUcdmeshCompression(DBfile_hdf5 *dbfile,
 /*ARGSUSED*/
 CALLBACK int
 db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
-                   float *coords[], int nnodes, int nzones, char *zlname,
+                   DB_DTPTR2 _coords, int nnodes, int nzones, char *zlname,
                    char *flname, int datatype, DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutUcdmesh";
     DBucdmesh_mt        m;
     int                 i, len, compressionFlags;
+    DB_DTPTR          **coords = (DB_DTPTR**) _coords;
 
     memset(&_um, 0, sizeof _um);
     memset(&m, 0, sizeof m);
@@ -9005,8 +9009,8 @@ PrepareForUcdvarCompression(DBfile_hdf5 *dbfile, const char *varname,
 /*ARGSUSED*/
 CALLBACK int
 db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
-                  char *varnames[/*nvars*/], float *vars[/*nvars*/],
-                  int nels, float *mixvars[/*nvars*/], int mixlen,
+                  char *varnames[/*nvars*/], DB_DTPTR2 _vars,
+                  int nels, DB_DTPTR2 _mixvars, int mixlen,
                   int datatype, int centering, DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -9015,6 +9019,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
     DBucdvar_mt         m;
     int                 i, saved_ndims, saved_nnodes, saved_nzones, len;
     int                 compressionFlags;
+    DB_DTPTR          **vars = (DB_DTPTR**) _vars;
+    DB_DTPTR          **mixvars = (DB_DTPTR**) _mixvars;
 
     memset(&m, 0, sizeof m);
 
@@ -10000,7 +10006,7 @@ CALLBACK int
 db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
                     int matnos[], int matlist[], int dims[], int ndims,
                     int mix_next[], int mix_mat[], int mix_zone[],
-                    float mix_vf[], int mixlen, int datatype,
+                    DB_DTPTR1 mix_vf, int mixlen, int datatype,
                     DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -10236,7 +10242,7 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char *name)
 CALLBACK int
 db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
                       int nmatspec[], int speclist[], int dims[], int ndims,
-                      int nspecies_mf, float species_mf[], int mix_speclist[],
+                      int nspecies_mf, DB_DTPTR1 species_mf, int mix_speclist[],
                       int mixlen, int datatype, DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -11915,13 +11921,14 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 CALLBACK int
-db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, float *coords[],
+db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
                      int nels, int datatype, DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutPointmesh";
     DBpointmesh_mt      m;
     int                 i, len;
+    DB_DTPTR          **coords = (DB_DTPTR**) _coords;
     
     memset(&m, 0, sizeof m);
     PROTECT {
@@ -12158,12 +12165,13 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
  */
 CALLBACK int
 db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
-                    float **vars, int nels, int datatype, DBoptlist *optlist)
+                    DB_DTPTR2 _vars, int nels, int datatype, DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBpointvar_mt       m;
     int                 i, saved_ndims, len;
     char               *s = 0;
+    DB_DTPTR          **vars = (DB_DTPTR**) _vars;
 
     memset(&m, 0, sizeof m);
     PROTECT {

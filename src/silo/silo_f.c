@@ -603,7 +603,7 @@ FORTRAN
 DBPUTMAT_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
            int *nmat, int *matnos, int *matlist, int *dims, int *ndims,
-           int *mix_next, int *mix_mat, int *mix_zone, float *mix_vf,
+           int *mix_next, int *mix_mat, int *mix_zone, DB_DTPTR1 mix_vf,
            int *mixlen, int *datatype, int *optlist_id, int *status)
 {
     int           *mixz = NULL;
@@ -689,7 +689,7 @@ DBPUTMAT_FC (int *dbid, FCD_DB name,
 FORTRAN
 DBPUTMSP_FC (int *dbid, FCD_DB name, int *lname, FCD_DB matname, int *lmatname,
            int *nmat, int *nmatspec, int *speclist, int *dims, int *ndims,
-           int *nspecies_mf, float *species_mf, int *mix_speclist, int *mixlen,
+           int *nspecies_mf, DB_DTPTR1 species_mf, int *mix_speclist, int *mixlen,
            int *datatype, int *optlist_id, int *status)
 {
     char          *nm = NULL, *mnm = NULL;
@@ -1745,12 +1745,12 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
  *
  *-------------------------------------------------------------------------*/
 FORTRAN
-DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
-          float *z, int *nels, int *datatype, int *optlist_id, int *status)
+DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPTR1 y,
+          DB_DTPTR1 z, int *nels, int *datatype, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
     char          *nm = NULL;
-    float         *coords[3];
+    DB_DTPTR      *coords[3];
     DBoptlist     *optlist = NULL;
 
     API_BEGIN("dbputpm", int, -1) {
@@ -1820,7 +1820,7 @@ DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
 FORTRAN
 DBPUTPV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
-           float *var, int *nels, int *datatype, int *optlist_id, int *status)
+           DB_DTPTR1 var, int *nels, int *datatype, int *optlist_id, int *status)
 {
     char          *nm = NULL, *mnm = NULL;
     DBfile        *dbfile = NULL;
@@ -1910,13 +1910,13 @@ DBPUTPV1_FC (int *dbid, FCD_DB name,
  *-------------------------------------------------------------------------*/
 FORTRAN
 DBPUTQM_FC (int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
-          FCD_DB yname, int *lyname, FCD_DB zname, int *lzname, float *x,
-          float *y, float *z, int *dims, int *ndims, int *datatype,
+          FCD_DB yname, int *lyname, FCD_DB zname, int *lzname, DB_DTPTR1 x,
+          DB_DTPTR1 y, DB_DTPTR1 z, int *dims, int *ndims, int *datatype,
           int *coordtype, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
     int            i;
-    float         *coords[3];
+    DB_DTPTR      *coords[3];
     char          *coordnames[3], *nm = NULL;
     DBoptlist     *optlist = NULL;
 
@@ -2047,7 +2047,7 @@ DBPUTQM_FC (int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
 FORTRAN
 DBPUTQV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
-           float *var, int *dims, int *ndims, float *mixvar, int *mixlen,
+           DB_DTPTR1 var, int *dims, int *ndims, DB_DTPTR1 mixvar, int *mixlen,
            int *datatype, int *centering, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -2133,14 +2133,14 @@ DBPUTQV1_FC (int *dbid, FCD_DB name,
  *
  *-------------------------------------------------------------------------*/
 FORTRAN
-DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
-          float *z, FCD_DB xname, int *lxname, FCD_DB yname, int *lyname,
+DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPTR1 y,
+          DB_DTPTR1 z, FCD_DB xname, int *lxname, FCD_DB yname, int *lyname,
           FCD_DB zname, int *lzname, int *datatype, int *nnodes, int *nzones,
           FCD_DB zlname, int *lzlname, FCD_DB flname, int *lflname,
           int *optlist_id, int *status)
 {
     char          *nm = NULL, *zlnm = NULL, *flnm = NULL, *coordnames[3];
-    float         *coords[3];
+    DB_DTPTR      *coords[3];
     DBfile        *dbfile = NULL;
     DBoptlist     *optlist = NULL;
 
@@ -2302,7 +2302,7 @@ DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, float *x, float *y,
 FORTRAN
 DBPUTUV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
-           float *var, int *nels, float *mixvar, int *mixlen, int *datatype,
+           DB_DTPTR1 var, int *nels, DB_DTPTR1 mixvar, int *mixlen, int *datatype,
            int *centering, int *optlist_id, int *status)
 {
     char          *nm = NULL, *mnm = NULL;
@@ -2942,7 +2942,7 @@ DBWRITE_FC (int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
  *-------------------------------------------------------------------------*/
 FORTRAN
 DBPUTCA_FC (int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
-          int *elengths, int *nelems, float *values, int *datatype,
+          int *elengths, int *nelems, DB_DTPTR1 values, int *datatype,
           int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -3050,7 +3050,7 @@ DBPUTCA_FC (int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
  *-------------------------------------------------------------------------*/
 FORTRAN
 DBGETCA_FC (int *dbid, FCD_DB _name, int *lname, int *width, FCD_DB enames,
-          int *elengths, int *nelems, float *values, int *nvalues,
+          int *elengths, int *nelems, DB_DTPTR1 values, int *nvalues,
           int *datatype)
 {
     DBfile        *dbfile = NULL;
@@ -3161,7 +3161,7 @@ DBGETCA_FC (int *dbid, FCD_DB _name, int *lname, int *width, FCD_DB enames,
  *
  *-------------------------------------------------------------------------*/
 FORTRAN
-DBFGETCA_FC (int *dbid, FCD_DB _name, int *lname, float *values, int *nvalues)
+DBFGETCA_FC (int *dbid, FCD_DB _name, int *lname, DB_DTPTR1 values, int *nvalues)
 {
     API_BEGIN("dbfgetca", int, -1) {
 #if CRAY
@@ -3202,7 +3202,7 @@ DBFGETCA_FC (int *dbid, FCD_DB _name, int *lname, float *values, int *nvalues)
  *-------------------------------------------------------------------------
  */
 FORTRAN
-DBPUTCURVE_FC (int *dbid, FCD_DB _name, int *lname, float *xvals, float *yvals,
+DBPUTCURVE_FC (int *dbid, FCD_DB _name, int *lname, DB_DTPTR1 xvals, DB_DTPTR1 yvals,
               int *datatype, int *npts, int *optlist_id, int *status)
 {
 
@@ -3263,8 +3263,8 @@ DBPUTCURVE_FC (int *dbid, FCD_DB _name, int *lname, float *xvals, float *yvals,
  *-------------------------------------------------------------------------
  */
 FORTRAN
-DBGETCURVE_FC (int *dbid, FCD_DB _name, int *lname, int *maxpts, float *xvals,
-              float *yvals, int *datatype, int *npts)
+DBGETCURVE_FC (int *dbid, FCD_DB _name, int *lname, int *maxpts, DB_DTPTR1 xvals,
+              DB_DTPTR1 yvals, int *datatype, int *npts)
 {
 
    DBfile   *dbfile ;

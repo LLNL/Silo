@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <silo.h>
+#ifndef WIN32
 #include <sys/time.h>
+#endif
 #include <sys/timeb.h>
 
 /* To compile this program on hyper, here is the command:

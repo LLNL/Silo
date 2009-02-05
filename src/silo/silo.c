@@ -616,7 +616,7 @@ db_GetDatatypeString(int type)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    db_close
+ * Function:    silo_db_close
  *
  * Purpose:     Free public parts of DBfile.  This function is called
  *              after the file has been closed and the private parts
@@ -632,7 +632,7 @@ db_GetDatatypeString(int type)
  * Modifications:
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
-db_close(DBfile *dbfile)
+silo_db_close(DBfile *dbfile)
 {
     if (dbfile) {
         db_FreeToc(dbfile);
@@ -5848,8 +5848,8 @@ DBGetQuadvar(DBfile *dbfile, const char *name)
  * Modifications:
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBGetQuadvar1 (DBfile *dbfile, const char *varname, float *var, int *dims,
-               int *ndims, float *mixvar, int *mixlen, int *datatype,
+DBGetQuadvar1 (DBfile *dbfile, const char *varname, DB_DTPTR1 var, int *dims,
+               int *ndims, DB_DTPTR1 mixvar, int *mixlen, int *datatype,
                int *centering)
 {
     char           tmpstr[64];
@@ -6949,7 +6949,7 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
 PUBLIC int
 DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
               int matnos[], int matlist[], int dims[], int ndims,
-              int mix_next[], int mix_mat[], int mix_zone[], float mix_vf[],
+              int mix_next[], int mix_mat[], int mix_zone[], DB_DTPTR1 mix_vf,
               int mixlen, int datatype, DBoptlist *optlist)
 {
     int retval;
@@ -7047,7 +7047,7 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
 PUBLIC int
 DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
                 int nmat, int nmatspec[], int speclist[], int dims[],
-                int ndims, int nspecies_mf, float species_mf[],
+                int ndims, int nspecies_mf, DB_DTPTR1 species_mf,
                 int mix_speclist[], int mixlen, int datatype,
                 DBoptlist *optlist)
 {
@@ -7417,7 +7417,7 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, float *coords[],
+DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
                int nels, int datatype, DBoptlist *optlist)
 {
     int retval;
@@ -7478,7 +7478,7 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, float *coords[],
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-              float *vars[], int nels, int datatype, DBoptlist *optlist)
+              DB_DTPTR2 vars, int nels, int datatype, DBoptlist *optlist)
 {
     int retval;
 
@@ -7536,9 +7536,9 @@ DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutPointvar1(DBfile *dbfile, const char *vname, const char *mname,
-               float var[], int nels, int datatype, DBoptlist *optlist)
+               DB_DTPTR1 var, int nels, int datatype, DBoptlist *optlist)
 {
-    float         *vars[1];
+    DB_DTPTR *vars[1];
     int retval;
 
     API_BEGIN2("DBPutPointvar1", int, -1, vname)
@@ -7587,7 +7587,7 @@ DBPutPointvar1(DBfile *dbfile, const char *vname, const char *mname,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
-              float *coords[], int dims[], int ndims, int datatype,
+              DB_DTPTR2 coords, int dims[], int ndims, int datatype,
               int coordtype, DBoptlist *optlist)
 {
     int retval;
@@ -7652,8 +7652,8 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-             char *varnames[], float *vars[], int dims[], int ndims,
-             float *mixvars[], int mixlen, int datatype, int centering,
+             char *varnames[], DB_DTPTR2 vars, int dims[], int ndims,
+             DB_DTPTR2 mixvars, int mixlen, int datatype, int centering,
              DBoptlist *optlist)
 {
     int retval;
@@ -7721,12 +7721,12 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, float *var,
-              int dims[], int ndims, float *mixvar, int mixlen, int datatype,
+DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 var,
+              int dims[], int ndims, DB_DTPTR1 mixvar, int mixlen, int datatype,
               int centering, DBoptlist *optlist)
 {
     char          *varnames[1];
-    float         *vars[1], *mixvars[1];
+    DB_DTPTR *vars[1], *mixvars[1];
     int retval;
 
     API_BEGIN2("DBPutQuadvar1", int, -1, vname) {
@@ -7774,7 +7774,7 @@ DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, float *var,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
-             char *coordnames[], float *coords[], int nnodes,
+             char *coordnames[], DB_DTPTR2 coords, int nnodes,
              int nzones, const char *zonel_name, const char *facel_name,
              int datatype, DBoptlist *optlist)
 {
@@ -7904,7 +7904,7 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-            char *varnames[], float *vars[], int nels, float *mixvars[],
+            char *varnames[], DB_DTPTR2 vars, int nels, DB_DTPTR2 mixvars,
             int mixlen, int datatype, int centering, DBoptlist *optlist)
 {
     int retval;
@@ -7967,11 +7967,11 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, float *var,
-             int nels, float *mixvar, int mixlen, int datatype, int centering,
+DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 var,
+             int nels, DB_DTPTR1 mixvar, int mixlen, int datatype, int centering,
              DBoptlist *optlist)
 {
-    float         *vars[1], *mixvars[1];
+    DB_DTPTR *vars[1], *mixvars[1];
     char          *varnames[1];
     int            retval;
 
@@ -8950,7 +8950,7 @@ CSGM_CalcExtents(int datatype, int ndims, int nbounds,
  *    double.
  *--------------------------------------------------------------------*/
 INTERNAL int
-_DBQMCalcExtents(float **coord_arrays, int datatype, int *min_index,
+_DBQMCalcExtents(DB_DTPTR2 _coord_arrays, int datatype, int *min_index,
                  int *max_index, int *dims, int ndims, int coordtype,
                  void *min_extents, void *max_extents)
 {
@@ -8960,6 +8960,7 @@ _DBQMCalcExtents(float **coord_arrays, int datatype, int *min_index,
     float         *fmin_extents = NULL, *fmax_extents = NULL;
     int            i;
     char          *me = "_DBQMCalcExtents";
+    DB_DTPTR**    coord_arrays = (DB_DTPTR**) _coord_arrays;
 
     if (datatype == DB_FLOAT)
     {
@@ -9159,26 +9160,29 @@ _DBQMCalcExtents(float **coord_arrays, int datatype, int *min_index,
  *    I removed the unused argument ny.
  *--------------------------------------------------------------------------*/
 INTERNAL int
-_DBSubsetMinMax2(float arr[], int datatype, float *amin, float *amax, int nx,
+_DBSubsetMinMax2(DB_DTPTR1 arr, int datatype, float *amin, float *amax, int nx,
                  int ixmin, int ixmax, int iymin, int iymax)
 {
     int            k, j, index;
     float          tmin, tmax;
     double         dtmin, dtmax;
     double        *darr = NULL, *damin = NULL, *damax = NULL;
+    float         *farr = NULL;
 
     switch (datatype) {
         case DB_FLOAT:
 
+            farr = (float *)arr;
+
             index = INDEX (ixmin, iymin, nx);
-            tmin = arr[index];
-            tmax = arr[index];
+            tmin = farr[index];
+            tmax = farr[index];
 
             for (j = iymin; j <= iymax; j++) {
                 for (k = ixmin; k <= ixmax; k++) {
                     index = INDEX (k, j, nx);
-                    tmin = MIN (tmin, arr[index]);
-                    tmax = MAX (tmax, arr[index]);
+                    tmin = MIN (tmin, farr[index]);
+                    tmax = MAX (tmax, farr[index]);
                 }
             }
             *amin = tmin;
@@ -9226,13 +9230,14 @@ _DBSubsetMinMax2(float arr[], int datatype, float *amin, float *amax, int nx,
  *      passed in as void* variables.
  *--------------------------------------------------------------------*/
 INTERNAL int
-UM_CalcExtents(float *coord_arrays[], int datatype, int ndims, int nnodes,
+UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
                void *min_extents, void *max_extents)
 {
     int            i, j;
     double       **dcoord_arrays = NULL;
     double        *dmin_extents = NULL, *dmax_extents = NULL;
     float         *fmin_extents = NULL, *fmax_extents = NULL;
+    float        **fcoord_arrays = NULL;
 
     if (datatype == DB_DOUBLE) {
 
@@ -9257,17 +9262,18 @@ UM_CalcExtents(float *coord_arrays[], int datatype, int ndims, int nnodes,
     else {
         fmin_extents = (float *)min_extents;
         fmax_extents = (float *)max_extents;
+        fcoord_arrays = (float **)coord_arrays;
 
         /* Initialize extent arrays */
         for (i = 0; i < ndims; i++) {
-            fmin_extents[i] = coord_arrays[i][0];
-            fmax_extents[i] = coord_arrays[i][0];
+            fmin_extents[i] = fcoord_arrays[i][0];
+            fmax_extents[i] = fcoord_arrays[i][0];
         }
 
         for (i = 0; i < ndims; i++) {
             for (j = 0; j < nnodes; j++) {
-                fmin_extents[i] = MIN(fmin_extents[i], coord_arrays[i][j]);
-                fmax_extents[i] = MAX(fmax_extents[i], coord_arrays[i][j]);
+                fmin_extents[i] = MIN(fmin_extents[i], fcoord_arrays[i][j]);
+                fmax_extents[i] = MAX(fmax_extents[i], fcoord_arrays[i][j]);
             }
         }
 
@@ -10635,13 +10641,15 @@ db_ResetGlobalData_Curve (void) {
  *     Thomas R. Treadway, Wed Jun 28 10:31:45 PDT 2006
  *     Added _topo_dim..
  *
+ *     Mark C. Miller, Tue Jan  6 22:12:43 PST 2009
+ *     Made default value for topo_dim to be NOT SET (-1).
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones) {
 
    memset(&_um, 0, sizeof(_um));
    _um._coordsys = DB_OTHER;
-   _um._topo_dim = ndims;
+   _um._topo_dim = -1;
    _um._facetype = DB_RECTILINEAR;
    _um._ndims = ndims;
    _um._nnodes = nnodes;

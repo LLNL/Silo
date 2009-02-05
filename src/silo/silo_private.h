@@ -771,7 +771,7 @@ typedef struct db_PathnameTag            db_Pathname;
  */
 INTERNAL context_t *context_switch (DBfile *, char *, char **);
 INTERNAL int context_restore (DBfile *, context_t *);
-INTERNAL DBfile *db_close (DBfile *);
+INTERNAL DBfile *silo_db_close (DBfile *);
 INTERNAL DBtoc *db_AllocToc (void);
 INTERNAL int db_FreeToc (DBfile *);
 INTERNAL int db_GetMachDataSize (int);
@@ -793,11 +793,11 @@ INTERNAL int db_ListDir2 (DBfile *, char **, int, int, char **,
                               int *);
 INTERNAL int CSGM_CalcExtents (int, int, int, const int*,
                                  const void *, double *, double *);
-INTERNAL int _DBQMCalcExtents (float **, int, int *, int *, int *, int,
+INTERNAL int _DBQMCalcExtents (DB_DTPTR2, int, int *, int *, int *, int,
                                    int, void *, void *);
-INTERNAL int UM_CalcExtents (float **, int, int, int, void *,
+INTERNAL int UM_CalcExtents (DB_DTPTR2, int, int, int, void *,
                                  void *);
-INTERNAL int _DBSubsetMinMax2 (float *, int, float *, float *, int,
+INTERNAL int _DBSubsetMinMax2 (DB_DTPTR1, int, float *, float *, int,
                                    int, int, int, int);
 INTERNAL int _DBSubsetMinMax3 (float *, int, float *, float *, int, int,
                                int, int, int, int, int, int);

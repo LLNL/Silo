@@ -1581,8 +1581,12 @@ build_rect3d(DBfile * dbfile, int size, int order)
 
     DBPutQuadmesh(dbfile, meshname, NULL, coords, dims, ndims, DB_FLOAT,
                   DB_COLLINEAR, optlist);
-
+#ifndef WIN32
     binf = open("rect3dz.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
+#else
+    binf = open("rect3dz.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IREAD|S_IWRITE);
+#endif
+
 
     DBPutQuadvar1(dbfile, var1name, meshname, d, zdims, ndims, NULL, 0,
                   DB_FLOAT, DB_ZONECENT, optlist);
@@ -1594,7 +1598,11 @@ build_rect3d(DBfile * dbfile, int size, int order)
     close(binf);
     printf("zsize = nz=%d, ny=%d, nx=%d\n", zdims[2], zdims[1], zdims[0]);
 
+#ifndef WIN32
     binf = open("rect3dn.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
+#else
+    binf = open("rect3dn.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IREAD|S_IWRITE);
+#endif
 
     DBPutQuadvar1(dbfile, var3name, meshname, u, dims, ndims, NULL, 0,
                   DB_FLOAT, DB_NODECENT, optlist);
