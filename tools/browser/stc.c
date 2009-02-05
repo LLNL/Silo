@@ -598,6 +598,19 @@ stc_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
    }
 }
 
+
+/*ARGSUSED*/
+static void
+stc_walk1_DBmrgtree(obj_t _self, void *mem, int operation, walk_t *wdata)
+{
+   DBmrgtree   *tree = (DBmrgtree*)mem;
+
+   assert (WALK_PRINT==operation);
+
+   DBWalkMrgtree(tree, DBPrintMrgtree, stdout, DB_PREORDER);
+   return;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    stc_walk2_DBdirectory
@@ -1469,6 +1482,7 @@ stc_silo_types (void) {
             "pointer (array 'self.lgroupings' (primitive 'int'))");
       COMP (groupnames,
             "pointer (array 'self.lgroupings' (primitive 'string'))");
+      COMP (mrgtree_name,      "primitive 'string'");
    } ESTRUCT;
 
    STRUCT (DBmultimeshadj) {
@@ -1515,6 +1529,9 @@ stc_silo_types (void) {
       COMP (extentssize,        "primitive 'int'");
       COMP (extents,
             "pointer (array 'self.nvars,self.extentssize' (primitive 'double'))");
+      COMP (tensor_rank,        "primitive 'int'");
+      IOASSOC (PA_DEFVARTYPE);
+      COMP (mmesh_name,         "primitive 'string'");
    } ESTRUCT;
 
 
@@ -1543,6 +1560,7 @@ stc_silo_types (void) {
             "pointer (array 'self.nmatnos' (primitive 'string'))");
       COMP (matcolors,
             "pointer (array 'self.nmatnos' (primitive 'string'))");
+      COMP (mmesh_name,         "primitive 'string'");
    } ESTRUCT;
 
    STRUCT (DBmultimatspecies) {
@@ -1606,6 +1624,7 @@ stc_silo_types (void) {
             "(pointer (array 'SH1 self.coordtype, self.dims' "
             "(primitive 'self.datatype')))");
       COMP (base_index,         "array 3 (primitive 'int')");
+      COMP (mrgtree_name,       "primitive 'string'");
    } ESTRUCT;
 
    STRUCT (DBquadvar) {
@@ -1789,6 +1808,7 @@ stc_silo_types (void) {
       COMP (zones,              "pointer 'DBcsgzonelist'");
       COMP (bndnames,
             "pointer (array 'self.nbounds' (primitive 'string'))");
+      COMP (mrgtree_name,       "primitive 'string'");
    } ESTRUCT;
 
    STRUCT (DBcsgvar) {
@@ -1853,6 +1873,7 @@ stc_silo_types (void) {
             "pointer (array 'self.nnodes' (primitive 'int'))");
       COMP (nodeno,
             "pointer (array 'self.nnodes' (primitive 'int'))");
+      COMP (mrgtree_name,       "primitive 'string'");
    } ESTRUCT;
 
    STRUCT (DBucdvar) {
@@ -1914,6 +1935,7 @@ stc_silo_types (void) {
             "array 'SH3 3, self.ndims' (primitive 'float')");
       COMP (gnodeno,
             "pointer (array 'self.nels' (primitive 'int'))");
+      COMP (mrgtree_name,       "primitive 'string'");
    } ESTRUCT;
 
    STRUCT (DBmeshvar) {
@@ -2037,6 +2059,28 @@ stc_silo_types (void) {
             "pointer (array 'self.nvalues' (primitive 'self.datatype'))");
    } ESTRUCT;
 
+   STRUCT (DBmrgtree) {
+      WALK1 (stc_walk1_DBmrgtree);
+      COMP (name,               "primitive 'string'");
+      COMP (src_mesh_name,      "primitive 'string'");
+      COMP (src_mesh_type,      "primitive 'int'");
+      COMP (type_info_bits,     "primitive 'int'");
+      COMP (num_nodes,          "primitive 'int'");
+   } ESTRUCT;
+
+   STRUCT(DBgroupelmap) {
+      COMP (name,               "primitive 'string'");
+      COMP (num_segments,       "primitive 'int'");
+      COMP (fracs_data_type,    "primitive 'int'");
+      IOASSOC (PA_DATATYPE);
+      COMP (segment_lengths,
+            "pointer (array 'self.num_segments' (primitive 'int'))");
+      COMP (segment_ids,
+            "pointer (array 'self.num_segments' (primitive 'int'))");
+      COMP (segment_ids,
+            "pointer (array 'self.num_segments' (primitive 'int'))");
+   } ESTRUCT;
+
    STRUCT (toc_t) {
       COMP (type,               "primitive 'int'");
       IOASSOC (PA_BR_OBJTYPE);
@@ -2112,5 +2156,24 @@ stc_silo_types (void) {
       COMP (narrays,            "primitive 'int'");
       COMP (array_names,
             "pointer (array 'self.narrays' (primitive 'string'))");
+      COMP (nmrgtrees,            "primitive 'int'");
+      COMP (mrgtree_names,
+            "pointer (array 'self.nmrgtrees' (primitive 'string'))");
+      COMP (ngroupelmaps,            "primitive 'int'");
+      COMP (groupelmap_names,
+            "pointer (array 'self.ngroupelmaps' (primitive 'string'))");
    } ESTRUCT;
+
+#if 0
+   STRUCT (DBsil) {
+      COMP (nsets,              "primitive 'int'");
+      COMP (setnames,
+            "pointer (array 'self.nsets' (primitive 'string'))");
+      COMP (nedges,             "primitive 'int'");
+      COMP (edgeheads,
+            "pointer (array 'self.nedges' (primitive 'int'))");
+      COMP (edgetails,
+            "pointer (array 'self.nedges' (primitive 'int'))");
+   } ESTRUCT;
+#endif
 }

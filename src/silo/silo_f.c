@@ -217,6 +217,19 @@ DBFortranRemovePointer (int value)
     DBFortranEmptyPointerSpaces++;
 }
 
+FORTRAN
+F_DBALLOCPTR(void *p)
+{
+    return DBFortranAllocPointer(p);
+}
+
+FORTRAN
+F_DBRMPTR(int *pid)
+{
+    DBFortranRemovePointer(*pid);
+    return 0;
+}
+
 /*----------------------------------------------------------------------
  * Routine                                                   F_DBADDIOPT
  *
@@ -3090,6 +3103,7 @@ F_DBPUTCURVE (int *dbid, FCD_DB _name, int *lname, float *xvals, float *yvals,
       dbfile = (DBfile *) DBFortranAccessPointer (*dbid) ;
       *status = DBPutCurve (dbfile, name, xvals, yvals, *datatype,
                 *npts, optlist) ;
+      FREE(name);
    } API_END;
    return 0 ;
 }
@@ -3861,6 +3875,566 @@ F_DBGETHDFNMS()
 {
     API_BEGIN("dbgethdfnms", int, -1) {
         API_RETURN(DBGetFriendlyHDF5Names());
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*-------------------------------------------------------------------------
+ * Routine                                                  F_DBSETDEPWARN
+ *
+ * Purpose: set maximum deprecation warnings issued by silo lib 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Thu Oct 11 20:56:41 PDT 2007
+ *-------------------------------------------------------------------------*/
+FORTRAN
+F_DBSETDEPWARN(int *max_count)
+{
+    API_BEGIN("dbsetdepwarn", int, -1) {
+        API_RETURN(DBSetDeprecateWarnings(*max_count));
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*-------------------------------------------------------------------------
+ * Routine                                                  F_DBGETDEPWARN
+ *
+ * Purpose: Get max. number of deprecation warnings issued by Silo lib 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Thu Oct 11 20:56:41 PDT 2007
+ *-------------------------------------------------------------------------*/
+FORTRAN
+F_DBGETDEPWARN()
+{
+    API_BEGIN("dbgetdepwarn", int, -1) {
+        API_RETURN(DBGetDeprecateWarnings());
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                                 F_DBMKMRGTREE
+ *
+ * Purpose
+ *     Create an mrgtree and return its identifier.
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBMKMRGTREE(int *source_mesh_type, int *type_info_bits,
+    int *max_root_descendents, int *optlist_id, int *tree_id)
+{
+    DBmrgtree *tree = NULL;
+    DBoptlist *optlist = NULL;
+
+    API_BEGIN("dbmkmrgtree", int, -1) {
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+
+        tree = DBMakeMrgtree(*source_mesh_type, *type_info_bits,
+            *max_root_descendents, optlist);
+        *tree_id = DBFortranAllocPointer(tree);
+
+        API_RETURN(tree ? 0 : (-1));
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                               F_DBFREEMRGTREE
+ *
+ * Purpose
+ *     Free an mrg tree.
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBFREEMRGTREE(int *tree_id)
+{
+    DBmrgtree     *tree= NULL;
+
+    API_BEGIN("dbfreemrgtree", int, -1) {
+        tree = (DBmrgtree *) DBFortranAccessPointer(*tree_id);
+        DBFreeMrgtree(tree);
+        DBFortranRemovePointer(*tree_id);
+        *tree_id = -1;
+        API_RETURN(0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                                   DBADDREGION
+ *
+ * Purpose
+ *     Add a region to an mrg tree 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBADDREGION(int *tree_id, FCD_DB region_name, int *lregion_name,
+    int *type_info_bits, int *max_descendents, FCD_DB maps_name,
+    int *lmaps_name, int *nsegs, int *seg_ids, int *seg_sizes,
+    int *seg_types, int *optlist_id, int *status)
+{
+    DBmrgtree *tree = NULL;
+    DBoptlist *optlist = NULL;
+    char *region_nm = NULL, *maps_nm = NULL;
+
+    API_BEGIN("dbaddregion", int, -1) {
+        if (*lregion_name<=0)
+            API_ERROR ("lregion_name", E_BADARGS) ;
+        if (*lmaps_name<=0)
+            API_ERROR ("lmaps_name", E_BADARGS) ;
+
+        tree = (DBmrgtree*) DBFortranAccessPointer(*tree_id);
+        optlist = (DBoptlist*) DBFortranAccessPointer(*optlist_id);
+
+      /*------------------------------
+       *  Duplicate all ascii strings.
+       *-----------------------------*/
+#ifdef CRAY
+        if (!strcmp(_fcdtocp(region_name), DB_F77NULLSTRING))
+            region_nm = NULL ;
+        else
+            region_nm = SW_strndup(_fcdtocp(region_name), *lregion_name);
+
+        if (!strcmp(_fcdtocp(maps_name), DB_F77NULLSTRING))
+            maps_nm = NULL ;
+        else
+            maps_nm = SW_strndup(_fcdtocp(maps_name), *lmaps_name);
+#else
+        if (!strcmp(region_name, DB_F77NULLSTRING))
+            region_nm = NULL ;
+        else
+            region_nm = SW_strndup(region_name, *lregion_name);
+
+        if (!strcmp(maps_name, DB_F77NULLSTRING))
+            maps_nm = NULL ;
+        else
+            maps_nm = SW_strndup(maps_name, *lmaps_name);
+#endif
+
+        *status = DBAddRegion(tree, region_nm, *type_info_bits,
+             *max_descendents, maps_nm, *nsegs, seg_ids, seg_sizes,
+              seg_types, optlist);
+
+        FREE(region_nm);
+        FREE(maps_nm);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                                   DBSETCWR
+ *
+ * Purpose
+ *     Set current working region of an mrg tree 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBSETCWR(int *tree_id, FCD_DB path, int *lpath)
+{
+    DBmrgtree *tree = NULL;
+    char *path_nm = NULL;
+    int err;
+
+    API_BEGIN("dbsetcwr", int, -1) {
+        if (*lpath<=0)
+            API_ERROR ("lpath", E_BADARGS) ;
+
+        tree = (DBmrgtree*) DBFortranAccessPointer(*tree_id);
+
+      /*------------------------------
+       *  Duplicate all ascii strings.
+       *-----------------------------*/
+#ifdef CRAY
+        if (!strcmp(_fcdtocp(path), DB_F77NULLSTRING))
+            path_nm = NULL ;
+        else
+            path_nm = SW_strndup(_fcdtocp(path), *lpath);
+#else
+        if (!strcmp(path, DB_F77NULLSTRING))
+            path_nm = NULL ;
+        else
+            path_nm = SW_strndup(path, *lpath);
+#endif
+
+        err = DBSetCwr(tree, path_nm);
+        FREE(path_nm);
+        API_RETURN(err);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                                  DBPUTMRGTREE
+ *
+ * Purpose
+ *     Write mrg tree to a file 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBPUTMRGTREE(int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
+    FCD_DB mesh_name, int *lmesh_name, int *tree_id, int *optlist_id,
+    int *status)
+{
+    DBfile     *dbfile ;
+    DBoptlist  *optlist ;
+    DBmrgtree  *tree;
+    char     *mrg_tree_nm = NULL, *mesh_nm = NULL;
+
+    API_BEGIN ("dbputmrgtree", int, -1) {
+        if (*lmrg_tree_name<=0)
+            API_ERROR ("lmrg_tree_name", E_BADARGS) ;
+        if (*lmesh_name<=0)
+            API_ERROR ("lmesh_name", E_BADARGS) ;
+
+        dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
+        tree = (DBmrgtree *) DBFortranAccessPointer(*tree_id);
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+
+#ifdef CRAY
+        if (!strcmp(_fcdtocp(mrg_tree_name), DB_F77NULLSTRING))
+            mrg_tree_nm  = NULL;
+        else
+            mrg_tree_nm  = SW_strndup(_fcdtocp(mrg_tree_name), *lmrg_tree_name);
+
+        if (!strcmp(_fcdtocp(mesh_name), DB_F77NULLSTRING))
+            mesh_nm  = NULL;
+        else
+            mesh_nm  = SW_strndup(_fcdtocp(mesh_name), *lmesh_name);
+#else
+        if (!strcmp(mrg_tree_name, DB_F77NULLSTRING))
+            mrg_tree_nm  = NULL;
+        else
+            mrg_tree_nm  = SW_strndup(mrg_tree_name, *lmrg_tree_name);
+
+        if (!strcmp(mesh_name, DB_F77NULLSTRING))
+            mesh_nm  = NULL;
+        else
+            mesh_nm  = SW_strndup(mesh_name, *lmesh_name);
+#endif
+
+        *status = DBPutMrgtree(dbfile, mrg_tree_nm, mesh_nm, tree, optlist);
+
+        FREE(mrg_tree_nm);
+        FREE(mesh_nm);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                                  DBPUTGRPLMAP
+ *
+ * Purpose
+ *     Set current working region of an mrg tree 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *     To populate the segment_data_ids and, if needed, segment_fracs_ids
+ *     the fortran client will need to use DBALLOCPTR to register one of
+ *     its pointers as an integer id and then use the resulting id at
+ *     the appropriate entry in segment_data_ids. The fortran client
+ *     should use DBRMPTR to remove the allocated pointer from the
+ *     table after this call is completed.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBPUTGRPLMAP(int *dbid, FCD_DB map_name, int *lmap_name,
+    int *num_segments, int *groupel_types, int *segment_lengths,
+    int *segment_ids, int *segment_data_ids, int *segment_fracs_ids,
+    int *fracs_data_type, int *optlist_id, int *status)
+{
+    DBfile     *dbfile ;
+    DBoptlist  *optlist ;
+    char       *map_nm = NULL;
+    int       **segment_data = 0;;
+    void      **segment_fracs = 0;
+    int         i;
+
+    API_BEGIN ("dbputgrplmap", int, -1) {
+        if (*map_name<=0)
+            API_ERROR ("lmap_name", E_BADARGS) ;
+
+        dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+
+#ifdef CRAY
+        if (!strcmp(_fcdtocp(map_name), DB_F77NULLSTRING))
+            map_nm  = NULL;
+        else
+            map_nm  = SW_strndup(_fcdtocp(map_name), *lmap_name);
+#else
+        if (!strcmp(map_name, DB_F77NULLSTRING))
+            map_nm  = NULL;
+        else
+            map_nm  = SW_strndup(map_name, *lmap_name);
+#endif
+
+        /* convert array of segment data ids to their pointers */
+        segment_data = (int**) malloc(sizeof(int*));
+        for (i = 0; i < *num_segments; i++)
+            segment_data[i] = DBFortranAccessPointer(segment_data_ids[i]);
+
+        /* convert array of segment fracs ids to their pointers */
+        if (segment_fracs_ids)
+        {
+            segment_fracs = (void**) malloc(sizeof(void*));
+            for (i = 0; i < *num_segments; i++)
+                segment_fracs[i] = DBFortranAccessPointer(segment_fracs_ids[i]);
+        }
+
+        *status = DBPutGroupelmap(dbfile, map_nm, *num_segments,
+            groupel_types, segment_lengths, segment_ids, segment_data,
+            segment_fracs, *fracs_data_type, optlist);
+
+        FREE(segment_data);
+        FREE(segment_fracs);
+        FREE(map_nm);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                                  DBPUTCSGM
+ *
+ * Purpose: Write csg mesh to the silo file
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBPUTCSGM(int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
+    const int *typeflags, const int *bndids, const void *coeffs,
+    int *lcoeffs, int *datatype, const double *extents, FCD_DB zlname,
+    int *lzlname, int *optlist_id, int *status) 
+{
+    DBfile     *dbfile ;
+    DBoptlist  *optlist ;
+    char       *nm = NULL;
+    char       *zl_nm = NULL;
+
+    API_BEGIN ("dbputcsgm", int, -1) {
+        if (*name<=0)
+            API_ERROR ("name", E_BADARGS) ;
+        if (*zlname<=0)
+            API_ERROR ("zlname", E_BADARGS) ;
+
+        dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+
+#ifdef CRAY
+        if (!strcmp(_fcdtocp(name), DB_F77NULLSTRING))
+            nm  = NULL;
+        else
+            nm  = SW_strndup(_fcdtocp(name), *lname);
+        if (!strcmp(_fcdtocp(zlname), DB_F77NULLSTRING))
+            zl_nm  = NULL;
+        else
+            zl_nm  = SW_strndup(_fcdtocp(zlname), *lzlname);
+#else
+        if (!strcmp(name, DB_F77NULLSTRING))
+            nm  = NULL;
+        else
+            nm  = SW_strndup(name, *lname);
+        if (!strcmp(zlname, DB_F77NULLSTRING))
+            zl_nm  = NULL;
+        else
+            zl_nm  = SW_strndup(zlname, *lzlname);
+#endif
+
+        *status = DBPutCsgm(dbfile, nm, *ndims, *nbounds, typeflags,
+            bndids, coeffs, *lcoeffs, *datatype, extents, zl_nm, optlist);
+
+        FREE(nm);
+        FREE(zl_nm);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                                  DBPUTCSGV
+ *
+ * Purpose: Write csg variable to the silo file
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBPUTCSGV1(int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
+    int *lmeshname, void *var_data, int *nvals, int *datatype,
+    int *centering, int *optlist_id, int *status)
+{
+    DBfile     *dbfile ;
+    DBoptlist  *optlist ;
+    char       *nm = NULL;
+    char       *m_nm = NULL;
+
+    API_BEGIN ("dbputcsgv1", int, -1) {
+        if (*name<=0)
+            API_ERROR ("name", E_BADARGS) ;
+        if (*meshname<=0)
+            API_ERROR ("meshname", E_BADARGS) ;
+
+        dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+
+#ifdef CRAY
+        if (!strcmp(_fcdtocp(name), DB_F77NULLSTRING))
+            nm  = NULL;
+        else
+            nm  = SW_strndup(_fcdtocp(name), *lname);
+        if (!strcmp(_fcdtocp(meshname), DB_F77NULLSTRING))
+            m_nm  = NULL;
+        else
+            m_nm  = SW_strndup(_fcdtocp(meshname), *lmeshname);
+#else
+        if (!strcmp(name, DB_F77NULLSTRING))
+            nm  = NULL;
+        else
+            nm  = SW_strndup(name, *lname);
+        if (!strcmp(meshname, DB_F77NULLSTRING))
+            m_nm  = NULL;
+        else
+            m_nm  = SW_strndup(meshname, *lmeshname);
+#endif
+
+        *status = DBPutCsgm(dbfile, nm, m_nm, 1, &nm, &var_data, *nvals,
+            *datatype, *centering, optlist);
+
+        FREE(nm);
+        FREE(m_nm);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                                  DBPUTCSGZL
+ *
+ * Purpose: Write csg zonelist to the silo file
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *--------------------------------------------------------------------*/
+FORTRAN
+F_DBPUTCSGZL(int *dbid, FCD_DB name, int *lname, int *nregs,
+    const int *typeflags, const int *leftids, const int *rightids,
+    const void *xforms, int *lxforms, int *datatype, int *nzones,
+    const int *zonelist, int *optlist_id, int *status) 
+{
+    DBfile     *dbfile ;
+    DBoptlist  *optlist ;
+    char       *nm = NULL;
+
+    API_BEGIN ("dbputcsgzl", int, -1) {
+        if (*name<=0)
+            API_ERROR ("name", E_BADARGS) ;
+
+        dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+
+#ifdef CRAY
+        if (!strcmp(_fcdtocp(name), DB_F77NULLSTRING))
+            nm  = NULL;
+        else
+            nm  = SW_strndup(_fcdtocp(name), *lname);
+#else
+        if (!strcmp(name, DB_F77NULLSTRING))
+            nm  = NULL;
+        else
+            nm  = SW_strndup(name, *lname);
+#endif
+
+        *status = DBPutCSGZonelist(dbfile, nm, *nregs, typeflags, leftids,
+            rightids, xforms, *lxforms, *datatype, *nzones, zonelist,
+            optlist); 
+
+        FREE(nm);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }

@@ -1401,6 +1401,17 @@ browser_DBFreeMatspecies (void *mem, obj_t type) {
    DBFreeMatspecies ((DBmatspecies*)mem);
 }
 
+/*ARGSUSED*/
+static void 
+browser_DBFreeMrgtree(void *mem, obj_t type) {
+   DBFreeMrgtree ((DBmrgtree*)mem);
+}
+
+/*ARGSUSED*/
+static void 
+browser_DBFreeGroupelmap(void *mem, obj_t type) {
+   DBFreeGroupelmap ((DBgroupelmap*)mem);
+}
 
 /*-------------------------------------------------------------------------
  * Function:    browser_DBFreeVar
@@ -1521,6 +1532,7 @@ browser_DBFreePHZonelist(void *mem, obj_t type)
 {
     DBFreePHZonelist((DBphzonelist*)mem);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    browser_DBSaveVar
@@ -1980,6 +1992,26 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             savefunc = NULL;
             freefunc = browser_DBFreeMatspecies;
             typename = "DBmatspecies";
+            goto done;
+        }
+    }
+
+    for (i=0; i<toc->nmrgtrees; i++) {
+        if (!strcmp(toc->mrgtree_names[i], base)) {
+            loadfunc = (void*(*)(DBfile*,char*))DBGetMrgtree;
+            savefunc = NULL;
+            freefunc = browser_DBFreeMrgtree;
+            typename = "DBmrgtree";
+            goto done;
+        }
+    }
+
+    for (i=0; i<toc->ngroupelmaps; i++) {
+        if (!strcmp(toc->groupelmap_names[i], base)) {
+            loadfunc = (void*(*)(DBfile*,char*))DBGetGroupelmap;
+            savefunc = NULL;
+            freefunc = browser_DBFreeGroupelmap;
+            typename = "DBgroupelmap";
             goto done;
         }
     }

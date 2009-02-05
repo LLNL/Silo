@@ -236,7 +236,17 @@ CALLBACK int db_hdf5_PutCompoundarray(DBfile *_dbfile, char *name,
 CALLBACK DBcompoundarray *db_hdf5_GetCompoundarray(DBfile *_dbfile,
                                                    char *name);
 
+/* Mrgtree objects */
+CALLBACK int db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
+    DBmrgtree *tree, DBoptlist *optlist);
+CALLBACK DBmrgtree *db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name);
 
+/* groupel maps */
+CALLBACK int db_hdf5_PutGroupelmap(DBfile *_dbfile, const char *map_name,
+    int num_segments, int *groupel_types, int *segment_lengths,
+    int *segment_ids, int **segment_data, void **segment_fracs,
+    int fracs_data_type, DBoptlist *opts);
+CALLBACK DBgroupelmap *db_hdf5_GetGroupelmap(DBfile *dbfile, const char *name);
 
 #endif /* !NO_CALLBACKS */
 

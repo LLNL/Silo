@@ -33,13 +33,15 @@ States Government or the University of California, and shall not be used
 for advertising or product endorsement purposes.
 
 */
-
+#include "config.h"
 #if defined(_WIN32)
 #include <silo_win32_compatibility.h>
 #else
 #include <unistd.h>
 #endif
+#if HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
 
 /*======================================================================
   ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -71,10 +73,19 @@ for advertising or product endorsement purposes.
   ======================================================================*/
 
 #include <stdio.h>
+#if HAVE_STRING_H
 #include <string.h>
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#endif
 #include "swat.h"
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 
 #define TMP_FILE    "/tmp/listing"
 #define MAXFILES    512

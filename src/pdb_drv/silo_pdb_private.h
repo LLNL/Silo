@@ -100,6 +100,8 @@ CALLBACK DBfacelist *db_pdb_GetFacelist(DBfile*, char*);
 CALLBACK DBzonelist *db_pdb_GetZonelist(DBfile*, char*);
 CALLBACK DBphzonelist *db_pdb_GetPHZonelist(DBfile*, char*);
 CALLBACK DBcsgzonelist *db_pdb_GetCSGZonelist(DBfile*, const char*);
+CALLBACK DBmrgtree *db_pdb_GetMrgtree(DBfile *_dbfile, const char *name);
+CALLBACK DBgroupelmap *db_pdb_GetGroupelmap(DBfile *dbfile, const char *name);
 CALLBACK void *db_pdb_GetVar (DBfile *, char *);
 CALLBACK int db_pdb_GetVarByteLength (DBfile *, char *);
 CALLBACK int db_pdb_GetVarLength (DBfile *, char *);
@@ -116,7 +118,6 @@ CALLBACK int db_pdb_SetDir (DBfile *, char *);
 CALLBACK int db_pdb_Filters (DBfile *, FILE *);
 CALLBACK int db_pdb_NewToc (DBfile *);
 CALLBACK int db_pdb_GetComponentNames (DBfile *, char *, char ***, char ***);
-
 
 PRIVATE int db_pdb_getobjinfo (PDBfile *, char *, char *, int *);
 PRIVATE int db_pdb_getvarinfo (PDBfile *, char *, char *, int *, int *, int);
@@ -187,11 +188,19 @@ CALLBACK int db_pdb_PutPHZonelist(DBfile *, char *,
                                   int, int *, int, int *, char *,
                                   int, int *, int, int *,
                                   int, int, int, DBoptlist *);
-
 CALLBACK int db_pdb_PutCSGZonelist (DBfile *, const char *, int,
                                     const int *, const int *, const int *,
                                     const void *, int, int,
                                     int, const int *, DBoptlist *);
+CALLBACK int db_pdb_PutMrgtree(DBfile *_dbfile, const char *name,
+                               const char *mesh_name, DBmrgtree *tree,
+                               DBoptlist *optlist);
+CALLBACK int db_pdb_PutGroupelmap(DBfile *_dbfile, const char *map_name,
+                                  int num_segments, int *groupel_types,
+                                  int *segment_lengths, int *segment_ids,
+                                  int **segment_data, void **segment_fracs,
+                                  int fracs_data_type, DBoptlist *opts);
+
 CALLBACK int db_pdb_Write (DBfile *, char *, void *, int *, int, int);
 CALLBACK int db_pdb_WriteSlice (DBfile*, char*, void*, int, int[], int[],
 				int[], int[], int);

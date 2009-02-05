@@ -66,7 +66,12 @@ for advertising or product endorsement purposes.
 #include <sys/file.h>       /* For R_OK and F_OK definitions. */
 #endif
 #include <errno.h>          /* For errno definitions. */
+#if HAVE_STRING_H
 #include <string.h>         /* For strerror */
+#endif
+#if HAVE_STRINGS_H
+#include <strings.h>
+#endif
 #if !defined(_WIN32)
 #include <sys/errno.h>      /* For errno definitions. */
 #endif
@@ -77,6 +82,12 @@ for advertising or product endorsement purposes.
 #include <sys/stat.h>
 #endif
 #include <ctype.h>          /* For isalnum */
+#if HAVE_SYS_FCNTL_H
+#include <sys/fcntl.h>      /* for O_RDONLY */
+#endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>          /* for O_RDONLY */
+#endif
 
 /* DB_MAIN must be defined before including silo_private.h. */
 #define DB_MAIN
@@ -134,7 +145,7 @@ PUBLIC char   *_db_err_list[] =
 };
 
 INTERNAL int   _db_err_level = DB_TOP;  /*what errors to issue (default) */
-INTERNAL void  (*_db_err_func)(char *);  /*how to issue errors  */
+INTERNAL void  (*_db_err_func)(const char *);  /*how to issue errors  */
 INTERNAL jstk_t *Jstk = NULL;   /*error jump stack  */
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
 PRIVATE filter_t _db_filter[DB_NFILTERS];
@@ -159,7 +170,8 @@ SILO_Globals_t SILO_Globals = {
     FALSE, /* enableChecksums */
     FALSE, /* enableCompression */
     FALSE, /* enableFriendlyHDF5Names */
-    FALSE  /* enableGrabDriver */
+    FALSE, /* enableGrabDriver */
+    3      /* maxDeprecateWarnings */
 };
 SILO_Compression_t SILO_Compression = {
     "\0" 
@@ -182,7 +194,7 @@ SILO_Compression_t SILO_Compression = {
  *    If s is "" then we use the previous value of s.
  *-------------------------------------------------------------------------*/
 INTERNAL int
-db_perror(char *s, int errorno, char *fname)
+db_perror(const char *s, int errorno, char *fname)
 {
     int            call_abort = 0;
     static char    old_s[256];
@@ -632,6 +644,12 @@ db_AllocToc(void)
     toc->array_names = NULL;
     toc->narrays = 0;
 
+    toc->mrgtree_names = NULL;
+    toc->nmrgtrees = 0;
+
+    toc->groupelmap_names = NULL;
+    toc->ngroupelmaps = 0;
+
     return(toc);
 }
 
@@ -853,6 +871,24 @@ db_FreeToc(DBfile *dbfile)
                 FREE(toc->array_names[i]);
             }
             FREE(toc->array_names);
+        }
+    }
+
+    if (toc->nmrgtrees > 0) {
+        if (toc->mrgtree_names) {
+            for (i = 0; i < toc->nmrgtrees; i++) {
+                FREE(toc->mrgtree_names[i]);
+            }
+            FREE(toc->mrgtree_names);
+        }
+    }
+
+    if (toc->ngroupelmaps > 0) {
+        if (toc->groupelmap_names) {
+            for (i = 0; i < toc->ngroupelmaps; i++) {
+                FREE(toc->groupelmap_names[i]);
+            }
+            FREE(toc->groupelmap_names);
         }
     }
 
@@ -1085,6 +1121,12 @@ DBGetObjtypeTag(char *typename)
     else if (STR_EQUAL(typename, "edgelist"))
         tag = DB_EDGELIST;
 
+    else if (STR_EQUAL(typename, "mrgtree"))
+        tag = DB_MRGTREE;
+
+    else if (STR_EQUAL(typename, "groupelmap"))
+        tag = DB_GROUPELMAP;
+
     else
         tag = DB_USERDEF;
 
@@ -1184,6 +1226,10 @@ DBGetObjtypeName(int type)
             return ("curve");
         case DB_ARRAY:
             return ("compoundarray");
+        case DB_MRGTREE:
+            return ("mrgtree");
+        case DB_GROUPELMAP:
+            return ("groupelmap");
         case DB_USERDEF:
             return ("unknown");
     }
@@ -2208,6 +2254,29 @@ DBGetFriendlyHDF5Names()
 }
 
 /*----------------------------------------------------------------------
+ * Routine:  DBSetDeprecateWarnings
+ *
+ * Purpose:  Set number of deprecate warnings Silo should print.
+ *           Default is 3. Setting to zero effectively disables.
+ *
+ * Programmer:  Mark C. Miller, Thu Oct 11 16:50:12 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBSetDeprecateWarnings(int count)
+{
+    int oldCount = SILO_Globals.maxDeprecateWarnings;
+    SILO_Globals.maxDeprecateWarnings = count;
+    return oldCount;
+}
+
+PUBLIC int
+DBGetDeprecateWarnings()
+{
+    return SILO_Globals.maxDeprecateWarnings;
+}
+
+/*----------------------------------------------------------------------
  * Routine:  DBGrabDriver
  *
  * Purpose:  Set and return the low level driver file handle
@@ -2216,13 +2285,19 @@ DBGetFriendlyHDF5Names()
  *
  * Description:  This routine returns a ponter to the driver-native
  * file handle.
+ *
+ * Modifications
+ *   Mark C. Miller, Thu Oct 11 15:36:10 PDT 2007
+ *   Record fact file was grabbed by adding var at top-level
  *--------------------------------------------------------------------*/
 PUBLIC void * 
 DBGrabDriver(DBfile *file)
 {
-    void *rtn=(void *) DB_UNKNOWN;
+    void *rtn = 0;
     if (file) {
-       if (file->pub.GrabId > 0) {
+       if (file->pub.GrabId > (void *) 0) {
+          int grab_val = 1;
+          DBWrite(file, "/_was_grabbed", &grab_val, &grab_val, 1, DB_INT);
           SILO_Globals.enableGrabDriver = TRUE;
           rtn = (void *) file->pub.GrabId;
        }
@@ -2824,7 +2899,7 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
  *
  *-------------------------------------------------------------------------*/
 PUBLIC void
-DBShowErrors(int level, void(*func)(char*))
+DBShowErrors(int level, void(*func)(const char*))
 {
     static int     old_level = DB_NONE;
     static int     nested_suspend = 0;
@@ -3870,7 +3945,7 @@ DBGetAtt(DBfile *dbfile, const char *varname, const char *attname)
 {
     void *retval = NULL;
 
-    API_DEPRECATE2("DBGetAtt", void *, NULL, varname) {
+    API_DEPRECATE2("DBGetAtt", void *, NULL, varname, "4.6") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (!varname || !*varname)
@@ -4169,7 +4244,7 @@ DBListDir(DBfile *dbfile, char *argv[], int argc)
 {
     int retval;
 
-    API_DEPRECATE("DBListDir", int, -1) {
+    API_DEPRECATE("DBListDir", int, -1, "4.6") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -4674,7 +4749,7 @@ DBReadAtt(DBfile *dbfile, const char *vname, const char *aname, void *results)
 {
     int retval;
 
-    API_DEPRECATE2("DBReadAtt", int, -1, vname) {
+    API_DEPRECATE2("DBReadAtt", int, -1, vname, "4.6") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -5360,7 +5435,7 @@ DBGetQuadvar1 (DBfile *dbfile, const char *varname, float *var, int *dims,
     int            nbytes, i;
     DBquadvar     *qv = NULL;
 
-    API_BEGIN2 ("DBGetQuadvar1", int, -1, varname) {
+    API_DEPRECATE2 ("DBGetQuadvar1", int, -1, varname, "4.6") {
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR("DBGetQuadvar1", E_GRABBED) ; 
         if (NULL == (qv = DBGetQuadvar (dbfile, varname)))
@@ -8939,6 +9014,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         _csgm._guihide = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MRGTREE_NAME:
+                        _csgm._mrgtree_name = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_REGION_PNAMES:
+                        _csgm._region_pnames = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -9086,6 +9169,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         _pm._gnodeno = (int*)optlist->values[i];
                         break;
 
+                    case DBOPT_MRGTREE_NAME:
+                        _pm._mrgtree_name = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_REGION_PNAMES:
+                        _pm._region_pnames = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -9209,6 +9300,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         _qm._guihide = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MRGTREE_NAME:
+                        _qm._mrgtree_name = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_REGION_PNAMES:
+                        _qm._region_pnames = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -9320,6 +9419,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_HIDE_FROM_GUI:
                         _um._guihide = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_MRGTREE_NAME:
+                        _um._mrgtree_name = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_REGION_PNAMES:
+                        _um._region_pnames = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -9486,6 +9593,22 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_ALLOWMAT0:
                         _mm._allowmat0 = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_MRGTREE_NAME:
+                        _mm._mrgtree_name = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_REGION_PNAMES:
+                        _mm._region_pnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_MMESH_NAME:
+                        _mm._mmesh_name = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_TENSOR_RANK:
+                        _mm._tensor_rank = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -9683,7 +9806,7 @@ DBGetComponentNames(DBfile *dbfile, const char *objname,
 {
     int retval;
 
-    API_DEPRECATE2("DBGetComponentNames", int, -1, objname)
+    API_DEPRECATE2("DBGetComponentNames", int, -1, objname, "4.6")
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
@@ -9865,6 +9988,8 @@ db_ResetGlobalData_Csgmesh () {
    _csgm._hi_offset_set = FALSE;
    _csgm._lo_offset_set = FALSE;
    _csgm._group_no = -1;
+   _csgm._mrgtree_name = NULL;
+   _csgm._region_pnames = NULL;
 
    return 0;
 }
@@ -9904,6 +10029,8 @@ db_ResetGlobalData_PointMesh (int ndims) {
    _pm._time_set = FALSE;
    _pm._dtime_set = FALSE;
    _pm._group_no = -1;
+   _pm._mrgtree_name = NULL;
+   _pm._region_pnames = NULL;
    return 0;
 }
 
@@ -9967,6 +10094,8 @@ db_ResetGlobalData_QuadMesh (int ndims) {
    }
    _qm._baseindex_set = 0;
    _qm._group_no = -1;
+   _qm._mrgtree_name = NULL;
+   _qm._region_pnames = NULL;
 
    return 0;
 }
@@ -10051,6 +10180,8 @@ db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones) {
    _um._hi_offset_set = FALSE;
    _um._lo_offset_set = FALSE;
    _um._group_no = -1;
+   _um._mrgtree_name = NULL;
+   _um._region_pnames = NULL;
 
    return 0;
 }
@@ -10137,6 +10268,10 @@ db_ResetGlobalData_MultiMesh (void) {
    _mm._lgroupings = 0;
    _mm._groupings = NULL;
    _mm._groupnames = NULL;
+   _mm._mrgtree_name = NULL;
+   _mm._region_pnames = NULL;
+   _mm._mmesh_name = NULL;
+   _mm._tensor_rank = 0;
    return 0;
 }
 
@@ -10190,6 +10325,13 @@ db_FullName2BaseName(const char *path)
  *
  *    Mark C. Miller, July 20, 2005 
  *
+ * Modifications:
+ *    Mark C. Miller, Wed Oct  3 21:51:42 PDT 2007
+ *    Made it handle null string as no chars output and empty string
+ *    ("") as '\n' output so during readback, we can construct either
+ *    null ptrs or emtpy strings correctly.
+ *    Made it handle a variable length list where n is unspecified.
+ *
  *--------------------------------------------------------------------*/
 INTERNAL void 
 db_StringArrayToStringList(const char *const *const strArray, int n,
@@ -10198,18 +10340,50 @@ db_StringArrayToStringList(const char *const *const strArray, int n,
     int i, len;
     char *s = NULL;
 
+    /* if n is unspecified, determine it by counting forward until
+       we get a null pointer */
+    if (n < 0)
+    {
+        n = 0;
+        while (strArray[n] != 0)
+            n++;
+    }
+
     /*
      * Create a character string which is a semi-colon separated list of
      * mesh names.
      */
-     for (i=len=0; i<n; i++) len += strlen(strArray[i])+1;
+     for (i=len=0; i<n; i++)
+     {
+         if (strArray[i])
+         {
+             if (strlen(strArray[i]) == 0)
+                 len += 2;
+             else
+                 len += strlen(strArray[i])+1;
+         }
+         else
+         {
+             len += 1;
+         }
+     }
      s = malloc(len+1);
      for (i=len=0; i<n; i++) {
          if (i) s[len++] = ';';
-         strcpy(s+len, strArray[i]);
-         len += strlen(strArray[i]);
+         if (strArray[i])
+         {
+             if (strlen(strArray[i]) == 0)
+             {
+                 s[len++] = '\n';
+             }
+             else
+             {
+                 strcpy(s+len, strArray[i]);
+                 len += strlen(strArray[i]);
+             }
+         }
      }
-     len++; /*count null*/
+     len++; /*count last null*/
 
      *strList = s;
      *m = len;
@@ -10229,17 +10403,41 @@ db_StringArrayToStringList(const char *const *const strArray, int n,
  *
  *    Mark C. Miller, Fri Jul 14 23:39:32 PDT 2006
  *    Fixed problem with empty strings in the input list being skipped
+ *
+ *    Mark C. Miller, Wed Oct  3 21:54:35 PDT 2007
+ *    Made it return empty or null strings depending on input
+ *    Made it handle a variable length list where n is unspecified
  *--------------------------------------------------------------------*/
 INTERNAL char **
 db_StringListToStringArray(char *strList, int n)
 {
-    int i,l;
-    char **retval = (char**) calloc(n, sizeof(char*));
+    int i,l, add1 = 0;
+    char **retval;
+
+    /* if n is unspecified (<0), compute it by counting semicolons */
+    if (n < 0)
+    {
+        add1 = 1;
+        n = 1;
+        while (strList[i] != '\0')
+        {
+            if (strList[i] == ';')
+                n++;
+            i++;
+        }
+    }
+    
+    retval = (char**) calloc(n+add1, sizeof(char*));
     for (i=0, l=0; i<n; i++) {
         if (strList[l] == ';')
         {
-            retval[i] = STRDUP("");
+            retval[i] = 0; 
             l += 1;
+        }
+        else if (strList[l] == '\n')
+        {
+            retval[i] = STRDUP(""); 
+            l += 2;
         }
         else
         {
@@ -10248,6 +10446,7 @@ db_StringListToStringArray(char *strList, int n)
             l += strlen(tok?tok:"")+1;
         }
     }
+    if (add1) retval[i] = 0;
     return retval;
 }
 
@@ -10908,3 +11107,899 @@ char *db_unsplit_path ( const db_Pathname *p )
 /*
  * END CODE FROM JIM REUS' DSL }
  */
+
+#if 0
+/*----------------------------------------------------------------------
+ *  Routine                                                DBMakeSil
+ *
+ *  Purpose Allocate an sil object of the requested size and
+ *  initialize it.
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007 
+ *--------------------------------------------------------------------*/
+PUBLIC DBsil *
+DBMakeSil(int maxsets, int maxedges)
+{
+    DBsil *sil = NULL;
+
+    API_BEGIN("DBMakeSil", DBsil *, NULL) {
+        if (maxsets <= 0)
+            API_ERROR("maxsets", E_BADARGS);
+        if (maxedges <= 0)
+            API_ERROR("maxedges", E_BADARGS);
+        if (NULL == (sil = ALLOC(DBsil)))
+            API_ERROR(NULL, E_NOMEM);
+        if (NULL == (sil->edgetails = ALLOC_N(int, maxedges))) {
+            API_ERROR(NULL, E_NOMEM);
+        }
+        if (NULL == (sil->edgeheads = ALLOC_N(int, maxedges))) {
+            API_ERROR(NULL, E_NOMEM);
+        }
+        if (NULL == (sil->setnames = ALLOC_N(char *, maxsets))) {
+            API_ERROR(NULL, E_NOMEM);
+        }
+
+        sil->nsets = 0;
+        sil->maxsets = maxsets;
+
+        sil->nedges = 0;
+        sil->maxedges = maxedges;
+
+        API_RETURN(sil);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                                DBFreeSil
+ *
+ *  Purpose Release the storage associated with the given sil object.
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007 
+ *
+ *  Returns
+ *
+ *      Returns 0 on success, -1 on failure.
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBFreeSil(DBsil *sil)
+{
+    int i;
+    API_BEGIN("DBFreeSil", int, -1) {
+        if (!sil) {
+            API_ERROR("sil pointer", E_BADARGS);
+        }
+        FREE(sil->edgetails);
+        FREE(sil->edgeheads);
+        for (i = 0; i < sil->nsets; i++)
+            FREE(sil->setnames[i]);
+        FREE(sil->setnames);
+    }
+    API_END;
+
+    return(0);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                                     DBAddSet
+ *
+ *  Purpose
+ *
+ *      Add a set to a sil 
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007 
+ *
+ *  Returns
+ *
+ *      Returns id of added set on success; -1 on failure 
+ *
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBAddSet(DBsil *sil, const char *setname)
+{
+    API_BEGIN("DBAddSet", int, -1) {
+        if (!sil)
+            API_ERROR("sil pointer", E_BADARGS);
+        if (!setname || !*setname)
+            API_ERROR("setname", E_BADARGS);
+        if (sil->nsets >= sil->maxsets) {
+            API_ERROR("sil nsets", E_BADARGS);
+        }
+
+        if (NULL == (sil->setnames[sil->nsets] =
+                     STRDUP(setname))) {
+            FREE(sil->setnames[sil->nsets]);
+            API_ERROR(NULL, E_NOMEM);
+        }
+        sil->nsets++;
+    }
+    API_END;
+
+    return(sil->nsets-1);
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                                    DBAddEdge
+ *
+ *  Purpose
+ *
+ *      Add an edge to a sil oject 
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007 
+ *
+ *  Returns
+ *
+ *      Returns non-negative on success (edge count), -1 on failure 
+ *
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBAddEdge(DBsil *sil, int set_at_head, int set_at_tail) 
+{
+    API_BEGIN("DBAddEdge", int, -1) {
+        if (!sil)
+            API_ERROR("sil pointer", E_BADARGS);
+        if (sil->nedges >= sil->maxedges) {
+            API_ERROR("sil nedges", E_BADARGS);
+        }
+        if (set_at_head < 0 || set_at_head >= sil->nsets) {
+            API_ERROR("set_at_head", E_BADARGS);
+        }
+        if (set_at_tail < 0 || set_at_tail >= sil->nsets) {
+            API_ERROR("set_at_tail", E_BADARGS);
+        }
+            sil->edgeheads[sil->nedges] = set_at_head;
+            sil->edgetails[sil->nedges] = set_at_tail;
+
+        sil->nedges++;
+    }
+    API_END;
+
+    return(sil->nedges);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBPutSil
+ *
+ * Purpose:     Writes a sil object to a silo file 
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBPutSil(DBfile *dbfile, const char *name, const DBsil *sil, 
+    const DBoptlist *opts)
+{
+    int retval;
+
+    API_BEGIN2("DBPutSil", int, -1, name)
+    {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutSil", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("sil name", E_BADARGS);
+        if (db_VariableNameValid((char *)name) == 0)
+            API_ERROR("sil name", E_INVALIDNAME);
+        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+            API_ERROR("overwrite not allowed", E_NOOVERWRITE);
+        if (NULL == dbfile->pub.p_sil)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.p_sil) (dbfile, (char *)name, sil, opts); 
+
+        db_FreeToc(dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /* BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBGetSil
+ *
+ * Purpose:     Read a sil object from the file.
+ *
+ * Return:      Success:        pointer to fresh sil obj
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007
+ *
+ *-------------------------------------------------------------------------*/
+PUBLIC DBsil *
+DBGetSil (DBfile *dbfile, const char *name)
+{
+    DBsil *retval = NULL;
+
+    API_BEGIN2("DBGetSil", DBsil *, NULL, name)
+    {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetSil", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("sil name", E_BADARGS);
+        if (NULL == dbfile->pub.g_sil)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.g_sil) (dbfile, (char *)name);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP;  /* BEWARE: If API_RETURN above is removed use API_END */
+}
+#endif
+
+static void
+DBFreeMrgnode(DBmrgtnode *tnode, int walk_order, void *data)
+{
+    if (tnode == 0)
+        return;
+    FREE(tnode->name);
+    if (tnode->narray > 0)
+    {
+        if (tnode->names[1] != 0)
+        {
+            int i;
+            for (i = 0; i < tnode->narray; i++)
+                FREE(tnode->names[i]);
+            FREE(tnode->names);
+        }
+        else
+        {
+            FREE(tnode->names[0]);
+            FREE(tnode->names);
+        }
+    }
+    FREE(tnode->maps_name);
+    FREE(tnode->seg_ids);
+    FREE(tnode->seg_lens);
+    FREE(tnode->seg_types);
+    FREE(tnode->children);
+    FREE(tnode);
+}
+
+void DBFreeMrgtree(DBmrgtree *tree)
+{
+    if (tree == 0)
+        return;
+    DBWalkMrgtree(tree, DBFreeMrgnode, 0, DB_POSTORDER);
+    FREE(tree->name);
+    FREE(tree->src_mesh_name);
+    FREE(tree);
+}
+
+void DBPrintMrgtree(DBmrgtnode *tnode, int walk_order, void *data)
+{
+    FILE *f = (FILE *) data;
+    int level = -1;
+    DBmrgtnode *tmp = tnode;
+
+    /* walk to top to determine level of indentation */
+    while (tmp != 0)
+    {
+        tmp = tmp->parent;
+        level++;
+    }
+    level *= 3;
+
+    if (f == 0)
+        f = stdout;
+
+    /* print this node using special '*' field width specifier */
+    fprintf(f, "%*s name = \"%s\" {\n", level, "", tnode->name);
+    fprintf(f, "%*s     walk_order = %d\n", level, "", tnode->walk_order);
+    fprintf(f, "%*s         parent = \"%s\"\n", level, "", tnode->parent?tnode->parent->name:"");
+    fprintf(f, "%*s         narray = %d\n", level, "", tnode->narray);
+    if (tnode->narray > 0)
+    {
+        if (tnode->names[1] != 0)
+        {
+            fprintf(f, "%*s          names = ...\n", level, "");
+            int j;
+            for (j = 0; j < tnode->narray; j++)
+                fprintf(f, "%*s                  \"%s\"\n", level, "", tnode->names[j]);
+        }
+        else
+        {
+            fprintf(f, "%*s          names = \"%s\"\n", level, "", tnode->names[0]);
+        }
+    }
+    fprintf(f, "%*s type_info_bits = %d\n", level, "", tnode->type_info_bits);
+    fprintf(f, "%*s   max_children = %d\n", level, "", tnode->max_children);
+    fprintf(f, "%*s      maps_name = \"%s\"\n", level, "", tnode->maps_name?tnode->maps_name:"");
+    fprintf(f, "%*s          nsegs = %d\n", level, "", tnode->nsegs);
+    if (tnode->nsegs > 0)
+    {
+        int j;
+        fprintf(f, "%*s       segments =     ids   |   lens   |   types\n", level, "");
+        for (j = 0; j < tnode->nsegs; j++)
+            fprintf(f, "%*s                  %.10d|%.10d|%.10d\n", level, "",
+                tnode->seg_ids[j], tnode->seg_lens[j], tnode->seg_types[j]);
+
+    }
+    fprintf(f, "%*s   num_children = %d\n", level, "", tnode->num_children);
+    if (tnode->num_children > 0)
+    {
+        int j;
+        for (j = 0; j < tnode->num_children && tnode->children[j] != 0; j++)
+            fprintf(f, "%*s              \"%s\"\n", level, "", tnode->children[j]->name);
+    }
+    fprintf(f, "%*s} \"%s\"\n", level, "", tnode->name);
+}
+
+void
+DBLinearizeMrgtree(DBmrgtnode *tnode, int walk_order, void *data)
+{
+    DBmrgtnode **ltree = (DBmrgtnode **) data;
+    ltree[walk_order] = tnode;
+    tnode->walk_order = walk_order;
+}
+
+static void
+DBWalkMrgtree_r(DBmrgtnode *node, int *walk_order, DBmrgwalkcb wcb, void *wdata,
+    int traversal_flags)
+{
+    if (node == 0)
+        return;
+
+    /* if we're at a terminal node, issue the callback */
+    if (node->children == 0)
+    {
+       wcb(node, *walk_order, wdata);
+       (*walk_order)++;
+    }
+    else
+    {
+        int i;
+
+        /* issue callback first if in pre-order mode */
+        if (traversal_flags & DB_PREORDER)
+        {
+            wcb(node, *walk_order, wdata);
+            (*walk_order)++;
+        }
+
+        /* recurse on all the children */
+        for (i = 0; i < node->num_children && node->children[i] != 0; i++)
+            DBWalkMrgtree_r(node->children[i], walk_order, wcb, wdata,
+                traversal_flags);
+
+        /* issue callback last if in post-order mode */
+        if (traversal_flags & DB_POSTORDER)
+        {
+            wcb(node, *walk_order, wdata);
+            (*walk_order)++;
+        }
+    }
+}
+
+void
+DBWalkMrgtree(DBmrgtree *tree, DBmrgwalkcb cb, void *wdata, int traversal_flags)
+{
+    int walk_order = 0;
+    DBmrgtnode *start = tree->root;
+
+    if (cb == 0)
+        return;
+
+    if (traversal_flags & DB_FROMCWR)
+        start = tree->cwr;
+
+    DBWalkMrgtree_r(start, &walk_order, cb, wdata, traversal_flags);
+}
+
+PUBLIC DBmrgtree *
+DBMakeMrgtree(int source_mesh_type, int type_info_bits,
+    int max_root_descendents, DBoptlist *opts)
+{
+    DBmrgtree *tree = NULL;
+    DBmrgtnode *root = NULL;
+
+    API_BEGIN("DBMakeMrgtree", DBmrgtree *, NULL) {
+        if (!(source_mesh_type == DB_MULTIMESH ||
+              source_mesh_type == DB_QUADMESH ||
+              source_mesh_type == DB_UCDMESH ||
+              source_mesh_type == DB_POINTMESH ||
+              source_mesh_type == DB_CSGMESH ||
+              source_mesh_type == DB_CURVE))
+            API_ERROR("source_mesh_type", E_BADARGS);
+        if (type_info_bits != 0)
+            API_ERROR("type_info_bits", E_BADARGS);
+        if (max_root_descendents <= 0)
+            API_ERROR("max_root_descendents", E_BADARGS);
+        if (NULL == (tree = ALLOC(DBmrgtree)))
+            API_ERROR(NULL, E_NOMEM);
+        if (NULL == (root = ALLOC(DBmrgtnode)))
+            API_ERROR(NULL, E_NOMEM);
+        memset(root, 0, sizeof(DBmrgtnode));
+        if (NULL == (root->children = ALLOC_N(DBmrgtnode*, max_root_descendents))) {
+            API_ERROR(NULL, E_NOMEM);
+        }
+
+        /* fill in the tree header */
+        tree->type_info_bits = type_info_bits;
+        tree->src_mesh_type = source_mesh_type;
+        tree->src_mesh_name = 0;
+        tree->name = 0;
+
+        /* update internal node info */
+        root->walk_order = -1;
+        root->parent = 0;
+
+        /* update client data data */
+        root->name = STRDUP("whole");
+        root->narray = 0;
+        root->names = 0;
+        root->type_info_bits = 0;
+        root->num_children = 0;
+        root->max_children = max_root_descendents;
+        root->maps_name = 0;
+        root->nsegs = 0;
+        root->seg_ids = 0;
+        root->seg_lens = 0;
+        root->seg_types = 0;
+
+        /* add the new tnode to the tree */
+        tree->root = root;
+        tree->cwr = root;
+        tree->num_nodes = 1;
+
+        API_RETURN(tree);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+PUBLIC int
+DBAddRegion(DBmrgtree *tree, const char *region_name,
+    int type_info_bits, int max_descendents, 
+    const char *maps_name, int nsegs, int *seg_ids,
+    int *seg_lens, int *seg_types, DBoptlist *opts)
+{
+    DBmrgtnode *tnode = NULL;
+
+    API_BEGIN("DBAddRegion", int, -1) {
+
+        if (!tree)
+            API_ERROR("tree pointer", E_BADARGS);
+        if (!region_name || !*region_name)
+            API_ERROR("region_name", E_BADARGS);
+        if (type_info_bits != 0)
+            API_ERROR("type_info_bits", E_BADARGS);
+        if (max_descendents < 0)
+            API_ERROR("max_descendents", E_BADARGS);
+        if (tree->cwr->num_children >= tree->cwr->max_children) {
+            API_ERROR("exceeded max_descendents", E_BADARGS);
+        }
+        if (NULL == (tnode = ALLOC(DBmrgtnode)))
+            API_ERROR(NULL, E_NOMEM);
+        memset(tnode, 0, sizeof(DBmrgtnode));
+        if (NULL == (tnode->children = ALLOC_N(DBmrgtnode*, max_descendents))) {
+            API_ERROR(NULL, E_NOMEM);
+        }
+        if (nsegs > 0)
+        {
+            if (seg_ids == 0)
+                API_ERROR("seg_ids", E_BADARGS);
+            if (seg_lens == 0)
+                API_ERROR("seg_lens", E_BADARGS);
+            if (seg_types == 0)
+                API_ERROR("seg_types", E_BADARGS);
+        }
+
+        /* update internal node info */
+        tnode->walk_order = -1;
+        tnode->parent = tree->cwr;
+
+        /* update client data data */
+        tnode->name = STRDUP(region_name); 
+        tnode->narray = 0;
+        tnode->names = 0;
+        tnode->type_info_bits = type_info_bits;
+        tnode->num_children = 0;
+        tnode->max_children = max_descendents;
+        tnode->maps_name = STRDUP(maps_name);
+        tnode->nsegs = nsegs;
+        if (nsegs > 0)
+        {
+            int i;
+
+            if (NULL == (tnode->seg_ids = ALLOC_N(int, nsegs))) {
+                API_ERROR(NULL, E_NOMEM);
+            }
+            if (NULL == (tnode->seg_lens = ALLOC_N(int, nsegs))) {
+                API_ERROR(NULL, E_NOMEM);
+            }
+            if (NULL == (tnode->seg_types = ALLOC_N(int, nsegs))) {
+                API_ERROR(NULL, E_NOMEM);
+            }
+
+            for (i = 0; i < nsegs; i++)
+            {
+                tnode->seg_ids[i] = seg_ids[i];
+                tnode->seg_lens[i] = seg_lens[i]; 
+                tnode->seg_types[i] = seg_types[i];
+            }
+        }
+        else
+        {
+            tnode->seg_ids = 0;
+            tnode->seg_lens = 0;
+            tnode->seg_types = 0;
+        }
+
+
+        /* add the new tnode to the tree */
+        tree->cwr->children[tree->cwr->num_children] = tnode;
+        tree->cwr->num_children++;
+        tree->num_nodes++;
+
+    }
+    API_END;
+
+    return(tree->cwr->num_children-1);
+}
+
+PUBLIC int
+DBAddRegionArray(DBmrgtree *tree, int nregns,
+    const char **regn_names, int type_info_bits,
+    const char *maps_name, int nsegs, int *seg_ids,
+    int *seg_lens, int *seg_types, DBoptlist *opts)
+{
+    DBmrgtnode *tnode = NULL;
+    int i;
+
+    API_BEGIN("DBAddRegionArray", int, -1) {
+
+        if (!tree)
+            API_ERROR("tree pointer", E_BADARGS);
+        if (nregns <= 0)
+            API_ERROR("nregns", E_BADARGS);
+        if (tree->cwr->num_children + nregns >= tree->cwr->max_children) {
+            API_ERROR("exceeded max_descendents", E_BADARGS);
+        }
+        if (NULL == (tnode = ALLOC(DBmrgtnode)))
+            API_ERROR(NULL, E_NOMEM);
+        memset(tnode, 0, sizeof(DBmrgtnode));
+        if (nsegs > 0)
+        {
+            if (seg_ids == 0)
+                API_ERROR("seg_ids", E_BADARGS);
+            if (seg_lens == 0)
+                API_ERROR("seg_lens", E_BADARGS);
+            if (seg_types == 0)
+                API_ERROR("seg_types", E_BADARGS);
+        }
+
+        /* update internal node info */
+        tnode->walk_order = -1;
+        tnode->parent = tree->cwr;
+
+        /* update client data data */
+        tnode->name = 0;
+        tnode->narray = nregns;
+        if (regn_names[1] == 0)
+        {
+            if (NULL == (tnode->names = ALLOC_N(char*, 1))) {
+                API_ERROR(NULL, E_NOMEM);
+            }
+            tnode->names[0] = STRDUP(regn_names[0]);
+        }
+        else
+        {
+            if (NULL == (tnode->names = ALLOC_N(char*, nregns))) {
+                API_ERROR(NULL, E_NOMEM);
+            }
+            for (i = 0; i < nregns; i++)
+                tnode->names[i] = STRDUP(regn_names[i]);
+        }
+        tnode->type_info_bits = type_info_bits;
+        tnode->num_children = 0;
+        tnode->max_children = 0;
+        tnode->children = 0;
+        tnode->maps_name = STRDUP(maps_name);
+        tnode->nsegs = nsegs;
+        if (nsegs > 0)
+        {
+
+            if (NULL == (tnode->seg_ids = ALLOC_N(int, nsegs))) {
+                API_ERROR(NULL, E_NOMEM);
+            }
+            if (NULL == (tnode->seg_lens = ALLOC_N(int, nsegs))) {
+                API_ERROR(NULL, E_NOMEM);
+            }
+            if (NULL == (tnode->seg_types = ALLOC_N(int, nsegs))) {
+                API_ERROR(NULL, E_NOMEM);
+            }
+
+            for (i = 0; i < nsegs; i++)
+            {
+                tnode->seg_ids[i] = seg_ids[i];
+                tnode->seg_lens[i] = seg_lens[i]; 
+                tnode->seg_types[i] = seg_types[i];
+            }
+        }
+        else
+        {
+            tnode->seg_ids = 0;
+            tnode->seg_lens = 0;
+            tnode->seg_types = 0;
+        }
+
+        /* add the new tnode to the tree */
+        tree->cwr->children[tree->cwr->num_children] = tnode;
+        tree->cwr->num_children++;
+        tree->num_nodes++;
+
+    }
+    API_END;
+
+    return(tree->cwr->num_children-1);
+}
+
+#warning ONLY DOES UP OR DOWN ON LEVEL
+PUBLIC int
+DBSetCwr(DBmrgtree *tree, const char *path)
+{
+    int retval = -1;
+
+    API_BEGIN("DBSetCwr", int, -1)
+    {
+        if (tree == 0)
+            API_ERROR("tree", E_BADARGS);
+        if (!path || !*path)
+            API_ERROR("path", E_BADARGS);
+        if (path[0] == '.' && path[1] == '.')
+        {
+            DBmrgtnode *tnode = tree->cwr;
+            if (tnode != tree->root)
+            {
+                tree->cwr = tnode->parent;
+                retval = 1;
+            }
+        }
+        else
+        {
+            DBmrgtnode *tnode = tree->cwr;
+            int i = 0;
+            while (i < tnode->num_children)
+            {
+                if (strcmp(tnode->children[i]->name, path) == 0)
+                {
+                    tree->cwr = tnode->children[i];
+                    break;
+                }
+                i++;
+            }
+            if (i < tnode->num_children)
+                retval = i;
+        }
+        API_RETURN(retval);
+    }
+    API_END_NOPOP;  /* BEWARE: If API_RETURN above is removed use API_END */
+}
+
+PUBLIC const char *
+DBGetCwg(DBmrgtree *tree)
+{
+    const char *retval = NULL;
+
+    API_BEGIN("DBGetCwg", const char *, NULL)
+    {
+        if (tree == 0)
+            API_ERROR("tree", E_BADARGS);
+
+#warning CONSTRUCT FULL PATH NAME
+        retval = tree->cwr->name; 
+        API_RETURN(retval);
+    }
+    API_END_NOPOP;  /* BEWARE: If API_RETURN above is removed use API_END */
+}
+
+PUBLIC int
+DBPutMrgtree(DBfile *dbfile, const char *name, const char *mesh_name,
+    DBmrgtree *tree, DBoptlist *opts)
+{
+    int retval;
+
+    API_BEGIN2("DBPutMrgtree", int, -1, name)
+    {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMrgtree", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("mrgtree name", E_BADARGS);
+        if (db_VariableNameValid((char *)name) == 0)
+            API_ERROR("mrgtree name", E_INVALIDNAME);
+        if (!mesh_name || !*mesh_name)
+            API_ERROR("mesh_name", E_BADARGS);
+        if (db_VariableNameValid((char *)mesh_name) == 0)
+            API_ERROR("mesh_name", E_INVALIDNAME);
+        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+            API_ERROR("overwrite not allowed", E_NOOVERWRITE);
+        if (NULL == dbfile->pub.p_mrgt)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.p_mrgt) (dbfile, (char *)name, (char *)mesh_name,
+                                       tree, opts); 
+
+        db_FreeToc(dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /* BEWARE: If API_RETURN above is removed use API_END */
+}
+
+PUBLIC DBmrgtree *
+DBGetMrgtree(DBfile *dbfile, const char *name)
+{
+    DBmrgtree *retval = NULL;
+
+    API_BEGIN2("DBGetMrgtree", DBmrgtree *, NULL, name) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMrgtree", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("mrgtree name", E_BADARGS);
+        if (!dbfile->pub.g_mrgt)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.g_mrgt) (dbfile, (char *)name);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+PUBLIC int
+DBPutGroupelmap(DBfile *dbfile, const char *name,
+    int num_segments, int *groupel_types, int *segment_lengths,
+    int *segment_ids, int **segment_data, void **segment_fracs,
+    int fracs_data_type, DBoptlist *opts)
+{
+    int retval;
+
+    API_BEGIN2("DBGroupelmap", int, -1, name) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutGroupelmap", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("groupel map name", E_BADARGS);
+        if (db_VariableNameValid((char *)name) == 0)
+            API_ERROR("groupel map name", E_INVALIDNAME);
+        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+            API_ERROR("overwrite not allowed", E_NOOVERWRITE);
+        if (num_segments < 0)
+            API_ERROR("num_segments", E_BADARGS);
+        if (!groupel_types)
+            API_ERROR("groupel_types", E_BADARGS);
+        if (!segment_lengths)
+            API_ERROR("segment_lengths", E_BADARGS);
+        if (!segment_ids)
+            API_ERROR("segment_ids", E_BADARGS);
+        if (!segment_data)
+            API_ERROR("segment_data", E_BADARGS);
+        if (!dbfile->pub.p_grplm)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.p_grplm) (dbfile, (char *)name,
+            num_segments, groupel_types, segment_lengths, segment_ids,
+            segment_data, segment_fracs, fracs_data_type, opts);
+
+        db_FreeToc(dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+PUBLIC DBgroupelmap *
+DBGetGroupelmap(DBfile *dbfile, const char *name)
+{
+    DBgroupelmap *retval = NULL;
+
+    API_BEGIN2("DBGetGroupelmap", DBgroupelmap *, NULL, name) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetGroupelmap", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("groupel map name", E_BADARGS);
+        if (!dbfile->pub.g_grplm)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.g_grplm) (dbfile, (char *)name);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Purpose
+ *
+ *    Flatten an array of variable lenght arrays of ints into a single
+ *    array of ints.
+ *
+ * Programmer
+ *
+ *    Mark C. Miller, Wed Oct 10 11:49:36 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+INTERNAL void 
+db_IntArrayToIntList(const int *const *const intArrays, int nArrays,
+const int *const lenArrays, int **intList, int *m)
+{
+    int i,j,n;
+    int *list = 0;
+
+    if (nArrays <= 0 || intArrays == 0 || lenArrays == 0 ||
+        intList == 0 || m == 0)
+    {
+        *intList = 0;
+        *m = 0;
+        return;
+    }
+
+    for (i=n=0; i < nArrays; i++)
+        n += lenArrays[i];
+
+    if (n == 0)
+    {
+        *intList = 0;
+        *m = 0;
+        return;
+    }
+
+    list = (int *) malloc(n * sizeof(int));
+
+    for (i=n=0; i < nArrays; i++)
+    {
+        for (j = 0; j < lenArrays[i]; j++)
+            list[n++] = intArrays[i][j];
+    }
+
+    *intList = list;
+    *m = n;
+}
+
+/*----------------------------------------------------------------------
+ * Purpose
+ *
+ *    Unflatten a a single array of ints and lengths into a an array
+ *    of arrays of the specified lengths.
+ *
+ * Programmer
+ *
+ *    Mark C. Miller, Wed Oct 10 11:49:36 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+INTERNAL int**
+db_IntListToIntArray(const int *const intList, int nArrays,
+    const int *const lenArrays)
+{
+    int i,j,n;
+    int **retval = 0;
+
+    if (nArrays <= 0 || intList == 0 || lenArrays == 0)
+        return 0;
+
+    retval = (int**) malloc(nArrays * sizeof(int*));
+    for (i=n=0; i < nArrays; i++)
+    {
+        retval[i] = (int *) malloc(lenArrays[i] * sizeof(int));
+        for (j = 0; j < lenArrays[i]; j++)
+            retval[i][j] = intList[n++];
+    }
+
+    return retval;
+}

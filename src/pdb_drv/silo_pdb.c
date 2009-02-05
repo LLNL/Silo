@@ -205,6 +205,14 @@ db_pdb_InitCallbacks ( DBfile *dbfile )
 #ifdef PDB_WRITE
     dbfile->pub.p_ca = db_pdb_PutCompoundarray;
 #endif
+
+    /* MRG trees and Groupel maps */
+    dbfile->pub.g_mrgt = db_pdb_GetMrgtree;
+    dbfile->pub.g_grplm = db_pdb_GetGroupelmap;
+#ifdef PDB_WRITE
+    dbfile->pub.p_mrgt = db_pdb_PutMrgtree;
+    dbfile->pub.p_grplm = db_pdb_PutGroupelmap;
+#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -917,7 +925,8 @@ db_pdb_NewToc (DBfile *_dbfile)
    int           *types=NULL;
    int            ivar, iqmesh, iqvar, iumesh, iuvar, icurve, idir, iarray,
       imat, imatspecies, imultimesh, imultivar, imultimat, imultimatspecies,
-      ipmesh, iptvar, iobj, icsgmesh, icsgvar, idefvars, imultimeshadj;
+      ipmesh, iptvar, iobj, icsgmesh, icsgvar, idefvars, imultimeshadj,
+      imrgtrees, igroupelmaps;
 
    DBtoc         *toc;
    char          *ctype;
@@ -1040,6 +1049,12 @@ db_pdb_NewToc (DBfile *_dbfile)
          case DB_ARRAY:
             toc->narrays++;
             break;
+         case DB_MRGTREE:
+            toc->nmrgtrees++;
+            break;
+         case DB_GROUPELMAP:
+            toc->ngroupelmaps++;
+            break;
          default:
             toc->nobj++;
             break;
@@ -1142,6 +1157,13 @@ db_pdb_NewToc (DBfile *_dbfile)
       toc->array_names = ALLOC_N(char *, toc->narrays);
    }
 
+   if (toc->nmrgtrees > 0) {
+      toc->mrgtree_names = ALLOC_N(char *, toc->nmrgtrees);
+   }
+
+   if (toc->ngroupelmaps > 0) {
+      toc->groupelmap_names = ALLOC_N(char *, toc->ngroupelmaps);
+   }
    /*----------------------------------------------------------------------
     *  Now loop over all the items in the directory and store the
     *  names and ID's
@@ -1149,7 +1171,7 @@ db_pdb_NewToc (DBfile *_dbfile)
    icurve = ivar = iqmesh = iqvar = iumesh = iuvar = idir = iarray = 0;
    imultimesh = imultivar = imultimat = imat = imatspecies = ipmesh = 0;
    iptvar = iobj = imultimatspecies = icsgmesh = icsgvar = idefvars = 0;
-   imultimeshadj = 0;
+   imultimeshadj = imrgtrees = igroupelmaps = 0 ;
 
    for (i = 0; i < num; i++) {
 
@@ -1266,6 +1288,16 @@ db_pdb_NewToc (DBfile *_dbfile)
       case DB_ARRAY:
          toc->array_names[iarray] = STRDUP(list[i]);
          iarray++;
+         break;
+
+      case DB_MRGTREE:
+         toc->mrgtree_names[imrgtrees] = STRDUP(list[i]);
+         imrgtrees++;
+         break;
+
+      case DB_GROUPELMAP:
+         toc->groupelmap_names[igroupelmaps] = STRDUP(list[i]);
+         igroupelmaps++;
          break;
 
       default:
@@ -2167,6 +2199,7 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("lgroupings", &tmpmm.lgroupings, DB_INT);
       DEFALL_OBJ("groupings", &tmpmm.groupings, DB_INT);
       DEFALL_OBJ("groupnames", &tmpgnames, DB_CHAR);
+      DEFALL_OBJ("mrgtree_name", &tmpmm.mrgtree_name, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -2420,6 +2453,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultivar";
    char           error[256];
+   char          *rpnames = NULL;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -2440,6 +2474,9 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("extentssize", &tmpmv.extentssize, DB_INT);
       DEFALL_OBJ("extents", &tmpmv.extents, DB_DOUBLE);
       DEFINE_OBJ("guihide", &tmpmv.guihide, DB_INT);
+      DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
+      DEFINE_OBJ("tensor_rank", &tmpmv.tensor_rank, DB_INT);
+      DEFALL_OBJ("mmesh_name", &tmpmv.mmesh_name, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -2476,6 +2513,12 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
             }
          }
          FREE(tmpnames);
+      }
+
+      if (rpnames != NULL)
+      {
+         mv->region_pnames = db_StringListToStringArray(rpnames, -1);
+         FREE(rpnames);
       }
    }
 
@@ -2565,6 +2608,7 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("guihide", &tmpmt.guihide, DB_INT);
       DEFALL_OBJ("material_names", &tmpmaterial_names, DB_CHAR);
       DEFALL_OBJ("matcolors", &tmpmatcolors, DB_CHAR);
+      DEFALL_OBJ("mmesh_name", &tmpmt.mmesh_name, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -2787,6 +2831,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("max_extents", tmppm.max_extents, DB_FLOAT);
 
    DEFINE_OBJ("guihide", &tmppm.guihide, DB_INT);
+   DEFALL_OBJ("mrgtree_name", &tmppm.mrgtree_name, DB_CHAR);
 
    if (SILO_Globals.dataReadMask & DBPMCoords)
    {
@@ -2885,6 +2930,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
    PJcomplist     tmp_obj;
    char           tmp[256];
    static char *me = "db_pdb_GetPointvar";
+   char          *rpnames = NULL;
    DBmeshvar tmpmv;
    memset(&tmpmv, 0, sizeof(DBmeshvar));
 
@@ -2907,6 +2953,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("units", &tmpmv.units, DB_CHAR);
    DEFALL_OBJ("meshid",&tmpmv.meshname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpmv.guihide, DB_INT);
+   DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
       return NULL;
@@ -2956,6 +3003,12 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
       }
 
       PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL);
+   }
+
+   if (rpnames != NULL)
+   {
+      mv->region_pnames = db_StringListToStringArray(rpnames, -1);
+      FREE(rpnames);
    }
 
    mv->id = 0;
@@ -3060,6 +3113,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
     DEFINE_OBJ("max_extents", tmpqm.max_extents, DB_FLOAT);
     DEFINE_OBJ("baseindex", tmpqm.base_index, DB_INT);
     DEFINE_OBJ("guihide", tmpqm.guihide, DB_INT);
+    DEFALL_OBJ("mrgtree_name", &tmpqm.mrgtree_name, DB_CHAR);
 
     /* The type passed here to PJ_GetObject is NULL because quadmeshes can have
      * one of two types:  DB_COLLINEAR or DB_NONCOLLINEAR.  */
@@ -3164,6 +3218,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
    PJcomplist     tmp_obj;
    char           tmp[256];
    static char *me = "db_pdb_GetQuadvar";
+   char          *rpnames = NULL;
    DBquadvar tmpqv;
    memset(&tmpqv, 0, sizeof(DBquadvar));
 
@@ -3194,6 +3249,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("max_index", tmpqv.max_index, DB_INT);
    DEFINE_OBJ("dims", tmpqv.dims, DB_INT);
    DEFINE_OBJ("align", tmpqv.align, DB_FLOAT);
+   DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
 
    /* Arrays that PJ_GetObject must allocate. */
    DEFALL_OBJ("label", &tmpqv.label, DB_CHAR);
@@ -3241,6 +3297,12 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
       }
 
       PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL);
+   }
+
+   if (rpnames != NULL)
+   {
+      qv->region_pnames = db_StringListToStringArray(rpnames, -1);
+      FREE(rpnames);
    }
 
    qv->id = 0;
@@ -3361,6 +3423,8 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
 
    /* Optional polyhedral zonelist */
    DEFALL_OBJ("phzonelist", &phzlname, DB_CHAR);
+
+   DEFALL_OBJ("mrgtree_name", &tmpum.mrgtree_name, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, &type) < 0)
       return NULL;
@@ -3585,6 +3649,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
    PJcomplist     tmp_obj;
    char           tmp[256];
    static char *me = "db_pdb_GetUcdvar";
+   char          *rpnames = NULL;
    DBucdvar tmpuv;
    memset(&tmpuv, 0, sizeof(DBucdvar));
 
@@ -3611,6 +3676,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("units", &tmpuv.units, DB_CHAR);
    DEFALL_OBJ("meshid",&tmpuv.meshname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpuv.guihide, DB_INT);
+   DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
       return NULL;
@@ -3653,6 +3719,12 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
       }
 
       PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL);
+   }
+
+   if (rpnames != NULL)
+   {
+      uv->region_pnames = db_StringListToStringArray(rpnames, -1);
+      FREE(rpnames);
    }
 
    uv->id = 0;
@@ -3712,6 +3784,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
    DEFALL_OBJ("units2", &tmpcsgm.units[2], DB_CHAR);
    DEFALL_OBJ("csgzonelist", &zlname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpcsgm.guihide, DB_INT);
+   DEFALL_OBJ("mrgtree_name", &tmpcsgm.mrgtree_name, DB_CHAR);
 
    if (SILO_Globals.dataReadMask & DBCSGMBoundaryInfo)
    {
@@ -3784,6 +3857,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
    PJcomplist     tmp_obj;
    char           tmp[256];
    static char *me = "db_pdb_GetCsgvar";
+   char          *rpnames = NULL;
    DBcsgvar tmpcsgv;
    memset(&tmpcsgv, 0, sizeof(DBcsgvar));
 
@@ -3801,6 +3875,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
    DEFALL_OBJ("units", &tmpcsgv.units, DB_CHAR);
    DEFALL_OBJ("meshid",&tmpcsgv.meshname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpcsgv.guihide, DB_INT);
+   DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, &type) < 0)
       return NULL;
@@ -3832,6 +3907,12 @@ db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
       }
 
       PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, NULL);
+   }
+
+   if (rpnames != NULL)
+   {
+      csgv->region_pnames = db_StringListToStringArray(rpnames, -1);
+      FREE(rpnames);
    }
 
    tmpcsgv.name = STRDUP(objname);
@@ -4646,6 +4727,324 @@ db_pdb_GetComponentNames (DBfile *_dbfile, char *objname,
    }
 
    return group->ncomponents ;
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                                 DBGetMrgtree
+ *
+ *  Purpose
+ *
+ *      Read mrg tree structure from the given database.
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Wed Oct 10 13:08:36 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+CALLBACK DBmrgtree *
+db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
+{
+   char *type = NULL;
+   DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
+   DBmrgtree     *tree = NULL;
+   PJcomplist     tmp_obj;
+   static char   *me = "db_pdb_GetMrgtree";
+   DBmrgtree      tmptree;
+   DBmrgtnode   **ltree;
+   int            root, num_nodes, i, j, n, pass;
+   int           *intArray = 0;
+   char          *s, **strArray = 0;
+   memset(&tmptree, 0, sizeof(DBmrgtree));
+
+   /*------------------------------------------------------------*/
+   /*          Comp. Name        Comp. Address     Data Type     */
+   /*------------------------------------------------------------*/
+   INIT_OBJ(&tmp_obj);
+
+   /* read header and scalars data only first */
+   DEFINE_OBJ("src_mesh_type", &tmptree.src_mesh_type, DB_INT);
+   DEFINE_OBJ("type_info_bits", &tmptree.type_info_bits, DB_INT);
+   DEFINE_OBJ("num_nodes", &tmptree.num_nodes, DB_INT);
+   DEFINE_OBJ("root", &root, DB_FLOAT);
+   DEFALL_OBJ("src_mesh_name", &tmptree.src_mesh_name, DB_CHAR);
+   DEFALL_OBJ("scalars", &intArray, DB_INT);
+
+   if (PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, &type) < 0)
+      return NULL;
+   CHECK_TYPE(type, DB_MRGTREE, mrgtree_name);
+   FREE(type);
+
+   tree = (DBmrgtree *) calloc(1,sizeof(DBmrgtree));
+   *tree = tmptree;
+   tree->root = 0;
+   tree->cwr = 0;
+   num_nodes = tree->num_nodes;
+
+   /* allocate all the nodes of the tree and a linear list of pointers
+   to them */
+   ltree = (DBmrgtnode **) malloc(num_nodes * sizeof(DBmrgtnode*));
+   for (i = 0; i < num_nodes; i++)
+       ltree[i] = (DBmrgtnode *) calloc(1,sizeof(DBmrgtnode));
+
+   /* Read the nodal scalar data */
+   for (i = 0; i < num_nodes; i++)
+   {
+       ltree[i]->narray           = intArray[i*6+0];
+       ltree[i]->type_info_bits   = intArray[i*6+1];
+       ltree[i]->max_children     = intArray[i*6+2];
+       ltree[i]->nsegs            = intArray[i*6+3];
+       ltree[i]->num_children     = intArray[i*6+4];
+       ltree[i]->parent           = intArray[i*6+5] >= 0 ? ltree[intArray[i*6+5]] : 0;
+   }
+   FREE(intArray);
+
+   /* read the node 'name' member */
+   INIT_OBJ(&tmp_obj);
+   DEFALL_OBJ("name", &s, DB_CHAR);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   strArray = db_StringListToStringArray(s, num_nodes);
+   for (i = 0; i < num_nodes; i++)
+       ltree[i]->name = strArray[i];
+   FREE(s);
+   FREE(strArray); /* free only top-level array of pointers */
+
+   /* read the node 'names' member */
+   INIT_OBJ(&tmp_obj);
+   DEFALL_OBJ("names", &s, DB_CHAR);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   for (pass = 0; s && pass < 2; pass++)
+   {
+       if (pass == 1)
+       {
+           if (n == 0)
+               break;
+           strArray = db_StringListToStringArray(s, n);
+       }
+       n = 0;
+       for (i = 0; i < num_nodes; i++)
+       {
+           if (ltree[i]->narray > 0)
+           {
+               if (strchr(strArray[n], '%') == 0)
+               {
+                   if (pass == 1)
+                       ltree[i]->names = (char**) malloc(ltree[i]->narray * sizeof(char*));
+                   for (j = 0; j < ltree[i]->narray; j++)
+                   {
+                       if (pass == 1)
+                           ltree[i]->names[j] = strArray[n];
+                       n++;
+                   }
+               }
+               else
+               {
+                   if (pass == 1)
+                   {
+                       ltree[i]->names = (char**) malloc(1 * sizeof(char*));
+                       ltree[i]->names[0] = strArray[n];
+                   }
+                   n++;
+               }
+           }
+       }
+   }
+   FREE(s);
+   FREE(strArray); /* free only top-level array of pointers */
+
+   /* read the maps_name data */
+   INIT_OBJ(&tmp_obj);
+   DEFALL_OBJ("maps_name", &s, DB_CHAR);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   strArray = db_StringListToStringArray(s, num_nodes);
+   for (i = 0; i < num_nodes; i++)
+       ltree[i]->maps_name = strArray[i];
+   FREE(s);
+   FREE(strArray); /* free only top-level array of pointers */
+
+   /* read the map segment id data */
+   INIT_OBJ(&tmp_obj);
+   DEFALL_OBJ("seg_ids", &intArray, DB_INT);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   n = 0;
+   for (i = 0; i < num_nodes; i++)
+   {
+       int ns = ltree[i]->nsegs;
+       if (ns > 0)
+       {
+           ltree[i]->seg_ids = (int*) malloc(ns * sizeof(int));
+           for (j = 0; j < ns; j++)
+               ltree[i]->seg_ids[j] = intArray[n++];
+       }
+   }
+   FREE(intArray);
+
+   /* read the map segment len data */
+   INIT_OBJ(&tmp_obj);
+   DEFALL_OBJ("seg_lens", &intArray, DB_INT);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   n = 0;
+   for (i = 0; i < num_nodes; i++)
+   {
+       int ns = ltree[i]->nsegs;
+       if (ns > 0)
+       {
+           ltree[i]->seg_lens = (int*) malloc(ns * sizeof(int));
+           for (j = 0; j < ns; j++)
+               ltree[i]->seg_lens[j] = intArray[n++];
+       }
+   }
+   FREE(intArray);
+
+   /* read the map segment type data */
+   INIT_OBJ(&tmp_obj);
+   DEFALL_OBJ("seg_types", &intArray, DB_INT);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   n = 0;
+   for (i = 0; i < num_nodes; i++)
+   {
+       int ns = ltree[i]->nsegs;
+       if (ns > 0)
+       {
+           ltree[i]->seg_types = (int*) malloc(ns * sizeof(int));
+           for (j = 0; j < ns; j++)
+               ltree[i]->seg_types[j] = intArray[n++];
+       }
+   }
+   FREE(intArray);
+
+   /* read the child ids */
+   INIT_OBJ(&tmp_obj);
+   DEFALL_OBJ("children", &intArray, DB_INT);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   n = 0;
+   for (i = 0; i < num_nodes; i++)
+   {
+       int nc = ltree[i]->num_children;
+       if (nc > 0)
+       {
+           ltree[i]->children = (DBmrgtnode**) malloc(nc * sizeof(DBmrgtnode*));
+           for (j = 0; j < nc; j++)
+               ltree[i]->children[j] = ltree[intArray[n++]];
+       }
+   }
+   FREE(intArray);
+
+   tree->root = ltree[root];
+   tree->cwr = tree->root;
+
+   FREE(ltree);
+
+   return (tree);
+
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                              DBGetGroupelmap
+ *
+ *  Purpose
+ *
+ *      Read groupel map object from the given database.
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Wed Oct 10 13:08:36 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+CALLBACK DBgroupelmap*
+db_pdb_GetGroupelmap(DBfile *_dbfile, const char *name)
+{
+    int i, j, n;
+    DBgroupelmap *gm = NULL;
+    DBfile_pdb *dbfile = (DBfile_pdb *) _dbfile;
+    static char *me = "db_pdb_GetGroupelmap";
+    PJcomplist tmp_obj;
+    char   *type = NULL;
+    int *segData = NULL;
+    int *fracLengths = NULL;
+    void *fracsArray = NULL;
+
+    DBgroupelmap tmpgm;
+    memset(&tmpgm, 0, sizeof(DBgroupelmap));
+
+    INIT_OBJ(&tmp_obj);
+    DEFINE_OBJ("num_segments",    &tmpgm.num_segments, DB_INT);
+    DEFINE_OBJ("fracs_data_type", &tmpgm.fracs_data_type, DB_INT);
+    DEFALL_OBJ("groupel_types",   &tmpgm.groupel_types, DB_INT);
+    DEFALL_OBJ("segment_lengths", &tmpgm.segment_lengths, DB_INT);
+    DEFALL_OBJ("segment_ids",     &tmpgm.segment_ids, DB_INT);
+    DEFALL_OBJ("segment_data",    &segData, DB_INT);
+    DEFALL_OBJ("frac_lengths",    &fracLengths, DB_INT);
+    DEFALL_OBJ("segment_fracs",   &fracsArray, DB_FLOAT);
+
+    if (PJ_GetObject(dbfile->pdb, (char*)name, &tmp_obj, &type) < 0)
+        return NULL;
+    CHECK_TYPE(type,DB_GROUPELMAP,name);
+    FREE(type);
+
+    gm = (DBgroupelmap*) calloc(1,sizeof(DBgroupelmap));
+    *gm = tmpgm;
+
+    /* unflatten the segment data */
+    gm->segment_data = (int **) malloc(gm->num_segments * sizeof(int*));
+    n = 0;
+    for (i = 0; i < gm->num_segments; i++)
+    {
+        gm->segment_data[i] = 0;
+        int sl = gm->segment_lengths[i];
+        if (sl > 0)
+        {
+            gm->segment_data[i] = (int*) malloc(sl * sizeof(int));
+            for (j = 0; j < sl; j++)
+                gm->segment_data[i][j] = segData[n++];
+        }
+    }
+    FREE(segData);
+
+    /* unflatten frac data if we have it */
+    if (fracLengths != NULL)
+    {
+        gm->segment_fracs = malloc(gm->num_segments * sizeof(void*));
+        n = 0;
+        for (i = 0; i < gm->num_segments; i++)
+        {
+            int len = fracLengths[i];
+
+            if (len <= 0)
+            {
+                gm->segment_fracs[i] = 0;
+                continue;
+            }
+
+            gm->segment_fracs[i] = malloc(len * (gm->fracs_data_type=DB_FLOAT?4:8));
+            for (j = 0; j < len; j++)
+            {
+                if (gm->fracs_data_type == DB_FLOAT)
+                {
+                    float *pfa = (float *) fracsArray;
+                    float *psf = (float *) gm->segment_fracs[i];
+                    psf[j] = pfa[n++];
+                }
+                else
+                {
+                    double *pfa = (double *) fracsArray;
+                    double *psf = (double *) gm->segment_fracs[i];
+                    psf[j] = pfa[n++];
+                }
+            }
+        }
+    }
+    else
+    {
+        gm->segment_fracs = 0;
+    }
+    FREE(fracLengths);
+    FREE(fracsArray);
+
+    gm->name = STRDUP(name);
+    if (DB_DOUBLE == gm->fracs_data_type && PJ_InqForceSingle())
+        gm->fracs_data_type = DB_FLOAT;
+
+    return gm;
 }
 
 /*----------------------------------------------------------------------
@@ -5646,13 +6045,15 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMESH, 18);
+   obj = DBMakeObject(name, DB_MULTIMESH, 20);
    DBAddIntComponent(obj, "nblocks", nmesh);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
    DBAddIntComponent(obj, "grouporigin", _mm._grouporigin);
    if (_mm._guihide)
       DBAddIntComponent(obj, "guihide", _mm._guihide);
+   if (_mm._mrgtree_name)
+      DBAddStrComponent(obj, "mrgtree_name", _mm._mrgtree_name);
 
    /*-------------------------------------------------------------
     *  Define and write variables before adding them to object.
@@ -6089,13 +6490,25 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIVAR, 13);
+   obj = DBMakeObject(name, DB_MULTIVAR, 16);
    DBAddIntComponent(obj, "nvars", nvars);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
    DBAddIntComponent(obj, "grouporigin", _mm._grouporigin);
    if (_mm._guihide)
       DBAddIntComponent(obj, "guihide", _mm._guihide);
+   if (_mm._region_pnames != NULL)
+   {
+        char *s=0; int len=0; long llen;
+        db_StringArrayToStringList((const char**)_mm._region_pnames, -1, &s, &len);
+        llen = len;
+        DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
+        FREE(s);
+   }
+   if (_mm._tensor_rank)
+      DBAddIntComponent(obj, "tensor_rank", _mm._tensor_rank);
+   if (_mm._mmesh_name != NULL)
+      DBAddStrComponent(obj, "mmesh_name", _mm._mmesh_name);
 
    /*-------------------------------------------------------------
     *  Define and write variables before adding them to object.
@@ -6234,7 +6647,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMAT, 16);
+   obj = DBMakeObject(name, DB_MULTIMAT, 17);
    DBAddIntComponent(obj, "nmats", nmats);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -6243,6 +6656,8 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
       DBAddIntComponent(obj, "allowmat0", _mm._allowmat0);
    if (_mm._guihide)
       DBAddIntComponent(obj, "guihide", _mm._guihide);
+   if (_mm._mmesh_name != NULL)
+      DBAddStrComponent(obj, "mmesh_name", _mm._mmesh_name);
 
    /*-------------------------------------------------------------
     *  Define and write materials before adding them to object.
@@ -6547,7 +6962,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, float *coords[],
     *  Initialize global data, and process options.
     *-------------------------------------------------------------*/
    db_InitPoint(dbfile, optlist, ndims, nels);
-   obj = DBMakeObject(name, DB_POINTMESH, 27);
+   obj = DBMakeObject(name, DB_POINTMESH, 30);
 
    /*-------------------------------------------------------------
     *  Write coordinate arrays.
@@ -6668,6 +7083,9 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, float *coords[],
    if (_pm._units[2] != NULL)
       DBAddStrComponent(obj, "units2", _pm._units[2]);
 
+   if (_pm._mrgtree_name != NULL)
+      DBAddStrComponent(obj, "mrgtree_name", _pm._mrgtree_name);
+
    /*-------------------------------------------------------------
     *  Write point-mesh object to output file.
     *-------------------------------------------------------------*/
@@ -6732,7 +7150,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
    db_InitPoint(dbfile, optlist, ndims, nels);
 #endif
 
-   obj = DBMakeObject(name, DB_POINTVAR, 21);
+   obj = DBMakeObject(name, DB_POINTVAR, 22);
 
    /*-------------------------------------------------------------
     *  Write variable arrays.
@@ -6788,6 +7206,15 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
 
    if (_pm._unit != NULL)
       DBAddStrComponent(obj, "units", _pm._unit);
+
+   if (_pm._region_pnames != NULL)
+   {
+        char *s=0; int len=0; long llen;
+        db_StringArrayToStringList((const char**)_pm._region_pnames, -1, &s, &len);
+        llen = len;
+        DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
+        FREE(s);
+   }
 
    /*-------------------------------------------------------------
     *  Write point-mesh object to output file.
@@ -6865,7 +7292,7 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
     *  Initialize global data, and process options.
     *-------------------------------------------------------------*/
     db_InitQuad(dbfile, name, optlist, dims, ndims);
-    obj = DBMakeObject(name, coordtype, 43);
+    obj = DBMakeObject(name, coordtype, 44);
 
    /*-------------------------------------------------------------
     *  Write coordinate arrays.
@@ -6964,6 +7391,9 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
     if (_qm._guihide)
         DBAddIntComponent(obj, "guihide", _qm._guihide);
 
+    if (_qm._mrgtree_name != NULL)
+        DBAddStrComponent(obj, "mrgtree_name", _qm._mrgtree_name);
+
    /*-------------------------------------------------------------
     *  Write quad-mesh object to SILO file.
     *-------------------------------------------------------------*/
@@ -7043,7 +7473,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
     *-------------------------------------------------------------*/
    db_InitQuad(_dbfile, meshname, optlist, dims, ndims);
 
-   obj = DBMakeObject(name, DB_QUADVAR, 26);
+   obj = DBMakeObject(name, DB_QUADVAR, 27);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -7163,6 +7593,15 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    if (_qm._unit != NULL)
       DBAddStrComponent(obj, "units", _qm._unit);
 
+   if (_qm._region_pnames != NULL)
+   {
+        char *s=0; int len=0; long llen;
+        db_StringArrayToStringList((const char**)_qm._region_pnames, -1, &s, &len);
+        llen = len;
+        DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
+        FREE(s);
+   }
+
    /*-------------------------------------------------------------
     *  Write quad-var object to output file.
     *-------------------------------------------------------------*/
@@ -7209,7 +7648,7 @@ db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
 
    db_InitCsg(dbfile, (char*) name, optlist);
 
-   obj = DBMakeObject(name, DB_CSGMESH, 31);
+   obj = DBMakeObject(name, DB_CSGMESH, 32);
 
    count[0] = nbounds;
 
@@ -7290,6 +7729,9 @@ db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
    if (_csgm._units[2] != NULL)
       DBAddStrComponent(obj, "units2", _csgm._units[2]);
 
+   if (_csgm._mrgtree_name != NULL)
+      DBAddStrComponent(obj, "mrgtree_name", _csgm._mrgtree_name);
+
    /*-------------------------------------------------------------
     *  Write csg-mesh object to output file.
     *-------------------------------------------------------------*/
@@ -7328,7 +7770,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
 
    db_InitCsg(_dbfile, (char*) name, optlist);
 
-   obj = DBMakeObject(name, DB_CSGVAR, 26);
+   obj = DBMakeObject(name, DB_CSGVAR, 27);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -7414,6 +7856,15 @@ db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
 
    if (_csgm._unit != NULL)
       DBAddStrComponent(obj, "units", _csgm._unit);
+
+   if (_csgm._region_pnames != NULL)
+   {
+        char *s=0; int len=0; long llen;
+        db_StringArrayToStringList((const char**)_csgm._region_pnames, -1, &s, &len);
+        llen = len;
+        DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
+        FREE(s);
+   }
 
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.
@@ -7568,7 +8019,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
 
    db_InitUcd(dbfile, name, optlist, ndims, nnodes, nzones);
 
-   obj = DBMakeObject(name, DB_UCDMESH, 29);
+   obj = DBMakeObject(name, DB_UCDMESH, 30);
 
    /*-------------------------------------------------------------
     *  We first will write the given coordinate arrays to output,
@@ -7673,6 +8124,9 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
     *-------------------------------------------------------------*/
    if (_um._phzl_name != NULL)
       DBAddStrComponent(obj, "phzonelist", _um._phzl_name);
+
+   if (_um._mrgtree_name != NULL)
+      DBAddStrComponent(obj, "mrgtree_name", _um._mrgtree_name);
 
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.
@@ -7914,7 +8368,7 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    db_InitUcd(_dbfile, meshname, optlist, ndims, nnodes, nzones);
 #endif
 
-   obj = DBMakeObject(name, DB_UCDVAR, 26);
+   obj = DBMakeObject(name, DB_UCDVAR, 27);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -8015,6 +8469,15 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
 
    if (_um._guihide)
       DBAddIntComponent(obj, "guihide", _um._guihide);
+
+   if (_um._region_pnames != NULL)
+   {
+        char *s=0; int len=0; long llen;
+        db_StringArrayToStringList((const char**)_um._region_pnames, -1, &s, &len);
+        llen = len;
+        DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
+        FREE(s);
+   }
 
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.
@@ -8245,6 +8708,314 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
 
    /*-------------------------------------------------------------
     *  Write object to output file.
+    *-------------------------------------------------------------*/
+   DBWriteObject(dbfile, obj, TRUE);
+   DBFreeObject(obj);
+
+   return 0;
+}
+#endif /* PDB_WRITE */
+
+/*----------------------------------------------------------------------
+ *  Routine                                            db_pdb_PutMrgtree
+ *
+ *  Purpose
+ *
+ *      Write mrg tree object into the open output file.
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Wed Oct 10 10:25:53 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+#ifdef PDB_WRITE
+/* ARGSUSED */
+CALLBACK int
+db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
+    const char *mesh_name, DBmrgtree *tree, DBoptlist *optlist)
+{
+    int                 i, j, n, len, pass, num_nodes = tree->num_nodes;
+    int                 tot_segs, tot_children;
+    long                count;
+    char               *s = 0;
+    DBmrgtnode        **ltree = 0;
+    char              **strArray = 0;
+    int                *intArray = 0;
+    DBobject           *obj;
+    char               *datatype_str;
+    char                tmp[256];
+
+    obj = DBMakeObject(name, DB_MRGTREE, 15);
+
+    /* Set global options */
+    db_ProcessOptlist(DB_MRGTREE, optlist);
+
+    /* allocate an emtpy, linearized list of tree node pointers */
+    ltree = (DBmrgtnode **) malloc(num_nodes * sizeof(DBmrgtnode*));
+
+    /* walk tree to populate the linearized list of nodes ptrs */
+    DBWalkMrgtree(tree, DBLinearizeMrgtree, ltree, DB_POSTORDER);
+
+    /* form an array of the integer, scalar data at each node */
+    intArray = (int *) malloc(num_nodes * sizeof(int) * 6);
+    for (i = 0; i < num_nodes; i++)
+    {
+        intArray[i*6+0] = ltree[i]->narray;
+        intArray[i*6+1] = ltree[i]->type_info_bits;
+        intArray[i*6+2] = ltree[i]->max_children;
+        intArray[i*6+3] = ltree[i]->nsegs;
+        intArray[i*6+4] = ltree[i]->num_children;
+        intArray[i*6+5] = ltree[i] != tree->root ? ltree[i]->parent->walk_order : -1;
+    }
+    count = num_nodes * 6;
+    DBWriteComponent(dbfile, obj, "scalars", name, "integer", intArray, 1, &count);
+    FREE(intArray);
+
+    /* form an array of strings of the name data member */
+    strArray = (char **) malloc(num_nodes * sizeof(char *));
+    for (i = 0; i < num_nodes; i++)
+        strArray[i] = ltree[i]->name;
+
+    /* output all the node names as one long dataset */
+    s = 0;
+    db_StringArrayToStringList((const char**)strArray, num_nodes, &s, &len);
+    count = len;
+    DBWriteComponent(dbfile, obj, "name", name, "char", s, 1, &count);
+    FREE(s);
+    FREE(strArray);
+
+    /* form an array of strings of names data member */
+    /* requires 2 passes; first pass only counts, 2nd pass builds the array */
+    for (pass = 0; pass < 2; pass ++)
+    {
+        if (pass == 1)
+        {
+            if (n == 0)
+                break;
+            strArray = (char **) malloc(n * sizeof(char *));
+        }
+        n = 0;
+        for (i = 0; i < num_nodes; i++)
+        {
+            if (ltree[i]->narray > 0)
+            {
+                if (ltree[i]->names[1] != 0)
+                {
+                    for (j = 0; j < ltree[i]->narray; j++)
+                    {
+                        if (pass == 1)
+                            strArray[n] = ltree[i]->names[j];
+                        n++;
+                    }
+                }
+                else
+                {
+                    if (pass == 1)
+                        strArray[n] = ltree[i]->names[0];
+                    n++;
+                }
+            }
+        }
+    }
+    if (n > 0)
+    {
+        s = 0;
+        db_StringArrayToStringList((const char**)strArray, n, &s, &len);
+        count = len;
+        DBWriteComponent(dbfile, obj, "names", name, "char", s, 1, &count);
+        FREE(s);
+        FREE(strArray);
+    }
+
+    /* linearize and output map name data */
+    strArray = (char **) malloc(num_nodes * sizeof(char*));
+    for (i = 0; i < num_nodes; i++)
+        strArray[i] = ltree[i]->maps_name;
+    s = 0;
+    len = 0;
+    db_StringArrayToStringList((const char**)strArray, num_nodes, &s, &len);
+    count = len;
+    DBWriteComponent(dbfile, obj, "maps_name", name, "char", s, 1, &count);
+    FREE(s);
+    FREE(strArray);
+
+    tot_segs = 0;
+    for (i = 0; i < num_nodes; i++)
+        tot_segs += ltree[i]->nsegs;
+    count = tot_segs;
+
+    /* linearize and output map segment id data */
+    intArray = (int *) malloc(tot_segs * sizeof(int));
+    n = 0;
+    for (i = 0; i < num_nodes; i++)
+        for (j = 0; j < ltree[i]->nsegs; j++)
+            intArray[n++] = ltree[i]->seg_ids[j];
+    DBWriteComponent(dbfile, obj, "seg_ids", name, "integer", intArray, 1, &count);
+    FREE(intArray);
+
+    /* linearize and output seg len type data */
+    intArray = (int *) malloc(tot_segs * sizeof(int));
+    n = 0;
+    for (i = 0; i < num_nodes; i++)
+        for (j = 0; j < ltree[i]->nsegs; j++)
+            intArray[n++] = ltree[i]->seg_lens[j];
+    DBWriteComponent(dbfile, obj, "seg_lens", name, "integer", intArray, 1, &count);
+    FREE(intArray);
+
+    /* linearize and output seg type data */
+    intArray = (int *) malloc(tot_segs * sizeof(int));
+    n = 0;
+    for (i = 0; i < num_nodes; i++)
+        for (j = 0; j < ltree[i]->nsegs; j++)
+            intArray[n++] = ltree[i]->seg_types[j];
+    DBWriteComponent(dbfile, obj, "seg_types", name, "integer", intArray, 1, &count);
+    FREE(intArray);
+
+    /* form integer array for children data */
+    tot_children = 0;
+    for (i = 0; i < num_nodes; i++)
+        tot_children += ltree[i]->num_children;
+    count = tot_children;
+    intArray = (int *) malloc(tot_children * sizeof(int));
+    n = 0;
+    for (i = 0; i < num_nodes; i++)
+        for (j = 0; j < ltree[i]->num_children; j++)
+            intArray[n++] = ltree[i]->children[j]->walk_order;
+    DBWriteComponent(dbfile, obj, "children", name, "integer", intArray, 1, &count);
+    FREE(intArray);
+    FREE(ltree);
+
+    DBAddIntComponent(obj, "src_mesh_type", tree->src_mesh_type);
+    if (tree->src_mesh_name)
+        DBAddStrComponent(obj, "src_mesh_name", tree->src_mesh_name);
+    else
+        DBAddStrComponent(obj, "src_mesh_name", "");
+    DBAddIntComponent(obj, "type_info_bits", tree->type_info_bits);
+    DBAddIntComponent(obj, "num_nodes", tree->num_nodes);
+    DBAddIntComponent(obj, "root", tree->root->walk_order);
+
+   /*-------------------------------------------------------------
+    *  Write ucd-mesh object to output file.
+    *-------------------------------------------------------------*/
+   DBWriteObject(dbfile, obj, TRUE);
+   DBFreeObject(obj);
+   return 0;
+}
+#endif /* PDB_WRITE */
+
+
+/*----------------------------------------------------------------------
+ *  Routine                                         db_pdb_PutGroupelmap
+ *
+ *  Purpose
+ *
+ *      Write groupel map object into the open output file.
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Wed Oct 10 10:25:53 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+#ifdef PDB_WRITE
+/* ARGSUSED */
+CALLBACK int
+db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
+    int num_segments, int *groupel_types, int *segment_lengths,
+    int *segment_ids, int **segment_data, void **segment_fracs,
+    int fracs_data_type, DBoptlist *opts)
+{
+   int            i, j, tot_len;
+   int           *intArray;
+   long           count;
+   DBobject      *obj;
+   char          *datatype_str;
+
+   /*-------------------------------------------------------------
+    *  Process option list; build object description.
+    *-------------------------------------------------------------*/
+   db_ProcessOptlist(DB_GROUPELMAP, opts);
+   obj = DBMakeObject(name, DB_GROUPELMAP, 10);
+
+   DBAddIntComponent(obj, "num_segments", num_segments);
+   DBAddIntComponent(obj, "fracs_data_type", fracs_data_type);
+
+   /* Write raw data arrays */
+   count = num_segments;
+   DBWriteComponent(dbfile, obj, "groupel_types", name, "integer",
+                    groupel_types, 1, &count);
+   DBWriteComponent(dbfile, obj, "segment_lengths", name, "integer",
+                    segment_lengths, 1, &count);
+   DBWriteComponent(dbfile, obj, "segment_ids", name, "integer",
+                    segment_ids, 1, &count);
+
+   tot_len = 0;
+   for (i = 0; i < num_segments; i++)
+       tot_len += segment_lengths[i];
+   intArray = (int *) malloc(tot_len * sizeof(int));
+   tot_len = 0;
+   for (i = 0; i < num_segments; i++)
+       for (j = 0; j < segment_lengths[i]; j++)
+           intArray[tot_len++] = segment_data[i][j];
+   count = tot_len;
+   DBWriteComponent(dbfile, obj, "segment_data", name, "integer",
+                    intArray, 1, &count);
+   FREE(intArray);
+
+   /* write out fractional data if we have it */
+   if (segment_fracs)
+   {
+       void *fracsArray;
+       char *datatype_str;
+
+       /* write array of frac lengths */
+       tot_len = 0;
+       intArray = (int *) malloc(num_segments * sizeof(int));
+       for (i = 0; i < num_segments; i++)
+       {
+           int len = segment_fracs[i] == 0 ? 0 : segment_lengths[i];
+           intArray[i] = len;
+           tot_len += len;
+       }
+       count = tot_len;
+       DBWriteComponent(dbfile, obj, "frac_lengths", name, "integer",
+                        intArray, 1, &count);
+       FREE(intArray);
+
+       /* build and write out fractional data array */
+       fracsArray = (void *) malloc(tot_len * (fracs_data_type == DB_FLOAT?4:8));
+       tot_len = 0;
+       for (i = 0; i < num_segments; i++)
+       {
+           if (segment_fracs[i] == 0)
+               continue;
+
+           for (j = 0; j < segment_lengths[i]; j++)
+           {
+               if (fracs_data_type == DB_FLOAT)
+               {
+                   float *pfa = (float *) fracsArray;
+                   float *psf = (float *) segment_fracs[i];
+                   pfa[tot_len++] = psf[j];
+               }
+               else
+               {
+                   double *pfa = (double *) fracsArray;
+                   double *psf = (double *) segment_fracs[i];
+                   pfa[tot_len++] = psf[j];
+               }
+           }
+       }
+       count = tot_len;
+       datatype_str = db_GetDatatypeString(fracs_data_type);
+       DBWriteComponent(dbfile, obj, "segment_fracs", name, datatype_str, 
+                        intArray, 1, &count);
+       FREE(fracsArray);
+       FREE(datatype_str);
+   }
+
+   /*-------------------------------------------------------------
+    *  Write material object to output file. Request that underlying
+    *  memory be freed (the 'TRUE' argument.)
     *-------------------------------------------------------------*/
    DBWriteObject(dbfile, obj, TRUE);
    DBFreeObject(obj);

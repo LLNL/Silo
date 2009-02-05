@@ -373,7 +373,9 @@ typedef struct diffopt_t {
 #define BROWSER_DB_CSGMESH         18
 #define BROWSER_DB_CSGVAR          19
 #define BROWSER_DB_MULTIMESHADJ    20
-#define BROWSER_NOBJTYPES          21   /*must be last                  */
+#define BROWSER_DB_MRGTREE         21
+#define BROWSER_DB_GROUPELMAP      22
+#define BROWSER_NOBJTYPES          23   /*must be last                  */
 
 typedef struct toc_t {
    char                 *name;          /*object name                   */

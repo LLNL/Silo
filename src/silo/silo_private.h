@@ -225,12 +225,14 @@ typedef struct context_t {
 #define jstk_push()     {jstk_t*jt=ALLOC(jstk_t);jt->prev=Jstk;Jstk=jt;}
 #define jstk_pop()      if(Jstk){jstk_t*jt=Jstk;Jstk=Jstk->prev;FREE(jt);}
 
-#define API_DEPRECATE(M,T,R)                                                  \
+#define API_DEPRECATE(M,T,R,VERS)                                             \
 {                                                                             \
    static int ncalls = 0;                                                     \
-   if (ncalls < 3) {                                                          \
-      fprintf(stderr, "The Silo function \"%s\"\n", M);                       \
-      fprintf(stderr, "Has been deprecated. Warning %d of 3\n", ncalls+1);    \
+   if (ncalls < SILO_Globals.maxDeprecateWarnings) {                          \
+      fprintf(stderr, "Silo warning %d of %d: \"%s\" was deprecated in version %s.\n", \
+          ncalls+1, SILO_Globals.maxDeprecateWarnings, M,VERS);               \
+      if (ncalls == 0)                                                        \
+          fprintf(stderr, "Use DBSetDeprecateWarnings(0) to disable.\n");     \
       fflush(stderr);                                                         \
    }                                                                          \
    ncalls++;                                                                  \
@@ -259,12 +261,14 @@ typedef struct context_t {
                            jstat = 1 ;                                        \
                         }
 
-#define API_DEPRECATE2(M,T,R,NM)                                              \
+#define API_DEPRECATE2(M,T,R,NM,VERS)                                         \
 {                                                                             \
    static int ncalls = 0;                                                     \
-   if (ncalls < 3) {                                                          \
-      fprintf(stderr, "The Silo function \"%s\"\n", M);                       \
-      fprintf(stderr, "Has been deprecated. Warning %d of 3\n", ncalls+1);    \
+   if (ncalls < SILO_Globals.maxDeprecateWarnings) {                          \
+      fprintf(stderr, "Silo warning %d of %d: \"%s\" was deprecated in version %s.\n", \
+          ncalls+1, SILO_Globals.maxDeprecateWarnings, M,VERS);               \
+      if (ncalls == 0)                                                        \
+          fprintf(stderr, "Use DBSetDeprecateWarnings(0) to disable.\n");     \
       fflush(stderr);                                                         \
    }                                                                          \
    ncalls++;                                                                  \
@@ -460,6 +464,8 @@ struct _pm {
     int            _guihide;
     int            _ascii_labels;
     int           *_gnodeno;
+    char          *_mrgtree_name;
+    char         **_region_pnames;
 
     /*These used only by NetCDF driver */
     int            _dim_ndims;
@@ -510,6 +516,8 @@ struct _qm {
     int            _baseindex_set;
     int            _group_no;
     int            _guihide;
+    char          *_mrgtree_name;
+    char         **_region_pnames;
 
     /* These are probably only used by the pdb driver */
     char           _nm_dims[64];
@@ -584,6 +592,8 @@ struct _um {
     int            _group_no;
     char          *_phzl_name;
     int            _guihide;
+    char          *_mrgtree_name;
+    char         **_region_pnames;
 };
 
 /*
@@ -616,6 +626,8 @@ struct _csgm {
     char          *_csgzl_name;
     char         **_bndnames;
     int            _guihide;
+    char          *_mrgtree_name;
+    char         **_region_pnames;
 };
 
 /*
@@ -674,6 +686,10 @@ struct _mm {
     char           **_groupnames;
     char           **_matcolors;
     char           **_matnames;
+    char           *_mrgtree_name;
+    char          **_region_pnames;
+    char           *_mmesh_name;
+    int             _tensor_rank;
 };
 
 /*
@@ -739,6 +755,7 @@ typedef struct SILO_Globals_t {
     int enableCompression;
     int enableFriendlyHDF5Names;
     int enableGrabDriver;
+    int maxDeprecateWarnings;
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 
@@ -771,7 +788,7 @@ INTERNAL char *DBGetObjtypeName (int);
 INTERNAL char *db_strndup (char *, int);
 INTERNAL char *db_GetDatatypeString (int);
 INTERNAL int db_GetDatatypeID (char *);
-INTERNAL int db_perror (char *, int, char *);
+INTERNAL int db_perror (const char *, int, char *);
 INTERNAL void _DBQQCalcStride (int *, int *, int, int);
 INTERNAL void _DBQMSetStride (DBquadmesh *);
 INTERNAL int _DBstrprint (FILE *, char **, int, int, int, int, int);
@@ -807,6 +824,8 @@ INTERNAL const char *db_FullName2BaseName(const char *);
 INTERNAL void db_StringArrayToStringList(const char *const *const, int, char **, int*);
 INTERNAL char ** db_StringListToStringArray(char *, int);
 INTERNAL void db_DriverTypeAndSubtype(int driver, int *type, int *subtype);
+INTERNAL void db_IntArrayToIntList(const int *const *const, int, const int *const, int**, int *);
+INTERNAL int ** db_IntListToIntArray(const int *const, int, const int *const);
 
 INTERNAL char *db_absoluteOf_path ( const char *cwg, const char *pathname );
 INTERNAL char *db_basename ( const char *pathname );
@@ -827,6 +846,6 @@ char   *safe_strdup (const char *);
  * Private variables.
  */
 extern int     _db_err_level;
-extern void    (*_db_err_func) (char *);
+extern void    (*_db_err_func) (const char *);
 
 #endif /* !SILO_PRIVATE_H */

@@ -110,6 +110,8 @@ prim_assoc_t    PA_BR_OBJTYPE[] = {
    {BROWSER_DB_DEFVARS,         "defvars"},
    {BROWSER_DB_CSGMESH,         "csgmesh"},
    {BROWSER_DB_CSGVAR,          "csgvar"},
+   {BROWSER_DB_MRGTREE,         "mrgtree"},
+   {BROWSER_DB_GROUPELMAP,      "groupelmap"},
    {0,                          NULL}};
 
 prim_assoc_t    PA_OBJTYPE[] = {
@@ -138,6 +140,8 @@ prim_assoc_t    PA_OBJTYPE[] = {
    {DB_DEFVARS,         "DB_DEFVARS"},
    {DB_CSGMESH,         "DB_CSGMESH"},
    {DB_CSGVAR,          "DB_CSGVAR"},
+   {DB_MRGTREE,         "DB_MRGTREE"},
+   {DB_GROUPELMAP,      "DB_GROUPELMAP"},
    {DB_USERDEF,         "DB_USERDEF"},
    {0,                  NULL}};
 
@@ -213,6 +217,10 @@ prim_assoc_t    PA_DEFVARTYPE[] = {
    {DB_VARTYPE_VECTOR,    "vector"},
    {DB_VARTYPE_TENSOR,    "tensor"},
    {DB_VARTYPE_SYMTENSOR, "symmetric tensor"},
+   {DB_VARTYPE_ARRAY,     "array"},
+   {DB_VARTYPE_MATERIAL,  "material"},
+   {DB_VARTYPE_SPECIES,   "species"},
+   {DB_VARTYPE_LABEL,     "LABEL"},
    {0,                    NULL}};
     
 prim_assoc_t    PA_REGIONOP[] = {

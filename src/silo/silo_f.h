@@ -110,6 +110,21 @@ for advertising or product endorsement purposes.
 #define F_DBGETCOMPRESS F77_ID(dbgetcompress_,dbgetcompress,DBGETCOMPRESS)
 #define F_DBSETHDFNMS   F77_ID(dbsethdfnms_,dbsethdfnms,DBSETHDFNMS)
 #define F_DBGETHDFNMS   F77_ID(dbgethdfnms_,dbgethdfnms,DBGETHDFNMS)
+#define F_DBSETDEPWARN  F77_ID(dbsetdepwarn_,dbsetdepwarn,DBSETDEPWARN)
+#define F_DBGETDEPWARN  F77_ID(dbgetdepwarn_,dbgetdepwarn,DBgETDEPWARN)
+#define F_DBPUTCSGM     F77_ID(dbputcsgm_,dbputcsgm,DBPUTCSGM)
+#define F_DBPUTCSGZL    F77_ID(dbputcsgzl_,dbputcsgzl,DBPUTCSGZL)
+#define F_DBPUTCSGV1    F77_ID(dbputcsgv1_,dbputcsgv1,DBPUTCSGV1)
+
+#define F_DBMKMRGTREE   F77_ID(dbmkmrgtree_,dbmkmrgtree,DBMKMRGTREE)
+#define F_DBFREEMRGTREE F77_ID(dbfreemrgtree_,dbfreemrgtree,DBFREEMRGTREE)
+#define F_DBADDREGION   F77_ID(dbaddregion_,dbaddregion,DBADDREGION)
+#define F_DBSETCWR      F77_ID(dbsetcwr_,dbsetcwr,DBSETCWR)
+#define F_DBPUTMRGTREE  F77_ID(dbputmrgtree_,dbputmrgtree,DBPUTMRGTREE)
+#define F_DBPUTGRPLMAP  F77_ID(dbputgrplmap_,dbputgrplmap,DBPUTGRPLMAP)
+
+#define F_DBALLOCPTR    F77_ID(dballocptr_,dballocptr,DBALLOCPTR)
+#define F_DBRMPTR       F77_ID(dbrmptr_,dbrmptr,DBRMPTR)
 
 void    *DBFortranAccessPointer(int value);
 

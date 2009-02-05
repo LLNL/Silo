@@ -207,6 +207,8 @@ typedef enum {
     DB_ARRAY=580,
     DB_DIR=600,
     DB_VARIABLE=610,
+    DB_MRGTREE=611,
+    DB_GROUPELMAP=612,
     DB_USERDEF=700
 } DBObjectType;
 
@@ -297,6 +299,10 @@ typedef enum {
 #define DBOPT_GROUPINGNAMES     316 /* array of size determined by 
                                        number of groups of names of groups. */
 #define DBOPT_ALLOWMAT0         317 /* Turn off material numer "0" warnings*/
+#define DBOPT_MRGTREE_NAME      318
+#define DBOPT_REGION_PNAMES     319
+#define DBOPT_TENSOR_RANK       320
+#define DBOPT_MMESH_NAME        321
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -351,6 +357,8 @@ typedef enum {
 #define  DB_ZONECENT            111
 #define  DB_FACECENT            112
 #define  DB_BNDCENT             113 /* for CSG meshes only */
+#define  DB_EDGECENT            114
+#define  DB_BLOCKCENT           115 /* for 'block-centered' data on multimeshs */
 
 /* Definitions for COORD_SYSTEM */
 #define  DB_CARTESIAN           120
@@ -447,6 +455,11 @@ typedef enum {
 #define DBCSG_XFORM             2131165184 /* 0x7F070000 */
 #define DBCSG_SWEEP             2131230720 /* 0x7F080000 */
 
+/* definitions for MRG Tree traversal flags */
+#define DB_PREORDER             0x00000001 
+#define DB_POSTORDER            0x00000002
+#define DB_FROMCWR              0x00000004 
+
 /* Miscellaneous constants */
 #define     DB_F77NULL  (-99)   /*Fortran NULL pointer      */
 #define     DB_F77NULLSTRING  "NULLSTRING"  /* FORTRAN STRING */
@@ -532,6 +545,12 @@ typedef struct {
     char         **array_names;
     int            narrays;
 
+    char         **mrgtree_names;
+    int            nmrgtrees;
+
+    char         **groupelmap_names;
+    int            ngroupelmaps;
+
 } DBtoc;
 
 /*----------------------------------------------------------------------------
@@ -563,7 +582,7 @@ typedef struct {
     int           *types;       /* [ndefs] derived variable types */
     char         **defns;       /* [ndefs] derived variable definitions */
     int        *guihides;       /* [ndefs] flags to hide from
-                                   proces-processor's GUI */
+                                   post-processor's GUI */
 } DBdefvars;
 
 typedef struct {
@@ -594,6 +613,7 @@ typedef struct {
     int            origin;      /* '0' or '1' */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     int           *gnodeno;     /* global node ids */
+    char          *mrgtree_name; /* optional name of assoc. mrgtree object */
 } DBpointmesh;
 
 /*----------------------------------------------------------------------------
@@ -619,6 +639,7 @@ typedef struct {
     int            lgroupings;  /* size of groupings array */
     int            *groupings;  /* Array of mesh-ids, group-ids, and counts */
     char          **groupnames; /* Array of group-names for groupings  */
+    char          *mrgtree_name; /* optional name of assoc. mrgtree object */
 } DBmultimesh;
 
 /*----------------------------------------------------------------------------
@@ -661,6 +682,9 @@ typedef struct {
     int            extentssize; /* size of each extent tuple */
     double        *extents;     /* min/max extents of each block */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char         **region_pnames;
+    char          *mmesh_name;
+    int            tensor_rank;    /* DB_VARTYPE_XXX */
 } DBmultivar;
 
 /*-------------------------------------------------------------------------
@@ -683,6 +707,7 @@ typedef struct {
     char         **matcolors;   /* optional colors for materials */
     char         **material_names; /* optional names of the materials */
     int            allowmat0;   /* Flag to allow material "0" */
+    char          *mmesh_name;
 } DBmultimat;
 
 /*-------------------------------------------------------------------------
@@ -834,6 +859,7 @@ typedef struct {
     int            size_index[3];  /* Number of nodes per dimension for 
                                     * original mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char          *mrgtree_name; /* optional name of assoc. mrgtree object */
 } DBquadmesh;
 
 typedef struct {
@@ -879,6 +905,7 @@ typedef struct {
     DBphzonelist  *phzones;     /* Data structure describing mesh zones */
 
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char          *mrgtree_name; /* optional name of assoc. mrgtree object */
 } DBucdmesh;
 
 /*----------------------------------------------------------------------------
@@ -929,6 +956,7 @@ typedef struct {
                                    the range [0, 255] */
     char          *meshname;    /* Name of associated mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char         **region_pnames;
 } DBquadvar;
 
 typedef struct {
@@ -961,6 +989,7 @@ typedef struct {
                                    the range [0, 255] */
     char          *meshname;    /* Name of associated mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char         **region_pnames;
 } DBucdvar;
 
 typedef struct {
@@ -1010,6 +1039,7 @@ typedef struct {
                                    the range [0, 255] */
     char          *meshname;      /* Name of associated mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char         **region_pnames;
 } DBmeshvar;
 
 typedef struct {
@@ -1138,7 +1168,7 @@ typedef struct {
 /*--------- Optional boundary attributes ---------*/
     char         **bndnames;     /* [nbounds] boundary names */
     int            guihide;     /* Flag to hide from post-processor's GUI */
-
+    char          *mrgtree_name; /* optional name of assoc. mrgtree object */
 } DBcsgmesh;
 
 typedef struct {
@@ -1164,6 +1194,7 @@ typedef struct {
                                    the range [0, 255] */
     char          *meshname;    /* Name of associated mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char         **region_pnames;
 } DBcsgvar;
 
 /*-------------------------------------------------------------------------
@@ -1203,6 +1234,70 @@ typedef struct {
     int            maxcomponents;  /* Max number of components */
 
 } DBobject;
+
+typedef struct {
+
+    int           *edgetails;   /* Array of integer set ids at edge tails */
+    int           *edgeheads;   /* Array of integer set ids at edge heads */
+    int            maxedges;    /* Maximum number of edges */
+    int            nedges;      /* Current number of edges */
+
+    char         **setnames;    /* Array of names of sets */
+    int            maxsets;     /* Maximum number of sets */
+    int            nsets;	/* Current number of sets */
+
+} DBsil;
+
+/* traversal oriented sil */
+typedef struct _DBtravsil {
+    char *name;
+    int ntails;
+    struct _DBtravsil *tails;
+    int nheads;
+    struct _DBtravsil *heads;
+} DBtravsil;
+
+typedef struct _DBmrgtnode {
+    char *name;
+    int  narray;
+    char **names;
+    int type_info_bits;
+    int max_children;
+    char *maps_name;
+    int nsegs;
+    int *seg_ids;
+    int *seg_lens;
+    int *seg_types;
+    int num_children;
+    struct _DBmrgtnode **children;
+
+    /* internal stuff to support updates, i/o, etc. */
+    int walk_order;
+    struct _DBmrgtnode  *parent;
+} DBmrgtnode;
+
+typedef void (*DBmrgwalkcb)(DBmrgtnode *tnode, int nat_node_num, void *data);
+
+typedef struct _DBmrgtree {
+    char *name;
+    char *src_mesh_name;
+    int src_mesh_type;
+    int type_info_bits;
+    int num_nodes;
+    DBmrgtnode *root;
+    DBmrgtnode *cwr;
+} DBmrgtree;
+
+typedef struct _DBgroupelmap {
+    char *name;
+    int num_segments;
+    int *groupel_types;
+    int *segment_lengths;
+    int *segment_ids;
+    int **segment_data;
+    void **segment_fracs;
+    int fracs_data_type;
+} DBgroupelmap;
 
 typedef struct DBfile *___DUMMY_TYPE;  /* Satisfy ANSI scope rules */
 
@@ -1346,6 +1441,16 @@ typedef struct DBfile_pub {
                               const int *, const int *, const int *, const int *,
                               const int **, const int *, const int **,
                               DBoptlist *optlist);
+    int            (*p_mrgt)(struct DBfile *dbfile, const char *name, const char *mesh_name,
+                             DBmrgtree *tree, DBoptlist *opts);
+    DBmrgtree     *(*g_mrgt)(struct DBfile *, const char *name);
+    int            (*p_grplm)(struct DBfile *dbfile, const char *map_name,
+                             int num_segments, int *groupel_types,
+			     int *segment_lengths, int *segment_ids,
+			     int **segment_data, void **segment_fracs,
+                             int fracs_data_type, DBoptlist *opts);
+    DBgroupelmap  *(*g_grplm)(struct DBfile *dbfile, const char *name);
+
 } DBfile_pub;
 
 typedef struct DBfile {
@@ -1445,12 +1550,14 @@ SILO_API extern int      DBSetCompression(const char *);
 SILO_API extern char    *DBGetCompression(void);
 SILO_API extern int      DBSetFriendlyHDF5Names(int enable);
 SILO_API extern int      DBGetFriendlyHDF5Names(void);
+SILO_API extern int      DBSetDeprecateWarnings(int max);
+SILO_API extern int      DBGetDeprecateWarnings();
 SILO_API extern void    *DBGrabDriver(DBfile *);
 SILO_API extern int      DBUngrabDriver(DBfile *, const void *);
 SILO_API extern int      DBGetDriverType(const DBfile *);
 SILO_API extern int      DBGetDriverTypeFromPath(const char *);
 SILO_API extern char    *DBVersion(void);
-SILO_API extern void     DBShowErrors(int, void (*)(char *));
+SILO_API extern void     DBShowErrors(int, void (*)(const char *));
 SILO_API extern char    *DBErrString(void);
 SILO_API extern char    *DBErrFunc(void);
 SILO_API extern int      DBClose(DBfile *);
@@ -1605,6 +1712,48 @@ SILO_API extern int      DBPutCSGZonelist(DBfile *, const char *, int, const int
 SILO_API extern int      DBPutCsgvar(DBfile *, const char *, const char *, int, const char **,
                                      const void **, int, int, int, DBoptlist *);
 
+#if 0
+SILO_API extern DBsil   *DBMakeSil(int,int);
+SILO_API extern int      DBFreeSil(DBsil *);
+SILO_API extern int      DBAddSet(DBsil *, const char *name);
+SILO_API extern int      DBAddEdge(DBsil *, int, int);
+SILO_API extern int      DBPutSil(DBfile *, const char *, const DBsil *sil, const DBoptlist *); 
+SILO_API extern DBsil   *DBGetSil(DBfile *, const char *);
+SILO_API extern DBtravsil  *DBBuildTravSil(DBsil *);
+SILO_API extern int      DBFreeTravSil(DBtravsil *);
+#endif
+
+SILO_API extern void DBFreeMrgtree(DBmrgtree *tree);
+SILO_API extern void DBPrintMrgtree(DBmrgtnode *tnode, int walk_order, void *data);
+SILO_API extern void DBLinearizeMrgtree(DBmrgtnode *tnode, int walk_order, void *data);
+SILO_API extern void DBWalkMrgtree(DBmrgtree *tree, DBmrgwalkcb cb, void *wdata,
+                         int traversal_order);
+
+SILO_API extern DBmrgtree *DBMakeMrgtree(int source_mesh_type, int mrgtree_info,
+                               int max_root_descendents, DBoptlist *opts);
+SILO_API extern int      DBAddRegion(DBmrgtree *tree, const char *region_name,
+                             int type_info_bits, int max_descendents,
+                             const char *maps_name, int nsegs, int *seg_ids,
+                             int *seg_sizes, int *seg_types, DBoptlist *opts);
+
+SILO_API extern int      DBAddRegionArray(DBmrgtree *tree, int nregn,
+                             const char **regn_names, int type_info_bits,
+                             const char *maps_name, int nsegs, int *seg_ids,
+                             int *seg_sizes, int *seg_types, DBoptlist *opts);
+
+SILO_API extern int      DBSetCwr(DBmrgtree *tree, const char *path);
+SILO_API extern const char *DBGetCwr(DBmrgtree *tree);
+
+SILO_API extern int      DBPutMrgtree(DBfile *dbfile, const char *mrg_tree_name,
+                             const char *mesh_name, DBmrgtree *tree, DBoptlist *opts);
+SILO_API extern DBmrgtree *DBGetMrgtree(DBfile *dbfile, const char *mrg_tree_name);
+
+SILO_API extern int      DBPutGroupelmap(DBfile *dbfile, const char *map_name,
+                             int num_segments, int *groupel_types, int *segment_lengths,
+                             int *segment_ids, int **segment_data, void **segment_fracs,
+                             int fracs_data_type, DBoptlist *opts);
+SILO_API extern DBgroupelmap *DBGetGroupelmap(DBfile *dbfile, const char *name);
+SILO_API extern void DBFreeGroupelmap(DBgroupelmap *map);
 
 SILO_API extern void *   DBFortranAccessPointer(int value);
 SILO_API extern int      DBFortranAllocPointer(void *pointer);

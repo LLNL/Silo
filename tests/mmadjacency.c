@@ -71,40 +71,40 @@ main(int argc, char *argv[])
        int lnodelists[] = {3,3,3, 3,3,3,  3,3,3, 3,3,3, 3,3,3,3};
 
        /* note, we're using global indexing here. Its just a test. */
-       int nodelistA[] = {4,13,22};   /* 0 & 1 */
-       int nodelistB[] = {35,36,37};  /* 0 & 3 */
-       int nodelistC[] = {22,30,37};  /* 0 & 4 */
+       static int nodelistA[] = {4,13,22};   /* 0 & 1 */
+       static int nodelistB[] = {35,36,37};  /* 0 & 3 */
+       static int nodelistC[] = {22,30,37};  /* 0 & 4 */
 
-       int nodelistD[] = {4,13,22};   /* 1 & 0 */
-       int nodelistE[] = {41,42,43};  /* 1 & 2 */
-       int nodelistF[] = {22,31,41};  /* 1 & 4 */
+       static int nodelistD[] = {4,13,22};   /* 1 & 0 */
+       static int nodelistE[] = {41,42,43};  /* 1 & 2 */
+       static int nodelistF[] = {22,31,41};  /* 1 & 4 */
 
-       int nodelistG[] = {41,42,43};  /* 2 & 1 */
-       int nodelistH[] = {56,65,74};  /* 2 & 3 */
-       int nodelistI[] = {41,48,56};  /* 2 & 4 */
+       static int nodelistG[] = {41,42,43};  /* 2 & 1 */
+       static int nodelistH[] = {56,65,74};  /* 2 & 3 */
+       static int nodelistI[] = {41,48,56};  /* 2 & 4 */
 
-       int nodelistJ[] = {35,36,37};  /* 3 & 0 */
-       int nodelistK[] = {56,65,74};  /* 3 & 2 */
-       int nodelistL[] = {37,47,56};  /* 3 & 4 */
+       static int nodelistJ[] = {35,36,37};  /* 3 & 0 */
+       static int nodelistK[] = {56,65,74};  /* 3 & 2 */
+       static int nodelistL[] = {37,47,56};  /* 3 & 4 */
 
-       int nodelistM[] = {22,30,37};  /* 4 & 0 */
-       int nodelistN[] = {22,31,41};  /* 4 & 1 */
-       int nodelistO[] = {41,48,56};  /* 4 & 2 */
-       int nodelistP[] = {37,47,56};  /* 4 & 3 */
+       static int nodelistM[] = {22,30,37};  /* 4 & 0 */
+       static int nodelistN[] = {22,31,41};  /* 4 & 1 */
+       static int nodelistO[] = {41,48,56};  /* 4 & 2 */
+       static int nodelistP[] = {37,47,56};  /* 4 & 3 */
 
-       int *nodelists[] = {nodelistA, nodelistB, nodelistC,
+       static int *nodelists[] = {nodelistA, nodelistB, nodelistC,
                            nodelistD, nodelistE, nodelistF,
                            nodelistG, nodelistH, nodelistI,
                            nodelistJ, nodelistK, nodelistL,
                            nodelistM, nodelistN, nodelistO, nodelistP};
 
-       int *nodelists2[] = {nodelistA, nodelistB, nodelistC,
+       static int *nodelists2[] = {nodelistA, nodelistB, nodelistC,
                                  NULL,      NULL,      NULL,
                                  NULL,      NULL,      NULL,
                             nodelistJ, nodelistK, nodelistL,
                             nodelistM, nodelistN, nodelistO, nodelistP};
 
-       int *nodelists3[] = {     NULL,      NULL,      NULL,
+       static int *nodelists3[] = {     NULL,      NULL,      NULL,
                             nodelistD, nodelistE, nodelistF,
                             nodelistG, nodelistH, nodelistI,
                                  NULL,      NULL,      NULL,

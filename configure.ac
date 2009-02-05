@@ -313,9 +313,9 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 4.6-pre4)
-m4_define(SILO_DATE, 2007/08/14)
-m4_define(SILO_TIME, 11:06:55)
+m4_define(SILO_VERSION, 4.6-pre5)
+m4_define(SILO_DATE, 2007/09/27)
+m4_define(SILO_TIME, 15:06:03)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
 m4_define(SILO_BUGS,visit-help@llnl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
@@ -758,7 +758,7 @@ AC_HEADER_TIME
 dnl
 dnl If we don't have these header files, we can't continue.
 dnl
-AC_CHECK_HEADERS(fcntl.h limits.h sys/time.h sys/types.h unistd.h stdarg.h, ,
+AC_CHECK_HEADERS(limits.h sys/time.h stdarg.h, ,
 AC_MSG_ERROR([$0 wasn't able to find a necessary header file
 (see above).  Please rectify this and rerun configure.
 See the file INSTALL_FAQ in this directory for possible reasons
@@ -770,6 +770,8 @@ dnl Only needed by browser
 AC_CHECK_HEADERS(fnmatch.h)
 dnl Only needed by silock
 AC_CHECK_HEADERS(ieeefp.h)
+dnl a few systems define O_RDONLY here
+AC_CHECK_HEADERS(fcntl.h sys/fcntl.h sys/types.h unistd.h)
 
 dnl
 dnl Check for various functions in the STDIO header files.

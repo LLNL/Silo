@@ -50,6 +50,8 @@
     DBAddOption(optlist, DBOPT_NMATNOS, &nmatnos);          \
     DBAddOption(optlist, DBOPT_MATNOS, matnos);             \
     DBAddOption(optlist, DBOPT_EXTENTS_SIZE, &ES);          \
+    DBAddOption(optlist, DBOPT_TENSOR_RANK, &scalar_rank);  \
+    DBAddOption(optlist, DBOPT_MMESH_NAME, mmesh_name);     \
     if (EX)                                                 \
        DBAddOption(optlist, DBOPT_EXTENTS, EX);             \
     if (ZCNTS)                                              \
@@ -551,7 +553,9 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     char            dirnames[MAXBLOCKS][STRLEN];
 
     DBoptlist      *optlist = NULL;
-    int             one = 1;
+    const int       one = 1;
+    const int       scalar_rank = DB_VARTYPE_SCALAR;
+    const char *const mmesh_name = "mesh1";
 
     int             nblocks = nblocks_x * nblocks_y * nblocks_z;
     int             extentssize;

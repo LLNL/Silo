@@ -38,6 +38,7 @@ for advertising or product endorsement purposes.
 #include <string.h>     /* For strcmp() */
 #include "silo.h"
 
+char *db_join_path ( const char *a, const char *b );
 static void build_csg(DBfile *dbfile, char *name);
 static int hadError = 0;
 

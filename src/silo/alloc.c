@@ -453,6 +453,7 @@ DBFreeMultimesh(DBmultimesh *msh)
     FREE(msh->meshnames);
     FREE(msh->meshtypes);
     FREE(msh->dirids);
+    FREE(msh->mrgtree_name);
     FREE(msh);
 }
 
@@ -676,6 +677,7 @@ DBFreeCsgmesh(DBcsgmesh *msh)
     FREE(msh->coeffidx);
     FREE(msh->bndnames);
     FREE(msh->name);
+    FREE(msh->mrgtree_name);
 
     DBFreeCSGZonelist(msh->zones);
 
@@ -742,6 +744,7 @@ DBFreeQuadmesh(DBquadmesh *msh)
     }
 
     FREE(msh->name);
+    FREE(msh->mrgtree_name);
     FREE(msh);
 }
 
@@ -807,6 +810,7 @@ DBFreePointmesh(DBpointmesh *msh)
     FREE(msh->gnodeno);
     FREE(msh->name);
     FREE(msh->title);
+    FREE(msh->mrgtree_name);
     FREE(msh);
 }
 
@@ -951,6 +955,7 @@ DBFreeUcdmesh(DBucdmesh *msh)
     FREE(msh->nodeno);
     FREE(msh->gnodeno);
     FREE(msh->name);
+    FREE(msh->mrgtree_name);
     FREE(msh);
 }
 
@@ -1698,4 +1703,30 @@ DBFreeCurve (DBcurve *cu)
       FREE (cu->y) ;
       FREE (cu) ;
    }
+}
+
+PUBLIC void
+DBFreeGroupelmap(DBgroupelmap *map)
+{
+    int i;
+
+    if (map == 0)
+        return;
+
+    FREE(map->name);
+    FREE(map->groupel_types);
+    FREE(map->segment_lengths);
+    FREE(map->segment_ids);
+
+    for (i = 0; i < map->num_segments; i++)
+        FREE(map->segment_data[i]);
+    FREE(map->segment_data);
+
+    if (map->segment_fracs)
+    {
+        for (i = 0; i < map->num_segments; i++)
+            FREE(map->segment_fracs[i]);
+        FREE(map->segment_fracs);
+    }
+    FREE(map);
 }
