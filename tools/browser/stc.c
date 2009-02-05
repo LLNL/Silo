@@ -1483,6 +1483,8 @@ stc_silo_types (void) {
       COMP (groupnames,
             "pointer (array 'self.lgroupings' (primitive 'string'))");
       COMP (mrgtree_name,      "primitive 'string'");
+      COMP (tv_connectivity,   "primitive 'int'");
+      COMP (disjoint_mode,     "primitive 'int'");
    } ESTRUCT;
 
    STRUCT (DBmultimeshadj) {
@@ -1809,6 +1811,8 @@ stc_silo_types (void) {
       COMP (bndnames,
             "pointer (array 'self.nbounds' (primitive 'string'))");
       COMP (mrgtree_name,       "primitive 'string'");
+      COMP (tv_connectivity,   "primitive 'int'");
+      COMP (disjoint_mode,     "primitive 'int'");
    } ESTRUCT;
 
    STRUCT (DBcsgvar) {
@@ -1874,6 +1878,8 @@ stc_silo_types (void) {
       COMP (nodeno,
             "pointer (array 'self.nnodes' (primitive 'int'))");
       COMP (mrgtree_name,       "primitive 'string'");
+      COMP (tv_connectivity,   "primitive 'int'");
+      COMP (disjoint_mode,     "primitive 'int'");
    } ESTRUCT;
 
    STRUCT (DBucdvar) {
@@ -2081,6 +2087,22 @@ stc_silo_types (void) {
             "pointer (array 'self.num_segments' (primitive 'int'))");
    } ESTRUCT;
 
+   STRUCT (DBmrgvar) {
+      COMP (name,               "primitive 'string'");
+      COMP (mrgt_name,          "primitive 'string'");
+      COMP (ncomps,             "primitive 'int'");
+      COMP (nregns,             "primitive 'int'");
+      COMP (datatype,           "primitive 'int'");
+      IOASSOC (PA_DATATYPE);
+      COMP (compnames,
+            "pointer (array 'self.ncomps' (primitive 'string'))");
+      COMP (reg_pnames,
+            "pointer (array 'self.nregns' (primitive 'string'))");
+      COMP (data,
+            "pointer (array 'self.ncomps' (pointer "
+            "(array 'self.nregns' (primitive 'self.datatype'))))");
+   } ESTRUCT;
+
    STRUCT (toc_t) {
       COMP (type,               "primitive 'int'");
       IOASSOC (PA_BR_OBJTYPE);
@@ -2162,6 +2184,9 @@ stc_silo_types (void) {
       COMP (ngroupelmaps,            "primitive 'int'");
       COMP (groupelmap_names,
             "pointer (array 'self.ngroupelmaps' (primitive 'string'))");
+      COMP (nmrgvars,               "primitive 'int'");
+      COMP (mrgvar_names,
+            "pointer (array 'self.nmrgvars' (primitive 'string'))");
    } ESTRUCT;
 
 #if 0

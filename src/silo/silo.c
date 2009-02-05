@@ -106,9 +106,6 @@ for advertising or product endorsement purposes.
 int SILO_VERS_TAG = 0;
 
 /* specify versions which are backward compatible with the current */
-int Silo_version_4_5_1_cksum = 0;
-int Silo_version_4_5_1 = 0;
-int Silo_version_4_5 = 0;
 
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
 PUBLIC int     db_errno = 0;    /*last error number                     */
@@ -145,7 +142,7 @@ PUBLIC char   *_db_err_list[] =
 };
 
 INTERNAL int   _db_err_level = DB_TOP;  /*what errors to issue (default) */
-INTERNAL void  (*_db_err_func)(const char *);  /*how to issue errors  */
+INTERNAL void  (*_db_err_func)(char *);  /*how to issue errors  */
 INTERNAL jstk_t *Jstk = NULL;   /*error jump stack  */
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
 PRIVATE filter_t _db_filter[DB_NFILTERS];
@@ -163,6 +160,7 @@ struct _csgzl  _csgzl;
 struct _mm     _mm;
 struct _cu     _cu;
 struct _dv     _dv;
+struct _mrgt   _mrgt;
 
 SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
@@ -176,6 +174,28 @@ SILO_Globals_t SILO_Globals = {
 SILO_Compression_t SILO_Compression = {
     "\0" 
 };
+
+INTERNAL int
+db_FullyDeprecatedConvention(const char *name)
+{
+    if (strcmp(name, "_visit_defvars") == 0)
+    {
+        DEPRECATE_MSG(name,4,6,"DBPutDefvars")
+    }
+    else if (strcmp(name, "_visit_domain_groups") == 0)
+    {
+        DEPRECATE_MSG(name,4,6,"DBPutMrgtree")
+    }
+    else if (strcmp(name, "_disjoint_elements") == 0)
+    {
+        DEPRECATE_MSG(name,4,6,"DBOPT_DISJOINT_MODE option")
+    }
+    else if (strncmp(name, "MultivarToMultimeshMap_",23) == 0)
+    {
+        DEPRECATE_MSG(name,4,6,"DBOPT_MMESH_NAME option for DBPutMultivar")
+    }
+    return 0;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    db_perror
@@ -246,7 +266,7 @@ db_perror(const char *s, int errorno, char *fname)
      * the indicated error handling routine.
      */
     if (_db_err_func) {
-        _db_err_func(s);
+        _db_err_func((char*)s);
     }
     else {
         if (fname && *fname)
@@ -335,7 +355,7 @@ db_strndup(char *string, int len)
 }
 
 /*----------------------------------------------------------------------
- * Function: db_VariableNameValid
+ * Function: DBVariableNameValid
  *
  * Purpose   Check the validity of a Silo variable name.
  *
@@ -363,9 +383,12 @@ db_strndup(char *string, int len)
  *    Hank Childs, Thu Sep  7 14:17:13 PDT 2000
  *    Allow variable names to be relative. [HYPer02087]
  *
+ *    Mark C. Miller, Mon Oct 22 22:08:09 PDT 2007
+ *    Made it part of the public API.
+ *
  *---------------------------------------------------------------------*/
-INTERNAL int
-db_VariableNameValid(char *s)
+PUBLIC int
+DBVariableNameValid(const char *s)
 {
     int             len;
     int             i;
@@ -376,7 +399,7 @@ db_VariableNameValid(char *s)
 
     p = strchr(s,':');
     if (p == NULL)
-        p = s;
+        p = (char*)s;
     else
         p++;    /* Move one character past the ':'. */
 
@@ -414,6 +437,13 @@ db_VariableNameValid(char *s)
 
     return 1;
 }
+/* kept this to deal with non-const qualified API */
+INTERNAL int
+db_VariableNameValid(char *s)
+{
+    return DBVariableNameValid(s);
+}
+
 
 /*----------------------------------------------------------------------
  *  Routine                                              _DBQQCalcStride
@@ -649,6 +679,9 @@ db_AllocToc(void)
 
     toc->groupelmap_names = NULL;
     toc->ngroupelmaps = 0;
+
+    toc->mrgvar_names = NULL;
+    toc->nmrgvars = 0;
 
     return(toc);
 }
@@ -892,6 +925,15 @@ db_FreeToc(DBfile *dbfile)
         }
     }
 
+    if (toc->nmrgvars > 0) {
+        if (toc->mrgvar_names) {
+            for (i = 0; i < toc->nmrgvars; i++) {
+                FREE(toc->mrgvar_names[i]);
+            }
+            FREE(toc->mrgvar_names);
+        }
+    }
+
     FREE(dbfile->pub.toc);
     return 0;
 }
@@ -1127,6 +1169,9 @@ DBGetObjtypeTag(char *typename)
     else if (STR_EQUAL(typename, "groupelmap"))
         tag = DB_GROUPELMAP;
 
+    else if (STR_EQUAL(typename, "mrgvar"))
+        tag = DB_MRGVAR;
+
     else
         tag = DB_USERDEF;
 
@@ -1230,6 +1275,8 @@ DBGetObjtypeName(int type)
             return ("mrgtree");
         case DB_GROUPELMAP:
             return ("groupelmap");
+        case DB_MRGVAR:
+            return ("mrgvar");
         case DB_USERDEF:
             return ("unknown");
     }
@@ -2899,7 +2946,7 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
  *
  *-------------------------------------------------------------------------*/
 PUBLIC void
-DBShowErrors(int level, void(*func)(const char*))
+DBShowErrors(int level, void(*func)(char*))
 {
     static int     old_level = DB_NONE;
     static int     nested_suspend = 0;
@@ -3437,7 +3484,7 @@ DBPause(DBfile *file)
 {
     int retval;
 
-    API_DEPRECATE("DBPause", int, -1, "4.6") {
+    API_DEPRECATE("DBPause", int, -1, 4,6,0) {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
         if (NULL == file->pub.pause)
@@ -3473,7 +3520,7 @@ DBContinue(DBfile *file)
 {
     int retval;
 
-    API_DEPRECATE("DBContinue", int, -1, "4.6") {
+    API_DEPRECATE("DBContinue", int, -1, 4,6,0) {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
         if (NULL == file->pub.cont)
@@ -3945,7 +3992,7 @@ DBGetAtt(DBfile *dbfile, const char *varname, const char *attname)
 {
     void *retval = NULL;
 
-    API_DEPRECATE2("DBGetAtt", void *, NULL, varname, "4.6") {
+    API_DEPRECATE2("DBGetAtt", void *, NULL, varname, 4,6,0) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (!varname || !*varname)
@@ -4244,7 +4291,7 @@ DBListDir(DBfile *dbfile, char *argv[], int argc)
 {
     int retval;
 
-    API_DEPRECATE("DBListDir", int, -1, "4.6") {
+    API_DEPRECATE("DBListDir", int, -1, 4,6,"DBGetToc()") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -4630,6 +4677,8 @@ DBWrite(DBfile *dbfile, const char *vname, void *var, int *dims, int ndims,
         }
         if (nvals == 0)
             API_ERROR("Zero length write attempted", E_BADARGS);
+        if (db_FullyDeprecatedConvention(vname))
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
         if (!dbfile->pub.write)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -4749,7 +4798,7 @@ DBReadAtt(DBfile *dbfile, const char *vname, const char *aname, void *results)
 {
     int retval;
 
-    API_DEPRECATE2("DBReadAtt", int, -1, vname, "4.6") {
+    API_DEPRECATE2("DBReadAtt", int, -1, vname, 4,6,0) {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -5435,7 +5484,7 @@ DBGetQuadvar1 (DBfile *dbfile, const char *varname, float *var, int *dims,
     int            nbytes, i;
     DBquadvar     *qv = NULL;
 
-    API_DEPRECATE2 ("DBGetQuadvar1", int, -1, varname, "4.6") {
+    API_DEPRECATE2 ("DBGetQuadvar1", int, -1, varname, 4,6,"DBGetQuadvar()") {
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR("DBGetQuadvar1", E_GRABBED) ; 
         if (NULL == (qv = DBGetQuadvar (dbfile, varname)))
@@ -7419,11 +7468,11 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
 {
     int retval;
 
-    API_BEGIN2("DBPutUcdmesh", int, -1, name) {
+    API_DEPRECATE2("DBPutUcdsubmesh", int, -1, name, 4, 6, "MRG Trees") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBPutUcdmesh", E_GRABBED) ; 
+            API_ERROR("DBPutUcdsubmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("mesh name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
@@ -7602,7 +7651,7 @@ DBPutZonelist(DBfile *dbfile, const char *name, int nzones, int ndims,
 {
     int retval;
 
-    API_BEGIN2("DBPutZonelist", int, -1, name) {
+    API_DEPRECATE2("DBPutZonelist", int, -1, name, 4, 6, "DBPutZonelist2()") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
@@ -8999,6 +9048,7 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         break;
 
                     case DBOPT_GROUPNUM:
+                        DEPRECATE_MSG("DBOPT_GROUPNUM",4,6,"MRG Trees")
                         _csgm._group_no = DEREF(int, optlist->values[i]);
                         break;
 
@@ -9020,6 +9070,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_REGION_PNAMES:
                         _csgm._region_pnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_TV_CONNECTIVITY:
+                        _csgm._tv_connectivity = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_DISJOINT_MODE:
+                        _csgm._disjoint_mode = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -9154,6 +9212,7 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         break;
 
                     case DBOPT_GROUPNUM:
+                        DEPRECATE_MSG("DBOPT_GROUPNUM",4,6,"MRG Trees")
                         _pm._group_no = DEREF(int, optlist->values[i]);
                         break;
 
@@ -9286,6 +9345,7 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         break;
 
                     case DBOPT_GROUPNUM:
+                        DEPRECATE_MSG("DBOPT_GROUPNUM",4,6,"MRG Trees")
                         _qm._group_no = DEREF(int, optlist->values[i]);
                         break;
 
@@ -9406,6 +9466,7 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         break;
 
                     case DBOPT_GROUPNUM:
+                        DEPRECATE_MSG("DBOPT_GROUPNUM",4,6,"MRG Trees")
                         _um._group_no = DEREF(int, optlist->values[i]);
                         break;
 
@@ -9427,6 +9488,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_REGION_PNAMES:
                         _um._region_pnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_TV_CONNECTIVITY:
+                        _um._tv_connectivity = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_DISJOINT_MODE:
+                        _um._disjoint_mode = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -9532,10 +9601,12 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         break;
 
                     case DBOPT_GROUPORIGIN:
+                        DEPRECATE_MSG("DBOPT_GROUPORIGIN",4,6,"MRG Trees")
                         _mm._grouporigin = DEREF(int, optlist->values[i]);
                         break;
 
                     case DBOPT_NGROUPS:
+                        DEPRECATE_MSG("DBOPT_NGROUPS",4,6,"MRG Trees")
                         _mm._ngroups = DEREF(int, optlist->values[i]);
                         break;
 
@@ -9572,14 +9643,17 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         break;
 
                     case DBOPT_GROUPINGS_SIZE:
+                        DEPRECATE_MSG("DBOPT_GROUPINGS_SIZE",4,6,"MRG Trees")
                         _mm._lgroupings = DEREF(int, optlist->values[i]);
                         break;
 
                     case DBOPT_GROUPINGS:
+                        DEPRECATE_MSG("DBOPT_GROUPINGS",4,6,"MRG Trees")
                         _mm._groupings = (int *) optlist->values[i];
                         break;
 
                     case DBOPT_GROUPINGNAMES:
+                        DEPRECATE_MSG("DBOPT_GROUPINGNAMES",4,6,"MRG Trees")
                         _mm._groupnames = (char **) optlist->values[i];
                         break;
 
@@ -9609,6 +9683,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_TENSOR_RANK:
                         _mm._tensor_rank = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_TV_CONNECTIVITY:
+                        _mm._tv_connectivity = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_DISJOINT_MODE:
+                        _mm._disjoint_mode = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -9673,6 +9755,26 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                 {
                     case DBOPT_HIDE_FROM_GUI:
                         _dv._guihide = DEREF(int, optlist->values[i]);
+                        break;
+
+                    default:
+                        unused++;
+                        break;
+                }
+            }
+            break;
+
+        case DB_MRGTREE:
+            for (i = 0; i < optlist->numopts; i++)
+            {
+                switch (optlist->options[i])
+                {
+                    case DBOPT_MRGV_ONAMES:
+                        _mrgt._mrgvar_onames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_MRGV_RNAMES:
+                        _mrgt._mrgvar_rnames = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -9806,7 +9908,7 @@ DBGetComponentNames(DBfile *dbfile, const char *objname,
 {
     int retval;
 
-    API_DEPRECATE2("DBGetComponentNames", int, -1, objname, "4.6")
+    API_DEPRECATE2("DBGetComponentNames", int, -1, objname, 4,6,0)
     {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
@@ -10292,6 +10394,11 @@ db_ResetGlobalData_Defvars (void) {
    return 0;
 }
 
+INTERNAL int
+db_ResetGlobalData_Mrgtree (void) {
+   memset(&_mrgt, 0, sizeof(_mrgt));
+   return 0;
+}
 
 /*----------------------------------------------------------------------
  * Routine                                  db_FullName2BaseName
@@ -10350,37 +10457,26 @@ db_StringArrayToStringList(const char *const *const strArray, int n,
     }
 
     /*
-     * Create a character string which is a semi-colon separated list of
-     * mesh names.
+     * Create a string which is a semi-colon separated list of strings
      */
      for (i=len=0; i<n; i++)
      {
          if (strArray[i])
-         {
-             if (strlen(strArray[i]) == 0)
-                 len += 2;
-             else
-                 len += strlen(strArray[i])+1;
-         }
+             len += strlen(strArray[i])+1;
          else
-         {
-             len += 1;
-         }
+             len += 2;
      }
      s = malloc(len+1);
      for (i=len=0; i<n; i++) {
          if (i) s[len++] = ';';
          if (strArray[i])
          {
-             if (strlen(strArray[i]) == 0)
-             {
-                 s[len++] = '\n';
-             }
-             else
-             {
-                 strcpy(s+len, strArray[i]);
-                 len += strlen(strArray[i]);
-             }
+             strcpy(s+len, strArray[i]);
+             len += strlen(strArray[i]);
+         }
+         else
+         {
+             s[len++] = '\n';
          }
      }
      len++; /*count last null*/
@@ -10431,22 +10527,105 @@ db_StringListToStringArray(char *strList, int n)
     for (i=0, l=0; i<n; i++) {
         if (strList[l] == ';')
         {
-            retval[i] = 0; 
+            retval[i] = STRDUP(""); 
             l += 1;
         }
         else if (strList[l] == '\n')
         {
-            retval[i] = STRDUP(""); 
+            retval[i] = 0; 
             l += 2;
         }
         else
         {
-            char *tok = strtok(l>i?NULL:strList, ";");
-            retval[i] = STRDUP(tok?tok:"");
-            l += strlen(tok?tok:"")+1;
+            int lstart = l;
+            while (strList[l] != ';' && strList[l] != '\0')
+                l++;
+            strList[l] = '\0';
+            retval[i] = STRDUP(&strList[lstart]);
+            l++;
         }
     }
     if (add1) retval[i] = 0;
+    return retval;
+}
+
+/*----------------------------------------------------------------------
+ * Purpose
+ *
+ *    Flatten an array of variable lenght arrays of ints into a single
+ *    array of ints.
+ *
+ * Programmer
+ *
+ *    Mark C. Miller, Wed Oct 10 11:49:36 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+INTERNAL void 
+db_IntArrayToIntList(const int *const *const intArrays, int nArrays,
+const int *const lenArrays, int **intList, int *m)
+{
+    int i,j,n;
+    int *list = 0;
+
+    if (nArrays <= 0 || intArrays == 0 || lenArrays == 0 ||
+        intList == 0 || m == 0)
+    {
+        *intList = 0;
+        *m = 0;
+        return;
+    }
+
+    for (i=n=0; i < nArrays; i++)
+        n += lenArrays[i];
+
+    if (n == 0)
+    {
+        *intList = 0;
+        *m = 0;
+        return;
+    }
+
+    list = (int *) malloc(n * sizeof(int));
+
+    for (i=n=0; i < nArrays; i++)
+    {
+        for (j = 0; j < lenArrays[i]; j++)
+            list[n++] = intArrays[i][j];
+    }
+
+    *intList = list;
+    *m = n;
+}
+
+/*----------------------------------------------------------------------
+ * Purpose
+ *
+ *    Unflatten a a single array of ints and lengths into a an array
+ *    of arrays of the specified lengths.
+ *
+ * Programmer
+ *
+ *    Mark C. Miller, Wed Oct 10 11:49:36 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+INTERNAL int**
+db_IntListToIntArray(const int *const intList, int nArrays,
+    const int *const lenArrays)
+{
+    int i,j,n;
+    int **retval = 0;
+
+    if (nArrays <= 0 || intList == 0 || lenArrays == 0)
+        return 0;
+
+    retval = (int**) malloc(nArrays * sizeof(int*));
+    for (i=n=0; i < nArrays; i++)
+    {
+        retval[i] = (int *) malloc(lenArrays[i] * sizeof(int));
+        for (j = 0; j < lenArrays[i]; j++)
+            retval[i][j] = intList[n++];
+    }
+
     return retval;
 }
 
@@ -11376,6 +11555,26 @@ void DBFreeMrgtree(DBmrgtree *tree)
     DBWalkMrgtree(tree, DBFreeMrgnode, 0, DB_POSTORDER);
     FREE(tree->name);
     FREE(tree->src_mesh_name);
+    if (tree->mrgvar_onames)
+    {
+        int i = 0;
+        while (tree->mrgvar_onames[i] != 0)
+        {
+            FREE(tree->mrgvar_onames[i]);
+            i++;
+        }
+        FREE(tree->mrgvar_onames);
+    }
+    if (tree->mrgvar_rnames)
+    {
+        int i = 0;
+        while (tree->mrgvar_rnames[i] != 0)
+        {
+            FREE(tree->mrgvar_rnames[i]);
+            i++;
+        }
+        FREE(tree->mrgvar_rnames);
+    }
     FREE(tree);
 }
 
@@ -11747,7 +11946,6 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
     return(tree->cwr->num_children-1);
 }
 
-#warning ONLY DOES UP OR DOWN ON LEVEL
 PUBLIC int
 DBSetCwr(DBmrgtree *tree, const char *path)
 {
@@ -11799,7 +11997,6 @@ DBGetCwg(DBmrgtree *tree)
         if (tree == 0)
             API_ERROR("tree", E_BADARGS);
 
-#warning CONSTRUCT FULL PATH NAME
         retval = tree->cwr->name; 
         API_RETURN(retval);
     }
@@ -11924,82 +12121,65 @@ DBGetGroupelmap(DBfile *dbfile, const char *name)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
-/*----------------------------------------------------------------------
- * Purpose
- *
- *    Flatten an array of variable lenght arrays of ints into a single
- *    array of ints.
- *
- * Programmer
- *
- *    Mark C. Miller, Wed Oct 10 11:49:36 PDT 2007
- *
- *--------------------------------------------------------------------*/
-INTERNAL void 
-db_IntArrayToIntList(const int *const *const intArrays, int nArrays,
-const int *const lenArrays, int **intList, int *m)
+PUBLIC int
+DBPutMrgvar(DBfile *dbfile, const char *name, const char *mrgt_name,
+    int ncomps, const char **compnames, int nregns, const char **reg_pnames,
+    int datatype, void **data, DBoptlist *opts)
 {
-    int i,j,n;
-    int *list = 0;
+    int retval;
 
-    if (nArrays <= 0 || intArrays == 0 || lenArrays == 0 ||
-        intList == 0 || m == 0)
-    {
-        *intList = 0;
-        *m = 0;
-        return;
+    API_BEGIN2("DBPutMrgvar", int, -1, name) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBPutMrgvar", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("mrgvar name", E_BADARGS);
+        if (db_VariableNameValid((char *)name) == 0)
+            API_ERROR("mrgvar name", E_INVALIDNAME);
+        if (!mrgt_name || !*mrgt_name)
+            API_ERROR("mrgt_name", E_BADARGS);
+        if (db_VariableNameValid((char *)mrgt_name) == 0)
+            API_ERROR("mrgt_name", E_INVALIDNAME);
+        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+            API_ERROR("overwrite not allowed", E_NOOVERWRITE);
+        if (nregns < 0)
+            API_ERROR("nregns", E_BADARGS);
+        if (ncomps < 0)
+            API_ERROR("ncomps", E_BADARGS);
+        if (!reg_pnames)
+            API_ERROR("reg_pnames", E_BADARGS);
+        if (!data)
+            API_ERROR("data", E_BADARGS);
+        if (!dbfile->pub.p_mrgv)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.p_mrgv) (dbfile, name, mrgt_name, ncomps,
+            compnames, nregns, reg_pnames, datatype, data, opts);
+
+        db_FreeToc(dbfile);
+        API_RETURN(retval);
     }
-
-    for (i=n=0; i < nArrays; i++)
-        n += lenArrays[i];
-
-    if (n == 0)
-    {
-        *intList = 0;
-        *m = 0;
-        return;
-    }
-
-    list = (int *) malloc(n * sizeof(int));
-
-    for (i=n=0; i < nArrays; i++)
-    {
-        for (j = 0; j < lenArrays[i]; j++)
-            list[n++] = intArrays[i][j];
-    }
-
-    *intList = list;
-    *m = n;
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
-/*----------------------------------------------------------------------
- * Purpose
- *
- *    Unflatten a a single array of ints and lengths into a an array
- *    of arrays of the specified lengths.
- *
- * Programmer
- *
- *    Mark C. Miller, Wed Oct 10 11:49:36 PDT 2007
- *
- *--------------------------------------------------------------------*/
-INTERNAL int**
-db_IntListToIntArray(const int *const intList, int nArrays,
-    const int *const lenArrays)
+PUBLIC DBmrgvar *
+DBGetMrgvar(DBfile *dbfile, const char *name)
 {
-    int i,j,n;
-    int **retval = 0;
+    DBmrgvar *retval = NULL;
 
-    if (nArrays <= 0 || intList == 0 || lenArrays == 0)
-        return 0;
+    API_BEGIN2("DBGetMrgvar", DBmrgvar *, NULL, name) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetMrgvar", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("mrgvar name", E_BADARGS);
+        if (!dbfile->pub.g_mrgv)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-    retval = (int**) malloc(nArrays * sizeof(int*));
-    for (i=n=0; i < nArrays; i++)
-    {
-        retval[i] = (int *) malloc(lenArrays[i] * sizeof(int));
-        for (j = 0; j < lenArrays[i]; j++)
-            retval[i][j] = intList[n++];
+        retval = (dbfile->pub.g_mrgv) (dbfile, (char *)name);
+        API_RETURN(retval);
     }
-
-    return retval;
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }

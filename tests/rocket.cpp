@@ -773,6 +773,16 @@ void write_top_mrgtree(DBfile *dbfile)
     DBSetCwr(topTree, ".."); // to nose group
     DBSetCwr(topTree, ".."); // to top 
 
+    // define a simple mrgvar on this tree
+    {
+        int c1[] = {1, 2, 3, 4};
+	int c2[] = {20, 40, 60, 80};
+	void *vals[] ={(void*)c1,(void*)c2};
+	const char *parent_name = "/assembly/nose/mirvs";
+	const char *reg_names[] = {parent_name, 0, 0, 0};
+	DBPutMrgvar(dbfile, "some_ints", "mrg_tree", 2, 0, 4, reg_names, DB_INT, vals, 0);
+    }
+
     DBPutMrgtree(dbfile, "mrg_tree", "mrocket", topTree, 0); 
 
     /* output MRG tree info for testing */
@@ -911,6 +921,99 @@ void write_block_mrgtree(DBfile *dbfile, int proc_id)
     DBSetDir(dbfile, "..");
 }
 
+
+#if 0
+void
+db_StringArrayToStringList(const char *const *const strArray, int n,
+                           char **strList, int *m)
+{
+    int i, len;
+    char *s = NULL;
+
+    /* if n is unspecified, determine it by counting forward until
+       we get a null pointer */
+    if (n < 0)
+    {
+        n = 0;
+        while (strArray[n] != 0)
+            n++;
+    }
+
+    /*
+     * Create a string which is a semi-colon separated list of strings
+     */
+     for (i=len=0; i<n; i++)
+     {
+         if (strArray[i])
+             len += strlen(strArray[i])+1;
+         else
+             len += 2;
+     }
+     s = (char*) malloc(len+1);
+     for (i=len=0; i<n; i++) {
+         if (i) s[len++] = ';';
+         if (strArray[i])
+         {
+             strcpy(s+len, strArray[i]);
+             len += strlen(strArray[i]);
+         }
+         else
+         {
+             s[len++] = '\n';
+         }
+     }
+     len++; /*count last null*/
+
+     *strList = s;
+     *m = len;
+}
+
+char **
+db_StringListToStringArray(char *strList, int n)
+{
+    int i,l, add1 = 0;
+    char **retval;
+
+    /* if n is unspecified (<0), compute it by counting semicolons */
+    if (n < 0)
+    {
+        add1 = 1;
+        n = 1;
+        while (strList[i] != '\0')
+        {
+            if (strList[i] == ';')
+                n++;
+            i++;
+        }
+    }
+
+    retval = (char**) calloc(n+add1, sizeof(char*));
+    for (i=0, l=0; i<n; i++) {
+        if (strList[l] == ';')
+        {
+            retval[i] = strdup("");
+            l += 1;
+        }
+        else if (strList[l] == '\n')
+        {
+            retval[i] = 0;
+            l += 2;
+        }
+        else
+        {
+            int lstart = l;
+            while (strList[l] != ';' && strList[l] != '\0')
+                l++;
+            strList[l] = '\0';
+            retval[i] = strdup(&strList[lstart]);
+            l++;
+        }
+    }
+    if (add1) retval[i] = 0;
+    return retval;
+}
+#endif
+
 //
 // Purpose: Build a simple, 3D mesh with a lot of interesting subsets
 // to serve as a talking point for VisIt's subsetting functionality.
@@ -921,6 +1024,27 @@ main(int argc, char **argv)
     FILE *outfile;
     DBfile *dbfile;
     int driver = DB_HDF5;
+
+#if 0
+    {
+        char *names[5];
+	names[0] = "sandy";
+	names[1] = 0;
+	names[2] = "jill";
+	names[3] = "steve";
+	names[4] = "mark";
+	char *strList;
+	int len;
+	db_StringArrayToStringList(names, 5, &strList, &len);
+	for (int i = 0; i < strlen(strList); i++)
+	    printf("strList[%d]=\"%c\"\n", i, strList[i]);
+        char **foo = db_StringListToStringArray(strList, 5);
+	for (int i = 0; i < 5; i++)
+	    printf("foo[%d]=\"%s\"\n", i, foo[i]?foo[i]:"(null)");
+
+        exit(1);
+    }
+#endif
 
     int j, i = 1;
     while (i < argc)

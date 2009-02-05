@@ -1730,3 +1730,29 @@ DBFreeGroupelmap(DBgroupelmap *map)
     }
     FREE(map);
 }
+
+PUBLIC void
+DBFreeMrgvar(DBmrgvar *mrgv)
+{
+    int i;
+
+    if (mrgv == 0)
+        return;
+
+    if (mrgv->compnames)
+    {
+        for (i = 0; i < mrgv->ncomps; i++)
+            FREE(mrgv->compnames[i]);
+        FREE(mrgv->compnames);
+    }
+
+    for (i = 0; i < mrgv->nregns; i++)
+        FREE(mrgv->reg_pnames[i]);
+    FREE(mrgv->reg_pnames);
+
+    for (i = 0; i < mrgv->ncomps; i++)
+        FREE(mrgv->data[i]);
+    FREE(mrgv->data);
+
+    FREE(mrgv);
+}

@@ -1413,6 +1413,12 @@ browser_DBFreeGroupelmap(void *mem, obj_t type) {
    DBFreeGroupelmap ((DBgroupelmap*)mem);
 }
 
+/*ARGSUSED*/
+static void 
+browser_DBFreeMrgvar(void *mem, obj_t type) {
+   DBFreeMrgvar ((DBmrgvar*)mem);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    browser_DBFreeVar
  *
@@ -2012,6 +2018,16 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             savefunc = NULL;
             freefunc = browser_DBFreeGroupelmap;
             typename = "DBgroupelmap";
+            goto done;
+        }
+    }
+
+    for (i=0; i<toc->nmrgvars; i++) {
+        if (!strcmp(toc->mrgvar_names[i], base)) {
+            loadfunc = (void*(*)(DBfile*,char*))DBGetMrgvar;
+            savefunc = NULL;
+            freefunc = browser_DBFreeMrgvar;
+            typename = "DBmrgvar";
             goto done;
         }
     }

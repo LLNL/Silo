@@ -209,9 +209,11 @@ db_pdb_InitCallbacks ( DBfile *dbfile )
     /* MRG trees and Groupel maps */
     dbfile->pub.g_mrgt = db_pdb_GetMrgtree;
     dbfile->pub.g_grplm = db_pdb_GetGroupelmap;
+    dbfile->pub.g_mrgv = db_pdb_GetMrgvar;
 #ifdef PDB_WRITE
     dbfile->pub.p_mrgt = db_pdb_PutMrgtree;
     dbfile->pub.p_grplm = db_pdb_PutGroupelmap;
+    dbfile->pub.p_mrgv = db_pdb_PutMrgvar;
 #endif
 }
 
@@ -926,7 +928,7 @@ db_pdb_NewToc (DBfile *_dbfile)
    int            ivar, iqmesh, iqvar, iumesh, iuvar, icurve, idir, iarray,
       imat, imatspecies, imultimesh, imultivar, imultimat, imultimatspecies,
       ipmesh, iptvar, iobj, icsgmesh, icsgvar, idefvars, imultimeshadj,
-      imrgtrees, igroupelmaps;
+      imrgtrees, igroupelmaps, imrgvars;
 
    DBtoc         *toc;
    char          *ctype;
@@ -1055,6 +1057,9 @@ db_pdb_NewToc (DBfile *_dbfile)
          case DB_GROUPELMAP:
             toc->ngroupelmaps++;
             break;
+         case DB_MRGVAR:
+            toc->nmrgvars++;
+            break;
          default:
             toc->nobj++;
             break;
@@ -1164,6 +1169,10 @@ db_pdb_NewToc (DBfile *_dbfile)
    if (toc->ngroupelmaps > 0) {
       toc->groupelmap_names = ALLOC_N(char *, toc->ngroupelmaps);
    }
+
+   if (toc->nmrgvars > 0) {
+      toc->mrgvar_names = ALLOC_N(char *, toc->nmrgvars);
+   }
    /*----------------------------------------------------------------------
     *  Now loop over all the items in the directory and store the
     *  names and ID's
@@ -1171,7 +1180,7 @@ db_pdb_NewToc (DBfile *_dbfile)
    icurve = ivar = iqmesh = iqvar = iumesh = iuvar = idir = iarray = 0;
    imultimesh = imultivar = imultimat = imat = imatspecies = ipmesh = 0;
    iptvar = iobj = imultimatspecies = icsgmesh = icsgvar = idefvars = 0;
-   imultimeshadj = imrgtrees = igroupelmaps = 0 ;
+   imultimeshadj = imrgtrees = igroupelmaps = imrgvars = 0 ;
 
    for (i = 0; i < num; i++) {
 
@@ -1298,6 +1307,11 @@ db_pdb_NewToc (DBfile *_dbfile)
       case DB_GROUPELMAP:
          toc->groupelmap_names[igroupelmaps] = STRDUP(list[i]);
          igroupelmaps++;
+         break;
+
+      case DB_MRGVAR:
+         toc->mrgvar_names[imrgvars] = STRDUP(list[i]);
+         imrgvars++;
          break;
 
       default:
@@ -2200,6 +2214,8 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("groupings", &tmpmm.groupings, DB_INT);
       DEFALL_OBJ("groupnames", &tmpgnames, DB_CHAR);
       DEFALL_OBJ("mrgtree_name", &tmpmm.mrgtree_name, DB_CHAR);
+      DEFINE_OBJ("tv_connectivity", &tmpmm.tv_connectivity, DB_INT);
+      DEFINE_OBJ("disjoint_mode", &tmpmm.disjoint_mode, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -3425,6 +3441,8 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
    DEFALL_OBJ("phzonelist", &phzlname, DB_CHAR);
 
    DEFALL_OBJ("mrgtree_name", &tmpum.mrgtree_name, DB_CHAR);
+   DEFINE_OBJ("tv_connectivity", &tmpum.tv_connectivity, DB_INT);
+   DEFINE_OBJ("disjoint_mode", &tmpum.disjoint_mode, DB_INT);
 
    if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, &type) < 0)
       return NULL;
@@ -3785,6 +3803,8 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
    DEFALL_OBJ("csgzonelist", &zlname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpcsgm.guihide, DB_INT);
    DEFALL_OBJ("mrgtree_name", &tmpcsgm.mrgtree_name, DB_CHAR);
+   DEFINE_OBJ("tv_connectivity", &tmpcsgm.tv_connectivity, DB_INT);
+   DEFINE_OBJ("disjoint_mode", &tmpcsgm.disjoint_mode, DB_INT);
 
    if (SILO_Globals.dataReadMask & DBCSGMBoundaryInfo)
    {
@@ -4754,6 +4774,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    int            root, num_nodes, i, j, n, pass;
    int           *intArray = 0;
    char          *s, **strArray = 0;
+   char          *mrgv_onames = 0, *mrgv_rnames = 0;
    memset(&tmptree, 0, sizeof(DBmrgtree));
 
    /*------------------------------------------------------------*/
@@ -4768,6 +4789,8 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    DEFINE_OBJ("root", &root, DB_FLOAT);
    DEFALL_OBJ("src_mesh_name", &tmptree.src_mesh_name, DB_CHAR);
    DEFALL_OBJ("scalars", &intArray, DB_INT);
+   DEFALL_OBJ("mrgvar_onames", &tmptree.mrgvar_onames, DB_CHAR);
+   DEFALL_OBJ("mrgvar_rnames", &tmptree.mrgvar_rnames, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, &type) < 0)
       return NULL;
@@ -5045,6 +5068,88 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, const char *name)
         gm->fracs_data_type = DB_FLOAT;
 
     return gm;
+}
+
+/*----------------------------------------------------------------------
+ *  Routine                                          db_pdb_GetMrgvar
+ *
+ *  Purpose
+ *
+ *      Read a mrgvar object from a SILO file and return the
+ *      SILO structure for this type.
+ *
+ *--------------------------------------------------------------------*/
+CALLBACK DBmrgvar *
+db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
+{
+   char *type = NULL;
+   DBmrgvar      *mrgv = NULL;
+   int            i;
+   DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
+   PJcomplist     tmp_obj;
+   char           tmp[256];
+   static char *me = "db_pdb_GetMrgvar";
+   char          *rpnames = NULL;
+   char          *cnames = NULL;
+   DBmrgvar tmpmrgv;
+   memset(&tmpmrgv, 0, sizeof(DBmrgvar));
+
+
+   /*------------------------------------------------------------*/
+   /*          Comp. Name        Comp. Address     Data Type     */
+   /*------------------------------------------------------------*/
+   INIT_OBJ(&tmp_obj);
+
+   DEFINE_OBJ("ncomps", &tmpmrgv.ncomps, DB_INT);
+   DEFINE_OBJ("nregns", &tmpmrgv.nregns, DB_INT);
+   DEFINE_OBJ("datatype", &tmpmrgv.datatype, DB_INT);
+   DEFALL_OBJ("mrgt_name",&tmpmrgv.mrgt_name, DB_CHAR);
+   DEFALL_OBJ("compnames", &cnames, DB_CHAR);
+   DEFALL_OBJ("reg_pnames", &rpnames, DB_CHAR);
+
+   if (PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, &type) < 0)
+      return NULL;
+   mrgv = (DBmrgvar *) calloc(1, sizeof(DBmrgvar));
+   *mrgv = tmpmrgv;
+   CHECK_TYPE(type, DB_MRGVAR, objname);
+
+   INIT_OBJ(&tmp_obj);
+
+   mrgv->data = ALLOC_N(void *, mrgv->ncomps);
+
+   if (mrgv->datatype == 0) {
+      strcpy(tmp, objname);
+      strcat(tmp, "_data");
+      if ((mrgv->datatype = db_pdb_GetVarDatatype(dbfile->pdb, tmp)) < 0) {
+         /* Not found. Assume float. */
+         mrgv->datatype = DB_FLOAT;
+      }
+   }
+
+   if (PJ_InqForceSingle())
+      mrgv->datatype = DB_FLOAT;
+
+   for (i = 0; i < mrgv->ncomps; i++) {
+      DEFALL_OBJ(_valstr[i], &mrgv->data[i], DB_FLOAT);
+   }
+
+   PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, NULL);
+
+   if (cnames != NULL)
+   {
+      mrgv->compnames = db_StringListToStringArray(cnames, mrgv->ncomps);
+      FREE(cnames);
+   }
+
+   if (rpnames != NULL)
+   {
+      mrgv->reg_pnames = db_StringListToStringArray(rpnames, mrgv->nregns);
+      FREE(rpnames);
+   }
+
+   mrgv->name = STRDUP(objname);
+
+   return (mrgv);
 }
 
 /*----------------------------------------------------------------------
@@ -6045,7 +6150,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMESH, 20);
+   obj = DBMakeObject(name, DB_MULTIMESH, 22);
    DBAddIntComponent(obj, "nblocks", nmesh);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -6054,6 +6159,10 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
       DBAddIntComponent(obj, "guihide", _mm._guihide);
    if (_mm._mrgtree_name)
       DBAddStrComponent(obj, "mrgtree_name", _mm._mrgtree_name);
+   if (_mm._tv_connectivity)
+      DBAddIntComponent(obj, "tv_connectivity", _mm._tv_connectivity);
+   if (_mm._disjoint_mode)
+      DBAddIntComponent(obj, "disjoint_mode", _mm._disjoint_mode);
 
    /*-------------------------------------------------------------
     *  Define and write variables before adding them to object.
@@ -7648,7 +7757,7 @@ db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
 
    db_InitCsg(dbfile, (char*) name, optlist);
 
-   obj = DBMakeObject(name, DB_CSGMESH, 32);
+   obj = DBMakeObject(name, DB_CSGMESH, 34);
 
    count[0] = nbounds;
 
@@ -7731,6 +7840,12 @@ db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
 
    if (_csgm._mrgtree_name != NULL)
       DBAddStrComponent(obj, "mrgtree_name", _csgm._mrgtree_name);
+
+   if (_csgm._tv_connectivity)
+       DBAddIntComponent(obj, "tv_connectivity", _csgm._tv_connectivity);
+
+   if (_csgm._disjoint_mode)
+       DBAddIntComponent(obj, "disjoint_mode", _csgm._disjoint_mode);
 
    /*-------------------------------------------------------------
     *  Write csg-mesh object to output file.
@@ -8019,7 +8134,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
 
    db_InitUcd(dbfile, name, optlist, ndims, nnodes, nzones);
 
-   obj = DBMakeObject(name, DB_UCDMESH, 30);
+   obj = DBMakeObject(name, DB_UCDMESH, 32);
 
    /*-------------------------------------------------------------
     *  We first will write the given coordinate arrays to output,
@@ -8128,6 +8243,12 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    if (_um._mrgtree_name != NULL)
       DBAddStrComponent(obj, "mrgtree_name", _um._mrgtree_name);
 
+   if (_um._tv_connectivity)
+      DBAddIntComponent(obj, "tv_connectivity", _um._tv_connectivity);
+
+   if (_um._disjoint_mode)
+      DBAddIntComponent(obj, "disjoint_mode", _um._disjoint_mode);
+
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.
     *-------------------------------------------------------------*/
@@ -8188,7 +8309,7 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
 
    db_InitUcd(dbfile, name, optlist, ndims, nnodes, nzones);
 
-   obj = DBMakeObject(name, DB_UCDMESH, 26);
+   obj = DBMakeObject(name, DB_UCDMESH, 28);
 
    /*-------------------------------------------------------------
     *  Then we will add references to the coordinate arrays of the
@@ -8278,6 +8399,13 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
 
    if (_um._guihide)
       DBAddIntComponent(obj, "guihide", _um._guihide);
+
+   if (_um._tv_connectivity)
+      DBAddIntComponent(obj, "tv_connectivity", _um._tv_connectivity);
+
+   if (_um._disjoint_mode)
+      DBAddIntComponent(obj, "disjoint_mode", _um._disjoint_mode);
+
 
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.
@@ -8745,9 +8873,10 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     char               *datatype_str;
     char                tmp[256];
 
-    obj = DBMakeObject(name, DB_MRGTREE, 15);
+    obj = DBMakeObject(name, DB_MRGTREE, 17);
 
     /* Set global options */
+    db_ResetGlobalData_Mrgtree();
     db_ProcessOptlist(DB_MRGTREE, optlist);
 
     /* allocate an emtpy, linearized list of tree node pointers */
@@ -8885,6 +9014,26 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     FREE(intArray);
     FREE(ltree);
 
+    if (_mrgt._mrgvar_onames)
+    {
+        s = 0;
+        len = 0;
+        db_StringArrayToStringList((const char**)_mrgt._mrgvar_onames, -1, &s, &len);
+        count = len;
+        DBWriteComponent(dbfile, obj, "mrgvar_onames", name, "char", s, 1, &count);
+        FREE(s);
+    }
+
+    if (_mrgt._mrgvar_rnames)
+    {
+        s = 0;
+        len = 0;
+        db_StringArrayToStringList((const char**)_mrgt._mrgvar_rnames, -1, &s, &len);
+        count = len;
+        DBWriteComponent(dbfile, obj, "mrgvar_rnames", name, "char", s, 1, &count);
+        FREE(s);
+    }
+
     DBAddIntComponent(obj, "src_mesh_type", tree->src_mesh_type);
     if (tree->src_mesh_name)
         DBAddStrComponent(obj, "src_mesh_name", tree->src_mesh_name);
@@ -8895,7 +9044,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     DBAddIntComponent(obj, "root", tree->root->walk_order);
 
    /*-------------------------------------------------------------
-    *  Write ucd-mesh object to output file.
+    *  Write object to output file.
     *-------------------------------------------------------------*/
    DBWriteObject(dbfile, obj, TRUE);
    DBFreeObject(obj);
@@ -9018,6 +9167,83 @@ db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
     *  memory be freed (the 'TRUE' argument.)
     *-------------------------------------------------------------*/
    DBWriteObject(dbfile, obj, TRUE);
+   DBFreeObject(obj);
+
+   return 0;
+}
+#endif /* PDB_WRITE */
+
+/*----------------------------------------------------------------------
+ *  Routine                                            db_pdb_PutMrgvar
+ *
+ *  Purpose
+ *
+ *      Write a mrg variable object into the open output file.
+ *
+ *  Programmer
+ *
+ *      Mark C. Miller, Thu Oct 18 09:35:47 PDT 2007
+ *
+ *--------------------------------------------------------------------*/
+#ifdef PDB_WRITE
+CALLBACK int
+db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
+    int ncomps, const char **compnames,
+    int nregns, const char **reg_pnames,
+    int datatype, void **data, DBoptlist *optlist)
+{
+   DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
+   int            i;
+   char *s=0; int len=0; long llen;
+   DBobject      *obj;
+   char          *suffix, *datatype_str, tmp1[256], tmp2[256];
+   static char   *me = "db_pdb_PutMrgvar";
+
+   /*-------------------------------------------------------------
+    *  Initialize global data, and process options.
+    *-------------------------------------------------------------*/
+   obj = DBMakeObject(name, DB_MRGVAR, 20);
+
+   DBAddStrComponent(obj, "mrgt_name", mrgt_name);
+
+   suffix = "data";
+   datatype_str = db_GetDatatypeString(datatype);
+
+   llen = nregns;
+   for (i = 0; i < ncomps; i++) {
+      char tmp3[256];
+      sprintf(tmp3, "%s_comp%d", name, i);
+
+      if (compnames && compnames[i])
+          db_mkname(dbfile->pdb, (char*)compnames[i], suffix, tmp2);
+      else
+          db_mkname(dbfile->pdb, tmp3, suffix, tmp2);
+      PJ_write_len(dbfile->pdb, tmp2, datatype_str, data[i],
+                   1, &llen);
+
+      sprintf(tmp1, "value%d", i);
+      DBAddVarComponent(obj, tmp1, tmp2);
+   }
+   FREE(datatype_str);
+
+   DBAddIntComponent(obj, "ncomps", ncomps);
+   DBAddIntComponent(obj, "nregns", nregns);
+   DBAddIntComponent(obj, "datatype", datatype);
+
+   if (compnames)
+   {
+       db_StringArrayToStringList((const char**)compnames, nregns, &s, &len);
+       llen = len;
+       DBWriteComponent(_dbfile, obj, "compnames", name, "char", s, 1, &llen);
+       FREE(s);
+   }
+
+   db_StringArrayToStringList((const char**)reg_pnames, nregns, &s, &len);
+   llen = len;
+   DBWriteComponent(_dbfile, obj, "reg_pnames", name, "char", s, 1, &llen);
+   FREE(s);
+
+   DBWriteObject(_dbfile, obj, 0);
    DBFreeObject(obj);
 
    return 0;

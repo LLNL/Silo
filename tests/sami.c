@@ -1097,10 +1097,8 @@ main(int argc, char *argv[])
     }
     
     
-#if 0
-    /* Turn off HDF5 warnings */
-    H5Eset_auto(NULL, NULL);
-#endif
+    /* turn of deprecate warnings */
+    DBSetDeprecateWarnings(0);
 
     /*
      * Create a new file (clobbering any old file), write some variables to

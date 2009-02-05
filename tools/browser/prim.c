@@ -112,6 +112,7 @@ prim_assoc_t    PA_BR_OBJTYPE[] = {
    {BROWSER_DB_CSGVAR,          "csgvar"},
    {BROWSER_DB_MRGTREE,         "mrgtree"},
    {BROWSER_DB_GROUPELMAP,      "groupelmap"},
+   {BROWSER_DB_MRGVAR,          "mrgvar"},
    {0,                          NULL}};
 
 prim_assoc_t    PA_OBJTYPE[] = {
@@ -142,6 +143,7 @@ prim_assoc_t    PA_OBJTYPE[] = {
    {DB_CSGVAR,          "DB_CSGVAR"},
    {DB_MRGTREE,         "DB_MRGTREE"},
    {DB_GROUPELMAP,      "DB_GROUPELMAP"},
+   {DB_MRGVAR,          "DB_MRGVAR"},
    {DB_USERDEF,         "DB_USERDEF"},
    {0,                  NULL}};
 

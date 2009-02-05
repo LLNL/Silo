@@ -200,6 +200,12 @@ CALLBACK int db_pdb_PutGroupelmap(DBfile *_dbfile, const char *map_name,
                                   int *segment_lengths, int *segment_ids,
                                   int **segment_data, void **segment_fracs,
                                   int fracs_data_type, DBoptlist *opts);
+CALLBACK int db_pdb_PutMrgvar(DBfile *dbfile, const char *name,
+                             const char *mrgt_name,
+                             int ncomps, const char **compnames,
+                             int nregns, const char **reg_pnames,
+                             int datatype, void **data, DBoptlist *opts);
+CALLBACK DBmrgvar *db_pdb_GetMrgvar(DBfile *dbfile, const char *name);
 
 CALLBACK int db_pdb_Write (DBfile *, char *, void *, int *, int, int);
 CALLBACK int db_pdb_WriteSlice (DBfile*, char*, void*, int, int[], int[],

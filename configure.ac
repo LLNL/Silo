@@ -313,7 +313,7 @@ dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
 m4_define(SILO_NAME, silo)
-m4_define(SILO_VERSION, 4.6-pre6)
+m4_define(SILO_VERSION, 4.6-pre7)
 m4_define(SILO_DATE, 2007/10/17)
 m4_define(SILO_TIME, 16:28:53)
 m4_define(SILO_DATETIME, [SILO_DATE SILO_TIME])
@@ -758,7 +758,7 @@ AC_HEADER_TIME
 dnl
 dnl If we don't have these header files, we can't continue.
 dnl
-AC_CHECK_HEADERS(limits.h sys/time.h stdarg.h, ,
+AC_CHECK_HEADERS(sys/time.h stdarg.h, ,
 AC_MSG_ERROR([$0 wasn't able to find a necessary header file
 (see above).  Please rectify this and rerun configure.
 See the file INSTALL_FAQ in this directory for possible reasons

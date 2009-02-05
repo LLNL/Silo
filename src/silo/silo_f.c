@@ -218,7 +218,7 @@ DBFortranRemovePointer (int value)
 }
 
 FORTRAN
-DBALLOCPTR_FC (void *p)
+DBMKPTR_FC (void *p)
 {
     return DBFortranAllocPointer(p);
 }
@@ -1499,8 +1499,8 @@ DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
         /*----------------------------------------
          *  Invoke the C function to do the work.
          *---------------------------------------*/
-        *status = DBPutDefvars(dbfile, nm, *ndefs, nms,
-                                 types, defs, optlists);
+        *status = DBPutDefvars(dbfile, nm, *ndefs, (const char **) nms,
+                                 types, (const char **) defs, optlists);
 
         for (i = 0; i < *ndefs; i++)
         {
@@ -4421,7 +4421,7 @@ DBPUTMRGTREE_FC (int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
  * Notes
  *     This function was built to be called from Fortran.
  *     To populate the segment_data_ids and, if needed, segment_fracs_ids
- *     the fortran client will need to use DBALLOCPTR to register one of
+ *     the fortran client will need to use DBMKPTR to register one of
  *     its pointers as an integer id and then use the resulting id at
  *     the appropriate entry in segment_data_ids. The fortran client
  *     should use DBRMPTR to remove the allocated pointer from the
@@ -4472,14 +4472,14 @@ DBPUTGRPLMAP_FC (int *dbid, FCD_DB map_name, int *lmap_name,
 #endif
 
         /* convert array of segment data ids to their pointers */
-        segment_data = (int**) malloc(sizeof(int*));
+        segment_data = (int**) malloc(*num_segments * sizeof(int*));
         for (i = 0; i < *num_segments; i++)
             segment_data[i] = DBFortranAccessPointer(segment_data_ids[i]);
 
         /* convert array of segment fracs ids to their pointers */
         if (segment_fracs_ids)
         {
-            segment_fracs = (void**) malloc(sizeof(void*));
+            segment_fracs = (void**) malloc(*num_segments * sizeof(void*));
             for (i = 0; i < *num_segments; i++)
                 segment_fracs[i] = DBFortranAccessPointer(segment_fracs_ids[i]);
         }
@@ -4569,6 +4569,15 @@ DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
  *
  * Notes
  *     This function was built to be called from Fortran.
+ *     To populate the data_ids
+ *     the fortran client will need to use DBMKPTR to register 
+ *     its pointers as integer ids and then use the resulting id at
+ *     the appropriate entry in data_ids. The fortran client
+ *     should use DBRMPTR to remove the allocated pointer from the
+ *     table after this call is completed.
+ *
+ * Returns
+ *
  *
  * Returns
  *     Returns 0 on success, -1 on failure.
@@ -4578,13 +4587,15 @@ DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
  *--------------------------------------------------------------------*/
 FORTRAN
 DBPUTCSGV1_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
-    int *lmeshname, void *var_data, int *nvals, int *datatype,
+    int *lmeshname, int *data_ids, int *nvals, int *datatype,
     int *centering, int *optlist_id, int *status)
 {
     DBfile     *dbfile ;
     DBoptlist  *optlist ;
     char       *nm = NULL;
     char       *m_nm = NULL;
+    void      **data = NULL;
+    int         i;
 
     API_BEGIN ("dbputcsgv1", int, -1) {
         if (*name<=0)
@@ -4615,11 +4626,16 @@ DBPUTCSGV1_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
             m_nm  = SW_strndup(meshname, *lmeshname);
 #endif
 
-        *status = DBPutCsgvar(dbfile, nm, m_nm, 1, &nm, &var_data, *nvals,
-            *datatype, *centering, optlist);
+        data = (void**) malloc(*nvals * sizeof(void*));
+        for (i = 0; i < *nvals; i++)
+            data[i] = DBFortranAccessPointer(data_ids[i]);
+
+        *status = DBPutCsgvar(dbfile, nm, m_nm, 1, (const char **)&nm,
+            (const void **)data, *nvals, *datatype, *centering, optlist);
 
         FREE(nm);
         FREE(m_nm);
+        FREE(data);
 
         API_RETURN((*status < 0) ? (-1) : 0);
     }
@@ -4679,3 +4695,137 @@ DBPUTCSGZL_FC (int *dbid, FCD_DB name, int *lname, int *nregs,
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
+
+/*-------------------------------------------------------------------------
+ * Routine                                                       DBPMRGV_FC
+ *
+ * Purpose
+ *     Writes a mrg variable object into the open database.
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *     To populate the data_ids
+ *     the fortran client will need to use DBMKPTR to register 
+ *     its pointers as integer ids and then use the resulting id at
+ *     the appropriate entry in data_ids. The fortran client
+ *     should use DBRMPTR to remove the allocated pointer from the
+ *     table after this call is completed.
+ *
+ * Returns
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Wed Oct 24 15:28:51 PDT 2007
+ *-------------------------------------------------------------------------*/
+FORTRAN
+DBPMRGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB tname, int *ltname,
+    int *ncomps, FCD_DB compnames, int *lcompnames,
+    int *nregns, FCD_DB regnnames, int *lregnnames,
+    int *datatype, int *data_ids, int *optlist_id, int *status)
+{
+    DBfile        *dbfile = NULL;
+    char         **compnms = NULL, *nm = NULL;
+    char         **regnnms = NULL, *tnm = NULL;
+    char          *realcompnames = NULL;
+    char          *realregnnames = NULL;
+    void         **data = NULL;
+    int            i, indx;
+    DBoptlist     *optlist = NULL;
+
+    API_BEGIN("dbpmrgv", int, -1) {
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+        /*------------------------------
+         *  Duplicate all ascii strings.
+         *-----------------------------*/
+        if (*lname <= 0)
+            API_ERROR("lname", E_BADARGS);
+
+#ifdef CRAY
+        if (strcmp(_fcdtocp(name), DB_F77NULLSTRING) == 0)
+            nm = NULL;
+        else
+            nm = SW_strndup(_fcdtocp(name), *lname);
+        if (strcmp(_fcdtocp(tname), DB_F77NULLSTRING) == 0)
+            tnm = NULL;
+        else
+            tnm = SW_strndup(_fcdtocp(tname), *ltname);
+#else
+        if (strcmp(name, DB_F77NULLSTRING) == 0)
+            nm = NULL;
+        else
+            nm = SW_strndup(name, *lname);
+        if (strcmp(tname, DB_F77NULLSTRING) == 0)
+            tnm = NULL;
+        else
+            tnm = SW_strndup(tname, *ltname);
+#endif
+
+#ifdef CRAY
+        if (strcmp(_fcdtocp(compnames), DB_F77NULLSTRING) == 0)
+            realcompnames = NULL;
+        else
+            realcompnames = _fcdtocp(compnames);
+        if (strcmp(_fcdtocp(regnnames), DB_F77NULLSTRING) == 0)
+            realregnnames = NULL;
+        else
+            realregnnames = _fcdtocp(regnnames);
+#else
+        if (strcmp(compnames, DB_F77NULLSTRING) == 0)
+            realcompnames = NULL;
+        else
+            realcompnames = compnames;
+        if (strcmp(regnnames, DB_F77NULLSTRING) == 0)
+            realregnnames = NULL;
+        else
+            realregnnames = regnnames;
+#endif
+
+        dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
+
+        if (*ncomps <= 0)
+            API_ERROR("ncomps", E_BADARGS);
+        compnms = ALLOC_N(char *, *ncomps);
+        for (indx = 0, i = 0; i < *ncomps; i++) {
+            if (lcompnames[i] < 0)
+                API_ERROR("lcompnames", E_BADARGS);
+            compnms[i] = SW_strndup(&realcompnames[indx], lcompnames[i]);
+            indx += fortran2DStrLen;
+        }
+
+        if (*nregns <= 0)
+            API_ERROR("nregns", E_BADARGS);
+        regnnms = ALLOC_N(char *, *nregns);
+        for (indx = 0, i = 0; i < *nregns; i++) {
+            if (lregnnames[i] < 0)
+                API_ERROR("lregnnames", E_BADARGS);
+            regnnms[i] = SW_strndup(&realregnnames[indx], lregnnames[i]);
+            indx += fortran2DStrLen;
+        }
+
+        data = (void**) malloc(*nregns * sizeof(void*));
+        for (i = 0; i < *nregns; i++)
+            data[i] = DBFortranAccessPointer(data_ids[i]);
+
+        /*----------------------------------------
+         *  Invoke the C function to do the work.
+         *---------------------------------------*/
+        *status = DBPutMrgvar(dbfile, nm, tnm, *ncomps, (const char **) compnms,
+            *nregns, (const char **) regnnms, *datatype, data, optlist);
+
+        for (i = 0; i < *ncomps; i++)
+            FREE(compnms[i]);
+        FREE(compnms);
+        for (i = 0; i < *nregns; i++)
+            FREE(regnnms[i]);
+        FREE(regnnms);
+        FREE(nm);
+        FREE(tnm);
+        FREE(data);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+

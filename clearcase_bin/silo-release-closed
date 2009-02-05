@@ -627,12 +627,14 @@ lilac() {
     mkdir chaos_3_x86_elan3; \
     cd chaos_3_x86_elan3; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
     --without-readline --without-hdf5; \
     make -j 4 check && make install; \
     make prefix=$BDTOPDIR/chaos_3_x86_elan3/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
     --without-readline \
     --with-hdf5=/usr/local/hdf5/hdf5-1.6.5/serial_gcc/include,/usr/local/hdf5/hdf5-1.6.5/serial_gcc/lib; \
@@ -657,6 +659,7 @@ gaussgcc() {
     mkdir chaos_3_x86_64_ib; \
     cd chaos_3_x86_64_ib; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=gcc CXX=g++ FC=f77 \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_ib-gcc \
     --disable-browser; \
@@ -664,6 +667,7 @@ gaussgcc() {
     make prefix=$BDTOPDIR/chaos_3_x86_64_ib-gcc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=gcc CXX=g++ FC=f77 \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_ib-gcc \
     --enable-silex \
@@ -687,6 +691,7 @@ gaussicc() {
     cd chaos_3_x86_64_ib-icc; \
     . /usr/local/intel/compiler91/bin/iccvars.sh; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_ib-icc \
     --disable-browser; \
@@ -694,6 +699,7 @@ gaussicc() {
     make prefix=$BDTOPDIR/chaos_3_x86_64_ib-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64_ib-icc \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_64-icc \
@@ -702,6 +708,7 @@ gaussicc() {
     make prefix=$BDTOPDIR/chaos_3_x86_64_ib-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --disable-browser --without-readline --enable-silex \
@@ -732,6 +739,7 @@ rheagcc() {
     mkdir chaos_3_x86_64; \
     cd chaos_3_x86_64; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=gcc CXX=g++ FC=f77 \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-gcc \
     --disable-browser; \
@@ -739,6 +747,7 @@ rheagcc() {
     make prefix=$BDTOPDIR/chaos_3_x86_64-gcc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=gcc CXX=g++ FC=f77 \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-gcc \
     --enable-silex \
@@ -762,6 +771,7 @@ rheaicc() {
     cd chaos_3_x86_64-icc; \
     . /usr/local/intel/compiler91/bin/iccvars.sh; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --disable-browser; \
@@ -769,6 +779,7 @@ rheaicc() {
     make prefix=$BDTOPDIR/chaos_3_x86_64-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_64-icc \
@@ -777,6 +788,7 @@ rheaicc() {
     make prefix=$BDTOPDIR/chaos_3_x86_64-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --disable-browser --without-readline --enable-silex \

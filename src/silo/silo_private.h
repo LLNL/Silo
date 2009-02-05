@@ -55,9 +55,6 @@ for advertising or product endorsement purposes.
 #include <unistd.h> /*for access() F_OK, R_OK */
 #endif
 #endif
-#if HAVE_LIMITS_H
-#include <limits.h> /*for determining machine type for F77_ID */
-#endif
 #include "silo.h"
 
 /*
@@ -225,25 +222,29 @@ typedef struct context_t {
 #define jstk_push()     {jstk_t*jt=ALLOC(jstk_t);jt->prev=Jstk;Jstk=jt;}
 #define jstk_pop()      if(Jstk){jstk_t*jt=Jstk;Jstk=Jstk->prev;FREE(jt);}
 
-#define API_DEPRECATE(M,T,R,VERS)                                             \
+#define DEPRECATE_MSG(M,Maj,Min,Alt)                                          \
 {                                                                             \
    static int ncalls = 0;                                                     \
    if (ncalls < SILO_Globals.maxDeprecateWarnings) {                          \
-      fprintf(stderr, "Silo warning %d of %d: \"%s\" was deprecated in version %s.\n", \
-          ncalls+1, SILO_Globals.maxDeprecateWarnings, M,VERS);               \
-      if (ncalls == 0)                                                        \
-          fprintf(stderr, "Use DBSetDeprecateWarnings(0) to disable.\n");     \
+      fprintf(stderr, "Silo warning %d of %d: \"%s\" was deprecated in version %d.%d.\n", \
+          ncalls+1, SILO_Globals.maxDeprecateWarnings, M,Maj,Min);            \
+      if (Alt)                                                                \
+          fprintf(stderr, "Use \"%s\" instead\n", Alt);                       \
+      fprintf(stderr, "Use DBSetDeprecateWarnings(0) to disable this message.\n");    \
       fflush(stderr);                                                         \
    }                                                                          \
    ncalls++;                                                                  \
 }                                                                             \
+
+#define API_DEPRECATE(M,T,R,Maj,Min,Alt)                                      \
+   DEPRECATE_MSG(M,Maj,Min,Alt)                                               \
    API_BEGIN(M,T,R)
 
 #define API_BEGIN(M,T,R) {                                                    \
                         char    *me = M ;                                     \
                         static int     jstat ;                                \
                         static context_t *jold ;                              \
-                        DBfile  *jdbfile = NULL ;                           \
+                        DBfile  *jdbfile = NULL ;                             \
                         T jrv = R ;                                           \
                         jstat = 0 ;                                           \
                         jold = NULL ;                                         \
@@ -261,18 +262,8 @@ typedef struct context_t {
                            jstat = 1 ;                                        \
                         }
 
-#define API_DEPRECATE2(M,T,R,NM,VERS)                                         \
-{                                                                             \
-   static int ncalls = 0;                                                     \
-   if (ncalls < SILO_Globals.maxDeprecateWarnings) {                          \
-      fprintf(stderr, "Silo warning %d of %d: \"%s\" was deprecated in version %s.\n", \
-          ncalls+1, SILO_Globals.maxDeprecateWarnings, M,VERS);               \
-      if (ncalls == 0)                                                        \
-          fprintf(stderr, "Use DBSetDeprecateWarnings(0) to disable.\n");     \
-      fflush(stderr);                                                         \
-   }                                                                          \
-   ncalls++;                                                                  \
-}                                                                             \
+#define API_DEPRECATE2(M,T,R,NM,Maj,Min,Alt)                                  \
+   DEPRECATE_MSG(M,Maj,Min,Alt)                                               \
    API_BEGIN2(M,T,R,NM)
 
 #define API_BEGIN2(M,T,R,NM) {                                                \
@@ -385,29 +376,6 @@ typedef struct context_t {
 #ifndef MAX
 #define MAX(X,Y)        ((X)>(Y)?(X):(Y))
 #define MIN(X,Y)        ((X)<(Y)?(X):(Y))
-#endif
-
-/* F77_ID - attempt a uniform naming of FORTRAN 77 functions which
- *        - gets around loader naming conventions
- *        -
- *        - F77_ID(foo_, foo, FOO)(x, y, z)
- */
-#ifndef F77_ID
-#ifdef _INT_MAX_46              /* UNICOS */
-#define F77_ID(x_, x, X)  X
-#endif
-#ifdef _H_LIMITS                /* AIX */
-#define F77_ID(x_, x, X)  x
-#endif
-#ifdef _INCLUDE_HPUX_SOURCE     /* HPUX */
-#define F77_ID(x_, x, X)  x
-#endif
-#if defined(__powerpc)
-#define F77_ID(x_, x, X)  x
-#endif
-#ifndef F77_ID
-#define F77_ID(x_, x, X)  x_
-#endif
 #endif
 
 #ifdef   DEREF
@@ -594,6 +562,8 @@ struct _um {
     int            _guihide;
     char          *_mrgtree_name;
     char         **_region_pnames;
+    int            _tv_connectivity;
+    int            _disjoint_mode;
 };
 
 /*
@@ -628,6 +598,8 @@ struct _csgm {
     int            _guihide;
     char          *_mrgtree_name;
     char         **_region_pnames;
+    int            _tv_connectivity;
+    int            _disjoint_mode;
 };
 
 /*
@@ -690,6 +662,8 @@ struct _mm {
     char          **_region_pnames;
     char           *_mmesh_name;
     int             _tensor_rank;
+    int             _tv_connectivity;
+    int             _disjoint_mode;
 };
 
 /*
@@ -711,6 +685,14 @@ struct _dv {
     int         _guihide; /* for this object type, its an array */
 };
 
+/*
+ * Global data for mrgtree 
+ */
+struct _mrgt {
+    char      **_mrgvar_onames;
+    char      **_mrgvar_rnames;
+};
+
 extern struct _ma _ma;
 extern struct _ms _ms;
 extern struct _csgm _csgm;
@@ -723,6 +705,7 @@ extern struct _csgzl _csgzl;
 extern struct _mm _mm;
 extern struct _cu _cu;
 extern struct _dv _dv;
+extern struct _mrgt _mrgt;
 
 /*-------------------------------------------------------------------------
  * Filter Name Table.  Filters are modules inserted between the API and the
@@ -846,6 +829,6 @@ char   *safe_strdup (const char *);
  * Private variables.
  */
 extern int     _db_err_level;
-extern void    (*_db_err_func) (const char *);
+extern void    (*_db_err_func) (char *);
 
 #endif /* !SILO_PRIVATE_H */

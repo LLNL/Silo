@@ -105,6 +105,8 @@ typedef struct DBcsgmesh_mt {
     char           zonel_name[256];
     char           bndnames[256];
     char           mrgtree_name[256];
+    int            tv_connectivity;
+    int            disjoint_mode;
 } DBcsgmesh_mt;
 static hid_t DBcsgmesh_mt5;
 
@@ -235,6 +237,8 @@ typedef struct DBucdmesh_mt {
     char                units[3][256];
     char                phzonelist[256];
     char                mrgtree_name[256];
+    int                 tv_connectivity;
+    int                 disjoint_mode;
 } DBucdmesh_mt;
 static hid_t    DBucdmesh_mt5;
 
@@ -353,6 +357,8 @@ typedef struct DBmultimesh_mt {
     char                groupings[256];
     char                groupnames[256];
     char                mrgtree_name[256];
+    int                 tv_connectivity;
+    int                 disjoint_mode;
 } DBmultimesh_mt;
 static hid_t    DBmultimesh_mt5;
 
@@ -527,6 +533,9 @@ typedef struct DBmrgtree_mt {
     char           n_seg_lens[256];
     char           n_seg_types[256];
     char           n_children[256];
+
+    char           mrgvar_onames[256];
+    char           mrgvar_rnames[256];
 } DBmrgtree_mt;
 static hid_t   DBmrgtree_mt5;
 
@@ -541,6 +550,17 @@ typedef struct DBgroupelmap_mt {
     char           segment_fracs[256]; 
 } DBgroupelmap_mt;
 static hid_t DBgroupelmap_mt5;
+
+typedef struct DBmrgvar {
+    int nregns;
+    int ncomps;
+    int datatype;
+    char mrgt_name[256];
+    char reg_pnames[256];
+    char compnames[256];
+    char data[MAX_VARS][256];
+} DBmrgvar_mt;
+static hid_t DBmrgvar_mt5;
 
 static hid_t    T_char = -1;
 static hid_t    T_short = -1;
@@ -1031,6 +1051,8 @@ db_hdf5_init(void)
         MEMBER_S(str256,        zonel_name);
         MEMBER_S(str256,        bndnames);
         MEMBER_S(str256,        mrgtree_name);
+        MEMBER_S(int,           tv_connectivity);
+        MEMBER_S(int,           disjoint_mode);
     } DEFINE;
 
     STRUCT(DBcsgvar) {
@@ -1155,6 +1177,8 @@ db_hdf5_init(void)
         MEMBER_R(str256,        label,          3);
         MEMBER_R(str256,        units,          3);
         MEMBER_S(str256,        mrgtree_name);
+        MEMBER_S(int,           tv_connectivity);
+        MEMBER_S(int,           disjoint_mode);
     } DEFINE;
     
     STRUCT(DBucdvar) {
@@ -1266,6 +1290,8 @@ db_hdf5_init(void)
         MEMBER_S(str256,        groupings);
         MEMBER_S(str256,        groupnames);
         MEMBER_S(str256,        mrgtree_name);
+        MEMBER_S(int,           tv_connectivity);
+        MEMBER_S(int,           disjoint_mode);
     } DEFINE;
 
     STRUCT(DBmultimeshadj) {
@@ -1428,6 +1454,9 @@ db_hdf5_init(void)
         MEMBER_S(str256,        n_seg_lens);
         MEMBER_S(str256,        n_seg_types);
         MEMBER_S(str256,        n_children);
+
+        MEMBER_S(str256,        mrgvar_onames);
+        MEMBER_S(str256,        mrgvar_rnames);
     } DEFINE;
 
     STRUCT(DBgroupelmap) {
@@ -1440,6 +1469,17 @@ db_hdf5_init(void)
         MEMBER_S(str256,        frac_lengths);
         MEMBER_S(str256,        segment_fracs);
     } DEFINE;
+
+    STRUCT(DBmrgvar) {
+        MEMBER_S(int,           nregns);
+        MEMBER_S(int,           ncomps);
+        MEMBER_S(int,           datatype);
+        MEMBER_S(str256,        mrgt_name);
+        MEMBER_S(str256,        reg_pnames);
+        MEMBER_S(str256,        compnames);
+        MEMBER_R(str256,        data,          MAX_VARS);
+    } DEFINE;
+
 }
 
 
@@ -1634,6 +1674,10 @@ db_hdf5_InitCallbacks(DBfile *_dbfile, int target)
     /* Groupel map functions */
     dbfile->pub.g_grplm = db_hdf5_GetGroupelmap;
     dbfile->pub.p_grplm = db_hdf5_PutGroupelmap;
+
+    /* mrgvar functions */
+    dbfile->pub.g_mrgv = db_hdf5_GetMrgvar;
+    dbfile->pub.p_mrgv = db_hdf5_PutMrgvar;
 }
 
 
@@ -2568,6 +2612,10 @@ load_toc(hid_t grp, const char *name, void *_toc)
     case DB_GROUPELMAP:
         names = &(toc->groupelmap_names);
         nvals = &(toc->ngroupelmaps);
+        break;
+    case DB_MRGVAR:
+        names = &(toc->mrgvar_names);
+        nvals = &(toc->nmrgvars);
         break;
     case DB_USERDEF:  /*fall through*/
     case DB_FACELIST: /*fall through*/
@@ -5585,6 +5633,8 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
         m.dtime = _csgm._dtime_set ? _csgm._dtime : 0;
         m.nbounds = nbounds;
         m.lcoeffs = lcoeffs;
+        m.tv_connectivity = _csgm._tv_connectivity;
+        m.disjoint_mode = _csgm._disjoint_mode;
         strcpy(m.zonel_name, zonel_name);
         strcpy(m.mrgtree_name, OPT(_csgm._mrgtree_name));
 
@@ -5608,6 +5658,8 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
             MEMBER_S(str(m.coeffs), coeffs);
             MEMBER_S(str(m.zonel_name), zonel_name);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
+            if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
+            if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
         } OUTPUT(dbfile, DB_CSGMESH, name, &m);
 
     } CLEANUP {
@@ -5693,6 +5745,8 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
             csgm->max_extents[i] = m.max_extents[i];
         }
         csgm->mrgtree_name = OPTDUP(m.mrgtree_name);
+        csgm->tv_connectivity = m.tv_connectivity;
+        csgm->disjoint_mode = m.disjoint_mode;
 
         /* Read the raw data */
         if ((SILO_Globals.dataReadMask & DBCSGMBoundaryInfo) && (m.nbounds > 0))
@@ -6996,6 +7050,8 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
             strcpy(m.units[i], OPT(_um._units[i]));
         }
         strcpy(m.mrgtree_name, OPT(_um._mrgtree_name));
+        m.tv_connectivity = _um._tv_connectivity;
+        m.disjoint_mode = _um._disjoint_mode;
 
         /* Write ucdmesh header to file */
         STRUCT(DBucdmesh) {
@@ -7022,6 +7078,8 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
             MEMBER_R(str(m.units[_j]), units, ndims);
             MEMBER_S(str(m.phzonelist), phzonelist);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
+            if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
+            if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
         } OUTPUT(dbfile, DB_UCDMESH, name, &m);
         
     } CLEANUP {
@@ -7138,6 +7196,8 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
             strcpy(m.units[i], OPT(_um._units[i]));
         }
         strcpy(m.mrgtree_name, OPT(_um._mrgtree_name));
+        m.tv_connectivity = _um._tv_connectivity;
+        m.disjoint_mode = _um._disjoint_mode;
         
         /* Write header to file */
         STRUCT(DBucdmesh) {
@@ -7161,6 +7221,8 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
             MEMBER_R(str(m.label[_j]), label, m.ndims);
             MEMBER_R(str(m.units[_j]), units, m.ndims);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
+            if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
+            if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
         } OUTPUT(dbfile, DB_UCDMESH, name, &m);
 
     } CLEANUP {
@@ -7264,6 +7326,8 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
             }
         }
         um->mrgtree_name = OPTDUP(m.mrgtree_name);
+        um->tv_connectivity = m.tv_connectivity;
+        um->disjoint_mode = m.disjoint_mode;
 
         /* Read the raw data */
         if (SILO_Globals.dataReadMask & DBUMCoords)
@@ -8665,6 +8729,8 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
         m.extentssize = _mm._extentssize;
         m.guihide = _mm._guihide;
         m.lgroupings = _mm._lgroupings;
+        m.tv_connectivity = _mm._tv_connectivity;
+        m.disjoint_mode = _mm._disjoint_mode;
         strcpy(m.mrgtree_name, OPT(_mm._mrgtree_name));
 
         /* Write meta data to file */
@@ -8687,6 +8753,8 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
             MEMBER_S(str(m.groupings), groupings);
             MEMBER_S(str(m.groupnames), groupnames);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
+            if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
+            if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
         } OUTPUT(dbfile, DB_MULTIMESH, name, &m);
 
         /* Free resources */
@@ -8772,6 +8840,8 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
         mm->guihide = m.guihide;
         mm->lgroupings = m.lgroupings;
         mm->mrgtree_name = OPTDUP(m.mrgtree_name);
+        mm->tv_connectivity = m.tv_connectivity;
+        mm->disjoint_mode = m.disjoint_mode;
 
         /* Read the raw data */
         if (mm->extentssize>0)
@@ -10976,6 +11046,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
     PROTECT {
 
         /* Set global options */
+        db_ResetGlobalData_Mrgtree();
         db_ProcessOptlist(DB_MRGTREE, opts);
 
         /* allocate an emtpy, linearized list of tree node pointers */
@@ -11116,6 +11187,26 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
         FREE(intArray);
         FREE(ltree);
 
+        if (_mrgt._mrgvar_onames)
+        {
+            s = 0;
+            len = 0;
+            db_StringArrayToStringList((const char**)_mrgt._mrgvar_onames, -1, &s, &len);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.mrgvar_onames/*out*/,
+                friendly_name(name, "_mrgvar_onames", 0));
+            FREE(s);
+        }
+
+        if (_mrgt._mrgvar_rnames)
+        {
+            s = 0;
+            len = 0;
+            db_StringArrayToStringList((const char**)_mrgt._mrgvar_rnames, -1, &s, &len);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.mrgvar_rnames/*out*/,
+                friendly_name(name, "_mrgvar_rnames", 0));
+            FREE(s);
+        }
+
         /* Build header in memory */
         m.src_mesh_type = tree->src_mesh_type;
         if (tree->src_mesh_name)
@@ -11139,6 +11230,8 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
             MEMBER_S(str(m.n_seg_lens), n_seg_lens);
             MEMBER_S(str(m.n_seg_types), n_seg_types);
             MEMBER_S(str(m.n_children), n_children);
+            MEMBER_S(str(m.mrgvar_onames), mrgvar_onames);
+            MEMBER_S(str(m.mrgvar_rnames), mrgvar_rnames);
         } OUTPUT(dbfile, DB_MRGTREE, name, &m);
 
     } CLEANUP {
@@ -11335,6 +11428,14 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
             }
         }
         FREE(intArray);
+
+        s = db_hdf5_comprd(dbfile, m.mrgvar_onames, 1);
+        if (s) tree->mrgvar_onames = db_StringListToStringArray(s, -1);
+        FREE(s);
+
+        s = db_hdf5_comprd(dbfile, m.mrgvar_rnames, 1);
+        if (s) tree->mrgvar_rnames = db_StringListToStringArray(s, -1);
+        FREE(s);
 
         tree->root = ltree[m.root];
         tree->cwr = tree->root;
@@ -11583,6 +11684,159 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, const char *name)
     } END_PROTECT;
 
     return gm;
+}
+
+CALLBACK int
+db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
+    const char *mrgt_name,
+    int ncomps, const char **compnames,
+    int nregns, const char **reg_pnames,
+    int datatype, void **data, DBoptlist *optlist)
+{
+    DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
+    static char         *me = "db_hdf5_PutMrgvar";
+    char                *s = 0;
+    int                 i, len;
+    DBmrgvar_mt         m;
+
+    memset(&m, 0, sizeof m);
+
+    PROTECT {
+
+        db_ProcessOptlist(DB_MRGVAR, optlist);
+
+        /* Write variable arrays */
+        if (ncomps>MAX_VARS) {
+            db_perror("too many variables", E_BADARGS, me);
+            UNWIND();
+        }
+        for (i=0; i<ncomps; i++) {
+            char tmpname[256];
+            const char *p = tmpname;
+            if (compnames)
+                p = compnames[i];
+            else
+                sprintf(tmpname, "%s_%03d", name, i);
+            db_hdf5_compwr(dbfile, datatype, 1, &nregns, data[i],
+                m.data[i]/*out*/, friendly_name(p, "_data", 0));
+        }
+
+        /* output reg_pnames */
+        db_StringArrayToStringList((const char**)reg_pnames, nregns, &s, &len);
+        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.reg_pnames/*out*/,
+                friendly_name(name, "_reg_pnames", 0));
+        FREE(s);
+
+        if (compnames)
+        {
+            /* output compnames */
+            db_StringArrayToStringList((const char**)compnames, ncomps, &s, &len);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.compnames/*out*/,
+                    friendly_name(name, "_compnames", 0));
+            FREE(s);
+        }
+
+        /* Build header in memory */
+        m.ncomps = ncomps;
+        m.nregns = nregns;
+        m.datatype = datatype;
+        strcpy(m.mrgt_name, OPT(mrgt_name));
+
+        /* Write header to file */
+        STRUCT(DBmrgvar) {
+            MEMBER_R(str(m.data[_j]), data, ncomps);
+            MEMBER_S(str(m.mrgt_name), mrgt_name);
+            if (m.ncomps)       MEMBER_S(int, ncomps);
+            if (m.nregns)       MEMBER_S(int, nregns);
+            if (m.datatype)     MEMBER_S(int, datatype);
+            MEMBER_S(str(m.compnames), compnames);
+            MEMBER_S(str(m.reg_pnames), reg_pnames);
+        } OUTPUT(dbfile, DB_MRGVAR, name, &m);
+
+    } CLEANUP {
+        /*void*/
+    } END_PROTECT;
+    return 0;
+}
+
+CALLBACK DBmrgvar *
+db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
+{
+    DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
+    static char         *me = "db_hdf5_GetMrgvar";
+    char                *s = 0;
+    hid_t               o=-1, attr=-1;
+    int                 _objtype, i;
+    DBmrgvar_mt         m;
+    DBmrgvar           *mrgv=NULL;
+
+    PROTECT {
+        /* Open object and make sure it's a ucdvar */
+        if ((o=H5Topen(dbfile->cwg, name))<0) {
+            db_perror(name, E_NOTFOUND, me);
+            UNWIND();
+        }
+        if ((attr=H5Aopen_name(o, "silo_type"))<0 ||
+            H5Aread(attr, H5T_NATIVE_INT, &_objtype)<0 ||
+            H5Aclose(attr)<0) {
+            db_perror(name, E_CALLFAIL, me);
+            UNWIND();
+        }
+        if (DB_MRGVAR!=(DBObjectType)_objtype) {
+            db_perror(name, E_CALLFAIL, me);
+            UNWIND();
+        }
+
+        /* Read ucdvar data into memory */
+        memset(&m, 0, sizeof m);
+        if ((attr=H5Aopen_name(o, "silo"))<0 ||
+            H5Aread(attr, DBmrgvar_mt5, &m)<0 ||
+            H5Aclose(attr)<0) {
+            db_perror(name, E_CALLFAIL, me);
+            UNWIND();
+        }
+
+        /* Create a mrgvar object and initialize meta data */
+        mrgv = (DBmrgvar *) calloc(1,sizeof(DBmrgvar));
+        mrgv->name = BASEDUP(name);
+        mrgv->mrgt_name = OPTDUP(m.mrgt_name);
+        printf("setting mrgv->mrgt_name =\"%s\'\n", mrgv->mrgt_name);
+        mrgv->nregns = m.nregns;
+        mrgv->ncomps = m.ncomps;
+        if ((mrgv->datatype = db_hdf5_GetVarType(_dbfile, m.data[0])) < 0)
+            mrgv->datatype = silo2silo_type(m.datatype);
+        if (mrgv->datatype == DB_DOUBLE && force_single_g)
+            mrgv->datatype = DB_FLOAT;
+
+        /* Read the raw data */
+        if (m.ncomps>MAX_VARS) {
+            db_perror(name, E_CALLFAIL, me);
+            UNWIND();
+        }
+        mrgv->data = calloc(m.ncomps, sizeof(void*));
+        for (i=0; i<m.ncomps; i++) {
+            mrgv->data[i] = db_hdf5_comprd(dbfile, m.data[i], 0);
+        }
+
+        s = db_hdf5_comprd(dbfile, m.compnames, 1);
+        if (s) mrgv->compnames = db_StringListToStringArray(s, m.ncomps);
+        FREE(s);
+
+        s = db_hdf5_comprd(dbfile, m.reg_pnames, 1);
+        if (s) mrgv->reg_pnames = db_StringListToStringArray(s, m.nregns);
+        FREE(s);
+
+        H5Tclose(o);
+        
+    } CLEANUP {
+        H5E_BEGIN_TRY {
+            H5Aclose(attr);
+            H5Tclose(o);
+        } H5E_END_TRY;
+        DBFreeMrgvar(mrgv);
+    } END_PROTECT;
+
+    return mrgv;
 }
 
 #else

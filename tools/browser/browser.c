@@ -104,7 +104,7 @@ char    *ObjTypeName[BROWSER_NOBJTYPES] = {
    "curve", "multimesh", "multivar", "multimat", "multispecies", "qmesh", 
    "qvar", "ucdmesh", "ucdvar", "ptmesh", "ptvar", "mat", "matspecies", "var",
    "obj", "dir", "array", "defvars", "csgmesh", "csgvar", "multimeshadj",
-   "mrgtree", "groupelmap"
+   "mrgtree", "groupelmap", "mrgvar"
 };
 
 /*
@@ -258,7 +258,7 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
            toc->nptvar + toc->nmat + toc->nmatspecies + toc->nvar + 
            toc->nobj + toc->ndir + toc->narrays + toc->ndefvars +
            toc->ncsgmesh + toc->ncsgvar + toc->nmultimeshadj +
-           toc->nmrgtrees + toc->ngroupelmaps;
+           toc->nmrgtrees + toc->ngroupelmaps + toc->nmrgvars;
    if (total) retval = malloc (total * sizeof(toc_t));
 
    /*
@@ -377,6 +377,11 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
    for (i=0; i<toc->ngroupelmaps; i++,at++) {
       retval[at].name = safe_strdup (toc->groupelmap_names[i]);
       retval[at].type = BROWSER_DB_GROUPELMAP;
+   }
+
+   for (i=0; i<toc->nmrgvars; i++,at++) {
+      retval[at].name = safe_strdup (toc->mrgvar_names[i]);
+      retval[at].type = BROWSER_DB_MRGVAR;
    }
 
    assert (at==total);

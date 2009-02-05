@@ -248,6 +248,14 @@ CALLBACK int db_hdf5_PutGroupelmap(DBfile *_dbfile, const char *map_name,
     int fracs_data_type, DBoptlist *opts);
 CALLBACK DBgroupelmap *db_hdf5_GetGroupelmap(DBfile *dbfile, const char *name);
 
+/* mrgvars */
+CALLBACK int db_hdf5_PutMrgvar(DBfile *dbfile, const char *name,
+                             const char *mrgt_name,
+                             int ncomps, const char **compnames,
+                             int nregns, const char **reg_pnames,
+                             int datatype, void **data, DBoptlist *opts);
+CALLBACK DBmrgvar *db_hdf5_GetMrgvar(DBfile *dbfile, const char *name);
+
 #endif /* !NO_CALLBACKS */
 
 #endif /* defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5) */

@@ -22,9 +22,10 @@ LCTOPDIR="/usr/gapps/silo"
 SZIPRELEASE=2.1
 HDF5RELEASE=1.6.6
 QTRELEASE=3.3.8
+lcun=$USER
 
 usage() {
-  printf "Usage: %s version [all|hoth|sunspot|up|yana|thunder|pengra|quad|bgl]" $0
+  printf "Usage: %s version [-lc-username <lc-username>] [all|hoth|sunspot|up|yana|thunder|pengra|quad|bgl]" $0
   printf "\n"
   printf "Silo release installing script. Assumes a tarball exist in\n"
   printf "current directory, called silo-$VERSION.tar.gz.\n"
@@ -36,6 +37,7 @@ usage() {
   printf "     perform a configure, make check, followed by a make install\n"
   printf "Log files are stored at $HOME/HOSTNAME.log\n"
 }
+
 hoth() {
   ssh -f hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
     PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/usr/lib/jre/bin:/sbin:/usr/sbin:/opt/bin:/usr/local/apps/bin:/usr/security/bin; \
@@ -211,7 +213,7 @@ berg() {
   berg64
 }
 berg32() {
-  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     OBJECT_MODE=32; \
     export PATH OBJECT_MODE; \
@@ -246,7 +248,7 @@ berg32() {
      \") >newberg32.log 2>&1"
 }
 berg64() {
-  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     OBJECT_MODE=64; \
     export PATH OBJECT_MODE; \
@@ -280,7 +282,7 @@ berggcc() {
   berggcc64
 }
 berggcc32() {
-  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     OBJECT_MODE=32; \
     export PATH OBJECT_MODE; \
@@ -317,7 +319,7 @@ berggcc32() {
      \") >newberggcc32.log 2>&1"
 }
 berggcc64() {
-  ssh -f newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@newberg "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     OBJECT_MODE=64; \
     export PATH OBJECT_MODE; \
@@ -365,7 +367,7 @@ up() {
   upgcc
 }
 up32() {
-  ssh -f up "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@up "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     OBJECT_MODE=32; \
     export PATH OBJECT_MODE; \
@@ -393,7 +395,7 @@ up32() {
      \") >up32.log 2>&1"
 }
 up64() {
-  ssh -f up "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@up "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     OBJECT_MODE=64; \
     export PATH OBJECT_MODE; \
@@ -430,7 +432,7 @@ upgcc() {
   upgcc64
 }
 upgcc32() {
-  ssh -f up "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@up "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     OBJECT_MODE=32; \
     export PATH OBJECT_MODE; \
@@ -460,7 +462,7 @@ upgcc32() {
      \") >upgcc32.log 2>&1"
 }
 upgcc64() {
-  ssh -f up "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@up "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/sbin:/usr/ucb:/usr/local/gnu/bin:/usr/local/scripts:/usr/apps/bin:/usr/gapps/bin; \
     OBJECT_MODE=64; \
     export PATH OBJECT_MODE; \
@@ -495,7 +497,7 @@ upgcc64() {
 gps() {
 # the default g++ has bugs 
 # problems with g77 floating exception during testsuite of quadf77 & ucdf77
-  ssh -f gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf tru64_5; \
@@ -519,7 +521,7 @@ gps() {
     \") > gps.log 2>&1"
 }
 gpscc() {
-  ssh -f gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf tru64_5_cc; \
@@ -531,7 +533,7 @@ gpscc() {
     \") > gps.log 2>&1"
 }
 gpscc() {
-  ssh -f gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@gps "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/bin:/usr/bin:/usr/ccs/bin:/usr/bin/X11:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf tru64_5_cc; \
@@ -570,19 +572,21 @@ pengra() {
 }
     
 pengragcc() {
-  ssh -f pengra "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@pengra "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf chaos_3_x86_elan3; \
     mkdir chaos_3_x86_elan3; \
     cd chaos_3_x86_elan3; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
     --disable-browser; \
     make -j 4 check && make install; \
     make prefix=$LCTOPDIR/chaos_3_x86_elan3/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3 \
     --enable-silex \
     --with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_x86_elan3-gcc-3.4.4 \
@@ -596,13 +600,14 @@ pengragcc() {
 }
     
 pengraicc() {
-  ssh -f pengra "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@pengra "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/local/intel/compiler100_025/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf chaos_3_x86_elan3-icc; \
     mkdir chaos_3_x86_elan3-icc; \
     cd chaos_3_x86_elan3-icc; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3-icc \
     --disable-browser; \
@@ -610,6 +615,7 @@ pengraicc() {
     make prefix=$LCTOPDIR/chaos_3_x86_elan3-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3-icc \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_elan3-icc \
@@ -618,6 +624,7 @@ pengraicc() {
     make prefix=$LCTOPDIR/chaos_3_x86_elan3-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_elan3-icc \
     --disable-browser --without-readline --enable-silex \
@@ -634,17 +641,19 @@ pengraicc() {
 }
     
 yana() {
+  echo "username = $lcun"
   yanagcc
   yanaicc
 }
 yanagcc() {
-  ssh -f yana "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@yana "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf chaos_3_x86_64; \
     mkdir chaos_3_x86_64; \
     cd chaos_3_x86_64; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=gcc CXX=g++ FC=f77 \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64 \
     --disable-browser; \
@@ -652,6 +661,7 @@ yanagcc() {
     make prefix=$LCTOPDIR/chaos_3_x86_64/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=gcc CXX=g++ FC=f77 \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64 \
     --enable-silex \
@@ -666,13 +676,14 @@ yanagcc() {
 }
     
 yanaicc() {
-  ssh -f yana "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@yana "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf chaos_3_x86_64-icc; \
     mkdir chaos_3_x86_64-icc; \
     cd chaos_3_x86_64-icc; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --disable-browser; \
@@ -680,6 +691,7 @@ yanaicc() {
     make prefix=$LCTOPDIR/chaos_3_x86_64-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/chaos_3_x86_64-icc \
@@ -688,6 +700,7 @@ yanaicc() {
     make prefix=$LCTOPDIR/chaos_3_x86_64-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_x86_64-icc \
     --disable-browser --without-readline --enable-silex \
@@ -710,19 +723,21 @@ thunder() {
   thundericc
 }
 thundergcc() {
-  ssh -f thunder "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@thunder "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf chaos_3_ia64-gcc-3.4.4; \
     mkdir chaos_3_ia64-gcc-3.4.4; \
     cd chaos_3_ia64-gcc-3.4.4; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64-gcc-3.4.4 \
     --disable-browser; \
     make -j 4 check; make install; \
     make prefix=$LCTOPDIR/chaos_3_ia64-gcc-3.4.4/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64-gcc-3.4.4 \
     --enable-silex \
     --with-Qt-dir=/usr/gapps/silo/qt/$QTRELEASE/chaos_3_ia64-gcc-3.4.4 \
@@ -737,7 +752,7 @@ thundergcc() {
     \") > thundergcc.log 2>&1"
 }
 thundericc() {
-  ssh -f thunder "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@thunder "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=usr/local/intel/compiler91/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf chaos_3_ia64-icc; \
@@ -745,6 +760,7 @@ thundericc() {
     cd chaos_3_ia64-icc; \
     . /usr/local/intel/compiler91/bin/iccvars.sh; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort F77=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64-icc \
     --disable-browser; \
@@ -752,6 +768,7 @@ thundericc() {
     make prefix=$LCTOPDIR/chaos_3_ia64-icc/$VERSION install; \
     make clean; \
     ../$TOPSRCDIR/configure \
+    CFLAGS=-fPIC CXXFLAGS=-fPIC \
     CC=icc CXX=icc FC=ifort \
     --prefix=$LCTOPDIR/$VERSION/chaos_3_ia64-icc \
     --enable-silex \
@@ -777,7 +794,7 @@ quad() {
   quad64
 }
 quad32() {
-  ssh -f quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin; \
     LD_LIBRARY_PATH=/usr/gapps/silo/qt/$QTRELEASE/irix_6.5-gcc-3.3/lib:$LD_LIBRARY_PATH; \
     PARALLEL=4; \
@@ -807,7 +824,7 @@ quad32() {
      \") >quad32.log 2>&1"
 }
 quad64() {
-  ssh -f quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@quad "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/usr/sbin:/usr/bsd:/sbin:/usr/bin:/usr/bin/X11:/usr/freeware/bin; \
     PARALLEL=4; \
     export PATH PARALLEL; \
@@ -835,7 +852,7 @@ quad64() {
 }
     
 ubgl() {
-  ssh -f ubgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
+  ssh -f ${lcun}@ubgl "(/bin/sh -c \"cd $LCTOPDIR/test; \
     PATH=/opt/ibmcmp/vac/7.0/bin:/opt/ibmcmp/xlf/9.1/bin:/usr/local/bin:/bin:/usr/bin:/usr/bin/X11:/usr/lib/mpi/bin:/usr/apps/bin:/usr/gapps/bin; \
     export PATH; \
     rm -rf sles_9_ppc64; \
@@ -879,15 +896,6 @@ VERSION=$1
 shift
 TARFILE="silo-$VERSION.tar.gz"
 TOPSRCDIR="silo-$VERSION"
-if [ -e $TARFILE ] ; then
-  scp $TARFILE hoth:$BDTOPDIR/test
-  scp $TARFILE yana:$LCTOPDIR/test
-
-  ssh hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
-   tar zxf $TARFILE\")"
-  ssh yana "(/bin/sh -c \"cd $LCTOPDIR/test; \
-   tar zxf $TARFILE\")"
-fi 
 
 if [ $# -lt 1 ] ; then
   hoth
@@ -993,8 +1001,22 @@ else
     sh*|-sh*)
       shar
       shift;;
+    -lc-username)
+      lcun=$2
+      shift 2
+      ;;
     *)
       shift;;
   esac
  done
 fi
+
+if [ -e $TARFILE ] ; then
+  scp $TARFILE hoth:$BDTOPDIR/test
+  scp $TARFILE ${lcun}@yana:$LCTOPDIR/test
+
+  ssh hoth "(/bin/sh -c \"cd $BDTOPDIR/test; \
+   tar zxf $TARFILE\")"
+  ssh ${lcun}@yana "(/bin/sh -c \"cd $LCTOPDIR/test; \
+   tar zxf $TARFILE\")"
+fi 
