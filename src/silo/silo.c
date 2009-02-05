@@ -3437,7 +3437,7 @@ DBPause(DBfile *file)
 {
     int retval;
 
-    API_BEGIN("DBPause", int, -1) {
+    API_DEPRECATE("DBPause", int, -1, "4.6") {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
         if (NULL == file->pub.pause)
@@ -3473,7 +3473,7 @@ DBContinue(DBfile *file)
 {
     int retval;
 
-    API_BEGIN("DBContinue", int, -1) {
+    API_DEPRECATE("DBContinue", int, -1, "4.6") {
         if (!file)
             API_ERROR(NULL, E_NOFILE);
         if (NULL == file->pub.cont)
