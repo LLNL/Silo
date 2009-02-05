@@ -177,8 +177,10 @@ main(int argc, char *argv[])
     for (j=0; j<i; j++)
         nodelist[j] += origin;
 
+    DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "zonelist", nzones, ndims, nodelist, 23, origin,
                   shapesize, shapecnt, 4);
+    DBSetDeprecateWarnings(3);
 
     facelist = DBCalcExternalFacelist(nodelist, nnodes, origin,
                                       shapesize, shapecnt, 4, NULL, 0);

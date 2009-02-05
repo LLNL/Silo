@@ -1240,8 +1240,10 @@ build_ucd2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
 
     /* Write out the mesh */
+    DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "ucd2d_zonelist", nzones, 2, zonelist,
                   zonelist_length, 0, shapesize, shapecount, 2);
+    DBSetDeprecateWarnings(3);
 
     DBPutUcdmesh(dbfile, "ucdmesh2d", 2, NULL, coords, nnodes, nzones,
                  "ucd2d_zonelist", NULL, DB_FLOAT, optlist);
@@ -2437,8 +2439,10 @@ build_ucd3d(DBfile * dbfile, int size, int order)
     DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0, zoneno,
                   &fshapesize, &fshapecnt, 1, NULL, NULL, 0);
 
+    DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
                   &zshapesize, &zshapecnt, 1);
+    DBSetDeprecateWarnings(3);
 
     DBPutUcdmesh(dbfile, meshname, 3, NULL, coords, nnodes, nzones,
                  "zl1", "fl1", DB_FLOAT, optlist);

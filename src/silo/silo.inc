@@ -20,33 +20,35 @@
 
 !...Functions.
       external dbaddcaopt, dbaddccmp, dbaddcopt, dbadddopt, dbaddicmp
-      external dbaddiopt, dbaddrcmp, dbaddregion, dbaddropt, dballocptr
-      external dbcalcfl, dbclose, dbcreate, dbfgetca, dbfreemrgtree
-      external dbfreeobject, dbfreeoptlist, dbget2dstrlen, dbgetca
-      external dbgetcksums, dbgetcompress, dbgetcurve, dbgetdepwarn
-      external dbgethdfnms, dbgetovrwrt, dbgetqv1, dbinqca, dbinqfile
-      external dbinqlen, dbmkdir, dbmkmrgtree, dbmkobject, dbmkoptlist
-      external dbopen, dbputca, dbputcurve, dbputdefvars, dbputfl
-      external dbputgrplmap, dbputmat, dbputmmat, dbputmmesh
-      external dbputmrgtree, dbputmsp, dbputmvar, dbputpm, dbputpv1
-      external dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl, dbputzl2
-      external dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
+      external dbaddiopt, dbaddrcmp, dbaddregion, dbaddregiona
+      external dbaddropt, dbcalcfl, dbclose, dbcreate, dberrno, dbfgetca
+      external dbfreemrgtree, dbfreeobject, dbfreeoptlist, dbget2dstrlen
+      external dbgetca, dbgetcksums, dbgetcompress, dbgetcurve
+      external dbgetdepwarn, dbgethdfnms, dbgetovrwrt, dbgetqv1, dbgmrgv
+      external dbinqca, dbinqfile, dbinqlen, dbmkdir, dbmkmrgtree
+      external dbmkobject, dbmkoptlist, dbmkptr, dbopen, dbpmrgv
+      external dbputca, dbputcsgm, dbputcsgv, dbputcsgzl, dbputcurve
+      external dbputdefvars, dbputfl, dbputgrplmap, dbputmat, dbputmmat
+      external dbputmmesh, dbputmrgtree, dbputmsp, dbputmvar, dbputpm
+      external dbputpv1, dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl
+      external dbputzl2, dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
       external dbsetcksums, dbsetcompress, dbsetcwr, dbsetdepwarn
       external dbsetdir, dbsetdirid, dbsethdfnms, dbsetovrwrt
       external dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
 
       integer  dbaddcaopt, dbaddccmp, dbaddcopt, dbadddopt, dbaddicmp
-      integer  dbaddiopt, dbaddrcmp, dbaddregion, dbaddropt, dballocptr
-      integer  dbcalcfl, dbclose, dbcreate, dbfgetca, dbfreemrgtree
-      integer  dbfreeobject, dbfreeoptlist, dbget2dstrlen, dbgetca
-      integer  dbgetcksums, dbgetcompress, dbgetcurve, dbgetdepwarn
-      integer  dbgethdfnms, dbgetovrwrt, dbgetqv1, dbinqca, dbinqfile
-      integer  dbinqlen, dbmkdir, dbmkmrgtree, dbmkobject, dbmkoptlist
-      integer  dbopen, dbputca, dbputcurve, dbputdefvars, dbputfl
-      integer  dbputgrplmap, dbputmat, dbputmmat, dbputmmesh
-      integer  dbputmrgtree, dbputmsp, dbputmvar, dbputpm, dbputpv1
-      integer  dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl, dbputzl2
-      integer  dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
+      integer  dbaddiopt, dbaddrcmp, dbaddregion, dbaddregiona
+      integer  dbaddropt, dbcalcfl, dbclose, dbcreate, dberrno, dbfgetca
+      integer  dbfreemrgtree, dbfreeobject, dbfreeoptlist, dbget2dstrlen
+      integer  dbgetca, dbgetcksums, dbgetcompress, dbgetcurve
+      integer  dbgetdepwarn, dbgethdfnms, dbgetovrwrt, dbgetqv1, dbgmrgv
+      integer  dbinqca, dbinqfile, dbinqlen, dbmkdir, dbmkmrgtree
+      integer  dbmkobject, dbmkoptlist, dbmkptr, dbopen, dbpmrgv
+      integer  dbputca, dbputcsgm, dbputcsgv, dbputcsgzl, dbputcurve
+      integer  dbputdefvars, dbputfl, dbputgrplmap, dbputmat, dbputmmat
+      integer  dbputmmesh, dbputmrgtree, dbputmsp, dbputmvar, dbputpm
+      integer  dbputpv1, dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl
+      integer  dbputzl2, dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
       integer  dbsetcksums, dbsetcompress, dbsetcwr, dbsetdepwarn
       integer  dbsetdir, dbsetdirid, dbsethdfnms, dbsetovrwrt
       integer  dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
@@ -68,48 +70,50 @@
       integer  DBCSG_SWEEP, DBCSG_TET_4F, DBCSG_TRI_3P, DBCSG_UNION
       integer  DBCSG_XFORM, DBOPT_ALIGN, DBOPT_ALLOWMAT0
       integer  DBOPT_ASCII_LABEL, DBOPT_BASEINDEX, DBOPT_BLOCKORIGIN
-      integer  DBOPT_BNDNAMES, DBOPT_COORDSYS, DBOPT_CYCLE, DBOPT_DTIME
-      integer  DBOPT_EXTENTS, DBOPT_EXTENTS_SIZE, DBOPT_FACETYPE
-      integer  DBOPT_GROUPINGNAMES, DBOPT_GROUPINGS
-      integer  DBOPT_GROUPINGS_SIZE, DBOPT_GROUPNUM, DBOPT_GROUPORIGIN
-      integer  DBOPT_HAS_EXTERNAL_ZONES, DBOPT_HIDE_FROM_GUI
-      integer  DBOPT_HI_OFFSET, DBOPT_LABEL, DBOPT_LO_OFFSET
-      integer  DBOPT_MAJORORDER, DBOPT_MATCOLORS, DBOPT_MATCOUNTS
-      integer  DBOPT_MATLISTS, DBOPT_MATNAME, DBOPT_MATNAMES
-      integer  DBOPT_MATNOS, DBOPT_MIXLENS, DBOPT_MMESH_NAME
-      integer  DBOPT_MRGTREE_NAME, DBOPT_NGROUPS, DBOPT_NMAT
+      integer  DBOPT_BNDNAMES, DBOPT_COORDSYS, DBOPT_CYCLE
+      integer  DBOPT_DISJOINT_MODE, DBOPT_DTIME, DBOPT_EXTENTS
+      integer  DBOPT_EXTENTS_SIZE, DBOPT_FACETYPE, DBOPT_GROUPINGNAMES
+      integer  DBOPT_GROUPINGS, DBOPT_GROUPINGS_SIZE, DBOPT_GROUPNUM
+      integer  DBOPT_GROUPORIGIN, DBOPT_HAS_EXTERNAL_ZONES
+      integer  DBOPT_HIDE_FROM_GUI, DBOPT_HI_OFFSET, DBOPT_LABEL
+      integer  DBOPT_LO_OFFSET, DBOPT_MAJORORDER, DBOPT_MATCOLORS
+      integer  DBOPT_MATCOUNTS, DBOPT_MATLISTS, DBOPT_MATNAME
+      integer  DBOPT_MATNAMES, DBOPT_MATNOS, DBOPT_MIXLENS
+      integer  DBOPT_MMESH_NAME, DBOPT_MRGTREE_NAME, DBOPT_MRGV_ONAMES
+      integer  DBOPT_MRGV_RNAMES, DBOPT_NGROUPS, DBOPT_NMAT
       integer  DBOPT_NMATNOS, DBOPT_NMATSPEC, DBOPT_NODENUM
       integer  DBOPT_NSPACE, DBOPT_ORIGIN, DBOPT_PHZONELIST
       integer  DBOPT_PLANAR, DBOPT_REFERENCE, DBOPT_REGION_PNAMES
       integer  DBOPT_REGNAMES, DBOPT_TENSOR_RANK, DBOPT_TIME
-      integer  DBOPT_TOPO_DIM, DBOPT_UNITS, DBOPT_USESPECMF
-      integer  DBOPT_XLABEL, DBOPT_XUNITS, DBOPT_XVARNAME, DBOPT_YLABEL
-      integer  DBOPT_YUNITS, DBOPT_YVARNAME, DBOPT_ZLABEL
-      integer  DBOPT_ZONECOUNTS, DBOPT_ZONENAMES, DBOPT_ZONENUM
-      integer  DBOPT_ZUNITS, DBOPT_ZVARNAME, DB_ABORT, DB_ALL, DB_APPEND
+      integer  DBOPT_TOPO_DIM, DBOPT_TV_CONNECTIVITY, DBOPT_UNITS
+      integer  DBOPT_USESPECMF, DBOPT_XLABEL, DBOPT_XUNITS
+      integer  DBOPT_XVARNAME, DBOPT_YLABEL, DBOPT_YUNITS
+      integer  DBOPT_YVARNAME, DBOPT_ZLABEL, DBOPT_ZONECOUNTS
+      integer  DBOPT_ZONENAMES, DBOPT_ZONENUM, DBOPT_ZUNITS
+      integer  DBOPT_ZVARNAME, DB_ABORT, DB_ABUTTING, DB_ALL, DB_APPEND
       integer  DB_AREA, DB_ARRAY, DB_BLOCKCENT, DB_BNDCENT, DB_CARTESIAN
       integer  DB_CHAR, DB_CLOBBER, DB_COLLINEAR, DB_COLMAJOR, DB_CRAY
       integer  DB_CSGMESH, DB_CSGVAR, DB_CSGZONELIST, DB_CURVE
       integer  DB_CURVILINEAR, DB_CYLINDRICAL, DB_DEBUG, DB_DEFVARS
       integer  DB_DIR, DB_DOUBLE, DB_EDGECENT, DB_EDGELIST, DB_F77NULL
-      integer  DB_FACECENT, DB_FACELIST, DB_FLOAT, DB_FROMCWR
-      integer  DB_GROUPELMAP, DB_HDF5, DB_HDF5_CORE, DB_HDF5_MPIO
-      integer  DB_HDF5_MPIOP, DB_HDF5_SEC2, DB_HDF5_STDIO, DB_INT
-      integer  DB_INTEL, DB_INVALID_OBJECT, DB_LOCAL, DB_LONG
-      integer  DB_MATERIAL, DB_MATSPECIES, DB_MRGTREE, DB_MULTIBLOCKMESH
-      integer  DB_MULTIBLOCKVAR, DB_MULTIMAT, DB_MULTIMATSPECIES
-      integer  DB_MULTIMESH, DB_MULTIMESHADJ, DB_MULTIVAR, DB_NETCDF
-      integer  DB_NFILES, DB_NFILTERS, DB_NOCLOBBER, DB_NODECENT
-      integer  DB_NONCOLLINEAR, DB_NONE, DB_NOTCENT, DB_NOTYPE
-      integer  DB_NUMERICAL, DB_OFF, DB_ON, DB_OTHER, DB_PDB
-      integer  DB_PHZONELIST, DB_POINTMESH, DB_POINTVAR, DB_POSTORDER
-      integer  DB_PREORDER, DB_QUADMESH, DB_QUADVAR, DB_QUAD_CURV
-      integer  DB_QUAD_RECT, DB_READ, DB_RECTILINEAR, DB_RESUME
-      integer  DB_ROWMAJOR, DB_RS6000, DB_SGI, DB_SHORT, DB_SPHERICAL
-      integer  DB_SUN3, DB_SUN4, DB_SUSPEND, DB_TAURUS, DB_TOP
-      integer  DB_UCDMESH, DB_UCDVAR, DB_UNKNOWN, DB_USERDEF
-      integer  DB_VARIABLE, DB_VARTYPE_ARRAY, DB_VARTYPE_LABEL
-      integer  DB_VARTYPE_MATERIAL, DB_VARTYPE_SCALAR
+      integer  DB_FACECENT, DB_FACELIST, DB_FLOAT, DB_FLOATING
+      integer  DB_FROMCWR, DB_GROUPELMAP, DB_HDF5, DB_HDF5_CORE
+      integer  DB_HDF5_MPIO, DB_HDF5_MPIOP, DB_HDF5_SEC2, DB_HDF5_STDIO
+      integer  DB_INT, DB_INTEL, DB_INVALID_OBJECT, DB_LOCAL, DB_LONG
+      integer  DB_MATERIAL, DB_MATSPECIES, DB_MRGTREE, DB_MRGVAR
+      integer  DB_MULTIBLOCKMESH, DB_MULTIBLOCKVAR, DB_MULTIMAT
+      integer  DB_MULTIMATSPECIES, DB_MULTIMESH, DB_MULTIMESHADJ
+      integer  DB_MULTIVAR, DB_NETCDF, DB_NFILES, DB_NFILTERS
+      integer  DB_NOCLOBBER, DB_NODECENT, DB_NONCOLLINEAR, DB_NONE
+      integer  DB_NOTCENT, DB_NOTYPE, DB_NUMERICAL, DB_OFF, DB_ON
+      integer  DB_OTHER, DB_PDB, DB_PHZONELIST, DB_POINTMESH
+      integer  DB_POINTVAR, DB_POSTORDER, DB_PREORDER, DB_QUADMESH
+      integer  DB_QUADVAR, DB_QUAD_CURV, DB_QUAD_RECT, DB_READ
+      integer  DB_RECTILINEAR, DB_RESUME, DB_ROWMAJOR, DB_RS6000, DB_SGI
+      integer  DB_SHORT, DB_SPHERICAL, DB_SUN3, DB_SUN4, DB_SUSPEND
+      integer  DB_TAURUS, DB_TOP, DB_UCDMESH, DB_UCDVAR, DB_UNKNOWN
+      integer  DB_USERDEF, DB_VARIABLE, DB_VARTYPE_ARRAY
+      integer  DB_VARTYPE_LABEL, DB_VARTYPE_MATERIAL, DB_VARTYPE_SCALAR
       integer  DB_VARTYPE_SPECIES, DB_VARTYPE_SYMTENSOR
       integer  DB_VARTYPE_TENSOR, DB_VARTYPE_VECTOR, DB_VOLUME
       integer  DB_ZONECENT, DB_ZONELIST, DB_ZONETYPE_BEAM
@@ -123,7 +127,7 @@
       parameter (SILO_VERS_MAJ             = 4              )
       parameter (SILO_VERS_MIN             = 6              )
       parameter (SILO_VERS_PAT             = 0              )
-      parameter (SILO_VERS_PRE             = 6              )
+      parameter (SILO_VERS_PRE             = 7              )
       parameter (DB_NETCDF                 = 0              )
       parameter (DB_PDB                    = 2              )
       parameter (DB_TAURUS                 = 3              )
@@ -167,6 +171,7 @@
       parameter (DB_VARIABLE               = 610            )
       parameter (DB_MRGTREE                = 611            )
       parameter (DB_GROUPELMAP             = 612            )
+      parameter (DB_MRGVAR                 = 613            )
       parameter (DB_USERDEF                = 700            )
       parameter (DB_INT                    = 16             )
       parameter (DB_SHORT                  = 17             )
@@ -247,6 +252,10 @@
       parameter (DBOPT_REGION_PNAMES       = 319            )
       parameter (DBOPT_TENSOR_RANK         = 320            )
       parameter (DBOPT_MMESH_NAME          = 321            )
+      parameter (DBOPT_TV_CONNECTIVITY     = 322            )
+      parameter (DBOPT_DISJOINT_MODE       = 323            )
+      parameter (DBOPT_MRGV_ONAMES         = 324            )
+      parameter (DBOPT_MRGV_RNAMES         = 325            )
       parameter (DB_TOP                    = 0              )
       parameter (DB_NONE                   = 1              )
       parameter (DB_ALL                    = 2              )
@@ -277,6 +286,8 @@
       parameter (DB_VOLUME                 = 141            )
       parameter (DB_ON                     = 1000           )
       parameter (DB_OFF                    = -1000          )
+      parameter (DB_ABUTTING               = 142            )
+      parameter (DB_FLOATING               = 143            )
       parameter (DB_VARTYPE_SCALAR         = 200            )
       parameter (DB_VARTYPE_VECTOR         = 201            )
       parameter (DB_VARTYPE_TENSOR         = 202            )

@@ -191,8 +191,10 @@ main(int argc, char *argv[])
     Pshapecnt[0]  = 2;	/* There are 2... */
     Pshapesize[0] = 8;	/* ...hexes */
 
+    DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "Pzonelist", 2, 3, Pnodelist, 12, 0, Pshapesize,
                   Pshapecnt, 1);
+    DBSetDeprecateWarnings(3);
 
     Pfacelist = DBCalcExternalFacelist(Pnodelist, 12, 0, Pshapesize, Pshapecnt, 1,
                                       NULL, 0);
@@ -213,8 +215,10 @@ main(int argc, char *argv[])
     |
     +-------------------------------------*/
 
+    DBSetDeprecateWarnings(0);
     DBPutUcdsubmesh(dbfile, "child", "parent", 1, "Czonelist",
                  "Cfacelist", NULL);
+    DBSetDeprecateWarnings(3);
 
     Cnodelist[ 0] =  1;	/* Just one hex, refering to parent nodes */
     Cnodelist[ 1] =  8;
@@ -228,8 +232,10 @@ main(int argc, char *argv[])
     Cshapecnt[0]  = 1;	/* There is 1... */
     Cshapesize[0] = 8;	/* ...hex */
 
+    DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "Czonelist", 1, 3, Cnodelist, 8, 0, Cshapesize,
                   Cshapecnt, 1);
+    DBSetDeprecateWarnings(3);
 
     Cfacelist = DBCalcExternalFacelist(Cnodelist, 8, 0, Cshapesize, Cshapecnt, 1,
                                       NULL, 0);

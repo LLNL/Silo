@@ -529,7 +529,9 @@ void writemesh_ucd2d(DBfile *db) {
   shapesize[0]=4;
   shapecnt[0]=nzones;
 
+  DBSetDeprecateWarnings(0);
   DBPutZonelist(db,"Mesh_zonelist",nzones,2,nl,lnodelist,0,shapesize,shapecnt,1);
+  DBSetDeprecateWarnings(3);
   DBPutUcdmesh (db,"Mesh",2,NULL,coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,NULL);
 
   /* do Node vars */

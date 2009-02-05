@@ -169,8 +169,10 @@ main(int argc, char *argv[])
     shapesize[0] = 8;	/* ...hexes */
 
 
+    DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "zonelist", 2, 3, nodelist, 12, 0, shapesize,
                   shapecnt, 1);
+    DBSetDeprecateWarnings(3);
 
     facelist = DBCalcExternalFacelist(nodelist, 12, 0, shapesize, shapecnt, 1,
                                       NULL, 0);

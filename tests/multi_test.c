@@ -686,9 +686,6 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
        }
     }
     SET_OPTIONS(extentssize,tmpExtents,zonecounts,NULL,NULL,NULL,has_external_zones);
-    DBAddOption(optlist, DBOPT_GROUPINGS_SIZE, &ngroupings);
-    DBAddOption(optlist, DBOPT_GROUPINGS, groupings);
-    DBAddOption(optlist, DBOPT_GROUPINGNAMES, groupingnames);
     if (DBPutMultimesh(dbfile, "mesh1", nblocks,
                        meshnames, meshtypes, optlist) == -1)
     {
@@ -697,9 +694,6 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         free(tmpExtents);
         return (-1);
     }                                  /* if */
-    DBClearOption(optlist, DBOPT_GROUPINGS_SIZE);
-    DBClearOption(optlist, DBOPT_GROUPINGS);
-    DBClearOption(optlist, DBOPT_GROUPINGNAMES);
     
     for (i = 0; i < ngroupings; i++)
         FREE(groupingnames[i]);

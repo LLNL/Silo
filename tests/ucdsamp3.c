@@ -255,8 +255,10 @@ build_ucd3(DBfile *dbfile, char *name)
      /*--------------------------------------------------
       *  Write out the zonelist.
       *-------------------------------------------------*/
+    DBSetDeprecateWarnings(0);
     (void)DBPutZonelist(dbfile, "zl", NZONES, 3, znodelist, LZNODELIST, 0,
                         &zshapesize, &zshapecnt, NZSHAPES);
+    DBSetDeprecateWarnings(3);
 
      /*--------------------------------------------------
       *  Write out the mesh.

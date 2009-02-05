@@ -1819,6 +1819,7 @@ main(int argc, char *argv[])
     
 
 
+    DBSetDeprecateWarnings(0);
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                       "unstructured mesh of globe", driver);
 

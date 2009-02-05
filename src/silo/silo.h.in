@@ -1600,6 +1600,7 @@ SILO_API extern char    *DBVersion(void);
 SILO_API extern void     DBShowErrors(int, void (*)(char *));
 SILO_API extern char    *DBErrString(void);
 SILO_API extern char    *DBErrFunc(void);
+SILO_API extern int      DBErrno(void);
 SILO_API extern int      DBClose(DBfile *);
 SILO_API extern int      DBPause(DBfile *);
 SILO_API extern int      DBContinue(DBfile *);

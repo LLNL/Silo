@@ -2999,6 +2999,12 @@ DBErrString(void)
     return _db_err_list[db_errno];
 }
 
+PUBLIC int
+DBErrno(void)
+{
+    return db_errno;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    DBErrFunc
  *

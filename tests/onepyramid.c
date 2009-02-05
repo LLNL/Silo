@@ -143,8 +143,10 @@ main(int argc, char *argv[])
     shapesize[0] = 5;
     shapecnt[0] = 1;
 
+    DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "zonelist", 1, 3, nodelist, 5, 0, shapesize,
                   shapecnt, 1);
+    DBSetDeprecateWarnings(3);
 
     facelist = DBCalcExternalFacelist(nodelist, 5, 0, shapesize, shapecnt, 1,
                                       NULL, 0);

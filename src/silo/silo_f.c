@@ -2832,6 +2832,12 @@ DBSHOWERRORS_FC (int *mode)
     return 0;
 }
 
+FORTRAN
+DBERRNO_FC()
+{
+    return DBErrno();
+}
+
 /*-------------------------------------------------------------------------
  * Routine                                                       DBWRITE_FC
  *
@@ -4276,6 +4282,94 @@ DBADDREGION_FC (int *tree_id, FCD_DB region_name, int *lregion_name,
               seg_types, optlist);
 
         FREE(region_nm);
+        FREE(maps_nm);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*----------------------------------------------------------------------
+ * Routine                                               DBADDREGIONA_FC
+ *
+ * Purpose
+ *     Add a region to an mrg tree 
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications
+ *
+ *
+ *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
+ *     Using AC_FC_WRAPPERS for name-mangling
+ *--------------------------------------------------------------------*/
+FORTRAN
+DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
+    int *type_info_bits, FCD_DB maps_name, int *lmaps_name, int *nsegs,
+    int *seg_ids, int *seg_sizes, int *seg_types, int *optlist_id, int *status)
+{
+    DBmrgtree *tree = NULL;
+    DBoptlist *optlist = NULL;
+    char **regn_nms = NULL, *maps_nm = NULL;
+    char *realregn_names = NULL;
+    int indx, i;
+
+    API_BEGIN("dbaddregiona", int, -1) {
+        if (*lmaps_name<=0)
+            API_ERROR ("lmaps_name", E_BADARGS) ;
+
+        tree = (DBmrgtree*) DBFortranAccessPointer(*tree_id);
+        optlist = (DBoptlist*) DBFortranAccessPointer(*optlist_id);
+
+      /*------------------------------
+       *  Duplicate all ascii strings.
+       *-----------------------------*/
+#ifdef CRAY
+        if (strcmp(_fcdtocp(regn_names), DB_F77NULLSTRING) == 0)
+            realregn_names = NULL;
+        else
+            realregn_names = _fcdtocp(regn_names);
+
+        if (!strcmp(_fcdtocp(maps_name), DB_F77NULLSTRING))
+            maps_nm = NULL ;
+        else
+            maps_nm = SW_strndup(_fcdtocp(maps_name), *lmaps_name);
+#else
+        if (strcmp(regn_names, DB_F77NULLSTRING) == 0)
+            realregn_names = NULL;
+        else
+            realregn_names = regn_names;
+
+        if (!strcmp(maps_name, DB_F77NULLSTRING))
+            maps_nm = NULL ;
+        else
+            maps_nm = SW_strndup(maps_name, *lmaps_name);
+#endif
+
+        if (*nregn <= 0)
+            API_ERROR("nmesh", E_BADARGS);
+        regn_nms = ALLOC_N(char *, *nregn);
+
+        for (indx = 0, i = 0; i < *nregn; i++) {
+            if (lregn_names[i] < 0)
+                API_ERROR("lregn_names", E_BADARGS);
+            regn_nms[i] = SW_strndup(&realregn_names[indx], lregn_names[i]);
+            indx += fortran2DStrLen;
+        }
+
+        *status = DBAddRegionArray(tree, *nregn, (const char**) regn_nms,
+            *type_info_bits, maps_nm, *nsegs, seg_ids, seg_sizes,
+             seg_types, optlist);
+
+        for (i = 0; i < *nregn; i++)
+            FREE(regn_nms[i]);
         FREE(maps_nm);
 
         API_RETURN((*status < 0) ? (-1) : 0);

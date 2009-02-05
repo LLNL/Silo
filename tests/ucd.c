@@ -200,8 +200,10 @@ build_ucd(DBfile *dbfile, char *name)
                         NULL, &fshapesize, &fshapecnt, NFSHAPES,
                         NULL, NULL, 0);
 
+    DBSetDeprecateWarnings(0);
     (void)DBPutZonelist(dbfile, "zl", NZONES, 2, znodelist, LZNODELIST, 0,
                         &zshapesize, &zshapecnt, NZSHAPES);
+    DBSetDeprecateWarnings(3);
 
     (void)DBPutUcdmesh(dbfile, name, 2, coordnames, coords,
                        NNODES, NZONES, "zl", NULL, DB_FLOAT, NULL);
