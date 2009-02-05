@@ -141,6 +141,16 @@ PUBLIC char   *_db_err_list[] =
     "Grab driver enabled."                    /* 26 */
 };
 
+static char *no_hdf5_driver_msg =
+    "\nYou have tried to open or create a Silo file using\n"
+    "the HDF5 driver. However, the installation of Silo\n"
+    "you are using does not have the HDF5 driver enabled.\n"
+    "You need to configure the Silo library using the\n"
+    "--with-hdf5=<INC,LIB> option and re-compile and\n"
+    "re-install Silo. If you do not have an installation\n"
+    "of HDF5 already on your sytem, you will also need\n"
+    "to obtain HDF5 from www.hdfgroup.org and install it.";
+
 INTERNAL int   _db_err_level = DB_TOP;  /*what errors to issue (default) */
 INTERNAL void  (*_db_err_func)(char *);  /*how to issue errors  */
 INTERNAL jstk_t *Jstk = NULL;   /*error jump stack  */
@@ -2383,6 +2393,8 @@ DBGetDriverType(const DBfile *file)
  * Thomas R. Treadway, Thu Jul  5 11:57:03 PDT 2007
  * DB_HDR5 is conditional
  *
+ * Mark C. Miller, Mon Nov 19 10:45:05 PST 2007
+ * Removed conditional compilation on HDF5 driver
  *--------------------------------------------------------------------*/
 PUBLIC int
 DBGetDriverTypeFromPath(const char *path)
@@ -2406,10 +2418,8 @@ DBGetDriverTypeFromPath(const char *path)
    (void) close(fd);
    if (strstr(buf, "PDB"))
       return DB_PDB;
-#ifdef DB_HDF5
    if (strstr(buf, "HDF"))
-      return DB_HDF5;
-#endif
+      return 7; /* can't use DB_HDF5 here. */
    return DB_UNKNOWN;
 }
 
@@ -3288,6 +3298,9 @@ DBOpenReal(const char *name, int type, int mode)
  *
  *    Mark C. Miller, Wed Apr  5 10:17:31 PDT 2006
  *    Added code to output silo library version string to the file
+ *
+ *    Mark C. Miller, Mon Nov 19 10:45:05 PST 2007
+ *    Added hdf5 driver warning.
  *-------------------------------------------------------------------------*/
 PUBLIC DBfile *
 DBCreateReal(const char *name, int mode, int target, const char *info, int type)
@@ -3325,8 +3338,15 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
         }
 
         if (!DBCreateCB[type]) {
-            sprintf(ascii, "%d", type);
-            API_ERROR(ascii, E_NOTIMP);
+            if (type == 7)
+            {
+                API_ERROR(no_hdf5_driver_msg, E_NOTIMP);
+            }
+            else
+            {
+                sprintf(ascii, "%d", type);
+                API_ERROR(ascii, E_NOTIMP);
+            }
         }
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)

@@ -84,6 +84,9 @@ for advertising or product endorsement purposes.
  *
  *     Mark C. Miller, Tue Aug  1 10:35:32 PDT 2006
  *     Added subtype arg. Eliminated exudos. Moved HDF5 to second place.
+ *
+ *     Mark C. Miller, Mon Nov 19 10:45:05 PST 2007
+ *     Added HDF5 driver warning.
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
 db_unk_Open(char *name, int mode, int subtype)
@@ -102,6 +105,16 @@ db_unk_Open(char *name, int mode, int subtype)
     static char *  hierarchy_names[] = { "PDB", "HDF5", "NetCDF", "Taurus",
                                          "debug" };
     static int     nhiers = sizeof(hierarchy) / sizeof(hierarchy[0]);
+
+    static char *no_hdf5_driver_msg =
+        "\nYou have tried to open or create a Silo file using\n"
+        "the HDF5 driver. However, the installation of Silo\n"
+        "you are using does not have the HDF5 driver enabled.\n"
+        "You need to configure the Silo library using the\n"
+        "--with-hdf5=<INC,LIB> option and re-compile and\n"
+        "re-install Silo. If you do not have an installation\n"
+        "of HDF5 already on your sytem, you will also need\n"
+        "to obtain HDF5 from www.hdfgroup.org and install it.";
 
     /*
      * If the file is read-only but the access mode calls for read/write,
@@ -134,6 +147,15 @@ db_unk_Open(char *name, int mode, int subtype)
     DBShowErrors(DB_RESUME, NULL);
 
     if (opened == NULL)
-        db_perror(tried, E_NOTIMP, me);
+    {
+        if (DBGetDriverTypeFromPath(name) == 7)
+        {
+            db_perror(no_hdf5_driver_msg, E_NOTIMP, me);
+        }
+        else
+        {
+            db_perror(tried, E_NOTIMP, me);
+        }
+    }
     return (opened);
 }
