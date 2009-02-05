@@ -2398,12 +2398,13 @@ db_hdf5_init(void)
  *    Jeremy Meredith, Wed Oct 25 16:16:59 PDT 2000
  *    Added DB_INTEL so we had a little-endian target.
  *
+ *    Mark C. Miller, Tue Feb  3 09:47:43 PST 2009
+ *    Changed dbfile arg from public DBfile* to private DBfile_hdf5*
  *-------------------------------------------------------------------------
  */
 PRIVATE void
-db_hdf5_InitCallbacks(DBfile *_dbfile, int target)
+db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
 {
-    DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_InitCallbacks";
     
     /* Initialize the driver global data structures */
@@ -4290,67 +4291,62 @@ db_hdf5_file_accprops(int subtype)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Tue Feb  3 09:48:23 PST 2009
+ *   Changed dbfile arg from public DBfile* to private DBfile_hdf5*
+ *   Changed return type from int to DBfile*
+ *   Removed PROTECT/UNWIND/END_PROTECT and replaced UNWIND() calls with
+ *   return silo_db_close(). This is because UNWIND was causing it to
+ *   NOT correctly handle the case in which the given filename was NOT
+ *   an HDF5 file and properly RETURNing NULL when necessary.
  *-------------------------------------------------------------------------
  */
-INTERNAL int
-db_hdf5_finish_open(DBfile *_dbfile)
+INTERNAL DBfile* 
+db_hdf5_finish_open(DBfile_hdf5 *dbfile)
 {
-    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_finish_open";
     hid_t       cwg=-1, link=-1, attr=-1;
     int         tmp, target=DB_LOCAL;
     
-    PROTECT {
-        /* Open "/" as current working group */
-        if ((cwg=H5Gopen(dbfile->fid, "/"))<0) {
-            db_perror("root group", E_CALLFAIL, me);
-            UNWIND();
-        }
+    /* Open "/" as current working group */
+    if ((cwg=H5Gopen(dbfile->fid, "/"))<0) {
+        db_perror("root group", E_CALLFAIL, me);
+        return silo_db_close((DBfile*) dbfile);
+    }
 
-        /*
-         * Open the link directory. If it doesn't exist then create one (it
-         * might not exist in old SAMI files).
-         */
-        H5E_BEGIN_TRY {
-            link = H5Gopen(dbfile->fid, LINKGRP);
-        } H5E_END_TRY;
-        if (link<0 && (link=H5Gcreate(dbfile->fid, LINKGRP, 0))<0) {
-            db_perror("link group", E_CALLFAIL, me);
-            UNWIND();
-        }
+    /*
+     * Open the link directory. If it doesn't exist then create one (it
+     * might not exist in old SAMI files).
+     */
+    H5E_BEGIN_TRY {
+        link = H5Gopen(dbfile->fid, LINKGRP);
+    } H5E_END_TRY;
+    if (link<0 && (link=H5Gcreate(dbfile->fid, LINKGRP, 0))<0) {
+        db_perror("link group", E_CALLFAIL, me);
+        return silo_db_close((DBfile*) dbfile);
+    }
 
-        /*
-         * Read the targetting information from the `target' attribute
-         * of the link group if there is one, otherwise assume DB_LOCAL
-         */
-        H5E_BEGIN_TRY {
-            attr = H5Aopen_name(link, "target");
-        } H5E_END_TRY;
-        if (attr>=0 &&
-            H5Aread(attr, H5T_NATIVE_INT, &tmp)>=0 &&
-            H5Aclose(attr)>=0) {
-            target = tmp;
-        }
+    /*
+     * Read the targetting information from the `target' attribute
+     * of the link group if there is one, otherwise assume DB_LOCAL
+     */
+    H5E_BEGIN_TRY {
+        attr = H5Aopen_name(link, "target");
+    } H5E_END_TRY;
+    if (attr>=0 &&
+        H5Aread(attr, H5T_NATIVE_INT, &tmp)>=0 &&
+        H5Aclose(attr)>=0) {
+        target = tmp;
+    }
 
-        /*
-         * Initialize the file struct. Use the same target architecture that
-         * was specified when the file was created.
-         */
-        dbfile->cwg = cwg;
-        dbfile->link = link;
-        db_hdf5_InitCallbacks((DBfile*)dbfile, target);
+    /*
+     * Initialize the file struct. Use the same target architecture that
+     * was specified when the file was created.
+     */
+    dbfile->cwg = cwg;
+    dbfile->link = link;
+    db_hdf5_InitCallbacks(dbfile, target);
         
-    } CLEANUP {
-        H5E_BEGIN_TRY {
-            H5Aclose(attr);
-            H5Gclose(cwg);
-            H5Gclose(link);
-        } H5E_END_TRY;
-        dbfile->cwg = -1;
-        dbfile->link = -1;
-    } END_PROTECT;
-
-    return 0;
+    return (DBfile*) dbfile;
 }
 
 
@@ -4367,79 +4363,78 @@ db_hdf5_finish_open(DBfile *_dbfile)
  *              Friday, March 26, 1999
  *
  * Modifications:
- *              Robb Matzke, 1999-08-17
- *              The file information string is written as a variable in the
- *              file instead of as a comment on the root group.
+ *   Robb Matzke, 1999-08-17
+ *   The file information string is written as a variable in the
+ *   file instead of as a comment on the root group.
+ *
+ *   Mark C. Miller, Tue Feb  3 09:48:23 PST 2009
+ *   Changed dbfile arg from public DBfile* to private DBfile_hdf5*
+ *   Changed return type from int to DBfile*
+ *   Removed PROTECT/UNWIND/END_PROTECT and replaced UNWIND() calls with
+ *   return silo_db_close(). This is because UNWIND was causing it to
+ *   NOT correctly handle the case in which the given filename was NOT
+ *   an HDF5 file and properly RETURNing NULL when necessary.
  *-------------------------------------------------------------------------
  */
-INTERNAL int
-db_hdf5_finish_create(DBfile *_dbfile, int target, char *finfo)
+INTERNAL DBfile* 
+db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
 {
-    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_finish_create";
     hid_t       attr=-1;
     int         size;
     char        hdf5VString[32];
     
-    PROTECT {
-        /* Open root group as CWG */
-        if ((dbfile->cwg=H5Gopen(dbfile->fid, "/"))<0) {
-            db_perror("root group", E_CALLFAIL, me);
-            UNWIND();
-        }
+    /* Open root group as CWG */
+    if ((dbfile->cwg=H5Gopen(dbfile->fid, "/"))<0) {
+        db_perror("root group", E_CALLFAIL, me);
+        return silo_db_close((DBfile*) dbfile);
+    }
 
-        /* Create the link group */
-        if ((dbfile->link=H5Gcreate(dbfile->fid, LINKGRP, 0))<0) {
-            db_perror("link group", E_CALLFAIL, me);
-            UNWIND();
-        }
+    /* Create the link group */
+    if ((dbfile->link=H5Gcreate(dbfile->fid, LINKGRP, 0))<0) {
+        db_perror("link group", E_CALLFAIL, me);
+        return silo_db_close((DBfile*) dbfile);
+    }
 
-        /* Callbacks */
-        db_hdf5_InitCallbacks((DBfile*)dbfile, target);
+    /* Callbacks */
+    db_hdf5_InitCallbacks(dbfile, target);
         
-        /*
-         * Write the target architecture into the `target' attribute of the
-         * link group so we can retrieve it later when the file is reopened.
-         */
-        if ((attr=H5Acreate(dbfile->link, "target", dbfile->T_int, SCALAR,
-                            H5P_DEFAULT))<0 ||
-            H5Awrite(attr, H5T_NATIVE_INT, &target)<0 ||
-            H5Aclose(attr)<0) {
-            db_perror("targetinfo", E_CALLFAIL, me);
-            UNWIND();
-        }
+    /*
+     * Write the target architecture into the `target' attribute of the
+     * link group so we can retrieve it later when the file is reopened.
+     */
+    if ((attr=H5Acreate(dbfile->link, "target", dbfile->T_int, SCALAR,
+                        H5P_DEFAULT))<0 ||
+        H5Awrite(attr, H5T_NATIVE_INT, &target)<0 ||
+        H5Aclose(attr)<0) {
+        db_perror("targetinfo", E_CALLFAIL, me);
+        return silo_db_close((DBfile*) dbfile);
+    }
 
-        if (finfo) {
-            /* Write file info as a variable in the file */
-            size = strlen(finfo)+1;
-            if (db_hdf5_Write(_dbfile, "_fileinfo", finfo, &size, 1,
-                              DB_CHAR)<0) {
-                db_perror("fileinfo", E_CALLFAIL, me);
-                UNWIND();
-            }
+    if (finfo) {
+        /* Write file info as a variable in the file */
+        size = strlen(finfo)+1;
+        if (db_hdf5_Write((DBfile*)dbfile, "_fileinfo", finfo, &size, 1,
+                          DB_CHAR)<0) {
+            db_perror("fileinfo", E_CALLFAIL, me);
+            return silo_db_close((DBfile*) dbfile);
         }
+    }
 
-        /*
-         * Write HDF5 library version information to the file 
-         */
-        sprintf(hdf5VString, "hdf5-%d.%d.%d%s%s", H5_VERS_MAJOR,
+    /*
+     * Write HDF5 library version information to the file 
+     */
+    sprintf(hdf5VString, "hdf5-%d.%d.%d%s%s", H5_VERS_MAJOR,
             H5_VERS_MINOR, H5_VERS_RELEASE,
             strlen(H5_VERS_SUBRELEASE) ? "-" : "", H5_VERS_SUBRELEASE);
-        size = strlen(hdf5VString)+1;
-        if (db_hdf5_Write(_dbfile, "_hdf5libinfo", hdf5VString, &size, 1,
-                              DB_CHAR)<0) {
-                db_perror("_hdf5libinfo", E_CALLFAIL, me);
-                UNWIND();
-        }
+    size = strlen(hdf5VString)+1;
+    if (db_hdf5_Write((DBfile*)dbfile, "_hdf5libinfo", hdf5VString, &size, 1,
+                      DB_CHAR)<0) {
+        db_perror("_hdf5libinfo", E_CALLFAIL, me);
+        return silo_db_close((DBfile*) dbfile);
+    }
 
-    } CLEANUP {
-        H5E_BEGIN_TRY {
-            H5Aclose(attr);
-            H5Gclose(dbfile->cwg);
-            H5Gclose(dbfile->link);
-        } H5E_END_TRY;
-    } END_PROTECT;
-    return 0;
+    return (DBfile*) dbfile;
 }
 
 
@@ -4505,6 +4500,11 @@ db_hdf5_initiate_close(DBfile *_dbfile)
  *   Mark C. Miller, Tue Feb  1 18:13:28 PST 2005
  *   Added call to H5Eset_auto(). Open can be called outside of init
  *
+ *   Mark C. Miller, Tue Feb  3 09:48:23 PST 2009
+ *   Removed PROTECT/UNWIND/END_PROTECT and replaced UNWIND() calls with
+ *   return silo_db_close(). This is because UNWIND was causing it to
+ *   NOT correctly handle the case in which the given filename was NOT
+ *   an HDF5 file and properly RETURNing NULL when necessary.
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
@@ -4516,57 +4516,43 @@ db_hdf5_Open(char *name, int mode, int subtype)
     unsigned    hmode;
     static char *me = "db_hdf5_Open";
 
-    PROTECT {
-        /* Turn off error messages from the hdf5 library */
 #if DEBUG_HDF5 == 0
-        H5Eset_auto(NULL, NULL);
+    H5Eset_auto(NULL, NULL);
 #endif
 
-        /* File access mode */
-        if (DB_READ==mode) {
-            hmode = H5F_ACC_RDONLY;
-        } else if (DB_APPEND==mode) {
-            hmode = H5F_ACC_RDWR;
-        } else {
-            db_perror("mode", E_INTERNAL, me);
-            UNWIND();
-        }
+    /* File access mode */
+    if (DB_READ==mode) {
+        hmode = H5F_ACC_RDONLY;
+    } else if (DB_APPEND==mode) {
+        hmode = H5F_ACC_RDWR;
+    } else {
+        db_perror("mode", E_INTERNAL, me);
+        return NULL;
+    }
 
-        faprops = db_hdf5_file_accprops(subtype); 
+    faprops = db_hdf5_file_accprops(subtype); 
 
-        /* Open existing hdf5 file */
-        if ((fid=H5Fopen(name, hmode, faprops))<0) {
-            H5Pclose(faprops);
-            db_perror(name, E_NOFILE, me);
-            UNWIND();
-        }
+    /* Open existing hdf5 file */
+    if ((fid=H5Fopen(name, hmode, faprops))<0) {
         H5Pclose(faprops);
+        db_perror(name, E_NOFILE, me);
+        return NULL;
+    }
+    H5Pclose(faprops);
 
-        /* Create silo file struct */
-        if (NULL==(dbfile=calloc(1, sizeof(DBfile_hdf5)))) {
-            db_perror(name, E_NOMEM, me);
-            UNWIND();
-        }
-        dbfile->pub.name = STRDUP(name);
-        dbfile->pub.type = DB_HDF5;
-        dbfile->pub.Grab = FALSE;
-        fidp = (hid_t *) malloc(sizeof(hid_t));
-        *fidp = fid;
-        dbfile->pub.GrabId = (void*) fidp;
-        dbfile->fid = fid;
-        db_hdf5_finish_open((DBfile*)dbfile);
-        
-    } CLEANUP {
-        H5E_BEGIN_TRY {
-            H5Fclose(fid);
-        } H5E_END_TRY;
-        if (dbfile) {
-            if (dbfile->pub.name) free(dbfile->pub.name);
-            free(dbfile);
-        }
-    } END_PROTECT;
-    
-    return (DBfile*)dbfile;
+    /* Create silo file struct */
+    if (NULL==(dbfile=calloc(1, sizeof(DBfile_hdf5)))) {
+        db_perror(name, E_NOMEM, me);
+        return NULL;
+    }
+    dbfile->pub.name = STRDUP(name);
+    dbfile->pub.type = DB_HDF5;
+    dbfile->pub.Grab = FALSE;
+    fidp = (hid_t *) malloc(sizeof(hid_t));
+    *fidp = fid;
+    dbfile->pub.GrabId = (void*) fidp;
+    dbfile->fid = fid;
+    return db_hdf5_finish_open(dbfile);
 }
 
 
@@ -4590,6 +4576,11 @@ db_hdf5_Open(char *name, int mode, int subtype)
  *   Mark C. Miller, Tue Feb  1 18:13:28 PST 2005
  *   Added call to H5Eset_auto(). Create can be called outside of init
  *
+ *   Mark C. Miller, Tue Feb  3 09:48:23 PST 2009
+ *   Removed PROTECT/UNWIND/END_PROTECT and replaced UNWIND() calls with
+ *   return silo_db_close(). This is because UNWIND was causing it to
+ *   NOT correctly handle the case in which the given filename was NOT
+ *   an HDF5 file and properly RETURNing NULL when necessary.
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
@@ -4600,65 +4591,52 @@ db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
     hid_t      *fidp = 0;
     static char *me = "db_hdf5_Create";
 
-    PROTECT {
-        /* Turn off error messages from the hdf5 library */
+    /* Turn off error messages from the hdf5 library */
 #if DEBUG_HDF5 == 0
-        H5Eset_auto(NULL, NULL);
+    H5Eset_auto(NULL, NULL);
 #endif
 
-        faprops = db_hdf5_file_accprops(subtype);
+    faprops = db_hdf5_file_accprops(subtype);
 
         /* Create or open hdf5 file */
-        if (DB_CLOBBER==mode) {
-            /* If we ever use checksumming (which requires chunked datasets),
-             * HDF5's BTree's will effect storage overhead. Since Silo really
-             * doesn't support growing/shrinking datasets, we just use a value
-             * of '1' for istore_k */
-            hid_t fcprops = H5Pcreate(H5P_FILE_CREATE);
-            H5Pset_istore_k(fcprops, 1);
-            fid = H5Fcreate(name, H5F_ACC_TRUNC, fcprops, faprops);
-            H5Pclose(fcprops);
-            H5Glink(fid, H5G_LINK_HARD, "/", ".."); /*don't care if fails*/
-        } else if (DB_NOCLOBBER==mode) {
-            fid = H5Fopen(name, H5F_ACC_RDWR, faprops);
-        } else {
-            H5Pclose(faprops);
-            db_perror("mode", E_BADARGS, me);
-            UNWIND();
-        }
-        if (fid<0) {
-            H5Pclose(faprops);
-            db_perror(name, E_NOFILE, me);
-            UNWIND();
-        }
-
+    if (DB_CLOBBER==mode) {
+        /* If we ever use checksumming (which requires chunked datasets),
+         * HDF5's BTree's will effect storage overhead. Since Silo really
+         * doesn't support growing/shrinking datasets, we just use a value
+         * of '1' for istore_k */
+        hid_t fcprops = H5Pcreate(H5P_FILE_CREATE);
+        H5Pset_istore_k(fcprops, 1);
+        fid = H5Fcreate(name, H5F_ACC_TRUNC, fcprops, faprops);
+        H5Pclose(fcprops);
+        H5Glink(fid, H5G_LINK_HARD, "/", ".."); /*don't care if fails*/
+    } else if (DB_NOCLOBBER==mode) {
+        fid = H5Fopen(name, H5F_ACC_RDWR, faprops);
+    } else {
         H5Pclose(faprops);
+        db_perror("mode", E_BADARGS, me);
+        return NULL;
+    }
+    if (fid<0) {
+        H5Pclose(faprops);
+        db_perror(name, E_NOFILE, me);
+        return NULL;
+    }
 
-        /* Create silo file struct */
-        if (NULL==(dbfile=calloc(1, sizeof(DBfile_hdf5)))) {
-            db_perror(name, E_NOMEM, me);
-            UNWIND();
-        }
-        dbfile->pub.name = STRDUP(name);
-        dbfile->pub.type = DB_HDF5;
-        dbfile->pub.Grab = FALSE;
-        fidp = (hid_t *) malloc(sizeof(hid_t));
-        *fidp = fid;
-        dbfile->pub.GrabId = (void*) fidp;
-        dbfile->fid = fid;
-        db_hdf5_finish_create((DBfile*)dbfile, target, finfo);
+    H5Pclose(faprops);
 
-    } CLEANUP {
-        H5E_BEGIN_TRY {
-            H5Fclose(fid);
-        } H5E_END_TRY;
-        if (dbfile) {
-            if (dbfile->pub.name) free(dbfile->pub.name);
-            free(dbfile);
-        }
-    } END_PROTECT;
-
-    return (DBfile*)dbfile;
+    /* Create silo file struct */
+    if (NULL==(dbfile=calloc(1, sizeof(DBfile_hdf5)))) {
+        db_perror(name, E_NOMEM, me);
+        return NULL;
+    }
+    dbfile->pub.name = STRDUP(name);
+    dbfile->pub.type = DB_HDF5;
+    dbfile->pub.Grab = FALSE;
+    fidp = (hid_t *) malloc(sizeof(hid_t));
+    *fidp = fid;
+    dbfile->pub.GrabId = (void*) fidp;
+    dbfile->fid = fid;
+    return db_hdf5_finish_create(dbfile, target, finfo);
 }
 
 
@@ -4679,6 +4657,9 @@ db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
  *   Mark C. Miller, Thu Jul 17 15:05:16 PDT 2008
  *   Added call to FreeNodelists for this file.
  *
+ *   Mark C. Miller, Tue Feb  3 09:52:51 PST 2009
+ *   Moved code to free pub.GrabId and set Grab related entries to zero to
+ *   silo_db_close() function and then added a call to that function here.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -4691,9 +4672,6 @@ db_hdf5_Close(DBfile *_dbfile)
        /* Free the private parts of the file */
        if (db_hdf5_initiate_close((DBfile*)dbfile)<0) return -1;
        if (H5Fclose(dbfile->fid)<0) return -1;
-       dbfile->pub.Grab = FALSE;
-       free(dbfile->pub.GrabId);
-       dbfile->pub.GrabId = 0;
        dbfile->fid = -1;
 
        /* Free the public parts of the file */

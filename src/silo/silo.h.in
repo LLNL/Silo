@@ -76,6 +76,31 @@ extern "C" {
 #define DB_DTPTR1 @SILO_DTYPPTR1@ /* NO_FORTRAN_DEFINE */
 #define DB_DTPTR2 @SILO_DTYPPTR2@ /* NO_FORTRAN_DEFINE */
 
+/* Permit client to explicitly require the legacy mode
+   for datatyped pointers */
+#ifdef DB_USE_LEGACY_DTPTR
+#ifdef DB_USE_MODERN_DTPTR
+#error cannot specify BOTH legacy and modern datatyped pointers 
+#endif
+#undef DB_DTPTR  /* NO_FORTRAN_DEFINE */
+#undef DB_DTPTR1 /* NO_FORTRAN_DEFINE */
+#undef DB_DTPTR2 /* NO_FORTRAN_DEFINE */
+#define DB_DTPTR  float   /* NO_FORTRAN_DEFINE */
+#define DB_DTPTR1 float*  /* NO_FORTRAN_DEFINE */
+#define DB_DTPTR2 float** /* NO_FORTRAN_DEFINE */
+#endif
+
+/* Permit client to explicitly require the modern mode
+   for datatyped pointers */
+#ifdef DB_USE_MODERN_DTPTR
+#undef DB_DTPTR  /* NO_FORTRAN_DEFINE */
+#undef DB_DTPTR1 /* NO_FORTRAN_DEFINE */
+#undef DB_DTPTR2 /* NO_FORTRAN_DEFINE */
+#define DB_DTPTR  void  /* NO_FORTRAN_DEFINE */
+#define DB_DTPTR1 void* /* NO_FORTRAN_DEFINE */
+#define DB_DTPTR2 void* /* NO_FORTRAN_DEFINE */
+#endif
+
 #include <stdio.h>
 
 #ifndef FALSE

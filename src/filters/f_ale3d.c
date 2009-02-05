@@ -2005,7 +2005,7 @@ f_ale3d_GetUcdvar(dbfile, name)
     uv->name = STRDUP(name);
     uv->units = NULL;
     uv->label = NULL;
-    uv->vals = ALLOC_N(float *, 1);
+    uv->vals = ALLOC_N(void *, 1);
     uv->nels = size;
     uv->datatype = DB_FLOAT;
     uv->nvals = 1;

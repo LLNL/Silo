@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# Script to iterate over a set of machine names and determine
+# the unique set of machines and compilers on them
+#
+
+#machine_names="alc atlas prism snowbert thunder up yana zeus"
+machine_names="hera zeus up yana prism"
+machine_types=""
+for m in $machine_names; do
+    sys_type=`ssh mcmiller@$m -x 'echo $SYS_TYPE'`
+    machine_types="$machine_types ${m}:$sys_type"
+done
+unique_machine_types=`echo $machine_types | tr ' ' '\n' | tr ':' ' ' | sort -k2 | uniq -f1 | cut -d' ' -f2`
+unique_machine_names=`echo $machine_types | tr ' ' '\n' | tr ':' ' ' | sort -k2 | uniq -f1 | cut -d' ' -f1`
+unique_machine_tnpairs=`echo $machine_types | tr ' ' '\n' | tr ':' ' ' | sort -k2 | uniq -f1 | tr ' ' ':'`
+echo $unique_machine_tnpairs | tr ' ' '\n'
+
+compiler_names="gcc xlc icc pgcc pathcc cc blrts_xlc"
+compile_modes=""
+for ump in $unique_machine_tnpairs; do
+    compilers=
+    um_name=`echo $ump | cut -d':' -f1`
+    um_type=`echo $ump | cut -d':' -f2`
+    for c in $compiler_names; do
+        has_c=`ssh mcmiller@$um_name -x "which $c"`
+        if test $? -eq 0; then
+            compile_modes="$compile_modes ${um_type}_${c}"
+            compilers="$compilers ${um_type}_${c}"
+        fi
+    done
+    echo "For machine name=\"$um_name\", type=\"$um_type\"..."
+    for c in $compilers; do
+        echo "    $c"
+    done
+done

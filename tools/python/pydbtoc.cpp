@@ -13,7 +13,7 @@
 //  Creation:    July 12, 2005
 //
 // ****************************************************************************
-static PyObject *DBtoc_dealloc(PyObject *self)
+static void DBtoc_dealloc(PyObject *self)
 {
     PyObject_Del(self);
 }

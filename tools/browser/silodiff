@@ -34,15 +34,15 @@ do
       "")
          # handle empty argument
          ;;
-      -help)
+      help|-help|--help)
          optError=1
          shift
          ;;
-      -recurse)
+      -recurse|--recurse)
          recurse=1
          shift
          ;;
-      -verbose)
+      -verbose|--verbose)
          verbose=1
          shift
          ;;
@@ -61,16 +61,23 @@ do
    esac
 done
 
-if test "$optError" = "1"; then
-    echo "Usage:  $0 <file|dir> <file|dir>"
+if test $optError = 1 -o -z "$arg1" -o -z "$arg2"; then
+    echo "Usage:  $0 <file|dir> <file|dir> <options>"
+    echo ""
+    echo "Options:"
+    echo "    -help:            print this help message"
+    echo "    -recurse:         recurse on directories"
+    echo "    -verbose:         report names of file(s) as they are processed."
+    echo ""
     echo "If both arguments are files, $0 will attempt to diff the files."
     echo ""
     echo "If one argument is a file and the other a directory, then $0 will attempt"
     echo "to diff the given file with a file by the same name in the given directory."
     echo ""
     echo "If both arguments are directories, $0 will descend into each directory"
-    echo "(recursively if '-recurse' is specified)  finding files whose names differ"
-    echo "ONLY in the first component of their paths and attempt to diff them."
+    echo "(and will do so recursively if '-recurse' is specified)  finding files"
+    echo "whose names differ ONLY in the first component of their paths and attempt"
+    echo "to diff them."
     echo ""
     echo "$0 uses Silo's browser tool to do its work. In turn, browser supports a"
     echo "number of additional options. Thus, any arguments to $0 which are neither"

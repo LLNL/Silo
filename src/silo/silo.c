@@ -633,12 +633,18 @@ db_GetDatatypeString(int type)
  *              Wed Nov  2 13:55:22 PST 1994
  *
  * Modifications:
+ *   Mark C. Miller, Tue Feb  3 09:53:53 PST 2009
+ *   Changed name to silo_db_close to avoid collision with popular BRLCAD
+ *   libs. Added stuff to free GrabId and set Grab related stuff to zero.
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
 silo_db_close(DBfile *dbfile)
 {
     if (dbfile) {
         db_FreeToc(dbfile);
+        FREE(dbfile->pub.GrabId);
+        dbfile->pub.GrabId = 0;
+        dbfile->pub.Grab = FALSE;
         FREE(dbfile->pub.name);
         FREE(dbfile);
     }
@@ -2001,7 +2007,7 @@ db_get_fileid ( int flags )
   c -= a; c -= b; c ^= (b>>15); \
 }
 
-static unsigned int bjhash(register const unsigned char *k)
+static unsigned int bjhash(register const char *k)
 {
    register unsigned int a,b,c,len;
 

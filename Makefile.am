@@ -58,3 +58,6 @@ help: config/make.help
 	cat $(srcdir)/config/make.help
 
 .PHONY: help
+
+## Override Automake's default definition for this
+am__tar = ${AMTAR} cof - "$$tardir"

@@ -9,4 +9,5 @@ EXTRA_DIST = \
  regressiontest \
  silo-release-closed \
  silo-release-open \
+ get_sys_info \
  winsilo-dist

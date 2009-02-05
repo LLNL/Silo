@@ -1348,7 +1348,7 @@ if test -n "$SILEX"; then
     done
     
     if test -z "$QtVersion"; then
-        AC_MSG_ERROR([  Sorry, but you need Qt version 4.4.0 or higher to compile VisIt. ])
+        AC_MSG_ERROR([  Sorry, but you need Qt version 4.4.0 or higher to compile Silo's silex tool. ])
     else
         AC_MSG_RESULT(Qt $QtVersion in $QT_INCLUDE)
     fi
