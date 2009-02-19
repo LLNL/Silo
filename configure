@@ -14,8 +14,6 @@
 # U.S. Department of Energy by Lawrence Livermore National Laboratory
 # in part under Contract W-7405-Eng-48 and in part under
 # Contract DE-AC52-07NA27344.
-#
-#
 ## --------------------- ##
 ## M4sh Initialization.  ##
 ## --------------------- ##
@@ -27755,7 +27753,7 @@ else
   CXX_LINK_NEEDED_FALSE=
 fi
 
-ac_config_files="$ac_config_files Makefile SiloWindows/Makefile clearcase_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile src/hzip/Makefile src/fpzip/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile"
+ac_config_files="$ac_config_files Makefile SiloWindows/Makefile svn_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile src/hzip/Makefile src/fpzip/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile"
 
 if test -n "$HDF5_DRV"; then
   ac_config_files="$ac_config_files src/libsiloh5.settings"
@@ -28459,7 +28457,7 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "SiloWindows/Makefile") CONFIG_FILES="$CONFIG_FILES SiloWindows/Makefile" ;;
-    "clearcase_bin/Makefile") CONFIG_FILES="$CONFIG_FILES clearcase_bin/Makefile" ;;
+    "svn_bin/Makefile") CONFIG_FILES="$CONFIG_FILES svn_bin/Makefile" ;;
     "config/Makefile") CONFIG_FILES="$CONFIG_FILES config/Makefile" ;;
     "config-site/Makefile") CONFIG_FILES="$CONFIG_FILES config-site/Makefile" ;;
     "docs/Makefile") CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;

@@ -1452,7 +1452,7 @@ AM_CONDITIONAL(CXX_LINK_NEEDED, test "$enable_shared" = "no" -a \( -n "$FPZIP" -
 AC_CONFIG_FILES([
             Makefile
             SiloWindows/Makefile
-            clearcase_bin/Makefile
+            svn_bin/Makefile
             config/Makefile
             config-site/Makefile
             docs/Makefile

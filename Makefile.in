@@ -280,7 +280,7 @@ MAINTAINERCLEANFILES = Makefile.in\
 
 SUBDIRS = . src tools tests
 DIST_SUBDIRS = . config config-site \
-  clearcase_bin docs src tests tools SiloWindows
+  svn_bin docs src tests tools SiloWindows
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive

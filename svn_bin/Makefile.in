@@ -35,7 +35,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = clearcase_bin
+subdir = svn_bin
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -228,9 +228,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  clearcase_bin/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  svn_bin/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  clearcase_bin/Makefile
+	  $(AUTOMAKE) --foreign  svn_bin/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
