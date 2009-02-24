@@ -1313,7 +1313,8 @@ if test -n "$SILEX"; then
 
     if test -z "$QT_BIN" || test -z "$QT_INCLUDE" || test -z "$QT_LIB"; then
         if test -z "QTDIR"; then
-            AC_MSG_ERROR([The QT_BIN, QT_INCLUDE and QT_LIB environment variables must be set in order to find Qt])
+            AC_MSG_WARN([The QT_BIN, QT_INCLUDE and QT_LIB environment variables must be set in order to find Qt. silex is being disabled])
+            SILEX=""
         else
             QT_BIN="$QTDIR/bin"
             QT_INCLUDE="$QTDIR/include"
@@ -1348,7 +1349,8 @@ if test -n "$SILEX"; then
     done
     
     if test -z "$QtVersion"; then
-        AC_MSG_ERROR([  Sorry, but you need Qt version 4.4.0 or higher to compile Silo's silex tool. ])
+        AC_MSG_WARN([  Sorry, but you need Qt version 4.4.0 or higher to compile Silo's silex tool. silex is being disabled])
+        SILEX=""
     else
         AC_MSG_RESULT(Qt $QtVersion in $QT_INCLUDE)
     fi

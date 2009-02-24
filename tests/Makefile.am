@@ -216,12 +216,12 @@ all-local:
 # to somehow override DB_HDF5= and PYTHON= in these test inokations.
 #
 check-local: $(TESTSUITE) $(PROGS)
-	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) $(TESTARGS)
+	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) $(TESTARGS)
 	@if test -e testsuite.log; then \
 	    cp testsuite.log testsuite.log.pdb ; \
 	fi
 if HDF5_DRV_NEEDED
-	$(SHELL) $(srcdir)/testsuite DB_HDF5=DB_HDF5 PYTHON=$(PYTHON) $(TESTARGS)
+	$(SHELL) $(srcdir)/testsuite DB_HDF5=DB_HDF5 PYTHON=$(PYTHON) BROWSER=$(BROWSER) $(TESTARGS)
 	@if test -e testsuite.log.pdb -a -e testsuite.log; then \
 	    cat testsuite.log.pdb >> testsuite.log ; \
 	fi

@@ -4283,7 +4283,7 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:205: test ! \\( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \\) -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND testhzip \`pwd\`"
+echo "$at_srcdir/testsuite.at:205: test ! \\( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \\) -o -z \"\$BROWSER\" -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND testhzip \`pwd\`"
 echo testsuite.at:205 >"$at_check_line_file"
 
 at_trace_this=
@@ -4292,12 +4292,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4336,7 +4336,7 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:208: test -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND checksums \`pwd\`"
+echo "$at_srcdir/testsuite.at:208: test -z \"\$BROWSER\" -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND checksums \`pwd\`"
 echo testsuite.at:208 >"$at_check_line_file"
 
 at_trace_this=
@@ -4345,12 +4345,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4389,7 +4389,7 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:211: test -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND testxvers \`pwd\`"
+echo "$at_srcdir/testsuite.at:211: test -z \"\$BROWSER\" -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND testxvers \`pwd\`"
 echo testsuite.at:211 >"$at_check_line_file"
 
 at_trace_this=
@@ -4398,12 +4398,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4509,12 +4509,12 @@ _ATEOF
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:220: test -f arrayf77 && exit 77 || \$VALGRIND arrayf77"
+echo "$at_srcdir/testsuite.at:220: test ! -f arrayf77 && exit 77 || \$VALGRIND arrayf77"
 echo testsuite.at:220 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -f arrayf77 && exit 77 || $VALGRIND arrayf77" in
+    case "test ! -f arrayf77 && exit 77 || $VALGRIND arrayf77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4522,12 +4522,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -f arrayf77 && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! -f arrayf77 && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -f arrayf77 && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! -f arrayf77 && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4566,12 +4566,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:223: test -f curvef77 && exit 77 || \$VALGRIND curvef77"
+echo "$at_srcdir/testsuite.at:223: test ! -f curvef77 && exit 77 || \$VALGRIND curvef77"
 echo testsuite.at:223 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -f curvef77 && exit 77 || $VALGRIND curvef77" in
+    case "test ! -f curvef77 && exit 77 || $VALGRIND curvef77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4579,12 +4579,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -f curvef77 && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! -f curvef77 && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -f curvef77 && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! -f curvef77 && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4623,12 +4623,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:226: test -f matf77 && exit 77 || \$VALGRIND matf77"
+echo "$at_srcdir/testsuite.at:226: test ! -f matf77 && exit 77 || \$VALGRIND matf77"
 echo testsuite.at:226 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -f matf77 && exit 77 || $VALGRIND matf77" in
+    case "test ! -f matf77 && exit 77 || $VALGRIND matf77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4636,12 +4636,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -f matf77 && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! -f matf77 && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -f matf77 && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! -f matf77 && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4680,12 +4680,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:229: test -f pointf77 && exit 77 || \$VALGRIND pointf77"
+echo "$at_srcdir/testsuite.at:229: test ! -f pointf77 && exit 77 || \$VALGRIND pointf77"
 echo testsuite.at:229 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -f pointf77 && exit 77 || $VALGRIND pointf77" in
+    case "test ! -f pointf77 && exit 77 || $VALGRIND pointf77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4693,12 +4693,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -f pointf77 && exit 77 || $VALGRIND pointf77 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! -f pointf77 && exit 77 || $VALGRIND pointf77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -f pointf77 && exit 77 || $VALGRIND pointf77 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! -f pointf77 && exit 77 || $VALGRIND pointf77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4737,12 +4737,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:232: test -f quadf77 && exit 77 || \$VALGRIND quadf77"
+echo "$at_srcdir/testsuite.at:232: test ! -f quadf77 && exit 77 || \$VALGRIND quadf77"
 echo testsuite.at:232 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -f quadf77 && exit 77 || $VALGRIND quadf77" in
+    case "test ! -f quadf77 && exit 77 || $VALGRIND quadf77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4750,12 +4750,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -f quadf77 && exit 77 || $VALGRIND quadf77 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! -f quadf77 && exit 77 || $VALGRIND quadf77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -f quadf77 && exit 77 || $VALGRIND quadf77 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! -f quadf77 && exit 77 || $VALGRIND quadf77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4794,12 +4794,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:235: test -f testallf77 && exit 77 || \$VALGRIND testallf77"
+echo "$at_srcdir/testsuite.at:235: test ! -f testallf77 && exit 77 || \$VALGRIND testallf77"
 echo testsuite.at:235 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -f testallf77 && exit 77 || $VALGRIND testallf77" in
+    case "test ! -f testallf77 && exit 77 || $VALGRIND testallf77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4807,12 +4807,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -f testallf77 && exit 77 || $VALGRIND testallf77 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! -f testallf77 && exit 77 || $VALGRIND testallf77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -f testallf77 && exit 77 || $VALGRIND testallf77 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! -f testallf77 && exit 77 || $VALGRIND testallf77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4851,12 +4851,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:238: test -f ucdf77 && exit 77 || \$VALGRIND ucdf77"
+echo "$at_srcdir/testsuite.at:238: test ! -f ucdf77 && exit 77 || \$VALGRIND ucdf77"
 echo testsuite.at:238 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -f ucdf77 && exit 77 || $VALGRIND ucdf77" in
+    case "test ! -f ucdf77 && exit 77 || $VALGRIND ucdf77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4864,12 +4864,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -f ucdf77 && exit 77 || $VALGRIND ucdf77 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! -f ucdf77 && exit 77 || $VALGRIND ucdf77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -f ucdf77 && exit 77 || $VALGRIND ucdf77 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! -f ucdf77 && exit 77 || $VALGRIND ucdf77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 

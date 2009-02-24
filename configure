@@ -27279,9 +27279,9 @@ if test -n "$SILEX"; then
 
     if test -z "$QT_BIN" || test -z "$QT_INCLUDE" || test -z "$QT_LIB"; then
         if test -z "QTDIR"; then
-            { { echo "$as_me:$LINENO: error: The QT_BIN, QT_INCLUDE and QT_LIB environment variables must be set in order to find Qt" >&5
-echo "$as_me: error: The QT_BIN, QT_INCLUDE and QT_LIB environment variables must be set in order to find Qt" >&2;}
-   { (exit 1); exit 1; }; }
+            { echo "$as_me:$LINENO: WARNING: The QT_BIN, QT_INCLUDE and QT_LIB environment variables must be set in order to find Qt. silex is being disabled" >&5
+echo "$as_me: WARNING: The QT_BIN, QT_INCLUDE and QT_LIB environment variables must be set in order to find Qt. silex is being disabled" >&2;}
+            SILEX=""
         else
             QT_BIN="$QTDIR/bin"
             QT_INCLUDE="$QTDIR/include"
@@ -27317,9 +27317,9 @@ echo $ECHO_N "checking for supported Qt version... $ECHO_C" >&6; }
     done
 
     if test -z "$QtVersion"; then
-        { { echo "$as_me:$LINENO: error:   Sorry, but you need Qt version 4.4.0 or higher to compile Silo's silex tool. " >&5
-echo "$as_me: error:   Sorry, but you need Qt version 4.4.0 or higher to compile Silo's silex tool. " >&2;}
-   { (exit 1); exit 1; }; }
+        { echo "$as_me:$LINENO: WARNING:   Sorry, but you need Qt version 4.4.0 or higher to compile Silo's silex tool. silex is being disabled" >&5
+echo "$as_me: WARNING:   Sorry, but you need Qt version 4.4.0 or higher to compile Silo's silex tool. silex is being disabled" >&2;}
+        SILEX=""
     else
         { echo "$as_me:$LINENO: result: Qt $QtVersion in $QT_INCLUDE" >&5
 echo "${ECHO_T}Qt $QtVersion in $QT_INCLUDE" >&6; }

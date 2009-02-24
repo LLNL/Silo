@@ -202,13 +202,13 @@ AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o 
 AT_CLEANUP
 AT_SETUP(testhzip)
 AT_KEYWORDS(compression)
-AT_CHECK(test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND testhzip `pwd`,,ignore,ignore)
+AT_CHECK(test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testhzip `pwd`,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(checksums)
-AT_CHECK(test -z "$DB_HDF5" && exit 77 || $VALGRIND checksums `pwd`,,ignore,ignore)
+AT_CHECK(test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND checksums `pwd`,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(xversion)
-AT_CHECK(test -z "$DB_HDF5" && exit 77 || $VALGRIND testxvers `pwd`,,ignore,ignore)
+AT_CHECK(test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testxvers `pwd`,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(largefile)
 AT_KEYWORDS(large)
@@ -217,25 +217,25 @@ AT_CLEANUP
 
 AT_BANNER(Fortran)
 AT_SETUP(arrayf77)
-AT_CHECK(test -f arrayf77 && exit 77 || $VALGRIND arrayf77,,ignore,ignore)
+AT_CHECK(test ! -f arrayf77 && exit 77 || $VALGRIND arrayf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(curvef77)
-AT_CHECK(test -f curvef77 && exit 77 || $VALGRIND curvef77,,ignore,ignore)
+AT_CHECK(test ! -f curvef77 && exit 77 || $VALGRIND curvef77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(matf77)
-AT_CHECK(test -f matf77 && exit 77 || $VALGRIND matf77,,ignore,ignore)
+AT_CHECK(test ! -f matf77 && exit 77 || $VALGRIND matf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(pointf77)
-AT_CHECK(test -f pointf77 && exit 77 || $VALGRIND pointf77,,ignore,ignore)
+AT_CHECK(test ! -f pointf77 && exit 77 || $VALGRIND pointf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(quadf77)
-AT_CHECK(test -f quadf77 && exit 77 || $VALGRIND quadf77,,ignore,ignore)
+AT_CHECK(test ! -f quadf77 && exit 77 || $VALGRIND quadf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(testallf77)
-AT_CHECK(test -f testallf77 && exit 77 || $VALGRIND testallf77,,ignore,ignore)
+AT_CHECK(test ! -f testallf77 && exit 77 || $VALGRIND testallf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(ucdf77)
-AT_CHECK(test -f ucdf77 && exit 77 || $VALGRIND ucdf77,,ignore,ignore)
+AT_CHECK(test ! -f ucdf77 && exit 77 || $VALGRIND ucdf77,,ignore,ignore)
 AT_CLEANUP
 
 AT_BANNER(Special)
