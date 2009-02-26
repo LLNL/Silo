@@ -5,10 +5,6 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, February  9, 1999
  *
- * Purpose:     A very incomplete and simple hdf5 driver so that pmesh can
- *              write >2GB of data to SAMI files which can later be read by
- *              ALEC.
- *
  *              This has evolved into a complete HDF5 driver for SILO.
  *
  * Note:        This file can be compiled even when HDF5 is not available.
@@ -40,7 +36,9 @@
 
 /* set this to non-zero to prmit HDF5 to generate error tracing
    messages */
+#ifndef DEBUG_HDF5
 #define DEBUG_HDF5 0
+#endif
 
 /* HZIP node order permuation vector construction
    To construct a permutation vector. Work backwards
@@ -169,7 +167,7 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
 #   define PROTECT      if(1)
 #   define CLEANUP      else
 #   define END_PROTECT  /*void*/
-#   define UNWIND()     abort()
+#   define UNWIND()     ; 
 #endif
 
 #define COMPRESSION_ERRMODE_FALLBACK 0
@@ -4505,6 +4503,10 @@ db_hdf5_initiate_close(DBfile *_dbfile)
  *   return silo_db_close(). This is because UNWIND was causing it to
  *   NOT correctly handle the case in which the given filename was NOT
  *   an HDF5 file and properly RETURNing NULL when necessary.
+ *
+ *   Mark C. Miller, Wed Feb 25 09:37:10 PST 2009
+ *   Changed error code for failure to open to indicate better error
+ *   message.
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
@@ -4535,7 +4537,7 @@ db_hdf5_Open(char *name, int mode, int subtype)
     /* Open existing hdf5 file */
     if ((fid=H5Fopen(name, hmode, faprops))<0) {
         H5Pclose(faprops);
-        db_perror(name, E_NOFILE, me);
+        db_perror(name, E_DRVRCANTOPEN, me);
         return NULL;
     }
     H5Pclose(faprops);

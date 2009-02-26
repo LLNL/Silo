@@ -309,13 +309,16 @@ db_pdb_close(DBfile *_dbfile)
  *
  *    Sean Ahern, Fri Oct 16 17:46:57 PDT 1998
  *    Reformatted whitespace.
+ *
+ *    Mark C. Miller, Wed Feb 25 09:37:48 PST 2009
+ *    Changed error code for failure to open to E_DRVRCANTOPEN
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
 db_pdb_Open(char *name, int mode, int subtype)
 {
     PDBfile        *pdb;
     DBfile_pdb     *dbfile;
-    static char    *me = "db_pdb_open";
+    static char    *me = "db_pdb_Open";
 
     if (!SW_file_exists(name))
     {
@@ -330,14 +333,14 @@ db_pdb_Open(char *name, int mode, int subtype)
     {
         if (NULL == (pdb = lite_PD_open(name, "r")))
         {
-            db_perror(NULL, E_NOFILE, me);
+            db_perror(NULL, E_DRVRCANTOPEN, me);
             return NULL;
         }
     } else if (mode == DB_APPEND)
     {
         if (NULL == (pdb = lite_PD_open(name, "a")))
         {
-            db_perror(NULL, E_NOFILE, me);
+            db_perror(NULL, E_DRVRCANTOPEN, me);
             return NULL;
         }
     } else

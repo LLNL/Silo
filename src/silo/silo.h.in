@@ -412,6 +412,7 @@ typedef enum {
 #define     E_GRABBED   26      /*Low level driver enabled */
 #define     E_NOTREG    27      /*The dbfile pointer is not resitered. */
 #define     E_CONCURRENT 28     /*File is opened multiply and not all read-only. */
+#define     E_DRVRCANTOPEN 29   /*Driver cannot open the file. */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */

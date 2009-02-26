@@ -73,6 +73,8 @@
  *-----------------------------------------------------------------------------
  */
 
+#include <stdlib.h>
+
 /*-----------------------------------------------------------------------------
  * Audience:    Public
  * Chapter:     Initialization 
@@ -432,6 +434,9 @@ PMPIO_RankInGroup(const PMPIO_baton_t *Bat, int rankInComm)
     return retval;
 }
 
+/* Define this Default PMPIO functions only if we have silo.h. We use existence
+of 'DB_HDF5' as indication that silo.h is present. */
+#ifdef DB_HDF5
 /*-----------------------------------------------------------------------------
  * Audience:    Public
  * Chapter:     Callbacks
@@ -493,5 +498,6 @@ PMPIO_DefaultClose(void *file, void *userData)
     if (siloFile)
         DBClose(siloFile);
 }
+#endif
 
 #endif

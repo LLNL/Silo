@@ -145,8 +145,9 @@ PUBLIC char   *_db_err_list[] =
     "Checksum failure.",                      /* 24 */
     "Compression failure.",                   /* 25 */
     "Grab driver enabled.",                   /* 26 */
-    "File was closed or never opened/created."/* 27 */
-    "File multiply opened and all not read-only." /* 28 */
+    "File was closed or never opened/created.",/* 27 */
+    "File multiply opened and all not read-only.", /* 28 */
+    "Specified driver cannot open this file." /* 29 */
 };
 
 static char *no_hdf5_driver_msg =
@@ -196,7 +197,12 @@ PRIVATE reg_status_t _db_regstatus[DB_NFILES] = /* DB_NFILES triples of zeros */
 
 PRIVATE filter_t _db_filter[DB_NFILTERS];
 const static char *api_dummy = 0;
-PRIVATE int db_isregistered_file(DBfile *dbfile, const char *name);
+PRIVATE int
+#if SIZEOF_OFF64_T > 4
+db_isregistered_file(DBfile *dbfile, const struct stat64 *filestate);
+#else
+db_isregistered_file(DBfile *dbfile, const struct stat *filestate);
+#endif
 
 /* Global structures for option lists.  */
 struct _ma     _ma;
@@ -2007,14 +2013,13 @@ db_get_fileid ( int flags )
   c -= a; c -= b; c ^= (b>>15); \
 }
 
-static unsigned int bjhash(register const char *k)
+static unsigned int bjhash(register const unsigned char *k, register unsigned int length, register unsigned int initval)
 {
    register unsigned int a,b,c,len;
 
-   int length = strlen(k);
-   len = length; 
+   len = length;
    a = b = 0x9e3779b9;
-   c = 0xDeadBeef;
+   c = initval;
 
    while (len >= 12)
    {
@@ -2047,6 +2052,7 @@ static unsigned int bjhash(register const char *k)
    return c;
 }
 
+
 /*-------------------------------------------------------------------------
  * Functions:   db_register_file, db_unregister_file, db_isregistered_file
  *
@@ -2059,17 +2065,32 @@ static unsigned int bjhash(register const char *k)
  *
  * Programmer:  Mark C. Miller, Wed Jul 23 00:14:00 PDT 2008
  *
+ * Modifications:
+ *   Mark C. Miller, Wed Feb 25 23:46:44 PST 2009
+ *   Replaced name of file which can be very different but still represent
+ *   the same file stat structure. We wind up using st_dev/st_ino members
+ *   of stat struct to identify a file. In fact, we use a bjhash of those
+ *   members. This is not foolproof. Non posix filesystems can apparently
+ *   result in st_dev/st_ino combinations which are the same but for
+ *   different files.
  *-------------------------------------------------------------------------*/
 PRIVATE int 
-db_register_file(DBfile *dbfile, const char *name, int writeable)
+#if SIZEOF_OFF64_T > 4
+db_register_file(DBfile *dbfile, const struct stat64 *filestate, int writeable)
+#else
+db_register_file(DBfile *dbfile, const struct stat *filestate, int writeable)
+#endif
 {
     int i;
     for (i = 0; i < DB_NFILES; i++)
     {
         if (_db_regstatus[i].f == 0)
         {
+            unsigned int hval = 0;
+            hval = bjhash((unsigned char *) &(filestate->st_dev), sizeof(filestate->st_dev), hval);
+            hval = bjhash((unsigned char *) &(filestate->st_ino), sizeof(filestate->st_ino), hval);
             _db_regstatus[i].f = dbfile;
-            _db_regstatus[i].n = bjhash(name); 
+            _db_regstatus[i].n = hval; 
             _db_regstatus[i].w = writeable;
             return i;
         }
@@ -2101,7 +2122,11 @@ db_unregister_file(DBfile *dbfile)
 }
 
 PRIVATE int
-db_isregistered_file(DBfile *dbfile, const char *name)
+#if SIZEOF_OFF64_T > 4
+db_isregistered_file(DBfile *dbfile, const struct stat64 *filestate)
+#else
+db_isregistered_file(DBfile *dbfile, const struct stat *filestate)
+#endif
 {
     int i;
     if (dbfile)
@@ -2112,13 +2137,15 @@ db_isregistered_file(DBfile *dbfile, const char *name)
                 return i;
         }
     }
-    else if (name)
+    else if (filestate)
     {
-        unsigned n = bjhash(name);
+        unsigned int hval = 0;
+        hval = bjhash((unsigned char *) &(filestate->st_dev), sizeof(filestate->st_dev), hval);
+        hval = bjhash((unsigned char *) &(filestate->st_ino), sizeof(filestate->st_ino), hval);
         for (i = 0; i < DB_NFILES; i++)
         {
             if (_db_regstatus[i].f != 0 &&
-                _db_regstatus[i].n == n)
+                _db_regstatus[i].n == hval)
                 return i;
         }
     }
@@ -3490,6 +3517,11 @@ DBFileVersionGE(DBfile *dbfile, int Maj, int Min, int Pat)
  *
  *    Mark C. Miller, Mon Jan 12 20:50:41 PST 2009
  *    Removed DB_SDX conditionally compiled code blocks.
+ *
+ *    Mark C. Miller, Wed Feb 25 23:50:06 PST 2009
+ *    Moved call to db_isregistered_file to AFTER calls to stat the file
+ *    add changed db_isregistered_file to accept stat struct instead of name.
+ *    Changed call to db_register_file to accpet stat struct.
  *------------------------------------------------------------------------- */
 PUBLIC DBfile *
 DBOpenReal(const char *name, int type, int mode)
@@ -3511,15 +3543,6 @@ DBOpenReal(const char *name, int type, int mode)
 
         /* deal with extended driver type specifications */
         db_DriverTypeAndSubtype(origtype, &type, &subtype);
-
-        /* Check if file is already opened. If so, none can
-           have it opened for write, including this new one */ 
-        i = db_isregistered_file(0, name);
-        if (i != -1)
-        {
-            if (_db_regstatus[i].w != 0 || mode != DB_READ)
-                API_ERROR(name, E_CONCURRENT);
-        }
 
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
@@ -3592,6 +3615,16 @@ DBOpenReal(const char *name, int type, int mode)
                 API_ERROR((char *)name, E_SYSTEMERR);
             }
         }
+
+        /* Check if file is already opened. If so, none can
+           have it opened for write, including this new one */ 
+        i = db_isregistered_file(0, &filestate);
+        if (i != -1)
+        {
+            if (_db_regstatus[i].w != 0 || mode != DB_READ)
+                API_ERROR(name, E_CONCURRENT);
+        }
+
         if( ( filestate.st_mode & S_IFDIR ) != 0 )
         {
             /************************************/
@@ -3615,7 +3648,7 @@ DBOpenReal(const char *name, int type, int mode)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
-        db_register_file(dbfile, name, mode!=DB_READ);
+        db_register_file(dbfile, &filestate, mode!=DB_READ);
 
         /*
          * Install filters.  First, all `init' filters, then the
@@ -3675,6 +3708,10 @@ DBOpenReal(const char *name, int type, int mode)
  *
  *    Mark C. Miller, Mon Nov 17 19:04:39 PST 2008
  *    Added code to check to see if name is a directory.
+ *
+ *    Mark C. Miller, Wed Feb 25 23:52:05 PST 2009
+ *    Moved call to db_isregistered_file to after stat calls. Stat the
+ *    file after its created so we can get information to register it.
  *-------------------------------------------------------------------------*/
 PUBLIC DBfile *
 DBCreateReal(const char *name, int mode, int target, const char *info, int type)
@@ -3697,14 +3734,6 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
         /* deal with extended driver type specifications */
         db_DriverTypeAndSubtype(origtype, &type, &subtype);
 
-        /* Check if file is already opened. If so, none can
-           have it opened for write, including this new one */
-        i = db_isregistered_file(0, name);
-        if (i != -1)
-        {
-            API_ERROR(name, E_CONCURRENT);
-        }
-
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
             API_ERROR(ascii, E_BADFTYPE);
@@ -3725,6 +3754,15 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
                 API_ERROR((char *)name, E_FILEISDIR);
             }
         }
+
+        /* Check if file is already opened. If so, none can
+           have it opened for write, including this new one */
+        i = db_isregistered_file(0, &filestate);
+        if (i != -1)
+        {
+            API_ERROR(name, E_CONCURRENT);
+        }
+
 
         if (!DBCreateCB[type]) {
             if (type == 7)
@@ -3748,7 +3786,12 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
-        db_register_file(dbfile, name, 1);
+#if SIZEOF_OFF64_T > 4
+        stat64(name, &filestate);
+#else
+        stat(name, &filestate);
+#endif
+        db_register_file(dbfile, &filestate, 1);
 
         /*
          * Install filters.  First all `init' routines, then the specified
