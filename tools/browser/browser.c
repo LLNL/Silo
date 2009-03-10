@@ -61,6 +61,7 @@
 #include <silo.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "browser.h"
 #include <ctype.h>
@@ -665,6 +666,12 @@ set_diff (const char *suffix, const char *d) {
    name = obj_dest (name);
 }
 
+static double 
+browser_version()
+{
+    return strtod(DBVersion(), 0);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    check_version
  *
@@ -705,12 +712,12 @@ check_version (const char *filename) {
       out_errorn ("check_version: The initialization file `%s' seems to "
                   "be lacking version information and may be out of date. "
                   "Please update your initialization file or add the "
-                  "statement `$browser_version=%d.%03d' after checking that "
+                  "statement `$browser_version=%3.1f' after checking that "
                   "the file contains valid initialization statements. Type "
                   "`help' for the latest documentation.  Or use the `-f FILE' "
                   "command-line option to specify some other startup file or "
                   "say `-f /dev/null' for no file.",
-                  filename, BROWSER_VERSION, BROWSER_PATCH);
+                  filename, browser_version());
       return -1;
    }
 
@@ -726,26 +733,26 @@ check_version (const char *filename) {
    vers = num_fp (val);
    val = obj_dest (val);
 
-   if (vers<BROWSER_VERSION) {
+   if (vers<browser_version()) {
       out_errorn ("check_version: The initialization file `%s' was written "
-                  "for version %d of the browser (the current browser version "
-                  "is %d).  Please obtain the latest version of that file "
+                  "for version %3.1f of the browser (the current browser version "
+                  "is %3.1f).  Please obtain the latest version of that file "
                   "or verify that the commands in that file still apply "
                   "to this version of the browser.  Or use the `-f FILE' "
                   "command-line option to specify some other startup file or "
                   "say `-f /dev/null' for no file.",
-                  filename, (int)vers, BROWSER_VERSION);
+                  filename, vers, browser_version());
       return -1;
    }
 
-   if (vers>=BROWSER_VERSION+1) {
+   if (vers>=browser_version()+1) {
       out_errorn ("check_version: Based on the contents of the initialization "
                   "file `%s', you appear to be running an old version of the "
-                  "browser.  The file was written for version %d, but this "
-                  "is browser version %d.  Or use the `-f FILE' command-line "
+                  "browser.  The file was written for version %3.1f, but this "
+                  "is browser version %3.1f.  Or use the `-f FILE' command-line "
                   "option to specify some other startup file or say `-f "
                   "/dev/null' for no file.",
-                  filename, (int)vers, BROWSER_VERSION);
+                  filename, vers, browser_version());
       return -1;
    }
 
