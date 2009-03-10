@@ -98,6 +98,9 @@
  *      Mark C. Miller, Tue Feb 15 11:11:22 PST 2005
  *      I changed the patch number for release 4.4.2
  *
+ *      Mark C. Miller, Tue Mar 10 15:41:50 PDT 2009
+ *      Removed VERSION symbols. No need for browser to maintain
+ *      version information apart from the Silo library it is linked with.
  *-------------------------------------------------------------------------
  */
 #ifndef _BROWSER_H
@@ -111,8 +114,6 @@
 
 #define false           0
 #define true            1
-#define BROWSER_VERSION 4
-#define BROWSER_PATCH   501
 #define CAUGHT_SIGINT   999999
 #define SHALLOW         0
 #define DEEP            1

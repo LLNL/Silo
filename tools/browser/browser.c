@@ -58,6 +58,8 @@
  */
 #include "config.h"     /*MeshTV configuration record*/
 
+#include <silo.h>
+
 #include <stdio.h>
 #include <assert.h>
 #include "browser.h"
@@ -874,6 +876,9 @@ rep_update(void)
  *              Wednesday, May 31, 2000
  *
  * Modifications:
+ *
+ *   Mark C. Miller, Tue Mar 10 15:42:31 PDT 2009
+ *   Changed to report version of the Silo library browser is linked with.
  *---------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -883,8 +888,8 @@ process_sw_version(switch_t *sw, const char *argv, const char *value)
     static int  ncalls=0;
 
     if (0==ncalls++) {
-        out_info("This is browser version %d.%03d",
-                 BROWSER_VERSION, BROWSER_PATCH);
+        out_info("This browser is linked with version %s of the Silo library",
+                 DBVersion());
     }
     return 0;
 }
