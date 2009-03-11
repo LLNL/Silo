@@ -6,6 +6,10 @@
 # Programmer: Mark C. Miller
 # Creation:   January 21, 2009
 #
+# Modifications:
+#   Mark C. Miller, Wed Mar 11 10:03:10 PDT 2009
+#   Added browserOptsDef and set lowlevel to 0. That is important when
+#   diff'ing HDF5 files.
 # ----------------------------------------------------------------------------
 #
 
@@ -23,6 +27,7 @@ if test -z "$tmpDir"; then
     fi
 fi
 optError=0
+browserOptsDef="-l 0 -r"
 browserOpts=""
 arg1=
 arg2=
@@ -84,7 +89,7 @@ if test $optError = 1 -o -z "$arg1" -o -z "$arg2"; then
     echo "files nor directories are treated as arguments to browser itself. For some"
     echo "options to browser like the '-f FILE' option, use the '--file=<FILE>'"
     echo "variant instead. By default, $0 will invoke browser with args"
-    echo "'-l 3 -r -e diff'. The available options to browser are..."
+    echo "'$browserOptsDef'. The available options to browser are..."
     echo ""
     browser --help 2>&1 | grep -v SWITCHES
     exit 1
@@ -112,7 +117,7 @@ if test -d $arg1 -a -d $arg2; then # both are dirs
             bf=`basename $f`
             if test -e $arg2/$bf; then
                 test $verbose = 1 && echo "Processing file \"$bf\"..."
-                browser -l 3 -r $browserOpts -e diff $f $arg2/$bf
+                browser $browserOptsDef $browserOpts -e diff $f $arg2/$bf
             else
                 test $verbose = 1 && echo "File \"$bf\" does not exist in \"$arg2\", skipping it."
             fi
@@ -120,10 +125,10 @@ if test -d $arg1 -a -d $arg2; then # both are dirs
     done
 elif test -d $arg1 -o -d $arg2; then # one is dir
     if test -d $arg1; then
-        browser -l 3 -r $browserOpts -e diff $arg1/$arg2 $arg2
+        browser $browserOptsDef $browserOpts -e diff $arg1/$arg2 $arg2
     else
-        browser -l 3 -r $browserOpts -e diff $arg1 $arg2/$arg1
+        browser $browserOptsDef $browserOpts -e diff $arg1 $arg2/$arg1
     fi
 else # neither are dirs
-    browser -l 3 -r $browserOpts -e diff $arg1 $arg2
+    browser $browserOptsDef $browserOpts -e diff $arg1 $arg2
 fi
