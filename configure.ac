@@ -326,6 +326,8 @@ dnl     Isolated version information to VERSION file, though configure
 dnl     still needs to get re-generated with each new version.
 dnl     Removed slew of extraneous refs to 'UsingXXX' variables.
 dnl
+dnl     Mark C. Miller, Mon Mar 30 13:29:57 PDT 2009
+dnl     Fixed uname="`uname`" to UNAME="`uname`" so Darwin check would work.
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -494,7 +496,7 @@ case $host_os in
     ;;
 esac
 
-uname="`uname`"
+UNAME="`uname`"
 host_config="none"
 for f in $host_cpu-$host_vendor-$host_os \
          $host_cpu-$host_vendor-$host_os_novers \
@@ -507,7 +509,7 @@ for f in $host_cpu-$host_vendor-$host_os \
          $host_os_novers \
          $host_vendor \
          $host_cpu \
-         $uname; do
+         $UNAME; do
   AC_MSG_CHECKING([for config-site $f])
   if test -f "$srcdir/config-site/$f.conf"; then
     host_config=$srcdir/config-site/$f.conf
