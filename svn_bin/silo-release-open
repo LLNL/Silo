@@ -345,7 +345,7 @@ function hothpgc() {
 function hothicc() {
     HOSTS="hoth"
     ARCH="i686_Linux_ELsmp_icc"
-    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ --disable-silex"
+    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort FCLIBS=-lifcore_pic LDFLAGS=-lstdc++ --disable-silex"
     export HOSTS ARCH CONFOPTS
     build \
     "PATH=/usr/local/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/atria/bin:/sbin:\
@@ -637,9 +637,9 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals --enable-silex"
 function yanaicc() {
     HOSTS="${lcun}@yana"
     ARCH="chaos_4_x86_64_icc"
-    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
+    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort FCLIBS=-lifcore_pic LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
-    CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
+    CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort FCLIBS=-lifcore_pic LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
@@ -738,9 +738,9 @@ FFLAGS=-Wno-globals F77FLAGS=-Wno-globals FCFLAGS=-Wno-globals"
 function heraicc() {
     HOSTS="${lcun}@hera"
     ARCH="chaos_4_x86_64_ib_icc"
-    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
+    CONFOPTS="CC=icc CXX=icc FC=ifort F77=ifort FCLIBS=-lifcore_pic LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC"
-    CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort LDFLAGS=-lstdc++ \
+    CONFOPTS2="CC=icc CXX=icc FC=ifort F77=ifort FCLIBS=-lifcore_pic LDFLAGS=-lstdc++ \
 CFLAGS=-fPIC CXXFLAGS=-fPIC --disable-silex \
 --with-szlib=/usr/gapps/silo/szip/$SZIPRELEASE/$ARCH \
 --with-hdf5=/usr/gapps/silo/hdf5/$HDF5RELEASE/$ARCH/include,\
