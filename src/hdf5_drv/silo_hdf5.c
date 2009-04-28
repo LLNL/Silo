@@ -5281,6 +5281,9 @@ db_hdf5_GetComponent(DBfile *_dbfile, char *objname, char *compname)
  *   but where DBGetObject flattens these tuples into groups of related
  *   scalars with digits appended to their names. This fixes a problem
  *   in silex displaying these vector-based components.
+ *
+ *   Mark C. Miller, Tue Apr 28 15:57:43 PDT 2009
+ *   Added missing statement to set mnofname = 0 after free'ing it.
  *-------------------------------------------------------------------------
  */
 CALLBACK void *
@@ -5433,6 +5436,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
                     memcpy(newretval, pretval, db_GetMachDataSize(datatype));
                     free(retval);
                     free(mnofname);
+                    mnofname = 0;
                     retval = newretval;
                 }
             }
