@@ -962,7 +962,7 @@ db_hdf5_fpzip_filter_op(unsigned int flags, size_t cd_nelmts,
          * try to compress into it. If it fails, we return the right
          * stuff to HDF5 and do not compress */
         
-        max_outbytes = nbytes / SILO_Compression.minratio;
+        max_outbytes = nbytes / SILO_Globals.compressionMinratio;
         cbuf = (unsigned char *) malloc(max_outbytes);        
 
         /* full precision */
@@ -1439,7 +1439,7 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
             ntopo = zl->ndims;
             nzones = zl->nzones;
 
-            max_outbytes = ((1<<ntopo) * nzones * sizeof(int)) / SILO_Compression.minratio;
+            max_outbytes = ((1<<ntopo) * nzones * sizeof(int)) / SILO_Globals.compressionMinratio;
             buffer = (unsigned char *) malloc(max_outbytes);
             if (buffer == 0) return early_retval;
 
@@ -1506,7 +1506,7 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
             }
 
             max_outbytes = (db_hdf5_hzip_params.totsize1d *
-                           sizeof_hztype(db_hdf5_hzip_params.hztype)) / SILO_Compression.minratio;
+                           sizeof_hztype(db_hdf5_hzip_params.hztype)) / SILO_Globals.compressionMinratio;
             buffer = (unsigned char *) malloc(max_outbytes);
             if (buffer == 0) return early_retval;
 
@@ -2939,43 +2939,43 @@ int db_hdf5_set_compression(int flags)
             have_hzip = TRUE;
     }
 /* Handle some global compression parameters */
-    if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+    if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
        "ERRMODE=")) != (char *)NULL) 
     {
         (void)strncpy(chararray, ptr+8, 4); 
         chararray[4] = '\0';
         if (strcmp(chararray, "FALL") == 0)
-            SILO_Compression.errmode = COMPRESSION_ERRMODE_FALLBACK;
+            SILO_Globals.compressionErrmode = COMPRESSION_ERRMODE_FALLBACK;
         else if (strcmp(chararray, "FAIL") == 0)
-            SILO_Compression.errmode = COMPRESSION_ERRMODE_FAIL;
+            SILO_Globals.compressionErrmode = COMPRESSION_ERRMODE_FAIL;
         else
         {
-            db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+            db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
             return (-1);
         }
     }
-    if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+    if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
        "MINRATIO=")) != (char *)NULL) 
     {
         float mcr;
         (void)strncpy(chararray, ptr+9, 5); 
         mcr = (float) strtod(chararray, &check);
         if (mcr > 1.0)
-            SILO_Compression.minratio = mcr;
+            SILO_Globals.compressionMinratio = mcr;
         else
         {
-            db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+            db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
             return (-1);
         }
     }
 
 /* Select the compression algorthm */
-    if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+    if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
        "METHOD=GZIP")) != (char *)NULL) 
     {
        if (have_gzip == FALSE)
        {
-          if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+          if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
              "LEVEL=")) != (char *)NULL)
           {
              (void)strncpy(chararray, ptr+6, 1); 
@@ -2990,7 +2990,7 @@ int db_hdf5_set_compression(int flags)
              }
              else
              {
-                db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+                db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
                 return (-1);
              }
           }
@@ -3005,7 +3005,7 @@ int db_hdf5_set_compression(int flags)
        }  /* if (have_gzip == FALSE) */
     }
 #ifdef H5_HAVE_FILTER_SZIP
-    else if ((ptr=(char *)strstr(SILO_Compression.parameters,
+    else if ((ptr=(char *)strstr(SILO_Globals.compressionParams,
        "METHOD=SZIP"))!=(char *)NULL)
     {
        if (have_szip == FALSE)
@@ -3013,21 +3013,21 @@ int db_hdf5_set_compression(int flags)
           filtn = H5Z_FILTER_SZIP;
           if (H5Zget_filter_info(filtn, &filter_config_flags)<0)
           {
-             db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+             db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
              return (-1);
           }
           if ((filter_config_flags &
           (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED))==
           (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED))
           {
-             if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+             if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
                 "BLOCK=")) != (char *)NULL)
              {
                 (void)strncpy(chararray, ptr+6, 2); 
                 block = (int) strtol(chararray, &check, 10);
                 if ((chararray != check) && (block >= 0) && (block <=32))
                 { 
-                   if (strstr(SILO_Compression.parameters, 
+                   if (strstr(SILO_Globals.compressionParams, 
                       "MASK=EC") != NULL)
                    {
                       if (H5Pset_szip(P_ckcrprops, 
@@ -3037,7 +3037,7 @@ int db_hdf5_set_compression(int flags)
                          return (-1);
                       }
                    }
-                   else if(strstr(SILO_Compression.parameters,
+                   else if(strstr(SILO_Globals.compressionParams,
                       "MASK=NN")!=NULL)
                    {
                       if (H5Pset_szip(P_ckcrprops, 
@@ -3059,7 +3059,7 @@ int db_hdf5_set_compression(int flags)
                 }
                 else
                 {
-                   db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+                   db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
                    return (-1);
                 }
              }
@@ -3076,12 +3076,12 @@ int db_hdf5_set_compression(int flags)
     }
 #endif
 #ifdef HAVE_HZIP
-    else if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+    else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
        "METHOD=HZIP")) != (char *)NULL) 
     {
        if (have_hzip == FALSE && (flags & ALLOW_MESH_COMPRESSION))
        {
-           if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+           if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
               "CODEC=")) != (char *)NULL)
            {
               (void)strncpy(chararray, ptr+6, 4); 
@@ -3105,7 +3105,7 @@ int db_hdf5_set_compression(int flags)
                   return (-1);
               }
            }
-           if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+           if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
               "BITS=")) != (char *)NULL)
            {
               (void)strncpy(chararray, ptr+5, 2); 
@@ -3128,7 +3128,7 @@ int db_hdf5_set_compression(int flags)
            }
 
            if (H5Pset_filter(P_ckcrprops, DB_HDF5_HZIP_ID,
-                   SILO_Compression.errmode ? 0 : H5Z_FLAG_OPTIONAL, 0, 0)<0)
+                   SILO_Globals.compressionErrmode ? 0 : H5Z_FLAG_OPTIONAL, 0, 0)<0)
            {
                db_perror("hzip filter setup", E_CALLFAIL, me);
                return (-1);
@@ -3137,12 +3137,12 @@ int db_hdf5_set_compression(int flags)
     }
 #endif
 #ifdef HAVE_FPZIP
-    else if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+    else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
        "METHOD=FPZIP")) != (char *)NULL) 
     {
        if (have_fpzip == FALSE)
        {
-          if ((ptr=(char *)strstr(SILO_Compression.parameters, 
+          if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
              "LOSS=")) != (char *)NULL)
           {
              (void)strncpy(chararray, ptr+5, 2); 
@@ -3153,13 +3153,13 @@ int db_hdf5_set_compression(int flags)
              }
              else
              {
-                db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+                db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
                 return (-1);
              }
           }
 
           if (H5Pset_filter(P_ckcrprops, DB_HDF5_FPZIP_ID,
-                  SILO_Compression.errmode ? 0 : H5Z_FLAG_OPTIONAL, 0, 0)<0)
+                  SILO_Globals.compressionErrmode ? 0 : H5Z_FLAG_OPTIONAL, 0, 0)<0)
           {
               db_perror("H5Pset_filter", E_CALLFAIL, me);
               return (-1);
@@ -3169,7 +3169,7 @@ int db_hdf5_set_compression(int flags)
 #endif
     else
     {
-       db_perror(SILO_Compression.parameters, E_COMPRESSION, me);
+       db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
        return (-1);
     }
     return 0;
@@ -3198,13 +3198,13 @@ int db_hdf5_set_properties(int rank, hsize_t size[])
     static char *me = "db_hdf5_set_properties";
     P_crprops = H5P_DEFAULT;
     if (SILO_Globals.enableChecksums && 
-        !SILO_Globals.enableCompression)
+        !SILO_Globals.compressionParams)
     {
         H5Pset_chunk(P_ckcrprops, rank, size);
         P_crprops = P_ckcrprops;
     }
     else if (SILO_Globals.enableChecksums && 
-        SILO_Globals.enableCompression)
+        SILO_Globals.compressionParams)
     {
         H5Pset_chunk(P_ckcrprops, rank, size);
         if (db_hdf5_set_compression(0)<0) {
@@ -3213,7 +3213,7 @@ int db_hdf5_set_properties(int rank, hsize_t size[])
         }
         P_crprops = P_ckcrprops;
     }
-    else if (SILO_Globals.enableCompression)
+    else if (SILO_Globals.compressionParams)
     {
         H5Pset_chunk(P_ckcrprops, rank, size);
         if (db_hdf5_set_compression(0)<0) {
@@ -3770,7 +3770,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
             db_perror("db_hdf5_set_properties", E_CALLFAIL, me);
             UNWIND();
         }
-        if (SILO_Globals.enableCompression && compressionFlags)
+        if (SILO_Globals.compressionParams && compressionFlags)
         {
             if (db_hdf5_set_compression(compressionFlags)<0)
             {
@@ -3805,7 +3805,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
         H5Sclose(space);
 
         /* remove any mesh specific filters if we have 'em */
-        if (SILO_Globals.enableCompression && compressionFlags)
+        if (SILO_Globals.compressionParams && compressionFlags)
         {
             int i;
             for (i=0; i<H5Pget_nfilters(P_crprops); i++)
@@ -7751,7 +7751,7 @@ db_hdf5_GetDefvars(DBfile *_dbfile, const char *name)
  */
 static int PrepareForQuadmeshCompression()
 {
-    if (SILO_Globals.enableCompression == 0) return 0;
+    if (SILO_Globals.compressionParams == 0) return 0;
 
 #ifdef HAVE_HZIP
     db_hdf5_hzip_clear_params();
@@ -8119,7 +8119,7 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char *name)
 static int
 PrepareForQuadvarCompression(int centering, int datatype)
 {
-    if (SILO_Globals.enableCompression == 0) return 0;
+    if (SILO_Globals.compressionParams == 0) return 0;
     if (centering == DB_ZONECENT) return 0;
 
 #ifdef HAVE_HZIP
@@ -8467,7 +8467,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
 static int PrepareForUcdmeshCompression(DBfile_hdf5 *dbfile,
     const char *meshname, const char *zlname)
 {
-    if (SILO_Globals.enableCompression == 0) return 0;
+    if (SILO_Globals.compressionParams == 0) return 0;
 
 #ifdef HAVE_HZIP
     if (LookupNodelist(dbfile, zlname, meshname) != 0)
@@ -9003,7 +9003,7 @@ static int
 PrepareForUcdvarCompression(DBfile_hdf5 *dbfile, const char *varname,
     const char *meshname, int datatype, int centering)
 {
-    if (SILO_Globals.enableCompression == 0) return 0;
+    if (SILO_Globals.compressionParams == 0) return 0;
 
 #ifdef HAVE_HZIP
     if (centering == DB_NODECENT)
@@ -9550,7 +9550,7 @@ PrepareForZonelistCompression(DBfile_hdf5 *dbfile, const char *name,
     int zncnt = shapecnt[0];
 
     if (nshapes == 0) return 0;
-    if (SILO_Globals.enableCompression == 0) return 0;
+    if (SILO_Globals.compressionParams == 0) return 0;
 
 #ifdef HAVE_HZIP
 

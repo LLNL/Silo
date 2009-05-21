@@ -420,7 +420,7 @@ db_pdb_Create (char *name, int mode, int target, int subtype, char *finfo)
         db_perror(name, E_NOTIMP, "no checksums in PDB driver");
         return NULL;
     }
-    if (SILO_Globals.enableCompression)
+    if (SILO_Globals.compressionParams)
     {
         db_perror(name, E_NOTIMP, "no compression in PDB driver");
         return NULL;

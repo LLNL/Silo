@@ -223,15 +223,12 @@ SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
     FALSE, /* enableChecksums */
-    FALSE, /* enableCompression */
     FALSE, /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
-    3      /* maxDeprecateWarnings */
-};
-SILO_Compression_t SILO_Compression = {
-    "\0",
-    2.0, /* min compression ratio */
-    0,   /* fallback */
+    3,     /* maxDeprecateWarnings */
+    0,     /* compressionParams (null) */
+    2.0,   /* compressionMinratio */
+    0      /* compressionErrmode (fallback) */
 };
 
 INTERNAL int
@@ -2491,28 +2488,32 @@ DBGetEnableChecksums()
  *
  * Description:  This routine enters the compression method information.
  *--------------------------------------------------------------------*/
-PUBLIC int 
+PUBLIC void 
 DBSetCompression(const char *s)
 {
-    int oldEnable;
-    oldEnable = SILO_Globals.enableCompression;
-    SILO_Globals.enableCompression = TRUE;
-    if (s && !*s) {
-        SILO_Compression.parameters = ALLOC_N(char, 12);
-        strcpy(SILO_Compression.parameters, "METHOD=GZIP");
+    if (s && *s == '\0') {
+        if (SILO_Globals.compressionParams)
+            FREE(SILO_Globals.compressionParams);
+        SILO_Globals.compressionParams = ALLOC_N(char, 12);
+        strcpy(SILO_Globals.compressionParams, "METHOD=GZIP");
     }   
     else if (s) {
-        SILO_Compression.parameters =ALLOC_N(char,strlen(s)+1);
-        strcpy(SILO_Compression.parameters, s);
+        if (SILO_Globals.compressionParams)
+            FREE(SILO_Globals.compressionParams);
+        SILO_Globals.compressionParams=ALLOC_N(char,strlen(s)+1);
+        strcpy(SILO_Globals.compressionParams, s);
     }
-   
-    return(oldEnable);
+    else {
+        if (SILO_Globals.compressionParams)
+            FREE(SILO_Globals.compressionParams);
+        SILO_Globals.compressionParams=0;
+    }
 }
 
 PUBLIC char * 
 DBGetCompression()
 {
-    return SILO_Compression.parameters;
+    return SILO_Globals.compressionParams;
 }
 
 PUBLIC int

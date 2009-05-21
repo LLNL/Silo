@@ -3977,7 +3977,7 @@ DBSETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
             API_ERROR("cvalue", E_BADARGS);
         cval = SW_strndup(cvalue, *lcvalue);
 
-        API_RETURN(DBSetCompression(cval));
+        DBSetCompression(cval);
     }
     API_END;
 
