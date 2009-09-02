@@ -843,7 +843,7 @@ SZIPRELEASE=2.1
 HDF5RELEASE=1.8.1
 QTRELEASE=3.3.8
 lcun=$USER
-BININSTALLS="browser silex silock silodiff silofile"
+BININSTALLS="browser silex silock silodiff silofile silofile.magic"
 declare -i i
 declare -af list
 MAKE="gmake"

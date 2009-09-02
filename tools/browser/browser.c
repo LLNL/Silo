@@ -1024,10 +1024,14 @@ process_sw_exclude(switch_t *sw, const char *argv, const char *value)
  * Modifications:
  *              Robb Matzke, 2000-10-19
  *              Set $obase from `--obase' argument.
+ *
+ *   Mark C. Miller, Wed Sep  2 16:46:46 PDT 2009
+ *   Added the 'pass' argument so we can skip resetting of $lowlevel on 
+ *   passes other than the first.
  *---------------------------------------------------------------------------
  */
 static void
-process_switches(switches_t *switches)
+process_switches(switches_t *switches, int pass)
 {
     switch_t    *sw;
     char        tmp[32], *s, *t, *word;
@@ -1071,7 +1075,7 @@ process_switches(switches_t *switches)
         DBDebugAPI = 2;
     }
 
-    if ((sw=switch_find(switches, "--lowlevel")) && sw->seen) {
+    if ((sw=switch_find(switches, "--lowlevel")) && sw->seen && pass==0) {
         sym_bi_set("lowlevel", sw->lexeme, NULL, NULL);
     }
     
@@ -1220,6 +1224,10 @@ bad_switch(const char *fmt, ...)
  *      where a client shell using i/o-redirection of stderr into stdout
  *      (e.g. '2>&1') results in browser output lines getting 'interrupted'
  *      with lines from stderr.
+ *
+ *      Mark C. Miller, Wed Sep  2 16:47:43 PDT 2009
+ *      Added an argument to process_switches to indicate which pass
+ *      is being made.
  *-------------------------------------------------------------------------
  */
 int
@@ -1425,7 +1433,7 @@ main(int argc, char *argv[])
     /* Parse, then process command-line options */
     Switches = sws;
     if ((argno=switch_parse(sws, argc, argv, bad_switch))<0) exit(1);
-    process_switches(sws);
+    process_switches(sws, 0);
 
     /* Assign the --exclude list to the $exclude variable */
     if ((sw=switch_find(sws, "--exclude")) && sw->seen) {
@@ -1513,7 +1521,7 @@ main(int argc, char *argv[])
 
     /* Flags set on the command-line override values set in the initilization
     * file, so reprocess the command-line switches. */
-    process_switches(sws);
+    process_switches(sws, 1);
 
     /* Process expressions given on the command line.  A control-C should
      * terminate the command and the browser. If there were expressions

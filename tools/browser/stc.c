@@ -1506,6 +1506,8 @@ stc_offset (obj_t _self, obj_t comp) {
  *  Thomas R. Treadway, Fri Jul  7 12:44:38 PDT 2006
  *  Added support for DBOPT_REFERENCE in Curves
  *  
+ *  Mark C. Miller, Wed Sep  2 16:48:37 PDT 2009
+ *  Added mixvals to ucdvar struct.
  *-------------------------------------------------------------------------
  */
 void
@@ -2023,6 +2025,9 @@ stc_silo_types (void) {
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");
+      COMP (mixvals,
+            "pointer (array 'self.nvals' (pointer (array 'self.mixlen' "
+            "(primitive 'self.datatype'))))");
    } ESTRUCT;
 
    STRUCT (DBpointmesh) {

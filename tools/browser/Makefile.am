@@ -1,9 +1,13 @@
 ## Procss this file with automake to create Makefile.in
+##
+##   Mark C. Miller, Wed Sep  2 15:25:10 PDT 2009
+##   Added READLINE_LIBS
 
 bin_PROGRAMS = browser
 dist_bin_SCRIPTS = \
  silodiff \
- silofile
+ silofile \
+ silofile.magic
 
 browser_SOURCES = $(FILES)
 if HDF5_DRV_NEEDED
@@ -19,6 +23,7 @@ endif
 else
   browser_LDADD = ../../src/libsilo.la
 endif
+browser_LDADD += $(READLINE_LIBS)
 info_TEXINFOS = browser.texi
 
 AM_CPPFLAGS = \

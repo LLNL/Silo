@@ -7,7 +7,9 @@
  *  of a 3D UCD mesh.
  *
  * Modifications:
- *
+ *   Mark C. Miller, Mon Aug 31 21:09:38 PDT 2009
+ *   Added 'reorder' option to test browser's differencing. Added a
+ *   option to turn on friendly hdf5 names.
  *-----------------------------------------------------------------------*/
 #include <math.h>
 #include <silo.h>
@@ -34,7 +36,7 @@ int main(int argc, char **argv)
     float nval[1000];
 
     DBfile *db;
-    int i,j, driver = DB_PDB;
+    int i,j, driver = DB_PDB, reorder = 0, friendly = 0;
     char          *filename = "ucd1d.pdb";
 
     for (i=1; i<argc; i++) {
@@ -44,6 +46,10 @@ int main(int argc, char **argv)
         } else if (!strcmp(argv[i], "DB_HDF5")) {
             driver = DB_HDF5;
             filename = "ucd1d.h5";
+        } else if (!strcmp(argv[i], "reorder")) {
+            reorder = 1;
+        } else if (!strcmp(argv[i], "friendly")) {
+            friendly = 1;
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
@@ -59,12 +65,18 @@ int main(int argc, char **argv)
             y[i*31+j] = sin(2*M_PI*(float)j/30)*5;
             z[i*31+j] = cos(2*M_PI*(float)j/30)*5;
 
-            nval[nzones] = sqrt(x[i*31+j]*x[i*31+j]*.2 + 
+            nval[nnodes] = sqrt(x[i*31+j]*x[i*31+j]*.2 + 
                                 y[i*31+j]*y[i*31+j]*.5 +
                                 z[i*31+j]*z[i*31+j]*1.);
 
             nnodes++;
         }
+    }
+    if (reorder)
+    {
+        float tmp = nval[0];
+        nval[0] = nval[1];
+        nval[1] = tmp;
     }
     coords[0]=x;
     coords[1]=y;
@@ -88,8 +100,17 @@ int main(int argc, char **argv)
             }
         }
     }
+    if (reorder)
+    {
+        float tmp = zval[nzones-1];
+        zval[nzones-1] = zval[nzones-2];
+        zval[nzones-2] = tmp;
+    }
     shapecnt[0] = nzones;
 
+
+    if (friendly && driver == DB_HDF5)
+        DBSetFriendlyHDF5Names(1);
 
     /* Write out the mesh */
     printf("Creating test file: \"%s\".\n", filename);
@@ -109,12 +130,22 @@ int main(int argc, char **argv)
                   shapesize,shapecnt, 1, 
                   NULL,NULL,0);
 
-    DBPutUcdvar1(db, "zval", "mesh", zval, nzones, NULL,0,
-                 DB_FLOAT, DB_ZONECENT, NULL);
+    if (reorder)
+    {
+        DBPutUcdvar1(db, "nval", "mesh", nval, nnodes, NULL,0,
+            DB_FLOAT, DB_NODECENT, NULL);
 
-    DBPutUcdvar1(db, "nval", "mesh", nval, nnodes, NULL,0,
-                 DB_FLOAT, DB_NODECENT, NULL);
+        DBPutUcdvar1(db, "zval", "mesh", zval, nzones, NULL,0,
+            DB_FLOAT, DB_ZONECENT, NULL);
+    }
+    else
+    {
+        DBPutUcdvar1(db, "zval", "mesh", zval, nzones, NULL,0,
+            DB_FLOAT, DB_ZONECENT, NULL);
 
+        DBPutUcdvar1(db, "nval", "mesh", nval, nnodes, NULL,0,
+            DB_FLOAT, DB_NODECENT, NULL);
+    }
 
     DBClose(db);
     return(0);   

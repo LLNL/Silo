@@ -47,6 +47,9 @@ for advertising or product endorsement purposes.
  * Modifications:
  *    Hank Childs, Wed Feb 16 15:35:56 PST 2005
  *    Prisms and tets are inside out.  Correct them.
+ *
+ *    Mark C. Miller, Wed Sep  2 16:50:06 PDT 2009
+ *    Added logic to free optlist and matnames to satisfy valgrind.
  */
 double    coord0 [1093] = {
  -7.27139e-22,  -2.12868e-32,   3.90084e-21,   2.03636e-31,  -4.22923e-21, 
@@ -1927,6 +1930,11 @@ main(int argc, char *argv[])
                  DB_DOUBLE, DB_ZONECENT, optlist);
 
     DBClose(dbfile);
+
+    DBFreeOptlist(optlist);
+    for (i = 0; i < 4; i++)
+        free(matnames[i]);
+    free(matnames);
 
     return(0);
 }

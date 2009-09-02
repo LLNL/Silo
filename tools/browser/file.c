@@ -140,6 +140,18 @@ file_class (void) {
  *      the `lowlevel' flag corresponding to the `-l' command-line
  *      switch. This will prevent someone from trying to diff a PDB and
  *      HDF5 file using the `-l' flag.
+ *
+ *      Mark C. Miller, Wed Sep  2 16:43:48 PDT 2009
+ *      Made it turn off $lowlevel for certain HDF5 situations. The problem
+ *      with HDF5 files is that the low-level data arrays for aggregate
+ *      objects do NOT appear in the toc by default. They appear only if
+ *      HDF5-friendly names are enabled. When they do NOT appear, doing
+ *      a diff with $lowlevel set to anything other than zero means the
+ *      low-level data arrays will NOT be diffed. I also added a warning
+ *      about performance of diff for PDB files when lowlevel is turned
+ *      off. In the PDB case, since low level arrays ALWAYS appear in the
+ *      toc, doing a diff with them means those arrays are diffed twice;
+ *      once as parts of aggregate objects and once as raw arrays.
  *-------------------------------------------------------------------------
  */
 static obj_t
@@ -199,6 +211,12 @@ file_new (va_list ap)
    } else if (seen_file_format!=f->pub.type && sym_bi_true("lowlevel")) {
        out_info("turning $lowlevel off due mixing file types");
        sym_bi_set("lowlevel", "0", NULL, NULL);
+   } else if (DBGetDriverType(f) == DB_HDF5 && sym_bi_true("lowlevel") != 0 &&
+              !DBGuessHasFriendlyHDF5Names(f)) {
+      out_info("turning $lowlevel off because this is an HDF5 file without friendly names.");
+      sym_bi_set("lowlevel", "0", NULL, NULL);
+   } else if (DBGetDriverType(f) == DB_PDB && sym_bi_true("lowlevel") == 0) {
+      out_info("having $lowlevel turned off for PDB files results in slower diff performance.");
    }
 
    return (obj_t)self;

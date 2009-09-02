@@ -1826,6 +1826,9 @@ hdf5_to_silo_error(const char *vname, const char *fname)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Wed Sep  2 16:41:32 PDT 2009
+ *   Made conditional compilation logic for VERSION_GE take into account
+ *   H5_USE_16_API setting.
  *-------------------------------------------------------------------------
  */
 PRIVATE void
@@ -1865,7 +1868,7 @@ db_hdf5_init(void)
 
 #ifdef HAVE_FPZIP
     db_hdf5_fpzip_params.loss = 0;
-#if HDF5_VERSION_GE(1,8,0)
+#if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
     db_hdf5_fpzip_class.version = H5Z_CLASS_T_VERS;
     db_hdf5_fpzip_class.encoder_present = 1;
     db_hdf5_fpzip_class.decoder_present = 1;
@@ -1895,7 +1898,7 @@ db_hdf5_init(void)
     ((struct HZMCODECbase *) db_hdf5_hzip_params.params)->bits = 12;
 #endif
 
-#if HDF5_VERSION_GE(1,8,0)
+#if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
     db_hdf5_hzip_class.version = H5Z_CLASS_T_VERS;
     db_hdf5_hzip_class.encoder_present = 1;
     db_hdf5_hzip_class.decoder_present = 1;

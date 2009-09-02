@@ -55,8 +55,11 @@ am__objects_1 = array.$(OBJEXT) bif.$(OBJEXT) browser.$(OBJEXT) \
 	stc.$(OBJEXT) str.$(OBJEXT) switch.$(OBJEXT) sym.$(OBJEXT)
 am_browser_OBJECTS = $(am__objects_1)
 browser_OBJECTS = $(am_browser_OBJECTS)
-@HDF5_DRV_NEEDED_FALSE@browser_DEPENDENCIES = ../../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@browser_DEPENDENCIES = ../../src/libsiloh5.la
+am__DEPENDENCIES_1 =
+@HDF5_DRV_NEEDED_FALSE@browser_DEPENDENCIES = ../../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_1)
+@HDF5_DRV_NEEDED_TRUE@browser_DEPENDENCIES = ../../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
 dist_binSCRIPT_INSTALL = $(INSTALL_SCRIPT)
 SCRIPTS = $(dist_bin_SCRIPTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
@@ -164,7 +167,6 @@ MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 NETCDF = @NETCDF@
 OBJEXT = @OBJEXT@
-OS_RULE = @OS_RULE@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -193,6 +195,7 @@ QT_LIB = @QT_LIB@
 QT_LIBS = @QT_LIBS@
 QT_MOC = @QT_MOC@
 RANLIB = @RANLIB@
+READLINE_LIBS = @READLINE_LIBS@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -267,13 +270,16 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_bin_SCRIPTS = \
  silodiff \
- silofile
+ silofile \
+ silofile.magic
 
 browser_SOURCES = $(FILES)
 @FPZIP_NEEDED_TRUE@@HDF5_DRV_NEEDED_TRUE@nodist_EXTRA_browser_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@@HZIP_NEEDED_TRUE@nodist_EXTRA_browser_SOURCES = dummy.cxx
-@HDF5_DRV_NEEDED_FALSE@browser_LDADD = ../../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@browser_LDADD = ../../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@browser_LDADD = ../../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(READLINE_LIBS)
+@HDF5_DRV_NEEDED_TRUE@browser_LDADD = ../../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(READLINE_LIBS)
 info_TEXINFOS = browser.texi
 AM_CPPFLAGS = \
  -I$(top_srcdir)/src/silo \

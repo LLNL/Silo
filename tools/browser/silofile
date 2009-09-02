@@ -1,46 +1,40 @@
 #!/bin/sh
 
-#
-# This script is used to help identify whether a given file is a
-# PDB file for an HDF5 file. It appends magic lines to an existing
-# magic file and uses the combined result in the file command.
-#
+magicFile=silofile.magic
+theDir=$(dirname $0)
 
-if test -n "$TMPDIR"; then
-    tmpDir=$TMPDIR
-else
-    if test -d /tmp; then
-        tmpDir=/tmp
-    elif test -d /usr/tmp; then
-        tmpDir=/usr/tmp
-    elif test -d /var/tmp; then
-        tmpDir=/var/tmp
+#
+# If we cannot find the magic file, then revert to
+# using the ordinary 'file' command and warn the
+# user about it.
+#
+if test ! -f $theDir/$magicFile; then
+    echo "$(basename $0) cannot find $magicFile. Reverting to ordinary file command..."
+    file $*
+    exit 0
+fi
+
+#
+# Ok, use silofile's magic file with the file command and check that
+# we get a known response from it. If not, put the file in the unknown
+# file list for later.
+#
+unknownFiles=
+for f in $*; do
+    knowIt=$(file -m $theDir/$magicFile $f 2>&1 | grep -v $magicFile)
+    if test -n "$(echo $knowIt | grep PDB)" -o \
+            -n "$(echo $knowIt | grep HDF4)" -o \
+            -n "$(echo $knowIt | grep HDF5)"; then
+        echo $knowIt
     else
-        tmpDir=.
+	unknownFiles="$unknownFiles $f"
     fi
-fi
-
-tmpMagicFile=$tmpDir/.silofile_magic_$$
-rm -f $tmpMagicFile
+done
 
 #
-# add some lines to the magic file for detecting PDB and HDF5
-# note since the HDF5 line is detecting a 'long' type, we include
-# two entries for big and small endian. Tabs in these strings
-# are required.
+# If we have any unknown files, use the ordinary file command on them.
 #
-echo "0		string		\!<<PDB:II>>\!		Portable Database (PDB) File" >> $tmpMagicFile
-echo "0		long		=0x46444889		Hierarchical Data Format (HDF) file" >> $tmpMagicFile
-echo "0		long		=0x28484446		Hierarchical Data Format (HDF) file" >> $tmpMagicFile
-
-if test -e /usr/share/magic; then
-    cat /usr/share/magic >> $tmpMagicFile
+if test -n "$unknownFiles"; then
+    echo "$(basename $0) did not recognize any of the following files..."
+    file $unknownFiles
 fi
-
-
-# the file command as a bad habit of printing on stderr a message
-# indicating that a different magic file is being used and then
-# giving that file's name. We filter it from the output here.
-file -m $tmpMagicFile $* 2>&1 | grep -v $tmpMagicFile
-
-rm -f $tmpMagicFile

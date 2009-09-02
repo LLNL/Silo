@@ -2557,6 +2557,94 @@ DBGetFriendlyHDF5Names()
     return SILO_Globals.enableFriendlyHDF5Names;
 }
 
+#define CHECK_FOR_FRIENDLY(ON,SU)					\
+    ntotal += toc->n ## ON;						\
+    for (i = 0; i < toc->n ## ON; i++)					\
+    {									\
+        char tmp[1024];							\
+        snprintf(tmp, sizeof(tmp), "%s_%s", toc->ON ## _names[i], SU);	\
+        if (DBInqVarExists(f, tmp))					\
+            nfriendly++;						\
+    }
+
+/*----------------------------------------------------------------------
+ * Routine:  db_guess_has_friendly_HDF5_names_r 
+ *
+ * Purpose:  Recursive helper func for DBGuessHasFriendlyHDF5Names 
+ *           names.
+ *
+ * Programmer: Mark C. Miller, Wed Sep  2 15:27:06 PDT 2009
+ *
+ *--------------------------------------------------------------------*/
+PRIVATE int
+db_guess_has_friendly_HDF5_names_r(DBfile *f)
+{
+    int i, ntotal = 0, nfriendly = 0;
+    int retval;
+    DBtoc *toc;
+
+    toc = DBGetToc(f);
+
+    CHECK_FOR_FRIENDLY(multimesh, "meshnames");
+    CHECK_FOR_FRIENDLY(multivar, "varnames");
+    CHECK_FOR_FRIENDLY(multimat, "matnames");
+    CHECK_FOR_FRIENDLY(qmesh, "coord0");
+    CHECK_FOR_FRIENDLY(qvar, "data");
+    CHECK_FOR_FRIENDLY(ucdmesh, "coord0");
+    CHECK_FOR_FRIENDLY(ucdvar, "data");
+    CHECK_FOR_FRIENDLY(ptmesh, "coord0");
+    CHECK_FOR_FRIENDLY(ptvar, "data");
+    CHECK_FOR_FRIENDLY(csgmesh, "_coeffs");
+    CHECK_FOR_FRIENDLY(csgvar, "data");
+    CHECK_FOR_FRIENDLY(mat, "_matlist");
+    CHECK_FOR_FRIENDLY(matspecies, "_speclist");
+    CHECK_FOR_FRIENDLY(curve, "_yvals");
+    CHECK_FOR_FRIENDLY(obj, "_nodelist");
+
+    if (ntotal >= 3) /* arb. min of 3 objects */
+    {
+        if (nfriendly >= ntotal/2)
+            return 1;
+        else
+            return 0;
+    }
+
+    retval = -1;
+    for (i = 0; i < toc->ndir && retval == -1; i++)
+    {
+        DBSetDir(f, toc->dir_names[i]);
+        retval = db_guess_has_friendly_HDF5_names_r(f);
+        DBSetDir(f, "..");
+    }
+
+    return retval;
+}
+
+/*----------------------------------------------------------------------
+ * Routine:  DBGuessHasFriendlyHDF5Names
+ *
+ * Purpose:  Determine if it looks like a given file has HDF5 friendly 
+ *           names.
+ *
+ * Programmer: Mark C. Miller, Wed Sep  2 15:27:06 PDT 2009
+ *
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBGuessHasFriendlyHDF5Names(DBfile *f)
+{
+    char cwd[1024];
+    int retval;
+
+    if (DBGetDriverType(f) != 7 /* DB_HDF5 */)
+        return 0;
+
+    DBGetDir(f, cwd);
+    retval = db_guess_has_friendly_HDF5_names_r(f);
+    DBSetDir(f, cwd);    
+
+    return retval;
+}
+
 /*----------------------------------------------------------------------
  * Routine:  DBSetDeprecateWarnings
  *

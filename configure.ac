@@ -328,6 +328,14 @@ dnl     Removed slew of extraneous refs to 'UsingXXX' variables.
 dnl
 dnl     Mark C. Miller, Mon Mar 30 13:29:57 PDT 2009
 dnl     Fixed uname="`uname`" to UNAME="`uname`" so Darwin check would work.
+dnl
+dnl     Mark C. Miller, Wed Sep  2 15:21:52 PDT 2009
+dnl     Making it work with '--with-hdf5' where HDF5 locations are specified
+dnl     in the config-site file. Fixed problem where READLINE_LIBS was
+dnl     getting populated with ALL libs not just those necessary to support
+dnl     readline. Fixed problem where browser would REQUIRE readline. Still
+dnl     can't handle case where user wants to specify different readline
+dnl     include/lib dirs.
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -623,9 +631,6 @@ AC_ARG_ENABLE(browser,
     if test "$enable_browser" = "no"; then
         BROWSER=""
     fi)
-if test -n "$BROWSER"; then
-    detect_readline=yes
-fi
 AC_SUBST(BROWSER)
 
 dnl handle silex
@@ -702,21 +707,6 @@ if test -n "$FPZIP"; then
     AC_DEFINE(HAVE_FPZIP,1,[Support for Lindstrom float array compression])
 fi
 
-# Obsolute
-# Add an option for disabling the stat checks.
-##AC_MSG_CHECKING(if we should disable filesystem checks)
-##AC_ARG_ENABLE(filesystem-checks,
-##        AC_HELP_STRING([--disable-filesystem-checks],
-##            [build without filesystem checks]),
-##        UseStat="$enable_filesystem_checks", 
-##        UseStat=yes)
-##if test "$UseStat" = "no"; then
-##    AC_MSG_RESULT(yes)
-##    AC_DEFINE(DISABLE_FILESYSTEM_CHECKS,1,[Disable stat checks])
-##else
-##    AC_MSG_RESULT(no)
-##fi
-
 # Turn on C optimization flags
 AC_MSG_CHECKING(compiler optimization)
 if test "X$USING_DEBUG" = Xno; then
@@ -747,23 +737,6 @@ AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement",CFLAGS="$CFLAGS -Wdeclar
 # Use size of off64_t to determine which form of stat() calls to make 
 #
 AC_CHECK_SIZEOF(off64_t)
-
-# Check to see if we're running clearmake.
-# If we are, set the build verbosity to 0.  Also, set the
-# compilation rule to include the OS, so that we won't wink in object
-# files across OSes.
-#
-dnl Note that the first character in the OS_RULE is a tab.  Don't change this 
-dnl to spaces; it's used in the Makefiles.
-AC_MSG_CHECKING(for clearmake)
-if test "`${MAKE-make} -version 2>/dev/null | cut -d' ' -f1`" = "clearmake"; then
-    AC_MSG_RESULT(yes)
-    CLEARCASE_BLD_VERBOSITY=0; export CLEARCASE_BLD_VERBOSITY
-    OS_RULE="	: $OS_type"
-else
-    AC_MSG_RESULT(no)
-fi
-AC_SUBST(OS_RULE)
 
 dnl We always use the install-sh script, so don't uncomment the following line.
 AC_PROG_INSTALL
@@ -876,38 +849,6 @@ AC_CACHE_SAVE
 dnl the hdf5 library checks (to follow) will require the -lm if its required
 AC_CHECK_LIBM
 LIBS="$LIBS $LIBM"
-
-
-dnl
-dnl We only need to check for -ldl if we're on SunOS.
-dnl MCM -- 10Jul08: No idea why we're doing dl checks twice here. But, 
-dnl I made the second ones in the case statement first check to see if
-dnl dl was already defined.
-AC_MSG_CHECKING(for Linux/SunOS and -ldl)
-if test "`uname 2>/dev/null`" = "Linux" || test "`uname 2>/dev/null`" = "SunOS"; then
-    AC_CHECK_LIB(dl, main,   LIBS="-ldl $LIBS")
-else
-    AC_MSG_RESULT(no)
-fi
-case "${host}" in
-  hppa*-hp-hpux*)
-   AC_CHECK_LIB(nsl, main, LIBS="-lnsl $LIBS")
-   ;;
-  sparc-sun-solaris2*)
-   if test -z "`echo $LIBS | tr ' ' '\n' | grep -x -e '-ldl'`"; then
-     AC_CHECK_LIB(dl, main,   LIBS="-ldl $LIBS")
-   fi
-   AC_CHECK_LIB(socket, main, LIBS="-lsocket $LIBS")
-   AC_CHECK_LIB(nsl, main, LIBS="-lnsl $LIBS")
-   ;;
-  *-*-linux-gnu)
-   if test -z "`echo $LIBS | tr ' ' '\n' | grep -x -e '-ldl'`"; then
-     AC_CHECK_LIB(dl, main,   LIBS="-ldl $LIBS")
-   fi
-   ;;
-  *)
-   ;;
-esac
 
 dnl ----------------------------------------------------------------------
 dnl Is the szlib present? It has a library
@@ -1035,6 +976,7 @@ esac
 #
 
 if test -n "$HDF5_DRV"; then
+   AC_MSG_CHECKING(for hdf5)
    saved_CPPFLAGS="$CPPFLAGS"
    saved_LDFLAGS="$LDFLAGS"
    saved_LIBS="$LIBS"
@@ -1043,24 +985,9 @@ if test -n "$HDF5_DRV"; then
 	   ,
 	   withval="default")
    if test "$withval" = "no" ; then
-      AC_MSG_CHECKING(for hdf5)
       AC_MSG_RESULT(suppressed)
       HDF5_DRV=""
    elif test "$withval" = "default" ; then
-      if test "$DEFAULT_HDF5" != "" ; then
-         CPPFLAGS="$CPPFLAGS -I$DEFAULT_HDF5/include"
-         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5/lib"
-         LIBS="$LIBS -lhdf5 -lz"
-         hdf5_inc=$DEFAULT_HDF5/include
-         hdf5_lib=$DEFAULT_HDF5/lib
-         hdf5_explicit=true
-      fi
-      if test "$DEFAULT_HDF5_LIB" != "" ; then
-         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5_LIB"
-         LIBS="$LIBS -lhdf5 -lz"
-         hdf5_lib=$DEFAULT_HDF5_LIB
-         hdf5_explicit=true
-      fi
       if test "$DEFAULT_HDF5_LIBDIR" != "" ; then
          LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5_LIBDIR"
          LIBS="$LIBS -lhdf5 -lz"
@@ -1073,30 +1000,14 @@ if test -n "$HDF5_DRV"; then
          hdf5_explicit=true
       fi
       if test -d "$hdf5_lib"; then
-         AC_MSG_CHECKING([using default hdf5 path provided])
          AC_MSG_RESULT([$hdf5_lib])
          AC_DEFINE(HAVE_HDF5_H,1,[hdf5 header file])
          AC_DEFINE(HAVE_LIBHDF5,1,[hdf5 library])
       else
-         AC_MSG_CHECKING(for hdf5)
-         AC_MSG_RESULT(suppressed)
+         AC_MSG_RESULT(no)
          HDF5_DRV=""
       fi
    elif test "$withval" = "yes" ; then
-      if test "$DEFAULT_HDF5" != "" ; then
-         CPPFLAGS="$CPPFLAGS -I$DEFAULT_HDF5/include"
-         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5/lib"
-         LIBS="$LIBS -lhdf5 -lz"
-         hdf5_inc=$DEFAULT_HDF5/include
-         hdf5_lib=$DEFAULT_HDF5/lib
-         hdf5_explicit=true
-      fi
-      if test "$DEFAULT_HDF5_LIB" != "" ; then
-         LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5_LIB"
-         LIBS="$LIBS -lhdf5 -lz"
-         hdf5_lib=$DEFAULT_HDF5_LIB
-         hdf5_explicit=true
-      fi
       if test "$DEFAULT_HDF5_LIBDIR" != "" ; then
          LDFLAGS="$LDFLAGS -L$DEFAULT_HDF5_LIBDIR"
          LIBS="$LIBS -lhdf5 -lz"
@@ -1109,12 +1020,12 @@ if test -n "$HDF5_DRV"; then
          hdf5_explicit=true
       fi
       if test -d "$hdf5_lib"; then
-         AC_MSG_CHECKING([using hdf5 path provided])
          AC_MSG_RESULT([$hdf5_lib])
+         AC_DEFINE(HAVE_HDF5_H,1,[hdf5 header file])
+         AC_DEFINE(HAVE_LIBHDF5,1,[hdf5 library])
       else
          AC_MSG_ERROR([expected to find hdf5 environment variables])
-         AC_MSG_CHECKING(for hdf5)
-         AC_MSG_RESULT(suppressed)
+         AC_MSG_RESULT(no)
          HDF5_DRV=""
       fi
    else
@@ -1273,14 +1184,21 @@ else
 fi
 
 dnl
+READLINE_LIBS=""
 if test "X$detect_readline" = Xyes; then
 # use contributed GNU m4 macro library provided see:
 #   autoconf-archive-2006-06-04/htmldoc/vl_lib_readline.html
+   saved_LIBS="$LIBS"
    VL_LIB_READLINE
+   # Put only the stuff NOT already in $LIBS into READLINE_LIBS
+   saved_LIBS_grep=$(echo $saved_LIBS | tr -s ' ' | sed 's% %\\|%g')
+   READLINE_LIBS=$(echo $LIBS | tr -s ' ' | tr ' ' '\n' | grep -v -e $saved_LIBS_grep | tr '\n' ' ')
+   LIBS="$saved_LIBS"
 else
    AC_MSG_CHECKING(for readline)
    AC_MSG_RESULT(disabled)
 fi
+AC_SUBST(READLINE_LIBS)
 
 AC_ARG_WITH(qt,
     AC_HELP_STRING([--with-qt],[specify top-level Qt directory @<:@default=yes@:>@]),
