@@ -80,10 +80,16 @@ c  Purpose
 c
 c	Build ucd-mesh, ucd-var, facelist and zonelist, and return
 c	the mesh ID.
+c
+c  Modifications:
+c    Kathleen Bonnell, Wed Sep 2 16:12:15 PDT 20099
+c    Changed 'character*8 name' to 'character*(*) name' to remove 
+c    'Character length argument mismatch' compiler error.
+c
 c-----------------------------------------------------------------------
 
       integer  dbid             ! Database identifier
-      character*8 name          ! Name of mesh to build
+      character*(*) name        ! Name of mesh to build
       integer     lname         ! Length of name
 
       include "silo.inc"       ! Don't forget to include this file

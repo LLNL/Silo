@@ -217,13 +217,13 @@ DBFortranRemovePointer (int value)
     DBFortranEmptyPointerSpaces++;
 }
 
-FORTRAN
+SILO_API FORTRAN
 DBMKPTR_FC (void *p)
 {
     return DBFortranAllocPointer(p);
 }
 
-FORTRAN
+SILO_API FORTRAN
 DBRMPTR_FC (int *pid)
 {
     DBFortranRemovePointer(*pid);
@@ -249,8 +249,11 @@ DBRMPTR_FC (int *pid)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDIOPT_FC (int *optlist_id, int *option, int *ivalue)
 {
     DBoptlist     *optlist = NULL;
@@ -290,8 +293,11 @@ DBADDIOPT_FC (int *optlist_id, int *option, int *ivalue)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDROPT_FC (int *optlist_id, int *option, float *rvalue)
 {
     DBoptlist     *optlist = NULL;
@@ -331,8 +337,11 @@ DBADDROPT_FC (int *optlist_id, int *option, float *rvalue)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDDOPT_FC (int *optlist_id, int *option, double *dvalue)
 {
     DBoptlist     *optlist = NULL;
@@ -386,8 +395,11 @@ DBADDDOPT_FC (int *optlist_id, int *option, double *dvalue)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDCOPT_FC (int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
 {
     char          *cval = NULL;
@@ -445,10 +457,11 @@ DBADDCOPT_FC (int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
- *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
  *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDCAOPT_FC (int *optlist_id, int *option,
              int *nval, FCD_DB cvalue, int *lcvalue)
 {
@@ -513,8 +526,11 @@ DBADDCAOPT_FC (int *optlist_id, int *option,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBMKOPTLIST_FC (int *maxopts, int *optlist_id)
 {
     DBoptlist     *optlist = NULL;
@@ -550,8 +566,11 @@ DBMKOPTLIST_FC (int *maxopts, int *optlist_id)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBFREEOPTLIST_FC (int *optlist_id)
 {
     int            err;
@@ -598,8 +617,11 @@ DBFREEOPTLIST_FC (int *optlist_id)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTMAT_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
            int *nmat, int *matnos, int *matlist, int *dims, int *ndims,
@@ -685,8 +707,11 @@ DBPUTMAT_FC (int *dbid, FCD_DB name,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTMSP_FC (int *dbid, FCD_DB name, int *lname, FCD_DB matname, int *lmatname,
            int *nmat, int *nmatspec, int *speclist, int *dims, int *ndims,
            int *nspecies_mf, DB_DTPTR1 species_mf, int *mix_speclist, int *mixlen,
@@ -782,8 +807,11 @@ DBPUTMSP_FC (int *dbid, FCD_DB name, int *lname, FCD_DB matname, int *lmatname,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBCALCFL_FC (int *znodelist, int *nnodes, int *origin, int *zshapesize,
            int *zshapecnt, int *nzshapes, int *matlist, int *bnd_method,
            int *object_id)
@@ -834,8 +862,11 @@ DBCALCFL_FC (int *znodelist, int *nnodes, int *origin, int *zshapesize,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBCLOSE_FC (int *dbid)
 {
     int            status;
@@ -881,8 +912,11 @@ DBCLOSE_FC (int *dbid)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBCREATE_FC (FCD_DB pathname, int *lpathname, int *mode, int *target,
            FCD_DB fileinfo, int *lfileinfo, int *filetype, int *dbid)
 {
@@ -961,8 +995,11 @@ DBCREATE_FC (FCD_DB pathname, int *lpathname, int *mode, int *target,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBINQLEN_FC (int *dbid, FCD_DB varname, int *lvarname, int *len)
 {
     char          *varnm = NULL;
@@ -1033,8 +1070,11 @@ DBINQLEN_FC (int *dbid, FCD_DB varname, int *lvarname, int *len)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBMKDIR_FC (int *dbid, FCD_DB dirname, int *ldirname, int *status)
 {
     char          *dir = NULL;
@@ -1106,8 +1146,11 @@ DBMKDIR_FC (int *dbid, FCD_DB dirname, int *ldirname, int *status)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBOPEN_FC (FCD_DB pathname, int *lpathname, int *type, int *mode, int *dbid)
 {
     char          *path = NULL;
@@ -1178,8 +1221,11 @@ DBOPEN_FC (FCD_DB pathname, int *lpathname, int *type, int *mode, int *dbid)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTFL_FC (int *dbid, FCD_DB name, int *lname, int *nfaces, int *ndims,
           int *nodelist, int *lnodelist, int *origin, int *zoneno,
           int *shapesize, int *shapecnt, int *nshapes, int *types,
@@ -1247,8 +1293,11 @@ DBPUTFL_FC (int *dbid, FCD_DB name, int *lname, int *nfaces, int *ndims,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBWRTFL_FC (int *dbid, FCD_DB name, int *lname, int *object_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -1327,8 +1376,11 @@ DBWRTFL_FC (int *dbid, FCD_DB name, int *lname, int *object_id, int *status)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
              int *lmeshnames, int *meshtypes, int *optlist_id, int *status)
 {
@@ -1415,11 +1467,15 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
  *     Mark C. Miller 
  *     October 12, 2005
  *
- *
+ * Modifications:
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
              int *lnames, int *types, FCD_DB defns, int *ldefns,
              int *optlist_id, int *status)
@@ -1551,8 +1607,11 @@ DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
             int *lvarnames, int *vartypes, int *optlist_id, int *status)
 {
@@ -1641,8 +1700,11 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
             int *lmatnames, int *optlist_id, int *status)
 {
@@ -1743,8 +1805,11 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPTR1 y,
           DB_DTPTR1 z, int *nels, int *datatype, int *optlist_id, int *status)
 {
@@ -1816,8 +1881,11 @@ DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPT
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTPV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
            DB_DTPTR1 var, int *nels, int *datatype, int *optlist_id, int *status)
@@ -1907,8 +1975,11 @@ DBPUTPV1_FC (int *dbid, FCD_DB name,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTQM_FC (int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
           FCD_DB yname, int *lyname, FCD_DB zname, int *lzname, DB_DTPTR1 x,
           DB_DTPTR1 y, DB_DTPTR1 z, int *dims, int *ndims, int *datatype,
@@ -2043,8 +2114,11 @@ DBPUTQM_FC (int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTQV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
            DB_DTPTR1 var, int *dims, int *ndims, DB_DTPTR1 mixvar, int *mixlen,
@@ -2131,8 +2205,11 @@ DBPUTQV1_FC (int *dbid, FCD_DB name,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPTR1 y,
           DB_DTPTR1 z, FCD_DB xname, int *lxname, FCD_DB yname, int *lyname,
           FCD_DB zname, int *lzname, int *datatype, int *nnodes, int *nzones,
@@ -2298,8 +2375,11 @@ DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPT
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTUV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
            DB_DTPTR1 var, int *nels, DB_DTPTR1 mixvar, int *mixlen, int *datatype,
@@ -2385,8 +2465,11 @@ DBPUTUV1_FC (int *dbid, FCD_DB name,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTZL_FC (int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
           int *nodelist, int *lnodelist, int *origin, int *shapesize,
           int *shapecnt, int *nshapes, int *status)
@@ -2438,12 +2521,16 @@ DBPUTZL_FC (int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
  *     Mark C. Miller
  *     July 19, 2005
  *
- *
+ * Modifications:
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
 
-FORTRAN
+SILO_API FORTRAN
 DBPUTZL2_FC (int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
           int *nodelist, int *lnodelist, int *origin, int *lo_offset,
           int *hi_offset, int *shapetype, int *shapesize,
@@ -2515,8 +2602,11 @@ DBPUTZL2_FC (int *dbid, FCD_DB name, int *lname, int *nzones, int *ndims,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBRDVAR_FC (int *dbid, FCD_DB varname, int *lvarname, void *ptr)
 {
     int            iret;
@@ -2581,8 +2671,11 @@ DBRDVAR_FC (int *dbid, FCD_DB varname, int *lvarname, void *ptr)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBRDVARSLICE_FC (int *dbid, FCD_DB varname, int *lvarname, int *offset,
                int *length, int *stride, int *ndims, void *ptr)
 {
@@ -2645,9 +2738,11 @@ DBRDVARSLICE_FC (int *dbid, FCD_DB varname, int *lvarname, int *offset,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
- *-------------------------------------------------------------------------
- */
-FORTRAN
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
+ *------------------------------------------------------------------------- */
+SILO_API FORTRAN
 DBWRITESLICE_FC (int *dbid, FCD_DB varname, int *lvarname, void *values,
                int *datatype, int *offset, int *length, int *stride,
                int *dims, int *ndims)
@@ -2721,8 +2816,11 @@ DBWRITESLICE_FC (int *dbid, FCD_DB varname, int *lvarname, void *values,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSETDIR_FC (int *dbid, FCD_DB pathname, int *lpathname)
 {
     int            err;
@@ -2787,8 +2885,11 @@ DBSETDIR_FC (int *dbid, FCD_DB pathname, int *lpathname)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSETDIRID_FC (int *dbid, int *dirid)
 {
     DBfile        *dbfile = NULL;
@@ -2823,8 +2924,11 @@ DBSETDIRID_FC (int *dbid, int *dirid)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSHOWERRORS_FC (int *mode)
 {
     DBShowErrors(*mode, NULL);
@@ -2832,7 +2936,7 @@ DBSHOWERRORS_FC (int *mode)
     return 0;
 }
 
-FORTRAN
+SILO_API FORTRAN
 DBERRNO_FC()
 {
     return DBErrno();
@@ -2869,8 +2973,11 @@ DBERRNO_FC()
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBWRITE_FC (int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
           int *ndims, int *datatype)
 {
@@ -2939,8 +3046,11 @@ DBWRITE_FC (int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTCA_FC (int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
           int *elengths, int *nelems, DB_DTPTR1 values, int *datatype,
           int *optlist_id, int *status)
@@ -3047,8 +3157,11 @@ DBPUTCA_FC (int *dbid, FCD_DB _name, int *lname, FCD_DB enames, int *width,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBGETCA_FC (int *dbid, FCD_DB _name, int *lname, int *width, FCD_DB enames,
           int *elengths, int *nelems, DB_DTPTR1 values, int *nvalues,
           int *datatype)
@@ -3160,7 +3273,7 @@ DBGETCA_FC (int *dbid, FCD_DB _name, int *lname, int *width, FCD_DB enames,
  *     Using AC_FC_WRAPPERS for name-mangling
  *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBFGETCA_FC (int *dbid, FCD_DB _name, int *lname, DB_DTPTR1 values, int *nvalues)
 {
     API_BEGIN("dbfgetca", int, -1) {
@@ -3199,9 +3312,11 @@ DBFGETCA_FC (int *dbid, FCD_DB _name, int *lname, DB_DTPTR1 values, int *nvalues
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
- *-------------------------------------------------------------------------
- */
-FORTRAN
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
+ *------------------------------------------------------------------------- */
+SILO_API FORTRAN
 DBPUTCURVE_FC (int *dbid, FCD_DB _name, int *lname, DB_DTPTR1 xvals, DB_DTPTR1 yvals,
               int *datatype, int *npts, int *optlist_id, int *status)
 {
@@ -3260,9 +3375,11 @@ DBPUTCURVE_FC (int *dbid, FCD_DB _name, int *lname, DB_DTPTR1 xvals, DB_DTPTR1 y
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
- *-------------------------------------------------------------------------
- */
-FORTRAN
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
+ *------------------------------------------------------------------------ */
+SILO_API FORTRAN
 DBGETCURVE_FC (int *dbid, FCD_DB _name, int *lname, int *maxpts, DB_DTPTR1 xvals,
               DB_DTPTR1 yvals, int *datatype, int *npts)
 {
@@ -3350,8 +3467,11 @@ DBGETCURVE_FC (int *dbid, FCD_DB _name, int *lname, int *maxpts, DB_DTPTR1 xvals
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBINQCA_FC (int *dbid, FCD_DB _name, int *lname, int *maxwidth, int *nelems,
           int *nvalues, int *datatype)
 {
@@ -3423,8 +3543,11 @@ DBINQCA_FC (int *dbid, FCD_DB _name, int *lname, int *maxwidth, int *nelems,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDICMP_FC (int *obj_id, char *compname, int *val)
 {
     DBobject      *object = NULL;
@@ -3459,8 +3582,11 @@ DBADDICMP_FC (int *obj_id, char *compname, int *val)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDRCMP_FC (int *object_id, char *compname, float *val)
 {
     DBobject      *object = NULL;
@@ -3502,8 +3628,11 @@ DBADDRCMP_FC (int *object_id, char *compname, float *val)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDCCMP_FC (int *object_id, char *compname, char *val)
 {
     DBobject      *object = NULL;
@@ -3544,8 +3673,11 @@ DBADDCCMP_FC (int *object_id, char *compname, char *val)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBMKOBJECT_FC (int *maxcomponents, int *object_id)
 {
     API_BEGIN("dbmkobject", int, -1) {
@@ -3583,8 +3715,11 @@ DBMKOBJECT_FC (int *maxcomponents, int *object_id)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBFREEOBJECT_FC (int *object_id)
 {
     DBobject      *obj = NULL;
@@ -3628,8 +3763,11 @@ DBFREEOBJECT_FC (int *object_id)
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBGETQV1_FC (int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
            int *ndims, void *mixvar, int *mixlen, int *datatype, int *centering)
 {
@@ -3718,8 +3856,11 @@ DBGETQV1_FC (int *dbid, FCD_DB varname, int *lvarname, void *var, int *dims,
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBINQFILE_FC (FCD_DB pathname, int *lpathname, int *is_file)
 {
     char          *path = NULL;
@@ -3763,12 +3904,14 @@ DBINQFILE_FC (FCD_DB pathname, int *lpathname, int *is_file)
  *     Thu Jul 28 10:41:14 PDT 2005 
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSET2DSTRLEN_FC (int *len)
 {
     int old = fortran2DStrLen;
@@ -3797,12 +3940,14 @@ DBSET2DSTRLEN_FC (int *len)
  *     Thu Jul 28 10:41:14 PDT 2005 
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBGET2DSTRLEN_FC ()
 {
     API_BEGIN("dbget2dstrlen", int, -1) {
@@ -3827,12 +3972,14 @@ DBGET2DSTRLEN_FC ()
  *     Mon May  1 15:50:09 PDT 2006 
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSETOVRWRT_FC (int *allow)
 {
     API_BEGIN("dbsetovrwrt", int, -1) {
@@ -3857,12 +4004,14 @@ DBSETOVRWRT_FC (int *allow)
  *     Mon May  1 15:50:09 PDT 2006 
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBGETOVRWRT_FC ()
 {
     API_BEGIN("dbgetovrwrt", int, -1) {
@@ -3887,12 +4036,14 @@ DBGETOVRWRT_FC ()
  *     Mon May  1 15:50:09 PDT 2006 
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSETCKSUMS_FC (int *enable)
 {
     API_BEGIN("dbsetcksums", int, -1) {
@@ -3917,12 +4068,14 @@ DBSETCKSUMS_FC (int *enable)
  *     Mon May  1 15:50:09 PDT 2006 
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBGETCKSUMS_FC ()
 {
     API_BEGIN("dbgetcksums", int, -1) {
@@ -3954,13 +4107,14 @@ DBGETCKSUMS_FC ()
  *
  *
  * Modifications
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
  *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
 {
     char          *cval = NULL;
@@ -4007,13 +4161,14 @@ DBSETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
  *
  *
  * Modifications
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
  *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
  *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBGETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
 {
     char          *cval = NULL;
@@ -4047,12 +4202,14 @@ DBGETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
  *     Mark C. Miller, Thu Apr 19 19:26:11 PDT 2007 
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSETHDFNMS_FC (int *enable)
 {
     API_BEGIN("dbsethdfnms", int, -1) {
@@ -4076,12 +4233,14 @@ DBSETHDFNMS_FC (int *enable)
  *     Mark C. Miller, Thu Apr 19 19:26:11 PDT 2007 
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBGETHDFNMS_FC ()
 {
     API_BEGIN("dbgethdfnms", int, -1) {
@@ -4103,8 +4262,13 @@ DBGETHDFNMS_FC ()
  *
  * Programmer
  *     Mark C. Miller, Thu Oct 11 20:56:41 PDT 2007
+ *
+ * Modifications:
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSETDEPWARN_FC (int *max_count)
 {
     API_BEGIN("dbsetdepwarn", int, -1) {
@@ -4126,8 +4290,13 @@ DBSETDEPWARN_FC (int *max_count)
  *
  * Programmer
  *     Mark C. Miller, Thu Oct 11 20:56:41 PDT 2007
+ *
+ * Modifications:
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBGETDEPWARN_FC ()
 {
     API_BEGIN("dbgetdepwarn", int, -1) {
@@ -4152,12 +4321,14 @@ DBGETDEPWARN_FC ()
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBMKMRGTREE_FC (int *source_mesh_type, int *type_info_bits,
     int *max_root_descendents, int *optlist_id, int *tree_id)
 {
@@ -4192,12 +4363,14 @@ DBMKMRGTREE_FC (int *source_mesh_type, int *type_info_bits,
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBFREEMRGTREE_FC (int *tree_id)
 {
     DBmrgtree     *tree= NULL;
@@ -4228,12 +4401,14 @@ DBFREEMRGTREE_FC (int *tree_id)
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDREGION_FC (int *tree_id, FCD_DB region_name, int *lregion_name,
     int *type_info_bits, int *max_descendents, FCD_DB maps_name,
     int *lmaps_name, int *nsegs, int *seg_ids, int *seg_sizes,
@@ -4305,12 +4480,14 @@ DBADDREGION_FC (int *tree_id, FCD_DB region_name, int *lregion_name,
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
     int *type_info_bits, FCD_DB maps_name, int *lmaps_name, int *nsegs,
     int *seg_ids, int *seg_sizes, int *seg_types, int *optlist_id, int *status)
@@ -4393,12 +4570,14 @@ DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBSETCWR_FC (int *tree_id, FCD_DB path, int *lpath)
 {
     DBmrgtree *tree = NULL;
@@ -4449,12 +4628,14 @@ DBSETCWR_FC (int *tree_id, FCD_DB path, int *lpath)
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTMRGTREE_FC (int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
     FCD_DB mesh_name, int *lmesh_name, int *tree_id, int *optlist_id,
     int *status)
@@ -4528,12 +4709,14 @@ DBPUTMRGTREE_FC (int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
  *
  * Modifications
- *
- *
  *     Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
  *     Using AC_FC_WRAPPERS for name-mangling
+ *
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTGRPLMAP_FC (int *dbid, FCD_DB map_name, int *lmap_name,
     int *num_segments, int *groupel_types, int *segment_lengths,
     int *segment_ids, int *segment_data_ids, int *segment_fracs_ids,
@@ -4604,8 +4787,13 @@ DBPUTGRPLMAP_FC (int *dbid, FCD_DB map_name, int *lmap_name,
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications:
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
     const int *typeflags, const int *bndids, const void *coeffs,
     int *lcoeffs, int *datatype, const double *extents, FCD_DB zlname,
@@ -4678,8 +4866,13 @@ DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications:
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTCSGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
     int *lmeshname, int *data_ids, int *nvals, int *datatype,
     int *centering, int *optlist_id, int *status)
@@ -4749,8 +4942,13 @@ DBPUTCSGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB meshname,
  *
  * Programmer
  *     Mark C. Miller, Tue Oct  9 22:25:20 PDT 2007
+ *
+ * Modifications:
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *--------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPUTCSGZL_FC (int *dbid, FCD_DB name, int *lname, int *nregs,
     const int *typeflags, const int *leftids, const int *rightids,
     const void *xforms, int *lxforms, int *datatype, int *nzones,
@@ -4812,8 +5010,13 @@ DBPUTCSGZL_FC (int *dbid, FCD_DB name, int *lname, int *nregs,
  *
  * Programmer
  *     Mark C. Miller, Wed Oct 24 15:28:51 PDT 2007
+ *
+ * Modifications:
+ *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
+ *     Added SILO_API so symbols are correctly exported on windows.
+ *
  *-------------------------------------------------------------------------*/
-FORTRAN
+SILO_API FORTRAN
 DBPMRGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB tname, int *ltname,
     int *ncomps, FCD_DB compnames, int *lcompnames,
     int *nregns, FCD_DB regnnames, int *lregnnames,

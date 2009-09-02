@@ -18,7 +18,7 @@
 			OutputDirectory=".\Debug\ucdsamp3"
 			IntermediateDirectory=".\Debug\ucdsamp3"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -55,8 +55,8 @@
 				ProgramDataBaseFileName=".\Debug\ucdsamp3\ucdsamp3"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DisableSpecificWarnings="4244;4305"
 				DebugInformationFormat="4"
+				DisableSpecificWarnings="4244;4305"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -112,7 +112,7 @@
 			OutputDirectory=".\Release\ucdsamp3"
 			IntermediateDirectory=".\Release\ucdsamp3"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"

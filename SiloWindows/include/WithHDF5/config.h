@@ -10,10 +10,10 @@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
    case), which must not contain underscores, for linking with Fortran. */
-#define FC_FUNC(name,NAME) name ## _
+#define FC_FUNC(name,NAME) NAME
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
-#define FC_FUNC_(name,NAME) name ## __
+/*#define SILO_FC_FUNC_(name,NAME) name ## _*/
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 /* #define HAVE_DLFCN_H 1 */

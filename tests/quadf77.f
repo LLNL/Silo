@@ -109,10 +109,16 @@ c
 c  Purpose
 c
 c	Build quad-mesh, quad-var and return the mesh ID.
+c
+c  Modifications:
+c    Kathleen Bonnell, Wed Sep 2 16:12:15 PDT 20099
+c    Changed 'character*8 name' to 'character*(*) name' to remove 
+c    'Character length argument mismatch' compiler error.
+c
 c----------------------------------------------------------------------
 
       integer  dbid, lname
-      character*8 name
+      character*(*) name
 
       parameter  (NX     = 4)
       parameter  (NY     = 3)

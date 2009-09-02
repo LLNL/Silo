@@ -115,6 +115,20 @@ REM    echo ============================================== >> %resultsfile%
 REM    echo ============================================== >> %resultsfile%
 REM )
 
+REM Fortran tests
+set ft=(array_f.exe curve_f.exe mat_f.exe point_f.exe quad_f.exe testall_f.exe ucd_f.exe)
+for %%v in %ft% do (
+    if exist %%v (
+        echo Running %%v
+        echo Running %%v >> %resultsfile%
+        %%v > %errorfile% 2>&1
+        type %errorfile% >> %resultsfile% 
+        echo exit code: %errorlevel% >> %resultsfile%
+        echo ============================================== >> %resultsfile%
+        echo ============================================== >> %resultsfile%
+    )
+)
+
 
 ::print results
 ::type %resultsfile%
