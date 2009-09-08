@@ -1692,6 +1692,10 @@ stc_silo_types (void) {
       COMP (nmat,               "primitive 'int'");
       COMP (nmatspec,
             "pointer (array 'self.nmat' (primitive 'int'))");
+      COMP (species_names,
+            "pointer (array 'SH4, self.nmatspec' (primitive 'string'))");
+      COMP (speccolors,
+            "pointer (array 'SH4, self.nmatspec' (primitive 'string'))");
    } ESTRUCT;
 
    STRUCT (DBquadmesh) {
@@ -2166,6 +2170,10 @@ stc_silo_types (void) {
       COMP (mixlen,             "primitive 'int'");
       COMP (mix_speclist,
             "pointer (array 'self.mixlen' (primitive 'int'))");
+      COMP (specnames,
+            "pointer (array 'SH4, self.nmatspec' (primitive 'string'))");
+      COMP (speccolors,
+            "pointer (array 'SH4, self.nmatspec' (primitive 'string'))");
    } ESTRUCT;
 
    STRUCT (DBcompoundarray) {

@@ -275,6 +275,8 @@ ptr_print (obj_t _self, out_t *f) {
  *
  * Modifications:
  *
+ *   Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *   Added RETRIEVE op case.
  *-------------------------------------------------------------------------
  */
 static void
@@ -284,15 +286,20 @@ ptr_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
    void         *ptr;
    out_t        *f;
 
+   ptr = *((void**)mem);
    switch (operation) {
    case WALK_PRINT:
       f = (wdata && wdata->f) ? wdata->f : OUT_STDOUT;
-      ptr = *((void**)mem);
       if (!ptr) {
          out_printf (f, "NULL");
       } else {
          obj_walk1 (self->sub, ptr, operation, wdata);
       }
+      break;
+
+   case WALK_RETRIEVE:
+      if (!ptr) return;
+      obj_walk1 (self->sub, ptr, operation, wdata);
       break;
 
    default:

@@ -27,6 +27,13 @@
 #define NX 30
 #define NY 40
 
+char *species_names[]={"Brad","Kathleen","Mark","Hank","Eric",
+                   "Jeremy","Cyrus","Sean","Dave","Randy",
+                   "Gunther","Tom"};
+char *speccolors[]={"Red","Green","Blue","Cyan","Magenta",
+                   "Yellow","Black","Orange","Brown","Purple",
+                   "White","Pink"};
+
 /*-------------------------------------------------------------------------
  * Function:    build_dbfile
  *
@@ -389,7 +396,7 @@ build_dbfile(DBfile *dbfile)
 
     /* create the option lists for the multi-block calls. */
 
-    optlist = DBMakeOptlist(8);
+    optlist = DBMakeOptlist(10);
     /* For all calls: */
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
@@ -401,6 +408,8 @@ build_dbfile(DBfile *dbfile)
     DBAddOption(optlist, DBOPT_MATNAME, "mat1");
     DBAddOption(optlist, DBOPT_NMAT, &nmats);
     DBAddOption(optlist, DBOPT_NMATSPEC, nmatspec);
+    DBAddOption(optlist, DBOPT_SPECNAMES, species_names);
+    DBAddOption(optlist, DBOPT_SPECCOLORS, speccolors);
     
 
     /* create the multi-block mesh */

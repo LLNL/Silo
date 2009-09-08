@@ -9620,6 +9620,9 @@ UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
  *
  *    Thomas R. Treadway, Tue Aug 15 14:05:59 PDT 2006
  *    Added DBOPT_ALLOWMAT0
+ *
+ *    Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *    Added names and colors for species.
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -9775,6 +9778,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_HIDE_FROM_GUI:
                         _ms._guihide = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_SPECNAMES:
+                        _ms._specnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_SPECCOLORS:
+                        _ms._speccolors = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -10346,6 +10357,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                            NOT SET value. So, we always add 1 to whatever the
                            caller gives us. */
                         _mm._topo_dim = DEREF(int, optlist->values[i])+1;
+                        break;
+
+                    case DBOPT_SPECNAMES:
+                        _mm._specnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_SPECCOLORS:
+                        _mm._speccolors = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -11915,238 +11934,6 @@ char *db_unsplit_path ( const db_Pathname *p )
 /*
  * END CODE FROM JIM REUS' DSL }
  */
-
-#if 0
-/*----------------------------------------------------------------------
- *  Routine                                                DBMakeSil
- *
- *  Purpose Allocate an sil object of the requested size and
- *  initialize it.
- *
- *  Programmer
- *
- *      Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007 
- *--------------------------------------------------------------------*/
-PUBLIC DBsil *
-DBMakeSil(int maxsets, int maxedges)
-{
-    DBsil *sil = NULL;
-
-    API_BEGIN("DBMakeSil", DBsil *, NULL) {
-        if (maxsets <= 0)
-            API_ERROR("maxsets", E_BADARGS);
-        if (maxedges <= 0)
-            API_ERROR("maxedges", E_BADARGS);
-        if (NULL == (sil = ALLOC(DBsil)))
-            API_ERROR(NULL, E_NOMEM);
-        if (NULL == (sil->edgetails = ALLOC_N(int, maxedges))) {
-            API_ERROR(NULL, E_NOMEM);
-        }
-        if (NULL == (sil->edgeheads = ALLOC_N(int, maxedges))) {
-            API_ERROR(NULL, E_NOMEM);
-        }
-        if (NULL == (sil->setnames = ALLOC_N(char *, maxsets))) {
-            API_ERROR(NULL, E_NOMEM);
-        }
-
-        sil->nsets = 0;
-        sil->maxsets = maxsets;
-
-        sil->nedges = 0;
-        sil->maxedges = maxedges;
-
-        API_RETURN(sil);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
-/*----------------------------------------------------------------------
- *  Routine                                                DBFreeSil
- *
- *  Purpose Release the storage associated with the given sil object.
- *
- *  Programmer
- *
- *      Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007 
- *
- *  Returns
- *
- *      Returns 0 on success, -1 on failure.
- *--------------------------------------------------------------------*/
-PUBLIC int
-DBFreeSil(DBsil *sil)
-{
-    int i;
-    API_BEGIN("DBFreeSil", int, -1) {
-        if (!sil) {
-            API_ERROR("sil pointer", E_BADARGS);
-        }
-        FREE(sil->edgetails);
-        FREE(sil->edgeheads);
-        for (i = 0; i < sil->nsets; i++)
-            FREE(sil->setnames[i]);
-        FREE(sil->setnames);
-    }
-    API_END;
-
-    return(0);
-}
-
-/*----------------------------------------------------------------------
- *  Routine                                                     DBAddSet
- *
- *  Purpose
- *
- *      Add a set to a sil 
- *
- *  Programmer
- *
- *      Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007 
- *
- *  Returns
- *
- *      Returns id of added set on success; -1 on failure 
- *
- *--------------------------------------------------------------------*/
-PUBLIC int
-DBAddSet(DBsil *sil, const char *setname)
-{
-    API_BEGIN("DBAddSet", int, -1) {
-        if (!sil)
-            API_ERROR("sil pointer", E_BADARGS);
-        if (!setname || !*setname)
-            API_ERROR("setname", E_BADARGS);
-        if (sil->nsets >= sil->maxsets) {
-            API_ERROR("sil nsets", E_BADARGS);
-        }
-
-        if (NULL == (sil->setnames[sil->nsets] =
-                     STRDUP(setname))) {
-            FREE(sil->setnames[sil->nsets]);
-            API_ERROR(NULL, E_NOMEM);
-        }
-        sil->nsets++;
-    }
-    API_END;
-
-    return(sil->nsets-1);
-}
-
-/*----------------------------------------------------------------------
- *  Routine                                                    DBAddEdge
- *
- *  Purpose
- *
- *      Add an edge to a sil oject 
- *
- *  Programmer
- *
- *      Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007 
- *
- *  Returns
- *
- *      Returns non-negative on success (edge count), -1 on failure 
- *
- *--------------------------------------------------------------------*/
-PUBLIC int
-DBAddEdge(DBsil *sil, int set_at_head, int set_at_tail) 
-{
-    API_BEGIN("DBAddEdge", int, -1) {
-        if (!sil)
-            API_ERROR("sil pointer", E_BADARGS);
-        if (sil->nedges >= sil->maxedges) {
-            API_ERROR("sil nedges", E_BADARGS);
-        }
-        if (set_at_head < 0 || set_at_head >= sil->nsets) {
-            API_ERROR("set_at_head", E_BADARGS);
-        }
-        if (set_at_tail < 0 || set_at_tail >= sil->nsets) {
-            API_ERROR("set_at_tail", E_BADARGS);
-        }
-            sil->edgeheads[sil->nedges] = set_at_head;
-            sil->edgetails[sil->nedges] = set_at_tail;
-
-        sil->nedges++;
-    }
-    API_END;
-
-    return(sil->nedges);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    DBPutSil
- *
- * Purpose:     Writes a sil object to a silo file 
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007
- *-------------------------------------------------------------------------*/
-PUBLIC int
-DBPutSil(DBfile *dbfile, const char *name, const DBsil *sil, 
-    const DBoptlist *opts)
-{
-    int retval;
-
-    API_BEGIN2("DBPutSil", int, -1, name)
-    {
-        if (!dbfile)
-            API_ERROR(NULL, E_NOFILE);
-        if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBPutSil", E_GRABBED) ; 
-        if (!name || !*name)
-            API_ERROR("sil name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
-            API_ERROR("sil name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
-            API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (NULL == dbfile->pub.p_sil)
-            API_ERROR(dbfile->pub.name, E_NOTIMP);
-
-        retval = (dbfile->pub.p_sil) (dbfile, (char *)name, sil, opts); 
-
-        db_FreeToc(dbfile);
-        API_RETURN(retval);
-    }
-    API_END_NOPOP; /* BEWARE: If API_RETURN above is removed use API_END */
-}
-
-/*-------------------------------------------------------------------------
- * Function:    DBGetSil
- *
- * Purpose:     Read a sil object from the file.
- *
- * Return:      Success:        pointer to fresh sil obj
- *
- *              Failure:        NULL
- *
- * Programmer:  Mark C. Miller, Tue Sep 18 15:41:25 PDT 2007
- *
- *-------------------------------------------------------------------------*/
-PUBLIC DBsil *
-DBGetSil (DBfile *dbfile, const char *name)
-{
-    DBsil *retval = NULL;
-
-    API_BEGIN2("DBGetSil", DBsil *, NULL, name)
-    {
-        if (!dbfile)
-            API_ERROR(NULL, E_NOFILE);
-        if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBGetSil", E_GRABBED) ; 
-        if (!name || !*name)
-            API_ERROR("sil name", E_BADARGS);
-        if (NULL == dbfile->pub.g_sil)
-            API_ERROR(dbfile->pub.name, E_NOTIMP);
-
-        retval = (dbfile->pub.g_sil) (dbfile, (char *)name);
-        API_RETURN(retval);
-    }
-    API_END_NOPOP;  /* BEWARE: If API_RETURN above is removed use API_END */
-}
-#endif
 
 static void
 DBFreeMrgnode(DBmrgtnode *tnode, int walk_order, void *data)

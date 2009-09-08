@@ -374,6 +374,8 @@ typedef enum {
 #define DBOPT_DISJOINT_MODE     323
 #define DBOPT_MRGV_ONAMES       324
 #define DBOPT_MRGV_RNAMES       325
+#define DBOPT_SPECNAMES         326
+#define DBOPT_SPECCOLORS        327
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -795,12 +797,14 @@ typedef struct {
     int            id;          /* Identifier for this object  */
     int            nspec;       /* Number of species   */
     int            ngroups;     /* Number of block groups in mesh */
-    char         **specnames;   /* Species names   */    
+    char         **specnames;   /* Species object names   */    
     int            blockorigin; /* Origin (0 or 1) of block numbers */
     int            grouporigin; /* Origin (0 or 1) of group numbers */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     int            nmat;        /* equiv. to nmatnos of a DBmultimat */
     int           *nmatspec;    /* equiv. to matnos of a DBmultimat */
+    char         **species_names; /* optional names of the species */
+    char         **speccolors;  /* optional colors for species */
 } DBmultimatspecies;
 
 /*----------------------------------------------------------------------
@@ -1190,6 +1194,8 @@ typedef struct {
 
     int            datatype;    /* Datatype of mass fraction data. */
     int            guihide;     /* Flag to hide from post-processor's GUI */
+    char         **specnames;   /* Array of species names; length is sum of nmatspec   */
+    char         **speccolors;  /* Array of species colors; length is sum of nmatspec */
 } DBmatspecies;
 
 typedef struct {

@@ -579,6 +579,8 @@ typedef struct DBmultimatspecies_mt {
     char                specnames[256];
     char                nmatspec[256];
     char                matname[256];
+    char                species_names[256];
+    char                speccolors[256];
 } DBmultimatspecies_mt;
 static hid_t    DBmultimatspecies_mt5;
 
@@ -596,6 +598,8 @@ typedef struct DBmatspecies_mt {
     char                nmatspec[256];
     char                species_mf[256];
     char                mix_speclist[256];
+    char                specnames[256];
+    char                speccolors[256];
 } DBmatspecies_mt;
 static hid_t    DBmatspecies_mt5;
 
@@ -2263,6 +2267,8 @@ db_hdf5_init(void)
         MEMBER_S(str256,        specnames);
         MEMBER_S(str256,        nmatspec);
         MEMBER_S(str256,        matname);
+        MEMBER_S(str256,        species_names);
+        MEMBER_S(str256,        speccolors);
     } DEFINE;
 
     STRUCT(DBmatspecies) {
@@ -2279,6 +2285,8 @@ db_hdf5_init(void)
         MEMBER_S(str256,        nmatspec);
         MEMBER_S(str256,        species_mf);
         MEMBER_S(str256,        mix_speclist);
+        MEMBER_S(str256,        specnames);
+        MEMBER_S(str256,        speccolors);
     } DEFINE;
 
     STRUCT(DBpointmesh) {
@@ -10280,6 +10288,9 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *   Added names and colors for species.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -10290,7 +10301,8 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBmatspecies_mt     m;
-    int                 i, nels;
+    char               *s = NULL;
+    int                 i, nels, nstrs = 0;
     
     memset(&m, 0, sizeof m);
     PROTECT {
@@ -10308,6 +10320,29 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
         db_hdf5_compwr(dbfile, DB_INT, 1, &mixlen, mix_speclist,
             m.mix_speclist/*out*/, friendly_name(name,"_mix_speclist", 0));
         
+        if (_ms._specnames != NULL) {
+            int len;
+            for (i = 0; i < nmat; i++)
+                nstrs += nmatspec[i];
+            db_StringArrayToStringList(_ms._specnames, nstrs, &s, &len);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
+                friendly_name(name, "_species_names", 0));
+            FREE(s);
+        }
+
+        if (_ms._speccolors != NULL) {
+            int len;
+            if (nstrs == 0)
+            {
+                for (i = 0; i < nmat; i++)
+                    nstrs += nmatspec[i];
+            }
+            db_StringArrayToStringList(_ms._speccolors, nstrs, &s, &len);
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.speccolors/*out*/,
+                friendly_name(name,"_speccolors", 0));
+            FREE(s);
+        }
+
         /* Build header in memory */
         m.ndims = ndims;
         m.nmat = nmat;
@@ -10334,6 +10369,8 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
             MEMBER_S(str(m.nmatspec), nmatspec);
             MEMBER_S(str(m.species_mf), species_mf);
             MEMBER_S(str(m.mix_speclist), mix_speclist);
+            MEMBER_S(str(m.specnames), specnames);
+            MEMBER_S(str(m.speccolors), speccolors);
         } OUTPUT(dbfile, DB_MATSPECIES, name, &m);
 
     } CLEANUP {
@@ -10362,6 +10399,9 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
  *
  *              Mark C. Miller, Mon Aug  2 15:06:57 PDT 2004
  *              Made it set correct datatype.
+ *
+ *              Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *              Added names and colors for species.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmatspecies *
@@ -10370,9 +10410,10 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMatspecies";
     hid_t               o=-1, attr=-1;
-    int                 _objtype, i, nels;
+    int                 _objtype, i, nels, nstrs = 0;
     DBmatspecies_mt     m;
     DBmatspecies        *ms=NULL;
+    char                *s=NULL;
 
     PROTECT {
         /* Open object and make sure it's a matspecies */
@@ -10425,8 +10466,29 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
         ms->species_mf = db_hdf5_comprd(dbfile, m.species_mf, 0);
         ms->speclist = db_hdf5_comprd(dbfile, m.speclist, 1);
         ms->mix_speclist = db_hdf5_comprd(dbfile, m.mix_speclist, 1);
+        if (SILO_Globals.dataReadMask & DBMatMatnames)
+        {
+            for (i=0; i < ms->nmat; i++)
+                nstrs += ms->nmatspec[i];
+            s = db_hdf5_comprd(dbfile, m.specnames, 1);
+            if (s) ms->specnames = db_StringListToStringArray(s, nstrs);
+            FREE(s);
+        }
+        if (SILO_Globals.dataReadMask & DBMatMatcolors)
+        {
+            if (nstrs == 0)
+            {
+                for (i=0; i < ms->nmat; i++)
+                    nstrs += ms->nmatspec[i];
+            }
+            s = db_hdf5_comprd(dbfile, m.speccolors, 1);
+            if (s) ms->speccolors = db_StringListToStringArray(s, nstrs);
+            FREE(s);
+        }
 
+        H5Aclose(attr);
         H5Tclose(o);
+
     } CLEANUP {
         H5E_BEGIN_TRY {
             H5Aclose(attr);
@@ -11721,6 +11783,8 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
             char *tok = strtok(i?NULL:s, ";");
             mm->matnames[i] = STRDUP(tok);
         }
+        FREE(s);
+
         if (m.nmatnos > 0) {
             char *tmpmaterial_names = db_hdf5_comprd(dbfile, m.material_names, 1);
             char *tmpmat_colors = db_hdf5_comprd(dbfile, m.mat_colors, 1);
@@ -11735,7 +11799,6 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
         }
         
         H5Tclose(o);
-        FREE(s);
         
     } CLEANUP {
         H5E_BEGIN_TRY {
@@ -11774,6 +11837,9 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *   Added names and colors for species.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -11782,7 +11848,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBmultimatspecies_mt m;
-    int                 i, len;
+    int                 i, len, nstrs = 0;
     char                *s=NULL;
 
     memset(&m, 0, sizeof m);
@@ -11817,9 +11883,34 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
         /* Write raw data arrays */
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
             friendly_name(name, "_specnames", 0));
+
         if (_mm._nmat>0 && _mm._nmatspec) {
+
             db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._nmat, _mm._nmatspec,
                 m.nmatspec/*out*/, friendly_name(name, "_nmatspec", 0));
+
+            if (_mm._specnames) {
+                int len; char *tmp;
+                for (i=0; i < _mm._nmat; i++)
+                    nstrs += _mm._nmatspec[i];
+                db_StringArrayToStringList(_mm._specnames, nstrs, &tmp, &len);
+                db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
+                    m.species_names/*out*/, friendly_name(name,"_species_names", 0));
+                FREE(tmp);
+            }
+
+            if (_mm._speccolors) {
+                int len; char *tmp;
+                if (nstrs == 0)
+                {
+                    for (i=0; i < _mm._nmat; i++)
+                        nstrs += _mm._nmatspec[i];
+                }
+                db_StringArrayToStringList(_mm._speccolors, nstrs, &tmp, &len);
+                db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
+                    m.speccolors/*out*/, friendly_name(name,"_speccolors", 0));
+                FREE(tmp);
+            }
         }
 
         /* Initialize meta data */
@@ -11848,6 +11939,8 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
             MEMBER_S(str(m.specnames), specnames);
             MEMBER_S(str(m.nmatspec), nmatspec);
             MEMBER_S(str(m.matname), matname);
+            MEMBER_S(str(m.species_names), species_names);
+            MEMBER_S(str(m.speccolors), speccolors);
         } OUTPUT(dbfile, DB_MULTIMATSPECIES, name, &m);
 
         /* Free resources */
@@ -11876,6 +11969,9 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
  *              Robb Matzke, 1999-07-13
  *              Added `ngroups', `blockorigin', and `grouporigin' to
  *              duplicate changes to the PDB driver.
+ *
+ *              Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *              Added names and colors for species.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimatspecies *
@@ -11884,7 +11980,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMultimatspecies";
     hid_t               o=-1, attr=-1;
-    int                 _objtype, i;
+    int                 _objtype, i, nstrs=0;
     DBmultimatspecies_mt m;
     DBmultimatspecies   *mm=NULL;
     char                *s=NULL;
@@ -11922,6 +12018,8 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
         mm->blockorigin = m.blockorigin;
         mm->grouporigin = m.grouporigin;
         mm->guihide = m.guihide;
+        mm->nmat = m.nmat;
+        mm->nmatspec = db_hdf5_comprd(dbfile, m.nmatspec, 1);
 
         /* Read the raw data */
         mm->specnames = calloc(m.nspec, sizeof(char*));
@@ -11930,9 +12028,32 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
             char *tok = strtok(i?NULL:s, ";");
             mm->specnames[i] = STRDUP(tok);
         }
-        
-        H5Tclose(o);
         FREE(s);
+        
+        if (mm->nmat > 0 && mm->nmatspec) {
+            char *tmpspecies_names = db_hdf5_comprd(dbfile, m.species_names, 1);
+            char *tmpspeccolors = db_hdf5_comprd(dbfile, m.speccolors, 1);
+  
+            if (tmpspecies_names)
+            {
+                for (i = 0; i < mm->nmat; i++)
+                    nstrs += mm->nmatspec[i];
+                mm->species_names = db_StringListToStringArray(tmpspecies_names, nstrs);
+            }
+            if (tmpspeccolors)
+            {
+                if (nstrs == 0)
+                {
+                    for (i = 0; i < mm->nmat; i++)
+                        nstrs += mm->nmatspec[i];
+                }
+                mm->speccolors = db_StringListToStringArray(tmpspeccolors, nstrs);
+            }
+            FREE(tmpspecies_names);
+            FREE(tmpspeccolors);
+        }
+
+        H5Tclose(o);
         
     } CLEANUP {
         H5E_BEGIN_TRY {

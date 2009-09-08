@@ -408,6 +408,8 @@ struct _ma {
 struct _ms {
     int            _majororder;
     int            _guihide;
+    char         **_specnames;
+    char         **_speccolors;
 };
 
 /*
@@ -672,6 +674,8 @@ struct _mm {
     int             _tv_connectivity;
     int             _disjoint_mode;
     int             _topo_dim;
+    char          **_specnames;
+    char          **_speccolors;
 };
 
 /*

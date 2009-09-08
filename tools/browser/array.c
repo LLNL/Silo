@@ -81,7 +81,11 @@ typedef struct obj_ary_t {
                                  * not be of size larger than N where N
                                  * comes from `(array "SH3 N, dims" ...)'
                                  */
-#define ARY_NSH         4       /*THIS MUST BE LAST!                    */
+#define ARY_SH_4        4       /* The array is one dimensional.  The size
+                                 * of the dimension is the sum of the
+                                 * dimensions specified.
+                                 */
+#define ARY_NSH         5       /*THIS MUST BE LAST!                    */
 
 static int      SHFlagsEncountered[ARY_NSH];
 
@@ -433,6 +437,8 @@ ary_get_print_limits (int nelmts,               /*input*/
  *      The array has an initial byte offset specification now.  The
  *      caller gives MEM and the array starts at MEM+BYTE_OFFSET.
  *
+ *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *      Added SH4 mode specially handled array.
  *-------------------------------------------------------------------------
  */
 static void
@@ -485,6 +491,10 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
    } else if (ARY_SH_2==self->special_handling) {
       ndims = 1;
       for (i=0,n=1; i<self->ndims; i++) n *= self->dim[i];
+      dim[0] = n;
+   } else if (ARY_SH_4==self->special_handling) {
+      ndims = 1;
+      for (i=0,n=0; i<self->ndims; i++) n += self->dim[i];
       dim[0] = n;
    } else {
       assert (self->ndims<=NELMTS(dim));
@@ -585,6 +595,9 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
  *
  *      Robb Matzke, 2000-06-27
  *      The two-column output style is now supported.
+ *
+ *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *      Added SH4 mode specially handled array.
  *-------------------------------------------------------------------------
  */
 static int
@@ -624,6 +637,10 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
         a_ndims = 1;
         for (i=0,n=1; i<a->ndims; i++) n *= a->dim[i];
         a_dim[0] = n;
+    } else if (ARY_SH_4==a->special_handling) {
+        a_ndims = 1;
+        for (i=0,n=0; i<a->ndims; i++) n += a->dim[i];
+        a_dim[0] = n;
     } else {
         assert (a->ndims<=NELMTS(a_dim));
         a_ndims = a->ndims;
@@ -645,6 +662,10 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
     } else if (ARY_SH_2==b->special_handling) {
         b_ndims = 1;
         for (i=0,n=1; i<b->ndims; i++) n *= b->dim[i];
+        b_dim[0] = n;
+    } else if (ARY_SH_4==b->special_handling) {
+        b_ndims = 1;
+        for (i=0,n=0; i<b->ndims; i++) n += b->dim[i];
         b_dim[0] = n;
     } else {
         assert(b->ndims<=NELMTS(b_dim));
@@ -1048,6 +1069,8 @@ ary_deref_nocopy (obj_t _self, int argc, obj_t argv[]) {
  *      Robb Matzke, 20 Mar 1997
  *      Added the `static' qualifier.
  *
+ *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *      Added SH4 mode specially handled array.
  *-------------------------------------------------------------------------
  */
 static obj_t
@@ -1078,6 +1101,9 @@ ary_deref (obj_t _self, int argc, obj_t argv[]) {
    } else if (ARY_SH_2==self->special_handling) {
       ndims = 1;
       for (i=0,dim[0]=1; i<self->ndims; i++) dim[0] *= self->dim[i];
+   } else if (ARY_SH_4==self->special_handling) {
+      ndims = 1;
+      for (i=0,dim[0]=0; i<self->ndims; i++) dim[0] += self->dim[i];
    } else {
       ndims = self->ndims;
       for (i=0; i<self->ndims; i++) dim[i] = self->dim[i];
@@ -1416,6 +1442,8 @@ ary_footnotes_reset (void)
  *
  * Modifications:
  *
+ *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *      Added SH4 mode specially handled array.
  *-------------------------------------------------------------------------
  */
 void
@@ -1460,4 +1488,17 @@ ary_footnotes_print (void)
       out_pop (OUT_STDOUT);
       SHFlagsEncountered[ARY_SH_3] = 999; /*don't show it again*/
    }
+
+   if (SHFlagsEncountered[ARY_SH_4] && SHFlagsEncountered[ARY_SH_4]<999) {
+      sprintf (title, "*** Footnote %d", num++);
+      out_push (OUT_STDOUT, title);
+      out_nl (OUT_STDOUT); /*blank line*/
+      out_putw (OUT_STDOUT, "The SH4 flag appearing in an array definition "
+                "indicates that the array is one-dimensional.  The size of "
+                "the dimension is the sum of the listed sizes.");
+      out_nl (OUT_STDOUT);
+      out_pop (OUT_STDOUT);
+      SHFlagsEncountered[ARY_SH_4] = 999; /*don't show it again*/
+   }
+
 }

@@ -116,7 +116,7 @@ parse_init (void) {
         "extra sanity checks.");
 
    bif ("diff",         V_diff,         0,
-        "Compate two objects.",
+        "Compare two objects.",
         "Calculates the differences between its arguments similar to the "
         "Unix `diff' command. If called with an even number of arguments "
         "the argument list is split in half and each argument from the first "

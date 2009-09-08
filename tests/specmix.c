@@ -73,6 +73,12 @@ int nmat = 4;
 int nspec[]={2,4,5,1};
 int matnos[]={1,2,3,4};
 char *matnames[]={"Top", "Lower right", "Bottom", "Left"};
+char *specnames[]={"Brad","Kathleen","Mark","Hank","Eric",
+                   "Jeremy","Cyrus","Sean","Dave","Randy",
+                   "Gunther","Tom"};
+char *speccolors[]={"Red","Green","Blue","Cyan","Magenta",
+                   "Yellow","Black","Orange","Brown","Purple",
+                   "White","Pink"};
 
 Mesh mesh;
 
@@ -737,7 +743,11 @@ writematspec(DBfile *db)
         }
     }
 
+    DBClearOptlist(optlist);
+    DBAddOption(optlist, DBOPT_SPECNAMES, specnames);
+    DBAddOption(optlist, DBOPT_SPECCOLORS, speccolors);
+
     DBPutMatspecies(db, "Species", "Material", nmat, nspec, speclist, dims, 2,
-                    mfc, specmf, mixspeclist, mixc, DB_FLOAT, NULL);
+                    mfc, specmf, mixspeclist, mixc, DB_FLOAT, optlist);
 
 }

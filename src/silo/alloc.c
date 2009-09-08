@@ -592,14 +592,36 @@ DBFreeMultimat (DBmultimat *mat)
  *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *    Added code to free nmatspec
  *
+ *    Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *    Added names and colors for species.
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultimatspecies (DBmultimatspecies *spec)
 {
-     int   i;
+     int   i, j, k;
 
      if (spec == NULL)
           return;
+
+     if (spec->species_names)
+     {
+         for(i=0,k=0;i<spec->nmat;i++)
+         {
+             for(j=0;j<spec->nmatspec[i];j++,k++)
+                 FREE(spec->species_names[k]);
+         }
+         FREE(spec->species_names);
+     }
+
+     if (spec->speccolors)
+     {
+         for(i=0,k=0;i<spec->nmat;i++)
+         {
+             for(j=0;j<spec->nmatspec[i];j++,k++)
+                 FREE(spec->speccolors[k]);
+         }
+         FREE(spec->speccolors);
+     }
 
      for (i = 0; i < spec->nspec; i++) {
           FREE(spec->specnames[i]);
@@ -1564,12 +1586,38 @@ DBAllocMatspecies(void)
  *
  *     Release all storage associated with the given matspecies object.
  *
+ *  Modifications:
+ *
+ *   Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *   Added names and colors for species.
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMatspecies(DBmatspecies *species)
 {
+    int i, j, k;
+
     if (species == NULL)
         return;
+
+    if (species->specnames)
+    {
+        for(i=0,k=0;i<species->nmat;i++)
+        {
+            for(j=0;j<species->nmatspec[i];j++,k++)
+                FREE(species->specnames[k]);
+        }
+        FREE(species->specnames);
+    }
+
+    if (species->speccolors)
+    {
+        for(i=0,k=0;i<species->nmat;i++)
+        {
+            for(j=0;j<species->nmatspec[i];j++,k++)
+                FREE(species->speccolors[k]);
+        }
+        FREE(species->speccolors);
+    }
 
     FREE(species->name);
     FREE(species->matname);

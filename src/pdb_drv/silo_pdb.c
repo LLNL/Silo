@@ -1670,6 +1670,9 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *      Added names and colors for species.
  *--------------------------------------------------------------------*/
 CALLBACK DBmatspecies *
 db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
@@ -1679,9 +1682,12 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    DBmatspecies  *mm;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    static char   *me = "db_pdb_GetMatspecies";
+   char *tmpnames = NULL;
+   char *tmpcolors = NULL;
    char           tmpstr[256];
    PJcomplist     tmp_obj;
    DBmatspecies   tmpmm;
+   int            i, nstrs = 0;
    memset(&tmpmm, 0, sizeof(DBmatspecies));
 
    /*------------------------------------------------------------*/
@@ -1701,6 +1707,10 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    DEFINE_OBJ("mixlen", &tmpmm.mixlen, DB_INT);
    DEFALL_OBJ("mix_speclist", &tmpmm.mix_speclist, DB_INT);
    DEFINE_OBJ("guihide", &tmpmm.guihide, DB_INT);
+   if (SILO_Globals.dataReadMask & DBMatMatnames)
+       DEFALL_OBJ("species_names",    &tmpnames,        DB_CHAR);
+   if (SILO_Globals.dataReadMask & DBMatMatcolors)
+       DEFALL_OBJ("speccolors",    &tmpcolors,        DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
       return NULL;
@@ -1735,6 +1745,21 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
 
    mm->id = 0;
    mm->name = STRDUP(objname);
+
+   for (i=0; i < mm->nmat; i++)
+       nstrs += mm->nmatspec[i];
+   if (tmpnames != NULL)
+   {
+       if (nstrs > 0)
+          mm->specnames = db_StringListToStringArray(tmpnames, nstrs);
+       FREE(tmpnames);
+   }
+   if (tmpcolors != NULL)
+   {
+       if (nstrs > 0)
+          mm->speccolors = db_StringListToStringArray(tmpcolors, nstrs);
+       FREE(tmpcolors);
+   }
 
    return (mm);
 }
@@ -2723,6 +2748,9 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
  *
  *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *    Added nmat and nmatspec
+ *
+ *    Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *    Added names and colors for species.
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultimatspecies *
 db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
@@ -2730,8 +2758,9 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
    char *typestring = NULL;
    DBmultimatspecies *mms = NULL;
    int                ncomps, type;
-   int                i;
+   int                i, nstrs = 0;
    char              *tmpnames=NULL, *s=NULL, *name=NULL, tmp[256];
+   char              *tmpspecnames=NULL, *tmpcolors=NULL;
    char               error[256];
    DBfile_pdb        *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist         tmp_obj;
@@ -2755,6 +2784,11 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("guihide", &tmpmms.guihide, DB_INT);
       DEFINE_OBJ("nmat", &tmpmms.nmat, DB_INT);
       DEFALL_OBJ("nmatspec", &tmpmms.nmatspec, DB_INT);
+      if (SILO_Globals.dataReadMask & DBMatMatnames)
+         DEFALL_OBJ("species_names", &tmpspecnames, DB_CHAR);
+      if (SILO_Globals.dataReadMask & DBMatMatcolors)
+         DEFALL_OBJ("speccolors", &tmpcolors, DB_CHAR);
+
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -2793,6 +2827,26 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
             }
          }
          FREE(tmpnames);
+      }
+
+      if (tmpspecnames != NULL)
+      {
+          for (i = 0; i < mms->nmat; i++)
+              nstrs += mms->nmatspec[i];
+          if (nstrs > 0)
+              mms->species_names = db_StringListToStringArray(tmpspecnames, nstrs);
+          FREE(tmpspecnames);
+      }
+      if (tmpcolors != NULL)
+      {
+          if (nstrs == 0)
+          {
+              for (i = 0; i < mms->nmat; i++)
+                  nstrs += mms->nmatspec[i];
+          }
+          if (nstrs > 0)
+              mms->speccolors = db_StringListToStringArray(tmpcolors, nstrs);
+          FREE(tmpcolors);
       }
    }
 
@@ -5995,7 +6049,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
       }
    }
 
-    /* If we have material names, write them out */
+   /* If we have material names, write them out */
    if (_ma._matnames != NULL)
    {
       int len; long llen; char *tmpstr = 0;
@@ -6053,6 +6107,8 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
  *      Jeremy Meredith, Wed Jul  7 12:15:31 PDT 1999
  *      I removed the origin value from the species object.
  *
+ *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *      Added names and colors for species.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -6063,7 +6119,7 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
                       int mixlen, int datatype, DBoptlist *optlist) {
 
    long           count[3];
-   int            i, nels;
+   int            i, nels, nstrs;
    DBobject      *obj;
    char          *datatype_str;
 
@@ -6071,7 +6127,7 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
     *  Process option list; build object description.
     *-------------------------------------------------------------*/
    db_ProcessOptlist(DB_MATSPECIES, optlist);
-   obj = DBMakeObject(name, DB_MATSPECIES, 26);
+   obj = DBMakeObject(name, DB_MATSPECIES, 15);
 
    /*-------------------------------------------------------------
     * Define literals used by material species data.
@@ -6117,6 +6173,36 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
       count[0] = mixlen;
       DBWriteComponent(dbfile, obj, "mix_speclist", name, "integer",
                        mix_speclist, 1, count);
+   }
+
+   /* If we have species names or colors, write them out */
+   nstrs = 0;
+   if (_ms._specnames != NULL)
+   {
+      int len; long llen; char *tmpstr = 0;
+
+      /* count how many names we have */
+      for (i=0; i < nmat; i++)
+          nstrs += nmatspec[i];
+      db_StringArrayToStringList(_ms._specnames, nstrs, &tmpstr, &len);
+      llen = (long) len;
+      DBWriteComponent(dbfile, obj, "species_names", name, "char", tmpstr, 1, &llen);
+      FREE(tmpstr);
+   }
+   if (_ms._speccolors != NULL)
+   {
+      int len; long llen; char *tmpstr = 0;
+
+      /* count how many names we have */
+      if (nstrs == 0)
+      {
+          for (i=0; i < nmat; i++)
+              nstrs += nmatspec[i];
+      }
+      db_StringArrayToStringList(_ms._speccolors, nstrs, &tmpstr, &len);
+      llen = (long) len;
+      DBWriteComponent(dbfile, obj, "speccolors", name, "char", tmpstr, 1, &llen);
+      FREE(tmpstr);
    }
 
    /*-------------------------------------------------------------
@@ -6972,13 +7058,15 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
  *    Fixed bug where there was an assumption that the string is
  *    NULL terminated.
  *
+ *    Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
+ *    Added names and colors for species.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
 db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
                     char *specnames[], DBoptlist *optlist) {
 
-   int            i, len;
+   int            i, len, nstrs;
    long           count[3];
    char          *tmp = NULL, *cur = NULL;
    DBobject      *obj;
@@ -6991,7 +7079,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMATSPECIES, 13);
+   obj = DBMakeObject(name, DB_MULTIMATSPECIES, 14);
    DBAddIntComponent(obj, "nspec", nspec);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -7056,7 +7144,38 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
       count[0]=_mm._nmat;
       DBWriteComponent(dbfile, obj, "nmatspec", name, "integer", _mm._nmatspec,
                        1, count);
+
+      /* If we have species names or colors, write them out */
+      nstrs = 0;
+      if (_mm._specnames != NULL)
+      {
+         int len; long llen; char *tmpstr = 0;
+
+         /* count how many names we have */
+         for (i=0; i < _mm._nmat; i++)
+             nstrs += _mm._nmatspec[i];
+         db_StringArrayToStringList(_mm._specnames, nstrs, &tmpstr, &len);
+         llen = (long) len;
+         DBWriteComponent(dbfile, obj, "species_names", name, "char", tmpstr, 1, &llen);
+         FREE(tmpstr);
+      }
+      if (_mm._speccolors != NULL)
+      {
+         int len; long llen; char *tmpstr = 0;
+
+         /* count how many names we have */
+         if (nstrs == 0)
+         {
+             for (i=0; i < _mm._nmat; i++)
+                 nstrs += _mm._nmatspec[i];
+         }
+         db_StringArrayToStringList(_mm._speccolors, nstrs, &tmpstr, &len);
+         llen = (long) len;
+         DBWriteComponent(dbfile, obj, "speccolors", name, "char", tmpstr, 1, &llen);
+         FREE(tmpstr);
+      }
    }
+
    /*-------------------------------------------------------------
     *  Write multi-species object to SILO file.
     *-------------------------------------------------------------*/
