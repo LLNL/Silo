@@ -62,9 +62,9 @@ typedef struct {
 void Mesh_Create(Mesh*,int,int); /* constructor */
 
 /* file-writing functions */
-void writemesh_curv2d(DBfile*);
-void writemesh_ucd2d(DBfile*);
-void writematspec(DBfile*);
+void writemesh_curv2d(DBfile*,int,int);
+void writemesh_ucd2d(DBfile*,int,int);
+int writematspec(DBfile*);
 
 /* problem specifics */
 enum ZVARS { ZV_P, ZV_D };
@@ -137,8 +137,8 @@ void Mesh_Create(Mesh *mesh,int zx_,int zy_) {
 int main(int argc, char *argv[]) {
   int x,y;
   int m,s;
-  int err;
-  int i, driver=DB_PDB;
+  int err, mixc;
+  int i, driver=DB_PDB, reorder=0;
   char filename[64], *file_ext=".silo";
   DBfile *db;
 
@@ -150,6 +150,8 @@ int main(int argc, char *argv[]) {
       } else if (!strcmp(argv[i], "DB_HDF5")) {
 	  driver = DB_HDF5;
 	  file_ext = ".h5";
+      } else if (!strcmp(argv[i], "reorder")) {
+	  reorder = 1;
       } else {
 	  fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
       }
@@ -374,15 +376,15 @@ int main(int argc, char *argv[]) {
   sprintf(filename, "specmix_quad%s", file_ext);
   printf("Writing %s using curvilinear mesh.\n", filename);
   db=DBCreate(filename, DB_CLOBBER, DB_LOCAL, "Mixed zone species test", driver);
-  writemesh_curv2d(db);
-  writematspec(db);
+  mixc=writematspec(db);
+  writemesh_curv2d(db,mixc,reorder);
   DBClose(db);
 
   sprintf(filename, "specmix_ucd%s", file_ext);
   printf("Writing %s using unstructured mesh.\n", filename);
   db=DBCreate(filename, DB_CLOBBER, DB_LOCAL, "Mixed zone species test", driver);
-  writemesh_ucd2d(db);
-  writematspec(db);
+  mixc=writematspec(db);
+  writemesh_ucd2d(db,mixc,reorder);
   DBClose(db);
 
   printf("Done!\n");
@@ -402,9 +404,9 @@ int main(int argc, char *argv[]) {
  *
  * Modifications:
  *---------------------------------------------------------------------------*/
-void writemesh_curv2d(DBfile *db) {
+void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
 
-  float f1[1000],f2[1000];
+  float f1[1000],f2[1000], fm[1000];
   int x,y,c;
 
   char  *coordnames[2];
@@ -466,8 +468,17 @@ void writemesh_curv2d(DBfile *db) {
     }
   }
 
+  for (c=0; c<mixc; c++)
+      fm[c] = 2.0/mixc*c;
+  if (reorder)
+  {
+    float tmp=fm[mixc-1];
+    fm[mixc-1]=fm[mixc-2];
+    fm[mixc-2]=tmp;
+  }
+
   DBPutQuadvar1(db, "p", "Mesh", f1, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "d", "Mesh", f2, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "d", "Mesh", f2, dims, 2, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
 }
 
 /*----------------------------------------------------------------------------
@@ -482,10 +493,10 @@ void writemesh_curv2d(DBfile *db) {
  *
  * Modifications:
  *---------------------------------------------------------------------------*/
-void writemesh_ucd2d(DBfile *db) {
+void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
 
   int   nl[5000];
-  float f1[1000],f2[1000];
+  float f1[1000],f2[1000], fm[1000];
   int x,y,c;
   char  *coordnames[2];
   float *coord[2];
@@ -582,8 +593,17 @@ void writemesh_ucd2d(DBfile *db) {
     }
   }
 
+  for (c=0; c<mixc; c++)
+      fm[c] = 2.0/mixc*c;
+  if (reorder)
+  {
+    float tmp=fm[mixc-1];
+    fm[mixc-1]=fm[mixc-2];
+    fm[mixc-2]=tmp;
+  }
+
   DBPutUcdvar1(db, "p", "Mesh", f1, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "d", "Mesh", f2, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "d", "Mesh", f2, nzones, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
 }
 
 
@@ -601,7 +621,7 @@ void writemesh_ucd2d(DBfile *db) {
  *    Sean Ahern, Wed Feb  6 16:32:35 PST 2002
  *    Added material names.
  *---------------------------------------------------------------------------*/
-void
+int
 writematspec(DBfile *db)
 {
     int     x, y, c;
@@ -750,4 +770,5 @@ writematspec(DBfile *db)
     DBPutMatspecies(db, "Species", "Material", nmat, nspec, speclist, dims, 2,
                     mfc, specmf, mixspeclist, mixc, DB_FLOAT, optlist);
 
+    return mixc;
 }
