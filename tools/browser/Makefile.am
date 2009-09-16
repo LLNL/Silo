@@ -27,7 +27,7 @@ browser_LDADD += $(READLINE_LIBS)
 info_TEXINFOS = browser.texi
 
 AM_CPPFLAGS = \
- -I$(top_srcdir)/src/silo \
+ -I$(top_builddir)/src/silo \
  -I$(includedir) \
  -DPUBLIC_INIT_FILE=\"$(includedir)/browser_rc\"
 

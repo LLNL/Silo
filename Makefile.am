@@ -41,7 +41,7 @@
  
 ACLOCAL_AMFLAGS = -I config
 
-noinst_HEADERS = config.h
+nodist_noinst_HEADERS = config.h
 
 EXTRA_DIST = COPYRIGHT FAQ
 

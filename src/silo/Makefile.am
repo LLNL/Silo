@@ -17,9 +17,11 @@ EXTRA_DIST = \
  silo.h.in
 
 include_HEADERS = \
- silo.h \
  silo.inc \
  pmpio.h
+
+nodist_include_HEADERS = \
+ silo.h
 
 noinst_HEADERS = \
  silo_drivers.h \

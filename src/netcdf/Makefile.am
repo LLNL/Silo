@@ -3,7 +3,7 @@
 noinst_LTLIBRARIES = libsilo_netcdf.la
 libsilo_netcdf_la_SOURCES = $(FILES)
 
-AM_CPPFLAGS = -I$(srcdir)/../pdb -I$(srcdir)/../silo  -I$(srcdir)/../score 
+AM_CPPFLAGS = -I$(srcdir)/../pdb -I$(builddir)/../silo -I$(srcdir)/../silo  -I$(srcdir)/../score 
 
 noinst_HEADERS = \
  silo_netcdf_private.h \

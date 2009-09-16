@@ -3,7 +3,7 @@
 noinst_LTLIBRARIES = libsilo_taurus.la
 libsilo_taurus_la_SOURCES = $(FILES)
 
-AM_CPPFLAGS = -I$(srcdir)/../silo
+AM_CPPFLAGS = -I$(builddir)/../silo -I$(srcdir)/../silo
 
 EXTRA_DIST = \
  README

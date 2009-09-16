@@ -23,7 +23,7 @@ EXTRA_DIST = \
 AM_CXXFLAGS=$(QT_CXXFLAGS)
 AM_CPPFLAGS = \
  -I$(includedir) \
- -I$(top_srcdir)/src/silo
+ -I$(top_builddir)/src/silo
 
 noinst_HEADERS = \
  Explorer.h \

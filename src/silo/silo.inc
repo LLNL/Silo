@@ -2,7 +2,7 @@
 !
 !     SILO include file for Fortan applications.
 !
-! Programmer:   miller Thu Jan 15 11:20:28 PST 2009
+! Programmer:   miller86 Tue Sep 15 18:03:55 PDT 2009
 !
 ! WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !    This file is generated automatically from C header files in the
@@ -83,29 +83,29 @@
       integer  DBOPT_NMATNOS, DBOPT_NMATSPEC, DBOPT_NODENUM
       integer  DBOPT_NSPACE, DBOPT_ORIGIN, DBOPT_PHZONELIST
       integer  DBOPT_PLANAR, DBOPT_REFERENCE, DBOPT_REGION_PNAMES
-      integer  DBOPT_REGNAMES, DBOPT_TENSOR_RANK, DBOPT_TIME
-      integer  DBOPT_TOPO_DIM, DBOPT_TV_CONNECTIVITY, DBOPT_UNITS
-      integer  DBOPT_USESPECMF, DBOPT_XLABEL, DBOPT_XUNITS
-      integer  DBOPT_XVARNAME, DBOPT_YLABEL, DBOPT_YUNITS
-      integer  DBOPT_YVARNAME, DBOPT_ZLABEL, DBOPT_ZONECOUNTS
-      integer  DBOPT_ZONENAMES, DBOPT_ZONENUM, DBOPT_ZUNITS
-      integer  DBOPT_ZVARNAME, DB_ABORT, DB_ABUTTING, DB_ALL, DB_APPEND
-      integer  DB_AREA, DB_ARRAY, DB_BLOCKCENT, DB_BNDCENT, DB_CARTESIAN
-      integer  DB_CHAR, DB_CLOBBER, DB_COLLINEAR, DB_COLMAJOR, DB_CRAY
-      integer  DB_CSGMESH, DB_CSGVAR, DB_CSGZONELIST, DB_CURVE
-      integer  DB_CURVILINEAR, DB_CYLINDRICAL, DB_DEBUG, DB_DEFVARS
-      integer  DB_DIR, DB_DOUBLE, DB_EDGECENT, DB_EDGELIST, DB_F77NULL
-      integer  DB_FACECENT, DB_FACELIST, DB_FLOAT, DB_FLOATING
-      integer  DB_FROMCWR, DB_GROUPELMAP, DB_HDF5, DB_HDF5_CORE
-      integer  DB_HDF5_MPIO, DB_HDF5_MPIOP, DB_HDF5_SEC2, DB_HDF5_STDIO
-      integer  DB_INT, DB_INTEL, DB_INVALID_OBJECT, DB_LOCAL, DB_LONG
-      integer  DB_MATERIAL, DB_MATSPECIES, DB_MRGTREE, DB_MRGVAR
-      integer  DB_MULTIBLOCKMESH, DB_MULTIBLOCKVAR, DB_MULTIMAT
-      integer  DB_MULTIMATSPECIES, DB_MULTIMESH, DB_MULTIMESHADJ
-      integer  DB_MULTIVAR, DB_NETCDF, DB_NFILES, DB_NFILTERS
-      integer  DB_NOCLOBBER, DB_NODECENT, DB_NONCOLLINEAR, DB_NONE
-      integer  DB_NOTCENT, DB_NOTYPE, DB_NUMERICAL, DB_OFF, DB_ON
-      integer  DB_OTHER, DB_PDB, DB_PHZONELIST, DB_POINTMESH
+      integer  DBOPT_REGNAMES, DBOPT_SPECCOLORS, DBOPT_SPECNAMES
+      integer  DBOPT_TENSOR_RANK, DBOPT_TIME, DBOPT_TOPO_DIM
+      integer  DBOPT_TV_CONNECTIVITY, DBOPT_UNITS, DBOPT_USESPECMF
+      integer  DBOPT_XLABEL, DBOPT_XUNITS, DBOPT_XVARNAME, DBOPT_YLABEL
+      integer  DBOPT_YUNITS, DBOPT_YVARNAME, DBOPT_ZLABEL
+      integer  DBOPT_ZONECOUNTS, DBOPT_ZONENAMES, DBOPT_ZONENUM
+      integer  DBOPT_ZUNITS, DBOPT_ZVARNAME, DB_ABORT, DB_ABUTTING
+      integer  DB_ALL, DB_APPEND, DB_AREA, DB_ARRAY, DB_BLOCKCENT
+      integer  DB_BNDCENT, DB_CARTESIAN, DB_CHAR, DB_CLOBBER
+      integer  DB_COLLINEAR, DB_COLMAJOR, DB_CRAY, DB_CSGMESH, DB_CSGVAR
+      integer  DB_CSGZONELIST, DB_CURVE, DB_CURVILINEAR, DB_CYLINDRICAL
+      integer  DB_DEBUG, DB_DEFVARS, DB_DIR, DB_DOUBLE, DB_EDGECENT
+      integer  DB_EDGELIST, DB_F77NULL, DB_FACECENT, DB_FACELIST
+      integer  DB_FLOAT, DB_FLOATING, DB_FROMCWR, DB_GROUPELMAP, DB_HDF5
+      integer  DB_HDF5_CORE, DB_HDF5_MPIO, DB_HDF5_MPIOP, DB_HDF5_SEC2
+      integer  DB_HDF5_STDIO, DB_INT, DB_INTEL, DB_INVALID_OBJECT
+      integer  DB_LOCAL, DB_LONG, DB_MATERIAL, DB_MATSPECIES, DB_MRGTREE
+      integer  DB_MRGVAR, DB_MULTIBLOCKMESH, DB_MULTIBLOCKVAR
+      integer  DB_MULTIMAT, DB_MULTIMATSPECIES, DB_MULTIMESH
+      integer  DB_MULTIMESHADJ, DB_MULTIVAR, DB_NETCDF, DB_NFILES
+      integer  DB_NFILTERS, DB_NOCLOBBER, DB_NODECENT, DB_NONCOLLINEAR
+      integer  DB_NONE, DB_NOTCENT, DB_NOTYPE, DB_NUMERICAL, DB_OFF
+      integer  DB_ON, DB_OTHER, DB_PDB, DB_PHZONELIST, DB_POINTMESH
       integer  DB_POINTVAR, DB_POSTORDER, DB_PREORDER, DB_QUADCURV
       integer  DB_QUADMESH, DB_QUADRECT, DB_QUADVAR, DB_QUAD_CURV
       integer  DB_QUAD_RECT, DB_READ, DB_RECTILINEAR, DB_RESUME
@@ -126,7 +126,7 @@
 
       parameter (SILO_VERS_MAJ             = 4              )
       parameter (SILO_VERS_MIN             = 7              )
-      parameter (SILO_VERS_PAT             = 0              )
+      parameter (SILO_VERS_PAT             = 1              )
       parameter (SILO_VERS_PRE             = 1              )
       parameter (DB_NETCDF                 = 0              )
       parameter (DB_PDB                    = 2              )
@@ -262,6 +262,8 @@
       parameter (DBOPT_DISJOINT_MODE       = 323            )
       parameter (DBOPT_MRGV_ONAMES         = 324            )
       parameter (DBOPT_MRGV_RNAMES         = 325            )
+      parameter (DBOPT_SPECNAMES           = 326            )
+      parameter (DBOPT_SPECCOLORS          = 327            )
       parameter (DB_TOP                    = 0              )
       parameter (DB_NONE                   = 1              )
       parameter (DB_ALL                    = 2              )

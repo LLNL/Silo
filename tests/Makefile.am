@@ -47,6 +47,7 @@ AM_CPPFLAGS = \
  -I$(includedir) \
  -I$(srcdir)/../src/pdb \
  -I$(srcdir)/../src/score \
+ -I$(builddir)/../src/silo \
  -I$(srcdir)/../src/silo
 quad_CPPFLAGS = $(AM_CPPFLAGS)
 TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)

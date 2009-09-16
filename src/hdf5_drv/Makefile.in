@@ -230,7 +230,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libsilo_hdf5_drv.la
 libsilo_hdf5_drv_la_SOURCES = $(FILES)
-AM_CPPFLAGS = -I$(srcdir)/../silo $(am__append_1) $(am__append_2)
+AM_CPPFLAGS = -I$(builddir)/../silo -I$(srcdir)/../silo \
+	$(am__append_1) $(am__append_2)
 noinst_HEADERS = \
  silo_hdf5_private.h
 

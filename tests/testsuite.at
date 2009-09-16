@@ -217,25 +217,32 @@ AT_CLEANUP
 
 AT_BANNER(Fortran)
 AT_SETUP(arrayf77)
-AT_CHECK(test ! -f arrayf77 && exit 77 || $VALGRIND arrayf77,,ignore,ignore)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(curvef77)
-AT_CHECK(test ! -f curvef77 && exit 77 || $VALGRIND curvef77,,ignore,ignore)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(matf77)
-AT_CHECK(test ! -f matf77 && exit 77 || $VALGRIND matf77,,ignore,ignore)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(pointf77)
-AT_CHECK(test ! -f pointf77 && exit 77 || $VALGRIND pointf77,,ignore,ignore)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f pointf77 -o -f ../../pointf77 \) && exit 77 || $VALGRIND pointf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(quadf77)
-AT_CHECK(test ! -f quadf77 && exit 77 || $VALGRIND quadf77,,ignore,ignore)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f quadf77 -o -f ../../quadf77 \) && exit 77 || $VALGRIND quadf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(testallf77)
-AT_CHECK(test ! -f testallf77 && exit 77 || $VALGRIND testallf77,,ignore,ignore)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f testallf77 -o -f ../../testallf77 \) && exit 77 || $VALGRIND testallf77,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(ucdf77)
-AT_CHECK(test ! -f ucdf77 && exit 77 || $VALGRIND ucdf77,,ignore,ignore)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f ucdf77 -o -f ../../ucdf77 \) && exit 77 || $VALGRIND ucdf77,,ignore,ignore)
 AT_CLEANUP
 
 AT_BANNER(Special)

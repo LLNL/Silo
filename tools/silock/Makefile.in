@@ -240,7 +240,7 @@ silock_SOURCES = silock.c
 @HDF5_DRV_NEEDED_TRUE@@HZIP_NEEDED_TRUE@nodist_EXTRA_silock_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_FALSE@silock_LDADD = ../../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@silock_LDADD = ../../src/libsiloh5.la
-AM_CPPFLAGS = -I$(includedir) -I$(top_srcdir)/src/silo
+AM_CPPFLAGS = -I$(includedir) -I$(top_builddir)/src/silo
 all: all-am
 
 .SUFFIXES:
