@@ -14,6 +14,8 @@ EXTRA_DIST= \
  amr2d.silo \
  amr2d_mesh_config.xml \
  amr3d_mesh_config.xml \
+ not_a_silo_file.h5 \
+ not_a_silo_file.pdb \
  $(check_SCRIPTS) \
  $(check_DATA)
 

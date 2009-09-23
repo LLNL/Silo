@@ -443,6 +443,7 @@ struct _pm {
     int           *_gnodeno;
     char          *_mrgtree_name;
     char         **_region_pnames;
+    int            _llong_gnodeno;
 
     /*These used only by NetCDF driver */
     int            _dim_ndims;
@@ -573,6 +574,7 @@ struct _um {
     char         **_region_pnames;
     int            _tv_connectivity;
     int            _disjoint_mode;
+    int            _llong_gnodeno;
 };
 
 /*
@@ -616,6 +618,7 @@ struct _csgm {
  */
 struct _uzl {
     int           *_gzoneno;
+    int            _llong_gzoneno;
 };
 
 /*

@@ -384,6 +384,7 @@ typedef struct DBucdmesh_mt {
     char                mrgtree_name[256];
     int                 tv_connectivity;
     int                 disjoint_mode;
+    int                 llong_gnodeno;
 } DBucdmesh_mt;
 static hid_t    DBucdmesh_mt5;
 
@@ -441,6 +442,7 @@ typedef struct DBzonelist_mt {
     char                shapesize[256];
     char                shapetype[256];
     char                gzoneno[256];
+    int                 llong_gzoneno;
 } DBzonelist_mt;
 static hid_t    DBzonelist_mt5;
 
@@ -622,6 +624,7 @@ typedef struct DBpointmesh_mt {
     char                units[3][256];
     char                gnodeno[256];
     char                mrgtree_name[256];
+    int                 llong_gnodeno;
 } DBpointmesh_mt;
 static hid_t    DBpointmesh_mt5;
 
@@ -716,6 +719,7 @@ static hid_t    T_char = -1;
 static hid_t    T_short = -1;
 static hid_t    T_int = -1;
 static hid_t    T_long = -1;
+static hid_t    T_llong = -1;
 static hid_t    T_float = -1;
 static hid_t    T_double = -1;
 static hid_t    T_str256 = -1;
@@ -1833,6 +1837,9 @@ hdf5_to_silo_error(const char *vname, const char *fname)
  *   Mark C. Miller, Wed Sep  2 16:41:32 PDT 2009
  *   Made conditional compilation logic for VERSION_GE take into account
  *   H5_USE_16_API setting.
+ *
+ *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *   Adding support for long long type.
  *-------------------------------------------------------------------------
  */
 PRIVATE void
@@ -1855,6 +1862,7 @@ db_hdf5_init(void)
     T_short = H5T_NATIVE_SHORT;
     T_int = H5T_NATIVE_INT;
     T_long = H5T_NATIVE_LONG;
+    T_llong = H5T_NATIVE_LLONG;
     T_float = H5T_NATIVE_FLOAT;
     T_double = H5T_NATIVE_DOUBLE;
     
@@ -2083,6 +2091,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        mrgtree_name);
         MEMBER_S(int,           tv_connectivity);
         MEMBER_S(int,           disjoint_mode);
+        MEMBER_S(int,           llong_gnodeno);
     } DEFINE;
     
     STRUCT(DBucdvar) {
@@ -2137,6 +2146,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        shapesize);
         MEMBER_S(str256,        shapetype);
         MEMBER_S(str256,        gzoneno);
+        MEMBER_S(int,           llong_gzoneno);
     } DEFINE;
 
     STRUCT(DBphzonelist) {
@@ -2308,6 +2318,7 @@ db_hdf5_init(void)
         MEMBER_R(str256,        units,          3);
         MEMBER_S(str256,        gnodeno);
         MEMBER_S(str256,        mrgtree_name);
+        MEMBER_S(int,           llong_gnodeno);
     } DEFINE;
 
     STRUCT(DBpointvar) {
@@ -2409,6 +2420,9 @@ db_hdf5_init(void)
  *
  *    Mark C. Miller, Tue Feb  3 09:47:43 PST 2009
  *    Changed dbfile arg from public DBfile* to private DBfile_hdf5*
+ *
+ *    Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *    Adding support for long long type.
  *-------------------------------------------------------------------------
  */
 PRIVATE void
@@ -2426,6 +2440,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
         dbfile->T_short  = T_short;
         dbfile->T_int    = T_int;
         dbfile->T_long   = T_long;
+        dbfile->T_llong  = T_llong;
         dbfile->T_float  = T_float;
         dbfile->T_double = T_double;
         dbfile->T_str    = T_str;
@@ -2439,6 +2454,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
         dbfile->T_short  = H5T_STD_I16BE;
         dbfile->T_int    = H5T_STD_I32BE;
         dbfile->T_long   = H5T_STD_I32BE;
+        dbfile->T_llong  = H5T_STD_I64BE;
         dbfile->T_float  = H5T_IEEE_F32BE;
         dbfile->T_double = H5T_IEEE_F64BE;
         dbfile->T_str    = T_str;
@@ -2449,6 +2465,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
         dbfile->T_short  = H5T_STD_I64BE;
         dbfile->T_int    = H5T_STD_I64BE;
         dbfile->T_long   = H5T_STD_I64BE;
+        dbfile->T_llong  = H5T_STD_I64BE;
         dbfile->T_float  = H5T_IEEE_F64BE; /*assuming new cray*/
         dbfile->T_double = H5T_IEEE_F64BE; /*assuming new cray*/
         dbfile->T_str    = T_str;
@@ -2459,6 +2476,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
         dbfile->T_short  = H5T_STD_I16LE;
         dbfile->T_int    = H5T_STD_I32LE;
         dbfile->T_long   = H5T_STD_I32LE;
+        dbfile->T_llong  = H5T_STD_I64LE;
         dbfile->T_float  = H5T_IEEE_F32LE;
         dbfile->T_double = H5T_IEEE_F64LE;
         dbfile->T_str    = T_str;
@@ -2672,6 +2690,8 @@ build_fspace(hid_t dset, int ndims, int *offset, int *length, int *stride,
  *
  * Modifications:
  *
+ *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *   Adding support for long long type.
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
@@ -2688,6 +2708,9 @@ silom2hdfm_type(int datatype)
         break;
     case DB_LONG:
         mtype = H5T_NATIVE_LONG;
+        break;
+    case DB_LONG_LONG:
+        mtype = H5T_NATIVE_LLONG;
         break;
     case DB_FLOAT:
         mtype = H5T_NATIVE_FLOAT;
@@ -2718,6 +2741,8 @@ silom2hdfm_type(int datatype)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *   Adding support for long long type.
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
@@ -2734,6 +2759,9 @@ silof2hdff_type(DBfile_hdf5 *dbfile, int datatype)
         break;
     case DB_LONG:
         ftype = dbfile->T_long;
+        break;
+    case DB_LONG_LONG:
+        ftype = dbfile->T_llong;
         break;
     case DB_FLOAT:
         ftype = dbfile->T_float;
@@ -2767,6 +2795,8 @@ silof2hdff_type(DBfile_hdf5 *dbfile, int datatype)
  *   Mark C. Miler, made it return DB_FLOAT or DB_DOUBLE based on
  *   data type passed in and NOT on current forceSingle mode
  *
+ *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *   Adding support for long long type.
  *-------------------------------------------------------------------------
  */
 PRIVATE int
@@ -2783,8 +2813,10 @@ hdf2silo_type(hid_t type)
             retval = DB_SHORT;
         } else if (sizeof(int)>=size) {
             retval = DB_INT;
-        } else {
+        } else if (sizeof(long)>=size) {
             retval = DB_LONG;
+        } else {
+            retval = DB_LONG_LONG;
         }
         break;
 
@@ -2858,6 +2890,8 @@ silo2silo_type(int datatype)
  *   Made it return NATIVE_FLOAT or NATIVE_DOUBLE NOT depending on
  *   current force_single_g mode
  *
+ *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *   Adding support for long long type.
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
@@ -2873,8 +2907,10 @@ hdf2hdf_type(hid_t ftype)
             mtype = H5T_NATIVE_SHORT;
         } else if (sizeof(int)>=H5Tget_size(ftype)) {
             mtype = H5T_NATIVE_INT;
-        } else {
+        } else if (sizeof(long)>=H5Tget_size(ftype)) {
             mtype = H5T_NATIVE_LONG;
+        } else {
+            mtype = H5T_NATIVE_LLONG;
         }
         break;
     case H5T_FLOAT:
@@ -8594,9 +8630,13 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
                 m.coord[i]/*out*/, friendly_name(name, "_coord%d", &i), 
                 compressionFlags);
         }
-        db_hdf5_compwrz(dbfile, DB_INT, 1, &nnodes, _um._gnodeno,
-            m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0),
-            compressionFlags);
+        if (_um._llong_gnodeno)
+            db_hdf5_compwr(dbfile, DB_LONG_LONG, 1, &nnodes, _um._gnodeno,
+                m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0));
+        else
+            db_hdf5_compwrz(dbfile, DB_INT, 1, &nnodes, _um._gnodeno,
+                m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0),
+                compressionFlags);
         
         /* Build ucdmesh header in memory */
         m.ndims = ndims;
@@ -8622,6 +8662,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         strcpy(m.mrgtree_name, OPT(_um._mrgtree_name));
         m.tv_connectivity = _um._tv_connectivity;
         m.disjoint_mode = _um._disjoint_mode;
+        m.llong_gnodeno = _um._llong_gnodeno;
 
         /* Write ucdmesh header to file */
         STRUCT(DBucdmesh) {
@@ -8650,6 +8691,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
             if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
             if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
+            if (m.llong_gnodeno)   MEMBER_S(int, llong_gnodeno);
         } OUTPUT(dbfile, DB_UCDMESH, name, &m);
         
     } CLEANUP {
@@ -8974,6 +9016,7 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
         }
         if (SILO_Globals.dataReadMask & DBUMGlobNodeNo)
             um->gnodeno = db_hdf5_comprd(dbfile, m.gnodeno, 1);
+        um->llong_gnodeno = m.llong_gnodeno;
 
         /* Read face, zone, and edge lists */
         if (m.facelist[0] && (SILO_Globals.dataReadMask & DBUMFacelist)) {
@@ -9689,8 +9732,13 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
             m.shapesize/*out*/, friendly_name(name,"_shapesize", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapetype,
             m.shapetype/*out*/, friendly_name(name,"_shapetype", 0));
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, _uzl._gzoneno,
-            m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
+
+        if (_uzl._llong_gzoneno)
+            db_hdf5_compwr(dbfile, DB_LONG_LONG, 1, &nzones, _uzl._gzoneno,
+                m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
+        else
+            db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, _uzl._gzoneno,
+                m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
 
         /* Build header in memory */
         m.ndims = ndims;
@@ -9700,6 +9748,7 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
         m.origin = origin;
         m.lo_offset = lo_offset;
         m.hi_offset = hi_offset;
+        m.llong_gzoneno = _uzl._llong_gzoneno;
 
         /* Write header to file */
         STRUCT(DBzonelist) {
@@ -9715,6 +9764,7 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
             MEMBER_S(str(m.shapesize), shapesize);
             MEMBER_S(str(m.shapetype), shapetype);
             MEMBER_S(str(m.gzoneno), gzoneno);
+            if (m.llong_gzoneno)MEMBER_S(int, llong_gzoneno);
         } OUTPUT(dbfile, DB_ZONELIST, name, &m);
         
     } CLEANUP {
@@ -9927,6 +9977,7 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char *name)
         }
         if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
             zl->gzoneno = db_hdf5_comprd(dbfile, m.gzoneno, 1);
+        zl->llong_gzoneno = m.llong_gzoneno;
 
         H5Tclose(o);
     } CLEANUP {
@@ -12154,8 +12205,14 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
 
         /* Global node numbers */
         if (_pm._gnodeno)
-            db_hdf5_compwr(dbfile, DB_INT, 1, &nels, _pm._gnodeno,
-                m.gnodeno/*out*/, friendly_name(name, "_gnodeno", 0));
+        {
+            if (_pm._llong_gnodeno)
+                db_hdf5_compwr(dbfile, DB_LONG_LONG, 1, &nels, _pm._gnodeno,
+                    m.gnodeno/*out*/, friendly_name(name, "_gnodeno", 0));
+            else
+                db_hdf5_compwr(dbfile, DB_INT, 1, &nels, _pm._gnodeno,
+                    m.gnodeno/*out*/, friendly_name(name, "_gnodeno", 0));
+        }
 
         /* Build header in memory */
         m.ndims = ndims;
@@ -12174,6 +12231,7 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
             strcpy(m.units[i], OPT(_pm._units[i]));
         }
         strcpy(m.mrgtree_name, OPT(_pm._mrgtree_name));
+        m.llong_gnodeno = _pm._llong_gnodeno;
         
         /* Write header to file */
         STRUCT(DBpointmesh) {
@@ -12195,6 +12253,7 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
             MEMBER_R(str(m.units[_j]), units, ndims);
             MEMBER_S(str(m.gnodeno), gnodeno);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
+            if (m.llong_gnodeno)MEMBER_S(int, llong_gnodeno);
         } OUTPUT(dbfile, DB_POINTMESH, name, &m);
 
     } CLEANUP {
@@ -12303,6 +12362,7 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
         }
         if (SILO_Globals.dataReadMask & DBPMGlobNodeNo)
             pm->gnodeno = db_hdf5_comprd(dbfile, m.gnodeno, 1);
+        pm->llong_gnodeno = m.llong_gnodeno;
 
         H5Tclose(o);
     } CLEANUP {

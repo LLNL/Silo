@@ -57,6 +57,8 @@ void PrintObjectComponentsType(DBfile *, char *, char *);
  *
  * Modifications:
  *
+ *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *   Adding support for long long type.
  ********************************************************************/
 
 char *
@@ -74,6 +76,9 @@ IntToTypename(int type)
         break;
     case DB_LONG:
         retval = "DB_LONG";
+        break;
+    case DB_LONG_LONG:
+        retval = "DB_LONG_LONG";
         break;
     case DB_FLOAT:
         retval = "DB_FLOAT";
@@ -125,6 +130,8 @@ main(int argc, char *argv[])
         exit(0);
     }
 
+    DBShowErrors (DB_NONE, NULL);
+
     /* Print the types for components in the specified files. */
     for(i = 1; i < argc; i++)
         PrintFileComponentTypes(argv[i]);
@@ -142,6 +149,10 @@ main(int argc, char *argv[])
  * Programmer: Mark C. Miller
  * Date:       June 19, 2008 
  *
+ * Modifications:
+ *
+ *   Mark C. Miller, Wed Sep 23 11:55:48 PDT 2009
+ *   Added misc. variables.
  ********************************************************************/
 #define PRINT_OBJS(theFile, theToc, theClass, Indent, S)        \
     nobjs += theToc->n ## theClass ## S;                                \
@@ -198,6 +209,7 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
     PRINT_OBJS(dbfile, dbtoc, obj, indent, /*void*/);
     PRINT_OBJS(dbfile, dbtoc, defvars, indent, /*void*/);
     PRINT_OBJS(dbfile, dbtoc, array, indent, s);
+    PRINT_OBJS(dbfile, dbtoc, var, indent, /*void*/);
     PRINT_OBJS(dbfile, dbtoc, curve, indent, /*void*/);
     PRINT_OBJS(dbfile, dbtoc, ptmesh, indent, /*void*/);
     PRINT_OBJS(dbfile, dbtoc, ptvar, indent, /*void*/);
@@ -233,6 +245,8 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Wed Sep 23 11:56:19 PDT 2009
+ *   Made it use DB_UNKNOWN driver to open.
  ********************************************************************/
 
 void
@@ -244,7 +258,7 @@ PrintFileComponentTypes(char *filename)
     DBtoc  *dbtoc = NULL;
 
     /* Open the data file. Return if it cannot be read. */
-    if((dbfile = DBOpen(filename, DB_PDB, DB_READ)) == NULL)
+    if((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) == NULL)
     {
         printf("File: %s\n    <could not be opened>\n\n", filename);
         return;
@@ -284,6 +298,8 @@ PrintFileComponentTypes(char *filename)
  *
  * Modifications:
  *
+ *  Mark C. Miller, Wed Sep 23 11:56:40 PDT 2009
+ *  Added support for misc. variable printing.
  ********************************************************************/
 
 void
@@ -295,8 +311,10 @@ PrintObjectComponentsType(DBfile *dbfile, char *objname, char *indent)
     /* Get the component names for the object. */
     if((obj = DBGetObject(dbfile, objname)) == NULL)
     {
-        printf("%sObject: \"%s\"\n    %s<cannot read object>\n\n", indent,
-               objname, indent);
+        int len = DBGetVarLength(dbfile, objname);
+        comptype = DBGetVarType(dbfile, objname);
+        printf("%sObject: \"%s\" is a simple array\n", indent, objname);
+        printf("    Length: %d  Type: %-11s\n", len, IntToTypename(comptype));
         return;
     }
 

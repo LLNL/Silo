@@ -64,6 +64,11 @@ for advertising or product endorsement purposes.
  * 	Robb Matzke, 1999-04-09
  *	Added argument parsing to control the driver which is used.
  *
+ *      Mark C. Miller, Mon Sep 21 15:20:30 PDT 2009
+ *      Added code to test long long type.
+ *
+ *      Mark C. Miller, Wed Sep 23 11:57:24 PDT 2009
+ *      Added logic to test DBInqFile.
  *-------------------------------------------------------------------------
  */
 int
@@ -73,11 +78,15 @@ main(int argc, char *argv[])
     int            i, j, k;
     int            ndims, dims[3];
     float          val[NX * NY * NZ];
+    long long      lval[NX * NY * NZ];
     int            offset[3], length[3], stride[3];
     float          val2[NX * NY * NZ];
+    long long      *lval2;
     int            cnt, driver=DB_PDB;
     char	  *filename="simple.pdb";
     int            k1, k2;
+    int            err;
+    int            inqval;
     DBfile        *dbfile;
 
     /* Parse command-line */
@@ -109,9 +118,36 @@ main(int argc, char *argv[])
         for (j = 0; j < NY; j++) {
             for (i = 0; i < NX; i++) {
                 val[i + j * NX + k * NX * NY] = i + j * NX + k * NX * NY;
+                lval[i + j * NX + k * NX * NY] = ((long long) 1 << 35) + i + j * NX + k * NX * NY;
             }
         }
     }
+
+    /* Test InqFile on a PDB (but not Silo) file */
+    if (driver == DB_PDB)
+        inqval = DBInqFile("not_a_silo_file.pdb");
+    else
+        inqval = DBInqFile("not_a_silo_file.h5");
+    if (inqval < 0)
+    {
+        fprintf(stderr, "Error in InqFile attempting to identify not_a_silo_file");
+        err = 1;
+    }
+    else if (inqval > 0)
+    {
+        fprintf(stderr, "Error in InqFile attempting to identify not_a_silo_file");
+        err = 1;
+    }
+
+    /* Create empty silo file to test InqFile */
+    dbfile = DBCreate(filename, 0, DB_LOCAL, "Empty Silo File", driver);
+    DBClose(dbfile);
+    if (DBInqFile(filename) <= 0)
+    {
+        fprintf(stderr, "InqFile says file created via DBCreate is NOT a silo file");
+        err = 1;
+    }
+    unlink(filename);
 
     /*
      * Create a file that contains a simple variables.
@@ -120,6 +156,8 @@ main(int argc, char *argv[])
     dbfile = DBCreate(filename, 0, DB_LOCAL, "Simple Test", driver);
 
     DBWrite(dbfile, "simple", val, dims, ndims, DB_FLOAT);
+    if (driver != DB_PDB)
+        DBWrite(dbfile, "llong", lval, dims, ndims, DB_LONG_LONG);
 
     DBClose(dbfile);
 
@@ -144,6 +182,8 @@ main(int argc, char *argv[])
         val2[i] = 0;
 
     DBReadVarSlice(dbfile, "simple", offset, length, stride, ndims, val2);
+    if (driver != DB_PDB)
+        lval2 = DBGetVar(dbfile, "llong");
 
     DBClose(dbfile);
 
@@ -159,6 +199,7 @@ main(int argc, char *argv[])
             }
         }
     }
+    err += cnt;
     printf("%d values don't match\n", cnt);
 
     cnt = 0;
@@ -169,6 +210,20 @@ main(int argc, char *argv[])
             cnt++;
     printf("%d values were overwritten\n", cnt);
 
-    return 0;
+    if (driver != DB_PDB)
+    {
+        cnt = 0;
+        for (k = 0; k < NZ; k++) {
+            for (j = 0; j < NY; j++) {
+                for (i = 0; i < NX; i++) {
+                    if (lval2[i + j * NX + k * NX * NY] != lval[i + j * NX + k * NX * NY])
+                        cnt++;
+                }
+            }
+        }
+        err += cnt;
+        printf("%d long long values don't match\n", cnt);
+    }
 
+    return err;
 }

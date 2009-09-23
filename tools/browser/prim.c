@@ -60,6 +60,7 @@
 #define BROWSER_LONG    4
 #define BROWSER_FLOAT   5
 #define BROWSER_DOUBLE  6
+#define BROWSER_LONG_LONG 7
 
 #define PA_NAME         (-999999)
 
@@ -155,6 +156,7 @@ prim_assoc_t    PA_DATATYPE[] = {
    {DB_FLOAT,           "float"},
    {DB_DOUBLE,          "double"},
    {DB_CHAR,            "char"},
+   {DB_LONG_LONG,       "llong"},
    {DB_NOTYPE,          "notype"},
    {0,                  NULL}};
 
@@ -620,6 +622,9 @@ prim_octal(char *buf/*out*/, const void *_mem, size_t nbytes)
  *
  *      Robb Matzke, 2000-10-19
  *      Use the $obase variable. Reindented.
+ *
+ *      Mark C. Miller, Wed Sep 23 11:51:52 PDT 2009
+ *      Added long long case.
  *-------------------------------------------------------------------------
  */
 static void
@@ -760,6 +765,26 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
                 }
                 break;
 
+            case BROWSER_LONG_LONG:
+                u = *((unsigned long long*)mem);
+                nbits = 8*sizeof(long long);
+                if (16==obase) {
+                    out_printf(f, "%0*x", 2*sizeof(long long), u);
+                } else if (8==obase) {
+                    out_printf(f, "%0*o", (nbits+2)/3, u);
+                } else if (2==obase) {
+                    for (i=0; i<sizeof(long long); i++) {
+                        u = *((unsigned char*)mem+i);
+                        for (j=0, mask=0x80; j<8; j++, mask>>=1) {
+                            sprintf(buf+i*8+j, "%c", u&mask?'1':'0');
+                        }
+                    }
+                    out_puts(f, buf);
+                } else {
+                    out_printf(f, buf, *((long long*)mem));
+                }
+                break;
+
             case BROWSER_FLOAT:
                 if (16==obase) {
                     for (i=0; i<sizeof(float); i++) {
@@ -865,6 +890,8 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
  *      Robb Matzke, 2 Sep 1997
  *      Added differencing for BROWSER_INT8 datatypes.
  *
+ *      Mark C. Miller, Wed Sep 23 11:52:20 PDT 2009
+ *      Added support for long long type
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -921,6 +948,14 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
     case BROWSER_LONG:
         a_d = *((long*)a_mem);
         b_d = *((long*)b_mem);
+        d_abs = DiffOpt.l_abs;
+        d_rel = DiffOpt.l_rel;
+        status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
+        break;
+
+    case BROWSER_LONG_LONG:
+        a_d = *((long long*)a_mem);
+        b_d = *((long long*)b_mem);
         d_abs = DiffOpt.l_abs;
         d_rel = DiffOpt.l_rel;
         status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
@@ -1117,6 +1152,8 @@ prim_sizeof (obj_t _self) {
  *    Lisa J. Roberts, Mon Nov 22 17:27:53 PST 1999
  *    I changed strdup to safe_strdup.
  *
+ *    Mark C. Miller, Wed Sep 23 11:52:45 PDT 2009
+ *    Added support for long long type.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -1160,6 +1197,11 @@ prim_bind (obj_t _self, void *mem) {
       self->tname = safe_strdup ("int");
       self->browser_type = BROWSER_INT;
       self->nbytes = sizeof(int);
+
+   } else if (!strcmp (self->name, "llong")) {
+      self->tname = safe_strdup ("llong");
+      self->browser_type = BROWSER_LONG_LONG;
+      self->nbytes = sizeof(long long);
 
    } else if (!strcmp (self->name, "long")) {
       self->tname = safe_strdup ("long");
@@ -1225,6 +1267,12 @@ prim_bind (obj_t _self, void *mem) {
          self->tname = safe_strdup ("long");
          self->browser_type = BROWSER_LONG;
          self->nbytes = sizeof(long);
+         break;
+
+      case DB_LONG_LONG:
+         self->tname = safe_strdup ("llong");
+         self->browser_type = BROWSER_LONG_LONG;
+         self->nbytes = sizeof(long long);
          break;
 
       case DB_FLOAT:
@@ -1328,6 +1376,8 @@ prim_set_io_assoc (obj_t _self, prim_assoc_t *assoc) {
  *      The browser type `string' is no longer translated to DB_CHAR.
  *      Instead, `int8' is translated to DB_CHAR.
  *
+ *      Mark C. Miller, Wed Sep 23 11:53:21 PDT 2009
+ *      Added support for long long.
  *-------------------------------------------------------------------------
  */
 DBdatatype
@@ -1348,6 +1398,8 @@ prim_silotype (obj_t _self) {
          return DB_INT;
       case BROWSER_LONG:
          return DB_LONG;
+      case BROWSER_LONG_LONG:
+         return DB_LONG_LONG;
       case BROWSER_FLOAT:
          return DB_FLOAT;
       case BROWSER_DOUBLE:
@@ -1366,6 +1418,9 @@ prim_silotype (obj_t _self) {
 
    } else if (!strcmp (self->name, "int")) {
       return DB_INT;
+
+   } else if (!strcmp (self->name, "llong")) {
+      return DB_LONG_LONG;
 
    } else if (!strcmp (self->name, "long")) {
       return DB_LONG;

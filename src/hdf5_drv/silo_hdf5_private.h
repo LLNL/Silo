@@ -37,6 +37,7 @@ typedef struct DBfile_hdf5 {
     hid_t       T_short;                /*target DB_SHORT type          */
     hid_t       T_int;                  /*target DB_INT type            */
     hid_t       T_long;                 /*target DB_LONG type           */
+    hid_t       T_llong;                /*target DB_LONG_LONG type      */
     hid_t       T_float;                /*target DB_FLOAT type          */
     hid_t       T_double;               /*target DB_DOUBLE type         */
     hid_t       T_str256;               /*target 256-char string        */

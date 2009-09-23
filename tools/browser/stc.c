@@ -1806,6 +1806,7 @@ stc_silo_types (void) {
             "pointer (array 'self.nzones' (primitive 'int'))");
       COMP (gzoneno,
             "pointer (array 'self.nzones' (primitive 'int'))");
+      COMP (llong_gzoneno,      "primitive 'int'");
    } ESTRUCT;
 
    STRUCT (DBphzonelist) {
@@ -1999,6 +2000,7 @@ stc_silo_types (void) {
       COMP (mrgtree_name,       "primitive 'string'");
       COMP (tv_connectivity,   "primitive 'int'");
       COMP (disjoint_mode,     "primitive 'int'");
+      COMP (llong_gnodeno,     "primitive 'int'");
    } ESTRUCT;
 
    STRUCT (DBucdvar) {
@@ -2064,6 +2066,7 @@ stc_silo_types (void) {
       COMP (gnodeno,
             "pointer (array 'self.nels' (primitive 'int'))");
       COMP (mrgtree_name,       "primitive 'string'");
+      COMP (llong_gnodeno,      "primitive 'int'");
    } ESTRUCT;
 
    STRUCT (DBmeshvar) {

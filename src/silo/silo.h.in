@@ -287,6 +287,7 @@ typedef enum {
     DB_FLOAT=19,
     DB_DOUBLE=20,
     DB_CHAR=21,
+    DB_LONG_LONG=22,
     DB_NOTYPE=25           /*unknown type */
 } DBdatatype;
 
@@ -376,6 +377,7 @@ typedef enum {
 #define DBOPT_MRGV_RNAMES       325
 #define DBOPT_SPECNAMES         326
 #define DBOPT_SPECCOLORS        327
+#define DBOPT_LLONGNZNUM        328
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -690,6 +692,7 @@ typedef struct {
     int            guihide;     /* Flag to hide from post-processor's GUI */
     int           *gnodeno;     /* global node ids */
     char          *mrgtree_name; /* optional name of assoc. mrgtree object */
+    int            llong_gnodeno; /* flag indicating gnoenode is long long */
 } DBpointmesh;
 
 /*----------------------------------------------------------------------------
@@ -841,6 +844,7 @@ typedef struct {
 /*--------- Optional zone attributes ---------*/
     int           *zoneno;      /* [nzones] zone number of each zone */
     int           *gzoneno;     /* [nzones] global zone number of each zone */
+    int            llong_gzoneno; /* flag indicating gzoneno is long long */
 } DBzonelist;
 
 typedef struct {
@@ -989,6 +993,7 @@ typedef struct {
     char          *mrgtree_name; /* optional name of assoc. mrgtree object */
     int            tv_connectivity;
     int            disjoint_mode;
+    int            llong_gnodeno; /* flag indicating gnoenode is long long */
 } DBucdmesh;
 
 /*----------------------------------------------------------------------------
@@ -1789,6 +1794,7 @@ SILO_API extern int      DBGetVarByteLength(DBfile *, const char *);
 SILO_API extern int      DBGetVarLength(DBfile *, const char *);
 SILO_API extern int      DBGetVarDims(DBfile *, const char *, int, int *);
 SILO_API extern int      DBGetVarType(DBfile *, const char *);
+SILO_API extern int      DBInqFileHasObjects(DBfile *);
 SILO_API extern int      DBInqMeshname(DBfile *, const char *, const char *);
 SILO_API extern int      DBInqMeshtype(DBfile *, const char *);
 SILO_API extern int      DBInqCompoundarray(DBfile *, const char *, char ***,

@@ -581,6 +581,9 @@ _DBQMSetStride(DBquadmesh *qmesh)
  *
  *    Robb Matzke, Thu Nov 10 12:30:43 EST 1994
  *    An invalid `type' is now an error.
+ *
+ *    Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *    Adding support for long long type.
  *---------------------------------------------------------------------*/
 INTERNAL char *
 db_GetDatatypeString(int type)
@@ -602,6 +605,9 @@ db_GetDatatypeString(int type)
             break;
         case DB_LONG:
             strcpy(str, "long");
+            break;
+        case DB_LONG_LONG:
+            strcpy(str, "long long");
             break;
         case DB_FLOAT:
             strcpy(str, "float");
@@ -1022,6 +1028,9 @@ db_FreeToc(DBfile *dbfile)
  *  Modified
  *    Robb Matzke, Thu Nov 10 12:33:44 EST 1994
  *    Added error mechanism.  An invalid `datatype' is an error.
+ *
+ *    Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *    Adding support for long long type.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_GetMachDataSize(int datatype)
@@ -1044,6 +1053,9 @@ db_GetMachDataSize(int datatype)
             break;
         case DB_LONG:
             size = sizeof(long);
+
+        case DB_LONG_LONG:
+            size = sizeof(long long);
 
             break;
         case DB_FLOAT:
@@ -1078,6 +1090,9 @@ db_GetMachDataSize(int datatype)
  *  Modified
  *    Robb Matzke, Thu Nov 10 12:35:24 EST 1994
  *    Added error mechanism.  An invalid `dataname' is an error.
+ *
+ *    Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
+ *    Adding support for long long type.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_GetDatatypeID(char *dataname)
@@ -1089,6 +1104,8 @@ db_GetDatatypeID(char *dataname)
         size = DB_INT;
     else if (STR_BEGINSWITH(dataname, "short"))
         size = DB_SHORT;
+    else if (STR_BEGINSWITH(dataname, "long long"))
+        size = DB_LONG_LONG;
     else if (STR_BEGINSWITH(dataname, "long"))
         size = DB_LONG;
     else if (STR_BEGINSWITH(dataname, "float"))
@@ -3958,13 +3975,81 @@ DBClose(DBfile *dbfile)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
+/*----------------------------------------------------------------------
+ * Routine:  db_inq_file_has_silo_objects_r
+ *
+ * Purpose:  Recursive helper func for DBInqFileHasObjects 
+ *
+ * Programmer: Mark C. Miller, Wed Sep 23 11:34:01 PDT 2009
+ *
+ *--------------------------------------------------------------------*/
+
+PRIVATE int
+db_inq_file_has_silo_objects_r(DBfile *f)
+{
+    int i, retval = 0;
+    DBtoc *toc = DBGetToc(f);
+
+    if (!toc)
+        return -1;
+
+    /* We exclude directories because a non-Silo file may contain them. */
+    retval = toc->ncurve + toc->ncsgmesh + toc->ncsgvar + toc->ndefvars +
+        toc->nmultimesh + toc->nmultimeshadj + toc->nmultivar +
+        toc->nmultimat + toc->nmultimatspecies + toc->nqmesh +
+        toc->nqvar + toc->nucdmesh + toc->nucdvar + toc->nptmesh +
+        toc->nptvar + toc->nvar + toc->nmat + toc->nmatspecies +
+        toc->nobj + toc->nmrgtrees + toc->ngroupelmaps +
+        toc->nmrgvars + toc->narrays;
+
+    /* Recurse on directories. */
+    for (i = 0; i < toc->ndir && retval == 0; i++)
+    {
+        DBSetDir(f, toc->dir_names[i]);
+        retval += db_inq_file_has_silo_objects_r(f);
+        DBSetDir(f, "..");
+    }
+
+    return retval;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBInqFileHasObjects
+ *
+ * Purpose:     See if the file contains any silo objects, excluding
+ *              directories in the search.
+ *
+ * Return:      Success:         >0 ==> yes, the file has silo objects.
+ *                              ==0 ==> no, the file has no silo objects.
+ *
+ *              Failure:        -1 
+ *
+ * Programmer:  Mark C. Miller, Wed Sep 23 09:42:27 PDT 2009
+ *-------------------------------------------------------------------------*/
+
+PUBLIC int
+DBInqFileHasObjects(DBfile *f)
+{
+    char cwd[4096];
+    int retval;
+
+    if (f == 0)
+        return -1;
+
+    DBGetDir(f, cwd);
+    retval = db_inq_file_has_silo_objects_r(f);
+    DBSetDir(f, cwd);    
+
+    return retval;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    DBInqFileReal
  *
  * Purpose:     Determines if the filename is a Silo file.
  *
  * Return:      0  if filename is not a Silo file, 
- *              >0 if filename is a Sile file,
+ *              >0 if filename is a Silo file,
  *              <0 if an error occurred.
  *
  * Programmer:  Hank Childs
@@ -3974,11 +4059,16 @@ DBClose(DBfile *dbfile)
  *    Sean Ahern, Wed Jul  5 15:35:48 PDT 2000
  *    Renamed the function to DBInqFileReal.  Client code now calls a macro
  *    called DBInqFile.
+ *
+ *    Mark C. Miller, Wed Sep 23 11:48:19 PDT 2009
+ *    Added logic to confirm that indeed the successfully opened file has
+ *    some silo objects in it.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBInqFileReal(const char *filename)
 {
     DBfile *dbfile = NULL;
+    int hasobjects = -1;
 
     API_BEGIN("DBInqFile", int, -1) {
         if (!filename || ! *filename)
@@ -3996,6 +4086,8 @@ DBInqFileReal(const char *filename)
          */
         PROTECT {
             dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ);
+            if (dbfile)
+                hasobjects = DBInqFileHasObjects(dbfile);
         } CLEANUP {
             CANCEL_UNWIND;
         } END_PROTECT;
@@ -4008,7 +4100,7 @@ DBInqFileReal(const char *filename)
         if (dbfile != NULL)
         {
             DBClose(dbfile);
-            API_RETURN(1);
+            API_RETURN(hasobjects);
         }
  
         API_RETURN(0);
@@ -9623,6 +9715,10 @@ UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
  *
  *    Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *    Added names and colors for species.
+ *
+ *    Mark C. Miller, Wed Sep 23 11:49:34 PDT 2009
+ *    Added DBOPT_LLONGNZNUM for long long global node/zone numbers
+ *    to pointmeshes, ucdmeshes, zonelists.
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -9886,6 +9982,10 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_REGION_PNAMES:
                         _pm._region_pnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_LLONGNZNUM:
+                        _pm._llong_gnodeno = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -10155,6 +10255,10 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         _um._disjoint_mode = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_LLONGNZNUM:
+                        _um._llong_gnodeno = DEREF(int, optlist->values[i]);
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -10169,6 +10273,10 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                 {
                     case DBOPT_ZONENUM:
                         _uzl._gzoneno = (int*)optlist->values[i];
+                        break;
+
+                    case DBOPT_LLONGNZNUM:
+                        _uzl._llong_gzoneno = DEREF(int, optlist->values[i]);
                         break;
 
                     default:

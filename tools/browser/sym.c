@@ -730,6 +730,9 @@ sym_truth (char *name) {
  *
  *      Robb Matzke, 2000-10-19
  *      Added the `$obase' variable.
+ *
+ *      Mark C. Miller, Wed Sep 23 11:53:59 PDT 2009
+ *      Added $fmt_llong for long long data.
  *-------------------------------------------------------------------------
  */
 void
@@ -922,6 +925,9 @@ sym_init (void)
    sym_bi_set("fmt_long",       "(long)%d",     "Long format",
               "This is a C printf() format string used to render long "
               "integer values in the browser output.");
+   sym_bi_set("fmt_llong",      "%lld",         "Long long format",
+              "This is a C printf() format string used to render long "
+              "long integer values in the browser output.");
 
    sprintf(tmp, "%%1.%dg", FLT_DIG);
    sym_bi_set("fmt_float",      tmp,            "Float format",

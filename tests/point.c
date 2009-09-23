@@ -170,6 +170,9 @@ main(int argc, char **argv)
  *
  *    Lisa J. Roberts, Fri Apr  7 10:30:29 PDT 2000
  *    Removed radius and theta, which were unused.
+ *
+ *    Mark C. Miller, Wed Sep 23 11:54:56 PDT 2009
+ *    Added logic to test long long global node numbers option.
  *--------------------------------------------------------------------*/
 static void
 build_point(DBfile *dbfile, char *name, int N, int dims)
@@ -178,6 +181,7 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     float          *u = NULL, *v = NULL, *w = NULL;
     float          *d = NULL, *t = NULL;
     int            *itype = NULL;
+    long long      *litype = NULL;
     int             i;
     float          *coords[3], *vars[3];
     DBoptlist      *optlist = NULL;
@@ -197,6 +201,7 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     d = ALLOC(float,N); assert_mem(d);
     t = ALLOC(float,N); assert_mem(t);
     itype = ALLOC(int,N); assert_mem(itype);
+    litype = ALLOC(long long,N); assert_mem(litype);
 
     optlist = DBMakeOptlist(10);
     optlist1 = DBMakeOptlist(10);
@@ -290,12 +295,17 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
         w[i] = w[i] / TwoPI;
         t[i] = pow(10., 5. * f * f);
         itype[i] = i;
+        litype[i] = ((long long)1<<35) + i;
     }
 
     coords[0] = x;
     coords[1] = y;
     coords[2] = z;
 
+   
+    DBClearOption(optlist, DBOPT_NODENUM);
+    DBAddOption(optlist, DBOPT_NODENUM, litype);
+    DBAddOption(optlist, DBOPT_LLONGNZNUM, &one);
     DBPutPointmesh(dbfile, name, dims, coords, N, DB_FLOAT, optlist);
 
     vars[0] = d;
