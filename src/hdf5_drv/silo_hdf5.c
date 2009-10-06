@@ -5331,6 +5331,10 @@ db_hdf5_GetComponent(DBfile *_dbfile, char *objname, char *compname)
  *
  *   Mark C. Miller, Tue Apr 28 15:57:43 PDT 2009
  *   Added missing statement to set mnofname = 0 after free'ing it.
+ *
+ *   Mark C. Miller, Tue Oct  6 10:24:01 PDT 2009
+ *   Removed call to free(mnofname) and set it to zero. Added logic
+ *   to free it just prior to STRDUP'ing it.
  *-------------------------------------------------------------------------
  */
 CALLBACK void *
@@ -5382,6 +5386,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
                 {
                     mnof = mno;
                     mnofidx = strtol(&compname[complen], 0, 0) - 1;
+                    if (mnofname) free(mnofname);
                     mnofname = STRDUP(memb_name);
                 }
             }
@@ -5482,8 +5487,6 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
                     }
                     memcpy(newretval, pretval, db_GetMachDataSize(datatype));
                     free(retval);
-                    free(mnofname);
-                    mnofname = 0;
                     retval = newretval;
                 }
             }
