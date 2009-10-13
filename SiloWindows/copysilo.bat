@@ -1,14 +1,14 @@
 @echo off
 
-set SiloIn=..\\src\\silo\\silo.h.in
-set SiloOut=..\\src\\silo\\silo.h
+set SiloIn=..\\..\\src\\silo\\silo.h.in
+set SiloOut=..\\..\\src\\silo\\silo.h
 set major=0
 set minor=0
 set patch=0
 set pre=
 
 REM Retrieve and parse the version tokens
-for /F "tokens=1,2,3* delims=.,-pre" %%i in (..\\VERSION) do (
+for /F "tokens=1,2,3* delims=.,-pre" %%i in (..\\..\\VERSION) do (
   Set major=%%i
   Set minor=%%j
   Set patch=%%k
@@ -16,14 +16,14 @@ for /F "tokens=1,2,3* delims=.,-pre" %%i in (..\\VERSION) do (
 )
 
 REM Read silo.h.in, parsing for VERS info, and substituting in appropriate values
-for /F "tokens=1* delims=]" %%i in ('find /v /n "" ^..\src\silo\silo.h.in') do (
+for /F "tokens=1* delims=]" %%i in ('find /v /n "" ^..\..\src\silo\silo.h.in') do (
   REM preserve blank lines
   if "%%j"=="" (
     @echo.>>%SiloOut%
   ) else (
     REM search the input line for special tokens
     for /F "tokens=1,2,3* delims=@" %%A in ("%%j") do (
-      @echo %%A%%B%%C%%D>>mytest.txt 
+      :: @echo %%A%%B%%C%%D>>mytest.txt 
       if "%%B"=="SILO_VERS_MAJ" (
         @echo %%A%major%>> %SiloOut% 
       ) else if "%%B"=="SILO_VERS_MIN" (

@@ -25,6 +25,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -122,6 +124,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -218,6 +222,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -314,6 +320,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -410,6 +418,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -490,6 +500,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -569,6 +581,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -649,6 +663,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

@@ -60,7 +60,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -127,7 +129,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -194,7 +198,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -261,7 +267,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -321,7 +329,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -378,7 +388,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -436,7 +448,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -493,7 +507,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Create silo.h"
+				CommandLine="..\copysilo.bat"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
