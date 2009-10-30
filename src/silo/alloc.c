@@ -509,6 +509,8 @@ DBFreeMultimeshadj(DBmultimeshadj *mshadj)
  *     Eric Brugger, Wed Jul  2 13:19:07 PDT 1997
  *     I added code to free mv->varnames to close a memory leak.
  *
+ *     Mark C. Miller, Thu Oct 29 15:55:34 PDT 2009
+ *     Added free for mmesh_name
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultivar (DBmultivar *mv)
@@ -524,6 +526,7 @@ DBFreeMultivar (DBmultivar *mv)
 
      FREE(mv->varnames);
      FREE(mv->vartypes);
+     FREE(mv->mmesh_name);
      FREE(mv);
 }
 
@@ -543,6 +546,8 @@ DBFreeMultivar (DBmultivar *mv)
  *     Added code to deal with material_names, matcolors and other
  *     stuff that has been added in past several years
  *
+ *     Mark C. Miller, Thu Oct 29 15:55:34 PDT 2009
+ *     Added free for mmesh_name
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultimat (DBmultimat *mat)
@@ -573,6 +578,7 @@ DBFreeMultimat (DBmultimat *mat)
      FREE(mat->matcounts);
      FREE(mat->matlists);
      FREE(mat->matnos);
+     FREE(mat->mmesh_name);
      FREE(mat);
 }
 
