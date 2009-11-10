@@ -36,6 +36,10 @@
  *
  *      Mark C. Miller, Thu Oct 18 09:23:10 PDT 2001
  *        Initial Implementation
+ *
+ *      Mark C. Miller, Thu Nov  5 10:49:43 PST 2009
+ *      Added logic to handle an HDF5 file without friendly names.
+ *      Added isinf to test for valid float/double.
  *-------------------------------------------------------------------------
  */
 #include <config.h>
@@ -61,8 +65,8 @@
    bogus tests for these macros and then add code in main to print a
    useful error message and then exit */
 #ifdef HAVE_ISNAN
-#define IS_VALID_FLOAT(val)        (!isnan((double)(val)))
-#define IS_VALID_DOUBLE(val)        (!isnan(val))
+#define IS_VALID_FLOAT(val)        (!isnan((double)(val))&&!isinf((double)(val)))
+#define IS_VALID_DOUBLE(val)        (!isnan(val)&&!isinf(val))
 #else
 #define IS_VALID_FLOAT(val)        ((val)!=0.0)  /* bogus test */
 #define IS_VALID_DOUBLE(val)        ((val)!=0.0)  /* bogus test */
@@ -360,7 +364,7 @@ main(int argc, char *argv[])
          fprintf(stderr,"Warning: As a precaution, you should use this tool\n");
          fprintf(stderr,"         only on the same class of platform the\n");
          fprintf(stderr,"         data was generated on.\n");
-         fprintf(stderr,"usage: silock [-nan] [-inf] [-q] [-progress]"
+         fprintf(stderr,"usage: silock [-q] [-progress]"
             " silofile\n");
          fprintf(stderr,"available options...\n");
          fprintf(stderr,"   -progress: Disable progress display\n");
@@ -398,7 +402,21 @@ main(int argc, char *argv[])
 
    DBShowErrors(DB_TOP, NULL);
 
-   scanSiloDir(siloFile, "/");
+   if (DBGetDriverType(siloFile) == DB_HDF5 && !DBGuessHasFriendlyHDF5Names(siloFile))
+   {
+       fprintf(stderr,"WARNING: This is an HDF5 file without \"Friendly\" HDF5 array names.\n");
+       fprintf(stderr,"WARNING: Consequently, while %s will be able to find/detect nans/infs,\n",
+           strrchr(argv[0],'/')?strrchr(argv[0],'/')+1:argv[0]);
+       fprintf(stderr,"WARNING: the names of the arrays in which it finds them will be cryptic.\n");
+       fprintf(stderr,"WARNING: You will most likely have to use h5ls/h5dump to determine which\n");
+       fprintf(stderr,"WARNING: Silo objects are involved.\n");
+       DBSetDir(siloFile, "/.silo");
+       scanSiloDir(siloFile, "/.silo");
+   }
+   else
+   {
+       scanSiloDir(siloFile, "/");
+   }
 
    DBClose(siloFile);
 

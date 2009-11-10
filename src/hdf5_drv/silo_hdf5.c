@@ -201,6 +201,14 @@ H5_VERS_INFO;
 PRIVATE int db_hdf5_fullname(DBfile_hdf5 *dbfile, char *name, char *full);
 PRIVATE int hdf2silo_type(hid_t type);
 
+/* Symbolic constants used in calls to db_StringListToStringArray
+   to indicate behavior. A '!' in front means to not perform the
+   associated action. For HDF5 driver, we handle the slash swap
+   on the 'names' member of multi-block objects only and we
+   never skip first semicolon. */
+static const int        handleSlashSwap = 1;
+static const int        skipFirstSemicolon = 0;
+
 /* Use `float' for all memory floating point values? */
 static int              force_single_g;
 
@@ -272,6 +280,8 @@ typedef struct DBcsgvar_mt {
     char           vals[MAX_VARS][256];
     char           meshname[256];
     char           region_pnames[256];
+    int            conserved;
+    int            extensive;
 } DBcsgvar_mt;
 static hid_t DBcsgvar_mt5;
 
@@ -355,6 +365,8 @@ typedef struct DBquadvar_mt {
     char                label[256];
     char                units[256];
     char                region_pnames[256];
+    int                 conserved;
+    int                 extensive;
 } DBquadvar_mt;
 static hid_t    DBquadvar_mt5;
 
@@ -410,6 +422,8 @@ typedef struct DBucdvar_mt {
     char                label[256];
     char                units[256];
     char                region_pnames[256];
+    int                 conserved;
+    int                 extensive;
 } DBucdvar_mt;
 static hid_t    DBucdvar_mt5;
 
@@ -543,6 +557,8 @@ typedef struct DBmultivar_mt {
     char                region_pnames[256];
     char                mmesh_name[256];
     int                 tensor_rank;
+    int                 conserved;
+    int                 extensive;
 } DBmultivar_mt;
 static hid_t    DBmultivar_mt5;
 
@@ -646,6 +662,8 @@ typedef struct DBpointvar_mt {
     char                units[256];
     char                data[MAX_VARS][256];
     char                region_pnames[256];
+    int                 conserved;
+    int                 extensive;
 } DBpointvar_mt;
 static hid_t    DBpointvar_mt5;
 
@@ -3762,6 +3780,9 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
  *   Added 'z' to name and compressionFlags argument to provide control
  *   over mesh-level compresion algorithms. The older (non-z) method 
  *   remains as a stub that simply calls this one with zero for flags.
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:00 PST 2009
+ *   Added support for hard links for friendly names too. 
  *-------------------------------------------------------------------------
  */
 PRIVATE int
@@ -3839,8 +3860,13 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
             }
-            if (SILO_Globals.enableFriendlyHDF5Names && fname)
-                H5Glink(dbfile->cwg, H5G_LINK_SOFT, name, fname);
+            if (fname)
+            {
+                if (SILO_Globals.enableFriendlyHDF5Names == 2)
+                    H5Glink(dbfile->cwg, H5G_LINK_HARD, name, fname);
+                else if (SILO_Globals.enableFriendlyHDF5Names != 0)
+                    H5Glink(dbfile->cwg, H5G_LINK_SOFT, name, fname);
+            }
         }
         if (buf && H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, buf)<0) {
             db_perror(name, E_CALLFAIL, me);
@@ -4837,6 +4863,10 @@ db_hdf5_MkDir(DBfile *_dbfile, char *name)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Thu Nov  5 10:55:46 PST 2009
+ *   Added some 'hidden' logic to support view of contents of /.silo dir
+ *   from browser. Its 'hidden' because I have no intention of letting
+ *   users know about it.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -4848,7 +4878,8 @@ db_hdf5_SetDir(DBfile *_dbfile, char *name)
     
     PROTECT {
         if ((newdir=H5Gopen(dbfile->cwg, name))<0 ||
-            H5Gget_objinfo(newdir, "..", FALSE, NULL)<0) {
+            (strcmp(name,"/.silo")!=0 &&
+            H5Gget_objinfo(newdir, "..", FALSE, NULL)<0)) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -4857,7 +4888,7 @@ db_hdf5_SetDir(DBfile *_dbfile, char *name)
         dbfile->cwg = newdir;
         if (dbfile->cwg_name) {
             free(dbfile->cwg_name);
-            dbfile->cwg_name = NULL;
+            dbfile->cwg_name = !strcmp(name,"/.silo")?strdup("/.silo"):NULL;
         }
     } CLEANUP {
         H5E_BEGIN_TRY {
@@ -7113,6 +7144,11 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
  *
  *   Mark C. Miller, Thu Sep  7 10:50:55 PDT 2006
  *   Added use of db_hdf5_resolvename for retrieval of subobjects
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBcsgmesh *
@@ -7188,7 +7224,8 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
         {
             char *tmpbndnames = db_hdf5_comprd(dbfile, m.bndnames, 1);
             if (tmpbndnames)
-                csgm->bndnames = db_StringListToStringArray(tmpbndnames, m.nbounds);
+                csgm->bndnames = db_StringListToStringArray(tmpbndnames, m.nbounds,
+                                     !handleSlashSwap, !skipFirstSemicolon);
             FREE(tmpbndnames);
         }
 
@@ -7226,6 +7263,9 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -7279,6 +7319,8 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
             m.dtime = _um._dtime;
         m.use_specmf = _um._use_specmf;
         m.datatype = datatype;
+        m.conserved = _csgm._conserved;
+        m.extensive = _csgm._extensive;
         strcpy(m.meshname, OPT(_csgm._meshname));
         strcpy(m.label, OPT(_csgm._label));
         strcpy(m.units, OPT(_csgm._unit));
@@ -7298,6 +7340,8 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
             if (m.guihide)      MEMBER_S(int, guihide);
             if (_csgm._time_set)  MEMBER_S(float, time);
             if (_csgm._dtime_set) MEMBER_S(double, dtime);
+            if (m.conserved)    MEMBER_S(int, conserved);
+            if (m.extensive)    MEMBER_S(int, extensive);
             MEMBER_S(str(m.region_pnames), region_pnames);
         } OUTPUT(dbfile, DB_CSGVAR, vname, &m);
 
@@ -7320,6 +7364,15 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
  * Programmer:  Mark C. Miller
  *              Wednesday, September 7, 2005 
  *
+ * Modifications:
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBcsgvar *
@@ -7378,6 +7431,8 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, const char *name)
         csgv->use_specmf = m.use_specmf;
         csgv->ascii_labels = m.ascii_labels;
         csgv->guihide = m.guihide;
+        csgv->conserved = m.conserved;
+        csgv->extensive = m.extensive;
 
         /* Read the raw data */
         if (m.nvals>MAX_VARS) {
@@ -7394,7 +7449,8 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, const char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) csgv->region_pnames = db_StringListToStringArray(s, -1);
+        if (s) csgv->region_pnames = db_StringListToStringArray(s, -1,
+                   !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
@@ -7522,6 +7578,10 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, const char *name, int nregs,
  *   Fixed case where we were forcing single on an integer array for the
  *   zonelist.
  *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBcsgzonelist *
@@ -7584,7 +7644,8 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name)
         {
             char *tmpnames = db_hdf5_comprd(dbfile, m.regnames, 1);
             if (tmpnames)
-                zl->regnames = db_StringListToStringArray(tmpnames, m.nregs);
+                zl->regnames = db_StringListToStringArray(tmpnames, m.nregs,
+                    !handleSlashSwap, !skipFirstSemicolon);
             FREE(tmpnames);
         }
 
@@ -7592,7 +7653,8 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name)
         {
             char *tmpnames = db_hdf5_comprd(dbfile, m.zonenames, 1);
             if (tmpnames)
-                zl->zonenames = db_StringListToStringArray(tmpnames, m.nzones);
+                zl->zonenames = db_StringListToStringArray(tmpnames, m.nzones,
+                    !handleSlashSwap, !skipFirstSemicolon);
             FREE(tmpnames);
         }
 
@@ -7718,6 +7780,10 @@ db_hdf5_PutDefvars(DBfile *_dbfile, const char *name, int ndefs,
  *   Mark C. Miller, Thu Jul 29 11:26:24 PDT 2004
  *   Made it set datatype correctly. Added support for dataReadMask
  *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBdefvars*
@@ -7762,13 +7828,15 @@ db_hdf5_GetDefvars(DBfile *_dbfile, const char *name)
         defv->ndefs = m.ndefs;
 
         s = db_hdf5_comprd(dbfile, m.names, 1);
-        if (s) defv->names = db_StringListToStringArray(s, defv->ndefs);
+        if (s) defv->names = db_StringListToStringArray(s, defv->ndefs,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         defv->types = db_hdf5_comprd(dbfile, m.types, 1);
 
         s = db_hdf5_comprd(dbfile, m.defns, 1);
-        if (s) defv->defns = db_StringListToStringArray(s, defv->ndefs);
+        if (s) defv->defns = db_StringListToStringArray(s, defv->ndefs, 
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         defv->guihides = db_hdf5_comprd(dbfile, m.guihides, 1);
@@ -8208,6 +8276,9 @@ PrepareForQuadvarCompression(int centering, int datatype)
  *   Mark C. Miller, Thu Jul 17 15:10:50 PDT 2008
  *   Added call to prepare for compression. Changed call to write variable
  *   data to comprdz to support possible comporession. 
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -8293,6 +8364,8 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         m.ascii_labels = _qm._ascii_labels;
         m.guihide = _qm._guihide;
         m.datatype = (DB_FLOAT==datatype || DB_DOUBLE==datatype)?0:datatype;
+        m.conserved = _qm._conserved;
+        m.extensive = _qm._extensive;
         strcpy(m.label, OPT(_qm._label));
         strcpy(m.units, OPT(_qm._unit));
         strcpy(m.meshid, OPT(_qm._meshname));
@@ -8332,6 +8405,8 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             if (m.ascii_labels) MEMBER_S(int, ascii_labels);
             if (m.datatype)     MEMBER_S(int, datatype);
             if (m.guihide)      MEMBER_S(int, guihide);
+            if (m.conserved)    MEMBER_S(int, conserved);
+            if (m.extensive)    MEMBER_S(int, extensive);
             MEMBER_3(int, dims);
             MEMBER_3(int, zones);
             MEMBER_3(int, min_index);
@@ -8396,6 +8471,13 @@ PrepareForQuadvarDecompression(DBfile_hdf5 *dbfile, const char *varname,
  *   Mark C. Miller, Thu Jul 17 15:13:57 PDT 2008
  *   Added to call to prepare for possible decompression.
  *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBquadvar *
@@ -8457,6 +8539,8 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
         qv->use_specmf = m.use_specmf;
         qv->ascii_labels = m.ascii_labels;
         qv->guihide = m.guihide;
+        qv->conserved = m.conserved;
+        qv->extensive = m.extensive;
         for (stride=1, i=0; i<m.ndims; stride*=m.dims[i++]) {
             qv->dims[i] = m.dims[i];
             qv->stride[i] = stride;
@@ -8485,7 +8569,8 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) qv->region_pnames = db_StringListToStringArray(s, -1);
+        if (s) qv->region_pnames = db_StringListToStringArray(s, -1,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
@@ -8896,6 +8981,10 @@ PrepareForUcdmeshDecompression(DBfile_hdf5 *dbfile, const char *meshname,
  *              Added support for decompression. Needed to change order
  *              of operations to read zonelist first as that is the 
  *              bootstrap HZIP needs to decompress anything.
+ *
+ *              Mark C. Miller, Thu Nov  5 16:17:18 PST 2009
+ *              Made it NOT db_Split() the zonelist if mask is such
+ *              that zonelist info is NOT included.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBucdmesh *
@@ -9000,8 +9089,9 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
             /* zones.  This will make dealing with ghost zones easier   */
             /* for applications.                                        */
             /*----------------------------------------------------------*/
-            if ((um->zones->min_index != 0) || 
-                (um->zones->max_index != um->zones->nzones - 1))
+            if (((um->zones->min_index != 0) || 
+                 (um->zones->max_index != um->zones->nzones - 1)) &&
+                 SILO_Globals.dataReadMask & DBZonelistInfo)
             {
                 db_SplitShapelist (um);
             }
@@ -9101,6 +9191,9 @@ PrepareForUcdvarCompression(DBfile_hdf5 *dbfile, const char *varname,
  *   Mark C. Miller, Thu Jul 17 15:17:51 PDT 2008
  *   Added call to prepare for compression. Changed call to write data
  *   to use compwrz.
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -9192,6 +9285,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         m.ascii_labels = _um._ascii_labels;
         m.guihide = _um._guihide;
         m.datatype = (DB_FLOAT==datatype || DB_DOUBLE==datatype)?0:datatype;
+        m.conserved = _um._conserved;
+        m.extensive = _um._extensive;
         strcpy(m.meshid, OPT(_um._meshname));
         strcpy(m.label, OPT(_um._label));
         strcpy(m.units, OPT(_um._unit));
@@ -9216,6 +9311,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             if (_um._dtime_set) MEMBER_S(double, dtime);
             if (_um._lo_offset_set) MEMBER_S(int, lo_offset);
             if (_um._hi_offset_set) MEMBER_S(int, hi_offset);
+            if (m.conserved)    MEMBER_S(int, conserved);
+            if (m.extensive)    MEMBER_S(int, extensive);
             MEMBER_S(str(m.label), label);
             MEMBER_S(str(m.units), units);
             MEMBER_S(str(m.region_pnames), region_pnames);
@@ -9310,6 +9407,14 @@ PrepareForUcdvarDecompression(DBfile *_dbfile, const char *varname,
  *
  *   Mark C. Miller, Thu Jul 17 15:19:14 PDT 2008
  *   Added call to prepare for possible decompression.
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBucdvar *
@@ -9371,6 +9476,8 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char *name)
         uv->use_specmf = m.use_specmf;
         uv->ascii_labels = m.ascii_labels;
         uv->guihide = m.guihide;
+        uv->conserved = m.conserved;
+        uv->extensive = m.extensive;
 
         /* If var is compressed, we need to do some work to decompress it */
         PrepareForUcdvarDecompression(_dbfile, name, uv->meshname, m.value, m.nvals);
@@ -9393,7 +9500,8 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) uv->region_pnames = db_StringListToStringArray(s, -1);
+        if (s) uv->region_pnames = db_StringListToStringArray(s, -1,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
@@ -10222,6 +10330,10 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
  *   Mark C. Miller, August 9, 2004
  *   Added code to read in optional material names
  *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmaterial *
@@ -10297,13 +10409,15 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char *name)
         if (SILO_Globals.dataReadMask & DBMatMatnames)
         {
             s = db_hdf5_comprd(dbfile, m.matnames, 1);
-            if (s) ma->matnames = db_StringListToStringArray(s, ma->nmat);
+            if (s) ma->matnames = db_StringListToStringArray(s, ma->nmat,
+                !handleSlashSwap, !skipFirstSemicolon);
             FREE(s);
         }
         if (SILO_Globals.dataReadMask & DBMatMatcolors)
         {
             s = db_hdf5_comprd(dbfile, m.matcolors, 1);
-            if (s) ma->matcolors = db_StringListToStringArray(s, ma->nmat);
+            if (s) ma->matcolors = db_StringListToStringArray(s, ma->nmat,
+                !handleSlashSwap, !skipFirstSemicolon);
             FREE(s);
         }
 
@@ -10456,6 +10570,11 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
  *
  *              Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *              Added names and colors for species.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmatspecies *
@@ -10525,7 +10644,8 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
             for (i=0; i < ms->nmat; i++)
                 nstrs += ms->nmatspec[i];
             s = db_hdf5_comprd(dbfile, m.specnames, 1);
-            if (s) ms->specnames = db_StringListToStringArray(s, nstrs);
+            if (s) ms->specnames = db_StringListToStringArray(s, nstrs,
+                !handleSlashSwap, !skipFirstSemicolon);
             FREE(s);
         }
         if (SILO_Globals.dataReadMask & DBMatMatcolors)
@@ -10536,7 +10656,8 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
                     nstrs += ms->nmatspec[i];
             }
             s = db_hdf5_comprd(dbfile, m.speccolors, 1);
-            if (s) ms->speccolors = db_StringListToStringArray(s, nstrs);
+            if (s) ms->speccolors = db_StringListToStringArray(s, nstrs,
+                !handleSlashSwap, !skipFirstSemicolon);
             FREE(s);
         }
 
@@ -10731,6 +10852,11 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
  *
  *   Mark C. Miller, Tue Feb 15 14:53:29 PST 2005
  *   Changed how force_single was handled to deal with possible throw
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimesh *
@@ -10798,19 +10924,17 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
         mm->zonecounts =  db_hdf5_comprd(dbfile, m.zonecounts, 1);
         mm->has_external_zones =  db_hdf5_comprd(dbfile, m.has_external_zones, 1);
         mm->meshtypes = db_hdf5_comprd(dbfile, m.meshtypes, 1);
-        mm->meshnames = calloc(m.nblocks, sizeof(char*));
         s = db_hdf5_comprd(dbfile, m.meshnames, 1);
-        for (i=0; i<m.nblocks; i++) {
-            char *tok = strtok(i?NULL:s, ";");
-            mm->meshnames[i] = STRDUP(tok);
-        }
+        if (s) mm->meshnames = db_StringListToStringArray(s, m.nblocks,
+            handleSlashSwap, !skipFirstSemicolon);
+        FREE(s);
         mm->groupings =  db_hdf5_comprd(dbfile, m.groupings, 1);
         t = db_hdf5_comprd(dbfile, m.groupnames, 1);
-        if (t) mm->groupnames = db_StringListToStringArray(t, mm->lgroupings);
+        if (t) mm->groupnames = db_StringListToStringArray(t, mm->lgroupings,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(t);
         
         H5Tclose(o);
-        FREE(s);
 
     } CLEANUP {
         H5E_BEGIN_TRY {
@@ -11394,6 +11518,9 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -11469,6 +11596,8 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         m.guihide = _mm._guihide;
         strcpy(m.mmesh_name, OPT(_mm._mmesh_name));
         m.tensor_rank = _mm._tensor_rank;
+        m.conserved = _mm._conserved;
+        m.extensive = _mm._extensive;
 
         /* Write meta data to file */
         STRUCT(DBmultivar) {
@@ -11482,6 +11611,8 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
             if (m.extentssize)  MEMBER_S(int, extentssize);
             if (m.guihide)      MEMBER_S(int, guihide);
             if (m.tensor_rank)  MEMBER_S(int, tensor_rank);
+            if (m.conserved)    MEMBER_S(int, conserved);
+            if (m.extensive)    MEMBER_S(int, extensive);
             MEMBER_S(str(m.vartypes), vartypes);
             MEMBER_S(str(m.varnames), varnames);
             MEMBER_S(str(m.extents), extents);
@@ -11525,6 +11656,14 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
  *
  *   Mark C. Miller, Tue Feb 15 14:53:29 PST 2005
  *   Changed how force_single was handled to deal with possible throw
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultivar *
@@ -11574,6 +11713,8 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
         mv->guihide = m.guihide;
         mv->tensor_rank = m.tensor_rank;
         mv->mmesh_name = OPTDUP(m.mmesh_name);
+        mv->conserved = m.conserved;
+        mv->extensive = m.extensive;
 
         /* Read the raw data variable types and convert to mem types*/
         if (mv->extentssize>0)
@@ -11581,16 +11722,14 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
         mv->vartypes = db_hdf5_comprd(dbfile, m.vartypes, 1);
 
         /* Read the raw data variable names */
-        mv->varnames = calloc(m.nvars, sizeof(char*));
         s = db_hdf5_comprd(dbfile, m.varnames, 1);
-        for (i=0; i<m.nvars; i++) {
-            char *tok = strtok(i?NULL:s, ";");
-            mv->varnames[i] = STRDUP(tok);
-        }
+        if (s) mv->varnames = db_StringListToStringArray(s, m.nvars,
+           handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) mv->region_pnames = db_StringListToStringArray(s, -1);
+        if (s) mv->region_pnames = db_StringListToStringArray(s, -1,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
         
         H5Tclose(o);
@@ -11776,6 +11915,11 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
  *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *    Added material names and material colors options as well as nmatnos
  *    and matnos
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimat *
@@ -11831,12 +11975,9 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
         mm->matcounts = db_hdf5_comprd(dbfile, m.matcounts, 1);
         mm->matlists = db_hdf5_comprd(dbfile, m.matlists, 1);
         mm->matnos = db_hdf5_comprd(dbfile, m.matnos, 1);
-        mm->matnames = calloc(m.nmats, sizeof(char*));
         s = db_hdf5_comprd(dbfile, m.matnames, 1);
-        for (i=0; i<m.nmats; i++) {
-            char *tok = strtok(i?NULL:s, ";");
-            mm->matnames[i] = STRDUP(tok);
-        }
+        if (s) mm->matnames = db_StringListToStringArray(s, m.nmats,
+            handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         if (m.nmatnos > 0) {
@@ -11844,10 +11985,10 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
             char *tmpmat_colors = db_hdf5_comprd(dbfile, m.mat_colors, 1);
             if (tmpmaterial_names)
                 mm->material_names = db_StringListToStringArray(tmpmaterial_names,
-                                                                m.nmatnos);
+                    m.nmatnos, !handleSlashSwap, !skipFirstSemicolon);
             if (tmpmat_colors)
                 mm->matcolors = db_StringListToStringArray(tmpmat_colors,
-                                                            m.nmatnos);
+                    m.nmatnos, !handleSlashSwap, !skipFirstSemicolon);
             FREE(tmpmaterial_names);
             FREE(tmpmat_colors);
         }
@@ -12026,6 +12167,11 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
  *
  *              Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *              Added names and colors for species.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimatspecies *
@@ -12076,12 +12222,9 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
         mm->nmatspec = db_hdf5_comprd(dbfile, m.nmatspec, 1);
 
         /* Read the raw data */
-        mm->specnames = calloc(m.nspec, sizeof(char*));
         s = db_hdf5_comprd(dbfile, m.specnames, 1);
-        for (i=0; i<m.nspec; i++) {
-            char *tok = strtok(i?NULL:s, ";");
-            mm->specnames[i] = STRDUP(tok);
-        }
+        if (s) mm->specnames = db_StringListToStringArray(s, m.nspec,
+            handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
         
         if (mm->nmat > 0 && mm->nmatspec) {
@@ -12092,7 +12235,8 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
             {
                 for (i = 0; i < mm->nmat; i++)
                     nstrs += mm->nmatspec[i];
-                mm->species_names = db_StringListToStringArray(tmpspecies_names, nstrs);
+                mm->species_names = db_StringListToStringArray(tmpspecies_names, nstrs,
+                    !handleSlashSwap, !skipFirstSemicolon);
             }
             if (tmpspeccolors)
             {
@@ -12101,7 +12245,8 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
                     for (i = 0; i < mm->nmat; i++)
                         nstrs += mm->nmatspec[i];
                 }
-                mm->speccolors = db_StringListToStringArray(tmpspeccolors, nstrs);
+                mm->speccolors = db_StringListToStringArray(tmpspeccolors, nstrs,
+                    !handleSlashSwap, !skipFirstSemicolon);
             }
             FREE(tmpspecies_names);
             FREE(tmpspeccolors);
@@ -12398,6 +12543,9 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -12460,6 +12608,8 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         m.dtime = _pm._dtime;
         m.ascii_labels = _pm._ascii_labels;
         m.datatype = (DB_FLOAT==datatype || DB_DOUBLE==datatype)?0:datatype;
+        m.conserved = _pm._conserved;
+        m.extensive = _pm._extensive;
         strcpy(m.meshid, OPT(meshname));
         strcpy(m.label, OPT(_pm._label));
         strcpy(m.units, OPT(_pm._unit));
@@ -12478,6 +12628,8 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             if (m.ascii_labels) MEMBER_S(int, ascii_labels);
             if (_pm._time_set)  MEMBER_S(float, time);
             if (_pm._dtime_set) MEMBER_S(double, dtime);
+            if (m.conserved)    MEMBER_S(int, conserved);
+            if (m.extensive)    MEMBER_S(int, extensive);
             MEMBER_S(str(m.meshid), meshid);
             MEMBER_S(str(m.label), label);
             MEMBER_S(str(m.units), units);
@@ -12509,6 +12661,13 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
  *   Mark C. Miller, Thu Jul 29 11:26:24 PDT 2004
  *   Made it set datatype correctly. Added support for dataReadMask
  *
+ *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmeshvar *
@@ -12570,6 +12729,8 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
         pv->max_index[0] = m.max_index;
         pv->guihide = m.guihide;
         pv->ascii_labels = m.ascii_labels;
+        pv->conserved = m.conserved;
+        pv->extensive = m.extensive;
 
         /* Read raw data */
         if (SILO_Globals.dataReadMask & DBPVData)
@@ -12581,7 +12742,8 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) pv->region_pnames = db_StringListToStringArray(s, -1);
+        if (s) pv->region_pnames = db_StringListToStringArray(s, -1,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
@@ -12923,143 +13085,14 @@ db_hdf5_InqMeshName(DBfile *_dbfile, char *name, char *meshname/*out*/)
     return 0;
 }
 
-#if 0
 /*-------------------------------------------------------------------------
- * Function:    db_hdf5_PutSil
+ * Function:    db_hdf5_PutMrgtree
  *
- * Purpose:     Put a sil object into the file.
+ * Purpose:     Write a mesh region grouping tree to a file.
  *
- * Return:      Success:        0
- *
- *              Failure:        -1, db_errno set
- *
- * Programmer:  Mark C. Miller, 
- *              Tue Sep 18 15:41:25 PDT 2007 
- *
+ * Programmer: Mark C. Miller
  *-------------------------------------------------------------------------
  */
-CALLBACK int
-db_hdf5_PutSil(DBfile *_dbfile, const char *name, const DBsil *sil,
-    const DBoptlist *opts)
-{
-    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
-    static char *me = "db_hdf5_PutSil";
-    DBsil_mt  m;
-    int len;
-    char *s;
-    int nedges;
-
-    memset(&m, 0, sizeof m);
-    PROTECT {
-
-        /* Write raw data arrays */
-        nedges = sil->nedges;
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nedges, sil->edgeheads,
-            m.heads/*out*/, friendly_name(name,"_heads", 0));
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nedges, sil->edgetails,
-            m.tails/*out*/, friendly_name(name,"_tails", 0));
-
-        db_StringArrayToStringList(sil->setnames, sil->nsets, &s, &len);
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.setnames/*out*/,
-            friendly_name(name, "_setnames", 0));
-        FREE(s);
-
-        /* Build the sil header in memory */
-        m.nedges = sil->nedges;
-        m.nsets = sil->nsets;
-
-        /* Write sil header to file */
-        STRUCT(DBsil) {
-            if (m.nedges) MEMBER_S(int, nedges);
-            if (m.nsets) MEMBER_S(int, nsets);
-            MEMBER_S(str(m.heads), heads);
-            MEMBER_S(str(m.tails), tails);
-            MEMBER_S(str(m.setnames), setnames);
-        } OUTPUT(dbfile, DB_SIL, name, &m);
-
-    } CLEANUP {
-        /*void*/;
-    } END_PROTECT;
-    return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    db_hdf5_GetSil
- *
- * Purpose:     Read a sil object from a file.
- *
- * Return:      Success:        Pointer to new sil object
- *
- *              Failure:        NULL
- *
- * Programmer:  Mark C. Miller 
- *              Tue Sep 18 17:16:16 PDT 2007 
- *
- *-------------------------------------------------------------------------
- */
-CALLBACK DBsil *
-db_hdf5_GetSil(DBfile *_dbfile, const char *name)
-{
-    DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
-    static char         *me = "db_hdf5_GetSil";
-    DBsil               *sil = NULL;
-    DBsil_mt             m;
-    hid_t               o=-1, attr=-1;
-    int                 _objtype;
-    char                *s;
-
-    PROTECT {
-        /* Open object and make sure it's a curve */
-        if ((o=H5Topen(dbfile->cwg, name))<0) {
-            db_perror(name, E_NOTFOUND, me);
-            UNWIND();
-        }
-        if ((attr=H5Aopen_name(o, "silo_type"))<0 ||
-            H5Aread(attr, H5T_NATIVE_INT, &_objtype)<0 ||
-            H5Aclose(attr)<0) {
-            db_perror(name, E_CALLFAIL, me);
-            UNWIND();
-        }
-        if (DB_SIL!=(DBObjectType)_objtype) {
-            db_perror(name, E_CALLFAIL, me);
-            UNWIND();
-        }
-
-        /* Read the curve data into memory */
-        memset(&m, 0, sizeof m);
-        if ((attr=H5Aopen_name(o, "silo"))<0 ||
-            H5Aread(attr, DBsil_mt5, &m)<0 ||
-            H5Aclose(attr)<0) {
-            db_perror(name, E_CALLFAIL, me);
-            UNWIND();
-        }
-
-        /* Create a curve object and initialize meta data */
-        if (NULL==(sil=DBMakeSil(m.nsets, m.nedges))) return NULL;
-        sil->nsets = m.nsets;
-        sil->maxsets = sil->nsets;
-        sil->nedges = m.nedges;
-        sil->maxedges = sil->nedges;
-        sil->edgeheads = db_hdf5_comprd(dbfile, m.heads, 0);
-        sil->edgetails = db_hdf5_comprd(dbfile, m.tails, 0);
-        s = db_hdf5_comprd(dbfile, m.setnames, 1);
-        if (s) sil->setnames = db_StringListToStringArray(s, sil->nsets);
-        FREE(s);
-        
-        H5Tclose(o);
-        
-    } CLEANUP {
-        H5E_BEGIN_TRY {
-            H5Aclose(attr);
-            H5Tclose(o);
-        } H5E_END_TRY;
-        DBFreeSil(sil);
-    } END_PROTECT;
-
-    return sil;
-}
-#endif
-
 CALLBACK int
 db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
     DBmrgtree *tree, DBoptlist *opts)
@@ -13273,6 +13306,21 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_GetMrgtree
+ *
+ * Purpose:     Read a mesh region grouping tree from a file.
+ *
+ * Programmer: Mark C. Miller
+ *
+ * Modifications:
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
+ *-------------------------------------------------------------------------
+ */
 CALLBACK DBmrgtree *
 db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
 {
@@ -13345,7 +13393,8 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
 
         /* read the node 'name' member */
         s = db_hdf5_comprd(dbfile, m.n_name, 1);
-        strArray = db_StringListToStringArray(s, num_nodes);
+        strArray = db_StringListToStringArray(s, num_nodes,
+            !handleSlashSwap, !skipFirstSemicolon);
         for (i = 0; i < num_nodes; i++)
             ltree[i]->name = strArray[i];
         FREE(s);
@@ -13355,7 +13404,8 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
         s = db_hdf5_comprd(dbfile, m.n_names, 1);
         if (s)
         {
-            strArray = db_StringListToStringArray(s, -1);
+            strArray = db_StringListToStringArray(s, -1,
+                !handleSlashSwap, !skipFirstSemicolon);
             n = 0;
             for (i = 0; i < num_nodes; i++)
             {
@@ -13381,7 +13431,8 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
 
         /* read the maps_name data */
         s = db_hdf5_comprd(dbfile, m.n_maps_name, 1);
-        strArray = db_StringListToStringArray(s, num_nodes);
+        strArray = db_StringListToStringArray(s, num_nodes,
+            !handleSlashSwap, !skipFirstSemicolon);
         for (i = 0; i < num_nodes; i++)
             ltree[i]->maps_name = strArray[i];
         FREE(s);
@@ -13448,11 +13499,13 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
         FREE(intArray);
 
         s = db_hdf5_comprd(dbfile, m.mrgvar_onames, 1);
-        if (s) tree->mrgvar_onames = db_StringListToStringArray(s, -1);
+        if (s) tree->mrgvar_onames = db_StringListToStringArray(s, -1,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.mrgvar_rnames, 1);
-        if (s) tree->mrgvar_rnames = db_StringListToStringArray(s, -1);
+        if (s) tree->mrgvar_rnames = db_StringListToStringArray(s, -1,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         tree->root = ltree[m.root];
@@ -13476,6 +13529,14 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
     return tree;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_PutGroupelmap
+ *
+ * Purpose:     Write a grouping element map to a file.
+ *
+ * Programmer: Mark C. Miller
+ *-------------------------------------------------------------------------
+ */
 CALLBACK int
 db_hdf5_PutGroupelmap(DBfile *_dbfile, const char *name,
     int num_segments, int *groupel_types, int *segment_lengths,
@@ -13581,6 +13642,21 @@ db_hdf5_PutGroupelmap(DBfile *_dbfile, const char *name,
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_GetGroupelmap
+ *
+ * Purpose:     Read a grouping element map from a file.
+ *
+ * Programmer: Mark C. Miller
+ *
+ * Modifications:
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
+ *-------------------------------------------------------------------------
+ */
 CALLBACK DBgroupelmap *
 db_hdf5_GetGroupelmap(DBfile *_dbfile, const char *name)
 {
@@ -13705,6 +13781,14 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, const char *name)
     return gm;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_PutMrgvar
+ *
+ * Purpose:     Write an mrgvar to a file 
+ *
+ * Programmer: Mark C. Miller
+ *-------------------------------------------------------------------------
+ */
 CALLBACK int
 db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
     const char *mrgt_name,
@@ -13781,6 +13865,21 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_GetMrgvar
+ *
+ * Purpose:     Read an mrgvar from a file.
+ *
+ * Programmer: Mark C. Miller
+ *
+ * Modifications:
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
+ *-------------------------------------------------------------------------
+ */
 CALLBACK DBmrgvar *
 db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
 {
@@ -13840,11 +13939,13 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.compnames, 1);
-        if (s) mrgv->compnames = db_StringListToStringArray(s, m.ncomps);
+        if (s) mrgv->compnames = db_StringListToStringArray(s, m.ncomps,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.reg_pnames, 1);
-        if (s) mrgv->reg_pnames = db_StringListToStringArray(s, -1);
+        if (s) mrgv->reg_pnames = db_StringListToStringArray(s, -1,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);

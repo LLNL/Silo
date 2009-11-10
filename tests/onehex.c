@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <float.h>
 
 #define IND(i,j) i-1][j-1
 
@@ -60,16 +61,20 @@ main(int argc, char *argv[])
     float           angle;
     float           var[8];
     int		    driver = DB_PDB;
+    int             setinf = 0;
+    int             setnan = 0;
     char 	    *filename = "onehex.silo";
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
-	    filename = "onehex.pdb";
 	} else if (!strcmp(argv[i], "DB_HDF5")) {
 	    driver = DB_HDF5;
-	    filename = "onehex.h5";
+	} else if (!strcmp(argv[i], "inf")) {
+            setinf = 1;
+	} else if (!strcmp(argv[i], "nan")) {
+            setnan = 1;
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
 	}
@@ -135,6 +140,16 @@ main(int argc, char *argv[])
     DBPutMaterial(dbfile, "mat", "hex", 1, matnos, matlist, dims,
                   1, NULL, NULL, NULL, NULL, 0, DB_FLOAT, NULL);
 
+    if (setinf)
+    {
+        double d = 2.0;
+        var[7] = FLT_MAX*d; 
+    }
+    if (setnan)
+    {
+        double d = -1.0;
+        var[0] = sqrt(d);
+    }
     DBPutUcdvar1(dbfile, "v", "hex", var, 8, NULL, 0, DB_FLOAT, DB_NODECENT,
                  NULL);
 

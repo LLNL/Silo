@@ -533,12 +533,18 @@ lex_gets(lex_t *f, char *buf, int size)
  *      Symbol names may include `-'. Something that starts with a `-' is
  *      only a number if it's followed by a digit.
  *
+ *      Mark C. Miller, Mon Nov  9 18:08:05 PST 2009
+ *      Added logic to support parsing of '#nnnnnn' dataset names,
+ *      but only when in '/.silo' dir.
  *-------------------------------------------------------------------------
  */
 int
 lex_token(lex_t *f, char **lexeme, int skipnl)
 {
-    int          c, at, quote;
+    int          c, at, quote, inDotSiloDir=0;
+    static const char *symcharsA = "_$/*?";
+    static const char *symcharsB = "_$/*?#";
+    const char *symchars = symcharsA;
 
     /* Return the current token if appropriate. */    
     if (f->tok && (!skipnl || TOK_EOL!=f->tok)) {
@@ -549,6 +555,23 @@ lex_token(lex_t *f, char **lexeme, int skipnl)
     /* Skip leading space. */    
     f->prompt = skipnl ? LEX_PROMPT2 : LEX_PROMPT;
     while (EOF!=(c=lex_getc(f)) && '\n'!=c && isspace(c)) /*void*/;
+
+    /* handle special case of leading '#' and see if we're in .silo dir */
+    if ('#'==c) {
+        obj_t   f1, val;
+        DBfile *file;
+        char cwd[1024];
+
+        f1 = obj_new (C_SYM, "$1");
+        val = sym_vboundp (f1);
+        f1 = obj_dest (f1);
+        if (NULL!=(file=file_file(val)) && 
+            DBGetDir(file, cwd)>=0 &&
+            !strncmp(cwd,"/.silo",6)) {
+            inDotSiloDir = 1;
+            symchars = symcharsB;
+        }
+    }
 
     /* Store the next token. */    
     if (EOF==c) {
@@ -564,7 +587,7 @@ lex_token(lex_t *f, char **lexeme, int skipnl)
             f->tok = TOK_EOL;
         }
 
-    } else if ('#'==c) {
+    } else if ('#'==c && !inDotSiloDir) {
         while (EOF!=(c=lex_getc(f)) && '\n'!=c) /*void*/;
         lex_ungetc(f, c);
         return lex_token(f, lexeme, skipnl);
@@ -585,13 +608,13 @@ lex_token(lex_t *f, char **lexeme, int skipnl)
         f->lexeme[1] = '\0';
         f->tok = c;
 
-    } else if (isalpha(c) || strchr("_$/*?",c)) {
+    } else if (isalpha(c) || strchr(symchars,c)) {
         /* A symbol. */        
         f->lexeme[0] = c;
         f->lexeme[1] = '\0';
         at = 1;
         while (EOF!=(c=lex_getc(f)) &&
-               (isalpha(c) || isdigit(c) || strchr("_$/*?-", c))) {
+               (isalpha(c) || isdigit(c) || strchr(symchars, c))) {
             if (at+1<sizeof(f->lexeme)) {
                 f->lexeme[at++] = c;
                 f->lexeme[at] = '\0';

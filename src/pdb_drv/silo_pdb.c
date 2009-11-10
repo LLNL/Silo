@@ -43,6 +43,18 @@ static char   *_ptvalstr[10] =
 
 static PJcomplist *_tcl;
 
+/* Symbolic constants used in calls to db_StringListToStringArray
+   to indicate behavior. A '!' in front means to not perform the
+   associated action. For PDB driver, we handle the slash swap
+   on the 'names' member of multi-block objects only and we
+   skip first semicolon ONLY for those string arrays that were
+   added to PDB driver prior to db_StringListToStringArray
+   coming into existence. This is to ensure diffs on files
+   before and after this change don't vary due to leading
+   semicolon. */
+static const int handleSlashSwap = 1;
+static const int skipFirstSemicolon = 1;
+
 /*-------------------------------------------------------------------------
  * Function:    db_pdb_InitCallbacks
  *
@@ -1536,6 +1548,11 @@ db_pdb_GetObject (DBfile *_file, char *name)
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBmaterial *
 db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
@@ -1627,7 +1644,8 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     }
     if ((tmpcolors != NULL) && (mm->nmat > 0))
     {
-        mm->matcolors = db_StringListToStringArray(tmpcolors, mm->nmat);
+        mm->matcolors = db_StringListToStringArray(tmpcolors, mm->nmat,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(tmpcolors);
     }
 
@@ -1673,6 +1691,11 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
  *
  *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *      Added names and colors for species.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBmatspecies *
 db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
@@ -1751,13 +1774,15 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    if (tmpnames != NULL)
    {
        if (nstrs > 0)
-          mm->specnames = db_StringListToStringArray(tmpnames, nstrs);
+          mm->specnames = db_StringListToStringArray(tmpnames, nstrs,
+              !handleSlashSwap, !skipFirstSemicolon);
        FREE(tmpnames);
    }
    if (tmpcolors != NULL)
    {
        if (nstrs > 0)
-          mm->speccolors = db_StringListToStringArray(tmpcolors, nstrs);
+          mm->speccolors = db_StringListToStringArray(tmpcolors, nstrs,
+              !handleSlashSwap, !skipFirstSemicolon);
        FREE(tmpcolors);
    }
 
@@ -2018,6 +2043,13 @@ db_pdb_GetComponentType (DBfile *_dbfile, char *objname, char *compname)
  *
  *      Mark C. Miller,
  *      August 8, 2005
+ *
+ *  Modifications:
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBdefvars *
 db_pdb_GetDefvars(DBfile *_dbfile, const char *objname)
@@ -2056,13 +2088,15 @@ db_pdb_GetDefvars(DBfile *_dbfile, const char *objname)
 
        if ((tmpnames != NULL) && (defv->ndefs > 0))
        {
-           defv->names = db_StringListToStringArray(tmpnames, defv->ndefs);
+           defv->names = db_StringListToStringArray(tmpnames, defv->ndefs,
+               !handleSlashSwap, !skipFirstSemicolon);
            FREE(tmpnames);
        }
 
        if ((tmpdefns != NULL) && (defv->ndefs > 0))
        {
-           defv->defns = db_StringListToStringArray(tmpdefns, defv->ndefs);
+           defv->defns = db_StringListToStringArray(tmpdefns, defv->ndefs,
+               !handleSlashSwap, !skipFirstSemicolon);
            FREE(tmpdefns);
        }
    }
@@ -2201,6 +2235,11 @@ pdb_getvarinfo (PDBfile *pdbfile,
  *    Thomas R. Treadway, Thu Jul 20 13:34:57 PDT 2006
  *    Added lgroupings, groupings, and groupnames options.
  *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Replaced strtok-loop over ...names member with call to
+ *   db_StringListToStringArray. Added logic to control behavior of
+ *   slash character swapping for windows/linux and skipping of first
+ *   semicolon in calls to db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBmultimesh *
 db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
@@ -2272,29 +2311,13 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
        *----------------------------------------*/
 
       if ((tmpnames != NULL) && (mm->nblocks > 0)) {
-         mm->meshnames = ALLOC_N(char *, mm->nblocks);
-
-         delim[0] = tmpnames[0];
-         delim[1] = '\0';
-         s = &tmpnames[1];
-         name = (char *)strtok(s, delim);
-
-         for (i = 0; i < mm->nblocks; i++) {
-            mm->meshnames[i] = STRDUP(name);
-            if (i+1 < mm->nblocks)
-            {
-                name = (char *)strtok(NULL, ";");
-                if (name==NULL)
-                {
-                    sprintf(error,"(%s) Not enough mesh names found\n",me);
-                    db_perror(error, E_INTERNAL, me);
-                }
-            }
-         }
+         mm->meshnames = db_StringListToStringArray(tmpnames, mm->nblocks,
+             handleSlashSwap, skipFirstSemicolon);
          FREE(tmpnames);
       }
       if ((tmpgnames != NULL) && (mm->lgroupings > 0)) {
-         mm->groupnames = db_StringListToStringArray(tmpgnames, mm->lgroupings);
+         mm->groupnames = db_StringListToStringArray(tmpgnames, mm->lgroupings,
+             !handleSlashSwap, !skipFirstSemicolon);
          FREE(tmpgnames);
       }
    }
@@ -2495,6 +2518,15 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, const char *objname, int nmesh,
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *    Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *    Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Replaced strtok-loop over ...names member with call to
+ *   db_StringListToStringArray. Added logic to control behavior of
+ *   slash character swapping for windows/linux and skipping of first
+ *   semicolon in calls to db_StringListToStringArray.
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultivar *
 db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
@@ -2532,6 +2564,8 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
       DEFINE_OBJ("tensor_rank", &tmpmv.tensor_rank, DB_INT);
       DEFALL_OBJ("mmesh_name", &tmpmv.mmesh_name, DB_CHAR);
+      DEFINE_OBJ("conserved", &tmpmv.conserved, DB_INT);
+      DEFINE_OBJ("extensive", &tmpmv.extensive, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -2548,31 +2582,15 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
        *----------------------------------------*/
 
       if (tmpnames != NULL && mv->nvars > 0) {
-         mv->varnames = ALLOC_N(char *, mv->nvars);
-
-         delim[0] = tmpnames[0];
-         delim[1] = '\0';
-         s = &tmpnames[1];
-         name = (char *)strtok(s, delim);
-
-         for (i = 0; i < mv->nvars; i++) {
-            mv->varnames[i] = STRDUP(name);
-            if (i+1 < mv->nvars)
-            {
-                name = (char *)strtok(NULL, ";");
-                if (name==NULL)
-                {
-                    sprintf(error,"(%s) Not enough variable names found\n",me);
-                    db_perror(error, E_INTERNAL, me);
-                }
-            }
-         }
+         mv->varnames = db_StringListToStringArray(tmpnames, mv->nvars,
+             handleSlashSwap, skipFirstSemicolon);
          FREE(tmpnames);
       }
 
       if (rpnames != NULL)
       {
-         mv->region_pnames = db_StringListToStringArray(rpnames, -1);
+         mv->region_pnames = db_StringListToStringArray(rpnames, -1,
+             !handleSlashSwap, !skipFirstSemicolon);
          FREE(rpnames);
       }
    }
@@ -2625,6 +2643,12 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
  *
  *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *    Added material_names and matcolors as well as nmatnos and matnos
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Replaced strtok-loop over ...names member with call to
+ *   db_StringListToStringArray. Added logic to control behavior of
+ *   slash character swapping for windows/linux and skipping of first
+ *   semicolon in calls to db_StringListToStringArray.
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultimat *
 db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
@@ -2681,39 +2705,21 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
 
       if (tmpnames != NULL && mt->nmats > 0)
       {
-         FREE(mt->matnames);
-         mt->matnames = ALLOC_N(char *, mt->nmats);
-
-         s = &tmpnames[1];
-            name = (char *)strtok(s, ";");
-
-         for (i = 0; i < mt->nmats; i++)
-         {
-            mt->matnames[i] = STRDUP(name);
-
-            if (i+1 < mt->nmats)
-            {
-                name = (char *)strtok(NULL, ";");
-                if (name==NULL)
-                {
-                    sprintf(error,"(%s) Not enough material names found\n",me);
-                    db_perror(error, E_INTERNAL, me);
-                }
-            }
-         }
-         FREE(tmpnames);
+          mt->matnames = db_StringListToStringArray(tmpnames, mt->nmats,
+              handleSlashSwap, skipFirstSemicolon);
+          FREE(tmpnames);
       }
 
       if (tmpmaterial_names && mt->nmatnos > 0)
       {
           mt->material_names = db_StringListToStringArray(tmpmaterial_names,
-                                                          mt->nmatnos);
+              mt->nmatnos, !handleSlashSwap, !skipFirstSemicolon);
           FREE(tmpmaterial_names);
       }
       if (tmpmatcolors && mt->nmatnos > 0)
       {
           mt->matcolors = db_StringListToStringArray(tmpmatcolors,
-                                                     mt->nmatnos);
+              mt->nmatnos, !handleSlashSwap, !skipFirstSemicolon);
           FREE(tmpmatcolors);
       }
    }
@@ -2751,6 +2757,12 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
  *
  *    Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *    Added names and colors for species.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Replaced strtok-loop over ...names member with call to
+ *   db_StringListToStringArray. Added logic to control behavior of
+ *   slash character swapping for windows/linux and skipping of first
+ *   semicolon in calls to db_StringListToStringArray.
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultimatspecies *
 db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
@@ -2806,27 +2818,9 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
 
       if (tmpnames != NULL && mms->nspec > 0)
       {
-         FREE(mms->specnames);
-         mms->specnames = ALLOC_N(char *, mms->nspec);
-
-         s = &tmpnames[1];
-            name = (char *)strtok(s, ";");
-
-         for (i = 0; i < mms->nspec; i++)
-         {
-            mms->specnames[i] = STRDUP(name);
-
-            if (i+1 < mms->nspec)
-            {
-                name = (char *)strtok(NULL, ";");
-                if (name==NULL)
-                {
-                    sprintf(error,"(%s) Not enough species names found\n",me);
-                    db_perror(error, E_INTERNAL, me);
-                }
-            }
-         }
-         FREE(tmpnames);
+          mms->specnames = db_StringListToStringArray(tmpnames, mms->nspec,
+              handleSlashSwap, skipFirstSemicolon);
+          FREE(tmpnames);
       }
 
       if (tmpspecnames != NULL)
@@ -2834,7 +2828,8 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
           for (i = 0; i < mms->nmat; i++)
               nstrs += mms->nmatspec[i];
           if (nstrs > 0)
-              mms->species_names = db_StringListToStringArray(tmpspecnames, nstrs);
+              mms->species_names = db_StringListToStringArray(tmpspecnames, nstrs,
+                  !handleSlashSwap, !skipFirstSemicolon);
           FREE(tmpspecnames);
       }
       if (tmpcolors != NULL)
@@ -2845,7 +2840,8 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
                   nstrs += mms->nmatspec[i];
           }
           if (nstrs > 0)
-              mms->speccolors = db_StringListToStringArray(tmpcolors, nstrs);
+              mms->speccolors = db_StringListToStringArray(tmpcolors, nstrs,
+                  !handleSlashSwap, !skipFirstSemicolon);
           FREE(tmpcolors);
       }
    }
@@ -3003,6 +2999,13 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
  *
+ *      Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *      Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBmeshvar *
 db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
@@ -3038,6 +3041,8 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("meshid",&tmpmv.meshname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpmv.guihide, DB_INT);
    DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
+   DEFINE_OBJ("conserved", &tmpmv.conserved, DB_INT);
+   DEFINE_OBJ("extensive", &tmpmv.extensive, DB_INT);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
       return NULL;
@@ -3091,7 +3096,8 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
 
    if (rpnames != NULL)
    {
-      mv->region_pnames = db_StringListToStringArray(rpnames, -1);
+      mv->region_pnames = db_StringListToStringArray(rpnames, -1,
+          !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
 
@@ -3291,6 +3297,14 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *      Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *      Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBquadvar *
 db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
@@ -3317,6 +3331,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("time", &tmpqv.time, DB_FLOAT);
    DEFINE_OBJ("dtime", &tmpqv.dtime, DB_DOUBLE);
    DEFINE_OBJ("datatype", &tmpqv.datatype, DB_INT);
+   DEFINE_OBJ("centering", &tmpqv.centering, DB_INT);
    DEFINE_OBJ("ndims", &tmpqv.ndims, DB_INT);
    DEFINE_OBJ("major_order", &tmpqv.major_order, DB_INT);
    DEFINE_OBJ("nels", &tmpqv.nels, DB_INT);
@@ -3327,6 +3342,8 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("ascii_labels", &tmpqv.ascii_labels, DB_INT);
    DEFALL_OBJ("meshid", &tmpqv.meshname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpqv.guihide, DB_INT);
+   DEFINE_OBJ("conserved", &tmpqv.conserved, DB_INT);
+   DEFINE_OBJ("conserved", &tmpqv.extensive, DB_INT);
 
    /* Arrays */
    DEFINE_OBJ("min_index", tmpqv.min_index, DB_INT);
@@ -3385,7 +3402,8 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
 
    if (rpnames != NULL)
    {
-      qv->region_pnames = db_StringListToStringArray(rpnames, -1);
+      qv->region_pnames = db_StringListToStringArray(rpnames, -1,
+          !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
 
@@ -3735,6 +3753,13 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
  *      Brad Whitlock, Wed Jan 18 15:07:57 PST 2006
  *      Added optional ascii_labels.
  *
+ *      Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *      Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBucdvar *
 db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
@@ -3774,6 +3799,8 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("meshid",&tmpuv.meshname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpuv.guihide, DB_INT);
    DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
+   DEFINE_OBJ("conserved", &tmpuv.conserved, DB_INT);
+   DEFINE_OBJ("extensive", &tmpuv.extensive, DB_INT);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
       return NULL;
@@ -3820,7 +3847,8 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
 
    if (rpnames != NULL)
    {
-      uv->region_pnames = db_StringListToStringArray(rpnames, -1);
+      uv->region_pnames = db_StringListToStringArray(rpnames, -1,
+          !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
 
@@ -3842,6 +3870,12 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
  *      Mark C. Miller
  *      August 9, 2005
  *
+ *  Modifications:
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBcsgmesh *
 db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
@@ -3914,7 +3948,8 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
 
     if ((tmpbndnames != NULL) && (tmpcsgm.nbounds > 0))
     {
-        tmpcsgm.bndnames = db_StringListToStringArray(tmpbndnames, tmpcsgm.nbounds);
+        tmpcsgm.bndnames = db_StringListToStringArray(tmpbndnames, tmpcsgm.nbounds,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(tmpbndnames);
     }
 
@@ -3945,6 +3980,12 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
  *
  *      Mark C. Miller, August 10, 2005
  *
+ *  Modifications:
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBcsgvar *
 db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
@@ -4010,7 +4051,8 @@ db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
 
    if (rpnames != NULL)
    {
-      csgv->region_pnames = db_StringListToStringArray(rpnames, -1);
+      csgv->region_pnames = db_StringListToStringArray(rpnames, -1,
+          !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
 
@@ -4251,6 +4293,12 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
  * Programmer:  Mark C. Miller 
  *              August 9, 2005 
  *
+ * Modifications:
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *-------------------------------------------------------------------------*/
 CALLBACK DBcsgzonelist *
 db_pdb_GetCSGZonelist(DBfile *_dbfile, const char *objname)
@@ -4308,13 +4356,15 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, const char *objname)
 
     if ((tmprnames != NULL) && (tmpzl.nregs > 0))
     {
-        tmpzl.regnames = db_StringListToStringArray(tmprnames, tmpzl.nregs);
+        tmpzl.regnames = db_StringListToStringArray(tmprnames, tmpzl.nregs,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(tmprnames);
     }
 
     if ((tmpznames != NULL) && (tmpzl.nzones > 0))
     {
-        tmpzl.zonenames = db_StringListToStringArray(tmpznames, tmpzl.nzones);
+        tmpzl.zonenames = db_StringListToStringArray(tmpznames, tmpzl.nzones,
+            !handleSlashSwap, !skipFirstSemicolon);
         FREE(tmpznames);
     }
 
@@ -4839,6 +4889,12 @@ db_pdb_GetComponentNames (DBfile *_dbfile, char *objname,
  *
  *      Mark C. Miller, Wed Oct 10 13:08:36 PDT 2007
  *
+ *  Modifications:
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Added logic to control behavior of slash character swapping for
+ *   windows/linux and skipping of first semicolon in calls to
+ *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBmrgtree *
 db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
@@ -4905,7 +4961,8 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("name", &s, DB_CHAR);
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
-   strArray = db_StringListToStringArray(s, num_nodes);
+   strArray = db_StringListToStringArray(s, num_nodes,
+       !handleSlashSwap, !skipFirstSemicolon);
    for (i = 0; i < num_nodes; i++)
        ltree[i]->name = strArray[i];
    FREE(s);
@@ -4917,7 +4974,8 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
    if (s)
    {
-       strArray = db_StringListToStringArray(s, -1);
+       strArray = db_StringListToStringArray(s, -1, !handleSlashSwap,
+           !skipFirstSemicolon);
        n = 0;
        for (i = 0; i < num_nodes; i++)
        {
@@ -4945,7 +5003,8 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("maps_name", &s, DB_CHAR);
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
-   strArray = db_StringListToStringArray(s, num_nodes);
+   strArray = db_StringListToStringArray(s, num_nodes, !handleSlashSwap,
+       !skipFirstSemicolon);
    for (i = 0; i < num_nodes; i++)
        ltree[i]->maps_name = strArray[i];
    FREE(s);
@@ -5021,12 +5080,14 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
 
    if (mrgv_onames)
    {
-      tree->mrgvar_onames = db_StringListToStringArray(mrgv_onames, -1);
+      tree->mrgvar_onames = db_StringListToStringArray(mrgv_onames, -1,
+          !handleSlashSwap, !skipFirstSemicolon);
       FREE(mrgv_onames);
    }
    if (mrgv_rnames)
    {
-      tree->mrgvar_rnames = db_StringListToStringArray(mrgv_rnames, -1);
+      tree->mrgvar_rnames = db_StringListToStringArray(mrgv_rnames, -1,
+          !handleSlashSwap, !skipFirstSemicolon);
       FREE(mrgv_rnames);
    }
 
@@ -5156,6 +5217,12 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, const char *name)
  *      Read a mrgvar object from a SILO file and return the
  *      SILO structure for this type.
  *
+ *
+ *   Mark C. Miller, Tue Nov 10 09:14:01 PST 2009
+ *   Replaced strtok-loop over ...names member with call to
+ *   db_StringListToStringArray. Added logic to control behavior of
+ *   slash character swapping for windows/linux and skipping of first
+ *   semicolon in calls to db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 CALLBACK DBmrgvar *
 db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
@@ -5215,13 +5282,15 @@ db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
 
    if (cnames != NULL)
    {
-      mrgv->compnames = db_StringListToStringArray(cnames, mrgv->ncomps);
+      mrgv->compnames = db_StringListToStringArray(cnames, mrgv->ncomps,
+          !handleSlashSwap, !skipFirstSemicolon);
       FREE(cnames);
    }
 
    if (rpnames != NULL)
    {
-      mrgv->reg_pnames = db_StringListToStringArray(rpnames, -1);
+      mrgv->reg_pnames = db_StringListToStringArray(rpnames, -1,
+          !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
 
@@ -6721,6 +6790,8 @@ db_pdb_PutMultimeshadj (DBfile *_dbfile, const char *name, int nmesh,
  *    Fixed bug where there was an assumption that the string is
  *    NULL terminated.
  *
+ *    Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *    Added support for conserved/extensive options.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -6740,7 +6811,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIVAR, 16);
+   obj = DBMakeObject(name, DB_MULTIVAR, 18);
    DBAddIntComponent(obj, "nvars", nvars);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -6759,6 +6830,10 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
       DBAddIntComponent(obj, "tensor_rank", _mm._tensor_rank);
    if (_mm._mmesh_name != NULL)
       DBAddStrComponent(obj, "mmesh_name", _mm._mmesh_name);
+   if (_mm._conserved)
+      DBAddIntComponent(obj, "conserved", _mm._conserved);
+   if (_mm._extensive)
+      DBAddIntComponent(obj, "extensive", _mm._extensive);
 
    /*-------------------------------------------------------------
     *  Define and write variables before adding them to object.
@@ -7412,6 +7487,9 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
  *
  *      Mark C. Miller, Tue Sep  6 11:05:58 PDT 2005
  *      Removed duplicate DBAddStr call for "meshid"
+ *
+ *      Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *      Added support for conserved/extensive options.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -7435,7 +7513,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
    db_InitPoint(dbfile, optlist, ndims, nels);
 #endif
 
-   obj = DBMakeObject(name, DB_POINTVAR, 22);
+   obj = DBMakeObject(name, DB_POINTVAR, 24);
 
    /*-------------------------------------------------------------
     *  Write variable arrays.
@@ -7500,6 +7578,12 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
         DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
    }
+
+   if (_pm._conserved)
+      DBAddIntComponent(obj, "conserved", _pm._conserved);
+
+   if (_pm._extensive)
+      DBAddIntComponent(obj, "extensive", _pm._extensive);
 
    /*-------------------------------------------------------------
     *  Write point-mesh object to output file.
@@ -7738,6 +7822,13 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
  *      Eric Brugger, Mon Oct  6 15:11:26 PDT 1997
  *      I modified the routine to output the maximum index properly.
  *
+ *      Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *      Added support for conserved/extensive options. Also, split
+ *      out the logic for centering and alignment to make clearer.
+ *      Added logic to support edge/face centering -- need to
+ *      multiply by ndims for each of i-,j- and k- associated edges
+ *      or faces. In addition, needed to add a 'centering' member
+ *      to quadvars.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -7748,7 +7839,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
 
    DBfile_pdb   *dbfile = (DBfile_pdb *) _dbfile;
    int          i, nels;
-   long         count[3], mcount[1];
+   long         count[4], mcount[1];
    char         *suffix, *datatype_str, tmp1[1024], tmp2[1024];
    static char  *me = "db_pdb_PutQuadvar";
    DBobject     *obj;
@@ -7761,7 +7852,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
     *-------------------------------------------------------------*/
    db_InitQuad(_dbfile, meshname, optlist, dims, ndims);
 
-   obj = DBMakeObject(name, DB_QUADVAR, 27);
+   obj = DBMakeObject(name, DB_QUADVAR, 30);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -7774,14 +7865,26 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
       count[i] = dims[i];
       nels *= dims[i];
    }
+   if ((ndims > 1 && centering == DB_EDGECENT) ||
+       (ndims > 2 && centering == DB_FACECENT))
+      nels *= ndims;
 
    switch (centering) {
    case DB_NODECENT:
       DBAddVarComponent(obj, "align", _qm._nm_alignn);
       break;
 
-   case DB_ZONECENT:
+   case DB_EDGECENT:
+      if (ndims == 1) /* edge centering on 1D mesh is like zone centering */
+          DBAddVarComponent(obj, "align", _qm._nm_alignz);
+      break;
+
    case DB_FACECENT:
+      if (ndims == 2) /* face centering on 2D mesh is like zone centering */
+          DBAddVarComponent(obj, "align", _qm._nm_alignz);
+      break;
+
+   case DB_ZONECENT:
       DBAddVarComponent(obj, "align", _qm._nm_alignz);
       break;
 
@@ -7818,8 +7921,22 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    for (i = 0; i < nvars; i++) {
 
       db_mkname(dbfile->pdb, varnames[i], suffix, tmp2);
-      PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i],
-                   ndims, count);
+      if ((ndims > 1 && centering == DB_EDGECENT) ||
+          (ndims > 2 && centering == DB_FACECENT))
+      {
+          int j, tmpndims = ndims+1;
+          long tmpcnt[4];
+          for (j = ndims; j > 0; j--)
+              tmpcnt[j] = count[j-1];
+          tmpcnt[0] = ndims;
+          PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i],
+                       tmpndims, tmpcnt);
+      }
+      else
+      {
+          PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i],
+                       ndims, count);
+      }
 
       sprintf(tmp1, "value%d", i);
       DBAddVarComponent(obj, tmp1, tmp2);
@@ -7850,6 +7967,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    DBAddIntComponent(obj, "nels", nels);
    DBAddIntComponent(obj, "origin", _qm._origin);
    DBAddIntComponent(obj, "datatype", datatype);
+   DBAddIntComponent(obj, "centering", centering);
    DBAddIntComponent(obj, "mixlen", mixlen);
 
    /*-------------------------------------------------------------
@@ -7889,6 +8007,13 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
    }
+
+   if (_qm._conserved)
+      DBAddIntComponent(obj, "conserved", _qm._conserved);
+
+   if (_qm._extensive)
+      DBAddIntComponent(obj, "extensive", _qm._extensive);
+
 
    /*-------------------------------------------------------------
     *  Write quad-var object to output file.
@@ -8047,6 +8172,9 @@ db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
  *
  *      Mark C. Miller, August 10. 2005 
  *
+ *  Modifications:
+ *      Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *      Added support for conserved/extensive options.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -8064,7 +8192,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
 
    db_InitCsg(_dbfile, (char*) name, optlist);
 
-   obj = DBMakeObject(name, DB_CSGVAR, 27);
+   obj = DBMakeObject(name, DB_CSGVAR, 29);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -8159,6 +8287,12 @@ db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
    }
+
+   if (_csgm._conserved)
+      DBAddIntComponent(obj, "conserved", _csgm._conserved);
+
+   if (_csgm._extensive)
+      DBAddIntComponent(obj, "extensive", _csgm._extensive);
 
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.
@@ -8653,6 +8787,8 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
  *     Brad Whitlock, Wed Jan 18 15:09:57 PST 2006
  *     Added ascii_labels.
  *
+ *     Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
+ *     Added support for conserved/extensive options.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -8680,7 +8816,7 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    db_InitUcd(_dbfile, meshname, optlist, ndims, nnodes, nzones);
 #endif
 
-   obj = DBMakeObject(name, DB_UCDVAR, 27);
+   obj = DBMakeObject(name, DB_UCDVAR, 29);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -8790,6 +8926,12 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
    }
+
+   if (_um._conserved)
+      DBAddIntComponent(obj, "conserved", _um._conserved);
+
+   if (_um._extensive)
+      DBAddIntComponent(obj, "extensive", _um._extensive);
 
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.

@@ -246,6 +246,10 @@ AT_CHECK(test ! \( -f ucdf77 -o -f ../../ucdf77 \) && exit 77 || $VALGRIND ucdf7
 AT_CLEANUP
 
 AT_BANNER(Special)
+AT_SETUP(silock)
+AT_KEYWORDS(tools)
+AT_CHECK(testsilock `pwd` $DB_HDF5,,ignore,ignore)
+AT_CLEANUP
 AT_SETUP(multi_file)
 AT_KEYWORDS(large)
 AT_CHECK($VALGRIND multi_file $DB_HDF5,,ignore)

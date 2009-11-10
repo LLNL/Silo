@@ -1,0 +1,41 @@
+#!/bin/sh
+result=0
+
+# -----------------------------------------------------------------------------
+# Test silock nan/inf checker. 
+#
+# Programmer: Mark C. Miller
+# Creation:   Thu Nov  5 11:13:33 PST 2009
+#
+# -----------------------------------------------------------------------------
+
+# Diddle the the directory because Autotest is not at all designed to handle
+# tests the way this one was written
+if test -n "$1"; then
+    topDir=$1
+    if test -e $topDir/../../multi_test; then
+        topDir=$1/../..
+    fi
+else
+    topDir=.
+fi
+
+for driver in DB_PDB $2; do
+    for fparams in "nan 0" "inf 7"; do
+        fpissue=$(echo $fparams | cut -d' ' -f1)
+        index=$(echo $fparams | cut -d' ' -f2)
+        $topDir/onehex $driver $fpissue >& /dev/null
+        foundIt=$($topDir/../tools/silock/silock onehex.silo | grep "has .* issue at index ${index}$")
+        if test -z "$foundIt"; then
+            result=1
+            break 2
+        fi
+    done
+done
+
+#
+# Cleanup
+#
+rm -rf onehex.silo
+
+exit $result 

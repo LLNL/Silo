@@ -378,6 +378,8 @@ typedef enum {
 #define DBOPT_SPECNAMES         326
 #define DBOPT_SPECCOLORS        327
 #define DBOPT_LLONGNZNUM        328
+#define DBOPT_CONSERVED         329
+#define DBOPT_EXTENSIVE         330
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -555,7 +557,7 @@ typedef enum {
 /*
  * Database table of contents for the current directory only.
  */
-typedef struct {
+typedef struct DBtoc_ {
 
     char         **curve_names;
     int            ncurve;
@@ -635,7 +637,7 @@ typedef struct {
  * Database Curve Object
  *--------------------------------------------------------------------------
  */
-typedef struct {
+typedef struct DBcurve_ {
 /*----------- X vs. Y (Curve) Data -----------*/
     int            id;          /* Identifier for this object */
     int            datatype;    /* Datatype for x and y (float, double) */
@@ -654,7 +656,7 @@ typedef struct {
     char          *reference;   /* Label to reference object */
 } DBcurve;
 
-typedef struct {
+typedef struct DBdefvars_ {
     int            ndefs;       /* number of definitions */
     char         **names;       /* [ndefs] derived variable names */
     int           *types;       /* [ndefs] derived variable types */
@@ -663,7 +665,7 @@ typedef struct {
                                    post-processor's GUI */
 } DBdefvars;
 
-typedef struct {
+typedef struct DBpointmesh_ {
 /*----------- Point Mesh -----------*/
     int            id;          /* Identifier for this object */
     int            block_no;    /* Block number for this mesh */
@@ -699,7 +701,7 @@ typedef struct {
  * Multi-Block Mesh Object
  *--------------------------------------------------------------------------
  */
-typedef struct {
+typedef struct DBmultimesh_ {
 /*----------- Multi-Block Mesh -----------*/
     int            id;          /* Identifier for this object */
     int            nblocks;     /* Number of blocks in mesh */
@@ -728,7 +730,7 @@ typedef struct {
  * Multi-Block Mesh Adjacency Object
  *--------------------------------------------------------------------------
  */
-typedef struct {
+typedef struct DBmultimeshadj_ {
 /*----------- Multi-Block Mesh Adjacency -----------*/
     int            nblocks;     /* Number of blocks in mesh */
     int            blockorigin; /* Origin (0 or 1) of block numbers */
@@ -752,7 +754,7 @@ typedef struct {
  * Multi-Block Variable Object
  *--------------------------------------------------------------------------
  */
-typedef struct {
+typedef struct DBmultivar_ {
 /*----------- Multi-Block Variable -----------*/
     int            id;          /* Identifier for this object  */
     int            nvars;       /* Number of variables   */
@@ -767,13 +769,17 @@ typedef struct {
     char         **region_pnames;
     char          *mmesh_name;
     int            tensor_rank;    /* DB_VARTYPE_XXX */
+    int            conserved;   /* indicates if the variable should be conserved
+                                   under various operations such as interp. */
+    int            extensive;   /* indicates if the variable reprsents an extensiv
+                                   physical property (as opposed to intensive) */
 } DBmultivar;
 
 /*-------------------------------------------------------------------------
  * Multi-material
  *-------------------------------------------------------------------------
  */
-typedef struct {
+typedef struct DBmultimat_ {
     int            id;          /* Identifier for this object  */
     int            nmats;       /* Number of materials   */
     int            ngroups;     /* Number of block groups in mesh */
@@ -796,7 +802,7 @@ typedef struct {
  * Multi-species
  *-------------------------------------------------------------------------
  */
-typedef struct {
+typedef struct DBmultimatspecies_ {
     int            id;          /* Identifier for this object  */
     int            nspec;       /* Number of species   */
     int            ngroups;     /* Number of block groups in mesh */
@@ -828,7 +834,7 @@ typedef struct {
 #define DB_ZONETYPE_PRISM       36
 #define DB_ZONETYPE_HEX         38
 
-typedef struct {
+typedef struct DBzonelist_ {
     int            ndims;       /* Number of dimensions (2,3) */
     int            nzones;      /* Number of zones in list */
     int            nshapes;     /* Number of zone shapes */
@@ -847,7 +853,7 @@ typedef struct {
     int            llong_gzoneno; /* flag indicating gzoneno is long long */
 } DBzonelist;
 
-typedef struct {
+typedef struct DBphzonelist_ {
     int            nfaces;      /* Number of faces in facelist (aka "facetable") */
     int           *nodecnt;     /* Count of nodes in each face */
     int            lnodelist;   /* Length of nodelist used to construct faces */
@@ -866,7 +872,7 @@ typedef struct {
     int           *gzoneno;     /* [nzones] global zone number of each zone */
 } DBphzonelist;
 
-typedef struct {
+typedef struct DBfacelist_ {
 /*----------- Required components ------------*/
     int            ndims;       /* Number of dimensions (2,3) */
     int            nfaces;      /* Number of faces in list */
@@ -891,7 +897,7 @@ typedef struct {
     int           *zoneno;      /* [nfaces] Zone number for each face */
 } DBfacelist;
 
-typedef struct {
+typedef struct DBedgelist_ {
     int            ndims;       /* Number of dimensions (2,3) */
     int            nedges;      /* Number of edges */
     int           *edge_beg;    /* [nedges] */
@@ -899,7 +905,7 @@ typedef struct {
     int            origin;      /* '0' or '1' */
 } DBedgelist;
 
-typedef struct {
+typedef struct DBquadmesh_ {
 /*----------- Quad Mesh -----------*/
     int            id;          /* Identifier for this object */
     int            block_no;    /* Block number for this mesh */
@@ -947,7 +953,7 @@ typedef struct {
     char          *mrgtree_name; /* optional name of assoc. mrgtree object */
 } DBquadmesh;
 
-typedef struct {
+typedef struct DBucdmesh_ {
 /*----------- Unstructured Cell Data (UCD) Mesh -----------*/
     int            id;          /* Identifier for this object */
     int            block_no;    /* Block number for this mesh */
@@ -1000,7 +1006,7 @@ typedef struct {
  * Database Mesh-Variable Object
  *---------------------------------------------------------------------------
  */
-typedef struct {
+typedef struct DBquadvar_ {
 /*----------- Quad Variable -----------*/
     int            id;          /* Identifier for this object */
     char          *name;        /* Name of variable */
@@ -1045,9 +1051,15 @@ typedef struct {
     char          *meshname;    /* Name of associated mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     char         **region_pnames;
+    int            conserved;   /* indicates if the variable should be conserved
+                                   under various operations such as interp. */
+    int            extensive;   /* indicates if the variable reprsents an extensiv
+                                   physical property (as opposed to intensive) */
+    int            centering;   /* explicit centering knowledge; should agree
+                                   with alignment. */
 } DBquadvar;
 
-typedef struct {
+typedef struct DBucdvar_ {
 /*----------- Unstructured Cell Data (UCD) Variable -----------*/
     int            id;          /* Identifier for this object */
     char          *name;        /* Name of variable */
@@ -1078,9 +1090,13 @@ typedef struct {
     char          *meshname;    /* Name of associated mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     char         **region_pnames;
+    int            conserved;   /* indicates if the variable should be conserved
+                                   under various operations such as interp. */
+    int            extensive;   /* indicates if the variable reprsents an extensiv
+                                   physical property (as opposed to intensive) */
 } DBucdvar;
 
-typedef struct {
+typedef struct DBmeshvar_ {
 /*----------- Generic Mesh-Data Variable -----------*/
     int            id;          /* Identifier for this object */
     char          *name;        /* Name of variable */
@@ -1128,9 +1144,13 @@ typedef struct {
     char          *meshname;      /* Name of associated mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     char         **region_pnames;
+    int            conserved;   /* indicates if the variable should be conserved
+                                   under various operations such as interp. */
+    int            extensive;   /* indicates if the variable reprsents an extensiv
+                                   physical property (as opposed to intensive) */
 } DBmeshvar;
 
-typedef struct {
+typedef struct DBmaterial_ {
 /*----------- Material Information -----------*/
     int            id;          /* Identifier */
     char          *name;        /* Name of this material information block */
@@ -1157,7 +1177,7 @@ typedef struct {
     int            guihide;     /* Flag to hide from post-processor's GUI */
 } DBmaterial;
 
-typedef struct {
+typedef struct DBmatspecies_ {
 /*----------- Species Information -----------*/
     int            id;          /* Identifier */
     char          *name;        /* Name of this matspecies information block */
@@ -1203,7 +1223,7 @@ typedef struct {
     char         **speccolors;  /* Array of species colors; length is sum of nmatspec */
 } DBmatspecies;
 
-typedef struct {
+typedef struct DBcsgzonelist_ {
 /*----------- CSG Zonelist -----------*/
     int            nregs;       /* Number of regions in regionlist */
     int            origin;      /* '0' or '1' */
@@ -1225,7 +1245,7 @@ typedef struct {
     char         **zonenames;  /* [nzones] names of each zone */
 } DBcsgzonelist;
 
-typedef struct {
+typedef struct DBcsgmesh_ {
 /*----------- CSG Mesh -----------*/
     int            block_no;    /* Block number for this mesh */
     int            group_no;    /* Block group number for this mesh */
@@ -1263,7 +1283,7 @@ typedef struct {
     int            disjoint_mode;
 } DBcsgmesh;
 
-typedef struct {
+typedef struct DBcsgvar_ {
 /*----------- CSG Variable -----------*/
     char          *name;        /* Name of variable */
     int            cycle;       /* Problem cycle number */
@@ -1287,6 +1307,10 @@ typedef struct {
     char          *meshname;    /* Name of associated mesh */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     char         **region_pnames;
+    int            conserved;   /* indicates if the variable should be conserved
+                                   under various operations such as interp. */
+    int            extensive;   /* indicates if the variable reprsents an extensiv
+                                   physical property (as opposed to intensive) */
 } DBcsgvar;
 
 /*-------------------------------------------------------------------------
@@ -1296,7 +1320,7 @@ typedef struct {
  * a compound array have elements of the same data type.
  *-------------------------------------------------------------------------
  */
-typedef struct {
+typedef struct DBcompoundarray_ {
     int            id;          /*identifier of the compound array */
     char          *name;        /*name of te compound array  */
     char         **elemnames;   /*names of the simple array elements */
@@ -1307,7 +1331,7 @@ typedef struct {
     int            datatype;    /*simple array element data type */
 } DBcompoundarray;
 
-typedef struct {
+typedef struct DBoptlist_ {
 
     int           *options;     /* Vector of option identifiers */
     void         **values;      /* Vector of pointers to option values */
@@ -1316,7 +1340,7 @@ typedef struct {
 
 } DBoptlist;
 
-typedef struct {
+typedef struct DBobject_ {
 
     char          *name;
     char          *type;        /* Type of group/object */
@@ -1326,30 +1350,6 @@ typedef struct {
     int            maxcomponents;  /* Max number of components */
 
 } DBobject;
-
-#if 0
-typedef struct {
-
-    int           *edgetails;   /* Array of integer set ids at edge tails */
-    int           *edgeheads;   /* Array of integer set ids at edge heads */
-    int            maxedges;    /* Maximum number of edges */
-    int            nedges;      /* Current number of edges */
-
-    char         **setnames;    /* Array of names of sets */
-    int            maxsets;     /* Maximum number of sets */
-    int            nsets;	/* Current number of sets */
-
-} DBsil;
-
-/* traversal oriented sil */
-typedef struct _DBtravsil {
-    char *name;
-    int ntails;
-    struct _DBtravsil *tails;
-    int nheads;
-    struct _DBtravsil *heads;
-} DBtravsil;
-#endif
 
 typedef struct _DBmrgtnode {
     char *name;

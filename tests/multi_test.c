@@ -1923,6 +1923,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             mixlen2;
     int             *mix_next2, *mix_mat2, *mix_zone2;
     float           *mix_vf2;
+    int             one = 1;
 
     DBoptlist      *optlist;
 
@@ -2150,7 +2151,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         time = 4.8;
         dtime = 4.8;
 
-        optlist = DBMakeOptlist(10);
+        optlist = DBMakeOptlist(12);
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
@@ -2181,8 +2182,12 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                       DB_FLOAT, DB_COLLINEAR, optlist);
 
         put_extents(d2,(dims[0]-1)*(dims[1]-1)*(dims[2]-1),varextents[3],block);
+        DBAddOption(optlist, DBOPT_CONSERVED, &one);
+        DBAddOption(optlist, DBOPT_EXTENSIVE, &one);
         DBPutQuadvar1(dbfile, var1name, meshname, d2, zdims, ndims,
                       NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
+        DBClearOption(optlist, DBOPT_CONSERVED);
+        DBClearOption(optlist, DBOPT_EXTENSIVE);
 
         put_extents(p2,(dims[0]-1)*(dims[1]-1)*(dims[2]-1),varextents[4],block);
         DBPutQuadvar1(dbfile, var2name, meshname, p2, zdims, ndims,

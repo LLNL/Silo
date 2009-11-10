@@ -865,6 +865,8 @@ DBCALCFL_FC (int *znodelist, int *nnodes, int *origin, int *zshapesize,
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Thu Nov  5 08:58:42 PST 2009
+ *     Added *dbid = -1
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBCLOSE_FC (int *dbid)
@@ -876,6 +878,7 @@ DBCLOSE_FC (int *dbid)
         dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
         status = DBClose(dbfile);
         DBFortranRemovePointer(*dbid);
+        *dbid = -1;
         API_RETURN(status);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */

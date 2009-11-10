@@ -9719,6 +9719,9 @@ UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
  *    Mark C. Miller, Wed Sep 23 11:49:34 PDT 2009
  *    Added DBOPT_LLONGNZNUM for long long global node/zone numbers
  *    to pointmeshes, ucdmeshes, zonelists.
+ *
+ *    Mark C. Miller, Thu Nov  5 16:14:12 PST 2009
+ *    Added conserved/extensive options to all var objects.
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -9818,6 +9821,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_DISJOINT_MODE:
                         _csgm._disjoint_mode = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_CONSERVED:
+                        _csgm._conserved = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_EXTENSIVE:
+                        _csgm._extensive = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -9988,6 +9999,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         _pm._llong_gnodeno = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_CONSERVED:
+                        _pm._conserved = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_EXTENSIVE:
+                        _pm._extensive = DEREF(int, optlist->values[i]);
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -10118,6 +10137,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_REGION_PNAMES:
                         _qm._region_pnames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_CONSERVED:
+                        _qm._conserved = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_EXTENSIVE:
+                        _qm._extensive = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -10257,6 +10284,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_LLONGNZNUM:
                         _um._llong_gnodeno = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_CONSERVED:
+                        _um._conserved = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_EXTENSIVE:
+                        _um._extensive = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -10473,6 +10508,14 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
 
                     case DBOPT_SPECCOLORS:
                         _mm._speccolors = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_CONSERVED:
+                        _mm._conserved = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_EXTENSIVE:
+                        _mm._extensive = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -11258,11 +11301,20 @@ db_StringArrayToStringList(char **strArray, int n,
  *    Mark C. Miller, Wed Oct  3 21:54:35 PDT 2007
  *    Made it return empty or null strings depending on input
  *    Made it handle a variable length list where n is unspecified
+ *
+ *    Mark C. Miller, Mon Nov  9 12:10:47 PST 2009
+ *    Added logic to handle swapping of slash character between 
+ *    windows/linux. Note that swapping of slash character only 
+ *    makes sense in certain context and only when it appears in
+ *    a string BEFORE a colon character. We try to minimize the
+ *    amount of work we do looking for a colon character by
+ *    remembering where we find it in the last substring.
  *--------------------------------------------------------------------*/
 INTERNAL char **
-db_StringListToStringArray(char *strList, int n)
+db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
+    int skipFirstSemicolon)
 {
-    int i,l, add1 = 0;
+    int i, l, add1 = 0, strLen, colonAt = 0;
     char **retval;
 
     /* if n is unspecified (<0), compute it by counting semicolons */
@@ -11270,7 +11322,7 @@ db_StringListToStringArray(char *strList, int n)
     {
         add1 = 1;
         n = 1;
-        i = 0;
+        i = (skipFirstSemicolon&&strList[0]==';')?1:0;
         while (strList[i] != '\0')
         {
             if (strList[i] == ';')
@@ -11278,9 +11330,10 @@ db_StringListToStringArray(char *strList, int n)
             i++;
         }
     }
+    strLen = i;
     
     retval = (char**) calloc(n+add1, sizeof(char*));
-    for (i=0, l=0; i<n; i++) {
+    for (i=0, l=(skipFirstSemicolon&&strList[0]==';')?1:0; i<n; i++) {
         if (strList[l] == ';')
         {
             retval[i] = STRDUP(""); 
@@ -11294,8 +11347,32 @@ db_StringListToStringArray(char *strList, int n)
         else
         {
             int lstart = l;
+            int ltmp = l;
+            if (handleSlashSwap && l+colonAt<strLen &&
+                strList[l+colonAt] != ':')
+            {
+                while (strList[ltmp] != ':' && strList[ltmp] != '\0')
+                    ltmp++;
+                if (strList[ltmp] == ':')
+                    colonAt = ltmp - l;
+                else
+                    colonAt = 0;
+            }
             while (strList[l] != ';' && strList[l] != '\0')
+            {
+                /* If we're reading on linux, convert any '\' BEFORE
+                   a colon to '/'. Likewise, if we're reading on
+                   windows, convert an '/' BEFORE a colon to '\' */
+                if (handleSlashSwap && (l-lstart)<colonAt)
+                {
+#if !defined(_WIN32) /* linux case */
+                    if (strList[l] == '\\') strList[l] = '/';
+#else               /* windows case */
+                    if (strList[l] == '/') strList[l] = '\\';
+#endif
+                }
                 l++;
+            }
             strList[l] = '\0';
             retval[i] = STRDUP(&strList[lstart]);
             l++;

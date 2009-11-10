@@ -27,7 +27,8 @@ check_SCRIPTS= \
  testxvers \
  test_error.py \
  test_read.py \
- test_write.py
+ test_write.py \
+ testsilock
 
 check_DATA= \
  xvers_data.tar.bz2 \
@@ -61,7 +62,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
-      rocket mmadjacency largefile version namescheme
+      rocket mmadjacency largefile version namescheme efcentering
 
 dir_SOURCES = \
  dir.c \
@@ -112,7 +113,9 @@ check_PROGRAMS = \
  dir \
  quad \
  version \
- namescheme
+ namescheme \
+ efcentering
+
 
 # Deal with need to use c++ linker whenever we've got C++
 # sources compiled with the silo library and the fact that
@@ -170,6 +173,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_testallf77_SOURCES = dummy.cxx
  nodist_EXTRA_compression_SOURCES = dummy.cxx
  nodist_EXTRA_grab_SOURCES = dummy.cxx
+ nodist_EXTRA_efcentering_SOURCES = dummy.cxx
 endif
 
 if HDF5_DRV_NEEDED

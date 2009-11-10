@@ -47,7 +47,7 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
 	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
 	quad$(EXEEXT) version$(EXEEXT) namescheme$(EXEEXT) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4)
+	efcentering$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
@@ -112,6 +112,11 @@ dir_OBJECTS = $(am_dir_OBJECTS)
 dir_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@dir_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@dir_DEPENDENCIES = ../src/libsiloh5.la
+efcentering_SOURCES = efcentering.c
+efcentering_OBJECTS = efcentering.$(OBJEXT)
+efcentering_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@efcentering_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@efcentering_DEPENDENCIES = ../src/libsiloh5.la
 extface_SOURCES = extface.c
 extface_OBJECTS = extface.$(OBJEXT)
 extface_LDADD = $(LDADD)
@@ -348,8 +353,10 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_cpz1plt_SOURCES) cpz1plt.c \
 	$(nodist_EXTRA_csg_SOURCES) csg.c $(curvef77_SOURCES) \
 	$(nodist_EXTRA_curvef77_SOURCES) $(dir_SOURCES) \
-	$(nodist_EXTRA_dir_SOURCES) $(nodist_EXTRA_extface_SOURCES) \
-	extface.c $(grab_SOURCES) $(nodist_EXTRA_grab_SOURCES) \
+	$(nodist_EXTRA_dir_SOURCES) \
+	$(nodist_EXTRA_efcentering_SOURCES) efcentering.c \
+	$(nodist_EXTRA_extface_SOURCES) extface.c $(grab_SOURCES) \
+	$(nodist_EXTRA_grab_SOURCES) \
 	$(nodist_EXTRA_group_test_SOURCES) group_test.c \
 	$(nodist_EXTRA_largefile_SOURCES) largefile.c \
 	$(nodist_EXTRA_listtypes_SOURCES) listtypes.c \
@@ -390,11 +397,11 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
 	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
-	extface.c $(am__grab_SOURCES_DIST) group_test.c largefile.c \
-	listtypes.c mat3d_3across.c $(am__matf77_SOURCES_DIST) \
-	merge_block.c mmadjacency.c multi_file.c multi_test.c \
-	multispec.c namescheme.c obj.c onehex.c oneprism.c \
-	onepyramid.c onetet.c partial_io.c point.c \
+	efcentering.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
+	largefile.c listtypes.c mat3d_3across.c \
+	$(am__matf77_SOURCES_DIST) merge_block.c mmadjacency.c \
+	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
+	onehex.c oneprism.c onepyramid.c onetet.c partial_io.c point.c \
 	$(am__pointf77_SOURCES_DIST) polyzl.c $(quad_SOURCES) \
 	$(am__quadf77_SOURCES_DIST) $(rocket_SOURCES) sami.c simple.c \
 	spec.c specmix.c subhex.c testall.c \
@@ -589,7 +596,8 @@ check_SCRIPTS = \
  testxvers \
  test_error.py \
  test_read.py \
- test_write.py
+ test_write.py \
+ testsilock
 
 check_DATA = \
  xvers_data.tar.bz2 \
@@ -620,7 +628,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
-	$(am__append_1) $(am__append_3)
+	efcentering $(am__append_1) $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -688,6 +696,7 @@ rocket_SOURCES = \
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testallf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_compression_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_grab_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_efcentering_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -773,6 +782,9 @@ curvef77$(EXEEXT): $(curvef77_OBJECTS) $(curvef77_DEPENDENCIES)
 dir$(EXEEXT): $(dir_OBJECTS) $(dir_DEPENDENCIES) 
 	@rm -f dir$(EXEEXT)
 	$(CXXLINK) $(dir_OBJECTS) $(dir_LDADD) $(LIBS)
+efcentering$(EXEEXT): $(efcentering_OBJECTS) $(efcentering_DEPENDENCIES) 
+	@rm -f efcentering$(EXEEXT)
+	$(CXXLINK) $(efcentering_OBJECTS) $(efcentering_LDADD) $(LIBS)
 extface$(EXEEXT): $(extface_OBJECTS) $(extface_DEPENDENCIES) 
 	@rm -f extface$(EXEEXT)
 	$(CXXLINK) $(extface_OBJECTS) $(extface_LDADD) $(LIBS)
@@ -909,6 +921,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efcentering.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group_test.Po@am__quote@

@@ -444,6 +444,8 @@ struct _pm {
     char          *_mrgtree_name;
     char         **_region_pnames;
     int            _llong_gnodeno;
+    int            _conserved;
+    int            _extensive;
 
     /*These used only by NetCDF driver */
     int            _dim_ndims;
@@ -496,6 +498,8 @@ struct _qm {
     int            _guihide;
     char          *_mrgtree_name;
     char         **_region_pnames;
+    int            _conserved;
+    int            _extensive;
 
     /* These are probably only used by the pdb driver */
     char           _nm_dims[64];
@@ -575,6 +579,8 @@ struct _um {
     int            _tv_connectivity;
     int            _disjoint_mode;
     int            _llong_gnodeno;
+    int            _conserved;
+    int            _extensive;
 };
 
 /*
@@ -611,6 +617,8 @@ struct _csgm {
     char         **_region_pnames;
     int            _tv_connectivity;
     int            _disjoint_mode;
+    int            _conserved;
+    int            _extensive;
 };
 
 /*
@@ -679,6 +687,8 @@ struct _mm {
     int             _topo_dim;
     char          **_specnames;
     char          **_speccolors;
+    int            _conserved;
+    int            _extensive;
 };
 
 /*
@@ -818,7 +828,7 @@ INTERNAL int db_ResetGlobalData_MultiMesh (void);
 INTERNAL int db_ResetGlobalData_Defvars(void);
 INTERNAL char *db_FullName2BaseName(const char *);
 INTERNAL void db_StringArrayToStringList(char**, int, char **, int*);
-INTERNAL char ** db_StringListToStringArray(char *, int);
+INTERNAL char ** db_StringListToStringArray(char *, int, int, int);
 INTERNAL void db_DriverTypeAndSubtype(int driver, int *type, int *subtype);
 INTERNAL void db_IntArrayToIntList(int**, int, const int *const, int**, int *);
 INTERNAL int ** db_IntListToIntArray(const int *const, int, const int *const);
