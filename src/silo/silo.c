@@ -8004,6 +8004,9 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Nov 11 09:19:20 PST 2009
+ *    Added check for valid centering.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
@@ -8042,6 +8045,10 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("mixlen", E_BADARGS);
         if (!mixvars && mixlen)
             API_ERROR("mixvars", E_BADARGS);
+        if (centering != DB_NODECENT && centering != DB_ZONECENT &&
+            centering != DB_FACECENT && centering != DB_BNDCENT &&
+            centering != DB_EDGECENT && centering != DB_BLOCKCENT)
+            API_ERROR("centering", E_BADARGS);
         if (!dbfile->pub.p_qv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8256,6 +8263,9 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Nov 11 09:19:20 PST 2009
+ *    Added check for valid centering.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
@@ -8289,6 +8299,10 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("nels", E_BADARGS);
         if (mixlen < 0)
             API_ERROR("mixlen", E_BADARGS);
+        if (centering != DB_NODECENT && centering != DB_ZONECENT &&
+            centering != DB_FACECENT && centering != DB_BNDCENT &&
+            centering != DB_EDGECENT && centering != DB_BLOCKCENT)
+            API_ERROR("centering", E_BADARGS);
         if (!dbfile->pub.p_uv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 

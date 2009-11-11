@@ -367,6 +367,7 @@ typedef struct DBquadvar_mt {
     char                region_pnames[256];
     int                 conserved;
     int                 extensive;
+    int                 centering;
 } DBquadvar_mt;
 static hid_t    DBquadvar_mt5;
 
@@ -2002,6 +2003,8 @@ db_hdf5_init(void)
         MEMBER_R(str256,        vals,           MAX_VARS);
         MEMBER_S(str256,        meshname);
         MEMBER_S(str256,        region_pnames);
+        MEMBER_S(int,           conserved);
+        MEMBER_S(int,           extensive);
     } DEFINE;
 
     STRUCT(DBcsgzonelist) {
@@ -2081,6 +2084,9 @@ db_hdf5_init(void)
         MEMBER_S(str256,        label);
         MEMBER_S(str256,        units);
         MEMBER_S(str256,        region_pnames);
+        MEMBER_S(int,           conserved);
+        MEMBER_S(int,           extensive);
+        MEMBER_S(int,           centering);
     } DEFINE;
 
     STRUCT(DBucdmesh) {
@@ -2134,6 +2140,8 @@ db_hdf5_init(void)
         MEMBER_S(str256,        label);
         MEMBER_S(str256,        units);
         MEMBER_S(str256,        region_pnames);
+        MEMBER_S(int,           conserved);
+        MEMBER_S(int,           extensive);
     } DEFINE;
 
     STRUCT(DBfacelist) {
@@ -2259,6 +2267,8 @@ db_hdf5_init(void)
         MEMBER_S(str256,        region_pnames);
         MEMBER_S(str256,        mmesh_name);
         MEMBER_S(int,           tensor_rank);
+        MEMBER_S(int,           conserved);
+        MEMBER_S(int,           extensive);
     } DEFINE;
 
     STRUCT(DBmultimat) {
@@ -2357,6 +2367,8 @@ db_hdf5_init(void)
         MEMBER_S(str256,        units);
         MEMBER_R(str256,        data,           MAX_VARS);
         MEMBER_S(str256,        region_pnames);
+        MEMBER_S(int,           conserved);
+        MEMBER_S(int,           extensive);
     } DEFINE;
 
     STRUCT(DBcompoundarray) {
@@ -8279,6 +8291,9 @@ PrepareForQuadvarCompression(int centering, int datatype)
  *
  *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
  *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Wed Nov 11 09:18:12 PST 2009
+ *   Fixed support for edge/face centered variables.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -8323,6 +8338,11 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             _qm._maxindex_z[i] = _qm._maxindex_n[i] - 1;
         }
 
+        /* adjust things for edge/face centerings */
+        if ((ndims > 1 && centering == DB_EDGECENT) ||
+            (ndims > 2 && centering == DB_FACECENT))
+           nels *= ndims;
+
         /* hack to maintain backward compatibility with pdb driver */
         len = 1;
         if (_qm._time_set == TRUE) {
@@ -8337,13 +8357,29 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
 
         /* Write variable arrays: vars[] and mixvars[] */
         if (nvars>MAX_VARS) {
-            db_perror("too many variables", E_BADARGS, me);
+            db_perror("too many subvariables", E_BADARGS, me);
             UNWIND();
         }
         for (i=0; i<nvars; i++) {
-            db_hdf5_compwrz(dbfile, datatype, ndims, dims, vars[i],
-                m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0),
-                compressionFlags);
+            /* Handle adjustment for edge/face centerings */
+            if ((ndims > 1 && centering == DB_EDGECENT) ||
+                (ndims > 2 && centering == DB_FACECENT))
+            {
+                int j, tmpndims = ndims+1;
+                int tmpdims[4];
+                for (j = ndims; j > 0; j--)
+                    tmpdims[j] = dims[j-1];
+                tmpdims[0] = ndims;
+                db_hdf5_compwrz(dbfile, datatype, tmpndims, tmpdims, vars[i],
+                    m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0),
+                    compressionFlags);
+            }
+            else
+            {
+                db_hdf5_compwrz(dbfile, datatype, ndims, dims, vars[i],
+                    m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0),
+                    compressionFlags);
+            }
             if (mixvars && mixvars[i] && mixlen>0) {
                 db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mixvars[i],
                     m.mixed_value[i]/*out*/, friendly_name(varnames[i], "_mix", 0));
@@ -8366,6 +8402,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         m.datatype = (DB_FLOAT==datatype || DB_DOUBLE==datatype)?0:datatype;
         m.conserved = _qm._conserved;
         m.extensive = _qm._extensive;
+        m.centering = centering;
         strcpy(m.label, OPT(_qm._label));
         strcpy(m.units, OPT(_qm._unit));
         strcpy(m.meshid, OPT(_qm._meshname));
@@ -8375,7 +8412,18 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             m.zones[i] = _qm._zones[i];
             m.min_index[i] = _qm._minindex[i];
             m.max_index[i] = _qm._maxindex_n[i];
-            m.align[i] = DB_NODECENT==centering ? 0.0 : 0.5;
+            switch (centering) {
+                case DB_NODECENT:
+                    m.align[i] = _qm._nm_alignn[i]; break;
+                case DB_EDGECENT: /* edge centering on 1D mesh is like zone centering */
+                    if (ndims == 1) m.align[i] = _qm._nm_alignz[i]; break;
+                case DB_FACECENT: /* face centering on 2D mesh is like zone centering */
+                    if (ndims == 2) m.align[i] = _qm._nm_alignz[i]; break;
+                case DB_ZONECENT:
+                    m.align[i] = _qm._nm_alignz[i]; break;
+                default:
+                    m.align[i] = _qm._nm_alignz[i]; break;
+            }
         }
 
         /* output mrgtree info if we have it */
@@ -8407,6 +8455,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             if (m.guihide)      MEMBER_S(int, guihide);
             if (m.conserved)    MEMBER_S(int, conserved);
             if (m.extensive)    MEMBER_S(int, extensive);
+            if (m.centering)    MEMBER_S(int, centering);
             MEMBER_3(int, dims);
             MEMBER_3(int, zones);
             MEMBER_3(int, min_index);
