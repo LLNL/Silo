@@ -8789,6 +8789,9 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
  *
  *     Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
  *     Added support for conserved/extensive options.
+ *
+ *     Mark C. Miller, Wed Nov 11 22:17:40 PST 2009
+ *     Removed unnecessary code checking centering.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -8826,16 +8829,6 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
     *-----------------------------------------------------------*/
 
    count[0] = nels;
-
-   switch (centering) {
-   case DB_NODECENT:
-   case DB_ZONECENT:
-   case DB_FACECENT:
-      break;
-
-   default:
-      return db_perror("centering", E_BADARGS, me);
-   }
 
    /*-------------------------------------------------------------
     *  We first will write the given variables to output, then

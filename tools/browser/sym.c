@@ -733,6 +733,9 @@ sym_truth (char *name) {
  *
  *      Mark C. Miller, Wed Sep 23 11:53:59 PDT 2009
  *      Added $fmt_llong for long long data.
+ *
+ *      Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *      Added suppot for alternate relative diff option using epsilon.
  *-------------------------------------------------------------------------
  */
 void
@@ -764,6 +767,14 @@ sym_init (void)
                           "then the browser will use an exact match instead.) "
                           "This variable, which defaults to zero, is set by "
                           "the -R and --relative command-line switches.";
+   const char *diff_eps = "When non-negative, this variable triggers an "
+                          "alternative relative `diff' algorithm where two "
+                          "values, A and B, are different if "
+                          "|A-B|/(|A|+|B|+EPS)>N where EPS is the value of "
+                          "this variable and N is the value of the associated "
+                          "relative difference tolerance variable. This "
+                          "variable, which defaults to -1, is set by the "
+                          "-x and --epsilon command-line switches.";
 
    /* Command-line options */
    sym_bi_set("lowlevel",       "0",
@@ -946,31 +957,25 @@ sym_init (void)
               "octal, or binary format as well by setting this variable "
               "to 16, 8, or 2 (default is anything else).");
 
-   /* Difference tolerances are all set to zero */
-   sym_bi_set("diff_int8_abs",  "0", "Absolute diff tolerance for bytes",
-              diff_abs);
-   sym_bi_set("diff_int8_rel",  "0", "Relative diff tolerance for bytes",
-              diff_rel);
-   sym_bi_set("diff_short_abs", "0", "Absolute diff tolerance for short",
-              diff_abs);
-   sym_bi_set("diff_short_rel", "0", "Relative diff tolerance for short",
-              diff_rel);
-   sym_bi_set("diff_int_abs",   "0", "Absolute diff tolerance for int",
-              diff_abs);
-   sym_bi_set("diff_int_rel",   "0", "Relative diff tolerance for int",
-              diff_rel);
-   sym_bi_set("diff_long_abs",  "0", "Absolute diff tolerance for long",
-              diff_abs);
-   sym_bi_set("diff_long_rel",  "0", "Relative diff tolerance for long",
-              diff_rel);
-   sym_bi_set("diff_float_abs", "0", "Absolute diff tolerance for float",
-              diff_abs);
-   sym_bi_set("diff_float_rel", "0", "Relative diff tolerance for float",
-              diff_rel);
-   sym_bi_set("diff_double_abs","0", "Absolute diff tolerance for double",
-              diff_abs);
-   sym_bi_set("diff_double_rel","0", "Relative diff tolerance for double",
-              diff_rel);
+   /* Difference tolerances are all set to zero, eps to -1. */
+   sym_bi_set("diff_int8_abs",  "0", "Absolute diff tolerance for byte", diff_abs);
+   sym_bi_set("diff_int8_rel",  "0", "Relative diff tolerance for byte", diff_rel);
+   sym_bi_set("diff_int8_eps",  "-1", "Epsilon for alternate relative diff for byte", diff_eps);
+   sym_bi_set("diff_short_abs", "0", "Absolute diff tolerance for short", diff_abs);
+   sym_bi_set("diff_short_rel", "0", "Relative diff tolerance for short", diff_rel);
+   sym_bi_set("diff_short_eps", "-1", "Epsilon for alternate relative diff for short", diff_eps);
+   sym_bi_set("diff_int_abs",   "0", "Absolute diff tolerance for int", diff_abs);
+   sym_bi_set("diff_int_rel",   "0", "Relative diff tolerance for int", diff_rel);
+   sym_bi_set("diff_int_eps",   "-1", "Epsilon for alternate relative diff for int", diff_eps);
+   sym_bi_set("diff_long_abs",  "0", "Absolute diff tolerance for long", diff_abs);
+   sym_bi_set("diff_long_rel",  "0", "Relative diff tolerance for long", diff_rel);
+   sym_bi_set("diff_long_eps",  "-1", "Epsilon for alternate relative diff for long", diff_eps);
+   sym_bi_set("diff_float_abs", "0", "Absolute diff tolerance for float", diff_abs);
+   sym_bi_set("diff_float_rel", "0", "Relative diff tolerance for float", diff_rel);
+   sym_bi_set("diff_float_eps", "-1", "Epsilon for alternate relative diff for float", diff_eps);
+   sym_bi_set("diff_double_abs","0", "Absolute diff tolerance for double", diff_abs);
+   sym_bi_set("diff_double_rel","0", "Relative diff tolerance for double", diff_rel);
+   sym_bi_set("diff_double_eps","-1", "Epsilon for alternate relative diff for double", diff_eps);
    
    /*
     * Primitive types.

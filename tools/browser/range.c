@@ -168,6 +168,9 @@ range_print (obj_t _self, out_t *f) {
  * Modifications:
  *              Robb Matzke, 2000-06-28
  *              Honors the DiffOpt settings.
+ *
+ *  Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *  Added suppot for alternate relative diff option epsilon param.
  *-------------------------------------------------------------------------
  */
 static int
@@ -178,8 +181,8 @@ range_diff (obj_t _a, obj_t _b)
     obj_range_t *a = MYCLASS(_a);
     obj_range_t *b = MYCLASS(_b);
 
-    if (different(a->lo, b->lo, DiffOpt.i_abs, DiffOpt.i_rel) ||
-        different(a->hi, b->hi, DiffOpt.i_abs, DiffOpt.i_rel)) {
+    if (different(a->lo, b->lo, DiffOpt.i_abs, DiffOpt.i_rel, DiffOpt.i_eps) ||
+        different(a->hi, b->hi, DiffOpt.i_abs, DiffOpt.i_rel, DiffOpt.i_eps)) {
         switch (DiffOpt.report) {
         case DIFF_REP_ALL:
             if (DiffOpt.two_column) {

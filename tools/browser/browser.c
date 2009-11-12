@@ -565,10 +565,13 @@ browser_rl_obj_generator (char *text, int state) {
  *
  * Modifications:
  *
+ *  Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *  Added suppot for alternate relative diff option.
  *-------------------------------------------------------------------------
  */
 int
-different (double a, double b, double abstol, double reltol) {
+different (double a, double b, double abstol, double reltol,
+    double reltol_eps) {
 
    double       num, den;
 
@@ -582,6 +585,24 @@ different (double a, double b, double abstol, double reltol) {
       } else {
          if (fabs(a-b) > abstol) return 1;
       }
+   }
+
+   /*
+    * First, see if we should use the alternate diff.
+    * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
+    */
+   if (reltol_eps >= 0)
+   {
+      if ((a<0 && b>0) || (b<0 && a>0)) {
+         num = fabs (a/2 - b/2);
+         den = fabs (a/2) + fabs(b/2) + reltol_eps/2;
+         reltol /= 2;
+      } else {
+         num = fabs (a - b);
+         den = fabs (a) + fabs(b) + reltol_eps;
+      }
+      if (0.0==den && num) return 1;
+      if (num/den > reltol) return 1;
    }
 
    /*
@@ -603,7 +624,7 @@ different (double a, double b, double abstol, double reltol) {
    /*
     * If all tests tried succeeded then the numbers are equal.
     */
-   if (abstol>0 || reltol>0) return 0;
+   if (abstol>0 || reltol>0 || reltol_eps>=0) return 0;
 
    /*
     * Otherwise do a normal exact comparison.
@@ -1028,6 +1049,9 @@ process_sw_exclude(switch_t *sw, const char *argv, const char *value)
  *   Mark C. Miller, Wed Sep  2 16:46:46 PDT 2009
  *   Added the 'pass' argument so we can skip resetting of $lowlevel on 
  *   passes other than the first.
+ *
+ *  Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *  Added suppot for alternate relative diff option using epsilon switch.
  *---------------------------------------------------------------------------
  */
 static void
@@ -1044,6 +1068,10 @@ process_switches(switches_t *switches, int pass)
 
     if ((sw=switch_find(switches, "--relative")) && sw->seen) {
         set_diff("rel", sw->lexeme);
+    }
+
+    if ((sw=switch_find(switches, "--epsilon")) && sw->seen) {
+        set_diff("eps", sw->lexeme);
     }
 
     if ((sw=switch_find(switches, "--diff")) && sw->seen) {
@@ -1228,6 +1256,10 @@ bad_switch(const char *fmt, ...)
  *      Mark C. Miller, Wed Sep  2 16:47:43 PDT 2009
  *      Added an argument to process_switches to indicate which pass
  *      is being made.
+ *
+ *      Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *      Added suppot for alternate relative diff option epsilon switch.
+ *      Improved help message for various diff options.
  *-------------------------------------------------------------------------
  */
 int
@@ -1303,16 +1335,32 @@ main(int argc, char *argv[])
     switch_add(sws, "-A", "--absolute", "g:TOL",        NULL);
     switch_doc(NULL,
                "All absolute differencing tolerances are set to TOL. "
+               "Two numbers, A and B, are different if |A-B|>TOL. "
                "This sets the internal variables `$diff_*_abs' where `*' "
                "is one of the following words: int8, short, int, long, "
-               "float, or double.");
+               "float, or double. Default is zero.");
    
     switch_add(sws, "-R", "--relative", "g:TOL",        NULL);
     switch_doc(NULL,
                "All relative differencing tolerances are set to TOL. "
+               "Two numbers, A and B, are different if |A-B|/2|A+B|>TOL."
                "This sets the internal variables `$diff_*_rel' where `*' "
                "is one of the following words: int8, short, int, long "
-               "float, or double.");
+               "float, or double. Default is zero.");
+   
+    switch_add(sws, "-x",   "--epsilon", "g:EPS",        NULL);
+    switch_doc(NULL,
+               "When non-negative, all relative differencing epsilon "
+               "parameters are set to EPS "
+               "and an alternate relative difference scheme is used where "
+               "two numbers, A and B, are different if |A-B|/(|A|+|B|+EPS)>TOL. "
+               "This sets the internal variables `$diff_*_eps' where `*' "
+               "is one of the following words: int8, short, int, long "
+               "float, or double. For EPS=0, this algorithm is the same as "
+               "`normal' relative differencing. But for EPS=1, it behaves in "
+               "such a way as to shift to relative differencing for large "
+               "numbers but absolute differencing for numbers near zero. "
+               "Default is -1 (e.g. turned off).");
    
     switch_add(sws, "-V", "--version",  NULL,           process_sw_version);
     switch_doc(NULL, "Shows the version number.");

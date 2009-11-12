@@ -336,12 +336,12 @@ typedef struct diffopt_t {
     int                 ignore_adds;    /*ignore things in B only       */
     int                 ignore_dels;    /*ignore things in A only       */
     int                 two_column;     /*use pdbdiff output style?     */
-    double              c_abs, c_rel;   /*int8 tolerances               */
-    double              s_abs, s_rel;   /*short tolerances              */
-    double              i_abs, i_rel;   /*integer tolerances            */
-    double              l_abs, l_rel;   /*long tolerances               */
-    double              f_abs, f_rel;   /*float tolerances              */
-    double              d_abs, d_rel;   /*double tolerances             */
+    double              c_abs, c_rel, c_eps; /*int8 tolerances          */
+    double              s_abs, s_rel, s_eps; /*short tolerances         */
+    double              i_abs, i_rel, i_eps; /*integer tolerances       */
+    double              l_abs, l_rel, l_eps; /*long tolerances          */
+    double              f_abs, f_rel, f_eps; /*float tolerances         */
+    double              d_abs, d_rel, d_eps; /*double tolerances        */
     strlist_t           exclude;        /*objects to exclude            */
 } diffopt_t;
 
@@ -457,7 +457,7 @@ extern int Verbosity;
 extern char HistoryFile[];
 extern char *ObjTypeName[BROWSER_NOBJTYPES];
 void usage(void);
-int different (double, double, double, double);
+int different (double, double, double, double, double);
 toc_t *browser_DBGetToc (DBfile*, int*, int(*)(toc_t*,toc_t*));
 int sort_toc_by_name (toc_t*, toc_t*);
 int sort_toc_by_type (toc_t*, toc_t*);

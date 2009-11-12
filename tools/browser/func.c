@@ -382,6 +382,10 @@ diff_lookup (char *ascii_name) {
  *              Robb Matzke, 2000-07-10
  *              Fixed a memory corruption bug when called with no
  *              arguments and no files opened on the command-line
+ *
+ *              Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *              Added suppot for alternate relative diff option using
+ *              epsilon.
  *-------------------------------------------------------------------------
  */
 obj_t
@@ -556,16 +560,22 @@ V_diff (int argc, obj_t argv[])
     /* Cache tolerances */
     DiffOpt.c_abs = diff_lookup("$diff_int8_abs");
     DiffOpt.c_rel = diff_lookup("$diff_int8_rel");
+    DiffOpt.c_eps = diff_lookup("$diff_int8_eps");
     DiffOpt.s_abs = diff_lookup("$diff_short_abs");
     DiffOpt.s_rel = diff_lookup("$diff_short_rel");
+    DiffOpt.s_eps = diff_lookup("$diff_short_eps");
     DiffOpt.i_abs = diff_lookup("$diff_int_abs");
     DiffOpt.i_rel = diff_lookup("$diff_int_rel");
+    DiffOpt.i_eps = diff_lookup("$diff_int_eps");
     DiffOpt.l_abs = diff_lookup("$diff_long_abs");
     DiffOpt.l_rel = diff_lookup("$diff_long_rel");
+    DiffOpt.l_eps = diff_lookup("$diff_long_eps");
     DiffOpt.f_abs = diff_lookup("$diff_float_abs");
     DiffOpt.f_rel = diff_lookup("$diff_float_rel");
+    DiffOpt.f_eps = diff_lookup("$diff_float_eps");
     DiffOpt.d_abs = diff_lookup("$diff_double_abs");
     DiffOpt.d_rel = diff_lookup("$diff_double_rel");
+    DiffOpt.d_eps = diff_lookup("$diff_double_eps");
 
             
     for (i=0; i<nopands/2; i++) {

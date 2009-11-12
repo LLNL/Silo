@@ -893,6 +893,9 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
  *
  *      Mark C. Miller, Wed Sep 23 11:52:20 PDT 2009
  *      Added support for long long type
+ *
+ *  Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *  Added suppot for alternate relative diff option using epsilon param.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -902,7 +905,7 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
     obj_prim_t  *a = MYCLASS(_a);
     obj_prim_t  *b = MYCLASS(_b);
     char                *a_s=NULL, *b_s=NULL;
-    double      a_d, b_d, d_abs, d_rel;
+    double      a_d, b_d, d_abs, d_rel, d_eps;
     int          status = 0;
     out_t       *f = wdata->f;
 
@@ -927,7 +930,8 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         b_d = *((signed char*)b_mem);
         d_abs = DiffOpt.c_abs;
         d_rel = DiffOpt.c_rel;
-        status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
+        d_eps = DiffOpt.c_eps;
+        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
         break;
 
     case BROWSER_SHORT:
@@ -935,7 +939,8 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         b_d = *((short*)b_mem);
         d_abs = DiffOpt.s_abs;
         d_rel = DiffOpt.s_rel;
-        status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
+        d_eps = DiffOpt.s_eps;
+        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
         break;
 
     case BROWSER_INT:
@@ -943,7 +948,8 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         b_d = *((int*)b_mem);
         d_abs = DiffOpt.i_abs;
         d_rel = DiffOpt.i_rel;
-        status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
+        d_eps = DiffOpt.i_eps;
+        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
         break;
 
     case BROWSER_LONG:
@@ -951,7 +957,8 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         b_d = *((long*)b_mem);
         d_abs = DiffOpt.l_abs;
         d_rel = DiffOpt.l_rel;
-        status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
+        d_eps = DiffOpt.l_eps;
+        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
         break;
 
     case BROWSER_LONG_LONG:
@@ -959,7 +966,8 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         b_d = *((long long*)b_mem);
         d_abs = DiffOpt.l_abs;
         d_rel = DiffOpt.l_rel;
-        status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
+        d_eps = DiffOpt.l_eps;
+        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
         break;
 
     case BROWSER_FLOAT:
@@ -967,7 +975,8 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         b_d = *((float*)b_mem);
         d_abs = DiffOpt.f_abs;
         d_rel = DiffOpt.f_rel;
-        status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
+        d_eps = DiffOpt.f_eps;
+        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
         break;
 
     case BROWSER_DOUBLE:
@@ -975,7 +984,8 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         b_d = *((double*)b_mem);
         d_abs = DiffOpt.d_abs;
         d_rel = DiffOpt.d_rel;
-        status = different(a_d, b_d, d_abs, d_rel) ? 2 : 0;
+        d_eps = DiffOpt.d_eps;
+        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
         break;
 
     default:

@@ -242,6 +242,9 @@ num_print(obj_t _self, out_t *f)
  *
  *      Robb Matzke, 2000-06-28
  *      Honors the DiffOpt settings. Supports two-column output.
+ *
+ *  Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *  Added suppot for alternate relative diff option using epsilon param.
  *-------------------------------------------------------------------------
  */
 static int
@@ -249,7 +252,7 @@ num_diff (obj_t _a, obj_t _b) {
 
    obj_num_t    *a = MYCLASS(_a);
    obj_num_t    *b = MYCLASS(_b);
-   double       ad, bd, abs, rel;
+   double       ad, bd, abs, rel, eps;
    int          status;
    out_t        *f = OUT_STDOUT;
 
@@ -258,14 +261,16 @@ num_diff (obj_t _a, obj_t _b) {
       bd = b->fp ? b->u.d : (double)(b->u.i);
       abs = DiffOpt.d_abs;
       rel = DiffOpt.d_rel;
+      eps = DiffOpt.d_eps;
    } else {
       ad = a->u.i;
       bd = b->u.i;
       abs = DiffOpt.i_abs;
       rel = DiffOpt.i_rel;
+      eps = DiffOpt.i_eps;
    }
 
-   status = different (ad, bd, abs, rel) ? 2 : 0;
+   status = different (ad, bd, abs, rel, eps) ? 2 : 0;
    if (status>0 && DIFF_REP_ALL==DiffOpt.report && DiffOpt.two_column) {
        obj_print(_a, f);
        out_column(f, OUT_COL2, DIFF_SEPARATOR);
