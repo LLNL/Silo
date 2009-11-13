@@ -736,6 +736,9 @@ sym_truth (char *name) {
  *
  *      Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
  *      Added suppot for alternate relative diff option using epsilon.
+ *
+ *      Mark C. Miller, Fri Nov 13 15:38:07 PST 2009
+ *      Changed name of "long long" type to "longlong" as PDB is sensitive
  *-------------------------------------------------------------------------
  */
 void
@@ -936,7 +939,7 @@ sym_init (void)
    sym_bi_set("fmt_long",       "(long)%d",     "Long format",
               "This is a C printf() format string used to render long "
               "integer values in the browser output.");
-   sym_bi_set("fmt_llong",      "%lld",         "Long long format",
+   sym_bi_set("fmt_longlong",   "%lld",         "Long long format",
               "This is a C printf() format string used to render long "
               "long integer values in the browser output.");
 

@@ -870,6 +870,7 @@ typedef struct DBphzonelist_ {
 /*--------- Optional zone attributes ---------*/
     int           *zoneno;      /* [nzones] zone number of each zone */
     int           *gzoneno;     /* [nzones] global zone number of each zone */
+    int            llong_gzoneno; /* flag indicating gzoneno is long long */
 } DBphzonelist;
 
 typedef struct DBfacelist_ {

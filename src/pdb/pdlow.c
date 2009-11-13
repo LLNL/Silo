@@ -71,6 +71,12 @@ extern int fprintf(FILE*, const char*, ...);
                       a->long_order,     b->long_order,                      \
                       c->long_alignment, d->long_alignment)
 
+#define PD_COMPARE_LONG_LONG_STD(eq, a, b, c, d)                             \
+   PD_COMPARE_FIX_STD(eq,                                                    \
+                      a->long_long_bytes,     b->long_long_bytes,            \
+                      a->long_long_order,     b->long_long_order,            \
+                      c->long_long_alignment, d->long_long_alignment)
+
 #define PD_COMPARE_FIX_STD(eq, na, nb, oa, ob, la, lb)                       \
     eq = (na != nb) || (oa != ob) || (la != lb)
 
@@ -145,6 +151,8 @@ static int      _PD_put_string (int,char*,...);
  *
  * Modifications:
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  *-------------------------------------------------------------------------
  */
 int
@@ -224,6 +232,12 @@ _lite_PD_rd_format (PDBfile *file) {
    for (j = 0; j < n; j++, *(format++) = *(p++)) /*void*/ ;
 
    /*
+    * add long long support
+    */
+   std->long_long_bytes   = *(p++);
+   std->long_long_order  = (char) *(p++);
+
+   /*
     * Read the biases.
     */
    if (_lite_PD_rfgets(infor, MAXLINE, file->stream) == NULL)
@@ -255,6 +269,8 @@ _lite_PD_rd_format (PDBfile *file) {
  *
  * Modifications:
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  *-------------------------------------------------------------------------
  */
 int
@@ -268,6 +284,7 @@ _lite_PD_compare_std (data_standard *a, data_standard *b,
          (a->short_bytes  == b->short_bytes) &&
          (a->int_bytes    == b->int_bytes) &&
          (a->long_bytes   == b->long_bytes) &&
+         (a->long_long_bytes   == b->long_long_bytes) &&
          (a->float_bytes  == b->float_bytes) &&
          (a->double_bytes == b->double_bytes) &&
          (a->short_order  == b->short_order) &&
@@ -316,6 +333,7 @@ _lite_PD_compare_std (data_standard *a, data_standard *b,
           (c->short_alignment  == d->short_alignment) &&
           (c->int_alignment    == d->int_alignment) &&
           (c->long_alignment   == d->long_alignment) &&
+          (c->long_long_alignment   == d->long_long_alignment) &&
           (c->float_alignment  == d->float_alignment) &&
           (c->double_alignment == d->double_alignment));
 
@@ -1263,6 +1281,8 @@ _lite_PD_init_chrt (PDBfile *file) {
  *    I added calls to lite_SC_mark to bump memory reference counts as
  *    appropriate.
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  *-------------------------------------------------------------------------
  */
 void
@@ -1322,6 +1342,15 @@ _lite_PD_setup_chart (HASHTAB *chart, data_standard *fstd, data_standard *hstd,
    }
    _lite_PD_defstr(chart, "long", falign->long_alignment,
                    (long) fstd->long_bytes, fstd->long_order,
+                   conv, NULL, NULL);
+
+   if (flag) {
+      PD_COMPARE_LONG_LONG_STD(conv, fstd, hstd, falign, halign);
+   } else {
+      conv = FALSE;
+   }
+   _lite_PD_defstr(chart, "longlong", falign->long_long_alignment,
+                   (long) fstd->long_long_bytes, fstd->long_long_order,
                    conv, NULL, NULL);
 
    if (flag) {
@@ -1427,6 +1456,8 @@ _lite_PD_add_block (PDBfile *file, syment *ep, dimdes *dims) {
  *
  * Modifications:
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
@@ -1495,6 +1526,12 @@ _lite_PD_wr_format (PDBfile *file) {
     * Get the double bias in.
     */
    double_bias = *format;
+
+   /*
+    * add long long support
+    */
+   *(p++) = std->long_long_bytes;
+   *(p++) = std->long_long_order;
 
    n         = (int) (p - outfor);
    outfor[0] = n;
@@ -1866,6 +1903,8 @@ _lite_PD_wr_symt (PDBfile *file) {
  *
  * Modifications:
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
@@ -1895,9 +1934,10 @@ _lite_PD_wr_extras (PDBfile *file) {
    al[4] = pa->long_alignment;
    al[5] = pa->float_alignment;
    al[6] = pa->double_alignment;
-   al[7] = '\0';
+   al[7] = pa->long_long_alignment;
+   al[8] = '\0';
 
-   if (al[0]*al[1]*al[3]*al[4]*al[5]*al[6] == 0)
+   if (al[0]*al[1]*al[3]*al[4]*al[5]*al[6]*al[7] == 0)
       return(FALSE);
 
    _PD_put_string(1, "Alignment:%s\n", al);

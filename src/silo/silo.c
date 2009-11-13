@@ -584,6 +584,10 @@ _DBQMSetStride(DBquadmesh *qmesh)
  *
  *    Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
  *    Adding support for long long type.
+ *
+ *    Mark C. Miller, Fri Nov 13 15:32:02 PST 2009
+ *    Changed name of "long long" type to "longlong" as PDB is
+ *    sensitive to spaces in type names.
  *---------------------------------------------------------------------*/
 INTERNAL char *
 db_GetDatatypeString(int type)
@@ -607,7 +611,7 @@ db_GetDatatypeString(int type)
             strcpy(str, "long");
             break;
         case DB_LONG_LONG:
-            strcpy(str, "long long");
+            strcpy(str, "longlong");
             break;
         case DB_FLOAT:
             strcpy(str, "float");
@@ -1093,6 +1097,10 @@ db_GetMachDataSize(int datatype)
  *
  *    Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
  *    Adding support for long long type.
+ *
+ *    Mark C. Miller, Fri Nov 13 15:32:02 PST 2009
+ *    Changed name of "long long" type to "longlong" as PDB is
+ *    sensitive to spaces in type names.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_GetDatatypeID(char *dataname)
@@ -1104,7 +1112,7 @@ db_GetDatatypeID(char *dataname)
         size = DB_INT;
     else if (STR_BEGINSWITH(dataname, "short"))
         size = DB_SHORT;
-    else if (STR_BEGINSWITH(dataname, "long long"))
+    else if (STR_BEGINSWITH(dataname, "longlong"))
         size = DB_LONG_LONG;
     else if (STR_BEGINSWITH(dataname, "long"))
         size = DB_LONG;
@@ -9736,6 +9744,9 @@ UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
  *
  *    Mark C. Miller, Thu Nov  5 16:14:12 PST 2009
  *    Added conserved/extensive options to all var objects.
+ *
+ *    Mark C. Miller, Fri Nov 13 15:33:02 PST 2009
+ *    Add DBOPT_LLONGNZNUM to polyhedral zonelist object.
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -10342,6 +10353,10 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                 {
                     case DBOPT_ZONENUM:
                         _phzl._gzoneno = (int*)optlist->values[i];
+                        break;
+
+                    case DBOPT_LLONGNZNUM:
+                        _phzl._llong_gzoneno = DEREF(int, optlist->values[i]);
                         break;
 
                     default:

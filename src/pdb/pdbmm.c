@@ -186,6 +186,8 @@ _lite_PD_clr_table (HASHTAB *tab, FreeFuncType rel) {
  *
  * Modifications:
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  *-------------------------------------------------------------------------
  */
 data_standard *
@@ -202,6 +204,8 @@ _lite_PD_mk_standard (void) {
    std->int_order     = 0;
    std->long_bytes    = 0;
    std->long_order    = 0;
+   std->long_long_bytes = 0;
+   std->long_long_order = 0;
    std->float_bytes   = 0;
    std->float_format  = NULL;
    std->float_order   = NULL;
@@ -230,6 +234,8 @@ _lite_PD_mk_standard (void) {
  *    Remove unnecessary calls to lite_SC_mark, since reference count now
  *    set when allocated.
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  *-------------------------------------------------------------------------
  */
 data_standard *
@@ -249,6 +255,8 @@ _lite_PD_copy_standard (data_standard *src) {
    std->int_order    = src->int_order;
    std->long_bytes   = src->long_bytes;
    std->long_order   = src->long_order;
+   std->long_long_bytes = src->long_long_bytes;
+   std->long_long_order = src->long_long_order;
    std->float_bytes  = src->float_bytes;
    std->double_bytes = src->double_bytes;
    
@@ -322,6 +330,8 @@ _lite_PD_rl_standard (data_standard *std) {
  *
  * Modifications:
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  *-------------------------------------------------------------------------
  */
 data_alignment *
@@ -338,9 +348,11 @@ _lite_PD_mk_alignment (char *vals) {
    align->long_alignment   = vals[4];
    align->float_alignment  = vals[5];
    align->double_alignment = vals[6];
+   align->long_long_alignment = vals[7];
 
-   if (strlen(vals) > 7) align->struct_alignment = vals[7];
+   if (strlen(vals) > 8) align->struct_alignment = vals[8];
    else align->struct_alignment = 0;
+
 
    return(align);
 }

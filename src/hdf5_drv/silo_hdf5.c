@@ -475,6 +475,7 @@ typedef struct DBphzonelist_mt {
     char                facecnt[256];
     char                facelist[256];
     char                gzoneno[256];
+    int                 llong_gzoneno;
 } DBphzonelist_mt;
 static hid_t    DBphzonelist_mt5;
 
@@ -2188,6 +2189,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        extface);
         MEMBER_S(str256,        facecnt);
         MEMBER_S(str256,        facelist);
+        MEMBER_S(int,           llong_gzoneno);
     } DEFINE;
 
     STRUCT(DBmaterial) {
@@ -9952,6 +9954,9 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *   Add support for long long global node/zone numbers.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -9982,8 +9987,12 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
             m.facecnt/*out*/, friendly_name(name,"_facecnt", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &lfacelist, facelist,
             m.facelist/*out*/, friendly_name(name,"_facelist", 0));
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, _uzl._gzoneno,
-            m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
+        if (_phzl._llong_gzoneno)
+            db_hdf5_compwr(dbfile, DB_LONG_LONG, 1, &nzones, _phzl._gzoneno,
+                m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
+        else
+            db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, _phzl._gzoneno,
+                m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
 
         /* Build header in memory */
         m.nfaces = nfaces;
@@ -9993,6 +10002,7 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
         m.origin = origin;
         m.lo_offset = lo_offset;
         m.hi_offset = hi_offset;
+        m.llong_gzoneno = _phzl._llong_gzoneno;
 
         /* Write header to file */
         STRUCT(DBphzonelist) {
@@ -10009,6 +10019,7 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
             MEMBER_S(str(m.facecnt), facecnt);
             MEMBER_S(str(m.facelist), facelist);
             MEMBER_S(str(m.gzoneno), gzoneno);
+            if (m.llong_gzoneno) MEMBER_S(int, llong_gzoneno);
         } OUTPUT(dbfile, DB_PHZONELIST, name, &m);
         
     } CLEANUP {

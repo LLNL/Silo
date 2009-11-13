@@ -98,6 +98,8 @@ long    lite_vax_double[]   = {64L,  8L, 55L, 0L, 1L,  9L, 0L,   0x81L};
  *
  *   typedef struct s_data_standard data_standard;
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  */
 
 data_standard
@@ -105,6 +107,7 @@ data_standard
                     2, NORMAL_ORDER,              /* size and order of short */
                     4, NORMAL_ORDER,                /* size and order of int */
                     4, NORMAL_ORDER,               /* size and order of long */
+                    8, NORMAL_ORDER,          /* size and order of long long */
                     4, lite_def_float,                   /* float definition */
                     lite_def_float_order,
                     8, lite_def_double,                 /* double definition */
@@ -113,6 +116,7 @@ data_standard
                     2, NORMAL_ORDER,              /* size and order of short */
                     4, NORMAL_ORDER,                /* size and order of int */
                     4, NORMAL_ORDER,               /* size and order of long */
+                    8, NORMAL_ORDER,          /* size and order of long long */
                     4, lite_ieee_float,                  /* float definition */
                     lite_ieee_float_order,
                     8, lite_ieeea_double,               /* double definition */
@@ -121,6 +125,7 @@ data_standard
                     2, NORMAL_ORDER,              /* size and order of short */
                     2, NORMAL_ORDER,                /* size and order of int */
                     4, NORMAL_ORDER,               /* size and order of long */
+                    8, NORMAL_ORDER,          /* size and order of long long */
                     4, lite_ieee_float,                  /* float definition */
                     lite_ieee_float_order,
                     12, lite_ieeeb_double,              /* double definition */
@@ -129,6 +134,7 @@ data_standard
                     2, REVERSE_ORDER,             /* size and order of short */
                     2, REVERSE_ORDER,               /* size and order of int */
                     4, REVERSE_ORDER,              /* size and order of long */
+                    8, REVERSE_ORDER,         /* size and order of long long */
                     4, lite_intel_float,                 /* float definition */
                     lite_intel_float_order,
                     8, lite_intel_double,               /* double definition */
@@ -137,6 +143,7 @@ data_standard
                     2, REVERSE_ORDER,             /* size and order of short */
                     4, REVERSE_ORDER,               /* size and order of int */
                     4, REVERSE_ORDER,              /* size and order of long */
+                    8, REVERSE_ORDER,         /* size and order of long long */
                     4, lite_vax_float,                   /* float definition */
                     lite_vax_float_order,
                     8, lite_vax_double,                 /* double definition */
@@ -145,6 +152,7 @@ data_standard
                     8, NORMAL_ORDER,              /* size and order of short */
                     8, NORMAL_ORDER,                /* size and order of int */
                     8, NORMAL_ORDER,               /* size and order of long */
+                    8, NORMAL_ORDER,          /* size and order of long long */
                     8, lite_cray_float,                  /* float definition */
                     lite_cray_float_order,
                     8, lite_cray_float,                 /* double definition */
@@ -171,16 +179,18 @@ data_standard
  *
  *   typedef struct s_data_alignment data_alignment;
  *
+ *   Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *   Added support for long long datatype.
  */
 
 data_alignment
- lite_RS6000_ALIGNMENT = {1, 4, 2, 4, 4, 4, 4, 0},
- lite_SPARC_ALIGNMENT  = {1, 4, 2, 4, 4, 4, 8, 0},
- lite_MIPS_ALIGNMENT   = {1, 4, 2, 4, 4, 4, 8, 0},
- lite_M68000_ALIGNMENT = {1, 2, 2, 2, 2, 2, 2, 0},
- lite_INTELA_ALIGNMENT = {1, 2, 2, 2, 2, 2, 2, 0},
- lite_UNICOS_ALIGNMENT = {4, 8, 8, 8, 8, 8, 8, 8},
- lite_DEF_ALIGNMENT    = {1, 4, 4, 4, 4, 4, 4, 0};
+ lite_RS6000_ALIGNMENT = {1, 4, 2, 4, 4, 4, 4, 4, 0},
+ lite_SPARC_ALIGNMENT  = {1, 4, 2, 4, 4, 4, 4, 8, 0},
+ lite_MIPS_ALIGNMENT   = {1, 4, 2, 4, 4, 4, 4, 8, 0},
+ lite_M68000_ALIGNMENT = {1, 2, 2, 2, 2, 2, 2, 2, 0},
+ lite_INTELA_ALIGNMENT = {1, 2, 2, 2, 2, 2, 2, 2, 0},
+ lite_UNICOS_ALIGNMENT = {4, 8, 8, 8, 8, 8, 8, 8, 8},
+ lite_DEF_ALIGNMENT    = {1, 4, 4, 4, 4, 4, 4, 4, 0};
 
 
 /*--------------------------------------------------------------------------*/

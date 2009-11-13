@@ -523,6 +523,8 @@ PJ_GetComponentType (PDBfile *file, char *objname, char *compname)
  *      Eric Brugger, Fri Sep  1 14:53:59 PDT 2000
  *      Added code to compress out "../" from the variable name.
  *
+ *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *      Add support for long long data type.
  *--------------------------------------------------------------------*/
 INTERNAL int
 PJ_ReadVariable(PDBfile *file,
@@ -710,6 +712,7 @@ PJ_ReadVariable(PDBfile *file,
       char          *c_conv = NULL;
       double        *d_conv = NULL;
       long          *l_conv = NULL;
+      long          *ll_conv = NULL;
       short         *s_conv = NULL;
       int           *i_conv = NULL;
 
@@ -731,6 +734,12 @@ PJ_ReadVariable(PDBfile *file,
 
          for (i = 0; i < num; i++)
             local_f[i] = (float)l_conv[i];
+         break;
+      case DB_LONG_LONG:
+         ll_conv = (long long *)(*var);
+
+         for (i = 0; i < num; i++)
+            local_f[i] = (float)ll_conv[i];
          break;
       case DB_DOUBLE:
          d_conv = (double *)(*var);

@@ -157,6 +157,7 @@ struct s_data_alignment {
    int short_alignment;
    int int_alignment;
    int long_alignment;
+   int long_long_alignment;
    int float_alignment;
    int double_alignment;
    int struct_alignment;
@@ -173,6 +174,8 @@ struct s_data_standard {
    int int_order;
    int long_bytes;
    int long_order;
+   int long_long_bytes;
+   int long_long_order;
    int float_bytes;
    long *float_format;
    int *float_order;

@@ -156,7 +156,7 @@ prim_assoc_t    PA_DATATYPE[] = {
    {DB_FLOAT,           "float"},
    {DB_DOUBLE,          "double"},
    {DB_CHAR,            "char"},
-   {DB_LONG_LONG,       "llong"},
+   {DB_LONG_LONG,       "longlong"},
    {DB_NOTYPE,          "notype"},
    {0,                  NULL}};
 
@@ -1165,6 +1165,10 @@ prim_sizeof (obj_t _self) {
  *
  *    Mark C. Miller, Wed Sep 23 11:52:45 PDT 2009
  *    Added support for long long type.
+ *
+ *    Mark C. Miller, Fri Nov 13 15:38:07 PST 2009
+ *    Changed name of "long long" type to "longlong" as PDB is sensitive
+ *    to spaces in type names.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -1209,8 +1213,8 @@ prim_bind (obj_t _self, void *mem) {
       self->browser_type = BROWSER_INT;
       self->nbytes = sizeof(int);
 
-   } else if (!strcmp (self->name, "llong")) {
-      self->tname = safe_strdup ("llong");
+   } else if (!strcmp (self->name, "longlong")) {
+      self->tname = safe_strdup ("longlong");
       self->browser_type = BROWSER_LONG_LONG;
       self->nbytes = sizeof(long long);
 
@@ -1281,7 +1285,7 @@ prim_bind (obj_t _self, void *mem) {
          break;
 
       case DB_LONG_LONG:
-         self->tname = safe_strdup ("llong");
+         self->tname = safe_strdup ("longlong");
          self->browser_type = BROWSER_LONG_LONG;
          self->nbytes = sizeof(long long);
          break;
@@ -1389,6 +1393,9 @@ prim_set_io_assoc (obj_t _self, prim_assoc_t *assoc) {
  *
  *      Mark C. Miller, Wed Sep 23 11:53:21 PDT 2009
  *      Added support for long long.
+ *
+ *      Mark C. Miller, Fri Nov 13 15:38:07 PST 2009
+ *      Changed name of "long long" type to "longlong" as PDB is sensitive
  *-------------------------------------------------------------------------
  */
 DBdatatype
@@ -1430,7 +1437,7 @@ prim_silotype (obj_t _self) {
    } else if (!strcmp (self->name, "int")) {
       return DB_INT;
 
-   } else if (!strcmp (self->name, "llong")) {
+   } else if (!strcmp (self->name, "longlong")) {
       return DB_LONG_LONG;
 
    } else if (!strcmp (self->name, "long")) {

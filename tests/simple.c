@@ -69,6 +69,9 @@ for advertising or product endorsement purposes.
  *
  *      Mark C. Miller, Wed Sep 23 11:57:24 PDT 2009
  *      Added logic to test DBInqFile.
+ *
+ *      Mark C. Miller, Fri Nov 13 15:40:35 PST 2009
+ *      Test long long on PDB driver too.
  *-------------------------------------------------------------------------
  */
 int
@@ -156,8 +159,7 @@ main(int argc, char *argv[])
     dbfile = DBCreate(filename, 0, DB_LOCAL, "Simple Test", driver);
 
     DBWrite(dbfile, "simple", val, dims, ndims, DB_FLOAT);
-    if (driver != DB_PDB)
-        DBWrite(dbfile, "llong", lval, dims, ndims, DB_LONG_LONG);
+    DBWrite(dbfile, "longlong", lval, dims, ndims, DB_LONG_LONG);
 
     DBClose(dbfile);
 
@@ -182,8 +184,7 @@ main(int argc, char *argv[])
         val2[i] = 0;
 
     DBReadVarSlice(dbfile, "simple", offset, length, stride, ndims, val2);
-    if (driver != DB_PDB)
-        lval2 = DBGetVar(dbfile, "llong");
+    lval2 = DBGetVar(dbfile, "longlong");
 
     DBClose(dbfile);
 
@@ -210,20 +211,17 @@ main(int argc, char *argv[])
             cnt++;
     printf("%d values were overwritten\n", cnt);
 
-    if (driver != DB_PDB)
-    {
-        cnt = 0;
-        for (k = 0; k < NZ; k++) {
-            for (j = 0; j < NY; j++) {
-                for (i = 0; i < NX; i++) {
-                    if (lval2[i + j * NX + k * NX * NY] != lval[i + j * NX + k * NX * NY])
-                        cnt++;
-                }
+    cnt = 0;
+    for (k = 0; k < NZ; k++) {
+        for (j = 0; j < NY; j++) {
+            for (i = 0; i < NX; i++) {
+                if (lval2[i + j * NX + k * NX * NY] != lval[i + j * NX + k * NX * NY])
+                    cnt++;
             }
         }
-        err += cnt;
-        printf("%d long long values don't match\n", cnt);
     }
+    err += cnt;
+        printf("%d long long values don't match\n", cnt);
 
     return err;
 }

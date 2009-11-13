@@ -1515,6 +1515,9 @@ stc_offset (obj_t _self, obj_t comp) {
  *  have to page through the problem-sized data to see tiny bits of
  *  metadata at the end. Also added conserved/extensive properties to
  *  all var objects and centering to quadvar.
+ *
+ *  Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
+ *  Added support for long long global node/zone numbers.
  *-------------------------------------------------------------------------
  */
 void
@@ -1830,6 +1833,7 @@ stc_silo_types (void) {
       COMP (hi_offset,          "primitive 'int'");
       COMP (lnodelist,          "primitive 'int'");
       COMP (lfacelist,          "primitive 'int'");
+      COMP (llong_gzoneno,      "primitive 'int'");
       COMP (nodecnt,
             "pointer (array 'self.nfaces' (primitive 'int'))");
       COMP (nodelist,

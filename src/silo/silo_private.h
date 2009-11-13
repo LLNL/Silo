@@ -634,6 +634,7 @@ struct _uzl {
  */
 struct _phzl {
     int           *_gzoneno;
+    int            _llong_gzoneno;
 };
 
 /*

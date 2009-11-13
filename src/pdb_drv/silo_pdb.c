@@ -2879,6 +2879,9 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *      Add support for long long global node/zone numbers.
  *--------------------------------------------------------------------*/
 CALLBACK DBpointmesh *
 db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
@@ -2906,6 +2909,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("ndims", &tmppm.ndims, DB_INT);
    DEFINE_OBJ("nels", &tmppm.nels, DB_INT);
    DEFINE_OBJ("origin", &tmppm.origin, DB_INT);
+   DEFINE_OBJ("llong_gnodeno", &tmppm.llong_gnodeno, DB_INT);
 
    DEFINE_OBJ("min_extents", tmppm.min_extents, DB_FLOAT);
    DEFINE_OBJ("max_extents", tmppm.max_extents, DB_FLOAT);
@@ -2920,9 +2924,6 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
        DEFALL_OBJ("coord2", &tmppm.coords[2], DB_FLOAT);
    }
 
-   if (SILO_Globals.dataReadMask & DBPMGlobNodeNo)
-       DEFALL_OBJ("gnodeno", &tmppm.gnodeno, DB_INT);
-
    DEFALL_OBJ("label0", &tmppm.labels[0], DB_CHAR);
    DEFALL_OBJ("label1", &tmppm.labels[1], DB_CHAR);
    DEFALL_OBJ("label2", &tmppm.labels[2], DB_CHAR);
@@ -2936,6 +2937,19 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
       return NULL;
    *pm = tmppm;
    CHECK_TYPE(type, DB_POINTMESH, objname);
+
+   /*
+    *  Read the remainder of the object: loop over all values
+    *  associated with this variable.
+    */
+   if (SILO_Globals.dataReadMask & DBPMGlobNodeNo) {
+      INIT_OBJ(&tmp_obj);
+      DEFALL_OBJ("gnodeno", &tmppm.gnodeno,
+          pm->llong_gnodeno?DB_LONG_LONG:DB_INT);
+      pm->gnodeno = 0;
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
+          pm->gnodeno = tmppm.gnodeno;
+   }
 
    pm->id = 0;
    pm->name = STRDUP(objname);
@@ -3464,6 +3478,11 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
  *      Moved DBAlloc calls to after PJ_GetObject. Added automatic
  *      vars for PJ_GetObject to read into. Added checks for return
  *      value of PJ_GetObject calls.
+ *
+ *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *      Add support for long long global node/zone numbers. Protect
+ *      call to db_SplitShapelist if data read mask did not include
+ *      zonelist info.
  *--------------------------------------------------------------------*/
 CALLBACK DBucdmesh *
 db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
@@ -3513,10 +3532,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
    DEFALL_OBJ("units1", &tmpum.units[1], DB_CHAR);
    DEFALL_OBJ("units2", &tmpum.units[2], DB_CHAR);
    DEFINE_OBJ("guihide", &tmpum.guihide, DB_INT);
-
-   /* Optional global node number */
-   if (SILO_Globals.dataReadMask & DBUMGlobNodeNo)
-       DEFALL_OBJ("gnodeno", &tmpum.gnodeno, DB_INT);
+   DEFINE_OBJ("llong_gnodeno", &tmpum.llong_gnodeno, DB_INT);
 
    /* Get SILO ID's for other UCD mesh components */
    DEFALL_OBJ("facelist", &flname, DB_CHAR);
@@ -3553,6 +3569,16 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       is non-zero we just pass it without alteration. */
    if (!DBFileVersionGE(_dbfile,4,5,1) || DBFileVersionGE(_dbfile, 4,7,0))
        um->topo_dim = um->topo_dim - 1;
+
+   /* Optional global node number */
+   if (SILO_Globals.dataReadMask & DBUMGlobNodeNo) {
+      INIT_OBJ(&tmp_obj);
+      DEFALL_OBJ("gnodeno", &tmpum.gnodeno,
+          um->llong_gnodeno?DB_LONG_LONG:DB_INT);
+      um->gnodeno = 0;
+      if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, NULL)>=0)
+          um->gnodeno = tmpum.gnodeno;
+   }
 
    /* Read facelist, zonelist, and edgelist */
 
@@ -3617,10 +3643,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       DEFALL_OBJ("shapetype", &tmpzones.shapetype, DB_INT);
       DEFALL_OBJ("shapesize", &tmpzones.shapesize, DB_INT);
       DEFALL_OBJ("shapecnt", &tmpzones.shapecnt, DB_INT);
-
-      /* Optional global zone number */
-      if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
-          DEFALL_OBJ("gzoneno", &tmpzones.gzoneno, DB_INT);
+      DEFINE_OBJ("llong_gzoneno", &tmpzones.llong_gzoneno, DB_INT);
 
       /*----------------------------------------------------------*/
       /* These are optional so set them to their default values   */
@@ -3653,10 +3676,22 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       /* zones.  This will make dealing with ghost zones easier   */
       /* for applications.                                        */
       /*----------------------------------------------------------*/
-      if (lo_offset != 0 || hi_offset != 0)
+      if ((lo_offset != 0 || hi_offset != 0) &&
+          SILO_Globals.dataReadMask & DBZonelistInfo)
       {
           db_SplitShapelist (um);
       }
+
+      /* Read optional global zone numbers */
+      if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
+          INIT_OBJ(&tmp_obj);
+          DEFALL_OBJ("gzoneno", &tmpzones.gzoneno,
+              tmpzones.llong_gzoneno?DB_LONG_LONG:DB_INT);
+          um->zones->gzoneno = 0;
+          if (PJ_GetObject(dbfile->pdb, zlname, &tmp_obj, NULL)>=0)
+              um->zones->gzoneno = tmpzones.gzoneno;
+      }
+
    }
 
    if (elname && *elname) {
@@ -4160,6 +4195,9 @@ db_pdb_GetFacelist(DBfile *_dbfile, char *objname)
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *      Add support for long long global node/zone numbers.
  *-------------------------------------------------------------------------*/
 CALLBACK DBzonelist *
 db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
@@ -4195,15 +4233,22 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
         DEFALL_OBJ("zoneno", &tmpzl.zoneno, DB_INT);
     }
 
-    if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
-        DEFALL_OBJ("gzoneno", &tmpzl.gzoneno, DB_INT);
-
     if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
        return NULL;
     if ((zl = DBAllocZonelist()) == NULL)
        return NULL;
     *zl = tmpzl;
     CHECK_TYPE(type, DB_ZONELIST, objname);
+
+    /* optional global zone numbers */
+    if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
+       INIT_OBJ(&tmp_obj);
+       DEFALL_OBJ("gzoneno", &tmpzl.gzoneno,
+           tmpzl.llong_gzoneno?DB_LONG_LONG:DB_INT); 
+       zl->gzoneno = 0;
+       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
+           zl->gzoneno = tmpzl.gzoneno; 
+    }
 
     return zl;
 }
@@ -4232,6 +4277,9 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
  *      Moved DBAlloc call to after PJ_GetObject. Added automatic
  *      var for PJ_GetObject to read into. Added check for return
  *      value of PJ_GetObject.
+ *
+ *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *      Add support for long long global node/zone numbers.
  *-------------------------------------------------------------------------*/
 CALLBACK DBphzonelist *
 db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
@@ -4268,15 +4316,25 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
         DEFALL_OBJ("zoneno", &tmpphzl.zoneno, DB_INT);
     }
 
-    if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) 
-        DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno, DB_INT);
-
     if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
        return NULL;
     if ((phzl = DBAllocPHZonelist()) == NULL)
        return NULL;
     *phzl = tmpphzl;
     CHECK_TYPE(type, DB_PHZONELIST, objname);
+
+    if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) 
+        DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno, DB_INT);
+
+    /* optional global zone numbers */
+    if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
+       INIT_OBJ(&tmp_obj);
+       DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno,
+           tmpphzl.llong_gzoneno?DB_LONG_LONG:DB_INT);
+       phzl->gzoneno = 0;
+       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
+           phzl->gzoneno = tmpphzl.gzoneno;
+    }
 
     return phzl;
 }
@@ -7302,6 +7360,8 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
  *      I modified the routine to output min and max extents as either
  *      float or doubles, depending on the datatype of the coordinates.
  *
+ *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *      Add support for long long global node/zone numbers.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -7321,7 +7381,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
     *  Initialize global data, and process options.
     *-------------------------------------------------------------*/
    db_InitPoint(dbfile, optlist, ndims, nels);
-   obj = DBMakeObject(name, DB_POINTMESH, 30);
+   obj = DBMakeObject(name, DB_POINTMESH, 31);
 
    /*-------------------------------------------------------------
     *  Write coordinate arrays.
@@ -7390,8 +7450,12 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
    if (_pm._gnodeno)
    {
        count[0] = nels;
-       DBWriteComponent(dbfile, obj, "gnodeno", name, "integer",
-                         _pm._gnodeno, 1, count);
+       if (_pm._llong_gnodeno)
+           DBWriteComponent(dbfile, obj, "gnodeno", name, "longlong",
+               _pm._gnodeno, 1, count);
+       else
+           DBWriteComponent(dbfile, obj, "gnodeno", name, "integer",
+               _pm._gnodeno, 1, count);
    }
 
    /*-------------------------------------------------------------
@@ -7412,6 +7476,8 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
    DBAddIntComponent(obj, "min_index", _pm._minindex);
    DBAddIntComponent(obj, "max_index", _pm._maxindex);
    DBAddIntComponent(obj, "datatype", datatype);
+   if (_pm._llong_gnodeno)
+       DBAddIntComponent(obj, "llong_gnodeno", _pm._llong_gnodeno);
    if (_pm._guihide)
        DBAddIntComponent(obj, "guihide", _pm._guihide);
    if (_pm._group_no >= 0)
@@ -8423,6 +8489,8 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
  *     Hank Childs, Thu Jan  6 13:51:22 PST 2000
  *     Put in lint directive for unused arguments.
  *
+ *     Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *     Add support for long long global node/zone numbers.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 /* ARGSUSED */
@@ -8448,7 +8516,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
 
    db_InitUcd(dbfile, name, optlist, ndims, nnodes, nzones);
 
-   obj = DBMakeObject(name, DB_UCDMESH, 32);
+   obj = DBMakeObject(name, DB_UCDMESH, 33);
 
    /*-------------------------------------------------------------
     *  We first will write the given coordinate arrays to output,
@@ -8509,12 +8577,18 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    DBAddIntComponent(obj, "planar", _um._planar);
    DBAddIntComponent(obj, "origin", _um._origin);
    DBAddIntComponent(obj, "datatype", datatype);
+   if (_um._llong_gnodeno)
+       DBAddIntComponent(obj, "llong_gnodeno", _um._llong_gnodeno);
 
    if (_um._gnodeno)
    {
        count[0] = nnodes;
-       DBWriteComponent(dbfile, obj, "gnodeno", name, "integer",
-                         _um._gnodeno, 1, count);
+       if (_um._llong_gnodeno)
+           DBWriteComponent(dbfile, obj, "gnodeno", name, "longlong",
+               _um._gnodeno, 1, count);
+       else
+           DBWriteComponent(dbfile, obj, "gnodeno", name, "integer",
+               _um._gnodeno, 1, count);
    }
 
    if (_um._group_no >= 0)
@@ -9017,6 +9091,8 @@ db_pdb_PutZonelist (DBfile *dbfile, char *name, int nzones, int ndims,
  *    Jeremy Meredith, Fri May 21 10:04:25 PDT 1999
  *    Added an option list, a call to initialize it, and gzoneno.
  *
+ *    Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *    Add support for long long global node/zone numbers.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -9035,7 +9111,7 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
     *  Build up object description by defining literals
     *  and defining/writing arrays.
     *-------------------------------------------------*/
-   obj = DBMakeObject(name, DB_ZONELIST, 15);
+   obj = DBMakeObject(name, DB_ZONELIST, 16);
 
    DBAddIntComponent(obj, "ndims", ndims);
    DBAddIntComponent(obj, "nzones", nzones);
@@ -9044,6 +9120,8 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
    DBAddIntComponent(obj, "origin", origin);
    DBAddIntComponent(obj, "lo_offset", lo_offset);
    DBAddIntComponent(obj, "hi_offset", hi_offset);
+   if (_uzl._llong_gzoneno)
+       DBAddIntComponent(obj, "llong_gzoneno", _uzl._llong_gzoneno);
 
    count[0] = lnodelist;
 
@@ -9064,8 +9142,12 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
    if (_uzl._gzoneno)
    {
        count[0] = nzones;
-       DBWriteComponent(dbfile, obj, "gzoneno", name, "integer",
-                        _uzl._gzoneno, 1, count);
+       if (_uzl._llong_gzoneno)
+           DBWriteComponent(dbfile, obj, "gzoneno", name, "longlong",
+               _uzl._gzoneno, 1, count);
+       else
+           DBWriteComponent(dbfile, obj, "gzoneno", name, "integer",
+               _uzl._gzoneno, 1, count);
    }
 
    /*-------------------------------------------------------------
@@ -9090,6 +9172,9 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
  *      Mark C. Miller 
  *      July 27, 2004
  *
+ *  Modifications:
+ *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
+ *      Add support for long long global node/zone numbers.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -9108,7 +9193,7 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
     *  Build up object description by defining literals
     *  and defining/writing arrays.
     *-------------------------------------------------*/
-   obj = DBMakeObject(name, DB_PHZONELIST, 15);
+   obj = DBMakeObject(name, DB_PHZONELIST, 16);
 
    DBAddIntComponent(obj, "nfaces", nfaces);
    DBAddIntComponent(obj, "lnodelist", lnodelist);
@@ -9117,6 +9202,8 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
    DBAddIntComponent(obj, "origin", origin);
    DBAddIntComponent(obj, "lo_offset", lo_offset);
    DBAddIntComponent(obj, "hi_offset", hi_offset);
+   if (_phzl._llong_gzoneno)
+       DBAddIntComponent(obj, "llong_gzoneno", _phzl._llong_gzoneno);
 
    count[0] = nfaces;
 
@@ -9149,8 +9236,12 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
    if (_phzl._gzoneno)
    {
        count[0] = nzones;
-       DBWriteComponent(dbfile, obj, "gzoneno", name, "integer",
-                        _phzl._gzoneno, 1, count);
+       if (_phzl._llong_gzoneno)
+           DBWriteComponent(dbfile, obj, "gzoneno", name, "longlong",
+               _phzl._gzoneno, 1, count);
+       else
+           DBWriteComponent(dbfile, obj, "gzoneno", name, "integer",
+               _phzl._gzoneno, 1, count);
    }
 
    /*-------------------------------------------------------------
