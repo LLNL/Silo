@@ -1518,6 +1518,14 @@ stc_offset (obj_t _self, obj_t comp) {
  *
  *  Mark C. Miller, Fri Nov 13 15:33:42 PST 2009
  *  Added support for long long global node/zone numbers.
+ *
+ *  Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *  Changed how long long global node/zone numbers are supported
+ *  from a int (bool), "llong_gnode|zoneno" to an int holding
+ *  the actual datatype. The type is assumed int if it its
+ *  value is zero or it does not exist. Otherwise, the type is
+ *  is whatever is stored in gnznodtype member. This makes it quite
+ *  easy for browser to handle variations in type of this data.
  *-------------------------------------------------------------------------
  */
 void
@@ -1809,7 +1817,8 @@ stc_silo_types (void) {
       COMP (origin,             "primitive 'int'");
       COMP (min_index,          "primitive 'int'");
       COMP (max_index,          "primitive 'int'");
-      COMP (llong_gzoneno,      "primitive 'int'");
+      COMP (gnznodtype,         "primitive 'int'");
+      IOASSOC (PA_DATATYPE);
       COMP (lnodelist,          "primitive 'int'");
       COMP (shapecnt,
             "pointer (array 'self.nshapes' (primitive 'int'))");
@@ -1822,7 +1831,7 @@ stc_silo_types (void) {
       COMP (zoneno,
             "pointer (array 'self.nzones' (primitive 'int'))");
       COMP (gzoneno,
-            "pointer (array 'self.nzones' (primitive 'int'))");
+            "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
    } ESTRUCT;
 
    STRUCT (DBphzonelist) {
@@ -1833,7 +1842,8 @@ stc_silo_types (void) {
       COMP (hi_offset,          "primitive 'int'");
       COMP (lnodelist,          "primitive 'int'");
       COMP (lfacelist,          "primitive 'int'");
-      COMP (llong_gzoneno,      "primitive 'int'");
+      COMP (gnznodtype,         "primitive 'int'");
+      IOASSOC (PA_DATATYPE);
       COMP (nodecnt,
             "pointer (array 'self.nfaces' (primitive 'int'))");
       COMP (nodelist,
@@ -1847,7 +1857,7 @@ stc_silo_types (void) {
       COMP (zoneno,
             "pointer (array 'self.nzones' (primitive 'int'))");
       COMP (gzoneno,
-            "pointer (array 'self.nzones' (primitive 'int'))");
+            "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
    } ESTRUCT;
 
    STRUCT (DBcsgzonelist) {
@@ -2004,7 +2014,8 @@ stc_silo_types (void) {
       COMP (mrgtree_name,      "primitive 'string'");
       COMP (tv_connectivity,   "primitive 'int'");
       COMP (disjoint_mode,     "primitive 'int'");
-      COMP (llong_gnodeno,     "primitive 'int'");
+      COMP (gnznodtype,        "primitive 'int'");
+      IOASSOC (PA_DATATYPE);
       COMP (min_extents,
             "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
       COMP (max_extents,
@@ -2013,7 +2024,7 @@ stc_silo_types (void) {
             "array 'SH3 3, self.ndims' (pointer (array 'self.nnodes' "
             "(primitive 'self.datatype')))");
       COMP (gnodeno,
-            "pointer (array 'self.nnodes' (primitive 'int'))");
+            "pointer (array 'self.nnodes' (primitive 'self.gnznodtype'))");
       COMP (nodeno,
             "pointer (array 'self.nnodes' (primitive 'int'))");
       COMP (faces,              "pointer 'DBfacelist'");
@@ -2078,7 +2089,8 @@ stc_silo_types (void) {
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (mrgtree_name,       "primitive 'string'");
-      COMP (llong_gnodeno,      "primitive 'int'");
+      COMP (gnznodtype,         "primitive 'int'");
+      IOASSOC (PA_DATATYPE);
       COMP (min_extents,
             "array 'SH3 3, self.ndims' (primitive 'float')");
       COMP (max_extents,
@@ -2087,7 +2099,7 @@ stc_silo_types (void) {
             "array 'self.ndims' (pointer (array 'self.nels' "
             "(primitive 'self.datatype')))");
       COMP (gnodeno,
-            "pointer (array 'self.nels' (primitive 'int'))");
+            "pointer (array 'self.nels' (primitive 'self.gnznodtype'))");
    } ESTRUCT;
 
    STRUCT (DBmeshvar) {

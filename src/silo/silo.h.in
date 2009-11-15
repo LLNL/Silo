@@ -692,9 +692,9 @@ typedef struct DBpointmesh_ {
     int            nels;        /* Number of elements in mesh */
     int            origin;      /* '0' or '1' */
     int            guihide;     /* Flag to hide from post-processor's GUI */
-    int           *gnodeno;     /* global node ids */
+    void          *gnodeno;     /* global node ids */
     char          *mrgtree_name; /* optional name of assoc. mrgtree object */
-    int            llong_gnodeno; /* flag indicating gnoenode is long long */
+    int            gnznodtype;  /* datatype for global node/zone ids */
 } DBpointmesh;
 
 /*----------------------------------------------------------------------------
@@ -849,8 +849,8 @@ typedef struct DBzonelist_ {
 
 /*--------- Optional zone attributes ---------*/
     int           *zoneno;      /* [nzones] zone number of each zone */
-    int           *gzoneno;     /* [nzones] global zone number of each zone */
-    int            llong_gzoneno; /* flag indicating gzoneno is long long */
+    void          *gzoneno;     /* [nzones] global zone number of each zone */
+    int            gnznodtype;  /* datatype for global node/zone ids */
 } DBzonelist;
 
 typedef struct DBphzonelist_ {
@@ -869,8 +869,8 @@ typedef struct DBphzonelist_ {
 
 /*--------- Optional zone attributes ---------*/
     int           *zoneno;      /* [nzones] zone number of each zone */
-    int           *gzoneno;     /* [nzones] global zone number of each zone */
-    int            llong_gzoneno; /* flag indicating gzoneno is long long */
+    void          *gzoneno;     /* [nzones] global zone number of each zone */
+    int            gnznodtype;  /* datatype for global node/zone ids */
 } DBphzonelist;
 
 typedef struct DBfacelist_ {
@@ -988,7 +988,7 @@ typedef struct DBucdmesh_ {
                                  * (option) */
 
 /*--------- Optional node attributes ---------*/
-    int           *gnodeno;     /* [nnodes] global node number of each node */
+    void          *gnodeno;     /* [nnodes] global node number of each node */
 
 /*--------- Optional zone attributes ---------*/
     int           *nodeno;      /* [nnodes] node number of each node */
@@ -1000,7 +1000,7 @@ typedef struct DBucdmesh_ {
     char          *mrgtree_name; /* optional name of assoc. mrgtree object */
     int            tv_connectivity;
     int            disjoint_mode;
-    int            llong_gnodeno; /* flag indicating gnoenode is long long */
+    int            gnznodtype;  /* datatype for global node/zone ids */
 } DBucdmesh;
 
 /*----------------------------------------------------------------------------

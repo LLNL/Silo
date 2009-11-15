@@ -2882,6 +2882,13 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
  *
  *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *      Add support for long long global node/zone numbers.
+ *
+ *      Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *      Changed how long long global node/zone numbers are supported
+ *      from a int (bool), "llong_gnode|zoneno" to an int holding
+ *      the actual datatype. The type is assumed int if it its
+ *      value is zero or it does not exist. Otherwise, the type is
+ *      is whatever is stored in gnznodtype member. 
  *--------------------------------------------------------------------*/
 CALLBACK DBpointmesh *
 db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
@@ -2909,7 +2916,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("ndims", &tmppm.ndims, DB_INT);
    DEFINE_OBJ("nels", &tmppm.nels, DB_INT);
    DEFINE_OBJ("origin", &tmppm.origin, DB_INT);
-   DEFINE_OBJ("llong_gnodeno", &tmppm.llong_gnodeno, DB_INT);
+   DEFINE_OBJ("gnznodtype", &tmppm.gnznodtype, DB_INT);
 
    DEFINE_OBJ("min_extents", tmppm.min_extents, DB_FLOAT);
    DEFINE_OBJ("max_extents", tmppm.max_extents, DB_FLOAT);
@@ -2942,10 +2949,10 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
     *  Read the remainder of the object: loop over all values
     *  associated with this variable.
     */
+   pm->gnznodtype = tmppm.gnznodtype?tmppm.gnznodtype:DB_INT;
    if (SILO_Globals.dataReadMask & DBPMGlobNodeNo) {
       INIT_OBJ(&tmp_obj);
-      DEFALL_OBJ("gnodeno", &tmppm.gnodeno,
-          pm->llong_gnodeno?DB_LONG_LONG:DB_INT);
+      DEFALL_OBJ("gnodeno", &tmppm.gnodeno, pm->gnznodtype);
       pm->gnodeno = 0;
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
           pm->gnodeno = tmppm.gnodeno;
@@ -3483,6 +3490,13 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
  *      Add support for long long global node/zone numbers. Protect
  *      call to db_SplitShapelist if data read mask did not include
  *      zonelist info.
+ *
+ *      Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *      Changed how long long global node/zone numbers are supported
+ *      from a int (bool), "llong_gnode|zoneno" to an int holding
+ *      the actual datatype. The type is assumed int if it its
+ *      value is zero or it does not exist. Otherwise, the type is
+ *      is whatever is stored in gnznodtype member. 
  *--------------------------------------------------------------------*/
 CALLBACK DBucdmesh *
 db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
@@ -3532,7 +3546,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
    DEFALL_OBJ("units1", &tmpum.units[1], DB_CHAR);
    DEFALL_OBJ("units2", &tmpum.units[2], DB_CHAR);
    DEFINE_OBJ("guihide", &tmpum.guihide, DB_INT);
-   DEFINE_OBJ("llong_gnodeno", &tmpum.llong_gnodeno, DB_INT);
+   DEFINE_OBJ("gnznodtype", &tmpum.gnznodtype, DB_INT);
 
    /* Get SILO ID's for other UCD mesh components */
    DEFALL_OBJ("facelist", &flname, DB_CHAR);
@@ -3571,10 +3585,10 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
        um->topo_dim = um->topo_dim - 1;
 
    /* Optional global node number */
+   um->gnznodtype = um->gnznodtype?um->gnznodtype:DB_INT;
    if (SILO_Globals.dataReadMask & DBUMGlobNodeNo) {
       INIT_OBJ(&tmp_obj);
-      DEFALL_OBJ("gnodeno", &tmpum.gnodeno,
-          um->llong_gnodeno?DB_LONG_LONG:DB_INT);
+      DEFALL_OBJ("gnodeno", &tmpum.gnodeno, um->gnznodtype);
       um->gnodeno = 0;
       if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, NULL)>=0)
           um->gnodeno = tmpum.gnodeno;
@@ -3643,7 +3657,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       DEFALL_OBJ("shapetype", &tmpzones.shapetype, DB_INT);
       DEFALL_OBJ("shapesize", &tmpzones.shapesize, DB_INT);
       DEFALL_OBJ("shapecnt", &tmpzones.shapecnt, DB_INT);
-      DEFINE_OBJ("llong_gzoneno", &tmpzones.llong_gzoneno, DB_INT);
+      DEFINE_OBJ("gnznodtype", &tmpzones.gnznodtype, DB_INT);
 
       /*----------------------------------------------------------*/
       /* These are optional so set them to their default values   */
@@ -3683,10 +3697,10 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       }
 
       /* Read optional global zone numbers */
+      um->zones->gnznodtype = um->zones->gnznodtype?um->zones->gnznodtype:DB_INT;
       if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
           INIT_OBJ(&tmp_obj);
-          DEFALL_OBJ("gzoneno", &tmpzones.gzoneno,
-              tmpzones.llong_gzoneno?DB_LONG_LONG:DB_INT);
+          DEFALL_OBJ("gzoneno", &tmpzones.gzoneno, um->zones->gnznodtype);
           um->zones->gzoneno = 0;
           if (PJ_GetObject(dbfile->pdb, zlname, &tmp_obj, NULL)>=0)
               um->zones->gzoneno = tmpzones.gzoneno;
@@ -4198,6 +4212,13 @@ db_pdb_GetFacelist(DBfile *_dbfile, char *objname)
  *
  *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *      Add support for long long global node/zone numbers.
+ *
+ *      Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *      Changed how long long global node/zone numbers are supported
+ *      from a int (bool), "llong_gnode|zoneno" to an int holding
+ *      the actual datatype. The type is assumed int if it its
+ *      value is zero or it does not exist. Otherwise, the type is
+ *      is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------*/
 CALLBACK DBzonelist *
 db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
@@ -4223,6 +4244,7 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
     DEFINE_OBJ("nshapes", &tmpzl.nshapes, DB_INT);
     DEFINE_OBJ("min_index", &tmpzl.min_index, DB_INT);
     DEFINE_OBJ("max_index", &tmpzl.max_index, DB_INT);
+    DEFINE_OBJ("gnznodtype", &tmpzl.gnznodtype, DB_INT);
 
     if (SILO_Globals.dataReadMask & DBZonelistInfo)
     {
@@ -4241,10 +4263,10 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
     CHECK_TYPE(type, DB_ZONELIST, objname);
 
     /* optional global zone numbers */
+    zl->gnznodtype = zl->gnznodtype?zl->gnznodtype:DB_INT;
     if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
        INIT_OBJ(&tmp_obj);
-       DEFALL_OBJ("gzoneno", &tmpzl.gzoneno,
-           tmpzl.llong_gzoneno?DB_LONG_LONG:DB_INT); 
+       DEFALL_OBJ("gzoneno", &tmpzl.gzoneno, zl->gnznodtype);
        zl->gzoneno = 0;
        if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
            zl->gzoneno = tmpzl.gzoneno; 
@@ -4280,6 +4302,13 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
  *
  *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *      Add support for long long global node/zone numbers.
+ *
+ *      Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *      Changed how long long global node/zone numbers are supported
+ *      from a int (bool), "llong_gnode|zoneno" to an int holding
+ *      the actual datatype. The type is assumed int if it its
+ *      value is zero or it does not exist. Otherwise, the type is
+ *      is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------*/
 CALLBACK DBphzonelist *
 db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
@@ -4305,6 +4334,7 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
     DEFINE_OBJ("origin", &tmpphzl.origin, DB_INT);
     DEFINE_OBJ("lo_offset", &tmpphzl.lo_offset, DB_INT);
     DEFINE_OBJ("hi_offset", &tmpphzl.hi_offset, DB_INT);
+    DEFINE_OBJ("gnznodtype", &tmpphzl.gnznodtype, DB_INT);
 
     if (SILO_Globals.dataReadMask & DBZonelistInfo)
     {
@@ -4323,14 +4353,11 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
     *phzl = tmpphzl;
     CHECK_TYPE(type, DB_PHZONELIST, objname);
 
-    if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) 
-        DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno, DB_INT);
-
     /* optional global zone numbers */
+    phzl->gnznodtype = phzl->gnznodtype?phzl->gnznodtype:DB_INT;
     if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
        INIT_OBJ(&tmp_obj);
-       DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno,
-           tmpphzl.llong_gzoneno?DB_LONG_LONG:DB_INT);
+       DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno, phzl->gnznodtype);
        phzl->gzoneno = 0;
        if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
            phzl->gzoneno = tmpphzl.gzoneno;
@@ -7362,6 +7389,13 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
  *
  *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *      Add support for long long global node/zone numbers.
+ *
+ *      Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *      Changed how long long global node/zone numbers are supported
+ *      from a int (bool), "llong_gnode|zoneno" to an int holding
+ *      the actual datatype. The type is assumed int if it its
+ *      value is zero or it does not exist. Otherwise, the type is
+ *      is whatever is stored in gnznodtype member. 
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -7477,7 +7511,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
    DBAddIntComponent(obj, "max_index", _pm._maxindex);
    DBAddIntComponent(obj, "datatype", datatype);
    if (_pm._llong_gnodeno)
-       DBAddIntComponent(obj, "llong_gnodeno", _pm._llong_gnodeno);
+       DBAddIntComponent(obj, "gnznodtype", DB_LONG_LONG);
    if (_pm._guihide)
        DBAddIntComponent(obj, "guihide", _pm._guihide);
    if (_pm._group_no >= 0)
@@ -8491,6 +8525,13 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
  *
  *     Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *     Add support for long long global node/zone numbers.
+ *
+ *      Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *      Changed how long long global node/zone numbers are supported
+ *      from a int (bool), "llong_gnode|zoneno" to an int holding
+ *      the actual datatype. The type is assumed int if it its
+ *      value is zero or it does not exist. Otherwise, the type is
+ *      is whatever is stored in gnznodtype member. 
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 /* ARGSUSED */
@@ -8578,7 +8619,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    DBAddIntComponent(obj, "origin", _um._origin);
    DBAddIntComponent(obj, "datatype", datatype);
    if (_um._llong_gnodeno)
-       DBAddIntComponent(obj, "llong_gnodeno", _um._llong_gnodeno);
+       DBAddIntComponent(obj, "gnznodtype", DB_LONG_LONG);
 
    if (_um._gnodeno)
    {
@@ -9121,7 +9162,7 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
    DBAddIntComponent(obj, "lo_offset", lo_offset);
    DBAddIntComponent(obj, "hi_offset", hi_offset);
    if (_uzl._llong_gzoneno)
-       DBAddIntComponent(obj, "llong_gzoneno", _uzl._llong_gzoneno);
+       DBAddIntComponent(obj, "gnznodtype", DB_LONG_LONG);
 
    count[0] = lnodelist;
 
@@ -9175,6 +9216,13 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
  *  Modifications:
  *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *      Add support for long long global node/zone numbers.
+ *
+ *      Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *      Changed how long long global node/zone numbers are supported
+ *      from a int (bool), "llong_gnode|zoneno" to an int holding
+ *      the actual datatype. The type is assumed int if it its
+ *      value is zero or it does not exist. Otherwise, the type is
+ *      is whatever is stored in gnznodtype member. 
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -9203,7 +9251,7 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
    DBAddIntComponent(obj, "lo_offset", lo_offset);
    DBAddIntComponent(obj, "hi_offset", hi_offset);
    if (_phzl._llong_gzoneno)
-       DBAddIntComponent(obj, "llong_gzoneno", _phzl._llong_gzoneno);
+       DBAddIntComponent(obj, "gnznodtype", DB_LONG_LONG);
 
    count[0] = nfaces;
 

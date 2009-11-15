@@ -397,7 +397,7 @@ typedef struct DBucdmesh_mt {
     char                mrgtree_name[256];
     int                 tv_connectivity;
     int                 disjoint_mode;
-    int                 llong_gnodeno;
+    int                 gnznodtype;
 } DBucdmesh_mt;
 static hid_t    DBucdmesh_mt5;
 
@@ -457,7 +457,7 @@ typedef struct DBzonelist_mt {
     char                shapesize[256];
     char                shapetype[256];
     char                gzoneno[256];
-    int                 llong_gzoneno;
+    int                 gnznodtype;
 } DBzonelist_mt;
 static hid_t    DBzonelist_mt5;
 
@@ -475,7 +475,7 @@ typedef struct DBphzonelist_mt {
     char                facecnt[256];
     char                facelist[256];
     char                gzoneno[256];
-    int                 llong_gzoneno;
+    int                 gnznodtype;
 } DBphzonelist_mt;
 static hid_t    DBphzonelist_mt5;
 
@@ -642,7 +642,7 @@ typedef struct DBpointmesh_mt {
     char                units[3][256];
     char                gnodeno[256];
     char                mrgtree_name[256];
-    int                 llong_gnodeno;
+    int                 gnznodtype;
 } DBpointmesh_mt;
 static hid_t    DBpointmesh_mt5;
 
@@ -2116,7 +2116,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        mrgtree_name);
         MEMBER_S(int,           tv_connectivity);
         MEMBER_S(int,           disjoint_mode);
-        MEMBER_S(int,           llong_gnodeno);
+        MEMBER_S(int,           gnznodtype);
     } DEFINE;
     
     STRUCT(DBucdvar) {
@@ -2173,7 +2173,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        shapesize);
         MEMBER_S(str256,        shapetype);
         MEMBER_S(str256,        gzoneno);
-        MEMBER_S(int,           llong_gzoneno);
+        MEMBER_S(int,           gnznodtype);
     } DEFINE;
 
     STRUCT(DBphzonelist) {
@@ -2189,7 +2189,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        extface);
         MEMBER_S(str256,        facecnt);
         MEMBER_S(str256,        facelist);
-        MEMBER_S(int,           llong_gzoneno);
+        MEMBER_S(int,           gnznodtype);
     } DEFINE;
 
     STRUCT(DBmaterial) {
@@ -2348,7 +2348,7 @@ db_hdf5_init(void)
         MEMBER_R(str256,        units,          3);
         MEMBER_S(str256,        gnodeno);
         MEMBER_S(str256,        mrgtree_name);
-        MEMBER_S(int,           llong_gnodeno);
+        MEMBER_S(int,           gnznodtype);
     } DEFINE;
 
     STRUCT(DBpointvar) {
@@ -8699,6 +8699,14 @@ static int PrepareForUcdmeshCompression(DBfile_hdf5 *dbfile,
  *   Mark C. Miller, Thu Jul 17 15:14:44 PDT 2008
  *   Added call to prepare for possible compression. Changed calls that
  *   write coordinates and gnodeno to use compwrz
+ *
+ *   Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *   Added support for long long global node numbers.
+ *   Changed how long long global node/zone numbers are supported
+ *   from a int (bool), "llong_gnode|zoneno" to an int holding
+ *   the actual datatype. The type is assumed int if it its
+ *   value is zero or it does not exist. Otherwise, the type is
+ *   is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -8801,7 +8809,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         strcpy(m.mrgtree_name, OPT(_um._mrgtree_name));
         m.tv_connectivity = _um._tv_connectivity;
         m.disjoint_mode = _um._disjoint_mode;
-        m.llong_gnodeno = _um._llong_gnodeno;
+        m.gnznodtype = _um._llong_gnodeno?DB_LONG_LONG:0;
 
         /* Write ucdmesh header to file */
         STRUCT(DBucdmesh) {
@@ -8830,7 +8838,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
             if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
             if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
-            if (m.llong_gnodeno)   MEMBER_S(int, llong_gnodeno);
+            if (m.gnznodtype)   MEMBER_S(int, gnznodtype);
         } OUTPUT(dbfile, DB_UCDMESH, name, &m);
         
     } CLEANUP {
@@ -9036,6 +9044,13 @@ PrepareForUcdmeshDecompression(DBfile_hdf5 *dbfile, const char *meshname,
  *              Mark C. Miller, Thu Nov  5 16:17:18 PST 2009
  *              Made it NOT db_Split() the zonelist if mask is such
  *              that zonelist info is NOT included.
+ *
+ *              Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *              Changed how long long global node/zone numbers are supported
+ *              from a int (bool), "llong_gnode|zoneno" to an int holding
+ *              the actual datatype. The type is assumed int if it its
+ *              value is zero or it does not exist. Otherwise, the type is
+ *              is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------
  */
 CALLBACK DBucdmesh *
@@ -9160,7 +9175,7 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
         }
         if (SILO_Globals.dataReadMask & DBUMGlobNodeNo)
             um->gnodeno = db_hdf5_comprd(dbfile, m.gnodeno, 1);
-        um->llong_gnodeno = m.llong_gnodeno;
+        um->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
 
         /* Read face, zone, and edge lists */
         if (m.facelist[0] && (SILO_Globals.dataReadMask & DBUMFacelist)) {
@@ -9862,6 +9877,13 @@ db_hdf5_PutZonelist(DBfile *_dbfile, char *name, int nzones, int ndims,
  *   Mark C. Miller, Thu Jul 17 15:20:31 PDT 2008
  *   Added code to prepare for possible compression. Changed call to
  *   write nodelist to use compwrz.
+ *
+ *   Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *   Changed how long long global node/zone numbers are supported
+ *   from a int (bool), "llong_gnode|zoneno" to an int holding
+ *   the actual datatype. The type is assumed int if it its
+ *   value is zero or it does not exist. Otherwise, the type is
+ *   is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -9910,7 +9932,7 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
         m.origin = origin;
         m.lo_offset = lo_offset;
         m.hi_offset = hi_offset;
-        m.llong_gzoneno = _uzl._llong_gzoneno;
+        m.gnznodtype = _uzl._llong_gzoneno?DB_LONG_LONG:0;
 
         /* Write header to file */
         STRUCT(DBzonelist) {
@@ -9926,7 +9948,7 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
             MEMBER_S(str(m.shapesize), shapesize);
             MEMBER_S(str(m.shapetype), shapetype);
             MEMBER_S(str(m.gzoneno), gzoneno);
-            if (m.llong_gzoneno)MEMBER_S(int, llong_gzoneno);
+            if (m.gnznodtype)   MEMBER_S(int, gnznodtype);
         } OUTPUT(dbfile, DB_ZONELIST, name, &m);
         
     } CLEANUP {
@@ -9957,6 +9979,13 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
  *
  *   Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *   Add support for long long global node/zone numbers.
+ *
+ *   Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *   Changed how long long global node/zone numbers are supported
+ *   from a int (bool), "llong_gnode|zoneno" to an int holding
+ *   the actual datatype. The type is assumed int if it its
+ *   value is zero or it does not exist. Otherwise, the type is
+ *   is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -10002,7 +10031,7 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
         m.origin = origin;
         m.lo_offset = lo_offset;
         m.hi_offset = hi_offset;
-        m.llong_gzoneno = _phzl._llong_gzoneno;
+        m.gnznodtype = _phzl._llong_gzoneno?DB_LONG_LONG:0;
 
         /* Write header to file */
         STRUCT(DBphzonelist) {
@@ -10019,7 +10048,7 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
             MEMBER_S(str(m.facecnt), facecnt);
             MEMBER_S(str(m.facelist), facelist);
             MEMBER_S(str(m.gzoneno), gzoneno);
-            if (m.llong_gzoneno) MEMBER_S(int, llong_gzoneno);
+            if (m.gnznodtype)   MEMBER_S(int, gnznodtype);
         } OUTPUT(dbfile, DB_PHZONELIST, name, &m);
         
     } CLEANUP {
@@ -10076,6 +10105,13 @@ PrepareForZonelistDecompression(DBfile_hdf5* dbfile, const char *zlname,
  *
  *              Mark C. Miller, Thu Jul 17 15:21:35 PDT 2008
  *              Added code to prepare for possible zonelist decompression.
+ *
+ *              Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *              Changed how long long global node/zone numbers are supported
+ *              from a int (bool), "llong_gnode|zoneno" to an int holding
+ *              the actual datatype. The type is assumed int if it its
+ *              value is zero or it does not exist. Otherwise, the type is
+ *              is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------
  */
 CALLBACK DBzonelist *
@@ -10148,7 +10184,7 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char *name)
         }
         if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
             zl->gzoneno = db_hdf5_comprd(dbfile, m.gzoneno, 1);
-        zl->llong_gzoneno = m.llong_gzoneno;
+        zl->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
 
         H5Tclose(o);
     } CLEANUP {
@@ -12351,6 +12387,13 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Jan 17 21:41:52 PST 2008
  *   Fixed missing origin member
+ *
+ *   Mark C. Miller, Sat Nov 14 20:28:34 PST 2009
+ *   Changed how long long global node/zone numbers are supported
+ *   from a int (bool), "llong_gnode|zoneno" to an int holding
+ *   the actual datatype. The type is assumed int if it its
+ *   value is zero or it does not exist. Otherwise, the type is
+ *   is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -12439,7 +12482,7 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
             strcpy(m.units[i], OPT(_pm._units[i]));
         }
         strcpy(m.mrgtree_name, OPT(_pm._mrgtree_name));
-        m.llong_gnodeno = _pm._llong_gnodeno;
+        m.gnznodtype = _pm._llong_gnodeno?DB_LONG_LONG:0;
         
         /* Write header to file */
         STRUCT(DBpointmesh) {
@@ -12461,7 +12504,7 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
             MEMBER_R(str(m.units[_j]), units, ndims);
             MEMBER_S(str(m.gnodeno), gnodeno);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
-            if (m.llong_gnodeno)MEMBER_S(int, llong_gnodeno);
+            if (m.gnznodtype    )MEMBER_S(int, gnznodtype);
         } OUTPUT(dbfile, DB_POINTMESH, name, &m);
 
     } CLEANUP {
@@ -12570,7 +12613,7 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
         }
         if (SILO_Globals.dataReadMask & DBPMGlobNodeNo)
             pm->gnodeno = db_hdf5_comprd(dbfile, m.gnodeno, 1);
-        pm->llong_gnodeno = m.llong_gnodeno;
+        pm->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
 
         H5Tclose(o);
     } CLEANUP {
