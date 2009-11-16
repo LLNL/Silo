@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>silo_relnotes_4.7.1.html</title>
+</head>
+<body>
+<h3>Announcing the release of version 4.7.1 of the Silo Library</h3>
+<ul>
+  <li>Obtain source code here <a
+ href="https://wci.llnl.gov/codes/silo/silo-4.7.1/silo-4.7.1.tar.gz">https://wci.llnl.gov/codes/silo/silo-4.7.1/silo-4.7.1.tar.gz</a></li>
+  <li>Obtain documentation here
+https://wci.llnl.gov/codes/silo/media/pdf/LLNL_SM_????.pdf</li>
+</ul>
+<h3>Organization of information in this release announcement</h3>
+<ol>
+  <li>New features in this release</li>
+  <li>Bugs fixed in this release</li>
+  <li>More detailed information on any of the above.<br>
+  </li>
+  <li>Items specific to LLNL installations</li>
+</ol>
+<h3>1. New features added in this release</h3>
+<ul>
+  <li>Support for DB_LONG_LONG datatype was added.</li>
+  <li>A new relative differencing option was added to silodiff/browser.</li>
+  <li>Species now support names and colors just as materials do.</li>
+  <li>All Silo structs are now non-anonymous.<br>
+  </li>
+</ul>
+<h3>2. Bugs fixed in this release</h3>
+<ul>
+  <li>silock now works for data produced on HDF5 driver.</li>
+  <li>silodiff corrrectly sets $lowlevel variable so that HDF5 file
+differences cannot be missed.</li>
+  <li>browser now displays mixvals for ucdvars.</li>
+  <li>libsilo.a|so no longer has dependence on libreadline.</li>
+  <li>Fortran interface now correctly compiles for Windows.</li>
+  <li>A double-free memory error causing silex to crash was fixed.</li>
+  <li>A missing pmpio.h include file dependency was added.</li>
+  <li>Browser now supports version of Silo library it is linked with.</li>
+  <li>A problem where once compression features were enabled, they
+could never be disabled was corrected.</li>
+  <li>Multi-part, multi-block objects written on Windows but read on
+Linux and vice-versa now<br>
+correctly handles the difference in slash character for filesystem
+pathnames.</li>
+  <li>A problem where silo.h and config.h were being included in source
+distribution tarballs<br>
+in spite of fact that these files are generated from their .in
+equivalents was corrected.</li>
+  <li>A bug in DBInqFile where it would return true for any PDB file
+was corrected. It now returns true ONLY if it finds <br>
+  </li>
+</ul>
+<br>
+</body>
+</html>
