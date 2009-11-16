@@ -138,7 +138,7 @@ main(int argc, char *argv[])
     }
     else if (inqval > 0)
     {
-        fprintf(stderr, "Error in InqFile attempting to identify not_a_silo_file");
+        fprintf(stderr, "InqFile incorrectly identified not_a_silo_file");
         err = 1;
     }
 

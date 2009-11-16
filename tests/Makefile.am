@@ -62,7 +62,8 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
-      rocket mmadjacency largefile version namescheme efcentering
+      rocket mmadjacency largefile version namescheme efcentering \
+      mk_nasf_pdb
 
 dir_SOURCES = \
  dir.c \
@@ -114,7 +115,8 @@ check_PROGRAMS = \
  quad \
  version \
  namescheme \
- efcentering
+ efcentering \
+ mk_nasf_pdb
 
 
 # Deal with need to use c++ linker whenever we've got C++
@@ -174,6 +176,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_compression_SOURCES = dummy.cxx
  nodist_EXTRA_grab_SOURCES = dummy.cxx
  nodist_EXTRA_efcentering_SOURCES = dummy.cxx
+ nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
 endif
 
 if HDF5_DRV_NEEDED

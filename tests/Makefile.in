@@ -47,7 +47,8 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
 	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
 	quad$(EXEEXT) version$(EXEEXT) namescheme$(EXEEXT) \
-	efcentering$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4)
+	efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) $(am__EXEEXT_2) \
+	$(am__EXEEXT_4)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
@@ -157,6 +158,11 @@ merge_block_OBJECTS = merge_block.$(OBJEXT)
 merge_block_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@merge_block_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@merge_block_DEPENDENCIES = ../src/libsiloh5.la
+mk_nasf_pdb_SOURCES = mk_nasf_pdb.c
+mk_nasf_pdb_OBJECTS = mk_nasf_pdb.$(OBJEXT)
+mk_nasf_pdb_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@mk_nasf_pdb_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@mk_nasf_pdb_DEPENDENCIES = ../src/libsiloh5.la
 mmadjacency_SOURCES = mmadjacency.c
 mmadjacency_OBJECTS = mmadjacency.$(OBJEXT)
 mmadjacency_LDADD = $(LDADD)
@@ -363,6 +369,7 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
 	$(matf77_SOURCES) $(nodist_EXTRA_matf77_SOURCES) \
 	$(nodist_EXTRA_merge_block_SOURCES) merge_block.c \
+	$(nodist_EXTRA_mk_nasf_pdb_SOURCES) mk_nasf_pdb.c \
 	$(nodist_EXTRA_mmadjacency_SOURCES) mmadjacency.c \
 	$(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
 	$(nodist_EXTRA_multi_test_SOURCES) multi_test.c \
@@ -399,12 +406,12 @@ DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
 	efcentering.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
 	largefile.c listtypes.c mat3d_3across.c \
-	$(am__matf77_SOURCES_DIST) merge_block.c mmadjacency.c \
-	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
-	onehex.c oneprism.c onepyramid.c onetet.c partial_io.c point.c \
-	$(am__pointf77_SOURCES_DIST) polyzl.c $(quad_SOURCES) \
-	$(am__quadf77_SOURCES_DIST) $(rocket_SOURCES) sami.c simple.c \
-	spec.c specmix.c subhex.c testall.c \
+	$(am__matf77_SOURCES_DIST) merge_block.c mk_nasf_pdb.c \
+	mmadjacency.c multi_file.c multi_test.c multispec.c \
+	namescheme.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
+	partial_io.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
+	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) $(rocket_SOURCES) \
+	sami.c simple.c spec.c specmix.c subhex.c testall.c \
 	$(am__testallf77_SOURCES_DIST) testpdb.c twohex.c ucd.c \
 	ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
 ETAGS = etags
@@ -628,7 +635,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
-	efcentering $(am__append_1) $(am__append_3)
+	efcentering mk_nasf_pdb $(am__append_1) $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -697,6 +704,7 @@ rocket_SOURCES = \
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_compression_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_grab_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_efcentering_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -809,6 +817,9 @@ matf77$(EXEEXT): $(matf77_OBJECTS) $(matf77_DEPENDENCIES)
 merge_block$(EXEEXT): $(merge_block_OBJECTS) $(merge_block_DEPENDENCIES) 
 	@rm -f merge_block$(EXEEXT)
 	$(CXXLINK) $(merge_block_OBJECTS) $(merge_block_LDADD) $(LIBS)
+mk_nasf_pdb$(EXEEXT): $(mk_nasf_pdb_OBJECTS) $(mk_nasf_pdb_DEPENDENCIES) 
+	@rm -f mk_nasf_pdb$(EXEEXT)
+	$(CXXLINK) $(mk_nasf_pdb_OBJECTS) $(mk_nasf_pdb_LDADD) $(LIBS)
 mmadjacency$(EXEEXT): $(mmadjacency_OBJECTS) $(mmadjacency_DEPENDENCIES) 
 	@rm -f mmadjacency$(EXEEXT)
 	$(CXXLINK) $(mmadjacency_OBJECTS) $(mmadjacency_LDADD) $(LIBS)
@@ -929,6 +940,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge_block.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_pdb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmadjacency.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multi_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multi_test.Po@am__quote@

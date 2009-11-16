@@ -3990,33 +3990,50 @@ DBClose(DBfile *dbfile)
  *
  * Programmer: Mark C. Miller, Wed Sep 23 11:34:01 PDT 2009
  *
+ * Modifications:
+ *   Mark C. Miller, Mon Nov 16 10:28:41 PST 2009
+ *   Fixed dir recursion by copying dir-related toc entries. Removed
+ *   misc. vars from count of silo objects.
  *--------------------------------------------------------------------*/
 
 PRIVATE int
 db_inq_file_has_silo_objects_r(DBfile *f)
 {
-    int i, retval = 0;
+    int i, ndir, retval = 0;
+    char **dirnames;
     DBtoc *toc = DBGetToc(f);
 
     if (!toc)
         return -1;
 
-    /* We exclude directories because a non-Silo file may contain them. */
+    /* save dirnames so we don't loose 'em as we get new tocs */
+    ndir = toc->ndir;
+    dirnames = (char **) malloc(ndir * sizeof(char*));
+    for (i = 0; i < ndir; i++)
+        dirnames[i] = STRDUP(toc->dir_names[i]);
+     
+    /* We exclude dirs and misc. vars because a non-Silo file may
+     * contain them. */
     retval = toc->ncurve + toc->ncsgmesh + toc->ncsgvar + toc->ndefvars +
         toc->nmultimesh + toc->nmultimeshadj + toc->nmultivar +
         toc->nmultimat + toc->nmultimatspecies + toc->nqmesh +
         toc->nqvar + toc->nucdmesh + toc->nucdvar + toc->nptmesh +
-        toc->nptvar + toc->nvar + toc->nmat + toc->nmatspecies +
+        toc->nptvar + toc->nmat + toc->nmatspecies +
         toc->nobj + toc->nmrgtrees + toc->ngroupelmaps +
         toc->nmrgvars + toc->narrays;
 
     /* Recurse on directories. */
-    for (i = 0; i < toc->ndir && retval == 0; i++)
+    for (i = 0; i < ndir && retval == 0; i++)
     {
-        DBSetDir(f, toc->dir_names[i]);
+        DBSetDir(f, dirnames[i]);
         retval += db_inq_file_has_silo_objects_r(f);
         DBSetDir(f, "..");
     }
+
+    /* free the dirnames */
+    for (i = 0; i < ndir; i++)
+        free(dirnames[i]);
+    free(dirnames);
 
     return retval;
 }
@@ -4033,6 +4050,10 @@ db_inq_file_has_silo_objects_r(DBfile *f)
  *              Failure:        -1 
  *
  * Programmer:  Mark C. Miller, Wed Sep 23 09:42:27 PDT 2009
+ *
+ * Modifications:
+ *   Mark C. Miller, Mon Nov 16 10:29:36 PST 2009
+ *   Added logic to test from some well known, tell-tale silo variables.
  *-------------------------------------------------------------------------*/
 
 PUBLIC int
@@ -4043,6 +4064,11 @@ DBInqFileHasObjects(DBfile *f)
 
     if (f == 0)
         return -1;
+
+    if (DBInqVarExists(f, "_silolibinfo"))
+        return 1;
+    if (DBInqVarExists(f, "_hdf5libinfo"))
+        return 1;
 
     DBGetDir(f, cwd);
     retval = db_inq_file_has_silo_objects_r(f);

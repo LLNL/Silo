@@ -8,10 +8,14 @@
 <body>
 <h3>Announcing the release of version 4.7.1 of the Silo Library</h3>
 <ul>
-  <li>Obtain source code here <a
+  <li>Obtain source code at <a
  href="https://wci.llnl.gov/codes/silo/silo-4.7.1/silo-4.7.1.tar.gz">https://wci.llnl.gov/codes/silo/silo-4.7.1/silo-4.7.1.tar.gz</a></li>
-  <li>Obtain documentation here
+  <li>Obtain documentation at
 https://wci.llnl.gov/codes/silo/media/pdf/LLNL_SM_????.pdf</li>
+  <li>An <a href="http://www.rce-cast.com/">HPC Podcast</a> on the
+topic of Silo is available at <a
+ href="http://www.rce-cast.com/components/com_podcast/media/20RCE-silo.mp3">http://www.rce-cast.com/components/com_podcast/media/20RCE-silo.mp3</a><br>
+  </li>
 </ul>
 <h3>Organization of information in this release announcement</h3>
 <ol>
@@ -26,11 +30,21 @@ https://wci.llnl.gov/codes/silo/media/pdf/LLNL_SM_????.pdf</li>
   <li>Support for DB_LONG_LONG datatype was added.</li>
   <li>A new relative differencing option was added to silodiff/browser.</li>
   <li>Species now support names and colors just as materials do.</li>
-  <li>All Silo structs are now non-anonymous.<br>
+  <li>All Silo structs are now non-anonymous.</li>
+  <li>All silo variables now support characterization as <span
+ style="font-style: italic;">conserved</span> quantities.</li>
+  <li>All silo variables now support characterization as <span
+ style="font-style: italic;">extensive</span> quantities.</li>
+  <li>Browser can now display the contents of the HDF5 driver's (magic)
+'/.silo' directory.</li>
+  <li>Hard links are now supported by the friendly HDF5 names feature.<br>
   </li>
 </ul>
 <h3>2. Bugs fixed in this release</h3>
 <ul>
+  <li>Problems writing edge- and face-centered quadvars and ucdvars
+were fixed.<br>
+  </li>
   <li>silock now works for data produced on HDF5 driver.</li>
   <li>silodiff corrrectly sets $lowlevel variable so that HDF5 file
 differences cannot be missed.</li>
@@ -50,8 +64,16 @@ pathnames.</li>
 distribution tarballs<br>
 in spite of fact that these files are generated from their .in
 equivalents was corrected.</li>
-  <li>A bug in DBInqFile where it would return true for any PDB file
-was corrected. It now returns true ONLY if it finds <br>
+  <li>A bug in DBInqFile where it would return true for any PDB file,
+even a PDB file NOT produced by<br>
+Silo
+was corrected. It now returns true ONLY if it finds tell-tale signs
+there are Silo objects in the<br>
+file and false otherwise.</li>
+  <li>DBCLOSE Fortran wrapper was corrected to set closed dbid to -1.</li>
+  <li>Silo's magic file was corrected so that '!' character in PDB
+moniker is not inadvertently<br>
+treated as the not-equal operator.<br>
   </li>
 </ul>
 <br>

@@ -62,7 +62,7 @@ AT_SETUP(partial_io)
 AT_CHECK($VALGRIND partial_io $DB_HDF5,,ignore)
 AT_CLEANUP
 AT_SETUP(simple)
-AT_CHECK($VALGRIND simple $DB_HDF5,,ignore)
+AT_CHECK($VALGRIND simple $DB_HDF5,0,ignore)
 AT_CLEANUP
 AT_SETUP(ucd)
 AT_CHECK($VALGRIND ucd $DB_HDF5,,ignore)
