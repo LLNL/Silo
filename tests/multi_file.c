@@ -7,6 +7,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 
 #include <silo.h>
 
@@ -20,6 +23,8 @@
 
 #define ALLOC_N(T,N)    ((T*)calloc((N),sizeof(T)))
 #define FREE(M)         if(M){free(M);(M)=NULL;}
+
+int multidir = 0;
 
 void fill_bkgr(int *, int, int, int, int);
 void fill_mat(float *, float *, float *, int *, int, int, int,
@@ -60,6 +65,10 @@ main(int argc, char *argv[])
         {
             driver = DB_HDF5;
             file_ext = "h5";
+        }
+        else if (!strcmp(argv[i], "multidir"))
+        {
+            multidir = 1;
         }
         else
         {
@@ -271,10 +280,17 @@ build_multi(char *basename, int driver, char *file_ext,
     for (i = 0; i < nblocks; i++)
     {
         int       filenum;
-        char      prefix[80];
+        char      prefix[120];
 
         filenum = i / (nblocks / NFILES);
-        sprintf(prefix, "%s%d.%s:/block%d/", basename, filenum, file_ext, i);
+        if (multidir)
+#ifdef WIN32	
+            sprintf(prefix, "multi_file.dir\\%03d\\%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
+#else
+            sprintf(prefix, "multi_file.dir/%03d/%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
+#endif
+        else
+            sprintf(prefix, "%s%d.%s:/block%d/", basename, filenum, file_ext, i);
 
         sprintf(names[i], "%smesh1", prefix);
         meshnames[i] = names[i];
@@ -581,6 +597,43 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     delta_y = ny / nblocks_y;
     delta_z = nz / nblocks_z;
 
+    if (multidir)
+    {
+        int i;
+        unlink("multi_file.dir/000/ucd3d0.pdb");
+        unlink("multi_file.dir/000/ucd3d0.h5");
+        rmdir("multi_file.dir/000");
+        unlink("multi_file.dir/001/ucd3d1.pdb");
+        unlink("multi_file.dir/001/ucd3d1.h5");
+        rmdir("multi_file.dir/001");
+        unlink("multi_file.dir/002/ucd3d2.pdb");
+        unlink("multi_file.dir/002/ucd3d2.h5");
+        rmdir("multi_file.dir/002");
+        unlink("multi_file.dir/003/ucd3d3.pdb");
+        unlink("multi_file.dir/003/ucd3d3.h5");
+        rmdir("multi_file.dir/003");
+        unlink("multi_file.dir/004/ucd3d4.pdb");
+        unlink("multi_file.dir/004/ucd3d4.h5");
+        rmdir("multi_file.dir/004");
+        unlink("multi_file.dir/005/ucd3d5.pdb");
+        unlink("multi_file.dir/005/ucd3d5.h5");
+        rmdir("multi_file.dir/005");
+        unlink("multi_file.dir/006/ucd3d6.pdb");
+        unlink("multi_file.dir/006/ucd3d6.h5");
+        rmdir("multi_file.dir/006");
+        unlink("multi_file.dir/007/ucd3d7.pdb");
+        unlink("multi_file.dir/007/ucd3d7.h5");
+        rmdir("multi_file.dir/007");
+        rmdir("multi_file.dir");
+        mkdir("multi_file.dir",S_IRWXU|S_IRWXG|S_IRWXU);
+        if (i < 0)
+        {
+            fprintf(stderr, "Unable to mkdir(\"multi_file.dir\")\n");
+            return;
+        }
+        fprintf(stdout, "\tMade directory multi_file.dir\n");
+    }
+
     /* 
      * Create the blocks for the multi-block object.
      */
@@ -589,7 +642,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     {
         char            dirname[80];
         int             filenum;
-        char            filename[80];
+        char            filename[120];
 
         int             imin, imax, jmin, jmax, kmin, kmax;
         int             nnx, nny, nnz;
@@ -623,7 +676,10 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
 
         sprintf(dirname, "/block%d", block);
         filenum = block / ((nblocks_x * nblocks_y * nblocks_z) / NFILES);
-        sprintf(filename, "%s%d.%s", basename, filenum, file_ext);
+        if (multidir)
+            sprintf(filename, "multi_file.dir/%03d/%s%d.%s", filenum, basename, filenum, file_ext);
+        else
+            sprintf(filename, "%s%d.%s", basename, filenum, file_ext);
 
         fprintf(stdout, "\t%s:%s\n", filename, dirname);
 
@@ -802,6 +858,20 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
          */
         if (block % ((nblocks_x * nblocks_y * nblocks_z) / NFILES) == 0)
         {
+            if (multidir)
+            {
+                int st;
+                char dname[60];
+                sprintf(dname, "multi_file.dir/%03d", filenum);
+                st = mkdir(dname, S_IRWXU|S_IRWXG|S_IRWXU);
+                if (st < 0)
+                {
+                    fprintf(stderr, "Unable to make directory \"%s\"\n", dname);
+                    return;
+                }
+                fprintf(stdout, "\tMade directory %s\n", dname);
+            }
+
             if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
                 "multi-file ucd 3d test file", driver)) == NULL)
             {
