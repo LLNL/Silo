@@ -1260,6 +1260,10 @@ bad_switch(const char *fmt, ...)
  *      Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
  *      Added suppot for alternate relative diff option epsilon switch.
  *      Improved help message for various diff options.
+ *
+ *      Mark C. Miller, Tue Nov 17 22:32:01 PST 2009
+ *      Fixed help messages so difference equations would not get split
+ *      across new lines.
  *-------------------------------------------------------------------------
  */
 int
@@ -1332,18 +1336,18 @@ main(int argc, char *argv[])
 #endif /*PUBLIC_INIT_FILE*/
 
     /* Define command-line switches */
-    switch_add(sws, "-A", "--absolute", "g:TOL",        NULL);
+    switch_add(sws, "-A", "--absolute", "g:ATOL",        NULL);
     switch_doc(NULL,
-               "All absolute differencing tolerances are set to TOL. "
-               "Two numbers, A and B, are different if |A-B|>TOL. "
+               "All absolute differencing tolerances are set to ATOL. "
+               "Two numbers, A and B, are different if\n|A-B|>ATOL. "
                "This sets the internal variables `$diff_*_abs' where `*' "
                "is one of the following words: int8, short, int, long, "
                "float, or double. Default is zero.");
    
-    switch_add(sws, "-R", "--relative", "g:TOL",        NULL);
+    switch_add(sws, "-R", "--relative", "g:RTOL",        NULL);
     switch_doc(NULL,
-               "All relative differencing tolerances are set to TOL. "
-               "Two numbers, A and B, are different if |A-B|/2|A+B|>TOL."
+               "All relative differencing tolerances are set to RTOL. "
+               "Two numbers, A and B, are different if\n2|A-B|/|A+B|>RTOL. "
                "This sets the internal variables `$diff_*_rel' where `*' "
                "is one of the following words: int8, short, int, long "
                "float, or double. Default is zero.");
@@ -1353,14 +1357,14 @@ main(int argc, char *argv[])
                "When non-negative, all relative differencing epsilon "
                "parameters are set to EPS "
                "and an alternate relative difference scheme is used where "
-               "two numbers, A and B, are different if |A-B|/(|A|+|B|+EPS)>TOL. "
+               "two numbers, A and B, are different if\n|A-B|/(|A|+|B|+EPS)>RTOL. "
                "This sets the internal variables `$diff_*_eps' where `*' "
                "is one of the following words: int8, short, int, long "
-               "float, or double. For EPS=0, this algorithm is the same as "
-               "`normal' relative differencing. But for EPS=1, it behaves in "
-               "such a way as to shift to relative differencing for large "
-               "numbers but absolute differencing for numbers near zero. "
-               "Default is -1 (e.g. turned off).");
+               "float, or double. For EPS=0, the algorithm is similar (but not "
+               "identical) to `normal' relative differencing. But for EPS=1, "
+               "it behaves in such a way as to shift between this alternate "
+               "relative differencing for large numbers and absolute differencing "
+               "for numbers near zero. Default is -1 (e.g. turned off).");
    
     switch_add(sws, "-V", "--version",  NULL,           process_sw_version);
     switch_doc(NULL, "Shows the version number.");

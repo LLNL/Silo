@@ -156,7 +156,7 @@ prim_assoc_t    PA_DATATYPE[] = {
    {DB_FLOAT,           "float"},
    {DB_DOUBLE,          "double"},
    {DB_CHAR,            "char"},
-   {DB_LONG_LONG,       "longlong"},
+   {DB_LONG_LONG,       "long_long"},
    {DB_NOTYPE,          "notype"},
    {0,                  NULL}};
 
@@ -1169,6 +1169,9 @@ prim_sizeof (obj_t _self) {
  *    Mark C. Miller, Fri Nov 13 15:38:07 PST 2009
  *    Changed name of "long long" type to "longlong" as PDB is sensitive
  *    to spaces in type names.
+ *
+ *    Mark C. Miller, Tue Nov 17 22:30:30 PST 2009
+ *    Changed name of long long datatype to match PDB proper.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -1213,8 +1216,8 @@ prim_bind (obj_t _self, void *mem) {
       self->browser_type = BROWSER_INT;
       self->nbytes = sizeof(int);
 
-   } else if (!strcmp (self->name, "longlong")) {
-      self->tname = safe_strdup ("longlong");
+   } else if (!strcmp (self->name, "long_long")) {
+      self->tname = safe_strdup ("long_long");
       self->browser_type = BROWSER_LONG_LONG;
       self->nbytes = sizeof(long long);
 
@@ -1285,7 +1288,7 @@ prim_bind (obj_t _self, void *mem) {
          break;
 
       case DB_LONG_LONG:
-         self->tname = safe_strdup ("longlong");
+         self->tname = safe_strdup ("long_long");
          self->browser_type = BROWSER_LONG_LONG;
          self->nbytes = sizeof(long long);
          break;
@@ -1396,6 +1399,9 @@ prim_set_io_assoc (obj_t _self, prim_assoc_t *assoc) {
  *
  *      Mark C. Miller, Fri Nov 13 15:38:07 PST 2009
  *      Changed name of "long long" type to "longlong" as PDB is sensitive
+ * 
+ *      Mark C. Miller, Tue Nov 17 22:30:30 PST 2009
+ *      Changed name of long long datatype to match PDB proper.
  *-------------------------------------------------------------------------
  */
 DBdatatype
@@ -1437,7 +1443,7 @@ prim_silotype (obj_t _self) {
    } else if (!strcmp (self->name, "int")) {
       return DB_INT;
 
-   } else if (!strcmp (self->name, "longlong")) {
+   } else if (!strcmp (self->name, "long_long")) {
       return DB_LONG_LONG;
 
    } else if (!strcmp (self->name, "long")) {

@@ -588,6 +588,11 @@ _DBQMSetStride(DBquadmesh *qmesh)
  *    Mark C. Miller, Fri Nov 13 15:32:02 PST 2009
  *    Changed name of "long long" type to "longlong" as PDB is
  *    sensitive to spaces in type names.
+ *
+ *    Mark C. Miller, Tue Nov 17 22:29:35 PST 2009
+ *    Fixed memory error by extending length of alloc'd string to
+ *    support "long_long". Changed name of long long data type
+ *    to match what PDB proper does.
  *---------------------------------------------------------------------*/
 INTERNAL char *
 db_GetDatatypeString(int type)
@@ -595,7 +600,7 @@ db_GetDatatypeString(int type)
     char          *str = NULL;
     char          *me = "db_GetDatatypeString";
 
-    if (NULL == (str = ALLOC_N(char, 8))) {
+    if (NULL == (str = ALLOC_N(char, 10))) {
         db_perror(NULL, E_NOMEM, me);
         return NULL;
     }
@@ -611,7 +616,7 @@ db_GetDatatypeString(int type)
             strcpy(str, "long");
             break;
         case DB_LONG_LONG:
-            strcpy(str, "longlong");
+            strcpy(str, "long_long");
             break;
         case DB_FLOAT:
             strcpy(str, "float");
@@ -1101,6 +1106,9 @@ db_GetMachDataSize(int datatype)
  *    Mark C. Miller, Fri Nov 13 15:32:02 PST 2009
  *    Changed name of "long long" type to "longlong" as PDB is
  *    sensitive to spaces in type names.
+ *
+ *    Mark C. Miller, Tue Nov 17 22:30:30 PST 2009
+ *    Changed name of long long datatype to match PDB proper.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_GetDatatypeID(char *dataname)
@@ -1112,7 +1120,7 @@ db_GetDatatypeID(char *dataname)
         size = DB_INT;
     else if (STR_BEGINSWITH(dataname, "short"))
         size = DB_SHORT;
-    else if (STR_BEGINSWITH(dataname, "longlong"))
+    else if (STR_BEGINSWITH(dataname, "long_long"))
         size = DB_LONG_LONG;
     else if (STR_BEGINSWITH(dataname, "long"))
         size = DB_LONG;

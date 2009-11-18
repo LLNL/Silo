@@ -7396,6 +7396,10 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
  *      the actual datatype. The type is assumed int if it its
  *      value is zero or it does not exist. Otherwise, the type is
  *      is whatever is stored in gnznodtype member. 
+ *
+ *      Mark C. Miller, Tue Nov 17 22:22:09 PST 2009
+ *      Changed name of long long datatype to match what PDB proper
+ *      would call it.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -7485,7 +7489,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
    {
        count[0] = nels;
        if (_pm._llong_gnodeno)
-           DBWriteComponent(dbfile, obj, "gnodeno", name, "longlong",
+           DBWriteComponent(dbfile, obj, "gnodeno", name, "long_long",
                _pm._gnodeno, 1, count);
        else
            DBWriteComponent(dbfile, obj, "gnodeno", name, "integer",
@@ -8532,6 +8536,10 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
  *      the actual datatype. The type is assumed int if it its
  *      value is zero or it does not exist. Otherwise, the type is
  *      is whatever is stored in gnznodtype member. 
+ *
+ *      Mark C. Miller, Tue Nov 17 22:22:09 PST 2009
+ *      Changed name of long long datatype to match what PDB proper
+ *      would call it.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 /* ARGSUSED */
@@ -8625,7 +8633,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    {
        count[0] = nnodes;
        if (_um._llong_gnodeno)
-           DBWriteComponent(dbfile, obj, "gnodeno", name, "longlong",
+           DBWriteComponent(dbfile, obj, "gnodeno", name, "long_long",
                _um._gnodeno, 1, count);
        else
            DBWriteComponent(dbfile, obj, "gnodeno", name, "integer",
@@ -9134,6 +9142,10 @@ db_pdb_PutZonelist (DBfile *dbfile, char *name, int nzones, int ndims,
  *
  *    Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *    Add support for long long global node/zone numbers.
+ *
+ *    Mark C. Miller, Tue Nov 17 22:22:09 PST 2009
+ *    Changed name of long long datatype to match what PDB proper
+ *    would call it.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -9184,7 +9196,7 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
    {
        count[0] = nzones;
        if (_uzl._llong_gzoneno)
-           DBWriteComponent(dbfile, obj, "gzoneno", name, "longlong",
+           DBWriteComponent(dbfile, obj, "gzoneno", name, "long_long",
                _uzl._gzoneno, 1, count);
        else
            DBWriteComponent(dbfile, obj, "gzoneno", name, "integer",
@@ -9223,6 +9235,10 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
  *      the actual datatype. The type is assumed int if it its
  *      value is zero or it does not exist. Otherwise, the type is
  *      is whatever is stored in gnznodtype member. 
+ *
+ *      Mark C. Miller, Tue Nov 17 22:22:09 PST 2009
+ *      Changed name of long long datatype to match what PDB proper
+ *      would call it.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -9285,7 +9301,7 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
    {
        count[0] = nzones;
        if (_phzl._llong_gzoneno)
-           DBWriteComponent(dbfile, obj, "gzoneno", name, "longlong",
+           DBWriteComponent(dbfile, obj, "gzoneno", name, "long_long",
                _phzl._gzoneno, 1, count);
        else
            DBWriteComponent(dbfile, obj, "gzoneno", name, "integer",

@@ -308,6 +308,9 @@ F_cons (obj_t head, obj_t tail) {
  *
  * Modifications:
  *
+ *   Mark C. Miller, Tue Nov 17 22:34:51 PST 2009
+ *   Added logic to exclude epsilon diff params from requirement to not be
+ *   less than zero.
  *-------------------------------------------------------------------------
  */
 static double
@@ -324,7 +327,7 @@ diff_lookup (char *ascii_name) {
          sprintf (buf, "diff: value of `%s' is inappropriate: ", ascii_name);
          out_error (buf, val);
          sym_vbind (name, NIL);
-      } else if ((retval=num_fp(val))<0.0) {
+      } else if ((retval=num_fp(val))<0.0 && !strstr(ascii_name, "_eps")) {
          out_errorn ("diff: value of `%s' is inappropriate: %d",
                      ascii_name, retval);
          sym_vbind (name, NIL);

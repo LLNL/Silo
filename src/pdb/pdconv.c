@@ -107,7 +107,7 @@ data_standard
                     2, NORMAL_ORDER,              /* size and order of short */
                     4, NORMAL_ORDER,                /* size and order of int */
                     4, NORMAL_ORDER,               /* size and order of long */
-                    8, NORMAL_ORDER,          /* size and order of long long */
+                    4, NORMAL_ORDER,          /* size and order of long long */
                     4, lite_def_float,                   /* float definition */
                     lite_def_float_order,
                     8, lite_def_double,                 /* double definition */
@@ -125,7 +125,7 @@ data_standard
                     2, NORMAL_ORDER,              /* size and order of short */
                     2, NORMAL_ORDER,                /* size and order of int */
                     4, NORMAL_ORDER,               /* size and order of long */
-                    8, NORMAL_ORDER,          /* size and order of long long */
+                    4, NORMAL_ORDER,          /* size and order of long long */
                     4, lite_ieee_float,                  /* float definition */
                     lite_ieee_float_order,
                     12, lite_ieeeb_double,              /* double definition */
@@ -134,7 +134,7 @@ data_standard
                     2, REVERSE_ORDER,             /* size and order of short */
                     2, REVERSE_ORDER,               /* size and order of int */
                     4, REVERSE_ORDER,              /* size and order of long */
-                    8, REVERSE_ORDER,         /* size and order of long long */
+                    4, REVERSE_ORDER,         /* size and order of long long */
                     4, lite_intel_float,                 /* float definition */
                     lite_intel_float_order,
                     8, lite_intel_double,               /* double definition */
@@ -143,7 +143,7 @@ data_standard
                     2, REVERSE_ORDER,             /* size and order of short */
                     4, REVERSE_ORDER,               /* size and order of int */
                     4, REVERSE_ORDER,              /* size and order of long */
-                    8, REVERSE_ORDER,         /* size and order of long long */
+                    4, REVERSE_ORDER,         /* size and order of long long */
                     4, lite_vax_float,                   /* float definition */
                     lite_vax_float_order,
                     8, lite_vax_double,                 /* double definition */
@@ -183,10 +183,17 @@ data_standard
  *   Added support for long long datatype.
  */
 
+/*
+                                     long long
+                                         |          
+                                         |
+                                         V
+                          0  1  2  3  4  5  6  7  8
+*/
 data_alignment
- lite_RS6000_ALIGNMENT = {1, 4, 2, 4, 4, 4, 4, 4, 0},
+ lite_RS6000_ALIGNMENT = {1, 4, 2, 4, 4, 8, 4, 4, 0},
  lite_SPARC_ALIGNMENT  = {1, 4, 2, 4, 4, 4, 4, 8, 0},
- lite_MIPS_ALIGNMENT   = {1, 4, 2, 4, 4, 4, 4, 8, 0},
+ lite_MIPS_ALIGNMENT   = {1, 4, 2, 4, 4, 8, 4, 8, 0},
  lite_M68000_ALIGNMENT = {1, 2, 2, 2, 2, 2, 2, 2, 0},
  lite_INTELA_ALIGNMENT = {1, 2, 2, 2, 2, 2, 2, 2, 0},
  lite_UNICOS_ALIGNMENT = {4, 8, 8, 8, 8, 8, 8, 8, 8},

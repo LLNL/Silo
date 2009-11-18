@@ -84,7 +84,7 @@ main(int argc, char *argv[])
     long long      lval[NX * NY * NZ];
     int            offset[3], length[3], stride[3];
     float          val2[NX * NY * NZ];
-    long long      *lval2;
+    long long      *lval2 = 0;
     int            cnt, driver=DB_PDB;
     char	  *filename="simple.pdb";
     int            k1, k2;
@@ -212,7 +212,7 @@ main(int argc, char *argv[])
     printf("%d values were overwritten\n", cnt);
 
     cnt = 0;
-    for (k = 0; k < NZ; k++) {
+    for (k = 0; k < NZ && lval2; k++) {
         for (j = 0; j < NY; j++) {
             for (i = 0; i < NX; i++) {
                 if (lval2[i + j * NX + k * NX * NY] != lval[i + j * NX + k * NX * NY])
@@ -222,6 +222,8 @@ main(int argc, char *argv[])
     }
     err += cnt;
         printf("%d long long values don't match\n", cnt);
+
+    if (lval2) free(lval2);
 
     return err;
 }

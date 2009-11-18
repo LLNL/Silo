@@ -739,6 +739,9 @@ sym_truth (char *name) {
  *
  *      Mark C. Miller, Fri Nov 13 15:38:07 PST 2009
  *      Changed name of "long long" type to "longlong" as PDB is sensitive
+ *
+ *      Mark C. Miller, Tue Nov 17 22:30:30 PST 2009
+ *      Changed name of long long datatype to match PDB proper.
  *-------------------------------------------------------------------------
  */
 void
@@ -939,7 +942,7 @@ sym_init (void)
    sym_bi_set("fmt_long",       "(long)%d",     "Long format",
               "This is a C printf() format string used to render long "
               "integer values in the browser output.");
-   sym_bi_set("fmt_longlong",   "%lld",         "Long long format",
+   sym_bi_set("fmt_long_long",   "%lld",         "Long long format",
               "This is a C printf() format string used to render long "
               "long integer values in the browser output.");
 
