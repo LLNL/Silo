@@ -21,8 +21,7 @@ topic of Silo is available at <a
 <ol>
   <li>New features in this release</li>
   <li>Bugs fixed in this release</li>
-  <li>More detailed information on any of the above.<br>
-  </li>
+  <li>More detailed information on any of the above.</li>
   <li>Items specific to LLNL installations</li>
 </ol>
 <h3>1. New features added in this release</h3>
@@ -37,14 +36,11 @@ topic of Silo is available at <a
  style="font-style: italic;">extensive</span> quantities.</li>
   <li>Browser can now display the contents of the HDF5 driver's (magic)
 '/.silo' directory.</li>
-  <li>Hard links are now supported by the friendly HDF5 names feature.<br>
-  </li>
+  <li>Hard links are now supported by the friendly HDF5 names feature.</li>
 </ul>
 <h3>2. Bugs fixed in this release</h3>
 <ul>
-  <li>Problems writing edge- and face-centered quadvars and ucdvars
-were fixed.<br>
-  </li>
+  <li>Problems writing edge- and face-centered quadvars and ucdvars were fixed.</li>
   <li>silock now works for data produced on HDF5 driver.</li>
   <li>silodiff corrrectly sets $lowlevel variable so that HDF5 file
 differences cannot be missed.</li>
@@ -53,28 +49,22 @@ differences cannot be missed.</li>
   <li>Fortran interface now correctly compiles for Windows.</li>
   <li>A double-free memory error causing silex to crash was fixed.</li>
   <li>A missing pmpio.h include file dependency was added.</li>
-  <li>Browser now supports version of Silo library it is linked with.</li>
+  <li>Browser now outputs version of Silo library it is linked with.</li>
   <li>A problem where once compression features were enabled, they
 could never be disabled was corrected.</li>
   <li>Multi-part, multi-block objects written on Windows but read on
-Linux and vice-versa now<br>
-correctly handles the difference in slash character for filesystem
+Linux and vice-versa now correctly handle the difference in slash character for filesystem
 pathnames.</li>
   <li>A problem where silo.h and config.h were being included in source
-distribution tarballs<br>
-in spite of fact that these files are generated from their .in
+distribution tarballs in spite of fact that these files are generated from their .in
 equivalents was corrected.</li>
   <li>A bug in DBInqFile where it would return true for any PDB file,
-even a PDB file NOT produced by<br>
-Silo
+even a PDB file NOT produced by Silo
 was corrected. It now returns true ONLY if it finds tell-tale signs
-there are Silo objects in the<br>
-file and false otherwise.</li>
+there are Silo objects in the file and false otherwise.</li>
   <li>DBCLOSE Fortran wrapper was corrected to set closed dbid to -1.</li>
   <li>Silo's magic file was corrected so that '!' character in PDB
-moniker is not inadvertently<br>
-treated as the not-equal operator.<br>
-  </li>
+moniker is not inadvertently treated as the not-equal operator.</li>
 </ul>
 <br>
 </body>
