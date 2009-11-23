@@ -1526,6 +1526,9 @@ stc_offset (obj_t _self, obj_t comp) {
  *  value is zero or it does not exist. Otherwise, the type is
  *  is whatever is stored in gnznodtype member. This makes it quite
  *  easy for browser to handle variations in type of this data.
+ *
+ *  Mark C. Miller, Mon Nov 23 11:18:25 PST 2009
+ *  Added missing 'topo_dim' member to multimesh object.
  *-------------------------------------------------------------------------
  */
 void
@@ -1594,6 +1597,8 @@ stc_silo_types (void) {
       COMP (mrgtree_name,       "primitive 'string'");
       COMP (tv_connectivity,    "primitive 'int'");
       COMP (disjoint_mode,      "primitive 'int'");
+      COMP (topo_dim,           "primitive 'int'");
+      IOASSOC (PA_TOPODIM);
       COMP (meshids,
             "pointer (array 'self.nblocks' (primitive 'int'))");
       COMP (meshnames,
