@@ -16,6 +16,12 @@
 
 # making use of the autotest features in autoconf
 # 
+
+# some example commands to compile ioperf plugins
+# gcc -shared -I. ioperf_sec2.c -o libiop_sec2.so
+# gcc -shared -I. ioperf_stdio.c -o libiop_stdio.so
+# gcc -shared -I. -I/usr/gapps/silo/hdf5/1.8.1/i686_Linux_ELsmp/include ioperf_hdf5.c -o libiop_hdf5.so /usr/gapps/silo/hdf5/1.8.1/i686_Linux_ELsmp/lib/libhdf5.a
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -47,14 +53,15 @@ check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
 	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
 	quad$(EXEEXT) version$(EXEEXT) namescheme$(EXEEXT) \
-	efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) $(am__EXEEXT_2) \
-	$(am__EXEEXT_4)
+	efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) ioperf$(EXEEXT) \
+	$(am__EXEEXT_2) $(am__EXEEXT_4)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
 @FORTRAN_NEEDED_TRUE@am__append_4 = $(FCPROGS)
 subdir = tests
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -132,6 +139,9 @@ group_test_OBJECTS = group_test.$(OBJEXT)
 group_test_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@group_test_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@group_test_DEPENDENCIES = ../src/libsiloh5.la
+ioperf_SOURCES = ioperf.c
+ioperf_OBJECTS = ioperf.$(OBJEXT)
+ioperf_DEPENDENCIES =
 largefile_SOURCES = largefile.c
 largefile_OBJECTS = largefile.$(OBJEXT)
 largefile_LDADD = $(LDADD)
@@ -364,6 +374,7 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_extface_SOURCES) extface.c $(grab_SOURCES) \
 	$(nodist_EXTRA_grab_SOURCES) \
 	$(nodist_EXTRA_group_test_SOURCES) group_test.c \
+	$(nodist_EXTRA_ioperf_SOURCES) ioperf.c \
 	$(nodist_EXTRA_largefile_SOURCES) largefile.c \
 	$(nodist_EXTRA_listtypes_SOURCES) listtypes.c \
 	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
@@ -405,7 +416,7 @@ DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
 	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
 	efcentering.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
-	largefile.c listtypes.c mat3d_3across.c \
+	ioperf.c largefile.c listtypes.c mat3d_3across.c \
 	$(am__matf77_SOURCES_DIST) merge_block.c mk_nasf_pdb.c \
 	mmadjacency.c multi_file.c multi_test.c multispec.c \
 	namescheme.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
@@ -414,6 +425,15 @@ DIST_SOURCES = TestReadMask.c alltypes.c array.c \
 	sami.c simple.c spec.c specmix.c subhex.c testall.c \
 	$(am__testallf77_SOURCES_DIST) testpdb.c twohex.c ucd.c \
 	ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(includedir)"
+includeHEADERS_INSTALL = $(INSTALL_HEADER)
+HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -591,8 +611,16 @@ EXTRA_DIST = \
  amr3d_mesh_config.xml \
  not_a_silo_file.h5 \
  not_a_silo_file.pdb \
+ ioperf_sec2.c \
+ ioperf_stdio.c \
+ ioperf_hdf5.c \
+ ioperf_pdb.c \
+ ioperf_silo.c \
  $(check_SCRIPTS) \
  $(check_DATA)
+
+include_HEADERS = \
+ ioperf.h
 
 
 # Note: use top entry in check_SCRIPTS as sole target to
@@ -635,7 +663,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
-	efcentering mk_nasf_pdb $(am__append_1) $(am__append_3)
+	efcentering mk_nasf_pdb ioperf $(am__append_1) $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -705,6 +733,8 @@ rocket_SOURCES = \
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_grab_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_efcentering_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ioperf_SOURCES = dummy.cxx
+ioperf_LDADD = -ldl
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -802,6 +832,9 @@ grab$(EXEEXT): $(grab_OBJECTS) $(grab_DEPENDENCIES)
 group_test$(EXEEXT): $(group_test_OBJECTS) $(group_test_DEPENDENCIES) 
 	@rm -f group_test$(EXEEXT)
 	$(CXXLINK) $(group_test_OBJECTS) $(group_test_LDADD) $(LIBS)
+ioperf$(EXEEXT): $(ioperf_OBJECTS) $(ioperf_DEPENDENCIES) 
+	@rm -f ioperf$(EXEEXT)
+	$(CXXLINK) $(ioperf_OBJECTS) $(ioperf_LDADD) $(LIBS)
 largefile$(EXEEXT): $(largefile_OBJECTS) $(largefile_DEPENDENCIES) 
 	@rm -f largefile$(EXEEXT)
 	$(CXXLINK) $(largefile_OBJECTS) $(largefile_LDADD) $(LIBS)
@@ -936,6 +969,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/largefile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@
@@ -1120,6 +1154,23 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(includedir)" || $(MKDIR_P) "$(DESTDIR)$(includedir)"
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(includeHEADERS_INSTALL) '$$d$$p' '$(DESTDIR)$(includedir)/$$f'"; \
+	  $(includeHEADERS_INSTALL) "$$d$$p" "$(DESTDIR)$(includedir)/$$f"; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(includedir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(includedir)/$$f"; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -1200,8 +1251,11 @@ check-am: all-am
 	  $(check_DATA)
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
-all-am: Makefile all-local
+all-am: Makefile $(HEADERS) all-local
 installdirs:
+	for dir in "$(DESTDIR)$(includedir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -1248,7 +1302,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -1284,7 +1338,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-includeHEADERS
 
 .MAKE: install-am install-strip
 
@@ -1295,12 +1349,13 @@ uninstall-am:
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am
+	install-includeHEADERS install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-includeHEADERS
 
 
 all-local:

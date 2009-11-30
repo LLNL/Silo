@@ -2,6 +2,11 @@
 # making use of the autotest features in autoconf
 # 
 
+# some example commands to compile ioperf plugins
+# gcc -shared -I. ioperf_sec2.c -o libiop_sec2.so
+# gcc -shared -I. ioperf_stdio.c -o libiop_stdio.so
+# gcc -shared -I. -I/usr/gapps/silo/hdf5/1.8.1/i686_Linux_ELsmp/include ioperf_hdf5.c -o libiop_hdf5.so /usr/gapps/silo/hdf5/1.8.1/i686_Linux_ELsmp/lib/libhdf5.a
+
 EXTRA_DIST= \
  package.m4 \
  pdbcmp.csh \
@@ -16,8 +21,16 @@ EXTRA_DIST= \
  amr3d_mesh_config.xml \
  not_a_silo_file.h5 \
  not_a_silo_file.pdb \
+ ioperf_sec2.c \
+ ioperf_stdio.c \
+ ioperf_hdf5.c \
+ ioperf_pdb.c \
+ ioperf_silo.c \
  $(check_SCRIPTS) \
  $(check_DATA)
+
+include_HEADERS = \
+ ioperf.h
 
 # Note: use top entry in check_SCRIPTS as sole target to
 # copy all scripts and data in one rule
@@ -63,7 +76,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
-      mk_nasf_pdb
+      mk_nasf_pdb ioperf
 
 dir_SOURCES = \
  dir.c \
@@ -116,7 +129,8 @@ check_PROGRAMS = \
  version \
  namescheme \
  efcentering \
- mk_nasf_pdb
+ mk_nasf_pdb \
+ ioperf
 
 
 # Deal with need to use c++ linker whenever we've got C++
@@ -177,7 +191,10 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_grab_SOURCES = dummy.cxx
  nodist_EXTRA_efcentering_SOURCES = dummy.cxx
  nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
+ nodist_EXTRA_ioperf_SOURCES = dummy.cxx
 endif
+
+ioperf_LDADD = -ldl
 
 if HDF5_DRV_NEEDED
   PROGS += $(HDF5PROGS)

@@ -391,7 +391,7 @@ main(int argc, char *argv[])
     DBShowErrors(DB_TOP, NULL);
     DBSetEnableChecksums(dochecks);
     if (driver == DB_HDF5 || driver == DB_HDF5_SEC2 ||
-        driver == DB_HDF5_STDIO || driver == DB_HDF5_CORE)
+        driver == DB_HDF5_STDIO || driver == (inc|DB_HDF5_CORE))
         DBSetFriendlyHDF5Names(hdfriendly);
 
     /*
