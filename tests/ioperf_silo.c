@@ -27,13 +27,13 @@ static int Write_silo(void *buf, size_t nbytes)
     static int n = 0;
     int dims[3] = {1, 1, 1};
     int status;
-    void *coords[3] = {0, 0, 0};
 
     dims[0] = nbytes / sizeof(double);
-    coords[0] = buf;
     if (!has_mesh)
     {
         char *coordnames[] = {"x"};
+        void *coords[3] = {0, 0, 0};
+        coords[0] = buf;
         has_mesh = 1;
         status = DBPutQuadmesh(dbfile, "mesh", coordnames, coords, dims, 1, DB_DOUBLE, DB_COLLINEAR, 0);
     }
