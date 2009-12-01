@@ -72,9 +72,9 @@ static void ProcessCommandLine(int argc, char *argv[], options_t *opts)
 {
     char plugin_opts_delim[256];
     int i,n,nerrors=0;
-    errno=0;
     for (i=1; i<argc; i++)
     {
+        errno=0;
         if (!strcmp(argv[i], "--io-interface"))
         {
             i++;
@@ -202,7 +202,7 @@ static void AddTimingInfo(ioop_t op, size_t size, double t0, double t1)
         double tottime=0, totwrtime=0, totrdtime=0, toterrtime=0;
         size_t totwrbytes=0, totrdbytes=0;
         double wrfastest=0, wrslowest=DBL_MAX, rdfastest=0, rdslowest=DBL_MAX;
-        int wrfastesti, wrslowesti, rdfastesti, rdslowesti;
+        int wrfastesti=-1, wrslowesti=-1, rdfastesti=-1, rdslowesti=-1;
         double wravg, rdavg;
 
         if (op == OP_OUTPUT_TIMINGS)
@@ -235,7 +235,7 @@ static void AddTimingInfo(ioop_t op, size_t size, double t0, double t1)
                     wrfastest = wrspeed;
                     wrfastesti = j;
                 }
-                else if (wrspeed < wrslowest)
+                if (wrspeed < wrslowest)
                 {
                     wrslowest = wrspeed;
                     wrslowesti = j;
@@ -252,7 +252,7 @@ static void AddTimingInfo(ioop_t op, size_t size, double t0, double t1)
                     rdfastest = rdspeed;
                     rdfastesti = j;
                 }
-                else if (rdspeed < rdslowest)
+                if (rdspeed < rdslowest)
                 {
                     rdslowest = rdspeed;
                     rdslowesti = j;
@@ -270,10 +270,12 @@ static void AddTimingInfo(ioop_t op, size_t size, double t0, double t1)
                 totwrbytes, tottime*1e-6, totwrbytes/(tottime*1e-6)/(1<<20));
             fprintf(stdout, "Average: %zd bytes in %f seconds = %f Mb/s\n",
                 totwrbytes, totwrtime*1e-6, totwrbytes/(totwrtime*1e-6)/(1<<20));
-            fprintf(stdout, "Fastest: %zd bytes in %f seconds = %f Mb/s (iter=%d)\n",
+            if (wrfastesti>=0)
+                fprintf(stdout, "Fastest: %zd bytes in %f seconds = %f Mb/s (iter=%d)\n",
                 tinfo[wrfastesti].size, (tinfo[wrfastesti].t1-tinfo[wrfastesti].t0)*1e-6,
                 wrfastest*1e+6/(1<<20), wrfastesti);
-            fprintf(stdout, "Slowest: %zd bytes in %f seconds = %f Mb/s (iter=%d)\n",
+            if (wrslowesti>=0)
+                fprintf(stdout, "Slowest: %zd bytes in %f seconds = %f Mb/s (iter=%d)\n",
                 tinfo[wrslowesti].size, (tinfo[wrslowesti].t1-tinfo[wrslowesti].t0)*1e-6,
                 wrslowest*1e+6/(1<<20), wrslowesti);
         }
@@ -284,10 +286,12 @@ static void AddTimingInfo(ioop_t op, size_t size, double t0, double t1)
                 totrdbytes, tottime*1e-6, totrdbytes/(tottime*1e-6)/(1<<20));
             fprintf(stdout, "Average: %zd bytes in %f seconds = %f Mb/s\n",
                 totrdbytes, totrdtime*1e-6, totrdbytes/(totrdtime*1e-6)/(1<<20));
-            fprintf(stdout, "Fastest: %zd bytes in %f seconds = %f Mb/s (iter=%d)\n",
+            if (rdfastesti>=0)
+                fprintf(stdout, "Fastest: %zd bytes in %f seconds = %f Mb/s (iter=%d)\n",
                 tinfo[rdfastesti].size, (tinfo[rdfastesti].t1-tinfo[rdfastesti].t0)*1e-6,
                 rdfastest*1e+6/(1<<20),rdfastesti);
-            fprintf(stdout, "Slowest: %zd bytes in %f seconds = %f Mb/s (iter=%d)\n",
+            if (rdslowesti>=0)
+                fprintf(stdout, "Slowest: %zd bytes in %f seconds = %f Mb/s (iter=%d)\n",
                 tinfo[rdslowesti].size, (tinfo[rdslowesti].t1-tinfo[rdslowesti].t0)*1e-6,
                 rdslowest*1e+6/(1<<20), rdslowesti);
         } 
@@ -323,13 +327,14 @@ static void TestWrites(iointerface_t *ioiface, const options_t *opts)
 
     for (i=0; i<opts->num_requests; i++)
     {
-        t0 = ioiface->Time();
-        if (opts->size_noise && ((i+1)%(opts->size_noise))==0)
+        if (opts->size_noise && i && (i%(opts->size_noise))==0)
         {
+            t0 = ioiface->Time();
             n = ioiface->Write(buf, 8);
             t1 = ioiface->Time();
             AddTimingInfo(n==8?OP_WRITE:OP_ERROR, n, t0, t1);
         }
+        t0 = ioiface->Time();
         n = ioiface->Write(buf, opts->request_size_in_bytes);
         t1 = ioiface->Time();
         AddTimingInfo(n==opts->request_size_in_bytes?OP_WRITE:OP_ERROR, n, t0, t1);
