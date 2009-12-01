@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -39,7 +39,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\silex.tlb"
+				TypeLibraryName="$(OutDir)\silex.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -51,10 +51,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\silex.pch"
-				AssemblerListingLocation=".\Debug\"
-				ObjectFile=".\Debug\"
-				ProgramDataBaseFileName=".\Debug\"
+				PrecompiledHeaderFile="$(OutDir)\silex.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -73,12 +73,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtCore4.lib QtGui4.lib silohdf5.lib"
-				OutputFile=".\Debug\silex.exe"
+				OutputFile="$(OutDir)\silex.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Debug"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;$(OutDir)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\silex.pdb"
+				ProgramDatabaseFile="$(OutDir)\silex.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -109,8 +109,8 @@
 		</Configuration>
 		<Configuration
 			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -132,7 +132,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\silex.tlb"
+				TypeLibraryName="$(OutDir)\silex.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -145,10 +145,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\silex.pch"
-				AssemblerListingLocation=".\Release\"
-				ObjectFile=".\Release\"
-				ProgramDataBaseFileName=".\Release\"
+				PrecompiledHeaderFile="$(OutDir)\silex.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4244;4305"
@@ -167,11 +167,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtCore4.lib QtGui4.lib silohdf5.lib"
-				OutputFile=".\Release\silex.exe"
+				OutputFile="$(OutDir)\silex.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Release"
-				ProgramDatabaseFile=".\Release\silex.pdb"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\silex.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -202,8 +202,8 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -225,7 +225,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\silex.tlb"
+				TypeLibraryName="$(OutDir)\silex.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -237,10 +237,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\silex.pch"
-				AssemblerListingLocation=".\Debug\"
-				ObjectFile=".\Debug\"
-				ProgramDataBaseFileName=".\Debug\"
+				PrecompiledHeaderFile="$(OutDir)\silex.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -259,12 +259,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtCore4.lib QtGui4.lib silo.lib"
-				OutputFile=".\Debug\silex.exe"
+				OutputFile="$(OutDir)\silex.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Debug"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;$(OutDir)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\silex.pdb"
+				ProgramDatabaseFile="$(OutDir)\silex.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -295,8 +295,8 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -318,7 +318,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\silex.tlb"
+				TypeLibraryName="$(OutDir)\silex.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -331,10 +331,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\silex.pch"
-				AssemblerListingLocation=".\Release\"
-				ObjectFile=".\Release\"
-				ProgramDataBaseFileName=".\Release\"
+				PrecompiledHeaderFile="$(OutDir)\silex.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -352,11 +352,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtCore4.lib QtGui4.lib silo.lib"
-				OutputFile=".\Release\silex.exe"
+				OutputFile="$(OutDir)\silex.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Release"
-				ProgramDatabaseFile=".\Release\silex.pdb"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\silex.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -387,8 +387,8 @@
 		</Configuration>
 		<Configuration
 			Name="StaticLibwithHDF5 Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -410,7 +410,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\silex.tlb"
+				TypeLibraryName="$(OutDir)\silex.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -423,10 +423,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\silex.pch"
-				AssemblerListingLocation=".\Release\"
-				ObjectFile=".\Release\"
-				ProgramDataBaseFileName=".\Release\"
+				PrecompiledHeaderFile="$(OutDir)\silex.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -444,11 +444,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtCore4.lib QtGui4.lib silohdf5.lib"
-				OutputFile=".\Release\silex.exe"
+				OutputFile="$(OutDir)\silex.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Release"
-				ProgramDatabaseFile=".\Release\silex.pdb"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\silex.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -479,8 +479,8 @@
 		</Configuration>
 		<Configuration
 			Name="StaticLibwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -502,7 +502,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\silex.tlb"
+				TypeLibraryName="$(OutDir)\silex.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -514,10 +514,10 @@
 				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\silex.pch"
-				AssemblerListingLocation=".\Debug\"
-				ObjectFile=".\Debug\"
-				ProgramDataBaseFileName=".\Debug\"
+				PrecompiledHeaderFile="$(OutDir)\silex.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -536,12 +536,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtCore4.lib QtGui4.lib silohdf5.lib"
-				OutputFile=".\Debug\silex.exe"
+				OutputFile="$(OutDir)\silex.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Debug"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;$(OutDir)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\silex.pdb"
+				ProgramDatabaseFile="$(OutDir)\silex.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -572,8 +572,8 @@
 		</Configuration>
 		<Configuration
 			Name="StaticLib Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -595,7 +595,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\silex.tlb"
+				TypeLibraryName="$(OutDir)\silex.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -608,10 +608,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\silex.pch"
-				AssemblerListingLocation=".\Release\"
-				ObjectFile=".\Release\"
-				ProgramDataBaseFileName=".\Release\"
+				PrecompiledHeaderFile="$(OutDir)\silex.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -629,11 +629,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtCore4.lib QtGui4.lib silo.lib"
-				OutputFile=".\Release\silex.exe"
+				OutputFile="$(OutDir)\silex.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Release"
-				ProgramDatabaseFile=".\Release\silex.pdb"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\silex.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -664,8 +664,8 @@
 		</Configuration>
 		<Configuration
 			Name="StaticLib Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -687,7 +687,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\silex.tlb"
+				TypeLibraryName="$(OutDir)\silex.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -699,10 +699,10 @@
 				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\silex.pch"
-				AssemblerListingLocation=".\Debug\"
-				ObjectFile=".\Debug\"
-				ProgramDataBaseFileName=".\Debug\"
+				PrecompiledHeaderFile="$(OutDir)\silex.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -721,12 +721,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="QtCore4.lib QtGui4.lib silo.lib"
-				OutputFile=".\Debug\silex.exe"
+				OutputFile="$(OutDir)\silex.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(QTDIR)\lib;.\Debug"
+				AdditionalLibraryDirectories="$(QTDIR)\lib;$(OutDir)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\silex.pdb"
+				ProgramDatabaseFile="$(OutDir)\silex.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -765,615 +765,39 @@
 			<File
 				RelativePath="..\..\tools\silex\Explorer_moc.cpp"
 				>
-				<FileConfiguration
-					Name="DLLwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLLwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\tools\silex\SiloArrayView_moc.cpp"
 				>
-				<FileConfiguration
-					Name="DLLwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLLwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\tools\silex\SiloDirTreeView_moc.cpp"
 				>
-				<FileConfiguration
-					Name="DLLwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLLwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\tools\silex\SiloDirView_moc.cpp"
 				>
-				<FileConfiguration
-					Name="DLLwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLLwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\tools\silex\SiloObjectView_moc.cpp"
 				>
-				<FileConfiguration
-					Name="DLLwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLLwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\tools\silex\SiloValueView_moc.cpp"
 				>
-				<FileConfiguration
-					Name="DLLwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLLwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\tools\silex\SiloView_moc.cpp"
 				>
-				<FileConfiguration
-					Name="DLLwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLLwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DLL Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLibwithHDF5 Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="StaticLib Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\tools\silex\Explorer.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\tools\silex\main.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\resources\silex.rc"
@@ -1382,478 +806,30 @@
 		<File
 			RelativePath="..\..\tools\silex\SiloArrayView.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\tools\silex\SiloDirTreeView.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\tools\silex\SiloDirView.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\tools\silex\SiloFile.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\tools\silex\SiloObjectView.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\tools\silex\SiloValueView.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\tools\silex\SiloView.cpp"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLLwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="DLL Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLibwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="StaticLib Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

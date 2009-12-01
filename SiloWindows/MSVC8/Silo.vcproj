@@ -15,8 +15,8 @@
 	<Configurations>
 		<Configuration
 			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -43,7 +43,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -56,10 +56,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/DLLwithHDF5.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -79,12 +79,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="hdf5dll.lib"
-				OutputFile="Release/silohdf5.dll"
+				OutputFile="$(OutDir)\silohdf5.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(HDF5_LIB_DIR)"
-				ProgramDatabaseFile=".\Release/silohdf5.pdb"
-				ImportLibrary=".\Release/silohdf5.lib"
+				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
+				ImportLibrary="$(OutDir)\silohdf5.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -114,8 +114,8 @@
 		</Configuration>
 		<Configuration
 			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -142,7 +142,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -153,10 +153,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug/DLLwithHDF5.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -176,13 +176,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="hdf5dll.lib"
-				OutputFile="Debug/silohdf5.dll"
+				OutputFile="$(OutDir)\silohdf5.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(HDF5_LIB_DIR)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug/silohdf5.pdb"
-				ImportLibrary=".\Debug/silohdf5.lib"
+				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
+				ImportLibrary="$(OutDir)\silohdf5.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -212,8 +212,8 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -240,7 +240,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/DLL.tlb"
+				TypeLibraryName="$(OutDir)\DLL.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -251,10 +251,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug/DLL.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(OutDir)\DLL.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -274,13 +274,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
-				OutputFile="Debug/silo.dll"
+				OutputFile="$(OutDir)\silo.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug/silo.pdb"
-				ImportLibrary=".\Debug/silo.lib"
+				ProgramDatabaseFile="$(OutDir)\silo.pdb"
+				ImportLibrary="$(OutDir)\silo.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -310,8 +310,8 @@
 		</Configuration>
 		<Configuration
 			Name="DLL Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -338,7 +338,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/DLL.tlb"
+				TypeLibraryName="$(OutDir)\DLL.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -351,10 +351,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/DLL.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(OutDir)\DLL.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -373,12 +373,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies=""
-				OutputFile="Release/silo.dll"
+				OutputFile="$(OutDir)\silo.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
-				ProgramDatabaseFile=".\Release/silo.pdb"
-				ImportLibrary=".\Release/silo.lib"
+				ProgramDatabaseFile="$(OutDir)\silo.pdb"
+				ImportLibrary="$(OutDir)\silo.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -408,8 +408,8 @@
 		</Configuration>
 		<Configuration
 			Name="StaticLibwithHDF5 Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -436,7 +436,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -449,10 +449,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/silo.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -490,8 +490,8 @@
 		</Configuration>
 		<Configuration
 			Name="StaticLibwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -518,7 +518,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -529,10 +529,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug/DLLwithHDF5.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -571,8 +571,8 @@
 		</Configuration>
 		<Configuration
 			Name="StaticLib Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -599,7 +599,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Release/DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -612,10 +612,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/silo.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="$(OutDir)\silo.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -653,8 +653,8 @@
 		</Configuration>
 		<Configuration
 			Name="StaticLib Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;.\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -681,7 +681,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -692,10 +692,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug/silo.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="$(OutDir)\silo.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -763,6 +763,10 @@
 		<Filter
 			Name="pdb"
 			>
+			<File
+				RelativePath="..\..\src\pdb\detect.c"
+				>
+			</File>
 			<File
 				RelativePath="..\..\src\pdb\pdb.c"
 				>
@@ -841,6 +845,9 @@
 			</File>
 			<File
 				RelativePath="..\..\src\silo\silo_f.c"
+			</File>
+			<File
+				RelativePath="..\..\src\silo\silo_fcb.c"
 				>
 			</File>
 			<File

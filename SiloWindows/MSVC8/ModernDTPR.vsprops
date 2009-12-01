@@ -2,7 +2,7 @@
 <VisualStudioPropertySheet
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="NO_SEC_DEP"
+	Name="MODERN_DTPTR"
 	>
 	<Tool
 		Name="VCCLCompilerTool"
