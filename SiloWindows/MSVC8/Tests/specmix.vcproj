@@ -14,9 +14,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug\specmix"
-			IntermediateDirectory=".\Debug\specmix"
+			Name="DLLwithHDF5_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\specmix"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\specmix"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -37,7 +37,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\specmix\specmix.tlb"
+				TypeLibraryName="$(OutDir)\specmix.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,10 +49,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\specmix\specmix.pch"
-				AssemblerListingLocation=".\Debug\specmix\"
-				ObjectFile=".\Debug\specmix\"
-				ProgramDataBaseFileName=".\Debug\specmix\specmix"
+				PrecompiledHeaderFile="$(OutDir)\specmix.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\specmix"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -72,12 +72,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Debug\specmix\specmix.exe"
+				OutputFile="$(SolutionDir)..\bin\specmix.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\specmix\specmix.pdb"
+				ProgramDatabaseFile="$(OutDir)\specmix.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -104,13 +104,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Debug\specmix\specmix.exe ..\bin"
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release\specmix"
-			IntermediateDirectory=".\Release\specmix"
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\specmix"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\specmix"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -131,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\specmix\specmix.tlb"
+				TypeLibraryName="$(OutDir)\specmix.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -144,10 +143,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\specmix\specmix.pch"
-				AssemblerListingLocation=".\Release\specmix\"
-				ObjectFile=".\Release\specmix\"
-				ProgramDataBaseFileName=".\Release\specmix\specmix"
+				PrecompiledHeaderFile="$(OutDir)\specmix.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4244;4305"
@@ -166,11 +165,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Release\specmix\specmix.exe"
+				OutputFile="$(SolutionDir)..\bin\specmix.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Release"
-				ProgramDatabaseFile=".\Release\specmix\specmix.pdb"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
+				ProgramDatabaseFile="$(OutDir)\specmix.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -197,7 +196,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Release\specmix\specmix.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

@@ -252,8 +252,6 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
 void
 PrintFileComponentTypes(char *filename)
 {
-    int    i, j, ndirs, nobj = 0;
-    char   topdir[200], **dir_names = NULL;
     DBfile *dbfile = NULL;
     DBtoc  *dbtoc = NULL;
 

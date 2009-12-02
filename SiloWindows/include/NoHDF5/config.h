@@ -152,6 +152,10 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #define HAVE_ZLIB_H 1
 
+#define HAVE_HZIP 1
+#define HAVE_FPZIP 1
+#define SILO_LONG_LONG __int64
+
 /* Name of package */
 #define PACKAGE "silo"
 

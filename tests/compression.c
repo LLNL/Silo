@@ -80,18 +80,17 @@ main(int argc, char *argv[])
     float          *frval;
     double         *dval;
     double         *drval;
-    int            cnt, driver=DB_HDF5;
+    int            driver=DB_HDF5;
     char          *filename="compression.h5";
     char          *ptr;
     char           tmpname[64];
-    int            k1, k2;
     DBfile        *dbfile;
 #if !defined(_WIN32)
     struct         timeval tim;
+    double         t1, t2;
 #endif
     struct stat    buffer;
     off_t          fsize;
-    double         t1, t2;
     int            has_loss = 0;
 
     /* Parse command-line */

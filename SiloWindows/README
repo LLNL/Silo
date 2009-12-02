@@ -44,15 +44,22 @@ Build instructions
    for the build process.
         silo-4.6
 
+3. Environment variables need to be defined:
+        ZLIB_INC_DIR    path to zlib include directory
+        ZLIB_LIB_DIR    path to zlib library files 
  
-3. If building silo with HDF5 support, you must define a few environment 
+4. If building silo with HDF5 support, you must define a few environment 
    variables so that the compiler can find the necessary files
    
         HDF5_INC_DIR    path to the HDF5 incude directory (where headers are 
                         located)
         HDF5_LIB_DIR    path to location of HDF5 libs
+
+        SZIP_INC_DIR    path to the szip incude directory (where headers are 
+                        located)
+        SZIP_LIB_DIR    path to location of szip libs
   
-4. Silex is built by default after Silo completes, and it also requires an 
+5. Silex is built by default after Silo completes, and it also requires an 
    evironment variable to be defined:
         QT_DIR          path to the Qt directory.
    If you do not have Qt or simply choose not to build Silex, you can remove 
@@ -60,25 +67,22 @@ Build instructions
    (Once Visual Studio is open).  To do so, right-click the solution name, 
    Unselect the silex project for the configuration you will be building.
 
-5. Open VisualStudio and the appropriate SiloWindows solution file located in 
+6. Open VisualStudio and the appropriate SiloWindows solution file located in 
    either the MSVC7 or MSVC8 subdirectory of SiloWindows.
 
-6. Choose the build configuration that is appropriate for your needs. Most 
+7. Choose the build configuration that is appropriate for your needs. Most 
    users should choose the DLL and only build the Release version.
    To change the active build configuration, select Build->Select active
    configuration from the main menu and choose the desired build configuration
    from the available list.  
 
-7. Build the Silo library. If you are building the Silo DLL, both silo.dll and
+8. Build the Silo library. If you are building the Silo DLL, both silo.dll and
    silo.lib are placed in the subdirectory for the selected build configuration.
    Those directories are: (where X represents the comiler version you are using)
 
-       SiloWindows\MSVCX\Debug
-       SiloWindows\MSVCX\Release
+       SiloWindows\MSVCX\<ConfigurationName) 
+       e.g.
 
-   Each configuration type will place the created lib/dll files in these 
-   directories, so if you elect to build multiple configurations, you should 
-   move the results of one build before starting another.
+       SiloWindows\MSVCX\DLLwithHDF5_Debug
+       SiloWindows\MSVCX\DLLwithHDF5_Release
 
-
-   

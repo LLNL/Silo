@@ -14,9 +14,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug\onepyramid"
-			IntermediateDirectory=".\Debug\onepyramid"
+			Name="DLLwithHDF5_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\onepyramid"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\onepyramid"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -37,7 +37,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\onepyramid\onepyramid.tlb"
+				TypeLibraryName="$(OutDir)\onepyramid.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,10 +49,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\onepyramid\onepyramid.pch"
-				AssemblerListingLocation=".\Debug\onepyramid\"
-				ObjectFile=".\Debug\onepyramid\"
-				ProgramDataBaseFileName=".\Debug\onepyramid\onepyramid"
+				PrecompiledHeaderFile="$(OutDir)\onepyramid.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\onepyramid"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -72,12 +72,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Debug\onepyramid\onepyramid.exe"
+				OutputFile="$(SolutionDir)..\bin\onepyramid.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\onepyramid\onepyramid.pdb"
+				ProgramDatabaseFile="$(OutDir)\onepyramid.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -104,13 +104,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Debug\onepyramid\onepyramid.exe ..\bin"
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release\onepyramid"
-			IntermediateDirectory=".\Release\onepyramid"
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\onepyramid"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\onepyramid"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -131,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\onepyramid\onepyramid.tlb"
+				TypeLibraryName="$(OutDir)\onepyramid.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -144,10 +143,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\onepyramid\onepyramid.pch"
-				AssemblerListingLocation=".\Release\onepyramid\"
-				ObjectFile=".\Release\onepyramid\"
-				ProgramDataBaseFileName=".\Release\onepyramid\onepyramid"
+				PrecompiledHeaderFile="$(OutDir)\onepyramid.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4244;4305"
@@ -166,11 +165,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Release\onepyramid\onepyramid.exe"
+				OutputFile="$(SolutionDir)..\bin\onepyramid.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Release"
-				ProgramDatabaseFile=".\Release\onepyramid\onepyramid.pdb"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
+				ProgramDatabaseFile="$(OutDir)\onepyramid.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -197,7 +196,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Release\onepyramid\onepyramid.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

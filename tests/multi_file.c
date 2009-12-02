@@ -10,6 +10,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifdef WIN32
+#  include <direct.h>
+#endif
 
 #include <silo.h>
 
@@ -599,7 +602,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
 
     if (multidir)
     {
-        int i;
+        int st;
         unlink("multi_file.dir/000/ucd3d0.pdb");
         unlink("multi_file.dir/000/ucd3d0.h5");
         rmdir("multi_file.dir/000");
@@ -625,8 +628,12 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         unlink("multi_file.dir/007/ucd3d7.h5");
         rmdir("multi_file.dir/007");
         rmdir("multi_file.dir");
-        mkdir("multi_file.dir",S_IRWXU|S_IRWXG|S_IRWXU);
-        if (i < 0)
+#ifndef WIN32
+        st = mkdir("multi_file.dir",S_IRWXU|S_IRWXG|S_IRWXU);
+#else
+        st = _mkdir("multi_file.dir");
+#endif
+        if (st < 0)
         {
             fprintf(stderr, "Unable to mkdir(\"multi_file.dir\")\n");
             return;
@@ -863,7 +870,11 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
                 int st;
                 char dname[60];
                 sprintf(dname, "multi_file.dir/%03d", filenum);
+#ifndef WIN32
                 st = mkdir(dname, S_IRWXU|S_IRWXG|S_IRWXU);
+#else
+                st = _mkdir(dname);
+#endif
                 if (st < 0)
                 {
                     fprintf(stderr, "Unable to make directory \"%s\"\n", dname);

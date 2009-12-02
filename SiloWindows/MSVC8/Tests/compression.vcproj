@@ -14,9 +14,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug\compression"
-			IntermediateDirectory=".\Debug\compression"
+			Name="DLLwithHDF5_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\compression"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\compression"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -37,7 +37,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\compression\compression.tlb"
+				TypeLibraryName="$(OutDir)\compression.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,15 +49,14 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\compression\compression.pch"
-				AssemblerListingLocation=".\Debug\compression\"
-				ObjectFile=".\Debug\compression\"
-				ProgramDataBaseFileName=".\Debug\compression\compression"
+				PrecompiledHeaderFile="$(OutDir)\compression.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\compression"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="1"
-				DisableSpecificWarnings="4244;4035"
+				DisableSpecificWarnings="4244;4305"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -73,12 +72,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Debug\compression\compression.exe"
+				OutputFile="$(SolutionDir)..\bin\compression.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\compression\compression.pdb"
+				ProgramDatabaseFile="$(OutDir)\compression.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -105,13 +104,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Debug\compression\compression.exe ..\bin"
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release\compression"
-			IntermediateDirectory=".\Release\compression"
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\compression"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\compression"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -132,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\compression\compression.tlb"
+				TypeLibraryName="$(OutDir)\compression.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -145,12 +143,13 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\compression\compression.pch"
-				AssemblerListingLocation=".\Release\compression\"
-				ObjectFile=".\Release\compression\"
-				ProgramDataBaseFileName=".\Release\compression\compression"
+				PrecompiledHeaderFile="$(OutDir)\compression.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
+				DisableSpecificWarnings="4244;4305"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -166,11 +165,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Release\compression\compression.exe"
+				OutputFile="$(SolutionDir)..\bin\compression.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Release"
-				ProgramDatabaseFile=".\Release\compression\compression.pdb"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
+				ProgramDatabaseFile="$(OutDir)\compression.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -197,7 +196,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Release\compression\compression.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>
@@ -207,14 +205,6 @@
 		<File
 			RelativePath="..\..\..\tests\compression.c"
 			>
-			<FileConfiguration
-				Name="DLLwithHDF5 Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					CompileAs="1"
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

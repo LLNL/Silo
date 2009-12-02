@@ -14,9 +14,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug\extface"
-			IntermediateDirectory=".\Debug\extface"
+			Name="DLLwithHDF5_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\extface"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\extface"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -37,7 +37,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\extface\extface.tlb"
+				TypeLibraryName="$(OutDir)\extface.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,10 +49,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\extface\extface.pch"
-				AssemblerListingLocation=".\Debug\extface\"
-				ObjectFile=".\Debug\extface\"
-				ProgramDataBaseFileName=".\Debug\extface\extface"
+				PrecompiledHeaderFile="$(OutDir)\extface.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\extface"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -72,12 +72,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Debug\extface\extface.exe"
+				OutputFile="$(SolutionDir)..\bin\extface.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\extface\extface.pdb"
+				ProgramDatabaseFile="$(OutDir)\extface.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -104,13 +104,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Debug\extface\extface.exe ..\bin"
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release\extface"
-			IntermediateDirectory=".\Release\extface"
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\extface"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\extface"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -131,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\extface\extface.tlb"
+				TypeLibraryName="$(OutDir)\extface.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -144,10 +143,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\extface\extface.pch"
-				AssemblerListingLocation=".\Release\extface\"
-				ObjectFile=".\Release\extface\"
-				ProgramDataBaseFileName=".\Release\extface\extface"
+				PrecompiledHeaderFile="$(OutDir)\extface.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4244;4305"
@@ -166,11 +165,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Release\extface\extface.exe"
+				OutputFile="$(SolutionDir)..\bin\extface.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Release"
-				ProgramDatabaseFile=".\Release\extface\extface.pdb"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
+				ProgramDatabaseFile="$(OutDir)\extface.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -197,7 +196,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Release\extface\extface.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

@@ -68,7 +68,7 @@ extern int build_ucd_tri(DBfile *dbfile, char *name);
 main(int argc, char *argv[])
 {
     
-    int            meshid, diridq, diridu, diridt, dbid;
+    int            meshid, diridq, diridu, diridt;
     int            meshtypes[3], mmid, nmesh;
     char          *meshnames[3], original_dir[128];
     DBfile        *dbfile, *dbfile2, *dbfile3, *dbfile4, *dbfile5;

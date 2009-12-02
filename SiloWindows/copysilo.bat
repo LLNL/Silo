@@ -15,6 +15,10 @@ for /F "tokens=1,2,3* delims=.,-pre" %%i in (..\\..\\VERSION) do (
   Set pre=%%l
 )
 
+if exist %SiloOut% (
+  del %SiloOut%
+)
+
 REM Read silo.h.in, parsing for VERS info, and substituting in appropriate values
 for /F "tokens=1* delims=]" %%i in ('find /v /n "" ^..\..\src\silo\silo.h.in') do (
   REM preserve blank lines

@@ -14,9 +14,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug\spec"
-			IntermediateDirectory=".\Debug\spec"
+			Name="DLLwithHDF5_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\spec"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\spec"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -37,7 +37,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\spec\spec.tlb"
+				TypeLibraryName="$(OutDir)\spec.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,10 +49,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\spec\spec.pch"
-				AssemblerListingLocation=".\Debug\spec\"
-				ObjectFile=".\Debug\spec\"
-				ProgramDataBaseFileName=".\Debug\spec\spec"
+				PrecompiledHeaderFile="$(OutDir)\spec.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\spec"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -72,12 +72,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Debug\spec\spec.exe"
+				OutputFile="$(SolutionDir)..\bin\spec.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\spec\spec.pdb"
+				ProgramDatabaseFile="$(OutDir)\spec.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -104,13 +104,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Debug\spec\spec.exe ..\bin"
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release\spec"
-			IntermediateDirectory=".\Release\spec"
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\spec"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\spec"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -131,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\spec\spec.tlb"
+				TypeLibraryName="$(OutDir)\spec.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -144,10 +143,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\spec\spec.pch"
-				AssemblerListingLocation=".\Release\spec\"
-				ObjectFile=".\Release\spec\"
-				ProgramDataBaseFileName=".\Release\spec\spec"
+				PrecompiledHeaderFile="$(OutDir)\spec.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4244;4305"
@@ -166,11 +165,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Release\spec\spec.exe"
+				OutputFile="$(SolutionDir)..\bin\spec.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Release"
-				ProgramDatabaseFile=".\Release\spec\spec.pdb"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
+				ProgramDatabaseFile="$(OutDir)\spec.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -197,7 +196,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Release\spec\spec.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

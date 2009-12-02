@@ -14,9 +14,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug\group_test"
-			IntermediateDirectory=".\Debug\group_test"
+			Name="DLLwithHDF5_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\group_test"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\group_test"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -37,7 +37,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\group_test\group_test.tlb"
+				TypeLibraryName="$(OutDir)\group_test.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,10 +49,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\group_test\group_test.pch"
-				AssemblerListingLocation=".\Debug\group_test\"
-				ObjectFile=".\Debug\group_test\"
-				ProgramDataBaseFileName=".\Debug\group_test\group_test"
+				PrecompiledHeaderFile="$(OutDir)\group_test.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\group_test"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -72,12 +72,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Debug\group_test\group_test.exe"
+				OutputFile="$(SolutionDir)..\bin\group_test.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\group_test\group_test.pdb"
+				ProgramDatabaseFile="$(OutDir)\group_test.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -104,13 +104,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Debug\group_test\group_test.exe ..\bin"
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release\group_test"
-			IntermediateDirectory=".\Release\group_test"
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\group_test"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\group_test"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -131,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\group_test\group_test.tlb"
+				TypeLibraryName="$(OutDir)\group_test.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -144,10 +143,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\group_test\group_test.pch"
-				AssemblerListingLocation=".\Release\group_test\"
-				ObjectFile=".\Release\group_test\"
-				ProgramDataBaseFileName=".\Release\group_test\group_test"
+				PrecompiledHeaderFile="$(OutDir)\group_test.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4244;4305"
@@ -166,11 +165,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Release\group_test\group_test.exe"
+				OutputFile="$(SolutionDir)..\bin\group_test.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Release"
-				ProgramDatabaseFile=".\Release\group_test\group_test.pdb"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
+				ProgramDatabaseFile="$(OutDir)\group_test.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -197,7 +196,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Release\group_test\group_test.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

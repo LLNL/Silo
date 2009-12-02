@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="alltypes"
 	ProjectGUID="{627C8E54-0ABD-4B8A-B76B-0BD13F5E684B}"
+	RootNamespace="alltypes"
 	>
 	<Platforms>
 		<Platform
@@ -14,9 +15,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug\alltypes"
-			IntermediateDirectory=".\Debug\alltypes"
+			Name="DLLwithHDF5_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\alltypes"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\alltypes"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -37,7 +38,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\alltypes\alltypes.tlb"
+				TypeLibraryName="$(OutDir)\alltypes.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,10 +50,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\alltypes\alltypes.pch"
-				AssemblerListingLocation=".\Debug\alltypes\"
-				ObjectFile=".\Debug\alltypes\"
-				ProgramDataBaseFileName=".\Debug\alltypes\alltypes"
+				PrecompiledHeaderFile="$(OutDir)\alltypes.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\alltypes"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -72,12 +73,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Debug\alltypes\alltypes.exe"
+				OutputFile="$(SolutionDir)..\bin\alltypes.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\alltypes\alltypes.pdb"
+				ProgramDatabaseFile="$(OutDir)\alltypes.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -104,13 +105,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Debug\alltypes\alltypes.exe ..\bin"
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release\alltypes"
-			IntermediateDirectory=".\Release\alltypes"
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\alltypes"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\alltypes"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -131,7 +131,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\alltypes\alltypes.tlb"
+				TypeLibraryName="$(OutDir)\alltypes.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -144,10 +144,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\alltypes\alltypes.pch"
-				AssemblerListingLocation=".\Release\alltypes\"
-				ObjectFile=".\Release\alltypes\"
-				ProgramDataBaseFileName=".\Release\alltypes\alltypes"
+				PrecompiledHeaderFile="$(OutDir)\alltypes.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4244;4305"
@@ -166,11 +166,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Release\alltypes\alltypes.exe"
+				OutputFile="$(SolutionDir)..\bin\alltypes.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Release"
-				ProgramDatabaseFile=".\Release\alltypes\alltypes.pdb"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
+				ProgramDatabaseFile="$(OutDir)\alltypes.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -197,7 +197,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Release\alltypes\alltypes.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

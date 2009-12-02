@@ -117,9 +117,8 @@ main(int argc, char *argv[])
     
     int            nerrors = 0;
     int            i, j, ndims=1; 
-    int            cnt, driver=DB_HDF5;
+    int            driver=DB_HDF5;
     char          *filename="largefile.h5";
-    int            k1, k2;
     DBfile        *dbfile;
 
     /* Parse command-line */

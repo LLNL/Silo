@@ -2,14 +2,15 @@
 
 set errorfile=.\error.txt 
 set resultsfile=.\results.txt 
-set drivers=(DB_HDF5 DB_PDB)
+set drivers=(DB_PDB DB_HDF5)
+set buildDir=..\Win32\DLLwithHDF5_Release\
 
 
 set gp=(version.exe namescheme.exe point.exe extface.exe testall.exe TesReadMask.exe array.exe multi_test.exe partial_io.exe simple.exe ucd.exe ucdsamp3.exe obj.exe onehex.exe oneprism.exe onepyramid.exe onetet.exe subhex.exe twohex.exe multispec.exe sami.exe specmix.exe spec.exe alltypes.exe wave.exe polyzl.exe csg.exe rocket.exe mmadjacency.exe mat3d_3across.exe ucd1d.exe dirtest.exe quad.exe namescheme.exe)
 
 
 :: copy necessary dlls to this executable directory
-if not exist .\silohdf5.dll  copy ..\Release\silohdf5.dll .
+if not exist .\silohdf5.dll  copy %buildDir%\silohdf5.dll .
 if not exist .\hdf5dll.dll   copy %HDF5_LIB_DIR%\hdf5dll.dll .
 if not exist .\zlib1.dll     copy %ZLIB_LIB_DIR%\zlib1.dll .
 if not exist .\szlibdll.dll  copy %SZIP_LIB_DIR%\szlibdll.dll .

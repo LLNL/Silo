@@ -7,6 +7,13 @@
 #define FPZIP_TARGETSCALE_TOO_LARGE     4
 #define FPZIP_BAD_PRECISION             5
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern int fpzip_errno;
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif

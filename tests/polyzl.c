@@ -62,7 +62,7 @@ int
 main(int argc, char *argv[])
 {
     
-    int            i, cnt, driver=DB_PDB;
+    int            i, driver=DB_PDB;
     char          *filename="polyzl.pdb";
     DBfile        *dbfile;
 

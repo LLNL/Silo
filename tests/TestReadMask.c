@@ -662,9 +662,8 @@ ResetTime(void)
 int
 ElapsedTime(void)
 {
-    int     ms;
-
 #if !defined(_WIN32)
+    int     ms;
     /* Get the end time */
     gettimeofday(&end_time,0);
 

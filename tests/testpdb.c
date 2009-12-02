@@ -72,7 +72,6 @@ ReadFile (char *filename, char *name)
     char      *cptr;
     char      **ccptr;
     char      carray[256];
-    float     *fptr;
     float     farray[20];
     float     fval;
 
@@ -154,7 +153,6 @@ CreateFile (char *filename, char *name, char *type, int num,
 {
     int       i;
     int       *null_ptr;
-    int       ierr;
     PDBfile   *file=NULL;
     Group     *group=NULL;
     float     *coord0;

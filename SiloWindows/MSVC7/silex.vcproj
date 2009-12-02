@@ -10,7 +10,7 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
+			Name="DLLwithHDF5_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -73,7 +73,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
+			Name="DLLwithHDF5_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -135,7 +135,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="DLL Debug|Win32"
+			Name="DLL_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -198,7 +198,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="DLL Release|Win32"
+			Name="DLL_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -260,7 +260,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="StaticLibwithHDF5 Release|Win32"
+			Name="StaticLibwithHDF5_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -322,7 +322,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="StaticLibwithHDF5 Debug|Win32"
+			Name="StaticLibwithHDF5_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -385,7 +385,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="StaticLib Release|Win32"
+			Name="StaticLib_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
@@ -447,7 +447,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="StaticLib Debug|Win32"
+			Name="StaticLib_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"

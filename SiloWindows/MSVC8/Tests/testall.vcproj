@@ -14,9 +14,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
-			OutputDirectory=".\Debug\testall"
-			IntermediateDirectory=".\Debug\testall"
+			Name="DLLwithHDF5_Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testall"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testall"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -37,7 +37,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\testall\testall.tlb"
+				TypeLibraryName="$(OutDir)\testall.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,10 +49,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug\testall\testall.pch"
-				AssemblerListingLocation=".\Debug\testall\"
-				ObjectFile=".\Debug\testall\"
-				ProgramDataBaseFileName=".\Debug\testall\testall"
+				PrecompiledHeaderFile="$(OutDir)\testall.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\testall"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -72,12 +72,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Debug\testall\testall.exe"
+				OutputFile="$(SolutionDir)..\bin\testall.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug\testall\testall.pdb"
+				ProgramDatabaseFile="$(OutDir)\testall.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -104,13 +104,12 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Debug\testall\testall.exe ..\bin"
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
-			OutputDirectory=".\Release\testall"
-			IntermediateDirectory=".\Release\testall"
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testall"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testall"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops"
 			UseOfMFC="0"
@@ -131,7 +130,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\testall\testall.tlb"
+				TypeLibraryName="$(OutDir)\testall.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -144,14 +143,13 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release\testall\testall.pch"
-				AssemblerListingLocation=".\Release\testall\"
-				ObjectFile=".\Release\testall\"
-				ProgramDataBaseFileName=".\Release\testall\testall"
+				PrecompiledHeaderFile="$(OutDir)\testall.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DisableSpecificWarnings="4244;4305"
-				ShowIncludes="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -167,11 +165,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile=".\Release\testall\testall.exe"
+				OutputFile="$(SolutionDir)..\bin\testall.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\Release"
-				ProgramDatabaseFile=".\Release\testall\testall.pdb"
+				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
+				ProgramDatabaseFile="$(OutDir)\testall.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -198,7 +196,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy .\Release\testall\testall.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

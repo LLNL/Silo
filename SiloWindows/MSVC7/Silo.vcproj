@@ -10,7 +10,7 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5 Release|Win32"
+			Name="DLLwithHDF5_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
@@ -22,8 +22,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="..\include\WithHDF5;..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS;_HDF5USEDLL_;DB_USE_MODERN_DTPTR"
+				AdditionalIncludeDirectories="..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS;_HDF5USEDLL_;DB_USE_MODERN_DTPTR;FPZIP_FP=FPZIP_FP_SAFE"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -39,11 +39,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="hdf5dll.lib"
+				AdditionalDependencies="zlib1.lib hdf5dll.lib"
 				OutputFile="$(OutDir)\silohdf5.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="$(HDF5_LIB_DIR)"
+				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR);$(HDF5_LIB_DIR)"
 				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
 				ImportLibrary="$(OutDir)\silohdf5.lib"
 				TargetMachine="1"/>
@@ -58,9 +58,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Create silo.h"
-				CommandLine="..\copysilo.bat"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -79,7 +77,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5 Debug|Win32"
+			Name="DLLwithHDF5_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
@@ -90,8 +88,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="..\include\WithHDF5;..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS;_HDF5USEDLL_;DB_USE_MODERN_DTPTR"
+				AdditionalIncludeDirectories="..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS;_HDF5USEDLL_;DB_USE_MODERN_DTPTR;FPZIP_FP=FPZIP_FP_SAFE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -107,11 +105,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="hdf5dll.lib"
+				AdditionalDependencies="zlib1.lib hdf5dll.lib"
 				OutputFile="$(OutDir)\silohdf5.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="$(HDF5_LIB_DIR)"
+				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR);$(HDF5_LIB_DIR)"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
 				ImportLibrary="$(OutDir)\silohdf5.lib"
@@ -127,9 +125,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Create silo.h"
-				CommandLine="..\copysilo.bat"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -148,7 +144,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="DLL Debug|Win32"
+			Name="DLL_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
@@ -159,8 +155,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="..\include\NoHDF5;..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS;DB_USE_MODERN_DTPTR"
+				AdditionalIncludeDirectories="..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS;DB_USE_MODERN_DTPTR;FPZIP_FP=FPZIP_FP_SAFE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -176,11 +172,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
+				AdditionalDependencies="zlib1.lib "
 				OutputFile="$(OutDir)\silo.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR)"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)\silo.pdb"
 				ImportLibrary="$(OutDir)\silo.lib"
@@ -196,9 +192,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Create silo.h"
-				CommandLine="..\copysilo.bat"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -217,7 +211,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="DLL Release|Win32"
+			Name="DLL_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
@@ -229,8 +223,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="..\include\NoHDF5;..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS;DB_USE_MODERN_DTPTR"
+				AdditionalIncludeDirectories="..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS;DB_USE_MODERN_DTPTR;FPZIP_FP=FPZIP_FP_SAFE"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -246,11 +240,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
+				AdditionalDependencies="zlib1.lib "
 				OutputFile="$(OutDir)\silo.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR)"
 				ProgramDatabaseFile="$(OutDir)\silo.pdb"
 				ImportLibrary="$(OutDir)\silo.lib"
 				TargetMachine="1"/>
@@ -265,9 +259,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Create silo.h"
-				CommandLine="..\copysilo.bat"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -286,7 +278,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="StaticLibwithHDF5 Release|Win32"
+			Name="StaticLibwithHDF5_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
@@ -298,8 +290,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="..\include\WithHDF5;..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY;DB_USE_MODERN_DTPTR"
+				AdditionalIncludeDirectories="..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY;DB_USE_MODERN_DTPTR;FPZIP_FP=FPZIP_FP_SAFE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -315,7 +307,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\silohdf5.lib"/>
+				AdditionalDependencies="zlib.lib hdf5.lib szlib.lib"
+				OutputFile="$(OutDir)\silohdf5.lib"
+				AdditionalLibraryDirectories="$(ZLIB_STATICLIB_DIR);$(HDF5_STATICLIB_DIR);$(SZIP_STATICLIB_DIR)"
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -327,9 +321,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Create silo.h"
-				CommandLine="..\copysilo.bat"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -346,7 +338,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="StaticLibwithHDF5 Debug|Win32"
+			Name="StaticLibwithHDF5_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
@@ -357,8 +349,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="..\include\WithHDF5;..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR)"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY;DB_USE_MODERN_DTPTR"
+				AdditionalIncludeDirectories="..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY;DB_USE_MODERN_DTPTR;FPZIP_FP=FPZIP_FP_SAFE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
@@ -374,7 +366,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/silohdf5.lib"/>
+				AdditionalDependencies="zlib.lib hdf5.lib szlib.lib"
+				OutputFile="$(OutDir)/silohdf5.lib"
+				AdditionalLibraryDirectories="$(ZLIB_STATICLIB_DIR);$(HDF5_STATICLIB_DIR); $(SZIP_STATICLIB_DIR)"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -386,9 +380,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Create silo.h"
-				CommandLine="..\copysilo.bat"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -405,7 +397,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="StaticLib Release|Win32"
+			Name="StaticLib_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
@@ -417,8 +409,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="..\include\NoHDF5;..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY;DB_USE_MODERN_DTPTR"
+				AdditionalIncludeDirectories="..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY;DB_USE_MODERN_DTPTR;FPZIP_FP=FPZIP_FP_SAFE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -434,7 +426,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\silo.lib"/>
+				AdditionalDependencies="zlib.lib"
+				OutputFile="$(OutDir)\silo.lib"
+				AdditionalLibraryDirectories="$(ZLIB_STATICLIB_DIR)"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -446,9 +440,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Create silo.h"
-				CommandLine="..\copysilo.bat"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -465,7 +457,7 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="StaticLib Debug|Win32"
+			Name="StaticLib_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
@@ -476,8 +468,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="..\include\NoHDF5;..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY;DB_USE_MODERN_DTPTR"
+				AdditionalIncludeDirectories="..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY;DB_USE_MODERN_DTPTR;FPZIP_FP=FPZIP_FP_SAFE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
@@ -493,7 +485,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\silo.lib"/>
+				AdditionalDependencies="zlib.lib"
+				OutputFile="$(OutDir)\silo.lib"
+				AdditionalLibraryDirectories="$(ZLIB_STATICLIB_DIR)"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -505,9 +499,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Create silo.h"
-				CommandLine="..\copysilo.bat"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -549,9 +541,6 @@
 		<Filter
 			Name="pdb"
 			Filter="">
-			<File
-				RelativePath="..\..\src\pdb\detect.c">
-			</File>
 			<File
 				RelativePath="..\..\src\pdb\pdb.c">
 			</File>
@@ -615,9 +604,6 @@
 				RelativePath="..\..\src\silo\silo_f.c">
 			</File>
 			<File
-				RelativePath="..\..\src\silo\silo_fcb.c">
-			</File>
-			<File
 				RelativePath="..\..\src\silo\silo_ns.c">
 			</File>
 		</Filter>
@@ -650,6 +636,62 @@
 			</File>
 			<File
 				RelativePath="..\..\src\taurus\taurus.c">
+			</File>
+		</Filter>
+		<Filter
+			Name="fpzip"
+			Filter="">
+			<File
+				RelativePath="..\..\src\fpzip\write.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\fpzip\read.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\fpzip\rcqsmodel.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\fpzip\rcencoder.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\fpzip\rcdecoder.cpp">
+			</File>
+		</Filter>
+		<Filter
+			Name="hzip"
+			Filter="">
+			<File
+				RelativePath="..\..\src\hzip\hzmdecoder.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hzmencoder.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hzmio.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hzmpredictor.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hzmread.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hzmwrite.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hznio.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hznpredictor.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hznread.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hznwrite.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\hzip\hzutil.cpp">
 			</File>
 		</Filter>
 	</Files>

@@ -5509,7 +5509,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
 
                 /* Build the hdf5 data type to read */
                 mtype = H5Tcreate(H5T_COMPOUND, mult * db_GetMachDataSize(datatype));
-                if (mnof != -1 && mnofidx != -1 & mnofname != 0)
+                if (mnof != -1 && mnofidx != -1 && mnofname != 0)
                     db_hdf5_put_cmemb(mtype, mnofname, 0, ndims, dim, hdf2hdf_type(ftype));
                 else
                     db_hdf5_put_cmemb(mtype, compname, 0, ndims, dim, hdf2hdf_type(ftype));
@@ -5522,7 +5522,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
 
                 /* Handle the case where we got a match on member name modulo trailing
                    digits (which really represent an index into the member) */
-                if (mnof != -1 && mnofidx != -1 & mnofname != 0)
+                if (mnof != -1 && mnofidx != -1 && mnofname != 0)
                 {
                     void *newretval;
                     char *pretval = (char *) retval + mnofidx * db_GetMachDataSize(datatype);

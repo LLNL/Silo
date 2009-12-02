@@ -3,26 +3,26 @@
 	<Platforms>
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
-		<Configuration Name="DLLwithHDF5 Debug|Win32" OutputDirectory=".\Debug\quad_f" IntermediateDirectory=".\Debug\quad_f">
+		<Configuration Name="DLLwithHDF5_Debug|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\quad_f" IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\quad_f">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\src\silo" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\Debug" GenerateDebugInformation="true" SubSystem="subSystemConsole" TargetMachine="machineX86" AdditionalDependencies="silohdf5.lib"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(SolutionDir)..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)" ManifestFile="$(IntDir)\$(TargetFileName).intermediate.manifest" GenerateDebugInformation="true" ProgramDatabaseFile="$(IntDir)$(TargetName).pdb" SubSystem="subSystemConsole" ImportLibrary="$(IntDir)\$(TargetName).lib" TargetMachine="machineX86" AdditionalDependencies="silohdf5.lib"/>
+				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)\$(InputName).res"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)\$(ProjectName).tlb"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="copy .\Debug\quad_f\quad_f.exe ..\bin"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="DLLwithHDF5 Release|Win32" OutputDirectory=".\Release\quad_f" IntermediateDirectory=".\Release\quad_f">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\src\silo"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\Release" SubSystem="subSystemConsole" AdditionalDependencies="silohdf5.lib"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true" OutputManifestFile="$(Intdir)\$(TargetFileName).embed.manifest" ResourceFile="$(IntDir)\$(TargetFileName).embed.manifest.res"/></Configuration>
+		<Configuration Name="DLLwithHDF5_Release|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\quad_f" IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\quad_f">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\src\silo" DiagnosticsFile="$(IntDir)$(TargetName).diag" ModulePath="$(IntDir)" ObjectFile="$(IntDir)"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(SolutionDir)..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)" ManifestFile="$(IntDir)\$(TargetFileName).intermediate.manifest" ProgramDatabaseFile="$(IntDir)$(TargetName).pdb" SubSystem="subSystemConsole" ImportLibrary="$(IntDir)\$(TargetName).lib" AdditionalDependencies="silohdf5.lib"/>
+				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)\$(InputName).res"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)\$(ProjectName).tlb"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="copy .\Release\quad_f\quad_f.exe ..\bin"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true" OutputManifestFile="$(Intdir)\$(TargetFileName).embed.manifest" ResourceFile="$(IntDir)\$(TargetFileName).embed.manifest.res"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>

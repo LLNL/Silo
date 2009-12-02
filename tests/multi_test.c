@@ -2349,9 +2349,6 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             itemp;
     int             hi_off;
 
-    DBobject       *obj;
-
-
     zonelist = ALLOC_N(int, 16000);
     facelist = ALLOC_N(int, 10000);
     zoneno = ALLOC_N(int, 2000);
