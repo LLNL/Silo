@@ -144,47 +144,65 @@ fail:
         exit(nerrors);
 }
 
+#ifdef STATIC_PLUGINS
+extern iointerface_t* CreateInterface_silo(int argc, char *argv[], const char *filename);
+#endif
+
 static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacename)
 {
-    char libfilename[256];
     char testfilename[256];
-    void *dlhandle;
+    void *dlhandle=0;
     iointerface_t *retval=0;
 
-    sprintf(libfilename, "./libiop_%s.so", ifacename);
+    /* First, get rid of the old data file */
     sprintf(testfilename, "iop_test_%s.dat", ifacename);
     unlink(testfilename);
-    dlhandle = dlopen(libfilename, RTLD_LAZY);
-    if (dlhandle)
+
+    /* First, attempt to create interface using static approach, if that
+       is enabled. */
+#ifdef STATIC_PLUGINS
+    if (!strcmp(ifacename, "silo"))
+        retval = CreateInterface_silo(argc, argv, testfilename);
+#endif
+
+    /* Fall back to dynamic approach */
+    if (!retval)
     {
-        CreateInterfaceFunc createFunc = (CreateInterfaceFunc) dlsym(dlhandle, "CreateInterface");
-        if (!createFunc)
+        char libfilename[256];
+        sprintf(libfilename, "./libiop_%s.so", ifacename);
+        dlhandle = dlopen(libfilename, RTLD_LAZY);
+        if (dlhandle)
         {
-            fprintf(stderr,"Encountered dlsym error \"%s\"\n", dlerror());
+            CreateInterfaceFunc createFunc = (CreateInterfaceFunc) dlsym(dlhandle, "CreateInterface");
+            if (!createFunc)
+            {
+                fprintf(stderr,"Encountered dlsym error \"%s\"\n", dlerror());
+                exit(1);
+            }
+
+            /* we allow the io-interface plugin to process command line args too */
+            retval = createFunc(argc, argv, testfilename);
+
+        }
+        else
+        {
+            fprintf(stderr,"Encountered dlopen error \"%s\"\n", dlerror());
             exit(1);
         }
-
-        /* we allow the io-interface plugin to process command line args too */
-        retval = createFunc(argc, argv, testfilename);
-
-        if (!retval)
-        {
-            fprintf(stderr,"Encountered error instantiating IO interface\n");
-            exit(1);
-        }
-
-        /* store off the handle to this plugin so we can close it later */
-        retval->dlhandle = dlhandle;
-
-        /* slip in the default time function */
-        if (!retval->Time)
-            retval->Time = GetTime;
     }
-    else
+
+    if (!retval)
     {
-        fprintf(stderr,"Encountered dlopen error \"%s\"\n", dlerror());
+        fprintf(stderr,"Encountered error instantiating IO interface\n");
         exit(1);
     }
+
+    /* store off the handle to this plugin so we can close it later */
+    retval->dlhandle = dlhandle;
+
+    /* slip in the default time function */
+    if (!retval->Time)
+        retval->Time = GetTime;
 
     return retval;
 }
@@ -393,7 +411,8 @@ main(int argc, char *argv[])
     AddTimingInfo(OP_CLOSE, 0, t0, t1);
 
     /* close the interface */
-    dlclose(ioiface->dlhandle);
+    if (ioiface->dlhandle)
+        dlclose(ioiface->dlhandle);
     
     /* output timing info */
     if (options.print_details)

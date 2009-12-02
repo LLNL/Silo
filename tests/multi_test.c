@@ -341,6 +341,8 @@ fill_rect3d_mat(float x[], float y[], float z[], int matlist[], int nx,
  *    Sean Ahern, Tue Dec  7 16:07:31 PST 1999
  *    Fixed the type of argv.
  *
+ *    Mark C. Miller, Wed Dec  2 12:12:49 PST 2009
+ *    Fixed declaration of 'inc'
  *------------------------------------------------------------------------*/
 int
 main(int argc, char *argv[])
@@ -350,6 +352,7 @@ main(int argc, char *argv[])
     int            i;
     int            dochecks = FALSE;
     int            hdfriendly = FALSE;
+    int            inc = 512 << 11;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -366,7 +369,6 @@ main(int argc, char *argv[])
             driver = DB_HDF5_STDIO;
             file_ext = ".h5";
         } else if (!strcmp(argv[i], "DB_HDF5_CORE")) {
-            int inc = 512 << 11;
             driver = inc | DB_HDF5_CORE;
             file_ext = ".h5";
         } else if (!strcmp(argv[i], "hzip")) {

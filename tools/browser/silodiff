@@ -10,8 +10,31 @@
 #   Mark C. Miller, Wed Mar 11 10:03:10 PDT 2009
 #   Added browserOptsDef and set lowlevel to 0. That is important when
 #   diff'ing HDF5 files.
+#
+#   Mark C. Miller, Wed Dec  2 11:47:31 PST 2009
+#   Added logic to use path to browser that is 'next to' silodiff or fall
+#   back what a browser in path, but issue a warning if they are somehow
+#   different.
 # ----------------------------------------------------------------------------
 #
+
+#
+# Get path to browser
+#
+brexe=browser
+sddir=$(dirname $0)
+if test -x ${sddir}/browser; then
+    brexe=${sddir}/browser
+else
+    brdir=$(dirname $(which browser))
+    if test $brdir != $sddir; then
+        echo "*WARNING*"
+        echo "*WARNING* Using browser at $brdir"
+        echo "*WARNING* which is different from"
+        echo "*WARNING* silodiff at $sddir"
+        echo "*WARNING*"
+    fi
+fi
 
 #
 # Handle Command Line Arguments
@@ -91,7 +114,7 @@ if test $optError = 1 -o -z "$arg1" -o -z "$arg2"; then
     echo "variant instead. By default, $0 will invoke browser with args"
     echo "'$browserOptsDef'. The available options to browser are..."
     echo ""
-    browser --help 2>&1 | grep -v SWITCHES
+    $brexe --help 2>&1 | grep -v SWITCHES
     exit 1
 fi
 
@@ -117,7 +140,7 @@ if test -d $arg1 -a -d $arg2; then # both are dirs
             bf=`basename $f`
             if test -e $arg2/$bf; then
                 test $verbose = 1 && echo "Processing file \"$bf\"..."
-                browser $browserOptsDef $browserOpts -e diff $f $arg2/$bf
+                $brexe $browserOptsDef $browserOpts -e diff $f $arg2/$bf
             else
                 test $verbose = 1 && echo "File \"$bf\" does not exist in \"$arg2\", skipping it."
             fi
@@ -125,10 +148,10 @@ if test -d $arg1 -a -d $arg2; then # both are dirs
     done
 elif test -d $arg1 -o -d $arg2; then # one is dir
     if test -d $arg1; then
-        browser $browserOptsDef $browserOpts -e diff $arg1/$arg2 $arg2
+        $brexe $browserOptsDef $browserOpts -e diff $arg1/$arg2 $arg2
     else
-        browser $browserOptsDef $browserOpts -e diff $arg1 $arg2/$arg1
+        $brexe $browserOptsDef $browserOpts -e diff $arg1 $arg2/$arg1
     fi
 else # neither are dirs
-    browser $browserOptsDef $browserOpts -e diff $arg1 $arg2
+    $brexe $browserOptsDef $browserOpts -e diff $arg1 $arg2
 fi
