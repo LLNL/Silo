@@ -309,7 +309,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="zlib.lib hdf5.lib szlib.lib"
 				OutputFile="$(OutDir)\silohdf5.lib"
-				AdditionalLibraryDirectories="$(ZLIB_STATICLIB_DIR);$(HDF5_STATICLIB_DIR);$(SZIP_STATICLIB_DIR)"
+				AdditionalLibraryDirectories="$(ZLIB_STATICLIB_DIR);$(HDF5_STATICLIB_DIR);$(SZIP_STATICLIB_DIR)"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
