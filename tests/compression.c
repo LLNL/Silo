@@ -130,7 +130,8 @@ main(int argc, char *argv[])
           has_loss = 1;
        } else if (!strcmp(argv[i], "minratio1000")) {
           DBSetCompression("ERRMODE=FAIL MINRATIO=1000 METHOD=FPZIP");
-          has_loss = 1;
+       } else if (!strcmp(argv[i], "minratio1001")) {
+          DBSetCompression("ERRMODE=FALLBACK MINRATIO=1000 METHOD=FPZIP");
        } else if (!strcmp(argv[i], "readonly")) {
           readonly = 1;
        } else if (!strcmp(argv[i], "help")) {

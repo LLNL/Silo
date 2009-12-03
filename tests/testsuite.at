@@ -183,18 +183,22 @@ AT_CLEANUP
 AT_SETUP(compression gzip)
 AT_KEYWORDS(compression)
 AT_CHECK(test -z "$DB_HDF5" && exit 77 || $VALGRIND compression gzip,,ignore,ignore)
+AT_CHECK(test -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(compression szip)
 AT_KEYWORDS(compression)
 AT_CHECK(test -z "$DB_HDF5" && exit 77 || $VALGRIND compression szip,,ignore,ignore)
+AT_CHECK(test -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(compression fpzip)
 AT_KEYWORDS(compression)
 AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression fpzip,,ignore,ignore)
+AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(compression lossy3)
 AT_KEYWORDS(compression)
 AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression lossy3,,ignore,ignore)
+AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly,50,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(compression minratio1000)
 AT_KEYWORDS(compression)

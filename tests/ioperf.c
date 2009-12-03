@@ -146,6 +146,7 @@ fail:
 
 #ifdef STATIC_PLUGINS
 extern iointerface_t* CreateInterface_silo(int argc, char *argv[], const char *filename);
+extern iointerface_t* CreateInterface_hdf5(int argc, char *argv[], const char *filename);
 #endif
 
 static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacename)
@@ -163,8 +164,9 @@ static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacena
 #ifdef STATIC_PLUGINS
     if (!strcmp(ifacename, "silo"))
         retval = CreateInterface_silo(argc, argv, testfilename);
-#endif
-
+    else if (!strcmp(ifacename, "hdf5"))
+        retval = CreateInterface_hdf5(argc, argv, testfilename);
+#else
     /* Fall back to dynamic approach */
     if (!retval)
     {
@@ -190,6 +192,7 @@ static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacena
             exit(1);
         }
     }
+#endif
 
     if (!retval)
     {
@@ -410,9 +413,11 @@ main(int argc, char *argv[])
     t1 = ioiface->Time();
     AddTimingInfo(OP_CLOSE, 0, t0, t1);
 
+#ifndef STATIC_PLUGINS
     /* close the interface */
     if (ioiface->dlhandle)
         dlclose(ioiface->dlhandle);
+#endif
     
     /* output timing info */
     if (options.print_details)
