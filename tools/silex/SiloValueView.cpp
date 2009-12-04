@@ -59,6 +59,8 @@ using std::cerr;
 //    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
 //    Ported to Qt4.
 //
+//    Mark C. Miller, Fri Dec  4 15:19:47 PST 2009
+//    Adding support for long long type
 // ****************************************************************************
 SiloValueViewWindow::SiloValueViewWindow(SiloFile *s, const QString &n, QWidget *p)
     : QMainWindow(p), silo(s), name(n)
@@ -89,6 +91,9 @@ SiloValueViewWindow::SiloValueViewWindow(SiloFile *s, const QString &n, QWidget 
         break;
       case DB_LONG:
         sprintf(str, "long: %ld", *((long*)var));
+        break;
+      case DB_LONG_LONG:
+        sprintf(str, "long long: %lld", *((long long*)var));
         break;
       case DB_FLOAT:
         sprintf(str, "float: %g", *((float*)var));

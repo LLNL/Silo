@@ -115,6 +115,8 @@ SiloObjectViewWindow::ShowItem(QTreeWidgetItem *i, int)
 //    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
 //    Ported to Qt4.
 //
+//    Mark C. Miller, Fri Dec  4 15:19:47 PST 2009
+//    Adding support for long long type
 // ****************************************************************************
 SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
     : QTreeWidget(p), silo(s), name(n)
@@ -169,7 +171,12 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
           case DB_LONG:
             typestr = "long";
             sprintf(value, "%ld", *((long*)comp));
-            ival = *((long*)comp);
+            ival = (int) *((long*)comp);
+            break;
+          case DB_LONG_LONG:
+            typestr = "long long";
+            sprintf(value, "%lld", *((long long*)comp));
+            ival = (int) *((long long*)comp);
             break;
           case DB_FLOAT:
             typestr = "float";

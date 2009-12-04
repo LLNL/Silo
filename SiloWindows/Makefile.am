@@ -55,7 +55,6 @@ EXTRA_DIST = \
  MSVC8/Tests/wave.vcproj\
  MSVC8/bin\
  MSVC8/bin/RunTests.bat\
- include/pdform.h\
  include/NoHDF5/config.h\
  include/WithHDF5/config.h\
  resources/silex.aps\

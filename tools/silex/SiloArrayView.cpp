@@ -67,6 +67,8 @@ using std::cerr;
 //    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
 //    Ported to Qt4.
 //
+//    Mark C. Miller, Fri Dec  4 15:19:47 PST 2009
+//    Adding support for long long type
 // ****************************************************************************
 SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                                          QWidget *p)
@@ -103,6 +105,9 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                 break;
               case DB_LONG:
                 sprintf(str, "%-4d: %ld", i, ((long*)var)[i]);
+                break;
+              case DB_LONG_LONG:
+                sprintf(str, "%-4d: %lld", i, ((long long*)var)[i]);
                 break;
               case DB_FLOAT:
                 sprintf(str, "%-4d: %g", i, ((float*)var)[i]);
