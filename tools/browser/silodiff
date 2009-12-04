@@ -15,26 +15,11 @@
 #   Added logic to use path to browser that is 'next to' silodiff or fall
 #   back what a browser in path, but issue a warning if they are somehow
 #   different.
+#
+#   Mark C. Miller, Fri Dec  4 09:58:17 PST 2009
+#   Made it possible to override browser path warning
 # ----------------------------------------------------------------------------
 #
-
-#
-# Get path to browser
-#
-brexe=browser
-sddir=$(dirname $0)
-if test -x ${sddir}/browser; then
-    brexe=${sddir}/browser
-else
-    brdir=$(dirname $(which browser))
-    if test $brdir != $sddir; then
-        echo "*WARNING*"
-        echo "*WARNING* Using browser at $brdir"
-        echo "*WARNING* which is different from"
-        echo "*WARNING* silodiff at $sddir"
-        echo "*WARNING*"
-    fi
-fi
 
 #
 # Handle Command Line Arguments
@@ -56,6 +41,7 @@ arg1=
 arg2=
 recurse=0
 verbose=0
+override=0
 for options
 do
    case $1 in
@@ -74,6 +60,10 @@ do
          verbose=1
          shift
          ;;
+      -override-browser-warning|--override-browser-warning)
+         override=1
+         shift
+         ;;
       *)
          if test -e $1; then
              if test -z "$arg1"; then
@@ -88,6 +78,31 @@ do
          ;;
    esac
 done
+
+#
+# Check path to browser and issue error/warning if necessary
+#
+brexe=browser
+sddir=$(dirname $0)
+if test -x ${sddir}/browser; then
+    brexe=${sddir}/browser
+else
+    brdir=$(dirname $(which browser))
+    if test $brdir != $sddir; then
+        leader="*WARNING*"
+        if test $override -eq 0; then
+            leader="*ERROR*"
+        fi
+        echo "$leader"
+        echo "$leader Using browser at \"$brdir\"."
+        echo "$leader and silodiff at \"$sddir\"."
+        echo "$leader"
+        if test $override -eq 0; then
+            echo "$leader Override with \"--override-browser-warning\" option."
+            exit 1
+        fi
+    fi
+fi
 
 if test $optError = 1 -o -z "$arg1" -o -z "$arg2"; then
     echo "Usage:  $0 <file|dir> <file|dir> <options>"
