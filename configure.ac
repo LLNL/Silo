@@ -336,6 +336,11 @@ dnl     getting populated with ALL libs not just those necessary to support
 dnl     readline. Fixed problem where browser would REQUIRE readline. Still
 dnl     can't handle case where user wants to specify different readline
 dnl     include/lib dirs.
+dnl
+dnl     Mark C. Miller, Sat Dec  5 15:20:30 PST 2009
+dnl     Added logic to inspect size of long and long long datatypes and, if
+dnl     they are different sizes, ensuring Silo's DB_LONG_LONG enum value
+dnl     is unique. Otherwise, ensuring it is the same as DB_LONG enum value.
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -737,6 +742,20 @@ AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement",CFLAGS="$CFLAGS -Wdeclar
 # Use size of off64_t to determine which form of stat() calls to make 
 #
 AC_CHECK_SIZEOF(off64_t)
+
+#
+# Handle definition of long long datatype. On some machines, long
+# long may be the same size as long. If so, set the DB_LONG_LONG
+# symbol to be same as DB_LONG. Otherwise, make its value unique.
+# 
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(long long)
+AC_CHECK_SIZEOF(double)
+DB_LONG_LONG_DEF=22 # '22' is next position in DBdatatype enum
+if test $ac_cv_sizeof_long_long -eq $ac_cv_sizeof_long; then
+    DB_LONG_LONG_DEF=DB_LONG
+fi
+AC_SUBST(DB_LONG_LONG_DEF)
 
 dnl We always use the install-sh script, so don't uncomment the following line.
 AC_PROG_INSTALL

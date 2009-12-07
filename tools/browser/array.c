@@ -598,6 +598,9 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
  *
  *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *      Added SH4 mode specially handled array.
+ *
+ *      Mark C. Miller, Mon Dec  7 07:29:42 PST 2009
+ *      Made it descend into arrays of differing type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -605,7 +608,7 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
 
     obj_ary_t   *a = MYCLASS(_a);
     obj_ary_t   *b = MYCLASS(_b);
-    int         nbytes;                 /*bytes per element             */
+    int         a_nbytes, b_nbytes;     /*bytes per element             */
     int         a_total, b_total;       /*total elements per array      */
     int         first=(-1), last;       /*differing range               */
     int         *elmtno=NULL;           /*linear element number         */
@@ -707,25 +710,24 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
         a_total *= a_dim[i];
         b_total *= b_dim[i];
     }
-    if ((nbytes=obj_sizeof(a->sub))<0) return -1;
-    if ((n=obj_sizeof(b->sub))<0) return -1;
-    if (n!=nbytes) {
+    if ((a_nbytes=obj_sizeof(a->sub))<0) return -1;
+    if ((b_nbytes=obj_sizeof(b->sub))<0) return -1;
+    if (b_nbytes!=a_nbytes) {
         switch (DiffOpt.report) {
         case DIFF_REP_ALL:
             if (DiffOpt.two_column) {
-                out_printf(f, "%d-byte data", nbytes);
+                out_printf(f, "%d-byte data", a_nbytes);
                 out_column(f, OUT_COL2, DIFF_SEPARATOR);
-                out_printf(f, "%d-byte data", n);
+                out_printf(f, "%d-byte data", b_nbytes);
                 out_nl(f);
-                return 1;
             }
             out_printf(f, "different data sizes [%d in file A; %d in file B]",
-                       nbytes, n);
+                       a_nbytes, b_nbytes);
             out_nl(f);
-            return 2;
+            break;
         case DIFF_REP_BRIEF:
             out_printf(f, "different data sizes [%d in file A; %d in file B]",
-                       nbytes, n);
+                       a_nbytes, b_nbytes);
             out_nl(f);
             return 1;
         case DIFF_REP_SUMMARY:
@@ -763,8 +765,8 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
         if (elmtno) *elmtno = i;
 
         if (i<MIN(a_total,b_total)) {
-            status = obj_walk2(a->sub, (char*)a_mem+i*nbytes,
-                               b->sub, (char*)b_mem+i*nbytes, wdata);
+            status = obj_walk2(a->sub, (char*)a_mem+i*a_nbytes,
+                               b->sub, (char*)b_mem+i*b_nbytes, wdata);
         } else if (i<MAX(a_total,b_total)) {
             if ((a_total>b_total && !DiffOpt.ignore_dels) ||
                 (a_total<b_total && !DiffOpt.ignore_adds)) {
@@ -785,7 +787,7 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
                 if (DiffOpt.two_column && 2==status) {
                     /* A */
                     if (i<a_total) {
-                        obj_walk1(a->sub, (char*)a_mem+i*nbytes,
+                        obj_walk1(a->sub, (char*)a_mem+i*a_nbytes,
                                   WALK_PRINT, wdata);
                     } else {
                         out_puts(f, DIFF_NOTAPP);
@@ -793,7 +795,7 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
                     /* B */
                     out_column(f, OUT_COL2, DIFF_SEPARATOR);
                     if (i<b_total) {
-                        obj_walk1(b->sub, (char*)b_mem+i*nbytes,
+                        obj_walk1(b->sub, (char*)b_mem+i*b_nbytes,
                                   WALK_PRINT, wdata);
                     } else {
                         out_puts(f, DIFF_NOTAPP);
@@ -854,7 +856,7 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
                         out_puts(f, buf);
                         j = first+(n-nright)-1;
                     } else {
-                        obj_walk1(a->sub, (char*)a_mem+j*nbytes,
+                        obj_walk1(a->sub, (char*)a_mem+j*a_nbytes,
                                   WALK_PRINT, wdata);
                     }
                 }
@@ -895,7 +897,7 @@ ary_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
                         out_puts(f, buf);
                         j = first+(n-nright)-1;
                     } else {
-                        obj_walk1(b->sub, (char*)b_mem+j*nbytes,
+                        obj_walk1(b->sub, (char*)b_mem+j*b_nbytes,
                                   WALK_PRINT, wdata);
                     }
                 }

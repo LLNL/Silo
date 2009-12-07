@@ -49,6 +49,7 @@
  */
 #include <assert.h>
 #include <browser.h>
+#include <config.h>
 #include <ctype.h>
 #include <math.h>
 #define MYCLASS(X)      ((obj_prim_t*)(X))
@@ -866,6 +867,21 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
     }
 }
 
+static double
+prim_getval(int type, void *mem)
+{
+    switch (type) {
+    case BROWSER_STR:       return 0;
+    case BROWSER_INT8:      return (double) *((signed char*)mem);
+    case BROWSER_SHORT:     return (double) *((short*)mem);
+    case BROWSER_INT:       return (double) *((int*)mem);
+    case BROWSER_LONG:      return (double) *((long*)mem);
+    case BROWSER_LONG_LONG: return (double) *((long long*)mem);
+    case BROWSER_FLOAT:     return (double) *((float*)mem);
+    case BROWSER_DOUBLE:    return (double) *((double*)mem);
+    }
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    prim_walk2
@@ -896,6 +912,11 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
  *
  *  Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
  *  Added suppot for alternate relative diff option using epsilon param.
+ *
+ *  Mark C. Miller, Sun Dec  6 16:01:01 PST 2009
+ *  Added support for diffing values of different type. Added special
+ *  diffing logic for diffing long long values as double mantissa is not
+ *  long enough to store all possible long long values.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -909,7 +930,8 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
     int          status = 0;
     out_t       *f = wdata->f;
 
-    if (a->browser_type != b->browser_type) return 2;
+    a_d = prim_getval(a->browser_type, a_mem);
+    b_d = prim_getval(b->browser_type, b_mem);
 
     switch (a->browser_type) {
     case BROWSER_STR:
@@ -926,8 +948,6 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         break;
 
     case BROWSER_INT8:
-        a_d = *((signed char*)a_mem);
-        b_d = *((signed char*)b_mem);
         d_abs = DiffOpt.c_abs;
         d_rel = DiffOpt.c_rel;
         d_eps = DiffOpt.c_eps;
@@ -935,8 +955,6 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         break;
 
     case BROWSER_SHORT:
-        a_d = *((short*)a_mem);
-        b_d = *((short*)b_mem);
         d_abs = DiffOpt.s_abs;
         d_rel = DiffOpt.s_rel;
         d_eps = DiffOpt.s_eps;
@@ -944,8 +962,6 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         break;
 
     case BROWSER_INT:
-        a_d = *((int*)a_mem);
-        b_d = *((int*)b_mem);
         d_abs = DiffOpt.i_abs;
         d_rel = DiffOpt.i_rel;
         d_eps = DiffOpt.i_eps;
@@ -953,8 +969,6 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         break;
 
     case BROWSER_LONG:
-        a_d = *((long*)a_mem);
-        b_d = *((long*)b_mem);
         d_abs = DiffOpt.l_abs;
         d_rel = DiffOpt.l_rel;
         d_eps = DiffOpt.l_eps;
@@ -962,17 +976,34 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         break;
 
     case BROWSER_LONG_LONG:
-        a_d = *((long long*)a_mem);
-        b_d = *((long long*)b_mem);
+    {
+#if SIZEOF_LONG_LONG>SIZEOF_LONG && SIZEOF_LONG_LONG>=SIZEOF_DOUBLE
+        if (b->browser_type == BROWSER_LONG_LONG)
+        {
+            long long a_ll = *((long long*)a_mem);
+            long long b_ll = *((long long*)b_mem);
+            d_abs = DiffOpt.l_abs;
+            d_rel = DiffOpt.l_rel;
+            d_eps = DiffOpt.l_eps;
+            status = differentll(a_ll, b_ll, d_abs, d_rel, d_eps) ? 2 : 0;
+        }
+        else
+        {
+            d_abs = DiffOpt.l_abs;
+            d_rel = DiffOpt.l_rel;
+            d_eps = DiffOpt.l_eps;
+            status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
+        }
+#else
         d_abs = DiffOpt.l_abs;
         d_rel = DiffOpt.l_rel;
         d_eps = DiffOpt.l_eps;
         status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
+#endif
         break;
+    }
 
     case BROWSER_FLOAT:
-        a_d = *((float*)a_mem);
-        b_d = *((float*)b_mem);
         d_abs = DiffOpt.f_abs;
         d_rel = DiffOpt.f_rel;
         d_eps = DiffOpt.f_eps;
@@ -980,8 +1011,6 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         break;
 
     case BROWSER_DOUBLE:
-        a_d = *((double*)a_mem);
-        b_d = *((double*)b_mem);
         d_abs = DiffOpt.d_abs;
         d_rel = DiffOpt.d_rel;
         d_eps = DiffOpt.d_eps;

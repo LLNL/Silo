@@ -287,7 +287,7 @@ typedef enum {
     DB_FLOAT=19,
     DB_DOUBLE=20,
     DB_CHAR=21,
-    DB_LONG_LONG=22,
+    DB_LONG_LONG=@DB_LONG_LONG_DEF@,
     DB_NOTYPE=25           /*unknown type */
 } DBdatatype;
 

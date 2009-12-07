@@ -633,6 +633,80 @@ different (double a, double b, double abstol, double reltol,
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    differentll
+ *
+ * Purpose:     Implement above difference function for long long type. 
+ *
+ * Programmer:  Mark C. Miller, Mon Dec  7 07:05:39 PST 2009
+ *-------------------------------------------------------------------------
+ */
+#if SIZEOF_LONG_LONG>SIZEOF_LONG && SIZEOF_LONG_LONG>=SIZEOF_DOUBLE
+#define FABS(A) ((A)<0?-(A):(A))
+int
+differentll (long long a, long long b, double abstol, double reltol,
+    double reltol_eps) {
+
+   long long num, den;
+
+   /*
+    * Now the |A-B| but make sure it doesn't overflow which can only
+    * happen if one is negative and the other is positive.
+    */
+   if (abstol>0) {
+      if ((a<0 && b>0) || (b<0 && a>0)) {
+         if (FABS(a/2 - b/2) > abstol/2) return 1;
+      } else {
+         if (FABS(a-b) > abstol) return 1;
+      }
+   }
+
+   /*
+    * First, see if we should use the alternate diff.
+    * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
+    */
+   if (reltol_eps >= 0)
+   {
+      if ((a<0 && b>0) || (b<0 && a>0)) {
+         num = FABS (a/2 - b/2);
+         den = FABS (a/2) + FABS(b/2) + reltol_eps/2;
+         reltol /= 2;
+      } else {
+         num = FABS (a - b);
+         den = FABS (a) + FABS(b) + reltol_eps;
+      }
+      if (0.0==den && num) return 1;
+      if (num/den > reltol) return 1;
+   }
+
+   /*
+    * Now check 2|A-B|/|A+B| in a way that won't overflow.
+    */
+   if (reltol>0) {
+      if ((a<0 && b>0) || (b<0 && a>0)) {
+         num = FABS (a/2 - b/2);
+         den = FABS (a/2 + b/2);
+         reltol /= 2;
+      } else {
+         num = FABS (a - b);
+         den = FABS (a/2 + b/2);
+      }
+      if (0.0==den && num) return 1;
+      if (num/den > reltol) return 1;
+   }
+
+   /*
+    * If all tests tried succeeded then the numbers are equal.
+    */
+   if (abstol>0 || reltol>0 || reltol_eps>=0) return 0;
+
+   /*
+    * Otherwise do a normal exact comparison.
+    */
+   return a!=b;
+}
+#endif
+
+/*-------------------------------------------------------------------------
  * Function:    set_diff
  *
  * Purpose:     Sets all differencing symbols to the same value.
