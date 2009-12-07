@@ -61,6 +61,10 @@ using std::cerr;
 //
 //    Mark C. Miller, Fri Dec  4 15:19:47 PST 2009
 //    Adding support for long long type
+//
+//    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+//    Conditionally compile long long support only when its
+//    different from long.
 // ****************************************************************************
 SiloValueViewWindow::SiloValueViewWindow(SiloFile *s, const QString &n, QWidget *p)
     : QMainWindow(p), silo(s), name(n)
@@ -92,9 +96,11 @@ SiloValueViewWindow::SiloValueViewWindow(SiloFile *s, const QString &n, QWidget 
       case DB_LONG:
         sprintf(str, "long: %ld", *((long*)var));
         break;
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
       case DB_LONG_LONG:
         sprintf(str, "long long: %lld", *((long long*)var));
         break;
+#endif
       case DB_FLOAT:
         sprintf(str, "float: %g", *((float*)var));
         break;

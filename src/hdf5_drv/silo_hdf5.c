@@ -2724,6 +2724,10 @@ build_fspace(hid_t dset, int ndims, int *offset, int *length, int *stride,
  *
  *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
  *   Adding support for long long type.
+ *
+ *   Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *   Conditionally compile long long support only when its
+ *   different from long.
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
@@ -2741,9 +2745,11 @@ silom2hdfm_type(int datatype)
     case DB_LONG:
         mtype = H5T_NATIVE_LONG;
         break;
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
     case DB_LONG_LONG:
         mtype = H5T_NATIVE_LLONG;
         break;
+#endif
     case DB_FLOAT:
         mtype = H5T_NATIVE_FLOAT;
         break;
@@ -2775,6 +2781,10 @@ silom2hdfm_type(int datatype)
  *
  *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
  *   Adding support for long long type.
+ *
+ *   Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *   Conditionally compile long long support only when its
+ *   different from long.
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
@@ -2792,9 +2802,11 @@ silof2hdff_type(DBfile_hdf5 *dbfile, int datatype)
     case DB_LONG:
         ftype = dbfile->T_long;
         break;
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
     case DB_LONG_LONG:
         ftype = dbfile->T_llong;
         break;
+#endif
     case DB_FLOAT:
         ftype = dbfile->T_float;
         break;

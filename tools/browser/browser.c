@@ -638,9 +638,15 @@ different (double a, double b, double abstol, double reltol,
  * Purpose:     Implement above difference function for long long type. 
  *
  * Programmer:  Mark C. Miller, Mon Dec  7 07:05:39 PST 2009
+ *
+ * Modifications:
+ *   Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *   Change conditional compilation logic to compile this routine
+ *   whenever a double is NOT sufficient to hold full precision of long
+ *   or long long.
  *-------------------------------------------------------------------------
  */
-#if SIZEOF_LONG_LONG>SIZEOF_LONG && SIZEOF_LONG_LONG>=SIZEOF_DOUBLE
+#if SIZEOF_LONG>=SIZEOF_DOUBLE || SIZEOF_LONG_LONG>=SIZEOF_DOUBLE
 #define FABS(A) ((A)<0?-(A):(A))
 int
 differentll (long long a, long long b, double abstol, double reltol,

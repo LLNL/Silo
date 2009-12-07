@@ -593,6 +593,10 @@ _DBQMSetStride(DBquadmesh *qmesh)
  *    Fixed memory error by extending length of alloc'd string to
  *    support "long_long". Changed name of long long data type
  *    to match what PDB proper does.
+ *
+ *    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *    Conditionally compile long long support only when its
+ *    different from long.
  *---------------------------------------------------------------------*/
 INTERNAL char *
 db_GetDatatypeString(int type)
@@ -615,9 +619,11 @@ db_GetDatatypeString(int type)
         case DB_LONG:
             strcpy(str, "long");
             break;
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
         case DB_LONG_LONG:
             strcpy(str, "long_long");
             break;
+#endif
         case DB_FLOAT:
             strcpy(str, "float");
             break;
@@ -1040,6 +1046,10 @@ db_FreeToc(DBfile *dbfile)
  *
  *    Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
  *    Adding support for long long type.
+ *
+ *    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *    Conditionally compile long long support only when its
+ *    different from long.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_GetMachDataSize(int datatype)
@@ -1063,10 +1073,12 @@ db_GetMachDataSize(int datatype)
         case DB_LONG:
             size = sizeof(long);
 
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
         case DB_LONG_LONG:
             size = sizeof(long long);
 
             break;
+#endif
         case DB_FLOAT:
             size = sizeof(float);
 
@@ -1109,6 +1121,10 @@ db_GetMachDataSize(int datatype)
  *
  *    Mark C. Miller, Tue Nov 17 22:30:30 PST 2009
  *    Changed name of long long datatype to match PDB proper.
+ *
+ *    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *    Conditionally compile long long support only when its
+ *    different from long.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_GetDatatypeID(char *dataname)
@@ -1120,8 +1136,10 @@ db_GetDatatypeID(char *dataname)
         size = DB_INT;
     else if (STR_BEGINSWITH(dataname, "short"))
         size = DB_SHORT;
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
     else if (STR_BEGINSWITH(dataname, "long_long"))
         size = DB_LONG_LONG;
+#endif
     else if (STR_BEGINSWITH(dataname, "long"))
         size = DB_LONG;
     else if (STR_BEGINSWITH(dataname, "float"))

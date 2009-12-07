@@ -39,6 +39,7 @@
 #define SILOFILE_H
 
 #include <silo.h>
+#include <config.h>
 #include <QString>
 #include <vector>
 using std::vector;

@@ -1,6 +1,7 @@
 #define NEED_SCORE_MM
 #define NO_CALLBACKS
 #include "silo_pdb_private.h"
+#include "config.h"
 
 /*-------------------------------------------------------------------------
  * Global private variables.
@@ -525,6 +526,10 @@ PJ_GetComponentType (PDBfile *file, char *objname, char *compname)
  *
  *      Mark C. Miller, Fri Nov 13 15:26:38 PST 2009
  *      Add support for long long data type.
+ *
+ *      Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *      Conditionally compile long long support only when its
+ *      different from long.
  *--------------------------------------------------------------------*/
 INTERNAL int
 PJ_ReadVariable(PDBfile *file,
@@ -735,12 +740,14 @@ PJ_ReadVariable(PDBfile *file,
          for (i = 0; i < num; i++)
             local_f[i] = (float)l_conv[i];
          break;
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
       case DB_LONG_LONG:
          ll_conv = (long long *)(*var);
 
          for (i = 0; i < num; i++)
             local_f[i] = (float)ll_conv[i];
          break;
+#endif
       case DB_DOUBLE:
          d_conv = (double *)(*var);
 

@@ -917,6 +917,9 @@ prim_getval(int type, void *mem)
  *  Added support for diffing values of different type. Added special
  *  diffing logic for diffing long long values as double mantissa is not
  *  long enough to store all possible long long values.
+ *
+ *  Mark C. Miller, Mon Dec  7 09:52:54 PST 2009
+ *  Expand above mods to handle case where sizeof(long)>=sizeof(double).
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -927,6 +930,7 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
     obj_prim_t  *b = MYCLASS(_b);
     char                *a_s=NULL, *b_s=NULL;
     double      a_d, b_d, d_abs, d_rel, d_eps;
+    long long   a_ll, b_ll;
     int          status = 0;
     out_t       *f = wdata->f;
 
@@ -969,19 +973,40 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
         break;
 
     case BROWSER_LONG:
+#if SIZEOF_LONG>=SIZEOF_DOUBLE
+        if (b->browser_type != BROWSER_FLOAT &&
+            b->browser_type != BROWSER_DOUBLE)
+        {
+            a_ll = (long long) *((long*)a_mem);
+            b_ll = (long long) *((long*)b_mem);
+            d_abs = DiffOpt.l_abs;
+            d_rel = DiffOpt.l_rel;
+            d_eps = DiffOpt.l_eps;
+            status = differentll(a_ll, b_ll, d_abs, d_rel, d_eps) ? 2 : 0;
+        }
+        else
+        {
+            d_abs = DiffOpt.l_abs;
+            d_rel = DiffOpt.l_rel;
+            d_eps = DiffOpt.l_eps;
+            status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
+        }
+#else
         d_abs = DiffOpt.l_abs;
         d_rel = DiffOpt.l_rel;
         d_eps = DiffOpt.l_eps;
         status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
+#endif
         break;
 
     case BROWSER_LONG_LONG:
     {
-#if SIZEOF_LONG_LONG>SIZEOF_LONG && SIZEOF_LONG_LONG>=SIZEOF_DOUBLE
-        if (b->browser_type == BROWSER_LONG_LONG)
+#if SIZEOF_LONG_LONG>=SIZEOF_DOUBLE
+        if (b->browser_type != BROWSER_FLOAT &&
+            b->browser_type != BROWSER_DOUBLE)
         {
-            long long a_ll = *((long long*)a_mem);
-            long long b_ll = *((long long*)b_mem);
+            a_ll = *((long long*)a_mem);
+            b_ll = *((long long*)b_mem);
             d_abs = DiffOpt.l_abs;
             d_rel = DiffOpt.l_rel;
             d_eps = DiffOpt.l_eps;
@@ -1201,6 +1226,10 @@ prim_sizeof (obj_t _self) {
  *
  *    Mark C. Miller, Tue Nov 17 22:30:30 PST 2009
  *    Changed name of long long datatype to match PDB proper.
+ *
+ *    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *    Conditionally compile long long support only when its
+ *    different from long.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -1316,11 +1345,13 @@ prim_bind (obj_t _self, void *mem) {
          self->nbytes = sizeof(long);
          break;
 
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
       case DB_LONG_LONG:
          self->tname = safe_strdup ("long_long");
          self->browser_type = BROWSER_LONG_LONG;
          self->nbytes = sizeof(long long);
          break;
+#endif
 
       case DB_FLOAT:
          self->tname = safe_strdup ("float");

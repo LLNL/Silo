@@ -37,6 +37,7 @@ for advertising or product endorsement purposes.
 #include <stdlib.h>
 #include <string.h>
 #include <silo.h>
+#include <config.h>
 
 #define ALLOC_N(T, N) (T *)malloc((N) * sizeof(T))
 #define FREE(P) if(P) {free(P); (P) = NULL;}
@@ -59,6 +60,10 @@ void PrintObjectComponentsType(DBfile *, char *, char *);
  *
  *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
  *   Adding support for long long type.
+ *
+ *   Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *   Conditionally compile long long support only when its
+ *   different from long.
  ********************************************************************/
 
 char *
@@ -77,9 +82,11 @@ IntToTypename(int type)
     case DB_LONG:
         retval = "DB_LONG";
         break;
+#if SIZEOF_LONG_LONG!=SIZEOF_LONG
     case DB_LONG_LONG:
         retval = "DB_LONG_LONG";
         break;
+#endif
     case DB_FLOAT:
         retval = "DB_FLOAT";
         break;
