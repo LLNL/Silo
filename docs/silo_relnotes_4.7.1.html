@@ -11,7 +11,7 @@
   <li>Obtain source code at <a
  href="https://wci.llnl.gov/codes/silo/silo-4.7.1/silo-4.7.1.tar.gz">https://wci.llnl.gov/codes/silo/silo-4.7.1/silo-4.7.1.tar.gz</a></li>
   <li>Obtain documentation at
-https://wci.llnl.gov/codes/silo/media/pdf/LLNL_SM_????.pdf</li>
+https://wci.llnl.gov/codes/silo/media/pdf/LLNL_SM_421083.pdf</li>
   <li>An <a href="http://www.rce-cast.com/">HPC Podcast</a> on the
 topic of Silo is available at <a
  href="http://www.rce-cast.com/components/com_podcast/media/20RCE-silo.mp3">http://www.rce-cast.com/components/com_podcast/media/20RCE-silo.mp3</a><br>
@@ -27,7 +27,8 @@ topic of Silo is available at <a
 <h3>1. New features added in this release</h3>
 <ul>
   <li>Support for DB_LONG_LONG datatype was added.</li>
-  <li>A new relative differencing option was added to silodiff/browser.</li>
+  <li>A new relative differencing option was added to silodiff/browser.
+Thanks to John Wohlbier for specifying the algorithm.</li>
   <li>Species now support names and colors just as materials do.</li>
   <li>All Silo structs are now non-anonymous.</li>
   <li>All silo variables now support characterization as <span
@@ -96,7 +97,8 @@ integral precision of long long data. In all other cases (and has always been th
 case), browser casts values to double and computes their differences as double
 values.<br>
 <h3>4. Details regarding new browser relative difference algorithm. </h3>
-Thanks to John Wohlbier, a new relative differencing option was added to browser. It
+Thanks to John Wohlbier for specifying a new relative differencing algorithm for
+browser. It
 is controlled by the -x EPS, --epsilon=EPS command line arguments and $diff_*_eps
 variables.
 <br>

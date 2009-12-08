@@ -717,7 +717,7 @@ PJ_ReadVariable(PDBfile *file,
       char          *c_conv = NULL;
       double        *d_conv = NULL;
       long          *l_conv = NULL;
-      long          *ll_conv = NULL;
+      long long     *ll_conv = NULL;
       short         *s_conv = NULL;
       int           *i_conv = NULL;
 
