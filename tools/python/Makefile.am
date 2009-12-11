@@ -9,7 +9,7 @@ else
   Silo_la_LIBADD = ../../src/libsilo.la
 endif
 
-AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(includedir) -I$(top_srcdir)/src/silo
+AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(top_builddir)/src/silo -I$(includedir)
 
 noinst_HEADERS = \
  pydbfile.h \
