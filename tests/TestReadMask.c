@@ -281,6 +281,9 @@ main(int argc, char *argv[])
     ms[maskindex] = test_readzonelist(dbfile, mask[maskindex]);
     printf("Reading zone list for %s took %d ms.\n\n", files[2], ms[maskindex]);
     maskindex++;
+    ms[maskindex] = test_readzonelist(dbfile, mask[maskindex]);
+    printf("Reading zone list for %s took %d ms.\n\n", files[2], ms[maskindex]);
+    maskindex++;
     DBClose(dbfile);
 
     /* Print the times. */
@@ -411,8 +414,7 @@ test_readpointvar(DBfile * dbfile, long mask)
     }
 
     /* This check gets us around a crash! */
-    if (mask != DBNone)
-        DBFreeMeshvar(mvar);
+    DBFreeMeshvar(mvar);
 
     /* Return how many milliseconds since the call to ResetTime. */
     return ms;
@@ -486,8 +488,7 @@ test_readquadvar(DBfile * dbfile, long mask)
     }
 
     /* This check gets us around a crash! */
-    if (mask != DBNone)
-        DBFreeQuadvar(qvar);
+    DBFreeQuadvar(qvar);
 
     /* Return how many milliseconds since the call to ResetTime. */
     return ms;
@@ -565,8 +566,7 @@ test_readucdvar(DBfile * dbfile, long mask)
     }
 
     /* This check gets us around a crash! */
-    if (mask != DBNone)
-        DBFreeUcdvar(uvar);
+    DBFreeUcdvar(uvar);
 
     /* Return how many milliseconds since the call to ResetTime. */
     return ms;

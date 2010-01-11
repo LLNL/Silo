@@ -187,7 +187,7 @@ _lite_PD_hyper_read (PDBfile *file, char *name, char *outtype,
                      syment *ep, byte *vr) {
 
    long         hbyt, fbyt;
-   int          nd, c, nrd;
+   int          nd, c, nrd, i;
    char         s[MAXLINE], *expr;
    dimdes       *dims;
    dimind       *pi;
@@ -214,7 +214,9 @@ _lite_PD_hyper_read (PDBfile *file, char *name, char *outtype,
    }
 
    expr = lite_SC_lasttok(s, "[]()");
-   strcpy(s, expr);
+   for (i = 0; expr[i] != '\0'; i++)
+      s[i] = expr[i];
+   s[i] = '\0';
 
    pi = _PD_compute_hyper_strides(file, s, dims, &nd);
    if (pi == NULL)

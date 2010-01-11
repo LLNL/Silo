@@ -743,20 +743,6 @@ AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement",CFLAGS="$CFLAGS -Wdeclar
 #
 AC_CHECK_SIZEOF(off64_t)
 
-#
-# Handle definition of long long datatype. On some machines, long
-# long may be the same size as long. If so, set the DB_LONG_LONG
-# symbol to be same as DB_LONG. Otherwise, make its value unique.
-# 
-AC_CHECK_SIZEOF(long)
-AC_CHECK_SIZEOF(long long)
-AC_CHECK_SIZEOF(double)
-DB_LONG_LONG_DEF=22 # '22' is next position in DBdatatype enum
-if test $ac_cv_sizeof_long_long -eq $ac_cv_sizeof_long; then
-    DB_LONG_LONG_DEF=DB_LONG
-fi
-AC_SUBST(DB_LONG_LONG_DEF)
-
 dnl We always use the install-sh script, so don't uncomment the following line.
 AC_PROG_INSTALL
 

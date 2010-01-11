@@ -579,6 +579,9 @@ V_diff (int argc, obj_t argv[])
     DiffOpt.d_abs = diff_lookup("$diff_double_abs");
     DiffOpt.d_rel = diff_lookup("$diff_double_rel");
     DiffOpt.d_eps = diff_lookup("$diff_double_eps");
+    DiffOpt.ll_abs = diff_lookup("$diff_llong_abs");
+    DiffOpt.ll_rel = diff_lookup("$diff_llong_rel");
+    DiffOpt.ll_eps = diff_lookup("$diff_llong_eps");
 
             
     for (i=0; i<nopands/2; i++) {

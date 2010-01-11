@@ -82,11 +82,9 @@ IntToTypename(int type)
     case DB_LONG:
         retval = "DB_LONG";
         break;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
     case DB_LONG_LONG:
         retval = "DB_LONG_LONG";
         break;
-#endif
     case DB_FLOAT:
         retval = "DB_FLOAT";
         break;

@@ -342,6 +342,7 @@ typedef struct diffopt_t {
     double              l_abs, l_rel, l_eps; /*long tolerances          */
     double              f_abs, f_rel, f_eps; /*float tolerances         */
     double              d_abs, d_rel, d_eps; /*double tolerances        */
+    double              ll_abs, ll_rel, ll_eps; /*long long tolerances  */
     strlist_t           exclude;        /*objects to exclude            */
 } diffopt_t;
 

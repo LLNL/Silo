@@ -740,14 +740,12 @@ PJ_ReadVariable(PDBfile *file,
          for (i = 0; i < num; i++)
             local_f[i] = (float)l_conv[i];
          break;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
       case DB_LONG_LONG:
          ll_conv = (long long *)(*var);
 
          for (i = 0; i < num; i++)
             local_f[i] = (float)ll_conv[i];
          break;
-#endif
       case DB_DOUBLE:
          d_conv = (double *)(*var);
 

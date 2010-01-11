@@ -637,6 +637,7 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
     out_t               *f=NULL;
     int                 i, j, obase;
     unsigned long       u, nbits, mask;
+    unsigned long long  ull;
 
     switch (operation) {
     case WALK_PRINT:
@@ -751,9 +752,9 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
                 u = *((unsigned long*)mem);
                 nbits = 8*sizeof(long);
                 if (16==obase) {
-                    out_printf(f, "%0*x", 2*sizeof(long), u);
+                    out_printf(f, "%0*lx", 2*sizeof(long), u);
                 } else if (8==obase) {
-                    out_printf(f, "%0*o", (nbits+2)/3, u);
+                    out_printf(f, "%0*lo", (nbits+2)/3, u);
                 } else if (2==obase) {
                     for (i=0; i<sizeof(long); i++) {
                         u = *((unsigned char*)mem+i);
@@ -768,12 +769,12 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
                 break;
 
             case BROWSER_LONG_LONG:
-                u = *((unsigned long long*)mem);
+                ull = *((unsigned long long*)mem);
                 nbits = 8*sizeof(long long);
                 if (16==obase) {
-                    out_printf(f, "%0*x", 2*sizeof(long long), u);
+                    out_printf(f, "%0*llx", 2*sizeof(long long), ull);
                 } else if (8==obase) {
-                    out_printf(f, "%0*o", (nbits+2)/3, u);
+                    out_printf(f, "%0*llo", (nbits+2)/3, ull);
                 } else if (2==obase) {
                     for (i=0; i<sizeof(long long); i++) {
                         u = *((unsigned char*)mem+i);
@@ -867,6 +868,21 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
     }
 }
 
+static long long
+prim_getval_ll(int type, void *mem)
+{
+    switch (type) {
+    case BROWSER_STR:       return 0;
+    case BROWSER_INT8:      return (long long) *((signed char*)mem);
+    case BROWSER_SHORT:     return (long long) *((short*)mem);
+    case BROWSER_INT:       return (long long) *((int*)mem);
+    case BROWSER_LONG:      return (long long) *((long*)mem);
+    case BROWSER_LONG_LONG: return (long long) *((long long*)mem);
+    case BROWSER_FLOAT:     return (long long) *((float*)mem);
+    case BROWSER_DOUBLE:    return (long long) *((double*)mem);
+    }
+}
+
 static double
 prim_getval(int type, void *mem)
 {
@@ -929,121 +945,114 @@ prim_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata)
     obj_prim_t  *a = MYCLASS(_a);
     obj_prim_t  *b = MYCLASS(_b);
     char                *a_s=NULL, *b_s=NULL;
-    double      a_d, b_d, d_abs, d_rel, d_eps;
-    long long   a_ll, b_ll;
     int          status = 0;
     out_t       *f = wdata->f;
 
-    a_d = prim_getval(a->browser_type, a_mem);
-    b_d = prim_getval(b->browser_type, b_mem);
-
-    switch (a->browser_type) {
-    case BROWSER_STR:
-        a_s = *((char**)a_mem);
-        b_s = *((char**)b_mem);
-
-        if ((a_s && !b_s) || (!a_s && b_s)) {
-            /* One is null, the other isn't */
-            status = 2;
-        } else if (a_s && b_s && strcmp(a_s, b_s)) {
-            /* Non-null and different */
-            status = 2;
-        }
-        break;
-
-    case BROWSER_INT8:
-        d_abs = DiffOpt.c_abs;
-        d_rel = DiffOpt.c_rel;
-        d_eps = DiffOpt.c_eps;
-        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
-        break;
-
-    case BROWSER_SHORT:
-        d_abs = DiffOpt.s_abs;
-        d_rel = DiffOpt.s_rel;
-        d_eps = DiffOpt.s_eps;
-        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
-        break;
-
-    case BROWSER_INT:
-        d_abs = DiffOpt.i_abs;
-        d_rel = DiffOpt.i_rel;
-        d_eps = DiffOpt.i_eps;
-        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
-        break;
-
-    case BROWSER_LONG:
-#if SIZEOF_LONG>=SIZEOF_DOUBLE
-        if (b->browser_type != BROWSER_FLOAT &&
-            b->browser_type != BROWSER_DOUBLE)
-        {
-            a_ll = (long long) *((long*)a_mem);
-            b_ll = (long long) *((long*)b_mem);
-            d_abs = DiffOpt.l_abs;
-            d_rel = DiffOpt.l_rel;
-            d_eps = DiffOpt.l_eps;
-            status = differentll(a_ll, b_ll, d_abs, d_rel, d_eps) ? 2 : 0;
-        }
-        else
-        {
-            d_abs = DiffOpt.l_abs;
-            d_rel = DiffOpt.l_rel;
-            d_eps = DiffOpt.l_eps;
-            status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
-        }
-#else
-        d_abs = DiffOpt.l_abs;
-        d_rel = DiffOpt.l_rel;
-        d_eps = DiffOpt.l_eps;
-        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
-#endif
-        break;
-
-    case BROWSER_LONG_LONG:
+    if (a->browser_type == b->browser_type)
     {
-#if SIZEOF_LONG_LONG>=SIZEOF_DOUBLE
-        if (b->browser_type != BROWSER_FLOAT &&
-            b->browser_type != BROWSER_DOUBLE)
+        if (a->browser_type == BROWSER_STR)
         {
-            a_ll = *((long long*)a_mem);
-            b_ll = *((long long*)b_mem);
-            d_abs = DiffOpt.l_abs;
-            d_rel = DiffOpt.l_rel;
-            d_eps = DiffOpt.l_eps;
+            a_s = *((char**)a_mem);
+            b_s = *((char**)b_mem);
+
+            if ((a_s && !b_s) || (!a_s && b_s)) {
+                /* One is null, the other isn't */
+                status = 2;
+            } else if (a_s && b_s && strcmp(a_s, b_s)) {
+                /* Non-null and different */
+                status = 2;
+            }
+        }
+        else if (a->browser_type == BROWSER_LONG_LONG)
+        {
+            long long a_ll = prim_getval_ll(a->browser_type, a_mem);
+            long long b_ll = prim_getval_ll(b->browser_type, b_mem);
+            double d_abs = DiffOpt.ll_abs;
+            double d_rel = DiffOpt.ll_rel;
+            double d_eps = DiffOpt.ll_eps;
             status = differentll(a_ll, b_ll, d_abs, d_rel, d_eps) ? 2 : 0;
         }
         else
         {
-            d_abs = DiffOpt.l_abs;
-            d_rel = DiffOpt.l_rel;
-            d_eps = DiffOpt.l_eps;
+            double a_d = prim_getval(a->browser_type, a_mem);
+            double b_d = prim_getval(b->browser_type, b_mem);
+            double d_abs, d_rel, d_eps;
+
+            switch (a->browser_type) {
+            case BROWSER_INT8:
+                d_abs = DiffOpt.c_abs;
+                d_rel = DiffOpt.c_rel;
+                d_eps = DiffOpt.c_eps;
+                break;
+            case BROWSER_SHORT:
+                d_abs = DiffOpt.s_abs;
+                d_rel = DiffOpt.s_rel;
+                d_eps = DiffOpt.s_eps;
+                break;
+            case BROWSER_INT:
+                d_abs = DiffOpt.i_abs;
+                d_rel = DiffOpt.i_rel;
+                d_eps = DiffOpt.i_eps;
+                break;
+            case BROWSER_LONG:
+                d_abs = DiffOpt.l_abs;
+                d_rel = DiffOpt.l_rel;
+                d_eps = DiffOpt.l_eps;
+                break;
+            case BROWSER_FLOAT:
+                d_abs = DiffOpt.f_abs;
+                d_rel = DiffOpt.f_rel;
+                d_eps = DiffOpt.f_eps;
+                break;
+            case BROWSER_DOUBLE:
+                d_abs = DiffOpt.d_abs;
+                d_rel = DiffOpt.d_rel;
+                d_eps = DiffOpt.d_eps;
+                break;
+            default:
+                abort();
+            }
+
             status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
         }
-#else
-        d_abs = DiffOpt.l_abs;
-        d_rel = DiffOpt.l_rel;
-        d_eps = DiffOpt.l_eps;
-        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
-#endif
-        break;
     }
-
-    case BROWSER_FLOAT:
-        d_abs = DiffOpt.f_abs;
-        d_rel = DiffOpt.f_rel;
-        d_eps = DiffOpt.f_eps;
-        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
-        break;
-
-    case BROWSER_DOUBLE:
-        d_abs = DiffOpt.d_abs;
-        d_rel = DiffOpt.d_rel;
-        d_eps = DiffOpt.d_eps;
-        status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
-        break;
-
-    default:
-        abort();
+    else
+    {
+        if (a->browser_type == BROWSER_STR ||
+            b->browser_type == BROWSER_STR)
+        {
+            /* different types but one is string. Can't handle that */
+            status = 2;
+        }
+        else if ((a->browser_type == BROWSER_INT8 ||
+                  a->browser_type == BROWSER_SHORT ||
+                  a->browser_type == BROWSER_INT ||
+                  a->browser_type == BROWSER_LONG ||
+                  a->browser_type == BROWSER_LONG_LONG) &&
+                 (b->browser_type == BROWSER_INT8 ||
+                  b->browser_type == BROWSER_SHORT ||
+                  b->browser_type == BROWSER_INT ||
+                  b->browser_type == BROWSER_LONG ||
+                  b->browser_type == BROWSER_LONG_LONG))
+        {
+            /* diff using largest integral type logic we can */
+            long long a_ll = prim_getval_ll(a->browser_type, a_mem);
+            long long b_ll = prim_getval_ll(b->browser_type, b_mem);
+            double d_abs = DiffOpt.ll_abs;
+            double d_rel = DiffOpt.ll_rel;
+            double d_eps = DiffOpt.ll_eps;
+            status = differentll(a_ll, b_ll, d_abs, d_rel, d_eps) ? 2 : 0;
+        }
+        else
+        {
+            /* diff using double precision logic */
+            double a_d = prim_getval(a->browser_type, a_mem);
+            double b_d = prim_getval(b->browser_type, b_mem);
+            double d_abs = DiffOpt.d_abs;
+            double d_rel = DiffOpt.d_rel;
+            double d_eps = DiffOpt.d_eps;
+            status = different(a_d, b_d, d_abs, d_rel, d_eps) ? 2 : 0;
+        }
     }
 
     if (status) {
@@ -1345,13 +1354,11 @@ prim_bind (obj_t _self, void *mem) {
          self->nbytes = sizeof(long);
          break;
 
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
       case DB_LONG_LONG:
          self->tname = safe_strdup ("long_long");
          self->browser_type = BROWSER_LONG_LONG;
          self->nbytes = sizeof(long long);
          break;
-#endif
 
       case DB_FLOAT:
          self->tname = safe_strdup ("float");

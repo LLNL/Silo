@@ -646,7 +646,6 @@ different (double a, double b, double abstol, double reltol,
  *   or long long.
  *-------------------------------------------------------------------------
  */
-#if SIZEOF_LONG>=SIZEOF_DOUBLE || SIZEOF_LONG_LONG>=SIZEOF_DOUBLE
 #define FABS(A) ((A)<0?-(A):(A))
 int
 differentll (long long a, long long b, double abstol, double reltol,
@@ -710,7 +709,6 @@ differentll (long long a, long long b, double abstol, double reltol,
     */
    return a!=b;
 }
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    set_diff
@@ -765,6 +763,12 @@ set_diff (const char *suffix, const char *d) {
    name = obj_new (C_SYM, tmp);
    sym_vbind (name, obj_new (C_NUM, d));
    name = obj_dest (name);
+
+   sprintf (tmp, "$diff_llong_%s", suffix);
+   name = obj_new (C_SYM, tmp);
+   sym_vbind (name, obj_new (C_NUM, d));
+   name = obj_dest (name);
+
 }
 
 static double 

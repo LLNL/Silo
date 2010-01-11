@@ -110,11 +110,9 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
               case DB_LONG:
                 sprintf(str, "%-4d: %ld", i, ((long*)var)[i]);
                 break;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
               case DB_LONG_LONG:
                 sprintf(str, "%-4d: %lld", i, ((long long*)var)[i]);
                 break;
-#endif
               case DB_FLOAT:
                 sprintf(str, "%-4d: %g", i, ((float*)var)[i]);
                 break;

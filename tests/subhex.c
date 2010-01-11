@@ -207,6 +207,8 @@ main(int argc, char *argv[])
                   Pfacelist->nshapes, Pfacelist->types, Pfacelist->typelist,
                   Pfacelist->ntypes);
 
+    DBFreeFacelist(Pfacelist);
+
     sprintf(mesh_command, "mesh hex; contour v");
     len = strlen(mesh_command) + 1;
     DBWrite(dbfile, "_meshtvinfo", mesh_command, &len, 1, DB_CHAR);

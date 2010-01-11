@@ -109,8 +109,7 @@ int SILO_VERS_TAG = 0;
 /* No lines of  the form 'int Silo_version_Maj_Min_Pat = 0;' below
    here indicates that this version is not backwards compatible with
    any previous versions.*/
-
-
+int Silo_version_4_7_1 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -619,11 +618,9 @@ db_GetDatatypeString(int type)
         case DB_LONG:
             strcpy(str, "long");
             break;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
         case DB_LONG_LONG:
             strcpy(str, "long_long");
             break;
-#endif
         case DB_FLOAT:
             strcpy(str, "float");
             break;
@@ -1073,12 +1070,10 @@ db_GetMachDataSize(int datatype)
         case DB_LONG:
             size = sizeof(long);
 
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
         case DB_LONG_LONG:
             size = sizeof(long long);
 
             break;
-#endif
         case DB_FLOAT:
             size = sizeof(float);
 
@@ -1136,10 +1131,8 @@ db_GetDatatypeID(char *dataname)
         size = DB_INT;
     else if (STR_BEGINSWITH(dataname, "short"))
         size = DB_SHORT;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
     else if (STR_BEGINSWITH(dataname, "long_long"))
         size = DB_LONG_LONG;
-#endif
     else if (STR_BEGINSWITH(dataname, "long"))
         size = DB_LONG;
     else if (STR_BEGINSWITH(dataname, "float"))
@@ -11390,6 +11383,9 @@ db_StringArrayToStringList(char **strArray, int n,
  *    a string BEFORE a colon character. We try to minimize the
  *    amount of work we do looking for a colon character by
  *    remembering where we find it in the last substring.
+ *
+ *    Mark C. Miller, Thu Dec 17 17:09:27 PST 2009
+ *    Fixed UMR on strLen when n>=0.
  *--------------------------------------------------------------------*/
 INTERNAL char **
 db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
@@ -11410,8 +11406,14 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
                 n++;
             i++;
         }
+        strLen = i;
     }
-    strLen = i;
+    else if (handleSlashSwap)
+    {
+        for (i = 0; strList[i] != '\0'; i++)
+            ;
+        strLen = i;
+    }
     
     retval = (char**) calloc(n+add1, sizeof(char*));
     for (i=0, l=(skipFirstSemicolon&&strList[0]==';')?1:0; i<n; i++) {

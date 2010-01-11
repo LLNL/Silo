@@ -89,7 +89,7 @@ main(int argc, char *argv[])
     int            cnt, driver=DB_PDB;
     char	  *filename="simple.pdb";
     int            k1, k2;
-    int            err;
+    int            err = 0;
     int            inqval;
     DBfile        *dbfile;
 

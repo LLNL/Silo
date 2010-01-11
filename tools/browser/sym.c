@@ -742,6 +742,10 @@ sym_truth (char *name) {
  *
  *      Mark C. Miller, Tue Nov 17 22:30:30 PST 2009
  *      Changed name of long long datatype to match PDB proper.
+ *
+ *      Mark C. Miller, Tue Dec 15 10:14:32 PST 2009
+ *      Fixed problem with default format for long type being '%d'. It
+ *      should really be '%ld'
  *-------------------------------------------------------------------------
  */
 void
@@ -930,19 +934,19 @@ sym_init (void)
    sym_bi_set("fmt_null",       "(null)",       "Null format",
               "This is a C printf() format string used to render null "
               "pointers in the browser output.");
-   sym_bi_set("fmt_int8",       "(int8)%d",     "Byte format",
+   sym_bi_set("fmt_int8",       "(int8)%hhd",   "Byte format",
               "This is a C printf() format string used to render byte "
               "values in the browser output.");
-   sym_bi_set("fmt_short",      "(short)%d",    "Short format",
+   sym_bi_set("fmt_short",      "(short)%hd",   "Short format",
               "This is a C printf() format string used to render short "
               "integer values in the browser output.");
    sym_bi_set("fmt_int",        "%d",           "Integer format",
               "This is a C printf() format string used to render integer "
               "values in the browser output.");
-   sym_bi_set("fmt_long",       "(long)%d",     "Long format",
+   sym_bi_set("fmt_long",       "(long)%ld",    "Long format",
               "This is a C printf() format string used to render long "
               "integer values in the browser output.");
-   sym_bi_set("fmt_long_long",   "%lld",         "Long long format",
+   sym_bi_set("fmt_long_long",   "(long long)%lld",         "Long long format",
               "This is a C printf() format string used to render long "
               "long integer values in the browser output.");
 
@@ -982,6 +986,9 @@ sym_init (void)
    sym_bi_set("diff_double_abs","0", "Absolute diff tolerance for double", diff_abs);
    sym_bi_set("diff_double_rel","0", "Relative diff tolerance for double", diff_rel);
    sym_bi_set("diff_double_eps","-1", "Epsilon for alternate relative diff for double", diff_eps);
+   sym_bi_set("diff_llong_abs",  "0", "Absolute diff tolerance for long long", diff_abs);
+   sym_bi_set("diff_llong_rel",  "0", "Relative diff tolerance for long long", diff_rel);
+   sym_bi_set("diff_llong_eps",  "-1", "Epsilon for alternate relative diff for long long", diff_eps);
    
    /*
     * Primitive types.

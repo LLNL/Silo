@@ -177,13 +177,11 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
             sprintf(value, "%ld", *((long*)comp));
             ival = (int) *((long*)comp);
             break;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
           case DB_LONG_LONG:
             typestr = "long long";
             sprintf(value, "%lld", *((long long*)comp));
             ival = (int) *((long long*)comp);
             break;
-#endif
           case DB_FLOAT:
             typestr = "float";
             sprintf(value, "%g", *((float*)comp));

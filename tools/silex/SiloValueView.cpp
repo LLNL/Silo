@@ -96,11 +96,9 @@ SiloValueViewWindow::SiloValueViewWindow(SiloFile *s, const QString &n, QWidget 
       case DB_LONG:
         sprintf(str, "long: %ld", *((long*)var));
         break;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
       case DB_LONG_LONG:
         sprintf(str, "long long: %lld", *((long long*)var));
         break;
-#endif
       case DB_FLOAT:
         sprintf(str, "float: %g", *((float*)var));
         break;

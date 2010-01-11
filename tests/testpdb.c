@@ -147,6 +147,12 @@ ReadFile (char *filename, char *name)
     return;
 }
 
+
+/*
+ *  Mark C. Miller, Thu Jan  7 10:36:24 PST 2010
+ *  Replaced safe_strdup with MAKE_N as PDB's mem allocation 
+ *  routines are required for this code.
+ */
 void
 CreateFile (char *filename, char *name, char *type, int num,
             char **comp_names, char **pdb_names)
@@ -194,11 +200,15 @@ CreateFile (char *filename, char *name, char *type, int num,
     group->comp_names = MAKE_N(char *, num);
     group->pdb_names = MAKE_N(char *, num);
     for (i = 0; i < num; i++) {
-        group->comp_names[i] = safe_strdup(comp_names[i]);
-        group->pdb_names[i] = safe_strdup(pdb_names[i]);
+        group->comp_names[i] = MAKE_N(char, strlen(comp_names[i])+1);
+        strcpy(group->comp_names[i], comp_names[i]);
+        group->pdb_names[i] = MAKE_N(char, strlen(pdb_names[i])+1);
+        strcpy(group->pdb_names[i], pdb_names[i]);
     }
-    group->type = safe_strdup(type);
-    group->name = safe_strdup(name);
+    group->type = MAKE_N(char, strlen(type)+1);
+    strcpy(group->type, type);
+    group->name = MAKE_N(char, strlen(name)+1);
+    strcpy(group->name, name);
     group->ncomponents = num;
 
     /*

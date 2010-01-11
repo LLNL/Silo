@@ -2745,11 +2745,9 @@ silom2hdfm_type(int datatype)
     case DB_LONG:
         mtype = H5T_NATIVE_LONG;
         break;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
     case DB_LONG_LONG:
         mtype = H5T_NATIVE_LLONG;
         break;
-#endif
     case DB_FLOAT:
         mtype = H5T_NATIVE_FLOAT;
         break;
@@ -2802,11 +2800,9 @@ silof2hdff_type(DBfile_hdf5 *dbfile, int datatype)
     case DB_LONG:
         ftype = dbfile->T_long;
         break;
-#if SIZEOF_LONG_LONG!=SIZEOF_LONG
     case DB_LONG_LONG:
         ftype = dbfile->T_llong;
         break;
-#endif
     case DB_FLOAT:
         ftype = dbfile->T_float;
         break;
@@ -8308,6 +8304,9 @@ PrepareForQuadvarCompression(int centering, int datatype)
  *
  *   Mark C. Miller, Wed Nov 11 09:18:12 PST 2009
  *   Fixed support for edge/face centered variables.
+ *
+ *   Mark C. Miller, Wed Jan  6 13:46:45 PST 2010
+ *   Fixed setting of align member based on centering.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -8428,15 +8427,15 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             m.max_index[i] = _qm._maxindex_n[i];
             switch (centering) {
                 case DB_NODECENT:
-                    m.align[i] = _qm._nm_alignn[i]; break;
+                    m.align[i] = 0.0; break;
                 case DB_EDGECENT: /* edge centering on 1D mesh is like zone centering */
-                    if (ndims == 1) m.align[i] = _qm._nm_alignz[i]; break;
+                    if (ndims == 1) m.align[i] = 0.5; break;
                 case DB_FACECENT: /* face centering on 2D mesh is like zone centering */
-                    if (ndims == 2) m.align[i] = _qm._nm_alignz[i]; break;
+                    if (ndims == 2) m.align[i] = 0.5; break;
                 case DB_ZONECENT:
-                    m.align[i] = _qm._nm_alignz[i]; break;
+                    m.align[i] = 0.5; break;
                 default:
-                    m.align[i] = _qm._nm_alignz[i]; break;
+                    m.align[i] = 0.5; break;
             }
         }
 
