@@ -389,6 +389,9 @@ diff_lookup (char *ascii_name) {
  *              Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
  *              Added suppot for alternate relative diff option using
  *              epsilon.
+ *
+ *              Mark C. Miller, Mon Jan 11 16:21:21 PST 2010
+ *              Added support for long long diffing params.
  *-------------------------------------------------------------------------
  */
 obj_t

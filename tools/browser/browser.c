@@ -644,6 +644,9 @@ different (double a, double b, double abstol, double reltol,
  *   Change conditional compilation logic to compile this routine
  *   whenever a double is NOT sufficient to hold full precision of long
  *   or long long.
+ *
+ *   Mark C. Miller, Mon Jan 11 16:20:16 PST 2010
+ *   Made it compiled UNconditionally.
  *-------------------------------------------------------------------------
  */
 #define FABS(A) ((A)<0?-(A):(A))
@@ -726,6 +729,8 @@ differentll (long long a, long long b, double abstol, double reltol,
  *      Robb Matzke, 2 Sep 1997
  *      Added initialization of the `int8' differencing parameters.
  *
+ *      Mark C. Miller, Mon Jan 11 16:20:39 PST 2010
+ *      Added initialization for long long diff params.
  *-------------------------------------------------------------------------
  */
 static void

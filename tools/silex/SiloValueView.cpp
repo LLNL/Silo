@@ -65,6 +65,9 @@ using std::cerr;
 //    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
 //    Conditionally compile long long support only when its
 //    different from long.
+//
+//    Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
+//    Made long long support UNconditionally compiled.
 // ****************************************************************************
 SiloValueViewWindow::SiloValueViewWindow(SiloFile *s, const QString &n, QWidget *p)
     : QMainWindow(p), silo(s), name(n)

@@ -596,6 +596,9 @@ _DBQMSetStride(DBquadmesh *qmesh)
  *    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
  *    Conditionally compile long long support only when its
  *    different from long.
+ *
+ *    Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
+ *    Made long long support UNconditionally compiled.
  *---------------------------------------------------------------------*/
 INTERNAL char *
 db_GetDatatypeString(int type)
@@ -1047,6 +1050,9 @@ db_FreeToc(DBfile *dbfile)
  *    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
  *    Conditionally compile long long support only when its
  *    different from long.
+ *
+ *    Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
+ *    Made long long support UNconditionally compiled.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_GetMachDataSize(int datatype)
@@ -1120,6 +1126,9 @@ db_GetMachDataSize(int datatype)
  *    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
  *    Conditionally compile long long support only when its
  *    different from long.
+ *
+ *    Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
+ *    Made long long support UNconditionally compiled.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_GetDatatypeID(char *dataname)

@@ -180,6 +180,10 @@ _lite_PD_indexed_read_as (PDBfile *file, char *fullpath, char *type, byte *vr,
  *
  * Modifications:
  *
+ *  Mark C. Miller, Mon Jan 11 16:04:56 PST 2010
+ *  Fixed src/dst overlap in strcpy flagged by valgrind. Note, in this
+ *  context, src is guarenteed to be an 'end' part of dst so a simple
+ *  manual shift of bytes works.
  *-------------------------------------------------------------------------
  */
 int

@@ -627,6 +627,9 @@ prim_octal(char *buf/*out*/, const void *_mem, size_t nbytes)
  *
  *      Mark C. Miller, Wed Sep 23 11:51:52 PDT 2009
  *      Added long long case.
+ *
+ *      Mark C. Miller, Mon Jan 11 16:08:57 PST 2010
+ *      Fixed handling base16/8 for long and long long types.
  *-------------------------------------------------------------------------
  */
 static void
@@ -868,6 +871,16 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
     }
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    prim_getval 
+ *
+ * Purpose:     Return value of primitive as long long.
+ *
+ * Mark C. Miller, Mon Jan 11 16:10:26 PST 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+/*ARGSUSED*/
 static long long
 prim_getval_ll(int type, void *mem)
 {
@@ -883,6 +896,16 @@ prim_getval_ll(int type, void *mem)
     }
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    prim_getval 
+ *
+ * Purpose:     Return value of primitive as double.
+ *
+ * Mark C. Miller, Mon Jan 11 16:10:26 PST 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+/*ARGSUSED*/
 static double
 prim_getval(int type, void *mem)
 {
@@ -936,6 +959,16 @@ prim_getval(int type, void *mem)
  *
  *  Mark C. Miller, Mon Dec  7 09:52:54 PST 2009
  *  Expand above mods to handle case where sizeof(long)>=sizeof(double).
+ *
+ *  Mark C. Miller, Mon Jan 11 16:11:11 PST 2010
+ *  Split logic handling same types for a and b operands and logic handling
+ *  case where a/b operands are of different type. For same type case,
+ *  all diffing is done as before, in double precision, except long long
+ *  which is done using long long. For differing types, all integral
+ *  valued data is handled using long long and all float data is handled
+ *  using double. If for the differing types one is float and the other
+ *  is integral, then it will diff using double also. Added support
+ *  for Diffopt.ll_xxx options also.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -1239,6 +1272,9 @@ prim_sizeof (obj_t _self) {
  *    Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
  *    Conditionally compile long long support only when its
  *    different from long.
+ *
+ *    Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
+ *    Made long long support UNconditionally compiled.
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/

@@ -55,6 +55,8 @@
  * 	Robb Matzke, 1999-04-09
  *	Added argument parsing to control the driver which is used.
  *
+ *      Mark C. Miller, Mon Jan 11 16:27:38 PST 2010
+ *      Added missing call to DBFreeFacelist.
  *-------------------------------------------------------------------------
  */
 int

@@ -746,6 +746,10 @@ sym_truth (char *name) {
  *      Mark C. Miller, Tue Dec 15 10:14:32 PST 2009
  *      Fixed problem with default format for long type being '%d'. It
  *      should really be '%ld'
+ *
+ *      Mark C. Miller, Mon Jan 11 16:14:51 PST 2010
+ *      Fixed default formats for int8, short and long long. Added
+ *      initialization of diffing parameters for long long.
  *-------------------------------------------------------------------------
  */
 void

@@ -38,6 +38,11 @@ struct timeval start_time;
 struct timeval end_time;
 #endif
 
+/*
+ * 
+ * Mark C. Miller, Mon Jan 11 16:24:33 PST 2010
+ * Added missing test reading of zonelist for last mask setting.
+ */
 int
 main(int argc, char *argv[])
 {
@@ -385,6 +390,10 @@ test_readpointmesh(DBfile * dbfile, long mask)
     return ms;
 }
 
+/*
+ * Mark C. Miller, Mon Jan 11 16:25:45 PST 2010
+ * Removed condition on call to DBFreeMeshvar
+ */
 int
 test_readpointvar(DBfile * dbfile, long mask)
 {
@@ -413,7 +422,6 @@ test_readpointvar(DBfile * dbfile, long mask)
         fprintf(stderr, "test_readpointvar: mvar = NULL!\n");
     }
 
-    /* This check gets us around a crash! */
     DBFreeMeshvar(mvar);
 
     /* Return how many milliseconds since the call to ResetTime. */
@@ -459,6 +467,10 @@ test_readquadmesh(DBfile * dbfile, long mask)
     return ms;
 }
 
+/*
+ * Mark C. Miller, Mon Jan 11 16:26:26 PST 2010
+ * Removed condition on DBFreeQuadvar call.
+ */
 int
 test_readquadvar(DBfile * dbfile, long mask)
 {
@@ -537,6 +549,10 @@ test_readucdmesh(DBfile * dbfile, const char *testName, long mask)
     return ms;
 }
 
+/*
+ * Mark C. Miller, Mon Jan 11 16:26:51 PST 2010
+ * Removed condition on DBFreeUcdvar call.
+ */
 int
 test_readucdvar(DBfile * dbfile, long mask)
 {

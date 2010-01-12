@@ -2728,6 +2728,9 @@ build_fspace(hid_t dset, int ndims, int *offset, int *length, int *stride,
  *   Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
  *   Conditionally compile long long support only when its
  *   different from long.
+ *
+ *   Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
+ *   Made long long support UNconditionally compiled.
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
@@ -2783,6 +2786,9 @@ silom2hdfm_type(int datatype)
  *   Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
  *   Conditionally compile long long support only when its
  *   different from long.
+ *
+ *   Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
+ *   Made long long support UNconditionally compiled.
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
