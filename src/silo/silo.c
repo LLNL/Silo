@@ -5437,6 +5437,9 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, const char *comp_name,
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Mon Jan 11 17:42:51 PST 2010
+ *    Allow special variable names in the magic /.silo dir for HDF5 files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBWrite(DBfile *dbfile, const char *vname, void *var, int *dims, int ndims,
@@ -5452,7 +5455,8 @@ DBWrite(DBfile *dbfile, const char *vname, void *var, int *dims, int ndims,
             API_ERROR("DBWrite", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("variable name", E_BADARGS);
-        if (db_VariableNameValid((char *)vname) == 0)
+        if (strncmp("/.silo/#", vname, 8) != 0 &&
+            db_VariableNameValid((char *)vname) == 0)
             API_ERROR("variable name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);

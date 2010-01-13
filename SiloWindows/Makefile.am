@@ -53,7 +53,6 @@ EXTRA_DIST = \
  MSVC8/Tests/ucdsamp3.vcproj\
  MSVC8/Tests/version.vcproj\
  MSVC8/Tests/wave.vcproj\
- MSVC8/bin\
  MSVC8/bin/RunTests.bat\
  include/NoHDF5/config.h\
  include/WithHDF5/config.h\

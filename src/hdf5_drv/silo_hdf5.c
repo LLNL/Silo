@@ -5641,6 +5641,11 @@ db_hdf5_GetComponentNames(DBfile *_dbfile, char *objname, char ***comp_names,
  *   Mark C. Miller, Mon Aug  2 15:06:57 PDT 2004
  *   I made it support writing a DBZonelist object. I also fixed an
  *   off-by-one error in indexing of string valued component names
+ *
+ *   Mark C. Miller, Wed Jan 13 14:21:50 PST 2010
+ *   Added condition of flags!=OVERWRITE before erroring on non-user
+ *   defined objects. A user could be using browser to OVERWRITE a
+ *   standard Silo object.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -5704,7 +5709,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 UNWIND();
             }
 
-        } else if (strcmp(obj->type, "unknown")) {
+        } else if (flags != OVER_WRITE && strcmp(obj->type, "unknown")) {
             db_perror("DBobject is not type DB_USERDEF", E_BADARGS, me);
             UNWIND();
         }
