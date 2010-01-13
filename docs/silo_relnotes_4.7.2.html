@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>silo_relnotes_4.7.1.html</title>
+</head>
+<body>
+<h3>Announcing the release of version 4.7.2 of the Silo Library</h3>
+<ul>
+  <li>Obtain source code at <a
+ href="https://wci.llnl.gov/codes/silo/silo-4.7.2/silo-4.7.2.tar.gz">https://wci.llnl.gov/codes/silo/silo-4.7.2/silo-4.7.2.tar.gz</a></li>
+  <li>Obtain documentation at
+https://wci.llnl.gov/codes/silo/media/pdf/LLNL_SM_421083.pdf</li>
+</ul>
+This release is to correct a couple critical problems with the 4.7.1
+release. The 4.7.1 release has<br>
+been removed from the web site and uninstalled from LLNL systems.<br>
+<br>
+Again apologies for the problems in the 4.7.1 release. This release has
+been tested and valgrind'd<br>
+against its own test suite as well as with VisIt 1.12 and VisIt 2.0.<br>
+<br>
+Silo 4.7.2 is link-time compatible with 4.7.1 except for codes using
+DB_LONG_LONG. This is<br>
+because the way DB_LONG_LONG was being handled in the Silo header file
+had to change<br>
+to correct a problem with it.<br>
+<h3>Critical bugs fixed in this release</h3>
+<ul>
+  <li>DB_LONG_LONG is no longer mapped to DB_LONG on platforms where<br>
+sizeof(long)==sizeof(long long).</li>
+  <li>The problem where centering for Quadvars was always being treated
+as node<br>
+centered was corrected.</li>
+  <li>A UMR in handling of arrays of strings in multi-block objects was
+corrected.</li>
+</ul>
+<h3>Other bugs fixed in this release<br>
+</h3>
+<ul>
+  <li>Diffing data of different type in browser is now commutative.</li>
+  <li>Default formats for printing long and long long data in base 8/16
+were corrected.</li>
+  <li>Missing diffing parameters for long long type were added.</li>
+  <li>Some leaks and a memory error were corrected in a couple of tests.</li>
+  <li>Overlap of src/dst in a strcpy in PDB was fixed.</li>
+</ul>
+<br>
+<br>
+</body>
+</html>
