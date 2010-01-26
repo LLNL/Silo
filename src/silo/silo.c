@@ -3704,6 +3704,7 @@ DBOpenReal(const char *name, int type, int mode)
         /* Check to make sure the file exists and has the   */
         /* correct permissions.                             */
         /****************************************************/
+        errno = 0;
 #if SIZEOF_OFF64_T > 4
         if (stat64(name, &filestate) != 0)
 #else
@@ -3895,16 +3896,15 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             {
                 API_ERROR((char *)name, E_FILEISDIR);
             }
-        }
 
-        /* Check if file is already opened. If so, none can
-           have it opened for write, including this new one */
-        i = db_isregistered_file(0, &filestate);
-        if (i != -1)
-        {
-            API_ERROR(name, E_CONCURRENT);
+            /* Check if file is already opened. If so, none can
+               have it opened for write, including this new one */
+            i = db_isregistered_file(0, &filestate);
+            if (i != -1)
+            {
+                API_ERROR(name, E_CONCURRENT);
+            }
         }
-
 
         if (!DBCreateCB[type]) {
             if (type == 7)
