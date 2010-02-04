@@ -460,6 +460,8 @@ DBADDCOPT_FC (int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
+ *     Added patch by Olivier Cessanat to allow variable length strings.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBADDCAOPT_FC (int *optlist_id, int *option,
@@ -488,7 +490,10 @@ DBADDCAOPT_FC (int *optlist_id, int *option,
             if (lcvalue[i] < 0)
                 API_ERROR("lcvalue", E_BADARGS);
             cval[i] = SW_strndup(&names[indx], lcvalue[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+                indx += fortran2DStrLen;
+            else
+                indx += lcvalue[i];
         }
         optlist->options[optlist->numopts] = *option;
         optlist->values[optlist->numopts] = cval;
@@ -1382,6 +1387,8 @@ DBWRTFL_FC (int *dbid, FCD_DB name, int *lname, int *object_id, int *status)
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
+ *     Added patch by Olivier Cessanat to allow variable length strings.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
@@ -1435,7 +1442,10 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
             if (lmeshnames[i] < 0)
                 API_ERROR("lmeshnames", E_BADARGS);
             meshnms[i] = SW_strndup(&realmeshnames[indx], lmeshnames[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+                indx += fortran2DStrLen;
+            else
+                indx += lmeshnames[i];
         }
 
         /*----------------------------------------
@@ -1477,6 +1487,8 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
+ *     Added patch by Olivier Cessanat to allow variable length strings.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
@@ -1541,14 +1553,20 @@ DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
             if (lnames[i] < 0)
                 API_ERROR("lnames", E_BADARGS);
             nms[i] = SW_strndup(&realnms[indx], lnames[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+               indx += fortran2DStrLen;
+            else
+                indx += lnames[i] ;
         }
         defs = ALLOC_N(char *, *ndefs);
         for (indx = 0, i = 0; i < *ndefs; i++) {
             if (ldefns[i] < 0)
                 API_ERROR("ldefns", E_BADARGS);
             defs[i] = SW_strndup(&realdefs[indx], ldefns[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+                indx += fortran2DStrLen;
+            else
+                indx += ldefns[i] ;
         }
         optlists = ALLOC_N(DBoptlist*, *ndefs);
         for (i = 0; i < *ndefs; i++) {
@@ -1613,6 +1631,8 @@ DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
+ *     Added patch by Olivier Cessanat to allow variable length strings.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
@@ -1665,7 +1685,10 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
             if (lvarnames[i] < 0)
                 API_ERROR("lvarnames", E_BADARGS);
             varnms[i] = SW_strndup(&realvarnames[indx], lvarnames[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+                indx += fortran2DStrLen;
+            else
+                indx += lvarnames[i];
         }
 
         /* Invoke the C function to do the work. */
@@ -1706,6 +1729,8 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
+ *     Added patch by Olivier Cessanat to allow variable length strings.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
@@ -1759,7 +1784,10 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
             if (lmatnames[i] < 0)
                 API_ERROR("lmatnames", E_BADARGS);
             matnms[i] = SW_strndup(&realmatnames[indx], lmatnames[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+                indx += fortran2DStrLen;
+            else
+                indx += lmatnames[i];
         }
 
         /*----------------------------------------
@@ -4489,6 +4517,8 @@ DBADDREGION_FC (int *tree_id, FCD_DB region_name, int *lregion_name,
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
+ *     Added patch by Olivier Cessanat to allow variable length strings.
  *--------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
@@ -4541,7 +4571,10 @@ DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
             if (lregn_names[i] < 0)
                 API_ERROR("lregn_names", E_BADARGS);
             regn_nms[i] = SW_strndup(&realregn_names[indx], lregn_names[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+                indx += fortran2DStrLen;
+            else
+                indx += lregn_names[i] ;
         }
 
         *status = DBAddRegionArray(tree, *nregn, regn_nms,
@@ -5018,6 +5051,8 @@ DBPUTCSGZL_FC (int *dbid, FCD_DB name, int *lname, int *nregs,
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
+ *     Added patch by Olivier Cessanat to allow variable length strings.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPMRGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB tname, int *ltname,
@@ -5091,7 +5126,10 @@ DBPMRGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB tname, int *ltname,
             if (lcompnames[i] < 0)
                 API_ERROR("lcompnames", E_BADARGS);
             compnms[i] = SW_strndup(&realcompnames[indx], lcompnames[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+                indx += fortran2DStrLen;
+            else
+                indx += lcompnames[i] ;
         }
 
         if (*nregns <= 0)
@@ -5101,7 +5139,10 @@ DBPMRGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB tname, int *ltname,
             if (lregnnames[i] < 0)
                 API_ERROR("lregnnames", E_BADARGS);
             regnnms[i] = SW_strndup(&realregnnames[indx], lregnnames[i]);
-            indx += fortran2DStrLen;
+            if (fortran2DStrLen > 0)
+                indx += fortran2DStrLen;
+            else
+                indx += lregnnames[i] ;
         }
 
         data = (void**) malloc(*nregns * sizeof(void*));
