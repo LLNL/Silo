@@ -2649,6 +2649,9 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
  *   db_StringListToStringArray. Added logic to control behavior of
  *   slash character swapping for windows/linux and skipping of first
  *   semicolon in calls to db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:14:20 PST 2010
+ *   Added missing logic for setting allowmat0.
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultimat *
 db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
@@ -2685,6 +2688,7 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("matcounts", &tmpmt.matcounts, DB_INT);
       DEFALL_OBJ("matlists", &tmpmt.matlists, DB_INT);
       DEFINE_OBJ("guihide", &tmpmt.guihide, DB_INT);
+      DEFINE_OBJ("allowmat0", &tmpmt.allowmat0, DB_INT);
       DEFALL_OBJ("material_names", &tmpmaterial_names, DB_CHAR);
       DEFALL_OBJ("matcolors", &tmpmatcolors, DB_CHAR);
       DEFALL_OBJ("mmesh_name", &tmpmt.mmesh_name, DB_CHAR);

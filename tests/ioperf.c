@@ -147,6 +147,9 @@ fail:
 #ifdef STATIC_PLUGINS
 extern iointerface_t* CreateInterface_silo(int argc, char *argv[], const char *filename);
 extern iointerface_t* CreateInterface_hdf5(int argc, char *argv[], const char *filename);
+extern iointerface_t* CreateInterface_stdio(int argc, char *argv[], const char *filename);
+extern iointerface_t* CreateInterface_sec2(int argc, char *argv[], const char *filename);
+extern iointerface_t* CreateInterface_pdb(int argc, char *argv[], const char *filename);
 #endif
 
 static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacename)
@@ -166,6 +169,12 @@ static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacena
         retval = CreateInterface_silo(argc, argv, testfilename);
     else if (!strcmp(ifacename, "hdf5"))
         retval = CreateInterface_hdf5(argc, argv, testfilename);
+    else if (!strcmp(ifacename, "stdio"))
+        retval = CreateInterface_stdio(argc, argv, testfilename);
+    else if (!strcmp(ifacename, "sec2"))
+        retval = CreateInterface_sec2(argc, argv, testfilename);
+    else if (!strcmp(ifacename, "pdb"))
+        retval = CreateInterface_pdb(argc, argv, testfilename);
 #else
     /* Fall back to dynamic approach */
     if (!retval)
@@ -348,6 +357,7 @@ static void TestWrites(iointerface_t *ioiface, const options_t *opts)
 
     for (i=0; i<opts->num_requests; i++)
     {
+        /* Add some request noise */
         if (opts->size_noise && i && (i%(opts->size_noise))==0)
         {
             t0 = ioiface->Time();
@@ -355,6 +365,8 @@ static void TestWrites(iointerface_t *ioiface, const options_t *opts)
             t1 = ioiface->Time();
             AddTimingInfo(n==8?OP_WRITE:OP_ERROR, n, t0, t1);
         }
+
+        /* Ok, do a write of prescribed size */
         t0 = ioiface->Time();
         n = ioiface->Write(buf, opts->request_size_in_bytes);
         t1 = ioiface->Time();

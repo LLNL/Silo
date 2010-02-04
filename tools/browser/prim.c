@@ -215,6 +215,8 @@ prim_assoc_t    PA_CENTERING[] = {
    {DB_ZONECENT,        "zone centered"},
    {DB_FACECENT,        "face centered"},
    {DB_EDGECENT,        "edge centered"},
+   {DB_BNDCENT,         "bondary centered"},
+   {DB_BLOCKCENT,       "block centered"},
    {0,                  NULL}};
     
 prim_assoc_t    PA_DEFVARTYPE[] = {

@@ -3714,6 +3714,57 @@ find_objno(hid_t grp, const char *name, void *_comp)
     return 1;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_handle_ctdt 
+ *
+ * Purpose:     Handle special logic for cycle, time and dtime optins. 
+ *
+ * Programmer:  Mark C. Miller, Thu Feb  4 08:58:10 PST 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+PRIVATE void 
+db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, int c)
+{
+    int set[] = {ts, dts, 1};
+    char *names[] = {"time","dtime","cycle"};
+    int types[] = {DB_FLOAT, DB_DOUBLE, DB_INT};
+    void *buf[] = {(void*)&t,(void*)&dt,(void*)&c};
+    hid_t space = -1;
+    int i;
+
+    H5E_BEGIN_TRY
+    {
+        for (i = 0; i < 3; i++)
+        {
+            hid_t dset, mtype, ftype;
+            const hsize_t one = 1;
+
+            if (!set[i]) continue;
+
+            dset = H5Dopen(dbfile->cwg, names[i]);
+            if (!(dset<0))
+            {
+                H5Dclose(dset);
+                continue;
+            }
+
+            mtype = silom2hdfm_type(types[i]);
+            ftype = silof2hdff_type(dbfile, types[i]);
+            if (space == -1)
+                space = H5Screate_simple(1, &one, &one);
+            dset = H5Dcreate(dbfile->cwg, names[i], ftype, space, H5P_DEFAULT);
+            H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, buf[i]);
+            H5Dclose(dset);
+        }
+
+        if (space != -1)
+            H5Sclose(space);
+
+    }
+    H5E_END_TRY;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_compname
@@ -3811,6 +3862,9 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
  *
  *   Mark C. Miller, Thu Nov  5 16:15:00 PST 2009
  *   Added support for hard links for friendly names too. 
+ *
+ *   Mark C. Miller, Thu Feb  4 11:24:24 PST 2010
+ *   Removed logic specific to support cycle, time and time.
  *-------------------------------------------------------------------------
  */
 PRIVATE int
@@ -3838,6 +3892,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
     }
 
     PROTECT {
+
         /* Obtain a unique name for the dataset or use the name supplied */
         if (!*name) {
             strcpy(name, LINKGRP);
@@ -3846,7 +3901,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
                 UNWIND();
             }
         }
-        
+
         /* Obtain the memory and file types for the dataset */
         if ((mtype=silom2hdfm_type(dtype))<0 ||
             (ftype=silof2hdff_type(dbfile, dtype))<0) {
@@ -3875,27 +3930,19 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
             }
         }
 
-        if ((!strcmp(name,"time") && dtype == DB_FLOAT && rank == 1 && _size[0] == 1) ||
-            (!strcmp(name,"dtime") && dtype == DB_DOUBLE && rank == 1 && _size[0] == 1) ||
-            (!strcmp(name,"cycle") && dtype == DB_INT && rank == 1 && _size[0] == 1)) {
-            if ((dset=H5Dcreate(dbfile->cwg, name, ftype, space, P_crprops))<0 &&
-                (dset=H5Dopen(dbfile->cwg, name))<0) {
-                db_perror(name, E_CALLFAIL, me);
-                UNWIND();
-            }
-        } else {
-            if ((dset=H5Dcreate(dbfile->link, name, ftype, space, P_crprops))<0) {
-                db_perror(name, E_CALLFAIL, me);
-                UNWIND();
-            }
-            if (fname)
-            {
-                if (SILO_Globals.enableFriendlyHDF5Names == 2)
-                    H5Glink(dbfile->cwg, H5G_LINK_HARD, name, fname);
-                else if (SILO_Globals.enableFriendlyHDF5Names != 0)
-                    H5Glink(dbfile->cwg, H5G_LINK_SOFT, name, fname);
-            }
+        if ((dset=H5Dcreate(dbfile->link, name, ftype, space, P_crprops))<0) {
+            db_perror(name, E_CALLFAIL, me);
+            UNWIND();
         }
+
+        if (fname)
+        {
+            if (SILO_Globals.enableFriendlyHDF5Names == 2)
+                H5Glink(dbfile->cwg, H5G_LINK_HARD, name, fname);
+            else if (SILO_Globals.enableFriendlyHDF5Names != 0)
+                H5Glink(dbfile->cwg, H5G_LINK_SOFT, name, fname);
+        }
+
         if (buf && H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, buf)<0) {
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
@@ -7060,6 +7107,10 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -7087,14 +7138,8 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
         }
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_csgm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_csgm._time), "time", 0);
-        }
-        if (_csgm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_csgm._dtime), "dtime", 0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_csgm._cycle), "cycle", 0);
+        db_hdf5_handle_ctdt(dbfile, _csgm._time_set, _csgm._time,
+            _csgm._dtime_set, _csgm._dtime, _csgm._cycle);
 
         m.min_extents[0] = extents[0];
         m.min_extents[1] = extents[1];
@@ -7943,6 +7988,10 @@ static int PrepareForQuadmeshCompression()
  *   Added call to prepare for mesh compression. Changed call for
  *   non-collinear coordinate case to use db_hdf5_compwrz to support
  *   possible compression.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -7983,14 +8032,8 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
         }
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_qm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_qm._time), "time", 0);
-        }
-        if (_qm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_qm._dtime), "dtime", 0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_qm._cycle), "cycle", 0);
+        db_hdf5_handle_ctdt(dbfile, _qm._time_set, _qm._time,
+            _qm._dtime_set, _qm._dtime, _qm._cycle);
 
         /*
          * Number of zones and nodes. We have to do this because
@@ -8318,6 +8361,10 @@ PrepareForQuadvarCompression(int centering, int datatype)
  *
  *   Mark C. Miller, Wed Jan  6 13:46:45 PST 2010
  *   Fixed setting of align member based on centering.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -8368,14 +8415,8 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
            nels *= ndims;
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_qm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_qm._time), "time",0);
-        }
-        if (_qm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_qm._dtime), "dtime",0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_qm._cycle), "cycle",0);
+        db_hdf5_handle_ctdt(dbfile, _qm._time_set, _qm._time,
+            _qm._dtime_set, _qm._dtime, _qm._cycle); 
 
         compressionFlags = PrepareForQuadvarCompression(centering, datatype);
 
@@ -8551,6 +8592,9 @@ PrepareForQuadvarDecompression(DBfile_hdf5 *dbfile, const char *varname,
  *   Added logic to control behavior of slash character swapping for
  *   windows/linux and skipping of first semicolon in calls to
  *   db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:27:59 PST 2010
+ *   Added missing setting for recently added centering member.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBquadvar *
@@ -8614,6 +8658,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
         qv->guihide = m.guihide;
         qv->conserved = m.conserved;
         qv->extensive = m.extensive;
+        qv->centering = m.centering;
         for (stride=1, i=0; i<m.ndims; stride*=m.dims[i++]) {
             qv->dims[i] = m.dims[i];
             qv->stride[i] = stride;
@@ -8729,6 +8774,10 @@ static int PrepareForUcdmeshCompression(DBfile_hdf5 *dbfile,
  *   the actual datatype. The type is assumed int if it its
  *   value is zero or it does not exist. Otherwise, the type is
  *   is whatever is stored in gnznodtype member. 
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -8770,14 +8819,8 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
             name, zlname); 
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_um._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time",0);
-        }
-        if (_um._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime",0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle",0);
+        db_hdf5_handle_ctdt(dbfile, _um._time_set, _um._time,
+            _um._dtime_set, _um._dtime, _um._cycle);
 
         /* Obtain extents as doubles */
         if (DB_DOUBLE==datatype) {
@@ -8894,6 +8937,10 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -8946,14 +8993,8 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
         db_ProcessOptlist(DB_UCDMESH, optlist);
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_um._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time",0);
-        }
-        if (_um._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime",0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle",0);
+        db_hdf5_handle_ctdt(dbfile, _um._time_set, _um._time,
+            _um._dtime_set, _um._dtime, _um._cycle);
 
         /* Build header in memory -- most fields are already initialized */
         m.ndims = _um._ndims;
@@ -9282,6 +9323,10 @@ PrepareForUcdvarCompression(DBfile_hdf5 *dbfile, const char *varname,
  *
  *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
  *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 /*ARGSUSED*/
@@ -9325,14 +9370,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             datatype, centering);
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_um._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_um._time), "time",0);
-        }
-        if (_um._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_um._dtime), "dtime",0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_um._cycle), "cycle",0);
+        db_hdf5_handle_ctdt(dbfile, _um._time_set, _um._time,
+            _um._dtime_set, _um._dtime, _um._cycle);
 
         /* Write variable arrays: vars[], mixvars[] */
         if (nvars>MAX_VARS) {
@@ -10236,6 +10275,9 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char *name)
  *              Robb Matzke, 1999-07-14
  *              Added the `gzoneno' property to mirror changes made to the
  *              PDB driver.
+ *
+ *  Mark C. Miller, Wed Jan 27 10:37:25 PST 2010
+ *  Added missing initialization of gnznodtype
  *-------------------------------------------------------------------------
  */
 CALLBACK DBphzonelist *
@@ -10283,6 +10325,7 @@ db_hdf5_GetPHZonelist(DBfile *_dbfile, char *name)
         phzl->origin = m.origin;
         phzl->lo_offset = m.lo_offset;
         phzl->hi_offset = m.hi_offset;
+        phzl->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
 
         if (SILO_Globals.dataReadMask & DBZonelistInfo)
         {
@@ -10823,6 +10866,10 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -10842,14 +10889,8 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
         db_ProcessOptlist(DB_MULTIMESH, optlist);
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_mm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
-        }
-        if (_mm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
+        db_hdf5_handle_ctdt(dbfile, _mm._time_set, _mm._time,
+            _mm._dtime_set, _mm._dtime, _mm._cycle);
 
         /*
          * Create a character string which is a semi-colon separated list of
@@ -11087,6 +11128,10 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Sat Oct 18 08:22:18 PDT 2008
  *   Added patch from Sean Ahern where the write of the zonelists was
  *   actually referring to the nodelists array.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -11223,14 +11268,8 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
            }
 
            /* hack to maintain backward compatibility with pdb driver */
-           len = 1;
-           if (_mm._time_set == TRUE) {
-               db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
-           }
-           if (_mm._dtime_set == TRUE) {
-               db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
-           }
-           db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
+           db_hdf5_handle_ctdt(dbfile, _mm._time_set, _mm._time,
+               _mm._dtime_set, _mm._dtime, _mm._cycle);
 
            /* Write meta data to file */
            STRUCT(DBmultimeshadj) {
@@ -11639,6 +11678,10 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
  *
  *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
  *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -11658,14 +11701,8 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         db_ProcessOptlist(DB_MULTIMESH, optlist);
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_mm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
-        }
-        if (_mm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
+        db_hdf5_handle_ctdt(dbfile, _mm._time_set, _mm._time,
+            _mm._dtime_set, _mm._dtime, _mm._cycle);
 
         /*
          * Create a character string which is a semi-colon separated list of
@@ -11892,6 +11929,10 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
  *
  *   Thoamas R. Treadway, Tue Aug 15 14:05:59 PDT 2006
  *   Added DBOPT_ALLOWMAT0
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -11910,14 +11951,8 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         db_ProcessOptlist(DB_MULTIMESH, optlist);
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_mm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
-        }
-        if (_mm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
+        db_hdf5_handle_ctdt(dbfile, _mm._time_set, _mm._time,
+            _mm._dtime_set, _mm._dtime, _mm._cycle);
 
         /*
          * Create a character string which is a semi-colon separated list of
@@ -12153,6 +12188,10 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *   Added names and colors for species.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -12171,14 +12210,8 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
         db_ProcessOptlist(DB_MULTIMESH, optlist);
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_mm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_mm._time), "time", 0);
-        }
-        if (_mm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_mm._dtime), "dtime", 0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_mm._cycle), "cycle", 0);
+        db_hdf5_handle_ctdt(dbfile, _mm._time_set, _mm._time,
+            _mm._dtime_set, _mm._dtime, _mm._cycle);
 
         /*
          * Create a character string which is a semi-colon separated list of
@@ -12416,6 +12449,10 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
  *   the actual datatype. The type is assumed int if it its
  *   value is zero or it does not exist. Otherwise, the type is
  *   is whatever is stored in gnznodtype member. 
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -12446,14 +12483,8 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
         _pm._maxindex = nels - _pm._hi_offset - 1;
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_pm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_pm._time), "time", 0);
-        }
-        if (_pm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_pm._dtime), "dtime", 0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_pm._cycle), "cycle", 0);
+        db_hdf5_handle_ctdt(dbfile, _pm._time_set, _pm._time,
+            _pm._dtime_set, _pm._dtime, _pm._cycle);
 
         /* Write raw data arrays */
         for (i=0; i<ndims; i++) {
@@ -12671,6 +12702,10 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
  *   Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
+ *   Refactored logic to handle time, dtime and cycle to a new method,
+ *   db_hdf5_handle_ctdt().
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -12696,14 +12731,8 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         _pm._maxindex = nels - _pm._hi_offset - 1;
 
         /* hack to maintain backward compatibility with pdb driver */
-        len = 1;
-        if (_pm._time_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_FLOAT, 1, &len, &(_pm._time), "time", 0);
-        }
-        if (_pm._dtime_set == TRUE) {
-            db_hdf5_compwr(dbfile, DB_DOUBLE, 1, &len, &(_pm._dtime), "dtime", 0);
-        }
-        db_hdf5_compwr(dbfile, DB_INT, 1, &len, &(_pm._cycle), "cycle", 0);
+        db_hdf5_handle_ctdt(dbfile, _pm._time_set, _pm._time,
+            _pm._dtime_set, _pm._dtime, _pm._cycle);
 
         /* Write raw data arrays */
         for (i=0; i<nvars; i++) {

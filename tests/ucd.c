@@ -178,8 +178,8 @@ build_ucd(DBfile *dbfile, char *name)
     double         ttime = 2.345;
 #endif
 
-    float         *coords[3], *vars[2];
-    char          *coordnames[3], *varnames[2];
+    float         *coords[3], *vars[8];
+    char          *coordnames[3], *varnames[8];
 
     fshapesize = 2;
     fshapecnt = NFACES;
@@ -239,6 +239,24 @@ build_ucd(DBfile *dbfile, char *name)
 
     (void)DBPutUcdvar(dbfile, "velocity", name, 2, varnames, vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
+
+    /* test writing more than 2 or 3 component variable */
+    vars[0] = d;
+    varnames[0] = "dcomp";
+    vars[1] = u;
+    varnames[1] = "ucomp";
+    vars[2] = v;
+    varnames[2] = "vcomp";
+    vars[3] = d;
+    varnames[3] = "dcomp_copy";
+    vars[4] = u;
+    varnames[4] = "ucomp_copy";
+    vars[5] = v;
+    varnames[5] = "vcomp_copy";
+
+    (void)DBPutUcdvar(dbfile, "many_comps", name, 6, varnames, vars, NNODES,
+                      NULL, 0, idatatype, DB_NODECENT, NULL);
+
 
     dims = NZONES;
 

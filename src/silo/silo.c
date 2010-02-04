@@ -110,6 +110,7 @@ int SILO_VERS_TAG = 0;
    here indicates that this version is not backwards compatible with
    any previous versions.*/
 int Silo_version_4_7_1 = 0;
+int Silo_version_4_7_2 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -8073,6 +8074,9 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
  *
  *    Mark C. Miller, Wed Nov 11 09:19:20 PST 2009
  *    Added check for valid centering.
+ *
+ *    Mark C. Miller, Thu Feb  4 11:29:35 PST 2010
+ *    Removed upper bound restriction for nvars.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
@@ -8097,7 +8101,7 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("quadmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)mname) == 0)
             API_ERROR("quadmesh name", E_INVALIDNAME);
-        if (nvars < 1 || nvars > 3)
+        if (nvars < 1)
             API_ERROR("nvars", E_BADARGS);
         if (!varnames && nvars)
             API_ERROR("varname", E_BADARGS);
@@ -8332,6 +8336,9 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
  *
  *    Mark C. Miller, Wed Nov 11 09:19:20 PST 2009
  *    Added check for valid centering.
+ *
+ *    Mark C. Miller, Thu Feb  4 11:28:55 PST 2010
+ *    Removed upper bound restriction on nvars.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
@@ -8355,7 +8362,7 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("UCDmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)mname) == 0)
             API_ERROR("UCDmesh name", E_INVALIDNAME);
-        if (nvars < 1 || nvars > 3)
+        if (nvars < 1)
             API_ERROR("nvars", E_BADARGS);
         if (!varnames && nvars)
             API_ERROR("varnames", E_BADARGS);

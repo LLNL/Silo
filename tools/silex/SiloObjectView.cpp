@@ -124,6 +124,9 @@ SiloObjectViewWindow::ShowItem(QTreeWidgetItem *i, int)
 //
 //    Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
 //    Made long long support UNconditionally compiled.
+//
+//    Mark C. Miller, Wed Feb  3 08:59:43 PST 2010
+//    Added other centering strings.
 // ****************************************************************************
 SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
     : QTreeWidget(p), silo(s), name(n)
@@ -230,6 +233,9 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
                 if (ival == DB_NODECENT)     strcat(value, " (DB_NODECENT)");
                 if (ival == DB_ZONECENT)     strcat(value, " (DB_ZONECENT)");
                 if (ival == DB_FACECENT)     strcat(value, " (DB_FACECENT)");
+                if (ival == DB_BNDCENT)      strcat(value, " (DB_BNDCENT)");
+                if (ival == DB_EDGECENT)     strcat(value, " (DB_EDGECENT)");
+                if (ival == DB_BLOCKCENT)    strcat(value, " (DB_BLOCKCENT)");
             }
             if (compname == "major_order")
             {
