@@ -1,0 +1,57 @@
+SILO_HOME=/usr/gapps/silo/4.7.2/i686_Linux_ELsmp
+SILO_INC=$(SILO_HOME)/include
+SILO_LIB=$(SILO_HOME)/lib
+SILO_LIBF=$(SILO_LIB)/libsiloh5.a
+
+# set for pdb-lite
+PDB_HOME=$(SILO_HOME)
+PDB_INC=/usr/gapps/visit/1.12.1/linux-intel/include/visit
+PDB_LIB=$(PDB_HOME)/lib
+PDB_LIBF=$(SILO_LIBF)
+
+HDF5_HOME=/usr/gapps/silo/hdf5/1.8.4/i686_Linux_ELsmp
+HDF5_INC=$(HDF5_HOME)/include
+HDF5_LIB=$(HDF5_HOME)/lib
+HDF5_LIBF=$(HDF5_LIB)/libhdf5.a
+
+# only for linking
+SZIP_HOME=/usr/gapps/silo/szip/2.1/i686_Linux_ELsmp
+SZIP_LIB=$(SZIP_HOME)/lib
+SZIP_LIBF=$(SZIP_LIB)/libsz.a
+
+CFLAGS=
+CC=gcc
+
+.SUFFIXES: .c .so .o
+
+DRIVER_SRC=\
+    ioperf_sec2.c \
+    ioperf_stdio.c \
+    ioperf_hdf5.c \
+    ioperf_silo.c \
+    ioperf_pdb.c
+
+DRIVER_STATIC_OBJ=$(DRIVER_SRC:.c=.o)
+DRIVER_SHARED_OBJ=$(DRIVER_SRC:.c=.so)
+
+# shared object rule
+.c.so:
+	$(CC) $< -o $@ -shared $(CFLAGS) -I. -I$(HDF5_INC) -I$(PDB_INC) -I$(SILO_INC) \
+		$(SILO_LIBF) $(HDF5_LIBF) $(SZIP_LIBF)
+
+# object rule
+.c.o:
+	$(CC) $< -o $@ -c -DSTATIC_PLUGINS $(CFLAGS) -I. -I$(HDF5_INC) -I$(PDB_INC) -I$(SILO_INC)
+
+ioperf_shared.o: ioperf.c
+	$(CC) $< -o $@ -c $(CFLAGS) -I.
+
+ioperf_static.o: ioperf.c
+	$(CC) $< -o $@ -c -DSTATIC_PLUGINS $(CFLAGS) -I.
+
+ioperf_shared: ioperf_shared.o $(DRIVER_SHARED_OBJ)
+	$(CC) $< -o $@ $(CFLAGS) $(DRIVER_SHARED_OBJ) -ldl -lz -lm \
+	-Wl,-rpath -Wl,`pwd`
+
+ioperf_static: ioperf_static.o $(DRIVER_STATIC_OBJ)
+	$(CC) $< -o $@ $(CFLAGS) $(DRIVER_STATIC_OBJ) $(SILO_LIBF) $(HDF5_LIBF) $(SZIP_LIBF) -lz -lm

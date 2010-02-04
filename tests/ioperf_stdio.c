@@ -41,7 +41,7 @@ static int Close_stdio()
     return n;
 }
 
-iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename)
+static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_filename)
 {
     iointerface_t *retval;
 
@@ -55,3 +55,15 @@ iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename)
 
     return retval;
 }
+
+#ifdef STATIC_PLUGINS
+iointerface_t *CreateInterface_stdio(int argc, char *argv[], const char *_filename)
+{
+    return CreateInterfaceReal(argc, argv, _filename);
+}
+#else
+iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename)
+{
+    return CreateInterfaceReal(argc, argv, _filename);
+}
+#endif

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include <pdb.h>
+#include <lite_pdb.h>
 #include <ioperf.h>
 
 /*
@@ -38,7 +38,7 @@ static int Close_pdb()
     return lite_PD_close(pdbfile);
 }
 
-iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename)
+static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_filename)
 {
     iointerface_t *retval;
 
@@ -52,3 +52,16 @@ iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename)
 
     return retval;
 }
+
+#ifdef STATIC_PLUGINS
+iointerface_t *CreateInterface_pdb(int argc, char *argv[], const char *_filename)
+{
+    return CreateInterfaceReal(argc, argv, _filename);
+}
+#else
+iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename)
+{
+    return CreateInterfaceReal(argc, argv, _filename);
+}
+#endif
+
