@@ -180,7 +180,7 @@ static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacena
     if (!retval)
     {
         char libfilename[256];
-        sprintf(libfilename, "./libiop_%s.so", ifacename);
+        sprintf(libfilename, "./ioperf_%s.so", ifacename);
         dlhandle = dlopen(libfilename, RTLD_LAZY);
         if (dlhandle)
         {

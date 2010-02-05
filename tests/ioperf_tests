@@ -1,0 +1,47 @@
+#!/bin/sh
+#drivers=$(ls ioperf_*.c | cut -d'_' -f2 | cut -d'.' -f1)
+drivers="sec2 stdio hdf5 pdb silo"
+#silodrivers="DB_PDB DB_HDF5 DB_HDF5_CORE DB_HDF5_SEC2 DB_HDF5_STDIO"
+silodrivers="DB_PDB DB_HDF5"
+#reqsizes="1K 5K 10K 25K 50K 75K 100K 175K 250K 500K 1M 5M 10M 50M 100M"
+reqsizes="1K 5K 10K 25K 50K 75K 100K 175K 250K"
+scenarios=(":" "-n:--size-noise 1")
+#siloscenarios=(":" "-n:--size-noise 1" "-f:--hdf5friendly" "-ck:--checksums" "-gz:--compression GZIP" "-sz:--compression SZIP" "-fpz:--compression FPZIP")
+siloscenarios=(":" "-n:--size-noise 1")
+numreqs="10"
+IOP=./ioperf_static
+
+for d in $drivers; do
+    if test $d = silo; then
+        for sd in $silodrivers; do
+            for (( i=0; i<${#siloscenarios[*]}; i++ )); do
+                moniker=$(echo ${siloscenarios[$i]} | cut -d':' -f1)
+                args=$(echo ${siloscenarios[$i]} | cut -d':' -f2)
+                echo "${d}-${sd}${moniker}"
+                for rs in $reqsizes; do
+                    results=$($IOP --io-interface $d --request-size $rs --num-requests $numreqs --silo-args --driver $sd $args)
+                    tot=$(echo $results | cut -d':' -f2 | cut -d'=' -f2 | cut -d' ' -f2)
+                    avg=$(echo $results | cut -d':' -f3 | cut -d'=' -f2 | cut -d' ' -f2)
+                    echo "$rs	$tot	$avg"
+                done
+                if test $sd = DB_PDB -a $i -eq 1; then
+                    break 1
+                fi
+            done
+            rm -f iop_test_${d}.dat
+        done
+    else
+        for (( i=0; i<${#scenarios[*]}; i++ )); do
+            moniker=$(echo ${scenarios[$i]} | cut -d':' -f1)
+            args=$(echo ${scenarios[$i]} | cut -d':' -f2)
+            echo "${d}${moniker}"
+            for rs in $reqsizes; do
+                results=$($IOP --io-interface $d --request-size $rs --num-requests $numreqs $args)
+                tot=$(echo $results | cut -d':' -f2 | cut -d'=' -f2 | cut -d' ' -f2)
+                avg=$(echo $results | cut -d':' -f3 | cut -d'=' -f2 | cut -d' ' -f2)
+                echo "$rs	$tot	$avg"
+            done
+        done
+    fi
+    rm -f iop_test_${d}.dat
+done
