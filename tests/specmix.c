@@ -9,6 +9,8 @@
  *
  * Modifications:
  *
+ *  Mark C. Miller, Thu Feb 11 09:56:05 PST 2010
+ *  Added test for vars with 8 subcomponents.
  *-----------------------------------------------------------------------*/
 #include <math.h>
 #include <silo.h>
@@ -410,6 +412,8 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
   int x,y,c;
 
   char  *coordnames[2];
+  char  *varnames[6];
+  void *varbufs[6];
   float *coord[2];
   int dims[2];
 
@@ -453,6 +457,22 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
 
   DBPutQuadvar1(db, "u", "Mesh", f1, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
   DBPutQuadvar1(db, "v", "Mesh", f2, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+
+  /* test writing a quadvar with many components */
+  varnames[0] = "u0";
+  varnames[1] = "v0";
+  varnames[2] = "u1";
+  varnames[3] = "v1";
+  varnames[4] = "u2";
+  varnames[5] = "v2";
+  varbufs[0] = f1;
+  varbufs[1] = f2;
+  varbufs[2] = f1;
+  varbufs[3] = f2;
+  varbufs[4] = f1;
+  varbufs[5] = f2;
+  DBPutQuadvar(db, "manyc", "Mesh", 6, varnames, varbufs, dims, 2, NULL, 0,
+    DB_FLOAT, DB_NODECENT, NULL);
 
   /* do Zone vars */
 

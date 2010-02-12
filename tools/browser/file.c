@@ -104,6 +104,65 @@ file_class (void) {
    return cls;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    file_reset_split_vfd_extensions
+ *
+ * Purpose:     Sets split vfd extensions pairs in preparation for opening. 
+ *
+ * Programmer:  Mark C. Miller, Fri Feb 12 08:25:07 PST 2010
+ *              The code to parse $splitvfdexts was cut-n-pasted from
+ *              Robb Matzke's code in func.c for $exclude variable.
+ *-------------------------------------------------------------------------
+ */
+void file_reset_split_vfd_extensions (void) {
+
+    char *tmp=0;
+    int i=0, npairs_used=0;
+    obj_t head=NIL, value=NIL, symbol=NIL, word=NIL;
+
+    DBRemoveAllSplitVFDExtensionPairs();
+
+    /* parse $splitvfdext to get extensions */
+    symbol = obj_new(C_SYM, "$splitvfdexts");
+    head = sym_vboundp(symbol);
+    symbol = obj_dest(symbol);
+    if (head && C_CONS!=head->pub.cls) {
+        head = obj_new(C_CONS, obj_copy(head, SHALLOW), NIL);
+    }
+    for (value=head; value; value=cons_tail(value),i++) {
+        if (C_CONS!=value->pub.cls) {
+            out_errorn("invalid value for $splitvfdexts");
+            goto done;
+        }
+        if (npairs_used >=16) {
+            out_errorn("too many split vfd extensions (limit 16)");
+            goto done;
+        }
+        word = cons_head(value);
+        if (C_STR==word->pub.cls) {
+            if (i>0 && i%2==1) {
+                npairs_used++;
+                DBAddSplitVFDExtensionPair(tmp, obj_name(word));
+                if (tmp) free(tmp);
+                tmp = 0;
+            } else {
+                tmp = safe_strdup(obj_name(word));
+            }
+        } else {
+            out_errorn("$splitvfdexts values should be strings");
+            goto done;
+        }
+    }
+    head = obj_dest(head);
+
+done:
+
+    /* Free temp expressions */
+    obj_dest(symbol);
+    obj_dest(head);
+
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    file_new
@@ -152,6 +211,9 @@ file_class (void) {
  *      off. In the PDB case, since low level arrays ALWAYS appear in the
  *      toc, doing a diff with them means those arrays are diffed twice;
  *      once as parts of aggregate objects and once as raw arrays.
+ *
+ *      Mark C. Miller, Fri Feb 12 08:26:07 PST 2010
+ *      Added call to file_reset_split_vfd_extensions.
  *-------------------------------------------------------------------------
  */
 static obj_t
@@ -167,6 +229,9 @@ file_new (va_list ap)
 
    fname = va_arg (ap, char*);
    rdonly = va_arg (ap, int);
+
+   /* reset split vfd extensions (whether the are used or not) */
+   file_reset_split_vfd_extensions();
 
    /*
     * Open the file, and if that fails because the file doesn't have write

@@ -90,9 +90,9 @@ static int ProcessArgs_silo(int argc, char *argv[])
                 else
                 {
                     errno = 0;
-                    meminc = 512;
+                    meminc = 0; /* silo defaults to 2^16 = 64 kilobytes */
                 }
-                driver = (meminc<<11)|DB_HDF5_STDIO;
+                driver = DB_HDF5_CORE(meminc);
 
             }
             else if (!strcmp(argv[i], "DB_PDB"))

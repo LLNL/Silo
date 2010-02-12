@@ -6131,6 +6131,9 @@ db_pdb_PutFacelist (DBfile *dbfile, char *name, int nfaces, int ndims,
  *
  *      Sean Ahern, Tue Feb  5 10:19:53 PST 2002
  *      Added naming of Silo materials.
+ *
+ *      Mark C. Miller, Thu Feb 11 09:40:10 PST 2010
+ *      Set global values in _ma to zero after use.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -6215,6 +6218,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matnames", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+      _ma._matnames = NULL;
    }
    if (_ma._matcolors != NULL)
    {
@@ -6223,6 +6227,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+      _ma._matcolors = NULL;
    }
 
    /*-------------------------------------------------------------
@@ -6267,6 +6272,9 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
  *
  *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *      Added names and colors for species.
+ *
+ *      Mark C. Miller, Thu Feb 11 09:40:10 PST 2010
+ *      Set global values in _ma to zero after use.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -6346,6 +6354,7 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "species_names", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+      _ms._specnames = NULL;
    }
    if (_ms._speccolors != NULL)
    {
@@ -6361,6 +6370,7 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "speccolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+      _ms._speccolors = NULL;
    }
 
    /*-------------------------------------------------------------

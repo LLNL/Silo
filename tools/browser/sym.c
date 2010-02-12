@@ -750,6 +750,9 @@ sym_truth (char *name) {
  *      Mark C. Miller, Mon Jan 11 16:14:51 PST 2010
  *      Fixed default formats for int8, short and long long. Added
  *      initialization of diffing parameters for long long.
+ *
+ *      Mark C. Miller, Fri Feb 12 08:41:39 PST 2010
+ *      Added $splitvfdexts variable.
  *-------------------------------------------------------------------------
  */
 void
@@ -853,6 +856,13 @@ sym_init (void)
               "checksum checks during subsequent read operations. "
               "This variable is set by the --checksums and -c "
               "command-line switches.\n");
+   sym_bi_set("splitvfdexts",       NULL,
+              "Specify extensions to be used when reading split files.",
+              "The value of this variable should be a list of pairs of "
+              "split vfd extensions. The first in each pair is for the "
+              "metadata file. The second is for the raw data file. "
+              "Multiple pairs of extensions are fine. Browser will try "
+              "Them in order when attempting to open a file.\n"); 
 
    /* Name of public init file */
    sym_bi_set("pubinit", PUBLIC_INIT_FILE,

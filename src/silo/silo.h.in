@@ -151,12 +151,29 @@ extern "C" {
 #define DB_DEBUG 6
 #define DB_HDF5 7            /* equivalent to DB_HDF5_SEC2 */
 
+/* symbols (private really) for various HDF5 vfds */
+#define DB_H5VFD_SEC2   0x00000001 /* section 2 I/O (open/read/write/close) */
+#define DB_H5VFD_STDIO  0x00000002 /* stdio (fopen/fread/fwrite/fclose) */
+#define DB_H5VFD_CORE   0x00000003 /* file in memory. MSbits specify alloc. inc. */
+#define DB_H5VFD_MPIO   0x00000004 /* use MPI-IO on MPI_COMM_SELF */
+#define DB_H5VFD_MPIOP  0x00000005 /* use MPI for any messaging, sec 2 for I/O */
+#define DB_H5VFD_SPLIT  0x00000006 /* use split file driver. */
+
 /* special driver ids to affect which Virtual File Driver HDF5 uses */
-#define DB_HDF5_SEC2   256  /* section 2 I/O (open/read/write/close) */
-#define DB_HDF5_STDIO  512  /* stdio (fopen/fread/fwrite/fclose) */
-#define DB_HDF5_CORE   768  /* file in memory. MSbits specify alloc. inc. */
-#define DB_HDF5_MPIO   1024  /* use MPI-IO on MPI_COMM_SELF */
-#define DB_HDF5_MPIOP  1280  /* use MPI for any messaging, sec 2 for I/O */
+#define DB_HDF5_SEC2     (DB_HDF5|(DB_H5VFD_SEC2<<4))
+#define DB_HDF5_STDIO    (DB_HDF5|(DB_H5VFD_STDIO<<4))
+#define DB_HDF5_MPIO     (DB_HDF5|(DB_H5VFD_MPIO<<4))
+#define DB_HDF5_MPIOP    (DB_HDF5|(DB_H5VFD_MPIOP<<4))
+
+/* other special driver ids that require VFD and allocation incriment */
+#define DB_HDF5_CORE(CoreInc)  (DB_HDF5|(DB_H5VFD_CORE<<4)|((CoreInc&0x3F)<<8))
+#define DB_HDF5_SPLIT(MetaVFD,MetaInc,RawVFD,RawInc,ExtPair) \
+    (\
+        DB_HDF5|(DB_H5VFD_SPLIT<<4)|\
+        ((MetaVFD&0xF)<<8)|((RawVFD&0xF)<<12)|\
+        ((MetaInc&0x3F)<<16)|((RawInc&0x3F)<<22)|\
+        ((ExtPair&0xF)<<28)\
+    )
 
 /*-------------------------------------------------------------------------
  * Other library-wide constants.
@@ -1694,6 +1711,9 @@ SILO_API extern int      DBGetFriendlyHDF5Names(void);
 SILO_API extern int      DBGuessHasFriendlyHDF5Names(DBfile *f);
 SILO_API extern int      DBSetDeprecateWarnings(int max);
 SILO_API extern int      DBGetDeprecateWarnings();
+SILO_API extern int      DBAddSplitVFDExtensionPair(const char *meta_ext, const char *raw_ext);
+SILO_API extern int      DBRemoveSplitVFDExtensionPair(const char *meta_ext, const char *raw_ext);
+SILO_API extern void     DBRemoveAllSplitVFDExtensionPairs();
 SILO_API extern void    *DBGrabDriver(DBfile *);
 SILO_API extern int      DBUngrabDriver(DBfile *, const void *);
 SILO_API extern int      DBGetDriverType(const DBfile *);

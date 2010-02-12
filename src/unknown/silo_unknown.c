@@ -87,14 +87,19 @@ for advertising or product endorsement purposes.
  *
  *     Mark C. Miller, Mon Nov 19 10:45:05 PST 2007
  *     Added HDF5 driver warning.
+ *
+ *     Mark C. Miller, Fri Feb 12 08:16:37 PST 2010
+ *     Replaced use of access() system call with db_silo_stat.
+ *     Added loop over split vfds trying various defined extension pairs.
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
-db_unk_Open(char *name, int mode, int subtype)
+db_unk_Open(char *name, int mode, int subtype_dummy)
 {
     DBfile        *opened = NULL;
     int            type;
     char          *me = "db_unk_Open";
-    char           tried[256], ascii[16];
+    char           tried[512], ascii[16];
+    db_silo_stat_struct filestate;
 
     /* Hierarchy defined as:
      *      DB_PDB, DB_HDF5, DB_NETCDF, DB_TAURUS, DB_DEBUG
@@ -116,11 +121,13 @@ db_unk_Open(char *name, int mode, int subtype)
         "of HDF5 already on your sytem, you will also need\n"
         "to obtain HDF5 from www.hdfgroup.org and install it.";
 
+
     /*
      * If the file is read-only but the access mode calls for read/write,
      * then return an error without even trying any drivers.
      */
-    if (DB_READ!=mode && access(name, W_OK)<0) {
+    db_silo_stat(name, &filestate, 0);
+    if (DB_READ!=mode && (filestate.st_mode&S_IWUSR)==0) {
        db_perror (name, E_FILENOWRITE, me);
        return NULL;
     }
@@ -137,12 +144,35 @@ db_unk_Open(char *name, int mode, int subtype)
         sprintf(ascii, " %s", hierarchy_names[type]);
         strcat(tried, ascii);
         PROTECT {
-            opened = (DBOpenCB[hierarchy[type]]) (name, mode, subtype);
+            opened = (DBOpenCB[hierarchy[type]]) (name, mode, subtype_dummy);
         }
         CLEANUP {
             CANCEL_UNWIND;
         }
         END_PROTECT;
+    }
+
+    /*
+     * try split vfd extensions (only for hdf5 driver)
+     */
+    if (!opened && DBOpenCB[7]!=NULL)
+    {
+        int i;
+        int *used_slots = db_get_used_split_vfd_ext_pair_slots();
+
+        for (i = 0; !opened && used_slots[i]!=-1; i++)
+        {
+            int subtype = (DB_HDF5_SPLIT(DB_H5VFD_CORE,18,DB_H5VFD_SEC2,0,used_slots[i])>>4)&0x0FFFFFFF;
+            sprintf(ascii, " HDF5_SPLIT[%d]", used_slots[i]);
+            strcat(tried, ascii);
+            PROTECT {
+                opened = (DBOpenCB[7]) (name, mode, subtype);
+            }
+            CLEANUP {
+                CANCEL_UNWIND;
+            }
+            END_PROTECT;
+        }
     }
     DBShowErrors(DB_RESUME, NULL);
 

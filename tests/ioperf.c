@@ -411,11 +411,6 @@ main(int argc, char *argv[])
     if (options.flags&IO_WRITE)
         TestWrites(ioiface, &options);
 
-/*
-    if (options.flags&IO_READ)
-        TestReads(ioiface, &options);
-*/
-        
     /* close the file */
     t0 = ioiface->Time();
     if (!ioiface->Close())
@@ -424,6 +419,12 @@ main(int argc, char *argv[])
     }
     t1 = ioiface->Time();
     AddTimingInfo(OP_CLOSE, 0, t0, t1);
+
+/*
+    if (options.flags&IO_READ)
+        TestReads(ioiface, &options);
+*/
+        
 
 #ifndef STATIC_PLUGINS
     /* close the interface */

@@ -198,11 +198,7 @@ PRIVATE reg_status_t _db_regstatus[DB_NFILES] = /* DB_NFILES triples of zeros */
 PRIVATE filter_t _db_filter[DB_NFILTERS];
 const static char *api_dummy = 0;
 PRIVATE int
-#if SIZEOF_OFF64_T > 4
-db_isregistered_file(DBfile *dbfile, const struct stat64 *filestate);
-#else
-db_isregistered_file(DBfile *dbfile, const struct stat *filestate);
-#endif
+db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate);
 
 /* Global structures for option lists.  */
 struct _ma     _ma;
@@ -228,7 +224,10 @@ SILO_Globals_t SILO_Globals = {
     3,     /* maxDeprecateWarnings */
     0,     /* compressionParams (null) */
     2.0,   /* compressionMinratio */
-    0      /* compressionErrmode (fallback) */
+    0,     /* compressionErrmode (fallback) */
+    {      /* split vfd extension pairs (default in slot 0) */
+        "-sh5m","", 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0,
+               0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0}
 };
 
 INTERNAL int
@@ -2124,13 +2123,13 @@ static unsigned int bjhash(register const unsigned char *k, register unsigned in
  *   members. This is not foolproof. Non posix filesystems can apparently
  *   result in st_dev/st_ino combinations which are the same but for
  *   different files.
+ *
+ *   Mark C. Miller, Fri Feb 12 08:20:03 PST 2010
+ *   Replaced conditional compilation with SIZEOF_OFF64T with
+ *   db_silo_stat_struct.
  *-------------------------------------------------------------------------*/
 PRIVATE int 
-#if SIZEOF_OFF64_T > 4
-db_register_file(DBfile *dbfile, const struct stat64 *filestate, int writeable)
-#else
-db_register_file(DBfile *dbfile, const struct stat *filestate, int writeable)
-#endif
+db_register_file(DBfile *dbfile, const db_silo_stat_struct *filestate, int writeable)
 {
     int i;
     for (i = 0; i < DB_NFILES; i++)
@@ -2173,11 +2172,7 @@ db_unregister_file(DBfile *dbfile)
 }
 
 PRIVATE int
-#if SIZEOF_OFF64_T > 4
-db_isregistered_file(DBfile *dbfile, const struct stat64 *filestate)
-#else
-db_isregistered_file(DBfile *dbfile, const struct stat *filestate)
-#endif
+db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
 {
     int i;
     if (dbfile)
@@ -2201,6 +2196,79 @@ db_isregistered_file(DBfile *dbfile, const struct stat *filestate)
         }
     }
     return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:   db_silo_stat
+ *
+ * Purpose:    Better stat method for silo taking into account stat/stat64
+ *             as well as issues with filenames used for split vfds.
+ *
+ * Programmer: Mark C. Miller, Fri Feb 12 08:21:52 PST 2010
+ *-------------------------------------------------------------------------*/
+PRIVATE int 
+db_register_file(DBfile *dbfile, const db_silo_stat_struct *filestate, int writeable)
+{
+    int i;
+    for (i = 0; i < DB_NFILES; i++)
+int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int skip_vfdexts)
+{
+    int i, retval;
+
+    errno = 0;
+    memset(statbuf, 0, sizeof(*statbuf));
+#if SIZEOF_OFF64_T > 4
+    if ((retval = stat64(name, statbuf)) != 0 && !skip_vfdexts)
+#else
+    if ((retval = stat(name, statbuf)) != 0 && !skip_vfdexts)
+#endif
+    {
+        /* save 'result' of orig. stat call */
+        int tmperrno = errno;
+        int tmpretval = retval;
+
+        /* try all possible split vfd extensions */
+        for (i = 0; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
+        {
+            static char tmpname[4096];
+
+            /* skip empty slots */
+            if (SILO_Globals.splitVFDExtensions[i][0]==0 ||
+                SILO_Globals.splitVFDExtensions[i][1]==0)
+                continue;
+
+            /* try the raw file name first */
+            if (strstr(SILO_Globals.splitVFDExtensions[i][1],"%s"))
+                sprintf(tmpname, SILO_Globals.splitVFDExtensions[i][1], name);
+            else
+                sprintf(tmpname, "%s%s", name, SILO_Globals.splitVFDExtensions[i][1]);
+#if SIZEOF_OFF64_T > 4
+            if (stat64(tmpname, statbuf) != 0)
+#else
+            if (stat(tmpname, statbuf) != 0)
+#endif
+                continue;
+            
+            /* try the meta file name */
+            if (strstr(SILO_Globals.splitVFDExtensions[i][0],"%s"))
+                sprintf(tmpname, SILO_Globals.splitVFDExtensions[i][0], name);
+            else
+                sprintf(tmpname, "%s%s", name, SILO_Globals.splitVFDExtensions[i][0]);
+#if SIZEOF_OFF64_T > 4
+            if ((retval = stat64(tmpname, statbuf)) == 0)
+#else
+            if ((retval = stat(tmpname, statbuf)) == 0)
+#endif
+                return retval;
+        }
+
+        /* restore result of orig. stat call */
+        errno = tmperrno;
+        retval = tmpretval;
+
+    }
+
+    return retval;
 }
 
 /*-------------------------------------------------------------------------
@@ -2720,6 +2788,93 @@ PUBLIC int
 DBGetDeprecateWarnings()
 {
     return SILO_Globals.maxDeprecateWarnings;
+}
+
+PUBLIC int
+DBAddSplitVFDExtensionPair(const char *meta_ext, const char *raw_ext)
+{
+    int i;
+
+    if (!meta_ext || !raw_ext) return -1;
+
+    for (i = 1; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
+    {
+        if (SILO_Globals.splitVFDExtensions[i][0]==0 &&
+            SILO_Globals.splitVFDExtensions[i][1]==0)
+        {
+            SILO_Globals.splitVFDExtensions[i][0] = safe_strdup(meta_ext);
+            SILO_Globals.splitVFDExtensions[i][1] = safe_strdup(raw_ext);
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+PUBLIC int 
+DBRemoveSplitVFDExtensionPair(const char *meta_ext, const char *raw_ext)
+{
+    int i;
+
+    if (!meta_ext || !raw_ext) return -1;
+
+    for (i = 1; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
+    {
+        /* skip empty slots */
+        if (SILO_Globals.splitVFDExtensions[i][0]==0 ||
+            SILO_Globals.splitVFDExtensions[i][1]==0)
+            continue;
+
+        if (!strcmp(SILO_Globals.splitVFDExtensions[i][0], meta_ext) &&
+            !strcmp(SILO_Globals.splitVFDExtensions[i][1], raw_ext))
+        {
+            FREE(SILO_Globals.splitVFDExtensions[i][0]);
+            SILO_Globals.splitVFDExtensions[i][0] = 0;
+
+            FREE(SILO_Globals.splitVFDExtensions[i][1]);
+            SILO_Globals.splitVFDExtensions[i][1] = 0;
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+PUBLIC void
+DBRemoveAllSplitVFDExtensionPairs()
+{
+    int i;
+
+    for (i = 1; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
+    {
+        /* skip empty slots */
+        if (SILO_Globals.splitVFDExtensions[i][0]==0 ||
+            SILO_Globals.splitVFDExtensions[i][1]==0)
+            continue;
+
+        FREE(SILO_Globals.splitVFDExtensions[i][0]);
+        SILO_Globals.splitVFDExtensions[i][0] = 0;
+
+        FREE(SILO_Globals.splitVFDExtensions[i][1]);
+        SILO_Globals.splitVFDExtensions[i][1] = 0;
+    }
+}
+
+const int * db_get_used_split_vfd_ext_pair_slots()
+{
+    int i,n;
+    static int used_slots[MAX_H5VFD_SPLIT_EXT_PAIRS+1];
+
+    for (i = 0; i < MAX_H5VFD_SPLIT_EXT_PAIRS+1; i++)
+        used_slots[i] = -1;
+    for (i = 0, n = 0; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
+    {
+        if (SILO_Globals.splitVFDExtensions[i][0]==0 ||
+            SILO_Globals.splitVFDExtensions[i][1]==0)
+            continue;
+        used_slots[n++] = i;
+    }
+    return used_slots;
 }
 
 /*----------------------------------------------------------------------
@@ -3665,6 +3820,10 @@ DBFileVersionGE(DBfile *dbfile, int Maj, int Min, int Pat)
  *    Moved call to db_isregistered_file to AFTER calls to stat the file
  *    add changed db_isregistered_file to accept stat struct instead of name.
  *    Changed call to db_register_file to accpet stat struct.
+ *
+ *    Mark C. Miller, Fri Feb 12 08:22:41 PST 2010
+ *    Replaced stat/stat64 calls with db_silo_stat. Replaced conditional
+ *    compilation logic for SIZEOF_OFF64_T with db_silo_stat_struct.
  *------------------------------------------------------------------------- */
 PUBLIC DBfile *
 DBOpenReal(const char *name, int type, int mode)
@@ -3674,11 +3833,9 @@ DBOpenReal(const char *name, int type, int mode)
     int            fileid, i;
     int            origtype = type;
     int            subtype = 0;
-#if SIZEOF_OFF64_T > 4
-    struct stat64    filestate;
-#else
-    struct stat    filestate;
-#endif
+    int            subtype_vfd;
+    int            skip_vfdexts = 1;
+    db_silo_stat_struct filestate;
 
     API_BEGIN("DBOpen", DBfile *, NULL) {
         if (!name)
@@ -3686,6 +3843,7 @@ DBOpenReal(const char *name, int type, int mode)
 
         /* deal with extended driver type specifications */
         db_DriverTypeAndSubtype(origtype, &type, &subtype);
+        subtype_vfd = subtype & 0xF;
 
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
@@ -3705,12 +3863,9 @@ DBOpenReal(const char *name, int type, int mode)
         /* Check to make sure the file exists and has the   */
         /* correct permissions.                             */
         /****************************************************/
-        errno = 0;
-#if SIZEOF_OFF64_T > 4
-        if (stat64(name, &filestate) != 0)
-#else
-        if (stat(name, &filestate) != 0)
-#endif
+        if (type == DB_UNKNOWN || subtype_vfd == DB_H5VFD_SPLIT)
+            skip_vfdexts = 0;
+        if (db_silo_stat(name, &filestate, skip_vfdexts) != 0)
         {
             if( errno == ENOENT )
             {
@@ -3856,6 +4011,10 @@ DBOpenReal(const char *name, int type, int mode)
  *    Mark C. Miller, Wed Feb 25 23:52:05 PST 2009
  *    Moved call to db_isregistered_file to after stat calls. Stat the
  *    file after its created so we can get information to register it.
+ *
+ *    Mark C. Miller, Fri Feb 12 08:22:41 PST 2010
+ *    Replaced stat/stat64 calls with db_silo_stat. Replaced conditional
+ *    compilation logic for SIZEOF_OFF64_T with db_silo_stat_struct.
  *-------------------------------------------------------------------------*/
 PUBLIC DBfile *
 DBCreateReal(const char *name, int mode, int target, const char *info, int type)
@@ -3865,11 +4024,9 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     int            fileid, i, n;
     int            origtype = type;
     int            subtype = 0;
-#if SIZEOF_OFF64_T > 4
-    struct stat64    filestate;
-#else
-    struct stat    filestate;
-#endif
+    int            subtype_vfd;
+    int            skip_vfdexts = 1;
+    db_silo_stat_struct filestate;
 
     API_BEGIN("DBCreate", DBfile *, NULL) {
         if (!name)
@@ -3877,17 +4034,16 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
 
         /* deal with extended driver type specifications */
         db_DriverTypeAndSubtype(origtype, &type, &subtype);
+        subtype_vfd = subtype & 0xF;
 
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
             API_ERROR(ascii, E_BADFTYPE);
         }
 
-#if SIZEOF_OFF64_T > 4
-        if (stat64(name, &filestate) == 0)  /* Success - File exists */
-#else
-        if (stat(name, &filestate) == 0)  /* Success - File exists */
-#endif
+        if (subtype_vfd == DB_H5VFD_SPLIT)
+            skip_vfdexts = 0;
+        if (db_silo_stat(name, &filestate, skip_vfdexts) == 0)  /* Success - File exists */
         {
             if (mode == DB_NOCLOBBER)
             {
@@ -3929,11 +4085,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
-#if SIZEOF_OFF64_T > 4
-        stat64(name, &filestate);
-#else
-        stat(name, &filestate);
-#endif
+        db_silo_stat(name, &filestate, skip_vfdexts);
         db_register_file(dbfile, &filestate, 1);
 
         /*
@@ -11578,36 +11730,27 @@ db_IntListToIntArray(const int *const intList, int nArrays,
  *  Mark C. Miller, Mon Aug 21 23:14:29 PDT 2006
  *  Made code that references DB_HDF5 conditionally compiled
  *
+ *  Mark C. Miller, Thu Feb 11 09:51:28 PST 2010
+ *  Changed logic for how subtype is handled.
  *--------------------------------------------------------------------*/
 INTERNAL void 
 db_DriverTypeAndSubtype(int driver, int *type, int *subtype)
 {
-    int theType = driver;
-    int theSubtype = 0;
+    int theType = driver & 0x0000000F; 
+    int subType = 0x00000000;
 
     if (driver > DB_NFORMATS)
     {
-        int highNibble = (driver & 0x0000FF00) >> 8;
-
-        /* HDF5 driver uses values 1-5 */
-        if (highNibble >= 1 && highNibble <=5)
-        {
-            /* the subtype is primarily for the core driver */
-            theSubtype = (driver & 0x7FFFFF00) >> 8;
 #ifdef DB_HDF5
-            theType = DB_HDF5;
-#else
-            theType = DB_UNKNOWN;
-#endif
-        }
-        else
+        if (theType == DB_HDF5)
         {
-            theType = DB_UNKNOWN;
+            subType = (driver >> 4) & 0x0FFFFFFF;
         }
+#endif
     }
 
     if (type) *type = theType;
-    if (subtype) *subtype = theSubtype;
+    if (subtype) *subtype = subType;
 }
 
 /*

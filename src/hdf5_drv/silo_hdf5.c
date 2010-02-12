@@ -1225,6 +1225,11 @@ FreeNodelists(DBfile_hdf5 *dbfile, const char *meshname)
 
    Programmer: Mark C. Miller
    Created:    July, 2008
+
+   Modifications:
+     Mark C. Miller, Thu Feb  4 20:02:00 PST 2010
+     Corrected type for hztype local variable from int to HZtype.
+
 */
 
 static HZtype silo2hztype(int silo_type)
@@ -1379,7 +1384,8 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
             HZNstream *stream;
             int i, ndims, nnodes, nread, nzones;
             void *var = 0;
-            int new_buf_size, hztype;
+            int new_buf_size;
+            HZtype hztype;
             int *nodelist;
             int perm, origin;
 
@@ -1860,6 +1866,9 @@ hdf5_to_silo_error(const char *vname, const char *fname)
  *
  *   Mark C. Miller, Mon Sep 21 15:17:08 PDT 2009
  *   Adding support for long long type.
+ *
+ *   Mark C. Miller, Thu Feb 11 09:37:41 PST 2010
+ *   Added logic to set HDF5's error output based on Silo's settings.
  *-------------------------------------------------------------------------
  */
 PRIVATE void
@@ -1870,9 +1879,10 @@ db_hdf5_init(void)
     if (ncalls++) return;               /*already initialized*/
 
     /* Turn off error messages from the hdf5 library */
-#if DEBUG_HDF5 == 0
-    H5Eset_auto(NULL, NULL);
-#endif
+    if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
+        H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
+    else
+        H5Eset_auto(NULL, NULL);
 
     /* Define a scalar data space */
     SCALAR = H5Screate(H5S_SCALAR);
@@ -3721,6 +3731,11 @@ find_objno(hid_t grp, const char *name, void *_comp)
  *
  * Programmer:  Mark C. Miller, Thu Feb  4 08:58:10 PST 2010
  *
+ * Modifications:
+ * 
+ *  Mark C. Miller, Sat Feb  6 09:54:37 PST 2010
+ *  In hopes that H5Lexists might be faster than attempting to open a
+ *  dataset, added that as initial test for existance.
  *-------------------------------------------------------------------------
  */
 PRIVATE void 
@@ -3739,14 +3754,22 @@ db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, in
         {
             hid_t dset, mtype, ftype;
             const hsize_t one = 1;
+            htri_t h5lexists = -1;
 
             if (!set[i]) continue;
 
-            dset = H5Dopen(dbfile->cwg, names[i]);
-            if (!(dset<0))
-            {
-                H5Dclose(dset);
+#if HDF5_VERSION_GE(1,8,0)
+            if ((h5lexists = H5Lexists(dbfile->cwg, names[i], H5P_DEFAULT)) == TRUE)
                 continue;
+#endif
+            if (h5lexists != FALSE)
+            {
+                dset = H5Dopen(dbfile->cwg, names[i]);
+                if (!(dset<0))
+                {
+                    H5Dclose(dset);
+                    continue;
+                }
             }
 
             mtype = silom2hdfm_type(types[i]);
@@ -4383,14 +4406,94 @@ db_hdf5_ForceSingle(int status)
  * Purpose:     Create file access property lists 
  *
  * Programmer:  Mark C. Miller, Aug 1, 2006 
+ *
+ * Notes: The least significant 4 bits in the 'driver' argument passed to
+ * an open or create call are stripped off and the value shifted 4 to the
+ * right to produce the 'subtype' that is passed into driver's open or
+ * create implementations. So, the 'subtype' arriving here is a 28 bit
+ * number.
+ *
+ * Typically, only the least significant 4 bits, 3...0 are ever
+ * used and they identify one of HDF5's common vfds (e.g. sec2, stdio,
+ * or core). However, in the case of the split vfd, then all the other
+ * bit-fields defined here come into play. The interpretation of the
+ * remaining bits depends on the vfd specified in the 4 least
+ * significant bits. 
+ *
+ * When the 4 least significant bits indicate the core vfd, then
+ * the bit-fields of 'subtype' are intepreted as follows ...
+ *
+ *  Bit Positions         Description
+ *  ----------------|-------------------------------------------
+ *      27          | 
+ *      .           |
+ *      .           |   UNUSED
+ *      .           |
+ *      10          | 
+ * -----------------+-------------------------------------------
+ *       9          |  6 bit number indicating log-base-2 size in bytes
+ *       8          |  of core vfd allocation incriment
+ *       7          |  (e.g. a value of '16' here means to use 
+ *       6          |  an allocation incriment of 2^16 (64 Kbytes)).
+ *       5          |  A value of zero here means to use default
+ *       4          |  which is 2^20 (1 Megabyte).
+ * -----------------+-------------------------------------------
+ *       3          | 4 bit number identifying the primary vfd
+ *       2          | to use.
+ *       1          |
+ *       0          |
+ *
+ *
+ * When the 4 least significant bits indicate the split vfd, then
+ * the bit-fields of 'subtype' are intepreted as follows ...
+ *
+ *  Bit Positions         Description
+ *  ----------------|-------------------------------------------
+ *      27          |  4 bit number identifying which split vfd 
+ *      26          |  extension pair, if any, to use. A value of 
+ *      25          |  0 here means to use default ext. pair.
+ *      24          |
+ *  ----------------+-------------------------------------------
+ *      23          |  6 bit number indicating log-base-2 size in bytes
+ *      22          |  of RAW data allocation incriment, if any,
+ *      21          |  to use if RAW vfd is core.
+ *      20          |  A value of 0 here means to use default
+ *      19          |  which is 2^20 for RAW data. Only relevant if
+ *      18          |  the RAW data vfd is core.
+ * -----------------+-------------------------------------------
+ *      17          |  6 bit number indicating log-base-2 size in bytes
+ *      16          |  of META data allocation incriment, if any,
+ *      15          |  to use if META vfd is core. 
+ *      14          |  A value of zero here means to use default
+ *      13          |  which is 2^16 (64 kilobytes) for META data. Only
+ *      12          |  relevant if the META data vfd is core.
+ * -----------------+-------------------------------------------
+ *      11          | 4 bit number identifying vfd to use for 
+ *      10          | RAW data.
+ *       9          |
+ *       8          |
+ * -----------------+-------------------------------------------
+ *       7          | 4 bit number identifying vfd to use for 
+ *       6          | META data.
+ *       5          |
+ *       4          |
+ * -----------------+-------------------------------------------
+ *       3          | 4 bit number identifying the primary vfd
+ *       2          | to use.
+ *       1          | 
+ *       0          |
+ *
+ * Modifications:
+ *   Mark C. Miller, Thu Feb 11 09:38:32 PST 2010
+ *   Added support for split vfd. Changed how allocation inc for core
+ *   and split vfd's is handled. Changed int values in case to symbolics.
  *-------------------------------------------------------------------------
  */
 INTERNAL hid_t 
 db_hdf5_file_accprops(int subtype)
 {
     hid_t retval = -1;
-    int vfd = subtype & 0x00000007;
-    int inc = ((subtype & 0x7FFFFFF8) >> 3) * 1024;
+    int vfd = subtype & 0x0000000F;
 
     /* default properties */
     retval = H5Pcreate(H5P_FILE_ACCESS);
@@ -4403,11 +4506,18 @@ db_hdf5_file_accprops(int subtype)
     switch (vfd)
     {
         case 0: break; /* this is the default case */
-        case 1: H5Pset_fapl_sec2(retval); break;
-        case 2: H5Pset_fapl_stdio(retval); break;
-        case 3: H5Pset_fapl_core(retval, inc, TRUE); break;
+        case DB_H5VFD_SEC2: H5Pset_fapl_sec2(retval); break;
+        case DB_H5VFD_STDIO: H5Pset_fapl_stdio(retval); break;
+        case DB_H5VFD_CORE:
+        {
+            int inc = (subtype >> 4) & 0x0000003F;
+            if (inc == 0) inc = 20; /* 2^20 => 1 Megabyte */
+            H5Pset_fapl_core(retval, (1<<inc), TRUE);
+            break;
+        }
 #ifdef PARALLEL
-        case 4:
+        case DB_H5VFD_MPIOP: H5Pset_fapl_mpiposix(retval, MPI_COMM_SELF); break;
+        case DB_H5VFD_MPIO:
         {
             MPI_Info info;
             MPI_Info_create(&info);
@@ -4415,8 +4525,43 @@ db_hdf5_file_accprops(int subtype)
             MPI_Info_free(&info);
             break;
         }
-        case 5: H5Pset_fapl_mpiposix(retval, MPI_COMM_SELF); break;
 #endif
+        case DB_H5VFD_SPLIT: 
+        {
+            int meta_vfd = (subtype >> 4) & 0x0000000F;
+            int raw_vfd = (subtype >> 8) & 0x0000000F;
+            int meta_inc = (subtype >> 12) & 0x0000003F;
+            int raw_inc = (subtype >> 18) & 0x0000003F;
+            int extpair = (subtype >> 24) & 0x0000000F;
+            hid_t meta_fapl = H5Pcreate(H5P_FILE_ACCESS);
+            hid_t raw_fapl = H5Pcreate(H5P_FILE_ACCESS);
+            char *mext, *rext;
+            if (SILO_Globals.splitVFDExtensions[extpair][0]==0 ||
+                SILO_Globals.splitVFDExtensions[extpair][1]==0)
+                extpair = 0;
+            mext = SILO_Globals.splitVFDExtensions[extpair][0];
+            rext = SILO_Globals.splitVFDExtensions[extpair][1];
+            if (meta_inc == 0) meta_inc = 16; /* 2^16 => 64 kilobytes */
+            if (raw_inc == 0) raw_inc = 20; /* 2^20 => 1 Megabyte */
+            switch (meta_vfd)
+            {
+                case 0: break; /* this is the default case */
+                case DB_H5VFD_SEC2: H5Pset_fapl_sec2(meta_fapl); break;
+                case DB_H5VFD_STDIO: H5Pset_fapl_stdio(meta_fapl); break;
+                case DB_H5VFD_CORE: H5Pset_fapl_core(meta_fapl, (1<<meta_inc), TRUE); break;
+            }
+            switch (raw_vfd)
+            {
+                case 0: break; /* this is the default case */
+                case DB_H5VFD_SEC2: H5Pset_fapl_sec2(raw_fapl); break;
+                case DB_H5VFD_STDIO: H5Pset_fapl_stdio(raw_fapl); break;
+                case DB_H5VFD_CORE: H5Pset_fapl_core(raw_fapl, (1<<raw_inc), TRUE); break;
+            }
+            H5Pset_fapl_split(retval, mext, meta_fapl, rext, raw_fapl);
+            H5Pclose(meta_fapl);
+            H5Pclose(raw_fapl);
+            break;
+        }
     }
 
     return retval;
@@ -4655,6 +4800,9 @@ db_hdf5_initiate_close(DBfile *_dbfile)
  *   Mark C. Miller, Wed Feb 25 09:37:10 PST 2009
  *   Changed error code for failure to open to indicate better error
  *   message.
+ *
+ *   Mark C. Miller, Thu Feb 11 09:37:41 PST 2010
+ *   Added logic to set HDF5's error output based on Silo's settings.
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
@@ -4666,9 +4814,10 @@ db_hdf5_Open(char *name, int mode, int subtype)
     unsigned    hmode;
     static char *me = "db_hdf5_Open";
 
-#if DEBUG_HDF5 == 0
-    H5Eset_auto(NULL, NULL);
-#endif
+    if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
+        H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
+    else
+        H5Eset_auto(NULL, NULL);
 
     /* File access mode */
     if (DB_READ==mode) {
@@ -4731,6 +4880,9 @@ db_hdf5_Open(char *name, int mode, int subtype)
  *   return silo_db_close(). This is because UNWIND was causing it to
  *   NOT correctly handle the case in which the given filename was NOT
  *   an HDF5 file and properly RETURNing NULL when necessary.
+ *
+ *   Mark C. Miller, Thu Feb 11 09:37:41 PST 2010
+ *   Added logic to set HDF5's error output based on Silo's settings.
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
@@ -4742,9 +4894,10 @@ db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
     static char *me = "db_hdf5_Create";
 
     /* Turn off error messages from the hdf5 library */
-#if DEBUG_HDF5 == 0
-    H5Eset_auto(NULL, NULL);
-#endif
+    if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
+        H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
+    else
+        H5Eset_auto(NULL, NULL);
 
     faprops = db_hdf5_file_accprops(subtype);
 
@@ -5277,6 +5430,9 @@ copy_dir(hid_t grp, const char *name, void *op_data)
  *
  * Programmer:  Mark C. Miller, Wed Aug  6 18:29:53 PDT 2008
  *
+ * Modifications:
+ *   Mark C. Miller, Thu Feb  4 20:02:53 PST 2010
+ *   Removed unused variable and function call referencing it.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -5286,7 +5442,6 @@ db_hdf5_CpDir(DBfile *_dbfile, const char *srcDir,
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     DBfile_hdf5 *dstfile = (DBfile_hdf5*)dstFile;
     static char *me = "db_hdf5_CpDir";
-    hid_t srcdir_id;
     copy_dir_data_t cp_data;
     char dstcwg[256], srccwg[256];
 
@@ -5322,7 +5477,6 @@ db_hdf5_CpDir(DBfile *_dbfile, const char *srcDir,
                 db_hdf5_SetDir(_dbfile, srccwg);
             if (dstcwg[0] != '\0')
                 db_hdf5_SetDir(dstFile, dstcwg);
-            H5Gclose(srcdir_id);
         } H5E_END_TRY;
     } END_PROTECT;
 
@@ -10374,6 +10528,9 @@ db_hdf5_GetPHZonelist(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Thu Apr 19 19:16:11 PDT 2007
  *   Modifed db_hdf5_compwr interface for friendly hdf5 dataset names
+ *
+ *   Mark C. Miller, Thu Feb 11 09:40:10 PST 2010
+ *   Set global values in _ma to zero after use.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -10416,6 +10573,7 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
                 friendly_name(name, "_matnames", 0));
             FREE(s);
+            _ma._matnames = NULL;
         }
 
         if (_ma._matcolors != NULL) {
@@ -10424,6 +10582,7 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matcolors/*out*/,
                 friendly_name(name,"_matcolors", 0));
             FREE(s);
+            _ma._matcolors = NULL;
         }
         
         /* Build header in memory */
@@ -10620,6 +10779,9 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char *name)
  *
  *   Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *   Added names and colors for species.
+ *
+ *   Mark C. Miller, Thu Feb 11 09:40:10 PST 2010
+ *   Set global values in _ms to zero after use.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -10657,6 +10819,7 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
                 friendly_name(name, "_species_names", 0));
             FREE(s);
+            _ms._specnames = NULL;
         }
 
         if (_ms._speccolors != NULL) {
@@ -10670,6 +10833,7 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.speccolors/*out*/,
                 friendly_name(name,"_speccolors", 0));
             FREE(s);
+            _ms._speccolors = NULL;
         }
 
         /* Build header in memory */

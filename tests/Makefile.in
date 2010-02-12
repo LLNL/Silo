@@ -616,6 +616,8 @@ EXTRA_DIST = \
  ioperf_hdf5.c \
  ioperf_pdb.c \
  ioperf_silo.c \
+ Make_ioperf \
+ ioperf_tests \
  $(check_SCRIPTS) \
  $(check_DATA)
 

@@ -58,11 +58,12 @@ for advertising or product endorsement purposes.
 #endif
 #endif
 #include "silo.h"
-
-/*
- * File status, maintained by DBOpen, DBCreate, and DBClose.
- */
-#define DB_ISOPEN       0x01          /*database is open; ID is in use */
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 /*
  * The error mechanism....
@@ -389,6 +390,24 @@ typedef struct context_t {
 #undef   DEREF
 #endif
 #define  DEREF(type,x)       (* ((type *) (x)))
+
+/*
+ * File status, maintained by DBOpen, DBCreate, and DBClose.
+ */
+#define DB_ISOPEN       0x01          /*database is open; ID is in use */
+
+/*
+ * stat struct definition
+ */
+#ifndef SIZEOF_OFF64_T
+#error missing definition for SIZEOF_OFF64_T in silo_private.h
+#else
+#if SIZEOF_OFF64_T > 4
+#define db_silo_stat_struct struct stat64
+#else
+#define db_silo_stat_struct struct stat
+#endif
+#endif
 
 /*
  * Global data for Material
@@ -751,6 +770,8 @@ typedef struct filter_t {
     int            (*open) (DBfile *, char *);
 } filter_t;
 
+#define MAX_H5VFD_SPLIT_EXT_PAIRS 16
+
 /* Namespace struct for Silo's global variables */
 typedef struct SILO_Globals_t {
     long dataReadMask;
@@ -762,6 +783,7 @@ typedef struct SILO_Globals_t {
     char *compressionParams;
     float compressionMinratio;
     int compressionErrmode;
+    char *splitVFDExtensions[MAX_H5VFD_SPLIT_EXT_PAIRS][2];
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 
@@ -844,7 +866,8 @@ INTERNAL char *db_normalize_path ( const char *p );
 INTERNAL int   db_relative_path ( char *pathname );
 INTERNAL char *db_unsplit_path ( const db_Pathname *p );
 INTERNAL db_Pathname *db_split_path ( const char *pathname );
-
+INTERNAL const int *db_get_used_split_vfd_ext_pair_slots();
+INTERNAL int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int skip_vfdexts);
 char   *safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/
 #define strdup(s) safe_strdup(s)

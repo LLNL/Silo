@@ -1124,6 +1124,31 @@ process_sw_exclude(switch_t *sw, const char *argv, const char *value)
     if (str) free(str);
     return 0;
 }
+
+/*---------------------------------------------------------------------------
+ * Purpose:     Handle split-vfd switch
+ *
+ * Programmer:  Mark C. Miller, Fri Feb 12 08:27:52 PST 2010
+ * 
+ * Note: we can get away with re-using process_sw_exclude here because
+ * that function makes no assumptions about which switch it is processing.
+ * Instead, it gets that info from the sw->info member.
+ *---------------------------------------------------------------------------
+ */
+/*ARGSUSED*/
+static int
+process_sw_split_vfd(switch_t *sw, const char *argv, const char *value)
+{
+    strlist_t   *split_vfd_list = (strlist_t*)(sw->info);
+    int retval = process_sw_exclude(sw, argv, value);
+    if (split_vfd_list->nused % 2)
+    {
+        out_errorn("split vfd extensions must be specified in pairs of "
+            "strings, meta-extension followed by raw-extension.");
+        retval = -1;
+    }
+    return retval;
+}
     
 /*---------------------------------------------------------------------------
  * Purpose:     Process command-line switches.
@@ -1353,6 +1378,9 @@ bad_switch(const char *fmt, ...)
  *      Mark C. Miller, Tue Nov 17 22:32:01 PST 2009
  *      Fixed help messages so difference equations would not get split
  *      across new lines.
+ *
+ *      Mark C. Miller, Fri Feb 12 08:41:04 PST 2010
+ *      Added the --split-vfd switch.
  *-------------------------------------------------------------------------
  */
 int
@@ -1364,7 +1392,7 @@ main(int argc, char *argv[])
     char         init_file_buf[1024];
     const char   *init_file=NULL;
     struct passwd *passwd=NULL;
-    strlist_t    eval_list, exclude_list;
+    strlist_t    eval_list, exclude_list, split_vfd_exts;
     switches_t   *sws=switch_new();
     switch_t     *sw=NULL;
     struct sigaction action;
@@ -1571,6 +1599,14 @@ main(int argc, char *argv[])
                "(default 0), which causes the browser to perform checksums, "
                "when available in the database, during read.\n");
 
+    switch_add(sws, NULL, "--split-vfd", "s:EXTENSIONS", process_sw_split_vfd);
+    memset(&split_vfd_exts, 0, sizeof split_vfd_exts);
+    switch_info(NULL, &split_vfd_exts);
+    switch_doc(NULL,
+               "Tells browser to use the split virtual file driver (vfd) to "
+               "open the file and, optionally, the extensions used to identify "
+               "the different file parts.\n");
+
     /* Parse, then process command-line options */
     Switches = sws;
     if ((argno=switch_parse(sws, argc, argv, bad_switch))<0) exit(1);
@@ -1587,6 +1623,21 @@ main(int argc, char *argv[])
             obj_dest(list[i]);
         }
         symbol = obj_new(C_SYM, "$exclude");
+        sym_vbind(symbol, value);
+        obj_dest(symbol);
+    }
+    
+    /* Assign the --split-vfd values list to the $split_vfd_exts variable */
+    if ((sw=switch_find(sws, "--split-vfd")) && sw->seen) {
+        obj_t list[NELMTS(split_vfd_exts.value)], symbol, value;
+        for (i=0; i<split_vfd_exts.nused; i++) {
+            list[i] = obj_new(C_STR, split_vfd_exts.value[i]);
+        }
+        value = V_make_list(split_vfd_exts.nused, list);
+        for (i=0; i<split_vfd_exts.nused; i++) {
+            obj_dest(list[i]);
+        }
+        symbol = obj_new(C_SYM, "$splitvfdexts");
         sym_vbind(symbol, value);
         obj_dest(symbol);
     }
