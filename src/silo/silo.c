@@ -2206,11 +2206,6 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
  *
  * Programmer: Mark C. Miller, Fri Feb 12 08:21:52 PST 2010
  *-------------------------------------------------------------------------*/
-PRIVATE int 
-db_register_file(DBfile *dbfile, const db_silo_stat_struct *filestate, int writeable)
-{
-    int i;
-    for (i = 0; i < DB_NFILES; i++)
 int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int skip_vfdexts)
 {
     int i, retval;
