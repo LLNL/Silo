@@ -10,6 +10,7 @@
  * Implement ioperf's I/O interface using Silo functions
  */
 
+static options_t options;
 static const char *filename;
 DBfile *dbfile;
 static int has_mesh = 0;
@@ -93,7 +94,6 @@ static int ProcessArgs_silo(int argc, char *argv[])
                     meminc = 0; /* silo defaults to 2^16 = 64 kilobytes */
                 }
                 driver = DB_HDF5_CORE(meminc);
-
             }
             else if (!strcmp(argv[i], "DB_PDB"))
                 driver = DB_PDB;
@@ -123,9 +123,11 @@ fail:
     return 1;
 }
 
-static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_filename)
+static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_filename, const options_t *opts)
 {
     iointerface_t *retval;
+
+    options = *opts;
 
     if (ProcessArgs_silo(argc, argv) != 0)
         return 0;
@@ -142,13 +144,13 @@ static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_f
 }
 
 #ifdef STATIC_PLUGINS
-iointerface_t *CreateInterface_silo(int argc, char *argv[], const char *_filename)
+iointerface_t *CreateInterface_silo(int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argc, argv, _filename);
+    return CreateInterfaceReal(argc, argv, _filename, opts);
 }
 #else
-iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename)
+iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argc, argv, _filename);
+    return CreateInterfaceReal(argc, argv, _filename, opts);
 }
 #endif

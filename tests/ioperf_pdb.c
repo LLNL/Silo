@@ -7,7 +7,8 @@
  * Implement ioperf's I/O interface using PDB functions
  */
 
-static const char *filename;
+static options_t options;
+static char *filename;
 static PDBfile *pdbfile;
 
 static int Open_pdb(ioflags_t iopflags)
@@ -38,10 +39,11 @@ static int Close_pdb()
     return lite_PD_close(pdbfile);
 }
 
-static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_filename)
+static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_filename, const options_t *opts)
 {
     iointerface_t *retval;
 
+    options = *opts;
     filename = strdup(_filename);
 
     retval = (iointerface_t*) calloc(sizeof(iointerface_t),1);
@@ -54,14 +56,14 @@ static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_f
 }
 
 #ifdef STATIC_PLUGINS
-iointerface_t *CreateInterface_pdb(int argc, char *argv[], const char *_filename)
+iointerface_t *CreateInterface_pdb(int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argc, argv, _filename);
+    return CreateInterfaceReal(argc, argv, _filename, opts);
 }
 #else
-iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename)
+iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argc, argv, _filename);
+    return CreateInterfaceReal(argc, argv, _filename, opts);
 }
 #endif
 

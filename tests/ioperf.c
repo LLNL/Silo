@@ -2,23 +2,77 @@
 #include <errno.h>
 #include <float.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include <ioperf.h>
 
-typedef struct _options_t
+/*-------------------------------------------------------------------------
+  Function: bjhash 
+
+  Purpose: Hash a variable length stream of bytes into a 32-bit value.
+
+  Programmer: By Bob Jenkins, 1996.  bob_jenkins@burtleburtle.net.
+
+  You may use this code any way you wish, private, educational, or
+  commercial.  It's free. However, do NOT use for cryptographic purposes.
+
+  See http://burtleburtle.net/bob/hash/evahash.html
+ *-------------------------------------------------------------------------*/
+
+#define bjhash_mix(a,b,c) \
+{ \
+  a -= b; a -= c; a ^= (c>>13); \
+  b -= c; b -= a; b ^= (a<<8); \
+  c -= a; c -= b; c ^= (b>>13); \
+  a -= b; a -= c; a ^= (c>>12);  \
+  b -= c; b -= a; b ^= (a<<16); \
+  c -= a; c -= b; c ^= (b>>5); \
+  a -= b; a -= c; a ^= (c>>3);  \
+  b -= c; b -= a; b ^= (a<<10); \
+  c -= a; c -= b; c ^= (b>>15); \
+}
+
+static unsigned int bjhash(register const unsigned char *k, register unsigned int length, register unsigned int initval)
 {
-    const char *io_interface;
-    int request_size_in_bytes;
-    int num_requests;
-    int initial_file_size;
-    int seek_noise;
-    int size_noise;
-    int test_read;
-    ioflags_t flags;
-    int print_details;
-} options_t;
+   register unsigned int a,b,c,len;
+
+   len = length;
+   a = b = 0x9e3779b9;
+   c = initval;
+
+   while (len >= 12)
+   {
+      a += (k[0] +((unsigned int)k[1]<<8) +((unsigned int)k[2]<<16) +((unsigned int)k[3]<<24));
+      b += (k[4] +((unsigned int)k[5]<<8) +((unsigned int)k[6]<<16) +((unsigned int)k[7]<<24));
+      c += (k[8] +((unsigned int)k[9]<<8) +((unsigned int)k[10]<<16)+((unsigned int)k[11]<<24));
+      bjhash_mix(a,b,c);
+      k += 12; len -= 12;
+   }
+
+   c += length;
+
+   switch(len)
+   {
+      case 11: c+=((unsigned int)k[10]<<24);
+      case 10: c+=((unsigned int)k[9]<<16);
+      case 9 : c+=((unsigned int)k[8]<<8);
+      case 8 : b+=((unsigned int)k[7]<<24);
+      case 7 : b+=((unsigned int)k[6]<<16);
+      case 6 : b+=((unsigned int)k[5]<<8);
+      case 5 : b+=k[4];
+      case 4 : a+=((unsigned int)k[3]<<24);
+      case 3 : a+=((unsigned int)k[2]<<16);
+      case 2 : a+=((unsigned int)k[1]<<8);
+      case 1 : a+=k[0];
+   }
+
+   bjhash_mix(a,b,c);
+
+   return c;
+}
 
 typedef struct _timeinfo_t
 {
@@ -41,6 +95,29 @@ static int GetSizeFromModifierChar(char c)
     }
     return n;
 }
+
+static char* GetRandomString()
+{
+    struct timeval tv0;
+    unsigned int hval;
+    long hid, rnum;
+    char rstate[128];
+    static char retval[128];
+
+    gettimeofday(&tv0, 0);
+    hval = bjhash((unsigned char *) &tv0, sizeof(tv0), 0);
+
+    hid = gethostid();
+    hval = bjhash((unsigned char *) &hid, sizeof(hid), hval);
+
+    initstate(hval, rstate, 128);
+    rnum = random();
+    hval = bjhash((unsigned char *) &rnum, sizeof(rnum), hval);
+
+    sprintf(retval, "%08d", hval);
+    return retval;
+}
+
 
 /*
  * This is a default timer, with microsecond accuracy or thereabouts.
@@ -116,6 +193,18 @@ static void ProcessCommandLine(int argc, char *argv[], options_t *opts)
             opts->initial_file_size = strtol(argv[i], (char **)NULL, 10)*n;
             if (errno) goto fail;
         }
+        else if (!strcmp(argv[i], "--alignment"))
+        {
+            i++;
+            n=strlen(argv[i])-1;
+            n=GetSizeFromModifierChar(argv[i][n]);
+            opts->alignment = strtol(argv[i], (char **)NULL, 10)*n;
+            if (errno) goto fail;
+        }
+        else if (!strcmp(argv[i], "--rand-file-name"))
+        {
+            opts->rand_file_name = 1;
+        }
         else if (!strcmp(argv[i], "--test-read"))
         {
             opts->flags = IO_READ;
@@ -145,36 +234,44 @@ fail:
 }
 
 #ifdef STATIC_PLUGINS
-extern iointerface_t* CreateInterface_silo(int argc, char *argv[], const char *filename);
-extern iointerface_t* CreateInterface_hdf5(int argc, char *argv[], const char *filename);
-extern iointerface_t* CreateInterface_stdio(int argc, char *argv[], const char *filename);
-extern iointerface_t* CreateInterface_sec2(int argc, char *argv[], const char *filename);
-extern iointerface_t* CreateInterface_pdb(int argc, char *argv[], const char *filename);
+extern iointerface_t* CreateInterface_silo(int argc, char *argv[],
+    const char *filename, const options_t *opts);
+extern iointerface_t* CreateInterface_hdf5(int argc, char *argv[],
+    const char *filename, const options_t *opts);
+extern iointerface_t* CreateInterface_stdio(int argc, char *argv[],
+    const char *filename, const options_t *opts);
+extern iointerface_t* CreateInterface_sec2(int argc, char *argv[],
+    const char *filename, const options_t *opts);
+extern iointerface_t* CreateInterface_pdb(int argc, char *argv[],
+    const char *filename, const options_t *opts);
 #endif
 
-static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacename)
+static iointerface_t* GetIOInterface(int argc, char *argv[], const options_t *opts)
 {
     char testfilename[256];
+    char ifacename[256];
     void *dlhandle=0;
     iointerface_t *retval=0;
 
     /* First, get rid of the old data file */
-    sprintf(testfilename, "iop_test_%s.dat", ifacename);
+    strcpy(ifacename, opts->io_interface);
+    sprintf(testfilename, "iop_test_%s%s.dat", ifacename, 
+        opts->rand_file_name?GetRandomString():"");
     unlink(testfilename);
 
     /* First, attempt to create interface using static approach, if that
        is enabled. */
 #ifdef STATIC_PLUGINS
     if (!strcmp(ifacename, "silo"))
-        retval = CreateInterface_silo(argc, argv, testfilename);
+        retval = CreateInterface_silo(argc, argv, testfilename, opts);
     else if (!strcmp(ifacename, "hdf5"))
-        retval = CreateInterface_hdf5(argc, argv, testfilename);
+        retval = CreateInterface_hdf5(argc, argv, testfilename, opts);
     else if (!strcmp(ifacename, "stdio"))
-        retval = CreateInterface_stdio(argc, argv, testfilename);
+        retval = CreateInterface_stdio(argc, argv, testfilename, opts);
     else if (!strcmp(ifacename, "sec2"))
-        retval = CreateInterface_sec2(argc, argv, testfilename);
+        retval = CreateInterface_sec2(argc, argv, testfilename, opts);
     else if (!strcmp(ifacename, "pdb"))
-        retval = CreateInterface_pdb(argc, argv, testfilename);
+        retval = CreateInterface_pdb(argc, argv, testfilename, opts);
 #else
     /* Fall back to dynamic approach */
     if (!retval)
@@ -192,7 +289,7 @@ static iointerface_t* GetIOInterface(int argc, char *argv[], const char *ifacena
             }
 
             /* we allow the io-interface plugin to process command line args too */
-            retval = createFunc(argc, argv, testfilename);
+            retval = createFunc(argc, argv, testfilename, opts);
 
         }
         else
@@ -382,19 +479,15 @@ main(int argc, char *argv[])
     double         t0,t1;
 
     /* setup default options */
-    options.io_interface = 0;
+    memset(&options, 0, sizeof(options));
     options.request_size_in_bytes = 4096;
-    options.initial_file_size = 0;
     options.num_requests = 100;
-    options.seek_noise = 0;
-    options.size_noise = 0;
     options.flags = IO_WRITE|IO_TRUNCATE;
-    options.print_details = 0;
 
     ProcessCommandLine(argc, argv, &options);
 
     /* GetIOInterface either exits or returns valid pointer */
-    ioiface = GetIOInterface(argc, argv, options.io_interface);
+    ioiface = GetIOInterface(argc, argv, &options);
 
     /* First call initializes timer */
     t0 = ioiface->Time();

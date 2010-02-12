@@ -1,4 +1,4 @@
-SILO_HOME=/usr/gapps/silo/4.7.2/i686_Linux_ELsmp
+SILO_HOME=/groups/visit/miller/silo/trunk/install
 SILO_INC=$(SILO_HOME)/include
 SILO_LIB=$(SILO_HOME)/lib
 SILO_LIBF=$(SILO_LIB)/libsiloh5.a
@@ -21,6 +21,7 @@ SZIP_LIBF=$(SZIP_LIB)/libsz.a
 
 CFLAGS=
 CC=gcc
+LINK=g++
 
 .SUFFIXES: .c .so .o
 
@@ -50,8 +51,8 @@ ioperf_static.o: ioperf.c
 	$(CC) $< -o $@ -c -DSTATIC_PLUGINS $(CFLAGS) -I.
 
 ioperf_shared: ioperf_shared.o $(DRIVER_SHARED_OBJ)
-	$(CC) $< -o $@ $(CFLAGS) $(DRIVER_SHARED_OBJ) -ldl -lz -lm \
+	$(LINK) $< -o $@ $(CFLAGS) $(DRIVER_SHARED_OBJ) -ldl -lz -lm \
 	-Wl,-rpath -Wl,`pwd`
 
 ioperf_static: ioperf_static.o $(DRIVER_STATIC_OBJ)
-	$(CC) $< -o $@ $(CFLAGS) $(DRIVER_STATIC_OBJ) $(SILO_LIBF) $(HDF5_LIBF) $(SZIP_LIBF) -lz -lm
+	$(LINK) $< -o $@ $(CFLAGS) $(DRIVER_STATIC_OBJ) $(SILO_LIBF) $(HDF5_LIBF) $(SZIP_LIBF) -lz -lm

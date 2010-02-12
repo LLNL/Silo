@@ -6,6 +6,21 @@ typedef enum _ioflags_t
     IO_TRUNCATE = 0x00000008
 } ioflags_t;
 
+typedef struct _options_t
+{
+    const char *io_interface;
+    int request_size_in_bytes;
+    int num_requests;
+    int initial_file_size;
+    int seek_noise;
+    int size_noise;
+    int test_read;
+    ioflags_t flags;
+    int print_details;
+    int alignment;
+    int rand_file_name;
+} options_t;
+
 typedef enum _ioop_t
 {
     OP_WRITE,
@@ -36,4 +51,4 @@ typedef struct _iointerface_t
     void *dlhandle;
 } iointerface_t;
 
-typedef iointerface_t* (*CreateInterfaceFunc)(int argc, char *argv[], const char *filename);
+typedef iointerface_t* (*CreateInterfaceFunc)(int argc, char *argv[], const char *filename, const options_t *opts);
