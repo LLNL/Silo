@@ -12,6 +12,7 @@
 #include <shlwapi.h>
 #endif
 #include <stdlib.h>
+#include <std.c>
 
 #define ALLOC(T)                ((T*)calloc((size_t)1,sizeof(T)))
 #define ALLOC_N(T,N)            ((T*)calloc((size_t)(N),sizeof(T)))
@@ -47,8 +48,8 @@ main (int argc, char **argv)
     {
         if (!strcmp(argv[3], "DB_PDB"))
             driver = DB_PDB;
-        else if (!strcmp(argv[3], "DB_HDF5"))
-            driver = DB_HDF5;
+        else if (!strncmp(argv[3], "DB_HDF5", 7))
+            driver = StringToDriver(argv[3]);
     }
     printf ("Using base %s. Mesh file name %s\n", argv[1], argv[2]);
 

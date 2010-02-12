@@ -43,6 +43,8 @@
 #endif
 #define RAD(deg)    M_PI*(deg/180.0)
 
+#include <std.c>
+
 int
 main(int argc, char *argv[])
 {
@@ -67,10 +69,8 @@ main(int argc, char *argv[])
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
-	if (!strcmp(argv[i], "DB_PDB")) {
-	    driver = DB_PDB;
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	if (!strncmp(argv[i], "DB_", 3)) {
+	    driver = StringToDriver(argv[i]);
 	} else if (!strcmp(argv[i], "inf")) {
             setinf = 1;
 	} else if (!strcmp(argv[i], "nan")) {

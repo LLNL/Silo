@@ -38,6 +38,7 @@ for advertising or product endorsement purposes.
 
 #include <math.h>
 #include <string.h>
+#include <std.c>
 
 #define NNODES 12
 #define NZONES 2
@@ -103,8 +104,8 @@ main(int argc, char *argv[])
         if (!strcmp(argv[i], "DB_PDB")) {
             driver = DB_PDB;
             filename = "polyzl.pdb";
-        } else if (!strcmp(argv[i], "DB_HDF5")) {
-            driver = DB_HDF5;
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
             filename = "polyzl.h5";
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

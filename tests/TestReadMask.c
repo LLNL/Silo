@@ -6,6 +6,7 @@
 #include <string.h>
 #endif
 #include <sys/timeb.h>
+#include <std.c>
 
 /* To compile this program on hyper, here is the command:
  *
@@ -107,8 +108,8 @@ main(int argc, char *argv[])
         if (!strcmp(argv[i], "DB_PDB")) {
             driver = DB_PDB;
             files = pdbfiles;
-        } else if (!strcmp(argv[i], "DB_HDF5")) {
-            driver = DB_HDF5;
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
             files = h5files;
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

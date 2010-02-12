@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <std.c>
 
 #define IND(i,j) i-1][j-1
 
@@ -72,8 +73,8 @@ main(int argc, char *argv[])
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    filename = "oneprism.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
 	    filename = "oneprism.h5";
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

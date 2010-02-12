@@ -15,6 +15,8 @@
  *
  ***************************************************************/
 
+#include <std.c>
+
 int
 main(int argc, char *argv[])
 {
@@ -52,8 +54,8 @@ main(int argc, char *argv[])
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    filename = "alltypes.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+	    driver = StringToDriver(argv[i]);
 	    filename = "alltypes.h5";
 	} else {
 	    fprintf(stderr, "unknown option: %s\n", argv[i]);

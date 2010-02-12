@@ -37,16 +37,13 @@ for advertising or product endorsement purposes.
 #include <stdlib.h>
 #include <string.h>
 #include "silo.h"
+#include <std.c>
 
 extern int build_quad(DBfile *dbfile, char *name);
 
 int
 main (int argc, char *argv[])
 {
-#if 0
-    int            meshtypes[3], mmid, nmesh;
-    char          *meshnames[3];
-#endif
     DBfile        *dbfile;
     int		  i, driver=DB_PDB;
     static char	  *filename="quad.pdb";
@@ -57,8 +54,8 @@ main (int argc, char *argv[])
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    filename = "quad.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
 	    filename = "quad.h5";
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

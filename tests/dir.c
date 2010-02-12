@@ -44,6 +44,7 @@ for advertising or product endorsement purposes.
 #include <sys/types.h>
 
 #include "silo.h"
+#include <std.c>
 extern int build_quad(DBfile *dbfile, char *name);
 extern int build_ucd(DBfile *dbfile, char *name);
 extern int build_ucd_tri(DBfile *dbfile, char *name);
@@ -83,8 +84,8 @@ main(int argc, char *argv[])
             driver = DB_PDB;
             filename = "dir.pdb";
             filename2 = "dir2.pdb";
-        } else if (!strcmp(argv[i], "DB_HDF5")) {
-            driver = DB_HDF5;
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
             filename = "dir.h5";
             filename2 = "dir2.h5";
         } else {
@@ -143,7 +144,7 @@ main(int argc, char *argv[])
     dbfile = DBOpen(filename, driver, DB_READ);
     dbfile2 = DBCreate(filename2, 0, DB_LOCAL, "dir test file", driver);
 
-    if (driver == DB_HDF5)
+    if (driver&0xF == DB_HDF5)
         DBCpDir(dbfile, "quad_dir/quad_subdir1", dbfile2, "gorfo");
 
     DBClose(dbfile);
@@ -152,7 +153,7 @@ main(int argc, char *argv[])
     dbfile = DBOpen(filename, driver, DB_READ);
     dbfile2 = DBOpen(filename2, driver, DB_APPEND);
 
-    if (driver == DB_HDF5)
+    if (driver&0xF == DB_HDF5)
         DBCpDir(dbfile, "ucd_dir", dbfile2, "gorfo/foobar");
 
     /* this should be ok becase we're opening for read */

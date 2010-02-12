@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "silo.h"
+#include <std.c>
 
 #define zx 3
 #define zy 3
@@ -83,8 +84,8 @@ int main(int argc, char **argv) {
         if (!strcmp(argv[i], "DB_PDB")) {
             driver = DB_PDB;
             filename = "mat3d_3across.pdb";
-        } else if (!strcmp(argv[i], "DB_HDF5")) {
-            driver = DB_HDF5;
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
             filename = "mat3d_3across.h5";
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

@@ -1,6 +1,7 @@
 #include <silo.h>
 #include <string.h>
 #include <stdlib.h>     /* For abort() */
+#include <std.c>
 
 #define NX	10
 #define NY	3
@@ -115,8 +116,8 @@ main (int argc, char *argv[]) {
        if (!strcmp(argv[i], "DB_PDB")) {
 	   driver = DB_PDB;
 	   filename = "partial.pdb";
-       } else if (!strcmp(argv[i], "DB_HDF5")) {
-	   driver = DB_HDF5;
+       } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+           driver = StringToDriver(argv[i]);
 	   filename = "partial.h5";
        } else {
 	   fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

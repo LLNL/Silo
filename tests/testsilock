@@ -20,11 +20,11 @@ else
     topDir=.
 fi
 
-for driver in DB_PDB $2; do
+for driver in DB_PDB "$2"; do
     for fparams in "nan 0" "inf 7"; do
         fpissue=$(echo $fparams | cut -d' ' -f1)
         index=$(echo $fparams | cut -d' ' -f2)
-        $topDir/onehex $driver $fpissue >& /dev/null
+        $topDir/onehex "$driver" $fpissue >& /dev/null
         foundIt=$($topDir/../tools/silock/silock onehex.silo | grep "has .* issue at index ${index}$")
         if test -z "$foundIt"; then
             result=1

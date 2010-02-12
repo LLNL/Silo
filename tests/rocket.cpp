@@ -48,6 +48,7 @@
 #include <cstring>
 
 #include <silo.h>
+#include <std.c>
 
 using std::map;
 using std::vector;
@@ -1031,33 +1032,12 @@ main(int argc, char **argv)
     DBfile *dbfile;
     int driver = DB_PDB;
 
-#if 0
-    {
-        char *names[5];
-	names[0] = "sandy";
-	names[1] = 0;
-	names[2] = "jill";
-	names[3] = "steve";
-	names[4] = "mark";
-	char *strList;
-	int len;
-	db_StringArrayToStringList(names, 5, &strList, &len);
-	for (int i = 0; i < strlen(strList); i++)
-	    printf("strList[%d]=\"%c\"\n", i, strList[i]);
-        char **foo = db_StringListToStringArray(strList, 5);
-	for (int i = 0; i < 5; i++)
-	    printf("foo[%d]=\"%s\"\n", i, foo[i]?foo[i]:"(null)");
-
-        exit(1);
-    }
-#endif
-
     int j, i = 1;
     while (i < argc)
     {
-        if (strcmp(argv[i], "DB_HDF5") == 0)
+        if (strncmp(argv[i], "DB_HDF5", 7) == 0)
         {
-            driver = DB_HDF5;
+            driver = StringToDriver(argv[i]);
         }
         else if (strcmp(argv[i], "DB_PDB") == 0)
         {

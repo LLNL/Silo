@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "silo.h"
+#include <std.c>
 
 #define NX 10                   /* Number of zones in x direction */
 #define NY 3                   /* Number of zones in y direction */
@@ -61,8 +62,8 @@ main(int argc, char *argv[])
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    filename = "species.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
 	    filename = "species.h5";
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

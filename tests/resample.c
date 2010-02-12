@@ -28,6 +28,7 @@
 
 #include <mpi.h>
 #include <silo.h>
+#include <std.c>
 
 
 #define   	ALLOC(T)        ((T*)calloc(1,sizeof(T)))
@@ -166,8 +167,8 @@ int main(int argc, char **argv)
         }
       else if (!strcmp(argv[i], "DB_PDB"))
           driver = DB_PDB;
-      else if (!strcmp(argv[i], "DB_HDF5"))
-         driver = DB_HDF5;
+      else if (!strncmp(argv[i], "DB_HDF5", 7))
+         driver = StringToDriver(argv[i]);
     } /* end of for loop */
   } /* end of if */
   else if (argc != 3)

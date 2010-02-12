@@ -38,6 +38,7 @@ for advertising or product endorsement purposes.
 #include <string.h>
 
 #include "silo.h"
+#include <std.c>
 
 #undef NX
 #define NX 100
@@ -73,8 +74,8 @@ main(int argc, char *argv[])
     for (i=1; i<argc; i++) {
         if (!strcmp(argv[i], "DB_PDB")) {
             driver = DB_PDB;
-        } else if (!strcmp(argv[i], "DB_HDF5")) {
-            driver = DB_HDF5;
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
         } else if (!strcmp(argv[i], "hzip")) {
             DBSetCompression("METHOD=HZIP");
         } else if (!strcmp(argv[i], "fpzip")) {

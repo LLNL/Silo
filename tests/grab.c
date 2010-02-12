@@ -56,6 +56,8 @@ for advertising or product endorsement purposes.
 #include "hdf5.h"
 #endif
 
+#include <std.c>
+
 
 /*-------------------------------------------------------------------------
  * Function:        main
@@ -135,8 +137,8 @@ main(int argc, char *argv[])
        if (!strcmp(argv[i], "DB_PDB")) {
           fprintf(stderr, "This test only supported on HDF5 driver\n");
           exit(1);
-       } else if (!strcmp(argv[i], "DB_HDF5")) {
-          driver = DB_HDF5;
+       } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+          driver = StringToDriver(argv[i]);
           filename = "grab.h5";
        } else if (!strcmp(argv[i], "verbose")) {
           verbose = 1;
@@ -253,7 +255,7 @@ main(int argc, char *argv[])
      * Return control of native API to Silo
      */
     type = DBUngrabDriver(dbfile, (void *)&silo_h5id);
-    if (type != driver)
+    if (type != driver&0xF)
     {
        printf("Wrong drive type returned from Ungrab\n");
        return 1;
@@ -271,7 +273,7 @@ main(int argc, char *argv[])
     DBClose(dbfile);
 
     type = DBGetDriverTypeFromPath(filename);
-    if (type != driver)
+    if (type != driver&0xF)
     {
        printf("Wrong drive type=%d returned from GetDriverTypeFromPath\n",
        type);

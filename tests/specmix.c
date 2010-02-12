@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <std.c>
 
 #define MAXVAR  4
 #define MAXMAT  5
@@ -149,8 +150,8 @@ int main(int argc, char *argv[]) {
       if (!strcmp(argv[i], "DB_PDB")) {
 	  driver = DB_PDB;
 	  file_ext = ".pdb";
-      } else if (!strcmp(argv[i], "DB_HDF5")) {
-	  driver = DB_HDF5;
+      } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+          driver = StringToDriver(argv[i]);
 	  file_ext = ".h5";
       } else if (!strcmp(argv[i], "reorder")) {
 	  reorder = 1;

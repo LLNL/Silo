@@ -15,6 +15,7 @@
 #endif
 
 #include <silo.h>
+#include <std.c>
 
 #define MAXBLOCKS       400       /* Maximum number of blocks in an object */
 #define STRLEN          60
@@ -64,9 +65,9 @@ main(int argc, char *argv[])
             driver = DB_PDB;
             file_ext = "pdb";
         }
-        else if (!strcmp(argv[i], "DB_HDF5"))
+        else if (!strncmp(argv[i], "DB_HDF5", 7))
         {
-            driver = DB_HDF5;
+            driver = StringToDriver(argv[i]);
             file_ext = "h5";
         }
         else if (!strcmp(argv[i], "multidir"))

@@ -10,6 +10,7 @@
  */
 #include <silo.h>
 #include <stdlib.h>
+#include <std.c>
 
 #include <config.h>
 #ifdef HAVE_HDF5_H
@@ -1082,8 +1083,8 @@ main(int argc, char *argv[])
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    filename = "sami.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
 	    filename = "sami.h5";
 	} else if (!strcmp(argv[i], "DB_LOCAL")) {
 	    arch_g = DB_LOCAL;
@@ -1129,7 +1130,7 @@ main(int argc, char *argv[])
     nerrors += test_read_all(dbfile);
 
     /* Rewrite with different memory data type and verify results */
-    if (DB_PDB != driver)
+    if (DB_PDB != driver&0xF)
     {
         nerrors += test_type_conv(dbfile);
     }
@@ -1138,7 +1139,7 @@ main(int argc, char *argv[])
      * Do some illegal things to make sure they fail. Make sure we can still
      * read data.
      */
-    if (DB_PDB != driver)
+    if (DB_PDB != driver&0xF)
     {
         nerrors += test_write_bad(dbfile);
         nerrors += test_read_all(dbfile);

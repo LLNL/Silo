@@ -68,6 +68,7 @@ for advertising or product endorsement purposes.
 #endif
 #include <string.h>
 #include "silo.h"
+#include <std.c>
 
 #define false   0
 #define true    1
@@ -3192,9 +3193,9 @@ build_curve (DBfile *dbfile, int driver)
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   if (DB_HDF5==driver) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (DB_HDF5==driver&0xF) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
-   if (DB_HDF5!=driver) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (DB_HDF5!=driver&0xF) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
 
    /*
     * Write the `coscurve' curve. It shares x values with the `sincurve'
@@ -3373,8 +3374,8 @@ main(int argc, char *argv[])
 	else if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    file_ext = "pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
 	    file_ext = "h5";
 	} else
             printf ("Unknown execute line option.\n");

@@ -40,6 +40,7 @@ for advertising or product endorsement purposes.
 #ifdef WIN32
 #include <string.h>
 #endif
+#include <std.c>
 
 #ifndef PI
 #  define PI    3.141592653589793238
@@ -102,20 +103,14 @@ main(int argc, char **argv)
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    file_ext = ".pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
 	    file_ext = ".h5";
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
 	}
     }
     
-
-
-    /************************
-     * Check the PDB driver *
-     ************************/
-
     /* Check 2D point meshes */
     sprintf(filename, "point2d%s", file_ext);
     printf("Creating file: '%s'...\n", filename);

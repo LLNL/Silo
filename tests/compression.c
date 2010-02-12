@@ -50,6 +50,8 @@ for advertising or product endorsement purposes.
 #define ONE_MEG 1048576
 #define INTERATE 50
 
+#include <std.c>
+
 /*-------------------------------------------------------------------------
  * Function:        main
  *
@@ -98,8 +100,8 @@ main(int argc, char *argv[])
        if (!strcmp(argv[i], "DB_PDB")) {
           fprintf(stderr, "This test only supported on HDF5 driver\n");
           exit(1);
-       } else if (!strcmp(argv[i], "DB_HDF5")) {
-          driver = DB_HDF5;
+       } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+          driver = StringToDriver(argv[i]);
           filename = "compression.h5";
        } else if (!strcmp(argv[i], "compress")) {
           if ((i+1<argc) && ((ptr=strstr(argv[i+1], "METHOD=")) != NULL))

@@ -1,6 +1,7 @@
 #include <silo.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <std.c>
 
 void
 add_edge(int nid1, int nid2, int *nedges, int *maxedges, int **edges)
@@ -212,8 +213,8 @@ main(int argc, char *argv[])
     for (i=1; i<argc; i++) {
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+	    driver = StringToDriver(argv[i]);
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
 	}

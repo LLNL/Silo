@@ -37,6 +37,7 @@ for advertising or product endorsement purposes.
 #include <stdlib.h>     /* For exit()   */
 #include <string.h>     /* For strcmp() */
 #include "silo.h"
+#include <std.c>
 
 static void build_ucd(DBfile *dbfile, char *name);
 
@@ -72,8 +73,8 @@ main(int argc, char *argv[])
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    filename = "ucd.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
 	    filename = "ucd.h5";
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

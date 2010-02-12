@@ -39,6 +39,7 @@ for advertising or product endorsement purposes.
 #include <stdio.h>
 #include <silo.h>
 #include <stdlib.h>     /* For exit() */
+#include <std.c>
 
 /*
  * Data describing the coordinates and zonelist to define a sphere
@@ -1812,8 +1813,8 @@ main(int argc, char *argv[])
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    filename = "globe.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+	    driver = StringToDriver(argv[i]);
 	    filename = "globe.h5";
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);

@@ -16,6 +16,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <std.c>
 
 int main(int argc, char **argv)
 {
@@ -43,8 +44,8 @@ int main(int argc, char **argv)
         if (!strcmp(argv[i], "DB_PDB")) {
             driver = DB_PDB;
             filename = "ucd1d.pdb";
-        } else if (!strcmp(argv[i], "DB_HDF5")) {
-            driver = DB_HDF5;
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
             filename = "ucd1d.h5";
         } else if (!strcmp(argv[i], "reorder")) {
             reorder = 1;
@@ -109,7 +110,7 @@ int main(int argc, char **argv)
     shapecnt[0] = nzones;
 
 
-    if (friendly && driver == DB_HDF5)
+    if (friendly && (driver&0xF) == DB_HDF5)
         DBSetFriendlyHDF5Names(1);
 
     /* Write out the mesh */

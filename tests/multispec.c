@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <silo.h>
+#include <std.c>
 
 #define MAXBLOCKS	100           /* maximum number of blocks in an object   */
 #define STRLEN		60
@@ -496,8 +497,8 @@ main(int argc, char *argv[]) {
 	if (!strcmp(argv[i], "DB_PDB")) {
 	    driver = DB_PDB;
 	    filename = "multispec.pdb";
-	} else if (!strcmp(argv[i], "DB_HDF5")) {
-	    driver = DB_HDF5;
+	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
 	    filename = "multispec.h5";
 	} else {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
