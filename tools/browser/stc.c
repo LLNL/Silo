@@ -1529,6 +1529,9 @@ stc_offset (obj_t _self, obj_t comp) {
  *
  *  Mark C. Miller, Mon Nov 23 11:18:25 PST 2009
  *  Added missing 'topo_dim' member to multimesh object.
+ *
+ *  Mark C. Miller, Wed Feb 24 16:39:21 PST 2010
+ *  Fixed a problem with display of extents in point meshes.
  *-------------------------------------------------------------------------
  */
 void
@@ -2097,9 +2100,9 @@ stc_silo_types (void) {
       COMP (gnznodtype,         "primitive 'int'");
       IOASSOC (PA_DATATYPE);
       COMP (min_extents,
-            "array 'SH3 3, self.ndims' (primitive 'float')");
+            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
       COMP (max_extents,
-            "array 'SH3 3, self.ndims' (primitive 'float')");
+            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
       COMP (coords,
             "array 'self.ndims' (pointer (array 'self.nels' "
             "(primitive 'self.datatype')))");
