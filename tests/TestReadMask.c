@@ -295,6 +295,7 @@ main(int argc, char *argv[])
     /* Print the times. */
     printTimes(ms);
 
+    CleanupDriverStuff();
     return 0;
 }
 

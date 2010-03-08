@@ -93,6 +93,7 @@ main(int argc, char *argv[])
         WriteFile (time, cycle, driver);
     }
 
+    CleanupDriverStuff();
     return 0;
 }
 

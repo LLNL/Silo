@@ -239,6 +239,7 @@ main(int argc, char *argv[])
 
     printf("Finished.\n");
 
+    CleanupDriverStuff();
     return (0);
 }
 

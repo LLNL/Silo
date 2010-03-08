@@ -81,6 +81,8 @@ main (int argc, char **argv)
     {
         MCopyFile (files[i], argv[2], driver);
     }
+
+    CleanupDriverStuff();
 }
 
 void

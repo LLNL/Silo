@@ -114,15 +114,31 @@ file_class (void) {
  *              Robb Matzke's code in func.c for $exclude variable.
  *-------------------------------------------------------------------------
  */
+#define MAX_FILE_OPTIONS_SETS 32
 void file_reset_split_vfd_extensions (void) {
 
     char *tmp=0;
     int i=0, npairs_used=0;
     obj_t head=NIL, value=NIL, symbol=NIL, word=NIL;
+    static int vfd = DB_H5VFD_SPLIT;
+    static int meta_opts_set_id = DB_FILE_OPTS_H5_DEFAULT_DEFAULT;
+    static int raw_opts_set_id = DB_FILE_OPTS_H5_DEFAULT_DEFAULT;
+    static DBoptlist *opts_sets[MAX_FILE_OPTIONS_SETS] =
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-    DBRemoveAllSplitVFDExtensionPairs();
+    /* free all the old file options sets */
+    DBUnregisterAllFileOptionsSets();
+    for (i = 0; i < MAX_FILE_OPTIONS_SETS && opts_sets[i]; i++)
+    {
+        free(DBGetOption(opts_sets[i], DBOPT_H5_RAW_EXTENSION));
+        free(DBGetOption(opts_sets[i], DBOPT_H5_META_EXTENSION));
+        DBFreeOptlist(opts_sets[i]);
+        opts_sets[i] = 0;
+    }
 
     /* parse $splitvfdext to get extensions */
+    i = 0;
     symbol = obj_new(C_SYM, "$splitvfdexts");
     head = sym_vboundp(symbol);
     symbol = obj_dest(symbol);
@@ -141,10 +157,20 @@ void file_reset_split_vfd_extensions (void) {
         word = cons_head(value);
         if (C_STR==word->pub.cls) {
             if (i>0 && i%2==1) {
+
+                /* add a file options set for the split vfd extension pair */
+                DBoptlist *opts = DBMakeOptlist(5);
+                DBAddOption(opts, DBOPT_H5_VFD, &vfd);
+                DBAddOption(opts, DBOPT_H5_RAW_FILE_OPTS, &raw_opts_set_id);
+                DBAddOption(opts, DBOPT_H5_RAW_EXTENSION, safe_strdup(obj_name(word)));
+                DBAddOption(opts, DBOPT_H5_META_FILE_OPTS, &meta_opts_set_id);
+                DBAddOption(opts, DBOPT_H5_META_EXTENSION, tmp);
+                DBRegisterFileOptionsSet(opts);
+
+                /* record this options set so we can delete it later */
+                opts_sets[npairs_used] = opts;
                 npairs_used++;
-                DBAddSplitVFDExtensionPair(tmp, obj_name(word));
-                if (tmp) free(tmp);
-                tmp = 0;
+
             } else {
                 tmp = safe_strdup(obj_name(word));
             }

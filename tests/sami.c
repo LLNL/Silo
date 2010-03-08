@@ -1188,5 +1188,6 @@ main(int argc, char *argv[])
     } else {
 	puts("All sami tests passed.");
     }
+    CleanupDriverStuff();
     return nerrors?1:0;
 }

@@ -228,5 +228,6 @@ main(int argc, char *argv[])
 
     if (lval2) free(lval2);
 
+    CleanupDriverStuff();
     return err;
 }

@@ -28,6 +28,7 @@ EXTRA_DIST= \
  ioperf_silo.c \
  Make_ioperf \
  ioperf_tests \
+ std.c \
  $(check_SCRIPTS) \
  $(check_DATA)
 
@@ -62,11 +63,11 @@ endif
 
 # paths look at install directories before sources
 AM_CPPFLAGS = \
- -I$(includedir) \
  -I$(srcdir)/../src/pdb \
  -I$(srcdir)/../src/score \
  -I$(builddir)/../src/silo \
- -I$(srcdir)/../src/silo
+ -I$(srcdir)/../src/silo \
+ -I$(includedir)
 quad_CPPFLAGS = $(AM_CPPFLAGS)
 TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)

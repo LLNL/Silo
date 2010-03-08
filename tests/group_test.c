@@ -328,6 +328,7 @@ main(int argc, char *argv[])
     } else
         DBClose(dbfile);
 
+    CleanupDriverStuff();
     return(0);
 }                               /* main */
 

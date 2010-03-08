@@ -145,7 +145,7 @@ static double GetTime()
     return t1-t0;
 }
 
-static void ProcessCommandLine(int argc, char *argv[], options_t *opts)
+static int ProcessCommandLine(int argc, char *argv[], options_t *opts)
 {
     char plugin_opts_delim[256];
     int i,n,nerrors=0;
@@ -231,22 +231,24 @@ fail:
         fprintf(stderr, "%d: no io-interface specified\n", nerrors++);
     if (nerrors)
         exit(nerrors);
+
+    return i+1;
 }
 
 #ifdef STATIC_PLUGINS
-extern iointerface_t* CreateInterface_silo(int argc, char *argv[],
+extern iointerface_t* CreateInterface_silo(int argi, int argc, char *argv[],
     const char *filename, const options_t *opts);
-extern iointerface_t* CreateInterface_hdf5(int argc, char *argv[],
+extern iointerface_t* CreateInterface_hdf5(int argi, int argc, char *argv[],
     const char *filename, const options_t *opts);
-extern iointerface_t* CreateInterface_stdio(int argc, char *argv[],
+extern iointerface_t* CreateInterface_stdio(int argi, int argc, char *argv[],
     const char *filename, const options_t *opts);
-extern iointerface_t* CreateInterface_sec2(int argc, char *argv[],
+extern iointerface_t* CreateInterface_sec2(int argi, int argc, char *argv[],
     const char *filename, const options_t *opts);
-extern iointerface_t* CreateInterface_pdb(int argc, char *argv[],
+extern iointerface_t* CreateInterface_pdb(int argi, int argc, char *argv[],
     const char *filename, const options_t *opts);
 #endif
 
-static iointerface_t* GetIOInterface(int argc, char *argv[], const options_t *opts)
+static iointerface_t* GetIOInterface(int argi, int argc, char *argv[], const options_t *opts)
 {
     char testfilename[256];
     char ifacename[256];
@@ -263,15 +265,15 @@ static iointerface_t* GetIOInterface(int argc, char *argv[], const options_t *op
        is enabled. */
 #ifdef STATIC_PLUGINS
     if (!strcmp(ifacename, "silo"))
-        retval = CreateInterface_silo(argc, argv, testfilename, opts);
+        retval = CreateInterface_silo(argi, argc, argv, testfilename, opts);
     else if (!strcmp(ifacename, "hdf5"))
-        retval = CreateInterface_hdf5(argc, argv, testfilename, opts);
+        retval = CreateInterface_hdf5(argi, argc, argv, testfilename, opts);
     else if (!strcmp(ifacename, "stdio"))
-        retval = CreateInterface_stdio(argc, argv, testfilename, opts);
+        retval = CreateInterface_stdio(argi, argc, argv, testfilename, opts);
     else if (!strcmp(ifacename, "sec2"))
-        retval = CreateInterface_sec2(argc, argv, testfilename, opts);
+        retval = CreateInterface_sec2(argi, argc, argv, testfilename, opts);
     else if (!strcmp(ifacename, "pdb"))
-        retval = CreateInterface_pdb(argc, argv, testfilename, opts);
+        retval = CreateInterface_pdb(argi, argc, argv, testfilename, opts);
 #else
     /* Fall back to dynamic approach */
     if (!retval)
@@ -289,7 +291,7 @@ static iointerface_t* GetIOInterface(int argc, char *argv[], const options_t *op
             }
 
             /* we allow the io-interface plugin to process command line args too */
-            retval = createFunc(argc, argv, testfilename, opts);
+            retval = createFunc(argi, argc, argv, testfilename, opts);
 
         }
         else
@@ -477,6 +479,7 @@ main(int argc, char *argv[])
     options_t      options;
     iointerface_t  *ioiface;
     double         t0,t1;
+    int            plugin_argi;
 
     /* setup default options */
     memset(&options, 0, sizeof(options));
@@ -484,10 +487,10 @@ main(int argc, char *argv[])
     options.num_requests = 100;
     options.flags = IO_WRITE|IO_TRUNCATE;
 
-    ProcessCommandLine(argc, argv, &options);
+    plugin_argi = ProcessCommandLine(argc, argv, &options);
 
     /* GetIOInterface either exits or returns valid pointer */
-    ioiface = GetIOInterface(argc, argv, &options);
+    ioiface = GetIOInterface(plugin_argi, argc, argv, &options);
 
     /* First call initializes timer */
     t0 = ioiface->Time();

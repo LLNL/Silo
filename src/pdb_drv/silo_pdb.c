@@ -326,7 +326,7 @@ db_pdb_close(DBfile *_dbfile)
  *    Changed error code for failure to open to E_DRVRCANTOPEN
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
-db_pdb_Open(char *name, int mode, int subtype)
+db_pdb_Open(char *name, int mode, int opts_set_id)
 {
     PDBfile        *pdb;
     DBfile_pdb     *dbfile;
@@ -422,7 +422,7 @@ db_pdb_Open(char *name, int mode, int subtype)
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 INTERNAL DBfile *
-db_pdb_Create (char *name, int mode, int target, int subtype, char *finfo)
+db_pdb_Create (char *name, int mode, int target, int opts_set_id, char *finfo)
 {
     DBfile_pdb     *dbfile;
     static char    *me = "db_pdb_create";

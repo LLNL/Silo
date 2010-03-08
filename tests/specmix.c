@@ -392,6 +392,7 @@ int main(int argc, char *argv[]) {
 
   printf("Done!\n");
 
+  CleanupDriverStuff();
   return 0;
 }
 

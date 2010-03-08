@@ -770,7 +770,8 @@ typedef struct filter_t {
     int            (*open) (DBfile *, char *);
 } filter_t;
 
-#define MAX_H5VFD_SPLIT_EXT_PAIRS 16
+#define MAX_FILE_OPTIONS_SETS 32
+#define NUM_DEFAULT_FILE_OPTIONS_SETS (DB_FILE_OPTS_LAST+1)
 
 /* Namespace struct for Silo's global variables */
 typedef struct SILO_Globals_t {
@@ -783,7 +784,7 @@ typedef struct SILO_Globals_t {
     char *compressionParams;
     float compressionMinratio;
     int compressionErrmode;
-    char *splitVFDExtensions[MAX_H5VFD_SPLIT_EXT_PAIRS][2];
+    const DBoptlist *fileOptionsSets[MAX_FILE_OPTIONS_SETS];
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 
@@ -852,7 +853,8 @@ INTERNAL int db_ResetGlobalData_Defvars(void);
 INTERNAL char *db_FullName2BaseName(const char *);
 INTERNAL void db_StringArrayToStringList(char**, int, char **, int*);
 INTERNAL char ** db_StringListToStringArray(char *, int, int, int);
-INTERNAL void db_DriverTypeAndSubtype(int driver, int *type, int *subtype);
+INTERNAL void db_DriverTypeAndFileOptionsSetId(int driver, int *type,
+                                               int *opts_set_id);
 INTERNAL void db_IntArrayToIntList(int**, int, const int *const, int**, int *);
 INTERNAL int ** db_IntListToIntArray(const int *const, int, const int *const);
 
@@ -866,7 +868,7 @@ INTERNAL char *db_normalize_path ( const char *p );
 INTERNAL int   db_relative_path ( char *pathname );
 INTERNAL char *db_unsplit_path ( const db_Pathname *p );
 INTERNAL db_Pathname *db_split_path ( const char *pathname );
-INTERNAL const int *db_get_used_split_vfd_ext_pair_slots();
+INTERNAL const int *db_get_used_file_options_sets_ids();
 INTERNAL int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int skip_vfdexts);
 char   *safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/

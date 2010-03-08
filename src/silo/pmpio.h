@@ -436,7 +436,7 @@ PMPIO_RankInGroup(const PMPIO_baton_t *Bat, int rankInComm)
 
 /* Define this Default PMPIO functions only if we have silo.h. We use existence
 of 'DB_HDF5' as indication that silo.h is present. */
-#ifdef DB_HDF5
+#ifdef DB_HDF5X
 /*-----------------------------------------------------------------------------
  * Audience:    Public
  * Chapter:     Callbacks

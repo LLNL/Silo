@@ -211,6 +211,7 @@ int main(int argc, char **argv)
   /* Shutdown Program */
   MPI_Finalize();
 
+  CleanupDriverStuff();
   return 1;
 } /* end of main */
 

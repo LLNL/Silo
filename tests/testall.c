@@ -3393,5 +3393,6 @@ main(int argc, char *argv[])
     if (!ntests)
         printf("No tests performed.\n");
 
+    CleanupDriverStuff();
     return(0);
 }

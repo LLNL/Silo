@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <silo.h>
+#include <std.c>
 
 #include <ioperf.h>
 
@@ -62,42 +63,22 @@ static int Read_silo(void *buf, size_t nbytes)
 
 static int Close_silo()
 {
+    CleanupDriverStuff();
     if (DBClose(dbfile) < 0) return 0;
     return 1;
 }
 
-static int ProcessArgs_silo(int argc, char *argv[])
+static int ProcessArgs_silo(int argi, int argc, char *argv[])
 {
     int i,n,nerrors=0;
-    for (i=1; i<argc; i++)
+    DBoptlist *opts = DBMakeOptlist(30);
+    for (i=argi; i<argc; i++)
     {
         errno=0;
         if (!strcmp(argv[i], "--driver"))
         {
             i++;
-            if (!strcmp(argv[i], "DB_HDF5"))
-                driver = DB_HDF5;
-            else if (!strcmp(argv[i], "DB_HDF5_SEC2"))
-                driver = DB_HDF5_SEC2;
-            else if (!strcmp(argv[i], "DB_HDF5_STDIO"))
-                driver = DB_HDF5_STDIO;
-            else if (!strcmp(argv[i], "DB_HDF5_CORE"))
-            {
-                int meminc = i<argc-1?strtol(argv[i+1], (char **)NULL, 10):0;
-                if (errno==0 && meminc>0)
-                {
-                    i++;
-                }
-                else
-                {
-                    errno = 0;
-                    meminc = 0; /* silo defaults to 2^16 = 64 kilobytes */
-                }
-                driver = DB_HDF5_CORE(meminc);
-            }
-            else if (!strcmp(argv[i], "DB_PDB"))
-                driver = DB_PDB;
-            else goto fail;
+	    driver = StringToDriver(argv[i]);
         }
         else if (!strcmp(argv[i], "--checksums"))
         {
@@ -114,6 +95,7 @@ static int ProcessArgs_silo(int argc, char *argv[])
             sprintf(compstr, "METHOD=%s", argv[i]);
             DBSetCompression(compstr);
         }
+        else goto fail;
     }
     return 0;
 
@@ -123,13 +105,15 @@ fail:
     return 1;
 }
 
-static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_filename, const options_t *opts)
+static iointerface_t *CreateInterfaceReal(int argi, int argc, char *argv[], const char *_filename, const options_t *opts)
 {
     iointerface_t *retval;
 
     options = *opts;
 
-    if (ProcessArgs_silo(argc, argv) != 0)
+    DBShowErrors(DB_ALL, NULL);
+
+    if (ProcessArgs_silo(argi, argc, argv) != 0)
         return 0;
 
     filename = strdup(_filename);
@@ -144,13 +128,13 @@ static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_f
 }
 
 #ifdef STATIC_PLUGINS
-iointerface_t *CreateInterface_silo(int argc, char *argv[], const char *_filename, const options_t *opts)
+iointerface_t *CreateInterface_silo(int argi, int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argc, argv, _filename, opts);
+    return CreateInterfaceReal(argi, argc, argv, _filename, opts);
 }
 #else
-iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename, const options_t *opts)
+iointerface_t *CreateInterface(int argi, int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argc, argv, _filename, opts);
+    return CreateInterfaceReal(argi, argc, argv, _filename, opts);
 }
 #endif

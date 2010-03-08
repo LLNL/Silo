@@ -153,20 +153,19 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     }
 
     /*
-     * try split vfd extensions (only for hdf5 driver)
+     * try various HDF5 options sets 
      */
     if (!opened && DBOpenCB[7]!=NULL)
     {
         int i;
-        int *used_slots = db_get_used_split_vfd_ext_pair_slots();
+        const int *opts_set_ids = db_get_used_file_options_sets_ids();
 
-        for (i = 0; !opened && used_slots[i]!=-1; i++)
+        for (i = 0; !opened && opts_set_ids[i]!=-1; i++)
         {
-            int subtype = (DB_HDF5_SPLIT(DB_H5VFD_CORE,18,DB_H5VFD_SEC2,0,used_slots[i])>>4)&0x0FFFFFFF;
-            sprintf(ascii, " HDF5_SPLIT[%d]", used_slots[i]);
+            sprintf(ascii, " HDF5_OPTS[%d]", opts_set_ids[i]);
             strcat(tried, ascii);
             PROTECT {
-                opened = (DBOpenCB[7]) (name, mode, subtype);
+                opened = (DBOpenCB[7]) (name, mode, opts_set_ids[i]);
             }
             CLEANUP {
                 CANCEL_UNWIND;

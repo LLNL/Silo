@@ -151,6 +151,7 @@ main(int argc, char **argv)
     DBFreePointmesh(pm);
     DBFreeMeshvar(pv);
 
+    CleanupDriverStuff();
     return(0);
 }
 

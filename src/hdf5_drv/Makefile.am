@@ -13,6 +13,8 @@ AM_CPPFLAGS += -I$(srcdir)/../fpzip
 endif
 
 noinst_HEADERS = \
- silo_hdf5_private.h
+ silo_hdf5_private.h \
+ H5FDsilo.h
 FILES = \
- silo_hdf5.c
+ silo_hdf5.c \
+ H5FDsilo.c

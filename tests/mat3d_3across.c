@@ -119,6 +119,7 @@ int main(int argc, char **argv) {
 
   DBClose(db);
 
+  CleanupDriverStuff();
   return 0;
 }
 

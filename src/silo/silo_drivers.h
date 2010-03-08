@@ -61,7 +61,7 @@ for advertising or product endorsement purposes.
 #undef DB_TAURUS
 #undef DB_UNKNOWN
 #undef DB_DEBUG
-#undef DB_HDF5
+#undef DB_HDF5X
 
 /* Now set up the real driver definitions. */
 #ifdef HAVE_NETCDF_DRIVER
@@ -76,7 +76,7 @@ for advertising or product endorsement purposes.
 #define DB_UNKNOWN
 #define DB_DEBUG
 #ifdef HAVE_HDF5_DRIVER
-#  define DB_HDF5
+#  define DB_HDF5X
 #endif
 
 /*-------------------------------------------------------------------------
@@ -179,9 +179,9 @@ extern DBfile *db_debug_create(char *, int, int, int, char *);
 #define DB_DEBUG_FSINGLE   NULL
 #endif
 
-#ifdef DB_HDF5
-#undef DB_HDF5
-#define DB_HDF5            7
+#ifdef DB_HDF5X
+#undef DB_HDF5X
+#define DB_HDF5X            7
 #define DB_HDF5_OPEN       db_hdf5_Open
 #define DB_HDF5_CREATE     db_hdf5_Create
 #define DB_HDF5_FSINGLE    db_hdf5_ForceSingle

@@ -69,6 +69,7 @@ int main(int argc, char **argv)
     build_objs(dbfile);
     DBClose(dbfile);
 
+    CleanupDriverStuff();
     return 0;
 }
 

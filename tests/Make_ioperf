@@ -9,7 +9,7 @@ PDB_INC=/usr/gapps/visit/1.12.1/linux-intel/include/visit
 PDB_LIB=$(PDB_HOME)/lib
 PDB_LIBF=$(SILO_LIBF)
 
-HDF5_HOME=/usr/gapps/silo/hdf5/1.8.4/i686_Linux_ELsmp
+HDF5_HOME=/home/miller86/tmp/hdf5-1.8.4/install
 HDF5_INC=$(HDF5_HOME)/include
 HDF5_LIB=$(HDF5_HOME)/lib
 HDF5_LIBF=$(HDF5_LIB)/libhdf5.a
@@ -19,7 +19,7 @@ SZIP_HOME=/usr/gapps/silo/szip/2.1/i686_Linux_ELsmp
 SZIP_LIB=$(SZIP_HOME)/lib
 SZIP_LIBF=$(SZIP_LIB)/libsz.a
 
-CFLAGS=
+CFLAGS=-g
 CC=gcc
 LINK=g++
 

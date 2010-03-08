@@ -138,6 +138,19 @@ extern "C" {
          (SILO_VERS_MAJ>Maj))
 #define DB_VERSION_GE(Maj,Min,Pat) SILO_VERSION_GE(Maj,Min,Pat)
 
+/* Monikers for default file options sets */
+#define DB_FILE_OPTS_H5_DEFAULT_DEFAULT 0
+#define DB_FILE_OPTS_H5_DEFAULT_SEC2    1
+#define DB_FILE_OPTS_H5_DEFAULT_STDIO   2
+#define DB_FILE_OPTS_H5_DEFAULT_CORE    3
+#define DB_FILE_OPTS_H5_DEFAULT_LOG     4
+#define DB_FILE_OPTS_H5_DEFAULT_SPLIT   5
+#define DB_FILE_OPTS_H5_DEFAULT_DIRECT  6
+#define DB_FILE_OPTS_H5_DEFAULT_FAMILY  7
+#define DB_FILE_OPTS_H5_DEFAULT_MPIP    8
+#define DB_FILE_OPTS_H5_DEFAULT_MPIO    9
+#define DB_FILE_OPTS_LAST DB_FILE_OPTS_H5_DEFAULT_MPIO
+
 /*-------------------------------------------------------------------------
  * Drivers.  This is a list of every driver that a user could use.  Not all of
  * them are necessarily compiled into the library.  However, users are free
@@ -149,31 +162,46 @@ extern "C" {
 #define DB_TAURUS 3
 #define DB_UNKNOWN 5
 #define DB_DEBUG 6
-#define DB_HDF5 7            /* equivalent to DB_HDF5_SEC2 */
+#define DB_HDF5X 7
 
-/* symbols (private really) for various HDF5 vfds */
-#define DB_H5VFD_SEC2   0x00000001 /* section 2 I/O (open/read/write/close) */
-#define DB_H5VFD_STDIO  0x00000002 /* stdio (fopen/fread/fwrite/fclose) */
-#define DB_H5VFD_CORE   0x00000003 /* file in memory. MSbits specify alloc. inc. */
-#define DB_H5VFD_MPIO   0x00000004 /* use MPI-IO on MPI_COMM_SELF */
-#define DB_H5VFD_MPIOP  0x00000005 /* use MPI for any messaging, sec 2 for I/O */
-#define DB_H5VFD_SPLIT  0x00000006 /* use split file driver. */
+/* DO NOT USE. Obsoleted ways of specifying different HDF5 vfds */
+#define DB_HDF5_SEC2_OBSOLETE 0x100
+#define DB_HDF5_STDIO_OBSOLETE 0x200
+#define DB_HDF5_CORE_OBSOLETE 0x300
+#define DB_HDF5_MPIO_OBSOLETE 0x400
+#define DB_HDF5_MPIOP_OBSOLETE 0x500
 
-/* special driver ids to affect which Virtual File Driver HDF5 uses */
-#define DB_HDF5_SEC2     (DB_HDF5|(DB_H5VFD_SEC2<<4))
-#define DB_HDF5_STDIO    (DB_HDF5|(DB_H5VFD_STDIO<<4))
-#define DB_HDF5_MPIO     (DB_HDF5|(DB_H5VFD_MPIO<<4))
-#define DB_HDF5_MPIOP    (DB_HDF5|(DB_H5VFD_MPIOP<<4))
+/* Macro for defining various HDF5 vfds as 'type' arg in create/open.
+   The 11 bit shift is to avoid possible collision with older versions
+   of Silo header file where VFDs where specified in bits 8-11. Their
+   obsoleted values are listed above. */ 
+#define DB_HDF5_OPTS(OptsId) (DB_HDF5X|((OptsId&0x3F)<<11))
 
-/* other special driver ids that require VFD and allocation incriment */
-#define DB_HDF5_CORE(CoreInc)  (DB_HDF5|(DB_H5VFD_CORE<<4)|((CoreInc&0x3F)<<8))
-#define DB_HDF5_SPLIT(MetaVFD,MetaInc,RawVFD,RawInc,ExtPair) \
-    (\
-        DB_HDF5|(DB_H5VFD_SPLIT<<4)|\
-        ((MetaVFD&0xF)<<8)|((RawVFD&0xF)<<12)|\
-        ((MetaInc&0x3F)<<16)|((RawInc&0x3F)<<22)|\
-        ((ExtPair&0xF)<<28)\
-    )
+/* Various default HDF5 driver options. Users can define their own
+   sets of options using DBRegisterFileOptionsSets(). */
+#define DB_HDF5 DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_DEFAULT)
+#define DB_HDF5_SEC2 DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_SEC2)
+#define DB_HDF5_STDIO DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_STDIO)
+#define DB_HDF5_CORE DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_CORE)
+#define DB_HDF5_LOG DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_LOG)
+#define DB_HDF5_SPLIT DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_SPLIT)
+#define DB_HDF5_DIRECT DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_DIRECT)
+#define DB_HDF5_FAMILY DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_FAMILY)
+#define DB_HDF5_MPIO DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_MPIO)
+#define DB_HDF5_MPIOP DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_MPIP)
+#define DB_HDF5_MPIP DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_MPIP)
+
+/* symbols for various HDF5 vfds */
+#define DB_H5VFD_DEFAULT 0
+#define DB_H5VFD_SEC2    1
+#define DB_H5VFD_STDIO   2
+#define DB_H5VFD_CORE    3
+#define DB_H5VFD_LOG     4
+#define DB_H5VFD_SPLIT   5
+#define DB_H5VFD_DIRECT  6
+#define DB_H5VFD_FAMILY  7
+#define DB_H5VFD_MPIO    8
+#define DB_H5VFD_MPIP    9
 
 /*-------------------------------------------------------------------------
  * Other library-wide constants.
@@ -326,6 +354,7 @@ typedef enum {
 #define         DB_INTEL        15
 
 /* Options */
+#define DBOPT_FIRST             260
 #define DBOPT_ALIGN             260
 #define DBOPT_COORDSYS          262
 #define DBOPT_CYCLE             263
@@ -397,6 +426,37 @@ typedef enum {
 #define DBOPT_LLONGNZNUM        328
 #define DBOPT_CONSERVED         329
 #define DBOPT_EXTENSIVE         330
+#define DBOPT_LAST              499 
+
+#define DBOPT_H5_FIRST              500
+#define DBOPT_H5_VFD                500
+#define DBOPT_H5_RAW_FILE_OPTS      501
+#define DBOPT_H5_RAW_EXTENSION      502
+#define DBOPT_H5_META_FILE_OPTS     503
+#define DBOPT_H5_META_EXTENSION     504
+#define DBOPT_H5_CORE_ALLOC_INC     505
+#define DBOPT_H5_CORE_NO_BACK_STORE 506
+#define DBOPT_H5_META_BLOCK_SIZE    507
+#define DBOPT_H5_SMALL_RAW_SIZE     508
+#define DBOPT_H5_ALIGN_MIN          509
+#define DBOPT_H5_ALIGN_VAL          510
+#define DBOPT_H5_DIRECT_MEM_ALIGN   511
+#define DBOPT_H5_DIRECT_BLOCK_SIZE  512
+#define DBOPT_H5_DIRECT_BUF_SIZE    513
+#define DBOPT_H5_LOG_NAME           514
+#define DBOPT_H5_LOG_BUF_SIZE       515
+#define DBOPT_H5_MPIO_COMM          516
+#define DBOPT_H5_MPIO_INFO          517
+#define DBOPT_H5_MPIP_NO_GPFS_HINTS 518
+#define DBOPT_H5_SIEVE_BUF_SIZE     519
+#define DBOPT_H5_CACHE_NELMTS       520
+#define DBOPT_H5_CACHE_NBYTES       521
+#define DBOPT_H5_CACHE_POLICY       522
+#define DBOPT_H5_FAM_SIZE           523
+#define DBOPT_H5_FAM_FILE_OPTS      524
+#define DBOPT_H5_USER_DRIVER_ID     525
+#define DBOPT_H5_USER_DRIVER_INFO   526
+#define DBOPT_H5_LAST               600
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */
@@ -436,6 +496,8 @@ typedef enum {
 #define     E_NOTREG    27      /*The dbfile pointer is not resitered. */
 #define     E_CONCURRENT 28     /*File is opened multiply and not all read-only. */
 #define     E_DRVRCANTOPEN 29   /*Driver cannot open the file. */
+#define     E_BADOPTCLASS 30    /*Optlist contains options for wrong class */
+#define     E_NOTENABLEDINBUILD 31 /*feature not enabled in this build */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
@@ -1711,9 +1773,9 @@ SILO_API extern int      DBGetFriendlyHDF5Names(void);
 SILO_API extern int      DBGuessHasFriendlyHDF5Names(DBfile *f);
 SILO_API extern int      DBSetDeprecateWarnings(int max);
 SILO_API extern int      DBGetDeprecateWarnings();
-SILO_API extern int      DBAddSplitVFDExtensionPair(const char *meta_ext, const char *raw_ext);
-SILO_API extern int      DBRemoveSplitVFDExtensionPair(const char *meta_ext, const char *raw_ext);
-SILO_API extern void     DBRemoveAllSplitVFDExtensionPairs();
+SILO_API extern int      DBRegisterFileOptionsSet(const DBoptlist *opts);
+SILO_API extern int      DBUnregisterFileOptionsSet(int opts_set_id);
+SILO_API extern void     DBUnregisterAllFileOptionsSets();
 SILO_API extern void    *DBGrabDriver(DBfile *);
 SILO_API extern int      DBUngrabDriver(DBfile *, const void *);
 SILO_API extern int      DBGetDriverType(const DBfile *);
@@ -1737,7 +1799,7 @@ SILO_API extern DBoptlist *DBMakeOptlist(int);
 SILO_API extern int      DBClearOptlist(DBoptlist *);
 SILO_API extern int      DBFreeOptlist(DBoptlist *);
 SILO_API extern int      DBAddOption(DBoptlist *, int, void *);
-SILO_API extern void    *DBGetOption(DBoptlist *, int);
+SILO_API extern void    *DBGetOption(const DBoptlist *, int);
 SILO_API extern int      DBClearOption(DBoptlist *, int);
 SILO_API extern DBtoc   *DBGetToc(DBfile *);
 SILO_API extern int      DBNewToc(DBfile *);

@@ -88,5 +88,6 @@ main (int argc, char *argv[])
 #endif
 
     DBClose(dbfile);
+    CleanupDriverStuff();
     exit(0);
 }

@@ -315,6 +315,8 @@ main (int argc, char *argv[]) {
 
    printf ("test passed, but check `%s' anyway with the browser.\n",
 	   filename) ;
+
+   CleanupDriverStuff();
    return 0 ;
 }
 

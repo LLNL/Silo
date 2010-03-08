@@ -1937,5 +1937,6 @@ main(int argc, char *argv[])
         free(matnames[i]);
     free(matnames);
 
+    CleanupDriverStuff();
     return(0);
 }

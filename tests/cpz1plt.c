@@ -437,5 +437,6 @@ main(int argc, char **argv)
 
      DBClose (dbfile2);
 
+     CleanupDriverStuff();
      return 0;
 }

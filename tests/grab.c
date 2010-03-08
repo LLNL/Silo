@@ -285,5 +285,6 @@ main(int argc, char *argv[])
     FREE(ycoord);
     FREE(zcoord);
 
+    CleanupDriverStuff();
     return 0;
 }

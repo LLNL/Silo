@@ -147,7 +147,9 @@ PUBLIC char   *_db_err_list[] =
     "Grab driver enabled.",                   /* 26 */
     "File was closed or never opened/created.",/* 27 */
     "File multiply opened and all not read-only.", /* 28 */
-    "Specified driver cannot open this file." /* 29 */
+    "Specified driver cannot open this file.",/* 29 */
+    "Optlist contains options for wrong class.",/* 30 */
+    "Feature not enabled in this build." /* 31 */
 };
 
 static char *no_hdf5_driver_msg =
@@ -225,9 +227,10 @@ SILO_Globals_t SILO_Globals = {
     0,     /* compressionParams (null) */
     2.0,   /* compressionMinratio */
     0,     /* compressionErrmode (fallback) */
-    {      /* split vfd extension pairs (default in slot 0) */
-        "-sh5m","", 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0,
-               0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0}
+    {      /* file options sets [32 of them] */
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    }
 };
 
 INTERNAL int
@@ -2206,61 +2209,90 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
  *
  * Programmer: Mark C. Miller, Fri Feb 12 08:21:52 PST 2010
  *-------------------------------------------------------------------------*/
-int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int skip_vfdexts)
+int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int opts_set_id)
 {
-    int i, retval;
-
+    int retval;
     errno = 0;
     memset(statbuf, 0, sizeof(*statbuf));
+
 #if SIZEOF_OFF64_T > 4
-    if ((retval = stat64(name, statbuf)) != 0 && !skip_vfdexts)
+    retval = stat64(name, statbuf);
 #else
-    if ((retval = stat(name, statbuf)) != 0 && !skip_vfdexts)
+    retval = stat(name, statbuf);
 #endif
+
+    if (opts_set_id == -1 ||
+        opts_set_id == DB_FILE_OPTS_H5_DEFAULT_SPLIT ||
+        opts_set_id > DB_FILE_OPTS_LAST)
     {
-        /* save 'result' of orig. stat call */
+        int i;
+        int imin = opts_set_id == -1 ? 0 : opts_set_id;
+        int imax = opts_set_id == -1 ? MAX_FILE_OPTIONS_SETS: opts_set_id;
         int tmperrno = errno;
-        int tmpretval = retval;
 
-        /* try all possible split vfd extensions */
-        for (i = 0; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
+        for (i = imin; i < imax; i++)
         {
+            db_silo_stat_struct tmpstatbuf;
             static char tmpname[4096];
+            char *meta_ext="", *raw_ext="-raw";
+            void *p; int vfd = -1, retval;
+            const DBoptlist *opts;
 
-            /* skip empty slots */
-            if (SILO_Globals.splitVFDExtensions[i][0]==0 ||
-                SILO_Globals.splitVFDExtensions[i][1]==0)
-                continue;
 
-            /* try the raw file name first */
-            if (strstr(SILO_Globals.splitVFDExtensions[i][1],"%s"))
-                sprintf(tmpname, SILO_Globals.splitVFDExtensions[i][1], name);
+            if (opts_set_id == -1)
+                opts = SILO_Globals.fileOptionsSets[i];
+            else if (opts_set_id == DB_FILE_OPTS_H5_DEFAULT_SPLIT)
+                opts = 0;
             else
-                sprintf(tmpname, "%s%s", name, SILO_Globals.splitVFDExtensions[i][1]);
+                opts = SILO_Globals.fileOptionsSets[i-NUM_DEFAULT_FILE_OPTIONS_SETS];
+
+            /* ignore if options set id does not yield a valid options set */
+            if (opts)
+            {
+                /* ignore if options set unrelated to split vfds */
+                if (p = DBGetOption(opts, DBOPT_H5_VFD))
+                    vfd = *((int*)p);
+                if (vfd != DB_H5VFD_SPLIT)
+                    continue;
+
+                /* ok, get meta/raw filenaming extension conventions */
+                if (p = DBGetOption(opts, DBOPT_H5_META_EXTENSION))
+                    meta_ext = (char *) p;
+                if (p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION))
+                    raw_ext = (char *) p;
+            }
+
+            /* try the raw file name, first */
+            if (strstr(raw_ext,"%s"))
+                sprintf(tmpname, raw_ext, name);
+            else
+                sprintf(tmpname, "%s%s", name, raw_ext);
+            errno = 0;
 #if SIZEOF_OFF64_T > 4
-            if (stat64(tmpname, statbuf) != 0)
+            if (stat64(tmpname, &tmpstatbuf) != 0 || errno != 0)
 #else
-            if (stat(tmpname, statbuf) != 0)
+            if (stat(tmpname, &tmpstatbuf) != 0 || errno != 0)
 #endif
                 continue;
-            
-            /* try the meta file name */
-            if (strstr(SILO_Globals.splitVFDExtensions[i][0],"%s"))
-                sprintf(tmpname, SILO_Globals.splitVFDExtensions[i][0], name);
+
+            /* try the meta file last and return its statbuf */
+            if (strstr(meta_ext,"%s"))
+                sprintf(tmpname, meta_ext, name);
             else
-                sprintf(tmpname, "%s%s", name, SILO_Globals.splitVFDExtensions[i][0]);
+                sprintf(tmpname, "%s%s", name, meta_ext);
+            memset(&tmpstatbuf, 0, sizeof(tmpstatbuf));
 #if SIZEOF_OFF64_T > 4
-            if ((retval = stat64(tmpname, statbuf)) == 0)
+            if (stat64(tmpname, &tmpstatbuf) == 0 && errno == 0)
 #else
-            if ((retval = stat(tmpname, statbuf)) == 0)
+            if (stat(tmpname, &tmpstatbuf) == 0 && errno == 0)
 #endif
-                return retval;
+            {
+                memcpy(statbuf, &tmpstatbuf, sizeof(tmpstatbuf));
+                return 0;
+            }
         }
 
-        /* restore result of orig. stat call */
         errno = tmperrno;
-        retval = tmpretval;
-
     }
 
     return retval;
@@ -2752,7 +2784,7 @@ DBGuessHasFriendlyHDF5Names(DBfile *f)
     char cwd[1024];
     int retval;
 
-    if (DBGetDriverType(f) != 7 /* DB_HDF5 */)
+    if (DBGetDriverType(f) != 7 /* DB_HDF5X */)
         return 0;
 
     DBGetDir(f, cwd);
@@ -2786,89 +2818,66 @@ DBGetDeprecateWarnings()
 }
 
 PUBLIC int
-DBAddSplitVFDExtensionPair(const char *meta_ext, const char *raw_ext)
+DBRegisterFileOptionsSet(const DBoptlist *opts)
 {
     int i;
 
-    if (!meta_ext || !raw_ext) return -1;
-
-    for (i = 1; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
+    for (i = 0; i < MAX_FILE_OPTIONS_SETS; i++)
     {
-        if (SILO_Globals.splitVFDExtensions[i][0]==0 &&
-            SILO_Globals.splitVFDExtensions[i][1]==0)
+        if (SILO_Globals.fileOptionsSets[i] == 0)
         {
-            SILO_Globals.splitVFDExtensions[i][0] = safe_strdup(meta_ext);
-            SILO_Globals.splitVFDExtensions[i][1] = safe_strdup(raw_ext);
-            return i;
+            SILO_Globals.fileOptionsSets[i] = opts;
+            return i+NUM_DEFAULT_FILE_OPTIONS_SETS;
         }
     }
-
     return -1;
 }
 
-PUBLIC int 
-DBRemoveSplitVFDExtensionPair(const char *meta_ext, const char *raw_ext)
+PUBLIC int
+DBUnregisterFileOptionsSet(int opts_set_id)
 {
-    int i;
-
-    if (!meta_ext || !raw_ext) return -1;
-
-    for (i = 1; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
-    {
-        /* skip empty slots */
-        if (SILO_Globals.splitVFDExtensions[i][0]==0 ||
-            SILO_Globals.splitVFDExtensions[i][1]==0)
-            continue;
-
-        if (!strcmp(SILO_Globals.splitVFDExtensions[i][0], meta_ext) &&
-            !strcmp(SILO_Globals.splitVFDExtensions[i][1], raw_ext))
-        {
-            FREE(SILO_Globals.splitVFDExtensions[i][0]);
-            SILO_Globals.splitVFDExtensions[i][0] = 0;
-
-            FREE(SILO_Globals.splitVFDExtensions[i][1]);
-            SILO_Globals.splitVFDExtensions[i][1] = 0;
-            return i;
-        }
-    }
-
-    return -1;
+    int _opts_set_id = opts_set_id-NUM_DEFAULT_FILE_OPTIONS_SETS;
+    if (SILO_Globals.fileOptionsSets[_opts_set_id] == 0)
+        return -1;
+    SILO_Globals.fileOptionsSets[_opts_set_id] = 0;
+    return 0;
 }
 
 PUBLIC void
-DBRemoveAllSplitVFDExtensionPairs()
+DBUnregisterAllFileOptionsSets()
 {
     int i;
 
-    for (i = 1; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
-    {
-        /* skip empty slots */
-        if (SILO_Globals.splitVFDExtensions[i][0]==0 ||
-            SILO_Globals.splitVFDExtensions[i][1]==0)
-            continue;
+    for (i = 0; i < MAX_FILE_OPTIONS_SETS; i++)
+        SILO_Globals.fileOptionsSets[i] = 0;
+} 
 
-        FREE(SILO_Globals.splitVFDExtensions[i][0]);
-        SILO_Globals.splitVFDExtensions[i][0] = 0;
-
-        FREE(SILO_Globals.splitVFDExtensions[i][1]);
-        SILO_Globals.splitVFDExtensions[i][1] = 0;
-    }
-}
-
-const int * db_get_used_split_vfd_ext_pair_slots()
+const int* db_get_used_file_options_sets_ids()
 {
     int i,n;
-    static int used_slots[MAX_H5VFD_SPLIT_EXT_PAIRS+1];
+    static int used_slots[MAX_FILE_OPTIONS_SETS+NUM_DEFAULT_FILE_OPTIONS_SETS+1];
 
-    for (i = 0; i < MAX_H5VFD_SPLIT_EXT_PAIRS+1; i++)
+   
+    /* For the default cases, only return those that 'matter' in that
+       they could possibly have an impact on Silo's ability to actually
+       open the file. In addtion, put them in some kind of priority order */
+    n = 0;
+    used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_SPLIT;
+    used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_DIRECT;
+    used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_FAMILY;
+    used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_MPIO;
+    used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_MPIP;
+    for (i = n; i < MAX_FILE_OPTIONS_SETS+NUM_DEFAULT_FILE_OPTIONS_SETS+1; i++)
         used_slots[i] = -1;
-    for (i = 0, n = 0; i < MAX_H5VFD_SPLIT_EXT_PAIRS; i++)
+
+    /* fill in with used options set slots */
+    for (i = 0; i < MAX_FILE_OPTIONS_SETS; i++)
     {
-        if (SILO_Globals.splitVFDExtensions[i][0]==0 ||
-            SILO_Globals.splitVFDExtensions[i][1]==0)
+        if (SILO_Globals.fileOptionsSets[i]==0)
             continue;
-        used_slots[n++] = i;
+        used_slots[n++] = i+NUM_DEFAULT_FILE_OPTIONS_SETS;
     }
+
     return used_slots;
 }
 
@@ -2958,7 +2967,7 @@ DBGetDriverTypeFromPath(const char *path)
    if (strstr(buf, "PDB"))
       return DB_PDB;
    if (strstr(buf, "HDF"))
-      return 7; /* can't use DB_HDF5 here. */
+      return 7; /* can't use DB_HDF5X here. */
    return DB_UNKNOWN;
 }
 
@@ -3827,9 +3836,7 @@ DBOpenReal(const char *name, int type, int mode)
     DBfile        *dbfile;
     int            fileid, i;
     int            origtype = type;
-    int            subtype = 0;
-    int            subtype_vfd;
-    int            skip_vfdexts = 1;
+    int            opts_set_id;
     db_silo_stat_struct filestate;
 
     API_BEGIN("DBOpen", DBfile *, NULL) {
@@ -3837,8 +3844,7 @@ DBOpenReal(const char *name, int type, int mode)
             API_ERROR(NULL, E_NOFILE);
 
         /* deal with extended driver type specifications */
-        db_DriverTypeAndSubtype(origtype, &type, &subtype);
-        subtype_vfd = subtype & 0xF;
+        db_DriverTypeAndFileOptionsSetId(origtype, &type, &opts_set_id);
 
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
@@ -3858,9 +3864,7 @@ DBOpenReal(const char *name, int type, int mode)
         /* Check to make sure the file exists and has the   */
         /* correct permissions.                             */
         /****************************************************/
-        if (type == DB_UNKNOWN || subtype_vfd == DB_H5VFD_SPLIT)
-            skip_vfdexts = 0;
-        if (db_silo_stat(name, &filestate, skip_vfdexts) != 0)
+        if (db_silo_stat(name, &filestate, type==DB_UNKNOWN?-1:opts_set_id) != 0)
         {
             if( errno == ENOENT )
             {
@@ -3936,7 +3940,7 @@ DBOpenReal(const char *name, int type, int mode)
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)
             API_ERROR((char *)name, E_MAXOPEN);
-        if (NULL == (dbfile = (DBOpenCB[type]) ((char *)name, mode, subtype)))
+        if (NULL == (dbfile = (DBOpenCB[type]) ((char *)name, mode, opts_set_id)))
         {
             _db_fstatus[fileid] = 0;
             API_RETURN(NULL);
@@ -4018,9 +4022,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     DBfile        *dbfile;
     int            fileid, i, n;
     int            origtype = type;
-    int            subtype = 0;
-    int            subtype_vfd;
-    int            skip_vfdexts = 1;
+    int            opts_set_id;
     db_silo_stat_struct filestate;
 
     API_BEGIN("DBCreate", DBfile *, NULL) {
@@ -4028,17 +4030,14 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_ERROR(NULL, E_NOFILE);
 
         /* deal with extended driver type specifications */
-        db_DriverTypeAndSubtype(origtype, &type, &subtype);
-        subtype_vfd = subtype & 0xF;
+        db_DriverTypeAndFileOptionsSetId(origtype, &type, &opts_set_id);
 
         if (type < 0 || type >= DB_NFORMATS) {
             sprintf(ascii, "%d", type);
             API_ERROR(ascii, E_BADFTYPE);
         }
 
-        if (subtype_vfd == DB_H5VFD_SPLIT)
-            skip_vfdexts = 0;
-        if (db_silo_stat(name, &filestate, skip_vfdexts) == 0)  /* Success - File exists */
+        if (db_silo_stat(name, &filestate, opts_set_id) == 0)  /* Success - File exists */
         {
             if (mode == DB_NOCLOBBER)
             {
@@ -4072,7 +4071,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)
             API_ERROR((char *)name, E_MAXOPEN);
-        dbfile = ((DBCreateCB[type]) ((char *)name, mode, target, subtype,
+        dbfile = ((DBCreateCB[type]) ((char *)name, mode, target, opts_set_id,
                                       (char *)info));
         if (!dbfile)
         {
@@ -4080,7 +4079,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
-        db_silo_stat(name, &filestate, skip_vfdexts);
+        db_silo_stat(name, &filestate, opts_set_id);
         db_register_file(dbfile, &filestate, 1);
 
         /*
@@ -4575,7 +4574,7 @@ DBClearOptlist(DBoptlist *optlist)
     int            i;
 
     API_BEGIN("DBClearOptlist", int, -1) {
-        if (!optlist || optlist->numopts <= 0) {
+        if (!optlist || optlist->numopts < 0) {
             API_ERROR("optlist pointer", E_BADARGS);
         }
 
@@ -4648,16 +4647,17 @@ DBAddOption(DBoptlist *optlist, int option, void *value)
 PUBLIC int
 DBClearOption(DBoptlist *optlist, int option)
 {
-    int            i, j;
+    int            i, j, foundit=0;
 
     API_BEGIN("DBClearOption", int, -1) {
-        if (!optlist || optlist->numopts <= 0) {
+        if (!optlist || optlist->numopts < 0) {
             API_ERROR("optlist pointer", E_BADARGS);
         }
 
         /* Shift values down in list by one entry */
         for (i = 0; i < optlist->numopts; i++) {
             if (optlist->options[i] == option) {
+                foundit = 1;
                 for (j = i; j < optlist->numopts-1; j++) {
                     optlist->options[j] = optlist->options[j+1];
                     optlist->values[j]  = optlist->values[j+1];
@@ -4665,9 +4665,12 @@ DBClearOption(DBoptlist *optlist, int option)
                 break;
             }
         }
-        optlist->numopts--;
-        optlist->options[optlist->numopts] = 0;
-        optlist->values[optlist->numopts]  = 0;
+
+        if (foundit) {
+            optlist->numopts--;
+            optlist->options[optlist->numopts] = 0;
+            optlist->values[optlist->numopts]  = 0;
+        }
     }
     API_END;
 
@@ -4687,12 +4690,12 @@ DBClearOption(DBoptlist *optlist, int option)
  *
  *--------------------------------------------------------------------*/
 PUBLIC void * 
-DBGetOption(DBoptlist *optlist, int option)
+DBGetOption(const DBoptlist *optlist, int option)
 {
     int            i;
 
     API_BEGIN("DBClearOption", void*, 0) {
-        if (!optlist || optlist->numopts <= 0) {
+        if (!optlist || optlist->numopts < 0) {
             API_ERROR("optlist pointer", E_BADARGS);
         }
 
@@ -9966,8 +9969,16 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
     int             i, j, *ip = NULL, unused = 0;
     char           *me = "db_ProcessOptlist";
 
-    if (!optlist || optlist->numopts <= 0)
+    if (!optlist || optlist->numopts < 0)
         return 0;
+
+    for (i = 0; i < optlist->numopts; i++)
+    {
+        if (optlist->options[i] >= DBOPT_FIRST &&
+            optlist->options[i] <= DBOPT_LAST)
+            continue;
+        return db_perror(NULL, E_BADOPTCLASS, me);
+    }
 
     switch (objtype)
     {
@@ -11727,25 +11738,72 @@ db_IntListToIntArray(const int *const intList, int nArrays,
  *
  *  Mark C. Miller, Thu Feb 11 09:51:28 PST 2010
  *  Changed logic for how subtype is handled.
+ *
+ *  Mark C. Miller, Thu Feb 25 19:00:09 PST 2010
+ *  Versions of silo 4.7.2 and earlier used a bit of a brain dead way
+ *  to specify alternative HDF5 vfds by manipulating the high order
+ *  bits in the integer 'type' arg to DBCreate/DBOpen. For example, the
+ *  default HDF5 driver was '7' while HDF5 w/STDIO vfd was '0x200'. This
+ *  was inflexible and unable to handle the large variety of options
+ *  available in HDF5.
+ *
+ *  Versions of silo newer than 4.7.2 use a global array of options
+ *  sets registered and stored in the SILO_Globals structure. So,
+ *  a particular set of HDF5 vfd options is identified by a single
+ *  integer indexing into this global list of options. It is this integer
+ *  index that is shifted left by 11 bits to make space for the primary
+ *  Silo driver id (e.g. DB_PDB or DB_HDF5) and obsoleted HDF5 vfd
+ *  specifications and then OR'd into the integer 'type' arg in the
+ *  DBCreate/DBOpen calls to specify HDF5 vfd options.
+ *
+ *  In the initial implementation of this new approach using a global
+ *  array of options sets, we allowed for a total of 32 (5 bits)
+ *  options sets plus another 10 default options sets for convenience.
+ *  But, we don't actually store the 10 default options set and use
+ *  only the integer identifer between 0 and 9 to identify them.
+ *  So, the identifier for a given options set ranges from 0...41
+ *  requiring a total of 6 bits. Those 6 bits are 0x1F800.
  *--------------------------------------------------------------------*/
 INTERNAL void 
-db_DriverTypeAndSubtype(int driver, int *type, int *subtype)
+db_DriverTypeAndFileOptionsSetId(int driver, int *type, int *_opts_set_id)
 {
-    int theType = driver & 0x0000000F; 
-    int subType = 0x00000000;
+    int theType = driver&0xF; 
+    int obsolete_subType = driver&0x700;
+    int opts_set_id = 0;
 
     if (driver > DB_NFORMATS)
     {
-#ifdef DB_HDF5
-        if (theType == DB_HDF5)
+        opts_set_id = (driver&0x1F800)>>11;
+#ifdef DB_HDF5X
+        if (theType == DB_HDF5X)
         {
-            subType = (driver >> 4) & 0x0FFFFFFF;
+            switch (obsolete_subType)
+            {
+                case DB_HDF5_SEC2_OBSOLETE:
+                    opts_set_id = DB_FILE_OPTS_H5_DEFAULT_SEC2;
+                    break;
+                case DB_HDF5_STDIO_OBSOLETE:
+                    opts_set_id = DB_FILE_OPTS_H5_DEFAULT_STDIO;
+                    break;
+                case DB_HDF5_CORE_OBSOLETE:
+#warning CAN WE HANDLE OLD CORE INC HERE
+                    opts_set_id = DB_FILE_OPTS_H5_DEFAULT_CORE;
+                    break;
+                case DB_HDF5_MPIO_OBSOLETE:
+                    opts_set_id = DB_FILE_OPTS_H5_DEFAULT_MPIO;
+                    break;
+                case DB_HDF5_MPIOP_OBSOLETE:
+                    opts_set_id = DB_FILE_OPTS_H5_DEFAULT_MPIP;
+                    break;
+                default:
+                    break;
+            }
         }
 #endif
     }
 
     if (type) *type = theType;
-    if (subtype) *subtype = subType;
+    if (_opts_set_id) *_opts_set_id = opts_set_id;
 }
 
 /*

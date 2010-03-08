@@ -360,8 +360,6 @@ main(int argc, char *argv[])
     int            show_all_errors = FALSE;
     int            inc = 12; /* 2^12 = 4 kilobytes */ 
 
-    int altext = DBAddSplitVFDExtensionPair("MyMeta","MyRaw");
-
     /* Parse command-line */
     for (i=1; i<argc; i++) {
         if (!strcmp(argv[i], "DB_PDB")) {
@@ -369,9 +367,6 @@ main(int argc, char *argv[])
             file_ext = ".pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
-            file_ext = ".h5";
-        } else if (!strcmp(argv[i], "DB_HDF5_SPLIT_ALT")) {
-            driver = DB_HDF5_SPLIT(DB_H5VFD_CORE,12,DB_H5VFD_SEC2,0,altext); 
             file_ext = ".h5";
         } else if (!strcmp(argv[i], "hzip")) {
             DBSetCompression("ERRMODE=FALLBACK METHOD=HZIP");
@@ -399,6 +394,7 @@ main(int argc, char *argv[])
     if (driver&0xF == DB_HDF5)
         DBSetFriendlyHDF5Names(hdfriendly);
 
+#if 0
     /*
      * Create the multi-block rectilinear 2d mesh.
      */
@@ -452,6 +448,7 @@ main(int argc, char *argv[])
         DBClose(dbfile);
     } else
         DBClose(dbfile);
+#endif
 
     /* 
      * Create the multi-block rectilinear 3d mesh.
@@ -471,6 +468,7 @@ main(int argc, char *argv[])
     } else
         DBClose(dbfile);
 
+#if 0
     /* 
      * Create the multi-block curvilinear 3d mesh.
      */
@@ -507,6 +505,9 @@ main(int argc, char *argv[])
     } else
         DBClose(dbfile);
 
+#endif
+
+    CleanupDriverStuff();
     return (0);
 }                                      /* main */
 

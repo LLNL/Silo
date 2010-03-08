@@ -147,5 +147,6 @@ main(int argc, char *argv[])
     DBFreeCompoundarray(ca);
 
     DBClose(dbfile);
+    CleanupDriverStuff();
     return 0;
 }

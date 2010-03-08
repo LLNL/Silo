@@ -55,7 +55,7 @@ static int Close_sec2()
     return n;
 }
 
-static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_filename, const options_t *opts)
+static iointerface_t *CreateInterfaceReal(int argi, int argc, char *argv[], const char *_filename, const options_t *opts)
 {
     iointerface_t *retval;
 
@@ -72,14 +72,14 @@ static iointerface_t *CreateInterfaceReal(int argc, char *argv[], const char *_f
 }
 
 #ifdef STATIC_PLUGINS
-iointerface_t *CreateInterface_sec2(int argc, char *argv[], const char *_filename, const options_t *opts)
+iointerface_t *CreateInterface_sec2(int argi, int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argc, argv, _filename, opts);
+    return CreateInterfaceReal(argi, argc, argv, _filename, opts);
 }
 #else
-iointerface_t *CreateInterface(int argc, char *argv[], const char *_filename, const options_t *opts)
+iointerface_t *CreateInterface(int argi, int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argc, argv, _filename, opts);
+    return CreateInterfaceReal(argi, argc, argv, _filename, opts);
 }
 #endif
 

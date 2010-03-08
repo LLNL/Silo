@@ -85,6 +85,7 @@ main(int argc, char *argv[])
      */
     build_multi(basename, driver, file_ext, 6, 8, 6);
 
+    CleanupDriverStuff();
     return 0;
 }
 

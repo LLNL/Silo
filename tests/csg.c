@@ -68,6 +68,7 @@ main(int argc, char *argv[])
     build_csg(dbfile, "csgmesh");
     DBClose(dbfile);
 
+    CleanupDriverStuff();
     return hadError;
 }
 

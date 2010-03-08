@@ -83,6 +83,7 @@ main(int argc, char *argv[])
     build_ucd3(dbfile, "mesh1");
     DBClose(dbfile);
 
+    CleanupDriverStuff();
     exit(0);
 }
 /*----------------------------------------------------------------------

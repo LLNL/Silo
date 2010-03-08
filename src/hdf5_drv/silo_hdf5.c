@@ -31,6 +31,7 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h> /*missing from silo header files*/
 #endif
+#include <stdio.h>
 #include "silo_hdf5_private.h"
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 
@@ -3748,6 +3749,12 @@ db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, in
     hid_t space = -1;
     int i;
 
+#warning FIXME
+#warning FIXME
+#warning FIXME
+#warning FIXME
+#warning FIXME
+    return;
     H5E_BEGIN_TRY
     {
         for (i = 0; i < 3; i++)
@@ -3777,7 +3784,7 @@ db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, in
             if (space == -1)
                 space = H5Screate_simple(1, &one, &one);
             dset = H5Dcreate(dbfile->cwg, names[i], ftype, space, H5P_DEFAULT);
-            H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, buf[i]);
+            H5Dwrite(dset, mtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[i]);
             H5Dclose(dset);
         }
 
@@ -4400,6 +4407,420 @@ db_hdf5_ForceSingle(int status)
     return 0;
 }
 
+INTERNAL hid_t
+db_hdf5_process_file_options(opts_set_id)
+{
+    static char *me = "db_hdf5_process_file_options";
+    hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
+    herr_t h5status = 0;
+
+    /* This property effects how HDF5 deals with objects that are left
+       open when the file containing them is closed. The SEMI setting
+       means that HDF5 will flag it is an error. The STRONG setting
+       means that HDF5 will attempt to close any option objects
+       automatically. That can wind up hiding coding errors in this
+       Silo plugin, so we do that onl when user has requested that
+       either top or no errors are reported. */
+    if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
+        h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_SEMI);
+    else
+        h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_STRONG);
+
+    /* Handle cases where we are running on Windows. If a client
+       request anything other than the default driver, we issue
+       a warning message and continue only on windows (default) vfd. */
+#warning TEST THIS LOGIC ON LINUX
+#warning TEST THIS LOGIC ON LINUX
+#warning TEST THIS LOGIC ON LINUX
+#warning TEST THIS LOGIC ON LINUX
+#warning TEST THIS LOGIC ON LINUX
+#warning TEST THIS LOGIC ON LINUX
+#if defined(_WIN32)
+    if (opts_set_id != DB_FILE_OPTS_H5_DEFAULT_DEFAULT && 
+        opts_set_id < NUM_DEFAULT_FILE_OPTIONS_SETS)
+    {
+        db_perror("Non-default HDF5 VFD specified on Windows.", E_CALLFAIL, me);
+        return retval;
+    }
+#endif
+
+    switch (opts_set_id)
+    {
+        /* default HDF5 driver */
+        case DB_FILE_OPTS_H5_DEFAULT_DEFAULT:
+            h5status |= H5Pset_fapl_silo(retval);
+            break;
+
+        /* default HDF5 sec2 driver */
+        case DB_FILE_OPTS_H5_DEFAULT_SEC2:
+            h5status |= H5Pset_fapl_sec2(retval);
+            break;
+
+        /* default HDF5 stdio driver */
+        case DB_FILE_OPTS_H5_DEFAULT_STDIO:
+#warning EVENTUALLY ADD OPTION TO SETVBUF TOO
+#warning EVENTUALLY ADD OPTION TO SETVBUF TOO
+#warning EVENTUALLY ADD OPTION TO SETVBUF TOO
+#warning EVENTUALLY ADD OPTION TO SETVBUF TOO
+            h5status |= H5Pset_fapl_stdio(retval);
+            break;
+
+        /* default HDF5 core driver 1 Meg inc & backing store */
+        case DB_FILE_OPTS_H5_DEFAULT_CORE:
+            h5status |= H5Pset_fapl_core(retval, (1<<20), TRUE);
+            break;
+
+        /* default HDF5 log driver. Should NOT do any actual I/O. */
+        case DB_FILE_OPTS_H5_DEFAULT_LOG:
+            h5status |= H5Pset_fapl_log(retval, "silo_hdf5_log.out",
+                H5FD_LOG_LOC_IO|H5FD_LOG_NUM_IO|
+                H5FD_LOG_TIME_IO|H5FD_LOG_ALLOC, 0);
+            break;
+
+        /* default HDF5 split file driver. */
+        case DB_FILE_OPTS_H5_DEFAULT_SPLIT:
+        {
+            hid_t meta_fapl = db_hdf5_process_file_options(DB_FILE_OPTS_H5_DEFAULT_CORE);
+            hid_t raw_fapl = db_hdf5_process_file_options(DB_FILE_OPTS_H5_DEFAULT_DEFAULT);
+            h5status |= H5Pset_fapl_split(retval, "", meta_fapl, "-raw", raw_fapl);
+            H5Pclose(meta_fapl);
+            H5Pclose(raw_fapl);
+            break;
+        }
+
+        /* default HDF5 direct driver. */
+        case DB_FILE_OPTS_H5_DEFAULT_DIRECT:
+        {
+#ifdef H5_HAVE_DIRECT
+            const int fourkb = (1<<12);
+            h5status |= H5Pset_fapl_direct(retval, fourkb, fourkb, fourkb*256);
+            h5status |= H5Pset_alignment(retval, fourkb/2, fourkb); 
+#else
+            H5Pclose(retval);
+            db_perror("HDF5 Direct VFD", E_NOTENABLEDINBUILD, me);
+            return -1;
+#endif
+            break;
+        }
+
+        /* default HDF5 family driver. */
+        case DB_FILE_OPTS_H5_DEFAULT_FAMILY:
+        {
+            hid_t memb_fapl = db_hdf5_process_file_options(DB_FILE_OPTS_H5_DEFAULT_DEFAULT);
+            h5status |= H5Pset_fapl_family(retval, (1<<30), memb_fapl);
+            H5Pclose(memb_fapl);
+        }
+
+        /* default HDF5 mpi drivers */
+        case DB_FILE_OPTS_H5_DEFAULT_MPIP:
+        {
+#ifdef H5_HAVE_PARALLEL
+            h5status |= H5Pset_fapl_mpiposix(retval, MPI_COMM_SELF, TRUE);
+#else
+            H5Pclose(retval);
+            db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
+            return -1;
+#endif
+            break;
+        }
+
+        case DB_FILE_OPTS_H5_DEFAULT_MPIO:
+        {
+#ifdef H5_HAVE_PARALLEL
+            MPI_Info info;
+            MPI_Info_create(&info);
+            h5status |= H5Pset_fapl_mpio(retval, MPI_COMM_SELF, info);
+            MPI_Info_free(&info);
+#else
+            H5Pclose(retval);
+            db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
+            return -1;
+#endif
+            break;
+        }
+
+        /* More complex cases where parameters specified by user
+           registered options sets. */
+        default:
+        {
+            int _opts_set_id = opts_set_id - NUM_DEFAULT_FILE_OPTIONS_SETS;
+            const DBoptlist *opts;
+            void *p; int vfd = DB_H5VFD_DEFAULT;
+
+            if (_opts_set_id >= MAX_FILE_OPTIONS_SETS ||
+                (opts = SILO_Globals.fileOptionsSets[_opts_set_id]) == 0)
+            {
+                H5Pclose(retval);
+                db_perror("Bad file options set index", E_CALLFAIL, me);
+                return -1;
+            }
+
+            /* get the vfd specification */
+            if (p = DBGetOption(opts, DBOPT_H5_VFD))
+            {
+                vfd = *((int*)p);
+            }
+            else if (p = DBGetOption(opts, DBOPT_H5_USER_DRIVER_ID))
+            {
+                int new_driver_id = *((int*)p);
+                p = DBGetOption(opts, DBOPT_H5_USER_DRIVER_INFO);
+                h5status |= H5Pset_driver(retval, new_driver_id, p);
+            }
+
+#warning TEST THIS LOGIC ON LINUX
+#if defined(_WIN32)
+            if (vfd != DB_H5VFD_DEFAULT)
+            {
+                db_perror("Non-default HDF5 VFD specified on Windows.", E_CALLFAIL, me);
+                vfd = DB_H5VFD_DEFAULT;
+            }
+#endif
+            
+            switch (vfd)
+            {
+                case DB_H5VFD_DEFAULT:
+                    break;
+                case DB_H5VFD_SEC2:
+                    h5status |= H5Pset_fapl_sec2(retval);
+                    break;
+                case DB_H5VFD_STDIO:
+                    h5status |= H5Pset_fapl_stdio(retval);
+                    break;
+                case DB_H5VFD_LOG:
+                {
+                    int bufsize = 0;
+                    int flags = H5FD_LOG_LOC_IO|H5FD_LOG_NUM_IO|H5FD_LOG_TIME_IO|H5FD_LOG_ALLOC;
+                    char *logname = "silo_hdf5_log.out";
+
+                    if (p = DBGetOption(opts, DBOPT_H5_LOG_NAME))
+                        logname = (char*) p;
+
+                    if (p = DBGetOption(opts, DBOPT_H5_LOG_BUF_SIZE))
+                    {
+                        bufsize = *((int*) p);
+                        flags = H5FD_LOG_ALL;
+                    }
+
+                    h5status |= H5Pset_fapl_log(retval, logname, flags, bufsize);
+                    break;
+                }
+                case DB_H5VFD_CORE:
+                {
+                    int inc = 1<<20; /* default of 1 Meg */
+                    hbool_t bs = TRUE; /* default back store on */
+
+                    /* get core allocation inc */
+                    if (p = DBGetOption(opts, DBOPT_H5_CORE_ALLOC_INC))
+                        inc = *((int*)p);
+
+                    /* get backing store flag */
+                    if (p = DBGetOption(opts, DBOPT_H5_CORE_NO_BACK_STORE))
+                        bs = FALSE;
+
+                    h5status |= H5Pset_fapl_core(retval, inc, bs);
+                    break;
+                }
+                case DB_H5VFD_DIRECT:
+                {
+#ifdef H5_HAVE_DIRECT
+                    int direct_block_size = (1<<12); /* 4 kilobytes (lustre default) */
+                    int direct_alignment, direct_cbuf_size;
+                    int align_min, align_va;
+    
+                    /* get direct block size */ 
+                    if (p = DBGetOption(opts, DBOPT_H5_DIRECT_BLOCK_SIZE))
+                        direct_block_size = *((int*)p);
+
+                    /* get direct alignment */ 
+                    if (p = DBGetOption(opts, DBOPT_H5_DIRECT_MEM_ALIGN))
+                        direct_alignment = *((int*)p);
+                    else
+                        direct_alignment = direct_block_size;
+
+                    /* get direct buffer size */ 
+                    if (p = DBGetOption(opts, DBOPT_H5_DIRECT_BUF_SIZE))
+                        direct_buf_size = *((int*)p);
+                    else
+                        direct_buf_size = direct_block_size * 256;
+
+                    /* get overall alignment threshold */ 
+                    if (p = DBGetOption(opts, DBOPT_H5_ALIGN_MIN))
+                        align_min = *((int*)p);
+                    else
+                        align_min = direct_block_size / 2;
+
+                    /* get overall alignment value */ 
+                    if (p = DBGetOption(opts, DBOPT_H5_ALIGN_VAL))
+                        align_val = *((int*)p);
+                    else
+                        align_val = direct_block_size;
+
+                    h5status |= H5Pset_fapl_direct(retval, direct_alignment, direct_block_size, direct_cbuf_size);
+                    h5status |= H5Pset_alignment(retval, align_min, align_val); 
+#else
+                    H5Pclose(retval);
+                    db_perror("HDF5 Direct VFD", E_NOTENABLEDINBUILD, me);
+                    return -1;
+#endif
+                    break;
+
+                }
+                case DB_H5VFD_SPLIT: 
+                {
+                    int meta_opts_set_id = DB_FILE_OPTS_H5_DEFAULT_CORE;
+                    int raw_opts_set_id = DB_FILE_OPTS_H5_DEFAULT_DEFAULT;
+                    char *mext = "", *rext = "-raw";
+                    hid_t meta_fapl = -1, raw_fapl = -1;
+
+                    /* get meta opts_set_id */
+                    if (p = DBGetOption(opts, DBOPT_H5_META_FILE_OPTS))
+                        meta_opts_set_id = *((int*)p);
+
+                    /* get meta fapl from opts_set_id */
+                    meta_fapl = db_hdf5_process_file_options(meta_opts_set_id);
+
+                    /* get meta extension */
+                    if (p = DBGetOption(opts, DBOPT_H5_META_EXTENSION))
+                        mext = (char *) p;
+
+                    /* get raw opts_set_id */
+                    if (p = DBGetOption(opts, DBOPT_H5_RAW_FILE_OPTS))
+                        raw_opts_set_id = *((int*)p);
+
+                    /* get raw fapl from opts_set_id */
+                    raw_fapl = db_hdf5_process_file_options(raw_opts_set_id);
+
+                    /* get raw extension */
+                    if (p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION))
+                        rext = (char *) p;
+
+                    h5status |= H5Pset_fapl_split(retval, mext, meta_fapl, rext, raw_fapl);
+                    H5Pclose(meta_fapl);
+                    H5Pclose(raw_fapl);
+                    break;
+                }
+                case DB_H5VFD_MPIO:
+                case DB_H5VFD_MPIP:
+                {
+#ifdef H5_HAVE_PARALLEL
+                    MPI_Comm mpi_comm = MPI_COMM_SELF;
+                    MPI_Info mpi_info; 
+                    int created_info = 0;
+                    hbool_t use_gpfs_hints = TRUE;
+
+                    /* get the communicator */
+                    if (p = DBGetOption(opts, DBOPT_H5_MPIO_COMM))
+                        mpi_comm = *((MPI_Comm *)p);
+
+                    /* get the info */
+                    if (p = DBGetOption(opts, DBOPT_H5_MPIO_INFO))
+                        mpi_info = *((MPI_Info *)p);
+                    else
+                    {
+                        MPI_Info_create(&info);
+                        created_info = 1;
+                    }
+
+                    /* get use_gpfs_hints flag */
+                    if (p = DBGetOption(opts, DBOPT_H5_MPIP_NO_GPFS_HINTS))
+                        use_gpfs_hints = FALSE;
+
+                    if (vfd == DB_H5VFD_MPIO)
+                    {
+                        h5status |= H5Pset_fapl_mpio(retval, mpi_comm, mpi_info);
+                        if (created_info) MPI_Info_free(&mpi_info);
+                    }
+                    else
+                    {
+                        h5status |= H5Pset_fapl_mpiposix(retval, mpi_comm, use_gpfs_hints);
+                    }
+#else 
+                    H5Pclose(retval);
+                    db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
+                    return -1;
+#endif
+                    break;
+                }
+                case DB_H5VFD_FAMILY:
+                {
+                    int memb_size = (1<<30); /* 1 gigabyte */
+                    int memb_opts_set_id = DB_FILE_OPTS_H5_DEFAULT_DEFAULT;
+                    hid_t memb_fapl;
+
+                    /* get size of files in family */
+                    if (p = DBGetOption(opts, DBOPT_H5_FAM_SIZE))
+                        memb_size = *((int*)p);
+
+                    /* get underlying family fapl */
+                    if (p = DBGetOption(opts, DBOPT_H5_FAM_FILE_OPTS))
+                        memb_opts_set_id = *((int*)p);
+
+                    memb_fapl = db_hdf5_process_file_options(memb_opts_set_id);
+                    h5status |= H5Pset_fapl_family(retval, memb_size, memb_fapl);
+                    H5Pclose(memb_fapl);
+                }
+            }
+
+            /* handle overall alignment requests */
+            if (p = DBGetOption(opts, DBOPT_H5_ALIGN_MIN))
+            {
+                int align_min = *((int*)p);
+                int align_val = align_min * 2;
+
+                /* get overall alignment value */ 
+                if (p = DBGetOption(opts, DBOPT_H5_ALIGN_VAL))
+                    align_val = *((int*)p);
+
+                h5status |= H5Pset_alignment(retval, align_min, align_val); 
+            }
+
+            /* handle meta block size */
+            if (p = DBGetOption(opts, DBOPT_H5_META_BLOCK_SIZE))
+            {
+                int size = *((int*)p);
+                h5status |= H5Pset_meta_block_size(retval, size);
+            }
+
+            /* handle raw block size */
+            if (p = DBGetOption(opts, DBOPT_H5_SMALL_RAW_SIZE))
+            {
+                int size = *((int*)p);
+                h5status |= H5Pset_small_data_block_size(retval, size);
+            }
+
+            /* handle sieve buffer size */
+            if (p = DBGetOption(opts, DBOPT_H5_SIEVE_BUF_SIZE))
+            {
+                int size = *((int*)p);
+                h5status |= H5Pset_sieve_buf_size(retval, size);
+            }
+
+            /* handle cache settings */
+            if (p = DBGetOption(opts, DBOPT_H5_CACHE_NELMTS))
+            {
+                int nelmts = *((int*)p);
+                int nbytes = nelmts * sizeof(double);
+                double policy = 1.0;
+
+                /* get size in bytes */
+                if (p = DBGetOption(opts, DBOPT_H5_CACHE_NBYTES))
+                    nbytes = *((int*)p);
+
+                /* get pre-emption policy */
+                if (p = DBGetOption(opts, DBOPT_H5_CACHE_POLICY))
+                    policy = *((double*)p);
+
+                h5status |= H5Pset_cache(retval, 0, nelmts, nbytes, policy);
+            }
+        }
+    }
+
+    if (h5status < 0)
+        return db_perror("Problem setting HDF5 VFD options", E_CALLFAIL, me);
+
+    return retval;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_file_accprops 
  *
@@ -4413,76 +4834,6 @@ db_hdf5_ForceSingle(int status)
  * create implementations. So, the 'subtype' arriving here is a 28 bit
  * number.
  *
- * Typically, only the least significant 4 bits, 3...0 are ever
- * used and they identify one of HDF5's common vfds (e.g. sec2, stdio,
- * or core). However, in the case of the split vfd, then all the other
- * bit-fields defined here come into play. The interpretation of the
- * remaining bits depends on the vfd specified in the 4 least
- * significant bits. 
- *
- * When the 4 least significant bits indicate the core vfd, then
- * the bit-fields of 'subtype' are intepreted as follows ...
- *
- *  Bit Positions         Description
- *  ----------------|-------------------------------------------
- *      27          | 
- *      .           |
- *      .           |   UNUSED
- *      .           |
- *      10          | 
- * -----------------+-------------------------------------------
- *       9          |  6 bit number indicating log-base-2 size in bytes
- *       8          |  of core vfd allocation incriment
- *       7          |  (e.g. a value of '16' here means to use 
- *       6          |  an allocation incriment of 2^16 (64 Kbytes)).
- *       5          |  A value of zero here means to use default
- *       4          |  which is 2^20 (1 Megabyte).
- * -----------------+-------------------------------------------
- *       3          | 4 bit number identifying the primary vfd
- *       2          | to use.
- *       1          |
- *       0          |
- *
- *
- * When the 4 least significant bits indicate the split vfd, then
- * the bit-fields of 'subtype' are intepreted as follows ...
- *
- *  Bit Positions         Description
- *  ----------------|-------------------------------------------
- *      27          |  4 bit number identifying which split vfd 
- *      26          |  extension pair, if any, to use. A value of 
- *      25          |  0 here means to use default ext. pair.
- *      24          |
- *  ----------------+-------------------------------------------
- *      23          |  6 bit number indicating log-base-2 size in bytes
- *      22          |  of RAW data allocation incriment, if any,
- *      21          |  to use if RAW vfd is core.
- *      20          |  A value of 0 here means to use default
- *      19          |  which is 2^20 for RAW data. Only relevant if
- *      18          |  the RAW data vfd is core.
- * -----------------+-------------------------------------------
- *      17          |  6 bit number indicating log-base-2 size in bytes
- *      16          |  of META data allocation incriment, if any,
- *      15          |  to use if META vfd is core. 
- *      14          |  A value of zero here means to use default
- *      13          |  which is 2^16 (64 kilobytes) for META data. Only
- *      12          |  relevant if the META data vfd is core.
- * -----------------+-------------------------------------------
- *      11          | 4 bit number identifying vfd to use for 
- *      10          | RAW data.
- *       9          |
- *       8          |
- * -----------------+-------------------------------------------
- *       7          | 4 bit number identifying vfd to use for 
- *       6          | META data.
- *       5          |
- *       4          |
- * -----------------+-------------------------------------------
- *       3          | 4 bit number identifying the primary vfd
- *       2          | to use.
- *       1          | 
- *       0          |
- *
  * Modifications:
  *   Mark C. Miller, Thu Feb 11 09:38:32 PST 2010
  *   Added support for split vfd. Changed how allocation inc for core
@@ -4492,79 +4843,8 @@ db_hdf5_ForceSingle(int status)
 INTERNAL hid_t 
 db_hdf5_file_accprops(int subtype)
 {
-    hid_t retval = -1;
-    int vfd = subtype & 0x0000000F;
-
-    /* default properties */
-    retval = H5Pcreate(H5P_FILE_ACCESS);
-
-    /* this property makes it so closing the file automatically closes
-       all open objects in the file. This is just in case the HDF5
-       driver is failing to close some object */
-    H5Pset_fclose_degree(retval, H5F_CLOSE_STRONG);
-
-    switch (vfd)
-    {
-        case 0: break; /* this is the default case */
-        case DB_H5VFD_SEC2: H5Pset_fapl_sec2(retval); break;
-        case DB_H5VFD_STDIO: H5Pset_fapl_stdio(retval); break;
-        case DB_H5VFD_CORE:
-        {
-            int inc = (subtype >> 4) & 0x0000003F;
-            if (inc == 0) inc = 20; /* 2^20 => 1 Megabyte */
-            H5Pset_fapl_core(retval, (1<<inc), TRUE);
-            break;
-        }
-#ifdef PARALLEL
-        case DB_H5VFD_MPIOP: H5Pset_fapl_mpiposix(retval, MPI_COMM_SELF); break;
-        case DB_H5VFD_MPIO:
-        {
-            MPI_Info info;
-            MPI_Info_create(&info);
-            H5Pset_fapl_mpio(retval, MPI_COMM_SELF, info);
-            MPI_Info_free(&info);
-            break;
-        }
-#endif
-        case DB_H5VFD_SPLIT: 
-        {
-            int meta_vfd = (subtype >> 4) & 0x0000000F;
-            int raw_vfd = (subtype >> 8) & 0x0000000F;
-            int meta_inc = (subtype >> 12) & 0x0000003F;
-            int raw_inc = (subtype >> 18) & 0x0000003F;
-            int extpair = (subtype >> 24) & 0x0000000F;
-            hid_t meta_fapl = H5Pcreate(H5P_FILE_ACCESS);
-            hid_t raw_fapl = H5Pcreate(H5P_FILE_ACCESS);
-            char *mext, *rext;
-            if (SILO_Globals.splitVFDExtensions[extpair][0]==0 ||
-                SILO_Globals.splitVFDExtensions[extpair][1]==0)
-                extpair = 0;
-            mext = SILO_Globals.splitVFDExtensions[extpair][0];
-            rext = SILO_Globals.splitVFDExtensions[extpair][1];
-            if (meta_inc == 0) meta_inc = 16; /* 2^16 => 64 kilobytes */
-            if (raw_inc == 0) raw_inc = 20; /* 2^20 => 1 Megabyte */
-            switch (meta_vfd)
-            {
-                case 0: break; /* this is the default case */
-                case DB_H5VFD_SEC2: H5Pset_fapl_sec2(meta_fapl); break;
-                case DB_H5VFD_STDIO: H5Pset_fapl_stdio(meta_fapl); break;
-                case DB_H5VFD_CORE: H5Pset_fapl_core(meta_fapl, (1<<meta_inc), TRUE); break;
-            }
-            switch (raw_vfd)
-            {
-                case 0: break; /* this is the default case */
-                case DB_H5VFD_SEC2: H5Pset_fapl_sec2(raw_fapl); break;
-                case DB_H5VFD_STDIO: H5Pset_fapl_stdio(raw_fapl); break;
-                case DB_H5VFD_CORE: H5Pset_fapl_core(raw_fapl, (1<<raw_inc), TRUE); break;
-            }
-            H5Pset_fapl_split(retval, mext, meta_fapl, rext, raw_fapl);
-            H5Pclose(meta_fapl);
-            H5Pclose(raw_fapl);
-            break;
-        }
-    }
-
-    return retval;
+    int opts_set_id = subtype & 0x0000003F;
+    return db_hdf5_process_file_options(opts_set_id);
 }
 
 
@@ -4806,7 +5086,7 @@ db_hdf5_initiate_close(DBfile *_dbfile)
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
-db_hdf5_Open(char *name, int mode, int subtype)
+db_hdf5_Open(char *name, int mode, int opts_set_id)
 {
     DBfile_hdf5 *dbfile=NULL;
     hid_t       fid=-1, faprops=-1;
@@ -4829,7 +5109,7 @@ db_hdf5_Open(char *name, int mode, int subtype)
         return NULL;
     }
 
-    faprops = db_hdf5_file_accprops(subtype); 
+    faprops = db_hdf5_file_accprops(opts_set_id); 
 
     /* Open existing hdf5 file */
     if ((fid=H5Fopen(name, hmode, faprops))<0) {
@@ -4886,7 +5166,7 @@ db_hdf5_Open(char *name, int mode, int subtype)
  *-------------------------------------------------------------------------
  */
 INTERNAL DBfile *
-db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
+db_hdf5_Create(char *name, int mode, int target, int opts_set_id, char *finfo)
 {
     DBfile_hdf5 *dbfile=NULL;
     hid_t       fid=-1, faprops=-1;
@@ -4899,7 +5179,7 @@ db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
     else
         H5Eset_auto(NULL, NULL);
 
-    faprops = db_hdf5_file_accprops(subtype);
+    faprops = db_hdf5_file_accprops(opts_set_id);
 
         /* Create or open hdf5 file */
     if (DB_CLOBBER==mode) {
@@ -4968,19 +5248,36 @@ db_hdf5_Create(char *name, int mode, int target, int subtype, char *finfo)
 CALLBACK int
 db_hdf5_Close(DBfile *_dbfile)
 {
-   DBfile_hdf5    *dbfile = (DBfile_hdf5*)_dbfile;
+    int retval = 0;
+    DBfile_hdf5    *dbfile = (DBfile_hdf5*)_dbfile;
+    static char *me = "db_hdf5_Close";
 
-   if (dbfile) {
-       FreeNodelists(dbfile, 0);
-       /* Free the private parts of the file */
-       if (db_hdf5_initiate_close((DBfile*)dbfile)<0) return -1;
-       if (H5Fclose(dbfile->fid)<0) return -1;
-       dbfile->fid = -1;
+    if (dbfile) {
 
-       /* Free the public parts of the file */
-       silo_db_close(_dbfile);
-   }
-   return 0;
+        PROTECT {
+
+            FreeNodelists(dbfile, 0);
+
+            /* Free the private parts of the file */
+            if (db_hdf5_initiate_close((DBfile*)dbfile)<0 ||
+                H5Fclose(dbfile->fid)<0)
+            {
+                db_perror(dbfile->pub.name, E_CALLFAIL, me);
+                UNWIND();
+            }
+            dbfile->fid = -1;
+
+            /* Free the public parts of the file */
+            silo_db_close(_dbfile);
+        
+        } CLEANUP {
+            retval = -1;
+            dbfile->fid = -1;
+            silo_db_close(_dbfile);
+        } END_PROTECT;
+    }
+
+    return retval;
 }
 
 

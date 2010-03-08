@@ -195,5 +195,6 @@ main(int argc, char *argv[])
     if (dbfile2 != 0)
         exit(1);
 
+    CleanupDriverStuff();
     return 0;
 }

@@ -322,5 +322,6 @@ main(int argc, char *argv[])
     free(dval);
     free(drval);
 
+    CleanupDriverStuff();
     return nerrors;
 }

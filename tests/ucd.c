@@ -86,6 +86,7 @@ main(int argc, char *argv[])
     build_ucd(dbfile, "ucdmesh");
     DBClose(dbfile);
 
+    CleanupDriverStuff();
     return 0;
 }
 

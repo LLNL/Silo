@@ -51,4 +51,4 @@ typedef struct _iointerface_t
     void *dlhandle;
 } iointerface_t;
 
-typedef iointerface_t* (*CreateInterfaceFunc)(int argc, char *argv[], const char *filename, const options_t *opts);
+typedef iointerface_t* (*CreateInterfaceFunc)(int argi, int argc, char *argv[], const char *filename, const options_t *opts);
