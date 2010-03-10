@@ -45,6 +45,14 @@
 
 #include <std.c>
 
+/******************************************************************************
+ * Modifications:
+ *   Mark C. Miller, Tue Mar  9 17:16:17 PST 2010
+ *   Added explicit logic to set split vfd as an example of how to do it.
+ *   Added missing DBFreeFacelist() so valgrind reports no leaks.
+ * 
+ *****************************************************************************/
+
 int
 main(int argc, char *argv[])
 {
@@ -67,10 +75,65 @@ main(int argc, char *argv[])
     int             setnan = 0;
     char 	    *filename = "onehex.silo";
 
+    int alloc_inc, vfd, core_vfd;
+    char *mext, *rext;
+    int meta_opts_id, raw_opts_id, split_opts_id;
+    DBoptlist *core_opts = 0, *split_opts = 0;
+
     /* Parse command-line */
     for (i=1; i<argc; i++) {
 	if (!strncmp(argv[i], "DB_", 3)) {
 	    driver = StringToDriver(argv[i]);
+	} else if (!strcmp(argv[i], "example")) {
+
+            /* set up the meta file options for core vfd with 1K alloc */
+            core_opts = DBMakeOptlist(10);
+
+            /* indicate the vfd is core */
+            core_vfd = DB_H5VFD_CORE;
+            DBAddOption(core_opts, DBOPT_H5_VFD, &core_vfd);
+
+            /* indicate the allocation increment is 1K */
+            alloc_inc = 1<<10;
+            DBAddOption(core_opts, DBOPT_H5_CORE_ALLOC_INC, &alloc_inc);
+
+            /* register the core file options set with the library */
+            meta_opts_id = DBRegisterFileOptionsSet(core_opts); 
+           
+            /* set up the raw file options */
+            /* We're using pre-defined default file options for the raw part */
+            raw_opts_id = DB_FILE_OPTS_H5_DEFAULT_SEC2;
+
+            /* now, set up the split file options */
+            split_opts = DBMakeOptlist(10);
+
+            /* indicate the vfd is split */
+            vfd = DB_H5VFD_SPLIT;
+            DBAddOption(split_opts, DBOPT_H5_VFD, &vfd);
+
+            /* indicate the meta file options set */
+            DBAddOption(split_opts, DBOPT_H5_META_FILE_OPTS, &meta_opts_id);
+
+            /* indicate the meta file extension */
+            mext = "silo-meta";
+            DBAddOption(split_opts, DBOPT_H5_META_EXTENSION, mext);
+
+            /* indicate the raw file options set */
+            DBAddOption(split_opts, DBOPT_H5_RAW_FILE_OPTS, &raw_opts_id);
+
+            /* indicate the raw file extension */
+            /* Note, this is NOT an extension but an sprintf name pattern */
+            rext = "silo_%s_raw.dat";
+            DBAddOption(split_opts, DBOPT_H5_RAW_EXTENSION, rext);
+
+            /* register the split file options set with the library */
+            split_opts_id = DBRegisterFileOptionsSet(split_opts); 
+
+            /* set the 'driver' */
+            driver = DB_HDF5_OPTS(split_opts_id);
+
+            /* DO NOT FREE THE ASSOCIATED OPTLIST UNTIL AFTER OPEN/CREATE */
+
 	} else if (!strcmp(argv[i], "inf")) {
             setinf = 1;
 	} else if (!strcmp(argv[i], "nan")) {
@@ -83,6 +146,10 @@ main(int argc, char *argv[])
     DBShowErrors(DB_ABORT, NULL);
     printf("Creating test file \"%s\".\n", filename);
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "3D ucd hex", driver);
+
+    /* Ok, now we can safely free the file options sets optlists */
+    if (core_opts) DBFreeOptlist(core_opts);
+    if (split_opts) DBFreeOptlist(split_opts);
 
     coordnames[0] = "xcoords";
     coordnames[1] = "ycoords";
@@ -179,6 +246,7 @@ main(int argc, char *argv[])
                   facelist->nshapes, facelist->types, facelist->typelist,
                   facelist->ntypes);
 
+    DBFreeFacelist(facelist);
     sprintf(mesh_command, "mesh hex; contour v");
     len = strlen(mesh_command) + 1;
     DBWrite(dbfile, "_meshtvinfo", mesh_command, &len, 1, DB_CHAR);
