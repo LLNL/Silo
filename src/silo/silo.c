@@ -2862,6 +2862,7 @@ const int* db_get_used_file_options_sets_ids()
        they could possibly have an impact on Silo's ability to actually
        open the file. In addtion, put them in some kind of priority order */
     n = 0;
+    used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_SILO;
     used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_SPLIT;
     used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_DIRECT;
     used_slots[n++] = DB_FILE_OPTS_H5_DEFAULT_FAMILY;
@@ -11768,7 +11769,6 @@ INTERNAL void
 db_DriverTypeAndFileOptionsSetId(int driver, int *type, int *_opts_set_id)
 {
     int theType = driver&0xF; 
-    int obsolete_subType = driver&0x700;
     int opts_set_id = 0;
 
     if (driver > DB_NFORMATS)
@@ -11777,6 +11777,7 @@ db_DriverTypeAndFileOptionsSetId(int driver, int *type, int *_opts_set_id)
 #ifdef DB_HDF5X
         if (theType == DB_HDF5X)
         {
+            int obsolete_subType = driver&0x700;
             switch (obsolete_subType)
             {
                 case DB_HDF5_SEC2_OBSOLETE:

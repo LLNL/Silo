@@ -149,7 +149,8 @@ extern "C" {
 #define DB_FILE_OPTS_H5_DEFAULT_FAMILY  7
 #define DB_FILE_OPTS_H5_DEFAULT_MPIP    8
 #define DB_FILE_OPTS_H5_DEFAULT_MPIO    9
-#define DB_FILE_OPTS_LAST DB_FILE_OPTS_H5_DEFAULT_MPIO
+#define DB_FILE_OPTS_H5_DEFAULT_SILO    10
+#define DB_FILE_OPTS_LAST DB_FILE_OPTS_H5_DEFAULT_SILO
 
 /*-------------------------------------------------------------------------
  * Drivers.  This is a list of every driver that a user could use.  Not all of
@@ -190,8 +191,10 @@ extern "C" {
 #define DB_HDF5_MPIO DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_MPIO)
 #define DB_HDF5_MPIOP DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_MPIP)
 #define DB_HDF5_MPIP DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_MPIP)
+#define DB_HDF5_SILO DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_SILO)
 
 /* symbols for various HDF5 vfds */
+#warning DO WE NEED THESE. THEY ARE THE SAME AS DEFAULT FILE OPTS
 #define DB_H5VFD_DEFAULT 0
 #define DB_H5VFD_SEC2    1
 #define DB_H5VFD_STDIO   2
@@ -202,6 +205,7 @@ extern "C" {
 #define DB_H5VFD_FAMILY  7
 #define DB_H5VFD_MPIO    8
 #define DB_H5VFD_MPIP    9
+#define DB_H5VFD_SILO    10
 
 /*-------------------------------------------------------------------------
  * Other library-wide constants.
@@ -456,7 +460,8 @@ typedef enum {
 #define DBOPT_H5_FAM_FILE_OPTS      524
 #define DBOPT_H5_USER_DRIVER_ID     525
 #define DBOPT_H5_USER_DRIVER_INFO   526
-#define DBOPT_H5_LAST               600
+#define DBOPT_H5_SILO_MAX_META      527
+#define DBOPT_H5_LAST               599
 
 /* Error trapping method */
 #define         DB_TOP          0 /*default--API traps  */

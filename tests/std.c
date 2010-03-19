@@ -2,7 +2,7 @@
 #include <string.h>
 #include <errno.h>
 
-#define CHECK_SYMBOL(A)  if (!strcmp(str, #A)) return A
+#define CHECK_SYMBOL(A)  if (!strncmp(str, #A, strlen(str))) return A
 
 #define CHECK_SYMBOLN_INT(A)				\
 if (!strncmp(tok, #A, strlen(#A)))			\
@@ -85,6 +85,7 @@ static int StringToDriver(const char *str)
     CHECK_SYMBOL(DB_HDF5_LOG);
     CHECK_SYMBOL(DB_HDF5_DIRECT);
     CHECK_SYMBOL(DB_HDF5_FAMILY);
+    CHECK_SYMBOL(DB_HDF5_SILO);
     
     CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_DEFAULT);
     CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_SEC2);
@@ -96,6 +97,7 @@ static int StringToDriver(const char *str)
     CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_FAMILY);
     CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_MPIP);
     CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_MPIO);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_SILO);
 
     CHECK_SYMBOL(DB_H5VFD_DEFAULT);
     CHECK_SYMBOL(DB_H5VFD_SEC2);
@@ -107,7 +109,9 @@ static int StringToDriver(const char *str)
     CHECK_SYMBOL(DB_H5VFD_FAMILY);
     CHECK_SYMBOL(DB_H5VFD_MPIO);
     CHECK_SYMBOL(DB_H5VFD_MPIP);
+    CHECK_SYMBOL(DB_H5VFD_SILO);
 
+#if 0
     if (!strncmp(str, "DB_HDF5_CORE(", 13))
     {
         MakeDriverOpts(&opts, &opts_id);
@@ -195,6 +199,7 @@ static int StringToDriver(const char *str)
 
         return DB_HDF5_OPTS(opts_id);
     }
+#endif
 
     if (!strncmp(str, "DB_HDF5_OPTS(", 13))
     {
@@ -211,9 +216,9 @@ static int StringToDriver(const char *str)
             int got_it = 0;
 
             CHECK_SYMBOLN_SYM(DBOPT_H5_VFD)
-            CHECK_SYMBOLN_INT(DBOPT_H5_RAW_FILE_OPTS)
+            CHECK_SYMBOLN_SYM(DBOPT_H5_RAW_FILE_OPTS)
             CHECK_SYMBOLN_STR(DBOPT_H5_RAW_EXTENSION)
-            CHECK_SYMBOLN_INT(DBOPT_H5_META_FILE_OPTS)
+            CHECK_SYMBOLN_SYM(DBOPT_H5_META_FILE_OPTS)
             CHECK_SYMBOLN_STR(DBOPT_H5_META_EXTENSION)
             CHECK_SYMBOLN_INT(DBOPT_H5_CORE_ALLOC_INC)
             CHECK_SYMBOLN_INT(DBOPT_H5_CORE_NO_BACK_STORE)
@@ -230,18 +235,30 @@ static int StringToDriver(const char *str)
             CHECK_SYMBOLN_INT(DBOPT_H5_CACHE_NELMTS)
             CHECK_SYMBOLN_INT(DBOPT_H5_CACHE_NBYTES)
             CHECK_SYMBOLN_INT(DBOPT_H5_FAM_SIZE)
-            CHECK_SYMBOLN_INT(DBOPT_H5_FAM_FILE_OPTS)
+            CHECK_SYMBOLN_SYM(DBOPT_H5_FAM_FILE_OPTS)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_MAX_META)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_DEFAULT);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SEC2);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_STDIO);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_CORE);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_LOG);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SPLIT);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_DIRECT);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_FAMILY);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_MPIP);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_MPIO);
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SILO);
 
             if (!got_it)
             {
-                fprintf(stderr, "Unable to determine driver from string \"%s\"\n", str);
+                fprintf(stderr, "Unable to determine driver from string \"%s\"\n", tok);
 	        exit(-1);
             }
 
 	    tok = strtok(0, ",)");
 	    if (errno != 0)
 	    {
-                fprintf(stderr, "Unable to determine driver from string \"%s\"\n", str);
+                fprintf(stderr, "Unable to determine driver from string \"%s\"\n", tok);
 	        exit(-1);
 	    }
         }

@@ -1126,31 +1126,6 @@ process_sw_exclude(switch_t *sw, const char *argv, const char *value)
 }
 
 /*---------------------------------------------------------------------------
- * Purpose:     Handle split-vfd switch
- *
- * Programmer:  Mark C. Miller, Fri Feb 12 08:27:52 PST 2010
- * 
- * Note: we can get away with re-using process_sw_exclude here because
- * that function makes no assumptions about which switch it is processing.
- * Instead, it gets that info from the sw->info member.
- *---------------------------------------------------------------------------
- */
-/*ARGSUSED*/
-static int
-process_sw_split_vfd(switch_t *sw, const char *argv, const char *value)
-{
-    strlist_t   *split_vfd_list = (strlist_t*)(sw->info);
-    int retval = process_sw_exclude(sw, argv, value);
-    if (split_vfd_list->nused % 2)
-    {
-        out_errorn("split vfd extensions must be specified in pairs of "
-            "strings, meta-extension followed by raw-extension.");
-        retval = -1;
-    }
-    return retval;
-}
-    
-/*---------------------------------------------------------------------------
  * Purpose:     Process command-line switches.
  *
  * Programmer:  Robb Matzke
@@ -1381,6 +1356,9 @@ bad_switch(const char *fmt, ...)
  *
  *      Mark C. Miller, Fri Feb 12 08:41:04 PST 2010
  *      Added the --split-vfd switch.
+ *
+ *      Mark C. Miller, Fri Mar 12 00:35:43 PST 2010
+ *      Replaced --split-vfd switch with --hdf5-vfd-opts switch.
  *-------------------------------------------------------------------------
  */
 int
@@ -1392,7 +1370,7 @@ main(int argc, char *argv[])
     char         init_file_buf[1024];
     const char   *init_file=NULL;
     struct passwd *passwd=NULL;
-    strlist_t    eval_list, exclude_list, split_vfd_exts;
+    strlist_t    eval_list, exclude_list, hdf5_vfd_opts;
     switches_t   *sws=switch_new();
     switch_t     *sw=NULL;
     struct sigaction action;
@@ -1599,13 +1577,15 @@ main(int argc, char *argv[])
                "(default 0), which causes the browser to perform checksums, "
                "when available in the database, during read.\n");
 
-    switch_add(sws, NULL, "--split-vfd", "s:EXTENSIONS", process_sw_split_vfd);
-    memset(&split_vfd_exts, 0, sizeof split_vfd_exts);
-    switch_info(NULL, &split_vfd_exts);
+    /* We can get away with using process_sw_exclude here to process hdf5 vfd
+     * options because that routine winds up stuffing the results into the
+     * list identifed in switch_info */
+    switch_add(sws, NULL, "--hdf5-vfd-opts", "s:H5VFDOPTS", process_sw_exclude);
+    memset(&hdf5_vfd_opts, 0, sizeof hdf5_vfd_opts);
+    switch_info(NULL, &hdf5_vfd_opts);
     switch_doc(NULL,
-               "Tells browser to use the split virtual file driver (vfd) to "
-               "open the file and, optionally, the extensions used to identify "
-               "the different file parts.\n");
+               "Tells browser sets of HDF5 virtual file driver (vfd) options "
+               "when opening files.\n");
 
     /* Parse, then process command-line options */
     Switches = sws;
@@ -1627,17 +1607,17 @@ main(int argc, char *argv[])
         obj_dest(symbol);
     }
     
-    /* Assign the --split-vfd values list to the $split_vfd_exts variable */
-    if ((sw=switch_find(sws, "--split-vfd")) && sw->seen) {
-        obj_t list[NELMTS(split_vfd_exts.value)], symbol, value;
-        for (i=0; i<split_vfd_exts.nused; i++) {
-            list[i] = obj_new(C_STR, split_vfd_exts.value[i]);
+    /* Assign the --hdf5-vfd-opts values list to the $h5vfdopts variable */
+    if ((sw=switch_find(sws, "--hdf5-vfd-opts")) && sw->seen) {
+        obj_t list[NELMTS(hdf5_vfd_opts.value)], symbol, value;
+        for (i=0; i<hdf5_vfd_opts.nused; i++) {
+            list[i] = obj_new(C_STR, hdf5_vfd_opts.value[i]);
         }
-        value = V_make_list(split_vfd_exts.nused, list);
-        for (i=0; i<split_vfd_exts.nused; i++) {
+        value = V_make_list(hdf5_vfd_opts.nused, list);
+        for (i=0; i<hdf5_vfd_opts.nused; i++) {
             obj_dest(list[i]);
         }
-        symbol = obj_new(C_SYM, "$splitvfdexts");
+        symbol = obj_new(C_SYM, "$h5vfdopts");
         sym_vbind(symbol, value);
         obj_dest(symbol);
     }

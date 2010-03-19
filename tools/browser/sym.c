@@ -753,6 +753,9 @@ sym_truth (char *name) {
  *
  *      Mark C. Miller, Fri Feb 12 08:41:39 PST 2010
  *      Added $splitvfdexts variable.
+ *
+ *      Mark C. Miller, Fri Mar 12 01:23:15 PST 2010
+ *      Replaced splitvfdexts with $hdf5_vfd_opts
  *-------------------------------------------------------------------------
  */
 void
@@ -856,12 +859,12 @@ sym_init (void)
               "checksum checks during subsequent read operations. "
               "This variable is set by the --checksums and -c "
               "command-line switches.\n");
-   sym_bi_set("splitvfdexts",       NULL,
-              "Specify extensions to be used when reading split files.",
-              "The value of this variable should be a list of pairs of "
-              "split vfd extensions. The first in each pair is for the "
-              "metadata file. The second is for the raw data file. "
-              "Multiple pairs of extensions are fine. Browser will try "
+   sym_bi_set("h5vfdopts",       NULL,
+              "Specify hdf5 (vfd) options sets when attempting to open files.",
+              "The value of this variable should be a list of OPTION=VALUE "
+              "strings. The keyword '_NEWSET_' can be used to separate one "
+              "group of OPTION=VALUE strings from another, each group forming "
+              "one set of options to be used to open files. Browser will try "
               "Them in order when attempting to open a file.\n"); 
 
    /* Name of public init file */

@@ -91,6 +91,9 @@ for advertising or product endorsement purposes.
  *     Mark C. Miller, Fri Feb 12 08:16:37 PST 2010
  *     Replaced use of access() system call with db_silo_stat.
  *     Added loop over split vfds trying various defined extension pairs.
+ *
+ *     Mark C. Miller, Thu Mar 18 18:16:22 PDT 2010
+ *     Increased size of tried/ascii to accomodate HDF5 options sets.
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
 db_unk_Open(char *name, int mode, int subtype_dummy)
@@ -98,7 +101,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     DBfile        *opened = NULL;
     int            type;
     char          *me = "db_unk_Open";
-    char           tried[512], ascii[16];
+    char           tried[1024], ascii[32];
     db_silo_stat_struct filestate;
 
     /* Hierarchy defined as:
@@ -162,7 +165,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
 
         for (i = 0; !opened && opts_set_ids[i]!=-1; i++)
         {
-            sprintf(ascii, " HDF5_OPTS[%d]", opts_set_ids[i]);
+            sprintf(ascii, " DB_HDF5_OPTS(%d)", opts_set_ids[i]);
             strcat(tried, ascii);
             PROTECT {
                 opened = (DBOpenCB[7]) (name, mode, opts_set_ids[i]);

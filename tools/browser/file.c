@@ -42,13 +42,122 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <config.h>     /*MeshTV configuration record*/
-
 #include <assert.h>
 #include <browser.h>
 #ifdef HAVE_FNMATCH_H
 #  include <fnmatch.h>
 #endif
+
+#include <config.h>     /*Silo configuration record*/
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+
+#define CHECK_SYMBOL(A)  if (!strncmp(str, #A, strlen(str))) return A
+
+#define CHECK_SYMBOLN_INT(A)				\
+if (!strncmp(tmp, #A"=", strlen(#A)+1))			\
+{							\
+    int n = sscanf(tmp, #A"=%d", &driver_ints[driver_nints]);\
+    if (n == 1)						\
+    {							\
+        DBAddOption(opts, A, &driver_ints[driver_nints]);\
+        driver_nints++;					\
+        got_it = 1;					\
+    }							\
+}
+
+#define CHECK_SYMBOLN_STR(A)				\
+if (!strncmp(tmp, #A"=", strlen(#A)+1))			\
+{							\
+    driver_strs[driver_nstrs] = safe_strdup(&tmp[strlen(#A)]+1);\
+    DBAddOption(opts, A, driver_strs[driver_nstrs]);	\
+    driver_nstrs++;					\
+    got_it = 1;						\
+}
+
+#define CHECK_SYMBOLN_SYM(A)				\
+if (!strncmp(tmp, #A"=", strlen(#A)+1))			\
+{							\
+    driver_ints[driver_nints] = StringToOptval(&tmp[strlen(#A)]+1);\
+    DBAddOption(opts, A, &driver_ints[driver_nints]);	\
+    driver_nints++;					\
+    got_it = 1;						\
+}
+
+static DBoptlist *driver_opts[] = {0,0,0,0,0,0,0,0,0,0,0};
+static int driver_ints[100];
+static int driver_nints = 0;
+static char *driver_strs[] = {0,0,0,0,0,0,0,0,0,0};
+static int driver_nstrs = 0;
+static const int driver_nopts = sizeof(driver_opts)/sizeof(driver_opts[0]);
+
+static void CleanupDriverStuff()
+{
+    int i;
+    for (i = 0; i < driver_nopts; i++)
+        if (driver_opts[i]) DBFreeOptlist(driver_opts[i]);
+    for (i = 0; i < sizeof(driver_strs)/sizeof(driver_strs[0]); i++)
+        if (driver_strs[i]) free(driver_strs[i]);
+}
+
+static void MakeDriverOpts(DBoptlist **_opts, int *opts_id)
+{
+    DBoptlist *opts = DBMakeOptlist(30);
+    int i;
+
+    for (i = 0; i < driver_nopts; i++)
+    {
+        if (driver_opts[i] == 0)
+        {
+            driver_opts[i] = opts;
+            break;
+        }
+    }
+
+    *_opts = opts;
+    *opts_id = DBRegisterFileOptionsSet(opts);
+}
+
+static int StringToOptval(const char *str)
+{
+    CHECK_SYMBOL(DB_PDB);
+    CHECK_SYMBOL(DB_HDF5);
+    CHECK_SYMBOL(DB_HDF5_SEC2);
+    CHECK_SYMBOL(DB_HDF5_STDIO);
+    CHECK_SYMBOL(DB_HDF5_CORE);
+    CHECK_SYMBOL(DB_HDF5_SPLIT);
+    CHECK_SYMBOL(DB_HDF5_MPIO);
+    CHECK_SYMBOL(DB_HDF5_MPIP);
+    CHECK_SYMBOL(DB_HDF5_LOG);
+    CHECK_SYMBOL(DB_HDF5_DIRECT);
+    CHECK_SYMBOL(DB_HDF5_FAMILY);
+    CHECK_SYMBOL(DB_HDF5_SILO);
+    
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_DEFAULT);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_SEC2);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_STDIO);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_CORE);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_LOG);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_SPLIT);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_DIRECT);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_FAMILY);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_MPIP);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_MPIO);
+    CHECK_SYMBOL(DB_FILE_OPTS_H5_DEFAULT_SILO);
+
+    CHECK_SYMBOL(DB_H5VFD_DEFAULT);
+    CHECK_SYMBOL(DB_H5VFD_SEC2);
+    CHECK_SYMBOL(DB_H5VFD_STDIO);
+    CHECK_SYMBOL(DB_H5VFD_CORE);
+    CHECK_SYMBOL(DB_H5VFD_LOG);
+    CHECK_SYMBOL(DB_H5VFD_SPLIT);
+    CHECK_SYMBOL(DB_H5VFD_DIRECT);
+    CHECK_SYMBOL(DB_H5VFD_FAMILY);
+    CHECK_SYMBOL(DB_H5VFD_MPIO);
+    CHECK_SYMBOL(DB_H5VFD_MPIP);
+    CHECK_SYMBOL(DB_H5VFD_SILO);
+}
 
 #define MYCLASS(X)      ((obj_file_t*)(X))
 
@@ -105,81 +214,94 @@ file_class (void) {
 }
 
 /*-------------------------------------------------------------------------
- * Function:    file_reset_split_vfd_extensions
+ * Function:    file_reset_hdf5_vfd_options
  *
- * Purpose:     Sets split vfd extensions pairs in preparation for opening. 
+ * Purpose:     Sets hdf5 virtual file driver options for opening. 
  *
  * Programmer:  Mark C. Miller, Fri Feb 12 08:25:07 PST 2010
- *              The code to parse $splitvfdexts was cut-n-pasted from
+ *              The code to parse $h5vfdopts was cut-n-pasted from
  *              Robb Matzke's code in func.c for $exclude variable.
+ *
+ * Modifications:
+ *   Mark C. Miller, Thu Mar 18 18:19:00 PDT 2010
+ *   Recoded entirely to accomodate new interface for HDF5 options.
  *-------------------------------------------------------------------------
  */
 #define MAX_FILE_OPTIONS_SETS 32
-void file_reset_split_vfd_extensions (void) {
+void file_reset_hdf5_vfd_options (void) {
 
-    char *tmp=0;
-    int i=0, npairs_used=0;
     obj_t head=NIL, value=NIL, symbol=NIL, word=NIL;
-    static int vfd = DB_H5VFD_SPLIT;
-    static int meta_opts_set_id = DB_FILE_OPTS_H5_DEFAULT_DEFAULT;
-    static int raw_opts_set_id = DB_FILE_OPTS_H5_DEFAULT_DEFAULT;
-    static DBoptlist *opts_sets[MAX_FILE_OPTIONS_SETS] =
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    int opts_id;
+    int added_options = 0;
+    DBoptlist *opts;
 
     /* free all the old file options sets */
     DBUnregisterAllFileOptionsSets();
-    for (i = 0; i < MAX_FILE_OPTIONS_SETS && opts_sets[i]; i++)
-    {
-        free(DBGetOption(opts_sets[i], DBOPT_H5_RAW_EXTENSION));
-        free(DBGetOption(opts_sets[i], DBOPT_H5_META_EXTENSION));
-        DBFreeOptlist(opts_sets[i]);
-        opts_sets[i] = 0;
-    }
+    CleanupDriverStuff();
 
-    /* parse $splitvfdext to get extensions */
-    i = 0;
-    symbol = obj_new(C_SYM, "$splitvfdexts");
+    /* start a new driver options set */
+    MakeDriverOpts(&opts, &opts_id);
+
+    /* parse $h5vfdopts to get extensions */
+    symbol = obj_new(C_SYM, "$h5vfdopts");
     head = sym_vboundp(symbol);
     symbol = obj_dest(symbol);
     if (head && C_CONS!=head->pub.cls) {
         head = obj_new(C_CONS, obj_copy(head, SHALLOW), NIL);
     }
-    for (value=head; value; value=cons_tail(value),i++) {
+    for (value=head; value; value=cons_tail(value)) {
         if (C_CONS!=value->pub.cls) {
-            out_errorn("invalid value for $splitvfdexts");
-            goto done;
-        }
-        if (npairs_used >=16) {
-            out_errorn("too many split vfd extensions (limit 16)");
+            out_errorn("invalid value for $h5vfdopts");
             goto done;
         }
         word = cons_head(value);
         if (C_STR==word->pub.cls) {
-            if (i>0 && i%2==1) {
-
-                /* add a file options set for the split vfd extension pair */
-                DBoptlist *opts = DBMakeOptlist(5);
-                DBAddOption(opts, DBOPT_H5_VFD, &vfd);
-                DBAddOption(opts, DBOPT_H5_RAW_FILE_OPTS, &raw_opts_set_id);
-                DBAddOption(opts, DBOPT_H5_RAW_EXTENSION, safe_strdup(obj_name(word)));
-                DBAddOption(opts, DBOPT_H5_META_FILE_OPTS, &meta_opts_set_id);
-                DBAddOption(opts, DBOPT_H5_META_EXTENSION, tmp);
-                DBRegisterFileOptionsSet(opts);
-
-                /* record this options set so we can delete it later */
-                opts_sets[npairs_used] = opts;
-                npairs_used++;
-
-            } else {
-                tmp = safe_strdup(obj_name(word));
+            int got_it = 0;
+            char *tmp = safe_strdup(obj_name(word));
+            if (!strncmp(tmp,"_NEWSET_",8))
+                MakeDriverOpts(&opts, &opts_id);
+            CHECK_SYMBOLN_SYM(DBOPT_H5_VFD)
+            CHECK_SYMBOLN_SYM(DBOPT_H5_RAW_FILE_OPTS)
+            CHECK_SYMBOLN_STR(DBOPT_H5_RAW_EXTENSION)
+            CHECK_SYMBOLN_SYM(DBOPT_H5_META_FILE_OPTS)
+            CHECK_SYMBOLN_STR(DBOPT_H5_META_EXTENSION)
+            CHECK_SYMBOLN_INT(DBOPT_H5_CORE_ALLOC_INC)
+            CHECK_SYMBOLN_INT(DBOPT_H5_CORE_NO_BACK_STORE)
+            CHECK_SYMBOLN_INT(DBOPT_H5_META_BLOCK_SIZE)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SMALL_RAW_SIZE)
+            CHECK_SYMBOLN_INT(DBOPT_H5_ALIGN_MIN)
+            CHECK_SYMBOLN_INT(DBOPT_H5_ALIGN_VAL)
+            CHECK_SYMBOLN_INT(DBOPT_H5_DIRECT_MEM_ALIGN)
+            CHECK_SYMBOLN_INT(DBOPT_H5_DIRECT_BLOCK_SIZE)
+            CHECK_SYMBOLN_INT(DBOPT_H5_DIRECT_BUF_SIZE)
+            CHECK_SYMBOLN_STR(DBOPT_H5_LOG_NAME)
+            CHECK_SYMBOLN_INT(DBOPT_H5_LOG_BUF_SIZE)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SIEVE_BUF_SIZE)
+            CHECK_SYMBOLN_INT(DBOPT_H5_CACHE_NELMTS)
+            CHECK_SYMBOLN_INT(DBOPT_H5_CACHE_NBYTES)
+            CHECK_SYMBOLN_INT(DBOPT_H5_FAM_SIZE)
+            CHECK_SYMBOLN_SYM(DBOPT_H5_FAM_FILE_OPTS)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_MAX_META)
+            free(tmp);
+            if (!got_it)
+            {
+                out_errorn("invalid value for $h5vfdopts");
+                goto done;
             }
+            added_options = 1;
         } else {
-            out_errorn("$splitvfdexts values should be strings");
+            out_errorn("$h5vfdopts values should be strings");
             goto done;
         }
     }
     head = obj_dest(head);
+
+    /* if the options set is empty, just get rid of it */
+    if (!added_options)
+    {
+        DBUnregisterAllFileOptionsSets();
+        CleanupDriverStuff();
+    }
 
 done:
 
@@ -240,6 +362,9 @@ done:
  *
  *      Mark C. Miller, Fri Feb 12 08:26:07 PST 2010
  *      Added call to file_reset_split_vfd_extensions.
+ *
+ *      Mark C. Miller, Fri Mar 12 01:22:11 PST 2010
+ *      Changed to call file_reset_hdf5_vfd_options
  *-------------------------------------------------------------------------
  */
 static obj_t
@@ -256,16 +381,17 @@ file_new (va_list ap)
    fname = va_arg (ap, char*);
    rdonly = va_arg (ap, int);
 
-   /* reset split vfd extensions (whether the are used or not) */
-   file_reset_split_vfd_extensions();
+   /* reset hdf5 vfd options (whether the are used or not) */
+   file_reset_hdf5_vfd_options();
 
    /*
     * Open the file, and if that fails because the file doesn't have write
     * permission then try opening it for read-only
     */
-   f = DBOpen (fname, DB_UNKNOWN, rdonly ? DB_READ : DB_APPEND);
+#define DEFAULT_DB_TYPE DB_UNKNOWN
+   f = DBOpen (fname, DEFAULT_DB_TYPE, rdonly ? DB_READ : DB_APPEND);
    if (!f && E_FILENOWRITE==db_errno && !rdonly) {
-      f = DBOpen (fname, DB_UNKNOWN, DB_READ);
+      f = DBOpen (fname, DEFAULT_DB_TYPE, DB_READ);
       if (f) {
          out_info ("file opened, but without write permission");
       }
@@ -280,7 +406,7 @@ file_new (va_list ap)
    if (!f && E_NOTFILTER==db_errno) {
       old_err_level = _db_err_level;
       _db_err_level = DB_ALL;
-      f = DBOpen (fname, DB_UNKNOWN, rdonly ? DB_READ : DB_APPEND);
+      f = DBOpen (fname, DEFAULT_DB_TYPE, rdonly ? DB_READ : DB_APPEND);
       _db_err_level = old_err_level;
    }
 

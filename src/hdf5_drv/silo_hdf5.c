@@ -3750,10 +3750,6 @@ db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, in
     int i;
 
 #warning FIXME
-#warning FIXME
-#warning FIXME
-#warning FIXME
-#warning FIXME
     return;
     H5E_BEGIN_TRY
     {
@@ -4413,27 +4409,34 @@ db_hdf5_process_file_options(opts_set_id)
     static char *me = "db_hdf5_process_file_options";
     hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
     herr_t h5status = 0;
+    hsize_t silo_max_meta = 1024 * 256;  /* 256KB */
+    hsize_t silo_raw_buf_size = 1024 * 1024; /* 1 MB */
+
+#warning FIX ME REMOVE ABORT
+    if (H5Pinsert(retval, "silo_max_meta", sizeof(hsize_t),
+            &silo_max_meta, 0, 0, 0, 0, 0) < 0)
+        abort();
+    if (H5Pinsert(retval, "silo_raw_buf_size", sizeof(hsize_t),
+            &silo_raw_buf_size, 0, 0, 0, 0, 0) < 0)
+        abort();
 
     /* This property effects how HDF5 deals with objects that are left
        open when the file containing them is closed. The SEMI setting
        means that HDF5 will flag it is an error. The STRONG setting
        means that HDF5 will attempt to close any option objects
        automatically. That can wind up hiding coding errors in this
-       Silo plugin, so we do that onl when user has requested that
+       Silo plugin, so we do that only when user has requested that
        either top or no errors are reported. */
     if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
         h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_SEMI);
     else
         h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_STRONG);
+#warning FIXME
+    h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_SEMI);
 
     /* Handle cases where we are running on Windows. If a client
        request anything other than the default driver, we issue
        a warning message and continue only on windows (default) vfd. */
-#warning TEST THIS LOGIC ON LINUX
-#warning TEST THIS LOGIC ON LINUX
-#warning TEST THIS LOGIC ON LINUX
-#warning TEST THIS LOGIC ON LINUX
-#warning TEST THIS LOGIC ON LINUX
 #warning TEST THIS LOGIC ON LINUX
 #if defined(_WIN32)
     if (opts_set_id != DB_FILE_OPTS_H5_DEFAULT_DEFAULT && 
@@ -4446,9 +4449,14 @@ db_hdf5_process_file_options(opts_set_id)
 
     switch (opts_set_id)
     {
-        /* default HDF5 driver */
+        /* Winds up using whatever the default vfd defined by HDF5 library is. */
         case DB_FILE_OPTS_H5_DEFAULT_DEFAULT:
+            break;
+
+        case DB_FILE_OPTS_H5_DEFAULT_SILO:
             h5status |= H5Pset_fapl_silo(retval);
+            h5status |= H5Pset_silo_max_meta(retval, (hsize_t) (1<<20));
+            /*h5status |= H5Pset_silo_raw_buf_size(retval, (hsize_t) (1<<20));*/
             break;
 
         /* default HDF5 sec2 driver */
@@ -4458,9 +4466,6 @@ db_hdf5_process_file_options(opts_set_id)
 
         /* default HDF5 stdio driver */
         case DB_FILE_OPTS_H5_DEFAULT_STDIO:
-#warning EVENTUALLY ADD OPTION TO SETVBUF TOO
-#warning EVENTUALLY ADD OPTION TO SETVBUF TOO
-#warning EVENTUALLY ADD OPTION TO SETVBUF TOO
 #warning EVENTUALLY ADD OPTION TO SETVBUF TOO
             h5status |= H5Pset_fapl_stdio(retval);
             break;
@@ -4503,12 +4508,13 @@ db_hdf5_process_file_options(opts_set_id)
             break;
         }
 
-        /* default HDF5 family driver. */
+        /* default HDF5 family driver w/1Gig (2^30) members. */
         case DB_FILE_OPTS_H5_DEFAULT_FAMILY:
         {
             hid_t memb_fapl = db_hdf5_process_file_options(DB_FILE_OPTS_H5_DEFAULT_DEFAULT);
             h5status |= H5Pset_fapl_family(retval, (1<<30), memb_fapl);
             H5Pclose(memb_fapl);
+            break;
         }
 
         /* default HDF5 mpi drivers */
@@ -4586,6 +4592,17 @@ db_hdf5_process_file_options(opts_set_id)
                 case DB_H5VFD_STDIO:
                     h5status |= H5Pset_fapl_stdio(retval);
                     break;
+                case DB_H5VFD_SILO:
+                {
+                    hsize_t max_meta = (1<<20);
+
+                    if (p = DBGetOption(opts, DBOPT_H5_SILO_MAX_META))
+                        max_meta = *((int*) p);
+
+                    h5status |= H5Pset_fapl_silo(retval);
+                    h5status |= H5Pset_silo_max_meta(retval, max_meta);
+                    break;
+                }
                 case DB_H5VFD_LOG:
                 {
                     int bufsize = 0;
