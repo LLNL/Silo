@@ -1,29 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of HDF5.  The full HDF5 copyright notice, including     *
- * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-/*
- * Programmer:	Robb Matzke <matzke@llnl.gov>
- *	      	Wednesday, October 22, 1997
- *
- * Purpose:   	This is the Posix stdio.h I/O subclass of H5Flow.
- *		It also serves as an example of coding a simple file driver,
- *		therefore, it should not use any non-public definitions.
- *
- * Notes:  Ported to the new H5FD architecture on 10/18/99 - QAK
- *
- */
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -31,11 +5,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-/* Disable certain warnings in PC-Lint: */
-/*lint --emacro( {534, 830}, H5P_FILE_ACCESS) */
-/*lint --emacro( {534, 830}, H5F_ACC_RDWR, H5F_ACC_EXCL) */
-/*lint -esym( 534, H5Eclear2, H5Epush2) */
 
 /* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
    in this file uses version 1.6 of the HDF5 API. This is harmless for
@@ -61,15 +30,16 @@
 
 #ifdef MAX
 #undef MAX
-#endif /* MAX */
+#endif
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
 
 /* File operations */
 #define OP_UNKNOWN      0
 #define OP_READ         1
 #define OP_WRITE        2
-#define OP_READMETA	3
 
+#define EXACT		0
+#define CLOSEST		1
 
 /* definitions related to the file stat utilities.
  * For Unix, if off_t is not 64bit big, try use the pseudo-standard
@@ -134,12 +104,6 @@
 #define H5F_addr_eq(X,Y)        ((X)!=HADDR_UNDEF &&                          \
                                  (X)==(Y))
 
-
-#define SB_OFFSET	512
-#define META_OFFSET     0
-#warning DEFINE THIS OFFSET BASED ON MAXADDR SIZE
-#define RAW_OFFSET      (1<<27)
-
 static const char *flavors(H5F_mem_t m)
 {
     static char tmp[32];
@@ -167,20 +131,34 @@ static const char *flavors(H5F_mem_t m)
 #ifdef H5_HAVE_SNPRINTF
 #define H5E_PUSH_HELPER(Func,Cls,Maj,Min,Msg,Ret,Errno)			\
 {									\
-    char msg[256] = Msg;						\
+    char msg[256];							\
     if (Errno != 0)							\
-        snprintf(msg, (int) sizeof(msg), Msg "(errno=%d, \"%s\")",	\
+        snprintf(msg, sizeof(msg), Msg "(errno=%d, \"%s\")",	\
             Errno, strerror(Errno));					\
+    ret_value = Ret;							\
     H5Epush_ret(Func, Cls, Maj, Min, msg, Ret)				\
 }
 #else
 #define H5E_PUSH_HELPER(Func,Cls,Maj,Min,Msg,Ret,Errno)			\
 {									\
+    ret_value = Ret;							\
     H5Epush_ret(Func, Cls, Maj, Min, msg, Ret)				\
 }
 #endif
 
+typedef struct silo_vfd_relevant_blocks_t_
+{
+    hsize_t  id0,  id1;
+    int     off0, off1;
+} silo_vfd_relevant_blocks_t;
 
+typedef struct silo_vfd_block_t_
+{
+    hsize_t id;
+    hsize_t age;
+    void *buf;
+    unsigned dirty;
+} silo_vfd_block_t;
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SILO_g = 0;
@@ -202,17 +180,15 @@ typedef struct H5FD_silo_t {
     int         fd;			/* file descriptor */
     haddr_t	eoa;			/*end of allocated region	*/
     haddr_t	eof;			/*end of file; current file size*/
+    haddr_t     file_eof;
     haddr_t	pos;			/*current file I/O position	*/
-    int         op;	/*last operation		*/
-    unsigned    write_access;  /* Flag to indicate the file was opened with write access */
-    char       *mbuf;
-    hsize_t     mbuf_size;
-    haddr_t	mbuf_eoa;
-    haddr_t     mbuf_eof;
-    haddr_t     mbuf_faddr;
-    unsigned    mbuf_dirty;
-    unsigned    first_read;
-    hsize_t     increment;
+    int         op;			/*last operation		*/
+    unsigned    write_access;  		/* Flag to indicate the file was opened with write access */
+    hsize_t     block_size;
+    hsize_t     op_counter;
+    silo_vfd_block_t *block_list;
+    int         max_blocks;
+    int         num_blocks;
 #ifndef _WIN32
     /*
      * On most systems the combination of device and i-node number uniquely
@@ -272,6 +248,12 @@ typedef struct H5FD_silo_t {
 #define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || \
     HADDR_UNDEF==(A)+(Z) || (file_offset_t)((A)+(Z))<(file_offset_t)(A))
+#define H5_CHECK_OVERFLOW(var, vartype, casttype) \
+{                                                 \
+    casttype _tmp_overflow = (casttype)(var);     \
+    assert((var) == (vartype)_tmp_overflow);      \
+}
+
 
 /* Prototypes */
 static hsize_t H5FD_silo_sb_size(H5FD_t *file);
@@ -284,7 +266,6 @@ static H5FD_t *H5FD_silo_open(const char *name, unsigned flags,
 static herr_t H5FD_silo_close(H5FD_t *lf);
 static int H5FD_silo_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_silo_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_silo_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 static haddr_t H5FD_silo_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_silo_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_silo_get_eof(const H5FD_t *_file);
@@ -314,7 +295,7 @@ static const H5FD_class_t H5FD_silo_g = {
     H5FD_silo_cmp,			        /*cmp			*/
     H5FD_silo_query,		                /*query			*/
     NULL,					/*get_type_map		*/
-    H5FD_silo_alloc,				/*alloc			*/
+    NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_silo_get_eoa,		                /*get_eoa		*/
     H5FD_silo_set_eoa, 	                	/*set_eoa		*/
@@ -326,8 +307,358 @@ static const H5FD_class_t H5FD_silo_g = {
     H5FD_silo_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
-    H5FD_FLMAP_DICHOTOMY 			/*fl_map		*/
+    H5FD_FLMAP_SINGLE				/*fl_map		*/
 };
+
+static silo_vfd_relevant_blocks_t
+relevant_blocks(hsize_t block_size, haddr_t addr, hsize_t size)
+{
+    silo_vfd_relevant_blocks_t ret_value;
+
+    /* first address of first block, inclusive */
+    ret_value.id0 = addr / block_size;
+    ret_value.off0 = addr % block_size;
+
+    /* last address of last block, inclusive */
+    ret_value.id1 = (addr + size - 1) / block_size;
+    ret_value.off1 = (addr + size - 1) % block_size;
+
+    return(ret_value);
+}
+
+static int find_block_by_id(H5FD_silo_t *file, hsize_t id, unsigned leq)
+{
+    int bot = 0, top = file->num_blocks - 1, mid;
+    silo_vfd_block_t *bl = file->block_list;
+    while (bot <= top)
+    {
+        mid = (bot + top) >> 1;
+
+        if (id > bl[mid].id)
+	{
+            if (leq)
+            {
+                if (mid == file->num_blocks-1) return mid;
+                if (id < bl[mid+1].id) return mid;
+            }
+            bot = mid + 1;
+	}
+        else if (id < bl[mid].id)
+	{
+            if (leq)
+            {
+                if (mid == 0) return -1;
+                if (id > bl[mid-1].id) return mid-1;
+            }
+            top = mid - 1;
+	}
+        else
+            return mid;
+    }
+    return -1; 
+}
+
+static int find_block_by_smallest_age(H5FD_silo_t *file)
+{
+    int i;
+    int min_idx = 0;
+    silo_vfd_block_t *bl = file->block_list;
+    hsize_t min_age = bl[0].age;
+    for (i = 0; i < file->num_blocks; i++)
+    {
+        if (bl[i].age < min_age)
+        {
+            min_age = bl[i].age;
+            min_idx = i;
+        }
+    }
+    return min_idx;
+}
+
+static herr_t put_data_to_block_by_index(H5FD_silo_t *file, const void *srcbuf, hsize_t size,
+    int blidx, int off)
+{
+    silo_vfd_block_t *block;
+    haddr_t addr;
+
+    HDassert(blidx < file->num_blocks);
+    block = &(file->block_list[blidx]);
+
+    HDassert(block->buf);
+
+    HDassert((hsize_t)off+size<=file->block_size);
+    memcpy(block->buf+off, srcbuf, size);
+
+    block->dirty = 1;
+    block->age = file->op_counter++;
+
+    addr = block->id * file->block_size + off + size;
+    if (addr > file->eof) file->eof = addr;
+
+    return 0;
+}
+
+static herr_t get_data_from_block_by_index(H5FD_silo_t *file, void *dstbuf, hsize_t size,
+    int blidx, int off)
+{
+    silo_vfd_block_t *block;
+
+    HDassert(blidx < file->num_blocks);
+    block = &(file->block_list[blidx]);
+
+    HDassert(block->buf);
+    
+    HDassert((hsize_t)off+size<=file->block_size);
+    memcpy(dstbuf, block->buf+off, size);
+
+    block->age = file->op_counter++;
+
+    return 0;
+}
+
+static herr_t file_write(H5FD_silo_t *file, haddr_t addr, size_t size, const void *buf)
+{
+    static const char  *func = "file_write";
+    ssize_t		nbytes;
+    herr_t              ret_value = 0;
+
+    HDassert(file && file->pub.cls);
+    HDassert(buf);
+
+    H5Eclear2(H5E_DEFAULT);
+
+    /* Check for overflow conditions */
+    if (HADDR_UNDEF==addr)
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr undefined", -1, -1)
+    if (REGION_OVERFLOW(addr, size))
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr overflow", -1, -1)
+#if 0
+    /* need to account for block being larger than eoa */
+    if (addr+size>file->eoa)
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr overflow", -1, -1)
+#endif
+
+    /* Seek to the correct location */
+    if((addr != file->pos || OP_WRITE != file->op) &&
+        HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
+            H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDlseek failed", -1, errno)
+
+    /* Write data, being careful of interrupted system calls and partial results */
+    while(size > 0) {
+        do {
+            nbytes = HDwrite(file->fd, buf, size);
+        } while(-1 == nbytes && EINTR == errno);
+        if(-1 == nbytes) /* error */
+            H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "HDwrite failed", -1, errno)
+        HDassert(nbytes > 0);
+        HDassert((size_t)nbytes <= size);
+        H5_CHECK_OVERFLOW(nbytes, ssize_t, size_t);
+        size -= (size_t)nbytes;
+        H5_CHECK_OVERFLOW(nbytes, ssize_t, haddr_t);
+        addr += (haddr_t)nbytes;
+        buf = (const char *)buf + nbytes;
+    }
+
+    if (ret_value < 0)
+    {
+        file->pos = HADDR_UNDEF;
+        file->op = OP_UNKNOWN;
+    }
+    else
+    {
+        file->pos = addr;
+        file->op = OP_WRITE;
+        if (file->pos > file->file_eof)
+            file->file_eof = file->pos;
+    }
+
+    return(ret_value);
+}
+
+static herr_t file_read(H5FD_silo_t *file, haddr_t addr, size_t size, void *buf)
+{
+    static const char  *func = "file_read";
+    ssize_t		nbytes;
+    herr_t              ret_value = 0;
+
+    HDassert(file && file->pub.cls);
+    HDassert(buf);
+
+    H5Eclear2(H5E_DEFAULT);
+
+    /* Check for overflow conditions */
+    if (HADDR_UNDEF==addr)
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr undefined", -1, -1)
+    if (REGION_OVERFLOW(addr, size))
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr overflow", -1, -1)
+#if 0
+#warning WAS FILE ARROW EOA
+    if (addr+size>file->eof)
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr overflow", -1, -1)
+#endif
+
+    /* Seek to the correct location */
+    if ((addr != file->pos || OP_READ != file->op) &&
+        HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDlseek failed", -1, errno)
+
+    /* Read data, careful of interrupted system calls, partial results and eof */
+    while(size > 0) {
+        do {
+            nbytes = HDread(file->fd, buf, size);
+        } while(-1 == nbytes && EINTR == errno);
+        if(-1 == nbytes) /* error */
+            H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "HDread failed", -1, errno)
+        if(0 == nbytes) {
+            /* end of file but not end of format address space */
+            HDmemset(buf, 0, size);
+            break;
+        } /* end if */
+        HDassert(nbytes >= 0);
+        HDassert((size_t)nbytes <= size);
+        H5_CHECK_OVERFLOW(nbytes, ssize_t, size_t);
+        size -= (size_t)nbytes;
+        H5_CHECK_OVERFLOW(nbytes, ssize_t, haddr_t);
+        addr += (haddr_t)nbytes;
+        buf = (char *)buf + nbytes;
+    }
+
+    if (ret_value < 0)
+    {
+        file->pos = HADDR_UNDEF;
+        file->op = OP_UNKNOWN;
+    }
+    else
+    {
+        file->pos = addr;
+        file->op = OP_READ;
+    }
+
+    return(ret_value);
+}
+
+static herr_t file_write_block(H5FD_silo_t *file, int blidx)
+{
+    static const char  *func = "file_write_block";
+    silo_vfd_block_t *b = &(file->block_list[blidx]);
+    herr_t ret_value = 0;
+    haddr_t addr;
+
+    HDassert(b->dirty);
+    HDassert(b->buf);
+
+    H5Eclear2(H5E_DEFAULT);
+
+    addr = b->id * file->block_size;
+
+    if (file_write(file, addr, file->block_size, b->buf) < 0)
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "file_write_block failed", -1, -1)
+
+    if (ret_value == 0)
+        b->dirty = 0;
+
+    return(ret_value);
+}
+
+static herr_t file_read_block(H5FD_silo_t *file, int blidx)
+{
+    static const char  *func = "file_read_block";
+    silo_vfd_block_t *b = &(file->block_list[blidx]);
+    herr_t ret_value = 0;
+    haddr_t addr;
+
+    HDassert(b->buf);
+
+    H5Eclear2(H5E_DEFAULT);
+
+    addr = b->id * file->block_size;
+
+    if (file_read(file, addr, file->block_size, b->buf) < 0)
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "file_read_block failed", -1, -1)
+
+    if (ret_value == 0)
+        b->dirty = 0;
+
+    return(ret_value);
+}
+
+static herr_t remove_block_by_index(H5FD_silo_t *file, int blidx)
+{
+    int i;
+    silo_vfd_block_t *bl = file->block_list;
+
+    HDassert(file->num_blocks>0);
+
+    for (i = blidx; i < file->num_blocks-1; i++)
+        bl[i] = bl[i+1];
+
+    file->num_blocks--;
+
+    return 0;
+}
+
+/* blidx refers to the block in the list JUST BEFORE the block we're inserting */ 
+/* a -1 implies it comes JUST BEFORE the 0th block */
+static herr_t insert_block_by_index(H5FD_silo_t *file, int blidx)
+{
+    int i;
+    silo_vfd_block_t *bl = file->block_list;
+
+    HDassert(file->num_blocks<file->max_blocks);
+
+    for (i = file->num_blocks; i > blidx+1; i--)
+        bl[i] = bl[i-1];
+    memset(&bl[blidx+1], 0, sizeof(silo_vfd_block_t));
+
+    file->num_blocks++;
+
+    return 0;
+}
+
+static int alloc_block_by_id(H5FD_silo_t *file, hsize_t id)
+{
+    haddr_t addr0 = id * file->block_size;
+    silo_vfd_block_t *b;
+    int blidx = find_block_by_id(file, id, CLOSEST);
+
+    /* blidx refers to the block in the list JUST BEFORE the block we're inserting */ 
+    insert_block_by_index(file, blidx);
+
+    /* update blidx to point to the block we're inserting */
+    blidx++;
+
+    b = &(file->block_list[blidx]);
+
+    b->buf = malloc(file->block_size);
+    b->id = id;
+    b->age = file->op_counter++;
+
+#warning MAYBE JUST LESS THAN
+    if (addr0<=file->file_eof)
+        file_read_block(file, blidx);
+
+    return blidx;
+}
+
+static herr_t free_block_by_index(H5FD_silo_t *file, int blidx)
+{
+    silo_vfd_block_t *b;
+    
+    HDassert(blidx<file->num_blocks);
+
+    b = &(file->block_list[blidx]);
+
+    HDassert(b->buf);
+
+    if (b->dirty)
+        file_write_block(file, blidx);
+
+    free(b->buf);
+
+    remove_block_by_index(file, blidx);
+
+    return 0;
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_silo_init
@@ -403,58 +734,46 @@ H5FD_silo_term(void)
 herr_t
 H5Pset_fapl_silo(hid_t fapl_id)
 {
-    static const char *func="H5FDset_fapl_silo";  /*for error reporting*/
+    static const char *func = "H5FDset_fapl_silo"; 
+    herr_t ret_value = 0;
+    hsize_t block_size = 16384;
+    int block_count = 16;
 
-    /*NO TRACE*/
-
-    /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
+    if (H5Pset(fapl_id, "silo_block_size", &block_size) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_size", -1, -1)
+    if (H5Pset(fapl_id, "silo_block_count", &block_count) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
+    if (H5Pset_meta_block_size(fapl_id, block_size) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
 
     return H5Pset_driver(fapl_id, H5FD_SILO, NULL);
 }
 
 herr_t
-H5Pset_silo_max_meta(hid_t fapl_id, hsize_t max_meta)
+H5Pset_silo_block_size_and_count(hid_t fapl_id, hsize_t block_size, int max_blocks_in_mem)
 {
-    static const char *func="H5FDset_silo_max_meta";
+    static const char *func="H5FDset_silo_block_size_and_count";
+    herr_t ret_value = 0;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
-    if (H5Pset(fapl_id, "silo_max_meta", &max_meta) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_max_meta", -1, -1)
-#if 0
-    if (H5Pset_meta_block_size(fapl_id, 0) < 0)
+    if (H5Pset(fapl_id, "silo_block_size", &block_size) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_size", -1, -1)
+    if (H5Pset_meta_block_size(fapl_id, block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
-#endif
+    if (H5Pset(fapl_id, "silo_block_count", &max_blocks_in_mem) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
 
-    return 0;
+    return ret_value;
 }
 
-herr_t
-H5Pset_silo_raw_buf_size(hid_t fapl_id, hsize_t raw_buf_size)
-{
-    static const char *func="H5FDset_silo_raw_buf_size";
-
-    /* Clear the error stack */
-    H5Eclear2(H5E_DEFAULT);
-
-    if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
-    if (H5Pset(fapl_id, "silo_raw_buf_size", &raw_buf_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_raw_buf_size", -1, -1)
-#if 0
-    if (H5Pset_small_data_block_size(fapl_id, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set small_data_block_size", -1, -1)
-#endif
-
-    return 0;
-}
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_silo_sb_size
@@ -478,12 +797,12 @@ H5FD_silo_sb_size(H5FD_t *_file)
 {
     H5FD_silo_t	*file = (H5FD_silo_t*)_file;
     unsigned		nseen = 0;
-    hsize_t		nbytes = 8; /*size of header*/
+    hsize_t		nbytes = 8; /*size of "LLNLsilo" header*/
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    /* Address of metadata at end of file */
+    /* block size for file */
     nbytes += 8;
 
     return nbytes;
@@ -493,26 +812,9 @@ H5FD_silo_sb_size(H5FD_t *_file)
 /*-------------------------------------------------------------------------
  * Function:	H5FD_silo_sb_encode
  *
- * Purpose:	Encode driver information for the superblock. The NAME
- *		argument is a nine-byte buffer which will be initialized with
- *		an eight-character name/version number and null termination.
- *
- *		The encoding is a six-byte member mapping followed two bytes
- *		which are unused. For each unique file in usage-type order
- *		encode all the starting addresses as unsigned 64-bit integers,
- *		then all the EOA values as unsigned 64-bit integers, then all
- *		the template names as null terminated strings which are
- *		siloples of 8 characters.
- *
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Monday, August 16, 1999
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -521,50 +823,32 @@ H5FD_silo_sb_encode(H5FD_t *_file, char *name/*out*/,
 {
     H5FD_silo_t	*file = (H5FD_silo_t*)_file;
     unsigned char	*p;
-    static const char *func="H5FD_silo_sb_encode";  /* Function Name for error reporting */
-    haddr_t tmp_eoa = file->eoa + SB_OFFSET;
+    static const char *func = "H5FD_silo_sb_encode";
 
-    /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     /* Name and version number */
     strncpy(name, "LLNLsilo", (size_t)8);
     name[8] = '\0';
 
-    /*
-     * Copy the starting addresses and EOA values into the buffer in order of
-     * usage type but only for types which map to something unique.
-     */
-
-    /* Encode all starting addresses and EOA values */
+    /* Encode block size into sb */
     p = buf+8;
-    assert(sizeof(haddr_t)<=8);
-    memcpy(p, &tmp_eoa, sizeof(haddr_t));
-    if (H5Tconvert(H5T_NATIVE_HADDR, H5T_STD_U64LE, 1, buf+8, NULL,
+    assert(sizeof(hsize_t)<=8);
+    memcpy(p, &file->block_size, sizeof(hsize_t));
+    if (H5Tconvert(H5T_NATIVE_HSIZE, H5T_STD_U64LE, 1, buf+8, NULL,
 		   H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
 
     return 0;
-} /* end H5FD_silo_sb_encode() */
+}
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_silo_sb_decode
  *
- * Purpose:	Decodes the superblock information for this driver. The NAME
- *		argument is the eight-character (plus null termination) name
- *		stored in the file.
- *
- *		The FILE argument is updated according to the information in
- *		the superblock. This may mean that some member files are
- *		closed and others are opened.
- *
  * Return:	Success:	0
  *
  *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Monday, August 16, 1999
  *
  *-------------------------------------------------------------------------
  */
@@ -572,9 +856,9 @@ static herr_t
 H5FD_silo_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 {
     H5FD_silo_t	*file = (H5FD_silo_t*)_file;
-    char		x[2*H5FD_MEM_NTYPES*8];
-    haddr_t		*ap;
-    static const char *func="H5FD_silo_sb_decode";  /* Function Name for error reporting */
+    char	       x[8];
+    hsize_t           *ap;
+    static const char *func = "H5FD_silo_sb_decode";
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -584,20 +868,16 @@ H5FD_silo_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid silo superblock", -1)
 
     buf += 8;
-    /* Decode Address and EOA values */
-    assert(sizeof(haddr_t)<=8);
+    /* Decode block size */
+    assert(sizeof(hsize_t)<=8);
     memcpy(x, buf, 8);
-    buf += 8;
-    if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HADDR, 1, x, NULL, H5P_DEFAULT)<0)
+    if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HSIZE, 1, x, NULL, H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
-    ap = (haddr_t*)x;
-    file->mbuf_faddr = *ap;
-
-    /* Set the EOA marker for all open files */
-#warning FIXME
+    ap = (hsize_t*)x;
+    file->block_size = *ap;
 
     return 0;
-} /* end H5FD_silo_sb_decode() */
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_silo_open
@@ -637,10 +917,10 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     H5FD_silo_t	*file = NULL;
     h5_stat_t   sb;
     static const char *func = "H5FD_silo_open";  /* Function Name for error reporting */
-    hsize_t silo_max_meta;
+    int silo_block_count;
+    hsize_t silo_block_size;
     hsize_t meta_block_size;
-    hsize_t small_data_block_size;
-    hsize_t raw_buf_size;
+    H5FD_t *ret_value = 0;
 
     /* Sanity check on file offsets */
     assert(sizeof(file_offset_t)>=sizeof(size_t));
@@ -657,26 +937,16 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL, -1)
 
     /* get some properties and sanity check them */
-#if 0
     if (H5Pget_meta_block_size(fapl_id, &meta_block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get meta_block_size", 0, -1)
-    if (meta_block_size != 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_NONE_MINOR, "meta_block_size!=0", 0, -1)
-    if (H5Pget_small_data_block_size(fapl_id, &small_data_block_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get meta_block_size", 0, -1)
-    if (small_data_block_size != 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_NONE_MINOR, "small_data_block_size!=0", 0, -1)
-#endif
-
-    if (H5Pget(fapl_id, "silo_max_meta", &silo_max_meta) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_max_meta", 0, -1)
-    if (H5Pget(fapl_id, "silo_raw_buf_size", &raw_buf_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_max_meta", 0, -1)
-
-#if 0
-    /* fudge for super block */
-    silo_max_meta += 512;
-#endif
+    if (H5Pget(fapl_id, "silo_block_size", &silo_block_size) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_block_size", 0, -1)
+    if (meta_block_size != silo_block_size)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "meta_block_size!=silo_block_size", 0, -1)
+    if (H5Pget(fapl_id, "silo_block_count", &silo_block_count) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_block_count", 0, -1)
+    if (silo_block_count < 1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "silo_block_count<1", 0, -1)
 
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -697,26 +967,18 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     /* Build the return value */
     if(NULL == (file = (H5FD_silo_t *)calloc((size_t)1, sizeof(H5FD_silo_t))))
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "calloc failed", NULL, errno)
+    if(NULL == (file->block_list = (silo_vfd_block_t *)calloc((size_t)silo_block_count, sizeof(silo_vfd_block_t))))
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "calloc failed", NULL, errno)
 
     file->fd = fd;
-#warning SHOULD THIS HAVE SILO_MAX_META SUBTRACTED OUT
+    file->file_eof = (haddr_t)sb.st_size;
+#warning IS EOF LAST ADDRESS OR A COUNT
     file->eof = (haddr_t)sb.st_size;
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
     file->write_access = write_access;
-    file->first_read = 1;
-#warning MAKE INCREMENT A USER SETTABLE PARAMETEA
-    file->increment = (1<<18); /* 1/4 megabyte */
-
-    /* read md in one junk if its an existing file */
-#if 0
-    file->op = OP_READMETA;
-    if (file->eof > 0)
-    {
-        if (H5FD_silo_read((H5FD_t*)file, H5FD_MEM_DEFAULT, (hid_t)-1, file->mbuf_faddr, file->mbuf_size, file->mbuf)<0)
-            H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "Reading of metadata failed", 0, -1)
-    }
-#endif
+    file->block_size = silo_block_size;
+    file->max_blocks = silo_block_count;
 
     /* The unique key */
     {
@@ -743,6 +1005,21 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     return((H5FD_t*)file);
 }   /* end H5FD_silo_open() */
 
+typedef struct silo_vfd_pair_t_ 
+{
+    int i;
+    hsize_t id;
+} silo_vfd_pair_t;
+
+static int compare_silo_vfd_pairs(const void *a, const void *b)
+{
+    silo_vfd_pair_t *paira = (silo_vfd_pair_t*)a;
+    silo_vfd_pair_t *pairb = (silo_vfd_pair_t*)b;
+    if (paira->id < pairb->id) return 1;
+    if (paira->id > pairb->id) return -1;
+    return 0;
+}
+
 /*-------------------------------------------------------------------------
  * Function:	H5F_silo_close
  *
@@ -766,27 +1043,39 @@ H5FD_silo_close(H5FD_t *_file)
 {
     H5FD_silo_t	*file = (H5FD_silo_t*)_file;
     static const char *func="H5FD_silo_close";  /* Function Name for error reporting */
+    herr_t ret_value = 0;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    /* write any buffered raw data to file */
-
-    /* write meta data to file */
-    if (file->mbuf_dirty > 0)
+    /* write any dirty blocks to file */
+    if (file->write_access)
     {
-        /* write enough of header of MD that we produce a good superblock at head of file */
-        H5FD_silo_write(_file, H5FD_MEM_NOLIST, (hid_t) -1, (haddr_t)0, (size_t) SB_OFFSET, file->mbuf);
-
-        /* now, write all of md, including the tidbit we just wrote above for superblock at end of file. */
-        file->mbuf_faddr = file->eoa+SB_OFFSET;
-        H5FD_silo_write(_file, H5FD_MEM_NOLIST, (hid_t) -1, (haddr_t)file->mbuf_faddr, (size_t) file->mbuf_eoa, file->mbuf);
+        int i;
+        silo_vfd_pair_t *sorted_pairs = (silo_vfd_pair_t*) malloc(file->num_blocks*sizeof(silo_vfd_pair_t));
+        for (i = 0; i < file->num_blocks; i++)
+        {
+            sorted_pairs[i].i = i;
+            sorted_pairs[i].id = file->block_list[i].id; 
+        }
+        qsort(sorted_pairs, file->num_blocks, sizeof(silo_vfd_pair_t), compare_silo_vfd_pairs);
+        for (i = 0; i < file->num_blocks; i++)
+        {
+            silo_vfd_block_t *b = &(file->block_list[sorted_pairs[i].i]);
+            if (!(b->buf))
+                continue;
+            if (b->dirty)
+                file_write_block(file, sorted_pairs[i].i);
+            free(b->buf);
+        }
+        free(sorted_pairs);
     }
 
     errno = 0;
     if (close(file->fd) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_CLOSEERROR, "close failed", -1, errno)
 
+    free(file->block_list);
     free(file);
 
     return(0);
@@ -890,75 +1179,6 @@ H5FD_silo_query(const H5FD_t *_f, unsigned long *flags /* out */)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_silo_alloc
- *
- * Purpose:	Allocates file memory. If fseeko isn't available, makes
- *              sure the file size isn't bigger than 2GB because the
- *              parameter OFFSET of fseek is of the type LONG INT, limiting
- *              the file size to 2GB.
- *
- * Return:	Success:	Address of new memory
- *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Raymond Lu
- *              30 March 2007
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static haddr_t
-H5FD_silo_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl_id, hsize_t size)
-{
-    H5FD_silo_t	*file = (H5FD_silo_t*)_file;
-    haddr_t		addr;
-    haddr_t ret_value;          /* Return value */
-    static const char  *func="H5FD_silo_alloc";  /* Function Name for error reporting */
-
-    /* Shut compiler up */
-    type = type;
-    dxpl_id = dxpl_id;
-
-    /* Clear the error stack */
-    H5Eclear2(H5E_DEFAULT);
-
-    if (type == H5FD_MEM_DRAW)
-    {
-        addr = file->eoa;
-#warning INCLUDE ALIGNMENT LOGIC HERE LATER
-        file->eoa = addr + size;
-        return(addr+RAW_OFFSET);
-    }
-    else
-    {
-        addr = file->mbuf_eoa;
-        file->mbuf_eoa = addr + size;
-        if (file->mbuf_eoa > file->mbuf_size)
-        {
-            void *x;
-            size_t new_mbuf_size;
-
-            /* Determine new size of memory buffer */
-            new_mbuf_size = (size_t) (file->increment * ((addr + size) / file->increment));
-            if((addr + size) % file->increment)
-                new_mbuf_size += file->increment;
-
-            x = realloc(file->mbuf, new_mbuf_size);
-            if (!x)
-                H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "out of memory for metadata", -1, -1)
-
-            file->mbuf = x;
-            file->mbuf_size = new_mbuf_size;
-        }
-        return(addr+META_OFFSET);
-    }
-
-   return(HADDR_UNDEF);
-
-}   /* H5FD_silo_alloc() */
-
-/*-------------------------------------------------------------------------
  * Function:	H5FD_silo_get_eoa
  *
  * Purpose:	Gets the end-of-address marker for the file. The EOA marker
@@ -993,24 +1213,7 @@ H5FD_silo_get_eoa(const H5FD_t *_file, H5FD_mem_t /*unused*/ type)
     /* Shut compiler up */
     type = type;
 
-    if (type == H5FD_MEM_DEFAULT)
-    {
-        haddr_t eoar = file->eoa;
-        haddr_t eoam = file->mbuf_eoa;
-        return(MAX(eoar,eoam));
-    }
-    else if (type == H5FD_MEM_DRAW)
-    {
-        eoa = file->eoa;
-        if (eoa > 0) eoa += RAW_OFFSET;
-        return(eoa);
-    }
-    else
-    {
-        eoa = file->mbuf_eoa;
-        if (eoa > 0) eoa += META_OFFSET;
-        return (eoa);
-    }
+    return(file->eoa);
 }
 
 /*-------------------------------------------------------------------------
@@ -1046,15 +1249,8 @@ H5FD_silo_set_eoa(H5FD_t *_file, H5FD_mem_t /*unused*/ type, haddr_t addr)
     /* Shut compiler up */
     type = type;
 
+    file->eoa = addr;
 
-    if (type == H5FD_MEM_DRAW)
-    {
-        file->eoa = addr-RAW_OFFSET;
-    }
-    else
-    {
-        file->mbuf_eoa = addr-META_OFFSET;
-    }
     return 0;
 }
 
@@ -1083,32 +1279,8 @@ static haddr_t
 H5FD_silo_get_eof(const H5FD_t *_file)
 {
     const H5FD_silo_t	*file = (const H5FD_silo_t *)_file;
-    haddr_t tmp_eoa, tmp_eoam, tmp_eoar;
-    haddr_t tmp_eof, tmp_eofm, tmp_eofr;
 
-    /* Clear the error stack */
-    H5Eclear2(H5E_DEFAULT);
-
-#if 1
-    /* meta data part */
-    tmp_eofm = file->mbuf_eof;
-    if (tmp_eofm > 0) tmp_eofm += META_OFFSET;
-
-    tmp_eoam = file->mbuf_eoa;
-    if (tmp_eoam > 0) tmp_eoam += META_OFFSET;
-
-    /* raw data part */
-    tmp_eofr = file->eof;
-    if (tmp_eofr > 0) tmp_eofr += RAW_OFFSET;
-
-    tmp_eoar = file->eoa;
-    if (tmp_eoar > 0) tmp_eoar += RAW_OFFSET;
-
-    tmp_eof = MAX(tmp_eofm, tmp_eofr);
-    tmp_eoa = MAX(tmp_eoam, tmp_eoar);
-
-    return(MAX(tmp_eof, tmp_eoa));
-#endif
+    return(MAX(file->eof, file->eoa));
 
 }
 
@@ -1172,38 +1344,17 @@ static herr_t
 H5FD_silo_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
     void *buf/*out*/)
 {
-    size_t		n;
-    ssize_t             nbytes;
     H5FD_silo_t		*file = (H5FD_silo_t*)_file;
     static const char *func="H5FD_silo_read";  /* Function Name for error reporting */
+    herr_t ret_value = 0;
+    silo_vfd_block_t *bl;
+    silo_vfd_relevant_blocks_t rb;
+    hsize_t id, nbytes;
+    int blidx, bufoff;
 
     /* Shut compiler up */
     type=type;
     dxpl_id=dxpl_id;
-
-    if (file->first_read && file->eof > 0 && file->mbuf_faddr > 0)
-    {
-        size_t mbuf_size, tmp_size;;
-
-        assert(file->eof > file->mbuf_faddr);
-        mbuf_size = file->eof - file->mbuf_faddr;
-        tmp_size = mbuf_size;
-
-        /* Determine new size of memory buffer */
-        mbuf_size = (size_t) (file->increment * (tmp_size / file->increment));
-        if(tmp_size % file->increment)
-            mbuf_size += file->increment;
-
-        if(NULL == (file->mbuf = (char*)calloc((size_t)mbuf_size, 1)))
-            H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "calloc failed", 0, -1)
-
-        file->op = OP_READMETA;
-        file->first_read = 0;
-        if (H5FD_silo_read(_file, H5FD_MEM_NOLIST, (hid_t)-1, file->mbuf_faddr, tmp_size, file->mbuf)<0)
-            H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "Reading of metadata failed", 0, -1)
-        file->mbuf_eoa = tmp_size;
-        file->mbuf_size = mbuf_size;
-    }
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -1212,76 +1363,65 @@ H5FD_silo_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size
     H5Eclear2(H5E_DEFAULT);
 
     /* Check for overflow */
-#if 0
     if (HADDR_UNDEF==addr)
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1, -1)
     if (REGION_OVERFLOW(addr, size))
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1, -1)
-    if (file->op != OP_READMETA && (addr+size)>file->eoa)
+    if ((addr+size)>file->eoa)
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1, -1)
-#endif
 
-    if (type == H5FD_MEM_DRAW)
-    {
-        addr -= RAW_OFFSET;
-        addr += SB_OFFSET;
-    }
-    else
-    {
-        addr -= META_OFFSET;
-    }
-
-    /* Check easy cases */
-    if (0 == size)
-        return(0);
-    if ((haddr_t)addr >= file->eof) {
-        memset(buf, 0, size);
-        return(0);
-    }
-
-    if (file->mbuf && type != H5FD_MEM_NOLIST && type != H5FD_MEM_DRAW)
-    {
-        memcpy(buf, file->mbuf+addr, size);
+    if (size == 0)
         return 0;
-    }
 
-    /* Seek to the correct location */
-    if((addr != file->pos || OP_READ != file->op) &&
-        HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
+    rb = relevant_blocks(file->block_size, addr, size);
+    blidx = -1; 
+    bl = file->block_list;
+    bufoff = 0;
+    for (id = rb.id0; id <= rb.id1; id++)
     {
-        file->op = OP_UNKNOWN;
-        file->pos = HADDR_UNDEF;
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDlseek failed", -1, errno)
+        /* look for the block in the list */
+        if (blidx < 0 || blidx >= file->num_blocks-1)
+            blidx = find_block_by_id(file, id, EXACT); 
+        else if (bl[blidx+1].id != id)
+            blidx = find_block_by_id(file, id, EXACT); 
+        else
+            blidx++;
+
+        if (blidx < 0)
+        {
+            if (file->num_blocks == file->max_blocks)
+            {
+                int tmpblidx = find_block_by_smallest_age(file);
+                free_block_by_index(file, tmpblidx);
+            }
+            blidx = alloc_block_by_id(file, id);
+        }
+
+        /* put the data in the block */
+	if (id == rb.id0 && id == rb.id1)
+	{
+	    get_data_from_block_by_index(file, buf, size, blidx, rb.off0);
+	    bufoff += size;
+	}
+        else if (id == rb.id0)
+	{
+	    nbytes = file->block_size - rb.off0;
+	    get_data_from_block_by_index(file, buf+bufoff, nbytes, blidx, rb.off0);
+	    bufoff += nbytes;
+	}
+	else if (id == rb.id1)
+	{
+	    nbytes = rb.off1+1;
+	    get_data_from_block_by_index(file, buf+bufoff, nbytes, blidx, 0);
+	    bufoff += nbytes;
+	}
+	else
+	{
+	    get_data_from_block_by_index(file, buf+bufoff, file->block_size, blidx, 0);
+	    bufoff += file->block_size;
+	}
     }
 
-    /*
-     * Read data, being careful of interrupted system calls, partial results,
-     * and the end of the file.
-     */
-    while(size > 0) {
-        do {
-            nbytes = HDread(file->fd, buf, size);
-        } while(-1 == nbytes && EINTR == errno);
-        if(-1 == nbytes) {/* error */
-            file->op = OP_UNKNOWN;
-            file->pos = HADDR_UNDEF;
-            H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "HDread failed", -1, errno)
-        }
-        if(0 == nbytes) {
-            /* end of file but not end of format address space */
-            HDmemset(buf, 0, size);
-            break;
-        } /* end if */
-        HDassert(nbytes >= 0);
-        HDassert((size_t)nbytes <= size);
-        size -= (size_t)nbytes;
-        addr += (haddr_t)nbytes;
-        buf = (char *)buf + nbytes;
-    } /* end while */
-
-    /* Update current position */
-    file->pos = addr;
-    file->op = OP_READ;
     return(0);
 }
 
@@ -1314,7 +1454,11 @@ H5FD_silo_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 {
     H5FD_silo_t		*file = (H5FD_silo_t*)_file;
     static const char *func="H5FD_silo_write";  /* Function Name for error reporting */
-    ssize_t             nbytes;
+    herr_t ret_value = 0;
+    silo_vfd_block_t *bl;
+    silo_vfd_relevant_blocks_t rb;
+    hsize_t id, nbytes;
+    int blidx, bufoff;
 
     /* Shut compiler up */
     dxpl_id=dxpl_id;
@@ -1326,122 +1470,65 @@ H5FD_silo_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if (type == H5FD_MEM_DRAW)
-    {
-        addr -= RAW_OFFSET;
-    }
-    else
-    {
-        addr -= META_OFFSET;
-    }
-
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr)
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1, -1)
     if (REGION_OVERFLOW(addr, size))
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1, -1)
-    if (type == H5FD_MEM_DRAW)
-    {
-        if (addr+size>file->eoa)
-            H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1, -1)
-    }
-    else if (type != H5FD_MEM_NOLIST)
-    {
-        if (addr+size>file->mbuf_size)
-        {
-            void *x;
-            size_t new_mbuf_size;
+    if (addr+size>file->eoa)
+        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1, -1)
 
-            /* Determine new size of memory buffer */
-            new_mbuf_size = (size_t) (file->increment * ((addr + size) / file->increment));
-            if((addr + size) % file->increment)
-                new_mbuf_size += file->increment;
-
-            x = realloc(file->mbuf, new_mbuf_size);
-            if (!x)
-                H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "out of memory for metadata", -1, -1)
-
-            file->mbuf = x;
-            file->mbuf_size = new_mbuf_size;
-        }
-    }
-
-    /* handle non-close/non-draw write */ 
-    if (type != H5FD_MEM_NOLIST && type != H5FD_MEM_DRAW)
-    {
-        memcpy(file->mbuf+addr, buf, size);
-        if (addr+size>file->mbuf_eof)
-            file->mbuf_eof = addr+size;
-        file->mbuf_dirty = 1;
+    if (size == 0)
         return 0;
-    }
 
-    if (type == H5FD_MEM_DRAW)
-        addr += SB_OFFSET;
-
-
-{
-    static int last_size = 0;
-    static int last_addr = 0;
-    static int run_size = 0;
-    static int run_cnt = 0;
-
-    if (addr == last_addr + last_size)
+    rb = relevant_blocks(file->block_size, addr, size);
+    blidx = -1; 
+    bl = file->block_list;
+    bufoff = 0;
+    for (id = rb.id0; id <= rb.id1; id++)
     {
-        if (run_size == 0) run_size = size + last_size;
-        else run_size += (int) size;
-        if (run_cnt == 0) run_cnt=2;
-        else run_cnt++;
-    } 
-    else
-    {
-        run_size = 0; 
-        run_cnt = 0;
-    }
+        /* look for the block in the list */
+        if (blidx < 0 || blidx >= file->num_blocks-1)
+            blidx = find_block_by_id(file, id, EXACT); 
+        else if (bl[blidx+1].id != id)
+            blidx = find_block_by_id(file, id, EXACT); 
+        else
+            blidx++;
 
-    last_size = (int) size;
-    last_addr = (int) addr;
-}
-
-
-
-    /* Seek to the correct location */
-    errno = 0;
-    if((addr != file->pos || OP_WRITE != file->op))
-    {
-        if (HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
+        if (blidx < 0)
         {
-            file->op = OP_UNKNOWN;
-            file->pos = HADDR_UNDEF;
-            H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDlseek failed", -1, errno)
+            if (file->num_blocks == file->max_blocks)
+            {
+                int tmpblidx = find_block_by_smallest_age(file);
+                free_block_by_index(file, tmpblidx);
+            }
+            blidx = alloc_block_by_id(file, id);
         }
+
+        /* put the data in the block */
+	if (id == rb.id0 && id == rb.id1)
+	{
+	    put_data_to_block_by_index(file, buf, size, blidx, rb.off0);
+	    bufoff += size;
+	}
+        else if (id == rb.id0)
+	{
+	    nbytes = file->block_size - rb.off0;
+	    put_data_to_block_by_index(file, buf+bufoff, nbytes, blidx, rb.off0);
+	    bufoff += nbytes;
+	}
+	else if (id == rb.id1)
+	{
+	    nbytes = rb.off1+1;
+	    put_data_to_block_by_index(file, buf+bufoff, nbytes, blidx, 0);
+	    bufoff += nbytes;
+	}
+	else
+	{
+	    put_data_to_block_by_index(file, buf+bufoff, file->block_size, blidx, 0);
+	    bufoff += file->block_size;
+	}
     }
-
-    /*
-     * Write the data, being careful of interrupted system calls and partial
-     * results
-     */
-    while(size > 0) {
-        do {
-            nbytes = HDwrite(file->fd, buf, size);
-        } while(-1 == nbytes && EINTR == errno);
-        if(-1 == nbytes) {/* error */
-            file->op = OP_UNKNOWN;
-            file->pos = HADDR_UNDEF;
-            H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "HDwrite failed", -1, errno)
-        }
-        HDassert(nbytes > 0);
-        HDassert((size_t)nbytes <= size);
-        size -= (size_t)nbytes;
-        addr += (haddr_t)nbytes;
-        buf = (const char *)buf + nbytes;
-    } /* end while */
-
-    /* Update current position and eof */
-    file->pos = addr;
-    file->op = OP_WRITE;
-    if(file->pos > file->eof)
-        file->eof = file->pos;
 
     return(0);
 }
@@ -1468,11 +1555,16 @@ H5FD_silo_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 {
     H5FD_silo_t	*file = (H5FD_silo_t*)_file;
     static const char *func = "H5FD_silo_truncate";  /* Function Name for error reporting */
+    herr_t ret_value = 0;
 
     /* Shut compiler up */
     dxpl_id = dxpl_id;
     closing = closing;
 
+#warning SKIPPING TRUNCATE
+#warning SKIPPING TRUNCATE
+#warning SKIPPING TRUNCATE
+#warning SKIPPING TRUNCATE
 #warning SKIPPING TRUNCATE
     return 0;
 
@@ -1504,12 +1596,12 @@ H5FD_silo_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
             H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDlseek failed", -1, errno)
 #endif
 
-        if(-1 == HDftruncate(file->fd, (file_offset_t)file->eoa+file->mbuf_size))
+        if(-1 == HDftruncate(file->fd, (file_offset_t)file->eoa))
             H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDftruncate failed", -1, errno)
 #endif /* _WIN32 */
 
         /* Update the eof value */
-        file->eof = file->eoa+file->mbuf_eoa;
+        file->file_eof = file->eoa;
 
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
