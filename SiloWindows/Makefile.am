@@ -60,4 +60,5 @@ EXTRA_DIST = \
  resources/silex.ico\
  resources/silex.rc\
  runsilexmoc.bat\
+ copysilo.bat\
  README
