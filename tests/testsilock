@@ -7,6 +7,10 @@ result=0
 # Programmer: Mark C. Miller
 # Creation:   Thu Nov  5 11:13:33 PST 2009
 #
+# Modifications:
+#
+#   Mark C. Miller, Thu Apr 29 15:56:33 PDT 2010
+#   Fix redirection to use sh syntax rather than csh syntax.
 # -----------------------------------------------------------------------------
 
 # Diddle the the directory because Autotest is not at all designed to handle
@@ -24,7 +28,7 @@ for driver in DB_PDB "$2"; do
     for fparams in "nan 0" "inf 7"; do
         fpissue=$(echo $fparams | cut -d' ' -f1)
         index=$(echo $fparams | cut -d' ' -f2)
-        $topDir/onehex "$driver" $fpissue >& /dev/null
+        $topDir/onehex "$driver" $fpissue 1>/dev/null 2>&1
         foundIt=$($topDir/../tools/silock/silock onehex.silo | grep "has .* issue at index ${index}$")
         if test -z "$foundIt"; then
             result=1
