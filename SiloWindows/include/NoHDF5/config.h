@@ -165,23 +165,17 @@
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "silo"
 
-/* Define to the full name and version of this package. */
-#define PACKAGE_STRING "silo 4.6.1"
-
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "silo"
 
-/* Define to the version of this package. */
-#define PACKAGE_VERSION "4.6.1"
+/* include the file that has the version defines */
+#include "siloversion.h"
 
 /* The size of `off64_t', as computed by sizeof. */
 #define SIZEOF_OFF64_T 4
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-/* Version number of package */
-#define VERSION "4.6.1"
 
 /* Define to 1 if the X Window System is missing or not being used. */
 /* #undef X_DISPLAY_MISSING */

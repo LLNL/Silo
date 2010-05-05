@@ -49,7 +49,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS;_HDF5USEDLL_;FPZIP_FP=FPZIP_FP_SAFE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -145,7 +145,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS;_HDF5USEDLL_;FPZIP_FP=FPZIP_FP_SAFE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
@@ -241,7 +241,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS;FPZIP_FP=FPZIP_FP_SAFE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
@@ -338,7 +338,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS;FPZIP_FP=FPZIP_FP_SAFE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -435,7 +435,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY;FPZIP_FP=FPZIP_FP_SAFE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -516,7 +516,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\include\WithHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY;FPZIP_FP=FPZIP_FP_SAFE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -598,7 +598,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY;FPZIP_FP=FPZIP_FP_SAFE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -679,7 +679,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\include\NoHDF5;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;..\..\src\hzip;..\..\src\fpzip;$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY;FPZIP_FP=FPZIP_FP_SAFE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -861,6 +861,10 @@
 		<Filter
 			Name="hdf5_drv"
 			>
+			<File
+				RelativePath="..\..\src\hdf5_drv\H5FDsilo.c"
+				>
+			</File>
 			<File
 				RelativePath="..\..\src\hdf5_drv\silo_hdf5.c"
 				>

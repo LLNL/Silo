@@ -1,14 +1,15 @@
 @echo off
 
-set SiloIn=..\\..\\src\\silo\\silo.h.in
-set SiloOut=..\\..\\src\\silo\\silo.h
+set SiloIn=.\\..\\src\\silo\\silo.h.in
+set SiloOut=.\\..\\src\\silo\\silo.h
+set VersionOut=.\\include\\siloversion.h
 set major=0
 set minor=0
 set patch=0
 set pre=
 
 REM Retrieve and parse the version tokens
-for /F "tokens=1,2,3* delims=.,-pre" %%i in (..\\..\\VERSION) do (
+for /F "tokens=1,2,3* delims=.,-pre" %%i in (.\\..\\VERSION) do (
   Set major=%%i
   Set minor=%%j
   Set patch=%%k
@@ -19,8 +20,12 @@ if exist %SiloOut% (
   del %SiloOut%
 )
 
+if exist %VersionOut% (
+  del %VersionOut%
+)
+
 REM Read silo.h.in, parsing for VERS info, and substituting in appropriate values
-for /F "tokens=1* delims=]" %%i in ('find /v /n "" ^..\..\src\silo\silo.h.in') do (
+for /F "tokens=1* delims=]" %%i in ('find /v /n "" ^.\..\src\silo\silo.h.in') do (
   REM preserve blank lines
   if "%%j"=="" (
     @echo.>>%SiloOut%
@@ -60,4 +65,15 @@ for /F "tokens=1* delims=]" %%i in ('find /v /n "" ^..\..\src\silo\silo.h.in') d
     )
   )
 )
+
+if "%pre%"=="" (
+  @echo #define PACKAGE_STRING "silo %major%.%minor%.%patch%>> %VersionOut% 
+  @echo #define PACKAGE_VERSION "%major%.%minor%.%patch%>> %VersionOut% 
+  @echo #define VERSION "%major%.%minor%.%patch%>> %VersionOut% 
+) else (
+  @echo #define PACKAGE_STRING "silo %major%.%minor%.%patch%-pre%pre%">> %VersionOut% 
+  @echo #define PACKAGE_VERSION "%major%.%minor%.%patch%-pre%pre%">> %VersionOut% 
+  @echo #define VERSION "%major%.%minor%.%patch%-pre%pre%">> %VersionOut% 
+)
+
 
