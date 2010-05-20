@@ -199,26 +199,24 @@ PRIVATE filter_t _db_filter[DB_NFILTERS];
 const static char *api_dummy = 0;
 
 /* stat struct definition */
-#ifdef _WIN32
-typedef struct db_silo_win32_stat_t {
-    DWORD fileindexlo;
-    DWORD fileindexhi;
-} db_silo_win32_stat_t;
-#define db_silo_stat_struct db_silo_win32_stat_t
-#else
+typedef struct db_silo_stat_t {
 #ifndef SIZEOF_OFF64_T
 #error missing definition for SIZEOF_OFF64_T in silo_private.h
 #else
 #if SIZEOF_OFF64_T > 4
-#define db_silo_stat_struct struct stat64
+    struct stat64 s;
 #else
-#define db_silo_stat_struct struct stat
-#endif /* #if SIZEOF_OFF64_T > 4 */
-#endif /* #ifndef SIZEOF_OFF64_T */
-#endif /* #ifdef _WIN32	*/
+    struct stat s;
+#endif
+#endif
+#ifdef _WIN32
+    DWORD fileindexlo;
+    DWORD fileindexhi;
+#endif
+} db_silo_stat_t;
 
-PRIVATE int db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate);
-PRIVATE int db_silo_stat(const char *name, db_silo_stat_struct *statbuf);
+PRIVATE int db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate);
+PRIVATE int db_silo_stat(const char *name, db_silo_stat_t *statbuf);
 
 /* Global structures for option lists.  */
 struct _ma     _ma;
@@ -2149,7 +2147,7 @@ static unsigned int bjhash(register const unsigned char *k, register unsigned in
  *   Added logic for _WIN32 form of the db_silo_stat_struct.
  *-------------------------------------------------------------------------*/
 PRIVATE int 
-db_register_file(DBfile *dbfile, const db_silo_stat_struct *filestate, int writeable)
+db_register_file(DBfile *dbfile, const db_silo_stat_t *filestate, int writeable)
 {
     int i;
     for (i = 0; i < DB_NFILES; i++)
@@ -2158,8 +2156,8 @@ db_register_file(DBfile *dbfile, const db_silo_stat_struct *filestate, int write
         {
             unsigned int hval = 0;
 #ifndef _WIN32
-            hval = bjhash((unsigned char *) &(filestate->st_dev), sizeof(filestate->st_dev), hval);
-            hval = bjhash((unsigned char *) &(filestate->st_ino), sizeof(filestate->st_ino), hval);
+            hval = bjhash((unsigned char *) &(filestate->s.st_dev), sizeof(filestate->s.st_dev), hval);
+            hval = bjhash((unsigned char *) &(filestate->s.st_ino), sizeof(filestate->s.st_ino), hval);
 #else
             hval = bjhash((unsigned char *) &(filestate->fileindexlo), sizeof(filestate->fileindexlo), hval);
             hval = bjhash((unsigned char *) &(filestate->fileindexhi), sizeof(filestate->fileindexhi), hval);
@@ -2197,7 +2195,7 @@ db_unregister_file(DBfile *dbfile)
 }
 
 PRIVATE int
-db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
+db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate)
 {
     int i;
     if (dbfile)
@@ -2212,8 +2210,8 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
     {
         unsigned int hval = 0;
 #ifndef _WIN32
-        hval = bjhash((unsigned char *) &(filestate->st_dev), sizeof(filestate->st_dev), hval);
-        hval = bjhash((unsigned char *) &(filestate->st_ino), sizeof(filestate->st_ino), hval);
+        hval = bjhash((unsigned char *) &(filestate->s.st_dev), sizeof(filestate->s.st_dev), hval);
+        hval = bjhash((unsigned char *) &(filestate->s.st_ino), sizeof(filestate->s.st_ino), hval);
 #else
         hval = bjhash((unsigned char *) &(filestate->fileindexlo), sizeof(filestate->fileindexlo), hval);
         hval = bjhash((unsigned char *) &(filestate->fileindexhi), sizeof(filestate->fileindexhi), hval);
@@ -2236,11 +2234,11 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
  *
  * Programmer: Mark C. Miller, Fri Feb 12 08:21:52 PST 2010
  *-------------------------------------------------------------------------*/
-int db_silo_stat(const char *name, db_silo_stat_struct *statbuf)
+int db_silo_stat(const char *name, db_silo_stat_t *statbuf)
 {
     int retval;
     errno = 0;
-    memset(statbuf, 0, sizeof(*statbuf));
+    memset(&(statbuf->s), 0, sizeof(statbuf->s));
 
 #ifdef _WIN32
     {
@@ -2265,9 +2263,9 @@ int db_silo_stat(const char *name, db_silo_stat_struct *statbuf)
     }
 #else
 #if SIZEOF_OFF64_T > 4
-    retval = stat64(name, statbuf);
+    retval = stat64(name, &(statbuf->s));
 #else
-    retval = stat(name, statbuf);
+    retval = stat(name, &(statbuf->s));
 #endif /* #if SIZEOF_OFF64_T > 4 */
 #endif /* #ifdef _WIN32 */
 
@@ -3749,7 +3747,7 @@ DBOpenReal(const char *name, int type, int mode)
     int            fileid, i;
     int            origtype = type;
     int            subtype = 0;
-    db_silo_stat_struct filestate;
+    db_silo_stat_t filestate;
 
     API_BEGIN("DBOpen", DBfile *, NULL) {
         if (!name)
@@ -3835,14 +3833,14 @@ DBOpenReal(const char *name, int type, int mode)
                 API_ERROR(name, E_CONCURRENT);
         }
 
-        if( ( filestate.st_mode & S_IFDIR ) != 0 )
+        if( ( filestate.s.st_mode & S_IFDIR ) != 0 )
         {
             /************************************/
             /* File is actually a directory.    */
             /************************************/
             API_ERROR((char *)name, E_FILEISDIR);
         }
-        if( ( filestate.st_mode & S_IREAD ) == 0 )
+        if( ( filestate.s.st_mode & S_IREAD ) == 0 )
         {
             /****************************************/
             /* File is missing read permissions.    */
@@ -3935,7 +3933,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     int            fileid, i, n;
     int            origtype = type;
     int            subtype = 0;
-    db_silo_stat_struct filestate;
+    db_silo_stat_t filestate;
 
     API_BEGIN("DBCreate", DBfile *, NULL) {
         if (!name)
@@ -3955,7 +3953,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             {
                 API_ERROR((char *)name, E_FEXIST);
             }
-            if ((filestate.st_mode & S_IFDIR) != 0)
+            if ((filestate.s.st_mode & S_IFDIR) != 0)
             {
                 API_ERROR((char *)name, E_FILEISDIR);
             }
