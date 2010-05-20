@@ -110,6 +110,7 @@ int SILO_VERS_TAG = 0;
    here indicates that this version is not backwards compatible with
    any previous versions.*/
 int Silo_version_4_7_1 = 0;
+int Silo_version_4_7_2 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -196,12 +197,28 @@ PRIVATE reg_status_t _db_regstatus[DB_NFILES] = /* DB_NFILES triples of zeros */
 
 PRIVATE filter_t _db_filter[DB_NFILTERS];
 const static char *api_dummy = 0;
-PRIVATE int
-#if SIZEOF_OFF64_T > 4
-db_isregistered_file(DBfile *dbfile, const struct stat64 *filestate);
+
+/* stat struct definition */
+#ifdef _WIN32
+typedef struct db_silo_win32_stat_t {
+    DWORD fileindexlo;
+    DWORD fileindexhi;
+} db_silo_win32_stat_t;
+#define db_silo_stat_struct db_silo_win32_stat_t
 #else
-db_isregistered_file(DBfile *dbfile, const struct stat *filestate);
-#endif
+#ifndef SIZEOF_OFF64_T
+#error missing definition for SIZEOF_OFF64_T in silo_private.h
+#else
+#if SIZEOF_OFF64_T > 4
+#define db_silo_stat_struct struct stat64
+#else
+#define db_silo_stat_struct struct stat
+#endif /* #if SIZEOF_OFF64_T > 4 */
+#endif /* #ifndef SIZEOF_OFF64_T */
+#endif /* #ifdef _WIN32	*/
+
+PRIVATE int db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate);
+PRIVATE int db_silo_stat(const char *name, db_silo_stat_struct *statbuf);
 
 /* Global structures for option lists.  */
 struct _ma     _ma;
@@ -2123,13 +2140,16 @@ static unsigned int bjhash(register const unsigned char *k, register unsigned in
  *   members. This is not foolproof. Non posix filesystems can apparently
  *   result in st_dev/st_ino combinations which are the same but for
  *   different files.
+ *
+ *   Mark C. Miller, Fri Feb 12 08:20:03 PST 2010
+ *   Replaced conditional compilation with SIZEOF_OFF64T with
+ *   db_silo_stat_struct.
+ *
+ *   Mark C. Miller, Wed May 19 17:07:05 PDT 2010
+ *   Added logic for _WIN32 form of the db_silo_stat_struct.
  *-------------------------------------------------------------------------*/
 PRIVATE int 
-#if SIZEOF_OFF64_T > 4
-db_register_file(DBfile *dbfile, const struct stat64 *filestate, int writeable)
-#else
-db_register_file(DBfile *dbfile, const struct stat *filestate, int writeable)
-#endif
+db_register_file(DBfile *dbfile, const db_silo_stat_struct *filestate, int writeable)
 {
     int i;
     for (i = 0; i < DB_NFILES; i++)
@@ -2137,8 +2157,13 @@ db_register_file(DBfile *dbfile, const struct stat *filestate, int writeable)
         if (_db_regstatus[i].f == 0)
         {
             unsigned int hval = 0;
+#ifndef _WIN32
             hval = bjhash((unsigned char *) &(filestate->st_dev), sizeof(filestate->st_dev), hval);
             hval = bjhash((unsigned char *) &(filestate->st_ino), sizeof(filestate->st_ino), hval);
+#else
+            hval = bjhash((unsigned char *) &(filestate->fileindexlo), sizeof(filestate->fileindexlo), hval);
+            hval = bjhash((unsigned char *) &(filestate->fileindexhi), sizeof(filestate->fileindexhi), hval);
+#endif
             _db_regstatus[i].f = dbfile;
             _db_regstatus[i].n = hval; 
             _db_regstatus[i].w = writeable;
@@ -2172,11 +2197,7 @@ db_unregister_file(DBfile *dbfile)
 }
 
 PRIVATE int
-#if SIZEOF_OFF64_T > 4
-db_isregistered_file(DBfile *dbfile, const struct stat64 *filestate)
-#else
-db_isregistered_file(DBfile *dbfile, const struct stat *filestate)
-#endif
+db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
 {
     int i;
     if (dbfile)
@@ -2190,8 +2211,13 @@ db_isregistered_file(DBfile *dbfile, const struct stat *filestate)
     else if (filestate)
     {
         unsigned int hval = 0;
+#ifndef _WIN32
         hval = bjhash((unsigned char *) &(filestate->st_dev), sizeof(filestate->st_dev), hval);
         hval = bjhash((unsigned char *) &(filestate->st_ino), sizeof(filestate->st_ino), hval);
+#else
+        hval = bjhash((unsigned char *) &(filestate->fileindexlo), sizeof(filestate->fileindexlo), hval);
+        hval = bjhash((unsigned char *) &(filestate->fileindexhi), sizeof(filestate->fileindexhi), hval);
+#endif
         for (i = 0; i < DB_NFILES; i++)
         {
             if (_db_regstatus[i].f != 0 &&
@@ -2200,6 +2226,52 @@ db_isregistered_file(DBfile *dbfile, const struct stat *filestate)
         }
     }
     return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:   db_silo_stat
+ *
+ * Purpose:    Better stat method for silo taking into account stat/stat64
+ *             as well as issues with filenames used for split vfds.
+ *
+ * Programmer: Mark C. Miller, Fri Feb 12 08:21:52 PST 2010
+ *-------------------------------------------------------------------------*/
+int db_silo_stat(const char *name, db_silo_stat_struct *statbuf)
+{
+    int retval;
+    errno = 0;
+    memset(statbuf, 0, sizeof(*statbuf));
+
+#ifdef _WIN32
+    {
+        /* this logic was copied by and large from HDF5 sec2 VFD */
+        int fd = open(name, O_RDONLY);
+        if (fd != -1)
+        {
+            struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+            GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &fileinfo);
+            statbuf->fileindexhi = fileinfo.nFileIndexHigh;
+            statbuf->fileindexlo = fileinfo.nFileIndexLow;
+            close(fd);
+            errno = 0;
+            retval = 0;
+        }
+        else
+        {
+            retval = -1;
+            if (errno == 0)
+                errno = ENOENT;
+        }
+    }
+#else
+#if SIZEOF_OFF64_T > 4
+    retval = stat64(name, statbuf);
+#else
+    retval = stat(name, statbuf);
+#endif /* #if SIZEOF_OFF64_T > 4 */
+#endif /* #ifdef _WIN32 */
+
+    return retval;
 }
 
 /*-------------------------------------------------------------------------
@@ -3664,6 +3736,10 @@ DBFileVersionGE(DBfile *dbfile, int Maj, int Min, int Pat)
  *    Moved call to db_isregistered_file to AFTER calls to stat the file
  *    add changed db_isregistered_file to accept stat struct instead of name.
  *    Changed call to db_register_file to accpet stat struct.
+ *
+ *    Mark C. Miller, Fri Feb 12 08:22:41 PST 2010
+ *    Replaced stat/stat64 calls with db_silo_stat. Replaced conditional
+ *    compilation logic for SIZEOF_OFF64_T with db_silo_stat_struct.
  *------------------------------------------------------------------------- */
 PUBLIC DBfile *
 DBOpenReal(const char *name, int type, int mode)
@@ -3673,11 +3749,7 @@ DBOpenReal(const char *name, int type, int mode)
     int            fileid, i;
     int            origtype = type;
     int            subtype = 0;
-#if SIZEOF_OFF64_T > 4
-    struct stat64    filestate;
-#else
-    struct stat    filestate;
-#endif
+    db_silo_stat_struct filestate;
 
     API_BEGIN("DBOpen", DBfile *, NULL) {
         if (!name)
@@ -3704,11 +3776,7 @@ DBOpenReal(const char *name, int type, int mode)
         /* Check to make sure the file exists and has the   */
         /* correct permissions.                             */
         /****************************************************/
-#if SIZEOF_OFF64_T > 4
-        if (stat64(name, &filestate) != 0)
-#else
-        if (stat(name, &filestate) != 0)
-#endif
+        if (db_silo_stat(name, &filestate) != 0)
         {
             if( errno == ENOENT )
             {
@@ -3854,6 +3922,10 @@ DBOpenReal(const char *name, int type, int mode)
  *    Mark C. Miller, Wed Feb 25 23:52:05 PST 2009
  *    Moved call to db_isregistered_file to after stat calls. Stat the
  *    file after its created so we can get information to register it.
+ *
+ *    Mark C. Miller, Fri Feb 12 08:22:41 PST 2010
+ *    Replaced stat/stat64 calls with db_silo_stat. Replaced conditional
+ *    compilation logic for SIZEOF_OFF64_T with db_silo_stat_struct.
  *-------------------------------------------------------------------------*/
 PUBLIC DBfile *
 DBCreateReal(const char *name, int mode, int target, const char *info, int type)
@@ -3863,11 +3935,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     int            fileid, i, n;
     int            origtype = type;
     int            subtype = 0;
-#if SIZEOF_OFF64_T > 4
-    struct stat64    filestate;
-#else
-    struct stat    filestate;
-#endif
+    db_silo_stat_struct filestate;
 
     API_BEGIN("DBCreate", DBfile *, NULL) {
         if (!name)
@@ -3881,11 +3949,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_ERROR(ascii, E_BADFTYPE);
         }
 
-#if SIZEOF_OFF64_T > 4
-        if (stat64(name, &filestate) == 0)  /* Success - File exists */
-#else
-        if (stat(name, &filestate) == 0)  /* Success - File exists */
-#endif
+        if (db_silo_stat(name, &filestate) == 0)  /* Success - File exists */
         {
             if (mode == DB_NOCLOBBER)
             {
@@ -3895,16 +3959,15 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             {
                 API_ERROR((char *)name, E_FILEISDIR);
             }
-        }
 
-        /* Check if file is already opened. If so, none can
-           have it opened for write, including this new one */
-        i = db_isregistered_file(0, &filestate);
-        if (i != -1)
-        {
-            API_ERROR(name, E_CONCURRENT);
+            /* Check if file is already opened. If so, none can
+               have it opened for write, including this new one */
+            i = db_isregistered_file(0, &filestate);
+            if (i != -1)
+            {
+                API_ERROR(name, E_CONCURRENT);
+            }
         }
-
 
         if (!DBCreateCB[type]) {
             if (type == 7)
@@ -3928,11 +3991,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
-#if SIZEOF_OFF64_T > 4
-        stat64(name, &filestate);
-#else
-        stat(name, &filestate);
-#endif
+        db_silo_stat(name, &filestate);
         db_register_file(dbfile, &filestate, 1);
 
         /*
@@ -8073,6 +8132,9 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
  *
  *    Mark C. Miller, Wed Nov 11 09:19:20 PST 2009
  *    Added check for valid centering.
+ *
+ *    Mark C. Miller, Thu Feb  4 11:29:35 PST 2010
+ *    Removed upper bound restriction for nvars.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
@@ -8097,7 +8159,7 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("quadmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)mname) == 0)
             API_ERROR("quadmesh name", E_INVALIDNAME);
-        if (nvars < 1 || nvars > 3)
+        if (nvars < 1)
             API_ERROR("nvars", E_BADARGS);
         if (!varnames && nvars)
             API_ERROR("varname", E_BADARGS);
@@ -8332,6 +8394,9 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
  *
  *    Mark C. Miller, Wed Nov 11 09:19:20 PST 2009
  *    Added check for valid centering.
+ *
+ *    Mark C. Miller, Thu Feb  4 11:28:55 PST 2010
+ *    Removed upper bound restriction on nvars.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
@@ -8355,7 +8420,7 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("UCDmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)mname) == 0)
             API_ERROR("UCDmesh name", E_INVALIDNAME);
-        if (nvars < 1 || nvars > 3)
+        if (nvars < 1)
             API_ERROR("nvars", E_BADARGS);
         if (!varnames && nvars)
             API_ERROR("varnames", E_BADARGS);
@@ -11423,8 +11488,12 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
     }
     else if (handleSlashSwap)
     {
+        int nsemis = 0;
         for (i = 0; strList[i] != '\0'; i++)
-            ;
+        {
+            if (strList[i] == ';') nsemis++;
+            if (nsemis >= n+1) break;
+        }
         strLen = i;
     }
     
