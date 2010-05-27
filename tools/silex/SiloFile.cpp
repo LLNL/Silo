@@ -262,3 +262,9 @@ SiloFile::InqVarType(const QString &name)
 {
     return DBInqVarType(db, (const char*)name.toAscii());
 }
+
+bool
+SiloFile::InqVarExists(const QString &name)
+{
+    return DBInqVarExists(db, (const char*)name.toAscii());
+}

@@ -81,12 +81,19 @@ SiloObjectViewWindow::SiloObjectViewWindow(SiloFile *s, const QString &n, QWidge
 //    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
 //    Ported to Qt4.
 //
+//    Mark C. Miller, Wed May 26 18:19:30 PDT 2010
+//    Added logic to first test for existence of var before attempting to
+//    dereference it. This prevents silex from coring when reading poorly
+//    constructed silo files.
 // ****************************************************************************
 void
 SiloObjectViewWindow::ShowItem(QTreeWidgetItem *i, int)
 {
     if (i->text(1) == "var")
-        emit showRequested(i->text(2));
+    {
+        if (silo->InqVarExists(i->text(2)))
+            emit showRequested(i->text(2));
+    }
 }
 
 // ----------------------------------------------------------------------------

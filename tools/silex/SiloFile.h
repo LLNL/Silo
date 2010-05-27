@@ -114,6 +114,8 @@ class SiloDir
 //    Jeremy Meredith, Thu Nov 20 17:28:45 EST 2008
 //    Ported to Qt4.
 //
+//    Mark C. Miller, Wed May 26 18:19:11 PDT 2010
+//    Added InqVarExists.
 // ****************************************************************************
 class SiloFile
 {
@@ -132,6 +134,7 @@ class SiloFile
     void         *GetComponent(const QString &oname, const QString &cname);
     int           GetComponentType(const QString &oname, const QString &cname);
     DBObjectType  InqVarType(const QString &name);
+    bool          InqVarExists(const QString &name);
 
   private:
     DBfile *db;
