@@ -1039,11 +1039,11 @@ main(int argc, char **argv)
         {
             driver = StringToDriver(argv[i]);
         }
-        else if (strcmp(argv[i], "DB_PDB") == 0)
+        else if (strncmp(argv[i], "DB_PDB", 6) == 0)
         {
-            driver = DB_PDB;
+            driver = StringToDriver(argv[i]);
         }
-        else
+	else if (argv[i][0] != '\0')
         {
             fprintf(stderr,"Uncrecognized driver name \"%s\"\n",
                 argv[i]);

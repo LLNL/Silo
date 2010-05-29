@@ -98,6 +98,9 @@
 /* Support for NetCDF */
 #undef HAVE_NETCDF_DRIVER
 
+/* Support for PDB Proper */
+#undef HAVE_PDBP_DRIVER
+
 /* Support for PDB */
 #undef HAVE_PDB_DRIVER
 

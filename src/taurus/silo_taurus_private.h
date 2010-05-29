@@ -84,8 +84,6 @@ CALLBACK int db_taur_NewToc(DBfile *);
  */
 extern TAURUSfile *db_taur_open(char *);
 extern int db_taur_close(TAURUSfile *);
-extern int db_taur_pwd(TAURUSfile *, char *);
-extern int db_taur_cd(TAURUSfile *, char *);
 extern void init_coord_info(TAURUSfile *);
 extern void init_mesh_info(TAURUSfile *);
 extern void init_zone_info(TAURUSfile *);

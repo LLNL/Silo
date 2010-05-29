@@ -2,7 +2,7 @@
 !
 !     SILO include file for Fortan applications.
 !
-! Programmer:   miller86 Mon Sep 21 18:24:57 PDT 2009
+! Programmer:   miller86 Mon May 24 21:44:59 PDT 2010
 !
 ! WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !    This file is generated automatically from C header files in the
@@ -30,10 +30,11 @@
       external dbputgrplmap, dbputmat, dbputmmat, dbputmmesh
       external dbputmrgtree, dbputmsp, dbputmvar, dbputpm, dbputpv1
       external dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl, dbputzl2
-      external dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
+      external dbrdvar, dbrdvarslice, dbregfopts, dbrmptr, dbset2dstrlen
       external dbsetcksums, dbsetcompress, dbsetcwr, dbsetdepwarn
       external dbsetdir, dbsetdirid, dbsethdfnms, dbsetovrwrt
-      external dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
+      external dbshowerrors, dbunregafopts, dbunregfopts, dbwrite
+      external dbwriteslice, dbwrtfl
 
       integer  dbaddcaopt, dbaddccmp, dbaddcopt, dbadddopt, dbaddicmp
       integer  dbaddiopt, dbaddrcmp, dbaddregion, dbaddregiona
@@ -47,10 +48,11 @@
       integer  dbputgrplmap, dbputmat, dbputmmat, dbputmmesh
       integer  dbputmrgtree, dbputmsp, dbputmvar, dbputpm, dbputpv1
       integer  dbputqm, dbputqv1, dbputum, dbputuv1, dbputzl, dbputzl2
-      integer  dbrdvar, dbrdvarslice, dbrmptr, dbset2dstrlen
+      integer  dbrdvar, dbrdvarslice, dbregfopts, dbrmptr, dbset2dstrlen
       integer  dbsetcksums, dbsetcompress, dbsetcwr, dbsetdepwarn
       integer  dbsetdir, dbsetdirid, dbsethdfnms, dbsetovrwrt
-      integer  dbshowerrors, dbwrite, dbwriteslice, dbwrtfl
+      integer  dbshowerrors, dbunregafopts, dbunregfopts, dbwrite
+      integer  dbwriteslice, dbwrtfl
 
 
 !...Parameters.
@@ -69,12 +71,28 @@
       integer  DBCSG_SWEEP, DBCSG_TET_4F, DBCSG_TRI_3P, DBCSG_UNION
       integer  DBCSG_XFORM, DBOPT_ALIGN, DBOPT_ALLOWMAT0
       integer  DBOPT_ASCII_LABEL, DBOPT_BASEINDEX, DBOPT_BLOCKORIGIN
-      integer  DBOPT_BNDNAMES, DBOPT_COORDSYS, DBOPT_CYCLE
-      integer  DBOPT_DISJOINT_MODE, DBOPT_DTIME, DBOPT_EXTENTS
-      integer  DBOPT_EXTENTS_SIZE, DBOPT_FACETYPE, DBOPT_GROUPINGNAMES
+      integer  DBOPT_BNDNAMES, DBOPT_CONSERVED, DBOPT_COORDSYS
+      integer  DBOPT_CYCLE, DBOPT_DISJOINT_MODE, DBOPT_DTIME
+      integer  DBOPT_EXTENSIVE, DBOPT_EXTENTS, DBOPT_EXTENTS_SIZE
+      integer  DBOPT_FACETYPE, DBOPT_FIRST, DBOPT_GROUPINGNAMES
       integer  DBOPT_GROUPINGS, DBOPT_GROUPINGS_SIZE, DBOPT_GROUPNUM
-      integer  DBOPT_GROUPORIGIN, DBOPT_HAS_EXTERNAL_ZONES
-      integer  DBOPT_HIDE_FROM_GUI, DBOPT_HI_OFFSET, DBOPT_LABEL
+      integer  DBOPT_GROUPORIGIN, DBOPT_H5_ALIGN_MIN, DBOPT_H5_ALIGN_VAL
+      integer  DBOPT_H5_CACHE_NBYTES, DBOPT_H5_CACHE_NELMTS
+      integer  DBOPT_H5_CACHE_POLICY, DBOPT_H5_CORE_ALLOC_INC
+      integer  DBOPT_H5_CORE_NO_BACK_STORE, DBOPT_H5_DIRECT_BLOCK_SIZE
+      integer  DBOPT_H5_DIRECT_BUF_SIZE, DBOPT_H5_DIRECT_MEM_ALIGN
+      integer  DBOPT_H5_FAM_FILE_OPTS, DBOPT_H5_FAM_SIZE, DBOPT_H5_FIRST
+      integer  DBOPT_H5_LAST, DBOPT_H5_LOG_BUF_SIZE, DBOPT_H5_LOG_NAME
+      integer  DBOPT_H5_META_BLOCK_SIZE, DBOPT_H5_META_EXTENSION
+      integer  DBOPT_H5_META_FILE_OPTS, DBOPT_H5_MPIO_COMM
+      integer  DBOPT_H5_MPIO_INFO, DBOPT_H5_MPIP_NO_GPFS_HINTS
+      integer  DBOPT_H5_RAW_EXTENSION, DBOPT_H5_RAW_FILE_OPTS
+      integer  DBOPT_H5_SIEVE_BUF_SIZE, DBOPT_H5_SILO_BLOCK_COUNT
+      integer  DBOPT_H5_SILO_BLOCK_SIZE, DBOPT_H5_SILO_LOG_STATS
+      integer  DBOPT_H5_SMALL_RAW_SIZE, DBOPT_H5_USER_DRIVER_ID
+      integer  DBOPT_H5_USER_DRIVER_INFO, DBOPT_H5_VFD
+      integer  DBOPT_HAS_EXTERNAL_ZONES, DBOPT_HIDE_FROM_GUI
+      integer  DBOPT_HI_OFFSET, DBOPT_LABEL, DBOPT_LAST
       integer  DBOPT_LLONGNZNUM, DBOPT_LO_OFFSET, DBOPT_MAJORORDER
       integer  DBOPT_MATCOLORS, DBOPT_MATCOUNTS, DBOPT_MATLISTS
       integer  DBOPT_MATNAME, DBOPT_MATNAMES, DBOPT_MATNOS
@@ -90,30 +108,49 @@
       integer  DBOPT_YUNITS, DBOPT_YVARNAME, DBOPT_ZLABEL
       integer  DBOPT_ZONECOUNTS, DBOPT_ZONENAMES, DBOPT_ZONENUM
       integer  DBOPT_ZUNITS, DBOPT_ZVARNAME, DB_ABORT, DB_ABUTTING
-      integer  DB_ALL, DB_APPEND, DB_AREA, DB_ARRAY, DB_BLOCKCENT
-      integer  DB_BNDCENT, DB_CARTESIAN, DB_CHAR, DB_CLOBBER
-      integer  DB_COLLINEAR, DB_COLMAJOR, DB_CRAY, DB_CSGMESH, DB_CSGVAR
-      integer  DB_CSGZONELIST, DB_CURVE, DB_CURVILINEAR, DB_CYLINDRICAL
-      integer  DB_DEBUG, DB_DEFVARS, DB_DIR, DB_DOUBLE, DB_EDGECENT
-      integer  DB_EDGELIST, DB_F77NULL, DB_FACECENT, DB_FACELIST
-      integer  DB_FLOAT, DB_FLOATING, DB_FROMCWR, DB_GROUPELMAP, DB_HDF5
-      integer  DB_HDF5_CORE, DB_HDF5_MPIO, DB_HDF5_MPIOP, DB_HDF5_SEC2
-      integer  DB_HDF5_STDIO, DB_INT, DB_INTEL, DB_INVALID_OBJECT
-      integer  DB_LOCAL, DB_LONG, DB_LONG_LONG, DB_MATERIAL
-      integer  DB_MATSPECIES, DB_MRGTREE, DB_MRGVAR, DB_MULTIBLOCKMESH
-      integer  DB_MULTIBLOCKVAR, DB_MULTIMAT, DB_MULTIMATSPECIES
-      integer  DB_MULTIMESH, DB_MULTIMESHADJ, DB_MULTIVAR, DB_NETCDF
-      integer  DB_NFILES, DB_NFILTERS, DB_NOCLOBBER, DB_NODECENT
-      integer  DB_NONCOLLINEAR, DB_NONE, DB_NOTCENT, DB_NOTYPE
-      integer  DB_NUMERICAL, DB_OFF, DB_ON, DB_OTHER, DB_PDB
-      integer  DB_PHZONELIST, DB_POINTMESH, DB_POINTVAR, DB_POSTORDER
-      integer  DB_PREORDER, DB_QUADCURV, DB_QUADMESH, DB_QUADRECT
-      integer  DB_QUADVAR, DB_QUAD_CURV, DB_QUAD_RECT, DB_READ
-      integer  DB_RECTILINEAR, DB_RESUME, DB_ROWMAJOR, DB_RS6000, DB_SGI
-      integer  DB_SHORT, DB_SPHERICAL, DB_SUN3, DB_SUN4, DB_SUSPEND
-      integer  DB_TAURUS, DB_TOP, DB_UCDMESH, DB_UCDVAR, DB_UNKNOWN
-      integer  DB_USERDEF, DB_VARIABLE, DB_VARTYPE_ARRAY
-      integer  DB_VARTYPE_LABEL, DB_VARTYPE_MATERIAL, DB_VARTYPE_SCALAR
+      integer  DB_ALL, DB_ALL_AND_DRVR, DB_APPEND, DB_AREA, DB_ARRAY
+      integer  DB_BLOCKCENT, DB_BNDCENT, DB_CARTESIAN, DB_CHAR
+      integer  DB_CLOBBER, DB_COLLINEAR, DB_COLMAJOR, DB_CRAY
+      integer  DB_CSGMESH, DB_CSGVAR, DB_CSGZONELIST, DB_CURVE
+      integer  DB_CURVILINEAR, DB_CYLINDRICAL, DB_DEBUG, DB_DEFVARS
+      integer  DB_DIR, DB_DOUBLE, DB_EDGECENT, DB_EDGELIST, DB_F77NULL
+      integer  DB_FACECENT, DB_FACELIST, DB_FILE_OPTS_H5_DEFAULT_CORE
+      integer  DB_FILE_OPTS_H5_DEFAULT_DEFAULT
+      integer  DB_FILE_OPTS_H5_DEFAULT_DIRECT
+      integer  DB_FILE_OPTS_H5_DEFAULT_FAMILY
+      integer  DB_FILE_OPTS_H5_DEFAULT_LOG, DB_FILE_OPTS_H5_DEFAULT_MPIO
+      integer  DB_FILE_OPTS_H5_DEFAULT_MPIP
+      integer  DB_FILE_OPTS_H5_DEFAULT_SEC2
+      integer  DB_FILE_OPTS_H5_DEFAULT_SILO
+      integer  DB_FILE_OPTS_H5_DEFAULT_SPLIT
+      integer  DB_FILE_OPTS_H5_DEFAULT_STDIO, DB_FILE_OPTS_LAST
+      integer  DB_FLOAT, DB_FLOATING, DB_FROMCWR, DB_GROUPELMAP
+      integer  DB_H5VFD_CORE, DB_H5VFD_DEFAULT, DB_H5VFD_DIRECT
+      integer  DB_H5VFD_FAMILY, DB_H5VFD_LOG, DB_H5VFD_MPIO
+      integer  DB_H5VFD_MPIP, DB_H5VFD_SEC2, DB_H5VFD_SILO
+      integer  DB_H5VFD_SPLIT, DB_H5VFD_STDIO, DB_HDF5, DB_HDF5X
+      integer  DB_HDF5_CORE, DB_HDF5_CORE_OBSOLETE, DB_HDF5_DIRECT
+      integer  DB_HDF5_FAMILY, DB_HDF5_LOG, DB_HDF5_MPIO, DB_HDF5_MPIOP
+      integer  DB_HDF5_MPIOP_OBSOLETE, DB_HDF5_MPIO_OBSOLETE
+      integer  DB_HDF5_MPIP, DB_HDF5_SEC2, DB_HDF5_SEC2_OBSOLETE
+      integer  DB_HDF5_SILO, DB_HDF5_SPLIT, DB_HDF5_STDIO
+      integer  DB_HDF5_STDIO_OBSOLETE, DB_INT, DB_INTEL
+      integer  DB_INVALID_OBJECT, DB_LOCAL, DB_LONG, DB_LONG_LONG
+      integer  DB_MATERIAL, DB_MATSPECIES, DB_MRGTREE, DB_MRGVAR
+      integer  DB_MULTIBLOCKMESH, DB_MULTIBLOCKVAR, DB_MULTIMAT
+      integer  DB_MULTIMATSPECIES, DB_MULTIMESH, DB_MULTIMESHADJ
+      integer  DB_MULTIVAR, DB_NETCDF, DB_NFILES, DB_NFILTERS
+      integer  DB_NOCLOBBER, DB_NODECENT, DB_NONCOLLINEAR, DB_NONE
+      integer  DB_NOTCENT, DB_NOTYPE, DB_NUMERICAL, DB_OFF, DB_ON
+      integer  DB_OTHER, DB_PDB, DB_PDBP, DB_PHZONELIST, DB_POINTMESH
+      integer  DB_POINTVAR, DB_POSTORDER, DB_PREORDER, DB_QUADCURV
+      integer  DB_QUADMESH, DB_QUADRECT, DB_QUADVAR, DB_QUAD_CURV
+      integer  DB_QUAD_RECT, DB_READ, DB_RECTILINEAR, DB_RESUME
+      integer  DB_ROWMAJOR, DB_RS6000, DB_SGI, DB_SHORT, DB_SPHERICAL
+      integer  DB_SUN3, DB_SUN4, DB_SUSPEND, DB_TAURUS, DB_TOP
+      integer  DB_UCDMESH, DB_UCDVAR, DB_UNKNOWN, DB_USERDEF
+      integer  DB_VARIABLE, DB_VARTYPE_ARRAY, DB_VARTYPE_LABEL
+      integer  DB_VARTYPE_MATERIAL, DB_VARTYPE_SCALAR
       integer  DB_VARTYPE_SPECIES, DB_VARTYPE_SYMTENSOR
       integer  DB_VARTYPE_TENSOR, DB_VARTYPE_VECTOR, DB_VOLUME
       integer  DB_ZONECENT, DB_ZONELIST, DB_ZONETYPE_BEAM
@@ -125,20 +162,80 @@
       character*12  DB_F77NULLSTRING
 
       parameter (SILO_VERS_MAJ             = 4              )
-      parameter (SILO_VERS_MIN             = 7              )
-      parameter (SILO_VERS_PAT             = 1              )
+      parameter (SILO_VERS_MIN             = 8              )
+      parameter (SILO_VERS_PAT             = 0              )
       parameter (SILO_VERS_PRE             = 1              )
       parameter (DB_NETCDF                 = 0              )
       parameter (DB_PDB                    = 2              )
       parameter (DB_TAURUS                 = 3              )
       parameter (DB_UNKNOWN                = 5              )
       parameter (DB_DEBUG                  = 6              )
-      parameter (DB_HDF5                   = 7              )
-      parameter (DB_HDF5_SEC2              = 256            )
-      parameter (DB_HDF5_STDIO             = 512            )
-      parameter (DB_HDF5_CORE              = 768            )
-      parameter (DB_HDF5_MPIO              = 1024           )
-      parameter (DB_HDF5_MPIOP             = 1280           )
+      parameter (DB_HDF5X                  = 7              )
+      parameter (DB_PDBP                   = 1              )
+      parameter (DB_HDF5_SEC2_OBSOLETE     = 256            )
+      parameter (DB_HDF5_STDIO_OBSOLETE    = 512            )
+      parameter (DB_HDF5_CORE_OBSOLETE     = 768            )
+      parameter (DB_HDF5_MPIO_OBSOLETE     = 1024           )
+      parameter (DB_HDF5_MPIOP_OBSOLETE    = 1280           )
+      parameter (DB_H5VFD_DEFAULT          = 0              )
+      parameter (DB_H5VFD_SEC2             = 1              )
+      parameter (DB_H5VFD_STDIO            = 2              )
+      parameter (DB_H5VFD_CORE             = 3              )
+      parameter (DB_H5VFD_LOG              = 4              )
+      parameter (DB_H5VFD_SPLIT            = 5              )
+      parameter (DB_H5VFD_DIRECT           = 6              )
+      parameter (DB_H5VFD_FAMILY           = 7              )
+      parameter (DB_H5VFD_MPIO             = 8              )
+      parameter (DB_H5VFD_MPIP             = 9              )
+      parameter (DB_H5VFD_SILO             = 10             )
+      parameter (DB_FILE_OPTS_H5_DEFAULT_DEFAULT = 
+     c    DB_H5VFD_DEFAULT)
+      parameter (DB_FILE_OPTS_H5_DEFAULT_SEC2 =
+     c DB_H5VFD_SEC2  )
+      parameter (DB_FILE_OPTS_H5_DEFAULT_STDIO =
+     c DB_H5VFD_STDIO )
+      parameter (DB_FILE_OPTS_H5_DEFAULT_CORE =
+     c DB_H5VFD_CORE  )
+      parameter (DB_FILE_OPTS_H5_DEFAULT_LOG =
+     c DB_H5VFD_LOG   )
+      parameter (DB_FILE_OPTS_H5_DEFAULT_SPLIT =
+     c DB_H5VFD_SPLIT )
+      parameter (DB_FILE_OPTS_H5_DEFAULT_DIRECT =
+     c DB_H5VFD_DIRECT)
+      parameter (DB_FILE_OPTS_H5_DEFAULT_FAMILY =
+     c DB_H5VFD_FAMILY)
+      parameter (DB_FILE_OPTS_H5_DEFAULT_MPIO =
+     c DB_H5VFD_MPIO  )
+      parameter (DB_FILE_OPTS_H5_DEFAULT_MPIP =
+     c DB_H5VFD_MPIP  )
+      parameter (DB_FILE_OPTS_H5_DEFAULT_SILO =
+     c DB_H5VFD_SILO  )
+      parameter (DB_FILE_OPTS_LAST         =
+     c DB_FILE_OPTS_H5_DEFAULT_SILO)
+      parameter (DB_HDF5                   =
+     c DB_FILE_OPTS_H5_DEFAULT_DEFAULT * 2048)
+      parameter (DB_HDF5_SEC2              =
+     c DB_FILE_OPTS_H5_DEFAULT_SEC2 * 2048)
+      parameter (DB_HDF5_STDIO             =
+     c DB_FILE_OPTS_H5_DEFAULT_STDIO * 2048)
+      parameter (DB_HDF5_CORE              =
+     c DB_FILE_OPTS_H5_DEFAULT_CORE * 2048)
+      parameter (DB_HDF5_LOG               =
+     c DB_FILE_OPTS_H5_DEFAULT_LOG * 2048)
+      parameter (DB_HDF5_SPLIT             =
+     c DB_FILE_OPTS_H5_DEFAULT_SPLIT * 2048)
+      parameter (DB_HDF5_DIRECT            =
+     c DB_FILE_OPTS_H5_DEFAULT_DIRECT * 2048)
+      parameter (DB_HDF5_FAMILY            =
+     c DB_FILE_OPTS_H5_DEFAULT_FAMILY * 2048)
+      parameter (DB_HDF5_MPIO              =
+     c DB_FILE_OPTS_H5_DEFAULT_MPIO * 2048)
+      parameter (DB_HDF5_MPIOP             =
+     c DB_FILE_OPTS_H5_DEFAULT_MPIP * 2048)
+      parameter (DB_HDF5_MPIP              =
+     c DB_FILE_OPTS_H5_DEFAULT_MPIP * 2048)
+      parameter (DB_HDF5_SILO              =
+     c DB_FILE_OPTS_H5_DEFAULT_SILO * 2048)
       parameter (DB_NFILES                 = 256            )
       parameter (DB_NFILTERS               = 32             )
       parameter (DB_COLLINEAR              = 130            )
@@ -198,6 +295,7 @@
       parameter (DB_RS6000                 = 13             )
       parameter (DB_CRAY                   = 14             )
       parameter (DB_INTEL                  = 15             )
+      parameter (DBOPT_FIRST               = 260            )
       parameter (DBOPT_ALIGN               = 260            )
       parameter (DBOPT_COORDSYS            = 262            )
       parameter (DBOPT_CYCLE               = 263            )
@@ -266,12 +364,48 @@
       parameter (DBOPT_SPECNAMES           = 326            )
       parameter (DBOPT_SPECCOLORS          = 327            )
       parameter (DBOPT_LLONGNZNUM          = 328            )
+      parameter (DBOPT_CONSERVED           = 329            )
+      parameter (DBOPT_EXTENSIVE           = 330            )
+      parameter (DBOPT_LAST                = 499            )
+      parameter (DBOPT_H5_FIRST            = 500            )
+      parameter (DBOPT_H5_VFD              = 500            )
+      parameter (DBOPT_H5_RAW_FILE_OPTS    = 501            )
+      parameter (DBOPT_H5_RAW_EXTENSION    = 502            )
+      parameter (DBOPT_H5_META_FILE_OPTS   = 503            )
+      parameter (DBOPT_H5_META_EXTENSION   = 504            )
+      parameter (DBOPT_H5_CORE_ALLOC_INC   = 505            )
+      parameter (DBOPT_H5_CORE_NO_BACK_STORE = 506            )
+      parameter (DBOPT_H5_META_BLOCK_SIZE  = 507            )
+      parameter (DBOPT_H5_SMALL_RAW_SIZE   = 508            )
+      parameter (DBOPT_H5_ALIGN_MIN        = 509            )
+      parameter (DBOPT_H5_ALIGN_VAL        = 510            )
+      parameter (DBOPT_H5_DIRECT_MEM_ALIGN = 511            )
+      parameter (DBOPT_H5_DIRECT_BLOCK_SIZE = 512            )
+      parameter (DBOPT_H5_DIRECT_BUF_SIZE  = 513            )
+      parameter (DBOPT_H5_LOG_NAME         = 514            )
+      parameter (DBOPT_H5_LOG_BUF_SIZE     = 515            )
+      parameter (DBOPT_H5_MPIO_COMM        = 516            )
+      parameter (DBOPT_H5_MPIO_INFO        = 517            )
+      parameter (DBOPT_H5_MPIP_NO_GPFS_HINTS = 518            )
+      parameter (DBOPT_H5_SIEVE_BUF_SIZE   = 519            )
+      parameter (DBOPT_H5_CACHE_NELMTS     = 520            )
+      parameter (DBOPT_H5_CACHE_NBYTES     = 521            )
+      parameter (DBOPT_H5_CACHE_POLICY     = 522            )
+      parameter (DBOPT_H5_FAM_SIZE         = 523            )
+      parameter (DBOPT_H5_FAM_FILE_OPTS    = 524            )
+      parameter (DBOPT_H5_USER_DRIVER_ID   = 525            )
+      parameter (DBOPT_H5_USER_DRIVER_INFO = 526            )
+      parameter (DBOPT_H5_SILO_BLOCK_SIZE  = 527            )
+      parameter (DBOPT_H5_SILO_BLOCK_COUNT = 528            )
+      parameter (DBOPT_H5_SILO_LOG_STATS   = 529            )
+      parameter (DBOPT_H5_LAST             = 599            )
       parameter (DB_TOP                    = 0              )
       parameter (DB_NONE                   = 1              )
       parameter (DB_ALL                    = 2              )
       parameter (DB_ABORT                  = 3              )
       parameter (DB_SUSPEND                = 4              )
       parameter (DB_RESUME                 = 5              )
+      parameter (DB_ALL_AND_DRVR           = 6              )
       parameter (DB_ROWMAJOR               = 0              )
       parameter (DB_COLMAJOR               = 1              )
       parameter (DB_NOTCENT                = 0              )

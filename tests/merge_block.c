@@ -46,8 +46,8 @@ main (int argc, char **argv)
     }
     if (argc == 4)
     {
-        if (!strcmp(argv[3], "DB_PDB"))
-            driver = DB_PDB;
+        if (!strncmp(argv[3], "DB_PDB", 6))
+            driver = StringToDriver(argv[3]);
         else if (!strncmp(argv[3], "DB_HDF5", 7))
             driver = StringToDriver(argv[3]);
     }

@@ -13,6 +13,10 @@ if PDB_DRV_NEEDED
 DRIVER_DIRS += pdb_drv
 DRIVER_LIBS += pdb_drv/libsilo_pdb_drv.la
 endif
+if PDBP_DRV_NEEDED
+DRIVER_DIRS += pdbp_drv
+DRIVER_LIBS += pdbp_drv/libsilo_pdbp_drv.la
+endif
 if HDF5_DRV_NEEDED
 DRIVER_DIRS += hdf5_drv
 DRIVER_LIBS += hdf5_drv/libsilo_hdf5_drv.la
@@ -32,7 +36,7 @@ endif
 SUBDIRS = score pdb silo debug \
 $(DRIVER_DIRS) unknown filters .
 DIST_SUBDIRS = . debug filters hdf5_drv hzip fpzip netcdf \
-pdb pdb_drv score silo taurus unknown
+pdb pdb_drv pdbp_drv score silo taurus unknown
 MAKESETTINGS = make.settings
 
 if HDF5_DRV_NEEDED

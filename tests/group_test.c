@@ -240,6 +240,7 @@ main(int argc, char *argv[])
     int         driver=DB_PDB;
     const char  *file_ext = "pdb";
     char        filename[256];
+    int         show_all_errors = FALSE;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -259,18 +260,21 @@ main(int argc, char *argv[])
                 usage(argv[0]);
             }
             if (rest && *rest) usage(argv[0]);
-        } else if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
+        } else if (!strncmp(argv[i], "DB_PDB",6)) {
+            driver = StringToDriver(argv[i]);
             file_ext = "pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
             file_ext = "h5";
-        } else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "unknown option: %s\n", argv[i]);
             usage(argv[0]);
         }
     }
     if (nnumbers!=3) usage(argv[0]);
+    if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
 
     DBSetDeprecateWarnings(0);
 

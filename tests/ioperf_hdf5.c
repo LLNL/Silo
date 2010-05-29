@@ -12,6 +12,9 @@
  */
 
 static int use_log = 0;
+static int use_silo_fapl = 0;
+static int silo_block_size = 1<<14;
+static int silo_block_count = 16;
 static int sbuf_size = -1;
 static int mbuf_size = -1;
 static int rbuf_size = -1;
@@ -35,7 +38,13 @@ static int Open_hdf5(ioflags_t iopflags)
     if (rbuf_size >= 0)
         h5status |= H5Pset_small_data_block_size(fapl_id, mbuf_size);
 
-    if (use_log)
+    if (use_silo_fapl)
+    {
+        h5status |= H5Pset_fapl_silo(fapl_id);
+        h5status |= H5Pset_silo_block_size_and_count(fapl_id, (hsize_t) silo_block_size,
+            silo_block_count);
+    }
+    else if (use_log)
     {
         int flags = H5FD_LOG_LOC_IO|H5FD_LOG_NUM_IO|H5FD_LOG_TIME_IO|H5FD_LOG_ALLOC;
 
@@ -130,6 +139,15 @@ static int ProcessArgs_hdf5(int argi, int argc, char *argv[])
             use_log = 1;
             lbuf_size = i<argc-1?strtol(argv[i+1], &eptr, 10):0;
             if (errno==0 && lbuf_size>=0 && eptr != argv[i+1]) i++;
+        }
+        else if (!strcmp(argv[i], "--silo-fapl"))
+        {
+            char *eptr;
+            use_silo_fapl = 1;
+            silo_block_size = i<argc-1?strtol(argv[i+1], &eptr, 10):silo_block_size;
+            if (errno==0 && silo_block_size>=0 && eptr != argv[i+1]) i++;
+            silo_block_count = i<argc-1?strtol(argv[i+1], &eptr, 10):silo_block_count;
+            if (errno==0 && silo_block_count>=0 && eptr != argv[i+1]) i++;
         }
         else goto fail;
     }

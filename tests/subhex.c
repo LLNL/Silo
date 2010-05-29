@@ -84,21 +84,24 @@ main(int argc, char *argv[])
     float           Pvar[12];
     int		    driver=DB_PDB;
     char	   *filename="subhex.silo";
+    int            show_all_errors = FALSE;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
-	if (!strcmp(argv[i], "DB_PDB")) {
-	    driver = DB_PDB;
+	if (!strncmp(argv[i], "DB_PDB", 6)) {
+	    driver = StringToDriver(argv[i]);
 	    filename = "subhex.pdb";
 	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
 	    filename = "subhex.h5";
-	} else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
 	}
     }
 
-    DBShowErrors(DB_ABORT, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
     printf("Creating test file \"%s\".\n", filename);
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "3D ucd hex", driver);
 

@@ -730,7 +730,9 @@ dnl
 # it is an argument to the -D argument. So, I think this is
 # just totally bogus!
 # Default to large file support
+AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE";)
 AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE";)
+AX_CHECK_COMPILER_FLAGS("-D_FILE_OFFSET_BITS=64",CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64";)
 AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement",CFLAGS="$CFLAGS -Wdeclaration-after-statement";)
 
 #
@@ -1188,6 +1190,20 @@ else
    LIBS="$saved_LIBS"
 fi
 
+AC_ARG_WITH(pdb-proper,
+    AC_HELP_STRING([--with-pdb-proper],[directory where PDB proper is installed @<:@default=no@:>@]),
+    if test $withval != yes; then
+        PDBP_DRV="pdbp_drv"
+        AC_DEFINE(HAVE_PDBP_DRIVER,1,[Support for PDB Proper])
+        AC_SUBST(PDBP_DRV)
+        CPPFLAGS="-I$withval/include $CPPFLAGS"
+        LDFLAGS="-L$withval/lib $LDFLAGS"
+        LIBS="-lpdb -lpml -lscore $tmp_LIBS"
+    else
+        AC_MSG_ERROR(You must specify a directory for PDB proper)
+    fi
+    )
+
 dnl
 READLINE_LIBS=""
 if test "X$detect_readline" = Xyes; then
@@ -1366,6 +1382,7 @@ AC_CACHE_SAVE
 dnl
 AM_CONDITIONAL(NETCDF_NEEDED, test -n "$NETCDF")
 AM_CONDITIONAL(PDB_DRV_NEEDED, test -n "$PDB_DRV")
+AM_CONDITIONAL(PDBP_DRV_NEEDED, test -n "$PDBP_DRV")
 AM_CONDITIONAL(TAURUS_NEEDED, test -n "$TAURUS")
 AM_CONDITIONAL(HDF5_DRV_NEEDED, test -n "$HDF5_DRV")
 AM_CONDITIONAL(BROWSER_NEEDED, test -n "$BROWSER")
@@ -1391,6 +1408,7 @@ AC_CONFIG_FILES([
             src/debug/Makefile
             src/netcdf/Makefile
             src/pdb_drv/Makefile
+            src/pdbp_drv/Makefile
             src/hdf5_drv/Makefile
             src/taurus/Makefile
             src/unknown/Makefile

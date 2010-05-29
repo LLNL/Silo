@@ -79,7 +79,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
-      mk_nasf_pdb ioperf
+      mk_nasf_pdb ioperf arbpoly2d
 
 dir_SOURCES = \
  dir.c \
@@ -91,6 +91,7 @@ rocket_SOURCES = \
  rocket.cpp
 
 check_PROGRAMS = \
+ arbpoly2d \
  array \
  extface \
  multi_test \
@@ -143,6 +144,7 @@ check_PROGRAMS = \
 # c++ code compiled into Silo. I got this hack from
 # automake manaual.
 if CXX_LINK_NEEDED
+ nodist_EXTRA_arbpoly2d_SOURCES = dummy.cxx
  nodist_EXTRA_array_SOURCES = dummy.cxx
  nodist_EXTRA_extface_SOURCES = dummy.cxx
  nodist_EXTRA_multi_test_SOURCES = dummy.cxx
@@ -242,30 +244,52 @@ all-local:
 # Autotest targets.
 # Since we run testsuite multiple times in different 'modes', we
 # need some extra logic to contatentate all the results into a
-# single, final testsuite.log. Also, it is possible for TESTARGS
-# to somehow override DB_HDF5= and PYTHON= in these test inokations.
-#
+# single, final testsuite.log.
+# ATARGS = args to testsuite (autotest) script itself.
+# STARGS = args to silo tests.
+# By default, with no special args, we run the testsuite twice,
+# first on PDB driver and then on HDF5 driver.
 check-local: $(TESTSUITE) $(PROGS)
-	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) $(TESTARGS)
+	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=$(STARGS) $(ATARGS)
 	@if test -e testsuite.log; then \
 	    cp testsuite.log testsuite.log.pdb ; \
 	fi
-if HDF5_DRV_NEEDED
-	$(SHELL) $(srcdir)/testsuite DB_HDF5=DB_HDF5 PYTHON=$(PYTHON) BROWSER=$(BROWSER) $(TESTARGS)
-	@if test -e testsuite.log.pdb -a -e testsuite.log; then \
-	    cat testsuite.log.pdb >> testsuite.log ; \
+if PDBP_DRV_NEEDED
+	@if test -z "$(STARGS)"; then \
+	    $(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=DB_PDBP $(ATARGS); \
+	    if test -e testsuite.log; then \
+	        cp testsuite.log testsuite.log.pdbp ; \
+	    fi \
 	fi
 endif
+if HDF5_DRV_NEEDED
+	@if test -z "$(STARGS)"; then \
+	    $(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=DB_HDF5 $(ATARGS); \
+	    if test -e testsuite.log; then \
+	        cp testsuite.log testsuite.log.hdf5; \
+	    fi \
+	fi
+endif
+	@rm -f testsuite.log
+	@if test -e testsuite.log.pdb; then \
+	    cat testsuite.log.pdb >> testsuite.log ; \
+	fi
+	@if test -e testsuite.log.pdbp; then \
+	    cat testsuite.log.pdbp >> testsuite.log ; \
+	fi
+	@if test -e testsuite.log.hdf5; then \
+	    cat testsuite.log.hdf5 >> testsuite.log ; \
+	fi
 
 clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
 
-testsuite: $(srcdir)/testsuite.at
+testsuite: $(srcdir)/testsuite.at $(top_srcdir)/VERSION
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	-mv -f $@.tmp $@
 
-$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac $(top_srcdir)/VERSION
 	{					\
 	  echo '# Signature of the current package.'; \
 	  echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \
@@ -276,15 +300,17 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	} >$(srcdir)/package.m4
 
 # deal with the CC=mpicc until I can find a better way
+# Mark C. Miller, Sat May 29 08:15:48 PDT 2010
+#     put CPPFLAGS ahead of AMCPPFLAGS
 resample$(EXEEXT): $(resample_OBJECTS) $(resample_DEPENDENCIES)
 	@rm -f resample$(EXEEXT)
 	$(LIBTOOL) --tag=CC --mode=link $(MPICC) $(AM_CFLAGS) $(CFLAGS) \
 		$(AM_LDFLAGS) $(LDFLAGS) -o $@ $(resample_LDFLAGS) \
 		$(resample_OBJECTS) $(resample_LDADD) $(LIBS)
 resample.o: resample.c
-	$(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o resample.o `test -f 'resample.c' || echo '$(srcdir)/'`resample.c
+	$(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(AM_CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o resample.o `test -f 'resample.c' || echo '$(srcdir)/'`resample.c
 resample.lo: resample.c
-	$(LIBTOOL) --tag=CC --mode=compile $(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o $@ $<
+	$(LIBTOOL) --tag=CC --mode=compile $(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(AM_CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o $@ $<
 
 tests: $(PROGS)
 

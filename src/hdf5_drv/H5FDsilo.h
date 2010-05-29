@@ -33,8 +33,7 @@ extern "C" {
 H5_DLL hid_t H5FD_silo_init(void);
 H5_DLL void H5FD_silo_term(void);
 H5_DLL herr_t H5Pset_fapl_silo(hid_t fapl_id);
-H5_DLL herr_t H5Pset_silo_max_meta(hid_t fapl_id, hsize_t max_meta);
-H5_DLL herr_t HH5Pset_silo_raw_buf_size(hid_t fapl_id, hsize_t buf_size);
+H5_DLL herr_t H5Pset_silo_block_size_and_count(hid_t fapl_id, hsize_t block_size, int max_blocks_in_mem);
 
 #ifdef __cplusplus
 }

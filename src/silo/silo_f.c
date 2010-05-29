@@ -4336,6 +4336,37 @@ DBGETDEPWARN_FC ()
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
+SILO_API FORTRAN
+DBREGFOPTS_FC ( int *optlist_id )
+{
+    DBoptlist *optlist = NULL;
+
+    API_BEGIN("dbregfopts", int, -1) {
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+        API_RETURN(DBRegisterFileOptionsSet(optlist));
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+SILO_API FORTRAN
+DBUNREGFOPTS_FC ( int *opts_set_id )
+{
+    API_BEGIN("dbunregfopts", int, -1) {
+        API_RETURN(DBUnregisterFileOptionsSet(*opts_set_id));
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+SILO_API FORTRAN
+DBUNREGAFOPTS_FC ()
+{
+    API_BEGIN("dbunregafopts", int, -1) {
+        DBUnregisterAllFileOptionsSets();
+        API_RETURN(0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
 /*----------------------------------------------------------------------
  * Routine                                                DBMKMRGTREE_FC
  *

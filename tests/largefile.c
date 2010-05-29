@@ -52,6 +52,8 @@ for advertising or product endorsement purposes.
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #endif
 
+#include <std.c>
+
 static void
 build_curve (DBfile *dbfile, int driver)
 {
@@ -118,23 +120,31 @@ main(int argc, char *argv[])
     int            nerrors = 0;
     int            i, j, ndims=1; 
     int            driver=DB_HDF5;
-    char          *filename="largefile.h5";
+    char          *filename="largefile.silo";
+    int            show_all_errors = FALSE;
     DBfile        *dbfile;
+    int            nIters = 2500;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            fprintf(stderr, "This test only supported on HDF5 driver\n");
-            exit(1);
-        } else if (!strcmp(argv[i], "DB_HDF5")) {
-            driver = DB_HDF5;
+        if (!strncmp(argv[i], "DB_PDB",6)) {
+            driver = StringToDriver(argv[i]);
+            if (sizeof(int)<8)
+            {
+                fprintf(stderr, "Looks like PDB cannot support >2Gig files. Will stop at 1.990 Gigs\n");
+                nIters = 1990;
+            }
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
             filename = "largefile.h5";
-        } else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument '%s'\n", argv[0], argv[i]);
         }
     }
 
-    DBShowErrors(DB_TOP, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
     DBForceSingle(1);
 
     /*
@@ -143,12 +153,12 @@ main(int argc, char *argv[])
     printf("Creating file: '%s'\n", filename);
     dbfile = DBCreate(filename, 0, DB_LOCAL, "Simple Test", driver);
 
-    for (j = 0; j < 2500; j++)
+    for (j = 0; j < nIters; j++)
     {
         char tmpname[64];
 
         if (j % 100 == 0)
-            printf("Iterations %04d to %04d of %04d\n", j, j+100-1, 2500);
+            printf("Iterations %04d to %04d of %04d\n", j, j+100-1, nIters);
 
         sprintf(tmpname, "simple_%04d", j);
 
@@ -190,7 +200,7 @@ main(int argc, char *argv[])
     {
         char tmpname[64];
 
-        int n = rand() % 500 + (j >= 50 ? 200 : 0);
+        int n = rand() % 500 + (j >= 50 ? (nIters-500) : 0);
 
         sprintf(tmpname, "simple_%04d", n);
 

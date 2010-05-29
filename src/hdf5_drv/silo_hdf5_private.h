@@ -42,6 +42,9 @@ typedef struct DBfile_hdf5 {
     hid_t       T_double;               /*target DB_DOUBLE type         */
     hid_t       T_str256;               /*target 256-char string        */
     hid_t       (*T_str)(char*);        /*target character string       */
+    hid_t      *oobjs;			/*currently open objects        */
+    int         soobjs;                 /*size of oobjs array           */
+    int         noobjs;			/*number entries in oobjs in use*/
 } DBfile_hdf5;
 
 #ifndef NO_CALLBACKS

@@ -19,7 +19,15 @@ SZIP_HOME=/usr/gapps/silo/szip/2.1/i686_Linux_ELsmp
 SZIP_LIB=$(SZIP_HOME)/lib
 SZIP_LIBF=$(SZIP_LIB)/libsz.a
 
-CFLAGS=-g
+#ZLIB_HOME=/usr/gapps/silo/zlib/1.2.3/sles_10_ppc64
+#ZLIB_LIB=$(ZLIB_HOME)/lib
+#ZLIB_LIBF=$(ZLIB_LIB)/libz.a
+
+#CFLAGS=-DPARALLEL
+#CC=mpixlc
+#LINK=mpixlcxx
+
+CFLAGS=-g -pg
 CC=gcc
 LINK=g++
 
@@ -38,7 +46,7 @@ DRIVER_SHARED_OBJ=$(DRIVER_SRC:.c=.so)
 # shared object rule
 .c.so:
 	$(CC) $< -o $@ -shared $(CFLAGS) -I. -I$(HDF5_INC) -I$(PDB_INC) -I$(SILO_INC) \
-		$(SILO_LIBF) $(HDF5_LIBF) $(SZIP_LIBF)
+		$(SILO_LIBF) $(HDF5_LIBF) $(SZIP_LIBF) $(ZLIB_LIBF)
 
 # object rule
 .c.o:
@@ -55,4 +63,4 @@ ioperf_shared: ioperf_shared.o $(DRIVER_SHARED_OBJ)
 	-Wl,-rpath -Wl,`pwd`
 
 ioperf_static: ioperf_static.o $(DRIVER_STATIC_OBJ)
-	$(LINK) $< -o $@ $(CFLAGS) $(DRIVER_STATIC_OBJ) $(SILO_LIBF) $(HDF5_LIBF) $(SZIP_LIBF) -lz -lm
+	$(LINK) $< -o $@ $(CFLAGS) $(DRIVER_STATIC_OBJ) $(SILO_LIBF) $(HDF5_LIBF) $(SZIP_LIBF) $(ZLIB_LIBF) -lz -lm

@@ -43,7 +43,7 @@ ACLOCAL_AMFLAGS = -I config
 
 nodist_noinst_HEADERS = config.h
 
-EXTRA_DIST = COPYRIGHT FAQ
+EXTRA_DIST = COPYRIGHT FAQ VERSION
 
 MAINTAINERCLEANFILES = Makefile.in\
  aclocal.m4\

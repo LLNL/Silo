@@ -39,10 +39,11 @@ int main(int argc, char **argv)
     DBfile *db;
     int i,j, driver = DB_PDB, reorder = 0, friendly = 0;
     char          *filename = "ucd1d.pdb";
+    int            show_all_errors = FALSE;
 
     for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
+        if (!strncmp(argv[i], "DB_PDB", 6)) {
+            driver = StringToDriver(argv[i]);
             filename = "ucd1d.pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
@@ -51,11 +52,14 @@ int main(int argc, char **argv)
             reorder = 1;
         } else if (!strcmp(argv[i], "friendly")) {
             friendly = 1;
-        } else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
 
+    if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
 
     /* Create the coordinate arrays and the nodal variable */
     for (i=0; i<30; i++)

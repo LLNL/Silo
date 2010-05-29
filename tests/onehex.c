@@ -74,6 +74,7 @@ main(int argc, char *argv[])
     int             setinf = 0;
     int             setnan = 0;
     char 	    *filename = "onehex.silo";
+    int             show_all_errors = FALSE;
 
     int alloc_inc, vfd, core_vfd;
     char *mext, *rext;
@@ -138,12 +139,14 @@ main(int argc, char *argv[])
             setinf = 1;
 	} else if (!strcmp(argv[i], "nan")) {
             setnan = 1;
-	} else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
 	}
     }
     
-    DBShowErrors(DB_ABORT, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
     printf("Creating test file \"%s\".\n", filename);
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "3D ucd hex", driver);
 

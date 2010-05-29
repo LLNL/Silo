@@ -146,7 +146,7 @@ PUBLIC char   *_db_err_list[] =
     "Compression failure.",                   /* 25 */
     "Grab driver enabled.",                   /* 26 */
     "File was closed or never opened/created.",/* 27 */
-    "File multiply opened and all not read-only.", /* 28 */
+    "File multiply opened w/>1 not read-only.", /* 28 */
     "Specified driver cannot open this file.",/* 29 */
     "Optlist contains options for wrong class.",/* 30 */
     "Feature not enabled in this build." /* 31 */
@@ -162,9 +162,6 @@ static char *no_hdf5_driver_msg =
     "of HDF5 already on your sytem, you will also need\n"
     "to obtain HDF5 from www.hdfgroup.org and install it.";
 
-INTERNAL int   _db_err_level = DB_TOP;  /*what errors to issue (default) */
-INTERNAL void  (*_db_err_func)(char *);  /*how to issue errors  */
-INTERNAL jstk_t *Jstk = NULL;   /*error jump stack  */
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
 typedef struct reg_status_t {
     DBfile *f;
@@ -199,8 +196,26 @@ PRIVATE reg_status_t _db_regstatus[DB_NFILES] = /* DB_NFILES triples of zeros */
 
 PRIVATE filter_t _db_filter[DB_NFILTERS];
 const static char *api_dummy = 0;
-PRIVATE int
-db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate);
+
+/* stat struct definition */
+typedef struct db_silo_stat_t {
+#ifndef SIZEOF_OFF64_T
+#error missing definition for SIZEOF_OFF64_T in silo_private.h
+#else
+#if SIZEOF_OFF64_T > 4
+    struct stat64 s;
+#else
+    struct stat s;
+#endif
+#endif
+#ifdef _WIN32
+    DWORD fileindexlo;
+    DWORD fileindexhi;
+#endif
+} db_silo_stat_t;
+
+PRIVATE int db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate);
+PRIVATE int db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id);
 
 /* Global structures for option lists.  */
 struct _ma     _ma;
@@ -228,9 +243,15 @@ SILO_Globals_t SILO_Globals = {
     2.0,   /* compressionMinratio */
     0,     /* compressionErrmode (fallback) */
     {      /* file options sets [32 of them] */
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
+        0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0
+    },
+    DB_TOP,/* _db_err_level */
+    0,     /* _db_err_func */
+    DB_NONE,/* _db_err_level_drvr */
+    0      /* Jstk */
 };
 
 INTERNAL int
@@ -300,14 +321,14 @@ db_perror(const char *s, int errorno, char *fname)
         old_s[0] = '\0';
     }
 
-    switch (_db_err_level) {
+    switch (SILO_Globals._db_err_level) {
         case DB_NONE:
-            if (Jstk)
-                longjmp(Jstk->jbuf, -1);
+            if (SILO_Globals.Jstk)
+                longjmp(SILO_Globals.Jstk->jbuf, -1);
             return -1;
         case DB_TOP:
-            if (Jstk)
-                longjmp(Jstk->jbuf, -1);
+            if (SILO_Globals.Jstk)
+                longjmp(SILO_Globals.Jstk->jbuf, -1);
             break;
         case DB_ALL:
             break;
@@ -323,7 +344,7 @@ db_perror(const char *s, int errorno, char *fname)
      * Issue the error message to standard error or by calling
      * the indicated error handling routine.
      */
-    if (_db_err_func) {
+    if (SILO_Globals._db_err_func) {
         int len;
         char better_s[1024];
         better_s[0]='\0';
@@ -334,7 +355,7 @@ db_perror(const char *s, int errorno, char *fname)
         len = strlen(better_s);
         if (s && *s)
             snprintf(better_s+len, sizeof(better_s)-len, ": %s", s);
-        _db_err_func((char*)better_s);
+        SILO_Globals._db_err_func((char*)better_s);
     }
     else {
         if (fname && *fname)
@@ -493,7 +514,7 @@ DBVariableNameValid(const char *s)
 
         if (! okay)
         {
-            if (DB_NONE!=_db_err_level)
+            if (DB_NONE!=SILO_Globals._db_err_level)
             {
                 fprintf(stderr,"\"%s\" is an invalid name.  Silo variable\n"
                         "names may contain only alphanumeric characters\n"
@@ -2130,9 +2151,12 @@ static unsigned int bjhash(register const unsigned char *k, register unsigned in
  *   Mark C. Miller, Fri Feb 12 08:20:03 PST 2010
  *   Replaced conditional compilation with SIZEOF_OFF64T with
  *   db_silo_stat_struct.
+ *
+ *   Mark C. Miller, Wed May 19 17:07:05 PDT 2010
+ *   Added logic for _WIN32 form of the db_silo_stat_struct.
  *-------------------------------------------------------------------------*/
 PRIVATE int 
-db_register_file(DBfile *dbfile, const db_silo_stat_struct *filestate, int writeable)
+db_register_file(DBfile *dbfile, const db_silo_stat_t *filestate, int writeable)
 {
     int i;
     for (i = 0; i < DB_NFILES; i++)
@@ -2140,8 +2164,13 @@ db_register_file(DBfile *dbfile, const db_silo_stat_struct *filestate, int write
         if (_db_regstatus[i].f == 0)
         {
             unsigned int hval = 0;
-            hval = bjhash((unsigned char *) &(filestate->st_dev), sizeof(filestate->st_dev), hval);
-            hval = bjhash((unsigned char *) &(filestate->st_ino), sizeof(filestate->st_ino), hval);
+#ifndef _WIN32
+            hval = bjhash((unsigned char *) &(filestate->s.st_dev), sizeof(filestate->s.st_dev), hval);
+            hval = bjhash((unsigned char *) &(filestate->s.st_ino), sizeof(filestate->s.st_ino), hval);
+#else
+            hval = bjhash((unsigned char *) &(filestate->fileindexlo), sizeof(filestate->fileindexlo), hval);
+            hval = bjhash((unsigned char *) &(filestate->fileindexhi), sizeof(filestate->fileindexhi), hval);
+#endif
             _db_regstatus[i].f = dbfile;
             _db_regstatus[i].n = hval; 
             _db_regstatus[i].w = writeable;
@@ -2175,7 +2204,7 @@ db_unregister_file(DBfile *dbfile)
 }
 
 PRIVATE int
-db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
+db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate)
 {
     int i;
     if (dbfile)
@@ -2189,8 +2218,13 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
     else if (filestate)
     {
         unsigned int hval = 0;
-        hval = bjhash((unsigned char *) &(filestate->st_dev), sizeof(filestate->st_dev), hval);
-        hval = bjhash((unsigned char *) &(filestate->st_ino), sizeof(filestate->st_ino), hval);
+#ifndef _WIN32
+        hval = bjhash((unsigned char *) &(filestate->s.st_dev), sizeof(filestate->s.st_dev), hval);
+        hval = bjhash((unsigned char *) &(filestate->s.st_ino), sizeof(filestate->s.st_ino), hval);
+#else
+        hval = bjhash((unsigned char *) &(filestate->fileindexlo), sizeof(filestate->fileindexlo), hval);
+        hval = bjhash((unsigned char *) &(filestate->fileindexhi), sizeof(filestate->fileindexhi), hval);
+#endif
         for (i = 0; i < DB_NFILES; i++)
         {
             if (_db_regstatus[i].f != 0 &&
@@ -2201,6 +2235,45 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
     return -1;
 }
 
+PRIVATE int
+db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
+{
+    int retval;
+    errno = 0;
+    memset(&(statbuf->s), 0, sizeof(statbuf->s));
+
+#ifdef _WIN32
+    {
+        /* this logic was copied by and large from HDF5 sec2 VFD */
+        int fd = open(name, O_RDONLY);
+        if (fd != -1)
+        {
+            struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+            GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &fileinfo);
+            statbuf->fileindexhi = fileinfo.nFileIndexHigh;
+            statbuf->fileindexlo = fileinfo.nFileIndexLow;
+            close(fd);
+            errno = 0;
+            retval = 0;
+        }
+        else
+        {
+            retval = -1;
+            if (errno == 0)
+                errno = ENOENT;
+        }
+    }
+#else
+#if SIZEOF_OFF64_T > 4
+    retval = stat64(name, &(statbuf->s));
+#else
+    retval = stat(name, &(statbuf->s));
+#endif /* #if SIZEOF_OFF64_T > 4 */
+#endif /* #ifdef _WIN32 */
+
+    return retval;
+}
+
 /*-------------------------------------------------------------------------
  * Function:   db_silo_stat
  *
@@ -2209,17 +2282,10 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_struct *filestate)
  *
  * Programmer: Mark C. Miller, Fri Feb 12 08:21:52 PST 2010
  *-------------------------------------------------------------------------*/
-int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int opts_set_id)
+PRIVATE int
+db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
 {
-    int retval;
-    errno = 0;
-    memset(statbuf, 0, sizeof(*statbuf));
-
-#if SIZEOF_OFF64_T > 4
-    retval = stat64(name, statbuf);
-#else
-    retval = stat(name, statbuf);
-#endif
+    int retval = db_silo_stat_one_file(name, statbuf); 
 
     if (opts_set_id == -1 ||
         opts_set_id == DB_FILE_OPTS_H5_DEFAULT_SPLIT ||
@@ -2232,7 +2298,7 @@ int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int opts_set_id
 
         for (i = imin; i < imax; i++)
         {
-            db_silo_stat_struct tmpstatbuf;
+            db_silo_stat_t tmpstatbuf;
             static char tmpname[4096];
             char *meta_ext="", *raw_ext="-raw";
             void *p; int vfd = -1, retval;
@@ -2268,11 +2334,7 @@ int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int opts_set_id
             else
                 sprintf(tmpname, "%s%s", name, raw_ext);
             errno = 0;
-#if SIZEOF_OFF64_T > 4
-            if (stat64(tmpname, &tmpstatbuf) != 0 || errno != 0)
-#else
-            if (stat(tmpname, &tmpstatbuf) != 0 || errno != 0)
-#endif
+            if (db_silo_stat_one_file(tmpname, &tmpstatbuf) != 0 || errno != 0)
                 continue;
 
             /* try the meta file last and return its statbuf */
@@ -2281,11 +2343,7 @@ int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int opts_set_id
             else
                 sprintf(tmpname, "%s%s", name, meta_ext);
             memset(&tmpstatbuf, 0, sizeof(tmpstatbuf));
-#if SIZEOF_OFF64_T > 4
-            if (stat64(tmpname, &tmpstatbuf) == 0 && errno == 0)
-#else
-            if (stat(tmpname, &tmpstatbuf) == 0 && errno == 0)
-#endif
+            if (db_silo_stat_one_file(tmpname, &tmpstatbuf) == 0 && errno == 0)
             {
                 memcpy(statbuf, &tmpstatbuf, sizeof(tmpstatbuf));
                 return 0;
@@ -2966,7 +3024,7 @@ DBGetDriverTypeFromPath(const char *path)
    }
    (void) close(fd);
    if (strstr(buf, "PDB"))
-      return DB_PDB;
+      return 2; /* can't use DB_PDB here */
    if (strstr(buf, "HDF"))
       return 7; /* can't use DB_HDF5X here. */
    return DB_UNKNOWN;
@@ -3525,25 +3583,36 @@ PUBLIC void
 DBShowErrors(int level, void(*func)(char*))
 {
     static int     old_level = DB_NONE;
+    static int     old_level_drvr = DB_NONE;
     static int     nested_suspend = 0;
+
+    SILO_Globals._db_err_level_drvr = DB_NONE;
+    if (level == DB_ALL_AND_DRVR)
+    {
+        level = DB_ALL;
+	SILO_Globals._db_err_level_drvr = DB_ALL;
+    }
 
     switch (level) {
         case DB_SUSPEND:
             if (nested_suspend++ == 0)
             {
-                old_level = _db_err_level;
+                old_level = SILO_Globals._db_err_level;
+                old_level_drvr = SILO_Globals._db_err_level_drvr;
             }
-            _db_err_level = DB_NONE;
+            SILO_Globals._db_err_level = DB_NONE;
+	    SILO_Globals._db_err_level_drvr = DB_NONE;
             break;
         case DB_RESUME:
             if (--nested_suspend == 0)
             {
-                _db_err_level = old_level;
+                SILO_Globals._db_err_level = old_level;
+	        SILO_Globals._db_err_level_drvr = old_level_drvr;
             }
             break;
         default:
-            _db_err_level = level;
-            _db_err_func = func;
+            SILO_Globals._db_err_level = level;
+            SILO_Globals._db_err_func = func;
             break;
     }
 }
@@ -3602,6 +3671,12 @@ PUBLIC char   *
 DBErrFunc(void)
 {
     return db_errfunc;
+}
+
+PUBLIC int
+DBErrlvl(void)
+{
+    return SILO_Globals._db_err_level;
 }
 
 /*-------------------------------------------------------------------------
@@ -3838,7 +3913,7 @@ DBOpenReal(const char *name, int type, int mode)
     int            fileid, i;
     int            origtype = type;
     int            opts_set_id;
-    db_silo_stat_struct filestate;
+    db_silo_stat_t filestate;
 
     API_BEGIN("DBOpen", DBfile *, NULL) {
         if (!name)
@@ -3924,19 +3999,26 @@ DBOpenReal(const char *name, int type, int mode)
                 API_ERROR(name, E_CONCURRENT);
         }
 
-        if( ( filestate.st_mode & S_IFDIR ) != 0 )
+        if( ( filestate.s.st_mode & S_IFDIR ) != 0 )
         {
             /************************************/
             /* File is actually a directory.    */
             /************************************/
             API_ERROR((char *)name, E_FILEISDIR);
         }
-        if( ( filestate.st_mode & S_IREAD ) == 0 )
+        if( ( filestate.s.st_mode & S_IREAD ) == 0 )
         {
             /****************************************/
             /* File is missing read permissions.    */
             /****************************************/
             API_ERROR((char *)name, E_FILENOREAD);
+        }
+        if (DB_READ!=mode && (filestate.s.st_mode & S_IWUSR) == 0)
+        {
+            /****************************************/
+            /* File is open for write and missing write permission. */
+            /****************************************/
+            API_ERROR((char *)name, E_FILENOWRITE);
         }
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)
@@ -4024,7 +4106,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     int            fileid, i, n;
     int            origtype = type;
     int            opts_set_id;
-    db_silo_stat_struct filestate;
+    db_silo_stat_t filestate;
 
     API_BEGIN("DBCreate", DBfile *, NULL) {
         if (!name)
@@ -4044,7 +4126,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             {
                 API_ERROR((char *)name, E_FEXIST);
             }
-            if ((filestate.st_mode & S_IFDIR) != 0)
+            if ((filestate.s.st_mode & S_IFDIR) != 0)
             {
                 API_ERROR((char *)name, E_FILEISDIR);
             }
@@ -8785,6 +8867,8 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
         if (!nodelist && lnodelist)
             API_ERROR("nodelist", E_BADARGS);
 
+#warning FIXME
+#if 0
         if (nzones <= 0)
             API_ERROR("nzones", E_BADARGS);
         if (!facecnt && nzones)
@@ -8793,12 +8877,13 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
             API_ERROR("lfacelist", E_BADARGS);
         if (!facelist && lfacelist)
             API_ERROR("facelist", E_BADARGS);
+#endif
 
         if (0 != origin && 1 != origin)
             API_ERROR("origin", E_BADARGS);
-        if ((lo_offset < 0) || (lo_offset >= nzones))
+        if (nzones>0 && ((lo_offset < 0) || (lo_offset >= nzones)))
             API_ERROR("lo_offset", E_BADARGS);
-        if ((hi_offset < 0) || (hi_offset >= nzones))
+        if (nzones>0 && ((hi_offset < 0) || (hi_offset >= nzones)))
             API_ERROR("hi_offset", E_BADARGS);
         if (lo_offset > hi_offset)
             API_ERROR("hi_offset", E_BADARGS);
@@ -11589,8 +11674,12 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
     }
     else if (handleSlashSwap)
     {
+        int nsemis = 0;
         for (i = 0; strList[i] != '\0'; i++)
-            ;
+        {
+            if (strList[i] == ';') nsemis++;
+            if (nsemis >= n+1) break;
+        }
         strLen = i;
     }
     

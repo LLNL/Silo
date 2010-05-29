@@ -165,8 +165,8 @@ int main(int argc, char **argv)
           fprintf(stderr, "\t-s - sequential mode \n");
           quit_me(1);
         }
-      else if (!strcmp(argv[i], "DB_PDB"))
-          driver = DB_PDB;
+      else if (!strncmp(argv[i], "DB_PDB", 6))
+          driver = StringToDriver(argv[i]);
       else if (!strncmp(argv[i], "DB_HDF5", 7))
          driver = StringToDriver(argv[i]);
     } /* end of for loop */

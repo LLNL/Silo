@@ -48,23 +48,26 @@ main(int argc, char *argv[])
     int             i,j;
 
     const int       origin = 0;
+    int             show_all_errors = FALSE;
 
     /* Parse command-line options */
     for (i=1; i<argc; i++) {
-	if (!strcmp(argv[i], "DB_PDB")) {
-	    driver = DB_PDB;
+	if (!strncmp(argv[i], "DB_PDB",6)) {
+	    driver = StringToDriver(argv[i]);
 	    filename = "alltypes.pdb";
 	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
 	    driver = StringToDriver(argv[i]);
 	    filename = "alltypes.h5";
-	} else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
 	    fprintf(stderr, "unknown option: %s\n", argv[i]);
 	    exit(1);
 	}
     }
 
     /* Turn on error handling */
-    DBShowErrors(DB_ABORT, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
     /* Create file */
     printf("Creating test file \"%s\".\n", filename);

@@ -258,6 +258,10 @@ foreach $var (@temparray) {
         $value = hex($value);
     } elsif ($value =~ /^0[0-7]*/) {
         $value = oct($value);
+    } elsif ($value =~ /^DB_HDF5_OPTS(.*)/) {
+        local ($foo, $bar) = split ('\(', $value);
+        local ($g1, $g2) = split ( '\)', $bar);
+        $value = "$g1 * 2048"
     }
     printf "      parameter (%-25s = %-15s)\n", $name, $value;
 }

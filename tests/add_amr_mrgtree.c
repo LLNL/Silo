@@ -419,6 +419,7 @@ main(int argc, char *argv[])
     char tmpName[256];
     char lvlMapsName[256];
     char chldMapsName[256];
+    int show_all_errors = FALSE;
 
     assert(copy==0);
 
@@ -428,7 +429,9 @@ main(int argc, char *argv[])
         if (!strcmp(argv[i], "-nocp"))
         {
             copy = 0;
-        }
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	}
         else if (siloFileName == 0)
         {
             siloFileName = strdup(argv[i]);
@@ -439,7 +442,7 @@ main(int argc, char *argv[])
         }
     }
 
-    DBShowErrors(DB_ABORT, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
 
     /* by default, we make a copy of the specified file */

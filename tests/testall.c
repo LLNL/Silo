@@ -3354,6 +3354,7 @@ main(int argc, char *argv[])
     int            ntests = 0;
     int		   driver=DB_PDB;
     char	   *file_ext = "pdb";
+    int            show_all_errors = FALSE;
 
     /*
      * parse the execute line.
@@ -3371,20 +3372,23 @@ main(int argc, char *argv[])
             order = DB_ROWMAJOR;
         else if (strcmp (argv[i], "-c") == 0)
             order = DB_COLMAJOR;
-	else if (!strcmp(argv[i], "DB_PDB")) {
-	    driver = DB_PDB;
+	else if (!strncmp(argv[i], "DB_PDB", 6)) {
+	    driver = StringToDriver(argv[i]);
 	    file_ext = "pdb";
 	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
 	    file_ext = "h5";
-	} else
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             printf ("Unknown execute line option.\n");
+        }
     }
 
     /*
      * Abort on any errors.
      */
-    DBShowErrors(DB_ABORT, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
     printf("Testing %s driver...\n", file_ext);
     MakeFiles(file_ext, size, order, driver);

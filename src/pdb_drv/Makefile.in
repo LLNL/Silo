@@ -45,7 +45,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_pdb_drv_la_LIBADD =
-am__objects_1 = pjgroup.lo pjjacket.lo pjobj.lo silo_pdb.lo
+am__objects_1 = silo_pdb.lo
 am_libsilo_pdb_drv_la_OBJECTS = $(am__objects_1)
 libsilo_pdb_drv_la_OBJECTS = $(am_libsilo_pdb_drv_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
@@ -132,6 +132,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PDBP_DRV = @PDBP_DRV@
 PDB_DRV = @PDB_DRV@
 PRTDIAG = @PRTDIAG@
 PYTHON = @PYTHON@
@@ -233,10 +234,12 @@ noinst_HEADERS = \
  silo_pdb_private.h
 
 FILES = \
+ silo_pdb.c
+
+EXTRA_DIST = \
  pjgroup.c \
  pjjacket.c \
- pjobj.c \
- silo_pdb.c
+ pjobj.c
 
 all: all-am
 
@@ -289,9 +292,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pjgroup.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pjjacket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pjobj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_pdb.Plo@am__quote@
 
 .c.o:

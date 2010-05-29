@@ -60,6 +60,7 @@ main(int argc, char *argv[])
     };
     char **files = pdbfiles;
     int maskindex = 0;
+    int show_all_errors = FALSE;
 
     /* Set the masks used for the tests. */
     long    mask[] = {
@@ -105,16 +106,20 @@ main(int argc, char *argv[])
     };
 
     for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
+        if (!strncmp(argv[i], "DB_PDB", 6)) {
+            driver = StringToDriver(argv[i]);
             files = pdbfiles;
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
             files = h5files;
-        } else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
+
+    if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
 
     printf("NOTE: The times listed here do not take any caching into\n");
     printf("account.  Thus, the first time listed in each section may be\n");

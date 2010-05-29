@@ -94,6 +94,13 @@ for advertising or product endorsement purposes.
  *
  *     Mark C. Miller, Thu Mar 18 18:16:22 PDT 2010
  *     Increased size of tried/ascii to accomodate HDF5 options sets.
+ *
+ *     Mark C. Miller, Sat May 15 16:11:13 PDT 2010
+ *     Add slot for PDB Proper. Put it ahead of PDB (lite) in priority.
+ *
+ *     Mark C. Miller, Fri May 21 08:24:31 PDT 2010
+ *     Moved logic stating a file and checking for write permissions up
+ *     to interface layer, silo.c
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
 db_unk_Open(char *name, int mode, int subtype_dummy)
@@ -102,15 +109,14 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     int            type;
     char          *me = "db_unk_Open";
     char           tried[1024], ascii[32];
-    db_silo_stat_struct filestate;
 
     /* Hierarchy defined as:
-     *      DB_PDB, DB_HDF5, DB_NETCDF, DB_TAURUS, DB_DEBUG
+     *      DB_PDBP, DB_PDB, DB_HDF5, DB_NETCDF, DB_TAURUS, DB_DEBUG
      * The reason we specify them as numbers instead of DB_WHATEVER is
      * that the driver might not be defined in silo.h.
      */
-    static int     hierarchy[] = { 2, 7, 0, 3, 6 };
-    static char *  hierarchy_names[] = { "PDB", "HDF5", "NetCDF", "Taurus",
+    static int     hierarchy[] = { 1, 2, 7, 0, 3, 6 };
+    static char *  hierarchy_names[] = { "PDBP", "PDB", "HDF5", "NetCDF", "Taurus",
                                          "debug" };
     static int     nhiers = sizeof(hierarchy) / sizeof(hierarchy[0]);
 
@@ -123,17 +129,6 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
         "re-install Silo. If you do not have an installation\n"
         "of HDF5 already on your sytem, you will also need\n"
         "to obtain HDF5 from www.hdfgroup.org and install it.";
-
-
-    /*
-     * If the file is read-only but the access mode calls for read/write,
-     * then return an error without even trying any drivers.
-     */
-    db_silo_stat(name, &filestate, 0);
-    if (DB_READ!=mode && (filestate.st_mode&S_IWUSR)==0) {
-       db_perror (name, E_FILENOWRITE, me);
-       return NULL;
-    }
 
     /*
      * Try each driver...

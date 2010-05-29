@@ -99,6 +99,11 @@ static void CleanupDriverStuff()
         if (driver_opts[i]) DBFreeOptlist(driver_opts[i]);
     for (i = 0; i < sizeof(driver_strs)/sizeof(driver_strs[0]); i++)
         if (driver_strs[i]) free(driver_strs[i]);
+    memset(driver_opts, 0, sizeof(driver_opts));
+    memset(driver_strs, 0, sizeof(driver_strs));
+    memset(driver_ints, 0, sizeof(driver_ints));
+    driver_nints = 0;
+    driver_nstrs = 0;
 }
 
 static void MakeDriverOpts(DBoptlist **_opts, int *opts_id)
@@ -281,7 +286,8 @@ void file_reset_hdf5_vfd_options (void) {
             CHECK_SYMBOLN_INT(DBOPT_H5_CACHE_NBYTES)
             CHECK_SYMBOLN_INT(DBOPT_H5_FAM_SIZE)
             CHECK_SYMBOLN_SYM(DBOPT_H5_FAM_FILE_OPTS)
-            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_MAX_META)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_BLOCK_SIZE)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_BLOCK_COUNT)
             free(tmp);
             if (!got_it)
             {
@@ -375,7 +381,6 @@ file_new (va_list ap)
    DBfile       *f;
    int          rdonly;
    int          old_err_level;
-   extern int   _db_err_level;
    static int   seen_file_format = -1;
 
    fname = va_arg (ap, char*);
@@ -388,7 +393,7 @@ file_new (va_list ap)
     * Open the file, and if that fails because the file doesn't have write
     * permission then try opening it for read-only
     */
-#define DEFAULT_DB_TYPE DB_UNKNOWN
+#define DEFAULT_DB_TYPE DB_UNKNOWN 
    f = DBOpen (fname, DEFAULT_DB_TYPE, rdonly ? DB_READ : DB_APPEND);
    if (!f && E_FILENOWRITE==db_errno && !rdonly) {
       f = DBOpen (fname, DEFAULT_DB_TYPE, DB_READ);
@@ -404,10 +409,10 @@ file_new (va_list ap)
     * to be a warning instead of an error.  See DBOpen() for documentation.
     */
    if (!f && E_NOTFILTER==db_errno) {
-      old_err_level = _db_err_level;
-      _db_err_level = DB_ALL;
+      old_err_level = DBErrlvl();
+      DBShowErrors(DB_ALL, NULL);
       f = DBOpen (fname, DEFAULT_DB_TYPE, rdonly ? DB_READ : DB_APPEND);
-      _db_err_level = old_err_level;
+      DBShowErrors(old_err_level, NULL);
    }
 
    if (!f) {

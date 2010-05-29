@@ -64,7 +64,7 @@ done
 #
 # Cleanup
 #
-rm -rf h5_hzip_files
-rm -f testhzip.out
+#rm -rf h5_hzip_files
+#rm -f testhzip.out
 
 exit $result 

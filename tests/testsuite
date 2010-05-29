@@ -917,7 +917,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF
-silo 4.7.3-pre2 test suite: VALGRIND="$VALGRIND" DB_HDF5="$DB_HDF5" test groups:
+silo 4.8-pre2 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS" test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -941,7 +941,7 @@ _ATEOF
   exit 0
 fi
 if $at_version_p; then
-  echo "$as_me (silo 4.7.3-pre2)"
+  echo "$as_me (silo 4.8-pre2)"
   cat <<\_ACEOF
 
 Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -1030,11 +1030,11 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 sed 'h;s/./-/g;s/^.../## /;s/...$/ ##/;p;x;p;x' <<_ASBOX
-## silo 4.7.3-pre2 test suite: VALGRIND="$VALGRIND" DB_HDF5="$DB_HDF5". ##
+## silo 4.8-pre2 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
 _ASBOX
 {
   sed 'h;s/./-/g;s/^.../## /;s/...$/ ##/;p;x;p;x' <<_ASBOX
-## silo 4.7.3-pre2 test suite: VALGRIND="$VALGRIND" DB_HDF5="$DB_HDF5". ##
+## silo 4.8-pre2 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
 _ASBOX
   echo
 
@@ -1293,15 +1293,15 @@ _ATEOF
 cat >expout <<'_ATEOF'
 This version of Silo is greater than or equal to 4.6
 This version of Silo is NOT greater than or equal to 90.5.2
-DBVersion() returns "4.7.3-pre2"
+DBVersion() returns "4.8-pre2"
 DBVersionGE(4,6,0) returns 1
 DBVersionGE(90,5,2) returns 0
 On file handle returned from DBCreate...
-    DBFileVersion() returns "4.7.3-pre2"
+    DBFileVersion() returns "4.8-pre2"
     DBFileVersionGE(4,6,0) returns 1
     DBFileVersionGE(90,5,2) returns 0
 On file handle returned from DBOpen...
-    DBFileVersion() returns "4.7.3-pre2"
+    DBFileVersion() returns "4.8-pre2"
     DBFileVersionGE(4,6,0) returns 1
     DBFileVersionGE(90,5,2) returns 0
 On old silo file handle returned from DBOpen...
@@ -1312,12 +1312,12 @@ On old silo file handle returned from DBOpen...
 _ATEOF
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:32: \$VALGRIND version \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:32: \$VALGRIND version \$STARGS"
 echo testsuite.at:32 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND version \"$DB_HDF5\"" in
+    case "$VALGRIND version $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1325,12 +1325,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND version "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND version $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND version "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND version $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1426,12 +1426,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:38: \$VALGRIND point \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:38: \$VALGRIND point \$STARGS"
 echo testsuite.at:38 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND point \"$DB_HDF5\"" in
+    case "$VALGRIND point $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1439,12 +1439,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND point "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND point $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND point "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND point $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1483,12 +1483,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:41: \$VALGRIND extface \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:41: \$VALGRIND extface \$STARGS"
 echo testsuite.at:41 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND extface \"$DB_HDF5\"" in
+    case "$VALGRIND extface $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1496,12 +1496,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND extface "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND extface $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND extface "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND extface $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1540,12 +1540,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:44: \$VALGRIND testall -small \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:44: \$VALGRIND testall -small \$STARGS"
 echo testsuite.at:44 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND testall -small \"$DB_HDF5\"" in
+    case "$VALGRIND testall -small $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1553,12 +1553,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND testall -small "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND testall -small $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND testall -small "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND testall -small $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1597,12 +1597,12 @@ $at_traceon
       $at_traceon
  # needs files generated by other execs
 $at_traceoff
-echo "$at_srcdir/testsuite.at:47: extface \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:47: extface \$STARGS"
 echo testsuite.at:47 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "extface \"$DB_HDF5\"" in
+    case "extface $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1610,12 +1610,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; extface "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; extface $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; extface "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; extface $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1638,12 +1638,12 @@ fi
 $at_traceon
  # don't valgrind these intermediate parts
 $at_traceoff
-echo "$at_srcdir/testsuite.at:48: point \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:48: point \$STARGS"
 echo testsuite.at:48 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "point \"$DB_HDF5\"" in
+    case "point $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1651,12 +1651,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; point "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; point $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; point "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; point $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1679,12 +1679,12 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:49: testall -small \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:49: testall -small \$STARGS"
 echo testsuite.at:49 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "testall -small \"$DB_HDF5\"" in
+    case "testall -small $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1692,12 +1692,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; testall -small "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; testall -small $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; testall -small "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; testall -small $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1720,12 +1720,12 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:50: \$VALGRIND TestReadMask \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:50: \$VALGRIND TestReadMask \$STARGS"
 echo testsuite.at:50 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND TestReadMask \"$DB_HDF5\"" in
+    case "$VALGRIND TestReadMask $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1733,12 +1733,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND TestReadMask "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND TestReadMask $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND TestReadMask "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND TestReadMask $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1777,12 +1777,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:53: \$VALGRIND array \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:53: \$VALGRIND array \$STARGS"
 echo testsuite.at:53 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND array \"$DB_HDF5\"" in
+    case "$VALGRIND array $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1790,12 +1790,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND array "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND array $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND array "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND array $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1834,12 +1834,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:56: \$VALGRIND multi_test \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:56: \$VALGRIND multi_test \$STARGS"
 echo testsuite.at:56 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND multi_test \"$DB_HDF5\"" in
+    case "$VALGRIND multi_test $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1847,12 +1847,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND multi_test "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND multi_test $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND multi_test "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND multi_test $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1891,12 +1891,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:59: \$VALGRIND multi_test earlyclose \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:59: \$VALGRIND multi_test earlyclose \$STARGS"
 echo testsuite.at:59 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND multi_test earlyclose \"$DB_HDF5\"" in
+    case "$VALGRIND multi_test earlyclose $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1904,12 +1904,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND multi_test earlyclose "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND multi_test earlyclose $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND multi_test earlyclose "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND multi_test earlyclose $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -1948,12 +1948,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:62: \$VALGRIND partial_io \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:62: \$VALGRIND partial_io \$STARGS"
 echo testsuite.at:62 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND partial_io \"$DB_HDF5\"" in
+    case "$VALGRIND partial_io $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -1961,12 +1961,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND partial_io "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND partial_io $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND partial_io "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND partial_io $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2005,12 +2005,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:65: \$VALGRIND simple \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:65: \$VALGRIND simple \$STARGS"
 echo testsuite.at:65 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND simple \"$DB_HDF5\"" in
+    case "$VALGRIND simple $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2018,12 +2018,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND simple "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND simple $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND simple "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND simple $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2062,12 +2062,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:68: \$VALGRIND ucd \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:68: \$VALGRIND ucd \$STARGS"
 echo testsuite.at:68 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND ucd \"$DB_HDF5\"" in
+    case "$VALGRIND ucd $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2075,12 +2075,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND ucd "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND ucd "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2119,12 +2119,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:71: \$VALGRIND ucdsamp3 \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:71: \$VALGRIND ucdsamp3 \$STARGS"
 echo testsuite.at:71 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND ucdsamp3 \"$DB_HDF5\"" in
+    case "$VALGRIND ucdsamp3 $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2132,12 +2132,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND ucdsamp3 "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND ucdsamp3 $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND ucdsamp3 "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND ucdsamp3 $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2176,12 +2176,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:74: \$VALGRIND testall -small -fortran \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:74: \$VALGRIND testall -small -fortran \$STARGS"
 echo testsuite.at:74 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND testall -small -fortran \"$DB_HDF5\"" in
+    case "$VALGRIND testall -small -fortran $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2189,12 +2189,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND testall -small -fortran "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND testall -small -fortran $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND testall -small -fortran "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND testall -small -fortran $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2233,12 +2233,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:77: \$VALGRIND obj \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:77: \$VALGRIND obj \$STARGS"
 echo testsuite.at:77 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND obj \"$DB_HDF5\"" in
+    case "$VALGRIND obj $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2246,12 +2246,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND obj "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND obj "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2290,12 +2290,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:80: \$VALGRIND onehex \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:80: \$VALGRIND onehex \$STARGS"
 echo testsuite.at:80 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND onehex \"$DB_HDF5\"" in
+    case "$VALGRIND onehex $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2303,12 +2303,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND onehex "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND onehex $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND onehex "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND onehex $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2347,12 +2347,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:83: \$VALGRIND oneprism \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:83: \$VALGRIND oneprism \$STARGS"
 echo testsuite.at:83 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND oneprism \"$DB_HDF5\"" in
+    case "$VALGRIND oneprism $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2360,12 +2360,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND oneprism "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND oneprism $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND oneprism "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND oneprism $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2404,12 +2404,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:86: \$VALGRIND onepyramid \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:86: \$VALGRIND onepyramid \$STARGS"
 echo testsuite.at:86 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND onepyramid \"$DB_HDF5\"" in
+    case "$VALGRIND onepyramid $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2417,12 +2417,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND onepyramid "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND onepyramid $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND onepyramid "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND onepyramid $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2461,12 +2461,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:89: \$VALGRIND onetet \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:89: \$VALGRIND onetet \$STARGS"
 echo testsuite.at:89 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND onetet \"$DB_HDF5\"" in
+    case "$VALGRIND onetet $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2474,12 +2474,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND onetet "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND onetet $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND onetet "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND onetet $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2518,12 +2518,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:92: \$VALGRIND subhex \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:92: \$VALGRIND subhex \$STARGS"
 echo testsuite.at:92 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND subhex \"$DB_HDF5\"" in
+    case "$VALGRIND subhex $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2531,12 +2531,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND subhex "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND subhex $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND subhex "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND subhex $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2575,12 +2575,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:95: \$VALGRIND twohex \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:95: \$VALGRIND twohex \$STARGS"
 echo testsuite.at:95 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND twohex \"$DB_HDF5\"" in
+    case "$VALGRIND twohex $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2588,12 +2588,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND twohex "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND twohex $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND twohex "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND twohex $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2632,12 +2632,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:98: \$VALGRIND multispec \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:98: \$VALGRIND multispec \$STARGS"
 echo testsuite.at:98 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND multispec \"$DB_HDF5\"" in
+    case "$VALGRIND multispec $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2645,12 +2645,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND multispec "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND multispec $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND multispec "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND multispec $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2689,12 +2689,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:101: \$VALGRIND sami \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:101: \$VALGRIND sami \$STARGS"
 echo testsuite.at:101 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND sami \"$DB_HDF5\"" in
+    case "$VALGRIND sami $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2702,12 +2702,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND sami "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND sami $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND sami "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND sami $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2746,12 +2746,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:104: \$VALGRIND specmix \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:104: \$VALGRIND specmix \$STARGS"
 echo testsuite.at:104 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND specmix \"$DB_HDF5\"" in
+    case "$VALGRIND specmix $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2759,12 +2759,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND specmix "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND specmix $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND specmix "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND specmix $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2803,12 +2803,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:107: \$VALGRIND spec \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:107: \$VALGRIND spec \$STARGS"
 echo testsuite.at:107 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND spec \"$DB_HDF5\"" in
+    case "$VALGRIND spec $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2816,12 +2816,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND spec "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND spec $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND spec "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND spec $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2860,12 +2860,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:110: \$VALGRIND group_test 0 0 0 \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:110: \$VALGRIND group_test 0 0 0 \$STARGS"
 echo testsuite.at:110 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND group_test 0 0 0 \"$DB_HDF5\"" in
+    case "$VALGRIND group_test 0 0 0 $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2873,12 +2873,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND group_test 0 0 0 "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND group_test 0 0 0 $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND group_test 0 0 0 "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND group_test 0 0 0 $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2917,12 +2917,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:113: \$VALGRIND ucd \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:113: \$VALGRIND ucd \$STARGS"
 echo testsuite.at:113 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND ucd \"$DB_HDF5\"" in
+    case "$VALGRIND ucd $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2930,12 +2930,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND ucd "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND ucd "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -2958,12 +2958,12 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:114: test -z \"\$DB_HDF5\" && \$VALGRIND listtypes ucd.pdb || \$VALGRIND listtypes ucd.h5"
+echo "$at_srcdir/testsuite.at:114: test -z \"\$STARGS\" && \$VALGRIND listtypes ucd.pdb || \$VALGRIND listtypes ucd.h5"
 echo testsuite.at:114 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -z \"$DB_HDF5\" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5" in
+    case "test -z \"$STARGS\" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -2971,12 +2971,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3015,12 +3015,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:117: \$VALGRIND alltypes \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:117: \$VALGRIND alltypes \$STARGS"
 echo testsuite.at:117 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND alltypes \"$DB_HDF5\"" in
+    case "$VALGRIND alltypes $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3028,12 +3028,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND alltypes "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND alltypes $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND alltypes "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND alltypes $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3072,12 +3072,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:120: \$VALGRIND wave \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:120: \$VALGRIND wave \$STARGS"
 echo testsuite.at:120 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND wave \"$DB_HDF5\"" in
+    case "$VALGRIND wave $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3085,12 +3085,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND wave "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND wave $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND wave "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND wave $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3129,12 +3129,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:123: \$VALGRIND polyzl \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:123: \$VALGRIND polyzl \$STARGS"
 echo testsuite.at:123 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND polyzl \"$DB_HDF5\"" in
+    case "$VALGRIND polyzl $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3142,12 +3142,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND polyzl "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND polyzl $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND polyzl "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND polyzl $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3186,12 +3186,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:126: \$VALGRIND csg \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:126: \$VALGRIND csg \$STARGS"
 echo testsuite.at:126 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND csg \"$DB_HDF5\"" in
+    case "$VALGRIND csg $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3199,12 +3199,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND csg "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND csg $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND csg "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND csg $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3243,12 +3243,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:129: \$VALGRIND rocket \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:129: \$VALGRIND rocket \$STARGS"
 echo testsuite.at:129 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND rocket \"$DB_HDF5\"" in
+    case "$VALGRIND rocket $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3256,12 +3256,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND rocket "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND rocket $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND rocket "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND rocket $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3300,12 +3300,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:132: \$VALGRIND mmadjacency \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:132: \$VALGRIND mmadjacency \$STARGS"
 echo testsuite.at:132 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND mmadjacency \"$DB_HDF5\"" in
+    case "$VALGRIND mmadjacency $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3313,12 +3313,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND mmadjacency "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND mmadjacency $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND mmadjacency "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND mmadjacency $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3357,12 +3357,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:135: \$VALGRIND mat3d_3across \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:135: \$VALGRIND mat3d_3across \$STARGS"
 echo testsuite.at:135 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND mat3d_3across \"$DB_HDF5\"" in
+    case "$VALGRIND mat3d_3across $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3370,12 +3370,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND mat3d_3across "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND mat3d_3across $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND mat3d_3across "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND mat3d_3across $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3414,12 +3414,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:138: \$VALGRIND ucd1d \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:138: \$VALGRIND ucd1d \$STARGS"
 echo testsuite.at:138 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND ucd1d \"$DB_HDF5\"" in
+    case "$VALGRIND ucd1d $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3427,12 +3427,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND ucd1d "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND ucd1d $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND ucd1d "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND ucd1d $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3471,12 +3471,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:141: \$VALGRIND dir \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:141: \$VALGRIND dir \$STARGS"
 echo testsuite.at:141 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND dir \"$DB_HDF5\"" in
+    case "$VALGRIND dir $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3484,12 +3484,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND dir "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND dir $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND dir "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND dir $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3528,12 +3528,12 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:144: \$VALGRIND quad \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:144: \$VALGRIND quad \$STARGS"
 echo testsuite.at:144 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND quad \"$DB_HDF5\"" in
+    case "$VALGRIND quad $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3541,12 +3541,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND quad "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND quad $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND quad "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND quad $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3595,12 +3595,12 @@ _ATEOF
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:150: multi_test \"\$DB_HDF5\" hdf-friendly"
+echo "$at_srcdir/testsuite.at:150: multi_test \$STARGS hdf-friendly"
 echo testsuite.at:150 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "multi_test \"$DB_HDF5\" hdf-friendly" in
+    case "multi_test $STARGS hdf-friendly" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3608,12 +3608,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; multi_test "$DB_HDF5" hdf-friendly ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; multi_test $STARGS hdf-friendly ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; multi_test "$DB_HDF5" hdf-friendly ) >"$at_stdout" 2>"$at_stderr"
+    ( :; multi_test $STARGS hdf-friendly ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3765,12 +3765,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:170: multi_test \"\$DB_HDF5\" hdf-friendly"
+echo "$at_srcdir/testsuite.at:170: multi_test \$STARGS hdf-friendly"
 echo testsuite.at:170 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "multi_test \"$DB_HDF5\" hdf-friendly" in
+    case "multi_test $STARGS hdf-friendly" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3778,12 +3778,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; multi_test "$DB_HDF5" hdf-friendly ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; multi_test $STARGS hdf-friendly ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; multi_test "$DB_HDF5" hdf-friendly ) >"$at_stdout" 2>"$at_stderr"
+    ( :; multi_test $STARGS hdf-friendly ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3872,12 +3872,12 @@ _ATEOF
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:176: test -n \"\$DB_HDF5\" && exit 77 || \$VALGRIND testpdb"
+echo "$at_srcdir/testsuite.at:176: test \"\$STARGS\" = DB_HDF5 && exit 77 || \$VALGRIND testpdb"
 echo testsuite.at:176 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -n \"$DB_HDF5\" && exit 77 || $VALGRIND testpdb" in
+    case "test \"$STARGS\" = DB_HDF5 && exit 77 || $VALGRIND testpdb" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3885,12 +3885,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -n "$DB_HDF5" && exit 77 || $VALGRIND testpdb ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND testpdb ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -n "$DB_HDF5" && exit 77 || $VALGRIND testpdb ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND testpdb ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3936,12 +3936,12 @@ _ATEOF
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:181: test -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND grab"
+echo "$at_srcdir/testsuite.at:181: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND grab"
 echo testsuite.at:181 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -z \"$DB_HDF5\" && exit 77 || $VALGRIND grab" in
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND grab" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3949,12 +3949,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && exit 77 || $VALGRIND grab ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && exit 77 || $VALGRIND grab ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3994,12 +3994,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:185: test -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression gzip"
+echo "$at_srcdir/testsuite.at:185: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression gzip"
 echo testsuite.at:185 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression gzip" in
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression gzip" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4007,12 +4007,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && exit 77 || $VALGRIND compression gzip ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && exit 77 || $VALGRIND compression gzip ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4035,12 +4035,12 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:186: test -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression readonly"
+echo "$at_srcdir/testsuite.at:186: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
 echo testsuite.at:186 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression readonly" in
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4048,12 +4048,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4093,12 +4093,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:190: test -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression szip"
+echo "$at_srcdir/testsuite.at:190: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression szip"
 echo testsuite.at:190 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression szip" in
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression szip" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4106,12 +4106,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && exit 77 || $VALGRIND compression szip ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && exit 77 || $VALGRIND compression szip ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4134,12 +4134,12 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:191: test -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression readonly"
+echo "$at_srcdir/testsuite.at:191: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
 echo testsuite.at:191 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression readonly" in
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4147,12 +4147,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4192,12 +4192,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:195: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression fpzip"
+echo "$at_srcdir/testsuite.at:195: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression fpzip"
 echo testsuite.at:195 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression fpzip" in
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4205,12 +4205,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression fpzip ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression fpzip ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4233,12 +4233,12 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:196: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression readonly"
+echo "$at_srcdir/testsuite.at:196: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
 echo testsuite.at:196 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression readonly" in
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4246,12 +4246,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4291,12 +4291,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:200: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression lossy3"
+echo "$at_srcdir/testsuite.at:200: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression lossy3"
 echo testsuite.at:200 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression lossy3" in
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4304,12 +4304,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression lossy3 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression lossy3 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4332,12 +4332,12 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:201: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression readonly"
+echo "$at_srcdir/testsuite.at:201: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
 echo testsuite.at:201 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression readonly" in
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4345,12 +4345,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4390,12 +4390,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:205: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND compression minratio1000"
+echo "$at_srcdir/testsuite.at:205: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression minratio1000"
 echo testsuite.at:205 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o -z \"$DB_HDF5\" && exit 77 || $VALGRIND compression minratio1000" in
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4403,12 +4403,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression minratio1000 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o -z "$DB_HDF5" && exit 77 || $VALGRIND compression minratio1000 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4448,7 +4448,7 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:209: test ! \\( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \\) -o -z \"\$BROWSER\" -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND testhzip \`pwd\`"
+echo "$at_srcdir/testsuite.at:209: test ! \\( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \\) -o -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testhzip \`pwd\`"
 echo testsuite.at:209 >"$at_check_line_file"
 
 at_trace_this=
@@ -4457,12 +4457,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4501,7 +4501,7 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:212: test -z \"\$BROWSER\" -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND checksums \`pwd\`"
+echo "$at_srcdir/testsuite.at:212: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND checksums \`pwd\`"
 echo testsuite.at:212 >"$at_check_line_file"
 
 at_trace_this=
@@ -4510,12 +4510,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4554,7 +4554,7 @@ $at_traceon
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:215: test -z \"\$BROWSER\" -o -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND testxvers \`pwd\`"
+echo "$at_srcdir/testsuite.at:215: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testxvers \`pwd\`"
 echo testsuite.at:215 >"$at_check_line_file"
 
 at_trace_this=
@@ -4563,12 +4563,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$BROWSER" -o -z "$DB_HDF5" && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4608,12 +4608,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:219: test -z \"\$DB_HDF5\" && exit 77 || \$VALGRIND largefile"
+echo "$at_srcdir/testsuite.at:219: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND largefile"
 echo testsuite.at:219 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test -z \"$DB_HDF5\" && exit 77 || $VALGRIND largefile" in
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND largefile" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4621,12 +4621,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$DB_HDF5" && exit 77 || $VALGRIND largefile ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test -z "$DB_HDF5" && exit 77 || $VALGRIND largefile ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5090,7 +5090,7 @@ _ATEOF
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:255: testsilock \`pwd\` \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:255: testsilock \`pwd\` \$STARGS"
 echo testsuite.at:255 >"$at_check_line_file"
 
 at_trace_this=
@@ -5099,12 +5099,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; testsilock `pwd` "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; testsilock `pwd` $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; testsilock `pwd` "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; testsilock `pwd` $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5144,12 +5144,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:259: \$VALGRIND multi_file \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:259: \$VALGRIND multi_file \$STARGS"
 echo testsuite.at:259 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND multi_file \"$DB_HDF5\"" in
+    case "$VALGRIND multi_file $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5157,12 +5157,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND multi_file "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND multi_file $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND multi_file "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND multi_file $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5202,12 +5202,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:263: \$VALGRIND testall -medium \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:263: \$VALGRIND testall -medium \$STARGS"
 echo testsuite.at:263 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND testall -medium \"$DB_HDF5\"" in
+    case "$VALGRIND testall -medium $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5215,12 +5215,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND testall -medium "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND testall -medium $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND testall -medium "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND testall -medium $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5260,12 +5260,12 @@ $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:267: \$VALGRIND testall -large \"\$DB_HDF5\""
+echo "$at_srcdir/testsuite.at:267: \$VALGRIND testall -large \$STARGS"
 echo testsuite.at:267 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND testall -large \"$DB_HDF5\"" in
+    case "$VALGRIND testall -large $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5273,12 +5273,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND testall -large "$DB_HDF5" ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND testall -large $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND testall -large "$DB_HDF5" ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND testall -large $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5596,7 +5596,7 @@ _ASBOX
   echo "Please send \`${at_testdir+${at_testdir}/}$as_me.log' and all information you think might help:"
   echo
   echo "   To: <visit-users@email.ornl.gov>"
-  echo "   Subject: [silo 4.7.3-pre2] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
+  echo "   Subject: [silo 4.8-pre2] $as_me:$at_fail_list${at_fail_list:+ failed${at_xpass_list:+,}}$at_xpass_list${at_xpass_list:+ passed unexpectedly}"
   echo
   if test $at_debug_p = false; then
     echo

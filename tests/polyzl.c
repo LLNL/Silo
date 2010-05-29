@@ -90,6 +90,7 @@ main(int argc, char *argv[])
 
     float *coords[3];
     char *coordnames[3];
+    int show_all_errors = FALSE;
 
     coords[0] = x;
     coords[1] = y;
@@ -101,18 +102,20 @@ main(int argc, char *argv[])
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
+        if (!strncmp(argv[i], "DB_PDB", 6)) {
+            driver = StringToDriver(argv[i]);
             filename = "polyzl.pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
             filename = "polyzl.h5";
-        } else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
     
-    DBShowErrors(DB_TOP, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
     DBForceSingle(1);
 
     /*

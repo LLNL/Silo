@@ -77,20 +77,25 @@ int main(int argc, char **argv) {
     DBfile *db;
     int            i, driver = DB_PDB;
     char          *filename = "csg.pdb";
+    int            show_all_errors = FALSE;
     char  *coordnames[3];
     float *coord[3];
 
     for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
+        if (!strncmp(argv[i], "DB_PDB",6)) {
+            driver = StringToDriver(argv[i]);
             filename = "mat3d_3across.pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
             filename = "mat3d_3across.h5";
-        } else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
+
+  if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
 
   coordnames[0]=strdup("x");
   coordnames[1]=strdup("y");

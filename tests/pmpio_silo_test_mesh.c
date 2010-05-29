@@ -113,7 +113,7 @@ int main(int argc, char **argv)
         {
             numGroups = strtol(argv[i], 0, 10);
         }
-        else
+	else if (argv[i][0] != '\0')
         {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }

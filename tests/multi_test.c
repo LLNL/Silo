@@ -362,8 +362,8 @@ main(int argc, char *argv[])
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
+        if (!strncmp(argv[i], "DB_PDB", 6)) {
+            driver = StringToDriver(argv[i]);
             file_ext = ".pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
@@ -384,17 +384,16 @@ main(int argc, char *argv[])
             hdfriendly = 2;
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
-        } else {
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
 
-    DBShowErrors(show_all_errors?DB_ALL:DB_TOP, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
     DBSetEnableChecksums(dochecks);
-    if (driver&0xF == DB_HDF5)
+    if ((driver&0xF) == DB_HDF5X)
         DBSetFriendlyHDF5Names(hdfriendly);
 
-#if 0
     /*
      * Create the multi-block rectilinear 2d mesh.
      */
@@ -448,7 +447,6 @@ main(int argc, char *argv[])
         DBClose(dbfile);
     } else
         DBClose(dbfile);
-#endif
 
     /* 
      * Create the multi-block rectilinear 3d mesh.
@@ -468,7 +466,6 @@ main(int argc, char *argv[])
     } else
         DBClose(dbfile);
 
-#if 0
     /* 
      * Create the multi-block curvilinear 3d mesh.
      */
@@ -504,8 +501,6 @@ main(int argc, char *argv[])
         DBClose(dbfile);
     } else
         DBClose(dbfile);
-
-#endif
 
     CleanupDriverStuff();
     return (0);
@@ -1239,9 +1234,9 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if (driver&0xF == DB_HDF5 && block % 6 == 0)
+        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if (driver&0xF == DB_HDF5 && block % 2 == 0)
+        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -1560,9 +1555,9 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if (driver&0xF == DB_HDF5 && block % 6 == 0)
+        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if (driver&0xF == DB_HDF5 && block % 2 == 0)
+        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -1797,9 +1792,9 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if (driver&0xF == DB_HDF5 && block % 6 == 0)
+        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if (driver&0xF == DB_HDF5 && block % 2 == 0)
+        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -2194,9 +2189,9 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if (driver&0xF == DB_HDF5 && block % 6 == 0)
+        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if (driver&0xF == DB_HDF5 && block % 2 == 0)
+        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -2715,9 +2710,9 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if (driver&0xF == DB_HDF5 && block % 6 == 0)
+        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if (driver&0xF == DB_HDF5 && block % 2 == 0)
+        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -3119,9 +3114,9 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if (driver&0xF == DB_HDF5 && block % 6 == 0)
+        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if (driver&0xF == DB_HDF5 && block % 2 == 0)
+        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)

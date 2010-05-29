@@ -33,13 +33,8 @@
 #endif
 #include <stdio.h>
 #include "silo_hdf5_private.h"
+#include "H5FDsilo.h"
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
-
-/* set this to non-zero to prmit HDF5 to generate error tracing
-   messages */
-#ifndef DEBUG_HDF5
-#define DEBUG_HDF5 0
-#endif
 
 /* HZIP node order permuation vector construction
    To construct a permutation vector. Work backwards
@@ -190,6 +185,46 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
          ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
          (H5_VERS_MAJOR>Maj))
 
+/* Re-define various H5Xopen/H5Xcreate calls we use here so that we can
+   keep track of currently opened objects in the file. Note that we are
+   re-defining the actual HDF5 function names (which include a '1' or
+   maybe a '2' in them) because HDF5 defines macros instead of functions
+   for those parts of its API that have changed between versions and
+   so we cannot succesfully re-define them. */
+#define H5Aopen_name(L,N)	db_hdf5_H5Aopen_name(L,N)
+#define H5Acreate1(L,N,T,S,P)	db_hdf5_H5Acreate(L,N,T,S,P)
+#define H5Aclose(A)		db_hdf5_H5Aclose(A)
+
+#define H5Dopen1(L,N)		db_hdf5_H5Dopen(L,N)
+#define H5Dcreate1(L,N,T,S,P)	db_hdf5_H5Dcreate(L,N,T,S,P)
+#define H5Dclose(D)		db_hdf5_H5Dclose(D)
+
+#define H5Gopen1(L,N)		db_hdf5_H5Gopen(L,N)
+#define H5Gcreate1(L,N,S)	db_hdf5_H5Gcreate(L,N,S)
+#define H5Gclose(G)		db_hdf5_H5Gclose(G)
+
+#define H5Topen1(L,N)		db_hdf5_H5Topen(L,N)
+#define H5Tcreate(C,S)		db_hdf5_H5Tcreate(C,S)
+#define H5Tclose(T)		db_hdf5_H5Tclose(T)
+
+PRIVATE hid_t db_hdf5_H5Aopen_name(hid_t loc_id, const char *name);
+PRIVATE hid_t db_hdf5_H5Acreate(hid_t loc_id, const char *attr_name,
+    hid_t type_id, hid_t space_id, hid_t acpl_id);
+PRIVATE herr_t db_hdf5_H5Aclose(hid_t attr_id);
+
+PRIVATE hid_t db_hdf5_H5Dopen(hid_t loc_id, const char *name);
+PRIVATE hid_t db_hdf5_H5Dcreate(hid_t loc_id, const char *name,
+    hid_t type_id, hid_t space_id, hid_t dcpl_id);
+PRIVATE herr_t db_hdf5_H5Dclose(hid_t dsid);
+
+PRIVATE hid_t db_hdf5_H5Gopen(hid_t loc_id, const char *name);
+PRIVATE hid_t db_hdf5_H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
+PRIVATE herr_t db_hdf5_H5Gclose(hid_t gid);
+
+PRIVATE hid_t db_hdf5_H5Topen( hid_t loc_id, const char *name);
+PRIVATE hid_t db_hdf5_H5Tcreate(H5T_class_t class, size_t size);
+PRIVATE herr_t db_hdf5_H5Tclose(hid_t tid);
+
 /* to encode the version of the hdf5 library in any silo executable */
 char SILO_built_with_H5_lib_vers_info_g[] = "SILO built with "
 #if HDF5_VERSION_GE(1,4,2)
@@ -221,6 +256,17 @@ typedef struct silo_hdf5_comp_t {
     char                *name;
     unsigned long       objno[2];
 } silo_hdf5_comp_t;
+
+/* structure to manage list of open objects */
+typedef struct silo_hdf5_fn2ool_t {
+    unsigned long fileno;
+    int nool;
+    int sool;
+    hid_t *ool;
+} silo_hdf5_fn2ool_t;
+static silo_hdf5_fn2ool_t *silo_hdf5_fn2ool = 0;
+static int silo_hdf5_nfn2ool = 0;
+static int silo_hdf5_sfn2ool = 0;
 
 /* Attributes for various types of objects */
 typedef struct DBcurve_mt {
@@ -891,6 +937,95 @@ static hid_t    P_ckrdprops = -1;
 INTERNAL void
 suppress_set_but_not_used_warning(const void *ptr)
 {}
+
+/* functions to manage list of open HDF5 objects */
+static void db_hdf5_register_hid_t(hid_t oid)
+{
+    int i;
+    H5O_info_t oinfo;
+    unsigned long filenum = (unsigned long) -1;
+    silo_hdf5_fn2ool_t *fn2ool;
+
+    if (oid == -1) return;
+
+    /* get this object's file number from HDF5 */
+    H5E_BEGIN_TRY
+    {
+        if (H5Oget_info(oid, &oinfo)<0)
+            assert(H5Iget_type(oid)==H5I_DATATYPE);
+        else
+            filenum = oinfo.fileno;
+    }
+    H5E_END_TRY
+
+    /* find this file's open object list */
+    for (i = 0; i < silo_hdf5_nfn2ool && filenum != silo_hdf5_fn2ool[i].fileno; i++);
+
+    /* add a new open object list if we didn't find one for this file */
+    if (i >= silo_hdf5_nfn2ool)
+    {
+        if (silo_hdf5_nfn2ool >= silo_hdf5_sfn2ool)
+        {
+            int new_size = silo_hdf5_sfn2ool*1.5;
+            while (new_size <= silo_hdf5_sfn2ool) new_size+=5;
+            silo_hdf5_fn2ool = (silo_hdf5_fn2ool_t*) realloc(silo_hdf5_fn2ool, new_size*sizeof(silo_hdf5_fn2ool_t));
+	    silo_hdf5_sfn2ool = new_size;
+        }
+	i = silo_hdf5_nfn2ool;
+	silo_hdf5_fn2ool[i].fileno = filenum;
+	silo_hdf5_fn2ool[i].nool = 0;
+	silo_hdf5_fn2ool[i].sool = 0;
+	silo_hdf5_fn2ool[i].ool = 0;
+	silo_hdf5_nfn2ool++;
+    }
+    fn2ool = &silo_hdf5_fn2ool[i];
+
+    /* add space to this file's open object list if necessary */
+    if (fn2ool->nool >= fn2ool->sool)
+    {
+        int new_size = fn2ool->sool*1.5;
+	while (new_size <= fn2ool->sool) new_size+=5;
+	fn2ool->ool = (hid_t*) realloc(fn2ool->ool, new_size*sizeof(hid_t));
+	fn2ool->sool = new_size;
+    }
+
+    /* add this object's id to this file's open object list */
+    fn2ool->ool[fn2ool->nool] = oid;
+    fn2ool->nool++;
+}
+
+static void db_hdf5_unregister_hid_t(hid_t oid)
+{
+    int i;
+    H5O_info_t oinfo;
+    unsigned long filenum = (unsigned long) -1;
+    silo_hdf5_fn2ool_t *fn2ool;
+
+    if (oid == -1) return;
+
+    /* get this object's file number from HDF5 */
+    H5E_BEGIN_TRY
+    {
+        if (H5Oget_info(oid, &oinfo)<0)
+            assert(H5Iget_type(oid)==H5I_DATATYPE);
+        else
+            filenum = oinfo.fileno;
+    }
+    H5E_END_TRY
+
+    /* find this file's open object list */
+    for (i = 0; i < silo_hdf5_nfn2ool && filenum != silo_hdf5_fn2ool[i].fileno; i++);
+    if (i >= silo_hdf5_nfn2ool) return;
+
+    /* find this object in the open object list */
+    fn2ool = &silo_hdf5_fn2ool[i];
+    for (i = 0; i < fn2ool->nool && oid != fn2ool->ool[i]; i++);
+    if (i >= fn2ool->nool) return;
+
+    fn2ool->ool[i] = fn2ool->ool[fn2ool->nool-1];
+    fn2ool->nool--;
+}
+
 
 #ifdef HAVE_FPZIP
 
@@ -1641,7 +1776,7 @@ friendly_name(const char *base_name, const char *fmtstr, const void *val)
  *
  *-------------------------------------------------------------------------
  */
-INTERNAL hid_t
+PRIVATE hid_t
 db_hdf5_file(DBfile *_dbfile)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
@@ -1667,7 +1802,7 @@ db_hdf5_file(DBfile *_dbfile)
  *
  *-------------------------------------------------------------------------
  */
-INTERNAL hid_t
+PRIVATE hid_t
 db_hdf5_cwg(DBfile *_dbfile)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
@@ -1693,7 +1828,7 @@ db_hdf5_cwg(DBfile *_dbfile)
  *
  *-------------------------------------------------------------------------
  */
-INTERNAL hid_t
+PRIVATE hid_t
 db_hdf5_get_cmemb(hid_t compound_type, int membno, int *ndims/*out*/,
                   int size[3]/*out*/)
 {
@@ -1736,7 +1871,7 @@ db_hdf5_get_cmemb(hid_t compound_type, int membno, int *ndims/*out*/,
  *
  *-------------------------------------------------------------------------
  */
-INTERNAL int
+PRIVATE int
 db_hdf5_put_cmemb(hid_t compound_type, const char *name, size_t offset,
                   int ndims, const int *dim, hid_t type)
 {
@@ -1880,7 +2015,7 @@ db_hdf5_init(void)
     if (ncalls++) return;               /*already initialized*/
 
     /* Turn off error messages from the hdf5 library */
-    if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
+    if (SILO_Globals._db_err_level_drvr == DB_ALL)
         H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
     else
         H5Eset_auto(NULL, NULL);
@@ -3006,7 +3141,8 @@ hdf2hdf_type(hid_t ftype)
  *   HZIP compression filter gets added or not.
  *-------------------------------------------------------------------------
  */
-int db_hdf5_set_compression(int flags)
+PRIVATE int
+db_hdf5_set_compression(int flags)
 {
     static char *me = "db_hdf5_set_compression";
     char *ptr;
@@ -3297,7 +3433,8 @@ int db_hdf5_set_compression(int flags)
  *
  *-------------------------------------------------------------------------
  */
-int db_hdf5_set_properties(int rank, hsize_t size[])
+PRIVATE int
+db_hdf5_set_properties(int rank, hsize_t size[])
 {
     static char *me = "db_hdf5_set_properties";
     P_crprops = H5P_DEFAULT;
@@ -3353,7 +3490,7 @@ int db_hdf5_set_properties(int rank, hsize_t size[])
  *
  *-------------------------------------------------------------------------
  */
-INTERNAL int
+PRIVATE int
 db_hdf5_get_comp_var(hid_t fileid, const char *name, hsize_t *nelmts,
     size_t *elsize, hid_t *datatype, void **buf)
 {
@@ -3742,15 +3879,23 @@ find_objno(hid_t grp, const char *name, void *_comp)
 PRIVATE void 
 db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, int c)
 {
-    int set[] = {ts, dts, 1};
+    int set[3];
+    void *buf[3];
     char *names[] = {"time","dtime","cycle"};
     int types[] = {DB_FLOAT, DB_DOUBLE, DB_INT};
-    void *buf[] = {(void*)&t,(void*)&dt,(void*)&c};
     hid_t space = -1;
     int i;
 
-#warning FIXME
+#warning REMOVE ME
     return;
+
+    set[0] = ts;
+    buf[0] = (void*)&t;
+    set[1] = dts;
+    buf[1] = (void*)&dt;
+    set[2] = 1;
+    buf[2] = (void*)&c;
+
     H5E_BEGIN_TRY
     {
         for (i = 0; i < 3; i++)
@@ -3857,7 +4002,7 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
 
 
 /*-------------------------------------------------------------------------
- * Function:    db_hdf5_compwr
+ * Function:    db_hdf5_compwrz
  *
  * Purpose:     Creates a new dataset in the link group.
  *
@@ -3921,10 +4066,15 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
 
         /* Obtain a unique name for the dataset or use the name supplied */
         if (!*name) {
-            strcpy(name, LINKGRP);
-            if (db_hdf5_compname(dbfile, ENDOF(name)/*out*/)<0) {
-                db_perror("compname", E_CALLFAIL, me);
-                UNWIND();
+#warning EXPLICITLY SETTING FRIENDLY NAMES
+            if (fname) {
+                sprintf(name, "./%s", fname);
+            } else {
+                strcpy(name, LINKGRP);
+                if (db_hdf5_compname(dbfile, ENDOF(name)/*out*/)<0) {
+                    db_perror("compname", E_CALLFAIL, me);
+                    UNWIND();
+                }
             }
         }
 
@@ -3956,17 +4106,10 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
             }
         }
 
-        if ((dset=H5Dcreate(dbfile->link, name, ftype, space, P_crprops))<0) {
+#warning EXPLICITLY SETTING FRIENDLY NAMES
+        if ((dset=H5Dcreate(fname?dbfile->cwg:dbfile->link, name, ftype, space, P_crprops))<0) {
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
-        }
-
-        if (fname)
-        {
-            if (SILO_Globals.enableFriendlyHDF5Names == 2)
-                H5Glink(dbfile->cwg, H5G_LINK_HARD, name, fname);
-            else if (SILO_Globals.enableFriendlyHDF5Names != 0)
-                H5Glink(dbfile->cwg, H5G_LINK_SOFT, name, fname);
         }
 
         if (buf && H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, buf)<0) {
@@ -4403,22 +4546,16 @@ db_hdf5_ForceSingle(int status)
     return 0;
 }
 
-INTERNAL hid_t
+PRIVATE hid_t
 db_hdf5_process_file_options(opts_set_id)
 {
     static char *me = "db_hdf5_process_file_options";
     hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
     herr_t h5status = 0;
-    hsize_t silo_max_meta = 1024 * 256;  /* 256KB */
-    hsize_t silo_raw_buf_size = 1024 * 1024; /* 1 MB */
-
-#warning FIX ME REMOVE ABORT
-    if (H5Pinsert(retval, "silo_max_meta", sizeof(hsize_t),
-            &silo_max_meta, 0, 0, 0, 0, 0) < 0)
-        abort();
-    if (H5Pinsert(retval, "silo_raw_buf_size", sizeof(hsize_t),
-            &silo_raw_buf_size, 0, 0, 0, 0, 0) < 0)
-        abort();
+#warning DECIDE ON PLACE FOR DEFAULT SILO SETTINGS
+    hsize_t silo_block_size = 16384; /* 16 KB */ 
+    int silo_block_count = 16; /* total of 1/4 MB */
+    int silo_log_stats = 0;
 
     /* This property effects how HDF5 deals with objects that are left
        open when the file containing them is closed. The SEMI setting
@@ -4427,17 +4564,14 @@ db_hdf5_process_file_options(opts_set_id)
        automatically. That can wind up hiding coding errors in this
        Silo plugin, so we do that only when user has requested that
        either top or no errors are reported. */
-    if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
+    if (SILO_Globals._db_err_level_drvr == DB_ALL)
         h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_SEMI);
     else
         h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_STRONG);
-#warning FIXME
-    h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_SEMI);
 
     /* Handle cases where we are running on Windows. If a client
        request anything other than the default driver, we issue
        a warning message and continue only on windows (default) vfd. */
-#warning TEST THIS LOGIC ON LINUX
 #if defined(_WIN32)
     if (opts_set_id != DB_FILE_OPTS_H5_DEFAULT_DEFAULT && 
         opts_set_id < NUM_DEFAULT_FILE_OPTIONS_SETS)
@@ -4455,8 +4589,8 @@ db_hdf5_process_file_options(opts_set_id)
 
         case DB_FILE_OPTS_H5_DEFAULT_SILO:
             h5status |= H5Pset_fapl_silo(retval);
-            h5status |= H5Pset_silo_max_meta(retval, (hsize_t) (1<<20));
-            /*h5status |= H5Pset_silo_raw_buf_size(retval, (hsize_t) (1<<20));*/
+#warning FIXME
+            /*h5status |= H5Pset_silo_block_size_and_count(retval, silo_block_size, silo_block_count); */
             break;
 
         /* default HDF5 sec2 driver */
@@ -4466,8 +4600,10 @@ db_hdf5_process_file_options(opts_set_id)
 
         /* default HDF5 stdio driver */
         case DB_FILE_OPTS_H5_DEFAULT_STDIO:
-#warning EVENTUALLY ADD OPTION TO SETVBUF TOO
             h5status |= H5Pset_fapl_stdio(retval);
+            /* I tried also having option to set buffer size. But, you need
+               a file handle that has NOT had any I/O occur on it yet and
+               HDF5 can't do that */
             break;
 
         /* default HDF5 core driver 1 Meg inc & backing store */
@@ -4573,7 +4709,6 @@ db_hdf5_process_file_options(opts_set_id)
                 h5status |= H5Pset_driver(retval, new_driver_id, p);
             }
 
-#warning TEST THIS LOGIC ON LINUX
 #if defined(_WIN32)
             if (vfd != DB_H5VFD_DEFAULT)
             {
@@ -4594,13 +4729,20 @@ db_hdf5_process_file_options(opts_set_id)
                     break;
                 case DB_H5VFD_SILO:
                 {
-                    hsize_t max_meta = (1<<20);
+                    hsize_t block_size = silo_block_size;
+                    int block_count = silo_block_count; 
+                    int log_stats = silo_log_stats;
 
-                    if (p = DBGetOption(opts, DBOPT_H5_SILO_MAX_META))
-                        max_meta = *((int*) p);
+                    if (p = DBGetOption(opts, DBOPT_H5_SILO_BLOCK_SIZE))
+                        block_size = (hsize_t) (*((int*) p));
+                    if (p = DBGetOption(opts, DBOPT_H5_SILO_BLOCK_COUNT))
+                        block_count = *((int*) p);
+                    if (p = DBGetOption(opts, DBOPT_H5_SILO_LOG_STATS))
+                        log_stats = *((int*) p);
 
                     h5status |= H5Pset_fapl_silo(retval);
-                    h5status |= H5Pset_silo_max_meta(retval, max_meta);
+                    h5status |= H5Pset_silo_block_size_and_count(retval, block_size, block_count);
+                    h5status |= H5Pset_silo_log_stats(retval, log_stats);
                     break;
                 }
                 case DB_H5VFD_LOG:
@@ -4642,7 +4784,7 @@ db_hdf5_process_file_options(opts_set_id)
 #ifdef H5_HAVE_DIRECT
                     int direct_block_size = (1<<12); /* 4 kilobytes (lustre default) */
                     int direct_alignment, direct_cbuf_size;
-                    int align_min, align_va;
+                    int align_min, align_val;
     
                     /* get direct block size */ 
                     if (p = DBGetOption(opts, DBOPT_H5_DIRECT_BLOCK_SIZE))
@@ -4656,9 +4798,9 @@ db_hdf5_process_file_options(opts_set_id)
 
                     /* get direct buffer size */ 
                     if (p = DBGetOption(opts, DBOPT_H5_DIRECT_BUF_SIZE))
-                        direct_buf_size = *((int*)p);
+                        direct_cbuf_size = *((int*)p);
                     else
-                        direct_buf_size = direct_block_size * 256;
+                        direct_cbuf_size = direct_block_size * 256;
 
                     /* get overall alignment threshold */ 
                     if (p = DBGetOption(opts, DBOPT_H5_ALIGN_MIN))
@@ -4710,6 +4852,13 @@ db_hdf5_process_file_options(opts_set_id)
                     /* get raw extension */
                     if (p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION))
                         rext = (char *) p;
+
+                    /* make sure the exentions are not identical */
+                    if (!strcmp(mext, rext))
+                    {
+                        db_perror("meta & raw extensions must be different", E_CALLFAIL, me);
+                        return -1;
+                    }
 
                     h5status |= H5Pset_fapl_split(retval, mext, meta_fapl, rext, raw_fapl);
                     H5Pclose(meta_fapl);
@@ -4857,7 +5006,7 @@ db_hdf5_process_file_options(opts_set_id)
  *   and split vfd's is handled. Changed int values in case to symbolics.
  *-------------------------------------------------------------------------
  */
-INTERNAL hid_t 
+PRIVATE hid_t 
 db_hdf5_file_accprops(int subtype)
 {
     int opts_set_id = subtype & 0x0000003F;
@@ -4888,7 +5037,7 @@ db_hdf5_file_accprops(int subtype)
  *   an HDF5 file and properly RETURNing NULL when necessary.
  *-------------------------------------------------------------------------
  */
-INTERNAL DBfile* 
+PRIVATE DBfile* 
 db_hdf5_finish_open(DBfile_hdf5 *dbfile)
 {
     static char *me = "db_hdf5_finish_open";
@@ -4964,7 +5113,7 @@ db_hdf5_finish_open(DBfile_hdf5 *dbfile)
  *   an HDF5 file and properly RETURNing NULL when necessary.
  *-------------------------------------------------------------------------
  */
-INTERNAL DBfile* 
+PRIVATE DBfile* 
 db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
 {
     static char *me = "db_hdf5_finish_create";
@@ -5042,11 +5191,13 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
  *
  *-------------------------------------------------------------------------
  */
-INTERNAL int
+PRIVATE int
 db_hdf5_initiate_close(DBfile *_dbfile)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_initiate_close";
+    unsigned long filenum;
+    H5O_info_t  oinfo;
     int         i;
 
     /* Close all datasets in the circular buffer */
@@ -5056,6 +5207,12 @@ db_hdf5_initiate_close(DBfile *_dbfile)
     }
     dbfile->dsettab_ins = dbfile->dsettab_rem = 0;
     
+    /* Obtain the fileno from cwg object. */
+    if (H5Oget_info(dbfile->cwg, &oinfo)<0) {
+        return db_perror("closing", E_CALLFAIL, me);
+    }
+    filenum = oinfo.fileno;
+
     /* Close current working group and link group */
     if (H5Gclose(dbfile->cwg)<0 || H5Gclose(dbfile->link)<0) {
         return db_perror("closing", E_CALLFAIL, me);
@@ -5066,7 +5223,33 @@ db_hdf5_initiate_close(DBfile *_dbfile)
     if (dbfile->cwg_name)
         free(dbfile->cwg_name);
     dbfile->cwg_name = NULL;
-    
+
+    /* Check for any open objects */
+    for (i = 0; i < silo_hdf5_nfn2ool && filenum != silo_hdf5_fn2ool[i].fileno; i++);
+    if (i < silo_hdf5_nfn2ool)
+    {
+        silo_hdf5_fn2ool_t *fn2ool = &silo_hdf5_fn2ool[i];
+	if (fn2ool->nool > 0)
+	{
+	    int n;
+            char msg[4096];
+	    sprintf(msg, "%d objects still open...\n", fn2ool->nool);
+	    n = strlen(msg);
+	    for (i = 0; i < fn2ool->nool && n < sizeof(msg); i++)
+	    {
+	        char name[256], msgtmp[270];
+		H5Iget_name(fn2ool->ool[i], name, sizeof(name));
+		sprintf(msgtmp, "%03d:%s\n", i, name);
+		strcat(msg, msgtmp);
+		n += strlen(msgtmp);
+	    }
+            return db_perror(msg, E_CALLFAIL, me);
+	}
+	free(fn2ool->ool);
+	silo_hdf5_fn2ool[i] = silo_hdf5_fn2ool[silo_hdf5_nfn2ool-1];
+	silo_hdf5_nfn2ool--;
+    }
+
     return 0;
 }
 
@@ -5111,7 +5294,7 @@ db_hdf5_Open(char *name, int mode, int opts_set_id)
     unsigned    hmode;
     static char *me = "db_hdf5_Open";
 
-    if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
+    if (SILO_Globals._db_err_level_drvr == DB_ALL)
         H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
     else
         H5Eset_auto(NULL, NULL);
@@ -5191,7 +5374,7 @@ db_hdf5_Create(char *name, int mode, int target, int opts_set_id, char *finfo)
     static char *me = "db_hdf5_Create";
 
     /* Turn off error messages from the hdf5 library */
-    if (_db_err_level == DB_ALL || _db_err_level == DB_ABORT)
+    if (SILO_Globals._db_err_level_drvr == DB_ALL)
         H5Eset_auto((H5E_auto1_t) H5Eprint1, stderr);
     else
         H5Eset_auto(NULL, NULL);
@@ -7003,8 +7186,7 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
           writes of int data to float dataset, for example. */
        if ((dset_type = H5Dget_type(dset))<0 ||
            (fclass = H5Tget_class(dset_type))<0 ||
-           (mclass = H5Tget_class(mtype))<0 ||
-           (H5Tclose(dset_type))<0) {
+           (mclass = H5Tget_class(mtype))<0) {
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
@@ -7012,6 +7194,7 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
+       H5Tclose(dset_type);
 #endif
 
        /* Write data */
@@ -11610,6 +11793,10 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
  *   Refactored logic to handle time, dtime and cycle to a new method,
  *   db_hdf5_handle_ctdt().
+ *
+ *   Mark C. Miller, Sat Mar 27 10:51:48 PDT 2010
+ *   Add missing call to H5Tclose(o). Wouldn't have detected this without
+ *   changing close degree setting based on DBShowErrors setting.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -11644,7 +11831,6 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
 
        if (o >= 0)
        {
-
             /* Object exists, do some simple sanity checking */
             if ((attr=H5Aopen_name(o, "silo_type"))<0 ||
                 H5Aread(attr, H5T_NATIVE_INT, &_objtype)<0 ||
@@ -11666,6 +11852,8 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
             }
 
             /* should add correct sanity checks here */
+
+            H5Tclose(o);
 
        }
        else
@@ -14598,6 +14786,96 @@ db_hdf5_FreeCompressionResources(DBfile *_dbfile, const char *meshname)
 {
     FreeNodelists((DBfile_hdf5*)_dbfile, meshname);
     return 0;
+}
+
+#undef H5Aopen_name
+#undef H5Acreate1
+#undef H5Aclose
+
+#undef H5Dopen1
+#undef H5Dcreate1
+#undef H5Dclose
+
+#undef H5Gopen1
+#undef H5Gcreate1
+#undef H5Gclose
+
+#undef H5Topen1
+#undef H5Tcreate
+#undef H5Tclose
+
+PRIVATE hid_t db_hdf5_H5Aopen_name(hid_t loc_id, const char *name)
+{
+    hid_t retval = H5Aopen_name(loc_id, name);
+    db_hdf5_register_hid_t(retval);
+    return retval;
+}
+PRIVATE hid_t db_hdf5_H5Acreate(hid_t loc_id, const char *attr_name,
+    hid_t type_id, hid_t space_id, hid_t acpl_id) 
+{
+    hid_t retval = H5Acreate1(loc_id, attr_name, type_id, space_id, acpl_id);
+    db_hdf5_register_hid_t(retval);
+    return retval;
+}
+PRIVATE herr_t db_hdf5_H5Aclose(hid_t attr_id)
+{
+    db_hdf5_unregister_hid_t(attr_id);
+    return H5Aclose(attr_id);
+}
+
+PRIVATE hid_t db_hdf5_H5Dopen(hid_t loc_id, const char *name)
+{
+    hid_t retval = H5Dopen1(loc_id, name);
+    db_hdf5_register_hid_t(retval);
+    return retval;
+}
+PRIVATE hid_t db_hdf5_H5Dcreate(hid_t loc_id, const char *name,
+    hid_t type_id, hid_t space_id, hid_t dcpl_id)
+{
+    hid_t retval = H5Dcreate1(loc_id, name, type_id, space_id, dcpl_id);
+    db_hdf5_register_hid_t(retval);
+    return retval;
+}
+PRIVATE herr_t db_hdf5_H5Dclose(hid_t dsid)
+{
+    db_hdf5_unregister_hid_t(dsid);
+    return H5Dclose(dsid);
+}
+
+PRIVATE hid_t db_hdf5_H5Gopen(hid_t loc_id, const char *name)
+{
+    hid_t retval = H5Gopen1(loc_id, name);
+    db_hdf5_register_hid_t(retval);
+    return retval;
+}
+PRIVATE hid_t db_hdf5_H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
+{
+    hid_t retval = H5Gcreate1(loc_id, name, size_hint);
+    db_hdf5_register_hid_t(retval);
+    return retval;
+}
+PRIVATE herr_t db_hdf5_H5Gclose(hid_t gid)
+{
+    db_hdf5_unregister_hid_t(gid);
+    return H5Gclose(gid);
+}
+
+PRIVATE hid_t db_hdf5_H5Topen( hid_t loc_id, const char *name)
+{
+    hid_t retval = H5Topen1(loc_id, name);
+    db_hdf5_register_hid_t(retval);
+    return retval;
+}
+PRIVATE hid_t db_hdf5_H5Tcreate(H5T_class_t class, size_t size)
+{
+    hid_t retval = H5Tcreate(class, size);
+    db_hdf5_register_hid_t(retval);
+    return retval;
+}
+PRIVATE herr_t db_hdf5_H5Tclose(hid_t tid)
+{
+    db_hdf5_unregister_hid_t(tid);
+    return H5Tclose(tid);
 }
 
 #else

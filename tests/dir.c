@@ -76,23 +76,26 @@ main(int argc, char *argv[])
     char          *filename = "dir.pdb";
     char          *filename2 = "dir2.pdb";
     int            i, driver = DB_PDB;
-
-    DBShowErrors(DB_ALL, NULL);
+    int            show_all_errors = FALSE;
 
     for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
+        if (!strncmp(argv[i], "DB_PDB",6)) {
+            driver = StringToDriver(argv[i]);
             filename = "dir.pdb";
             filename2 = "dir2.pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
             filename = "dir.h5";
             filename2 = "dir2.h5";
-        } else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
     
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
+
     dbfile = DBCreate(filename, 0, DB_LOCAL, "dir test file", driver);
     printf("Creating file: '%s'...\n", filename);
 

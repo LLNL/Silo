@@ -6,6 +6,9 @@ typedef enum _ioflags_t
     IO_TRUNCATE = 0x00000008
 } ioflags_t;
 
+/* if you define members such that a value of 0 serves
+   as a suitable default, then you don't have to worry
+   about an special initialization. */
 typedef struct _options_t
 {
     const char *io_interface;
@@ -19,6 +22,9 @@ typedef struct _options_t
     int print_details;
     int alignment;
     int rand_file_name;
+    int no_mpi;
+    int mpi_rank;
+    int mpi_size;
 } options_t;
 
 typedef enum _ioop_t

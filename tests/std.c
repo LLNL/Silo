@@ -75,6 +75,7 @@ static int StringToDriver(const char *str)
     int opts_id = -1;
 
     CHECK_SYMBOL(DB_PDB);
+    CHECK_SYMBOL(DB_PDBP);
     CHECK_SYMBOL(DB_HDF5);
     CHECK_SYMBOL(DB_HDF5_SEC2);
     CHECK_SYMBOL(DB_HDF5_STDIO);
@@ -111,96 +112,6 @@ static int StringToDriver(const char *str)
     CHECK_SYMBOL(DB_H5VFD_MPIP);
     CHECK_SYMBOL(DB_H5VFD_SILO);
 
-#if 0
-    if (!strncmp(str, "DB_HDF5_CORE(", 13))
-    {
-        MakeDriverOpts(&opts, &opts_id);
-
-        driver_ints[driver_nints] = DB_H5VFD_CORE;
-        DBAddOption(opts, DBOPT_H5_VFD, &driver_ints[driver_nints]);
-        driver_nints++;
-
-        sscanf(str, "DB_HDF5_CORE(%d)", &driver_ints[driver_nints]);
-        DBAddOption(opts, DBOPT_H5_CORE_ALLOC_INC, &driver_ints[driver_nints]);
-        driver_nints++;
-
-        return DB_HDF5_OPTS(opts_id);
-    }
-
-    if (!strncmp(str, "DB_HDF5_FAMILY(", 15))
-    {
-        MakeDriverOpts(&opts, &opts_id);
-
-        driver_ints[driver_nints] = DB_H5VFD_FAMILY;
-        DBAddOption(opts, DBOPT_H5_VFD, &driver_ints[driver_nints]);
-        driver_nints++;
-
-        sscanf(str, "DB_HDF5_FAMILY(%d)", &driver_ints[driver_nints]);
-        DBAddOption(opts, DBOPT_H5_FAM_SIZE, &driver_ints[driver_nints]);
-        driver_nints++;
-
-        return DB_HDF5_OPTS(opts_id);
-    }
-
-    if (!strncmp(str, "DB_HDF5_SPLIT(", 14))
-    {
-        char *tok, *tmpstr;;
-
-        MakeDriverOpts(&opts, &opts_id);
-
-        driver_ints[driver_nints] = DB_H5VFD_SPLIT;
-        DBAddOption(opts, DBOPT_H5_VFD, &driver_ints[driver_nints]);
-        driver_nints++;
-
-	tmpstr = strdup(&str[14]);
-	errno = 0;
-
-	tok = strtok(tmpstr, ",");
-	if (errno != 0)
-	{
-            fprintf(stderr, "Unable to determine driver from string \"%s\"\n", str);
-	    exit(-1);
-	}
-        driver_ints[driver_nints] = StringToDriver(tok);
-        DBAddOption(opts, DBOPT_H5_META_FILE_OPTS, &driver_ints[driver_nints]);
-        driver_nints++;
-
-	tok = strtok(0, ",");
-	if (errno != 0)
-	{
-            fprintf(stderr, "Unable to determine driver from string \"%s\"\n", str);
-	    exit(-1);
-	}
-        driver_strs[driver_nstrs] = strdup(tok);
-        DBAddOption(opts, DBOPT_H5_META_EXTENSION, driver_strs[driver_nstrs]);
-        driver_nstrs++;
-
-	tok = strtok(0, ",");
-	if (errno != 0)
-	{
-            fprintf(stderr, "Unable to determine driver from string \"%s\"\n", str);
-	    exit(-1);
-	}
-        driver_ints[driver_nints] = StringToDriver(tok);
-        DBAddOption(opts, DBOPT_H5_RAW_FILE_OPTS, &driver_ints[driver_nints]);
-        driver_nints++;
-
-	tok = strtok(0, ",");
-	if (errno != 0)
-	{
-            fprintf(stderr, "Unable to determine driver from string \"%s\"\n", str);
-	    exit(-1);
-	}
-        driver_strs[driver_nstrs] = strdup(tok);
-        DBAddOption(opts, DBOPT_H5_RAW_EXTENSION, driver_strs[driver_nstrs]);
-        driver_nstrs++;
-
-	free(tmpstr);
-
-        return DB_HDF5_OPTS(opts_id);
-    }
-#endif
-
     if (!strncmp(str, "DB_HDF5_OPTS(", 13))
     {
         char *tok, *tmpstr;;
@@ -236,18 +147,20 @@ static int StringToDriver(const char *str)
             CHECK_SYMBOLN_INT(DBOPT_H5_CACHE_NBYTES)
             CHECK_SYMBOLN_INT(DBOPT_H5_FAM_SIZE)
             CHECK_SYMBOLN_SYM(DBOPT_H5_FAM_FILE_OPTS)
-            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_MAX_META)
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_DEFAULT);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SEC2);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_STDIO);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_CORE);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_LOG);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SPLIT);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_DIRECT);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_FAMILY);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_MPIP);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_MPIO);
-            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SILO);
+            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_BLOCK_SIZE)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_BLOCK_COUNT)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_LOG_STATS)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_DEFAULT)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SEC2)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_STDIO)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_CORE)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_LOG)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SPLIT)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_DIRECT)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_FAMILY)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_MPIP)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_MPIO)
+            CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SILO)
 
             if (!got_it)
             {

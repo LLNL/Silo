@@ -58,6 +58,7 @@ for advertising or product endorsement purposes.
  */
 #undef DB_NETCDF
 #undef DB_PDB
+#undef DB_PDBP
 #undef DB_TAURUS
 #undef DB_UNKNOWN
 #undef DB_DEBUG
@@ -69,6 +70,9 @@ for advertising or product endorsement purposes.
 #endif
 #ifdef HAVE_PDB_DRIVER
 #  define DB_PDB
+#endif
+#ifdef HAVE_PDBP_DRIVER
+#  define DB_PDBP
 #endif
 #ifdef HAVE_TAURUS_DRIVER
 #  define DB_TAURUS
@@ -114,8 +118,25 @@ extern int db_cdf_ForceSingle(int);
 #define DB_NETCDF_FSINGLE  NULL
 #endif
 
-/*slot 1 unused */
+/* Slot 1 is for PDB Proper */
+#ifdef DB_PDBP
+#undef  DB_PDBP
+#define DB_PDBP       1
+#define DB_PDBP_OPEN        db_pdbp_Open
+#define DB_PDBP_CREATE      db_pdbp_Create
+#define DB_PDBP_FSINGLE     db_pdbp_ForceSingle
 
+extern DBfile *db_pdbp_Open(char *, int, int);
+extern DBfile *db_pdbp_Create(char *, int, int, int, char *);
+extern int db_pdbp_ForceSingle(int);
+
+#else
+#define DB_PDBP_OPEN        NULL
+#define DB_PDBP_CREATE      NULL
+#define DB_PDBP_FSINGLE     NULL
+#endif
+
+/* Slot 2 is PDB Lite */
 #ifdef DB_PDB
 #undef  DB_PDB
 #define DB_PDB       2
@@ -212,7 +233,7 @@ extern int db_hdf5_ForceSingle(int);
  *-------------------------------------------------------------------------
  */
 #define DBOPENCB        {DB_NETCDF_OPEN,        \
-                         NULL,                  /*unused*/\
+                         DB_PDBP_OPEN,          \
                          DB_PDB_OPEN,           \
                          DB_TAURUS_OPEN,        \
                          NULL,                  /*unused*/\
@@ -223,7 +244,7 @@ extern int db_hdf5_ForceSingle(int);
                          NULL}                  /*unused*/
 
 #define DBCREATECB      {DB_NETCDF_CREATE,      \
-                         NULL,                  /*unused*/\
+                         DB_PDBP_CREATE,        \
                          DB_PDB_CREATE,         \
                          DB_TAURUS_CREATE,      \
                          NULL,                  /*unused*/\
@@ -234,7 +255,7 @@ extern int db_hdf5_ForceSingle(int);
                          NULL}                  /*unused*/
 
 #define DBFSINGLECB     {DB_NETCDF_FSINGLE,     \
-                         NULL,                  /*unused*/\
+                         DB_PDBP_FSINGLE,       \
                          DB_PDB_FSINGLE,        \
                          DB_TAURUS_FSINGLE,     \
                          NULL,                  /*unused*/\

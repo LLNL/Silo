@@ -138,20 +138,6 @@ extern "C" {
          (SILO_VERS_MAJ>Maj))
 #define DB_VERSION_GE(Maj,Min,Pat) SILO_VERSION_GE(Maj,Min,Pat)
 
-/* Monikers for default file options sets */
-#define DB_FILE_OPTS_H5_DEFAULT_DEFAULT 0
-#define DB_FILE_OPTS_H5_DEFAULT_SEC2    1
-#define DB_FILE_OPTS_H5_DEFAULT_STDIO   2
-#define DB_FILE_OPTS_H5_DEFAULT_CORE    3
-#define DB_FILE_OPTS_H5_DEFAULT_LOG     4
-#define DB_FILE_OPTS_H5_DEFAULT_SPLIT   5
-#define DB_FILE_OPTS_H5_DEFAULT_DIRECT  6
-#define DB_FILE_OPTS_H5_DEFAULT_FAMILY  7
-#define DB_FILE_OPTS_H5_DEFAULT_MPIP    8
-#define DB_FILE_OPTS_H5_DEFAULT_MPIO    9
-#define DB_FILE_OPTS_H5_DEFAULT_SILO    10
-#define DB_FILE_OPTS_LAST DB_FILE_OPTS_H5_DEFAULT_SILO
-
 /*-------------------------------------------------------------------------
  * Drivers.  This is a list of every driver that a user could use.  Not all of
  * them are necessarily compiled into the library.  However, users are free
@@ -159,11 +145,12 @@ extern "C" {
  * silo.h doesn't have to be generated every time the library is recompiled.
  *--------------------------------------------------------------------------*/
 #define DB_NETCDF 0
-#define DB_PDB 2
+#define DB_PDB 2 /* PDB Lite */
 #define DB_TAURUS 3
 #define DB_UNKNOWN 5
 #define DB_DEBUG 6
 #define DB_HDF5X 7
+#define DB_PDBP 1 /* PDB Proper */
 
 /* DO NOT USE. Obsoleted ways of specifying different HDF5 vfds */
 #define DB_HDF5_SEC2_OBSOLETE 0x100
@@ -171,6 +158,19 @@ extern "C" {
 #define DB_HDF5_CORE_OBSOLETE 0x300
 #define DB_HDF5_MPIO_OBSOLETE 0x400
 #define DB_HDF5_MPIOP_OBSOLETE 0x500
+
+/* symbols for various HDF5 vfds */
+#define DB_H5VFD_DEFAULT 0
+#define DB_H5VFD_SEC2    1
+#define DB_H5VFD_STDIO   2
+#define DB_H5VFD_CORE    3
+#define DB_H5VFD_LOG     4
+#define DB_H5VFD_SPLIT   5
+#define DB_H5VFD_DIRECT  6
+#define DB_H5VFD_FAMILY  7
+#define DB_H5VFD_MPIO    8
+#define DB_H5VFD_MPIP    9
+#define DB_H5VFD_SILO    10
 
 /* Macro for defining various HDF5 vfds as 'type' arg in create/open.
    The 11 bit shift is to avoid possible collision with older versions
@@ -193,19 +193,20 @@ extern "C" {
 #define DB_HDF5_MPIP DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_MPIP)
 #define DB_HDF5_SILO DB_HDF5_OPTS(DB_FILE_OPTS_H5_DEFAULT_SILO)
 
-/* symbols for various HDF5 vfds */
-#warning DO WE NEED THESE. THEY ARE THE SAME AS DEFAULT FILE OPTS
-#define DB_H5VFD_DEFAULT 0
-#define DB_H5VFD_SEC2    1
-#define DB_H5VFD_STDIO   2
-#define DB_H5VFD_CORE    3
-#define DB_H5VFD_LOG     4
-#define DB_H5VFD_SPLIT   5
-#define DB_H5VFD_DIRECT  6
-#define DB_H5VFD_FAMILY  7
-#define DB_H5VFD_MPIO    8
-#define DB_H5VFD_MPIP    9
-#define DB_H5VFD_SILO    10
+/* Monikers for default file options sets */
+/* We just make the default options sets the same as the vfd is */
+#define DB_FILE_OPTS_H5_DEFAULT_DEFAULT DB_H5VFD_DEFAULT 
+#define DB_FILE_OPTS_H5_DEFAULT_SEC2    DB_H5VFD_SEC2 
+#define DB_FILE_OPTS_H5_DEFAULT_STDIO   DB_H5VFD_STDIO 
+#define DB_FILE_OPTS_H5_DEFAULT_CORE    DB_H5VFD_CORE 
+#define DB_FILE_OPTS_H5_DEFAULT_LOG     DB_H5VFD_LOG 
+#define DB_FILE_OPTS_H5_DEFAULT_SPLIT   DB_H5VFD_SPLIT 
+#define DB_FILE_OPTS_H5_DEFAULT_DIRECT  DB_H5VFD_DIRECT 
+#define DB_FILE_OPTS_H5_DEFAULT_FAMILY  DB_H5VFD_FAMILY 
+#define DB_FILE_OPTS_H5_DEFAULT_MPIO    DB_H5VFD_MPIO
+#define DB_FILE_OPTS_H5_DEFAULT_MPIP    DB_H5VFD_MPIP
+#define DB_FILE_OPTS_H5_DEFAULT_SILO    DB_H5VFD_SILO 
+#define DB_FILE_OPTS_LAST DB_FILE_OPTS_H5_DEFAULT_SILO
 
 /*-------------------------------------------------------------------------
  * Other library-wide constants.
@@ -460,7 +461,9 @@ typedef enum {
 #define DBOPT_H5_FAM_FILE_OPTS      524
 #define DBOPT_H5_USER_DRIVER_ID     525
 #define DBOPT_H5_USER_DRIVER_INFO   526
-#define DBOPT_H5_SILO_MAX_META      527
+#define DBOPT_H5_SILO_BLOCK_SIZE    527
+#define DBOPT_H5_SILO_BLOCK_COUNT   528
+#define DBOPT_H5_SILO_LOG_STATS     529
 #define DBOPT_H5_LAST               599
 
 /* Error trapping method */
@@ -470,6 +473,7 @@ typedef enum {
 #define         DB_ABORT        3 /*abort() is called  */
 #define         DB_SUSPEND      4 /*suspend error reporting temporarily */
 #define         DB_RESUME       5 /*resume normal error reporting */
+#define         DB_ALL_AND_DRVR 6 /*DB_ALL + driver error reporting */
 
 /* Errors */
 #define     E_NOERROR   0       /*No error   */
@@ -1794,6 +1798,7 @@ SILO_API extern void     DBShowErrors(int, void (*)(char *));
 SILO_API extern char    *DBErrString(void);
 SILO_API extern char    *DBErrFunc(void);
 SILO_API extern int      DBErrno(void);
+SILO_API extern int      DBErrlvl(void);
 SILO_API extern int      DBClose(DBfile *);
 SILO_API extern int      DBPause(DBfile *);
 SILO_API extern int      DBContinue(DBfile *);

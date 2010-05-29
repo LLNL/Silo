@@ -6,6 +6,33 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+/*
+   TO DO:
+
+     *1. Examine file block alignment with HDF5 lib metadata allocations
+      2. On systems that support O_DIRECT, try posix_madvise/posix_memalign
+      3. Support partial last block
+      4. Aggregate multiple blocks
+     *5. allow an 'auto' block count or 'max-N'
+      6. If 5, add DBFreeSomeSiloVFDBlocks
+      7. Compare with sec2 VFD, PDB
+     *8. Pre-empt raw data blocks over meta data blocks
+      9. Move mdc_config from silo_hdf5.c to this file
+    *10. Does mdc_config really matter now?
+     11. Fix skipping truncate (maybe by 3)
+    *12. Sanity check block size on read relative to write.
+     13. Get performance studies on other systems
+     14. Study read performance too.
+     15. Move to DICHOTOMY and write all meta blocks at end of file.
+     16. Write blocks from different MPI tasks to same file. On read
+         back, need to specify which 'task' but should otherwise work.
+     17. Use direct I/O where possible (and appropriate).
+     18. Capture I/O statistics here.
+     19. Set mdc_config to never preempt (chews up memory in lib),
+         all writes for md will come on close.
+
+*/
+
 /* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
    in this file uses version 1.6 of the HDF5 API. This is harmless for
    versions of HDF5 before 1.8 and ensures correct compilation with
@@ -40,6 +67,10 @@
 
 #define EXACT		0
 #define CLOSEST		1
+
+#define SILO_BLKSZ_PROPNAME "silo_block_size"
+#define SILO_BLKCNT_PROPNAME "silo_block_count"
+#define SILO_LOGSTS_PROPNAME "silo_log_stats"
 
 /* definitions related to the file stat utilities.
  * For Unix, if off_t is not 64bit big, try use the pseudo-standard
@@ -146,6 +177,84 @@ static const char *flavors(H5F_mem_t m)
 }
 #endif
 
+typedef struct silo_vfd_hot_block_stats_t_
+{
+    hsize_t id;
+    hsize_t num_block_writes;
+    hsize_t num_block_reads;
+    float raw_frac;
+} silo_vfd_hot_block_stats_t;
+
+typedef struct silo_vfd_stats_t_
+{
+    /* statistics for this VFD's interaction with the filesystem */
+    hsize_t max_block_id;
+    hsize_t max_blocks_in_mem;
+
+    hsize_t total_seeks;
+
+    hsize_t num_multiblock_writes;
+    hsize_t num_multiblock_reads;
+
+    hsize_t num_blocks_majority_md;
+    hsize_t num_blocks_majority_raw;
+
+    hsize_t total_write_count;
+    hsize_t total_write_bytes;
+
+    hsize_t total_block_raw_writes;
+    hsize_t total_block_raw_re_writes;
+    double total_time_in_raw_writes;
+
+    hsize_t total_block_md_writes;
+    hsize_t total_block_md_re_writes;
+    double total_time_in_md_writes;
+
+    hsize_t total_read_count;
+    hsize_t total_read_bytes;
+
+    hsize_t total_block_reads;
+    hsize_t total_block_re_reads;
+    double total_time_in_reads;
+
+    int num_hot_blocks;
+    int max_hot_blocks;
+    silo_vfd_hot_block_stats_t *hot_block_list;
+
+    double timestamp_open_started;
+    double timestamp_close_finished;
+
+    /* Statistics for HDF5 lib's interaction with this VFD */
+    hsize_t total_vfd_raw_write_count;
+    hsize_t total_vfd_raw_write_bytes;
+    hsize_t vfd_raw_write_count_hist[32];
+    hsize_t vfd_raw_write_bytes_hist[32];
+
+    hsize_t total_vfd_md_write_count;
+    hsize_t total_vfd_md_write_bytes;
+    hsize_t vfd_md_write_count_hist[32];
+    hsize_t vfd_md_write_bytes_hist[32];
+
+    hsize_t total_vfd_raw_read_count;
+    hsize_t total_vfd_raw_read_bytes;
+    hsize_t vfd_raw_read_count_hist[32];
+    hsize_t vfd_raw_read_bytes_hist[32];
+
+    hsize_t total_vfd_md_read_count;
+    hsize_t total_vfd_md_read_bytes;
+    hsize_t vfd_md_read_count_hist[32];
+    hsize_t vfd_md_read_bytes_hist[32];
+
+    hsize_t max_hdf5_cache_size;
+
+} silo_vfd_stats_t;
+
+typedef struct silo_vfd_block_bitmap_t_
+{
+    unsigned char *bitmap;
+    hsize_t nbytes;
+} silo_vfd_block_bitmap_t;
+
 typedef struct silo_vfd_relevant_blocks_t_
 {
     hsize_t  id0,  id1;
@@ -158,7 +267,24 @@ typedef struct silo_vfd_block_t_
     hsize_t age;
     void *buf;
     unsigned dirty;
+    hsize_t minmoff, maxmoff;
+    hsize_t minroff, maxroff;
 } silo_vfd_block_t;
+
+typedef struct silo_vfd_pair_t_ 
+{
+    int i;
+    hsize_t id;
+} silo_vfd_pair_t;
+
+static int compare_silo_vfd_pairs(const void *a, const void *b)
+{
+    silo_vfd_pair_t *paira = (silo_vfd_pair_t*)a;
+    silo_vfd_pair_t *pairb = (silo_vfd_pair_t*)b;
+    if (paira->id < pairb->id) return -1;
+    if (paira->id > pairb->id) return 1;
+    return 0;
+}
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SILO_g = 0;
@@ -189,6 +315,11 @@ typedef struct H5FD_silo_t {
     silo_vfd_block_t *block_list;
     int         max_blocks;
     int         num_blocks;
+    int         log_stats;
+    char       *log_name;
+    silo_vfd_block_bitmap_t was_written_map;
+    silo_vfd_block_bitmap_t was_in_mem_map;
+    silo_vfd_stats_t stats;
 #ifndef _WIN32
     /*
      * On most systems the combination of device and i-node number uniquely
@@ -310,6 +441,96 @@ static const H5FD_class_t H5FD_silo_g = {
     H5FD_FLMAP_SINGLE				/*fl_map		*/
 };
 
+static void update_hotblock_stats(H5FD_silo_t *file, hsize_t id, int dir, float raw_frac)
+{
+    int bot = 0, top = file->stats.num_hot_blocks - 1, mid=-1;
+    silo_vfd_hot_block_stats_t *hbl = file->stats.hot_block_list;
+    int haveIt = 0;
+
+    while (bot <= top)
+    {
+        mid = (bot + top) >> 1;
+        if (id > hbl[mid].id)
+	{
+            if (mid == file->stats.num_hot_blocks-1) break;
+            if (id < hbl[mid+1].id) break;
+            bot = mid + 1;
+	}
+        else if (id < hbl[mid].id)
+	{
+            if (mid == 0 || id > hbl[mid-1].id) {mid--; break; }
+            top = mid - 1;
+	}
+        else
+        {
+            haveIt = 1;
+            break;
+        }
+    }
+
+    if (!haveIt)
+    {
+        int i;
+        if (file->stats.num_hot_blocks == file->stats.max_hot_blocks)
+        {
+            int new_max = file->stats.max_hot_blocks * 2 + 1;
+            hbl = realloc(file->stats.hot_block_list, sizeof(silo_vfd_hot_block_stats_t)*new_max);
+            file->stats.max_hot_blocks = new_max;
+            file->stats.hot_block_list = hbl;
+        }
+        mid++;
+        for (i = file->stats.num_hot_blocks; i > mid; i--)
+            hbl[i] = hbl[i-1];
+        memset(&hbl[mid], 0, sizeof(silo_vfd_hot_block_stats_t));
+        file->stats.num_hot_blocks++;
+        hbl[mid].id = id;
+    }
+
+    HDassert(id == hbl[mid].id);
+
+    if (dir == OP_WRITE)
+    {
+        hbl[mid].num_block_writes++;
+        if (raw_frac>0.5)
+            file->stats.total_block_raw_re_writes++;
+        else
+            file->stats.total_block_md_re_writes++;
+    }
+    else
+    {
+        hbl[mid].num_block_reads++;
+        file->stats.total_block_re_reads++;
+    }
+    hbl[mid].raw_frac = raw_frac;
+}
+
+static void set_block_bitmap_by_id(silo_vfd_block_bitmap_t *bbm, hsize_t id)
+{
+    hsize_t byte_offset = id / (hsize_t) 8;
+    int bit_offset = id % (hsize_t) 8;
+    int mask = 1<<bit_offset;
+    if (byte_offset >= bbm->nbytes)
+    {
+        bbm->bitmap = (unsigned char *) realloc(bbm->bitmap, (byte_offset+1)*2);
+        memset(bbm->bitmap+bbm->nbytes, 0, (byte_offset+1)*2 - bbm->nbytes);
+        bbm->nbytes = (byte_offset+1)*2;
+    }
+    bbm->bitmap[byte_offset] |= mask;
+}
+
+static int get_block_bitmap_by_id(silo_vfd_block_bitmap_t *bbm, hsize_t id)
+{
+    hsize_t byte_offset = id / (hsize_t) 8;
+    int bit_offset = id % (hsize_t) 8;
+    if (byte_offset < bbm->nbytes)
+    {
+        int mask = 1<<bit_offset;
+        unsigned int val = (unsigned int) bbm->bitmap[byte_offset];
+        return val & mask;
+    }
+    return 0;
+}
+
 static silo_vfd_relevant_blocks_t
 relevant_blocks(hsize_t block_size, haddr_t addr, hsize_t size)
 {
@@ -358,24 +579,51 @@ static int find_block_by_id(H5FD_silo_t *file, hsize_t id, unsigned leq)
     return -1; 
 }
 
-static int find_block_by_smallest_age(H5FD_silo_t *file)
+static int find_block_to_preempt(H5FD_silo_t *file)
 {
     int i;
-    int min_idx = 0;
+    int min_midx = -1;
+    int min_ridx = -1;
     silo_vfd_block_t *bl = file->block_list;
-    hsize_t min_age = bl[0].age;
-    for (i = 0; i < file->num_blocks; i++)
+    hsize_t min_mage = file->op_counter;
+    hsize_t min_rage = file->op_counter;
+    for (i = 1; i < file->num_blocks; i++)
     {
-        if (bl[i].age < min_age)
+#if 1
+        int msize = bl[i].maxmoff - bl[i].minmoff;
+        int rsize = bl[i].maxroff - bl[i].minroff;
+
+        if (msize > rsize)
         {
-            min_age = bl[i].age;
-            min_idx = i;
+            if (bl[i].age < min_mage)
+            {
+                min_mage = bl[i].age;
+                min_midx = i;
+            }
         }
+        else
+        {
+            if (bl[i].age < min_rage)
+            {
+                min_rage = bl[i].age;
+                min_ridx = i;
+            }
+        }
+#else
+        if (bl[i].age < min_rage)
+        {
+            min_rage = bl[i].age;
+            min_ridx = i;
+        }
+#endif
     }
-    return min_idx;
+
+    if (min_ridx == -1)
+        return min_midx;
+    return min_ridx;
 }
 
-static herr_t put_data_to_block_by_index(H5FD_silo_t *file, const void *srcbuf, hsize_t size,
+static herr_t put_data_to_block_by_index(H5FD_silo_t *file, H5FD_mem_t type, const void *srcbuf, hsize_t size,
     int blidx, int off)
 {
     silo_vfd_block_t *block;
@@ -387,10 +635,21 @@ static herr_t put_data_to_block_by_index(H5FD_silo_t *file, const void *srcbuf, 
     HDassert(block->buf);
 
     HDassert((hsize_t)off+size<=file->block_size);
-    memcpy(block->buf+off, srcbuf, size);
+    memcpy((char*)block->buf+off, srcbuf, size);
 
     block->dirty = 1;
     block->age = file->op_counter++;
+
+    if (type == H5FD_MEM_DRAW)
+    {
+        if (off < block->minroff) block->minroff = off;
+        if (off+size-1 > block->maxroff) block->maxroff = off+size-1;
+    }
+    else
+    {
+        if (off < block->minmoff) block->minmoff = off;
+        if (off+size-1 > block->maxmoff) block->maxmoff = off+size-1;
+    }
 
     addr = block->id * file->block_size + off + size;
     if (addr > file->eof) file->eof = addr;
@@ -398,7 +657,7 @@ static herr_t put_data_to_block_by_index(H5FD_silo_t *file, const void *srcbuf, 
     return 0;
 }
 
-static herr_t get_data_from_block_by_index(H5FD_silo_t *file, void *dstbuf, hsize_t size,
+static herr_t get_data_from_block_by_index(H5FD_silo_t *file, H5FD_mem_t type, void *dstbuf, hsize_t size,
     int blidx, int off)
 {
     silo_vfd_block_t *block;
@@ -409,9 +668,20 @@ static herr_t get_data_from_block_by_index(H5FD_silo_t *file, void *dstbuf, hsiz
     HDassert(block->buf);
     
     HDassert((hsize_t)off+size<=file->block_size);
-    memcpy(dstbuf, block->buf+off, size);
+    memcpy(dstbuf, (char*)block->buf+off, size);
 
     block->age = file->op_counter++;
+
+    if (type == H5FD_MEM_DRAW)
+    {
+        if (off < block->minroff) block->minroff = off;
+        if (off+size-1 > block->maxroff) block->maxroff = off+size-1;
+    }
+    else
+    {
+        if (off < block->minmoff) block->minmoff = off;
+        if (off+size-1 > block->maxmoff) block->maxmoff = off+size-1;
+    }
 
     return 0;
 }
@@ -439,14 +709,19 @@ static herr_t file_write(H5FD_silo_t *file, haddr_t addr, size_t size, const voi
 #endif
 
     /* Seek to the correct location */
-    if((addr != file->pos || OP_WRITE != file->op) &&
-        HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
+    if (addr != file->pos || OP_WRITE != file->op)
+    {
+        if (HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
             H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDlseek failed", -1, errno)
+        file->stats.total_seeks++;
+    }
 
     /* Write data, being careful of interrupted system calls and partial results */
     while(size > 0) {
         do {
             nbytes = HDwrite(file->fd, buf, size);
+            file->stats.total_write_count++;
+            file->stats.total_write_bytes += nbytes;
         } while(-1 == nbytes && EINTR == errno);
         if(-1 == nbytes) /* error */
             H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "HDwrite failed", -1, errno)
@@ -498,14 +773,19 @@ static herr_t file_read(H5FD_silo_t *file, haddr_t addr, size_t size, void *buf)
 #endif
 
     /* Seek to the correct location */
-    if ((addr != file->pos || OP_READ != file->op) &&
-        HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDlseek failed", -1, errno)
+    if (addr != file->pos || OP_READ != file->op)
+    {
+        if (HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
+            H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "HDlseek failed", -1, errno)
+        file->stats.total_seeks++;
+    }
 
     /* Read data, careful of interrupted system calls, partial results and eof */
     while(size > 0) {
         do {
             nbytes = HDread(file->fd, buf, size);
+            file->stats.total_read_count++;
+            file->stats.total_read_bytes += nbytes;
         } while(-1 == nbytes && EINTR == errno);
         if(-1 == nbytes) /* error */
             H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "HDread failed", -1, errno)
@@ -554,6 +834,25 @@ static herr_t file_write_block(H5FD_silo_t *file, int blidx)
     if (file_write(file, addr, file->block_size, b->buf) < 0)
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "file_write_block failed", -1, -1)
 
+    if (file->log_stats)
+    {
+        int msize = 0, rsize = 0;
+        if (b->maxmoff > b->minmoff)
+            msize = b->maxmoff - b->minmoff;
+        if (b->maxroff > b->minroff)
+            rsize = b->maxroff - b->minroff;
+
+        if (rsize >= msize)
+            file->stats.total_block_raw_writes++;
+        else
+            file->stats.total_block_md_writes++;
+
+        if (get_block_bitmap_by_id(&(file->was_written_map), b->id))
+            update_hotblock_stats(file, b->id, OP_WRITE, (rsize+msize)?(float)rsize/(msize+rsize):(float)0);
+
+        set_block_bitmap_by_id(&(file->was_written_map), b->id);
+    }
+
     if (ret_value == 0)
         b->dirty = 0;
 
@@ -575,6 +874,14 @@ static herr_t file_read_block(H5FD_silo_t *file, int blidx)
 
     if (file_read(file, addr, file->block_size, b->buf) < 0)
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_READERROR, "file_read_block failed", -1, -1)
+    file->stats.total_block_reads++;
+
+    /* check if the block was ever in memory before */
+    if (file->log_stats)
+    {
+        if (get_block_bitmap_by_id(&(file->was_in_mem_map), b->id))
+            update_hotblock_stats(file, b->id, OP_READ, 0);
+    }
 
     if (ret_value == 0)
         b->dirty = 0;
@@ -586,8 +893,20 @@ static herr_t remove_block_by_index(H5FD_silo_t *file, int blidx)
 {
     int i;
     silo_vfd_block_t *bl = file->block_list;
+    silo_vfd_block_t *b = &file->block_list[blidx];
 
     HDassert(file->num_blocks>0);
+
+    if (file->log_stats)
+    {
+        int msize = b->maxmoff - b->minmoff;
+        int rsize = b->maxroff - b->minroff;
+
+        if (rsize >= msize)
+            file->stats.num_blocks_majority_raw++;
+        else
+            file->stats.num_blocks_majority_md++;
+    }
 
     for (i = blidx; i < file->num_blocks-1; i++)
         bl[i] = bl[i+1];
@@ -611,6 +930,8 @@ static herr_t insert_block_by_index(H5FD_silo_t *file, int blidx)
     memset(&bl[blidx+1], 0, sizeof(silo_vfd_block_t));
 
     file->num_blocks++;
+    if (file->num_blocks > file->stats.max_blocks_in_mem)
+        file->stats.max_blocks_in_mem = file->num_blocks;
 
     return 0;
 }
@@ -632,10 +953,19 @@ static int alloc_block_by_id(H5FD_silo_t *file, hsize_t id)
     b->buf = malloc(file->block_size);
     b->id = id;
     b->age = file->op_counter++;
+    b->minmoff = file->block_size;
+    b->maxmoff = 0;
+    b->minroff = file->block_size;
+    b->maxroff = 0;
 
-#warning MAYBE JUST LESS THAN
-    if (addr0<=file->file_eof)
+    if (addr0<file->file_eof)
         file_read_block(file, blidx);
+
+    if (file->log_stats)
+    {
+        set_block_bitmap_by_id(&(file->was_in_mem_map), id);
+        if (id > file->stats.max_block_id) file->stats.max_block_id = id;
+    }
 
     return blidx;
 }
@@ -736,20 +1066,57 @@ H5Pset_fapl_silo(hid_t fapl_id)
 {
     static const char *func = "H5FDset_fapl_silo"; 
     herr_t ret_value = 0;
-    hsize_t block_size = 16384;
-    int block_count = 16;
+    hsize_t default_block_size = 16384;
+    H5AC_cache_config_t mdc_config;
+    int default_block_count = 16;
+    int default_log_stats = 0;
+    hid_t default_fapl;
 
     H5Eclear2(H5E_DEFAULT);
 
     if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
-    if (H5Pset(fapl_id, "silo_block_size", &block_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_size", -1, -1)
-    if (H5Pset(fapl_id, "silo_block_count", &block_count) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
-    if (H5Pset_meta_block_size(fapl_id, block_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
 
+    if (H5Pinsert(fapl_id, SILO_BLKSZ_PROPNAME, sizeof(hsize_t), &default_block_size, 0, 0, 0, 0, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert silo_block_size property", -1, -1)
+    if (H5Pinsert(fapl_id, SILO_BLKCNT_PROPNAME, sizeof(int), &default_block_count, 0, 0, 0, 0, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert silo_block_count property", -1, -1)
+    if (H5Pinsert(fapl_id, SILO_LOGSTS_PROPNAME, sizeof(int), &default_log_stats, 0, 0, 0, 0, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert silo_log_stats property", -1, -1)
+
+    if (H5Pset(fapl_id, SILO_BLKSZ_PROPNAME, &default_block_size) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_size", -1, -1)
+    if (H5Pset(fapl_id, SILO_BLKCNT_PROPNAME, &default_block_count) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
+    if (H5Pset(fapl_id, SILO_LOGSTS_PROPNAME, &default_log_stats) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_log_stats", -1, -1)
+    if (H5Pset_meta_block_size(fapl_id, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
+    if (H5Pset_small_data_block_size(fapl_id, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set small_data_block_size", -1, -1)
+    if (H5Pset_sieve_buf_size(fapl_id, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set sieve_buf_size", -1, -1)
+
+    /* Get default metdata cache configuration. */
+#warning FIX ME
+#if 1
+    memset(&mdc_config, 0, sizeof(mdc_config));
+    mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+    default_fapl = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5Pget_mdc_config(default_fapl, &mdc_config)<0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get default mdc_config", -1, -1)
+    H5Pclose(default_fapl);
+
+    /* Turn off evicitions. This means memory for HDF5 metadata will grow without bound. */
+#warning FIX ME
+    mdc_config.evictions_enabled = 0;
+    mdc_config.incr_mode = H5C_incr__off;
+    mdc_config.flash_incr_mode = H5C_flash_incr__off;
+    mdc_config.decr_mode = H5C_decr__off;
+    if (H5Pset_mdc_config(fapl_id, &mdc_config)<0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set mdc_config to turn off evictions", -1, -1)
+#endif
+    
     return H5Pset_driver(fapl_id, H5FD_SILO, NULL);
 }
 
@@ -764,12 +1131,33 @@ H5Pset_silo_block_size_and_count(hid_t fapl_id, hsize_t block_size, int max_bloc
 
     if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
-    if (H5Pset(fapl_id, "silo_block_size", &block_size) < 0)
+    if (H5Pset(fapl_id, SILO_BLKSZ_PROPNAME, &block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_size", -1, -1)
-    if (H5Pset_meta_block_size(fapl_id, block_size) < 0)
+    if (H5Pset_meta_block_size(fapl_id, 0) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
-    if (H5Pset(fapl_id, "silo_block_count", &max_blocks_in_mem) < 0)
+    if (H5Pset_small_data_block_size(fapl_id, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set small_data_block_size", -1, -1)
+    if (H5Pset_sieve_buf_size(fapl_id, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set sieve_buf_size", -1, -1)
+    if (H5Pset(fapl_id, SILO_BLKCNT_PROPNAME, &max_blocks_in_mem) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
+
+    return ret_value;
+}
+
+herr_t
+H5Pset_silo_log_stats(hid_t fapl_id, int log)
+{
+    static const char *func="H5Pset_silo_log_stats";
+    herr_t ret_value = 0;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
+    if (H5Pset(fapl_id, SILO_LOGSTS_PROPNAME, &log) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_log_stats", -1, -1)
 
     return ret_value;
 }
@@ -805,7 +1193,7 @@ H5FD_silo_sb_size(H5FD_t *_file)
     /* block size for file */
     nbytes += 8;
 
-    return nbytes;
+    return 1024-100-nbytes;
 }
 
 
@@ -835,8 +1223,7 @@ H5FD_silo_sb_encode(H5FD_t *_file, char *name/*out*/,
     p = buf+8;
     assert(sizeof(hsize_t)<=8);
     memcpy(p, &file->block_size, sizeof(hsize_t));
-    if (H5Tconvert(H5T_NATIVE_HSIZE, H5T_STD_U64LE, 1, buf+8, NULL,
-		   H5P_DEFAULT)<0)
+    if (H5Tconvert(H5T_NATIVE_HSIZE, H5T_STD_U64LE, 1, buf+8, NULL, H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
 
     return 0;
@@ -874,7 +1261,7 @@ H5FD_silo_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HSIZE, 1, x, NULL, H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
     ap = (hsize_t*)x;
-    file->block_size = *ap;
+    /*file->block_size = *ap; ignore stored value for now */
 
     return 0;
 }
@@ -920,6 +1307,9 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     int silo_block_count;
     hsize_t silo_block_size;
     hsize_t meta_block_size;
+    hsize_t small_data_block_size;
+    size_t  sieve_buf_size;
+    int     silo_log_stats = 0;
     H5FD_t *ret_value = 0;
 
     /* Sanity check on file offsets */
@@ -939,14 +1329,35 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     /* get some properties and sanity check them */
     if (H5Pget_meta_block_size(fapl_id, &meta_block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get meta_block_size", 0, -1)
-    if (H5Pget(fapl_id, "silo_block_size", &silo_block_size) < 0)
+    if (meta_block_size != 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "meta_block_size!=0", 0, -1)
+
+    if (H5Pget_small_data_block_size(fapl_id, &small_data_block_size) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get small_data_block_size", 0, -1)
+    if (small_data_block_size != 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "small_data_block_size!=0", 0, -1)
+
+    if (H5Pget_sieve_buf_size(fapl_id, &sieve_buf_size) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get sieve_buf_size", 0, -1)
+    if (sieve_buf_size != 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "sieve_buf_size!=0", 0, -1)
+
+    if (H5Pget(fapl_id, SILO_BLKSZ_PROPNAME, &silo_block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_block_size", 0, -1)
-    if (meta_block_size != silo_block_size)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "meta_block_size!=silo_block_size", 0, -1)
-    if (H5Pget(fapl_id, "silo_block_count", &silo_block_count) < 0)
+
+#if 0
+    if (meta_block_size != silo_block_size || small_data_block_size != silo_block_size)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "raw/meta_block_size!=silo_block_size", 0, -1)
+#endif
+
+    if (H5Pget(fapl_id, SILO_BLKCNT_PROPNAME, &silo_block_count) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_block_count", 0, -1)
     if (silo_block_count < 1)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "silo_block_count<1", 0, -1)
+    if (H5Pget(fapl_id, SILO_LOGSTS_PROPNAME, &silo_log_stats) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_log_stats", 0, -1)
+
+#warning CHECK MDC CONFIG HERE TOO
 
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -972,13 +1383,20 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
 
     file->fd = fd;
     file->file_eof = (haddr_t)sb.st_size;
-#warning IS EOF LAST ADDRESS OR A COUNT
     file->eof = (haddr_t)sb.st_size;
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
     file->write_access = write_access;
     file->block_size = silo_block_size;
     file->max_blocks = silo_block_count;
+    file->log_stats = silo_log_stats;
+    if (silo_log_stats)
+    {
+        const char *ext = "-h5-vfd-log";
+        if (NULL == (file->log_name = (char*) malloc(strlen(name)+strlen(ext)+1)))
+            H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "malloc failed", NULL, errno)
+        sprintf(file->log_name, "%s%s", name, ext);
+    }
 
     /* The unique key */
     {
@@ -1004,21 +1422,6 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
 
     return((H5FD_t*)file);
 }   /* end H5FD_silo_open() */
-
-typedef struct silo_vfd_pair_t_ 
-{
-    int i;
-    hsize_t id;
-} silo_vfd_pair_t;
-
-static int compare_silo_vfd_pairs(const void *a, const void *b)
-{
-    silo_vfd_pair_t *paira = (silo_vfd_pair_t*)a;
-    silo_vfd_pair_t *pairb = (silo_vfd_pair_t*)b;
-    if (paira->id < pairb->id) return 1;
-    if (paira->id > pairb->id) return -1;
-    return 0;
-}
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_silo_close
@@ -1052,6 +1455,8 @@ H5FD_silo_close(H5FD_t *_file)
     if (file->write_access)
     {
         int i;
+
+        /* sort blocks by increasing block id */
         silo_vfd_pair_t *sorted_pairs = (silo_vfd_pair_t*) malloc(file->num_blocks*sizeof(silo_vfd_pair_t));
         for (i = 0; i < file->num_blocks; i++)
         {
@@ -1059,13 +1464,13 @@ H5FD_silo_close(H5FD_t *_file)
             sorted_pairs[i].id = file->block_list[i].id; 
         }
         qsort(sorted_pairs, file->num_blocks, sizeof(silo_vfd_pair_t), compare_silo_vfd_pairs);
+
+        /* write the blocks, freeing as we go along */
         for (i = 0; i < file->num_blocks; i++)
         {
             silo_vfd_block_t *b = &(file->block_list[sorted_pairs[i].i]);
-            if (!(b->buf))
-                continue;
-            if (b->dirty)
-                file_write_block(file, sorted_pairs[i].i);
+            if (!(b->buf)) continue;
+            if (b->dirty) file_write_block(file, sorted_pairs[i].i);
             free(b->buf);
         }
         free(sorted_pairs);
@@ -1074,6 +1479,161 @@ H5FD_silo_close(H5FD_t *_file)
     errno = 0;
     if (close(file->fd) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_CLOSEERROR, "close failed", -1, errno)
+
+    if (file->log_stats)
+    {
+        int i, first;
+        hsize_t cum_raw_count, cum_raw_bytes, cum_md_count, cum_md_bytes;
+        hsize_t tot_raw_count, tot_raw_bytes, tot_md_count, tot_md_bytes;
+        FILE* logf = fopen(file->log_name, "w");
+        fprintf(logf, "======== Interactions between the VFD and the filesystem ========\n");
+        fprintf(logf, "block size = %llu\n", file->block_size);
+        fprintf(logf, "block count = %d\n", file->max_blocks);
+        fprintf(logf, "\n");
+        fprintf(logf, "max block id = %llu\n", file->stats.max_block_id);
+        fprintf(logf, "max blocks in mem = %llu\n", file->stats.max_blocks_in_mem);
+        fprintf(logf, "\n");
+        fprintf(logf, "total seeks = %llu\n", file->stats.total_seeks);
+        fprintf(logf, "\n");
+        fprintf(logf, "number of multi-block writes = %llu\n", file->stats.num_multiblock_writes);
+        fprintf(logf, "number of multi-block reads = %llu\n", file->stats.num_multiblock_reads);
+        fprintf(logf, "\n");
+        fprintf(logf, "number of blocks majority md = %llu\n", file->stats.num_blocks_majority_md);
+        fprintf(logf, "number of blocks majority raw = %llu\n", file->stats.num_blocks_majority_raw);
+        fprintf(logf, "\n");
+        fprintf(logf, "number of writes = %llu\n", file->stats.total_write_count);
+        fprintf(logf, "number of bytes written = %llu\n", file->stats.total_write_bytes);
+        fprintf(logf, "\n");
+        fprintf(logf, "number of times a raw block was written = %llu\n", file->stats.total_block_raw_writes);
+        fprintf(logf, "number of times a raw block was written more than once = %llu\n", file->stats.total_block_raw_re_writes);
+        fprintf(logf, "\n");
+        fprintf(logf, "number of times an md block was written = %llu\n", file->stats.total_block_md_writes);
+        fprintf(logf, "number of times an md block was written more than once = %llu\n", file->stats.total_block_md_re_writes);
+        fprintf(logf, "\n");
+        fprintf(logf, "number of reads = %llu\n", file->stats.total_read_count);
+        fprintf(logf, "number of bytes read = %llu\n", file->stats.total_read_bytes);
+        fprintf(logf, "\n");
+        fprintf(logf, "number of times a block was read = %llu\n", file->stats.total_block_reads);
+        fprintf(logf, "number of times a block was read more than once = %llu\n", file->stats.total_block_re_reads);
+        fprintf(logf, "\n");
+        fprintf(logf, "number of hot blocks %llu\n", file->stats.num_hot_blocks);
+        fprintf(logf, "hot blocks...\n");
+        for (i = 0; i < file->stats.num_hot_blocks; i++)
+        {
+            silo_vfd_hot_block_stats_t *hb = &(file->stats.hot_block_list[i]); 
+            fprintf(logf,"    %8llu: %4s (%f), #writes=%8llu, #reads=%8llu\n",
+                hb->id, (hb->raw_frac>0.5?"raw":"meta"), hb->raw_frac, hb->num_block_writes+1, hb->num_block_reads+1);
+        }
+        if (file->stats.hot_block_list) free(file->stats.hot_block_list);
+        if (file->was_written_map.bitmap) free(file->was_written_map.bitmap);
+        if (file->was_in_mem_map.bitmap) free(file->was_in_mem_map.bitmap);
+        fprintf(logf, "\n");
+        fprintf(logf, "\n");
+        fprintf(logf, "\n");
+        fprintf(logf, "======== Interactions between HDF5 library and the VFD ========\n");
+        fprintf(logf, "number raw writes = %llu\n", file->stats.total_vfd_raw_write_count);
+        fprintf(logf, "number raw bytes written = %llu\n", file->stats.total_vfd_raw_write_bytes);
+        fprintf(logf, "number md writes = %llu\n", file->stats.total_vfd_md_write_count);
+        fprintf(logf, "number md bytes written = %llu\n", file->stats.total_vfd_md_write_bytes);
+        fprintf(logf, "histogram...\n");
+        cum_raw_count = 0;
+        cum_raw_bytes = 0;
+        cum_md_count = 0;
+        cum_md_bytes = 0;
+        tot_raw_count = file->stats.total_vfd_raw_write_count;
+        if (tot_raw_count < 1) tot_raw_count = 1;
+        tot_raw_bytes = file->stats.total_vfd_raw_write_bytes;
+        if (tot_raw_bytes < 1) tot_raw_bytes = 1;
+        tot_md_count = file->stats.total_vfd_md_write_count;
+        if (tot_md_count < 1) tot_md_count = 1;
+        tot_md_bytes = file->stats.total_vfd_md_write_bytes;
+        if (tot_md_bytes < 1) tot_md_bytes = 1;
+        for (i = 0, first = 1; i < 32; i++)
+        {
+            cum_raw_count += file->stats.vfd_raw_write_count_hist[i];
+            cum_raw_bytes += file->stats.vfd_raw_write_bytes_hist[i];
+            cum_md_count += file->stats.vfd_md_write_count_hist[i];
+            cum_md_bytes += file->stats.vfd_md_write_bytes_hist[i];
+
+            if (file->stats.vfd_raw_write_count_hist[i] == 0 &&
+                file->stats.vfd_md_write_count_hist[i] == 0)
+                continue;
+
+            if (first)
+            {
+                first = 0;
+                fprintf(logf,"                                              WRITES                                        \n");
+                fprintf(logf,"------------------------------------------------|-------------------------------------------\n");
+                fprintf(logf,"                    RAW DATA                    |                   META DATA               \n");
+                fprintf(logf,"    #reqs      Tot   Cum  #byts      Tot   Cum  | #reqs      Tot   Cum  #byts      Tot   Cum\n");
+            }
+
+            fprintf(logf,"%2d: %8llu (%3d%%, %3d%%) %8llu (%3d%%, %3d%%) | "
+                              "%8llu (%3d%%, %3d%%) %8llu (%3d%%, %3d%%)\n", i,
+                file->stats.vfd_raw_write_count_hist[i],
+                (int) (100.0 * file->stats.vfd_raw_write_count_hist[i] / tot_raw_count),
+                (int) (100.0 * cum_raw_count / tot_raw_count),
+                file->stats.vfd_raw_write_bytes_hist[i],
+                (int) (100.0 * file->stats.vfd_raw_write_bytes_hist[i] / tot_raw_bytes),
+                (int) (100.0 * cum_raw_bytes / tot_raw_bytes),
+                file->stats.vfd_md_write_count_hist[i],
+                (int) (100.0 * file->stats.vfd_md_write_count_hist[i] / tot_md_count),
+                (int) (100.0 * cum_md_count / tot_md_count),
+                file->stats.vfd_md_write_bytes_hist[i],
+                (int) (100.0 * file->stats.vfd_md_write_bytes_hist[i] / tot_md_bytes),
+                (int) (100.0 * cum_md_bytes / tot_md_bytes));
+        }
+        cum_raw_count = 0;
+        cum_raw_bytes = 0;
+        cum_md_count = 0;
+        cum_md_bytes = 0;
+        tot_raw_count = file->stats.total_vfd_raw_read_count;
+        if (tot_raw_count < 1) tot_raw_count = 1;
+        tot_raw_bytes = file->stats.total_vfd_raw_read_bytes;
+        if (tot_raw_bytes < 1) tot_raw_bytes = 1;
+        tot_md_count = file->stats.total_vfd_md_read_count;
+        if (tot_md_count < 1) tot_md_count = 1;
+        tot_md_bytes = file->stats.total_vfd_md_read_bytes;
+        if (tot_md_bytes < 1) tot_md_bytes = 1;
+        for (i = 0, first = 1; i < 32; i++)
+        {
+            cum_raw_count += file->stats.vfd_raw_write_count_hist[i];
+            cum_raw_bytes += file->stats.vfd_raw_write_bytes_hist[i];
+            cum_md_count += file->stats.vfd_md_write_count_hist[i];
+            cum_md_bytes += file->stats.vfd_md_write_bytes_hist[i];
+
+            if (file->stats.vfd_raw_read_count_hist[i] == 0 &&
+                file->stats.vfd_md_read_count_hist[i] == 0)
+                continue;
+
+            if (first)
+            {
+                first = 0;
+                fprintf(logf,"                                              READS                                         \n");
+                fprintf(logf,"------------------------------------------------|-------------------------------------------\n");
+                fprintf(logf,"                    RAW DATA                    |                   META DATA               \n");
+                fprintf(logf,"    #reqs      Tot   Cum  #byts      Tot   Cum  | #reqs      Tot   Cum  #byts      Tot   Cum\n");
+            }
+
+            fprintf(logf,"%2d: %8llu (%3d%%, %3d%%) %8llu (%3d%%, %3d%%) | "
+                              "%8llu (%3d%%, %3d%%) %8llu (%3d%%, %3d%%)\n", i,
+                file->stats.vfd_raw_read_count_hist[i],
+                (int) (100.0 * file->stats.vfd_raw_read_count_hist[i] / tot_raw_count),
+                (int) (100.0 * cum_raw_count / tot_raw_count),
+                file->stats.vfd_raw_read_bytes_hist[i],
+                (int) (100.0 * file->stats.vfd_raw_read_bytes_hist[i] / tot_raw_bytes),
+                (int) (100.0 * cum_raw_bytes / tot_raw_bytes),
+                file->stats.vfd_md_read_count_hist[i],
+                (int) (100.0 * file->stats.vfd_md_read_count_hist[i] / tot_md_count),
+                (int) (100.0 * cum_md_count / tot_md_count),
+                file->stats.vfd_md_read_bytes_hist[i],
+                (int) (100.0 * file->stats.vfd_md_read_bytes_hist[i] / tot_md_bytes),
+                (int) (100.0 * cum_md_bytes / tot_md_bytes));
+        }
+
+        fclose(logf);
+        free(file->log_name);
+    }
 
     free(file->block_list);
     free(file);
@@ -1169,10 +1729,13 @@ H5FD_silo_query(const H5FD_t *_f, unsigned long *flags /* out */)
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
+#warning FIXE ME
+#if 0
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
-        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
+#endif
     }
 
     return(0);
@@ -1239,7 +1802,7 @@ H5FD_silo_get_eoa(const H5FD_t *_file, H5FD_mem_t /*unused*/ type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_silo_set_eoa(H5FD_t *_file, H5FD_mem_t /*unused*/ type, haddr_t addr)
+H5FD_silo_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 {
     H5FD_silo_t	*file = (H5FD_silo_t*)_file;
 
@@ -1281,7 +1844,6 @@ H5FD_silo_get_eof(const H5FD_t *_file)
     const H5FD_silo_t	*file = (const H5FD_silo_t *)_file;
 
     return(MAX(file->eof, file->eoa));
-
 }
 
 /*-------------------------------------------------------------------------
@@ -1391,7 +1953,7 @@ H5FD_silo_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size
         {
             if (file->num_blocks == file->max_blocks)
             {
-                int tmpblidx = find_block_by_smallest_age(file);
+                int tmpblidx = find_block_to_preempt(file);
                 free_block_by_index(file, tmpblidx);
             }
             blidx = alloc_block_by_id(file, id);
@@ -1400,26 +1962,49 @@ H5FD_silo_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size
         /* put the data in the block */
 	if (id == rb.id0 && id == rb.id1)
 	{
-	    get_data_from_block_by_index(file, buf, size, blidx, rb.off0);
+	    get_data_from_block_by_index(file, type, buf, size, blidx, rb.off0);
 	    bufoff += size;
 	}
         else if (id == rb.id0)
 	{
 	    nbytes = file->block_size - rb.off0;
-	    get_data_from_block_by_index(file, buf+bufoff, nbytes, blidx, rb.off0);
+	    get_data_from_block_by_index(file, type, (char*)buf+bufoff, nbytes, blidx, rb.off0);
 	    bufoff += nbytes;
 	}
 	else if (id == rb.id1)
 	{
 	    nbytes = rb.off1+1;
-	    get_data_from_block_by_index(file, buf+bufoff, nbytes, blidx, 0);
+	    get_data_from_block_by_index(file, type, (char*)buf+bufoff, nbytes, blidx, 0);
 	    bufoff += nbytes;
 	}
 	else
 	{
-	    get_data_from_block_by_index(file, buf+bufoff, file->block_size, blidx, 0);
+	    get_data_from_block_by_index(file, type, (char*)buf+bufoff, file->block_size, blidx, 0);
 	    bufoff += file->block_size;
 	}
+    }
+
+    if (file->log_stats)
+    {
+        int n;
+        hsize_t tmpsize = size;
+        for (n = 0; tmpsize; n++, tmpsize=(tmpsize>>1));
+        if (type == H5FD_MEM_DRAW)
+        {
+            file->stats.total_vfd_raw_read_count++;
+            file->stats.total_vfd_raw_read_bytes += size;
+            file->stats.vfd_raw_read_count_hist[n]++;
+            file->stats.vfd_raw_read_bytes_hist[n] += size;
+        }
+        else
+        {
+            file->stats.total_vfd_md_read_count++;
+            file->stats.total_vfd_md_read_bytes += size;
+            file->stats.vfd_md_read_count_hist[n]++;
+            file->stats.vfd_md_read_bytes_hist[n] += size;
+        }
+        if (rb.id1 > rb.id0+1)
+            file->stats.num_multiblock_reads++;
     }
 
     return(0);
@@ -1481,6 +2066,8 @@ H5FD_silo_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if (size == 0)
         return 0;
 
+printf("%s %llu %llu %d\n", flavors(type), file->op_counter, addr, (int) size);
+
     rb = relevant_blocks(file->block_size, addr, size);
     blidx = -1; 
     bl = file->block_list;
@@ -1499,7 +2086,7 @@ H5FD_silo_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         {
             if (file->num_blocks == file->max_blocks)
             {
-                int tmpblidx = find_block_by_smallest_age(file);
+                int tmpblidx = find_block_to_preempt(file);
                 free_block_by_index(file, tmpblidx);
             }
             blidx = alloc_block_by_id(file, id);
@@ -1508,26 +2095,49 @@ H5FD_silo_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         /* put the data in the block */
 	if (id == rb.id0 && id == rb.id1)
 	{
-	    put_data_to_block_by_index(file, buf, size, blidx, rb.off0);
+	    put_data_to_block_by_index(file, type, buf, size, blidx, rb.off0);
 	    bufoff += size;
 	}
         else if (id == rb.id0)
 	{
 	    nbytes = file->block_size - rb.off0;
-	    put_data_to_block_by_index(file, buf+bufoff, nbytes, blidx, rb.off0);
+	    put_data_to_block_by_index(file, type, (const char*)buf+bufoff, nbytes, blidx, rb.off0);
 	    bufoff += nbytes;
 	}
 	else if (id == rb.id1)
 	{
 	    nbytes = rb.off1+1;
-	    put_data_to_block_by_index(file, buf+bufoff, nbytes, blidx, 0);
+	    put_data_to_block_by_index(file, type, (const char*)buf+bufoff, nbytes, blidx, 0);
 	    bufoff += nbytes;
 	}
 	else
 	{
-	    put_data_to_block_by_index(file, buf+bufoff, file->block_size, blidx, 0);
+	    put_data_to_block_by_index(file, type, (const char*)buf+bufoff, file->block_size, blidx, 0);
 	    bufoff += file->block_size;
 	}
+    }
+
+    if (file->log_stats)
+    {
+        int n;
+        hsize_t tmpsize = size;
+        for (n = 0; tmpsize; n++, tmpsize=(tmpsize>>1));
+        if (type == H5FD_MEM_DRAW)
+        {
+            file->stats.total_vfd_raw_write_count++;
+            file->stats.total_vfd_raw_write_bytes += size;
+            file->stats.vfd_raw_write_count_hist[n]++;
+            file->stats.vfd_raw_write_bytes_hist[n] += size;
+        }
+        else
+        {
+            file->stats.total_vfd_md_write_count++;
+            file->stats.total_vfd_md_write_bytes += size;
+            file->stats.vfd_md_write_count_hist[n]++;
+            file->stats.vfd_md_write_bytes_hist[n] += size;
+        }
+        if (rb.id1 > rb.id0+1)
+            file->stats.num_multiblock_writes++;
     }
 
     return(0);
@@ -1557,16 +2167,15 @@ H5FD_silo_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
     static const char *func = "H5FD_silo_truncate";  /* Function Name for error reporting */
     herr_t ret_value = 0;
 
-    /* Shut compiler up */
-    dxpl_id = dxpl_id;
-    closing = closing;
-
-#warning SKIPPING TRUNCATE
 #warning SKIPPING TRUNCATE
 #warning SKIPPING TRUNCATE
 #warning SKIPPING TRUNCATE
 #warning SKIPPING TRUNCATE
     return 0;
+
+    /* Shut compiler up */
+    dxpl_id = dxpl_id;
+    closing = closing;
 
     HDassert(file);
 

@@ -58,12 +58,6 @@ for advertising or product endorsement purposes.
 #endif
 #endif
 #include "silo.h"
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 
 /*
  * The error mechanism....
@@ -215,15 +209,14 @@ typedef struct jstk_t {
     struct jstk_t *prev;
     jmp_buf        jbuf;
 } jstk_t;
-extern jstk_t *Jstk;
 
 typedef struct context_t {
     int            dirid;
     char          *name;
 } context_t;
 
-#define jstk_push()     {jstk_t*jt=ALLOC(jstk_t);jt->prev=Jstk;Jstk=jt;}
-#define jstk_pop()      if(Jstk){jstk_t*jt=Jstk;Jstk=Jstk->prev;FREE(jt);}
+#define jstk_push()     {jstk_t*jt=ALLOC(jstk_t);jt->prev=SILO_Globals.Jstk;SILO_Globals.Jstk=jt;}
+#define jstk_pop()      if(SILO_Globals.Jstk){jstk_t*jt=SILO_Globals.Jstk;SILO_Globals.Jstk=SILO_Globals.Jstk->prev;FREE(jt);}
 
 #define DEPRECATE_MSG(M,Maj,Min,Alt)                                          \
 {                                                                             \
@@ -255,10 +248,10 @@ typedef struct context_t {
                            write (DBDebugAPI, M, strlen(M));                  \
                            write (DBDebugAPI, "\n", 1);                       \
                         }                                                     \
-                        if (!Jstk){                                           \
+                        if (!SILO_Globals.Jstk){                              \
                            jstk_push() ;                                      \
-                           if (setjmp(Jstk->jbuf)) {                          \
-                              while (Jstk) jstk_pop () ;                      \
+                           if (setjmp(SILO_Globals.Jstk->jbuf)) {             \
+                              while (SILO_Globals.Jstk) jstk_pop () ;         \
                               db_perror ("", db_errno, me) ;                  \
                               return R ;                                      \
                            }                                                  \
@@ -286,13 +279,13 @@ typedef struct context_t {
                            write (DBDebugAPI, M, strlen(M));                  \
                            write (DBDebugAPI, "\n", 1);                       \
                         }                                                     \
-                        if (!Jstk){                                           \
+                        if (!SILO_Globals.Jstk){                              \
                            jstk_push() ;                                      \
-                           if (setjmp(Jstk->jbuf)) {                          \
+                           if (setjmp(SILO_Globals.Jstk->jbuf)) {             \
                               if (jold) {                                     \
                                  context_restore (jdbfile, jold) ;            \
                               }                                               \
-                              while (Jstk) jstk_pop () ;                      \
+                              while (SILO_Globals.Jstk) jstk_pop () ;         \
                               db_perror ("", db_errno, me) ;                  \
                               return R ;                                      \
                            }                                                  \
@@ -300,7 +293,7 @@ typedef struct context_t {
                            if (NM && jdbfile && !jdbfile->pub.pathok) {       \
                               char *jr ;                                      \
                               jold = context_switch (jdbfile,(char *)NM,&jr) ;\
-                              if (!jold) longjmp (Jstk->jbuf, -1) ;           \
+                              if (!jold) longjmp (SILO_Globals.Jstk->jbuf, -1) ;\
                               NM = jr ;                                       \
                            }                                                  \
                         }
@@ -325,10 +318,10 @@ typedef struct context_t {
                            return jrv ;                                 \
                         }
 
-#define PROTECT         {jstk_push();if(!setjmp(Jstk->jbuf)){
-#define UNWIND()        longjmp(Jstk->jbuf,-1)
+#define PROTECT         {jstk_push();if(!setjmp(SILO_Globals.Jstk->jbuf)){
+#define UNWIND()        longjmp(SILO_Globals.Jstk->jbuf,-1)
 #define CLEANUP         jstk_pop();}else{int jcan=0;
-#define END_PROTECT     jstk_pop();if(!jcan&&Jstk)longjmp(Jstk->jbuf,-1);}}
+#define END_PROTECT     jstk_pop();if(!jcan&&SILO_Globals.Jstk)longjmp(SILO_Globals.Jstk->jbuf,-1);}}
 #define CANCEL_UNWIND   jcan=1
 
 /*
@@ -395,19 +388,6 @@ typedef struct context_t {
  * File status, maintained by DBOpen, DBCreate, and DBClose.
  */
 #define DB_ISOPEN       0x01          /*database is open; ID is in use */
-
-/*
- * stat struct definition
- */
-#ifndef SIZEOF_OFF64_T
-#error missing definition for SIZEOF_OFF64_T in silo_private.h
-#else
-#if SIZEOF_OFF64_T > 4
-#define db_silo_stat_struct struct stat64
-#else
-#define db_silo_stat_struct struct stat
-#endif
-#endif
 
 /*
  * Global data for Material
@@ -785,6 +765,10 @@ typedef struct SILO_Globals_t {
     float compressionMinratio;
     int compressionErrmode;
     const DBoptlist *fileOptionsSets[MAX_FILE_OPTIONS_SETS];
+    int _db_err_level;
+    void  (*_db_err_func)(char *);
+    int _db_err_level_drvr;
+    jstk_t *Jstk;   /*error jump stack  */
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 
@@ -869,15 +853,8 @@ INTERNAL int   db_relative_path ( char *pathname );
 INTERNAL char *db_unsplit_path ( const db_Pathname *p );
 INTERNAL db_Pathname *db_split_path ( const char *pathname );
 INTERNAL const int *db_get_used_file_options_sets_ids();
-INTERNAL int db_silo_stat(const char *name, db_silo_stat_struct *statbuf, int skip_vfdexts);
 char   *safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/
 #define strdup(s) safe_strdup(s)
-
-/*
- * Private variables.
- */
-extern int     _db_err_level;
-extern void    (*_db_err_func) (char *);
 
 #endif /* !SILO_PRIVATE_H */

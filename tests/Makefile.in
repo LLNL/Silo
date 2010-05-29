@@ -40,21 +40,21 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = array$(EXEEXT) extface$(EXEEXT) multi_test$(EXEEXT) \
-	partial_io$(EXEEXT) point$(EXEEXT) group_test$(EXEEXT) \
-	listtypes$(EXEEXT) simple$(EXEEXT) ucd$(EXEEXT) \
-	ucdsamp3$(EXEEXT) testall$(EXEEXT) alltypes$(EXEEXT) \
-	obj$(EXEEXT) onehex$(EXEEXT) oneprism$(EXEEXT) \
-	onepyramid$(EXEEXT) onetet$(EXEEXT) TestReadMask$(EXEEXT) \
-	subhex$(EXEEXT) twohex$(EXEEXT) multispec$(EXEEXT) \
-	specmix$(EXEEXT) testpdb$(EXEEXT) sami$(EXEEXT) spec$(EXEEXT) \
-	cpz1plt$(EXEEXT) merge_block$(EXEEXT) mat3d_3across$(EXEEXT) \
-	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
-	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
-	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
-	quad$(EXEEXT) version$(EXEEXT) namescheme$(EXEEXT) \
-	efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) ioperf$(EXEEXT) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4)
+check_PROGRAMS = arbpoly2d$(EXEEXT) array$(EXEEXT) extface$(EXEEXT) \
+	multi_test$(EXEEXT) partial_io$(EXEEXT) point$(EXEEXT) \
+	group_test$(EXEEXT) listtypes$(EXEEXT) simple$(EXEEXT) \
+	ucd$(EXEEXT) ucdsamp3$(EXEEXT) testall$(EXEEXT) \
+	alltypes$(EXEEXT) obj$(EXEEXT) onehex$(EXEEXT) \
+	oneprism$(EXEEXT) onepyramid$(EXEEXT) onetet$(EXEEXT) \
+	TestReadMask$(EXEEXT) subhex$(EXEEXT) twohex$(EXEEXT) \
+	multispec$(EXEEXT) specmix$(EXEEXT) testpdb$(EXEEXT) \
+	sami$(EXEEXT) spec$(EXEEXT) cpz1plt$(EXEEXT) \
+	merge_block$(EXEEXT) mat3d_3across$(EXEEXT) ucd1d$(EXEEXT) \
+	wave$(EXEEXT) multi_file$(EXEEXT) polyzl$(EXEEXT) csg$(EXEEXT) \
+	rocket$(EXEEXT) mmadjacency$(EXEEXT) largefile$(EXEEXT) \
+	dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
+	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
+	ioperf$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
@@ -85,6 +85,11 @@ alltypes_OBJECTS = alltypes.$(OBJEXT)
 alltypes_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@alltypes_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@alltypes_DEPENDENCIES = ../src/libsiloh5.la
+arbpoly2d_SOURCES = arbpoly2d.c
+arbpoly2d_OBJECTS = arbpoly2d.$(OBJEXT)
+arbpoly2d_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@arbpoly2d_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@arbpoly2d_DEPENDENCIES = ../src/libsiloh5.la
 array_SOURCES = array.c
 array_OBJECTS = array.$(OBJEXT)
 array_LDADD = $(LDADD)
@@ -363,6 +368,7 @@ F77LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_alltypes_SOURCES) alltypes.c \
+	$(nodist_EXTRA_arbpoly2d_SOURCES) arbpoly2d.c \
 	$(nodist_EXTRA_array_SOURCES) array.c $(arrayf77_SOURCES) \
 	$(nodist_EXTRA_arrayf77_SOURCES) $(compression_SOURCES) \
 	$(nodist_EXTRA_compression_SOURCES) \
@@ -412,7 +418,7 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_ucdsamp3_SOURCES) ucdsamp3.c \
 	$(nodist_EXTRA_version_SOURCES) version.c \
 	$(nodist_EXTRA_wave_SOURCES) wave.c
-DIST_SOURCES = TestReadMask.c alltypes.c array.c \
+DIST_SOURCES = TestReadMask.c alltypes.c arbpoly2d.c array.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
 	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
 	efcentering.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
@@ -503,6 +509,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PDBP_DRV = @PDBP_DRV@
 PDB_DRV = @PDB_DRV@
 PRTDIAG = @PRTDIAG@
 PYTHON = @PYTHON@
@@ -666,7 +673,8 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
-	efcentering mk_nasf_pdb ioperf $(am__append_1) $(am__append_3)
+	efcentering mk_nasf_pdb ioperf arbpoly2d $(am__append_1) \
+	$(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -685,6 +693,7 @@ rocket_SOURCES = \
 # This is a hack to force c++ linkage when we have
 # c++ code compiled into Silo. I got this hack from
 # automake manaual.
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arbpoly2d_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_array_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_extface_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_multi_test_SOURCES = dummy.cxx
@@ -802,6 +811,9 @@ TestReadMask$(EXEEXT): $(TestReadMask_OBJECTS) $(TestReadMask_DEPENDENCIES)
 alltypes$(EXEEXT): $(alltypes_OBJECTS) $(alltypes_DEPENDENCIES) 
 	@rm -f alltypes$(EXEEXT)
 	$(CXXLINK) $(alltypes_OBJECTS) $(alltypes_LDADD) $(LIBS)
+arbpoly2d$(EXEEXT): $(arbpoly2d_OBJECTS) $(arbpoly2d_DEPENDENCIES) 
+	@rm -f arbpoly2d$(EXEEXT)
+	$(CXXLINK) $(arbpoly2d_OBJECTS) $(arbpoly2d_LDADD) $(LIBS)
 array$(EXEEXT): $(array_OBJECTS) $(array_DEPENDENCIES) 
 	@rm -f array$(EXEEXT)
 	$(CXXLINK) $(array_OBJECTS) $(array_LDADD) $(LIBS)
@@ -962,6 +974,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-TestReadMask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alltypes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly2d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpz1plt.Po@am__quote@
@@ -1376,28 +1389,48 @@ all-local:
 # Autotest targets.
 # Since we run testsuite multiple times in different 'modes', we
 # need some extra logic to contatentate all the results into a
-# single, final testsuite.log. Also, it is possible for TESTARGS
-# to somehow override DB_HDF5= and PYTHON= in these test inokations.
-#
+# single, final testsuite.log.
+# ATARGS = args to testsuite (autotest) script itself.
+# STARGS = args to silo tests.
+# By default, with no special args, we run the testsuite twice,
+# first on PDB driver and then on HDF5 driver.
 check-local: $(TESTSUITE) $(PROGS)
-	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) $(TESTARGS)
+	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=$(STARGS) $(ATARGS)
 	@if test -e testsuite.log; then \
 	    cp testsuite.log testsuite.log.pdb ; \
 	fi
-@HDF5_DRV_NEEDED_TRUE@	$(SHELL) $(srcdir)/testsuite DB_HDF5=DB_HDF5 PYTHON=$(PYTHON) BROWSER=$(BROWSER) $(TESTARGS)
-@HDF5_DRV_NEEDED_TRUE@	@if test -e testsuite.log.pdb -a -e testsuite.log; then \
-@HDF5_DRV_NEEDED_TRUE@	    cat testsuite.log.pdb >> testsuite.log ; \
+@PDBP_DRV_NEEDED_TRUE@	@if test -z "$(STARGS)"; then \
+@PDBP_DRV_NEEDED_TRUE@	    $(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=DB_PDBP $(ATARGS); \
+@PDBP_DRV_NEEDED_TRUE@	    if test -e testsuite.log; then \
+@PDBP_DRV_NEEDED_TRUE@	        cp testsuite.log testsuite.log.pdbp ; \
+@PDBP_DRV_NEEDED_TRUE@	    fi \
+@PDBP_DRV_NEEDED_TRUE@	fi
+@HDF5_DRV_NEEDED_TRUE@	@if test -z "$(STARGS)"; then \
+@HDF5_DRV_NEEDED_TRUE@	    $(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=DB_HDF5 $(ATARGS); \
+@HDF5_DRV_NEEDED_TRUE@	    if test -e testsuite.log; then \
+@HDF5_DRV_NEEDED_TRUE@	        cp testsuite.log testsuite.log.hdf5; \
+@HDF5_DRV_NEEDED_TRUE@	    fi \
 @HDF5_DRV_NEEDED_TRUE@	fi
+	@rm -f testsuite.log
+	@if test -e testsuite.log.pdb; then \
+	    cp testsuite.log.pdb >> testsuite.log ; \
+	fi
+	@if test -e testsuite.log.pdbp; then \
+	    cp testsuite.log.pdbp >> testsuite.log ; \
+	fi
+	@if test -e testsuite.log.hdf5; then \
+	    cp testsuite.log.hdf5 >> testsuite.log ; \
+	fi
 
 clean-local:
 	rm -f testsuite.log
 	rm -rf testsuite.dir
 
-testsuite: $(srcdir)/testsuite.at
+testsuite: $(srcdir)/testsuite.at $(top_srcdir)/VERSION
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	-mv -f $@.tmp $@
 
-$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac $(top_srcdir)/VERSION
 	{					\
 	  echo '# Signature of the current package.'; \
 	  echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \
@@ -1408,15 +1441,17 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	} >$(srcdir)/package.m4
 
 # deal with the CC=mpicc until I can find a better way
+# Mark C. Miller, Sat May 29 08:15:48 PDT 2010
+#     put CPPFLAGS ahead of AMCPPFLAGS
 resample$(EXEEXT): $(resample_OBJECTS) $(resample_DEPENDENCIES)
 	@rm -f resample$(EXEEXT)
 	$(LIBTOOL) --tag=CC --mode=link $(MPICC) $(AM_CFLAGS) $(CFLAGS) \
 		$(AM_LDFLAGS) $(LDFLAGS) -o $@ $(resample_LDFLAGS) \
 		$(resample_OBJECTS) $(resample_LDADD) $(LIBS)
 resample.o: resample.c
-	$(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o resample.o `test -f 'resample.c' || echo '$(srcdir)/'`resample.c
+	$(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(AM_CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o resample.o `test -f 'resample.c' || echo '$(srcdir)/'`resample.c
 resample.lo: resample.c
-	$(LIBTOOL) --tag=CC --mode=compile $(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o $@ $<
+	$(LIBTOOL) --tag=CC --mode=compile $(MPICC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(AM_CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o $@ $<
 
 tests: $(PROGS)
 

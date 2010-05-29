@@ -3,6 +3,7 @@
 drivers="sec2 stdio hdf5 pdb silo"
 #silodrivers="DB_PDB DB_HDF5 DB_HDF5_CORE DB_HDF5_SEC2 DB_HDF5_STDIO"
 silodrivers="DB_PDB DB_HDF5"
+#silodrivers="DB_PDB DB_HDF5_OPTS(DBOPT_H5_VFD=DB_H5VFD_SILO,DBOPT_H5_SILO_BLOCK_SIZE=307200)"
 #reqsizes="1K 5K 10K 25K 50K 75K 100K 175K 250K 500K 1M 5M 10M 50M 100M"
 reqsizes="1K 5K 10K 25K 50K 75K 100K 175K 250K"
 scenarios=(":" "-n:--size-noise 1")
@@ -19,7 +20,7 @@ for d in $drivers; do
                 args=$(echo ${siloscenarios[$i]} | cut -d':' -f2)
                 echo "${d}-${sd}${moniker}"
                 for rs in $reqsizes; do
-                    results=$($IOP --io-interface $d --request-size $rs --num-requests $numreqs --silo-args --driver $sd $args)
+                    results=$($IOP --io-interface $d --request-size $rs --num-requests $numreqs $args --silo-args --driver $sd)
                     tot=$(echo $results | cut -d':' -f2 | cut -d'=' -f2 | cut -d' ' -f2)
                     avg=$(echo $results | cut -d':' -f3 | cut -d'=' -f2 | cut -d' ' -f2)
                     echo "$rs	$tot	$avg"
@@ -28,7 +29,7 @@ for d in $drivers; do
                     break 1
                 fi
             done
-            rm -f iop_test_${d}.dat
+#            rm -f iop_test_${d}.dat
         done
     else
         for (( i=0; i<${#scenarios[*]}; i++ )); do
@@ -43,5 +44,5 @@ for d in $drivers; do
             done
         done
     fi
-    rm -f iop_test_${d}.dat
+#    rm -f iop_test_${d}.dat
 done

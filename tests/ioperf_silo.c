@@ -16,6 +16,7 @@ static const char *filename;
 DBfile *dbfile;
 static int has_mesh = 0;
 static int driver = DB_HDF5;
+static int show_all_errors = FALSE;
 
 static int Open_silo(ioflags_t iopflags)
 {
@@ -95,6 +96,10 @@ static int ProcessArgs_silo(int argi, int argc, char *argv[])
             sprintf(compstr, "METHOD=%s", argv[i]);
             DBSetCompression(compstr);
         }
+        else if (!strcmp(argv[i], "--show-all-errors"))
+	{
+            show_all_errors = 1;
+	}
         else goto fail;
     }
     return 0;
@@ -111,7 +116,7 @@ static iointerface_t *CreateInterfaceReal(int argi, int argc, char *argv[], cons
 
     options = *opts;
 
-    DBShowErrors(DB_ALL, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
     if (ProcessArgs_silo(argi, argc, argv) != 0)
         return 0;

@@ -28,22 +28,6 @@ typedef struct {
 } PJgroup;
 
 /*
- * WARNING: Don't use the PD_... functions.  Use the PJ_...
- *      versions instead because they `fix' the symbol
- *     name parameter.  We could just redefine these names
- *     to the equivalent PJ_... name, but instead, lets
- *     change the source code so no one gets confused.
- */
-#define lite_PD_read         	DONT_USE_PD_FUNCTIONS
-#define lite_PD_read_alt     	DONT_USE_PD_FUNCTIONS
-#define lite_PD_read_as      	DONT_USE_PD_FUNCTIONS
-#define lite_PD_read_as_alt  	DONT_USE_PD_FUNCTIONS
-#define lite_PD_write		DONT_USE_PD_FUNCTIONS
-#define lite_PD_write_alt	DONT_USE_PD_FUNCTIONS
-#define lite_PD_write_as	DONT_USE_PD_FUNCTIONS
-#define lite_PD_write_as_alt	DONT_USE_PD_FUNCTIONS
-
-/*
  * Generally, nothing uses SCORE memory management any more.  However,
  * sometimes we need it when talking to SCORE or PDB at the low levels.
  * Those few source files that need SCORE memory management should
@@ -101,6 +85,7 @@ CALLBACK DBzonelist *db_pdb_GetZonelist(DBfile*, char*);
 CALLBACK DBphzonelist *db_pdb_GetPHZonelist(DBfile*, char*);
 CALLBACK DBcsgzonelist *db_pdb_GetCSGZonelist(DBfile*, const char*);
 CALLBACK DBmrgtree *db_pdb_GetMrgtree(DBfile *_dbfile, const char *name);
+CALLBACK DBmrgvar *db_pdb_GetMrgvar(DBfile *dbfile, const char *name);
 CALLBACK DBgroupelmap *db_pdb_GetGroupelmap(DBfile *dbfile, const char *name);
 CALLBACK void *db_pdb_GetVar (DBfile *, char *);
 CALLBACK int db_pdb_GetVarByteLength (DBfile *, char *);
@@ -207,7 +192,6 @@ CALLBACK int db_pdb_PutMrgvar(DBfile *dbfile, const char *name,
                              int ncomps, char **compnames,
                              int nregns, char **reg_pnames,
                              int datatype, void **data, DBoptlist *opts);
-CALLBACK DBmrgvar *db_pdb_GetMrgvar(DBfile *dbfile, const char *name);
 
 CALLBACK int db_pdb_Write (DBfile *, char *, void *, int *, int, int);
 CALLBACK int db_pdb_WriteSlice (DBfile*, char*, void*, int, int[], int[],
@@ -248,37 +232,35 @@ PRIVATE void db_InitDefvars (DBoptlist*);
  * Private functions.
  *-------------------------------------------------------------------------
  */
-INTERNAL char **PJ_ls (PDBfile *, char *, char *, int *);
-INTERNAL int PJ_get_fullpath (PDBfile *, char *, char *, char *);
+PRIVATE char **PJ_ls (PDBfile *, char *, char *, int *);
+PRIVATE int PJ_get_fullpath (PDBfile *, char *, char *, char *);
 
-INTERNAL int PJ_read (PDBfile *, char *, void *);
-INTERNAL int PJ_read_alt (PDBfile *, char *, void *, long *);
-INTERNAL int PJ_read_as (PDBfile *, char *, char *, void *);
-INTERNAL int PJ_read_as_alt (PDBfile *, char *, char *, void *, long *);
-INTERNAL syment *PJ_inquire_entry (PDBfile *, char *);
-INTERNAL int pdb_getvarinfo (PDBfile *, char *, char *, int *, int *, int);
+PRIVATE int PJ_read (PDBfile *, char *, void *);
+PRIVATE int PJ_read_alt (PDBfile *, char *, void *, long *);
+PRIVATE int PJ_read_as (PDBfile *, char *, char *, void *);
+PRIVATE int PJ_read_as_alt (PDBfile *, char *, char *, void *, long *);
+PRIVATE syment *PJ_inquire_entry (PDBfile *, char *);
+PRIVATE int pdb_getvarinfo (PDBfile *, char *, char *, int *, int *, int);
 
-INTERNAL int PJ_ForceSingle (int);
-INTERNAL int PJ_GetObject (PDBfile *, char *, PJcomplist *, char **ret_type);
-INTERNAL int PJ_ClearCache(void);
-INTERNAL int PJ_InqForceSingle (void);
-INTERNAL void PJ_NoCache ( void );
-INTERNAL void *PJ_GetComponent (PDBfile *, char *, char *);
-INTERNAL int PJ_GetComponentType (PDBfile *, char *, char *);
-INTERNAL int PJ_ReadVariable (PDBfile *, char *, int, int, char **);
-INTERNAL int pj_GetVarDatatypeID (PDBfile *, char *);
-INTERNAL int db_pdb_GetVarDatatype (PDBfile *, char *);
+PRIVATE int PJ_ForceSingle (int);
+PRIVATE int PJ_GetObject (PDBfile *, char *, PJcomplist *, char **ret_type);
+PRIVATE int PJ_ClearCache(void);
+PRIVATE int PJ_InqForceSingle (void);
+PRIVATE void PJ_NoCache ( void );
+PRIVATE void *PJ_GetComponent (PDBfile *, char *, char *);
+PRIVATE int PJ_GetComponentType (PDBfile *, char *, char *);
+PRIVATE int PJ_ReadVariable (PDBfile *, char *, int, int, char **);
 
-INTERNAL int PJ_get_group (PDBfile *, char *, PJgroup **);
-INTERNAL PJgroup *PJ_make_group (char *, char *, char **, char **, int);
-INTERNAL int PJ_rel_group (PJgroup *);
-INTERNAL int PJ_print_group (PJgroup *, FILE *);
+PRIVATE int PJ_get_group (PDBfile *, char *, PJgroup **);
+PRIVATE PJgroup *PJ_make_group (char *, char *, char **, char **, int);
+PRIVATE int PJ_rel_group (PJgroup *);
+PRIVATE int PJ_print_group (PJgroup *, FILE *);
 
 #ifdef PDB_WRITE
-INTERNAL int PJ_put_group (PDBfile*,PJgroup*, int);
-INTERNAL int PJ_write (PDBfile*,char*,char*,void*) ;
-INTERNAL int PJ_write_len (PDBfile*,char*,char*,const void*,int,long*);
-INTERNAL int PJ_write_alt (PDBfile*,char*,char*,void*,int,long*);
+PRIVATE int PJ_put_group (PDBfile*,PJgroup*, int);
+PRIVATE int PJ_write (PDBfile*,char*,char*,void*) ;
+PRIVATE int PJ_write_len (PDBfile*,char*,char*,const void*,int,long*);
+PRIVATE int PJ_write_alt (PDBfile*,char*,char*,void*,int,long*);
 #endif /* PDB_WRITE */
 
 #endif /* !SILO_PDB_PRIVATE_H */

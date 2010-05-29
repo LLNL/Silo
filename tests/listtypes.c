@@ -142,7 +142,12 @@ main(int argc, char *argv[])
 
     /* Print the types for components in the specified files. */
     for(i = 1; i < argc; i++)
-        PrintFileComponentTypes(argv[i]);
+    {
+        if (!strcmp(argv[i], "show-all-errors"))
+            DBShowErrors (DB_ALL_AND_DRVR, NULL);
+        else
+            PrintFileComponentTypes(argv[i]);
+    }
     
     return 0;
 }
@@ -189,8 +194,8 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
         DBGetDir(dbfile, currentdir);
         for(i = 0; i < ndirs; i++)
         {
-            dir_names[i] = ALLOC_N(char, 1+strlen(dbtoc->dir_names[i]+
-                                   strlen(currentdir)));
+            dir_names[i] = ALLOC_N(char, 1+strlen(dbtoc->dir_names[i])+
+                                   strlen(currentdir));
             sprintf(dir_names[i], "%s%s", currentdir, dbtoc->dir_names[i]);
         }
 
@@ -210,6 +215,9 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
         for(i = 0; i < ndirs; i++)
             FREE(dir_names[i]);
         FREE(dir_names);
+
+        DBSetDir(dbfile, currentdir);
+        dbtoc = DBGetToc(dbfile);
     }
 
     /* Print the objects in the top directory. */

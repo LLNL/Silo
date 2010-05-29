@@ -126,6 +126,9 @@ for advertising or product endorsement purposes.
 #define DBRMPTR_FC       FC_FUNC (dbrmptr,DBRMPTR)
 #define DBPMRGV_FC       FC_FUNC (dbpmrgv,DBPMRGV)
 #define DBERRNO_FC       FC_FUNC (dberrno, DBERRNO)
+#define DBREGFOPTS_FC	 FC_FUNC (dbregfopts, DBREGFOPTS)
+#define DBUNREGFOPTS_FC  FC_FUNC (dbunregfopts, DBUNREGFOPTS)
+#define DBUNREGAFOPTS_FC FC_FUNC (dbunregafopts, DBUNREGAFOPTS)
 
 void    *DBFortranAccessPointer(int value);
 

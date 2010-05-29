@@ -9,6 +9,10 @@
 
 #include <ioperf.h>
 
+#ifdef PARALLEL
+#include <mpi.h>
+#endif
+
 /*-------------------------------------------------------------------------
   Function: bjhash 
 
@@ -96,7 +100,7 @@ static int GetSizeFromModifierChar(char c)
     return n;
 }
 
-static char* GetRandomString()
+static char* GetUniqueString(const options_t *opts)
 {
     struct timeval tv0;
     unsigned int hval;
@@ -104,6 +108,13 @@ static char* GetRandomString()
     char rstate[128];
     static char retval[128];
 
+    if (!opts->no_mpi)
+    {
+        sprintf(retval, "%08d", opts->mpi_rank);
+	return retval;
+    }
+
+    /* ok, try to build a random string */
     gettimeofday(&tv0, 0);
     hval = bjhash((unsigned char *) &tv0, sizeof(tv0), 0);
 
@@ -205,6 +216,10 @@ static int ProcessCommandLine(int argc, char *argv[], options_t *opts)
         {
             opts->rand_file_name = 1;
         }
+        else if (!strcmp(argv[i], "--no-mpi"))
+        {
+            opts->no_mpi = 1;
+        }
         else if (!strcmp(argv[i], "--test-read"))
         {
             opts->flags = IO_READ;
@@ -217,7 +232,7 @@ static int ProcessCommandLine(int argc, char *argv[], options_t *opts)
         {
             break;
         }
-        else
+	else if (argv[i][0] != '\0')
         {
 fail:
 	    fprintf(stderr, "%s: bad argument `%s' (\"%s\")\n", argv[0], argv[i],
@@ -258,7 +273,7 @@ static iointerface_t* GetIOInterface(int argi, int argc, char *argv[], const opt
     /* First, get rid of the old data file */
     strcpy(ifacename, opts->io_interface);
     sprintf(testfilename, "iop_test_%s%s.dat", ifacename, 
-        opts->rand_file_name?GetRandomString():"");
+        opts->rand_file_name?GetUniqueString(opts):"");
     unlink(testfilename);
 
     /* First, attempt to create interface using static approach, if that
@@ -489,6 +504,15 @@ main(int argc, char *argv[])
 
     plugin_argi = ProcessCommandLine(argc, argv, &options);
 
+#ifdef PARALLEL
+    if (!options.no_mpi)
+    {
+        MPI_Init(&argc, &argv);
+        MPI_Comm_size(MPI_COMM_WORLD, &options.mpi_size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &options.mpi_rank);
+    }
+#endif
+
     /* GetIOInterface either exits or returns valid pointer */
     ioiface = GetIOInterface(plugin_argi, argc, argv, &options);
 
@@ -533,6 +557,11 @@ main(int argc, char *argv[])
         AddTimingInfo(OP_OUTPUT_TIMINGS, 0, 0, 0);
     else
         AddTimingInfo(OP_OUTPUT_SUMMARY, 0, 0, 0);
+
+#ifdef PARALLEL
+    if (!options.no_mpi)
+        MPI_Finalize();
+#endif
 
     return (0);
 }

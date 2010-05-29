@@ -54,15 +54,16 @@ main(int argc, char *argv[])
     char          *basename="ucd3d";
     char          *file_ext="pdb";
     int            driver=DB_PDB;
+    int            show_all_errors = FALSE;
 
     /*
      * Parse the command-line.
      */
     for (i = 1; i < argc; i++)
     {
-        if (!strcmp(argv[i], "DB_PDB"))
+        if (!strncmp(argv[i], "DB_PDB", 6))
         {
-            driver = DB_PDB;
+            driver = StringToDriver(argv[i]);
             file_ext = "pdb";
         }
         else if (!strncmp(argv[i], "DB_HDF5", 7))
@@ -74,11 +75,17 @@ main(int argc, char *argv[])
         {
             multidir = 1;
         }
-        else
+        else if (!strcmp(argv[i], "show-all-errors"))
+	{
+            show_all_errors = 1;
+	}
+	else if (argv[i][0] != '\0')
         {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
+
+    if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
 
     /* 
      * Create the multi-block ucd 3d mesh.

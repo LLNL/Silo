@@ -70,21 +70,25 @@ main(int argc, char *argv[])
     int       i, driver = DB_PDB;
     double    time;
     int       cycle;
+    int       show_all_errors = FALSE;
 
     for (i=1; i<argc; i++) {
-        if (!strcmp(argv[i], "DB_PDB")) {
-            driver = DB_PDB;
+        if (!strncmp(argv[i], "DB_PDB", 6)) {
+            driver = StringToDriver(argv[i]);
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
         } else if (!strcmp(argv[i], "hzip")) {
             DBSetCompression("METHOD=HZIP");
         } else if (!strcmp(argv[i], "fpzip")) {
             DBSetCompression("METHOD=FPZIP");
-        } else {
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
 
+    if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
 
     for (i = 0; i < NT + 1; i++)
     {

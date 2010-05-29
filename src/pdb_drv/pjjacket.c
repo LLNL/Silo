@@ -26,11 +26,7 @@
        (int)  PJ_read_as_alt()
 */
 
-extern char   *pj_fixname(PDBfile *, char *);
-
-#ifdef lite_PD_read
-#undef lite_PD_read
-#endif
+static char   *pj_fixname(PDBfile *, char *);
 
 /*-------------------------------------------------------------------------
  * Function:    PJ_read
@@ -55,10 +51,6 @@ PJ_read (PDBfile *file, char *name, void *var) {
    return (lite_PD_read(file, newname, var));
 }
 
-#ifdef lite_PD_read_alt
-#undef lite_PD_read_alt
-#endif
-
 /*-------------------------------------------------------------------------
  * Function:    PJ_read_alt
  *
@@ -82,10 +74,6 @@ PJ_read_alt (PDBfile *file, char *name, void *var, long *ind) {
    return (lite_PD_read_alt(file, newname, var, ind));
 }
 
-#ifdef lite_PD_read_as
-#undef lite_PD_read_as
-#endif
-
 /*-------------------------------------------------------------------------
  * Function:    PJ_read_as
  *
@@ -108,10 +96,6 @@ PJ_read_as (PDBfile *file, char *name, char *type, void *var) {
 
    return (lite_PD_read_as(file, newname, type, var));
 }
-
-#ifdef lite_PD_read_as_alt
-#undef lite_PD_read_as_alt
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    PJ_read_as_alt
@@ -146,10 +130,6 @@ PJ_read_as_alt (PDBfile *file, char *name, char *type, void *var, long *ind) {
  *    used since pj_fixname is always invoked to get the full
  *    path name.
  *-----------------------------------------------------------*/
-
-#ifdef lite_PD_inquire_entry
-#undef lite_PD_inquire_entry
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    PJ_inquire_entry
@@ -230,10 +210,6 @@ pj_fixname (PDBfile *file, char *inname) {
 }
 
 
-#ifdef lite_PD_write
-#undef lite_PD_write
-#endif
-
 /*-------------------------------------------------------------------------
  * Function:    PJ_write
  *
@@ -259,10 +235,6 @@ PJ_write (PDBfile *file, char *name, char *type, void *var) {
 }
 #endif /* PDB_WRITE */
 
-
-#ifdef lite_PD_write_alt
-#undef lite_PD_write_alt
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    PJ_write_alt

@@ -40,14 +40,16 @@ host_triplet = @host@
 @NETCDF_NEEDED_TRUE@am__append_2 = netcdf/libsilo_netcdf.la
 @PDB_DRV_NEEDED_TRUE@am__append_3 = pdb_drv
 @PDB_DRV_NEEDED_TRUE@am__append_4 = pdb_drv/libsilo_pdb_drv.la
-@HDF5_DRV_NEEDED_TRUE@am__append_5 = hdf5_drv
-@HDF5_DRV_NEEDED_TRUE@am__append_6 = hdf5_drv/libsilo_hdf5_drv.la
-@TAURUS_NEEDED_TRUE@am__append_7 = taurus
-@TAURUS_NEEDED_TRUE@am__append_8 = taurus/libsilo_taurus.la
-@HZIP_NEEDED_TRUE@am__append_9 = hzip
-@HZIP_NEEDED_TRUE@am__append_10 = hzip/libsilo_hzip.la
-@FPZIP_NEEDED_TRUE@am__append_11 = fpzip
-@FPZIP_NEEDED_TRUE@am__append_12 = fpzip/libsilo_fpzip.la
+@PDBP_DRV_NEEDED_TRUE@am__append_5 = pdbp_drv
+@PDBP_DRV_NEEDED_TRUE@am__append_6 = pdbp_drv/libsilo_pdbp_drv.la
+@HDF5_DRV_NEEDED_TRUE@am__append_7 = hdf5_drv
+@HDF5_DRV_NEEDED_TRUE@am__append_8 = hdf5_drv/libsilo_hdf5_drv.la
+@TAURUS_NEEDED_TRUE@am__append_9 = taurus
+@TAURUS_NEEDED_TRUE@am__append_10 = taurus/libsilo_taurus.la
+@HZIP_NEEDED_TRUE@am__append_11 = hzip
+@HZIP_NEEDED_TRUE@am__append_12 = hzip/libsilo_hzip.la
+@FPZIP_NEEDED_TRUE@am__append_13 = fpzip
+@FPZIP_NEEDED_TRUE@am__append_14 = fpzip/libsilo_fpzip.la
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libsilo.settings.in $(srcdir)/libsiloh5.settings.in
@@ -186,6 +188,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PDBP_DRV = @PDBP_DRV@
 PDB_DRV = @PDB_DRV@
 PRTDIAG = @PRTDIAG@
 PYTHON = @PYTHON@
@@ -281,14 +284,16 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 DRIVER_DIRS = $(am__append_1) $(am__append_3) $(am__append_5) \
-	$(am__append_7) $(am__append_9) $(am__append_11)
+	$(am__append_7) $(am__append_9) $(am__append_11) \
+	$(am__append_13)
 DRIVER_LIBS = $(am__append_2) $(am__append_4) $(am__append_6) \
-	$(am__append_8) $(am__append_10) $(am__append_12)
+	$(am__append_8) $(am__append_10) $(am__append_12) \
+	$(am__append_14)
 SUBDIRS = score pdb silo debug \
 $(DRIVER_DIRS) unknown filters .
 
 DIST_SUBDIRS = . debug filters hdf5_drv hzip fpzip netcdf \
-pdb pdb_drv score silo taurus unknown
+pdb pdb_drv pdbp_drv score silo taurus unknown
 
 MAKESETTINGS = make.settings
 @HDF5_DRV_NEEDED_FALSE@SETTINGSFILE = libsilo.settings

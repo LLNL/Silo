@@ -51,6 +51,12 @@ static char   *dir_names[] =
 {"almansi", "green", "inf_strain",
  "nodal", "shell", "stress", "rates"};
 
+PRIVATE int db_taur_cd(TAURUSfile *taurus, char *path);
+PRIVATE int db_taur_pwd(TAURUSfile *taurus, char *path);
+INTERNAL void db_taur_extface(int *znodelist, int nnodes,
+                 int nzones, int *matlist, int **fnodelist,
+                 int *nfaces, int **zoneno);
+
 /*-------------------------------------------------------------------------
  * Function:    db_taur_InitCallbacks
  *
@@ -1744,7 +1750,7 @@ db_taur_ReadVar(DBfile *_dbfile, char *varname, void *ptr)
  *
  *-------------------------------------------------------------------------
  */
-INTERNAL int
+PRIVATE int
 db_taur_cd(TAURUSfile *taurus, char *path)
 {
     int            i;
@@ -1839,7 +1845,7 @@ db_taur_cd(TAURUSfile *taurus, char *path)
  *
  *-------------------------------------------------------------------------
  */
-INTERNAL int
+PRIVATE int
 db_taur_pwd(TAURUSfile *taurus, char *path)
 {
     if (taurus->state == -1) {

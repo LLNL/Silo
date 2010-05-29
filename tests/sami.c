@@ -1077,16 +1077,11 @@ main(int argc, char *argv[])
 {
     DBfile		*dbfile;
     int			i, nerrors=0,  driver=DB_PDB;
-    char		*filename="sami.pdb";
+    char		*filename="sami.silo";
+    int                 show_all_errors = FALSE;
     
     for (i=1; i<argc; i++) {
-	if (!strcmp(argv[i], "DB_PDB")) {
-	    driver = DB_PDB;
-	    filename = "sami.pdb";
-	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
-            driver = StringToDriver(argv[i]);
-	    filename = "sami.h5";
-	} else if (!strcmp(argv[i], "DB_LOCAL")) {
+	if (!strcmp(argv[i], "DB_LOCAL")) {
 	    arch_g = DB_LOCAL;
 	} else if (!strcmp(argv[i], "DB_SUN3")) {
 	    arch_g = DB_SUN3;
@@ -1098,12 +1093,17 @@ main(int argc, char *argv[])
 	    arch_g = DB_RS6000;
 	} else if (!strcmp(argv[i], "DB_CRAY")) {
 	    arch_g = DB_CRAY;
-	} else {
+	} else if (!strncmp(argv[i], "DB_",3)) {
+            driver = StringToDriver(argv[i]);
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+	} else if (argv[i][0] != '\0') {
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
 	}
     }
     
-    
+    if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
+
     /* turn of deprecate warnings */
     DBSetDeprecateWarnings(0);
 
@@ -1130,7 +1130,7 @@ main(int argc, char *argv[])
     nerrors += test_read_all(dbfile);
 
     /* Rewrite with different memory data type and verify results */
-    if (DB_PDB != driver&0xF)
+    if (DB_PDB != driver&0xF && DB_PDBP != driver&0xF)
     {
         nerrors += test_type_conv(dbfile);
     }
@@ -1139,7 +1139,7 @@ main(int argc, char *argv[])
      * Do some illegal things to make sure they fail. Make sure we can still
      * read data.
      */
-    if (DB_PDB != driver&0xF)
+    if (DB_PDB != driver&0xF && DB_PDBP != driver&0xF)
     {
         nerrors += test_write_bad(dbfile);
         nerrors += test_read_all(dbfile);

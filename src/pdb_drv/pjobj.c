@@ -1,7 +1,6 @@
 #define NEED_SCORE_MM
 #define NO_CALLBACKS
 #include "silo_pdb_private.h"
-#include "config.h"
 
 /*-------------------------------------------------------------------------
  * Global private variables.
@@ -70,6 +69,7 @@ static char    *cached_file_name = NULL;
 
 PRIVATE int db_pdb_ParseVDBSpec (char *mvdbspec, char **varname,
                                  char **filename);
+PRIVATE int pj_GetVarDatatypeID (PDBfile *file, char *varname);
 PRIVATE void reduce_path(char *path, char *npath);
 
 /*----------------------------------------------------------------------
@@ -794,7 +794,7 @@ PJ_ReadVariable(PDBfile *file,
  *      Removed the last two parameters to PJ_inquire_entry because they
  *      weren't being used.
  *--------------------------------------------------------------------*/
-INTERNAL int
+PRIVATE int
 pj_GetVarDatatypeID (PDBfile *file, char *varname) {
 
    syment        *ep;
@@ -807,39 +807,6 @@ pj_GetVarDatatypeID (PDBfile *file, char *varname) {
       return (OOPS);
 
    return (SW_GetDatatypeID(ep->type));
-}
-
-/*----------------------------------------------------------------------
- *  Routine                                       db_pdb_GetVarDatatype
- *
- *  Purpose
- *
- *      Return the datatype of the given variable.
- *
- *  Notes
- *
- *  Modifications
- *
- *      Al Leibee, Wed Aug 18 15:59:26 PDT 1993
- *      Convert to new PJ_inquire_interface.
- *
- *      Sean Ahern, Wed Apr 12 11:14:38 PDT 2000
- *      Removed the last two parameters to PJ_inquire_entry because they
- *      weren't being used.
- *--------------------------------------------------------------------*/
-INTERNAL int
-db_pdb_GetVarDatatype (PDBfile *pdb, char *varname) {
-
-   syment        *ep;
-   int            datatype;
-
-   ep = PJ_inquire_entry(pdb, varname);
-   if (!ep)
-      return -1;
-
-   datatype = SW_GetDatatypeID(ep->type);
-
-   return datatype;
 }
 
 /*----------------------------------------------------------------------

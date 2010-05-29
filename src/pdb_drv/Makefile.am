@@ -8,7 +8,8 @@ AM_CPPFLAGS = -I$(srcdir)/../pdb -I$(builddir)/../silo -I$(srcdir)/../silo -I$(s
 noinst_HEADERS = \
  silo_pdb_private.h
 FILES = \
+ silo_pdb.c
+EXTRA_DIST = \
  pjgroup.c \
  pjjacket.c \
- pjobj.c \
- silo_pdb.c
+ pjobj.c

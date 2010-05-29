@@ -117,6 +117,7 @@ main(int argc, char *argv[])
     float         *zcoord;
     float         *var;
     float          widths[3];
+    int            show_all_errors = FALSE;
 
 #ifdef HAVE_HDF5_H
     hid_t          sid1;       /* Dataspace ID                     */
@@ -134,7 +135,7 @@ main(int argc, char *argv[])
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
-       if (!strcmp(argv[i], "DB_PDB")) {
+       if (!strncmp(argv[i], "DB_PDB",6)) {
           fprintf(stderr, "This test only supported on HDF5 driver\n");
           exit(1);
        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
@@ -148,7 +149,9 @@ main(int argc, char *argv[])
           printf("       DB_PDB   - enable PDB driver, which doesn't support driver grab\n");
           printf("       DB_HDF5  - enable HDF5 driver, the default\n");
           return (0);
-       } else {
+       } else if (!strcmp(argv[i], "show-all-errors")) {
+          show_all_errors = 1;
+       } else if (argv[i][0] != '\0') {
           fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
        }
     }
@@ -188,7 +191,7 @@ main(int argc, char *argv[])
     coords[1] = ycoord;
     coords[2] = zcoord;
 
-    DBShowErrors(DB_TOP, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
 
       /*
        * Create a file that contains a simple variables.
