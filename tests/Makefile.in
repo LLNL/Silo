@@ -1413,13 +1413,13 @@ check-local: $(TESTSUITE) $(PROGS)
 @HDF5_DRV_NEEDED_TRUE@	fi
 	@rm -f testsuite.log
 	@if test -e testsuite.log.pdb; then \
-	    cp testsuite.log.pdb >> testsuite.log ; \
+	    cat testsuite.log.pdb >> testsuite.log ; \
 	fi
 	@if test -e testsuite.log.pdbp; then \
-	    cp testsuite.log.pdbp >> testsuite.log ; \
+	    cat testsuite.log.pdbp >> testsuite.log ; \
 	fi
 	@if test -e testsuite.log.hdf5; then \
-	    cp testsuite.log.hdf5 >> testsuite.log ; \
+	    cat testsuite.log.hdf5 >> testsuite.log ; \
 	fi
 
 clean-local:

@@ -236,11 +236,6 @@ noinst_HEADERS = \
 FILES = \
  silo_pdb.c
 
-EXTRA_DIST = \
- pjgroup.c \
- pjjacket.c \
- pjobj.c
-
 all: all-am
 
 .SUFFIXES:

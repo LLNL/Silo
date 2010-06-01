@@ -9,7 +9,3 @@ noinst_HEADERS = \
  silo_pdb_private.h
 FILES = \
  silo_pdb.c
-EXTRA_DIST = \
- pjgroup.c \
- pjjacket.c \
- pjobj.c
