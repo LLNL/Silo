@@ -951,9 +951,7 @@ static void db_hdf5_register_hid_t(hid_t oid)
     /* get this object's file number from HDF5 */
     H5E_BEGIN_TRY
     {
-        if (H5Oget_info(oid, &oinfo)<0)
-            assert(H5Iget_type(oid)==H5I_DATATYPE);
-        else
+        if (H5Oget_info(oid, &oinfo)>=0)
             filenum = oinfo.fileno;
     }
     H5E_END_TRY
@@ -1006,9 +1004,7 @@ static void db_hdf5_unregister_hid_t(hid_t oid)
     /* get this object's file number from HDF5 */
     H5E_BEGIN_TRY
     {
-        if (H5Oget_info(oid, &oinfo)<0)
-            assert(H5Iget_type(oid)==H5I_DATATYPE);
-        else
+        if (H5Oget_info(oid, &oinfo)>=0)
             filenum = oinfo.fileno;
     }
     H5E_END_TRY
@@ -4214,7 +4210,7 @@ db_hdf5_compckz(DBfile_hdf5 *dbfile, char *name)
             }
         }
         H5Dclose(d);
-        H5Tclose(plist);
+        H5Pclose(plist);
     } CLEANUP {
         H5E_BEGIN_TRY {
             H5Dclose(d);
