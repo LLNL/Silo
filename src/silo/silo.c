@@ -88,6 +88,10 @@ for advertising or product endorsement purposes.
 #if HAVE_FCNTL_H
 #include <fcntl.h>          /* for O_RDONLY */
 #endif
+#ifdef _WIN32
+#include <windows.h>        /* for FileInfo funcs */
+#include <io.h>             /* for FileInfo funcs */
+#endif
 
 /* DB_MAIN must be defined before including silo_private.h. */
 #define DB_MAIN
@@ -2242,7 +2246,14 @@ db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
     errno = 0;
     memset(&(statbuf->s), 0, sizeof(statbuf->s));
 
+#if SIZEOF_OFF64_T > 4
+    retval = stat64(name, &(statbuf->s));
+#else
+    retval = stat(name, &(statbuf->s));
+#endif /* #if SIZEOF_OFF64_T > 4 */
+
 #ifdef _WIN32
+    if (retval == 0)
     {
         /* this logic was copied by and large from HDF5 sec2 VFD */
         int fd = open(name, O_RDONLY);
@@ -2263,12 +2274,6 @@ db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
                 errno = ENOENT;
         }
     }
-#else
-#if SIZEOF_OFF64_T > 4
-    retval = stat64(name, &(statbuf->s));
-#else
-    retval = stat(name, &(statbuf->s));
-#endif /* #if SIZEOF_OFF64_T > 4 */
 #endif /* #ifdef _WIN32 */
 
     return retval;
