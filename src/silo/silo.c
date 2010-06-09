@@ -240,7 +240,7 @@ SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
     FALSE, /* enableChecksums */
-    FALSE, /* enableFriendlyHDF5Names */
+    TRUE,  /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
     3,     /* maxDeprecateWarnings */
     0,     /* compressionParams (null) */
