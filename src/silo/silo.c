@@ -11467,13 +11467,20 @@ db_StringArrayToStringList(char **strArray, int n,
  *
  *    Mark C. Miller, Thu Dec 17 17:09:27 PST 2009
  *    Fixed UMR on strLen when n>=0.
+ *
+ *    Mark C. Miller, Wed Jun 30 16:01:17 PDT 2010
+ *    Made logic for handling slash swap more sane. Now, swapping is
+ *    performed AFTER the list of strings has been broken out into
+ *    separate arrays.
  *--------------------------------------------------------------------*/
 INTERNAL char **
 db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
     int skipFirstSemicolon)
 {
-    int i, l, add1 = 0, strLen, colonAt = 0;
+    int i, l, add1 = 0, strLen;
     char **retval;
+    int *colonAt = 0;
+    int needToSlashSwap = 0;
 
     /* if n is unspecified (<0), compute it by counting semicolons */
     if (n < 0)
@@ -11489,19 +11496,12 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
         }
         strLen = i;
     }
-    else if (handleSlashSwap)
-    {
-        int nsemis = 0;
-        for (i = 0; strList[i] != '\0'; i++)
-        {
-            if (strList[i] == ';') nsemis++;
-            if (nsemis >= n+1) break;
-        }
-        strLen = i;
-    }
-    
+
     retval = (char**) calloc(n+add1, sizeof(char*));
-    for (i=0, l=(skipFirstSemicolon&&strList[0]==';')?1:0; i<n; i++) {
+    if (handleSlashSwap)
+        colonAt = (int *) calloc(n, sizeof(int));
+    for (i=0, l=(skipFirstSemicolon&&strList[0]==';')?1:0; i<n; i++)
+    {
         if (strList[l] == ';')
         {
             retval[i] = STRDUP(""); 
@@ -11515,29 +11515,22 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
         else
         {
             int lstart = l;
-            int ltmp = l;
-            if (handleSlashSwap && l+colonAt<strLen &&
-                strList[l+colonAt] != ':')
-            {
-                while (strList[ltmp] != ':' && strList[ltmp] != '\0')
-                    ltmp++;
-                if (strList[ltmp] == ':')
-                    colonAt = ltmp - l;
-                else
-                    colonAt = 0;
-            }
             while (strList[l] != ';' && strList[l] != '\0')
             {
-                /* If we're reading on linux, convert any '\' BEFORE
-                   a colon to '/'. Likewise, if we're reading on
-                   windows, convert an '/' BEFORE a colon to '\' */
-                if (handleSlashSwap && (l-lstart)<colonAt)
+                /* Since we're already marching through characters looking
+                   for a ';', if we're supposed to swap slash characters too,
+                   keep track of colons also. We keep track of the LAST ':'
+                   we see in colonAt[i]. */
+                if (handleSlashSwap)
                 {
 #if !defined(_WIN32) /* linux case */
-                    if (strList[l] == '\\') strList[l] = '/';
-#else               /* windows case */
-                    if (strList[l] == '/') strList[l] = '\\';
+                    if (strList[l] == '\\')
+#else                /* windows case */
+                    if (strList[l] == '/')
 #endif
+                        needToSlashSwap = 1;
+                    if (strList[l] == ':')
+                        colonAt[i] = l-lstart;
                 }
                 l++;
             }
@@ -11547,6 +11540,27 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
         }
     }
     if (add1) retval[i] = 0;
+
+    /* Ok, now swap slash characters if requested and needed */
+    if (handleSlashSwap)
+    {
+        if (needToSlashSwap)
+        {
+            for (i=0; i < n; i++)
+            {
+                for (l = 0; l < colonAt[i]; l++)
+                {
+#if !defined(_WIN32) /* linux case */
+                    if (retval[i][l] == '\\') retval[i][l] = '/';
+#else                /* windows case */
+                    if (retval[i][l] == '/') retval[i][l] = '\\';
+#endif
+                }
+            }
+        }
+        free(colonAt);
+    }
+
     return retval;
 }
 
@@ -12996,38 +13010,4 @@ safe_strdup(const char *s)
     retval[strlen(s)] = '\0';
         
     return(retval);
-}
-/*-------------------------------------------------------------------------
- * Function:    randf
- * 
- * Purpose:     Generates random numbers between RMIN (inclusive) and
- *              RMAX (exclusive).  RMIN should be smaller than RMAX.
- * 
- * Return:      A pseudo-random number
- * 
- * Programmer:  Robb Matzke
- *              robb@callisto.nuance.mdn.com
- *              Jul  9, 1996
- * 
- * Modifications:
- *       Thomas R. Treadway, Wed Nov 28 15:25:53 PST 2007
- *       Moved from src/swat/randf.c
- *
- *-------------------------------------------------------------------------
- */
-double
-randf(rmin, rmax)
-    double          rmin;
-    double          rmax;
-{   
-    unsigned long   acc;
-    static double   divisor = 0;
-
-    if (divisor < 1)
-        divisor = pow(2.0, 30);
-
-    rmax -= rmin;
-    acc = ((rand() & 0x7fff) << 15) | (rand() & 0x7fff);
-
-    return (rmax * (acc / divisor) + rmin);
 }

@@ -1919,7 +1919,6 @@ SILO_API extern void     DBFortranRemovePointer(int value);
 
 SILO_API extern int      DBVariableNameValid(const char *s);
 SILO_API extern char *safe_strdup(const char *s);
-SILO_API double randf (double rmin, double rmax);
 
 SILO_API extern int      DBFreeCompressionResources(DBfile *dbfile, const char *meshname);
 
