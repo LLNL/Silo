@@ -2206,6 +2206,158 @@ DBPUTQV1_FC (int *dbid, FCD_DB name,
 }
 
 /*-------------------------------------------------------------------------
+ * Routine                                                      DBPUTQV_FC
+ *
+ * Purpose
+ *     Write a vector quad field object to the database.
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Olivier Cessenat
+ *     Sat Feb  6 18:19:43 CET 2010
+ *
+ * Modifications
+ *
+ *-------------------------------------------------------------------------*/
+SILO_API FORTRAN
+DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
+	    int *nvars, FCD_DB varnames, int* lvarnames,
+	    DB_DTPTR1 vars, int *dims, int *ndims, DB_DTPTR1 mixvar, int *mixlen,
+	    int *datatype, int *centering, int *optlist_id, int *status)
+{
+    DBfile        *dbfile = NULL;
+    char          *cvname = NULL, *cmname = NULL;
+    DBoptlist     *optlist = NULL;
+    char          **cvarnames = NULL;
+    char          *names = NULL;
+    int           indx, i, j;
+    float **cvars = NULL ;
+    float **cmixvar = NULL ;
+
+    API_BEGIN("dbputqv", int, -1) {
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+
+        /*------------------------------
+         *  Duplicate all ascii strings.
+         *-----------------------------*/
+        if (*lvname <= 0)
+            API_ERROR("lvname", E_BADARGS);
+#ifdef CRAY
+        if (strcmp(_fcdtocp(vname), DB_F77NULLSTRING) == 0)
+            cvname = NULL;
+        else
+            cvname = SW_strndup(_fcdtocp(vname), *lvname);
+#else
+        if (strcmp(vname, DB_F77NULLSTRING) == 0)
+            cvname = NULL;
+        else
+            cvname = SW_strndup(vname, *lvname);
+#endif
+        if (*lmname <= 0)
+            API_ERROR("lmname", E_BADARGS);
+#ifdef CRAY
+        if (strcmp(_fcdtocp(mname), DB_F77NULLSTRING) == 0)
+            cmname = NULL;
+        else
+            cmname = SW_strndup(_fcdtocp(mname), *lmname);
+#else
+        if (strcmp(mname, DB_F77NULLSTRING) == 0)
+            cmname = NULL;
+        else
+            cmname = SW_strndup(mname, *lmname);
+#endif
+
+        /*------------------------------
+         *  Create the char ** array to variable names as in dbaddcaopt
+         *-----------------------------*/
+        if (strcmp(varnames, DB_F77NULLSTRING) == 0)
+            names = NULL;
+        else
+            names = varnames;
+
+        if (*nvars <= 0)
+            API_ERROR("nvars", E_BADARGS);
+
+        cvarnames = ALLOC_N(char *, *nvars);
+        for (indx = 0, i = 0; i < *nvars; i++) {
+	  if (lvarnames[i] < 0)
+	    API_ERROR("lvarnames", E_BADARGS);
+
+	  cvarnames[i] = SW_strndup(&names[indx], lvarnames[i]);
+	  /* Allow for a matrix or array form */
+	  if (fortran2DStrLen > 0) {
+	    /* Matrix API */
+	    indx += fortran2DStrLen;
+	  } else {
+	    /* More General Vector API */
+	    indx += lvarnames[i];
+	  }
+        }
+
+        /*------------------------------
+         *  Create the float pointers addresses:
+         *-----------------------------*/
+	/* Compute the size of the array */
+	indx = dims[0] ;
+	for (j=1; j<*ndims; j++ ) {
+	  indx *= dims[j] ;
+	}
+	if (*datatype == DB_DOUBLE) {
+	  /* Doubles use twice as much storage as floats */
+	  indx*= 2 ;
+	}
+
+	/* Now convert the Fortran data arrays into C arrays of data */
+
+	if ((*(int *)vars) != DB_F77NULL) {
+	  cvars = malloc(sizeof(float*) * (*nvars));
+	  /* Make pointers to Fortran address in vars array */
+	  for (i=0;i<*nvars;i++) {
+	    cvars[i] = vars + i*indx ;
+	  }
+	} else {
+	  API_ERROR("vars", E_BADARGS);
+	}
+	if ((*(int *)mixvar) != DB_F77NULL) {
+	  /* Now convert the Fortran data array into a C array of data */
+	  cmixvar = malloc(sizeof(float*) * (*nvars));
+	  /* Make pointers to Fortran address in vars array */
+	  for (i=0;i<*nvars;i++) {
+	    cmixvar[i] = mixvar + i*indx ;
+	  }
+	}
+
+        dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
+
+        *status = DBPutQuadvar(dbfile, cvname, cmname, *nvars,
+			       cvarnames, cvars, dims, *ndims,
+			       cmixvar, *mixlen, *datatype, *centering,
+			       optlist);
+
+	/* Remove pointers to pointers arrays */
+	if (cmixvar != NULL) 
+	  FREE(cmixvar)
+	if (cvars != NULL) 
+	  FREE(cvars)
+
+	/* Remove strings copies */ 
+        for (i = 0; i < *nvars; i++)
+	    FREE(cvarnames[i]);
+        FREE(cvarnames);
+        FREE(cmname);
+        FREE(cvname);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*-------------------------------------------------------------------------
  * Routine                                                       DBPUTUM_FC
  *
  * Purpose
