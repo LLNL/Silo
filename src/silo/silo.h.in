@@ -431,6 +431,11 @@ typedef enum {
 #define DBOPT_LLONGNZNUM        328
 #define DBOPT_CONSERVED         329
 #define DBOPT_EXTENSIVE         330
+#define DBOPT_MB_FILE_NS        331
+#define DBOPT_MB_BLOCK_NS       332
+#define DBOPT_MB_BLOCK_TYPE     333
+#define DBOPT_MB_EMPTY_LIST     334
+#define DBOPT_MB_EMPTY_COUNT    335
 #define DBOPT_LAST              499 
 
 #define DBOPT_H5_FIRST              500
@@ -464,6 +469,7 @@ typedef enum {
 #define DBOPT_H5_SILO_BLOCK_SIZE    527
 #define DBOPT_H5_SILO_BLOCK_COUNT   528
 #define DBOPT_H5_SILO_LOG_STATS     529
+#define DBOPT_H5_SILO_USE_DIRECT    530
 #define DBOPT_H5_LAST               599
 
 /* Error trapping method */
@@ -507,6 +513,7 @@ typedef enum {
 #define     E_DRVRCANTOPEN 29   /*Driver cannot open the file. */
 #define     E_BADOPTCLASS 30    /*Optlist contains options for wrong class */
 #define     E_NOTENABLEDINBUILD 31 /*feature not enabled in this build */
+#define     E_MAXFILEOPTSETS 32    /*Too many file options sets */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
@@ -812,6 +819,11 @@ typedef struct DBmultimesh_ {
     int            tv_connectivity;
     int            disjoint_mode;
     int            topo_dim;    /* Topological dimension; max of all blocks. */ 
+    char          *file_ns;     /* namescheme for files (in lieu of meshnames) */
+    char          *block_ns;    /* namescheme for block objects (in lieu of meshnames) */
+    int            block_type;  /* constant block type for all blocks (in lieu of meshtypes) */
+    int           *empty_list;  /* list of empty block #'s (option for namescheme) */
+    int            empty_cnt;   /* size of empty list */
 } DBmultimesh;
 
 /*----------------------------------------------------------------------------
@@ -861,6 +873,11 @@ typedef struct DBmultivar_ {
                                    under various operations such as interp. */
     int            extensive;   /* indicates if the variable reprsents an extensiv
                                    physical property (as opposed to intensive) */
+    char          *file_ns;     /* namescheme for files (in lieu of meshnames) */
+    char          *block_ns;    /* namescheme for block objects (in lieu of meshnames) */
+    int            block_type;  /* constant block type for all blocks (in lieu of meshtypes) */
+    int           *empty_list;  /* list of empty block #'s (option for namescheme) */
+    int            empty_cnt;   /* size of empty list */
 } DBmultivar;
 
 /*-------------------------------------------------------------------------
@@ -884,6 +901,10 @@ typedef struct DBmultimat_ {
     char         **material_names; /* optional names of the materials */
     int            allowmat0;   /* Flag to allow material "0" */
     char          *mmesh_name;
+    char          *file_ns;     /* namescheme for files (in lieu of meshnames) */
+    char          *block_ns;    /* namescheme for block objects (in lieu of meshnames) */
+    int           *empty_list;  /* list of empty block #'s (option for namescheme) */
+    int            empty_cnt;   /* size of empty list */
 } DBmultimat;
 
 /*-------------------------------------------------------------------------
@@ -902,6 +923,10 @@ typedef struct DBmultimatspecies_ {
     int           *nmatspec;    /* equiv. to matnos of a DBmultimat */
     char         **species_names; /* optional names of the species */
     char         **speccolors;  /* optional colors for species */
+    char          *file_ns;     /* namescheme for files (in lieu of meshnames) */
+    char          *block_ns;    /* namescheme for block objects (in lieu of meshnames) */
+    int           *empty_list;  /* list of empty block #'s (option for namescheme) */
+    int            empty_cnt;   /* size of empty list */
 } DBmultimatspecies;
 
 /*----------------------------------------------------------------------
@@ -1954,17 +1979,6 @@ SILO_API extern int      DBPutCSGZonelist(DBfile *, const char *, int, const int
 SILO_API extern int      DBPutCsgvar(DBfile *, const char *, const char *, int, char **,
                                      void **, int, int, int, DBoptlist *);
 
-#if 0
-SILO_API extern DBsil   *DBMakeSil(int,int);
-SILO_API extern int      DBFreeSil(DBsil *);
-SILO_API extern int      DBAddSet(DBsil *, const char *name);
-SILO_API extern int      DBAddEdge(DBsil *, int, int);
-SILO_API extern int      DBPutSil(DBfile *, const char *, const DBsil *sil, const DBoptlist *); 
-SILO_API extern DBsil   *DBGetSil(DBfile *, const char *);
-SILO_API extern DBtravsil  *DBBuildTravSil(DBsil *);
-SILO_API extern int      DBFreeTravSil(DBtravsil *);
-#endif
-
 SILO_API extern void DBFreeMrgtree(DBmrgtree *tree);
 SILO_API extern void DBPrintMrgtree(DBmrgtnode *tnode, int walk_order, void *data);
 SILO_API extern void DBLinearizeMrgtree(DBmrgtnode *tnode, int walk_order, void *data);
@@ -2011,12 +2025,16 @@ SILO_API extern void     DBFortranRemovePointer(int value);
 
 SILO_API extern int      DBVariableNameValid(const char *s);
 SILO_API extern char *safe_strdup(const char *s);
-SILO_API double randf (double rmin, double rmax);
 
 SILO_API extern int      DBFreeCompressionResources(DBfile *dbfile, const char *meshname);
 
 SILO_API extern DBnamescheme *DBMakeNamescheme(const char *fmt, ...);
 SILO_API const char *DBGetName(DBnamescheme *ns, int natnum);
+
+SILO_API extern void DBStringArrayToStringList(char **strArray, int n,
+                         char **strList, int *m);
+SILO_API char ** DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
+                     int skipFirstSemicolon);
 
 /*-------------------------------------------------------------------------
  * Public global variables.
