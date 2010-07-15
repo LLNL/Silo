@@ -1,10 +1,21 @@
+/* The _GNU_SOURCE wrapper logic is to enable the O_DIRECT flag */
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif
+
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <stdio.h> /* for snprintf */
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#ifdef __linux__
+#undef _GNU_SOURCE
+#endif
 
 /*
    TO DO:
@@ -43,13 +54,6 @@
 #include "hdf5.h"
 #include "H5FDsilo.h"
 
-#ifdef H5_HAVE_STDIO_H
-#include <stdio.h> /* for snprintf */
-#endif
-#ifdef H5_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
@@ -71,6 +75,7 @@
 #define SILO_BLKSZ_PROPNAME "silo_block_size"
 #define SILO_BLKCNT_PROPNAME "silo_block_count"
 #define SILO_LOGSTS_PROPNAME "silo_log_stats"
+#define SILO_USEDIR_PROPNAME "silo_use_direct"
 
 /* definitions related to the file stat utilities.
  * For Unix, if off_t is not 64bit big, try use the pseudo-standard
@@ -317,6 +322,7 @@ typedef struct H5FD_silo_t {
     int         num_blocks;
     int         log_stats;
     char       *log_name;
+    int         use_direct;
     silo_vfd_block_bitmap_t was_written_map;
     silo_vfd_block_bitmap_t was_in_mem_map;
     silo_vfd_stats_t stats;
@@ -1058,7 +1064,11 @@ H5FD_silo_term(void)
  *
  * Modifications:
  *      Stolen from the sec2 driver - QAK, 10/18/99
+ *      Ditto, Mark C. Miller, Febuary, 2010
  *
+ *   Mark C. Miller, Wed Jul 14 20:59:15 PDT 2010
+ *   Added support for direct I/O option. Made default values macro
+ *   constants.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1066,10 +1076,11 @@ H5Pset_fapl_silo(hid_t fapl_id)
 {
     static const char *func = "H5FDset_fapl_silo"; 
     herr_t ret_value = 0;
-    hsize_t default_block_size = 16384;
+    hsize_t default_block_size = H5FD_SILO_DEFAULT_BLOCK_SIZE;
     H5AC_cache_config_t mdc_config;
-    int default_block_count = 16;
-    int default_log_stats = 0;
+    int default_block_count = H5FD_SILO_DEFAULT_BLOCK_COUNT;
+    int default_log_stats = H5FD_SILO_DEFAULT_LOG_STATS;
+    int default_use_direct = H5FD_SILO_DEFAULT_USE_DIRECT;
     hid_t default_fapl;
 
     H5Eclear2(H5E_DEFAULT);
@@ -1078,18 +1089,23 @@ H5Pset_fapl_silo(hid_t fapl_id)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
 
     if (H5Pinsert(fapl_id, SILO_BLKSZ_PROPNAME, sizeof(hsize_t), &default_block_size, 0, 0, 0, 0, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert silo_block_size property", -1, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert " SILO_BLKSZ_PROPNAME, -1, -1)
     if (H5Pinsert(fapl_id, SILO_BLKCNT_PROPNAME, sizeof(int), &default_block_count, 0, 0, 0, 0, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert silo_block_count property", -1, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert " SILO_BLKCNT_PROPNAME, -1, -1)
     if (H5Pinsert(fapl_id, SILO_LOGSTS_PROPNAME, sizeof(int), &default_log_stats, 0, 0, 0, 0, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert silo_log_stats property", -1, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert " SILO_LOGSTS_PROPNAME, -1, -1)
+    if (H5Pinsert(fapl_id, SILO_USEDIR_PROPNAME, sizeof(int), &default_use_direct, 0, 0, 0, 0, 0) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert " SILO_USEDIR_PROPNAME, -1, -1)
 
     if (H5Pset(fapl_id, SILO_BLKSZ_PROPNAME, &default_block_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_size", -1, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set " SILO_BLKSZ_PROPNAME, -1, -1)
     if (H5Pset(fapl_id, SILO_BLKCNT_PROPNAME, &default_block_count) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set " SILO_BLKCNT_PROPNAME, -1, -1)
     if (H5Pset(fapl_id, SILO_LOGSTS_PROPNAME, &default_log_stats) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_log_stats", -1, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set " SILO_LOGSTS_PROPNAME, -1, -1)
+    if (H5Pset(fapl_id, SILO_USEDIR_PROPNAME, &default_use_direct) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set " SILO_USEDIR_PROPNAME, -1, -1)
+
     if (H5Pset_meta_block_size(fapl_id, 0) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
     if (H5Pset_small_data_block_size(fapl_id, 0) < 0)
@@ -1162,6 +1178,22 @@ H5Pset_silo_log_stats(hid_t fapl_id, int log)
     return ret_value;
 }
 
+herr_t
+H5Pset_silo_use_direct(hid_t fapl_id, int used)
+{
+    static const char *func="H5Pset_silo_use_direct";
+    herr_t ret_value = 0;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
+    if (H5Pset(fapl_id, SILO_USEDIR_PROPNAME, &used) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set " SILO_USEDIR_PROPNAME, -1, -1)
+
+    return ret_value;
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_silo_sb_size
@@ -1292,6 +1324,8 @@ H5FD_silo_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
  * Modifications:
  *      Ported to VFL/H5FD layer - QAK, 10/18/99
  *
+ *   Mark C. Miller, Wed Jul 14 21:00:13 PDT 2010
+ *   Added direct I/O flag.
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -1304,12 +1338,13 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     H5FD_silo_t	*file = NULL;
     h5_stat_t   sb;
     static const char *func = "H5FD_silo_open";  /* Function Name for error reporting */
-    int silo_block_count;
-    hsize_t silo_block_size;
+    int silo_block_count = H5FD_SILO_DEFAULT_BLOCK_COUNT;
+    hsize_t silo_block_size = H5FD_SILO_DEFAULT_BLOCK_SIZE;
     hsize_t meta_block_size;
     hsize_t small_data_block_size;
     size_t  sieve_buf_size;
-    int     silo_log_stats = 0;
+    int     silo_log_stats = H5FD_SILO_DEFAULT_LOG_STATS;
+    int     silo_use_direct = H5FD_SILO_DEFAULT_USE_DIRECT;
     H5FD_t *ret_value = 0;
 
     /* Sanity check on file offsets */
@@ -1343,7 +1378,7 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "sieve_buf_size!=0", 0, -1)
 
     if (H5Pget(fapl_id, SILO_BLKSZ_PROPNAME, &silo_block_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_block_size", 0, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_BLKSZ_PROPNAME, 0, -1)
 
 #if 0
     if (meta_block_size != silo_block_size || small_data_block_size != silo_block_size)
@@ -1351,11 +1386,14 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     if (H5Pget(fapl_id, SILO_BLKCNT_PROPNAME, &silo_block_count) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_block_count", 0, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_BLKCNT_PROPNAME, 0, -1)
     if (silo_block_count < 1)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "silo_block_count<1", 0, -1)
+
     if (H5Pget(fapl_id, SILO_LOGSTS_PROPNAME, &silo_log_stats) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get silo_log_stats", 0, -1)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_LOGSTS_PROPNAME, 0, -1)
+    if (H5Pget(fapl_id, SILO_USEDIR_PROPNAME, &silo_use_direct) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_USEDIR_PROPNAME, 0, -1)
 
 #warning CHECK MDC CONFIG HERE TOO
 
@@ -1364,6 +1402,7 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     if (H5F_ACC_TRUNC & flags) o_flags |= O_TRUNC;
     if (H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
+    if (silo_use_direct) o_flags |= O_DIRECT;
 
     errno = 0;
     if ((fd = HDopen(name, o_flags, 0666)) < 0)
