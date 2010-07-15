@@ -689,6 +689,11 @@ struct _mm {
     char          **_speccolors;
     int            _conserved;
     int            _extensive;
+    char          *_file_ns;
+    char          *_block_ns;
+    int            _block_type;
+    int           *_empty_list;
+    int            _empty_cnt;
 };
 
 /*
