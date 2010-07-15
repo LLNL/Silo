@@ -11729,6 +11729,11 @@ DBStringArrayToStringList(char **strArray, int n,
  *    Made this function public, replacing 'db_' with 'DB' in name.
  *    Merged fixes from 4.7.3 patches to fix problems with swaping
  *    the slash character.
+ *
+ *    Mark C. Miller, Wed Jun 30 16:01:17 PDT 2010
+ *    Made logic for handling slash swap more sane. Now, swapping is
+ *    performed AFTER the list of strings has been broken out into
+ *    separate arrays.
  *--------------------------------------------------------------------*/
 PUBLIC char **
 DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
@@ -11776,8 +11781,8 @@ DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
             {
                 /* Since we're already marching through characters looking
                    for a ';', if we're supposed to swap slash characters too,
-                   keep track of colons also. We track the LAST colon we find
-                   in colonAt[] array. */
+                   keep track of colons also. We keep track of the LAST ':'
+                   we see in colonAt[i]. */
                 if (handleSlashSwap)
                 {
 #if !defined(_WIN32) /* linux case */
