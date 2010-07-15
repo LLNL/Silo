@@ -35,7 +35,8 @@ if (!strncmp(tok, #A, strlen(#A)))			\
 }
 
 
-static DBoptlist *driver_opts[] = {0,0,0,0,0,0,0,0,0,0,0};
+static DBoptlist *driver_opts[] = {0,0,0,0,0,0,0,0,0,0};
+static int driver_opts_ids[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 static int driver_ints[100];
 static int driver_nints = 0;
 static char *driver_strs[] = {0,0,0,0,0,0,0,0,0,0};
@@ -46,7 +47,10 @@ static void CleanupDriverStuff()
 {
     int i;
     for (i = 0; i < driver_nopts; i++)
+    {
+        if (driver_opts_ids[i] != -1) DBUnregisterFileOptionsSet(driver_opts_ids[i]);
         if (driver_opts[i]) DBFreeOptlist(driver_opts[i]);
+    }
     for (i = 0; i < sizeof(driver_strs)/sizeof(driver_strs[0]); i++)
         if (driver_strs[i]) free(driver_strs[i]);
 }
@@ -67,6 +71,7 @@ static void MakeDriverOpts(DBoptlist **_opts, int *opts_id)
 
     *_opts = opts;
     *opts_id = DBRegisterFileOptionsSet(opts);
+     driver_opts_ids[i] = *opts_id;
 }
 
 static int StringToDriver(const char *str)
@@ -150,6 +155,7 @@ static int StringToDriver(const char *str)
             CHECK_SYMBOLN_INT(DBOPT_H5_SILO_BLOCK_SIZE)
             CHECK_SYMBOLN_INT(DBOPT_H5_SILO_BLOCK_COUNT)
             CHECK_SYMBOLN_INT(DBOPT_H5_SILO_LOG_STATS)
+            CHECK_SYMBOLN_INT(DBOPT_H5_SILO_USE_DIRECT)
             CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_DEFAULT)
             CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_SEC2)
             CHECK_SYMBOLN_STR(DB_FILE_OPTS_H5_DEFAULT_STDIO)

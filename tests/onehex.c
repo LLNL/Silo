@@ -50,6 +50,10 @@
  *   Mark C. Miller, Tue Mar  9 17:16:17 PST 2010
  *   Added explicit logic to set split vfd as an example of how to do it.
  *   Added missing DBFreeFacelist() so valgrind reports no leaks.
+ *
+ *   Mark C. Miller, Wed Jul 14 15:43:10 PDT 2010
+ *   Changed name of 'example' option to 'split'. Added code to Unregister
+ *   option sets.
  * 
  *****************************************************************************/
 
@@ -85,7 +89,7 @@ main(int argc, char *argv[])
     for (i=1; i<argc; i++) {
 	if (!strncmp(argv[i], "DB_", 3)) {
 	    driver = StringToDriver(argv[i]);
-	} else if (!strcmp(argv[i], "example")) {
+	} else if (!strcmp(argv[i], "split")) {
 
             /* set up the meta file options for core vfd with 1K alloc */
             core_opts = DBMakeOptlist(10);
@@ -151,8 +155,16 @@ main(int argc, char *argv[])
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "3D ucd hex", driver);
 
     /* Ok, now we can safely free the file options sets optlists */
-    if (core_opts) DBFreeOptlist(core_opts);
-    if (split_opts) DBFreeOptlist(split_opts);
+    if (core_opts)
+    {
+        DBUnregisterFileOptionsSet(meta_opts_id);
+        DBFreeOptlist(core_opts);
+    }
+    if (split_opts)
+    {
+        DBUnregisterFileOptionsSet(split_opts_id);
+        DBFreeOptlist(split_opts);
+    }
 
     coordnames[0] = "xcoords";
     coordnames[1] = "ycoords";

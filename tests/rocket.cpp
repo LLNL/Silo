@@ -1025,12 +1025,18 @@ db_StringListToStringArray(char *strList, int n)
 // Purpose: Build a simple, 3D mesh with a lot of interesting subsets
 // to serve as a talking point for VisIt's subsetting functionality.
 //
+// Modifications:
+//    Mark C. Miller, Wed Jul 14 15:33:02 PDT 2010
+//    Added show-all-errors option.
+//
+
 int
 main(int argc, char **argv)
 {
     FILE *outfile;
     DBfile *dbfile;
     int driver = DB_PDB;
+    int show_all_errors = FALSE;
 
     int j, i = 1;
     while (i < argc)
@@ -1043,6 +1049,9 @@ main(int argc, char **argv)
         {
             driver = StringToDriver(argv[i]);
         }
+        else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+        }
 	else if (argv[i][0] != '\0')
         {
             fprintf(stderr,"Uncrecognized driver name \"%s\"\n",
@@ -1051,6 +1060,8 @@ main(int argc, char **argv)
         }
         i++;
     }
+
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
     /* initialize some global data */
     for (i = 0; i < 5; i++)

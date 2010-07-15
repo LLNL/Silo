@@ -67,7 +67,42 @@ static void build_defvars(DBfile *dbfile, int dims);
 
 /* Other functions */
 #ifndef randf
-extern double randf(double rmin, double rmax);
+/*-------------------------------------------------------------------------
+ * Function:    randf
+ * 
+ * Purpose:     Generates random numbers between RMIN (inclusive) and
+ *              RMAX (exclusive).  RMIN should be smaller than RMAX.
+ * 
+ * Return:      A pseudo-random number
+ * 
+ * Programmer:  Robb Matzke
+ *              robb@callisto.nuance.mdn.com
+ *              Jul  9, 1996
+ * 
+ * Modifications:
+ *       Thomas R. Treadway, Wed Nov 28 15:25:53 PST 2007
+ *       Moved from src/swat/randf.c
+ *
+ *       Mark C. Miller, Wed Jun 30 09:43:10 PDT 2010
+ *       Moved here from src/silo/silo.c
+ *-------------------------------------------------------------------------
+ */
+double
+randf(rmin, rmax)
+    double          rmin;
+    double          rmax;
+{   
+    unsigned long   acc;
+    static double   divisor = 0;
+
+    if (divisor < 1)
+        divisor = pow(2.0, 30);
+
+    rmax -= rmin;
+    acc = ((rand() & 0x7fff) << 15) | (rand() & 0x7fff);
+
+    return (rmax * (acc / divisor) + rmin);
+}
 #endif
 
 
