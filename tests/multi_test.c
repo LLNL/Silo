@@ -348,6 +348,11 @@ fill_rect3d_mat(float x[], float y[], float z[], int matlist[], int nx,
  *    Added option for split vfd. Changed how allocation inc is handled
  *    by Silo library. Added option to turn on ALL errors. Added
  *    alternate extensions for split-vfd.
+ *
+ *    Mark C. Miller, Wed Jul 14 15:28:05 PDT 2010
+ *    Changed name of hdf-friendly-hard option to hdf-friendly-only which
+ *    if present will create a file in which NO data is written to /.silo
+ *    dir and all datasets are written 'next to' the objects the bind to.
  *------------------------------------------------------------------------*/
 int
 main(int argc, char *argv[])
@@ -379,8 +384,8 @@ main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "check")) {
             dochecks = TRUE;
         } else if (!strcmp(argv[i], "hdf-friendly")) {
-            hdfriendly = TRUE;
-        } else if (!strcmp(argv[i], "hdf-friendly-hard")) {
+            hdfriendly = 1;
+        } else if (!strcmp(argv[i], "hdf-friendly-only")) {
             hdfriendly = 2;
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
