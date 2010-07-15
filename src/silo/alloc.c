@@ -428,6 +428,10 @@ DBFreeDefvars(DBdefvars *defv)
  *     Eric Brugger, Wed Jul  2 13:19:07 PDT 1997
  *     I added code to free msh->meshnames to close a memory leak.
  *
+ *     Mark C. Miller, Wed Jul 14 20:26:09 PDT 2010
+ *     Added support for namescheme options on multi-block objects.
+ *     When these options are in use, the ...names member can be null.
+ *     So, modified to only delete the ...names member if it is non-null.
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultimesh(DBmultimesh *msh)
@@ -437,8 +441,11 @@ DBFreeMultimesh(DBmultimesh *msh)
     if (msh == NULL)
         return;
 
-    for (i = 0; i < msh->nblocks; i++) {
-        FREE(msh->meshnames[i]);
+    if (msh->meshnames)
+    {
+        for (i = 0; i < msh->nblocks; i++) {
+            FREE(msh->meshnames[i]);
+        }
     }
 
     if (msh->groupnames)
@@ -511,6 +518,11 @@ DBFreeMultimeshadj(DBmultimeshadj *mshadj)
  *
  *     Mark C. Miller, Thu Oct 29 15:55:34 PDT 2009
  *     Added free for mmesh_name
+ *
+ *     Mark C. Miller, Wed Jul 14 20:26:09 PDT 2010
+ *     Added support for namescheme options on multi-block objects.
+ *     When these options are in use, the ...names member can be null.
+ *     So, modified to only delete the ...names member if it is non-null.
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultivar (DBmultivar *mv)
@@ -520,8 +532,11 @@ DBFreeMultivar (DBmultivar *mv)
      if (mv == NULL)
           return;
 
-     for (i = 0; i < mv->nvars; i++) {
-          FREE(mv->varnames[i]);
+     if (mv->varnames)
+     {
+         for (i = 0; i < mv->nvars; i++) {
+              FREE(mv->varnames[i]);
+         }
      }
 
      FREE(mv->varnames);
@@ -548,6 +563,11 @@ DBFreeMultivar (DBmultivar *mv)
  *
  *     Mark C. Miller, Thu Oct 29 15:55:34 PDT 2009
  *     Added free for mmesh_name
+ *
+ *     Mark C. Miller, Wed Jul 14 20:26:09 PDT 2010
+ *     Added support for namescheme options on multi-block objects.
+ *     When these options are in use, the ...names member can be null.
+ *     So, modified to only delete the ...names member if it is non-null.
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultimat (DBmultimat *mat)
@@ -557,8 +577,11 @@ DBFreeMultimat (DBmultimat *mat)
      if (mat == NULL)
           return;
 
-     for (i = 0; i < mat->nmats; i++) {
-          FREE(mat->matnames[i]);
+     if (mat->matnames)
+     {
+         for (i = 0; i < mat->nmats; i++) {
+              FREE(mat->matnames[i]);
+         }
      }
      FREE(mat->matnames);
      if (mat->material_names)
@@ -600,6 +623,11 @@ DBFreeMultimat (DBmultimat *mat)
  *
  *    Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *    Added names and colors for species.
+ *
+ *     Mark C. Miller, Wed Jul 14 20:26:09 PDT 2010
+ *     Added support for namescheme options on multi-block objects.
+ *     When these options are in use, the ...names member can be null.
+ *     So, modified to only delete the ...names member if it is non-null.
  *----------------------------------------------------------------------*/
 PUBLIC void
 DBFreeMultimatspecies (DBmultimatspecies *spec)
@@ -629,8 +657,11 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
          FREE(spec->speccolors);
      }
 
-     for (i = 0; i < spec->nspec; i++) {
-          FREE(spec->specnames[i]);
+     if (spec->specnames)
+     {
+         for (i = 0; i < spec->nspec; i++) {
+              FREE(spec->specnames[i]);
+         }
      }
      FREE(spec->specnames);
 
