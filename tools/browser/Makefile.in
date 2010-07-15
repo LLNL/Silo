@@ -271,8 +271,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dist_bin_SCRIPTS = \
  silodiff \
- silofile \
- silofile.magic
+ silofile
 
 browser_SOURCES = $(FILES)
 @FPZIP_NEEDED_TRUE@@HDF5_DRV_NEEDED_TRUE@nodist_EXTRA_browser_SOURCES = dummy.cxx
