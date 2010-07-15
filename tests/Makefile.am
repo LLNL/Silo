@@ -250,13 +250,13 @@ all-local:
 # By default, with no special args, we run the testsuite twice,
 # first on PDB driver and then on HDF5 driver.
 check-local: $(TESTSUITE) $(PROGS)
-	$(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=$(STARGS) $(ATARGS)
+	$(SHELL) $(srcdir)/testsuite PYTHON="$(PYTHON)" BROWSER="$(BROWSER)" STARGS="$(STARGS)" $(ATARGS)
 	@if test -e testsuite.log; then \
 	    cp testsuite.log testsuite.log.pdb ; \
 	fi
 if PDBP_DRV_NEEDED
 	@if test -z "$(STARGS)"; then \
-	    $(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=DB_PDBP $(ATARGS); \
+	    $(SHELL) $(srcdir)/testsuite PYTHON="$(PYTHON)" BROWSER="$(BROWSER)" STARGS=DB_PDBP $(ATARGS); \
 	    if test -e testsuite.log; then \
 	        cp testsuite.log testsuite.log.pdbp ; \
 	    fi \
@@ -264,7 +264,7 @@ if PDBP_DRV_NEEDED
 endif
 if HDF5_DRV_NEEDED
 	@if test -z "$(STARGS)"; then \
-	    $(SHELL) $(srcdir)/testsuite PYTHON=$(PYTHON) BROWSER=$(BROWSER) STARGS=DB_HDF5 $(ATARGS); \
+	    $(SHELL) $(srcdir)/testsuite PYTHON="$(PYTHON)" BROWSER="$(BROWSER)" STARGS=DB_HDF5 $(ATARGS); \
 	    if test -e testsuite.log; then \
 	        cp testsuite.log testsuite.log.hdf5; \
 	    fi \
