@@ -85,7 +85,13 @@ typedef struct obj_ary_t {
                                  * of the dimension is the sum of the
                                  * dimensions specified.
                                  */
-#define ARY_NSH         5       /*THIS MUST BE LAST!                    */
+#define ARY_SH_5        5       /* The array is one dimensional.  The size
+                                 * of the dimenion is determined by
+                                 * traversing the array until encountering
+                                 * sentinal, N, where N comes from
+                                 * `(array "SH5 N, ...)' 
+                                 */
+#define ARY_NSH         6       /*THIS MUST BE LAST!                    */
 
 static int      SHFlagsEncountered[ARY_NSH];
 
@@ -439,6 +445,10 @@ ary_get_print_limits (int nelmts,               /*input*/
  *
  *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *      Added SH4 mode specially handled array.
+ *
+ *      Mark C. Miller, Wed Jul 14 21:01:16 PDT 2010
+ *      Added hackish SH5 mode, where 1D array's size is determined by
+ *      traversal for a terminal sentinel.
  *-------------------------------------------------------------------------
  */
 static void
@@ -460,8 +470,13 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
     * The size of each element of the array...
     */
    if ((nbytes=obj_sizeof(self->sub))<=0) {
-      out_error ("unable to determine size of: ", self->sub);
-      return;
+      /* Total hack to make SH5 case work */
+      if (ARY_SH_5==self->special_handling) {
+          nbytes=sizeof(int);
+      } else {
+          out_error ("unable to determine size of: ", self->sub);
+          return;
+      }
    }
 
    if (WALK_PRINT==operation) {
@@ -555,8 +570,32 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
 
    case WALK_RETRIEVE:
       if (wdata->nvals<0) return ;      /*error already detected*/
-      for (i=0; i<n && wdata->nvals<wdata->maxvals; i++) {
-         obj_walk1 (self->sub, (char*)mem+i*nbytes, operation, wdata);
+      if (wdata->vals == 0)
+      {
+          /* Total hack to make SH5 case work */
+          wdata->vals = (int *) malloc(10*sizeof(int));
+          wdata->nvals = 0;
+          wdata->maxvals = 10;
+          i = 0;
+          while (1)
+          {
+              if (wdata->nvals == wdata->maxvals)
+              {
+                  wdata->maxvals *= 1.5;
+                  wdata->vals = (int *) realloc(wdata->vals, wdata->maxvals*sizeof(int));
+              }
+              wdata->vals[i] = *((int*)(mem+i*nbytes));
+              wdata->nvals++;
+              if (wdata->vals[i] == -1)
+                  break;
+              i++;
+          }
+      }
+      else
+      {
+          for (i=0; i<n && wdata->nvals<wdata->maxvals; i++) {
+             obj_walk1 (self->sub, (char*)mem+i*nbytes, operation, wdata);
+          }
       }
       break;
 
@@ -1240,6 +1279,9 @@ ary_deref (obj_t _self, int argc, obj_t argv[]) {
  *      then the special handling flag is discarded and the array is
  *      multi-dimensional.
  *
+ *      Mark C. Miller, Wed Jul 14 21:01:16 PDT 2010
+ *      Added hackish SH5 mode, where 1D array's size is determined by
+ *      traversal for a terminal sentinel.
  *-------------------------------------------------------------------------
  */
 static obj_t
@@ -1247,7 +1289,7 @@ ary_bind (obj_t _self, void *mem) {
 
    obj_ary_t    *self = MYCLASS(_self);
    char         *s, *t, *rest, buf[1024];
-   int          i, n, dim[NDIMS], max_dim0=0;
+   int          i, n, dim[NDIMS], max_dim0=0, sentinel;
    lex_t        *lex_input=NULL;
    obj_t        in=NIL, sdo=NIL;
    walk_t       wdata;
@@ -1296,6 +1338,9 @@ ary_bind (obj_t _self, void *mem) {
          } else if (ARY_SH_3==self->special_handling) {
             self->special_handling = 0; /*completely handled here*/
             max_dim0 = strtol (rest, &rest, 0);
+         } else if (ARY_SH_5==self->special_handling) {
+            sentinel = strtol (rest, &rest, 0);
+            self->ndims = 1;
          }
          assert (!rest || !*rest);
 
@@ -1334,30 +1379,47 @@ ary_bind (obj_t _self, void *mem) {
             self->ndims = 0;
             goto error;
          }
-         wdata.vals = dim;
-         wdata.nvals = 0;
-         wdata.maxvals = NELMTS(dim);
-         obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
-         if (wdata.nvals<1) {
-            out_errorn ("array dimension has no value: %s", t);
-            self->ndims = 0;
-            goto error;
+         if (ARY_SH_5==self->special_handling)
+         {
+             wdata.vals = 0;
+             wdata.nvals = 0;
+             wdata.maxvals = 0;
+             obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
+             if (wdata.nvals<1) {
+                out_errorn ("array dimension has no value: %s", t);
+                self->ndims = 0;
+                goto error;
+             }
+             sdo = obj_dest (sdo);
+             self->ndims = 1;
+             self->dim[0] = wdata.nvals;
          }
-         sdo = obj_dest (sdo);
-         for (i=0; i<wdata.nvals; i++) {
-            if (self->ndims>=NDIMS) {
-               out_errorn ("too many dimensions in array type");
-               goto error;
-            }
-            self->dim[self->ndims] = n = wdata.vals[i];
-            self->ndims += 1;
-            if (n<0) {
-               out_errorn ("dimension %d is invalid: %d",
-                           self->ndims, n);
-               goto error;
-            }
+         else
+         {
+             wdata.vals = dim;
+             wdata.nvals = 0;
+             wdata.maxvals = NELMTS(dim);
+             obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
+             if (wdata.nvals<1) {
+                out_errorn ("array dimension has no value: %s", t);
+                self->ndims = 0;
+                goto error;
+             }
+             sdo = obj_dest (sdo);
+             for (i=0; i<wdata.nvals; i++) {
+                if (self->ndims>=NDIMS) {
+                   out_errorn ("too many dimensions in array type");
+                   goto error;
+                }
+                self->dim[self->ndims] = n = wdata.vals[i];
+                self->ndims += 1;
+                if (n<0) {
+                   out_errorn ("dimension %d is invalid: %d",
+                               self->ndims, n);
+                   goto error;
+                }
+             }
          }
-
       } else {
          /*
           * What?
@@ -1446,6 +1508,10 @@ ary_footnotes_reset (void)
  *
  *      Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *      Added SH4 mode specially handled array.
+ *
+ *      Mark C. Miller, Wed Jul 14 21:01:16 PDT 2010
+ *      Added hackish SH5 mode, where 1D array's size is determined by
+ *      traversal for a terminal sentinel.
  *-------------------------------------------------------------------------
  */
 void
@@ -1502,5 +1568,20 @@ ary_footnotes_print (void)
       out_pop (OUT_STDOUT);
       SHFlagsEncountered[ARY_SH_4] = 999; /*don't show it again*/
    }
+
+   if (SHFlagsEncountered[ARY_SH_5] && SHFlagsEncountered[ARY_SH_5]<999) {
+      sprintf (title, "*** Footnote %d", num++);
+      out_push (OUT_STDOUT, title);
+      out_nl (OUT_STDOUT); /*blank line*/
+      out_putw (OUT_STDOUT, "The SH5 flag appearing in an array definition "
+                "indicates that the array is one-dimensional.  The size of "
+                "the dimension is determined by traversing the array for a "
+                "sentinel, terminal value. The sentinel value is determined "
+                "by the argument to this flag.");
+      out_nl (OUT_STDOUT);
+      out_pop (OUT_STDOUT);
+      SHFlagsEncountered[ARY_SH_5] = 999; /*don't show it again*/
+   }
+
 
 }
