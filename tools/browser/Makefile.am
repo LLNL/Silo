@@ -2,12 +2,14 @@
 ##
 ##   Mark C. Miller, Wed Sep  2 15:25:10 PDT 2009
 ##   Added READLINE_LIBS
+##
+##   Mark C. Miller, Wed Jul 14 21:05:19 PDT 2010
+##   Removed silofile.magic
 
 bin_PROGRAMS = browser
 dist_bin_SCRIPTS = \
  silodiff \
- silofile \
- silofile.magic
+ silofile
 
 browser_SOURCES = $(FILES)
 if HDF5_DRV_NEEDED
