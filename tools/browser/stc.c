@@ -1532,6 +1532,9 @@ stc_offset (obj_t _self, obj_t comp) {
  *
  *  Mark C. Miller, Wed Feb 24 16:39:21 PST 2010
  *  Fixed a problem with display of extents in point meshes.
+ *
+ *  Mark C. Miller, Wed Jul 14 21:06:27 PDT 2010
+ *  Added support for namescheme/emtpy_list options on multi-block objs.
  *-------------------------------------------------------------------------
  */
 void
@@ -1602,6 +1605,12 @@ stc_silo_types (void) {
       COMP (disjoint_mode,      "primitive 'int'");
       COMP (topo_dim,           "primitive 'int'");
       IOASSOC (PA_TOPODIM);
+      COMP (file_ns,            "primitive 'string'");
+      COMP (block_ns,           "primitive 'string'");
+      COMP (block_type,         "primitive 'int'");
+      COMP (empty_cnt,          "primitive 'int'");
+      COMP (empty_list,
+            "pointer (array 'self.empty_cnt' (primitive 'int'))");
       COMP (meshids,
             "pointer (array 'self.nblocks' (primitive 'int'))");
       COMP (meshnames,
@@ -1665,6 +1674,12 @@ stc_silo_types (void) {
       COMP (mmesh_name,         "primitive 'string'");
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (file_ns,            "primitive 'string'");
+      COMP (block_ns,           "primitive 'string'");
+      COMP (block_type,         "primitive 'int'");
+      COMP (empty_cnt,          "primitive 'int'");
+      COMP (empty_list,
+            "pointer (array 'self.empty_cnt' (primitive 'int'))");
       COMP (varnames,
             "pointer (array 'self.nvars' (primitive 'string'))");
 
@@ -1690,6 +1705,11 @@ stc_silo_types (void) {
       COMP (blockorigin,        "primitive 'int'");
       COMP (grouporigin,        "primitive 'int'");
       COMP (mmesh_name,         "primitive 'string'");
+      COMP (file_ns,            "primitive 'string'");
+      COMP (block_ns,           "primitive 'string'");
+      COMP (empty_cnt,          "primitive 'int'");
+      COMP (empty_list,
+            "pointer (array 'self.empty_cnt' (primitive 'int'))");
       COMP (matnames,
             "pointer (array 'self.nmats' (primitive 'string'))");
       COMP (mixlens,
@@ -1716,6 +1736,11 @@ stc_silo_types (void) {
       COMP (blockorigin,        "primitive 'int'");
       COMP (grouporigin,        "primitive 'int'");
       COMP (nmat,               "primitive 'int'");
+      COMP (file_ns,            "primitive 'string'");
+      COMP (block_ns,           "primitive 'string'");
+      COMP (empty_cnt,          "primitive 'int'");
+      COMP (empty_list,
+            "pointer (array 'self.empty_cnt' (primitive 'int'))");
       COMP (specnames,
             "pointer (array 'self.nspec' (primitive 'string'))");
       COMP (nmatspec,
