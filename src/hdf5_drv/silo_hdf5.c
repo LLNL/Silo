@@ -185,46 +185,6 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
          ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
          (H5_VERS_MAJOR>Maj))
 
-/* Re-define various H5Xopen/H5Xcreate calls we use here so that we can
-   keep track of currently opened objects in the file. Note that we are
-   re-defining the actual HDF5 function names (which include a '1' or
-   maybe a '2' in them) because HDF5 defines macros instead of functions
-   for those parts of its API that have changed between versions and
-   so we cannot succesfully re-define them. */
-#define H5Aopen_name(L,N)	db_hdf5_H5Aopen_name(L,N)
-#define H5Acreate1(L,N,T,S,P)	db_hdf5_H5Acreate(L,N,T,S,P)
-#define H5Aclose(A)		db_hdf5_H5Aclose(A)
-
-#define H5Dopen1(L,N)		db_hdf5_H5Dopen(L,N)
-#define H5Dcreate1(L,N,T,S,P)	db_hdf5_H5Dcreate(L,N,T,S,P)
-#define H5Dclose(D)		db_hdf5_H5Dclose(D)
-
-#define H5Gopen1(L,N)		db_hdf5_H5Gopen(L,N)
-#define H5Gcreate1(L,N,S)	db_hdf5_H5Gcreate(L,N,S)
-#define H5Gclose(G)		db_hdf5_H5Gclose(G)
-
-#define H5Topen1(L,N)		db_hdf5_H5Topen(L,N)
-#define H5Tcreate(C,S)		db_hdf5_H5Tcreate(C,S)
-#define H5Tclose(T)		db_hdf5_H5Tclose(T)
-
-PRIVATE hid_t db_hdf5_H5Aopen_name(hid_t loc_id, const char *name);
-PRIVATE hid_t db_hdf5_H5Acreate(hid_t loc_id, const char *attr_name,
-    hid_t type_id, hid_t space_id, hid_t acpl_id);
-PRIVATE herr_t db_hdf5_H5Aclose(hid_t attr_id);
-
-PRIVATE hid_t db_hdf5_H5Dopen(hid_t loc_id, const char *name);
-PRIVATE hid_t db_hdf5_H5Dcreate(hid_t loc_id, const char *name,
-    hid_t type_id, hid_t space_id, hid_t dcpl_id);
-PRIVATE herr_t db_hdf5_H5Dclose(hid_t dsid);
-
-PRIVATE hid_t db_hdf5_H5Gopen(hid_t loc_id, const char *name);
-PRIVATE hid_t db_hdf5_H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
-PRIVATE herr_t db_hdf5_H5Gclose(hid_t gid);
-
-PRIVATE hid_t db_hdf5_H5Topen( hid_t loc_id, const char *name);
-PRIVATE hid_t db_hdf5_H5Tcreate(H5T_class_t class, size_t size);
-PRIVATE herr_t db_hdf5_H5Tclose(hid_t tid);
-
 /* to encode the version of the hdf5 library in any silo executable */
 char SILO_built_with_H5_lib_vers_info_g[] = "SILO built with "
 #if HDF5_VERSION_GE(1,4,2)
@@ -256,17 +216,6 @@ typedef struct silo_hdf5_comp_t {
     char                *name;
     unsigned long       objno[2];
 } silo_hdf5_comp_t;
-
-/* structure to manage list of open objects */
-typedef struct silo_hdf5_fn2ool_t {
-    unsigned long fileno;
-    int nool;
-    int sool;
-    hid_t *ool;
-} silo_hdf5_fn2ool_t;
-static silo_hdf5_fn2ool_t *silo_hdf5_fn2ool = 0;
-static int silo_hdf5_nfn2ool = 0;
-static int silo_hdf5_sfn2ool = 0;
 
 /* Attributes for various types of objects */
 typedef struct DBcurve_mt {
@@ -570,6 +519,11 @@ typedef struct DBmultimesh_mt {
     int                 tv_connectivity;
     int                 disjoint_mode;
     int                 topo_dim;
+    char                file_ns_name[256];
+    char                block_ns_name[256];
+    int                 block_type;
+    char                empty_list[256];
+    int                 empty_cnt;
 } DBmultimesh_mt;
 static hid_t    DBmultimesh_mt5;
 
@@ -608,6 +562,11 @@ typedef struct DBmultivar_mt {
     int                 tensor_rank;
     int                 conserved;
     int                 extensive;
+    char                file_ns_name[256];
+    char                block_ns_name[256];
+    int                 block_type;
+    char                empty_list[256];
+    int                 empty_cnt;
 } DBmultivar_mt;
 static hid_t    DBmultivar_mt5;
 
@@ -630,6 +589,10 @@ typedef struct DBmultimat_mt {
     char                material_names[256];
     char                mat_colors[256];
     char                mmesh_name[256];
+    char                file_ns_name[256];
+    char                block_ns_name[256];
+    char                empty_list[256];
+    int                 empty_cnt;
 } DBmultimat_mt;
 static hid_t    DBmultimat_mt5;
 
@@ -648,6 +611,10 @@ typedef struct DBmultimatspecies_mt {
     char                matname[256];
     char                species_names[256];
     char                speccolors[256];
+    char                file_ns_name[256];
+    char                block_ns_name[256];
+    char                empty_list[256];
+    int                 empty_cnt;
 } DBmultimatspecies_mt;
 static hid_t    DBmultimatspecies_mt5;
 
@@ -937,91 +904,6 @@ static hid_t    P_ckrdprops = -1;
 INTERNAL void
 suppress_set_but_not_used_warning(const void *ptr)
 {}
-
-/* functions to manage list of open HDF5 objects */
-static void db_hdf5_register_hid_t(hid_t oid)
-{
-    int i;
-    H5O_info_t oinfo;
-    unsigned long filenum = (unsigned long) -1;
-    silo_hdf5_fn2ool_t *fn2ool;
-
-    if (oid == -1) return;
-
-    /* get this object's file number from HDF5 */
-    H5E_BEGIN_TRY
-    {
-        if (H5Oget_info(oid, &oinfo)>=0)
-            filenum = oinfo.fileno;
-    }
-    H5E_END_TRY
-
-    /* find this file's open object list */
-    for (i = 0; i < silo_hdf5_nfn2ool && filenum != silo_hdf5_fn2ool[i].fileno; i++);
-
-    /* add a new open object list if we didn't find one for this file */
-    if (i >= silo_hdf5_nfn2ool)
-    {
-        if (silo_hdf5_nfn2ool >= silo_hdf5_sfn2ool)
-        {
-            int new_size = silo_hdf5_sfn2ool*1.5;
-            while (new_size <= silo_hdf5_sfn2ool) new_size+=5;
-            silo_hdf5_fn2ool = (silo_hdf5_fn2ool_t*) realloc(silo_hdf5_fn2ool, new_size*sizeof(silo_hdf5_fn2ool_t));
-	    silo_hdf5_sfn2ool = new_size;
-        }
-	i = silo_hdf5_nfn2ool;
-	silo_hdf5_fn2ool[i].fileno = filenum;
-	silo_hdf5_fn2ool[i].nool = 0;
-	silo_hdf5_fn2ool[i].sool = 0;
-	silo_hdf5_fn2ool[i].ool = 0;
-	silo_hdf5_nfn2ool++;
-    }
-    fn2ool = &silo_hdf5_fn2ool[i];
-
-    /* add space to this file's open object list if necessary */
-    if (fn2ool->nool >= fn2ool->sool)
-    {
-        int new_size = fn2ool->sool*1.5;
-	while (new_size <= fn2ool->sool) new_size+=5;
-	fn2ool->ool = (hid_t*) realloc(fn2ool->ool, new_size*sizeof(hid_t));
-	fn2ool->sool = new_size;
-    }
-
-    /* add this object's id to this file's open object list */
-    fn2ool->ool[fn2ool->nool] = oid;
-    fn2ool->nool++;
-}
-
-static void db_hdf5_unregister_hid_t(hid_t oid)
-{
-    int i;
-    H5O_info_t oinfo;
-    unsigned long filenum = (unsigned long) -1;
-    silo_hdf5_fn2ool_t *fn2ool;
-
-    if (oid == -1) return;
-
-    /* get this object's file number from HDF5 */
-    H5E_BEGIN_TRY
-    {
-        if (H5Oget_info(oid, &oinfo)>=0)
-            filenum = oinfo.fileno;
-    }
-    H5E_END_TRY
-
-    /* find this file's open object list */
-    for (i = 0; i < silo_hdf5_nfn2ool && filenum != silo_hdf5_fn2ool[i].fileno; i++);
-    if (i >= silo_hdf5_nfn2ool) return;
-
-    /* find this object in the open object list */
-    fn2ool = &silo_hdf5_fn2ool[i];
-    for (i = 0; i < fn2ool->nool && oid != fn2ool->ool[i]; i++);
-    if (i >= fn2ool->nool) return;
-
-    fn2ool->ool[i] = fn2ool->ool[fn2ool->nool-1];
-    fn2ool->nool--;
-}
-
 
 #ifdef HAVE_FPZIP
 
@@ -2001,6 +1883,9 @@ hdf5_to_silo_error(const char *vname, const char *fname)
  *
  *   Mark C. Miller, Thu Feb 11 09:37:41 PST 2010
  *   Added logic to set HDF5's error output based on Silo's settings.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 PRIVATE void
@@ -2377,6 +2262,11 @@ db_hdf5_init(void)
         MEMBER_S(int,           tv_connectivity);
         MEMBER_S(int,           disjoint_mode);
         MEMBER_S(int,           topo_dim);
+        MEMBER_S(str256,        file_ns_name);
+        MEMBER_S(str256,        block_ns_name);
+        MEMBER_S(int,           block_type);
+        MEMBER_S(str256,        empty_list);
+        MEMBER_S(int,           empty_cnt);
     } DEFINE;
 
     STRUCT(DBmultimeshadj) {
@@ -2413,6 +2303,11 @@ db_hdf5_init(void)
         MEMBER_S(int,           tensor_rank);
         MEMBER_S(int,           conserved);
         MEMBER_S(int,           extensive);
+        MEMBER_S(str256,        file_ns_name);
+        MEMBER_S(str256,        block_ns_name);
+        MEMBER_S(int,           block_type);
+        MEMBER_S(str256,        empty_list);
+        MEMBER_S(int,           empty_cnt);
     } DEFINE;
 
     STRUCT(DBmultimat) {
@@ -2434,6 +2329,10 @@ db_hdf5_init(void)
         MEMBER_S(str256,        material_names);
         MEMBER_S(str256,        mat_colors);
         MEMBER_S(str256,        mmesh_name);
+        MEMBER_S(str256,        file_ns_name);
+        MEMBER_S(str256,        block_ns_name);
+        MEMBER_S(str256,        empty_list);
+        MEMBER_S(int,           empty_cnt);
     } DEFINE;
 
     STRUCT(DBmultimatspecies) {
@@ -2451,6 +2350,10 @@ db_hdf5_init(void)
         MEMBER_S(str256,        matname);
         MEMBER_S(str256,        species_names);
         MEMBER_S(str256,        speccolors);
+        MEMBER_S(str256,        file_ns_name);
+        MEMBER_S(str256,        block_ns_name);
+        MEMBER_S(str256,        empty_list);
+        MEMBER_S(int,           empty_cnt);
     } DEFINE;
 
     STRUCT(DBmatspecies) {
@@ -3882,9 +3785,6 @@ db_hdf5_handle_ctdt(DBfile_hdf5 *dbfile, int ts, float t, int dts, double dt, in
     hid_t space = -1;
     int i;
 
-#warning REMOVE ME
-    return;
-
     set[0] = ts;
     buf[0] = (void*)&t;
     set[1] = dts;
@@ -4032,6 +3932,12 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
  *
  *   Mark C. Miller, Thu Feb  4 11:24:24 PST 2010
  *   Removed logic specific to support cycle, time and time.
+ *   Mark C. Miller, Wed Jul 14 20:49:21 PDT 2010
+ *
+ *   Added logic to support a different kind of 'friendly-names' mode
+ *   where no datasets are put in the 'LINKGRP' and are instead put
+ *   'next to' the objects they bind with. The intention is to eliminate
+ *   the one, very, very large '/.silo' group.
  *-------------------------------------------------------------------------
  */
 PRIVATE int
@@ -4059,21 +3965,15 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
     }
 
     PROTECT {
-
         /* Obtain a unique name for the dataset or use the name supplied */
         if (!*name) {
-#warning EXPLICITLY SETTING FRIENDLY NAMES
-            if (fname) {
-                sprintf(name, "./%s", fname);
-            } else {
-                strcpy(name, LINKGRP);
-                if (db_hdf5_compname(dbfile, ENDOF(name)/*out*/)<0) {
-                    db_perror("compname", E_CALLFAIL, me);
-                    UNWIND();
-                }
+            strcpy(name, LINKGRP);
+            if (db_hdf5_compname(dbfile, ENDOF(name)/*out*/)<0) {
+                db_perror("compname", E_CALLFAIL, me);
+                UNWIND();
             }
         }
-
+        
         /* Obtain the memory and file types for the dataset */
         if ((mtype=silom2hdfm_type(dtype))<0 ||
             (ftype=silof2hdff_type(dbfile, dtype))<0) {
@@ -4102,10 +4002,32 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
             }
         }
 
-#warning EXPLICITLY SETTING FRIENDLY NAMES
-        if ((dset=H5Dcreate(fname?dbfile->cwg:dbfile->link, name, ftype, space, P_crprops))<0) {
-            db_perror(name, E_CALLFAIL, me);
-            UNWIND();
+        if (SILO_Globals.enableFriendlyHDF5Names == 2)
+        {
+            if (fname)
+            {
+                if ((dset=H5Dcreate(dbfile->cwg, fname, ftype, space, P_crprops))<0) {
+                    db_perror(name, E_CALLFAIL, me);
+                    UNWIND();
+                }
+                strcpy(name, fname);
+            }
+            else
+            {
+                if ((dset=H5Dcreate(dbfile->link, name, ftype, space, P_crprops))<0) {
+                    db_perror(name, E_CALLFAIL, me);
+                    UNWIND();
+                }
+            }
+        }
+        else
+        {
+            if ((dset=H5Dcreate(dbfile->link, name, ftype, space, P_crprops))<0) {
+                db_perror(name, E_CALLFAIL, me);
+                UNWIND();
+            }
+            if (fname && SILO_Globals.enableFriendlyHDF5Names == 1)
+                H5Glink(dbfile->cwg, H5G_LINK_SOFT, name, fname);
         }
 
         if (buf && H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, buf)<0) {
@@ -4542,16 +4464,30 @@ db_hdf5_ForceSingle(int status)
     return 0;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_process_file_options
+ *
+ * Purpose:     Laboriously digest a file options set and set up correct
+ *              HDF5 vfd behavior.
+ *
+ * Return:      The constructed file access properties list hid_t
+ * 
+ * Programmer:  Mark C. Miller
+ *              Febuary, 2010 
+ *
+ * Modifications:
+ *
+ *  Mark C. Miller, Wed Jul 14 20:52:19 PDT 2010
+ *  Moved default silo settings to macro constants in H5FDsilo.h.
+ *  Added support for direct I/O to silo vfd.
+ *-------------------------------------------------------------------------
+ */
 PRIVATE hid_t
 db_hdf5_process_file_options(opts_set_id)
 {
     static char *me = "db_hdf5_process_file_options";
     hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
     herr_t h5status = 0;
-#warning DECIDE ON PLACE FOR DEFAULT SILO SETTINGS
-    hsize_t silo_block_size = 16384; /* 16 KB */ 
-    int silo_block_count = 16; /* total of 1/4 MB */
-    int silo_log_stats = 0;
 
     /* This property effects how HDF5 deals with objects that are left
        open when the file containing them is closed. The SEMI setting
@@ -4585,8 +4521,6 @@ db_hdf5_process_file_options(opts_set_id)
 
         case DB_FILE_OPTS_H5_DEFAULT_SILO:
             h5status |= H5Pset_fapl_silo(retval);
-#warning FIXME
-            /*h5status |= H5Pset_silo_block_size_and_count(retval, silo_block_size, silo_block_count); */
             break;
 
         /* default HDF5 sec2 driver */
@@ -4725,9 +4659,10 @@ db_hdf5_process_file_options(opts_set_id)
                     break;
                 case DB_H5VFD_SILO:
                 {
-                    hsize_t block_size = silo_block_size;
-                    int block_count = silo_block_count; 
-                    int log_stats = silo_log_stats;
+                    hsize_t block_size = H5FD_SILO_DEFAULT_BLOCK_SIZE; 
+                    int block_count = H5FD_SILO_DEFAULT_BLOCK_COUNT; 
+                    int log_stats = H5FD_SILO_DEFAULT_LOG_STATS;
+                    int use_direct = H5FD_SILO_DEFAULT_USE_DIRECT;
 
                     if (p = DBGetOption(opts, DBOPT_H5_SILO_BLOCK_SIZE))
                         block_size = (hsize_t) (*((int*) p));
@@ -4735,10 +4670,13 @@ db_hdf5_process_file_options(opts_set_id)
                         block_count = *((int*) p);
                     if (p = DBGetOption(opts, DBOPT_H5_SILO_LOG_STATS))
                         log_stats = *((int*) p);
+                    if (p = DBGetOption(opts, DBOPT_H5_SILO_USE_DIRECT))
+                        use_direct = *((int*) p);
 
                     h5status |= H5Pset_fapl_silo(retval);
                     h5status |= H5Pset_silo_block_size_and_count(retval, block_size, block_count);
                     h5status |= H5Pset_silo_log_stats(retval, log_stats);
+                    h5status |= H5Pset_silo_use_direct(retval, use_direct);
                     break;
                 }
                 case DB_H5VFD_LOG:
@@ -5107,6 +5045,9 @@ db_hdf5_finish_open(DBfile_hdf5 *dbfile)
  *   return silo_db_close(). This is because UNWIND was causing it to
  *   NOT correctly handle the case in which the given filename was NOT
  *   an HDF5 file and properly RETURNing NULL when necessary.
+ *
+ *   Mark C. Miller, Mon Jun 28 20:19:35 PDT 2010
+ *   Added logic to handle HDF5 header/lib version numbers separately.
  *-------------------------------------------------------------------------
  */
 PRIVATE DBfile* 
@@ -5116,6 +5057,7 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
     hid_t       attr=-1;
     int         size;
     char        hdf5VString[32];
+    unsigned    majno, minno, relno;
     
     /* Open root group as CWG */
     if ((dbfile->cwg=H5Gopen(dbfile->fid, "/"))<0) {
@@ -5157,12 +5099,22 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
     /*
      * Write HDF5 library version information to the file 
      */
-    sprintf(hdf5VString, "hdf5-%d.%d.%d%s%s", H5_VERS_MAJOR,
-            H5_VERS_MINOR, H5_VERS_RELEASE,
+    H5get_libversion(&majno, &minno, &relno);
+    if (majno != H5_VERS_MAJOR || minno != H5_VERS_MINOR || relno != H5_VERS_RELEASE)
+    {
+        /* Since headers and libs don't match, write information about headers first */
+        sprintf(hdf5VString, "hdf5-%d.%d.%d%s%s", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
             strlen(H5_VERS_SUBRELEASE) ? "-" : "", H5_VERS_SUBRELEASE);
+        size = strlen(hdf5VString)+1;
+        if (db_hdf5_Write((DBfile*)dbfile, "_hdf5incinfo", hdf5VString, &size, 1, DB_CHAR)<0) {
+            db_perror("_hdf5incinfo", E_CALLFAIL, me);
+            return silo_db_close((DBfile*) dbfile);
+        }
+    }
+
+    sprintf(hdf5VString, "hdf5-%d.%d.%d", majno, minno, relno);
     size = strlen(hdf5VString)+1;
-    if (db_hdf5_Write((DBfile*)dbfile, "_hdf5libinfo", hdf5VString, &size, 1,
-                      DB_CHAR)<0) {
+    if (db_hdf5_Write((DBfile*)dbfile, "_hdf5libinfo", hdf5VString, &size, 1, DB_CHAR)<0) {
         db_perror("_hdf5libinfo", E_CALLFAIL, me);
         return silo_db_close((DBfile*) dbfile);
     }
@@ -5185,6 +5137,8 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
  *
  * Modifications:
  *
+ *   Mark C. Miller, Wed Jul 14 20:53:33 PDT 2010
+ *   Added logic to check for open objects and try to print their names.
  *-------------------------------------------------------------------------
  */
 PRIVATE int
@@ -5193,8 +5147,7 @@ db_hdf5_initiate_close(DBfile *_dbfile)
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_initiate_close";
     unsigned long filenum;
-    H5O_info_t  oinfo;
-    int         i;
+    int i;
 
     /* Close all datasets in the circular buffer */
     for (i=0; i<NDSETTAB; i++) {
@@ -5203,12 +5156,6 @@ db_hdf5_initiate_close(DBfile *_dbfile)
     }
     dbfile->dsettab_ins = dbfile->dsettab_rem = 0;
     
-    /* Obtain the fileno from cwg object. */
-    if (H5Oget_info(dbfile->cwg, &oinfo)<0) {
-        return db_perror("closing", E_CALLFAIL, me);
-    }
-    filenum = oinfo.fileno;
-
     /* Close current working group and link group */
     if (H5Gclose(dbfile->cwg)<0 || H5Gclose(dbfile->link)<0) {
         return db_perror("closing", E_CALLFAIL, me);
@@ -5220,31 +5167,37 @@ db_hdf5_initiate_close(DBfile *_dbfile)
         free(dbfile->cwg_name);
     dbfile->cwg_name = NULL;
 
-    /* Check for any open objects */
-    for (i = 0; i < silo_hdf5_nfn2ool && filenum != silo_hdf5_fn2ool[i].fileno; i++);
-    if (i < silo_hdf5_nfn2ool)
+    /* Check for any open objects in this file */
+#if HDF5_VERSION_GE(1,6,0)
+    if (SILO_Globals._db_err_level_drvr == DB_ALL)
     {
-        silo_hdf5_fn2ool_t *fn2ool = &silo_hdf5_fn2ool[i];
-	if (fn2ool->nool > 0)
-	{
-	    int n;
+        int noo = H5Fget_obj_count(dbfile->fid, H5F_OBJ_LOCAL | H5F_OBJ_ALL);
+        if (noo > 1) /* HDF5 bug, always get 1 for "/" group */
+        {
+            int n;
             char msg[4096];
-	    sprintf(msg, "%d objects still open...\n", fn2ool->nool);
-	    n = strlen(msg);
-	    for (i = 0; i < fn2ool->nool && n < sizeof(msg); i++)
-	    {
-	        char name[256], msgtmp[270];
-		H5Iget_name(fn2ool->ool[i], name, sizeof(name));
-		sprintf(msgtmp, "%03d:%s\n", i, name);
-		strcat(msg, msgtmp);
-		n += strlen(msgtmp);
-	    }
-            return db_perror(msg, E_CALLFAIL, me);
-	}
-	free(fn2ool->ool);
-	silo_hdf5_fn2ool[i] = silo_hdf5_fn2ool[silo_hdf5_nfn2ool-1];
-	silo_hdf5_nfn2ool--;
+            hid_t *ooids = (hid_t *) malloc(noo * sizeof(hid_t));
+            sprintf(msg, "Internal Silo error: %d objects left open in file: ", noo);
+#if HDF5_VERSION_GE(1,6,5)
+            H5Fget_obj_ids(dbfile->fid, H5F_OBJ_LOCAL | H5F_OBJ_ALL, noo, ooids);
+#else
+            H5Fget_obj_ids(dbfile->fid, H5F_OBJ_ALL, noo, ooids);
+#endif
+            n = strlen(msg);
+            for (i = 0; i < noo && n < sizeof(msg); i++)
+            {
+                char name[256], tmp[260];
+                H5Iget_name(ooids[i], name, sizeof(name));
+                sprintf(tmp, "\"%s\", ", name);
+                strcat(msg, tmp);
+                n += strlen(tmp);
+            }
+            free(ooids);
+
+            return db_perror(dbfile->pub.name, E_CALLFAIL, msg);
+        }
     }
+#endif
 
     return 0;
 }
@@ -7949,7 +7902,7 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
         {
             char *tmpbndnames = db_hdf5_comprd(dbfile, m.bndnames, 1);
             if (tmpbndnames)
-                csgm->bndnames = db_StringListToStringArray(tmpbndnames, m.nbounds,
+                csgm->bndnames = DBStringListToStringArray(tmpbndnames, m.nbounds,
                                      !handleSlashSwap, !skipFirstSemicolon);
             FREE(tmpbndnames);
         }
@@ -8026,7 +7979,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
         /* output mrgtree info if we have it */
         if (_csgm._region_pnames != NULL) {
             int len;
-            db_StringArrayToStringList(_csgm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList(_csgm._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(vname, "_region_pnames", 0));
             FREE(s);
@@ -8174,7 +8127,7 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, const char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) csgv->region_pnames = db_StringListToStringArray(s, -1,
+        if (s) csgv->region_pnames = DBStringListToStringArray(s, -1,
                    !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
@@ -8246,7 +8199,7 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, const char *name, int nregs,
 
         if (_csgzl._regnames) {
             int len; char *tmp;
-            db_StringArrayToStringList(_csgzl._regnames, nregs, &tmp, &len);
+            DBStringArrayToStringList(_csgzl._regnames, nregs, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.regnames/*out*/, friendly_name(name, "_regnames",0));
             FREE(tmp);
@@ -8254,7 +8207,7 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, const char *name, int nregs,
 
         if (_csgzl._zonenames) {
             int len; char *tmp;
-            db_StringArrayToStringList(_csgzl._zonenames, nzones, &tmp, &len);
+            DBStringArrayToStringList(_csgzl._zonenames, nzones, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.zonenames/*out*/, friendly_name(name, "_zonenames",0));
             FREE(tmp);
@@ -8369,7 +8322,7 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name)
         {
             char *tmpnames = db_hdf5_comprd(dbfile, m.regnames, 1);
             if (tmpnames)
-                zl->regnames = db_StringListToStringArray(tmpnames, m.nregs,
+                zl->regnames = DBStringListToStringArray(tmpnames, m.nregs,
                     !handleSlashSwap, !skipFirstSemicolon);
             FREE(tmpnames);
         }
@@ -8378,7 +8331,7 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name)
         {
             char *tmpnames = db_hdf5_comprd(dbfile, m.zonenames, 1);
             if (tmpnames)
-                zl->zonenames = db_StringListToStringArray(tmpnames, m.nzones,
+                zl->zonenames = DBStringListToStringArray(tmpnames, m.nzones,
                     !handleSlashSwap, !skipFirstSemicolon);
             FREE(tmpnames);
         }
@@ -8449,7 +8402,7 @@ db_hdf5_PutDefvars(DBfile *_dbfile, const char *name, int ndefs,
     memset(&m, 0, sizeof m);
     PROTECT {
 
-        db_StringArrayToStringList(names, ndefs, &s, &len);
+        DBStringArrayToStringList(names, ndefs, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.names/*out*/,
             friendly_name(name, "_names",0));
         FREE(s);
@@ -8457,7 +8410,7 @@ db_hdf5_PutDefvars(DBfile *_dbfile, const char *name, int ndefs,
         db_hdf5_compwr(dbfile, DB_INT, 1, &ndefs, (void*)types, m.types/*out*/,
             friendly_name(name, "_types",0));
 
-        db_StringArrayToStringList(defns, ndefs, &s, &len);
+        DBStringArrayToStringList(defns, ndefs, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.defns/*out*/,
             friendly_name(name, "_defns",0));
         FREE(s);
@@ -8553,14 +8506,14 @@ db_hdf5_GetDefvars(DBfile *_dbfile, const char *name)
         defv->ndefs = m.ndefs;
 
         s = db_hdf5_comprd(dbfile, m.names, 1);
-        if (s) defv->names = db_StringListToStringArray(s, defv->ndefs,
+        if (s) defv->names = DBStringListToStringArray(s, defv->ndefs,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         defv->types = db_hdf5_comprd(dbfile, m.types, 1);
 
         s = db_hdf5_comprd(dbfile, m.defns, 1);
-        if (s) defv->defns = db_StringListToStringArray(s, defv->ndefs, 
+        if (s) defv->defns = DBStringListToStringArray(s, defv->ndefs, 
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
@@ -9141,7 +9094,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* output mrgtree info if we have it */
         if (_qm._region_pnames != NULL) {
             int len;
-            db_StringArrayToStringList(_qm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList(_qm._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -9334,7 +9287,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) qv->region_pnames = db_StringListToStringArray(s, -1,
+        if (s) qv->region_pnames = DBStringListToStringArray(s, -1,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
@@ -10037,7 +9990,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* output mrgtree info if we have it */
         if (_um._region_pnames != NULL) {
             int len;
-            db_StringArrayToStringList(_um._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList(_um._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -10274,7 +10227,7 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) uv->region_pnames = db_StringListToStringArray(s, -1,
+        if (s) uv->region_pnames = DBStringListToStringArray(s, -1,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
@@ -11062,7 +11015,7 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
 
         if (_ma._matnames != NULL) {
             int len;
-            db_StringArrayToStringList(_ma._matnames, nmat, &s, &len);
+            DBStringArrayToStringList(_ma._matnames, nmat, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
                 friendly_name(name, "_matnames", 0));
             FREE(s);
@@ -11071,7 +11024,7 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
 
         if (_ma._matcolors != NULL) {
             int len;
-            db_StringArrayToStringList(_ma._matcolors, nmat, &s, &len);
+            DBStringArrayToStringList(_ma._matcolors, nmat, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matcolors/*out*/,
                 friendly_name(name,"_matcolors", 0));
             FREE(s);
@@ -11222,14 +11175,14 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char *name)
         if (SILO_Globals.dataReadMask & DBMatMatnames)
         {
             s = db_hdf5_comprd(dbfile, m.matnames, 1);
-            if (s) ma->matnames = db_StringListToStringArray(s, ma->nmat,
+            if (s) ma->matnames = DBStringListToStringArray(s, ma->nmat,
                 !handleSlashSwap, !skipFirstSemicolon);
             FREE(s);
         }
         if (SILO_Globals.dataReadMask & DBMatMatcolors)
         {
             s = db_hdf5_comprd(dbfile, m.matcolors, 1);
-            if (s) ma->matcolors = db_StringListToStringArray(s, ma->nmat,
+            if (s) ma->matcolors = DBStringListToStringArray(s, ma->nmat,
                 !handleSlashSwap, !skipFirstSemicolon);
             FREE(s);
         }
@@ -11308,7 +11261,7 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
             int len;
             for (i = 0; i < nmat; i++)
                 nstrs += nmatspec[i];
-            db_StringArrayToStringList(_ms._specnames, nstrs, &s, &len);
+            DBStringArrayToStringList(_ms._specnames, nstrs, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
                 friendly_name(name, "_species_names", 0));
             FREE(s);
@@ -11322,7 +11275,7 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
                 for (i = 0; i < nmat; i++)
                     nstrs += nmatspec[i];
             }
-            db_StringArrayToStringList(_ms._speccolors, nstrs, &s, &len);
+            DBStringArrayToStringList(_ms._speccolors, nstrs, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.speccolors/*out*/,
                 friendly_name(name,"_speccolors", 0));
             FREE(s);
@@ -11462,7 +11415,7 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
             for (i=0; i < ms->nmat; i++)
                 nstrs += ms->nmatspec[i];
             s = db_hdf5_comprd(dbfile, m.specnames, 1);
-            if (s) ms->specnames = db_StringListToStringArray(s, nstrs,
+            if (s) ms->specnames = DBStringListToStringArray(s, nstrs,
                 !handleSlashSwap, !skipFirstSemicolon);
             FREE(s);
         }
@@ -11474,7 +11427,7 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
                     nstrs += ms->nmatspec[i];
             }
             s = db_hdf5_comprd(dbfile, m.speccolors, 1);
-            if (s) ms->speccolors = db_StringListToStringArray(s, nstrs,
+            if (s) ms->speccolors = DBStringListToStringArray(s, nstrs,
                 !handleSlashSwap, !skipFirstSemicolon);
             FREE(s);
         }
@@ -11527,6 +11480,9 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
  *   Refactored logic to handle time, dtime and cycle to a new method,
  *   db_hdf5_handle_ctdt().
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -11553,20 +11509,24 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
          * Create a character string which is a semi-colon separated list of
          * mesh names.
          */
-        for (i=len=0; i<nmesh; i++) len += strlen(meshnames[i])+1;
-        s = malloc(len+1);
-        for (i=len=0; i<nmesh; i++) {
-            if (i) s[len++] = ';';
-            strcpy(s+len, meshnames[i]);
-            len += strlen(meshnames[i]);
+        if (meshnames)
+        {
+            for (i=len=0; i<nmesh; i++) len += strlen(meshnames[i])+1;
+            s = malloc(len+1);
+            for (i=len=0; i<nmesh; i++) {
+                if (i) s[len++] = ';';
+                strcpy(s+len, meshnames[i]);
+                len += strlen(meshnames[i]);
+            }
+            len++; /*count null*/
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
+                m.meshnames/*out*/, friendly_name(name,"_meshnames", 0));
         }
-        len++; /*count null*/
         
         /* Write raw data arrays */
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nmesh, meshtypes,
-            m.meshtypes/*out*/, friendly_name(name,"_meshtypes", 0));
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
-            m.meshnames/*out*/, friendly_name(name,"_meshnames", 0));
+        if (meshtypes)
+            db_hdf5_compwr(dbfile, DB_INT, 1, &nmesh, meshtypes,
+                m.meshtypes/*out*/, friendly_name(name,"_meshtypes", 0));
         if (_mm._extents && _mm._extentssize) {
             int sizes[2];
             sizes[0] = nmesh;
@@ -11587,11 +11547,27 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
                 m.groupings/*out*/, friendly_name(name,"_groupings",0));
         }
         if (_mm._lgroupings > 0 && _mm._groupnames != NULL) {
-           db_StringArrayToStringList(_mm._groupnames, 
+           DBStringArrayToStringList(_mm._groupnames, 
                            _mm._lgroupings, &t, &len);
            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, t,
                 m.groupnames/*out*/, friendly_name(name,"_groupnames",0));
            FREE(t);
+        }
+        if (_mm._file_ns)
+        {
+           len = strlen(_mm._file_ns)+1;
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, _mm._file_ns,
+                m.file_ns_name/*out*/, friendly_name(name,"_file_ns",0));
+        }
+        if (_mm._block_ns)
+        {
+           len = strlen(_mm._block_ns)+1;
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, _mm._block_ns,
+                m.block_ns_name/*out*/, friendly_name(name,"_block_ns",0));
+        }
+        if (_mm._empty_list && _mm._empty_cnt>0) {
+            db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._empty_cnt, _mm._empty_list,
+                m.empty_list/*out*/, friendly_name(name,"_empty_list",0));
         }
         
         /* Initialize meta data */
@@ -11609,6 +11585,8 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
         m.disjoint_mode = _mm._disjoint_mode;
         m.topo_dim = _mm._topo_dim;
         strcpy(m.mrgtree_name, OPT(_mm._mrgtree_name));
+        m.block_type = _mm._block_type;
+        m.empty_cnt = _mm._empty_cnt;
 
         /* Write meta data to file */
         STRUCT(DBmultimesh) {
@@ -11633,6 +11611,11 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
             if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
             if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
             if (m.topo_dim)     MEMBER_S(int, topo_dim);
+            MEMBER_S(str(m.file_ns_name), file_ns_name);
+            MEMBER_S(str(m.block_ns_name), block_ns_name);
+            if (m.block_type)   MEMBER_S(int, block_type);
+            MEMBER_S(str(m.empty_list), empty_list);
+            if (m.empty_cnt)   MEMBER_S(int, empty_cnt);
         } OUTPUT(dbfile, DB_MULTIMESH, name, &m);
 
         /* Free resources */
@@ -11673,6 +11656,9 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
  *   Added logic to control behavior of slash character swapping for
  *   windows/linux and skipping of first semicolon in calls to
  *   db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimesh *
@@ -11741,14 +11727,19 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
         mm->has_external_zones =  db_hdf5_comprd(dbfile, m.has_external_zones, 1);
         mm->meshtypes = db_hdf5_comprd(dbfile, m.meshtypes, 1);
         s = db_hdf5_comprd(dbfile, m.meshnames, 1);
-        if (s) mm->meshnames = db_StringListToStringArray(s, m.nblocks,
+        if (s) mm->meshnames = DBStringListToStringArray(s, m.nblocks,
             handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
         mm->groupings =  db_hdf5_comprd(dbfile, m.groupings, 1);
         t = db_hdf5_comprd(dbfile, m.groupnames, 1);
-        if (t) mm->groupnames = db_StringListToStringArray(t, mm->lgroupings,
+        if (t) mm->groupnames = DBStringListToStringArray(t, mm->lgroupings,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(t);
+        mm->file_ns =  db_hdf5_comprd(dbfile, m.file_ns_name, 1);
+        mm->block_ns =  db_hdf5_comprd(dbfile, m.block_ns_name, 1);
+        mm->block_type = m.block_type;
+        mm->empty_list =  db_hdf5_comprd(dbfile, m.empty_list, 1);
+        mm->empty_cnt = m.empty_cnt;
         
         H5Tclose(o);
 
@@ -12344,6 +12335,9 @@ db_hdf5_GetMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
  *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
  *   Refactored logic to handle time, dtime and cycle to a new method,
  *   db_hdf5_handle_ctdt().
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -12370,20 +12364,24 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
          * Create a character string which is a semi-colon separated list of
          * variable names.
          */
-        for (i=len=0; i<nvars; i++) len += strlen(varnames[i])+1;
-        s = malloc(len+1);
-        for (i=len=0; i<nvars; i++) {
-            if (i) s[len++] = ';';
-            strcpy(s+len, varnames[i]);
-            len += strlen(varnames[i]);
+        if (varnames)
+        {
+            for (i=len=0; i<nvars; i++) len += strlen(varnames[i])+1;
+            s = malloc(len+1);
+            for (i=len=0; i<nvars; i++) {
+                if (i) s[len++] = ';';
+                strcpy(s+len, varnames[i]);
+                len += strlen(varnames[i]);
+            }
+            len++; /*count null*/
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
+                m.varnames/*out*/, friendly_name(name, "_varnames", 0));
         }
-        len++; /*count null*/
         
         /* Write raw data arrays */
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nvars, vartypes,
-            m.vartypes/*out*/, friendly_name(name, "_vartypes", 0));
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
-            m.varnames/*out*/, friendly_name(name, "_varnames", 0));
+        if (vartypes)
+            db_hdf5_compwr(dbfile, DB_INT, 1, &nvars, vartypes,
+                m.vartypes/*out*/, friendly_name(name, "_vartypes", 0));
         if (_mm._extents && _mm._extentssize) {
             int sizes[2];
             sizes[0] = nvars;
@@ -12395,10 +12393,28 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         /* output mrgtree info if we have it */
         if (_mm._region_pnames != NULL) {
             int len;
-            db_StringArrayToStringList(_mm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList(_mm._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
+        }
+
+        /* output nameschemes if we have 'em */
+        if (_mm._file_ns)
+        {
+           len = strlen(_mm._file_ns)+1;
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, _mm._file_ns,
+                m.file_ns_name/*out*/, friendly_name(name,"_file_ns",0));
+        }
+        if (_mm._block_ns)
+        {
+           len = strlen(_mm._block_ns)+1;
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, _mm._block_ns,
+                m.block_ns_name/*out*/, friendly_name(name,"_block_ns",0));
+        }
+        if (_mm._empty_list && _mm._empty_cnt>0) {
+            db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._empty_cnt, _mm._empty_list,
+                m.empty_list/*out*/, friendly_name(name,"_empty_list",0));
         }
 
         /* Initialize meta data */
@@ -12415,6 +12431,8 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         m.tensor_rank = _mm._tensor_rank;
         m.conserved = _mm._conserved;
         m.extensive = _mm._extensive;
+        m.block_type = _mm._block_type;
+        m.empty_cnt = _mm._empty_cnt;
 
         /* Write meta data to file */
         STRUCT(DBmultivar) {
@@ -12435,6 +12453,11 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
             MEMBER_S(str(m.extents), extents);
             MEMBER_S(str(m.region_pnames), region_pnames);
             MEMBER_S(str(m.mmesh_name), mmesh_name);
+            MEMBER_S(str(m.file_ns_name), file_ns_name);
+            MEMBER_S(str(m.block_ns_name), block_ns_name);
+            if (m.block_type)   MEMBER_S(int, block_type);
+            MEMBER_S(str(m.empty_list), empty_list);
+            if (m.empty_cnt)   MEMBER_S(int, empty_cnt);
         } OUTPUT(dbfile, DB_MULTIVAR, name, &m);
 
         /* Free resources */
@@ -12481,6 +12504,9 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
  *   Added logic to control behavior of slash character swapping for
  *   windows/linux and skipping of first semicolon in calls to
  *   db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultivar *
@@ -12540,14 +12566,20 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
 
         /* Read the raw data variable names */
         s = db_hdf5_comprd(dbfile, m.varnames, 1);
-        if (s) mv->varnames = db_StringListToStringArray(s, m.nvars,
+        if (s) mv->varnames = DBStringListToStringArray(s, m.nvars,
            handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) mv->region_pnames = db_StringListToStringArray(s, -1,
+        if (s) mv->region_pnames = DBStringListToStringArray(s, -1,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
+
+        mv->file_ns =  db_hdf5_comprd(dbfile, m.file_ns_name, 1);
+        mv->block_ns =  db_hdf5_comprd(dbfile, m.block_ns_name, 1);
+        mv->block_type = m.block_type;
+        mv->empty_list =  db_hdf5_comprd(dbfile, m.empty_list, 1);
+        mv->empty_cnt = m.empty_cnt;
         
         H5Tclose(o);
         
@@ -12595,6 +12627,9 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
  *   Refactored logic to handle time, dtime and cycle to a new method,
  *   db_hdf5_handle_ctdt().
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -12620,18 +12655,21 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
          * Create a character string which is a semi-colon separated list of
          * material names.
          */
-        for (i=len=0; i<nmats; i++) len += strlen(matnames[i])+1;
-        s = malloc(len+1);
-        for (i=len=0; i<nmats; i++) {
-            if (i) s[len++] = ';';
-            strcpy(s+len, matnames[i]);
-            len += strlen(matnames[i]);
-        }
-        len++; /*count null*/
-
         /* Write raw data arrays */
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
-            friendly_name(name, "_matnames", 0));
+        if (matnames)
+        {
+            for (i=len=0; i<nmats; i++) len += strlen(matnames[i])+1;
+            s = malloc(len+1);
+            for (i=len=0; i<nmats; i++) {
+                if (i) s[len++] = ';';
+                strcpy(s+len, matnames[i]);
+                len += strlen(matnames[i]);
+            }
+            len++; /*count null*/
+
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
+                friendly_name(name, "_matnames", 0));
+        }
         if (_mm._matnos && _mm._nmatnos > 0) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._nmatnos, _mm._matnos,
                 m.matnos/*out*/, friendly_name(name,"_matnos", 0));
@@ -12650,7 +12688,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         }
         if (_mm._matcolors && _mm._nmatnos > 0) {
             int len; char *tmp;
-            db_StringArrayToStringList(_mm._matcolors,
+            DBStringArrayToStringList(_mm._matcolors,
                 _mm._nmatnos, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.mat_colors/*out*/, friendly_name(name,"_matcolors", 0));
@@ -12658,11 +12696,28 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         }
         if (_mm._matnames && _mm._nmatnos > 0) {
             int len; char *tmp;
-            db_StringArrayToStringList(_mm._matnames,
+            DBStringArrayToStringList(_mm._matnames,
                 _mm._nmatnos, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.material_names/*out*/, friendly_name(name,"_material_names", 0));
             FREE(tmp);
+        }
+        /* output nameschemes if we have 'em */
+        if (_mm._file_ns)
+        {
+           len = strlen(_mm._file_ns)+1;
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, _mm._file_ns,
+                m.file_ns_name/*out*/, friendly_name(name,"_file_ns",0));
+        }
+        if (_mm._block_ns)
+        {
+           len = strlen(_mm._block_ns)+1;
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, _mm._block_ns,
+                m.block_ns_name/*out*/, friendly_name(name,"_block_ns",0));
+        }
+        if (_mm._empty_list && _mm._empty_cnt>0) {
+            db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._empty_cnt, _mm._empty_list,
+                m.empty_list/*out*/, friendly_name(name,"_empty_list",0));
         }
 
         /* Initialize meta data */
@@ -12677,6 +12732,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         m.allowmat0 = _mm._allowmat0;
         m.guihide = _mm._guihide;
         strcpy(m.mmesh_name, OPT(_mm._mmesh_name));
+        m.empty_cnt = _mm._empty_cnt;
 
         /* Write meta data to file */
         STRUCT(DBmultimat) {
@@ -12698,6 +12754,10 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
             MEMBER_S(str(m.material_names), material_names);
             MEMBER_S(str(m.mat_colors), mat_colors);
             MEMBER_S(str(m.mmesh_name), mmesh_name);
+            MEMBER_S(str(m.file_ns_name), file_ns_name);
+            MEMBER_S(str(m.block_ns_name), block_ns_name);
+            MEMBER_S(str(m.empty_list), empty_list);
+            if (m.empty_cnt)   MEMBER_S(int, empty_cnt);
         } OUTPUT(dbfile, DB_MULTIMAT, name, &m);
 
         /* Free resources */
@@ -12735,6 +12795,9 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
  *   Added logic to control behavior of slash character swapping for
  *   windows/linux and skipping of first semicolon in calls to
  *   db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimat *
@@ -12791,7 +12854,7 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
         mm->matlists = db_hdf5_comprd(dbfile, m.matlists, 1);
         mm->matnos = db_hdf5_comprd(dbfile, m.matnos, 1);
         s = db_hdf5_comprd(dbfile, m.matnames, 1);
-        if (s) mm->matnames = db_StringListToStringArray(s, m.nmats,
+        if (s) mm->matnames = DBStringListToStringArray(s, m.nmats,
             handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
@@ -12799,14 +12862,19 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
             char *tmpmaterial_names = db_hdf5_comprd(dbfile, m.material_names, 1);
             char *tmpmat_colors = db_hdf5_comprd(dbfile, m.mat_colors, 1);
             if (tmpmaterial_names)
-                mm->material_names = db_StringListToStringArray(tmpmaterial_names,
+                mm->material_names = DBStringListToStringArray(tmpmaterial_names,
                     m.nmatnos, !handleSlashSwap, !skipFirstSemicolon);
             if (tmpmat_colors)
-                mm->matcolors = db_StringListToStringArray(tmpmat_colors,
+                mm->matcolors = DBStringListToStringArray(tmpmat_colors,
                     m.nmatnos, !handleSlashSwap, !skipFirstSemicolon);
             FREE(tmpmaterial_names);
             FREE(tmpmat_colors);
         }
+
+        mm->file_ns =  db_hdf5_comprd(dbfile, m.file_ns_name, 1);
+        mm->block_ns =  db_hdf5_comprd(dbfile, m.block_ns_name, 1);
+        mm->empty_list =  db_hdf5_comprd(dbfile, m.empty_list, 1);
+        mm->empty_cnt = m.empty_cnt;
         
         H5Tclose(o);
         
@@ -12854,6 +12922,9 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
  *   Mark C. Miller, Thu Feb  4 11:25:00 PST 2010
  *   Refactored logic to handle time, dtime and cycle to a new method,
  *   db_hdf5_handle_ctdt().
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 CALLBACK int
@@ -12879,18 +12950,21 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
          * Create a character string which is a semi-colon separated list of
          * material names.
          */
-        for (i=len=0; i<nspec; i++) len += strlen(specnames[i])+1;
-        s = malloc(len+1);
-        for (i=len=0; i<nspec; i++) {
-            if (i) s[len++] = ';';
-            strcpy(s+len, specnames[i]);
-            len += strlen(specnames[i]);
-        }
-        len++; /*count null*/
-
         /* Write raw data arrays */
-        db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
-            friendly_name(name, "_specnames", 0));
+        if (specnames)
+        {
+            for (i=len=0; i<nspec; i++) len += strlen(specnames[i])+1;
+            s = malloc(len+1);
+            for (i=len=0; i<nspec; i++) {
+                if (i) s[len++] = ';';
+                strcpy(s+len, specnames[i]);
+                len += strlen(specnames[i]);
+            }
+            len++; /*count null*/
+
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
+                friendly_name(name, "_specnames", 0));
+        }
 
         if (_mm._nmat>0 && _mm._nmatspec) {
 
@@ -12901,7 +12975,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
                 int len; char *tmp;
                 for (i=0; i < _mm._nmat; i++)
                     nstrs += _mm._nmatspec[i];
-                db_StringArrayToStringList(_mm._specnames, nstrs, &tmp, &len);
+                DBStringArrayToStringList(_mm._specnames, nstrs, &tmp, &len);
                 db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                     m.species_names/*out*/, friendly_name(name,"_species_names", 0));
                 FREE(tmp);
@@ -12914,11 +12988,28 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
                     for (i=0; i < _mm._nmat; i++)
                         nstrs += _mm._nmatspec[i];
                 }
-                db_StringArrayToStringList(_mm._speccolors, nstrs, &tmp, &len);
+                DBStringArrayToStringList(_mm._speccolors, nstrs, &tmp, &len);
                 db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                     m.speccolors/*out*/, friendly_name(name,"_speccolors", 0));
                 FREE(tmp);
             }
+        }
+        /* output nameschemes if we have 'em */
+        if (_mm._file_ns)
+        {
+           len = strlen(_mm._file_ns)+1;
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, _mm._file_ns,
+                m.file_ns_name/*out*/, friendly_name(name,"_file_ns",0));
+        }
+        if (_mm._block_ns)
+        {
+           len = strlen(_mm._block_ns)+1;
+           db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, _mm._block_ns,
+                m.block_ns_name/*out*/, friendly_name(name,"_block_ns",0));
+        }
+        if (_mm._empty_list && _mm._empty_cnt>0) {
+            db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._empty_cnt, _mm._empty_list,
+                m.empty_list/*out*/, friendly_name(name,"_empty_list",0));
         }
 
         /* Initialize meta data */
@@ -12932,6 +13023,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
         m.grouporigin = _mm._grouporigin;
         m.guihide = _mm._guihide;
         strcpy(m.matname, OPT(_mm._matname));
+        m.empty_cnt = _mm._empty_cnt;
 
         /* Write meta data to file */
         STRUCT(DBmultimatspecies) {
@@ -12949,6 +13041,10 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
             MEMBER_S(str(m.matname), matname);
             MEMBER_S(str(m.species_names), species_names);
             MEMBER_S(str(m.speccolors), speccolors);
+            MEMBER_S(str(m.file_ns_name), file_ns_name);
+            MEMBER_S(str(m.block_ns_name), block_ns_name);
+            MEMBER_S(str(m.empty_list), empty_list);
+            if (m.empty_cnt)   MEMBER_S(int, empty_cnt);
         } OUTPUT(dbfile, DB_MULTIMATSPECIES, name, &m);
 
         /* Free resources */
@@ -12985,6 +13081,9 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
  *   Added logic to control behavior of slash character swapping for
  *   windows/linux and skipping of first semicolon in calls to
  *   db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:48:15 PDT 2010
+ *   Added support for namescheme/empty_list options for multi-block objs.
  *-------------------------------------------------------------------------
  */
 CALLBACK DBmultimatspecies *
@@ -13036,7 +13135,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
 
         /* Read the raw data */
         s = db_hdf5_comprd(dbfile, m.specnames, 1);
-        if (s) mm->specnames = db_StringListToStringArray(s, m.nspec,
+        if (s) mm->specnames = DBStringListToStringArray(s, m.nspec,
             handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
         
@@ -13048,7 +13147,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
             {
                 for (i = 0; i < mm->nmat; i++)
                     nstrs += mm->nmatspec[i];
-                mm->species_names = db_StringListToStringArray(tmpspecies_names, nstrs,
+                mm->species_names = DBStringListToStringArray(tmpspecies_names, nstrs,
                     !handleSlashSwap, !skipFirstSemicolon);
             }
             if (tmpspeccolors)
@@ -13058,12 +13157,17 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
                     for (i = 0; i < mm->nmat; i++)
                         nstrs += mm->nmatspec[i];
                 }
-                mm->speccolors = db_StringListToStringArray(tmpspeccolors, nstrs,
+                mm->speccolors = DBStringListToStringArray(tmpspeccolors, nstrs,
                     !handleSlashSwap, !skipFirstSemicolon);
             }
             FREE(tmpspecies_names);
             FREE(tmpspeccolors);
         }
+
+        mm->file_ns =  db_hdf5_comprd(dbfile, m.file_ns_name, 1);
+        mm->block_ns =  db_hdf5_comprd(dbfile, m.block_ns_name, 1);
+        mm->empty_list =  db_hdf5_comprd(dbfile, m.empty_list, 1);
+        mm->empty_cnt = m.empty_cnt;
 
         H5Tclose(o);
         
@@ -13405,7 +13509,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* output mrgtree info if we have it */
         if (_pm._region_pnames != NULL) {
             int len;
-            db_StringArrayToStringList(_pm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList(_pm._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -13558,7 +13662,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) pv->region_pnames = db_StringListToStringArray(s, -1,
+        if (s) pv->region_pnames = DBStringListToStringArray(s, -1,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
@@ -13958,7 +14062,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
         
         /* output all the node names as one long dataset */
         s = 0;
-        db_StringArrayToStringList(strArray, num_nodes, &s, &len);
+        DBStringArrayToStringList(strArray, num_nodes, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_name/*out*/,
             friendly_name(name, "_name", 0));
         FREE(s);
@@ -14000,7 +14104,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
         if (n > 0)
         {
             s = 0;
-            db_StringArrayToStringList(strArray, n, &s, &len);
+            DBStringArrayToStringList(strArray, n, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_names/*out*/,
                 friendly_name(name, "_names", 0));
             FREE(s);
@@ -14013,7 +14117,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
             strArray[i] = ltree[i]->maps_name;
         s = 0;
         len = 0;
-        db_StringArrayToStringList(strArray, num_nodes, &s, &len);
+        DBStringArrayToStringList(strArray, num_nodes, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_maps_name/*out*/,
             friendly_name(name, "_maps_name", 0));
         FREE(s);
@@ -14071,7 +14175,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
         {
             s = 0;
             len = 0;
-            db_StringArrayToStringList(_mrgt._mrgvar_onames, -1, &s, &len);
+            DBStringArrayToStringList(_mrgt._mrgvar_onames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.mrgvar_onames/*out*/,
                 friendly_name(name, "_mrgvar_onames", 0));
             FREE(s);
@@ -14081,7 +14185,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
         {
             s = 0;
             len = 0;
-            db_StringArrayToStringList(_mrgt._mrgvar_rnames, -1, &s, &len);
+            DBStringArrayToStringList(_mrgt._mrgvar_rnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.mrgvar_rnames/*out*/,
                 friendly_name(name, "_mrgvar_rnames", 0));
             FREE(s);
@@ -14209,7 +14313,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
 
         /* read the node 'name' member */
         s = db_hdf5_comprd(dbfile, m.n_name, 1);
-        strArray = db_StringListToStringArray(s, num_nodes,
+        strArray = DBStringListToStringArray(s, num_nodes,
             !handleSlashSwap, !skipFirstSemicolon);
         for (i = 0; i < num_nodes; i++)
             ltree[i]->name = strArray[i];
@@ -14220,7 +14324,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
         s = db_hdf5_comprd(dbfile, m.n_names, 1);
         if (s)
         {
-            strArray = db_StringListToStringArray(s, -1,
+            strArray = DBStringListToStringArray(s, -1,
                 !handleSlashSwap, !skipFirstSemicolon);
             n = 0;
             for (i = 0; i < num_nodes; i++)
@@ -14247,7 +14351,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
 
         /* read the maps_name data */
         s = db_hdf5_comprd(dbfile, m.n_maps_name, 1);
-        strArray = db_StringListToStringArray(s, num_nodes,
+        strArray = DBStringListToStringArray(s, num_nodes,
             !handleSlashSwap, !skipFirstSemicolon);
         for (i = 0; i < num_nodes; i++)
             ltree[i]->maps_name = strArray[i];
@@ -14315,12 +14419,12 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
         FREE(intArray);
 
         s = db_hdf5_comprd(dbfile, m.mrgvar_onames, 1);
-        if (s) tree->mrgvar_onames = db_StringListToStringArray(s, -1,
+        if (s) tree->mrgvar_onames = DBStringListToStringArray(s, -1,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.mrgvar_rnames, 1);
-        if (s) tree->mrgvar_rnames = db_StringListToStringArray(s, -1,
+        if (s) tree->mrgvar_rnames = DBStringListToStringArray(s, -1,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
@@ -14644,7 +14748,7 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
         nstrs = nregns;
         if (strchr(reg_pnames[0], '%') != 0)
             nstrs = 1;
-        db_StringArrayToStringList(reg_pnames, nstrs, &s, &len);
+        DBStringArrayToStringList(reg_pnames, nstrs, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.reg_pnames/*out*/,
                 friendly_name(name, "_reg_pnames", 0));
         FREE(s);
@@ -14652,7 +14756,7 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
         if (compnames)
         {
             /* output compnames */
-            db_StringArrayToStringList(compnames, ncomps, &s, &len);
+            DBStringArrayToStringList(compnames, ncomps, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.compnames/*out*/,
                     friendly_name(name, "_compnames", 0));
             FREE(s);
@@ -14755,12 +14859,12 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.compnames, 1);
-        if (s) mrgv->compnames = db_StringListToStringArray(s, m.ncomps,
+        if (s) mrgv->compnames = DBStringListToStringArray(s, m.ncomps,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.reg_pnames, 1);
-        if (s) mrgv->reg_pnames = db_StringListToStringArray(s, -1,
+        if (s) mrgv->reg_pnames = DBStringListToStringArray(s, -1,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(s);
 
@@ -14782,96 +14886,6 @@ db_hdf5_FreeCompressionResources(DBfile *_dbfile, const char *meshname)
 {
     FreeNodelists((DBfile_hdf5*)_dbfile, meshname);
     return 0;
-}
-
-#undef H5Aopen_name
-#undef H5Acreate1
-#undef H5Aclose
-
-#undef H5Dopen1
-#undef H5Dcreate1
-#undef H5Dclose
-
-#undef H5Gopen1
-#undef H5Gcreate1
-#undef H5Gclose
-
-#undef H5Topen1
-#undef H5Tcreate
-#undef H5Tclose
-
-PRIVATE hid_t db_hdf5_H5Aopen_name(hid_t loc_id, const char *name)
-{
-    hid_t retval = H5Aopen_name(loc_id, name);
-    db_hdf5_register_hid_t(retval);
-    return retval;
-}
-PRIVATE hid_t db_hdf5_H5Acreate(hid_t loc_id, const char *attr_name,
-    hid_t type_id, hid_t space_id, hid_t acpl_id) 
-{
-    hid_t retval = H5Acreate1(loc_id, attr_name, type_id, space_id, acpl_id);
-    db_hdf5_register_hid_t(retval);
-    return retval;
-}
-PRIVATE herr_t db_hdf5_H5Aclose(hid_t attr_id)
-{
-    db_hdf5_unregister_hid_t(attr_id);
-    return H5Aclose(attr_id);
-}
-
-PRIVATE hid_t db_hdf5_H5Dopen(hid_t loc_id, const char *name)
-{
-    hid_t retval = H5Dopen1(loc_id, name);
-    db_hdf5_register_hid_t(retval);
-    return retval;
-}
-PRIVATE hid_t db_hdf5_H5Dcreate(hid_t loc_id, const char *name,
-    hid_t type_id, hid_t space_id, hid_t dcpl_id)
-{
-    hid_t retval = H5Dcreate1(loc_id, name, type_id, space_id, dcpl_id);
-    db_hdf5_register_hid_t(retval);
-    return retval;
-}
-PRIVATE herr_t db_hdf5_H5Dclose(hid_t dsid)
-{
-    db_hdf5_unregister_hid_t(dsid);
-    return H5Dclose(dsid);
-}
-
-PRIVATE hid_t db_hdf5_H5Gopen(hid_t loc_id, const char *name)
-{
-    hid_t retval = H5Gopen1(loc_id, name);
-    db_hdf5_register_hid_t(retval);
-    return retval;
-}
-PRIVATE hid_t db_hdf5_H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
-{
-    hid_t retval = H5Gcreate1(loc_id, name, size_hint);
-    db_hdf5_register_hid_t(retval);
-    return retval;
-}
-PRIVATE herr_t db_hdf5_H5Gclose(hid_t gid)
-{
-    db_hdf5_unregister_hid_t(gid);
-    return H5Gclose(gid);
-}
-
-PRIVATE hid_t db_hdf5_H5Topen( hid_t loc_id, const char *name)
-{
-    hid_t retval = H5Topen1(loc_id, name);
-    db_hdf5_register_hid_t(retval);
-    return retval;
-}
-PRIVATE hid_t db_hdf5_H5Tcreate(H5T_class_t class, size_t size)
-{
-    hid_t retval = H5Tcreate(class, size);
-    db_hdf5_register_hid_t(retval);
-    return retval;
-}
-PRIVATE herr_t db_hdf5_H5Tclose(hid_t tid)
-{
-    db_hdf5_unregister_hid_t(tid);
-    return H5Tclose(tid);
 }
 
 #else
