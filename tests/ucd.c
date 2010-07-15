@@ -247,17 +247,17 @@ build_ucd(DBfile *dbfile, char *name)
 
     /* test writing more than 2 or 3 component variable */
     vars[0] = d;
-    varnames[0] = "dcomp";
+    varnames[0] = "dcompm";
     vars[1] = u;
-    varnames[1] = "ucomp";
+    varnames[1] = "ucompm";
     vars[2] = v;
-    varnames[2] = "vcomp";
+    varnames[2] = "vcompm";
     vars[3] = d;
-    varnames[3] = "dcomp_copy";
+    varnames[3] = "dcompm_copy";
     vars[4] = u;
-    varnames[4] = "ucomp_copy";
+    varnames[4] = "ucompm_copy";
     vars[5] = v;
-    varnames[5] = "vcomp_copy";
+    varnames[5] = "vcompm_copy";
 
     (void)DBPutUcdvar(dbfile, "many_comps", name, 6, varnames, vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
