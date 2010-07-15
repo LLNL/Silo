@@ -29,6 +29,7 @@
 #define FREE(M)         if(M){free(M);(M)=NULL;}
 
 int multidir = 0;
+int use_ns = 0;
 
 void fill_bkgr(int *, int, int, int, int);
 void fill_mat(float *, float *, float *, int *, int, int, int,
@@ -46,6 +47,9 @@ void build_block_ucd3d(char *, int, char *, int, int, int);
  * Programmer:  Eric Brugger
  * Date:        September 17, 2001
  *
+ * Modifications:
+ *   Mark C. Miller, Wed Jul 14 15:33:43 PDT 2010
+ *   Added use-ns (namescheme) options for multi-block objects. 
  ***********************************************************************/
 int
 main(int argc, char *argv[])
@@ -74,6 +78,10 @@ main(int argc, char *argv[])
         else if (!strcmp(argv[i], "multidir"))
         {
             multidir = 1;
+        }
+        else if (!strcmp(argv[i], "use-ns"))
+        {
+            use_ns = 1;
         }
         else if (!strcmp(argv[i], "show-all-errors"))
 	{
@@ -251,6 +259,9 @@ fill_mat(float *x, float *y, float *z, int *matlist, int nx,
  * Programmer:  Eric Brugger
  * Date:        September 17, 2001
  *
+ * Modifications:
+ *   Mark C. Miller, Wed Jul 14 15:34:55 PDT 2010
+ *   Added support for namescheme options on mulit-block objects.
  ***********************************************************************/
 int
 build_multi(char *basename, int driver, char *file_ext,
@@ -278,6 +289,9 @@ build_multi(char *basename, int driver, char *file_ext,
     int             vartypes[MAXBLOCKS];
     char            names0[MAXBLOCKS][STRLEN];
     char           *matnames[MAXBLOCKS];
+    char           file_ns[128];
+    char           block_ns[128];
+    int            block_type;
 
     DBoptlist      *optlist=NULL;
 
@@ -325,6 +339,24 @@ build_multi(char *basename, int driver, char *file_ext,
     }
 
     /*
+     * Create nameschemes for files and blocks within files
+     */
+    if (use_ns)
+    {
+        if (multidir)
+        {
+#ifdef WIN32	
+            sprintf(file_ns, "|multi_file.dir\\%%03d\\%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
+#else
+            sprintf(file_ns, "|multi_file.dir/%%03d/%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
+#endif
+        }
+        else
+            sprintf(file_ns, "|%%s%%d.%%s|'%s'|n/36|'%s'", basename, file_ext);
+        sprintf(block_ns, "|/block%%d/mesh1|n");
+    }
+
+    /*
      * Create the blocks.
      */
     build_block_ucd3d(basename, driver, file_ext, 
@@ -352,59 +384,73 @@ build_multi(char *basename, int driver, char *file_ext,
     matnos[1] = 2;
     matnos[2] = 3;
 
-    optlist = DBMakeOptlist(5);
+    optlist = DBMakeOptlist(10);
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
     DBAddOption(optlist, DBOPT_NMATNOS, &nmatnos);
     DBAddOption(optlist, DBOPT_MATNOS, matnos);
+    if (use_ns)
+    {
+        DBAddOption(optlist, DBOPT_MB_FILE_NS, file_ns);
+        DBAddOption(optlist, DBOPT_MB_BLOCK_NS, block_ns);
+        DBAddOption(optlist, DBOPT_MB_BLOCK_TYPE, &block_type);
+    }
 
     /*
      * Create the multi-block mesh, variables and material.
      */
+    block_type = DB_UCDMESH;
     if (DBPutMultimesh(dbfile, "mesh1", nblocks,
-                       meshnames, meshtypes, optlist) == -1)
+                       use_ns?0:meshnames, use_ns?0:meshtypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi mesh\n");
         return -1;
     }
-    if (DBPutMultivar(dbfile, "d", nblocks, var1names, vartypes, optlist)
+    block_type = DB_UCDVAR;
+    sprintf(block_ns, "|/block%%d/d|n");
+    if (DBPutMultivar(dbfile, "d", nblocks, use_ns?0:var1names, use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var d\n");
         return -1;
     }
-    if (DBPutMultivar(dbfile, "p", nblocks, var2names, vartypes, optlist)
+    sprintf(block_ns, "|/block%%d/p|n");
+    if (DBPutMultivar(dbfile, "p", nblocks, use_ns?0:var2names, use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var p\n");
         return -1;
     }
-    if (DBPutMultivar(dbfile, "u", nblocks, var3names, vartypes, optlist)
+    sprintf(block_ns, "|/block%%d/u|n");
+    if (DBPutMultivar(dbfile, "u", nblocks, use_ns?0:var3names, use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var u\n");
         return -1;
     }
-    if (DBPutMultivar(dbfile, "v", nblocks, var4names, vartypes, optlist)
+    sprintf(block_ns, "|/block%%d/v|n");
+    if (DBPutMultivar(dbfile, "v", nblocks, use_ns?0:var4names, use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var v\n");
         return -1;
     }
-    if (DBPutMultivar(dbfile, "w", nblocks, var5names, vartypes, optlist)
+    sprintf(block_ns, "|/block%%d/w|n");
+    if (DBPutMultivar(dbfile, "w", nblocks, use_ns?0:var5names, use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var w\n");
         return -1;
     }
-    if (DBPutMultimat(dbfile, "mat1", nblocks, matnames, optlist) == -1)
+    sprintf(block_ns, "|/block%%d/mat1|n");
+    if (DBPutMultimat(dbfile, "mat1", nblocks, use_ns?0:matnames, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi material\n");
