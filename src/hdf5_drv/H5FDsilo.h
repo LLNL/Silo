@@ -14,10 +14,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Monday, August  2, 1999
+ * Programmer:  Mark C. Miller  (plagerized greatly from sec2 driver)
+ *              Febuary, 2010
  *
  * Purpose:	The public header file for the sec2 driver.
+ *
+ * Modifications
+ *
+ *   Mark C. Miller, Wed Jul 14 20:46:11 PDT 2010
+ *   Added macro definitions for defualts.
+ *   Added support for direct I/O.
  */
 #ifndef H5FDsilo_H
 #define H5FDsilo_H
@@ -25,6 +31,10 @@
 #include "H5Ipublic.h"
 
 #define H5FD_SILO	(H5FD_silo_init())
+#define H5FD_SILO_DEFAULT_BLOCK_COUNT 16
+#define H5FD_SILO_DEFAULT_BLOCK_SIZE 16384
+#define H5FD_SILO_DEFAULT_LOG_STATS 0
+#define H5FD_SILO_DEFAULT_USE_DIRECT 0
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +44,8 @@ H5_DLL hid_t H5FD_silo_init(void);
 H5_DLL void H5FD_silo_term(void);
 H5_DLL herr_t H5Pset_fapl_silo(hid_t fapl_id);
 H5_DLL herr_t H5Pset_silo_block_size_and_count(hid_t fapl_id, hsize_t block_size, int max_blocks_in_mem);
+H5_DLL herr_t H5Pset_silo_log_stats(hid_t fapl_id, int log);
+H5_DLL herr_t H5Pset_silo_use_direct(hid_t fapl_id, int used);
 
 #ifdef __cplusplus
 }
