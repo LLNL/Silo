@@ -76,6 +76,7 @@ for advertising or product endorsement purposes.
 #define DBPUTPV1_FC      FC_FUNC (dbputpv1,DBPUTPV1)
 #define DBPUTQM_FC       FC_FUNC (dbputqm,DBPUTQM)
 #define DBPUTQV1_FC      FC_FUNC (dbputqv1,DBPUTQV1)
+#define DBPUTQV_FC       FC_FUNC (dbputqv,DBPUTQV)
 #define DBPUTUM_FC       FC_FUNC (dbputum,DBPUTUM)
 #define DBPUTUV1_FC      FC_FUNC (dbputuv1,DBPUTUV1)
 #define DBPUTZL_FC       FC_FUNC (dbputzl,DBPUTZL)
