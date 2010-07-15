@@ -1,33 +1,32 @@
 #!/bin/sh
 
-magicFile=silofile.magic
-theDir=$(dirname $0)
+#
+# Modifications:
+#   
+#   Mark C. Miller, Wed Jul 14 21:04:10 PDT 2010
+#   Completely re-wrote to use od instead of file command as that
+#   has proven more reliable.
+#
 
 #
-# If we cannot find the magic file, then revert to
-# using the ordinary 'file' command and warn the
-# user about it.
-#
-if test ! -f $theDir/$magicFile; then
-    echo "$(basename $0) cannot find $magicFile. Reverting to ordinary file command..."
-    file $*
-    exit 0
-fi
-
-#
-# Ok, use silofile's magic file with the file command and check that
-# we get a known response from it. If not, put the file in the unknown
-# file list for later.
+# Use octal dump (od) command to examine first few bytes of file.
+# If do not find expected bytes of any of the formats we'd like
+# to identify here, fall back to using the good ole' file command.
 #
 unknownFiles=
 for f in $*; do
-    knowIt=$(file -m $theDir/$magicFile $f 2>&1 | grep -v $magicFile)
-    if test -n "$(echo $knowIt | grep PDB)" -o \
-            -n "$(echo $knowIt | grep HDF4)" -o \
-            -n "$(echo $knowIt | grep HDF5)"; then
-        echo $knowIt
+    headerBytes=$(od -c -N 10 $f)
+    if test -n "$(echo $headerBytes | tr -d ' ' | grep '<<PDB:')"; then
+        echo "$f: Portable Database (PDB) data"
+    elif test -n "$(echo $headerBytes | tr -d ' \\' | grep 'HDFrn032')"; then
+        echo "$f: Hierarchical Data Format version 5 (HDF5) data"
     else
-	unknownFiles="$unknownFiles $f"
+        headerBytes=$(od -t x1 -N 4 $f)
+        if test -n "$(echo $headerBytes | grep '0000000 0e 03 13 01')"; then
+            echo "$f: Hierarchical Data Format version 4 (HDF4) data"
+        else
+	    unknownFiles="$unknownFiles $f"
+        fi
     fi
 done
 
@@ -35,6 +34,5 @@ done
 # If we have any unknown files, use the ordinary file command on them.
 #
 if test -n "$unknownFiles"; then
-    echo "$(basename $0) did not recognize any of the following files..."
     file $unknownFiles
 fi
