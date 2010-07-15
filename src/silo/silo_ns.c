@@ -119,7 +119,9 @@ BuildExprTree(const char **porig)
             }
 
             case '$': /* array ref */
+            case '#':
             {
+                char typec = *p;
                 char tokbuf[129];
                 char *tp = tokbuf;
                 DBexprnode *subtree;
@@ -129,7 +131,7 @@ BuildExprTree(const char **porig)
                 p--;
                 *tp = '\0';
                 errno = 0;
-                tree = UpdateTree(tree, '$', 0, tokbuf);
+                tree = UpdateTree(tree, typec, 0, tokbuf);
                 p++;
                 subtree = BuildExprTree(&p);
                 if (tree->left == 0)
@@ -215,13 +217,18 @@ EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
 {
     if (tree == 0)
         return 0;
-    else if (tree->type == '$' && tree->left != 0)
+    else if ((tree->type == '$' || tree->type == '#') && tree->left != 0)
     {
         int i, q = EvalExprTree(ns, tree->left, n);
         for (i = 0; i < ns->narrefs; i++)
         {
             if (strcmp(tree->sval, ns->arrnames[i]) == 0)
-                return ns->arrvals[i][q];
+            {
+                if (tree->type == '$')
+                    return SaveString(ns, (char*) (ns->arrvals[i][q]));
+                else
+                    return ns->arrvals[i][q];
+            }
         }
     }
     else if (tree->left == 0 && tree->right == 0)
@@ -321,7 +328,7 @@ DBMakeNamescheme(const char *fmt, ...)
     i = n+1;
     while (i < 4096 && fmt[i] != '\0')
     {
-        if (fmt[i] == '$')
+        if (fmt[i] == '$' || fmt[i] == '#')
             rv->narrefs++;
         i++;
     }
@@ -348,7 +355,7 @@ DBMakeNamescheme(const char *fmt, ...)
     done = 0;
     while (!done)
     {
-        if (fmt[i] == '$')
+        if (fmt[i] == '$' || fmt[i] == '#')
         {
             for (j = 1; fmt[i+j] != '['; j++)
                 ;
