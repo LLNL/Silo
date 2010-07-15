@@ -3163,6 +3163,9 @@ build_carray(DBfile * dbfile)
  *     data array, but the pdb driver makes the user know something about
  *     the implementation of the pdb driver.
  *
+ *     Mark C. Miller, Wed Jul 14 15:25:16 PDT 2010
+ *     Changed name for "sincurve_xvals" so that it does NOT collide with
+ *     'friendly' named versions of itself.
  *-------------------------------------------------------------------------
  */
 static void
@@ -3193,9 +3196,9 @@ build_curve (DBfile *dbfile, int driver)
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   if (DB_HDF5==driver&0xF) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (DB_HDF5==driver&0xF) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_x");
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
-   if (DB_HDF5!=driver&0xF) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (DB_HDF5!=driver&0xF) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_x");
 
    /*
     * Write the `coscurve' curve. It shares x values with the `sincurve'
