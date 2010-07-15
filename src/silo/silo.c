@@ -153,9 +153,11 @@ PUBLIC char   *_db_err_list[] =
     "File multiply opened w/>1 not read-only.", /* 28 */
     "Specified driver cannot open this file.",/* 29 */
     "Optlist contains options for wrong class.",/* 30 */
-    "Feature not enabled in this build." /* 31 */
+    "Feature not enabled in this build.", /* 31 */
+    "Too many file options sets (missing call to DBUnregisterFileOptionsSet?)." /* 32 */
 };
 
+#warning REMOVE DUP FROM UNKNOWN PLUGIN
 static char *no_hdf5_driver_msg =
     "\nYou have tried to open or create a Silo file using\n"
     "the HDF5 driver. However, the installation of Silo\n"
@@ -240,7 +242,7 @@ SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
     FALSE, /* enableChecksums */
-    FALSE, /* enableFriendlyHDF5Names */
+    TRUE,  /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
     3,     /* maxDeprecateWarnings */
     0,     /* compressionParams (null) */
@@ -2614,6 +2616,12 @@ DBUninstall(DBfile *dbfile)
  *               useful to him (i.e. constant connectivity over a
  *               time-varying dataset.)
  *
+ * Note: Many of these DBSet/Get routines DO NOT include the standard
+ * API_BEGIN/API_END macros. This is primarily due to the fact that
+ * these calls CANNOT fail. For others, that can fail, we do indeed
+ * use the API_BEGIN/API_END macros as per instructions in
+ * silo_private.h
+ *
  * Modifications:
  *--------------------------------------------------------------------*/
 PUBLIC long
@@ -2885,25 +2893,32 @@ DBRegisterFileOptionsSet(const DBoptlist *opts)
 {
     int i;
 
-    for (i = 0; i < MAX_FILE_OPTIONS_SETS; i++)
-    {
-        if (SILO_Globals.fileOptionsSets[i] == 0)
+    API_BEGIN("DBRegisterFileOptionsSet", int, -1) {
+        for (i = 0; i < MAX_FILE_OPTIONS_SETS; i++)
         {
-            SILO_Globals.fileOptionsSets[i] = opts;
-            return i+NUM_DEFAULT_FILE_OPTIONS_SETS;
+            if (SILO_Globals.fileOptionsSets[i] == 0)
+            {
+                SILO_Globals.fileOptionsSets[i] = opts;
+                API_RETURN(i+NUM_DEFAULT_FILE_OPTIONS_SETS);
+            }
         }
+        API_ERROR("Silo library", E_MAXFILEOPTSETS);
     }
-    return -1;
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
 PUBLIC int
 DBUnregisterFileOptionsSet(int opts_set_id)
 {
     int _opts_set_id = opts_set_id-NUM_DEFAULT_FILE_OPTIONS_SETS;
-    if (SILO_Globals.fileOptionsSets[_opts_set_id] == 0)
-        return -1;
-    SILO_Globals.fileOptionsSets[_opts_set_id] = 0;
-    return 0;
+
+    API_BEGIN("DBUnregisterFileOptionsSet", int, -1) {
+        if (SILO_Globals.fileOptionsSets[_opts_set_id] == 0)
+            API_ERROR("opts_set_id", E_BADARGS);
+        SILO_Globals.fileOptionsSets[_opts_set_id] = 0;
+        API_RETURN(0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
 PUBLIC void
@@ -4776,13 +4791,17 @@ DBClearOption(DBoptlist *optlist, int option)
  *
  *      Mark C. Miller, August 18, 2005 
  *
+ *  Modifications:
+ *
+ *      Mark C. Miller, Wed Jul 14 20:35:50 PDT 2010
+ *      Replaced 'return' with 'API_RETURN'
  *--------------------------------------------------------------------*/
 PUBLIC void * 
 DBGetOption(const DBoptlist *optlist, int option)
 {
     int            i;
 
-    API_BEGIN("DBClearOption", void*, 0) {
+    API_BEGIN("DBGetOption", void*, 0) {
         if (!optlist || optlist->numopts < 0) {
             API_ERROR("optlist pointer", E_BADARGS);
         }
@@ -4790,7 +4809,7 @@ DBGetOption(const DBoptlist *optlist, int option)
         /* find the given option in the optlist and return its value */
         for (i = 0; i < optlist->numopts; i++) {
             if (optlist->options[i] == option) {
-                return optlist->values[i];
+                API_RETURN(optlist->values[i]);
             }
         }
     }
@@ -7786,6 +7805,10 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
+ *    Added support for nameschemes on multi-block objects. This meant
+ *    adjusting sanity checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimesh(DBfile *dbfile, const char *name, int nmesh,
@@ -7806,13 +7829,15 @@ DBPutMultimesh(DBfile *dbfile, const char *name, int nmesh,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmesh < 0)
             API_ERROR("nmesh", E_BADARGS);
-        if (!meshnames && nmesh)
+        if (!meshnames && nmesh && (!optlist || 
+             !DBGetOption(optlist, DBOPT_MB_FILE_NS) ||
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS)))
             API_ERROR("mesh names", E_BADARGS);
-        if (!meshtypes && nmesh)
+        if (!meshtypes && nmesh && (!optlist ||
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
             API_ERROR("mesh types", E_BADARGS);
         if (!dbfile->pub.p_mm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-
 
         retval = (dbfile->pub.p_mm) (dbfile, (char *)name, nmesh, meshnames,
                                      meshtypes, optlist);
@@ -7907,6 +7932,10 @@ DBPutMultimeshadj(DBfile *dbfile, const char *name, int nmesh,
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
+ *    Added support for nameschemes on multi-block objects. This meant
+ *    adjusting sanity checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
@@ -7927,9 +7956,12 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nvar < 0)
             API_ERROR("nvar", E_BADARGS);
-        if (!varnames && nvar)
+        if (!varnames && nvar && (!optlist ||
+             !DBGetOption(optlist, DBOPT_MB_FILE_NS) ||
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS)))
             API_ERROR("varnames", E_BADARGS);
-        if (!vartypes && nvar)
+        if (!vartypes && nvar && (!optlist ||
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
             API_ERROR("vartypes", E_BADARGS);
         if (!dbfile->pub.p_mv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -7963,6 +7995,10 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
+ *    Added support for nameschemes on multi-block objects. This meant
+ *    adjusting sanity checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
@@ -7983,7 +8019,9 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmats < 0)
             API_ERROR("nmats", E_BADARGS);
-        if (!matnames && nmats)
+        if (!matnames && nmats && (!optlist ||
+             !DBGetOption(optlist, DBOPT_MB_FILE_NS) ||
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS)))
             API_ERROR("material-names", E_BADARGS);
         if (!dbfile->pub.p_mt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -8017,6 +8055,10 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
+ *    Added support for nameschemes on multi-block objects. This meant
+ *    adjusting sanity checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
@@ -8037,7 +8079,9 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nspec < 0)
             API_ERROR("nspec", E_BADARGS);
-        if (!specnames && nspec)
+        if (!specnames && nspec && (!optlist ||
+             !DBGetOption(optlist, DBOPT_MB_FILE_NS) ||
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS)))
             API_ERROR("species-names", E_BADARGS);
         if (!dbfile->pub.p_mms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -10053,6 +10097,9 @@ UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
  *
  *    Mark C. Miller, Fri Nov 13 15:33:02 PST 2009
  *    Add DBOPT_LLONGNZNUM to polyhedral zonelist object.
+ *
+ *    Mark C. Miller, Wed Jul 14 20:36:23 PDT 2010
+ *    Added support for nameschemes options on multi-block objects.
  *-------------------------------------------------------------------------*/
 INTERNAL int
 db_ProcessOptlist(int objtype, DBoptlist *optlist)
@@ -10861,6 +10908,26 @@ db_ProcessOptlist(int objtype, DBoptlist *optlist)
                         _mm._extensive = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MB_FILE_NS:
+                        _mm._file_ns = (char *) optlist->values[i];
+                        break;
+
+                    case DBOPT_MB_BLOCK_NS:
+                        _mm._block_ns = (char *) optlist->values[i];
+                        break;
+
+                    case DBOPT_MB_BLOCK_TYPE:
+                        _mm._block_type = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_MB_EMPTY_LIST:
+                        _mm._empty_list = (int *) optlist->values[i];
+                        break;
+
+                    case DBOPT_MB_EMPTY_COUNT:
+                        _mm._empty_cnt = DEREF(int, optlist->values[i]);
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11580,9 +11647,11 @@ db_FullName2BaseName(const char *path)
  *    null ptrs or emtpy strings correctly.
  *    Made it handle a variable length list where n is unspecified.
  *
+ *    Mark C. Miller, Wed Jul 14 20:38:46 PDT 2010
+ *    Made this function public, replacing 'db_' with 'DB' in name.
  *--------------------------------------------------------------------*/
-INTERNAL void 
-db_StringArrayToStringList(char **strArray, int n,
+PUBLIC void 
+DBStringArrayToStringList(char **strArray, int n,
                            char **strList, int *m)
 {
     int i, len;
@@ -11655,13 +11724,20 @@ db_StringArrayToStringList(char **strArray, int n,
  *
  *    Mark C. Miller, Thu Dec 17 17:09:27 PST 2009
  *    Fixed UMR on strLen when n>=0.
+ *
+ *    Mark C. Miller, Wed Jul 14 20:38:46 PDT 2010
+ *    Made this function public, replacing 'db_' with 'DB' in name.
+ *    Merged fixes from 4.7.3 patches to fix problems with swaping
+ *    the slash character.
  *--------------------------------------------------------------------*/
-INTERNAL char **
-db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
+PUBLIC char **
+DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
     int skipFirstSemicolon)
 {
-    int i, l, add1 = 0, strLen, colonAt = 0;
+    int i, l, add1 = 0, strLen;
     char **retval;
+    int *colonAt = 0;
+    int needToSlashSwap = 0;
 
     /* if n is unspecified (<0), compute it by counting semicolons */
     if (n < 0)
@@ -11677,19 +11753,12 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
         }
         strLen = i;
     }
-    else if (handleSlashSwap)
-    {
-        int nsemis = 0;
-        for (i = 0; strList[i] != '\0'; i++)
-        {
-            if (strList[i] == ';') nsemis++;
-            if (nsemis >= n+1) break;
-        }
-        strLen = i;
-    }
-    
+
     retval = (char**) calloc(n+add1, sizeof(char*));
-    for (i=0, l=(skipFirstSemicolon&&strList[0]==';')?1:0; i<n; i++) {
+    if (handleSlashSwap)
+        colonAt = (int *) calloc(n, sizeof(int));
+    for (i=0, l=(skipFirstSemicolon&&strList[0]==';')?1:0; i<n; i++)
+    {
         if (strList[l] == ';')
         {
             retval[i] = STRDUP(""); 
@@ -11703,29 +11772,22 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
         else
         {
             int lstart = l;
-            int ltmp = l;
-            if (handleSlashSwap && l+colonAt<strLen &&
-                strList[l+colonAt] != ':')
-            {
-                while (strList[ltmp] != ':' && strList[ltmp] != '\0')
-                    ltmp++;
-                if (strList[ltmp] == ':')
-                    colonAt = ltmp - l;
-                else
-                    colonAt = 0;
-            }
             while (strList[l] != ';' && strList[l] != '\0')
             {
-                /* If we're reading on linux, convert any '\' BEFORE
-                   a colon to '/'. Likewise, if we're reading on
-                   windows, convert an '/' BEFORE a colon to '\' */
-                if (handleSlashSwap && (l-lstart)<colonAt)
+                /* Since we're already marching through characters looking
+                   for a ';', if we're supposed to swap slash characters too,
+                   keep track of colons also. We track the LAST colon we find
+                   in colonAt[] array. */
+                if (handleSlashSwap)
                 {
 #if !defined(_WIN32) /* linux case */
-                    if (strList[l] == '\\') strList[l] = '/';
-#else               /* windows case */
-                    if (strList[l] == '/') strList[l] = '\\';
+                    if (strList[l] == '\\')
+#else                /* windows case */
+                    if (strList[l] == '/')
 #endif
+                        needToSlashSwap = 1;
+                    if (strList[l] == ':')
+                        colonAt[i] = l-lstart;
                 }
                 l++;
             }
@@ -11735,6 +11797,27 @@ db_StringListToStringArray(char *strList, int n, int handleSlashSwap,
         }
     }
     if (add1) retval[i] = 0;
+
+    /* Ok, now swap slash characters if requested and needed */
+    if (handleSlashSwap)
+    {
+        if (needToSlashSwap)
+        {
+            for (i=0; i < n; i++)
+            {
+                for (l = 0; l < colonAt[i]; l++)
+                {
+#if !defined(_WIN32) /* linux case */
+                    if (retval[i][l] == '\\') retval[i][l] = '/';
+#else                /* windows case */
+                    if (retval[i][l] == '/') retval[i][l] = '\\';
+#endif
+                }
+            }
+        }
+        free(colonAt);
+    }
+
     return retval;
 }
 
@@ -13222,38 +13305,4 @@ safe_strdup(const char *s)
     retval[strlen(s)] = '\0';
         
     return(retval);
-}
-/*-------------------------------------------------------------------------
- * Function:    randf
- * 
- * Purpose:     Generates random numbers between RMIN (inclusive) and
- *              RMAX (exclusive).  RMIN should be smaller than RMAX.
- * 
- * Return:      A pseudo-random number
- * 
- * Programmer:  Robb Matzke
- *              robb@callisto.nuance.mdn.com
- *              Jul  9, 1996
- * 
- * Modifications:
- *       Thomas R. Treadway, Wed Nov 28 15:25:53 PST 2007
- *       Moved from src/swat/randf.c
- *
- *-------------------------------------------------------------------------
- */
-double
-randf(rmin, rmax)
-    double          rmin;
-    double          rmax;
-{   
-    unsigned long   acc;
-    static double   divisor = 0;
-
-    if (divisor < 1)
-        divisor = pow(2.0, 30);
-
-    rmax -= rmin;
-    acc = ((rand() & 0x7fff) << 15) | (rand() & 0x7fff);
-
-    return (rmax * (acc / divisor) + rmin);
 }
