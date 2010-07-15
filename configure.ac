@@ -1198,7 +1198,7 @@ AC_ARG_WITH(pdb-proper,
         AC_SUBST(PDBP_DRV)
         CPPFLAGS="-I$withval/include $CPPFLAGS"
         LDFLAGS="-L$withval/lib $LDFLAGS"
-        LIBS="-lpdb -lpml -lscore $tmp_LIBS"
+        LIBS="-lpdb -lpml -lscore $LIBS"
     else
         AC_MSG_ERROR(You must specify a directory for PDB proper)
     fi

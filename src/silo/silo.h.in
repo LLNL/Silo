@@ -1702,6 +1702,8 @@ typedef struct DBfile_pub {
     int            (*cpdir)(struct DBfile *, const char *,
                             struct DBfile *, const char *);
 
+    int          (*sort_obo)(struct DBfile *dbfile, int nobjs,
+                             const char *const *const obj_names, int *ranks);
 } DBfile_pub;
 
 typedef struct DBfile {
@@ -1838,6 +1840,8 @@ SILO_API extern void    *DBGetOption(const DBoptlist *, int);
 SILO_API extern int      DBClearOption(DBoptlist *, int);
 SILO_API extern DBtoc   *DBGetToc(DBfile *);
 SILO_API extern int      DBNewToc(DBfile *);
+SILO_API extern int      DBSortObjectsByOffset(DBfile *, int nobjs,
+                             const char *const *const obj_names, int *ranks);
 SILO_API extern int      DBFilters(DBfile *, FILE *);
 SILO_API extern int      DBFilterRegistration(const char *, int (*init) (DBfile *, char *),
                                      int (*open) (DBfile *, char *));

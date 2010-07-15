@@ -196,6 +196,10 @@ CALLBACK int db_pdb_PutMrgvar(DBfile *dbfile, const char *name,
 CALLBACK int db_pdb_Write (DBfile *, char *, void *, int *, int, int);
 CALLBACK int db_pdb_WriteSlice (DBfile*, char*, void*, int, int[], int[],
 				int[], int[], int);
+
+CALLBACK int db_pdb_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
+    const char *const *const names, int *ordering);
+
 PRIVATE int db_InitCsg (DBfile *, char *, DBoptlist *);
 PRIVATE int db_InitPoint (DBfile *, DBoptlist *, int, int);
 PRIVATE int db_InitQuad (DBfile *, char *, DBoptlist *, int *, int);

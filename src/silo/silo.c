@@ -11821,6 +11821,44 @@ DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
     return retval;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    DBSortObjectsByOffset
+ *
+ * Purpose:     Determines the offset within the Silo file of each object
+ *              in the list of objects passed in and returns an array
+ *              and returns an integer array indicating their ordering. 
+ *
+ * Return:      Success:        Non-zero. 
+ *              Failure:        zero.
+ *
+ * Programmer:  Mark C. Miller, Thu Jul 15 06:40:27 PDT 2010
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBSortObjectsByOffset(DBfile *dbfile, int nobjs, 
+    const char *const *const names, int *ordering)
+{
+    int retval;
+
+    API_BEGIN2("DBSortObjectsByOffset", int, -1, api_dummy);
+    {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (nobjs <= 0)
+            API_ERROR("nobjs", E_BADARGS);
+        if (!names)
+            API_ERROR("names", E_BADARGS);
+        if (!ordering)
+            API_ERROR("ordering", E_BADARGS);
+        if (!dbfile->pub.sort_obo)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.sort_obo) (dbfile, nobjs, names, ordering); 
+
+        API_RETURN(retval);
+    }
+    API_END_NOPOP;  /* If API_RETURN above is removed, use API_END instead */
+}
+
 /*----------------------------------------------------------------------
  * Purpose
  *

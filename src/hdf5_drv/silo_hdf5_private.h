@@ -265,6 +265,9 @@ CALLBACK DBmrgvar *db_hdf5_GetMrgvar(DBfile *dbfile, const char *name);
 CALLBACK int db_hdf5_FreeCompressionResources(DBfile *_dbfile,
                  const char *meshname);
 
+CALLBACK int db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
+                 const char *const *const names, int *ordering);
+
 #endif /* !NO_CALLBACKS */
 
 #endif /* defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5) */

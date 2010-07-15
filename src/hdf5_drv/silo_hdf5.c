@@ -2685,7 +2685,10 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
     dbfile->pub.g_mrgv = db_hdf5_GetMrgvar;
     dbfile->pub.p_mrgv = db_hdf5_PutMrgvar;
 
+    /* Compression support functions */
     dbfile->pub.free_z = db_hdf5_FreeCompressionResources;
+
+    dbfile->pub.sort_obo = db_hdf5_SortObjectsByOffset;
 }
 
 
@@ -4136,7 +4139,7 @@ db_hdf5_compckz(DBfile_hdf5 *dbfile, char *name)
     } CLEANUP {
         H5E_BEGIN_TRY {
             H5Dclose(d);
-            H5Tclose(plist);
+            H5Pclose(plist);
         } H5E_END_TRY;
     } END_PROTECT;
 
@@ -14885,6 +14888,79 @@ CALLBACK int
 db_hdf5_FreeCompressionResources(DBfile *_dbfile, const char *meshname)
 {
     FreeNodelists((DBfile_hdf5*)_dbfile, meshname);
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_SortObjectsByOffset
+ *
+ * Purpose:     Returned array of indexes into an array of object names
+ *              sorted by offset within the file. This can be used by
+ *              readers to 'schedule' reading of objects to minimize
+ *              jumping around the file.
+ *
+ * Programmer: Mark C. Miller, Thu Jul 15 07:42:46 PDT 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* Support type for db_hdf5_SortObjectsByOffset */
+typedef struct _index_offset_pair_t {
+    int index;
+    haddr_t offset;
+} index_offset_pair_t;
+
+/* Support function for db_hdf5_SortObjectsByOffset */
+static int compare_index_offset_pair(const void *a1, const void *a2)
+{
+    index_offset_pair_t *p1 = (index_offset_pair_t*) a1;
+    index_offset_pair_t *p2 = (index_offset_pair_t*) a2;
+    if (p1->index == -1) return 1;
+    if (p2->index == -1) return -1;
+    if (p1->offset < p2->offset) return -1;
+    else if (p1->offset > p2->offset) return 1;
+    else return 0;
+}
+
+CALLBACK int
+db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
+    const char *const *const names, int *ordering)
+{
+    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
+    static char *me = "db_hdf5_GetMrgvar";
+    index_offset_pair_t *iop = (index_offset_pair_t*)
+        malloc(nobjs * sizeof(index_offset_pair_t));
+    int i;
+
+    /* Gather up object addresses. If object names contain colon, ':'
+       this indicates the object is in a different file than current.
+       These will always be pushed to the 'back' of the list */
+    for (i = 0; i < nobjs; i++)
+    {
+        iop[i].index = i;
+        if (strchr(names[i], ':')) iop[i].offset = HADDR_MAX;
+        else
+        {
+            H5O_info_t oinfo;
+            hid_t oid;
+            if ((oid=H5Oopen(dbfile->cwg, names[i], H5P_DEFAULT))<0 ||
+                 H5Oget_info(oid, &oinfo)<0 ||
+                 H5Oclose(oid)<0)
+                iop[i].offset = HADDR_MAX;
+            else
+                iop[i].offset = oinfo.addr;
+        }
+    }
+
+    /* Ok, sort the index/offset pairs */
+    qsort(iop, nobjs, sizeof(index_offset_pair_t), compare_index_offset_pair);
+
+    /* Populate ordering array */
+    for (i = 0; i < nobjs; i++)
+        ordering[i] = iop[i].index;
+
+    free(iop);
+
     return 0;
 }
 

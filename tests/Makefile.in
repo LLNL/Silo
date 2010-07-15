@@ -54,7 +54,8 @@ check_PROGRAMS = arbpoly2d$(EXEEXT) array$(EXEEXT) extface$(EXEEXT) \
 	rocket$(EXEEXT) mmadjacency$(EXEEXT) largefile$(EXEEXT) \
 	dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
 	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
-	ioperf$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4)
+	ioperf$(EXEEXT) readstuff$(EXEEXT) $(am__EXEEXT_2) \
+	$(am__EXEEXT_4)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
@@ -258,6 +259,11 @@ am__quadf77_SOURCES_DIST = quadf77.f
 quadf77_OBJECTS = $(am_quadf77_OBJECTS)
 @FORTRAN_NEEDED_TRUE@quadf77_DEPENDENCIES = $(LDADD) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
+readstuff_SOURCES = readstuff.c
+readstuff_OBJECTS = readstuff.$(OBJEXT)
+readstuff_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@readstuff_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@readstuff_DEPENDENCIES = ../src/libsiloh5.la
 am_rocket_OBJECTS = rocket.$(OBJEXT)
 rocket_OBJECTS = $(am_rocket_OBJECTS)
 rocket_LDADD = $(LDADD)
@@ -402,9 +408,11 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_pointf77_SOURCES) \
 	$(nodist_EXTRA_polyzl_SOURCES) polyzl.c $(quad_SOURCES) \
 	$(nodist_EXTRA_quad_SOURCES) $(quadf77_SOURCES) \
-	$(nodist_EXTRA_quadf77_SOURCES) $(rocket_SOURCES) \
-	$(nodist_EXTRA_rocket_SOURCES) $(nodist_EXTRA_sami_SOURCES) \
-	sami.c $(nodist_EXTRA_simple_SOURCES) simple.c \
+	$(nodist_EXTRA_quadf77_SOURCES) \
+	$(nodist_EXTRA_readstuff_SOURCES) readstuff.c \
+	$(rocket_SOURCES) $(nodist_EXTRA_rocket_SOURCES) \
+	$(nodist_EXTRA_sami_SOURCES) sami.c \
+	$(nodist_EXTRA_simple_SOURCES) simple.c \
 	$(nodist_EXTRA_spec_SOURCES) spec.c \
 	$(nodist_EXTRA_specmix_SOURCES) specmix.c \
 	$(nodist_EXTRA_subhex_SOURCES) subhex.c \
@@ -427,10 +435,11 @@ DIST_SOURCES = TestReadMask.c alltypes.c arbpoly2d.c array.c \
 	mmadjacency.c multi_file.c multi_test.c multispec.c \
 	namescheme.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
 	partial_io.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
-	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) $(rocket_SOURCES) \
-	sami.c simple.c spec.c specmix.c subhex.c testall.c \
-	$(am__testallf77_SOURCES_DIST) testpdb.c twohex.c ucd.c \
-	ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
+	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) readstuff.c \
+	$(rocket_SOURCES) sami.c simple.c spec.c specmix.c subhex.c \
+	testall.c $(am__testallf77_SOURCES_DIST) testpdb.c twohex.c \
+	ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c \
+	wave.c
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -673,8 +682,8 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
-	efcentering mk_nasf_pdb ioperf arbpoly2d $(am__append_1) \
-	$(am__append_3)
+	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
+	$(am__append_1) $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -746,6 +755,7 @@ rocket_SOURCES = \
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_efcentering_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ioperf_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_readstuff_SOURCES = dummy.cxx
 ioperf_LDADD = -ldl
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
@@ -916,6 +926,9 @@ quad$(EXEEXT): $(quad_OBJECTS) $(quad_DEPENDENCIES)
 quadf77$(EXEEXT): $(quadf77_OBJECTS) $(quadf77_DEPENDENCIES) 
 	@rm -f quadf77$(EXEEXT)
 	$(CXXLINK) $(quadf77_OBJECTS) $(quadf77_LDADD) $(LIBS)
+readstuff$(EXEEXT): $(readstuff_OBJECTS) $(readstuff_DEPENDENCIES) 
+	@rm -f readstuff$(EXEEXT)
+	$(CXXLINK) $(readstuff_OBJECTS) $(readstuff_LDADD) $(LIBS)
 rocket$(EXEEXT): $(rocket_OBJECTS) $(rocket_DEPENDENCIES) 
 	@rm -f rocket$(EXEEXT)
 	$(CXXLINK) $(rocket_OBJECTS) $(rocket_LDADD) $(LIBS)
@@ -1007,6 +1020,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-quad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-testlib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readstuff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sami.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Po@am__quote@

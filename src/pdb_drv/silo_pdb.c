@@ -1865,6 +1865,8 @@ db_pdb_InitCallbacks ( DBfile *dbfile )
 #endif
 
     dbfile->pub.free_z = db_pdb_FreeCompressionResources;
+
+    dbfile->pub.sort_obo = db_pdb_SortObjectsByOffset;
 }
 
 /*-------------------------------------------------------------------------
@@ -11551,6 +11553,65 @@ db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
    return 0;
 }
 #endif /* PDB_WRITE */
+
+/*----------------------------------------------------------------------
+ *  Routine                                   db_pdb_SortObjectsByOffset
+ *
+ *  Purpose: Returned array of sorted indices for a list of object names
+ *           sorted by offset within the file.
+ *
+ *  Programmer: Mark C. Miller, Thu Jul 15 08:06:27 PDT 2010
+ *
+ *--------------------------------------------------------------------*/
+/* Support type for db_hdf5_SortObjectsByOffset */
+typedef struct _index_offset_pair_t {
+    int index;
+    long offset;
+} index_offset_pair_t;
+
+/* Support function for db_hdf5_SortObjectsByOffset */
+static int compare_index_offset_pair(const void *a1, const void *a2)
+{
+    index_offset_pair_t *p1 = (index_offset_pair_t*) a1;
+    index_offset_pair_t *p2 = (index_offset_pair_t*) a2;
+    if (p1->offset < p2->offset) return -1;
+    else if (p1->offset > p2->offset) return 1;
+    else return 0;
+}
+
+CALLBACK int
+db_pdb_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
+    const char *const *const names, int *ordering)
+{
+   DBfile_pdb *dbfile = (DBfile_pdb *) _dbfile;
+   static char *me = "db_pdb_SortObjectsByOffset";
+   index_offset_pair_t *iop = (index_offset_pair_t*)
+       malloc(nobjs * sizeof(index_offset_pair_t));
+   int i;
+
+   for (i = 0; i < nobjs; i++)
+   {
+       iop[i].index = i;
+       if (strchr(names[i], ':')) iop[i].offset = LONG_MAX;
+       else
+       {
+           syment *ep = lite_PD_inquire_entry (dbfile->pdb, (char*)names[i], TRUE, NULL);
+           if (!ep) iop[i].offset = LONG_MAX;
+           else iop[i].offset = PD_entry_address(ep); 
+        }
+    }
+
+    /* Ok, sort the index/offset pairs */
+    qsort(iop, nobjs, sizeof(index_offset_pair_t), compare_index_offset_pair);
+
+    /* Populate ordering array */
+    for (i = 0; i < nobjs; i++)
+        ordering[i] = iop[i].index;
+
+    free(iop);
+
+    return 0;
+}
 
 /*----------------------------------------------------------------------
  *  Routine                                                  db_InitCsg
