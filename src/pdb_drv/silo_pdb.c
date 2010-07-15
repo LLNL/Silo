@@ -3301,7 +3301,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     }
     if ((tmpcolors != NULL) && (mm->nmat > 0))
     {
-        mm->matcolors = db_StringListToStringArray(tmpcolors, mm->nmat,
+        mm->matcolors = DBStringListToStringArray(tmpcolors, mm->nmat,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(tmpcolors);
     }
@@ -3431,14 +3431,14 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    if (tmpnames != NULL)
    {
        if (nstrs > 0)
-          mm->specnames = db_StringListToStringArray(tmpnames, nstrs,
+          mm->specnames = DBStringListToStringArray(tmpnames, nstrs,
               !handleSlashSwap, !skipFirstSemicolon);
        FREE(tmpnames);
    }
    if (tmpcolors != NULL)
    {
        if (nstrs > 0)
-          mm->speccolors = db_StringListToStringArray(tmpcolors, nstrs,
+          mm->speccolors = DBStringListToStringArray(tmpcolors, nstrs,
               !handleSlashSwap, !skipFirstSemicolon);
        FREE(tmpcolors);
    }
@@ -3745,14 +3745,14 @@ db_pdb_GetDefvars(DBfile *_dbfile, const char *objname)
 
        if ((tmpnames != NULL) && (defv->ndefs > 0))
        {
-           defv->names = db_StringListToStringArray(tmpnames, defv->ndefs,
+           defv->names = DBStringListToStringArray(tmpnames, defv->ndefs,
                !handleSlashSwap, !skipFirstSemicolon);
            FREE(tmpnames);
        }
 
        if ((tmpdefns != NULL) && (defv->ndefs > 0))
        {
-           defv->defns = db_StringListToStringArray(tmpdefns, defv->ndefs,
+           defv->defns = DBStringListToStringArray(tmpdefns, defv->ndefs,
                !handleSlashSwap, !skipFirstSemicolon);
            FREE(tmpdefns);
        }
@@ -3897,6 +3897,9 @@ pdb_getvarinfo (PDBfile *pdbfile,
  *   db_StringListToStringArray. Added logic to control behavior of
  *   slash character swapping for windows/linux and skipping of first
  *   semicolon in calls to db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:40:55 PDT 2010
+ *   Added support for namescheme/empty list options.
  *--------------------------------------------------------------------*/
 CALLBACK DBmultimesh *
 db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
@@ -3905,8 +3908,8 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
    DBmultimesh   *mm = NULL;
    int            ncomps, type;
    int            i;
-   char          *tmpnames, delim[2], *s, *name, tmp[256];
-   char          *tmpgnames = NULL;
+   char          *tmpnames=0, delim[2], *s, *name, tmp[256];
+   char          *tmpgnames = 0;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultimesh";
@@ -3942,6 +3945,11 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("tv_connectivity", &tmpmm.tv_connectivity, DB_INT);
       DEFINE_OBJ("disjoint_mode", &tmpmm.disjoint_mode, DB_INT);
       DEFINE_OBJ("topo_dim", &tmpmm.topo_dim, DB_INT);
+      DEFALL_OBJ("file_ns", &tmpmm.file_ns, DB_CHAR);
+      DEFALL_OBJ("block_ns", &tmpmm.block_ns, DB_CHAR);
+      DEFINE_OBJ("block_type", &tmpmm.block_type, DB_INT);
+      DEFALL_OBJ("empty_list", &tmpmm.empty_list, DB_INT);
+      DEFINE_OBJ("empty_cnt", &tmpmm.empty_cnt, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -3968,12 +3976,12 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
        *----------------------------------------*/
 
       if ((tmpnames != NULL) && (mm->nblocks > 0)) {
-         mm->meshnames = db_StringListToStringArray(tmpnames, mm->nblocks,
+         mm->meshnames = DBStringListToStringArray(tmpnames, mm->nblocks,
              handleSlashSwap, skipFirstSemicolon);
          FREE(tmpnames);
       }
       if ((tmpgnames != NULL) && (mm->lgroupings > 0)) {
-         mm->groupnames = db_StringListToStringArray(tmpgnames, mm->lgroupings,
+         mm->groupnames = DBStringListToStringArray(tmpgnames, mm->lgroupings,
              !handleSlashSwap, !skipFirstSemicolon);
          FREE(tmpgnames);
       }
@@ -4184,6 +4192,9 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, const char *objname, int nmesh,
  *   db_StringListToStringArray. Added logic to control behavior of
  *   slash character swapping for windows/linux and skipping of first
  *   semicolon in calls to db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:40:55 PDT 2010
+ *   Added support for namescheme/empty list options.
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultivar *
 db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
@@ -4192,7 +4203,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
    DBmultivar    *mv = NULL;
    int            ncomps, type;
    int            i;
-   char          *tmpnames, delim[2], *s, *name, tmp[256];
+   char          *tmpnames=0, delim[2], *s, *name, tmp[256];
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultivar";
@@ -4223,6 +4234,11 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("mmesh_name", &tmpmv.mmesh_name, DB_CHAR);
       DEFINE_OBJ("conserved", &tmpmv.conserved, DB_INT);
       DEFINE_OBJ("extensive", &tmpmv.extensive, DB_INT);
+      DEFALL_OBJ("file_ns", &tmpmv.file_ns, DB_CHAR);
+      DEFALL_OBJ("block_ns", &tmpmv.block_ns, DB_CHAR);
+      DEFINE_OBJ("block_type", &tmpmv.block_type, DB_INT);
+      DEFALL_OBJ("empty_list", &tmpmv.empty_list, DB_INT);
+      DEFINE_OBJ("empty_cnt", &tmpmv.empty_cnt, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -4239,14 +4255,14 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
        *----------------------------------------*/
 
       if (tmpnames != NULL && mv->nvars > 0) {
-         mv->varnames = db_StringListToStringArray(tmpnames, mv->nvars,
+         mv->varnames = DBStringListToStringArray(tmpnames, mv->nvars,
              handleSlashSwap, skipFirstSemicolon);
          FREE(tmpnames);
       }
 
       if (rpnames != NULL)
       {
-         mv->region_pnames = db_StringListToStringArray(rpnames, -1,
+         mv->region_pnames = DBStringListToStringArray(rpnames, -1,
              !handleSlashSwap, !skipFirstSemicolon);
          FREE(rpnames);
       }
@@ -4309,6 +4325,9 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
  *
  *   Mark C. Miller, Thu Feb  4 11:14:20 PST 2010
  *   Added missing logic for setting allowmat0.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:40:55 PDT 2010
+ *   Added support for namescheme/empty list options.
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultimat *
 db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
@@ -4349,6 +4368,10 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("material_names", &tmpmaterial_names, DB_CHAR);
       DEFALL_OBJ("matcolors", &tmpmatcolors, DB_CHAR);
       DEFALL_OBJ("mmesh_name", &tmpmt.mmesh_name, DB_CHAR);
+      DEFALL_OBJ("file_ns", &tmpmt.file_ns, DB_CHAR);
+      DEFALL_OBJ("block_ns", &tmpmt.block_ns, DB_CHAR);
+      DEFALL_OBJ("empty_list", &tmpmt.empty_list, DB_INT);
+      DEFINE_OBJ("empty_cnt", &tmpmt.empty_cnt, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -4366,20 +4389,20 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
 
       if (tmpnames != NULL && mt->nmats > 0)
       {
-          mt->matnames = db_StringListToStringArray(tmpnames, mt->nmats,
+          mt->matnames = DBStringListToStringArray(tmpnames, mt->nmats,
               handleSlashSwap, skipFirstSemicolon);
           FREE(tmpnames);
       }
 
       if (tmpmaterial_names && mt->nmatnos > 0)
       {
-          mt->material_names = db_StringListToStringArray(tmpmaterial_names,
+          mt->material_names = DBStringListToStringArray(tmpmaterial_names,
               mt->nmatnos, !handleSlashSwap, !skipFirstSemicolon);
           FREE(tmpmaterial_names);
       }
       if (tmpmatcolors && mt->nmatnos > 0)
       {
-          mt->matcolors = db_StringListToStringArray(tmpmatcolors,
+          mt->matcolors = DBStringListToStringArray(tmpmatcolors,
               mt->nmatnos, !handleSlashSwap, !skipFirstSemicolon);
           FREE(tmpmatcolors);
       }
@@ -4424,6 +4447,9 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
  *   db_StringListToStringArray. Added logic to control behavior of
  *   slash character swapping for windows/linux and skipping of first
  *   semicolon in calls to db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:40:55 PDT 2010
+ *   Added support for namescheme/empty list options.
  *-------------------------------------------------------------------------*/
 CALLBACK DBmultimatspecies *
 db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
@@ -4461,7 +4487,10 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
          DEFALL_OBJ("species_names", &tmpspecnames, DB_CHAR);
       if (SILO_Globals.dataReadMask & DBMatMatcolors)
          DEFALL_OBJ("speccolors", &tmpcolors, DB_CHAR);
-
+      DEFALL_OBJ("file_ns", &tmpmms.file_ns, DB_CHAR);
+      DEFALL_OBJ("block_ns", &tmpmms.block_ns, DB_CHAR);
+      DEFALL_OBJ("empty_list", &tmpmms.empty_list, DB_INT);
+      DEFINE_OBJ("empty_cnt", &tmpmms.empty_cnt, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
          return NULL;
@@ -4479,7 +4508,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
 
       if (tmpnames != NULL && mms->nspec > 0)
       {
-          mms->specnames = db_StringListToStringArray(tmpnames, mms->nspec,
+          mms->specnames = DBStringListToStringArray(tmpnames, mms->nspec,
               handleSlashSwap, skipFirstSemicolon);
           FREE(tmpnames);
       }
@@ -4489,7 +4518,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
           for (i = 0; i < mms->nmat; i++)
               nstrs += mms->nmatspec[i];
           if (nstrs > 0)
-              mms->species_names = db_StringListToStringArray(tmpspecnames, nstrs,
+              mms->species_names = DBStringListToStringArray(tmpspecnames, nstrs,
                   !handleSlashSwap, !skipFirstSemicolon);
           FREE(tmpspecnames);
       }
@@ -4501,7 +4530,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
                   nstrs += mms->nmatspec[i];
           }
           if (nstrs > 0)
-              mms->speccolors = db_StringListToStringArray(tmpcolors, nstrs,
+              mms->speccolors = DBStringListToStringArray(tmpcolors, nstrs,
                   !handleSlashSwap, !skipFirstSemicolon);
           FREE(tmpcolors);
       }
@@ -4778,7 +4807,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
 
    if (rpnames != NULL)
    {
-      mv->region_pnames = db_StringListToStringArray(rpnames, -1,
+      mv->region_pnames = DBStringListToStringArray(rpnames, -1,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
@@ -5084,7 +5113,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
 
    if (rpnames != NULL)
    {
-      qv->region_pnames = db_StringListToStringArray(rpnames, -1,
+      qv->region_pnames = DBStringListToStringArray(rpnames, -1,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
@@ -5557,7 +5586,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
 
    if (rpnames != NULL)
    {
-      uv->region_pnames = db_StringListToStringArray(rpnames, -1,
+      uv->region_pnames = DBStringListToStringArray(rpnames, -1,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
@@ -5658,7 +5687,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
 
     if ((tmpbndnames != NULL) && (tmpcsgm.nbounds > 0))
     {
-        tmpcsgm.bndnames = db_StringListToStringArray(tmpbndnames, tmpcsgm.nbounds,
+        tmpcsgm.bndnames = DBStringListToStringArray(tmpbndnames, tmpcsgm.nbounds,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(tmpbndnames);
     }
@@ -5761,7 +5790,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
 
    if (rpnames != NULL)
    {
-      csgv->region_pnames = db_StringListToStringArray(rpnames, -1,
+      csgv->region_pnames = DBStringListToStringArray(rpnames, -1,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
@@ -6102,14 +6131,14 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, const char *objname)
 
     if ((tmprnames != NULL) && (tmpzl.nregs > 0))
     {
-        tmpzl.regnames = db_StringListToStringArray(tmprnames, tmpzl.nregs,
+        tmpzl.regnames = DBStringListToStringArray(tmprnames, tmpzl.nregs,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(tmprnames);
     }
 
     if ((tmpznames != NULL) && (tmpzl.nzones > 0))
     {
-        tmpzl.zonenames = db_StringListToStringArray(tmpznames, tmpzl.nzones,
+        tmpzl.zonenames = DBStringListToStringArray(tmpznames, tmpzl.nzones,
             !handleSlashSwap, !skipFirstSemicolon);
         FREE(tmpznames);
     }
@@ -6707,7 +6736,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("name", &s, DB_CHAR);
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
-   strArray = db_StringListToStringArray(s, num_nodes,
+   strArray = DBStringListToStringArray(s, num_nodes,
        !handleSlashSwap, !skipFirstSemicolon);
    for (i = 0; i < num_nodes; i++)
        ltree[i]->name = strArray[i];
@@ -6720,7 +6749,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
    if (s)
    {
-       strArray = db_StringListToStringArray(s, -1, !handleSlashSwap,
+       strArray = DBStringListToStringArray(s, -1, !handleSlashSwap,
            !skipFirstSemicolon);
        n = 0;
        for (i = 0; i < num_nodes; i++)
@@ -6749,7 +6778,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("maps_name", &s, DB_CHAR);
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
-   strArray = db_StringListToStringArray(s, num_nodes, !handleSlashSwap,
+   strArray = DBStringListToStringArray(s, num_nodes, !handleSlashSwap,
        !skipFirstSemicolon);
    for (i = 0; i < num_nodes; i++)
        ltree[i]->maps_name = strArray[i];
@@ -6826,13 +6855,13 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
 
    if (mrgv_onames)
    {
-      tree->mrgvar_onames = db_StringListToStringArray(mrgv_onames, -1,
+      tree->mrgvar_onames = DBStringListToStringArray(mrgv_onames, -1,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(mrgv_onames);
    }
    if (mrgv_rnames)
    {
-      tree->mrgvar_rnames = db_StringListToStringArray(mrgv_rnames, -1,
+      tree->mrgvar_rnames = DBStringListToStringArray(mrgv_rnames, -1,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(mrgv_rnames);
    }
@@ -7028,14 +7057,14 @@ db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
 
    if (cnames != NULL)
    {
-      mrgv->compnames = db_StringListToStringArray(cnames, mrgv->ncomps,
+      mrgv->compnames = DBStringListToStringArray(cnames, mrgv->ncomps,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(cnames);
    }
 
    if (rpnames != NULL)
    {
-      mrgv->reg_pnames = db_StringListToStringArray(rpnames, -1,
+      mrgv->reg_pnames = DBStringListToStringArray(rpnames, -1,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
@@ -7629,7 +7658,7 @@ db_pdb_PutDefvars (DBfile *dbfile, const char *name, int ndefs,
    /*-------------------------------------------------------------
     *  Define and write variable names 
     *-------------------------------------------------------------*/
-   db_StringArrayToStringList(names, ndefs, &tmp, &len);
+   DBStringArrayToStringList(names, ndefs, &tmp, &len);
    count[0] = len;  
    DBWriteComponent(dbfile, obj, "names", name, "char",
                     tmp, 1, count);
@@ -7639,7 +7668,7 @@ db_pdb_PutDefvars (DBfile *dbfile, const char *name, int ndefs,
    /*-------------------------------------------------------------
     *  Define and write variable definitions 
     *-------------------------------------------------------------*/
-   db_StringArrayToStringList(defns, ndefs, &tmp, &len);
+   DBStringArrayToStringList(defns, ndefs, &tmp, &len);
    count[0] = len;  
    DBWriteComponent(dbfile, obj, "defns", name, "char",
                     tmp, 1, count);
@@ -7871,7 +7900,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
    if (_ma._matnames != NULL)
    {
       int len; long llen; char *tmpstr = 0;
-      db_StringArrayToStringList(_ma._matnames, nmat, &tmpstr, &len);
+      DBStringArrayToStringList(_ma._matnames, nmat, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matnames", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -7880,7 +7909,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
    if (_ma._matcolors != NULL)
    {
       int len; long llen; char *tmpstr = 0;
-      db_StringArrayToStringList(_ma._matcolors, nmat, &tmpstr, &len);
+      DBStringArrayToStringList(_ma._matcolors, nmat, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -8007,7 +8036,7 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
       /* count how many names we have */
       for (i=0; i < nmat; i++)
           nstrs += nmatspec[i];
-      db_StringArrayToStringList(_ms._specnames, nstrs, &tmpstr, &len);
+      DBStringArrayToStringList(_ms._specnames, nstrs, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "species_names", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -8023,7 +8052,7 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
           for (i=0; i < nmat; i++)
               nstrs += nmatspec[i];
       }
-      db_StringArrayToStringList(_ms._speccolors, nstrs, &tmpstr, &len);
+      DBStringArrayToStringList(_ms._speccolors, nstrs, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "speccolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -8086,6 +8115,8 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
  *    Thomas R. Treadway, Thu Jul 20 13:34:57 PDT 2006
  *    Added lgroupings, groupings, and groupnames options.
  *
+ *   Mark C. Miller, Wed Jul 14 20:40:55 PDT 2010
+ *   Added support for namescheme/empty list options.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -8107,7 +8138,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMESH, 22);
+   obj = DBMakeObject(name, DB_MULTIMESH, 30);
    DBAddIntComponent(obj, "nblocks", nmesh);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -8127,40 +8158,43 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
     *  Define and write variables before adding them to object.
     *-------------------------------------------------------------*/
    count[0] = nmesh;
+   if (meshtypes)
+       DBWriteComponent(dbfile, obj, "meshtypes", name, "integer",
+                        meshtypes, 1, count);
 
-   DBWriteComponent(dbfile, obj, "meshtypes", name, "integer",
-                    meshtypes, 1, count);
+   if (meshnames)
+   {
+       /* Compute size needed for string of concatenated block names.
+        *
+        * Note that we start with 2 so that we have one `;' and the NULL
+        * terminator.  Also, the +1 in the "len +=" line is for the `;'
+        * character.
+        */
+       len = 2;
+       for(i=0; i<nmesh; i++)
+       {
+           len += strlen(meshnames[i]) + 1;
+       }
+       tmp = ALLOC_N(char,len);
 
-    /* Compute size needed for string of concatenated block names.
-     *
-     * Note that we start with 2 so that we have one `;' and the NULL
-     * terminator.  Also, the +1 in the "len +=" line is for the `;'
-     * character.
-     */
-    len = 2;
-    for(i=0; i<nmesh; i++)
-    {
-        len += strlen(meshnames[i]) + 1;
-    }
-    tmp = ALLOC_N(char,len);
+      /* Build 1-D character string from 2-D mesh-name array */
+      tmp[0] = ';';
+      tmp[1] = '\0';
 
-   /* Build 1-D character string from 2-D mesh-name array */
-   tmp[0] = ';';
-   tmp[1] = '\0';
+      cur = tmp+1;
+      for (i = 0; i < nmesh; i++) {
+         int len2;
+         len2 = strlen(meshnames[i]);
+         strncpy(cur, meshnames[i], len2);
+         cur += len2;
+         strncpy(cur, ";", 1);
+         cur += 1;
+      }
 
-   cur = tmp+1;
-   for (i = 0; i < nmesh; i++) {
-      int len2;
-      len2 = strlen(meshnames[i]);
-      strncpy(cur, meshnames[i], len2);
-      cur += len2;
-      strncpy(cur, ";", 1);
-      cur += 1;
+      count[0] = (long) (cur - tmp);
+      DBWriteComponent(dbfile, obj, "meshnames", name, "char",
+                       tmp, 1, count);
    }
-
-   count[0] = (long) (cur - tmp);
-   DBWriteComponent(dbfile, obj, "meshnames", name, "char",
-                    tmp, 1, count);
 
    /*-------------------------------------------------------------
     *  Define and write the time and cycle.
@@ -8208,7 +8242,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
    if (_mm._lgroupings > 0)
       DBAddIntComponent(obj, "lgroupings", _mm._lgroupings);
    if ((_mm._lgroupings  > 0) && (_mm._groupnames != NULL)) {
-      db_StringArrayToStringList(_mm._groupnames, 
+      DBStringArrayToStringList(_mm._groupnames, 
                     _mm._lgroupings, &gtmp, &len);
 
       count[0] = len;
@@ -8220,6 +8254,31 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
       count[0] = _mm._lgroupings;
       DBWriteComponent(dbfile, obj, "groupings", name, "integer",
                     _mm._groupings, 1, count);
+   }
+
+   /*-------------------------------------------------------------
+    *  Add the DBOPT_MB_... options if present.
+    *-------------------------------------------------------------*/
+   if (_mm._file_ns)
+   { 
+      count[0] = strlen(_mm._file_ns)+1;
+      DBWriteComponent(dbfile, obj, "file_ns", name, "char",
+                    _mm._file_ns, 1, count);
+   }
+   if (_mm._block_ns)
+   { 
+      count[0] = strlen(_mm._block_ns)+1;
+      DBWriteComponent(dbfile, obj, "block_ns", name, "char",
+                    _mm._block_ns, 1, count);
+   }
+   if (_mm._block_type)
+      DBAddIntComponent(obj, "block_type", _mm._block_type);
+   if (_mm._empty_list && _mm._empty_cnt>0)
+   {
+      DBAddIntComponent(obj, "empty_cnt", _mm._empty_cnt);
+      count[0] = _mm._empty_cnt;
+      DBWriteComponent(dbfile, obj, "empty_list", name, "integer", 
+                       _mm._empty_list, 1, count);
    }
 
    /*-------------------------------------------------------------
@@ -8548,6 +8607,9 @@ db_pdb_PutMultimeshadj (DBfile *_dbfile, const char *name, int nmesh,
  *
  *    Mark C. Miller, Thu Nov  5 16:15:49 PST 2009
  *    Added support for conserved/extensive options.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:40:55 PDT 2010
+ *   Added support for namescheme/empty list options.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -8567,7 +8629,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIVAR, 18);
+   obj = DBMakeObject(name, DB_MULTIVAR, 30);
    DBAddIntComponent(obj, "nvars", nvars);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -8577,7 +8639,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    if (_mm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList(_mm._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList(_mm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -8595,8 +8657,9 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
     *  Define and write variables before adding them to object.
     *-------------------------------------------------------------*/
    count[0] = nvars;
-   DBWriteComponent(dbfile, obj, "vartypes", name, "integer",
-                    vartypes, 1, count);
+   if (vartypes)
+       DBWriteComponent(dbfile, obj, "vartypes", name, "integer",
+                        vartypes, 1, count);
 
     /* Compute size needed for string of concatenated block names.
      *
@@ -8604,30 +8667,33 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    len = 2;
-    for(i=0; i<nvars; i++)
+    if (varnames)
     {
-        len += strlen(varnames[i]) + 1;
-    }
-    tmp = ALLOC_N(char,len);
+        len = 2;
+        for(i=0; i<nvars; i++)
+        {
+            len += strlen(varnames[i]) + 1;
+        }
+        tmp = ALLOC_N(char,len);
 
-   /* Build 1-D character string from 2-D mesh-name array */
-   tmp[0] = ';';
-   tmp[1] = '\0';
+        /* Build 1-D character string from 2-D mesh-name array */
+        tmp[0] = ';';
+        tmp[1] = '\0';
 
-   cur = tmp+1;
-   for (i = 0; i < nvars; i++) {
-      int len2;
-      len2 = strlen(varnames[i]);
-      strncpy(cur, varnames[i], len2);
-      cur += len2;
-      strncpy(cur, ";", 1);
-      cur += 1;
-   }
+        cur = tmp+1;
+        for (i = 0; i < nvars; i++) {
+           int len2;
+           len2 = strlen(varnames[i]);
+           strncpy(cur, varnames[i], len2);
+           cur += len2;
+           strncpy(cur, ";", 1);
+           cur += 1;
+        }
 
-   count[0] = (long) (cur - tmp);
-   DBWriteComponent(dbfile, obj, "varnames", name, "char",
+        count[0] = (long) (cur - tmp);
+        DBWriteComponent(dbfile, obj, "varnames", name, "char",
                     tmp, 1, count);
+    }
 
    /*-------------------------------------------------------------
     *  Define and write the time and cycle.
@@ -8648,6 +8714,30 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
       count[0] = _mm._extentssize * nvars;
       DBWriteComponent(dbfile, obj, "extents", name, "double", _mm._extents,
                        1, count);
+   }
+
+   /*-------------------------------------------------------------
+    *  Add the DBOPT_MB_... options if present.
+    *-------------------------------------------------------------*/
+   if (_mm._file_ns)
+   { 
+      count[0] = strlen(_mm._file_ns)+1;
+      DBWriteComponent(dbfile, obj, "file_ns", name, "char",
+                    _mm._file_ns, 1, count);
+   }
+   if (_mm._block_ns)
+   { 
+      count[0] = strlen(_mm._block_ns)+1;
+      DBWriteComponent(dbfile, obj, "block_ns", name, "char",
+                    _mm._block_ns, 1, count);
+   }
+   if (_mm._block_type)
+      DBAddIntComponent(obj, "block_type", _mm._block_type);
+   if (_mm._empty_list && _mm._empty_cnt>0) {
+      DBAddIntComponent(obj, "empty_cnt", _mm._empty_cnt);
+      count[0] = _mm._empty_cnt;
+      DBWriteComponent(dbfile, obj, "empty_list", name, "integer", 
+                       _mm._empty_list, 1, count);
    }
 
    /*-------------------------------------------------------------
@@ -8709,6 +8799,9 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
  *
  *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *    Added matnames and matcolors options
+ *
+ *   Mark C. Miller, Wed Jul 14 20:40:55 PDT 2010
+ *   Added support for namescheme/empty list options.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -8728,7 +8821,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMAT, 17);
+   obj = DBMakeObject(name, DB_MULTIMAT, 30);
    DBAddIntComponent(obj, "nmats", nmats);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -8750,30 +8843,33 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    len = 2;
-    for(i=0; i<nmats; i++)
+    if (matnames)
     {
-        len += strlen(matnames[i]) + 1;
-    }
-    tmp = ALLOC_N(char,len);
+        len = 2;
+        for(i=0; i<nmats; i++)
+        {
+            len += strlen(matnames[i]) + 1;
+        }
+        tmp = ALLOC_N(char,len);
 
-   /* Build 1-D character string from 2-D mesh-name array */
-   tmp[0] = ';';
-   tmp[1] = '\0';
+       /* Build 1-D character string from 2-D mesh-name array */
+       tmp[0] = ';';
+       tmp[1] = '\0';
 
-   cur = tmp+1;
-   for (i = 0; i < nmats; i++) {
-      int len2;
-      len2 = strlen(matnames[i]);
-      strncpy(cur, matnames[i], len2);
-      cur += len2;
-      strncpy(cur, ";", 1);
-      cur += 1;
-   }
+       cur = tmp+1;
+       for (i = 0; i < nmats; i++) {
+          int len2;
+          len2 = strlen(matnames[i]);
+          strncpy(cur, matnames[i], len2);
+          cur += len2;
+          strncpy(cur, ";", 1);
+          cur += 1;
+       }
 
-   count[0] = (long) (cur - tmp);
-   DBWriteComponent(dbfile, obj, "matnames", name, "char",
+       count[0] = (long) (cur - tmp);
+       DBWriteComponent(dbfile, obj, "matnames", name, "char",
                     tmp, 1, count);
+    }
 
    /*-------------------------------------------------------------
     *  Define and write the time and cycle.
@@ -8826,7 +8922,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
     *-------------------------------------------------------------*/
    if (_mm._matnames && _mm._nmatnos > 0) {
       int len; long llen; char *tmpstr = 0;
-      db_StringArrayToStringList(_mm._matnames, _mm._nmatnos,
+      DBStringArrayToStringList(_mm._matnames, _mm._nmatnos,
           &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "material_names", name, "char", tmpstr, 1, &llen);
@@ -8838,11 +8934,33 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
     *-------------------------------------------------------------*/
    if (_mm._matcolors && _mm._nmatnos > 0) {
       int len; long llen; char *tmpstr = 0;
-      db_StringArrayToStringList(_mm._matcolors, _mm._nmatnos,
+      DBStringArrayToStringList(_mm._matcolors, _mm._nmatnos,
           &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+   }
+
+   /*-------------------------------------------------------------
+    *  Add the DBOPT_MB_... options if present.
+    *-------------------------------------------------------------*/
+   if (_mm._file_ns)
+   { 
+      count[0] = strlen(_mm._file_ns)+1;
+      DBWriteComponent(dbfile, obj, "file_ns", name, "char",
+                    _mm._file_ns, 1, count);
+   }
+   if (_mm._block_ns)
+   { 
+      count[0] = strlen(_mm._block_ns)+1;
+      DBWriteComponent(dbfile, obj, "block_ns", name, "char",
+                    _mm._block_ns, 1, count);
+   }
+   if (_mm._empty_list && _mm._empty_cnt>0) {
+      DBAddIntComponent(obj, "empty_cnt", _mm._empty_cnt);
+      count[0] = _mm._empty_cnt;
+      DBWriteComponent(dbfile, obj, "empty_list", name, "integer", 
+                       _mm._empty_list, 1, count);
    }
 
    /*-------------------------------------------------------------
@@ -8891,6 +9009,9 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
  *
  *    Mark C. Miller, Tue Sep  8 15:40:51 PDT 2009
  *    Added names and colors for species.
+ *
+ *   Mark C. Miller, Wed Jul 14 20:40:55 PDT 2010
+ *   Added support for namescheme/empty list options.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 CALLBACK int
@@ -8910,7 +9031,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMATSPECIES, 14);
+   obj = DBMakeObject(name, DB_MULTIMATSPECIES, 30);
    DBAddIntComponent(obj, "nspec", nspec);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -8928,30 +9049,33 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
      * terminator.  Also, the +1 in the "len +=" line is for the `;'
      * character.
      */
-    len = 2;
-    for(i=0; i<nspec; i++)
+    if (specnames)
     {
-        len += strlen(specnames[i]) + 1;
-    }
-    tmp = ALLOC_N(char,len);
+        len = 2;
+        for(i=0; i<nspec; i++)
+        {
+            len += strlen(specnames[i]) + 1;
+        }
+        tmp = ALLOC_N(char,len);
 
-   /* Build 1-D character string from 2-D mesh-name array */
-   tmp[0] = ';';
-   tmp[1] = '\0';
+       /* Build 1-D character string from 2-D mesh-name array */
+       tmp[0] = ';';
+       tmp[1] = '\0';
 
-   cur = tmp+1;
-   for (i = 0; i < nspec; i++) {
-      int len2;
-      len2 = strlen(specnames[i]);
-      strncpy(cur, specnames[i], len2);
-      cur += len2;
-      strncpy(cur, ";", 1);
-      cur += 1;
-   }
+       cur = tmp+1;
+       for (i = 0; i < nspec; i++) {
+          int len2;
+          len2 = strlen(specnames[i]);
+          strncpy(cur, specnames[i], len2);
+          cur += len2;
+          strncpy(cur, ";", 1);
+          cur += 1;
+       }
 
-   count[0] = (long) (cur - tmp);
-   DBWriteComponent(dbfile, obj, "specnames", name, "char",
+       count[0] = (long) (cur - tmp);
+       DBWriteComponent(dbfile, obj, "specnames", name, "char",
                     tmp, 1, count);
+    }
 
    /*-------------------------------------------------------------
     *  Define and write the time and cycle.
@@ -8985,7 +9109,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
          /* count how many names we have */
          for (i=0; i < _mm._nmat; i++)
              nstrs += _mm._nmatspec[i];
-         db_StringArrayToStringList(_mm._specnames, nstrs, &tmpstr, &len);
+         DBStringArrayToStringList(_mm._specnames, nstrs, &tmpstr, &len);
          llen = (long) len;
          DBWriteComponent(dbfile, obj, "species_names", name, "char", tmpstr, 1, &llen);
          FREE(tmpstr);
@@ -9000,11 +9124,33 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
              for (i=0; i < _mm._nmat; i++)
                  nstrs += _mm._nmatspec[i];
          }
-         db_StringArrayToStringList(_mm._speccolors, nstrs, &tmpstr, &len);
+         DBStringArrayToStringList(_mm._speccolors, nstrs, &tmpstr, &len);
          llen = (long) len;
          DBWriteComponent(dbfile, obj, "speccolors", name, "char", tmpstr, 1, &llen);
          FREE(tmpstr);
       }
+   }
+
+   /*-------------------------------------------------------------
+    *  Add the DBOPT_MB_... options if present.
+    *-------------------------------------------------------------*/
+   if (_mm._file_ns)
+   { 
+      count[0] = strlen(_mm._file_ns)+1;
+      DBWriteComponent(dbfile, obj, "file_ns", name, "char",
+                    _mm._file_ns, 1, count);
+   }
+   if (_mm._block_ns)
+   { 
+      count[0] = strlen(_mm._block_ns)+1;
+      DBWriteComponent(dbfile, obj, "block_ns", name, "char",
+                    _mm._block_ns, 1, count);
+   }
+   if (_mm._empty_list && _mm._empty_cnt>0) {
+      DBAddIntComponent(obj, "empty_cnt", _mm._empty_cnt);
+      count[0] = _mm._empty_cnt;
+      DBWriteComponent(dbfile, obj, "empty_list", name, "integer", 
+                       _mm._empty_list, 1, count);
    }
 
    /*-------------------------------------------------------------
@@ -9348,7 +9494,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
    if (_pm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList(_pm._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList(_pm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -9777,7 +9923,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    if (_qm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList(_qm._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList(_qm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -10057,7 +10203,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
    if (_csgm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList(_csgm._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList(_csgm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -10138,7 +10284,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
    if (_csgzl._regnames)
    {
        int len; char *tmp;
-       db_StringArrayToStringList(_csgzl._regnames, nregs, &tmp, &len);
+       DBStringArrayToStringList(_csgzl._regnames, nregs, &tmp, &len);
        count[0] = len;
        DBWriteComponent(dbfile, obj, "regnames", name, "char",
                         tmp, 1, count);
@@ -10148,7 +10294,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
    if (_csgzl._zonenames)
    {
        int len; char *tmp;
-       db_StringArrayToStringList(_csgzl._zonenames, nzones, &tmp, &len);
+       DBStringArrayToStringList(_csgzl._zonenames, nzones, &tmp, &len);
        count[0] = len;
        DBWriteComponent(dbfile, obj, "zonenames", name, "char",
                         tmp, 1, count);
@@ -10708,7 +10854,7 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    if (_um._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        db_StringArrayToStringList(_um._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList(_um._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -11057,7 +11203,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
 
     /* output all the node names as one long dataset */
     s = 0;
-    db_StringArrayToStringList(strArray, num_nodes, &s, &len);
+    DBStringArrayToStringList(strArray, num_nodes, &s, &len);
     count = len;
     DBWriteComponent(dbfile, obj, "name", name, "char", s, 1, &count);
     FREE(s);
@@ -11099,7 +11245,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     if (n > 0)
     {
         s = 0;
-        db_StringArrayToStringList(strArray, n, &s, &len);
+        DBStringArrayToStringList(strArray, n, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "names", name, "char", s, 1, &count);
         FREE(s);
@@ -11112,7 +11258,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
         strArray[i] = ltree[i]->maps_name;
     s = 0;
     len = 0;
-    db_StringArrayToStringList(strArray, num_nodes, &s, &len);
+    DBStringArrayToStringList(strArray, num_nodes, &s, &len);
     count = len;
     DBWriteComponent(dbfile, obj, "maps_name", name, "char", s, 1, &count);
     FREE(s);
@@ -11168,7 +11314,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     {
         s = 0;
         len = 0;
-        db_StringArrayToStringList(_mrgt._mrgvar_onames, -1, &s, &len);
+        DBStringArrayToStringList(_mrgt._mrgvar_onames, -1, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "mrgvar_onames", name, "char", s, 1, &count);
         FREE(s);
@@ -11178,7 +11324,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     {
         s = 0;
         len = 0;
-        db_StringArrayToStringList(_mrgt._mrgvar_rnames, -1, &s, &len);
+        DBStringArrayToStringList(_mrgt._mrgvar_rnames, -1, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "mrgvar_rnames", name, "char", s, 1, &count);
         FREE(s);
@@ -11385,7 +11531,7 @@ db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
 
    if (compnames)
    {
-       db_StringArrayToStringList(compnames, ncomps, &s, &len);
+       DBStringArrayToStringList(compnames, ncomps, &s, &len);
        llen = len;
        DBWriteComponent(_dbfile, obj, "compnames", name, "char", s, 1, &llen);
        FREE(s);
@@ -11394,7 +11540,7 @@ db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
    nstrs = nregns;
    if (strchr(reg_pnames[0], '%') != 0)
        nstrs = 1;
-   db_StringArrayToStringList(reg_pnames, nstrs, &s, &len);
+   DBStringArrayToStringList(reg_pnames, nstrs, &s, &len);
    llen = len;
    DBWriteComponent(_dbfile, obj, "reg_pnames", name, "char", s, 1, &llen);
    FREE(s);
