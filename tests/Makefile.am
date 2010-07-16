@@ -44,7 +44,8 @@ check_SCRIPTS= \
  test_error.py \
  test_read.py \
  test_write.py \
- testsilock
+ testsilock \
+ testdtypes
 
 check_DATA= \
  xvers_data.tar.bz2 \

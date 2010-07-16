@@ -11,6 +11,8 @@
  *
  *  Mark C. Miller, Thu Feb 11 09:56:05 PST 2010
  *  Added test for vars with 8 subcomponents.
+ *   Mark C. Miller, Mon Feb  1 17:08:45 PST 2010
+ *   Added stuff to output all silo data types.
  *-----------------------------------------------------------------------*/
 #include <math.h>
 #include <silo.h>
@@ -142,7 +144,7 @@ int main(int argc, char *argv[]) {
   int m,s;
   int err, mixc;
   int i, driver=DB_PDB, reorder=0;
-  char filename[64], *file_ext=".silo";
+  char filename[64], *file_ext=".pdb";
   int show_all_errors = FALSE;
   DBfile *db;
 
@@ -423,7 +425,16 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
   float *coord[2];
   int dims[2];
 
+  char *cnvar, *czvar;
+  short *snvar, *szvar;
+  int *invar, *izvar;
+  long *lnvar, *lzvar;
+  long long *Lnvar, *Lzvar;
+  float *fnvar, *fzvar;
+  double *dnvar, *dzvar;
 
+  int nnodes=mesh.nx*mesh.ny;
+  int nzones=mesh.zx*mesh.zy;
   
   /* do mesh */
   c=0;
@@ -452,17 +463,45 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
 
   /* do Node vars */
 
+  cnvar = (char *)        malloc(sizeof(char)*nnodes); 
+  snvar = (short *)       malloc(sizeof(short)*nnodes); 
+  invar = (int *)         malloc(sizeof(int)*nnodes); 
+  lnvar = (long *)        malloc(sizeof(long)*nnodes); 
+  Lnvar = (long long *)   malloc(sizeof(long long)*nnodes); 
+  fnvar = (float *)       malloc(sizeof(float)*nnodes); 
+  dnvar = (double *)      malloc(sizeof(double)*nnodes); 
   c=0;
   for (x=0;x<mesh.nx;x++) {
     for (y=0;y<mesh.ny;y++) {
       f1[c]=mesh.node[x][y].vars[NV_U];
       f2[c]=mesh.node[x][y].vars[NV_V];
+      cnvar[c] = (char)        (x<y?x:y);
+      snvar[c] = (short)       (x<y?x:y);
+      invar[c] = (int)         (x<y?x:y);
+      lnvar[c] = (long)        (x<y?x:y);
+      Lnvar[c] = (long long)   (x<y?x:y);
+      fnvar[c] = (float)       (x<y?x:y);
+      dnvar[c] = (double)      (x<y?x:y);
       c++;
     }
   }
 
   DBPutQuadvar1(db, "u", "Mesh", f1, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
   DBPutQuadvar1(db, "v", "Mesh", f2, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "cnvar", "Mesh", cnvar, dims, 2, NULL, 0, DB_CHAR, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "snvar", "Mesh", snvar, dims, 2, NULL, 0, DB_SHORT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "invar", "Mesh", invar, dims, 2, NULL, 0, DB_INT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "lnvar", "Mesh", lnvar, dims, 2, NULL, 0, DB_LONG, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "Lnvar", "Mesh", Lnvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "fnvar", "Mesh", fnvar, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "dnvar", "Mesh", dnvar, dims, 2, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
+  free(cnvar);
+  free(snvar);
+  free(invar);
+  free(lnvar);
+  free(Lnvar);
+  free(fnvar);
+  free(dnvar);
 
   /* test writing a quadvar with many components */
   varnames[0] = "u0";
@@ -485,11 +524,25 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
   dims[0]--;
   dims[1]--;
 
+  czvar = (char *)        malloc(sizeof(char)*nzones); 
+  szvar = (short *)       malloc(sizeof(short)*nzones); 
+  izvar = (int *)         malloc(sizeof(int)*nzones); 
+  lzvar = (long *)        malloc(sizeof(long)*nzones); 
+  Lzvar = (long long *)   malloc(sizeof(long long)*nzones); 
+  fzvar = (float *)       malloc(sizeof(float)*nzones); 
+  dzvar = (double *)      malloc(sizeof(double)*nzones); 
   c=0;
   for (x=0;x<mesh.zx;x++) {
     for (y=0;y<mesh.zy;y++) {
       f1[c]=mesh.zone[x][y].vars[ZV_P];
       f2[c]=mesh.zone[x][y].vars[ZV_D];
+      czvar[c] = (char)        (x<y?x:y);
+      szvar[c] = (short)       (x<y?x:y);
+      izvar[c] = (int)         (x<y?x:y);
+      lzvar[c] = (long)        (x<y?x:y);
+      Lzvar[c] = (long long)   (x<y?x:y);
+      fzvar[c] = (float)       (x<y?x:y);
+      dzvar[c] = (double)      (x<y?x:y);
       c++;
     }
   }
@@ -505,6 +558,20 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
 
   DBPutQuadvar1(db, "p", "Mesh", f1, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
   DBPutQuadvar1(db, "d", "Mesh", f2, dims, 2, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "czvar", "Mesh", czvar, dims, 2, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "szvar", "Mesh", szvar, dims, 2, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "izvar", "Mesh", izvar, dims, 2, NULL, 0, DB_INT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "lzvar", "Mesh", lzvar, dims, 2, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "Lzvar", "Mesh", Lzvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "fzvar", "Mesh", fzvar, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "dzvar", "Mesh", dzvar, dims, 2, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
+  free(czvar);
+  free(szvar);
+  free(izvar);
+  free(lzvar);
+  free(Lzvar);
+  free(fzvar);
+  free(dzvar);
 }
 
 /*----------------------------------------------------------------------------
@@ -527,6 +594,13 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
   char  *coordnames[2];
   float *coord[2];
   int dims[2];
+  char *cnvar, *czvar;
+  short *snvar, *szvar;
+  int *invar, *izvar;
+  long *lnvar, *lzvar;
+  long long *Lnvar, *Lzvar;
+  float *fnvar, *fzvar;
+  double *dnvar, *dzvar;
 
   int lnodelist;
   int nnodes;
@@ -583,11 +657,25 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
 
   /* do Node vars */
 
+  cnvar = (char *)        malloc(sizeof(char)*nnodes); 
+  snvar = (short *)       malloc(sizeof(short)*nnodes); 
+  invar = (int *)         malloc(sizeof(int)*nnodes); 
+  lnvar = (long *)        malloc(sizeof(long)*nnodes); 
+  Lnvar = (long long *)   malloc(sizeof(long long)*nnodes); 
+  fnvar = (float *)       malloc(sizeof(float)*nnodes); 
+  dnvar = (double *)      malloc(sizeof(double)*nnodes); 
   c=0;
   for (x=0;x<mesh.nx;x++) {
     for (y=0;y<mesh.ny;y++) {
       f1[c]=mesh.node[x][y].vars[NV_U];
       f2[c]=mesh.node[x][y].vars[NV_V];
+      cnvar[c] = (char)        (x<y?x:y);
+      snvar[c] = (short)       (x<y?x:y);
+      invar[c] = (int)         (x<y?x:y);
+      lnvar[c] = (long)        (x<y?x:y);
+      Lnvar[c] = (long long)   (x<y?x:y);
+      fnvar[c] = (float)       (x<y?x:y);
+      dnvar[c] = (double)      (x<y?x:y);
       c++;
     }
   }
@@ -602,19 +690,49 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
         DB_NODECENT, opt);
     DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT,
         DB_NODECENT, opt);
+    DBPutUcdvar1(db, "u", "Mesh", f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "cnvar", "Mesh", cnvar, nnodes, NULL, 0, DB_CHAR, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "snvar", "Mesh", snvar, nnodes, NULL, 0, DB_SHORT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "invar", "Mesh", invar, nnodes, NULL, 0, DB_INT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "lnvar", "Mesh", lnvar, nnodes, NULL, 0, DB_LONG, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "Lnvar", "Mesh", Lnvar, nnodes, NULL, 0, DB_LONG_LONG, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "fnvar", "Mesh", fnvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "dnvar", "Mesh", dnvar, nnodes, NULL, 0, DB_DOUBLE, DB_NODECENT, opt);
     DBFreeOptlist(opt);
   }
+  free(cnvar);
+  free(snvar);
+  free(invar);
+  free(lnvar);
+  free(Lnvar);
+  free(fnvar);
+  free(dnvar);
 
   /* do Zone vars */
 
   dims[0]--;
   dims[1]--;
 
+  czvar = (char *)        malloc(sizeof(char)*nzones); 
+  szvar = (short *)       malloc(sizeof(short)*nzones); 
+  izvar = (int *)         malloc(sizeof(int)*nzones); 
+  lzvar = (long *)        malloc(sizeof(long)*nzones); 
+  Lzvar = (long long *)   malloc(sizeof(long long)*nzones); 
+  fzvar = (float *)       malloc(sizeof(float)*nzones); 
+  dzvar = (double *)      malloc(sizeof(double)*nzones); 
   c=0;
   for (x=0;x<mesh.zx;x++) {
     for (y=0;y<mesh.zy;y++) {
       f1[c]=mesh.zone[x][y].vars[ZV_P];
       f2[c]=mesh.zone[x][y].vars[ZV_D];
+      czvar[c] = (char)        (x<y?x:y);
+      szvar[c] = (short)       (x<y?x:y);
+      izvar[c] = (int)         (x<y?x:y);
+      lzvar[c] = (long)        (x<y?x:y);
+      Lzvar[c] = (long long)   (x<y?x:y);
+      fzvar[c] = (float)       (x<y?x:y);
+      dzvar[c] = (double)      (x<y?x:y);
       c++;
     }
   }
@@ -630,6 +748,20 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
 
   DBPutUcdvar1(db, "p", "Mesh", f1, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
   DBPutUcdvar1(db, "d", "Mesh", f2, nzones, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "czvar", "Mesh", czvar, nzones, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "szvar", "Mesh", szvar, nzones, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "izvar", "Mesh", izvar, nzones, NULL, 0, DB_INT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "lzvar", "Mesh", lzvar, nzones, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "Lzvar", "Mesh", Lzvar, nzones, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "fzvar", "Mesh", fzvar, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "dzvar", "Mesh", dzvar, nzones, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
+  free(czvar);
+  free(szvar);
+  free(izvar);
+  free(lzvar);
+  free(Lzvar);
+  free(fzvar);
+  free(dzvar);
 }
 
 

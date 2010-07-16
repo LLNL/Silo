@@ -258,6 +258,11 @@ AT_SETUP(silock)
 AT_KEYWORDS(tools)
 AT_CHECK(testsilock `pwd` $STARGS,,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(force single)
+AT_KEYWORDS(conversions)
+AT_CHECK(specmix $STARGS,,ignore)
+AT_CHECK(testdtypes `pwd` $STARGS,,ignore)
+AT_CLEANUP
 AT_SETUP(multi_file)
 AT_KEYWORDS(large)
 AT_CHECK($VALGRIND multi_file $STARGS,,ignore)
