@@ -2952,14 +2952,16 @@ PRIVATE int
 silo2silo_type(int datatype)
 {
     switch (datatype) {
-    case DB_CHAR:
-        return DB_CHAR;
-    case 0:
-    case DB_FLOAT:
-    case DB_DOUBLE:
-        return force_single_g ? DB_FLOAT : DB_DOUBLE;
+    case 0: return force_single_g ? DB_FLOAT : DB_DOUBLE;
+    case DB_CHAR: return DB_CHAR;
+    case DB_SHORT: return DB_SHORT;
+    case DB_INT: return DB_INT;
+    case DB_LONG: return DB_LONG;
+    case DB_LONG_LONG: return DB_LONG_LONG;
+    case DB_FLOAT: return DB_FLOAT;
+    case DB_DOUBLE: return force_single_g ? DB_FLOAT : DB_DOUBLE;
     }
-    return DB_INT;
+    return DB_FLOAT;
 }
 
 
@@ -4258,6 +4260,12 @@ db_hdf5_comprd(DBfile_hdf5 *dbfile, char *name, int ignore_force_single)
                 else if (mtype == H5T_NATIVE_LONG)
                 {
                     long *lbuf = (long *) buf;
+                    for (i = 0; i < nelmts; i++)
+                        newbuf[i] = (float)(lbuf[i]);
+                }
+                else if (mtype == H5T_NATIVE_LLONG)
+                {
+                    long long *lbuf = (long long *) buf;
                     for (i = 0; i < nelmts; i++)
                         newbuf[i] = (float)(lbuf[i]);
                 }
@@ -7652,8 +7660,7 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
         if ((cu->datatype = db_hdf5_GetVarType(_dbfile, 
                                 db_hdf5_resolvename(_dbfile, name, m.xvarname))) < 0)
             cu->datatype = DB_FLOAT;
-        if (cu->datatype == DB_DOUBLE && force_single_g)
-            cu->datatype = DB_FLOAT;
+        if (force_single_g) cu->datatype = DB_FLOAT;
         cu->title = OPTDUP(m.label);
         cu->xvarname = OPTDUP(m.xvarname);
         cu->yvarname = OPTDUP(m.yvarname);
@@ -7870,8 +7877,7 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
         csgm->cycle = m.cycle;
         if ((csgm->datatype = db_hdf5_GetVarType(_dbfile, m.coeffs)) < 0)
             csgm->datatype = DB_FLOAT;
-        if (csgm->datatype == DB_DOUBLE && force_single_g)
-            csgm->datatype = DB_FLOAT;
+        if (force_single_g) csgm->datatype = DB_FLOAT;
         csgm->time = m.time;
         csgm->dtime = m.dtime;
         csgm->ndims = m.ndims;
@@ -8100,8 +8106,7 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, const char *name)
         csgv->dtime = m.dtime;
         if ((csgv->datatype = db_hdf5_GetVarType(_dbfile, m.vals[0])) < 0)
             csgv->datatype = silo2silo_type(m.datatype);
-        if (csgv->datatype == DB_DOUBLE && force_single_g)
-            csgv->datatype = DB_FLOAT;
+        if (force_single_g) csgv->datatype = DB_FLOAT;
         csgv->nels = m.nels;
         csgv->nvals = m.nvals;
         csgv->centering = m.centering;
@@ -8304,8 +8309,7 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name)
         zl->lxform = m.lxform;
         if ((zl->datatype = db_hdf5_GetVarType(_dbfile, m.xform)) < 0)
             zl->datatype = DB_FLOAT;
-        if (zl->datatype == DB_DOUBLE && force_single_g)
-            zl->datatype = DB_FLOAT;
+        if (force_single_g) zl->datatype = DB_FLOAT;
 
         /* Read the raw data */
         if (SILO_Globals.dataReadMask & DBZonelistInfo)
@@ -8842,8 +8846,7 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char *name)
         qm->planar = m.planar;
         if ((qm->datatype = db_hdf5_GetVarType(_dbfile, m.coord[0])) < 0)
             qm->datatype = DB_FLOAT;
-        if (qm->datatype == DB_DOUBLE && force_single_g)
-            qm->datatype = DB_FLOAT;
+        if (force_single_g) qm->datatype = DB_FLOAT;
         qm->time = m.time;
         qm->dtime = m.dtime;
         qm->ndims = m.ndims;
@@ -9242,8 +9245,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
         qv->cycle = m.cycle;
         if ((qv->datatype = db_hdf5_GetVarType(_dbfile, m.value[0])) < 0)
             qv->datatype = silo2silo_type(m.datatype);
-        if (qv->datatype == DB_DOUBLE && force_single_g)
-            qv->datatype = DB_FLOAT;
+        if (force_single_g) qv->datatype = DB_FLOAT;
         qv->nels = m.nels;
         qv->nvals = m.nvals;
         qv->ndims = m.ndims;
@@ -9769,8 +9771,7 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
             um->topo_dim = um->topo_dim - 1;
         if ((um->datatype = db_hdf5_GetVarType(_dbfile, m.coord[0])) < 0)
             um->datatype = DB_FLOAT;
-        if (um->datatype == DB_DOUBLE && force_single_g)
-            um->datatype = DB_FLOAT;
+        if (force_single_g) um->datatype = DB_FLOAT;
         um->time = m.time;
         um->dtime = m.dtime;
         um->ndims = m.ndims;
@@ -10191,8 +10192,7 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char *name)
         uv->dtime = m.dtime;
         if ((uv->datatype = db_hdf5_GetVarType(_dbfile, m.value[0])) < 0)
             uv->datatype = silo2silo_type(m.datatype);
-        if (uv->datatype == DB_DOUBLE && force_single_g)
-            uv->datatype = DB_FLOAT;
+        if (force_single_g) uv->datatype = DB_FLOAT;
         uv->nels = m.nels;
         uv->nvals = m.nvals;
         uv->ndims = m.ndims;
@@ -11151,8 +11151,7 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char *name)
         ma->mixlen = m.mixlen;
         if ((ma->datatype = db_hdf5_GetVarType(_dbfile, m.mix_vf)) < 0)
             ma->datatype = DB_DOUBLE;  /* PDB driver assumes double */
-        if (ma->datatype == DB_DOUBLE && force_single_g)
-            ma->datatype = DB_FLOAT;
+        if (force_single_g) ma->datatype = DB_FLOAT;
         for (nels=1, i=0; i<m.ndims; i++) {
             ma->dims[i] = m.dims[i];
             ma->stride[i] = nels;
@@ -11396,8 +11395,7 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
         ms->mixlen = m.mixlen;
         if ((ms->datatype = db_hdf5_GetVarType(_dbfile, m.species_mf)) < 0)
             ms->datatype = silo2silo_type(m.datatype);
-        if (ms->datatype == DB_DOUBLE && force_single_g)
-            ms->datatype = DB_FLOAT;
+        if (force_single_g) ms->datatype = DB_FLOAT;
         for (i=0, nels=1; i<m.ndims; i++) {
             ms->dims[i] = m.dims[i];
             ms->stride[i] = nels;
@@ -13399,8 +13397,7 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
         pm->dtime = m.dtime;
         if ((pm->datatype = db_hdf5_GetVarType(_dbfile, m.coord[0])) < 0)
             pm->datatype = DB_FLOAT;
-        if (pm->datatype == DB_DOUBLE && force_single_g)
-            pm->datatype = DB_FLOAT;
+        if (force_single_g) pm->datatype = DB_FLOAT;
         pm->ndims = m.ndims;
         pm->nels = m.nels;
         pm->group_no = m.group_no;
@@ -13635,8 +13632,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
         pv->cycle = m.cycle;
         if ((pv->datatype = db_hdf5_GetVarType(_dbfile, m.data[0])) < 0)
             pv->datatype = silo2silo_type(m.datatype);
-        if (pv->datatype == DB_DOUBLE && force_single_g)
-            pv->datatype = DB_FLOAT;
+        if (force_single_g) pv->datatype = DB_FLOAT;
         pv->nels = m.nels;
         pv->nvals = m.nvals;
         pv->nspace = m.nspace;
@@ -13817,8 +13813,7 @@ db_hdf5_GetCompoundarray(DBfile *_dbfile, char *name)
         ca->nvalues = m.nvalues;
         if ((ca->datatype = db_hdf5_GetVarType(_dbfile, m.values)) < 0)
             ca->datatype = silo2silo_type(m.datatype);
-        if (ca->datatype == DB_DOUBLE && force_single_g)
-            ca->datatype = DB_FLOAT;
+        if (force_single_g) ca->datatype = DB_FLOAT;
         
         /* Read the raw data */
         ca->elemlengths = db_hdf5_comprd(dbfile, m.elemlengths, 1);
@@ -14844,8 +14839,7 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
         mrgv->ncomps = m.ncomps;
         if ((mrgv->datatype = db_hdf5_GetVarType(_dbfile, m.data[0])) < 0)
             mrgv->datatype = silo2silo_type(m.datatype);
-        if (mrgv->datatype == DB_DOUBLE && force_single_g)
-            mrgv->datatype = DB_FLOAT;
+        if (force_single_g) mrgv->datatype = DB_FLOAT;
 
         /* Read the raw data */
         if (m.ncomps>MAX_VARS) {
