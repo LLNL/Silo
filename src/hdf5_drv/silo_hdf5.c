@@ -4571,8 +4571,7 @@ db_hdf5_process_file_options(opts_set_id)
             h5status |= H5Pset_alignment(retval, fourkb/2, fourkb); 
 #else
             H5Pclose(retval);
-            db_perror("HDF5 Direct VFD", E_NOTENABLEDINBUILD, me);
-            return -1;
+            return db_perror("HDF5 Direct VFD", E_NOTENABLEDINBUILD, me);
 #endif
             break;
         }
@@ -4593,8 +4592,7 @@ db_hdf5_process_file_options(opts_set_id)
             h5status |= H5Pset_fapl_mpiposix(retval, MPI_COMM_SELF, TRUE);
 #else
             H5Pclose(retval);
-            db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
-            return -1;
+            return db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
 #endif
             break;
         }
@@ -4608,8 +4606,7 @@ db_hdf5_process_file_options(opts_set_id)
             MPI_Info_free(&info);
 #else
             H5Pclose(retval);
-            db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
-            return -1;
+            return db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
 #endif
             break;
         }
@@ -4755,8 +4752,7 @@ db_hdf5_process_file_options(opts_set_id)
                     h5status |= H5Pset_alignment(retval, align_min, align_val); 
 #else
                     H5Pclose(retval);
-                    db_perror("HDF5 Direct VFD", E_NOTENABLEDINBUILD, me);
-                    return -1;
+                    return db_perror("HDF5 Direct VFD", E_NOTENABLEDINBUILD, me);
 #endif
                     break;
 
@@ -4839,8 +4835,7 @@ db_hdf5_process_file_options(opts_set_id)
                     }
 #else 
                     H5Pclose(retval);
-                    db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
-                    return -1;
+                    return db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
 #endif
                     break;
                 }
@@ -5714,10 +5709,11 @@ typedef struct copy_dir_data_t {
 static herr_t 
 copy_dir(hid_t grp, const char *name, void *op_data)
 {
+    static char         *me = "copy_dir";
+#if HDF5_VERSION_GE(1,8,0)
     H5G_stat_t          sb;
     hid_t               obj;
     int                 objtype = -1;
-    static char         *me = "copy_dir";
     copy_dir_data_t *cp_data = (copy_dir_data_t *)op_data;
     DBfile_hdf5 *dstfile = (DBfile_hdf5*)cp_data->dstFile;
 
@@ -5824,10 +5820,9 @@ copy_dir(hid_t grp, const char *name, void *op_data)
                     char cname[8];
                     db_hdf5_compname(dstfile, cname);
 
-#if HDF5_VERSION_GE(1,8,0)
                     /* copy this dataset to /.silo dir in dst file */
                     H5Ocopy(grp, mem_value, dstfile->link, cname, H5P_DEFAULT, H5P_DEFAULT);
-#endif
+
                     /* update this attribute's entry with name for this dataset */
                     sprintf(file_value+offset, "%s%s", LINKGRP, cname);
                 }
@@ -5856,9 +5851,7 @@ copy_dir(hid_t grp, const char *name, void *op_data)
     }
 
     case H5G_DATASET:
-#if HDF5_VERSION_GE(1,8,0)
         H5Ocopy(grp, name, dstfile->cwg, name, H5P_DEFAULT, H5P_DEFAULT);
-#endif
         break;
 
     default:
@@ -5866,6 +5859,9 @@ copy_dir(hid_t grp, const char *name, void *op_data)
         break;
     }
     return 0;
+#else
+    return db_perror("H5O API for copy", E_NOTENABLEDINBUILD);
+#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -14926,8 +14922,9 @@ CALLBACK int
 db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     const char *const *const names, int *ordering)
 {
+    static char *me = "db_hdf5_SortObjectsByOffset";
+#if HDF5_VERSION_GE(1,8,0)
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
-    static char *me = "db_hdf5_GetMrgvar";
     index_offset_pair_t *iop = (index_offset_pair_t*)
         malloc(nobjs * sizeof(index_offset_pair_t));
     int i;
@@ -14962,6 +14959,9 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     free(iop);
 
     return 0;
+#else
+    return db_perror("H5O API for sort", E_NOTENABLEDINBUILD, me);
+#endif
 }
 
 #else
