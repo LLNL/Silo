@@ -152,11 +152,7 @@ PUBLIC char   *_db_err_list[] =
     "Specified driver cannot open this file.",/* 29 */
     "Optlist contains options for wrong class.",/* 30 */
     "Feature not enabled in this build.", /* 31 */
-    "Too many file options sets (missing call to DBUnregisterFileOptionsSet?)." /* 32 */
-};
-
-#warning REMOVE DUP FROM UNKNOWN PLUGIN
-static char *no_hdf5_driver_msg =
+    "Too many file options sets (missing DBUnregisterFileOptionsSet?).", /* 32 */
     "\nYou have tried to open or create a Silo file using\n"
     "the HDF5 driver. However, the installation of Silo\n"
     "you are using does not have the HDF5 driver enabled.\n"
@@ -164,7 +160,8 @@ static char *no_hdf5_driver_msg =
     "--with-hdf5=<INC,LIB> option and re-compile and\n"
     "re-install Silo. If you do not have an installation\n"
     "of HDF5 already on your sytem, you will also need\n"
-    "to obtain HDF5 from www.hdfgroup.org and install it.";
+    "to obtain HDF5 from www.hdfgroup.org and install it." /* 33 */
+};
 
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
 typedef struct reg_status_t {
@@ -4159,13 +4156,13 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
         }
 
         if (!DBCreateCB[type]) {
+            sprintf(ascii, "%d", type);
             if (type == 7)
             {
-                API_ERROR(no_hdf5_driver_msg, E_NOTIMP);
+                API_ERROR(ascii, E_NOHDF5);
             }
             else
             {
-                sprintf(ascii, "%d", type);
                 API_ERROR(ascii, E_NOTIMP);
             }
         }

@@ -120,16 +120,6 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
                                          "debug" };
     static int     nhiers = sizeof(hierarchy) / sizeof(hierarchy[0]);
 
-    static char *no_hdf5_driver_msg =
-        "\nYou have tried to open or create a Silo file using\n"
-        "the HDF5 driver. However, the installation of Silo\n"
-        "you are using does not have the HDF5 driver enabled.\n"
-        "You need to configure the Silo library using the\n"
-        "--with-hdf5=<INC,LIB> option and re-compile and\n"
-        "re-install Silo. If you do not have an installation\n"
-        "of HDF5 already on your sytem, you will also need\n"
-        "to obtain HDF5 from www.hdfgroup.org and install it.";
-
     /*
      * Try each driver...
      */
@@ -177,7 +167,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     {
         if (DBGetDriverTypeFromPath(name) == 7)
         {
-            db_perror(no_hdf5_driver_msg, E_NOTIMP, me);
+            db_perror(tried, E_NOHDF5, me);
         }
         else
         {

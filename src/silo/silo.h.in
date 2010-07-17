@@ -514,6 +514,7 @@ typedef enum {
 #define     E_BADOPTCLASS 30    /*Optlist contains options for wrong class */
 #define     E_NOTENABLEDINBUILD 31 /*feature not enabled in this build */
 #define     E_MAXFILEOPTSETS 32    /*Too many file options sets */
+#define     E_NOHDF5 33         /*HDF5 driver not available */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */

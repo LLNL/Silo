@@ -1,3 +1,5 @@
+#if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
+
 /* The _GNU_SOURCE wrapper logic is to enable the O_DIRECT flag */
 #ifdef __linux__
 #define _GNU_SOURCE
@@ -2272,3 +2274,4 @@ H5FD_silo_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 #error "Do not use HDF5 private definitions"
 #endif
 
+#endif
