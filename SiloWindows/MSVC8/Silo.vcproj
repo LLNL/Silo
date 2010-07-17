@@ -802,18 +802,6 @@
 			Name="pdb_drv"
 			>
 			<File
-				RelativePath="..\..\src\pdb_drv\pjgroup.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb_drv\pjjacket.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb_drv\pjobj.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\pdb_drv\silo_pdb.c"
 				>
 			</File>

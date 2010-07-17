@@ -335,7 +335,9 @@ typedef struct context_t {
  */
 #define PRIVATE         static
 #define INTERNAL                /*semi-private */
+#ifndef CALLBACK
 #define CALLBACK        static
+#endif
 #define PUBLIC                  /*public */
 #define FORTRAN         int
 

@@ -2318,7 +2318,7 @@ DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
 	  cvars = malloc(sizeof(float*) * (*nvars));
 	  /* Make pointers to Fortran address in vars array */
 	  for (i=0;i<*nvars;i++) {
-	    cvars[i] = vars + i*indx ;
+	    cvars[i] = (float*)vars + i*indx ;
 	  }
 	} else {
 	  API_ERROR("vars", E_BADARGS);
@@ -2328,7 +2328,7 @@ DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
 	  cmixvar = malloc(sizeof(float*) * (*nvars));
 	  /* Make pointers to Fortran address in vars array */
 	  for (i=0;i<*nvars;i++) {
-	    cmixvar[i] = mixvar + i*indx ;
+	    cmixvar[i] = (float*)mixvar + i*indx ;
 	  }
 	}
 

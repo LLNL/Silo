@@ -40,12 +40,12 @@
 extern "C" {
 #endif
 
-H5_DLL hid_t H5FD_silo_init(void);
-H5_DLL void H5FD_silo_term(void);
-H5_DLL herr_t H5Pset_fapl_silo(hid_t fapl_id);
-H5_DLL herr_t H5Pset_silo_block_size_and_count(hid_t fapl_id, hsize_t block_size, int max_blocks_in_mem);
-H5_DLL herr_t H5Pset_silo_log_stats(hid_t fapl_id, int log);
-H5_DLL herr_t H5Pset_silo_use_direct(hid_t fapl_id, int used);
+hid_t H5FD_silo_init(void);
+void H5FD_silo_term(void);
+herr_t H5Pset_fapl_silo(hid_t fapl_id);
+herr_t H5Pset_silo_block_size_and_count(hid_t fapl_id, hsize_t block_size, int max_blocks_in_mem);
+herr_t H5Pset_silo_log_stats(hid_t fapl_id, int log);
+herr_t H5Pset_silo_use_direct(hid_t fapl_id, int used);
 
 #ifdef __cplusplus
 }

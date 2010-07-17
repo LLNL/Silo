@@ -11,7 +11,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #ifdef __linux__
 #undef _GNU_SOURCE
@@ -178,7 +180,7 @@ static const char *flavors(H5F_mem_t m)
 #define H5E_PUSH_HELPER(Func,Cls,Maj,Min,Msg,Ret,Errno)			\
 {									\
     ret_value = Ret;							\
-    H5Epush_ret(Func, Cls, Maj, Min, msg, Ret)				\
+    H5Epush_ret(Func, Cls, Maj, Min, Msg, Ret)				\
 }
 #endif
 
@@ -1402,7 +1404,9 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     if (H5F_ACC_TRUNC & flags) o_flags |= O_TRUNC;
     if (H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
+#ifdef O_DIRECT
     if (silo_use_direct) o_flags |= O_DIRECT;
+#endif
 
     errno = 0;
     if ((fd = HDopen(name, o_flags, 0666)) < 0)

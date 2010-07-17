@@ -14,6 +14,15 @@
 #define stat   _stat
 #define access _access
 
+#ifndef S_IWUSR
+#ifdef S_IWRITE
+#define S_IWUSR S_IWRITE
+#else
+#define S_IWUSR _S_IWRITE
+#endif
+#endif
+
+
 /* Define modes for the call to _access if they are not already defined. */
 #ifndef F_OK
 #define F_OK   0
