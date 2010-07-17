@@ -225,7 +225,7 @@ EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
             if (strcmp(tree->sval, ns->arrnames[i]) == 0)
             {
                 if (tree->type == '$')
-                    return SaveString(ns, (char*) (ns->arrvals[i][q]));
+                    return SaveString(ns,  ((char**)ns->arrvals[i])[q]);
                 else
                     return ns->arrvals[i][q];
             }
