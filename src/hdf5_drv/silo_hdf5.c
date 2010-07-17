@@ -5152,7 +5152,6 @@ db_hdf5_initiate_close(DBfile *_dbfile)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_initiate_close";
-    unsigned long filenum;
     int i;
 
     /* Close all datasets in the circular buffer */

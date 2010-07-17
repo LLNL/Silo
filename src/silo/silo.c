@@ -4533,9 +4533,28 @@ DBInqVarExists(DBfile *dbfile, const char *varname)
 /*-------------------------------------------------------------------------
  * Function:    DBForceSingle
  *
- * Purpose:     If `status' is non-zero, then all device drivers are
- *              initialized so that double-precision floating-point
- *              values are converted to single-precision.
+ * Purpose:     If 'status' is non-zero, then any 'datatype'd arrays are
+ *              converted on read from whatever their native datatype is to
+ *              float. A 'datatype'd array is an array that is part of some
+ *              Silo object containing a 'datatype' member which indicates
+ *              the type of data in the array. So, for example, a DBucdvar
+ *              has a 'datatype' member to indicate the type of data in the
+ *              var and mixvar arrays. Such arrays will be converted on read
+ *              if 'status' here is non-zero. However, a DBmaterial object 
+ *              is ALWAYS integer data. There is no 'datatype' member for
+ *              such an object and so its data will NEVER be converted to
+ *              float on read regardless of force single status set here.
+ *
+ *              I believe this function's original intention was to convert
+ *              only double precision arrays to single precision. However,
+ *              the PDB driver was apparently never designed that way and
+ *              the PDB driver's behavior sort of established the defacto
+ *              meaning of force single. So, now, as of Silo version 4.8
+ *              the HDF5 driver obeys it as well. Though, in fact the HDF5
+ *              driver was originally written to support the original
+ *              intention of force single status and it worked in this
+ *              ('buggy') fashion for many years before we started
+ *              encountering real problems with it in VisIt.
  *
  * Return:      Success:        0 if all drivers succeeded or did not
  *                              implement this function.
@@ -4548,6 +4567,10 @@ DBInqVarExists(DBfile *dbfile, const char *varname)
  * Modifications:
  *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
  *    I replaced API_END with API_END_NOPOP.
+ *
+ *    Mark C. Miller, Fri Jul 16 19:28:23 PDT 2010
+ *    Updated 'Purpose' above to reflect current understanding of the
+ *    meaning of force single.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBForceSingle(int status)
