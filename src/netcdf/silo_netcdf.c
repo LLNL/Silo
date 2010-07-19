@@ -141,7 +141,7 @@ db_cdf_InitCallbacks (DBfile *dbfile)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_Close(DBfile *_dbfile)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -238,7 +238,7 @@ db_cdf_Open(char *name, int mode, int subtype)
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_Filters(DBfile *dbfile, FILE *stream)
 {
     fprintf(stream, "NetCDF Device Driver\n");
@@ -286,7 +286,7 @@ db_cdf_ForceSingle(int status)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_GetDir(DBfile *_dbfile, char *result)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -351,7 +351,7 @@ db_cdf_GetDir(DBfile *_dbfile, char *result)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_NewToc(DBfile *_dbfile)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -593,7 +593,7 @@ db_cdf_NewToc(DBfile *_dbfile)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK void *
+SILO_CALLBACK void *
 db_cdf_GetAtt(DBfile *_dbfile, char *varname, char *attname)
 {
     void          *result;
@@ -635,7 +635,7 @@ db_cdf_GetAtt(DBfile *_dbfile, char *varname, char *attname)
  *      Added support for the read mask stuff.
  *
  *-------------------------------------------------------------------------*/
-CALLBACK DBmaterial *
+SILO_CALLBACK DBmaterial *
 db_cdf_GetMaterial(DBfile *_dbfile, char *name)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -709,7 +709,7 @@ db_cdf_GetMaterial(DBfile *_dbfile, char *name)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK DBmatspecies *
+SILO_CALLBACK DBmatspecies *
 db_cdf_GetMatspecies(DBfile *_dbfile, char *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -794,7 +794,7 @@ db_cdf_GetMatspecies(DBfile *_dbfile, char *objname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK void *
+SILO_CALLBACK void *
 db_cdf_GetComponent(DBfile *_dbfile, char *objname, char *compname)
 {
     void          *result = NULL;
@@ -842,7 +842,7 @@ db_cdf_GetComponent(DBfile *_dbfile, char *objname, char *compname)
  *    Handle topo_dim member correctly.
  *-------------------------------------------------------------------------
  */
-CALLBACK DBmultimesh *
+SILO_CALLBACK DBmultimesh *
 db_cdf_GetMultimesh(DBfile *_dbfile, char *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -928,7 +928,7 @@ db_cdf_GetMultimesh(DBfile *_dbfile, char *objname)
  *      Added support for the read mask stuff.
  *
  *-------------------------------------------------------------------------*/
-CALLBACK DBpointmesh *
+SILO_CALLBACK DBpointmesh *
 db_cdf_GetPointmesh(DBfile *_dbfile, char *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1004,7 +1004,7 @@ db_cdf_GetPointmesh(DBfile *_dbfile, char *objname)
  *      Added support for the read mask stuff.
  *
  *-------------------------------------------------------------------------*/
-CALLBACK DBmeshvar *
+SILO_CALLBACK DBmeshvar *
 db_cdf_GetPointvar(DBfile *_dbfile, char *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1082,7 +1082,7 @@ db_cdf_GetPointvar(DBfile *_dbfile, char *objname)
  *      Added support for the read mask stuff.
  *
  *-------------------------------------------------------------------------*/
-CALLBACK DBquadmesh *
+SILO_CALLBACK DBquadmesh *
 db_cdf_GetQuadmesh(DBfile *_dbfile, char *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1166,7 +1166,7 @@ db_cdf_GetQuadmesh(DBfile *_dbfile, char *objname)
  *      Added support for the read mask stuff.
  *
  *-------------------------------------------------------------------------*/
-CALLBACK DBquadvar *
+SILO_CALLBACK DBquadvar *
 db_cdf_GetQuadvar(DBfile *_dbfile, char *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1276,7 +1276,7 @@ db_cdf_GetQuadvar(DBfile *_dbfile, char *objname)
  *    Mark C. Miller, Mon Jan 12 17:29:05 PST 2009
  *    Handle topo_dim member correctly.
  *-------------------------------------------------------------------------*/
-CALLBACK DBucdmesh *
+SILO_CALLBACK DBucdmesh *
 db_cdf_GetUcdmesh(DBfile *_dbfile, char *meshname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1434,7 +1434,7 @@ db_cdf_GetUcdmesh(DBfile *_dbfile, char *meshname)
  *      Sean Ahern, Fri Aug  3 13:18:37 PDT 2001
  *      Added support for the read mask stuff.
  *--------------------------------------------------------------------*/
-CALLBACK DBucdvar *
+SILO_CALLBACK DBucdvar *
 db_cdf_GetUcdvar(DBfile *_dbfile, char *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1523,7 +1523,7 @@ db_cdf_GetUcdvar(DBfile *_dbfile, char *varname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK void *
+SILO_CALLBACK void *
 db_cdf_GetVar(DBfile *_dbfile, char *name)
 {
     char          *me = "db_cdf_GetVar";
@@ -1564,7 +1564,7 @@ db_cdf_GetVar(DBfile *_dbfile, char *name)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_GetVarByteLength(DBfile *_dbfile, char *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1600,7 +1600,7 @@ db_cdf_GetVarByteLength(DBfile *_dbfile, char *varname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_GetVarLength(DBfile *_dbfile, char *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1633,7 +1633,7 @@ db_cdf_GetVarLength(DBfile *_dbfile, char *varname)
  *
  *--------------------------------------------------------------------
  */
-CALLBACK DBObjectType
+SILO_CALLBACK DBObjectType
 db_cdf_InqVarType(DBfile *_dbfile, char *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1669,7 +1669,7 @@ db_cdf_InqVarType(DBfile *_dbfile, char *varname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_InqMeshname(DBfile *_dbfile, char *vname, char *mname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1709,7 +1709,7 @@ db_cdf_InqMeshname(DBfile *_dbfile, char *vname, char *mname)
  *  Changed FREE to SCFREE to be consistant with allocation.
  *--------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_InqMeshtype(DBfile *_dbfile, char *meshname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1766,7 +1766,7 @@ db_cdf_InqMeshtype(DBfile *_dbfile, char *meshname)
  *  Modifications
  *
  *--------------------------------------------------------------------*/
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_InqVarExists(DBfile *_dbfile, char *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1794,7 +1794,7 @@ db_cdf_InqVarExists(DBfile *_dbfile, char *varname)
  *
  *--------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_GetVarType(DBfile *_dbfile, char *vname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1828,7 +1828,7 @@ db_cdf_GetVarType(DBfile *_dbfile, char *vname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_ReadAtt(DBfile *_dbfile, char *vname, char *aname, void *results)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1861,7 +1861,7 @@ db_cdf_ReadAtt(DBfile *_dbfile, char *vname, char *aname, void *results)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_ReadVar(DBfile *_dbfile, char *name, void *result)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1905,7 +1905,7 @@ db_cdf_ReadVar(DBfile *_dbfile, char *name, void *result)
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_ReadVar1(DBfile *_dbfile, char *vname, int offset, void *result)
 {
     char          *me = "db_cdf_ReadVar1";
@@ -1996,7 +1996,7 @@ db_setdir (DBfile_cdf *dbfile, char *dirname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_SetDir(DBfile *_dbfile, char *path)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -2060,7 +2060,7 @@ db_cdf_SetDir(DBfile *_dbfile, char *path)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_cdf_SetDirID(DBfile *_dbfile, int dirid)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;

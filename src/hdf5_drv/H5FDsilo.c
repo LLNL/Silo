@@ -1,3 +1,4 @@
+#include <config.h>
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 
 /* The _GNU_SOURCE wrapper logic is to enable the O_DIRECT flag */

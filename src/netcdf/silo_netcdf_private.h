@@ -110,36 +110,36 @@ typedef struct {
  * Callbacks...
  *-------------------------------------------------------------------------
  */
-#ifndef NO_CALLBACKS
-CALLBACK int db_cdf_Close(DBfile *);
-CALLBACK int db_cdf_InqVarExists(DBfile *, char *);
-CALLBACK int db_cdf_GetDir(DBfile *, char *);
-CALLBACK void *db_cdf_GetAtt(DBfile *, char *, char *);
+#ifndef SILO_NO_CALLBACKS
+SILO_CALLBACK int db_cdf_Close(DBfile *);
+SILO_CALLBACK int db_cdf_InqVarExists(DBfile *, char *);
+SILO_CALLBACK int db_cdf_GetDir(DBfile *, char *);
+SILO_CALLBACK void *db_cdf_GetAtt(DBfile *, char *, char *);
 
-CALLBACK void *db_cdf_GetComponent(DBfile *, char *, char *);
-CALLBACK DBmaterial *db_cdf_GetMaterial(DBfile *, char *);
-CALLBACK DBmatspecies *db_cdf_GetMatspecies(DBfile *, char *);
-CALLBACK DBmultimesh *db_cdf_GetMultimesh(DBfile *, char *);
-CALLBACK DBpointmesh *db_cdf_GetPointmesh(DBfile *, char *);
-CALLBACK DBmeshvar *db_cdf_GetPointvar(DBfile *, char *);
-CALLBACK DBquadmesh *db_cdf_GetQuadmesh(DBfile *, char *);
-CALLBACK DBquadvar *db_cdf_GetQuadvar(DBfile *, char *);
-CALLBACK DBucdmesh *db_cdf_GetUcdmesh(DBfile *, char *);
-CALLBACK DBucdvar *db_cdf_GetUcdvar(DBfile *, char *);
-CALLBACK void *db_cdf_GetVar(DBfile *, char *);
-CALLBACK int db_cdf_GetVarByteLength(DBfile *, char *);
-CALLBACK int db_cdf_GetVarLength(DBfile *, char *);
-CALLBACK int db_cdf_GetVarType(DBfile *, char *);
-CALLBACK DBObjectType db_cdf_InqVarType(DBfile *, char *);
-CALLBACK int db_cdf_InqMeshname(DBfile *, char *, char *);
-CALLBACK int db_cdf_InqMeshtype(DBfile *, char *);
-CALLBACK int db_cdf_ReadAtt(DBfile *, char *, char *, void *);
-CALLBACK int db_cdf_ReadVar(DBfile *, char *, void *);
-CALLBACK int db_cdf_ReadVar1(DBfile *, char *, int, void *);
-CALLBACK int db_cdf_SetDir(DBfile *, char *);
-CALLBACK int db_cdf_SetDirID(DBfile *, int);
-CALLBACK int db_cdf_Filters(DBfile *, FILE *);
-CALLBACK int db_cdf_NewToc(DBfile *);
+SILO_CALLBACK void *db_cdf_GetComponent(DBfile *, char *, char *);
+SILO_CALLBACK DBmaterial *db_cdf_GetMaterial(DBfile *, char *);
+SILO_CALLBACK DBmatspecies *db_cdf_GetMatspecies(DBfile *, char *);
+SILO_CALLBACK DBmultimesh *db_cdf_GetMultimesh(DBfile *, char *);
+SILO_CALLBACK DBpointmesh *db_cdf_GetPointmesh(DBfile *, char *);
+SILO_CALLBACK DBmeshvar *db_cdf_GetPointvar(DBfile *, char *);
+SILO_CALLBACK DBquadmesh *db_cdf_GetQuadmesh(DBfile *, char *);
+SILO_CALLBACK DBquadvar *db_cdf_GetQuadvar(DBfile *, char *);
+SILO_CALLBACK DBucdmesh *db_cdf_GetUcdmesh(DBfile *, char *);
+SILO_CALLBACK DBucdvar *db_cdf_GetUcdvar(DBfile *, char *);
+SILO_CALLBACK void *db_cdf_GetVar(DBfile *, char *);
+SILO_CALLBACK int db_cdf_GetVarByteLength(DBfile *, char *);
+SILO_CALLBACK int db_cdf_GetVarLength(DBfile *, char *);
+SILO_CALLBACK int db_cdf_GetVarType(DBfile *, char *);
+SILO_CALLBACK DBObjectType db_cdf_InqVarType(DBfile *, char *);
+SILO_CALLBACK int db_cdf_InqMeshname(DBfile *, char *, char *);
+SILO_CALLBACK int db_cdf_InqMeshtype(DBfile *, char *);
+SILO_CALLBACK int db_cdf_ReadAtt(DBfile *, char *, char *, void *);
+SILO_CALLBACK int db_cdf_ReadVar(DBfile *, char *, void *);
+SILO_CALLBACK int db_cdf_ReadVar1(DBfile *, char *, int, void *);
+SILO_CALLBACK int db_cdf_SetDir(DBfile *, char *);
+SILO_CALLBACK int db_cdf_SetDirID(DBfile *, int);
+SILO_CALLBACK int db_cdf_Filters(DBfile *, FILE *);
+SILO_CALLBACK int db_cdf_NewToc(DBfile *);
 
 #endif
 

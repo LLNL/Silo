@@ -131,7 +131,7 @@ for advertising or product endorsement purposes.
  * > should never appear in a PROTECT/CLEANUP/END_PROTECT construct
  * > as this would bypass the END_PROTECT.
  * >
- * > CALLBACK int db_pdb_open (char *name, int mode)
+ * > SILO_CALLBACK int db_pdb_open (char *name, int mode)
  * > {
  * >     char  *path=NULL, *fullname=NULL;
  * >     int  fd;
@@ -329,14 +329,14 @@ typedef struct context_t {
  * We define some new function return types:
  *    PRIVATE -- the function is used internally by defining file only.
  *    INTERNAL -- the function is public, but not part of the API.
- *    CALLBACK -- the function is a callback--never called directly
+ *    SILO_CALLBACK -- the function is a callback--never called directly
  *    PUBLIC -- the function can be called publicly
  *    FORTRAN -- the function is part of the fortran interface.
  */
 #define PRIVATE         static
 #define INTERNAL                /*semi-private */
 #ifndef CALLBACK
-#define CALLBACK        static
+#define SILO_CALLBACK        static
 #endif
 #define PUBLIC                  /*public */
 #define FORTRAN         int

@@ -265,7 +265,7 @@ db_taur_Open(char *name, int mode, int subtype)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_Close (DBfile *_dbfile)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -300,7 +300,7 @@ db_taur_Close (DBfile *_dbfile)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_GetDir(DBfile *_dbfile, char *path)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -329,7 +329,7 @@ db_taur_GetDir(DBfile *_dbfile, char *path)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_SetDir(DBfile *_dbfile, char *path)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -362,7 +362,7 @@ db_taur_SetDir(DBfile *_dbfile, char *path)
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_Filters(DBfile *dbfile, FILE *stream)
 {
     fprintf(stream, "Taurus Device Driver\n");
@@ -418,7 +418,7 @@ db_taur_Filters(DBfile *dbfile, FILE *stream)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_NewToc(DBfile *_dbfile)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -561,7 +561,7 @@ db_taur_NewToc(DBfile *_dbfile)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK void *
+SILO_CALLBACK void *
 db_taur_GetComponent(DBfile *_dbfile, char *obj_name, char *comp_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -631,7 +631,7 @@ db_taur_GetComponent(DBfile *_dbfile, char *obj_name, char *comp_name)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK DBmaterial *
+SILO_CALLBACK DBmaterial *
 db_taur_GetMaterial(DBfile *_dbfile, char *mat_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -770,7 +770,7 @@ db_taur_GetMaterial(DBfile *_dbfile, char *mat_name)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK DBucdmesh *
+SILO_CALLBACK DBucdmesh *
 db_taur_GetUcdmesh(DBfile *_dbfile, char *mesh_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -1120,7 +1120,7 @@ db_taur_GetUcdmesh(DBfile *_dbfile, char *mesh_name)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK DBucdvar *
+SILO_CALLBACK DBucdvar *
 db_taur_GetUcdvar(DBfile *_dbfile, char *var_name)
 {
     int            i, j;
@@ -1255,7 +1255,7 @@ db_taur_GetUcdvar(DBfile *_dbfile, char *var_name)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK void *
+SILO_CALLBACK void *
 db_taur_GetVar(DBfile *_dbfile, char *varname)
 {
     void          *ptr;
@@ -1296,7 +1296,7 @@ db_taur_GetVar(DBfile *_dbfile, char *varname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_GetVarByteLength(DBfile *_dbfile, char *varname)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -1351,7 +1351,7 @@ db_taur_GetVarByteLength(DBfile *_dbfile, char *varname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_GetVarLength(DBfile *_dbfile, char *varname)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -1405,7 +1405,7 @@ db_taur_GetVarLength(DBfile *_dbfile, char *varname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_InqMeshname(DBfile *_dbfile, char *var_name, char *mesh_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -1495,7 +1495,7 @@ db_taur_InqMeshname(DBfile *_dbfile, char *var_name, char *mesh_name)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_InqMeshtype(DBfile *_dbfile, char *mesh_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -1578,7 +1578,7 @@ db_taur_InqMeshtype(DBfile *_dbfile, char *mesh_name)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_InqVartype(DBfile *_dbfile, char *varname)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
@@ -1645,7 +1645,7 @@ db_taur_InqVartype(DBfile *_dbfile, char *varname)
  *
  *--------------------------------------------------------------------*/
 /* ARGSUSED */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_InqVarExists(DBfile *_dbfile, char *varname)
 {
     if (strcmp(varname, "time") == 0) {
@@ -1697,7 +1697,7 @@ db_taur_InqVarExists(DBfile *_dbfile, char *varname)
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_taur_ReadVar(DBfile *_dbfile, char *varname, void *ptr)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;

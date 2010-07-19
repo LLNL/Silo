@@ -56,26 +56,26 @@ typedef struct DBfile_taur {
     TAURUSfile    *taurus;
 } DBfile_taur;
 
-#ifndef NO_CALLBACKS
-CALLBACK int db_taur_Close(DBfile *);
-CALLBACK int db_taur_GetDir(DBfile *, char *);
-CALLBACK int db_taur_SetDir(DBfile *, char *);
-CALLBACK void *db_taur_GetComponent(DBfile *, char *, char *);
-CALLBACK int db_taur_InqMeshname(DBfile *, char *, char *);
-CALLBACK int db_taur_InqVarExists(DBfile *, char *);
-CALLBACK int db_taur_InqMeshtype(DBfile *, char *);
-CALLBACK int db_taur_InqVartype(DBfile *, char *);
-CALLBACK int db_taur_ReadVar(DBfile *, char *, void *);
-CALLBACK DBmaterial *db_taur_GetMaterial(DBfile *, char *);
-CALLBACK DBucdmesh *db_taur_GetUcdmesh(DBfile *, char *);
-CALLBACK DBucdvar *db_taur_GetUcdvar(DBfile *, char *);
-CALLBACK void *db_taur_GetVar(DBfile *, char *);
-CALLBACK int db_taur_GetVarByteLength(DBfile *, char *);
-CALLBACK int db_taur_GetVarLength(DBfile *, char *);
-CALLBACK int db_taur_Filters(DBfile *, FILE *);
-CALLBACK int db_taur_NewToc(DBfile *);
+#ifndef SILO_NO_CALLBACKS
+SILO_CALLBACK int db_taur_Close(DBfile *);
+SILO_CALLBACK int db_taur_GetDir(DBfile *, char *);
+SILO_CALLBACK int db_taur_SetDir(DBfile *, char *);
+SILO_CALLBACK void *db_taur_GetComponent(DBfile *, char *, char *);
+SILO_CALLBACK int db_taur_InqMeshname(DBfile *, char *, char *);
+SILO_CALLBACK int db_taur_InqVarExists(DBfile *, char *);
+SILO_CALLBACK int db_taur_InqMeshtype(DBfile *, char *);
+SILO_CALLBACK int db_taur_InqVartype(DBfile *, char *);
+SILO_CALLBACK int db_taur_ReadVar(DBfile *, char *, void *);
+SILO_CALLBACK DBmaterial *db_taur_GetMaterial(DBfile *, char *);
+SILO_CALLBACK DBucdmesh *db_taur_GetUcdmesh(DBfile *, char *);
+SILO_CALLBACK DBucdvar *db_taur_GetUcdvar(DBfile *, char *);
+SILO_CALLBACK void *db_taur_GetVar(DBfile *, char *);
+SILO_CALLBACK int db_taur_GetVarByteLength(DBfile *, char *);
+SILO_CALLBACK int db_taur_GetVarLength(DBfile *, char *);
+SILO_CALLBACK int db_taur_Filters(DBfile *, FILE *);
+SILO_CALLBACK int db_taur_NewToc(DBfile *);
 
-#endif /* !NO_CALLBACKS */
+#endif /* !SILO_NO_CALLBACKS */
 
 /*-------------------------------------------------------------------------
  * Private or Internal functions.  These functions should only be called

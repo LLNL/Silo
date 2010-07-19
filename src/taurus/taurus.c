@@ -43,7 +43,7 @@ for advertising or product endorsement purposes.
  * prototype for `db_taur_extface'.
  */
 
-#define NO_CALLBACKS
+#define SILO_NO_CALLBACKS
 #include "config.h"
 #include "silo_taurus_private.h"
 

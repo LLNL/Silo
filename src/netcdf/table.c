@@ -34,7 +34,7 @@ for advertising or product endorsement purposes.
 
 */
 
-#define NO_CALLBACKS
+#define SILO_NO_CALLBACKS
 #include "silo_netcdf_private.h"
 #include "table.h"
 

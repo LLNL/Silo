@@ -52,10 +52,10 @@ typedef struct DBfile_debug {
     FILE          *file;
 } DBfile_debug;
 
-CALLBACK int db_debug_close(DBfile *);
-CALLBACK DBcompoundarray *db_debug_GetCompoundarray(DBfile *, char *);
-CALLBACK int db_debug_Filters(DBfile *, FILE *);
-CALLBACK int db_debug_PutCompoundarray(DBfile *, char *, char **, int *,
+SILO_CALLBACK int db_debug_close(DBfile *);
+SILO_CALLBACK DBcompoundarray *db_debug_GetCompoundarray(DBfile *, char *);
+SILO_CALLBACK int db_debug_Filters(DBfile *, FILE *);
+SILO_CALLBACK int db_debug_PutCompoundarray(DBfile *, char *, char **, int *,
                                        int, void *, int, int, DBoptlist *);
 
 INTERNAL DBfile *db_debug_create(char *, int, int, int, char *);

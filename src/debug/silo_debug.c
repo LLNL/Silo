@@ -62,7 +62,7 @@ for advertising or product endorsement purposes.
  *
  *-------------------------------------------------------------------------
  */
-CALLBACK int
+SILO_CALLBACK int
 db_debug_close(DBfile *_dbfile)
 {
 
@@ -179,7 +179,7 @@ db_debug_open(char *name, int mode, int subtype)
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-CALLBACK int
+SILO_CALLBACK int
 db_debug_Filters(DBfile *dbfile, FILE *stream)
 {
     fprintf(stream, "Debug Device Driver\n");
@@ -205,7 +205,7 @@ db_debug_Filters(DBfile *dbfile, FILE *stream)
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-CALLBACK DBcompoundarray *
+SILO_CALLBACK DBcompoundarray *
 db_debug_GetCompoundarray(DBfile *_file, char *name)
 {
 
@@ -232,7 +232,7 @@ db_debug_GetCompoundarray(DBfile *_file, char *name)
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-CALLBACK int
+SILO_CALLBACK int
 db_debug_PutCompoundarray(DBfile *_dbfile, char *array_name, char **elemnames,
                           int *elemlengths, int nelems, void *values,
                           int nvalues, int datatype, DBoptlist *optlist)
