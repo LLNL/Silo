@@ -233,6 +233,8 @@ struct _cu     _cu;
 struct _dv     _dv;
 struct _mrgt   _mrgt;
 
+    static int     hierarchy[] = { 1, 2, 7, 0, 3, 6 };
+
 SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
@@ -252,7 +254,14 @@ SILO_Globals_t SILO_Globals = {
     DB_TOP,/* _db_err_level */
     0,     /* _db_err_func */
     DB_NONE,/* _db_err_level_drvr */
-    0      /* Jstk */
+    0,     /* Jstk */
+    {      /* unknown driver priority */
+        1, 2, 7, 0, 3, 6, -1, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0
+    }
 };
 
 INTERNAL int
@@ -2883,6 +2892,40 @@ DBGetDeprecateWarnings()
     return SILO_Globals.maxDeprecateWarnings;
 }
 
+/*----------------------------------------------------------------------
+ * Routine:  DBSetUnknownDriverPriority
+ *
+ * Purpose:  Set priority order of drivers used by unknown driver. 
+ *
+ * Programmer:  Mark C. Miller, May 1, 2006 
+ *
+ * Description:  This routine sets the flag that controls whether
+ *               checksums are computed on client data.
+ *--------------------------------------------------------------------*/
+PUBLIC int* 
+DBSetUnknownDriverPriorities(const int *priorities)
+{
+    int i = 0;
+    static int oldPriorities[MAX_FILE_OPTIONS_SETS+DB_NFORMATS+1];
+    memcpy(oldPriorities, SILO_Globals.unknownDriverPriorities, sizeof(oldPriorities));
+    while (i < (MAX_FILE_OPTIONS_SETS+DB_NFORMATS+1) && priorities[i] >= 0)
+    {
+        SILO_Globals.unknownDriverPriorities[i] = priorities[i];
+        i++;
+    }
+    if (i < (MAX_FILE_OPTIONS_SETS+DB_NFORMATS+1))
+        SILO_Globals.unknownDriverPriorities[i] = -1;
+    return oldPriorities;
+}
+
+PUBLIC int*
+DBGetUnknownDriverPriorities()
+{
+    static int priorities[MAX_FILE_OPTIONS_SETS+DB_NFORMATS+1];
+    memcpy(priorities, SILO_Globals.unknownDriverPriorities, sizeof(priorities));
+    return priorities;
+}
+
 PUBLIC int
 DBRegisterFileOptionsSet(const DBoptlist *opts)
 {
@@ -3681,11 +3724,30 @@ DBErrno(void)
  *              Tue Feb 21 08:25:40 EST 1995
  *
  * Modifications:
+ *   Mark C. Miller, Mon Jul 19 08:49:29 PDT 2010
+ *   Changed name to DBerrFuncname as this function returns the NAME of
+ *   the last Silo function that err'd. The previous name, DBErrFunc
+ *   suggested it returned the pointer to the function passed in
+ *   DBShowErrors. I added a new function, DBErrfunc, to return that.
+ * 
  *-------------------------------------------------------------------------*/
 PUBLIC char   *
 DBErrFunc(void)
 {
+    DEPRECATE_MSG("DBErrFunc",4,8,"DBErrFuncname");
     return db_errfunc;
+}
+
+PUBLIC char   *
+DBErrFuncname(void)
+{
+    return db_errfunc;
+}
+
+PUBLIC DBErrFunc_t
+DBErrfunc(void)
+{
+    return SILO_Globals._db_err_func;
 }
 
 PUBLIC int

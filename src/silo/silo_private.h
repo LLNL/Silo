@@ -776,6 +776,7 @@ typedef struct SILO_Globals_t {
     void  (*_db_err_func)(char *);
     int _db_err_level_drvr;
     jstk_t *Jstk;   /*error jump stack  */
+    int unknownDriverPriorities[MAX_FILE_OPTIONS_SETS+10+1];
 } SILO_Globals_t;
 extern SILO_Globals_t SILO_Globals;
 

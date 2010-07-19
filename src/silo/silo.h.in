@@ -1712,6 +1712,8 @@ typedef struct DBfile {
     /*private part follows per device driver */
 } DBfile;
 
+typedef void (*DBErrFunc_t)(char*);
+
 
 /* The first prototypes here are the functions by which client code first
  * gets into Silo.  They are separated out because they do a version number
@@ -1810,6 +1812,8 @@ SILO_API extern int      DBGetFriendlyHDF5Names(void);
 SILO_API extern int      DBGuessHasFriendlyHDF5Names(DBfile *f);
 SILO_API extern int      DBSetDeprecateWarnings(int max);
 SILO_API extern int      DBGetDeprecateWarnings();
+SILO_API extern int     *DBSetUnknownDriverPriorities(const int *);
+SILO_API extern int     *DBGetUnknownDriverPriorities();
 SILO_API extern int      DBRegisterFileOptionsSet(const DBoptlist *opts);
 SILO_API extern int      DBUnregisterFileOptionsSet(int opts_set_id);
 SILO_API extern void     DBUnregisterAllFileOptionsSets();
@@ -1822,9 +1826,11 @@ SILO_API extern char    *DBVersion(void);
 SILO_API extern int      DBVersionGE(int Maj, int Min, int Pat);
 SILO_API extern char    *DBFileVersion(DBfile *dbfile);
 SILO_API extern int      DBFileVersionGE(DBfile *dbfile, int Maj, int Min, int Pat);
-SILO_API extern void     DBShowErrors(int, void (*)(char *));
+SILO_API extern void     DBShowErrors(int, DBErrFunc_t);
 SILO_API extern char    *DBErrString(void);
 SILO_API extern char    *DBErrFunc(void);
+SILO_API extern char    *DBErrFuncname(void);
+SILO_API extern DBErrFunc_t DBErrfunc(void);
 SILO_API extern int      DBErrno(void);
 SILO_API extern int      DBErrlvl(void);
 SILO_API extern int      DBClose(DBfile *);

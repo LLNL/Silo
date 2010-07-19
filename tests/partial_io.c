@@ -32,7 +32,7 @@ err_handler (char *mesg) {
    int		ok = strstr(mesg,Expected) != 0;
    
    printf ("Got error%s: %s: %s: %s\n",
-	   ok?"[OK]":"", DBErrFunc(), DBErrString(), mesg) ;
+	   ok?"[OK]":"", DBErrFuncname(), DBErrString(), mesg) ;
    if (!ok) {
       printf ("Aborting... [That was an unexpected error]\n") ;
       fflush (stdout) ;
