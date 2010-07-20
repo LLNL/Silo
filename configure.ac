@@ -1,39 +1,53 @@
-dnl Process this file with autoconf to produce configure.
+dnl Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+dnl LLNL-CODE-425250.
+dnl All rights reserved.
 dnl 
+dnl This file is part of Silo. For details, see silo.llnl.gov.
 dnl 
+dnl Redistribution and use in source and binary forms, with or without
+dnl modification, are permitted provided that the following conditions
+dnl are met:
 dnl 
-dnl This work was produced at the University of California, Lawrence Livermore
-dnl National Laboratory (UC LLNL)  under contract no.  W-7405-ENG-48 (Contract
-dnl 48) between  the U.S. Department of Energy  (DOE)  and The Regents  of the
-dnl University  of  California  (University)  for  the  operation of  UC LLNL.
-dnl The  rights of  the Federal  Government  are reserved  under  Contract  48
-dnl subject  to  the restrictions agreed  upon  by  the DOE and  University as
-dnl allowed under DOE Acquisition Letter 97-1.
-dnl
-dnl                                 DISCLAIMER
-dnl
-dnl This work  was prepared as an  account  of work sponsored by an  agency of
-dnl the United States Government. Neither the United States Government nor the
-dnl University  of California nor any of  their employees, makes any warranty,
-dnl express or implied,  or assumes  any liability  or responsiblity  for  the
-dnl accuracy, completeness, or    usefullness of any  information,  apparatus,
-dnl product, or  process   disclosed, or represents that  its   use would  not
-dnl infringe privately    owned  rights. Reference   herein  to  any  specific
-dnl commercial  products, process,  or    service by trade   name,  trademark,
-dnl manufacturer, or otherwise, does  not necessarily constitute or imply  its
-dnl endorsement, recommendation, or  favoring by the United  States Government
-dnl or the   University  of  California.  The views   and  opinions of authors
-dnl expressed herein do not  necessarily state or  reflect those of the United
-dnl States Government  or the University of  California, and shall not be used
-dnl for advertising or product endorsement purposes.
-dnl
-dnl                       NOTIFICATION OF COMMERCIAL USE
-dnl
-dnl Commercialization  of this  product is  prohibited  without notifying  the
-dnl Department  of  Energy  (DOE) or  Lawrence  Livermore National  Laboratory
-dnl (LLNL).
-dnl
-
+dnl    * Redistributions of source code must retain the above copyright
+dnl      notice, this list of conditions and the disclaimer below.
+dnl    * Redistributions in binary form must reproduce the above copyright
+dnl      notice, this list of conditions and the disclaimer (as noted
+dnl      below) in the documentation and/or other materials provided with
+dnl      the distribution.
+dnl    * Neither the name of the LLNS/LLNL nor the names of its
+dnl      contributors may be used to endorse or promote products derived
+dnl      from this software without specific prior written permission.
+dnl 
+dnl THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
+dnl "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
+dnl LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+dnl A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
+dnl LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
+dnl CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+dnl EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
+dnl PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
+dnl PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+dnl LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
+dnl NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
+dnl SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+dnl 
+dnl This work was produced at Lawrence Livermore National Laboratory under
+dnl Contract No.  DE-AC52-07NA27344 with the DOE.
+dnl 
+dnl Neither the  United States Government nor  Lawrence Livermore National
+dnl Security, LLC nor any of  their employees, makes any warranty, express
+dnl or  implied,  or  assumes  any  liability or  responsibility  for  the
+dnl accuracy, completeness,  or usefulness of  any information, apparatus,
+dnl product, or  process disclosed, or  represents that its use  would not
+dnl infringe privately-owned rights.
+dnl 
+dnl Any reference herein to  any specific commercial products, process, or
+dnl services by trade name,  trademark, manufacturer or otherwise does not
+dnl necessarily  constitute or imply  its endorsement,  recommendation, or
+dnl favoring  by  the  United  States  Government  or  Lawrence  Livermore
+dnl National Security,  LLC. The views  and opinions of  authors expressed
+dnl herein do not necessarily state  or reflect those of the United States
+dnl Government or Lawrence Livermore National Security, LLC, and shall not
 dnl
 dnl This is the autoconf configuration file for MeshTV and company.
 dnl Robb Matzke <matzke@llnl.gov>
