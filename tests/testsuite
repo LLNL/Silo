@@ -632,70 +632,70 @@ at_groups_all=' banner-1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 2
 # numerical order.
 at_format='??'
 # Description of all the test groups.
-at_help_all="1;testsuite.at:11;version;;
-2;testsuite.at:34;namescheme;;
-3;testsuite.at:37;point;;
-4;testsuite.at:40;extface;;
-5;testsuite.at:43;testall -small;;
-6;testsuite.at:46;TestReadMask;;
-7;testsuite.at:52;array;;
-8;testsuite.at:55;multi_test;;
-9;testsuite.at:58;multi_test earlyclose;;
-10;testsuite.at:61;partial_io;;
-11;testsuite.at:64;simple;;
-12;testsuite.at:67;ucd;;
-13;testsuite.at:70;ucdsamp3;;
-14;testsuite.at:73;testall -small -fortran;;
-15;testsuite.at:76;obj;;
-16;testsuite.at:79;onehex;;
-17;testsuite.at:82;oneprism;;
-18;testsuite.at:85;onepyramid;;
-19;testsuite.at:88;onetet;;
-20;testsuite.at:91;subhex;;
-21;testsuite.at:94;twohex;;
-22;testsuite.at:97;multispec;;
-23;testsuite.at:100;sami;;
-24;testsuite.at:103;specmix;;
-25;testsuite.at:106;spec;;
-26;testsuite.at:109;group_test;;
-27;testsuite.at:112;listtypes;;
-28;testsuite.at:116;alltypes;;
-29;testsuite.at:119;wave;;
-30;testsuite.at:122;polyzl;;
-31;testsuite.at:125;csg;;
-32;testsuite.at:128;rocket;;
-33;testsuite.at:131;mmadjacency;;
-34;testsuite.at:134;mat3d_3across;;
-35;testsuite.at:137;ucd1d;;
-36;testsuite.at:140;dir;;
-37;testsuite.at:143;quad;;
-38;testsuite.at:146;readstuff;;
-39;testsuite.at:152;read;python;
-40;testsuite.at:157;write;python;
-41;testsuite.at:172;error handling;python;
-42;testsuite.at:179;testpdb;;
-43;testsuite.at:184;grab;;
-44;testsuite.at:187;compression gzip;compression;
-45;testsuite.at:192;compression szip;compression;
-46;testsuite.at:197;compression fpzip;compression;
-47;testsuite.at:202;compression lossy3;compression;
-48;testsuite.at:207;compression minratio1000;compression;
-49;testsuite.at:211;testhzip;compression;
-50;testsuite.at:215;checksums;;
-51;testsuite.at:218;xversion;;
-52;testsuite.at:221;largefile;large;
-53;testsuite.at:227;arrayf77;fortran;
-54;testsuite.at:231;curvef77;fortran;
-55;testsuite.at:235;matf77;fortran;
-56;testsuite.at:239;pointf77;fortran;
-57;testsuite.at:243;quadf77;fortran;
-58;testsuite.at:247;testallf77;fortran;
-59;testsuite.at:251;ucdf77;fortran;
-60;testsuite.at:257;silock;tools;
-61;testsuite.at:261;force single;conversions;
-62;testsuite.at:266;multi_file;large;
-63;testsuite.at:270;testall -medium;large;
-64;testsuite.at:274;testall -large;large;
+at_help_all="1;testsuite.at:63;version;;
+2;testsuite.at:86;namescheme;;
+3;testsuite.at:89;point;;
+4;testsuite.at:92;extface;;
+5;testsuite.at:95;testall -small;;
+6;testsuite.at:98;TestReadMask;;
+7;testsuite.at:104;array;;
+8;testsuite.at:107;multi_test;;
+9;testsuite.at:110;multi_test earlyclose;;
+10;testsuite.at:113;partial_io;;
+11;testsuite.at:116;simple;;
+12;testsuite.at:119;ucd;;
+13;testsuite.at:122;ucdsamp3;;
+14;testsuite.at:125;testall -small -fortran;;
+15;testsuite.at:128;obj;;
+16;testsuite.at:131;onehex;;
+17;testsuite.at:134;oneprism;;
+18;testsuite.at:137;onepyramid;;
+19;testsuite.at:140;onetet;;
+20;testsuite.at:143;subhex;;
+21;testsuite.at:146;twohex;;
+22;testsuite.at:149;multispec;;
+23;testsuite.at:152;sami;;
+24;testsuite.at:155;specmix;;
+25;testsuite.at:158;spec;;
+26;testsuite.at:161;group_test;;
+27;testsuite.at:164;listtypes;;
+28;testsuite.at:168;alltypes;;
+29;testsuite.at:171;wave;;
+30;testsuite.at:174;polyzl;;
+31;testsuite.at:177;csg;;
+32;testsuite.at:180;rocket;;
+33;testsuite.at:183;mmadjacency;;
+34;testsuite.at:186;mat3d_3across;;
+35;testsuite.at:189;ucd1d;;
+36;testsuite.at:192;dir;;
+37;testsuite.at:195;quad;;
+38;testsuite.at:198;readstuff;;
+39;testsuite.at:204;read;python;
+40;testsuite.at:209;write;python;
+41;testsuite.at:224;error handling;python;
+42;testsuite.at:231;testpdb;;
+43;testsuite.at:236;grab;;
+44;testsuite.at:239;compression gzip;compression;
+45;testsuite.at:244;compression szip;compression;
+46;testsuite.at:249;compression fpzip;compression;
+47;testsuite.at:254;compression lossy3;compression;
+48;testsuite.at:259;compression minratio1000;compression;
+49;testsuite.at:263;testhzip;compression;
+50;testsuite.at:267;checksums;;
+51;testsuite.at:270;xversion;;
+52;testsuite.at:273;largefile;large;
+53;testsuite.at:279;arrayf77;fortran;
+54;testsuite.at:283;curvef77;fortran;
+55;testsuite.at:287;matf77;fortran;
+56;testsuite.at:291;pointf77;fortran;
+57;testsuite.at:295;quadf77;fortran;
+58;testsuite.at:299;testallf77;fortran;
+59;testsuite.at:303;ucdf77;fortran;
+60;testsuite.at:309;silock;tools;
+61;testsuite.at:313;force single;conversions;
+62;testsuite.at:318;multi_file;large;
+63;testsuite.at:322;testall -medium;large;
+64;testsuite.at:326;testall -large;large;
 "
 
 at_prev=
@@ -1132,7 +1132,7 @@ IFS=$as_save_IFS
 
   if test -f "$as_dir/$at_program"; then
     {
-      echo "$at_srcdir/testsuite.at:3: $as_dir/$at_program --version"
+      echo "$at_srcdir/testsuite.at:55: $as_dir/$at_program --version"
       "$as_dir/$at_program" --version
       echo
     } >&5 2>&1
@@ -1274,7 +1274,7 @@ echo "$as_me: error: cannot create directory $as_dir" >&2;}
 
   case $at_group in
 
-  banner-1 ) # Banner 1. testsuite.at:10
+  banner-1 ) # Banner 1. testsuite.at:62
     cat <<\_ATEOF
 
 Non-driver-specific
@@ -1282,14 +1282,14 @@ Non-driver-specific
 _ATEOF
     ;;
 
-  1 ) # 1. testsuite.at:11: version
-    at_setup_line='testsuite.at:11'
+  1 ) # 1. testsuite.at:63: version
+    at_setup_line='testsuite.at:63'
     at_desc="version"
     $at_quiet $ECHO_N "  1: version                                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "1. testsuite.at:11: testing ..."
+      echo "1. testsuite.at:63: testing ..."
       $at_traceon
 
 cat >expout <<'_ATEOF'
@@ -1314,8 +1314,8 @@ On old silo file handle returned from DBOpen...
 _ATEOF
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:32: \$VALGRIND version \$STARGS"
-echo testsuite.at:32 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:84: \$VALGRIND version \$STARGS"
+echo testsuite.at:84 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1342,7 +1342,7 @@ $at_diff expout "$at_stdout" || at_failed=:
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:32: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:84: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1360,19 +1360,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  2 ) # 2. testsuite.at:34: namescheme
-    at_setup_line='testsuite.at:34'
+  2 ) # 2. testsuite.at:86: namescheme
+    at_setup_line='testsuite.at:86'
     at_desc="namescheme"
     $at_quiet $ECHO_N "  2: namescheme                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "2. testsuite.at:34: testing ..."
+      echo "2. testsuite.at:86: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:35: \$VALGRIND namescheme"
-echo testsuite.at:35 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:87: \$VALGRIND namescheme"
+echo testsuite.at:87 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1399,7 +1399,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:35: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:87: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1417,19 +1417,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  3 ) # 3. testsuite.at:37: point
-    at_setup_line='testsuite.at:37'
+  3 ) # 3. testsuite.at:89: point
+    at_setup_line='testsuite.at:89'
     at_desc="point"
     $at_quiet $ECHO_N "  3: point                                          $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "3. testsuite.at:37: testing ..."
+      echo "3. testsuite.at:89: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:38: \$VALGRIND point \$STARGS"
-echo testsuite.at:38 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:90: \$VALGRIND point \$STARGS"
+echo testsuite.at:90 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1456,7 +1456,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:38: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:90: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1474,19 +1474,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  4 ) # 4. testsuite.at:40: extface
-    at_setup_line='testsuite.at:40'
+  4 ) # 4. testsuite.at:92: extface
+    at_setup_line='testsuite.at:92'
     at_desc="extface"
     $at_quiet $ECHO_N "  4: extface                                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "4. testsuite.at:40: testing ..."
+      echo "4. testsuite.at:92: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:41: \$VALGRIND extface \$STARGS"
-echo testsuite.at:41 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:93: \$VALGRIND extface \$STARGS"
+echo testsuite.at:93 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1513,7 +1513,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:41: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:93: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1531,19 +1531,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  5 ) # 5. testsuite.at:43: testall -small
-    at_setup_line='testsuite.at:43'
+  5 ) # 5. testsuite.at:95: testall -small
+    at_setup_line='testsuite.at:95'
     at_desc="testall -small"
     $at_quiet $ECHO_N "  5: testall -small                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "5. testsuite.at:43: testing ..."
+      echo "5. testsuite.at:95: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:44: \$VALGRIND testall -small \$STARGS"
-echo testsuite.at:44 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:96: \$VALGRIND testall -small \$STARGS"
+echo testsuite.at:96 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1570,7 +1570,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:44: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:96: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1588,19 +1588,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  6 ) # 6. testsuite.at:46: TestReadMask
-    at_setup_line='testsuite.at:46'
+  6 ) # 6. testsuite.at:98: TestReadMask
+    at_setup_line='testsuite.at:98'
     at_desc="TestReadMask"
     $at_quiet $ECHO_N "  6: TestReadMask                                   $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "6. testsuite.at:46: testing ..."
+      echo "6. testsuite.at:98: testing ..."
       $at_traceon
  # needs files generated by other execs
 $at_traceoff
-echo "$at_srcdir/testsuite.at:47: extface \$STARGS"
-echo testsuite.at:47 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:99: extface \$STARGS"
+echo testsuite.at:99 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1627,7 +1627,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:47: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:99: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1640,8 +1640,8 @@ fi
 $at_traceon
  # don't valgrind these intermediate parts
 $at_traceoff
-echo "$at_srcdir/testsuite.at:48: point \$STARGS"
-echo testsuite.at:48 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:100: point \$STARGS"
+echo testsuite.at:100 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1668,7 +1668,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:48: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:100: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1681,8 +1681,8 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:49: testall -small \$STARGS"
-echo testsuite.at:49 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:101: testall -small \$STARGS"
+echo testsuite.at:101 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1709,7 +1709,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:49: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:101: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1722,8 +1722,8 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:50: \$VALGRIND TestReadMask \$STARGS"
-echo testsuite.at:50 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:102: \$VALGRIND TestReadMask \$STARGS"
+echo testsuite.at:102 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1750,7 +1750,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:50: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:102: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1768,19 +1768,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  7 ) # 7. testsuite.at:52: array
-    at_setup_line='testsuite.at:52'
+  7 ) # 7. testsuite.at:104: array
+    at_setup_line='testsuite.at:104'
     at_desc="array"
     $at_quiet $ECHO_N "  7: array                                          $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "7. testsuite.at:52: testing ..."
+      echo "7. testsuite.at:104: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:53: \$VALGRIND array \$STARGS"
-echo testsuite.at:53 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:105: \$VALGRIND array \$STARGS"
+echo testsuite.at:105 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1807,7 +1807,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:53: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:105: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1825,19 +1825,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  8 ) # 8. testsuite.at:55: multi_test
-    at_setup_line='testsuite.at:55'
+  8 ) # 8. testsuite.at:107: multi_test
+    at_setup_line='testsuite.at:107'
     at_desc="multi_test"
     $at_quiet $ECHO_N "  8: multi_test                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "8. testsuite.at:55: testing ..."
+      echo "8. testsuite.at:107: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:56: \$VALGRIND multi_test \$STARGS"
-echo testsuite.at:56 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:108: \$VALGRIND multi_test \$STARGS"
+echo testsuite.at:108 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1864,7 +1864,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:56: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:108: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1882,19 +1882,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  9 ) # 9. testsuite.at:58: multi_test earlyclose
-    at_setup_line='testsuite.at:58'
+  9 ) # 9. testsuite.at:110: multi_test earlyclose
+    at_setup_line='testsuite.at:110'
     at_desc="multi_test earlyclose"
     $at_quiet $ECHO_N "  9: multi_test earlyclose                          $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "9. testsuite.at:58: testing ..."
+      echo "9. testsuite.at:110: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:59: \$VALGRIND multi_test earlyclose \$STARGS"
-echo testsuite.at:59 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:111: \$VALGRIND multi_test earlyclose \$STARGS"
+echo testsuite.at:111 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1921,7 +1921,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:59: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:111: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -1939,19 +1939,19 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  10 ) # 10. testsuite.at:61: partial_io
-    at_setup_line='testsuite.at:61'
+  10 ) # 10. testsuite.at:113: partial_io
+    at_setup_line='testsuite.at:113'
     at_desc="partial_io"
     $at_quiet $ECHO_N " 10: partial_io                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "10. testsuite.at:61: testing ..."
+      echo "10. testsuite.at:113: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:62: \$VALGRIND partial_io \$STARGS"
-echo testsuite.at:62 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:114: \$VALGRIND partial_io \$STARGS"
+echo testsuite.at:114 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -1978,1016 +1978,6 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:62: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  11 ) # 11. testsuite.at:64: simple
-    at_setup_line='testsuite.at:64'
-    at_desc="simple"
-    $at_quiet $ECHO_N " 11: simple                                         $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "11. testsuite.at:64: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:65: \$VALGRIND simple \$STARGS"
-echo testsuite.at:65 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND simple $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND simple $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND simple $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:65: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  12 ) # 12. testsuite.at:67: ucd
-    at_setup_line='testsuite.at:67'
-    at_desc="ucd"
-    $at_quiet $ECHO_N " 12: ucd                                            $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "12. testsuite.at:67: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:68: \$VALGRIND ucd \$STARGS"
-echo testsuite.at:68 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND ucd $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:68: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  13 ) # 13. testsuite.at:70: ucdsamp3
-    at_setup_line='testsuite.at:70'
-    at_desc="ucdsamp3"
-    $at_quiet $ECHO_N " 13: ucdsamp3                                       $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "13. testsuite.at:70: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:71: \$VALGRIND ucdsamp3 \$STARGS"
-echo testsuite.at:71 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND ucdsamp3 $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND ucdsamp3 $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND ucdsamp3 $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:71: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  14 ) # 14. testsuite.at:73: testall -small -fortran
-    at_setup_line='testsuite.at:73'
-    at_desc="testall -small -fortran"
-    $at_quiet $ECHO_N " 14: testall -small -fortran                        $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "14. testsuite.at:73: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:74: \$VALGRIND testall -small -fortran \$STARGS"
-echo testsuite.at:74 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND testall -small -fortran $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND testall -small -fortran $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND testall -small -fortran $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:74: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  15 ) # 15. testsuite.at:76: obj
-    at_setup_line='testsuite.at:76'
-    at_desc="obj"
-    $at_quiet $ECHO_N " 15: obj                                            $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "15. testsuite.at:76: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:77: \$VALGRIND obj \$STARGS"
-echo testsuite.at:77 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND obj $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:77: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  16 ) # 16. testsuite.at:79: onehex
-    at_setup_line='testsuite.at:79'
-    at_desc="onehex"
-    $at_quiet $ECHO_N " 16: onehex                                         $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "16. testsuite.at:79: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:80: \$VALGRIND onehex \$STARGS"
-echo testsuite.at:80 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND onehex $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND onehex $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND onehex $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:80: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  17 ) # 17. testsuite.at:82: oneprism
-    at_setup_line='testsuite.at:82'
-    at_desc="oneprism"
-    $at_quiet $ECHO_N " 17: oneprism                                       $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "17. testsuite.at:82: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:83: \$VALGRIND oneprism \$STARGS"
-echo testsuite.at:83 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND oneprism $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND oneprism $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND oneprism $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:83: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  18 ) # 18. testsuite.at:85: onepyramid
-    at_setup_line='testsuite.at:85'
-    at_desc="onepyramid"
-    $at_quiet $ECHO_N " 18: onepyramid                                     $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "18. testsuite.at:85: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:86: \$VALGRIND onepyramid \$STARGS"
-echo testsuite.at:86 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND onepyramid $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND onepyramid $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND onepyramid $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:86: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  19 ) # 19. testsuite.at:88: onetet
-    at_setup_line='testsuite.at:88'
-    at_desc="onetet"
-    $at_quiet $ECHO_N " 19: onetet                                         $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "19. testsuite.at:88: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:89: \$VALGRIND onetet \$STARGS"
-echo testsuite.at:89 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND onetet $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND onetet $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND onetet $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:89: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  20 ) # 20. testsuite.at:91: subhex
-    at_setup_line='testsuite.at:91'
-    at_desc="subhex"
-    $at_quiet $ECHO_N " 20: subhex                                         $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "20. testsuite.at:91: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:92: \$VALGRIND subhex \$STARGS"
-echo testsuite.at:92 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND subhex $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND subhex $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND subhex $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:92: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  21 ) # 21. testsuite.at:94: twohex
-    at_setup_line='testsuite.at:94'
-    at_desc="twohex"
-    $at_quiet $ECHO_N " 21: twohex                                         $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "21. testsuite.at:94: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:95: \$VALGRIND twohex \$STARGS"
-echo testsuite.at:95 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND twohex $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND twohex $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND twohex $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:95: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  22 ) # 22. testsuite.at:97: multispec
-    at_setup_line='testsuite.at:97'
-    at_desc="multispec"
-    $at_quiet $ECHO_N " 22: multispec                                      $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "22. testsuite.at:97: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:98: \$VALGRIND multispec \$STARGS"
-echo testsuite.at:98 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND multispec $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND multispec $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND multispec $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:98: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  23 ) # 23. testsuite.at:100: sami
-    at_setup_line='testsuite.at:100'
-    at_desc="sami"
-    $at_quiet $ECHO_N " 23: sami                                           $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "23. testsuite.at:100: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:101: \$VALGRIND sami \$STARGS"
-echo testsuite.at:101 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND sami $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND sami $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND sami $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:101: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  24 ) # 24. testsuite.at:103: specmix
-    at_setup_line='testsuite.at:103'
-    at_desc="specmix"
-    $at_quiet $ECHO_N " 24: specmix                                        $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "24. testsuite.at:103: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:104: \$VALGRIND specmix \$STARGS"
-echo testsuite.at:104 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND specmix $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND specmix $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND specmix $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:104: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  25 ) # 25. testsuite.at:106: spec
-    at_setup_line='testsuite.at:106'
-    at_desc="spec"
-    $at_quiet $ECHO_N " 25: spec                                           $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "25. testsuite.at:106: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:107: \$VALGRIND spec \$STARGS"
-echo testsuite.at:107 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND spec $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND spec $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND spec $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:107: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  26 ) # 26. testsuite.at:109: group_test
-    at_setup_line='testsuite.at:109'
-    at_desc="group_test"
-    $at_quiet $ECHO_N " 26: group_test                                     $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "26. testsuite.at:109: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:110: \$VALGRIND group_test 0 0 0 \$STARGS"
-echo testsuite.at:110 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND group_test 0 0 0 $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND group_test 0 0 0 $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND group_test 0 0 0 $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:110: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  27 ) # 27. testsuite.at:112: listtypes
-    at_setup_line='testsuite.at:112'
-    at_desc="listtypes"
-    $at_quiet $ECHO_N " 27: listtypes                                      $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "27. testsuite.at:112: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:113: \$VALGRIND ucd \$STARGS"
-echo testsuite.at:113 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "$VALGRIND ucd $STARGS" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:113: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:114: test -z \"\$STARGS\" && \$VALGRIND listtypes ucd.pdb || \$VALGRIND listtypes ucd.h5"
-echo testsuite.at:114 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test -z \"$STARGS\" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5 ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5 ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
    *) echo "$at_srcdir/testsuite.at:114: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
@@ -3006,23 +1996,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  28 ) # 28. testsuite.at:116: alltypes
+  11 ) # 11. testsuite.at:116: simple
     at_setup_line='testsuite.at:116'
-    at_desc="alltypes"
-    $at_quiet $ECHO_N " 28: alltypes                                       $ECHO_C"
+    at_desc="simple"
+    $at_quiet $ECHO_N " 11: simple                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "28. testsuite.at:116: testing ..."
+      echo "11. testsuite.at:116: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:117: \$VALGRIND alltypes \$STARGS"
+echo "$at_srcdir/testsuite.at:117: \$VALGRIND simple \$STARGS"
 echo testsuite.at:117 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND alltypes $STARGS" in
+    case "$VALGRIND simple $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3030,12 +2020,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND alltypes $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND simple $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND alltypes $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND simple $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3063,23 +2053,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  29 ) # 29. testsuite.at:119: wave
+  12 ) # 12. testsuite.at:119: ucd
     at_setup_line='testsuite.at:119'
-    at_desc="wave"
-    $at_quiet $ECHO_N " 29: wave                                           $ECHO_C"
+    at_desc="ucd"
+    $at_quiet $ECHO_N " 12: ucd                                            $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "29. testsuite.at:119: testing ..."
+      echo "12. testsuite.at:119: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:120: \$VALGRIND wave \$STARGS"
+echo "$at_srcdir/testsuite.at:120: \$VALGRIND ucd \$STARGS"
 echo testsuite.at:120 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND wave $STARGS" in
+    case "$VALGRIND ucd $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3087,12 +2077,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND wave $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND wave $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3120,23 +2110,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  30 ) # 30. testsuite.at:122: polyzl
+  13 ) # 13. testsuite.at:122: ucdsamp3
     at_setup_line='testsuite.at:122'
-    at_desc="polyzl"
-    $at_quiet $ECHO_N " 30: polyzl                                         $ECHO_C"
+    at_desc="ucdsamp3"
+    $at_quiet $ECHO_N " 13: ucdsamp3                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "30. testsuite.at:122: testing ..."
+      echo "13. testsuite.at:122: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:123: \$VALGRIND polyzl \$STARGS"
+echo "$at_srcdir/testsuite.at:123: \$VALGRIND ucdsamp3 \$STARGS"
 echo testsuite.at:123 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND polyzl $STARGS" in
+    case "$VALGRIND ucdsamp3 $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3144,12 +2134,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND polyzl $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND ucdsamp3 $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND polyzl $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND ucdsamp3 $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3177,23 +2167,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  31 ) # 31. testsuite.at:125: csg
+  14 ) # 14. testsuite.at:125: testall -small -fortran
     at_setup_line='testsuite.at:125'
-    at_desc="csg"
-    $at_quiet $ECHO_N " 31: csg                                            $ECHO_C"
+    at_desc="testall -small -fortran"
+    $at_quiet $ECHO_N " 14: testall -small -fortran                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "31. testsuite.at:125: testing ..."
+      echo "14. testsuite.at:125: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:126: \$VALGRIND csg \$STARGS"
+echo "$at_srcdir/testsuite.at:126: \$VALGRIND testall -small -fortran \$STARGS"
 echo testsuite.at:126 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND csg $STARGS" in
+    case "$VALGRIND testall -small -fortran $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3201,12 +2191,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND csg $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND testall -small -fortran $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND csg $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND testall -small -fortran $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3234,23 +2224,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  32 ) # 32. testsuite.at:128: rocket
+  15 ) # 15. testsuite.at:128: obj
     at_setup_line='testsuite.at:128'
-    at_desc="rocket"
-    $at_quiet $ECHO_N " 32: rocket                                         $ECHO_C"
+    at_desc="obj"
+    $at_quiet $ECHO_N " 15: obj                                            $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "32. testsuite.at:128: testing ..."
+      echo "15. testsuite.at:128: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:129: \$VALGRIND rocket \$STARGS"
+echo "$at_srcdir/testsuite.at:129: \$VALGRIND obj \$STARGS"
 echo testsuite.at:129 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND rocket $STARGS" in
+    case "$VALGRIND obj $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3258,12 +2248,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND rocket $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND rocket $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3291,23 +2281,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  33 ) # 33. testsuite.at:131: mmadjacency
+  16 ) # 16. testsuite.at:131: onehex
     at_setup_line='testsuite.at:131'
-    at_desc="mmadjacency"
-    $at_quiet $ECHO_N " 33: mmadjacency                                    $ECHO_C"
+    at_desc="onehex"
+    $at_quiet $ECHO_N " 16: onehex                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "33. testsuite.at:131: testing ..."
+      echo "16. testsuite.at:131: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:132: \$VALGRIND mmadjacency \$STARGS"
+echo "$at_srcdir/testsuite.at:132: \$VALGRIND onehex \$STARGS"
 echo testsuite.at:132 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND mmadjacency $STARGS" in
+    case "$VALGRIND onehex $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3315,12 +2305,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND mmadjacency $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND onehex $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND mmadjacency $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND onehex $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3348,23 +2338,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  34 ) # 34. testsuite.at:134: mat3d_3across
+  17 ) # 17. testsuite.at:134: oneprism
     at_setup_line='testsuite.at:134'
-    at_desc="mat3d_3across"
-    $at_quiet $ECHO_N " 34: mat3d_3across                                  $ECHO_C"
+    at_desc="oneprism"
+    $at_quiet $ECHO_N " 17: oneprism                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "34. testsuite.at:134: testing ..."
+      echo "17. testsuite.at:134: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:135: \$VALGRIND mat3d_3across \$STARGS"
+echo "$at_srcdir/testsuite.at:135: \$VALGRIND oneprism \$STARGS"
 echo testsuite.at:135 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND mat3d_3across $STARGS" in
+    case "$VALGRIND oneprism $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3372,18 +2362,18 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND mat3d_3across $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND oneprism $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND mat3d_3across $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND oneprism $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
 at_failed=false
 $at_diff "$at_devnull" "$at_stderr" || at_failed=:
-$at_diff "$at_devnull" "$at_stdout" || at_failed=:
+echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
@@ -3405,23 +2395,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  35 ) # 35. testsuite.at:137: ucd1d
+  18 ) # 18. testsuite.at:137: onepyramid
     at_setup_line='testsuite.at:137'
-    at_desc="ucd1d"
-    $at_quiet $ECHO_N " 35: ucd1d                                          $ECHO_C"
+    at_desc="onepyramid"
+    $at_quiet $ECHO_N " 18: onepyramid                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "35. testsuite.at:137: testing ..."
+      echo "18. testsuite.at:137: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:138: \$VALGRIND ucd1d \$STARGS"
+echo "$at_srcdir/testsuite.at:138: \$VALGRIND onepyramid \$STARGS"
 echo testsuite.at:138 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND ucd1d $STARGS" in
+    case "$VALGRIND onepyramid $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3429,12 +2419,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND ucd1d $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND onepyramid $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND ucd1d $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND onepyramid $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3462,23 +2452,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  36 ) # 36. testsuite.at:140: dir
+  19 ) # 19. testsuite.at:140: onetet
     at_setup_line='testsuite.at:140'
-    at_desc="dir"
-    $at_quiet $ECHO_N " 36: dir                                            $ECHO_C"
+    at_desc="onetet"
+    $at_quiet $ECHO_N " 19: onetet                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "36. testsuite.at:140: testing ..."
+      echo "19. testsuite.at:140: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:141: \$VALGRIND dir \$STARGS"
+echo "$at_srcdir/testsuite.at:141: \$VALGRIND onetet \$STARGS"
 echo testsuite.at:141 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND dir $STARGS" in
+    case "$VALGRIND onetet $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3486,17 +2476,17 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND dir $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND onetet $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND dir $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND onetet $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
 at_failed=false
-echo stderr:; cat "$at_stderr"
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
@@ -3519,23 +2509,23 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  37 ) # 37. testsuite.at:143: quad
+  20 ) # 20. testsuite.at:143: subhex
     at_setup_line='testsuite.at:143'
-    at_desc="quad"
-    $at_quiet $ECHO_N " 37: quad                                           $ECHO_C"
+    at_desc="subhex"
+    $at_quiet $ECHO_N " 20: subhex                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "37. testsuite.at:143: testing ..."
+      echo "20. testsuite.at:143: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:144: \$VALGRIND quad \$STARGS"
+echo "$at_srcdir/testsuite.at:144: \$VALGRIND subhex \$STARGS"
 echo testsuite.at:144 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$VALGRIND quad $STARGS" in
+    case "$VALGRIND subhex $STARGS" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -3543,12 +2533,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $VALGRIND quad $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; $VALGRIND subhex $STARGS ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $VALGRIND quad $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    ( :; $VALGRIND subhex $STARGS ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -3576,19 +2566,1029 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  38 ) # 38. testsuite.at:146: readstuff
+  21 ) # 21. testsuite.at:146: twohex
     at_setup_line='testsuite.at:146'
+    at_desc="twohex"
+    $at_quiet $ECHO_N " 21: twohex                                         $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "21. testsuite.at:146: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:147: \$VALGRIND twohex \$STARGS"
+echo testsuite.at:147 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND twohex $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND twohex $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND twohex $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:147: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  22 ) # 22. testsuite.at:149: multispec
+    at_setup_line='testsuite.at:149'
+    at_desc="multispec"
+    $at_quiet $ECHO_N " 22: multispec                                      $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "22. testsuite.at:149: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:150: \$VALGRIND multispec \$STARGS"
+echo testsuite.at:150 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND multispec $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND multispec $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND multispec $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:150: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  23 ) # 23. testsuite.at:152: sami
+    at_setup_line='testsuite.at:152'
+    at_desc="sami"
+    $at_quiet $ECHO_N " 23: sami                                           $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "23. testsuite.at:152: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:153: \$VALGRIND sami \$STARGS"
+echo testsuite.at:153 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND sami $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND sami $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND sami $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:153: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  24 ) # 24. testsuite.at:155: specmix
+    at_setup_line='testsuite.at:155'
+    at_desc="specmix"
+    $at_quiet $ECHO_N " 24: specmix                                        $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "24. testsuite.at:155: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:156: \$VALGRIND specmix \$STARGS"
+echo testsuite.at:156 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND specmix $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND specmix $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND specmix $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:156: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  25 ) # 25. testsuite.at:158: spec
+    at_setup_line='testsuite.at:158'
+    at_desc="spec"
+    $at_quiet $ECHO_N " 25: spec                                           $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "25. testsuite.at:158: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:159: \$VALGRIND spec \$STARGS"
+echo testsuite.at:159 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND spec $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND spec $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND spec $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:159: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  26 ) # 26. testsuite.at:161: group_test
+    at_setup_line='testsuite.at:161'
+    at_desc="group_test"
+    $at_quiet $ECHO_N " 26: group_test                                     $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "26. testsuite.at:161: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:162: \$VALGRIND group_test 0 0 0 \$STARGS"
+echo testsuite.at:162 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND group_test 0 0 0 $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND group_test 0 0 0 $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND group_test 0 0 0 $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:162: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  27 ) # 27. testsuite.at:164: listtypes
+    at_setup_line='testsuite.at:164'
+    at_desc="listtypes"
+    $at_quiet $ECHO_N " 27: listtypes                                      $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "27. testsuite.at:164: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:165: \$VALGRIND ucd \$STARGS"
+echo testsuite.at:165 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND ucd $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND ucd $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:165: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:166: test -z \"\$STARGS\" && \$VALGRIND listtypes ucd.pdb || \$VALGRIND listtypes ucd.h5"
+echo testsuite.at:166 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test -z \"$STARGS\" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5 ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test -z "$STARGS" && $VALGRIND listtypes ucd.pdb || $VALGRIND listtypes ucd.h5 ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:166: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  28 ) # 28. testsuite.at:168: alltypes
+    at_setup_line='testsuite.at:168'
+    at_desc="alltypes"
+    $at_quiet $ECHO_N " 28: alltypes                                       $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "28. testsuite.at:168: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:169: \$VALGRIND alltypes \$STARGS"
+echo testsuite.at:169 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND alltypes $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND alltypes $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND alltypes $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:169: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  29 ) # 29. testsuite.at:171: wave
+    at_setup_line='testsuite.at:171'
+    at_desc="wave"
+    $at_quiet $ECHO_N " 29: wave                                           $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "29. testsuite.at:171: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:172: \$VALGRIND wave \$STARGS"
+echo testsuite.at:172 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND wave $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND wave $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND wave $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:172: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  30 ) # 30. testsuite.at:174: polyzl
+    at_setup_line='testsuite.at:174'
+    at_desc="polyzl"
+    $at_quiet $ECHO_N " 30: polyzl                                         $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "30. testsuite.at:174: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:175: \$VALGRIND polyzl \$STARGS"
+echo testsuite.at:175 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND polyzl $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND polyzl $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND polyzl $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:175: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  31 ) # 31. testsuite.at:177: csg
+    at_setup_line='testsuite.at:177'
+    at_desc="csg"
+    $at_quiet $ECHO_N " 31: csg                                            $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "31. testsuite.at:177: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:178: \$VALGRIND csg \$STARGS"
+echo testsuite.at:178 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND csg $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND csg $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND csg $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:178: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  32 ) # 32. testsuite.at:180: rocket
+    at_setup_line='testsuite.at:180'
+    at_desc="rocket"
+    $at_quiet $ECHO_N " 32: rocket                                         $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "32. testsuite.at:180: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:181: \$VALGRIND rocket \$STARGS"
+echo testsuite.at:181 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND rocket $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND rocket $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND rocket $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:181: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  33 ) # 33. testsuite.at:183: mmadjacency
+    at_setup_line='testsuite.at:183'
+    at_desc="mmadjacency"
+    $at_quiet $ECHO_N " 33: mmadjacency                                    $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "33. testsuite.at:183: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:184: \$VALGRIND mmadjacency \$STARGS"
+echo testsuite.at:184 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND mmadjacency $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND mmadjacency $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND mmadjacency $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:184: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  34 ) # 34. testsuite.at:186: mat3d_3across
+    at_setup_line='testsuite.at:186'
+    at_desc="mat3d_3across"
+    $at_quiet $ECHO_N " 34: mat3d_3across                                  $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "34. testsuite.at:186: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:187: \$VALGRIND mat3d_3across \$STARGS"
+echo testsuite.at:187 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND mat3d_3across $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND mat3d_3across $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND mat3d_3across $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+$at_diff "$at_devnull" "$at_stdout" || at_failed=:
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:187: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  35 ) # 35. testsuite.at:189: ucd1d
+    at_setup_line='testsuite.at:189'
+    at_desc="ucd1d"
+    $at_quiet $ECHO_N " 35: ucd1d                                          $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "35. testsuite.at:189: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:190: \$VALGRIND ucd1d \$STARGS"
+echo testsuite.at:190 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND ucd1d $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND ucd1d $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND ucd1d $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:190: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  36 ) # 36. testsuite.at:192: dir
+    at_setup_line='testsuite.at:192'
+    at_desc="dir"
+    $at_quiet $ECHO_N " 36: dir                                            $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "36. testsuite.at:192: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:193: \$VALGRIND dir \$STARGS"
+echo testsuite.at:193 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND dir $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND dir $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND dir $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:193: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  37 ) # 37. testsuite.at:195: quad
+    at_setup_line='testsuite.at:195'
+    at_desc="quad"
+    $at_quiet $ECHO_N " 37: quad                                           $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "37. testsuite.at:195: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:196: \$VALGRIND quad \$STARGS"
+echo testsuite.at:196 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "$VALGRIND quad $STARGS" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; $VALGRIND quad $STARGS ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; $VALGRIND quad $STARGS ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:196: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  38 ) # 38. testsuite.at:198: readstuff
+    at_setup_line='testsuite.at:198'
     at_desc="readstuff"
     $at_quiet $ECHO_N " 38: readstuff                                      $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "38. testsuite.at:146: testing ..."
+      echo "38. testsuite.at:198: testing ..."
       $at_traceon
  # needs data file from multi_test
 $at_traceoff
-echo "$at_srcdir/testsuite.at:147: multi_test \$STARGS"
-echo testsuite.at:147 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:199: multi_test \$STARGS"
+echo testsuite.at:199 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -3615,7 +3615,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:147: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:199: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -3628,8 +3628,8 @@ fi
 $at_traceon
  # don't valgrind these intermediate parts
 $at_traceoff
-echo "$at_srcdir/testsuite.at:148: \$VALGRIND readstuff \$STARGS"
-echo testsuite.at:148 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:200: \$VALGRIND readstuff \$STARGS"
+echo testsuite.at:200 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -3673,7 +3673,7 @@ $at_traceon
     ;;
 
 
-  banner-2 ) # Banner 2. testsuite.at:151
+  banner-2 ) # Banner 2. testsuite.at:203
     cat <<\_ATEOF
 
 pythonmodule
@@ -3681,20 +3681,20 @@ pythonmodule
 _ATEOF
     ;;
 
-  39 ) # 39. testsuite.at:152: read
-    at_setup_line='testsuite.at:152'
+  39 ) # 39. testsuite.at:204: read
+    at_setup_line='testsuite.at:204'
     at_desc="read"
     $at_quiet $ECHO_N " 39: read                                           $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "39. testsuite.at:152: testing ..."
+      echo "39. testsuite.at:204: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:154: multi_test \$STARGS hdf-friendly"
-echo testsuite.at:154 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:206: multi_test \$STARGS hdf-friendly"
+echo testsuite.at:206 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -3721,7 +3721,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:154: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:206: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -3734,8 +3734,8 @@ fi
 $at_traceon
  # generate data for python tests
 $at_traceoff
-echo "$at_srcdir/testsuite.at:155: test -z \"\$PYTHON\" && exit 77 || env PYTHONPATH=../../../tools/python/.libs \$PYTHON ../../test_read.py"
-echo testsuite.at:155 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:207: test -z \"\$PYTHON\" && exit 77 || env PYTHONPATH=../../../tools/python/.libs \$PYTHON ../../test_read.py"
+echo testsuite.at:207 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -3762,7 +3762,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:155: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:207: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -3780,14 +3780,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  40 ) # 40. testsuite.at:157: write
-    at_setup_line='testsuite.at:157'
+  40 ) # 40. testsuite.at:209: write
+    at_setup_line='testsuite.at:209'
     at_desc="write"
     $at_quiet $ECHO_N " 40: write                                          $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "40. testsuite.at:157: testing ..."
+      echo "40. testsuite.at:209: testing ..."
       $at_traceon
 
 
@@ -3805,8 +3805,8 @@ t9=x3
 _ATEOF
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:170: test -z \"\$PYTHON\" && exit 77 || env PYTHONPATH=../../../tools/python/.libs \$PYTHON ../../test_write.py"
-echo testsuite.at:170 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:222: test -z \"\$PYTHON\" && exit 77 || env PYTHONPATH=../../../tools/python/.libs \$PYTHON ../../test_write.py"
+echo testsuite.at:222 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -3833,7 +3833,7 @@ $at_diff expout "$at_stdout" || at_failed=:
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:170: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:222: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -3851,20 +3851,20 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  41 ) # 41. testsuite.at:172: error handling
-    at_setup_line='testsuite.at:172'
+  41 ) # 41. testsuite.at:224: error handling
+    at_setup_line='testsuite.at:224'
     at_desc="error handling"
     $at_quiet $ECHO_N " 41: error handling                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "41. testsuite.at:172: testing ..."
+      echo "41. testsuite.at:224: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:174: multi_test \$STARGS hdf-friendly"
-echo testsuite.at:174 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:226: multi_test \$STARGS hdf-friendly"
+echo testsuite.at:226 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -3891,7 +3891,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:174: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:226: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -3904,8 +3904,8 @@ fi
 $at_traceon
  # generate data for python tests
 $at_traceoff
-echo "$at_srcdir/testsuite.at:175: test -z \"\$PYTHON\" && exit 77 || env PYTHONPATH=../../../tools/python/.libs \$PYTHON ../../test_error.py"
-echo testsuite.at:175 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:227: test -z \"\$PYTHON\" && exit 77 || env PYTHONPATH=../../../tools/python/.libs \$PYTHON ../../test_error.py"
+echo testsuite.at:227 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -3932,7 +3932,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:175: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:227: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -3951,7 +3951,7 @@ $at_traceon
     ;;
 
 
-  banner-3 ) # Banner 3. testsuite.at:178
+  banner-3 ) # Banner 3. testsuite.at:230
     cat <<\_ATEOF
 
 PDB Specific
@@ -3959,19 +3959,19 @@ PDB Specific
 _ATEOF
     ;;
 
-  42 ) # 42. testsuite.at:179: testpdb
-    at_setup_line='testsuite.at:179'
+  42 ) # 42. testsuite.at:231: testpdb
+    at_setup_line='testsuite.at:231'
     at_desc="testpdb"
     $at_quiet $ECHO_N " 42: testpdb                                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "42. testsuite.at:179: testing ..."
+      echo "42. testsuite.at:231: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:180: test \"\$STARGS\" = DB_HDF5 && exit 77 || \$VALGRIND testpdb"
-echo testsuite.at:180 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:232: test \"\$STARGS\" = DB_HDF5 && exit 77 || \$VALGRIND testpdb"
+echo testsuite.at:232 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -4015,7 +4015,7 @@ $at_traceon
     ;;
 
 
-  banner-4 ) # Banner 4. testsuite.at:183
+  banner-4 ) # Banner 4. testsuite.at:235
     cat <<\_ATEOF
 
 HDF5 Specific
@@ -4023,19 +4023,19 @@ HDF5 Specific
 _ATEOF
     ;;
 
-  43 ) # 43. testsuite.at:184: grab
-    at_setup_line='testsuite.at:184'
+  43 ) # 43. testsuite.at:236: grab
+    at_setup_line='testsuite.at:236'
     at_desc="grab"
     $at_quiet $ECHO_N " 43: grab                                           $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "43. testsuite.at:184: testing ..."
+      echo "43. testsuite.at:236: testing ..."
       $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:185: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND grab"
-echo testsuite.at:185 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:237: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND grab"
+echo testsuite.at:237 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -4053,861 +4053,6 @@ if test -n "$at_trace_this"; then
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
     ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:185: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  44 ) # 44. testsuite.at:187: compression gzip
-    at_setup_line='testsuite.at:187'
-    at_desc="compression gzip"
-    $at_quiet $ECHO_N " 44: compression gzip                               $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "44. testsuite.at:187: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:189: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression gzip"
-echo testsuite.at:189 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression gzip" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:189: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:190: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-echo testsuite.at:190 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:190: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  45 ) # 45. testsuite.at:192: compression szip
-    at_setup_line='testsuite.at:192'
-    at_desc="compression szip"
-    $at_quiet $ECHO_N " 45: compression szip                               $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "45. testsuite.at:192: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:194: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression szip"
-echo testsuite.at:194 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression szip" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:194: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:195: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-echo testsuite.at:195 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:195: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  46 ) # 46. testsuite.at:197: compression fpzip
-    at_setup_line='testsuite.at:197'
-    at_desc="compression fpzip"
-    $at_quiet $ECHO_N " 46: compression fpzip                              $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "46. testsuite.at:197: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:199: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression fpzip"
-echo testsuite.at:199 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:199: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:200: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-echo testsuite.at:200 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:200: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  47 ) # 47. testsuite.at:202: compression lossy3
-    at_setup_line='testsuite.at:202'
-    at_desc="compression lossy3"
-    $at_quiet $ECHO_N " 47: compression lossy3                             $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "47. testsuite.at:202: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:204: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression lossy3"
-echo testsuite.at:204 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3 ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3 ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:204: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:205: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-echo testsuite.at:205 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   50) ;;
-   *) echo "$at_srcdir/testsuite.at:205: exit code was $at_status, expected 50"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  48 ) # 48. testsuite.at:207: compression minratio1000
-    at_setup_line='testsuite.at:207'
-    at_desc="compression minratio1000"
-    $at_quiet $ECHO_N " 48: compression minratio1000                       $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "48. testsuite.at:207: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:209: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression minratio1000"
-echo testsuite.at:209 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000 ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000 ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   1) ;;
-   *) echo "$at_srcdir/testsuite.at:209: exit code was $at_status, expected 1"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  49 ) # 49. testsuite.at:211: testhzip
-    at_setup_line='testsuite.at:211'
-    at_desc="testhzip"
-    $at_quiet $ECHO_N " 49: testhzip                                       $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "49. testsuite.at:211: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:213: test ! \\( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \\) -o -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testhzip \`pwd\`"
-echo testsuite.at:213 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    echo 'Not enabling shell tracing (command contains a `...` command substitution)'
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:213: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  50 ) # 50. testsuite.at:215: checksums
-    at_setup_line='testsuite.at:215'
-    at_desc="checksums"
-    $at_quiet $ECHO_N " 50: checksums                                      $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "50. testsuite.at:215: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:216: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND checksums \`pwd\`"
-echo testsuite.at:216 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    echo 'Not enabling shell tracing (command contains a `...` command substitution)'
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:216: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  51 ) # 51. testsuite.at:218: xversion
-    at_setup_line='testsuite.at:218'
-    at_desc="xversion"
-    $at_quiet $ECHO_N " 51: xversion                                       $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "51. testsuite.at:218: testing ..."
-      $at_traceon
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:219: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testxvers \`pwd\`"
-echo testsuite.at:219 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    echo 'Not enabling shell tracing (command contains a `...` command substitution)'
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:219: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  52 ) # 52. testsuite.at:221: largefile
-    at_setup_line='testsuite.at:221'
-    at_desc="largefile"
-    $at_quiet $ECHO_N " 52: largefile                                      $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "52. testsuite.at:221: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:223: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND largefile"
-echo testsuite.at:223 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND largefile" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:223: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-
-  banner-5 ) # Banner 5. testsuite.at:226
-    cat <<\_ATEOF
-
-Fortran
-
-_ATEOF
-    ;;
-
-  53 ) # 53. testsuite.at:227: arrayf77
-    at_setup_line='testsuite.at:227'
-    at_desc="arrayf77"
-    $at_quiet $ECHO_N " 53: arrayf77                                       $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "53. testsuite.at:227: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:229: test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || \$VALGRIND arrayf77"
-echo testsuite.at:229 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || $VALGRIND arrayf77" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:229: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  54 ) # 54. testsuite.at:231: curvef77
-    at_setup_line='testsuite.at:231'
-    at_desc="curvef77"
-    $at_quiet $ECHO_N " 54: curvef77                                       $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "54. testsuite.at:231: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:233: test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || \$VALGRIND curvef77"
-echo testsuite.at:233 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || $VALGRIND curvef77" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-echo stderr:; cat "$at_stderr"
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:233: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-      $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  55 ) # 55. testsuite.at:235: matf77
-    at_setup_line='testsuite.at:235'
-    at_desc="matf77"
-    $at_quiet $ECHO_N " 55: matf77                                         $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "55. testsuite.at:235: testing ..."
-      $at_traceon
-
-
-$at_traceoff
-echo "$at_srcdir/testsuite.at:237: test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || \$VALGRIND matf77"
-echo testsuite.at:237 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || $VALGRIND matf77" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4935,20 +4080,875 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  56 ) # 56. testsuite.at:239: pointf77
+  44 ) # 44. testsuite.at:239: compression gzip
     at_setup_line='testsuite.at:239'
+    at_desc="compression gzip"
+    $at_quiet $ECHO_N " 44: compression gzip                               $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "44. testsuite.at:239: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:241: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression gzip"
+echo testsuite.at:241 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression gzip" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:241: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:242: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+echo testsuite.at:242 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:242: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  45 ) # 45. testsuite.at:244: compression szip
+    at_setup_line='testsuite.at:244'
+    at_desc="compression szip"
+    $at_quiet $ECHO_N " 45: compression szip                               $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "45. testsuite.at:244: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:246: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression szip"
+echo testsuite.at:246 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression szip" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:246: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:247: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+echo testsuite.at:247 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:247: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  46 ) # 46. testsuite.at:249: compression fpzip
+    at_setup_line='testsuite.at:249'
+    at_desc="compression fpzip"
+    $at_quiet $ECHO_N " 46: compression fpzip                              $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "46. testsuite.at:249: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:251: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression fpzip"
+echo testsuite.at:251 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:251: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:252: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+echo testsuite.at:252 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:252: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  47 ) # 47. testsuite.at:254: compression lossy3
+    at_setup_line='testsuite.at:254'
+    at_desc="compression lossy3"
+    $at_quiet $ECHO_N " 47: compression lossy3                             $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "47. testsuite.at:254: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:256: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression lossy3"
+echo testsuite.at:256 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3 ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression lossy3 ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:256: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:257: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+echo testsuite.at:257 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   50) ;;
+   *) echo "$at_srcdir/testsuite.at:257: exit code was $at_status, expected 50"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  48 ) # 48. testsuite.at:259: compression minratio1000
+    at_setup_line='testsuite.at:259'
+    at_desc="compression minratio1000"
+    $at_quiet $ECHO_N " 48: compression minratio1000                       $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "48. testsuite.at:259: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:261: test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression minratio1000"
+echo testsuite.at:261 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test ! \\( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000 ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000 ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   1) ;;
+   *) echo "$at_srcdir/testsuite.at:261: exit code was $at_status, expected 1"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  49 ) # 49. testsuite.at:263: testhzip
+    at_setup_line='testsuite.at:263'
+    at_desc="testhzip"
+    $at_quiet $ECHO_N " 49: testhzip                                       $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "49. testsuite.at:263: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:265: test ! \\( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \\) -o -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testhzip \`pwd\`"
+echo testsuite.at:265 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    echo 'Not enabling shell tracing (command contains a `...` command substitution)'
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:265: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  50 ) # 50. testsuite.at:267: checksums
+    at_setup_line='testsuite.at:267'
+    at_desc="checksums"
+    $at_quiet $ECHO_N " 50: checksums                                      $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "50. testsuite.at:267: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:268: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND checksums \`pwd\`"
+echo testsuite.at:268 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    echo 'Not enabling shell tracing (command contains a `...` command substitution)'
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND checksums `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:268: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  51 ) # 51. testsuite.at:270: xversion
+    at_setup_line='testsuite.at:270'
+    at_desc="xversion"
+    $at_quiet $ECHO_N " 51: xversion                                       $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "51. testsuite.at:270: testing ..."
+      $at_traceon
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:271: test -z \"\$BROWSER\" -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND testxvers \`pwd\`"
+echo testsuite.at:271 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    echo 'Not enabling shell tracing (command contains a `...` command substitution)'
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testxvers `pwd` ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:271: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  52 ) # 52. testsuite.at:273: largefile
+    at_setup_line='testsuite.at:273'
+    at_desc="largefile"
+    $at_quiet $ECHO_N " 52: largefile                                      $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "52. testsuite.at:273: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:275: test \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND largefile"
+echo testsuite.at:275 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND largefile" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:275: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+
+  banner-5 ) # Banner 5. testsuite.at:278
+    cat <<\_ATEOF
+
+Fortran
+
+_ATEOF
+    ;;
+
+  53 ) # 53. testsuite.at:279: arrayf77
+    at_setup_line='testsuite.at:279'
+    at_desc="arrayf77"
+    $at_quiet $ECHO_N " 53: arrayf77                                       $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "53. testsuite.at:279: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:281: test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || \$VALGRIND arrayf77"
+echo testsuite.at:281 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || $VALGRIND arrayf77" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:281: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  54 ) # 54. testsuite.at:283: curvef77
+    at_setup_line='testsuite.at:283'
+    at_desc="curvef77"
+    $at_quiet $ECHO_N " 54: curvef77                                       $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "54. testsuite.at:283: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:285: test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || \$VALGRIND curvef77"
+echo testsuite.at:285 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || $VALGRIND curvef77" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:285: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  55 ) # 55. testsuite.at:287: matf77
+    at_setup_line='testsuite.at:287'
+    at_desc="matf77"
+    $at_quiet $ECHO_N " 55: matf77                                         $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "55. testsuite.at:287: testing ..."
+      $at_traceon
+
+
+$at_traceoff
+echo "$at_srcdir/testsuite.at:289: test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || \$VALGRIND matf77"
+echo testsuite.at:289 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || $VALGRIND matf77" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:289: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+      $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  56 ) # 56. testsuite.at:291: pointf77
+    at_setup_line='testsuite.at:291'
     at_desc="pointf77"
     $at_quiet $ECHO_N " 56: pointf77                                       $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "56. testsuite.at:239: testing ..."
+      echo "56. testsuite.at:291: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:241: test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || \$VALGRIND pointf77"
-echo testsuite.at:241 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:293: test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || \$VALGRIND pointf77"
+echo testsuite.at:293 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -4975,7 +4975,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:241: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:293: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -4993,20 +4993,20 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  57 ) # 57. testsuite.at:243: quadf77
-    at_setup_line='testsuite.at:243'
+  57 ) # 57. testsuite.at:295: quadf77
+    at_setup_line='testsuite.at:295'
     at_desc="quadf77"
     $at_quiet $ECHO_N " 57: quadf77                                        $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "57. testsuite.at:243: testing ..."
+      echo "57. testsuite.at:295: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:245: test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || \$VALGRIND quadf77"
-echo testsuite.at:245 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:297: test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || \$VALGRIND quadf77"
+echo testsuite.at:297 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5033,7 +5033,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:245: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:297: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -5051,20 +5051,20 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  58 ) # 58. testsuite.at:247: testallf77
-    at_setup_line='testsuite.at:247'
+  58 ) # 58. testsuite.at:299: testallf77
+    at_setup_line='testsuite.at:299'
     at_desc="testallf77"
     $at_quiet $ECHO_N " 58: testallf77                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "58. testsuite.at:247: testing ..."
+      echo "58. testsuite.at:299: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:249: test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || \$VALGRIND testallf77"
-echo testsuite.at:249 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:301: test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || \$VALGRIND testallf77"
+echo testsuite.at:301 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5091,7 +5091,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:249: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:301: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -5109,20 +5109,20 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  59 ) # 59. testsuite.at:251: ucdf77
-    at_setup_line='testsuite.at:251'
+  59 ) # 59. testsuite.at:303: ucdf77
+    at_setup_line='testsuite.at:303'
     at_desc="ucdf77"
     $at_quiet $ECHO_N " 59: ucdf77                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "59. testsuite.at:251: testing ..."
+      echo "59. testsuite.at:303: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:253: test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || \$VALGRIND ucdf77"
-echo testsuite.at:253 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:305: test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || \$VALGRIND ucdf77"
+echo testsuite.at:305 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5149,7 +5149,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:253: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:305: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -5168,7 +5168,7 @@ $at_traceon
     ;;
 
 
-  banner-6 ) # Banner 6. testsuite.at:256
+  banner-6 ) # Banner 6. testsuite.at:308
     cat <<\_ATEOF
 
 Special
@@ -5176,20 +5176,20 @@ Special
 _ATEOF
     ;;
 
-  60 ) # 60. testsuite.at:257: silock
-    at_setup_line='testsuite.at:257'
+  60 ) # 60. testsuite.at:309: silock
+    at_setup_line='testsuite.at:309'
     at_desc="silock"
     $at_quiet $ECHO_N " 60: silock                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "60. testsuite.at:257: testing ..."
+      echo "60. testsuite.at:309: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:259: testsilock \`pwd\` \$STARGS"
-echo testsuite.at:259 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:311: testsilock \`pwd\` \$STARGS"
+echo testsuite.at:311 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5212,7 +5212,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:259: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:311: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -5230,20 +5230,20 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  61 ) # 61. testsuite.at:261: force single
-    at_setup_line='testsuite.at:261'
+  61 ) # 61. testsuite.at:313: force single
+    at_setup_line='testsuite.at:313'
     at_desc="force single"
     $at_quiet $ECHO_N " 61: force single                                   $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "61. testsuite.at:261: testing ..."
+      echo "61. testsuite.at:313: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:263: specmix \$STARGS"
-echo testsuite.at:263 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:315: specmix \$STARGS"
+echo testsuite.at:315 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5270,7 +5270,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:263: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:315: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -5283,8 +5283,8 @@ fi
 $at_traceon
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:264: testdtypes \`pwd\` \$STARGS"
-echo testsuite.at:264 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:316: testdtypes \`pwd\` \$STARGS"
+echo testsuite.at:316 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5307,7 +5307,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:264: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:316: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -5325,20 +5325,20 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  62 ) # 62. testsuite.at:266: multi_file
-    at_setup_line='testsuite.at:266'
+  62 ) # 62. testsuite.at:318: multi_file
+    at_setup_line='testsuite.at:318'
     at_desc="multi_file"
     $at_quiet $ECHO_N " 62: multi_file                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "62. testsuite.at:266: testing ..."
+      echo "62. testsuite.at:318: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:268: \$VALGRIND multi_file \$STARGS"
-echo testsuite.at:268 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:320: \$VALGRIND multi_file \$STARGS"
+echo testsuite.at:320 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5365,7 +5365,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:268: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:320: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -5383,20 +5383,20 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  63 ) # 63. testsuite.at:270: testall -medium
-    at_setup_line='testsuite.at:270'
+  63 ) # 63. testsuite.at:322: testall -medium
+    at_setup_line='testsuite.at:322'
     at_desc="testall -medium"
     $at_quiet $ECHO_N " 63: testall -medium                                $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "63. testsuite.at:270: testing ..."
+      echo "63. testsuite.at:322: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:272: \$VALGRIND testall -medium \$STARGS"
-echo testsuite.at:272 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:324: \$VALGRIND testall -medium \$STARGS"
+echo testsuite.at:324 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5423,7 +5423,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:272: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:324: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -5441,20 +5441,20 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  64 ) # 64. testsuite.at:274: testall -large
-    at_setup_line='testsuite.at:274'
+  64 ) # 64. testsuite.at:326: testall -large
+    at_setup_line='testsuite.at:326'
     at_desc="testall -large"
     $at_quiet $ECHO_N " 64: testall -large                                 $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "64. testsuite.at:274: testing ..."
+      echo "64. testsuite.at:326: testing ..."
       $at_traceon
 
 
 $at_traceoff
-echo "$at_srcdir/testsuite.at:276: \$VALGRIND testall -large \$STARGS"
-echo testsuite.at:276 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:328: \$VALGRIND testall -large \$STARGS"
+echo testsuite.at:328 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -5481,7 +5481,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:276: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:328: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
