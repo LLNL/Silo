@@ -51,14 +51,7 @@ herein do not necessarily state  or reflect those of the United States
 Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
-/*
- * Modifications:
- *
- *   Mark C. Miller, Mon Aug  2 15:06:57 PDT 2004
- *   Fixed several issues with this driver so that Ale3d can
- *   now restart from it. Added dataReadMask functionality
- *
- */
+
 /* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
    in this file uses version 1.6 of the HDF5 API. This is harmless for
    versions of HDF5 before 1.8 and ensures correct compilation with
@@ -4867,7 +4860,7 @@ db_hdf5_process_file_options(opts_set_id)
                         mpi_info = *((MPI_Info *)p);
                     else
                     {
-                        MPI_Info_create(&info);
+                        MPI_Info_create(&mpi_info);
                         created_info = 1;
                     }
 
