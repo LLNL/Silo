@@ -491,7 +491,9 @@ main(int argc, char *argv[])
     DBPutMultimesh(dbfile, tmpName, mm->nblocks, mm->meshnames, mm->meshtypes, optList);
     DBClearOptlist(optList);
 
+#if !defined(_WIN32)
 #warning HACK FOR SINGLE VARIABLE
+#endif
     {
         DBmultivar *mv = DBGetMultivar(dbfile, "foo");
         DBoptlist *optList2 = DBMakeOptlist(10);
