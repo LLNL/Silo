@@ -1875,7 +1875,6 @@ static haddr_t
 H5FD_silo_get_eoa(const H5FD_t *_file, H5FD_mem_t /*unused*/ type)
 {
     const H5FD_silo_t	*file = (const H5FD_silo_t *)_file;
-    haddr_t eoa;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);

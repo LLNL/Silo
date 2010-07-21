@@ -441,7 +441,6 @@ DBMakeNamescheme(const char *fmt, ...)
 PUBLIC const char *
 DBGetName(DBnamescheme *ns, int natnum)
 {
-    va_list ap;
     char *currentExpr, *tmpExpr;
     static char retval[1024];
     int i;

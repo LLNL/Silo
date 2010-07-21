@@ -67,6 +67,7 @@ be used for advertising or product endorsement purposes.
 #ifndef H5FDsilo_H
 #define H5FDsilo_H
 
+#if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 #include "H5Ipublic.h"
 
 #define H5FD_SILO	(H5FD_silo_init())
@@ -99,4 +100,5 @@ herr_t H5Pset_silo_use_direct(hid_t fapl_id, int used);
 }
 #endif
 
+#endif  /*defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5) */
 #endif

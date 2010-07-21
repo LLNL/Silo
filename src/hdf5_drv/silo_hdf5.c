@@ -1556,7 +1556,7 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
         }
         else /* ucd or quad mesh coords or nodal variables */
         {
-            int i, outbytes, nbytes;
+            int i, outbytes;
             size_t max_outbytes;
             HZNstream* stream;
             unsigned char *buffer = 0;
@@ -3088,7 +3088,7 @@ db_hdf5_set_compression(int flags)
     char *ptr;
     char chararray[32];
     char *check;
-    int level, block, stat, nfilters;
+    int level, block, nfilters;
     int nbits, prec;
     int have_gzip, have_szip, have_fpzip, have_hzip, i;
     H5Z_filter_t filtn;
@@ -3987,7 +3987,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
                int compressionFlags)
 {
     static char *me = "db_hdf5_compwr";
-    hid_t       dset=-1, mtype=-1, ftype=-1, space=-1, P_props;
+    hid_t       dset=-1, mtype=-1, ftype=-1, space=-1;
     int         i, nels;
     hsize_t     size[8];
     int         alloc = 0;
@@ -5789,7 +5789,7 @@ copy_dir(hid_t grp, const char *name, void *op_data)
     case H5G_TYPE:
     {
         hid_t       o=-1, attr=-1, atype=-1, s1024=-1;
-        char        *file_value=NULL, *mem_value=NULL, *bkg=NULL, bigname[1024];
+        char        *file_value=NULL, *mem_value=NULL, *bkg=NULL;
         DBObjectType objtype;
         int         _objtype, nmembs, i;
         DBobject    *obj=NULL;
@@ -7234,7 +7234,6 @@ db_hdf5_WriteSlice(DBfile *_dbfile, char *vname, void *values, int dtype,
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile ;
    static char  *me = "db_hdf5_WriteSlice" ;
    hid_t        mtype=-1, ftype=-1, fspace=-1, mspace=-1, dset=-1;
-   hid_t        P_props;
    hsize_t      ds_size[H5S_MAX_RANK];
    int          i;
 
@@ -7764,7 +7763,7 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutCsgmesh";
-    int                 i,len;
+    int                 i;
     DBcsgmesh_mt        m;
 
     memset(&m, 0, sizeof m); 
@@ -7997,7 +7996,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
     static char         *me = "db_hdf5_PutCsgvar";
     char                *s = 0;
     DBcsgvar_mt         m;
-    int                 i, saved_ndims, saved_nnodes, saved_nzones, len;
+    int                 i; 
 
     memset(&m, 0, sizeof m);
 
@@ -8640,7 +8639,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutQuadmesh";
-    int                 i,len;
+    int                 i;
     DBquadmesh_mt       m;
     int                 compressionFlags;
     DB_DTPTR          **coords = (DB_DTPTR**) _coords;
@@ -9015,7 +9014,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
     static char         *me = "db_hdf5_PutQuadvar";
     char                *s = 0;
     DBquadvar_mt        m;
-    int                 i, nels, len;
+    int                 i, nels;
     int                 compressionFlags;
     DB_DTPTR          **vars = (DB_DTPTR**) _vars;
     DB_DTPTR          **mixvars = (DB_DTPTR**) _mixvars;
@@ -9425,7 +9424,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutUcdmesh";
     DBucdmesh_mt        m;
-    int                 i, len, compressionFlags;
+    int                 i, compressionFlags;
     DB_DTPTR          **coords = (DB_DTPTR**) _coords;
 
     memset(&_um, 0, sizeof _um);
@@ -9588,7 +9587,7 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_pdb_PutUcdmesh";
     hid_t               o=-1, attr=-1;
-    int                 _objtype, i, len;
+    int                 _objtype, i;
     DBucdmesh_mt        m;
 
     PROTECT {
@@ -9975,7 +9974,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
     static char         *me = "db_hdf5_PutUcdvar";
     char                *s = 0;
     DBucdvar_mt         m;
-    int                 i, saved_ndims, saved_nnodes, saved_nzones, len;
+    int                 i, saved_ndims, saved_nnodes, saved_nzones;
     int                 compressionFlags;
     DB_DTPTR          **vars = (DB_DTPTR**) _vars;
     DB_DTPTR          **mixvars = (DB_DTPTR**) _mixvars;
@@ -11699,7 +11698,7 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMultimesh";
     hid_t               o=-1, attr=-1;
-    int                 _objtype, i;
+    int                 _objtype;
     DBmultimesh_mt      m;
     DBmultimesh         *mm=NULL;
     char                *s=NULL;
@@ -12547,7 +12546,7 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMultivar";
     hid_t               o=-1, attr=-1;
-    int                 _objtype, i;
+    int                 _objtype;
     DBmultivar_mt       m;
     DBmultivar          *mv=NULL;
     char                *s=NULL;
@@ -12838,7 +12837,7 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMultimat";
     hid_t               o=-1, attr=-1;
-    int                 _objtype, i;
+    int                 _objtype;
     DBmultimat_mt       m;
     DBmultimat          *mm=NULL;
     char                *s=NULL;
@@ -13260,7 +13259,7 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutPointmesh";
     DBpointmesh_mt      m;
-    int                 i, len;
+    int                 i;
     DB_DTPTR          **coords = (DB_DTPTR**) _coords;
     
     memset(&m, 0, sizeof m);
@@ -13511,7 +13510,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBpointvar_mt       m;
-    int                 i, saved_ndims, len;
+    int                 i, saved_ndims;
     char               *s = 0;
     DB_DTPTR          **vars = (DB_DTPTR**) _vars;
 
@@ -14276,7 +14275,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMrgtree";
     hid_t               o=-1, attr=-1;
-    int                 _objtype, i, j, n, num_nodes, pass;
+    int                 _objtype, i, j, n, num_nodes;
     DBmrgtree_mt         m;
     int                 *intArray = 0;
     char               **strArray = 0;

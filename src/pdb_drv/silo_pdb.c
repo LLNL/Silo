@@ -3962,13 +3962,11 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
    char *typestring = NULL;
    DBmultimesh   *mm = NULL;
    int            ncomps, type;
-   int            i;
-   char          *tmpnames=0, delim[2], *s, *name, tmp[256];
+   char          *tmpnames=0, tmp[256];
    char          *tmpgnames = 0;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultimesh";
-   char           error[256];
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4257,12 +4255,10 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
    char *typestring = NULL;
    DBmultivar    *mv = NULL;
    int            ncomps, type;
-   int            i;
-   char          *tmpnames=0, delim[2], *s, *name, tmp[256];
+   char          *tmpnames=0, tmp[256];
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultivar";
-   char           error[256];
    char          *rpnames = NULL;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, &ncomps);
@@ -4390,10 +4386,8 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
    char *typestring = NULL;
    DBmultimat    *mt = NULL;
    int            ncomps, type;
-   int            i;
    char          *tmpnames=NULL, *s=NULL, *name=NULL, tmp[256];
    char          *tmpmatcolors=NULL, *tmpmaterial_names=NULL;
-   char           error[256];
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultimat";
@@ -4515,7 +4509,6 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
    int                i, nstrs = 0;
    char              *tmpnames=NULL, *s=NULL, *name=NULL, tmp[256];
    char              *tmpspecnames=NULL, *tmpcolors=NULL;
-   char               error[256];
    DBfile_pdb        *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist         tmp_obj;
    static char       *me = "db_pdb_GetMultimatspecies";
@@ -5679,7 +5672,6 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
    DBcsgmesh     *csgm = NULL;
    char          *zlname = NULL, *tmpbndnames = NULL;
    PJcomplist     tmp_obj;
-   int            lo_offset, hi_offset;
    static char *me = "db_pdb_GetCsgmesh";
    DBcsgmesh tmpcsgm;
    memset(&tmpcsgm, 0, sizeof(DBcsgmesh));
@@ -6736,7 +6728,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    static char   *me = "db_pdb_GetMrgtree";
    DBmrgtree      tmptree;
    DBmrgtnode   **ltree;
-   int            root, num_nodes, i, j, n, pass;
+   int            root, num_nodes, i, j, n;
    int           *intArray = 0;
    char          *s, **strArray = 0;
    char          *mrgv_onames = 0, *mrgv_rnames = 0;
@@ -10023,11 +10015,9 @@ db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
                    const double *extents, const char *zlname,
                    DBoptlist *optlist) {
 
-   int            i;
    long           count[3];
    DBobject      *obj;
    char          *datatype_str;
-   char           tmp[256];
    double         min_extents[3], max_extents[3];
 
    /*-------------------------------------------------------------
@@ -10161,7 +10151,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            i;
-   long           count[3], mcount[1];
+   long           count[3];
    DBobject      *obj;
    char          *suffix, *datatype_str, tmp1[256], tmp2[256];
    static char   *me = "db_pdb_PutCsgvar";
@@ -11221,8 +11211,6 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
     char              **strArray = 0;
     int                *intArray = 0;
     DBobject           *obj;
-    char               *datatype_str;
-    char                tmp[256];
 
     obj = DBMakeObject(name, DB_MRGTREE, 17);
 
@@ -11425,7 +11413,6 @@ db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
    int           *intArray;
    long           count;
    DBobject      *obj;
-   char          *datatype_str;
 
    /*-------------------------------------------------------------
     *  Process option list; build object description.
@@ -11687,7 +11674,6 @@ db_InitCsg(DBfile *_dbfile, char *meshname, DBoptlist *optlist) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    long           count[3];
-   float          a[3];
    char           tmp[256];
 
    db_mkname(dbfile->pdb, meshname, "typeflags", tmp);

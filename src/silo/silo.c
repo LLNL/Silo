@@ -2331,7 +2331,7 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
             db_silo_stat_t tmpstatbuf;
             static char tmpname[4096];
             char *meta_ext="", *raw_ext="-raw";
-            void *p; int vfd = -1, retval;
+            void *p; int vfd = -1;
             const DBoptlist *opts;
 
 
@@ -11513,7 +11513,6 @@ db_ResetGlobalData_PointMesh (int ndims) {
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_QuadMesh (int ndims) {
-   int       i;
 
    FREE(_qm._meshname);
    memset(&_qm, 0, sizeof(_qm));
