@@ -16,9 +16,10 @@ under the  same licensing terms  that all previous releases  have been
 made. We call this other release a /legacy/ release.  The legacy terms
 are repeated, below, for convenience.
 
-   ----------------------------------------------------------------
-   This work was produced at Lawrence Livermore National Laboratory
-   under Contract No. DE-AC52-07NA27344 with the DOE.
+   ------------------------------------------------------------------
+   Copyright (c) 1994-2010, Lawrence Livermore National Security, LLC.
+   All rights reserved. This work was produced at Lawrence Livermore
+   National Laboratory under Contract No. DE-AC52-07NA27344 with the DOE.
 
                              DISCLAIMER
 
@@ -38,7 +39,7 @@ are repeated, below, for convenience.
    United States Government or the University of California, and shall
    not be used for advertising or product endorsement purposes.
 
-                        NOTIFICATION OF COMMERCIAL USE
+                     NOTIFICATION OF COMMERCIAL USE
 
    Commercialization of this  product is prohibited without notifying
    the Department of Energy (DOE) or Lawrence Livermore National
@@ -46,13 +47,13 @@ are repeated, below, for convenience.
    ----------------------------------------------------------------
 
 The BSD Open Source release  distributions do not contain the Hzip and
-FPzip  compression libraries  while the  legacy  release distributions
-do.  The impact of  this could  be that  a Silo  file produced  with a
-legacy distribution  that contains Hzip or FPzip  compressed data will
-not be readable in a BSD distribution. Since compression features must
-be  explicitly turned on  by a  Silo application,  this impact  can be
-easily mitigating by ensuring the  Hzip and FPzip compression are used
-only for files not intended to be read by BSD releases.
+FPzip compression libraries while the legacy release distributions do.
+This  means any objects  within a  Silo file  containing data  that is
+compressed with Hzip  or FPzip from a legacy  distribution will not be
+readable  in a BSD  distribution. Since  compression features  must be
+explicitly turned on by a  Silo application, this impact can be easily
+mitigating by  ensuring the Hzip  and FPzip compression are  used only
+for objects within Silo files not intended to be read by BSD releases.
 
 For more  information on availability  of Hzip and  FPzip compression,
 contact the developer, Peter Lindstrom, lindstrom2@llnl.gov.
