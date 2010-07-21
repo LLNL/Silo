@@ -70,8 +70,15 @@ be used for advertising or product endorsement purposes.
 #include "H5Ipublic.h"
 
 #define H5FD_SILO	(H5FD_silo_init())
+
+#ifdef FOO_DAWN
+#define H5FD_SILO_DEFAULT_BLOCK_COUNT 32 
+#define H5FD_SILO_DEFAULT_BLOCK_SIZE (1<<20) 
+#else
+#warning FIX DAWN SETTINS
 #define H5FD_SILO_DEFAULT_BLOCK_COUNT 16
 #define H5FD_SILO_DEFAULT_BLOCK_SIZE 16384
+#endif
 #define H5FD_SILO_DEFAULT_LOG_STATS 0
 #define H5FD_SILO_DEFAULT_USE_DIRECT 0
 

@@ -70,6 +70,13 @@ DIST_SUBDIRS = . config config-site \
 help: config/make.help
 	cat $(srcdir)/config/make.help
 
+dist-gzip-bsd:	dist-gzip
+	gunzip < $(PACKAGE)-$(VERSION).tar.gz | tar xf -
+	rm -rf $(PACKAGE)-$(VERSION)/src/hzip
+	rm -rf $(PACKAGE)-$(VERSION)/src/fpzip
+	mv $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)-bsd
+	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd.tar.gz
+
 .PHONY: help
 
 ## Override Automake's default definition for this
