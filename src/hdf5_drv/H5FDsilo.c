@@ -1170,7 +1170,9 @@ H5Pset_fapl_silo(hid_t fapl_id)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set sieve_buf_size", -1, -1)
 
     /* Get default metdata cache configuration. */
+#if !defined(_WIN32)
 #warning FIX ME
+#endif
 #if 1
     memset(&mdc_config, 0, sizeof(mdc_config));
     mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -1180,7 +1182,9 @@ H5Pset_fapl_silo(hid_t fapl_id)
     H5Pclose(default_fapl);
 
     /* Turn off evicitions. This means memory for HDF5 metadata will grow without bound. */
+#if !defined(_WIN32)
 #warning FIX ME
+#endif
     mdc_config.evictions_enabled = 0;
     mdc_config.incr_mode = H5C_incr__off;
     mdc_config.flash_incr_mode = H5C_flash_incr__off;
@@ -1451,7 +1455,9 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     if (H5Pget(fapl_id, SILO_USEDIR_PROPNAME, &silo_use_direct) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_USEDIR_PROPNAME, 0, -1)
 
+#if !defined(_WIN32)
 #warning CHECK MDC CONFIG HERE TOO
+#endif
 
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -1515,7 +1521,9 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
 #endif
     }
 
+#if !defined(_WIN32)
 #warning FAMILY TO SEC2 LOGIC ON FAPL MISSING
+#endif
 
     return((H5FD_t*)file);
 }   /* end H5FD_silo_open() */
@@ -1826,7 +1834,9 @@ H5FD_silo_query(const H5FD_t *_f, unsigned long *flags /* out */)
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
+#if !defined(_WIN32)
 #warning FIXE ME
+#endif
 #if 0
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
@@ -2264,10 +2274,9 @@ H5FD_silo_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
     static const char *func = "H5FD_silo_truncate";  /* Function Name for error reporting */
     herr_t ret_value = 0;
 
+#if !defined(_WIN32)
 #warning SKIPPING TRUNCATE
-#warning SKIPPING TRUNCATE
-#warning SKIPPING TRUNCATE
-#warning SKIPPING TRUNCATE
+#endif
     return 0;
 
     /* Shut compiler up */

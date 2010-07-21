@@ -75,7 +75,9 @@ be used for advertising or product endorsement purposes.
 #define H5FD_SILO_DEFAULT_BLOCK_COUNT 32 
 #define H5FD_SILO_DEFAULT_BLOCK_SIZE (1<<20) 
 #else
+#if !defined(_WIN32)
 #warning FIX DAWN SETTINS
+#endif
 #define H5FD_SILO_DEFAULT_BLOCK_COUNT 16
 #define H5FD_SILO_DEFAULT_BLOCK_SIZE 16384
 #endif

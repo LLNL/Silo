@@ -9015,7 +9015,9 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
         if (!nodelist && lnodelist)
             API_ERROR("nodelist", E_BADARGS);
 
+#if !defined(_WIN32)
 #warning FIXME
+#endif
 #if 0
         if (nzones <= 0)
             API_ERROR("nzones", E_BADARGS);
@@ -12106,7 +12108,9 @@ db_DriverTypeAndFileOptionsSetId(int driver, int *type, int *_opts_set_id)
                     opts_set_id = DB_FILE_OPTS_H5_DEFAULT_STDIO;
                     break;
                 case DB_HDF5_CORE_OBSOLETE:
+#if !defined(_WIN32)
 #warning CAN WE HANDLE OLD CORE INC HERE
+#endif
                     opts_set_id = DB_FILE_OPTS_H5_DEFAULT_CORE;
                     break;
                 case DB_HDF5_MPIO_OBSOLETE:
