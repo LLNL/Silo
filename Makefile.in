@@ -287,7 +287,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I config
 nodist_noinst_HEADERS = config.h
-EXTRA_DIST = COPYRIGHT FAQ VERSION
+EXTRA_DIST = COPYRIGHT FAQ VERSION BSD_LICENSE_README
 MAINTAINERCLEANFILES = Makefile.in\
  aclocal.m4\
  configure
