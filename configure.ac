@@ -355,6 +355,10 @@ dnl     Mark C. Miller, Sat Dec  5 15:20:30 PST 2009
 dnl     Added logic to inspect size of long and long long datatypes and, if
 dnl     they are different sizes, ensuring Silo's DB_LONG_LONG enum value
 dnl     is unique. Otherwise, ensuring it is the same as DB_LONG enum value.
+dnl
+dnl     Mark C. Miller, Wed Jul 21 09:31:24 PDT 2010
+dnl     Adjusted logic to support BSD releases which will NOT include
+dnl     hzip/fpzip compression features or source dirs.
 dnl --------------------------------------------------------------------------
 
 dnl
@@ -686,7 +690,14 @@ elif test -n "$with_zlib" && test "$with_zlib" != yes; then
 fi
 
 dnl handle Peter Lindstrom's hzip compression stuff 
-HZIP=$DEFAULT_HZIP
+AC_MSG_CHECKING(for hzip)
+if test -d $srcdir/src/hzip; then
+    AC_MSG_RESULT(found)
+    HZIP=$DEFAULT_HZIP
+else
+    AC_MSG_RESULT(hzip compression not available in BSD version)
+    HZIP=""
+fi
 AC_ARG_ENABLE(hzip,
     AC_HELP_STRING([--enable-hzip], 
         [enable Lindstrom hex/quad mesh compression @<:@default=yes@:>@]),
@@ -714,7 +725,14 @@ if test -n "$HZIP" && test "$with_zlib" != no; then
 fi
 
 dnl enable Peter Lindstrom's fpzip compression stuff 
-FPZIP=$DEFAULT_FPZIP
+AC_MSG_CHECKING(for fpzip)
+if test -d $srcdir/src/fpzip; then
+    AC_MSG_RESULT(found)
+    FPZIP=$DEFAULT_FPZIP
+else
+    AC_MSG_RESULT(fpzip compression not available in BSD version)
+    FPZIP=""
+fi
 AC_ARG_ENABLE(fpzip,
     AC_HELP_STRING([--enable-fpzip], 
         [enable Lindstrom float 1,2,3D array compression @<:@default=yes@:>@]),
@@ -1427,14 +1445,18 @@ AC_CONFIG_FILES([
             src/taurus/Makefile
             src/unknown/Makefile
             src/filters/Makefile
-            src/hzip/Makefile
-            src/fpzip/Makefile
             tests/Makefile
             tools/Makefile
             tools/browser/Makefile
             tools/python/Makefile
             tools/silex/Makefile
             tools/silock/Makefile])
+if test -n "$HZIP"; then
+  AC_CONFIG_FILES([src/hzip/Makefile])
+fi
+if test -n "$FPZIP"; then
+  AC_CONFIG_FILES([src/fpzip/Makefile])
+fi
 if test -n "$HDF5_DRV"; then
   AC_CONFIG_FILES([src/libsiloh5.settings])
 else

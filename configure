@@ -21186,7 +21186,17 @@ _ACEOF
     ZLIB="zlib"
 fi
 
-HZIP=$DEFAULT_HZIP
+{ echo "$as_me:$LINENO: checking for hzip" >&5
+echo $ECHO_N "checking for hzip... $ECHO_C" >&6; }
+if test -d $srcdir/src/hzip; then
+    { echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+    HZIP=$DEFAULT_HZIP
+else
+    { echo "$as_me:$LINENO: result: hzip compression not available in BSD version" >&5
+echo "${ECHO_T}hzip compression not available in BSD version" >&6; }
+    HZIP=""
+fi
 # Check whether --enable-hzip was given.
 if test "${enable_hzip+set}" = set; then
   enableval=$enable_hzip; if test "$enable_hzip" = "no"; then
@@ -21443,7 +21453,17 @@ _ACEOF
 
 fi
 
-FPZIP=$DEFAULT_FPZIP
+{ echo "$as_me:$LINENO: checking for fpzip" >&5
+echo $ECHO_N "checking for fpzip... $ECHO_C" >&6; }
+if test -d $srcdir/src/fpzip; then
+    { echo "$as_me:$LINENO: result: found" >&5
+echo "${ECHO_T}found" >&6; }
+    FPZIP=$DEFAULT_FPZIP
+else
+    { echo "$as_me:$LINENO: result: fpzip compression not available in BSD version" >&5
+echo "${ECHO_T}fpzip compression not available in BSD version" >&6; }
+    FPZIP=""
+fi
 # Check whether --enable-fpzip was given.
 if test "${enable_fpzip+set}" = set; then
   enableval=$enable_fpzip; if test "$enable_fpzip" = "no"; then
@@ -27446,8 +27466,16 @@ else
   CXX_LINK_NEEDED_FALSE=
 fi
 
-ac_config_files="$ac_config_files Makefile SiloWindows/Makefile svn_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/pdbp_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile src/hzip/Makefile src/fpzip/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile"
+ac_config_files="$ac_config_files Makefile SiloWindows/Makefile svn_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/pdbp_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile"
 
+if test -n "$HZIP"; then
+  ac_config_files="$ac_config_files src/hzip/Makefile"
+
+fi
+if test -n "$FPZIP"; then
+  ac_config_files="$ac_config_files src/fpzip/Makefile"
+
+fi
 if test -n "$HDF5_DRV"; then
   ac_config_files="$ac_config_files src/libsiloh5.settings"
 
@@ -28174,14 +28202,14 @@ do
     "src/taurus/Makefile") CONFIG_FILES="$CONFIG_FILES src/taurus/Makefile" ;;
     "src/unknown/Makefile") CONFIG_FILES="$CONFIG_FILES src/unknown/Makefile" ;;
     "src/filters/Makefile") CONFIG_FILES="$CONFIG_FILES src/filters/Makefile" ;;
-    "src/hzip/Makefile") CONFIG_FILES="$CONFIG_FILES src/hzip/Makefile" ;;
-    "src/fpzip/Makefile") CONFIG_FILES="$CONFIG_FILES src/fpzip/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tools/Makefile") CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
     "tools/browser/Makefile") CONFIG_FILES="$CONFIG_FILES tools/browser/Makefile" ;;
     "tools/python/Makefile") CONFIG_FILES="$CONFIG_FILES tools/python/Makefile" ;;
     "tools/silex/Makefile") CONFIG_FILES="$CONFIG_FILES tools/silex/Makefile" ;;
     "tools/silock/Makefile") CONFIG_FILES="$CONFIG_FILES tools/silock/Makefile" ;;
+    "src/hzip/Makefile") CONFIG_FILES="$CONFIG_FILES src/hzip/Makefile" ;;
+    "src/fpzip/Makefile") CONFIG_FILES="$CONFIG_FILES src/fpzip/Makefile" ;;
     "src/libsiloh5.settings") CONFIG_FILES="$CONFIG_FILES src/libsiloh5.settings" ;;
     "src/libsilo.settings") CONFIG_FILES="$CONFIG_FILES src/libsilo.settings" ;;
 
