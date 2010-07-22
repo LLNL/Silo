@@ -113,6 +113,10 @@ product endorsement purposes.
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <share.h>
 #endif
 
 #ifdef MAX
@@ -171,10 +175,14 @@ product endorsement purposes.
     #define HDassert(X)         assert(X)
 #endif /* HDassert */
 #ifndef HDopen
-    #ifdef _O_BINARY
-        #define HDopen(S,F,M)           open(S,F|_O_BINARY,M)
+    #ifdef _WIN32
+        #define HDopen(S,F,M)           my_sopen_s(S,F,M)
     #else
-        #define HDopen(S,F,M)           open(S,F,M)
+        #ifdef _O_BINARY
+            #define HDopen(S,F,M)       open(S,F|_O_BINARY,M)
+        #else
+            #define HDopen(S,F,M)       open(S,F,M)
+        #endif
     #endif
 #endif /* HDopen */
 #ifndef HDread
@@ -502,6 +510,16 @@ static const H5FD_class_t H5FD_silo_g = {
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE				/*fl_map		*/
 };
+
+#ifdef _WIN32
+static int my_sopen_s(const char *name, int flags, mode_t mode)
+{
+    int fd;
+    errno_t r = _sopen_s(&fd, name, flags, _SH_DENYNO, mode);
+    if (r != 0) fd = -1;
+    return fd;
+}
+#endif
 
 static void update_hotblock_stats(H5FD_silo_t *file, hsize_t id, int dir, float raw_frac)
 {
@@ -2171,8 +2189,6 @@ H5FD_silo_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     if (size == 0)
         return 0;
-
-printf("%s %llu %llu %d\n", flavors(type), file->op_counter, addr, (int) size);
 
     rb = relevant_blocks(file->block_size, addr, size);
     blidx = -1; 

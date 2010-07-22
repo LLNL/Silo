@@ -56,6 +56,7 @@ be used for advertising or product endorsement purposes.
 
 #include <math.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <std.c>
 
@@ -86,6 +87,7 @@ main(int argc, char *argv[])
     int		   driver = DB_PDB;
     char	  *filename = "carray.pdb";
     int            show_all_errors = FALSE;
+    int            sleepsecs = 0;
     
 
     DBShowErrors(DB_TOP, NULL);
@@ -99,6 +101,8 @@ main(int argc, char *argv[])
 	} else if (!strncmp(argv[i], "DB_HDF5", 7)) {
 	    driver = StringToDriver(argv[i]);
 	    filename = "carray.h5";
+        } else if (!strcmp(argv[i], "sleep")) {
+            sleepsecs = 10;
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
@@ -137,6 +141,10 @@ main(int argc, char *argv[])
                        ename, esize, 3,  /*simple arrays */
                        val, 18, DB_FLOAT,  /*values */
                        NULL);   /*options */
+    i = 1;
+    if (sleepsecs)
+        DBWrite (dbfile, "sleepsecs", &sleepsecs, &i, 1, DB_INT);
+
     DBClose(dbfile);
 
     /*
@@ -146,6 +154,7 @@ main(int argc, char *argv[])
     printf("Reopening `%s'\n", filename);
     dbfile = DBOpen(filename, driver, DB_READ);
     ca = DBGetCompoundarray(dbfile, "carray");
+    sleep(sleepsecs);
 
     /*
      * Print the information we found.
