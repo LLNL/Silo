@@ -63,6 +63,9 @@ be used for advertising or product endorsement purposes.
  *   Mark C. Miller, Wed Jul 14 20:46:11 PDT 2010
  *   Added macro definitions for defualts.
  *   Added support for direct I/O.
+ *
+ *   Mark C. Miller, Wed Jul 21 22:02:53 PDT 2010
+ *   Set larger defaults for BG/P and BG/L systems.
  */
 #ifndef H5FDsilo_H
 #define H5FDsilo_H
@@ -72,13 +75,12 @@ be used for advertising or product endorsement purposes.
 
 #define H5FD_SILO	(H5FD_silo_init())
 
-#ifdef FOO_DAWN
+/* Set larger default values for BG architectures */
+/* These CPP symbols are defined only for bg... compilers */
+#if defined(__bgp__) || defined(__bgl__)
 #define H5FD_SILO_DEFAULT_BLOCK_COUNT 32 
 #define H5FD_SILO_DEFAULT_BLOCK_SIZE (1<<20) 
 #else
-#if !defined(_WIN32)
-#warning FIX DAWN SETTINS
-#endif
 #define H5FD_SILO_DEFAULT_BLOCK_COUNT 16
 #define H5FD_SILO_DEFAULT_BLOCK_SIZE 16384
 #endif
