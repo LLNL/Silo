@@ -4551,6 +4551,10 @@ db_hdf5_process_file_options(opts_set_id)
     /* Handle cases where we are running on Windows. If a client
        request anything other than the default driver, we issue
        a warning message and continue only on windows (default) vfd. */
+#if !defined(_WIN32)
+#warning REMOVED WINDOWS SPECIFIC CHECK
+#endif
+#if 0
 #if defined(_WIN32)
     if (opts_set_id != DB_FILE_OPTS_H5_DEFAULT_DEFAULT && 
         opts_set_id < NUM_DEFAULT_FILE_OPTIONS_SETS)
@@ -4558,6 +4562,7 @@ db_hdf5_process_file_options(opts_set_id)
         db_perror("Non-default HDF5 VFD specified on Windows.", E_CALLFAIL, me);
         return retval;
     }
+#endif
 #endif
 
     switch (opts_set_id)
@@ -4683,12 +4688,17 @@ db_hdf5_process_file_options(opts_set_id)
                 h5status |= H5Pset_driver(retval, new_driver_id, p);
             }
 
+#if !defined(_WIN32)
+#warning REMOVED WINDOWS SPECIFIC CHECK
+#endif
+#if 0
 #if defined(_WIN32)
             if (vfd != DB_H5VFD_DEFAULT)
             {
                 db_perror("Non-default HDF5 VFD specified on Windows.", E_CALLFAIL, me);
                 vfd = DB_H5VFD_DEFAULT;
             }
+#endif
 #endif
             
             switch (vfd)
