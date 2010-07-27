@@ -58,6 +58,9 @@
 ##
 ##   Mark C. Miller, Wed Jul 14 21:05:19 PDT 2010
 ##   Removed silofile.magic
+##
+##   Mark C. Miller, Tue Jul 27 09:57:51 PDT 2010
+##   Added variable to control makeinfo output.
 
 bin_PROGRAMS = browser
 dist_bin_SCRIPTS = \
@@ -80,6 +83,7 @@ else
 endif
 browser_LDADD += $(READLINE_LIBS)
 info_TEXINFOS = browser.texi
+AM_MAKEINFOHTMLFLAGS = --no-split
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/src/silo \

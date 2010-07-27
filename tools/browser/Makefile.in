@@ -149,7 +149,6 @@ TEXINFOS = browser.texi
 TEXI2DVI = texi2dvi
 TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
-AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
 DVIPS = dvips
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -334,6 +333,7 @@ browser_SOURCES = $(FILES)
 @HDF5_DRV_NEEDED_TRUE@browser_LDADD = ../../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(READLINE_LIBS)
 info_TEXINFOS = browser.texi
+AM_MAKEINFOHTMLFLAGS = --no-split
 AM_CPPFLAGS = \
  -I$(top_builddir)/src/silo \
  -I$(includedir) \
