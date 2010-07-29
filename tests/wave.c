@@ -80,7 +80,7 @@ be used for advertising or product endorsement purposes.
 
 #define A  1.
 
-void WriteFile(double t, int cycle, int driver);
+void SWriteFile(double t, int cycle, int driver);
 
 int
 main(int argc, char *argv[])
@@ -112,7 +112,7 @@ main(int argc, char *argv[])
     {
         time = T0 + ((double)i / (double)NT) * DT;
         cycle = i * 10;
-        WriteFile (time, cycle, driver);
+        SWriteFile (time, cycle, driver);
     }
 
     CleanupDriverStuff();
@@ -120,7 +120,7 @@ main(int argc, char *argv[])
 }
 
 void
-WriteFile(double time, int cycle, int driver)
+SWriteFile(double time, int cycle, int driver)
 {
     int       i, j, k;
     char      *coordnames[3]={"x", "y", "z"};

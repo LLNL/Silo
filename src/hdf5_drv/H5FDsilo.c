@@ -176,6 +176,7 @@ product endorsement purposes.
 #endif /* HDassert */
 #ifndef HDopen
     #ifdef _WIN32
+        typedef int mode_t;
         #define HDopen(S,F,M)           my_sopen_s(S,F,M)
     #else
         #ifdef _O_BINARY
@@ -1404,6 +1405,9 @@ H5FD_silo_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
  *
  *   Mark C. Miller, Wed Jul 14 21:00:13 PDT 2010
  *   Added direct I/O flag.
+ *
+ *   Kathleen Bonnell, Thu Jul 29 09:52:10 PDT 2010
+ *   Added mode ivar so that correct mode setting could be set for Windows.
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -1424,6 +1428,7 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     int     silo_log_stats = H5FD_SILO_DEFAULT_LOG_STATS;
     int     silo_use_direct = H5FD_SILO_DEFAULT_USE_DIRECT;
     H5FD_t *ret_value = 0;
+    mode_t mode;
 
     /* Sanity check on file offsets */
     assert(sizeof(file_offset_t)>=sizeof(size_t));
@@ -1485,9 +1490,14 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
 #ifdef O_DIRECT
     if (silo_use_direct) o_flags |= O_DIRECT;
 #endif
+#ifdef _WIN32
+    mode = _S_IWRITE | _S_IREAD;
+#else
+    mode = 0666;
+#endif
 
     errno = 0;
-    if ((fd = HDopen(name, o_flags, 0666)) < 0)
+    if ((fd = HDopen(name, o_flags, mode)) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_CANTOPENFILE, "HDopen failed", NULL, errno)
 
     if (HDfstat(fd, &sb)<0)

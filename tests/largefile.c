@@ -99,9 +99,9 @@ build_curve (DBfile *dbfile, int driver)
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   if (DB_HDF5==driver&0xF) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (DB_HDF5==(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
-   if (DB_HDF5!=driver&0xF) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (DB_HDF5!=(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
 
    /*
     * Write the 'coscurve' curve. It shares x values with the 'sincurve'

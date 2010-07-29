@@ -1180,7 +1180,7 @@ main(int argc, char *argv[])
     nerrors += test_read_all(dbfile);
 
     /* Rewrite with different memory data type and verify results */
-    if (DB_PDB != driver&0xF && DB_PDBP != driver&0xF)
+    if (DB_PDB != (driver&0xF) && DB_PDBP != (driver&0xF))
     {
         nerrors += test_type_conv(dbfile);
     }
@@ -1189,7 +1189,7 @@ main(int argc, char *argv[])
      * Do some illegal things to make sure they fail. Make sure we can still
      * read data.
      */
-    if (DB_PDB != driver&0xF && DB_PDBP != driver&0xF)
+    if (DB_PDB != (driver&0xF) && DB_PDBP != (driver&0xF))
     {
         nerrors += test_write_bad(dbfile);
         nerrors += test_read_all(dbfile);

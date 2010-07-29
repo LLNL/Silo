@@ -56,11 +56,13 @@ be used for advertising or product endorsement purposes.
 
 #include <math.h>
 #include <string.h>
-#include <unistd.h>
+#ifndef _WIN32
+  #include <unistd.h>
+#endif
 
 #include <std.c>
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -74,6 +76,8 @@ be used for advertising or product endorsement purposes.
  * 	Robb Matzke, 1999-04-09
  *	Added argument parsing to control the driver which is used.
  *
+ *    Kathleen Bonnell, Thu Jul 29 09:58:47 PDT 2010
+ *    Added correct Sleep function for Windows.
  *-------------------------------------------------------------------------
  */
 int
@@ -154,7 +158,12 @@ main(int argc, char *argv[])
     printf("Reopening `%s'\n", filename);
     dbfile = DBOpen(filename, driver, DB_READ);
     ca = DBGetCompoundarray(dbfile, "carray");
+#ifdef _WIN32
+    /* Windows Sleep is specified in milliseconds */
+    Sleep(sleepsecs*1000);
+#else
     sleep(sleepsecs);
+#endif
 
     /*
      * Print the information we found.

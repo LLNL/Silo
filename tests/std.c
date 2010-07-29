@@ -52,6 +52,12 @@ product endorsement purposes.
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#ifdef _WIN32
+  #ifndef WINDOWS_LEAN_AND_MEAN
+    #define WINDOWS_LEAN_AND_MEAN
+  #endif
+  #include <windows.h>
+#endif
 
 #define CHECK_SYMBOL(A)  if (!strncmp(str, #A, strlen(str))) return A
 

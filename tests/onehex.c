@@ -321,5 +321,5 @@ main(int argc, char *argv[])
 
     CleanupDriverStuff();
 
-    return (0);
+    return 0;
 }

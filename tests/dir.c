@@ -165,7 +165,7 @@ main(int argc, char *argv[])
     dbfile = DBOpen(filename, driver, DB_READ);
     dbfile2 = DBCreate(filename2, 0, DB_LOCAL, "dir test file", driver);
 
-    if (driver&0xF == DB_HDF5)
+    if ((driver&0xF) == DB_HDF5)
         DBCpDir(dbfile, "quad_dir/quad_subdir1", dbfile2, "gorfo");
 
     DBClose(dbfile);
@@ -174,7 +174,7 @@ main(int argc, char *argv[])
     dbfile = DBOpen(filename, driver, DB_READ);
     dbfile2 = DBOpen(filename2, driver, DB_APPEND);
 
-    if (driver&0xF == DB_HDF5)
+    if ((driver&0xF) == DB_HDF5)
         DBCpDir(dbfile, "ucd_dir", dbfile2, "gorfo/foobar");
 
     /* this should be ok becase we're opening for read */

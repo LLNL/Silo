@@ -276,7 +276,7 @@ main(int argc, char *argv[])
      * Return control of native API to Silo
      */
     type = DBUngrabDriver(dbfile, (void *)&silo_h5id);
-    if (type != driver&0xF)
+    if (type != (driver&0xF))
     {
        printf("Wrong drive type returned from Ungrab\n");
        return 1;
@@ -294,7 +294,7 @@ main(int argc, char *argv[])
     DBClose(dbfile);
 
     type = DBGetDriverTypeFromPath(filename);
-    if (type != driver&0xF)
+    if (type != (driver&0xF))
     {
        printf("Wrong drive type=%d returned from GetDriverTypeFromPath\n",
        type);
