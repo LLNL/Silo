@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{A1F2E6F2-6E49-4746-9133-9DF0A404C7DB}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="DLLwithHDF5_Debug|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testall_f" IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testall_f">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\src\silo" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(SolutionDir)..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)" ManifestFile="$(IntDir)\$(TargetFileName).intermediate.manifest" GenerateDebugInformation="true" ProgramDatabaseFile="$(IntDir)$(TargetName).pdb" SubSystem="subSystemConsole" ImportLibrary="$(IntDir)\$(TargetName).lib" TargetMachine="machineX86" AdditionalDependencies="silohdf5.lib"/>
+				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)\$(InputName).res"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)\$(ProjectName).tlb"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true" OutputManifestFile="$(Intdir)\$(TargetFileName).embed.manifest" ResourceFile="$(IntDir)\$(TargetFileName).embed.manifest.res"/></Configuration>
+		<Configuration Name="DLLwithHDF5_Release|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testall_f" IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testall_f">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\src\silo" DiagnosticsFile="$(IntDir)$(TargetName).diag" ModulePath="$(IntDir)" ObjectFile="$(IntDir)"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(SolutionDir)..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)" ManifestFile="$(IntDir)\$(TargetFileName).intermediate.manifest" ProgramDatabaseFile="$(IntDir)$(TargetName).pdb" SubSystem="subSystemConsole" ImportLibrary="$(IntDir)\$(TargetName).lib" AdditionalDependencies="silohdf5.lib"/>
+				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)\$(InputName).res"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)\$(ProjectName).tlb"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true" OutputManifestFile="$(Intdir)\$(TargetFileName).embed.manifest" ResourceFile="$(IntDir)\$(TargetFileName).embed.manifest.res"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="..\..\..\tests\testallf77.f"/></Filter></Files>
+	<Globals/></VisualStudioProject>

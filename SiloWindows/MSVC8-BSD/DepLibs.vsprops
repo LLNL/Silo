@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="DepLibs"
+	>
+	<UserMacro
+		Name="QT_INC_DIR"
+		Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\Qt\include"
+	/>
+	<UserMacro
+		Name="QT_LIB_DIR"
+		Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\Qt\lib\MSVC80"
+	/>
+</VisualStudioPropertySheet>

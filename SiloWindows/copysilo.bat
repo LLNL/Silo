@@ -1,7 +1,7 @@
 @echo off
 
 set SiloIn=.\\..\\src\\silo\\silo.h.in
-set SiloOut=.\\..\\src\\silo\\silo.h
+set SiloOut=.\\include\\silo.h
 set VersionOut=.\\include\\siloversion.h
 set major=0
 set minor=0

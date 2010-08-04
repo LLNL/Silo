@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="BaseIncludes"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="..\..\include;..\..\..\src\debug;..\..\..\src\hdf5_drv;..\..\..\src\pdb;..\..\..\src\pdb_drv;..\..\..\src\score;..\..\..\src\silo;..\..\..\src\taurus;..\..\..\src\unknown"
+
+	/>
+</VisualStudioPropertySheet>

@@ -54,11 +54,6 @@
 /* System provides fwrite prototypes */
 #define HAVE_FWRITE_POINTER 1
 
-/* Support for HDF5 */
-/* #define HAVE_HDF5_DRIVER 1*/
-
-/* Define to 1 if you have the <hdf5.h> header file. */
-/* #define HAVE_HDF5_H 1 */
 
 /* Define to 1 if you have the <history.h> header file. */
 /* #undef HAVE_HISTORY_H */
@@ -152,8 +147,6 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #define HAVE_ZLIB_H 1
 
-#define HAVE_HZIP 1
-#define HAVE_FPZIP 1
 #define SILO_LONG_LONG __int64
 
 /* Name of package */

@@ -136,6 +136,7 @@ main(int argc, char *argv[])
     float         *var;
     float          widths[3];
     int            show_all_errors = FALSE;
+    int type;
 
 #ifdef HAVE_HDF5_H
     hid_t          sid1;       /* Dataspace ID                     */
@@ -143,7 +144,6 @@ main(int argc, char *argv[])
     hsize_t        sdims1[] = {SPACE1_DIM1};
     hsize_t        tdims1[] = {ARRAY1_DIM1};
     int wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    int type;
 #endif
 
     var = ALLOC_N(float, (NX+1)*(NY+1)*(NZ+1));

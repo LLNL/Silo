@@ -1,9 +1,9 @@
-          Building Silo using Microsoft Visual C++ version 7.1 or 8.0
+          Building Silo using Microsoft Visual C++ version 8.0
           ===========================================================
 
-This guide contains instructions for building Silo using MSVC++ 7.1 or 8 
+This guide contains instructions for building Silo using MSVC 8.0
 on a computer running MS Windows. While the Silo source code should build using
-other compilers, we only provide project files and support for MSVC++ 7.1 and 8.
+other compilers, we only provide project files and support for MSVC and 8.0.
 
 What gets built
 ===============
@@ -38,15 +38,14 @@ Build instructions
 1. Run the copysilo.bat file in the SiloWindows subdirectory.
 
 2. The solution and project files are found in the SiloWindows subdirectory of 
-   the silo source tree.  There is a separate subdirectory for building with 
-   version 7.1 (MSVC7) and version 8 (MSVC8) of the compiler.  In addition, 
-   there are subdirectories for special includes and resource files necessary 
-   for the build process.
-        silo-4.6
+   the silo source tree.  There is a subdirectory for MSVC8 project file. In
+   addition there are subdirectories for special includes and resource files 
+   necessary for the build process.
 
 3. Environment variables need to be defined:
         ZLIB_INC_DIR    path to zlib include directory
         ZLIB_LIB_DIR    path to zlib library files 
+        ZLIB_LIB_DIR_STATIC    path to static zlib library files 
  
 4. If building silo with HDF5 support, you must define a few environment 
    variables so that the compiler can find the necessary files
@@ -54,10 +53,12 @@ Build instructions
         HDF5_INC_DIR    path to the HDF5 incude directory (where headers are 
                         located)
         HDF5_LIB_DIR    path to location of HDF5 libs
+        HDF5_LIB_DIR_STATIC    path to location of static HDF5 libs
 
         SZIP_INC_DIR    path to the szip incude directory (where headers are 
                         located)
         SZIP_LIB_DIR    path to location of szip libs
+        SZIP_LIB_DIR_STATIC    path to location of static szip libs
   
 5. Silex is built by default after Silo completes, and it also requires an 
    evironment variable to be defined:
@@ -67,8 +68,8 @@ Build instructions
    (Once Visual Studio is open).  To do so, right-click the solution name, 
    Unselect the silex project for the configuration you will be building.
 
-6. Open VisualStudio and the appropriate SiloWindows solution file located in 
-   either the MSVC7 or MSVC8 subdirectory of SiloWindows.
+6. Open VisualStudio and the SiloWindows solution file located in 
+   the MSVC8 subdirectory of SiloWindows.
 
 7. Choose the build configuration that is appropriate for your needs. Most 
    users should choose the DLL and only build the Release version.
@@ -78,11 +79,11 @@ Build instructions
 
 8. Build the Silo library. If you are building the Silo DLL, both silo.dll and
    silo.lib are placed in the subdirectory for the selected build configuration.
-   Those directories are: (where X represents the comiler version you are using)
+   Those directories are: 
 
-       SiloWindows\MSVCX\<ConfigurationName) 
+       SiloWindows\MSVC8\<ConfigurationName) 
        e.g.
 
-       SiloWindows\MSVCX\DLLwithHDF5_Debug
-       SiloWindows\MSVCX\DLLwithHDF5_Release
+       SiloWindows\MSVC8\DLLwithHDF5_Debug
+       SiloWindows\MSVC8\DLLwithHDF5_Release
 
