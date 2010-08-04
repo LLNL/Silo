@@ -51,6 +51,13 @@
 # be used for advertising or product endorsement purposes.
 #
 ##############################################################################
+
+#
+# Modifications:
+#
+#   Mark C. Miller, Tue Aug  3 17:23:07 PDT 2010
+#   Added logic to error out of there already exists a bsd dir into which we
+#   wish to create a bsd tree. Added logic to remove the dir after completion.
  
 ACLOCAL_AMFLAGS = -I config
 
@@ -71,11 +78,17 @@ help: config/make.help
 	cat $(srcdir)/config/make.help
 
 dist-gzip-bsd:	dist-gzip
+	@if test -e $(PACKAGE)-$(VERSION)-bsd; then \
+	    echo "A directory or file named $(PACKAGE)-$(VERSION)-bsd already exists" ;\
+	    echo "Please remove before proceeding" ;\
+	    exit 1 ;\
+	fi
 	gunzip < $(PACKAGE)-$(VERSION).tar.gz | tar xf -
 	rm -rf $(PACKAGE)-$(VERSION)/src/hzip
 	rm -rf $(PACKAGE)-$(VERSION)/src/fpzip
 	mv $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)-bsd
 	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd.tar.gz
+	rm -rf $(PACKAGE)-$(VERSION)-bsd
 
 .PHONY: help
 
