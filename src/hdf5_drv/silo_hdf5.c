@@ -10816,6 +10816,10 @@ PrepareForZonelistDecompression(DBfile_hdf5* dbfile, const char *zlname,
  *              the actual datatype. The type is assumed int if it its
  *              value is zero or it does not exist. Otherwise, the type is
  *              is whatever is stored in gnznodtype member. 
+ *
+ *              Mark C. Miller, Tue Jul 27 23:20:27 PDT 2010
+ *              Removed odd-ball logic to summarily set min/max index to
+ *              zero unless 'calledFromGetUcdmesh'
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBzonelist *
@@ -10861,18 +10865,8 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char *name)
         zl->nshapes = m.nshapes;
         zl->lnodelist = m.lnodelist;
         zl->origin = m.origin;
-
-        /* hack so that HDF5 driver behaves same as PDB driver */
-        if (calledFromGetUcdmesh)
-        {
-            zl->min_index = m.lo_offset;
-            zl->max_index = m.nzones - m.hi_offset - 1;
-        }
-        else
-        {
-            zl->min_index = 0;
-            zl->max_index = 0;
-        }
+        zl->min_index = m.lo_offset;
+        zl->max_index = m.nzones - m.hi_offset - 1;
 
         /* Prepare for possible zonelist decompression */
         PrepareForZonelistDecompression(dbfile, name,
