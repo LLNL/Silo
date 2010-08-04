@@ -134,6 +134,12 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     static const char *hierarchy_names[] = {"NetCDF", "PDB Proper", "PDB",
                                             "Taurus", "", "", "Debug", "HDF5", "", ""};
 
+#if !defined(_WIN32)
+#warning THIS IS ALL WRONG
+#warning MUST USE PRIORITY ORDERING IF IT IS NOT DEFAULT ORDERING FIRST
+#warning OTHERWISE USE REGISTERED OPTIONS SETS FIRST
+#warning NEXT, MUST ACCOMODATE DRIVER IDS USING MACRO
+#endif
     /*
      * Save current error reporting and then turn it off
      */
