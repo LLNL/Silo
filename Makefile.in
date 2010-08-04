@@ -745,11 +745,17 @@ help: config/make.help
 	cat $(srcdir)/config/make.help
 
 dist-gzip-bsd:	dist-gzip
+	@if test -e $(PACKAGE)-$(VERSION)-bsd; then \
+	    echo "A directory or file named $(PACKAGE)-$(VERSION)-bsd already exists" ;\
+	    echo "Please remove before proceeding" ;\
+	    exit 1 ;\
+	fi
 	gunzip < $(PACKAGE)-$(VERSION).tar.gz | tar xf -
 	rm -rf $(PACKAGE)-$(VERSION)/src/hzip
 	rm -rf $(PACKAGE)-$(VERSION)/src/fpzip
 	mv $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)-bsd
 	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd.tar.gz
+	rm -rf $(PACKAGE)-$(VERSION)-bsd
 
 .PHONY: help
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
