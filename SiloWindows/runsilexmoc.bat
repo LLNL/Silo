@@ -1,5 +1,5 @@
 @echo off
-set MOC=%QTDIR%\bin\moc.exe
+set MOC=C:\VisIt\VisItDev\windowsbuild\ThirdParty\Qt\lib\MSVC80\moc.exe
 set SILEX=..\..\tools\silex
 
 

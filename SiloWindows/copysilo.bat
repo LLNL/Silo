@@ -48,11 +48,13 @@ for /F "tokens=1* delims=]" %%i in ('find /v /n "" ^.\..\src\silo\silo.h.in') do
           @echo %%A Silo_version_%major%_%minor%_%patch%_pre%pre%>> %SiloOut% 
         )
       ) else if "%%B"=="SILO_DTYPPTR" (
-          @echo %%A@%%B@%%C>> %SiloOut%
+          @echo %%Avoid%%C>> %SiloOut%
       ) else if "%%B"=="SILO_DTYPPTR1" (
-          @echo %%A@%%B@%%C>> %SiloOut%
+          @echo %%Avoid*%%C>> %SiloOut%
       ) else if "%%B"=="SILO_DTYPPTR2" (
-          @echo %%A@%%B@%%C>> %SiloOut%
+          @echo %%Avoid*%%C>> %SiloOut%
+      ) else if "%%B"=="DB_LONG_LONG_DEF" (
+          @echo %%A22%%C>> %SiloOut%
       ) else (
         if not "%%C"=="" (
           @echo %%A%%B%%C>> %SiloOut%
