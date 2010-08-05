@@ -52,6 +52,16 @@ product endorsement purposes.
 #include <config.h>
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 
+#include "hdf5.h"
+
+/* useful macro for comparing HDF5 versions */
+#define HDF5_VERSION_GE(Maj,Min,Rel)  \
+        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+         (H5_VERS_MAJOR>Maj))
+
+#if HDF5_VERSION_GE(1,8,4)
+
 /* The _GNU_SOURCE wrapper logic is to enable the O_DIRECT flag */
 #ifdef __linux__
 #define _GNU_SOURCE
@@ -2360,4 +2370,5 @@ H5FD_silo_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 #error "Do not use HDF5 private definitions"
 #endif
 
-#endif
+#endif /* #if HDF5_VERSION_GE(1,8,4) */
+#endif /* #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5) */

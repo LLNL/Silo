@@ -126,7 +126,7 @@ EXTRA_DIST = \
 ./runsilexmoc.bat\
 ./Makefile.in\
 ./copysilo.bat\
-./README
+./README\
 ./MSVC8-BSD/Tests/alltypes.vcproj\
 ./MSVC8-BSD/Tests/array.vcproj\
 ./MSVC8-BSD/Tests/array_f.vfproj\
@@ -184,4 +184,4 @@ EXTRA_DIST = \
 ./MSVC8-BSD/NO_SEC_DEP.vsprops\
 ./MSVC8-BSD/silex.vcproj\
 ./MSVC8-BSD/Silo.vcproj\
-./MSVC8-BSD/SiloWindows.sln\
+./MSVC8-BSD/SiloWindows.sln

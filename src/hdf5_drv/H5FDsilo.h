@@ -71,6 +71,17 @@ be used for advertising or product endorsement purposes.
 #define H5FDsilo_H
 
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
+
+#include "hdf5.h"
+
+/* useful macro for comparing HDF5 versions */
+#define HDF5_VERSION_GE(Maj,Min,Rel)  \
+        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+         (H5_VERS_MAJOR>Maj))
+
+#if HDF5_VERSION_GE(1,8,4)
+
 #include "H5Ipublic.h"
 
 #define H5FD_SILO	(H5FD_silo_init())
@@ -102,5 +113,6 @@ herr_t H5Pset_silo_use_direct(hid_t fapl_id, int used);
 }
 #endif
 
-#endif  /*defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5) */
-#endif
+#endif /* #if HDF5_VERSION_GE */
+#endif /* #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5) */
+#endif /* #ifndef H5FDsilo_H */

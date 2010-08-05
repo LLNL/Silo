@@ -72,8 +72,8 @@ be used for advertising or product endorsement purposes.
 #include "H5FDsilo.h"
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 
-/* HZIP node order permuation vector construction
-   To construct a permutation vector. Work backwards
+/* HZIP node order permuation vector construction.
+   To construct a permutation vector, work backwards
    from the highest numbered node on the canonical
    element, finding its cooresponding node number on
    the source element. Put the resulting number in
@@ -4527,6 +4527,10 @@ db_hdf5_ForceSingle(int status)
  *  Mark C. Miller, Wed Jul 14 20:52:19 PDT 2010
  *  Moved default silo settings to macro constants in H5FDsilo.h.
  *  Added support for direct I/O to silo vfd.
+ *
+ *  Mark C. Miller, Wed Aug  4 16:06:41 PDT 2010
+ *  Added conditional compilation logic for silo fapl for HDF5 1.8.4 or
+ *  greater.
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
@@ -4559,8 +4563,8 @@ db_hdf5_process_file_options(opts_set_id)
     if (opts_set_id != DB_FILE_OPTS_H5_DEFAULT_DEFAULT && 
         opts_set_id < NUM_DEFAULT_FILE_OPTIONS_SETS)
     {
-        db_perror("Non-default HDF5 VFD specified on Windows.", E_CALLFAIL, me);
-        return retval;
+        H5Pclose(retval);
+        return db_perror("Non-default HDF5 VFD specified on Windows.", E_CALLFAIL, me);
     }
 #endif
 #endif
@@ -4572,7 +4576,12 @@ db_hdf5_process_file_options(opts_set_id)
             break;
 
         case DB_FILE_OPTS_H5_DEFAULT_SILO:
+#if HDF5_VERSION_GE(1,8,4)
             h5status |= H5Pset_fapl_silo(retval);
+#else
+            H5Pclose(retval);
+            return db_perror("Silo block VFD >= HDF5 1.8.4", E_NOTENABLEDINBUILD, me);
+#endif
             break;
 
         /* default HDF5 sec2 driver */
@@ -4672,8 +4681,7 @@ db_hdf5_process_file_options(opts_set_id)
                 (opts = SILO_Globals.fileOptionsSets[_opts_set_id]) == 0)
             {
                 H5Pclose(retval);
-                db_perror("Bad file options set index", E_CALLFAIL, me);
-                return -1;
+                return db_perror("Bad file options set index", E_CALLFAIL, me);
             }
 
             /* get the vfd specification */
@@ -4713,6 +4721,7 @@ db_hdf5_process_file_options(opts_set_id)
                     break;
                 case DB_H5VFD_SILO:
                 {
+#if HDF5_VERSION_GE(1,8,4)
                     hsize_t block_size = H5FD_SILO_DEFAULT_BLOCK_SIZE; 
                     int block_count = H5FD_SILO_DEFAULT_BLOCK_COUNT; 
                     int log_stats = H5FD_SILO_DEFAULT_LOG_STATS;
@@ -4731,6 +4740,10 @@ db_hdf5_process_file_options(opts_set_id)
                     h5status |= H5Pset_silo_block_size_and_count(retval, block_size, block_count);
                     h5status |= H5Pset_silo_log_stats(retval, log_stats);
                     h5status |= H5Pset_silo_use_direct(retval, use_direct);
+#else
+                    H5Pclose(retval);
+                    return db_perror("Silo block VFD >= HDF5 1.8.4", E_NOTENABLEDINBUILD, me);
+#endif
                     break;
                 }
                 case DB_H5VFD_LOG:
@@ -4843,8 +4856,8 @@ db_hdf5_process_file_options(opts_set_id)
                     /* make sure the exentions are not identical */
                     if (!strcmp(mext, rext))
                     {
-                        db_perror("meta & raw extensions must be different", E_CALLFAIL, me);
-                        return -1;
+                        H5Pclose(retval);
+                        return db_perror("meta & raw extensions must be different", E_CALLFAIL, me);
                     }
 
                     h5status |= H5Pset_fapl_split(retval, mext, meta_fapl, rext, raw_fapl);
@@ -4968,7 +4981,10 @@ db_hdf5_process_file_options(opts_set_id)
     }
 
     if (h5status < 0)
+    {
+        H5Pclose(retval);
         return db_perror("Problem setting HDF5 VFD options", E_CALLFAIL, me);
+    }
 
     return retval;
 }
