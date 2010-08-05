@@ -53,6 +53,12 @@ product endorsement purposes.
 #define SILO_PDB_PRIVATE_H
 
 #include "pdb.h"
+/* 'VERSION' is defined in PDB proper and Silo's config.h */
+#ifdef USING_PDB_PROPER
+#    ifdef VERSION
+#    undef VERSION
+#    endif
+#endif
 #include "silo_private.h"
 
 /*
