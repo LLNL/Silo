@@ -49,6 +49,13 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
+/* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
+   in this file uses version 1.6 of the HDF5 API. This is harmless for
+   versions of HDF5 before 1.8 and ensures correct compilation with
+   version 1.8 and thereafter. When, and if, the HDF5 code in this file
+   is explicitly upgraded to the 1.8 API, this symbol should be removed. */
+#define H5_USE_16_API
+
 #include <config.h>
 #if defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5)
 
