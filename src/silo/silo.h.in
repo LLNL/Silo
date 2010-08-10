@@ -456,6 +456,7 @@ typedef enum {
 #define DBOPT_MB_EMPTY_COUNT    335
 #define DBOPT_LAST              499 
 
+/* Options relating to virtual file drivers */
 #define DBOPT_H5_FIRST              500
 #define DBOPT_H5_VFD                500
 #define DBOPT_H5_RAW_FILE_OPTS      501
