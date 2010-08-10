@@ -126,41 +126,95 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     DBfile        *opened = NULL;
     DBErrFunc_t    oldErrfunc = 0;
     int            oldErrlvl;
-    int            i, type, ntried = 0;
-    int            driver_ids_already_tried[MAX_FILE_OPTIONS_SETS+10+1];
+    int            i, j, type, ntried = 0;
+    int            driver_types_already_tried[MAX_FILE_OPTIONS_SETS+10+1];
+    int            default_driver_priorities[MAX_FILE_OPTIONS_SETS+10+1] =
+                       DEFAULT_DRIVER_PRIORITIES;
+    int            priorities_are_set_to_default = 1;
     char          *me = "db_unk_Open";
     char           tried[1024], ascii[32];
     const int *opts_set_ids = db_get_used_file_options_sets_ids();
     static const char *hierarchy_names[] = {"NetCDF", "PDB Proper", "PDB",
                                             "Taurus", "", "", "Debug", "HDF5", "", ""};
 
-#if !defined(_WIN32)
-#warning THIS IS ALL WRONG
-#warning MUST USE PRIORITY ORDERING IF IT IS NOT DEFAULT ORDERING FIRST
-#warning OTHERWISE USE REGISTERED OPTIONS SETS FIRST
-#warning NEXT, MUST ACCOMODATE DRIVER IDS USING MACRO
-#endif
-    /*
-     * Save current error reporting and then turn it off
-     */
+    /* Save current error reporting and then turn it off */
     oldErrlvl = DBErrlvl();
     oldErrfunc = DBErrfunc();
     DBShowErrors(DB_SUSPEND, NULL);
     strcpy(tried, "attempted SILO drivers:");
 
-    for (i = 0; i < sizeof(driver_ids_already_tried)/sizeof(driver_ids_already_tried[0]); i++)
-        driver_ids_already_tried[i] = -1;
+    /* Initialize list of driver ids we've already tried */
+    for (i = 0; i < sizeof(driver_types_already_tried)/sizeof(driver_types_already_tried[0]); i++)
+        driver_types_already_tried[i] = -1;
 
+    /* See if we're using default priorities or not */
+    for (i = 0; i < sizeof(default_driver_priorities)/sizeof(default_driver_priorities[0]); i++)
+    {
+        if (SILO_Globals.unknownDriverPriorities[i] != default_driver_priorities[i])
+        {
+            priorities_are_set_to_default = 0;
+            break;
+        }
+    }
+
+    /* If we're not using default priorities, we need to try them first */
+    if (!priorities_are_set_to_default)
+    {
+        for (type = 0; !opened && SILO_Globals.unknownDriverPriorities[type]!=-1; type++)
+        {
+            int driverId;
+            int driverType = SILO_Globals.unknownDriverPriorities[type];
+            int tried_already = 0;
+            db_DriverTypeAndFileOptionsSetId(driverType, &driverId, 0);
+            for (i = 0; driver_types_already_tried[i]!=-1; i++)
+            {
+                 if (driverType == driver_types_already_tried[i])
+                 {
+                     tried_already = 1;
+                     break;
+                 }
+            }
+            if (tried_already)
+                continue;
+            if (DBOpenCB[driverId] == NULL)
+                continue;
+            sprintf(ascii, " %s", hierarchy_names[driverId]);
+            strcat(tried, ascii);
+            PROTECT {
+                opened = (DBOpenCB[driverId]) (name, mode, subtype_dummy);
+            }
+            CLEANUP {
+                CANCEL_UNWIND;
+            }
+            END_PROTECT;
+            driver_types_already_tried[ntried++] = driverType;
+        }
+    }
+     
     /*
-     * Try various registered options sets FIRST, so that any registered file
-     * options sets take priority over anything else. Note, here we are going
-     * to try ONLY file options sets registered by Silo client and NOT any
-     * of the default file options sets.
+     * Try various registered options sets. Note, here we are going to try
+     * ONLY file options sets registered by Silo client and NOT any of the
+     * default file options sets.
      */
     if (DBOpenCB[DB_HDF5X]!=NULL)
     {
         for (i = 0; !opened && opts_set_ids[i]!=-1; i++)
         {
+            int driverId;
+            int driverType = DB_HDF5_OPTS(opts_set_ids[i]); 
+            int tried_already = 0;
+            db_DriverTypeAndFileOptionsSetId(driverType, &driverId, 0);
+            for (j = 0; driver_types_already_tried[j]!=-1; j++)
+            {
+                 if (driverType == driver_types_already_tried[j])
+                 {
+                     tried_already = 1;
+                     break;
+                 }
+            }
+            if (tried_already)
+                continue;
+            /* skip the 'default' ones */
             if (opts_set_ids[i] < NUM_DEFAULT_FILE_OPTIONS_SETS)
                 continue;
             sprintf(ascii, " DB_HDF5_OPTS(%d)", opts_set_ids[i]);
@@ -172,7 +226,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
                 CANCEL_UNWIND;
             }
             END_PROTECT;
-            driver_ids_already_tried[ntried++] = DB_HDF5_OPTS(opts_set_ids[i]); 
+            driver_types_already_tried[ntried++] = driverType;
         }
     }
 
@@ -180,32 +234,37 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
      * Try each driver according to priority ordering specified in Silo
      * Globals being careful NOT re-try any that we already tried above.
      */
-    for (type = 0; !opened && SILO_Globals.unknownDriverPriorities[type]!=-1; type++)
+    if (priorities_are_set_to_default)
     {
-        int driverId = SILO_Globals.unknownDriverPriorities[type];
-        int tried_already = 0;
-        for (i = 0; driver_ids_already_tried[i]!=-1; i++)
+        for (type = 0; !opened && SILO_Globals.unknownDriverPriorities[type]!=-1; type++)
         {
-             if (driverId == driver_ids_already_tried[i])
-             {
-                 tried_already = 1;
-                 break;
-             }
+            int driverId;
+            int driverType = SILO_Globals.unknownDriverPriorities[type];
+            int tried_already = 0;
+            db_DriverTypeAndFileOptionsSetId(driverType, &driverId, 0);
+            for (j = 0; driver_types_already_tried[j]!=-1; j++)
+            {
+                 if (driverType == driver_types_already_tried[j])
+                 {
+                     tried_already = 1;
+                     break;
+                 }
+            }
+            if (tried_already)
+                continue;
+            if (DBOpenCB[driverId] == NULL)
+                continue;
+            sprintf(ascii, " %s", hierarchy_names[driverId]);
+            strcat(tried, ascii);
+            PROTECT {
+                opened = (DBOpenCB[driverId]) (name, mode, subtype_dummy);
+            }
+            CLEANUP {
+                CANCEL_UNWIND;
+            }
+            END_PROTECT;
+            driver_types_already_tried[ntried++] = driverType;
         }
-        if (tried_already)
-            continue;
-        if (DBOpenCB[driverId] == NULL)
-            continue;
-        sprintf(ascii, " %s", hierarchy_names[driverId]);
-        strcat(tried, ascii);
-        PROTECT {
-            opened = (DBOpenCB[driverId]) (name, mode, subtype_dummy);
-        }
-        CLEANUP {
-            CANCEL_UNWIND;
-        }
-        END_PROTECT;
-        driver_ids_already_tried[ntried++] = driverId;
     }
 
     /*
@@ -215,18 +274,22 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     {
         for (i = 0; !opened && opts_set_ids[i]!=-1; i++)
         {
-            int j, tried_already = 0;
-            if (opts_set_ids[i] >= NUM_DEFAULT_FILE_OPTIONS_SETS)
-                continue;
-            for (j = 0; driver_ids_already_tried[j]!=-1; j++)
+            int driverId;
+            int driverType = DB_HDF5_OPTS(opts_set_ids[i]); 
+            int tried_already = 0;
+            db_DriverTypeAndFileOptionsSetId(driverType, &driverId, 0);
+            for (j = 0; driver_types_already_tried[j]!=-1; j++)
             {
-                 if (DB_HDF5_OPTS(opts_set_ids[i]) == driver_ids_already_tried[j])
+                 if (driverType == driver_types_already_tried[j])
                  {
                      tried_already = 1;
                      break;
                  }
             }
             if (tried_already)
+                continue;
+            /* skip the 'default' ones */
+            if (opts_set_ids[i] >= NUM_DEFAULT_FILE_OPTIONS_SETS)
                 continue;
             sprintf(ascii, " DB_HDF5_OPTS(%d)", opts_set_ids[i]);
             strcat(tried, ascii);
@@ -237,6 +300,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
                 CANCEL_UNWIND;
             }
             END_PROTECT;
+            driver_types_already_tried[ntried++] = driverType;
         }
     }
 
@@ -254,5 +318,6 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
             db_perror(tried, E_NOTIMP, me);
         }
     }
+
     return (opened);
 }
