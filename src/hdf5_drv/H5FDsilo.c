@@ -1028,8 +1028,12 @@ static herr_t insert_block_by_index(H5FD_silo_t *file, int blidx)
     memset(&bl[blidx+1], 0, sizeof(silo_vfd_block_t));
 
     file->num_blocks++;
-    if (file->num_blocks > file->stats.max_blocks_in_mem)
-        file->stats.max_blocks_in_mem = file->num_blocks;
+
+    if (file->log_stats)
+    {
+        if (file->num_blocks > file->stats.max_blocks_in_mem)
+            file->stats.max_blocks_in_mem = file->num_blocks;
+    }
 
     return 0;
 }
@@ -1198,6 +1202,7 @@ H5Pset_fapl_silo(hid_t fapl_id)
     if (H5Pset(fapl_id, SILO_USEDIR_PROPNAME, &default_use_direct) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set " SILO_USEDIR_PROPNAME, -1, -1)
 
+#if 0
     if (H5Pset_meta_block_size(fapl_id, 0) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
     if (H5Pset_small_data_block_size(fapl_id, 0) < 0)
@@ -1228,6 +1233,7 @@ H5Pset_fapl_silo(hid_t fapl_id)
     if (H5Pset_mdc_config(fapl_id, &mdc_config)<0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set mdc_config to turn off evictions", -1, -1)
 #endif
+#endif
     
     return H5Pset_driver(fapl_id, H5FD_SILO, NULL);
 }
@@ -1245,14 +1251,16 @@ H5Pset_silo_block_size_and_count(hid_t fapl_id, hsize_t block_size, int max_bloc
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1, -1)
     if (H5Pset(fapl_id, SILO_BLKSZ_PROPNAME, &block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_size", -1, -1)
+    if (H5Pset(fapl_id, SILO_BLKCNT_PROPNAME, &max_blocks_in_mem) < 0)
+        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
+#if 0
     if (H5Pset_meta_block_size(fapl_id, 0) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
     if (H5Pset_small_data_block_size(fapl_id, 0) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set small_data_block_size", -1, -1)
     if (H5Pset_sieve_buf_size(fapl_id, 0) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set sieve_buf_size", -1, -1)
-    if (H5Pset(fapl_id, SILO_BLKCNT_PROPNAME, &max_blocks_in_mem) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
+#endif
 
     return ret_value;
 }
@@ -1321,7 +1329,8 @@ H5FD_silo_sb_size(H5FD_t *_file)
     /* block size for file */
     nbytes += 8;
 
-    return 1024-100-nbytes;
+/*    return 1024-100-nbytes;*/
+    return nbytes;
 }
 
 
@@ -1462,6 +1471,7 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL, -1)
 
     /* get some properties and sanity check them */
+#if 0
     if (H5Pget_meta_block_size(fapl_id, &meta_block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get meta_block_size", 0, -1)
     if (meta_block_size != 0)
@@ -1476,6 +1486,7 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get sieve_buf_size", 0, -1)
     if (sieve_buf_size != 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "sieve_buf_size!=0", 0, -1)
+#endif
 
     if (H5Pget(fapl_id, SILO_BLKSZ_PROPNAME, &silo_block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_BLKSZ_PROPNAME, 0, -1)
@@ -1879,15 +1890,10 @@ H5FD_silo_query(const H5FD_t *_f, unsigned long *flags /* out */)
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
-#if !defined(_WIN32)
-#warning FIXE ME
-#endif
-#if 0
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-#endif
     }
 
     return(0);
