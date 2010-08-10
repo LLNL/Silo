@@ -56,6 +56,11 @@ result=0
 # Test datatype handling with force single on and off 
 #
 # Programmer: Mark C. Miller, Thu Jul 15 18:05:03 PDT 2010
+#
+# Modifications:
+#
+#   Mark C. Miller, Mon Aug  9 16:59:23 PDT 2010
+#   Made it work for any HDF5 driver, not just DB_HDF5.
 # -----------------------------------------------------------------------------
 
 # Diddle the the directory because Autotest is not at all designed to handle
@@ -70,11 +75,11 @@ else
 fi
 
 smode="pdb"
-if test "$2" = "DB_HDF5"; then
+if test "${2:0:7}" = "DB_HDF5"; then
     smode="h5"
 fi
 
-#echo -e "driver\tfsmode\tmesh\tvartyp\tdattyp\tstatus"
+echo -e "driver\tfsmode\tmesh\tvartyp\tdattyp\tstatus"
 for fsmode in "-s 1" ""; do
     for mt in "quad" "ucd"; do
         for v in "n" "z"; do
@@ -83,9 +88,9 @@ for fsmode in "-s 1" ""; do
                 if test -n "$diffs"; then
                     result=1
                     break 4
-#                        echo -e "${smode}\t${fsmode}\t${mt}\t${v}\t${d}\tFAILED"
-#                    else
-#                        echo -e "${smode}\t${fsmode}\t${mt}\t${v}\t${d}\tPASSED"
+                    echo -e "${smode}\t${fsmode}\t${mt}\t${v}\t${d}\tFAILED"
+                else
+                    echo -e "${smode}\t${fsmode}\t${mt}\t${v}\t${d}\tPASSED"
                 fi
             done
         done
