@@ -778,6 +778,16 @@ typedef struct filter_t {
 
 #define MAX_FILE_OPTIONS_SETS 32
 #define NUM_DEFAULT_FILE_OPTIONS_SETS (DB_FILE_OPTS_LAST+1)
+#define DEFAULT_DRIVER_PRIORITIES \
+   {      /* unknown driver priorities */ \
+        1, 2, 7, 0, 3, 6, -1, 0, \
+        0, 0, 0, 0, 0, 0, 0, 0, \
+        0, 0, 0, 0, 0, 0, 0, 0, \
+        0, 0, 0, 0, 0, 0, 0, 0, \
+        0, 0, 0, 0, 0, 0, 0, 0, \
+        0, 0, 0 \
+    }
+
 
 /* Namespace struct for Silo's global variables */
 typedef struct SILO_Globals_t {

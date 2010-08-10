@@ -252,8 +252,6 @@ struct _cu     _cu;
 struct _dv     _dv;
 struct _mrgt   _mrgt;
 
-    static int     hierarchy[] = { 1, 2, 7, 0, 3, 6 };
-
 SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
@@ -274,13 +272,7 @@ SILO_Globals_t SILO_Globals = {
     0,     /* _db_err_func */
     DB_NONE,/* _db_err_level_drvr */
     0,     /* Jstk */
-    {      /* unknown driver priority */
-        1, 2, 7, 0, 3, 6, -1, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0
-    }
+    DEFAULT_DRIVER_PRIORITIES
 };
 
 INTERNAL int
@@ -9015,19 +9007,6 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
         if (!nodelist && lnodelist)
             API_ERROR("nodelist", E_BADARGS);
 
-#if !defined(_WIN32)
-#warning FIXME
-#endif
-#if 0
-        if (nzones <= 0)
-            API_ERROR("nzones", E_BADARGS);
-        if (!facecnt && nzones)
-            API_ERROR("facecnt", E_BADARGS);
-        if (lfacelist <= 0)
-            API_ERROR("lfacelist", E_BADARGS);
-        if (!facelist && lfacelist)
-            API_ERROR("facelist", E_BADARGS);
-#endif
 
         if (0 != origin && 1 != origin)
             API_ERROR("origin", E_BADARGS);
