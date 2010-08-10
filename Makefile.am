@@ -61,6 +61,9 @@
 #
 #   Mark C. Miller, Wed Aug  4 15:52:52 PDT 2010
 #   Added logic to handle windows project files for BSD release.
+#
+#   Mark C. Miller, Mon Aug  9 16:58:46 PDT 2010
+#   Added creation of smalltest dist for bsd distributions.
  
 ACLOCAL_AMFLAGS = -I config
 
@@ -80,7 +83,6 @@ DIST_SUBDIRS = . config config-site \
 help: config/make.help
 	cat $(srcdir)/config/make.help
 
-#dist-gzip-bsd: $(PACKAGE)-$(VERSION).tar.gz
 dist-gzip-bsd: dist-gzip
 	@if test -e $(PACKAGE)-$(VERSION); then \
 	    echo "A directory or file named $(PACKAGE)-$(VERSION) already exists" ;\
@@ -99,6 +101,8 @@ dist-gzip-bsd: dist-gzip
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC8
 	mv $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC8-BSD $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC8
 	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd.tar.gz
+	rm -rf $(PACKAGE)-$(VERSION)-bsd/tests/{amr3d.silo,pion0244.silo,z1plt.silo,amr2d.silo,xvers_data.tar.bz2}
+	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.gz
 	rm -rf $(PACKAGE)-$(VERSION)-bsd
 	rm -rf $(PACKAGE)-$(VERSION)/SiloWindows/MSVC8-BSD
 	tar cf - $(PACKAGE)-$(VERSION) | gzip --best > $(PACKAGE)-$(VERSION).tar.gz
