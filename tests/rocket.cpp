@@ -889,7 +889,7 @@ void add_nose(int zval)
             nodelist_g.push_back(layerNodelist[i*4+j] + zval*layerNNodes);
         matlist_g.push_back(matMap["Liquid Propellant"]);
         procid_g.push_back(0);
-        bitmap_g.push_back(NOSE|STAGE3);
+        bitmap_g.push_back(STAGE3|NOSE);
     }
 
     // add external wedges
@@ -912,7 +912,7 @@ void add_nose(int zval)
         matlist_g.push_back(matMap[i%2 ? "Electronics" : "Body"]);
         procid_g.push_back(2);
         k++;
-        bitmap_g.push_back(NOSE|BUS|STAGE3);
+        bitmap_g.push_back(STAGE3|NOSE|BUS);
     }
 
     // add top-level pyramids
@@ -1006,6 +1006,55 @@ void build_body()
     add_fins();
 }
 
+#ifdef HAVE_IMESH
+static iBase_EntitySetHandle
+CreateSet(siloimesh_t mesh, iBase_EntitySetHandle parent, const char *name)
+{
+    // Obtain the SET_NAME tag handle (create if doesn't already exist)
+    iBase_TagHandle snTag; 
+    iMesh_getTagHandle(mesh->theMesh, "SET_NAME", &snTag, &(mesh->error), 9);
+    CheckITAPSError(getTagHandle);
+    if (mesh->error != iBase_SUCCESS)
+        iMesh_createTag(mesh->theMesh, "SET_NAME", 64, iBase_BYTES,
+            &snTag, &(mesh->error), 9);
+
+    char tmp[64];
+    memset(tmp, '\0', sizeof(tmp));
+    strcpy(tmp, name);
+    iBase_EntitySetHandle theSet;
+    iMesh_createEntSet(mesh->theMesh, 0, &theSet, &(mesh->error));
+    CheckITAPSError(createEntSet);
+    iMesh_setEntSetData(mesh->theMesh, theSet, snTag,
+        tmp, sizeof(tmp), &(mesh->error));
+    CheckITAPSError(setEntSetData);
+
+    if (parent != mesh->rootSet)
+    {
+        iMesh_addEntSet(mesh->theMesh, theSet, parent, &(mesh->error));
+        CheckITAPSError(addEntSet);
+    }
+
+    return theSet;
+}
+
+static void
+PutEnts(siloimesh_t mesh, iBase_EntitySetHandle theSet, int mask,
+    const vector<int> &bitmap)
+{
+return;
+    vector<iBase_EntityHandle> ents;
+    for (int i = 0; i < (int) bitmap.size(); i++)
+        if (bitmap[i]&mask) ents.push_back(mesh->zones[i]);
+
+    if (ents.size() == 0)
+        return;
+
+    iMesh_addEntArrToSet(mesh->theMesh, &ents[0], ents.size(), theSet, &(mesh->error));
+    CheckITAPSError(addEntArrToSet);
+}
+
+#endif
+
 void write_rocket(siloimesh_t mesh)
 {
     // output rocket as monolithic, single mesh
@@ -1056,6 +1105,8 @@ void write_rocket(siloimesh_t mesh)
     }
 
 #ifdef HAVE_IMESH
+    // Ok, we're going to use PutMaterial here to do something similar
+    // except that we're outputting the domain decomposition.
     {
         char *subsetnames[3] = {"domain_0","domain_1","domain_2"};
         int subsetnos[3] = {0, 1, 2};
@@ -1065,7 +1116,52 @@ void write_rocket(siloimesh_t mesh)
             &procid_g[0], &nzones_g, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts);
         DBFreeOptlist(opts);
     }
-    //PutAssemblyFromVar(mesh->theMesh, DB_ZONECENT, bitmap_g);
+
+    // Ok, now output the assembly hierarchy using bitmap_g as our guide.
+    iBase_EntitySetHandle assmSet = CreateSet(mesh, mesh->rootSet, "Assembly");
+
+    iBase_EntitySetHandle boostSet = CreateSet(mesh, assmSet, "Booster");
+    PutEnts(mesh, boostSet, BOOSTER, bitmap_g);
+
+    iBase_EntitySetHandle s1Set = CreateSet(mesh, boostSet, "Stage1");
+    PutEnts(mesh, s1Set, STAGE1, bitmap_g);
+
+    iBase_EntitySetHandle finsSet = CreateSet(mesh, s1Set, "Fins");
+    PutEnts(mesh, finsSet, FINS, bitmap_g);
+
+    iBase_EntitySetHandle fin1Set = CreateSet(mesh, finsSet, "Fin1");
+    PutEnts(mesh, fin1Set, FIN(1), bitmap_g);
+    iBase_EntitySetHandle fin2Set = CreateSet(mesh, finsSet, "Fin2");
+    PutEnts(mesh, fin2Set, FIN(2), bitmap_g);
+    iBase_EntitySetHandle fin3Set = CreateSet(mesh, finsSet, "Fin3");
+    PutEnts(mesh, fin3Set, FIN(3), bitmap_g);
+    iBase_EntitySetHandle fin4Set = CreateSet(mesh, finsSet, "Fin4");
+    PutEnts(mesh, fin4Set, FIN(4), bitmap_g);
+
+    iBase_EntitySetHandle s2Set = CreateSet(mesh, boostSet, "Stage2");
+    PutEnts(mesh, s2Set, STAGE2, bitmap_g);
+
+    iBase_EntitySetHandle noseSet = CreateSet(mesh, assmSet, "Nose");
+    PutEnts(mesh, noseSet, NOSE, bitmap_g);
+
+    iBase_EntitySetHandle s3Set = CreateSet(mesh, noseSet, "Stage 3");
+    PutEnts(mesh, s3Set, STAGE3, bitmap_g);
+
+    iBase_EntitySetHandle busSet = CreateSet(mesh, s3Set, "Bus");
+    PutEnts(mesh, busSet, BUS, bitmap_g);
+
+    iBase_EntitySetHandle mirvsSet = CreateSet(mesh, noseSet, "Mirvs");
+    PutEnts(mesh, mirvsSet, MIRVS, bitmap_g);
+
+    iBase_EntitySetHandle mirv1Set = CreateSet(mesh, mirvsSet, "Mirv1");
+    PutEnts(mesh, mirv1Set, MIRV(1), bitmap_g);
+    iBase_EntitySetHandle mirv2Set = CreateSet(mesh, mirvsSet, "Mirv2");
+    PutEnts(mesh, mirv2Set, MIRV(2), bitmap_g);
+    iBase_EntitySetHandle mirv3Set = CreateSet(mesh, mirvsSet, "Mirv3");
+    PutEnts(mesh, mirv3Set, MIRV(3), bitmap_g);
+    iBase_EntitySetHandle mirv4Set = CreateSet(mesh, mirvsSet, "Mirv4");
+    PutEnts(mesh, mirv4Set, MIRV(4), bitmap_g);
+
 #endif
 }
 
