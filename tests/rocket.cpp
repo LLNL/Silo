@@ -62,13 +62,21 @@ be used for advertising or product endorsement purposes.
 #include <vector>
 #include <string>
 #include <cstring>
+#include <iostream>
 
 #include <silo.h>
 #include <std.c>
 
+#ifdef HAVE_IMESH
+#include <iBase.h>
+#include <iMesh.h>
+#endif
+
 using std::map;
 using std::vector;
 using std::string;
+using std::cerr;
+using std::endl;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -206,6 +214,219 @@ static int zshapecnt_g[] = {8*12+4, 8, 4, 4, 4};
 
 static DBmrgtree *topTree;
 
+#ifdef HAVE_IMESH
+#define CheckITAPSError2(IMI, ERR, FN, THELINE, THEFILE)                                        \
+    if (ERR != 0)                                                                               \
+    {                                                                                           \
+        char msg[1024];                                                                         \
+        char desc[256];                                                                         \
+        for (int i = 0; i < sizeof(desc); i++) desc[i] = '\0';                                  \
+        int dummyError = ERR;                                                                   \
+        iMesh_getDescription(IMI, desc, &dummyError, sizeof(desc));                             \
+        snprintf(msg, sizeof(msg), "Encountered ITAPS error (%d) after call to \"%s\""          \
+            " at line %d in file \"%s\"\nThe description is...\n"                               \
+            "    \"%s\"\n", ERR, #FN, THELINE, THEFILE, desc);                                  \
+        cerr << msg << endl;                                                                    \
+    }                                                                                           \
+    else                                                                                        \
+    {                                                                                           \
+        cerr << "Made it past call to \"" << #FN << "\" at line "                               \
+             << THELINE << " in file " << THEFILE << endl;                                      \
+    }
+
+#define CheckITAPSError(FN) CheckITAPSError2(mesh->theMesh, mesh->error, FN, __LINE__, __FILE__)
+#endif
+
+typedef struct siloimesh_struct_t {
+    DBfile *dbfile;
+#ifdef HAVE_IMESH
+    iMesh_Instance theMesh;
+    iBase_EntitySetHandle rootSet;
+    iBase_EntitySetHandle cwdSet;
+    iBase_EntityHandle *verts;
+    iBase_EntityHandle *zones;
+    int error;
+#endif
+} siloimesh_struct_t;
+typedef siloimesh_struct_t *siloimesh_t;
+
+//
+// Implement the part of the Silo API we need here but for both Silo
+// and iMesh.
+//
+static int
+SetDir(siloimesh_t mesh, const char *dirname)
+{
+    // Check if dir already exists
+    if (DBInqVarExists(mesh->dbfile, dirname) == 0)
+        DBMkDir(mesh->dbfile, dirname);
+
+    // Set the dir
+    DBSetDir(mesh->dbfile, dirname);
+
+#ifdef HAVE_IMESH
+    // Obtain the SET_NAME tag handle (create if doesn't already exist)
+    iBase_TagHandle snTag; 
+    iMesh_getTagHandle(mesh->theMesh, "SET_NAME", &snTag, &(mesh->error), 9);
+    CheckITAPSError(getTagHandle);
+    if (mesh->error != iBase_SUCCESS)
+        iMesh_createTag(mesh->theMesh, "SET_NAME", 64, iBase_BYTES,
+            &snTag, &(mesh->error), 9);
+
+    // Check if ent set already exists
+    bool alreadyHaveSet = false;
+    iBase_EntitySetHandle theSet;
+    iBase_EntitySetHandle *subsets;
+    int subsets_alloc = 0, subsets_size = 0;
+    iMesh_getEntSets(mesh->theMesh, mesh->cwdSet, 1,
+        &subsets, &subsets_alloc, &subsets_size, &(mesh->error));
+    CheckITAPSError(getEntSets);
+    if (mesh->error == iBase_SUCCESS && subsets_size>0)
+    {
+        // Loop over all ent sets looking for one whose
+        // SET_NAME tag value is same as dirname
+        for (int i = 0; i < subsets_size; i++)
+        {
+            char *sn;
+            int sn_alloc = 0, sn_size = 0;
+            iMesh_getEntSetData(mesh->theMesh, subsets[i], snTag,
+                &sn, &sn_alloc, &sn_size, &(mesh->error));
+            CheckITAPSError(getEntSetData);
+            if (mesh->error == iBase_SUCCESS &&
+                !strncmp(sn, dirname, sn_size))
+            {
+                alreadyHaveSet = true;
+                theSet = subsets[i];
+                break;
+            }
+        }
+    }
+
+    // If set didn't exist, create it and set its SET_NAME tag 
+    if (!alreadyHaveSet)
+    {
+        char tmp[64];
+        memset(tmp, '\0', sizeof(tmp));
+        strcpy(tmp, dirname);
+        iMesh_createEntSet(mesh->theMesh, 0, &theSet, &(mesh->error));
+        CheckITAPSError(createEntSet);
+        iMesh_setEntSetData(mesh->theMesh, theSet, snTag,
+            tmp, sizeof(tmp), &(mesh->error));
+        CheckITAPSError(setEntSetData);
+    }
+
+    // Set the cwd set
+    mesh->cwdSet = theSet;
+#endif
+}
+
+static int
+PutMesh(siloimesh_t mesh, const char *name, int ndims,
+             char *coordnames[], float **coords, int nnodes,
+             int nzones, const char *zonel_name, const char *facel_name,
+             int datatype, DBoptlist *optlist)
+{
+    DBPutUcdmesh(mesh->dbfile, name, ndims, coordnames, coords, nnodes, nzones,
+        zonel_name, facel_name, datatype, optlist);
+
+#ifdef HAVE_IMESH
+    // Convert coordinate array to an interleaved array that iMesh
+    // can understand. Note iBase_INTERLEAVED is probably more
+    // portable than iBase_BLOCKED.
+    double *imcoords = new double[nnodes*3];
+    for (int k = 0; k < nnodes; k++)
+    {
+        imcoords[3*k+0] = coords[0][k];
+        imcoords[3*k+1] = coords[1][k];
+        imcoords[3*k+2] = coords[2][k];
+    }
+    iBase_EntityHandle *vertHdls = new iBase_EntityHandle[nnodes];
+    int vertHdls_alloc = nnodes, vertHdls_size = 0;
+
+    // Create vertex entities. Note, don't really know in which entity set
+    // these wind up getting created. I assume its the root set.
+    iMesh_createVtxArr(mesh->theMesh, nnodes, iBase_INTERLEAVED, imcoords, nnodes*3,
+        &vertHdls, &vertHdls_alloc, &vertHdls_size, &(mesh->error));
+    CheckITAPSError(createVtxArr);
+    delete [] imcoords;
+
+    // Stick these vertex entities in the cwd set 
+    iMesh_addEntArrToSet(mesh->theMesh, vertHdls, nnodes, mesh->cwdSet, &(mesh->error));
+    CheckITAPSError(addEntArrToSet);
+
+    // Remove these entites from the root set
+#if 0
+    iMesh_rmvEntArrFromSet(mesh->theMesh, vertHdls, nnodes, mesh->rootSet, &(mesh->error));
+    CheckITAPSError(rmvEntArrFromSet);
+#endif
+    mesh->verts = vertHdls; // Hold on to these for later 
+#endif
+}
+
+static int
+PutZonelist(siloimesh_t mesh, const char *name, int nzones, int ndims,
+               int *nodelist, int lnodelist, int origin, int lo_offset,
+               int hi_offset, int *shapetype, int *shapesize, int *shapecnt,
+               int nshapes, DBoptlist *optlist)
+{
+    DBPutZonelist2(mesh->dbfile, name, nzones, ndims, nodelist, lnodelist, origin,
+        lo_offset, hi_offset, shapetype, shapesize, shapecnt, nshapes, optlist);
+
+#ifdef HAVE_IMESH
+    int i, nlidx = 0;
+    int zncnt = 0;
+    iBase_EntityHandle *vertHdls = mesh->verts;
+    iBase_EntityHandle *zoneHdls = new iBase_EntityHandle[nzones];
+    for (i = 0; i < nshapes; i++)
+    {
+        int segnl = shapesize[i] * shapecnt[i];
+        iBase_EntityHandle *imvertlist = new iBase_EntityHandle[segnl];
+        int *status = new int[segnl];
+        int status_alloc = segnl, status_size = 0;
+        int ent_topo = iMesh_HEXAHEDRON; // assume hex
+        if (shapesize[i] == 6)
+            ent_topo = iMesh_PRISM;
+        else if (shapesize[i] == 5)
+            ent_topo = iMesh_PYRAMID;
+        int segnlidx = 0;
+        for (int j = 0; j < shapecnt[i]; j++)
+            for (int k = 0; k < shapesize[i]; k++)
+                imvertlist[segnlidx++] = vertHdls[nodelist[nlidx++]];
+
+        iBase_EntityHandle *pzoneHdls = &zoneHdls[zncnt];
+        int zoneHdls_alloc = shapecnt[i], zoneHdls_size = 0;
+        iMesh_createEntArr(mesh->theMesh, ent_topo, imvertlist, segnl, 
+            &pzoneHdls, &zoneHdls_alloc, &zoneHdls_size,
+            &status, &status_alloc, &status_size,
+            &(mesh->error));
+        CheckITAPSError(createEntArr);
+
+        delete [] imvertlist;
+        delete [] status;
+        zncnt += shapecnt[i];
+    }
+
+    // Stick all the entities we created above into the cwd set 
+    iMesh_addEntArrToSet(mesh->theMesh, zoneHdls, nzones, mesh->cwdSet, &(mesh->error));
+    CheckITAPSError(addEntArrToSet);
+
+    mesh->zones = zoneHdls;
+#endif
+}
+
+static int
+PutMaterial(siloimesh_t mesh, const char *name, const char *meshname, int nmat,
+              int matnos[], int matlist[], int dims[], int ndims,
+              int mix_next[], int mix_mat[], int mix_zone[], DB_DTPTR1 mix_vf,
+              int mixlen, int datatype, DBoptlist *optlist)
+{
+    DBPutMaterial(mesh->dbfile, name, meshname, nmat, matnos, matlist, dims, ndims,
+        mix_next, mix_mat, mix_zone, mix_vf, mixlen, datatype, optlist);
+
+#ifdef HAVE_IMESH
+#endif
+}
+
 //
 // Given a single, monolithic whole mesh where each zone
 // is assigned to a given processor in the 'procid' array,
@@ -217,7 +438,7 @@ static DBmrgtree *topTree;
 // to build here. A color value less than zero indicates the
 // latter.
 //
-void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
+void write_a_block(const vector<int> &colist, int color, siloimesh_t mesh,
     const char *const dirname)
 {
     int j, k;
@@ -400,12 +621,7 @@ void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
         nodelist_l[i] = g2lnode[nodelist_l[i]];
 
     // make and set the local dir
-    DBMkDir(dbfile, dirname);
-    DBSetDir(dbfile, dirname);
-
-    // output the zonelist
-    DBPutZonelist2(dbfile, "zl", nlzones, 3, &nodelist_l[0], nodelist_l.size(),
-                0, 0, 0, &tmptype[0], &tmpsize[0], &tmpcnt[0], tmpcnt.size(), NULL); 
+    SetDir(mesh, dirname);
 
     DBoptlist *opts = DBMakeOptlist(2);
     char *mrgname = "mrg_tree";
@@ -420,18 +636,22 @@ void write_a_block(const vector<int> &colist, int color, DBfile *dbfile,
     coordnames[0] = "X";
     coordnames[1] = "Y";
     coordnames[2] = "Z";
-    DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, txvals.size(), nlzones,
+    PutMesh(mesh, "mesh", 3, coordnames, coords, txvals.size(), nlzones,
         "zl", 0, DB_FLOAT, opts);
     DBFreeOptlist(opts);
+
+    // output the zonelist
+    PutZonelist(mesh, "zl", nlzones, 3, &nodelist_l[0], nodelist_l.size(),
+                0, 0, 0, &tmptype[0], &tmpsize[0], &tmpcnt[0], tmpcnt.size(), NULL); 
 
     // output the materials
     opts = DBMakeOptlist(2);
     DBAddOption(opts, DBOPT_MATNAMES, matNames);
-    DBPutMaterial(dbfile, "materials", "mesh", 5, matnos,
+    PutMaterial(mesh, "materials", "mesh", 5, matnos,
         &tmatlist[0], &nlzones, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts);
     DBFreeOptlist(opts);
 
-    DBSetDir(dbfile, "..");
+    DBSetDir(mesh->dbfile, "..");
 }
 
 //
@@ -630,10 +850,10 @@ void build_body()
     add_fins();
 }
 
-void write_rocket(DBfile *dbfile)
+void write_rocket(siloimesh_t mesh)
 {
     // output rocket as monolithic, single mesh
-    DBPutZonelist2(dbfile, "zl", nzones_g, 3, &nodelist_g[0], nodelist_g.size(),
+    DBPutZonelist2(mesh->dbfile, "zl", nzones_g, 3, &nodelist_g[0], nodelist_g.size(),
                     0, 0, 0, zshapetype_g, zshapesize_g, zshapecnt_g,
                     sizeof(zshapetype_g)/sizeof(zshapetype_g[0]), NULL); 
 
@@ -646,14 +866,14 @@ void write_rocket(DBfile *dbfile)
     coords[1] = &yvals_g[0];
     coords[2] = &zvals_g[0];
 
-    DBPutUcdmesh(dbfile, "rocket", 3, coordnames, coords, xvals_g.size(), nzones_g,
+    DBPutUcdmesh(mesh->dbfile, "rocket", 3, coordnames, coords, xvals_g.size(), nzones_g,
         "zl", 0, DB_FLOAT, 0);
 
     {   char *varnames[1];
         varnames[0] = "procid";
         float *vars[1];
         vars[0] = (float*) &procid_g[0];
-        DBPutUcdvar(dbfile, "procid", "rocket", 1, varnames, vars,
+        DBPutUcdvar(mesh->dbfile, "procid", "rocket", 1, varnames, vars,
             nzones_g, NULL, 0, DB_INT, DB_ZONECENT, 0);
     }
 
@@ -661,12 +881,12 @@ void write_rocket(DBfile *dbfile)
         varnames[0] = "bitmap";
         float *vars[1];
         vars[0] = (float*) &bitmap_g[0];
-        DBPutUcdvar(dbfile, "bitmap", "rocket", 1, varnames, vars,
+        DBPutUcdvar(mesh->dbfile, "bitmap", "rocket", 1, varnames, vars,
             nzones_g, NULL, 0, DB_INT, DB_ZONECENT, 0);
     }
 }
 
-void write_mrocket(DBfile *dbfile)
+void write_mrocket(siloimesh_t mesh)
 {
     //
     // Output rocket in blocks
@@ -675,7 +895,7 @@ void write_mrocket(DBfile *dbfile)
     {
         char tmpName[256];
         sprintf(tmpName, "domain_%d", i);
-        write_a_block(procid_g, i, dbfile, tmpName);
+        write_a_block(procid_g, i, mesh, tmpName);
     }
 
     char *mbitmapnames[3];
@@ -697,14 +917,14 @@ void write_mrocket(DBfile *dbfile)
     char *mrgname = "mrg_tree";
     DBAddOption(opts, DBOPT_MRGTREE_NAME, mrgname);
 
-    DBPutMultimesh(dbfile, "mrocket", 3, mmeshnames, meshtypes, opts);
-    DBPutMultimat(dbfile, "mmaterials", 3, mmatnames, 0);
-    DBPutMultivar(dbfile, "mbitmap", 3, mbitmapnames, vartypes, 0);
+    DBPutMultimesh(mesh->dbfile, "mrocket", 3, mmeshnames, meshtypes, opts);
+    DBPutMultimat(mesh->dbfile, "mmaterials", 3, mmatnames, 0);
+    DBPutMultivar(mesh->dbfile, "mbitmap", 3, mbitmapnames, vartypes, 0);
 
     DBFreeOptlist(opts);
 }
 
-void write_top_mrgtree(DBfile *dbfile)
+void write_top_mrgtree(siloimesh_t mesh)
 {
 
     topTree = DBMakeMrgtree(DB_MULTIMESH, 0, 5, 0);
@@ -719,7 +939,7 @@ void write_top_mrgtree(DBfile *dbfile)
     int *b2m_map[] = {&b2m_data[0], &b2m_data[1], &b2m_data[2], &b2m_data[3], &b2m_data[4]};
     int b2m_segids[] = {0, 1, 2, 3, 4};
     int b2m_types[] = {DB_BLOCKCENT, DB_BLOCKCENT, DB_BLOCKCENT, DB_BLOCKCENT, DB_BLOCKCENT};
-    DBPutGroupelmap(dbfile, "block_to_mat", 5, b2m_types, b2m_lens, b2m_segids,
+    DBPutGroupelmap(mesh->dbfile, "block_to_mat", 5, b2m_types, b2m_lens, b2m_segids,
         b2m_map, 0, DB_FLOAT, 0);
 
     // material regions
@@ -740,7 +960,7 @@ void write_top_mrgtree(DBfile *dbfile)
     int *b2a_map[] = {&b2a_data[0], &b2a_data[2], &b2a_data[4], &b2a_data[5]};
     int b2a_segids[] = {0, 1, 2, 3};
     int b2a_types[] = {DB_BLOCKCENT, DB_BLOCKCENT, DB_BLOCKCENT, DB_BLOCKCENT};
-    DBPutGroupelmap(dbfile, "block_to_assembly", 4, b2a_types, b2a_lens, b2a_segids,
+    DBPutGroupelmap(mesh->dbfile, "block_to_assembly", 4, b2a_types, b2a_lens, b2a_segids,
         b2a_map, 0, DB_FLOAT, 0);
 
     //
@@ -803,10 +1023,10 @@ void write_top_mrgtree(DBfile *dbfile)
 	void *vals[] ={(void*)c1,(void*)c2};
 	char *parent_name = "/assembly/nose/mirvs";
 	char *reg_names[] = {parent_name, 0, 0, 0};
-	DBPutMrgvar(dbfile, "some_ints", "mrg_tree", 2, 0, 4, reg_names, DB_INT, vals, 0);
+	DBPutMrgvar(mesh->dbfile, "some_ints", "mrg_tree", 2, 0, 4, reg_names, DB_INT, vals, 0);
     }
 
-    DBPutMrgtree(dbfile, "mrg_tree", "mrocket", topTree, 0); 
+    DBPutMrgtree(mesh->dbfile, "mrg_tree", "mrocket", topTree, 0); 
 
     /* output MRG tree info for testing */
     FILE *outfile = fopen("mrg_tree_b4save.txt","w");
@@ -848,13 +1068,13 @@ CreateBlockTree(DBmrgtnode *tnode, int walk_order, void *data)
     }
 }
 
-void write_block_mrgtree(DBfile *dbfile, int proc_id)
+void write_block_mrgtree(siloimesh_t mesh, int proc_id)
 {
     int i,j;
     char domName[64];
 
     sprintf(domName, "/domain_%d", proc_id);
-    DBSetDir(dbfile, domName); 
+    DBSetDir(mesh->dbfile, domName); 
 
     DBmrgtree *tree = DBMakeMrgtree(DB_UCDMESH, 0, 5, 0);
 
@@ -897,7 +1117,7 @@ void write_block_mrgtree(DBfile *dbfile, int proc_id)
             j++;
         }
     }
-    DBPutGroupelmap(dbfile, "mat_maps", j, mat_map_types, mat_map_lens, mat_map_segids,
+    DBPutGroupelmap(mesh->dbfile, "mat_maps", j, mat_map_types, mat_map_lens, mat_map_segids,
         mat_map_data, 0, DB_FLOAT, 0);
     DBSetCwr(tree, "..");
 
@@ -922,7 +1142,7 @@ void write_block_mrgtree(DBfile *dbfile, int proc_id)
             j++;
         }
     }
-    DBPutGroupelmap(dbfile, "ass_maps", j, ass_map_types, ass_map_lens, ass_map_segids,
+    DBPutGroupelmap(mesh->dbfile, "ass_maps", j, ass_map_types, ass_map_lens, ass_map_segids,
         ass_map_data, 0, DB_FLOAT, 0);
 
     //printf("Starting new walk\n");
@@ -938,10 +1158,10 @@ void write_block_mrgtree(DBfile *dbfile, int proc_id)
     DBSetCwr(topTree, "..");
 
     /* output the mrgtree for this block */
-    DBPutMrgtree(dbfile, "mrg_tree", "mesh", tree, 0); 
+    DBPutMrgtree(mesh->dbfile, "mrg_tree", "mesh", tree, 0); 
     DBFreeMrgtree(tree);
 
-    DBSetDir(dbfile, "..");
+    DBSetDir(mesh->dbfile, "..");
 }
 
 
@@ -1051,6 +1271,8 @@ main(int argc, char **argv)
 {
     FILE *outfile;
     DBfile *dbfile;
+    siloimesh_struct_t mesh_struct;
+    siloimesh_t mesh = &mesh_struct;
     int driver = DB_PDB;
     int show_all_errors = FALSE;
 
@@ -1103,40 +1325,55 @@ main(int argc, char **argv)
 
     /* create the file */
     printf("Creating test file: \"rocket.silo\".\n");
-    dbfile = DBCreate("rocket.silo", DB_CLOBBER, DB_LOCAL,
+    mesh->dbfile = DBCreate("rocket.silo", DB_CLOBBER, DB_LOCAL,
                       "3D mesh with many interesting subsets", driver);
+#ifdef HAVE_IMESH
+    iMesh_newMesh("", &(mesh->theMesh), &(mesh->error), 0);
+    CheckITAPSError(newMesh);
+    iMesh_getRootSet(mesh->theMesh, &(mesh->rootSet), &(mesh->error));
+    mesh->cwdSet = mesh->rootSet;
+    CheckITAPSError(getRootSet);
+#endif
 
     /* output the single domain rocket mesh, etc. */
-    write_rocket(dbfile);
+    write_rocket(mesh);
 
     /* output multi-block representation for rocket */
-    write_mrocket(dbfile);
+    write_mrocket(mesh);
 
     /* write out the top-level mrg tree (and groupel maps) for multi-block case */
-    write_top_mrgtree(dbfile);
+    write_top_mrgtree(mesh);
 
     /* write out mrg trees (and groupel maps) on each block */
     for (i = 0; i < 3; i++)
-        write_block_mrgtree(dbfile, i);
+        write_block_mrgtree(mesh, i);
 
     DBFreeMrgtree(topTree);
 
     /* close the file */
-    DBClose(dbfile);
+    DBClose(mesh->dbfile);
+#ifdef HAVE_IMESH
+    {
+        char *imeshFilename = "rocket.h5m";
+        iMesh_save(mesh->theMesh, mesh->rootSet, imeshFilename, "",
+            &(mesh->error), strlen(imeshFilename), 0);
+        CheckITAPSError(save);
+    }
+#endif
 
     /* open the file and examine the MRG tree again */
-    dbfile = DBOpen("rocket.silo", driver, DB_READ);
+    mesh->dbfile = DBOpen("rocket.silo", driver, DB_READ);
 
     /* read the top level mrg tree and write it to a text file */
-    DBmrgtree *tree = DBGetMrgtree(dbfile, "mrg_tree");
+    DBmrgtree *tree = DBGetMrgtree(mesh->dbfile, "mrg_tree");
     outfile = fopen("mrg_tree_afsave.txt","w");
     DBWalkMrgtree(tree, DBPrintMrgtree, outfile, DB_PREORDER);
     fclose(outfile);
     DBFreeMrgtree(tree);
 
-    DBgroupelmap *map = DBGetGroupelmap(dbfile, "block_to_mat");
+    DBgroupelmap *map = DBGetGroupelmap(mesh->dbfile, "block_to_mat");
     DBFreeGroupelmap(map);
 
-    DBClose(dbfile);
+    DBClose(mesh->dbfile);
     return 0;
 }
