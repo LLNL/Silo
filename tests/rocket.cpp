@@ -200,6 +200,7 @@ static vector<float> xvals_g, yvals_g, zvals_g;
 static vector<int> nodelist_g;
 static vector<int> matlist_g;
 static vector<int> procid_g;
+static vector<float> nodalv_g;
 static vector<int> bitmap_g;
 static vector<field_t> fields_g;
 
@@ -429,8 +430,9 @@ PutMaterial(siloimesh_t mesh, const char *name, const char *meshname, int nmat,
               int mix_next[], int mix_mat[], int mix_zone[], DB_DTPTR1 mix_vf,
               int mixlen, int datatype, DBoptlist *optlist)
 {
-    DBPutMaterial(mesh->dbfile, name, meshname, nmat, matnos, matlist, dims, ndims,
-        mix_next, mix_mat, mix_zone, mix_vf, mixlen, datatype, optlist);
+    if (name)
+        DBPutMaterial(mesh->dbfile, name, meshname, nmat, matnos, matlist, dims, ndims,
+            mix_next, mix_mat, mix_zone, mix_vf, mixlen, datatype, optlist);
 
 #ifdef HAVE_IMESH
     // Obtain the SET_NAME tag handle
@@ -452,10 +454,7 @@ PutMaterial(siloimesh_t mesh, const char *name, const char *meshname, int nmat,
             if (matlist[i] == matnos[m]) matZones.push_back(mesh->zones[i]); 
 
         if (matZones.size() == 0)
-        {
-            cerr << "skipping " << matnos[m] << endl;
             continue;
-        }
 
         iBase_EntitySetHandle matSet;
         iMesh_createEntSet(mesh->theMesh, 0, &matSet, &(mesh->error));
@@ -813,6 +812,7 @@ void make_base_layer()
         xvals_g.push_back(layerXVals[i]);
         yvals_g.push_back(layerYVals[i]);
         zvals_g.push_back(0.0);
+        nodalv_g.push_back(i<=8?400.0:0.0);
     }
 }
 
@@ -829,6 +829,7 @@ void add_layer(int zval)
         xvals_g.push_back(layerXVals[i]);
         yvals_g.push_back(layerYVals[i]);
         zvals_g.push_back((float)zval);
+        nodalv_g.push_back(i<=8?(zval<4?(4-zval)*100:10.0):0.0);
     }
     for (i = 0; i < layerNZones; i++)
     {
@@ -869,6 +870,7 @@ void add_nose(int zval)
         xvals_g.push_back(layerXVals[i]);
         yvals_g.push_back(layerYVals[i]);
         zvals_g.push_back((float)zval);
+        nodalv_g.push_back(0.0);
     }
 
     // add nose end node at zval + 1
@@ -876,6 +878,7 @@ void add_nose(int zval)
     xvals_g.push_back(0.0);
     yvals_g.push_back(0.0);
     zvals_g.push_back((float)zval+1.0);
+    nodalv_g.push_back(0.0);
 
     // add central core hexes
     for (i = 0; i < 4; i++)
@@ -940,18 +943,22 @@ void add_fins()
         xvals_g.push_back(-finX);
         yvals_g.push_back(finY);
         zvals_g.push_back((float)i);
+        nodalv_g.push_back(0.0);
 
         xvals_g.push_back(finY);
         yvals_g.push_back(finX);
         zvals_g.push_back((float)i);
+        nodalv_g.push_back(0.0);
 
         xvals_g.push_back(finX);
         yvals_g.push_back(-finY);
         zvals_g.push_back((float)i);
+        nodalv_g.push_back(0.0);
 
         xvals_g.push_back(-finY);
         yvals_g.push_back(-finX);
         zvals_g.push_back((float)i);
+        nodalv_g.push_back(0.0);
     }
 
     // add fin bottoms (wedges) on layer 0
@@ -1039,6 +1046,27 @@ void write_rocket(siloimesh_t mesh)
         PutVar(mesh, "bitmap", "rocket", 1, varnames, vars,
             nzones_g, NULL, 0, DB_INT, DB_ZONECENT, 0);
     }
+
+    {   char *varnames[1];
+        varnames[0] = "tempc";
+        float *vars[1];
+        vars[0] = (float*) &nodalv_g[0];
+        PutVar(mesh, "temp", "rocket", 1, varnames, vars,
+            xvals_g.size(), NULL, 0, DB_FLOAT, DB_NODECENT, 0);
+    }
+
+#ifdef HAVE_IMESH
+    {
+        char *subsetnames[3] = {"domain_0","domain_1","domain_2"};
+        int subsetnos[3] = {0, 1, 2};
+        DBoptlist *opts = DBMakeOptlist(2);
+        DBAddOption(opts, DBOPT_MATNAMES, subsetnames);
+        PutMaterial(mesh, 0, "mesh", 3, subsetnos,
+            &procid_g[0], &nzones_g, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts);
+        DBFreeOptlist(opts);
+    }
+    //PutAssemblyFromVar(mesh->theMesh, DB_ZONECENT, bitmap_g);
+#endif
 }
 
 void write_mrocket(siloimesh_t mesh)
