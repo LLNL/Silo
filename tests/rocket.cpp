@@ -248,7 +248,7 @@ typedef struct siloimesh_struct_t {
     int error;
 #endif
 } siloimesh_struct_t;
-typedef siloimesh_struct_t *siloimesh_t;
+typedef siloimesh_struct_t* siloimesh_t;
 
 //
 // Implement the part of the Silo API we need here but for both Silo
@@ -263,6 +263,10 @@ SetDir(siloimesh_t mesh, const char *dirname)
 
     // Set the dir
     DBSetDir(mesh->dbfile, dirname);
+
+#if !defined(_WIN32)
+#warning NEED TO IMPLEMENT .. SETTING
+#endif
 
 #ifdef HAVE_IMESH
     // Obtain the SET_NAME tag handle (create if doesn't already exist)
@@ -350,12 +354,15 @@ PutMesh(siloimesh_t mesh, const char *name, int ndims,
     CheckITAPSError(createVtxArr);
     delete [] imcoords;
 
+#if 0
     // Stick these vertex entities in the cwd set 
     iMesh_addEntArrToSet(mesh->theMesh, vertHdls, nnodes, mesh->cwdSet, &(mesh->error));
     CheckITAPSError(addEntArrToSet);
 
     // Remove these entites from the root set
-#if 0
+    // Apparently, when the entities are first created, they do not exist in
+    // any set in the mesh object. What would happen if you save then? Note
+    // that when I save the mesh, even though
     iMesh_rmvEntArrFromSet(mesh->theMesh, vertHdls, nnodes, mesh->rootSet, &(mesh->error));
     CheckITAPSError(rmvEntArrFromSet);
 #endif
@@ -406,9 +413,11 @@ PutZonelist(siloimesh_t mesh, const char *name, int nzones, int ndims,
         zncnt += shapecnt[i];
     }
 
+#if 0
     // Stick all the entities we created above into the cwd set 
     iMesh_addEntArrToSet(mesh->theMesh, zoneHdls, nzones, mesh->cwdSet, &(mesh->error));
     CheckITAPSError(addEntArrToSet);
+#endif
 
     mesh->zones = zoneHdls;
 #endif
@@ -424,8 +433,147 @@ PutMaterial(siloimesh_t mesh, const char *name, const char *meshname, int nmat,
         mix_next, mix_mat, mix_zone, mix_vf, mixlen, datatype, optlist);
 
 #ifdef HAVE_IMESH
+    // Obtain the SET_NAME tag handle
+    iBase_TagHandle snTag; 
+    iMesh_getTagHandle(mesh->theMesh, "SET_NAME", &snTag, &(mesh->error), 9);
+    CheckITAPSError(getTagHandle);
+    if (mesh->error != iBase_SUCCESS)
+        iMesh_createTag(mesh->theMesh, "SET_NAME", 64, iBase_BYTES,
+            &snTag, &(mesh->error), 9);
+    
+    int lmatlist = 1;
+    for (int i = 0; i < ndims; i++)
+        lmatlist *= dims[i];
+
+    for (int m = 0; m < nmat; m++)
+    {
+        vector<iBase_EntityHandle> matZones;
+        for (int i = 0; i < lmatlist; i++)
+            if (matlist[i] == matnos[m]) matZones.push_back(mesh->zones[i]); 
+
+        if (matZones.size() == 0)
+        {
+            cerr << "skipping " << matnos[m] << endl;
+            continue;
+        }
+
+        iBase_EntitySetHandle matSet;
+        iMesh_createEntSet(mesh->theMesh, 0, &matSet, &(mesh->error));
+        CheckITAPSError(createEntSet);
+        iMesh_addEntArrToSet(mesh->theMesh, &matZones[0], matZones.size(), matSet, &(mesh->error));
+        CheckITAPSError(addEntArrToSet);
+
+        void *p = DBGetOption(optlist, DBOPT_MATNAMES);
+        if (p)
+        {
+            char **matnames = (char **) p;
+            char tmp[64];
+            memset(tmp, '\0', sizeof(tmp));
+            strcpy(tmp, matnames[m]);
+            iMesh_setEntSetData(mesh->theMesh, matSet, snTag,
+                tmp, sizeof(tmp), &(mesh->error));
+            CheckITAPSError(setEntSetData);
+        }
+    }
 #endif
 }
+
+#define CONV_LOOP(dtype)                        \
+{                                               \
+    dtype **tmpvars = (dtype **) vars;          \
+    for (int i = 0; i < nels; i++)              \
+    {                                           \
+        for (int j = 0; j < nvars; j++)         \
+        {                                       \
+            tmpvals[i*nvars+j] = tmpvars[j][i]; \
+        }                                       \
+    }                                           \
+    break;					\
+}
+
+template <typename T>
+static void ConvertAndInterleave(DB_DTPTR2 vars, int nvars, int nels, int dt, T* tmpvals)
+{
+    switch (dt)
+    {
+        case DB_FLOAT: CONV_LOOP(float);
+        case DB_DOUBLE: CONV_LOOP(double);
+        case DB_INT: CONV_LOOP(int);
+        case DB_SHORT: CONV_LOOP(short);
+        case DB_LONG: CONV_LOOP(long);
+        case DB_LONG_LONG: CONV_LOOP(long long);
+        case DB_CHAR: CONV_LOOP(char);
+    }
+}
+
+static int
+PutVar(siloimesh_t mesh, const char *vname, const char *mname, int nvars,
+            char *varnames[], DB_DTPTR2 vars, int nels, DB_DTPTR2 mixvars,
+            int mixlen, int datatype, int centering, DBoptlist *optlist)
+{
+    DBPutUcdvar(mesh->dbfile, vname, mname, nvars, varnames, vars, nels, mixvars,
+        mixlen, datatype, centering, optlist);
+
+#if HAVE_IMESH
+    iBase_EntityHandle *entHdls;
+    int nEnts;
+    if (centering == DB_NODECENT)
+    {
+        entHdls = mesh->verts;
+        iMesh_getNumOfType(mesh->theMesh, mesh->rootSet, iBase_VERTEX, &nEnts, &(mesh->error));
+        CheckITAPSError(getNumOfType);
+    }
+    else
+    {
+        entHdls = mesh->zones;
+        iMesh_getNumOfType(mesh->theMesh, mesh->rootSet, iBase_REGION, &nEnts, &(mesh->error));
+        CheckITAPSError(getNumOfType);
+    }
+    assert(nEnts == nels);
+
+    iBase_TagHandle theTag;
+    if (datatype == DB_FLOAT || datatype == DB_DOUBLE)
+    {
+        iMesh_createTag(mesh->theMesh, vname, nvars, iBase_DOUBLE,
+            &theTag, &(mesh->error), strlen(vname)+1);
+        CheckITAPSError(createTag);
+
+        double *tmpvals = new double[nvars*nels];
+        ConvertAndInterleave(vars, nvars, nels, datatype, tmpvals);
+        iMesh_setDblArrData(mesh->theMesh, entHdls, nEnts, theTag, tmpvals, nvars*nels, &(mesh->error));
+        CheckITAPSError(setDblArrData);
+        delete [] tmpvals;
+    }
+    else if (datatype == DB_SHORT || datatype == DB_INT ||
+             datatype == DB_LONG || datatype == DB_LONG_LONG)
+    {
+        iMesh_createTag(mesh->theMesh, vname, nvars, iBase_INTEGER,
+            &theTag, &(mesh->error), strlen(vname)+1);
+        CheckITAPSError(createTag);
+
+        int *tmpvals = new int[nvars*nels];
+        ConvertAndInterleave(vars, nvars, nels, datatype, tmpvals);
+        iMesh_setIntArrData(mesh->theMesh, entHdls, nEnts, theTag, tmpvals, nvars*nels, &(mesh->error));
+        CheckITAPSError(setIntArrData);
+        delete [] tmpvals;
+    }
+    else
+    {
+        iMesh_createTag(mesh->theMesh, vname, nvars, iBase_BYTES,
+            &theTag, &(mesh->error), strlen(vname)+1);
+        CheckITAPSError(createTag);
+
+        char *tmpvals = new char[nvars*nels];
+        ConvertAndInterleave(vars, nvars, nels, datatype, tmpvals);
+        iMesh_setArrData(mesh->theMesh, entHdls, nEnts, theTag, tmpvals, nvars*nels, &(mesh->error));
+        CheckITAPSError(setArrData);
+        delete [] tmpvals;
+    }
+
+
+#endif
+}
+
 
 //
 // Given a single, monolithic whole mesh where each zone
@@ -621,7 +769,8 @@ void write_a_block(const vector<int> &colist, int color, siloimesh_t mesh,
         nodelist_l[i] = g2lnode[nodelist_l[i]];
 
     // make and set the local dir
-    SetDir(mesh, dirname);
+    DBMkDir(mesh->dbfile, dirname);
+    DBSetDir(mesh->dbfile, dirname);
 
     DBoptlist *opts = DBMakeOptlist(2);
     char *mrgname = "mrg_tree";
@@ -636,18 +785,18 @@ void write_a_block(const vector<int> &colist, int color, siloimesh_t mesh,
     coordnames[0] = "X";
     coordnames[1] = "Y";
     coordnames[2] = "Z";
-    PutMesh(mesh, "mesh", 3, coordnames, coords, txvals.size(), nlzones,
+    DBPutUcdmesh(mesh->dbfile, "mesh", 3, coordnames, coords, txvals.size(), nlzones,
         "zl", 0, DB_FLOAT, opts);
     DBFreeOptlist(opts);
 
     // output the zonelist
-    PutZonelist(mesh, "zl", nlzones, 3, &nodelist_l[0], nodelist_l.size(),
+    DBPutZonelist2(mesh->dbfile, "zl", nlzones, 3, &nodelist_l[0], nodelist_l.size(),
                 0, 0, 0, &tmptype[0], &tmpsize[0], &tmpcnt[0], tmpcnt.size(), NULL); 
 
     // output the materials
     opts = DBMakeOptlist(2);
     DBAddOption(opts, DBOPT_MATNAMES, matNames);
-    PutMaterial(mesh, "materials", "mesh", 5, matnos,
+    DBPutMaterial(mesh->dbfile, "materials", "mesh", 5, matnos,
         &tmatlist[0], &nlzones, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts);
     DBFreeOptlist(opts);
 
@@ -853,10 +1002,6 @@ void build_body()
 void write_rocket(siloimesh_t mesh)
 {
     // output rocket as monolithic, single mesh
-    DBPutZonelist2(mesh->dbfile, "zl", nzones_g, 3, &nodelist_g[0], nodelist_g.size(),
-                    0, 0, 0, zshapetype_g, zshapesize_g, zshapecnt_g,
-                    sizeof(zshapetype_g)/sizeof(zshapetype_g[0]), NULL); 
-
     char *coordnames[3];
     coordnames[0] = "X";
     coordnames[1] = "Y";
@@ -866,14 +1011,24 @@ void write_rocket(siloimesh_t mesh)
     coords[1] = &yvals_g[0];
     coords[2] = &zvals_g[0];
 
-    DBPutUcdmesh(mesh->dbfile, "rocket", 3, coordnames, coords, xvals_g.size(), nzones_g,
+    PutMesh(mesh, "rocket", 3, coordnames, coords, xvals_g.size(), nzones_g,
         "zl", 0, DB_FLOAT, 0);
+
+    PutZonelist(mesh, "zl", nzones_g, 3, &nodelist_g[0], nodelist_g.size(),
+                    0, 0, 0, zshapetype_g, zshapesize_g, zshapecnt_g,
+                    sizeof(zshapetype_g)/sizeof(zshapetype_g[0]), NULL); 
+
+    DBoptlist *opts = DBMakeOptlist(2);
+    DBAddOption(opts, DBOPT_MATNAMES, matNames);
+    PutMaterial(mesh, "materials", "mesh", 5, matnos,
+        &matlist_g[0], &nzones_g, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts);
+    DBFreeOptlist(opts);
 
     {   char *varnames[1];
         varnames[0] = "procid";
         float *vars[1];
         vars[0] = (float*) &procid_g[0];
-        DBPutUcdvar(mesh->dbfile, "procid", "rocket", 1, varnames, vars,
+        PutVar(mesh, "procid", "rocket", 1, varnames, vars,
             nzones_g, NULL, 0, DB_INT, DB_ZONECENT, 0);
     }
 
@@ -881,7 +1036,7 @@ void write_rocket(siloimesh_t mesh)
         varnames[0] = "bitmap";
         float *vars[1];
         vars[0] = (float*) &bitmap_g[0];
-        DBPutUcdvar(mesh->dbfile, "bitmap", "rocket", 1, varnames, vars,
+        PutVar(mesh, "bitmap", "rocket", 1, varnames, vars,
             nzones_g, NULL, 0, DB_INT, DB_ZONECENT, 0);
     }
 }
