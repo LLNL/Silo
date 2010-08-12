@@ -118,6 +118,9 @@ static char *matNames[] = {"High Explosive", "Solid Propellant",
                            "Liquid Propellant", "Electronics", "Body"};
 static map<string, int> matMap;
 
+// global zone ids for which lighting time is a variable
+int ltZones[] = {0,1,2,3};
+
 // global node ids of hold-down points
 static int holdDownNodes[] = {0,2,4,6,8,10,12,14,16};
 
@@ -131,7 +134,10 @@ static int maxQNodes[] = {43,44,45,46,47,48,49,50,145,146,147,148,149,150,151,15
                           162,167,168,169,170};
 
 // global node ids of edge endpts for umbilical hookups
-static int umbilicalEdges[][2] = {{66,83},{83,100},{100,117},{117,134}};
+static int umbilicalEdges[] = {66,83, 83,100, 100,117, 117,134};
+static int umbilicalEdgesSizes[] = {2};
+static int umbilicalEdgesShapetypes[] = {DB_ZONETYPE_BEAM};
+static int umbilicalEdgesCounts[] = {4};
 
 // boundary condition on umbilical edges (only z-accel allowed)
 static float xddUmbilicalEdges[] = {0.0,0.0,0.0,0.0};
@@ -139,27 +145,25 @@ static float yddUmbilicalEdges[] = {0.0,0.0,0.0,0.0};
 
 // global node ids of faces in contact with launch tube
 static int launchContactFacesTemplate[4] = {10,27,28,11};
-static int launchContactFaces[32][4];
+static int launchContactFaces[32*4];
+static int launchContactFacesSizes[] = {4};
+static int launchContactFacesShapetypes[] = {DB_ZONETYPE_QUAD};
+static int launchContactFacesCounts[] = {32};
 
 // global node ids of control surfaces
-int controlSurfaceFaces[] = {
-        9,26,167,165,    26,43,167,   43,44,167,   44,27,167,   27,10,163,167,
-        146,145,154,155,   155,154,162,
+static int controlSurfaceFaces[] = {
+        9,26,167,165,   27,10,163,167,  146,145,154,155,
+        11,28,168,164,  29,12,164,168,  148,147,156,157,
+        13,30,169,165,  150,149,158,159,  31,14,165,169,
+        15,32,170,166,  33,15,166,170,  152,151,160,161,
 
-        11,28,168,164,   28,45,168,   45,46,168,   46,29,168,   29,12,164,168,
-        148,147,156,157,   157,156,162,
-
-        13,30,169,165,   30,47,169,   47,48,169,   48,31,169,   31,14,165,169,
-        150,149,158,159,   159,158,162,
-
-        15,32,170,166,   32,49,170,   49,50,170,   50,33,170,   33,15,166,170,
-        152,151,160,161,   161,160,162};
-int controlSurfaceSizes[] = {4,3,3,3,4,4,3, 4,3,3,3,4,4,3, 4,3,3,3,4,4,3,
-        4,3,3,3,4,4,3};
-
-// global zone ids for which lighting time is a variable
-int ltZones[] = {0,1,2,3};
-
+        26,43,167,   43,44,167,   44,27,167,   155,154,162,
+        28,45,168,   45,46,168,   46,29,168,   157,156,162,
+        30,47,169,   47,48,169,   48,31,169,   159,158,162,
+        32,49,170,   49,50,170,   50,33,170,   161,160,162};
+static int controlSurfaceSizes[] = {4,3};
+static int controlSurfaceShapetypes[] = {DB_ZONETYPE_QUAD, DB_ZONETYPE_TRIANGLE};
+static int controlSurfaceCounts[] = {12,16};
 
 //
 // Bit fields used in enumerating different subsets in the
@@ -377,8 +381,9 @@ PutZonelist(siloimesh_t mesh, const char *name, int nzones, int ndims,
                int hi_offset, int *shapetype, int *shapesize, int *shapecnt,
                int nshapes, DBoptlist *optlist)
 {
-    DBPutZonelist2(mesh->dbfile, name, nzones, ndims, nodelist, lnodelist, origin,
-        lo_offset, hi_offset, shapetype, shapesize, shapecnt, nshapes, optlist);
+    if (name)
+        DBPutZonelist2(mesh->dbfile, name, nzones, ndims, nodelist, lnodelist, origin,
+            lo_offset, hi_offset, shapetype, shapesize, shapecnt, nshapes, optlist);
 
 #ifdef HAVE_IMESH
     int i, nlidx = 0;
@@ -391,11 +396,21 @@ PutZonelist(siloimesh_t mesh, const char *name, int nzones, int ndims,
         iBase_EntityHandle *imvertlist = new iBase_EntityHandle[segnl];
         int *status = new int[segnl];
         int status_alloc = segnl, status_size = 0;
-        int ent_topo = iMesh_HEXAHEDRON; // assume hex
-        if (shapesize[i] == 6)
-            ent_topo = iMesh_PRISM;
-        else if (shapesize[i] == 5)
-            ent_topo = iMesh_PYRAMID;
+
+        int ent_topo;
+        switch (shapetype[i])
+        {
+            case DB_ZONETYPE_BEAM: ent_topo = iMesh_LINE_SEGMENT; break;
+            case DB_ZONETYPE_POLYGON: ent_topo = iMesh_POLYGON; break;
+            case DB_ZONETYPE_TRIANGLE: ent_topo = iMesh_TRIANGLE; break;
+            case DB_ZONETYPE_QUAD: ent_topo = iMesh_QUADRILATERAL; break;
+            case DB_ZONETYPE_POLYHEDRON: ent_topo = iMesh_POLYHEDRON; break;
+            case DB_ZONETYPE_TET: ent_topo = iMesh_TETRAHEDRON; break;
+            case DB_ZONETYPE_PYRAMID: ent_topo = iMesh_PYRAMID; break;
+            case DB_ZONETYPE_PRISM: ent_topo = iMesh_PRISM; break;
+            case DB_ZONETYPE_HEX: ent_topo = iMesh_HEXAHEDRON; break;
+        }
+
         int segnlidx = 0;
         for (int j = 0; j < shapecnt[i]; j++)
             for (int k = 0; k < shapesize[i]; k++)
@@ -413,12 +428,6 @@ PutZonelist(siloimesh_t mesh, const char *name, int nzones, int ndims,
         delete [] status;
         zncnt += shapecnt[i];
     }
-
-#if 0
-    // Stick all the entities we created above into the cwd set 
-    iMesh_addEntArrToSet(mesh->theMesh, zoneHdls, nzones, mesh->cwdSet, &(mesh->error));
-    CheckITAPSError(addEntArrToSet);
-#endif
 
     mesh->zones = zoneHdls;
 #endif
@@ -1041,13 +1050,28 @@ static void
 PutEnts(siloimesh_t mesh, iBase_EntitySetHandle theSet, int mask,
     const vector<int> &bitmap)
 {
-return;
     vector<iBase_EntityHandle> ents;
     for (int i = 0; i < (int) bitmap.size(); i++)
         if (bitmap[i]&mask) ents.push_back(mesh->zones[i]);
 
     if (ents.size() == 0)
         return;
+
+    iMesh_addEntArrToSet(mesh->theMesh, &ents[0], ents.size(), theSet, &(mesh->error));
+    CheckITAPSError(addEntArrToSet);
+}
+
+static void
+PutEntsByIndex(siloimesh_t mesh, iBase_EntitySetHandle theSet, int centering, int nents,
+    const int *ids)
+{
+    vector<iBase_EntityHandle> ents;
+    if (centering == DB_NODECENT)
+        for (int i = 0; i < nents; i++)
+            ents.push_back(mesh->verts[ids[i]]);
+    else
+        for (int i = 0; i < nents; i++)
+            ents.push_back(mesh->zones[ids[i]]);
 
     iMesh_addEntArrToSet(mesh->theMesh, &ents[0], ents.size(), theSet, &(mesh->error));
     CheckITAPSError(addEntArrToSet);
@@ -1119,48 +1143,80 @@ void write_rocket(siloimesh_t mesh)
 
     // Ok, now output the assembly hierarchy using bitmap_g as our guide.
     iBase_EntitySetHandle assmSet = CreateSet(mesh, mesh->rootSet, "Assembly");
+        iBase_EntitySetHandle boostSet = CreateSet(mesh, assmSet, "Booster");
+            iBase_EntitySetHandle s1Set = CreateSet(mesh, boostSet, "Stage1");
+                iBase_EntitySetHandle finsSet = CreateSet(mesh, s1Set, "Fins");
+                    iBase_EntitySetHandle fin1Set = CreateSet(mesh, finsSet, "Fin1");
+                    iBase_EntitySetHandle fin2Set = CreateSet(mesh, finsSet, "Fin2");
+                    iBase_EntitySetHandle fin3Set = CreateSet(mesh, finsSet, "Fin3");
+                    iBase_EntitySetHandle fin4Set = CreateSet(mesh, finsSet, "Fin4");
+            iBase_EntitySetHandle s2Set = CreateSet(mesh, boostSet, "Stage2");
+        iBase_EntitySetHandle noseSet = CreateSet(mesh, assmSet, "Nose");
+            iBase_EntitySetHandle s3Set = CreateSet(mesh, noseSet, "Stage 3");
+                iBase_EntitySetHandle busSet = CreateSet(mesh, s3Set, "Bus");
+            iBase_EntitySetHandle mirvsSet = CreateSet(mesh, noseSet, "Mirvs");
+                iBase_EntitySetHandle mirv1Set = CreateSet(mesh, mirvsSet, "Mirv1");
+                iBase_EntitySetHandle mirv2Set = CreateSet(mesh, mirvsSet, "Mirv2");
+                iBase_EntitySetHandle mirv3Set = CreateSet(mesh, mirvsSet, "Mirv3");
+                iBase_EntitySetHandle mirv4Set = CreateSet(mesh, mirvsSet, "Mirv4");
 
-    iBase_EntitySetHandle boostSet = CreateSet(mesh, assmSet, "Booster");
+#if 0
+    PutEnts(mesh, assmSet, 0xFFFFFFFF, bitmap_g);
     PutEnts(mesh, boostSet, BOOSTER, bitmap_g);
-
-    iBase_EntitySetHandle s1Set = CreateSet(mesh, boostSet, "Stage1");
     PutEnts(mesh, s1Set, STAGE1, bitmap_g);
-
-    iBase_EntitySetHandle finsSet = CreateSet(mesh, s1Set, "Fins");
     PutEnts(mesh, finsSet, FINS, bitmap_g);
-
-    iBase_EntitySetHandle fin1Set = CreateSet(mesh, finsSet, "Fin1");
-    PutEnts(mesh, fin1Set, FIN(1), bitmap_g);
-    iBase_EntitySetHandle fin2Set = CreateSet(mesh, finsSet, "Fin2");
-    PutEnts(mesh, fin2Set, FIN(2), bitmap_g);
-    iBase_EntitySetHandle fin3Set = CreateSet(mesh, finsSet, "Fin3");
-    PutEnts(mesh, fin3Set, FIN(3), bitmap_g);
-    iBase_EntitySetHandle fin4Set = CreateSet(mesh, finsSet, "Fin4");
-    PutEnts(mesh, fin4Set, FIN(4), bitmap_g);
-
-    iBase_EntitySetHandle s2Set = CreateSet(mesh, boostSet, "Stage2");
+    PutEnts(mesh, fin1Set, FIN(0), bitmap_g);
+    PutEnts(mesh, fin2Set, FIN(1), bitmap_g);
+    PutEnts(mesh, fin3Set, FIN(2), bitmap_g);
+    PutEnts(mesh, fin4Set, FIN(3), bitmap_g);
     PutEnts(mesh, s2Set, STAGE2, bitmap_g);
-
-    iBase_EntitySetHandle noseSet = CreateSet(mesh, assmSet, "Nose");
     PutEnts(mesh, noseSet, NOSE, bitmap_g);
-
-    iBase_EntitySetHandle s3Set = CreateSet(mesh, noseSet, "Stage 3");
     PutEnts(mesh, s3Set, STAGE3, bitmap_g);
-
-    iBase_EntitySetHandle busSet = CreateSet(mesh, s3Set, "Bus");
     PutEnts(mesh, busSet, BUS, bitmap_g);
-
-    iBase_EntitySetHandle mirvsSet = CreateSet(mesh, noseSet, "Mirvs");
     PutEnts(mesh, mirvsSet, MIRVS, bitmap_g);
+    PutEnts(mesh, mirv1Set, MIRV(0), bitmap_g);
+    PutEnts(mesh, mirv2Set, MIRV(1), bitmap_g);
+    PutEnts(mesh, mirv3Set, MIRV(2), bitmap_g);
+    PutEnts(mesh, mirv4Set, MIRV(3), bitmap_g);
+#endif
 
-    iBase_EntitySetHandle mirv1Set = CreateSet(mesh, mirvsSet, "Mirv1");
-    PutEnts(mesh, mirv1Set, MIRV(1), bitmap_g);
-    iBase_EntitySetHandle mirv2Set = CreateSet(mesh, mirvsSet, "Mirv2");
-    PutEnts(mesh, mirv2Set, MIRV(2), bitmap_g);
-    iBase_EntitySetHandle mirv3Set = CreateSet(mesh, mirvsSet, "Mirv3");
-    PutEnts(mesh, mirv3Set, MIRV(3), bitmap_g);
-    iBase_EntitySetHandle mirv4Set = CreateSet(mesh, mirvsSet, "Mirv4");
-    PutEnts(mesh, mirv4Set, MIRV(4), bitmap_g);
+    // Some special subsets
+
+    // lighting time nodes
+    iBase_EntitySetHandle ltZonesSet = CreateSet(mesh, mesh->rootSet, "ltZones");
+    PutEntsByIndex(mesh, ltZonesSet, DB_ZONECENT, 4, ltZones);
+
+    // hold down nodes
+    iBase_EntitySetHandle holdDownSet = CreateSet(mesh, mesh->rootSet, "Hold Down");
+    PutEntsByIndex(mesh, holdDownSet, DB_NODECENT, 9, holdDownNodes);
+
+    // high dynamic pressure points
+    iBase_EntitySetHandle highQSet = CreateSet(mesh, mesh->rootSet, "Max Q");
+    PutEntsByIndex(mesh, highQSet, DB_NODECENT, sizeof(maxQNodes)/sizeof(maxQNodes[0]), maxQNodes);
+
+    // Using PutZonelist here will corrupt 'zones' member of mesh object.
+    // We don't intend to need that any further so its ok.
+    // We use PutZonelist here as a utility to output groups of other
+    // types of edge and face zones.
+    int identity[32];
+    for (int i = 0; i < 32; i++) identity[i] = i;
+    PutZonelist(mesh, 0, 4, 3, umbilicalEdges, sizeof(umbilicalEdges)/sizeof(umbilicalEdges[0]),
+                    0, 0, 0, umbilicalEdgesShapetypes, umbilicalEdgesSizes, umbilicalEdgesCounts,
+                    1, NULL);
+    iBase_EntitySetHandle umbilicalSet = CreateSet(mesh, mesh->rootSet, "Umbilicals");
+    PutEntsByIndex(mesh, umbilicalSet, DB_ZONECENT, 4, identity);
+
+    PutZonelist(mesh, 0, 32, 3, launchContactFaces, sizeof(launchContactFaces)/sizeof(launchContactFaces[0]),
+                    0, 0, 0, launchContactFacesShapetypes, launchContactFacesSizes, launchContactFacesCounts,
+                    1, NULL);
+    iBase_EntitySetHandle launchFaces = CreateSet(mesh, mesh->rootSet, "Launch Tube Contacts");
+    PutEntsByIndex(mesh, launchFaces, DB_ZONECENT, 32, identity);
+
+    PutZonelist(mesh, 0, 16+12, 3, controlSurfaceFaces, sizeof(controlSurfaceFaces)/sizeof(controlSurfaceFaces[0]),
+                    0, 0, 0, controlSurfaceShapetypes, controlSurfaceSizes, controlSurfaceCounts,
+                    2, NULL);
+    iBase_EntitySetHandle controlSurfaces = CreateSet(mesh, mesh->rootSet, "Control Surfaces");
+    PutEntsByIndex(mesh, controlSurfaces, DB_ZONECENT, 16+12, identity);
 
 #endif
 }
@@ -1590,11 +1646,11 @@ main(int argc, char **argv)
         for (j = 0; j < 4; j++)
         {
             for (int k = 0; k < 4; k++)
-                launchContactFaces[i*4+j][k] =
+                launchContactFaces[(i*4+j)*4+k] =
                     launchContactFacesTemplate[k] + 2*j + launchLayer;
         }
-        launchContactFaces[i*4+3][2] = launchContactFaces[i*4+3][2] - 8;
-        launchContactFaces[i*4+3][3] = launchContactFaces[i*4+3][3] - 8;
+        launchContactFaces[(i*4+3)*4+2] = launchContactFaces[(i*4+3)*4+2] - 8;
+        launchContactFaces[(i*4+3)*4+3] = launchContactFaces[(i*4+3)*4+3] - 8;
 
         launchLayer += layerNNodes;
     }
