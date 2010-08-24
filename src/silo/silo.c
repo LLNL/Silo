@@ -132,6 +132,9 @@ int SILO_VERS_TAG = 0;
 /* No lines of  the form 'int Silo_version_Maj_Min_Pat = 0;' below
    here indicates that this version is not backwards compatible with
    any previous versions.*/
+int Silo_version_4_8_pre2;
+int Silo_version_4_8_pre3;
+int Silo_version_4_8_pre4;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -4886,27 +4889,24 @@ DBClearOption(DBoptlist *optlist, int option)
  *
  *      Mark C. Miller, Wed Jul 14 20:35:50 PDT 2010
  *      Replaced 'return' with 'API_RETURN'
+ *
+ *      Mark C. Miller, Tue Aug 10 23:49:51 PDT 2010
+ *      Removed API_BEGIN/END stuff so that function can be handed
+ *      a null optlist and it will behave well.
  *--------------------------------------------------------------------*/
 PUBLIC void * 
 DBGetOption(const DBoptlist *optlist, int option)
 {
     int            i;
 
-    API_BEGIN("DBGetOption", void*, 0) {
-        if (!optlist || optlist->numopts < 0) {
-            API_ERROR("optlist pointer", E_BADARGS);
-        }
+    if (!optlist) return 0;
 
-        /* find the given option in the optlist and return its value */
-        for (i = 0; i < optlist->numopts; i++) {
-            if (optlist->options[i] == option) {
-                API_RETURN(optlist->values[i]);
-            }
-        }
-    }
-    API_END;
+    /* find the given option in the optlist and return its value */
+    for (i = 0; i < optlist->numopts; i++)
+        if (optlist->options[i] == option)
+            return optlist->values[i];
 
-    return(0);
+    return 0;
 }
 
 /*-------------------------------------------------------------------------

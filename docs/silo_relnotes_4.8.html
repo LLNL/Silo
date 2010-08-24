@@ -51,16 +51,19 @@ identifying silo files as well as their underlying format (PDB or HDF5).</li>
 multi-block object block names when moving files between windows and
 Linux was fixed. Thanks to Al Nichols for reporting the and the fix.<br>
   </li>
+  <li>Leaks of optional species names and colors were corrected.</li>
 </ul>
 <h3>2. Performance-oriented features in this release</h3>
 <ul>
+  <li>To take advantage of some of the performance improvements described here,
+      HDF5 Version 1.8.4 or newer is required.</li>
   <li>A number of options for using various Virtual File Drivers (VFDs)
 that
 come pre-packaged with the HDF5 library were added to Silo. The
 interface to controlling these VFDs was enhanced. See documentation on
 DBRegisterFileOptionsSet() in the Silo 4.8 user's manual for more
-information. See <a href="http://IM-391641-1.pdf">IM-391641-1.pdf</a>
-and Collette.pdf for some details.<br>
+information. See <a href="https://wci-dev.llnl.gov/codes/silo/media/pdf/llnl_pres_428015.pdf">Overview of Silo block-based VFD</a>
+and <a href="https://wci-dev.llnl.gov/codes/silo/media/pdf/llnl_pres_428059.pdf">Scaling Studies of Silo block-based VFD</a> for some details.<br>
   </li>
   <li>There is a new, Silo-specific VFD designed specifically for
 BlueGene (e.g. BG/P and BG/Q) systems called the Silo block-based VFD.
@@ -75,10 +78,10 @@ options in the Silo 4.8 User's manual.</li>
 'type' argument in DBCreate/DBOopen calls. Thanks to Marty Marinak for
 testing and Stewart Brown for guidance in implementing this feature.
 This feature may be particularly important to codes using PDB driver on
-BlueGene sysems (e.g. BG/P) because the PDB Proper in <a
+BlueGene systems (e.g. BG/P) because the PDB Proper in <a
  href="https://wci.llnl.gov/codes/pact/">PACT</a> has undergone
 substantial performance tuning for those systems.</li>
-&lt;&gt; <li>A new I/O performance benchmarking tool, ioperf, was
+<li>A new I/O performance benchmarking tool, ioperf, was
 added
 to Silo tests. This tool can be useful in comparing performance of the
 Poor Man's Parallel I/O strategy with any I/O library including sec2,
@@ -91,7 +94,7 @@ will return the order in which the named objects appear in the file.
 This is useful in optimizing read operations from the file by
 potentially minimizing the frequency/number of seeks.</li>
   <li>New options for using nameschemes instead of explicit lists of
-names of blocks for mulit-block objects were added. These options can
+names of blocks for multi-block objects were added. These options can
 profoundly reduce the total size of multi-block objects as well as the
 root files into which they are written as well as the I/O time to read
 and write them.<br>
@@ -105,7 +108,7 @@ corrected.</li>
   <li>The default behavior for the friendly HDF5 names option has been
 changed in two key ways. First, friendly names are turned ON by
 default. Second, HDF5 datasets are in fact written as their friendly
-named variant in the current working directory instead of writting them
+named variant in the current working directory instead of writing them
 in the magic <span style="font-family: monospace;">/.silo</span>
 directory with the friendly names being links to them. This is
 important for scalability as the number of objects in the<span
@@ -115,6 +118,9 @@ related metadata.</li>
 </ul>
 <h3>3. Other new features in this release</h3>
 <ul>
+  <li>Note that Silo Version 4.8 is NOT link-time, backward compatible
+with any previous version. You will need to re-compile all code that includes
+the Silo header file, silo.h.</li>
   <li>Silo is now officially released with a BSD Open source license.
 Thanks to Eric Brugger for reviewing the approximately 150,000 lines of
 code as well as the LLNL IM Team for completing the review and release
@@ -142,8 +148,24 @@ Fortran interface. Thanks to Olivier Cessenat for this implementation.</li>
 ucdvar or quadvar was relaxed so that now, for example, DBPutUcdvar can
 write a variable with 100 sub-variables.</li>
   <li>DBnamescheme objects now support references to external arrays of
-string value.<br>
-  </li>
+string value.</li>
+  <li>DBErrFunc was deprecated. Use DBErrFuncname now. Also, a new method,
+      DBErrfunc was added to return the function pointer for the error
+      function set in the last most-recent DBShowErrors() call.</li>
+  <li>A new function, DBErrlvl, was added to return the error reporting level
+set in the last, most-recent DBShowErrors() call.</li>
+  <li>The test suite was enhanced substantially to run test on a variety of
+      HDF5 virtual file drivers and library settings.</li>
+  <li>Functions for catenating an array of strings into a single, semi-colon
+separated string and the reverse operation were added to the public API. See
+DBStringArrayToStringList and DBStringListToStringArray. These functions used
+to be solely internal to Silo but have proven to be useful for Silo applications
+needing to read and write arbitrary collections of strings.</li>
+   <li>A new function, DBSetUnknownDriverPriorities was added to control the
+behavior of the unknown (e.g. DB_UNKNOWN) driver when opening files of unspecified
+low-level format type. Previously, the Silo library had a hard-coded sequence of
+drivers it would try to open a file using DB_UNKNOWN driver type. Now, that sequence
+can be specified by the Silo application.</li>
 </ul>
 <h3>4. Important information regarding BSD vs. Legacy Licenses</h3>
 <ul>

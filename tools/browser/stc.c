@@ -2299,10 +2299,22 @@ stc_silo_types (void) {
       IOASSOC (PA_DATATYPE);
       COMP (segment_lengths,
             "pointer (array 'self.num_segments' (primitive 'int'))");
+      COMP (groupel_types,
+            "pointer (array 'self.num_segments' (primitive 'int'))");
+      tmp = obj_new (C_PRIM, "int");
+      prim_set_io_assoc (tmp, PA_CENTERING);
+      tmp = obj_new (C_PTR, obj_new (C_ARY, "self.num_segments", tmp));
+      COMP3 (groupel_types, "groupel_types", tmp);
       COMP (segment_ids,
             "pointer (array 'self.num_segments' (primitive 'int'))");
-      COMP (segment_ids,
-            "pointer (array 'self.num_segments' (primitive 'int'))");
+      COMP (segment_data,
+            "pointer (array 'SH3 1000, self.num_segments' "
+            "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
+            "(primitive 'int'))))");
+      COMP (segment_fracs,
+            "pointer (array 'SH3 1000, self.num_segments' "
+            "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
+            "(primitive 'self.fracs_data_type'))))");
    } ESTRUCT;
 
    STRUCT (DBmrgvar) {

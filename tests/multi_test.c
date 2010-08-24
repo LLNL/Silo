@@ -1,54 +1,3 @@
-/*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
-LLNL-CODE-425250.
-All rights reserved.
-
-This file is part of Silo. For details, see silo.llnl.gov.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-   * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the disclaimer below.
-   * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the disclaimer (as noted
-     below) in the documentation and/or other materials provided with
-     the distribution.
-   * Neither the name of the LLNS/LLNL nor the names of its
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
-
-THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
-"AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
-LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
-LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
-CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
-PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
-NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-This work was produced at Lawrence Livermore National Laboratory under
-Contract  No.   DE-AC52-07NA27344 with  the  DOE.  Neither the  United
-States Government  nor Lawrence  Livermore National Security,  LLC nor
-any of  their employees,  makes any warranty,  express or  implied, or
-assumes   any   liability   or   responsibility  for   the   accuracy,
-completeness, or usefulness of any information, apparatus, product, or
-process  disclosed, or  represents  that its  use  would not  infringe
-privately-owned   rights.  Any  reference   herein  to   any  specific
-commercial products,  process, or  services by trade  name, trademark,
-manufacturer or otherwise does not necessarily constitute or imply its
-endorsement,  recommendation,   or  favoring  by   the  United  States
-Government or Lawrence Livermore National Security, LLC. The views and
-opinions  of authors  expressed  herein do  not  necessarily state  or
-reflect those  of the United  States Government or  Lawrence Livermore
-National  Security, LLC,  and shall  not  be used  for advertising  or
-product endorsement purposes.
-*/
 /*---------------------------------------------------------------------------
  * multi_testall.c -- Multi-Block Test File Generator.
  *
@@ -82,8 +31,8 @@ product endorsement purposes.
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "silo.h"
-#include <std.c>
 
 #define NX 30
 #define NY 40
@@ -394,16 +343,6 @@ fill_rect3d_mat(float x[], float y[], float z[], int matlist[], int nx,
  *
  *    Mark C. Miller, Wed Dec  2 12:12:49 PST 2009
  *    Fixed declaration of 'inc'
- *
- *    Mark C. Miller, Thu Feb 11 09:54:07 PST 2010
- *    Added option for split vfd. Changed how allocation inc is handled
- *    by Silo library. Added option to turn on ALL errors. Added
- *    alternate extensions for split-vfd.
- *
- *    Mark C. Miller, Wed Jul 14 15:28:05 PDT 2010
- *    Changed name of hdf-friendly-hard option to hdf-friendly-only which
- *    if present will create a file in which NO data is written to /.silo
- *    dir and all datasets are written 'next to' the objects the bind to.
  *------------------------------------------------------------------------*/
 int
 main(int argc, char *argv[])
@@ -413,16 +352,24 @@ main(int argc, char *argv[])
     int            i;
     int            dochecks = FALSE;
     int            hdfriendly = FALSE;
-    int            show_all_errors = FALSE;
-    int            inc = 12; /* 2^12 = 4 kilobytes */ 
+    int            inc = 512 << 11;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
-        if (!strncmp(argv[i], "DB_PDB", 6)) {
-            driver = StringToDriver(argv[i]);
+        if (!strcmp(argv[i], "DB_PDB")) {
+            driver = DB_PDB;
             file_ext = ".pdb";
-        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
-            driver = StringToDriver(argv[i]);
+        } else if (!strcmp(argv[i], "DB_HDF5")) {
+            driver = DB_HDF5;
+            file_ext = ".h5";
+        } else if (!strcmp(argv[i], "DB_HDF5_SEC2")) {
+            driver = DB_HDF5_SEC2;
+            file_ext = ".h5";
+        } else if (!strcmp(argv[i], "DB_HDF5_STDIO")) {
+            driver = DB_HDF5_STDIO;
+            file_ext = ".h5";
+        } else if (!strcmp(argv[i], "DB_HDF5_CORE")) {
+            driver = inc | DB_HDF5_CORE;
             file_ext = ".h5";
         } else if (!strcmp(argv[i], "hzip")) {
             DBSetCompression("ERRMODE=FALLBACK METHOD=HZIP");
@@ -435,19 +382,18 @@ main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "check")) {
             dochecks = TRUE;
         } else if (!strcmp(argv[i], "hdf-friendly")) {
-            hdfriendly = 1;
-        } else if (!strcmp(argv[i], "hdf-friendly-only")) {
+            hdfriendly = TRUE;
+        } else if (!strcmp(argv[i], "hdf-friendly-hard")) {
             hdfriendly = 2;
-        } else if (!strcmp(argv[i], "show-all-errors")) {
-            show_all_errors = 1;
-	} else if (argv[i][0] != '\0') {
+        } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
 
-    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
+    DBShowErrors(DB_TOP, NULL);
     DBSetEnableChecksums(dochecks);
-    if ((driver&0xF) == DB_HDF5X)
+    if (driver == DB_HDF5 || driver == DB_HDF5_SEC2 ||
+        driver == DB_HDF5_STDIO || driver == (inc|DB_HDF5_CORE))
         DBSetFriendlyHDF5Names(hdfriendly);
 
     /*
@@ -558,7 +504,6 @@ main(int argc, char *argv[])
     } else
         DBClose(dbfile);
 
-    CleanupDriverStuff();
     return (0);
 }                                      /* main */
 
@@ -602,9 +547,6 @@ main(int argc, char *argv[])
  *
  *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *    Added additional material object with material names and colors 
- *
- *    Mark C. Miller, Thu Feb 11 09:55:17 PST 2010
- *    Removed bunch of extranous code for 'groupings'.
  *------------------------------------------------------------------------*/
 int
 build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
@@ -643,6 +585,33 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     int             extentssize;
     int            *tmpList;
     double         *tmpExtents;
+
+    /* 
+     * Initialize a simple grouping
+     */
+    int             ngroupings;
+    int             groupings[9];
+    char          **groupingnames = NULL;
+    ngroupings = 9;            /* number of elements in the grouping arrays */
+    groupings[0] = 5;          /* number of elements in this group */
+    groupings[1] = 0;
+    groupings[2] = 1;
+    groupings[3] = 2;
+    groupings[4] = 3;
+    groupings[5] = 4;
+    groupings[6] = 2;          /* number of elements in next group */
+    groupings[7] = 5;
+    groupings[8] = 6;
+    groupingnames = (char**)malloc(sizeof(char*)*ngroupings);
+    groupingnames[0] = safe_strdup("First Grouping");
+    groupingnames[1] = safe_strdup("Zero");
+    groupingnames[2] = safe_strdup("One");
+    groupingnames[3] = safe_strdup("Two");
+    groupingnames[4] = safe_strdup("Three");
+    groupingnames[5] = safe_strdup("Four");
+    groupingnames[6] = safe_strdup("Second Grouping");
+    groupingnames[7] = safe_strdup("Five");
+    groupingnames[8] = safe_strdup("Six");
 
     /* 
      * Initialize the names and create the directories for the blocks.
@@ -754,6 +723,10 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* if */
     
+    for (i = 0; i < ngroupings; i++)
+        FREE(groupingnames[i]);
+    FREE(groupingnames);
+
     /* test hidding a multimesh */
     DBAddOption(optlist, DBOPT_HIDE_FROM_GUI, &one);
     DBPutMultimesh(dbfile, "mesh1_hidden", nblocks, meshnames, meshtypes, optlist);
@@ -1290,9 +1263,9 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
+        if (driver == DB_HDF5 && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
+        else if (driver == DB_HDF5 && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -1611,9 +1584,9 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
+        if (driver == DB_HDF5 && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
+        else if (driver == DB_HDF5 && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -1848,9 +1821,9 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
+        if (driver == DB_HDF5 && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
+        else if (driver == DB_HDF5 && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -2245,9 +2218,9 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
+        if (driver == DB_HDF5 && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
+        else if (driver == DB_HDF5 && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -2766,9 +2739,9 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
+        if (driver == DB_HDF5 && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
+        else if (driver == DB_HDF5 && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)
@@ -3170,9 +3143,9 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         /*
          * Test explicit call to free compression resources for a mesh
          */
-        if ((driver&0xF) == DB_HDF5X && block % 6 == 0)
+        if (driver == DB_HDF5 && block % 6 == 0)
             DBFreeCompressionResources(dbfile,0);        /* all mesh case */
-        else if ((driver&0xF) == DB_HDF5X && block % 2 == 0)
+        else if (driver == DB_HDF5 && block % 2 == 0)
             DBFreeCompressionResources(dbfile,meshname); /* specific mesh case */
 
         if (DBSetDir(dbfile, "..") == -1)

@@ -94,6 +94,7 @@ dist-gzip-bsd: dist-gzip
 	    echo "Please remove before proceeding" ;\
 	    exit 1 ;\
 	fi
+	rm -f $(PACKAGE)-$(VERSION)-bsd.tar.gz $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.gz
 	gunzip < $(PACKAGE)-$(VERSION).tar.gz | tar xf -
 	cp -R $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)-bsd
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/hzip
@@ -101,7 +102,7 @@ dist-gzip-bsd: dist-gzip
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC8
 	mv $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC8-BSD $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC8
 	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd.tar.gz
-	rm -rf $(PACKAGE)-$(VERSION)-bsd/tests/{amr3d.silo,pion0244.silo,z1plt.silo,amr2d.silo,xvers_data.tar.bz2}
+	rm -rf $(PACKAGE)-$(VERSION)-bsd/tests/{amr3d.silo,pion0244.silo,amr2d.silo,xvers_data.tar.bz2}
 	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.gz
 	rm -rf $(PACKAGE)-$(VERSION)-bsd
 	rm -rf $(PACKAGE)-$(VERSION)/SiloWindows/MSVC8-BSD

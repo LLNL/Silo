@@ -220,6 +220,13 @@ static int zshapecnt_g[] = {8*12+4, 8, 4, 4, 4};
 static DBmrgtree *topTree;
 
 #ifdef HAVE_IMESH
+#define SET_CLASS_DOMAINS 1
+#define SET_CLASS_MATERIALS 2
+#define SET_CLASS_ASSEMBLY 3
+#define SET_CLASS_NODESETS 4
+#define SET_CLASS_EDGESETS 5
+#define SET_CLASS_FACESETS 6
+
 #define CheckITAPSError2(IMI, ERR, FN, THELINE, THEFILE)                                        \
     if (ERR != 0)                                                                               \
     {                                                                                           \
@@ -275,12 +282,17 @@ SetDir(siloimesh_t mesh, const char *dirname)
 
 #ifdef HAVE_IMESH
     // Obtain the SET_NAME tag handle (create if doesn't already exist)
-    iBase_TagHandle snTag; 
+    iBase_TagHandle snTag, scTag; 
     iMesh_getTagHandle(mesh->theMesh, "SET_NAME", &snTag, &(mesh->error), 9);
     CheckITAPSError(getTagHandle);
     if (mesh->error != iBase_SUCCESS)
         iMesh_createTag(mesh->theMesh, "SET_NAME", 64, iBase_BYTES,
             &snTag, &(mesh->error), 9);
+    iMesh_getTagHandle(mesh->theMesh, "SET_CLASS", &scTag, &(mesh->error), 10);
+    CheckITAPSError(getTagHandle);
+    if (mesh->error != iBase_SUCCESS)
+        iMesh_createTag(mesh->theMesh, "SET_CLASS", 1, iBase_INTEGER,
+            &scTag, &(mesh->error), 10);
 
     // Check if ent set already exists
     bool alreadyHaveSet = false;
@@ -314,6 +326,7 @@ SetDir(siloimesh_t mesh, const char *dirname)
     // If set didn't exist, create it and set its SET_NAME tag 
     if (!alreadyHaveSet)
     {
+        int setClass = SET_CLASS_DOMAINS;
         char tmp[64];
         memset(tmp, '\0', sizeof(tmp));
         strcpy(tmp, dirname);
@@ -322,6 +335,9 @@ SetDir(siloimesh_t mesh, const char *dirname)
         iMesh_setEntSetData(mesh->theMesh, theSet, snTag,
             tmp, sizeof(tmp), &(mesh->error));
         CheckITAPSError(setEntSetData);
+        iMesh_setEntSetIntData(mesh->theMesh, theSet, scTag,
+            setClass, &(mesh->error));
+        CheckITAPSError(createEntSet);
     }
 
     // Set the cwd set
@@ -437,7 +453,7 @@ static int
 PutMaterial(siloimesh_t mesh, const char *name, const char *meshname, int nmat,
               int matnos[], int matlist[], int dims[], int ndims,
               int mix_next[], int mix_mat[], int mix_zone[], DB_DTPTR1 mix_vf,
-              int mixlen, int datatype, DBoptlist *optlist)
+              int mixlen, int datatype, DBoptlist *optlist, int set_class)
 {
     if (name)
         DBPutMaterial(mesh->dbfile, name, meshname, nmat, matnos, matlist, dims, ndims,
@@ -445,12 +461,17 @@ PutMaterial(siloimesh_t mesh, const char *name, const char *meshname, int nmat,
 
 #ifdef HAVE_IMESH
     // Obtain the SET_NAME tag handle
-    iBase_TagHandle snTag; 
+    iBase_TagHandle snTag, scTag; 
     iMesh_getTagHandle(mesh->theMesh, "SET_NAME", &snTag, &(mesh->error), 9);
     CheckITAPSError(getTagHandle);
     if (mesh->error != iBase_SUCCESS)
         iMesh_createTag(mesh->theMesh, "SET_NAME", 64, iBase_BYTES,
             &snTag, &(mesh->error), 9);
+    iMesh_getTagHandle(mesh->theMesh, "SET_CLASS", &scTag, &(mesh->error), 10);
+    CheckITAPSError(getTagHandle);
+    if (mesh->error != iBase_SUCCESS)
+        iMesh_createTag(mesh->theMesh, "SET_CLASS", 1, iBase_INTEGER,
+            &scTag, &(mesh->error), 10);
     
     int lmatlist = 1;
     for (int i = 0; i < ndims; i++)
@@ -482,6 +503,9 @@ PutMaterial(siloimesh_t mesh, const char *name, const char *meshname, int nmat,
                 tmp, sizeof(tmp), &(mesh->error));
             CheckITAPSError(setEntSetData);
         }
+        iMesh_setEntSetIntData(mesh->theMesh, matSet, scTag,
+            set_class, &(mesh->error));
+        CheckITAPSError(setEntSetData);
     }
 #endif
 }
@@ -523,6 +547,14 @@ PutVar(siloimesh_t mesh, const char *vname, const char *mname, int nvars,
         mixlen, datatype, centering, optlist);
 
 #if HAVE_IMESH
+    void *p = DBGetOption(optlist, DBOPT_MATNAMES);
+    int nregs = 0;
+    if (p)
+    {
+        char **reg_names = (char **) p;
+        while (reg_names[nregs]) nregs++;
+    }
+
     iBase_EntityHandle *entHdls;
     int nEnts;
     if (centering == DB_NODECENT)
@@ -537,7 +569,7 @@ PutVar(siloimesh_t mesh, const char *vname, const char *mname, int nvars,
         iMesh_getNumOfType(mesh->theMesh, mesh->rootSet, iBase_REGION, &nEnts, &(mesh->error));
         CheckITAPSError(getNumOfType);
     }
-    assert(nEnts == nels);
+    assert(p || nEnts == nels);
 
     iBase_TagHandle theTag;
     if (datatype == DB_FLOAT || datatype == DB_DOUBLE)
@@ -1017,15 +1049,20 @@ void build_body()
 
 #ifdef HAVE_IMESH
 static iBase_EntitySetHandle
-CreateSet(siloimesh_t mesh, iBase_EntitySetHandle parent, const char *name)
+CreateSet(siloimesh_t mesh, iBase_EntitySetHandle parent, const char *name, int set_class)
 {
     // Obtain the SET_NAME tag handle (create if doesn't already exist)
-    iBase_TagHandle snTag; 
+    iBase_TagHandle snTag, scTag; 
     iMesh_getTagHandle(mesh->theMesh, "SET_NAME", &snTag, &(mesh->error), 9);
     CheckITAPSError(getTagHandle);
     if (mesh->error != iBase_SUCCESS)
         iMesh_createTag(mesh->theMesh, "SET_NAME", 64, iBase_BYTES,
             &snTag, &(mesh->error), 9);
+    iMesh_getTagHandle(mesh->theMesh, "SET_CLASS", &scTag, &(mesh->error), 10);
+    CheckITAPSError(getTagHandle);
+    if (mesh->error != iBase_SUCCESS)
+        iMesh_createTag(mesh->theMesh, "SET_CLASS", 1, iBase_INTEGER,
+            &scTag, &(mesh->error), 10);
 
     char tmp[64];
     memset(tmp, '\0', sizeof(tmp));
@@ -1035,6 +1072,9 @@ CreateSet(siloimesh_t mesh, iBase_EntitySetHandle parent, const char *name)
     CheckITAPSError(createEntSet);
     iMesh_setEntSetData(mesh->theMesh, theSet, snTag,
         tmp, sizeof(tmp), &(mesh->error));
+    CheckITAPSError(setEntSetData);
+    iMesh_setEntSetIntData(mesh->theMesh, theSet, scTag,
+        set_class, &(mesh->error));
     CheckITAPSError(setEntSetData);
 
     if (parent != mesh->rootSet)
@@ -1101,7 +1141,7 @@ void write_rocket(siloimesh_t mesh)
     DBoptlist *opts = DBMakeOptlist(2);
     DBAddOption(opts, DBOPT_MATNAMES, matNames);
     PutMaterial(mesh, "materials", "mesh", 5, matnos,
-        &matlist_g[0], &nzones_g, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts);
+        &matlist_g[0], &nzones_g, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts, SET_CLASS_MATERIALS);
     DBFreeOptlist(opts);
 
     {   char *varnames[1];
@@ -1137,61 +1177,58 @@ void write_rocket(siloimesh_t mesh)
         DBoptlist *opts = DBMakeOptlist(2);
         DBAddOption(opts, DBOPT_MATNAMES, subsetnames);
         PutMaterial(mesh, 0, "mesh", 3, subsetnos,
-            &procid_g[0], &nzones_g, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts);
+            &procid_g[0], &nzones_g, 1, 0, 0, 0, 0, 0, DB_FLOAT, opts, SET_CLASS_DOMAINS);
         DBFreeOptlist(opts);
     }
 
     // Ok, now output the assembly hierarchy using bitmap_g as our guide.
-    iBase_EntitySetHandle assmSet = CreateSet(mesh, mesh->rootSet, "Assembly");
-        iBase_EntitySetHandle boostSet = CreateSet(mesh, assmSet, "Booster");
-            iBase_EntitySetHandle s1Set = CreateSet(mesh, boostSet, "Stage1");
-                iBase_EntitySetHandle finsSet = CreateSet(mesh, s1Set, "Fins");
-                    iBase_EntitySetHandle fin1Set = CreateSet(mesh, finsSet, "Fin1");
-                    iBase_EntitySetHandle fin2Set = CreateSet(mesh, finsSet, "Fin2");
-                    iBase_EntitySetHandle fin3Set = CreateSet(mesh, finsSet, "Fin3");
-                    iBase_EntitySetHandle fin4Set = CreateSet(mesh, finsSet, "Fin4");
-            iBase_EntitySetHandle s2Set = CreateSet(mesh, boostSet, "Stage2");
-        iBase_EntitySetHandle noseSet = CreateSet(mesh, assmSet, "Nose");
-            iBase_EntitySetHandle s3Set = CreateSet(mesh, noseSet, "Stage 3");
-                iBase_EntitySetHandle busSet = CreateSet(mesh, s3Set, "Bus");
-            iBase_EntitySetHandle mirvsSet = CreateSet(mesh, noseSet, "Mirvs");
-                iBase_EntitySetHandle mirv1Set = CreateSet(mesh, mirvsSet, "Mirv1");
-                iBase_EntitySetHandle mirv2Set = CreateSet(mesh, mirvsSet, "Mirv2");
-                iBase_EntitySetHandle mirv3Set = CreateSet(mesh, mirvsSet, "Mirv3");
-                iBase_EntitySetHandle mirv4Set = CreateSet(mesh, mirvsSet, "Mirv4");
-
-#if 0
+    iBase_EntitySetHandle assmSet = CreateSet(mesh, mesh->rootSet, "Assembly", SET_CLASS_ASSEMBLY);
     PutEnts(mesh, assmSet, 0xFFFFFFFF, bitmap_g);
-    PutEnts(mesh, boostSet, BOOSTER, bitmap_g);
-    PutEnts(mesh, s1Set, STAGE1, bitmap_g);
-    PutEnts(mesh, finsSet, FINS, bitmap_g);
-    PutEnts(mesh, fin1Set, FIN(0), bitmap_g);
-    PutEnts(mesh, fin2Set, FIN(1), bitmap_g);
-    PutEnts(mesh, fin3Set, FIN(2), bitmap_g);
-    PutEnts(mesh, fin4Set, FIN(3), bitmap_g);
-    PutEnts(mesh, s2Set, STAGE2, bitmap_g);
-    PutEnts(mesh, noseSet, NOSE, bitmap_g);
-    PutEnts(mesh, s3Set, STAGE3, bitmap_g);
-    PutEnts(mesh, busSet, BUS, bitmap_g);
-    PutEnts(mesh, mirvsSet, MIRVS, bitmap_g);
-    PutEnts(mesh, mirv1Set, MIRV(0), bitmap_g);
-    PutEnts(mesh, mirv2Set, MIRV(1), bitmap_g);
-    PutEnts(mesh, mirv3Set, MIRV(2), bitmap_g);
-    PutEnts(mesh, mirv4Set, MIRV(3), bitmap_g);
-#endif
+        iBase_EntitySetHandle boostSet = CreateSet(mesh, assmSet, "Booster", SET_CLASS_ASSEMBLY);
+        PutEnts(mesh, boostSet, BOOSTER, bitmap_g);
+            iBase_EntitySetHandle s1Set = CreateSet(mesh, boostSet, "Stage1", SET_CLASS_ASSEMBLY);
+            PutEnts(mesh, s1Set, STAGE1, bitmap_g);
+                iBase_EntitySetHandle finsSet = CreateSet(mesh, s1Set, "Fins", SET_CLASS_ASSEMBLY);
+                PutEnts(mesh, finsSet, FINS, bitmap_g);
+                    iBase_EntitySetHandle fin1Set = CreateSet(mesh, finsSet, "Fin1", SET_CLASS_ASSEMBLY);
+                    PutEnts(mesh, fin1Set, FIN(0), bitmap_g);
+                    iBase_EntitySetHandle fin2Set = CreateSet(mesh, finsSet, "Fin2", SET_CLASS_ASSEMBLY);
+                    PutEnts(mesh, fin2Set, FIN(1), bitmap_g);
+                    iBase_EntitySetHandle fin3Set = CreateSet(mesh, finsSet, "Fin3", SET_CLASS_ASSEMBLY);
+                    PutEnts(mesh, fin3Set, FIN(2), bitmap_g);
+                    iBase_EntitySetHandle fin4Set = CreateSet(mesh, finsSet, "Fin4", SET_CLASS_ASSEMBLY);
+                    PutEnts(mesh, fin4Set, FIN(3), bitmap_g);
+            iBase_EntitySetHandle s2Set = CreateSet(mesh, boostSet, "Stage2", SET_CLASS_ASSEMBLY);
+            PutEnts(mesh, s2Set, STAGE2, bitmap_g);
+        iBase_EntitySetHandle noseSet = CreateSet(mesh, assmSet, "Nose", SET_CLASS_ASSEMBLY);
+        PutEnts(mesh, noseSet, NOSE, bitmap_g);
+            iBase_EntitySetHandle s3Set = CreateSet(mesh, noseSet, "Stage 3", SET_CLASS_ASSEMBLY);
+            PutEnts(mesh, s3Set, STAGE3, bitmap_g);
+                iBase_EntitySetHandle busSet = CreateSet(mesh, s3Set, "Bus", SET_CLASS_ASSEMBLY);
+                PutEnts(mesh, busSet, BUS, bitmap_g);
+            iBase_EntitySetHandle mirvsSet = CreateSet(mesh, noseSet, "Mirvs", SET_CLASS_ASSEMBLY);
+                PutEnts(mesh, mirvsSet, MIRVS, bitmap_g);
+                iBase_EntitySetHandle mirv1Set = CreateSet(mesh, mirvsSet, "Mirv1", SET_CLASS_ASSEMBLY);
+                PutEnts(mesh, mirv1Set, MIRV(0), bitmap_g);
+                iBase_EntitySetHandle mirv2Set = CreateSet(mesh, mirvsSet, "Mirv2", SET_CLASS_ASSEMBLY);
+                PutEnts(mesh, mirv2Set, MIRV(1), bitmap_g);
+                iBase_EntitySetHandle mirv3Set = CreateSet(mesh, mirvsSet, "Mirv3", SET_CLASS_ASSEMBLY);
+                PutEnts(mesh, mirv3Set, MIRV(2), bitmap_g);
+                iBase_EntitySetHandle mirv4Set = CreateSet(mesh, mirvsSet, "Mirv4", SET_CLASS_ASSEMBLY);
+                PutEnts(mesh, mirv4Set, MIRV(3), bitmap_g);
 
     // Some special subsets
 
     // lighting time nodes
-    iBase_EntitySetHandle ltZonesSet = CreateSet(mesh, mesh->rootSet, "ltZones");
+    iBase_EntitySetHandle ltZonesSet = CreateSet(mesh, mesh->rootSet, "ltZones", SET_CLASS_NODESETS);
     PutEntsByIndex(mesh, ltZonesSet, DB_ZONECENT, 4, ltZones);
 
     // hold down nodes
-    iBase_EntitySetHandle holdDownSet = CreateSet(mesh, mesh->rootSet, "Hold Down");
+    iBase_EntitySetHandle holdDownSet = CreateSet(mesh, mesh->rootSet, "Hold Down", SET_CLASS_NODESETS);
     PutEntsByIndex(mesh, holdDownSet, DB_NODECENT, 9, holdDownNodes);
 
     // high dynamic pressure points
-    iBase_EntitySetHandle highQSet = CreateSet(mesh, mesh->rootSet, "Max Q");
+    iBase_EntitySetHandle highQSet = CreateSet(mesh, mesh->rootSet, "Max Q", SET_CLASS_NODESETS);
     PutEntsByIndex(mesh, highQSet, DB_NODECENT, sizeof(maxQNodes)/sizeof(maxQNodes[0]), maxQNodes);
 
     // Using PutZonelist here will corrupt 'zones' member of mesh object.
@@ -1203,21 +1240,20 @@ void write_rocket(siloimesh_t mesh)
     PutZonelist(mesh, 0, 4, 3, umbilicalEdges, sizeof(umbilicalEdges)/sizeof(umbilicalEdges[0]),
                     0, 0, 0, umbilicalEdgesShapetypes, umbilicalEdgesSizes, umbilicalEdgesCounts,
                     1, NULL);
-    iBase_EntitySetHandle umbilicalSet = CreateSet(mesh, mesh->rootSet, "Umbilicals");
+    iBase_EntitySetHandle umbilicalSet = CreateSet(mesh, mesh->rootSet, "Umbilicals", SET_CLASS_EDGESETS);
     PutEntsByIndex(mesh, umbilicalSet, DB_ZONECENT, 4, identity);
 
     PutZonelist(mesh, 0, 32, 3, launchContactFaces, sizeof(launchContactFaces)/sizeof(launchContactFaces[0]),
                     0, 0, 0, launchContactFacesShapetypes, launchContactFacesSizes, launchContactFacesCounts,
                     1, NULL);
-    iBase_EntitySetHandle launchFaces = CreateSet(mesh, mesh->rootSet, "Launch Tube Contacts");
+    iBase_EntitySetHandle launchFaces = CreateSet(mesh, mesh->rootSet, "Launch Tube Contacts", SET_CLASS_FACESETS);
     PutEntsByIndex(mesh, launchFaces, DB_ZONECENT, 32, identity);
 
     PutZonelist(mesh, 0, 16+12, 3, controlSurfaceFaces, sizeof(controlSurfaceFaces)/sizeof(controlSurfaceFaces[0]),
                     0, 0, 0, controlSurfaceShapetypes, controlSurfaceSizes, controlSurfaceCounts,
                     2, NULL);
-    iBase_EntitySetHandle controlSurfaces = CreateSet(mesh, mesh->rootSet, "Control Surfaces");
+    iBase_EntitySetHandle controlSurfaces = CreateSet(mesh, mesh->rootSet, "Control Surfaces", SET_CLASS_FACESETS);
     PutEntsByIndex(mesh, controlSurfaces, DB_ZONECENT, 16+12, identity);
-
 #endif
 }
 

@@ -6999,19 +6999,19 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, const char *name)
                 continue;
             }
 
-            gm->segment_fracs[i] = malloc(len * (gm->fracs_data_type=DB_FLOAT?4:8));
+            gm->segment_fracs[i] = malloc(len * ((gm->fracs_data_type==DB_FLOAT)?sizeof(float):sizeof(double)));
             for (j = 0; j < len; j++)
             {
                 if (gm->fracs_data_type == DB_FLOAT)
                 {
                     float *pfa = (float *) fracsArray;
-                    float *psf = (float *) gm->segment_fracs[i];
+                    float *psf = (float *) (gm->segment_fracs[i]);
                     psf[j] = pfa[n++];
                 }
                 else
                 {
                     double *pfa = (double *) fracsArray;
-                    double *psf = (double *) gm->segment_fracs[i];
+                    double *psf = (double *) (gm->segment_fracs[i]);
                     psf[j] = pfa[n++];
                 }
             }
@@ -11400,6 +11400,9 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
  *
  *      Mark C. Miller, Wed Oct 10 10:25:53 PDT 2007
  *
+ *  Modifications:
+ *    Mark C. Miller, Wed Aug 18 20:55:42 PDT 2010
+ *    Fix bug setting correct size for frac_lengths array.
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 /* ARGSUSED */
@@ -11461,13 +11464,13 @@ db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
            intArray[i] = len;
            tot_len += len;
        }
-       count = tot_len;
+       count = num_segments;
        DBWriteComponent(dbfile, obj, "frac_lengths", name, "integer",
                         intArray, 1, &count);
        FREE(intArray);
 
        /* build and write out fractional data array */
-       fracsArray = (void *) malloc(tot_len * (fracs_data_type == DB_FLOAT?4:8));
+       fracsArray = (void *) malloc(tot_len * ((fracs_data_type==DB_FLOAT)?sizeof(float):sizeof(double)));
        tot_len = 0;
        for (i = 0; i < num_segments; i++)
        {
@@ -11493,7 +11496,7 @@ db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
        count = tot_len;
        datatype_str = db_GetDatatypeString(fracs_data_type);
        DBWriteComponent(dbfile, obj, "segment_fracs", name, datatype_str, 
-                        intArray, 1, &count);
+                        fracsArray, 1, &count);
        FREE(fracsArray);
        FREE(datatype_str);
    }

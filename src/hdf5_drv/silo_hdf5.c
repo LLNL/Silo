@@ -14562,7 +14562,7 @@ db_hdf5_PutGroupelmap(DBfile *_dbfile, const char *name,
             FREE(intArray);
 
             /* build and write out fractional data array */
-            fracsArray = (void *) malloc(tot_len * (fracs_data_type == DB_FLOAT?4:8)); 
+            fracsArray = (void *) malloc(tot_len * ((fracs_data_type==DB_FLOAT)?sizeof(float):sizeof(double))); 
             tot_len = 0;
             for (i = 0; i < num_segments; i++)
             {
@@ -14710,7 +14710,7 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, const char *name)
                     continue;
                 }
 
-                gm->segment_fracs[i] = malloc(len * (gm->fracs_data_type=DB_FLOAT?4:8));
+                gm->segment_fracs[i] = malloc(len * ((gm->fracs_data_type==DB_FLOAT)?sizeof(float):sizeof(double)));
                 for (j = 0; j < len; j++)
                 {
                     if (gm->fracs_data_type == DB_FLOAT)

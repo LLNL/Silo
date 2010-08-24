@@ -1326,21 +1326,30 @@ ary_bind (obj_t _self, void *mem) {
          self->special_handling = strtol (t+2, &rest, 0);
          
          if (ARY_SH_1==self->special_handling && rest && *rest) {
-            lex_input = lex_string (rest);
-            in = parse_stmt (lex_input, false);
-            lex_close (lex_input);
-            sdo = obj_eval (in);
-            in = obj_dest (in);
-            if (!sdo || C_SDO!=sdo->pub.cls) {
-               out_error ("array SH1 argument is invalid: ", sdo);
-               self->ndims = 0;
-               goto error;
-            }
-            wdata.vals = dim;
-            wdata.nvals = 0;
-            wdata.maxvals = 2;
-            obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
-            sdo = obj_dest (sdo);
+	    if (strstr(rest, "DB_COLLINEAR"))
+	    {
+                wdata.vals = dim;
+                wdata.nvals = 1;
+		wdata.vals[0] = DB_COLLINEAR;
+	    }
+	    else
+	    {
+                lex_input = lex_string (rest);
+                in = parse_stmt (lex_input, false);
+                lex_close (lex_input);
+                sdo = obj_eval (in);
+                in = obj_dest (in);
+                if (!sdo || C_SDO!=sdo->pub.cls) {
+                   out_error ("array SH1 argument is invalid: ", sdo);
+                   self->ndims = 0;
+                   goto error;
+                }
+                wdata.vals = dim;
+                wdata.nvals = 0;
+                wdata.maxvals = 2;
+                obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
+                sdo = obj_dest (sdo);
+	    }
             if (wdata.nvals<1) {
                out_errorn ("array SH1 argument has no value: %s", rest);
                self->ndims = 0;
