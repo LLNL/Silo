@@ -135,6 +135,7 @@ int SILO_VERS_TAG = 0;
 int Silo_version_4_8_pre2;
 int Silo_version_4_8_pre3;
 int Silo_version_4_8_pre4;
+int Silo_version_4_8_pre5;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
