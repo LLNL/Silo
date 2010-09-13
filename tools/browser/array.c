@@ -605,7 +605,7 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
                   wdata->maxvals *= 1.5;
                   wdata->vals = (int *) realloc(wdata->vals, wdata->maxvals*sizeof(int));
               }
-              wdata->vals[i] = *((int*)(mem+i*nbytes));
+              wdata->vals[i] = *((int*)((char*)mem+i*nbytes));
               wdata->nvals++;
               if (wdata->vals[i] == -1)
                   break;

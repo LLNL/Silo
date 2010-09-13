@@ -57,5 +57,6 @@ int main()
     hid_t g1 = H5Gcreate(f, "dir1", 0);
     hid_t g2 = H5Gcreate(g1, "dir2", 0);
     H5Fclose(f);
+    H5close();
     return 0;
 }
