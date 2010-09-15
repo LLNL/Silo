@@ -67,7 +67,7 @@ result=0
 # tests the way this one was written
 if test -n "$1"; then
     topDir=$1
-    if test -e $topDir/../../testsuite; then
+    if test -e $topDir/../../multi_test; then
         topDir=$1/../..
     fi
 else
