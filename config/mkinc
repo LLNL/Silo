@@ -277,9 +277,23 @@ foreach $var (@temparray) {
     } elsif ($value =~ /^DB_HDF5_OPTS(.*)/) {
         local ($foo, $bar) = split ('\(', $value);
         local ($g1, $g2) = split ( '\)', $bar);
-        $value = "$g1 * 2048"
+        $value = "DB_HDF5X+$g1*2048";
     }
-    printf "      parameter (%-25s = %-15s)\n", $name, $value;
+    $line = sprintf("      parameter (%-25s = %-15s)", $name, $value);
+    if (length($line)>72) {
+        local $off=0;
+        while ($off < length($line)) {
+            $curline = substr($line, $off, $off+64);
+            if ($off == 0) {
+                printf "$curline\n";
+            } else {
+                printf "     c$curline\n";
+            }
+            $off += 64;
+        }
+    } else {
+        printf "$line\n";
+    }
 }
 
 print "\n\n! End.\n";
