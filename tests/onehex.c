@@ -130,6 +130,7 @@ main(int argc, char *argv[])
     int             setnan = 0;
     char 	    *filename = "onehex.silo";
     int             show_all_errors = FALSE;
+    int             append = FALSE;
 
     int alloc_inc, vfd, core_vfd;
     char *mext, *rext;
@@ -190,6 +191,8 @@ main(int argc, char *argv[])
 
             /* DO NOT FREE THE ASSOCIATED OPTLIST UNTIL AFTER OPEN/CREATE */
 
+	} else if (!strcmp(argv[i], "append")) {
+            append = TRUE;
 	} else if (!strcmp(argv[i], "inf")) {
             setinf = 1;
 	} else if (!strcmp(argv[i], "nan")) {
@@ -203,7 +206,14 @@ main(int argc, char *argv[])
     
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
     printf("Creating test file \"%s\".\n", filename);
-    dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "3D ucd hex", driver);
+    if (append)
+    {
+        dbfile = DBOpen(filename, driver, DB_APPEND);
+        DBMkDir(dbfile, "dir1");
+        DBSetDir(dbfile, "dir1");
+    }
+    else
+        dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "3D ucd hex", driver);
 
     /* Ok, now we can safely free the file options sets optlists */
     if (core_opts)
