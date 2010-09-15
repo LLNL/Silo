@@ -92,7 +92,8 @@ plugins to test.<br>
 list of object names an application wishes to read from a Silo file,
 will return the order in which the named objects appear in the file.
 This is useful in optimizing read operations from the file by
-potentially minimizing the frequency/number of seeks.</li>
+potentially minimizing the frequency/number of seeks as well as
+improving efficiency of read-ahead.</li>
   <li>New options for using nameschemes instead of explicit lists of
 names of blocks for multi-block objects were added. These options can
 profoundly reduce the total size of multi-block objects as well as the
