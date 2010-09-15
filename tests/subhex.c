@@ -109,6 +109,10 @@ product endorsement purposes.
  *
  *      Mark C. Miller, Mon Jan 11 16:27:38 PST 2010
  *      Added missing call to DBFreeFacelist.
+ *
+ *      Mark C. Miller, Tue Sep 14 20:50:10 PDT 2010
+ *      Fixed uninitialized write for Cvar by assigning a value. Fixed
+ *      another missing call to DBFreeFacelist.
  *-------------------------------------------------------------------------
  */
 int
@@ -131,7 +135,7 @@ main(int argc, char *argv[])
     char            mesh_command[256];
     float           rot1[4][4], rot2[4][4], final[4][4];
     float           angle;
-    float           Cvar[1];
+    float           Cvar[1] = {3.141592678};
     float           Pvar[12];
     int		    driver=DB_PDB;
     char	   *filename="subhex.silo";
@@ -306,6 +310,8 @@ main(int argc, char *argv[])
                Cfacelist->zoneno, Cfacelist->shapesize, Cfacelist->shapecnt,
                   Cfacelist->nshapes, Cfacelist->types, Cfacelist->typelist,
                   Cfacelist->ntypes);
+
+    DBFreeFacelist(Cfacelist);
 
     DBPutUcdvar1(dbfile, "u", "child", Cvar, 1, NULL, 0, DB_FLOAT, DB_ZONECENT,
                  NULL);

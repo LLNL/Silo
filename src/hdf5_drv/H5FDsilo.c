@@ -114,6 +114,7 @@ product endorsement purposes.
      18. Capture I/O statistics here.
      19. Set mdc_config to never preempt (chews up memory in lib),
          all writes for md will come on close.
+     20. Use COMPACT storage mode in driver for small datasets.
 
 */
 
@@ -800,11 +801,6 @@ static herr_t file_write(H5FD_silo_t *file, haddr_t addr, size_t size, const voi
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr undefined", -1, -1)
     if (REGION_OVERFLOW(addr, size))
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr overflow", -1, -1)
-#if 0
-    /* need to account for block being larger than eoa */
-    if (addr+size>file->eoa)
-        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr overflow", -1, -1)
-#endif
 
     /* Seek to the correct location */
     if (addr != file->pos || OP_WRITE != file->op)
@@ -864,11 +860,6 @@ static herr_t file_read(H5FD_silo_t *file, haddr_t addr, size_t size, void *buf)
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr undefined", -1, -1)
     if (REGION_OVERFLOW(addr, size))
         H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr overflow", -1, -1)
-#if 0
-#warning WAS FILE ARROW EOA
-    if (addr+size>file->eof)
-        H5E_PUSH_HELPER (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "addr overflow", -1, -1)
-#endif
 
     /* Seek to the correct location */
     if (addr != file->pos || OP_READ != file->op)
@@ -1202,39 +1193,6 @@ H5Pset_fapl_silo(hid_t fapl_id)
     if (H5Pset(fapl_id, SILO_USEDIR_PROPNAME, &default_use_direct) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set " SILO_USEDIR_PROPNAME, -1, -1)
 
-#if 0
-    if (H5Pset_meta_block_size(fapl_id, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
-    if (H5Pset_small_data_block_size(fapl_id, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set small_data_block_size", -1, -1)
-    if (H5Pset_sieve_buf_size(fapl_id, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set sieve_buf_size", -1, -1)
-
-    /* Get default metdata cache configuration. */
-#if !defined(_WIN32)
-#warning FIX ME
-#endif
-#if 1
-    memset(&mdc_config, 0, sizeof(mdc_config));
-    mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-    default_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5Pget_mdc_config(default_fapl, &mdc_config)<0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get default mdc_config", -1, -1)
-    H5Pclose(default_fapl);
-
-    /* Turn off evicitions. This means memory for HDF5 metadata will grow without bound. */
-#if !defined(_WIN32)
-#warning FIX ME
-#endif
-    mdc_config.evictions_enabled = 0;
-    mdc_config.incr_mode = H5C_incr__off;
-    mdc_config.flash_incr_mode = H5C_flash_incr__off;
-    mdc_config.decr_mode = H5C_decr__off;
-    if (H5Pset_mdc_config(fapl_id, &mdc_config)<0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set mdc_config to turn off evictions", -1, -1)
-#endif
-#endif
-    
     return H5Pset_driver(fapl_id, H5FD_SILO, NULL);
 }
 
@@ -1253,14 +1211,6 @@ H5Pset_silo_block_size_and_count(hid_t fapl_id, hsize_t block_size, int max_bloc
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_size", -1, -1)
     if (H5Pset(fapl_id, SILO_BLKCNT_PROPNAME, &max_blocks_in_mem) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set silo_block_count", -1, -1)
-#if 0
-    if (H5Pset_meta_block_size(fapl_id, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set meta_block_size", -1, -1)
-    if (H5Pset_small_data_block_size(fapl_id, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set small_data_block_size", -1, -1)
-    if (H5Pset_sieve_buf_size(fapl_id, 0) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTSET, "can't set sieve_buf_size", -1, -1)
-#endif
 
     return ret_value;
 }
@@ -1471,30 +1421,8 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL, -1)
 
     /* get some properties and sanity check them */
-#if 0
-    if (H5Pget_meta_block_size(fapl_id, &meta_block_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get meta_block_size", 0, -1)
-    if (meta_block_size != 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "meta_block_size!=0", 0, -1)
-
-    if (H5Pget_small_data_block_size(fapl_id, &small_data_block_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get small_data_block_size", 0, -1)
-    if (small_data_block_size != 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "small_data_block_size!=0", 0, -1)
-
-    if (H5Pget_sieve_buf_size(fapl_id, &sieve_buf_size) < 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get sieve_buf_size", 0, -1)
-    if (sieve_buf_size != 0)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "sieve_buf_size!=0", 0, -1)
-#endif
-
     if (H5Pget(fapl_id, SILO_BLKSZ_PROPNAME, &silo_block_size) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_BLKSZ_PROPNAME, 0, -1)
-
-#if 0
-    if (meta_block_size != silo_block_size || small_data_block_size != silo_block_size)
-        H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "raw/meta_block_size!=silo_block_size", 0, -1)
-#endif
 
     if (H5Pget(fapl_id, SILO_BLKCNT_PROPNAME, &silo_block_count) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_BLKCNT_PROPNAME, 0, -1)
@@ -1505,10 +1433,6 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_LOGSTS_PROPNAME, 0, -1)
     if (H5Pget(fapl_id, SILO_USEDIR_PROPNAME, &silo_use_direct) < 0)
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get " SILO_USEDIR_PROPNAME, 0, -1)
-
-#if !defined(_WIN32)
-#warning CHECK MDC CONFIG HERE TOO
-#endif
 
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -1576,10 +1500,6 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
 
 #endif
     }
-
-#if !defined(_WIN32)
-#warning FAMILY TO SEC2 LOGIC ON FAPL MISSING
-#endif
 
     return((H5FD_t*)file);
 }   /* end H5FD_silo_open() */
@@ -2322,9 +2242,7 @@ H5FD_silo_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
     static const char *func = "H5FD_silo_truncate";  /* Function Name for error reporting */
     herr_t ret_value = 0;
 
-#if !defined(_WIN32)
-#warning SKIPPING TRUNCATE
-#endif
+    /* Just skip the truncate */
     return 0;
 
     /* Shut compiler up */

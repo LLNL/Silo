@@ -197,6 +197,9 @@ main(int argc, char *argv[])
                  DB_NODECENT, NULL);
 
     /* same using ph-zonelist */
+    shapesize[0] = 3;
+    shapesize[1] = 4;
+    shapesize[2] = 5;
     DBPutUcdmesh(dbfile, "mesh_phzl", 2, coordnames, coords, 8, 1, "phzl",
                  NULL, DB_FLOAT, NULL);
     DBPutPHZonelist(dbfile, "phzl", 3, shapesize, LEN(nl), nl, 0,0,0,0,0,0,0,0,0);

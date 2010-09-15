@@ -219,7 +219,6 @@ static int zshapecnt_g[] = {8*12+4, 8, 4, 4, 4};
 
 static DBmrgtree *topTree;
 
-#ifdef HAVE_IMESH
 #define SET_CLASS_DOMAINS 1
 #define SET_CLASS_MATERIALS 2
 #define SET_CLASS_ASSEMBLY 3
@@ -227,6 +226,7 @@ static DBmrgtree *topTree;
 #define SET_CLASS_EDGESETS 5
 #define SET_CLASS_FACESETS 6
 
+#ifdef HAVE_IMESH
 #define CheckITAPSError2(IMI, ERR, FN, THELINE, THEFILE)                                        \
     if (ERR != 0)                                                                               \
     {                                                                                           \
@@ -266,7 +266,7 @@ typedef siloimesh_struct_t* siloimesh_t;
 // Implement the part of the Silo API we need here but for both Silo
 // and iMesh.
 //
-static int
+static void
 SetDir(siloimesh_t mesh, const char *dirname)
 {
     // Check if dir already exists
@@ -345,7 +345,7 @@ SetDir(siloimesh_t mesh, const char *dirname)
 #endif
 }
 
-static int
+static void
 PutMesh(siloimesh_t mesh, const char *name, int ndims,
              char *coordnames[], float **coords, int nnodes,
              int nzones, const char *zonel_name, const char *facel_name,
@@ -391,7 +391,7 @@ PutMesh(siloimesh_t mesh, const char *name, int ndims,
 #endif
 }
 
-static int
+static void
 PutZonelist(siloimesh_t mesh, const char *name, int nzones, int ndims,
                int *nodelist, int lnodelist, int origin, int lo_offset,
                int hi_offset, int *shapetype, int *shapesize, int *shapecnt,
@@ -449,7 +449,7 @@ PutZonelist(siloimesh_t mesh, const char *name, int nzones, int ndims,
 #endif
 }
 
-static int
+static void
 PutMaterial(siloimesh_t mesh, const char *name, const char *meshname, int nmat,
               int matnos[], int matlist[], int dims[], int ndims,
               int mix_next[], int mix_mat[], int mix_zone[], DB_DTPTR1 mix_vf,
@@ -538,7 +538,7 @@ static void ConvertAndInterleave(DB_DTPTR2 vars, int nvars, int nels, int dt, T*
     }
 }
 
-static int
+static void
 PutVar(siloimesh_t mesh, const char *vname, const char *mname, int nvars,
             char *varnames[], DB_DTPTR2 vars, int nels, DB_DTPTR2 mixvars,
             int mixlen, int datatype, int centering, DBoptlist *optlist)

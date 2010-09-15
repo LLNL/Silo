@@ -105,21 +105,20 @@ re-writing <span style="font-family: monospace;">cycle</span>,<span
  style="font-family: monospace;">dtime</span> for every DBPutXXX
 operation was
 corrected.</li>
-  <li>The default behavior for the friendly HDF5 names option has been
-changed in two key ways. First, friendly names are turned ON by
-default. Second, HDF5 datasets are in fact written as their friendly
+  <li>A new friendly names option was added such that
+HDF5 datasets are in fact written as their friendly
 named variant in the current working directory instead of writing them
 in the magic <span style="font-family: monospace;">/.silo</span>
-directory with the friendly names being links to them. This is
+directory with the friendly names being links to them. This may be 
 important for scalability as the number of objects in the<span
  style="font-family: monospace;"> /.silo</span> directory can otherwise
-grow too large causing performance issues for HDF5 to handle the
+grow quite large causing possible performance issues for HDF5 to handle the
 related metadata.</li>
 </ul>
 <h3>3. Other new features in this release</h3>
 <ul>
   <li>Note that Silo Version 4.8 is NOT link-time, backward compatible
-with any previous version. You will need to re-compile all code that includes
+with any previously released version. You will need to re-compile all code that includes
 the Silo header file, silo.h.</li>
   <li>Silo is now officially released with a BSD Open source license.
 Thanks to Eric Brugger for reviewing the approximately 150,000 lines of

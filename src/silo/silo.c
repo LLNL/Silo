@@ -260,7 +260,7 @@ SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
     FALSE, /* enableChecksums */
-    TRUE,  /* enableFriendlyHDF5Names */
+    FALSE,  /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
     3,     /* maxDeprecateWarnings */
     0,     /* compressionParams (null) */
@@ -12087,9 +12087,6 @@ db_DriverTypeAndFileOptionsSetId(int driver, int *type, int *_opts_set_id)
                     opts_set_id = DB_FILE_OPTS_H5_DEFAULT_STDIO;
                     break;
                 case DB_HDF5_CORE_OBSOLETE:
-#if !defined(_WIN32)
-#warning CAN WE HANDLE OLD CORE INC HERE
-#endif
                     opts_set_id = DB_FILE_OPTS_H5_DEFAULT_CORE;
                     break;
                 case DB_HDF5_MPIO_OBSOLETE:

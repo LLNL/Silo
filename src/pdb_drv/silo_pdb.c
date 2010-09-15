@@ -11141,15 +11141,22 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
    DBWriteComponent(dbfile, obj, "nodelist", name, "integer",
                     nodelist, 1, count);
 
-   count[0] = nzones;
+   if (facecnt)
+   {
+       count[0] = nzones;
 
-   DBWriteComponent(dbfile, obj, "facecnt", name, "integer",
-                    facecnt, 1, count);
+       DBWriteComponent(dbfile, obj, "facecnt", name, "integer",
+                        facecnt, 1, count);
+   }
 
-   count[0] = lfacelist;
+   if (facelist)
+   {
+       count[0] = lfacelist;
 
-   DBWriteComponent(dbfile, obj, "facelist", name, "integer",
-                    facelist, 1, count);
+       DBWriteComponent(dbfile, obj, "facelist", name, "integer",
+                        facelist, 1, count);
+
+   }
 
    if (extface)
    {

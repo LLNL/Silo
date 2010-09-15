@@ -119,6 +119,7 @@ main(int argc, char *argv[])
 
     /* Turn on error handling */
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
+    DBSetFriendlyHDF5Names(2);
 
     /* Create file */
     printf("Creating test file \"%s\".\n", filename);
