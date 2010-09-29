@@ -81,6 +81,7 @@ $0 = shift @ARGV;
 #
 #           mv silo.inc silo.inc~
 #           mkinc < silo.h > silo.inc
+#           cat silo.h silo_f.h | ../../config/mkinc  > silo.inc
 #
 # Programmer:   Robb Matzke, Wed Nov 30 10:44:43 PST 1994
 #
@@ -114,6 +115,10 @@ $0 = shift @ARGV;
 #   Thomas R. Treadway, Thu Oct 11 15:21:03 PDT 2007
 #   Modfied to handle new Fortran name-mangling 
 #
+#   Olivier Cessenat, Sat Sep 25 12:14:45 CEST 2010
+#   Right hand side values computed so that couples (name,value) fit
+#   within 72 characters to hold on a single unwrapped line.
+#
 #########################################################################
 
 
@@ -122,6 +127,7 @@ local ($sdx) = 0;
 
 local($enum_body) = 0;
 local($brace_level) = 0;
+local(%vals) = () ;
 
 ### Gather the info...
 while (<>) {
@@ -279,7 +285,36 @@ foreach $var (@temparray) {
         local ($g1, $g2) = split ( '\)', $bar);
         $value = "DB_HDF5X+$g1*2048";
     }
-    $line = sprintf("      parameter (%-25s = %-15s)", $name, $value);
+    # Evaluate the RHS using array %vals:
+    if ($value =~ /^\d+$/) {
+      $vals{$name} = $value ;
+    } else {
+      # Let us look at the RHS expression:
+      my $rhs = $value ;
+      my $nhs = "" ;
+      while($rhs =~ /(.*?)(\w+)(.*)/i) {
+         # $nhs .= $1 . '${' . $2 . '}' ;
+         if (exists $vals{$2}) {
+           $nhs .= $1 . $vals{$2} ;
+         } else {
+           # print STDERR "KO var $2\n" ;
+           $nhs .= $1 . $2 ;
+         }
+         $rhs = $3 ;
+      }
+      $nhs .= $rhs ;
+      my $aval = eval("$nhs") ;
+      $vals{$name} = $aval unless (exists $vals{$name}) ;
+      # print STDERR "nhs = $nhs, val=$aval (line=$.:$value)\n" ;
+    }
+    # Replace the old symbolic value with the new perl evaluated one:
+    unless ($name =~ /DB_F77NULL/) {
+	$value = $vals{$name} if (exists $vals{$name}) ;
+    }
+    # Why make the line human readable whereas it only needs be compiler compliant ?
+    # $line = sprintf("      parameter (%-25s = %-15s)", $name, $value);
+    # Written in a FORTRAN 77/Fortran 90 manner:
+    $line = sprintf("      parameter(%s=%s)", $name, $value);
     if (length($line)>72) {
         local $off=0;
         while ($off < length($line)) {
