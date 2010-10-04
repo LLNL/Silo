@@ -13,7 +13,7 @@
 #define FC_FUNC(name,NAME) NAME
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
-/*#define SILO_FC_FUNC_(name,NAME) name ## _*/
+/*#define FC_FUNC_(name,NAME) name ## _*/
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 /* #define HAVE_DLFCN_H 1 */
@@ -42,6 +42,9 @@
 /* System provides fprintf prototypes */
 #define HAVE_FPRINTF_POINTER 1
 
+/* Support for Lindstrom float array compression */
+#undef HAVE_FPZIP
+
 /* System provides fread prototypes */
 #define HAVE_FREAD_POINTER 1
 
@@ -54,9 +57,19 @@
 /* System provides fwrite prototypes */
 #define HAVE_FWRITE_POINTER 1
 
+/* Support for HDF5 */ 
+/* This gets defined in the Visual Studio Project Files for the HDF5 build option */
+/* #undef HAVE_HDF5_DRIVER */
+
+/* Define to 1 if you have the <hdf5.h> header file. */
+/* This gets defined in the Visual Studio Project files for the HDF5 build option */
+/* #undef HAVE_HDF5_H */
 
 /* Define to 1 if you have the <history.h> header file. */
 /* #undef HAVE_HISTORY_H */
+
+/* Support for Lindstrom hex/quad mesh compression */
+/* #undef HAVE_HZIP */
 
 /* Define to 1 if you have the <ieeefp.h> header file. */
 /* #undef HAVE_IEEEFP_H */
@@ -67,8 +80,9 @@
 /* Define to 1 if you have the `isnan' function. */
 #define HAVE_ISNAN 1
 
-/* Define to 1 if you have the `hdf5' library (-lhdf5). */
-#define HAVE_LIBHDF5 1
+/* Define to 1 if you have the `hdf5' library (-lhdf5).  */
+/* This gets defined in the  Visual Studio project file for the HDF5 configuration */
+/* #define HAVE_LIBHDF5 1 */
 
 /* Define if you have a readline compatible library */
 #define HAVE_LIBREADLINE 1
@@ -88,7 +102,10 @@
 #define HAVE_MEMORY_H 1
 
 /* Support for NetCDF */
-/* #define HAVE_NETCDF_DRIVER 1 */
+/* #undef HAVE_NETCDF_DRIVER */
+
+/* Support for PDB Proper */
+/* #undef HAVE_PDBP_DRIVER */
 
 /* Support for PDB */
 #define HAVE_PDB_DRIVER 1
@@ -97,13 +114,13 @@
 /* #undef HAVE_READLINE_H */
 
 /* Define if your readline library has \`add_history' */
-/* #define HAVE_READLINE_HISTORY 1 */
+/* #undef HAVE_READLINE_HISTORY */
 
 /* Define to 1 if you have the <readline/history.h> header file. */
-/* #define HAVE_READLINE_HISTORY_H 1 */
+/* #undef HAVE_READLINE_HISTORY_H */
 
 /* Define to 1 if you have the <readline/readline.h> header file. */
-/* #define HAVE_READLINE_READLINE_H 1 */
+/* #undef HAVE_READLINE_READLINE_H */
 
 /* System provides setvbuf prototypes */
 #define HAVE_SETVBUF_POINTER 1
@@ -112,7 +129,7 @@
 #define HAVE_STDARG_H 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
-/* #define HAVE_STDINT_H 1 */
+/* #undef HAVE_STDINT_H */
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
@@ -121,19 +138,19 @@
 #define HAVE_STRERROR 1
 
 /* Define to 1 if you have the <strings.h> header file. */
-/* #define HAVE_STRINGS_H 1 */
+/* #undef HAVE_STRINGS_H */
 
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the <sys/fcntl.h> header file. */
-/* #define HAVE_SYS_FCNTL_H 1 */
+/* #undef HAVE_SYS_FCNTL_H */
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/time.h> header file. */
-/* #define HAVE_SYS_TIME_H 1 */
+/* #undef HAVE_SYS_TIME_H */
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
@@ -142,12 +159,10 @@
 #define HAVE_TAURUS_DRIVER 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
-/* #define HAVE_UNISTD_H 1 */
+/* #undef HAVE_UNISTD_H */
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #define HAVE_ZLIB_H 1
-
-#define SILO_LONG_LONG __int64
 
 /* Name of package */
 #define PACKAGE "silo"
@@ -157,6 +172,9 @@
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "silo"
+
+/* Define to the full name and version of this package. */
+/* #undef PACKAGE_STRING */
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "silo"
