@@ -2260,6 +2260,18 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate)
     return -1;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:   db_silo_stat_one_file
+ *
+ * Purpose:    Better stat method for silo taking into account stat/stat64
+ *             as well as windows-specific notion of an 'inode'.
+ *
+ * Programmer: Mark C. Miller
+ *
+ * Modifications:
+ *   Adjusted the windows-specific logic to obtain fileindex information so
+ *   that if that work fails, it still returns stat retval and errno of stat.
+ *-------------------------------------------------------------------------*/
 PRIVATE int
 db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
 {
@@ -2277,6 +2289,7 @@ db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
     if (retval == 0)
     {
         /* this logic was copied by and large from HDF5 sec2 VFD */
+        int errnotmp = errno;
         int fd = open(name, O_RDONLY);
         if (fd != -1)
         {
@@ -2285,15 +2298,8 @@ db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
             statbuf->fileindexhi = fileinfo.nFileIndexHigh;
             statbuf->fileindexlo = fileinfo.nFileIndexLow;
             close(fd);
-            errno = 0;
-            retval = 0;
         }
-        else
-        {
-            retval = -1;
-            if (errno == 0)
-                errno = ENOENT;
-        }
+        errno = errnotmp;
     }
 #endif /* #ifdef _WIN32 */
 
