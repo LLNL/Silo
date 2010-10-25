@@ -3081,11 +3081,15 @@ DBGetDriverType(const DBfile *file)
  *
  * Mark C. Miller, Mon Nov 19 10:45:05 PST 2007
  * Removed conditional compilation on HDF5 driver
+ *
+ * Mark C. Miller, Mon Oct 25 16:12:49 PDT 2010
+ * Initialize buf to ensure it will be null terminated no matter
+ * what happens during open/read.
  *--------------------------------------------------------------------*/
 PUBLIC int
 DBGetDriverTypeFromPath(const char *path)
 {
-   char buf[8];
+   char buf[9] = {'\0','\0','\0','\0','\0','\0','\0','\0','\0'};
    int fd;
    int nbytes;
    int flags = O_RDONLY;
