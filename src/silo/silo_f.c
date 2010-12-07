@@ -4314,6 +4314,8 @@ DBGETCKSUMS_FC ()
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Mon Dec  6 17:36:57 PST 2010
+ *     Patched as per Olivier Cessenat suggestion.
  *--------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBSETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
@@ -4322,17 +4324,11 @@ DBSETCOMPRESS_FC (FCD_DB cvalue, int *lcvalue)
     DBoptlist     *optlist = NULL;
 
     API_BEGIN("dbsetcompression", int, -1) {
-        if (*lcvalue <= 0)
-            API_ERROR("lcvalue", E_BADARGS);
-
-        /*------------------------------
-         *  Duplicate all ascii strings.
-         *-----------------------------*/
-        if (strcmp(cvalue, DB_F77NULLSTRING) == 0)
-            API_ERROR("cvalue", E_BADARGS);
-        cval = SW_strndup(cvalue, *lcvalue);
+        if (strcmp(cvalue, DB_F77NULLSTRING) < 0 && *lcvalue > 0)
+            cval = SW_strndup(cvalue, *lcvalue);
 
         DBSetCompression(cval);
+        FREE(cval);
     }
     API_END;
 
