@@ -12,6 +12,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Silo", "Silo.vcproj", "{20B
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pdb_detect", "pdb_detect\pdb_detect.vcproj", "{17857422-AD82-4D37-A5AF-94C4556935D0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "browser", "browser.vcproj", "{7C65A1CE-9430-4012-8CED-783C233AEA1D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{20BFB7B0-9F43-43BB-B188-555DEA431CDF} = {20BFB7B0-9F43-43BB-B188-555DEA431CDF}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		DLL_Debug|Win32 = DLL_Debug|Win32
@@ -140,6 +145,42 @@ Global
 		{17857422-AD82-4D37-A5AF-94C4556935D0}.StaticLibwithHDF5_Release|Win32.Build.0 = Release|Win32
 		{17857422-AD82-4D37-A5AF-94C4556935D0}.StaticLibwithHDF5_Release|x64.ActiveCfg = Release|x64
 		{17857422-AD82-4D37-A5AF-94C4556935D0}.StaticLibwithHDF5_Release|x64.Build.0 = Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLL_Debug|Win32.ActiveCfg = DLL_Debug|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLL_Debug|Win32.Build.0 = DLL_Debug|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLL_Debug|x64.ActiveCfg = DLL_Debug|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLL_Debug|x64.Build.0 = DLL_Debug|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLL_Release|Win32.ActiveCfg = DLL_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLL_Release|Win32.Build.0 = DLL_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLL_Release|x64.ActiveCfg = DLL_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLL_Release|x64.Build.0 = DLL_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLLwithHDF5_Debug|Win32.ActiveCfg = DLLwithHDF5_Debug|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLLwithHDF5_Debug|Win32.Build.0 = DLLwithHDF5_Debug|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLLwithHDF5_Debug|x64.ActiveCfg = DLLwithHDF5_Debug|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLLwithHDF5_Debug|x64.Build.0 = DLLwithHDF5_Debug|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLLwithHDF5_Release|Win32.ActiveCfg = DLLwithHDF5_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLLwithHDF5_Release|Win32.Build.0 = DLLwithHDF5_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLLwithHDF5_Release|x64.ActiveCfg = DLLwithHDF5_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.DLLwithHDF5_Release|x64.Build.0 = DLLwithHDF5_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.Release|Win32.ActiveCfg = StaticLib_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.Release|Win32.Build.0 = StaticLib_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.Release|x64.ActiveCfg = StaticLib_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.Release|x64.Build.0 = StaticLib_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLib_Debug|Win32.ActiveCfg = StaticLib_Debug|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLib_Debug|Win32.Build.0 = StaticLib_Debug|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLib_Debug|x64.ActiveCfg = StaticLib_Debug|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLib_Debug|x64.Build.0 = StaticLib_Debug|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLib_Release|Win32.ActiveCfg = StaticLib_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLib_Release|Win32.Build.0 = StaticLib_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLib_Release|x64.ActiveCfg = StaticLib_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLib_Release|x64.Build.0 = StaticLib_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLibwithHDF5_Debug|Win32.ActiveCfg = StaticLibwithHDF5_Debug|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLibwithHDF5_Debug|Win32.Build.0 = StaticLibwithHDF5_Debug|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLibwithHDF5_Debug|x64.ActiveCfg = StaticLibwithHDF5_Debug|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLibwithHDF5_Debug|x64.Build.0 = StaticLibwithHDF5_Debug|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLibwithHDF5_Release|Win32.ActiveCfg = StaticLibwithHDF5_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLibwithHDF5_Release|Win32.Build.0 = StaticLibwithHDF5_Release|Win32
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLibwithHDF5_Release|x64.ActiveCfg = StaticLibwithHDF5_Release|x64
+		{7C65A1CE-9430-4012-8CED-783C233AEA1D}.StaticLibwithHDF5_Release|x64.Build.0 = StaticLibwithHDF5_Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

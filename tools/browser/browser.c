@@ -86,7 +86,16 @@ be used for advertising or product endorsement purposes.
 #include <assert.h>
 #include "browser.h"
 #include <ctype.h>
-#include <pwd.h>
+#ifndef _WIN32
+  #include <pwd.h>
+#else
+  #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+  #endif
+  #include <Windows.h>
+  #include <shlobj.h>
+  #include <shlwapi.h>
+#endif
 #include <math.h>
 #ifdef HAVE_LIBREADLINE
 #  if defined(HAVE_READLINE_READLINE_H)
@@ -115,10 +124,10 @@ extern int read_history ();
 #endif /* HAVE_READLINE_HISTORY */
 #include <signal.h>
 #ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
+#  include <sys/stat.h>
 #endif /* HAVE_SYS_STAT_H */
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#  include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
 const char *arg0;               /*argv[0]                               */
@@ -138,8 +147,12 @@ char    *ObjTypeName[BROWSER_NOBJTYPES] = {
 /*
  * Externals for the ale3d and debug filter registration.
  */
+#if 0
 extern int       f_ale3d_Open ();
 extern int       f_debug_Open ();
+#endif
+#include <f_ale3d.h>
+#include <f_sample.h>
 
 /*---------------------------------------------------------------------------
  * Purpose:     Print a usage message to the standard error stream.
@@ -1380,6 +1393,10 @@ bad_switch(const char *fmt, ...)
  *
  *      Mark C. Miller, Fri Mar 12 00:35:43 PST 2010
  *      Replaced --split-vfd switch with --hdf5-vfd-opts switch.
+ *
+ *      Kathleen Bonnell, Thu Dec 9 09:21:15 PST 2010
+ *      Modifications for WIN32: ifdef out sigaction sections; use Win32 
+ *      retrieval of users 'home' dir; use setvbuf instead of setlinebuf. 
  *-------------------------------------------------------------------------
  */
 int
@@ -1394,14 +1411,20 @@ main(int argc, char *argv[])
     strlist_t    eval_list, exclude_list, hdf5_vfd_opts;
     switches_t   *sws=switch_new();
     switch_t     *sw=NULL;
+#ifndef _WIN32
     struct sigaction action;
+#endif
     
     arg0 = argv[0]; /*global executable name*/
 
     /* We want stdout line buffered to prevent possible redirection
        from client shells (e.g. 2>&1) from having stderr cause
        breaks in lines in stdout */
+#ifndef _WIN32
     setlinebuf(stdout);
+#else
+    setvbuf(stdout, NULL, _IONBF, 0);
+#endif
 
 #if defined(HAVE_READLINE_READLINE_H) && defined(HAVE_LIBREADLINE)
     /* We have our own readline completion function that tries to complete
@@ -1416,6 +1439,7 @@ main(int argc, char *argv[])
     using_history();
     stifle_history(HISTORY_STIFLE);
 #ifdef HISTORY_FILE
+  #ifndef _WIN32
     if ((passwd=getpwuid(getuid())) && passwd->pw_dir) {
         assert (strlen(passwd->pw_dir)+strlen(HISTORY_FILE)+2 <
                 sizeof(HistoryFile));
@@ -1424,6 +1448,30 @@ main(int argc, char *argv[])
     } else {
         HistoryFile[0] = '\0';
     }
+  #else
+    {  /* new scope */
+        /* Retrieve users personal folder, generally 'My Documents" or
+         * "Documents" 
+        */
+        char userhome[1024];
+        int haveUserHome = 0;
+        TCHAR szPath[MAX_PATH];
+        struct _stat fs;
+        if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL,
+                                  SHGFP_TYPE_CURRENT, szPath)))
+        {
+            ExpandEnvironmentStrings(userhome, szPath, 1024);
+            assert (strlen(userhome) + strlen(HISTORY_FILE) +2 <
+                sizeof(HistoryFile));  
+            sprintf(HistoryFile, "%s\\%s", userhome, HISTORY_FILE);
+            read_history(HistoryFile);
+        }
+        else
+        {
+            HistoryFile[0] = '\0';
+        }
+    } /* end new scope */
+  #endif
 #endif /*HISTORY_FILE*/
 #endif /*HAVE_READLINE_HISTORY_H && HAVE_READLINE_HISTORY*/
 
@@ -1440,10 +1488,29 @@ main(int argc, char *argv[])
     /* Determine where the default startup file is located. Read either
      * the user's init file or the system-wide init file, but not both.
      * The `--file' command-line option overrides this. */
+#ifndef _WIN32
     if ((passwd=getpwuid(getuid())) && passwd->pw_dir) {
         sprintf(init_file_buf, "%s/%s", passwd->pw_dir, INIT_FILE);
         if (access(init_file_buf, F_OK)>=0) init_file = init_file_buf;
     }
+#else
+    { 
+        /* Retrieve users personal folder, generally 'My Documents" or
+         * "Documents" 
+        */
+        char userhome[1024];
+        int haveUserHome = 0;
+        TCHAR szPath[MAX_PATH];
+        if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL,
+                                  SHGFP_TYPE_CURRENT, szPath)))
+        {
+            ExpandEnvironmentStrings(userhome, szPath, 1024);
+            sprintf(init_file_buf, "%s\\%s", userhome, INIT_FILE);
+            if (access(init_file_buf, F_OK)>=0) init_file = init_file_buf;
+        }
+    } /* end new scope */
+#endif
+
 #ifdef PUBLIC_INIT_FILE
     if (!init_file) {
         strcpy(init_file_buf, PUBLIC_INIT_FILE);
@@ -1649,7 +1716,7 @@ main(int argc, char *argv[])
         ((sw=switch_find(sws, "--version")) && sw->seen && 2==argc)) {
         exit(0);
     }
-   
+  
     /* Register the ale3d and debug filters. */    
     DBFilterRegistration("ale3d", NULL, f_ale3d_Open);
     DBFilterRegistration("debug", NULL, f_debug_Open);
@@ -1671,6 +1738,7 @@ main(int argc, char *argv[])
 
     /* Don't dump core on floating-point exceptions. Keep track of window
      * size changes. */
+#ifndef _WIN32
     action.sa_handler = sigwinch_handler;
     sigemptyset(&action.sa_mask);
     action.sa_flags = SA_RESTART;
@@ -1680,6 +1748,7 @@ main(int argc, char *argv[])
     sigemptyset(&action.sa_mask);
     action.sa_flags = SA_RESTART;
     sigaction(SIGFPE, &action, NULL);
+#endif
 
     /* Open the initialization file and read it. */    
     if ((sw=switch_find(sws, "--file")) && sw->seen) init_file = sw->lexeme;

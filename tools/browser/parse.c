@@ -66,7 +66,9 @@ be used for advertising or product endorsement purposes.
 #include <browser.h>
 #include <ctype.h>
 #include <signal.h>
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 static void     bif (const char*, obj_t(*)(int,obj_t[]), int, const char*,
                      const char*);
@@ -477,6 +479,8 @@ bif (const char *func_name, obj_t(*func_ptr)(int x, obj_t y[]), int flags,
  *      Signal handlers are registered with sigaction() since its behavior
  *      is more consistent.
  *
+ *      Kathleen Bonnell, Thu Dec 9 09:36:44 PST 2010
+ *      sigaction not defined on WIN32, ifdef it.
  *-------------------------------------------------------------------------
  */
 obj_t
@@ -485,6 +489,8 @@ parse_stmt (lex_t *f, int implied_print) {
    char         *lexeme, buf[1024], *s, *fmode;
    int          tok, i;
    obj_t        head=NIL, opstack=NIL, b1=NIL, retval=NIL, tmp=NIL;
+
+#ifndef _WIN32
    struct sigaction new_action, old_action;
 
    /* SIGINT should have the default action while we're parsing */
@@ -492,6 +498,7 @@ parse_stmt (lex_t *f, int implied_print) {
    sigemptyset(&new_action.sa_mask);
    new_action.sa_flags = SA_RESTART;
    sigaction(SIGINT, &new_action, &old_action);
+#endif
 
    tok = lex_token (f, &lexeme, false);
 
@@ -642,14 +649,18 @@ parse_stmt (lex_t *f, int implied_print) {
    }
 
 done:
+#ifndef _WIN32
    sigaction(SIGINT, &old_action, NULL);
+#endif
    return retval;
 
 error:
    if (head) head = obj_dest (head);
    if (opstack) opstack = obj_dest (opstack);
    if (retval) retval = obj_dest (retval);
+#ifndef _WIN32
    sigaction(SIGINT, &old_action, NULL);
+#endif
    return NIL;
 }
 

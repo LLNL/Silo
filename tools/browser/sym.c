@@ -777,6 +777,9 @@ sym_truth (char *name) {
  *
  *      Mark C. Miller, Fri Mar 12 01:23:15 PST 2010
  *      Replaced splitvfdexts with $hdf5_vfd_opts
+ *
+ *      Kathleen Bonnell, Thu Dec 9 09:40:03 PST 2010
+ *      Surround use of PUBLIC_INIT_FILE with ifdef for its existence.
  *-------------------------------------------------------------------------
  */
 void
@@ -889,12 +892,14 @@ sym_init (void)
               "Them in order when attempting to open a file.\n"); 
 
    /* Name of public init file */
+#ifdef PUBLIC_INIT_FILE
    sym_bi_set("pubinit", PUBLIC_INIT_FILE,
               "Name of public initialization file.",
               "The name of the public initialization file is stored in this "
               "variable regardless of whether that file has actually been "
               "read. Its primary purpose is to be used as the argument to "
               "the `include' function in a user-local startup file.");
+#endif
    
    /* Set $diff to something reasonable */
    list[0] = obj_new(C_SYM, "detail");

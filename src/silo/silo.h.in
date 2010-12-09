@@ -280,23 +280,8 @@ extern "C" {
 #define DBMMADJZonelists     0x04000000
 #define DBPMGlobNodeNo       0x08000000
 
-/* Macros used for exporting symbols on Win32 systems. */
-#ifndef SILO_API
-#ifdef _WIN32
-/* Make Silo a DLL by default. */
-#ifdef SILO_STATIC_LIBRARY
-#define SILO_API
-#else
-#ifdef SILO_EXPORTS
-#define SILO_API __declspec(dllexport)
-#else
-#define SILO_API __declspec(dllimport)
-#endif
-#endif
-#else
-#define SILO_API
-#endif
-#endif
+/* Header with macros for exporting symbols on Win32 systems. */
+#include <silo_exports.h>
 
 /* Definitions for COORD_TYPE */
 /* Placed before DBObjectType enum because the

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Silo"
-	ProjectGUID="{20BFB7B0-9F43-43BB-B188-555DEA431CDF}"
-	RootNamespace="Silo"
+	Name="browser"
+	ProjectGUID="{7C65A1CE-9430-4012-8CED-783C233AEA1D}"
+	RootNamespace="browser"
 	>
 	<Platforms>
 		<Platform
@@ -18,207 +18,11 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5_Release|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
-			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops;.\HDF5_Defines.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS"
-				StringPooling="true"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
-				AssemblerListingLocation="$(OutDir)\"
-				ObjectFile="$(OutDir)\"
-				ProgramDataBaseFileName="$(OutDir)\"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				CompileAs="0"
-				DisableSpecificWarnings="4244;4305"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="zlib1.lib hdf5dll.lib"
-				OutputFile="$(OutDir)\silohdf5.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR);$(HDF5_LIB_DIR)"
-				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
-				ImportLibrary="$(OutDir)\silohdf5.lib"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy $(HDF5_LIB_DIR)\hdf5dll.dll $(OutDir)&#x0D;&#x0A;copy $(ZLIB_LIB_DIR)\zlib1.dll $(OutDir)&#x0D;&#x0A;copy $(SZIP_LIB_DIR)\szlibdll.dll $(OutDir)"
-			/>
-		</Configuration>
-		<Configuration
-			Name="DLLwithHDF5_Release|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
-			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops;.\HDF5_Defines.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS"
-				StringPooling="true"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
-				AssemblerListingLocation="$(OutDir)\"
-				ObjectFile="$(OutDir)\"
-				ProgramDataBaseFileName="$(OutDir)\"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				CompileAs="0"
-				DisableSpecificWarnings="4244;4305"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="zlib1.lib hdf5dll.lib"
-				OutputFile="$(OutDir)\silohdf5.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR);$(HDF5_LIB_DIR)"
-				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
-				ImportLibrary="$(OutDir)\silohdf5.lib"
-				TargetMachine="17"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy $(HDF5_LIB_DIR)\hdf5dll.dll $(OutDir)&#x0D;&#x0A;copy $(ZLIB_LIB_DIR)\zlib1.dll $(OutDir)&#x0D;&#x0A;copy $(SZIP_LIB_DIR)\szlibdll.dll $(OutDir)"
-			/>
-		</Configuration>
-		<Configuration
 			Name="DLLwithHDF5_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
-			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops;.\HDF5_Defines.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -237,29 +41,25 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions=""
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -274,14 +74,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlib1.lib hdf5dll.lib"
-				OutputFile="$(OutDir)\silohdf5.dll"
-				LinkIncremental="1"
+				AdditionalDependencies="silohdf5.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR);$(HDF5_LIB_DIR)"
+				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
-				ImportLibrary="$(OutDir)\silohdf5.lib"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -307,15 +107,15 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(HDF5_LIB_DIR)\hdf5dll.dll $(OutDir)&#x0D;&#x0A;copy $(ZLIB_LIB_DIR)\zlib1.dll $(OutDir)&#x0D;&#x0A;copy $(SZIP_LIB_DIR)\szlibdll.dll $(OutDir)"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DLLwithHDF5_Debug|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
-			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops;.\HDF5_Defines.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -334,29 +134,26 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions=""
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -371,14 +168,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="zlib1.lib hdf5dll.lib"
-				OutputFile="$(OutDir)\silohdf5.dll"
-				LinkIncremental="1"
+				AdditionalDependencies="silohdf5.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR);$(HDF5_LIB_DIR)"
+				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
-				ImportLibrary="$(OutDir)\silohdf5.lib"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -404,14 +201,204 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(HDF5_LIB_DIR)\hdf5dll.dll $(OutDir)&#x0D;&#x0A;copy $(ZLIB_LIB_DIR)\zlib1.dll $(OutDir)&#x0D;&#x0A;copy $(SZIP_LIB_DIR)\szlibdll.dll $(OutDir)"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DLLwithHDF5_Release|Win32"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName="$(OutDir)\browser.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				CompileAs="0"
+				DisableSpecificWarnings="4244;4305"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="silohdf5.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				IgnoreDefaultLibraryNames=""
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
+			/>
+		</Configuration>
+		<Configuration
+			Name="DLLwithHDF5_Release|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+				TypeLibraryName="$(OutDir)\browser.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
+				AssemblerListingLocation="$(OutDir)\"
+				ObjectFile="$(OutDir)\"
+				ProgramDataBaseFileName="$(OutDir)\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DisableSpecificWarnings="4244;4305"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="silohdf5.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				IgnoreDefaultLibraryNames=""
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DLL_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -431,29 +418,25 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions=""
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLL.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLL.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -468,14 +451,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
-				OutputFile="$(OutDir)\silo.dll"
-				LinkIncremental="1"
+				AdditionalDependencies="silo.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\silo.pdb"
-				ImportLibrary="$(OutDir)\silo.lib"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -501,13 +484,14 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DLL_Debug|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -527,29 +511,26 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions=""
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLL.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLL.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -564,14 +545,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
-				OutputFile="$(OutDir)\silo.dll"
-				LinkIncremental="1"
+				AdditionalDependencies="silo.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="$(OutDir)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\silo.pdb"
-				ImportLibrary="$(OutDir)\silo.lib"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -597,13 +578,14 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DLL_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -623,30 +605,25 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLL.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLL.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -661,14 +638,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
-				ShowProgress="0"
-				OutputFile="$(OutDir)\silo.dll"
+				AdditionalDependencies="silo.lib"
+				OutputFile="$(OutDir)\browser.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=""
-				ProgramDatabaseFile="$(OutDir)\silo.pdb"
-				ImportLibrary="$(OutDir)\silo.lib"
+				AdditionalLibraryDirectories="$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -694,13 +670,14 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="DLL_Release|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -720,30 +697,26 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLL.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLL.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -758,14 +731,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=""
-				ShowProgress="0"
-				OutputFile="$(OutDir)\silo.dll"
+				AdditionalDependencies="silo.lib"
+				OutputFile="$(OutDir)\browser.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=""
-				ProgramDatabaseFile="$(OutDir)\silo.pdb"
-				ImportLibrary="$(OutDir)\silo.lib"
+				AdditionalLibraryDirectories="$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -791,14 +763,15 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="StaticLibwithHDF5_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops;.\HDF5_Defines.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -817,30 +790,25 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -854,13 +822,21 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies="zlib.lib hdf5.lib szlib.lib"
-				OutputFile="$(OutDir)\silohdf5.lib"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR_STATIC);$(HDF5_LIB_DIR_STATIC);$(SZIP_LIB_DIR_STATIC)"
+				Name="VCLinkerTool"
+				AdditionalDependencies="silohdf5.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -872,15 +848,22 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="StaticLibwithHDF5_Release|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops;.\HDF5_Defines.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -899,30 +882,26 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -936,13 +915,21 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies="zlib.lib hdf5.lib szlib.lib"
-				OutputFile="$(OutDir)\silohdf5.lib"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR_STATIC);$(HDF5_LIB_DIR_STATIC);$(SZIP_LIB_DIR_STATIC)"
+				Name="VCLinkerTool"
+				AdditionalDependencies="silohdf5.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -954,15 +941,22 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="StaticLibwithHDF5_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops;.\HDF5_Defines.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -981,29 +975,25 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1017,13 +1007,23 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies="zlib.lib hdf5.lib szlib.lib"
-				OutputFile="$(OutDir)/silohdf5.lib"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR_STATIC);$(HDF5_LIB_DIR_STATIC); $(SZIP_LIB_DIR_STATIC)"
+				Name="VCLinkerTool"
+				AdditionalDependencies="silohdf5.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				IgnoreDefaultLibraryNames="libcmt.lib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1035,15 +1035,22 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="StaticLibwithHDF5_Debug|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops;.\HDF5_Defines.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -1062,29 +1069,26 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1098,13 +1102,23 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies="zlib.lib hdf5.lib szlib.lib"
-				OutputFile="$(OutDir)/silohdf5.lib"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR_STATIC);$(HDF5_LIB_DIR_STATIC); $(SZIP_LIB_DIR_STATIC)"
+				Name="VCLinkerTool"
+				AdditionalDependencies="silohdf5.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				IgnoreDefaultLibraryNames="libcmt.lib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1116,14 +1130,21 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="StaticLib_Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -1143,30 +1164,25 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\silo.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1180,13 +1196,21 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies=""
-				OutputFile="$(OutDir)\silo.lib"
-				AdditionalLibraryDirectories=""
+				Name="VCLinkerTool"
+				AdditionalDependencies="silo.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1198,14 +1222,21 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="StaticLib_Release|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -1225,30 +1256,26 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SILO_STATIC_LIBRARY"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\silo.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1262,13 +1289,21 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies=""
-				OutputFile="$(OutDir)\silo.lib"
-				AdditionalLibraryDirectories=""
+				Name="VCLinkerTool"
+				AdditionalDependencies="silo.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1280,14 +1315,21 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="StaticLib_Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -1307,29 +1349,25 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\silo.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1343,13 +1381,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies=""
-				OutputFile="$(OutDir)\silo.lib"
-				AdditionalLibraryDirectories=""
+				Name="VCLinkerTool"
+				AdditionalDependencies="silo.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1361,14 +1408,21 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="StaticLib_Debug|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			InheritedPropertySheets=".\NO_SEC_DEP.vsprops;.\ModernDTPR.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
@@ -1388,29 +1442,26 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\browser.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SILO_STATIC_LIBRARY"
+				AdditionalIncludeDirectories="..\include;..\..\tools\browser;..\..\src\silo;..\..\src\filters"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SILO_STATIC_LIBRARY"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\silo.pch"
+				PrecompiledHeaderFile="$(OutDir)\browser.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1424,13 +1475,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				AdditionalDependencies=""
-				OutputFile="$(OutDir)\silo.lib"
-				AdditionalLibraryDirectories=""
+				Name="VCLinkerTool"
+				AdditionalDependencies="silo.lib"
+				OutputFile="$(OutDir)\browser.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(OutDir)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\browser.pdb"
+				SubSystem="1"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1442,165 +1502,96 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(SolutionDir)..\silodiff.bat $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="score"
+		<File
+			RelativePath="..\..\tools\browser\array.c"
 			>
-			<File
-				RelativePath="..\..\src\score\memmove.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\score\scctl.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\score\scctla.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\score\schash.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\score\scstr.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="pdb"
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\bif.c"
 			>
-			<File
-				RelativePath="..\..\src\pdb\pdb.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdbdir.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdbio.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdbmm.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdbx.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdconv.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdlow.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdmemb.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdpath.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\pdb\pdrdwr.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="pdb_drv"
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\browser.c"
 			>
-			<File
-				RelativePath="..\..\src\pdb_drv\silo_pdb.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="silo"
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\cons.c"
 			>
-			<File
-				RelativePath="..\..\src\silo\alloc.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\silo\extface.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\silo\silo.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\silo\silo_f.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\silo\silo_ns.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="unknown"
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\file.c"
 			>
-			<File
-				RelativePath="..\..\src\unknown\silo_unknown.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="debug"
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\func.c"
 			>
-			<File
-				RelativePath="..\..\src\debug\silo_debug.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="hdf5_drv"
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\lex.c"
 			>
-			<File
-				RelativePath="..\..\src\hdf5_drv\H5FDsilo.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hdf5_drv\silo_hdf5.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="taurus_drv"
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\num.c"
 			>
-			<File
-				RelativePath="..\..\src\taurus\silo_taurus.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\taurus\taurus.c"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="filters"
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\obj.c"
 			>
-			<File
-				RelativePath="..\..\src\filters\f_ale3d.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\filters\f_sample.c"
-				>
-			</File>
-		</Filter>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\output.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\parse.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\prim.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\ptr.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\range.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\sdo.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\stc.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\str.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\switch.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\tools\browser\sym.c"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

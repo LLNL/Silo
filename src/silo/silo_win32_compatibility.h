@@ -6,20 +6,25 @@
 #include <sys\types.h>
 #include <sys\stat.h>
 
-#define snprintf _snprintf
 
-#define write  _write
-#define read   _read
-
-#define stat   _stat
-#define access _access
+#define access    _access
+#define isatty    _isatty
+#define pclose    _pclose
+#define popen     _popen
+#define read      _read
+#define snprintf  _snprintf
+#define stat      _stat
+#define write     _write
 
 #ifndef S_IWUSR
-#ifdef S_IWRITE
-#define S_IWUSR S_IWRITE
-#else
-#define S_IWUSR _S_IWRITE
+  #ifdef S_IWRITE
+    #define S_IWUSR S_IWRITE
+  #else
+    #define S_IWUSR _S_IWRITE
+  #endif
 #endif
+#ifndef S_ISREG
+  #define S_ISREG(x) (((x) & S_IFMT) == S_IFREG)
 #endif
 
 
@@ -35,6 +40,14 @@
 #ifndef R_OK
 #define R_OK   4
 #endif
+
+
+/* It may require some experimentation to get these defines correct */
+#define WTERMSIG(x)    ((x) & 0xff) 
+#define WEXITSTATUS(x) (((x) >> 8) & 0xff)
+#define WIFSIGNALED(x) (WTERMSIG(x) != 0) 
+#define WIFEXITED(x)   (WTERMSIG(x) == 0)
+
 
 #endif
 #endif

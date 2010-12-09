@@ -73,9 +73,14 @@ be used for advertising or product endorsement purposes.
 #include <ctype.h>
 #include <errno.h>
 #include <signal.h>
-#include <termios.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
+#ifndef _WIN32
+#  include <termios.h>
+#  include <sys/ioctl.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 #define         OUT_INDENT 3            /*chars per indentation level   */
 #define         OUT_RTMAR 2             /*right margin                  */
@@ -91,7 +96,7 @@ static int      Progress=0;             /*current progress report size  */
 out_t           *OUT_STDOUT;            /*standard output               */
 out_t           *OUT_STDERR;            /*standard error                */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    handle_signals
  *
@@ -104,16 +109,19 @@ out_t           *OUT_STDERR;            /*standard error                */
  *              Jan 13 1997
  *
  * Modifications:
- *
+ *   Kathleen Bonnell, Thu Dec 9 09:33:15 PST 2010\
+ *   SIGPIPE is not defined on WIN32.
  *-------------------------------------------------------------------------
  */
 static void
 handle_signals(int signo)
 {
     switch (signo) {
+#ifndef _WIN32
     case SIGPIPE:
         BrokenPipe++;
         break;
+#endif
 
     case SIGINT:
         CaughtSigint++;
@@ -121,7 +129,7 @@ handle_signals(int signo)
     }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_brokenpipe
  *
@@ -165,7 +173,7 @@ out_brokenpipe(out_t *f)
     return f->pflags;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_section
  *
@@ -187,7 +195,7 @@ out_section(out_t *f)
     if (PAGER_NEXT_SECTION==f->pflags) f->pflags = PAGER_OKAY;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_error
  *
@@ -220,7 +228,7 @@ out_error (const char *mesg, obj_t obj) {
    }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_errorn
  *
@@ -265,7 +273,7 @@ out_errorn (const char *fmt, ...) {
    }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_error_disable
  *
@@ -290,7 +298,7 @@ out_error_disable (void) {
    return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_error_restore
  *
@@ -321,7 +329,7 @@ out_error_restore (void) {
    return ErrorDisable;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_indent
  *
@@ -343,7 +351,7 @@ out_indent (out_t *f) {
    f->indent += 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_info
  *
@@ -445,7 +453,7 @@ out_init_size(void)
     OUT_COL2 = (OUT_LTMAR+OUT_NCOLS)/2;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_init
  *
@@ -468,12 +476,17 @@ out_init_size(void)
  *              Robb Matzke, 2000-06-28
  *              Signal handlers are registered with sigaction() since its
  *              behavior is more consistent.
+ *
+ *              Kathleen Bonnell, Thu Dec 9 09:34:51 PST 2010
+ *              sigaction not defined on Win32.
  *-------------------------------------------------------------------------
  */
 void
 out_init (void)
 {
+#ifndef _WIN32
     struct sigaction    action;
+#endif
     
     /* Keep track of terminal size changes */
     out_init_size();
@@ -483,14 +496,16 @@ out_init (void)
     OUT_STDERR = out_stream (stderr);
 
     /* Arrange to handle broken pipes and interrupts */
+#ifndef _WIN32
     action.sa_handler = handle_signals;
     sigemptyset(&action.sa_mask);
     action.sa_flags = SA_RESTART;
     sigaction(SIGPIPE, &action, NULL);
     sigaction(SIGINT, &action, NULL);
+#endif
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_literal
  *
@@ -518,7 +533,7 @@ out_literal (out_t *f, int val) {
    return old_literal;
 }
    
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_nl
  *
@@ -542,15 +557,20 @@ out_literal (out_t *f, int val) {
  *      Robb Matzke, 6 Feb 1997
  *      Lines which would have nothing after the equal are left blank.
  *
+ *      Kathleen Bonnell, Thu Dec 9 09:34:27 PST 2010
+ *      Comment out the paging functionality on Win32. (Till a path forward
+ *      for this platform can be determined).
  *-------------------------------------------------------------------------
  */
 void
 out_nl(out_t *f)
 {
+#ifndef _WIN32
     char                buf[256];
     int                 i, n, rawmode=false;
     struct termios      oldtio, tio;
     static const char   *prompt = "more? ('q' to quit) ";
+#endif
 
     if (out_brokenpipe(f)) return;
     if (isatty(fileno(f->f))) out_progress(NULL);
@@ -558,7 +578,9 @@ out_nl(out_t *f)
     putc('\n', f->f);
     f->row += 1;
     f->col = 0;
-
+#ifdef _WIN32
+    fflush(f->f);
+#else
     /* Pause output if it's going to a terminal. */    
  again:
     if (PAGER_ACTIVE(f) && f->row+1==OUT_NROWS) {
@@ -599,9 +621,10 @@ out_nl(out_t *f)
         }
         f->row = 0;
     }
+#endif
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_pop
  *
@@ -656,7 +679,7 @@ out_header(out_t *f, const char *header)
     f->header = safe_strdup(header);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_prefix
  *
@@ -804,7 +827,7 @@ out_column(out_t *f, int column, const char *separator)
     out_literal(f, oldlit);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_printf
  *
@@ -844,7 +867,7 @@ out_printf (out_t *f, const char *fmt, ...) {
    }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_push
  *
@@ -874,7 +897,7 @@ out_push (out_t *f, const char *name) {
    f->nfields += 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_push_array
  *
@@ -937,7 +960,7 @@ out_push_array (out_t *f, const char *name, int ndims, const int *offset,
    return &(f->field[idx].elmtno);
 }
    
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_puts
  *
@@ -982,7 +1005,7 @@ out_puts (out_t *f, const char *s) {
    }
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_line
  *
@@ -1042,7 +1065,7 @@ out_line (out_t *f, const char *string)
     out_literal (f, oldlit);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_progress
  *
@@ -1083,7 +1106,7 @@ out_progress (const char *s) {
    Progress = i;
 }
    
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_putw
  *
@@ -1147,7 +1170,7 @@ out_putw (out_t *f, const char *s) {
     f->nfields = old_nfields; /*restore prefix*/
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_reset
  *
@@ -1176,7 +1199,7 @@ out_reset (out_t *f) {
    f->pflags = PAGER_OKAY;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_stream
  *
@@ -1219,7 +1242,7 @@ out_stream (FILE *stream) {
    return f;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_undent
  *
@@ -1241,7 +1264,7 @@ out_undent (out_t *f) {
    if (f->indent>0) f->indent -= 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    out_getindex
  *

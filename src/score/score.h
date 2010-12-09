@@ -71,34 +71,20 @@ be used for advertising or product endorsement purposes.
 #include <limits.h>		/*needed for SHRT_MAX*/
 #include <stdio.h>
 #if HAVE_STDLIB_H
-#include <stdlib.h>
+#  include <stdlib.h>
 #endif
 #if HAVE_STRING_H
-#include <string.h>
+#  include <string.h>
 #endif
 #if HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#  include <sys/types.h>
 #endif
 
-/* Macros used for exporting symbols on Win32 systems. */
-#ifndef SILO_API
+#include <silo_exports.h>
 #ifdef _WIN32
-#ifndef HAVE_MEMMOVE
-#define HAVE_MEMMOVE
-#endif
-/* Make Silo a DLL by default. */
-#ifdef SILO_STATIC_LIBRARY
-#define SILO_API
-#else
-#ifdef SILO_EXPORTS
-#define SILO_API __declspec(dllexport)
-#else
-#define SILO_API __declspec(dllimport)
-#endif
-#endif
-#else
-#define SILO_API
-#endif
+#  ifndef HAVE_MEMMOVE
+#    define HAVE_MEMMOVE
+#  endif
 #endif
 
 /*--------------------------------------------------------------------------*/

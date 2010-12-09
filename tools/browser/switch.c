@@ -198,7 +198,7 @@ switch_doc(switch_t *sw, const char *doc_string)
 switch_t *
 switch_find(switches_t *switches, const char *name)
 {
-    int         i;
+    size_t         i;
 
     if (name && '-'==name[0] && '-'==name[1]) {
         for (i=0; i<switches->nused; i++) {
@@ -285,7 +285,7 @@ switch_synopsis(switch_t *sw, char *buffer)
 void
 switch_usage(switches_t *switches, const char *arg0, const char *sname)
 {
-    int         i;
+    size_t      i;
     char        synopsis[256];
 
     /* Base name of executable */

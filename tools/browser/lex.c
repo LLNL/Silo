@@ -114,7 +114,10 @@ extern int read_history ();
  * Non-posix functions
  */
 lex_t *LEX_STDIN = NULL;
+
+#ifndef _WIN32
 extern FILE *fdopen(int, const char *);
+#endif
 
 
 /*-------------------------------------------------------------------------

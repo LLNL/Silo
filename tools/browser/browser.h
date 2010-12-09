@@ -122,6 +122,9 @@ be used for advertising or product endorsement purposes.
  *      Mark C. Miller, Tue Mar 10 15:41:50 PDT 2009
  *      Removed VERSION symbols. No need for browser to maintain
  *      version information apart from the Silo library it is linked with.
+ *
+ *      Kathleen Bonnell, Thu Dec 9 09:28:57 PST 2010
+ *      Added declaration of diferentll, couple of Win32-specifics.
  *-------------------------------------------------------------------------
  */
 #ifndef _BROWSER_H
@@ -132,6 +135,9 @@ be used for advertising or product endorsement purposes.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#  include <silo_win32_compatibility.h>
+#endif
 
 #define false           0
 #define true            1
@@ -142,7 +148,9 @@ be used for advertising or product endorsement purposes.
 #define NDIMS           10
 #define NELMTS(X)       (sizeof(X)/sizeof(*(X)))
 
+#ifndef _WIN32
 char *safe_strdup(const char *);
+#endif
 #undef strdup
 #define strdup(s) safe_strdup(s)
 
@@ -480,6 +488,7 @@ extern char HistoryFile[];
 extern char *ObjTypeName[BROWSER_NOBJTYPES];
 void usage(void);
 int different (double, double, double, double, double);
+int differentll (long long, long long, double, double, double);
 toc_t *browser_DBGetToc (DBfile*, int*, int(*)(toc_t*,toc_t*));
 int sort_toc_by_name (toc_t*, toc_t*);
 int sort_toc_by_type (toc_t*, toc_t*);

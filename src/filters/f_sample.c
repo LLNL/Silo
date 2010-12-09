@@ -99,6 +99,7 @@ be used for advertising or product endorsement purposes.
 
 #include "silo_private.h"       /*low-level SILO programming support */
 #include "filter.h"             /*filter programming support  */
+#include "f_sample.h"
 
 static char   *f_debug_name[DB_NFILES];  /*saved filter names */
 static DBfile_pub f_debug_cb[DB_NFILES];  /*only callback fields used */

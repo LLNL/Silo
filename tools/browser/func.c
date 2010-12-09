@@ -92,12 +92,19 @@ extern int read_history ();
   /* no history */
 #endif /* HAVE_READLINE_HISTORY */
 #include <stdlib.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#ifndef _WIN32
+  #include <sys/wait.h>
+#endif
+#ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+#endif
+
 
 /* Non-posix functions */
+#ifndef _WIN32
 extern FILE *popen (const char *, const char *);
 extern int pclose (FILE*);
+#endif
 
 /* Global variables. */
 diffopt_t       DiffOpt;
@@ -108,7 +115,7 @@ int             NHelpVarToc;
 helptoc_t       HelpOpToc[25];
 int             NHelpOpToc;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_array
  *
@@ -164,7 +171,7 @@ V_array (int argc, obj_t argv[]) {
    return obj_new (C_ARY, buf, obj_copy (argv[argc-1], SHALLOW));
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_assign
  *
@@ -244,7 +251,7 @@ V_assign (int argc, obj_t argv[]) {
    return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_close
  *
@@ -286,7 +293,7 @@ V_close (int argc, obj_t argv[]) {
    return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    F_cons
  *
@@ -310,7 +317,7 @@ F_cons (obj_t head, obj_t tail) {
    return obj_new (C_CONS, obj_copy(head, SHALLOW), obj_copy(tail, SHALLOW));
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    diff_lookup
  *
@@ -369,7 +376,7 @@ diff_lookup (char *ascii_name) {
    return retval;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_diff
  *
@@ -691,7 +698,7 @@ V_diff (int argc, obj_t argv[])
     return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_dot
  *
@@ -736,7 +743,7 @@ V_dot (int argc, obj_t argv[]) {
    return retval;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_exit
  *
@@ -804,7 +811,7 @@ V_exit (int argc, obj_t argv[]) {
    return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    F_fbind
  *
@@ -827,7 +834,7 @@ F_fbind (obj_t self, obj_t func) {
    sym_fbind (self, obj_copy(func, SHALLOW));
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_file
  *
@@ -883,7 +890,7 @@ V_file (int argc, obj_t argv[]) {
    return retval;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    F_flatten
  *
@@ -950,7 +957,7 @@ F_flatten (obj_t lst) {
    return retval;
 }
          
-
+
 /*-------------------------------------------------------------------------
  * Function:    F_head
  *
@@ -1006,7 +1013,7 @@ help_apropos(obj_t sym, void *cdata)
     return found;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_help
  *
@@ -1224,7 +1231,7 @@ V_include(int argc, obj_t argv[])
     return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    F_length
  *
@@ -1253,7 +1260,7 @@ F_length (obj_t lst) {
    return i;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_list
  *
@@ -1496,7 +1503,7 @@ V_list (int argc, obj_t argv[])
     return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_make_list
  *
@@ -1533,7 +1540,7 @@ V_make_list (int argc, obj_t argv[]) {
    return retval;
 }
    
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_noprint
  *
@@ -1559,7 +1566,7 @@ V_noprint (int argc, obj_t argv[]) {
    return NIL;
 }
          
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_open
  *
@@ -1645,7 +1652,7 @@ error:
    return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_pipe
  *
@@ -1736,7 +1743,7 @@ V_pipe (int argc, obj_t argv[]) {
    return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_pointer
  *
@@ -1764,7 +1771,7 @@ V_pointer (int argc, obj_t argv[]) {
    return obj_new (C_PTR, obj_copy (argv[0], SHALLOW));
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_primitive
  *
@@ -1804,7 +1811,7 @@ V_primitive (int argc, obj_t argv[]) {
    return obj_new (C_PRIM, s);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_print
  *
@@ -1843,7 +1850,7 @@ V_print (int argc, obj_t argv[]) {
    return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_pwd
  *
@@ -1916,7 +1923,7 @@ V_pwd (int argc, obj_t argv[])
     return NIL;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_quote
  *
@@ -1943,7 +1950,7 @@ V_quote (int argc, obj_t argv[]) {
    return V_make_list (argc, argv);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_redirect
  *
@@ -2021,7 +2028,7 @@ V_redirect (int argc, obj_t argv[]) {
    return NIL;
 }
    
-
+
 /*-------------------------------------------------------------------------
  * Function:    F_reverse
  *
@@ -2058,7 +2065,7 @@ F_reverse (obj_t lst) {
    return ret;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_setcwd
  *
@@ -2143,7 +2150,7 @@ V_setcwd (int argc, obj_t argv[])
     return NIL;
 }
       
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_setf
  *
@@ -2181,7 +2188,7 @@ V_setf (int argc, obj_t argv[]) {
    return NIL;
 }
       
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_struct
  *
@@ -2284,7 +2291,7 @@ V_struct (int argc, obj_t argv[]) {
                    obj_copy(sub[31], SHALLOW), offset[31], name[31], NULL);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    F_tail
  *
@@ -2311,7 +2318,7 @@ F_tail (obj_t lst) {
    return obj_copy (cons_tail(lst), SHALLOW);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    V_typeof
  *

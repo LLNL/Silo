@@ -59,6 +59,7 @@ be used for advertising or product endorsement purposes.
 #include <math.h>
 #include "silo_private.h"
 #include "filter.h"
+#include "f_ale3d.h"
 
 #if 0
 #define MAXBUF          100000
