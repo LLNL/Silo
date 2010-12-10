@@ -56,6 +56,10 @@
 # Modifications:
 #   Mark C. Miller, Tue Aug  3 17:24:43 PDT 2010
 #   Ensure a number of silo project files were included.
+#
+#   Kathleen Bonnell, Fri Dec 10 10:02:09 PST 2010
+#   Add silodiff.bat, browser.vcproj
+
 
 EXTRA_DIST = \
 ./MSVC8/Tests/alltypes.vcproj\
@@ -114,6 +118,7 @@ EXTRA_DIST = \
 ./MSVC8/ModernDTPR.vsprops\
 ./MSVC8/NO_SEC_DEP.vsprops\
 ./MSVC8/NON_BSD_DEFINES.vsprops\
+./MSVC8/browser.vcproj\
 ./MSVC8/silex.vcproj\
 ./MSVC8/Silo.vcproj\
 ./MSVC8/SiloWindows.sln\
@@ -126,6 +131,7 @@ EXTRA_DIST = \
 ./runsilexmoc.bat\
 ./Makefile.in\
 ./copysilo.bat\
+./silodiff.bat\
 ./README\
 ./MSVC8-BSD/Tests/alltypes.vcproj\
 ./MSVC8-BSD/Tests/array.vcproj\
@@ -182,6 +188,7 @@ EXTRA_DIST = \
 ./MSVC8-BSD/HDF5_Defines.vsprops\
 ./MSVC8-BSD/ModernDTPR.vsprops\
 ./MSVC8-BSD/NO_SEC_DEP.vsprops\
+./MSVC8-BSD/browser.vcproj\
 ./MSVC8-BSD/silex.vcproj\
 ./MSVC8-BSD/Silo.vcproj\
 ./MSVC8-BSD/SiloWindows.sln

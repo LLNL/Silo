@@ -66,6 +66,7 @@ EXTRA_DIST = \
  silo_fcb.c \
  silo_f.h \
  silo_f.c \
+ silo_exports.h \
  silo.h.in
 
 include_HEADERS = \

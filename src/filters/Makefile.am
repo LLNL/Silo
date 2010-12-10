@@ -61,5 +61,7 @@ AM_CPPFLAGS = -I$(builddir)/../silo -I$(srcdir)/../silo
 noinst_HEADERS = \
  filter.h
 FILES = \
+ f_ale3d.h \
+ f_sample.h \
  f_ale3d.c \
  f_sample.c
