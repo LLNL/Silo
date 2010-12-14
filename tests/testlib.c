@@ -187,6 +187,8 @@ build_quad(DBfile *dbfile, char *name)
                         matlist, zones, ndims, NULL, NULL, NULL, NULL,
                         mixlen, DB_FLOAT, NULL);
 
+    DBFreeOptlist(optlist);
+
     return (meshid);
 }
 

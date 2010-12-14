@@ -157,6 +157,7 @@ build_csg(DBfile *dbfile, char *name)
 
         DBPutCSGZonelist(dbfile, "csgzl", nregs, typeflags, leftids, rightids,
                          NULL, 0, DB_INT, nzones, zonelist, optlist);
+        DBFreeOptlist(optlist);
     }
 
     /* output a csg variable */
@@ -172,7 +173,7 @@ build_csg(DBfile *dbfile, char *name)
         DBPutCsgvar(dbfile, "var1", "csgmesh", 1, pname, pv, 2, DB_DOUBLE,
             DB_ZONECENT, 0);
 
-        DBGetCsgvar(dbfile, "var1");
+        DBFreeCsgvar(DBGetCsgvar(dbfile, "var1"));
     }
 
     /* test DBInqMeshname */
@@ -195,5 +196,6 @@ build_csg(DBfile *dbfile, char *name)
         const char *child = "/facelist";
         char *result = DBJoinPath(parent, child);
         printf("Got \"%s\" for result\n", result);
+        free(result);
     }
 }

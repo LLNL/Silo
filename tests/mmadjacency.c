@@ -157,6 +157,8 @@ main(int argc, char *argv[])
 
     DBClose(dbfile);
 
+    DBFreeMultimeshadj(foo);
+
     CleanupDriverStuff();
     return 0;
 }

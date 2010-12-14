@@ -220,6 +220,8 @@ main(int argc, char *argv[])
 
     DBClose(dbfile);
 
+    DBFreeFacelist(facelist);
+
     CleanupDriverStuff();
     return (0);
 }

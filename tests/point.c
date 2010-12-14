@@ -390,6 +390,7 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     build_defvars(dbfile, dims);
 
     DBFreeOptlist(optlist);
+    DBFreeOptlist(optlist1);
     FREE(x);
     FREE(y);
     FREE(z);
@@ -399,6 +400,7 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     FREE(d);
     FREE(t);
     FREE(itype);
+    FREE(litype);
 }
 
 static void

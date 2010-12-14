@@ -155,6 +155,8 @@ main(int argc, char *argv[])
 
     DBClose(dbfile);
 
+    DBFreeOptlist(optlist);
+
     CleanupDriverStuff();
     return 0;
 

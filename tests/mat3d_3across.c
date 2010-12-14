@@ -174,6 +174,10 @@ int main(int argc, char **argv) {
 		mix_next, mix_mat, mix_zone, mix_vf, mixlen, DB_FLOAT, NULL);
 
   DBClose(db);
+ 
+  free(coordnames[0]);
+  free(coordnames[1]);
+  free(coordnames[2]);
 
   CleanupDriverStuff();
   return 0;

@@ -252,6 +252,8 @@ main(int argc, char *argv[])
 
     DBClose(dbfile);
 
+    DBFreeFacelist(facelist);
+
     dbfile = DBOpen(filename, driver, DB_READ);
     {
        char tmpname[256];

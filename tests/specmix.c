@@ -449,6 +449,14 @@ int main(int argc, char *argv[]) {
 
   printf("Done!\n");
 
+  for (x=0;x<mesh.nx;x++)
+      free(mesh.node[x]);
+  free(mesh.node);
+
+  for (x=0;x<mesh.zx;x++)
+    free(mesh.zone[x]);
+  free(mesh.zone);
+
   CleanupDriverStuff();
   return 0;
 }
@@ -510,7 +518,8 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
 
   DBPutQuadmesh(db, "Mesh", coordnames, coord, dims, 2, 
 		DB_FLOAT, DB_NONCOLLINEAR, NULL);
-
+  free(coordnames[0]);
+  free(coordnames[1]);
 
   /* do Node vars */
 
@@ -642,7 +651,6 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
   int   nl[5000];
   float f1[1000],f2[1000], fm[1000];
   int x,y,c;
-  char  *coordnames[2];
   float *coord[2];
   int dims[2];
   char *cnvar, *czvar;
@@ -672,11 +680,6 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
       c++;
     }
   }
-
-  coordnames[0]=NEW(char,20);
-  coordnames[1]=NEW(char,20);
-  strcpy(coordnames[0],"x");
-  strcpy(coordnames[1],"y");
 
   coord[0]=f1;
   coord[1]=f2;
@@ -978,6 +981,8 @@ writematspec(DBfile *db)
 
     DBPutMatspecies(db, "Species", "Material", nmat, nspec, speclist, dims, 2,
                     mfc, specmf, mixspeclist, mixc, DB_FLOAT, optlist);
+
+    DBFreeOptlist(optlist);
 
     return mixc;
 }
