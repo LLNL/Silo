@@ -3762,6 +3762,9 @@ db_pdb_GetComponentType (DBfile *_dbfile, char *objname, char *compname)
  *   Added logic to control behavior of slash character swapping for
  *   windows/linux and skipping of first semicolon in calls to
  *   db_StringListToStringArray.
+ *
+ *   Mark C. Miller, Thu Jan  6 17:01:28 PST 2011
+ *   Fix name of guihide array (removed the extra 's').
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBdefvars *
 db_pdb_GetDefvars(DBfile *_dbfile, const char *objname)
@@ -3786,7 +3789,7 @@ db_pdb_GetDefvars(DBfile *_dbfile, const char *objname)
        INIT_OBJ(&tmp_obj);
        DEFINE_OBJ("ndefs", &tmpdefv.ndefs, DB_INT);
        DEFALL_OBJ("types", &tmpdefv.types, DB_INT);
-       DEFALL_OBJ("guihides", &tmpdefv.guihides, DB_INT);
+       DEFALL_OBJ("guihide", &tmpdefv.guihides, DB_INT);
        DEFALL_OBJ("names", &tmpnames, DB_CHAR);
        DEFALL_OBJ("defns", &tmpdefns, DB_CHAR);
 
