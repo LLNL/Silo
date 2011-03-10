@@ -119,6 +119,20 @@ typedef struct amrConfig_t
     int currentPatch;
 } amrConfig_t;
 
+static void freeAmrConf(amrConfig_t *amrconf)
+{
+    int i;
+    free(amrconf->meshName);
+    for (i = 0; i < amrconf->numLevels; i++)
+        free(amrconf->levels[i]);
+    free(amrconf->levels);
+    for (i = 0; i < amrconf->numPatches; i++)
+        free(amrconf->patches[i].children);
+    free(amrconf->numPatchesOnLevel);
+    free(amrconf->ratios);
+    free(amrconf->patches);
+}
+
 #ifdef XML_LARGE_SIZE
 #if defined(XML_USE_MSC_EXTENSIONS) && _MSC_VER < 1400
 #define XML_FMT_INT_MOD "I64"
@@ -331,7 +345,7 @@ chardata(void *userData, const XML_Char *s, int len)
     if (len == 0)
         return;
 
-    s1 = malloc(len+1);
+    s1 = (char*) malloc(len+1);
     strncpy(s1, s, len);
     s1[len] = '\0';
 
@@ -405,6 +419,7 @@ int ProcessXMLAMRConfigFile(const char *xmlFileName, amrConfig_t *amrconfig)
           break;
     }
     XML_ParserFree(p);
+    fclose(acf);
     return 0;
 }
 
@@ -459,7 +474,7 @@ main(int argc, char *argv[])
         }
     }
 
-    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
 
     /* by default, we make a copy of the specified file */
@@ -487,19 +502,22 @@ main(int argc, char *argv[])
     mm = DBGetMultimesh(dbfile, amrconf.meshName);
     sprintf(tmpName, "%s_wmrgtree", amrconf.meshName);
     optList = DBMakeOptlist(10);
-    DBAddOption(optList, DBOPT_MRGTREE_NAME, "mrgTree");
+    char *foo = "mrgTree";
+    DBAddOption(optList, DBOPT_MRGTREE_NAME, foo);
     DBPutMultimesh(dbfile, tmpName, mm->nblocks, mm->meshnames, mm->meshtypes, optList);
     DBClearOptlist(optList);
+    DBFreeMultimesh(mm);
 
 #if !defined(_WIN32)
 #warning HACK FOR SINGLE VARIABLE
 #endif
     {
-        DBmultivar *mv = DBGetMultivar(dbfile, "foo");
+        DBmultivar *mv = DBGetMultivar(dbfile, "Density");
         DBoptlist *optList2 = DBMakeOptlist(10);
         DBAddOption(optList2, DBOPT_MMESH_NAME, tmpName);
         DBPutMultivar(dbfile, "foo_wmrgtree", mv->nvars, mv->varnames, mv->vartypes, optList2);
         DBFreeOptlist(optList2);
+        DBFreeMultivar(mv);
     }
     
     /* write this multi-mesh object back to the file, with a different name
@@ -559,6 +577,8 @@ main(int argc, char *argv[])
         levelRegnNames[0] = "@level%d@n";
         DBAddRegionArray(mrgTree, amrconf.numLevels, levelRegnNames, 0, lvlMapsName, 1,
             segIds, amrconf.numPatchesOnLevel, segTypes, 0);
+        free(segTypes);
+        free(segIds);
     }
     DBSetCwr(mrgTree, "..");
 
@@ -580,6 +600,9 @@ main(int argc, char *argv[])
         patchRegnNames[0] = "@patch%d@n";
         DBAddRegionArray(mrgTree, amrconf.numPatches, patchRegnNames, 0, chldMapsName, 1,
             segIds, segLens, segTypes, 0);
+        free(segTypes);
+        free(segIds);
+        free(segLens);
     }
 
     {
@@ -596,6 +619,10 @@ main(int argc, char *argv[])
         DBAddOption(optList, DBOPT_MRGV_ONAMES, mrgv_onames);
         DBPutMrgtree(dbfile, "mrgTree", "amr_mesh", mrgTree, optList);
         DBFreeMrgtree(mrgTree);
+        free(mrgv_onames[0]);
+        free(mrgv_onames[1]);
+        free(mrgv_onames[2]);
+        free(mrgv_onames[3]);
     }
 
     /* Output level refinement ratios as an mrg variable on the array of regions
@@ -674,6 +701,10 @@ main(int argc, char *argv[])
     }
 
     DBClose(dbfile);
+    DBFreeOptlist(optList);
+    freeAmrConf(&amrconf);
+    free(amrconfigFileName);
+    free(siloFileName);
 
     return (0);
 }
