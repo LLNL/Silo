@@ -474,11 +474,18 @@ DBFreeMultimesh(DBmultimesh *msh)
     }
     if (msh->groupings)
         FREE(msh->groupings);
+
+    FREE(msh->extents);
+    FREE(msh->zonecounts);
+    FREE(msh->has_external_zones);
     FREE(msh->meshids);
     FREE(msh->meshnames);
     FREE(msh->meshtypes);
     FREE(msh->dirids);
     FREE(msh->mrgtree_name);
+    FREE(msh->file_ns);
+    FREE(msh->block_ns);
+    FREE(msh->empty_list);
     FREE(msh);
 }
 
@@ -557,9 +564,20 @@ DBFreeMultivar (DBmultivar *mv)
          }
      }
 
+     if (mv->region_pnames)
+     {
+         for (i = 0; mv->region_pnames[i]; i++)
+             free(mv->region_pnames[i]);
+         free(mv->region_pnames);
+     }
+
      FREE(mv->varnames);
      FREE(mv->vartypes);
      FREE(mv->mmesh_name);
+     FREE(mv->extents);
+     FREE(mv->file_ns);
+     FREE(mv->block_ns);
+     FREE(mv->empty_list);
      FREE(mv);
 }
 
@@ -620,6 +638,9 @@ DBFreeMultimat (DBmultimat *mat)
      FREE(mat->matlists);
      FREE(mat->matnos);
      FREE(mat->mmesh_name);
+     FREE(mat->file_ns);
+     FREE(mat->block_ns);
+     FREE(mat->empty_list);
      FREE(mat);
 }
 
@@ -684,6 +705,9 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
      FREE(spec->specnames);
 
      FREE(spec->nmatspec);
+     FREE(spec->file_ns);
+     FREE(spec->block_ns);
+     FREE(spec->empty_list);
      FREE(spec);
 }
 
