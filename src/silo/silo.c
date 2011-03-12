@@ -2260,6 +2260,18 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate)
     return -1;
 }
 
+INTERNAL int
+db_num_registered_files()
+{
+    int i;
+    int cnt = 0;
+    for (i = 0; i < DB_NFILES; i++)
+    {
+        if (_db_regstatus[i].f) cnt++;
+    }
+    return cnt;
+}
+
 PRIVATE int
 db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
 {
