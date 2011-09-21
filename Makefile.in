@@ -81,9 +81,8 @@
 #   Mark C. Miller, Mon Aug  9 16:58:46 PDT 2010
 #   Added creation of smalltest dist for bsd distributions.
 #
-#   Kathleen Bonnell, Thu Mar 3 10:33:54 PST 2011 
-#   Handle MSVC9 window project files.
-
+#   Kathleen Bonnell, Thu Mar 3 10:34:15 PST 2011 
+#   Handle MSVC9 windows project files. 
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@

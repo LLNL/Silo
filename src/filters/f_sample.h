@@ -54,6 +54,6 @@ be used for advertising or product endorsement purposes.
 
 #ifndef F_SAMPLE_H
 #define F_SAMPLE_H
-#include <silo_exports.h>
+#include <silo.h>
 SILO_API extern int f_debug_Open();
 #endif

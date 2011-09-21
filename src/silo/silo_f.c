@@ -530,6 +530,47 @@ DBADDCAOPT_FC (int *optlist_id, int *option,
     return(0);
 }
 
+/*-------------------------------------------------------------------------
+ * Routine                                                    DBADDIAOPT_FC
+ * 
+ * Purpose
+ *     Add an integer array option to the given option list.
+ *     
+ * Programmer
+ *     Neil Hodge
+ *     Tue Sep 13 11:16:43 PDT 2011
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *-------------------------------------------------------------------------*/
+SILO_API FORTRAN
+DBADDIAOPT_FC (int *optlist_id, int *option,
+               int *nval, int *ivalues)
+{
+    int *ival = NULL;
+    DBoptlist     *optlist = NULL;
+    int i;
+
+    API_BEGIN("dbaddiaopt", int, -1) {
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+        if (!optlist)
+            API_ERROR("optlist_id", E_BADARGS);
+
+        if (*nval <= 0)
+            API_ERROR("nval", E_BADARGS);
+        ival = ALLOC_N(int, *nval);
+
+        ival = ivalues;
+
+        optlist->options[optlist->numopts] = *option;
+        optlist->values[optlist->numopts] = ival;
+        optlist->numopts++;
+    }
+    API_END;
+
+    return(0);
+}
+
 /*----------------------------------------------------------------------
  * Routine                                                DBMKOPTLIST_FC
  *
@@ -4635,6 +4676,8 @@ DBFREEMRGTREE_FC (int *tree_id)
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Neil Hodge, Tue Sep 13 11:17:41 PDT 2011
+ *     Allow null maps_name.
  *--------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBADDREGION_FC (int *tree_id, FCD_DB region_name, int *lregion_name,
@@ -4649,7 +4692,7 @@ DBADDREGION_FC (int *tree_id, FCD_DB region_name, int *lregion_name,
     API_BEGIN("dbaddregion", int, -1) {
         if (*lregion_name<=0)
             API_ERROR ("lregion_name", E_BADARGS) ;
-        if (*lmaps_name<=0)
+        if (*lmaps_name<0)
             API_ERROR ("lmaps_name", E_BADARGS) ;
 
         tree = (DBmrgtree*) DBFortranAccessPointer(*tree_id);
@@ -4948,6 +4991,8 @@ DBPUTMRGTREE_FC (int *dbid, FCD_DB mrg_tree_name, int *lmrg_tree_name,
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Neil Hodge, Tue Sep 13 11:18:30 PDT 2011
+ *     Test derefernced segement_frac_ids for non-null
  *--------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTGRPLMAP_FC (int *dbid, FCD_DB map_name, int *lmap_name,
@@ -4987,7 +5032,7 @@ DBPUTGRPLMAP_FC (int *dbid, FCD_DB map_name, int *lmap_name,
             segment_data[i] = DBFortranAccessPointer(segment_data_ids[i]);
 
         /* convert array of segment fracs ids to their pointers */
-        if (segment_fracs_ids)
+        if (*segment_fracs_ids)
         {
             segment_fracs = (void**) malloc(*num_segments * sizeof(void*));
             for (i = 0; i < *num_segments; i++)

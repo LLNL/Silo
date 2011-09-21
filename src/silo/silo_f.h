@@ -74,6 +74,7 @@ be used for advertising or product endorsement purposes.
 #define DBADDDOPT_FC     FC_FUNC (dbadddopt,DBADDDOPT)
 #define DBADDCOPT_FC     FC_FUNC (dbaddcopt,DBADDCOPT)
 #define DBADDCAOPT_FC     FC_FUNC (dbaddcaopt,DBADDCAOPT)
+#define DBADDIAOPT_FC    FC_FUNC (dbaddiaopt,DBADDIAOPT)
 #define DBMKOPTLIST_FC   FC_FUNC (dbmkoptlist,DBMKOPTLIST)
 #define DBFREEOPTLIST_FC FC_FUNC (dbfreeoptlist,DBFREEOPTLIST)
 #define DBPUTMAT_FC      FC_FUNC (dbputmat,DBPUTMAT)

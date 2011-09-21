@@ -80,7 +80,25 @@ be used for advertising or product endorsement purposes.
 #  include <sys/types.h>
 #endif
 
-#include <silo_exports.h>
+/*
+ * LITE exports for WIN32
+ */
+#ifndef LITE_API
+  #ifdef _WIN32
+    #ifdef LITE_STATIC_LIBRARY
+      #define LITE_API
+    #else
+      #ifdef LITE_EXPORTS
+        #define LITE_API __declspec(dllexport)
+      #else
+        #define LITE_API __declspec(dllimport)
+      #endif
+    #endif
+  #else
+    #define LITE_API
+  #endif
+#endif
+
 #ifdef _WIN32
 #  ifndef HAVE_MEMMOVE
 #    define HAVE_MEMMOVE
@@ -293,23 +311,23 @@ typedef int	(*PFfflush)(void*);
 /*                         VARIABLE DECLARATIONS                            */
 /*--------------------------------------------------------------------------*/
 
-extern int		lite_SC_c_sp_alloc;
-extern int		lite_SC_c_sp_free;
-extern int		lite_SC_c_sp_diff;
-extern int		lite_SC_c_sp_max;
-extern int *		lite_LAST;
-extern char *		lite_SC_CHAR_S ;
+LITE_API extern int	lite_SC_c_sp_alloc;
+LITE_API extern int	lite_SC_c_sp_free;
+LITE_API extern int	lite_SC_c_sp_diff;
+LITE_API extern int	lite_SC_c_sp_max;
+LITE_API extern int *	lite_LAST;
+LITE_API extern char *	lite_SC_CHAR_S ;
 
 /* IO hooks */
-extern PFfclose lite_io_close_hook;
-extern PFfflush lite_io_flush_hook;
-extern PFfopen lite_io_open_hook;
-extern PFfprintf lite_io_printf_hook;
-extern PFfread lite_io_read_hook;
-extern PFfseek lite_io_seek_hook;
-extern PFsetvbuf lite_io_setvbuf_hook;
-extern PFftell lite_io_tell_hook;
-extern PFfwrite lite_io_write_hook;
+LITE_API extern PFfclose lite_io_close_hook;
+LITE_API extern PFfflush lite_io_flush_hook;
+LITE_API extern PFfopen lite_io_open_hook;
+LITE_API extern PFfprintf lite_io_printf_hook;
+LITE_API extern PFfread lite_io_read_hook;
+LITE_API extern PFfseek lite_io_seek_hook;
+LITE_API extern PFsetvbuf lite_io_setvbuf_hook;
+LITE_API extern PFftell lite_io_tell_hook;
+LITE_API extern PFfwrite lite_io_write_hook;
 
 
 
@@ -317,37 +335,37 @@ extern PFfwrite lite_io_write_hook;
 /*                          FUNCTION DECLARATIONS                           */
 /*--------------------------------------------------------------------------*/
 
-SILO_API extern byte *	lite_SC_alloc (long,long,char*);
-SILO_API extern long	lite_SC_arrlen (byte*);
-SILO_API extern char *	lite_SC_date (void);
-SILO_API extern byte *	lite_SC_def_lookup (char*,HASHTAB*);
-SILO_API extern char **	lite_SC_dump_hash (HASHTAB*,char*,int);
-SILO_API extern char *	lite_SC_firsttok (char*,char*);
-SILO_API extern int	lite_SC_free (byte*);
-SILO_API extern int	lite_SC_hash (char*,int);
-SILO_API extern void	lite_SC_hash_clr (HASHTAB*);
-SILO_API extern char **	lite_SC_hash_dump (HASHTAB*,char*);
-SILO_API extern int	lite_SC_hash_rem (char*,HASHTAB*);
-SILO_API extern hashel *lite_SC_install (char*,byte*,char*,HASHTAB*);
-SILO_API extern char *	lite_SC_lasttok (char*,char*);
-SILO_API extern hashel *lite_SC_lookup (char*,HASHTAB*);
-SILO_API extern HASHTAB *lite_SC_make_hash_table (int,int);
-SILO_API extern int	lite_SC_mark (byte*,int);
-SILO_API extern byte *	lite_SC_realloc (byte*,long,long);
-SILO_API extern int	lite_SC_ref_count (byte*);
-SILO_API extern int	lite_SC_regx_match (char*,char*);
-SILO_API extern void	lite_SC_rl_hash_table (HASHTAB*);
-SILO_API extern int	lite_SC_stoi (char*);
-SILO_API extern long	lite_SC_stol (char*);
-SILO_API extern void	lite_SC_string_sort (char**,int);
-SILO_API extern char *	lite_SC_strrev (char*);
-SILO_API extern char *	lite_SC_strsavef (char*,char*);
-extern hashel *		_lite_SC_install (char*,byte*,char*,HASHTAB*);
-extern char *		_lite_SC_pr_tok (char*,char*);
-extern long int		_lite_SC_strtol (char*,char**,int);
+LITE_API extern byte *	lite_SC_alloc (long,long,char*);
+LITE_API extern long	lite_SC_arrlen (byte*);
+LITE_API extern char *	lite_SC_date (void);
+LITE_API extern byte *	lite_SC_def_lookup (char*,HASHTAB*);
+LITE_API extern char **	lite_SC_dump_hash (HASHTAB*,char*,int);
+LITE_API extern char *	lite_SC_firsttok (char*,char*);
+LITE_API extern int	lite_SC_free (byte*);
+LITE_API extern int	lite_SC_hash (char*,int);
+LITE_API extern void	lite_SC_hash_clr (HASHTAB*);
+LITE_API extern char **	lite_SC_hash_dump (HASHTAB*,char*);
+LITE_API extern int	lite_SC_hash_rem (char*,HASHTAB*);
+LITE_API extern hashel * lite_SC_install (char*,byte*,char*,HASHTAB*);
+LITE_API extern char *	lite_SC_lasttok (char*,char*);
+LITE_API extern hashel * lite_SC_lookup (char*,HASHTAB*);
+LITE_API extern HASHTAB * lite_SC_make_hash_table (int,int);
+LITE_API extern int	lite_SC_mark (byte*,int);
+LITE_API extern byte *	lite_SC_realloc (byte*,long,long);
+LITE_API extern int	lite_SC_ref_count (byte*);
+LITE_API extern int	lite_SC_regx_match (char*,char*);
+LITE_API extern void	lite_SC_rl_hash_table (HASHTAB*);
+LITE_API extern int	lite_SC_stoi (char*);
+LITE_API extern long	lite_SC_stol (char*);
+LITE_API extern void	lite_SC_string_sort (char**,int);
+LITE_API extern char *	lite_SC_strrev (char*);
+LITE_API extern char *	lite_SC_strsavef (char*,char*);
+LITE_API extern hashel * _lite_SC_install (char*,byte*,char*,HASHTAB*);
+LITE_API extern char   * _lite_SC_pr_tok (char*,char*);
+LITE_API extern long int	_lite_SC_strtol (char*,char**,int);
 
 #ifndef HAVE_MEMMOVE
-extern void *	memmove (void*,const void*,size_t) ;
+LITE_API extern void *	memmove (void*,const void*,size_t) ;
 #endif
 
 #endif /* !_SCORE_H */

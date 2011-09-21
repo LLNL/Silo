@@ -147,10 +147,6 @@ char    *ObjTypeName[BROWSER_NOBJTYPES] = {
 /*
  * Externals for the ale3d and debug filter registration.
  */
-#if 0
-extern int       f_ale3d_Open ();
-extern int       f_debug_Open ();
-#endif
 #include <f_ale3d.h>
 #include <f_sample.h>
 

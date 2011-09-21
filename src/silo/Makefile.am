@@ -52,6 +52,8 @@
 #
 ## Procss this file with automake to create Makefile.in
 
+AM_CPPFLAGS = -I$(top_srcdir)/src
+
 noinst_LTLIBRARIES = libsilo_silo.la
 libsilo_silo_la_SOURCES = $(FILES)
 
@@ -66,7 +68,6 @@ EXTRA_DIST = \
  silo_fcb.c \
  silo_f.h \
  silo_f.c \
- silo_exports.h \
  silo.h.in
 
 include_HEADERS = \

@@ -51,7 +51,7 @@ product endorsement purposes.
 */
 #include <stdlib.h>
 #include <string.h>
-#include <lite_pdb.h>
+#include <pdb.h> /* below we are using lite_ functions */
 #include <ioperf.h>
 
 /*

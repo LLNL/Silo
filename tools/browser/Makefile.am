@@ -88,7 +88,8 @@ AM_MAKEINFOHTMLFLAGS = --no-split
 AM_CPPFLAGS = \
  -I$(top_builddir)/src/silo \
  -I$(includedir) \
- -DPUBLIC_INIT_FILE=\"$(includedir)/browser_rc\"
+ -DPUBLIC_INIT_FILE=\"$(includedir)/browser_rc\" \
+ -I$(top_srcdir)/src/filters
 
 EXTRA_DIST = \
  browser.html \

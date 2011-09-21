@@ -54,6 +54,6 @@ be used for advertising or product endorsement purposes.
 
 #ifndef F_ALE3D_H
 #define F_ALE3D_H
-#include <silo_exports.h>
+#include <silo.h>
 SILO_API extern int f_ale3d_Open();
 #endif

@@ -254,7 +254,7 @@ EXTRA_DIST = \
 ./MSVC8-BSD/browser.vcproj\
 ./MSVC8-BSD/silex.vcproj\
 ./MSVC8-BSD/Silo.vcproj\
-./MSVC8-BSD/SiloWindows.sln
+./MSVC8-BSD/SiloWindows.sln\
 ./MSVC9-BSD/Tests/alltypes.vcproj\
 ./MSVC9-BSD/Tests/array.vcproj\
 ./MSVC9-BSD/Tests/array_f.vfproj\

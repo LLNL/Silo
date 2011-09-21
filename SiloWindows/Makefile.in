@@ -72,12 +72,11 @@
 #   Mark C. Miller, Tue Aug  3 17:24:43 PDT 2010
 #   Ensure a number of silo project files were included.
 #
-#   Kathleen Bonnell, Fri Dec 10 10:02:58 PST 2010
-#   Add silodiff.bat, browser.vcproj.
+#   Kathleen Bonnell, Fri Dec 10 10:02:09 PST 2010
+#   Add silodiff.bat, browser.vcproj
 #
-#   Kathleen Bonnell, Thu Mar 3 10:42:31 PST 2011
-#   Add MSVC9 project files
-
+#   Kathleen Bonnell, Thu Mar 3 10:38:05 PST 2011
+#   Add MSVC9 project files.
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -397,9 +396,9 @@ EXTRA_DIST = \
 ./Makefile.am\
 ./Makefile\
 ./runsilexmoc.bat\
-./silodiff.bat\
 ./Makefile.in\
 ./copysilo.bat\
+./silodiff.bat\
 ./README\
 ./MSVC8-BSD/Tests/alltypes.vcproj\
 ./MSVC8-BSD/Tests/array.vcproj\
@@ -459,7 +458,7 @@ EXTRA_DIST = \
 ./MSVC8-BSD/browser.vcproj\
 ./MSVC8-BSD/silex.vcproj\
 ./MSVC8-BSD/Silo.vcproj\
-./MSVC8-BSD/SiloWindows.sln
+./MSVC8-BSD/SiloWindows.sln\
 ./MSVC9-BSD/Tests/alltypes.vcproj\
 ./MSVC9-BSD/Tests/array.vcproj\
 ./MSVC9-BSD/Tests/array_f.vfproj\
