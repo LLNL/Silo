@@ -3162,7 +3162,8 @@ db_hdf5_set_compression(int flags)
              level = (int) strtol(chararray, &check, 10);
              if ((chararray != check) && (level >= 0) && (level <=9))
              {
-                if (H5Pset_deflate(P_ckcrprops, level) < 0)
+                if (H5Pset_shuffle(P_ckcrprops)<0 ||
+                    H5Pset_deflate(P_ckcrprops, level)<0)
                 {
                    db_perror("H5Pset_deflate", E_CALLFAIL, me);
                    return (-1);
@@ -3176,7 +3177,8 @@ db_hdf5_set_compression(int flags)
           }
           else
           {
-             if (H5Pset_deflate(P_ckcrprops, 1) < 0)
+             if (H5Pset_shuffle(P_ckcrprops)<0 ||
+                 H5Pset_deflate(P_ckcrprops, 1)<0)
              {
                 db_perror("H5Pset_deflate", E_CALLFAIL, me);
                 return (-1);
@@ -3210,8 +3212,8 @@ db_hdf5_set_compression(int flags)
                    if (strstr(SILO_Globals.compressionParams, 
                       "MASK=EC") != NULL)
                    {
-                      if (H5Pset_szip(P_ckcrprops, 
-                         H5_SZIP_EC_OPTION_MASK,block)<0)
+                      if (H5Pset_shuffle(P_ckcrprops)<0 ||
+                          H5Pset_szip(P_ckcrprops, H5_SZIP_EC_OPTION_MASK,block)<0)
                       {
                          db_perror("H5Pset_szip", E_CALLFAIL, me);
                          return (-1);
@@ -3220,8 +3222,8 @@ db_hdf5_set_compression(int flags)
                    else if(strstr(SILO_Globals.compressionParams,
                       "MASK=NN")!=NULL)
                    {
-                      if (H5Pset_szip(P_ckcrprops, 
-                         H5_SZIP_NN_OPTION_MASK,block)<0)
+                      if (H5Pset_shuffle(P_ckcrprops)<0 ||
+                          H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK,block)<0)
                       {
                          db_perror("H5Pset_szip", E_CALLFAIL, me);
                          return (-1);
@@ -3229,8 +3231,8 @@ db_hdf5_set_compression(int flags)
                    }
                    else
                    {
-                      if (H5Pset_szip(P_ckcrprops, 
-                         H5_SZIP_NN_OPTION_MASK, block)<0)
+                      if (H5Pset_shuffle(P_ckcrprops)<0 ||
+                          H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK, block)<0)
                       {
                          db_perror("H5Pset_szip", E_CALLFAIL, me);
                          return (-1);
@@ -3245,7 +3247,8 @@ db_hdf5_set_compression(int flags)
              }
              else
              {
-                if (H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK, 4) < 0)
+                if (H5Pset_shuffle(P_ckcrprops)<0 ||
+                    H5Pset_szip(P_ckcrprops, H5_SZIP_NN_OPTION_MASK, 4)<0)
                 {
                    db_perror("H5Pset_szip", E_CALLFAIL, me);
                    return (-1);

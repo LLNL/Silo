@@ -363,6 +363,10 @@ main(int argc, char *argv[])
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
             file_ext = ".h5";
+        } else if (!strcmp(argv[i], "gzip1")) {
+            DBSetCompression("METHOD=GZIP LEVEL=1");
+        } else if (!strcmp(argv[i], "gzip9")) {
+            DBSetCompression("METHOD=GZIP LEVEL=9");
         } else if (!strcmp(argv[i], "hzip")) {
             DBSetCompression("ERRMODE=FALLBACK METHOD=HZIP");
         } else if (!strcmp(argv[i], "fpzip")) {
