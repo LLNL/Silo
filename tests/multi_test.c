@@ -359,10 +359,10 @@ main(int argc, char *argv[])
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB", 6)) {
             driver = StringToDriver(argv[i]);
-            file_ext = "pdb";
+            file_ext = ".pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
-            file_ext = "h5";
+            file_ext = ".h5";
         } else if (!strcmp(argv[i], "hzip")) {
             DBSetCompression("ERRMODE=FALLBACK METHOD=HZIP");
         } else if (!strcmp(argv[i], "fpzip")) {
