@@ -5241,24 +5241,27 @@ db_hdf5_initiate_close(DBfile *_dbfile)
 #if HDF5_VERSION_GE(1,6,0)
     if (SILO_Globals._db_err_level_drvr == DB_ALL)
     {
-        int noo = H5Fget_obj_count(dbfile->fid, H5F_OBJ_LOCAL | H5F_OBJ_ALL);
-        if (noo > 1) /* HDF5 bug, always get 1 for "/" group */
+        const unsigned int obj_flags = H5F_OBJ_LOCAL | H5F_OBJ_DATASET |
+            H5F_OBJ_GROUP | H5F_OBJ_DATATYPE | H5F_OBJ_ATTR;
+
+        int noo = H5Fget_obj_count(dbfile->fid, obj_flags);
+        if (noo > 0)
         {
             int n;
             char msg[4096];
             hid_t *ooids = (hid_t *) malloc(noo * sizeof(hid_t));
             sprintf(msg, "Internal Silo error: %d objects left open in file: ", noo);
 #if HDF5_VERSION_GE(1,6,5)
-            H5Fget_obj_ids(dbfile->fid, H5F_OBJ_LOCAL | H5F_OBJ_ALL, noo, ooids);
+            H5Fget_obj_ids(dbfile->fid, obj_flags, noo, ooids);
 #else
-            H5Fget_obj_ids(dbfile->fid, H5F_OBJ_ALL, noo, ooids);
+            H5Fget_obj_ids(dbfile->fid, obj_flags, noo, ooids);
 #endif
             n = strlen(msg);
             for (i = 0; i < noo && n < sizeof(msg); i++)
             {
                 char name[256], tmp[260];
                 H5Iget_name(ooids[i], name, sizeof(name));
-                sprintf(tmp, "\"%s\", ", name);
+                sprintf(tmp, "\"%s\" (id=%llu), ", name, ooids[i]);
                 strcat(msg, tmp);
                 n += strlen(tmp);
             }
