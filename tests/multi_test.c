@@ -25,6 +25,7 @@
  *     Lisa J. Roberts, Fri Apr  7 10:30:59 PDT 2000
  *     Added string.h to get rid of compiler warnings.
  *
+ * testing a commit update cycle
  *-------------------------------------------------------------------------*/
 
 #include <math.h>
