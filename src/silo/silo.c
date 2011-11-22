@@ -7932,8 +7932,8 @@ DBPutMultimesh(DBfile *dbfile, const char *name, int nmesh,
         if (nmesh < 0)
             API_ERROR("nmesh", E_BADARGS);
         if (!meshnames && nmesh && (!optlist || 
-             !DBGetOption(optlist, DBOPT_MB_FILE_NS) ||
-             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS)))
+            (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
             API_ERROR("mesh names", E_BADARGS);
         if (!meshtypes && nmesh && (!optlist ||
              !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
@@ -8059,8 +8059,8 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
         if (nvar < 0)
             API_ERROR("nvar", E_BADARGS);
         if (!varnames && nvar && (!optlist ||
-             !DBGetOption(optlist, DBOPT_MB_FILE_NS) ||
-             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS)))
+             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
+              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
             API_ERROR("varnames", E_BADARGS);
         if (!vartypes && nvar && (!optlist ||
              !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
@@ -8122,8 +8122,8 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
         if (nmats < 0)
             API_ERROR("nmats", E_BADARGS);
         if (!matnames && nmats && (!optlist ||
-             !DBGetOption(optlist, DBOPT_MB_FILE_NS) ||
-             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS)))
+             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
+              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
             API_ERROR("material-names", E_BADARGS);
         if (!dbfile->pub.p_mt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -8182,8 +8182,8 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
         if (nspec < 0)
             API_ERROR("nspec", E_BADARGS);
         if (!specnames && nspec && (!optlist ||
-             !DBGetOption(optlist, DBOPT_MB_FILE_NS) ||
-             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS)))
+             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
+              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
             API_ERROR("species-names", E_BADARGS);
         if (!dbfile->pub.p_mms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
