@@ -69,7 +69,6 @@ EXTRA_DIST = \
 ./MSVC9/Tests/array.vcproj\
 ./MSVC9/Tests/array_f.vfproj\
 ./MSVC9/Tests/compression.vcproj\
-./MSVC9/Tests/CopyTestDependencies.bat\
 ./MSVC9/Tests/csg.vcproj\
 ./MSVC9/Tests/curve_f.vfproj\
 ./MSVC9/Tests/dirtest.vcproj\
@@ -95,8 +94,8 @@ EXTRA_DIST = \
 ./MSVC9/Tests/point.vcproj\
 ./MSVC9/Tests/point_f.vfproj\
 ./MSVC9/Tests/polyzl.vcproj\
-./MSVC9/Tests/PreBuildStep.vsprops\
 ./MSVC9/Tests/quad.vcproj\
+./MSVC9/Tests/quad_f.vfproj\
 ./MSVC9/Tests/rocket.vcproj\
 ./MSVC9/Tests/sami.vcproj\
 ./MSVC9/Tests/simple.vcproj\
@@ -105,10 +104,8 @@ EXTRA_DIST = \
 ./MSVC9/Tests/subhex.vcproj\
 ./MSVC9/Tests/testall.vcproj\
 ./MSVC9/Tests/testall_f.vfproj\
-./MSVC9/Tests/TestIncludes.vsprops\
 ./MSVC9/Tests/testpdb.vcproj\
 ./MSVC9/Tests/TestReadMask.vcproj\
-./MSVC9/Tests/Tests.sln\
 ./MSVC9/Tests/twohex.vcproj\
 ./MSVC9/Tests/ucd1d.vcproj\
 ./MSVC9/Tests/ucd.vcproj\
@@ -116,6 +113,10 @@ EXTRA_DIST = \
 ./MSVC9/Tests/ucdsamp3.vcproj\
 ./MSVC9/Tests/version.vcproj\
 ./MSVC9/Tests/wave.vcproj\
+./MSVC9/Tests/Tests.sln\
+./MSVC9/Tests/CopyTestDependencies.bat\
+./MSVC9/Tests/PreBuildStep.vsprops\
+./MSVC9/Tests/TestIncludes.vsprops\
 ./MSVC9/bin/RunTests.bat\
 ./MSVC9/pdb_detect/pdb_detect.vcproj\
 ./MSVC9/BaseIncludes.vsprops\
@@ -171,6 +172,7 @@ EXTRA_DIST = \
 ./MSVC9-BSD/Tests/point_f.vfproj\
 ./MSVC9-BSD/Tests/polyzl.vcproj\
 ./MSVC9-BSD/Tests/quad.vcproj\
+./MSVC9-BSD/Tests/quad_f.vfproj\
 ./MSVC9-BSD/Tests/rocket.vcproj\
 ./MSVC9-BSD/Tests/sami.vcproj\
 ./MSVC9-BSD/Tests/simple.vcproj\
@@ -189,9 +191,9 @@ EXTRA_DIST = \
 ./MSVC9-BSD/Tests/version.vcproj\
 ./MSVC9-BSD/Tests/wave.vcproj\
 ./MSVC9-BSD/Tests/Tests.sln\
+./MSVC9-BSD/Tests/CopyTestDependencies.bat\
 ./MSVC9-BSD/Tests/PreBuildStep.vsprops\
 ./MSVC9-BSD/Tests/TestIncludes.vsprops\
-./MSVC9-BSD/Tests/CopyTestDependencies.bat\
 ./MSVC9-BSD/bin/RunTests.bat\
 ./MSVC9-BSD/pdb_detect/pdb_detect.vcproj\
 ./MSVC9-BSD/BaseIncludes.vsprops\

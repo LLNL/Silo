@@ -299,6 +299,7 @@ EXTRA_DIST = \
 ./MSVC9/Tests/point_f.vfproj\
 ./MSVC9/Tests/polyzl.vcproj\
 ./MSVC9/Tests/quad.vcproj\
+./MSVC9/Tests/quad_f.vfproj\
 ./MSVC9/Tests/rocket.vcproj\
 ./MSVC9/Tests/sami.vcproj\
 ./MSVC9/Tests/simple.vcproj\
@@ -374,6 +375,7 @@ EXTRA_DIST = \
 ./MSVC9-BSD/Tests/point_f.vfproj\
 ./MSVC9-BSD/Tests/polyzl.vcproj\
 ./MSVC9-BSD/Tests/quad.vcproj\
+./MSVC9-BSD/Tests/quad_f.vfproj\
 ./MSVC9-BSD/Tests/rocket.vcproj\
 ./MSVC9-BSD/Tests/sami.vcproj\
 ./MSVC9-BSD/Tests/simple.vcproj\
