@@ -4,7 +4,7 @@
 		<Platform Name="Win32"/>
 		<Platform Name="x64"/></Platforms>
 	<Configurations>
-		<Configuration Name="DLLwithHDF5_Debug|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\mat_f" IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\mat_f">
+		<Configuration Name="Debug|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\mat_f" IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\mat_f">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\src\silo" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
 				<Tool Name="VFLinkerTool" OutputFile="$(SolutionDir)..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)" ManifestFile="$(IntDir)\$(TargetFileName).intermediate.manifest" GenerateDebugInformation="true" ProgramDatabaseFile="$(IntDir)$(TargetName).pdb" SubSystem="subSystemConsole" ImportLibrary="$(IntDir)\$(TargetName).lib" TargetMachine="machineX86" AdditionalDependencies="silohdf5.lib"/>
 				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)\$(InputName).res"/>
@@ -14,7 +14,7 @@
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true" OutputManifestFile="$(Intdir)\$(TargetFileName).embed.manifest" ResourceFile="$(IntDir)\$(TargetFileName).embed.manifest.res"/></Configuration>
-		<Configuration Name="DLLwithHDF5_Release|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\mat_f" IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\mat_f">
+		<Configuration Name="Release|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\mat_f" IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\mat_f">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\src\silo" DiagnosticsFile="$(IntDir)$(TargetName).diag" ModulePath="$(IntDir)" ObjectFile="$(IntDir)"/>
 				<Tool Name="VFLinkerTool" OutputFile="$(SolutionDir)..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)" ManifestFile="$(IntDir)\$(TargetFileName).intermediate.manifest" ProgramDatabaseFile="$(IntDir)$(TargetName).pdb" SubSystem="subSystemConsole" ImportLibrary="$(IntDir)\$(TargetName).lib" AdditionalDependencies="silohdf5.lib"/>
 				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)\$(InputName).res"/>
@@ -24,7 +24,7 @@
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true" OutputManifestFile="$(Intdir)\$(TargetFileName).embed.manifest" ResourceFile="$(IntDir)\$(TargetFileName).embed.manifest.res"/></Configuration>
-		<Configuration Name="DLLwithHDF5_Debug|x64">
+		<Configuration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\src\silo" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
 				<Tool Name="VFLinkerTool" OutputFile="$(SolutionDir)..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)" ManifestFile="$(IntDir)\$(TargetFileName).intermediate.manifest" GenerateDebugInformation="true" ProgramDatabaseFile="$(IntDir)$(TargetName).pdb" SubSystem="subSystemConsole" ImportLibrary="$(IntDir)\$(TargetName).lib" AdditionalDependencies="silohdf5.lib"/>
 				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)\$(InputName).res"/>
@@ -34,7 +34,7 @@
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true" OutputManifestFile="$(Intdir)\$(TargetFileName).embed.manifest" ResourceFile="$(IntDir)\$(TargetFileName).embed.manifest.res"/></Configuration>
-		<Configuration Name="DLLwithHDF5_Release|x64">
+		<Configuration Name="Release|x64">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\src\silo" DiagnosticsFile="$(IntDir)$(TargetName).diag" ModulePath="$(IntDir)" ObjectFile="$(IntDir)"/>
 				<Tool Name="VFLinkerTool" OutputFile="$(SolutionDir)..\bin\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)" ManifestFile="$(IntDir)\$(TargetFileName).intermediate.manifest" ProgramDatabaseFile="$(IntDir)$(TargetName).pdb" SubSystem="subSystemConsole" ImportLibrary="$(IntDir)\$(TargetName).lib" AdditionalDependencies="silohdf5.lib"/>
 				<Tool Name="VFResourceCompilerTool" ResourceOutputFileName="$(IntDir)\$(InputName).res"/>

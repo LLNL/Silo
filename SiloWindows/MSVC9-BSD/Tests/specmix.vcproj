@@ -18,11 +18,11 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="DLLwithHDF5_Debug|Win32"
+			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\specmix"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\specmix"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops"
+			InheritedPropertySheets="..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops;..\DepLibs.vsprops;.\PreBuildStep.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -110,11 +110,11 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5_Debug|x64"
+			Name="Debug|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops"
+			InheritedPropertySheets="..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops;..\DepLibs.vsprops;.\PreBuildStep.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -203,11 +203,11 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5_Release|Win32"
+			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\specmix"
 			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\specmix"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops"
+			InheritedPropertySheets="..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops;..\DepLibs.vsprops;.\PreBuildStep.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -294,11 +294,11 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="DLLwithHDF5_Release|x64"
+			Name="Release|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops"
+			InheritedPropertySheets="..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops;..\DepLibs.vsprops;.\PreBuildStep.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"

@@ -1,5 +1,5 @@
 @echo off
-set MOC=%QTDIR%\bin\moc.exe
+set MOC=%1\moc.exe
 set SILEX=..\..\tools\silex
 
 

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="QT_DEFINES"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+                AdditionalIncludeDirectories="$(QT_INC_DIR);$(QT_INC_DIR)\QtCore;"
+	/>
+        <Tool
+	    Name="VCLinkterTool"
+	    AdditionalLibraryDirectories="$(QT_LIB_DIR);"
+            AdditionalDependencies="QtCore4.lib;QtGui4.lib;silohdf5.lib;"
+        />
+</VisualStudioPropertySheet>
