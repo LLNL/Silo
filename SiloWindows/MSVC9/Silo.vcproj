@@ -150,7 +150,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR_X64);$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -182,7 +182,7 @@
 				OutputFile="$(OutDir)\silohdf5.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR);$(HDF5_LIB_DIR)"
+				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR_X64);$(HDF5_LIB_DIR_X64)"
 				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -209,7 +209,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(HDF5_LIB_DIR)\hdf5dll.dll $(OutDir)&#x0D;&#x0A;copy $(ZLIB_LIB_DIR)\zlib1.dll $(OutDir)&#x0D;&#x0A;copy $(SZIP_LIB_DIR)\szlibdll.dll $(OutDir)&#x0D;&#x0A;"
+				CommandLine="copy $(HDF5_LIB_DIR_X64)\hdf5dll.dll $(OutDir)&#x0D;&#x0A;copy $(ZLIB_LIB_DIR_X64)\zlib1.dll $(OutDir)&#x0D;&#x0A;copy $(SZIP_LIB_DIR_X64)\szlibdll.dll $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -342,7 +342,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
+				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR_X64);$(ZLIB_INC_DIR)"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
@@ -373,7 +373,7 @@
 				OutputFile="$(OutDir)\silohdf5.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR);$(HDF5_LIB_DIR)"
+				AdditionalLibraryDirectories="$(ZLIB_LIB_DIR_X64);$(HDF5_LIB_DIR_X64)"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\silohdf5.pdb"
 				RandomizedBaseAddress="1"
@@ -401,7 +401,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(HDF5_LIB_DIR)\hdf5dll.dll $(OutDir)&#x0D;&#x0A;copy $(ZLIB_LIB_DIR)\zlib1.dll $(OutDir)&#x0D;&#x0A;copy $(SZIP_LIB_DIR)\szlibdll.dll $(OutDir)&#x0D;&#x0A;"
+				CommandLine="copy $(HDF5_LIB_DIR_X64)\hdf5dll.dll $(OutDir)&#x0D;&#x0A;copy $(ZLIB_LIB_DIR_X64)\zlib1.dll $(OutDir)&#x0D;&#x0A;copy $(SZIP_LIB_DIR_X64)\szlibdll.dll $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
