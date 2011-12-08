@@ -408,7 +408,36 @@ EXTRA_DIST = \
 ./MSVC9-BSD/browser.vcproj\
 ./MSVC9-BSD/silex.vcproj\
 ./MSVC9-BSD/Silo.vcproj\
-./MSVC9-BSD/SiloWindows.sln
+./MSVC9-BSD/SiloWindows.sln\
+./MSVC2010/BaseIncludes.props\
+./MSVC2010/DepLibs.props\
+./MSVC2010/ModernDTPR.props\
+./MSVC2010/NON_BSD_DEFINES.props\
+./MSVC2010/NO_SEC_DEP.props\
+./MSVC2010/QT_Defines.props\
+./MSVC2010/Silo.sln\
+./MSVC2010/Silo.vcxproj\
+./MSVC2010/Silo.vcxproj.filters\
+./MSVC2010/browser.vcxproj\
+./MSVC2010/browser.vcxproj.filters\
+./MSVC2010/silex.vcxproj\
+./MSVC2010/silex.vcxproj.filters\
+./MSVC2010/pdb_detect/pdb_detect.vcxproj\
+./MSVC2010/pdb_detect/pdb_detect.vcxproj.filters\
+./MSVC2010-BSD/BaseIncludes.props\
+./MSVC2010-BSD/DepLibs.props\
+./MSVC2010-BSD/ModernDTPR.props\
+./MSVC2010-BSD/NO_SEC_DEP.props\
+./MSVC2010-BSD/QT_Defines.props\
+./MSVC2010-BSD/Silo.sln\
+./MSVC2010-BSD/Silo.vcxproj\
+./MSVC2010-BSD/Silo.vcxproj.filters\
+./MSVC2010-BSD/browser.vcxproj\
+./MSVC2010-BSD/browser.vcxproj.filters\
+./MSVC2010-BSD/silex.vcxproj\
+./MSVC2010-BSD/silex.vcxproj.filters\
+./MSVC2010-BSD/pdb_detect/pdb_detect.vcxproj\
+./MSVC2010-BSD/pdb_detect/pdb_detect.vcxproj.filters
 
 all: all-am
 
