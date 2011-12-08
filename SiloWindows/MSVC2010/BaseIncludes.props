@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <_PropertySheetDisplayName>BaseIncludes</_PropertySheetDisplayName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\..\src\debug;$(SolutionDir)..\..\src\hdf5_drv;$(SolutionDir)..\..\src\pdb;$(SolutionDir)..\..\src\pdb_drv;$(SolutionDir)..\..\src\score;$(SolutionDir)..\..\src\silo;$(SolutionDir)..\..\src\taurus;$(SolutionDir)..\..\src\unknown;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+</Project>

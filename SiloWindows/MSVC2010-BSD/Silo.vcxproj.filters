@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files\silo">
+      <UniqueIdentifier>{b44642f2-0e22-4359-b89d-c614990994e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\score">
+      <UniqueIdentifier>{0ce27567-4be8-499f-b4ed-a9691b6ee052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pdb_drv">
+      <UniqueIdentifier>{a5a05c0d-c9ff-479d-b704-e8e36367455a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\taurus_drv">
+      <UniqueIdentifier>{5cfee3fc-3f25-4ace-9c79-58ec311615c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\score">
+      <UniqueIdentifier>{80f224fd-98b4-4c51-b15d-e90068310f94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pdb_drv">
+      <UniqueIdentifier>{8d5272ec-4b82-49bf-9f22-3133a17cc2ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pdb">
+      <UniqueIdentifier>{6f7b3441-fd7c-4882-b55e-2a5298100280}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\filters">
+      <UniqueIdentifier>{33c5d424-dd8d-4a6d-9e66-fd4b812b7486}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\hdf5_drv">
+      <UniqueIdentifier>{f1de1134-82ac-4e1a-ac70-9072c99a7dae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\silo">
+      <UniqueIdentifier>{0c828d0b-349d-4989-91c7-0d9a310af1b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\unknown">
+      <UniqueIdentifier>{9aa3c521-e2aa-4070-96f7-83975de1dfad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hdf5_drv">
+      <UniqueIdentifier>{57a6a43e-8406-4fdf-9c59-35197de4a97f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\filters">
+      <UniqueIdentifier>{9476e32e-ba96-4459-a75a-254258fcc5ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\unknown">
+      <UniqueIdentifier>{b6fe0391-5082-4b6b-aa8f-30a7a7f170b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pdb">
+      <UniqueIdentifier>{dde8ddc9-470a-4ae4-9697-c2033fcc730c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\taurus_drv">
+      <UniqueIdentifier>{5c033d34-5b73-4ebf-9dfe-f80d0599db6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\debug">
+      <UniqueIdentifier>{99f571f9-ae34-4b74-bfc8-7e6e1d1a72aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\debug">
+      <UniqueIdentifier>{bed62ec2-c976-4850-8d57-bd00ec661159}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\silo\silo_ns.c">
+      <Filter>Source Files\silo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\silo\alloc.c">
+      <Filter>Source Files\silo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\silo\extface.c">
+      <Filter>Source Files\silo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\silo\silo.c">
+      <Filter>Source Files\silo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\silo\silo_f.c">
+      <Filter>Source Files\silo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\taurus\silo_taurus.c">
+      <Filter>Source Files\taurus_drv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\taurus\taurus.c">
+      <Filter>Source Files\taurus_drv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\score\memmove.c">
+      <Filter>Source Files\score</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\score\scctl.c">
+      <Filter>Source Files\score</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\score\scctla.c">
+      <Filter>Source Files\score</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\score\schash.c">
+      <Filter>Source Files\score</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\score\scstr.c">
+      <Filter>Source Files\score</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb_drv\silo_pdb.c">
+      <Filter>Source Files\pdb_drv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdb.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdbdir.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdbio.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdbmm.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdbx.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdlow.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdmemb.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdpath.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdrdwr.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pdb\pdconv.c">
+      <Filter>Source Files\pdb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\hdf5_drv\H5FDsilo.c">
+      <Filter>Source Files\hdf5_drv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\hdf5_drv\silo_hdf5.c">
+      <Filter>Source Files\hdf5_drv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\filters\f_ale3d.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\filters\f_sample.c">
+      <Filter>Source Files\filters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\unknown\silo_unknown.c">
+      <Filter>Source Files\unknown</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\debug\silo_debug.c">
+      <Filter>Source Files\debug</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\silo\pmpio.h">
+      <Filter>Header Files\silo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\silo\silo_win32_compatibility.h">
+      <Filter>Header Files\silo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\silo\silo_drivers.h">
+      <Filter>Header Files\silo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\silo\silo_f.h">
+      <Filter>Header Files\silo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\silo\silo_private.h">
+      <Filter>Header Files\silo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\taurus\silo_taurus_private.h">
+      <Filter>Header Files\taurus_drv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\taurus\taurus.h">
+      <Filter>Header Files\taurus_drv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\score\score.h">
+      <Filter>Header Files\score</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\pdb_drv\silo_pdb_private.h">
+      <Filter>Header Files\pdb_drv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\pdb\pdb.h">
+      <Filter>Header Files\pdb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\filters\filter.h">
+      <Filter>Header Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\hdf5_drv\H5FDsilo.h">
+      <Filter>Header Files\hdf5_drv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\hdf5_drv\silo_hdf5_private.h">
+      <Filter>Header Files\hdf5_drv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\unknown\silo_unknown_private.h">
+      <Filter>Header Files\unknown</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\debug\silo_debug_private.h">
+      <Filter>Header Files\debug</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\silo\silo.inc">
+      <Filter>Header Files\silo</Filter>
+    </None>
+  </ItemGroup>
+</Project>
