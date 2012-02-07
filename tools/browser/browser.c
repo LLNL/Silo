@@ -690,22 +690,10 @@ differentll (long long a, long long b, double abstol, double reltol,
    long long num, den;
 
    /*
-    * Now the |A-B| but make sure it doesn't overflow which can only
-    * happen if one is negative and the other is positive.
-    */
-   if (abstol>0) {
-      if ((a<0 && b>0) || (b<0 && a>0)) {
-         if (FABS(a/2 - b/2) > abstol/2) return 1;
-      } else {
-         if (FABS(a-b) > abstol) return 1;
-      }
-   }
-
-   /*
     * First, see if we should use the alternate diff.
     * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
     */
-   if (reltol_eps >= 0)
+   if (reltol_eps >= 0 && reltol > 0)
    {
       if ((a<0 && b>0) || (b<0 && a>0)) {
          num = FABS (a/2 - b/2);
@@ -717,28 +705,40 @@ differentll (long long a, long long b, double abstol, double reltol,
       }
       if (0.0==den && num) return 1;
       if (num/den > reltol) return 1;
+      return 0;
    }
-
-   /*
-    * Now check 2|A-B|/|A+B| in a way that won't overflow.
-    */
-   if (reltol>0) {
-      if ((a<0 && b>0) || (b<0 && a>0)) {
-         num = FABS (a/2 - b/2);
-         den = FABS (a/2 + b/2);
-         reltol /= 2;
-      } else {
-         num = FABS (a - b);
-         den = FABS (a/2 + b/2);
+   else
+   {
+      /*
+       * Now the |A-B| but make sure it doesn't overflow which can only
+       * happen if one is negative and the other is positive.
+       */
+      if (abstol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            if (FABS(a/2 - b/2) > abstol/2) return 1;
+         } else {
+            if (FABS(a-b) > abstol) return 1;
+         }
       }
-      if (0.0==den && num) return 1;
-      if (num/den > reltol) return 1;
-   }
 
-   /*
-    * If all tests tried succeeded then the numbers are equal.
-    */
-   if (abstol>0 || reltol>0 || reltol_eps>=0) return 0;
+      /*
+       * Now check 2|A-B|/|A+B| in a way that won't overflow.
+       */
+      if (reltol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            num = FABS (a/2 - b/2);
+            den = FABS (a/2 + b/2);
+            reltol /= 2;
+         } else {
+            num = FABS (a - b);
+            den = FABS (a/2 + b/2);
+         }
+         if (0.0==den && num) return 1;
+         if (num/den > reltol) return 1;
+
+         if (abstol>0 || reltol>0) return 0;
+      }
+   }
 
    /*
     * Otherwise do a normal exact comparison.
