@@ -10502,6 +10502,7 @@ PrepareForZonelistCompression(DBfile_hdf5 *dbfile, const char *name,
     int origin, int nshapes, const int *shapetype, const int *shapecnt,
     const int *nodelist)
 {
+	int i;
     int ntopo = 0;
     int zncnt = shapecnt[0];
 
@@ -10514,7 +10515,7 @@ PrepareForZonelistCompression(DBfile_hdf5 *dbfile, const char *name,
     if (shapetype[0] == DB_ZONETYPE_QUAD)
     {
         ntopo = 2;
-        for (int i = 1; i < nshapes; i++)
+        for (i = 1; i < nshapes; i++)
         {
             zncnt += shapecnt[i];
             if (shapetype[i] != DB_ZONETYPE_QUAD)
@@ -10524,7 +10525,7 @@ PrepareForZonelistCompression(DBfile_hdf5 *dbfile, const char *name,
     else if (shapetype[0] == DB_ZONETYPE_HEX)
     {
         ntopo = 3;
-        for (int i = 1; i < nshapes; i++)
+        for (i = 1; i < nshapes; i++)
         {
             zncnt += shapecnt[i];
             if (shapetype[i] != DB_ZONETYPE_HEX)
