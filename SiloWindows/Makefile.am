@@ -141,7 +141,6 @@ EXTRA_DIST = \
 ./copysilo.bat\
 ./silodiff.bat\
 ./README\
-./MSVC8-BSD/SiloWindows.sln\
 ./MSVC9-BSD/Tests/alltypes.vcproj\
 ./MSVC9-BSD/Tests/array.vcproj\
 ./MSVC9-BSD/Tests/array_f.vfproj\
