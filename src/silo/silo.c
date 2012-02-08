@@ -9403,7 +9403,7 @@ _DBstrprint(FILE *fp, char *strs[], int nstrs, int order, int left_margin,
     maxwidth = strlen(sorted_strs[0]);
 
     for (i = 1; i < nstrs; i++) {
-        maxwidth = MAX(maxwidth, strlen(sorted_strs[i]));
+        maxwidth = MAX(maxwidth, (int)strlen(sorted_strs[i]));
     }
 
      /*----------------------------------------

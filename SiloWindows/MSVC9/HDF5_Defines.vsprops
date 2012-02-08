@@ -6,6 +6,6 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		PreprocessorDefinitions="_HDF5USEDLL_;HAVE_HDF5_DRIVER=1;HAVE_HDF5_H=1;HAVE_LIBHDF5=1"
+		PreprocessorDefinitions="HAVE_HDF5_DRIVER=1;HAVE_HDF5_H=1;HAVE_LIBHDF5=1"
 	/>
 </VisualStudioPropertySheet>

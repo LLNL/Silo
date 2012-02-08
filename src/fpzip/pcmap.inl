@@ -30,6 +30,9 @@ PCmap<float, width, void>::icast(unsigned r) const
 #endif
 }
 
+#ifdef _WIN32
+#  pragma warning(disable:4146)
+#endif
 template <unsigned width>
 unsigned
 PCmap<float, width, void>::forward(float d) const
@@ -38,6 +41,9 @@ PCmap<float, width, void>::forward(float d) const
   r = ~r;
   r >>= shift;
   r ^= -(r >> (bits - 1)) >> (shift + 1);
+#ifdef _WIN32
+  #pragma warning(default:4146)
+#endif
   return r;
 }
 
@@ -93,6 +99,9 @@ PCmap<double, width, void>::icast(unsigned long long r) const
 #endif
 }
 
+#ifdef _WIN32
+#  pragma warning(disable:4146)
+#endif
 template <unsigned width>
 unsigned long long
 PCmap<double, width, void>::forward(double d) const
@@ -101,6 +110,9 @@ PCmap<double, width, void>::forward(double d) const
   r = ~r;
   r >>= shift;
   r ^= -(r >> (bits - 1)) >> (shift + 1);
+#ifdef _WIN32
+  #pragma warning(default:4146)
+#endif
   return r;
 }
 

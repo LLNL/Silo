@@ -50,6 +50,9 @@ unsigned RCdecoder::decode_ratio(unsigned n)
 }
 
 // normalize the range and input data
+#ifdef _WIN32
+#pragma warning(disable:4146)
+#endif
 void RCdecoder::normalize()
 {
   while (!((low ^ (low + range)) >> 24)) {
@@ -63,4 +66,7 @@ void RCdecoder::normalize()
     get(2);
     range = -low;
   }
+#ifdef _WIN32
+#pragma warning(default:4146)
+#endif
 }

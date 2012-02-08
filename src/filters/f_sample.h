@@ -55,5 +55,5 @@ be used for advertising or product endorsement purposes.
 #ifndef F_SAMPLE_H
 #define F_SAMPLE_H
 #include <silo.h>
-SILO_API extern int f_debug_Open();
+SILO_API extern int f_debug_Open(DBfile *, char *);
 #endif

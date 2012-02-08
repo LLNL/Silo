@@ -27,6 +27,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			BuildLogFile="$(IntDir)\$(ProjectName)_BuildLog.htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -46,7 +47,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\silohdf5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -54,12 +55,12 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS;LITE_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\silohdf5.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
@@ -124,6 +125,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			BuildLogFile="$(IntDir)\$(ProjectName)_BuildLog.htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -143,7 +145,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\silohdf5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -151,12 +153,12 @@
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR_X64);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SILO_EXPORTS;LITE_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\silohdf5.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
@@ -221,6 +223,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			BuildLogFile="$(IntDir)\$(ProjectName)_BuildLog.htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -240,18 +243,18 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\silohdf5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS;LITE_EXPORTS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\silohdf5.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
@@ -317,6 +320,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			BuildLogFile="$(IntDir)\$(ProjectName)_BuildLog.htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -336,18 +340,18 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\DLLwithHDF5.tlb"
+				TypeLibraryName="$(OutDir)\silohdf5.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\include;..\..\src\debug;..\..\src\hdf5_drv;..\..\src\pdb;..\..\src\pdb_drv;..\..\src\score;..\..\src\silo;..\..\src\taurus;..\..\src\unknown;$(HDF5_INC_DIR_X64);$(ZLIB_INC_DIR)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;SILO_EXPORTS;LITE_EXPORTS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\DLLwithHDF5.pch"
+				PrecompiledHeaderFile="$(OutDir)\silohdf5.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"

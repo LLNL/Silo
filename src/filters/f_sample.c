@@ -124,9 +124,7 @@ static DBfile_pub f_debug_cb[DB_NFILES];  /*only callback fields used */
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_Filters(dbfile, stream)
-    DBfile        *dbfile;
-    FILE          *stream;
+f_debug_Filters(DBfile *dbfile, FILE *stream)
 {
     int            id;
     char          *me = "f_debug_Filters";
@@ -154,8 +152,7 @@ f_debug_Filters(dbfile, stream)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_Uninstall(dbfile)
-    DBfile        *dbfile;
+f_debug_Uninstall(DBfile *dbfile)
 {
     int            id;
     char          *me = "f_debug_Uninstall";
@@ -197,8 +194,7 @@ f_debug_Uninstall(dbfile)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_Close(dbfile)
-    DBfile        *dbfile;
+f_debug_Close(DBfile *dbfile)
 {
     int            retval;
     char          *me = "f_debug_Close";
@@ -256,9 +252,7 @@ f_debug_Close(dbfile)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_SetDir(dbfile, path)
-    DBfile        *dbfile;
-    char          *path;
+f_debug_SetDir(DBfile *dbfile, char *path)
 {
     int            id, retval;
     char          *me = "f_debug_SetDir";
@@ -293,9 +287,7 @@ f_debug_SetDir(dbfile, path)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_SetDirID(dbfile, dirid)
-    DBfile        *dbfile;
-    int            dirid;
+f_debug_SetDirID(DBfile *dbfile, int dirid)
 {
     int            id, retval;
     char          *me = "f_debug_SetDirID";
@@ -329,9 +321,7 @@ f_debug_SetDirID(dbfile, dirid)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_GetDir(dbfile, path)
-    DBfile        *dbfile;
-    char          *path;        /*output */
+f_debug_GetDir(DBfile *dbfile, char *path /*output */)
 {
     int            id, retval;
     char          *me = "f_debug_GetDirID";
@@ -365,8 +355,7 @@ f_debug_GetDir(dbfile, path)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_NewToc(dbfile)
-    DBfile        *dbfile;
+f_debug_NewToc(DBfile *dbfile)
 {
     int            id, retval;
     char          *me = "f_debug_NewToc";
@@ -405,9 +394,7 @@ f_debug_NewToc(dbfile)
  *-------------------------------------------------------------------------
  */
 static DBucdvar *
-f_debug_GetUcdvar(dbfile, name)
-    DBfile        *dbfile;
-    char          *name;
+f_debug_GetUcdvar(DBfile *dbfile, char *name)
 {
     int            id;
     char          *me = "f_debug_GetUcdvar";
@@ -444,9 +431,7 @@ f_debug_GetUcdvar(dbfile, name)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_InqMeshType(dbfile, name)
-    DBfile        *dbfile;
-    char          *name;
+f_debug_InqMeshType(DBfile *dbfile, char *name)
 {
     int            id, retval;
     char          *me = "f_debug_InqMeshType";
@@ -485,10 +470,7 @@ f_debug_InqMeshType(dbfile, name)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_InqMeshName(dbfile, name, meshname)
-    DBfile        *dbfile;
-    char          *name;
-    char          *meshname;    /*OUTPUT */
+f_debug_InqMeshName(DBfile *dbfile, char *name, char *meshname /*OUTPUT */)
 {
     int            id, retval;
     char          *me = "f_debug_InqMeshName";
@@ -546,9 +528,7 @@ f_debug_InqMeshName(dbfile, name, meshname)
  *-------------------------------------------------------------------------
  */
 int
-f_debug_Open(dbfile, filter_name)
-    DBfile        *dbfile;
-    char          *filter_name;
+f_debug_Open(DBfile *dbfile, char *filter_name)
 {
     int            id;
     char          *me = "f_debug_Open";

@@ -1164,11 +1164,9 @@ H5Pset_fapl_silo(hid_t fapl_id)
     static const char *func = "H5FDset_fapl_silo"; 
     herr_t ret_value = 0;
     hsize_t default_block_size = H5FD_SILO_DEFAULT_BLOCK_SIZE;
-    H5AC_cache_config_t mdc_config;
     int default_block_count = H5FD_SILO_DEFAULT_BLOCK_COUNT;
     int default_log_stats = H5FD_SILO_DEFAULT_LOG_STATS;
     int default_use_direct = H5FD_SILO_DEFAULT_USE_DIRECT;
-    hid_t default_fapl;
 
     H5Eclear2(H5E_DEFAULT);
 
@@ -1398,9 +1396,6 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     static const char *func = "H5FD_silo_open";  /* Function Name for error reporting */
     int silo_block_count = H5FD_SILO_DEFAULT_BLOCK_COUNT;
     hsize_t silo_block_size = H5FD_SILO_DEFAULT_BLOCK_SIZE;
-    hsize_t meta_block_size;
-    hsize_t small_data_block_size;
-    size_t  sieve_buf_size;
     int     silo_log_stats = H5FD_SILO_DEFAULT_LOG_STATS;
     int     silo_use_direct = H5FD_SILO_DEFAULT_USE_DIRECT;
     H5FD_t *ret_value = 0;

@@ -549,7 +549,6 @@ DBADDIAOPT_FC (int *optlist_id, int *option,
 {
     int *ival = NULL;
     DBoptlist     *optlist = NULL;
-    int i;
 
     API_BEGIN("dbaddiaopt", int, -1) {
         optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);

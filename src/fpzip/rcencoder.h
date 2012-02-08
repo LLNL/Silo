@@ -2,7 +2,10 @@
 #define RC_ENCODER_H
 
 #include "rcmodel.h"
-
+#ifdef _WIN32
+#pragma warning(push)
+#pragma warning(disable:4146)
+#endif
 class RCencoder {
 public:
   RCencoder() : low(0), range(-1u) {}
@@ -39,5 +42,9 @@ private:
 };
 
 #include "rcencoder.inl"
+
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #endif

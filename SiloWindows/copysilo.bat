@@ -117,5 +117,5 @@ for /F "tokens=1* delims=]" %%i in ('find /v /n "" ^.\..\src\silo\silo.h.in') do
 
 @echo #define PACKAGE_STRING "silo %major%.%minor%%dotpatch%%dotpre%" >> %VersionOut% 
 @echo #define PACKAGE_VERSION "%major%.%minor%%dotpatch%%dotpre%" >> %VersionOut% 
-@echo #define VERSION "%major%.%minor%%dotpatch%%dotpre%" >> %VersionOut% 
+@echo #define SILO_VERSION "%major%.%minor%%dotpatch%%dotpre%" >> %VersionOut% 
 

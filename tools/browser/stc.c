@@ -539,7 +539,7 @@ stc_walk1_DBdirectory (obj_t _self, void *mem, int operation, walk_t *wdata)
    assert (WALK_PRINT==operation);
 
    for (i=0; i<dir->nsyms; i++) {
-      width = MAX (width, strlen(dir->toc[i].name));
+      width = MAX (width, (int) strlen(dir->toc[i].name));
    }
    if (0==width) {
       out_errorn ("empty directory");

@@ -599,7 +599,7 @@ prim_octal(char *buf/*out*/, const void *_mem, size_t nbytes)
 {
     unsigned char       *mem = (unsigned char*)_mem;
     size_t              qlen=0, at=0, stride=(8*nbytes)%3;
-    unsigned            q=0, d;
+    unsigned            q=0;
 
     
     while (nbytes>0 || qlen) {

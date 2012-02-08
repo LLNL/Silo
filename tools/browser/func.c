@@ -1462,7 +1462,7 @@ V_list (int argc, obj_t argv[])
         /* Find the widest entry and if any entries were even selected. */    
         width = 0;
         for (i=0; i<nentries; i++) {
-            if (selected[i]) width = MAX(width, strlen(toc[i].name));
+            if (selected[i]) width = MAX(width, (int)strlen(toc[i].name));
         }
         if (0==width) {
             out_errorn("ls: no matches");

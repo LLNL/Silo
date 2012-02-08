@@ -27,6 +27,7 @@
 			InheritedPropertySheets="..\NO_SEC_DEP.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
+			BuildLogFile="$(IntDir)\$(ProjectName)_BuildLog.htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -106,6 +107,7 @@
 			InheritedPropertySheets="..\NO_SEC_DEP.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
+			BuildLogFile="$(IntDir)\$(ProjectName)_BuildLog.htm"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"

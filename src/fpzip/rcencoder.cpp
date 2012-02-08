@@ -43,6 +43,9 @@ void RCencoder::encode_ratio(unsigned s, unsigned n)
 }
 
 // normalize the range and output data
+#ifdef _WIN32
+#pragma warning(disable:4146)
+#endif
 void RCencoder::normalize()
 {
   while (!((low ^ (low + range)) >> 24)) {
@@ -56,4 +59,7 @@ void RCencoder::normalize()
     put(2);
     range = -low;
   }
+#ifdef _WIN32
+#pragma warning(default:4146)
+#endif
 }

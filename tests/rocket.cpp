@@ -1641,7 +1641,6 @@ int
 main(int argc, char **argv)
 {
     FILE *outfile;
-    DBfile *dbfile;
     siloimesh_struct_t mesh_struct;
     siloimesh_t mesh = &mesh_struct;
     int driver = DB_PDB;

@@ -909,8 +909,7 @@ v_exists ( DBtoc *toc, char *name)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_Uninstall(dbfile)
-    DBfile        *dbfile;
+f_ale3d_Uninstall(DBfile *dbfile)
 {
     int            id;
     char          *me = "f_ale3d_Uninstall";
@@ -945,9 +944,7 @@ f_ale3d_Uninstall(dbfile)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_Filters(dbfile, stream)
-    DBfile        *dbfile;
-    FILE          *stream;
+f_ale3d_Filters(DBfile *dbfile, FILE *stream)
 {
     int            id;
     char          *me = "f_ale3d_Filters";
@@ -976,8 +973,7 @@ f_ale3d_Filters(dbfile, stream)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_Close(dbfile)
-    DBfile        *dbfile;
+f_ale3d_Close(DBfile *dbfile)
 {
     int            retval;
     char          *me = "f_ale3d_close";
@@ -1016,8 +1012,7 @@ f_ale3d_Close(dbfile)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_NewToc(dbfile)
-    DBfile        *dbfile;
+f_ale3d_NewToc(DBfile *dbfile)
 {
     int            id, nvars, i, j;
     char          *me = "f_ale3d_NewToc";
@@ -1173,9 +1168,7 @@ f_ale3d_NewToc(dbfile)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_SetDir(dbfile, path)
-    DBfile        *dbfile;
-    char          *path;
+f_ale3d_SetDir(DBfile *dbfile, char *path)
 {
     int            dirid;
     char          *me = "f_ale3d_SetDir";
@@ -1317,9 +1310,7 @@ f_ale3d_SetDir(dbfile, path)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_SetDirID(dbfile, dirid)
-    DBfile        *dbfile;
-    int            dirid;
+f_ale3d_SetDirID(DBfile *dbfile, int dirid)
 {
     char          *me = "f_ale3d_SetDirID";
 
@@ -1370,9 +1361,7 @@ f_ale3d_SetDirID(dbfile, dirid)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_GetDir(dbfile, path)
-    DBfile        *dbfile;
-    char          *path;        /*output */
+f_ale3d_GetDir(DBfile *dbfile, char *path /*output */)
 {
     char          *me = "f_ale3d_GetDir";
 
@@ -1915,9 +1904,7 @@ calc_shell_other(float *result, float **data, int length, int extra)
  *-------------------------------------------------------------------------
  */
 static DBucdvar *
-f_ale3d_GetUcdvar(dbfile, name)
-    DBfile        *dbfile;
-    char          *name;
+f_ale3d_GetUcdvar(DBfile *dbfile, char *name)
 {
     static int     sequence = 0;
     int            id, inter, ndeps, i, j, size, offset, slice_size, stride;
@@ -2139,9 +2126,7 @@ f_ale3d_GetUcdvar(dbfile, name)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_InqMeshType(dbfile, name)
-    DBfile        *dbfile;
-    char          *name;
+f_ale3d_InqMeshType(DBfile *dbfile, char *name)
 {
     int            id, inter;
     char          *me = "f_ale3d_InqMeshType";
@@ -2195,10 +2180,7 @@ f_ale3d_InqMeshType(dbfile, name)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_InqMeshName(dbfile, name, meshname)
-    DBfile        *dbfile;
-    char          *name;
-    char          *meshname;    /*OUTPUT */
+f_ale3d_InqMeshName(DBfile *dbfile, char *name, char *meshname /*OUTPUT */)
 {
     int            id, inter;
     char          *me = "f_ale3d_InqMeshName";
@@ -2255,9 +2237,7 @@ f_ale3d_InqMeshName(dbfile, name, meshname)
  *-------------------------------------------------------------------------
  */
 int
-f_ale3d_Open(dbfile, filter_name)
-    DBfile        *dbfile;
-    char          *filter_name;
+f_ale3d_Open(DBfile *dbfile, char *filter_name)
 {
     int            id;
     char          *me = "f_ale3d_open";
