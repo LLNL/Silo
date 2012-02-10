@@ -149,6 +149,61 @@ int nodelist[] = {
    12,18,13
 };
 
+/* order-randomized nodelist for all the faces */
+int nodelist2[] = {
+
+    /* 6 new faces from zone 0 (hex) */
+     9, 6, 0, 3,
+     0, 1, 4, 3,
+     0, 6, 7, 1,
+     3, 4,10, 9,
+     1, 7,10, 4,
+     6, 9,10,7,
+
+    /* 5 new faces from zone 1 (hex) */
+     7,10,11, 8,
+     8,11, 5, 2,
+     1, 7, 8, 2,
+     5,11,10, 4,
+     1, 2, 5, 4,
+
+   /* 4 new faces from zone 2 (pyramid) */ 
+     7,16,10,
+     9,10,16,
+     9,16, 6,
+    16, 7, 6,
+
+   /* 4 new faces from zone 3 (pyramid) */
+     6, 9,15,12,
+     9,16,15,
+    15,16,12,
+     6,12,16,
+
+   /* 3 new faces from zone 4 (wedge) */
+    16,10,11,17,
+    17, 8, 7,16,
+    11, 8,17,
+
+   /* 3 new faces from zone 5 (pyramid) */
+    6,12,13, 7,
+    7,13,16,
+   12,16,13,
+
+   /* 3 new faces from zone 6 (wedge) */
+   16,17,14,13,
+    7,13,14, 8,
+    8,14,17,
+
+   /* 3 new faces from zone 7 (tet) */
+   15,16,18,
+   15,18,12,
+   12,18,16,
+
+   /* 2 new faces from zone 8 (tet) */
+   13,18,16,
+   12,18,13
+};
+
 int facecnts[] = {
     /* zone 0 (hex) */     6,
     /* zone 1 (hex) */     6,
@@ -190,6 +245,35 @@ int facelist[] = {
     31, 32, -31, -25
 };
 
+/* order-randomized facelist */
+int facelist2[] = {
+    /* zone 0 (hex) */
+    3, 0, 4, 1, 2, 5,
+
+    /* zone 1 (hex) */
+    6, 8, 10, 7, 9, -5,
+
+    /* zone 2 (pyramid) */
+    -6, 12, 13, 14, 11, 
+
+    /* zone 3 (pyramid) */
+    15, 16, 17, 18, -14,
+
+    /* zone 4 (wedge) */
+    -7, 19, -12, 20, 21,
+
+    /* zone 5 (pyramid) */
+    23, -19, 24, 22, -15,
+
+    /* zone 6 (wedge) */
+    -24, -21, 25, 26, 27,
+
+    /* zone 7 (tet) */
+    28, 29, 30, -18,
+
+    /* zone 8 (tet) */
+    31, 32, -31, -25
+};
 int
 main(int argc, char *argv[])
 {
@@ -252,6 +336,16 @@ main(int argc, char *argv[])
     DBPutPHZonelist(dbfile, "phzl",
         nfaces, nodecnts, lnodelist, nodelist, 0,
         nzones, facecnts, lfacelist, facelist, 0,
+        0, nzones-1, 0);
+
+    ol = DBMakeOptlist(3);
+    DBAddOption(ol, DBOPT_PHZONELIST, "phzl_r");
+    DBPutUcdmesh(dbfile, "arbmesh_r", 3, coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
+    DBFreeOptlist(ol);
+
+    DBPutPHZonelist(dbfile, "phzl_r",
+        nfaces, nodecnts, lnodelist, nodelist2, 0,
+        nzones, facecnts, lfacelist, facelist2, 0,
         0, nzones-1, 0);
 
     DBClose(dbfile);
