@@ -57,7 +57,7 @@ product endorsement purposes.
 
 #define LEN(A)  (sizeof(A)/sizeof(A[0]))
 
-int icdata[] = {
+float icdata[] = {
     0,   0, 0, 0,
     1,   1, 0, 0,
     2,   2, 0, 0,
@@ -79,7 +79,20 @@ int icdata[] = {
     16,  1, 2, 1,
     17,  2, 2, 1,
 
-    18,  1, 3, 1
+    18,  1, 3, 1,
+
+    19,  2.75,0,1,
+    20,  3,0,0.75,
+    21,  3,0.25,1,
+
+    22,  3, 1, 1,
+    23,  3, 1, 0,
+
+    24,  2.75,2,1,
+    25,  3,1.75,1,
+    26,  3,1.75,0.75,
+
+    27,  3, 0, 0
 };
 
 int nodecnts[] = {
@@ -91,7 +104,9 @@ int nodecnts[] = {
     /* 5 (pyramid w/3 new faces) */ 4,3,3,
     /* 6 (wedge w/3 new faces) */   4,4,3,
     /* 7 (tet w/3 new faces) */     3,3,3,
-    /* 8 (tet w/2 new faces) */     3,3
+    /* 8 (tet w/2 new faces) */     3,3,
+    /* 9 (arb w/6 new faces) */     5,5,5,4,4,3,
+    /* 10 (arb w/4 new faces) */    5,5,4,3 
 };
 
 /* nodelist for all the faces */
@@ -146,7 +161,22 @@ int nodelist[] = {
 
    /* 2 new faces from zone 8 (tet) */
    16,13,18,
-   12,18,13
+   12,18,13,
+
+   /* 6 new faces from zone 9 (arb) */
+   19, 21, 22, 11, 5,
+   20, 27, 23, 22, 21,
+   27, 20, 19, 5, 2,
+   2, 8, 23, 27,
+   8, 11, 22, 23,
+   20, 21, 19,
+
+   /* 4 new faces from zone 10 (arb) */
+   22, 25, 24, 17, 11,
+   8, 17, 24, 26, 23,
+   22, 23, 26, 25,
+   24, 25, 26
+
 };
 
 /* order-randomized nodelist for all the faces */
@@ -201,7 +231,21 @@ int nodelist2[] = {
 
    /* 2 new faces from zone 8 (tet) */
    13,18,16,
-   12,18,13
+   12,18,13,
+
+   /* 6 new faces from zone 9 (arb) */
+   19, 21, 22, 11, 5,
+   23, 22, 21, 20, 27,
+   27, 20, 19, 5, 2,
+   2, 8, 23, 27,
+   22, 23, 8, 11,
+   20, 21, 19,
+
+   /* 4 new faces from zone 10 (arb) */
+   22, 25, 24, 17, 11,
+   23, 8, 17, 24, 26,
+   22, 23, 26, 25,
+   24, 25, 26
 };
 
 int facecnts[] = {
@@ -213,7 +257,9 @@ int facecnts[] = {
     /* zone 5 (pyramid) */ 5,
     /* zone 6 (wedge) */   5,
     /* zone 7 (tet) */     4,
-    /* zone 8 (tet) */     4
+    /* zone 8 (tet) */     4,
+    /* zone 9 (arb) */     7,
+    /* zone 10 (arb) */    6
 };
 
 int facelist[] = {
@@ -242,7 +288,14 @@ int facelist[] = {
     28, 29, 30, -18,
 
     /* zone 8 (tet) */
-    31, 32, -31, -25
+    31, 32, -31, -25,
+
+    /* zone 9 (arb) */
+    -8, 33, 34, 35, 36, 37, 38,
+
+    /* zone 10 (arb) */
+    -22, -38, 39, 40, 41, 42
+    
 };
 
 /* order-randomized facelist */
@@ -272,8 +325,15 @@ int facelist2[] = {
     28, 29, 30, -18,
 
     /* zone 8 (tet) */
-    31, 32, -31, -25
+    31, 32, -31, -25,
+
+    /* zone 9 (arb) */
+    38, 36, 34, -8, 35, 37, 33,
+
+    /* zone 10 (arb) */
+    40, 42, -38, 39, 41, -22
 };
+
 int
 main(int argc, char *argv[])
 {
