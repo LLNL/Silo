@@ -406,7 +406,7 @@ main(int argc, char *argv[])
     DBPutPHZonelist(dbfile, "phzl_r",
         nfaces, nodecnts, lnodelist, nodelist2, 0,
         nzones, facecnts, lfacelist, facelist2, 0,
-        0, nzones-1, 0);
+        0, 7, 0);
 
     DBClose(dbfile);
 
