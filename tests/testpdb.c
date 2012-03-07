@@ -129,6 +129,7 @@ ReadFile (char *filename, char *name)
     /*
      * Open the file.
      */
+    lite_SC_HSZLARGE = 521; /* tiny test of hash tab size control */
     if ((file = lite_PD_open(filename, "r")) == NULL)
     {
         printf("Error opening file.\n");

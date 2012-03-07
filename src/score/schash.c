@@ -64,6 +64,75 @@ be used for advertising or product endorsement purposes.
  */
 #include "score.h"
 
+/*-------------------------------------------------------------------------
+  Function: bjhash 
+
+  Purpose: Hash a variable length stream of bytes into a 32-bit value.
+
+  Programmer: By Bob Jenkins, 1996.  bob_jenkins@burtleburtle.net.
+
+  You may use this code any way you wish, private, educational, or
+  commercial.  It's free. However, do NOT use for cryptographic purposes.
+
+  See http://burtleburtle.net/bob/hash/evahash.html
+ *-------------------------------------------------------------------------*/
+
+#define bjhash_mix(a,b,c) \
+{ \
+  a -= b; a -= c; a ^= (c>>13); \
+  b -= c; b -= a; b ^= (a<<8); \
+  c -= a; c -= b; c ^= (b>>13); \
+  a -= b; a -= c; a ^= (c>>12);  \
+  b -= c; b -= a; b ^= (a<<16); \
+  c -= a; c -= b; c ^= (b>>5); \
+  a -= b; a -= c; a ^= (c>>3);  \
+  b -= c; b -= a; b ^= (a<<10); \
+  c -= a; c -= b; c ^= (b>>15); \
+}
+
+static unsigned int bjhash(register const unsigned char *k, register unsigned int length, register unsigned int initval)
+{
+   register unsigned int a,b,c,len;
+
+   len = length;
+   a = b = 0x9e3779b9;
+   c = initval;
+
+   while (len >= 12)
+   {
+      a += (k[0] +((unsigned int)k[1]<<8) +((unsigned int)k[2]<<16) +((unsigned int)k[3]<<24));
+      b += (k[4] +((unsigned int)k[5]<<8) +((unsigned int)k[6]<<16) +((unsigned int)k[7]<<24));
+      c += (k[8] +((unsigned int)k[9]<<8) +((unsigned int)k[10]<<16)+((unsigned int)k[11]<<24));
+      bjhash_mix(a,b,c);
+      k += 12; len -= 12;
+   }
+
+   c += length;
+
+   switch(len)
+   {
+      case 11: c+=((unsigned int)k[10]<<24);
+      case 10: c+=((unsigned int)k[9]<<16);
+      case 9 : c+=((unsigned int)k[8]<<8);
+      case 8 : b+=((unsigned int)k[7]<<24);
+      case 7 : b+=((unsigned int)k[6]<<16);
+      case 6 : b+=((unsigned int)k[5]<<8);
+      case 5 : b+=k[4];
+      case 4 : a+=((unsigned int)k[3]<<24);
+      case 3 : a+=((unsigned int)k[2]<<16);
+      case 2 : a+=((unsigned int)k[1]<<8);
+      case 1 : a+=k[0];
+   }
+
+   bjhash_mix(a,b,c);
+
+   return c;
+}
+
+
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	lite_SC_hash
@@ -84,13 +153,10 @@ be used for advertising or product endorsement purposes.
 int
 lite_SC_hash (char *s, int size) {
 
-   int hashval;
-
-   for (hashval = 0; *s != '\0'; ) {
-      hashval = (hashval << 1) ^ (*s++);
-   }
-
-   return(abs(hashval) % size);
+   int len = strlen(s);
+   unsigned int hashval = bjhash(s, len, 0xDeadBeef);
+   if (hashval > INT_MAX) hashval -= INT_MAX;
+   return hashval % size;
 }
 
 
@@ -113,16 +179,33 @@ lite_SC_hash (char *s, int size) {
 hashel *
 lite_SC_lookup (char *s, HASHTAB *tab) {
 
+   static char last_s[4096] = "";
+   static HASHTAB *last_tab = 0;
    hashel *np, **tb;
-   int sz;
+   static hashel *last_np=0;
+   int sz, c=0;
 
    if (tab == NULL) return(NULL);
+
+   /*if (last_tab == tab && last_np && strcmp(last_s, s) == 0) return last_np;*/
 
    sz = tab->size;
    tb = tab->table;
    for (np = tb[lite_SC_hash(s, sz)]; np != NULL; np = np->next) {
-      if (strcmp(s, np->name) == 0) return(np); /* found it */
+      if (strcmp(s, np->name) == 0) {
+        last_tab = tab;
+        strcpy(last_s, s);
+        last_np = np;
+#if 0
+printf("FOUND \"%s\", sz = %d, #compares = %d\n", s, sz, c);
+#endif
+        return(np); /* found it */
+      }
+      c++;
    }
+#if 0
+printf("DID NOT FIND \"%s\", sz = %d, #compares = %d\n", s, sz, c);
+#endif
 
    return(NULL); /* not found */
 }

@@ -96,7 +96,7 @@ _lite_PD_mk_pdb (char *name) {
    file->name       = lite_SC_strsavef(name, "char*:_PD_MK_PDB:name");
    file->type       = NULL;
 
-   file->symtab     = lite_SC_make_hash_table(HSZLARGE, NODOC);
+   file->symtab     = lite_SC_make_hash_table(lite_SC_HSZLARGE, NODOC);
    file->chart      = lite_SC_make_hash_table(1, NODOC);
    file->host_chart = lite_SC_make_hash_table(1, NODOC);
    file->attrtab    = NULL;

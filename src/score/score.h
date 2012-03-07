@@ -118,7 +118,7 @@ be used for advertising or product endorsement purposes.
 #define BINARY_MODE_WPLUS 	"w+b"
 #define LRG_TXT_BUFFER		4096
 #define NODOC			0
-#define HSZLARGE		521
+#define HSZLARGE		65537	
 #define SC_BITS_BYTE		8
 
 #define SC_CHAR_I        	1
@@ -313,6 +313,7 @@ extern int		lite_SC_c_sp_diff;
 extern int		lite_SC_c_sp_max;
 extern int *		lite_LAST;
 extern char *		lite_SC_CHAR_S ;
+extern int              lite_SC_HSZLARGE;
 
 /* IO hooks */
 extern PFfclose lite_io_close_hook;
