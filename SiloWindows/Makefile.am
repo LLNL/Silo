@@ -66,6 +66,8 @@
 
 EXTRA_DIST = \
 ./MSVC9/Tests/alltypes.vcproj\
+./MSVC9/Tests/arbpoly.vcproj\
+./MSVC9/Tests/arbpoly3d.vcproj\
 ./MSVC9/Tests/array.vcproj\
 ./MSVC9/Tests/array_f.vfproj\
 ./MSVC9/Tests/compression.vcproj\
@@ -142,6 +144,8 @@ EXTRA_DIST = \
 ./silodiff.bat\
 ./README\
 ./MSVC9-BSD/Tests/alltypes.vcproj\
+./MSVC9-BSD/Tests/arbpoly.vcproj\
+./MSVC9-BSD/Tests/arbpoly3d.vcproj\
 ./MSVC9-BSD/Tests/array.vcproj\
 ./MSVC9-BSD/Tests/array_f.vfproj\
 ./MSVC9-BSD/Tests/compression.vcproj\
