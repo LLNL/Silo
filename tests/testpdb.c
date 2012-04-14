@@ -127,10 +127,9 @@ ReadFile (char *filename, char *name)
     float     fval;
 
     /*
-     * Open the file.
+     * Open the file. Test additional open mode chars
      */
-    lite_SC_HSZLARGE = 521; /* tiny test of hash tab size control */
-    if ((file = lite_PD_open(filename, "r")) == NULL)
+    if ((file = lite_PD_open(filename, "rli")) == NULL)
     {
         printf("Error opening file.\n");
         exit(-1);
