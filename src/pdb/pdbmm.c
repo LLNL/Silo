@@ -82,12 +82,16 @@ be used for advertising or product endorsement purposes.
  *    Remove unnecessary calls to lite_SC_mark, since reference count now
  *    set when allocated.
  *
+ *    Mark C. Miller, Fri Apr 13 22:35:57 PDT 2012
+ *    Added options arg and S,M,L,XL hash table size options. Added
+ *    ignore_apersand_ia_ptr_syms option.
  *-------------------------------------------------------------------------
  */
 PDBfile *
-_lite_PD_mk_pdb (char *name) {
+_lite_PD_mk_pdb (char *name, const char *options) {
 
    PDBfile *file;
+   int symtsz = HSZMEDIUM;
 
    file = FMAKE(PDBfile, "_PD_MK_PDB:file");
    if (file == NULL) return(NULL);
@@ -96,7 +100,13 @@ _lite_PD_mk_pdb (char *name) {
    file->name       = lite_SC_strsavef(name, "char*:_PD_MK_PDB:name");
    file->type       = NULL;
 
-   file->symtab     = lite_SC_make_hash_table(lite_SC_HSZLARGE, NODOC);
+   if (strchr(options, 's')) symtsz = HSZSMALL;
+   else if (strchr(options, 'm')) symtsz = HSZMEDIUM;
+   else if (strchr(options, 'l')) symtsz = HSZLARGE;
+   else if (strchr(options, 'x')) symtsz = HSZXLARGE;
+   else symtsz = HSZMEDIUM;
+
+   file->symtab     = lite_SC_make_hash_table(symtsz, NODOC);
    file->chart      = lite_SC_make_hash_table(1, NODOC);
    file->host_chart = lite_SC_make_hash_table(1, NODOC);
    file->attrtab    = NULL;
@@ -121,6 +131,9 @@ _lite_PD_mk_pdb (char *name) {
    file->symtaddr = 0L;
    file->chrtaddr = 0L;
    file->headaddr = 0L;
+
+   file->ignore_apersand_ptr_ia_syms = 0;
+   if (strchr(options, 'i')) file->ignore_apersand_ptr_ia_syms = 1;
 
    return(file);
 }

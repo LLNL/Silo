@@ -101,6 +101,7 @@ char		lite_PD_err[MAXLINE];
 int		lite_PD_buffer_size = -1;
 ReaderFuncType	lite_pdb_rd_hook = NULL;
 WriterFuncType	lite_pdb_wr_hook = NULL;
+char           *lite_PD_DEF_CREATM = "w";
 
 #ifdef PDB_WRITE
 static int	_append_flag = FALSE ;
@@ -266,6 +267,9 @@ lite_PD_error(char *s, int n) {
  *	Added write capability back into the function, but it is protected
  *	with #ifdef PDB_WRITE.
  *
+ *      Mark C. Miller, Fri Apr 13 22:37:56 PDT 2012
+ *      Changed mode string checks to strchr to accomodate wider variety
+ *      of mode characters for new hash table size and open modes.
  *-------------------------------------------------------------------------
  */
 PDBfile *
@@ -280,9 +284,9 @@ lite_PD_open (char *name, char *mode) {
    /*
     * If opened in write mode use PD_CREATE instead.
     */
-   if (*mode == 'w') return lite_PD_create (name);
+   if (strchr(mode,'w')) return lite_PD_create (name);
 #else
-   assert (!strcmp(mode,"r")) ;
+   assert (!strchr(mode,'r')) ;
 #endif
 
    switch (setjmp(_lite_PD_open_err)) {
@@ -304,7 +308,7 @@ lite_PD_open (char *name, char *mode) {
 #ifdef PDB_WRITE
    fp = io_open(str, BINARY_MODE_RPLUS);
    if (fp == NULL) {
-      if (*mode == 'r') {
+      if (strchr(mode,'r')) {
 #endif
 	 fp = io_open(str, BINARY_MODE_R);
 	 if (fp == NULL) {
@@ -312,7 +316,7 @@ lite_PD_open (char *name, char *mode) {
 			  PD_OPEN);
 	 }
 #ifdef PDB_WRITE
-      } else if (*mode == 'a') {
+      } else if (strchr(mode,'a')) {
 	 return lite_PD_create (name);
       } else {
 	 lite_PD_error("CAN'T OPEN FILE - PD_OPEN", PD_OPEN);
@@ -326,13 +330,13 @@ lite_PD_open (char *name, char *mode) {
       }
    }
 
-   file = _lite_PD_mk_pdb(str);
+   file = _lite_PD_mk_pdb(str, mode);
    if (file == NULL) {
       lite_PD_error("CAN'T ALLOCATE PDBFILE - PD_OPEN", PD_OPEN);
    }
    file->stream = fp;
 #ifdef PDB_WRITE
-   if (*mode == 'a') file->mode = PD_APPEND;
+   if (strchr(mode,'a')) file->mode = PD_APPEND;
    else file->mode = PD_OPEN;
 #else
    file->mode = PD_OPEN ;
@@ -1111,6 +1115,8 @@ _PD_write (PDBfile *file, char *name, char *intype, char *outtype,
  *
  * Modifications:
  *
+ * Mark C. Miller, Fri Apr 13 22:39:29 PDT 2012
+ * Pass default creation mode options to PD_mk_pdb().
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
@@ -1150,7 +1156,7 @@ lite_PD_create (char *name) {
    /*
     * Make the PDBfile.
     */
-   file = _lite_PD_mk_pdb(str);
+   file = _lite_PD_mk_pdb(str, lite_PD_DEF_CREATM);
    if (file == NULL) {
       lite_PD_error("CAN'T ALLOCATE PDBFILE - PD_CREATE", PD_OPEN);
    }

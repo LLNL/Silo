@@ -75,7 +75,6 @@ int	lite_SC_c_sp_diff ;
 int	lite_SC_c_sp_free ;
 int	lite_SC_c_sp_max ;
 char	*lite_SC_CHAR_S = "char";
-int     lite_SC_HSZLARGE = HSZLARGE;
 
 /* These prototypes are only included if we can't get them any other place.
  * We need them for their pointers, below.

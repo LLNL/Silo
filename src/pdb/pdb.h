@@ -265,6 +265,7 @@ struct s_PDBfile {
    long headaddr;
    long symtaddr;
    long chrtaddr;
+   int ignore_apersand_ptr_ia_syms; 
 };
 
 typedef struct s_PDBfile PDBfile;
@@ -449,6 +450,7 @@ extern jmp_buf		_lite_PD_trace_err ;
 extern char		lite_PD_err[] ;
 extern int		lite_PD_buffer_size ;
 extern int		lite_FORMAT_FIELDS ;
+extern char*            lite_PD_DEF_CREATM;
 extern data_standard	lite_IEEEA_STD ;
 extern data_standard	lite_IEEEB_STD ;
 extern data_standard	lite_INTELA_STD ;
@@ -542,7 +544,7 @@ extern defstr *		_lite_PD_mk_defstr (char*,memdes*,long,int,int,int,
 					    int*,long*);
 extern memdes *		_lite_PD_mk_descriptor (char*,int);
 extern dimdes *		_lite_PD_mk_dimensions (long,long);
-extern PDBfile *	_lite_PD_mk_pdb (char*);
+extern PDBfile *	_lite_PD_mk_pdb (char*, const char*);
 extern data_standard *	_lite_PD_mk_standard (void);
 extern syment *		_lite_PD_mk_syment (char*,long,long,symindir*,dimdes*);
 extern int		_lite_PD_null_pointer (char*,int);

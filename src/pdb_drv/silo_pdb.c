@@ -2706,6 +2706,10 @@ db_pdb_NewToc (DBfile *_dbfile)
           *  Group (object)
           *----------------------------------------*/
       }
+      else if (STR_BEGINSWITH(ep->type, "GroupDataShadow")) {
+          toc->nobj++;
+          continue;
+      }
       else if (STR_BEGINSWITH(ep->type, "Group")) {
 
          /*

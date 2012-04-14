@@ -90,7 +90,8 @@ be used for advertising or product endorsement purposes.
   c -= a; c -= b; c ^= (b>>15); \
 }
 
-static unsigned int bjhash(register const unsigned char *k, register unsigned int length, register unsigned int initval)
+static unsigned int bjhash(register const unsigned char *k,
+    register unsigned int length, register unsigned int initval)
 {
    register unsigned int a,b,c,len;
 
@@ -129,10 +130,6 @@ static unsigned int bjhash(register const unsigned char *k, register unsigned in
    return c;
 }
 
-
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function:	lite_SC_hash
@@ -148,6 +145,8 @@ static unsigned int bjhash(register const unsigned char *k, register unsigned in
  *
  * Modifications:
  *
+ *   Mark C. Miller, Fri Apr 13 22:43:19 PDT 2012
+ *   Use "BJ Hash"
  *-------------------------------------------------------------------------
  */
 int
@@ -179,33 +178,16 @@ lite_SC_hash (char *s, int size) {
 hashel *
 lite_SC_lookup (char *s, HASHTAB *tab) {
 
-   static char last_s[4096] = "";
-   static HASHTAB *last_tab = 0;
    hashel *np, **tb;
-   static hashel *last_np=0;
-   int sz, c=0;
+   int sz;
 
    if (tab == NULL) return(NULL);
-
-   /*if (last_tab == tab && last_np && strcmp(last_s, s) == 0) return last_np;*/
 
    sz = tab->size;
    tb = tab->table;
    for (np = tb[lite_SC_hash(s, sz)]; np != NULL; np = np->next) {
-      if (strcmp(s, np->name) == 0) {
-        last_tab = tab;
-        strcpy(last_s, s);
-        last_np = np;
-#if 0
-printf("FOUND \"%s\", sz = %d, #compares = %d\n", s, sz, c);
-#endif
-        return(np); /* found it */
-      }
-      c++;
+      if (strcmp(s, np->name) == 0) return(np); /* found it */
    }
-#if 0
-printf("DID NOT FIND \"%s\", sz = %d, #compares = %d\n", s, sz, c);
-#endif
 
    return(NULL); /* not found */
 }
