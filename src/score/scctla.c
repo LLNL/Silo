@@ -188,7 +188,6 @@ union u_mem_header {
       desc->ref_count = 1;                                             \
       desc->type      = 0;                                             \
       desc->length    = nb;                                            \
-      desc->name      = name;					       \
    }
 
 #define SAVE_LINKS(desc) /*void*/
@@ -421,7 +420,9 @@ lite_SC_free (byte *p) {
    if (_SC_zero_space) {
       memset(space, 0, nbp);
    } else {
+#ifdef NEED_MEM_TRACE
       desc->name      = NULL;
+#endif
       desc->id        = 0L;
       desc->ref_count = 0;
       desc->type      = 0;
@@ -606,13 +607,20 @@ _SC_prim_alloc (size_t nbp) {
 	 nu--;
 	 for (i = 0; i < nu; i++, pn += us) {
 	    ths       = (mem_descriptor *) pn;
+#ifdef NEED_MEM_TRACE
 	    ths->name = (char *) (pn + us);
+#endif
 	 }
 	 ths       = (mem_descriptor *) pn;
+#ifdef NEED_MEM_TRACE
 	 ths->name = NULL;
+#endif
       }
 
+#ifdef NEED_MEM_TRACE
+#error HOW TO UPDATE FREE LIST IF THIS CODE IS ENABLED 
       _SC_free_list[unsz] = (mem_descriptor *) (md->name);
+#endif
       p = (byte *) md;
    } else {
       p = _SC_ALLOC((size_t) nbp);
@@ -660,7 +668,9 @@ _SC_prim_free (byte *p, unsigned long nbp) {
    if (unsz < UNIT_SIZE_MAX) {
       ths = (mem_descriptor *) p;
       lst = _SC_free_list[unsz];
+#ifdef NEED_MEM_TRACE
       ths->name = (char *) lst;
+#endif
       _SC_free_list[unsz] = ths;
    } else {
       _SC_FREE(p);
