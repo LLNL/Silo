@@ -169,7 +169,6 @@ static mem_header	*_SC_latest_block ;
  * this solves all alignment problems (especially for RISC chips)
  */
 struct s_mem_descriptor {
-   char			*name;
    long 		id;
    short 		ref_count;
    short 		type;
