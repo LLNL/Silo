@@ -90,7 +90,9 @@ typedef struct s_mem_descriptor mem_descriptor;
  * These machines might get away with not defining this: meiko, solaris,
  * sun, sun-gnu.
  */
-#undef NEED_MEM_TRACE
+#if NORMAL_SCORE_HEADERS
+#define NEED_MEM_TRACE
+#endif
 #ifdef NEED_MEM_TRACE
 
 /*

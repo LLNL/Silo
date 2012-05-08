@@ -158,6 +158,9 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
 
+/* SCORE memory header optimizations */
+#undef NORMAL_SCORE_HEADERS
+
 /* Name of package */
 #undef PACKAGE
 
