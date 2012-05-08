@@ -614,14 +614,14 @@ AC_SUBST(SILO_DTYPPTR)
 AC_SUBST(SILO_DTYPPTR1)
 AC_SUBST(SILO_DTYPPTR2)
 
-dnl Switch to disable score memory header optimizations
-AC_ARG_ENABLE(normal-score-mem-headers,
-    AC_HELP_STRING([--enable-normal-score-mem-headers],
-        [compile with normal score memory headers @<:@default=no@:>@]),
+dnl Switch to disable score lite memory header optimizations
+AC_ARG_ENABLE(normal-sclite-mem-headers,
+    AC_HELP_STRING([--enable-normal-sclite-mem-headers],
+        [compile with normal score lite memory headers @<:@default=no@:>@]),
     if test "$enableval" = "yes" ; then
-        AC_DEFINE(NORMAL_SCORE_HEADERS,1,[SCORE memory header optimizations])
+        AC_DEFINE(NORMAL_SCLITE_HEADERS,1,[SCORE lite memory header optimizations])
     fi,
-    AC_DEFINE(NORMAL_SCORE_HEADERS,0,[SCORE memory header optimizations]))
+    AC_DEFINE(NORMAL_SCLITE_HEADERS,0,[SCORE lite memory header optimizations]))
 
 dnl we don't need to check for netcdf driver. It is always there.
 NETCDF="netcdf"

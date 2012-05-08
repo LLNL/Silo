@@ -1575,8 +1575,8 @@ Optional Features:
   --enable-legacy-datatyped-pointers
                           compile using legacy (float) pointers for datatype'd
                           pointers [default=no]
-  --enable-normal-score-mem-headers
-                          compile with normal score memory headers
+  --enable-normal-sclite-mem-headers
+                          compile with normal score lite memory headers
                           [default=no]
   --enable-browser        build browser [default=yes]
   --enable-silex          build the silex browser [default=no]
@@ -21085,19 +21085,19 @@ fi
 
 
 
-# Check whether --enable-normal-score-mem-headers was given.
-if test "${enable_normal_score_mem_headers+set}" = set; then
-  enableval=$enable_normal_score_mem_headers; if test "$enableval" = "yes" ; then
+# Check whether --enable-normal-sclite-mem-headers was given.
+if test "${enable_normal_sclite_mem_headers+set}" = set; then
+  enableval=$enable_normal_sclite_mem_headers; if test "$enableval" = "yes" ; then
 
 cat >>confdefs.h <<\_ACEOF
-#define NORMAL_SCORE_HEADERS 1
+#define NORMAL_SCLITE_HEADERS 1
 _ACEOF
 
     fi
 else
 
 cat >>confdefs.h <<\_ACEOF
-#define NORMAL_SCORE_HEADERS 0
+#define NORMAL_SCLITE_HEADERS 0
 _ACEOF
 
 fi
