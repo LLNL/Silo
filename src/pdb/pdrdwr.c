@@ -133,7 +133,7 @@ static int              _PD_read_hyper_space (PDBfile*,syment*,char*,char*,
                                                   long,long) ;
 static char *           _PD_wr_hyper_index (PDBfile*,char*,dimind*,char*,
                                             char*,long,symblock*,int,int);
-static void             _PD_wr_leaf_members (PDBfile*,char*,char*,long,byte*);
+static void             _PD_wr_leaf_members (PDBfile*,char*,char*,long,lite_SC_byte*);
 static int              _PD_wr_ind_itags (PDBfile*,long,char*);
 static char *           _PD_write_hyper_space (PDBfile*,char*,char*,char*,
                                                symblock*,int,int,long,
@@ -160,7 +160,7 @@ static char *           _PD_write_hyper_space (PDBfile*,char*,char*,char*,
  *-------------------------------------------------------------------------
  */
 int
-_lite_PD_indexed_read_as (PDBfile *file, char *fullpath, char *type, byte *vr,
+_lite_PD_indexed_read_as (PDBfile *file, char *fullpath, char *type, lite_SC_byte *vr,
                           int nd, long *ind, syment *ep) {
 
    int          i, err;
@@ -241,7 +241,7 @@ _lite_PD_indexed_read_as (PDBfile *file, char *fullpath, char *type, byte *vr,
  */
 int
 _lite_PD_hyper_read (PDBfile *file, char *name, char *outtype,
-                     syment *ep, byte *vr) {
+                     syment *ep, lite_SC_byte *vr) {
 
    long         hbyt, fbyt;
    int          nd, c, nrd, i;
@@ -339,7 +339,7 @@ _lite_PD_hyper_read (PDBfile *file, char *name, char *outtype,
  *-------------------------------------------------------------------------
  */
 long
-_lite_PD_rd_syment (PDBfile *file, syment *ep, char *outtype, byte *vr) {
+_lite_PD_rd_syment (PDBfile *file, syment *ep, char *outtype, lite_SC_byte *vr) {
 
    FILE *fp;
    int dst, vif, size, boffs, readonly;
@@ -1340,7 +1340,7 @@ _PD_compute_hyper_strides (PDBfile *file, char *ind, dimdes *dims, int *pnd) {
  */
 #ifdef PDB_WRITE
 int
-_lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, byte *vr,
+_lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, lite_SC_byte *vr,
                       char *intype) {
 
    long hbyt, fbyt;
@@ -1693,7 +1693,7 @@ _PD_wr_hyper_index (PDBfile *file, char *out, dimind *pi,
 #ifdef PDB_WRITE
 static void
 _PD_wr_leaf_members (PDBfile *file, char *intype, char *outtype,
-                     long nitems, byte *vr) {
+                     long nitems, lite_SC_byte *vr) {
 
    long bytepitem, in_offs, out_offs;
    int ret;
@@ -1763,7 +1763,7 @@ _PD_wr_leaf_members (PDBfile *file, char *intype, char *outtype,
  */
 #ifdef PDB_WRITE
 long
-_lite_PD_number_refd (byte *vr, char *type, HASHTAB *tab) {
+_lite_PD_number_refd (lite_SC_byte *vr, char *type, HASHTAB *tab) {
 
    long bytepitem, nitems;
 

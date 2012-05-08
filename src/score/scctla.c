@@ -169,23 +169,19 @@ static mem_header	*_SC_latest_block ;
  * this solves all alignment problems (especially for RISC chips)
  */
 struct s_mem_descriptor {
-   long 		id;
    short 		ref_count;
-   short 		type;
-   long 		length;
+   int                  length;
 };
 
 union u_mem_header {
    mem_descriptor 	block;
-   double 		align[2];
+   double 		align[1];
 };
 
 #define ASSIGN_BLOCK(space, nb, name) {                                \
       mem_descriptor *desc;                                            \
       desc = &space->block;                                            \
-      desc->id        = SC_MEM_ID;                                     \
       desc->ref_count = 1;                                             \
-      desc->type      = 0;                                             \
       desc->length    = nb;                                            \
    }
 
@@ -201,7 +197,7 @@ union u_mem_header {
 #endif /* NEED_MEM_TRACE */
 
 #define SCORE_BLOCK_P(desc)                                            \
-    ((desc)->id == SC_MEM_ID)
+    (1 == 1)
 
 #define BLOCK_LENGTH(desc)                                             \
     (desc)->length
@@ -240,8 +236,8 @@ static unsigned long	Sz_max = ( 1L << NBITS) - 1;        /* maximum value */
 static unsigned long	Sz = sizeof(mem_header);  /* size in bytes of header */
 static char		tokbuffer[MAXLINE];  /* used by firsttok and lasttok */
 static int		_SC_zero_space = TRUE;
-static byte *		_SC_prim_alloc (size_t) ;
-static void		_SC_prim_free (byte*,unsigned long) ;
+static lite_SC_byte *		_SC_prim_alloc (size_t) ;
+static void		_SC_prim_free (lite_SC_byte*,unsigned long) ;
 
 
 /*-------------------------------------------------------------------------
@@ -265,7 +261,7 @@ static void		_SC_prim_free (byte*,unsigned long) ;
  *
  *-------------------------------------------------------------------------
  */
-byte *
+lite_SC_byte *
 lite_SC_alloc (long nitems, long bytepitem, char *name) {
 
    long nb;
@@ -296,7 +292,7 @@ lite_SC_alloc (long nitems, long bytepitem, char *name) {
       if (_SC_zero_space) memset(space, 0, nb);
    }
 
-   return((byte *) space);
+   return((lite_SC_byte *) space);
 }
 
 
@@ -323,8 +319,8 @@ lite_SC_alloc (long nitems, long bytepitem, char *name) {
  *
  *-------------------------------------------------------------------------
  */
-byte *
-lite_SC_realloc (byte *p, long nitems, long bytepitem) {
+lite_SC_byte *
+lite_SC_realloc (lite_SC_byte *p, long nitems, long bytepitem) {
 
    long nb, ob, db;
    unsigned long nbp, obp;
@@ -371,7 +367,7 @@ lite_SC_realloc (byte *p, long nitems, long bytepitem) {
       if ((db > 0) && (_SC_zero_space)) memset(((char *) space + ob), 0, db);
    }
 
-   return((byte *) space);
+   return((lite_SC_byte *) space);
 }
 
 
@@ -393,7 +389,7 @@ lite_SC_realloc (byte *p, long nitems, long bytepitem) {
  *-------------------------------------------------------------------------
  */
 int
-lite_SC_free (byte *p) {
+lite_SC_free (lite_SC_byte *p) {
 
    mem_header *space;
    mem_descriptor *desc;
@@ -421,14 +417,14 @@ lite_SC_free (byte *p) {
    } else {
 #ifdef NEED_MEM_TRACE
       desc->name      = NULL;
-#endif
       desc->id        = 0L;
-      desc->ref_count = 0;
       desc->type      = 0;
+#endif
+      desc->ref_count = 0;
       desc->length    = 0L;
    }
 
-   _SC_prim_free((byte *) space, nbp);
+   _SC_prim_free((lite_SC_byte *) space, nbp);
    _SC_n_mem_blocks--;
    return(TRUE);
 }
@@ -452,7 +448,7 @@ lite_SC_free (byte *p) {
  *-------------------------------------------------------------------------
  */
 long
-lite_SC_arrlen (byte *p) {
+lite_SC_arrlen (lite_SC_byte *p) {
 
    mem_header *space;
    mem_descriptor *desc;
@@ -487,7 +483,7 @@ lite_SC_arrlen (byte *p) {
  *-------------------------------------------------------------------------
  */
 int
-lite_SC_mark (byte *p, int n) {
+lite_SC_mark (lite_SC_byte *p, int n) {
 
    mem_header *space;
    mem_descriptor *desc;
@@ -522,7 +518,7 @@ lite_SC_mark (byte *p, int n) {
  *-------------------------------------------------------------------------
  */
 int
-lite_SC_ref_count (byte *p) {
+lite_SC_ref_count (lite_SC_byte *p) {
 
    mem_header *space;
    mem_descriptor *desc;
@@ -557,10 +553,10 @@ lite_SC_ref_count (byte *p) {
  *
  *-------------------------------------------------------------------------
  */
-static byte *
+static lite_SC_byte *
 _SC_prim_alloc (size_t nbp) {
 
-   byte *p;
+   lite_SC_byte *p;
 #ifdef CACHE_SMALL_MEM_REQ
    char *pn;
    mem_descriptor *md, *ths;
@@ -620,7 +616,7 @@ _SC_prim_alloc (size_t nbp) {
 #error HOW TO UPDATE FREE LIST IF THIS CODE IS ENABLED 
       _SC_free_list[unsz] = (mem_descriptor *) (md->name);
 #endif
-      p = (byte *) md;
+      p = (lite_SC_byte *) md;
    } else {
       p = _SC_ALLOC((size_t) nbp);
    }
@@ -652,7 +648,7 @@ _SC_prim_alloc (size_t nbp) {
  */
 /* ARGSUSED */
 static void
-_SC_prim_free (byte *p, unsigned long nbp) {
+_SC_prim_free (lite_SC_byte *p, unsigned long nbp) {
 
 #ifdef CACHE_SMALL_MEM_REQ
    mem_descriptor *lst, *ths;

@@ -209,7 +209,7 @@ lite_SC_lookup (char *s, HASHTAB *tab) {
  *
  *-------------------------------------------------------------------------
  */
-byte *
+lite_SC_byte *
 lite_SC_def_lookup (char *s, HASHTAB *tab) {
 
    hashel *np;
@@ -239,7 +239,7 @@ lite_SC_def_lookup (char *s, HASHTAB *tab) {
  *-------------------------------------------------------------------------
  */
 hashel *
-lite_SC_install (char *name, byte *obj, char *type, HASHTAB *tab) {
+lite_SC_install (char *name, lite_SC_byte *obj, char *type, HASHTAB *tab) {
 
    return _lite_SC_install (name, obj, type, tab);
 }
@@ -273,7 +273,7 @@ lite_SC_install (char *name, byte *obj, char *type, HASHTAB *tab) {
  *-------------------------------------------------------------------------
  */
 hashel *
-_lite_SC_install (char *name, byte *obj, char *type, HASHTAB *tab) {
+_lite_SC_install (char *name, lite_SC_byte *obj, char *type, HASHTAB *tab) {
 
    hashel *np, **tb;
    int hashval, sz;

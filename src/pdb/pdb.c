@@ -107,7 +107,7 @@ char           *lite_PD_DEF_CREATM = "w";
 static int	_append_flag = FALSE ;
 data_standard	*lite_REQ_STANDARD = NULL;
 data_alignment	*lite_REQ_ALIGNMENT = NULL;
-static syment *	_PD_write (PDBfile*,char*,char*,char*,byte*,dimdes*,int);
+static syment *	_PD_write (PDBfile*,char*,char*,char*,lite_SC_byte*,dimdes*,int);
 #endif /* PDB_WRITE */
 
 
@@ -557,7 +557,7 @@ lite_PD_open (char *name, char *mode) {
  *-------------------------------------------------------------------------
  */
 int
-lite_PD_read (PDBfile *file, char *name, byte *vr) {
+lite_PD_read (PDBfile *file, char *name, lite_SC_byte *vr) {
 
    return lite_PD_read_as (file, name, NULL, vr);
 }
@@ -586,7 +586,7 @@ lite_PD_read (PDBfile *file, char *name, byte *vr) {
  *-------------------------------------------------------------------------
  */
 int
-lite_PD_read_alt (PDBfile *file, char *name, byte *vr, long *ind) {
+lite_PD_read_alt (PDBfile *file, char *name, lite_SC_byte *vr, long *ind) {
 
    return lite_PD_read_as_alt (file, name, NULL, vr, ind) ;
 }
@@ -614,7 +614,7 @@ lite_PD_read_alt (PDBfile *file, char *name, byte *vr, long *ind) {
  *-------------------------------------------------------------------------
  */
 int
-lite_PD_read_as (PDBfile *file, char *name, char *type, byte *vr) {
+lite_PD_read_as (PDBfile *file, char *name, char *type, lite_SC_byte *vr) {
 
    int		err;
    syment	*ep;
@@ -675,7 +675,7 @@ lite_PD_read_as (PDBfile *file, char *name, char *type, byte *vr) {
  *-------------------------------------------------------------------------
  */
 int
-lite_PD_read_as_alt (PDBfile *file, char *name, char *type, byte *vr,
+lite_PD_read_as_alt (PDBfile *file, char *name, char *type, lite_SC_byte *vr,
 		     long *ind) {
 
    char		fullpath[MAXLINE];
@@ -784,7 +784,7 @@ lite_PD_typedef (PDBfile *file, char *oname, char *tname) {
  */
 #ifdef PDB_WRITE
 int
-lite_PD_write (PDBfile *file, char *name, char *type, byte *vr) {
+lite_PD_write (PDBfile *file, char *name, char *type, lite_SC_byte *vr) {
 
    return lite_PD_write_as (file, name, type, type, vr) ;
 }
@@ -812,7 +812,7 @@ lite_PD_write (PDBfile *file, char *name, char *type, byte *vr) {
 #ifdef PDB_WRITE
 int
 lite_PD_write_as (PDBfile *file, char *name, char *intype, char *outtype,
-		  byte *vr) {
+		  lite_SC_byte *vr) {
    
    syment *ep;
    dimdes *dims;
@@ -856,7 +856,7 @@ lite_PD_write_as (PDBfile *file, char *name, char *intype, char *outtype,
  */
 #ifdef PDB_WRITE
 int
-lite_PD_write_alt (PDBfile *file, char *name, char *type, byte *vr, int nd,
+lite_PD_write_alt (PDBfile *file, char *name, char *type, lite_SC_byte *vr, int nd,
 		   long *ind) {
 
    return lite_PD_write_as_alt (file, name, type, type, vr, nd, ind) ;
@@ -895,7 +895,7 @@ lite_PD_write_alt (PDBfile *file, char *name, char *type, byte *vr, int nd,
 #ifdef PDB_WRITE
 int
 lite_PD_write_as_alt (PDBfile *file, char *name, char *intype, char *outtype,
-		      byte *vr, int nd, long *ind) {
+		      lite_SC_byte *vr, int nd, long *ind) {
    int i;
    long start, stop, step, leng;
    char expr[MAXLINE], index[MAXLINE], hname[MAXLINE];
@@ -971,7 +971,7 @@ lite_PD_write_as_alt (PDBfile *file, char *name, char *intype, char *outtype,
 #ifdef PDB_WRITE
 static syment *
 _PD_write (PDBfile *file, char *name, char *intype, char *outtype,
-	   byte *vr, dimdes *dims, int appnd) {
+	   lite_SC_byte *vr, dimdes *dims, int appnd) {
 
    int reset;
    syment *ep;

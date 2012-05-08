@@ -222,7 +222,7 @@ be used for advertising or product endorsement purposes.
 /* REMAKE_N - reallocate a block of type x and return a pointer to it */
 
 #define REMAKE_N(p, x, n)                                                    \
-   (p = (x *) lite_SC_realloc((byte *) p, (long) (n), (long) sizeof(x)))
+   (p = (x *) lite_SC_realloc((lite_SC_byte *) p, (long) (n), (long) sizeof(x)))
 
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
@@ -241,7 +241,7 @@ be used for advertising or product endorsement purposes.
 /*--------------------------------------------------------------------------*/
 
 
-typedef void		byte ;
+typedef void		lite_SC_byte ;
 typedef void		(*FreeFuncType)(void *) ;
 typedef void		*((*MallocFuncType)(size_t));
 typedef void		*((*ReallocFuncType)(void *,size_t));
@@ -258,9 +258,9 @@ typedef double		(*PFDouble)() ;
  */
 typedef struct s_pcons {
    char		*car_type;
-   byte 	*car;
+   lite_SC_byte *car;
    char 	*cdr_type;
-   byte 	*cdr;
+   lite_SC_byte *cdr;
 } pcons;
 
 /*
@@ -276,7 +276,7 @@ typedef struct s_pcons {
 typedef struct s_hashel {
    char 	*name;
    char 	*type;
-   byte 	*def;
+   lite_SC_byte *def;
    struct s_hashel *next; /* next entry in chain */
 } hashel ;
 
@@ -298,7 +298,7 @@ typedef union u_SC_address {
 
 typedef FILE *	(*PFfopen)(char*,char*);
 typedef long 	(*PFftell)(void*);
-typedef size_t	(*PFfread)(byte*,size_t,size_t,void*);
+typedef size_t	(*PFfread)(lite_SC_byte*,size_t,size_t,void*);
 typedef size_t	(*PFfwrite)(void*,size_t,size_t,void*);
 typedef int	(*PFsetvbuf)(void*,char*,int,size_t);
 typedef int	(*PFfclose)(void*);
@@ -335,24 +335,24 @@ extern PFfwrite lite_io_write_hook;
 /*                          FUNCTION DECLARATIONS                           */
 /*--------------------------------------------------------------------------*/
 
-SILO_API extern byte *	lite_SC_alloc (long,long,char*);
-SILO_API extern long	lite_SC_arrlen (byte*);
+SILO_API extern lite_SC_byte *	lite_SC_alloc (long,long,char*);
+SILO_API extern long	lite_SC_arrlen (lite_SC_byte*);
 SILO_API extern char *	lite_SC_date (void);
-SILO_API extern byte *	lite_SC_def_lookup (char*,HASHTAB*);
+SILO_API extern lite_SC_byte *	lite_SC_def_lookup (char*,HASHTAB*);
 SILO_API extern char **	lite_SC_dump_hash (HASHTAB*,char*,int);
 SILO_API extern char *	lite_SC_firsttok (char*,char*);
-SILO_API extern int	lite_SC_free (byte*);
+SILO_API extern int	lite_SC_free (lite_SC_byte*);
 SILO_API extern int	lite_SC_hash (char*,int);
 SILO_API extern void	lite_SC_hash_clr (HASHTAB*);
 SILO_API extern char **	lite_SC_hash_dump (HASHTAB*,char*);
 SILO_API extern int	lite_SC_hash_rem (char*,HASHTAB*);
-SILO_API extern hashel *lite_SC_install (char*,byte*,char*,HASHTAB*);
+SILO_API extern hashel *lite_SC_install (char*,lite_SC_byte*,char*,HASHTAB*);
 SILO_API extern char *	lite_SC_lasttok (char*,char*);
 SILO_API extern hashel *lite_SC_lookup (char*,HASHTAB*);
 SILO_API extern HASHTAB *lite_SC_make_hash_table (int,int);
-SILO_API extern int	lite_SC_mark (byte*,int);
-SILO_API extern byte *	lite_SC_realloc (byte*,long,long);
-SILO_API extern int	lite_SC_ref_count (byte*);
+SILO_API extern int	lite_SC_mark (lite_SC_byte*,int);
+SILO_API extern lite_SC_byte *	lite_SC_realloc (lite_SC_byte*,long,long);
+SILO_API extern int	lite_SC_ref_count (lite_SC_byte*);
 SILO_API extern int	lite_SC_regx_match (char*,char*);
 SILO_API extern void	lite_SC_rl_hash_table (HASHTAB*);
 SILO_API extern int	lite_SC_stoi (char*);
@@ -360,7 +360,7 @@ SILO_API extern long	lite_SC_stol (char*);
 SILO_API extern void	lite_SC_string_sort (char**,int);
 SILO_API extern char *	lite_SC_strrev (char*);
 SILO_API extern char *	lite_SC_strsavef (char*,char*);
-extern hashel *		_lite_SC_install (char*,byte*,char*,HASHTAB*);
+extern hashel *		_lite_SC_install (char*,lite_SC_byte*,char*,HASHTAB*);
 extern char *		_lite_SC_pr_tok (char*,char*);
 extern long int		_lite_SC_strtol (char*,char**,int);
 

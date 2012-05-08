@@ -11667,11 +11667,13 @@ db_ResetGlobalData_Ucdzonelist (void) {
  *    Mark C. Miller, Mon Jan 12 16:28:18 PST 2009
  *    Removed explicit setting of members already correctly handled
  *    by memset to zero.
+ *
+ *    Mark C. Miller, Thu May  3 16:14:11 PDT 2012
+ *    Removed setting of nmatnos to -1.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_MultiMesh (void) {
    memset(&_mm, 0, sizeof(_mm));
-   _mm._nmatnos = -1;
    _mm._nmat = -1;
    _mm._blockorigin = 1;
    _mm._grouporigin = 1;
