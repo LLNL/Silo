@@ -623,6 +623,16 @@ AC_ARG_ENABLE(normal-sclite-mem-headers,
     fi,
     AC_DEFINE(NORMAL_SCLITE_HEADERS,0,[SCORE lite memory header optimizations]))
 
+dnl Switch to have 'make install' install score/pdb lite header files
+INSTALL_LITE_HEADERS=""
+AC_ARG_ENABLE(install-lite-headers,
+    AC_HELP_STRING([--enable-install-lite-headers],
+        [Install SCORE/PDB lite header files @<:@default=no@:>@]),
+    if test "$enableval" = "yes" ; then
+        INSTALL_LITE_HEADERS=""
+    fi)
+AC_SUBST(INSTALL_LITE_HEADERS)
+
 dnl we don't need to check for netcdf driver. It is always there.
 NETCDF="netcdf"
 AC_DEFINE(HAVE_NETCDF_DRIVER,1,[Support for NetCDF])

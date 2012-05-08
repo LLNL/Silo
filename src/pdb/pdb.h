@@ -59,12 +59,24 @@ be used for advertising or product endorsement purposes.
  *
  */
 
+/*
+grep SILO_API pdb.h | tr '\t' ' ' | tr -s ' ' | sed -e 's|^SILO_API \(.*\) \(*\?\)lite_\(.*\)(.*);|#define \3 lite_\3|' | tr '\t' ' ' | tr -s ' '
+*/
+
+#ifdef PCK_PDB
+#error CANNOT INCLUDE PDB PROPER AND PDB LITE HEADERS IN SAME COMPILATION MODULE
+#endif
+
 #ifndef _PDB_H
 #define _PDB_H
 
 #include <setjmp.h> /* For the setjmp/long structure jmp_buf. */
 #include <stdio.h>
 #include "score.h" /* For type definitions */ 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* The MAXLINE macro is defined in score.h and taken from stdio.h's */
 /* FILENAME_MAX.  HP's is only 14, so correct that here. */
@@ -476,10 +488,7 @@ extern WriterFuncType	lite_pdb_wr_hook;
 
 SILO_API extern int	lite_PD_cd (PDBfile*,char*);
 SILO_API extern int	lite_PD_close (PDBfile*);
-SILO_API extern int	lite_PD_convert (char**,char**,char*,char*,long,
-					 data_standard*,data_standard*,
-					 data_standard*,long*,long*,HASHTAB*,
-					 HASHTAB*,int,int);
+SILO_API extern int	lite_PD_convert (char**,char**,char*,char*,long, data_standard*,data_standard*, data_standard*,long*,long*,HASHTAB*, HASHTAB*,int,int);
 SILO_API extern dimdes *lite_PD_copy_dims (dimdes*);
 SILO_API extern memdes *lite_PD_copy_members (memdes*);
 SILO_API extern syment *lite_PD_copy_syment (syment*);
@@ -497,6 +506,10 @@ SILO_API extern int	lite_PD_read_alt (PDBfile*,char*,lite_SC_byte*,long*);
 SILO_API extern int	lite_PD_read_as (PDBfile*,char*,char*,lite_SC_byte*);
 SILO_API extern int	lite_PD_read_as_alt (PDBfile*,char*,char*,lite_SC_byte*,long*);
 SILO_API extern defstr *lite_PD_typedef (PDBfile*,char*,char*);
+/* added 26Feb08 as per request from Burl Hall */
+SILO_API extern int     lite_PD_entry_number(syment*);
+SILO_API extern long    lite_PD_get_file_length(PDBfile *file);
+
 extern int		_lite_PD_align (long,char*,HASHTAB*,int*);
 extern void		_lite_PD_check_casts (HASHTAB*,char**,long);
 extern void		_lite_PD_clr_table (HASHTAB*,FreeFuncType);
@@ -576,10 +589,6 @@ extern long		_lite_PD_str_size (memdes*,HASHTAB*);
 extern int		_lite_PD_unp_bits (char*,char*,int,int,int,int,long,
 					   long);
 
-/* added 26Feb08 as per request from Burl Hall */
-SILO_API extern int     lite_PD_entry_number(syment*);
-SILO_API extern long    lite_PD_get_file_length(PDBfile *file);
-
 extern char            *lite_PD_SYMENT_S;
 extern char            *lite_PD_DEFSTR_S;
 
@@ -587,37 +596,39 @@ extern char            *lite_PD_DEFSTR_S;
 SILO_API extern int	lite_PD_mkdir (PDBfile*,char*);
 SILO_API extern int	lite_PD_write (PDBfile*,char*,char*,lite_SC_byte*);
 SILO_API extern int	lite_PD_write_as (PDBfile*,char*,char*,char*,lite_SC_byte*);
-SILO_API extern int	lite_PD_write_alt (PDBfile*,char*,char*,lite_SC_byte*,int,
-			 		   long*);
-SILO_API extern int	lite_PD_write_as_alt (PDBfile*,char*,char*,char*,lite_SC_byte*,
-					      int,long*);
+SILO_API extern int	lite_PD_write_alt (PDBfile*,char*,char*,lite_SC_byte*,int, long*);
+SILO_API extern int	lite_PD_write_as_alt (PDBfile*,char*,char*,char*,lite_SC_byte*, int,long*);
 SILO_API extern PDBfile *lite_PD_create (char*);
-extern int		_lite_PD_adj_dimensions (PDBfile*,char*,syment*);
-extern int		_lite_PD_add_block (PDBfile*,syment*,dimdes*);
-extern int		_lite_PD_hyper_write (PDBfile*,char*,syment*,lite_SC_byte*,
-					      char*);
-extern void		_lite_PD_convert_attrtab (PDBfile*);
-extern int		_lite_PD_wr_format (PDBfile*);
 SILO_API extern defstr *lite_PD_defstr (PDBfile*,char*,...);
 SILO_API extern int	lite_PD_cast (PDBfile*,char*,char*,char*);
+SILO_API extern int	lite_PD_target (data_standard*,data_alignment*);
+SILO_API extern int	lite_PD_flush (PDBfile*);
+SILO_API extern syment 	*lite_PD_defent_alt (PDBfile*,char*,char*,int,long*);
+/* added 26Feb08 as per request from Burl Hall */
+SILO_API extern int      lite_PD_append_alt(PDBfile*,char*,void*,int,long*);
+SILO_API extern void     lite_PD_set_major_order(PDBfile*,int);
+
+extern int		_lite_PD_adj_dimensions (PDBfile*,char*,syment*);
+extern int		_lite_PD_add_block (PDBfile*,syment*,dimdes*);
+extern int		_lite_PD_hyper_write (PDBfile*,char*,syment*,lite_SC_byte*, char*);
+extern void		_lite_PD_convert_attrtab (PDBfile*);
+extern int		_lite_PD_wr_format (PDBfile*);
 extern int		_lite_PD_extend_file (PDBfile*,long);
 extern long		_lite_PD_wr_syment (PDBfile*,char*,long,char*,char*);
 extern long		_lite_PD_number_refd (lite_SC_byte*,char*,HASHTAB*);
 extern int		_lite_PD_wr_itag (PDBfile*,long,char*,long,int);
 extern void		_lite_PD_eod (PDBfile*);
-SILO_API extern int	lite_PD_target (data_standard*,data_alignment*);
-SILO_API extern int	lite_PD_flush (PDBfile*);
 extern long		_lite_PD_wr_chrt (PDBfile*);
 extern long		_lite_PD_wr_symt (PDBfile*);
 extern int		_lite_PD_wr_extras (PDBfile*);
 extern int		_lite_PD_rev_chrt (PDBfile*);
 extern void		_lite_PD_wr_prim_extras (FILE*,HASHTAB*,int,int);
-SILO_API extern syment 	*lite_PD_defent_alt (PDBfile*,char*,char*,int,long*);
 extern syment		*_lite_PD_defent (PDBfile*,char*,char*,long,dimdes*);
 
-/* added 26Feb08 as per request from Burl Hall */
-SILO_API extern int      lite_PD_append_alt(PDBfile*,char*,void*,int,long*);
-SILO_API extern void     lite_PD_set_major_order(PDBfile*,int);
 #endif /* PDB_WRITE */
    
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* !_PDB_H */

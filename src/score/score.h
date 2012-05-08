@@ -51,7 +51,7 @@ herein do not necessarily state  or reflect those of the United States
 Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
-#include "config.h" /* For HAVE_MEMMOVE test. */
+
 /*
  * SCORE.H - include file for PACT standard core package
  *
@@ -59,6 +59,10 @@ be used for advertising or product endorsement purposes.
  * Software Release #92-0043
  *
  */
+
+#ifdef PCK_SCORE
+#error CANNOT INCLUDE SCORE PROPER AND SCORE LITE HEADERS IN SAME COMPILATION MODULE
+#endif
 
 #ifndef _SCORE_H
 #define _SCORE_H
@@ -78,6 +82,10 @@ be used for advertising or product endorsement purposes.
 #endif
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /* Macros used for exporting symbols on Win32 systems. */
@@ -366,6 +374,10 @@ extern long int		_lite_SC_strtol (char*,char**,int);
 
 #ifndef HAVE_MEMMOVE
 extern void *	memmove (void*,const void*,size_t) ;
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* !_SCORE_H */
