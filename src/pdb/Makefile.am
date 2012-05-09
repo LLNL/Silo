@@ -57,13 +57,15 @@ libsilo_pdb_la_SOURCES = $(FILES)
 
 AM_CPPFLAGS = -I$(srcdir)/../score
 
-EXTRA_DIST = \
- detect.c
+EXTRA_DIST = detect.c
 
-noinst_HEADERS = \
- pdb.h
-nodist_noinst_HEADERS = \
- pdform.h
+noinst_HEADERS = pdb.h
+nodist_noinst_HEADERS = pdform.h
+
+if INSTALL_LITE_HEADERS
+include_HEADERS = lite_pdb.h
+endif
+
 FILES = \
  pdb.c \
  pdbdir.c \
@@ -84,6 +86,14 @@ pdform.h: detect
 	-@echo " * for `uname -a`" >>$@
 	@echo " */" >> $@
 	./detect >> $@
+
+lite_pdb.h: pdb.h
+	@cp $< $@
+	@rm -f lite_pdb_funcs.tmp
+	@grep SILO_API $< | grep -v IS_A_PDB_MACRO | tr '\t' ' ' | tr -s ' ' | sed -e 's|^SILO_API \(.*\) \(*\?\)lite_\(.*\)(.*);|#define \3 lite_\3|' | tr '\t' ' ' | tr -s ' '  > lite_pdb_funcs.tmp
+	@sed -i '/INSERT FUNCTION NAME MAPPING MACROS HERE/ r lite_pdb_funcs.tmp' $@
+	@rm -f lite_pdb_funcs.tmp
+	@sed -i -e 's|^#ifndef _PDB_H|#ifndef _LITE_PDB_H|' -e 's|^#define _PDB_H|#define _LITE_PDB_H|' -e 's|^#include "score.h"|#include "lite_score.h"|' $@
 
 detect: detect.o
 	$(CC) $(CFLAGS) -o $@ detect.o

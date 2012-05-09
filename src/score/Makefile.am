@@ -56,11 +56,23 @@
 noinst_LTLIBRARIES = libsilo_score.la
 libsilo_score_la_SOURCES = $(FILES)
 
-noinst_HEADERS = \
- score.h
+if INSTALL_LITE_HEADERS
+include_HEADERS = lite_score.h
+endif
+
+noinst_HEADERS = score.h
+
 FILES = \
  memmove.c \
  scctla.c \
  scctl.c \
  schash.c \
  scstr.c
+
+lite_score.h: score.h
+	@cp $< $@
+	@rm -f lite_score_funcs.tmp
+	@grep SILO_API $< | grep -v IS_A_PDB_MACRO | grep -v '^#' | tr '\t' ' ' | tr -s ' ' | sed -e 's|^SILO_API \(.*\) \(*\?\)lite_\(.*\)(.*);|#define \3 lite_\3|' | tr '\t' ' ' | tr -s ' '  > lite_score_funcs.tmp
+	@sed -i '/INSERT FUNCTION NAME MAPPING MACROS HERE/ r lite_score_funcs.tmp' $@
+	@rm -f lite_score_funcs.tmp
+	@sed -i -e 's|^#ifndef _SCORE_H|#ifndef _LITE_SCORE_H|' -e 's|^#define _SCORE_H|#define _LITE_SCORE_H|' -e 's|^#include "config.h"||' $@

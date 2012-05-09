@@ -57,6 +57,9 @@ product endorsement purposes.
 #include <pdb.h>
 #endif
 
+#include <stdlib.h>
+#include <string.h>
+
 char *safe_strdup(const char *);
 
 typedef struct {

@@ -88,6 +88,8 @@ be used for advertising or product endorsement purposes.
 extern "C" {
 #endif
 
+/* INSERT FUNCTION NAME MAPPING MACROS HERE */
+
 /* Macros used for exporting symbols on Win32 systems. */
 #ifndef SILO_API
 #ifdef _WIN32

@@ -932,6 +932,8 @@ pyexecdir
 pkgpyexecdir
 PYTHON_CPPFLAGS
 BUNDLE_TARGET
+INSTALL_LITE_HEADERS_TRUE
+INSTALL_LITE_HEADERS_FALSE
 NETCDF_NEEDED_TRUE
 NETCDF_NEEDED_FALSE
 PDB_DRV_NEEDED_TRUE
@@ -1578,6 +1580,8 @@ Optional Features:
   --enable-normal-sclite-mem-headers
                           compile with normal score lite memory headers
                           [default=no]
+  --enable-install-lite-headers
+                          Install SCORE/PDB lite header files [default=no]
   --enable-browser        build browser [default=yes]
   --enable-silex          build the silex browser [default=no]
   --enable-hzip           enable Lindstrom hex/quad mesh compression
@@ -6463,7 +6467,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6466 "configure"' > conftest.$ac_ext
+  echo '#line 6470 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8519,11 +8523,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8522: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8526: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8526: \$? = $ac_status" >&5
+   echo "$as_me:8530: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8809,11 +8813,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8812: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8816: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8816: \$? = $ac_status" >&5
+   echo "$as_me:8820: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8913,11 +8917,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8916: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8920: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8920: \$? = $ac_status" >&5
+   echo "$as_me:8924: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11334,7 +11338,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11337 "configure"
+#line 11341 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11434,7 +11438,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11437 "configure"
+#line 11441 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13870,11 +13874,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13873: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13877: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13877: \$? = $ac_status" >&5
+   echo "$as_me:13881: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13974,11 +13978,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13977: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13981: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13981: \$? = $ac_status" >&5
+   echo "$as_me:13985: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15536,11 +15540,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15539: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15543: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15543: \$? = $ac_status" >&5
+   echo "$as_me:15547: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15640,11 +15644,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15643: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15647: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15647: \$? = $ac_status" >&5
+   echo "$as_me:15651: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17827,11 +17831,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17830: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17834: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17834: \$? = $ac_status" >&5
+   echo "$as_me:17838: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18117,11 +18121,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18120: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18124: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18124: \$? = $ac_status" >&5
+   echo "$as_me:18128: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18221,11 +18225,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18224: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18228: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18228: \$? = $ac_status" >&5
+   echo "$as_me:18232: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21100,6 +21104,12 @@ cat >>confdefs.h <<\_ACEOF
 #define NORMAL_SCLITE_HEADERS 0
 _ACEOF
 
+fi
+
+
+# Check whether --enable-install-lite-headers was given.
+if test "${enable_install_lite_headers+set}" = set; then
+  enableval=$enable_install_lite_headers; INSTLITE="$enableval"
 fi
 
 
@@ -27383,6 +27393,14 @@ echo "$as_me: not updating unwritable cache $cache_file" >&6;}
 fi
 rm -f confcache
 
+ if test "$INSTLITE" = "yes"; then
+  INSTALL_LITE_HEADERS_TRUE=
+  INSTALL_LITE_HEADERS_FALSE='#'
+else
+  INSTALL_LITE_HEADERS_TRUE='#'
+  INSTALL_LITE_HEADERS_FALSE=
+fi
+
  if test -n "$NETCDF"; then
   NETCDF_NEEDED_TRUE=
   NETCDF_NEEDED_FALSE='#'
@@ -27640,6 +27658,13 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${INSTALL_LITE_HEADERS_TRUE}" && test -z "${INSTALL_LITE_HEADERS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"INSTALL_LITE_HEADERS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"INSTALL_LITE_HEADERS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -28492,6 +28517,8 @@ pyexecdir!$pyexecdir$ac_delim
 pkgpyexecdir!$pkgpyexecdir$ac_delim
 PYTHON_CPPFLAGS!$PYTHON_CPPFLAGS$ac_delim
 BUNDLE_TARGET!$BUNDLE_TARGET$ac_delim
+INSTALL_LITE_HEADERS_TRUE!$INSTALL_LITE_HEADERS_TRUE$ac_delim
+INSTALL_LITE_HEADERS_FALSE!$INSTALL_LITE_HEADERS_FALSE$ac_delim
 NETCDF_NEEDED_TRUE!$NETCDF_NEEDED_TRUE$ac_delim
 NETCDF_NEEDED_FALSE!$NETCDF_NEEDED_FALSE$ac_delim
 PDB_DRV_NEEDED_TRUE!$PDB_DRV_NEEDED_TRUE$ac_delim
@@ -28525,7 +28552,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 90; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 92; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

@@ -59,10 +59,6 @@ be used for advertising or product endorsement purposes.
  *
  */
 
-/*
-grep SILO_API pdb.h | tr '\t' ' ' | tr -s ' ' | sed -e 's|^SILO_API \(.*\) \(*\?\)lite_\(.*\)(.*);|#define \3 lite_\3|' | tr '\t' ' ' | tr -s ' '
-*/
-
 #ifdef PCK_PDB
 #error CANNOT INCLUDE PDB PROPER AND PDB LITE HEADERS IN SAME COMPILATION MODULE
 #endif
@@ -77,6 +73,8 @@ grep SILO_API pdb.h | tr '\t' ' ' | tr -s ' ' | sed -e 's|^SILO_API \(.*\) \(*\?
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* INSERT FUNCTION NAME MAPPING MACROS HERE */
 
 /* The MAXLINE macro is defined in score.h and taken from stdio.h's */
 /* FILENAME_MAX.  HP's is only 14, so correct that here. */
@@ -507,7 +505,7 @@ SILO_API extern int	lite_PD_read_as (PDBfile*,char*,char*,lite_SC_byte*);
 SILO_API extern int	lite_PD_read_as_alt (PDBfile*,char*,char*,lite_SC_byte*,long*);
 SILO_API extern defstr *lite_PD_typedef (PDBfile*,char*,char*);
 /* added 26Feb08 as per request from Burl Hall */
-SILO_API extern int     lite_PD_entry_number(syment*);
+SILO_API extern int     lite_PD_entry_number(syment*); /* IS_A_PDB_MACRO */
 SILO_API extern long    lite_PD_get_file_length(PDBfile *file);
 
 extern int		_lite_PD_align (long,char*,HASHTAB*,int*);
@@ -606,7 +604,7 @@ SILO_API extern int	lite_PD_flush (PDBfile*);
 SILO_API extern syment 	*lite_PD_defent_alt (PDBfile*,char*,char*,int,long*);
 /* added 26Feb08 as per request from Burl Hall */
 SILO_API extern int      lite_PD_append_alt(PDBfile*,char*,void*,int,long*);
-SILO_API extern void     lite_PD_set_major_order(PDBfile*,int);
+SILO_API extern void     lite_PD_set_major_order(PDBfile*,int); /* IS_A_PDB_MACRO */
 
 extern int		_lite_PD_adj_dimensions (PDBfile*,char*,syment*);
 extern int		_lite_PD_add_block (PDBfile*,syment*,dimdes*);
