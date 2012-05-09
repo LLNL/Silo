@@ -311,7 +311,7 @@ FILES = \
  pdrdwr.c
 
 BUILT_SOURCES = detect pdform.h
-CLEANFILES = detect pdform.h
+CLEANFILES = detect pdform.h lite_pdb.h
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

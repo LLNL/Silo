@@ -293,6 +293,7 @@ noinst_LTLIBRARIES = libsilo_score.la
 libsilo_score_la_SOURCES = $(FILES)
 @INSTALL_LITE_HEADERS_TRUE@include_HEADERS = lite_score.h
 noinst_HEADERS = score.h
+CLEANFILES = lite_score.h
 FILES = \
  memmove.c \
  scctla.c \
@@ -499,6 +500,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)

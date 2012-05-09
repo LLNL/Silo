@@ -62,6 +62,8 @@ endif
 
 noinst_HEADERS = score.h
 
+CLEANFILES = lite_score.h
+
 FILES = \
  memmove.c \
  scctla.c \
