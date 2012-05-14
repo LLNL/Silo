@@ -49,6 +49,7 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
+#define H5_USE_16_API
 #include <hdf5.h>
 
 int main()

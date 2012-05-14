@@ -329,15 +329,15 @@ extern int *		lite_LAST;
 extern char *		lite_SC_CHAR_S ;
 
 /* IO hooks */
-extern PFfclose lite_io_close_hook;
-extern PFfflush lite_io_flush_hook;
-extern PFfopen lite_io_open_hook;
-extern PFfprintf lite_io_printf_hook;
-extern PFfread lite_io_read_hook;
-extern PFfseek lite_io_seek_hook;
-extern PFsetvbuf lite_io_setvbuf_hook;
-extern PFftell lite_io_tell_hook;
-extern PFfwrite lite_io_write_hook;
+extern PFfclose lite_io_close_hook; /* NOT_LITE_API */
+extern PFfflush lite_io_flush_hook; /* NOT_LITE_API */
+extern PFfopen lite_io_open_hook; /* NOT_LITE_API */
+extern PFfprintf lite_io_printf_hook; /* NOT_LITE_API */
+extern PFfread lite_io_read_hook; /* NOT_LITE_API */
+extern PFfseek lite_io_seek_hook; /* NOT_LITE_API */
+extern PFsetvbuf lite_io_setvbuf_hook; /* NOT_LITE_API */
+extern PFftell lite_io_tell_hook; /* NOT_LITE_API */
+extern PFfwrite lite_io_write_hook; /* NOT_LITE_API */
 
 
 
@@ -370,7 +370,7 @@ SILO_API extern long	lite_SC_stol (char*);
 SILO_API extern void	lite_SC_string_sort (char**,int);
 SILO_API extern char *	lite_SC_strrev (char*);
 SILO_API extern char *	lite_SC_strsavef (char*,char*);
-extern hashel *		_lite_SC_install (char*,lite_SC_byte*,char*,HASHTAB*);
+extern hashel *         _lite_SC_install (char*,lite_SC_byte*,char*,HASHTAB*);
 extern char *		_lite_SC_pr_tok (char*,char*);
 extern long int		_lite_SC_strtol (char*,char**,int);
 

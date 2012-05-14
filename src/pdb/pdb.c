@@ -1143,7 +1143,7 @@ lite_PD_create (char *name) {
    /*
     * Open the file.
     */
-   strcpy(str, name);
+   strncpy(str, name, MAXLINE-1);
    fp = io_open(str, BINARY_MODE_WPLUS);
    if (!fp) lite_PD_error("CAN'T CREATE FILE - PD_CREATE", PD_CREATE);
 
@@ -1609,14 +1609,14 @@ lite_PD_defent_alt (PDBfile *file, char *name, char *outtype,
       prev = next;
    }
 
-   return _lite_PD_defent (file, name, outtype, number, dims);
+   return lite_PD_defent (file, name, outtype, number, dims);
 }
 #endif /* PDB_WRITE */
 
 
 
 /*-------------------------------------------------------------------------
- * Function:	_lite_PD_defent
+ * Function:	lite_PD_defent
  *
  * Purpose:	Define an entry in the PDB file symbol table and
  *              stake out the disk space but write nothing.
@@ -1635,7 +1635,7 @@ lite_PD_defent_alt (PDBfile *file, char *name, char *outtype,
  */
 #ifdef PDB_WRITE
 syment *
-_lite_PD_defent (PDBfile *file, char *name, char *outtype, long number,
+lite_PD_defent (PDBfile *file, char *name, char *outtype, long number,
 		 dimdes *dims) {
 
    long		addr, bytespitem;
@@ -1743,9 +1743,25 @@ long  lite_PD_get_file_length(PDBfile *file) {
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
+int lite_PD_append(PDBfile *file, char *name, void *vr) {
+    _append_flag = TRUE;
+    return(lite_PD_write_as(file, name, NULL, NULL, vr));
+}
+
 int lite_PD_append_alt(PDBfile *file, char *name, void *vr, int nd, long *ind) {
-  _append_flag = TRUE;
-  return(lite_PD_write_as_alt(file, name, NULL, NULL, vr, nd, ind));
+    _append_flag = TRUE;
+    return(lite_PD_write_as_alt(file, name, NULL, NULL, vr, nd, ind));
+}
+
+int lite_PD_append_as(PDBfile *file, char *name, char *intype, void *vr) {
+    _append_flag = TRUE;
+    return(lite_PD_write_as(file, name, intype, NULL, vr));
+}
+
+int lite_PD_append_as_alt(PDBfile *file, char *name, char *intype,
+                     void *vr, int nd, long *ind) {
+    _append_flag = TRUE;
+    return(lite_PD_write_as_alt(file, name, intype, NULL, vr, nd, ind));
 }
 #endif /* PDB_WRITE */
 

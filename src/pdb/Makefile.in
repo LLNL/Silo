@@ -613,7 +613,7 @@ pdform.h: detect
 lite_pdb.h: pdb.h
 	@cp $< $@
 	@rm -f lite_pdb_funcs.tmp
-	@grep SILO_API $< | grep -v IS_A_PDB_MACRO | tr '\t' ' ' | tr -s ' ' | sed -e 's|^SILO_API \(.*\) \(*\?\)lite_\(.*\)(.*);|#define \3 lite_\3|' | tr '\t' ' ' | tr -s ' '  > lite_pdb_funcs.tmp
+	@grep lite_ $@ | grep extern | grep -v _lite | grep -v NOT_LITE_API | tr '\t' ' ' | tr -s ' ' | sed -e 's@^\(.*\)[ *]*lite_\([a-zA-Z0-9_]*\)\(\[\]\)\? *[(;]\(.*\)@#define \2 lite_\2@' > lite_pdb_funcs.tmp
 	@sed -i '/INSERT FUNCTION NAME MAPPING MACROS HERE/ r lite_pdb_funcs.tmp' $@
 	@rm -f lite_pdb_funcs.tmp
 	@sed -i -e 's|^#ifndef _PDB_H|#ifndef _LITE_PDB_H|' -e 's|^#define _PDB_H|#define _LITE_PDB_H|' -e 's|^#include "score.h"|#include "lite_score.h"|' $@

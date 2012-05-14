@@ -476,8 +476,8 @@ extern data_alignment	lite_RS6000_ALIGNMENT ;
 extern data_alignment	lite_MIPS_ALIGNMENT ;
 extern data_alignment 	lite_DEF_ALIGNMENT ;
 extern data_alignment	*lite_INT_ALIGNMENT ;
-extern ReaderFuncType	lite_pdb_rd_hook;
-extern WriterFuncType	lite_pdb_wr_hook;
+extern ReaderFuncType	lite_pdb_rd_hook ; /* NOT_LITE_API */
+extern WriterFuncType	lite_pdb_wr_hook ; /* NOT_LITE_API */
 
 
 /*--------------------------------------------------------------------------*/
@@ -505,8 +505,8 @@ SILO_API extern int	lite_PD_read_as (PDBfile*,char*,char*,lite_SC_byte*);
 SILO_API extern int	lite_PD_read_as_alt (PDBfile*,char*,char*,lite_SC_byte*,long*);
 SILO_API extern defstr *lite_PD_typedef (PDBfile*,char*,char*);
 /* added 26Feb08 as per request from Burl Hall */
-SILO_API extern int     lite_PD_entry_number(syment*); /* IS_A_PDB_MACRO */
-SILO_API extern long    lite_PD_get_file_length(PDBfile *file);
+SILO_API extern int     lite_PD_entry_number (syment*); /* NOT_LITE_API */
+SILO_API extern long    lite_PD_get_file_length (PDBfile *file);
 
 extern int		_lite_PD_align (long,char*,HASHTAB*,int*);
 extern void		_lite_PD_check_casts (HASHTAB*,char**,long);
@@ -601,10 +601,15 @@ SILO_API extern defstr *lite_PD_defstr (PDBfile*,char*,...);
 SILO_API extern int	lite_PD_cast (PDBfile*,char*,char*,char*);
 SILO_API extern int	lite_PD_target (data_standard*,data_alignment*);
 SILO_API extern int	lite_PD_flush (PDBfile*);
+SILO_API extern syment	*lite_PD_defent (PDBfile*,char*,char*,long,dimdes*);
 SILO_API extern syment 	*lite_PD_defent_alt (PDBfile*,char*,char*,int,long*);
 /* added 26Feb08 as per request from Burl Hall */
-SILO_API extern int      lite_PD_append_alt(PDBfile*,char*,void*,int,long*);
-SILO_API extern void     lite_PD_set_major_order(PDBfile*,int); /* IS_A_PDB_MACRO */
+SILO_API extern void     lite_PD_set_major_order (PDBfile*,int); /* NOT_LITE_API */
+SILO_API extern int      lite_PD_append_alt (PDBfile*,char*,void*,int,long*);
+/* added 08May12 to compile pdbtst.c */
+SILO_API extern int      lite_PD_append(PDBfile *file, char *name, void *vr);
+SILO_API extern int      lite_PD_append_as(PDBfile *file, char *name, char *intype, void *vr);
+SILO_API extern int      lite_PD_append_as_alt(PDBfile *file, char *name, char *intype, void *vr, int nd, long *ind);
 
 extern int		_lite_PD_adj_dimensions (PDBfile*,char*,syment*);
 extern int		_lite_PD_add_block (PDBfile*,syment*,dimdes*);
@@ -621,7 +626,6 @@ extern long		_lite_PD_wr_symt (PDBfile*);
 extern int		_lite_PD_wr_extras (PDBfile*);
 extern int		_lite_PD_rev_chrt (PDBfile*);
 extern void		_lite_PD_wr_prim_extras (FILE*,HASHTAB*,int,int);
-extern syment		*_lite_PD_defent (PDBfile*,char*,char*,long,dimdes*);
 
 #endif /* PDB_WRITE */
    
