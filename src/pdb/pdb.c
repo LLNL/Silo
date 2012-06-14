@@ -270,6 +270,10 @@ lite_PD_error(char *s, int n) {
  *      Mark C. Miller, Fri Apr 13 22:37:56 PDT 2012
  *      Changed mode string checks to strchr to accomodate wider variety
  *      of mode characters for new hash table size and open modes.
+ *
+ *      Mark C. Miller, Thu Jun 14 13:25:02 PDT 2012
+ *      Remove call to io_close in ABORT case. The file pointer may not
+ *      have been properly initialized.
  *-------------------------------------------------------------------------
  */
 PDBfile *
@@ -291,7 +295,6 @@ lite_PD_open (char *name, char *mode) {
 
    switch (setjmp(_lite_PD_open_err)) {
    case ABORT:
-      io_close(fp);
       return(NULL);
    case ERR_FREE:
       return(file);
@@ -1117,6 +1120,10 @@ _PD_write (PDBfile *file, char *name, char *intype, char *outtype,
  *
  * Mark C. Miller, Fri Apr 13 22:39:29 PDT 2012
  * Pass default creation mode options to PD_mk_pdb().
+ *
+ * Mark C. Miller, Thu Jun 14 13:25:02 PDT 2012
+ * Remove call to io_close in ABORT case. The file pointer may not
+ * have been properly initialized.
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
@@ -1131,7 +1138,6 @@ lite_PD_create (char *name) {
 
    switch (setjmp(_lite_PD_create_err)) {
    case ABORT:
-      io_close(fp);
       return(NULL);
    case ERR_FREE:
       return(file);
