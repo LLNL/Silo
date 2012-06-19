@@ -1,0 +1,3 @@
+make CXXFLAGS=-rdynamic LIBS=-ldl rocket
+
+g++ -shared -fPIC -DHAVE_CONFIG_H -I. -I.. -I./../src/pdb -I./../src/score -I./../src/silo -I./../src/silo -I/home/miller86/visit/visit/install/silo/4.8/linux-x86_64_gcc-4.1/include -I/home/miller86/visit/visit/install/hdf5/1.8.4/linux-x86_64_gcc-4.1/include -O2 -m64 -fPIC -MT rocket.o -MD -MP -MF .deps/rocket.Tpo rocket_silo.cpp -o rocket_silo.so
