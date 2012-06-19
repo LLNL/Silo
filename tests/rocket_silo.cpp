@@ -212,27 +212,67 @@ static void ProcessArgsForSilo(const int argc, const char *const *const argv)
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 }
 
-static int WriteFormatReal(int argc, const char *const *const argv)
+static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
+    const char *className, const char *const *const regnNames,
+    int nreg, bool addMaps = false, int remapForProci = -1)
 {
-cerr << "Got here" << endl;
+    DBAddRegion(mrgt, className, 0, nreg, 0, 0, 0, 0, 0, 0);
+    DBSetCwr(mrgt, className);
 
-    ProcessArgsForSilo(argc, argv);
+    int seg_types[1], seg_lens[1], seg_ids[1];
+    const int *seg_data[1];
+    seg_types[0] = DB_NODECENT;
+    seg_ids[0] = 0;
 
-    if (silo_driver == -1)
+    for (int i = 0; i < nreg; i++)
     {
-        cerr << "Silo driver not set" << endl;
-        return 1;
+        if (!addMaps) // no maps, so just define the region
+        {
+            DBAddRegion(mrgt, regnNames[i], 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+        else // Do it as one map per region. Could do one map for all regions too.
+        {
+            vector<string> cnames;
+            cnames.push_back(regnNames[i]);
+            vector<int> map_data;
+            nodeClasses.GetEntitiesInClasses(cnames, map_data);
+
+            if (remapForProci > 0)
+            {
+                stringstream procClassName;
+                procClassName << "domain" << remapForProci;
+                vector<int> upn, dnn, upz, dnz;
+                GetUpDownMapsForZoneClass(procClassName.str(), upn, dnn, upz, dnz);
+                vector<int> map_data2;
+                for (int j = 0; j < map_data.size(); j++)
+                {
+                    if (dnn[map_data[j]] != -1)
+                        map_data2.push_back(dnn[map_data[j]]);
+                }
+                map_data = map_data2;
+            }
+
+            if (map_data.size() == 0)
+            {
+                DBAddRegion(mrgt, regnNames[i], 0, 0, 0, 0, 0, 0, 0, 0);
+            }
+            else
+            {
+                seg_lens[0] = map_data.size();
+                seg_data[0] = &map_data[0];
+                string mapnm = string(regnNames[i]) + "_map";
+                DBAddRegion(mrgt, regnNames[i], 0, 0, mapnm.c_str(), 1, seg_ids, seg_lens, seg_types, 0);
+                DBPutGroupelmap(dbfile, mapnm.c_str(), 1, seg_types, seg_lens, seg_ids, (int**)seg_data, 0, 0, 0);
+            }
+        }
     }
 
-    cout << "Creating test file: \"rocket.silo\"" << endl;
+    DBSetCwr(mrgt, "..");
+}
 
-    DBfile *dbfile = DBCreate("rocket.silo", DB_CLOBBER, DB_LOCAL,
-                      "3D mesh with many interesting subsets", silo_driver);
-    DBoptlist *ol = DBMakeOptlist(10);
-
-    DBMkDir(dbfile, "UseCaseA");
-    DBSetDir(dbfile, "UseCaseA");
-
+static int WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
+    const vector<string>& dom_classes)
+{
     float *coords[3];
     coords[0] = &xvals_g[0];
     coords[1] = &yvals_g[0];
@@ -253,69 +293,50 @@ cerr << "Got here" << endl;
     DBPutZonelist2(dbfile, "zl", nzones, 3, &nodelist_g[0], (int) nodelist_g.size(), 0, 0, 0,
         &shapetyp[0], &shapesize[0], &shapecnt[0], (int) shapetyp.size(), 0);
 
-    // Create a zone-centered variable showing domain-decomp
+    // Create a zone-centered variable showing domain-decomp for debug purposes
+    int ndoms = dom_classes.size();
     vector<int> dom_map;
-    char *dclasses[] = {"domain0", "domain1", "domain2", "domain3", "domain4"};
-    const int ndoms = sizeof(dclasses)/sizeof(dclasses[0]);
-    vector<string> dom_classes(dclasses, dclasses + ndoms);
     zoneClasses.GetEntitiesPartitionedByClasses(dom_classes, dom_map);
     DBPutUcdvar1(dbfile, "proc_map", "mesh", &dom_map[0], nzones, 0, 0, DB_INT, DB_ZONECENT, 0);
 
+    // Create MRG Tree 
     DBmrgtree *mrgt = DBMakeMrgtree(DB_UCDMESH, 0x0, 4, 0);
-    DBAddRegion(mrgt, "nodesets", 0, 3, 0, 0, 0, 0, 0, 0);
-    DBSetCwr(mrgt, "nodesets");
 
-    vector<int> nodeset;
-    vector<string> cnames;
-    int seg_types[5], seg_lens[5], seg_ids[5], *seg_data[5];
-    seg_types[0] = DB_NODECENT;
-    seg_ids[0] = 0;
-
+    // Add nodeset regions to MRG Tree
     const char *ns_names[] = {"HighQ", "HoldDownPoints", "TowerContact"};
     const int nns = sizeof(ns_names)/sizeof(ns_names[0]);
-    for (int i = 0; i < nns; i++)
-    {
-        cnames.clear();
-        cnames.push_back(ns_names[i]);
-        nodeClasses.GetEntitiesInClasses(cnames, nodeset);
-        seg_lens[0] = nodeset.size();
-        seg_data[0] = &nodeset[0];
-        string mapnm = string(ns_names[i]) + "_map";
-        DBAddRegion(mrgt, ns_names[i], 0, 0, mapnm.c_str(), 1, seg_ids, seg_lens, seg_types, 0);
-        DBPutGroupelmap(dbfile, mapnm.c_str(), 1, seg_types, seg_lens, seg_ids, seg_data, 0, 0, 0);
-    }
+    const bool addMaps = true;
+    AddRegions(dbfile, mrgt, "nodesets", ns_names, nns, addMaps);
 
-    DBSetCwr(mrgt, "..");
-    DBAddRegion(mrgt, "facesets", 0, 2, 0, 0, 0, 0, 0, 0);
-    DBSetCwr(mrgt, "facesets");
-
+    // Add faceset regions to MRG Tree
     const char *fs_names[] = {"PeakPressure", "ControlSurfaces"};
     const int nfs = sizeof(fs_names)/sizeof(fs_names[0]);
-    for (int i = 0; i < nfs; i++)
-    {
-        cnames.clear();
-        cnames.push_back(fs_names[i]);
-        nodeClasses.GetEntitiesInClasses(cnames, nodeset);
-        seg_lens[0] = nodeset.size();
-        seg_data[0] = &nodeset[0];
-        string mapnm = string(fs_names[i]) + "_map";
-        DBAddRegion(mrgt, fs_names[i], 0, 0, mapnm.c_str(), 1, seg_ids, seg_lens, seg_types, 0);
-        DBPutGroupelmap(dbfile, mapnm.c_str(), 1, seg_types, seg_lens, seg_ids, seg_data, 0, 0, 0);
-    }
+    AddRegions(dbfile, mrgt, "facesets", fs_names, nfs, addMaps);
 
+    // Up until now, only map data has been written to file. Now,
+    // write the MRG Tree too.
     DBPutMrgtree(dbfile, "mrgtree", "mesh", mrgt, 0);
     DBFreeMrgtree(mrgt);
+}
 
-    DBSetDir(dbfile, "..");
-    DBMkDir(dbfile, "UseCaseB");
-    DBSetDir(dbfile, "UseCaseB");
+static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
+    const vector<string>& dom_classes)
+{
+    float *coords[3];
+    char *coordnames[3];
+    coordnames[0] = "X";
+    coordnames[1] = "Y";
+    coordnames[2] = "Z";
+
+    int ndoms = dom_classes.size();
+
     for (int i = 0; i < ndoms; i++)
     {
-        DBMkDir(dbfile, dclasses[i]);
-        DBSetDir(dbfile, dclasses[i]);
+        DBMkDir(dbfile, dom_classes[i].c_str());
+        DBSetDir(dbfile, dom_classes[i].c_str());
 
         vector<int> upz, upn, dnz, dnn;
-        GetUpDownMapsForZoneClass(dclasses[i], upn, dnn, upz, dnz);
+        GetUpDownMapsForZoneClass(dom_classes[i], upn, dnn, upz, dnz);
 
         vector<float> x, y, z;
         MapArray(upn, xvals_g, x, (float) -1);
@@ -324,7 +345,7 @@ cerr << "Got here" << endl;
         int nnodes2 = upn.size();
         int nzones2 = upz.size();
 
-        // Map the nodelist
+        // Map the Zonelist object's nodelist
         vector<int> nl;
         for (int j = 0; j < upz.size(); j++)
         {
@@ -343,30 +364,102 @@ cerr << "Got here" << endl;
         coords[0] = &x[0];
         coords[1] = &y[0];
         coords[2] = &z[0];
+        DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
         DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, nnodes2, nzones2, "zl", 0, DB_FLOAT, 0);
+        DBClearOptlist(ol);
 
-        SiloZonelistStuff(dclasses[i], shapetyp, shapesize, shapecnt);
+        vector<int> shapetyp, shapesize, shapecnt;
+        SiloZonelistStuff(dom_classes[i], shapetyp, shapesize, shapecnt);
         DBPutZonelist2(dbfile, "zl", nzones2, 3, &nl[0], (int) nl.size(), 0, 0, 0,
             &shapetyp[0], &shapesize[0], &shapecnt[0], (int) shapetyp.size(), 0);
 
+        // Create MRG Tree 
+        DBmrgtree *mrgt = DBMakeMrgtree(DB_UCDMESH, 0x0, 4, 0);
+
+        // Add nodeset regions to MRG Tree
+        const char *ns_names[] = {"HighQ", "HoldDownPoints", "TowerContact"};
+        const int nns = sizeof(ns_names)/sizeof(ns_names[0]);
+        const bool addMaps = true;
+        AddRegions(dbfile, mrgt, "nodesets", ns_names, nns, addMaps, i);
+
+        // Add faceset regions to MRG Tree
+        const char *fs_names[] = {"PeakPressure", "ControlSurfaces"};
+        const int nfs = sizeof(fs_names)/sizeof(fs_names[0]);
+        AddRegions(dbfile, mrgt, "facesets", fs_names, nfs, addMaps, i);
+
+        // Up until now, only map data has been written to file. Now,
+        // write the MRG Tree too.
+        DBPutMrgtree(dbfile, "mrgtree", "mesh", mrgt, 0);
+        DBFreeMrgtree(mrgt);
+
         DBSetDir(dbfile, "..");
     }
+
     int mtypes[ndoms];
     char *mnames[ndoms];
     for (int i = 0; i < ndoms; i++)
     {
         mtypes[i] = DB_UCDMESH;
-        string mname = "/UseCaseB/"+string(dclasses[i])+"/mesh";
+        string mname = "/UseCaseB/"+dom_classes[i]+"/mesh";
         mnames[i] = strdup(mname.c_str());
     }
-    DBPutMultimesh(dbfile, "mmesh", ndoms, mnames, mtypes, 0);
+
+    DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
+    DBPutMultimesh(dbfile, "mmesh", ndoms, mnames, mtypes, ol);
+    DBClearOptlist(ol);
+
+    // Create MRG Tree 
+    DBmrgtree *mrgt = DBMakeMrgtree(DB_UCDMESH, 0x0, 4, 0);
+
+    // Add nodeset regions to MRG Tree
+    const char *ns_names[] = {"HighQ", "HoldDownPoints", "TowerContact"};
+    const int nns = sizeof(ns_names)/sizeof(ns_names[0]);
+    const bool addMaps = false;
+    AddRegions(dbfile, mrgt, "nodesets", ns_names, nns, addMaps);
+
+    // Add faceset regions to MRG Tree
+    const char *fs_names[] = {"PeakPressure", "ControlSurfaces"};
+    const int nfs = sizeof(fs_names)/sizeof(fs_names[0]);
+    AddRegions(dbfile, mrgt, "facesets", fs_names, nfs, addMaps);
+
+    // Up until now, only map data has been written to file. Now,
+    // write the MRG Tree too.
+    DBPrintMrgtree(mrgt->root, DB_PREORDER, stdout);
+    DBPutMrgtree(dbfile, "mrgtree", "mmesh", mrgt, 0);
+    DBFreeMrgtree(mrgt);
+
     for (int i = 0; i < ndoms; i++)
         free(mnames[i]);
-    
+}
 
-#if 0
-    DBPutMaterial();
-#endif
+static int WriteFormatReal(int argc, const char *const *const argv)
+{
+    ProcessArgsForSilo(argc, argv);
+
+    if (silo_driver == -1)
+    {
+        cerr << "Silo driver not set" << endl;
+        return 1;
+    }
+
+    char *dclasses[] = {"domain0", "domain1", "domain2", "domain3", "domain4"};
+    int ndoms = sizeof(dclasses) / sizeof(dclasses[0]);
+    vector<string> dom_classes(dclasses, dclasses + ndoms);
+
+    DBfile *dbfile = DBCreate("rocket.silo", DB_CLOBBER, DB_LOCAL,
+                      "3D mesh with many interesting subsets", silo_driver);
+    DBoptlist *ol = DBMakeOptlist(10);
+
+    DBMkDir(dbfile, "UseCaseA");
+    DBSetDir(dbfile, "UseCaseA");
+
+    WriteSiloSingleMesh(dbfile, ol, dom_classes);
+
+    DBSetDir(dbfile, "..");
+    DBMkDir(dbfile, "UseCaseB");
+    DBSetDir(dbfile, "UseCaseB");
+
+    WriteSiloMultiMesh(dbfile, ol, dom_classes);
 
     DBClose(dbfile);
 }
