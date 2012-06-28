@@ -55,7 +55,7 @@
 noinst_LTLIBRARIES = libsilo_pdb.la
 libsilo_pdb_la_SOURCES = $(FILES)
 
-AM_CPPFLAGS = -I$(srcdir)/../score
+AM_CPPFLAGS = -I$(top_srcdir)/src/score -I$(top_srcdir)/src/silo
 
 EXTRA_DIST = \
  detect.c

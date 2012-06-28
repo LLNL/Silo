@@ -68,4 +68,4 @@ endif
 else
   silock_LDADD = ../../src/libsilo.la
 endif
-AM_CPPFLAGS = -I$(top_builddir)/src/silo -I$(includedir)
+AM_CPPFLAGS = -I$(top_srcdir)/src/silo -I$(includedir)

@@ -11322,32 +11322,35 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
         tot_segs += ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1);
     count = tot_segs;
 
-    /* linearize and output map segment id data */
-    intArray = (int *) malloc(tot_segs * sizeof(int));
-    n = 0;
-    for (i = 0; i < num_nodes; i++)
-        for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
-            intArray[n++] = ltree[i]->seg_ids[j];
-    DBWriteComponent(dbfile, obj, "seg_ids", name, "integer", intArray, 1, &count);
-    FREE(intArray);
+    if (tot_segs > 0)
+    {
+        /* linearize and output map segment id data */
+        intArray = (int *) malloc(tot_segs * sizeof(int));
+        n = 0;
+        for (i = 0; i < num_nodes; i++)
+            for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
+                intArray[n++] = ltree[i]->seg_ids[j];
+        DBWriteComponent(dbfile, obj, "seg_ids", name, "integer", intArray, 1, &count);
+        FREE(intArray);
 
-    /* linearize and output seg len type data */
-    intArray = (int *) malloc(tot_segs * sizeof(int));
-    n = 0;
-    for (i = 0; i < num_nodes; i++)
-        for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
-            intArray[n++] = ltree[i]->seg_lens[j];
-    DBWriteComponent(dbfile, obj, "seg_lens", name, "integer", intArray, 1, &count);
-    FREE(intArray);
+        /* linearize and output seg len type data */
+        intArray = (int *) malloc(tot_segs * sizeof(int));
+        n = 0;
+        for (i = 0; i < num_nodes; i++)
+            for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
+                intArray[n++] = ltree[i]->seg_lens[j];
+        DBWriteComponent(dbfile, obj, "seg_lens", name, "integer", intArray, 1, &count);
+        FREE(intArray);
 
-    /* linearize and output seg type data */
-    intArray = (int *) malloc(tot_segs * sizeof(int));
-    n = 0;
-    for (i = 0; i < num_nodes; i++)
-        for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
-            intArray[n++] = ltree[i]->seg_types[j];
-    DBWriteComponent(dbfile, obj, "seg_types", name, "integer", intArray, 1, &count);
-    FREE(intArray);
+        /* linearize and output seg type data */
+        intArray = (int *) malloc(tot_segs * sizeof(int));
+        n = 0;
+        for (i = 0; i < num_nodes; i++)
+            for (j = 0; j < ltree[i]->nsegs * (ltree[i]->narray?ltree[i]->narray:1); j++)
+                intArray[n++] = ltree[i]->seg_types[j];
+        DBWriteComponent(dbfile, obj, "seg_types", name, "integer", intArray, 1, &count);
+        FREE(intArray);
+    }
 
     /* form integer array for children data */
     tot_children = 0;

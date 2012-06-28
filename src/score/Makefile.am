@@ -56,8 +56,11 @@
 noinst_LTLIBRARIES = libsilo_score.la
 libsilo_score_la_SOURCES = $(FILES)
 
+AM_CPPFLAGS = -I$(top_srcdir)/src/silo
+
 noinst_HEADERS = \
  score.h
+
 FILES = \
  memmove.c \
  scctla.c \

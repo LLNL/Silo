@@ -4075,7 +4075,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
         }
 
         if (buf && H5Dwrite(dset, mtype, space, space, H5P_DEFAULT, buf)<0) {
-            db_perror(name, E_CALLFAIL, me);
+            hdf5_to_silo_error(name, "db_hdf5_compwrz");
             UNWIND();
         }
 
@@ -5271,6 +5271,9 @@ db_hdf5_initiate_close(DBfile *_dbfile)
         }
     }
 #endif
+
+    // Tell HDF5 to garbage collect (whatever it can)
+    H5garbage_collect();
 
     return 0;
 }
@@ -7182,6 +7185,7 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
                    UNWIND();
                }
            }
+#warning WHAT IF EXISTING DATASET WAS COMPRESSED
        } else {
            /* Create memory and file data space (both identical) */
            for (i=0; i<ndims; i++) ds_size[i] = dims[i];
@@ -8504,7 +8508,7 @@ db_hdf5_PutDefvars(DBfile *_dbfile, const char *name, int ndefs,
         } OUTPUT(dbfile, DB_DEFVARS, name, &m);
 
     } CLEANUP {
-        /*void*/;
+        if (guihide) free(guihide);
     } END_PROTECT;
     return 0;
 }

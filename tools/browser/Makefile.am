@@ -86,7 +86,8 @@ info_TEXINFOS = browser.texi
 AM_MAKEINFOHTMLFLAGS = --no-split
 
 AM_CPPFLAGS = \
- -I$(top_builddir)/src/silo \
+ -I$(top_srcdir)/src/silo \
+ -I$(top_srcdir)/src/filters \
  -I$(includedir) \
  -DPUBLIC_INIT_FILE=\"$(includedir)/browser_rc\" \
  -I$(top_srcdir)/src/filters

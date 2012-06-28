@@ -6707,7 +6707,12 @@ DBAnnotateUcdmesh(DBucdmesh *m)
       if ((z=m->zones) != NULL)
          if (z->shapetype == NULL)
          {
-            int N;
+            int N, dims;
+
+            if (m->topo_dim == 0 || m->topo_dim == 1 || m->topo_dim == 2)
+                dims = m->topo_dim;
+            else
+                dims = z->ndims;
 
             N = z->nshapes;
             if ((z->shapetype=(int *)malloc(N*sizeof(int))) != NULL)
@@ -6718,7 +6723,7 @@ DBAnnotateUcdmesh(DBucdmesh *m)
                {
                   int i;
 
-                  switch (z->ndims)
+                  switch (dims)
                   {
                     case 1: for (i=0; i<N; ++i)
                                z->shapetype[i] = DB_ZONETYPE_BEAM;

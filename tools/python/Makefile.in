@@ -306,7 +306,7 @@ Silo_la_SOURCES = $(FILES)
 Silo_la_LDFLAGS = -module -avoid-version
 @HDF5_DRV_NEEDED_FALSE@Silo_la_LIBADD = ../../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@Silo_la_LIBADD = ../../src/libsiloh5.la
-AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(top_builddir)/src/silo -I$(includedir)
+AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(top_srcdir)/src/silo -I$(includedir)
 noinst_HEADERS = \
  pydbfile.h \
  pydbtoc.h \
