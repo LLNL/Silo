@@ -93,15 +93,15 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = arbpoly2d$(EXEEXT) array$(EXEEXT) extface$(EXEEXT) \
-	multi_test$(EXEEXT) partial_io$(EXEEXT) point$(EXEEXT) \
-	group_test$(EXEEXT) listtypes$(EXEEXT) simple$(EXEEXT) \
-	ucd$(EXEEXT) ucdsamp3$(EXEEXT) testall$(EXEEXT) \
-	alltypes$(EXEEXT) obj$(EXEEXT) onehex$(EXEEXT) \
-	oneprism$(EXEEXT) onepyramid$(EXEEXT) onetet$(EXEEXT) \
-	TestReadMask$(EXEEXT) subhex$(EXEEXT) twohex$(EXEEXT) \
-	multispec$(EXEEXT) specmix$(EXEEXT) testpdb$(EXEEXT) \
-	sami$(EXEEXT) spec$(EXEEXT) cpz1plt$(EXEEXT) \
+check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
+	extface$(EXEEXT) multi_test$(EXEEXT) partial_io$(EXEEXT) \
+	point$(EXEEXT) group_test$(EXEEXT) listtypes$(EXEEXT) \
+	simple$(EXEEXT) ucd$(EXEEXT) ucdsamp3$(EXEEXT) \
+	testall$(EXEEXT) alltypes$(EXEEXT) obj$(EXEEXT) \
+	onehex$(EXEEXT) oneprism$(EXEEXT) onepyramid$(EXEEXT) \
+	onetet$(EXEEXT) TestReadMask$(EXEEXT) subhex$(EXEEXT) \
+	twohex$(EXEEXT) multispec$(EXEEXT) specmix$(EXEEXT) \
+	testpdb$(EXEEXT) sami$(EXEEXT) spec$(EXEEXT) cpz1plt$(EXEEXT) \
 	merge_block$(EXEEXT) mat3d_3across$(EXEEXT) ucd1d$(EXEEXT) \
 	wave$(EXEEXT) multi_file$(EXEEXT) polyzl$(EXEEXT) csg$(EXEEXT) \
 	rocket$(EXEEXT) mmadjacency$(EXEEXT) largefile$(EXEEXT) \
@@ -139,6 +139,11 @@ alltypes_OBJECTS = alltypes.$(OBJEXT)
 alltypes_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@alltypes_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@alltypes_DEPENDENCIES = ../src/libsiloh5.la
+arbpoly_SOURCES = arbpoly.c
+arbpoly_OBJECTS = arbpoly.$(OBJEXT)
+arbpoly_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@arbpoly_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@arbpoly_DEPENDENCIES = ../src/libsiloh5.la
 arbpoly2d_SOURCES = arbpoly2d.c
 arbpoly2d_OBJECTS = arbpoly2d.$(OBJEXT)
 arbpoly2d_LDADD = $(LDADD)
@@ -200,7 +205,12 @@ group_test_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@group_test_DEPENDENCIES = ../src/libsiloh5.la
 ioperf_SOURCES = ioperf.c
 ioperf_OBJECTS = ioperf.$(OBJEXT)
-ioperf_DEPENDENCIES =
+ioperf_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@ioperf_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@ioperf_DEPENDENCIES = ../src/libsiloh5.la
+ioperf_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(ioperf_LDFLAGS) $(LDFLAGS) -o $@
 largefile_SOURCES = largefile.c
 largefile_OBJECTS = largefile.$(OBJEXT)
 largefile_LDADD = $(LDADD)
@@ -317,11 +327,14 @@ readstuff_OBJECTS = readstuff.$(OBJEXT)
 readstuff_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@readstuff_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@readstuff_DEPENDENCIES = ../src/libsiloh5.la
-am_rocket_OBJECTS = rocket.$(OBJEXT)
+am_rocket_OBJECTS = rocket-rocket.$(OBJEXT)
 rocket_OBJECTS = $(am_rocket_OBJECTS)
 rocket_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@rocket_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@rocket_DEPENDENCIES = ../src/libsiloh5.la
+rocket_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(rocket_CXXFLAGS) $(CXXFLAGS) \
+	$(rocket_LDFLAGS) $(LDFLAGS) -o $@
 sami_SOURCES = sami.c
 sami_OBJECTS = sami.$(OBJEXT)
 sami_LDADD = $(LDADD)
@@ -427,6 +440,7 @@ F77LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_alltypes_SOURCES) alltypes.c \
+	$(nodist_EXTRA_arbpoly_SOURCES) arbpoly.c \
 	$(nodist_EXTRA_arbpoly2d_SOURCES) arbpoly2d.c \
 	$(nodist_EXTRA_array_SOURCES) array.c $(arrayf77_SOURCES) \
 	$(nodist_EXTRA_arrayf77_SOURCES) $(compression_SOURCES) \
@@ -479,7 +493,7 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_ucdsamp3_SOURCES) ucdsamp3.c \
 	$(nodist_EXTRA_version_SOURCES) version.c \
 	$(nodist_EXTRA_wave_SOURCES) wave.c
-DIST_SOURCES = TestReadMask.c alltypes.c arbpoly2d.c array.c \
+DIST_SOURCES = TestReadMask.c alltypes.c arbpoly.c arbpoly2d.c array.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
 	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
 	efcentering.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
@@ -736,7 +750,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
-	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
+	efcentering mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff \
 	$(am__append_1) $(am__append_3)
 dir_SOURCES = \
  dir.c \
@@ -749,6 +763,9 @@ quad_SOURCES = \
 rocket_SOURCES = \
  rocket.cpp
 
+EXTRA_rocket_DEPENDENCIES = \
+ rocket_silo.o
+
 
 # Deal with need to use c++ linker whenever we've got C++
 # sources compiled with the silo library and the fact that
@@ -756,6 +773,7 @@ rocket_SOURCES = \
 # This is a hack to force c++ linkage when we have
 # c++ code compiled into Silo. I got this hack from
 # automake manaual.
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arbpoly_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arbpoly2d_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_array_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_extface_SOURCES = dummy.cxx
@@ -810,7 +828,9 @@ rocket_SOURCES = \
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ioperf_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_readstuff_SOURCES = dummy.cxx
-ioperf_LDADD = -ldl
+rocket_LDFLAGS = -ldl
+rocket_CXXFLAGS = -rdynamic
+ioperf_LDFLAGS = -ldl
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -875,6 +895,9 @@ TestReadMask$(EXEEXT): $(TestReadMask_OBJECTS) $(TestReadMask_DEPENDENCIES)
 alltypes$(EXEEXT): $(alltypes_OBJECTS) $(alltypes_DEPENDENCIES) 
 	@rm -f alltypes$(EXEEXT)
 	$(CXXLINK) $(alltypes_OBJECTS) $(alltypes_LDADD) $(LIBS)
+arbpoly$(EXEEXT): $(arbpoly_OBJECTS) $(arbpoly_DEPENDENCIES) 
+	@rm -f arbpoly$(EXEEXT)
+	$(CXXLINK) $(arbpoly_OBJECTS) $(arbpoly_LDADD) $(LIBS)
 arbpoly2d$(EXEEXT): $(arbpoly2d_OBJECTS) $(arbpoly2d_DEPENDENCIES) 
 	@rm -f arbpoly2d$(EXEEXT)
 	$(CXXLINK) $(arbpoly2d_OBJECTS) $(arbpoly2d_LDADD) $(LIBS)
@@ -913,7 +936,7 @@ group_test$(EXEEXT): $(group_test_OBJECTS) $(group_test_DEPENDENCIES)
 	$(CXXLINK) $(group_test_OBJECTS) $(group_test_LDADD) $(LIBS)
 ioperf$(EXEEXT): $(ioperf_OBJECTS) $(ioperf_DEPENDENCIES) 
 	@rm -f ioperf$(EXEEXT)
-	$(CXXLINK) $(ioperf_OBJECTS) $(ioperf_LDADD) $(LIBS)
+	$(ioperf_LINK) $(ioperf_OBJECTS) $(ioperf_LDADD) $(LIBS)
 largefile$(EXEEXT): $(largefile_OBJECTS) $(largefile_DEPENDENCIES) 
 	@rm -f largefile$(EXEEXT)
 	$(CXXLINK) $(largefile_OBJECTS) $(largefile_LDADD) $(LIBS)
@@ -985,7 +1008,7 @@ readstuff$(EXEEXT): $(readstuff_OBJECTS) $(readstuff_DEPENDENCIES)
 	$(CXXLINK) $(readstuff_OBJECTS) $(readstuff_LDADD) $(LIBS)
 rocket$(EXEEXT): $(rocket_OBJECTS) $(rocket_DEPENDENCIES) 
 	@rm -f rocket$(EXEEXT)
-	$(CXXLINK) $(rocket_OBJECTS) $(rocket_LDADD) $(LIBS)
+	$(rocket_LINK) $(rocket_OBJECTS) $(rocket_LDADD) $(LIBS)
 sami$(EXEEXT): $(sami_OBJECTS) $(sami_DEPENDENCIES) 
 	@rm -f sami$(EXEEXT)
 	$(CXXLINK) $(sami_OBJECTS) $(sami_LDADD) $(LIBS)
@@ -1041,6 +1064,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-TestReadMask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alltypes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly2d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Po@am__quote@
@@ -1075,7 +1099,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-quad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-testlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readstuff.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket-dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket-rocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sami.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spec.Po@am__quote@
@@ -1202,6 +1227,34 @@ quad-dummy.obj: dummy.cxx
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='quad-dummy.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(quad_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quad-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+
+rocket-rocket.o: rocket.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -MT rocket-rocket.o -MD -MP -MF $(DEPDIR)/rocket-rocket.Tpo -c -o rocket-rocket.o `test -f 'rocket.cpp' || echo '$(srcdir)/'`rocket.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/rocket-rocket.Tpo $(DEPDIR)/rocket-rocket.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='rocket.cpp' object='rocket-rocket.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-rocket.o `test -f 'rocket.cpp' || echo '$(srcdir)/'`rocket.cpp
+
+rocket-rocket.obj: rocket.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -MT rocket-rocket.obj -MD -MP -MF $(DEPDIR)/rocket-rocket.Tpo -c -o rocket-rocket.obj `if test -f 'rocket.cpp'; then $(CYGPATH_W) 'rocket.cpp'; else $(CYGPATH_W) '$(srcdir)/rocket.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/rocket-rocket.Tpo $(DEPDIR)/rocket-rocket.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='rocket.cpp' object='rocket-rocket.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-rocket.obj `if test -f 'rocket.cpp'; then $(CYGPATH_W) 'rocket.cpp'; else $(CYGPATH_W) '$(srcdir)/rocket.cpp'; fi`
+
+rocket-dummy.o: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -MT rocket-dummy.o -MD -MP -MF $(DEPDIR)/rocket-dummy.Tpo -c -o rocket-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/rocket-dummy.Tpo $(DEPDIR)/rocket-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='rocket-dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+
+rocket-dummy.obj: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -MT rocket-dummy.obj -MD -MP -MF $(DEPDIR)/rocket-dummy.Tpo -c -o rocket-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/rocket-dummy.Tpo $(DEPDIR)/rocket-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='rocket-dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
 
 .cxx.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -133,7 +133,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
-      mk_nasf_pdb ioperf arbpoly2d readstuff
+      mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff
 
 dir_SOURCES = \
  dir.c \
@@ -143,8 +143,11 @@ quad_SOURCES = \
  testlib.c
 rocket_SOURCES = \
  rocket.cpp
+EXTRA_rocket_DEPENDENCIES = \
+ rocket_silo.o
 
 check_PROGRAMS = \
+ arbpoly \
  arbpoly2d \
  array \
  extface \
@@ -199,6 +202,7 @@ check_PROGRAMS = \
 # c++ code compiled into Silo. I got this hack from
 # automake manaual.
 if CXX_LINK_NEEDED
+ nodist_EXTRA_arbpoly_SOURCES = dummy.cxx
  nodist_EXTRA_arbpoly2d_SOURCES = dummy.cxx
  nodist_EXTRA_array_SOURCES = dummy.cxx
  nodist_EXTRA_extface_SOURCES = dummy.cxx
@@ -255,7 +259,9 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_readstuff_SOURCES = dummy.cxx
 endif
 
-ioperf_LDADD = -ldl
+rocket_LDFLAGS = -ldl
+rocket_CXXFLAGS = -rdynamic
+ioperf_LDFLAGS = -ldl
 
 if HDF5_DRV_NEEDED
   PROGS += $(HDF5PROGS)

@@ -237,7 +237,7 @@ static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
             vector<int> map_data;
             nodeClasses.GetEntitiesInClasses(cnames, map_data);
 
-            if (remapForProci > 0)
+            if (remapForProci >= 0)
             {
                 stringstream procClassName;
                 procClassName << "domain" << remapForProci;
@@ -246,8 +246,10 @@ static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
                 vector<int> map_data2;
                 for (int j = 0; j < map_data.size(); j++)
                 {
-                    if (dnn[map_data[j]] != -1)
-                        map_data2.push_back(dnn[map_data[j]]);
+                    int gnid = map_data[j];
+                    int lnid = dnn[gnid];
+                    if (lnid != -1)
+                        map_data2.push_back(lnid);
                 }
                 map_data = map_data2;
             }
@@ -365,7 +367,7 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
         coords[1] = &y[0];
         coords[2] = &z[0];
         DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
-        DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, nnodes2, nzones2, "zl", 0, DB_FLOAT, 0);
+        DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, nnodes2, nzones2, "zl", 0, DB_FLOAT, ol);
         DBClearOptlist(ol);
 
         vector<int> shapetyp, shapesize, shapecnt;
@@ -424,7 +426,8 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
 
     // Up until now, only map data has been written to file. Now,
     // write the MRG Tree too.
-    DBPrintMrgtree(mrgt->root, DB_PREORDER, stdout);
+    //DBPrintMrgtree(mrgt->root, DB_PREORDER, stdout);
+assert(1>0);
     DBPutMrgtree(dbfile, "mrgtree", "mmesh", mrgt, 0);
     DBFreeMrgtree(mrgt);
 

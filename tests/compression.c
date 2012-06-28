@@ -112,7 +112,7 @@ main(int argc, char *argv[])
     struct stat    buffer;
     off_t          fsize;
     int            has_loss = 0;
-    int            show_all_errors = FALSE;
+    int            show_errors = DB_TOP;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -165,7 +165,7 @@ main(int argc, char *argv[])
           printf("       DB_HDF5  - enable HDF5 driver, the default\n");
           return (0);
        } else if (!strcmp(argv[i], "show-all-errors")) {
-          show_all_errors = 1;
+          show_errors = DB_ALL_AND_DRVR;
        } else if (argv[i][0] != '\0') {
           fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
        }
@@ -177,7 +177,7 @@ main(int argc, char *argv[])
     dval = (double*) malloc(ONE_MEG);
     drval = (double*) malloc(ONE_MEG);
 
-    if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
+    DBShowErrors(show_errors, 0);
 
     if (!readonly)
     {

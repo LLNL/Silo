@@ -157,6 +157,7 @@ static int Close_hdf5()
     if (dspc != -1)
         H5Sclose(dspc);
     if (H5Fclose(fid) < 0) return 0;
+    H5garbage_collect();
     return 1;
 }
 
