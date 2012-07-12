@@ -12693,6 +12693,9 @@ done:    ;
 |                pathname components.  Note that this function is intended for
 |                internal use only.
 |
+|   Modifications:
+|     Mark C. Miller, Wed Jul 11 17:01:09 PDT 2012
+|     Initialize tmp buffer to the empty string with tmp[0] = '\0'
 +-----------------------------------------------------------------------------*/
 
 char *db_unsplit_path ( const db_Pathname *p )
@@ -12705,6 +12708,7 @@ char *db_unsplit_path ( const db_Pathname *p )
       int          slashed;
       static char  tmp[4096];
 
+      tmp[0] = '\0';
       first   = TRUE;
       slashed = FALSE;
       c       = p->firstComponent;
