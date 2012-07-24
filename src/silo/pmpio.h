@@ -222,8 +222,8 @@ typedef struct _PMPIO_baton_t
 
 } PMPIO_baton_t;
 
-#define PMPIO_BATON_OK  0xBabeFace
-#define PMPIO_BATON_ERR 0xDeadBeef
+#define PMPIO_BATON_OK  0 
+#define PMPIO_BATON_ERR 1
 
 /*-----------------------------------------------------------------------------
  * Audience:    Public
