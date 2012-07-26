@@ -427,7 +427,6 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
     // Up until now, only map data has been written to file. Now,
     // write the MRG Tree too.
     //DBPrintMrgtree(mrgt->root, DB_PREORDER, stdout);
-assert(1>0);
     DBPutMrgtree(dbfile, "mrgtree", "mmesh", mrgt, 0);
     DBFreeMrgtree(mrgt);
 
