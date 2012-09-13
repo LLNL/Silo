@@ -859,7 +859,7 @@ INTERNAL int _DBSubsetMinMax2 (DB_DTPTR1, int, float *, float *, int,
                                    int, int, int, int);
 INTERNAL int _DBSubsetMinMax3 (float *, int, float *, float *, int, int,
                                int, int, int, int, int, int);
-INTERNAL int db_ProcessOptlist (int, DBoptlist *);
+INTERNAL int db_ProcessOptlist (int, const DBoptlist *const);
 INTERNAL int db_VariableNameValid(char *);
 INTERNAL int db_SplitShapelist (DBucdmesh *um);
 INTERNAL int db_ResetGlobalData_Csgmesh ();

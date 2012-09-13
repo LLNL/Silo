@@ -37,6 +37,8 @@
 #include "silo.h"
 #include "std.c"
 
+#define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
+
 #define NX 30
 #define NY 40
 #define NZ 30
@@ -79,6 +81,7 @@
        DBAddOption(optlist, DBOPT_HAS_EXTERNAL_ZONES, HASEXT)
 
 
+static int vidx['z'-'a'];
 double varextents[MAXNUMVARS][2*MAXBLOCKS];
 int mixlens[MAXBLOCKS];
 int zonecounts[MAXBLOCKS];
@@ -87,10 +90,12 @@ int matcounts[MAXBLOCKS];
 int matlists[MAXBLOCKS][MAXMATNO+1];
 int driver = DB_PDB;
 int check_early_close = FALSE;
+int testread = FALSE;
+int testbadread = FALSE;
 
-int           build_multi(DBfile *, int, int, int, int, int, int, int);
+int           build_multi(DBfile *, int, int, int, int, int, int, int, int);
 
-void          build_block_rect2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int);
+void          build_block_rect2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int, int);
 void          build_block_curv2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int);
 void          build_block_point2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int);
 void          build_block_rect3d(DBfile *, char[MAXBLOCKS][STRLEN], int, int,
@@ -346,6 +351,9 @@ fill_rect3d_mat(float x[], float y[], float z[], int matlist[], int nx,
  *
  *    Mark C. Miller, Wed Dec  2 12:12:49 PST 2009
  *    Fixed declaration of 'inc'
+ *
+ *    Mark C. Miller, Tue Sep 11 17:36:56 PDT 2012
+ *    Added ability to test read operations too, but only for first case.
  *------------------------------------------------------------------------*/
 int
 main(int argc, char *argv[])
@@ -355,7 +363,16 @@ main(int argc, char *argv[])
     int            i;
     int            dochecks = FALSE;
     int            hdfriendly = FALSE;
-    int            inc = 512 << 11;
+
+    /* set up variable name to varextents index map */
+    vidx['d'-'a'] = 3;
+    vidx['p'-'a'] = 4;
+    vidx['u'-'a'] = 5;
+    vidx['v'-'a'] = 6;
+    vidx['w'-'a'] = 7;
+    vidx['x'-'a'] = 0;
+    vidx['y'-'a'] = 1;
+    vidx['z'-'a'] = 2;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -383,34 +400,50 @@ main(int argc, char *argv[])
             hdfriendly = TRUE;
         } else if (!strcmp(argv[i], "hdf-friendly-hard")) {
             hdfriendly = 2;
+        } else if (!strcmp(argv[i], "testread")) {
+            testread = 1;
+        } else if (!strcmp(argv[i], "testbadread")) {
+            testbadread = 1;
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
     }
 
-    DBShowErrors(DB_TOP, NULL);
+    DBShowErrors(DB_ALL_AND_DRVR, NULL);
+    if (testread || testbadread) DBShowErrors(DB_NONE, NULL);
     DBSetEnableChecksums(dochecks);
-    if (driver == DB_HDF5 || driver == DB_HDF5_SEC2 ||
-        driver == DB_HDF5_STDIO || driver == (inc|DB_HDF5_CORE))
-        DBSetFriendlyHDF5Names(hdfriendly);
+    DBSetFriendlyHDF5Names(hdfriendly);
 
     /*
      * Create the multi-block rectilinear 2d mesh.
      */
     sprintf(filename, "multi_rect2d%s", file_ext);
     fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
-                         "multi-block rectilinear 2d test file", driver))
-        == NULL)
+    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
     {
-        fprintf(stderr, "Could not create '%s'.\n", filename);
-    } else if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1,
-                           DB_COLLINEAR) == -1)
+        if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 0) == -1)
+            fprintf(stderr, "Error building contents for '%s'.\n", filename);
+        DBClose(dbfile);
+        dbfile = 0;
+        if (testread || testbadread)
+        {
+            fprintf(stdout, "reading %s\n", filename);
+            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            {
+                if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 1) == -1)
+                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                DBClose(dbfile);
+            }
+            else
+            {
+                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+            }
+        }
+    }
+    else
     {
-        fprintf(stderr, "Error in creating '%s'.\n", filename);
-        DBClose(dbfile);
-    } else
-        DBClose(dbfile);
+        fprintf(stderr, "Error in creating file '%s'.\n", filename);
+    }
 
     /* 
      * Create the multi-block curvilinear 2d mesh.
@@ -423,7 +456,7 @@ main(int argc, char *argv[])
     {
         fprintf(stderr, "Could not create '%s'.\n", filename);
     } else if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5, 1, 1,
-                           DB_NONCOLLINEAR) == -1)
+                           DB_NONCOLLINEAR, 0) == -1)
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
         DBClose(dbfile);
@@ -441,7 +474,7 @@ main(int argc, char *argv[])
     {
         fprintf(stderr, "Could not create '%s'.\n", filename);
     } else if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5, 1, 1,
-                           0) == -1)
+                           0, 0) == -1)
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
         DBClose(dbfile);
@@ -459,7 +492,7 @@ main(int argc, char *argv[])
     {
         fprintf(stderr, "Could not create '%s'.\n", filename);
     } else if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3,
-                           DB_COLLINEAR) == -1)
+                           DB_COLLINEAR, 0) == -1)
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
         DBClose(dbfile);
@@ -477,7 +510,7 @@ main(int argc, char *argv[])
     {
         fprintf(stderr, "Could not create '%s'.\n", filename);
     } else if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3,
-                           DB_NONCOLLINEAR) == -1)
+                           DB_NONCOLLINEAR, 0) == -1)
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
         DBClose(dbfile);
@@ -495,7 +528,7 @@ main(int argc, char *argv[])
     {
         fprintf(stderr, "Could not create '%s'.\n", filename);
     } else if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3, 4, 3,
-                           0) == -1)
+                           0, 0) == -1)
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
         DBClose(dbfile);
@@ -546,10 +579,14 @@ main(int argc, char *argv[])
  *
  *    Mark C. Miller, Mon Aug  7 17:03:51 PDT 2006
  *    Added additional material object with material names and colors 
+ *
+ *    Mark C. Miller, Tue Sep 11 17:36:24 PDT 2012
+ *    Added ability to test read operations too but only for first case
+ *    though.
  *------------------------------------------------------------------------*/
 int
 build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
-            int nblocks_y, int nblocks_z, int coord_type)
+            int nblocks_y, int nblocks_z, int coord_type, int handle_read)
 {
     int             i,j,k;
     int             cycle;
@@ -558,7 +595,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     int             nmatnos;
     int             matnos[3];
     char            names[MAXBLOCKS][STRLEN];
-    char           *meshnames[MAXBLOCKS];
+    char     const *meshnames[MAXBLOCKS];
     int             meshtypes[MAXBLOCKS];
     char            names1[MAXBLOCKS][STRLEN];
     char            names2[MAXBLOCKS][STRLEN];
@@ -584,33 +621,6 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     int             extentssize;
     int            *tmpList;
     double         *tmpExtents;
-
-    /* 
-     * Initialize a simple grouping
-     */
-    int             ngroupings;
-    int             groupings[9];
-    char          **groupingnames = NULL;
-    ngroupings = 9;            /* number of elements in the grouping arrays */
-    groupings[0] = 5;          /* number of elements in this group */
-    groupings[1] = 0;
-    groupings[2] = 1;
-    groupings[3] = 2;
-    groupings[4] = 3;
-    groupings[5] = 4;
-    groupings[6] = 2;          /* number of elements in next group */
-    groupings[7] = 5;
-    groupings[8] = 6;
-    groupingnames = (char**)malloc(sizeof(char*)*ngroupings);
-    groupingnames[0] = safe_strdup("First Grouping");
-    groupingnames[1] = safe_strdup("Zero");
-    groupingnames[2] = safe_strdup("One");
-    groupingnames[3] = safe_strdup("Two");
-    groupingnames[4] = safe_strdup("Three");
-    groupingnames[5] = safe_strdup("Four");
-    groupingnames[6] = safe_strdup("Second Grouping");
-    groupingnames[7] = safe_strdup("Five");
-    groupingnames[8] = safe_strdup("Six");
 
     /* 
      * Initialize the names and create the directories for the blocks.
@@ -642,7 +652,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
 
         sprintf(dirnames[i], "/block%d", i);
 
-        if (DBMkDir(dbfile, dirnames[i]) == -1)
+        if (!handle_read && DBMkDir(dbfile, dirnames[i]) == -1)
         {
             fprintf(stderr, "Could not make directory \"%s\"\n", dirnames[i]);
             return (-1);
@@ -661,7 +671,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         if (coord_type == DB_COLLINEAR)
         {
             if (dim == 2)
-                build_block_rect2d(dbfile, dirnames, nblocks_x, nblocks_y);
+                build_block_rect2d(dbfile, dirnames, nblocks_x, nblocks_y, handle_read);
             else if (dim == 3)
                 build_block_rect3d(dbfile, dirnames, nblocks_x, nblocks_y,
                                    nblocks_z);
@@ -693,6 +703,8 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* switch */
 
+    if (handle_read) return 0;
+
     cycle = 48;
     time = 4.8;
     dtime = 4.8;
@@ -722,10 +734,6 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* if */
     
-    for (i = 0; i < ngroupings; i++)
-        FREE(groupingnames[i]);
-    FREE(groupingnames);
-
     /* test hidding a multimesh */
     DBAddOption(optlist, DBOPT_HIDE_FROM_GUI, &one);
     DBPutMultimesh(dbfile, "mesh1_hidden", nblocks, meshnames, meshtypes, optlist);
@@ -853,6 +861,83 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     return (0);
 }                                      /* build_multi */
 
+#define TESTQMESH2(F,MN,CNMS,CS,DS,NDS,CTYPE,OL)                         \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetUcdmesh(F,MN);                              \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetPointmesh(F,MN);                            \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgmesh(F,MN);                              \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            DBquadmesh *qm = DBGetQuadmesh(F, MN);                       \
+            ASSERT(qm);                                                  \
+            DBFreeQuadmesh(qm);                                          \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(DBPutQuadmesh(F,MN,CNMS,CS,DS,NDS,DB_FLOAT,CTYPE,OL)==0); \
+    }                                                                    \
+}
+
+#define TESTQVAR2(F,VN,MN,VP,DS,NDS,VTYPE,CENT,OL)                       \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetUcdvar(F,VN);                               \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetPointvar(F,VN);                             \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgvar(F,VN);                               \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            DBquadvar *qv = DBGetQuadvar(F, VN);                         \
+            ASSERT(qv);                                                  \
+            DBFreeQuadvar(qv);                                           \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        int d1 = VTYPE == DB_ZONECENT ? -1 : 0;                          \
+        int sz = (dims[0]+d1)*(dims[1]+d1)*(NDS==3?(dims[2]+d1):1);      \
+        put_extents(VP,sz,varextents[vidx[VN[0]]],block);                \
+        ASSERT(DBPutQuadvar1(F,VN,MN,VP,DS,NDS,NULL,0,VTYPE,CENT,OL)==0); \
+    }                                                                    \
+}
+
+#define TESTMAT2(F,MATNM,MN,NMATS,MATNOS,MATLIST,DS,NDS,MIX_NEXT,MIX_MAT,MIX_ZONE,MIX_VF,MIXLEN,DTYPE,OL) \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testread)                                                    \
+        {                                                                \
+            DBmaterial *mat = DBGetMaterial(F, MATNM);                   \
+            ASSERT(mat);                                                 \
+            DBFreeMaterial(mat);                                         \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        matcounts[block] = count_mats(DS[0]*DS[1],MATLIST,matlists[block]); \
+        mixlens[block] = MIXLEN;                                         \
+        ASSERT(DBPutMaterial(F,MATNM,MN,NMATS,MATNOS,MATLIST,DS,NDS,     \
+                   MIX_NEXT,MIX_MAT,MIX_ZONE,MIX_VF,MIXLEN,DTYPE,OL)==0);\
+    }                                                                    \
+}
+
 /*-------------------------------------------------------------------------
  * Function:    build_block_rect2d
  *
@@ -873,7 +958,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
  *-------------------------------------------------------------------------*/
 void
 build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
-                   int nblocks_x, int nblocks_y)
+                   int nblocks_x, int nblocks_y, int handle_read)
 {
     int             cycle;
     float           time;
@@ -1232,30 +1317,16 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             (varextents[1][2*block+1] >= 1.0))
             has_external_zones[block] = 1;
         zonecounts[block] = (dims[0]-1)*(dims[1]-1);
-        DBPutQuadmesh(dbfile, meshname, coordnames, coords, dims, ndims,
-                      DB_FLOAT, DB_COLLINEAR, optlist);
 
-        put_extents(d2,(dims[0]-1)*(dims[1]-1),varextents[3],block);
-        DBPutQuadvar1(dbfile, var1name, meshname, d2, zdims, ndims,
-                      NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQMESH2(dbfile, meshname, coordnames, coords, dims, ndims, DB_COLLINEAR, optlist);
 
-        put_extents(p2,(dims[0]-1)*(dims[1]-1),varextents[4],block);
-        DBPutQuadvar1(dbfile, var2name, meshname, p2, zdims, ndims,
-                      NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR2(dbfile, var1name, meshname, d2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR2(dbfile, var2name, meshname, p2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR2(dbfile, var3name, meshname, u2, zdims, ndims, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR2(dbfile, var4name, meshname, v2, zdims, ndims, DB_FLOAT, DB_NODECENT, optlist);
 
-        put_extents(u2,dims[0]*dims[1],varextents[5],block);
-        DBPutQuadvar1(dbfile, var3name, meshname, u2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
-
-        put_extents(v2,dims[0]*dims[1],varextents[6],block);
-        DBPutQuadvar1(dbfile, var4name, meshname, v2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
-
-        matcounts[block] = count_mats(dims2[0]*dims2[1],matlist2,matlists[block]);
-        mixlens[block] = mixlen2;
-        DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
-                      matlist2, dims2, ndims, mix_next2, mix_mat2,
-                      mix_zone2, mix_vf2, mixlen2, DB_FLOAT, optlist);
+        TESTMAT2(dbfile, matname, meshname, nmats, matnos, matlist2, dims2, ndims,
+                mix_next2, mix_mat2, mix_zone2, mix_vf2, mixlen2, DB_FLOAT, optlist);
 
         DBFreeOptlist(optlist);
 

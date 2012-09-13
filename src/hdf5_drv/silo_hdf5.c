@@ -238,14 +238,14 @@ PRIVATE int hdf2silo_type(hid_t type);
    associated action. For HDF5 driver, we handle the slash swap
    on the 'names' member of multi-block objects only and we
    never skip first semicolon. */
-static const int        handleSlashSwap = 1;
-static const int        skipFirstSemicolon = 0;
+static int const        handleSlashSwap = 1;
+static int const        skipFirstSemicolon = 0;
 
 /* Use `float' for all memory floating point values? */
 static int              force_single_g;
 
 /* used to control behavior of GetZonelist */
-static const char      *calledFromGetUcdmesh = 0;
+static char const      *calledFromGetUcdmesh = 0;
 
 /* Struct used when building the CWD name */
 typedef struct silo_hdf5_comp_t {
@@ -880,10 +880,12 @@ static hid_t    P_ckrdprops = -1;
         _size = 3;                                                            \
         _m_ary = H5Tarray_create(_tmp_m, 1, &_size, NULL);                    \
         db_hdf5_put_cmemb(_mt, #NAME, OFFSET(_m, NAME), 0, NULL, _m_ary);     \
+        H5Tclose(_m_ary);                                                     \
         if (_f && (_tmp_f=_f->T_##TYPE)>=0) {                                 \
             hid_t _f_ary = H5Tarray_create(_tmp_f, 1, &_size, NULL);          \
             db_hdf5_put_cmemb(_ft, #NAME, _f_off, 0, NULL, _f_ary);           \
             _f_off += 3*H5Tget_size(_f_ary);                                  \
+            H5Tclose(_f_ary);                                                 \
         }                                                                     \
     }                                                                         \
 }
@@ -938,7 +940,7 @@ static hid_t    P_ckrdprops = -1;
 
 /*ARGSUSED*/
 INTERNAL void
-suppress_set_but_not_used_warning(const void *ptr)
+suppress_set_but_not_used_warning(void const *ptr)
 {}
 
 #ifdef HAVE_FPZIP
@@ -963,13 +965,14 @@ static db_hdf5_fpzip_params_t db_hdf5_fpzip_params;
 static herr_t
 db_hdf5_fpzip_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 {
-    return 1;
-#if 0
-    /* This code should work but HDF5 doesn't like being told '0'
-     * for certain cases. So, let it pass and handle it in the
-     * actual filter operation by skipping non-float data there. */
+#if HDF5_VERSION_GE(1,8,8)
     if (H5Tget_class(type_id) != H5T_FLOAT)
         return 0;
+    return 1;
+#else
+    /* Older versions of HDF5 don't like being told '0' for certain cases.
+     * So, let it pass and handle it in the actual filter operation by
+     * skipping non-float data there. */
     return 1;
 #endif
 }
@@ -1089,7 +1092,7 @@ static H5Z_class_t db_hdf5_fpzip_class;
 #ifndef HAVE_HZIP
 /*ARGSUSED*/
 static void
-FreeNodelists(DBfile_hdf5 *dbfile, const char *meshname) {}
+FreeNodelists(DBfile_hdf5 *dbfile, char const *meshname) {}
 #else
 
 /* The following section of code is used to mange caching of nodelists
@@ -1113,7 +1116,7 @@ static zlInfo_t keptNodelistInfos[MAX_NODELIST_INFOS];
    uses it. The preference is to use the name of the zonelist itself.
 */
 static const DBzonelist*
-LookupNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname)
+LookupNodelist(DBfile_hdf5 *dbfile, char const *zlname, char const *meshname)
 {
     int i;
     char fullmname[256];
@@ -1150,8 +1153,8 @@ LookupNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname)
  have one. So, we call LookupNodelist as a first step.
 */
 static void 
-RegisterNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname,
-    int ntopodims, int nzones, int origin, const int *nodelist)
+RegisterNodelist(DBfile_hdf5 *dbfile, char const *zlname, char const *meshname,
+    int ntopodims, int nzones, int origin, int const *nodelist)
 {
     DBzonelist *zl = DBAllocZonelist();
     int i;
@@ -1198,7 +1201,7 @@ RegisterNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname,
 }
 
 static void
-AddMeshnameToNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshname)
+AddMeshnameToNodelist(DBfile_hdf5 *dbfile, char const *zlname, char const *meshname)
 {
     int i;
     char fullmname[256];
@@ -1222,7 +1225,7 @@ AddMeshnameToNodelist(DBfile_hdf5 *dbfile, const char *zlname, const char *meshn
 }
 
 static void
-FreeNodelists(DBfile_hdf5 *dbfile, const char *meshname)
+FreeNodelists(DBfile_hdf5 *dbfile, char const *meshname)
 {
     int i;
     if (dbfile) /* clear all for a given file */
@@ -1324,12 +1327,12 @@ static int sizeof_hztype(HZtype hztype)
 typedef struct db_hdf5_hzip_params_t {
     /* these items set DBSetCompression call */
     unsigned            codec;
-    const void         *params;
+    void const         *params;
 
     /* these items set by hdf5 driver as needed. */
     int                 iszl;
-    const char         *zlname;
-    const char         *meshname;
+    char const         *zlname;
+    char const         *meshname;
     DBfile_hdf5        *dbfile;
     int                 zlorigin;
     int                 isquad;
@@ -1346,7 +1349,7 @@ static void
 db_hdf5_hzip_clear_params()
 {
     unsigned tmpcodec = db_hdf5_hzip_params.codec;
-    const void *tmpparams = db_hdf5_hzip_params.params;
+    void const *tmpparams = db_hdf5_hzip_params.params;
     memset(&db_hdf5_hzip_params, 0, sizeof(db_hdf5_hzip_params));
     db_hdf5_hzip_params.codec = tmpcodec;
     db_hdf5_hzip_params.params = tmpparams;
@@ -1355,7 +1358,6 @@ db_hdf5_hzip_clear_params()
 static herr_t
 db_hdf5_hzip_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 {
-    /* see not above regarding fpzip */
     return 1;
 }
 
@@ -1636,8 +1638,8 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
 static H5Z_class_t db_hdf5_hzip_class;
 #endif
 
-INTERNAL const char *
-friendly_name(const char *base_name, const char *fmtstr, const void *val)
+INTERNAL char const *
+friendly_name(char const *base_name, char const *fmtstr, void const *val)
 {
     static char retval[1024];
     static char totfmtstr[1024];
@@ -1663,8 +1665,8 @@ friendly_name(const char *base_name, const char *fmtstr, const void *val)
     typechar = i+1 < flen ? fmtstr[i+1] : '\0';
     switch (typechar)
     {
-        case 'd': sprintf(retval, totfmtstr, *((const int*) val)); break; 
-        case 's': sprintf(retval, totfmtstr, *((const char*) val)); break;
+        case 'd': sprintf(retval, totfmtstr, *((int const*) val)); break; 
+        case 's': sprintf(retval, totfmtstr, *((char const*) val)); break;
         case 'f': sprintf(retval, totfmtstr, *((const float*) val)); break;
         default: return totfmtstr;
     }
@@ -1786,8 +1788,8 @@ db_hdf5_get_cmemb(hid_t compound_type, int membno, int *ndims/*out*/,
  *-------------------------------------------------------------------------
  */
 PRIVATE int
-db_hdf5_put_cmemb(hid_t compound_type, const char *name, size_t offset,
-                  int ndims, const int *dim, hid_t type)
+db_hdf5_put_cmemb(hid_t compound_type, char const *name, size_t offset,
+                  int ndims, int const *dim, hid_t type)
 {
     int         retval;
     
@@ -1799,6 +1801,7 @@ db_hdf5_put_cmemb(hid_t compound_type, const char *name, size_t offset,
         type = H5Tarray_create(type, ndims, bigdims, NULL);
     }
     retval = H5Tinsert(compound_type, name, offset, type);
+    if (ndims) H5Tclose(type);
 #else
     retval = H5Tinsert_array(compound_type, name, offset, ndims, dim, NULL,
                              type);
@@ -1885,7 +1888,7 @@ silo_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
  *-------------------------------------------------------------------------
  */
 PRIVATE void
-hdf5_to_silo_error(const char *vname, const char *fname)
+hdf5_to_silo_error(char const *vname, char const *fname)
 {
     int silo_error_code = E_NOERROR;
 
@@ -3311,7 +3314,8 @@ db_hdf5_set_compression(int flags)
            }
 
            if (H5Pset_filter(P_ckcrprops, DB_HDF5_HZIP_ID,
-                   SILO_Globals.compressionErrmode ? 0 : H5Z_FLAG_OPTIONAL, 0, 0)<0)
+                   SILO_Globals.compressionErrmode == COMPRESSION_ERRMODE_FALLBACK ?
+                       H5Z_FLAG_OPTIONAL : H5Z_FLAG_MANDATORY, 0, 0)<0)
            {
                db_perror("hzip filter setup", E_CALLFAIL, me);
                return (-1);
@@ -3342,7 +3346,8 @@ db_hdf5_set_compression(int flags)
           }
 
           if (H5Pset_filter(P_ckcrprops, DB_HDF5_FPZIP_ID,
-                  SILO_Globals.compressionErrmode ? 0 : H5Z_FLAG_OPTIONAL, 0, 0)<0)
+                   SILO_Globals.compressionErrmode == COMPRESSION_ERRMODE_FALLBACK ?
+                       H5Z_FLAG_OPTIONAL : H5Z_FLAG_MANDATORY, 0, 0)<0)
           {
               db_perror("H5Pset_filter", E_CALLFAIL, me);
               return (-1);
@@ -3434,7 +3439,7 @@ db_hdf5_set_properties(int rank, hsize_t size[])
  *-------------------------------------------------------------------------
  */
 PRIVATE int
-db_hdf5_get_comp_var(hid_t fileid, const char *name, hsize_t *nelmts,
+db_hdf5_get_comp_var(hid_t fileid, char const *name, hsize_t *nelmts,
     size_t *elsize, hid_t *datatype, void **buf)
 {
     hid_t typeid = -1, stypeid = -1, attr = -1, comptype, memtype;
@@ -3614,7 +3619,7 @@ db_hdf5_get_comp_var(hid_t fileid, const char *name, hsize_t *nelmts,
  *-------------------------------------------------------------------------
  */
 PRIVATE herr_t
-load_toc(hid_t grp, const char *name, void *_toc)
+load_toc(hid_t grp, char const *name, void *_toc)
 {
     DBtoc               *toc = (DBtoc*)_toc;
     H5G_stat_t          sb;
@@ -3794,7 +3799,7 @@ load_toc(hid_t grp, const char *name, void *_toc)
  *-------------------------------------------------------------------------
  */
 PRIVATE herr_t
-find_objno(hid_t grp, const char *name, void *_comp)
+find_objno(hid_t grp, char const *name, void *_comp)
 {
     silo_hdf5_comp_t    *comp = (silo_hdf5_comp_t*)_comp;
     H5G_stat_t          sb;
@@ -3986,7 +3991,7 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
  */
 PRIVATE int
 db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
-               void *buf, char *name/*in,out*/, const char *fname,
+               void const *buf, char *name/*in,out*/, char const *fname,
                int compressionFlags)
 {
     static char *me = "db_hdf5_compwr";
@@ -4124,7 +4129,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
  */
 PRIVATE int
 db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
-               void *buf, char *name/*in,out*/, const char *fname)
+               void const *buf, char *name/*in,out*/, char const *fname)
 {
     return db_hdf5_compwrz(dbfile, dtype, rank, _size, buf, name, fname, 0);
 }
@@ -4341,8 +4346,8 @@ db_hdf5_comprd(DBfile_hdf5 *dbfile, char *name, int ignore_force_single)
  */
 PRIVATE char * 
 db_hdf5_resolvename(DBfile *_dbfile,
-                    const char *parent_objname,
-                    const char *child_objname)
+                    char const *parent_objname,
+                    char const *child_objname)
 {
     static char cwgname[4096];
     static char result[4096];
@@ -4555,6 +4560,9 @@ db_hdf5_process_file_options(opts_set_id)
     else
         h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_STRONG);
 
+    /* Disable chunk caching */
+    H5Pset_cache(retval, 0, 0, 0, 0);
+
     /* Handle cases where we are running on Windows. If a client
        request anything other than the default driver, we issue
        a warning message and continue only on windows (default) vfd. */
@@ -4627,7 +4635,7 @@ db_hdf5_process_file_options(opts_set_id)
         case DB_FILE_OPTS_H5_DEFAULT_DIRECT:
         {
 #ifdef H5_HAVE_DIRECT
-            const int fourkb = (1<<12);
+            int const fourkb = (1<<12);
             h5status |= H5Pset_fapl_direct(retval, fourkb, fourkb, fourkb*256);
             h5status |= H5Pset_alignment(retval, fourkb/2, fourkb); 
 #else
@@ -4677,7 +4685,7 @@ db_hdf5_process_file_options(opts_set_id)
         default:
         {
             int _opts_set_id = opts_set_id - NUM_DEFAULT_FILE_OPTIONS_SETS;
-            const DBoptlist *opts;
+            DBoptlist const *opts;
             void *p; int vfd = DB_H5VFD_DEFAULT;
 
             if (_opts_set_id >= MAX_FILE_OPTIONS_SETS ||
@@ -5119,6 +5127,12 @@ db_hdf5_finish_open(DBfile_hdf5 *dbfile)
  *
  *   Mark C. Miller, Mon Jun 28 20:19:35 PDT 2010
  *   Added logic to handle HDF5 header/lib version numbers separately.
+ *
+ *   Mark C. Miller, Thu Aug 30 17:44:56 PDT 2012
+ *   Added new, internal, db_hdf5_WriteCKZ method to enable caller to
+ *   indicate if filters should be turned off. This is useful for disabling
+ *   compression or checksuming for tiny metadata datasets such as hdf5
+ *   library info.
  *-------------------------------------------------------------------------
  */
 PRIVATE DBfile* 
@@ -5129,6 +5143,7 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
     int         size;
     char        hdf5VString[32];
     unsigned    majno, minno, relno;
+    const       int nofilters = 1;
     
     /* Open root group as CWG */
     if ((dbfile->cwg=H5Gopen(dbfile->fid, "/"))<0) {
@@ -5160,8 +5175,7 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
     if (finfo) {
         /* Write file info as a variable in the file */
         size = strlen(finfo)+1;
-        if (db_hdf5_Write((DBfile*)dbfile, "_fileinfo", finfo, &size, 1,
-                          DB_CHAR)<0) {
+        if (db_hdf5_WriteCKZ((DBfile*)dbfile, "_fileinfo", finfo, &size, 1, DB_CHAR, nofilters)<0) {
             db_perror("fileinfo", E_CALLFAIL, me);
             return silo_db_close((DBfile*) dbfile);
         }
@@ -5177,7 +5191,7 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
         sprintf(hdf5VString, "hdf5-%d.%d.%d%s%s", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
             strlen(H5_VERS_SUBRELEASE) ? "-" : "", H5_VERS_SUBRELEASE);
         size = strlen(hdf5VString)+1;
-        if (db_hdf5_Write((DBfile*)dbfile, "_hdf5incinfo", hdf5VString, &size, 1, DB_CHAR)<0) {
+        if (db_hdf5_WriteCKZ((DBfile*)dbfile, "_hdf5incinfo", hdf5VString, &size, 1, DB_CHAR, nofilters)<0) {
             db_perror("_hdf5incinfo", E_CALLFAIL, me);
             return silo_db_close((DBfile*) dbfile);
         }
@@ -5185,7 +5199,7 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
 
     sprintf(hdf5VString, "hdf5-%d.%d.%d", majno, minno, relno);
     size = strlen(hdf5VString)+1;
-    if (db_hdf5_Write((DBfile*)dbfile, "_hdf5libinfo", hdf5VString, &size, 1, DB_CHAR)<0) {
+    if (db_hdf5_WriteCKZ((DBfile*)dbfile, "_hdf5libinfo", hdf5VString, &size, 1, DB_CHAR, nofilters)<0) {
         db_perror("_hdf5libinfo", E_CALLFAIL, me);
         return silo_db_close((DBfile*) dbfile);
     }
@@ -5785,7 +5799,7 @@ typedef struct copy_dir_data_t {
 } copy_dir_data_t;
 
 static herr_t 
-copy_dir(hid_t grp, const char *name, void *op_data)
+copy_dir(hid_t grp, char const *name, void *op_data)
 {
     static char         *me = "copy_dir";
 #if HDF5_VERSION_GE(1,8,0)
@@ -5959,8 +5973,8 @@ copy_dir(hid_t grp, const char *name, void *op_data)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_CpDir(DBfile *_dbfile, const char *srcDir,
-    DBfile *dstFile, const char *dstDir)
+db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
+    DBfile *dstFile, char const *dstDir)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     DBfile_hdf5 *dstfile = (DBfile_hdf5*)dstFile;
@@ -6579,7 +6593,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
  */
 SILO_CALLBACK int
 db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char *compname,
-                       char *prefix, char *dataname, const void *data,
+                       char *prefix, char *dataname, void const *data,
                        int rank, long _size[])
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
@@ -7149,6 +7163,14 @@ SILO_CALLBACK int
 db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
               int *dims, int ndims, int datatype)
 {
+    const int nofilters = 0;
+    return db_hdf5_WriteCKZ(_dbfile, vname, var, dims, ndims, datatype, nofilters);
+}
+
+INTERNAL int
+db_hdf5_WriteCKZ(DBfile *_dbfile, char *vname, void *var,
+              int *dims, int ndims, int datatype, int nofilters)
+{
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile;
    static char  *me = "db_hdf5_Write";
    hid_t        mtype=-1, ftype=-1, space=-1, dset=-1, dset_type=-1;
@@ -7194,16 +7216,26 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
                UNWIND();
            }
 
-           if (db_hdf5_set_properties(ndims, ds_size) < 0 ) {
-               db_perror("db_hdf5_set_properties", E_CALLFAIL, me);
-               UNWIND();
-           }
+           if (nofilters == 0)
+           {
+               if (db_hdf5_set_properties(ndims, ds_size) < 0 ) {
+                   db_perror("db_hdf5_set_properties", E_CALLFAIL, me);
+                   UNWIND();
+               }
 
-           /* Create dataset if it doesn't already exist */
-           if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, space,
-                               P_crprops))<0) {
-               db_perror(vname, E_CALLFAIL, me);
-               UNWIND();
+               /* Create dataset if it doesn't already exist */
+               if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, space, P_crprops))<0) {
+                   db_perror(vname, E_CALLFAIL, me);
+                   UNWIND();
+               }
+           }
+           else
+           {
+               /* Create dataset if it doesn't already exist */
+               if ((dset=H5Dcreate(dbfile->cwg, vname, ftype, space, H5P_DEFAULT))<0) {
+                   db_perror(vname, E_CALLFAIL, me);
+                   UNWIND();
+               }
            }
        }
        
@@ -7791,10 +7823,10 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
  */
 /*ARGSUSED*/
 SILO_CALLBACK int
-db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
-                   int nbounds, const int *typeflags, const int *bndids,
-                   const void *coeffs, int lcoeffs, int datatype,
-                   const double *extents, const char *zonel_name,
+db_hdf5_PutCsgmesh(DBfile *_dbfile, char const *name, int ndims,
+                   int nbounds, int const *typeflags, int const *bndids,
+                   void const *coeffs, int lcoeffs, int datatype,
+                   double const *extents, char const *zonel_name,
                    DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -7906,7 +7938,7 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, const char *name, int ndims,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBcsgmesh *
-db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
+db_hdf5_GetCsgmesh(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetCsgmesh";
@@ -8023,7 +8055,7 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, const char *name)
  */
 /*ARGSUSED*/
 SILO_CALLBACK int
-db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
+db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
                   int nvars, char *varnames[], void *vars[],
                   int nvals, int datatype, int centering, DBoptlist *optlist)
 
@@ -8129,7 +8161,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, const char *vname, const char *meshname,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBcsgvar *
-db_hdf5_GetCsgvar(DBfile *_dbfile, const char *name)
+db_hdf5_GetCsgvar(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetCsgvar";
@@ -8237,11 +8269,11 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, const char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutCSGZonelist(DBfile *_dbfile, const char *name, int nregs,
-                 const int *typeflags,
-                 const int *leftids, const int *rightids,
-                 const void *xforms, int lxforms, int datatype,
-                 int nzones, const int *zonelist, DBoptlist *optlist)
+db_hdf5_PutCSGZonelist(DBfile *_dbfile, char const *name, int nregs,
+                 int const *typeflags,
+                 int const *leftids, int const *rightids,
+                 void const *xforms, int lxforms, int datatype,
+                 int nzones, int const *zonelist, DBoptlist *optlist)
 
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -8337,7 +8369,7 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, const char *name, int nregs,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBcsgzonelist *
-db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name)
+db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetCSGZonelist";
@@ -8440,8 +8472,8 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, const char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutDefvars(DBfile *_dbfile, const char *name, int ndefs,
-                   char *names[], const int *types,
+db_hdf5_PutDefvars(DBfile *_dbfile, char const *name, int ndefs,
+                   char *names[], int const *types,
                    char *defns[], DBoptlist *opts[])
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
@@ -8538,7 +8570,7 @@ db_hdf5_PutDefvars(DBfile *_dbfile, const char *name, int ndefs,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBdefvars*
-db_hdf5_GetDefvars(DBfile *_dbfile, const char *name)
+db_hdf5_GetDefvars(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetDefvars";
@@ -8827,7 +8859,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
  *-------------------------------------------------------------------------
  */
 static void
-PrepareForQuadmeshDecompression(DBfile_hdf5 *dbfile, const char *meshname,
+PrepareForQuadmeshDecompression(DBfile_hdf5 *dbfile, char const *meshname,
     const DBquadmesh *qm)
 {
 #ifdef HAVE_HZIP
@@ -9221,7 +9253,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
  *-------------------------------------------------------------------------
  */
 static void
-PrepareForQuadvarDecompression(DBfile_hdf5 *dbfile, const char *varname,
+PrepareForQuadvarDecompression(DBfile_hdf5 *dbfile, char const *varname,
     const DBquadvar *qv)
 {
 #ifdef HAVE_HZIP
@@ -9389,7 +9421,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 static int PrepareForUcdmeshCompression(DBfile_hdf5 *dbfile,
-    const char *meshname, const char *zlname)
+    char const *meshname, char const *zlname)
 {
     if (SILO_Globals.compressionParams == 0) return 0;
 
@@ -9733,8 +9765,8 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
  *-------------------------------------------------------------------------
  */
 static void
-PrepareForUcdmeshDecompression(DBfile_hdf5 *dbfile, const char *meshname,
-    const char *zlname)
+PrepareForUcdmeshDecompression(DBfile_hdf5 *dbfile, char const *meshname,
+    char const *zlname)
 {
 #ifdef HAVE_HZIP
     db_hdf5_hzip_clear_params();
@@ -9946,8 +9978,8 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 static int
-PrepareForUcdvarCompression(DBfile_hdf5 *dbfile, const char *varname,
-    const char *meshname, int datatype, int centering)
+PrepareForUcdvarCompression(DBfile_hdf5 *dbfile, char const *varname,
+    char const *meshname, int datatype, int centering)
 {
     if (SILO_Globals.compressionParams == 0) return 0;
 
@@ -10138,8 +10170,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
  *-------------------------------------------------------------------------
  */
 static void
-PrepareForUcdvarDecompression(DBfile *_dbfile, const char *varname,
-    const char *meshname, char valnames[MAX_VARS][256], int nvals)
+PrepareForUcdvarDecompression(DBfile *_dbfile, char const *varname,
+    char const *meshname, char valnames[MAX_VARS][256], int nvals)
 {
 
 #ifdef HAVE_HZIP
@@ -10502,9 +10534,9 @@ db_hdf5_GetFacelist(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 static int
-PrepareForZonelistCompression(DBfile_hdf5 *dbfile, const char *name,
-    int origin, int nshapes, const int *shapetype, const int *shapecnt,
-    const int *nodelist)
+PrepareForZonelistCompression(DBfile_hdf5 *dbfile, char const *name,
+    int origin, int nshapes, int const *shapetype, int const *shapecnt,
+    int const *nodelist)
 {
 	int i;
     int ntopo = 0;
@@ -10797,8 +10829,8 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
  *-------------------------------------------------------------------------
  */
 static void
-PrepareForZonelistDecompression(DBfile_hdf5* dbfile, const char *zlname,
-    const char *meshname, int origin)
+PrepareForZonelistDecompression(DBfile_hdf5* dbfile, char const *zlname,
+    char const *meshname, int origin)
 {
 #ifdef HAVE_HZIP
     db_hdf5_hzip_clear_params();
@@ -11547,8 +11579,9 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutMultimesh(DBfile *_dbfile, char *name, int nmesh,
-                     char *meshnames[], int meshtypes[], DBoptlist *optlist)
+db_hdf5_PutMultimesh(DBfile *_dbfile, char const *name, int nmesh,
+                     char const *const *meshnames, int const *meshtypes,
+                     DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBmultimesh_mt      m;
@@ -11848,11 +11881,11 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
-                  const int *meshtypes, const int *nneighbors,
-                  const int *neighbors, const int *back,
-                  const int *lnodelists, int *nodelists[],
-                  const int *lzonelists, int *zonelists[],
+db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
+                  int const *meshtypes, int const *nneighbors,
+                  int const *neighbors, int const *back,
+                  int const *lnodelists, int *nodelists[],
+                  int const *lzonelists, int *zonelists[],
                   DBoptlist *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -12121,8 +12154,8 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBmultimeshadj *
-db_hdf5_GetMultimeshadj(DBfile *_dbfile, const char *name, int nmesh,
-                        const int *block_map)
+db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
+                        int const *block_map)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMultimesh";
@@ -14072,7 +14105,7 @@ db_hdf5_InqMeshName(DBfile *_dbfile, char *name, char *meshname/*out*/)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
+db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
     DBmrgtree *tree, DBoptlist *opts)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -14300,7 +14333,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, const char *name, const char *mesh_name,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBmrgtree *
-db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
+db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMrgtree";
@@ -14516,7 +14549,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, const char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutGroupelmap(DBfile *_dbfile, const char *name,
+db_hdf5_PutGroupelmap(DBfile *_dbfile, char const *name,
     int num_segments, int *groupel_types, int *segment_lengths,
     int *segment_ids, int **segment_data, void **segment_fracs,
     int fracs_data_type, DBoptlist *opts)
@@ -14636,7 +14669,7 @@ db_hdf5_PutGroupelmap(DBfile *_dbfile, const char *name,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBgroupelmap *
-db_hdf5_GetGroupelmap(DBfile *_dbfile, const char *name)
+db_hdf5_GetGroupelmap(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetGroupelmap";
@@ -14768,8 +14801,8 @@ db_hdf5_GetGroupelmap(DBfile *_dbfile, const char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
-    const char *mrgt_name,
+db_hdf5_PutMrgvar(DBfile *_dbfile, char const *name,
+    char const *mrgt_name,
     int ncomps, char **compnames,
     int nregns, char **reg_pnames,
     int datatype, void **data, DBoptlist *optlist)
@@ -14793,7 +14826,7 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
         }
         for (i=0; i<ncomps; i++) {
             char tmpname[256];
-            const char *p = tmpname;
+            char const *p = tmpname;
             if (compnames)
                 sprintf(tmpname, "%s_%s", name, compnames[i]);
             else
@@ -14859,7 +14892,7 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, const char *name,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBmrgvar *
-db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
+db_hdf5_GetMrgvar(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetMrgvar";
@@ -14939,7 +14972,7 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, const char *name)
 }
 
 SILO_CALLBACK int 
-db_hdf5_FreeCompressionResources(DBfile *_dbfile, const char *meshname)
+db_hdf5_FreeCompressionResources(DBfile *_dbfile, char const *meshname)
 {
     FreeNodelists((DBfile_hdf5*)_dbfile, meshname);
     return 0;
@@ -14965,7 +14998,7 @@ typedef struct _index_offset_pair_t {
 } index_offset_pair_t;
 
 /* Support function for db_hdf5_SortObjectsByOffset */
-static int compare_index_offset_pair(const void *a1, const void *a2)
+static int compare_index_offset_pair(void const *a1, void const *a2)
 {
     index_offset_pair_t *p1 = (index_offset_pair_t*) a1;
     index_offset_pair_t *p2 = (index_offset_pair_t*) a2;
@@ -14978,7 +15011,7 @@ static int compare_index_offset_pair(const void *a1, const void *a2)
 
 SILO_CALLBACK int
 db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
-    const char *const *const names, int *ordering)
+    char const *const *const names, int *ordering)
 {
     static char *me = "db_hdf5_SortObjectsByOffset";
 #if HDF5_VERSION_GE(1,8,0)

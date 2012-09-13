@@ -343,7 +343,7 @@ PJ_write_alt (PDBfile *file, char *name, char *type, void *var, int nd,
  */
 #ifdef PDB_WRITE
 INTERNAL int
-PJ_write_len (PDBfile *file, char *name, char *type, const void *var, int nd,
+PJ_write_len (PDBfile *file, char *name, char *type, void const *var, int nd,
               long *len) {
 
    long           ind[15], i;
@@ -560,10 +560,13 @@ PJ_NoCache ( void )
  *      Made the function return the type of the object, if requested.
  *      Beefed up the error message if the object isn't found.
  *
+ *      Mark C. Miller, Wed Sep 12 09:08:32 PDT 2012
+ *      Replaced returned 'ret_type' argument with input expected_dbtype
+ *      argument and cause it to fail if type that is read doesn't
+ *      match the expected_dbtype.
  *--------------------------------------------------------------------*/
 INTERNAL int
-PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj,
-             char **ret_type)
+PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj, int expected_dbtype)
 {
     int             i, j, error;
     char           *varname=NULL, *filename=NULL;
@@ -630,6 +633,21 @@ PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj,
             return -1;
         }
 
+        /* Check object type before we do any allocations */
+        if (expected_dbtype > 0)
+        {
+            if (strcmp(cached_group->type, DBGetObjtypeName(expected_dbtype)) != 0)
+            {
+                char error[256];
+                FREE(varname);
+                FREE(filename);
+                sprintf(error,"Requested %s object \"%s\" is not a %s.",
+                    cached_group->type, objname_in, DBGetObjtypeName(expected_dbtype));
+                db_perror(error, E_NOTFOUND, me);
+                return -1;
+            }
+        }
+
         /* We've gotten a new group, remember which one it is. */
         cached_obj_name = STRDUP(objname);
         cached_file_name = STRDUP(file->name);
@@ -638,10 +656,19 @@ PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj,
         use_PJgroup_cache = 1;
     }
 
-    /* If we are asked to, return the object type */
-    if (ret_type)
+    /* Check object type */
+    if (expected_dbtype > 0)
     {
-        *ret_type = safe_strdup(cached_group->type);
+        if (strcmp(cached_group->type, DBGetObjtypeName(expected_dbtype)) != 0)
+        {
+            char error[256];
+            FREE(varname);
+            FREE(filename);
+            sprintf(error,"Requested %s object \"%s\" is not a %s.",
+                cached_group->type, objname_in, DBGetObjtypeName(expected_dbtype));
+            db_perror(error, E_NOTFOUND, me);
+            return -1;
+        }
     }
 
     /* Walk through the object, putting the data into the appropriate memory
@@ -754,7 +781,7 @@ PJ_GetComponent (PDBfile *file, char *objname, char *compname) {
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ(compname, &result, DB_NOTYPE);
 
-   if (PJ_GetObject(file, objname, &tmp_obj, NULL) < 0) {
+   if (PJ_GetObject(file, objname, &tmp_obj, 0) < 0) {
       db_perror("PJ_GetObject", E_CALLFAIL, me);
       return NULL;
    }
@@ -798,7 +825,7 @@ PJ_GetComponentType (PDBfile *file, char *objname, char *compname)
        INIT_OBJ(&tmp_obj);
        DEFALL_OBJ(compname, &result, DB_NOTYPE);
 
-       if (PJ_GetObject(file, objname, &tmp_obj, NULL) < 0) {
+       if (PJ_GetObject(file, objname, &tmp_obj, 0) < 0) {
           db_perror("PJ_GetObject", E_CALLFAIL, me);
           return DB_NOTYPE;
        }
@@ -1682,18 +1709,6 @@ static char   *_ptvalstr[10] =
  "6_data", "7_data", "8_data",
  "9_data"};
 
-#define CHECK_TYPE(typestring,type,name) \
-    if (strcmp(typestring, DBGetObjtypeName(type)) != 0) \
-    { \
-        char error[256]; \
-        sprintf(error,"Requested %s object \"%s\" is not a %s.",\
-                typestring, name, DBGetObjtypeName(type)); \
-        FREE(typestring); \
-        db_perror(error, E_INTERNAL, me); \
-    } else { \
-        FREE(typestring); \
-    }
-
 static PJcomplist *_tcl;
 
 /* Symbolic constants used in calls to db_StringListToStringArray
@@ -1705,8 +1720,8 @@ static PJcomplist *_tcl;
    coming into existence. This is to ensure diffs on files
    before and after this change don't vary due to leading
    semicolon. */
-static const int handleSlashSwap = 1;
-static const int skipFirstSemicolon = 1;
+static int const handleSlashSwap = 1;
+static int const skipFirstSemicolon = 1;
 
 /*----------------------------------------------------------------------
  *  Routine                                       db_pdb_GetVarDatatype
@@ -3274,7 +3289,6 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     DBfile_pdb *dbfile = (DBfile_pdb *) _dbfile;
     static char *me = "db_pdb_GetMaterial";
     PJcomplist tmp_obj;
-    char   *type = NULL;
     char *tmpnames = NULL;
     char *tmpcolors = NULL;
     DBmaterial tmpmm;
@@ -3311,7 +3325,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
         DEFALL_OBJ("mix_vf",      &tmpmm.mix_vf,      DB_FLOAT);
     }
 
-    if (PJ_GetObject(dbfile->pdb, name, &tmp_obj, &type) < 0)
+    if (PJ_GetObject(dbfile->pdb, name, &tmp_obj, DB_MATERIAL) < 0)
         return NULL;
 
     if (NULL == (mm = DBAllocMaterial()))
@@ -3321,7 +3335,6 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     }
     *mm = tmpmm;
 
-    CHECK_TYPE(type,DB_MATERIAL,name);
     _DBQQCalcStride(mm->stride, mm->dims, mm->ndims, mm->major_order);
 
     /* If we have material names, restore it to an array of names.  In the
@@ -3413,7 +3426,6 @@ SILO_CALLBACK DBmatspecies *
 db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
                       char   *objname)   /*Name of matspecies obj to return */
 {
-   char *type = NULL;
    DBmatspecies  *mm;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    static char   *me = "db_pdb_GetMatspecies";
@@ -3447,7 +3459,7 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    if (SILO_Globals.dataReadMask & DBMatMatcolors)
        DEFALL_OBJ("speccolors",    &tmpcolors,        DB_CHAR);
 
-   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MATSPECIES) < 0)
       return NULL;
 
    if (NULL == (mm = DBAllocMatspecies())) {
@@ -3455,8 +3467,6 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
       return NULL;
    }
    *mm = tmpmm;
-
-   CHECK_TYPE(type, DB_MATSPECIES, objname);
 
    /* Now read in species_mf per its datatype. */
    INIT_OBJ(&tmp_obj);
@@ -3474,7 +3484,7 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
       mm->datatype = DB_FLOAT;
 
    DEFALL_OBJ("species_mf", &mm->species_mf, mm->datatype);
-   PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
 
    _DBQQCalcStride(mm->stride, mm->dims, mm->ndims, mm->major_order);
 
@@ -3528,7 +3538,6 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
 SILO_CALLBACK DBcompoundarray *
 db_pdb_GetCompoundarray (DBfile *_dbfile, char *array_name)
 {
-   char *type = NULL;
    int            i;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    DBcompoundarray *ca = NULL;
@@ -3547,13 +3556,12 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char *array_name)
    DEFINE_OBJ("datatype", &tmpca.datatype, DB_INT);
    DEFALL_OBJ("elemnames", &name_vector, DB_CHAR);
    DEFALL_OBJ("elemlengths", &tmpca.elemlengths, DB_INT);
-   if (PJ_GetObject(dbfile->pdb, array_name, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, array_name, &tmp_obj, DB_ARRAY) < 0)
        return NULL;
    if (NULL == (ca = DBAllocCompoundarray()))
       return NULL;
    *ca = tmpca;
 
-   CHECK_TYPE(type, DB_ARRAY, array_name);
    if (ca->nelems <= 0 || ca->nvalues <= 0 || ca->datatype < 0 ||
        !name_vector) {
       DBFreeCompoundarray(ca);
@@ -3588,7 +3596,7 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char *array_name)
    }
 
    DEFALL_OBJ("values", &ca->values, ca->datatype);
-   PJ_GetObject(dbfile->pdb, array_name, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, array_name, &tmp_obj, 0);
 
    ca->id = 0;
    ca->name = STRDUP(array_name);
@@ -3628,7 +3636,6 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char *array_name)
 SILO_CALLBACK DBcurve *
 db_pdb_GetCurve (DBfile *_dbfile, char *name)
 {
-   char *type = NULL;
    DBfile_pdb   *dbfile = (DBfile_pdb *) _dbfile ;
    DBcurve      *cu ;
    static char  *me = "db_pdb_GetCurve" ;
@@ -3648,12 +3655,11 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
    DEFALL_OBJ ("yunits",   &tmpcu.yunits,   DB_CHAR) ;
    DEFALL_OBJ ("reference",&tmpcu.reference,DB_CHAR) ;
    DEFINE_OBJ ("guihide",  &tmpcu.guihide,  DB_INT) ;
-   if (PJ_GetObject (dbfile->pdb, name, &tmp_obj, &type)<0)
+   if (PJ_GetObject (dbfile->pdb, name, &tmp_obj, DB_CURVE)<0)
        return NULL ;
    if (NULL == (cu = DBAllocCurve ())) return NULL ;
    *cu = tmpcu;
 
-   CHECK_TYPE(type, DB_CURVE, name);
    if (cu->npts<=0)
    {
       DBFreeCurve (cu) ;
@@ -3679,7 +3685,7 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
          INIT_OBJ (&tmp_obj) ;
          DEFALL_OBJ ("xvals", &cu->x, cu->datatype) ;
          DEFALL_OBJ ("yvals", &cu->y, cu->datatype) ;
-         PJ_GetObject (dbfile->pdb, name, &tmp_obj, NULL) ;
+         PJ_GetObject (dbfile->pdb, name, &tmp_obj, 0) ;
       }
    }
 
@@ -3767,9 +3773,8 @@ db_pdb_GetComponentType (DBfile *_dbfile, char *objname, char *compname)
  *   Fix name of guihide array (removed the extra 's').
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBdefvars *
-db_pdb_GetDefvars(DBfile *_dbfile, const char *objname)
+db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
 {
-   char *typestring = NULL;
    DBdefvars     *defv = NULL;
    int            ncomps, type;
    char          *tmpnames, *tmpdefns, tmp[256];
@@ -3793,13 +3798,11 @@ db_pdb_GetDefvars(DBfile *_dbfile, const char *objname)
        DEFALL_OBJ("names", &tmpnames, DB_CHAR);
        DEFALL_OBJ("defns", &tmpdefns, DB_CHAR);
 
-       if (PJ_GetObject(dbfile->pdb, (char *) objname, &tmp_obj, &typestring) < 0)
+       if (PJ_GetObject(dbfile->pdb, (char *) objname, &tmp_obj, DB_DEFVARS) < 0)
            return NULL;
        if ((defv = DBAllocDefvars(0)) == NULL)
            return NULL;
        *defv = tmpdefv;
-
-      CHECK_TYPE(typestring, DB_DEFVARS, objname);
 
        if ((tmpnames != NULL) && (defv->ndefs > 0))
        {
@@ -3962,7 +3965,6 @@ pdb_getvarinfo (PDBfile *pdbfile,
 SILO_CALLBACK DBmultimesh *
 db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
 {
-   char *typestring = NULL;
    DBmultimesh   *mm = NULL;
    int            ncomps, type;
    char          *tmpnames=0, tmp[256];
@@ -4007,13 +4009,11 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("empty_list", &tmpmm.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmm.empty_cnt, DB_INT);
 
-      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMESH) < 0)
          return NULL;
       if ((mm = DBAllocMultimesh(0)) == NULL)
          return NULL;
       *mm = tmpmm;
-
-      CHECK_TYPE(typestring, DB_MULTIMESH, objname);
 
       /* The value we store to the file for 'topo_dim' member is
          designed such that zero indicates a value that was NOT
@@ -4055,10 +4055,9 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
  *      the given database.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBmultimeshadj *
-db_pdb_GetMultimeshadj (DBfile *_dbfile, const char *objname, int nmesh,
-    const int *block_map)
+db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
+    int const *block_map)
 {
-   char *typestring = NULL;
    DBmultimeshadj   *mmadj = NULL;
    int            ncomps, type;
    int            i, j, tmpnmesh;
@@ -4091,13 +4090,11 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, const char *objname, int nmesh,
       DEFALL_OBJ("lnodelists", &tmpmmadj.lnodelists, DB_INT);
       DEFALL_OBJ("lzonelists", &tmpmmadj.lzonelists, DB_INT);
 
-      if (PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, &typestring) < 0)
+      if (PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, DB_MULTIMESHADJ) < 0)
          return NULL;
       if ((mmadj = DBAllocMultimeshadj(0)) == NULL)
          return NULL;
       *mmadj = tmpmmadj;
-
-      CHECK_TYPE(typestring, DB_MULTIMESHADJ, objname);
 
        offsetmap = ALLOC_N(int, mmadj->nblocks);
        lneighbors = 0;
@@ -4255,7 +4252,6 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, const char *objname, int nmesh,
 SILO_CALLBACK DBmultivar *
 db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
 {
-   char *typestring = NULL;
    DBmultivar    *mv = NULL;
    int            ncomps, type;
    char          *tmpnames=0, tmp[256];
@@ -4294,12 +4290,11 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("empty_list", &tmpmv.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmv.empty_cnt, DB_INT);
 
-      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIVAR) < 0)
          return NULL;
       if ((mv = DBAllocMultivar(0)) == NULL)
          return NULL;
       *mv = tmpmv;
-      CHECK_TYPE(typestring, DB_MULTIVAR, objname);
 
       /*----------------------------------------
        *  Internally, the varnames are stored
@@ -4386,7 +4381,6 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBmultimat *
 db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
 {
-   char *typestring = NULL;
    DBmultimat    *mt = NULL;
    int            ncomps, type;
    char          *tmpnames=NULL, *s=NULL, *name=NULL, tmp[256];
@@ -4425,12 +4419,11 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("empty_list", &tmpmt.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmt.empty_cnt, DB_INT);
 
-      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMAT) < 0)
          return NULL;
       if ((mt = DBAllocMultimat(0)) == NULL)
          return NULL;
       *mt = tmpmt;
-      CHECK_TYPE(typestring, DB_MULTIMAT, objname);
 
       /*----------------------------------------
        *  Internally, the material names are stored
@@ -4506,7 +4499,6 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBmultimatspecies *
 db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
 {
-   char *typestring = NULL;
    DBmultimatspecies *mms = NULL;
    int                ncomps, type;
    int                i, nstrs = 0;
@@ -4543,12 +4535,11 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("empty_list", &tmpmms.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmms.empty_cnt, DB_INT);
 
-      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &typestring) < 0)
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMATSPECIES) < 0)
          return NULL;
       if ((mms = DBAllocMultimatspecies(0)) == NULL)
          return NULL;
       *mms = tmpmms;
-      CHECK_TYPE(typestring, DB_MULTIMATSPECIES, objname);
 
       /*----------------------------------------
        *  Internally, the material species names
@@ -4634,7 +4625,6 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBpointmesh *
 db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
 {
-   char *type = NULL;
    DBpointmesh   *pm = NULL;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
@@ -4679,12 +4669,11 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("units1", &tmppm.units[1], DB_CHAR);
    DEFALL_OBJ("units2", &tmppm.units[2], DB_CHAR);
 
-   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_POINTMESH) < 0)
       return NULL;
    if ((pm = DBAllocPointmesh()) == NULL)
       return NULL;
    *pm = tmppm;
-   CHECK_TYPE(type, DB_POINTMESH, objname);
 
    /*
     *  Read the remainder of the object: loop over all values
@@ -4695,7 +4684,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
       INIT_OBJ(&tmp_obj);
       DEFALL_OBJ("gnodeno", &tmppm.gnodeno, pm->gnznodtype);
       pm->gnodeno = 0;
-      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
+      if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0)>=0)
           pm->gnodeno = tmppm.gnodeno;
    }
 
@@ -4772,7 +4761,6 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBmeshvar *
 db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
 {
-   char *type = NULL;
    DBmeshvar     *mv = NULL;
    int            i;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -4806,12 +4794,11 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("conserved", &tmpmv.conserved, DB_INT);
    DEFINE_OBJ("extensive", &tmpmv.extensive, DB_INT);
 
-   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_POINTVAR) < 0)
       return NULL;
    if ((mv = DBAllocMeshvar()) == NULL)
       return NULL;
    *mv = tmpmv;
-   CHECK_TYPE(type, DB_POINTVAR, objname);
 
    /*
     *  Read the remainder of the object: loop over all values
@@ -4853,7 +4840,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
           }
       }
 
-      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL);
+      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
    }
 
    if (rpnames != NULL)
@@ -4914,7 +4901,6 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBquadmesh *
 db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
 {
-    char *type = NULL;
     DBquadmesh     *qm = NULL;
     PJcomplist      tmp_obj;
     DBfile_pdb     *dbfile = (DBfile_pdb *) _dbfile;
@@ -4969,24 +4955,12 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
 
     /* The type passed here to PJ_GetObject is NULL because quadmeshes can have
      * one of two types:  DB_COLLINEAR or DB_NONCOLLINEAR.  */
-    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_QUAD_RECT) < 0 &&
+        PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_QUAD_CURV) < 0)
        return NULL;
     if ((qm = DBAllocQuadmesh()) == NULL)
        return NULL;
     *qm = tmpqm;
-    if ((strcmp(type, DBGetObjtypeName(DB_QUAD_RECT)) != 0)
-        &&
-        (strcmp(type, DBGetObjtypeName(DB_QUAD_CURV)) != 0)
-       )
-    {
-        char error[256];
-        sprintf(error,"Requested %s object \"%s\" is not a quadmesh.",
-                type, objname);
-        FREE(type);
-        db_perror(error, E_INTERNAL, me);
-    } else {
-        FREE(type);
-    }
 
     /*
      * If base_index was not set with the PJ_GetObject call, then
@@ -5071,7 +5045,6 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBquadvar *
 db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
 {
-   char *type = NULL;
    DBquadvar     *qv = NULL;
    int            i;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -5118,12 +5091,11 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("label", &tmpqv.label, DB_CHAR);
    DEFALL_OBJ("units", &tmpqv.units, DB_CHAR);
 
-   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_QUADVAR) < 0)
       return NULL;
    if ((qv = DBAllocQuadvar()) == NULL)
       return NULL;
    *qv = tmpqv;
-   CHECK_TYPE(type, DB_QUADVAR, objname);
 
    /*
     *  Read the remainder of the object: loop over all values
@@ -5159,7 +5131,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
          }
       }
 
-      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL);
+      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
    }
 
    if (rpnames != NULL)
@@ -5242,7 +5214,6 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBucdmesh *
 db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
 {
-   char *type = NULL;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    DBucdmesh     *um = NULL;
    char          *flname = NULL, *zlname = NULL, *elname = NULL,
@@ -5301,12 +5272,11 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
    DEFINE_OBJ("tv_connectivity", &tmpum.tv_connectivity, DB_INT);
    DEFINE_OBJ("disjoint_mode", &tmpum.disjoint_mode, DB_INT);
 
-   if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, DB_UCDMESH) < 0)
       return NULL;
    if ((um = DBAllocUcdmesh()) == NULL)
       return NULL;
    *um = tmpum;
-   CHECK_TYPE(type, DB_UCDMESH, meshname);
 
    if (PJ_InqForceSingle() == TRUE)
       um->datatype = DB_FLOAT;
@@ -5331,7 +5301,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       INIT_OBJ(&tmp_obj);
       DEFALL_OBJ("gnodeno", &tmpum.gnodeno, um->gnznodtype);
       um->gnodeno = 0;
-      if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, NULL)>=0)
+      if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, 0)>=0)
           um->gnodeno = tmpum.gnodeno;
    }
 
@@ -5363,7 +5333,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       DEFALL_OBJ("types", &tmpfaces.types, DB_INT);
       DEFALL_OBJ("zoneno", &tmpfaces.zoneno, DB_INT);
 
-      if (PJ_GetObject(dbfile->pdb, flname, &tmp_obj, NULL) < 0)
+      if (PJ_GetObject(dbfile->pdb, flname, &tmp_obj, 0) < 0)
       {
          DBFreeUcdmesh(um);
          return NULL;
@@ -5408,7 +5378,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       DEFINE_OBJ("lo_offset", &lo_offset, DB_INT);
       DEFINE_OBJ("hi_offset", &hi_offset, DB_INT);
 
-      if (PJ_GetObject(dbfile->pdb, zlname, &tmp_obj, &type) < 0)
+      if (PJ_GetObject(dbfile->pdb, zlname, &tmp_obj, DB_ZONELIST) < 0)
       {
          DBFreeUcdmesh(um);
          return NULL;
@@ -5419,8 +5389,6 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
          return NULL;
       }
       *(um->zones) = tmpzones;
-
-      CHECK_TYPE(type, DB_ZONELIST, zlname);
 
       um->zones->min_index = lo_offset;
       um->zones->max_index = um->zones->nzones - hi_offset - 1;
@@ -5443,7 +5411,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
           INIT_OBJ(&tmp_obj);
           DEFALL_OBJ("gzoneno", &tmpzones.gzoneno, um->zones->gnznodtype);
           um->zones->gzoneno = 0;
-          if (PJ_GetObject(dbfile->pdb, zlname, &tmp_obj, NULL)>=0)
+          if (PJ_GetObject(dbfile->pdb, zlname, &tmp_obj, 0)>=0)
               um->zones->gzoneno = tmpzones.gzoneno;
       }
 
@@ -5466,7 +5434,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       DEFALL_OBJ("edge_beg", &tmpedges.edge_beg, DB_INT);
       DEFALL_OBJ("edge_end", &tmpedges.edge_end, DB_INT);
 
-      if (PJ_GetObject(dbfile->pdb, elname, &tmp_obj, NULL) < 0)
+      if (PJ_GetObject(dbfile->pdb, elname, &tmp_obj, 0) < 0)
       {
          DBFreeUcdmesh(um);
          return NULL;
@@ -5554,7 +5522,6 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
 SILO_CALLBACK DBucdvar *
 db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
 {
-   char *type = NULL;
    DBucdvar      *uv = NULL;
    int            i;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -5592,12 +5559,11 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("conserved", &tmpuv.conserved, DB_INT);
    DEFINE_OBJ("extensive", &tmpuv.extensive, DB_INT);
 
-   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_UCDVAR) < 0)
       return NULL;
    if ((uv = DBAllocUcdvar()) == NULL)
       return NULL;
    *uv = tmpuv;
-   CHECK_TYPE(type, DB_UCDVAR, objname);
 
    /*
     *  Read the remainder of the object: loop over all values
@@ -5632,7 +5598,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
          }
       }
 
-      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL);
+      PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0);
    }
 
    if (rpnames != NULL)
@@ -5668,9 +5634,8 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
  *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBcsgmesh *
-db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
+db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
 {
-   char *type = NULL;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    DBcsgmesh     *csgm = NULL;
    char          *zlname = NULL, *tmpbndnames = NULL;
@@ -5718,9 +5683,8 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
    if (SILO_Globals.dataReadMask & DBCSGMBoundaryNames)
        DEFALL_OBJ("bndnames", &tmpbndnames, DB_CHAR);
 
-   if (PJ_GetObject(dbfile->pdb, (char*) meshname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, (char*) meshname, &tmp_obj, DB_CSGMESH) < 0)
       return NULL;
-   CHECK_TYPE(type, DB_CSGMESH, meshname);
 
     /* now that we know the object's data type, we can correctly
        read the coeffs */
@@ -5732,7 +5696,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
         }
 
         DEFALL_OBJ("coeffs", &tmpcsgm.coeffs, tmpcsgm.datatype);
-        PJ_GetObject(dbfile->pdb, (char*) meshname, &tmp_obj, NULL);
+        PJ_GetObject(dbfile->pdb, (char*) meshname, &tmp_obj, 0);
     }
 
     if ((tmpbndnames != NULL) && (tmpcsgm.nbounds > 0))
@@ -5777,9 +5741,8 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, const char *meshname)
  *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBcsgvar *
-db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
+db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
 {
-   char *type = NULL;
    DBcsgvar      *csgv = NULL;
    int            i;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -5806,9 +5769,8 @@ db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
    DEFINE_OBJ("guihide", &tmpcsgv.guihide, DB_INT);
    DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
 
-   if (PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, DB_CSGVAR) < 0)
       return NULL;
-   CHECK_TYPE(type, DB_CSGVAR, objname);
 
    /*
     *  Read the remainder of the object: loop over all values
@@ -5835,7 +5797,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
          DEFALL_OBJ(_valstr[i], &tmpcsgv.vals[i], tmpcsgv.datatype);
       }
 
-      PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, NULL);
+      PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, 0);
    }
 
    if (rpnames != NULL)
@@ -5882,7 +5844,6 @@ db_pdb_GetCsgvar (DBfile *_dbfile, const char *objname)
 SILO_CALLBACK DBfacelist *
 db_pdb_GetFacelist(DBfile *_dbfile, char *objname)
 {
-    char *type = NULL;
     DBfacelist          *fl=NULL;
     PJcomplist          tmp_obj;
     DBfile_pdb          *dbfile = (DBfile_pdb*)_dbfile;
@@ -5914,12 +5875,11 @@ db_pdb_GetFacelist(DBfile *_dbfile, char *objname)
         DEFALL_OBJ("zoneno", &tmpfl.zoneno, DB_INT);
     }
 
-    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_FACELIST) < 0)
        return NULL;
     if ((fl = DBAllocFacelist()) == NULL)
        return NULL;
     *fl = tmpfl;
-    CHECK_TYPE(type, DB_FACELIST, objname);
 
     return fl;
 }
@@ -5963,7 +5923,6 @@ db_pdb_GetFacelist(DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBzonelist *
 db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
 {
-    char *type = NULL;
     DBzonelist          *zl = NULL;
     PJcomplist          tmp_obj;
     DBfile_pdb          *dbfile = (DBfile_pdb*)_dbfile;
@@ -5995,12 +5954,11 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
         DEFALL_OBJ("zoneno", &tmpzl.zoneno, DB_INT);
     }
 
-    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_ZONELIST) < 0)
        return NULL;
     if ((zl = DBAllocZonelist()) == NULL)
        return NULL;
     *zl = tmpzl;
-    CHECK_TYPE(type, DB_ZONELIST, objname);
 
     /* optional global zone numbers */
     zl->gnznodtype = zl->gnznodtype?zl->gnznodtype:DB_INT;
@@ -6008,7 +5966,7 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
        INIT_OBJ(&tmp_obj);
        DEFALL_OBJ("gzoneno", &tmpzl.gzoneno, zl->gnznodtype);
        zl->gzoneno = 0;
-       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
+       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0)>=0)
            zl->gzoneno = tmpzl.gzoneno; 
     }
 
@@ -6053,7 +6011,6 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
 SILO_CALLBACK DBphzonelist *
 db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
 {
-    char *type = NULL;
     DBphzonelist          *phzl = NULL;
     PJcomplist          tmp_obj;
     DBfile_pdb          *dbfile = (DBfile_pdb*)_dbfile;
@@ -6086,12 +6043,11 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
         DEFALL_OBJ("zoneno", &tmpphzl.zoneno, DB_INT);
     }
 
-    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, &type) < 0)
+    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_PHZONELIST) < 0)
        return NULL;
     if ((phzl = DBAllocPHZonelist()) == NULL)
        return NULL;
     *phzl = tmpphzl;
-    CHECK_TYPE(type, DB_PHZONELIST, objname);
 
     /* optional global zone numbers */
     phzl->gnznodtype = phzl->gnznodtype?phzl->gnznodtype:DB_INT;
@@ -6099,7 +6055,7 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
        INIT_OBJ(&tmp_obj);
        DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno, phzl->gnznodtype);
        phzl->gzoneno = 0;
-       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, NULL)>=0)
+       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, 0)>=0)
            phzl->gzoneno = tmpphzl.gzoneno;
     }
 
@@ -6126,9 +6082,8 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
  *   db_StringListToStringArray.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBcsgzonelist *
-db_pdb_GetCSGZonelist(DBfile *_dbfile, const char *objname)
+db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
 {
-    char *type = NULL;
     char *tmprnames = 0, *tmpznames = 0;
     DBcsgzonelist      *zl = NULL;
     PJcomplist          tmp_obj;
@@ -6162,9 +6117,8 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, const char *objname)
     if (SILO_Globals.dataReadMask & DBCSGZonelistZoneNames)
         DEFALL_OBJ("zonenames", &tmpznames, DB_CHAR);
 
-    if (PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, &type) < 0)
+    if (PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, DB_CSGZONELIST) < 0)
        return NULL;
-    CHECK_TYPE(type, DB_CSGZONELIST, objname);
 
     /* now that we know the object's data type, we can correctly
        read the xforms */
@@ -6176,7 +6130,7 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, const char *objname)
         }
 
         DEFALL_OBJ("xform", &tmpzl.xform, tmpzl.datatype);
-        PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, NULL);
+        PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, 0);
     }
 
     if ((tmprnames != NULL) && (tmpzl.nregs > 0))
@@ -6722,9 +6676,8 @@ db_pdb_GetComponentNames (DBfile *_dbfile, char *objname,
  *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBmrgtree *
-db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
+db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
 {
-   char *type = NULL;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    DBmrgtree     *tree = NULL;
    PJcomplist     tmp_obj;
@@ -6752,10 +6705,8 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    DEFALL_OBJ("mrgvar_onames", &mrgv_onames, DB_CHAR);
    DEFALL_OBJ("mrgvar_rnames", &mrgv_rnames, DB_CHAR);
 
-   if (PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, DB_MRGTREE) < 0)
       return NULL;
-   CHECK_TYPE(type, DB_MRGTREE, mrgtree_name);
-   FREE(type);
 
    tree = (DBmrgtree *) calloc(1,sizeof(DBmrgtree));
    memset(tree, 0, sizeof(DBmrgtree));
@@ -6785,7 +6736,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    /* read the node 'name' member */
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("name", &s, DB_CHAR);
-   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    strArray = DBStringListToStringArray(s, num_nodes,
        !handleSlashSwap, !skipFirstSemicolon);
    for (i = 0; i < num_nodes; i++)
@@ -6796,7 +6747,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    /* read the node 'names' member */
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("names", &s, DB_CHAR);
-   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    if (s)
    {
        strArray = DBStringListToStringArray(s, -1, !handleSlashSwap,
@@ -6827,7 +6778,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    /* read the maps_name data */
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("maps_name", &s, DB_CHAR);
-   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    strArray = DBStringListToStringArray(s, num_nodes, !handleSlashSwap,
        !skipFirstSemicolon);
    for (i = 0; i < num_nodes; i++)
@@ -6838,7 +6789,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    /* read the map segment id data */
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("seg_ids", &intArray, DB_INT);
-   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    n = 0;
    for (i = 0; i < num_nodes; i++)
    {
@@ -6855,7 +6806,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    /* read the map segment len data */
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("seg_lens", &intArray, DB_INT);
-   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    n = 0;
    for (i = 0; i < num_nodes; i++)
    {
@@ -6872,7 +6823,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    /* read the map segment type data */
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("seg_types", &intArray, DB_INT);
-   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    n = 0;
    for (i = 0; i < num_nodes; i++)
    {
@@ -6889,7 +6840,7 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
    /* read the child ids */
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("children", &intArray, DB_INT);
-   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
    n = 0;
    for (i = 0; i < num_nodes; i++)
    {
@@ -6938,14 +6889,13 @@ db_pdb_GetMrgtree(DBfile *_dbfile, const char *mrgtree_name)
  *
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBgroupelmap*
-db_pdb_GetGroupelmap(DBfile *_dbfile, const char *name)
+db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
 {
     int i, j, n;
     DBgroupelmap *gm = NULL;
     DBfile_pdb *dbfile = (DBfile_pdb *) _dbfile;
     static char *me = "db_pdb_GetGroupelmap";
     PJcomplist tmp_obj;
-    char   *type = NULL;
     int *segData = NULL;
     int *fracLengths = NULL;
     void *fracsArray = NULL;
@@ -6963,10 +6913,8 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, const char *name)
     DEFALL_OBJ("frac_lengths",    &fracLengths, DB_INT);
     DEFALL_OBJ("segment_fracs",   &fracsArray, DB_FLOAT);
 
-    if (PJ_GetObject(dbfile->pdb, (char*)name, &tmp_obj, &type) < 0)
+    if (PJ_GetObject(dbfile->pdb, (char*)name, &tmp_obj, DB_GROUPELMAP) < 0)
         return NULL;
-    CHECK_TYPE(type,DB_GROUPELMAP,name);
-    FREE(type);
 
     gm = (DBgroupelmap*) calloc(1,sizeof(DBgroupelmap));
     *gm = tmpgm;
@@ -7050,9 +6998,8 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, const char *name)
  *   semicolon in calls to db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBmrgvar *
-db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
+db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
 {
-   char *type = NULL;
    DBmrgvar      *mrgv = NULL;
    int            i;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -7077,11 +7024,10 @@ db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
    DEFALL_OBJ("compnames", &cnames, DB_CHAR);
    DEFALL_OBJ("reg_pnames", &rpnames, DB_CHAR);
 
-   if (PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, &type) < 0)
+   if (PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, DB_MRGVAR) < 0)
       return NULL;
    mrgv = (DBmrgvar *) calloc(1, sizeof(DBmrgvar));
    *mrgv = tmpmrgv;
-   CHECK_TYPE(type, DB_MRGVAR, objname);
 
    INIT_OBJ(&tmp_obj);
 
@@ -7103,7 +7049,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
       DEFALL_OBJ(_valstr[i], &mrgv->data[i], DB_FLOAT);
    }
 
-   PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, NULL);
+   PJ_GetObject(dbfile->pdb, (char*)objname, &tmp_obj, 0);
 
    if (cnames != NULL)
    {
@@ -7135,7 +7081,7 @@ db_pdb_GetMrgvar(DBfile *_dbfile, const char *objname)
  *  Programmer: Mark C. Miller, Tue Dec  2 09:59:20 PST 2008
  *--------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_FreeCompressionResources(DBfile *_dbfile, const char *meshname)
+db_pdb_FreeCompressionResources(DBfile *_dbfile, char const *meshname)
 {
     return 0;
 }
@@ -7213,7 +7159,7 @@ db_pdb_WriteObject(DBfile   *_file,    /*File to write into */
 #ifdef PDB_WRITE
 SILO_CALLBACK int
 db_pdb_WriteComponent (DBfile *_file, DBobject *obj, char *compname,
-                       char *prefix, char *datatype, const void *var,
+                       char *prefix, char *datatype, void const *var,
                        int nd, long count[])
 {
    PDBfile       *file;
@@ -7663,8 +7609,8 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutDefvars (DBfile *dbfile, const char *name, int ndefs,
-                     char *names[], const int types[],
+db_pdb_PutDefvars (DBfile *dbfile, char const *name, int ndefs,
+                     char *names[], int const types[],
                      char *defns[], DBoptlist *optlists[]) {
 
    int            i, len;
@@ -8170,9 +8116,9 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
-                     char *meshnames[], int meshtypes[],
-                     DBoptlist *optlist) {
+db_pdb_PutMultimesh (DBfile *dbfile, char const *name, int nmesh,
+                     char const *const *meshnames, int const *meshtypes,
+                     DBoptlist const *optlist) {
 
    int            i, len;
    long           count[3];
@@ -8360,11 +8306,11 @@ db_pdb_PutMultimesh (DBfile *dbfile, char *name, int nmesh,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMultimeshadj (DBfile *_dbfile, const char *name, int nmesh,
-                  const int *meshtypes, const int *nneighbors,
-                  const int *neighbors, const int *back,
-                  const int *lnodelists, int *nodelists[],
-                  const int *lzonelists, int *zonelists[],
+db_pdb_PutMultimeshadj (DBfile *_dbfile, char const *name, int nmesh,
+                  int const *meshtypes, int const *nneighbors,
+                  int const *neighbors, int const *back,
+                  int const *lnodelists, int *nodelists[],
+                  int const *lzonelists, int *zonelists[],
                   DBoptlist *optlist) {
 
 
@@ -10011,11 +9957,11 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
 #ifdef PDB_WRITE
 /* ARGSUSED */
 SILO_CALLBACK int
-db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
+db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
                    int nbounds,
-                   const int *typeflags, const int *bndids,
-                   const void *coeffs, int lcoeffs, int datatype,
-                   const double *extents, const char *zlname,
+                   int const *typeflags, int const *bndids,
+                   void const *coeffs, int lcoeffs, int datatype,
+                   double const *extents, char const *zlname,
                    DBoptlist *optlist) {
 
    long           count[3];
@@ -10147,7 +10093,7 @@ db_pdb_PutCsgmesh (DBfile *dbfile, const char *name, int ndims,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
+db_pdb_PutCsgvar (DBfile *_dbfile, char const *name, char const *meshname,
                   int nvars, char *varnames[], void *vars[],
                   int nels, int datatype, int centering,
                   DBoptlist *optlist) {
@@ -10288,11 +10234,11 @@ db_pdb_PutCsgvar (DBfile *_dbfile, const char *name, const char *meshname,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutCSGZonelist (DBfile *dbfile, const char *name, int nregs,
-                 const int *typeflags,
-                 const int *leftids, const int *rightids,
-                 const void *xforms, int lxforms, int datatype,
-                 int nzones, const int *zonelist, DBoptlist *optlist) {
+db_pdb_PutCSGZonelist (DBfile *dbfile, char const *name, int nregs,
+                 int const *typeflags,
+                 int const *leftids, int const *rightids,
+                 void const *xforms, int lxforms, int datatype,
+                 int nzones, int const *zonelist, DBoptlist *optlist) {
 
    long           count[1];
    DBobject      *obj;
@@ -11210,8 +11156,8 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
 #ifdef PDB_WRITE
 /* ARGSUSED */
 SILO_CALLBACK int
-db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
-    const char *mesh_name, DBmrgtree *tree, DBoptlist *optlist)
+db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
+    char const *mesh_name, DBmrgtree *tree, DBoptlist *optlist)
 {
     int                 i, j, n, len, pass, num_nodes = tree->num_nodes;
     int                 tot_segs, tot_children;
@@ -11420,7 +11366,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, const char *name,
 #ifdef PDB_WRITE
 /* ARGSUSED */
 SILO_CALLBACK int
-db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
+db_pdb_PutGroupelmap(DBfile *dbfile, char const *name,
     int num_segments, int *groupel_types, int *segment_lengths,
     int *segment_ids, int **segment_data, void **segment_fracs,
     int fracs_data_type, DBoptlist *opts)
@@ -11539,7 +11485,7 @@ db_pdb_PutGroupelmap(DBfile *dbfile, const char *name,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMrgvar(DBfile *_dbfile, const char *name, const char *mrgt_name,
+db_pdb_PutMrgvar(DBfile *_dbfile, char const *name, char const *mrgt_name,
     int ncomps, char **compnames,
     int nregns, char **reg_pnames,
     int datatype, void **data, DBoptlist *optlist)
@@ -11626,7 +11572,7 @@ typedef struct _index_offset_pair_t {
 } index_offset_pair_t;
 
 /* Support function for db_hdf5_SortObjectsByOffset */
-static int compare_index_offset_pair(const void *a1, const void *a2)
+static int compare_index_offset_pair(void const *a1, void const *a2)
 {
     index_offset_pair_t *p1 = (index_offset_pair_t*) a1;
     index_offset_pair_t *p2 = (index_offset_pair_t*) a2;
@@ -11637,7 +11583,7 @@ static int compare_index_offset_pair(const void *a1, const void *a2)
 
 SILO_CALLBACK int
 db_pdb_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
-    const char *const *const names, int *ordering)
+    char const *const *const names, int *ordering)
 {
    DBfile_pdb *dbfile = (DBfile_pdb *) _dbfile;
    static char *me = "db_pdb_SortObjectsByOffset";
@@ -12318,7 +12264,7 @@ db_mkname (PDBfile *pdb, char *name, char *suffix, char *out)
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE int
-db_InitMulti (DBfile *_dbfile, DBoptlist *optlist) {
+db_InitMulti (DBfile *_dbfile, DBoptlist const *const optlist) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    long           count[3];

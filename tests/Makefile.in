@@ -107,8 +107,8 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	rocket$(EXEEXT) mmadjacency$(EXEEXT) largefile$(EXEEXT) \
 	dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
 	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
-	ioperf$(EXEEXT) readstuff$(EXEEXT) $(am__EXEEXT_2) \
-	$(am__EXEEXT_4)
+	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
+	$(am__EXEEXT_2) $(am__EXEEXT_4)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
@@ -370,6 +370,11 @@ am__testallf77_SOURCES_DIST = testallf77.f
 testallf77_OBJECTS = $(am_testallf77_OBJECTS)
 @FORTRAN_NEEDED_TRUE@testallf77_DEPENDENCIES = $(LDADD) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
+testfs_SOURCES = testfs.c
+testfs_OBJECTS = testfs.$(OBJEXT)
+testfs_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@testfs_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@testfs_DEPENDENCIES = ../src/libsiloh5.la
 testpdb_SOURCES = testpdb.c
 testpdb_OBJECTS = testpdb.$(OBJEXT)
 testpdb_LDADD = $(LDADD)
@@ -485,6 +490,7 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_subhex_SOURCES) subhex.c \
 	$(nodist_EXTRA_testall_SOURCES) testall.c \
 	$(testallf77_SOURCES) $(nodist_EXTRA_testallf77_SOURCES) \
+	$(nodist_EXTRA_testfs_SOURCES) testfs.c \
 	$(nodist_EXTRA_testpdb_SOURCES) testpdb.c \
 	$(nodist_EXTRA_twohex_SOURCES) twohex.c \
 	$(nodist_EXTRA_ucd_SOURCES) ucd.c \
@@ -504,9 +510,9 @@ DIST_SOURCES = TestReadMask.c alltypes.c arbpoly.c arbpoly2d.c array.c \
 	partial_io.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
 	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) readstuff.c \
 	$(rocket_SOURCES) sami.c simple.c spec.c specmix.c subhex.c \
-	testall.c $(am__testallf77_SOURCES_DIST) testpdb.c twohex.c \
-	ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c \
-	wave.c
+	testall.c $(am__testallf77_SOURCES_DIST) testfs.c testpdb.c \
+	twohex.c ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c \
+	version.c wave.c
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -751,7 +757,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
 	efcentering mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff \
-	$(am__append_1) $(am__append_3)
+	testfs $(am__append_1) $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -828,6 +834,7 @@ EXTRA_rocket_DEPENDENCIES = \
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ioperf_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_readstuff_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testfs_SOURCES = dummy.cxx
 rocket_LDFLAGS = -ldl
 rocket_CXXFLAGS = -rdynamic
 ioperf_LDFLAGS = -ldl
@@ -1030,6 +1037,9 @@ testall$(EXEEXT): $(testall_OBJECTS) $(testall_DEPENDENCIES)
 testallf77$(EXEEXT): $(testallf77_OBJECTS) $(testallf77_DEPENDENCIES) 
 	@rm -f testallf77$(EXEEXT)
 	$(CXXLINK) $(testallf77_OBJECTS) $(testallf77_LDADD) $(LIBS)
+testfs$(EXEEXT): $(testfs_OBJECTS) $(testfs_DEPENDENCIES) 
+	@rm -f testfs$(EXEEXT)
+	$(CXXLINK) $(testfs_OBJECTS) $(testfs_LDADD) $(LIBS)
 testpdb$(EXEEXT): $(testpdb_OBJECTS) $(testpdb_DEPENDENCIES) 
 	@rm -f testpdb$(EXEEXT)
 	$(CXXLINK) $(testpdb_OBJECTS) $(testpdb_LDADD) $(LIBS)
@@ -1107,6 +1117,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/specmix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subhex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testall.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpdb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/twohex.Po@am__quote@

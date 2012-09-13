@@ -93,6 +93,9 @@ using std::cerr;
 //
 //    Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
 //    Made long long support UNconditionally compiled.
+//
+//    Mark C. Miller, Wed Sep 12 15:34:28 PDT 2012
+//    Added logic to NOT cut DB_CHAR arrays shorter than 400 chars.
 // ****************************************************************************
 SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                                          QWidget *p)
@@ -170,8 +173,11 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
             if (((char*)var)[j] == ';')
                 numSemi++;
         }
-
-        if (numSpace < numMax && numSemi < numMax)
+        if (len < 400)
+        {
+            lb->addItem((char*)var);
+        }
+        else if (numSpace < numMax && numSemi < numMax)
         {
             // Copy the character array into a temporary buffer,
             // splitting by length

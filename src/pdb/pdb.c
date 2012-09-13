@@ -287,7 +287,7 @@ lite_PD_open (char *name, char *mode) {
 
    switch (setjmp(_lite_PD_open_err)) {
    case ABORT:
-      io_close(fp);
+      if (fp) io_close(fp);
       return(NULL);
    case ERR_FREE:
       return(file);
@@ -1125,7 +1125,7 @@ lite_PD_create (char *name) {
 
    switch (setjmp(_lite_PD_create_err)) {
    case ABORT:
-      io_close(fp);
+      if (fp) io_close(fp);
       return(NULL);
    case ERR_FREE:
       return(file);

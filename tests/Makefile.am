@@ -133,7 +133,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
-      mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff
+      mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff testfs
 
 dir_SOURCES = \
  dir.c \
@@ -192,7 +192,8 @@ check_PROGRAMS = \
  efcentering \
  mk_nasf_pdb \
  ioperf \
- readstuff
+ readstuff \
+ testfs
 
 
 # Deal with need to use c++ linker whenever we've got C++
@@ -257,6 +258,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
  nodist_EXTRA_ioperf_SOURCES = dummy.cxx
  nodist_EXTRA_readstuff_SOURCES = dummy.cxx
+ nodist_EXTRA_testfs_SOURCES = dummy.cxx
 endif
 
 rocket_LDFLAGS = -ldl

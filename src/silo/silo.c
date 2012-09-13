@@ -75,7 +75,6 @@ be used for advertising or product endorsement purposes.
 #include "config.h" /* For a possible redefinition of setjmp/longjmp.
                        Also for SDX driver detection.  */
 #include <stdio.h>
-#include <assert.h>
 #include <float.h>
 #include <math.h>
 #if HAVE_STDLIB_H
@@ -3837,7 +3836,7 @@ DBVersionGE(int Maj, int Min, int Pat)
  * Programmer:  Mark C. Miller, Mon Jan 12 20:59:30 PST 2009
  *-------------------------------------------------------------------------*/
 PUBLIC char *
-DBFileVersion(DBfile *dbfile)
+DBFileVersion(const DBfile *dbfile)
 {
     static char version[256];
     if (dbfile->pub.file_lib_version)
@@ -3861,7 +3860,7 @@ DBFileVersion(DBfile *dbfile)
  * Programmer:  Mark C. Miller, Mon Jan 12 20:59:30 PST 2009
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBFileVersionGE(DBfile *dbfile, int Maj, int Min, int Pat)
+DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
 {
     int retval = -1;
     int fileMaj = -1, fileMin = -1, filePat = -1;
@@ -4199,11 +4198,16 @@ DBOpenReal(const char *name, int type, int mode)
  *    Mark C. Miller, Fri Feb 12 08:22:41 PST 2010
  *    Replaced stat/stat64 calls with db_silo_stat. Replaced conditional
  *    compilation logic for SIZEOF_OFF64_T with db_silo_stat_struct.
+ *
+ *    Mark C. Miller, Thu Aug 30 17:41:24 PDT 2012
+ *    Added logic to temporarily disable any compression settings prior
+ *    to writing silo library info and then re-enabling it.
  *-------------------------------------------------------------------------*/
 PUBLIC DBfile *
 DBCreateReal(const char *name, int mode, int target, const char *info, int type)
 {
     char           ascii[16];
+    char           *tmpcs = 0;
     DBfile        *dbfile;
     int            fileid, i, n;
     int            origtype = type;
@@ -4279,9 +4283,23 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
         db_filter_install(dbfile);
 
         /* write silo library version information to the file */
+        /* Temporarily turn off any compression settings and then re-enable */
+        if (DBGetCompression())
+        {
+    
+            n = strlen(DBGetCompression());
+            tmpcs = ALLOC_N(char,n+1);
+            strncpy(tmpcs, DBGetCompression(), n);
+            DBSetCompression(0);
+        }
         n = strlen(SILO_VSTRING)+1;
         DBWrite(dbfile, SILO_VSTRING_NAME, SILO_VSTRING, &n, 1, DB_CHAR);
         dbfile->pub.file_lib_version = STRDUP(SILO_VSTRING);
+        if (tmpcs)
+        {
+            DBSetCompression(tmpcs);
+            FREE(tmpcs);
+        }
 
         API_RETURN(dbfile);
     }
@@ -7918,8 +7936,8 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
  *    adjusting sanity checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutMultimesh(DBfile *dbfile, const char *name, int nmesh,
-               char **meshnames, int meshtypes[], DBoptlist *optlist)
+DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
+               char const *const *meshnames, int const *meshtypes, DBoptlist const *optlist)
 {
     int retval;
 
@@ -10198,7 +10216,7 @@ UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
  *    Added support for nameschemes options on multi-block objects.
  *-------------------------------------------------------------------------*/
 INTERNAL int
-db_ProcessOptlist(int objtype, DBoptlist *optlist)
+db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 {
     int             i, j, *ip = NULL, unused = 0;
     char           *me = "db_ProcessOptlist";
@@ -11669,11 +11687,13 @@ db_ResetGlobalData_Ucdzonelist (void) {
  *    Mark C. Miller, Mon Jan 12 16:28:18 PST 2009
  *    Removed explicit setting of members already correctly handled
  *    by memset to zero.
+ *
+ *    Mark C. Miller, Thu Aug 30 17:55:43 PDT 2012
+ *    Removed setting nmatnos to -1.
  *--------------------------------------------------------------------*/
 INTERNAL int
 db_ResetGlobalData_MultiMesh (void) {
    memset(&_mm, 0, sizeof(_mm));
-   _mm._nmatnos = -1;
    _mm._nmat = -1;
    _mm._blockorigin = 1;
    _mm._grouporigin = 1;

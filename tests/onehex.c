@@ -213,7 +213,12 @@ main(int argc, char *argv[])
         DBSetDir(dbfile, "dir1");
     }
     else
-        dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "3D ucd hex", driver);
+        dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
+            "This is a test to see how well this string displays in Qt widget in Silex\n"
+            "This is a test to see how well this string displays in Qt widget in Silex\n"
+            "This is a test to see how well this string displays in Qt widget in Silex\n"
+            "This is a test to see how well this string displays in Qt widget in Silex\n",
+            driver);
 
     /* Ok, now we can safely free the file options sets optlists */
     if (core_opts)

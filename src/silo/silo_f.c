@@ -1453,7 +1453,8 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
              int *lmeshnames, int *meshtypes, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
-    char         **meshnms = NULL, *nm = NULL;
+    char         **meshnms = NULL;
+    char          *nm = NULL;
     char          *realmeshnames = NULL;
     int            i, indx;
     DBoptlist     *optlist = NULL;

@@ -1549,7 +1549,7 @@ typedef struct _DBgroupelmap {
 typedef struct _DBnamescheme
 {
     char *fmt;              /* orig. format string */
-    const char **fmtptrs;   /* ptrs into first (printf) part of fmt for each conversion spec. */
+    char const **fmtptrs;   /* ptrs into first (printf) part of fmt for each conversion spec. */
     int fmtlen;             /* len of first part of fmt */
     int ncspecs;            /* # of conversion specs in first part of fmt */
     char delim;             /* delimiter char used for parts of fmt */
@@ -1557,7 +1557,7 @@ typedef struct _DBnamescheme
     char *embedstrs[DB_MAX_EXPSTRS]; /* ptrs to copies of embedded strings */
     int narrefs;            /* number of array refs in conversion specs */
     char **arrnames;        /* array names used by array refs */
-    const int **arrvals;    /* pointer to actual array data assoc. with each name */
+    int const **arrvals;    /* pointer to actual array data assoc. with each name */
     char **exprstrs;        /* expressions to be evaluated for each conv. spec. */
 } DBnamescheme;
 
@@ -1594,7 +1594,7 @@ typedef struct DBfile_pub {
     void          *(*g_comp)(struct DBfile *, char *, char *);
     int            (*g_comptyp)(struct DBfile *, char *, char *);
     int            (*w_comp)(struct DBfile *, DBobject *, char *, char *,
-                             char *, const void *, int, long *);
+                             char *, void const *, int, long *);
     int            (*write) (struct DBfile *, char *, void *, int *, int, int);
     int            (*writeslice)(struct DBfile *, char *, void *, int,
                                  int[], int[], int[], int[], int);
@@ -1612,7 +1612,7 @@ typedef struct DBfile_pub {
     int            (*g_compnames)(struct DBfile *, char *, char ***, char ***);
     DBcompoundarray *(*g_ca)(struct DBfile *, char *);
     DBcurve       *(*g_cu)(struct DBfile *, char *);
-    DBdefvars     *(*g_defv)(struct DBfile *, const char *);
+    DBdefvars     *(*g_defv)(struct DBfile *, char const *);
     DBmaterial    *(*g_ma)(struct DBfile *, char *);
     DBmatspecies  *(*g_ms)(struct DBfile *, char *);
     DBmultimesh   *(*g_mm)(struct DBfile *, char *);
@@ -1638,8 +1638,8 @@ typedef struct DBfile_pub {
                            void *, int, int, DBoptlist *);
     int            (*p_cu)(struct DBfile *, char *, void *, void *, int, int,
                            DBoptlist *);
-    int            (*p_defv)(struct DBfile *, const char *, int, 
-                           char **, const int *, char **,
+    int            (*p_defv)(struct DBfile *, char const *, int, 
+                           char **, int const *, char **,
                            DBoptlist **);
     int            (*p_fl)(struct DBfile *, char *, int, int, int *, int, int,
                            int *, int *, int *, int, int *, int *, int);
@@ -1649,8 +1649,8 @@ typedef struct DBfile_pub {
     int            (*p_ms)(struct DBfile *, char *, char *, int, int *, int *,
                            int *, int, int, DB_DTPTR1, int *, int, int,
                            DBoptlist *);
-    int            (*p_mm)(struct DBfile *, char *, int, char **, int *,
-                           DBoptlist *);
+    int            (*p_mm)(struct DBfile *, char const*, int, char const *const *, int const *,
+                           DBoptlist const *);
     int            (*p_mv)(struct DBfile *, char *, int, char **, int *,
                            DBoptlist *);
     int            (*p_mt)(struct DBfile *, char *, int, char **, DBoptlist *);
@@ -1686,45 +1686,45 @@ typedef struct DBfile_pub {
                              int, int *, int, int *,
                              int, int, int,
                              DBoptlist *);
-    int            (*p_csgzl)(struct DBfile *, const char *, int, const int *,
-                              const int *, const int *, const void *, int, int,
-                              int, const int *, DBoptlist *);
-    DBcsgzonelist *(*g_csgzl)(struct DBfile *, const char *);
-    int            (*p_csgm)(struct DBfile *, const char *, int, int,
-                             const int *, const int *,
-                             const void *, int, int, const double *,
-                             const char *, DBoptlist *);
-    DBcsgmesh     *(*g_csgm)(struct DBfile *, const char *);
-    int            (*p_csgv)(struct DBfile *, const char *, const char *, int,
+    int            (*p_csgzl)(struct DBfile *, char const *, int, int const *,
+                              int const *, int const *, void const *, int, int,
+                              int, int const *, DBoptlist *);
+    DBcsgzonelist *(*g_csgzl)(struct DBfile *, char const *);
+    int            (*p_csgm)(struct DBfile *, char const *, int, int,
+                             int const *, int const *,
+                             void const *, int, int, double const *,
+                             char const *, DBoptlist *);
+    DBcsgmesh     *(*g_csgm)(struct DBfile *, char const *);
+    int            (*p_csgv)(struct DBfile *, char const *, char const *, int,
                              char **, void **, int, int, int,
                              DBoptlist *);
-    DBcsgvar      *(*g_csgv)(struct DBfile *, const char *);
-    DBmultimeshadj *(*g_mmadj)(struct DBfile *, const char *, int, const int *);
-    int            (*p_mmadj)(struct DBfile *, const char *, int, const int *,
-                              const int *, const int *, const int *, const int *,
-                              int **, const int *, int **,
+    DBcsgvar      *(*g_csgv)(struct DBfile *, char const *);
+    DBmultimeshadj *(*g_mmadj)(struct DBfile *, char const *, int, int const *);
+    int            (*p_mmadj)(struct DBfile *, char const *, int, int const *,
+                              int const *, int const *, int const *, int const *,
+                              int **, int const *, int **,
                               DBoptlist *optlist);
-    int            (*p_mrgt)(struct DBfile *dbfile, const char *name, const char *mesh_name,
+    int            (*p_mrgt)(struct DBfile *dbfile, char const *name, char const *mesh_name,
                              DBmrgtree *tree, DBoptlist *opts);
-    DBmrgtree     *(*g_mrgt)(struct DBfile *, const char *name);
-    int            (*p_grplm)(struct DBfile *dbfile, const char *map_name,
+    DBmrgtree     *(*g_mrgt)(struct DBfile *, char const *name);
+    int            (*p_grplm)(struct DBfile *dbfile, char const *map_name,
                              int num_segments, int *groupel_types,
 			     int *segment_lengths, int *segment_ids,
 			     int **segment_data, void **segment_fracs,
                              int fracs_data_type, DBoptlist *opts);
-    DBgroupelmap  *(*g_grplm)(struct DBfile *dbfile, const char *name);
-    int            (*p_mrgv)(struct DBfile *dbfile, const char *name,
-                             const char *mrgt_name,
+    DBgroupelmap  *(*g_grplm)(struct DBfile *dbfile, char const *name);
+    int            (*p_mrgv)(struct DBfile *dbfile, char const *name,
+                             char const *mrgt_name,
                              int ncomps, char **compnames,
                              int nregns, char **reg_pnames,
                              int datatype, void **data, DBoptlist *opts);
-    DBmrgvar      *(*g_mrgv)(struct DBfile *dbfile, const char *name);
-    int            (*free_z)(struct DBfile *, const char *);
-    int            (*cpdir)(struct DBfile *, const char *,
-                            struct DBfile *, const char *);
+    DBmrgvar      *(*g_mrgv)(struct DBfile *dbfile, char const *name);
+    int            (*free_z)(struct DBfile *, char const *);
+    int            (*cpdir)(struct DBfile *, char const *,
+                            struct DBfile *, char const *);
 
     int          (*sort_obo)(struct DBfile *dbfile, int nobjs,
-                             const char *const *const obj_names, int *ranks);
+                             char const *const *obj_names, int *ranks);
 } DBfile_pub;
 
 typedef struct DBfile {
@@ -1747,9 +1747,9 @@ typedef void (*DBErrFunc_t)(char*);
  * then the function is a "first-call" function and should have this
  * macro/function pair.  */
 
-SILO_API extern DBfile  *DBOpenReal(const char *, int, int);
-SILO_API extern DBfile  *DBCreateReal(const char *, int, int, const char *, int);
-SILO_API extern int      DBInqFileReal(const char *);
+SILO_API extern DBfile  *DBOpenReal(char const *, int, int);
+SILO_API extern DBfile  *DBCreateReal(char const *, int, int, char const *, int);
+SILO_API extern int      DBInqFileReal(char const *);
 
 #define SILO_VSTRING_NAME "_silolibinfo"
 #define SILO_VSTRING PACKAGE_VERSION
@@ -1825,27 +1825,27 @@ SILO_API extern int      DBSetAllowOverwrites(int allow);
 SILO_API extern int      DBGetAllowOverwrites(void);
 SILO_API extern int      DBSetEnableChecksums(int enable);
 SILO_API extern int      DBGetEnableChecksums(void);
-SILO_API extern void     DBSetCompression(const char *);
+SILO_API extern void     DBSetCompression(char const *);
 SILO_API extern char    *DBGetCompression(void);
 SILO_API extern int      DBSetFriendlyHDF5Names(int enable);
 SILO_API extern int      DBGetFriendlyHDF5Names(void);
 SILO_API extern int      DBGuessHasFriendlyHDF5Names(DBfile *f);
 SILO_API extern int      DBSetDeprecateWarnings(int max);
 SILO_API extern int      DBGetDeprecateWarnings();
-SILO_API extern int     *DBSetUnknownDriverPriorities(const int *);
+SILO_API extern int     *DBSetUnknownDriverPriorities(int const *);
 SILO_API extern int     *DBGetUnknownDriverPriorities();
-SILO_API extern int      DBRegisterFileOptionsSet(const DBoptlist *opts);
+SILO_API extern int      DBRegisterFileOptionsSet(DBoptlist const *opts);
 SILO_API extern int      DBUnregisterFileOptionsSet(int opts_set_id);
 SILO_API extern void     DBUnregisterAllFileOptionsSets();
 SILO_API extern void    *DBGrabDriver(DBfile *);
-SILO_API extern int      DBUngrabDriver(DBfile *, const void *);
-SILO_API extern int      DBGetDriverType(const DBfile *);
-SILO_API extern int      DBGetDriverTypeFromPath(const char *);
-SILO_API extern char    *DBJoinPath(const char *, const char *);
+SILO_API extern int      DBUngrabDriver(DBfile *, void const *);
+SILO_API extern int      DBGetDriverType(DBfile const *);
+SILO_API extern int      DBGetDriverTypeFromPath(char const *);
+SILO_API extern char    *DBJoinPath(char const *, char const *);
 SILO_API extern char    *DBVersion(void);
 SILO_API extern int      DBVersionGE(int Maj, int Min, int Pat);
-SILO_API extern char    *DBFileVersion(DBfile *dbfile);
-SILO_API extern int      DBFileVersionGE(DBfile *dbfile, int Maj, int Min, int Pat);
+SILO_API extern char    *DBFileVersion(DBfile const *dbfile);
+SILO_API extern int      DBFileVersionGE(DBfile const *dbfile, int Maj, int Min, int Pat);
 SILO_API extern void     DBShowErrors(int, DBErrFunc_t);
 SILO_API extern char    *DBErrString(void);
 SILO_API extern char    *DBErrFunc(void);
@@ -1856,158 +1856,158 @@ SILO_API extern int      DBErrlvl(void);
 SILO_API extern int      DBClose(DBfile *);
 SILO_API extern int      DBPause(DBfile *);
 SILO_API extern int      DBContinue(DBfile *);
-SILO_API extern int      DBInqVarExists(DBfile *, const char *);
+SILO_API extern int      DBInqVarExists(DBfile *, char const *);
 SILO_API extern int      DBForceSingle(int);
 SILO_API extern int      DBUninstall(DBfile *);
 SILO_API extern DBoptlist *DBMakeOptlist(int);
 SILO_API extern int      DBClearOptlist(DBoptlist *);
 SILO_API extern int      DBFreeOptlist(DBoptlist *);
 SILO_API extern int      DBAddOption(DBoptlist *, int, void *);
-SILO_API extern void    *DBGetOption(const DBoptlist *, int);
+SILO_API extern void    *DBGetOption(DBoptlist const *, int);
 SILO_API extern int      DBClearOption(DBoptlist *, int);
 SILO_API extern DBtoc   *DBGetToc(DBfile *);
 SILO_API extern int      DBNewToc(DBfile *);
 SILO_API extern int      DBSortObjectsByOffset(DBfile *, int nobjs,
-                             const char *const *const obj_names, int *ranks);
+                             char const *const *obj_names, int *ranks);
 SILO_API extern int      DBFilters(DBfile *, FILE *);
-SILO_API extern int      DBFilterRegistration(const char *, int (*init) (DBfile *, char *),
+SILO_API extern int      DBFilterRegistration(char const *, int (*init) (DBfile *, char *),
                                      int (*open) (DBfile *, char *));
-SILO_API extern void    *DBGetAtt(DBfile *, const char *, const char *);
-SILO_API extern DBobject *DBGetObject(DBfile *, const char *);
+SILO_API extern void    *DBGetAtt(DBfile *, char const *, char const *);
+SILO_API extern DBobject *DBGetObject(DBfile *, char const *);
 SILO_API extern int      DBChangeObject(DBfile *, DBobject *);
 SILO_API extern int      DBWriteObject(DBfile *, DBobject *, int);
-SILO_API extern void    *DBGetComponent(DBfile *, const char *, const char *);
-SILO_API extern int      DBGetComponentType(DBfile *, const char *, const char *);
-SILO_API extern int      DBWriteComponent(DBfile *, DBobject *, const char *, const char *, const char *,
-                                 const void *, int, long *);
-SILO_API extern int      DBWrite(DBfile *, const char *, void *, int *, int, int);
-SILO_API extern int      DBWriteSlice(DBfile *, const char *, void *, int, int[], int[],
+SILO_API extern void    *DBGetComponent(DBfile *, char const *, char const *);
+SILO_API extern int      DBGetComponentType(DBfile *, char const *, char const *);
+SILO_API extern int      DBWriteComponent(DBfile *, DBobject *, char const *, char const *, char const *,
+                                 void const *, int, long *);
+SILO_API extern int      DBWrite(DBfile *, char const *, void *, int *, int, int);
+SILO_API extern int      DBWriteSlice(DBfile *, char const *, void *, int, int[], int[],
                              int[], int[], int);
 SILO_API extern DBfacelist *DBCalcExternalFacelist(int *, int, int, int *, int *, int,
                                           int *, int);
 SILO_API extern DBfacelist *DBCalcExternalFacelist2(int *, int, int, int, int, int *,
                                            int *, int *, int, int *, int);
 SILO_API extern int      DBGetDir(DBfile *, char *);
-SILO_API extern int      DBSetDir(DBfile *, const char *);
+SILO_API extern int      DBSetDir(DBfile *, char const *);
 SILO_API extern int      DBSetDirID(DBfile *, int);
 SILO_API extern int      DBListDir(DBfile *, char **, int);
-SILO_API extern int      DBMkDir(DBfile *, const char *);
-SILO_API extern int      DBCpDir(DBfile *dbfile, const char *srcDir,
-                             DBfile *dstFile, const char *dstDir);
+SILO_API extern int      DBMkDir(DBfile *, char const *);
+SILO_API extern int      DBCpDir(DBfile *dbfile, char const *srcDir,
+                             DBfile *dstFile, char const *dstDir);
 
 #define DBMkdir DBMkDir
-SILO_API extern int      DBReadAtt(DBfile *, const char *, const char *, void *);
-SILO_API extern int      DBRead(DBfile *, const char *, void *);
-SILO_API extern int      DBReadVar(DBfile *, const char *, void *);
-SILO_API extern int      DBReadVar1(DBfile *, const char *, int, void *);
-SILO_API extern int      DBReadVarSlice(DBfile *, const char *, int *, int *, int *, int,
+SILO_API extern int      DBReadAtt(DBfile *, char const *, char const *, void *);
+SILO_API extern int      DBRead(DBfile *, char const *, void *);
+SILO_API extern int      DBReadVar(DBfile *, char const *, void *);
+SILO_API extern int      DBReadVar1(DBfile *, char const *, int, void *);
+SILO_API extern int      DBReadVarSlice(DBfile *, char const *, int *, int *, int *, int,
                                void *);
-SILO_API extern DBobject *DBMakeObject(const char *, int, int);
+SILO_API extern DBobject *DBMakeObject(char const *, int, int);
 SILO_API extern int      DBFreeObject(DBobject *);
 SILO_API extern int      DBClearObject(DBobject *);
-SILO_API extern int      DBAddVarComponent(DBobject *, const char *, const char *);
-SILO_API extern int      DBAddIntComponent(DBobject *, const char *, int);
-SILO_API extern int      DBAddFltComponent(DBobject *, const char *, double);
-SILO_API extern int      DBAddDblComponent(DBobject *, const char *, double);
-SILO_API extern int      DBAddStrComponent(DBobject *, const char *, const char *);
-SILO_API extern int      DBGetComponentNames(DBfile *, const char *, char ***, char ***);
+SILO_API extern int      DBAddVarComponent(DBobject *, char const *, char const *);
+SILO_API extern int      DBAddIntComponent(DBobject *, char const *, int);
+SILO_API extern int      DBAddFltComponent(DBobject *, char const *, double);
+SILO_API extern int      DBAddDblComponent(DBobject *, char const *, double);
+SILO_API extern int      DBAddStrComponent(DBobject *, char const *, char const *);
+SILO_API extern int      DBGetComponentNames(DBfile *, char const *, char ***, char ***);
 
-SILO_API extern DBcompoundarray *DBGetCompoundarray(DBfile *, const char *);
-SILO_API extern DBcurve *DBGetCurve(DBfile *, const char *);
-SILO_API extern DBdefvars *DBGetDefvars(DBfile *, const char *);
-SILO_API extern DBmaterial *DBGetMaterial(DBfile *, const char *);
-SILO_API extern DBmatspecies *DBGetMatspecies(DBfile *, const char *);
-SILO_API extern DBmultimesh *DBGetMultimesh(DBfile *, const char *);
-SILO_API extern DBmultimeshadj *DBGetMultimeshadj(DBfile *, const char *,
+SILO_API extern DBcompoundarray *DBGetCompoundarray(DBfile *, char const *);
+SILO_API extern DBcurve *DBGetCurve(DBfile *, char const *);
+SILO_API extern DBdefvars *DBGetDefvars(DBfile *, char const *);
+SILO_API extern DBmaterial *DBGetMaterial(DBfile *, char const *);
+SILO_API extern DBmatspecies *DBGetMatspecies(DBfile *, char const *);
+SILO_API extern DBmultimesh *DBGetMultimesh(DBfile *, char const *);
+SILO_API extern DBmultimeshadj *DBGetMultimeshadj(DBfile *, char const *,
                                                   int, const int *);
-SILO_API extern DBmultivar *DBGetMultivar(DBfile *, const char *);
-SILO_API extern DBmultimat *DBGetMultimat(DBfile *, const char *);
-SILO_API extern DBmultimatspecies *DBGetMultimatspecies(DBfile *, const char *);
-SILO_API extern DBpointmesh *DBGetPointmesh(DBfile *, const char *);
-SILO_API extern DBmeshvar *DBGetPointvar(DBfile *, const char *);
-SILO_API extern DBquadmesh *DBGetQuadmesh(DBfile *, const char *);
-SILO_API extern DBquadvar *DBGetQuadvar(DBfile *, const char *);
-SILO_API extern int      DBGetQuadvar1(DBfile *, const char *, DB_DTPTR1, int *, int *,
+SILO_API extern DBmultivar *DBGetMultivar(DBfile *, char const *);
+SILO_API extern DBmultimat *DBGetMultimat(DBfile *, char const *);
+SILO_API extern DBmultimatspecies *DBGetMultimatspecies(DBfile *, char const *);
+SILO_API extern DBpointmesh *DBGetPointmesh(DBfile *, char const *);
+SILO_API extern DBmeshvar *DBGetPointvar(DBfile *, char const *);
+SILO_API extern DBquadmesh *DBGetQuadmesh(DBfile *, char const *);
+SILO_API extern DBquadvar *DBGetQuadvar(DBfile *, char const *);
+SILO_API extern int      DBGetQuadvar1(DBfile *, char const *, DB_DTPTR1, int *, int *,
                               DB_DTPTR1, int *, int *, int *);
 SILO_API extern int      DBAnnotateUcdmesh(DBucdmesh *);
-SILO_API extern DBucdmesh *DBGetUcdmesh(DBfile *, const char *);
-SILO_API extern DBucdvar *DBGetUcdvar(DBfile *, const char *);
-SILO_API extern DBcsgmesh *DBGetCsgmesh(DBfile *, const char *);
-SILO_API extern DBcsgvar *DBGetCsgvar(DBfile *, const char *);
-SILO_API extern DBcsgzonelist *DBGetCSGZonelist(DBfile *, const char *);
-SILO_API extern DBfacelist *DBGetFacelist(DBfile *, const char *);
-SILO_API extern DBzonelist *DBGetZonelist(DBfile *, const char *);
-SILO_API extern DBphzonelist *DBGetPHZonelist(DBfile *, const char *);
-SILO_API extern void    *DBGetVar(DBfile *, const char *);
-SILO_API extern int      DBGetVarByteLength(DBfile *, const char *);
-SILO_API extern int      DBGetVarLength(DBfile *, const char *);
-SILO_API extern int      DBGetVarDims(DBfile *, const char *, int, int *);
-SILO_API extern int      DBGetVarType(DBfile *, const char *);
+SILO_API extern DBucdmesh *DBGetUcdmesh(DBfile *, char const *);
+SILO_API extern DBucdvar *DBGetUcdvar(DBfile *, char const *);
+SILO_API extern DBcsgmesh *DBGetCsgmesh(DBfile *, char const *);
+SILO_API extern DBcsgvar *DBGetCsgvar(DBfile *, char const *);
+SILO_API extern DBcsgzonelist *DBGetCSGZonelist(DBfile *, char const *);
+SILO_API extern DBfacelist *DBGetFacelist(DBfile *, char const *);
+SILO_API extern DBzonelist *DBGetZonelist(DBfile *, char const *);
+SILO_API extern DBphzonelist *DBGetPHZonelist(DBfile *, char const *);
+SILO_API extern void    *DBGetVar(DBfile *, char const *);
+SILO_API extern int      DBGetVarByteLength(DBfile *, char const *);
+SILO_API extern int      DBGetVarLength(DBfile *, char const *);
+SILO_API extern int      DBGetVarDims(DBfile *, char const *, int, int *);
+SILO_API extern int      DBGetVarType(DBfile *, char const *);
 SILO_API extern int      DBInqFileHasObjects(DBfile *);
-SILO_API extern int      DBInqMeshname(DBfile *, const char *, const char *);
-SILO_API extern int      DBInqMeshtype(DBfile *, const char *);
-SILO_API extern int      DBInqCompoundarray(DBfile *, const char *, char ***,
+SILO_API extern int      DBInqMeshname(DBfile *, char const *, char const *);
+SILO_API extern int      DBInqMeshtype(DBfile *, char const *);
+SILO_API extern int      DBInqCompoundarray(DBfile *, char const *, char ***,
                                    int **, int *, int *, int *);
-SILO_API extern DBObjectType DBInqVarType(DBfile *, const char *);
+SILO_API extern DBObjectType DBInqVarType(DBfile *, char const *);
 
-SILO_API extern int      DBPutCompoundarray(DBfile *, const char *, char **, int *, int,
+SILO_API extern int      DBPutCompoundarray(DBfile *, char const *, char **, int *, int,
                                    void *, int, int, DBoptlist *);
-SILO_API extern int      DBPutCurve(DBfile *, const char *, void *, void *, int, int,
+SILO_API extern int      DBPutCurve(DBfile *, char const *, void *, void *, int, int,
                            DBoptlist *);
-SILO_API extern int      DBPutDefvars (DBfile *, const char *, int, char **, 
-                            const int *, char **, DBoptlist **);
-SILO_API extern int      DBPutFacelist(DBfile *, const char *, int, int, int *, int, int,
+SILO_API extern int      DBPutDefvars (DBfile *, char const *, int, char **, 
+                            int const *, char **, DBoptlist **);
+SILO_API extern int      DBPutFacelist(DBfile *, char const *, int, int, int *, int, int,
                             int *, int *, int *, int, int *, int *, int);
-SILO_API extern int      DBPutMaterial(DBfile *, const char *, const char *, int, int *, int *,
+SILO_API extern int      DBPutMaterial(DBfile *, char const *, char const *, int, int *, int *,
                            int *, int, int *, int *, int *, DB_DTPTR1, int,
                               int, DBoptlist *);
-SILO_API extern int      DBPutMatspecies(struct DBfile *, const char *, const char *, int, int *,
+SILO_API extern int      DBPutMatspecies(struct DBfile *, char const *, char const *, int, int *,
                                 int *, int *, int, int, DB_DTPTR1, int *, int, int,
                                 DBoptlist *);
-SILO_API extern int      DBPutMultimesh(DBfile *, const char *, int, char **, int *,
-                               DBoptlist *);
-SILO_API extern int      DBPutMultimeshadj(DBfile *, const char *, int, const int *,
-                               const int *, const int *, const int *, const int *,
-                               int **, const int *, int **, DBoptlist *optlist);
-SILO_API extern int      DBPutMultivar(DBfile *, const char *, int, char **, int *,
+SILO_API extern int      DBPutMultimesh(DBfile *, char const *, int, char const *const *, int const *,
+                               DBoptlist const *);
+SILO_API extern int      DBPutMultimeshadj(DBfile *, char const *, int, int const *,
+                               int const *, int const *, int const *, int const *,
+                               int **, int const *, int **, DBoptlist *optlist);
+SILO_API extern int      DBPutMultivar(DBfile *, char const *, int, char **, int *,
                               DBoptlist *);
-SILO_API extern int      DBPutMultimat(DBfile *, const char *, int, char **, DBoptlist *);
-SILO_API extern int      DBPutMultimatspecies(DBfile *, const char *, int, char **,
+SILO_API extern int      DBPutMultimat(DBfile *, char const *, int, char **, DBoptlist *);
+SILO_API extern int      DBPutMultimatspecies(DBfile *, char const *, int, char **,
                                      DBoptlist *);
-SILO_API extern int      DBPutPointmesh(DBfile *, const char *, int, DB_DTPTR2, int, int,
+SILO_API extern int      DBPutPointmesh(DBfile *, char const *, int, DB_DTPTR2, int, int,
                                DBoptlist *);
-SILO_API extern int      DBPutPointvar(DBfile *, const char *, const char *, int, DB_DTPTR2, int,
+SILO_API extern int      DBPutPointvar(DBfile *, char const *, char const *, int, DB_DTPTR2, int,
                               int, DBoptlist *);
-SILO_API extern int      DBPutPointvar1(DBfile *, const char *, const char *, DB_DTPTR1, int, int,
+SILO_API extern int      DBPutPointvar1(DBfile *, char const *, char const *, DB_DTPTR1, int, int,
                                DBoptlist *);
-SILO_API extern int      DBPutQuadmesh(DBfile *, const char *, char **, DB_DTPTR2, int *, int,
+SILO_API extern int      DBPutQuadmesh(DBfile *, char const *, char **, DB_DTPTR2, int *, int,
                               int, int, DBoptlist *);
-SILO_API extern int      DBPutQuadvar(DBfile *, const char *, const char *, int, char **, DB_DTPTR2,
+SILO_API extern int      DBPutQuadvar(DBfile *, char const *, char const *, int, char **, DB_DTPTR2,
                              int *, int, DB_DTPTR2, int, int, int, DBoptlist *);
-SILO_API extern int      DBPutQuadvar1(DBfile *, const char *, const char *, DB_DTPTR1, int *, int,
+SILO_API extern int      DBPutQuadvar1(DBfile *, char const *, char const *, DB_DTPTR1, int *, int,
                               DB_DTPTR1, int, int, int, DBoptlist *);
-SILO_API extern int      DBPutUcdmesh(DBfile *, const char *, int, char **, DB_DTPTR2, int,
-                             int, const char *, const char *, int, DBoptlist *);
-SILO_API extern int      DBPutUcdsubmesh(DBfile *, const char *, const char *, int,
-                             const char *, const char *, DBoptlist *);
-SILO_API extern int      DBPutUcdvar(DBfile *, const char *, const char *, int, char **, DB_DTPTR2,
+SILO_API extern int      DBPutUcdmesh(DBfile *, char const *, int, char **, DB_DTPTR2, int,
+                             int, char const *, char const *, int, DBoptlist *);
+SILO_API extern int      DBPutUcdsubmesh(DBfile *, char const *, char const *, int,
+                             char const *, char const *, DBoptlist *);
+SILO_API extern int      DBPutUcdvar(DBfile *, char const *, char const *, int, char **, DB_DTPTR2,
                             int, DB_DTPTR2, int, int, int, DBoptlist *);
-SILO_API extern int      DBPutUcdvar1(DBfile *, const char *, const char *, DB_DTPTR1, int, DB_DTPTR1,
+SILO_API extern int      DBPutUcdvar1(DBfile *, char const *, char const *, DB_DTPTR1, int, DB_DTPTR1,
                              int, int, int, DBoptlist *);
-SILO_API extern int      DBPutZonelist(DBfile *, const char *, int, int, int *, int, int,
+SILO_API extern int      DBPutZonelist(DBfile *, char const *, int, int, int *, int, int,
                               int *, int *, int);
-SILO_API extern int      DBPutZonelist2(DBfile *, const char *, int, int, int *, int, int,
+SILO_API extern int      DBPutZonelist2(DBfile *, char const *, int, int, int *, int, int,
                                int, int, int *, int *, int *, int, DBoptlist*);
-SILO_API extern int      DBPutPHZonelist(DBfile *, const char *, int, int *, int, int *, const char *,
+SILO_API extern int      DBPutPHZonelist(DBfile *, char const *, int, int *, int, int *, char const *,
                                                            int, int *, int, int *,
                                                            int, int, int, DBoptlist *);
-SILO_API extern int      DBPutCsgmesh(DBfile *, const char *, int, int, const int *, const int *,
-                                      const void *, int, int, const double *, const char *,
+SILO_API extern int      DBPutCsgmesh(DBfile *, char const *, int, int, int const *, int const *,
+                                      void const *, int, int, double const *, char const *,
                                       DBoptlist *);
-SILO_API extern int      DBPutCSGZonelist(DBfile *, const char *, int, const int *,
-                                          const int *, const int *, const void *, int, int,
-                                          int, const int *, DBoptlist *);
-SILO_API extern int      DBPutCsgvar(DBfile *, const char *, const char *, int, char **,
+SILO_API extern int      DBPutCSGZonelist(DBfile *, char const *, int, int const *,
+                                          int const *, int const *, void const *, int, int,
+                                          int, int const *, DBoptlist *);
+SILO_API extern int      DBPutCsgvar(DBfile *, char const *, char const *, int, char **,
                                      void **, int, int, int, DBoptlist *);
 
 SILO_API extern void DBFreeMrgtree(DBmrgtree *tree);
@@ -2018,49 +2018,49 @@ SILO_API extern void DBWalkMrgtree(DBmrgtree *tree, DBmrgwalkcb cb, void *wdata,
 
 SILO_API extern DBmrgtree *DBMakeMrgtree(int source_mesh_type, int mrgtree_info,
                                int max_root_descendents, DBoptlist *opts);
-SILO_API extern int      DBAddRegion(DBmrgtree *tree, const char *region_name,
+SILO_API extern int      DBAddRegion(DBmrgtree *tree, char const *region_name,
                              int type_info_bits, int max_descendents,
-                             const char *maps_name, int nsegs, int *seg_ids,
+                             char const *maps_name, int nsegs, int *seg_ids,
                              int *seg_sizes, int *seg_types, DBoptlist *opts);
 
 SILO_API extern int      DBAddRegionArray(DBmrgtree *tree, int nregn,
                              char **regn_names, int type_info_bits,
-                             const char *maps_name, int nsegs, int *seg_ids,
+                             char const *maps_name, int nsegs, int *seg_ids,
                              int *seg_sizes, int *seg_types, DBoptlist *opts);
 
-SILO_API extern int      DBSetCwr(DBmrgtree *tree, const char *path);
-SILO_API extern const char *DBGetCwr(DBmrgtree *tree);
+SILO_API extern int      DBSetCwr(DBmrgtree *tree, char const *path);
+SILO_API extern char const *DBGetCwr(DBmrgtree *tree);
 
-SILO_API extern int      DBPutMrgtree(DBfile *dbfile, const char *mrg_tree_name,
-                             const char *mesh_name, DBmrgtree *tree, DBoptlist *opts);
-SILO_API extern DBmrgtree *DBGetMrgtree(DBfile *dbfile, const char *mrg_tree_name);
+SILO_API extern int      DBPutMrgtree(DBfile *dbfile, char const *mrg_tree_name,
+                             char const *mesh_name, DBmrgtree *tree, DBoptlist *opts);
+SILO_API extern DBmrgtree *DBGetMrgtree(DBfile *dbfile, char const *mrg_tree_name);
 
-SILO_API extern int      DBPutMrgvar(DBfile *dbfile, const char *name,
-                             const char *mrgt_name,
+SILO_API extern int      DBPutMrgvar(DBfile *dbfile, char const *name,
+                             char const *mrgt_name,
 			     int ncomps, char **compnames,
 			     int nregns, char **reg_pnames,
                              int datatype, void **data, DBoptlist *opts);
-SILO_API extern DBmrgvar *DBGetMrgvar(DBfile *dbfile, const char *name);
+SILO_API extern DBmrgvar *DBGetMrgvar(DBfile *dbfile, char const *name);
 SILO_API extern void DBFreeMrgvar(DBmrgvar *mrgv);
 
-SILO_API extern int      DBPutGroupelmap(DBfile *dbfile, const char *map_name,
+SILO_API extern int      DBPutGroupelmap(DBfile *dbfile, char const *map_name,
                              int num_segments, int *groupel_types, int *segment_lengths,
                              int *segment_ids, int **segment_data, void **segment_fracs,
                              int fracs_data_type, DBoptlist *opts);
-SILO_API extern DBgroupelmap *DBGetGroupelmap(DBfile *dbfile, const char *name);
+SILO_API extern DBgroupelmap *DBGetGroupelmap(DBfile *dbfile, char const *name);
 SILO_API extern void DBFreeGroupelmap(DBgroupelmap *map);
 
 SILO_API extern void *   DBFortranAccessPointer(int value);
 SILO_API extern int      DBFortranAllocPointer(void *pointer);
 SILO_API extern void     DBFortranRemovePointer(int value);
 
-SILO_API extern int      DBVariableNameValid(const char *s);
-SILO_API extern char *safe_strdup(const char *s);
+SILO_API extern int      DBVariableNameValid(char const *s);
+SILO_API extern char *safe_strdup(char const *s);
 
-SILO_API extern int      DBFreeCompressionResources(DBfile *dbfile, const char *meshname);
+SILO_API extern int      DBFreeCompressionResources(DBfile *dbfile, char const *meshname);
 
-SILO_API extern DBnamescheme *DBMakeNamescheme(const char *fmt, ...);
-SILO_API const char *DBGetName(DBnamescheme *ns, int natnum);
+SILO_API extern DBnamescheme *DBMakeNamescheme(char const *fmt, ...);
+SILO_API char const *DBGetName(DBnamescheme *ns, int natnum);
 
 SILO_API extern void DBStringArrayToStringList(char **strArray, int n,
                          char **strList, int *m);
@@ -2076,8 +2076,8 @@ SILO_API extern int     db_errno;        /*error number of last error */
 SILO_API extern char    db_errfunc[];    /*name of erring function */
 
 #ifndef DB_MAIN
-SILO_API extern DBfile *(*DBOpenCB[])(const char *, int, int);
-SILO_API extern DBfile *(*DBCreateCB[])(const char *, int, int, int, const char *);
+SILO_API extern DBfile *(*DBOpenCB[])(char const *, int, int);
+SILO_API extern DBfile *(*DBCreateCB[])(char const *, int, int, int, char const *);
 SILO_API extern int     (*DBFSingleCB[])(int);
 #endif
 
