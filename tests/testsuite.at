@@ -322,6 +322,10 @@ AT_SETUP(multi_file)
 AT_KEYWORDS(large)
 AT_CHECK($VALGRIND multi_file $STARGS,,ignore)
 AT_CLEANUP
+AT_SETUP(multi_file use-ns)
+AT_KEYWORDS(large)
+AT_CHECK($VALGRIND multi_file use-ns $STARGS,,ignore)
+AT_CLEANUP
 AT_SETUP(testall -medium)
 AT_KEYWORDS(large)
 AT_CHECK($VALGRIND testall -medium $STARGS,,ignore)

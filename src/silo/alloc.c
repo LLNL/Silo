@@ -514,10 +514,13 @@ DBFreeMultimeshadj(DBmultimeshadj *mshadj)
     if (mshadj->nodelists) {
        for (i = 0; i < lneighbors; i++)
           FREE(mshadj->nodelists[i]);
+       FREE(mshadj->nodelists);
     }
+
     if (mshadj->zonelists) {
        for (i = 0; i < lneighbors; i++)
           FREE(mshadj->zonelists[i]);
+       FREE(mshadj->zonelists);
     }
 
     FREE(mshadj->meshtypes);
@@ -1894,9 +1897,32 @@ DBFreeMrgvar(DBmrgvar *mrgv)
 PUBLIC void
 DBFreeNamescheme(DBnamescheme *ns)
 {
-    int i;
+    int i,k;
 
-    /* Always free up the old name scheme and clear it out */
+    if (ns->arralloc)
+    {
+        for (i = 0, k = 0; i < ns->narrefs; i++)
+        {
+            while (ns->fmt[k] != '\0' && ns->fmt[k] != '$' && ns->fmt[k] != '#') k++;
+            if (ns->fmt[k] == '#')
+            {
+                FREE(ns->arrvals[i]);
+            }
+            else
+            {
+                int j;
+                for (j = 0; j < ns->arrsizes[i]; j++)
+                {
+                    FREE(((char **)(ns->arrvals[i]))[j]);
+                }
+                FREE(ns->arrvals[i]);
+            }
+        }
+    }
+    for (i = 0; i < ns->narrefs; i++)
+        FREE(ns->arrnames[i]);
+    FREE(ns->arrnames);
+    FREE(ns->arrsizes);
     FREE(ns->fmt);
     FREE(ns->fmtptrs);
     for (i = 0; i < DB_MAX_EXPSTRS; i++)
@@ -1904,13 +1930,6 @@ DBFreeNamescheme(DBnamescheme *ns)
     for (i = 0; i < ns->ncspecs; i++)
         FREE(ns->exprstrs[i]);
     FREE(ns->exprstrs);
-    for (i = 0; i < ns->narrefs; i++)
-    {
-        FREE(ns->arrnames[i]);
-        /*FREE(ns->arrvals[i]); user allocates these */
-    }
-    FREE(ns->arrnames);
-    FREE(ns->arrvals);
     FREE(ns);
 }
 
@@ -1964,11 +1983,17 @@ DBAllocGroupelmap(int num_segs, DBdatatype frac_type)
             case DB_LONG:
                 gm->segment_fracs = (void**) ALLOC_N(long*, num_segs);
                 break;
+            case DB_LONG_LONG:
+                gm->segment_fracs = (void**) ALLOC_N(long long*, num_segs);
+                break;
             case DB_FLOAT:
                 gm->segment_fracs = (void**) ALLOC_N(float*, num_segs);
                 break;
             case DB_DOUBLE:
                 gm->segment_fracs = (void**) ALLOC_N(double*, num_segs);
+                break;
+            default:
+                gm->segment_fracs = 0;
                 break;
         }
 

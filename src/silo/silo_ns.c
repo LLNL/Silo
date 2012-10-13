@@ -278,7 +278,7 @@ EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
                 if (tree->type == '$')
                     return SaveString(ns,  ((char**)ns->arrvals[i])[q]);
                 else
-                    return ns->arrvals[i][q];
+                    return ((int*)ns->arrvals[i])[q];
             }
         }
     }
@@ -323,6 +323,7 @@ DBMakeNamescheme(const char *fmt, ...)
     va_list ap;
     int i, j, k, n, pass, ncspecs, done;
     DBnamescheme *rv = 0;
+    DBfile *dbfile = 0;
 
     /* We have nothing to do for a null or empty format string */
     if (fmt == 0 || *fmt == '\0')
@@ -393,8 +394,22 @@ DBMakeNamescheme(const char *fmt, ...)
     rv->exprstrs = (char **) calloc(rv->ncspecs, sizeof(char*));
     if (rv->narrefs > 0)
     {
+        void *dummy;
+
         rv->arrnames = (char **) calloc(rv->narrefs, sizeof(char*));
-        rv->arrvals  = (const int **) calloc(rv->narrefs, sizeof(int*));
+        rv->arrvals  = (void *) calloc(rv->narrefs, sizeof(void*));
+        rv->arrsizes = (int *) calloc(rv->narrefs, sizeof(int));
+
+        /* If we have non-zero ext. array references, then we may have the case of
+           '0, DBfile*'. So, check for that now */
+        va_start(ap, fmt);
+        dummy = va_arg(ap, void *);
+        if (dummy == 0)
+        {
+            dbfile = va_arg(ap, DBfile *);
+            rv->arralloc = 1;
+        }
+        va_end(ap);
     }
 
     /* Ok, now go through rest of fmt string a second time and grab each
@@ -418,7 +433,29 @@ DBMakeNamescheme(const char *fmt, ...)
             if (k == rv->narrefs)
             {
                 rv->arrnames[k] = STRNDUP(&fmt[i+1], j-1);
-                rv->arrvals[k] = va_arg(ap, const int *);
+                if (!dbfile)
+                    rv->arrvals[k] = va_arg(ap, void *);
+                else
+                {
+                    rv->arrvals[k] = DBGetVar(dbfile, rv->arrnames[k]);
+                    if (rv->arrvals[k] != 0)
+                    {
+                        /* Handle ext. array refs to arrays of strings */
+                        if (DBGetVarType(dbfile, rv->arrnames[k]) == DB_CHAR)
+                        {
+                            rv->arrsizes[k] = -1; /* initialize to 'unknown size' */
+                            char **tmp = DBStringListToStringArray((char*)rv->arrvals[k], &(rv->arrsizes[k]), 0, 0);
+                            FREE(rv->arrvals[k]);
+                            rv->arrvals[k] = tmp;
+                        }
+                    }
+                    else
+                    {
+                        DBFreeNamescheme(rv);
+                        rv = 0;
+                        done = 1;
+                    }
+                }
                 rv->narrefs++;
             }
         }
@@ -436,6 +473,11 @@ DBMakeNamescheme(const char *fmt, ...)
     va_end(ap);
 
     return rv;
+}
+
+PUBLIC DBnamescheme *
+DBMakeNameschemeWithArrays(DBfile *dbfile, const char *fmt)
+{
 }
 
 PUBLIC const char *

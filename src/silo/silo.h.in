@@ -136,6 +136,18 @@ be used for advertising or product endorsement purposes.
 #define DB_DTPTR2 void* /* NO_FORTRAN_DEFINE */
 #endif
 
+/* Macros to get multiply subscripted array constness correct
+   with C++ and C compilers */
+#if defined(__cplusplus) || defined(USE_CONST_DB_CONSTARR)
+#define DB_CONSTARR1 const * /* NO_FORTRAN_DEFINE */
+#define DB_CONSTARR2 const * const * /* NO_FORTRAN_DEFINE */
+#define DB_CONSTARR3 const * const * const * /* NO_FORTRAN_DEFINE */
+#else
+#define DB_CONSTARR1 * /* NO_FORTRAN_DEFINE */
+#define DB_CONSTARR2 ** /* NO_FORTRAN_DEFINE */
+#define DB_CONSTARR3 *** /* NO_FORTRAN_DEFINE */
+#endif
+
 #ifndef FALSE
 #define FALSE   0
 #endif
@@ -1555,9 +1567,11 @@ typedef struct _DBnamescheme
     char delim;             /* delimiter char used for parts of fmt */
     int nembed;             /* number of last embedded string encountered */
     char *embedstrs[DB_MAX_EXPSTRS]; /* ptrs to copies of embedded strings */
+    int arralloc;           /* flag indicating if Silo allocated the arrays or not */
     int narrefs;            /* number of array refs in conversion specs */
     char **arrnames;        /* array names used by array refs */
-    int const **arrvals;    /* pointer to actual array data assoc. with each name */
+    void **arrvals;         /* pointer to actual array data assoc. with each name */
+    int  *arrsizes;         /* size of each array (only needed for deallocating external arrays of strings) */
     char **exprstrs;        /* expressions to be evaluated for each conv. spec. */
 } DBnamescheme;
 
@@ -1702,8 +1716,8 @@ typedef struct DBfile_pub {
     DBmultimeshadj *(*g_mmadj)(struct DBfile *, char const *, int, int const *);
     int            (*p_mmadj)(struct DBfile *, char const *, int, int const *,
                               int const *, int const *, int const *, int const *,
-                              int **, int const *, int **,
-                              DBoptlist *optlist);
+                              int DB_CONSTARR2, int const *, int DB_CONSTARR2, 
+                              DBoptlist const *optlist);
     int            (*p_mrgt)(struct DBfile *dbfile, char const *name, char const *mesh_name,
                              DBmrgtree *tree, DBoptlist *opts);
     DBmrgtree     *(*g_mrgt)(struct DBfile *, char const *name);
@@ -1964,11 +1978,11 @@ SILO_API extern int      DBPutMaterial(DBfile *, char const *, char const *, int
 SILO_API extern int      DBPutMatspecies(struct DBfile *, char const *, char const *, int, int *,
                                 int *, int *, int, int, DB_DTPTR1, int *, int, int,
                                 DBoptlist *);
-SILO_API extern int      DBPutMultimesh(DBfile *, char const *, int, char const *const *, int const *,
+SILO_API extern int      DBPutMultimesh(DBfile *, char DB_CONSTARR1, int, char DB_CONSTARR2, int DB_CONSTARR1,
                                DBoptlist const *);
-SILO_API extern int      DBPutMultimeshadj(DBfile *, char const *, int, int const *,
-                               int const *, int const *, int const *, int const *,
-                               int **, int const *, int **, DBoptlist *optlist);
+SILO_API extern int      DBPutMultimeshadj(DBfile *, char DB_CONSTARR1, int, int DB_CONSTARR1,
+                               int DB_CONSTARR1, int DB_CONSTARR1, int DB_CONSTARR1, int DB_CONSTARR1,
+                               int DB_CONSTARR2, int DB_CONSTARR1, int DB_CONSTARR2, DBoptlist const *optlist);
 SILO_API extern int      DBPutMultivar(DBfile *, char const *, int, char **, int *,
                               DBoptlist *);
 SILO_API extern int      DBPutMultimat(DBfile *, char const *, int, char **, DBoptlist *);
@@ -2064,8 +2078,8 @@ SILO_API char const *DBGetName(DBnamescheme *ns, int natnum);
 
 SILO_API extern void DBStringArrayToStringList(char **strArray, int n,
                          char **strList, int *m);
-SILO_API char ** DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
-                     int skipFirstSemicolon);
+SILO_API char ** DBStringListToStringArray(char *strList, int *n, int handleSlashSwap,
+                     int skipSemicolonAtIndexZero);
 
 /*-------------------------------------------------------------------------
  * Public global variables.

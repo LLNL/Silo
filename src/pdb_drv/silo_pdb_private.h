@@ -179,12 +179,12 @@ SILO_CALLBACK int db_pdb_PutMaterial (DBfile *, char *, char *, int, int *,
 SILO_CALLBACK int db_pdb_PutMatspecies (struct DBfile *, char *, char *, int,
 				   int *, int *, int *, int, int, DB_DTPTR1,
 				   int *, int, int, DBoptlist *);
-SILO_CALLBACK int db_pdb_PutMultimesh (DBfile *, char const *, int, char const *const *, int const *,
+SILO_CALLBACK int db_pdb_PutMultimesh (DBfile *, char DB_CONSTARR1, int, char DB_CONSTARR2, int DB_CONSTARR1,
 				  DBoptlist const *);
-SILO_CALLBACK int db_pdb_PutMultimeshadj (DBfile *, char const *, int, int const *,
-                               int const *, int const *, int const *, int const *,
-                               int **, int const *, int **,
-                               DBoptlist *optlist);
+SILO_CALLBACK int db_pdb_PutMultimeshadj (DBfile *, char DB_CONSTARR1, int, int DB_CONSTARR1,
+                               int DB_CONSTARR1, int DB_CONSTARR1, int DB_CONSTARR1, int DB_CONSTARR1,
+                               int DB_CONSTARR2, int DB_CONSTARR1, int DB_CONSTARR2,
+                               DBoptlist const *optlist);
 SILO_CALLBACK int db_pdb_PutMultivar (DBfile *, char *, int, char **, int *,
 				 DBoptlist *);
 SILO_CALLBACK int db_pdb_PutMultimat (DBfile *, char *, int, char **,

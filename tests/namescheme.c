@@ -62,14 +62,31 @@ be used for advertising or product endorsement purposes.
 */
 
 #include <silo.h>
+#include <std.c>
 #include <string.h>
 
-int main()
+int main(int argc, char **argv)
 {
     int i;
     int P[100], U[4];
     char *N[3];
     char blockName[1024];
+    int driver = DB_PDB;
+    int show_all_errors = 0;
+
+    for (i=1; i<argc; i++) {
+        if (!strncmp(argv[i], "DB_PDB", 6)) {
+            driver = StringToDriver(argv[i]);
+        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+            driver = StringToDriver(argv[i]);
+        } else if (!strcmp(argv[i], "show-all-errors")) {
+            show_all_errors = 1;
+        } else if (argv[i][0] != '\0') {
+            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+        }
+    }
+
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
     /* Test a somewhat complex expression */ 
     DBnamescheme *ns2;
@@ -123,7 +140,7 @@ int main()
     N[0] = "red";
     N[1] = "green";
     N[2] = "blue";
-    ns = DBMakeNamescheme("Hfoo_%sH$N[n%3]", N);
+    ns = DBMakeNamescheme("Hfoo_%sH$Noodle[n%3]", N);
     if (strcmp(DBGetName(ns, 17), "foo_blue") != 0)
         return 1;
     if (strcmp(DBGetName(ns, 6), "foo_red") != 0)
@@ -152,6 +169,85 @@ int main()
         return 0;
     DBFreeNamescheme(ns);
     DBFreeNamescheme(ns2);
+
+    /* Test DBnamescheme construction from arrays in a Silo file */
+    {
+        DBfile *dbfile;
+        int dims[3];
+        int strListLen;
+
+        /* uses same namescheme as above but am placing arrays in different dir
+           relative to where I will place the namesheme */
+        char *ns1 = "@foo_%03dx%03d@#../arr_dir/Place[n]@#../arr_dir/Upper[n%4]";
+        char *ns1r;
+        /* Use absolute path to external array. */
+        char *ns2 = "Hfoo_%sH$/arr_dir/Noodle[n%3]";
+        char *ns2r;
+        char *strList;
+
+        dbfile = DBCreate("namescheme.silo", DB_CLOBBER, DB_LOCAL,
+            "Test namescheme constructor with external arrays in file", driver);
+
+        /* Put the external arrays in arr_dir */
+        DBMkDir(dbfile, "arr_dir");
+        DBSetDir(dbfile, "arr_dir");
+        dims[0] = 100;
+        DBWrite(dbfile, "Place", P, dims, 1, DB_INT);
+        DBWrite(dbfile, "Upper", U, dims, 1, DB_INT);
+        DBStringArrayToStringList(N, 3, &strList, &strListLen);
+        dims[0] = strListLen;
+        DBWrite(dbfile, "Noodle", strList, dims, 1, DB_CHAR);
+        DBSetDir(dbfile, "..");
+
+        DBMkDir(dbfile, "dir_1");
+        DBSetDir(dbfile, "dir_1");
+        dims[0] = strlen(ns1)+1;
+        DBWrite(dbfile, "ns1", ns1, dims, 1, DB_CHAR);
+        DBSetDir(dbfile, "..");
+        DBMkDir(dbfile, "dir_2");
+        DBMkDir(dbfile, "dir_2/dir_3");
+        DBSetDir(dbfile, "/dir_2/dir_3");
+        dims[0] = strlen(ns2)+1;
+        DBWrite(dbfile, "ns2", ns2, dims, 1, DB_CHAR);
+
+        DBClose(dbfile);
+
+        dbfile = DBOpen("namescheme.silo", DB_UNKNOWN, DB_READ);
+        DBSetDir(dbfile, "dir_1");
+        ns1r = DBGetVar(dbfile, "ns1");
+
+        /* Use the '0, DBfile*' form of args to constructor */
+        ns = DBMakeNamescheme(ns1r, 0, dbfile);
+
+        /* Ok, lets test the constructed namescheme */
+        if (strcmp(DBGetName(ns, 17), "foo_085x001") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 18), "foo_090x004") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 19), "foo_095x009") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 20), "foo_100x000") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 21), "foo_105x001") != 0)
+            return 1;
+        DBFreeNamescheme(ns);
+
+        DBSetDir(dbfile, "/dir_2/dir_3");
+        ns2r = DBGetVar(dbfile, "ns2");
+
+        /* Use the '0, DBfile*' form of args to constructor */
+        ns = DBMakeNamescheme(ns2r, 0, dbfile);
+
+        if (strcmp(DBGetName(ns, 17), "foo_blue") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 6), "foo_red") != 0)
+            return 1;
+        DBFreeNamescheme(ns);
+
+        DBClose(dbfile);
+    }
+    
+    CleanupDriverStuff();
 
     return 0;
 }

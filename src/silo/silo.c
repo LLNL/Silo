@@ -317,7 +317,7 @@ db_FullyDeprecatedConvention(const char *name)
  *    If s is "" then we use the previous value of s.
  *-------------------------------------------------------------------------*/
 INTERNAL int
-db_perror(const char *s, int errorno, char *fname)
+db_perror(char const *s, int errorno, char const *fname)
 {
     int            call_abort = 0;
     static char    old_s[256];
@@ -1945,7 +1945,7 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
  * Modifications:
  *-------------------------------------------------------------------------*/
 INTERNAL context_t *
-context_switch(DBfile *dbfile, char *name, char **base)
+context_switch(DBfile *dbfile, char const *name, char const **base)
 {
     char          *me = "context_switch";
     char           s[256], *b;
@@ -7936,8 +7936,8 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
  *    adjusting sanity checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
-               char const *const *meshnames, int const *meshtypes, DBoptlist const *optlist)
+DBPutMultimesh(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
+               char DB_CONSTARR2 meshnames, int DB_CONSTARR1 meshtypes, DBoptlist const *optlist)
 {
     int retval;
 
@@ -7990,12 +7990,12 @@ DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
  *
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutMultimeshadj(DBfile *dbfile, const char *name, int nmesh,
-                  const int *meshtypes, const int *nneighbors,
-                  const int *neighbors, const int *back,
-                  const int *lnodelists, int *nodelists[],
-                  const int *lzonelists, int *zonelists[],
-                  DBoptlist *optlist)
+DBPutMultimeshadj(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
+                  int DB_CONSTARR1 meshtypes, int DB_CONSTARR1 nneighbors,
+                  int DB_CONSTARR1 neighbors, int DB_CONSTARR1 back,
+                  int DB_CONSTARR1 lnodelists, int DB_CONSTARR2 nodelists,
+                  int DB_CONSTARR1 lzonelists, int DB_CONSTARR2 zonelists,
+                  DBoptlist const *optlist)
 {
     int retval;
 
@@ -11851,20 +11851,20 @@ DBStringArrayToStringList(char **strArray, int n,
  *    separate arrays.
  *--------------------------------------------------------------------*/
 PUBLIC char **
-DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
-    int skipFirstSemicolon)
+DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
+    int skipSemicolonAtIndexZero)
 {
-    int i, l, add1 = 0, strLen;
+    int i, l, n, add1 = 0, strLen;
     char **retval;
     int *colonAt = 0;
     int needToSlashSwap = 0;
 
     /* if n is unspecified (<0), compute it by counting semicolons */
-    if (n < 0)
+    if (_n == 0 || *_n < 0)
     {
         add1 = 1;
         n = 1;
-        i = (skipFirstSemicolon&&strList[0]==';')?1:0;
+        i = (skipSemicolonAtIndexZero&&strList[0]==';')?1:0;
         while (strList[i] != '\0')
         {
             if (strList[i] == ';')
@@ -11873,11 +11873,15 @@ DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
         }
         strLen = i;
     }
+    else
+    {
+        n = *_n;
+    }
 
     retval = (char**) calloc(n+add1, sizeof(char*));
     if (handleSlashSwap)
         colonAt = (int *) calloc(n, sizeof(int));
-    for (i=0, l=(skipFirstSemicolon&&strList[0]==';')?1:0; i<n; i++)
+    for (i=0, l=(skipSemicolonAtIndexZero&&strList[0]==';')?1:0; i<n; i++)
     {
         if (strList[l] == ';')
         {
@@ -11937,6 +11941,7 @@ DBStringListToStringArray(char *strList, int n, int handleSlashSwap,
         }
         free(colonAt);
     }
+    if (_n && *_n < 0) *_n = n;
 
     return retval;
 }
@@ -12158,7 +12163,7 @@ char *db_absoluteOf_path (const char *cwg,
 
    if (0 < strlen(pathname))
    {  if (db_isAbsolute_path(pathname))
-          result = STRDUP(pathname);
+          result = db_normalize_path(pathname);
       else
           result = db_join_path(cwg,pathname);
    }

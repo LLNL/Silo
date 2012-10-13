@@ -76,6 +76,9 @@ be used for advertising or product endorsement purposes.
 #include <unistd.h> /*for access() F_OK, R_OK */
 #endif
 #endif
+/* define USE_CONST_DB_CONSTARR so that when we compile Silo
+   we are sure to get the CONST versions of DB_CONSTARR symbols */
+#define USE_CONST_DB_CONSTARR
 #include "silo.h"
 
 /*
@@ -310,8 +313,8 @@ typedef struct context_t {
                            }                                                  \
                            jstat = 1 ;                                        \
                            if (NM && jdbfile && !jdbfile->pub.pathok) {       \
-                              char *jr ;                                      \
-                              jold = context_switch (jdbfile,(char *)NM,&jr) ;\
+                              char const *jr ;                                \
+                              jold = context_switch (jdbfile,(char const *)NM,&jr) ;\
                               if (!jold) longjmp (SILO_Globals.Jstk->jbuf, -1) ;\
                               NM = jr ;                                       \
                            }                                                  \
@@ -827,7 +830,7 @@ typedef struct db_PathnameTag            db_Pathname;
 /*
  * Private functions.
  */
-INTERNAL context_t *context_switch (DBfile *, char *, char **);
+INTERNAL context_t *context_switch (DBfile *, char const *, char const **);
 INTERNAL int context_restore (DBfile *, context_t *);
 INTERNAL DBfile *silo_db_close (DBfile *);
 INTERNAL DBtoc *db_AllocToc (void);
@@ -838,7 +841,7 @@ INTERNAL char *DBGetObjtypeName (int);
 INTERNAL char *db_strndup (const char *, int);
 INTERNAL char *db_GetDatatypeString (int);
 INTERNAL int db_GetDatatypeID (char *);
-INTERNAL int db_perror (const char *, int, char *);
+INTERNAL int db_perror (char const *, int, char const *);
 INTERNAL void _DBQQCalcStride (int *, int *, int, int);
 INTERNAL void _DBQMSetStride (DBquadmesh *);
 INTERNAL int _DBstrprint (FILE *, char **, int, int, int, int, int);
