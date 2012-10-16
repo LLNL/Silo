@@ -47,7 +47,7 @@ Silo Development FAQ
    as it should recognise that Makefile.am, etc. has been modified and run
    the appropriate commands to regenerate the Makefile.
    1) you must put the current autotools binaries in your PATH: 
-      PATH=/usr/gapps/silo/autotools/i686-pc-linux-gnu:$PATH
+      PATH=/groups/visit/miller/silo/autotools/linux-x86_64/bin:$PATH
    2) check-out all of the autotools generated files:
       config/bootstrap -o
    3) Enable maintainer tools:

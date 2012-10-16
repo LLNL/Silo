@@ -1,7 +1,5 @@
 #!/bin/sh
-#set -x
-HOST=`/usr/gapps/silo/autotools/bin/config.guess`
-AUTOTOOLS=/usr/gapps/silo/autotools/$HOST/bin
+AUTOTOOLS=/groups/visit/miller/silo/autotools/linux-x86_64/bin
 # somewhat of a hack
 if test -x configure.ac ; then
   echo "must be in the same directory as ./configure to run this script"

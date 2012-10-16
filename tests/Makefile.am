@@ -133,7 +133,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       TestReadMask twohex multispec sami specmix spec cpz1plt spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
-      mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff testfs
+      mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff
 
 dir_SOURCES = \
  dir.c \

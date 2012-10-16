@@ -11849,6 +11849,10 @@ DBStringArrayToStringList(char **strArray, int n,
  *    Made logic for handling slash swap more sane. Now, swapping is
  *    performed AFTER the list of strings has been broken out into
  *    separate arrays.
+ *
+ *    Mark C. Miller, Fri Oct 12 22:57:23 PDT 2012
+ *    Changed interface to return value for number of strings as well
+ *    as accept an input value or nothing at all.
  *--------------------------------------------------------------------*/
 PUBLIC char **
 DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
@@ -11941,6 +11945,8 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
         }
         free(colonAt);
     }
+
+    /* Return value of n computed if requested */
     if (_n && *_n < 0) *_n = n;
 
     return retval;
