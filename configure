@@ -1536,6 +1536,11 @@ Optional Features:
   --enable-legacy-datatyped-pointers
                           compile using legacy (float) pointers for datatype'd
                           pointers [default=no]
+  --enable-normal-sclite-mem-headers
+                          compile with normal score lite memory headers
+                          [default=no]
+  --enable-install-lite-headers
+                          Install SCORE/PDB lite header files [default=no]
   --enable-browser        build browser [default=yes]
   --enable-silex          build the silex browser [default=no]
   --enable-hzip           enable Lindstrom hex/quad mesh compression
@@ -22801,6 +22806,30 @@ fi
 
 
 
+# Check whether --enable-normal-sclite-mem-headers was given.
+if test "${enable_normal_sclite_mem_headers+set}" = set; then
+  enableval=$enable_normal_sclite_mem_headers; if test "$enableval" = "yes" ; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NORMAL_SCLITE_HEADERS 1
+_ACEOF
+
+    fi
+else
+
+cat >>confdefs.h <<\_ACEOF
+#define NORMAL_SCLITE_HEADERS 0
+_ACEOF
+
+fi
+
+
+# Check whether --enable-install-lite-headers was given.
+if test "${enable_install_lite_headers+set}" = set; then
+  enableval=$enable_install_lite_headers; INSTLITE="$enableval"
+fi
+
+
 NETCDF="netcdf"
 
 $as_echo "#define HAVE_NETCDF_DRIVER 1" >>confdefs.h
@@ -26226,6 +26255,14 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
 fi
 rm -f confcache
 
+ if test "$INSTLITE" = "yes"; then
+  INSTALL_LITE_HEADERS_TRUE=
+  INSTALL_LITE_HEADERS_FALSE='#'
+else
+  INSTALL_LITE_HEADERS_TRUE='#'
+  INSTALL_LITE_HEADERS_FALSE=
+fi
+
  if test -n "$NETCDF"; then
   NETCDF_NEEDED_TRUE=
   NETCDF_NEEDED_FALSE='#'
@@ -26502,6 +26539,13 @@ fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${INSTALL_LITE_HEADERS_TRUE}" && test -z "${INSTALL_LITE_HEADERS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"INSTALL_LITE_HEADERS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"INSTALL_LITE_HEADERS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
 fi
 if test -z "${NETCDF_NEEDED_TRUE}" && test -z "${NETCDF_NEEDED_FALSE}"; then
   as_fn_error $? "conditional \"NETCDF_NEEDED\" was never defined.

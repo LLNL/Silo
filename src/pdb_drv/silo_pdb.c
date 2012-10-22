@@ -2721,6 +2721,10 @@ db_pdb_NewToc (DBfile *_dbfile)
           *  Group (object)
           *----------------------------------------*/
       }
+      else if (STR_BEGINSWITH(ep->type, "GroupDataShadow")) {
+          toc->nobj++;
+          continue;
+      }
       else if (STR_BEGINSWITH(ep->type, "Group")) {
 
          /*
@@ -11831,6 +11835,7 @@ db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
     *--------------------------------------------------*/
    _qm._nzones = nzones;
    _qm._nnodes = nnodes;
+   FREE(_qm._meshname);
    _qm._meshname = STRDUP(meshname);
 
    for (i = 0; i < ndims; i++) {

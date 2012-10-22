@@ -1919,6 +1919,7 @@ DBFreeNamescheme(DBnamescheme *ns)
             }
         }
     }
+    FREE(ns->arrvals);
     for (i = 0; i < ns->narrefs; i++)
         FREE(ns->arrnames[i]);
     FREE(ns->arrnames);

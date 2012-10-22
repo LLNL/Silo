@@ -78,9 +78,9 @@ be used for advertising or product endorsement purposes.
  *
  *-------------------------------------------------------------------------
  */
-byte *
+lite_SC_byte *
 lite_PD_get_attribute (PDBfile *file, char *vr, char *at) {
-   byte 	*vl, **data;
+   lite_SC_byte 	*vl, **data;
    attribute 	*attr;
    attribute_value *avl;
    char 	fullname[MAXLINE];
@@ -147,7 +147,7 @@ _lite_PD_convert_attrtab (PDBfile *file) {
    struct ohashel {
       char *name;
       char *type;
-      byte *def;
+      lite_SC_byte *def;
       struct ohashel *next;
    } *onp, *nxt, **otb;
 

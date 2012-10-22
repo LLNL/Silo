@@ -330,15 +330,10 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libsilo_pdb.la
 libsilo_pdb_la_SOURCES = $(FILES)
 AM_CPPFLAGS = -I$(top_srcdir)/src/score -I$(top_srcdir)/src/silo
-EXTRA_DIST = \
- detect.c
-
-noinst_HEADERS = \
- pdb.h
-
-nodist_noinst_HEADERS = \
- pdform.h
-
+EXTRA_DIST = detect.c
+noinst_HEADERS = pdb.h
+nodist_noinst_HEADERS = pdform.h
+@INSTALL_LITE_HEADERS_TRUE@include_HEADERS = lite_pdb.h
 FILES = \
  pdb.c \
  pdbdir.c \
@@ -352,7 +347,7 @@ FILES = \
  pdrdwr.c
 
 BUILT_SOURCES = detect pdform.h
-CLEANFILES = detect pdform.h
+CLEANFILES = detect pdform.h lite_pdb.h
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -445,6 +440,23 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(includedir)" || $(MKDIR_P) "$(DESTDIR)$(includedir)"
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(includeHEADERS_INSTALL) '$$d$$p' '$(DESTDIR)$(includedir)/$$f'"; \
+	  $(includeHEADERS_INSTALL) "$$d$$p" "$(DESTDIR)$(includedir)/$$f"; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(includedir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(includedir)/$$f"; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -547,6 +559,9 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 installdirs:
+	for dir in "$(DESTDIR)$(includedir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
@@ -603,7 +618,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -649,7 +664,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-includeHEADERS
 
 .MAKE: all check install install-am install-strip
 
@@ -673,6 +688,14 @@ pdform.h: detect
 	-@echo " * for `uname -a`" >>$@
 	@echo " */" >> $@
 	./detect >> $@
+
+lite_pdb.h: pdb.h
+	@cp $< $@
+	@rm -f lite_pdb_funcs.tmp
+	@grep lite_ $@ | grep extern | grep -v _lite | grep -v NOT_LITE_API | tr '\t' ' ' | tr -s ' ' | sed -e 's@^\(.*\)[ *]*lite_\([a-zA-Z0-9_]*\)\(\[\]\)\? *[(;]\(.*\)@#define \2 lite_\2@' > lite_pdb_funcs.tmp
+	@sed -i '/INSERT FUNCTION NAME MAPPING MACROS HERE/ r lite_pdb_funcs.tmp' $@
+	@rm -f lite_pdb_funcs.tmp
+	@sed -i -e 's|^#ifndef _PDB_H|#ifndef _LITE_PDB_H|' -e 's|^#define _PDB_H|#define _LITE_PDB_H|' -e 's|^#include "score.h"|#include "lite_score.h"|' $@
 
 detect: detect.o
 	$(CC) $(CFLAGS) -o $@ detect.o

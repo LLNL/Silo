@@ -51,7 +51,7 @@ herein do not necessarily state  or reflect those of the United States
 Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
-#include "config.h" /* For HAVE_MEMMOVE test. */
+
 /*
  * SCORE.H - include file for PACT standard core package
  *
@@ -59,6 +59,10 @@ be used for advertising or product endorsement purposes.
  * Software Release #92-0043
  *
  */
+
+#ifdef PCK_SCORE
+#error CANNOT INCLUDE SCORE PROPER AND SCORE LITE HEADERS IN SAME COMPILATION MODULE
+#endif
 
 #ifndef _SCORE_H
 #define _SCORE_H
@@ -99,6 +103,13 @@ be used for advertising or product endorsement purposes.
   #endif
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* INSERT FUNCTION NAME MAPPING MACROS HERE */
+
+/* Macros used for exporting symbols on Win32 systems. */
 #ifdef _WIN32
 #  ifndef HAVE_MEMMOVE
 #    define HAVE_MEMMOVE
@@ -122,7 +133,11 @@ be used for advertising or product endorsement purposes.
 #define BINARY_MODE_WPLUS 	"w+b"
 #define LRG_TXT_BUFFER		4096
 #define NODOC			0
-#define HSZLARGE		521
+/* Possible hash table sizes. Should be primes */
+#define HSZSMALL		521
+#define HSZMEDIUM	 	5231
+#define HSZLARGE		52121
+#define HSZXLARGE		521021
 #define SC_BITS_BYTE		8
 
 #define SC_CHAR_I        	1
@@ -222,7 +237,7 @@ be used for advertising or product endorsement purposes.
 /* REMAKE_N - reallocate a block of type x and return a pointer to it */
 
 #define REMAKE_N(p, x, n)                                                    \
-   (p = (x *) lite_SC_realloc((byte *) p, (long) (n), (long) sizeof(x)))
+   (p = (x *) lite_SC_realloc((lite_SC_byte *) p, (long) (n), (long) sizeof(x)))
 
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
@@ -241,7 +256,7 @@ be used for advertising or product endorsement purposes.
 /*--------------------------------------------------------------------------*/
 
 
-typedef void		byte ;
+typedef void		lite_SC_byte ;
 typedef void		(*FreeFuncType)(void *) ;
 typedef void		*((*MallocFuncType)(size_t));
 typedef void		*((*ReallocFuncType)(void *,size_t));
@@ -258,9 +273,9 @@ typedef double		(*PFDouble)() ;
  */
 typedef struct s_pcons {
    char		*car_type;
-   byte 	*car;
+   lite_SC_byte *car;
    char 	*cdr_type;
-   byte 	*cdr;
+   lite_SC_byte *cdr;
 } pcons;
 
 /*
@@ -276,7 +291,7 @@ typedef struct s_pcons {
 typedef struct s_hashel {
    char 	*name;
    char 	*type;
-   byte 	*def;
+   lite_SC_byte *def;
    struct s_hashel *next; /* next entry in chain */
 } hashel ;
 
@@ -298,7 +313,7 @@ typedef union u_SC_address {
 
 typedef FILE *	(*PFfopen)(char*,char*);
 typedef long 	(*PFftell)(void*);
-typedef size_t	(*PFfread)(byte*,size_t,size_t,void*);
+typedef size_t	(*PFfread)(lite_SC_byte*,size_t,size_t,void*);
 typedef size_t	(*PFfwrite)(void*,size_t,size_t,void*);
 typedef int	(*PFsetvbuf)(void*,char*,int,size_t);
 typedef int	(*PFfclose)(void*);
@@ -319,15 +334,15 @@ LITE_API extern int *	lite_LAST;
 LITE_API extern char *	lite_SC_CHAR_S ;
 
 /* IO hooks */
-LITE_API extern PFfclose lite_io_close_hook;
-LITE_API extern PFfflush lite_io_flush_hook;
-LITE_API extern PFfopen lite_io_open_hook;
-LITE_API extern PFfprintf lite_io_printf_hook;
-LITE_API extern PFfread lite_io_read_hook;
-LITE_API extern PFfseek lite_io_seek_hook;
-LITE_API extern PFsetvbuf lite_io_setvbuf_hook;
-LITE_API extern PFftell lite_io_tell_hook;
-LITE_API extern PFfwrite lite_io_write_hook;
+extern PFfclose lite_io_close_hook; /* NOT_LITE_API */
+extern PFfflush lite_io_flush_hook; /* NOT_LITE_API */
+extern PFfopen lite_io_open_hook; /* NOT_LITE_API */
+extern PFfprintf lite_io_printf_hook; /* NOT_LITE_API */
+extern PFfread lite_io_read_hook; /* NOT_LITE_API */
+extern PFfseek lite_io_seek_hook; /* NOT_LITE_API */
+extern PFsetvbuf lite_io_setvbuf_hook; /* NOT_LITE_API */
+extern PFftell lite_io_tell_hook; /* NOT_LITE_API */
+extern PFfwrite lite_io_write_hook; /* NOT_LITE_API */
 
 
 
@@ -335,24 +350,24 @@ LITE_API extern PFfwrite lite_io_write_hook;
 /*                          FUNCTION DECLARATIONS                           */
 /*--------------------------------------------------------------------------*/
 
-LITE_API extern byte *	lite_SC_alloc (long,long,char*);
-LITE_API extern long	lite_SC_arrlen (byte*);
+LITE_API extern lite_SC_byte *	lite_SC_alloc (long,long,char*);
+LITE_API extern long	lite_SC_arrlen (lite_SC_byte*);
 LITE_API extern char *	lite_SC_date (void);
-LITE_API extern byte *	lite_SC_def_lookup (char*,HASHTAB*);
+LITE_API extern lite_SC_byte *	lite_SC_def_lookup (char*,HASHTAB*);
 LITE_API extern char **	lite_SC_dump_hash (HASHTAB*,char*,int);
 LITE_API extern char *	lite_SC_firsttok (char*,char*);
-LITE_API extern int	lite_SC_free (byte*);
+LITE_API extern int	lite_SC_free (lite_SC_byte*);
 LITE_API extern int	lite_SC_hash (char*,int);
 LITE_API extern void	lite_SC_hash_clr (HASHTAB*);
 LITE_API extern char **	lite_SC_hash_dump (HASHTAB*,char*);
 LITE_API extern int	lite_SC_hash_rem (char*,HASHTAB*);
-LITE_API extern hashel * lite_SC_install (char*,byte*,char*,HASHTAB*);
+LITE_API extern hashel *lite_SC_install (char*,lite_SC_byte*,char*,HASHTAB*);
 LITE_API extern char *	lite_SC_lasttok (char*,char*);
-LITE_API extern hashel * lite_SC_lookup (char*,HASHTAB*);
-LITE_API extern HASHTAB * lite_SC_make_hash_table (int,int);
-LITE_API extern int	lite_SC_mark (byte*,int);
-LITE_API extern byte *	lite_SC_realloc (byte*,long,long);
-LITE_API extern int	lite_SC_ref_count (byte*);
+LITE_API extern hashel *lite_SC_lookup (char*,HASHTAB*);
+LITE_API extern HASHTAB *lite_SC_make_hash_table (int,int);
+LITE_API extern int	lite_SC_mark (lite_SC_byte*,int);
+LITE_API extern lite_SC_byte *	lite_SC_realloc (lite_SC_byte*,long,long);
+LITE_API extern int	lite_SC_ref_count (lite_SC_byte*);
 LITE_API extern int	lite_SC_regx_match (char*,char*);
 LITE_API extern void	lite_SC_rl_hash_table (HASHTAB*);
 LITE_API extern int	lite_SC_stoi (char*);
@@ -360,12 +375,16 @@ LITE_API extern long	lite_SC_stol (char*);
 LITE_API extern void	lite_SC_string_sort (char**,int);
 LITE_API extern char *	lite_SC_strrev (char*);
 LITE_API extern char *	lite_SC_strsavef (char*,char*);
-LITE_API extern hashel * _lite_SC_install (char*,byte*,char*,HASHTAB*);
-LITE_API extern char   * _lite_SC_pr_tok (char*,char*);
-LITE_API extern long int	_lite_SC_strtol (char*,char**,int);
+extern hashel *         _lite_SC_install (char*,lite_SC_byte*,char*,HASHTAB*);
+extern char *		_lite_SC_pr_tok (char*,char*);
+extern long int		_lite_SC_strtol (char*,char**,int);
 
 #ifndef HAVE_MEMMOVE
 LITE_API extern void *	memmove (void*,const void*,size_t) ;
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* !_SCORE_H */

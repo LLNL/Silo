@@ -59,12 +59,22 @@ be used for advertising or product endorsement purposes.
  *
  */
 
+#ifdef PCK_PDB
+#error CANNOT INCLUDE PDB PROPER AND PDB LITE HEADERS IN SAME COMPILATION MODULE
+#endif
+
 #ifndef _PDB_H
 #define _PDB_H
 
 #include <setjmp.h> /* For the setjmp/long structure jmp_buf. */
 #include <stdio.h>
 #include "score.h" /* For type definitions */ 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* INSERT FUNCTION NAME MAPPING MACROS HERE */
 
 /* The MAXLINE macro is defined in score.h and taken from stdio.h's */
 /* FILENAME_MAX.  HP's is only 14, so correct that here. */
@@ -265,6 +275,7 @@ struct s_PDBfile {
    long headaddr;
    long symtaddr;
    long chrtaddr;
+   int ignore_apersand_ptr_ia_syms; 
 };
 
 typedef struct s_PDBfile PDBfile;
@@ -397,7 +408,7 @@ typedef struct s_dimind dimind;
 struct s_attribute {
    char *name;
    char *type;
-   byte **data;
+   lite_SC_byte **data;
    long size;
    long indx;
 };
@@ -442,30 +453,31 @@ typedef struct s_PD_image PD_image;
 /*                            PDBLIB VARIABLES                              */
 /*--------------------------------------------------------------------------*/
 
-LITE_API extern jmp_buf		_lite_PD_close_err ;
-LITE_API extern jmp_buf		_lite_PD_print_err ;
-LITE_API extern jmp_buf		_lite_PD_read_err ;
-LITE_API extern jmp_buf		_lite_PD_trace_err ;
-LITE_API extern char		lite_PD_err[] ;
-LITE_API extern int		lite_PD_buffer_size ;
-LITE_API extern int		lite_FORMAT_FIELDS ;
-LITE_API extern data_standard	lite_IEEEA_STD ;
-LITE_API extern data_standard	lite_IEEEB_STD ;
-LITE_API extern data_standard	lite_INTELA_STD ;
-LITE_API extern data_standard	lite_CRAY_STD ;
-LITE_API extern data_standard	lite_VAX_STD ;
-LITE_API extern data_standard	lite_DEF_STD ;
-LITE_API extern data_standard	*lite_INT_STANDARD ;
-LITE_API extern data_alignment	lite_M68000_ALIGNMENT ;
-LITE_API extern data_alignment 	lite_INTELA_ALIGNMENT ;
-LITE_API extern data_alignment 	lite_UNICOS_ALIGNMENT ;
-LITE_API extern data_alignment	lite_SPARC_ALIGNMENT ;
-LITE_API extern data_alignment	lite_RS6000_ALIGNMENT ;
-LITE_API extern data_alignment	lite_MIPS_ALIGNMENT ;
-LITE_API extern data_alignment 	lite_DEF_ALIGNMENT ;
-LITE_API extern data_alignment	*lite_INT_ALIGNMENT ;
-LITE_API extern ReaderFuncType	lite_pdb_rd_hook;
-LITE_API extern WriterFuncType	lite_pdb_wr_hook;
+extern jmp_buf		_lite_PD_close_err ;
+extern jmp_buf		_lite_PD_print_err ;
+extern jmp_buf		_lite_PD_read_err ;
+extern jmp_buf		_lite_PD_trace_err ;
+extern char		lite_PD_err[] ;
+extern int		lite_PD_buffer_size ;
+extern int		lite_FORMAT_FIELDS ;
+extern char*            lite_PD_DEF_CREATM;
+extern data_standard	lite_IEEEA_STD ;
+extern data_standard	lite_IEEEB_STD ;
+extern data_standard	lite_INTELA_STD ;
+extern data_standard	lite_CRAY_STD ;
+extern data_standard	lite_VAX_STD ;
+extern data_standard	lite_DEF_STD ;
+extern data_standard	*lite_INT_STANDARD ;
+extern data_alignment	lite_M68000_ALIGNMENT ;
+extern data_alignment 	lite_INTELA_ALIGNMENT ;
+extern data_alignment 	lite_UNICOS_ALIGNMENT ;
+extern data_alignment	lite_SPARC_ALIGNMENT ;
+extern data_alignment	lite_RS6000_ALIGNMENT ;
+extern data_alignment	lite_MIPS_ALIGNMENT ;
+extern data_alignment 	lite_DEF_ALIGNMENT ;
+extern data_alignment	*lite_INT_ALIGNMENT ;
+extern ReaderFuncType	lite_pdb_rd_hook ; /* NOT_LITE_API */
+extern WriterFuncType	lite_pdb_wr_hook ; /* NOT_LITE_API */
 
 
 /*--------------------------------------------------------------------------*/
@@ -474,32 +486,33 @@ LITE_API extern WriterFuncType	lite_pdb_wr_hook;
 
 LITE_API extern int	lite_PD_cd (PDBfile*,char*);
 LITE_API extern int	lite_PD_close (PDBfile*);
-LITE_API extern int	lite_PD_convert (char**,char**,char*,char*,long,
-					 data_standard*,data_standard*,
-					 data_standard*,long*,long*,HASHTAB*,
-					 HASHTAB*,int,int);
+LITE_API extern int	lite_PD_convert (char**,char**,char*,char*,long, data_standard*,data_standard*, data_standard*,long*,long*,HASHTAB*, HASHTAB*,int,int);
 LITE_API extern dimdes *lite_PD_copy_dims (dimdes*);
 LITE_API extern memdes *lite_PD_copy_members (memdes*);
 LITE_API extern syment *lite_PD_copy_syment (syment*);
 LITE_API extern defstr *lite_PD_defncv (PDBfile*,char*,long,int);
 LITE_API extern char *	lite_PD_dereference (char*);
 LITE_API extern void	lite_PD_error (char*,int);
-LITE_API extern byte *	lite_PD_get_attribute (PDBfile*,char*,char*);
+LITE_API extern lite_SC_byte *	lite_PD_get_attribute (PDBfile*,char*,char*);
 LITE_API extern long	lite_PD_hyper_number (PDBfile*,char*,syment*);
 LITE_API extern syment *lite_PD_inquire_entry (PDBfile*,char*,int,char*);
 LITE_API extern char **	lite_PD_ls (PDBfile*,char*,char*,int*);
 LITE_API extern PDBfile *lite_PD_open (char*,char*);
 LITE_API extern char *	lite_PD_pwd (PDBfile*);
-LITE_API extern int	lite_PD_read (PDBfile*,char*,byte*);
-LITE_API extern int	lite_PD_read_alt (PDBfile*,char*,byte*,long*);
-LITE_API extern int	lite_PD_read_as (PDBfile*,char*,char*,byte*);
-LITE_API extern int	lite_PD_read_as_alt (PDBfile*,char*,char*,byte*,long*);
+LITE_API extern int	lite_PD_read (PDBfile*,char*,lite_SC_byte*);
+LITE_API extern int	lite_PD_read_alt (PDBfile*,char*,lite_SC_byte*,long*);
+LITE_API extern int	lite_PD_read_as (PDBfile*,char*,char*,lite_SC_byte*);
+LITE_API extern int	lite_PD_read_as_alt (PDBfile*,char*,char*,lite_SC_byte*,long*);
 LITE_API extern defstr *lite_PD_typedef (PDBfile*,char*,char*);
-LITE_API extern int		_lite_PD_align (long,char*,HASHTAB*,int*);
-LITE_API extern void		_lite_PD_check_casts (HASHTAB*,char**,long);
-LITE_API extern void		_lite_PD_clr_table (HASHTAB*,FreeFuncType);
-LITE_API extern long		_lite_PD_comp_num (dimdes*);
-LITE_API extern int		_lite_PD_compare_std (data_standard*,data_standard*,
+/* added 26Feb08 as per request from Burl Hall */
+LITE_API extern int     lite_PD_entry_number (syment*); /* NOT_LITE_API */
+LITE_API extern long    lite_PD_get_file_length (PDBfile *file);
+
+extern int		_lite_PD_align (long,char*,HASHTAB*,int*);
+extern void		_lite_PD_check_casts (HASHTAB*,char**,long);
+extern void		_lite_PD_clr_table (HASHTAB*,FreeFuncType);
+extern long		_lite_PD_comp_num (dimdes*);
+extern int		_lite_PD_compare_std (data_standard*,data_standard*,
 					      data_alignment*,data_alignment*);
 LITE_API extern int		_lite_PD_convert (char**,char**,long,int,defstr*,
 					  defstr*,data_standard*,long*,long*);
@@ -521,10 +534,10 @@ LITE_API extern char *		_lite_PD_fixname (PDBfile*,char*);
 LITE_API extern long		_lite_PD_hyper_number (PDBfile*,char*,long,dimdes*,
 					       long*);
 LITE_API extern int		_lite_PD_hyper_read (PDBfile*,char*,char*,syment*,
-					     byte*);
+					     lite_SC_byte*);
 LITE_API extern void		_lite_PD_iconvert (char**,char**,long,long,int,long,
 					   int,int);
-LITE_API extern int		_lite_PD_indexed_read_as (PDBfile*,char*,char*,byte*,
+extern int		_lite_PD_indexed_read_as (PDBfile*,char*,char*,lite_SC_byte*,
 						  int,long*,syment*);
 LITE_API extern int		_lite_PD_indirection (char*);
 LITE_API extern void		_lite_PD_init_chrt (PDBfile*);
@@ -540,33 +553,33 @@ LITE_API extern char *		_lite_PD_member_type (char*);
 LITE_API extern data_alignment *	_lite_PD_mk_alignment (char*);
 LITE_API extern defstr *		_lite_PD_mk_defstr (char*,memdes*,long,int,int,int,
 					    int*,long*);
-LITE_API extern memdes *		_lite_PD_mk_descriptor (char*,int);
-LITE_API extern dimdes *		_lite_PD_mk_dimensions (long,long);
-LITE_API extern PDBfile *	_lite_PD_mk_pdb (char*);
-LITE_API extern data_standard *	_lite_PD_mk_standard (void);
-LITE_API extern syment *		_lite_PD_mk_syment (char*,long,long,symindir*,dimdes*);
-LITE_API extern int		_lite_PD_null_pointer (char*,int);
-LITE_API extern int		_lite_PD_pio_close (FILE*);
-LITE_API extern int		_lite_PD_pio_printf (FILE*,char*,...);
-LITE_API extern int		_lite_PD_pio_seek (FILE*,long,int);
-LITE_API extern int		_lite_PD_prim_typep (char*,HASHTAB*,int);
-LITE_API extern int		_lite_PD_rd_chrt (PDBfile*);
-LITE_API extern int		_lite_PD_rd_extras (PDBfile*);
-LITE_API extern int		_lite_PD_rd_format (PDBfile*);
-LITE_API extern int		_lite_PD_rd_itag (PDBfile*,PD_itag*);
-LITE_API extern void		_lite_PD_rd_prim_extras (PDBfile*,int,int,char*);
-LITE_API extern long		_lite_PD_rd_syment (PDBfile*,syment*,char*,byte*);
-LITE_API extern int		_lite_PD_rd_symt (PDBfile*);
-LITE_API extern char *		_lite_PD_rfgets (char*,int,FILE*);
-LITE_API extern void		_lite_PD_rl_alignment (data_alignment*);
-LITE_API extern void		_lite_PD_rl_defstr (defstr*);
-LITE_API extern void		_lite_PD_rl_descriptor (memdes*);
-LITE_API extern void		_lite_PD_rl_dimensions (dimdes*);
-LITE_API extern void		_lite_PD_rl_pdb (PDBfile*);
-LITE_API extern void		_lite_PD_rl_standard (data_standard*);
-LITE_API extern void		_lite_PD_rl_syment (syment*);
-LITE_API extern void		_lite_PD_rl_syment_d (syment*);
-LITE_API extern void		_lite_PD_setup_chart (HASHTAB*,data_standard*,
+extern memdes *		_lite_PD_mk_descriptor (char*,int);
+extern dimdes *		_lite_PD_mk_dimensions (long,long);
+extern PDBfile *	_lite_PD_mk_pdb (char*, const char*);
+extern data_standard *	_lite_PD_mk_standard (void);
+extern syment *		_lite_PD_mk_syment (char*,long,long,symindir*,dimdes*);
+extern int		_lite_PD_null_pointer (char*,int);
+extern int		_lite_PD_pio_close (FILE*);
+extern int		_lite_PD_pio_printf (FILE*,char*,...);
+extern int		_lite_PD_pio_seek (FILE*,long,int);
+extern int		_lite_PD_prim_typep (char*,HASHTAB*,int);
+extern int		_lite_PD_rd_chrt (PDBfile*);
+extern int		_lite_PD_rd_extras (PDBfile*);
+extern int		_lite_PD_rd_format (PDBfile*);
+extern int		_lite_PD_rd_itag (PDBfile*,PD_itag*);
+extern void		_lite_PD_rd_prim_extras (PDBfile*,int,int,char*);
+extern long		_lite_PD_rd_syment (PDBfile*,syment*,char*,lite_SC_byte*);
+extern int		_lite_PD_rd_symt (PDBfile*);
+extern char *		_lite_PD_rfgets (char*,int,FILE*);
+extern void		_lite_PD_rl_alignment (data_alignment*);
+extern void		_lite_PD_rl_defstr (defstr*);
+extern void		_lite_PD_rl_descriptor (memdes*);
+extern void		_lite_PD_rl_dimensions (dimdes*);
+extern void		_lite_PD_rl_pdb (PDBfile*);
+extern void		_lite_PD_rl_standard (data_standard*);
+extern void		_lite_PD_rl_syment (syment*);
+extern void		_lite_PD_rl_syment_d (syment*);
+extern void		_lite_PD_setup_chart (HASHTAB*,data_standard*,
 					      data_standard*,data_alignment*,
 					      data_alignment*,int);
 LITE_API extern long		_lite_PD_skip_over (PDBfile*,long,int);
@@ -574,48 +587,50 @@ LITE_API extern long		_lite_PD_str_size (memdes*,HASHTAB*);
 LITE_API extern int		_lite_PD_unp_bits (char*,char*,int,int,int,int,long,
 					   long);
 
-/* added 26Feb08 as per request from Burl Hall */
-LITE_API extern int     lite_PD_entry_number(syment*);
-LITE_API extern long    lite_PD_get_file_length(PDBfile *file);
-
 LITE_API extern char            *lite_PD_SYMENT_S;
 LITE_API extern char            *lite_PD_DEFSTR_S;
 
 #ifdef PDB_WRITE
 LITE_API extern int	lite_PD_mkdir (PDBfile*,char*);
-LITE_API extern int	lite_PD_write (PDBfile*,char*,char*,byte*);
-LITE_API extern int	lite_PD_write_as (PDBfile*,char*,char*,char*,byte*);
-LITE_API extern int	lite_PD_write_alt (PDBfile*,char*,char*,byte*,int,
-			 		   long*);
-LITE_API extern int	lite_PD_write_as_alt (PDBfile*,char*,char*,char*,byte*,
-					      int,long*);
+LITE_API extern int	lite_PD_write (PDBfile*,char*,char*,lite_SC_byte*);
+LITE_API extern int	lite_PD_write_as (PDBfile*,char*,char*,char*,lite_SC_byte*);
+LITE_API extern int	lite_PD_write_alt (PDBfile*,char*,char*,lite_SC_byte*,int, long*);
+LITE_API extern int	lite_PD_write_as_alt (PDBfile*,char*,char*,char*,lite_SC_byte*, int,long*);
 LITE_API extern PDBfile *lite_PD_create (char*);
-LITE_API extern int		_lite_PD_adj_dimensions (PDBfile*,char*,syment*);
-LITE_API extern int		_lite_PD_add_block (PDBfile*,syment*,dimdes*);
-LITE_API extern int		_lite_PD_hyper_write (PDBfile*,char*,syment*,byte*,
-					      char*);
-LITE_API extern void		_lite_PD_convert_attrtab (PDBfile*);
-LITE_API extern int		_lite_PD_wr_format (PDBfile*);
 LITE_API extern defstr *lite_PD_defstr (PDBfile*,char*,...);
 LITE_API extern int	lite_PD_cast (PDBfile*,char*,char*,char*);
-LITE_API extern int		_lite_PD_extend_file (PDBfile*,long);
-LITE_API extern long		_lite_PD_wr_syment (PDBfile*,char*,long,char*,char*);
-LITE_API extern long		_lite_PD_number_refd (byte*,char*,HASHTAB*);
-LITE_API extern int		_lite_PD_wr_itag (PDBfile*,long,char*,long,int);
-LITE_API extern void		_lite_PD_eod (PDBfile*);
 LITE_API extern int	lite_PD_target (data_standard*,data_alignment*);
 LITE_API extern int	lite_PD_flush (PDBfile*);
-LITE_API extern long		_lite_PD_wr_chrt (PDBfile*);
-LITE_API extern long		_lite_PD_wr_symt (PDBfile*);
-LITE_API extern int		_lite_PD_wr_extras (PDBfile*);
-LITE_API extern int		_lite_PD_rev_chrt (PDBfile*);
-LITE_API extern void		_lite_PD_wr_prim_extras (FILE*,HASHTAB*,int,int);
+LITE_API extern syment	*lite_PD_defent (PDBfile*,char*,char*,long,dimdes*);
 LITE_API extern syment 	*lite_PD_defent_alt (PDBfile*,char*,char*,int,long*);
-LITE_API extern syment		*_lite_PD_defent (PDBfile*,char*,char*,long,dimdes*);
-
 /* added 26Feb08 as per request from Burl Hall */
-LITE_API extern int      lite_PD_append_alt(PDBfile*,char*,void*,int,long*);
-LITE_API extern void     lite_PD_set_major_order(PDBfile*,int);
+LITE_API extern void     lite_PD_set_major_order (PDBfile*,int); /* NOT_LITE_API */
+LITE_API extern int      lite_PD_append_alt (PDBfile*,char*,void*,int,long*);
+/* added 08May12 to compile pdbtst.c */
+LITE_API extern int      lite_PD_append(PDBfile *file, char *name, void *vr);
+LITE_API extern int      lite_PD_append_as(PDBfile *file, char *name, char *intype, void *vr);
+LITE_API extern int      lite_PD_append_as_alt(PDBfile *file, char *name, char *intype, void *vr, int nd, long *ind);
+
+extern int		_lite_PD_adj_dimensions (PDBfile*,char*,syment*);
+extern int		_lite_PD_add_block (PDBfile*,syment*,dimdes*);
+extern int		_lite_PD_hyper_write (PDBfile*,char*,syment*,lite_SC_byte*, char*);
+extern void		_lite_PD_convert_attrtab (PDBfile*);
+extern int		_lite_PD_wr_format (PDBfile*);
+extern int		_lite_PD_extend_file (PDBfile*,long);
+extern long		_lite_PD_wr_syment (PDBfile*,char*,long,char*,char*);
+extern long		_lite_PD_number_refd (lite_SC_byte*,char*,HASHTAB*);
+extern int		_lite_PD_wr_itag (PDBfile*,long,char*,long,int);
+extern void		_lite_PD_eod (PDBfile*);
+extern long		_lite_PD_wr_chrt (PDBfile*);
+extern long		_lite_PD_wr_symt (PDBfile*);
+extern int		_lite_PD_wr_extras (PDBfile*);
+extern int		_lite_PD_rev_chrt (PDBfile*);
+extern void		_lite_PD_wr_prim_extras (FILE*,HASHTAB*,int,int);
+
 #endif /* PDB_WRITE */
    
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* !_PDB_H */

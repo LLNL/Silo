@@ -56,10 +56,14 @@
 noinst_LTLIBRARIES = libsilo_score.la
 libsilo_score_la_SOURCES = $(FILES)
 
-AM_CPPFLAGS = -I$(top_srcdir)/src/silo
+if INSTALL_LITE_HEADERS
+include_HEADERS = lite_score.h
+endif
 
-noinst_HEADERS = \
- score.h
+noinst_HEADERS = score.h
+
+CLEANFILES = lite_score.h
+
 
 FILES = \
  memmove.c \
@@ -67,3 +71,11 @@ FILES = \
  scctl.c \
  schash.c \
  scstr.c
+
+lite_score.h: score.h
+	@cp $< $@
+	@rm -f lite_score_funcs.tmp
+	@grep lite_ $@ | grep extern | grep -v _lite | grep -v NOT_LITE_API | tr '\t' ' ' | tr -s ' ' | sed -e 's@^\(.*\)[ *]*lite_\([a-zA-Z0-9_]*\) *[(;]\(.*\)@#define \2 lite_\2@' > lite_score_funcs.tmp
+	@sed -i '/INSERT FUNCTION NAME MAPPING MACROS HERE/ r lite_score_funcs.tmp' $@
+	@rm -f lite_score_funcs.tmp
+	@sed -i -e 's|^#ifndef _SCORE_H|#ifndef _LITE_SCORE_H|' -e 's|^#define _SCORE_H|#define _LITE_SCORE_H|' -e 's|^#include "config.h"||' $@

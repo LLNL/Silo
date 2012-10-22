@@ -135,6 +135,7 @@ int Silo_version_4_8_pre2;
 int Silo_version_4_8_pre3;
 int Silo_version_4_8_pre4;
 int Silo_version_4_8_pre5;
+int Silo_version_4_8;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -2257,6 +2258,18 @@ db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate)
         }
     }
     return -1;
+}
+
+INTERNAL int
+db_num_registered_files()
+{
+    int i;
+    int cnt = 0;
+    for (i = 0; i < DB_NFILES; i++)
+    {
+        if (_db_regstatus[i].f) cnt++;
+    }
+    return cnt;
 }
 
 /*-------------------------------------------------------------------------

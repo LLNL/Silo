@@ -49,8 +49,16 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
+#ifdef PDB_LITE
+#include <lite_score.h>
+#include <lite_pdb.h>
+#else
 #include <score.h>
 #include <pdb.h>
+#endif
+
+#include <stdlib.h>
+#include <string.h>
 
 char *safe_strdup(const char *);
 
@@ -127,9 +135,9 @@ ReadFile (char *filename, char *name)
     float     fval;
 
     /*
-     * Open the file.
+     * Open the file. Test additional open mode chars
      */
-    if ((file = lite_PD_open(filename, "r")) == NULL)
+    if ((file = PD_open(filename, "rli")) == NULL)
     {
         printf("Error opening file.\n");
         exit(-1);
@@ -139,7 +147,7 @@ ReadFile (char *filename, char *name)
      * Read some variables and print their results.
      */
     printf("reading group\n");
-    lite_PD_read(file, name, &group);
+    PD_read(file, name, &group);
     printf("group->name = %s\n", group->name);
     printf("group->type = %s\n", group->type);
     printf("group->ncomponents = %d\n", group->ncomponents);
@@ -158,13 +166,13 @@ ReadFile (char *filename, char *name)
 
     printf("reading group->name\n");
     sprintf(str, "%s->name", name);
-    lite_PD_read(file, str, &cptr);
+    PD_read(file, str, &cptr);
     printf("%s->name = %s\n", name, cptr);
     SFREE(cptr);
 
     printf("reading group->comp_names\n");
     sprintf(str, "%s->comp_names", name);
-    lite_PD_read(file, str, &ccptr);
+    PD_read(file, str, &ccptr);
     printf("%s->comp_names[0] = %s\n", name, ccptr[0]);
     for (i = 0; i < 17; i++)
        SFREE(ccptr[i]);
@@ -172,28 +180,28 @@ ReadFile (char *filename, char *name)
 
     printf("reading group->comp_names[1]\n");
     sprintf(str, "%s->comp_names[1]", name);
-    lite_PD_read(file, str, &cptr);
+    PD_read(file, str, &cptr);
     printf("%s->comp_names[1] = %s\n", name, cptr);
     SFREE(cptr);
 
     printf("reading group->comp_names[1][2:4]\n");
     sprintf(str, "%s->comp_names[1][2:4]", name);
-    lite_PD_read(file, str, &carray);
+    PD_read(file, str, &carray);
     carray[3] = '\0';
     printf("%s->comp_names[1][2:4] = %s\n", name, carray);
 
     printf("reading coord0\n");
-    lite_PD_read(file, "coord0", farray);
+    PD_read(file, "coord0", farray);
     printf("coord0[4] = %g\n", farray[4]);
 
     printf("reading coord0(0, 3)\n");
-    lite_PD_read(file, "coord0(0, 3)", &fval);
+    PD_read(file, "coord0(0, 3)", &fval);
     printf("coord0(0, 3) = %g\n", fval);
 
     /*
      * Close the file.
      */
-    lite_PD_close(file);
+    PD_close(file);
 
     return;
 }
@@ -218,7 +226,7 @@ CreateFile (char *filename, char *name, char *type, int num,
     /*
      * Create a file.
      */
-    if ((file = lite_PD_create(filename)) == NULL)
+    if ((file = PD_create(filename)) == NULL)
     {
         printf("Error creating file.\n");
         exit(-1);
@@ -230,7 +238,7 @@ CreateFile (char *filename, char *name, char *type, int num,
     null_ptr  = FMAKE(int, "NULL");
     *null_ptr = 0;
 
-    if (lite_PD_defstr(file, "Group",
+    if (PD_defstr(file, "Group",
                        "char    *name",
                        "char    *type",
                        "char    **comp_names",
@@ -265,7 +273,7 @@ CreateFile (char *filename, char *name, char *type, int num,
     /*
      * Write the group.
      */
-    if (lite_PD_write(file, name, "Group *", &group) == 0)
+    if (PD_write(file, name, "Group *", &group) == 0)
     {
         printf("Error writing group.\n");
         exit(-1);
@@ -296,7 +304,7 @@ CreateFile (char *filename, char *name, char *type, int num,
     ind[3] = 0;
     ind[4] = 9;
     ind[5] = 1;
-    if (lite_PD_write_alt(file, "coord0", "float", coord0, 2, ind) == 0)
+    if (PD_write_alt(file, "coord0", "float", coord0, 2, ind) == 0)
     {
         printf("Error writing array.\n");
         exit(-1);
@@ -307,7 +315,7 @@ CreateFile (char *filename, char *name, char *type, int num,
     /*
      * Close the file.
      */
-    lite_PD_close(file);
+    PD_close(file);
 
     return;
 }

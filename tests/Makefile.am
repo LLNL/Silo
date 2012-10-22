@@ -122,18 +122,22 @@ AM_CPPFLAGS = \
  -I$(builddir)/../src/silo \
  -I$(srcdir)/../src/silo \
  -I$(includedir)
-quad_CPPFLAGS = $(AM_CPPFLAGS)
-TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
+#quad_CPPFLAGS = $(AM_CPPFLAGS)
+if INSTALL_LITE_HEADERS
+testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+endif
+#TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 
-HDF5PROGS=compression grab
+HDF5PROGS=compression grab mk_nasf_h5
 FCPROGS= arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
-      TestReadMask twohex multispec sami specmix spec cpz1plt spec \
+      TestReadMask twohex multispec sami specmix spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
-      mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff
+      mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
+      pdbtst
 
 dir_SOURCES = \
  dir.c \
@@ -172,6 +176,7 @@ check_PROGRAMS = \
  multispec \
  specmix \
  testpdb \
+ pdbtst \
  sami \
  spec \
  cpz1plt \
@@ -272,6 +277,8 @@ if HDF5_DRV_NEEDED
   compression_LDADD = $(LDADD)
   grab_SOURCES = grab.c
   grab_LDADD = $(LDADD)
+  mk_nasf_h5_SOURCES = mk_nasf_h5.c
+  mk_nasf_h5_LDADD = $(LDADD)
 endif
 
 if FORTRAN_NEEDED

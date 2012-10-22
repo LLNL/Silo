@@ -49,15 +49,16 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
-#define H5_USE_16_API
-#include <hdf5.h>
+#include <pdb.h>
 
 int main()
 {
-    hid_t f = H5Fcreate("not_a_silo_file.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
-    hid_t g1 = H5Gcreate(f, "dir1", 0);
-    hid_t g2 = H5Gcreate(g1, "dir2", 0);
-    H5Fclose(f);
-    H5close();
+    int foo[10] = {0,1,2,3,4,5,6,7,8,9};
+    PDBfile *f = lite_PD_open("not_a_silo_file.pdb", "w");
+    lite_PD_mkdir(f, "dir1");
+    lite_PD_mkdir(f, "dir2");
+    lite_PD_cd(f, "dir2");
+    lite_PD_write(f, "foo(10)", "integer", foo);
+    lite_PD_close(f);
     return 0;
 }

@@ -1827,15 +1827,17 @@ db_hdf5_put_cmemb(hid_t compound_type, char const *name, size_t offset,
  *
  *-------------------------------------------------------------------------
  */
+static int T_str_stype_set = 0;
 PRIVATE hid_t
 T_str(char *s)
 {
     static hid_t        stype = -1;
 
     if (!s || !*s) return -1;
-    if (stype>=0) H5Tclose(stype);
+    if (T_str_stype_set && stype>=0) H5Tclose(stype);
     stype = H5Tcopy(H5T_C_S1);
     H5Tset_size(stype, strlen(s)+1);
+    T_str_stype_set = 1;
     return stype;
 }
 
@@ -1930,9 +1932,13 @@ hdf5_to_silo_error(char const *vname, char const *fname)
 PRIVATE void
 db_hdf5_init(void)
 {
-    static int          ncalls;
 
+#if !(HDF5_VERSION_GE(1,8,4) && !HDF5_VERSION_GE(1,8,5))
+    static int          ncalls;
     if (ncalls++) return;               /*already initialized*/
+#else
+    H5open();
+#endif
 
     /* Turn off error messages from the hdf5 library */
     if (SILO_Globals._db_err_level_drvr == DB_ALL)
@@ -5515,6 +5521,15 @@ db_hdf5_Close(DBfile *_dbfile)
             silo_db_close(_dbfile);
         } END_PROTECT;
     }
+
+    /* work-around leaks in HDF5, version 1.8.4 only */
+#if HDF5_VERSION_GE(1,8,4) && !HDF5_VERSION_GE(1,8,5)
+    if (db_num_registered_files() == 0)
+    {
+        T_str_stype_set = 0;
+        H5close();
+    }
+#endif
 
     return retval;
 }

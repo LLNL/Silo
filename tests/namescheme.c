@@ -197,6 +197,7 @@ int main(int argc, char **argv)
         DBStringArrayToStringList(N, 3, &strList, &strListLen);
         dims[0] = strListLen;
         DBWrite(dbfile, "Noodle", strList, dims, 1, DB_CHAR);
+        free(strList);
         DBSetDir(dbfile, "..");
 
         DBMkDir(dbfile, "dir_1");
@@ -231,6 +232,7 @@ int main(int argc, char **argv)
         if (strcmp(DBGetName(ns, 21), "foo_105x001") != 0)
             return 1;
         DBFreeNamescheme(ns);
+        free(ns1r);
 
         DBSetDir(dbfile, "/dir_2/dir_3");
         ns2r = DBGetVar(dbfile, "ns2");
@@ -243,6 +245,7 @@ int main(int argc, char **argv)
         if (strcmp(DBGetName(ns, 6), "foo_red") != 0)
             return 1;
         DBFreeNamescheme(ns);
+        free(ns2r);
 
         DBClose(dbfile);
     }

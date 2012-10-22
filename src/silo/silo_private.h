@@ -833,6 +833,7 @@ typedef struct db_PathnameTag            db_Pathname;
 INTERNAL context_t *context_switch (DBfile *, char const *, char const **);
 INTERNAL int context_restore (DBfile *, context_t *);
 INTERNAL DBfile *silo_db_close (DBfile *);
+INTERNAL int db_num_registered_files();
 INTERNAL DBtoc *db_AllocToc (void);
 INTERNAL int db_FreeToc (DBfile *);
 INTERNAL int db_GetMachDataSize (int);

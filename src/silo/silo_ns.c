@@ -397,8 +397,8 @@ DBMakeNamescheme(const char *fmt, ...)
         void *dummy;
 
         rv->arrnames = (char **) calloc(rv->narrefs, sizeof(char*));
-        rv->arrvals  = (void *) calloc(rv->narrefs, sizeof(void*));
-        rv->arrsizes = (int *) calloc(rv->narrefs, sizeof(int));
+        rv->arrvals  = (void **) calloc(rv->narrefs, sizeof(void*));
+        rv->arrsizes =   (int *) calloc(rv->narrefs, sizeof(int));
 
         /* If we have non-zero ext. array references, then we may have the case of
            '0, DBfile*'. So, check for that now */
@@ -473,11 +473,6 @@ DBMakeNamescheme(const char *fmt, ...)
     va_end(ap);
 
     return rv;
-}
-
-PUBLIC DBnamescheme *
-DBMakeNameschemeWithArrays(DBfile *dbfile, const char *fmt)
-{
 }
 
 PUBLIC const char *

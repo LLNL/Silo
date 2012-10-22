@@ -154,7 +154,7 @@ am__EXEEXT_3 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
 	testallf77$(EXEEXT)
 @FORTRAN_NEEDED_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
 TestReadMask_SOURCES = TestReadMask.c
-TestReadMask_OBJECTS = TestReadMask-TestReadMask.$(OBJEXT)
+TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
 TestReadMask_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@TestReadMask_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@TestReadMask_DEPENDENCIES = ../src/libsiloh5.la
@@ -261,6 +261,10 @@ merge_block_OBJECTS = merge_block.$(OBJEXT)
 merge_block_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@merge_block_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@merge_block_DEPENDENCIES = ../src/libsiloh5.la
+am__mk_nasf_h5_SOURCES_DIST = mk_nasf_h5.c
+@HDF5_DRV_NEEDED_TRUE@am_mk_nasf_h5_OBJECTS = mk_nasf_h5.$(OBJEXT)
+mk_nasf_h5_OBJECTS = $(am_mk_nasf_h5_OBJECTS)
+@HDF5_DRV_NEEDED_TRUE@mk_nasf_h5_DEPENDENCIES = $(LDADD)
 mk_nasf_pdb_SOURCES = mk_nasf_pdb.c
 mk_nasf_pdb_OBJECTS = mk_nasf_pdb.$(OBJEXT)
 mk_nasf_pdb_LDADD = $(LDADD)
@@ -321,6 +325,11 @@ partial_io_OBJECTS = partial_io.$(OBJEXT)
 partial_io_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@partial_io_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@partial_io_DEPENDENCIES = ../src/libsiloh5.la
+pdbtst_SOURCES = pdbtst.c
+pdbtst_OBJECTS = pdbtst.$(OBJEXT)
+pdbtst_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@pdbtst_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@pdbtst_DEPENDENCIES = ../src/libsiloh5.la
 point_SOURCES = point.c
 point_OBJECTS = point.$(OBJEXT)
 point_LDADD = $(LDADD)
@@ -336,7 +345,7 @@ polyzl_OBJECTS = polyzl.$(OBJEXT)
 polyzl_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@polyzl_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@polyzl_DEPENDENCIES = ../src/libsiloh5.la
-am_quad_OBJECTS = quad-quad.$(OBJEXT) quad-testlib.$(OBJEXT)
+am_quad_OBJECTS = quad.$(OBJEXT) testlib.$(OBJEXT)
 quad_OBJECTS = $(am_quad_OBJECTS)
 quad_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@quad_DEPENDENCIES = ../src/libsilo.la
@@ -400,7 +409,7 @@ testfs_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@testfs_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@testfs_DEPENDENCIES = ../src/libsiloh5.la
 testpdb_SOURCES = testpdb.c
-testpdb_OBJECTS = testpdb.$(OBJEXT)
+testpdb_OBJECTS = testpdb-testpdb.$(OBJEXT)
 testpdb_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@testpdb_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@testpdb_DEPENDENCIES = ../src/libsiloh5.la
@@ -489,9 +498,9 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
 	$(matf77_SOURCES) $(nodist_EXTRA_matf77_SOURCES) \
 	$(nodist_EXTRA_merge_block_SOURCES) merge_block.c \
-	$(nodist_EXTRA_mk_nasf_pdb_SOURCES) mk_nasf_pdb.c \
-	$(nodist_EXTRA_mmadjacency_SOURCES) mmadjacency.c \
-	$(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
+	$(mk_nasf_h5_SOURCES) $(nodist_EXTRA_mk_nasf_pdb_SOURCES) \
+	mk_nasf_pdb.c $(nodist_EXTRA_mmadjacency_SOURCES) \
+	mmadjacency.c $(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
 	$(nodist_EXTRA_multi_test_SOURCES) multi_test.c \
 	$(nodist_EXTRA_multispec_SOURCES) multispec.c \
 	$(nodist_EXTRA_namescheme_SOURCES) namescheme.c \
@@ -500,7 +509,7 @@ SOURCES = $(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_oneprism_SOURCES) oneprism.c \
 	$(nodist_EXTRA_onepyramid_SOURCES) onepyramid.c \
 	$(nodist_EXTRA_onetet_SOURCES) onetet.c \
-	$(nodist_EXTRA_partial_io_SOURCES) partial_io.c \
+	$(nodist_EXTRA_partial_io_SOURCES) partial_io.c pdbtst.c \
 	$(nodist_EXTRA_point_SOURCES) point.c $(pointf77_SOURCES) \
 	$(nodist_EXTRA_pointf77_SOURCES) \
 	$(nodist_EXTRA_polyzl_SOURCES) polyzl.c $(quad_SOURCES) \
@@ -529,10 +538,11 @@ DIST_SOURCES = TestReadMask.c alltypes.c arbpoly.c arbpoly2d.c array.c \
 	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
 	efcentering.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
 	ioperf.c largefile.c listtypes.c mat3d_3across.c \
-	$(am__matf77_SOURCES_DIST) merge_block.c mk_nasf_pdb.c \
-	mmadjacency.c multi_file.c multi_test.c multispec.c \
-	namescheme.c obj.c onehex.c oneprism.c onepyramid.c onetet.c \
-	partial_io.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
+	$(am__matf77_SOURCES_DIST) merge_block.c \
+	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
+	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
+	onehex.c oneprism.c onepyramid.c onetet.c partial_io.c \
+	pdbtst.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
 	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) readstuff.c \
 	$(rocket_SOURCES) sami.c simple.c spec.c specmix.c subhex.c \
 	testall.c $(am__testallf77_SOURCES_DIST) testfs.c testpdb.c \
@@ -812,18 +822,19 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/silo \
  -I$(includedir)
 
-quad_CPPFLAGS = $(AM_CPPFLAGS)
-TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
+#quad_CPPFLAGS = $(AM_CPPFLAGS)
+@INSTALL_LITE_HEADERS_TRUE@testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+#TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
-HDF5PROGS = compression grab
+HDF5PROGS = compression grab mk_nasf_h5
 FCPROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
-	TestReadMask twohex multispec sami specmix spec cpz1plt spec \
-	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
-	csg rocket mmadjacency largefile version namescheme \
-	efcentering mk_nasf_pdb ioperf arbpoly arbpoly2d readstuff \
-	$(am__append_1) $(am__append_3)
+	TestReadMask twohex multispec sami specmix spec cpz1plt \
+	group_test listtypes alltypes wave multi_file polyzl csg \
+	rocket mmadjacency largefile version namescheme efcentering \
+	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
+	merge_block pdbtst $(am__append_1) $(am__append_3)
 dir_SOURCES = \
  dir.c \
  testlib.c
@@ -908,6 +919,8 @@ ioperf_LDFLAGS = -ldl
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
 @HDF5_DRV_NEEDED_TRUE@grab_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_TRUE@mk_nasf_h5_SOURCES = mk_nasf_h5.c
+@HDF5_DRV_NEEDED_TRUE@mk_nasf_h5_LDADD = $(LDADD)
 @FORTRAN_NEEDED_TRUE@arrayf77_SOURCES = arrayf77.f
 @FORTRAN_NEEDED_TRUE@arrayf77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@curvef77_SOURCES = curvef77.f
@@ -1140,8 +1153,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-TestReadMask.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask-dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alltypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly2d.Po@am__quote@
@@ -1160,6 +1172,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge_block.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_h5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_pdb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmadjacency.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multi_file.Po@am__quote@
@@ -1172,11 +1185,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onepyramid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onetet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partial_io.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdbtst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polyzl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-dummy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-quad.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad-testlib.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readstuff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket-dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket-rocket.Po@am__quote@
@@ -1188,7 +1200,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testall.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testlib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpdb-dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpdb-testpdb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/twohex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucd1d.Po@am__quote@
@@ -1222,14 +1235,14 @@ TestReadMask-TestReadMask.o: TestReadMask.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/TestReadMask-TestReadMask.Tpo $(DEPDIR)/TestReadMask-TestReadMask.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='TestReadMask.c' object='TestReadMask-TestReadMask.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o TestReadMask-TestReadMask.o `test -f 'TestReadMask.c' || echo '$(srcdir)/'`TestReadMask.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testpdb-testpdb.o `test -f 'testpdb.c' || echo '$(srcdir)/'`testpdb.c
 
 TestReadMask-TestReadMask.obj: TestReadMask.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT TestReadMask-TestReadMask.obj -MD -MP -MF $(DEPDIR)/TestReadMask-TestReadMask.Tpo -c -o TestReadMask-TestReadMask.obj `if test -f 'TestReadMask.c'; then $(CYGPATH_W) 'TestReadMask.c'; else $(CYGPATH_W) '$(srcdir)/TestReadMask.c'; fi`
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/TestReadMask-TestReadMask.Tpo $(DEPDIR)/TestReadMask-TestReadMask.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='TestReadMask.c' object='TestReadMask-TestReadMask.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TestReadMask_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o TestReadMask-TestReadMask.obj `if test -f 'TestReadMask.c'; then $(CYGPATH_W) 'TestReadMask.c'; else $(CYGPATH_W) '$(srcdir)/TestReadMask.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testpdb-testpdb.obj `if test -f 'testpdb.c'; then $(CYGPATH_W) 'testpdb.c'; else $(CYGPATH_W) '$(srcdir)/testpdb.c'; fi`
 
 quad-quad.o: quad.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(quad_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT quad-quad.o -MD -MP -MF $(DEPDIR)/quad-quad.Tpo -c -o quad-quad.o `test -f 'quad.c' || echo '$(srcdir)/'`quad.c
@@ -1335,6 +1348,20 @@ rocket-dummy.obj: dummy.cxx
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='rocket-dummy.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+
+testpdb-dummy.o: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT testpdb-dummy.o -MD -MP -MF $(DEPDIR)/testpdb-dummy.Tpo -c -o testpdb-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/testpdb-dummy.Tpo $(DEPDIR)/testpdb-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='testpdb-dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o testpdb-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+
+testpdb-dummy.obj: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT testpdb-dummy.obj -MD -MP -MF $(DEPDIR)/testpdb-dummy.Tpo -c -o testpdb-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/testpdb-dummy.Tpo $(DEPDIR)/testpdb-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='testpdb-dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o testpdb-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
 
 .cxx.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

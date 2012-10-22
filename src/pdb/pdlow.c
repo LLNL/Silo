@@ -414,6 +414,9 @@ _lite_PD_compare_std (data_standard *a, data_standard *b,
  *    Remove unnecessary calls to lite_SC_mark, since reference count now
  *    set when allocated.
  *
+ *    Mark C. Miller, Fri Apr 13 22:40:59 PDT 2012
+ *    Ignore symbols of the form "/&ptrs/ia_######" when controlling
+ *    flag is set.
  *-------------------------------------------------------------------------
  */
 int
@@ -468,6 +471,8 @@ _lite_PD_rd_symt (PDBfile *file) {
 
          prev = next;
       }
+      if (file->ignore_apersand_ptr_ia_syms &&
+          strstr(name, "/&ptrs/ia_")) continue;
       ep = _lite_PD_mk_syment(type, numb, addr, NULL, dims);
       _lite_PD_e_install(name, ep, tab);
    }

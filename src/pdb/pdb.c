@@ -101,12 +101,13 @@ char		lite_PD_err[MAXLINE];
 int		lite_PD_buffer_size = -1;
 ReaderFuncType	lite_pdb_rd_hook = NULL;
 WriterFuncType	lite_pdb_wr_hook = NULL;
+char           *lite_PD_DEF_CREATM = "w";
 
 #ifdef PDB_WRITE
 static int	_append_flag = FALSE ;
 data_standard	*lite_REQ_STANDARD = NULL;
 data_alignment	*lite_REQ_ALIGNMENT = NULL;
-static syment *	_PD_write (PDBfile*,char*,char*,char*,byte*,dimdes*,int);
+static syment *	_PD_write (PDBfile*,char*,char*,char*,lite_SC_byte*,dimdes*,int);
 #endif /* PDB_WRITE */
 
 
@@ -266,6 +267,13 @@ lite_PD_error(char *s, int n) {
  *	Added write capability back into the function, but it is protected
  *	with #ifdef PDB_WRITE.
  *
+ *      Mark C. Miller, Fri Apr 13 22:37:56 PDT 2012
+ *      Changed mode string checks to strchr to accomodate wider variety
+ *      of mode characters for new hash table size and open modes.
+ *
+ *      Mark C. Miller, Thu Jun 14 13:25:02 PDT 2012
+ *      Remove call to io_close in ABORT case. The file pointer may not
+ *      have been properly initialized.
  *-------------------------------------------------------------------------
  */
 PDBfile *
@@ -280,9 +288,9 @@ lite_PD_open (char *name, char *mode) {
    /*
     * If opened in write mode use PD_CREATE instead.
     */
-   if (*mode == 'w') return lite_PD_create (name);
+   if (strchr(mode,'w')) return lite_PD_create (name);
 #else
-   assert (!strcmp(mode,"r")) ;
+   assert (!strchr(mode,'r')) ;
 #endif
 
    switch (setjmp(_lite_PD_open_err)) {
@@ -304,7 +312,7 @@ lite_PD_open (char *name, char *mode) {
 #ifdef PDB_WRITE
    fp = io_open(str, BINARY_MODE_RPLUS);
    if (fp == NULL) {
-      if (*mode == 'r') {
+      if (strchr(mode,'r')) {
 #endif
 	 fp = io_open(str, BINARY_MODE_R);
 	 if (fp == NULL) {
@@ -312,7 +320,7 @@ lite_PD_open (char *name, char *mode) {
 			  PD_OPEN);
 	 }
 #ifdef PDB_WRITE
-      } else if (*mode == 'a') {
+      } else if (strchr(mode,'a')) {
 	 return lite_PD_create (name);
       } else {
 	 lite_PD_error("CAN'T OPEN FILE - PD_OPEN", PD_OPEN);
@@ -326,13 +334,13 @@ lite_PD_open (char *name, char *mode) {
       }
    }
 
-   file = _lite_PD_mk_pdb(str);
+   file = _lite_PD_mk_pdb(str, mode);
    if (file == NULL) {
       lite_PD_error("CAN'T ALLOCATE PDBFILE - PD_OPEN", PD_OPEN);
    }
    file->stream = fp;
 #ifdef PDB_WRITE
-   if (*mode == 'a') file->mode = PD_APPEND;
+   if (strchr(mode,'a')) file->mode = PD_APPEND;
    else file->mode = PD_OPEN;
 #else
    file->mode = PD_OPEN ;
@@ -553,7 +561,7 @@ lite_PD_open (char *name, char *mode) {
  *-------------------------------------------------------------------------
  */
 int
-lite_PD_read (PDBfile *file, char *name, byte *vr) {
+lite_PD_read (PDBfile *file, char *name, lite_SC_byte *vr) {
 
    return lite_PD_read_as (file, name, NULL, vr);
 }
@@ -582,7 +590,7 @@ lite_PD_read (PDBfile *file, char *name, byte *vr) {
  *-------------------------------------------------------------------------
  */
 int
-lite_PD_read_alt (PDBfile *file, char *name, byte *vr, long *ind) {
+lite_PD_read_alt (PDBfile *file, char *name, lite_SC_byte *vr, long *ind) {
 
    return lite_PD_read_as_alt (file, name, NULL, vr, ind) ;
 }
@@ -610,7 +618,7 @@ lite_PD_read_alt (PDBfile *file, char *name, byte *vr, long *ind) {
  *-------------------------------------------------------------------------
  */
 int
-lite_PD_read_as (PDBfile *file, char *name, char *type, byte *vr) {
+lite_PD_read_as (PDBfile *file, char *name, char *type, lite_SC_byte *vr) {
 
    int		err;
    syment	*ep;
@@ -671,7 +679,7 @@ lite_PD_read_as (PDBfile *file, char *name, char *type, byte *vr) {
  *-------------------------------------------------------------------------
  */
 int
-lite_PD_read_as_alt (PDBfile *file, char *name, char *type, byte *vr,
+lite_PD_read_as_alt (PDBfile *file, char *name, char *type, lite_SC_byte *vr,
 		     long *ind) {
 
    char		fullpath[MAXLINE];
@@ -780,7 +788,7 @@ lite_PD_typedef (PDBfile *file, char *oname, char *tname) {
  */
 #ifdef PDB_WRITE
 int
-lite_PD_write (PDBfile *file, char *name, char *type, byte *vr) {
+lite_PD_write (PDBfile *file, char *name, char *type, lite_SC_byte *vr) {
 
    return lite_PD_write_as (file, name, type, type, vr) ;
 }
@@ -808,7 +816,7 @@ lite_PD_write (PDBfile *file, char *name, char *type, byte *vr) {
 #ifdef PDB_WRITE
 int
 lite_PD_write_as (PDBfile *file, char *name, char *intype, char *outtype,
-		  byte *vr) {
+		  lite_SC_byte *vr) {
    
    syment *ep;
    dimdes *dims;
@@ -852,7 +860,7 @@ lite_PD_write_as (PDBfile *file, char *name, char *intype, char *outtype,
  */
 #ifdef PDB_WRITE
 int
-lite_PD_write_alt (PDBfile *file, char *name, char *type, byte *vr, int nd,
+lite_PD_write_alt (PDBfile *file, char *name, char *type, lite_SC_byte *vr, int nd,
 		   long *ind) {
 
    return lite_PD_write_as_alt (file, name, type, type, vr, nd, ind) ;
@@ -891,7 +899,7 @@ lite_PD_write_alt (PDBfile *file, char *name, char *type, byte *vr, int nd,
 #ifdef PDB_WRITE
 int
 lite_PD_write_as_alt (PDBfile *file, char *name, char *intype, char *outtype,
-		      byte *vr, int nd, long *ind) {
+		      lite_SC_byte *vr, int nd, long *ind) {
    int i;
    long start, stop, step, leng;
    char expr[MAXLINE], index[MAXLINE], hname[MAXLINE];
@@ -967,7 +975,7 @@ lite_PD_write_as_alt (PDBfile *file, char *name, char *intype, char *outtype,
 #ifdef PDB_WRITE
 static syment *
 _PD_write (PDBfile *file, char *name, char *intype, char *outtype,
-	   byte *vr, dimdes *dims, int appnd) {
+	   lite_SC_byte *vr, dimdes *dims, int appnd) {
 
    int reset;
    syment *ep;
@@ -1111,6 +1119,12 @@ _PD_write (PDBfile *file, char *name, char *intype, char *outtype,
  *
  * Modifications:
  *
+ * Mark C. Miller, Fri Apr 13 22:39:29 PDT 2012
+ * Pass default creation mode options to PD_mk_pdb().
+ *
+ * Mark C. Miller, Thu Jun 14 13:25:02 PDT 2012
+ * Remove call to io_close in ABORT case. The file pointer may not
+ * have been properly initialized.
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
@@ -1137,7 +1151,7 @@ lite_PD_create (char *name) {
    /*
     * Open the file.
     */
-   strcpy(str, name);
+   strncpy(str, name, MAXLINE-1);
    fp = io_open(str, BINARY_MODE_WPLUS);
    if (!fp) lite_PD_error("CAN'T CREATE FILE - PD_CREATE", PD_CREATE);
 
@@ -1150,7 +1164,7 @@ lite_PD_create (char *name) {
    /*
     * Make the PDBfile.
     */
-   file = _lite_PD_mk_pdb(str);
+   file = _lite_PD_mk_pdb(str, lite_PD_DEF_CREATM);
    if (file == NULL) {
       lite_PD_error("CAN'T ALLOCATE PDBFILE - PD_CREATE", PD_OPEN);
    }
@@ -1603,14 +1617,14 @@ lite_PD_defent_alt (PDBfile *file, char *name, char *outtype,
       prev = next;
    }
 
-   return _lite_PD_defent (file, name, outtype, number, dims);
+   return lite_PD_defent (file, name, outtype, number, dims);
 }
 #endif /* PDB_WRITE */
 
 
 
 /*-------------------------------------------------------------------------
- * Function:	_lite_PD_defent
+ * Function:	lite_PD_defent
  *
  * Purpose:	Define an entry in the PDB file symbol table and
  *              stake out the disk space but write nothing.
@@ -1629,7 +1643,7 @@ lite_PD_defent_alt (PDBfile *file, char *name, char *outtype,
  */
 #ifdef PDB_WRITE
 syment *
-_lite_PD_defent (PDBfile *file, char *name, char *outtype, long number,
+lite_PD_defent (PDBfile *file, char *name, char *outtype, long number,
 		 dimdes *dims) {
 
    long		addr, bytespitem;
@@ -1737,9 +1751,25 @@ long  lite_PD_get_file_length(PDBfile *file) {
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
+int lite_PD_append(PDBfile *file, char *name, void *vr) {
+    _append_flag = TRUE;
+    return(lite_PD_write_as(file, name, NULL, NULL, vr));
+}
+
 int lite_PD_append_alt(PDBfile *file, char *name, void *vr, int nd, long *ind) {
-  _append_flag = TRUE;
-  return(lite_PD_write_as_alt(file, name, NULL, NULL, vr, nd, ind));
+    _append_flag = TRUE;
+    return(lite_PD_write_as_alt(file, name, NULL, NULL, vr, nd, ind));
+}
+
+int lite_PD_append_as(PDBfile *file, char *name, char *intype, void *vr) {
+    _append_flag = TRUE;
+    return(lite_PD_write_as(file, name, intype, NULL, vr));
+}
+
+int lite_PD_append_as_alt(PDBfile *file, char *name, char *intype,
+                     void *vr, int nd, long *ind) {
+    _append_flag = TRUE;
+    return(lite_PD_write_as_alt(file, name, intype, NULL, vr, nd, ind));
 }
 #endif /* PDB_WRITE */
 
