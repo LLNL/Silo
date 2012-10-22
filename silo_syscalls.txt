@@ -1,0 +1,67 @@
+Required by Silo library + PDB driver
+--------------------------------------
+fstat or fstat64
+stat or stat64
+lseek
+open, close
+read, write
+exit
+time (PDB driver could probably be removed)
+
+Required by Silo library + HDF5 driver
+--------------------------------------
+Note: most of these come from HDF5 library.
+Some may be optional or removeable at expense of loss
+of minor features. Asked HDF Group for analysis.
+time
+getpwuid
+getuid
+fsync
+write
+read
+access
+fstat
+fileno
+signal
+sigprocmask
+gettimeofday
+getcwd
+open
+lseek
+read
+close
+lstat
+stat
+fstat
+ftruncate
+
+Required by Silo Library compression features
+-------------------------------------
+access (could maybe replace with another, used by compression)
+flush (used by compression feature)
+
+Required by Silo tools
+----------------------
+Note: not typically necessary to run tools on compute nodes
+ioctl
+kill
+getpid
+sigaction
+passwd
+access
+exit
+gettimeofday
+
+Required by Silo tests
+----------------------
+Note: not all Silo tests use all these
+unlink
+mkdir
+rmdir
+gettimeofday
+exit
+lseek
+write
+read
+close
+open
