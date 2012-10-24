@@ -672,6 +672,8 @@ PDB_DRV_NEEDED_FALSE
 PDB_DRV_NEEDED_TRUE
 NETCDF_NEEDED_FALSE
 NETCDF_NEEDED_TRUE
+INSTALL_LITE_HEADERS_FALSE
+INSTALL_LITE_HEADERS_TRUE
 BUNDLE_TARGET
 PYTHON_CPPFLAGS
 pkgpyexecdir
@@ -861,6 +863,8 @@ with_sysroot
 enable_libtool_lock
 enable_optimization
 enable_legacy_datatyped_pointers
+enable_normal_sclite_mem_headers
+enable_install_lite_headers
 with_readline
 enable_browser
 enable_silex
@@ -22807,25 +22811,21 @@ fi
 
 
 # Check whether --enable-normal-sclite-mem-headers was given.
-if test "${enable_normal_sclite_mem_headers+set}" = set; then
+if test "${enable_normal_sclite_mem_headers+set}" = set; then :
   enableval=$enable_normal_sclite_mem_headers; if test "$enableval" = "yes" ; then
 
-cat >>confdefs.h <<\_ACEOF
-#define NORMAL_SCLITE_HEADERS 1
-_ACEOF
+$as_echo "#define NORMAL_SCLITE_HEADERS 1" >>confdefs.h
 
     fi
 else
 
-cat >>confdefs.h <<\_ACEOF
-#define NORMAL_SCLITE_HEADERS 0
-_ACEOF
+$as_echo "#define NORMAL_SCLITE_HEADERS 0" >>confdefs.h
 
 fi
 
 
 # Check whether --enable-install-lite-headers was given.
-if test "${enable_install_lite_headers+set}" = set; then
+if test "${enable_install_lite_headers+set}" = set; then :
   enableval=$enable_install_lite_headers; INSTLITE="$enableval"
 fi
 
@@ -26541,11 +26541,8 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${INSTALL_LITE_HEADERS_TRUE}" && test -z "${INSTALL_LITE_HEADERS_FALSE}"; then
-  { { echo "$as_me:$LINENO: error: conditional \"INSTALL_LITE_HEADERS\" was never defined.
-Usually this means the macro was only invoked conditionally." >&5
-echo "$as_me: error: conditional \"INSTALL_LITE_HEADERS\" was never defined.
-Usually this means the macro was only invoked conditionally." >&2;}
-   { (exit 1); exit 1; }; }
+  as_fn_error $? "conditional \"INSTALL_LITE_HEADERS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${NETCDF_NEEDED_TRUE}" && test -z "${NETCDF_NEEDED_FALSE}"; then
   as_fn_error $? "conditional \"NETCDF_NEEDED\" was never defined.

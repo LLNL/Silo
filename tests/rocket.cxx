@@ -733,62 +733,76 @@ typedef struct _func_and_handle_t
     void *dlhandle;
 } func_and_handle_t;
 
-static void
+static int
 WriteAllFormats(int argc, char **argv)
 {
+    int nerrors = 0;
+    int d, foundOne = 0;
     map<string, func_and_handle_t> formatMap;
 
-    DIR *cwdir = opendir(".");
-    if (!cwdir)
+    // Accomodate all possible places autotools may wind up building the plugins
+    char *dirs[] = {".", "../..", ".libs", "../../.libs"};
+    for (d = 0; d < sizeof(dirs)/sizeof(dirs[0]) && !foundOne; d++)
     {
-        fprintf(stderr, "Unable to open current working directory with opendir()\n");
+        DIR *cwdir = opendir(dirs[d]);
+        if (!cwdir) continue;
+    
+        struct dirent* dent;
+        while (dent = readdir(cwdir))
+        {
+            string dname = string(dent->d_name);
+    
+            if (dname.find("rocket_") == string::npos)
+                continue;
+            if (dname.rfind(".so") == string::npos)
+                continue;
+    
+            string fmtname = dname.substr(7,dname.size()-10);
+            string pname = string(dirs[d])+"/"+dname;
+    
+            void *dlhandle = dlopen(pname.c_str(), RTLD_LAZY);
+            if (!dlhandle)
+            {
+                cerr << "Encountered dlopen error \"" << dlerror() << "\" for file \""
+                     << pname << "\" Skipping it." << endl;
+                continue;
+            }
+    
+            FormatWriteFunc writeFunc = (FormatWriteFunc) dlsym(dlhandle, "WriteFormat");
+            if (!writeFunc)
+            {
+                cerr << "Encountered dlsym error \"" << dlerror() << "\" for format \""
+                     << fmtname << "\". Skipping it." << endl;
+                dlclose(dlhandle);
+                continue;
+            }
+    
+            if (!foundOne)
+                cout << "Using \"" << dirs[d] << "\" as plugin dir." << endl;
+            foundOne = 1;
+            formatMap[fmtname].func = writeFunc;
+            formatMap[fmtname].dlhandle = dlhandle;
+        }
+
+        closedir(cwdir);
+    }
+
+    if (!foundOne)
+    {
+        fprintf(stderr, "Unable to find suitable plugin directory\n");
         exit(1);
     }
-
-    struct dirent* dent;
-    while (dent = readdir(cwdir))
-    {
-        string dname = string(dent->d_name);
-
-        if (dname.find("rocket_") == string::npos)
-            continue;
-        if (dname.rfind(".so") == string::npos)
-            continue;
-
-        string fmtname = dname.substr(7,dname.size()-10);
-
-        void *dlhandle = dlopen(string("./" + dname).c_str(), RTLD_LAZY);
-
-        if (!dlhandle)
-        {
-            cerr << "Encountered dlopen error \"" << dlerror() << "\" for format \""
-                 << fmtname << "\" Skipping it." << endl;
-            continue;
-        }
-
-        FormatWriteFunc writeFunc = (FormatWriteFunc) dlsym(dlhandle, "WriteFormat");
-
-        if (!writeFunc)
-        {
-            cerr << "Encountered dlsym error \"" << dlerror() << "\" for format \""
-                 << fmtname << "\". Skipping it." << endl;
-            dlclose(dlhandle);
-            continue;
-        }
-
-        formatMap[fmtname].func = writeFunc;
-        formatMap[fmtname].dlhandle = dlhandle;
-    }
-    closedir(cwdir);
-
+    
     cout << "Found " << formatMap.size() << " format writers." << endl;
-
+    
     for (map<string, func_and_handle_t>::iterator it = formatMap.begin(); it != formatMap.end(); it++)
     {
         cout << "Processing format \"" << it->first << "\"..." << endl;
-        ((it->second).func)(argc, argv);
+        nerrors += ((it->second).func)(argc, argv);
         dlclose((it->second).dlhandle);
     }
+
+    return nerrors + !formatMap.size();
 }
 #endif
 
@@ -803,6 +817,8 @@ extern int WriteFormat_silo(int argc, const char *const *const argv);
 int
 main(int argc, char **argv)
 {
+    int nerrors = 0;
+
     DefineNodeClasses();
     DefineZoneClasses();
 
@@ -819,14 +835,14 @@ main(int argc, char **argv)
 #ifdef STATIC_PLUGINS
 
 #ifdef HAVE_SILO
-    WriteFormat_silo(argc, argv);
+    nerrors += WriteFormat_silo(argc, argv);
 #endif
 
 #else // STATIC_PLUGINS
 
-    WriteAllFormats(argc, argv);
+    nerrors += WriteAllFormats(argc, argv);
 
 #endif
 
-    return 0;
+    return nerrors;
 }

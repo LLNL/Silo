@@ -139,16 +139,19 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
       pdbtst
 
-dir_SOURCES = \
- dir.c \
- testlib.c
-quad_SOURCES = \
- quad.c \
- testlib.c
-rocket_SOURCES = \
- rocket.cpp
-EXTRA_rocket_DEPENDENCIES = \
- rocket_silo.o
+dir_SOURCES = dir.c testlib.c
+quad_SOURCES = quad.c testlib.c
+rocket_SOURCES = rocket.cxx
+#rocket_silo_SOURCES = rocket_silo.cxx
+#rocket_silo_CXXFLAGS = -shared
+
+check_LTLIBRARIES = rocket_silo.la
+rocket_silo_la_SOURCES = rocket_silo.cxx
+rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+
+rocket_LDFLAGS = -ldl
+rocket_CXXFLAGS = -rdynamic
+ioperf_LDFLAGS = -ldl
 
 check_PROGRAMS = \
  arbpoly \
@@ -243,7 +246,8 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_multi_file_SOURCES = dummy.cxx
  nodist_EXTRA_polyzl_SOURCES = dummy.cxx
  nodist_EXTRA_csg_SOURCES = dummy.cxx
- nodist_EXTRA_rocket_SOURCES = dummy.cxx
+# nodist_EXTRA_rocket_SOURCES = dummy.cxx
+# nodist_EXTRA_rocket_silo_SOURCES = dummy.cxx
  nodist_EXTRA_mmadjacency_SOURCES = dummy.cxx
  nodist_EXTRA_largefile_SOURCES = dummy.cxx
  nodist_EXTRA_dir_SOURCES = dummy.cxx
@@ -266,9 +270,6 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_testfs_SOURCES = dummy.cxx
 endif
 
-rocket_LDFLAGS = -ldl
-rocket_CXXFLAGS = -rdynamic
-ioperf_LDFLAGS = -ldl
 
 if HDF5_DRV_NEEDED
   PROGS += $(HDF5PROGS)

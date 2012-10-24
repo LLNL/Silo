@@ -187,7 +187,7 @@ static void SiloZonelistStuff(const string& restrict_to_class,
 }
 
 static int silo_driver = -1;
-static void ProcessArgsForSilo(const int argc, const char *const *const argv)
+static int ProcessArgsForSilo(const int argc, const char *const *const argv)
 {
     int show_all_errors = FALSE;
     int j, i = 1;
@@ -210,6 +210,7 @@ static void ProcessArgsForSilo(const int argc, const char *const *const argv)
     }
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
+    return 0;
 }
 
 static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
@@ -450,6 +451,8 @@ static int WriteFormatReal(int argc, const char *const *const argv)
 
     DBfile *dbfile = DBCreate("rocket.silo", DB_CLOBBER, DB_LOCAL,
                       "3D mesh with many interesting subsets", silo_driver);
+    assert(dbfile);
+
     DBoptlist *ol = DBMakeOptlist(10);
 
     DBMkDir(dbfile, "UseCaseA");
@@ -463,7 +466,11 @@ static int WriteFormatReal(int argc, const char *const *const argv)
 
     WriteSiloMultiMesh(dbfile, ol, dom_classes);
 
+    DBFreeOptlist(ol);
+
     DBClose(dbfile);
+
+    return 0;
 }
 
 #ifdef __cplusplus
