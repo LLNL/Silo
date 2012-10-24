@@ -344,26 +344,21 @@ static iointerface_t* GetIOInterface(int argi, int argc, char *argv[], const opt
     /* Fall back to dynamic approach */
     if (!retval)
     {
-        char libfilename[256];
-        sprintf(libfilename, "./ioperf_%s.so", ifacename);
-        dlhandle = dlopen(libfilename, RTLD_LAZY);
-        if (dlhandle)
+        int d, foundIt = 0;
+        char *dirs[] = {".", "../..", ".libs", "../../.libs"};
+        for (d = 0; d < sizeof(dirs)/sizeof(dirs[0]) && !foundIt; d++)
         {
+            char libfilename[256];
+            sprintf(libfilename, "%s/ioperf_%s.so", dirs[d], ifacename);
+            dlhandle = dlopen(libfilename, RTLD_LAZY);
+            if (!dlhandle) continue;
+
             CreateInterfaceFunc createFunc = (CreateInterfaceFunc) dlsym(dlhandle, "CreateInterface");
-            if (!createFunc)
-            {
-                fprintf(stderr,"Encountered dlsym error \"%s\"\n", dlerror());
-                exit(1);
-            }
+            if (!createFunc) continue;
 
             /* we allow the io-interface plugin to process command line args too */
+            printf("Using plugin file \"%s\n\n", libfilename);
             retval = createFunc(argi, argc, argv, testfilename, opts);
-
-        }
-        else
-        {
-            fprintf(stderr,"Encountered dlopen error \"%s\"\n", dlerror());
-            exit(1);
         }
     }
 #endif

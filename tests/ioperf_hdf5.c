@@ -239,7 +239,7 @@ iointerface_t *CreateInterface_hdf5(int argi, int argc, char *argv[], const char
 #else
 iointerface_t *CreateInterface(int argi, int argc, char *argv[], const char *_filename, const options_t *opts)
 {
-    return CreateInterfaceReal(argi argc, argv, _filename, opts);
+    return CreateInterfaceReal(argi, argc, argv, _filename, opts);
 }
 #endif
 

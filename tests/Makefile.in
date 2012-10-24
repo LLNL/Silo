@@ -148,6 +148,36 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
+ioperf_hdf5_la_LIBADD =
+ioperf_hdf5_la_SOURCES = ioperf_hdf5.c
+ioperf_hdf5_la_OBJECTS = ioperf_hdf5.lo
+ioperf_hdf5_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ioperf_hdf5_la_LDFLAGS) $(LDFLAGS) -o $@
+ioperf_pdb_la_LIBADD =
+ioperf_pdb_la_SOURCES = ioperf_pdb.c
+ioperf_pdb_la_OBJECTS = ioperf_pdb.lo
+ioperf_pdb_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ioperf_pdb_la_LDFLAGS) $(LDFLAGS) -o $@
+ioperf_sec2_la_LIBADD =
+ioperf_sec2_la_SOURCES = ioperf_sec2.c
+ioperf_sec2_la_OBJECTS = ioperf_sec2.lo
+ioperf_sec2_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ioperf_sec2_la_LDFLAGS) $(LDFLAGS) -o $@
+ioperf_silo_la_LIBADD =
+ioperf_silo_la_SOURCES = ioperf_silo.c
+ioperf_silo_la_OBJECTS = ioperf_silo.lo
+ioperf_silo_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ioperf_silo_la_LDFLAGS) $(LDFLAGS) -o $@
+ioperf_stdio_la_LIBADD =
+ioperf_stdio_la_SOURCES = ioperf_stdio.c
+ioperf_stdio_la_OBJECTS = ioperf_stdio.lo
+ioperf_stdio_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(ioperf_stdio_la_LDFLAGS) $(LDFLAGS) -o $@
 rocket_silo_la_LIBADD =
 am_rocket_silo_la_OBJECTS = rocket_silo.lo
 rocket_silo_la_OBJECTS = $(am_rocket_silo_la_OBJECTS)
@@ -484,7 +514,8 @@ F77LD = $(F77)
 F77LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(F77LD) $(AM_FFLAGS) $(FFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(rocket_silo_la_SOURCES) \
+SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
+	ioperf_stdio.c $(rocket_silo_la_SOURCES) \
 	$(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
 	$(nodist_EXTRA_alltypes_SOURCES) alltypes.c \
 	$(nodist_EXTRA_arbpoly_SOURCES) arbpoly.c \
@@ -540,12 +571,13 @@ SOURCES = $(rocket_silo_la_SOURCES) \
 	$(nodist_EXTRA_ucdsamp3_SOURCES) ucdsamp3.c \
 	$(nodist_EXTRA_version_SOURCES) version.c \
 	$(nodist_EXTRA_wave_SOURCES) wave.c
-DIST_SOURCES = $(rocket_silo_la_SOURCES) TestReadMask.c alltypes.c \
-	arbpoly.c arbpoly2d.c array.c $(am__arrayf77_SOURCES_DIST) \
-	$(am__compression_SOURCES_DIST) cpz1plt.c csg.c \
-	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) efcentering.c \
-	extface.c $(am__grab_SOURCES_DIST) group_test.c ioperf.c \
-	largefile.c listtypes.c mat3d_3across.c \
+DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
+	ioperf_stdio.c $(rocket_silo_la_SOURCES) TestReadMask.c \
+	alltypes.c arbpoly.c arbpoly2d.c array.c \
+	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
+	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
+	efcentering.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
+	ioperf.c largefile.c listtypes.c mat3d_3across.c \
 	$(am__matf77_SOURCES_DIST) merge_block.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
 	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
@@ -846,14 +878,31 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
-#rocket_silo_SOURCES = rocket_silo.cxx
-#rocket_silo_CXXFLAGS = -shared
-check_LTLIBRARIES = rocket_silo.la
-rocket_silo_la_SOURCES = rocket_silo.cxx
-rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 rocket_LDFLAGS = -ldl
 rocket_CXXFLAGS = -rdynamic
+EXTRA_rocket_DEPENDENCIES = rocket_silo.la
+
+# plugins for rocket and for ioperf
+check_LTLIBRARIES = \
+    rocket_silo.la \
+    ioperf_silo.la \
+    ioperf_hdf5.la \
+    ioperf_pdb.la \
+    ioperf_sec2.la \
+    ioperf_stdio.la
+
+rocket_silo_la_SOURCES = rocket_silo.cxx
+# the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
+rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_hdf5.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
 ioperf_LDFLAGS = -ldl
+ioperf_CXXFALGS = -rdynamic
+# the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
+ioperf_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+ioperf_hdf5_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+ioperf_pdb_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+ioperf_sec2_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 
 # Deal with need to use c++ linker whenever we've got C++
 # sources compiled with the silo library and the fact that
@@ -983,6 +1032,16 @@ clean-checkLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+ioperf_hdf5.la: $(ioperf_hdf5_la_OBJECTS) $(ioperf_hdf5_la_DEPENDENCIES) $(EXTRA_ioperf_hdf5_la_DEPENDENCIES) 
+	$(ioperf_hdf5_la_LINK)  $(ioperf_hdf5_la_OBJECTS) $(ioperf_hdf5_la_LIBADD) $(LIBS)
+ioperf_pdb.la: $(ioperf_pdb_la_OBJECTS) $(ioperf_pdb_la_DEPENDENCIES) $(EXTRA_ioperf_pdb_la_DEPENDENCIES) 
+	$(ioperf_pdb_la_LINK)  $(ioperf_pdb_la_OBJECTS) $(ioperf_pdb_la_LIBADD) $(LIBS)
+ioperf_sec2.la: $(ioperf_sec2_la_OBJECTS) $(ioperf_sec2_la_DEPENDENCIES) $(EXTRA_ioperf_sec2_la_DEPENDENCIES) 
+	$(ioperf_sec2_la_LINK)  $(ioperf_sec2_la_OBJECTS) $(ioperf_sec2_la_LIBADD) $(LIBS)
+ioperf_silo.la: $(ioperf_silo_la_OBJECTS) $(ioperf_silo_la_DEPENDENCIES) $(EXTRA_ioperf_silo_la_DEPENDENCIES) 
+	$(ioperf_silo_la_LINK)  $(ioperf_silo_la_OBJECTS) $(ioperf_silo_la_LIBADD) $(LIBS)
+ioperf_stdio.la: $(ioperf_stdio_la_OBJECTS) $(ioperf_stdio_la_DEPENDENCIES) $(EXTRA_ioperf_stdio_la_DEPENDENCIES) 
+	$(ioperf_stdio_la_LINK)  $(ioperf_stdio_la_OBJECTS) $(ioperf_stdio_la_LIBADD) $(LIBS)
 rocket_silo.la: $(rocket_silo_la_OBJECTS) $(rocket_silo_la_DEPENDENCIES) $(EXTRA_rocket_silo_la_DEPENDENCIES) 
 	$(rocket_silo_la_LINK)  $(rocket_silo_la_OBJECTS) $(rocket_silo_la_LIBADD) $(LIBS)
 
@@ -1190,6 +1249,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_hdf5.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_pdb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_sec2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_silo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_stdio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/largefile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@

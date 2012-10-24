@@ -142,16 +142,33 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
-#rocket_silo_SOURCES = rocket_silo.cxx
-#rocket_silo_CXXFLAGS = -shared
-
-check_LTLIBRARIES = rocket_silo.la
-rocket_silo_la_SOURCES = rocket_silo.cxx
-rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
-
 rocket_LDFLAGS = -ldl
 rocket_CXXFLAGS = -rdynamic
+EXTRA_rocket_DEPENDENCIES = rocket_silo.la
+
+# plugins for rocket and for ioperf
+check_LTLIBRARIES = \
+    rocket_silo.la \
+    ioperf_silo.la \
+    ioperf_hdf5.la \
+    ioperf_pdb.la \
+    ioperf_sec2.la \
+    ioperf_stdio.la
+
+rocket_silo_la_SOURCES = rocket_silo.cxx
+# the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
+rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+
+EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_hdf5.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
 ioperf_LDFLAGS = -ldl
+ioperf_CXXFALGS = -rdynamic
+# the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
+ioperf_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+ioperf_hdf5_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+ioperf_pdb_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+ioperf_sec2_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
+
 
 check_PROGRAMS = \
  arbpoly \
