@@ -188,7 +188,7 @@ am__EXEEXT_1 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
 @HDF5_DRV_NEEDED_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
 am__EXEEXT_3 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
 	pointf77$(EXEEXT) quadf77$(EXEEXT) ucdf77$(EXEEXT) \
-	testallf77$(EXEEXT)
+	testallf77$(EXEEXT) csgmesh$(EXEEXT)
 @FORTRAN_NEEDED_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
@@ -235,6 +235,11 @@ csg_OBJECTS = csg.$(OBJEXT)
 csg_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@csg_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@csg_DEPENDENCIES = ../src/libsiloh5.la
+am__csgmesh_SOURCES_DIST = csgmesh.f
+@FORTRAN_NEEDED_TRUE@am_csgmesh_OBJECTS = csgmesh.$(OBJEXT)
+csgmesh_OBJECTS = $(am_csgmesh_OBJECTS)
+@FORTRAN_NEEDED_TRUE@csgmesh_DEPENDENCIES = $(LDADD) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
 am__curvef77_SOURCES_DIST = curvef77.f
 @FORTRAN_NEEDED_TRUE@am_curvef77_OBJECTS = curvef77.$(OBJEXT)
 curvef77_OBJECTS = $(am_curvef77_OBJECTS)
@@ -524,7 +529,8 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_arrayf77_SOURCES) $(compression_SOURCES) \
 	$(nodist_EXTRA_compression_SOURCES) \
 	$(nodist_EXTRA_cpz1plt_SOURCES) cpz1plt.c \
-	$(nodist_EXTRA_csg_SOURCES) csg.c $(curvef77_SOURCES) \
+	$(nodist_EXTRA_csg_SOURCES) csg.c $(csgmesh_SOURCES) \
+	$(nodist_EXTRA_csgmesh_SOURCES) $(curvef77_SOURCES) \
 	$(nodist_EXTRA_curvef77_SOURCES) $(dir_SOURCES) \
 	$(nodist_EXTRA_dir_SOURCES) \
 	$(nodist_EXTRA_efcentering_SOURCES) efcentering.c \
@@ -575,9 +581,10 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	ioperf_stdio.c $(rocket_silo_la_SOURCES) TestReadMask.c \
 	alltypes.c arbpoly.c arbpoly2d.c array.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
-	cpz1plt.c csg.c $(am__curvef77_SOURCES_DIST) $(dir_SOURCES) \
-	efcentering.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
-	ioperf.c largefile.c listtypes.c mat3d_3across.c \
+	cpz1plt.c csg.c $(am__csgmesh_SOURCES_DIST) \
+	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) efcentering.c \
+	extface.c $(am__grab_SOURCES_DIST) group_test.c ioperf.c \
+	largefile.c listtypes.c mat3d_3across.c \
 	$(am__matf77_SOURCES_DIST) merge_block.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
 	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
@@ -867,7 +874,9 @@ AM_CPPFLAGS = \
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 HDF5PROGS = compression grab mk_nasf_h5
-FCPROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77
+FCPROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
+         csgmesh
+
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
 	TestReadMask twohex multispec sami specmix spec cpz1plt \
@@ -960,6 +969,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_quadf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ucdf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testallf77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_csgmesh_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_compression_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_grab_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_efcentering_SOURCES = dummy.cxx
@@ -987,6 +997,8 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @FORTRAN_NEEDED_TRUE@ucdf77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@testallf77_SOURCES = testallf77.f
 @FORTRAN_NEEDED_TRUE@testallf77_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@csgmesh_SOURCES = csgmesh.f
+@FORTRAN_NEEDED_TRUE@csgmesh_LDADD = $(LDADD) $(FCLIBS)
 all: all-am
 
 .SUFFIXES:
@@ -1080,6 +1092,9 @@ cpz1plt$(EXEEXT): $(cpz1plt_OBJECTS) $(cpz1plt_DEPENDENCIES) $(EXTRA_cpz1plt_DEP
 csg$(EXEEXT): $(csg_OBJECTS) $(csg_DEPENDENCIES) $(EXTRA_csg_DEPENDENCIES) 
 	@rm -f csg$(EXEEXT)
 	$(CXXLINK) $(csg_OBJECTS) $(csg_LDADD) $(LIBS)
+csgmesh$(EXEEXT): $(csgmesh_OBJECTS) $(csgmesh_DEPENDENCIES) $(EXTRA_csgmesh_DEPENDENCIES) 
+	@rm -f csgmesh$(EXEEXT)
+	$(CXXLINK) $(csgmesh_OBJECTS) $(csgmesh_LDADD) $(LIBS)
 curvef77$(EXEEXT): $(curvef77_OBJECTS) $(curvef77_DEPENDENCIES) $(EXTRA_curvef77_DEPENDENCIES) 
 	@rm -f curvef77$(EXEEXT)
 	$(CXXLINK) $(curvef77_OBJECTS) $(curvef77_LDADD) $(LIBS)

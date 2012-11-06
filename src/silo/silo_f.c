@@ -5112,7 +5112,8 @@ DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
 #endif
 
         *status = DBPutCsgmesh(dbfile, nm, *ndims, *nbounds, typeflags,
-            bndids, coeffs, *lcoeffs, *datatype, extents, zl_nm, optlist);
+            *bndids == DB_F77NULL?0:bndids, coeffs, *lcoeffs, *datatype,
+            extents, zl_nm, optlist);
 
         FREE(nm);
         FREE(zl_nm);
@@ -5256,8 +5257,8 @@ DBPUTCSGZL_FC (int *dbid, FCD_DB name, int *lname, int *nregs,
 #endif
 
         *status = DBPutCSGZonelist(dbfile, nm, *nregs, typeflags, leftids,
-            rightids, xforms, *lxforms, *datatype, *nzones, zonelist,
-            optlist); 
+            rightids, *lxforms>0?xforms:0, *lxforms>0?*lxforms:0, *datatype,
+            *nzones, zonelist, optlist); 
 
         FREE(nm);
 
