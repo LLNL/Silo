@@ -307,6 +307,10 @@ AT_SETUP(ucdf77)
 AT_KEYWORDS(fortran)
 AT_CHECK(test ! \( -f ucdf77 -o -f ../../ucdf77 \) && exit 77 || $VALGRIND ucdf77,,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(csgmesh)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f csgmesh -o -f ../../csgmesh \) && exit 77 || $VALGRIND csgmesh $STARGS,,ignore,ignore)
+AT_CLEANUP
 
 AT_BANNER(Special)
 AT_SETUP(silock)
