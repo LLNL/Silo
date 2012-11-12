@@ -195,6 +195,106 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
     }
 }
 
+static void COMP_func(PyObject *pyobj, void const *cptr, char const *memstr, char const *typestr)
+{
+if (!strcmp(typestr,"primitive 'int'")) {
+    PyDict_SetItemString(pyobj, memstr, PyInt_FromLong(*((int*)(cptr))));
+} else if (!strcmp(typestr,"primitive 'string'")) {
+    if (*((char**)cptr) == 0)
+        PyDict_SetItemString(pyobj, memstr, PyString_FromString(""));
+    else
+        PyDict_SetItemString(pyobj, memstr, PyString_FromString(*((char**)cptr)));
+} else if (!strcmp(typestr, "primitive 'float'")) {
+    PyDict_SetItemString(pyobj, memstr, PyFloat_FromDouble(*((float*)cptr)));
+} else if (!strcmp(typestr, "primitive 'double'")) {
+    PyDict_SetItemString(pyobj, memstr, PyFloat_FromDouble(*((double*)cptr)));
+} else {
+}
+}
+
+#define STRUCT(vtype) case vtype:
+#if 0
+#define COMP(memnm, typestr) \
+if (!strcmp(typestr,"primitive 'int'")) {\
+    PyDict_SetItemString(retval, #memnm, PyInt_FromLong(v->memnm)); \
+} else if (!strcmp(typestr,"primitive 'string'")) { \
+    PyDict_SetItemString(retval, #memnm, PyString_FromString(v->memnm)); \
+} else if (!strcmp(typestr, "primitive 'float'")) { \
+    PyDict_SetItemString(retval, #memnm, PyFloat_FromDouble((float)v->memnm)); \
+} else if (!strcmp(typestr, "primitive 'double'")) { \
+    PyDict_SetItemString(retval, #memnm, PyFloat_FromDouble((double)v->memnm)); \
+} else { \
+}
+#endif
+#define COMP(memnm, typestr) COMP_func(retval, (void*)&(v->memnm), #memnm, typestr)
+#define IOASSOC(A)
+#define ESTRUCT
+
+static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
+{
+    DBfile *db = ((DBfileObject*)self)->db;
+
+    if (!db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    char *str;
+    if(!PyArg_ParseTuple(args, "s", &str))
+        return NULL;
+
+    PyObject *retval = PyDict_New();
+
+    int vartype = DBInqVarType(db, str);
+    
+    long olddrmask = DBSetDataReadMask(DBNone);
+    switch (vartype)
+    {
+        STRUCT (DB_UCDVAR) {
+            DBucdvar *v = DBGetUcdvar(db, str);
+
+            COMP (id,                 "primitive 'int'");
+            COMP (name,               "primitive 'string'");
+            COMP (meshname,           "primitive 'string'");
+            COMP (cycle,              "primitive 'int'");
+            COMP (units,              "primitive 'string'");
+            COMP (label,              "primitive 'string'");
+            COMP (time,               "primitive 'float'");
+            COMP (dtime,              "primitive 'double'");
+            COMP (meshid,             "primitive 'int'");
+            COMP (datatype,           "primitive 'int'");
+            IOASSOC (PA_DATATYPE);
+            COMP (nels,               "primitive 'int'");
+            COMP (nvals,              "primitive 'int'");
+            COMP (ndims,              "primitive 'int'");
+            COMP (origin,             "primitive 'int'");
+            COMP (centering,          "primitive 'int'");
+            IOASSOC (PA_CENTERING);
+            COMP (mixlen,             "primitive 'int'");
+            COMP (use_specmf,         "primitive 'int'");
+            IOASSOC (PA_ONOFF);
+            COMP (ascii_labels,       "primitive 'int'");
+            IOASSOC (PA_BOOLEAN);
+            COMP (guihide,            "primitive 'int'");
+            IOASSOC (PA_BOOLEAN);
+            COMP (conserved,          "primitive 'int'");
+            COMP (extensive,          "primitive 'int'");
+#if 0
+            COMP (vals,
+                  "pointer (array 'self.nvals' (pointer "
+                  "(array 'self.nels' (primitive 'self.datatype'))))");
+            COMP (mixvals,
+                  "pointer (array 'self.nvals' (pointer (array 'self.mixlen' "
+                  "(primitive 'self.datatype'))))");
+#endif
+        } ESTRUCT;
+    }
+    DBSetDataReadMask(olddrmask);
+
+    return retval;
+}
+
 // ****************************************************************************
 //  Method:  DBfile_DBGetVar
 //
@@ -463,6 +563,7 @@ static PyObject *DBfile_DBClose(PyObject *self, PyObject *args)
 static struct PyMethodDef DBfile_methods[] = {
     {"GetToc", DBfile_DBGetToc, METH_VARARGS},
     {"GetVar", DBfile_DBGetVar, METH_VARARGS},
+    {"GetVarInfo", DBfile_DBGetVarInfo, METH_VARARGS},
     {"Write", DBfile_DBWrite, METH_VARARGS},
     {"MkDir", DBfile_DBMkDir, METH_VARARGS},
     {"SetDir", DBfile_DBSetDir, METH_VARARGS},
