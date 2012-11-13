@@ -1,8 +1,7 @@
-# generated automatically by aclocal 1.12 -*- Autoconf -*-
+# generated automatically by aclocal 1.11.1 -*- Autoconf -*-
 
 # Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-# 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
-# Inc.
+# 2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -14,720 +13,17 @@
 
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
-m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.69],,
-[m4_warning([this file was generated for autoconf 2.69.
+m4_if(m4_defn([AC_AUTOCONF_VERSION]), [2.63],,
+[m4_warning([this file was generated for autoconf 2.63.
 You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
-To do so, use the procedure documented by the package, typically 'autoreconf'.])])
+To do so, use the procedure documented by the package, typically `autoreconf'.])])
 
-#
-# SYNOPSIS
-#
-#   AX_CHECK_COMPILER_FLAGS(FLAGS, [ACTION-SUCCESS], [ACTION-FAILURE])
-#
-# DESCRIPTION
-#
-#   Check whether the given compiler FLAGS work with the current
-#   language's compiler, or whether they give an error. (Warnings,
-#   however, are ignored.)
-#
-#   ACTION-SUCCESS/ACTION-FAILURE are shell commands to execute on
-#   success/failure.
-#
-# LAST MODIFICATION
-#
-#   2007-07-29
-#
-# COPYLEFT
-#
-#   Copyright (c) 2007 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2007 Matteo Frigo
-#
-#   This program is free software: you can redistribute it and/or
-#   modify it under the terms of the GNU General Public License as
-#   published by the Free Software Foundation, either version 3 of the
-#   License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-#   General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with this program. If not, see
-#   <http://www.gnu.org/licenses/>.
-#
-#   As a special exception, the respective Autoconf Macro's copyright
-#   owner gives unlimited permission to copy, distribute and modify the
-#   configure scripts that are the output of Autoconf when processing
-#   the Macro. You need not follow the terms of the GNU General Public
-#   License when using or distributing such scripts, even though
-#   portions of the text of the Macro appear in them. The GNU General
-#   Public License (GPL) does govern all other use of the material that
-#   constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the
-#   Autoconf Macro released by the Autoconf Macro Archive. When you
-#   make and distribute a modified version of the Autoconf Macro, you
-#   may extend this special exception to the GPL to apply to your
-#   modified version as well.
-
-AC_DEFUN([AX_CHECK_COMPILER_FLAGS],
-[AC_PREREQ(2.59) dnl for _AC_LANG_PREFIX
-AC_MSG_CHECKING([whether _AC_LANG compiler accepts $1])
-dnl Some hackery here since AC_CACHE_VAL can't handle a non-literal varname:
-AS_LITERAL_IF([$1],
-  [AC_CACHE_VAL(AS_TR_SH(ax_cv_[]_AC_LANG_ABBREV[]_flags_$1), [
-      ax_save_FLAGS=$[]_AC_LANG_PREFIX[]FLAGS
-      _AC_LANG_PREFIX[]FLAGS="$1"
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
-        AS_TR_SH(ax_cv_[]_AC_LANG_ABBREV[]_flags_$1)=yes,
-        AS_TR_SH(ax_cv_[]_AC_LANG_ABBREV[]_flags_$1)=no)
-      _AC_LANG_PREFIX[]FLAGS=$ax_save_FLAGS])],
-  [ax_save_FLAGS=$[]_AC_LANG_PREFIX[]FLAGS
-   _AC_LANG_PREFIX[]FLAGS="$1"
-   AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
-     eval AS_TR_SH(ax_cv_[]_AC_LANG_ABBREV[]_flags_$1)=yes,
-     eval AS_TR_SH(ax_cv_[]_AC_LANG_ABBREV[]_flags_$1)=no)
-   _AC_LANG_PREFIX[]FLAGS=$ax_save_FLAGS])
-eval ax_check_compiler_flags=$AS_TR_SH(ax_cv_[]_AC_LANG_ABBREV[]_flags_$1)
-AC_MSG_RESULT($ax_check_compiler_flags)
-if test "x$ax_check_compiler_flags" = xyes; then
-	m4_default([$2], :)
-else
-	m4_default([$3], :)
-fi
-])dnl AX_CHECK_COMPILER_FLAGS
-
-# ===========================================================================
-#        http://www.gnu.org/software/autoconf-archive/ax_have_qt.html
-# ===========================================================================
-#
-# SYNOPSIS
-#
-#   AX_HAVE_QT [--with-Qt-dir=DIR] [--with-Qt-lib-dir=DIR] [--with-Qt-lib=LIB]
-#   AX_HAVE_QT [--with-Qt-include-dir=DIR] [--with-Qt-bin-dir=DIR] [--with-Qt-lib-dir=DIR] [--with-Qt-lib=LIB]
-#
-# DESCRIPTION
-#
-#   Searches common directories for Qt include files, libraries and Qt
-#   binary utilities. The macro supports several different versions of the
-#   Qt framework being installed on the same machine. Without options, the
-#   macro is designed to look for the latest library, i.e., the highest
-#   definition of QT_VERSION in qglobal.h. By use of one or more options a
-#   different library may be selected. There are two different sets of
-#   options. Both sets contain the option --with-Qt-lib=LIB which can be
-#   used to force the use of a particular version of the library file when
-#   more than one are available. LIB must be in the form as it would appear
-#   behind the "-l" option to the compiler. Examples for LIB would be
-#   "qt-mt" for the multi-threaded version and "qt" for the regular version.
-#   In addition to this, the first set consists of an option
-#   --with-Qt-dir=DIR which can be used when the installation conforms to
-#   Trolltech's standard installation, which means that header files are in
-#   DIR/include, binary utilities are in DIR/bin and the library is in
-#   DIR/lib. The second set of options can be used to indicate individual
-#   locations for the header files, the binary utilities and the library
-#   file, in addition to the specific version of the library file.
-#
-#   The following shell variable is set to either "yes" or "no":
-#
-#     have_qt
-#
-#   Additionally, the following variables are exported:
-#
-#     QT_CXXFLAGS
-#     QT_LIBS
-#     QT_MOC
-#     QT_UIC
-#     QT_LRELEASE
-#     QT_LUPDATE
-#     QT_DIR
-#
-#   which respectively contain an "-I" flag pointing to the Qt include
-#   directory (and "-DQT_THREAD_SUPPORT" when LIB is "qt-mt"), link flags
-#   necessary to link with Qt and X, the name of the meta object compiler
-#   and the user interface compiler both with full path, and finaly the
-#   variable QTDIR as Trolltech likes to see it defined (if possible).
-#
-#   Example lines for Makefile.in:
-#
-#     CXXFLAGS = @QT_CXXFLAGS@
-#     MOC      = @QT_MOC@
-#
-#   After the variables have been set, a trial compile and link is performed
-#   to check the correct functioning of the meta object compiler. This test
-#   may fail when the different detected elements stem from different
-#   releases of the Qt framework. In that case, an error message is emitted
-#   and configure stops.
-#
-#   No common variables such as $LIBS or $CFLAGS are polluted.
-#
-#   Options:
-#
-#   --with-Qt-dir=DIR: DIR is equal to $QTDIR if you have followed the
-#   installation instructions of Trolltech. Header files are in DIR/include,
-#   binary utilities are in DIR/bin and the library is in DIR/lib.
-#
-#   --with-Qt-include-dir=DIR: Qt header files are in DIR.
-#
-#   --with-Qt-bin-dir=DIR: Qt utilities such as moc and uic are in DIR.
-#
-#   --with-Qt-lib-dir=DIR: The Qt library is in DIR.
-#
-#   --with-Qt-lib=LIB: Use -lLIB to link with the Qt library.
-#
-#   If some option "=no" or, equivalently, a --without-Qt-* version is given
-#   in stead of a --with-Qt-*, "have_qt" is set to "no" and the other
-#   variables are set to the empty string.
-#
-# LICENSE
-#
-#   Copyright (c) 2008 Bastiaan Veelo <Bastiaan@Veelo.net>
-#
-#   Copying and distribution of this file, with or without modification, are
-#   permitted in any medium without royalty provided the copyright notice
-#   and this notice are preserved. This file is offered as-is, without any
-#   warranty.
-
-#serial 10
-
-dnl Calls AX_PATH_QT_DIRECT (contained in this file) as a subroutine.
-AU_ALIAS([BNV_HAVE_QT], [AX_HAVE_QT])
-AC_DEFUN([AX_HAVE_QT],
-[
-  AC_REQUIRE([AC_PROG_CXX])
-  AC_REQUIRE([AC_PATH_X])
-  AC_REQUIRE([AC_PATH_XTRA])
-
-  AC_MSG_CHECKING(for Qt)
-
-  AC_ARG_WITH([Qt-dir],
-              AS_HELP_STRING([--with-Qt-dir=DIR],
-                             [DIR is equal to $QTDIR if you have followed the
-                              installation instructions of Trolltech. Header
-                              files are in DIR/include, binary utilities are
-                              in DIR/bin. The library is in DIR/lib, unless
-                              --with-Qt-lib-dir is also set.]))
-  AC_ARG_WITH([Qt-include-dir],
-              AS_HELP_STRING([--with-Qt-include-dir=DIR],
-                             [Qt header files are in DIR]))
-  AC_ARG_WITH([Qt-bin-dir],
-              AS_HELP_STRING([--with-Qt-bin-dir=DIR],
-                             [Qt utilities such as moc and uic are in DIR]))
-  AC_ARG_WITH([Qt-lib-dir],
-              AS_HELP_STRING([--with-Qt-lib-dir=DIR],
-                             [The Qt library is in DIR]))
-  AC_ARG_WITH([Qt-lib],
-              AS_HELP_STRING([--with-Qt-lib=LIB],
-                             [Use -lLIB to link with the Qt library]))
-  if test x"$with_Qt_dir" = x"no" ||
-     test x"$with_Qt_include-dir" = x"no" ||
-     test x"$with_Qt_bin_dir" = x"no" ||
-     test x"$with_Qt_lib_dir" = x"no" ||
-     test x"$with_Qt_lib" = x"no"; then
-    # user disabled Qt. Leave cache alone.
-    have_qt="User disabled Qt."
-  else
-    # "yes" is a bogus option
-    if test x"$with_Qt_dir" = xyes; then
-      with_Qt_dir=
-    fi
-    if test x"$with_Qt_include_dir" = xyes; then
-      with_Qt_include_dir=
-    fi
-    if test x"$with_Qt_bin_dir" = xyes; then
-      with_Qt_bin_dir=
-    fi
-    if test x"$with_Qt_lib_dir" = xyes; then
-      with_Qt_lib_dir=
-    fi
-    if test x"$with_Qt_lib" = xyes; then
-      with_Qt_lib=
-    fi
-    # No Qt unless we discover otherwise
-    have_qt=no
-    # Check whether we are requested to link with a specific version
-    if test x"$with_Qt_lib" != x; then
-      ax_qt_lib="$with_Qt_lib"
-    fi
-    # Check whether we were supplied with an answer already
-    if test x"$with_Qt_dir" != x; then
-      have_qt=yes
-      ax_qt_dir="$with_Qt_dir"
-      ax_qt_include_dir="$with_Qt_dir/include"
-      ax_qt_bin_dir="$with_Qt_dir/bin"
-      ax_qt_lib_dir="$with_Qt_dir/lib"
-      # Only search for the lib if the user did not define one already
-      if test x"$ax_qt_lib" = x; then
-        ax_qt_lib="`ls $ax_qt_lib_dir/libQt* | sed -n 1p |
-                     sed s@$ax_qt_lib_dir/lib@@ | [sed s@[.].*@@]`"
-      fi
-      ax_qt_LIBS="-L$ax_qt_lib_dir -l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-    else
-      # Use cached value or do search, starting with suggestions from
-      # the command line
-      AC_CACHE_VAL(ax_cv_have_qt,
-      [
-        # We are not given a solution and there is no cached value.
-        ax_qt_dir=NO
-        ax_qt_include_dir=NO
-        ax_qt_lib_dir=NO
-        if test x"$ax_qt_lib" = x; then
-          ax_qt_lib=NO
-        fi
-        AX_PATH_QT_DIRECT
-        if test "$ax_qt_dir" = NO ||
-           test "$ax_qt_include_dir" = NO ||
-           test "$ax_qt_lib_dir" = NO ||
-           test "$ax_qt_lib" = NO; then
-          # Problem with finding complete Qt.  Cache the known absence of Qt.
-          ax_cv_have_qt="have_qt=no"
-        else
-          # Record where we found Qt for the cache.
-          ax_cv_have_qt="have_qt=yes                  \
-                       ax_qt_dir=$ax_qt_dir          \
-               ax_qt_include_dir=$ax_qt_include_dir  \
-                   ax_qt_bin_dir=$ax_qt_bin_dir      \
-                      ax_qt_LIBS=\"$ax_qt_LIBS\""
-        fi
-      ])dnl
-      eval "$ax_cv_have_qt"
-    fi # all $ax_qt_* are set
-  fi   # $have_qt reflects the system status
-  if test x"$have_qt" = xyes; then
-    QT_CXXFLAGS="-I$ax_qt_include_dir -I$ax_qt_include_dir/Qt -I$ax_qt_include_dir/QtCore -I$ax_qt_include_dir/QtGui"
-    if test x"$ax_qt_lib" = xqt-mt; then
-        QT_CXXFLAGS="$QT_CXXFLAGS -DQT_THREAD_SUPPORT"
-    fi
-    QT_DIR="$ax_qt_dir"
-    QT_LIBS="$ax_qt_LIBS"
-    # If ax_qt_dir is defined, utilities are expected to be in the
-    # bin subdirectory
-    if test x"$ax_qt_dir" != x; then
-        if test -x "$ax_qt_dir/bin/uic"; then
-          QT_UIC="$ax_qt_dir/bin/uic"
-        else
-          # Old versions of Qt don't have uic
-          QT_UIC=
-        fi
-      QT_MOC="$ax_qt_dir/bin/moc"
-      QT_LRELEASE="$ax_qt_dir/bin/lrelease"
-      QT_LUPDATE="$ax_qt_dir/bin/lupdate"
-    else
-      # Or maybe we are told where to look for the utilities
-      if test x"$ax_qt_bin_dir" != x; then
-        if test -x "$ax_qt_bin_dir/uic"; then
-          QT_UIC="$ax_qt_bin_dir/uic"
-        else
-          # Old versions of Qt don't have uic
-          QT_UIC=
-        fi
-        QT_MOC="$ax_qt_bin_dir/moc"
-        QT_LRELEASE="$ax_qt_bin_dir/lrelease"
-        QT_LUPDATE="$ax_qt_bin_dir/lupdate"
-      else
-      # Last possibility is that they are in $PATH
-        QT_UIC="`which uic`"
-        QT_MOC="`which moc`"
-        QT_LRELEASE="`which lrelease`"
-        QT_LUPDATE="`which lupdate`"
-      fi
-    fi
-    # All variables are defined, report the result
-    AC_MSG_RESULT([$have_qt:
-    QT_CXXFLAGS=$QT_CXXFLAGS
-    QT_DIR=$QT_DIR
-    QT_LIBS=$QT_LIBS
-    QT_UIC=$QT_UIC
-    QT_MOC=$QT_MOC
-    QT_LRELEASE=$QT_LRELEASE
-    QT_LUPDATE=$QT_LUPDATE])
-  else
-    # Qt was not found
-    QT_CXXFLAGS=
-    QT_DIR=
-    QT_LIBS=
-    QT_UIC=
-    QT_MOC=
-    QT_LRELEASE=
-    QT_LUPDATE=
-    AC_MSG_RESULT($have_qt)
-  fi
-  AC_SUBST(QT_CXXFLAGS)
-  AC_SUBST(QT_DIR)
-  AC_SUBST(QT_LIBS)
-  AC_SUBST(QT_UIC)
-  AC_SUBST(QT_MOC)
-  AC_SUBST(QT_LRELEASE)
-  AC_SUBST(QT_LUPDATE)
-
-  #### Being paranoid:
-  if test x"$have_qt" = xyes; then
-    AC_MSG_CHECKING(correct functioning of Qt installation)
-    AC_CACHE_VAL(ax_cv_qt_test_result,
-    [
-      cat > ax_qt_test.h << EOF
-#include <QObject>
-class Test : public QObject
-{
-Q_OBJECT
-public:
-  Test() {}
-  ~Test() {}
-public slots:
-  void receive() {}
-signals:
-  void send();
-};
-EOF
-
-      cat > ax_qt_main.$ac_ext << EOF
-#include "ax_qt_test.h"
-#include <QApplication>
-int main( int argc, char **argv )
-{
-  QApplication app( argc, argv );
-  Test t;
-  QObject::connect( &t, SIGNAL(send()), &t, SLOT(receive()) );
-}
-EOF
-
-      ax_cv_qt_test_result="failure"
-      ax_try_1="$QT_MOC ax_qt_test.h -o moc_ax_qt_test.$ac_ext >/dev/null 2>/dev/null"
-      AC_TRY_EVAL(ax_try_1)
-      if test x"$ac_status" != x0; then
-        echo "$ax_err_1" >&AS_MESSAGE_LOG_FD
-        echo "configure: could not run $QT_MOC on:" >&AS_MESSAGE_LOG_FD
-        cat ax_qt_test.h >&AS_MESSAGE_LOG_FD
-      else
-        ax_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_ax_qt_test.o moc_ax_qt_test.$ac_ext >/dev/null 2>/dev/null"
-        AC_TRY_EVAL(ax_try_2)
-        if test x"$ac_status" != x0; then
-          echo "$ax_err_2" >&AS_MESSAGE_LOG_FD
-          echo "configure: could not compile:" >&AS_MESSAGE_LOG_FD
-          cat moc_ax_qt_test.$ac_ext >&AS_MESSAGE_LOG_FD
-        else
-          ax_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o ax_qt_main.o ax_qt_main.$ac_ext >/dev/null 2>/dev/null"
-          AC_TRY_EVAL(ax_try_3)
-          if test x"$ac_status" != x0; then
-            echo "$ax_err_3" >&AS_MESSAGE_LOG_FD
-            echo "configure: could not compile:" >&AS_MESSAGE_LOG_FD
-            cat ax_qt_main.$ac_ext >&AS_MESSAGE_LOG_FD
-          else
-            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS >/dev/null 2>/dev/null"
-            AC_TRY_EVAL(ax_try_4)
-            if test x"$ac_status" != x0; then
-              echo "$ax_err_4" >&AS_MESSAGE_LOG_FD
-            else
-              ax_cv_qt_test_result="success"
-            fi
-          fi
-        fi
-      fi
-    ])dnl AC_CACHE_VAL ax_cv_qt_test_result
-    AC_MSG_RESULT([$ax_cv_qt_test_result])
-    if test x"$ax_cv_qt_test_result" = "xfailure"; then
-      AC_MSG_ERROR([Failed to find matching components of a complete
-                  Qt installation. Try using more options,
-                  see ./configure --help.])
-    fi
-
-    rm -f ax_qt_test.h moc_ax_qt_test.$ac_ext moc_ax_qt_test.o \
-          ax_qt_main.$ac_ext ax_qt_main.o ax_qt_main
-  fi
-])
-
-dnl Internal subroutine of AX_HAVE_QT
-dnl Set ax_qt_dir ax_qt_include_dir ax_qt_bin_dir ax_qt_lib_dir ax_qt_lib
-AC_DEFUN([AX_PATH_QT_DIRECT],
-[
-  ## Binary utilities ##
-  if test x"$with_Qt_bin_dir" != x; then
-    ax_qt_bin_dir=$with_Qt_bin_dir
-  fi
-  ## Look for header files ##
-  if test x"$with_Qt_include_dir" != x; then
-    ax_qt_include_dir="$with_Qt_include_dir"
-  else
-    # The following header file is expected to define QT_VERSION.
-    qt_direct_test_header=qglobal.h
-    # Look for the header file in a standard set of common directories.
-    ax_include_path_list="
-      /usr/include
-      `ls -dr ${QTDIR}/include 2>/dev/null`
-      `ls -dr /usr/include/qt* 2>/dev/null`
-      `ls -dr /usr/lib/qt*/include 2>/dev/null`
-      `ls -dr /usr/local/qt*/include 2>/dev/null`
-      `ls -dr /opt/qt*/include 2>/dev/null`
-      `ls -dr /Developer/qt*/include 2>/dev/null`
-    "
-    for ax_dir in $ax_include_path_list; do
-      if test -r "$ax_dir/$qt_direct_test_header"; then
-        ax_dirs="$ax_dirs $ax_dir"
-      fi
-    done
-    # Now look for the newest in this list
-    ax_prev_ver=0
-    for ax_dir in $ax_dirs; do
-      ax_this_ver=`egrep -w '#define QT_VERSION' $ax_dir/$qt_direct_test_header | sed s/'#define QT_VERSION'//`
-      if expr $ax_this_ver '>' $ax_prev_ver > /dev/null; then
-        ax_qt_include_dir=$ax_dir
-        ax_prev_ver=$ax_this_ver
-      fi
-    done
-  fi dnl Found header files.
-
-  # Are these headers located in a traditional Trolltech installation?
-  # That would be $ax_qt_include_dir stripped from its last element:
-  ax_possible_qt_dir=`dirname $ax_qt_include_dir`
-  if (test -x $ax_possible_qt_dir/bin/moc) &&
-     ((ls $ax_possible_qt_dir/lib/libQt* > /dev/null 2>/dev/null) ||
-      (ls $ax_possible_qt_dir/lib64/libQt* > /dev/null 2>/dev/null)); then
-    # Then the rest is a piece of cake
-    ax_qt_dir=$ax_possible_qt_dir
-    ax_qt_bin_dir="$ax_qt_dir/bin"
-    if test x"$with_Qt_lib_dir" != x; then
-      ax_qt_lib_dir="$with_Qt_lib_dir"
-    else
-      if (test -d $ax_qt_dir/lib64); then
-	ax_qt_lib_dir="$ax_qt_dir/lib64"
-      else
-	ax_qt_lib_dir="$ax_qt_dir/lib"
-      fi
-    fi
-    # Only look for lib if the user did not supply it already
-    if test x"$ax_qt_lib" = xNO; then
-      ax_qt_lib="`ls $ax_qt_lib_dir/libQt* | sed -n 1p |
-                   sed s@$ax_qt_lib_dir/lib@@ | [sed s@[.].*@@]`"
-    fi
-    ax_qt_LIBS="-L$ax_qt_lib_dir -l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-  else
-    # There is no valid definition for $QTDIR as Trolltech likes to see it
-    ax_qt_dir=
-    ## Look for Qt library ##
-    if test x"$with_Qt_lib_dir" != x; then
-      ax_qt_lib_dir="$with_Qt_lib_dir"
-      # Only look for lib if the user did not supply it already
-      if test x"$ax_qt_lib" = xNO; then
-        ax_qt_lib="`ls $ax_qt_lib_dir/libQt* | sed -n 1p |
-                     sed s@$ax_qt_lib_dir/lib@@ | [sed s@[.].*@@]`"
-      fi
-      ax_qt_LIBS="-L$ax_qt_lib_dir -l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-    else
-      # Normally, when there is no traditional Trolltech installation,
-      # the library is installed in a place where the linker finds it
-      # automatically.
-      # If the user did not define the library name, try with qt
-      if test x"$ax_qt_lib" = xNO; then
-        ax_qt_lib=qt
-      fi
-      qt_direct_test_header=qapplication.h
-      qt_direct_test_main="
-        int argc;
-        char ** argv;
-        QApplication app(argc,argv);
-      "
-      # See if we find the library without any special options.
-      # Don't add top $LIBS permanently yet
-      ax_save_LIBS="$LIBS"
-      LIBS="-l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-      ax_qt_LIBS="$LIBS"
-      ax_save_CXXFLAGS="$CXXFLAGS"
-      CXXFLAGS="-I$ax_qt_include_dir -I$ax_qt_include_dir/Qt -I$ax_qt_include_dir/QtCore -I$ax_qt_include_dir/QtGui"
-      AC_TRY_LINK([#include <$qt_direct_test_header>],
-        $qt_direct_test_main,
-      [
-        # Success.
-        # We can link with no special library directory.
-        ax_qt_lib_dir=
-      ], [
-        # That did not work. Try the multi-threaded version
-        echo "Non-critical error, please neglect the above." >&AS_MESSAGE_LOG_FD
-        ax_qt_lib=qt-mt
-        LIBS="-l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-        AC_TRY_LINK([#include <$qt_direct_test_header>],
-          $qt_direct_test_main,
-        [
-          # Success.
-          # We can link with no special library directory.
-          ax_qt_lib_dir=
-        ], [
-          # That did not work. Try the OpenGL version
-          echo "Non-critical error, please neglect the above." >&AS_MESSAGE_LOG_FD
-          ax_qt_lib=qt-gl
-          LIBS="-l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-          AC_TRY_LINK([#include <$qt_direct_test_header>],
-            $qt_direct_test_main,
-          [
-            # Success.
-            # We can link with no special library directory.
-            ax_qt_lib_dir=
-          ], [
-            # That did not work. Maybe a library version I don't know about?
-            echo "Non-critical error, please neglect the above." >&AS_MESSAGE_LOG_FD
-            # Look for some Qt lib in a standard set of common directories.
-            ax_dir_list="
-              `echo $ax_qt_includes | sed ss/includess`
-              /lib
-	      /usr/lib64
-              /usr/lib
-	      /usr/local/lib64
-              /usr/local/lib
-	      /opt/lib64
-              /opt/lib
-              `ls -dr /usr/lib64/qt* 2>/dev/null`
-              `ls -dr /usr/lib64/qt*/lib64 2>/dev/null`
-              `ls -dr /usr/lib/qt* 2>/dev/null`
-              `ls -dr /usr/local/qt* 2>/dev/null`
-              `ls -dr /opt/qt* 2>/dev/null`
-            "
-            for ax_dir in $ax_dir_list; do
-              if ls $ax_dir/libQt* >/dev/null 2>/dev/null; then
-                # Gamble that it's the first one...
-                ax_qt_lib="`ls $ax_dir/libQt* | sed -n 1p |
-                            sed s@$ax_dir/lib@@ | sed s/[[.]].*//`"
-                ax_qt_lib_dir="$ax_dir"
-                break
-              fi
-            done
-            # Try with that one
-            LIBS="-l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-            AC_TRY_LINK([#include <$qt_direct_test_header>],
-              $qt_direct_test_main,
-            [
-              # Success.
-              # We can link with no special library directory.
-              ax_qt_lib_dir=
-            ], [
-             : # Leave ax_qt_lib_dir defined
-            ])
-          ])
-        ])
-      ])
-      if test x"$ax_qt_lib_dir" != x; then
-        ax_qt_LIBS="-L$ax_qt_lib_dir $LIBS"
-      else
-        ax_qt_LIBS="$LIBS"
-      fi
-      LIBS="$ax_save_LIBS"
-      CXXFLAGS="$ax_save_CXXFLAGS"
-    fi dnl $with_Qt_lib_dir was not given
-  fi dnl Done setting up for non-traditional Trolltech installation
-])
-
-#
-# SYNOPSIS
-#
-#   VL_LIB_READLINE
-#
-# DESCRIPTION
-#
-#   Searches for a readline compatible library. If found, defines
-#   `HAVE_LIBREADLINE'. If the found library has the `add_history'
-#   function, sets also `HAVE_READLINE_HISTORY'. Also checks for the
-#   locations of the necessary include files and sets `HAVE_READLINE_H'
-#   or `HAVE_READLINE_READLINE_H' and `HAVE_READLINE_HISTORY_H' or
-#   'HAVE_HISTORY_H' if the corresponding include files exists.
-#
-#   The libraries that may be readline compatible are `libedit',
-#   `libeditline' and `libreadline'. Sometimes we need to link a
-#   termcap library for readline to work, this macro tests these cases
-#   too by trying to link with `libtermcap', `libcurses' or
-#   `libncurses' before giving up.
-#
-#   Here is an example of how to use the information provided by this
-#   macro to perform the necessary includes or declarations in a C
-#   file:
-#
-#     #ifdef HAVE_LIBREADLINE
-#     #  if defined(HAVE_READLINE_READLINE_H)
-#     #    include <readline/readline.h>
-#     #  elif defined(HAVE_READLINE_H)
-#     #    include <readline.h>
-#     #  else /* !defined(HAVE_READLINE_H) */
-#     extern char *readline ();
-#     #  endif /* !defined(HAVE_READLINE_H) */
-#     char *cmdline = NULL;
-#     #else /* !defined(HAVE_READLINE_READLINE_H) */
-#       /* no readline */
-#     #endif /* HAVE_LIBREADLINE */
-#
-#     #ifdef HAVE_READLINE_HISTORY
-#     #  if defined(HAVE_READLINE_HISTORY_H)
-#     #    include <readline/history.h>
-#     #  elif defined(HAVE_HISTORY_H)
-#     #    include <history.h>
-#     #  else /* !defined(HAVE_HISTORY_H) */
-#     extern void add_history ();
-#     extern int write_history ();
-#     extern int read_history ();
-#     #  endif /* defined(HAVE_READLINE_HISTORY_H) */
-#       /* no history */
-#     #endif /* HAVE_READLINE_HISTORY */
-#
-# LAST MODIFICATION
-#
-#   2002-04-04
-#
-# COPYLEFT
-#
-#   Copyright (c) 2002 Ville Laurikari <vl@iki.fi>
-#
-#   Copying and distribution of this file, with or without
-#   modification, are permitted in any medium without royalty provided
-#   the copyright notice and this notice are preserved.
-
-AC_DEFUN([VL_LIB_READLINE], [
-  AC_CACHE_CHECK([for a readline compatible library],
-                 vl_cv_lib_readline, [
-    ORIG_LIBS="$LIBS"
-    for readline_lib in readline edit editline; do
-      for termcap_lib in "" termcap curses ncurses; do
-        if test -z "$termcap_lib"; then
-          TRY_LIB="-l$readline_lib"
-        else
-          TRY_LIB="-l$readline_lib -l$termcap_lib"
-        fi
-        LIBS="$ORIG_LIBS $TRY_LIB"
-        AC_TRY_LINK_FUNC(readline, vl_cv_lib_readline="$TRY_LIB")
-        if test -n "$vl_cv_lib_readline"; then
-          break
-        fi
-      done
-      if test -n "$vl_cv_lib_readline"; then
-        break
-      fi
-    done
-    if test -z "$vl_cv_lib_readline"; then
-      vl_cv_lib_readline="no"
-      LIBS="$ORIG_LIBS"
-    fi
-  ])
-
-  if test "$vl_cv_lib_readline" != "no"; then
-    AC_DEFINE(HAVE_LIBREADLINE, 1,
-              [Define if you have a readline compatible library])
-    AC_CHECK_HEADERS(readline.h readline/readline.h)
-    AC_CACHE_CHECK([whether readline supports history],
-                   vl_cv_lib_readline_history, [
-      vl_cv_lib_readline_history="no"
-      AC_TRY_LINK_FUNC(add_history, vl_cv_lib_readline_history="yes")
-    ])
-    if test "$vl_cv_lib_readline_history" = "yes"; then
-      AC_DEFINE(HAVE_READLINE_HISTORY, 1,
-                [Define if your readline library has \`add_history'])
-      AC_CHECK_HEADERS(history.h readline/history.h)
-    fi
-  fi
-])dnl
-
-# Copyright (C) 2002-2012 Free Software Foundation, Inc.
+# Copyright (C) 2002, 2003, 2005, 2006, 2007, 2008  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
-
-# serial 8
 
 # AM_AUTOMAKE_VERSION(VERSION)
 # ----------------------------
@@ -735,10 +31,10 @@ AC_DEFUN([VL_LIB_READLINE], [
 # generated from the m4 files accompanying Automake X.Y.
 # (This private macro should not be called outside this file.)
 AC_DEFUN([AM_AUTOMAKE_VERSION],
-[am__api_version='1.12'
+[am__api_version='1.11'
 dnl Some users find AM_AUTOMAKE_VERSION and mistake it for a way to
 dnl require some minimum version.  Point them to the right macro.
-m4_if([$1], [1.12], [],
+m4_if([$1], [1.11.1], [],
       [AC_FATAL([Do not call $0, use AM_INIT_AUTOMAKE([$1]).])])dnl
 ])
 
@@ -754,24 +50,22 @@ m4_define([_AM_AUTOCONF_VERSION], [])
 # Call AM_AUTOMAKE_VERSION and AM_AUTOMAKE_VERSION so they can be traced.
 # This function is AC_REQUIREd by AM_INIT_AUTOMAKE.
 AC_DEFUN([AM_SET_CURRENT_AUTOMAKE_VERSION],
-[AM_AUTOMAKE_VERSION([1.12])dnl
+[AM_AUTOMAKE_VERSION([1.11.1])dnl
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
 _AM_AUTOCONF_VERSION(m4_defn([AC_AUTOCONF_VERSION]))])
 
 # AM_AUX_DIR_EXPAND                                         -*- Autoconf -*-
 
-# Copyright (C) 2001-2012 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 2
-
 # For projects using AC_CONFIG_AUX_DIR([foo]), Autoconf sets
-# $ac_aux_dir to '$srcdir/foo'.  In other projects, it is set to
-# '$srcdir', '$srcdir/..', or '$srcdir/../..'.
+# $ac_aux_dir to `$srcdir/foo'.  In other projects, it is set to
+# `$srcdir', `$srcdir/..', or `$srcdir/../..'.
 #
 # Of course, Automake must honor this variable whenever it calls a
 # tool from the auxiliary directory.  The problem is that $srcdir (and
@@ -790,7 +84,7 @@ _AM_AUTOCONF_VERSION(m4_defn([AC_AUTOCONF_VERSION]))])
 #
 # The reason of the latter failure is that $top_srcdir and $ac_aux_dir
 # are both prefixed by $srcdir.  In an in-source build this is usually
-# harmless because $srcdir is '.', but things will broke when you
+# harmless because $srcdir is `.', but things will broke when you
 # start a VPATH build or use an absolute $srcdir.
 #
 # So we could use something similar to $top_srcdir/$ac_aux_dir/missing,
@@ -816,21 +110,22 @@ am_aux_dir=`cd $ac_aux_dir && pwd`
 
 # AM_CONDITIONAL                                            -*- Autoconf -*-
 
-# Copyright (C) 1997-2012 Free Software Foundation, Inc.
+# Copyright (C) 1997, 2000, 2001, 2003, 2004, 2005, 2006, 2008
+# Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 10
+# serial 9
 
 # AM_CONDITIONAL(NAME, SHELL-CONDITION)
 # -------------------------------------
 # Define a conditional.
 AC_DEFUN([AM_CONDITIONAL],
-[AC_PREREQ([2.52])dnl
- m4_if([$1], [TRUE],  [AC_FATAL([$0: invalid condition: $1])],
-       [$1], [FALSE], [AC_FATAL([$0: invalid condition: $1])])dnl
+[AC_PREREQ(2.52)dnl
+ ifelse([$1], [TRUE],  [AC_FATAL([$0: invalid condition: $1])],
+	[$1], [FALSE], [AC_FATAL([$0: invalid condition: $1])])dnl
 AC_SUBST([$1_TRUE])dnl
 AC_SUBST([$1_FALSE])dnl
 _AM_SUBST_NOTMAKE([$1_TRUE])dnl
@@ -849,15 +144,16 @@ AC_CONFIG_COMMANDS_PRE(
 Usually this means the macro was only invoked conditionally.]])
 fi])])
 
-# Copyright (C) 1999-2012 Free Software Foundation, Inc.
+# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2009
+# Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 16
+# serial 10
 
-# There are a few dirty hacks below to avoid letting 'AC_PROG_CC' be
+# There are a few dirty hacks below to avoid letting `AC_PROG_CC' be
 # written in clear, in which case automake, when reading aclocal.m4,
 # will think it sees a *use*, and therefore will trigger all it's
 # C support machinery.  Also note that it means that autoscan, seeing
@@ -880,12 +176,12 @@ AC_REQUIRE([AM_OUTPUT_DEPENDENCY_COMMANDS])dnl
 AC_REQUIRE([AM_MAKE_INCLUDE])dnl
 AC_REQUIRE([AM_DEP_TRACK])dnl
 
-m4_if([$1], [CC],   [depcc="$CC"   am_compiler_list=],
-      [$1], [CXX],  [depcc="$CXX"  am_compiler_list=],
-      [$1], [OBJC], [depcc="$OBJC" am_compiler_list='gcc3 gcc'],
-      [$1], [UPC],  [depcc="$UPC"  am_compiler_list=],
-      [$1], [GCJ],  [depcc="$GCJ"  am_compiler_list='gcc3 gcc'],
-                    [depcc="$$1"   am_compiler_list=])
+ifelse([$1], CC,   [depcc="$CC"   am_compiler_list=],
+       [$1], CXX,  [depcc="$CXX"  am_compiler_list=],
+       [$1], OBJC, [depcc="$OBJC" am_compiler_list='gcc3 gcc'],
+       [$1], UPC,  [depcc="$UPC"  am_compiler_list=],
+       [$1], GCJ,  [depcc="$GCJ"  am_compiler_list='gcc3 gcc'],
+                   [depcc="$$1"   am_compiler_list=])
 
 AC_CACHE_CHECK([dependency style of $depcc],
                [am_cv_$1_dependencies_compiler_type],
@@ -893,9 +189,8 @@ AC_CACHE_CHECK([dependency style of $depcc],
   # We make a subdir and do the tests there.  Otherwise we can end up
   # making bogus files that we don't know about and never remove.  For
   # instance it was reported that on HP-UX the gcc test will end up
-  # making a dummy file named 'D' -- because '-MD' means "put the output
-  # in D".
-  rm -rf conftest.dir
+  # making a dummy file named `D' -- because `-MD' means `put the output
+  # in D'.
   mkdir conftest.dir
   # Copy depcomp to subdir because otherwise we won't find it if we're
   # using a relative directory.
@@ -934,16 +229,16 @@ AC_CACHE_CHECK([dependency style of $depcc],
     : > sub/conftest.c
     for i in 1 2 3 4 5 6; do
       echo '#include "conftst'$i'.h"' >> sub/conftest.c
-      # Using ": > sub/conftst$i.h" creates only sub/conftst1.h with
-      # Solaris 10 /bin/sh.
-      echo '/* dummy */' > sub/conftst$i.h
+      # Using `: > sub/conftst$i.h' creates only sub/conftst1.h with
+      # Solaris 8's {/usr,}/bin/sh.
+      touch sub/conftst$i.h
     done
     echo "${am__include} ${am__quote}sub/conftest.Po${am__quote}" > confmf
 
-    # We check with '-c' and '-o' for the sake of the "dashmstdout"
+    # We check with `-c' and `-o' for the sake of the "dashmstdout"
     # mode.  It turns out that the SunPro C++ compiler does not properly
-    # handle '-M -o', and we need to detect this.  Also, some Intel
-    # versions had trouble with output in subdirs.
+    # handle `-M -o', and we need to detect this.  Also, some Intel
+    # versions had trouble with output in subdirs
     am__obj=sub/conftest.${OBJEXT-o}
     am__minus_obj="-o $am__obj"
     case $depmode in
@@ -952,16 +247,16 @@ AC_CACHE_CHECK([dependency style of $depcc],
       test "$am__universal" = false || continue
       ;;
     nosideeffect)
-      # After this tag, mechanisms are not by side-effect, so they'll
-      # only be used when explicitly requested.
+      # after this tag, mechanisms are not by side-effect, so they'll
+      # only be used when explicitly requested
       if test "x$enable_dependency_tracking" = xyes; then
 	continue
       else
 	break
       fi
       ;;
-    msvc7 | msvc7msys | msvisualcpp | msvcmsys)
-      # This compiler won't grok '-c -o', but also, the minuso test has
+    msvisualcpp | msvcmsys)
+      # This compiler won't grok `-c -o', but also, the minuso test has
       # not run yet.  These depmodes are late enough in the game, and
       # so weak that their functioning should not be impacted.
       am__obj=conftest.${OBJEXT-o}
@@ -1009,7 +304,7 @@ AM_CONDITIONAL([am__fastdep$1], [
 # AM_SET_DEPDIR
 # -------------
 # Choose a directory name for dependency files.
-# This macro is AC_REQUIREd in _AM_DEPENDENCIES.
+# This macro is AC_REQUIREd in _AM_DEPENDENCIES
 AC_DEFUN([AM_SET_DEPDIR],
 [AC_REQUIRE([AM_SET_LEADING_DOT])dnl
 AC_SUBST([DEPDIR], ["${am__leading_dot}deps"])dnl
@@ -1019,34 +314,28 @@ AC_SUBST([DEPDIR], ["${am__leading_dot}deps"])dnl
 # AM_DEP_TRACK
 # ------------
 AC_DEFUN([AM_DEP_TRACK],
-[AC_ARG_ENABLE([dependency-tracking], [dnl
-AS_HELP_STRING(
-  [--enable-dependency-tracking],
-  [do not reject slow dependency extractors])
-AS_HELP_STRING(
-  [--disable-dependency-tracking],
-  [speeds up one-time build])])
+[AC_ARG_ENABLE(dependency-tracking,
+[  --disable-dependency-tracking  speeds up one-time build
+  --enable-dependency-tracking   do not reject slow dependency extractors])
 if test "x$enable_dependency_tracking" != xno; then
   am_depcomp="$ac_aux_dir/depcomp"
   AMDEPBACKSLASH='\'
-  am__nodep='_no'
 fi
 AM_CONDITIONAL([AMDEP], [test "x$enable_dependency_tracking" != xno])
 AC_SUBST([AMDEPBACKSLASH])dnl
 _AM_SUBST_NOTMAKE([AMDEPBACKSLASH])dnl
-AC_SUBST([am__nodep])dnl
-_AM_SUBST_NOTMAKE([am__nodep])dnl
 ])
 
 # Generate code to set up dependency tracking.              -*- Autoconf -*-
 
-# Copyright (C) 1999-2012 Free Software Foundation, Inc.
+# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2008
+# Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 6
+#serial 5
 
 # _AM_OUTPUT_DEPENDENCY_COMMANDS
 # ------------------------------
@@ -1065,7 +354,7 @@ AC_DEFUN([_AM_OUTPUT_DEPENDENCY_COMMANDS],
     # Strip MF so we end up with the name of the file.
     mf=`echo "$mf" | sed -e 's/:.*$//'`
     # Check whether this is an Automake generated Makefile or not.
-    # We used to match only the files named 'Makefile.in', but
+    # We used to match only the files named `Makefile.in', but
     # some people rename them; so instead we look at the file content.
     # Grep'ing the first line is not enough: some people post-process
     # each Makefile.in and add a new line on top of each file to say so.
@@ -1077,19 +366,21 @@ AC_DEFUN([_AM_OUTPUT_DEPENDENCY_COMMANDS],
       continue
     fi
     # Extract the definition of DEPDIR, am__include, and am__quote
-    # from the Makefile without running 'make'.
+    # from the Makefile without running `make'.
     DEPDIR=`sed -n 's/^DEPDIR = //p' < "$mf"`
     test -z "$DEPDIR" && continue
     am__include=`sed -n 's/^am__include = //p' < "$mf"`
     test -z "am__include" && continue
     am__quote=`sed -n 's/^am__quote = //p' < "$mf"`
+    # When using ansi2knr, U may be empty or an underscore; expand it
+    U=`sed -n 's/^U = //p' < "$mf"`
     # Find all dependency output files, they are included files with
     # $(DEPDIR) in their names.  We invoke sed twice because it is the
     # simplest approach to changing $(DEPDIR) to its actual value in the
     # expansion.
     for file in `sed -n "
       s/^$am__include $am__quote\(.*(DEPDIR).*\)$am__quote"'$/\1/p' <"$mf" | \
-	 sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g'`; do
+	 sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g' -e 's/\$U/'"$U"'/g'`; do
       # Make sure the directory exists.
       test -f "$dirpart/$file" && continue
       fdir=`AS_DIRNAME(["$file"])`
@@ -1107,7 +398,7 @@ AC_DEFUN([_AM_OUTPUT_DEPENDENCY_COMMANDS],
 # This macro should only be invoked once -- use via AC_REQUIRE.
 #
 # This code is only required when automatic dependency tracking
-# is enabled.  FIXME.  This creates each '.P' file that we will
+# is enabled.  FIXME.  This creates each `.P' file that we will
 # need in order to bootstrap the dependency handling code.
 AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
 [AC_CONFIG_COMMANDS([depfiles],
@@ -1117,13 +408,14 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
 
 # Do all the work for Automake.                             -*- Autoconf -*-
 
-# Copyright (C) 1996-2012 Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+# 2005, 2006, 2008, 2009 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 18
+# serial 16
 
 # This macro actually does too much.  Some checks are only needed if
 # your package does certain things.  But this isn't really a big deal.
@@ -1174,25 +466,23 @@ m4_ifval([$2],
  AC_SUBST([VERSION], [$2])],
 [_AM_SET_OPTIONS([$1])dnl
 dnl Diagnose old-style AC_INIT with new-style AM_AUTOMAKE_INIT.
-m4_if(
-  m4_ifdef([AC_PACKAGE_NAME], [ok]):m4_ifdef([AC_PACKAGE_VERSION], [ok]),
-  [ok:ok],,
+m4_if(m4_ifdef([AC_PACKAGE_NAME], 1)m4_ifdef([AC_PACKAGE_VERSION], 1), 11,,
   [m4_fatal([AC_INIT should be called with package and version arguments])])dnl
  AC_SUBST([PACKAGE], ['AC_PACKAGE_TARNAME'])dnl
  AC_SUBST([VERSION], ['AC_PACKAGE_VERSION'])])dnl
 
 _AM_IF_OPTION([no-define],,
-[AC_DEFINE_UNQUOTED([PACKAGE], ["$PACKAGE"], [Name of package])
- AC_DEFINE_UNQUOTED([VERSION], ["$VERSION"], [Version number of package])])dnl
+[AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE", [Name of package])
+ AC_DEFINE_UNQUOTED(VERSION, "$VERSION", [Version number of package])])dnl
 
 # Some tools Automake needs.
 AC_REQUIRE([AM_SANITY_CHECK])dnl
 AC_REQUIRE([AC_ARG_PROGRAM])dnl
-AM_MISSING_PROG([ACLOCAL], [aclocal-${am__api_version}])
-AM_MISSING_PROG([AUTOCONF], [autoconf])
-AM_MISSING_PROG([AUTOMAKE], [automake-${am__api_version}])
-AM_MISSING_PROG([AUTOHEADER], [autoheader])
-AM_MISSING_PROG([MAKEINFO], [makeinfo])
+AM_MISSING_PROG(ACLOCAL, aclocal-${am__api_version})
+AM_MISSING_PROG(AUTOCONF, autoconf)
+AM_MISSING_PROG(AUTOMAKE, automake-${am__api_version})
+AM_MISSING_PROG(AUTOHEADER, autoheader)
+AM_MISSING_PROG(MAKEINFO, makeinfo)
 AC_REQUIRE([AM_PROG_INSTALL_SH])dnl
 AC_REQUIRE([AM_PROG_INSTALL_STRIP])dnl
 AC_REQUIRE([AM_PROG_MKDIR_P])dnl
@@ -1206,28 +496,28 @@ _AM_IF_OPTION([tar-ustar], [_AM_PROG_TAR([ustar])],
 			     [_AM_PROG_TAR([v7])])])
 _AM_IF_OPTION([no-dependencies],,
 [AC_PROVIDE_IFELSE([AC_PROG_CC],
-		  [_AM_DEPENDENCIES([CC])],
+		  [_AM_DEPENDENCIES(CC)],
 		  [define([AC_PROG_CC],
-			  defn([AC_PROG_CC])[_AM_DEPENDENCIES([CC])])])dnl
+			  defn([AC_PROG_CC])[_AM_DEPENDENCIES(CC)])])dnl
 AC_PROVIDE_IFELSE([AC_PROG_CXX],
-		  [_AM_DEPENDENCIES([CXX])],
+		  [_AM_DEPENDENCIES(CXX)],
 		  [define([AC_PROG_CXX],
-			  defn([AC_PROG_CXX])[_AM_DEPENDENCIES([CXX])])])dnl
+			  defn([AC_PROG_CXX])[_AM_DEPENDENCIES(CXX)])])dnl
 AC_PROVIDE_IFELSE([AC_PROG_OBJC],
-		  [_AM_DEPENDENCIES([OBJC])],
+		  [_AM_DEPENDENCIES(OBJC)],
 		  [define([AC_PROG_OBJC],
-			  defn([AC_PROG_OBJC])[_AM_DEPENDENCIES([OBJC])])])dnl
+			  defn([AC_PROG_OBJC])[_AM_DEPENDENCIES(OBJC)])])dnl
 ])
 _AM_IF_OPTION([silent-rules], [AC_REQUIRE([AM_SILENT_RULES])])dnl
-dnl The 'parallel-tests' driver may need to know about EXEEXT, so add the
-dnl 'am__EXEEXT' conditional if _AM_COMPILER_EXEEXT was seen.  This macro
+dnl The `parallel-tests' driver may need to know about EXEEXT, so add the
+dnl `am__EXEEXT' conditional if _AM_COMPILER_EXEEXT was seen.  This macro
 dnl is hooked onto _AC_COMPILER_EXEEXT early, see below.
 AC_CONFIG_COMMANDS_PRE(dnl
 [m4_provide_if([_AM_COMPILER_EXEEXT],
   [AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])])])dnl
 ])
 
-dnl Hook into '_AC_COMPILER_EXEEXT' early to learn its expansion.  Do not
+dnl Hook into `_AC_COMPILER_EXEEXT' early to learn its expansion.  Do not
 dnl add the conditional right here, as _AC_COMPILER_EXEEXT may be further
 dnl mangled by Autoconf and run in a shell conditional statement.
 m4_define([_AC_COMPILER_EXEEXT],
@@ -1255,13 +545,11 @@ for _am_header in $config_headers :; do
 done
 echo "timestamp for $_am_arg" >`AS_DIRNAME(["$_am_arg"])`/stamp-h[]$_am_stamp_count])
 
-# Copyright (C) 2001-2012 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2003, 2005, 2008  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
-
-# serial 8
 
 # AM_PROG_INSTALL_SH
 # ------------------
@@ -1276,9 +564,9 @@ if test x"${install_sh}" != xset; then
     install_sh="\${SHELL} $am_aux_dir/install-sh"
   esac
 fi
-AC_SUBST([install_sh])])
+AC_SUBST(install_sh)])
 
-# Copyright (C) 2003-2012 Free Software Foundation, Inc.
+# Copyright (C) 2003, 2005  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1302,19 +590,20 @@ AC_SUBST([am__leading_dot])])
 # Add --enable-maintainer-mode option to configure.         -*- Autoconf -*-
 # From Jim Meyering
 
-# Copyright (C) 1996-2012 Free Software Foundation, Inc.
+# Copyright (C) 1996, 1998, 2000, 2001, 2002, 2003, 2004, 2005, 2008
+# Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 7
+# serial 5
 
 # AM_MAINTAINER_MODE([DEFAULT-MODE])
 # ----------------------------------
 # Control maintainer-specific portions of Makefiles.
-# Default is to disable them, unless 'enable' is passed literally.
-# For symmetry, 'disable' may be passed as well.  Anyway, the user
+# Default is to disable them, unless `enable' is passed literally.
+# For symmetry, `disable' may be passed as well.  Anyway, the user
 # can override the default with the --enable/--disable switch.
 AC_DEFUN([AM_MAINTAINER_MODE],
 [m4_case(m4_default([$1], [disable]),
@@ -1322,14 +611,13 @@ AC_DEFUN([AM_MAINTAINER_MODE],
        [disable], [m4_define([am_maintainer_other], [enable])],
        [m4_define([am_maintainer_other], [enable])
         m4_warn([syntax], [unexpected argument to AM@&t@_MAINTAINER_MODE: $1])])
-AC_MSG_CHECKING([whether to enable maintainer-specific portions of Makefiles])
+AC_MSG_CHECKING([whether to am_maintainer_other maintainer-specific portions of Makefiles])
   dnl maintainer-mode's default is 'disable' unless 'enable' is passed
   AC_ARG_ENABLE([maintainer-mode],
-    [AS_HELP_STRING([--]am_maintainer_other[-maintainer-mode],
-      am_maintainer_other[ make rules and dependencies not useful
-      (and sometimes confusing) to the casual installer])],
-    [USE_MAINTAINER_MODE=$enableval],
-    [USE_MAINTAINER_MODE=]m4_if(am_maintainer_other, [enable], [no], [yes]))
+[  --][am_maintainer_other][-maintainer-mode  am_maintainer_other make rules and dependencies not useful
+			  (and sometimes confusing) to the casual installer],
+      [USE_MAINTAINER_MODE=$enableval],
+      [USE_MAINTAINER_MODE=]m4_if(am_maintainer_other, [enable], [no], [yes]))
   AC_MSG_RESULT([$USE_MAINTAINER_MODE])
   AM_CONDITIONAL([MAINTAINER_MODE], [test $USE_MAINTAINER_MODE = yes])
   MAINT=$MAINTAINER_MODE_TRUE
@@ -1341,13 +629,13 @@ AU_DEFUN([jm_MAINTAINER_MODE], [AM_MAINTAINER_MODE])
 
 # Check to see how 'make' treats includes.	            -*- Autoconf -*-
 
-# Copyright (C) 2001-2012 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2002, 2003, 2005, 2009  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 5
+# serial 4
 
 # AM_MAKE_INCLUDE()
 # -----------------
@@ -1366,7 +654,7 @@ am__quote=
 _am_result=none
 # First try GNU make style include.
 echo "include confinc" > confmf
-# Ignore all kinds of additional output from 'make'.
+# Ignore all kinds of additional output from `make'.
 case `$am_make -s -f confmf 2> /dev/null` in #(
 *the\ am__doit\ target*)
   am__include=include
@@ -1393,13 +681,14 @@ rm -f confinc confmf
 
 # Fake the existence of programs that GNU maintainers use.  -*- Autoconf -*-
 
-# Copyright (C) 1997-2012 Free Software Foundation, Inc.
+# Copyright (C) 1997, 1999, 2000, 2001, 2003, 2004, 2005, 2008
+# Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 7
+# serial 6
 
 # AM_MISSING_PROG(NAME, PROGRAM)
 # ------------------------------
@@ -1429,21 +718,19 @@ if eval "$MISSING --run true"; then
   am_missing_run="$MISSING --run "
 else
   am_missing_run=
-  AC_MSG_WARN(['missing' script is too old or missing])
+  AC_MSG_WARN([`missing' script is too old or missing])
 fi
 ])
 
-# Copyright (C) 2003-2012 Free Software Foundation, Inc.
+# Copyright (C) 2003, 2004, 2005, 2006  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 2
-
 # AM_PROG_MKDIR_P
 # ---------------
-# Check for 'mkdir -p'.
+# Check for `mkdir -p'.
 AC_DEFUN([AM_PROG_MKDIR_P],
 [AC_PREREQ([2.60])dnl
 AC_REQUIRE([AC_PROG_MKDIR_P])dnl
@@ -1463,13 +750,13 @@ esac
 
 # Helper functions for option handling.                     -*- Autoconf -*-
 
-# Copyright (C) 2001-2012 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2002, 2003, 2005, 2008  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 6
+# serial 4
 
 # _AM_MANGLE_OPTION(NAME)
 # -----------------------
@@ -1477,13 +764,13 @@ AC_DEFUN([_AM_MANGLE_OPTION],
 [[_AM_OPTION_]m4_bpatsubst($1, [[^a-zA-Z0-9_]], [_])])
 
 # _AM_SET_OPTION(NAME)
-# --------------------
+# ------------------------------
 # Set option NAME.  Presently that only means defining a flag for this option.
 AC_DEFUN([_AM_SET_OPTION],
-[m4_define(_AM_MANGLE_OPTION([$1]), [1])])
+[m4_define(_AM_MANGLE_OPTION([$1]), 1)])
 
 # _AM_SET_OPTIONS(OPTIONS)
-# ------------------------
+# ----------------------------------
 # OPTIONS is a space-separated list of Automake options.
 AC_DEFUN([_AM_SET_OPTIONS],
 [m4_foreach_w([_AM_Option], [$1], [_AM_SET_OPTION(_AM_Option)])])
@@ -1494,13 +781,12 @@ AC_DEFUN([_AM_SET_OPTIONS],
 AC_DEFUN([_AM_IF_OPTION],
 [m4_ifset(_AM_MANGLE_OPTION([$1]), [$2], [$3])])
 
-# Copyright (C) 1999-2012 Free Software Foundation, Inc.
+# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009
+# Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
-
-# serial 9
 
 # AM_PATH_PYTHON([MINIMUM-VERSION], [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
 # ---------------------------------------------------------------------------
@@ -1529,10 +815,8 @@ AC_DEFUN([AM_PATH_PYTHON],
   dnl Find a Python interpreter.  Python versions prior to 2.0 are not
   dnl supported. (2.0 was released on October 16, 2000).
   m4_define_default([_AM_PYTHON_INTERPRETER_LIST],
-[python python2 python3 python3.2 python3.1 python3.0 python2.7 dnl
- python2.6 python2.5 python2.4 python2.3 python2.2 python2.1 python2.0])
-
-  AC_ARG_VAR([PYTHON], [the Python interpreter])
+                    [python python2 python3 python3.0 python2.5 python2.4 python2.3 python2.2 dnl
+python2.1 python2.0])
 
   m4_if([$1],[],[
     dnl No version check is needed.
@@ -1545,11 +829,10 @@ AC_DEFUN([AM_PATH_PYTHON],
     dnl A version check is needed.
     if test -n "$PYTHON"; then
       # If the user set $PYTHON, use it and don't search something else.
-      AC_MSG_CHECKING([whether $PYTHON version is >= $1])
+      AC_MSG_CHECKING([whether $PYTHON version >= $1])
       AM_PYTHON_CHECK_VERSION([$PYTHON], [$1],
-			      [AC_MSG_RESULT([yes])],
-			      [AC_MSG_RESULT([no])
-			       AC_MSG_ERROR([Python interpreter is too old])])
+			      [AC_MSG_RESULT(yes)],
+			      [AC_MSG_ERROR(too old)])
       am_display_PYTHON=$PYTHON
     else
       # Otherwise, try each interpreter until we find one that satisfies
@@ -1605,7 +888,9 @@ AC_DEFUN([AM_PATH_PYTHON],
   dnl   site-packages directory, not the python standard library
   dnl   directory like in previous automake betas.  This behavior
   dnl   is more consistent with lispdir.m4 for example.
-  dnl Query distutils for this directory.
+  dnl Query distutils for this directory.  distutils does not exist in
+  dnl Python 1.5, so we fall back to the hardcoded directory if it
+  dnl doesn't work.
   AC_CACHE_CHECK([for $am_display_PYTHON script directory],
     [am_cv_python_pythondir],
     [if test "x$prefix" = xNONE
@@ -1614,7 +899,8 @@ AC_DEFUN([AM_PATH_PYTHON],
      else
        am_py_prefix=$prefix
      fi
-     am_cv_python_pythondir=`$PYTHON -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_python_lib(0,0,prefix='$am_py_prefix'))" 2>/dev/null`
+     am_cv_python_pythondir=`$PYTHON -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_python_lib(0,0,prefix='$am_py_prefix'))" 2>/dev/null ||
+     echo "$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages"`
      case $am_cv_python_pythondir in
      $am_py_prefix*)
        am__strip_prefix=`echo "$am_py_prefix" | sed 's|.|.|g'`
@@ -1640,7 +926,9 @@ AC_DEFUN([AM_PATH_PYTHON],
 
   dnl pyexecdir -- directory for installing python extension modules
   dnl   (shared libraries)
-  dnl Query distutils for this directory.
+  dnl Query distutils for this directory.  distutils does not exist in
+  dnl Python 1.5, so we fall back to the hardcoded directory if it
+  dnl doesn't work.
   AC_CACHE_CHECK([for $am_display_PYTHON extension module directory],
     [am_cv_python_pyexecdir],
     [if test "x$exec_prefix" = xNONE
@@ -1649,7 +937,8 @@ AC_DEFUN([AM_PATH_PYTHON],
      else
        am_py_exec_prefix=$exec_prefix
      fi
-     am_cv_python_pyexecdir=`$PYTHON -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_python_lib(1,0,prefix='$am_py_exec_prefix'))" 2>/dev/null`
+     am_cv_python_pyexecdir=`$PYTHON -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_python_lib(1,0,prefix='$am_py_exec_prefix'))" 2>/dev/null ||
+     echo "$PYTHON_EXEC_PREFIX/lib/python$PYTHON_VERSION/site-packages"`
      case $am_cv_python_pyexecdir in
      $am_py_exec_prefix*)
        am__strip_prefix=`echo "$am_py_exec_prefix" | sed 's|.|.|g'`
@@ -1697,13 +986,11 @@ for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[[i]]
 sys.exit(sys.hexversion < minverhex)"
   AS_IF([AM_RUN_LOG([$1 -c "$prog"])], [$3], [$4])])
 
-# Copyright (C) 2001-2012 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
-
-# serial 1
 
 # AM_RUN_LOG(COMMAND)
 # -------------------
@@ -1718,18 +1005,22 @@ AC_DEFUN([AM_RUN_LOG],
 
 # Check to make sure that the build environment is sane.    -*- Autoconf -*-
 
-# Copyright (C) 1996-2012 Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 2000, 2001, 2003, 2005, 2008
+# Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 9
+# serial 5
 
 # AM_SANITY_CHECK
 # ---------------
 AC_DEFUN([AM_SANITY_CHECK],
 [AC_MSG_CHECKING([whether build environment is sane])
+# Just in case
+sleep 1
+echo timestamp > conftest.file
 # Reject unsafe characters in $srcdir or the absolute working directory
 # name.  Accept space and tab only in the latter.
 am_lf='
@@ -1740,40 +1031,32 @@ case `pwd` in
 esac
 case $srcdir in
   *[[\\\"\#\$\&\'\`$am_lf\ \	]]*)
-    AC_MSG_ERROR([unsafe srcdir value: '$srcdir']);;
+    AC_MSG_ERROR([unsafe srcdir value: `$srcdir']);;
 esac
 
-# Do 'set' in a subshell so we don't clobber the current shell's
+# Do `set' in a subshell so we don't clobber the current shell's
 # arguments.  Must try -L first in case configure is actually a
 # symlink; some systems play weird games with the mod time of symlinks
 # (eg FreeBSD returns the mod time of the symlink's containing
 # directory).
 if (
-   am_has_slept=no
-   for am_try in 1 2; do
-     echo "timestamp, slept: $am_has_slept" > conftest.file
-     set X `ls -Lt "$srcdir/configure" conftest.file 2> /dev/null`
-     if test "$[*]" = "X"; then
-	# -L didn't work.
-	set X `ls -t "$srcdir/configure" conftest.file`
-     fi
-     if test "$[*]" != "X $srcdir/configure conftest.file" \
-	&& test "$[*]" != "X conftest.file $srcdir/configure"; then
+   set X `ls -Lt "$srcdir/configure" conftest.file 2> /dev/null`
+   if test "$[*]" = "X"; then
+      # -L didn't work.
+      set X `ls -t "$srcdir/configure" conftest.file`
+   fi
+   rm -f conftest.file
+   if test "$[*]" != "X $srcdir/configure conftest.file" \
+      && test "$[*]" != "X conftest.file $srcdir/configure"; then
 
-	# If neither matched, then we have a broken ls.  This can happen
-	# if, for instance, CONFIG_SHELL is bash and it inherits a
-	# broken ls alias from the environment.  This has actually
-	# happened.  Such a system could not be considered "sane".
-	AC_MSG_ERROR([ls -t appears to fail.  Make sure there is not a broken
-  alias in your environment])
-     fi
-     if test "$[2]" = conftest.file || test $am_try -eq 2; then
-       break
-     fi
-     # Just in case.
-     sleep 1
-     am_has_slept=yes
-   done
+      # If neither matched, then we have a broken ls.  This can happen
+      # if, for instance, CONFIG_SHELL is bash and it inherits a
+      # broken ls alias from the environment.  This has actually
+      # happened.  Such a system could not be considered "sane".
+      AC_MSG_ERROR([ls -t appears to fail.  Make sure there is not a broken
+alias in your environment])
+   fi
+
    test "$[2]" = conftest.file
    )
 then
@@ -1783,61 +1066,43 @@ else
    AC_MSG_ERROR([newly created file is older than distributed files!
 Check your system clock])
 fi
-AC_MSG_RESULT([yes])
-# If we didn't sleep, we still need to ensure time stamps of config.status and
-# generated files are strictly newer.
-am_sleep_pid=
-if grep 'slept: no' conftest.file >/dev/null 2>&1; then
-  ( sleep 1 ) &
-  am_sleep_pid=$!
-fi
-AC_CONFIG_COMMANDS_PRE(
-  [AC_MSG_CHECKING([that generated files are newer than configure])
-   if test -n "$am_sleep_pid"; then
-     # Hide warnings about reused PIDs.
-     wait $am_sleep_pid 2>/dev/null
-   fi
-   AC_MSG_RESULT([done])])
-rm -f conftest.file
-])
+AC_MSG_RESULT(yes)])
 
-# Copyright (C) 2001-2012 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 2
-
 # AM_PROG_INSTALL_STRIP
 # ---------------------
-# One issue with vendor 'install' (even GNU) is that you can't
+# One issue with vendor `install' (even GNU) is that you can't
 # specify the program used to strip binaries.  This is especially
 # annoying in cross-compiling environments, where the build's strip
 # is unlikely to handle the host's binaries.
 # Fortunately install-sh will honor a STRIPPROG variable, so we
-# always use install-sh in "make install-strip", and initialize
+# always use install-sh in `make install-strip', and initialize
 # STRIPPROG with the value of the STRIP variable (set by the user).
 AC_DEFUN([AM_PROG_INSTALL_STRIP],
 [AC_REQUIRE([AM_PROG_INSTALL_SH])dnl
-# Installed binaries are usually stripped using 'strip' when the user
-# run "make install-strip".  However 'strip' might not be the right
+# Installed binaries are usually stripped using `strip' when the user
+# run `make install-strip'.  However `strip' might not be the right
 # tool to use in cross-compilation environments, therefore Automake
-# will honor the 'STRIP' environment variable to overrule this program.
-dnl Don't test for $cross_compiling = yes, because it might be 'maybe'.
+# will honor the `STRIP' environment variable to overrule this program.
+dnl Don't test for $cross_compiling = yes, because it might be `maybe'.
 if test "$cross_compiling" != no; then
   AC_CHECK_TOOL([STRIP], [strip], :)
 fi
 INSTALL_STRIP_PROGRAM="\$(install_sh) -c -s"
 AC_SUBST([INSTALL_STRIP_PROGRAM])])
 
-# Copyright (C) 2006-2012 Free Software Foundation, Inc.
+# Copyright (C) 2006, 2008  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 3
+# serial 2
 
 # _AM_SUBST_NOTMAKE(VARIABLE)
 # ---------------------------
@@ -1846,24 +1111,24 @@ AC_SUBST([INSTALL_STRIP_PROGRAM])])
 AC_DEFUN([_AM_SUBST_NOTMAKE])
 
 # AM_SUBST_NOTMAKE(VARIABLE)
-# --------------------------
+# ---------------------------
 # Public sister of _AM_SUBST_NOTMAKE.
 AC_DEFUN([AM_SUBST_NOTMAKE], [_AM_SUBST_NOTMAKE($@)])
 
 # Check how to create a tarball.                            -*- Autoconf -*-
 
-# Copyright (C) 2004-2012 Free Software Foundation, Inc.
+# Copyright (C) 2004, 2005  Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
-# serial 3
+# serial 2
 
 # _AM_PROG_TAR(FORMAT)
 # --------------------
 # Check how to create a tarball in format FORMAT.
-# FORMAT should be one of 'v7', 'ustar', or 'pax'.
+# FORMAT should be one of `v7', `ustar', or `pax'.
 #
 # Substitute a variable $(am__tar) that is a command
 # writing to stdout a FORMAT-tarball containing the directory
@@ -1874,11 +1139,10 @@ AC_DEFUN([AM_SUBST_NOTMAKE], [_AM_SUBST_NOTMAKE($@)])
 # a tarball read from stdin.
 #     $(am__untar) < result.tar
 AC_DEFUN([_AM_PROG_TAR],
-[# Always define AMTAR for backward compatibility.  Yes, it's still used
-# in the wild :-(  We should find a proper way to deprecate it ...
-AC_SUBST([AMTAR], ['$${TAR-tar}'])
+[# Always define AMTAR for backward compatibility.
+AM_MISSING_PROG([AMTAR], [tar])
 m4_if([$1], [v7],
-     [am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'],
+     [am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'],
      [m4_case([$1], [ustar],, [pax],,
               [m4_fatal([Unknown tar format])])
 AC_MSG_CHECKING([how to create a $1 tar archive])
@@ -1886,7 +1150,7 @@ AC_MSG_CHECKING([how to create a $1 tar archive])
 _am_tools='gnutar m4_if([$1], [ustar], [plaintar]) pax cpio none'
 _am_tools=${am_cv_prog_tar_$1-$_am_tools}
 # Do not fold the above two line into one, because Tru64 sh and
-# Solaris sh will not grok spaces in the rhs of '-'.
+# Solaris sh will not grok spaces in the rhs of `-'.
 for _am_tool in $_am_tools
 do
   case $_am_tool in
@@ -1947,8 +1211,11 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
+m4_include([config/ax_check_compiler_flags.m4])
+m4_include([config/ax_have_qt.m4])
 m4_include([config/libtool.m4])
 m4_include([config/ltoptions.m4])
 m4_include([config/ltsugar.m4])
 m4_include([config/ltversion.m4])
 m4_include([config/lt~obsolete.m4])
+m4_include([config/vl_lib_readline.m4])
