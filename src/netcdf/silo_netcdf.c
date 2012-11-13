@@ -439,7 +439,7 @@ db_cdf_NewToc(DBfile *_dbfile)
                 toc->nmatspecies++;
                 break;
             case DB_ARRAY:
-                toc->narrays++;
+                toc->narray++;
                 break;
             default:
                 toc->nobj++;
@@ -500,8 +500,8 @@ db_cdf_NewToc(DBfile *_dbfile)
         toc->matspecies_names = ALLOC_N(char *, toc->nmatspecies);
     }
 
-    if (toc->narrays > 0) {
-        toc->array_names = ALLOC_N(char *, toc->narrays);
+    if (toc->narray > 0) {
+        toc->array_names = ALLOC_N(char *, toc->narray);
     }
 
     if (toc->nobj > 0) {

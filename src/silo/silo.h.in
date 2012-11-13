@@ -748,16 +748,16 @@ typedef struct DBtoc_ {
     int            ndir;
 
     char         **array_names;
-    int            narrays;
+    int            narray;
 
     char         **mrgtree_names;
-    int            nmrgtrees;
+    int            nmrgtree;
 
     char         **groupelmap_names;
-    int            ngroupelmaps;
+    int            ngroupelmap;
 
     char         **mrgvar_names;
-    int            nmrgvars;
+    int            nmrgvar;
 
 } DBtoc;
 
@@ -1596,20 +1596,24 @@ typedef struct DBfile_pub {
 
     /* Public Methods */
     int            (*close)(struct DBfile *);
-    int            (*exist)(struct DBfile *, char *);
+    int            (*exist)(struct DBfile *, char const *);
     int            (*pause)(struct DBfile *);
     int            (*cont)(struct DBfile *);
     int            (*newtoc)(struct DBfile *);
-    DBObjectType   (*inqvartype)(struct DBfile *, char*);
+    DBObjectType   (*inqvartype)(struct DBfile *, char const *);
     int            (*uninstall)(struct DBfile *);
-    DBobject      *(*g_obj)(struct DBfile *, char *);
-    int            (*c_obj)(struct DBfile *, DBobject *, int);
-    int            (*w_obj)(struct DBfile *, DBobject *, int);
-    void          *(*g_comp)(struct DBfile *, char *, char *);
-    int            (*g_comptyp)(struct DBfile *, char *, char *);
-    int            (*w_comp)(struct DBfile *, DBobject *, char *, char *,
-                             char *, void const *, int, long *);
-    int            (*write) (struct DBfile *, char *, void *, int *, int, int);
+    DBobject      *(*g_obj)(struct DBfile *, char const *);
+    int            (*c_obj)(struct DBfile *, DBobject const *, int);
+    int            (*w_obj)(struct DBfile *, DBobject const *, int);
+    void          *(*g_comp)(struct DBfile *, char const *, char const *);
+    int            (*g_comptyp)(struct DBfile *, char const *, char const *);
+    int            (*w_comp)(struct DBfile *, DBobject *, char const *, char const *,
+                             char const *, void const *, int, long const *);
+    int            (*write) (struct DBfile *, char const *, void const *, int const *, int, int);
+
+
+
+
     int            (*writeslice)(struct DBfile *, char *, void *, int,
                                  int[], int[], int[], int[], int);
     void          *(*g_attr)(struct DBfile *, char *, char *);
@@ -1888,13 +1892,13 @@ SILO_API extern int      DBFilterRegistration(char const *, int (*init) (DBfile 
                                      int (*open) (DBfile *, char *));
 SILO_API extern void    *DBGetAtt(DBfile *, char const *, char const *);
 SILO_API extern DBobject *DBGetObject(DBfile *, char const *);
-SILO_API extern int      DBChangeObject(DBfile *, DBobject *);
-SILO_API extern int      DBWriteObject(DBfile *, DBobject *, int);
+SILO_API extern int      DBChangeObject(DBfile *, DBobject const *);
+SILO_API extern int      DBWriteObject(DBfile *, DBobject const *, int);
 SILO_API extern void    *DBGetComponent(DBfile *, char const *, char const *);
 SILO_API extern int      DBGetComponentType(DBfile *, char const *, char const *);
 SILO_API extern int      DBWriteComponent(DBfile *, DBobject *, char const *, char const *, char const *,
-                                 void const *, int, long *);
-SILO_API extern int      DBWrite(DBfile *, char const *, void *, int *, int, int);
+                                 void const *, int, long const *);
+SILO_API extern int      DBWrite(DBfile *, char const *, void const *, int const *, int, int);
 SILO_API extern int      DBWriteSlice(DBfile *, char const *, void *, int, int[], int[],
                              int[], int[], int);
 SILO_API extern DBfacelist *DBCalcExternalFacelist(int *, int, int, int *, int *, int,

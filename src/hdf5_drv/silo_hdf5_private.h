@@ -129,11 +129,11 @@ SILO_CALLBACK int db_hdf5_WriteSlice (DBfile*, char*, void*, int, int[], int[],
 SILO_CALLBACK DBobject *db_hdf5_GetObject(DBfile *_dbfile, char *name);
 SILO_CALLBACK int db_hdf5_GetComponentNames(DBfile *_dbfile, char *objname,
                                        char ***comp_names, char ***file_names);
-SILO_CALLBACK int db_hdf5_WriteObject(DBfile *_dbfile, DBobject *obj, int flags);
+SILO_CALLBACK int db_hdf5_WriteObject(DBfile *_dbfile, DBobject const *obj, int flags);
 SILO_CALLBACK int db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj,
-                                    char *compname, char *prefix,
-                                    char *datatype, void const *data, int rank,
-                                    long _size[]);
+                                    char const *compname, char const *prefix,
+                                    char const *datatype, void const *data, int rank,
+                                    long const _size[]);
 SILO_CALLBACK int db_hdf5_GetComponentType(DBfile *_dbfile, char *objname,
                                     char *compname);
 SILO_CALLBACK void *db_hdf5_GetComponent(DBfile *_dbfile, char *objname,

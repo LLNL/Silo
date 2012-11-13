@@ -185,9 +185,9 @@ main(int argc, char *argv[])
  *   Mark C. Miller, Wed Sep 23 11:55:48 PDT 2009
  *   Added misc. variables.
  ********************************************************************/
-#define PRINT_OBJS(theFile, theToc, theClass, Indent, S)        \
-    nobjs += theToc->n ## theClass ## S;                                \
-    for (i = 0; i < theToc->n ## theClass ## S; i++)            \
+#define PRINT_OBJS(theFile, theToc, theClass, Indent)                \
+    nobjs += theToc->n ## theClass;                                  \
+    for (i = 0; i < theToc->n ## theClass; i++)                      \
         PrintObjectComponentsType(theFile, theToc->theClass ## _names[i], Indent);
 
 int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
@@ -240,29 +240,29 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
 
     /* Print the objects in the top directory. */
     nobjs = ndirs; 
-    PRINT_OBJS(dbfile, dbtoc, obj, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, defvars, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, array, indent, s);
-    PRINT_OBJS(dbfile, dbtoc, var, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, curve, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, ptmesh, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, ptvar, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, qmesh, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, qvar, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, ucdmesh, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, ucdvar, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, csgmesh, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, csgvar, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, mat, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, matspecies, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, multimesh, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, multimeshadj, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, multivar, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, multimat, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, multimatspecies, indent, /*void*/);
-    PRINT_OBJS(dbfile, dbtoc, mrgtree, indent, s);
-    PRINT_OBJS(dbfile, dbtoc, mrgvar, indent, s);
-    PRINT_OBJS(dbfile, dbtoc, groupelmap, indent, s);
+    PRINT_OBJS(dbfile, dbtoc, obj, indent);
+    PRINT_OBJS(dbfile, dbtoc, defvars, indent);
+    PRINT_OBJS(dbfile, dbtoc, array, indent);
+    PRINT_OBJS(dbfile, dbtoc, var, indent);
+    PRINT_OBJS(dbfile, dbtoc, curve, indent);
+    PRINT_OBJS(dbfile, dbtoc, ptmesh, indent);
+    PRINT_OBJS(dbfile, dbtoc, ptvar, indent);
+    PRINT_OBJS(dbfile, dbtoc, qmesh, indent);
+    PRINT_OBJS(dbfile, dbtoc, qvar, indent);
+    PRINT_OBJS(dbfile, dbtoc, ucdmesh, indent);
+    PRINT_OBJS(dbfile, dbtoc, ucdvar, indent);
+    PRINT_OBJS(dbfile, dbtoc, csgmesh, indent);
+    PRINT_OBJS(dbfile, dbtoc, csgvar, indent);
+    PRINT_OBJS(dbfile, dbtoc, mat, indent);
+    PRINT_OBJS(dbfile, dbtoc, matspecies, indent);
+    PRINT_OBJS(dbfile, dbtoc, multimesh, indent);
+    PRINT_OBJS(dbfile, dbtoc, multimeshadj, indent);
+    PRINT_OBJS(dbfile, dbtoc, multivar, indent);
+    PRINT_OBJS(dbfile, dbtoc, multimat, indent);
+    PRINT_OBJS(dbfile, dbtoc, multimatspecies, indent);
+    PRINT_OBJS(dbfile, dbtoc, mrgtree, indent);
+    PRINT_OBJS(dbfile, dbtoc, mrgvar, indent);
+    PRINT_OBJS(dbfile, dbtoc, groupelmap, indent);
     return nobjs;
 }
 

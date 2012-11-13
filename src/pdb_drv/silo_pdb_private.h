@@ -160,9 +160,9 @@ PRIVATE int db_pdb_getobjinfo (PDBfile *, char *, char *, int *);
 PRIVATE int db_pdb_getvarinfo (PDBfile *, char *, char *, int *, int *, int);
 
 #ifdef PDB_WRITE
-SILO_CALLBACK int db_pdb_WriteObject (DBfile *, DBobject *, int);
-SILO_CALLBACK int db_pdb_WriteComponent (DBfile *, DBobject *, char *,
-				    char *, char *, void const *, int, long *);
+SILO_CALLBACK int db_pdb_WriteObject (DBfile *, DBobject const *, int);
+SILO_CALLBACK int db_pdb_WriteComponent (DBfile *, DBobject *, char const *,
+				    char const *, char const *, void const *, int, long const *);
 SILO_CALLBACK int db_pdb_MkDir (DBfile *, char *);
 SILO_CALLBACK int db_pdb_PutCompoundarray (DBfile *, char *, char **, int *,
 				      int, void *, int, int, DBoptlist *);
@@ -243,7 +243,7 @@ SILO_CALLBACK int db_pdb_PutMrgvar(DBfile *dbfile, char const *name,
                              int nregns, char **reg_pnames,
                              int datatype, void **data, DBoptlist *opts);
 
-SILO_CALLBACK int db_pdb_Write (DBfile *, char *, void *, int *, int, int);
+SILO_CALLBACK int db_pdb_Write (DBfile *, char const *, void const *, int const *, int, int);
 SILO_CALLBACK int db_pdb_WriteSlice (DBfile*, char*, void*, int, int[], int[],
 				int[], int[], int);
 
@@ -314,7 +314,7 @@ PRIVATE int PJ_print_group (PJgroup *, FILE *);
 PRIVATE int PJ_put_group (PDBfile*,PJgroup*, int);
 PRIVATE int PJ_write (PDBfile*,char*,char*,void*) ;
 PRIVATE int PJ_write_len (PDBfile*,char*,char*,void const *,int,long*);
-PRIVATE int PJ_write_alt (PDBfile*,char*,char*,void*,int,long*);
+PRIVATE int PJ_write_alt (PDBfile*,char const *,char const *,void const *,int,long const *);
 #endif /* PDB_WRITE */
 
 #endif /* !SILO_PDB_PRIVATE_H */

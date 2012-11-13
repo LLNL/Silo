@@ -813,16 +813,16 @@ db_AllocToc(void)
     toc->ndir = 0;
 
     toc->array_names = NULL;
-    toc->narrays = 0;
+    toc->narray = 0;
 
     toc->mrgtree_names = NULL;
-    toc->nmrgtrees = 0;
+    toc->nmrgtree = 0;
 
     toc->groupelmap_names = NULL;
-    toc->ngroupelmaps = 0;
+    toc->ngroupelmap = 0;
 
     toc->mrgvar_names = NULL;
-    toc->nmrgvars = 0;
+    toc->nmrgvar = 0;
 
     return(toc);
 }
@@ -1039,36 +1039,36 @@ db_FreeToc(DBfile *dbfile)
         }
     }
 
-    if (toc->narrays > 0) {
+    if (toc->narray > 0) {
         if (toc->array_names) {
-            for (i = 0; i < toc->narrays; i++) {
+            for (i = 0; i < toc->narray; i++) {
                 FREE(toc->array_names[i]);
             }
             FREE(toc->array_names);
         }
     }
 
-    if (toc->nmrgtrees > 0) {
+    if (toc->nmrgtree > 0) {
         if (toc->mrgtree_names) {
-            for (i = 0; i < toc->nmrgtrees; i++) {
+            for (i = 0; i < toc->nmrgtree; i++) {
                 FREE(toc->mrgtree_names[i]);
             }
             FREE(toc->mrgtree_names);
         }
     }
 
-    if (toc->ngroupelmaps > 0) {
+    if (toc->ngroupelmap > 0) {
         if (toc->groupelmap_names) {
-            for (i = 0; i < toc->ngroupelmaps; i++) {
+            for (i = 0; i < toc->ngroupelmap; i++) {
                 FREE(toc->groupelmap_names[i]);
             }
             FREE(toc->groupelmap_names);
         }
     }
 
-    if (toc->nmrgvars > 0) {
+    if (toc->nmrgvar > 0) {
         if (toc->mrgvar_names) {
-            for (i = 0; i < toc->nmrgvars; i++) {
+            for (i = 0; i < toc->nmrgvar; i++) {
                 FREE(toc->mrgvar_names[i]);
             }
             FREE(toc->mrgvar_names);
@@ -1690,9 +1690,9 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
             }
         }
 
-        if (ls_array && toc->narrays > 0) {
+        if (ls_array && toc->narray > 0) {
             if (build_list) {
-                for (i = 0; i < toc->narrays; i++) {
+                for (i = 0; i < toc->narray; i++) {
                     list[*nlist] = ALLOC_N(char,
                                strlen         (toc->array_names[i]) + 1);
 
@@ -1700,8 +1700,8 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
                 }
             }
             else {
-                printf("%7d compound arrays:\n", toc->narrays);
-                _DBstrprint(stdout, toc->array_names, toc->narrays,
+                printf("%7d compound arrays:\n", toc->narray);
+                _DBstrprint(stdout, toc->array_names, toc->narray,
                             'c', left_margin, col_margin, line_width);
                 printf("\n");
             }
@@ -4410,8 +4410,8 @@ db_inq_file_has_silo_objects_r(DBfile *f)
         toc->nmultimat + toc->nmultimatspecies + toc->nqmesh +
         toc->nqvar + toc->nucdmesh + toc->nucdvar + toc->nptmesh +
         toc->nptvar + toc->nmat + toc->nmatspecies +
-        toc->nobj + toc->nmrgtrees + toc->ngroupelmaps +
-        toc->nmrgvars + toc->narrays;
+        toc->nobj + toc->nmrgtree + toc->ngroupelmap +
+        toc->nmrgvar + toc->narray;
 
     /* Recurse on directories. */
     for (i = 0; i < ndir && retval == 0; i++)
@@ -4637,7 +4637,7 @@ DBInqVarExists(DBfile *dbfile, const char *varname)
         if (dbfile->pub.exist == NULL)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.exist) (dbfile, (char *)varname);
+        retval = (dbfile->pub.exist) (dbfile, varname);
         API_RETURN(retval);
     }
     API_END_NOPOP; /* BEWARE: If API_RETURN above is removed use API_END */
@@ -5008,7 +5008,7 @@ DBGetToc(DBfile *dbfile)
  *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC DBObjectType
-DBInqVarType(DBfile *dbfile, const char *varname)
+DBInqVarType(DBfile *dbfile, char const *varname)
 {
     DBObjectType retval;
 
@@ -5022,7 +5022,7 @@ DBInqVarType(DBfile *dbfile, const char *varname)
         if (!dbfile->pub.inqvartype)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.inqvartype) (dbfile, (char *)varname);
+        retval = (dbfile->pub.inqvartype) (dbfile, varname);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -5162,7 +5162,7 @@ DBGetAtt(DBfile *dbfile, const char *varname, const char *attname)
  *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *--------------------------------------------------------------------*/
 PUBLIC void   *
-DBGetComponent(DBfile *dbfile, const char *objname, const char *compname)
+DBGetComponent(DBfile *dbfile, char const *objname, char const *compname)
 {
     void *retval = NULL;
 
@@ -5178,8 +5178,7 @@ DBGetComponent(DBfile *dbfile, const char *objname, const char *compname)
         if (!dbfile->pub.g_comp)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_comp) (dbfile, (char *)objname,
-                                       (char *)compname);
+        retval = (dbfile->pub.g_comp) (dbfile, objname, compname);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -5209,7 +5208,7 @@ DBGetComponent(DBfile *dbfile, const char *objname, const char *compname)
  *--------------------------------------------------------------------*/
 
 PUBLIC int
-DBGetComponentType(DBfile *dbfile, const char *objname, const char *compname)
+DBGetComponentType(DBfile *dbfile, char const *objname, char const *compname)
 {
     int retval = DB_NOTYPE;
 
@@ -5225,8 +5224,7 @@ DBGetComponentType(DBfile *dbfile, const char *objname, const char *compname)
         if (!dbfile->pub.g_comptyp)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_comptyp) (dbfile, (char *)objname,
-                                          (char *)compname);
+        retval = (dbfile->pub.g_comptyp) (dbfile, objname, compname);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -5591,7 +5589,7 @@ DBCpDir(DBfile *dbfile, const char *srcDir,
  *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBChangeObject (DBfile *dbfile, DBobject *obj)
+DBChangeObject (DBfile *dbfile, DBobject const *obj)
 {
     int             retval;
 
@@ -5643,7 +5641,7 @@ DBChangeObject (DBfile *dbfile, DBobject *obj)
  *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBWriteObject(DBfile *dbfile, DBobject *obj, int freemem)
+DBWriteObject(DBfile *dbfile, DBobject const *obj, int freemem)
 {
     int retval;
 
@@ -5690,7 +5688,7 @@ DBWriteObject(DBfile *dbfile, DBobject *obj, int freemem)
  *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC DBobject *
-DBGetObject (DBfile *dbfile, const char *objname)
+DBGetObject (DBfile *dbfile, char const *objname)
 {
     DBobject       *retval = NULL;
 
@@ -5704,7 +5702,7 @@ DBGetObject (DBfile *dbfile, const char *objname)
             API_ERROR("object name", E_BADARGS);
         if (!dbfile->pub.g_obj)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-        retval = (dbfile->pub.g_obj) (dbfile, (char *)objname);
+        retval = (dbfile->pub.g_obj) (dbfile, (char const *)objname);
         API_RETURN(retval);
     }
     API_END_NOPOP;                     /* BEWARE:  If API_RETURN above is
@@ -5747,9 +5745,9 @@ DBGetObject (DBfile *dbfile, const char *objname)
  *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBWriteComponent(DBfile *dbfile, DBobject *obj, const char *comp_name,
-                 const char *prefix, const char *datatype, const void *var, int nd,
-                 long *count)
+DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
+                 char const *prefix, char const *datatype, void const *var, int nd,
+                 long const *count)
 {
     int retval;
     int nvals, i;
@@ -5792,9 +5790,8 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, const char *comp_name,
         if (!dbfile->pub.w_comp)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.w_comp) (dbfile, obj, (char *)comp_name,
-                                     (char *)prefix, (char *)datatype, var,
-                                     nd, count);
+        retval = (dbfile->pub.w_comp) (dbfile, obj, comp_name, prefix,
+                                       datatype, var, nd, count);
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -5833,8 +5830,8 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, const char *comp_name,
  *    Allow special variable names in the magic /.silo dir for HDF5 files.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBWrite(DBfile *dbfile, const char *vname, void *var, int *dims, int ndims,
-        int datatype)
+DBWrite(DBfile *dbfile, char const *vname, void const *var, int const *dims,
+    int ndims, int datatype)
 {
     int retval;
     int nvals, i;
@@ -5866,7 +5863,7 @@ DBWrite(DBfile *dbfile, const char *vname, void *var, int *dims, int ndims,
         if (!dbfile->pub.write)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.write) (dbfile, (char *)vname, var, dims,
+        retval = (dbfile->pub.write) (dbfile, vname, var, dims,
                                       ndims, datatype);
         db_FreeToc(dbfile);
         API_RETURN(retval);

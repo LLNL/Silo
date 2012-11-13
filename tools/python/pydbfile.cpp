@@ -247,47 +247,39 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
         }
         int type = DBGetComponentType(db, str, compname.c_str());
         string typestr = "";
-        char  value[256] = "";
         int ival = -1;
         switch (type)
         {
           case DB_INT:
             typestr = "int";
-            sprintf(value, "%d", *((int*)comp));
             ival = *((int*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_SHORT:
             typestr = "short";
-            sprintf(value, "%d", *((short*)comp));
             ival = *((short*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_LONG:
             typestr = "long";
-            sprintf(value, "%ld", *((long*)comp));
             ival = (int) *((long*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_LONG_LONG:
             typestr = "long long";
-            sprintf(value, "%lld", *((long long*)comp));
             ival = (int) *((long long*)comp);
             PyDict_SetItemString(retval, compname.c_str(), PyInt_FromLong((long)ival));
             break;
           case DB_FLOAT:
             typestr = "float";
-            sprintf(value, "%g", *((float*)comp));
             PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble(*((float*)comp)));
             break;
           case DB_DOUBLE:
             typestr = "double";
-            sprintf(value, "%g", *((double*)comp));
             PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble(*((double*)comp)));
             break;
           case DB_CHAR:
             typestr = "char";
-            sprintf(value, "%s", ((char*)comp));
             if (*((char*)comp)== 0)
                 PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(""));
             else
@@ -295,7 +287,6 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             break;
           case DB_NOTYPE:
             typestr = "notype";
-            sprintf(value, "NOTYPE");
             break;
           default:
             typestr = "var";
@@ -305,7 +296,6 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
                 int len = pdbname.length();
                 valStr = string((const char*)(pdbname.c_str()),4,len-5);
             }
-            sprintf(value, "%s", valStr.c_str());
             PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(valStr.c_str()));
             break;
         }
@@ -314,71 +304,6 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
         free(comp);
         comp = NULL;
 
-        if (type==DB_INT || type==DB_SHORT || type==DB_LONG)
-        {
-            if (compname == "coordtype")
-            {
-                PyDict_DelItemString(retval, compname.c_str());
-                if (ival == DB_COLLINEAR)    strcat(value, " (DB_COLLINEAR)");
-                if (ival == DB_NONCOLLINEAR) strcat(value, " (DB_NONCOLLINEAR)");
-                PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(value));
-            }
-            if (compname == "centering")
-            {
-                PyDict_DelItemString(retval, compname.c_str());
-                if (ival == DB_NOTCENT)      strcat(value, " (DB_NOTCENT)");
-                if (ival == DB_NODECENT)     strcat(value, " (DB_NODECENT)");
-                if (ival == DB_ZONECENT)     strcat(value, " (DB_ZONECENT)");
-                if (ival == DB_FACECENT)     strcat(value, " (DB_FACECENT)");
-                if (ival == DB_BNDCENT)      strcat(value, " (DB_BNDCENT)");
-                if (ival == DB_EDGECENT)     strcat(value, " (DB_EDGECENT)");
-                if (ival == DB_BLOCKCENT)    strcat(value, " (DB_BLOCKCENT)");
-                PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(value));
-            }
-            if (compname == "major_order")
-            {
-                PyDict_DelItemString(retval, compname.c_str());
-                if (ival == DB_ROWMAJOR)     strcat(value, " (DB_ROWMAJOR)");
-                if (ival == DB_COLMAJOR)     strcat(value, " (DB_COLMAJOR)");
-                PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(value));
-            }
-            if (compname == "coord_sys")
-            {
-                PyDict_DelItemString(retval, compname.c_str());
-                if (ival == DB_CARTESIAN)    strcat(value, " (DB_CARTESIAN)");
-                if (ival == DB_CYLINDRICAL)  strcat(value, " (DB_CYLINDRICAL)");
-                if (ival == DB_SPHERICAL)    strcat(value, " (DB_SPHERICAL)");
-                if (ival == DB_NUMERICAL)    strcat(value, " (DB_NUMERICAL)");
-                if (ival == DB_OTHER)        strcat(value, " (DB_OTHER)");
-                PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(value));
-            }
-            if (compname == "planar")
-            {
-                PyDict_DelItemString(retval, compname.c_str());
-                if (ival == DB_AREA)         strcat(value, " (DB_AREA)");
-                if (ival == DB_VOLUME)       strcat(value, " (DB_VOLUME)");
-                PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(value));
-            }
-            if (compname == "facetype")
-            {
-                PyDict_DelItemString(retval, compname.c_str());
-                if (ival == DB_RECTILINEAR)  strcat(value, " (DB_RECTILINEAR)");
-                if (ival == DB_CURVILINEAR)  strcat(value, " (DB_CURVILINEAR)");
-                PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(value));
-            }
-            if (compname == "datatype")
-            {
-                PyDict_DelItemString(retval, compname.c_str());
-                if (ival == DB_INT)          strcat(value, " (DB_INT)");
-                if (ival == DB_SHORT)        strcat(value, " (DB_SHORT)");
-                if (ival == DB_LONG)         strcat(value, " (DB_LONG)");
-                if (ival == DB_FLOAT)        strcat(value, " (DB_FLOAT)");
-                if (ival == DB_DOUBLE)       strcat(value, " (DB_DOUBLE)");
-                if (ival == DB_CHAR)         strcat(value, " (DB_CHAR)");
-                if (ival == DB_NOTYPE)       strcat(value, " (DB_NOTYPE)");
-                PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(value));
-            }
-        }
     }
     DBFreeObject(silo_obj);
 

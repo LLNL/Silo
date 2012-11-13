@@ -2405,17 +2405,17 @@ stc_silo_types (void) {
       COMP (ndir,               "primitive 'int'");
       COMP (dir_names,
             "pointer (array 'self.ndir' (primitive 'string'))");
-      COMP (narrays,            "primitive 'int'");
+      COMP (narray,            "primitive 'int'");
       COMP (array_names,
-            "pointer (array 'self.narrays' (primitive 'string'))");
-      COMP (nmrgtrees,            "primitive 'int'");
+            "pointer (array 'self.narray' (primitive 'string'))");
+      COMP (nmrgtree,            "primitive 'int'");
       COMP (mrgtree_names,
-            "pointer (array 'self.nmrgtrees' (primitive 'string'))");
-      COMP (ngroupelmaps,            "primitive 'int'");
+            "pointer (array 'self.nmrgtree' (primitive 'string'))");
+      COMP (ngroupelmap,            "primitive 'int'");
       COMP (groupelmap_names,
-            "pointer (array 'self.ngroupelmaps' (primitive 'string'))");
-      COMP (nmrgvars,               "primitive 'int'");
+            "pointer (array 'self.ngroupelmap' (primitive 'string'))");
+      COMP (nmrgvar,               "primitive 'int'");
       COMP (mrgvar_names,
-            "pointer (array 'self.nmrgvars' (primitive 'string'))");
+            "pointer (array 'self.nmrgvar' (primitive 'string'))");
    } ESTRUCT;
 }

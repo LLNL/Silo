@@ -145,10 +145,16 @@ SiloDir::SiloDir(DBfile *db, const QString &name_, const QString &path_)
         var.push_back(toc->var_names[i]);
     for (i=0; i<toc->nobj; i++)
         obj.push_back(toc->obj_names[i]);
-    for (i=0; i<toc->narrays; i++)
+    for (i=0; i<toc->narray; i++)
         array.push_back(toc->array_names[i]);
     for (i=0; i<toc->ndir; i++)
         dir.push_back(toc->dir_names[i]);
+    for (i=0; i<toc->nmrgtree; i++)
+        dir.push_back(toc->mrgtree_names[i]);
+    for (i=0; i<toc->nmrgvar; i++)
+        dir.push_back(toc->mrgvar_names[i]);
+    for (i=0; i<toc->ngroupelmap; i++)
+        dir.push_back(toc->groupelmap_names[i]);
 
     for (unsigned int i=0; i<dir.size(); i++)
     {

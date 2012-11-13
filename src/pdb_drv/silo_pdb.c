@@ -315,8 +315,8 @@ PJ_write (PDBfile *file, char *name, char *type, void *var) {
  */
 #ifdef PDB_WRITE
 INTERNAL int
-PJ_write_alt (PDBfile *file, char *name, char *type, void *var, int nd,
-              long *ind) {
+PJ_write_alt (PDBfile *file, char const *name, char const *type,
+    void const *var, int nd, long const *ind) {
 
    char          *newname = pj_fixname(file, name);
 
@@ -2672,7 +2672,7 @@ db_pdb_NewToc (DBfile *_dbfile)
    int            ivar, iqmesh, iqvar, iumesh, iuvar, icurve, idir, iarray,
       imat, imatspecies, imultimesh, imultivar, imultimat, imultimatspecies,
       ipmesh, iptvar, iobj, icsgmesh, icsgvar, idefvars, imultimeshadj,
-      imrgtrees, igroupelmaps, imrgvars;
+      imrgtree, igroupelmap, imrgvar;
 
    DBtoc         *toc;
    char          *ctype;
@@ -2797,16 +2797,16 @@ db_pdb_NewToc (DBfile *_dbfile)
             toc->nmatspecies++;
             break;
          case DB_ARRAY:
-            toc->narrays++;
+            toc->narray++;
             break;
          case DB_MRGTREE:
-            toc->nmrgtrees++;
+            toc->nmrgtree++;
             break;
          case DB_GROUPELMAP:
-            toc->ngroupelmaps++;
+            toc->ngroupelmap++;
             break;
          case DB_MRGVAR:
-            toc->nmrgvars++;
+            toc->nmrgvar++;
             break;
          default:
             toc->nobj++;
@@ -2906,20 +2906,20 @@ db_pdb_NewToc (DBfile *_dbfile)
       toc->matspecies_names = ALLOC_N(char *, toc->nmatspecies);
    }
 
-   if (toc->narrays > 0) {
-      toc->array_names = ALLOC_N(char *, toc->narrays);
+   if (toc->narray > 0) {
+      toc->array_names = ALLOC_N(char *, toc->narray);
    }
 
-   if (toc->nmrgtrees > 0) {
-      toc->mrgtree_names = ALLOC_N(char *, toc->nmrgtrees);
+   if (toc->nmrgtree > 0) {
+      toc->mrgtree_names = ALLOC_N(char *, toc->nmrgtree);
    }
 
-   if (toc->ngroupelmaps > 0) {
-      toc->groupelmap_names = ALLOC_N(char *, toc->ngroupelmaps);
+   if (toc->ngroupelmap > 0) {
+      toc->groupelmap_names = ALLOC_N(char *, toc->ngroupelmap);
    }
 
-   if (toc->nmrgvars > 0) {
-      toc->mrgvar_names = ALLOC_N(char *, toc->nmrgvars);
+   if (toc->nmrgvar > 0) {
+      toc->mrgvar_names = ALLOC_N(char *, toc->nmrgvar);
    }
    /*----------------------------------------------------------------------
     *  Now loop over all the items in the directory and store the
@@ -2928,7 +2928,7 @@ db_pdb_NewToc (DBfile *_dbfile)
    icurve = ivar = iqmesh = iqvar = iumesh = iuvar = idir = iarray = 0;
    imultimesh = imultivar = imultimat = imat = imatspecies = ipmesh = 0;
    iptvar = iobj = imultimatspecies = icsgmesh = icsgvar = idefvars = 0;
-   imultimeshadj = imrgtrees = igroupelmaps = imrgvars = 0 ;
+   imultimeshadj = imrgtree = igroupelmap = imrgvar = 0 ;
 
    for (i = 0; i < num; i++) {
 
@@ -3048,18 +3048,18 @@ db_pdb_NewToc (DBfile *_dbfile)
          break;
 
       case DB_MRGTREE:
-         toc->mrgtree_names[imrgtrees] = STRDUP(list[i]);
-         imrgtrees++;
+         toc->mrgtree_names[imrgtree] = STRDUP(list[i]);
+         imrgtree++;
          break;
 
       case DB_GROUPELMAP:
-         toc->groupelmap_names[igroupelmaps] = STRDUP(list[i]);
-         igroupelmaps++;
+         toc->groupelmap_names[igroupelmap] = STRDUP(list[i]);
+         igroupelmap++;
          break;
 
       case DB_MRGVAR:
-         toc->mrgvar_names[imrgvars] = STRDUP(list[i]);
-         imrgvars++;
+         toc->mrgvar_names[imrgvar] = STRDUP(list[i]);
+         imrgvar++;
          break;
 
       default:
@@ -7121,7 +7121,7 @@ db_pdb_FreeCompressionResources(DBfile *_dbfile, char const *meshname)
 #ifdef PDB_WRITE
 SILO_CALLBACK int
 db_pdb_WriteObject(DBfile   *_file,    /*File to write into */
-                   DBobject *obj,      /*Object description to write out */
+                   DBobject const *obj,/*Object description to write out */
                    int      flags)     /*Sentinel: 1=free associated memory */
 {
    PJgroup       *group;
@@ -7162,9 +7162,9 @@ db_pdb_WriteObject(DBfile   *_file,    /*File to write into */
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_WriteComponent (DBfile *_file, DBobject *obj, char *compname,
-                       char *prefix, char *datatype, void const *var,
-                       int nd, long count[])
+db_pdb_WriteComponent (DBfile *_file, DBobject *obj, char const *compname,
+                       char const *prefix, char const *datatype, void const *var,
+                       int nd, long const *count)
 {
    PDBfile       *file;
    char           tmp[256];
@@ -7201,8 +7201,8 @@ db_pdb_WriteComponent (DBfile *_file, DBobject *obj, char *compname,
  *-------------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_Write (DBfile *_dbfile, char *vname, void *var,
-              int *dims, int ndims, int datatype)
+db_pdb_Write (DBfile *_dbfile, char const *vname, void const *var,
+              int const *dims, int ndims, int datatype)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    char          *idata;

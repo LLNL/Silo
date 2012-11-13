@@ -2263,7 +2263,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
         }
     }
 
-    for (i=0; i<toc->nmrgtrees; i++) {
+    for (i=0; i<toc->nmrgtree; i++) {
         if (!strcmp(toc->mrgtree_names[i], base)) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMrgtree;
             savefunc = NULL;
@@ -2273,7 +2273,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
         }
     }
 
-    for (i=0; i<toc->ngroupelmaps; i++) {
+    for (i=0; i<toc->ngroupelmap; i++) {
         if (!strcmp(toc->groupelmap_names[i], base)) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetGroupelmap;
             savefunc = NULL;
@@ -2283,7 +2283,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
         }
     }
 
-    for (i=0; i<toc->nmrgvars; i++) {
+    for (i=0; i<toc->nmrgvar; i++) {
         if (!strcmp(toc->mrgvar_names[i], base)) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMrgvar;
             savefunc = NULL;
@@ -2293,7 +2293,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
         }
     }
 
-    for (i=0; i<toc->narrays; i++) {
+    for (i=0; i<toc->narray; i++) {
         if (!strcmp(toc->array_names[i], base)) {
             if (Verbosity>=2) {
                 out_info("file_deref: loading DBcompoundarray %s:%s",
@@ -2385,7 +2385,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
      * array then print a warning message to that effect.
      */
     if (!strchr(orig, '/')) {
-        for (i=0; i<toc->narrays; i++) {
+        for (i=0; i<toc->narray; i++) {
             DBcompoundarray *ca = DBGetCompoundarray(file,
                                                      toc->array_names[i]);
             assert(ca);

@@ -68,6 +68,29 @@ static void DBtoc_dealloc(PyObject *self)
     PyObject_Del(self);
 }
 
+#define PRINT_OBJS(nm)                                 \
+{                                                      \
+    sprintf(tmp, "n%s = %d\n", #nm, toc->n ## nm);  \
+    len += strlen(tmp);                                \
+    if (s) strcat(s, tmp);                             \
+                                                       \
+    sprintf(tmp, "%s_names = (", #nm);                 \
+    len += strlen(tmp);                                \
+    if (s) strcat(s, tmp);                             \
+    for (int i=0; i<toc->n ## nm; i++)                 \
+    {                                                  \
+        len += strlen(toc->nm ## _names[i]);           \
+        if (s) strcat(s, toc->nm ## _names[i]);        \
+        if (i < toc->n ## nm -1)                       \
+        {                                              \
+            len += strlen(sep);                        \
+            if (s) strcat(s, sep);                     \
+        }                                              \
+    }                                                  \
+    len += strlen(term);                               \
+    if (s) strcat(s, term);                            \
+}
+
 // ****************************************************************************
 //  Method:  DBtoc_as_string
 //
@@ -80,6 +103,9 @@ static void DBtoc_dealloc(PyObject *self)
 //  Programmer:  Jeremy Meredith
 //  Creation:    July 12, 2005
 //
+//  Modifications
+//    Mark C. Miller, Tue Nov 13 14:36:36 PST 2012
+//    Added all the members of the toc.
 // ****************************************************************************
 static int DBtoc_as_string(PyObject *self, char *s)
 {
@@ -92,45 +118,28 @@ static int DBtoc_as_string(PyObject *self, char *s)
 
     if (s) strcpy(s, "");
 
-    sprintf(tmp, "nvar = %d\n", toc->nvar);
-    len += strlen(tmp);
-    if (s) strcat(s, tmp);
+    PRINT_OBJS(var);
+    PRINT_OBJS(dir);
+    PRINT_OBJS(curve);
+    PRINT_OBJS(multimesh);
+    PRINT_OBJS(multivar);
+    PRINT_OBJS(multimat);
+    PRINT_OBJS(multimatspecies);
+    PRINT_OBJS(csgmesh);
+    PRINT_OBJS(csgvar);
+    PRINT_OBJS(defvars);
+    PRINT_OBJS(qmesh);
+    PRINT_OBJS(qvar);
+    PRINT_OBJS(ucdmesh);
+    PRINT_OBJS(ptmesh);
+    PRINT_OBJS(ptvar);
+    PRINT_OBJS(mat);
+    PRINT_OBJS(matspecies);
+    PRINT_OBJS(array);
+    PRINT_OBJS(mrgtree);
+    PRINT_OBJS(mrgvar);
+    PRINT_OBJS(groupelmap);
 
-    sprintf(tmp, "var_names = (");
-    len += strlen(tmp);
-    if (s) strcat(s, tmp);
-    for (int i=0; i<toc->nvar; i++)
-    {
-        len += strlen(toc->var_names[i]);
-        if (s) strcat(s, toc->var_names[i]);
-        if (i < toc->nvar-1)
-        {
-            len += strlen(sep);
-            if (s) strcat(s, sep);
-        }
-    }
-    len += strlen(term);
-    if (s) strcat(s, term);
-
-    sprintf(tmp, "ndir = %d\n", toc->ndir);
-    len += strlen(tmp);
-    if (s) strcat(s, tmp);
-
-    sprintf(tmp, "dir_names = (");
-    len += strlen(tmp);
-    if (s) strcat(s, tmp);
-    for (int i=0; i<toc->ndir; i++)
-    {
-        len += strlen(toc->dir_names[i]);
-        if (s) strcat(s, toc->dir_names[i]);
-        if (i < toc->ndir-1)
-        {
-            len += strlen(sep);
-            if (s) strcat(s, sep);
-        }
-    }
-    len += strlen(term);
-    if (s) strcat(s, term);
     return len;
 }
 
@@ -183,70 +192,48 @@ static int DBtoc_print(PyObject *self, FILE *fp, int flags)
     return 0;
 }
 
-
-// ****************************************************************************
-//  Method:  DBtoc_GetNVar
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    July 12, 2005
-//
-// ****************************************************************************
-static PyObject *DBtoc_GetNVar(PyObject *self, PyObject *args)
-{
-    DBtoc *toc = ((DBtocObject*)self)->toc;
-    PyObject *retval = PyInt_FromLong(toc->nvar);
-    return retval;
+#define GET_FUNC_DEFS(nm)                                                  \
+static PyObject *DBtoc_GetN ## nm(PyObject *self, PyObject *args)          \
+{                                                                          \
+    DBtoc *toc = ((DBtocObject*)self)->toc;                                \
+    PyObject *retval = PyInt_FromLong(toc->n ## nm);                       \
+    return retval;                                                         \
+}                                                                          \
+static PyObject *DBtoc_Get ## nm ## names(PyObject *self, PyObject *args)  \
+{                                                                          \
+    DBtoc *toc = ((DBtocObject*)self)->toc;                                \
+    PyObject *retval = PyTuple_New(toc->n ## nm);                          \
+    for (int i=0; i<toc->n ## nm; i++)                                     \
+    {                                                                      \
+        PyTuple_SET_ITEM(retval, i, PyString_FromString(toc->nm ## _names[i])); \
+    }                                                                      \
+    return retval;                                                         \
 }
 
-// ****************************************************************************
-//  Method:  DBtoc_GetVarNames
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    July 12, 2005
-//
-// ****************************************************************************
-static PyObject *DBtoc_GetVarNames(PyObject *self, PyObject *args)
-{
-    DBtoc *toc = ((DBtocObject*)self)->toc;
-    PyObject *retval = PyTuple_New(toc->nvar);
-    for (int i=0; i<toc->nvar; i++)
-    {
-        PyTuple_SET_ITEM(retval, i, PyString_FromString(toc->var_names[i]));
-    }
-    return retval;
-}
+GET_FUNC_DEFS(var)
+GET_FUNC_DEFS(dir)
+GET_FUNC_DEFS(curve);
+GET_FUNC_DEFS(multimesh);
+GET_FUNC_DEFS(multivar);
+GET_FUNC_DEFS(multimat);
+GET_FUNC_DEFS(multimatspecies);
+GET_FUNC_DEFS(csgmesh);
+GET_FUNC_DEFS(csgvar);
+GET_FUNC_DEFS(defvars);
+GET_FUNC_DEFS(qmesh);
+GET_FUNC_DEFS(qvar);
+GET_FUNC_DEFS(ucdmesh);
+GET_FUNC_DEFS(ptmesh);
+GET_FUNC_DEFS(ptvar);
+GET_FUNC_DEFS(mat);
+GET_FUNC_DEFS(matspecies);
+GET_FUNC_DEFS(array);
+GET_FUNC_DEFS(mrgtree);
+GET_FUNC_DEFS(mrgvar);
+GET_FUNC_DEFS(groupelmap);
 
-// ****************************************************************************
-//  Method:  DBtoc_GetNDir
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    July 12, 2005
-//
-// ****************************************************************************
-static PyObject *DBtoc_GetNDir(PyObject *self, PyObject *args)
-{
-    DBtoc *toc = ((DBtocObject*)self)->toc;
-    PyObject *retval = PyInt_FromLong(toc->ndir);
-    return retval;
-}
-
-// ****************************************************************************
-//  Method:  DBtoc_GetDirNames
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    July 12, 2005
-//
-// ****************************************************************************
-static PyObject *DBtoc_GetDirNames(PyObject *self, PyObject *args)
-{
-    DBtoc *toc = ((DBtocObject*)self)->toc;
-    PyObject *retval = PyTuple_New(toc->ndir);
-    for (int i=0; i<toc->ndir; i++)
-    {
-        PyTuple_SET_ITEM(retval, i, PyString_FromString(toc->dir_names[i]));
-    }
-    return retval;
-}
+#define GET_FUNC_N(nm) if (!strcmp(name, "n" #nm)) return DBtoc_GetN ## nm(self, NULL);
+#define GET_FUNC_NAMES(nm) if (!strcmp(name, #nm "_names")) return DBtoc_Get ## nm ## names(self, NULL);
 
 // ****************************************************************************
 //  Method: DBtoc_getattr 
@@ -260,17 +247,56 @@ static PyObject *DBtoc_GetDirNames(PyObject *self, PyObject *args)
 //  Programmer:  Jeremy Meredith
 //  Creation:    July 12, 2005
 //
+//  Modifications
+//    Mark C. Miller, Tue Nov 13 14:36:36 PST 2012
+//    Added all the members of the toc.
 // ****************************************************************************
 static PyObject *DBtoc_getattr(PyObject *self, char *name)
 {
-    if (strcmp(name, "nvar") == 0)
-        return DBtoc_GetNVar(self, NULL);
-    if (strcmp(name, "var_names") == 0)
-        return DBtoc_GetVarNames(self, NULL);
-    if (strcmp(name, "ndir") == 0)
-        return DBtoc_GetNDir(self, NULL);
-    if (strcmp(name, "dir_names") == 0)
-        return DBtoc_GetDirNames(self, NULL);
+    GET_FUNC_N(var);
+    GET_FUNC_N(dir);
+    GET_FUNC_N(curve);
+    GET_FUNC_N(multimesh);
+    GET_FUNC_N(multivar);
+    GET_FUNC_N(multimat);
+    GET_FUNC_N(multimatspecies);
+    GET_FUNC_N(csgmesh);
+    GET_FUNC_N(csgvar);
+    GET_FUNC_N(defvars);
+    GET_FUNC_N(qmesh);
+    GET_FUNC_N(qvar);
+    GET_FUNC_N(ucdmesh);
+    GET_FUNC_N(ptmesh);
+    GET_FUNC_N(ptvar);
+    GET_FUNC_N(mat);
+    GET_FUNC_N(matspecies);
+    GET_FUNC_N(array);
+    GET_FUNC_N(mrgtree);
+    GET_FUNC_N(mrgvar);
+    GET_FUNC_N(groupelmap);
+
+    GET_FUNC_NAMES(var);
+    GET_FUNC_NAMES(dir);
+    GET_FUNC_NAMES(curve);
+    GET_FUNC_NAMES(multimesh);
+    GET_FUNC_NAMES(multivar);
+    GET_FUNC_NAMES(multimat);
+    GET_FUNC_NAMES(multimatspecies);
+    GET_FUNC_NAMES(csgmesh);
+    GET_FUNC_NAMES(csgvar);
+    GET_FUNC_NAMES(defvars);
+    GET_FUNC_NAMES(qmesh);
+    GET_FUNC_NAMES(qvar);
+    GET_FUNC_NAMES(ucdmesh);
+    GET_FUNC_NAMES(ptmesh);
+    GET_FUNC_NAMES(ptvar);
+    GET_FUNC_NAMES(mat);
+    GET_FUNC_NAMES(matspecies);
+    GET_FUNC_NAMES(array);
+    GET_FUNC_NAMES(mrgtree);
+    GET_FUNC_NAMES(mrgvar);
+    GET_FUNC_NAMES(groupelmap);
+
     return 0;
 }
 

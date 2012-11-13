@@ -3742,7 +3742,7 @@ load_toc(hid_t grp, char const *name, void *_toc)
         break;
     case DB_ARRAY:
         names = &(toc->array_names);
-        nvals = &(toc->narrays);
+        nvals = &(toc->narray);
         break;
     case DB_DIR:
         names = &(toc->dir_names);
@@ -3754,15 +3754,15 @@ load_toc(hid_t grp, char const *name, void *_toc)
         break;
     case DB_MRGTREE:
         names = &(toc->mrgtree_names);
-        nvals = &(toc->nmrgtrees);
+        nvals = &(toc->nmrgtree);
         break;
     case DB_GROUPELMAP:
         names = &(toc->groupelmap_names);
-        nvals = &(toc->ngroupelmaps);
+        nvals = &(toc->ngroupelmap);
         break;
     case DB_MRGVAR:
         names = &(toc->mrgvar_names);
-        nvals = &(toc->nmrgvars);
+        nvals = &(toc->nmrgvar);
         break;
     case DB_USERDEF:  /*fall through*/
     case DB_FACELIST: /*fall through*/
@@ -3996,7 +3996,7 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
  *-------------------------------------------------------------------------
  */
 PRIVATE int
-db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
+db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int const _size[],
                void const *buf, char *name/*in,out*/, char const *fname,
                int compressionFlags)
 {
@@ -4134,7 +4134,7 @@ db_hdf5_compwrz(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
  *-------------------------------------------------------------------------
  */
 PRIVATE int
-db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int _size[],
+db_hdf5_compwr(DBfile_hdf5 *dbfile, int dtype, int rank, int const _size[],
                void const *buf, char *name/*in,out*/, char const *fname)
 {
     return db_hdf5_compwrz(dbfile, dtype, rank, _size, buf, name, fname, 0);
@@ -6413,7 +6413,7 @@ db_hdf5_GetComponentNames(DBfile *_dbfile, char *objname, char ***comp_names,
  */
 SILO_CALLBACK int
 db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
-                    DBobject *obj,      /*Object description to write out */
+                    DBobject const *obj,/*Object description to write out */
                     int flags)          /*1=>free associated memory */
 {
     DBfile_hdf5         *dbfile=(DBfile_hdf5*)_dbfile;
@@ -6617,9 +6617,9 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char *compname,
-                       char *prefix, char *dataname, void const *data,
-                       int rank, long _size[])
+db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char const *compname,
+                       char const *prefix, char const *dataname, void const *data,
+                       int rank, long const *_size)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     int         size[32], i;
@@ -6627,7 +6627,7 @@ db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char *compname,
     int         datatype = db_GetDatatypeID(dataname);
     
     for (i=0; i<rank; i++) size[i] = _size[i];
-    db_hdf5_compwr(dbfile, datatype, rank, size, (void*)data, varname,
+    db_hdf5_compwr(dbfile, datatype, rank, size, data, varname,
         friendly_name(obj->name, varname, 0));
     DBAddVarComponent(obj, compname, varname);
     return 0;

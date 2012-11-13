@@ -210,7 +210,7 @@ PyObject *silo_Create(PyObject *self, PyObject *args)
 // ****************************************************************************
 //  Method:  initSilo
 //
-//  Purpose:
+
 //    Called by python to initialize the Silo module.
 //
 //  Arguments:
@@ -219,7 +219,13 @@ PyObject *silo_Create(PyObject *self, PyObject *args)
 //  Programmer:  Jeremy Meredith
 //  Creation:    July 12, 2005
 //
+//  Modifications:
+//    Mark C. Miller, Tue Nov 13 10:56:57 PST 2012
+//    Added a slew of constants so calllers can properly examine dict
+//    contents returned by GetVarInfo method.
+//
 // ****************************************************************************
+#define ADD_CONSTANT(C)  PyDict_SetItemString(d, #C, PyInt_FromLong(C))
 extern "C" void initSilo()
 {
     AddMethod("Open", silo_Open,
@@ -236,15 +242,83 @@ extern "C" void initSilo()
     SiloError = PyErr_NewException("Silo.SiloException", NULL, NULL);
     PyDict_SetItemString(d, "SiloException", SiloError);
 
-    // Drivers
-    PyDict_SetItemString(d, "DB_PDB", PyInt_FromLong(DB_PDB));
-    PyDict_SetItemString(d, "DB_HDF5", PyInt_FromLong(DB_HDF5));
+    // File Drivers
+    ADD_CONSTANT(DB_PDB);
+    ADD_CONSTANT(DB_HDF5);
+    ADD_CONSTANT(DB_HDF5_SEC2);
+    ADD_CONSTANT(DB_HDF5_STDIO);
+    ADD_CONSTANT(DB_HDF5_CORE);
+    ADD_CONSTANT(DB_HDF5_LOG);
+    ADD_CONSTANT(DB_HDF5_SPLIT);
+    ADD_CONSTANT(DB_HDF5_DIRECT);
+    ADD_CONSTANT(DB_HDF5_FAMILY);
+    ADD_CONSTANT(DB_HDF5_MPIO);
+    ADD_CONSTANT(DB_HDF5_MPIOP);
+    ADD_CONSTANT(DB_HDF5_MPIP);
+    ADD_CONSTANT(DB_HDF5_SILO);
 
-    // Clobber
-    PyDict_SetItemString(d, "DB_CLOBBER", PyInt_FromLong(DB_CLOBBER));
-    PyDict_SetItemString(d, "DB_NOCLOBBER", PyInt_FromLong(DB_NOCLOBBER));
-    
-    // Read/Append
-    PyDict_SetItemString(d, "DB_READ", PyInt_FromLong(DB_READ));
-    PyDict_SetItemString(d, "DB_APPEND", PyInt_FromLong(DB_APPEND));
+    // File flags
+    ADD_CONSTANT(DB_CLOBBER);
+    ADD_CONSTANT(DB_NOCLOBBER);
+    ADD_CONSTANT(DB_READ);
+    ADD_CONSTANT(DB_APPEND);
+
+    // Coordinate type flags
+    ADD_CONSTANT(DB_COLLINEAR);
+    ADD_CONSTANT(DB_NONCOLLINEAR);
+    ADD_CONSTANT(DB_QUAD_RECT);
+    ADD_CONSTANT(DB_QUAD_CURV);
+
+    // Centering
+    ADD_CONSTANT(DB_NOTCENT);
+    ADD_CONSTANT(DB_NODECENT);
+    ADD_CONSTANT(DB_ZONECENT);
+    ADD_CONSTANT(DB_FACECENT);
+    ADD_CONSTANT(DB_BNDCENT);
+    ADD_CONSTANT(DB_EDGECENT);
+    ADD_CONSTANT(DB_BLOCKCENT);
+
+    // Major order
+    ADD_CONSTANT(DB_ROWMAJOR);
+    ADD_CONSTANT(DB_COLMAJOR);
+
+    // Coordinate system
+    ADD_CONSTANT(DB_CARTESIAN);
+    ADD_CONSTANT(DB_CYLINDRICAL);
+    ADD_CONSTANT(DB_SPHERICAL);
+    ADD_CONSTANT(DB_NUMERICAL);
+    ADD_CONSTANT(DB_OTHER);
+
+    // Planar
+    ADD_CONSTANT(DB_AREA);
+    ADD_CONSTANT(DB_VOLUME);
+
+    // Facetype
+    ADD_CONSTANT(DB_RECTILINEAR);
+    ADD_CONSTANT(DB_CURVILINEAR);
+
+    // Datatype
+    ADD_CONSTANT(DB_INT);
+    ADD_CONSTANT(DB_SHORT);
+    ADD_CONSTANT(DB_LONG);
+    ADD_CONSTANT(DB_LONG_LONG);
+    ADD_CONSTANT(DB_FLOAT);
+    ADD_CONSTANT(DB_DOUBLE);
+    ADD_CONSTANT(DB_CHAR);
+    ADD_CONSTANT(DB_NOTYPE);
+
+    ADD_CONSTANT(DB_ON);
+    ADD_CONSTANT(DB_OFF);
+
+    ADD_CONSTANT(DB_ABUTTING);
+    ADD_CONSTANT(DB_FLOATING);
+
+    ADD_CONSTANT(DB_VARTYPE_SCALAR);
+    ADD_CONSTANT(DB_VARTYPE_VECTOR);
+    ADD_CONSTANT(DB_VARTYPE_TENSOR);
+    ADD_CONSTANT(DB_VARTYPE_SYMTENSOR);
+    ADD_CONSTANT(DB_VARTYPE_ARRAY);
+    ADD_CONSTANT(DB_VARTYPE_MATERIAL);
+    ADD_CONSTANT(DB_VARTYPE_SPECIES);
+    ADD_CONSTANT(DB_VARTYPE_LABEL);
 }

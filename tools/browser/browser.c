@@ -293,9 +293,9 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
            toc->nmultimat + toc->nmultimatspecies + toc->nqmesh + 
            toc->nqvar + toc->nucdmesh + toc->nucdvar + toc->nptmesh +
            toc->nptvar + toc->nmat + toc->nmatspecies + toc->nvar + 
-           toc->nobj + toc->ndir + toc->narrays + toc->ndefvars +
+           toc->nobj + toc->ndir + toc->narray + toc->ndefvars +
            toc->ncsgmesh + toc->ncsgvar + toc->nmultimeshadj +
-           toc->nmrgtrees + toc->ngroupelmaps + toc->nmrgvars;
+           toc->nmrgtree + toc->ngroupelmap + toc->nmrgvar;
    if (total) retval = malloc (total * sizeof(toc_t));
 
    /*
@@ -401,22 +401,22 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
       retval[at].type = BROWSER_DB_DIR;
    }
 
-   for (i=0; i<toc->narrays; i++,at++) {
+   for (i=0; i<toc->narray; i++,at++) {
       retval[at].name = safe_strdup (toc->array_names[i]);
       retval[at].type = BROWSER_DB_ARRAY;
    }
 
-   for (i=0; i<toc->nmrgtrees; i++,at++) {
+   for (i=0; i<toc->nmrgtree; i++,at++) {
       retval[at].name = safe_strdup (toc->mrgtree_names[i]);
       retval[at].type = BROWSER_DB_MRGTREE;
    }
 
-   for (i=0; i<toc->ngroupelmaps; i++,at++) {
+   for (i=0; i<toc->ngroupelmap; i++,at++) {
       retval[at].name = safe_strdup (toc->groupelmap_names[i]);
       retval[at].type = BROWSER_DB_GROUPELMAP;
    }
 
-   for (i=0; i<toc->nmrgvars; i++,at++) {
+   for (i=0; i<toc->nmrgvar; i++,at++) {
       retval[at].name = safe_strdup (toc->mrgvar_names[i]);
       retval[at].type = BROWSER_DB_MRGVAR;
    }
