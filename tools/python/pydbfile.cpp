@@ -109,6 +109,12 @@ static PyObject *DBfile_DBGetToc(PyObject *self, PyObject *args)
 //    was being given a length argument that included the trailing null and
 //    the result was a bit if an odd string in python.
 //
+//    Mark C. Miller, Wed Nov 14 15:35:44 PST 2012
+//    Removed error return case for 'only flat variables.' This also fixes a
+//    problem with string object members on HDF5 driver where the funky "'<s>"
+//    construct is used for *both* string valued members and variable
+//    members whose value is also a string but is the name of another dataset
+//    in the file.
 // ****************************************************************************
 static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
 {
@@ -126,10 +132,7 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
 
     int vartype = DBInqVarType(db, str);
     if (vartype != DB_VARIABLE)
-    {
-        SiloErrorFunc("Only flat variables are supported.");
         return NULL;
-    }
 
     int len = DBGetVarLength(db,str);
     int type = DBGetVarType(db,str);
@@ -312,7 +315,10 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
                 PyObject *argTuple = PyTuple_New(1);
                 PyTuple_SetItem(argTuple, 0, PyString_FromString(valStr.c_str()));
                 PyObject *dobj = DBfile_DBGetVar(self, argTuple);
-                PyDict_SetItemString(retval, compname.c_str(), dobj);
+                if (dobj)
+                    PyDict_SetItemString(retval, compname.c_str(), dobj);
+                else
+                    PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(valStr.c_str()));
             }
             else
             {
@@ -756,7 +762,6 @@ static int DBfile_compare(PyObject *v, PyObject *w)
 //  Creation:    July 12, 2005
 //
 // ****************************************************************************
-static const char *DBfile_Purpose = "This class wraps a Silo DBfile object.";
 PyTypeObject DBfileType =
 {
     //
@@ -792,7 +797,7 @@ PyTypeObject DBfileType =
     0,                                   // tp_setattro
     0,                                   // tp_as_buffer
     Py_TPFLAGS_CHECKTYPES,               // tp_flags
-    DBfile_Purpose,              // tp_doc
+    "This class wraps a Silo DBfile object.", // tp_doc
     0,                                   // tp_traverse
     0,                                   // tp_clear
     0,                                   // tp_richcompare

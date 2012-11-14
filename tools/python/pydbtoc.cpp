@@ -328,7 +328,6 @@ static int DBtoc_compare(PyObject *v, PyObject *w)
 //  Creation:    July 12, 2005
 //
 // ****************************************************************************
-static char *DBtoc_Purpose = "This class wraps a Silo DBtoc object.";
 PyTypeObject DBtocType =
 {
     //
@@ -364,7 +363,7 @@ PyTypeObject DBtocType =
     0,                                   // tp_setattro
     0,                                   // tp_as_buffer
     Py_TPFLAGS_CHECKTYPES,               // tp_flags
-    DBtoc_Purpose,              // tp_doc
+    "This class wraps a Silo DBtoc object.", // tp_doc
     0,                                   // tp_traverse
     0,                                   // tp_clear
     0,                                   // tp_richcompare
