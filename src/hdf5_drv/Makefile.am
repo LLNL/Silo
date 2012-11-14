@@ -53,7 +53,8 @@
 ## Procss this file with automake to create Makefile.in
 
 noinst_LTLIBRARIES = libsilo_hdf5_drv.la
-libsilo_hdf5_drv_la_SOURCES = $(FILES)
+libsilo_hdf5_drv_la_SOURCES = silo_hdf5.c
+libsilo_H5FDsilo_la_SOURCES = H5FDsilo.c
 AM_CPPFLAGS = -I$(builddir)/../silo -I$(srcdir)/../silo
 
 if HZIP_NEEDED
@@ -67,6 +68,3 @@ endif
 noinst_HEADERS = \
  silo_hdf5_private.h \
  H5FDsilo.h
-FILES = \
- silo_hdf5.c \
- H5FDsilo.c
