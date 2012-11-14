@@ -206,6 +206,10 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
 //
 //  Creation Mark C. Miller, Mon Nov 12 11:12:03 PST 2012
 //  Plagerized liberally from Silex' SiloObjectView
+//  
+//  Mark C. Miller, Tue Nov 13 17:29:29 PST 2012
+//  Added optional 1/0 flag to descend into variable components and read their
+//  data as a tuple member of the returned python dict.
 // ****************************************************************************
 static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
 {
@@ -218,8 +222,14 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
     }
 
     char *str;
-    if (!PyArg_ParseTuple(args, "s", &str))
-        return NULL;
+    int get_data_flag = 0;
+    if (!PyArg_ParseTuple(args, "si", &str, &get_data_flag))
+    {
+        if (!PyArg_ParseTuple(args, "s", &str))
+            return NULL;
+        else
+            PyErr_Clear();
+    }
 
     DBobject *silo_obj = DBGetObject(db, str);
     if (!silo_obj)
@@ -296,7 +306,18 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
                 int len = pdbname.length();
                 valStr = string((const char*)(pdbname.c_str()),4,len-5);
             }
-            PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(valStr.c_str()));
+            if (get_data_flag)
+            {
+
+                PyObject *argTuple = PyTuple_New(1);
+                PyTuple_SetItem(argTuple, 0, PyString_FromString(valStr.c_str()));
+                PyObject *dobj = DBfile_DBGetVar(self, argTuple);
+                PyDict_SetItemString(retval, compname.c_str(), dobj);
+            }
+            else
+            {
+                PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(valStr.c_str()));
+            }
             break;
         }
 
