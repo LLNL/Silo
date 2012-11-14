@@ -111,7 +111,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_hdf5_drv_la_LIBADD =
-am_libsilo_hdf5_drv_la_OBJECTS = silo_hdf5.lo
+am_libsilo_hdf5_drv_la_OBJECTS = silo_hdf5.lo H5FDsilo.lo
 libsilo_hdf5_drv_la_OBJECTS = $(am_libsilo_hdf5_drv_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -307,8 +307,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libsilo_hdf5_drv.la
-libsilo_hdf5_drv_la_SOURCES = silo_hdf5.c
-libsilo_H5FDsilo_la_SOURCES = H5FDsilo.c
+libsilo_hdf5_drv_la_SOURCES = silo_hdf5.c H5FDsilo.c
+#libsilo_H5FDsilo_la_SOURCES = H5FDsilo.c
 AM_CPPFLAGS = -I$(builddir)/../silo -I$(srcdir)/../silo \
 	$(am__append_1) $(am__append_2)
 noinst_HEADERS = \
@@ -367,6 +367,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDsilo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_hdf5.Plo@am__quote@
 
 .c.o:
