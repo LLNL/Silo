@@ -255,12 +255,31 @@ BuildExprTree(const char **porig)
 }
 
 /* very simple circular cache for a handful of embedded strings */
-static int SaveString(DBnamescheme *ns, const char *sval)
+static int SaveInternalString(DBnamescheme *ns, const char *sval)
 {
     int modn = ns->nembed++ % DB_MAX_EXPSTRS;
     FREE(ns->embedstrs[modn]);
     ns->embedstrs[modn] = STRDUP(sval);
     return modn;
+}
+
+/* very simple circular cache for strings returned from DBGetName */
+#define DB_MAX_RETSTRS 32
+static char const * retstrbuf[DB_MAX_RETSTRS];
+static char const *SaveReturnedString(char const *retstr)
+{
+    static unsigned int n = 0;
+    int modn = n++ % DB_MAX_RETSTRS;
+    if (retstr == 0)
+    {
+        for (n = 0; n < DB_MAX_RETSTRS; n++)
+            FREE(retstrbuf[n]);
+        n = 0;
+        return 0;
+    }
+    FREE(retstrbuf[modn]);
+    retstrbuf[modn] = STRDUP(retstr);
+    return retstrbuf[modn];
 }
 
 static int
@@ -276,7 +295,7 @@ EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
             if (strcmp(tree->sval, ns->arrnames[i]) == 0)
             {
                 if (tree->type == '$')
-                    return SaveString(ns,  ((char**)ns->arrvals[i])[q]);
+                    return SaveInternalString(ns,  ((char**)ns->arrvals[i])[q]);
                 else
                     return ((int*)ns->arrvals[i])[q];
             }
@@ -289,7 +308,7 @@ EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
         else if (tree->type == 'n')
             return n;
         else if (tree->type == 's')
-            return SaveString(ns, tree->sval);
+            return SaveInternalString(ns, tree->sval);
     }
     else if (tree->left != 0 && tree->right != 0)
     {
@@ -482,6 +501,9 @@ DBGetName(DBnamescheme *ns, int natnum)
     static char retval[1024];
     int i;
 
+    /* a hackish way to cleanup the returned string buffer */
+    if (ns == 0 && natnum == 0) return SaveReturnedString(0);
+
     retval[0] = '\0';
     strncat(retval, ns->fmt, ns->fmtptrs[0] - ns->fmt);
     for (i = 0; i < ns->ncspecs; i++)
@@ -511,5 +533,5 @@ DBGetName(DBnamescheme *ns, int natnum)
         strcat(retval, tmp);
         FREE(tmpExpr);
     }
-    return retval;
+    return SaveReturnedString(retval);
 }

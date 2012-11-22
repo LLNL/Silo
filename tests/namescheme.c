@@ -95,6 +95,14 @@ int main(int argc, char **argv)
         return 1;
     DBFreeNamescheme(ns);
 
+    /* test returned string is different for successive calls (Dan Laney bug) */
+    ns = DBMakeNamescheme("@/foo/bar/proc-%d@n");
+    char teststr[256];
+    sprintf(teststr, "%s %s", DBGetName(ns,0), DBGetName(ns,123));
+    if (strcmp(teststr, "/foo/bar/proc-0 /foo/bar/proc-123") != 0)
+        return 1;
+    DBFreeNamescheme(ns);
+
     /* Test ?:: operator */
     ns = DBMakeNamescheme("@foo_%d@(n-5)?14:77:");
     if (strcmp(DBGetName(ns, 6), "foo_14") != 0)
@@ -249,6 +257,9 @@ int main(int argc, char **argv)
 
         DBClose(dbfile);
     }
+
+    /* hackish way to cleanup the circular cache used internally */
+    DBGetName(0,0);
     
     CleanupDriverStuff();
 
