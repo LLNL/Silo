@@ -234,6 +234,14 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             PyErr_Clear();
     }
 
+    //
+    // Note that because we read the object through Silo's generic object
+    // interface, the Silo library will not be able to correctly apply
+    // object-level de-compression algorithms. We could add logic to the
+    // implementation of the GetObject method to detect the kind of object
+    // being read and, if it is a compressed mesh/var object, do the work
+    // necessary to prepare for its decompression. Too much work for now.
+    //
     DBobject *silo_obj = DBGetObject(db, str);
     if (!silo_obj)
     {
