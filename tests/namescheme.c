@@ -73,6 +73,8 @@ int main(int argc, char **argv)
     char blockName[1024];
     int driver = DB_PDB;
     int show_all_errors = 0;
+	DBnamescheme *ns, *ns2;
+    char teststr[256];
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB", 6)) {
@@ -89,15 +91,13 @@ int main(int argc, char **argv)
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
     /* Test a somewhat complex expression */ 
-    DBnamescheme *ns2;
-    DBnamescheme *ns = DBMakeNamescheme("@foo_%+03d@3-((n % 3)*(4+1)+1/2)+1");
+    ns = DBMakeNamescheme("@foo_%+03d@3-((n % 3)*(4+1)+1/2)+1");
     if (strcmp(DBGetName(ns, 25), "foo_+01") != 0)
         return 1;
     DBFreeNamescheme(ns);
 
     /* test returned string is different for successive calls (Dan Laney bug) */
     ns = DBMakeNamescheme("@/foo/bar/proc-%d@n");
-    char teststr[256];
     sprintf(teststr, "%s %s", DBGetName(ns,0), DBGetName(ns,123));
     if (strcmp(teststr, "/foo/bar/proc-0 /foo/bar/proc-123") != 0)
         return 1;

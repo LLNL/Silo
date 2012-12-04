@@ -462,8 +462,9 @@ DBMakeNamescheme(const char *fmt, ...)
                         /* Handle ext. array refs to arrays of strings */
                         if (DBGetVarType(dbfile, rv->arrnames[k]) == DB_CHAR)
                         {
+							char **tmp = NULL;
                             rv->arrsizes[k] = -1; /* initialize to 'unknown size' */
-                            char **tmp = DBStringListToStringArray((char*)rv->arrvals[k], &(rv->arrsizes[k]), 0, 0);
+                            tmp = DBStringListToStringArray((char*)rv->arrvals[k], &(rv->arrsizes[k]), 0, 0);
                             FREE(rv->arrvals[k]);
                             rv->arrvals[k] = tmp;
                         }
