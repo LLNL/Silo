@@ -955,8 +955,6 @@ static herr_t file_read_block(H5FD_silo_t *file, int blidx)
     herr_t ret_value = 0;
     haddr_t addr;
 
-    HDassert(b->buf);
-
     H5Eclear2(H5E_DEFAULT);
 
     addr = b->id * file->block_size;
@@ -1044,6 +1042,7 @@ static int alloc_block_by_id(H5FD_silo_t *file, hsize_t id)
     b = &(file->block_list[blidx]);
 
     b->buf = malloc(file->block_size);
+    HDassert(b->buf);
     b->id = id;
     b->age = file->op_counter++;
     b->minmoff = file->block_size;
