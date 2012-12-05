@@ -97,12 +97,20 @@ c ..Don't forget to include this file!
       include "silo.inc"
 
       integer  dirid, dbid, meshid, varid, silo_id, optlistid
-      integer  varid1
+      integer  varid1, driver, nargs
       real     x(5), y(5), z(5), foo(5)
       real     d(5), ttime
       integer  itype(5), tcycle
       real     ftype(5)
       double precision dttime
+      character*256 cloption
+
+      driver = DB_PDB
+      nargs = iargc()
+      call getarg(1, cloption)
+      if (cloption .eq. "DB_HDF5") then
+          driver = DB_HDF5
+      end if
 
 c...Generate some data to write out.
 
@@ -124,12 +132,12 @@ c...Generate some data to write out.
       dttime = 0.123
 c...Create the file (using the SILO interface)
 
-      ierr =  dbcreate ("pointf77.pdb", 12, DB_CLOBBER, DB_LOCAL,
-     .                 "file info goes here", 19, DB_PDB, dbid)
+      ierr =  dbcreate ("pointf77.silo", 13, DB_CLOBBER, DB_LOCAL,
+     .                 "file info goes here", 19, driver, dbid)
       if (ierr .ne. 0) then
          print *, 'dbcreate had error'
       else
-         print *, 'created file pointf77.pdb'
+         print *, 'created file pointf77.silo'
       endif
 
 c...Create an option list containing time and cyle info.

@@ -78,14 +78,22 @@ c...............................................................................
       include "silo.inc"
 
       integer  buildquad
-      integer  dbid, meshid, err
+      integer  dbid, meshid, err, driver, nargs
       integer  iarr(20)
       real*8   darr(20)
       character*8 cname
+      character*256 cloption
 
-c...Create PDB flavor file.
-      err = dbcreate("quadf77.pdb", 11, DB_CLOBBER, DB_LOCAL,
-     .               "file info", 9, DB_PDB, dbid)
+      driver = DB_PDB
+      nargs = iargc()
+      call getarg(1, cloption)
+      if (cloption .eq. "DB_HDF5") then
+          driver = DB_HDF5
+      end if
+
+c...Create file.
+      err = dbcreate("quadf77.silo", 12, DB_CLOBBER, DB_LOCAL,
+     .               "file info", 9, driver, dbid)
 
       meshid = buildquad (dbid, "quad", 4)
       meshid = buildquad (dbid, "quad2", 5)
@@ -94,13 +102,13 @@ c...Create PDB flavor file.
 
       err = dbclose(dbid)
 
-      print *,'Created file: quadf77.pdb'
+      print *,'Created file: quadf77.silo'
 
 
 
 
-c...Read PDB stuff.
-      err = dbopen ("quadf77.pdb", 11, DB_PDB, DB_READ, dbid)
+c...Read stuff.
+      err = dbopen ("quadf77.silo", 12, driver, DB_READ, dbid)
 
       err = dbrdvar (dbid, "hcom2", 5, iarr)
       if (err .ne. 0) print *, 'Error reading hcom2'

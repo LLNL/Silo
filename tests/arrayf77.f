@@ -63,7 +63,8 @@ c-------------------------------------------------------------------------
 
       implicit none
       include "silo.inc"
-      integer dbid, err
+      integer dbid, err, driver, nargs
+      character*256 cloption
 
       character*32 elemnames(3)
       integer elemlengths(3), array_id, i
@@ -78,12 +79,19 @@ c-------------------------------------------------------------------------
       data elemnames/"x","y","z"/
       data elemlengths/4,6,8/
 
+      driver = DB_PDB
+      nargs = iargc()
+      call getarg(1, cloption)
+      if (cloption .eq. "DB_HDF5") then
+          driver = DB_HDF5
+      end if
+
       err = dbshowerrors(DB_ABORT)
 
 c...Create file named "robb.pdb".  Database ID is returned in 'dbid'.
 
-      err = dbcreate("arrayf77.pdb", 12, 0, DB_LOCAL, "file info",
-     $     9, DB_PDB, dbid)
+      err = dbcreate("arrayf77.silo", 13, 0, DB_LOCAL, "file info",
+     $     9, driver, dbid)
 
 
       do i=1, 18
@@ -100,7 +108,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 C  Now try to read from the file...
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-      err = dbopen ("arrayf77.pdb", 12, DB_PDB, DB_READ, dbid)
+      err = dbopen ("arrayf77.silo", 13, DB_UNKNOWN, DB_READ, dbid)
 
       err = dbgetca (dbid, "carray", 6, 32, g_enames, g_elengths,
      $     g_nelems, g_values, g_nvalues, g_datatype)

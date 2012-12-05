@@ -63,7 +63,16 @@ c-------------------------------------------------------------------------
       implicit none
       include "silo.inc"
       integer dbid, curveid, err, i, curve_id, dtype, npts
+      integer driver, nargs
       real x(20), y1(20), y2(20), xin(20), yin1(20), yin2(20)
+      character*256 cloption
+
+      driver = DB_PDB
+      nargs = iargc()
+      call getarg(1, cloption)
+      if (cloption .eq. "DB_HDF5") then
+          driver = DB_HDF5
+      end if
 
 c     Create the curve x and y values...
 
@@ -75,8 +84,8 @@ c     Create the curve x and y values...
 
 c     Write curve data to a PDB file...
 
-      err = dbcreate ("curvef77.pdb", 12, 0, DB_LOCAL,
-     $     "Curve Data", 10, DB_PDB, dbid)
+      err = dbcreate ("curvef77.silo", 13, 0, DB_LOCAL,
+     $     "Curve Data", 10, driver, dbid)
 
       err = dbputcurve (dbid, "sincurve", 8, x, y1, DB_FLOAT,
      $     20, DB_F77NULL, curve_id)
@@ -88,7 +97,7 @@ c     Write curve data to a PDB file...
 
 c     Read the pdb file...
 
-      err = dbopen ("curvef77.pdb", 12, DB_PDB, DB_READ, dbid)
+      err = dbopen ("curvef77.silo", 13, driver, DB_READ, dbid)
       err = dbgetcurve (dbid, "sincurve", 8, 20, xin, yin1,
      $     dtype, npts)
       err = dbgetcurve (dbid, "coscurve", 8, 20, xin, yin2,

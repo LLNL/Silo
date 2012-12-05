@@ -57,16 +57,24 @@
 
 c...This program tests the use of the UCD Fortran jacket routines, plus
 c...the underlying UCD C routines.
+      integer driver, nargs
+      character*256 cloption
 
+      driver = DB_PDB
+      nargs = iargc()
+      call getarg(1, cloption)
+      if (cloption .eq. "DB_HDF5") then
+          driver = DB_HDF5
+      end if
 
-      call writeit ("mat.pdb")
-      print *,'Created mat.pdb'
+      call writeit ("mat.silo", driver)
+      print *,'Created mat.silo'
 
 
       stop
       end
 
-      subroutine writeit (fname)
+      subroutine writeit (fname, drvr)
 c----------------------------------------------------------------------
 c----------------------------------------------------------------------
 c----------------------------------------------------------------------
@@ -155,7 +163,7 @@ c...Create option list for use with functions that want it.
 
 
       err = dbcreate(fname, len(fname), 0, DB_LOCAL,
-     .               "foo-info", 8, DB_PDB, dbid)
+     .               "foo-info", 8, drvr, dbid)
       if (err .ne. 0) then
          print *,'Error from dbcreate'
          stop

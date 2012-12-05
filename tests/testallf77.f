@@ -63,15 +63,23 @@ c---------------------------------------------------------------------
       implicit none
 
       include "silo.inc"
-      integer  dbid, meshid, err
+      integer  dbid, meshid, err, driver, nargs
+      character*256 cloption 
 
       integer buildrect2d
       integer builducd
 
-c...Create file named "rectf77.pdb". Database ID is returned in 'dbid'.
+c...Create file named "rectf77.silo". Database ID is returned in 'dbid'.
 
-      err = dbcreate("rectf77.pdb", 11, 0, DB_LOCAL,
-     .               "file info", 9, DB_PDB, dbid)
+      driver = DB_PDB
+      nargs = iargc()
+      call getarg(1, cloption)
+      if (cloption .eq. "DB_HDF5") then
+          driver = DB_HDF5
+      end if
+
+      err = dbcreate("rectf77.silo", 12, 0, DB_LOCAL,
+     .               "file info", 9, driver, dbid)
 
 
 c...Write out necessary objects for MeshTV.
@@ -84,12 +92,12 @@ c...Close data file.
       err = dbclose(dbid)
 
 
-      print *,'Created file: rectf77.pdb'
+      print *,'Created file: rectf77.silo'
 
-c...Create file named "ucdf77.pdb". Database ID is returned in 'dbid'.
+c...Create file named "ucdf77.silo". Database ID is returned in 'dbid'.
 
-      err = dbcreate("ucdf77.pdb", 10, 0, DB_LOCAL,
-     .               "file info", 9, DB_PDB, dbid)
+      err = dbcreate("ucdf77.silo", 11, 0, DB_LOCAL,
+     .               "file info", 9, driver, dbid)
 
 
 c...Write out necessary objects for MeshTV.
@@ -102,7 +110,7 @@ c...Close data file.
       err = dbclose(dbid)
 
 
-      print *,'Created file: ucdf77.pdb'
+      print *,'Created file: ucdf77.silo'
 
       stop
       end
