@@ -81,7 +81,7 @@
        DBAddOption(optlist, DBOPT_HAS_EXTERNAL_ZONES, HASEXT)
 
 
-static int vidx['z'-'a'];
+static int vidx['z'-'a'+1];
 double varextents[MAXNUMVARS][2*MAXBLOCKS];
 int mixlens[MAXBLOCKS];
 int zonecounts[MAXBLOCKS];

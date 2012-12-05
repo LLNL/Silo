@@ -3,10 +3,10 @@
 set errorfile=.\error.txt 
 set resultsfile=.\results.txt 
 set drivers=(DB_PDB DB_HDF5)
-set buildDir=..\Win32\DLLwithHDF5_Release\
+set buildDir=..\Win32\Release\
 
 
-set gp=(version.exe namescheme.exe point.exe extface.exe testall.exe TesReadMask.exe array.exe multi_test.exe partial_io.exe simple.exe ucd.exe ucdsamp3.exe obj.exe onehex.exe oneprism.exe onepyramid.exe onetet.exe subhex.exe twohex.exe multispec.exe sami.exe specmix.exe spec.exe alltypes.exe wave.exe polyzl.exe csg.exe rocket.exe mmadjacency.exe mat3d_3across.exe ucd1d.exe dirtest.exe quad.exe namescheme.exe arbpoly.exe arbpoly3d.exe)
+set gp=(version.exe namescheme.exe point.exe extface.exe testall.exe TesReadMask.exe array.exe multi_test.exe partial_io.exe simple.exe ucd.exe ucdsamp3.exe obj.exe onehex.exe oneprism.exe onepyramid.exe onetet.exe subhex.exe twohex.exe multispec.exe sami.exe specmix.exe spec.exe alltypes.exe wave.exe polyzl.exe csg.exe mmadjacency.exe mat3d_3across.exe ucd1d.exe dirtest.exe quad.exe namescheme.exe arbpoly.exe arbpoly3d.exe testfs.exe)
 
 
 :: copy necessary dlls to this executable directory
@@ -117,7 +117,7 @@ REM    echo ============================================== >> %resultsfile%
 REM )
 
 REM Fortran tests
-set ft=(array_f.exe curve_f.exe mat_f.exe point_f.exe quad_f.exe testall_f.exe ucd_f.exe)
+set ft=(array_f.exe curve_f.exe mat_f.exe point_f.exe quad_f.exe testall_f.exe ucd_f.exe csgmesh_f.exe)
 for %%v in %ft% do (
     if exist %%v (
         echo Running %%v
