@@ -913,7 +913,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     {                                                                    \
         int d1 = VTYPE == DB_ZONECENT ? -1 : 0;                          \
         int sz = (dims[0]+d1)*(dims[1]+d1)*(NDS==3?(dims[2]+d1):1);      \
-        put_extents(VP,sz,varextents[vidx[VN[0]]],block);                \
+        put_extents(VP,sz,varextents[vidx[VN[0]-'a']],block);            \
         ASSERT(DBPutQuadvar1(F,VN,MN,VP,DS,NDS,NULL,0,VTYPE,CENT,OL)==0); \
     }                                                                    \
 }
