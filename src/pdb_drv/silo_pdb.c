@@ -928,6 +928,9 @@ PJ_GetComponentType (PDBfile *file, char *objname, char *compname)
  *
  *      Mark C. Miller, Mon Jan 11 16:02:16 PST 2010
  *      Made long long support UNconditionally compiled.
+ *
+ *      Mark C. MIller Mon Dec 10 09:54:05 PST 2012
+ *      Fix possible ABR when tname is size zero.
  *--------------------------------------------------------------------*/
 INTERNAL int
 PJ_ReadVariable(PDBfile *file,
@@ -967,6 +970,8 @@ PJ_ReadVariable(PDBfile *file,
     *-------------------------------------------------*/
 
    if (name[0] == '\'') {
+      int tnmlen;
+
       /*
        * No forcing of literals.  Since literals return an
        * an actual data type of -1, they will never get forced
@@ -983,7 +988,9 @@ PJ_ReadVariable(PDBfile *file,
        *-------------------------------------------------*/
 
       strcpy(tname, &name[1]);
-      tname[strlen(tname) - 1] = '\0';
+      tnmlen = strlen(tname);
+      tnmlen = tnmlen>0?tnmlen:1;
+      tname[tnmlen - 1] = '\0';
 
       if (name[1] == '<')
          lit = &tname[3];
@@ -2286,6 +2293,7 @@ PJ_ls (PDBfile       *file, /* PDB file pointer */
    char         **score_out, **malloc_out;
 
    score_out = lite_PD_ls(file, path, type, num);
+   if (*num == 0) return 0;
    malloc_out = ALLOC_N(char *, *num + 1);
    memcpy(malloc_out, score_out, *num * sizeof(char *));
 
