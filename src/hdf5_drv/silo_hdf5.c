@@ -1228,20 +1228,7 @@ static void
 FreeNodelists(DBfile_hdf5 *dbfile, char const *meshname)
 {
     int i;
-    if (dbfile) /* clear all for a given file */
-    {
-        for (i = 0; i < MAX_NODELIST_INFOS; i++)
-        {
-            if (keptNodelistInfos[i].zl && (keptNodelistInfos[i].db5file == dbfile))
-            {
-                FREE(keptNodelistInfos[i].meshname);
-                FREE(keptNodelistInfos[i].zlname);
-                DBFreeZonelist(keptNodelistInfos[i].zl);
-                memset(&keptNodelistInfos[i], 0x0, sizeof(keptNodelistInfos[i]));
-            }
-        }
-    }
-    else if (meshname) /* clear all for a given mesh */
+    if (meshname && dbfile) /* clear all for a given mesh */
     {
         char fullmname[256];
         db_hdf5_fullname(dbfile, (char*) meshname, fullmname);
@@ -1250,6 +1237,19 @@ FreeNodelists(DBfile_hdf5 *dbfile, char const *meshname)
         {
             if (keptNodelistInfos[i].zl && keptNodelistInfos[i].meshname &&
                 (strcmp(fullmname, keptNodelistInfos[i].meshname) == 0))
+            {
+                FREE(keptNodelistInfos[i].meshname);
+                FREE(keptNodelistInfos[i].zlname);
+                DBFreeZonelist(keptNodelistInfos[i].zl);
+                memset(&keptNodelistInfos[i], 0x0, sizeof(keptNodelistInfos[i]));
+            }
+        }
+    }
+    else if (dbfile) /* clear all for a given file */
+    {
+        for (i = 0; i < MAX_NODELIST_INFOS; i++)
+        {
+            if (keptNodelistInfos[i].zl && (keptNodelistInfos[i].db5file == dbfile))
             {
                 FREE(keptNodelistInfos[i].meshname);
                 FREE(keptNodelistInfos[i].zlname);
@@ -3932,7 +3932,13 @@ db_hdf5_compname(DBfile_hdf5 *dbfile, char name[8]/*out*/)
             db_perror("nlinks attribute", E_CALLFAIL, me);
             UNWIND();
         }
+
         nlinks++;
+        if (nlinks > 999999) {
+            db_perror("exceeded maximum number of nlinks", E_CALLFAIL, me);
+            UNWIND();
+        }
+
         if (H5Awrite(attr, H5T_NATIVE_INT, &nlinks)<0) {
             db_perror("nlinks attribute", E_CALLFAIL, me);
             UNWIND();
@@ -5147,7 +5153,7 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
     static char *me = "db_hdf5_finish_create";
     hid_t       attr=-1;
     int         size;
-    char        hdf5VString[32];
+    char        hdf5VString[64];
     unsigned    majno, minno, relno;
     const       int nofilters = 1;
     
@@ -5279,9 +5285,11 @@ db_hdf5_initiate_close(DBfile *_dbfile)
             n = strlen(msg);
             for (i = 0; i < noo && n < sizeof(msg); i++)
             {
-                char name[256], tmp[260];
+                char name[256], tmp[256];
                 H5Iget_name(ooids[i], name, sizeof(name));
-                sprintf(tmp, "\"%s\" (id=%llu), ", name, ooids[i]);
+                sprintf(tmp, "\"%.235s\" (id=%llu), ", name, ooids[i]);
+                if ((strlen(msg) + strlen(tmp) + 1) >= sizeof(msg))
+                    break;
                 strcat(msg, tmp);
                 n += strlen(tmp);
             }
@@ -12008,7 +12016,7 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
               object that can vary from call to call. Reserve space for
               the entire nodelists and/or zonelists arrays */
 
-           if (nodelists) {
+           if (lnodelists && nodelists) {
 
                /* compute total length of nodelists array */
                len = 0;
@@ -12024,7 +12032,7 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
                }
            }
 
-           if (zonelists) {
+           if (lzonelists && zonelists) {
 
                /* compute total length of nodelists array */
                len = 0;

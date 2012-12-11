@@ -527,7 +527,7 @@ DBGetName(DBnamescheme *ns, int natnum)
         theVal = EvalExprTree(ns, exprtree, natnum);
         FreeTree(exprtree);
         strncpy(tmpfmt, ns->fmtptrs[i], ns->fmtptrs[i+1] - ns->fmtptrs[i]);
-        if (strcmp(tmpfmt, "%s") == 0)
+        if (strcmp(tmpfmt, "%s") == 0 && 0 <= theVal && theVal < DB_MAX_EXPSTRS)
             sprintf(tmp, tmpfmt, ns->embedstrs[theVal]);
         else
             sprintf(tmp, tmpfmt, theVal);

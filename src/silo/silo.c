@@ -2215,7 +2215,7 @@ db_unregister_file(DBfile *dbfile)
         {
             int j;
             _db_regstatus[i].f = 0;
-            for (j = i; (_db_regstatus[j+1].f != 0) && (j < DB_NFILES-1); j++)
+            for (j = i; (j < DB_NFILES-1) && (_db_regstatus[j+1].f != 0); j++)
             {
                 _db_regstatus[j].f = _db_regstatus[j+1].f;
                 _db_regstatus[j].n = _db_regstatus[j+1].n;

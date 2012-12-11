@@ -371,7 +371,6 @@ PJ_write_len (PDBfile *file, char *name, char *type, void const *var, int nd,
  * Global private variables.
  *-------------------------------------------------------------------------
  */
-static PJcomplist *_tcl;
 static int     _pj_force_single = FALSE;
 
 /*======================================================================
@@ -626,9 +625,9 @@ PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj, int expected_
         if (error || cached_group == NULL)
         {
             char err_str[256];
+            sprintf(err_str,"PJ_get_group: Probably no such object \"%s\".",objname);
             FREE(varname);
             FREE(filename);
-            sprintf(err_str,"PJ_get_group: Probably no such object \"%s\".",objname);
             db_perror(err_str, E_CALLFAIL, me);
             return -1;
         }
@@ -639,10 +638,10 @@ PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj, int expected_
             if (strcmp(cached_group->type, DBGetObjtypeName(expected_dbtype)) != 0)
             {
                 char error[256];
-                FREE(varname);
-                FREE(filename);
                 sprintf(error,"Requested %s object \"%s\" is not a %s.",
                     cached_group->type, objname_in, DBGetObjtypeName(expected_dbtype));
+                FREE(varname);
+                FREE(filename);
                 db_perror(error, E_NOTFOUND, me);
                 return -1;
             }
@@ -776,6 +775,7 @@ PJ_GetComponent (PDBfile *file, char *objname, char *compname) {
    char          *result = NULL;
    PJcomplist     tmp_obj;
    char          *me = "PJ_GetComponent";
+   PJcomplist    *_tcl;
 
    /* Read just the requested component of the given object */
    INIT_OBJ(&tmp_obj);
@@ -812,6 +812,7 @@ PJ_GetComponentType (PDBfile *file, char *objname, char *compname)
 {
    int  retval = DB_NOTYPE;
    char *me = "PJ_GetComponentType";
+   PJcomplist    *_tcl;
 
    /* If there is no cached group, or we are interested in a
     * different object, get the one we want.  */
@@ -1716,8 +1717,6 @@ static char   *_ptvalstr[10] =
  "6_data", "7_data", "8_data",
  "9_data"};
 
-static PJcomplist *_tcl;
-
 /* Symbolic constants used in calls to db_StringListToStringArray
    to indicate behavior. A '!' in front means to not perform the
    associated action. For PDB driver, we handle the slash swap
@@ -2330,7 +2329,7 @@ PJ_get_fullpath(
 {
     int             ierr;
     char           *subpath;
-    char            tmpstr[256];
+    char            tmpstr[1024];
 
     if (file == NULL || cwd == NULL || path == NULL || name == NULL)
         return (FALSE);
@@ -2743,6 +2742,7 @@ db_pdb_NewToc (DBfile *_dbfile)
          if (!PJ_read(file, name, &ctype)) {
             sprintf(name, "%s->type", list[i]);
             if (!PJ_read(file, name, &ctype)) {
+               FREE(types);
                return db_perror("PJ_read", E_CALLFAIL, me);
             }
          }
@@ -3078,7 +3078,7 @@ db_pdb_NewToc (DBfile *_dbfile)
    }
 
    FREE(list);
-   if (types) FREE(types);
+   FREE(types);
    return 0;
 }
 
@@ -3304,9 +3304,10 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     char *tmpnames = NULL;
     char *tmpcolors = NULL;
     DBmaterial tmpmm;
-    memset(&tmpmm, 0, sizeof(DBmaterial));
+    PJcomplist *_tcl;
 
     /* Comp. Name        Comp. Address     Data Type     */
+    memset(&tmpmm, 0, sizeof(DBmaterial));
     INIT_OBJ(&tmp_obj);
 
     DEFINE_OBJ("ndims",       &tmpmm.ndims,       DB_INT);
@@ -3447,11 +3448,12 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    PJcomplist     tmp_obj;
    DBmatspecies   tmpmm;
    int            i, nstrs = 0;
-   memset(&tmpmm, 0, sizeof(DBmatspecies));
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmpmm, 0, sizeof(DBmatspecies));
    INIT_OBJ(&tmp_obj);
 
    DEFALL_OBJ("matname", &tmpmm.matname, DB_CHAR);
@@ -3557,11 +3559,12 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char *array_name)
    static char   *me = "db_pdb_GetCompoundarray";
    PJcomplist     tmp_obj;
    DBcompoundarray tmpca;
-   memset(&tmpca, 0, sizeof(DBcompoundarray));
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmpca, 0, sizeof(DBcompoundarray));
    INIT_OBJ(&tmp_obj);
    DEFINE_OBJ("nelems", &tmpca.nelems, DB_INT);
    DEFINE_OBJ("nvalues", &tmpca.nvalues, DB_INT);
@@ -3653,8 +3656,9 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
    static char  *me = "db_pdb_GetCurve" ;
    PJcomplist   tmp_obj ;
    DBcurve tmpcu;
-   memset(&tmpcu, 0, sizeof(DBcurve));
+   PJcomplist  *_tcl;
 
+   memset(&tmpcu, 0, sizeof(DBcurve));
    INIT_OBJ (&tmp_obj) ;
    DEFINE_OBJ ("npts", &tmpcu.npts, DB_INT) ;
    DEFINE_OBJ ("datatype", &tmpcu.datatype, DB_INT) ;
@@ -3801,8 +3805,9 @@ db_pdb_GetDefvars(DBfile *_dbfile, char const *objname)
    if (type == DB_DEFVARS)
    {
        DBdefvars tmpdefv;
-       memset(&tmpdefv, 0, sizeof(DBdefvars));
+       PJcomplist *_tcl;
 
+       memset(&tmpdefv, 0, sizeof(DBdefvars));
        INIT_OBJ(&tmp_obj);
        DEFINE_OBJ("ndefs", &tmpdefv.ndefs, DB_INT);
        DEFALL_OBJ("types", &tmpdefv.types, DB_INT);
@@ -3984,6 +3989,7 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultimesh";
+   PJcomplist    *_tcl;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4079,6 +4085,7 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
    static char   *me = "db_pdb_GetMultimeshadj";
    char           tmpn[256];
    int           *offsetmap, *offsetmapn=0, *offsetmapz=0, lneighbors, tmpoff;
+   PJcomplist    *_tcl;
 
    db_pdb_getobjinfo(dbfile->pdb, (char*)objname, tmp, &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4271,6 +4278,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultivar";
    char          *rpnames = NULL;
+   PJcomplist    *_tcl;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4400,6 +4408,7 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    static char   *me = "db_pdb_GetMultimat";
+   PJcomplist    *_tcl;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4519,6 +4528,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
    DBfile_pdb        *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist         tmp_obj;
    static char       *me = "db_pdb_GetMultimatspecies";
+   PJcomplist    *_tcl;
 
    db_pdb_getobjinfo(dbfile->pdb, objname, tmp, &ncomps);
    type = DBGetObjtypeTag(tmp);
@@ -4642,12 +4652,12 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
    PJcomplist     tmp_obj;
    static char *me = "db_pdb_GetPointmesh";
    DBpointmesh tmppm;
-   memset(&tmppm, 0, sizeof(DBpointmesh));
-
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmppm, 0, sizeof(DBpointmesh));
    INIT_OBJ(&tmp_obj);
 
    DEFINE_OBJ("block_no", &tmppm.block_no, DB_INT);
@@ -4781,12 +4791,12 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
    static char *me = "db_pdb_GetPointvar";
    char          *rpnames = NULL;
    DBmeshvar tmpmv;
-   memset(&tmpmv, 0, sizeof(DBmeshvar));
-
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmpmv, 0, sizeof(DBmeshvar));
    INIT_OBJ(&tmp_obj);
 
    DEFINE_OBJ("cycle", &tmpmv.cycle, DB_INT);
@@ -4918,8 +4928,9 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
     DBfile_pdb     *dbfile = (DBfile_pdb *) _dbfile;
     static char *me = "db_pdb_GetQuadmesh";
     DBquadmesh tmpqm;
-    memset(&tmpqm, 0, sizeof(DBquadmesh));
+    PJcomplist    *_tcl;
 
+    memset(&tmpqm, 0, sizeof(DBquadmesh));
     tmpqm.base_index[0] = -99999;
 
     /*------------------------------------------------------------*
@@ -5065,12 +5076,12 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
    static char *me = "db_pdb_GetQuadvar";
    char          *rpnames = NULL;
    DBquadvar tmpqv;
-   memset(&tmpqv, 0, sizeof(DBquadvar));
-
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmpqv, 0, sizeof(DBquadvar));
    INIT_OBJ(&tmp_obj);
 
    /* Scalars */
@@ -5234,12 +5245,12 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
    int            lo_offset, hi_offset;
    static char *me = "db_pdb_GetUcdmesh";
    DBucdmesh tmpum;
-   memset(&tmpum, 0, sizeof(DBucdmesh));
-
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmpum, 0, sizeof(DBucdmesh));
    INIT_OBJ(&tmp_obj);
 
    DEFINE_OBJ("block_no", &tmpum.block_no, DB_INT);
@@ -5542,12 +5553,12 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
    static char *me = "db_pdb_GetUcdvar";
    char          *rpnames = NULL;
    DBucdvar tmpuv;
-   memset(&tmpuv, 0, sizeof(DBucdvar));
-
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmpuv, 0, sizeof(DBucdvar));
    INIT_OBJ(&tmp_obj);
 
    DEFINE_OBJ("cycle", &tmpuv.cycle, DB_INT);
@@ -5654,11 +5665,12 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
    PJcomplist     tmp_obj;
    static char *me = "db_pdb_GetCsgmesh";
    DBcsgmesh tmpcsgm;
-   memset(&tmpcsgm, 0, sizeof(DBcsgmesh));
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmpcsgm, 0, sizeof(DBcsgmesh));
    INIT_OBJ(&tmp_obj);
 
    DEFINE_OBJ("block_no", &tmpcsgm.block_no, DB_INT);
@@ -5763,8 +5775,9 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
    static char *me = "db_pdb_GetCsgvar";
    char          *rpnames = NULL;
    DBcsgvar tmpcsgv;
-   memset(&tmpcsgv, 0, sizeof(DBcsgvar));
+   PJcomplist    *_tcl;
 
+   memset(&tmpcsgv, 0, sizeof(DBcsgvar));
    INIT_OBJ(&tmp_obj);
 
    DEFINE_OBJ("cycle", &tmpcsgv.cycle, DB_INT);
@@ -5819,10 +5832,10 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
       FREE(rpnames);
    }
 
-   tmpcsgv.name = STRDUP(objname);
-
    if ((csgv = DBAllocCsgvar()) == NULL)
       return NULL;
+
+   tmpcsgv.name = STRDUP(objname);
    *csgv = tmpcsgv;
 
    return (csgv);
@@ -5860,13 +5873,13 @@ db_pdb_GetFacelist(DBfile *_dbfile, char *objname)
     PJcomplist          tmp_obj;
     DBfile_pdb          *dbfile = (DBfile_pdb*)_dbfile;
     static char *me = "db_pdb_GetFacelist";
-    DBfacelist tmpfl;
-    memset(&tmpfl, 0, sizeof(DBfacelist));
-
+    DBfacelist           tmpfl;
+    PJcomplist         *_tcl;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
     /*------------------------------------------------------------*/
+    memset(&tmpfl, 0, sizeof(DBfacelist));
     INIT_OBJ(&tmp_obj);
 
     DEFINE_OBJ("ndims", &tmpfl.ndims, DB_INT);
@@ -5938,14 +5951,14 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
     DBzonelist          *zl = NULL;
     PJcomplist          tmp_obj;
     DBfile_pdb          *dbfile = (DBfile_pdb*)_dbfile;
-    static char *me = "db_pdb_GetZonelist";
-    DBzonelist tmpzl;
-    memset(&tmpzl, 0, sizeof(DBzonelist));
-
+    static char         *me = "db_pdb_GetZonelist";
+    DBzonelist           tmpzl;
+    PJcomplist          *_tcl;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
     /*------------------------------------------------------------*/
+    memset(&tmpzl, 0, sizeof(DBzonelist));
     INIT_OBJ(&tmp_obj);
 
     DEFINE_OBJ("ndims", &tmpzl.ndims, DB_INT);
@@ -6026,14 +6039,14 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
     DBphzonelist          *phzl = NULL;
     PJcomplist          tmp_obj;
     DBfile_pdb          *dbfile = (DBfile_pdb*)_dbfile;
-    static char *me = "db_pdb_GetPHZonelist";
-    DBphzonelist tmpphzl;
-    memset(&tmpphzl, 0, sizeof(DBphzonelist));
-
+    static char         *me = "db_pdb_GetPHZonelist";
+    DBphzonelist         tmpphzl;
+    PJcomplist          *_tcl;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
     /*------------------------------------------------------------*/
+    memset(&tmpphzl, 0, sizeof(DBphzonelist));
     INIT_OBJ(&tmp_obj);
 
     DEFINE_OBJ("nfaces", &tmpphzl.nfaces, DB_INT);
@@ -6100,13 +6113,14 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
     DBcsgzonelist      *zl = NULL;
     PJcomplist          tmp_obj;
     DBfile_pdb         *dbfile = (DBfile_pdb*)_dbfile;
-    static char *me = "db_pdb_GetCSGZonelist";
-    DBcsgzonelist tmpzl;
-    memset(&tmpzl, 0, sizeof(DBcsgzonelist));
+    static char        *me = "db_pdb_GetCSGZonelist";
+    DBcsgzonelist       tmpzl;
+    PJcomplist         *_tcl;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
     /*------------------------------------------------------------*/
+    memset(&tmpzl, 0, sizeof(DBcsgzonelist));
     INIT_OBJ(&tmp_obj);
 
     DEFINE_OBJ("nregs", &tmpzl.nregs, DB_INT);
@@ -6700,11 +6714,12 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
    int           *intArray = 0;
    char          *s, **strArray = 0;
    char          *mrgv_onames = 0, *mrgv_rnames = 0;
-   memset(&tmptree, 0, sizeof(DBmrgtree));
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmptree, 0, sizeof(DBmrgtree));
    INIT_OBJ(&tmp_obj);
 
    /* read header and scalars data only first */
@@ -6726,6 +6741,8 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
    tree->root = 0;
    tree->cwr = 0;
    num_nodes = tree->num_nodes;
+
+   if (num_nodes <= 0) return (tree);
 
    /* allocate all the nodes of the tree and a linear list of pointers
    to them */
@@ -6749,12 +6766,15 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("name", &s, DB_CHAR);
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
-   strArray = DBStringListToStringArray(s, &num_nodes,
-       !handleSlashSwap, !skipFirstSemicolon);
-   for (i = 0; i < num_nodes; i++)
-       ltree[i]->name = strArray[i];
-   FREE(s);
-   FREE(strArray); /* free only top-level array of pointers */
+   if (s)
+   {
+       strArray = DBStringListToStringArray(s, &num_nodes,
+           !handleSlashSwap, !skipFirstSemicolon);
+       for (i = 0; i < num_nodes; i++)
+           ltree[i]->name = strArray[i];
+       FREE(s);
+       FREE(strArray); /* free only top-level array of pointers */
+   }
 
    /* read the node 'names' member */
    INIT_OBJ(&tmp_obj);
@@ -6783,20 +6803,23 @@ db_pdb_GetMrgtree(DBfile *_dbfile, char const *mrgtree_name)
                n++;
            }
        }
+       FREE(s);
+       FREE(strArray); /* free only top-level array of pointers */
    }
-   FREE(s);
-   FREE(strArray); /* free only top-level array of pointers */
 
    /* read the maps_name data */
    INIT_OBJ(&tmp_obj);
    DEFALL_OBJ("maps_name", &s, DB_CHAR);
    PJ_GetObject(dbfile->pdb, (char*)mrgtree_name, &tmp_obj, 0);
-   strArray = DBStringListToStringArray(s, &num_nodes, !handleSlashSwap,
-       !skipFirstSemicolon);
-   for (i = 0; i < num_nodes; i++)
-       ltree[i]->maps_name = strArray[i];
-   FREE(s);
-   FREE(strArray); /* free only top-level array of pointers */
+   if (s)
+   {
+       strArray = DBStringListToStringArray(s, &num_nodes, !handleSlashSwap,
+           !skipFirstSemicolon);
+       for (i = 0; i < num_nodes; i++)
+           ltree[i]->maps_name = strArray[i];
+       FREE(s);
+       FREE(strArray); /* free only top-level array of pointers */
+   }
 
    /* read the map segment id data */
    INIT_OBJ(&tmp_obj);
@@ -6911,10 +6934,10 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
     int *segData = NULL;
     int *fracLengths = NULL;
     void *fracsArray = NULL;
-
     DBgroupelmap tmpgm;
-    memset(&tmpgm, 0, sizeof(DBgroupelmap));
+    PJcomplist *_tcl;
 
+    memset(&tmpgm, 0, sizeof(DBgroupelmap));
     INIT_OBJ(&tmp_obj);
     DEFINE_OBJ("num_segments",    &tmpgm.num_segments, DB_INT);
     DEFINE_OBJ("fracs_data_type", &tmpgm.fracs_data_type, DB_INT);
@@ -7017,16 +7040,16 @@ db_pdb_GetMrgvar(DBfile *_dbfile, char const *objname)
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    PJcomplist     tmp_obj;
    char           tmp[256];
-   static char *me = "db_pdb_GetMrgvar";
+   static char   *me = "db_pdb_GetMrgvar";
    char          *rpnames = NULL;
    char          *cnames = NULL;
-   DBmrgvar tmpmrgv;
-   memset(&tmpmrgv, 0, sizeof(DBmrgvar));
-
+   DBmrgvar       tmpmrgv;
+   PJcomplist    *_tcl;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
    /*------------------------------------------------------------*/
+   memset(&tmpmrgv, 0, sizeof(DBmrgvar));
    INIT_OBJ(&tmp_obj);
 
    DEFINE_OBJ("ncomps", &tmpmrgv.ncomps, DB_INT);
@@ -11260,8 +11283,8 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
         count = len;
         DBWriteComponent(dbfile, obj, "names", name, "char", s, 1, &count);
         FREE(s);
-        FREE(strArray);
     }
+    FREE(strArray);
 
     /* linearize and output map name data */
     strArray = (char **) malloc(num_nodes * sizeof(char*));
