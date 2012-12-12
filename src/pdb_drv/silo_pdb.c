@@ -635,7 +635,18 @@ PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj, int expected_
         /* Check object type before we do any allocations */
         if (expected_dbtype > 0)
         {
-            if (strcmp(cached_group->type, DBGetObjtypeName(expected_dbtype)) != 0)
+            int matched = 1;
+            if (expected_dbtype == DB_QUADMESH)
+            {
+                if ((strcmp(cached_group->type, DBGetObjtypeName(DB_QUAD_RECT)) != 0) &&
+                    (strcmp(cached_group->type, DBGetObjtypeName(DB_QUAD_CURV)) != 0))
+                    matched = 0;
+            }  
+            else if (strcmp(cached_group->type, DBGetObjtypeName(expected_dbtype)) != 0)
+            {
+                matched = 0;
+            }
+            if (!matched)
             {
                 char error[256];
                 sprintf(error,"Requested %s object \"%s\" is not a %s.",
@@ -658,7 +669,18 @@ PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj, int expected_
     /* Check object type */
     if (expected_dbtype > 0)
     {
-        if (strcmp(cached_group->type, DBGetObjtypeName(expected_dbtype)) != 0)
+        int matched = 1;
+        if (expected_dbtype == DB_QUADMESH)
+        {
+            if ((strcmp(cached_group->type, DBGetObjtypeName(DB_QUAD_RECT)) != 0) &&
+                (strcmp(cached_group->type, DBGetObjtypeName(DB_QUAD_CURV)) != 0))
+                matched = 0;
+        }  
+        else if (strcmp(cached_group->type, DBGetObjtypeName(expected_dbtype)) != 0)
+        {
+            matched = 0;
+        }
+        if (!matched)
         {
             char error[256];
             FREE(varname);
@@ -4983,8 +5005,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
 
     /* The type passed here to PJ_GetObject is NULL because quadmeshes can have
      * one of two types:  DB_COLLINEAR or DB_NONCOLLINEAR.  */
-    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_QUAD_RECT) < 0 &&
-        PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_QUAD_CURV) < 0)
+    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_QUADMESH) < 0)
        return NULL;
     if ((qm = DBAllocQuadmesh()) == NULL)
        return NULL;

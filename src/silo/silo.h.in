@@ -1296,6 +1296,7 @@ typedef struct DBmeshvar_ {
     int            extensive;   /* indicates if the variable reprsents an extensiv
                                    physical property (as opposed to intensive) */
 } DBmeshvar;
+typedef DBmeshvar DBpointvar; /* better named alias for pointvar */
 
 typedef struct DBmaterial_ {
 /*----------- Material Information -----------*/
@@ -1824,6 +1825,7 @@ SILO_API extern void     DBFreeCsgvar(DBcsgvar *);
 SILO_API extern void     DBFreeQuadvar(DBquadvar *);
 SILO_API extern void     DBFreeUcdmesh(DBucdmesh *);
 SILO_API extern void     DBFreeMeshvar(DBmeshvar *);
+SILO_API extern void     DBFreePointvar(DBpointvar *);
 SILO_API extern void     DBFreePointmesh(DBpointmesh *);
 SILO_API extern void     DBFreeQuadmesh(DBquadmesh *);
 SILO_API extern void     DBFreeCsgmesh(DBcsgmesh *);

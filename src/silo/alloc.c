@@ -983,6 +983,12 @@ DBFreeMeshvar(DBmeshvar *var)
     FREE(var);
 }
 
+PUBLIC void
+DBFreePointvar(DBpointvar *var)
+{
+    DBFreeMeshvar(var);
+}
+
 /*----------------------------------------------------------------------
  *  Function                                            DBAllocUcdmesh
  *

@@ -37,8 +37,6 @@
 #include "silo.h"
 #include "std.c"
 
-#define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
-
 #define NX 30
 #define NY 40
 #define NZ 30
@@ -80,6 +78,399 @@
     if (HASEXT)                                             \
        DBAddOption(optlist, DBOPT_HAS_EXTERNAL_ZONES, HASEXT)
 
+#define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
+
+static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
+{
+    char saved_byte_bucket1[4096], saved_byte_bucket2[4096];
+    int pass;
+
+    for (pass = 1; pass <= 2; pass++)
+    {
+        va_list ap;
+        int nsaved = 0;
+
+        va_start(ap, struct_size);
+        while (1) 
+        {
+            char *addr_in_struct1 = va_arg(ap, char*);
+            int size, offset;
+
+            if (!addr_in_struct1) break;
+            size = va_arg(ap, int);
+            offset = addr_in_struct1 - struct1;
+
+            /* on 1rst pass, clear and copy bytes from structs to buckets */
+            if (pass == 1)
+            {
+                memcpy(&saved_byte_bucket1[nsaved], struct1+offset, size);
+                memcpy(&saved_byte_bucket2[nsaved], struct2+offset, size);
+                memset(struct1+offset, 0, size);
+                memset(struct2+offset, 0, size);
+            }
+            else /* on 2nd pass, just restored saved bytes */
+            {
+                memcpy(struct1+offset, &saved_byte_bucket1[nsaved], size);
+                memcpy(struct2+offset, &saved_byte_bucket2[nsaved], size);
+            }
+            nsaved += size;
+        }
+        va_end(ap);
+
+        if (pass == 1)
+        {
+            ASSERT(memcmp(struct1, struct2, struct_size) == 0); 
+        }
+    }
+}
+
+#define CHECK_ARRAY(P1, P2, N, ATYPE)                                    \
+{                                                                        \
+    if (P1 == 0 && P2 == 0)                                              \
+        ; /* do-nothing */                                               \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(P1 != 0 && P2 != 0);                                      \
+        switch (ATYPE)                                                   \
+        {                                                                \
+        case DB_CHAR:                                                    \
+        {                                                                \
+            int jj; char *p1 = (char*) P1, *p2 = (char*) P2;             \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_SHORT:                                                   \
+        {                                                                \
+            int jj; short *p1 = (short*) P1, *p2 = (short*) P2;          \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_INT:                                                     \
+        {                                                                \
+            int jj; int *p1 = (int*) P1, *p2 = (int*) P2;                \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_LONG:                                                    \
+        {                                                                \
+            int jj; long *p1 = (long*) P1, *p2 = (long*) P2;             \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_LONG_LONG:                                               \
+        {                                                                \
+            int jj; long long *p1 = (long long*) P1, *p2 = (long long*) P2; \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_FLOAT:                                                   \
+        {                                                                \
+            int jj; float *p1 = (float*) P1, *p2 = (float*) P2;          \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_DOUBLE:                                                  \
+        {                                                                \
+            int jj; double *p1 = (double*) P1, *p2 = (double*) P2;       \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        default: ASSERT(1==0);                                           \
+        }                                                                \
+    }                                                                    \
+}
+
+#define TESTFL(F,NM,NFS,NDS,FL,LFL,ORG,ZNO,SHSZ,SHCNT,NSH,TYPES,TL,NTYPES)\
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetZonelist(F,NM);                             \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetPointmesh(F,NM);                            \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgmesh(F,NM);                              \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            int i;                                                       \
+            DBfacelist *fl = DBGetFacelist(F, NM);                       \
+            ASSERT(fl);                                                  \
+            CHECK_ARRAY(FL, fl->nodelist, LFL, DB_INT);                  \
+            if (ZNO)                                                     \
+                CHECK_ARRAY(ZNO, fl->zoneno, NFS, DB_INT);               \
+            CHECK_ARRAY(SHSZ, fl->shapesize, NSH, DB_INT);               \
+            CHECK_ARRAY(SHCNT, fl->shapecnt, NSH, DB_INT);               \
+            if (NTYPES > 0)                                              \
+            {                                                            \
+                CHECK_ARRAY(TYPES, fl->types, NTYPES, DB_INT);           \
+                CHECK_ARRAY(TL, fl->typelist, NTYPES, DB_INT);           \
+            }                                                            \
+            DBFreeFacelist(fl);                                          \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(DBPutFacelist(F,NM,NFS,NDS,FL,LFL,ORG,ZNO,SHSZ,SHCNT,NSH,TYPES,TL,NTYPES)==0); \
+    }                                                                    \
+}
+
+#define TESTZL(F,NM,NZS,NDS,ZL,LZL,ORG,LO,HI,SHTYP,SHSZ,SHCNT,NSH,OL)\
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetFacelist(F,NM);                             \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetPointmesh(F,NM);                            \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgmesh(F,NM);                              \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            int i;                                                       \
+            DBzonelist *zl = DBGetZonelist(F, NM);                       \
+            ASSERT(zl);                                                  \
+            ASSERT(LZL == zl->lnodelist);                                \
+            CHECK_ARRAY(ZL, zl->nodelist, LZL, DB_INT);                  \
+            ASSERT(NSH == zl->nshapes);                                  \
+            CHECK_ARRAY(SHSZ, zl->shapesize, NSH, DB_INT);               \
+            CHECK_ARRAY(SHCNT, zl->shapecnt, NSH, DB_INT);               \
+            CHECK_ARRAY(SHTYP, zl->shapetype, NSH, DB_INT);              \
+            DBFreeZonelist(zl);                                          \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(DBPutZonelist2(F,NM,NZS,NDS,ZL,LZL,ORG,LO,HI,SHTYP,SHSZ,SHCNT,NSH,OL)==0); \
+    }                                                                    \
+}
+
+#define TESTUMESH(F,MN,NDS,CNMS,CS,NNS,NZS,ZLNM,FLNM,DTYPE,OL)           \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetQuadmesh(F,MN);                             \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetPointmesh(F,MN);                            \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgmesh(F,MN);                              \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            DBucdmesh *um = DBGetUcdmesh(F, MN);                         \
+            ASSERT(um);                                                  \
+            CHECK_ARRAY(CS[0], um->coords[0], NNS, DTYPE);               \
+            CHECK_ARRAY(CS[1], um->coords[1], NNS, DTYPE);               \
+            if (NDS > 2)                                                 \
+                CHECK_ARRAY(CS[2], um->coords[2], NNS, DTYPE);           \
+            DBFreeUcdmesh(um);                                           \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(DBPutUcdmesh(F,MN,NDS,CNMS,CS,NNS,NZS,ZLNM,FLNM,DTYPE,OL)==0);    \
+    }                                                                    \
+}
+
+#define TESTQMESH(F,MN,CNMS,CS,DS,NDS,DTYPE,CTYPE,OL)                   \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetUcdmesh(F,MN);                              \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetPointmesh(F,MN);                            \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgmesh(F,MN);                              \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
+            DBquadmesh *qm = DBGetQuadmesh(F, MN);                       \
+            ASSERT(qm);                                                  \
+            ASSERT(qm->ndims == NDS);                                    \
+            ASSERT(qm->datatype == DTYPE);                               \
+            CHECK_ARRAY(CS[0], qm->coords[0], (CTYPE==DB_COLLINEAR?DS[0]:sz), DTYPE); \
+            CHECK_ARRAY(CS[1], qm->coords[1], (CTYPE==DB_COLLINEAR?DS[1]:sz), DTYPE); \
+            CHECK_ARRAY(CS[2], qm->coords[2], (CTYPE==DB_COLLINEAR?DS[2]:sz), DTYPE); \
+            DBFreeQuadmesh(qm);                                          \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(DBPutQuadmesh(F,MN,CNMS,CS,DS,NDS,DTYPE,CTYPE,OL)==0);    \
+    }                                                                    \
+}
+
+#define TESTPMESH(F,MN,NDS,CS,NPTS,DTYPE,OL)                             \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetUcdmesh(F,MN);                              \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetQuadmesh(F,MN);                             \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgmesh(F,MN);                              \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            DBpointmesh *pm = DBGetPointmesh(F, MN);                     \
+            ASSERT(pm);                                                  \
+            ASSERT(pm->nels == NPTS);                                    \
+            ASSERT(pm->ndims == NDS);                                    \
+            ASSERT(pm->datatype == DTYPE);                               \
+            CHECK_ARRAY(CS[0], pm->coords[0], NPTS, DTYPE);              \
+            CHECK_ARRAY(CS[1], pm->coords[1], NPTS, DTYPE);              \
+            CHECK_ARRAY(CS[2], pm->coords[2], NPTS, DTYPE);              \
+            DBFreePointmesh(pm);                                         \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(DBPutPointmesh(F,MN,NDS,CS,NPTS,DTYPE,OL)==0);            \
+    }                                                                    \
+}
+
+#define TESTUVAR(F,VN,MN,NV,VNMS,VP,NVALS,MXVALS,MXLEN,DTYPE,CENT,OL)    \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetQuadvar(F,VN);                              \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetPointvar(F,VN);                             \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgvar(F,VN);                               \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            int i;                                                       \
+            DBucdvar *uv = DBGetUcdvar(F, VN);                           \
+            ASSERT(uv);                                                  \
+            for (i = 0; i < NV; i++)                                     \ 
+                CHECK_ARRAY(VP[i], uv->vals[i], NVALS, DTYPE);           \
+            DBFreeUcdvar(uv);                                            \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(DBPutUcdvar(F,VN,MN,NV,VNMS,VP,NVALS,MXVALS,MXLEN,DTYPE,CENT,OL)==0); \
+    }                                                                    \
+}
+
+#define TESTQVAR(F,VN,MN,VP,DS,NDS,VTYPE,CENT,OL)                       \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetUcdvar(F,VN);                               \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetPointvar(F,VN);                             \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgvar(F,VN);                               \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
+            DBquadvar *qv = DBGetQuadvar(F, VN);                         \
+            ASSERT(qv);                                                  \
+            CHECK_ARRAY(VP, qv->vals[0], sz, VTYPE);                     \
+            DBFreeQuadvar(qv);                                           \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                           \
+        put_extents(VP,sz,varextents[vidx[VN[0]-'a']],block);            \
+        ASSERT(DBPutQuadvar1(F,VN,MN,VP,DS,NDS,NULL,0,VTYPE,CENT,OL)==0); \
+    }                                                                    \
+}
+
+#define TESTPVAR(F,VN,MN,NV,VP,NPTS,DTYPE,OL)                            \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testbadread)                                                 \
+        {                                                                \
+            void *m;                                                     \
+            m = (void*) DBGetUcdvar(F,VN);                               \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCurve(F,VN);                                \
+            ASSERT(m==0);                                                \
+            m = (void*) DBGetCsgvar(F,VN);                               \
+            ASSERT(m==0);                                                \
+        }                                                                \
+        if (testread)                                                    \
+        {                                                                \
+            int i;                                                       \
+            DBpointvar *pv = DBGetPointvar(F, VN);                       \
+            ASSERT(pv);                                                  \
+            ASSERT(pv->nvals == NV);                                     \
+            ASSERT(pv->nels == NPTS);                                    \
+            for (i = 0; i < NV; i++)                                     \
+                CHECK_ARRAY(VP[i], pv->vals[i], NPTS, DTYPE);            \
+            DBFreePointvar(pv);                                          \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(DBPutPointvar(F,VN,MN,NV,VP,NPTS,DTYPE,OL)==0);           \
+    }                                                                    \
+}
+
+#define TESTMAT(F,MATNM,MN,NMATS,MATNOS,MATLIST,DS,NDS,MIX_NEXT,MIX_MAT,MIX_ZONE,MIX_VF,MIXLEN,DTYPE,OL) \
+{                                                                        \
+    if (handle_read)                                                     \
+    {                                                                    \
+        if (testread)                                                    \
+        {                                                                \
+            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
+            DBmaterial *mat = DBGetMaterial(F, MATNM);                   \
+            ASSERT(mat);                                                 \
+            CHECK_ARRAY(MATLIST, mat->matlist, sz, DB_INT);              \
+            ASSERT(MIXLEN == mat->mixlen);                               \
+            if (MIXLEN > 0)                                              \
+            {                                                            \
+                CHECK_ARRAY(MIX_NEXT, mat->mix_next, MIXLEN, DB_INT);    \
+                CHECK_ARRAY(MIX_MAT, mat->mix_mat, MIXLEN, DB_INT);      \
+                CHECK_ARRAY(MIX_ZONE, mat->mix_zone, MIXLEN, DB_INT);    \
+                CHECK_ARRAY(MIX_VF, mat->mix_vf, MIXLEN, DTYPE);         \
+            }                                                            \
+            DBFreeMaterial(mat);                                         \
+        }                                                                \
+    }                                                                    \
+    else                                                                 \
+    {                                                                    \
+        matcounts[block] = count_mats(DS[0]*DS[1],MATLIST,matlists[block]); \
+        mixlens[block] = MIXLEN;                                         \
+        ASSERT(DBPutMaterial(F,MATNM,MN,NMATS,MATNOS,MATLIST,DS,NDS,     \
+                   MIX_NEXT,MIX_MAT,MIX_ZONE,MIX_VF,MIXLEN,DTYPE,OL)==0);\
+    }                                                                    \
+}
 
 static int vidx['z'-'a'+1];
 double varextents[MAXNUMVARS][2*MAXBLOCKS];
@@ -96,14 +487,11 @@ int testbadread = FALSE;
 int           build_multi(DBfile *, int, int, int, int, int, int, int, int);
 
 void          build_block_rect2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int, int);
-void          build_block_curv2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int);
-void          build_block_point2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int);
-void          build_block_rect3d(DBfile *, char[MAXBLOCKS][STRLEN], int, int,
-                                 int);
-void          build_block_curv3d(DBfile *, char[MAXBLOCKS][STRLEN], int, int,
-                                 int);
-void          build_block_ucd3d(DBfile *, char[MAXBLOCKS][STRLEN], int, int,
-                                int);
+void          build_block_curv2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int, int);
+void          build_block_point2d(DBfile *, char[MAXBLOCKS][STRLEN], int, int, int);
+void          build_block_rect3d(DBfile *, char[MAXBLOCKS][STRLEN], int, int, int, int);
+void          build_block_curv3d(DBfile *, char[MAXBLOCKS][STRLEN], int, int, int, int);
+void          build_block_ucd3d(DBfile *, char[MAXBLOCKS][STRLEN], int, int, int, int);
 
 static void   put_extents(float *arr, int len, double *ext_arr, int block);
 static void   fill_rect3d_bkgr(int matlist[], int nx, int ny, int nz,
@@ -410,7 +798,9 @@ main(int argc, char *argv[])
     }
 
     DBShowErrors(DB_ALL_AND_DRVR, NULL);
+#if 0
     if (testread || testbadread) DBShowErrors(DB_NONE, NULL);
+#endif
     DBSetEnableChecksums(dochecks);
     DBSetFriendlyHDF5Names(hdfriendly);
 
@@ -450,90 +840,156 @@ main(int argc, char *argv[])
      */
     sprintf(filename, "multi_curv2d%s", file_ext);
     fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
-                         "multi-block curvilinear 2d test file", driver))
-        == NULL)
+    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block curvilinear 2d test file", driver)))
     {
-        fprintf(stderr, "Could not create '%s'.\n", filename);
-    } else if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5, 1, 1,
-                           DB_NONCOLLINEAR, 0) == -1)
+        if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5, 1, 1, DB_NONCOLLINEAR, 0) == -1)
+            fprintf(stderr, "Could not create '%s'.\n", filename);
+        DBClose(dbfile);
+        dbfile = 0;
+        if (testread || testbadread)
+        {
+            fprintf(stdout, "reading %s\n", filename);
+            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            {
+                if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5, 1, 1, DB_NONCOLLINEAR, 1) == -1)
+                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                DBClose(dbfile);
+            }
+            else
+            {
+                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+            }
+        }
+    }
+    else
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
-        DBClose(dbfile);
-    } else
-        DBClose(dbfile);
+    }
 
     /* 
      * Create the multi-block point 2d mesh.
      */
     sprintf(filename, "multi_point2d%s", file_ext);
     fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
-                           "multi-block point 2d test file", driver))
-        == NULL)
+    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block point 2d test file", driver)))
     {
-        fprintf(stderr, "Could not create '%s'.\n", filename);
-    } else if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5, 1, 1,
-                           0, 0) == -1)
+        if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5, 1, 1, 0, 0) == -1)
+            fprintf(stderr, "Could not create '%s'.\n", filename);
+        DBClose(dbfile);
+        dbfile = 0;
+        if (testread || testbadread)
+        {
+            fprintf(stdout, "reading %s\n", filename);
+            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            {
+                if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5, 1, 1, 0, 1) == -1)
+                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                DBClose(dbfile);
+            }
+            else
+            {
+                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+            }
+        }
+    }
+    else
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
-        DBClose(dbfile);
-    } else
-        DBClose(dbfile);
+    }
 
     /* 
      * Create the multi-block rectilinear 3d mesh.
      */
     sprintf(filename, "multi_rect3d%s", file_ext);
     fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
-                         "multi-block rectilinear 3d test file", driver))
-        == NULL)
+    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 3d test file", driver)))
     {
-        fprintf(stderr, "Could not create '%s'.\n", filename);
-    } else if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3,
-                           DB_COLLINEAR, 0) == -1)
+        if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_COLLINEAR, 0) == -1)
+            fprintf(stderr, "Could not create '%s'.\n", filename);
+        DBClose(dbfile);
+        dbfile = 0;
+        if (testread || testbadread)
+        {
+            fprintf(stdout, "reading %s\n", filename);
+            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            {
+                if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_COLLINEAR, 1) == -1)
+                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                DBClose(dbfile);
+            }
+            else
+            {
+                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+            }
+        }
+    }
+    else
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
-        DBClose(dbfile);
-    } else
-        DBClose(dbfile);
+    }
 
     /* 
      * Create the multi-block curvilinear 3d mesh.
      */
     sprintf(filename, "multi_curv3d%s", file_ext);
     fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
-                         "multi-block curvilinear 3d test file", driver))
-        == NULL)
+    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block curvilinear 3d test file", driver)))
     {
-        fprintf(stderr, "Could not create '%s'.\n", filename);
-    } else if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3,
-                           DB_NONCOLLINEAR, 0) == -1)
+        if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_NONCOLLINEAR, 0) == -1)
+            fprintf(stderr, "Could not create '%s'.\n", filename);
+        DBClose(dbfile);
+        dbfile = 0;
+        if (testread || testbadread)
+        {
+            fprintf(stdout, "reading %s\n", filename);
+            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            {
+                if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_NONCOLLINEAR, 1) == -1)
+                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                DBClose(dbfile);
+            }
+            else
+            {
+                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+            }
+        }
+    }
+    else
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
-        DBClose(dbfile);
-    } else
-        DBClose(dbfile);
+    }
+
 
     /* 
      * Create the multi-block ucd 3d mesh.
      */
     sprintf(filename, "multi_ucd3d%s", file_ext);
     fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
-                           "multi-block ucd 3d test file", driver))
-        == NULL)
+    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block ucd 3d test file", driver)))
     {
-        fprintf(stderr, "Could not create '%s'.\n", filename);
-    } else if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3, 4, 3,
-                           0, 0) == -1)
+        if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3, 4, 3, 0, 0) == -1)
+            fprintf(stderr, "Could not create '%s'.\n", filename);
+        DBClose(dbfile);
+        dbfile = 0;
+        if (testread || testbadread)
+        {
+            fprintf(stdout, "reading %s\n", filename);
+            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            {
+                if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3, 4, 3, 0, 1) == -1)
+                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                DBClose(dbfile);
+            }
+            else
+            {
+                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+            }
+        }
+    }
+    else
     {
         fprintf(stderr, "Error in creating '%s'.\n", filename);
-        DBClose(dbfile);
-    } else
-        DBClose(dbfile);
+    }
 
     CleanupDriverStuff();
     return (0);
@@ -673,28 +1129,25 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
             if (dim == 2)
                 build_block_rect2d(dbfile, dirnames, nblocks_x, nblocks_y, handle_read);
             else if (dim == 3)
-                build_block_rect3d(dbfile, dirnames, nblocks_x, nblocks_y,
-                                   nblocks_z);
+                build_block_rect3d(dbfile, dirnames, nblocks_x, nblocks_y, nblocks_z, handle_read);
         } else if (coord_type == DB_NONCOLLINEAR)
         {
             if (dim == 2)
-                build_block_curv2d(dbfile, dirnames, nblocks_x, nblocks_y);
+                build_block_curv2d(dbfile, dirnames, nblocks_x, nblocks_y, handle_read);
             else if (dim == 3)
-                build_block_curv3d(dbfile, dirnames, nblocks_x, nblocks_y,
-                                   nblocks_z);
+                build_block_curv3d(dbfile, dirnames, nblocks_x, nblocks_y, nblocks_z, handle_read);
         }
         break;
 
     case DB_UCDMESH:
         if (dim == 3)
-            build_block_ucd3d(dbfile, dirnames, nblocks_x, nblocks_y,
-                              nblocks_z);
+            build_block_ucd3d(dbfile, dirnames, nblocks_x, nblocks_y, nblocks_z, handle_read);
 
         break;
 
     case DB_POINTMESH:
         if (dim == 2)
-            build_block_point2d(dbfile, dirnames, nblocks_x, nblocks_y);
+            build_block_point2d(dbfile, dirnames, nblocks_x, nblocks_y, handle_read);
 
         break;
 
@@ -861,149 +1314,6 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     return (0);
 }                                      /* build_multi */
 
-#define CHECK_ARRAY(P1, P2, N, ATYPE)                                    \
-{                                                                        \
-    if (P1 == 0 && P2 == 0)                                              \
-        ; /* do-nothing */                                               \
-    else                                                                 \
-    {                                                                    \
-        ASSERT(P1 != 0 && P2 != 0);                                      \
-        switch (ATYPE)                                                   \
-        {                                                                \
-        case DB_CHAR:                                                    \
-        {                                                                \
-            int jj; char *p1 = (char*) P1, *p2 = (char*) P2;             \
-            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
-            break;                                                       \
-        }                                                                \
-        case DB_SHORT:                                                   \
-        {                                                                \
-            int jj; short *p1 = (short*) P1, *p2 = (short*) P2;          \
-            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
-            break;                                                       \
-        }                                                                \
-        case DB_INT:                                                     \
-        {                                                                \
-            int jj; int *p1 = (int*) P1, *p2 = (int*) P2;                \
-            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
-            break;                                                       \
-        }                                                                \
-        case DB_LONG:                                                    \
-        {                                                                \
-            int jj; long *p1 = (long*) P1, *p2 = (long*) P2;             \
-            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
-            break;                                                       \
-        }                                                                \
-        case DB_LONG_LONG:                                               \
-        {                                                                \
-            int jj; long long *p1 = (long long*) P1, *p2 = (long long*) P2; \
-            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
-            break;                                                       \
-        }                                                                \
-        case DB_FLOAT:                                                   \
-        {                                                                \
-            int jj; float *p1 = (float*) P1, *p2 = (float*) P2;          \
-            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
-            break;                                                       \
-        }                                                                \
-        case DB_DOUBLE:                                                  \
-        {                                                                \
-            int jj; double *p1 = (double*) P1, *p2 = (double*) P2;       \
-            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
-            break;                                                       \
-        }                                                                \
-        default: ASSERT(1==0);                                           \
-        }                                                                \
-    }                                                                    \
-}
-#define TESTQMESH2(F,MN,CNMS,CS,DS,NDS,CTYPE,OL)                         \
-{                                                                        \
-    if (handle_read)                                                     \
-    {                                                                    \
-        if (testbadread)                                                 \
-        {                                                                \
-            void *m;                                                     \
-            m = (void*) DBGetUcdmesh(F,MN);                              \
-            ASSERT(m==0);                                                \
-            m = (void*) DBGetPointmesh(F,MN);                            \
-            ASSERT(m==0);                                                \
-            m = (void*) DBGetCsgmesh(F,MN);                              \
-            ASSERT(m==0);                                                \
-        }                                                                \
-        if (testread)                                                    \
-        {                                                                \
-            DBquadmesh *qm = DBGetQuadmesh(F, MN);                       \
-            ASSERT(qm);                                                  \
-            DBFreeQuadmesh(qm);                                          \
-        }                                                                \
-    }                                                                    \
-    else                                                                 \
-    {                                                                    \
-        ASSERT(DBPutQuadmesh(F,MN,CNMS,CS,DS,NDS,DB_FLOAT,CTYPE,OL)==0); \
-    }                                                                    \
-}
-
-#define TESTQVAR2(F,VN,MN,VP,DS,NDS,VTYPE,CENT,OL)                       \
-{                                                                        \
-    if (handle_read)                                                     \
-    {                                                                    \
-        if (testbadread)                                                 \
-        {                                                                \
-            void *m;                                                     \
-            m = (void*) DBGetUcdvar(F,VN);                               \
-            ASSERT(m==0);                                                \
-            m = (void*) DBGetPointvar(F,VN);                             \
-            ASSERT(m==0);                                                \
-            m = (void*) DBGetCsgvar(F,VN);                               \
-            ASSERT(m==0);                                                \
-        }                                                                \
-        if (testread)                                                    \
-        {                                                                \
-            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
-            DBquadvar *qv = DBGetQuadvar(F, VN);                         \
-            ASSERT(qv);                                                  \
-            CHECK_ARRAY(VP, qv->vals[0], sz, VTYPE);                     \
-            DBFreeQuadvar(qv);                                           \
-        }                                                                \
-    }                                                                    \
-    else                                                                 \
-    {                                                                    \
-        int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                           \
-        put_extents(VP,sz,varextents[vidx[VN[0]-'a']],block);            \
-        ASSERT(DBPutQuadvar1(F,VN,MN,VP,DS,NDS,NULL,0,VTYPE,CENT,OL)==0); \
-    }                                                                    \
-}
-
-#define TESTMAT2(F,MATNM,MN,NMATS,MATNOS,MATLIST,DS,NDS,MIX_NEXT,MIX_MAT,MIX_ZONE,MIX_VF,MIXLEN,DTYPE,OL) \
-{                                                                        \
-    if (handle_read)                                                     \
-    {                                                                    \
-        if (testread)                                                    \
-        {                                                                \
-            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
-            DBmaterial *mat = DBGetMaterial(F, MATNM);                   \
-            CHECK_ARRAY(MATLIST, mat->matlist, sz, DB_INT);              \
-            ASSERT(MIXLEN == mat->mixlen);                               \
-            if (MIXLEN > 0)                                              \
-            {                                                            \
-                CHECK_ARRAY(MIX_NEXT, mat->mix_next, MIXLEN, DB_INT);    \
-                CHECK_ARRAY(MIX_MAT, mat->mix_mat, MIXLEN, DB_INT);      \
-                CHECK_ARRAY(MIX_ZONE, mat->mix_zone, MIXLEN, DB_INT);    \
-                CHECK_ARRAY(MIX_VF, mat->mix_vf, MIXLEN, DTYPE);         \
-            }                                                            \
-            ASSERT(mat);                                                 \
-            DBFreeMaterial(mat);                                         \
-        }                                                                \
-    }                                                                    \
-    else                                                                 \
-    {                                                                    \
-        matcounts[block] = count_mats(DS[0]*DS[1],MATLIST,matlists[block]); \
-        mixlens[block] = MIXLEN;                                         \
-        ASSERT(DBPutMaterial(F,MATNM,MN,NMATS,MATNOS,MATLIST,DS,NDS,     \
-                   MIX_NEXT,MIX_MAT,MIX_ZONE,MIX_VF,MIXLEN,DTYPE,OL)==0);\
-    }                                                                    \
-}
-
 /*-------------------------------------------------------------------------
  * Function:    build_block_rect2d
  *
@@ -1098,6 +1408,7 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     coordnames[1] = "ycoords";
     coords[0] = x;
     coords[1] = y;
+    coords[2] = 0;
     ndims = 2;
     dims[0] = NX + 1;
     dims[1] = NY + 1;
@@ -1296,6 +1607,7 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     coords[0] = x2;
     coords[1] = y2;
+    coords[2] = 0;
     dims[0] = delta_x + 1;
     dims[1] = delta_y + 1;
     zdims[0] = delta_x;
@@ -1384,14 +1696,14 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             has_external_zones[block] = 1;
         zonecounts[block] = (dims[0]-1)*(dims[1]-1);
 
-        TESTQMESH2(dbfile, meshname, coordnames, coords, dims, ndims, DB_COLLINEAR, optlist);
+        TESTQMESH(dbfile, meshname, coordnames, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
 
-        TESTQVAR2(dbfile, var1name, meshname, d2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
-        TESTQVAR2(dbfile, var2name, meshname, p2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
-        TESTQVAR2(dbfile, var3name, meshname, u2, zdims, ndims, DB_FLOAT, DB_NODECENT, optlist);
-        TESTQVAR2(dbfile, var4name, meshname, v2, zdims, ndims, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var1name, meshname, d2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var2name, meshname, p2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var3name, meshname, u2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var4name, meshname, v2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
 
-        TESTMAT2(dbfile, matname, meshname, nmats, matnos, matlist2, dims2, ndims,
+        TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims2, ndims,
                 mix_next2, mix_mat2, mix_zone2, mix_vf2, mixlen2, DB_FLOAT, optlist);
 
         DBFreeOptlist(optlist);
@@ -1460,7 +1772,7 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
  */
 void
 build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
-                   int nblocks_x, int nblocks_y)
+                   int nblocks_x, int nblocks_y, int handle_read)
 {
     int             cycle;
     float           time;
@@ -1529,6 +1841,7 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     coordnames[2] = "zcoords";
     coords[0] = x;
     coords[1] = y;
+    coords[2] = 0;
     ndims = 2;
     dims[0] = NX + 1;
     dims[1] = NY + 1;
@@ -1627,6 +1940,7 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     coords[0] = x2;
     coords[1] = y2;
+    coords[2] = 0;
     dims[0] = delta_x + 1;
     dims[1] = delta_y + 1;
     zdims[0] = delta_x;
@@ -1690,30 +2004,16 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         put_extents(y2,dims[0]*dims[1],varextents[1],block);
         has_external_zones[block] = 1;
         zonecounts[block] = (dims[0]-1)*(dims[1]-1);
-        DBPutQuadmesh(dbfile, meshname, coordnames, coords, dims, ndims,
-                      DB_FLOAT, DB_NONCOLLINEAR, optlist);
 
-        put_extents(d2,(dims[0]-1)*(dims[1]-1),varextents[3],block);
-        DBPutQuadvar1(dbfile, var1name, meshname, d2, zdims, ndims,
-                      NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQMESH(dbfile, meshname, coordnames, coords, dims, ndims, DB_FLOAT, DB_NONCOLLINEAR, optlist);
 
-        put_extents(p2,(dims[0]-1)*(dims[1]-1),varextents[4],block);
-        DBPutQuadvar1(dbfile, var2name, meshname, p2, zdims, ndims,
-                      NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var1name, meshname, d2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var2name, meshname, p2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var3name, meshname, u2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var4name, meshname, v2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
 
-        put_extents(u2,dims[0]*dims[1],varextents[5],block);
-        DBPutQuadvar1(dbfile, var3name, meshname, u2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
-
-        put_extents(v2,dims[0]*dims[1],varextents[6],block);
-        DBPutQuadvar1(dbfile, var4name, meshname, v2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
-
-        matcounts[block] = count_mats(dims2[0]*dims2[1],matlist2,matlists[block]);
-        mixlens[block] = mixlen;
-        DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
-                      matlist2, dims2, ndims, mix_next, mix_mat, mix_zone,
-                      mix_vf, mixlen, DB_FLOAT, optlist);
+        TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims2, ndims,
+                0, 0, 0, 0, mixlen, DB_FLOAT, optlist);
 
         DBFreeOptlist(optlist);
 
@@ -1771,7 +2071,7 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
  */
 void
 build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
-                    int nblocks_x, int nblocks_y)
+                    int nblocks_x, int nblocks_y, int handle_read)
 {
     int             cycle;
     float           time;
@@ -1822,6 +2122,7 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     meshname = "mesh1";
     coords[0] = x;
     coords[1] = y;
+    coords[2] = 0;
     dtheta = (180. / NX) * (3.1415926 / 180.);
     dr = 3. / NY;
     theta = 0;
@@ -1878,6 +2179,7 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     coords[0] = x2;
     coords[1] = y2;
+    coords[2] = 0;
 
     /* 
      * Create the blocks for the multi-block object.
@@ -1930,27 +2232,23 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         put_extents(x2,npts,varextents[0],block);
         put_extents(y2,npts,varextents[1],block);
         zonecounts[block] = 0;
-        DBPutPointmesh(dbfile, meshname, 2, coords, npts, DB_FLOAT, optlist);
+        TESTPMESH(dbfile, meshname, 2, coords, npts, DB_FLOAT, optlist);
 
         put_extents(d2,npts,varextents[3],block);
         vars[0] = d2;
-        DBPutPointvar(dbfile, var1name, meshname, 1, vars, npts, DB_FLOAT,
-                      optlist);
+        TESTPVAR(dbfile, var1name, meshname, 1, vars, npts, DB_FLOAT, optlist);
 
         put_extents(p2,npts,varextents[4],block);
         vars[0] = p2;
-        DBPutPointvar(dbfile, var2name, meshname, 1, vars, npts, DB_FLOAT,
-                      optlist);
+        TESTPVAR(dbfile, var2name, meshname, 1, vars, npts, DB_FLOAT, optlist);
 
         put_extents(u2,npts,varextents[5],block);
         vars[0] = u2;
-        DBPutPointvar(dbfile, var3name, meshname, 1, vars, npts, DB_FLOAT,
-                      optlist);
+        TESTPVAR(dbfile, var3name, meshname, 1, vars, npts, DB_FLOAT, optlist);
 
         put_extents(v2,npts,varextents[6],block);
         vars[0] = v2;
-        DBPutPointvar(dbfile, var4name, meshname, 1, vars, npts, DB_FLOAT,
-                      optlist);
+        TESTPVAR(dbfile, var4name, meshname, 1, vars, npts, DB_FLOAT, optlist);
 
         DBFreeOptlist(optlist);
 
@@ -2018,7 +2316,7 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
  */
 void
 build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
-                   int nblocks_x, int nblocks_y, int nblocks_z)
+                   int nblocks_x, int nblocks_y, int nblocks_z, int handle_read)
 {
     int             cycle;
     float           time;
@@ -2316,38 +2614,23 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             has_external_zones[block] = 1;
 
         zonecounts[block] = (dims[0]-1)*(dims[1]-1)*(dims[2]-1);
-        DBPutQuadmesh(dbfile, meshname, coordnames, coords, dims, ndims,
-                      DB_FLOAT, DB_COLLINEAR, optlist);
+        TESTQMESH(dbfile, meshname, coordnames, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
 
-        put_extents(d2,(dims[0]-1)*(dims[1]-1)*(dims[2]-1),varextents[3],block);
         DBAddOption(optlist, DBOPT_CONSERVED, &one);
         DBAddOption(optlist, DBOPT_EXTENSIVE, &one);
-        DBPutQuadvar1(dbfile, var1name, meshname, d2, zdims, ndims,
-                      NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var1name, meshname, d2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
         DBClearOption(optlist, DBOPT_CONSERVED);
         DBClearOption(optlist, DBOPT_EXTENSIVE);
 
-        put_extents(p2,(dims[0]-1)*(dims[1]-1)*(dims[2]-1),varextents[4],block);
-        DBPutQuadvar1(dbfile, var2name, meshname, p2, zdims, ndims,
-                      NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
-
-        put_extents(u2,dims[0]*dims[1]*dims[2],varextents[5],block);
-        DBPutQuadvar1(dbfile, var3name, meshname, u2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
-
-        put_extents(v2,dims[0]*dims[1]*dims[2],varextents[6],block);
-        DBPutQuadvar1(dbfile, var4name, meshname, v2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
-
-        put_extents(w2,dims[0]*dims[1]*dims[2],varextents[7],block);
-        DBPutQuadvar1(dbfile, var5name, meshname, w2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var2name, meshname, p2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var3name, meshname, u2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var4name, meshname, v2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var5name, meshname, w2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
 
         matcounts[block] = count_mats(dims2[0]*dims2[1]*dims2[2],matlist2,matlists[block]);
         mixlens[block] = mixlen2;
-        DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
-                  matlist2, dims2, ndims, mix_next2, mix_mat2, mix_zone2,
-                      mix_vf2, mixlen2, DB_FLOAT, optlist);
+        TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims2, ndims,
+                mix_next2, mix_mat2, mix_zone2, mix_vf2, mixlen2, DB_FLOAT, optlist);
 
         DBFreeOptlist(optlist);
 
@@ -2426,7 +2709,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
  */
 void
 build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
-                  int nblocks_x, int nblocks_y, int nblocks_z)
+                  int nblocks_x, int nblocks_y, int nblocks_z, int handle_read)
 {
 
     int             cycle;
@@ -2813,10 +3096,12 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_HI_OFFSET, &hi_off);
 
         if (nfaces > 0)
-            DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
+        {
+            TESTFL(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
                       zoneno, &fshapesize, &fshapecnt, 1, NULL, NULL, 0);
+        }
 
-        DBPutZonelist2(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
+        TESTZL(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
             0, hi_off, &zshapetype, &zshapesize, &zshapecnt, 1, 0);
 
         /* 
@@ -2828,47 +3113,54 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         has_external_zones[block] = nfaces ? 1 : 0;
         zonecounts[block] = nzones;
         if (nfaces > 0)
-            DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
-                         nnodes, nzones, "zl1", "fl1", DB_FLOAT, optlist);
+        {
+            TESTUMESH(dbfile, meshname, 3, coordnames, coords,
+                nnodes, nzones, "zl1", "fl1", DB_FLOAT, optlist);
+        }
         else
-            DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
-                         nnodes, nzones, "zl1", NULL, DB_FLOAT, optlist);
+        {
+            TESTUMESH(dbfile, meshname, 3, coordnames, coords,
+                nnodes, nzones, "zl1", 0, DB_FLOAT, optlist);
+        }
 
         put_extents(d2,nzones,varextents[3],block);
         vars[0] = d2;
         varnames[0] = var1name;
-        DBPutUcdvar(dbfile, var1name, meshname, 1, varnames, vars,
+        TESTUVAR(dbfile, var1name, meshname, 1, varnames, vars,
                     nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
 
         put_extents(p2,nzones,varextents[4],block);
         vars[0] = p2;
         varnames[0] = var2name;
-        DBPutUcdvar(dbfile, var2name, meshname, 1, varnames, vars,
+        TESTUVAR(dbfile, var2name, meshname, 1, varnames, vars,
                     nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
 
         put_extents(u2,nnodes,varextents[5],block);
         vars[0] = u2;
         varnames[0] = var3name;
-        DBPutUcdvar(dbfile, var3name, meshname, 1, varnames, vars,
+        TESTUVAR(dbfile, var3name, meshname, 1, varnames, vars,
                     nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
         put_extents(v2,nnodes,varextents[6],block);
         vars[0] = v2;
         varnames[0] = var4name;
-        DBPutUcdvar(dbfile, var4name, meshname, 1, varnames, vars,
+        TESTUVAR(dbfile, var4name, meshname, 1, varnames, vars,
                     nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
         put_extents(w2,nnodes,varextents[7],block);
         vars[0] = w2;
         varnames[0] = var5name;
-        DBPutUcdvar(dbfile, var5name, meshname, 1, varnames, vars,
+        TESTUVAR(dbfile, var5name, meshname, 1, varnames, vars,
                     nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
         matcounts[block] = count_mats(nzones,matlist2,matlists[block]);
         mixlens[block] = mixlen;
-        DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
-                      matlist2, &nzones, 1, mix_next, mix_mat, mix_zone,
-                      mix_vf, mixlen, DB_FLOAT, optlist);
+        {
+            int dims[1];
+            dims[0] = nzones;
+            TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims,
+                    1, mix_next, mix_mat, mix_zone, mix_vf, mixlen, DB_FLOAT, optlist);
+        }
 
         DBFreeOptlist(optlist);
 
@@ -2944,7 +3236,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
  */
 void
 build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
-                   int nblocks_x, int nblocks_y, int nblocks_z)
+                   int nblocks_x, int nblocks_y, int nblocks_z, int handle_read)
 {
     int             cycle;
     float           time;
@@ -3244,35 +3536,18 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         put_extents(z2,dims[0]*dims[1]*dims[2],varextents[2],block);
         has_external_zones[block] = 1;
         zonecounts[block] = (dims[0]-1)*(dims[1]-1)*(dims[2]-1);
-        DBPutQuadmesh(dbfile, meshname, coordnames, coords,
-                      dims, ndims, DB_FLOAT, DB_NONCOLLINEAR,
-                      optlist);
+        TESTQMESH(dbfile, meshname, coordnames, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
 
-        put_extents(d2,(dims[0]-1)*(dims[1]-1)*(dims[2]-1),varextents[3],block);
-        DBPutQuadvar1(dbfile, var1name, meshname, d2, zdims, ndims,
-                      NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
-
-        put_extents(p2,(dims[0]-1)*(dims[1]-1)*(dims[2]-1),varextents[4],block);
-        DBPutQuadvar1(dbfile, var2name, meshname, p2, zdims, ndims,
-                      NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
-
-        put_extents(u2,dims[0]*dims[1]*dims[2],varextents[5],block);
-        DBPutQuadvar1(dbfile, var3name, meshname, u2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
-
-        put_extents(v2,dims[0]*dims[1]*dims[2],varextents[6],block);
-        DBPutQuadvar1(dbfile, var4name, meshname, v2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
-
-        put_extents(w2,dims[0]*dims[1]*dims[2],varextents[7],block);
-        DBPutQuadvar1(dbfile, var5name, meshname, w2, dims, ndims,
-                      NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var1name, meshname, d2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var2name, meshname, p2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
+        TESTQVAR(dbfile, var3name, meshname, u2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var4name, meshname, v2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
+        TESTQVAR(dbfile, var5name, meshname, w2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
 
         matcounts[block] = count_mats((dims[0]-1)*(dims[1]-1)*(dims[2]-1),matlist2,matlists[block]);
         mixlens[block] = mixlen;
-        DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
-                      matlist2, dims2, ndims, mix_next, mix_mat, mix_zone,
-                      mix_vf, mixlen, DB_FLOAT, optlist);
+        TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims2, ndims,
+                mix_next, mix_mat, mix_zone, mix_vf, mixlen, DB_FLOAT, optlist);
 
         DBFreeOptlist(optlist);
 
