@@ -861,6 +861,61 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     return (0);
 }                                      /* build_multi */
 
+#define CHECK_ARRAY(P1, P2, N, ATYPE)                                    \
+{                                                                        \
+    if (P1 == 0 && P2 == 0)                                              \
+        ; /* do-nothing */                                               \
+    else                                                                 \
+    {                                                                    \
+        ASSERT(P1 != 0 && P2 != 0);                                      \
+        switch (ATYPE)                                                   \
+        {                                                                \
+        case DB_CHAR:                                                    \
+        {                                                                \
+            int jj; char *p1 = (char*) P1, *p2 = (char*) P2;             \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_SHORT:                                                   \
+        {                                                                \
+            int jj; short *p1 = (short*) P1, *p2 = (short*) P2;          \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_INT:                                                     \
+        {                                                                \
+            int jj; int *p1 = (int*) P1, *p2 = (int*) P2;                \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_LONG:                                                    \
+        {                                                                \
+            int jj; long *p1 = (long*) P1, *p2 = (long*) P2;             \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_LONG_LONG:                                               \
+        {                                                                \
+            int jj; long long *p1 = (long long*) P1, *p2 = (long long*) P2; \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_FLOAT:                                                   \
+        {                                                                \
+            int jj; float *p1 = (float*) P1, *p2 = (float*) P2;          \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        case DB_DOUBLE:                                                  \
+        {                                                                \
+            int jj; double *p1 = (double*) P1, *p2 = (double*) P2;       \
+            for (jj = 0; jj < N; jj++) ASSERT(p1[jj]==p2[jj]);           \
+            break;                                                       \
+        }                                                                \
+        default: ASSERT(1==0);                                           \
+        }                                                                \
+    }                                                                    \
+}
 #define TESTQMESH2(F,MN,CNMS,CS,DS,NDS,CTYPE,OL)                         \
 {                                                                        \
     if (handle_read)                                                     \
@@ -904,15 +959,16 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         }                                                                \
         if (testread)                                                    \
         {                                                                \
+            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
             DBquadvar *qv = DBGetQuadvar(F, VN);                         \
             ASSERT(qv);                                                  \
+            CHECK_ARRAY(VP, qv->vals[0], sz, VTYPE);                     \
             DBFreeQuadvar(qv);                                           \
         }                                                                \
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        int d1 = VTYPE == DB_ZONECENT ? -1 : 0;                          \
-        int sz = (dims[0]+d1)*(dims[1]+d1)*(NDS==3?(dims[2]+d1):1);      \
+        int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                           \
         put_extents(VP,sz,varextents[vidx[VN[0]-'a']],block);            \
         ASSERT(DBPutQuadvar1(F,VN,MN,VP,DS,NDS,NULL,0,VTYPE,CENT,OL)==0); \
     }                                                                    \
@@ -924,7 +980,17 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     {                                                                    \
         if (testread)                                                    \
         {                                                                \
+            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
             DBmaterial *mat = DBGetMaterial(F, MATNM);                   \
+            CHECK_ARRAY(MATLIST, mat->matlist, sz, DB_INT);              \
+            ASSERT(MIXLEN == mat->mixlen);                               \
+            if (MIXLEN > 0)                                              \
+            {                                                            \
+                CHECK_ARRAY(MIX_NEXT, mat->mix_next, MIXLEN, DB_INT);    \
+                CHECK_ARRAY(MIX_MAT, mat->mix_mat, MIXLEN, DB_INT);      \
+                CHECK_ARRAY(MIX_ZONE, mat->mix_zone, MIXLEN, DB_INT);    \
+                CHECK_ARRAY(MIX_VF, mat->mix_vf, MIXLEN, DTYPE);         \
+            }                                                            \
             ASSERT(mat);                                                 \
             DBFreeMaterial(mat);                                         \
         }                                                                \

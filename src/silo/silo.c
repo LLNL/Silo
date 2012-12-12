@@ -1500,7 +1500,7 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
     char           opts[256], cwd[256], orig_dir[256], *paths[64];
     DBtoc         *toc = NULL;
     int            left_margin, col_margin, line_width;
-    char          *me = "db_pdb_ListDir2";
+    char          *me = "db_ListDir2";
 
      /*----------------------------------------
       *  Parse input options and pathnames.
@@ -2842,6 +2842,8 @@ db_guess_has_friendly_HDF5_names_r(DBfile *f)
 
     toc = DBGetToc(f);
 
+    if (!toc) return 0;
+
     CHECK_FOR_FRIENDLY(multimesh, "meshnames");
     CHECK_FOR_FRIENDLY(multivar, "varnames");
     CHECK_FOR_FRIENDLY(multimat, "matnames");
@@ -3897,7 +3899,8 @@ DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
 
         errno = 0;
         token = strtok(version, ".");
-        val = strtol(token, 0, 10);
+        if (token)
+            val = strtol(token, 0, 10);
         if (token != 0 && val != 0 && errno == 0)
         {
             fileMaj = val;
@@ -12182,6 +12185,10 @@ char *db_absoluteOf_path (const char *cwg,
           result = db_normalize_path(pathname);
       else
           result = db_join_path(cwg,pathname);
+   }
+   else
+   {
+      result = safe_strdup("");
    }
    return result;
 }
