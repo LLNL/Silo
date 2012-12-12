@@ -2292,7 +2292,11 @@ PJ_ls (PDBfile       *file, /* PDB file pointer */
    char         **score_out, **malloc_out;
 
    score_out = lite_PD_ls(file, path, type, num);
-   if (*num == 0) return 0;
+   if (*num == 0)
+   {
+      lite_SC_free(score_out);
+      return 0;
+   }
    malloc_out = ALLOC_N(char *, *num + 1);
    memcpy(malloc_out, score_out, *num * sizeof(char *));
 
@@ -2743,6 +2747,7 @@ db_pdb_NewToc (DBfile *_dbfile)
             sprintf(name, "%s->type", list[i]);
             if (!PJ_read(file, name, &ctype)) {
                FREE(types);
+               FREE(list);
                return db_perror("PJ_read", E_CALLFAIL, me);
             }
          }
