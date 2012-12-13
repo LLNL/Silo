@@ -249,6 +249,7 @@ ff[0] = szf*8;
 dval  = 0.0;
 ddv   = 1.0;
 first = -1;
+last = 2;
 for (j = 1; j < szd; j++)
    {bodb.d[0] = dval;
 

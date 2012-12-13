@@ -281,7 +281,7 @@ lite_PD_convert (char **out, char **in, char *intype, char *outtype,
                  data_standard *hstd, long *pin_offs, long *pout_offs,
                  HASHTAB *in_chart, HASHTAB *out_chart, int boffs, int error) {
 
-   int ret, tmp;
+   int ret = FALSE, tmp;
    long i, mitems, in_incr, out_incr;
    char *mtype;
    defstr *idp, *odp, *midp, *modp;

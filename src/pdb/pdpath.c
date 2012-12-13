@@ -606,9 +606,11 @@ _PD_do_member (char *name, int deref_flag) {
     */
    if (deref_flag) {
       _PD_do_deref();
-      sprintf(t, "%s->%s", FRAME(path), name);
+      if (snprintf(t, sizeof(t), "%s->%s", FRAME(path), name)>=sizeof(t))
+         t[sizeof(t)-1] = '\0';
    } else {
-      sprintf(t, "%s.%s", FRAME(path), name);
+      if (snprintf(t, sizeof(t), "%s.%s", FRAME(path), name)>=sizeof(t))
+         t[sizeof(t)-1] = '\0';
    }
 
    strcpy(FRAME(path), t);
@@ -740,7 +742,8 @@ _PD_do_index (char *expr) {
    /*
     * Update the path.
     */
-   sprintf(t, "%s[%s]", FRAME(path), expr);
+   if (snprintf(t, sizeof(t), "%s[%s]", FRAME(path), expr)>=sizeof(t))
+      t[sizeof(t)-1] = '\0';
    strcpy(FRAME(path), t);
 
    dims = CURRENT(dims);
@@ -835,7 +838,8 @@ _PD_do_cast (char *type) {
    /*
     * Update the path.
     */
-   sprintf(t, "(%s) %s", type, FRAME(path));
+   if (snprintf(t, sizeof(t), "(%s) %s", type, FRAME(path))>=sizeof(t))
+      t[sizeof(t)-1] = '\0';
    strcpy(FRAME(path), t);
 
    da = CURRENT(ad.diskaddr);

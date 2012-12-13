@@ -23,9 +23,10 @@ RCqsmodel::RCqsmodel(bool compress, unsigned symbols, unsigned bits, unsigned pe
   cumf = new unsigned[n + 1];
   cumf[0] = 0;
   cumf[n] = 1 << bits;
-  if (compress)
+  if (compress) {
+    searchshift = 0;
     search = 0;
-  else {
+  } else {
     searchshift = bits - TBLSHIFT;
     search = new unsigned[(1 << TBLSHIFT) + 1];
   }

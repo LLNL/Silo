@@ -328,7 +328,8 @@ db_perror(char const *s, int errorno, char const *fname)
      * can read them later.
      */
     db_errno = errorno;
-    strncpy(db_errfunc, fname, sizeof(db_errfunc) - 1);
+    if (fname)
+        strncpy(db_errfunc, fname, sizeof(db_errfunc) - 1);
     db_errfunc[sizeof(db_errfunc) - 1] = '\0';
 
     /*
@@ -1506,6 +1507,8 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
       *  Parse input options and pathnames.
       *----------------------------------------*/
 
+    if (!list || !nlist) return -1;
+
     npaths = 0;
     nopts = 0;
 
@@ -1620,6 +1623,8 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
             DBSetDir(_dbfile, paths[k]);
 
         toc = DBGetToc(_dbfile);
+        if (!toc)
+            return db_perror("unable to get toc", E_INTERNAL, me);
 
         if (ls_curve && toc->ncurve > 0) {
             if (build_list) {
@@ -2492,14 +2497,14 @@ db_filter_install ( DBfile *dbfile )
          * database variable.
          */
         if (i >= DB_NFILTERS) {
+            int q = 0;
             len = strlen(not_found);
-            if (not_found[0] && len + 1 < sizeof(not_found)) {
-                strcpy(not_found + len, ";");
+            if (len && len + 1 < sizeof(not_found)) {
+                strcat(not_found, ";");
                 len++;
             }
-            strncpy(not_found + len, filter_name,
-                    MAX(0, (int)sizeof(not_found) - len - 1));
-            len += MAX(0, (int)sizeof(not_found) - len - 1);
+            while (len + 1 < sizeof(not_found))
+                not_found[len++] = filter_name[q++];
             not_found[len] = '\0';
             continue;
         }
@@ -3113,10 +3118,12 @@ DBGetDriverTypeFromPath(const char *path)
    }
    if ((nbytes = read(fd, (char *)buf, 8)) == -1) {
       printf("cannot read `%s'\n", path);
+      close(fd);
       return -1;
    }
    if (nbytes <= 5) {
       printf("cannot read `%s' buffer too small\n", path);
+      close(fd);
       return -1;
    }
    (void) close(fd);
@@ -4306,6 +4313,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             n = strlen(DBGetCompression());
             tmpcs = ALLOC_N(char,n+1);
             strncpy(tmpcs, DBGetCompression(), n);
+            tmpcs[n] = '\0';
             DBSetCompression(0);
         }
         n = strlen(SILO_VSTRING)+1;
@@ -12006,86 +12014,6 @@ DBSortObjectsByOffset(DBfile *dbfile, int nobjs,
 /*----------------------------------------------------------------------
  * Purpose
  *
- *    Flatten an array of variable lenght arrays of ints into a single
- *    array of ints.
- *
- * Programmer
- *
- *    Mark C. Miller, Wed Oct 10 11:49:36 PDT 2007
- *
- *--------------------------------------------------------------------*/
-INTERNAL void 
-db_IntArrayToIntList(int **intArrays, int nArrays,
-const int *const lenArrays, int **intList, int *m)
-{
-    int i,j,n;
-    int *list = 0;
-
-    if (nArrays <= 0 || intArrays == 0 || lenArrays == 0 ||
-        intList == 0 || m == 0)
-    {
-        *intList = 0;
-        *m = 0;
-        return;
-    }
-
-    for (i=n=0; i < nArrays; i++)
-        n += lenArrays[i];
-
-    if (n == 0)
-    {
-        *intList = 0;
-        *m = 0;
-        return;
-    }
-
-    list = (int *) malloc(n * sizeof(int));
-
-    for (i=n=0; i < nArrays; i++)
-    {
-        for (j = 0; j < lenArrays[i]; j++)
-            list[n++] = intArrays[i][j];
-    }
-
-    *intList = list;
-    *m = n;
-}
-
-/*----------------------------------------------------------------------
- * Purpose
- *
- *    Unflatten a a single array of ints and lengths into a an array
- *    of arrays of the specified lengths.
- *
- * Programmer
- *
- *    Mark C. Miller, Wed Oct 10 11:49:36 PDT 2007
- *
- *--------------------------------------------------------------------*/
-INTERNAL int**
-db_IntListToIntArray(const int *const intList, int nArrays,
-    const int *const lenArrays)
-{
-    int i,j,n;
-    int **retval = 0;
-
-    if (nArrays <= 0 || intList == 0 || lenArrays == 0)
-        return 0;
-
-    retval = (int**) malloc(nArrays * sizeof(int*));
-    for (i=n=0; i < nArrays; i++)
-    {
-        retval[i] = (int *) malloc(lenArrays[i] * sizeof(int));
-        for (j = 0; j < lenArrays[i]; j++)
-            retval[i][j] = intList[n++];
-    }
-
-    return retval;
-}
-
-/*----------------------------------------------------------------------
- * Purpose
- *
  *    Break an extend driver id into type and subtype 
  *
  * Programmer
@@ -12218,7 +12146,7 @@ char *db_basename ( const char *pathname )
 
    result = 0;
    {  if (0 < strlen(pathname))
-      {  if (pathname && (strcmp(pathname,"/") == 0))
+      {  if (strcmp(pathname,"/") == 0)
             result = STRDUP("/");
          else
          {  int i;
@@ -12299,7 +12227,7 @@ char *db_dirname ( const char *pathname )
 
    result = 0;
    {  if (0 < strlen(pathname))
-      {  if (pathname && (strcmp(pathname,"/") == 0))
+      {  if (strcmp(pathname,"/") == 0)
             result = STRDUP("");
          else
          {  int  i;

@@ -178,7 +178,6 @@ static int      _PD_consistent_dims (PDBfile*,syment*,dimdes*);
 static int      _PD_put_string (int,char*,...);
 #endif /* PDB_WRITE */
    
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_rd_format
  *
@@ -304,7 +303,6 @@ _lite_PD_rd_format (PDBfile *file) {
    return(TRUE);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_compare_std
  *
@@ -395,7 +393,6 @@ _lite_PD_compare_std (data_standard *a, data_standard *b,
    return(eq);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_rd_symt
  *
@@ -479,7 +476,6 @@ _lite_PD_rd_symt (PDBfile *file) {
    return(TRUE);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_rd_chrt
  *
@@ -569,7 +565,6 @@ _lite_PD_rd_chrt (PDBfile *file) {
    return(TRUE);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_check_casts
  *
@@ -607,7 +602,6 @@ _lite_PD_check_casts (HASHTAB *chrt, char **lst, long n) {
    }
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_rd_extras
  *
@@ -632,7 +626,7 @@ int
 _lite_PD_rd_extras (PDBfile *file) {
 
    char *token;
-   data_alignment *pa;
+   data_alignment *pa = 0;
 
    _PD_n_casts = 0L;
 
@@ -669,7 +663,8 @@ _lite_PD_rd_extras (PDBfile *file) {
              data_standard *ps = file->std;
              ps->longlong_bytes     = token[0];
              ps->longlong_order     = token[1];
-             pa->longlong_alignment = token[2];
+             if (pa) pa->longlong_alignment = token[2];
+             else return(FALSE);
          }
 
       } else if (strcmp(token, "Casts") == 0) {
@@ -797,7 +792,6 @@ _lite_PD_rd_extras (PDBfile *file) {
 /*                     PRIMITIVE TYPE I/O ROUTINES                          */
 /*--------------------------------------------------------------------------*/
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_rd_prim_extras
  *
@@ -860,7 +854,6 @@ _lite_PD_rd_prim_extras (PDBfile *file, int dc, int rec, char *bf) {
 /*                            SUPPORT ROUTINES                              */
 /*--------------------------------------------------------------------------*/
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_e_install
  *
@@ -892,7 +885,6 @@ _lite_PD_e_install (char *name, syment *entr, HASHTAB *tab) {
    lite_SC_install(name, entr, lite_PD_SYMENT_S, tab);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_d_install
  *
@@ -934,7 +926,6 @@ _lite_PD_d_install (char *name, defstr *def, HASHTAB *tab) {
    lite_SC_install(name, def, lite_PD_DEFSTR_S, tab);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_defstr
  *
@@ -964,7 +955,6 @@ _lite_PD_defstr (HASHTAB *chart, char *name, int align, long sz, int flg,
    return(dp);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_defstr_inst
  *
@@ -1064,7 +1054,6 @@ _lite_PD_defstr_inst (char *name, memdes *desc, int flg, int *ordr,
    return(flag ? dp : Sdp);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_rfgets
  *
@@ -1087,7 +1076,6 @@ _lite_PD_rfgets(char *s, int n, FILE *fp) {
    return _PD_get_tok(s, n, fp, '\n') ;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _PD_get_tok
  *
@@ -1179,7 +1167,6 @@ _PD_get_tok (char *s, int n, FILE *fp, int ch) {
    return(s);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _PD_get_token
  *
@@ -1266,7 +1253,6 @@ _PD_get_token (char *bf, char *s, int n, int ch) {
    return(s);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_init_chrt
  *
@@ -1336,7 +1322,6 @@ _lite_PD_init_chrt (PDBfile *file) {
    return;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_setup_chart
  *
@@ -1456,7 +1441,6 @@ _lite_PD_setup_chart (HASHTAB *chart, data_standard *fstd, data_standard *hstd,
 
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_add_block
  *
@@ -1509,7 +1493,6 @@ _lite_PD_add_block (PDBfile *file, syment *ep, dimdes *dims) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_wr_format
  *
@@ -1629,7 +1612,6 @@ _lite_PD_wr_format (PDBfile *file) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _PD_consistent_dims
  *
@@ -1682,6 +1664,9 @@ _PD_consistent_dims (PDBfile *file, syment *ep, dimdes *ndims) {
       nd = ndims;
       od = odims;
    }
+   else {
+      return(FALSE);
+   }
 
    if (nd->index_min == file->default_offset) {
       od->index_max += nd->index_max - nd->index_min + 1;
@@ -1699,7 +1684,6 @@ _PD_consistent_dims (PDBfile *file, syment *ep, dimdes *ndims) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_extend_file
  *
@@ -1748,7 +1732,6 @@ _lite_PD_extend_file (PDBfile *file, long nb) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_eod
  *
@@ -1781,7 +1764,6 @@ _lite_PD_eod (PDBfile *file) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_wr_chrt
  *
@@ -1855,7 +1837,6 @@ _lite_PD_wr_chrt (PDBfile *file) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_wr_symt
  *
@@ -1944,7 +1925,6 @@ _lite_PD_wr_symt (PDBfile *file) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_wr_extras
  *
@@ -2142,7 +2122,6 @@ _lite_PD_wr_extras (PDBfile *file) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_rev_chrt
  *
@@ -2169,7 +2148,6 @@ _lite_PD_rev_chrt (PDBfile *file) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _PD_put_string
  *
@@ -2228,7 +2206,6 @@ _PD_put_string (int reset, char *fmt, ...) {
 }
 #endif /* PDB_WRITE */
 
-
 /*-------------------------------------------------------------------------
  * Function:    _lite_PD_wr_prim_extras
  *

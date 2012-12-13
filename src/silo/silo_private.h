@@ -880,9 +880,6 @@ INTERNAL void db_StringArrayToStringList(char**, int, char **, int*);
 INTERNAL char ** db_StringListToStringArray(char *, int, int, int);
 INTERNAL void db_DriverTypeAndFileOptionsSetId(int driver, int *type,
                                                int *opts_set_id);
-INTERNAL void db_IntArrayToIntList(int**, int, const int *const, int**, int *);
-INTERNAL int ** db_IntListToIntArray(const int *const, int, const int *const);
-
 INTERNAL char *db_absoluteOf_path ( const char *cwg, const char *pathname );
 INTERNAL char *db_basename ( const char *pathname );
 INTERNAL char *db_dirname ( const char *pathname );

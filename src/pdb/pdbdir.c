@@ -339,8 +339,10 @@ lite_PD_pwd(PDBfile *file) {
        (strcmp(file->current_prefix, "/") == 0)) {
       strcpy(cwd, "/");
    } else {
+      int cwdlen;
       strcpy(cwd, file->current_prefix);
-      cwd[strlen(cwd) - 1] = '\0';
+      cwdlen = strlen(cwd);
+      cwd[cwdlen?cwdlen-1:0] = '\0';
    }
    return(cwd);
 }
@@ -400,8 +402,9 @@ _lite_PD_fixname (PDBfile *file, char *inname) {
 	     */
 	    if (strcmp("/", outname) != 0) {
 	       char  *s;
-	       if (outname[strlen(outname) - 1] == '/') {
-		  outname[strlen(outname) - 1] = '\0';
+               int onlen = strlen(outname);
+	       if (outname[onlen?onlen-1:0] == '/') {
+		  outname[onlen?onlen-1:0] = '\0';
 	       }
 	       s = strrchr(outname, '/');
 	       if (s != NULL) s[0] = '\0';
@@ -410,8 +413,8 @@ _lite_PD_fixname (PDBfile *file, char *inname) {
 	    /*
 	     * Append to end of current path.
 	     */
-	    if ((strlen(outname) == 0) ||
-                (outname[strlen(outname) - 1] != '/'))
+            int onlen = strlen(outname);
+	    if ((onlen == 0) || (outname[onlen-1] != '/'))
                 strcat(outname, "/");
 	    strcat(outname, node);
 	 }
@@ -420,7 +423,8 @@ _lite_PD_fixname (PDBfile *file, char *inname) {
 
       if ((strlen(inname) > 0) &&
           (inname[strlen(inname) - 1] == '/') &&
-	  (outname[strlen(outname) - 1] != '/'))
+          ((strlen(outname) == 0) || 
+	   (outname[strlen(outname) - 1] != '/')))
 	 strcat(outname, "/");
    }
 
@@ -506,7 +510,8 @@ lite_PD_mkdir (PDBfile *file, char *dirname) {
    if (s != NULL) {
       s[1] = '\0';
       if (lite_PD_inquire_entry(file, head, FALSE, NULL) == NULL) {
-	 head[strlen(head) - 1] = '\0';
+         int hlen = strlen(head);
+	 head[hlen?hlen-1:0] = '\0';
 	 sprintf(lite_PD_err, "ERROR: DIRECTORY %s DOES NOT EXIST - "
 		 "PD_MKDIR\n", head);
 	 return(FALSE);

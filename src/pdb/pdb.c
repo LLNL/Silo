@@ -639,7 +639,8 @@ lite_PD_read_as (PDBfile *file, char *name, char *type, lite_SC_byte *vr) {
     */
    ep = _lite_PD_effective_ep(file, name, TRUE, fullpath);
    if (ep == NULL) {
-      sprintf(msg, "UNREADABLE OR MISSING ENTRY \"%s\" - PD_READ_AS",fullpath);
+      if (snprintf(msg, sizeof(msg), "UNREADABLE OR MISSING ENTRY \"%s\" - PD_READ_AS",fullpath) >= sizeof(msg))
+          msg[sizeof(msg)-1] = '\0';
       lite_PD_error(msg, PD_READ);
    }
 
@@ -1151,7 +1152,8 @@ lite_PD_create (char *name) {
    /*
     * Open the file.
     */
-   strncpy(str, name, MAXLINE-1);
+   strncpy(str, name, sizeof(str));
+   str[sizeof(str)-1] = '\0';
    fp = io_open(str, BINARY_MODE_WPLUS);
    if (!fp) lite_PD_error("CAN'T CREATE FILE - PD_CREATE", PD_CREATE);
 

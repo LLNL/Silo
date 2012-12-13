@@ -244,7 +244,7 @@ _lite_PD_hyper_read (PDBfile *file, char *name, char *outtype,
                      syment *ep, lite_SC_byte *vr) {
 
    long         hbyt, fbyt;
-   int          nd, c, nrd, i;
+   int          nd, c, nrd, i, slen;
    char         s[MAXLINE], *expr;
    dimdes       *dims;
    dimind       *pi;
@@ -260,7 +260,8 @@ _lite_PD_hyper_read (PDBfile *file, char *name, char *outtype,
 
    dims = PD_entry_dimensions(ep);
    strcpy(s, name);
-   c = s[strlen(s)-1];
+   slen = strlen(s);
+   c = slen > 0 ? s[slen-1] : 0;
    if (((c != ')') && (c != ']')) || (dims == NULL)) {
       return(_lite_PD_rd_syment(file, ep, outtype, vr));
    }
@@ -1344,7 +1345,7 @@ _lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, lite_SC_byte *vr,
                       char *intype) {
 
    long hbyt, fbyt;
-   int nd, c;
+   int nd, c, slen;
    char s[MAXLINE], *expr;
    dimdes *dims;
    dimind *pi;
@@ -1352,7 +1353,8 @@ _lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, lite_SC_byte *vr,
    memset(s, 0, sizeof(s));
    dims = PD_entry_dimensions(ep);
    strcpy(s, name);
-   c = s[strlen(s)-1];
+   slen = strlen(s);
+   c = slen > 0 ? s[slen-1] : 0;
    if (((c != ')') && (c != ']')) || (dims == NULL)) {
       return(_lite_PD_wr_syment(file, vr, PD_entry_number(ep),
                                 intype, PD_entry_type(ep)));
@@ -1435,11 +1437,13 @@ _lite_PD_wr_syment (PDBfile *file, char *vr, long nitems,
    char bf[MAXLINE], *litype, *lotype, *svr, *ttype;
    FILE *fp;
 
+   size = 0;
    call_ptr = 0L;
    lval_ptr = 0L;
    str_ptr  = 0L;
    litype   = NULL;
    lotype   = NULL;
+   svr      = NULL;
 
    SAVE_S(litype, intype);
    SAVE_S(lotype, outtype);
@@ -1486,6 +1490,8 @@ _lite_PD_wr_syment (PDBfile *file, char *vr, long nitems,
       case LEAF_INDIR :
          if (desc == NULL) {
             i++;
+            if (svr == NULL)
+                lite_PD_error("SVR UMR - _PD_WR_SYMENT", PD_WRITE) ;
             svr += size;
             GO(LEAF_ITEM);
          }

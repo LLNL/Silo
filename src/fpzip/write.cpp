@@ -276,8 +276,7 @@ fpzip_file_write_f(
   FILE* file = fopen(path, "wb");
   if (!file)
     return;
-  if (!fpzip_file_write(file, data, prec, *dp, *nx, *ny, *nz, *nf))
-    return;
+  fpzip_file_write(file, data, prec, *dp, *nx, *ny, *nz, *nf);
   fclose(file);
 }
 

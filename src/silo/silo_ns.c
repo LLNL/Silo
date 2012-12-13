@@ -189,6 +189,8 @@ BuildExprTree(const char **porig)
                     tree->left = subtree;
                 else if (tree->right == 0)
                     tree->right = subtree;
+                else
+                    free(subtree); /* should never hit this case */
                 break;
             }
 
@@ -476,7 +478,7 @@ DBMakeNamescheme(const char *fmt, ...)
                         done = 1;
                     }
                 }
-                rv->narrefs++;
+                if (rv && !done) rv->narrefs++; /* rv could have been set to null, above */
             }
         }
         else if (fmt[i] == rv->delim || fmt[i] == '\0')
@@ -502,8 +504,9 @@ DBGetName(DBnamescheme *ns, int natnum)
     static char retval[1024];
     int i;
 
-    /* a hackish way to cleanup the returned string buffer */
+    /* a hackish way to cleanup the saved returned string buffer */
     if (ns == 0 && natnum == 0) return SaveReturnedString(0);
+    if (ns == 0) return SaveReturnedString("");
 
     retval[0] = '\0';
     strncat(retval, ns->fmt, ns->fmtptrs[0] - ns->fmt);

@@ -549,7 +549,8 @@ lite_PD_inquire_entry(PDBfile *file, char *name, int flag, char *fullname) {
 	 ep = (syment *) lite_SC_def_lookup(s + 1, file->symtab);
       } else if (strrchr(s, '/') == NULL) {
 	 char t[MAXLINE];
-	 sprintf(t, "/%s", s);
+	 if (snprintf(t, sizeof(t), "/%s", s)>=sizeof(t))
+             t[sizeof(t)-1] = '\0';
 	 ep = (syment *) lite_SC_def_lookup(t, file->symtab);
       }
    }

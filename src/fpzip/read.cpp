@@ -291,12 +291,13 @@ fpzip_file_read_f(
   if (!file)
     return;
   status = fpzip_file_read(file, data, prec, dp, &unx, &uny, &unz, &unf);
-  if (data != 0 && status == 0)
-    return;
-  *nx = (int) unx;
-  *ny = (int) uny;
-  *nz = (int) unz;
-  *nf = (int) unf;
+  if (!(data != 0 && status == 0))
+  {
+      *nx = (int) unx;
+      *ny = (int) uny;
+      *nz = (int) unz;
+      *nf = (int) unf;
+  }
   fclose(file);
 }
 

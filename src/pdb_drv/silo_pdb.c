@@ -8963,15 +8963,15 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
     *  Add the DBOPT_MATCOUNTS and DBOPT_MATLISTS options if present.
     *-------------------------------------------------------------*/
    if (_mm._matcounts != NULL && _mm._matlists != NULL) {
-
-      count[0] = nmats; 
-      DBWriteComponent(dbfile, obj, "matcounts", name, "integer", _mm._matcounts,
-                       1, count);
-      count[0] = 0;
+      long tot = 0;
       for (i = 0; i < nmats; i++)
-         count[0] += _mm._matcounts[i];
-      DBWriteComponent(dbfile, obj, "matlists", name, "integer", _mm._matlists,
-                       1, count);
+         tot += _mm._matcounts[i];
+
+      if (tot) {
+         count[0] = nmats; 
+         DBWriteComponent(dbfile, obj, "matcounts", name, "integer", _mm._matcounts, 1, count);
+         DBWriteComponent(dbfile, obj, "matlists", name, "integer", _mm._matlists, 1, &tot);
+      }
    }
 
    /*-------------------------------------------------------------

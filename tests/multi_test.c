@@ -381,6 +381,7 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
 
 #define TESTQVAR(F,VN,MN,VP,DS,NDS,VTYPE,CENT,OL)                       \
 {                                                                        \
+    int sz = DS[0]*(NDS>=2?DS[1]:1)*(NDS==3?DS[2]:1);                    \
     if (handle_read)                                                     \
     {                                                                    \
         if (testbadread)                                                 \
@@ -395,7 +396,6 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
         }                                                                \
         if (testread)                                                    \
         {                                                                \
-            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
             DBquadvar *qv = DBGetQuadvar(F, VN);                         \
             ASSERT(qv);                                                  \
             CHECK_ARRAY(VP, qv->vals[0], sz, VTYPE);                     \
@@ -404,7 +404,6 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                           \
         put_extents(VP,sz,varextents[vidx[VN[0]-'a']],block);            \
         ASSERT(DBPutQuadvar1(F,VN,MN,VP,DS,NDS,NULL,0,VTYPE,CENT,OL)==0); \
     }                                                                    \
@@ -444,11 +443,11 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
 
 #define TESTMAT(F,MATNM,MN,NMATS,MATNOS,MATLIST,DS,NDS,MIX_NEXT,MIX_MAT,MIX_ZONE,MIX_VF,MIXLEN,DTYPE,OL) \
 {                                                                        \
+    int sz = DS[0]*(NDS>=2?DS[1]:1)*(NDS==3?DS[2]:1);                    \
     if (handle_read)                                                     \
     {                                                                    \
         if (testread)                                                    \
         {                                                                \
-            int sz = DS[0]*DS[1]*(NDS==3?DS[2]:1);                       \
             DBmaterial *mat = DBGetMaterial(F, MATNM);                   \
             ASSERT(mat);                                                 \
             CHECK_ARRAY(MATLIST, mat->matlist, sz, DB_INT);              \
@@ -465,7 +464,7 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        matcounts[block] = count_mats(DS[0]*DS[1],MATLIST,matlists[block]); \
+        matcounts[block] = count_mats(sz,MATLIST,matlists[block]);       \
         mixlens[block] = MIXLEN;                                         \
         ASSERT(DBPutMaterial(F,MATNM,MN,NMATS,MATNOS,MATLIST,DS,NDS,     \
                    MIX_NEXT,MIX_MAT,MIX_ZONE,MIX_VF,MIXLEN,DTYPE,OL)==0);\
@@ -798,9 +797,7 @@ main(int argc, char *argv[])
     }
 
     DBShowErrors(DB_ALL_AND_DRVR, NULL);
-#if 0
     if (testread || testbadread) DBShowErrors(DB_NONE, NULL);
-#endif
     DBSetEnableChecksums(dochecks);
     DBSetFriendlyHDF5Names(hdfriendly);
 
