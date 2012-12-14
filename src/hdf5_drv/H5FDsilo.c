@@ -1447,16 +1447,26 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_IO, H5E_CANTOPENFILE, "HDopen failed", NULL, errno)
 
     if (HDfstat(fd, &sb)<0)
+    {
+        close(fd);
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_FILE, H5E_BADFILE, "HDfstat failed", NULL, errno)
+    }
 
     if (flags & H5F_ACC_RDWR)
         write_access = 1;
 
     /* Build the return value */
     if(NULL == (file = (H5FD_silo_t *)calloc((size_t)1, sizeof(H5FD_silo_t))))
+    {
+        close(fd);
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "calloc failed", NULL, errno)
+    }
     if(NULL == (file->block_list = (silo_vfd_block_t *)calloc((size_t)silo_block_count, sizeof(silo_vfd_block_t))))
+    {
+        close(fd);
+        free(file);
         H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "calloc failed", NULL, errno)
+    }
 
     file->fd = fd;
     file->file_eof = (haddr_t)sb.st_size;
@@ -1471,7 +1481,12 @@ H5FD_silo_open( const char *name, unsigned flags, hid_t fapl_id,
     {
         const char *ext = "-h5-vfd-log";
         if (NULL == (file->log_name = (char*) malloc(strlen(name)+strlen(ext)+1)))
+        {
+            close(file->fd);
+            free(file->block_list);
+            free(file);
             H5E_PUSH_HELPER(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "malloc failed", NULL, errno)
+        }
         sprintf(file->log_name, "%s%s", name, ext);
     }
 
@@ -1591,7 +1606,7 @@ H5FD_silo_close(H5FD_t *_file)
         fprintf(logf, "number of times a block was read = %llu\n", file->stats.total_block_reads);
         fprintf(logf, "number of times a block was read more than once = %llu\n", file->stats.total_block_re_reads);
         fprintf(logf, "\n");
-        fprintf(logf, "number of hot blocks %llu\n", file->stats.num_hot_blocks);
+        fprintf(logf, "number of hot blocks %d\n", file->stats.num_hot_blocks);
         fprintf(logf, "hot blocks...\n");
         for (i = 0; i < file->stats.num_hot_blocks; i++)
         {

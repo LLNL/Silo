@@ -1399,30 +1399,30 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
             if (stream == 0) return early_retval;
 
             ndims = hzip_mesh_dimensions(stream);
-            if (ndims < 2 || ndims > 3) return early_retval;
             hzip_mesh_close(stream);
+            if (ndims < 2 || ndims > 3) return early_retval;
 
             /* Ok, no re-open the stream with correct permutation */
             stream = hzip_mesh_open_mem(*buf, nbytes, SILO_HZIP_PERMUTATION[ndims]);
             if (stream == 0) return early_retval;
 
             ndims = hzip_mesh_dimensions(stream);
-            if (ndims < 2 || ndims > 3) return early_retval;
+            if (ndims < 2 || ndims > 3) {hzip_mesh_close(stream); return early_retval;}
 
             nzones = hzip_mesh_cells(stream);
-            if (nzones < 0) return early_retval;
+            if (nzones < 0) {hzip_mesh_close(stream); return early_retval;}
 
             new_buf_size = (1<<ndims) * nzones * sizeof(int);
             nodelist = (int *) malloc(new_buf_size);
-            if (nodelist == 0) return early_retval;
+            if (nodelist == 0) {hzip_mesh_close(stream); return early_retval;}
 
             nread = hzip_mesh_read(stream, nodelist, nzones);
+            hzip_mesh_close(stream);
             if (nread != nzones)
             {
                 free(nodelist);
                 return early_retval;
             }
-            hzip_mesh_close(stream);
 
             RegisterNodelist(db_hdf5_hzip_params.dbfile, db_hdf5_hzip_params.zlname,
                 db_hdf5_hzip_params.meshname, ndims, nzones,
@@ -1449,8 +1449,8 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
             if (stream == 0) return early_retval;
 
             ndims = hzip_node_dimensions(stream);
-            if (ndims < 2 || ndims > 3) return early_retval;
             hzip_node_close(stream);
+            if (ndims < 2 || ndims > 3) return early_retval;
 
             if (db_hdf5_hzip_params.isquad)
             {
@@ -1482,19 +1482,20 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
             if (stream == 0) return early_retval;
 
             ndims = hzip_node_dimensions(stream);
-            if (ndims < 2 || ndims > 3) return early_retval;
+            if (ndims < 2 || ndims > 3) {hzip_node_close(stream); return early_retval;}
 
             nnodes = hzip_node_count(stream);
-            if (nnodes < 0) return early_retval;
+            if (nnodes < 0) {hzip_node_close(stream); return early_retval;}
 
             hztype = hzip_node_type(stream);
-            if (hztype < 0) return early_retval;
+            if (hztype < 0) {hzip_node_close(stream); return early_retval;}
 
             new_buf_size = nnodes * sizeof_hztype(hztype);
             var = malloc(new_buf_size);
-            if (var == 0) return early_retval;
+            if (var == 0) {hzip_node_close(stream); return early_retval;}
 
             nread = hzip_node_read(stream, var, nodelist, nzones);
+            hzip_node_close(stream);
             if (nread != nnodes)
             {
                 if (db_hdf5_hzip_params.isquad)
@@ -1502,7 +1503,6 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
                 free(var);
                 return early_retval;
             }
-            hzip_node_close(stream);
 
             if (db_hdf5_hzip_params.isquad)
                 free(nodelist);
@@ -12067,7 +12067,8 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
                /* negative rank means to reserve space */
                if (db_hdf5_compwr(dbfile, DB_INT, -1, &len, NULL,
                        m.nodelists/*out*/, friendly_name(name,"_nodelists",0))<0) {
-                  return db_perror ("db_hdf5_compwr", E_CALLFAIL, me) ;
+                  db_perror ("db_hdf5_compwr", E_CALLFAIL, me) ;
+                  UNWIND();
                }
            }
 
@@ -12083,7 +12084,8 @@ db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
                /* negative rank means to reserve space */
                if (db_hdf5_compwr(dbfile, DB_INT, -1, &len, NULL,
                        m.zonelists/*out*/, friendly_name(name, "_zonelists",0))<0) {
-                  return db_perror ("db_hdf5_compwr", E_CALLFAIL, me) ;
+                  db_perror ("db_hdf5_compwr", E_CALLFAIL, me) ;
+                  UNWIND();
                }
            }
 
