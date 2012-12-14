@@ -1036,9 +1036,6 @@ _PD_write (PDBfile *file, char *name, char *intype, char *outtype,
        */
       addr   = PD_entry_address(ep);
       _lite_PD_rl_dimensions(dims);
-#if 0
-      number = PD_entry_number(ep);
-#endif
       lname  = fullpath;
       reset  = FALSE;
    } else {

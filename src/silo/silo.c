@@ -371,17 +371,23 @@ db_perror(char const *s, int errorno, char const *fname)
      * the indicated error handling routine.
      */
     if (SILO_Globals._db_err_func) {
-        int len;
-        char better_s[1024];
-        better_s[0]='\0';
+        int flen = 0, elen = 0, slen = 0;
+        char *better_s;
+
+        elen = strlen(db_strerror(errorno));
+        if (fname && *fname) flen = strlen(fname) + 2;
+        if (s && *s) slen = strlen(s) + 2;
+        better_s = (char *) malloc(elen + flen + slen + 1);
+
         if (fname && *fname)
-            snprintf(better_s, sizeof(better_s), "%s: ", fname);
-        len = strlen(better_s);
-        snprintf(better_s+len, sizeof(better_s)-len, "%s", db_strerror(errorno));
-        len = strlen(better_s);
+            sprintf(better_s, "%s: ", fname);
+        sprintf(better_s + flen, "%s", db_strerror(errorno));
         if (s && *s)
-            snprintf(better_s+len, sizeof(better_s)-len, ": %s", s);
+            sprintf(better_s + flen + elen, ": %s", s);
+
         SILO_Globals._db_err_func((char*)better_s);
+
+        free(better_s);
     }
     else {
         if (fname && *fname)

@@ -4174,15 +4174,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
 
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:284: test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || \$VALGRIND arrayf77"
+$as_echo "$at_srcdir/testsuite.at:284: test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || \$VALGRIND arrayf77 \$STARGS"
 echo testsuite.at:284 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || $VALGRIND arrayf77"; then
-  ( $at_traceon; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test ! \\( -f arrayf77 -o -f ../../arrayf77 \\) && exit 77 || $VALGRIND arrayf77 $STARGS"; then
+  ( $at_traceon; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -4212,15 +4212,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
 
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:288: test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || \$VALGRIND curvef77"
+$as_echo "$at_srcdir/testsuite.at:288: test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || \$VALGRIND curvef77 \$STARGS"
 echo testsuite.at:288 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || $VALGRIND curvef77"; then
-  ( $at_traceon; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test ! \\( -f curvef77 -o -f ../../curvef77 \\) && exit 77 || $VALGRIND curvef77 $STARGS"; then
+  ( $at_traceon; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -4250,15 +4250,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
 
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:292: test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || \$VALGRIND matf77"
+$as_echo "$at_srcdir/testsuite.at:292: test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || \$VALGRIND matf77 \$STARGS"
 echo testsuite.at:292 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || $VALGRIND matf77"; then
-  ( $at_traceon; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test ! \\( -f matf77 -o -f ../../matf77 \\) && exit 77 || $VALGRIND matf77 $STARGS"; then
+  ( $at_traceon; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test ! \( -f matf77 -o -f ../../matf77 \) && exit 77 || $VALGRIND matf77 $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -4288,15 +4288,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
 
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:296: test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || \$VALGRIND pointf77"
+$as_echo "$at_srcdir/testsuite.at:296: test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || \$VALGRIND pointf77 \$STARGS"
 echo testsuite.at:296 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || $VALGRIND pointf77"; then
-  ( $at_traceon; test ! \( -f pointf77 -o -f ../../pointf77 \) && exit 77 || $VALGRIND pointf77 ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test ! \\( -f pointf77 -o -f ../../pointf77 \\) && exit 77 || $VALGRIND pointf77 $STARGS"; then
+  ( $at_traceon; test ! \( -f pointf77 -o -f ../../pointf77 \) && exit 77 || $VALGRIND pointf77 $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test ! \( -f pointf77 -o -f ../../pointf77 \) && exit 77 || $VALGRIND pointf77 ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test ! \( -f pointf77 -o -f ../../pointf77 \) && exit 77 || $VALGRIND pointf77 $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -4326,15 +4326,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
 
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:300: test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || \$VALGRIND quadf77"
+$as_echo "$at_srcdir/testsuite.at:300: test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || \$VALGRIND quadf77 \$STARGS"
 echo testsuite.at:300 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || $VALGRIND quadf77"; then
-  ( $at_traceon; test ! \( -f quadf77 -o -f ../../quadf77 \) && exit 77 || $VALGRIND quadf77 ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test ! \\( -f quadf77 -o -f ../../quadf77 \\) && exit 77 || $VALGRIND quadf77 $STARGS"; then
+  ( $at_traceon; test ! \( -f quadf77 -o -f ../../quadf77 \) && exit 77 || $VALGRIND quadf77 $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test ! \( -f quadf77 -o -f ../../quadf77 \) && exit 77 || $VALGRIND quadf77 ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test ! \( -f quadf77 -o -f ../../quadf77 \) && exit 77 || $VALGRIND quadf77 $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -4364,15 +4364,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
 
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:304: test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || \$VALGRIND testallf77"
+$as_echo "$at_srcdir/testsuite.at:304: test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || \$VALGRIND testallf77 \$STARGS"
 echo testsuite.at:304 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || $VALGRIND testallf77"; then
-  ( $at_traceon; test ! \( -f testallf77 -o -f ../../testallf77 \) && exit 77 || $VALGRIND testallf77 ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test ! \\( -f testallf77 -o -f ../../testallf77 \\) && exit 77 || $VALGRIND testallf77 $STARGS"; then
+  ( $at_traceon; test ! \( -f testallf77 -o -f ../../testallf77 \) && exit 77 || $VALGRIND testallf77 $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test ! \( -f testallf77 -o -f ../../testallf77 \) && exit 77 || $VALGRIND testallf77 ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test ! \( -f testallf77 -o -f ../../testallf77 \) && exit 77 || $VALGRIND testallf77 $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false
@@ -4402,15 +4402,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
 
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:308: test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || \$VALGRIND ucdf77"
+$as_echo "$at_srcdir/testsuite.at:308: test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || \$VALGRIND ucdf77 \$STARGS"
 echo testsuite.at:308 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || $VALGRIND ucdf77"; then
-  ( $at_traceon; test ! \( -f ucdf77 -o -f ../../ucdf77 \) && exit 77 || $VALGRIND ucdf77 ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test ! \\( -f ucdf77 -o -f ../../ucdf77 \\) && exit 77 || $VALGRIND ucdf77 $STARGS"; then
+  ( $at_traceon; test ! \( -f ucdf77 -o -f ../../ucdf77 \) && exit 77 || $VALGRIND ucdf77 $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test ! \( -f ucdf77 -o -f ../../ucdf77 \) && exit 77 || $VALGRIND ucdf77 ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test ! \( -f ucdf77 -o -f ../../ucdf77 \) && exit 77 || $VALGRIND ucdf77 $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false

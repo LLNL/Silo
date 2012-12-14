@@ -54,9 +54,10 @@ be used for advertising or product endorsement purposes.
 
 #include "silo.h"               /*include public silo           */
 
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <std.c>
 

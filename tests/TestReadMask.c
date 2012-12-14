@@ -55,6 +55,7 @@ product endorsement purposes.
 #include <sys/time.h>
 #else
 #include <string.h>
+#include <time.h>
 #endif
 #include <sys/timeb.h>
 #include <std.c>

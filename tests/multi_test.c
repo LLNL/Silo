@@ -122,6 +122,7 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
             ASSERT(memcmp(struct1, struct2, struct_size) == 0); 
         }
     }
+    return 0;
 }
 
 #define CHECK_ARRAY(P1, P2, N, ATYPE)                                    \
@@ -368,7 +369,7 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
             int i;                                                       \
             DBucdvar *uv = DBGetUcdvar(F, VN);                           \
             ASSERT(uv);                                                  \
-            for (i = 0; i < NV; i++)                                     \ 
+            for (i = 0; i < NV; i++)                                     \
                 CHECK_ARRAY(VP[i], uv->vals[i], NVALS, DTYPE);           \
             DBFreeUcdvar(uv);                                            \
         }                                                                \
@@ -2624,8 +2625,6 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         TESTQVAR(dbfile, var4name, meshname, v2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
         TESTQVAR(dbfile, var5name, meshname, w2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
 
-        matcounts[block] = count_mats(dims2[0]*dims2[1]*dims2[2],matlist2,matlists[block]);
-        mixlens[block] = mixlen2;
         TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims2, ndims,
                 mix_next2, mix_mat2, mix_zone2, mix_vf2, mixlen2, DB_FLOAT, optlist);
 
@@ -3541,8 +3540,6 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         TESTQVAR(dbfile, var4name, meshname, v2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
         TESTQVAR(dbfile, var5name, meshname, w2, dims, ndims, DB_FLOAT, DB_NODECENT, optlist);
 
-        matcounts[block] = count_mats((dims[0]-1)*(dims[1]-1)*(dims[2]-1),matlist2,matlists[block]);
-        mixlens[block] = mixlen;
         TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims2, ndims,
                 mix_next, mix_mat, mix_zone, mix_vf, mixlen, DB_FLOAT, optlist);
 

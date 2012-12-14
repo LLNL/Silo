@@ -90,7 +90,8 @@ be used for advertising or product endorsement purposes.
   c -= a; c -= b; c ^= (b>>15); \
 }
 
-static unsigned int bjhash(register const unsigned char *k,
+#define K(I,L)    (((unsigned int)((unsigned char)k[I]))<<L)
+static unsigned int bjhash(register const char *k,
     register unsigned int length, register unsigned int initval)
 {
    register unsigned int a,b,c,len;
@@ -101,9 +102,9 @@ static unsigned int bjhash(register const unsigned char *k,
 
    while (len >= 12)
    {
-      a += (k[0] +((unsigned int)k[1]<<8) +((unsigned int)k[2]<<16) +((unsigned int)k[3]<<24));
-      b += (k[4] +((unsigned int)k[5]<<8) +((unsigned int)k[6]<<16) +((unsigned int)k[7]<<24));
-      c += (k[8] +((unsigned int)k[9]<<8) +((unsigned int)k[10]<<16)+((unsigned int)k[11]<<24));
+      a += (K(0,0) + K(1,8) + K(2,16) + K(3,24));
+      b += (K(4,0) + K(5,8) + K(6,16) + K(7,24));
+      c += (K(8,0) + K(9,8) + K(10,16) + K(11,24));
       bjhash_mix(a,b,c);
       k += 12; len -= 12;
    }
@@ -112,23 +113,25 @@ static unsigned int bjhash(register const unsigned char *k,
 
    switch(len)
    {
-      case 11: c+=((unsigned int)k[10]<<24);
-      case 10: c+=((unsigned int)k[9]<<16);
-      case 9 : c+=((unsigned int)k[8]<<8);
-      case 8 : b+=((unsigned int)k[7]<<24);
-      case 7 : b+=((unsigned int)k[6]<<16);
-      case 6 : b+=((unsigned int)k[5]<<8);
-      case 5 : b+=k[4];
-      case 4 : a+=((unsigned int)k[3]<<24);
-      case 3 : a+=((unsigned int)k[2]<<16);
-      case 2 : a+=((unsigned int)k[1]<<8);
-      case 1 : a+=k[0];
+      case 11: c+=K(10,24);
+      case 10: c+=K(9,16);
+      case 9 : c+=K(8,8);
+      case 8 : b+=K(7,24);
+      case 7 : b+=K(6,16);
+      case 6 : b+=K(5,8);
+      case 5 : b+=K(4,0);
+      case 4 : a+=K(3,24);
+      case 3 : a+=K(2,16);
+      case 2 : a+=K(1,8);
+      case 1 : a+=K(0,0);
    }
 
    bjhash_mix(a,b,c);
 
    return c;
 }
+#undef K
+#undef bjhash_mix
 
 
 /*-------------------------------------------------------------------------
