@@ -1888,13 +1888,17 @@ main(int argc, char *argv[])
             matlist[k++] = mat;
     }
 
-    i = 30;
-    DBWrite(dbfile, "_meshtvinfo", "mesh mesh1;pseudocolor u",
-            &i, 1, DB_CHAR);
-    i = 50;
-    DBWrite(dbfile, "_meshtv_defvars",
-            "vel vector {u,v,w};speed scalar sqrt(u*u+v*v+w*w)",
-            &i, 1, DB_CHAR);
+    {
+        char var[] = "mesh mesh1;pseudocolor u";
+        i = sizeof(var);
+        DBWrite(dbfile, "_meshtvinfo", var, &i, 1, DB_CHAR);
+    }
+
+    {
+        char var[] = "vel vector {u,v,w};speed scalar sqrt(u*u+v*v+w*w)";
+        i = sizeof(var);
+        DBWrite(dbfile, "_meshtv_defvars", var, &i, 1, DB_CHAR);
+    }
 
     /* 
      * Create a zonelist that describes a mesh that looks like a

@@ -264,14 +264,14 @@ build_ucd(DBfile *dbfile, char *name)
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
     /* test writing more than 2 or 3 component variable */
-    vars[0] = d;
-    varnames[0] = "dcompm";
+    vars[0] = x;
+    varnames[0] = "xcompm";
     vars[1] = u;
     varnames[1] = "ucompm";
     vars[2] = v;
     varnames[2] = "vcompm";
-    vars[3] = d;
-    varnames[3] = "dcompm_copy";
+    vars[3] = y;
+    varnames[3] = "ycompm";
     vars[4] = u;
     varnames[4] = "ucompm_copy";
     vars[5] = v;

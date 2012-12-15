@@ -201,6 +201,7 @@ int main(int argc, char **argv)
         DBSetDir(dbfile, "arr_dir");
         dims[0] = 100;
         DBWrite(dbfile, "Place", P, dims, 1, DB_INT);
+        dims[0] = 4;
         DBWrite(dbfile, "Upper", U, dims, 1, DB_INT);
         DBStringArrayToStringList(N, 3, &strList, &strListLen);
         dims[0] = strListLen;
