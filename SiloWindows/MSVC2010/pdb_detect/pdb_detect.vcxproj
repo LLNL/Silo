@@ -78,6 +78,10 @@
       <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h
 </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>cd ..\..\
+copysilo.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>

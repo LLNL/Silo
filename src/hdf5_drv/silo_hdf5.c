@@ -5216,7 +5216,7 @@ db_hdf5_finish_create(DBfile_hdf5 *dbfile, int target, char *finfo)
     if (finfo) {
         /* Write file info as a variable in the file */
         size = strlen(finfo)+1;
-        if (db_hdf5_WriteCKZ((DBfile*)dbfile, "_fileinfo", finfo, &size, 1, DB_CHAR, nofilters)<0) {
+        if (db_hdf5_WriteCKZ((DBfile*)dbfile, "_fileinfo", (void*)finfo, &size, 1, DB_CHAR, nofilters)<0) {
             db_perror("fileinfo", E_CALLFAIL, me);
             return silo_db_close((DBfile*) dbfile);
         }
@@ -7273,7 +7273,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char *vname, void *var,
                    UNWIND();
                }
            }
-#warning WHAT IF EXISTING DATASET WAS COMPRESSED
+//#warning WHAT IF EXISTING DATASET WAS COMPRESSED
        } else {
            /* Create memory and file data space (both identical) */
            for (i=0; i<ndims; i++) ds_size[i] = dims[i];
@@ -10152,7 +10152,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         for (i=0; i<nvars; i++) {
             db_hdf5_compwrz(dbfile, datatype, 1, &nels, vars[i],
                 m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0), compressionFlags);
-#warning WHY NOT COMPRESS MIX DATA TOO
+//#warning WHY NOT COMPRESS MIX DATA TOO
             if (mixvars && mixvars[i] && mixlen>0) {
                 db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mixvars[i],
                     m.mixed_value[i]/*out*/, friendly_name(varnames[i], "_mix", 0));

@@ -59,6 +59,9 @@ be used for advertising or product endorsement purposes.
  *
  */
 #include "pdb.h"
+#if defined(_WIN32)
+#include <silo_win32_compatibility.h>
+#endif
 
 /*--------------------------------------------------------------------------*/
 /*                          ACCESSOR FUNCTIONS                              */

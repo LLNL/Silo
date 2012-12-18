@@ -12,9 +12,9 @@
     <ZLIB_INC_DIR>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\zlib\include</ZLIB_INC_DIR>
     <ZLIB_LIB_DIR>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\zlib\lib\MSVC2010</ZLIB_LIB_DIR>
     <ZLIB_LIB_DIR_X64>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\zlib\lib\MSVC2010-x64</ZLIB_LIB_DIR_X64>
-    <QT_INC_DIR>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.7.4\include</QT_INC_DIR>
-    <QT_LIB_DIR>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.7.4\lib\MSVC2010</QT_LIB_DIR>
-    <QT_LIB_DIR_X64>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.7.4\lib\MSVC2010-x64</QT_LIB_DIR_X64>
+    <QT_INC_DIR>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.8.3\include</QT_INC_DIR>
+    <QT_LIB_DIR>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.8.3\lib\MSVC2010</QT_LIB_DIR>
+    <QT_LIB_DIR_X64>C:\a_VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.8.3\lib\MSVC2010-x64</QT_LIB_DIR_X64>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />

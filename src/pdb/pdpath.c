@@ -63,6 +63,8 @@ be used for advertising or product endorsement purposes.
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#else
+#include <silo_win32_compatibility.h>
 #endif
 #include "pdb.h"
 
