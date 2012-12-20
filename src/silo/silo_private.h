@@ -837,7 +837,6 @@ INTERNAL int db_num_registered_files();
 INTERNAL DBtoc *db_AllocToc (void);
 INTERNAL int db_FreeToc (DBfile *);
 INTERNAL int db_GetMachDataSize (int);
-INTERNAL int DBGetObjtypeTag (char *);
 INTERNAL char *DBGetObjtypeName (int);
 INTERNAL char *db_strndup (const char *, int);
 INTERNAL char *db_GetDatatypeString (int);

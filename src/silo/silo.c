@@ -1256,14 +1256,17 @@ db_GetDatatypeID(char *dataname)
  *    Jeremy Meredith, Sept 18 1998
  *    Added multi-block material species.
  *--------------------------------------------------------------------*/
-INTERNAL int
-DBGetObjtypeTag(char *typename)
+PUBLIC int
+DBGetObjtypeTag(char const *typename)
 {
     int            tag;
     char          *me = "DBGetObjtypeTag";
 
     if (!typename || !*typename)
         return db_perror("type name", E_BADARGS, me);
+
+    if (typename[0] == 'D' && typename[1] == 'B')
+        typename += 2;
 
     if (STR_EQUAL(typename, "multiblockmesh") ||
         STR_EQUAL(typename, "multimesh"))

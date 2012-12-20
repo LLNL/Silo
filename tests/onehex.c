@@ -113,9 +113,9 @@ main(int argc, char *argv[])
 {
     DBfile         *dbfile = NULL;
     char           *coordnames[3];
-    float          *coords[3];
+    double         *coords[3];
     int             nodelist[8];
-    float           x[8], y[8], z[8];
+    double          x[8], y[8], z[8];
     int             shapesize[1];
     int             shapecnt[1];
     DBfacelist     *facelist = NULL;
@@ -124,7 +124,7 @@ main(int argc, char *argv[])
     char            mesh_command[256];
     float           rot1[4][4], rot2[4][4], final[4][4];
     float           angle;
-    float           var[8];
+    double          var[8];
     int		    driver = DB_PDB;
     int             setinf = 0;
     int             setnan = 0;
@@ -279,7 +279,7 @@ main(int argc, char *argv[])
     }
 
     DBPutUcdmesh(dbfile, "hex", 3, coordnames, coords, 8, 1, "zonelist",
-                 "facelist", DB_FLOAT, NULL);
+                 "facelist", DB_DOUBLE, NULL);
 
     matnos[0] = 1;
     matlist[0] = 1;
@@ -298,7 +298,7 @@ main(int argc, char *argv[])
         double d = -1.0;
         var[0] = sqrt(d);
     }
-    DBPutUcdvar1(dbfile, "v", "hex", var, 8, NULL, 0, DB_FLOAT, DB_NODECENT,
+    DBPutUcdvar1(dbfile, "v", "hex", var, 8, NULL, 0, DB_DOUBLE, DB_NODECENT,
                  NULL);
 
     nodelist[0] = 0;

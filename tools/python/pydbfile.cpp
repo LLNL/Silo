@@ -480,6 +480,15 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
     return Py_None;
 }
 
+// ****************************************************************************
+//  Method:  DBfile_DBWriteObject
+//
+//  Purpose: Generalized method for writing silo objects.
+//
+//  Python Arguments:
+//    form 1: object name, python dictionary (with problem sized arrays as
+//    members)
+// ****************************************************************************
 static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
 {
     DBfile *db = ((DBfileObject*)self)->db;
@@ -490,18 +499,17 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    printf("got here\n");
     char *objname;
     PyDictObject *dictobj;
     if (!PyArg_ParseTuple(args, "sO!", &objname, &PyDict_Type, &dictobj)) return NULL;
 
     int ncomps = PyDict_Size((PyObject*)dictobj);
     if (!ncomps) return NULL;
+    int objtype = DBGetObjtypeTag(PyString_AsString(PyDict_GetItemString((PyObject*)dictobj, "type")));
+    DBobject *siloobj = DBMakeObject(objname, objtype, ncomps);
 
     PyObject *key, *value;
     Py_ssize_t pos = 0;
-
-    DBobject *siloobj = DBMakeObject(objname, DB_UCDMESH, ncomps);
     while (PyDict_Next((PyObject*)dictobj, &pos, &key, &value))
     {
         if (PyInt_Check(value))
@@ -517,21 +525,41 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
             for (int i = 0; i < len && allint; i++)
             {
                 if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
-                    allint = false;
+                {
+                    double dval = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                    if (dval != (int) dval) allint = false;
+                }
             }
             if (allint)
             {
                 int *vals = new int[len];
                 for (int i = 0; i < len; i++)
-                    vals[i] = PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
+                {
+                    if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
+                    {
+                        double dval = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                        vals[i] = (int) dval;
+                    }
+                    else
+                    {
+                        vals[i] = PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
+                    }
+                }
                 DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "integer", vals, 1, &len);
+                delete [] vals;
             }
             else
             {
                 double *vals = new double[len];
                 for (int i = 0; i < len; i++)
-                    vals[i] = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                {
+                    if (PyInt_Check(PyTuple_GET_ITEM(value,i)))
+                        vals[i] = (double) PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
+                    else
+                        vals[i] = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                }
                 DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "double", vals, 1, &len);
+                delete [] vals;
             }
         }
     }

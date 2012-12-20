@@ -1922,6 +1922,7 @@ SILO_API extern int      DBReadVar(DBfile *, char const *, void *);
 SILO_API extern int      DBReadVar1(DBfile *, char const *, int, void *);
 SILO_API extern int      DBReadVarSlice(DBfile *, char const *, int *, int *, int *, int,
                                void *);
+SILO_API extern int      DBGetObjtypeTag (char const *);
 SILO_API extern DBobject *DBMakeObject(char const *, int, int);
 SILO_API extern int      DBFreeObject(DBobject *);
 SILO_API extern int      DBClearObject(DBobject *);
