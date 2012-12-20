@@ -690,7 +690,7 @@ _lite_PD_adj_dimensions (PDBfile *file, char *name, syment *ep) {
       }
 
       sprintf(expr, "%s%ld:%ld:%ld,", expr, imin, imax, istep);
-      dims = dims->next;
+      if (dims) dims = dims->next;
    }
 
    if (expr[0] != '\0') {

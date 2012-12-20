@@ -234,6 +234,9 @@ AT_BANNER(PDB Specific)
 AT_SETUP(testpdb)
 AT_CHECK(test "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND testpdb,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(pdbtst)
+AT_CHECK(test "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND pdbtst,ignore,ignore)
+AT_CLEANUP
 
 AT_BANNER(HDF5 Specific)
 AT_SETUP(grab)

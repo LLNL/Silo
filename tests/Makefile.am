@@ -125,6 +125,7 @@ AM_CPPFLAGS = \
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
 if INSTALL_LITE_HEADERS
 testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
 endif
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
@@ -138,7 +139,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      pdbtst
+      testpdb pdbtst
 
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
@@ -254,6 +255,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_multispec_SOURCES = dummy.cxx
  nodist_EXTRA_specmix_SOURCES = dummy.cxx
  nodist_EXTRA_testpdb_SOURCES = dummy.cxx
+ nodist_EXTRA_pdbtst_SOURCES = dummy.cxx
  nodist_EXTRA_sami_SOURCES = dummy.cxx
  nodist_EXTRA_spec_SOURCES = dummy.cxx
  nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx
