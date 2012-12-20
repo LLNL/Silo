@@ -290,13 +290,12 @@ main(int argc, char *argv[])
 
     if (setinf)
     {
-        double d = 2.0;
-        var[7] = FLT_MAX*d; 
+        double d = 1.0 / 0.0;
+        var[7] = d;
     }
     if (setnan)
     {
-        double d = -1.0;
-        var[0] = sqrt(d);
+        var[0] = nan("");
     }
     DBPutUcdvar1(dbfile, "v", "hex", var, 8, NULL, 0, DB_DOUBLE, DB_NODECENT,
                  NULL);

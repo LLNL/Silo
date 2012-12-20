@@ -3682,15 +3682,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
 
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:234: test -z \"\$BROWSER\" && exit 77 || \$VALGRIND testonehex \`pwd\`"
+$as_echo "$at_srcdir/testsuite.at:234: test -z \"\$PYTHON\" -o -z \"\$BROWSER\" && exit 77 || \$VALGRIND testonehex \`pwd\`"
 echo testsuite.at:234 >"$at_check_line_file"
 
 if { echo 'Not enabling shell tracing (command contains a `...` command substitution)'
    false; }; then
-  ( $at_traceon; test -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd` ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; test -z "$PYTHON" -o -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd` ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd` ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test -z "$PYTHON" -o -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd` ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false

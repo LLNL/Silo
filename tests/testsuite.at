@@ -231,7 +231,7 @@ AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.l
 AT_CLEANUP
 AT_SETUP(write objects)
 AT_KEYWORDS(python)
-AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd`,,ignore,ignore)
+AT_CHECK(test -z "$PYTHON" -o -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd`,,ignore,ignore)
 AT_CLEANUP
 
 AT_BANNER(PDB Specific)
