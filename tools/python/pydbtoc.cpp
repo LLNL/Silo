@@ -70,25 +70,28 @@ static void DBtoc_dealloc(PyObject *self)
 
 #define PRINT_OBJS(nm)                                 \
 {                                                      \
-    sprintf(tmp, "n%s = %d\n", #nm, toc->n ## nm);  \
-    len += strlen(tmp);                                \
-    if (s) strcat(s, tmp);                             \
-                                                       \
-    sprintf(tmp, "%s_names = (", #nm);                 \
-    len += strlen(tmp);                                \
-    if (s) strcat(s, tmp);                             \
-    for (int i=0; i<toc->n ## nm; i++)                 \
+    if (toc->n ## nm)                                  \
     {                                                  \
-        len += strlen(toc->nm ## _names[i]);           \
-        if (s) strcat(s, toc->nm ## _names[i]);        \
-        if (i < toc->n ## nm -1)                       \
+        sprintf(tmp, "n%s = %d\n", #nm, toc->n ## nm); \
+        len += strlen(tmp);                            \
+        if (s) strcat(s, tmp);                         \
+                                                       \
+        sprintf(tmp, "%s_names = (", #nm);             \
+        len += strlen(tmp);                            \
+        if (s) strcat(s, tmp);                         \
+        for (int i=0; i<toc->n ## nm; i++)             \
         {                                              \
-            len += strlen(sep);                        \
-            if (s) strcat(s, sep);                     \
+            len += strlen(toc->nm ## _names[i]);       \
+            if (s) strcat(s, toc->nm ## _names[i]);    \
+            if (i < toc->n ## nm -1)                   \
+            {                                          \
+                len += strlen(sep);                    \
+                if (s) strcat(s, sep);                 \
+            }                                          \
         }                                              \
+        len += strlen(term);                           \
+        if (s) strcat(s, term);                        \
     }                                                  \
-    len += strlen(term);                               \
-    if (s) strcat(s, term);                            \
 }
 
 // ****************************************************************************

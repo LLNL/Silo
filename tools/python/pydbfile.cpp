@@ -360,6 +360,10 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
 //  Programmer:  Jeremy Meredith
 //  Creation:    July 12, 2005
 //
+//  Modifications
+//  Mark C. Miller, Thu Dec 20 00:05:41 PST 2012
+//  Adjust parsing logic to avoid deprecation warning for parsing a float into
+//  an integer variable.
 // ****************************************************************************
 static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
 {
@@ -379,28 +383,18 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
     double dvar;
     char *svar;
     PyObject *tuple;
-    if (PyArg_ParseTuple(args, "si", &str, &ivar) &&
-        PyArg_ParseTuple(args, "sd", &str, &dvar))
+    if (PyArg_ParseTuple(args, "sd", &str, &dvar))
     {
         dims = 1;
-        if (ivar == dvar)
+        if (dvar == (int) dvar)
         {
+            ivar = (int) dvar;
             err = DBWrite(db, str, &ivar, &dims,1, DB_INT);
         }
         else
         {
             err = DBWrite(db, str, &dvar, &dims,1, DB_DOUBLE);
         }
-    }
-    else if (PyArg_ParseTuple(args, "si", &str, &ivar))
-    {
-        dims = 1;
-        err = DBWrite(db, str, &ivar, &dims,1, DB_INT);
-    }
-    else if (PyArg_ParseTuple(args, "sd", &str, &dvar))
-    {
-        dims = 1;
-        err = DBWrite(db, str, &dvar, &dims,1, DB_DOUBLE);
     }
     else if (PyArg_ParseTuple(args, "ss", &str, &svar))
     {
@@ -484,6 +478,69 @@ static PyObject *DBfile_DBWrite(PyObject *self, PyObject *args)
     PyErr_Clear();
     Py_INCREF(Py_None);
     return Py_None;
+}
+
+static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
+{
+    DBfile *db = ((DBfileObject*)self)->db;
+
+    if (!db)
+    {
+        SiloErrorFunc("This file has been closed.");
+        return NULL;
+    }
+
+    printf("got here\n");
+    char *objname;
+    PyDictObject *dictobj;
+    if (!PyArg_ParseTuple(args, "sO!", &objname, &PyDict_Type, &dictobj)) return NULL;
+
+    int ncomps = PyDict_Size((PyObject*)dictobj);
+    if (!ncomps) return NULL;
+
+    PyObject *key, *value;
+    Py_ssize_t pos = 0;
+
+    DBobject *siloobj = DBMakeObject(objname, DB_UCDMESH, ncomps);
+    while (PyDict_Next((PyObject*)dictobj, &pos, &key, &value))
+    {
+        if (PyInt_Check(value))
+            DBAddIntComponent(siloobj, PyString_AsString(key), PyInt_AS_LONG(value));
+        else if (PyFloat_Check(value))
+            DBAddDblComponent(siloobj, PyString_AsString(key), PyFloat_AS_DOUBLE(value));
+        else if (PyString_Check(value))
+            DBAddStrComponent(siloobj, PyString_AsString(key), PyString_AsString(value));
+        else if (PyTuple_Check(value))
+        {
+            long len = PyTuple_Size(value);
+            bool allint = true;
+            for (int i = 0; i < len && allint; i++)
+            {
+                if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
+                    allint = false;
+            }
+            if (allint)
+            {
+                int *vals = new int[len];
+                for (int i = 0; i < len; i++)
+                    vals[i] = PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
+                DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "integer", vals, 1, &len);
+            }
+            else
+            {
+                double *vals = new double[len];
+                for (int i = 0; i < len; i++)
+                    vals[i] = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "double", vals, 1, &len);
+            }
+        }
+    }
+    DBWriteObject(db, siloobj, 1);
+
+    PyErr_Clear();
+    Py_INCREF(Py_None);
+    return Py_None;
+
 }
 
 // ****************************************************************************
@@ -615,6 +672,7 @@ static struct PyMethodDef DBfile_methods[] = {
     {"GetVar", DBfile_DBGetVar, METH_VARARGS},
     {"GetVarInfo", DBfile_DBGetVarInfo, METH_VARARGS},
     {"Write", DBfile_DBWrite, METH_VARARGS},
+    {"WriteObject", DBfile_DBWriteObject, METH_VARARGS},
     {"MkDir", DBfile_DBMkDir, METH_VARARGS},
     {"SetDir", DBfile_DBSetDir, METH_VARARGS},
     {"Close", DBfile_DBClose, METH_VARARGS},

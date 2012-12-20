@@ -105,7 +105,7 @@ AT_SETUP(array)
 AT_CHECK($VALGRIND array $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_test)
-AT_CHECK($VALGRIND multi_test $STARGS,,ignore)
+AT_CHECK($VALGRIND multi_test testread $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_test earlyclose)
 AT_CHECK($VALGRIND multi_test earlyclose $STARGS,,ignore,ignore)

@@ -355,7 +355,7 @@ partial_io_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@partial_io_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@partial_io_DEPENDENCIES = ../src/libsiloh5.la
 pdbtst_SOURCES = pdbtst.c
-pdbtst_OBJECTS = pdbtst.$(OBJEXT)
+pdbtst_OBJECTS = pdbtst-pdbtst.$(OBJEXT)
 pdbtst_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@pdbtst_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@pdbtst_DEPENDENCIES = ../src/libsiloh5.la
@@ -541,7 +541,8 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_oneprism_SOURCES) oneprism.c \
 	$(nodist_EXTRA_onepyramid_SOURCES) onepyramid.c \
 	$(nodist_EXTRA_onetet_SOURCES) onetet.c \
-	$(nodist_EXTRA_partial_io_SOURCES) partial_io.c pdbtst.c \
+	$(nodist_EXTRA_partial_io_SOURCES) partial_io.c \
+	$(nodist_EXTRA_pdbtst_SOURCES) pdbtst.c \
 	$(nodist_EXTRA_point_SOURCES) point.c $(pointf77_SOURCES) \
 	$(nodist_EXTRA_pointf77_SOURCES) \
 	$(nodist_EXTRA_polyzl_SOURCES) polyzl.c $(quad_SOURCES) \
@@ -844,6 +845,7 @@ AM_CPPFLAGS = \
 
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
 @INSTALL_LITE_HEADERS_TRUE@testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+@INSTALL_LITE_HEADERS_TRUE@pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 HDF5PROGS = compression grab mk_nasf_h5
@@ -856,7 +858,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	group_test listtypes alltypes wave multi_file polyzl csg \
 	rocket mmadjacency largefile version namescheme efcentering \
 	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
-	merge_block pdbtst $(am__append_1) $(am__append_3)
+	merge_block testpdb pdbtst $(am__append_1) $(am__append_3)
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
@@ -917,6 +919,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_multispec_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_specmix_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testpdb_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_pdbtst_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_sami_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_spec_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx
@@ -1143,7 +1146,7 @@ partial_io$(EXEEXT): $(partial_io_OBJECTS) $(partial_io_DEPENDENCIES)
 	$(CXXLINK) $(partial_io_OBJECTS) $(partial_io_LDADD) $(LIBS)
 pdbtst$(EXEEXT): $(pdbtst_OBJECTS) $(pdbtst_DEPENDENCIES) 
 	@rm -f pdbtst$(EXEEXT)
-	$(LINK) $(pdbtst_OBJECTS) $(pdbtst_LDADD) $(LIBS)
+	$(CXXLINK) $(pdbtst_OBJECTS) $(pdbtst_LDADD) $(LIBS)
 point$(EXEEXT): $(point_OBJECTS) $(point_DEPENDENCIES) 
 	@rm -f point$(EXEEXT)
 	$(CXXLINK) $(point_OBJECTS) $(point_LDADD) $(LIBS)
@@ -1257,7 +1260,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onepyramid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onetet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partial_io.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdbtst.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdbtst-dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdbtst-pdbtst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polyzl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad.Po@am__quote@
@@ -1302,6 +1306,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
+pdbtst-pdbtst.o: pdbtst.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pdbtst-pdbtst.o -MD -MP -MF $(DEPDIR)/pdbtst-pdbtst.Tpo -c -o pdbtst-pdbtst.o `test -f 'pdbtst.c' || echo '$(srcdir)/'`pdbtst.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pdbtst-pdbtst.Tpo $(DEPDIR)/pdbtst-pdbtst.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pdbtst.c' object='pdbtst-pdbtst.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pdbtst-pdbtst.o `test -f 'pdbtst.c' || echo '$(srcdir)/'`pdbtst.c
+
+pdbtst-pdbtst.obj: pdbtst.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pdbtst-pdbtst.obj -MD -MP -MF $(DEPDIR)/pdbtst-pdbtst.Tpo -c -o pdbtst-pdbtst.obj `if test -f 'pdbtst.c'; then $(CYGPATH_W) 'pdbtst.c'; else $(CYGPATH_W) '$(srcdir)/pdbtst.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pdbtst-pdbtst.Tpo $(DEPDIR)/pdbtst-pdbtst.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pdbtst.c' object='pdbtst-pdbtst.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pdbtst-pdbtst.obj `if test -f 'pdbtst.c'; then $(CYGPATH_W) 'pdbtst.c'; else $(CYGPATH_W) '$(srcdir)/pdbtst.c'; fi`
+
 testpdb-testpdb.o: testpdb.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testpdb-testpdb.o -MD -MP -MF $(DEPDIR)/testpdb-testpdb.Tpo -c -o testpdb-testpdb.o `test -f 'testpdb.c' || echo '$(srcdir)/'`testpdb.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/testpdb-testpdb.Tpo $(DEPDIR)/testpdb-testpdb.Po
@@ -1336,6 +1354,20 @@ testpdb-testpdb.obj: testpdb.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+pdbtst-dummy.o: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pdbtst-dummy.o -MD -MP -MF $(DEPDIR)/pdbtst-dummy.Tpo -c -o pdbtst-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/pdbtst-dummy.Tpo $(DEPDIR)/pdbtst-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='pdbtst-dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pdbtst-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+
+pdbtst-dummy.obj: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pdbtst-dummy.obj -MD -MP -MF $(DEPDIR)/pdbtst-dummy.Tpo -c -o pdbtst-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/pdbtst-dummy.Tpo $(DEPDIR)/pdbtst-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='pdbtst-dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pdbtst-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
 
 rocket-rocket.o: rocket.cxx
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -MT rocket-rocket.o -MD -MP -MF $(DEPDIR)/rocket-rocket.Tpo -c -o rocket-rocket.o `test -f 'rocket.cxx' || echo '$(srcdir)/'`rocket.cxx

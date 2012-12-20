@@ -204,6 +204,7 @@ PyObject *silo_Create(PyObject *self, PyObject *args)
                         "File creation failed");
         return NULL;
     }
+    DBSetAllowOverwrites(1);
     return DBfile_NEW(db);
 }
 
