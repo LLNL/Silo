@@ -57,6 +57,7 @@
 
 c...This program tests the use of the UCD Fortran jacket routines, plus
 c...the underlying UCD C routines.
+      include 'silo.inc'
       integer driver, nargs
       character*256 cloption
 

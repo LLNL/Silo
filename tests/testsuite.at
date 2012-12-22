@@ -234,15 +234,15 @@ AT_KEYWORDS(python)
 AT_CHECK(test -z "$PYTHON" -o -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd`,,ignore,ignore)
 AT_CLEANUP
 
-AT_BANNER(PDB Specific)
+AT_BANNER(PDB Lite)
 AT_SETUP(testpdb)
-AT_CHECK(test "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND testpdb,ignore,ignore)
+AT_CHECK(test ! \( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \) -o "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND testpdb,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(pdbtst)
-AT_CHECK(test "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND pdbtst,ignore,ignore)
+AT_CHECK(test ! \( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \) -o "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND pdbtst,ignore,ignore)
 AT_CLEANUP
 
-AT_BANNER(HDF5 Specific)
+AT_BANNER(HDF5 Driver Specific)
 AT_SETUP(grab)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab,,ignore,ignore)
 AT_CLEANUP

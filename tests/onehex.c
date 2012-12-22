@@ -296,6 +296,8 @@ main(int argc, char *argv[])
     if (setnan)
     {
         var[0] = nan("");
+        if (var[0] == 0.0)
+            var[0] = sqrt((double)-1.0);
     }
     DBPutUcdvar1(dbfile, "v", "hex", var, 8, NULL, 0, DB_DOUBLE, DB_NODECENT,
                  NULL);

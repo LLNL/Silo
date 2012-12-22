@@ -509,7 +509,11 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
     DBobject *siloobj = DBMakeObject(objname, objtype, ncomps);
 
     PyObject *key, *value;
+#if PY_VERSION_GE(2,5,0)
     Py_ssize_t pos = 0;
+#else
+    int pos = 0;
+#endif
     while (PyDict_Next((PyObject*)dictobj, &pos, &key, &value))
     {
         if (PyInt_Check(value))

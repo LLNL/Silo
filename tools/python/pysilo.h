@@ -60,6 +60,10 @@
 //
 // ****************************************************************************
 
+#define PY_VERSION_GE(Maj,Min,Mic)  \
+        (((PY_MAJOR_VERSION==Maj) && (PY_MINOR_VERSION==Min) && (PY_MICRO_VERSION>=Mic)) || \
+         ((PY_MAJOR_VERSION==Maj) && (PY_MINOR_VERSION>Min)) || \
+         (PY_MAJOR_VERSION>Maj))
 
 void SiloErrorFunc(const char *errString);
 
