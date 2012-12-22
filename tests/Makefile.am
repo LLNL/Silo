@@ -123,9 +123,11 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/silo \
  -I$(includedir)
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
+PDBTESTS =
 if INSTALL_LITE_HEADERS
 testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
 pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+PDBTESTS = testpdb pdbtst
 endif
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
@@ -139,7 +141,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      testpdb pdbtst
+      $(PDBTESTS)
 
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
@@ -197,8 +199,6 @@ check_PROGRAMS = \
  twohex \
  multispec \
  specmix \
- testpdb \
- pdbtst \
  sami \
  spec \
  cpz1plt \
@@ -220,8 +220,8 @@ check_PROGRAMS = \
  mk_nasf_pdb \
  ioperf \
  readstuff \
- testfs
-
+ testfs \
+ $(PDBTESTS)
 
 # Deal with need to use c++ linker whenever we've got C++
 # sources compiled with the silo library and the fact that

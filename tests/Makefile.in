@@ -103,15 +103,14 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	onehex$(EXEEXT) oneprism$(EXEEXT) onepyramid$(EXEEXT) \
 	onetet$(EXEEXT) TestReadMask$(EXEEXT) subhex$(EXEEXT) \
 	twohex$(EXEEXT) multispec$(EXEEXT) specmix$(EXEEXT) \
-	testpdb$(EXEEXT) pdbtst$(EXEEXT) sami$(EXEEXT) spec$(EXEEXT) \
-	cpz1plt$(EXEEXT) merge_block$(EXEEXT) mat3d_3across$(EXEEXT) \
-	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
-	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
-	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
-	quad$(EXEEXT) version$(EXEEXT) namescheme$(EXEEXT) \
-	efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) ioperf$(EXEEXT) \
-	readstuff$(EXEEXT) testfs$(EXEEXT) $(am__EXEEXT_2) \
-	$(am__EXEEXT_4)
+	sami$(EXEEXT) spec$(EXEEXT) cpz1plt$(EXEEXT) \
+	merge_block$(EXEEXT) mat3d_3across$(EXEEXT) ucd1d$(EXEEXT) \
+	wave$(EXEEXT) multi_file$(EXEEXT) polyzl$(EXEEXT) csg$(EXEEXT) \
+	rocket$(EXEEXT) mmadjacency$(EXEEXT) largefile$(EXEEXT) \
+	dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
+	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
+	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
+	$(am__EXEEXT_1) $(am__EXEEXT_3) $(am__EXEEXT_5)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
@@ -171,12 +170,14 @@ rocket_silo_la_OBJECTS = $(am_rocket_silo_la_OBJECTS)
 rocket_silo_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(rocket_silo_la_LDFLAGS) $(LDFLAGS) -o $@
-am__EXEEXT_1 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
-@HDF5_DRV_NEEDED_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
-am__EXEEXT_3 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
+@INSTALL_LITE_HEADERS_TRUE@am__EXEEXT_1 = testpdb$(EXEEXT) \
+@INSTALL_LITE_HEADERS_TRUE@	pdbtst$(EXEEXT)
+am__EXEEXT_2 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
+@HDF5_DRV_NEEDED_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2)
+am__EXEEXT_4 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
 	pointf77$(EXEEXT) quadf77$(EXEEXT) ucdf77$(EXEEXT) \
 	testallf77$(EXEEXT) csgmesh$(EXEEXT)
-@FORTRAN_NEEDED_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
+@FORTRAN_NEEDED_TRUE@am__EXEEXT_5 = $(am__EXEEXT_4)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
 TestReadMask_LDADD = $(LDADD)
@@ -843,7 +844,9 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/silo \
  -I$(includedir)
 
+@INSTALL_LITE_HEADERS_TRUE@PDBTESTS = testpdb pdbtst
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
+PDBTESTS = 
 @INSTALL_LITE_HEADERS_TRUE@testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
 @INSTALL_LITE_HEADERS_TRUE@pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
@@ -858,7 +861,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	group_test listtypes alltypes wave multi_file polyzl csg \
 	rocket mmadjacency largefile version namescheme efcentering \
 	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
-	merge_block testpdb pdbtst $(am__append_1) $(am__append_3)
+	merge_block $(PDBTESTS) $(am__append_1) $(am__append_3)
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
