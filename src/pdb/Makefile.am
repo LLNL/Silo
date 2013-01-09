@@ -63,7 +63,7 @@ noinst_HEADERS = pdb.h
 nodist_noinst_HEADERS = pdform.h
 
 if INSTALL_LITE_HEADERS
-include_HEADERS = lite_pdb.h
+nodist_include_HEADERS = lite_pdb.h
 endif
 
 FILES = \

@@ -57,7 +57,7 @@ noinst_LTLIBRARIES = libsilo_score.la
 libsilo_score_la_SOURCES = $(FILES)
 
 if INSTALL_LITE_HEADERS
-include_HEADERS = lite_score.h
+nodist_include_HEADERS = lite_score.h
 endif
 
 noinst_HEADERS = score.h

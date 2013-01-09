@@ -79,6 +79,7 @@ EXTRA_DIST= \
  ioperf_hdf5.c \
  ioperf_pdb.c \
  ioperf_silo.c \
+ rocket.h \
  Make_ioperf \
  ioperf_tests \
  std.c \
@@ -97,6 +98,7 @@ check_SCRIPTS= \
  test_error.py \
  test_read.py \
  test_write.py \
+ testonehex \
  testsilock \
  testdtypes
 
