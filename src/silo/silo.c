@@ -178,7 +178,8 @@ PUBLIC char   *_db_err_list[] =
     "--with-hdf5=<INC,LIB> option and re-compile and\n"
     "re-install Silo. If you do not have an installation\n"
     "of HDF5 already on your sytem, you will also need\n"
-    "to obtain HDF5 from www.hdfgroup.org and install it." /* 33 */
+    "to obtain HDF5 from www.hdfgroup.org and install it.", /* 33 */
+    "Empty objects not permitted. See DBSetAllowEmptyObjects()." /* 34 */
 };
 
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
@@ -254,6 +255,7 @@ struct _mrgt   _mrgt;
 SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
+    FALSE, /* allowEmptyObjects */
     FALSE, /* enableChecksums */
     FALSE,  /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
@@ -2722,6 +2724,30 @@ DBGetAllowOverwrites()
 }
 
 /*----------------------------------------------------------------------
+ * Routine:  DBSetAllowEmptyObjects
+ *
+ * Purpose:  Set and return the allow empty objects flags 
+ *
+ * Programmer:  Mark C. Miller, January 9, 2013
+ *
+ * Description:  This routine sets the flag that controls whether
+ *               empty objects are allowed. By default, they are not.
+ *--------------------------------------------------------------------*/
+PUBLIC int 
+DBSetAllowEmptyObjects(int allow)
+{
+    int oldAllow = SILO_Globals.allowEmptyObjects;
+    SILO_Globals.allowEmptyObjects = allow;
+    return oldAllow;
+}
+
+PUBLIC int 
+DBGetAllowEmptyObjects()
+{
+    return SILO_Globals.allowEmptyObjects;
+}
+
+/*----------------------------------------------------------------------
  * Routine:  DBSetEnableChecksums
  *
  * Purpose:  Set and return the enable checksums flags 
@@ -3607,9 +3633,13 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
             API_ERROR("object ncomponents", E_BADARGS);
         }
         if (!ss)
-            API_ERROR("string literal component", E_BADARGS);
-
-        sprintf(tmp, "'<s>%s'", ss);
+        {
+            if (!SILO_Globals.allowEmptyObjects)
+                API_ERROR("string literal component", E_BADARGS);
+            sprintf(tmp, "'<s>null'", ss);
+        }
+        else
+            sprintf(tmp, "'<s>%s'", ss);
 
         if (NULL == (object->comp_names[object->ncomponents] =
                      STRDUP(compname)) ||
@@ -5774,6 +5804,14 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
             API_ERROR("DBWriteComponent", E_GRABBED) ; 
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
+        if (SILO_Globals.allowEmptyObjects)
+        {
+            if (!var) API_RETURN(0);
+            if (!count) API_RETURN(0);
+            for(nvals=1,i=0;i<nd;i++)
+                nvals *= count[i];
+            if (!nvals) API_RETURN(0);
+        }
         if (!comp_name || !*comp_name)
             API_ERROR("component name", E_BADARGS);
         if (db_VariableNameValid((char *)comp_name) == 0)
@@ -7794,20 +7832,36 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
             API_ERROR("material name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (!meshname || !*meshname)
-            API_ERROR("mesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)meshname) == 0)
-            API_ERROR("mesh name", E_INVALIDNAME);
         if (nmat < 0)
-            API_ERROR("nmat", E_BADARGS);
-        if (!matnos && nmat)
-            API_ERROR("matnos", E_BADARGS);
-        if (ndims <= 0)
-            API_ERROR("ndims", E_BADARGS);
-        if (!dims)
-            API_ERROR("dims", E_BADARGS);
-        if (!matlist)
-            API_ERROR("matlist", E_BADARGS);
+            API_ERROR("nmat<0", E_BADARGS);
+        if (ndims < 0)
+            API_ERROR("ndims<0", E_BADARGS);
+        if (dims) /* examine dims for zero size in any dim */
+        {
+            int i;
+            for (i = 0; i < ndims && dims; i++)
+                if (dims[i] == 0) dims = 0;
+        }
+        if (SILO_Globals.allowEmptyObjects)
+        {
+            if (nmat && !matnos) API_ERROR("matnos==0", E_BADARGS);
+            if (ndims && !dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
+            if (dims && !matlist) API_ERROR("matlist", E_BADARGS);
+            if (meshname && !*meshname) API_ERROR("mesh name", E_BADARGS);
+            if (meshname && !db_VariableNameValid((char *)meshname))
+                API_ERROR("mesh name", E_INVALIDNAME);
+        }
+        else
+        {
+            if (nmat<1) API_ERROR("nmat<1", E_EMPTYOBJECT);
+            if (ndims<1) API_ERROR("ndims<1", E_EMPTYOBJECT);
+            if (!matnos) API_ERROR("matnos==0", E_EMPTYOBJECT);
+            if (!matnos && nmat) API_ERROR("matnos==0", E_BADARGS);
+            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_EMPTYOBJECT);
+            if (!matlist) API_ERROR("matlist==0", E_EMPTYOBJECT);
+            if (!meshname || !*meshname) API_ERROR("mesh name", E_EMPTYOBJECT);
+            if (!db_VariableNameValid((char *)meshname)) API_ERROR("meshname", E_INVALIDNAME);
+        }
         if (mixlen < 0)
             API_ERROR("mixlen", E_BADARGS);
         if (!mix_next && mixlen)
@@ -8794,16 +8848,31 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("UCDmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)mname) == 0)
             API_ERROR("UCDmesh name", E_INVALIDNAME);
-        if (nvars < 1)
-            API_ERROR("nvars", E_BADARGS);
-        if (!varnames && nvars)
-            API_ERROR("varnames", E_BADARGS);
-        if (!vars && nvars)
-            API_ERROR("vars", E_BADARGS);
-        if (nels <= 0)
-            API_ERROR("nels", E_BADARGS);
+        if (nvars < 0)
+            API_ERROR("nvars<0", E_BADARGS);
+        if (nels < 0)
+            API_ERROR("nels<0", E_BADARGS);
         if (mixlen < 0)
             API_ERROR("mixlen", E_BADARGS);
+        if (vars)
+        {
+            int i;
+            void **vars2 = vars;
+            for (i = 0; i < nvars && vars; i++)
+                if (vars2[i] == 0) vars = 0;
+        }
+        if (SILO_Globals.allowEmptyObjects)
+        {
+            if (nvars && !varnames) API_ERROR("varnames==0", E_BADARGS);
+            if (nvars && !vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+        }
+        else
+        {
+            if (nvars < 1) API_ERROR("nvars<1", E_EMPTYOBJECT);
+            if (nels < 1) API_ERROR("nels<1", E_EMPTYOBJECT);
+            if (!varnames) API_ERROR("varnames==0", E_EMPTYOBJECT);
+            if (!vars) API_ERROR("vars==0", E_EMPTYOBJECT);
+        }
         if (centering != DB_NODECENT && centering != DB_ZONECENT &&
             centering != DB_FACECENT && centering != DB_BNDCENT &&
             centering != DB_EDGECENT && centering != DB_BLOCKCENT)

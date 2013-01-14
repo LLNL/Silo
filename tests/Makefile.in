@@ -110,7 +110,7 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
 	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
 	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_3) $(am__EXEEXT_5)
+	empty$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_3) $(am__EXEEXT_5)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
@@ -243,6 +243,11 @@ efcentering_OBJECTS = efcentering.$(OBJEXT)
 efcentering_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@efcentering_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@efcentering_DEPENDENCIES = ../src/libsiloh5.la
+empty_SOURCES = empty.c
+empty_OBJECTS = empty.$(OBJEXT)
+empty_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@empty_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@empty_DEPENDENCIES = ../src/libsiloh5.la
 extface_SOURCES = extface.c
 extface_OBJECTS = extface.$(OBJEXT)
 extface_LDADD = $(LDADD)
@@ -522,6 +527,7 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_curvef77_SOURCES) $(dir_SOURCES) \
 	$(nodist_EXTRA_dir_SOURCES) \
 	$(nodist_EXTRA_efcentering_SOURCES) efcentering.c \
+	$(nodist_EXTRA_empty_SOURCES) empty.c \
 	$(nodist_EXTRA_extface_SOURCES) extface.c $(grab_SOURCES) \
 	$(nodist_EXTRA_grab_SOURCES) \
 	$(nodist_EXTRA_group_test_SOURCES) group_test.c \
@@ -572,8 +578,8 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
 	cpz1plt.c csg.c $(am__csgmesh_SOURCES_DIST) \
 	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) efcentering.c \
-	extface.c $(am__grab_SOURCES_DIST) group_test.c ioperf.c \
-	largefile.c listtypes.c mat3d_3across.c \
+	empty.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
+	ioperf.c largefile.c listtypes.c mat3d_3across.c \
 	$(am__matf77_SOURCES_DIST) merge_block.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
 	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
@@ -863,7 +869,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	group_test listtypes alltypes wave multi_file polyzl csg \
 	rocket mmadjacency largefile version namescheme efcentering \
 	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
-	merge_block $(PDBTESTS) $(am__append_1) $(am__append_3)
+	merge_block empty $(PDBTESTS) $(am__append_1) $(am__append_3)
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
@@ -958,6 +964,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ioperf_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_readstuff_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testfs_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_empty_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -1083,6 +1090,9 @@ dir$(EXEEXT): $(dir_OBJECTS) $(dir_DEPENDENCIES)
 efcentering$(EXEEXT): $(efcentering_OBJECTS) $(efcentering_DEPENDENCIES) 
 	@rm -f efcentering$(EXEEXT)
 	$(CXXLINK) $(efcentering_OBJECTS) $(efcentering_LDADD) $(LIBS)
+empty$(EXEEXT): $(empty_OBJECTS) $(empty_DEPENDENCIES) 
+	@rm -f empty$(EXEEXT)
+	$(CXXLINK) $(empty_OBJECTS) $(empty_LDADD) $(LIBS)
 extface$(EXEEXT): $(extface_OBJECTS) $(extface_DEPENDENCIES) 
 	@rm -f extface$(EXEEXT)
 	$(CXXLINK) $(extface_OBJECTS) $(extface_LDADD) $(LIBS)
@@ -1239,6 +1249,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efcentering.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/empty.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group_test.Po@am__quote@

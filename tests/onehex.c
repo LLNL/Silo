@@ -55,6 +55,8 @@ product endorsement purposes.
 #include <string.h>
 #include <float.h>
 
+#define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
+
 #define IND(i,j) i-1][j-1
 
 #define matrix_assign(matrix,a11,a12,a13,a14,a21,a22,a23,a24,a31,a32,a33,a34,a41,a42,a43,a44)         \
@@ -128,6 +130,7 @@ main(int argc, char *argv[])
     int		    driver = DB_PDB;
     int             setinf = 0;
     int             setnan = 0;
+    int             testeo = 0;
     char 	    *filename = "onehex.silo";
     int             show_all_errors = FALSE;
     int             append = FALSE;
@@ -197,6 +200,8 @@ main(int argc, char *argv[])
             setinf = 1;
 	} else if (!strcmp(argv[i], "nan")) {
             setnan = 1;
+	} else if (!strcmp(argv[i], "testeo")) {
+            testeo = 1;
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
@@ -287,6 +292,17 @@ main(int argc, char *argv[])
 
     DBPutMaterial(dbfile, "mat", "hex", 1, matnos, matlist, dims,
                   1, NULL, NULL, NULL, NULL, 0, DB_FLOAT, NULL);
+
+    if (testeo)
+    {
+        /* correct behavior is for this DBPut... to fail */
+        ASSERT(DBPutMaterial(dbfile, "empty_mat", "hex", 0, 0, 0, 0,
+                0, NULL, NULL, NULL, NULL, 0, DB_FLOAT, NULL)<0);
+        DBSetAllowEmptyObjects(1);
+        ASSERT(DBPutMaterial(dbfile, "empty_mat", "hex", 0, 0, 0, 0,
+                0, NULL, NULL, NULL, NULL, 0, DB_FLOAT, NULL)==0);
+        DBSetAllowEmptyObjects(0);
+    }
 
     if (setinf)
     {

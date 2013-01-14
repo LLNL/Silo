@@ -796,6 +796,7 @@ typedef struct filter_t {
 typedef struct SILO_Globals_t {
     long dataReadMask;
     int allowOverwrites;
+    int allowEmptyObjects;
     int enableChecksums;
     int enableFriendlyHDF5Names;
     int enableGrabDriver;

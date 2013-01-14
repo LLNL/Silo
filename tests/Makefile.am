@@ -143,7 +143,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      $(PDBTESTS)
+      empty $(PDBTESTS)
 
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
@@ -223,6 +223,7 @@ check_PROGRAMS = \
  ioperf \
  readstuff \
  testfs \
+ empty \
  $(PDBTESTS)
 
 # Deal with need to use c++ linker whenever we've got C++
@@ -291,6 +292,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_ioperf_SOURCES = dummy.cxx
  nodist_EXTRA_readstuff_SOURCES = dummy.cxx
  nodist_EXTRA_testfs_SOURCES = dummy.cxx
+ nodist_EXTRA_empty_SOURCES = dummy.cxx
 endif
 
 

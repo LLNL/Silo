@@ -202,6 +202,12 @@ AT_SETUP(readstuff) # needs data file from multi_test
 AT_CHECK(multi_test $STARGS,,ignore) # don't valgrind these intermediate parts
 AT_CHECK($VALGRIND readstuff $STARGS,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(testfs)
+AT_CHECK($VALGRIND testfs $STARGS,,ignore)
+AT_CLEANUP
+AT_SETUP(empty)
+AT_CHECK($VALGRIND empty $STARGS,,ignore)
+AT_CLEANUP
 
 AT_BANNER(pythonmodule)
 AT_SETUP(read)
