@@ -9312,51 +9312,52 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
     *  them out to output file.
     *-------------------------------------------------------------*/
    count[0] = ndims;
-   switch (datatype) {
+   if (ndims) {
+      switch (datatype) {
+      case DB_FLOAT:
+         switch (ndims) {
+         case 3:
+            _DBarrminmax(coords[2], nels, &fmin_extents[2], &fmax_extents[2]);
+         case 2:
+            _DBarrminmax(coords[1], nels, &fmin_extents[1], &fmax_extents[1]);
+         case 1:
+            _DBarrminmax(coords[0], nels, &fmin_extents[0], &fmax_extents[0]);
+            break;
+         default:
+            return db_perror("ndims", E_BADARGS, me);
+         }
 
-   case DB_FLOAT:
-      switch (ndims) {
-      case 3:
-         _DBarrminmax(coords[2], nels, &fmin_extents[2], &fmax_extents[2]);
-      case 2:
-         _DBarrminmax(coords[1], nels, &fmin_extents[1], &fmax_extents[1]);
-      case 1:
-         _DBarrminmax(coords[0], nels, &fmin_extents[0], &fmax_extents[0]);
+         DBWriteComponent(dbfile, obj, "min_extents", name, "float",
+                          fmin_extents, 1, count);
+         DBWriteComponent(dbfile, obj, "max_extents", name, "float",
+                          fmax_extents, 1, count);
+
+         break;
+      case DB_DOUBLE:
+         switch (ndims) {
+         case 3:
+            _DBdarrminmax((double *)coords[2], nels,
+                          &dmin_extents[2], &dmax_extents[2]);
+         case 2:
+            _DBdarrminmax((double *)coords[1], nels,
+                          &dmin_extents[1], &dmax_extents[1]);
+         case 1:
+            _DBdarrminmax((double *)coords[0], nels,
+                          &dmin_extents[0], &dmax_extents[0]);
+            break;
+         default:
+            return db_perror("ndims", E_BADARGS, me);
+         }
+
+         DBWriteComponent(dbfile, obj, "min_extents", name, "double",
+                          dmin_extents, 1, count);
+         DBWriteComponent(dbfile, obj, "max_extents", name, "double",
+                          dmax_extents, 1, count);
+
          break;
       default:
-         return db_perror("ndims", E_BADARGS, me);
+         return db_perror("type not supported", E_NOTIMP, me);
       }
-
-      DBWriteComponent(dbfile, obj, "min_extents", name, "float",
-                       fmin_extents, 1, count);
-      DBWriteComponent(dbfile, obj, "max_extents", name, "float",
-                       fmax_extents, 1, count);
-
-      break;
-   case DB_DOUBLE:
-      switch (ndims) {
-      case 3:
-         _DBdarrminmax((double *)coords[2], nels,
-                       &dmin_extents[2], &dmax_extents[2]);
-      case 2:
-         _DBdarrminmax((double *)coords[1], nels,
-                       &dmin_extents[1], &dmax_extents[1]);
-      case 1:
-         _DBdarrminmax((double *)coords[0], nels,
-                       &dmin_extents[0], &dmax_extents[0]);
-         break;
-      default:
-         return db_perror("ndims", E_BADARGS, me);
-      }
-
-      DBWriteComponent(dbfile, obj, "min_extents", name, "double",
-                       dmin_extents, 1, count);
-      DBWriteComponent(dbfile, obj, "max_extents", name, "double",
-                       dmax_extents, 1, count);
-
-      break;
-   default:
-      return db_perror("type not supported", E_NOTIMP, me);
    }
 
    if (_pm._gnodeno)
@@ -10054,18 +10055,21 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
                        coeffs, 1, count);
    FREE(datatype_str);
 
-   min_extents[0] = extents[0];
-   min_extents[1] = extents[1];
-   min_extents[2] = extents[2];
-   max_extents[0] = extents[3];
-   max_extents[1] = extents[4];
-   max_extents[2] = extents[5];
+   if (extents)
+   {
+      min_extents[0] = extents[0];
+      min_extents[1] = extents[1];
+      min_extents[2] = extents[2];
+      max_extents[0] = extents[3];
+      max_extents[1] = extents[4];
+      max_extents[2] = extents[5];
 
-   count[0] = ndims;
-   DBWriteComponent(dbfile, obj, "min_extents", name, "double",
-                    min_extents, 1, count);
-   DBWriteComponent(dbfile, obj, "max_extents", name, "double",
-                    max_extents, 1, count);
+      count[0] = ndims;
+      DBWriteComponent(dbfile, obj, "min_extents", name, "double",
+                       min_extents, 1, count);
+      DBWriteComponent(dbfile, obj, "max_extents", name, "double",
+                       max_extents, 1, count);
+   }
 
    /*-------------------------------------------------------------
     *  Build a output object definition for a ucd mesh. The minimum

@@ -61,11 +61,11 @@ product endorsement purposes.
 {   int retval = FUNCCALL;                                                                              \
     if (pass == 0)                                                                                      \
     {                                                                                                   \
-        if(!(RETPRED0)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#RETPRED0,__LINE__);abort();} \
+        if(!(RETPRED0)){fprintf(stderr,"On empty object rejection pass, assertion \"%s\" at line %d failed\n",#RETPRED0,__LINE__);abort();} \
     }                                                                                                   \
     else                                                                                                \
     {                                                                                                   \
-        if(!(RETPRED1)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#RETPRED1,__LINE__);abort();} \
+        if(!(RETPRED1)){fprintf(stderr,"On empty object allow pass, assertion \"%s\" at line %d failed\n",#RETPRED1,__LINE__);abort();} \
     }                                                                                                   \
 }
 
@@ -89,17 +89,54 @@ main(int argc, char *argv[])
 	}
     }
     
-    DBShowErrors(DB_NONE, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_NONE, NULL);
     printf("Creating test file \"%s\".\n", filename);
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "test empty silo objects", driver);
 
     for (pass = 0; pass < 2; pass++)
     {
+        int dt = DB_FLOAT;
+        int ct = DB_ZONECENT;
         if (pass) DBSetAllowEmptyObjects(1);
 
-        /*ASSERT(DBPutUcdmesh(dbfile, "empty_ucdmesh", 0, 0, 0, 0, 0, 0, 0, DB_DOUBLE, NULL),retval<0,retval==0);*/
-        ASSERT(DBPutMaterial(dbfile, "empty_mat", 0, 0, 0, 0, 0,
-                0, NULL, NULL, NULL, NULL, 0, DB_FLOAT, NULL),retval<0,retval==0);
+#if 0
+DBPutCurve
+DBPutUcdsubmesh
+
+DBPutFacelist
+DBPutZonelist
+DBPutZonelist2
+DBPutPHZonelist
+DBPutCSGZonelist
+
+DBPutMrgtree
+DBPutMrgvar
+DBPutGroupelmap
+#endif
+
+
+        /* empty point meshes and vars */
+        ASSERT(DBPutPointmesh(dbfile, "empty_pointmesh", 0,0,0,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointvar(dbfile, "pv", "empty_pointmesh", 0,0,0,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointvar1(dbfile, "pv1", "empty_pointmesh", 0,0,dt,0),retval<0,retval==0);
+
+        /* empty quad meshes and vars */
+        ASSERT(DBPutQuadmesh(dbfile, "empty_quadmesh", 0,0,0,0,dt,DB_COLLINEAR,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar(dbfile, "qv", "empty_quadmesh", 0,0,0,0,0,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar1(dbfile, "qv1", "empty_quadmesh", 0,0,0,0,0,dt,ct,0),retval<0,retval==0);
+
+        /* empty ucd meshes and vars */
+        ASSERT(DBPutUcdmesh(dbfile, "empty_ucdmesh", 0,0,0,0,0,0,0,dt,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile, "uv", "empty_ucdmesh", 0,0,0,0,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar1(dbfile, "uv1", "empty_ucdmesh", 0,0,0,0,dt,ct,0),retval<0,retval==0);
+
+        /* csg meshes and vars */
+        ASSERT(DBPutCsgmesh(dbfile, "empty_csgmesh", 0,0,0,0,0,0,dt,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile, "csgv", "empty_csgmesh", 0,0,0,0,dt,ct,0),retval<0,retval==0);
+
+        /* empty materials and species */
+        ASSERT(DBPutMaterial(dbfile, "empty_mat", 0,0,0,0,0,0,0,0,0,0,0,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile, "empty_spec", "empty_mat", 0,0,0,0,0,0,0,0,0,dt,0),retval<0,retval==0);
     }
 
     DBClose(dbfile);
