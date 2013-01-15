@@ -7952,27 +7952,37 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
         if (db_VariableNameValid((char *)matname) == 0)
             API_ERROR("material name", E_INVALIDNAME);
         if (nmat < 0)
-            API_ERROR("nmat", E_BADARGS);
-        if (!nmatspec)
-            API_ERROR("nmatspec", E_BADARGS);
-        if (!speclist)
-            API_ERROR("speclist", E_BADARGS);
-        if (ndims <= 0 || ndims > 3)
-            API_ERROR("ndims", E_BADARGS);
-        if (!dims)
-            API_ERROR("dims", E_BADARGS);
+            API_ERROR("nmat<0", E_BADARGS);
+        if (ndims < 0)
+            API_ERROR("ndims<0", E_BADARGS);
         if (nspecies_mf < 0)
-            API_ERROR("nspecies_mf", E_BADARGS);
-        if (!species_mf && nspecies_mf)
-            API_ERROR("species_mf", E_BADARGS);
+            API_ERROR("nspecies_mf<0", E_BADARGS);
+        if (ndims)
+        {
+            int i;
+            for (i = 0; i < ndims && dims; i++)
+                if (!dims[i]) dims = 0;
+        }
+        if (SILO_Globals.allowEmptyObjects)
+        {
+            if (ndims && !dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
+            if (nmat && !nmatspec) API_ERROR("nmatspec==0", E_BADARGS);
+            if (nspecies_mf && !species_mf) API_ERROR("species_mf==0", E_BADARGS);
+        }
+        else
+        {
+            if (!nmatspec) API_ERROR("nmatspec==0", E_EMPTYOBJECT);
+            if (!speclist) API_ERROR("speclist==0", E_EMPTYOBJECT);
+            if (ndims < 1 || ndims > 3) API_ERROR("ndims<1 || ndims>3", E_BADARGS);
+            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_EMPTYOBJECT);
+            if (!species_mf && nspecies_mf) API_ERROR("species_mf==0", E_EMPTYOBJECT);
+        }
         if (mixlen < 0)
             API_ERROR("mixlen", E_BADARGS);
         if (!mix_speclist && mixlen)
             API_ERROR("mix_speclist", E_BADARGS);
         if (!dbfile->pub.p_ms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-
-
         retval = (dbfile->pub.p_ms) (dbfile, (char *)name, (char *)matname,
                                      nmat, nmatspec, speclist, dims, ndims,
                                      nspecies_mf, species_mf, mix_speclist,

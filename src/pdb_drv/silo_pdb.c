@@ -9876,8 +9876,11 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
     */
    db_mkname (dbfile->pdb, name, "dims", tmp2) ;
    mcount[0] = ndims ;
-   PJ_write_len (dbfile->pdb, tmp2, "integer", dims, 1, mcount) ;
-   DBAddVarComponent (obj, "dims", tmp2) ;
+   if (mcount[0])
+   {
+       PJ_write_len (dbfile->pdb, tmp2, "integer", dims, 1, mcount) ;
+       DBAddVarComponent (obj, "dims", tmp2) ;
+   }
 
    /*
     * Max indices
@@ -9885,8 +9888,11 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    for (i=0; i<ndims; i++) maxindex[i] = dims[i] - _qm._hi_offset[i] - 1 ;
    db_mkname (dbfile->pdb, name, "maxindex", tmp2) ;
    mcount[0] = ndims ;
-   PJ_write_len (dbfile->pdb, tmp2, "integer", maxindex, 1, mcount) ;
-   DBAddVarComponent (obj, "max_index", tmp2) ;
+   if (mcount[0])
+   {
+       PJ_write_len (dbfile->pdb, tmp2, "integer", maxindex, 1, mcount) ;
+       DBAddVarComponent (obj, "max_index", tmp2) ;
+   }
 
    /*-------------------------------------------------------------
     *  We first will write the given variables to SILO, then
@@ -9904,7 +9910,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
           (ndims > 2 && centering == DB_FACECENT))
       {
           int j, tmpndims = ndims+1;
-          long tmpcnt[4];
+          long tmpcnt[4] = {0,0,0,0};
           for (j = ndims; j > 0; j--)
               tmpcnt[j] = count[j-1];
           tmpcnt[0] = ndims;
@@ -9913,8 +9919,10 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
       }
       else
       {
-          PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i],
-                       ndims, count);
+          int i; long n=1;
+          for (i = 0; i < ndims; i++, n *= count[i]);
+          if (n)
+              PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i], ndims, count);
       }
 
       sprintf(tmp1, "value%d", i);
@@ -11919,7 +11927,7 @@ db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
    count[0] = ndims;
    /*  File name contained within meshname */
    p = strchr(meshname, ':');
-   if (p == NULL) {
+   if (p == NULL && count[0]) {
       PJ_write_len(dbfile->pdb, _qm._nm_dims, "integer", dims, 1, count);
       PJ_write_len(dbfile->pdb, _qm._nm_zones, "integer", _qm._zones,
                 1, count);
@@ -12033,7 +12041,7 @@ db_InitUcd (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
     * so we'll use that meshes discriptions.
     *-----------------------------------------------------*/
    p = strchr(meshname, ':');
-   if (p == NULL) {
+   if (p == NULL && count[0]) {
       a[0] = a[1] = a[2] = 0.5;
       PJ_write_len(dbfile->pdb, _um._nm_alignz, "float", a, 1, count);
    

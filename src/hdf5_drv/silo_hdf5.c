@@ -7915,12 +7915,15 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, char const *name, int ndims,
         db_hdf5_handle_ctdt(dbfile, _csgm._time_set, _csgm._time,
             _csgm._dtime_set, _csgm._dtime, _csgm._cycle);
 
-        m.min_extents[0] = extents[0];
-        m.min_extents[1] = extents[1];
-        m.min_extents[2] = extents[2];
-        m.max_extents[0] = extents[3];
-        m.max_extents[1] = extents[4];
-        m.max_extents[2] = extents[5];
+        if (extents)
+        {
+            m.min_extents[0] = extents[0];
+            m.min_extents[1] = extents[1];
+            m.min_extents[2] = extents[2];
+            m.max_extents[0] = extents[3];
+            m.max_extents[1] = extents[4];
+            m.max_extents[2] = extents[5];
+        }
 
         db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)typeflags,m.typeflags/*out*/,
             friendly_name(name, "_typeflags", 0));
@@ -7947,7 +7950,8 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, char const *name, int ndims,
         m.lcoeffs = lcoeffs;
         m.tv_connectivity = _csgm._tv_connectivity;
         m.disjoint_mode = _csgm._disjoint_mode;
-        strcpy(m.zonel_name, zonel_name);
+        if (zonel_name)
+            strcpy(m.zonel_name, zonel_name);
         strcpy(m.mrgtree_name, OPT(_csgm._mrgtree_name));
 
         /* Build csgmesh header in file */
