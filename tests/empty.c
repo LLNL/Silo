@@ -93,27 +93,28 @@ main(int argc, char *argv[])
     printf("Creating test file \"%s\".\n", filename);
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "test empty silo objects", driver);
 
+    /* first pass confirms we catch bad arguments; second pass confirms we permit empty objects */
     for (pass = 0; pass < 2; pass++)
     {
         int dt = DB_FLOAT;
         int ct = DB_ZONECENT;
         if (pass) DBSetAllowEmptyObjects(1);
 
-#if 0
-DBPutCurve
-DBPutUcdsubmesh
+        /* Because the following objects will not ever appear in a multi-xxx object,
+           we do not currently test for support of empties...
+               DBPutCurve
+               DBPutUcdsubmesh
 
-DBPutFacelist
-DBPutZonelist
-DBPutZonelist2
-DBPutPHZonelist
-DBPutCSGZonelist
+               DBPutFacelist
+               DBPutZonelist
+               DBPutZonelist2
+               DBPutPHZonelist
+               DBPutCSGZonelist
 
-DBPutMrgtree
-DBPutMrgvar
-DBPutGroupelmap
-#endif
-
+               DBPutMrgtree
+               DBPutMrgvar
+               DBPutGroupelmap
+        */
 
         /* empty point meshes and vars */
         ASSERT(DBPutPointmesh(dbfile, "empty_pointmesh", 0,0,0,dt,0),retval<0,retval==0);

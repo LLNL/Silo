@@ -9296,30 +9296,30 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
             API_ERROR("lcoeffs", E_BADARGS);
         if (SILO_Globals.allowEmptyObjects)
         {
+            if (nbounds && !typeflags) API_ERROR("typeflags==0", E_BADARGS);
+            if (lcoeffs && !coeffs) API_ERROR("coeffs==0", E_BADARGS);
+            if (coeffs && !extents) API_ERROR("extents==0", E_BADARGS);
+            if (ndims && !(ndims == 2 || ndims == 3))
+                API_ERROR("ndims must be either 2 or 3", E_BADARGS);
             if (zonel_name)
             {
                 if (!*zonel_name) API_ERROR("zonelist name", E_BADARGS);
                 if (!db_VariableNameValid((char *)zonel_name)) API_ERROR("zonelist name", E_INVALIDNAME);
             }
-            if (ndims && !(ndims == 2 || ndims == 3))
-                API_ERROR("ndims must be either 2 or 3", E_BADARGS);
-            if (nbounds && !typeflags) API_ERROR("typeflags==0", E_BADARGS);
-            if (lcoeffs && !coeffs) API_ERROR("coeffs==0", E_BADARGS);
-            if (coeffs && !extents) API_ERROR("extents==0", E_BADARGS);
         }
         else
         {
+            if (!nbounds) API_ERROR("nbounds==0", E_EMPTYOBJECT);
+            if (!lcoeffs) API_ERROR("lcoeffs==0", E_EMPTYOBJECT);
+            if (!typeflags) API_ERROR("type flags", E_EMPTYOBJECT);
+            if (!coeffs) API_ERROR("coefficients", E_EMPTYOBJECT);
+            if (!extents) API_ERROR("extents", E_EMPTYOBJECT);
             if (!zonel_name || !*zonel_name)
                 API_ERROR("zonelist name", E_BADARGS);
             if (db_VariableNameValid((char *)zonel_name) == 0)
                 API_ERROR("zonelist name", E_INVALIDNAME);
             if (!(ndims == 2 || ndims == 3))
                 API_ERROR("ndims must be either 2 or 3", E_BADARGS);
-            if (!nbounds) API_ERROR("nbounds==0", E_EMPTYOBJECT);
-            if (!lcoeffs) API_ERROR("lcoeffs==0", E_EMPTYOBJECT);
-            if (!typeflags) API_ERROR("type flags", E_EMPTYOBJECT);
-            if (!coeffs) API_ERROR("coefficients", E_EMPTYOBJECT);
-            if (!extents) API_ERROR("extents", E_EMPTYOBJECT);
         }
         if (!dbfile->pub.p_csgm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -9532,10 +9532,10 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
         }
         else
         {
-            if (nvars < 1 || nvars > 9) API_ERROR("nvars<1 || nvars>9", E_BADARGS);
             if (!nvals) API_ERROR("nvals==0", E_EMPTYOBJECT);
             if (!vars) API_ERROR("vars==0 || vars[i]==0", E_EMPTYOBJECT);
             if (!varnames) API_ERROR("varnames=0 || varnames[i]==0||\"\"", E_EMPTYOBJECT);
+            if (nvars < 1 || nvars > 9) API_ERROR("nvars<1 || nvars>9", E_BADARGS);
         }
         if (!dbfile->pub.p_csgv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
