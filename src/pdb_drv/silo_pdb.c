@@ -9486,11 +9486,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
     *-------------------------------------------------------------*/
-#if 1                      /*Which one is correct? (1st one is the original) */
    db_InitPoint(dbfile, optlist, _pm._ndims, nels);
-#else
-   db_InitPoint(dbfile, optlist, ndims, nels);
-#endif
 
    obj = DBMakeObject(name, DB_POINTVAR, 24);
 
@@ -9528,7 +9524,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
 
    DBAddIntComponent(obj, "nvals", nvars);
    DBAddIntComponent(obj, "nels", nels);
-   DBAddIntComponent(obj, "ndims", 1);
+   DBAddIntComponent(obj, "ndims", _pm._ndims);
    DBAddIntComponent(obj, "datatype", datatype);
    DBAddIntComponent(obj, "nspace", _pm._nspace);
    DBAddIntComponent(obj, "origin", _pm._origin);
@@ -9839,7 +9835,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
     *  Write variable arrays.
     *  Set index variables and counters.
     *-----------------------------------------------------------*/
-   nels = 1;
+   nels = ndims?1:0;
    for (i = 0; i < ndims; i++) {
       count[i] = dims[i];
       nels *= dims[i];
@@ -11868,7 +11864,7 @@ db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
    /*--------------------------------------------------
     *  Define number of zones and nodes.
     *--------------------------------------------------*/
-   nzones = nnodes = 1;
+   nzones = nnodes = ndims?1:0;
 
    for (i = 0; i < ndims; i++) {
       nzones *= (dims[i] - 1);

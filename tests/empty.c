@@ -49,11 +49,13 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
-#include <silo.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include <assert.h>
 #include <float.h>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <silo.h>
 
 #include <std.c>
 
@@ -77,6 +79,7 @@ main(int argc, char *argv[])
     char 	    *filename = "empty.silo";
     int             show_all_errors = FALSE;
     int             i, pass;
+    void           *p;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -141,6 +144,72 @@ main(int argc, char *argv[])
     }
 
     DBClose(dbfile);
+    dbfile = 0;
+
+    /* Ok, now try to read each empty object to make sure we get what we expect and nothing fails */
+    dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ);
+
+    /* test read back of empty point meshes and vars */
+    {   DBpointmesh *pointmesh = DBGetPointmesh(dbfile, "empty_pointmesh");
+        assert(pointmesh);
+        assert(pointmesh->nels==0);
+        assert(pointmesh->ndims==0);
+        assert(pointmesh->coords==0 || pointmesh->coords[0]==0);
+    }
+    {   int i=0; char *vnames[] = {"pv", "pv1", 0};
+        while (vnames[i])
+        {
+            DBpointvar *pointvar = DBGetPointvar(dbfile, vnames[i++]);
+            assert(pointvar);
+            assert(pointvar->nels==0);
+            assert(pointvar->nvals==0);
+            assert(pointvar->vals==0 || pointvar->vals[0]==0);
+            /*assert(pointvar->ndims==0);*/
+            assert(pointvar->dims[0]*pointvar->dims[1]*pointvar->dims[2]==0);
+        }
+    }
+
+    /* test read back of empty quad meshes and vars */
+    {   DBquadmesh *quadmesh = DBGetQuadmesh(dbfile, "empty_quadmesh");
+        assert(quadmesh);
+        assert(quadmesh->ndims==0);
+        assert(quadmesh->nnodes==0);
+        assert(quadmesh->dims[0]*quadmesh->dims[1]*quadmesh->dims[2]==0);
+    }
+    {   int i=0; char *vnames[] = {"qv", "qv1", 0};
+        while (vnames[i])
+        {
+            DBquadvar *quadvar = DBGetQuadvar(dbfile, vnames[i++]);
+            assert(quadvar);
+            assert(quadvar->nels==0);
+            assert(quadvar->nvals==0);
+            assert(quadvar->ndims==0);
+            assert(quadvar->vals==0 || quadvar->vals[0]==0);
+            assert(quadvar->dims[0]*quadvar->dims[1]*quadvar->dims[2]==0);
+        }
+    }
+
+    /* test read back of empty ucd meshes and vars */
+    {   DBucdmesh *ucdmesh = DBGetUcdmesh(dbfile, "empty_ucdmesh");
+        assert(ucdmesh);
+        assert(ucdmesh->ndims==0);
+        assert(ucdmesh->topo_dim==-1); /* unique case */
+        assert(ucdmesh->nnodes==0);
+        assert(ucdmesh->faces==0);
+        assert(ucdmesh->zones==0);
+        assert(ucdmesh->edges==0);
+    }
+    {   int i=0; char *vnames[] = {"uv", "uv1", 0};
+        while (vnames[i])
+        {
+            DBucdvar *ucdvar = DBGetUcdvar(dbfile, vnames[i++]);
+            assert(ucdvar);
+            assert(ucdvar->nels==0);
+            assert(ucdvar->nvals==0);
+            assert(ucdvar->ndims==0);
+            assert(ucdvar->vals==0 || ucdvar->vals[0]==0);
+        }
+    }
 
     CleanupDriverStuff();
 

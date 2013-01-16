@@ -8814,7 +8814,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
          * Number of zones and nodes. We have to do this because
          * _DBQMCalcExtents uses this global information.
          */
-        for (_qm._nzones=_qm._nnodes=1, i=0; i<ndims; i++) {
+        for (_qm._nzones=_qm._nnodes=ndims?1:0, i=0; i<ndims; i++) {
             _qm._nzones *= (dims[i]-1);
             _qm._nnodes *= dims[i];
             _qm._dims[i] = dims[i];
@@ -9172,7 +9172,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         db_ProcessOptlist(DB_QUADMESH, optlist); /*yes, QUADMESH*/
         _qm._meshname = STRDUP(meshname);
         _qm._nzones = _qm._nnodes = 1; /*initial value only*/
-        for (nels=1, i=0; i<ndims; i++) {
+        for (nels=ndims?1:0, i=0; i<ndims; i++) {
             nels *= dims[i];
             _qm._nzones *= (dims[i]-1);
             _qm._nnodes *= dims[i];
@@ -13816,7 +13816,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
         pv->nels = m.nels;
         pv->nvals = m.nvals;
         pv->nspace = m.nspace;
-        pv->ndims = 1;
+        pv->ndims = m.nvals;
         pv->origin = m.origin;
         pv->time = m.time;
         pv->dtime = m.dtime;
