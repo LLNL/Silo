@@ -103,20 +103,11 @@ main(int argc, char *argv[])
         int ct = DB_ZONECENT;
         if (pass) DBSetAllowEmptyObjects(1);
 
-        /* Because the following objects will not ever appear in a multi-xxx object,
-           we do not currently test for support of empties...
-               DBPutCurve
-               DBPutUcdsubmesh
-
-               DBPutFacelist
-               DBPutZonelist
-               DBPutZonelist2
-               DBPutPHZonelist
-               DBPutCSGZonelist
-
-               DBPutMrgtree
-               DBPutMrgvar
-               DBPutGroupelmap
+        /* Because references to the following objects will not ever appear in a
+           multi-xxx object, we do not currently test for support of empties...
+               DBPutCurve, DBPutUcdsubmesh, DBPutFacelist, DBPutZonelist,
+               DBPutZonelist2 DBPutPHZonelist, DBPutCSGZonelist, DBPutMrgtree,
+               DBPutMrgvar, DBPutGroupelmap
         */
 
         /* empty point meshes and vars */
@@ -193,7 +184,7 @@ main(int argc, char *argv[])
     {   DBucdmesh *ucdmesh = DBGetUcdmesh(dbfile, "empty_ucdmesh");
         assert(ucdmesh);
         assert(ucdmesh->ndims==0);
-        assert(ucdmesh->topo_dim==-1); /* unique case */
+        assert(ucdmesh->topo_dim==-1); /* unique case; -1 means 'unset' */
         assert(ucdmesh->nnodes==0);
         assert(ucdmesh->faces==0);
         assert(ucdmesh->zones==0);
@@ -209,6 +200,47 @@ main(int argc, char *argv[])
             assert(ucdvar->ndims==0);
             assert(ucdvar->vals==0 || ucdvar->vals[0]==0);
         }
+    }
+
+    /* test read back of empty csg meshes and vars */
+    {   DBcsgmesh *csgmesh = DBGetCsgmesh(dbfile, "empty_csgmesh");
+        assert(csgmesh);
+        assert(csgmesh->nbounds==0);
+        assert(csgmesh->typeflags==0);
+        assert(csgmesh->bndids==0);
+        assert(csgmesh->coeffs==0);
+        assert(csgmesh->lcoeffs==0);
+        assert(csgmesh->coeffidx==0);
+    }
+    {   DBcsgvar *csgvar = DBGetCsgvar(dbfile, "csgv");
+        assert(csgvar);
+        assert(csgvar->nels==0);
+        assert(csgvar->nvals==0);
+        assert(csgvar->vals==0 || csgvar->vals[0]==0);
+    }
+
+    /* test read back of empty materials and matspecies */
+    {   DBmaterial *mat = DBGetMaterial(dbfile, "empty_mat");
+        assert(mat);
+        assert(mat->nmat==0);
+        assert(mat->matnos==0);
+        assert(mat->ndims==0);
+        assert(mat->dims[0]*mat->dims[1]*mat->dims[2]==0);
+        assert(mat->matlist==0);
+        assert(mat->mixlen==0);
+    }
+
+    {   DBmatspecies *spec = DBGetMatspecies(dbfile, "empty_spec");
+        assert(spec);
+        assert(spec->nmat==0);
+        assert(spec->nmatspec==0);
+        assert(spec->ndims==0);
+        assert(spec->dims[0]*spec->dims[1]*spec->dims[2]==0);
+        assert(spec->nspecies_mf==0);
+        assert(spec->species_mf==0);
+        assert(spec->speclist==0);
+        assert(spec->mixlen==0);
+        assert(spec->mix_speclist==0);
     }
 
     CleanupDriverStuff();
