@@ -467,6 +467,7 @@ typedef enum {
 #define DBOPT_MB_BLOCK_TYPE     333
 #define DBOPT_MB_EMPTY_LIST     334
 #define DBOPT_MB_EMPTY_COUNT    335
+#define DBOPT_MB_REPR_BLOCK_IDX 336
 #define DBOPT_LAST              499 
 
 /* Options relating to virtual file drivers */
@@ -858,6 +859,7 @@ typedef struct DBmultimesh_ {
     int            block_type;  /* constant block type for all blocks (in lieu of meshtypes) */
     int           *empty_list;  /* list of empty block #'s (option for namescheme) */
     int            empty_cnt;   /* size of empty list */
+    int            repr_block_idx; /* index of a 'representative' block */
 } DBmultimesh;
 
 /*----------------------------------------------------------------------------
@@ -912,6 +914,7 @@ typedef struct DBmultivar_ {
     int            block_type;  /* constant block type for all blocks (in lieu of meshtypes) */
     int           *empty_list;  /* list of empty block #'s (option for namescheme) */
     int            empty_cnt;   /* size of empty list */
+    int            repr_block_idx; /* index of a 'representative' block */
 } DBmultivar;
 
 /*-------------------------------------------------------------------------
@@ -939,6 +942,7 @@ typedef struct DBmultimat_ {
     char          *block_ns;    /* namescheme for block objects (in lieu of meshnames) */
     int           *empty_list;  /* list of empty block #'s (option for namescheme) */
     int            empty_cnt;   /* size of empty list */
+    int            repr_block_idx; /* index of a 'representative' block */
 } DBmultimat;
 
 /*-------------------------------------------------------------------------
@@ -961,6 +965,7 @@ typedef struct DBmultimatspecies_ {
     char          *block_ns;    /* namescheme for block objects (in lieu of meshnames) */
     int           *empty_list;  /* list of empty block #'s (option for namescheme) */
     int            empty_cnt;   /* size of empty list */
+    int            repr_block_idx; /* index of a 'representative' block */
 } DBmultimatspecies;
 
 /*----------------------------------------------------------------------

@@ -640,7 +640,7 @@ at_help_all="1;testsuite.at:63;version;;
 5;testsuite.at:95;testall -small;;
 6;testsuite.at:98;TestReadMask;;
 7;testsuite.at:104;array;;
-8;testsuite.at:107;multi_test;;
+8;testsuite.at:107;multi_test testread;;
 9;testsuite.at:110;multi_test earlyclose;;
 10;testsuite.at:113;partial_io;;
 11;testsuite.at:116;simple;;
@@ -2280,11 +2280,11 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_7
 #AT_START_8
-# 8. testsuite.at:107: multi_test
+# 8. testsuite.at:107: multi_test testread
 at_setup_line='testsuite.at:107'
 at_func_banner 1
-at_desc="multi_test"
-$at_quiet $as_echo_n "  8: $at_desc                                     "
+at_desc="multi_test testread"
+$at_quiet $as_echo_n "  8: $at_desc                            "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
 (

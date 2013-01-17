@@ -146,6 +146,7 @@ main(int argc, char *argv[])
         assert(pointmesh->nels==0);
         assert(pointmesh->ndims==0);
         assert(pointmesh->coords==0 || pointmesh->coords[0]==0);
+        DBFreePointmesh(pointmesh);
     }
     {   int i=0; char *vnames[] = {"pv", "pv1", 0};
         while (vnames[i])
@@ -157,6 +158,7 @@ main(int argc, char *argv[])
             assert(pointvar->vals==0 || pointvar->vals[0]==0);
             /*assert(pointvar->ndims==0);*/
             assert(pointvar->dims[0]*pointvar->dims[1]*pointvar->dims[2]==0);
+            DBFreePointvar(pointvar);
         }
     }
 
@@ -166,6 +168,7 @@ main(int argc, char *argv[])
         assert(quadmesh->ndims==0);
         assert(quadmesh->nnodes==0);
         assert(quadmesh->dims[0]*quadmesh->dims[1]*quadmesh->dims[2]==0);
+        DBFreeQuadmesh(quadmesh);
     }
     {   int i=0; char *vnames[] = {"qv", "qv1", 0};
         while (vnames[i])
@@ -177,6 +180,7 @@ main(int argc, char *argv[])
             assert(quadvar->ndims==0);
             assert(quadvar->vals==0 || quadvar->vals[0]==0);
             assert(quadvar->dims[0]*quadvar->dims[1]*quadvar->dims[2]==0);
+            DBFreeQuadvar(quadvar);
         }
     }
 
@@ -189,6 +193,7 @@ main(int argc, char *argv[])
         assert(ucdmesh->faces==0);
         assert(ucdmesh->zones==0);
         assert(ucdmesh->edges==0);
+        DBFreeUcdmesh(ucdmesh);
     }
     {   int i=0; char *vnames[] = {"uv", "uv1", 0};
         while (vnames[i])
@@ -199,6 +204,7 @@ main(int argc, char *argv[])
             assert(ucdvar->nvals==0);
             assert(ucdvar->ndims==0);
             assert(ucdvar->vals==0 || ucdvar->vals[0]==0);
+            DBFreeUcdvar(ucdvar);
         }
     }
 
@@ -211,12 +217,14 @@ main(int argc, char *argv[])
         assert(csgmesh->coeffs==0);
         assert(csgmesh->lcoeffs==0);
         assert(csgmesh->coeffidx==0);
+        DBFreeCsgmesh(csgmesh);
     }
     {   DBcsgvar *csgvar = DBGetCsgvar(dbfile, "csgv");
         assert(csgvar);
         assert(csgvar->nels==0);
         assert(csgvar->nvals==0);
         assert(csgvar->vals==0 || csgvar->vals[0]==0);
+        DBFreeCsgvar(csgvar);
     }
 
     /* test read back of empty materials and matspecies */
@@ -228,8 +236,8 @@ main(int argc, char *argv[])
         assert(mat->dims[0]*mat->dims[1]*mat->dims[2]==0);
         assert(mat->matlist==0);
         assert(mat->mixlen==0);
+        DBFreeMaterial(mat);
     }
-
     {   DBmatspecies *spec = DBGetMatspecies(dbfile, "empty_spec");
         assert(spec);
         assert(spec->nmat==0);
@@ -241,6 +249,7 @@ main(int argc, char *argv[])
         assert(spec->speclist==0);
         assert(spec->mixlen==0);
         assert(spec->mix_speclist==0);
+        DBFreeMatspecies(spec);
     }
 
     CleanupDriverStuff();

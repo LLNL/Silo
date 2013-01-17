@@ -94,7 +94,7 @@ main(int argc, char *argv[])
         }
     }
     
-    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_NONE, NULL);
 
     /* Test opening a file in a non-existent directory */
     {

@@ -4053,6 +4053,7 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("block_type", &tmpmm.block_type, DB_INT);
       DEFALL_OBJ("empty_list", &tmpmm.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmm.empty_cnt, DB_INT);
+      DEFINE_OBJ("repr_block_idx", &tmpmm.repr_block_idx, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMESH) < 0)
          return NULL;
@@ -4066,8 +4067,9 @@ db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
          dimension, when we store topo_dim to a file, we always
          add 1. So, we have to subtract it here. This was implemented
          for multimeshes in 4.7 and so is handled correctly for
-         them in all cases. */
+         them in all cases. Likewise for repr_block_idx. */
        mm->topo_dim = mm->topo_dim - 1;
+       mm->repr_block_idx = mm->repr_block_idx-1;
 
       /*----------------------------------------
        *  Internally, the meshnames and groupings 
@@ -4336,12 +4338,16 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
       DEFINE_OBJ("block_type", &tmpmv.block_type, DB_INT);
       DEFALL_OBJ("empty_list", &tmpmv.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmv.empty_cnt, DB_INT);
+      DEFINE_OBJ("repr_block_idx", &tmpmv.repr_block_idx, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIVAR) < 0)
          return NULL;
       if ((mv = DBAllocMultivar(0)) == NULL)
          return NULL;
       *mv = tmpmv;
+
+      /* -1 to support zero value indicating NOT SET */
+      mv->repr_block_idx = mv->repr_block_idx - 1;
 
       /*----------------------------------------
        *  Internally, the varnames are stored
@@ -4466,12 +4472,16 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("block_ns", &tmpmt.block_ns, DB_CHAR);
       DEFALL_OBJ("empty_list", &tmpmt.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmt.empty_cnt, DB_INT);
+      DEFINE_OBJ("repr_block_idx", &tmpmt.repr_block_idx, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMAT) < 0)
          return NULL;
       if ((mt = DBAllocMultimat(0)) == NULL)
          return NULL;
       *mt = tmpmt;
+
+      /* -1 to support zero value indicating NOT SET */
+      mt->repr_block_idx = mt->repr_block_idx - 1;
 
       /*----------------------------------------
        *  Internally, the material names are stored
@@ -4583,12 +4593,16 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("block_ns", &tmpmms.block_ns, DB_CHAR);
       DEFALL_OBJ("empty_list", &tmpmms.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmms.empty_cnt, DB_INT);
+      DEFINE_OBJ("repr_block_idx", &tmpmms.repr_block_idx, DB_INT);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIMATSPECIES) < 0)
          return NULL;
       if ((mms = DBAllocMultimatspecies(0)) == NULL)
          return NULL;
       *mms = tmpmms;
+
+      /* -1 to support zero value indicating NOT SET */
+      mms->repr_block_idx = mms->repr_block_idx - 1;
 
       /*----------------------------------------
        *  Internally, the material species names
@@ -8195,7 +8209,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMESH, 30);
+   obj = DBMakeObject(name, DB_MULTIMESH, 31);
    DBAddIntComponent(obj, "nblocks", nmesh);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -8337,6 +8351,8 @@ db_pdb_PutMultimesh (DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
       DBWriteComponent(dbfile, obj, "empty_list", name, "integer", 
                        _mm._empty_list, 1, count);
    }
+   if (_mm._repr_block_idx > 0)
+      DBAddIntComponent(obj, "repr_block_idx", _mm._repr_block_idx);
 
    /*-------------------------------------------------------------
     *  Write multi-mesh object to SILO file.
@@ -8686,7 +8702,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIVAR, 30);
+   obj = DBMakeObject(name, DB_MULTIVAR, 31);
    DBAddIntComponent(obj, "nvars", nvars);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -8796,6 +8812,8 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
       DBWriteComponent(dbfile, obj, "empty_list", name, "integer", 
                        _mm._empty_list, 1, count);
    }
+   if (_mm._repr_block_idx)
+      DBAddIntComponent(obj, "repr_block_idx", _mm._repr_block_idx);
 
    /*-------------------------------------------------------------
     *  Write multi-var object to SILO file.
@@ -8878,7 +8896,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMAT, 30);
+   obj = DBMakeObject(name, DB_MULTIMAT, 31);
    DBAddIntComponent(obj, "nmats", nmats);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -9019,6 +9037,8 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
       DBWriteComponent(dbfile, obj, "empty_list", name, "integer", 
                        _mm._empty_list, 1, count);
    }
+   if (_mm._repr_block_idx)
+      DBAddIntComponent(obj, "repr_block_idx", _mm._repr_block_idx);
 
    /*-------------------------------------------------------------
     *  Write multi-material object to SILO file.
@@ -9088,7 +9108,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIMATSPECIES, 30);
+   obj = DBMakeObject(name, DB_MULTIMATSPECIES, 31);
    DBAddIntComponent(obj, "nspec", nspec);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -9209,6 +9229,8 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
       DBWriteComponent(dbfile, obj, "empty_list", name, "integer", 
                        _mm._empty_list, 1, count);
    }
+   if (_mm._repr_block_idx)
+      DBAddIntComponent(obj, "repr_block_idx", _mm._repr_block_idx);
 
    /*-------------------------------------------------------------
     *  Write multi-species object to SILO file.
@@ -9915,8 +9937,8 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
       }
       else
       {
-          int i; long n=1;
-          for (i = 0; i < ndims; i++, n *= count[i]);
+          int k; long n=1;
+          for (k = 0; k < ndims; n *= count[k++]);
           if (n)
               PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i], ndims, count);
       }

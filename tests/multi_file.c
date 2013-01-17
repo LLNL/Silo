@@ -82,6 +82,7 @@ product endorsement purposes.
 
 int multidir = 0;
 int use_ns = 0;
+int empties = 0;
 
 void fill_bkgr(int *, int, int, int, int);
 void fill_mat(float *, float *, float *, int *, int, int, int,
@@ -128,24 +129,19 @@ main(int argc, char *argv[])
             file_ext = "h5";
         }
         else if (!strcmp(argv[i], "multidir"))
-        {
             multidir = 1;
-        }
         else if (!strcmp(argv[i], "use-ns"))
-        {
             use_ns = 1;
-        }
+        else if (!strcmp(argv[i], "empties"))
+            empties = 1;
         else if (!strcmp(argv[i], "show-all-errors"))
-	{
             show_all_errors = 1;
-	}
 	else if (argv[i][0] != '\0')
-        {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
-        }
     }
 
     if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
+    if (empties) DBSetAllowEmptyObjects(1);
 
     /* 
      * Create the multi-block ucd 3d mesh.
@@ -561,8 +557,9 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     float           h, dh;
     float           dist;
 
-    int             block;
+    int             block, eb;
     int             delta_x, delta_y, delta_z;
+    int             empty_blocks[] = {1,2,16,47,122,241};
 
     nx = 120;
     ny = 160;
@@ -752,7 +749,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
      * Create the blocks for the multi-block object.
      */
 
-    for (block = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
+    for (block = 0, eb = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
     {
         char            dirname[80];
         int             filenum;
@@ -1035,51 +1032,78 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         DBAddOption(optlist, DBOPT_ZUNITS, "cm");
         DBAddOption(optlist, DBOPT_HI_OFFSET, &hi_off);
 
-        if (nfaces > 0)
-            DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
-                      zoneno, &fshapesize, &fshapecnt, 1, NULL, NULL, 0);
+        if (empties && block == empty_blocks[eb])
+        {
+            eb++;
 
-        DBPutZonelist2(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
-            0, hi_off, &zshapetype, &zshapesize, &zshapecnt, 1, 0);
+            DBPutUcdmesh(dbfile, meshname, 0,0,0,0,0,0,0,DB_FLOAT,optlist);
 
-        /* 
-         * Output the rest of the mesh and variables.
-         */
-        if (nfaces > 0)
-            DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
-                         nnodes, nzones, "zl1", "fl1", DB_FLOAT, optlist);
+            vars[0] = d2;
+            varnames[0] = var1name;
+            DBPutUcdvar(dbfile, var1name, meshname, 0,0,0,0,0,0,DB_FLOAT,DB_NODECENT,optlist);
+
+            vars[0] = p2;
+            varnames[0] = var2name;
+            DBPutUcdvar(dbfile, var2name, meshname, 0,0,0,0,0,0,DB_FLOAT,DB_NODECENT,optlist);
+
+            vars[0] = u2;
+            varnames[0] = var3name;
+            DBPutUcdvar(dbfile, var3name, meshname, 0,0,0,0,0,0,DB_FLOAT,DB_NODECENT,optlist);
+
+            vars[0] = v2;
+            varnames[0] = var4name;
+            DBPutUcdvar(dbfile, var4name, meshname, 0,0,0,0,0,0,DB_FLOAT,DB_NODECENT,optlist);
+
+            vars[0] = w2;
+            varnames[0] = var5name;
+            DBPutUcdvar(dbfile, var5name, meshname, 0,0,0,0,0,0,DB_FLOAT,DB_NODECENT,optlist);
+
+            DBPutMaterial(dbfile, matname, meshname,0,0,0,0,0,0,0,0,0,0,DB_FLOAT,optlist);
+        }
         else
+        {
+            if (nfaces > 0)
+                DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
+                          zoneno, &fshapesize, &fshapecnt, 1, NULL, NULL, 0);
+
+            DBPutZonelist2(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
+                0, hi_off, &zshapetype, &zshapesize, &zshapecnt, 1, 0);
+
+            /* 
+             * Output the rest of the mesh and variables.
+             */
             DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
-                         nnodes, nzones, "zl1", NULL, DB_FLOAT, optlist);
+                         nnodes, nzones, "zl1", nfaces>0?"fl1":0, DB_FLOAT, optlist);
 
-        vars[0] = d2;
-        varnames[0] = var1name;
-        DBPutUcdvar(dbfile, var1name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+            vars[0] = d2;
+            varnames[0] = var1name;
+            DBPutUcdvar(dbfile, var1name, meshname, 1, varnames, vars,
+                        nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
-        vars[0] = p2;
-        varnames[0] = var2name;
-        DBPutUcdvar(dbfile, var2name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+            vars[0] = p2;
+            varnames[0] = var2name;
+            DBPutUcdvar(dbfile, var2name, meshname, 1, varnames, vars,
+                        nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
-        vars[0] = u2;
-        varnames[0] = var3name;
-        DBPutUcdvar(dbfile, var3name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+            vars[0] = u2;
+            varnames[0] = var3name;
+            DBPutUcdvar(dbfile, var3name, meshname, 1, varnames, vars,
+                        nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
-        vars[0] = v2;
-        varnames[0] = var4name;
-        DBPutUcdvar(dbfile, var4name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+            vars[0] = v2;
+            varnames[0] = var4name;
+            DBPutUcdvar(dbfile, var4name, meshname, 1, varnames, vars,
+                        nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
-        vars[0] = w2;
-        varnames[0] = var5name;
-        DBPutUcdvar(dbfile, var5name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+            vars[0] = w2;
+            varnames[0] = var5name;
+            DBPutUcdvar(dbfile, var5name, meshname, 1, varnames, vars,
+                        nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
-        DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
-                      matlist2, &nzones, 1, mix_next, mix_mat, mix_zone,
-                      mix_vf, mixlen, DB_FLOAT, optlist);
+            DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
+                          matlist2, &nzones, 1, mix_next, mix_mat, mix_zone,
+                          mix_vf, mixlen, DB_FLOAT, optlist);
+        }
 
         DBFreeOptlist(optlist);
 

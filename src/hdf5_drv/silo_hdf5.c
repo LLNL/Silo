@@ -560,6 +560,7 @@ typedef struct DBmultimesh_mt {
     int                 block_type;
     char                empty_list[256];
     int                 empty_cnt;
+    int                 repr_block_idx;
 } DBmultimesh_mt;
 static hid_t    DBmultimesh_mt5;
 
@@ -603,6 +604,7 @@ typedef struct DBmultivar_mt {
     int                 block_type;
     char                empty_list[256];
     int                 empty_cnt;
+    int                 repr_block_idx;
 } DBmultivar_mt;
 static hid_t    DBmultivar_mt5;
 
@@ -629,6 +631,7 @@ typedef struct DBmultimat_mt {
     char                block_ns_name[256];
     char                empty_list[256];
     int                 empty_cnt;
+    int                 repr_block_idx;
 } DBmultimat_mt;
 static hid_t    DBmultimat_mt5;
 
@@ -651,6 +654,7 @@ typedef struct DBmultimatspecies_mt {
     char                block_ns_name[256];
     char                empty_list[256];
     int                 empty_cnt;
+    int                 repr_block_idx;
 } DBmultimatspecies_mt;
 static hid_t    DBmultimatspecies_mt5;
 
@@ -2314,6 +2318,7 @@ db_hdf5_init(void)
         MEMBER_S(int,           block_type);
         MEMBER_S(str256,        empty_list);
         MEMBER_S(int,           empty_cnt);
+        MEMBER_S(int,           repr_block_idx);
     } DEFINE;
 
     STRUCT(DBmultimeshadj) {
@@ -2355,6 +2360,7 @@ db_hdf5_init(void)
         MEMBER_S(int,           block_type);
         MEMBER_S(str256,        empty_list);
         MEMBER_S(int,           empty_cnt);
+        MEMBER_S(int,           repr_block_idx);
     } DEFINE;
 
     STRUCT(DBmultimat) {
@@ -2380,6 +2386,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        block_ns_name);
         MEMBER_S(str256,        empty_list);
         MEMBER_S(int,           empty_cnt);
+        MEMBER_S(int,           repr_block_idx);
     } DEFINE;
 
     STRUCT(DBmultimatspecies) {
@@ -2401,6 +2408,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        block_ns_name);
         MEMBER_S(str256,        empty_list);
         MEMBER_S(int,           empty_cnt);
+        MEMBER_S(int,           repr_block_idx);
     } DEFINE;
 
     STRUCT(DBmatspecies) {
@@ -8294,7 +8302,7 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, char const *name)
             UNWIND();
         }
 
-        if (SILO_Globals.dataReadMask & DBCSGVData)
+        if (SILO_Globals.dataReadMask & DBCSGVData && m.nvals)
         {
             csgv->vals = calloc(m.nvals, sizeof(void*));
             for (i=0; i<m.nvals; i++) {
@@ -8814,7 +8822,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
          * Number of zones and nodes. We have to do this because
          * _DBQMCalcExtents uses this global information.
          */
-        for (_qm._nzones=_qm._nnodes=ndims?1:0, i=0; i<ndims; i++) {
+        for (_qm._nzones=_qm._nnodes=(ndims?1:0), i=0; i<ndims; i++) {
             _qm._nzones *= (dims[i]-1);
             _qm._nnodes *= dims[i];
             _qm._dims[i] = dims[i];
@@ -9172,7 +9180,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         db_ProcessOptlist(DB_QUADMESH, optlist); /*yes, QUADMESH*/
         _qm._meshname = STRDUP(meshname);
         _qm._nzones = _qm._nnodes = 1; /*initial value only*/
-        for (nels=ndims?1:0, i=0; i<ndims; i++) {
+        for (nels=(ndims?1:0), i=0; i<ndims; i++) {
             nels *= dims[i];
             _qm._nzones *= (dims[i]-1);
             _qm._nnodes *= dims[i];
@@ -9447,7 +9455,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
         }
-        if (SILO_Globals.dataReadMask & DBQVData)
+        if (SILO_Globals.dataReadMask & DBQVData && m.nvals)
         {
             qv->vals = calloc(m.nvals, sizeof(void*));
             if (m.mixlen) qv->mixvals = calloc(m.nvals, sizeof(void*));
@@ -10392,7 +10400,7 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char *name)
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
         }
-        if (SILO_Globals.dataReadMask & DBUVData)
+        if (SILO_Globals.dataReadMask & DBUVData && m.nvals)
         {
             uv->vals = calloc(m.nvals, sizeof(void*));
             if (m.mixlen) uv->mixvals = calloc(m.nvals, sizeof(void*));
@@ -11758,6 +11766,7 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char const *name, int nmesh,
         strcpy(m.mrgtree_name, OPT(_mm._mrgtree_name));
         m.block_type = _mm._block_type;
         m.empty_cnt = _mm._empty_cnt;
+        m.repr_block_idx = _mm._repr_block_idx;
 
         /* Write meta data to file */
         STRUCT(DBmultimesh) {
@@ -11787,6 +11796,7 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char const *name, int nmesh,
             if (m.block_type)   MEMBER_S(int, block_type);
             MEMBER_S(str(m.empty_list), empty_list);
             if (m.empty_cnt)   MEMBER_S(int, empty_cnt);
+            if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIMESH, name, &m);
 
         /* Free resources */
@@ -11890,6 +11900,7 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char *name)
            for multimeshes in 4.7 and so is handled correctly for
            them in all cases. */
         mm->topo_dim = m.topo_dim - 1;
+        mm->repr_block_idx = m.repr_block_idx - 1;
 
         /* Read the raw data */
         if (mm->extentssize>0)
@@ -12610,6 +12621,7 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         m.extensive = _mm._extensive;
         m.block_type = _mm._block_type;
         m.empty_cnt = _mm._empty_cnt;
+        m.repr_block_idx = _mm._repr_block_idx;
 
         /* Write meta data to file */
         STRUCT(DBmultivar) {
@@ -12635,6 +12647,7 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
             if (m.block_type)   MEMBER_S(int, block_type);
             MEMBER_S(str(m.empty_list), empty_list);
             if (m.empty_cnt)   MEMBER_S(int, empty_cnt);
+            if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIVAR, name, &m);
 
         /* Free resources */
@@ -12757,6 +12770,7 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
         mv->block_type = m.block_type;
         mv->empty_list =  db_hdf5_comprd(dbfile, m.empty_list, 1);
         mv->empty_cnt = m.empty_cnt;
+        mv->repr_block_idx = m.repr_block_idx - 1;
         
         H5Tclose(o);
         
@@ -12910,6 +12924,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         m.guihide = _mm._guihide;
         strcpy(m.mmesh_name, OPT(_mm._mmesh_name));
         m.empty_cnt = _mm._empty_cnt;
+        m.repr_block_idx = _mm._repr_block_idx;
 
         /* Write meta data to file */
         STRUCT(DBmultimat) {
@@ -12935,6 +12950,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
             MEMBER_S(str(m.block_ns_name), block_ns_name);
             MEMBER_S(str(m.empty_list), empty_list);
             if (m.empty_cnt)   MEMBER_S(int, empty_cnt);
+            if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIMAT, name, &m);
 
         /* Free resources */
@@ -13052,6 +13068,7 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char *name)
         mm->block_ns =  db_hdf5_comprd(dbfile, m.block_ns_name, 1);
         mm->empty_list =  db_hdf5_comprd(dbfile, m.empty_list, 1);
         mm->empty_cnt = m.empty_cnt;
+        mm->repr_block_idx = m.repr_block_idx - 1;
         
         H5Tclose(o);
         
@@ -13201,6 +13218,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
         m.guihide = _mm._guihide;
         strcpy(m.matname, OPT(_mm._matname));
         m.empty_cnt = _mm._empty_cnt;
+        m.repr_block_idx = _mm._repr_block_idx;
 
         /* Write meta data to file */
         STRUCT(DBmultimatspecies) {
@@ -13222,6 +13240,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
             MEMBER_S(str(m.block_ns_name), block_ns_name);
             MEMBER_S(str(m.empty_list), empty_list);
             if (m.empty_cnt)   MEMBER_S(int, empty_cnt);
+            if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIMATSPECIES, name, &m);
 
         /* Free resources */
@@ -13345,6 +13364,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char *name)
         mm->block_ns =  db_hdf5_comprd(dbfile, m.block_ns_name, 1);
         mm->empty_list =  db_hdf5_comprd(dbfile, m.empty_list, 1);
         mm->empty_cnt = m.empty_cnt;
+        mm->repr_block_idx = m.repr_block_idx;
 
         H5Tclose(o);
         
@@ -13828,7 +13848,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
         pv->extensive = m.extensive;
 
         /* Read raw data */
-        if (SILO_Globals.dataReadMask & DBPVData)
+        if (SILO_Globals.dataReadMask & DBPVData && m.nvals)
         {
             pv->vals = calloc(m.nvals, sizeof(void*));
             for (i=0; i<m.nvals; i++) {

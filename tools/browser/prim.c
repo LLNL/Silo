@@ -309,7 +309,12 @@ prim_assoc_t PA_TOPODIM[] = {
    { 1,        "1"},
    { 2,        "2"},
    { 3,        "3"},
-};
+   {0,         NULL}};
+
+prim_assoc_t PA_REPRBLOCK[] = {
+   {PA_NAME,                                    "representative block index"},
+   {-1,        "not specified"},
+   {0,         NULL}};
 
 
 /*-------------------------------------------------------------------------

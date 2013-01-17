@@ -718,6 +718,7 @@ struct _mm {
     int            _block_type;
     int           *_empty_list;
     int            _empty_cnt;
+    int            _repr_block_idx;
 };
 
 /*

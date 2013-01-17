@@ -63,8 +63,8 @@ difffiles () {
         bf=`basename $df .h5`
         # do a diff on the files
         rm -f testxvers.out
-        $topDir/../tools/browser/browser -q -e diff $df $topDir/xvers_data/${bf}_$1 1>testxvers.out 2>&1
-        if test `wc -l testxvers.out | tr -s ' ' | cut -d' ' -f2` -gt 20; then
+        $topDir/../tools/browser/browser -q -R 0.00001 -e diff $df $topDir/xvers_data/${bf}_$1 1>testxvers.out 2>&1
+        if test $(cat testxvers.out | grep -v 'not centered'\\\|'not specified'\\\|'extensive'\\\|'conserved' | wc -l) -gt 20; then
             return 1
             break
         fi

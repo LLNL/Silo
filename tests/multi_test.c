@@ -3552,7 +3552,7 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         put_extents(z2,dims[0]*dims[1]*dims[2],varextents[2],block);
         has_external_zones[block] = 1;
         zonecounts[block] = (dims[0]-1)*(dims[1]-1)*(dims[2]-1);
-        TESTQMESH(dbfile, meshname, coordnames, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
+        TESTQMESH(dbfile, meshname, coordnames, coords, dims, ndims, DB_FLOAT, DB_NONCOLLINEAR, optlist);
 
         TESTQVAR(dbfile, var1name, meshname, d2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);
         TESTQVAR(dbfile, var2name, meshname, p2, zdims, ndims, DB_FLOAT, DB_ZONECENT, optlist);

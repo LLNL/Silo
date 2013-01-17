@@ -11266,6 +11266,11 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _mm._empty_cnt = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MB_REPR_BLOCK_IDX:
+                        /* +1 to support zero value indicating NOT SET */
+                        _mm._repr_block_idx = DEREF(int,optlist->values[i])+1;
+                        break;
+
                     default:
                         unused++;
                         break;

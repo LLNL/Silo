@@ -1629,6 +1629,8 @@ stc_silo_types (void) {
       COMP (file_ns,            "primitive 'string'");
       COMP (block_ns,           "primitive 'string'");
       COMP (block_type,         "primitive 'int'");
+      COMP (repr_block_idx,     "primitive 'int'");
+      IOASSOC (PA_REPRBLOCK);
       COMP (empty_cnt,          "primitive 'int'");
       COMP (empty_list,
             "pointer (array 'self.empty_cnt' (primitive 'int'))");
@@ -1698,6 +1700,8 @@ stc_silo_types (void) {
       COMP (file_ns,            "primitive 'string'");
       COMP (block_ns,           "primitive 'string'");
       COMP (block_type,         "primitive 'int'");
+      COMP (repr_block_idx,     "primitive 'int'");
+      IOASSOC (PA_REPRBLOCK);
       COMP (empty_cnt,          "primitive 'int'");
       COMP (empty_list,
             "pointer (array 'self.empty_cnt' (primitive 'int'))");
@@ -1728,6 +1732,8 @@ stc_silo_types (void) {
       COMP (mmesh_name,         "primitive 'string'");
       COMP (file_ns,            "primitive 'string'");
       COMP (block_ns,           "primitive 'string'");
+      COMP (repr_block_idx,     "primitive 'int'");
+      IOASSOC (PA_REPRBLOCK);
       COMP (empty_cnt,          "primitive 'int'");
       COMP (empty_list,
             "pointer (array 'self.empty_cnt' (primitive 'int'))");
@@ -1759,6 +1765,8 @@ stc_silo_types (void) {
       COMP (nmat,               "primitive 'int'");
       COMP (file_ns,            "primitive 'string'");
       COMP (block_ns,           "primitive 'string'");
+      COMP (repr_block_idx,     "primitive 'int'");
+      IOASSOC (PA_REPRBLOCK);
       COMP (empty_cnt,          "primitive 'int'");
       COMP (empty_list,
             "pointer (array 'self.empty_cnt' (primitive 'int'))");
