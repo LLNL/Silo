@@ -347,6 +347,7 @@ build_multi(char *basename, int driver, char *file_ext,
     DBfile         *dbfile=NULL;
 
     int             nblocks = nblocks_x * nblocks_y * nblocks_z;
+    int             repr_block_idx;
 
     /* 
      * Initialize the names and create the directories for the blocks.
@@ -444,6 +445,8 @@ build_multi(char *basename, int driver, char *file_ext,
         DBAddOption(optlist, DBOPT_MB_BLOCK_NS, block_ns);
         DBAddOption(optlist, DBOPT_MB_BLOCK_TYPE, &block_type);
     }
+    repr_block_idx = 9;
+    DBAddOption(optlist, DBOPT_MB_REPR_BLOCK_IDX, &repr_block_idx);
 
     /*
      * Create the multi-block mesh, variables and material.
@@ -559,7 +562,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
 
     int             block, eb;
     int             delta_x, delta_y, delta_z;
-    int             empty_blocks[] = {1,2,16,47,122,241};
+    int             empty_blocks[] = {0,1,2,3,4,5,6,7,8,16,47,122,241};
 
     nx = 120;
     ny = 160;

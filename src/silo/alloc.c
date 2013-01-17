@@ -788,6 +788,19 @@ DBFreeCsgmesh(DBcsgmesh *msh)
     FREE(msh);
 }
 
+PUBLIC int
+DBIsEmptyCsgmesh(DBcsgmesh const *msh)
+{
+    if (!msh) return 0;
+    if (msh->nbounds!=0) return 0;
+    if (msh->typeflags!=0) return 0;
+    if (msh->bndids!=0) return 0;
+    if (msh->coeffs!=0) return 0;
+    if (msh->lcoeffs!=0) return 0;
+    if (msh->coeffidx!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                            DBAllocQuadmesh
  *
@@ -850,6 +863,21 @@ DBFreeQuadmesh(DBquadmesh *msh)
     FREE(msh->name);
     FREE(msh->mrgtree_name);
     FREE(msh);
+}
+
+PUBLIC int
+DBIsEmptyQuadmesh(DBquadmesh const *msh)
+{
+    if (!msh) return 0;
+    if (msh->nnodes!=0) return 0;
+    if (msh->coords[0]!=0) return 0;
+    if (msh->coords[1]!=0) return 0;
+    if (msh->coords[2]!=0) return 0;
+    if (msh->ndims!=0) return 0;
+    if (msh->dims[0]!=0) return 0;
+    if (msh->dims[1]!=0) return 0;
+    if (msh->dims[2]!=0) return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------
@@ -918,6 +946,18 @@ DBFreePointmesh(DBpointmesh *msh)
     FREE(msh);
 }
 
+PUBLIC int
+DBIsEmptyPointmesh(DBpointmesh const *msh)
+{
+    if (!msh) return 0;
+    if (msh->nels!=0) return 0;
+    if (msh->ndims!=0) return 0;
+    if (msh->coords[0]!=0) return 0;
+    if (msh->coords[1]!=0) return 0;
+    if (msh->coords[2]!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                              DBAllocMeshvar
  *
@@ -983,10 +1023,36 @@ DBFreeMeshvar(DBmeshvar *var)
     FREE(var);
 }
 
+PUBLIC int
+DBIsEmptyMeshvar(DBmeshvar const *var)
+{
+    if (!var) return 0;
+    if (var->nels!=0) return 0;
+    if (var->nvals!=0) return 0;
+    if (var->vals!=0) return 0;
+  /*if (var->ndims!=0) return 0; long standing bug/assumption in Silo */
+    if (var->dims[0]!=0) return 0;
+    if (var->dims[1]!=0) return 0;
+    if (var->dims[2]!=0) return 0;
+    return 1;
+}
+
+PUBLIC DBpointvar *
+DBAllocPointvar()
+{
+    return DBAllocMeshvar();
+}
+
 PUBLIC void
 DBFreePointvar(DBpointvar *var)
 {
     DBFreeMeshvar(var);
+}
+
+PUBLIC int
+DBIsEmptyPointvar(DBpointvar const *pv)
+{
+    return DBIsEmptyMeshvar(pv);
 }
 
 /*----------------------------------------------------------------------
@@ -1069,6 +1135,22 @@ DBFreeUcdmesh(DBucdmesh *msh)
     FREE(msh);
 }
 
+PUBLIC int
+DBIsEmptyUcdmesh(DBucdmesh const *msh)
+{
+    if (!msh) return 0;
+    if (msh->ndims!=0) return 0;
+    if (msh->topo_dim!=-1) return 0; /* unique case; -1 means 'unset' */
+    if (msh->nnodes!=0) return 0;
+    if (msh->coords[0]!=0) return 0;
+    if (msh->coords[1]!=0) return 0;
+    if (msh->coords[2]!=0) return 0;
+    if (msh->faces!=0) return 0;
+    if (msh->zones!=0) return 0;
+    if (msh->edges!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                               DBAllocCsgvar
  *
@@ -1126,6 +1208,16 @@ DBFreeCsgvar(DBcsgvar *var)
     FREE(var->units);
     FREE(var->meshname);
     FREE(var);
+}
+
+PUBLIC int
+DBIsEmptyCsgvar(DBcsgvar const *var)
+{
+    if (!var) return 0;
+    if (var->nels!=0) return 0;
+    if (var->nvals!=0) return 0;
+    if (var->vals!=0) return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------
@@ -1214,6 +1306,20 @@ DBFreeQuadvar(DBquadvar *var)
     FREE(var);
 }
 
+PUBLIC int
+DBIsEmptyQuadvar(DBquadvar const *var)
+{
+    if (!var) return 0;
+    if (var->nels!=0) return 0;
+    if (var->nvals!=0) return 0;
+    if (var->vals!=0) return 0;
+    if (var->ndims!=0) return 0;
+    if (var->dims[0]!=0) return 0;
+    if (var->dims[1]!=0) return 0;
+    if (var->dims[2]!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                            DBAllocUcdvar
  *
@@ -1298,6 +1404,17 @@ DBFreeUcdvar(DBucdvar *var)
     FREE(var->units);
     FREE(var->meshname);
     FREE(var);
+}
+
+PUBLIC int
+DBIsEmptyUcdvar(DBucdvar const *var)
+{
+    if (!var) return 0;
+    if (var->nels!=0) return 0;
+    if (var->nvals!=0) return 0;
+    if (var->ndims!=0) return 0;
+    if (var->vals!=0) return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------
@@ -1638,6 +1755,21 @@ DBFreeMaterial(DBmaterial *mats)
     FREE(mats);
 }
 
+PUBLIC int
+DBIsEmptyMaterial(DBmaterial const *mats)
+{
+    if (!mats) return 0;
+    if (mats->nmat!=0) return 0;
+    if (mats->matnos!=0) return 0;
+    if (mats->ndims!=0) return 0;
+    if (mats->dims[0]!=0) return 0;
+    if (mats->dims[1]!=0) return 0;
+    if (mats->dims[2]!=0) return 0;
+    if (mats->matlist!=0) return 0;
+    if (mats->mixlen!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                          DBAllocMatspecies
  *
@@ -1714,6 +1846,24 @@ DBFreeMatspecies(DBmatspecies *species)
     FREE(species->speclist);
     FREE(species->mix_speclist);
     FREE(species);
+}
+
+PUBLIC int
+DBIsEmptyMatspecies(DBmatspecies const *species)
+{
+    if (!species) return 0;
+    if (species->nmat!=0) return 0;
+    if (species->nmatspec!=0) return 0;
+    if (species->ndims!=0) return 0;
+    if (species->dims[0]!=0) return 0;
+    if (species->dims[1]!=0) return 0;
+    if (species->dims[2]!=0) return 0;
+    if (species->nspecies_mf!=0) return 0;
+    if (species->species_mf!=0) return 0;
+    if (species->speclist!=0) return 0;
+    if (species->mixlen!=0) return 0;
+    if (species->mix_speclist!=0) return 0;
+    return 1;
 }
 
 /*-------------------------------------------------------------------------

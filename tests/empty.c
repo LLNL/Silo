@@ -142,113 +142,63 @@ main(int argc, char *argv[])
 
     /* test read back of empty point meshes and vars */
     {   DBpointmesh *pointmesh = DBGetPointmesh(dbfile, "empty_pointmesh");
-        assert(pointmesh);
-        assert(pointmesh->nels==0);
-        assert(pointmesh->ndims==0);
-        assert(pointmesh->coords==0 || pointmesh->coords[0]==0);
+        assert(DBIsEmptyPointmesh(pointmesh));
         DBFreePointmesh(pointmesh);
     }
     {   int i=0; char *vnames[] = {"pv", "pv1", 0};
         while (vnames[i])
         {
             DBpointvar *pointvar = DBGetPointvar(dbfile, vnames[i++]);
-            assert(pointvar);
-            assert(pointvar->nels==0);
-            assert(pointvar->nvals==0);
-            assert(pointvar->vals==0 || pointvar->vals[0]==0);
-            /*assert(pointvar->ndims==0);*/
-            assert(pointvar->dims[0]*pointvar->dims[1]*pointvar->dims[2]==0);
+            DBIsEmptyPointvar(pointvar);
             DBFreePointvar(pointvar);
         }
     }
 
     /* test read back of empty quad meshes and vars */
     {   DBquadmesh *quadmesh = DBGetQuadmesh(dbfile, "empty_quadmesh");
-        assert(quadmesh);
-        assert(quadmesh->ndims==0);
-        assert(quadmesh->nnodes==0);
-        assert(quadmesh->dims[0]*quadmesh->dims[1]*quadmesh->dims[2]==0);
+        assert(DBIsEmptyQuadmesh(quadmesh));
         DBFreeQuadmesh(quadmesh);
     }
     {   int i=0; char *vnames[] = {"qv", "qv1", 0};
         while (vnames[i])
         {
             DBquadvar *quadvar = DBGetQuadvar(dbfile, vnames[i++]);
-            assert(quadvar);
-            assert(quadvar->nels==0);
-            assert(quadvar->nvals==0);
-            assert(quadvar->ndims==0);
-            assert(quadvar->vals==0 || quadvar->vals[0]==0);
-            assert(quadvar->dims[0]*quadvar->dims[1]*quadvar->dims[2]==0);
+            assert(DBIsEmptyQuadvar(quadvar));
             DBFreeQuadvar(quadvar);
         }
     }
 
     /* test read back of empty ucd meshes and vars */
     {   DBucdmesh *ucdmesh = DBGetUcdmesh(dbfile, "empty_ucdmesh");
-        assert(ucdmesh);
-        assert(ucdmesh->ndims==0);
-        assert(ucdmesh->topo_dim==-1); /* unique case; -1 means 'unset' */
-        assert(ucdmesh->nnodes==0);
-        assert(ucdmesh->faces==0);
-        assert(ucdmesh->zones==0);
-        assert(ucdmesh->edges==0);
+        assert(DBIsEmptyUcdmesh(ucdmesh));
         DBFreeUcdmesh(ucdmesh);
     }
     {   int i=0; char *vnames[] = {"uv", "uv1", 0};
         while (vnames[i])
         {
             DBucdvar *ucdvar = DBGetUcdvar(dbfile, vnames[i++]);
-            assert(ucdvar);
-            assert(ucdvar->nels==0);
-            assert(ucdvar->nvals==0);
-            assert(ucdvar->ndims==0);
-            assert(ucdvar->vals==0 || ucdvar->vals[0]==0);
+            assert(DBIsEmptyUcdvar(ucdvar));
             DBFreeUcdvar(ucdvar);
         }
     }
 
     /* test read back of empty csg meshes and vars */
     {   DBcsgmesh *csgmesh = DBGetCsgmesh(dbfile, "empty_csgmesh");
-        assert(csgmesh);
-        assert(csgmesh->nbounds==0);
-        assert(csgmesh->typeflags==0);
-        assert(csgmesh->bndids==0);
-        assert(csgmesh->coeffs==0);
-        assert(csgmesh->lcoeffs==0);
-        assert(csgmesh->coeffidx==0);
+        assert(DBIsEmptyCsgmesh(csgmesh));
         DBFreeCsgmesh(csgmesh);
     }
     {   DBcsgvar *csgvar = DBGetCsgvar(dbfile, "csgv");
-        assert(csgvar);
-        assert(csgvar->nels==0);
-        assert(csgvar->nvals==0);
-        assert(csgvar->vals==0 || csgvar->vals[0]==0);
+        assert(DBIsEmptyCsgvar(csgvar));
         DBFreeCsgvar(csgvar);
     }
 
     /* test read back of empty materials and matspecies */
     {   DBmaterial *mat = DBGetMaterial(dbfile, "empty_mat");
-        assert(mat);
-        assert(mat->nmat==0);
-        assert(mat->matnos==0);
-        assert(mat->ndims==0);
-        assert(mat->dims[0]*mat->dims[1]*mat->dims[2]==0);
-        assert(mat->matlist==0);
-        assert(mat->mixlen==0);
+        assert(DBIsEmptyMaterial(mat));
         DBFreeMaterial(mat);
     }
     {   DBmatspecies *spec = DBGetMatspecies(dbfile, "empty_spec");
-        assert(spec);
-        assert(spec->nmat==0);
-        assert(spec->nmatspec==0);
-        assert(spec->ndims==0);
-        assert(spec->dims[0]*spec->dims[1]*spec->dims[2]==0);
-        assert(spec->nspecies_mf==0);
-        assert(spec->species_mf==0);
-        assert(spec->speclist==0);
-        assert(spec->mixlen==0);
-        assert(spec->mix_speclist==0);
+        assert(DBIsEmptyMatspecies(spec));
         DBFreeMatspecies(spec);
     }
 

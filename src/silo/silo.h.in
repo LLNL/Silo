@@ -1845,6 +1845,18 @@ SILO_API extern void     DBFreeCompoundarray(DBcompoundarray *);
 SILO_API extern void     DBFreeCurve(DBcurve *);
 SILO_API extern void     DBFreeNamescheme(DBnamescheme *);
 
+SILO_API extern int      DBIsEmptyPointmesh(DBpointmesh const *msh);
+SILO_API extern int      DBIsEmptyPointvar(DBpointvar const *var);
+SILO_API extern int      DBIsEmptyMeshvar(DBmeshvar const *var);
+SILO_API extern int      DBIsEmptyQuadmesh(DBquadmesh const *msh);
+SILO_API extern int      DBIsEmptyQuadvar(DBquadvar const *var);
+SILO_API extern int      DBIsEmptyUcdmesh(DBucdmesh const *msh);
+SILO_API extern int      DBIsEmptyUcdvar(DBucdvar const *var);
+SILO_API extern int      DBIsEmptyCsgmesh(DBcsgmesh const *msh);
+SILO_API extern int      DBIsEmptyCsgvar(DBcsgvar const *var);
+SILO_API extern int      DBIsEmptyMaterial(DBmaterial const *mat);
+SILO_API extern int      DBIsEmptyMatspecies(DBmatspecies const *spec);
+
 SILO_API extern long     DBSetDataReadMask(long);
 SILO_API extern long     DBGetDataReadMask(void);
 SILO_API extern int      DBSetAllowOverwrites(int allow);
