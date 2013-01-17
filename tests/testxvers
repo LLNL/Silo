@@ -111,12 +111,16 @@ bunzip2 < $topDir/xvers_data.tar.bz2 | tar xf -
 # Now, run browser and make sure we don't get any errors in the diff
 #
 result=0
-test $result -gt 0 || difffiles v1${vtest}.h5
-result=$?
-test $result -gt 0 || difffiles v1${vtest}ck.h5
-result=$?
-test $result -gt 0 || difffiles v1${vtest}fpz.h5
-result=$?
+difffiles v1${vtest}.h5
+result=$(expr $result + $?)
+if test $result -eq 0; then
+    difffiles v1${vtest}ck.h5
+    result=$(expr $result + $?)
+fi
+if test $result -eq 0; then
+    difffiles v1${vtest}fpz.h5
+    result=$(expr $result + $?)
+fi
 
 #
 # Cleanup
