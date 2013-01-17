@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
