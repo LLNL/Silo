@@ -153,10 +153,10 @@ rocket_CXXFLAGS = -rdynamic
 EXTRA_rocket_DEPENDENCIES = rocket_silo.la
 
 # plugins for rocket and for ioperf
+HDF5CKLTLIBS = ioperf_hdf5.la
 check_LTLIBRARIES = \
     rocket_silo.la \
     ioperf_silo.la \
-    ioperf_hdf5.la \
     ioperf_pdb.la \
     ioperf_sec2.la \
     ioperf_stdio.la
@@ -299,6 +299,7 @@ endif
 if HDF5_DRV_NEEDED
   PROGS += $(HDF5PROGS)
   check_PROGRAMS += $(HDF5PROGS)
+  check_LTLIBRARIES += $(HDF5CKLTLIBS)
   compression_SOURCES = compression.c
   compression_LDADD = $(LDADD)
   grab_SOURCES = grab.c

@@ -113,8 +113,9 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	empty$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_3) $(am__EXEEXT_5)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
-@FORTRAN_NEEDED_TRUE@am__append_3 = $(FCPROGS)
+@HDF5_DRV_NEEDED_TRUE@am__append_3 = $(HDF5CKLTLIBS)
 @FORTRAN_NEEDED_TRUE@am__append_4 = $(FCPROGS)
+@FORTRAN_NEEDED_TRUE@am__append_5 = $(FCPROGS)
 subdir = tests
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -140,6 +141,7 @@ ioperf_hdf5_la_OBJECTS = ioperf_hdf5.lo
 ioperf_hdf5_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(ioperf_hdf5_la_LDFLAGS) $(LDFLAGS) -o $@
+@HDF5_DRV_NEEDED_TRUE@am_ioperf_hdf5_la_rpath =
 ioperf_pdb_la_LIBADD =
 ioperf_pdb_la_SOURCES = ioperf_pdb.c
 ioperf_pdb_la_OBJECTS = ioperf_pdb.lo
@@ -869,7 +871,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	group_test listtypes alltypes wave multi_file polyzl csg \
 	rocket mmadjacency largefile version namescheme efcentering \
 	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
-	merge_block empty $(PDBTESTS) $(am__append_1) $(am__append_3)
+	merge_block empty $(PDBTESTS) $(am__append_1) $(am__append_4)
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
@@ -878,14 +880,9 @@ rocket_CXXFLAGS = -rdynamic
 EXTRA_rocket_DEPENDENCIES = rocket_silo.la
 
 # plugins for rocket and for ioperf
-check_LTLIBRARIES = \
-    rocket_silo.la \
-    ioperf_silo.la \
-    ioperf_hdf5.la \
-    ioperf_pdb.la \
-    ioperf_sec2.la \
-    ioperf_stdio.la
-
+HDF5CKLTLIBS = ioperf_hdf5.la
+check_LTLIBRARIES = rocket_silo.la ioperf_silo.la ioperf_pdb.la \
+	ioperf_sec2.la ioperf_stdio.la $(am__append_3)
 rocket_silo_la_SOURCES = rocket_silo.cxx
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
 rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
@@ -1031,7 +1028,7 @@ clean-checkLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 ioperf_hdf5.la: $(ioperf_hdf5_la_OBJECTS) $(ioperf_hdf5_la_DEPENDENCIES) 
-	$(ioperf_hdf5_la_LINK)  $(ioperf_hdf5_la_OBJECTS) $(ioperf_hdf5_la_LIBADD) $(LIBS)
+	$(ioperf_hdf5_la_LINK) $(am_ioperf_hdf5_la_rpath) $(ioperf_hdf5_la_OBJECTS) $(ioperf_hdf5_la_LIBADD) $(LIBS)
 ioperf_pdb.la: $(ioperf_pdb_la_OBJECTS) $(ioperf_pdb_la_DEPENDENCIES) 
 	$(ioperf_pdb_la_LINK)  $(ioperf_pdb_la_OBJECTS) $(ioperf_pdb_la_LIBADD) $(LIBS)
 ioperf_sec2.la: $(ioperf_sec2_la_OBJECTS) $(ioperf_sec2_la_DEPENDENCIES) 
