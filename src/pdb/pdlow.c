@@ -1487,7 +1487,7 @@ _lite_PD_add_block (PDBfile *file, syment *ep, dimdes *dims) {
     * We are through with the dimensions
     * their information has been moved into the entry dimensions
     */
-#warning REMOVED AS PER pdbtst.c FAILING
+/*#warning REMOVED AS PER pdbtst.c FAILING*/
 #if 0
    _lite_PD_rl_dimensions(dims);
 #endif

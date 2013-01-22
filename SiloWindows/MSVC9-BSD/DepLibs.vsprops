@@ -6,54 +6,54 @@
     >
     <UserMacro
         Name="HDF5_INC_DIR"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\hdf5-1.8.7\MSVC90\include"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\hdf5-1.8.7\MSVC90\include"
     />
     <UserMacro
         Name="HDF5_INC_DIR_X64"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\hdf5-1.8.7\MSVC90-x64\include"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\hdf5-1.8.7\MSVC90-x64\include"
     />
     <UserMacro
         Name="HDF5_LIB_DIR"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\hdf5-1.8.7\MSVC90\lib"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\hdf5-1.8.7\MSVC90\lib"
     />
     <UserMacro
         Name="HDF5_LIB_DIR_X64"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\hdf5-1.8.7\MSVC90-x64\lib"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\hdf5-1.8.7\MSVC90-x64\lib"
     />
     <UserMacro
         Name="SZIP_INC_DIR"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\szip\include"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\szip\include"
     />
     <UserMacro
         Name="SZIP_LIB_DIR"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\szip\lib\MSVC90"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\szip\lib\MSVC90"
     />
     <UserMacro
         Name="SZIP_LIB_DIR_X64"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\szip\lib\MSVC90-x64"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\szip\lib\MSVC90-x64"
     />
     <UserMacro
         Name="ZLIB_INC_DIR"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\zlib\include"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\zlib\include"
     />
     <UserMacro
         Name="ZLIB_LIB_DIR"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\zlib\lib\MSVC90"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\zlib\lib\MSVC90"
     />
     <UserMacro
         Name="ZLIB_LIB_DIR_X64"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\zlib\lib\MSVC90-x64"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\zlib\lib\MSVC90-x64"
     />
     <UserMacro
         Name="QT_INC_DIR"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.7.4\include"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\Qt-4.8.3\include"
     />
     <UserMacro
         Name="QT_LIB_DIR"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.7.4\lib\MSVC90"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\Qt-4.8.3\lib\MSVC90"
     />
     <UserMacro
         Name="QT_LIB_DIR_X64"
-        Value="C:\VisIt\VisItDev\windowsbuild\ThirdParty\Qt-4.7.4\lib\MSVC90-x64"
+        Value="C:\VisIt\TRUNK\windowsbuild\ThirdParty\Qt-4.8.3\lib\MSVC90-x64"
     />
 </VisualStudioPropertySheet>

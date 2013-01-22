@@ -57,7 +57,9 @@ be used for advertising or product endorsement purposes.
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 
 #include <std.c>
 

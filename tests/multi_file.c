@@ -60,10 +60,11 @@ product endorsement purposes.
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #ifdef WIN32
 #  include <direct.h>
+#else
+#  include <unistd.h>
 #endif
 
 #include <silo.h>

@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="rocket"
-	ProjectGUID="{A9F76A7B-20A1-4D93-9444-175824B7B3DF}"
+	Name="empty"
+	ProjectGUID="{F167FF6B-B926-43D7-A5DA-086B87336B06}"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -19,8 +19,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\rocket"
-			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\rocket"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\empty"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\empty"
 			ConfigurationType="1"
 			InheritedPropertySheets="..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops;..\DepLibs.vsprops"
 			UseOfMFC="0"
@@ -41,7 +41,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(OutDir)\rocket.tlb"
+				TypeLibraryName="$(OutDir)\empty.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -53,10 +53,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\rocket.pch"
+				PrecompiledHeaderFile="$(OutDir)\empty.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
-				ProgramDataBaseFileName="$(OutDir)\rocket"
+				ProgramDataBaseFileName="$(OutDir)\empty"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -76,12 +76,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile="$(SolutionDir)..\bin\rocket.exe"
+				OutputFile="$(SolutionDir)..\bin\empty.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\rocket.pdb"
+				ProgramDatabaseFile="$(OutDir)\empty.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -134,7 +134,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\rocket.tlb"
+				TypeLibraryName="$(OutDir)\empty.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -146,10 +146,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\rocket.pch"
+				PrecompiledHeaderFile="$(OutDir)\empty.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
-				ProgramDataBaseFileName="$(OutDir)\rocket"
+				ProgramDataBaseFileName="$(OutDir)\empty"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -169,12 +169,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile="$(SolutionDir)..\bin\rocket.exe"
+				OutputFile="$(SolutionDir)..\bin\empty.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\rocket.pdb"
+				ProgramDatabaseFile="$(OutDir)\empty.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -204,8 +204,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\rocket"
-			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\rocket"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\empty"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\empty"
 			ConfigurationType="1"
 			InheritedPropertySheets="..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops;..\DepLibs.vsprops"
 			UseOfMFC="0"
@@ -226,7 +226,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(OutDir)\rocket.tlb"
+				TypeLibraryName="$(OutDir)\empty.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -239,7 +239,7 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\rocket.pch"
+				PrecompiledHeaderFile="$(OutDir)\empty.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
@@ -261,11 +261,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile="$(SolutionDir)..\bin\rocket.exe"
+				OutputFile="$(SolutionDir)..\bin\empty.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
-				ProgramDatabaseFile="$(OutDir)\rocket.pdb"
+				ProgramDatabaseFile="$(OutDir)\empty.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -318,7 +318,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\rocket.tlb"
+				TypeLibraryName="$(OutDir)\empty.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -331,7 +331,7 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\rocket.pch"
+				PrecompiledHeaderFile="$(OutDir)\empty.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
@@ -353,11 +353,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile="$(SolutionDir)..\bin\rocket.exe"
+				OutputFile="$(SolutionDir)..\bin\empty.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
-				ProgramDatabaseFile="$(OutDir)\rocket.pdb"
+				ProgramDatabaseFile="$(OutDir)\empty.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -390,26 +390,8 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\tests\rocket.cpp"
+			RelativePath="..\..\..\tests\empty.c"
 			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-					CompileAs="2"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					ObjectFile="$(IntDir)/$(InputName)1.obj"
-					CompileAs="2"
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="testpdb"
-	ProjectGUID="{29110B58-9FD5-4A8E-B9F7-064650EE16C6}"
+	Name="empty"
+	ProjectGUID="{2C3B0E05-5959-4630-A94F-625C9BCE9B10}"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -19,8 +19,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testpdb"
-			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testpdb"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\empty"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\empty"
 			ConfigurationType="1"
 			InheritedPropertySheets="..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops;..\DepLibs.vsprops"
 			UseOfMFC="0"
@@ -41,22 +41,22 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(OutDir)\testpdb.tlb"
+				TypeLibraryName="$(OutDir)\empty.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\silo;..\..\..\src\score;..\..\..\src\pdb"
-				PreprocessorDefinitions="WIN32;_CONSOLE;PDB_LITE"
+				AdditionalIncludeDirectories="..\..\..\src\silo"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\testpdb.pch"
+				PrecompiledHeaderFile="$(OutDir)\empty.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
-				ProgramDataBaseFileName="$(OutDir)\testpdb"
+				ProgramDataBaseFileName="$(OutDir)\empty"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
@@ -76,12 +76,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile="$(SolutionDir)..\bin\testpdb.exe"
+				OutputFile="$(SolutionDir)..\bin\empty.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\testpdb.pdb"
+				ProgramDatabaseFile="$(OutDir)\empty.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -134,22 +134,22 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\testpdb.tlb"
+				TypeLibraryName="$(OutDir)\empty.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\src\silo;..\..\..\src\score;..\..\..\src\pdb"
-				PreprocessorDefinitions="WIN32;_CONSOLE;PDB_LITE"
+				AdditionalIncludeDirectories="..\..\..\src\silo"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\testpdb.pch"
+				PrecompiledHeaderFile="$(OutDir)\empty.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
-				ProgramDataBaseFileName="$(OutDir)\testpdb"
+				ProgramDataBaseFileName="$(OutDir)\empty"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -169,12 +169,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile="$(SolutionDir)..\bin\testpdb.exe"
+				OutputFile="$(SolutionDir)..\bin\empty.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)\testpdb.pdb"
+				ProgramDatabaseFile="$(OutDir)\empty.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -204,8 +204,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testpdb"
-			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\testpdb"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\empty"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)\empty"
 			ConfigurationType="1"
 			InheritedPropertySheets="..\NO_SEC_DEP.vsprops;..\ModernDTPR.vsprops;.\TestIncludes.vsprops;..\BaseIncludes.vsprops;..\HDF5_Defines.vsprops;..\DepLibs.vsprops"
 			UseOfMFC="0"
@@ -226,20 +226,20 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="$(OutDir)\testpdb.tlb"
+				TypeLibraryName="$(OutDir)\empty.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\silo;..\..\..\src\score;..\..\..\src\pdb"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;PDB_LITE"
+				AdditionalIncludeDirectories="..\..\..\src\silo"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\testpdb.pch"
+				PrecompiledHeaderFile="$(OutDir)\empty.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
@@ -261,11 +261,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile="$(SolutionDir)..\bin\testpdb.exe"
+				OutputFile="$(SolutionDir)..\bin\empty.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
-				ProgramDatabaseFile="$(OutDir)\testpdb.pdb"
+				ProgramDatabaseFile="$(OutDir)\empty.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -318,20 +318,20 @@
 			<Tool
 				Name="VCMIDLTool"
 				TargetEnvironment="3"
-				TypeLibraryName="$(OutDir)\testpdb.tlb"
+				TypeLibraryName="$(OutDir)\empty.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\src\silo;..\..\..\src\score;..\..\..\src\pdb"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;PDB_LITE"
+				AdditionalIncludeDirectories="..\..\..\src\silo"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(OutDir)\testpdb.pch"
+				PrecompiledHeaderFile="$(OutDir)\empty.pch"
 				AssemblerListingLocation="$(OutDir)\"
 				ObjectFile="$(OutDir)\"
 				ProgramDataBaseFileName="$(OutDir)\"
@@ -353,11 +353,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="silohdf5.lib"
-				OutputFile="$(SolutionDir)..\bin\testpdb.exe"
+				OutputFile="$(SolutionDir)..\bin\empty.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="$(SolutionDir)..\$(PlatformName)\$(ConfigurationName)"
-				ProgramDatabaseFile="$(OutDir)\testpdb.pdb"
+				ProgramDatabaseFile="$(OutDir)\empty.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -390,7 +390,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\tests\testpdb.c"
+			RelativePath="..\..\..\tests\empty.c"
 			>
 		</File>
 	</Files>

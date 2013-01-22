@@ -109,6 +109,8 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "csgmesh_f", "csgmesh_f.vfpr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testfs", "testfs.vcproj", "{619248C9-5C52-48D3-BD1C-4BE670F6B67F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "empty", "empty.vcproj", "{F167FF6B-B926-43D7-A5DA-086B87336B06}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -533,6 +535,14 @@ Global
 		{619248C9-5C52-48D3-BD1C-4BE670F6B67F}.Release|Win32.Build.0 = Release|Win32
 		{619248C9-5C52-48D3-BD1C-4BE670F6B67F}.Release|x64.ActiveCfg = Release|x64
 		{619248C9-5C52-48D3-BD1C-4BE670F6B67F}.Release|x64.Build.0 = Release|x64
+		{F167FF6B-B926-43D7-A5DA-086B87336B06}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F167FF6B-B926-43D7-A5DA-086B87336B06}.Debug|Win32.Build.0 = Debug|Win32
+		{F167FF6B-B926-43D7-A5DA-086B87336B06}.Debug|x64.ActiveCfg = Debug|x64
+		{F167FF6B-B926-43D7-A5DA-086B87336B06}.Debug|x64.Build.0 = Debug|x64
+		{F167FF6B-B926-43D7-A5DA-086B87336B06}.Release|Win32.ActiveCfg = Release|Win32
+		{F167FF6B-B926-43D7-A5DA-086B87336B06}.Release|Win32.Build.0 = Release|Win32
+		{F167FF6B-B926-43D7-A5DA-086B87336B06}.Release|x64.ActiveCfg = Release|x64
+		{F167FF6B-B926-43D7-A5DA-086B87336B06}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
