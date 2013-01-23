@@ -53,8 +53,8 @@ sub genlite {
         elsif (/^#define _(PDB|SCORE)_H/) {
             print $litehdrfile "#define _LITE_$1_H\n";
         }
-        elsif (/^#include score.h/) {
-            print $litehdrfile "#include lite_score.h\n";
+        elsif (/^#include "score.h"\s*(.*)$/) {
+            print $litehdrfile "#include \"lite_score.h\" $1\n";
         }
         elsif (/^#include "config.h"/) {
             # skip this line

@@ -673,16 +673,11 @@ pdform.h: detect
 	@echo " */" >> $@
 	./detect >> $@
 
-lite_pdb.h: pdb.h
-	@cp $< $@
-	@rm -f lite_pdb_funcs.tmp
-	@grep lite_ $@ | grep extern | grep -v _lite | grep -v NOT_LITE_API | tr '\t' ' ' | tr -s ' ' | sed -e 's@^\(.*\)[ *]*lite_\([a-zA-Z0-9_]*\)\(\[\]\)\? *[(;]\(.*\)@#define \2 lite_\2@' > lite_pdb_funcs.tmp
-	@sed -i '/INSERT FUNCTION NAME MAPPING MACROS HERE/ r lite_pdb_funcs.tmp' $@
-	@rm -f lite_pdb_funcs.tmp
-	@sed -i -e 's|^#ifndef _PDB_H|#ifndef _LITE_PDB_H|' -e 's|^#define _PDB_H|#define _LITE_PDB_H|' -e 's|^#include "score.h"|#include "lite_score.h"|' $@
-
 detect: detect.o
 	$(CC) $(CFLAGS) -o $@ detect.o
+
+lite_pdb.h: pdb.h
+	if test ! -e $@; then $(top_srcdir)/config/mklite $< $@; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
