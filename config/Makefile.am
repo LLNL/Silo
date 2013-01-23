@@ -63,7 +63,8 @@ AUX_DIST = \
 
 EXTRA_DIST = \
  bootstrap\
- mkinc
+ mkinc \
+ mklite
 
 MAINTAINERCLEANFILES = \
  config.h.in\
