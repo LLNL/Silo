@@ -1,0 +1,85 @@
+#!/usr/bin/perl
+
+#
+# Tool to generate lite_pdb.h file from pdb.h and score.h headers.
+#
+# Mark C. Miller, Tue Jan 22 13:07:48 PST 2013
+#
+#
+
+#
+# usage block
+#
+sub usage {
+    print "$0 <input header file path> <output LITE header file path>\n";
+    exit 1;
+}
+
+#
+# Function to generate LITE header
+#
+sub genlite {
+    local(@apimap);
+    local(@hdrlines);
+
+    #
+    # Build the API mapping macros that map "PD_<whatever>" to "lite_PD_<whatever>"
+    #
+    open(my $hdrfile, "<",  $infile) or die "Can't open \"$infile\": $!";
+    while (<$hdrfile>) {
+        push(@hdrlines,$_);
+        if (/NOT_LITE_API/) {
+            # skip these lines
+        }
+        elsif (/_lite/) {
+            # skip these lines
+        }
+        elsif (/extern(.*)[ *]*lite_([a-zA-Z0-9_]*)\s?[[(;](.*)/) {
+            push(@apimap, "#define $2 lite_$2\n");
+        } else {
+        }
+    }
+    close $hdrfile or die "$hdrfile: $!";
+
+    #
+    # Generate lite header file
+    #
+    open(my $litehdrfile, ">",  $outfile) or die "Can't open \"$outfile\": $!";
+    local($line) = 0;
+    foreach (@hdrlines) {
+        if (/^#ifndef _(PDB|SCORE)_H/) {
+            print $litehdrfile "#ifndef _LITE_$1_H\n";
+        }
+        elsif (/^#define _(PDB|SCORE)_H/) {
+            print $litehdrfile "#define _LITE_$1_H\n";
+        }
+        elsif (/^#include score.h/) {
+            print $litehdrfile "#include lite_score.h\n";
+        }
+        elsif (/^#include "config.h"/) {
+            # skip this line
+        }
+        elsif (/INSERT FUNCTION NAME MAPPING MACROS HERE/) {
+            foreach (@apimap) {
+                print $litehdrfile $_;
+            }
+        }
+        else {
+            print $litehdrfile $_;
+        }
+    }
+}
+
+local($infile) = $ARGV[0];
+local($outfile) = $ARGV[1];
+local($ispdb) = 0;
+
+if ($infile eq "" || $outfile eq "") {
+    usage();
+}
+
+if ($infile =~ /pdb/) {
+    $ispdb = 1;
+}
+
+genlite();
