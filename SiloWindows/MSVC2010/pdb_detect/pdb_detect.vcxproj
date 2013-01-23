@@ -74,14 +74,16 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Message>Create pdbform.h</Message>
-      <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h</Command>
-      <Command>perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\pdb\pdb.h $(SolutionDir)\..\include\lite_pdb.h</Command>
-      <Command>perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\score\score.h $(SolutionDir)\..\include\lite_score.h</Command>
+      <Message>Create pdbform.h, lite_pdb.h, lite_score.h</Message>
+      <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h
+               perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\pdb\pdb.h $(SolutionDir)\..\include\lite_pdb.h
+               perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\score\score.h $(SolutionDir)\..\include\lite_score.h
+      </Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>cd ..\..\
-copysilo.bat</Command>
+               copysilo.bat
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -108,11 +110,17 @@ copysilo.bat</Command>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Message>Create pdbform.h</Message>
-      <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h</Command>
-      <Command>perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\pdb\pdb.h $(SolutionDir)\..\include\lite_pdb.h</Command>
-      <Command>perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\score\score.h $(SolutionDir)\..\include\lite_score.h</Command>
+      <Message>Create pdbform.h, lite_pdb.h, lite_score.h</Message>
+      <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h
+               perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\pdb\pdb.h $(SolutionDir)\..\include\lite_pdb.h
+               perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\score\score.h $(SolutionDir)\..\include\lite_score.h
+      </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>cd ..\..\
+               copysilo.bat
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\pdb\detect.c" />
