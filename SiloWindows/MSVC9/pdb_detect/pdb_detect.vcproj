@@ -31,7 +31,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="cd ..\..\&#x0D;&#x0A;copysilo.bat"
+				CommandLine="cd ..\..\&#x0D;&#x0A;copysilo.bat&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -95,8 +95,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Create pdbform.h"
-				CommandLine="$(OutDir)\pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h&#x0D;&#x0A;"
+				Description="Create pdbform.h, lite_pdb.h, lite_score.h"
+				CommandLine="$(OutDir)\pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h&#x0D;&#x0A;perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\pdb\pdb.h $(SolutionDir)..\include\lite_pdb.h&#x0D;&#x0A;perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\score\score.h $(SolutionDir)..\include\lite_score.h"
 			/>
 		</Configuration>
 		<Configuration
@@ -111,7 +111,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="cd ..\..\&#x0D;&#x0A;copysilo.bat"
+				CommandLine="cd ..\..\&#x0D;&#x0A;copysilo.bat&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -176,8 +176,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Create pdbform.h"
-				CommandLine="$(OutDir)\pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h&#x0D;&#x0A;"
+				Description="Create pdbform.h, lite_pdb.h, lite_score.h."
+				CommandLine="$(OutDir)\pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h&#x0D;&#x0A;perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\pdb\pdb.h $(SolutionDir)..\include\lite_pdb.h&#x0D;&#x0A;perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\score\score.h $(SolutionDir)..\include\lite_score.h"
 			/>
 		</Configuration>
 	</Configurations>

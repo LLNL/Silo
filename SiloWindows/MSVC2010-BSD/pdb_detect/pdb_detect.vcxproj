@@ -75,8 +75,9 @@
     </Link>
     <PostBuildEvent>
       <Message>Create pdbform.h</Message>
-      <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h
-</Command>
+      <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h</Command>
+      <Command>perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\pdb\pdb.h $(SolutionDir)\..\include\lite_pdb.h</Command>
+      <Command>perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\score\score.h $(SolutionDir)\..\include\lite_score.h</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>cd ..\..\
@@ -108,8 +109,9 @@ copysilo.bat</Command>
     </Link>
     <PostBuildEvent>
       <Message>Create pdbform.h</Message>
-      <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h
-</Command>
+      <Command>$(OutDir)pdb_detect.exe &gt; ..\..\..\src\pdb\pdform.h</Command>
+      <Command>perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\pdb\pdb.h $(SolutionDir)\..\include\lite_pdb.h</Command>
+      <Command>perl.exe $(SolutionDir)..\..\config\mklite $(SolutionDir)..\..\src\score\score.h $(SolutionDir)\..\include\lite_score.h</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

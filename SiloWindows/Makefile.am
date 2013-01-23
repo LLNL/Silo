@@ -74,6 +74,7 @@ EXTRA_DIST = \
 ./MSVC9/Tests/csg.vcproj\
 ./MSVC9/Tests/curve_f.vfproj\
 ./MSVC9/Tests/dirtest.vcproj\
+./MSVC9/Tests/empty.vcproj\
 ./MSVC9/Tests/extface.vcproj\
 ./MSVC9/Tests/grab.vcproj\
 ./MSVC9/Tests/group_test.vcproj\
@@ -99,7 +100,6 @@ EXTRA_DIST = \
 ./MSVC9/Tests/Preparation.vcproj\
 ./MSVC9/Tests/quad.vcproj\
 ./MSVC9/Tests/quad_f.vfproj\
-./MSVC9/Tests/rocket.vcproj\
 ./MSVC9/Tests/sami.vcproj\
 ./MSVC9/Tests/simple.vcproj\
 ./MSVC9/Tests/spec.vcproj\
@@ -152,6 +152,7 @@ EXTRA_DIST = \
 ./MSVC9-BSD/Tests/csg.vcproj\
 ./MSVC9-BSD/Tests/curve_f.vfproj\
 ./MSVC9-BSD/Tests/dirtest.vcproj\
+./MSVC9-BSD/Tests/empty.vcproj\
 ./MSVC9-BSD/Tests/extface.vcproj\
 ./MSVC9-BSD/Tests/grab.vcproj\
 ./MSVC9-BSD/Tests/group_test.vcproj\
@@ -177,7 +178,6 @@ EXTRA_DIST = \
 ./MSVC9-BSD/Tests/Preparation.vcproj\
 ./MSVC9-BSD/Tests/quad.vcproj\
 ./MSVC9-BSD/Tests/quad_f.vfproj\
-./MSVC9-BSD/Tests/rocket.vcproj\
 ./MSVC9-BSD/Tests/sami.vcproj\
 ./MSVC9-BSD/Tests/simple.vcproj\
 ./MSVC9-BSD/Tests/spec.vcproj\

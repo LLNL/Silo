@@ -1,9 +1,11 @@
-          Building Silo using Microsoft Visual C++ version 9.0
+          Building Silo using Microsoft Visual C++ version 9.0 (2008)
+                                                   or     10.0 (2010)
           ===========================================================
 
-This guide contains instructions for building Silo using MSVC 9.0
+This guide contains instructions for building Silo using MSVC 9.0 or 10
 on a computer running MS Windows. While the Silo source code should build using
-other compilers, we only provide project files and support for MSVC and 9.0.
+other compilers, we only provide project files and support for MSVC and 9.0 or 
+10.0.
 
 What gets built
 ===============
@@ -15,6 +17,10 @@ When developing applications that use Silo, be sure to link your application
 with the silohdf5.lib import library. This resolves the symbols that come from 
 the Silo DLL at runtime.  Then be sure that silohdf5.dll is in your path when 
 you run your application.  Be sure to also link with the hdf5dll.lib, szlibdll.lib and zlib1.lib).
+
+*** As of Silo 4.9, PERL is required in order to generate the lite versions ***
+*** of pdb.h and score.h   Make sure PERL is in your PATH, or edit your     ***
+*** Visual Studio settings to include perl's path in your Executables       ***
 
 Build instructions
 ==================
