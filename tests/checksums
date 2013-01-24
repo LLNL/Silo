@@ -93,29 +93,18 @@ $topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 # We do this using octal dump (od) and looking for some numbers
 # we expect in a silo object (domain_23/fl)
 #
-offset=`od -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | grep '167         179         323         311' | cut -d' ' -f1`
+offset=`od -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1`
 offset=`echo $offset | cut -d' ' -f1`
 size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
 
 #
-# Make a file of 4 integer zeros
-#
-rm -f zeros
-i=0
-/bin/echo -n -e '\000' > zeros
-while test $i -lt 15; do
-    /bin/echo -n -e '\000' >> zeros
-    i=`expr $i + 1`
-done
-
-#
 # Corrupt a checksumed file by splicing together the first
-# part of the original file with the 4 integer zeros (above)
+# part of the original file with the 4 integer zeros (zeros.dat)
 # and the last part of the file (minus the part we've zeroed)
 #
 rm -f multi_ucd3d_corrupt.h5
 head -c $offset h5_check_files/multi_ucd3d.h5 > multi_ucd3d_corrupt.h5
-cat zeros >> multi_ucd3d_corrupt.h5
+cat $topDir/zeros.dat >> multi_ucd3d_corrupt.h5
 leftover=`expr $size - $offset - 16`
 tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 
@@ -143,7 +132,6 @@ fi
 # Cleanup
 #
 rm -rf h5_check_files
-rm -f zeros
 rm -f multi_ucd3d_corrupt.h5
 
 exit $result 

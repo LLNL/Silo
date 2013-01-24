@@ -83,6 +83,7 @@ EXTRA_DIST= \
  Make_ioperf \
  ioperf_tests \
  std.c \
+ zeros.dat \
  $(check_SCRIPTS) \
  $(check_DATA)
 
