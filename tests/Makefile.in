@@ -110,7 +110,8 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
 	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
 	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
-	empty$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_3) $(am__EXEEXT_5)
+	empty$(EXEEXT) majorder$(EXEEXT) $(am__EXEEXT_1) \
+	$(am__EXEEXT_3) $(am__EXEEXT_5)
 @HDF5_DRV_NEEDED_TRUE@am__append_1 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_3 = $(HDF5CKLTLIBS)
@@ -282,6 +283,11 @@ listtypes_OBJECTS = listtypes.$(OBJEXT)
 listtypes_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@listtypes_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@listtypes_DEPENDENCIES = ../src/libsiloh5.la
+majorder_SOURCES = majorder.c
+majorder_OBJECTS = majorder.$(OBJEXT)
+majorder_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@majorder_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_TRUE@majorder_DEPENDENCIES = ../src/libsiloh5.la
 mat3d_3across_SOURCES = mat3d_3across.c
 mat3d_3across_OBJECTS = mat3d_3across.$(OBJEXT)
 mat3d_3across_LDADD = $(LDADD)
@@ -536,6 +542,7 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_ioperf_SOURCES) ioperf.c \
 	$(nodist_EXTRA_largefile_SOURCES) largefile.c \
 	$(nodist_EXTRA_listtypes_SOURCES) listtypes.c \
+	$(nodist_EXTRA_majorder_SOURCES) majorder.c \
 	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
 	$(matf77_SOURCES) $(nodist_EXTRA_matf77_SOURCES) \
 	$(nodist_EXTRA_merge_block_SOURCES) merge_block.c \
@@ -581,7 +588,7 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	cpz1plt.c csg.c $(am__csgmesh_SOURCES_DIST) \
 	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) efcentering.c \
 	empty.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
-	ioperf.c largefile.c listtypes.c mat3d_3across.c \
+	ioperf.c largefile.c listtypes.c majorder.c mat3d_3across.c \
 	$(am__matf77_SOURCES_DIST) merge_block.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
 	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
@@ -872,7 +879,8 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	group_test listtypes alltypes wave multi_file polyzl csg \
 	rocket mmadjacency largefile version namescheme efcentering \
 	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
-	merge_block empty $(PDBTESTS) $(am__append_1) $(am__append_4)
+	merge_block empty majorder $(PDBTESTS) $(am__append_1) \
+	$(am__append_4)
 dir_SOURCES = dir.c testlib.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
@@ -963,6 +971,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_readstuff_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testfs_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_empty_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_majorder_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -1109,6 +1118,9 @@ largefile$(EXEEXT): $(largefile_OBJECTS) $(largefile_DEPENDENCIES)
 listtypes$(EXEEXT): $(listtypes_OBJECTS) $(listtypes_DEPENDENCIES) 
 	@rm -f listtypes$(EXEEXT)
 	$(CXXLINK) $(listtypes_OBJECTS) $(listtypes_LDADD) $(LIBS)
+majorder$(EXEEXT): $(majorder_OBJECTS) $(majorder_DEPENDENCIES) 
+	@rm -f majorder$(EXEEXT)
+	$(CXXLINK) $(majorder_OBJECTS) $(majorder_LDADD) $(LIBS)
 mat3d_3across$(EXEEXT): $(mat3d_3across_OBJECTS) $(mat3d_3across_DEPENDENCIES) 
 	@rm -f mat3d_3across$(EXEEXT)
 	$(CXXLINK) $(mat3d_3across_OBJECTS) $(mat3d_3across_LDADD) $(LIBS)
@@ -1259,6 +1271,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_stdio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/largefile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/majorder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge_block.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_h5.Po@am__quote@
