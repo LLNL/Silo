@@ -259,6 +259,18 @@ int main(int argc, char **argv)
         DBClose(dbfile);
     }
 
+    /* test namescheme with constant componets */
+    {
+        ns = DBMakeNamescheme("@foo/bar/gorfo_0@");
+        if (strcmp(DBGetName(ns, 0), "foo/bar/gorfo_0") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 1), "foo/bar/gorfo_0") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 122), "foo/bar/gorfo_0") != 0)
+            return 1;
+        DBFreeNamescheme(ns);
+    }
+
     /* hackish way to cleanup the circular cache used internally */
     DBGetName(0,0);
     
