@@ -342,7 +342,7 @@ PUBLIC DBnamescheme *
 DBMakeNamescheme(const char *fmt, ...)
 {
     va_list ap;
-    int i, j, k, n, pass, ncspecs, done;
+    int i, j, k, n, pass, ncspecs, done, saved_narrefs;
     DBnamescheme *rv = 0;
     DBfile *dbfile = 0;
 
@@ -436,6 +436,7 @@ DBMakeNamescheme(const char *fmt, ...)
     /* Ok, now go through rest of fmt string a second time and grab each
        expression that goes with each conversion spec. Also, handle array refs */
     i = n+1;
+    saved_narrefs = rv->narrefs;
     rv->narrefs = 0;
     ncspecs = 0;
     va_start(ap, fmt);
@@ -455,10 +456,19 @@ DBMakeNamescheme(const char *fmt, ...)
             {
                 rv->arrnames[k] = STRNDUP(&fmt[i+1], j-1);
                 if (!dbfile)
+                {
                     rv->arrvals[k] = va_arg(ap, void *);
+                    if (rv->arrvals[k] < 0x0000FFFF)
+                    {
+                        DBFreeNamescheme(rv);
+                        rv = 0;
+                        done = 1;
+                    }
+                }
                 else
                 {
-                    rv->arrvals[k] = DBGetVar(dbfile, rv->arrnames[k]);
+                    if (DBInqVarExists(dbfile, rv->arrnames[k]))
+                        rv->arrvals[k] = DBGetVar(dbfile, rv->arrnames[k]);
                     if (rv->arrvals[k] != 0)
                     {
                         /* Handle ext. array refs to arrays of strings */
@@ -493,6 +503,12 @@ DBMakeNamescheme(const char *fmt, ...)
         i++;
     }
     va_end(ap);
+
+    if (rv && rv->narrefs != saved_narrefs)
+    {
+        DBFreeNamescheme(rv);
+        rv = 0;
+    }
 
     return rv;
 }

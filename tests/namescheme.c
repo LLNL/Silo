@@ -256,6 +256,12 @@ int main(int argc, char **argv)
         DBFreeNamescheme(ns);
         free(ns2r);
 
+        /* Test invalid namescheme construction */
+        ns = DBMakeNamescheme("@foo/bar/gorfo_%d@#n");
+        if (ns) return 1;
+        ns = DBMakeNamescheme("@foo/bar/gorfo_%d@#n", 0, dbfile);
+        if (ns) return 1;
+
         DBClose(dbfile);
     }
 
