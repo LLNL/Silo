@@ -19,7 +19,7 @@ https://wci.llnl.gov/codes/silo/media/pdf/LLNL-SM-453191.pdf</a></li>
 </ul>
 <h2>Organization of information in this announcement</h2>
 <ol>
-  <li>Important informagion regarding this release.</li>
+  <li>Important information regarding this release.</li>
   <li>Bugs fixed in this release.</li>
   <li>Robustness features in this release.</li>
   <li>New features in this release.</li>
@@ -28,39 +28,47 @@ https://wci.llnl.gov/codes/silo/media/pdf/LLNL-SM-453191.pdf</a></li>
 
 <h3>1. Important information regarding this release.</h3>
 <ul>
+  <li>Until the release tarballs are permanently available at the URL's mentioned above (probably next week sometime), they will be temporarily available at...
+    <ul>
+      <li><a href="ftp://ftp.llnl.gov/outgoing/silo-4.9.tar.gz">ftp://ftp.llnl.gov/outgoing/silo-4.9.tar.gz</a></li>
+      <li><a href="ftp://ftp.llnl.gov/outgoing/silo-4.9-bsd.tar.gz">ftp://ftp.llnl.gov/outgoing/silo-4.9-bsd.tar.gz</a></li>
+      <li><a href="ftp://ftp.llnl.gov/outgoing/silo-4.9-bsd-smalltest.tar.gz">ftp://ftp.llnl.gov/outgoing/silo-4.9-bsd-smalltest.tar.gz</a></li>
+    </ul>
+  </li>
   <li>Version 4.9 is <b>NOT</b> link-time compatible with any previous version. You will need to re-compile and re-link your applications.</li>
   <li>Unfortunately, there was no time to update the documentation prior
  to this release. Please refer to section 5 of these 
 release notes for key documentation information regarding PDB Lite, 
 Namescheme and Empty Object support.</li>
-  <li>Until the release tarballs are available at the URL's mentioned above, they will be temporarily available at <a href="ftp://ftp.llnl.gov/outgoing/silo-4.9.tar.gz">ftp://ftp.llnl.gov/outgoing/silo-4.9.tar.gz</a> and <a href="ftp://ftp.llnl.gov/outgoing/silo-4.9-bsd.tar.gz">ftp://ftp.llnl.gov/outgoing/silo-4.9-bsd.tar.gz</a></li>
   <li>The VisIt plugin in VisIt 2.6.1 to be released shortly, 
 includes enhancements for new namescheme constructor and empty objects.</li>
-  <li>In some cases, passing a 'make check' required adding 'LIBS=-lstdc++' to the make command line (e.g. 'make check LIBS=-lstdc++'.</li>
+  <li>In some cases, passing a 'make check' requires adding 'LIBS=-lstdc++' to the make command line (e.g. 'make check LIBS=-lstdc++'.</li>
+  <li>The rocket test will fail during 'make check' on OSX. I've yet to learn how to handle dlopen and shared libs there. For similar reasons, Silo's python module has yet to be tested on a OSX.</li>
 </ul>
 
 <h3>2. Bugs fixed in this release</h3>
 <ul>
-  <li>Added patch from Olivier Cessenat for DBSetCompression in Fortran API.</li>
+  <li>Added patch from Olivier Cessenat for DBSetCompression in Fortran API. Thanks Olivier.</li>
   <li>Fixed minor bug with guihide info for defvars.</li>
-  <li>Some leaks in DBFreeXXX methods were fixed.</li>
+  <li>Fixed some leaks in DBFreeXXX methods.</li>
   <li>Fixed order of shuffle filter used in HDF5 compression pipelines for floating point data.</li>
   <li>Fixed a leak in HDF5 resources that would cause out of memory 
 conditions for very large number of file opens and closes (tens of 
-thousands).</li>
+thousands). Thanks to Matt O'Brien for test case.</li>
   <li>Made reltol_eps diff algorithm mutually exclusive to abs||rel diff algorithms.</li>
-  <li>Added patches from Niel Hodge to Fortran intercace for DBADDREGION and DBPUTGRPLMAP for null maps and segment_fracs.</li>
+  <li>Added patches from Neil Hodge to Fortran intercace for DBADDREGION and DBPUTGRPLMAP for null maps and segment_fracs. Thanks Neil.</li>
   <li>Fixed invalid formatting of silo.inc file and fixed mkinc tool that produces it. Thanks to Olivier Cessenat.</li>
-  <li>Qt configuration logic was updated to most current.</li>
+  <li>Qt autoconf logic was updated to most current. Typically, something like <pre>--with-Qt-dir=<path-to-qt-top-level-dir> --with-Qt-lib=QtGui</pre> is required.</li>
   <li>Extensive test for variety of arbitrary polyhedra methods were added.</li>
   <li>A performance bug in DBSetDir()/DBGetDir() methods was fixed. 
-Thanks to Brian McCandless to reporting the bug and providing the fix.</li>
+Thanks to Brian McCandless for reporting the bug and providing the fix.</li>
   <li>Return of static local variable from DBGetName was replaced with a circular buffer.</li>
   <li>DBtoc data member names were changed to all obey same 
 pluralization rules. If you have code that examines the members of the 
 DBtoc structure, be sure to review silo.h file for corrected names.</li>
   <li>A fortran test for csg meshes was added, csgmesh_f.f. Thanks to Robert Salko.</li>
   <li>Added the ability to specify driver via CL arguments to Fortran tests.</li>
+  <li>Some bourne shell based unit tests were adjusted to work on OSX.</li>
 </ul>
 
 <h3>3. Robustness features in this release</h3>

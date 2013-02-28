@@ -267,8 +267,8 @@ static int SaveInternalString(DBnamescheme *ns, const char *sval)
 
 /* very simple circular cache for strings returned from DBGetName */
 #define DB_MAX_RETSTRS 32
-static char const * retstrbuf[DB_MAX_RETSTRS];
-static char const *SaveReturnedString(char const *retstr)
+static char * retstrbuf[DB_MAX_RETSTRS];
+static char * SaveReturnedString(char const * retstr)
 {
     static unsigned int n = 0;
     int modn = n++ % DB_MAX_RETSTRS;
@@ -345,6 +345,7 @@ DBMakeNamescheme(const char *fmt, ...)
     int i, j, k, n, pass, ncspecs, done, saved_narrefs;
     DBnamescheme *rv = 0;
     DBfile *dbfile = 0;
+    char const *relpath = 0;
 
     /* We have nothing to do for a null or empty format string */
     if (fmt == 0 || *fmt == '\0')
@@ -428,6 +429,7 @@ DBMakeNamescheme(const char *fmt, ...)
         if (dummy == 0)
         {
             dbfile = va_arg(ap, DBfile *);
+            relpath = va_arg(ap, char const *);
             rv->arralloc = 1;
         }
         va_end(ap);
@@ -445,8 +447,21 @@ DBMakeNamescheme(const char *fmt, ...)
     {
         if (fmt[i] == '$' || fmt[i] == '#')
         {
-            for (j = 1; fmt[i+j] != '['; j++)
+            for (j = 1; fmt[i+j] != '[' && 
+                        fmt[i+j] != '#' &&
+                        fmt[i+j] != '$' &&
+                        fmt[i+j] != '%' &&
+                        fmt[i+j] != '*' &&
+                        fmt[i+j] != '+' &&
+                        fmt[i+j] != '\0' ; j++)
                 ;
+            if (fmt[i+j] != '[')
+            {
+                DBFreeNamescheme(rv);
+                rv = 0;
+                done = 1;
+                continue;
+            }
             for (k = 0; k < rv->narrefs; k++)
             {
                 if (strncmp(&fmt[i+1],rv->arrnames[k],j-1) == 0)
@@ -458,23 +473,27 @@ DBMakeNamescheme(const char *fmt, ...)
                 if (!dbfile)
                 {
                     rv->arrvals[k] = va_arg(ap, void *);
-                    if (rv->arrvals[k] < 0x0000FFFF)
+#if 0
+                    if (rv->arrvals[k] < (void*) 0x0000FFFF)
                     {
                         DBFreeNamescheme(rv);
                         rv = 0;
                         done = 1;
+                        continue;
                     }
+#endif
                 }
                 else
                 {
-                    if (DBInqVarExists(dbfile, rv->arrnames[k]))
-                        rv->arrvals[k] = DBGetVar(dbfile, rv->arrnames[k]);
+                    char *arrnm = relpath?db_absoluteOf_path(relpath, rv->arrnames[k]):rv->arrnames[k];
+                    if (DBInqVarExists(dbfile, arrnm))
+                        rv->arrvals[k] = DBGetVar(dbfile, arrnm);
                     if (rv->arrvals[k] != 0)
                     {
                         /* Handle ext. array refs to arrays of strings */
-                        if (DBGetVarType(dbfile, rv->arrnames[k]) == DB_CHAR)
+                        if (DBGetVarType(dbfile, arrnm) == DB_CHAR)
                         {
-							char **tmp = NULL;
+                            char **tmp = NULL;
                             rv->arrsizes[k] = -1; /* initialize to 'unknown size' */
                             tmp = DBStringListToStringArray((char*)rv->arrvals[k], &(rv->arrsizes[k]), 0, 0);
                             FREE(rv->arrvals[k]);
@@ -486,7 +505,9 @@ DBMakeNamescheme(const char *fmt, ...)
                         DBFreeNamescheme(rv);
                         rv = 0;
                         done = 1;
+                        continue;
                     }
+                    if (relpath) free(arrnm);
                 }
                 if (rv && !done) rv->narrefs++; /* rv could have been set to null, above */
             }
@@ -546,7 +567,7 @@ DBGetName(DBnamescheme *ns, int natnum)
         theVal = EvalExprTree(ns, exprtree, natnum);
         FreeTree(exprtree);
         strncpy(tmpfmt, ns->fmtptrs[i], ns->fmtptrs[i+1] - ns->fmtptrs[i]);
-        if (strcmp(tmpfmt, "%s") == 0 && 0 <= theVal && theVal < DB_MAX_EXPSTRS)
+        if (strncmp(tmpfmt, "%s", 2) == 0 && 0 <= theVal && theVal < DB_MAX_EXPSTRS)
             sprintf(tmp, tmpfmt, ns->embedstrs[theVal]);
         else
             sprintf(tmp, tmpfmt, theVal);

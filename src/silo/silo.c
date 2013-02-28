@@ -12316,11 +12316,13 @@ char *db_absoluteOf_path (const char *cwg,
                           const char *pathname)
 {  char *result;
 
-   if (0 < strlen(pathname))
+   if (pathname && strlen(pathname))
    {  if (db_isAbsolute_path(pathname))
           result = db_normalize_path(pathname);
-      else
+      else if (cwg && strlen(cwg))
           result = db_join_path(cwg,pathname);
+      else
+          result = safe_strdup("");
    }
    else
    {
