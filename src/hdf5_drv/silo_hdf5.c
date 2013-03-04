@@ -210,7 +210,7 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
 #define TRUE            1
 
 #define LINKGRP         "/.silo/"       /*name of link group            */
-#define MAX_VARS        8               /*max vars per DB*var object    */
+#define MAX_VARS        16              /*max vars per DB*var object    */
 #define OPTDUP(S)       ((S)&&*(S)?strdup(S):NULL)
 #define BASEDUP(S)       ((S)&&*(S)?db_FullName2BaseName(S):NULL)
 #define ALIGN(ADDR,N)   (((ADDR)+(N)-1)&~((N)-1))
