@@ -188,10 +188,14 @@ int main(int argc, char **argv)
            relative to where I will place the namesheme */
         char *ns1 = "@foo_%03dx%03d@#../arr_dir/Place[n]@#../arr_dir/Upper[n%4]";
         char *ns1r;
-        /* Use absolute path to external array. */
+        /* Use absolute path to external array; 'H' is delim char */
         char *ns2 = "Hfoo_%sH$/arr_dir/Noodle[n%3]";
         char *ns2r;
         char *strList;
+        /* use paths relative to the MB mesh object in which the nameschems
+           are embedded */
+        char *ns3 = "|/meshes/mesh1/dom_%s_%d|$../ns_arrays/Noodle[n]|n*2+1";
+        char *ns3r;
 
         dbfile = DBCreate("namescheme.silo", DB_CLOBBER, DB_LOCAL,
             "Test namescheme constructor with external arrays in file", driver);
@@ -206,7 +210,6 @@ int main(int argc, char **argv)
         DBStringArrayToStringList(N, 3, &strList, &strListLen);
         dims[0] = strListLen;
         DBWrite(dbfile, "Noodle", strList, dims, 1, DB_CHAR);
-        free(strList);
         DBSetDir(dbfile, "..");
 
         DBMkDir(dbfile, "dir_1");
@@ -220,14 +223,63 @@ int main(int argc, char **argv)
         dims[0] = strlen(ns2)+1;
         DBWrite(dbfile, "ns2", ns2, dims, 1, DB_CHAR);
 
+        DBSetDir(dbfile, "/");
+        DBMkDir(dbfile, "meshes");
+        DBSetDir(dbfile, "meshes");
+        DBMkDir(dbfile, "ns_arrays");
+        dims[0] = strListLen;
+        DBWrite(dbfile, "ns_arrays/Noodle", strList, dims, 1, DB_CHAR);
+
+        DBMkDir(dbfile, "mesh1");
+        DBSetDir(dbfile, "mesh1");
+        DBMkDir(dbfile, "dom_red_1");
+        DBMkDir(dbfile, "dom_green_3");
+        DBMkDir(dbfile, "dom_blue_5");
+        DBSetDir(dbfile, "dom_red_1");
+        {
+            int ndims = 2;
+            int dims[] = {4,2};
+            float xcoords[] = {0, 1, 2, 3};
+            float ycoords[] = {0, 1};
+            float *coords[2] = {xcoords, ycoords};
+            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+        }
+        DBSetDir(dbfile, "../dom_green_3");
+        {
+            int ndims = 2;
+            int dims[] = {4,2};
+            float xcoords[] = {0, 1, 2, 3};
+            float ycoords[] = {1, 2};
+            float *coords[2] = {xcoords, ycoords};
+            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+        }
+        DBSetDir(dbfile, "../dom_blue_5");
+        {
+            int ndims = 2;
+            int dims[] = {4,2};
+            float xcoords[] = {0, 1, 2, 3};
+            float ycoords[] = {2, 3};
+            float *coords[2] = {xcoords, ycoords};
+            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+        }
+        DBSetDir(dbfile, "..");
+        {
+            int btype = DB_QUADMESH;
+            DBoptlist *optlist = DBMakeOptlist(2);
+            DBAddOption(optlist, DBOPT_MB_BLOCK_NS, ns3);
+            DBAddOption(optlist, DBOPT_MB_BLOCK_TYPE, &btype);
+            DBPutMultimesh(dbfile, "mmesh", 3, 0, 0, optlist);
+            DBFreeOptlist(optlist);
+        }
+        free(strList);
         DBClose(dbfile);
 
         dbfile = DBOpen("namescheme.silo", DB_UNKNOWN, DB_READ);
         DBSetDir(dbfile, "dir_1");
         ns1r = DBGetVar(dbfile, "ns1");
 
-        /* Use the '0, DBfile*' form of args to constructor */
-        ns = DBMakeNamescheme(ns1r, 0, dbfile);
+        /* Use the '0, DBfile*, 0' form of args to constructor */
+        ns = DBMakeNamescheme(ns1r, 0, dbfile, 0);
 
         /* Ok, lets test the constructed namescheme */
         if (strcmp(DBGetName(ns, 17), "foo_085x001") != 0)
@@ -246,8 +298,8 @@ int main(int argc, char **argv)
         DBSetDir(dbfile, "/dir_2/dir_3");
         ns2r = DBGetVar(dbfile, "ns2");
 
-        /* Use the '0, DBfile*' form of args to constructor */
-        ns = DBMakeNamescheme(ns2r, 0, dbfile);
+        /* Use the '0, DBfile*, 0' form of args to constructor */
+        ns = DBMakeNamescheme(ns2r, 0, dbfile, 0);
 
         if (strcmp(DBGetName(ns, 17), "foo_blue") != 0)
             return 1;
@@ -256,7 +308,40 @@ int main(int argc, char **argv)
         DBFreeNamescheme(ns);
         free(ns2r);
 
+        /* Test invalid namescheme construction */
+        ns = DBMakeNamescheme("@foo/bar/gorfo_%d@#n");
+        if (ns) return 1;
+        ns = DBMakeNamescheme("@foo/bar/gorfo_%d@#n", 0, dbfile, 0);
+        if (ns) return 1;
+
+        /* Test construction via retrieval from MB object */
+        DBSetDir(dbfile, "/meshes/mesh1");
+        {
+            DBmultimesh *mm = DBGetMultimesh(dbfile, "mmesh");
+            ns = DBMakeNamescheme(mm->block_ns, 0, dbfile, "/meshes/mesh1");
+            if (strcmp(DBGetName(ns, 0), "/meshes/mesh1/dom_red_1") != 0)
+                return 1;
+            if (strcmp(DBGetName(ns, 1), "/meshes/mesh1/dom_green_3") != 0)
+                return 1;
+            if (strcmp(DBGetName(ns, 2), "/meshes/mesh1/dom_blue_5") != 0)
+                return 1;
+            DBFreeNamescheme(ns);
+            DBFreeMultimesh(mm);
+        }
+
         DBClose(dbfile);
+    }
+
+    /* test namescheme with constant componets */
+    {
+        ns = DBMakeNamescheme("@foo/bar/gorfo_0@");
+        if (strcmp(DBGetName(ns, 0), "foo/bar/gorfo_0") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 1), "foo/bar/gorfo_0") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 122), "foo/bar/gorfo_0") != 0)
+            return 1;
+        DBFreeNamescheme(ns);
     }
 
     /* hackish way to cleanup the circular cache used internally */

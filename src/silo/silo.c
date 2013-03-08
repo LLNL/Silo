@@ -131,6 +131,8 @@ int SILO_VERS_TAG = 0;
 /* No lines of  the form 'int Silo_version_Maj_Min_Pat = 0;' below
    here indicates that this version is not backwards compatible with
    any previous versions.*/
+int Silo_version_4_9 = 0;
+int Silo_version_4_9_0 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -12316,11 +12318,13 @@ char *db_absoluteOf_path (const char *cwg,
                           const char *pathname)
 {  char *result;
 
-   if (0 < strlen(pathname))
+   if (pathname && strlen(pathname))
    {  if (db_isAbsolute_path(pathname))
           result = db_normalize_path(pathname);
-      else
+      else if (cwg && strlen(cwg))
           result = db_join_path(cwg,pathname);
+      else
+          result = safe_strdup("");
    }
    else
    {
