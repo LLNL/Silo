@@ -75,7 +75,7 @@ EXTRA_DIST = \
 
 AM_CXXFLAGS=$(QT_CXXFLAGS)
 AM_CPPFLAGS = \
- -I$(top_srcdir)/src/silo \
+ -I$(top_builddir)/src/silo \
  -I$(includedir)
 
 noinst_HEADERS = \

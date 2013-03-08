@@ -131,6 +131,8 @@ int SILO_VERS_TAG = 0;
 /* No lines of  the form 'int Silo_version_Maj_Min_Pat = 0;' below
    here indicates that this version is not backwards compatible with
    any previous versions.*/
+int Silo_version_4_9 = 0;
+int Silo_version_4_9_0 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
