@@ -79,7 +79,12 @@ main(int argc, char *argv[])
     char 	    *filename = "empty.silo";
     int             show_all_errors = FALSE;
     int             i, pass;
-    void           *p;
+    char           *cnames[3] = {"x","y","z"};
+    void const     *coords[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
+    void const     *vars[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
+    void           *var = (void*)1;
+    int             iarr[3] = {1,1,1}; /* dummy int array */
+    double          exts[4] = {0,0,0,0};
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -111,27 +116,36 @@ main(int argc, char *argv[])
         */
 
         /* empty point meshes and vars */
-        ASSERT(DBPutPointmesh(dbfile, "empty_pointmesh", 0,0,0,dt,0),retval<0,retval==0);
-        ASSERT(DBPutPointvar(dbfile, "pv", "empty_pointmesh", 0,0,0,dt,0),retval<0,retval==0);
-        ASSERT(DBPutPointvar1(dbfile, "pv1", "empty_pointmesh", 0,0,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointmesh(dbfile,"empty_pointmesh",1,coords,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutPointvar(dbfile,"pv","empty_pointmesh",1,vars,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutPointvar1(dbfile,"pv1","empty_pointmesh",var,0,0,0),retval<0,retval==0);
 
         /* empty quad meshes and vars */
-        ASSERT(DBPutQuadmesh(dbfile, "empty_quadmesh", 0,0,0,0,dt,DB_COLLINEAR,0),retval<0,retval==0);
-        ASSERT(DBPutQuadvar(dbfile, "qv", "empty_quadmesh", 0,0,0,0,0,0,0,dt,ct,0),retval<0,retval==0);
-        ASSERT(DBPutQuadvar1(dbfile, "qv1", "empty_quadmesh", 0,0,0,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmesh",cnames,coords,iarr,0,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar(dbfile,"qv","empty_quadmesh",0,cnames,vars,iarr,0,0,0,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar1(dbfile,"qv1","empty_quadmesh",0,0,0,0,0,dt,ct,0),retval<0,retval==0);
 
         /* empty ucd meshes and vars */
-        ASSERT(DBPutUcdmesh(dbfile, "empty_ucdmesh", 0,0,0,0,0,0,0,dt,0),retval<0,retval==0);
-        ASSERT(DBPutUcdvar(dbfile, "uv", "empty_ucdmesh", 0,0,0,0,0,0,dt,ct,0),retval<0,retval==0);
-        ASSERT(DBPutUcdvar1(dbfile, "uv1", "empty_ucdmesh", 0,0,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh1",0,cnames,coords,8,1,"foo","bar",0,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh2",1,cnames,coords,0,1,"foo","bar",0,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh3",1,cnames,coords,8,0,"foo","bar",0,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uva","empty_ucdmesh1",0,cnames,vars,1,vars,1,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uvb","empty_ucdmesh1",1,cnames,vars,0,vars,1,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar1(dbfile,"uv1","empty_ucdmesh1",var,0,vars,1,0,0,0),retval<0,retval==0);
 
         /* csg meshes and vars */
-        ASSERT(DBPutCsgmesh(dbfile, "empty_csgmesh", 0,0,0,0,0,0,dt,0,0,0),retval<0,retval==0);
-        ASSERT(DBPutCsgvar(dbfile, "csgv", "empty_csgmesh", 0,0,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh1",0,1,iarr,iarr,var,1,0,exts,"foo",0),retval<0,retval==0);
+        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh2",1,0,iarr,iarr,var,1,0,exts,"foo",0),retval<0,retval==0);
+        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh3",1,1,iarr,iarr,var,0,0,exts,"foo",0),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile,"csgva","empty_csgmesh1",0,cnames,vars,1,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile,"csgvb","empty_csgmesh1",1,cnames,vars,0,0,0,0),retval<0,retval==0);
 
         /* empty materials and species */
-        ASSERT(DBPutMaterial(dbfile, "empty_mat", 0,0,0,0,0,0,0,0,0,0,0,dt,0),retval<0,retval==0);
-        ASSERT(DBPutMatspecies(dbfile, "empty_spec", "empty_mat", 0,0,0,0,0,0,0,0,0,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_mata","foo",0,iarr,iarr,iarr,1,iarr,iarr,iarr,iarr,1,0,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matb","foo",1,iarr,iarr,iarr,0,iarr,iarr,iarr,iarr,1,0,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_speca","empty_mata",0,iarr,iarr,iarr,1,1,var,iarr,1,0,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specb","empty_mata",1,iarr,iarr,iarr,0,1,var,iarr,1,0,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specc","empty_mata",1,iarr,iarr,iarr,1,0,var,iarr,1,0,0),retval<0,retval==0);
     }
 
     DBClose(dbfile);
@@ -169,11 +183,15 @@ main(int argc, char *argv[])
     }
 
     /* test read back of empty ucd meshes and vars */
-    {   DBucdmesh *ucdmesh = DBGetUcdmesh(dbfile, "empty_ucdmesh");
-        assert(DBIsEmptyUcdmesh(ucdmesh));
-        DBFreeUcdmesh(ucdmesh);
+    {   int i=0; char *mnames[] = {"empty_ucdmesh1", "empty_ucdmesh2", "empty_ucdmesh3", 0};
+        while (mnames[i])
+        {
+            DBucdmesh *ucdmesh = DBGetUcdmesh(dbfile, mnames[i++]);
+            assert(DBIsEmptyUcdmesh(ucdmesh));
+            DBFreeUcdmesh(ucdmesh);
+        }
     }
-    {   int i=0; char *vnames[] = {"uv", "uv1", 0};
+    {   int i=0; char *vnames[] = {"uva", "uvb", "uv1", 0};
         while (vnames[i])
         {
             DBucdvar *ucdvar = DBGetUcdvar(dbfile, vnames[i++]);
@@ -183,23 +201,39 @@ main(int argc, char *argv[])
     }
 
     /* test read back of empty csg meshes and vars */
-    {   DBcsgmesh *csgmesh = DBGetCsgmesh(dbfile, "empty_csgmesh");
-        assert(DBIsEmptyCsgmesh(csgmesh));
-        DBFreeCsgmesh(csgmesh);
+    {   int i=0; char *mnames[] = {"empty_csgmesh1", "empty_csgmesh2", "empty_csgmesh3", 0};
+        while (mnames[i])
+        {
+            DBcsgmesh *csgmesh = DBGetCsgmesh(dbfile, mnames[i++]);
+            assert(DBIsEmptyCsgmesh(csgmesh));
+            DBFreeCsgmesh(csgmesh);
+        }
     }
-    {   DBcsgvar *csgvar = DBGetCsgvar(dbfile, "csgv");
-        assert(DBIsEmptyCsgvar(csgvar));
-        DBFreeCsgvar(csgvar);
+    {   int i=0; char *vnames[] = {"csgva", "csgvb", 0};
+        while (vnames[i])
+        {
+            DBcsgvar *csgvar = DBGetCsgvar(dbfile, vnames[i++]);
+            assert(DBIsEmptyCsgvar(csgvar));
+            DBFreeCsgvar(csgvar);
+        }
     }
 
     /* test read back of empty materials and matspecies */
-    {   DBmaterial *mat = DBGetMaterial(dbfile, "empty_mat");
-        assert(DBIsEmptyMaterial(mat));
-        DBFreeMaterial(mat);
+    {   int i=0; char *vnames[] = {"empty_mata", "empty_matb", 0};
+        while (vnames[i])
+        {
+            DBmaterial *mat = DBGetMaterial(dbfile, vnames[i++]);
+            assert(DBIsEmptyMaterial(mat));
+            DBFreeMaterial(mat);
+        }
     }
-    {   DBmatspecies *spec = DBGetMatspecies(dbfile, "empty_spec");
-        assert(DBIsEmptyMatspecies(spec));
-        DBFreeMatspecies(spec);
+    {   int i=0; char *vnames[] = {"empty_speca", "empty_specb", "empty_specc", 0};
+        while (vnames[i])
+        {
+            DBmatspecies *spec = DBGetMatspecies(dbfile, vnames[i++]);
+            assert(DBIsEmptyMatspecies(spec));
+            DBFreeMatspecies(spec);
+        }
     }
 
     CleanupDriverStuff();

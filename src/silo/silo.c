@@ -7838,43 +7838,45 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
             API_ERROR("nmat<0", E_BADARGS);
         if (ndims < 0)
             API_ERROR("ndims<0", E_BADARGS);
-        if (dims) /* examine dims for zero size in any dim */
+        if (nmat && ndims)
         {
             int i;
             for (i = 0; i < ndims && dims; i++)
                 if (dims[i] == 0) dims = 0;
+            if (!matnos) API_ERROR("matnos==0", E_BADARGS);
+            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
+            if (!matlist) API_ERROR("matlist==0", E_BADARGS);
+            if (!meshname || !*meshname) API_ERROR("mesh name", E_BADARGS);
+            if (!db_VariableNameValid((char *)meshname)) API_ERROR("meshname", E_INVALIDNAME);
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (nmat && !matnos) API_ERROR("matnos==0", E_BADARGS);
-            if (ndims && !dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
-            if (dims && !matlist) API_ERROR("matlist", E_BADARGS);
-            if (meshname && !*meshname) API_ERROR("mesh name", E_BADARGS);
-            if (meshname && !db_VariableNameValid((char *)meshname))
-                API_ERROR("mesh name", E_INVALIDNAME);
+            API_ERROR("nmat==0 || ndims==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (nmat<1) API_ERROR("nmat<1", E_EMPTYOBJECT);
-            if (ndims<1) API_ERROR("ndims<1", E_EMPTYOBJECT);
-            if (!matnos) API_ERROR("matnos==0", E_EMPTYOBJECT);
-            if (!matnos && nmat) API_ERROR("matnos==0", E_BADARGS);
-            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_EMPTYOBJECT);
-            if (!matlist) API_ERROR("matlist==0", E_EMPTYOBJECT);
-            if (!meshname || !*meshname) API_ERROR("mesh name", E_EMPTYOBJECT);
-            if (!db_VariableNameValid((char *)meshname)) API_ERROR("meshname", E_INVALIDNAME);
+            /* this is an intentionally empty object */
+            nmat = 0;
+            matnos = 0;
+            matlist = 0;
+            dims = 0;
+            ndims = 0;
+            mix_next = 0;
+            mix_mat = 0;
+            mix_zone = 0;
+            mixlen = 0;
+            datatype = DB_FLOAT;
         }
         if (mixlen < 0)
-            API_ERROR("mixlen", E_BADARGS);
+            API_ERROR("mixlen<0", E_BADARGS);
         if (!mix_next && mixlen)
-            API_ERROR("mix_next", E_BADARGS);
+            API_ERROR("mix_next==0", E_BADARGS);
         if (!mix_mat && mixlen)
-            API_ERROR("mix_mat", E_BADARGS);
+            API_ERROR("mix_mat==0", E_BADARGS);
         if (!mix_vf && mixlen)
-            API_ERROR("mix_vf", E_BADARGS);
+            API_ERROR("mix_vf==0", E_BADARGS);
         if (!dbfile->pub.p_ma)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-
 
         retval = (dbfile->pub.p_ma) (dbfile, (char *)name, (char *)meshname,
                                      nmat, matnos, matlist, dims, ndims,
@@ -7959,25 +7961,33 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
             API_ERROR("ndims<0", E_BADARGS);
         if (nspecies_mf < 0)
             API_ERROR("nspecies_mf<0", E_BADARGS);
-        if (ndims)
+        if (nmat && ndims && nspecies_mf)
         {
             int i;
             for (i = 0; i < ndims && dims; i++)
                 if (!dims[i]) dims = 0;
+            if (!nmatspec) API_ERROR("nmatspec==0", E_BADARGS);
+            if (!speclist) API_ERROR("speclist==0", E_BADARGS);
+            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
+            if (!species_mf) API_ERROR("species_mf==0", E_BADARGS);
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (ndims && !dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
-            if (nmat && !nmatspec) API_ERROR("nmatspec==0", E_BADARGS);
-            if (nspecies_mf && !species_mf) API_ERROR("species_mf==0", E_BADARGS);
+            API_ERROR("nmat==0 || ndims==0 || nspecies_mf==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (!nmatspec) API_ERROR("nmatspec==0", E_EMPTYOBJECT);
-            if (!speclist) API_ERROR("speclist==0", E_EMPTYOBJECT);
-            if (ndims < 1 || ndims > 3) API_ERROR("ndims<1 || ndims>3", E_BADARGS);
-            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_EMPTYOBJECT);
-            if (!species_mf && nspecies_mf) API_ERROR("species_mf==0", E_EMPTYOBJECT);
+            /* this is an intentionally empty object */
+            nmat = 0;
+            nmatspec = 0;
+            speclist = 0;
+            dims = 0;
+            ndims = 0;
+            nspecies_mf = 0;
+            species_mf = 0;
+            mix_speclist = 0;
+            mixlen = 0;
+            datatype = DB_FLOAT;
         }
         if (mixlen < 0)
             API_ERROR("mixlen", E_BADARGS);
@@ -8353,27 +8363,28 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
             API_ERROR("pointmesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (ndims < 0 || ndims > 3)
-            API_ERROR("ndims", E_BADARGS);
         if (nels < 0)
-            API_ERROR("nels", E_BADARGS);
-        if (ndims)
+            API_ERROR("nels<0", E_BADARGS);
+        if (nels > 0)
         {
             int i;
             void **coords2 = (void**) coords;
+            if (ndims < 1 || ndims > 3)
+                API_ERROR("ndims < 1 || ndims > 3", E_BADARGS);
             for (i = 0; i < ndims && coords; i++)
                 if (coords2[i] == 0) coords = 0;
+            if (!coords)
+                API_ERROR("coords==0 || coords[i]==0 for some i", E_BADARGS);
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (ndims && !coords) API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            if (nels && !coords) API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
+            API_ERROR("nels==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (!ndims) API_ERROR("ndims==0", E_EMPTYOBJECT);
-            if (!nels) API_ERROR("nels==0", E_EMPTYOBJECT);
-            if (!coords) API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
+            ndims = 0;
+            coords = 0;
+            datatype = DB_FLOAT;
         }
         if (!dbfile->pub.p_pm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -8434,26 +8445,27 @@ DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
         if (db_VariableNameValid((char *)mname) == 0)
             API_ERROR("pointmesh name", E_INVALIDNAME);
         if (nvars < 0)
-            API_ERROR("nvars", E_BADARGS);
+            API_ERROR("nvars<0", E_BADARGS);
         if (nels < 0)
-            API_ERROR("nels", E_BADARGS);
-        if (nvars)
+            API_ERROR("nels<0", E_BADARGS);
+        if (nels)
         {
             int i;
             void **vars2 = (void**) vars;
+            if (!nvars) API_ERROR("nvars==0", E_BADARGS);
             for (i = 0; i < nvars && vars; i++)
                 if (!vars2[i]) vars = 0;
+            if (!vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (nvars && !vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
-            if (nels && !vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+            API_ERROR("nels==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (nvars<1) API_ERROR("nvars<1", E_EMPTYOBJECT);
-            if (!nels) API_ERROR("nels==0", E_EMPTYOBJECT);
-            if (!vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+            nvars = 0;
+            vars = 0;
+            datatype = DB_FLOAT;
         }
         if (!dbfile->pub.p_pv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -8554,10 +8566,6 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
             API_ERROR("quadmesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if ((datatype != DB_FLOAT) && (datatype != DB_DOUBLE))
-            API_ERROR("datatype must be DB_FLOAT or DB_DOUBLE", E_BADARGS);
-        if ((coordtype != DB_COLLINEAR) && (coordtype != DB_NONCOLLINEAR))
-            API_ERROR("coordtype must be DB_COLLINEAR or DB_NONCOLLINEAR", E_BADARGS);
         if (ndims < 0)
             API_ERROR("ndims", E_BADARGS);
         if (ndims)
@@ -8568,18 +8576,29 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
                 if (!coords2[i]) coords = 0;
             for (i = 0; i < ndims && dims; i++)
                 if (!dims[i]) dims = 0;
+            if (!coords)
+                API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
+            if (!dims)
+                API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (ndims && !dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
-            if (dims && !coords) API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
+            /* this is an empty object but we don't think it was intentional */
+            API_ERROR("ndims==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (!ndims) API_ERROR("ndims==0", E_EMPTYOBJECT);
-            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
-            if (!coords) API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
+            /* this is an intentionally empty object */
+            coordnames = 0;
+            coords = 0;
+            dims = 0;
+            datatype = DB_FLOAT;
+            coordtype = DB_COLLINEAR;
         }
+        if ((datatype != DB_FLOAT) && (datatype != DB_DOUBLE))
+            API_ERROR("datatype must be DB_FLOAT or DB_DOUBLE", E_BADARGS);
+        if ((coordtype != DB_COLLINEAR) && (coordtype != DB_NONCOLLINEAR))
+            API_ERROR("coordtype must be DB_COLLINEAR or DB_NONCOLLINEAR", E_BADARGS);
         if (!dbfile->pub.p_qm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8653,30 +8672,41 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
         if (ndims)
         {
             int i;
+            void **vars2 = (void**) vars;
             for (i = 0; i < ndims && dims; i++)
                 if (!dims[i]) dims = 0;
-        }
-        if (nvars)
-        {
-            int i;
-            void **vars2 = (void**) vars;
+            if (!dims)
+                API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
+            if (nvars < 1)
+                API_ERROR("nvars<1", E_BADARGS);
             for (i = 0; i < nvars && vars; i++)
                 if (!vars2[i]) vars = 0;
+            vars2 = mixvars;
+            for (i = 0; i < nvars && mixvars; i++)
+                if (!vars2[i]) mixvars = 0;
             for (i = 0; i < nvars && varnames; i++)
                 if (!varnames[i] && !*varnames[i]) varnames = 0;
+            if (!vars)
+                API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+            if (!varnames)
+                API_ERROR("varnames==0 || varnames[i]==0||\"\"", E_BADARGS);
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (nvars && !vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
-            if (nvars && !varnames) API_ERROR("varnames==0 || varnames[i]==0||\"\"", E_BADARGS);
-            if (ndims && !dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
+            /* this is an empty object but we don't think it was intentional */
+            API_ERROR("ndims==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (nvars<1) API_ERROR("nvars<1", E_EMPTYOBJECT);
-            if (!ndims) API_ERROR("ndims==0", E_EMPTYOBJECT);
-            if (!vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
-            if (!varnames) API_ERROR("varnames==0 || varnames[i]==0||\"\"", E_BADARGS);
+            /* this is an intentionally empty object*/
+            nvars = 0;
+            vars = 0;
+            varnames = 0;
+            dims = 0;
+            mixvars = 0;
+            mixlen = 0;
+            datatype = DB_FLOAT;
+            centering = DB_NODECENT;
         }
         if (mixlen < 0)
             API_ERROR("mixlen", E_BADARGS);
@@ -8778,6 +8808,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
              int datatype, DBoptlist *optlist)
 {
     int retval;
+    char *zl_name;
 
     API_BEGIN2("DBPutUcdmesh", int, -1, name) {
         if (!dbfile)
@@ -8796,24 +8827,56 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
             API_ERROR("nnodes", E_BADARGS);
         if (nzones < 0)
             API_ERROR("nzones", E_BADARGS);
-        if (ndims)
+        if (ndims && nnodes && nzones)
         {
             int i;
             void **coords2 = (void**) coords;
             for (i = 0; i < ndims && coords; i++)
                 if (coords2[i] == 0) coords = 0;;
+            if (!coords)
+                API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
+            if (optlist && (zl_name = DBGetOption(optlist, DBOPT_PHZONELIST)))
+            {
+                if (!zl_name || !*zl_name)
+                    API_ERROR("zonelist name specified with DBOPT_PHZONELIST is null or \"\"", E_BADARGS);
+                if (db_VariableNameValid((char *)zl_name) == 0)
+                    API_ERROR("zonelist name specified with DBOPT_PHZONELIST", E_INVALIDNAME);
+            }
+            else if (zonel_name)
+            {
+                if (!*zonel_name)
+                    API_ERROR("zonel_name==\"\"", E_BADARGS);
+                if (db_VariableNameValid((char *)zonel_name) == 0)
+                    API_ERROR("zonel_name", E_INVALIDNAME);
+            }
+            else if (facel_name)
+            {
+                if (!*facel_name)
+                    API_ERROR("facel_name==\"\"", E_BADARGS);
+                if (db_VariableNameValid((char *)facel_name) == 0)
+                    API_ERROR("facel_name", E_INVALIDNAME);
+            }
+            else
+            {
+                API_ERROR("no zonelist or facelist specified", E_BADARGS);
+            }
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (ndims && !coords) API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            if (nnodes && !coords) API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            if (nzones && !nnodes) API_ERROR("nnodes==0", E_BADARGS);
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("ndims==0 || nnodes==0 || nzones==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (ndims == 0) API_ERROR("ndims==0", E_EMPTYOBJECT);
-            if (nnodes == 0) API_ERROR("nnodes==0", E_EMPTYOBJECT);
-            if (nzones == 0) API_ERROR("nzones==0", E_EMPTYOBJECT);
+            /* this is an intentionally empty object */
+            ndims = 0;
+            nnodes = 0;
+            nzones = 0;
+            coordnames = 0;
+            coords = 0;
+            zonel_name = 0;
+            facel_name = 0;
+            datatype = DB_FLOAT;
         }
         if (!dbfile->pub.p_um)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -8951,7 +9014,7 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("nels<0", E_BADARGS);
         if (mixlen < 0)
             API_ERROR("mixlen", E_BADARGS);
-        if (vars)
+        if (nvars && nels)
         {
             int i;
             void **vars2 = (void**) vars;
@@ -8959,18 +9022,35 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
                 if (vars2[i] == 0) vars = 0;
             for (i = 0; i < nvars && varnames; i++)
                 if (!varnames[i] && !*varnames[i]) varnames = 0;
+            if (mixvars)
+            {
+                vars2 = mixvars;
+                for (i = 0; i < nvars && mixvars; i++)
+                    if (vars2[i] == 0) mixvars = 0;
+            }
+            if (!vars)
+                API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+            if (!varnames)
+                API_ERROR("varnames==0 || varnames[i]==0", E_BADARGS);
+            if (mixlen && !mixvars)
+                API_ERROR("mixvars==0 || mixvars[i]==0", E_BADARGS);
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (nvars && !varnames) API_ERROR("varnames==0 || varnames[i]==0||\"\"", E_BADARGS);
-            if (nvars && !vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nels==0 || nvars==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (nvars < 1) API_ERROR("nvars<1", E_EMPTYOBJECT);
-            if (nels < 1) API_ERROR("nels<1", E_EMPTYOBJECT);
-            if (!varnames) API_ERROR("varnames==0 || varnames[i]==0||\"\"", E_EMPTYOBJECT);
-            if (!vars) API_ERROR("vars==0", E_EMPTYOBJECT);
+            /* this is an intentionally empty object */
+            nvars = 0;
+            nels = 0;
+            varnames = 0;
+            vars = 0;
+            mixvars = 0;
+            mixlen = 0;
+            datatype = DB_FLOAT;
+            centering = DB_NODECENT;
         }
         if (centering != DB_NODECENT && centering != DB_ZONECENT &&
             centering != DB_FACECENT && centering != DB_BNDCENT &&
@@ -8978,7 +9058,6 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("centering", E_BADARGS);
         if (!dbfile->pub.p_uv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-
 
         retval = (dbfile->pub.p_uv) (dbfile, (char *)vname, (char *)mname,
                                      nvars, varnames, vars, nels, mixvars,
@@ -9293,35 +9372,38 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nbounds < 0)
-            API_ERROR("nbounds", E_BADARGS);
+            API_ERROR("nbounds<0", E_BADARGS);
+        if (ndims < 0)
+            API_ERROR("ndims<0", E_BADARGS);
         if (lcoeffs < 0)
-            API_ERROR("lcoeffs", E_BADARGS);
-        if (SILO_Globals.allowEmptyObjects)
+            API_ERROR("lcoeffs<0", E_BADARGS);
+        if (ndims && nbounds && lcoeffs)
         {
-            if (nbounds && !typeflags) API_ERROR("typeflags==0", E_BADARGS);
-            if (lcoeffs && !coeffs) API_ERROR("coeffs==0", E_BADARGS);
-            if (coeffs && !extents) API_ERROR("extents==0", E_BADARGS);
-            if (ndims && !(ndims == 2 || ndims == 3))
+            if (!(ndims == 2 || ndims == 3))
                 API_ERROR("ndims must be either 2 or 3", E_BADARGS);
-            if (zonel_name)
-            {
-                if (!*zonel_name) API_ERROR("zonelist name", E_BADARGS);
-                if (!db_VariableNameValid((char *)zonel_name)) API_ERROR("zonelist name", E_INVALIDNAME);
-            }
+            if (!typeflags) API_ERROR("typeflags==0", E_BADARGS);
+            if (!coeffs) API_ERROR("coeffs==0", E_BADARGS);
+            if (!extents) API_ERROR("extents==0", E_BADARGS);
+            if (!zonel_name || !*zonel_name) API_ERROR("zonel_name", E_BADARGS);
+            if (db_VariableNameValid((char *)zonel_name) == 0)
+                API_ERROR("zonelist name", E_INVALIDNAME);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            API_ERROR("nbounds==0 || ndims==0 || lcoeffs==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (!nbounds) API_ERROR("nbounds==0", E_EMPTYOBJECT);
-            if (!lcoeffs) API_ERROR("lcoeffs==0", E_EMPTYOBJECT);
-            if (!typeflags) API_ERROR("type flags", E_EMPTYOBJECT);
-            if (!coeffs) API_ERROR("coefficients", E_EMPTYOBJECT);
-            if (!extents) API_ERROR("extents", E_EMPTYOBJECT);
-            if (!zonel_name || !*zonel_name)
-                API_ERROR("zonelist name", E_BADARGS);
-            if (db_VariableNameValid((char *)zonel_name) == 0)
-                API_ERROR("zonelist name", E_INVALIDNAME);
-            if (!(ndims == 2 || ndims == 3))
-                API_ERROR("ndims must be either 2 or 3", E_BADARGS);
+            /* this is an intentionally empty object */
+            ndims = 0;
+            nbounds = 0;
+            typeflags = 0;
+            bndids = 0;
+            coeffs = 0;
+            lcoeffs = 0;
+            datatype = DB_FLOAT;
+            extents = 0;
+            zonel_name = 0;
         }
         if (!dbfile->pub.p_csgm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -9510,35 +9592,36 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
             API_ERROR("CSGmesh name", E_BADARGS);
         if (db_VariableNameValid((char *)meshname) == 0)
             API_ERROR("CSGmesh name", E_INVALIDNAME);
-        if (!(centering == DB_ZONECENT || centering == DB_BNDCENT)) 
-            API_ERROR("centering", E_BADARGS);
         if (nvars < 0)
             API_ERROR("nvars<0", E_BADARGS);
         if (nvals < 0)
             API_ERROR("nvals<0", E_BADARGS);
-        if (nvars)
+        if (nvars && nvals)
         {
             int i;
             for (i = 0; i < nvars && vars; i++)
                 if (!vars[i]) vars = 0;
             for (i = 0; i < nvars && varnames; i++)
                 if (!varnames[i] && !*varnames[i]) varnames = 0;
+            if (!vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+            if (!varnames) API_ERROR("varnames==0 || varnames[i]==0", E_BADARGS);
         }
-        if (SILO_Globals.allowEmptyObjects)
+        else if (!SILO_Globals.allowEmptyObjects)
         {
-            if (nvars && (nvars < 1 || nvars > 9)) API_ERROR("nvars<1 || nvars>9", E_BADARGS);
-            if (nvars && !vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
-            if (nvars && !varnames) API_ERROR("varnames==0 || varnames[i]==0||\"\"", E_BADARGS);
-            if (nvars && !nvals) API_ERROR("nvals==0", E_BADARGS);
-            if (nvals && !nvars) API_ERROR("nvars==0", E_BADARGS);
+            API_ERROR("nvals==0 || nvars==0", E_EMPTYOBJECT);
         }
         else
         {
-            if (!nvals) API_ERROR("nvals==0", E_EMPTYOBJECT);
-            if (!vars) API_ERROR("vars==0 || vars[i]==0", E_EMPTYOBJECT);
-            if (!varnames) API_ERROR("varnames=0 || varnames[i]==0||\"\"", E_EMPTYOBJECT);
-            if (nvars < 1 || nvars > 9) API_ERROR("nvars<1 || nvars>9", E_BADARGS);
+            /* this is an intentionally empty object */
+            nvars = 0;
+            varnames = 0;
+            vars = 0;
+            nvals = 0;
+            datatype = DB_FLOAT;
+            centering = DB_ZONECENT;
         }
+        if (!(centering == DB_ZONECENT || centering == DB_BNDCENT)) 
+            API_ERROR("centering", E_BADARGS);
         if (!dbfile->pub.p_csgv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
