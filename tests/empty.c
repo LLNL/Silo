@@ -110,10 +110,11 @@ main(int argc, char *argv[])
 
         /* Because references to the following objects will not ever appear in a
            multi-xxx object, we do not currently test for support of empties...
-               DBPutCurve, DBPutUcdsubmesh, DBPutFacelist, DBPutZonelist,
-               DBPutZonelist2 DBPutPHZonelist, DBPutCSGZonelist, DBPutMrgtree,
-               DBPutMrgvar, DBPutGroupelmap
+               DBPutUcdsubmesh, DBPutMrgtree, DBPutMrgvar, DBPutGroupelmap
         */
+
+        /* empty curve objects */
+        ASSERT(DBPutCurve(dbfile,"empty_curve",coords[0],coords[0],0,0,0),retval<0,retval==0);
 
         /* empty point meshes and vars */
         ASSERT(DBPutPointmesh(dbfile,"empty_pointmesh",1,coords,0,0,0),retval<0,retval==0);
@@ -125,10 +126,20 @@ main(int argc, char *argv[])
         ASSERT(DBPutQuadvar(dbfile,"qv","empty_quadmesh",0,cnames,vars,iarr,0,0,0,0,0,0),retval<0,retval==0);
         ASSERT(DBPutQuadvar1(dbfile,"qv1","empty_quadmesh",0,0,0,0,0,dt,ct,0),retval<0,retval==0);
 
-        /* empty ucd meshes and vars */
+        /* empty ucd meshes, facelists, zonelists and vars */
         ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh1",0,cnames,coords,8,1,"foo","bar",0,0),retval<0,retval==0);
         ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh2",1,cnames,coords,0,1,"foo","bar",0,0),retval<0,retval==0);
         ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh3",1,cnames,coords,8,0,"foo","bar",0,0),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelista",0,1,iarr,1,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelistb",1,0,iarr,1,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelistc",1,1,iarr,0,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelistd",1,1,iarr,1,1,iarr,iarr,iarr,0,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2a",0,1,iarr,1,0,0,0,iarr,iarr,iarr,1,0),retval<0,retval==0);
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2b",1,0,iarr,1,0,0,0,iarr,iarr,iarr,1,0),retval<0,retval==0);
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2c",1,1,iarr,0,0,0,0,iarr,iarr,iarr,1,0),retval<0,retval==0);
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2d",1,1,iarr,1,0,0,0,iarr,iarr,iarr,0,0),retval<0,retval==0);
+        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelista",0,iarr,1,iarr,cnames[0],1,iarr,1,iarr,0,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelistb",1,iarr,0,iarr,cnames[0],1,iarr,1,iarr,0,0,0,0),retval<0,retval==0);
         ASSERT(DBPutUcdvar(dbfile,"uva","empty_ucdmesh1",0,cnames,vars,1,vars,1,0,0,0),retval<0,retval==0);
         ASSERT(DBPutUcdvar(dbfile,"uvb","empty_ucdmesh1",1,cnames,vars,0,vars,1,0,0,0),retval<0,retval==0);
         ASSERT(DBPutUcdvar1(dbfile,"uv1","empty_ucdmesh1",var,0,vars,1,0,0,0),retval<0,retval==0);
@@ -137,6 +148,8 @@ main(int argc, char *argv[])
         ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh1",0,1,iarr,iarr,var,1,0,exts,"foo",0),retval<0,retval==0);
         ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh2",1,0,iarr,iarr,var,1,0,exts,"foo",0),retval<0,retval==0);
         ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh3",1,1,iarr,iarr,var,0,0,exts,"foo",0),retval<0,retval==0);
+        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelista",0,iarr,iarr,iarr,0,0,0,1,iarr,0),retval<0,retval==0);
+        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelistb",1,iarr,iarr,iarr,0,0,0,0,iarr,0),retval<0,retval==0);
         ASSERT(DBPutCsgvar(dbfile,"csgva","empty_csgmesh1",0,cnames,vars,1,0,0,0),retval<0,retval==0);
         ASSERT(DBPutCsgvar(dbfile,"csgvb","empty_csgmesh1",1,cnames,vars,0,0,0,0),retval<0,retval==0);
 
@@ -153,6 +166,12 @@ main(int argc, char *argv[])
 
     /* Ok, now try to read each empty object to make sure we get what we expect and nothing fails */
     dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ);
+
+    /* test read back of empty curves */
+    {   DBcurve *curve = DBGetCurve(dbfile, "empty_curve");
+        assert(DBIsEmptyCurve(curve));
+        DBFreeCurve(curve);
+    }
 
     /* test read back of empty point meshes and vars */
     {   DBpointmesh *pointmesh = DBGetPointmesh(dbfile, "empty_pointmesh");
@@ -182,13 +201,39 @@ main(int argc, char *argv[])
         }
     }
 
-    /* test read back of empty ucd meshes and vars */
+    /* test read back of empty ucd meshes, zonelists and vars */
     {   int i=0; char *mnames[] = {"empty_ucdmesh1", "empty_ucdmesh2", "empty_ucdmesh3", 0};
         while (mnames[i])
         {
             DBucdmesh *ucdmesh = DBGetUcdmesh(dbfile, mnames[i++]);
             assert(DBIsEmptyUcdmesh(ucdmesh));
             DBFreeUcdmesh(ucdmesh);
+        }
+    }
+    {   int i=0; char *flnames[] = {"empty_facelista", "empty_facelistb",
+                                    "empty_facelistc", "empty_facelistd", 0};
+        while (flnames[i])
+        {
+            DBfacelist *fl = DBGetFacelist(dbfile, flnames[i++]);
+            assert(DBIsEmptyFacelist(fl));
+            DBFreeFacelist(fl);
+        }
+    }
+    {   int i=0; char *zlnames[] = {"empty_zonelist2a", "empty_zonelist2b",
+                                    "empty_zonelist2c", "empty_zonelist2d", 0};
+        while (zlnames[i])
+        {
+            DBzonelist *zl = DBGetZonelist(dbfile, zlnames[i++]);
+            assert(DBIsEmptyZonelist(zl));
+            DBFreeZonelist(zl);
+        }
+    }
+    {   int i=0; char *zlnames[] = {"empty_phzonelista", "empty_phzonelistb", 0};
+        while (zlnames[i])
+        {
+            DBphzonelist *zl = DBGetPHZonelist(dbfile, zlnames[i++]);
+            assert(DBIsEmptyPHZonelist(zl));
+            DBFreePHZonelist(zl);
         }
     }
     {   int i=0; char *vnames[] = {"uva", "uvb", "uv1", 0};
@@ -207,6 +252,14 @@ main(int argc, char *argv[])
             DBcsgmesh *csgmesh = DBGetCsgmesh(dbfile, mnames[i++]);
             assert(DBIsEmptyCsgmesh(csgmesh));
             DBFreeCsgmesh(csgmesh);
+        }
+    }
+    {   int i=0; char *zlnames[] = {"empty_csgzonelista", "empty_csgzonelistb", 0};
+        while (zlnames[i])
+        {
+            DBcsgzonelist *zl = DBGetCSGZonelist(dbfile, zlnames[i++]);
+            assert(DBIsEmptyCSGZonelist(zl));
+            DBFreeCSGZonelist(zl);
         }
     }
     {   int i=0; char *vnames[] = {"csgva", "csgvb", 0};

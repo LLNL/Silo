@@ -865,6 +865,17 @@ static hid_t    P_ckrdprops = -1;
             if (_f) _ft = H5Tcreate(H5T_COMPOUND, 3*sizeof _m);               \
             /* MEMBER DEFINITIONS HERE... */
 
+#define MEMBER_DUMMY(TYPE,NAME) {                                             \
+    _tmp_m = T_##TYPE; /*possible function call*/                             \
+    if (_tmp_m>=0) {                                                          \
+        db_hdf5_put_cmemb(_mt, #NAME, 0, 0, NULL, _tmp_m);                    \
+        if (_f && (_tmp_f=_f->T_##TYPE)>=0) {                                 \
+            db_hdf5_put_cmemb(_ft, #NAME, _f_off, 0, NULL, _tmp_f);           \
+            _f_off += H5Tget_size(_tmp_f);                                    \
+        }                                                                     \
+    }                                                                         \
+}
+
 #define MEMBER_S(TYPE,NAME) {                                                 \
     _tmp_m = T_##TYPE; /*possible function call*/                             \
     if (_tmp_m>=0) {                                                          \
@@ -928,6 +939,7 @@ static hid_t    P_ckrdprops = -1;
         if (0==_i) _f=(DBFILE);                                               \
         else if (1==_i) break;                                                \
     }                                                                         \
+    if (!_f_off) MEMBER_DUMMY(int,dummy);                                     \
     H5Tpack(_ft);                                                             \
     db_hdf5_hdrwr(DBFILE, (char*)NAME, _mt, _ft, MEM, DBTYPE);                \
     H5Tclose(_mt);                                                            \
@@ -7699,43 +7711,19 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
             UNWIND();
         }
 
-        if (_cu._reference && (xvals || yvals)) {
-            db_perror("xvals and yvals can not be defined with DBOPT_REFERENCE",
-                      E_BADARGS, me);
-            UNWIND();
-        }
-
         /* Write X and Y arrays if supplied */
-        if (_cu._varname[0]) {
-            if (db_hdf5_fullname(dbfile, _cu._varname[0],
-                                 m.xvarname/*out*/)<0) {
-                db_perror(_cu._varname[0], E_CALLFAIL, me);
-                UNWIND();
-            }
-        }
         if (xvals) {
             db_hdf5_compwr(dbfile, dtype, 1, &npts, xvals, m.xvarname/*out*/,
                 friendly_name(name, "_xvals", 0));
-        } else if (!_cu._varname[0] && !_cu._reference) {
-            db_perror("one of xvals or xvarname must be specified",
-                      E_BADARGS, me);
-            UNWIND();
+        } else if (_cu._varname[0]) {
+            db_hdf5_fullname(dbfile, _cu._varname[0], m.xvarname/*out*/);
         }
 
-        if (_cu._varname[1]) {
-            if (db_hdf5_fullname(dbfile, _cu._varname[1],
-                                 m.yvarname/*out*/)<0) {
-                db_perror(_cu._varname[1], E_CALLFAIL, me);
-                UNWIND();
-            }
-        }
         if (yvals) {
             db_hdf5_compwr(dbfile, dtype, 1, &npts, yvals, m.yvarname/*out*/,
                 friendly_name(name, "_yvals", 0));
-        } else if (!_cu._varname[1] && !_cu._reference) {
-            db_perror("one of yvals or yvarname must be specified",
-                      E_BADARGS, me);
-            UNWIND();
+        } else if (_cu._varname[1]) {
+            db_hdf5_fullname(dbfile, _cu._varname[1], m.yvarname/*out*/);
         }
 
         /* Build the curve header in memory */
@@ -7833,9 +7821,12 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
         if (NULL==(cu=DBAllocCurve())) return NULL;
         cu->npts = m.npts;
         cu->guihide = m.guihide;
-        if ((cu->datatype = db_hdf5_GetVarType(_dbfile, 
+        cu->datatype = DB_FLOAT;
+        if (strlen(m.xvarname)) {
+            if ((cu->datatype = db_hdf5_GetVarType(_dbfile, 
                                 db_hdf5_resolvename(_dbfile, name, m.xvarname))) < 0)
-            cu->datatype = DB_FLOAT;
+                cu->datatype = DB_FLOAT;
+        }
         if (force_single_g) cu->datatype = DB_FLOAT;
         cu->title = OPTDUP(m.label);
         cu->xvarname = OPTDUP(m.xvarname);
@@ -8401,12 +8392,14 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, char const *name, int nregs,
         m.nregs = nregs;
         m.lxform = lxforms;
         m.nzones = nzones;
+        if (nregs == 0 && nzones == 0) m.origin = 1;
 
         /* Write header to file */
         STRUCT(DBcsgzonelist) {
             if (m.nregs)        MEMBER_S(int, nregs);
             if (m.lxform)       MEMBER_S(int, lxform);
             if (m.nzones)       MEMBER_S(int, nzones);
+            if (m.origin)       MEMBER_S(int, origin);
             MEMBER_S(str(m.typeflags), typeflags);
             MEMBER_S(str(m.leftids), leftids);
             MEMBER_S(str(m.rightids), rightids);
@@ -10624,12 +10617,12 @@ PrepareForZonelistCompression(DBfile_hdf5 *dbfile, char const *name,
     int const *nodelist)
 {
 	int i;
-    int ntopo = 0;
-    int zncnt = shapecnt[0];
+    int ntopo = 0, zncnt = 0;
 
     if (nshapes == 0) return 0;
     if (SILO_Globals.compressionParams == 0) return 0;
 
+    zncnt = shapecnt[0];
 #ifdef HAVE_HZIP
 
     /* hzip supports only quad/hex meshes */
