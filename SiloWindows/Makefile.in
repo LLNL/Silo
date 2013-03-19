@@ -439,6 +439,7 @@ EXTRA_DIST = \
 ./MSVC9-BSD/SiloWindows.sln\
 ./MSVC2010/BaseIncludes.props\
 ./MSVC2010/DepLibs.props\
+./MSVC2010/HDF5_Defines.props\
 ./MSVC2010/ModernDTPR.props\
 ./MSVC2010/NON_BSD_DEFINES.props\
 ./MSVC2010/NO_SEC_DEP.props\
@@ -454,6 +455,7 @@ EXTRA_DIST = \
 ./MSVC2010/pdb_detect/pdb_detect.vcxproj.filters\
 ./MSVC2010-BSD/BaseIncludes.props\
 ./MSVC2010-BSD/DepLibs.props\
+./MSVC2010-BSD/HDF5_Defines.props\
 ./MSVC2010-BSD/ModernDTPR.props\
 ./MSVC2010-BSD/NO_SEC_DEP.props\
 ./MSVC2010-BSD/QT_Defines.props\
