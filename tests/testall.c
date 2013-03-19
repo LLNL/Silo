@@ -3203,6 +3203,7 @@ build_curve (DBfile *dbfile, int driver)
       y[1][i] = cos (x[i]) ;
    }
 
+   DBSetFriendlyHDF5Names(1);
    opts = DBMakeOptlist (10) ;
    DBAddOption (opts, DBOPT_XLABEL, "X Axis") ;
    DBAddOption (opts, DBOPT_YLABEL, "Y Axis") ;
@@ -3214,18 +3215,23 @@ build_curve (DBfile *dbfile, int driver)
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   if (DB_HDF5==(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_x");
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
-   if (DB_HDF5!=(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_x");
 
    /*
     * Write the `coscurve' curve. It shares x values with the `sincurve'
     * curve.
     */
+   if (driver == DB_HDF5)
+       DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   else
+       DBAddOption(opts, DBOPT_XVARNAME, "sincurve_x");
    DBPutCurve (dbfile, "coscurve", NULL, y[1], DB_FLOAT, 20, opts) ;
+   DBClearOption(opts, DBOPT_XVARNAME);
+
    DBAddOption (opts, DBOPT_REFERENCE, "sincurve") ;
    DBPutCurve (dbfile, "sincurv1", NULL, NULL, DB_FLOAT, 20, opts);
    DBFreeOptlist (opts) ;
+   DBSetFriendlyHDF5Names(0);
 }
 
 /*-------------------------------------------------------------------------

@@ -1446,6 +1446,21 @@ DBAllocZonelist(void)
     return (zl);
 }
 
+PUBLIC int
+DBIsEmptyZonelist(DBzonelist const *zl)
+{
+    if (!zl) return 0;
+    if (zl->ndims!=0) return 0;
+    if (zl->nzones!=0) return 0;
+    if (zl->nshapes!=0) return 0;
+    if (zl->lnodelist!=0) return 0;
+    if (zl->nodelist!=0) return 0;
+    if (zl->shapecnt!=0) return 0;
+    if (zl->shapesize!=0) return 0;
+    if (zl->shapetype!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                            DBAllocPHZonelist
  *
@@ -1471,6 +1486,17 @@ DBAllocPHZonelist(void)
     return (phzl);
 }
 
+PUBLIC int
+DBIsEmptyPHZonelist(DBphzonelist const *zl)
+{
+    if (!zl) return 0;
+    if (zl->nfaces!=0) return 0;
+    if (zl->nodecnt!=0) return 0;
+    if (zl->lnodelist!=0) return 0;
+    if (zl->nodelist!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                          DBAllocCSGZonelist
  *
@@ -1494,6 +1520,19 @@ DBAllocCSGZonelist(void)
     API_END;
 
     return (csgzl);
+}
+
+PUBLIC int
+DBIsEmptyCSGZonelist(DBcsgzonelist const *zl)
+{
+    if (!zl) return 0;
+    if (zl->nregs!=0) return 0;
+    if (zl->typeflags!=0) return 0;
+    if (zl->leftids!=0) return 0;
+    if (zl->rightids!=0) return 0;
+    if (zl->nzones!=0) return 0;
+    if (zl->zonelist!=0) return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------
@@ -1661,6 +1700,20 @@ DBAllocFacelist(void)
     API_END;
 
     return (fl);
+}
+
+PUBLIC int
+DBIsEmptyFacelist(DBfacelist const *fl)
+{
+    if (!fl) return 0;
+    if (fl->ndims!=0) return 0;
+    if (fl->nfaces!=0) return 0;
+    if (fl->lnodelist!=0) return 0;
+    if (fl->nodelist!=0) return 0;
+    if (fl->nshapes!=0) return 0;
+    if (fl->shapecnt!=0) return 0;
+    if (fl->shapesize!=0) return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------
@@ -1956,6 +2009,16 @@ DBAllocCurve (void)
    } API_END ;
 
    return cu ;
+}
+
+PUBLIC int
+DBIsEmptyCurve(DBcurve const *crv)
+{
+    if (!crv) return 0;
+    if (crv->npts!=0) return 0;
+    if (crv->x!=0) return 0;
+    if (crv->y!=0) return 0;
+    return 1;
 }
 
 /*-------------------------------------------------------------------------

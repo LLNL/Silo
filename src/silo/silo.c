@@ -7639,13 +7639,48 @@ DBPutCurve (DBfile *dbfile, const char *name, void *xvals, void *yvals,
             API_ERROR("curve name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (npts <= 0)
+        if (npts < 0)
             API_ERROR("number of values", E_BADARGS);
+        if (npts)
+        {
+            if (DBGetOption(opts, DBOPT_REFERENCE))
+            {
+                if (yvals || xvals)
+                    API_ERROR("xvals & yvals must be null when using DBOPT_REFERENCE", E_BADARGS);
+            }
+            else
+            {
+                if (!xvals && !DBGetOption(opts, DBOPT_XVARNAME))
+                    API_ERROR("xvals==0 || DBOPT_XVARNAME", E_BADARGS);
+                if (xvals && DBGetOption(opts, DBOPT_XVARNAME))
+                    API_ERROR("xvals!=0 && DBOPT_XVARNAME", E_BADARGS);
+                if (!yvals && !DBGetOption(opts, DBOPT_YVARNAME))
+                    API_ERROR("yvals==0 || DBOPT_YVARNAME", E_BADARGS);
+                if (yvals && DBGetOption(opts, DBOPT_YVARNAME))
+                    API_ERROR("yvals!=0 && DBOPT_YVARNAME", E_BADARGS);
+            }
+        }
+        else if (!SILO_Globals.allowEmptyObjects &&
+                 !DBGetOption(opts, DBOPT_REFERENCE))
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("npts==0", E_EMPTYOBJECT);
+        }
+        else
+        {
+            /* this is an intentionally empty object */
+            npts = 0;
+            xvals = 0;
+            yvals = 0;
+            datatype = DB_FLOAT;
+        }
+
         if (NULL == dbfile->pub.p_cu)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.p_cu) (dbfile, (char *)name, xvals, yvals,
                                      datatype, npts, opts);
+
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -7757,18 +7792,43 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
             API_ERROR("ndims", E_BADARGS);
         if (lnodelist < 0)
             API_ERROR("lnodelist", E_BADARGS);
-        if (!nodelist && lnodelist)
-            API_ERROR("nodelist", E_BADARGS);
-        if (origin != 0 && origin != 1)
-            API_ERROR("origin", E_BADARGS);
         if (nshapes < 0)
             API_ERROR("nshapes", E_BADARGS);
-        if (!shapesize && nshapes)
-            API_ERROR("shapesize", E_BADARGS);
-        if (!shapecnt && nshapes)
-            API_ERROR("shapecnt", E_BADARGS);
         if (ntypes < 0)
             API_ERROR("ntypes", E_BADARGS);
+        if (nfaces && ndims && lnodelist && nshapes)
+        {
+            if (!nodelist)
+                API_ERROR("nodelist", E_BADARGS);
+            if (!shapesize)
+                API_ERROR("shapesize", E_BADARGS);
+            if (!shapecnt)
+                API_ERROR("shapecnt", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nfaces==0 || ndims==0 || lnodelist==0 || nshapes==0", E_EMPTYOBJECT);
+        }
+        else
+        {
+            /* this is an intentionally empty object */
+            nfaces = 0;
+            ndims = 0;
+            nodelist = 0;
+            lnodelist = 0;
+            origin = 0; /* HDF5 driver needs something non-zero */
+            zoneno = 0;
+            shapesize = 0;
+            shapecnt = 0;
+            nshapes = 0;
+            types = 0;
+            typelist = 0;
+            ntypes = 0;
+        }
+        if (origin != 0 && origin != 1)
+            API_ERROR("origin", E_BADARGS);
+
         if (!dbfile->pub.p_fl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8835,7 +8895,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
                 if (coords2[i] == 0) coords = 0;;
             if (!coords)
                 API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            if (optlist && (zl_name = DBGetOption(optlist, DBOPT_PHZONELIST)))
+            if (zl_name = DBGetOption(optlist, DBOPT_PHZONELIST))
             {
                 if (!zl_name || !*zl_name)
                     API_ERROR("zonelist name specified with DBOPT_PHZONELIST is null or \"\"", E_BADARGS);
@@ -9234,28 +9294,49 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
             API_ERROR("nzones", E_BADARGS);
         if (ndims < 0)
             API_ERROR("ndims", E_BADARGS);
-        if (lnodelist <= 0)
+        if (lnodelist < 0)
             API_ERROR("lnodelist", E_BADARGS);
-        if (!nodelist && lnodelist)
-            API_ERROR("nodelist", E_BADARGS);
+        if (nshapes < 0)
+            API_ERROR("nshapes", E_BADARGS);
+        if (nzones && ndims && lnodelist && nshapes)
+        {
+            if (!nodelist)
+                API_ERROR("nodelist", E_BADARGS);
+            if (!shapetype)
+                API_ERROR("shape type", E_BADARGS);
+            if (!shapesize)
+                API_ERROR("shape size", E_BADARGS);
+            if (!shapecnt)
+                API_ERROR("shape count", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nzones==0 || ndims==0 || lnodelist==0 || nshapes==0", E_EMPTYOBJECT);
+        }
+        else
+        {
+            /* this is an intentionally empty object */
+            nzones = 0;
+            ndims = 0;
+            nodelist = 0;
+            lnodelist = 0;
+            origin = 0; /* something has to be non-zero for HDF5 driver to be 'ok' */
+            lo_offset = 0;
+            hi_offset = 0;
+            shapetype = 0;
+            shapesize = 0;
+            shapecnt = 0;
+            nshapes = 0;
+        }
         if (0 != origin && 1 != origin)
             API_ERROR("origin", E_BADARGS);
         if (lo_offset < 0)
             API_ERROR("lo_offset", E_BADARGS);
         if (hi_offset < 0)
             API_ERROR("hi_offset", E_BADARGS);
-        if (nshapes < 0)
-            API_ERROR("nshapes", E_BADARGS);
-        if (!shapetype && nshapes)
-            API_ERROR("shape type", E_BADARGS);
-        if (!shapesize && nshapes)
-            API_ERROR("shape size", E_BADARGS);
-        if (!shapecnt && nshapes)
-            API_ERROR("shape count", E_BADARGS);
         if (!dbfile->pub.p_zl2)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-
-
         retval = (dbfile->pub.p_zl2) (dbfile, (char *)name, nzones, ndims,
                                       nodelist, lnodelist, origin, lo_offset,
                                       hi_offset, shapetype, shapesize,
@@ -9303,17 +9384,38 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
             API_ERROR("zonelist name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-
-        if (nfaces <= 0)
+        if (nfaces < 0)
             API_ERROR("nfaces", E_BADARGS);
         if (!nodecnt && nfaces)
             API_ERROR("nodecnt", E_BADARGS);
-        if (lnodelist <= 0)
+        if (lnodelist < 0)
             API_ERROR("lnodelist", E_BADARGS);
-        if (!nodelist && lnodelist)
-            API_ERROR("nodelist", E_BADARGS);
-
-
+        if (nfaces && lnodelist)
+        {
+            if (!nodelist)
+                API_ERROR("nodelist", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nfaces==0 || lodelist==0", E_EMPTYOBJECT);
+        }
+        else
+        {
+            /* this is an intentionally empty object */
+            nfaces = 0;
+            nodecnt = 0;
+            lnodelist = 0;
+            nodelist = 0;
+            extface = 0;
+            nzones = 0;
+            facecnt = 0;
+            lfacelist = 0;
+            facelist = 0;
+            origin = 0; /* HDF5 driver needs something non-zero */
+            lo_offset = 0;
+            hi_offset = 0;
+        }
         if (0 != origin && 1 != origin)
             API_ERROR("origin", E_BADARGS);
         if (nzones>0 && ((lo_offset < 0) || (lo_offset >= nzones)))
@@ -9492,20 +9594,42 @@ DBPutCSGZonelist(DBfile *dbfile, const char *name, int nregs,
             API_ERROR("zonelist name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (nregs <= 0)
+        if (nregs < 0)
             API_ERROR("nregs", E_BADARGS);
-        if (!typeflags)
-            API_ERROR("typeflags", E_BADARGS);
-        if (!leftids)
-            API_ERROR("leftids", E_BADARGS);
-        if (!rightids)
-            API_ERROR("rightids", E_BADARGS);
-        if ((xforms && lxforms <= 0) || (!xforms && lxforms > 0))
-            API_ERROR("xforms and lxforms", E_BADARGS);
-        if (nzones <= 0)
+        if (nzones < 0)
             API_ERROR("nzones", E_BADARGS);
-        if (!zonelist)
-            API_ERROR("zonelist", E_BADARGS);
+        if (nregs && nzones)
+        {
+            if (!typeflags)
+                API_ERROR("typeflags", E_BADARGS);
+            if (!leftids)
+                API_ERROR("leftids", E_BADARGS);
+            if (!rightids)
+                API_ERROR("rightids", E_BADARGS);
+            if (!zonelist)
+                API_ERROR("zonelist", E_BADARGS);
+            if ((xforms && lxforms <= 0) || (!xforms && lxforms > 0))
+                API_ERROR("xforms and lxforms", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("ndims==0 || nnodes==0 || nzones==0", E_EMPTYOBJECT);
+        }
+        else
+        {
+            /* this is an intentionally empty object */
+            nregs = 0;
+            typeflags = 0;
+            leftids = 0;
+            rightids = 0;
+            xforms = 0;
+            lxforms = 0;
+            datatype = DB_FLOAT;
+            nzones = 0;
+            zonelist = 0;
+        }
+
         if (!dbfile->pub.p_csgzl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 

@@ -3703,12 +3703,14 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
    if (NULL == (cu = DBAllocCurve ())) return NULL ;
    *cu = tmpcu;
 
+#if 0
    if (cu->npts<=0)
    {
       DBFreeCurve (cu) ;
       db_perror (name, E_NOTFOUND, me) ;
       return NULL ;
    }
+#endif
 
    if (DB_DOUBLE == cu->datatype && PJ_InqForceSingle())
       cu->datatype = DB_FLOAT ;
@@ -7612,36 +7614,18 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
     * Y values array must be the null pointer!
     */
    dtype_s = db_GetDatatypeString (dtype) ;
-   if (_cu._reference && (xvals || yvals)) {
-      return db_perror ("vals argument can not be used with reference option",
-                        E_BADARGS, me) ;
-   }
    if (_cu._varname[0]) {
-      if (xvals) {
-         return db_perror ("xvals argument specified with xvarname option",
-                           E_BADARGS, me) ;
-      } else if (!_cu._varname[0]) {
-         DBAddVarComponent (obj, "xvals", _cu._varname[0]) ;
-      } 
+      DBAddVarComponent (obj, "xvals", _cu._varname[0]) ;
    } else {
-      if (!xvals && !_cu._reference) {
-         return db_perror ("xvals", E_BADARGS, me) ;
-      } else if (xvals && !_cu._reference) {
+      if (xvals && !_cu._reference) {
          DBWriteComponent (_dbfile, obj, "xvals", name, dtype_s,
                         xvals, 1, &lnpts);
       }
    }
    if (_cu._varname[1]) {
-      if (yvals) {
-         return db_perror ("yvals argument specified with yvarname option",
-                           E_BADARGS, me) ;
-      } else if (!_cu._varname[1]) {
-         DBAddVarComponent (obj, "yvals", _cu._varname[1]) ;
-      }
+      DBAddVarComponent (obj, "yvals", _cu._varname[1]) ;
    } else {
-      if (!yvals && !_cu._reference) {
-         return db_perror ("yvals", E_BADARGS, me) ;
-      } else if (yvals && !_cu._reference) {
+      if (yvals && !_cu._reference) {
          DBWriteComponent (_dbfile, obj, "yvals", name, dtype_s,
                         yvals, 1, &lnpts);
       }
