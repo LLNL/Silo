@@ -4565,6 +4565,24 @@ DBUNREGFOPTS_FC ( int *opts_set_id )
 }
 
 SILO_API FORTRAN
+DBSETEMPTYOK_FC(int *ok)
+{
+    API_BEGIN("dbsetemptyok", int, -1) {
+        API_RETURN(DBSetAllowEmptyObjects(*ok));
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+SILO_API FORTRAN
+DBGETEMPTYOK_FC()
+{
+    API_BEGIN("dbgetemptyok", int, -1) {
+        API_RETURN(DBGetAllowEmptyObjects());
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+SILO_API FORTRAN
 DBUNREGAFOPTS_FC ()
 {
     API_BEGIN("dbunregafopts", int, -1) {
