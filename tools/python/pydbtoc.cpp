@@ -134,6 +134,7 @@ static int DBtoc_as_string(PyObject *self, char *s)
     PRINT_OBJS(qmesh);
     PRINT_OBJS(qvar);
     PRINT_OBJS(ucdmesh);
+    PRINT_OBJS(ucdvar);
     PRINT_OBJS(ptmesh);
     PRINT_OBJS(ptvar);
     PRINT_OBJS(mat);
@@ -226,6 +227,7 @@ GET_FUNC_DEFS(defvars);
 GET_FUNC_DEFS(qmesh);
 GET_FUNC_DEFS(qvar);
 GET_FUNC_DEFS(ucdmesh);
+GET_FUNC_DEFS(ucdvar);
 GET_FUNC_DEFS(ptmesh);
 GET_FUNC_DEFS(ptvar);
 GET_FUNC_DEFS(mat);
@@ -269,6 +271,7 @@ static PyObject *DBtoc_getattr(PyObject *self, char *name)
     GET_FUNC_N(qmesh);
     GET_FUNC_N(qvar);
     GET_FUNC_N(ucdmesh);
+    GET_FUNC_N(ucdvar);
     GET_FUNC_N(ptmesh);
     GET_FUNC_N(ptvar);
     GET_FUNC_N(mat);
@@ -291,6 +294,7 @@ static PyObject *DBtoc_getattr(PyObject *self, char *name)
     GET_FUNC_NAMES(qmesh);
     GET_FUNC_NAMES(qvar);
     GET_FUNC_NAMES(ucdmesh);
+    GET_FUNC_NAMES(ucdvar);
     GET_FUNC_NAMES(ptmesh);
     GET_FUNC_NAMES(ptvar);
     GET_FUNC_NAMES(mat);
