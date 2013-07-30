@@ -1,6 +1,79 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <silo.h>
+#include <config.h>
+#ifdef HAVE_HDF5_H
+#include <hdf5.h>
+#endif
 
-extern void PrintFileComponentTypes(char const *filename, FILE* outf, int show_all_errors, int test_fic_vfd);
+extern void PrintFileComponentTypes(DBfile *dbfile, FILE* outf);
+
+static void
+ProcessSiloFile(char const *filename, int test_fic_vfd)
+{
+    DBfile *dbfile;
+
+    if (test_fic_vfd)
+    {
+#ifdef HAVE_HDF5_H
+        hid_t fapl, fid;
+        int file_len;
+        ssize_t read_len;
+        void *file_buf;
+        DBoptlist *file_optlist;
+        int fic_optset;
+        int fic_vfd;
+
+        /* Open the file using default (sec2) and get file image from it */
+        fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        file_len = (int) H5Fget_file_image(fid, NULL, (size_t)0);
+        file_buf = malloc((size_t)file_len);
+        read_len = H5Fget_file_image(fid, file_buf, (size_t)file_len);
+        H5Fclose(fid);
+
+        /* now, try to open the above buffer as a 'file' */
+        file_optlist = DBMakeOptlist(10);
+        fic_vfd = DB_H5VFD_FIC;
+        DBAddOption(file_optlist, DBOPT_H5_VFD, &fic_vfd);
+        DBAddOption(file_optlist, DBOPT_H5_FIC_SIZE, &file_len);
+        DBAddOption(file_optlist, DBOPT_H5_FIC_BUF, file_buf);
+        fic_optset = DBRegisterFileOptionsSet(file_optlist);
+
+        /* Ok, now test silo opening this 'buffer' */
+        if((dbfile = DBOpen("dummy", DB_HDF5_OPTS(fic_optset), DB_READ)) == NULL)
+        {
+            fprintf(stderr, "File: %s\n    <could not be opened>\n\n", "dummy");
+            return;
+        }
+
+        /* free up the file options set */
+        DBUnregisterFileOptionsSet(fic_optset);
+        DBFreeOptlist(file_optlist);
+
+#else
+
+        fprintf(stderr, "Cannot test FIC vfd without HDF5 library\n");
+        exit(-1);
+
+#endif
+
+    }
+    else
+    {
+        /* Open the data file. Return if it cannot be read. */
+        if((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) == NULL)
+        {
+            fprintf(stderr, "File: %s\n    <could not be opened>\n\n", filename);
+            return;
+        }
+    }
+
+    fprintf(stdout, "File: %s\n", filename);
+
+    PrintFileComponentTypes(dbfile, stdout);
+
+    DBClose(dbfile);
+}
 
 /*********************************************************************
  *
@@ -35,15 +108,19 @@ main(int argc, char *argv[])
         return 0;
     }
 
+    DBShowErrors(DB_NONE, NULL);
+
     /* Print the types for components in the specified files. */
     for(i = 1; i < argc; i++)
     {
         if (!strcmp(argv[i], "show-all-errors"))
-            show_all_errors = 1;
+            DBShowErrors(DB_ALL_AND_DRVR, NULL);
         else if (!strcmp(argv[i], "test-fic-vfd"))
             test_fic_vfd = 1;
         else
-            PrintFileComponentTypes(argv[i], stdout, show_all_errors, test_fic_vfd);
+        {
+            ProcessSiloFile(argv[i], test_fic_vfd);
+        }
     }
     
     return 0;

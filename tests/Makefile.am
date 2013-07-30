@@ -148,6 +148,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
+bcastopen_SOURCES = bcastopen.c bcastopen_test.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl

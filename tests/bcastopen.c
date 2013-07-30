@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <mpi.h>
 #include <hdf5.h>
 #include <silo.h>
@@ -5,19 +6,19 @@
 DBfile *DBOpenByBcast(char const *filename, MPI_Comm comm, int rank_of_root)
 {
     int rank;
+    int file_len;
+    void *file_buf;
     DBfile *retval = 0;
+    DBoptlist *file_optlist;
+    int fic_vfd;
+    int fic_optset;
 
     MPI_Comm_rank(comm, &rank);
 
     if (rank == rank_of_root)
     {
         hid_t fapl, fid;
-        int file_len;
         ssize_t read_len;
-        void *file_buf;
-        DBoptlist *file_optlist;
-        int fic_optset;
-        int fic_vfd;
 
         /* Just open the file at the HDF5 level
            using default (sec2) and get file image from it */

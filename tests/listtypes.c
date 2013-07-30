@@ -64,7 +64,7 @@ be used for advertising or product endorsement purposes.
 #define FREE(P) if(P) {free(P); (P) = NULL;}
 
 /* Prototypes */
-void PrintFileComponentTypes(char const *, FILE*, int, int);
+void PrintFileComponentTypes(DBfile*, FILE*);
 static void PrintObjectComponentsType(DBfile *, FILE*, char *, char *);
 
 /*********************************************************************
@@ -242,77 +242,17 @@ static int ProcessCurrentDirectory(DBfile *dbfile, FILE* outf, DBtoc *dbtoc, int
  ********************************************************************/
 
 void
-PrintFileComponentTypes(char const *filename, FILE* outf, int show_all_errors, int test_fic_vfd)
+PrintFileComponentTypes(DBfile *dbfile, FILE* outf)
 {
-    DBfile *dbfile = NULL;
     DBtoc  *dbtoc = NULL;
-
-    if (show_all_errors)
-        DBShowErrors(DB_ALL_AND_DRVR, NULL);
-    else
-        DBShowErrors(DB_NONE, NULL);
-
-    if (test_fic_vfd)
-    {
-#ifdef HAVE_HDF5_H
-        hid_t fapl, fid;
-        int file_len;
-        ssize_t read_len;
-        void *file_buf;
-        DBoptlist *file_optlist;
-        int fic_optset;
-        int fic_vfd;
-
-        /* Open the file using default (sec2) and get file image from it */
-        fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-        file_len = (int) H5Fget_file_image(fid, NULL, (size_t)0);
-        file_buf = malloc((size_t)file_len);
-        read_len = H5Fget_file_image(fid, file_buf, (size_t)file_len);
-        H5Fclose(fid);
-
-        /* now, try to open the above buffer as a 'file' */
-        file_optlist = DBMakeOptlist(10);
-        fic_vfd = DB_H5VFD_FIC;
-        DBAddOption(file_optlist, DBOPT_H5_VFD, &fic_vfd);
-        DBAddOption(file_optlist, DBOPT_H5_FIC_SIZE, &file_len);
-        DBAddOption(file_optlist, DBOPT_H5_FIC_BUF, file_buf);
-        fic_optset = DBRegisterFileOptionsSet(file_optlist);
-
-        /* Ok, now test silo opening this 'buffer' */
-        if((dbfile = DBOpen("dummy", DB_HDF5_OPTS(fic_optset), DB_READ)) == NULL)
-        {
-            fprintf(stderr, "File: %s\n    <could not be opened>\n\n", filename);
-            return;
-        }
-
-        /* free up the file options set */
-        DBUnregisterFileOptionsSet(fic_optset);
-        DBFreeOptlist(file_optlist);
-
-#else
-        fprintf(stderr, "Cannot test FIC vfd without HDF5 library\n");
-        exit(-1);
-#endif
-    }
-    else
-    {
-        /* Open the data file. Return if it cannot be read. */
-        if((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) == NULL)
-        {
-            fprintf(stderr, "File: %s\n    <could not be opened>\n\n", filename);
-            return;
-        }
-    }
 
     /* Read the file's table of contents. */
     if((dbtoc = DBGetToc(dbfile)) == NULL)
     {
-        fprintf(stderr, "File: %s\n    <could not read TOC>\n\n", filename);
+        fprintf(outf, "File: \n    <could not read TOC>\n\n");
         DBClose(dbfile);
         return;
     }
-
-    fprintf(outf, "File: %s\n", filename);
 
     if (ProcessCurrentDirectory(dbfile, outf, dbtoc, 0) <= 0)
         fprintf(outf, "<file contains no objects>\n\n");
