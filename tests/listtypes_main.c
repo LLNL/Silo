@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-extern void PrintFileComponentTypes(char const *filename, int show_all_errors, int test_fic_vfd);
+extern void PrintFileComponentTypes(char const *filename, FILE* outf, int show_all_errors, int test_fic_vfd);
 
 /*********************************************************************
  *
@@ -32,7 +32,7 @@ main(int argc, char *argv[])
     if (argc < 2)
     {
         printf("Usage: listtypes filename [filename ...]\n");
-        exit(0);
+        return 0;
     }
 
     /* Print the types for components in the specified files. */

@@ -280,8 +280,8 @@ largefile_OBJECTS = largefile.$(OBJEXT)
 largefile_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@largefile_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@largefile_DEPENDENCIES = ../src/libsiloh5.la
-listtypes_SOURCES = listtypes.c
-listtypes_OBJECTS = listtypes.$(OBJEXT)
+am_listtypes_OBJECTS = listtypes.$(OBJEXT) listtypes_main.$(OBJEXT)
+listtypes_OBJECTS = $(am_listtypes_OBJECTS)
 listtypes_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@listtypes_DEPENDENCIES = ../src/libsilo.la
 @HDF5_DRV_NEEDED_TRUE@listtypes_DEPENDENCIES = ../src/libsiloh5.la
@@ -543,7 +543,7 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_group_test_SOURCES) group_test.c \
 	$(nodist_EXTRA_ioperf_SOURCES) ioperf.c \
 	$(nodist_EXTRA_largefile_SOURCES) largefile.c \
-	$(nodist_EXTRA_listtypes_SOURCES) listtypes.c \
+	$(listtypes_SOURCES) $(nodist_EXTRA_listtypes_SOURCES) \
 	$(nodist_EXTRA_majorder_SOURCES) majorder.c \
 	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
 	$(matf77_SOURCES) $(nodist_EXTRA_matf77_SOURCES) \
@@ -590,8 +590,8 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	cpz1plt.c csg.c $(am__csgmesh_SOURCES_DIST) \
 	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) efcentering.c \
 	empty.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
-	ioperf.c largefile.c listtypes.c majorder.c mat3d_3across.c \
-	$(am__matf77_SOURCES_DIST) merge_block.c \
+	ioperf.c largefile.c $(listtypes_SOURCES) majorder.c \
+	mat3d_3across.c $(am__matf77_SOURCES_DIST) merge_block.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
 	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
 	onehex.c oneprism.c onepyramid.c onetet.c partial_io.c \
@@ -883,6 +883,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	merge_block empty majorder $(PDBTESTS) $(am__append_2) \
 	$(am__append_5)
 dir_SOURCES = dir.c testlib.c
+listtypes_SOURCES = listtypes.c listtypes_main.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl
@@ -1272,6 +1273,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_stdio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/largefile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/majorder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge_block.Po@am__quote@

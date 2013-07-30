@@ -64,7 +64,7 @@ be used for advertising or product endorsement purposes.
 #define FREE(P) if(P) {free(P); (P) = NULL;}
 
 /* Prototypes */
-void PrintFileComponentTypes(char *, FILE*, int, int);
+void PrintFileComponentTypes(char const *, FILE*, int, int);
 static void PrintObjectComponentsType(DBfile *, FILE*, char *, char *);
 
 /*********************************************************************
@@ -183,7 +183,7 @@ static int ProcessCurrentDirectory(DBfile *dbfile, FILE* outf, DBtoc *dbtoc, int
             DBSetDir(dbfile, dir_names[j]);
             current_dbtoc = DBGetToc(dbfile);
             fprintf(outf, "%sDirectory: %s\n", indent, dir_names[j]);
-            if (ProcessCurrentDirectory(dbfile, current_dbtoc, depth+1) <= 0)
+            if (ProcessCurrentDirectory(dbfile, outf, current_dbtoc, depth+1) <= 0)
                 fprintf(outf, "%s<directory contains no objects>\n\n", indent);
         }
 
@@ -314,7 +314,7 @@ PrintFileComponentTypes(char const *filename, FILE* outf, int show_all_errors, i
 
     fprintf(outf, "File: %s\n", filename);
 
-    if (ProcessCurrentDirectory(dbfile, dbtoc, outf, 0) <= 0)
+    if (ProcessCurrentDirectory(dbfile, outf, dbtoc, 0) <= 0)
         fprintf(outf, "<file contains no objects>\n\n");
 
     /* Close the file. */
@@ -372,7 +372,7 @@ PrintObjectComponentsType(DBfile *dbfile, FILE* outf, char *objname, char *inden
             if(comptype != DB_VARIABLE)
                 comp = DBGetComponent(dbfile, objname, obj->comp_names[i]);
 
-            printf(outf, "    %sComponent: %-15s  Type: %-11s",
+            fprintf(outf, "    %sComponent: %-15s  Type: %-11s",
                    indent, obj->comp_names[i], IntToTypename(comptype));
 
             if(comp != NULL)
