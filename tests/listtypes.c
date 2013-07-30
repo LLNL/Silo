@@ -56,13 +56,16 @@ be used for advertising or product endorsement purposes.
 #include <string.h>
 #include <silo.h>
 #include <config.h>
+#ifdef HAVE_HDF5_H
+#include <hdf5.h>
+#endif
 
 #define ALLOC_N(T, N) (T *)malloc((N) * sizeof(T))
 #define FREE(P) if(P) {free(P); (P) = NULL;}
 
 /* Prototypes */
-void PrintFileComponentTypes(char *);
-void PrintObjectComponentsType(DBfile *, char *, char *);
+void PrintFileComponentTypes(char *, FILE*, int, int);
+static void PrintObjectComponentsType(DBfile *, FILE*, char *, char *);
 
 /*********************************************************************
  *
@@ -87,7 +90,7 @@ void PrintObjectComponentsType(DBfile *, char *, char *);
  *   Made long long support UNconditionally compiled.
  ********************************************************************/
 
-char *
+static char *
 IntToTypename(int type)
 {
     char *retval;
@@ -127,51 +130,6 @@ IntToTypename(int type)
 
 /*********************************************************************
  *
- * Purpose: Main function for listtypes.c. This function iterates
- *          over the command line arguments and supplies them to
- *          a function that prints the component types for a file.
- *          This program tests the DBGetComponentType function.
- *
- * Programmer: Brad Whitlock
- * Date:       Thu Jan 20 13:05:37 PST 2000
- *
- * Input Arguments:
- *     argc : The number of command line arguments.
- *     argv : An array containing the command line arguments.
- *
- * Modifications:
- *     Thomas R. Treadway, Thu Jul  5 16:33:38 PDT 2007
- *     Chaneged main's return type to int, to stop gcc-4.x whining.
- *
- ********************************************************************/
-
-int
-main(int argc, char *argv[])
-{
-    int i;
-
-    if(argc < 2)
-    {
-        printf("Usage: listtypes filename [filename ...]\n");
-        exit(0);
-    }
-
-    DBShowErrors (DB_NONE, NULL);
-
-    /* Print the types for components in the specified files. */
-    for(i = 1; i < argc; i++)
-    {
-        if (!strcmp(argv[i], "show-all-errors"))
-            DBShowErrors (DB_ALL_AND_DRVR, NULL);
-        else
-            PrintFileComponentTypes(argv[i]);
-    }
-    
-    return 0;
-}
-
-/*********************************************************************
- *
  * Purpose: Macroize code that processes entries in the TOC.
  *
  * The last 'S' argument to the macro is used to handle plural or
@@ -185,12 +143,12 @@ main(int argc, char *argv[])
  *   Mark C. Miller, Wed Sep 23 11:55:48 PDT 2009
  *   Added misc. variables.
  ********************************************************************/
-#define PRINT_OBJS(theFile, theToc, theClass, Indent)                \
+#define PRINT_OBJS(theFile, outFile, theToc, theClass, Indent)       \
     nobjs += theToc->n ## theClass;                                  \
     for (i = 0; i < theToc->n ## theClass; i++)                      \
-        PrintObjectComponentsType(theFile, theToc->theClass ## _names[i], Indent);
+        PrintObjectComponentsType(theFile, outFile, theToc->theClass ## _names[i], Indent);
 
-int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
+static int ProcessCurrentDirectory(DBfile *dbfile, FILE* outf, DBtoc *dbtoc, int depth)
 {
     int i, j, nobjs;
     char indent[1024];
@@ -224,9 +182,9 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
             DBtoc *current_dbtoc;
             DBSetDir(dbfile, dir_names[j]);
             current_dbtoc = DBGetToc(dbfile);
-            printf("%sDirectory: %s\n", indent, dir_names[j]);
+            fprintf(outf, "%sDirectory: %s\n", indent, dir_names[j]);
             if (ProcessCurrentDirectory(dbfile, current_dbtoc, depth+1) <= 0)
-                printf("%s<directory contains no objects>\n\n", indent);
+                fprintf(outf, "%s<directory contains no objects>\n\n", indent);
         }
 
         /* Free the directory list. */
@@ -240,29 +198,29 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
 
     /* Print the objects in the top directory. */
     nobjs = ndirs; 
-    PRINT_OBJS(dbfile, dbtoc, obj, indent);
-    PRINT_OBJS(dbfile, dbtoc, defvars, indent);
-    PRINT_OBJS(dbfile, dbtoc, array, indent);
-    PRINT_OBJS(dbfile, dbtoc, var, indent);
-    PRINT_OBJS(dbfile, dbtoc, curve, indent);
-    PRINT_OBJS(dbfile, dbtoc, ptmesh, indent);
-    PRINT_OBJS(dbfile, dbtoc, ptvar, indent);
-    PRINT_OBJS(dbfile, dbtoc, qmesh, indent);
-    PRINT_OBJS(dbfile, dbtoc, qvar, indent);
-    PRINT_OBJS(dbfile, dbtoc, ucdmesh, indent);
-    PRINT_OBJS(dbfile, dbtoc, ucdvar, indent);
-    PRINT_OBJS(dbfile, dbtoc, csgmesh, indent);
-    PRINT_OBJS(dbfile, dbtoc, csgvar, indent);
-    PRINT_OBJS(dbfile, dbtoc, mat, indent);
-    PRINT_OBJS(dbfile, dbtoc, matspecies, indent);
-    PRINT_OBJS(dbfile, dbtoc, multimesh, indent);
-    PRINT_OBJS(dbfile, dbtoc, multimeshadj, indent);
-    PRINT_OBJS(dbfile, dbtoc, multivar, indent);
-    PRINT_OBJS(dbfile, dbtoc, multimat, indent);
-    PRINT_OBJS(dbfile, dbtoc, multimatspecies, indent);
-    PRINT_OBJS(dbfile, dbtoc, mrgtree, indent);
-    PRINT_OBJS(dbfile, dbtoc, mrgvar, indent);
-    PRINT_OBJS(dbfile, dbtoc, groupelmap, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, obj, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, defvars, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, array, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, var, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, curve, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, ptmesh, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, ptvar, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, qmesh, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, qvar, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, ucdmesh, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, ucdvar, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, csgmesh, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, csgvar, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, mat, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, matspecies, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, multimesh, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, multimeshadj, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, multivar, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, multimat, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, multimatspecies, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, mrgtree, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, mrgvar, indent);
+    PRINT_OBJS(dbfile, outf, dbtoc, groupelmap, indent);
     return nobjs;
 }
 
@@ -284,30 +242,80 @@ int ProcessCurrentDirectory(DBfile *dbfile, DBtoc *dbtoc, int depth)
  ********************************************************************/
 
 void
-PrintFileComponentTypes(char *filename)
+PrintFileComponentTypes(char const *filename, FILE* outf, int show_all_errors, int test_fic_vfd)
 {
     DBfile *dbfile = NULL;
     DBtoc  *dbtoc = NULL;
 
-    /* Open the data file. Return if it cannot be read. */
-    if((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) == NULL)
+    if (show_all_errors)
+        DBShowErrors(DB_ALL_AND_DRVR, NULL);
+    else
+        DBShowErrors(DB_NONE, NULL);
+
+    if (test_fic_vfd)
     {
-        printf("File: %s\n    <could not be opened>\n\n", filename);
-        return;
+#ifdef HAVE_HDF5_H
+        hid_t fapl, fid;
+        int file_len;
+        ssize_t read_len;
+        void *file_buf;
+        DBoptlist *file_optlist;
+        int fic_optset;
+        int fic_vfd;
+
+        /* Open the file using default (sec2) and get file image from it */
+        fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        file_len = (int) H5Fget_file_image(fid, NULL, (size_t)0);
+        file_buf = malloc((size_t)file_len);
+        read_len = H5Fget_file_image(fid, file_buf, (size_t)file_len);
+        H5Fclose(fid);
+
+        /* now, try to open the above buffer as a 'file' */
+        file_optlist = DBMakeOptlist(10);
+        fic_vfd = DB_H5VFD_FIC;
+        DBAddOption(file_optlist, DBOPT_H5_VFD, &fic_vfd);
+        DBAddOption(file_optlist, DBOPT_H5_FIC_SIZE, &file_len);
+        DBAddOption(file_optlist, DBOPT_H5_FIC_BUF, file_buf);
+        fic_optset = DBRegisterFileOptionsSet(file_optlist);
+
+        /* Ok, now test silo opening this 'buffer' */
+        if((dbfile = DBOpen("dummy", DB_HDF5_OPTS(fic_optset), DB_READ)) == NULL)
+        {
+            fprintf(stderr, "File: %s\n    <could not be opened>\n\n", filename);
+            return;
+        }
+
+        /* free up the file options set */
+        DBUnregisterFileOptionsSet(fic_optset);
+        DBFreeOptlist(file_optlist);
+
+#else
+        fprintf(stderr, "Cannot test FIC vfd without HDF5 library\n");
+        exit(-1);
+#endif
+    }
+    else
+    {
+        /* Open the data file. Return if it cannot be read. */
+        if((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)) == NULL)
+        {
+            fprintf(stderr, "File: %s\n    <could not be opened>\n\n", filename);
+            return;
+        }
     }
 
     /* Read the file's table of contents. */
     if((dbtoc = DBGetToc(dbfile)) == NULL)
     {
-        printf("File: %s\n    <could not read TOC>\n\n", filename);
+        fprintf(stderr, "File: %s\n    <could not read TOC>\n\n", filename);
         DBClose(dbfile);
         return;
     }
 
-    printf("File: %s\n", filename);
+    fprintf(outf, "File: %s\n", filename);
 
-    if (ProcessCurrentDirectory(dbfile, dbtoc, 0) <= 0)
-        printf("<file contains no objects>\n\n");
+    if (ProcessCurrentDirectory(dbfile, dbtoc, outf, 0) <= 0)
+        fprintf(outf, "<file contains no objects>\n\n");
 
     /* Close the file. */
     DBClose(dbfile);
@@ -334,8 +342,8 @@ PrintFileComponentTypes(char *filename)
  *  Added support for misc. variable printing.
  ********************************************************************/
 
-void
-PrintObjectComponentsType(DBfile *dbfile, char *objname, char *indent)
+static void
+PrintObjectComponentsType(DBfile *dbfile, FILE* outf, char *objname, char *indent)
 {
     int  i, comptype = DB_NOTYPE;
     DBobject *obj = NULL;
@@ -345,12 +353,12 @@ PrintObjectComponentsType(DBfile *dbfile, char *objname, char *indent)
     {
         int len = DBGetVarLength(dbfile, objname);
         comptype = DBGetVarType(dbfile, objname);
-        printf("%sObject: \"%s\" is a simple array\n", indent, objname);
-        printf("    Length: %d  Type: %-11s\n", len, IntToTypename(comptype));
+        fprintf(outf, "%sObject: \"%s\" is a simple array\n", indent, objname);
+        fprintf(outf, "    Length: %d  Type: %-11s\n", len, IntToTypename(comptype));
         return;
     }
 
-    printf("%sObject: \"%s\"\n", indent, objname);
+    fprintf(outf, "%sObject: \"%s\"\n", indent, objname);
     if(obj->ncomponents > 0)
     {
         void *comp = NULL;
@@ -364,7 +372,7 @@ PrintObjectComponentsType(DBfile *dbfile, char *objname, char *indent)
             if(comptype != DB_VARIABLE)
                 comp = DBGetComponent(dbfile, objname, obj->comp_names[i]);
 
-            printf("    %sComponent: %-15s  Type: %-11s",
+            printf(outf, "    %sComponent: %-15s  Type: %-11s",
                    indent, obj->comp_names[i], IntToTypename(comptype));
 
             if(comp != NULL)
@@ -375,31 +383,31 @@ PrintObjectComponentsType(DBfile *dbfile, char *objname, char *indent)
                 switch(comptype)
                 {
                 case DB_INT:
-                    printf(" Value: %d\n", *((int *)comp));
+                    fprintf(outf, " Value: %d\n", *((int *)comp));
                     break;
                 case DB_CHAR:
-                    printf(" Value: %s\n", (char *)comp);
+                    fprintf(outf, " Value: %s\n", (char *)comp);
                     break;
                 case DB_FLOAT:
-                    printf(" Value: %g\n", *((float *)comp));
+                    fprintf(outf, " Value: %g\n", *((float *)comp));
                     break;
                 case DB_DOUBLE:
-                    printf(" Value: %.30g\n", *((double *)comp));
+                    fprintf(outf, " Value: %.30g\n", *((double *)comp));
                     break;
                 default:
-                    printf(" Value: ???\n");
+                    fprintf(outf, " Value: ???\n");
                 }
 
                 /* Free the component memory. */
                 free(comp);
             }
             else
-                printf("\n");
+                fprintf(outf, "\n");
         }
-        printf("\n");
+        fprintf(outf, "\n");
     }
     else
-        printf("    %s<no components>\n\n", indent);
+        fprintf(outf, "    %s<no components>\n\n", indent);
 
     /* Free the object.*/
     DBFreeObject(obj);

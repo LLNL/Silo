@@ -216,6 +216,7 @@ be used for advertising or product endorsement purposes.
 #define DB_H5VFD_MPIO    8
 #define DB_H5VFD_MPIP    9
 #define DB_H5VFD_SILO    10
+#define DB_H5VFD_FIC     11 /* File Image in Core */
 
 /* Macro for defining various HDF5 vfds as 'type' arg in create/open.
    The 11 bit shift is to avoid possible collision with older versions
@@ -237,6 +238,7 @@ be used for advertising or product endorsement purposes.
 #define DB_FILE_OPTS_H5_DEFAULT_MPIP    DB_H5VFD_MPIP
 #define DB_FILE_OPTS_H5_DEFAULT_SILO    DB_H5VFD_SILO 
 #define DB_FILE_OPTS_LAST DB_FILE_OPTS_H5_DEFAULT_SILO
+/* note: no possible *default* settings for DB_H5VFD_FIC */
 
 /* Various default HDF5 driver options. Users can define their own
    sets of options using DBRegisterFileOptionsSets(). */
@@ -503,6 +505,8 @@ typedef enum {
 #define DBOPT_H5_SILO_BLOCK_COUNT   528
 #define DBOPT_H5_SILO_LOG_STATS     529
 #define DBOPT_H5_SILO_USE_DIRECT    530
+#define DBOPT_H5_FIC_SIZE           531
+#define DBOPT_H5_FIC_BUF            532
 #define DBOPT_H5_LAST               599
 
 /* Error trapping method */

@@ -2344,6 +2344,21 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
 {
     int retval = db_silo_stat_one_file(name, statbuf); 
 
+    /* check for case where we're opening a buffer as a file */
+    if (opts_set_id > DB_FILE_OPTS_LAST)
+    {
+        const DBoptlist *opts = SILO_Globals.fileOptionsSets[opts_set_id-NUM_DEFAULT_FILE_OPTIONS_SETS];
+        void *p; int vfd = -1;
+        if (p = DBGetOption(opts, DBOPT_H5_VFD))
+            vfd = *((int*)p);
+        if (vfd == DB_H5VFD_FIC)
+        {
+            statbuf->s.st_mode = 0x0;
+            statbuf->s.st_mode |= S_IREAD;
+            return 0;
+        }
+    }
+
     if (opts_set_id == -1 ||
         opts_set_id == DB_FILE_OPTS_H5_DEFAULT_SPLIT ||
         opts_set_id > DB_FILE_OPTS_LAST)
@@ -2361,7 +2376,6 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
             void *p; int vfd = -1;
             const DBoptlist *opts;
 
-
             if (opts_set_id == -1)
                 opts = SILO_Globals.fileOptionsSets[i];
             else if (opts_set_id == DB_FILE_OPTS_H5_DEFAULT_SPLIT)
@@ -2375,6 +2389,7 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
                 /* ignore if options set unrelated to split vfds */
                 if (p = DBGetOption(opts, DBOPT_H5_VFD))
                     vfd = *((int*)p);
+
                 if (vfd != DB_H5VFD_SPLIT)
                     continue;
 
