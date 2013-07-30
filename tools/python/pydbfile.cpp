@@ -507,7 +507,7 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
     if (!ncomps) return NULL;
     int objtype = DBGetObjtypeTag(PyString_AsString(PyDict_GetItemString((PyObject*)dictobj, "type")));
     DBobject *siloobj = DBMakeObject(objname, objtype, ncomps);
-
+printf("writing objname = \"%s\"\n", objname);
     PyObject *key, *value;
 #if PY_VERSION_GE(2,5,0)
     Py_ssize_t pos = 0;
@@ -529,10 +529,7 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
             for (int i = 0; i < len && allint; i++)
             {
                 if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
-                {
-                    double dval = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
-                    if (dval != (int) dval) allint = false;
-                }
+                    allint = false;
             }
             if (allint)
             {
