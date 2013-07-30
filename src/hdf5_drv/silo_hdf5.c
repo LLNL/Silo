@@ -4875,6 +4875,9 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                         int size = -1;
                         void *buf = 0;
 
+                        /* cannot use backing store in this case */
+                        h5status |= H5Pset_fapl_core(retval, inc, FALSE);
+
                         /* get file image size */
                         if (p = DBGetOption(opts, DBOPT_H5_FIC_SIZE))
                             size = *((int*)p);
@@ -6592,10 +6595,6 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 db_perror(msg, E_BADARGS, me);
                 UNWIND();
             }
-
-        } else if (flags != OVER_WRITE && strcmp(obj->type, "unknown")) {
-            db_perror("DBobject is not type DB_USERDEF", E_BADARGS, me);
-            UNWIND();
         }
 
         /* How much memory do we need? Align all components */

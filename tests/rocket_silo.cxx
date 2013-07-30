@@ -300,7 +300,7 @@ static int WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
     int ndoms = dom_classes.size();
     vector<int> dom_map;
     zoneClasses.GetEntitiesPartitionedByClasses(dom_classes, dom_map);
-    DBPutUcdvar1(dbfile, "proc_map", "mesh", &dom_map[0], nzones, 0, 0, DB_INT, DB_ZONECENT, 0);
+    DBPutUcdvar1(dbfile, "proc_map", "mesh", (float*) &dom_map[0], nzones, 0, 0, DB_INT, DB_ZONECENT, 0);
 
     // Create MRG Tree 
     DBmrgtree *mrgt = DBMakeMrgtree(DB_UCDMESH, 0x0, 4, 0);
