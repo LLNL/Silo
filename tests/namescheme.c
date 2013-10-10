@@ -105,6 +105,8 @@ int main(int argc, char **argv)
 
     /* Test ?:: operator */
     ns = DBMakeNamescheme("@foo_%d@(n-5)?14:77:");
+    if (strcmp(DBGetName(ns, 5), "foo_77") != 0)
+        return 1;
     if (strcmp(DBGetName(ns, 6), "foo_14") != 0)
         return 1;
     DBFreeNamescheme(ns);
@@ -121,6 +123,10 @@ int main(int argc, char **argv)
 
     /* Test embedded string value results */
     ns = DBMakeNamescheme("@foo_%s@(n-5)?'master':'slave':");
+    if (strcmp(DBGetName(ns, 4), "foo_master") != 0)
+        return 1;
+    if (strcmp(DBGetName(ns, 5), "foo_slave") != 0)
+        return 1;
     if (strcmp(DBGetName(ns, 6), "foo_master") != 0)
         return 1;
     DBFreeNamescheme(ns);
@@ -183,6 +189,7 @@ int main(int argc, char **argv)
         DBfile *dbfile;
         int dims[3];
         int strListLen;
+        char *FileNumbers[] = {"","1","2","3"};
 
         /* uses same namescheme as above but am placing arrays in different dir
            relative to where I will place the namesheme */
@@ -197,6 +204,10 @@ int main(int argc, char **argv)
         char *ns3 = "|/meshes/mesh1/dom_%s_%d|$../ns_arrays/Noodle[n]|n*2+1";
         char *ns3r;
 
+        /* Test McCandless' namescheme example */
+        char *ns4 = "@%s%s@(n/4)?'myfilename.':'':@(n/4)?$/arr_dir/FileNumbers[n/4]:'':";
+        char *ns4r;
+
         dbfile = DBCreate("namescheme.silo", DB_CLOBBER, DB_LOCAL,
             "Test namescheme constructor with external arrays in file", driver);
 
@@ -207,6 +218,9 @@ int main(int argc, char **argv)
         DBWrite(dbfile, "Place", P, dims, 1, DB_INT);
         dims[0] = 4;
         DBWrite(dbfile, "Upper", U, dims, 1, DB_INT);
+        DBStringArrayToStringList(FileNumbers, 4, &strList, &strListLen);
+        dims[0] = strListLen;
+        DBWrite(dbfile, "FileNumbers", strList, dims, 1, DB_CHAR);
         DBStringArrayToStringList(N, 3, &strList, &strListLen);
         dims[0] = strListLen;
         DBWrite(dbfile, "Noodle", strList, dims, 1, DB_CHAR);
@@ -222,6 +236,8 @@ int main(int argc, char **argv)
         DBSetDir(dbfile, "/dir_2/dir_3");
         dims[0] = strlen(ns2)+1;
         DBWrite(dbfile, "ns2", ns2, dims, 1, DB_CHAR);
+        dims[0] = strlen(ns4)+1;
+        DBWrite(dbfile, "ns4", ns4, dims, 1, DB_CHAR);
 
         DBSetDir(dbfile, "/");
         DBMkDir(dbfile, "meshes");
@@ -328,6 +344,26 @@ int main(int argc, char **argv)
             DBFreeNamescheme(ns);
             DBFreeMultimesh(mm);
         }
+
+        /* Test McCandless' example */
+        DBSetDir(dbfile, "/");
+        ns4r = DBGetVar(dbfile, "/dir_2/dir_3/ns4");
+        ns = DBMakeNamescheme(ns4r, 0, dbfile, 0);
+        {
+            int q;
+            for (q = 0; q < 16; q++)
+                printf("For idx=%d, Name =\"%s\"\n", q, DBGetName(ns,q));
+        }
+        if (strcmp(DBGetName(ns, 0), "") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 1), "") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 4), "myfilename.1") != 0)
+            return 1;
+        if (strcmp(DBGetName(ns, 15), "myfilename.3") != 0)
+            return 1;
+        DBFreeNamescheme(ns);
+        free(ns4r);
 
         DBClose(dbfile);
     }
