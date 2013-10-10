@@ -175,7 +175,6 @@ BuildExprTree(const char **porig)
                 char typec = *p;
                 char tokbuf[129];
                 char *tp = tokbuf;
-                DBexprnode *subtree;
                 p++;
                 while (*p != '[')
                     *tp++ = *p++;
@@ -183,14 +182,6 @@ BuildExprTree(const char **porig)
                 *tp = '\0';
                 errno = 0;
                 tree = UpdateTree(tree, typec, 0, tokbuf);
-                p++;
-                subtree = BuildExprTree(&p);
-                if (tree->left == 0)
-                    tree->left = subtree;
-                else if (tree->right == 0)
-                    tree->right = subtree;
-                else
-                    free(subtree); /* should never hit this case */
                 break;
             }
 
@@ -202,7 +193,7 @@ BuildExprTree(const char **porig)
                 break;
             }
 
-            case '(':
+            case '(': case '[':
             {
                 DBexprnode *subtree;
                 p++;
@@ -319,9 +310,16 @@ EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
         {
             vc = EvalExprTree(ns, tree->left, n);
             tree = tree->right;
+            if (vc) 
+                vl = EvalExprTree(ns, tree->left, n);
+            else
+                vr = EvalExprTree(ns, tree->right, n);
         }
-        vl = EvalExprTree(ns, tree->left, n);
-        vr = EvalExprTree(ns, tree->right, n);
+        else
+        {
+            vl = EvalExprTree(ns, tree->left, n);
+            vr = EvalExprTree(ns, tree->right, n);
+        }
         switch (tree->type)
         {
             case '+': return vl + vr;

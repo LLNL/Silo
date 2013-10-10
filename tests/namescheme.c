@@ -189,7 +189,7 @@ int main(int argc, char **argv)
         DBfile *dbfile;
         int dims[3];
         int strListLen;
-        char *FileNumbers[] = {"","1","2","3"};
+        char *FileNumbers[] = {"1","2","3"};
 
         /* uses same namescheme as above but am placing arrays in different dir
            relative to where I will place the namesheme */
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
         char *ns3r;
 
         /* Test McCandless' namescheme example */
-        char *ns4 = "@%s%s@(n/4)?'myfilename.':'':@(n/4)?$/arr_dir/FileNumbers[n/4]:'':";
+        char *ns4 = "@%s%s@(n/4)?'myfilename.':'':@(n/4)?$/arr_dir/FileNumbers[n/4-1]:'':";
         char *ns4r;
 
         dbfile = DBCreate("namescheme.silo", DB_CLOBBER, DB_LOCAL,
@@ -218,7 +218,7 @@ int main(int argc, char **argv)
         DBWrite(dbfile, "Place", P, dims, 1, DB_INT);
         dims[0] = 4;
         DBWrite(dbfile, "Upper", U, dims, 1, DB_INT);
-        DBStringArrayToStringList(FileNumbers, 4, &strList, &strListLen);
+        DBStringArrayToStringList(FileNumbers, 3, &strList, &strListLen);
         dims[0] = strListLen;
         DBWrite(dbfile, "FileNumbers", strList, dims, 1, DB_CHAR);
         DBStringArrayToStringList(N, 3, &strList, &strListLen);
@@ -349,11 +349,6 @@ int main(int argc, char **argv)
         DBSetDir(dbfile, "/");
         ns4r = DBGetVar(dbfile, "/dir_2/dir_3/ns4");
         ns = DBMakeNamescheme(ns4r, 0, dbfile, 0);
-        {
-            int q;
-            for (q = 0; q < 16; q++)
-                printf("For idx=%d, Name =\"%s\"\n", q, DBGetName(ns,q));
-        }
         if (strcmp(DBGetName(ns, 0), "") != 0)
             return 1;
         if (strcmp(DBGetName(ns, 1), "") != 0)
