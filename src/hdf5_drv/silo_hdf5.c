@@ -239,26 +239,13 @@ PRIVATE int db_hdf5_fullname(DBfile_hdf5 *dbfile, char *name, char *full);
 PRIVATE int hdf2silo_type(hid_t type);
 
 /* callbacks prototypes for file image ops */
+#if HDF5_VERSION_GE(1,8,9)
 PRIVATE void *image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *udata);
 PRIVATE void *image_memcpy(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
 PRIVATE void *image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
 PRIVATE herr_t image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *udata);
 PRIVATE void *udata_copy(void *udata);
 PRIVATE herr_t udata_free(void *udata);
-
-/* Symbolic constants used in calls to db_StringListToStringArray
-   to indicate behavior. A '!' in front means to not perform the
-   associated action. For HDF5 driver, we handle the slash swap
-   on the 'names' member of multi-block objects only and we
-   never skip first semicolon. */
-static int const        handleSlashSwap = 1;
-static int const        skipFirstSemicolon = 0;
-
-/* Use `float' for all memory floating point values? */
-static int              force_single_g;
-
-/* used to control behavior of GetZonelist */
-static char const      *calledFromGetUcdmesh = 0;
 
 /* Data structure to pass application data to image file callbacks. */ 
 typedef struct {
@@ -274,6 +261,21 @@ typedef struct {
                                 /* be open */
     int ref_count;		/* Reference counter on udata struct */
 } db_hdf5_H5LT_file_image_ud_t;
+#endif
+
+/* Symbolic constants used in calls to db_StringListToStringArray
+   to indicate behavior. A '!' in front means to not perform the
+   associated action. For HDF5 driver, we handle the slash swap
+   on the 'names' member of multi-block objects only and we
+   never skip first semicolon. */
+static int const        handleSlashSwap = 1;
+static int const        skipFirstSemicolon = 0;
+
+/* Use `float' for all memory floating point values? */
+static int              force_single_g;
+
+/* used to control behavior of GetZonelist */
+static char const      *calledFromGetUcdmesh = 0;
 
 /* Struct used when building the CWD name */
 typedef struct silo_hdf5_comp_t {
@@ -4865,6 +4867,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     /* Set up the file image too */
                     if (vfd == DB_H5VFD_FIC)
                     {
+#if HDF5_VERSION_GE(1,8,9)
                         H5FD_file_image_callbacks_t callbacks = {&image_malloc, &image_memcpy,
                                                                  &image_realloc, &image_free,
                                                                  &udata_copy, &udata_free,
@@ -4923,6 +4926,10 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
 
                         /* Assign file image in user buffer to FAPL */
                         h5status |= H5Pset_file_image(retval, buf, (size_t)size);
+#else
+                        H5Pclose(retval);
+                        return db_perror("DB_H5VFD_FIC >= HDF5 1.8.9", E_NOTENABLEDINBUILD, me);
+#endif
                     }
 
                     break;
@@ -15161,7 +15168,8 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
 #endif
 }
 
-/* Definition of callbacks for file image operations. */
+#if HDF5_VERSION_GE(1,8,9)
+/* Definition of callbacks for file image operations. [ */
 
 /*-------------------------------------------------------------------------
 * Function: image_malloc 
@@ -15555,6 +15563,7 @@ udata_free(void *_udata)
 out:        
     return(-1);
 } /* end udata_free */
+#endif /* ] #if HDF5_VERSION_GE(1,8,9) */
 
 #else /* ] defined(HAVE_HDF5_H) && defined(HAVE_LIBHDF5) [ */
 

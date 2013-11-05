@@ -28027,7 +28027,7 @@ int main( int argc, char **argv )
 EOF
 
       ax_cv_qt_test_result="failure"
-      ax_try_1="$QT_MOC ax_qt_test.h -o moc_ax_qt_test.$ac_ext >/dev/null 2>/dev/null"
+      ax_try_1="$QT_MOC ax_qt_test.h -o moc_ax_qt_test.$ac_ext"
       { (eval echo "$as_me:$LINENO: \"$ax_try_1\"") >&5
   (eval $ax_try_1) 2>&5
   ac_status=$?
@@ -28038,7 +28038,7 @@ EOF
         echo "configure: could not run $QT_MOC on:" >&5
         cat ax_qt_test.h >&5
       else
-        ax_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_ax_qt_test.o moc_ax_qt_test.$ac_ext >/dev/null 2>/dev/null"
+        ax_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_ax_qt_test.o moc_ax_qt_test.$ac_ext"
         { (eval echo "$as_me:$LINENO: \"$ax_try_2\"") >&5
   (eval $ax_try_2) 2>&5
   ac_status=$?
@@ -28049,7 +28049,7 @@ EOF
           echo "configure: could not compile:" >&5
           cat moc_ax_qt_test.$ac_ext >&5
         else
-          ax_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o ax_qt_main.o ax_qt_main.$ac_ext >/dev/null 2>/dev/null"
+          ax_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o ax_qt_main.o ax_qt_main.$ac_ext"
           { (eval echo "$as_me:$LINENO: \"$ax_try_3\"") >&5
   (eval $ax_try_3) 2>&5
   ac_status=$?
@@ -28060,7 +28060,7 @@ EOF
             echo "configure: could not compile:" >&5
             cat ax_qt_main.$ac_ext >&5
           else
-            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS >/dev/null 2>/dev/null"
+            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS"
             { (eval echo "$as_me:$LINENO: \"$ax_try_4\"") >&5
   (eval $ax_try_4) 2>&5
   ac_status=$?
