@@ -8138,7 +8138,7 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, char const *name)
         if ((SILO_Globals.dataReadMask & DBCSGMBoundaryInfo) && (m.lcoeffs > 0))
             csgm->coeffs = db_hdf5_comprd(dbfile, m.coeffs, 0);
 
-        if ((m.zonel_name[0] && (SILO_Globals.dataReadMask & DBCSGMZonelist)))
+        if ((m.nbounds>0 && m.zonel_name[0] && (SILO_Globals.dataReadMask & DBCSGMZonelist)))
             csgm->zones = db_hdf5_GetCSGZonelist(_dbfile, 
                               db_hdf5_resolvename(_dbfile, name, m.zonel_name));
 
@@ -10023,7 +10023,7 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
            going to let it fail. */
 
         /* For compression's sake, read the zonelist first */
-        if (m.zonelist[0] && (SILO_Globals.dataReadMask & DBUMZonelist)) {
+        if (um->nnodes>0 && m.zonelist[0] && (SILO_Globals.dataReadMask & DBUMZonelist)) {
             calledFromGetUcdmesh = um->name;
             um->zones = db_hdf5_GetZonelist(_dbfile, 
                             db_hdf5_resolvename(_dbfile, name, m.zonelist));
@@ -10061,11 +10061,11 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
         um->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
 
         /* Read face, zone, and edge lists */
-        if (m.facelist[0] && (SILO_Globals.dataReadMask & DBUMFacelist)) {
+        if (um->nnodes>0 && m.facelist[0] && (SILO_Globals.dataReadMask & DBUMFacelist)) {
             um->faces = db_hdf5_GetFacelist(_dbfile,
                             db_hdf5_resolvename(_dbfile, name, m.facelist));
         }
-        if (m.phzonelist[0] && (SILO_Globals.dataReadMask & DBUMZonelist)) {
+        if (um->nnodes>0 && m.phzonelist[0] && (SILO_Globals.dataReadMask & DBUMZonelist)) {
             um->phzones = db_hdf5_GetPHZonelist(_dbfile, 
                               db_hdf5_resolvename(_dbfile, name, m.phzonelist));
         }
@@ -11204,7 +11204,8 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
     PROTECT {
         /* Set global options */
         db_ProcessOptlist(DB_MATERIAL, optlist);
-        for (i=0, nels=1; i<ndims; i++) nels *= dims[i];
+        nels = nmat==0?0:1;
+        for (i=0; i<ndims; i++) nels *= dims[i];
 
         /* Write raw data arrays */
         db_hdf5_compwr(dbfile, DB_INT, 1, &nels, matlist,
@@ -11453,7 +11454,8 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
         db_ProcessOptlist(DB_MATSPECIES, optlist);
 
         /* Write raw data arrays */
-        for (i=0, nels=1; i<ndims; i++) nels *= dims[i];
+        nels = nmat==0?0:1;
+        for (i=0; i<ndims; i++) nels *= dims[i];
         db_hdf5_compwr(dbfile, DB_INT, 1, &nels, speclist, m.speclist/*out*/,
             friendly_name(name,"_speclist", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nmat, nmatspec, m.nmatspec/*out*/,
@@ -13467,28 +13469,31 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
             _pm._dtime_set, _pm._dtime, _pm._cycle);
 
         /* Write raw data arrays */
-        for (i=0; i<ndims; i++) {
+        for (i=0; i<ndims && nels>0; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nels, coords[i],
                 m.coord[i]/*out*/, friendly_name(name, "_coord%d", &i));
         }
 
         /* Find the mesh extents from the coordinate arrays */
-        if (DB_DOUBLE==datatype) {
-            for (i=0; i<ndims; i++) {
-                _DBdarrminmax(((double**)coords)[i], nels,
-                              m.min_extents+i, m.max_extents+i);
-            }
-        } else {
-            for (i=0; i<ndims; i++) {
-                float min_extents, max_extents;
-                _DBarrminmax(coords[i], nels, &min_extents, &max_extents);
-                m.min_extents[i] = min_extents;
-                m.max_extents[i] = max_extents;
+        if (nels>0)
+        {
+            if (DB_DOUBLE==datatype) {
+                for (i=0; i<ndims; i++) {
+                    _DBdarrminmax(((double**)coords)[i], nels,
+                                  m.min_extents+i, m.max_extents+i);
+                }
+            } else {
+                for (i=0; i<ndims; i++) {
+                    float min_extents, max_extents;
+                    _DBarrminmax(coords[i], nels, &min_extents, &max_extents);
+                    m.min_extents[i] = min_extents;
+                    m.max_extents[i] = max_extents;
+                }
             }
         }
 
         /* Global node numbers */
-        if (_pm._gnodeno)
+        if (nels>0 && _pm._gnodeno)
         {
             if (_pm._llong_gnodeno)
                 db_hdf5_compwr(dbfile, DB_LONG_LONG, 1, &nels, _pm._gnodeno,

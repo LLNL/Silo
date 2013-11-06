@@ -2002,7 +2002,7 @@ SILO_API extern DBObjectType DBInqVarType(DBfile *, char const *);
 
 SILO_API extern int      DBPutCompoundarray(DBfile *, char const *, char **, int *, int,
                                    void *, int, int, DBoptlist *);
-SILO_API extern int      DBPutCurve(DBfile *, char const *, void *, void *, int, int,
+SILO_API extern int      DBPutCurve(DBfile *, char const *, const void *, const void *, int, int,
                            DBoptlist *);
 SILO_API extern int      DBPutDefvars (DBfile *, char const *, int, char **, 
                             int const *, char **, DBoptlist **);

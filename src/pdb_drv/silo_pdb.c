@@ -5362,7 +5362,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
 
    /* Optional global node number */
    um->gnznodtype = um->gnznodtype?um->gnznodtype:DB_INT;
-   if (SILO_Globals.dataReadMask & DBUMGlobNodeNo) {
+   if (um->nnodes>0 && (SILO_Globals.dataReadMask & DBUMGlobNodeNo)) {
       INIT_OBJ(&tmp_obj);
       DEFALL_OBJ("gnodeno", &tmpum.gnodeno, um->gnznodtype);
       um->gnodeno = 0;
@@ -5372,7 +5372,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
 
    /* Read facelist, zonelist, and edgelist */
 
-   if ((flname != NULL && strlen(flname) > 0)
+   if (um->nnodes>0 && (flname != NULL && strlen(flname) > 0)
        && (SILO_Globals.dataReadMask & DBUMFacelist))
    {
       DBfacelist tmpfaces;
@@ -5412,7 +5412,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
 
    }
 
-   if ((zlname != NULL && strlen(zlname) > 0)
+   if (um->nnodes>0 && (zlname != NULL && strlen(zlname) > 0)
        && (SILO_Globals.dataReadMask & DBUMZonelist))
    {
       DBzonelist tmpzones;
@@ -5482,7 +5482,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
 
    }
 
-   if (elname && *elname) {
+   if (um->nnodes>0 && elname && *elname) {
       DBedgelist tmpedges;
       memset(&tmpedges, 0, sizeof(DBedgelist));
 
@@ -5512,7 +5512,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       *(um->edges) = tmpedges;
    }
 
-   if (phzlname && *phzlname && (SILO_Globals.dataReadMask & DBUMZonelist)) {
+   if (um->nnodes>0 && phzlname && *phzlname && (SILO_Globals.dataReadMask & DBUMZonelist)) {
       um->phzones = db_pdb_GetPHZonelist(_dbfile, phzlname);
    }
 
@@ -5774,7 +5774,8 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
 
    tmpcsgm.name = STRDUP(meshname);
 
-   if ((zlname && *zlname && (SILO_Globals.dataReadMask & DBCSGMZonelist)))
+   if ((tmpcsgm.nbounds > 0 && zlname && *zlname &&
+        (SILO_Globals.dataReadMask & DBCSGMZonelist)))
       tmpcsgm.zones = db_pdb_GetCSGZonelist(_dbfile, zlname);
   
    if ((csgm = DBAllocCsgmesh()) == NULL)
@@ -7919,7 +7920,8 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
    DBWriteComponent(dbfile, obj, "dims", name, "integer", dims, 1, count);
 
    /* Do zonal material ID array */
-   for (nels = 1, i = 0; i < ndims; i++)
+   nels = ndims==0?0:1;
+   for (i = 0; i < ndims; i++)
       nels *= dims[i];
 
    count[0] = nels;
@@ -8056,7 +8058,8 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
    DBWriteComponent(dbfile, obj, "dims", name, "integer", dims, 1, count);
 
    /* Do zonal material species ID array */
-   for (nels = 1, i = 0; i < ndims; i++)
+   nels = ndims==0?0:1;
+   for (i = 0; i < ndims; i++)
       nels *= dims[i];
 
    count[0] = nels;
@@ -9318,7 +9321,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
     *  them out to output file.
     *-------------------------------------------------------------*/
    count[0] = ndims;
-   if (ndims) {
+   if (ndims && nels) {
       switch (datatype) {
       case DB_FLOAT:
          switch (ndims) {

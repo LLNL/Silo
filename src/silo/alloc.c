@@ -951,7 +951,6 @@ DBIsEmptyPointmesh(DBpointmesh const *msh)
 {
     if (!msh) return 0;
     if (msh->nels!=0) return 0;
-    if (msh->ndims!=0) return 0;
     if (msh->coords[0]!=0) return 0;
     if (msh->coords[1]!=0) return 0;
     if (msh->coords[2]!=0) return 0;
@@ -1450,7 +1449,6 @@ PUBLIC int
 DBIsEmptyZonelist(DBzonelist const *zl)
 {
     if (!zl) return 0;
-    if (zl->ndims!=0) return 0;
     if (zl->nzones!=0) return 0;
     if (zl->nshapes!=0) return 0;
     if (zl->lnodelist!=0) return 0;
@@ -1706,7 +1704,6 @@ PUBLIC int
 DBIsEmptyFacelist(DBfacelist const *fl)
 {
     if (!fl) return 0;
-    if (fl->ndims!=0) return 0;
     if (fl->nfaces!=0) return 0;
     if (fl->lnodelist!=0) return 0;
     if (fl->nodelist!=0) return 0;
