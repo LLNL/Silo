@@ -8794,7 +8794,7 @@ DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 va
         vars[0] = var;
         mixvars[0] = mixvar;
 
-        retval = DBPutQuadvar(dbfile, (char *)vname, (char *)mname, var?1:0,
+        retval = DBPutQuadvar(dbfile, (char *)vname, (char *)mname, 1,
                               varnames, vars, dims, ndims, mixvars, mixlen,
                               datatype, centering, optlist);
         db_FreeToc(dbfile);
@@ -9038,8 +9038,10 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
         if (db_VariableNameValid((char *)mname) == 0)
             API_ERROR("UCDmesh name", E_INVALIDNAME);
         if (nvars < 0)
+            API_ERROR("nvars<0", E_BADARGS);
+        if (nels < 0)
             API_ERROR("nels<0", E_BADARGS);
-        if (nvars)
+        if (nvars && nels)
         {
             int i;
             void **vars2 = (void**) vars;
@@ -9047,8 +9049,6 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
                 if (vars2[i] == 0) vars = 0;
             for (i = 0; i < nvars && varnames; i++)
                 if (!varnames[i] && !*varnames[i]) varnames = 0;
-            if (nels < 0)
-                API_ERROR("nels<0", E_BADARGS);
             if (mixlen < 0)
                 API_ERROR("mixlen", E_BADARGS);
             if (mixvars)
@@ -9067,10 +9067,11 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
         else if (!SILO_Globals.allowEmptyObjects)
         {
             /* this is an empty object but we don't know if it was intentional */
-            API_ERROR("nvars=0", E_EMPTYOBJECT);
+            API_ERROR("nvars=0 || nels==0", E_EMPTYOBJECT);
         }
         else
         {
+            nvars = 0;
             nels = 0;
             mixlen = 0;
         }
@@ -9666,15 +9667,15 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nvars < 0)
             API_ERROR("nvars<0", E_BADARGS);
-        if (nvars)
+        if (nvals < 0)
+            API_ERROR("nvals<0", E_BADARGS);
+        if (nvars && nvals)
         {
             int i;
             if (!meshname || !*meshname)
                 API_ERROR("CSGmesh name", E_BADARGS);
             if (db_VariableNameValid((char *)meshname) == 0)
                 API_ERROR("CSGmesh name", E_INVALIDNAME);
-            if (nvals < 0)
-                API_ERROR("nvals<0", E_BADARGS);
             for (i = 0; i < nvars && vars; i++)
                 if (!vars[i]) vars = 0;
             for (i = 0; i < nvars && varnames; i++)
@@ -9686,10 +9687,11 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
-            API_ERROR("nvars=0", E_EMPTYOBJECT);
+            API_ERROR("nvars=0 || nvals=0", E_EMPTYOBJECT);
         }
         else
         {
+            nvars = 0;
             nvals = 0;
         }
         if (!dbfile->pub.p_csgv)

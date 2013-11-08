@@ -104,8 +104,9 @@ main(int argc, char *argv[])
     /* first pass confirms we catch bad arguments; second pass confirms we permit empty objects */
     for (pass = 0; pass < 2; pass++)
     {
-        int dt = DB_FLOAT;
-        int ct = DB_ZONECENT;
+        const int dt = DB_FLOAT;
+        const int ct = DB_ZONECENT;
+        const int ZZ = 0; /* Used for sole arg causing emptiness */
         if (pass) DBSetAllowEmptyObjects(1);
 
         /* Because references to the following objects will not ever appear in a
@@ -114,53 +115,113 @@ main(int argc, char *argv[])
         */
 
         /* empty curve objects */
-        ASSERT(DBPutCurve(dbfile,"empty_curve",coords[0],coords[0],dt,0,0),retval<0,retval==0);
+        ASSERT(DBPutCurve(dbfile,"empty_curvea",coords[0],coords[0],dt,ZZ,0),retval<0,retval==0);
+        ASSERT(DBPutCurve(dbfile,"empty_curveb",        0,coords[0],dt,ZZ,0),retval<0,retval==0);
+        ASSERT(DBPutCurve(dbfile,"empty_curvec",coords[0],        0,dt,ZZ,0),retval<0,retval==0);
 
         /* empty point meshes and vars */
-        ASSERT(DBPutPointmesh(dbfile,"empty_pointmesh",1,coords,0,dt,0),retval<0,retval==0);
-        ASSERT(DBPutPointvar(dbfile,"pv","empty_pointmesh",1,vars,0,dt,0),retval<0,retval==0);
-        ASSERT(DBPutPointvar1(dbfile,"pv1","empty_pointmesh",var,0,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointmesh(dbfile,"empty_pointmesha",1,coords,ZZ,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointmesh(dbfile,"empty_pointmeshb",3,     0,ZZ,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointvar(dbfile,"pva","empty_pointmesha",1,vars,ZZ,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointvar(dbfile,"pvb","empty_pointmesha",3,   0,ZZ,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointvar1(dbfile,"pv1a","empty_pointmesha",var,ZZ,dt,0),retval<0,retval==0);
+        ASSERT(DBPutPointvar1(dbfile,"pv1b","empty_pointmesha",  0,ZZ,dt,0),retval<0,retval==0);
 
         /* empty quad meshes and vars */
-        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmesh",cnames,coords,iarr,0,dt,DB_COLLINEAR,0),retval<0,retval==0);
-        ASSERT(DBPutQuadvar(dbfile,"qv","empty_quadmesh",0,cnames,vars,iarr,0,0,0,dt,ct,0),retval<0,retval==0);
-        ASSERT(DBPutQuadvar1(dbfile,"qv1","empty_quadmesh",0,0,0,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmesha",cnames,coords,iarr,ZZ,dt,DB_COLLINEAR,0),retval<0,retval==0);
+        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmeshb",     0,coords,iarr,ZZ,dt,DB_COLLINEAR,0),retval<0,retval==0);
+        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmeshc",cnames,     0,iarr,ZZ,dt,DB_COLLINEAR,0),retval<0,retval==0);
+        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmeshd",cnames,coords,   0,ZZ,dt,DB_COLLINEAR,0),retval<0,retval==0);
+
+        ASSERT(DBPutQuadvar(dbfile,"qva","empty_quadmesha",1,cnames,vars,iarr,ZZ,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar(dbfile,"qvb","empty_quadmesha",2,     0,vars,iarr,ZZ,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar(dbfile,"qvc","empty_quadmesha",3,cnames,   0,iarr,ZZ,0,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar(dbfile,"qvd","empty_quadmesha",4,cnames,vars,   0,ZZ,0,0,dt,ct,0),retval<0,retval==0);
+
+        ASSERT(DBPutQuadvar1(dbfile,"qv1a","empty_quadmesha",var,iarr,ZZ,var,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar1(dbfile,"qv1b","empty_quadmesha",  0,iarr,ZZ,var,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar1(dbfile,"qv1c","empty_quadmesha",var,   0,ZZ,var,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutQuadvar1(dbfile,"qv1d","empty_quadmesha",var,iarr,ZZ,  0,0,dt,ct,0),retval<0,retval==0);
 
         /* empty ucd meshes, facelists, zonelists and vars */
-        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh1",0,cnames,coords,8,1,"foo","bar",dt,0),retval<0,retval==0);
-        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh2",0,cnames,coords,0,1,"foo","bar",dt,0),retval<0,retval==0);
-        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh3",0,cnames,coords,8,0,"foo","bar",dt,0),retval<0,retval==0);
-        ASSERT(DBPutFacelist(dbfile,"empty_facelista",0,0,iarr,1,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
-        ASSERT(DBPutFacelist(dbfile,"empty_facelistb",0,0,iarr,1,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
-        ASSERT(DBPutFacelist(dbfile,"empty_facelistc",0,0,iarr,0,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
-        ASSERT(DBPutFacelist(dbfile,"empty_facelistd",0,1,iarr,1,0,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
-        ASSERT(DBPutFacelist(dbfile,"empty_faceliste",0,1,iarr,1,1,iarr,iarr,iarr,0,iarr,iarr,1),retval<0,retval==0);
-        ASSERT(DBPutFacelist(dbfile,"empty_facelistf",0,1,iarr,1,1,iarr,iarr,iarr,1,iarr,iarr,0),retval<0,retval==0);
-        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2a",0,1,iarr,1,0,0,0,iarr,iarr,iarr,1,0),retval<0,retval==0);
-        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2b",0,0,iarr,1,0,0,0,iarr,iarr,iarr,1,0),retval<0,retval==0);
-        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2c",0,1,iarr,0,0,0,0,iarr,iarr,iarr,1,0),retval<0,retval==0);
-        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2d",0,1,iarr,1,0,0,0,iarr,iarr,iarr,0,0),retval<0,retval==0);
-        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelista",0,iarr,1,iarr,cnames[0],1,iarr,1,iarr,0,0,0,0),retval<0,retval==0);
-        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelistb",0,iarr,0,iarr,cnames[0],1,iarr,1,iarr,0,0,0,0),retval<0,retval==0);
-        ASSERT(DBPutUcdvar(dbfile,"uva","empty_ucdmesh1",0,cnames,vars,1,vars,1,dt,ct,0),retval<0,retval==0);
-        ASSERT(DBPutUcdvar(dbfile,"uvb","empty_ucdmesh1",0,cnames,vars,0,vars,1,dt,ct,0),retval<0,retval==0);
-        ASSERT(DBPutUcdvar1(dbfile,"uv1","empty_ucdmesh1",var,0,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh1",3,cnames,coords,ZZ,1,"foo","bar",dt,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh2",1,     0,coords,ZZ,1,"foo","bar",dt,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh3",2,cnames,     0,ZZ,0,"foo","bar",dt,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh4",ZZ,cnames,coords,8,1,"foo","bar",dt,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh5",ZZ,     0,coords,8,1,"foo","bar",dt,0),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh6",ZZ,cnames,     0,8,0,"foo","bar",dt,0),retval<0,retval==0);
+
+        ASSERT(DBPutFacelist(dbfile,"empty_facelista",ZZ,0,iarr,1,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelistb",ZZ,0,   0,1,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelistc",ZZ,0,iarr,1,1,   0,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelistd",ZZ,0,iarr,1,1,iarr,   0,iarr,1,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_faceliste",ZZ,0,iarr,1,1,iarr,iarr,   0,1,iarr,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelistf",ZZ,0,iarr,1,1,iarr,iarr,iarr,1,   0,iarr,1),retval<0,retval==0);
+        ASSERT(DBPutFacelist(dbfile,"empty_facelistg",ZZ,0,iarr,1,1,iarr,iarr,iarr,1,iarr,   0,1),retval<0,retval==0);
+
+        ASSERT(DBPutZonelist(dbfile,"empty_zonelista",ZZ,1,iarr,10,0,iarr,iarr,10),retval<0,retval==0);
+        ASSERT(DBPutZonelist(dbfile,"empty_zonelistb",ZZ,1,   0,10,0,iarr,iarr,10),retval<0,retval==0);
+        ASSERT(DBPutZonelist(dbfile,"empty_zonelistc",ZZ,1,iarr,10,0,   0,iarr,10),retval<0,retval==0);
+        ASSERT(DBPutZonelist(dbfile,"empty_zonelistd",ZZ,1,iarr,10,0,iarr,    0,10),retval<0,retval==0);
+
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2a",ZZ,1,iarr,1,0,0,0,iarr,iarr,iarr,1,0),retval<0,retval==0);
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2b",ZZ,0,   0,1,3,3,3,iarr,iarr,iarr,1,0),retval<0,retval==0);
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2c",ZZ,1,iarr,0,3,3,3,   0,iarr,iarr,1,0),retval<0,retval==0);
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2d",ZZ,1,iarr,1,0,3,0,iarr,   0,iarr,0,0),retval<0,retval==0);
+        ASSERT(DBPutZonelist2(dbfile,"empty_zonelist2e",ZZ,1,iarr,1,3,0,0,iarr,iarr,   0,1,0),retval<0,retval==0);
+
+        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelista",ZZ,iarr,1,iarr,cnames[0],1,iarr,1,iarr,0,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelistb",ZZ,   0,1,iarr,cnames[0],1,iarr,1,iarr,0,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelistc",ZZ,iarr,1,   0,cnames[0],1,iarr,1,iarr,0,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelistd",ZZ,iarr,1,iarr,        0,1,iarr,1,iarr,0,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutPHZonelist(dbfile,"empty_phzoneliste",ZZ,iarr,1,iarr,cnames[0],1,   0,1,iarr,0,0,0,0),retval<0,retval==0);
+        ASSERT(DBPutPHZonelist(dbfile,"empty_phzonelistf",ZZ,iarr,1,iarr,cnames[0],1,iarr,1,   0,0,0,0,0),retval<0,retval==0);
+
+        ASSERT(DBPutUcdvar(dbfile,"uva","empty_ucdmesh1",ZZ,cnames,vars,1,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uvb","empty_ucdmesh1",ZZ,     0,vars,2,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uvc","empty_ucdmesh1",ZZ,cnames,   0,3,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uvd","empty_ucdmesh1",ZZ,cnames,vars,4,   0,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uve","empty_ucdmesh1",1,cnames,vars,ZZ,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uvf","empty_ucdmesh1",2,     0,vars,ZZ,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uvg","empty_ucdmesh1",3,cnames,   0,ZZ,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar(dbfile,"uvh","empty_ucdmesh1",4,cnames,vars,ZZ,   0,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar1(dbfile,"uv1a","empty_ucdmesh1",var,ZZ,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar1(dbfile,"uv1b","empty_ucdmesh1",  0,ZZ,vars,1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutUcdvar1(dbfile,"uv1c","empty_ucdmesh1",var,ZZ,   0,1,dt,ct,0),retval<0,retval==0);
 
         /* csg meshes and vars */
-        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh1",0,1,iarr,iarr,var,1,dt,exts,"foo",0),retval<0,retval==0);
-        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh2",1,0,iarr,iarr,var,1,dt,exts,"foo",0),retval<0,retval==0);
-        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh3",1,1,iarr,iarr,var,0,dt,exts,"foo",0),retval<0,retval==0);
-        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelista",0,iarr,iarr,iarr,0,0,0,1,iarr,0),retval<0,retval==0);
-        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelistb",1,iarr,iarr,iarr,0,0,0,0,iarr,0),retval<0,retval==0);
-        ASSERT(DBPutCsgvar(dbfile,"csgva","empty_csgmesh1",0,cnames,vars,1,dt,ct,0),retval<0,retval==0);
-        ASSERT(DBPutCsgvar(dbfile,"csgvb","empty_csgmesh1",0,cnames,vars,0,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh1",ZZ, 1,iarr,iarr,var, 1,dt,exts,"foo",0),retval<0,retval==0);
+        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh2", 1,ZZ,   0,iarr,var, 1,dt,exts,"foo",0),retval<0,retval==0);
+        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh3", 1, 1,iarr,   0,var,ZZ,dt,exts,"foo",0),retval<0,retval==0);
+        ASSERT(DBPutCsgmesh(dbfile,"empty_csgmesh4", 1, 1,iarr,iarr,  0,ZZ,dt,exts,"foo",0),retval<0,retval==0);
+
+        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelista",ZZ,iarr,iarr,iarr,0,0,0, 1,iarr,0),retval<0,retval==0);
+        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelistb",ZZ,   0,iarr,iarr,0,0,0, 1,iarr,0),retval<0,retval==0);
+        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelistc",ZZ,iarr,   0,iarr,0,0,0, 1,iarr,0),retval<0,retval==0);
+        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelistd", 1,iarr,iarr,   0,0,0,0,ZZ,iarr,0),retval<0,retval==0);
+        ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzoneliste", 1,iarr,iarr,iarr,0,0,0,ZZ,   0,0),retval<0,retval==0);
+
+        ASSERT(DBPutCsgvar(dbfile,"csgva","empty_csgmesh1",ZZ,cnames,vars, 1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile,"csgvb","empty_csgmesh1",ZZ,     0,vars, 1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile,"csgvc","empty_csgmesh1",ZZ,cnames,   0, 1,dt,ct,0),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile,"csgvd","empty_csgmesh1", 1,cnames,vars,ZZ,dt,ct,0),retval<0,retval==0);
 
         /* empty materials and species */
-        ASSERT(DBPutMaterial(dbfile,"empty_mata","foo",0,iarr,iarr,iarr,1,iarr,iarr,iarr,iarr,1,dt,0),retval<0,retval==0);
-        ASSERT(DBPutMaterial(dbfile,"empty_matb","foo",0,iarr,iarr,iarr,0,iarr,iarr,iarr,iarr,1,dt,0),retval<0,retval==0);
-        ASSERT(DBPutMatspecies(dbfile,"empty_speca","empty_mata",0,iarr,iarr,iarr,1,1,var,iarr,1,dt,0),retval<0,retval==0);
-        ASSERT(DBPutMatspecies(dbfile,"empty_specb","empty_mata",0,iarr,iarr,iarr,0,1,var,iarr,1,dt,0),retval<0,retval==0);
-        ASSERT(DBPutMatspecies(dbfile,"empty_specc","empty_mata",0,iarr,iarr,iarr,1,0,var,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_mata","foo",ZZ,iarr,iarr,iarr,1,iarr,iarr,iarr,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matb","foo",ZZ,   0,iarr,iarr,1,iarr,iarr,iarr,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matc","foo",ZZ,iarr,   0,iarr,1,iarr,iarr,iarr,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matd","foo",ZZ,iarr,iarr,   0,1,iarr,iarr,iarr,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_mate","foo",ZZ,iarr,iarr,iarr,1,   0,iarr,iarr,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matf","foo",ZZ,iarr,iarr,iarr,1,iarr,   0,iarr,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matg","foo",ZZ,iarr,iarr,iarr,1,iarr,iarr,   0,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_math","foo",ZZ,iarr,iarr,iarr,1,iarr,iarr,iarr,   0,1,dt,0),retval<0,retval==0);
+
+        ASSERT(DBPutMatspecies(dbfile,"empty_speca","empty_mata",ZZ,iarr,iarr,iarr,1,1,var,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specb","empty_mata",ZZ,   0,iarr,iarr,1,1,var,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specc","empty_mata",ZZ,iarr,   0,iarr,1,1,var,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specd","empty_mata",ZZ,iarr,iarr,   0,1,1,var,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_spece","empty_mata",ZZ,iarr,iarr,iarr,1,1,  0,iarr,1,dt,0),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specf","empty_mata",ZZ,iarr,iarr,iarr,1,1,var,   0,1,dt,0),retval<0,retval==0);
     }
 
     DBClose(dbfile);
@@ -170,17 +231,25 @@ main(int argc, char *argv[])
     dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ);
 
     /* test read back of empty curves */
-    {   DBcurve *curve = DBGetCurve(dbfile, "empty_curve");
-        assert(DBIsEmptyCurve(curve));
-        DBFreeCurve(curve);
+    {   int i=0; char *cnames[] = {"empty_curvea", "empty_curveb", "empty_curvec", 0};
+        while (cnames[i])
+        {
+            DBcurve *curve = DBGetCurve(dbfile, cnames[i++]);
+            assert(DBIsEmptyCurve(curve));
+            DBFreeCurve(curve);
+        }
     }
 
     /* test read back of empty point meshes and vars */
-    {   DBpointmesh *pointmesh = DBGetPointmesh(dbfile, "empty_pointmesh");
-        assert(DBIsEmptyPointmesh(pointmesh));
-        DBFreePointmesh(pointmesh);
+    {   int i=0; char *pmnames[] = {"empty_pointmesha", "empty_pointmeshb", 0};
+        while (pmnames[i])
+        {
+            DBpointmesh *pointmesh = DBGetPointmesh(dbfile, pmnames[i++]);
+            assert(DBIsEmptyPointmesh(pointmesh));
+            DBFreePointmesh(pointmesh);
+        }
     }
-    {   int i=0; char *vnames[] = {"pv", "pv1", 0};
+    {   int i=0; char *vnames[] = {"pva", "pvb", "pv1a", "pv1b", 0};
         while (vnames[i])
         {
             DBpointvar *pointvar = DBGetPointvar(dbfile, vnames[i++]);
@@ -190,11 +259,17 @@ main(int argc, char *argv[])
     }
 
     /* test read back of empty quad meshes and vars */
-    {   DBquadmesh *quadmesh = DBGetQuadmesh(dbfile, "empty_quadmesh");
-        assert(DBIsEmptyQuadmesh(quadmesh));
-        DBFreeQuadmesh(quadmesh);
+    {   int i=0; char *qmnames[] = {"empty_quadmesha", "empty_quadmeshb",
+                                    "empty_quadmeshc", "empty_quadmeshd", 0};
+        while (qmnames[i])
+        {
+            DBquadmesh *quadmesh = DBGetQuadmesh(dbfile, qmnames[i++]);
+            assert(DBIsEmptyQuadmesh(quadmesh));
+            DBFreeQuadmesh(quadmesh);
+        }
     }
-    {   int i=0; char *vnames[] = {"qv", "qv1", 0};
+    {   int i=0; char *vnames[] = {"qva" , "qvb",  "qvc",  "qvd",
+                                   "qv1a", "qv1b", "qv1c", "qv1d", 0};
         while (vnames[i])
         {
             DBquadvar *quadvar = DBGetQuadvar(dbfile, vnames[i++]);
@@ -204,7 +279,8 @@ main(int argc, char *argv[])
     }
 
     /* test read back of empty ucd meshes, zonelists and vars */
-    {   int i=0; char *mnames[] = {"empty_ucdmesh1", "empty_ucdmesh2", "empty_ucdmesh3", 0};
+    {   int i=0; char *mnames[] = {"empty_ucdmesh1", "empty_ucdmesh2", "empty_ucdmesh3",
+                                   "empty_ucdmesh4", "empty_ucdmesh5", "empty_ucdmesh6", 0};
         while (mnames[i])
         {
             DBucdmesh *ucdmesh = DBGetUcdmesh(dbfile, mnames[i++]);
@@ -214,7 +290,8 @@ main(int argc, char *argv[])
     }
     {   int i=0; char *flnames[] = {"empty_facelista", "empty_facelistb",
                                     "empty_facelistc", "empty_facelistd",
-                                    "empty_faceliste", "empty_facelistf", 0};
+                                    "empty_faceliste", "empty_facelistf",
+                                    "empty_facelistg", 0};
         while (flnames[i])
         {
             DBfacelist *fl = DBGetFacelist(dbfile, flnames[i++]);
@@ -222,8 +299,11 @@ main(int argc, char *argv[])
             DBFreeFacelist(fl);
         }
     }
-    {   int i=0; char *zlnames[] = {"empty_zonelist2a", "empty_zonelist2b",
-                                    "empty_zonelist2c", "empty_zonelist2d", 0};
+    {   int i=0; char *zlnames[] = {"empty_zonelista", "empty_zonelistb",
+                                    "empty_zonelistc", "empty_zonelistd",
+                                    "empty_zonelist2a", "empty_zonelist2b",
+                                    "empty_zonelist2c", "empty_zonelist2d",
+                                    "empty_zonelist2e", 0};
         while (zlnames[i])
         {
             DBzonelist *zl = DBGetZonelist(dbfile, zlnames[i++]);
@@ -231,7 +311,9 @@ main(int argc, char *argv[])
             DBFreeZonelist(zl);
         }
     }
-    {   int i=0; char *zlnames[] = {"empty_phzonelista", "empty_phzonelistb", 0};
+    {   int i=0; char *zlnames[] = {"empty_phzonelista", "empty_phzonelistb",
+                                    "empty_phzonelistc", "empty_phzonelistd",
+                                    "empty_phzoneliste", "empty_phzonelistf", 0};
         while (zlnames[i])
         {
             DBphzonelist *zl = DBGetPHZonelist(dbfile, zlnames[i++]);
@@ -239,7 +321,9 @@ main(int argc, char *argv[])
             DBFreePHZonelist(zl);
         }
     }
-    {   int i=0; char *vnames[] = {"uva", "uvb", "uv1", 0};
+    {   int i=0; char *vnames[] = { "uva",  "uvb",  "uvc",
+                                    "uvd",  "uve",  "uvf", "uvg", "uvh",
+                                    "uv1a", "uv1b", "uv1c", 0};
         while (vnames[i])
         {
             DBucdvar *ucdvar = DBGetUcdvar(dbfile, vnames[i++]);
@@ -257,7 +341,9 @@ main(int argc, char *argv[])
             DBFreeCsgmesh(csgmesh);
         }
     }
-    {   int i=0; char *zlnames[] = {"empty_csgzonelista", "empty_csgzonelistb", 0};
+    {   int i=0; char *zlnames[] = {"empty_csgzonelista", "empty_csgzonelistb",
+                                    "empty_csgzonelistc", "empty_csgzonelistd", 
+                                    "empty_csgzoneliste", 0};
         while (zlnames[i])
         {
             DBcsgzonelist *zl = DBGetCSGZonelist(dbfile, zlnames[i++]);
@@ -265,7 +351,7 @@ main(int argc, char *argv[])
             DBFreeCSGZonelist(zl);
         }
     }
-    {   int i=0; char *vnames[] = {"csgva", "csgvb", 0};
+    {   int i=0; char *vnames[] = {"csgva", "csgvb", "csgvc", "csgvd", 0};
         while (vnames[i])
         {
             DBcsgvar *csgvar = DBGetCsgvar(dbfile, vnames[i++]);
@@ -275,7 +361,8 @@ main(int argc, char *argv[])
     }
 
     /* test read back of empty materials and matspecies */
-    {   int i=0; char *vnames[] = {"empty_mata", "empty_matb", 0};
+    {   int i=0; char *vnames[] = {"empty_mata", "empty_matb", "empty_matc", "empty_matd",
+                                   "empty_mate", "empty_matf", "empty_matg", "empty_math", 0};
         while (vnames[i])
         {
             DBmaterial *mat = DBGetMaterial(dbfile, vnames[i++]);
@@ -283,7 +370,8 @@ main(int argc, char *argv[])
             DBFreeMaterial(mat);
         }
     }
-    {   int i=0; char *vnames[] = {"empty_speca", "empty_specb", "empty_specc", 0};
+    {   int i=0; char *vnames[] = {"empty_speca", "empty_specb", "empty_specc",
+                                   "empty_spece", "empty_specf", 0};
         while (vnames[i])
         {
             DBmatspecies *spec = DBGetMatspecies(dbfile, vnames[i++]);

@@ -4870,7 +4870,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
     *  associated with this variable.
     */
 
-   if ((mv->nvals > 0) && (SILO_Globals.dataReadMask & DBPVData)) {
+   if ((mv->ndims>0) && (mv->nvals > 0) && (SILO_Globals.dataReadMask & DBPVData)) {
       INIT_OBJ(&tmp_obj);
 
       mv->vals = ALLOC_N(DB_DTPTR *, mv->nvals);
@@ -5167,7 +5167,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
     *  associated with this variable.
     */
 
-   if ((qv->nvals > 0) && (SILO_Globals.dataReadMask & DBQVData)) {
+   if ((qv->ndims>0) && (qv->nvals > 0) && (SILO_Globals.dataReadMask & DBQVData)) {
       INIT_OBJ(&tmp_obj);
 
       qv->vals = ALLOC_N(DB_DTPTR *, qv->nvals);
@@ -9309,7 +9309,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
     *-------------------------------------------------------------*/
    datatype_str = db_GetDatatypeString(datatype);
    count[0] = nels;
-   for (i = 0; i < ndims; i++) {
+   for (i = 0; i < ndims && nels; i++) {
       sprintf(tmp, "coord%d", i);
       DBWriteComponent(dbfile, obj, tmp, name, datatype_str,
                        coords[i], 1, count);
@@ -9503,20 +9503,23 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
     *  Write variable arrays.
     *  Set index variables and counters.
     *-----------------------------------------------------------*/
-   datatype_str = db_GetDatatypeString(datatype);
-   count[0] = nels;
-   if (nvars == 1) {
-      DBWriteComponent(dbfile, obj, "_data", name, datatype_str,
-                       vars[0], 1, count);
-   }
-   else {
-      for (i = 0; i < nvars; i++) {
-         sprintf(tmp, "%d_data", i);
-         DBWriteComponent(dbfile, obj, tmp, name, datatype_str,
-                          vars[i], 1, count);
+   if (nels)
+   {
+      datatype_str = db_GetDatatypeString(datatype);
+      count[0] = nels;
+      if (nvars == 1) {
+         DBWriteComponent(dbfile, obj, "_data", name, datatype_str,
+                          vars[0], 1, count);
       }
+      else {
+         for (i = 0; i < nvars; i++) {
+            sprintf(tmp, "%d_data", i);
+            DBWriteComponent(dbfile, obj, tmp, name, datatype_str,
+                             vars[i], 1, count);
+         }
+      }
+      FREE(datatype_str);
    }
-   FREE(datatype_str);
 
    /*-------------------------------------------------------------
     *  Build a SILO object definition for a point var. The
@@ -9908,7 +9911,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    suffix = "data";
 
    datatype_str = db_GetDatatypeString(datatype);
-   for (i = 0; i < nvars; i++) {
+   for (i = 0; i < nvars && ndims; i++) {
 
       db_mkname(dbfile->pdb, varnames[i], suffix, tmp2);
       if ((ndims > 1 && centering == DB_EDGECENT) ||
@@ -9924,7 +9927,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
       }
       else
       {
-          int k; long n=1;
+          int k; long n=ndims==0?0:1;
           for (k = 0; k < ndims; n *= count[k++]);
           if (n)
               PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i], ndims, count);

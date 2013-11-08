@@ -9248,7 +9248,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             db_perror("too many subvariables", E_BADARGS, me);
             UNWIND();
         }
-        for (i=0; i<nvars; i++) {
+        for (i=0; i<nvars && ndims; i++) {
             /* Handle adjustment for edge/face centerings */
             if ((ndims > 1 && centering == DB_EDGECENT) ||
                 (ndims > 2 && centering == DB_FACECENT))
@@ -9495,7 +9495,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
             db_perror(name, E_CALLFAIL, me);
             UNWIND();
         }
-        if (SILO_Globals.dataReadMask & DBQVData && m.nvals)
+        if (SILO_Globals.dataReadMask & DBQVData && m.nvals && m.ndims>0)
         {
             qv->vals = calloc(m.nvals, sizeof(void*));
             if (m.mixlen) qv->mixvals = calloc(m.nvals, sizeof(void*));
@@ -13717,7 +13717,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             _pm._dtime_set, _pm._dtime, _pm._cycle);
 
         /* Write raw data arrays */
-        for (i=0; i<nvars; i++) {
+        for (i=0; i<nvars && nels; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nels, vars[i],
                 m.data[i]/*out*/, friendly_name(name, nvars==1?"_data":"%d_data", &i));
         }
