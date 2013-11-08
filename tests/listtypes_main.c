@@ -4,6 +4,10 @@
 #include <config.h>
 #ifdef HAVE_HDF5_H
 #include <hdf5.h>
+#define HDF5_VERSION_GE(Maj,Min,Rel)  \
+        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
+         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
+         (H5_VERS_MAJOR>Maj))
 #endif
 
 extern void PrintFileComponentTypes(DBfile *dbfile, FILE* outf);
@@ -16,6 +20,7 @@ ProcessSiloFile(char const *filename, int test_fic_vfd)
     if (test_fic_vfd)
     {
 #ifdef HAVE_HDF5_H
+#if HDF5_VERSION_GE(1,8,9)
         hid_t fapl, fid;
         int file_len;
         ssize_t read_len;
@@ -50,6 +55,7 @@ ProcessSiloFile(char const *filename, int test_fic_vfd)
         DBUnregisterFileOptionsSet(fic_optset);
         DBFreeOptlist(file_optlist);
 
+#endif
 #else
 
         fprintf(stderr, "Cannot test FIC vfd without HDF5 library\n");

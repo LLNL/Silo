@@ -206,7 +206,7 @@ AT_SETUP(testfs)
 AT_CHECK($VALGRIND testfs $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(empty)
-AT_CHECK($VALGRIND empty $STARGS,,ignore)
+AT_CHECK($VALGRIND empty $STARGS,,ignore,ignore)
 AT_CLEANUP
 
 AT_BANNER(pythonmodule)

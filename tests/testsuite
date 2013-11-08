@@ -3565,7 +3565,7 @@ else
 fi
 at_status=$?
 at_failed=false
-at_func_diff_devnull "$at_stderr" || at_failed=:
+echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
 at_func_check_status 0 $at_status "$at_srcdir/testsuite.at:209"
 

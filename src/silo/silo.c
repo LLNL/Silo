@@ -7813,13 +7813,6 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
                 API_ERROR("shapecnt==0", E_BADARGS);
             if (ntypes < 0)
                 API_ERROR("ntypes<0", E_BADARGS);
-            if (ntypes)
-            {
-                if (!types)
-                    API_ERROR("types==0", E_BADARGS);
-                if (!typelist)
-                    API_ERROR("typelist==0", E_BADARGS);
-            }
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
@@ -8623,14 +8616,10 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
                 if (!coords2[i]) coords = 0;
             for (i = 0; i < ndims && dims; i++)
                 if (!dims[i]) dims = 0;
-            for (i = 0; i < ndims && coordnames; i++)
-                if (!coordnames[i] && !*coordnames[i]) coordnames= 0;
             if (!coords)
                 API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
             if (!dims)
                 API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
-            if (!coordnames)
-                API_ERROR("coordnames==0 || coordnames[i]==0||\"\"", E_BADARGS);
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
@@ -8866,10 +8855,6 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
                 if (coords2[i] == 0) coords = 0;;
             if (!coords)
                 API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            for (i = 0; i < ndims && coordnames; i++)
-                if (!coordnames[i] && !*coordnames[i]) coordnames= 0;
-            if (!coordnames)
-                API_ERROR("coordnames==0 || coordnames[i]==0||\"\"", E_BADARGS);
             if (zl_name = DBGetOption(optlist, DBOPT_PHZONELIST))
             {
                 if (!zl_name || !*zl_name)
