@@ -5755,6 +5755,9 @@ static void indent(struct printbuf *pb, int level, int flags)
         }
 }
 
+#define JSON_C_TO_STRING_EXTPTR_AS_BINARY (JSON_C_TO_STRING_PRETTY<<1)
+#define JSON_C_TO_STRING_EXTPTR_SKIP (JSON_C_TO_STRING_EXTPTR_AS_BINARY<<1)
+
 static int json_object_extptr_to_json_string(struct json_object* jso,
                                             struct printbuf *pb,
                                             int level,
@@ -5772,22 +5775,7 @@ static int json_object_extptr_to_json_string(struct json_object* jso,
         sprintbuf(pb, ",\"datatype\":%s", json_object_to_json_string(json_object_object_get(jso, "datatype")));
         sprintbuf(pb, ",\"ndims\":%s", json_object_to_json_string(json_object_object_get(jso, "ndims")));
         sprintbuf(pb, ",\"dims\":%s", json_object_to_json_string(json_object_object_get(jso, "dims")));
-#if 0
-        jso->_to_json_string(jso, pb, level+1, flags);
-        subobj = json_object_object_get(jso, "ptr");
-        subobj->_to_json_string(subobj, pb, level, flags);
-        subobj = json_object_object_get(jso, "datatype");
-        subobj->_to_json_string(subobj, pb, level, flags);
-        subobj = json_object_object_get(jso, "ndims");
-        subobj->_to_json_string(subobj, pb, level, flags);
-        subobj = json_object_object_get(jso, "dims");
-        subobj->_to_json_string(subobj, pb, level, flags);
-#endif
  
-        sprintbuf(pb, ",\"data\":[");
-        if (flags & JSON_C_TO_STRING_PRETTY)
-                sprintbuf(pb, "\n");
-
         p = (char*) json_object_get_strptr(json_object_object_get(jso, "ptr"));
         datatype = json_object_get_int(json_object_object_get(jso, "datatype"));
         ndims = json_object_get_int(json_object_object_get(jso, "ndims"));
@@ -5798,74 +5786,85 @@ static int json_object_extptr_to_json_string(struct json_object* jso,
             dims[ii] = json_object_get_int(json_object_array_get_idx(darr, ii));
             nvals *= dims[ii];
         }
-#if 0
-printf("appending %d vals of size %d, new size is %d\n", nvals, nvals*db_GetMachDataSize(datatype),
-       printbuf_length(pb));
-        printbuf_memappend(pb, p, nvals*db_GetMachDataSize(datatype));
-#endif
 
-#if 1
-        for(ii=0; ii < nvals; ii++)
+        if (flags & JSON_C_TO_STRING_EXTPTR_AS_BINARY)
         {
-                struct json_object *val;
-                if (had_children)
-                {
-                        sprintbuf(pb, ",");
-                        if (flags & JSON_C_TO_STRING_PRETTY)
-                                sprintbuf(pb, "\n");
-                }
-                had_children = 1;
-                if (flags & JSON_C_TO_STRING_SPACED)
-                        sprintbuf(pb, " ");
-                indent(pb, level + 1, flags);
-
-                switch (datatype)
-                {
-                    case DB_CHAR:
-                    {
-                        sprintbuf(pb, "%c", *((char*)p));
-                        p += sizeof(char);
-                        break;
-                    }
-                    case DB_SHORT:
-                    {
-                        sprintbuf(pb, "%hd", *((short*)p));
-                        p += sizeof(short);
-                        break;
-                    }
-                    case DB_INT:
-                    {
-                        sprintbuf(pb, "%d", *((int*)p));
-                        p += sizeof(int);
-                        break;
-                    }
-                    case DB_LONG:
-                    {
-                        sprintbuf(pb, "%ld", *((long*)p));
-                        p += sizeof(long);
-                        break;
-                    }
-                    case DB_LONG_LONG:
-                    {
-                        sprintbuf(pb, "%lld", *((long long*)p));
-                        p += sizeof(long long);
-                        break;
-                    }
-                    case DB_FLOAT:
-                    {
-                        sprintbuf(pb, "%f", *((float*)p));
-                        p += sizeof(float);
-                        break;
-                    }
-                    case DB_DOUBLE:
-                    {
-                        sprintbuf(pb, "%f", *((double*)p));
-                        p += sizeof(double);
-                        break;
-                    }
-                }
+            sprintbuf(pb, ",\"nvals\":%d", nvals);
+            sprintbuf(pb, ",\"data\":[");
+            printbuf_memappend(pb, p, nvals*db_GetMachDataSize(datatype));
         }
-#endif
+        else if (flags & JSON_C_TO_STRING_EXTPTR_SKIP)
+        {
+            return sprintbuf(pb, "}");
+        }
+        else
+        {
+
+            sprintbuf(pb, ",\"data\":[");
+            if (flags & JSON_C_TO_STRING_PRETTY)
+                    sprintbuf(pb, "\n");
+
+            for(ii=0; ii < nvals; ii++)
+            {
+                    struct json_object *val;
+                    if (had_children)
+                    {
+                            sprintbuf(pb, ",");
+                            if (flags & JSON_C_TO_STRING_PRETTY)
+                                    sprintbuf(pb, "\n");
+                    }
+                    had_children = 1;
+                    if (flags & JSON_C_TO_STRING_SPACED)
+                            sprintbuf(pb, " ");
+                    indent(pb, level + 1, flags);
+
+                    switch (datatype)
+                    {
+                        case DB_CHAR:
+                        {
+                            sprintbuf(pb, "%c", *((char*)p));
+                            p += sizeof(char);
+                            break;
+                        }
+                        case DB_SHORT:
+                        {
+                            sprintbuf(pb, "%hd", *((short*)p));
+                            p += sizeof(short);
+                            break;
+                        }
+                        case DB_INT:
+                        {
+                            sprintbuf(pb, "%d", *((int*)p));
+                            p += sizeof(int);
+                            break;
+                        }
+                        case DB_LONG:
+                        {
+                            sprintbuf(pb, "%ld", *((long*)p));
+                            p += sizeof(long);
+                            break;
+                        }
+                        case DB_LONG_LONG:
+                        {
+                            sprintbuf(pb, "%lld", *((long long*)p));
+                            p += sizeof(long long);
+                            break;
+                        }
+                        case DB_FLOAT:
+                        {
+                            sprintbuf(pb, "%f", *((float*)p));
+                            p += sizeof(float);
+                            break;
+                        }
+                        case DB_DOUBLE:
+                        {
+                            sprintbuf(pb, "%f", *((double*)p));
+                            p += sizeof(double);
+                            break;
+                        }
+                    }
+            }
+        }
         if (flags & JSON_C_TO_STRING_PRETTY)
         {
                 if (had_children)
@@ -5877,8 +5876,6 @@ printf("appending %d vals of size %d, new size is %d\n", nvals, nvals*db_GetMach
                 retval = sprintbuf(pb, " ]}");
         else
                 retval = sprintbuf(pb, "]}");
-
-printf("RETURING %d\n", retval);
 
         return retval;
 }
@@ -5896,9 +5893,7 @@ static struct json_object *json_object_new_extptr(void *p, int ndims, int const 
     struct json_object *jobj = json_object_new_object();
     struct json_object *jarr = json_object_new_array();
 
-#if 1
     json_object_set_serializer(jobj, json_object_extptr_to_json_string, 0, 0);
-#endif
 
     for (i = 0; i < ndims; i++)
         json_object_array_add(jarr, json_object_new_int(dims[i]));
@@ -5913,6 +5908,7 @@ static struct json_object *json_object_new_extptr(void *p, int ndims, int const 
     return jobj;
 }
 
+/* Return a Silo object as a Json Object. Bulk data passed using funky exptr */
 PUBLIC struct json_object *
 DBGetJsonObject(DBfile *dbfile, char const *objname)
 {
@@ -5947,13 +5943,10 @@ DBGetJsonObject(DBfile *dbfile, char const *objname)
         {
             char tmp[256];
             size_t len = strlen(sobj->pdb_names[i])-5;
-printf("len = %d\n", len);
             memset(tmp, 0, sizeof(tmp));
             strncpy(tmp, sobj->pdb_names[i]+4, len);
-printf("TESTING sub-object \"%s\"\n", tmp);
             if (DBInqVarExists(dbfile, tmp))
             {
-printf("Processing sub-object \"%s\"\n", tmp);
                 json_object_object_add(jobj, sobj->comp_names[i],
                     DBGetJsonObject(dbfile, tmp));
             }
@@ -5968,7 +5961,6 @@ printf("Processing sub-object \"%s\"\n", tmp);
             void *p;
             int ndims, dims[32];
             int dtype = DBGetVarType(dbfile, cat_comp_name);
-printf("Got here with comp name \"%s\"\n", cat_comp_name);
             ndims = DBGetVarDims(dbfile, cat_comp_name, sizeof(dims)/sizeof(dims[0]), dims);
             p = DBGetVar(dbfile, cat_comp_name);
             json_object_object_add(jobj, sobj->comp_names[i],
@@ -6060,7 +6052,6 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
                     struct json_object *darr = json_object_object_get(mobj, "dims");
                     for (i = 0; i < ndims; i++)
                         dims[i] = (long) json_object_get_int(json_object_array_get_idx(darr, i));
-printf("Writing component named \"%s\" to object named \"%s\"\n", mname, json_object_get_string(silo_name_obj));
                     DBWriteComponent(dbfile, sobj, mname, json_object_get_string(silo_name_obj),
                         db_GetDatatypeString(datatype), p, ndims, dims);
                 }
