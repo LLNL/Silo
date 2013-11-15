@@ -111,6 +111,10 @@ be used for advertising or product endorsement purposes.
 #include <io.h>             /* for FileInfo funcs */
 #endif
 
+#if HAVE_JSON
+#include <json.h>
+#endif
+
 /* DB_MAIN must be defined before including silo_private.h. */
 #define DB_MAIN
 #include "silo_private.h"
@@ -4698,7 +4702,6 @@ DBInqVarExists(DBfile *dbfile, const char *varname)
             API_ERROR("variable name", E_BADARGS);
         if (dbfile->pub.exist == NULL)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-
         retval = (dbfile->pub.exist) (dbfile, varname);
         API_RETURN(retval);
     }
@@ -5725,6 +5728,106 @@ DBWriteObject(DBfile *dbfile, DBobject const *obj, int freemem)
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
+
+#if HAVE_JSON
+struct json_object *json_object_new_strptr(void *p)
+{
+    static char tmp[32];
+    snprintf(tmp, sizeof(tmp), "%p", p);
+    return json_object_new_string(tmp);
+}
+
+static struct json_object *json_object_new_extptr(void *p, int ndims, int const *dims, int datatype)
+{
+    int i;
+    struct json_object *jobj = json_object_new_object();
+    struct json_object *jarr = json_object_new_array();
+
+    for (i = 0; i < ndims; i++)
+        json_object_array_add(jarr, json_object_new_int(dims[i]));
+
+    json_object_object_add(jobj, "ptr", json_object_new_strptr(p));
+    json_object_object_add(jobj, "datatype", json_object_new_int(datatype));
+    json_object_object_add(jobj, "ndims", json_object_new_int(ndims));
+    json_object_object_add(jobj, "dims", jarr);
+
+#warning DO WE NEED TO DECRIMENT JARR REFS WITH PUT CALL
+
+    return jobj;
+}
+
+PUBLIC struct json_object *
+DBGetJsonObject(DBfile *dbfile, char const *objname)
+{
+    int i;
+    struct json_object *jobj = json_object_new_object();
+    DBobject *sobj = DBGetObject(dbfile, objname);
+    if (!sobj) return jobj;
+
+    for (i = 0; i < sobj->ncomponents; i++)
+    {
+        char cat_comp_name[1024];
+        snprintf(cat_comp_name, sizeof(cat_comp_name), "%s_%s", objname, sobj->comp_names[i]);
+             if (!strncmp(sobj->pdb_names[i], "'<i>", 4))
+        {
+            json_object_object_add(jobj, sobj->comp_names[i],
+                json_object_new_int(strtol(sobj->pdb_names[i]+4, NULL, 0)));
+        }
+        else if (!strncmp(sobj->pdb_names[i], "'<f>", 4))
+        {
+            json_object_object_add(jobj, sobj->comp_names[i],
+                json_object_new_double(strtod(sobj->pdb_names[i]+4, NULL)));
+        }
+        else if (!strncmp(sobj->pdb_names[i], "'<d>", 4))
+        {
+            json_object_object_add(jobj, sobj->comp_names[i],
+                json_object_new_double(strtod(sobj->pdb_names[i]+4, NULL)));
+        }
+        else if (!strncmp(sobj->pdb_names[i], "'<s>", 4))
+        {
+            char tmp[256];
+            size_t len = strlen(sobj->pdb_names[i])-5;
+printf("len = %d\n", len);
+            memset(tmp, 0, sizeof(tmp));
+            strncpy(tmp, sobj->pdb_names[i]+4, len);
+printf("TESTING sub-object \"%s\"\n", tmp);
+            if (DBInqVarExists(dbfile, tmp))
+            {
+printf("Processing sub-object \"%s\"\n", tmp);
+                json_object_object_add(jobj, sobj->comp_names[i],
+                    DBGetJsonObject(dbfile, tmp));
+            }
+            else
+            {
+                json_object_object_add(jobj, sobj->comp_names[i],
+                    json_object_new_string(tmp));
+            }
+        }
+        else if (DBInqVarType(dbfile, cat_comp_name) == DB_VARIABLE)
+        {
+            void *p;
+            int ndims, dims[32];
+            int dtype = DBGetVarType(dbfile, cat_comp_name);
+printf("Got here with comp name \"%s\"\n", cat_comp_name);
+            ndims = DBGetVarDims(dbfile, cat_comp_name, sizeof(dims)/sizeof(dims[0]), dims);
+            p = DBGetVar(dbfile, cat_comp_name);
+            json_object_object_add(jobj, sobj->comp_names[i],
+                json_object_new_extptr(p, ndims, dims, dtype));
+        }
+        else if (DBInqVarExists(dbfile, sobj->comp_names[i]))
+        {
+            json_object_object_add(jobj, sobj->comp_names[i],
+                DBGetJsonObject(dbfile, sobj->comp_names[i]));
+        }
+        else /* some component we do not know how to handle */
+        {
+            json_object_object_add(jobj, sobj->comp_names[i],
+                json_object_new_string("<unknown>"));
+        }
+    }
+    return jobj;
+}
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    DBGetObject

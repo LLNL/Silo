@@ -1761,6 +1761,8 @@ typedef struct DBfile {
     /*private part follows per device driver */
 } DBfile;
 
+#define DB_NOFILE ((DBfile*)0xFFFFFFFF)
+
 typedef void (*DBErrFunc_t)(char*);
 
 
@@ -1922,6 +1924,9 @@ SILO_API extern int      DBFilters(DBfile *, FILE *);
 SILO_API extern int      DBFilterRegistration(char const *, int (*init) (DBfile *, char *),
                                      int (*open) (DBfile *, char *));
 SILO_API extern void    *DBGetAtt(DBfile *, char const *, char const *);
+#if HAVE_JSON
+SILO_API extern struct json_object *DBGetJsonObject(DBfile *, char const *);
+#endif
 SILO_API extern DBobject *DBGetObject(DBfile *, char const *);
 SILO_API extern int      DBChangeObject(DBfile *, DBobject const *);
 SILO_API extern int      DBWriteObject(DBfile *, DBobject const *, int);

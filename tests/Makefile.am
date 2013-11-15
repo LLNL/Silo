@@ -132,6 +132,7 @@ testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
 pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
 PDBTESTS += testpdb pdbtst
 endif
+JSON_TESTS = json.c
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 
@@ -144,7 +145,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      empty majorder $(PDBTESTS)
+      empty majorder $(PDBTESTS) $(JSONTESTS)
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
