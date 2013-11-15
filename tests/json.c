@@ -69,7 +69,7 @@ main(int argc, char *argv[])
     int		    i, driver = DB_PDB;
     char 	    *filename = "onehex.silo";
     int             show_all_errors = FALSE;
-    struct json_object *jsilo_obj;
+    struct json_object *jsilo_obj, *fil_obj;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -87,10 +87,18 @@ main(int argc, char *argv[])
 
 #if HAVE_JSON
     jsilo_obj = DBGetJsonObject(dbfile, "hex");
+    DBClose(dbfile);
+
     json_object_to_file("onehex.json", jsilo_obj);
+    fil_obj = json_object_from_file("onehex.json");
+    printf("fil_obj=%s\n", json_object_to_json_string(fil_obj));
+#if 1
+    dbfile = DBCreate("onehex_from_json.pdb", DB_CLOBBER, DB_LOCAL, "test json output", DB_PDB);
+    DBWriteJsonObject(dbfile, fil_obj);
+    DBClose(dbfile);
 #endif
 
-    DBClose(dbfile);
+#endif
 
     CleanupDriverStuff();
 

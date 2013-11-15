@@ -113,6 +113,8 @@ be used for advertising or product endorsement purposes.
 
 #if HAVE_JSON
 #include <json.h>
+#include <json_object_private.h>
+#include <printbuf.h>
 #endif
 
 /* DB_MAIN must be defined before including silo_private.h. */
@@ -5730,11 +5732,162 @@ DBWriteObject(DBfile *dbfile, DBobject const *obj, int freemem)
 }
 
 #if HAVE_JSON
-struct json_object *json_object_new_strptr(void *p)
+static void *json_object_get_strptr(struct json_object *o)
+{
+    void *p;
+    char const *strptr = json_object_get_string(o);
+    sscanf(strptr, "%p", &p);
+    return p;
+}
+
+static struct json_object *json_object_new_strptr(void *p)
 {
     static char tmp[32];
     snprintf(tmp, sizeof(tmp), "%p", p);
     return json_object_new_string(tmp);
+}
+
+static void indent(struct printbuf *pb, int level, int flags)
+{
+        if (flags & JSON_C_TO_STRING_PRETTY)
+        {
+                printbuf_memset(pb, -1, ' ', level * 2);
+        }
+}
+
+static int json_object_extptr_to_json_string(struct json_object* jso,
+                                            struct printbuf *pb,
+                                            int level,
+                                            int flags)
+{
+        int had_children = 0;
+        int ii;
+        char *p;
+        int datatype, nvals, ndims, dims[32];
+        struct json_object *darr, *subobj;
+        int retval;
+
+
+        sprintbuf(pb, "{\"ptr\":%s", json_object_to_json_string(json_object_object_get(jso, "ptr")));
+        sprintbuf(pb, ",\"datatype\":%s", json_object_to_json_string(json_object_object_get(jso, "datatype")));
+        sprintbuf(pb, ",\"ndims\":%s", json_object_to_json_string(json_object_object_get(jso, "ndims")));
+        sprintbuf(pb, ",\"dims\":%s", json_object_to_json_string(json_object_object_get(jso, "dims")));
+#if 0
+        jso->_to_json_string(jso, pb, level+1, flags);
+        subobj = json_object_object_get(jso, "ptr");
+        subobj->_to_json_string(subobj, pb, level, flags);
+        subobj = json_object_object_get(jso, "datatype");
+        subobj->_to_json_string(subobj, pb, level, flags);
+        subobj = json_object_object_get(jso, "ndims");
+        subobj->_to_json_string(subobj, pb, level, flags);
+        subobj = json_object_object_get(jso, "dims");
+        subobj->_to_json_string(subobj, pb, level, flags);
+#endif
+ 
+        sprintbuf(pb, ",\"data\":[");
+        if (flags & JSON_C_TO_STRING_PRETTY)
+                sprintbuf(pb, "\n");
+
+        p = (char*) json_object_get_strptr(json_object_object_get(jso, "ptr"));
+        datatype = json_object_get_int(json_object_object_get(jso, "datatype"));
+        ndims = json_object_get_int(json_object_object_get(jso, "ndims"));
+        darr = json_object_object_get(jso, "dims");
+        nvals = 1;
+        for (ii = 0; ii < ndims; ii++)
+        {
+            dims[ii] = json_object_get_int(json_object_array_get_idx(darr, ii));
+            nvals *= dims[ii];
+        }
+#if 0
+printf("appending %d vals of size %d, new size is %d\n", nvals, nvals*db_GetMachDataSize(datatype),
+       printbuf_length(pb));
+        printbuf_memappend(pb, p, nvals*db_GetMachDataSize(datatype));
+#endif
+
+#if 1
+        for(ii=0; ii < nvals; ii++)
+        {
+                struct json_object *val;
+                if (had_children)
+                {
+                        sprintbuf(pb, ",");
+                        if (flags & JSON_C_TO_STRING_PRETTY)
+                                sprintbuf(pb, "\n");
+                }
+                had_children = 1;
+                if (flags & JSON_C_TO_STRING_SPACED)
+                        sprintbuf(pb, " ");
+                indent(pb, level + 1, flags);
+
+                switch (datatype)
+                {
+                    case DB_CHAR:
+                    {
+                        sprintbuf(pb, "%c", *((char*)p));
+                        p += sizeof(char);
+                        break;
+                    }
+                    case DB_SHORT:
+                    {
+                        sprintbuf(pb, "%hd", *((short*)p));
+                        p += sizeof(short);
+                        break;
+                    }
+                    case DB_INT:
+                    {
+                        sprintbuf(pb, "%d", *((int*)p));
+                        p += sizeof(int);
+                        break;
+                    }
+                    case DB_LONG:
+                    {
+                        sprintbuf(pb, "%ld", *((long*)p));
+                        p += sizeof(long);
+                        break;
+                    }
+                    case DB_LONG_LONG:
+                    {
+                        sprintbuf(pb, "%lld", *((long long*)p));
+                        p += sizeof(long long);
+                        break;
+                    }
+                    case DB_FLOAT:
+                    {
+                        sprintbuf(pb, "%f", *((float*)p));
+                        p += sizeof(float);
+                        break;
+                    }
+                    case DB_DOUBLE:
+                    {
+                        sprintbuf(pb, "%f", *((double*)p));
+                        p += sizeof(double);
+                        break;
+                    }
+                }
+        }
+#endif
+        if (flags & JSON_C_TO_STRING_PRETTY)
+        {
+                if (had_children)
+                        sprintbuf(pb, "\n");
+                indent(pb,level,flags);
+        }
+
+        if (flags & JSON_C_TO_STRING_SPACED)
+                retval = sprintbuf(pb, " ]}");
+        else
+                retval = sprintbuf(pb, "]}");
+
+printf("RETURING %d\n", retval);
+
+        return retval;
+}
+
+static void json_object_set_serializer(json_object *jso,
+    json_object_to_json_string_fn to_string_func,
+    void * userdata, json_object_delete_fn * user_delete)
+{
+    jso->_to_json_string = to_string_func;
 }
 
 static struct json_object *json_object_new_extptr(void *p, int ndims, int const *dims, int datatype)
@@ -5742,6 +5895,10 @@ static struct json_object *json_object_new_extptr(void *p, int ndims, int const 
     int i;
     struct json_object *jobj = json_object_new_object();
     struct json_object *jarr = json_object_new_array();
+
+#if 1
+    json_object_set_serializer(jobj, json_object_extptr_to_json_string, 0, 0);
+#endif
 
     for (i = 0; i < ndims; i++)
         json_object_array_add(jarr, json_object_new_int(dims[i]));
@@ -5763,6 +5920,9 @@ DBGetJsonObject(DBfile *dbfile, char const *objname)
     struct json_object *jobj = json_object_new_object();
     DBobject *sobj = DBGetObject(dbfile, objname);
     if (!sobj) return jobj;
+
+    json_object_object_add(jobj, "silo_name", json_object_new_string(sobj->name));
+    json_object_object_add(jobj, "silo_type", json_object_new_int(DBGetObjtypeTag(sobj->type)));
 
     for (i = 0; i < sobj->ncomponents; i++)
     {
@@ -5826,6 +5986,94 @@ printf("Got here with comp name \"%s\"\n", cat_comp_name);
         }
     }
     return jobj;
+}
+
+static struct json_object *json_object_new_stringsafe(char const *s)
+{
+    if (!s || !*s)
+        return json_object_new_string("");
+    else
+        return json_object_new_string(s);
+}
+
+int json_object_object_length(struct json_object *o)
+{
+    struct lh_table *t = json_object_get_object(o);
+    return t->count;
+}
+
+int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
+{
+    json_object *silo_type_obj = json_object_object_get(jobj, "silo_type");
+    json_object *silo_name_obj = json_object_object_get(jobj, "silo_name");
+    DBobject *sobj = DBMakeObject( 
+                         json_object_get_string(silo_name_obj),
+                         json_object_get_int(silo_type_obj),
+                         json_object_object_length(jobj)+10
+                     );
+    struct json_object_iterator jiter = json_object_iter_begin(jobj);
+    struct json_object_iterator jend = json_object_iter_end(jobj);
+    while (!json_object_iter_equal(&jiter, &jend))
+    {
+        struct json_object *mobj = json_object_iter_peek_value(&jiter);
+        char const *mname = json_object_iter_peek_name(&jiter);
+        json_type jtype = json_object_get_type(mobj);
+
+        switch (jtype)
+        {
+            case json_type_array:
+            case json_type_null: break;
+            case json_type_boolean:
+            case json_type_int:
+            {
+                int val = 0;
+                if (jtype == json_type_boolean && json_object_get_boolean(mobj))
+                    val = 1;
+                else
+                    val = json_object_get_int(mobj);
+                DBAddIntComponent(sobj, mname, val);
+                break;
+            }
+            case json_type_double:
+            {
+                DBAddDblComponent(sobj, mname, json_object_get_double(mobj));
+                break;
+            }
+            case json_type_string:
+            {
+                if (strlen(json_object_get_string(mobj)))
+                    DBAddStrComponent(sobj, mname, json_object_get_string(mobj));
+                break;
+            }
+            case json_type_object: /* must be extptr array reference */
+            {
+                if (json_object_object_get_ex(mobj, "ptr", 0) &&
+                    json_object_object_get_ex(mobj, "datatype", 0) &&
+                    json_object_object_get_ex(mobj, "ndims", 0) &&
+                    json_object_object_get_ex(mobj, "dims", 0))
+                {
+                    int i;
+                    long dims[32];
+                    void *p = json_object_get_strptr(json_object_object_get(mobj, "ptr"));
+                    int datatype = json_object_get_int(json_object_object_get(mobj, "datatype"));
+                    int ndims = json_object_get_int(json_object_object_get(mobj, "ndims"));
+                    struct json_object *darr = json_object_object_get(mobj, "dims");
+                    for (i = 0; i < ndims; i++)
+                        dims[i] = (long) json_object_get_int(json_object_array_get_idx(darr, i));
+printf("Writing component named \"%s\" to object named \"%s\"\n", mname, json_object_get_string(silo_name_obj));
+                    DBWriteComponent(dbfile, sobj, mname, json_object_get_string(silo_name_obj),
+                        db_GetDatatypeString(datatype), p, ndims, dims);
+                }
+                else
+                {
+                    DBWriteJsonObject(dbfile, mobj);
+                }
+                break;
+            }
+        }
+        json_object_iter_next(&jiter);
+    }
+    return DBWriteObject(dbfile, sobj, 0);
 }
 #endif
 
