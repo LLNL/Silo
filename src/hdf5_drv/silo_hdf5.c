@@ -13867,7 +13867,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
         pv->extensive = m.extensive;
 
         /* Read raw data */
-        if (SILO_Globals.dataReadMask & DBPVData && m.nvals)
+        if (SILO_Globals.dataReadMask & DBPVData && m.nvals && m.nels)
         {
             pv->vals = calloc(m.nvals, sizeof(void*));
             for (i=0; i<m.nvals; i++) {

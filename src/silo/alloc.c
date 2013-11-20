@@ -1027,7 +1027,7 @@ DBIsEmptyMeshvar(DBmeshvar const *var)
 {
     if (!var) return 0;
     if (var->nels!=0) return 0;
-    if (var->nvals!=0) return 0;
+  /*if (var->nvals!=0) return 0; */
     if (var->vals!=0) return 0;
   /*if (var->ndims!=0) return 0; long standing bug/assumption in Silo */
     if (var->dims[0]!=0) return 0;

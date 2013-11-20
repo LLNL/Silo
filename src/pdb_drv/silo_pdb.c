@@ -4870,7 +4870,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
     *  associated with this variable.
     */
 
-   if ((mv->ndims>0) && (mv->nvals > 0) && (SILO_Globals.dataReadMask & DBPVData)) {
+   if (mv->ndims>0 && mv->nels>0 && mv->nvals>0 && (SILO_Globals.dataReadMask & DBPVData)) {
       INIT_OBJ(&tmp_obj);
 
       mv->vals = ALLOC_N(DB_DTPTR *, mv->nvals);
@@ -9503,7 +9503,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
     *  Write variable arrays.
     *  Set index variables and counters.
     *-----------------------------------------------------------*/
-   if (nels)
+   if (nels>0 && nvars>0)
    {
       datatype_str = db_GetDatatypeString(datatype);
       count[0] = nels;
