@@ -80,6 +80,7 @@ be used for advertising or product endorsement purposes.
 
 #include <math.h>
 #include <stdlib.h>
+#include <unistd.h>
 #ifdef WIN32
 #include <stdio.h>
 #include <io.h>

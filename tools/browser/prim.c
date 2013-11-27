@@ -922,6 +922,7 @@ prim_getval_ll(int type, void *mem)
     case BROWSER_FLOAT:     return (long long) *((float*)mem);
     case BROWSER_DOUBLE:    return (long long) *((double*)mem);
     }
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -947,6 +948,7 @@ prim_getval(int type, void *mem)
     case BROWSER_FLOAT:     return (double) *((float*)mem);
     case BROWSER_DOUBLE:    return (double) *((double*)mem);
     }
+    return 0;
 }
 
 

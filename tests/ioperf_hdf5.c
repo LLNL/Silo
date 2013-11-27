@@ -75,6 +75,9 @@ static const char *filename;
 static hid_t fid;
 static hid_t dspc = -1;
 
+extern herr_t H5Pset_fapl_silo(hid_t);
+extern herr_t H5Pset_silo_block_size_and_count(hid_t, hsize_t, int);
+
 static int Open_hdf5(ioflags_t iopflags)
 {
     hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);

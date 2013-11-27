@@ -76,9 +76,6 @@ be used for advertising or product endorsement purposes.
 #include <unistd.h> /*for access() F_OK, R_OK */
 #endif
 #endif
-/* define USE_CONST_DB_CONSTARR so that when we compile Silo
-   we are sure to get the CONST versions of DB_CONSTARR symbols */
-#define USE_CONST_DB_CONSTARR
 #include "silo.h"
 
 /*

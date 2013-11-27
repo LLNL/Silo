@@ -237,6 +237,8 @@ H5_VERS_INFO;
 /* some necessary forward declarations */
 PRIVATE int db_hdf5_fullname(DBfile_hdf5 *dbfile, char *name, char *full);
 PRIVATE int hdf2silo_type(hid_t type);
+PRIVATE int db_hdf5_WriteCKZ(DBfile *_dbfile, char *vname, void *var,
+              int *dims, int ndims, int datatype, int nofilters);
 
 /* callbacks prototypes for file image ops */
 #if HDF5_VERSION_GE(1,8,9)
@@ -1534,8 +1536,6 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
             if (nnodes < 0) {hzip_node_close(stream); return early_retval;}
 
             hztype = hzip_node_type(stream);
-            if (hztype < 0) {hzip_node_close(stream); return early_retval;}
-
             new_buf_size = nnodes * sizeof_hztype(hztype);
             var = malloc(new_buf_size);
             if (var == 0) {hzip_node_close(stream); return early_retval;}
@@ -4769,11 +4769,11 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
             }
 
             /* get the vfd specification */
-            if (p = DBGetOption(opts, DBOPT_H5_VFD))
+            if ((p = DBGetOption(opts, DBOPT_H5_VFD)))
             {
                 vfd = *((int*)p);
             }
-            else if (p = DBGetOption(opts, DBOPT_H5_USER_DRIVER_ID))
+            else if ((p = DBGetOption(opts, DBOPT_H5_USER_DRIVER_ID)))
             {
                 int new_driver_id = *((int*)p);
                 p = DBGetOption(opts, DBOPT_H5_USER_DRIVER_INFO);
@@ -4811,13 +4811,13 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     int log_stats = H5FD_SILO_DEFAULT_LOG_STATS;
                     int use_direct = H5FD_SILO_DEFAULT_USE_DIRECT;
 
-                    if (p = DBGetOption(opts, DBOPT_H5_SILO_BLOCK_SIZE))
+                    if ((p = DBGetOption(opts, DBOPT_H5_SILO_BLOCK_SIZE)))
                         block_size = (hsize_t) (*((int*) p));
-                    if (p = DBGetOption(opts, DBOPT_H5_SILO_BLOCK_COUNT))
+                    if ((p = DBGetOption(opts, DBOPT_H5_SILO_BLOCK_COUNT)))
                         block_count = *((int*) p);
-                    if (p = DBGetOption(opts, DBOPT_H5_SILO_LOG_STATS))
+                    if ((p = DBGetOption(opts, DBOPT_H5_SILO_LOG_STATS)))
                         log_stats = *((int*) p);
-                    if (p = DBGetOption(opts, DBOPT_H5_SILO_USE_DIRECT))
+                    if ((p = DBGetOption(opts, DBOPT_H5_SILO_USE_DIRECT)))
                         use_direct = *((int*) p);
 
                     h5status |= H5Pset_fapl_silo(retval);
@@ -4836,10 +4836,10 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     int flags = H5FD_LOG_LOC_IO|H5FD_LOG_NUM_IO|H5FD_LOG_TIME_IO|H5FD_LOG_ALLOC;
                     char *logname = "silo_hdf5_log.out";
 
-                    if (p = DBGetOption(opts, DBOPT_H5_LOG_NAME))
+                    if ((p = DBGetOption(opts, DBOPT_H5_LOG_NAME)))
                         logname = (char*) p;
 
-                    if (p = DBGetOption(opts, DBOPT_H5_LOG_BUF_SIZE))
+                    if ((p = DBGetOption(opts, DBOPT_H5_LOG_BUF_SIZE)))
                     {
                         bufsize = *((int*) p);
                         flags = H5FD_LOG_ALL;
@@ -4855,11 +4855,11 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     hbool_t bs = TRUE; /* default back store on */
 
                     /* get core allocation inc */
-                    if (p = DBGetOption(opts, DBOPT_H5_CORE_ALLOC_INC))
+                    if ((p = DBGetOption(opts, DBOPT_H5_CORE_ALLOC_INC)))
                         inc = *((int*)p);
 
                     /* get backing store flag */
-                    if (p = DBGetOption(opts, DBOPT_H5_CORE_NO_BACK_STORE))
+                    if ((p = DBGetOption(opts, DBOPT_H5_CORE_NO_BACK_STORE)))
                         bs = FALSE;
 
                     h5status |= H5Pset_fapl_core(retval, inc, bs);
@@ -4882,7 +4882,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                         h5status |= H5Pset_fapl_core(retval, inc, FALSE);
 
                         /* get file image size */
-                        if (p = DBGetOption(opts, DBOPT_H5_FIC_SIZE))
+                        if ((p = DBGetOption(opts, DBOPT_H5_FIC_SIZE)))
                             size = *((int*)p);
                         else
                         {
@@ -4891,7 +4891,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                         }
 
                         /* get file image buffer pointer */
-                        if (p = DBGetOption(opts, DBOPT_H5_FIC_BUF))
+                        if ((p = DBGetOption(opts, DBOPT_H5_FIC_BUF)))
                             buf = (void*)p;
                         else
                         {
@@ -4942,29 +4942,29 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     int align_min, align_val;
     
                     /* get direct block size */ 
-                    if (p = DBGetOption(opts, DBOPT_H5_DIRECT_BLOCK_SIZE))
+                    if ((p = DBGetOption(opts, DBOPT_H5_DIRECT_BLOCK_SIZE)))
                         direct_block_size = *((int*)p);
 
                     /* get direct alignment */ 
-                    if (p = DBGetOption(opts, DBOPT_H5_DIRECT_MEM_ALIGN))
+                    if ((p = DBGetOption(opts, DBOPT_H5_DIRECT_MEM_ALIGN)))
                         direct_alignment = *((int*)p);
                     else
                         direct_alignment = direct_block_size;
 
                     /* get direct buffer size */ 
-                    if (p = DBGetOption(opts, DBOPT_H5_DIRECT_BUF_SIZE))
+                    if ((p = DBGetOption(opts, DBOPT_H5_DIRECT_BUF_SIZE)))
                         direct_cbuf_size = *((int*)p);
                     else
                         direct_cbuf_size = direct_block_size * 256;
 
                     /* get overall alignment threshold */ 
-                    if (p = DBGetOption(opts, DBOPT_H5_ALIGN_MIN))
+                    if ((p = DBGetOption(opts, DBOPT_H5_ALIGN_MIN)))
                         align_min = *((int*)p);
                     else
                         align_min = direct_block_size / 2;
 
                     /* get overall alignment value */ 
-                    if (p = DBGetOption(opts, DBOPT_H5_ALIGN_VAL))
+                    if ((p = DBGetOption(opts, DBOPT_H5_ALIGN_VAL)))
                         align_val = *((int*)p);
                     else
                         align_val = direct_block_size;
@@ -4986,25 +4986,25 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     hid_t meta_fapl = -1, raw_fapl = -1;
 
                     /* get meta opts_set_id */
-                    if (p = DBGetOption(opts, DBOPT_H5_META_FILE_OPTS))
+                    if ((p = DBGetOption(opts, DBOPT_H5_META_FILE_OPTS)))
                         meta_opts_set_id = *((int*)p);
 
                     /* get meta fapl from opts_set_id */
                     meta_fapl = db_hdf5_process_file_options(meta_opts_set_id, mode);
 
                     /* get meta extension */
-                    if (p = DBGetOption(opts, DBOPT_H5_META_EXTENSION))
+                    if ((p = DBGetOption(opts, DBOPT_H5_META_EXTENSION)))
                         mext = (char *) p;
 
                     /* get raw opts_set_id */
-                    if (p = DBGetOption(opts, DBOPT_H5_RAW_FILE_OPTS))
+                    if ((p = DBGetOption(opts, DBOPT_H5_RAW_FILE_OPTS)))
                         raw_opts_set_id = *((int*)p);
 
                     /* get raw fapl from opts_set_id */
                     raw_fapl = db_hdf5_process_file_options(raw_opts_set_id, mode);
 
                     /* get raw extension */
-                    if (p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION))
+                    if ((p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION)))
                         rext = (char *) p;
 
                     /* make sure the exentions are not identical */
@@ -5029,11 +5029,11 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     hbool_t use_gpfs_hints = TRUE;
 
                     /* get the communicator */
-                    if (p = DBGetOption(opts, DBOPT_H5_MPIO_COMM))
+                    if ((p = DBGetOption(opts, DBOPT_H5_MPIO_COMM)))
                         mpi_comm = *((MPI_Comm *)p);
 
                     /* get the info */
-                    if (p = DBGetOption(opts, DBOPT_H5_MPIO_INFO))
+                    if ((p = DBGetOption(opts, DBOPT_H5_MPIO_INFO)))
                         mpi_info = *((MPI_Info *)p);
                     else
                     {
@@ -5042,7 +5042,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     }
 
                     /* get use_gpfs_hints flag */
-                    if (p = DBGetOption(opts, DBOPT_H5_MPIP_NO_GPFS_HINTS))
+                    if ((p = DBGetOption(opts, DBOPT_H5_MPIP_NO_GPFS_HINTS)))
                         use_gpfs_hints = FALSE;
 
                     if (vfd == DB_H5VFD_MPIO)
@@ -5067,11 +5067,11 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     hid_t memb_fapl;
 
                     /* get size of files in family */
-                    if (p = DBGetOption(opts, DBOPT_H5_FAM_SIZE))
+                    if ((p = DBGetOption(opts, DBOPT_H5_FAM_SIZE)))
                         memb_size = *((int*)p);
 
                     /* get underlying family fapl */
-                    if (p = DBGetOption(opts, DBOPT_H5_FAM_FILE_OPTS))
+                    if ((p = DBGetOption(opts, DBOPT_H5_FAM_FILE_OPTS)))
                         memb_opts_set_id = *((int*)p);
 
                     memb_fapl = db_hdf5_process_file_options(memb_opts_set_id, mode);
@@ -5081,52 +5081,52 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
             }
 
             /* handle overall alignment requests */
-            if (p = DBGetOption(opts, DBOPT_H5_ALIGN_MIN))
+            if ((p = DBGetOption(opts, DBOPT_H5_ALIGN_MIN)))
             {
                 int align_min = *((int*)p);
                 int align_val = align_min * 2;
 
                 /* get overall alignment value */ 
-                if (p = DBGetOption(opts, DBOPT_H5_ALIGN_VAL))
+                if ((p = DBGetOption(opts, DBOPT_H5_ALIGN_VAL)))
                     align_val = *((int*)p);
 
                 h5status |= H5Pset_alignment(retval, align_min, align_val); 
             }
 
             /* handle meta block size */
-            if (p = DBGetOption(opts, DBOPT_H5_META_BLOCK_SIZE))
+            if ((p = DBGetOption(opts, DBOPT_H5_META_BLOCK_SIZE)))
             {
                 int size = *((int*)p);
                 h5status |= H5Pset_meta_block_size(retval, size);
             }
 
             /* handle raw block size */
-            if (p = DBGetOption(opts, DBOPT_H5_SMALL_RAW_SIZE))
+            if ((p = DBGetOption(opts, DBOPT_H5_SMALL_RAW_SIZE)))
             {
                 int size = *((int*)p);
                 h5status |= H5Pset_small_data_block_size(retval, size);
             }
 
             /* handle sieve buffer size */
-            if (p = DBGetOption(opts, DBOPT_H5_SIEVE_BUF_SIZE))
+            if ((p = DBGetOption(opts, DBOPT_H5_SIEVE_BUF_SIZE)))
             {
                 int size = *((int*)p);
                 h5status |= H5Pset_sieve_buf_size(retval, size);
             }
 
             /* handle cache settings */
-            if (p = DBGetOption(opts, DBOPT_H5_CACHE_NELMTS))
+            if ((p = DBGetOption(opts, DBOPT_H5_CACHE_NELMTS)))
             {
                 int nelmts = *((int*)p);
                 int nbytes = nelmts * sizeof(double);
                 double policy = 1.0;
 
                 /* get size in bytes */
-                if (p = DBGetOption(opts, DBOPT_H5_CACHE_NBYTES))
+                if ((p = DBGetOption(opts, DBOPT_H5_CACHE_NBYTES)))
                     nbytes = *((int*)p);
 
                 /* get pre-emption policy */
-                if (p = DBGetOption(opts, DBOPT_H5_CACHE_POLICY))
+                if ((p = DBGetOption(opts, DBOPT_H5_CACHE_POLICY)))
                     policy = *((double*)p);
 
                 h5status |= H5Pset_cache(retval, 0, nelmts, nbytes, policy);
@@ -7309,7 +7309,7 @@ db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
     return db_hdf5_WriteCKZ(_dbfile, vname, var, dims, ndims, datatype, nofilters);
 }
 
-INTERNAL int
+PRIVATE int
 db_hdf5_WriteCKZ(DBfile *_dbfile, char *vname, void *var,
               int *dims, int ndims, int datatype, int nofilters)
 {

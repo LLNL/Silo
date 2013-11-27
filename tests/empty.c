@@ -90,7 +90,7 @@ static DBfile *dbfile = NULL;
     }                                                   \
 }
 
-static DBoptlist *OL(DBoptlist const *ol)
+static DBoptlist *OL(DBoptlist *ol)
 {
     double *dtime = (double*) DBGetOption(ol, DBOPT_DTIME);
     int *hfg = (int*) DBGetOption(ol, DBOPT_HIDE_FROM_GUI);
@@ -107,8 +107,8 @@ main(int argc, char *argv[])
     int             show_all_errors = FALSE;
     int             i, pass;
     char           *cnames[3] = {"x","y","z"};
-    void const     *coords[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
-    void const     *vars[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
+    void           *coords[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
+    void           *vars[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
     void           *var = (void*)1;
     int             iarr[3] = {1,1,1}; /* dummy int array */
     double          exts[4] = {0,0,0,0};

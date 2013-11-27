@@ -465,7 +465,7 @@ build_dbfile(DBfile *dbfile)
     
 
     /* create the multi-block mesh */
-    if (DBPutMultimesh(dbfile, "mesh1", nblocks, meshnames, 
+    if (DBPutMultimesh(dbfile, "mesh1", nblocks, (char const * const *) meshnames, 
                                         meshtypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);

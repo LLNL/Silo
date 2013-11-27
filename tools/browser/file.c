@@ -63,13 +63,13 @@ be used for advertising or product endorsement purposes.
  *
  *-------------------------------------------------------------------------
  */
+#include <config.h>     /*Silo configuration record*/
 #include <assert.h>
 #include <browser.h>
 #ifdef HAVE_FNMATCH_H
 #  include <fnmatch.h>
 #endif
 
-#include <config.h>     /*Silo configuration record*/
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -183,6 +183,8 @@ static int StringToOptval(const char *str)
     CHECK_SYMBOL(DB_H5VFD_MPIO);
     CHECK_SYMBOL(DB_H5VFD_MPIP);
     CHECK_SYMBOL(DB_H5VFD_SILO);
+
+    return DB_PDB;
 }
 
 #define MYCLASS(X)      ((obj_file_t*)(X))

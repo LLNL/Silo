@@ -136,15 +136,15 @@ main(int argc, char *argv[])
        int nblocks = sizeof(meshtypes) / sizeof(meshtypes[0]);
 
        DBPutMultimeshadj(dbfile, "mmadjacency", nblocks, meshtypes,
-          nneighbors, neighbors, NULL, lnodelists, nodelists,
+          nneighbors, neighbors, NULL, lnodelists, (int const * const *) nodelists,
           NULL, NULL, NULL);
 
        /* now try writing the same object with repeated calls */
        DBPutMultimeshadj(dbfile, "mmadjacency2", nblocks, meshtypes,
-          nneighbors, neighbors, NULL, lnodelists, nodelists2,
+          nneighbors, neighbors, NULL, lnodelists, (int const * const *) nodelists2,
           NULL, NULL, NULL);
        DBPutMultimeshadj(dbfile, "mmadjacency2", nblocks, meshtypes,
-          nneighbors, neighbors, NULL, lnodelists, nodelists3,
+          nneighbors, neighbors, NULL, lnodelists, (int const * const *) nodelists3,
           NULL, NULL, NULL);
     }
 

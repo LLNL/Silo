@@ -8178,8 +8178,8 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMultimesh (DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
-                     char DB_CONSTARR2 meshnames, int DB_CONSTARR1 meshtypes,
+db_pdb_PutMultimesh (DBfile *dbfile, char const *name, int nmesh,
+                     char const * const *meshnames, int const *meshtypes,
                      DBoptlist const *optlist) {
 
    int            i, len;
@@ -8370,11 +8370,11 @@ db_pdb_PutMultimesh (DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMultimeshadj (DBfile *_dbfile, char DB_CONSTARR1 name, int nmesh,
-                  int DB_CONSTARR1 meshtypes, int DB_CONSTARR1 nneighbors,
-                  int DB_CONSTARR1 neighbors, int DB_CONSTARR1 back,
-                  int DB_CONSTARR1 lnodelists, int DB_CONSTARR2 nodelists,
-                  int DB_CONSTARR1 lzonelists, int DB_CONSTARR2 zonelists,
+db_pdb_PutMultimeshadj (DBfile *_dbfile, char const *name, int nmesh,
+                  int const *meshtypes, int const *nneighbors,
+                  int const *neighbors, int const *back,
+                  int const *lnodelists, int const * const *nodelists,
+                  int const *lzonelists, int const * const *zonelists,
                   DBoptlist const *optlist) {
 
 

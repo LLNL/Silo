@@ -112,7 +112,7 @@ main(int argc, char *argv[])
     obj_names[11] = "../mesh1";
     obj_names[12] = "../block11/u";
 
-    DBSortObjectsByOffset(dbfile, 13, obj_names, ordering);
+    DBSortObjectsByOffset(dbfile, 13, (char const * const *) obj_names, ordering);
     printf("UNsorted objects...\n");
     for (i = 0; i < 13; i++)
         printf("\t\"%s\"\n", obj_names[i]);

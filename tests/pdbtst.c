@@ -272,7 +272,7 @@ static int PM_value_compare(double x1, double x2, double tol)
 
     return(rv);}
 
-static int def_hash_types(PDBfile *file)
+static void def_hash_types(PDBfile *file)
 {
     PD_defstr(file, haelemstr,
                     "char *name",
@@ -3992,9 +3992,15 @@ static int run_test(PFTest test, int n, char *host, int native)
 
     cs = SC_mem_monitor(cs, dbg, "B", msg);
 
+#if defined PRId64
     PRINT(STDOUT,
-          "\t\t     %3d    %8d  %8d   %7d     %.2g\n",
+          "\t\t     %3d    %8" PRId64 "  %8" PRI64d "   %7" PRI64d "     %.2g\n",
           n, bytaa, bytfa, bytaa - bytfa, time);
+#else
+    PRINT(STDOUT,
+          "\t\t     %3lld    %8lld  %8lld   %7lld     %.2g\n",
+          n, bytaa, bytfa, bytaa - bytfa, time);
+#endif
 
     return(fail);}
 
@@ -4052,7 +4058,7 @@ int main(int c, char **v)
         struct dirent *dent;
 
         ddir = opendir(".");
-        while (dent = readdir(ddir))
+        while ((dent = readdir(ddir)))
         {
             if (dent->d_name[0] == '.') continue;
             SC_ASSERT(REMOVE(dent->d_name)==0);

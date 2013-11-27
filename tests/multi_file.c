@@ -454,7 +454,8 @@ build_multi(char *basename, int driver, char *file_ext,
      */
     block_type = DB_UCDMESH;
     if (DBPutMultimesh(dbfile, "mesh1", nblocks,
-                       use_ns?0:meshnames, use_ns?0:meshtypes, optlist) == -1)
+                       (char const * const *) (use_ns?0:meshnames),
+                       use_ns?0:meshtypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi mesh\n");

@@ -836,7 +836,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -867,7 +867,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5, 1, 1, DB_NONCOLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -898,7 +898,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5, 1, 1, 0, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -929,7 +929,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_COLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -960,7 +960,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_NONCOLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -992,7 +992,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3, 4, 3, 0, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);

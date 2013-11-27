@@ -63,6 +63,7 @@ be used for advertising or product endorsement purposes.
  *
  *-------------------------------------------------------------------------
  */
+#include <config.h>
 #include <browser.h>
 #include <ctype.h>
 #include <signal.h>

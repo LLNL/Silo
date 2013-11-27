@@ -76,7 +76,7 @@ be used for advertising or product endorsement purposes.
  * Programmer:  Mark C. Miller, Wed Aug 29 11:07:16 PDT 2012
  *-------------------------------------------------------------------------
  */
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     int            i, driver = DB_PDB;
     int            show_all_errors = FALSE;

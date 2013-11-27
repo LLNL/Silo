@@ -531,7 +531,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int nblocks_x,
     /* create the multi-block mesh */
 
     if (DBPutMultimesh(dbfile, "mesh1", nblocks,
-                       meshnames, meshtypes, optlist) == -1)
+                       (char const * const *) meshnames, meshtypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi mesh\n");

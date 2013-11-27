@@ -2349,7 +2349,7 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
     {
         const DBoptlist *opts = SILO_Globals.fileOptionsSets[opts_set_id-NUM_DEFAULT_FILE_OPTIONS_SETS];
         void *p; int vfd = -1;
-        if (p = DBGetOption(opts, DBOPT_H5_VFD))
+        if ((p = DBGetOption(opts, DBOPT_H5_VFD)))
             vfd = *((int*)p);
         if (vfd == DB_H5VFD_FIC)
         {
@@ -2387,16 +2387,16 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
             if (opts)
             {
                 /* ignore if options set unrelated to split vfds */
-                if (p = DBGetOption(opts, DBOPT_H5_VFD))
+                if ((p = DBGetOption(opts, DBOPT_H5_VFD)))
                     vfd = *((int*)p);
 
                 if (vfd != DB_H5VFD_SPLIT)
                     continue;
 
                 /* ok, get meta/raw filenaming extension conventions */
-                if (p = DBGetOption(opts, DBOPT_H5_META_EXTENSION))
+                if ((p = DBGetOption(opts, DBOPT_H5_META_EXTENSION)))
                     meta_ext = (char *) p;
-                if (p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION))
+                if ((p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION)))
                     raw_ext = (char *) p;
             }
 
@@ -3653,7 +3653,7 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
         {
             if (!SILO_Globals.allowEmptyObjects)
                 API_ERROR("string literal component", E_BADARGS);
-            sprintf(tmp, "'<s>null'", ss);
+            sprintf(tmp, "'<s>null'");
         }
         else
             sprintf(tmp, "'<s>%s'", ss);
@@ -8111,8 +8111,9 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
  *    adjusting sanity checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutMultimesh(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
-               char DB_CONSTARR2 meshnames, int DB_CONSTARR1 meshtypes, DBoptlist const *optlist)
+DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
+    char const * const *meshnames, int const *meshtypes,
+    DBoptlist const *optlist)
 {
     int retval;
 
@@ -8165,11 +8166,11 @@ DBPutMultimesh(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
  *
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutMultimeshadj(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
-                  int DB_CONSTARR1 meshtypes, int DB_CONSTARR1 nneighbors,
-                  int DB_CONSTARR1 neighbors, int DB_CONSTARR1 back,
-                  int DB_CONSTARR1 lnodelists, int DB_CONSTARR2 nodelists,
-                  int DB_CONSTARR1 lzonelists, int DB_CONSTARR2 zonelists,
+DBPutMultimeshadj(DBfile *dbfile, char const *name, int nmesh,
+                  int const *meshtypes, int const *nneighbors,
+                  int const *neighbors, int const *back,
+                  int const *lnodelists, int const * const *nodelists,
+                  int const *lzonelists, int const * const *zonelists,
                   DBoptlist const *optlist)
 {
     int retval;
@@ -8882,7 +8883,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
                 if (coords2[i] == 0) coords = 0;;
             if (!coords)
                 API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            if (zl_name = DBGetOption(optlist, DBOPT_PHZONELIST))
+            if ((zl_name = DBGetOption(optlist, DBOPT_PHZONELIST)))
             {
                 if (!zl_name || !*zl_name)
                     API_ERROR("zonelist name specified with DBOPT_PHZONELIST is null or \"\"", E_BADARGS);
