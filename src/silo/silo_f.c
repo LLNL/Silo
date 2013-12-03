@@ -1453,7 +1453,7 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
              int *lmeshnames, int *meshtypes, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
-    char const *  *meshnms = NULL;
+    char         **meshnms = NULL;
     char          *nm = NULL;
     char          *realmeshnames = NULL;
     int            i, indx;
@@ -1495,12 +1495,12 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
 
         if (*nmesh <= 0)
             API_ERROR("nmesh", E_BADARGS);
-        meshnms = ALLOC_N(char const *, *nmesh);
+        meshnms = ALLOC_N(char *, *nmesh);
 
         for (indx = 0, i = 0; i < *nmesh; i++) {
             if (lmeshnames[i] < 0)
                 API_ERROR("lmeshnames", E_BADARGS);
-            meshnms[i] = (char const *) SW_strndup(&realmeshnames[indx], lmeshnames[i]);
+            meshnms[i] = (char *) SW_strndup(&realmeshnames[indx], lmeshnames[i]);
             if (fortran2DStrLen > 0)
                 indx += fortran2DStrLen;
             else

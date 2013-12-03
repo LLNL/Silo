@@ -351,6 +351,8 @@ EXTRA_DIST = \
 
 include_HEADERS = \
  silo.inc \
+ silo_f77.inc \
+ silo_f9x.inc \
  pmpio.h
 
 nodist_include_HEADERS = \
@@ -369,7 +371,7 @@ FILES = \
  silo_ns.c \
  $(EXTRAFILES)
 
-BUILT_SOURCES = silo.inc
+BUILT_SOURCES = silo.inc silo_f9x.inc
 DISTCLEANFILES = silo_version.h
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -711,6 +713,13 @@ uninstall-am: uninstall-includeHEADERS uninstall-nodist_includeHEADERS
 silo.inc: silo.h.in silo_f.h
 	if test ! -e $@; then \
 	  cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; fi
+
+silo_f77.inc: silo.inc
+	@ln -s $< $@ 2>/dev/null
+
+silo_f9x.inc: silo.h.in silo_f.h
+	if test ! -e $@; then \
+	  cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc --f90 > $@; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

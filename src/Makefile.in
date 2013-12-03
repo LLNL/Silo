@@ -101,6 +101,8 @@ host_triplet = @host@
 @HZIP_NEEDED_TRUE@am__append_12 = hzip/libsilo_hzip.la
 @FPZIP_NEEDED_TRUE@am__append_13 = fpzip
 @FPZIP_NEEDED_TRUE@am__append_14 = fpzip/libsilo_fpzip.la
+@HZIP_NEEDED_TRUE@am__append_15 = hzip
+@FPZIP_NEEDED_TRUE@am__append_16 = fpzip
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libsilo.settings.in $(srcdir)/libsiloh5.settings.in
@@ -408,9 +410,8 @@ DRIVER_LIBS = $(am__append_2) $(am__append_4) $(am__append_6) \
 SUBDIRS = score pdb silo debug \
 $(DRIVER_DIRS) unknown filters .
 
-DIST_SUBDIRS = . debug filters hdf5_drv hzip fpzip netcdf \
-pdb pdb_drv pdbp_drv score silo taurus unknown
-
+DIST_SUBDIRS = . debug filters hdf5_drv netcdf pdb pdb_drv pdbp_drv \
+	score silo taurus unknown $(am__append_15) $(am__append_16)
 MAKESETTINGS = make.settings
 @HDF5_DRV_NEEDED_FALSE@SETTINGSFILE = libsilo.settings
 @HDF5_DRV_NEEDED_TRUE@SETTINGSFILE = libsiloh5.settings

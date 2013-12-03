@@ -99,7 +99,10 @@ DISTCLEANFILES = silo_version.h
 # be extra careful about check-in time-stamps! silo.inc MUST be the oldest.
 silo.inc: silo.h.in silo_f.h
 	if test ! -e $@; then \
-	  cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; ln -s $@ silo_f77.inc; fi
+	  cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; fi
+
+silo_f77.inc: silo.inc
+	@ln -s $< $@ 2>/dev/null
 
 silo_f9x.inc: silo.h.in silo_f.h
 	if test ! -e $@; then \

@@ -296,6 +296,10 @@ AT_SETUP(arrayf77)
 AT_KEYWORDS(fortran)
 AT_CHECK(test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 $STARGS,,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(arrayf90)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f arrayf90 -o -f ../../arrayf90 \) && exit 77 || $VALGRIND arrayf90 $STARGS,,ignore,ignore)
+AT_CLEANUP
 AT_SETUP(curvef77)
 AT_KEYWORDS(fortran)
 AT_CHECK(test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 $STARGS,,ignore,ignore)

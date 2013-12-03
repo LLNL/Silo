@@ -8737,7 +8737,7 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
                 API_ERROR("nvars<1", E_BADARGS);
             for (i = 0; i < nvars && vars; i++)
                 if (!vars2[i]) vars = 0;
-            vars2 = mixvars;
+            vars2 = (void**) mixvars;
             for (i = 0; i < nvars && mixvars; i++)
                 if (!vars2[i]) mixvars = 0;
             for (i = 0; i < nvars && varnames; i++)
@@ -9066,7 +9066,7 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
                 API_ERROR("mixlen", E_BADARGS);
             if (mixvars)
             {
-                vars2 = mixvars;
+                vars2 = (void**) mixvars;
                 for (i = 0; i < nvars && mixvars; i++)
                     if (vars2[i] == 0) mixvars = 0;
             }
