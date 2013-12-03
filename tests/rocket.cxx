@@ -754,7 +754,7 @@ WriteAllFormats(int argc, char **argv)
     
             if (dname.find("rocket_") == string::npos)
                 continue;
-            if (dname.rfind(".o") == string::npos)
+            if (dname.rfind(".so") == string::npos)
                 continue;
     
             string fmtname = dname.substr(7,dname.size()-10);
