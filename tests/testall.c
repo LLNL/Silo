@@ -3191,7 +3191,8 @@ static void
 build_curve (DBfile *dbfile, int driver)
 {
    float        x[20], y[2][20] ;
-   int          i, one=1;
+   float        r[40], theta[40] ;
+   int          i, one=1, coord_sys = DB_SPHERICAL;
    DBoptlist    *opts ;
 
    /*
@@ -3231,6 +3232,21 @@ build_curve (DBfile *dbfile, int driver)
 
    DBAddOption (opts, DBOPT_REFERENCE, "sincurve") ;
    DBPutCurve (dbfile, "sincurv1", NULL, NULL, DB_FLOAT, 20, opts);
+
+   DBClearOptlist(opts);
+   DBAddOption (opts, DBOPT_XLABEL, "radius") ;
+   DBAddOption (opts, DBOPT_YLABEL, "angle") ;
+   DBAddOption (opts, DBOPT_XUNITS, "radians") ;
+   DBAddOption (opts, DBOPT_YUNITS, "meters") ;
+   DBAddOption (opts, DBOPT_COORDSYS, &coord_sys );
+  
+   for (i=0; i<40; i++) {
+      r[i] = 1.0;
+      theta[i] = 2 * M_PI * (float) (i / 39.0);
+   }
+
+   DBPutCurve (dbfile, "circle", r, theta, DB_FLOAT, 40, opts);
+
    DBFreeOptlist (opts) ;
    DBSetFriendlyHDF5Names(0);
 }

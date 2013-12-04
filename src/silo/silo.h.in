@@ -558,8 +558,8 @@ typedef enum {
 
 /* Definitions for COORD_SYSTEM */
 #define  DB_CARTESIAN           120
-#define  DB_CYLINDRICAL         121
-#define  DB_SPHERICAL           122
+#define  DB_CYLINDRICAL         121 /* x,r;  y,theta;  z,height; 2D variant is eqiv. to poloar */
+#define  DB_SPHERICAL           122 /* x,r;  y,theta;  z,phi;  2D variant is equiv. to polar */
 #define  DB_NUMERICAL           123
 #define  DB_OTHER               124
 
@@ -776,6 +776,7 @@ typedef struct DBcurve_ {
     int            npts;        /* Number of points in curve */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     char          *reference;   /* Label to reference object */
+    int            coord_sys;   /* To indicate other coordinate systems */
 } DBcurve;
 
 typedef struct DBdefvars_ {

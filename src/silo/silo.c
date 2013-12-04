@@ -10929,7 +10929,7 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         break;
 
                     case DBOPT_COORDSYS:
-                        _qm._coordsys = DEREF(int, optlist->values[i]);
+                        _qm._coord_sys = DEREF(int, optlist->values[i]);
                         break;
 
                     case DBOPT_FACETYPE:
@@ -11069,7 +11069,7 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         break;
 
                     case DBOPT_COORDSYS:
-                        _um._coordsys = DEREF(int, optlist->values[i]);
+                        _um._coord_sys = DEREF(int, optlist->values[i]);
                         break;
 
                     case DBOPT_TOPO_DIM:
@@ -11487,6 +11487,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_REFERENCE:
                         _cu._reference = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_COORDSYS:
+                        _cu._coord_sys = DEREF(int, optlist->values[i]);
                         break;
 
                     default:
@@ -11929,7 +11933,7 @@ db_ResetGlobalData_QuadMesh (int ndims) {
    FREE(_qm._meshname);
    memset(&_qm, 0, sizeof(_qm));
 
-   _qm._coordsys = DB_OTHER;
+   _qm._coord_sys = DB_OTHER;
    _qm._facetype = DB_RECTILINEAR;
    _qm._ndims = ndims;
    _qm._nspace = ndims;
@@ -12013,7 +12017,7 @@ INTERNAL int
 db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones) {
 
    memset(&_um, 0, sizeof(_um));
-   _um._coordsys = DB_OTHER;
+   _um._coord_sys = DB_OTHER;
    _um._facetype = DB_RECTILINEAR;
    _um._ndims = ndims;
    _um._nnodes = nnodes;

@@ -3698,19 +3698,11 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
    DEFALL_OBJ ("yunits",   &tmpcu.yunits,   DB_CHAR) ;
    DEFALL_OBJ ("reference",&tmpcu.reference,DB_CHAR) ;
    DEFINE_OBJ ("guihide",  &tmpcu.guihide,  DB_INT) ;
+   DEFINE_OBJ ("coord_sys",  &tmpcu.coord_sys,  DB_INT) ;
    if (PJ_GetObject (dbfile->pdb, name, &tmp_obj, DB_CURVE)<0)
        return NULL ;
    if (NULL == (cu = DBAllocCurve ())) return NULL ;
    *cu = tmpcu;
-
-#if 0
-   if (cu->npts<=0)
-   {
-      DBFreeCurve (cu) ;
-      db_perror (name, E_NOTFOUND, me) ;
-      return NULL ;
-   }
-#endif
 
    if (DB_DOUBLE == cu->datatype && PJ_InqForceSingle())
       cu->datatype = DB_FLOAT ;
@@ -7646,7 +7638,8 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
    if (_cu._labels[1])  DBAddStrComponent (obj, "ylabel",   _cu._labels[1]) ;
    if (_cu._units[1])   DBAddStrComponent (obj, "yunits",   _cu._units[1]) ;
    if (_cu._reference)  DBAddStrComponent (obj, "reference",_cu._reference) ;
-   if (_cu._guihide)    DBAddIntComponent (obj, "guihide",  _cu._guihide);
+   if (_cu._guihide)    DBAddIntComponent (obj, "guihide",  _cu._guihide) ;
+   if (_cu._coord_sys)  DBAddIntComponent (obj, "coord_sys", _cu._coord_sys) ;
    DBWriteObject (_dbfile, obj, TRUE) ;
    DBFreeObject(obj);
 
@@ -9707,7 +9700,7 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
     DBAddIntComponent(obj, "facetype", _qm._facetype);
     DBAddIntComponent(obj, "major_order", _qm._majororder);
     DBAddIntComponent(obj, "cycle", _qm._cycle);
-    DBAddIntComponent(obj, "coord_sys", _qm._coordsys);
+    DBAddIntComponent(obj, "coord_sys", _qm._coord_sys);
     DBAddIntComponent(obj, "planar", _qm._planar);
     DBAddIntComponent(obj, "origin", _qm._origin);
 
@@ -10512,7 +10505,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    DBAddIntComponent(obj, "nzones", nzones);
    DBAddIntComponent(obj, "facetype", _um._facetype);
    DBAddIntComponent(obj, "cycle", _um._cycle);
-   DBAddIntComponent(obj, "coord_sys", _um._coordsys);
+   DBAddIntComponent(obj, "coord_sys", _um._coord_sys);
    if (_um._topo_dim > 0)
       DBAddIntComponent(obj, "topo_dim", _um._topo_dim);
    DBAddIntComponent(obj, "planar", _um._planar);
@@ -10695,7 +10688,7 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
    DBAddIntComponent(obj, "nzones", nzones);
    DBAddIntComponent(obj, "facetype", _um._facetype);
    DBAddIntComponent(obj, "cycle", _um._cycle);
-   DBAddIntComponent(obj, "coord_sys", _um._coordsys);
+   DBAddIntComponent(obj, "coord_sys", _um._coord_sys);
    if (_um._topo_dim > 0)
       DBAddIntComponent(obj, "topo_dim", _um._topo_dim);
    DBAddIntComponent(obj, "planar", _um._planar);

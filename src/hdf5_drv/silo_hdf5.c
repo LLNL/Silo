@@ -289,6 +289,7 @@ typedef struct silo_hdf5_comp_t {
 typedef struct DBcurve_mt {
     int                 npts;
     int                 guihide;
+    int                 coord_sys;
     char                xvarname[256];
     char                yvarname[256];
     char                label[256];
@@ -2066,6 +2067,7 @@ db_hdf5_init(void)
     STRUCT(DBcurve) {
         MEMBER_S(int,           npts);
         MEMBER_S(int,           guihide);
+        MEMBER_S(int,           coord_sys);
         MEMBER_S(str256,        xvarname);
         MEMBER_S(str256,        yvarname);
         MEMBER_S(str256,        label);
@@ -7782,6 +7784,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
         /* Build the curve header in memory */
         m.npts = npts;
         m.guihide = _cu._guihide;
+        m.coord_sys = _cu._coord_sys;
         strcpy(m.label, OPT(_cu._label));
         strcpy(m.xlabel, OPT(_cu._labels[0]));
         strcpy(m.ylabel, OPT(_cu._labels[1]));
@@ -7793,6 +7796,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
         STRUCT(DBcurve) {
             if (m.npts) MEMBER_S(int, npts);
             if (m.guihide) MEMBER_S(int, guihide);
+            if (m.coord_sys) MEMBER_S(int, coord_sys);
             MEMBER_S(str(_cu._label), label);
             MEMBER_S(str(m.xvarname), xvarname);
             MEMBER_S(str(m.yvarname), yvarname);
@@ -7873,6 +7877,7 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
         if (NULL==(cu=DBAllocCurve())) return NULL;
         cu->npts = m.npts;
         cu->guihide = m.guihide;
+        cu->coord_sys = m.coord_sys;
         cu->datatype = DB_FLOAT;
         if (strlen(m.xvarname)) {
             if ((cu->datatype = db_hdf5_GetVarType(_dbfile, 
@@ -8845,7 +8850,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
         }
 
         /* Set global options */
-        _qm._coordsys = DB_OTHER;
+        _qm._coord_sys = DB_OTHER;
         _qm._facetype = DB_RECTILINEAR;
         _qm._ndims = ndims;
         _qm._nspace = ndims;
@@ -8921,7 +8926,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
         m.facetype = _qm._facetype;
         m.major_order = _qm._majororder;
         m.cycle = _qm._cycle;
-        m.coord_sys = _qm._coordsys;
+        m.coord_sys = _qm._coord_sys;
         m.planar = _qm._planar;
         m.origin = _qm._origin;
         m.group_no = _qm._group_no;
@@ -9212,7 +9217,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
 
     PROTECT {
         /* Set global options */
-        _qm._coordsys = DB_OTHER;
+        _qm._coord_sys = DB_OTHER;
         _qm._facetype = DB_RECTILINEAR;
         _qm._ndims = _qm._nspace = ndims;
         _qm._planar = DB_AREA;
@@ -9624,7 +9629,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
 
         /* Set global options */
         strcpy(_um._meshname, name);
-        _um._coordsys = DB_OTHER;
+        _um._coord_sys = DB_OTHER;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = ndims;
         _um._nnodes = nnodes;
@@ -9675,7 +9680,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
         m.nnodes = nnodes;
         m.nzones = nzones;
         m.facetype = _um._facetype;
-        m.coord_sys = _um._coordsys;
+        m.coord_sys = _um._coord_sys;
         m.topo_dim = _um._topo_dim;
         m.planar = _um._planar;
         m.origin = _um._origin;
@@ -9801,7 +9806,7 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
 
         /* Set global options */
         strcpy(_um._meshname, name);
-        _um._coordsys = DB_OTHER;
+        _um._coord_sys = DB_OTHER;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = m.ndims;
         _um._nnodes = m.nnodes;
@@ -9821,7 +9826,7 @@ db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name, char *parentmesh,
         m.nzones = _um._nzones;
         m.facetype = _um._facetype;
         m.cycle = _um._cycle;
-        m.coord_sys = _um._coordsys;
+        m.coord_sys = _um._coord_sys;
         m.topo_dim = _um._topo_dim;
         m.planar = _um._planar;
         m.origin = _um._origin;
@@ -10172,7 +10177,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         saved_nnodes = _um._nnodes;
         saved_nzones = _um._nzones;
         memset(&_um, 0, sizeof _um);
-        _um._coordsys = DB_OTHER;
+        _um._coord_sys = DB_OTHER;
         _um._topo_dim = saved_ndims;
         _um._facetype = DB_RECTILINEAR;
         _um._ndims = saved_ndims;

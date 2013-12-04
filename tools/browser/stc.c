@@ -1590,6 +1590,8 @@ stc_silo_types (void) {
       COMP (reference,          "primitive 'string'");
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
+      COMP (coord_sys,          "primitive 'int'");
+      IOASSOC (PA_COORDSYS);
       COMP (x,
             "pointer (array 'self.npts' (primitive 'self.datatype'))");
       COMP (y,

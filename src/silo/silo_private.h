@@ -488,7 +488,7 @@ struct _qm {
     int            _dtime_set;
     float          _align[3];
     int            _cycle;
-    int            _coordsys;
+    int            _coord_sys;
     int            _facetype;
     int            _hi_offset[3];
     int            _lo_offset[3];
@@ -564,7 +564,7 @@ struct _um {
     int            _lo_offset;
     int            _hi_offset_set;
     int            _lo_offset_set;
-    int            _coordsys;
+    int            _coord_sys;
     int            _topo_dim;
     int            _facetype;
     int            _ndims;
@@ -728,6 +728,7 @@ struct _cu {
    char         *_units[2] ;
     int          _guihide;
    char         *_reference ;
+    int          _coord_sys ;
 };
 
 /*
