@@ -221,7 +221,7 @@ static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
     DBSetCwr(mrgt, className);
 
     int seg_types[1], seg_lens[1], seg_ids[1];
-    const int *seg_data[1];
+    int *seg_data[1];
     seg_types[0] = DB_NODECENT;
     seg_ids[0] = 0;
 
@@ -265,7 +265,7 @@ static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
                 seg_data[0] = &map_data[0];
                 string mapnm = string(regnNames[i]) + "_map";
                 DBAddRegion(mrgt, regnNames[i], 0, 0, mapnm.c_str(), 1, seg_ids, seg_lens, seg_types, 0);
-                DBPutGroupelmap(dbfile, mapnm.c_str(), 1, seg_types, seg_lens, seg_ids, (int**)seg_data, 0, 0, 0);
+                DBPutGroupelmap(dbfile, mapnm.c_str(), 1, seg_types, seg_lens, seg_ids, (int**)seg_data, 0, DB_NOTYPE, 0);
             }
         }
     }
