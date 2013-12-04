@@ -1438,6 +1438,12 @@ prim_bind (obj_t _self, void *mem) {
          self->nbytes = sizeof(double);
          break;
 
+      case DB_NOTYPE:
+         self->tname = safe_strdup ("notype");
+         self->browser_type = BROWSER_INT;
+         self->nbytes = 0;
+         break;
+
       default:
          out_errorn ("prim_bind: cannot resolve %s to a silo type",
                      self->name);

@@ -2316,11 +2316,11 @@ stc_silo_types (void) {
       COMP (segment_ids,
             "pointer (array 'self.num_segments' (primitive 'int'))");
       COMP (segment_data,
-            "pointer (array 'SH3 1000, self.num_segments' "
+            "pointer (array 'SH3 10000, self.num_segments' "
             "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
             "(primitive 'int'))))");
       COMP (segment_fracs,
-            "pointer (array 'SH3 1000, self.num_segments' "
+            "pointer (array 'SH3 10000, self.num_segments' "
             "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
             "(primitive 'self.fracs_data_type'))))");
    } ESTRUCT;
