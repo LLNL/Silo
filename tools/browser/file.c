@@ -191,7 +191,7 @@ static int StringToOptval(const char *str)
 
 typedef struct obj_file_t {
    obj_pub_t    pub;
-   int          rdonly;
+   int          writeable;
    char         *name;
    DBfile       *f;
 } obj_file_t;
@@ -402,12 +402,12 @@ file_new (va_list ap)
    obj_file_t   *self;
    char         *fname=NULL;
    DBfile       *f;
-   int          rdonly;
+   int          writeable;
    int          old_err_level;
    static int   seen_file_format = -1;
 
    fname = va_arg (ap, char*);
-   rdonly = va_arg (ap, int);
+   writeable = va_arg (ap, int);
 
    /* reset hdf5 vfd options (whether the are used or not) */
    file_reset_hdf5_vfd_options();
@@ -417,13 +417,13 @@ file_new (va_list ap)
     * permission then try opening it for read-only
     */
 #define DEFAULT_DB_TYPE DB_UNKNOWN 
-   f = DBOpen (fname, DEFAULT_DB_TYPE, rdonly ? DB_READ : DB_APPEND);
-   if (!f && E_FILENOWRITE==db_errno && !rdonly) {
+   f = DBOpen (fname, DEFAULT_DB_TYPE, writeable ? DB_APPEND : DB_READ);
+   if (!f && E_FILENOWRITE==db_errno && writeable) {
       f = DBOpen (fname, DEFAULT_DB_TYPE, DB_READ);
       if (f) {
          out_info ("file opened, but without write permission");
       }
-      rdonly = true;
+      writeable = false;
    }
 
    /*
@@ -434,7 +434,7 @@ file_new (va_list ap)
    if (!f && E_NOTFILTER==db_errno) {
       old_err_level = DBErrlvl();
       DBShowErrors(DB_ALL, NULL);
-      f = DBOpen (fname, DEFAULT_DB_TYPE, rdonly ? DB_READ : DB_APPEND);
+      f = DBOpen (fname, DEFAULT_DB_TYPE, writeable ? DB_APPEND : DB_READ);
       DBShowErrors(old_err_level, NULL);
    }
 
@@ -446,7 +446,7 @@ file_new (va_list ap)
    self = calloc (1, sizeof(obj_file_t));
    self->name = safe_strdup (fname);
    self->f = f;
-   self->rdonly = rdonly;
+   self->writeable = writeable;
 
    /* If we see any file which is not PDB then turn off the `$lowlevel'
     * flag for fear of the caller attempting a `diff' operation across
@@ -526,7 +526,7 @@ file_print (obj_t _self, out_t *f) {
    char         cwd[1024];
 
    if (DBGetDir (self->f, cwd)<0) strcpy (cwd, "???");
-   out_printf (f, "%s%s:%s", self->name, self->rdonly?"[RDONLY]":"", cwd);
+   out_printf (f, "%s%s:%s", self->name, self->writeable?"[WRITEABLE]":"", cwd);
 }
 
 
@@ -859,7 +859,7 @@ browser_DBSaveObject (obj_t _self, char *unused, void *mem, obj_t type) {
    double       d;
    obj_t        comp_name;
 
-   if (self->rdonly) {
+   if (!self->writeable) {
       out_errorn ("file `%s' is read-only", self->name);
       return -1;
    }
@@ -1831,7 +1831,7 @@ browser_DBSaveVar (obj_t _self, char *name, void *mem, obj_t type)
     DBdatatype      silotype;
     DBfile         *dbfile = file_file(_self);
 
-    if (self->rdonly)
+    if (!self->writeable)
     {
         out_errorn("file `%s' is read-only", self->name);
         return -1;
@@ -2783,7 +2783,7 @@ file_diff (obj_t a, obj_t b)
 
 
 /*-------------------------------------------------------------------------
- * Function:    file_rdonly
+ * Function:    file_writeable
  *
  * Purpose:     Determines if the file is read-only.
  *
@@ -2800,9 +2800,9 @@ file_diff (obj_t a, obj_t b)
  *-------------------------------------------------------------------------
  */
 int
-file_rdonly (obj_t _self)
+file_writeable (obj_t _self)
 {
    obj_file_t   *self = MYCLASS(_self);
 
-   return self->rdonly;
+   return self->writeable;
 }

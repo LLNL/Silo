@@ -1229,9 +1229,9 @@ process_switches(switches_t *switches, int pass)
         sym_bi_set("lowlevel", sw->lexeme, NULL, NULL);
     }
     
-    if ((sw=switch_find(switches, "--rdonly")) && sw->seen) {
+    if ((sw=switch_find(switches, "--writeable")) && sw->seen) {
         sprintf(tmp, "%d", sw->value.d); /*boolean*/
-        sym_bi_set("rdonly", tmp, NULL, NULL);
+        sym_bi_set("writeable", tmp, NULL, NULL);
     }
 
     if ((sw=switch_find(switches, "--single")) && sw->seen) {
@@ -1629,11 +1629,11 @@ main(int argc, char *argv[])
                "displayed with a type-dependent printf(3C) format string "
                "which is user defined (e.g., `$fmt_int').");
 
-    switch_add(sws, "-r", "--rdonly",   "b=1",          NULL);
+    switch_add(sws, "-W", "--writeable",   "b=1",          NULL);
     switch_doc(NULL,
-               "If this switch is specified then all files will be open in "
-               "read-only mode regardless of their permissions. This switch "
-               "sets the $rdonly variable.");
+               "If this switch is specified then all files will be open with "
+               "write permission if the file permissions allow it. This switch "
+               "sets the $writeable variable.");
 
     switch_add(sws, "-s", "--single",   "b=1",          NULL);
     switch_doc(NULL,

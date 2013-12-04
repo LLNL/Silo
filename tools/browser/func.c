@@ -858,6 +858,11 @@ F_fbind (obj_t self, obj_t func) {
  *      Robb Matzke, 2 Apr 1997
  *      If `$rdonly' is true then the file is open for reading only.
  *
+ *      Mark C. Miller, Wed Dec  4 11:22:26 PST 2013
+ *      Replaced `$rdonly' behavior with `$writable' thereby swaping the
+ *      default open behavior to be to open for write only when it is
+ *      acutally requested.
+ *
  *-------------------------------------------------------------------------
  */
 obj_t
@@ -865,7 +870,7 @@ V_file (int argc, obj_t argv[]) {
 
    obj_t        retval=NIL, filename=NIL;
    char         *fname;
-   int          rdonly = sym_bi_true("rdonly");
+   int          writeable = sym_bi_true("writeable");
 
    if (1!=argc) {
       out_errorn ("file: wrong number of arguments");
@@ -882,7 +887,7 @@ V_file (int argc, obj_t argv[]) {
    } else if (NULL==(fname=obj_name(filename))) {
       out_errorn ("file: arg-1 is inappropriate");
 
-   } else if (NIL==(retval=obj_new (C_FILE, fname, rdonly))) {
+   } else if (NIL==(retval=obj_new (C_FILE, fname, writeable))) {
 #if 0 /*error message already printed*/
       out_errorn ("file: could not open `%s'", fname);
 #endif

@@ -842,12 +842,12 @@ sym_init (void)
               "`comp_names' or `pdb_names' arrays since the SILO DBobject "
               "is regenerated from the user-friendly fields before being "
               "saved back to the file.");
-   sym_bi_set("rdonly",         "0",
-              "Open files for read-only access.",
+   sym_bi_set("writeable",         "0",
+              "Open files for write access.",
               "If this variable has any true value (nil, zero, and the empty "
               "string are considered false) then the browser opens files in "
-              "read-only mode regardless of the file permissions. Editing "
-              "objects in a read-only file is not allowed.");
+              "write mode if the file permissions allow it. Editing "
+              "objects in a writeable file is allowed.");
    sym_bi_set("diff",           NULL,
               "Influence behavior of `diff' function.",
               "This variable controls the details of the `diff' function. It "
