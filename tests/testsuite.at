@@ -86,6 +86,9 @@ AT_CLEANUP
 AT_SETUP(namescheme)
 AT_CHECK($VALGRIND namescheme,,ignore)
 AT_CLEANUP
+AT_SETUP(realloc_obj_and_opts)
+AT_CHECK($VALGRIND realloc_obj_and_opts $STARGS,,ignore)
+AT_CLEANUP
 AT_SETUP(point)
 AT_CHECK($VALGRIND point $STARGS,,ignore)
 AT_CLEANUP

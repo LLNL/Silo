@@ -63,9 +63,14 @@ main(int argc, char *argv[])
     DBfile *dbfile;
     int comp_data[] = {0,1,2,3,4,5,6,7,8,9};
     int ndims = 1;
-    int dims = sizeof(comp_data)/sizeof(comp_data[0]);
+    const long int dims = sizeof(comp_data)/sizeof(comp_data[0]);
+    int cycle = 1;
+    float time = 1.5;
+    double dtime = 1.515;
+    int lo_offset = 7;
+    int hi_offset = 24;
 
-    dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "object tests", DB_PDB);
+    dbfile = DBCreate("object-tests.silo", DB_CLOBBER, DB_LOCAL, "object tests", DB_PDB);
 
     /* confirm can handle more components than orginal make of '3' */
     obj = DBMakeObject("test", DB_USERDEF, 3);
@@ -80,8 +85,30 @@ main(int argc, char *argv[])
     DBAddDblComponent(obj, "Dbl3", 1.53776);
     DBAddDblComponent(obj, "Dbl4", 1.53776);
     DBWriteComponent(dbfile, obj, "intCompB", "pre_", "integer", comp_data, 1, &dims);
-    DBWriteObject(dbfil,e obj, 0);
+    DBWriteObject(dbfile, obj, 0);
     DBFreeObject(obj);
+
+    opts = DBMakeOptlist(3);
+    DBAddOption(opts, DBOPT_CYCLE, &cycle);
+    DBAddOption(opts, DBOPT_TIME, &time);
+    DBAddOption(opts, DBOPT_DTIME, &dtime);
+    DBClearOption(opts, DBOPT_CYCLE);
+    DBAddOption(opts, DBOPT_LO_OFFSET, &lo_offset);
+    DBAddOption(opts, DBOPT_HI_OFFSET, &hi_offset);
+    DBClearOptlist(opts);
+    DBAddOption(opts, DBOPT_CYCLE, &cycle);
+    DBAddOption(opts, DBOPT_TIME, &time);
+    DBAddOption(opts, DBOPT_DTIME, &dtime);
+    DBAddOption(opts, DBOPT_LO_OFFSET, &lo_offset);
+    DBAddOption(opts, DBOPT_HI_OFFSET, &hi_offset);
+    DBAddOption(opts, DBOPT_COORDSYS, &cycle);
+    DBAddOption(opts, DBOPT_NMATNOS, &cycle);
+    DBAddOption(opts, DBOPT_HIDE_FROM_GUI, &cycle);
+    DBAddOption(opts, DBOPT_TOPO_DIM, &cycle);
+    DBAddOption(opts, DBOPT_ALLOWMAT0, &cycle);
+    DBAddOption(opts, DBOPT_TV_CONNECTIVITY, &cycle);
+    DBAddOption(opts, DBOPT_DISJOINT_MODE, &cycle);
+    DBFreeOptlist(opts);
 
     DBClose(dbfile);
   
