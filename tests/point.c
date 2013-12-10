@@ -232,6 +232,7 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     float          *x = NULL, *y = NULL, *z = NULL;
     float          *u = NULL, *v = NULL, *w = NULL;
     float          *d = NULL, *t = NULL;
+    float          *vm1 = NULL, *vm2 = NULL;
     int            *itype = NULL;
     long long      *litype = NULL;
     int             i;
@@ -244,11 +245,16 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     float           time = 4.4;
     double          dtime = 4.4;
 
+    double          missing_value1 = (float) 345.678;
+    double          missing_value2 = 0;
+
     x = ALLOC(float,N); assert_mem(x);
     y = ALLOC(float,N); assert_mem(y);
     z = ALLOC(float,N); assert_mem(y);
     u = ALLOC(float,N); assert_mem(u);
     v = ALLOC(float,N); assert_mem(v);
+    vm1 = ALLOC(float,N); assert_mem(vm1);
+    vm2 = ALLOC(float,N); assert_mem(vm2);
     w = ALLOC(float,N); assert_mem(w);
     d = ALLOC(float,N); assert_mem(d);
     t = ALLOC(float,N); assert_mem(t);
@@ -266,6 +272,7 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     DBAddOption(optlist1, DBOPT_TIME, &time);
     DBAddOption(optlist1, DBOPT_DTIME, &dtime);
     DBAddOption(optlist1, DBOPT_HIDE_FROM_GUI, &one);
+    DBAddOption(optlist1, DBOPT_MISSING_VALUE, &missing_value1);
 
     DBMkDir(dbfile, "dir1");
     DBMkDir(dbfile, "dir2");
@@ -288,6 +295,13 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
             d[i] = sqrt(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
         u[i] = x[i] / TwoPI;
         v[i] = y[i] / TwoPI;
+        vm1[i] = v[i];
+        vm2[i] = v[i];
+        if ((i % 7) == 0)
+        {
+            vm1[i] = missing_value1;
+            vm2[i] = missing_value2;
+        }
         w[i] = w[i] / TwoPI;
         t[i] = pow(10., 5. * f * f);
         itype[i] = i;
@@ -307,6 +321,17 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
 
     vars[0] = v;
     DBPutPointvar(dbfile, "v", name, 1, vars, N, DB_FLOAT, optlist);
+
+    vars[0] = vm1;
+    DBClearOption(optlist1, DBOPT_HIDE_FROM_GUI);
+    DBPutPointvar(dbfile, "vm1", name, 1, vars, N, DB_FLOAT, optlist1);
+
+    DBClearOption(optlist1, DBOPT_MISSING_VALUE);
+    DBAddOption(optlist1, DBOPT_MISSING_VALUE, &missing_value2);
+    vars[0] = vm2;
+    DBPutPointvar(dbfile, "vm2", name, 1, vars, N, DB_FLOAT, optlist1);
+    DBClearOption(optlist1, DBOPT_MISSING_VALUE);
+    DBAddOption(optlist1, DBOPT_HIDE_FROM_GUI, &one);
 
     if(dims == 3)
     {

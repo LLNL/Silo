@@ -146,7 +146,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      empty majorder $(PDBTESTS)
+      empty majorder realloc_obj_and_opts $(PDBTESTS)
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
@@ -230,6 +230,7 @@ check_PROGRAMS = \
  testfs \
  empty \
  majorder \
+ realloc_obj_and_opts \
  $(PDBTESTS)
 
 # Deal with need to use c++ linker whenever we've got C++
@@ -301,6 +302,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_testfs_SOURCES = dummy.cxx
  nodist_EXTRA_empty_SOURCES = dummy.cxx
  nodist_EXTRA_majorder_SOURCES = dummy.cxx
+ nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
 endif
 
 

@@ -96,7 +96,9 @@ product endorsement purposes.
     if (MLISTS)                                             \
        DBAddOption(optlist, DBOPT_MATLISTS, MLISTS);        \
     if (HASEXT)                                             \
-       DBAddOption(optlist, DBOPT_HAS_EXTERNAL_ZONES, HASEXT)
+       DBAddOption(optlist, DBOPT_HAS_EXTERNAL_ZONES, HASEXT);\
+    if (missing_value != DB_MISSING_VALUE_NOT_SET)\
+       DBAddOption(optlist, DBOPT_MISSING_VALUE, &missing_value)
 
 #define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
 
@@ -503,6 +505,7 @@ int driver = DB_PDB;
 int check_early_close = FALSE;
 int testread = FALSE;
 int testbadread = FALSE;
+double missing_value = DB_MISSING_VALUE_NOT_SET;
 
 int           build_multi(DBfile *, int, int, int, int, int, int, int, int);
 
@@ -812,6 +815,8 @@ main(int argc, char *argv[])
             testread = 1;
         } else if (!strcmp(argv[i], "testbadread")) {
             testbadread = 1;
+        } else if (!strcmp(argv[i], "missing-value")) {
+            missing_value = strtod(argv[++i],0);
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
@@ -2853,8 +2858,8 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                             (x[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] - xcenter) +
                             (y[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] - ycenter) *
                             (y[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] - ycenter));
-                d[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] = dist;
-                p[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] = 1. / (dist + .0001);
+                d[i * NX * NY + j * NX + k] = dist;
+                p[i * NX * NY + j * NX + k] = 1. / (dist + .0001);
             }
         }
     }

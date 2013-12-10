@@ -236,8 +236,8 @@ typedef struct db_silo_stat_t {
 #endif
 } db_silo_stat_t;
 
+/* This function is used in API_BEGIN macros and so we forward declare it */
 PRIVATE int db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate);
-PRIVATE int db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id);
 
 /* Global structures for option lists.  */
 struct _ma     _ma;
@@ -3217,6 +3217,34 @@ DBUngrabDriver(DBfile *file, const void *driver_handle)
     return DB_UNKNOWN;
 }
 
+static int 
+db_IncObjectComponentCount(DBobject *obj)
+{
+    int new_maxcomps = 0;
+    char **new_comp_names = 0;
+    char **new_pdb_names = 0;
+
+    obj->ncomponents++;
+    if (obj->ncomponents < obj->maxcomponents)
+        return 1;
+
+    new_maxcomps = obj->maxcomponents * 1.618 + 1; /* golden rule + 1 */
+    new_comp_names = REALLOC_N(obj->comp_names, char *, new_maxcomps);
+    new_pdb_names = REALLOC_N(obj->pdb_names, char *, new_maxcomps);
+
+    if (!new_comp_names || !new_pdb_names)
+    {
+        db_perror(0, E_NOMEM, "db_IncObjectComponentCount");
+        return 0;
+    }
+
+    obj->maxcomponents = new_maxcomps;
+    obj->comp_names = new_comp_names;
+    obj->pdb_names = new_pdb_names;
+
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Routine                                                 DBMakeObject
  *
@@ -3246,11 +3274,10 @@ DBMakeObject(const char *name, int type, int maxcomps)
             API_ERROR("object name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
             API_ERROR("object name", E_INVALIDNAME);
-        if (maxcomps <= 0)
-            API_ERROR("maxcomps", E_BADARGS);
         if (NULL == (object = ALLOC(DBobject)))
             API_ERROR(NULL, E_NOMEM);
 
+        if (maxcomps <= 0) maxcomps = 30;
         object->name = STRDUP(name);
         object->type = STRDUP(DBGetObjtypeName(type));
         object->comp_names = ALLOC_N(char *, maxcomps);
@@ -3423,7 +3450,9 @@ DBAddVarComponent(DBobject *object, const char *compname, const char *pdbname)
             API_ERROR(NULL, E_NOMEM);
         }
 
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
+
     }
     API_END;
 
@@ -3484,7 +3513,9 @@ DBAddIntComponent(DBobject *object, const char *compname, int ii)
             API_ERROR(NULL, E_NOMEM);
         }
 
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
+
     }
     API_END;
 
@@ -3548,7 +3579,8 @@ DBAddFltComponent(DBobject *object, const char *compname, double ff)
             FREE(object->comp_names[object->ncomponents]);
             API_ERROR(NULL, E_NOMEM);
         }
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
     }
     API_END;
 
@@ -3599,7 +3631,8 @@ DBAddDblComponent(DBobject *object, const char *compname, double ff)
             FREE(object->comp_names[object->ncomponents]);
             API_ERROR(NULL, E_NOMEM);
         }
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
     }
     API_END;
 
@@ -3665,7 +3698,8 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
             FREE(object->comp_names[object->ncomponents]);
             API_ERROR(NULL, E_NOMEM);
         }
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
     }
     API_END;
 
@@ -4926,6 +4960,21 @@ DBAddOption(DBoptlist *optlist, int option, void *value)
         optlist->options[optlist->numopts] = option;
         optlist->values[optlist->numopts] = value;
         optlist->numopts++;
+
+        if (optlist->numopts >= optlist->maxopts)
+        {
+            int new_maxopts = optlist->maxopts * 1.618 + 1; /* golden rule + 1 */
+            int *new_options = REALLOC_N(optlist->options, int, new_maxopts);
+            void **new_values = REALLOC_N(optlist->values, void*, new_maxopts);
+
+            if (!new_options || !new_values)
+                API_ERROR(0, E_NOMEM);
+
+            optlist->maxopts = new_maxopts;
+            optlist->options = new_options;
+            optlist->values  = new_values;
+        }
+
     }
     API_END;
 
@@ -7962,6 +8011,7 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
                                      nmat, matnos, matlist, dims, ndims,
                                      mix_next, mix_mat, mix_zone, mix_vf,
                                      mixlen, datatype, optlist);
+
         /* Zero out the _ma._matnames pointer so we can't accidentially use it
          * again. Likewise for matcolors. */
         _ma._matnames = NULL;
@@ -10725,6 +10775,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _csgm._extensive = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MISSING_VALUE:
+                        _csgm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -10901,6 +10955,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _pm._extensive = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MISSING_VALUE:
+                        _pm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11039,6 +11097,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_EXTENSIVE:
                         _qm._extensive = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_MISSING_VALUE:
+                        _qm._missing_value = DEREF(double, optlist->values[i]);
                         break;
 
                     default:
@@ -11186,6 +11248,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_EXTENSIVE:
                         _um._extensive = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_MISSING_VALUE:
+                        _um._missing_value = DEREF(double, optlist->values[i]);
                         break;
 
                     default:
@@ -11441,6 +11507,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _mm._repr_block_idx = DEREF(int,optlist->values[i])+1;
                         break;
 
+                    case DBOPT_MISSING_VALUE:
+                        _mm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11491,6 +11561,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_COORDSYS:
                         _cu._coord_sys = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_MISSING_VALUE:
+                        _cu._missing_value = DEREF(double, optlist->values[i]);
                         break;
 
                     default:
@@ -11843,6 +11917,7 @@ db_ResetGlobalData_Csgmesh () {
    memset(&_csgm, 0, sizeof(_csgm));
    _csgm._use_specmf = DB_OFF;
    _csgm._group_no = -1;
+   _csgm._missing_value = DB_MISSING_VALUE_NOT_SET;
 
    return 0;
 }
@@ -11884,6 +11959,7 @@ db_ResetGlobalData_PointMesh (int ndims) {
    _pm._ndims = ndims;
    _pm._nspace = ndims;
    _pm._group_no = -1;
+   _pm._missing_value = DB_MISSING_VALUE_NOT_SET;
    return 0;
 }
 
@@ -11940,6 +12016,7 @@ db_ResetGlobalData_QuadMesh (int ndims) {
    _qm._planar = DB_AREA;
    _qm._use_specmf = DB_OFF;
    _qm._group_no = -1;
+   _qm._missing_value = DB_MISSING_VALUE_NOT_SET;
 
    return 0;
 }
@@ -11965,6 +12042,7 @@ INTERNAL void
 db_ResetGlobalData_Curve (void) {
 
    memset (&_cu, 0, sizeof(_cu)) ;
+   _cu._missing_value = DB_MISSING_VALUE_NOT_SET;
 }
 
 /*----------------------------------------------------------------------
@@ -12025,6 +12103,7 @@ db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones) {
    _um._planar = DB_OTHER;
    _um._use_specmf = DB_OFF;
    _um._group_no = -1;
+   _um._missing_value = DB_MISSING_VALUE_NOT_SET;
 
    return 0;
 }
@@ -12100,6 +12179,7 @@ db_ResetGlobalData_MultiMesh (void) {
    _mm._nmat = -1;
    _mm._blockorigin = 1;
    _mm._grouporigin = 1;
+   _mm._missing_value = DB_MISSING_VALUE_NOT_SET;
    return 0;
 }
 

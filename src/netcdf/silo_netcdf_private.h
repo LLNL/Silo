@@ -130,11 +130,11 @@ typedef struct {
  */
 #ifndef SILO_NO_CALLBACKS
 SILO_CALLBACK int db_cdf_Close(DBfile *);
-SILO_CALLBACK int db_cdf_InqVarExists(DBfile *, char *);
+SILO_CALLBACK int db_cdf_InqVarExists(DBfile *, char const *);
 SILO_CALLBACK int db_cdf_GetDir(DBfile *, char *);
 SILO_CALLBACK void *db_cdf_GetAtt(DBfile *, char *, char *);
 
-SILO_CALLBACK void *db_cdf_GetComponent(DBfile *, char *, char *);
+SILO_CALLBACK void *db_cdf_GetComponent(DBfile *, char const *, char const *);
 SILO_CALLBACK DBmaterial *db_cdf_GetMaterial(DBfile *, char *);
 SILO_CALLBACK DBmatspecies *db_cdf_GetMatspecies(DBfile *, char *);
 SILO_CALLBACK DBmultimesh *db_cdf_GetMultimesh(DBfile *, char *);
@@ -148,7 +148,7 @@ SILO_CALLBACK void *db_cdf_GetVar(DBfile *, char *);
 SILO_CALLBACK int db_cdf_GetVarByteLength(DBfile *, char *);
 SILO_CALLBACK int db_cdf_GetVarLength(DBfile *, char *);
 SILO_CALLBACK int db_cdf_GetVarType(DBfile *, char *);
-SILO_CALLBACK DBObjectType db_cdf_InqVarType(DBfile *, char *);
+SILO_CALLBACK DBObjectType db_cdf_InqVarType(DBfile *, char const *);
 SILO_CALLBACK int db_cdf_InqMeshname(DBfile *, char *, char *);
 SILO_CALLBACK int db_cdf_InqMeshtype(DBfile *, char *);
 SILO_CALLBACK int db_cdf_ReadAtt(DBfile *, char *, char *, void *);

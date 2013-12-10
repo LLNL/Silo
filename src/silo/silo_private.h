@@ -410,6 +410,26 @@ typedef struct context_t {
  */
 #define DB_ISOPEN       0x01          /*database is open; ID is in use */
 
+#define db_SetMissingValueForGet(DST, SRC) \
+{                                          \
+    DST = SRC;                             \
+    if (DST == DB_MISSING_VALUE_NOT_SET)   \
+        DST = 0.0;                         \
+    else if (DST == 0.0)                   \
+        DST = DB_MISSING_VALUE_NOT_SET;    \
+}
+
+#define db_SetMissingValueForPut(DST, SRC) \
+{                                          \
+    if (SRC != DB_MISSING_VALUE_NOT_SET)   \
+    {                                      \
+        if (SRC == 0)                      \
+            DST = DB_MISSING_VALUE_NOT_SET;\
+        else                               \
+            DST = SRC;                     \
+    }                                      \
+}
+
 /*
  * Global data for Material
  */
@@ -466,6 +486,7 @@ struct _pm {
     int            _llong_gnodeno;
     int            _conserved;
     int            _extensive;
+    double         _missing_value;
 
     /*These used only by NetCDF driver */
     int            _dim_ndims;
@@ -520,6 +541,7 @@ struct _qm {
     char         **_region_pnames;
     int            _conserved;
     int            _extensive;
+    double         _missing_value;
 
     /* These are probably only used by the pdb driver */
     char           _nm_dims[64];
@@ -601,6 +623,7 @@ struct _um {
     int            _llong_gnodeno;
     int            _conserved;
     int            _extensive;
+    double         _missing_value;
 };
 
 /*
@@ -639,6 +662,7 @@ struct _csgm {
     int            _disjoint_mode;
     int            _conserved;
     int            _extensive;
+    double         _missing_value;
 };
 
 /*
@@ -716,6 +740,7 @@ struct _mm {
     int           *_empty_list;
     int            _empty_cnt;
     int            _repr_block_idx;
+    double         _missing_value;
 };
 
 /*
@@ -729,6 +754,7 @@ struct _cu {
     int          _guihide;
    char         *_reference ;
     int          _coord_sys ;
+    double       _missing_value;
 };
 
 /*

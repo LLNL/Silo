@@ -813,7 +813,7 @@ db_cdf_GetMatspecies(DBfile *_dbfile, char *objname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK void *
-db_cdf_GetComponent(DBfile *_dbfile, char *objname, char *compname)
+db_cdf_GetComponent(DBfile *_dbfile, char const *objname, char const *compname)
 {
     void          *result = NULL;
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
@@ -1652,7 +1652,7 @@ db_cdf_GetVarLength(DBfile *_dbfile, char *varname)
  *--------------------------------------------------------------------
  */
 SILO_CALLBACK DBObjectType
-db_cdf_InqVarType(DBfile *_dbfile, char *varname)
+db_cdf_InqVarType(DBfile *_dbfile, char const *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_InqVarType";
@@ -1785,7 +1785,7 @@ db_cdf_InqMeshtype(DBfile *_dbfile, char *meshname)
  *
  *--------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_cdf_InqVarExists(DBfile *_dbfile, char *varname)
+db_cdf_InqVarExists(DBfile *_dbfile, char const *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
 

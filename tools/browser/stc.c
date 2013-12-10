@@ -1592,6 +1592,8 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (coord_sys,          "primitive 'int'");
       IOASSOC (PA_COORDSYS);
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
       COMP (x,
             "pointer (array 'self.npts' (primitive 'self.datatype'))");
       COMP (y,
@@ -1704,6 +1706,8 @@ stc_silo_types (void) {
       COMP (block_type,         "primitive 'int'");
       COMP (repr_block_idx,     "primitive 'int'");
       IOASSOC (PA_REPRBLOCK);
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
       COMP (empty_cnt,          "primitive 'int'");
       COMP (empty_list,
             "pointer (array 'self.empty_cnt' (primitive 'int'))");
@@ -1866,6 +1870,8 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
       COMP (mixvals,
             "pointer (array 'self.nvals' (pointer (array 'self.mixlen' "
             "(primitive 'self.datatype'))))");
@@ -2047,6 +2053,8 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");
@@ -2124,6 +2132,8 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");
@@ -2203,6 +2213,8 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");

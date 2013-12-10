@@ -3699,6 +3699,7 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
    DEFALL_OBJ ("reference",&tmpcu.reference,DB_CHAR) ;
    DEFINE_OBJ ("guihide",  &tmpcu.guihide,  DB_INT) ;
    DEFINE_OBJ ("coord_sys",  &tmpcu.coord_sys,  DB_INT) ;
+   DEFINE_OBJ ("missing_value", &tmpcu.missing_value, DB_DOUBLE);
    if (PJ_GetObject (dbfile->pdb, name, &tmp_obj, DB_CURVE)<0)
        return NULL ;
    if (NULL == (cu = DBAllocCurve ())) return NULL ;
@@ -3725,6 +3726,11 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
          PJ_GetObject (dbfile->pdb, name, &tmp_obj, 0) ;
       }
    }
+
+   if      (cu->missing_value == DB_MISSING_VALUE_NOT_SET)
+       cu->missing_value = 0.0;
+   else if (cu->missing_value == 0.0)
+       cu->missing_value = DB_MISSING_VALUE_NOT_SET;
 
    cu->id = 0 ;
 
@@ -4333,6 +4339,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
       DEFALL_OBJ("empty_list", &tmpmv.empty_list, DB_INT);
       DEFINE_OBJ("empty_cnt", &tmpmv.empty_cnt, DB_INT);
       DEFINE_OBJ("repr_block_idx", &tmpmv.repr_block_idx, DB_INT);
+      DEFINE_OBJ("missing_value", &tmpmv.missing_value, DB_DOUBLE);
 
       if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MULTIVAR) < 0)
          return NULL;
@@ -4362,6 +4369,12 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
              !handleSlashSwap, !skipFirstSemicolon);
          FREE(rpnames);
       }
+
+      if      (mv->missing_value == DB_MISSING_VALUE_NOT_SET)
+          mv->missing_value = 0.0;
+      else if (mv->missing_value == 0.0)
+          mv->missing_value = DB_MISSING_VALUE_NOT_SET;
+
    }
 
    return (mv);
@@ -4850,6 +4863,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
    DEFINE_OBJ("conserved", &tmpmv.conserved, DB_INT);
    DEFINE_OBJ("extensive", &tmpmv.extensive, DB_INT);
+   DEFINE_OBJ("missing_value", &tmpmv.missing_value, DB_DOUBLE);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_POINTVAR) < 0)
       return NULL;
@@ -4906,6 +4920,11 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
+
+   if      (mv->missing_value == DB_MISSING_VALUE_NOT_SET)
+       mv->missing_value = 0.0;
+   else if (mv->missing_value == 0.0)
+       mv->missing_value = DB_MISSING_VALUE_NOT_SET;
 
    mv->id = 0;
    mv->name = STRDUP(objname);
@@ -5136,6 +5155,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
    DEFINE_OBJ("guihide", &tmpqv.guihide, DB_INT);
    DEFINE_OBJ("conserved", &tmpqv.conserved, DB_INT);
    DEFINE_OBJ("conserved", &tmpqv.extensive, DB_INT);
+   DEFINE_OBJ("missing_value", &tmpqv.missing_value, DB_DOUBLE);
 
    /* Arrays */
    DEFINE_OBJ("min_index", tmpqv.min_index, DB_INT);
@@ -5197,6 +5217,11 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
+
+   if      (qv->missing_value == DB_MISSING_VALUE_NOT_SET)
+       qv->missing_value = 0.0;
+   else if (qv->missing_value == 0.0)
+       qv->missing_value = DB_MISSING_VALUE_NOT_SET;
 
    qv->id = 0;
    qv->name = STRDUP(objname);
@@ -5615,6 +5640,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
    DEFINE_OBJ("conserved", &tmpuv.conserved, DB_INT);
    DEFINE_OBJ("extensive", &tmpuv.extensive, DB_INT);
+   DEFINE_OBJ("missing_value", &tmpuv.missing_value, DB_DOUBLE);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_UCDVAR) < 0)
       return NULL;
@@ -5664,6 +5690,11 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
+
+   if      (uv->missing_value == DB_MISSING_VALUE_NOT_SET)
+       uv->missing_value = 0.0;
+   else if (uv->missing_value == 0.0)
+       uv->missing_value = DB_MISSING_VALUE_NOT_SET;
 
    uv->id = 0;
    uv->name = STRDUP(objname);
@@ -5828,6 +5859,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
    DEFALL_OBJ("meshid",&tmpcsgv.meshname, DB_CHAR);
    DEFINE_OBJ("guihide", &tmpcsgv.guihide, DB_INT);
    DEFALL_OBJ("region_pnames", &rpnames, DB_CHAR);
+   DEFINE_OBJ("missing_value", &tmpcsgv.missing_value, DB_DOUBLE);
 
    if (PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, DB_CSGVAR) < 0)
       return NULL;
@@ -5862,10 +5894,15 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
 
    if (rpnames != NULL)
    {
-      csgv->region_pnames = DBStringListToStringArray(rpnames, 0,
+      tmpcsgv.region_pnames = DBStringListToStringArray(rpnames, 0,
           !handleSlashSwap, !skipFirstSemicolon);
       FREE(rpnames);
    }
+
+   if      (tmpcsgv.missing_value == DB_MISSING_VALUE_NOT_SET)
+       tmpcsgv.missing_value = 0.0;
+   else if (tmpcsgv.missing_value == 0.0)
+       tmpcsgv.missing_value = DB_MISSING_VALUE_NOT_SET;
 
    if ((csgv = DBAllocCsgvar()) == NULL)
       return NULL;
@@ -7596,7 +7633,7 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
     * them with any values specified in the options list.
     */
    db_InitCurve (opts) ;
-   obj = DBMakeObject (name, DB_CURVE, 18) ;
+   obj = DBMakeObject (name, DB_CURVE, 19) ;
 
    /*
     * Write the X and Y arrays.  If the user specified a variable
@@ -7640,6 +7677,14 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
    if (_cu._reference)  DBAddStrComponent (obj, "reference",_cu._reference) ;
    if (_cu._guihide)    DBAddIntComponent (obj, "guihide",  _cu._guihide) ;
    if (_cu._coord_sys)  DBAddIntComponent (obj, "coord_sys", _cu._coord_sys) ;
+   if (_cu._missing_value != DB_MISSING_VALUE_NOT_SET)
+   {
+      if (_cu._missing_value == 0.0)
+          DBAddDblComponent(obj, "missing_value", DB_MISSING_VALUE_NOT_SET);
+      else
+          DBAddDblComponent(obj, "missing_value", _cu._missing_value);
+   }
+
    DBWriteObject (_dbfile, obj, TRUE) ;
    DBFreeObject(obj);
 
@@ -7965,6 +8010,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
       FREE(tmpstr);
       _ma._matcolors = NULL;
    }
+
 
    /*-------------------------------------------------------------
     *  Write material object to output file. Request that underlying
@@ -8682,7 +8728,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    /*-------------------------------------------------------------
     *  Build object description from literals and var-id's
     *-------------------------------------------------------------*/
-   obj = DBMakeObject(name, DB_MULTIVAR, 31);
+   obj = DBMakeObject(name, DB_MULTIVAR, 32);
    DBAddIntComponent(obj, "nvars", nvars);
    DBAddIntComponent(obj, "ngroups", _mm._ngroups);
    DBAddIntComponent(obj, "blockorigin", _mm._blockorigin);
@@ -8794,6 +8840,14 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    }
    if (_mm._repr_block_idx)
       DBAddIntComponent(obj, "repr_block_idx", _mm._repr_block_idx);
+
+   if (_mm._missing_value != DB_MISSING_VALUE_NOT_SET)
+   {
+      if (_mm._missing_value == 0.0)
+          DBAddDblComponent(obj, "missing_value", DB_MISSING_VALUE_NOT_SET);
+      else
+          DBAddDblComponent(obj, "missing_value", _mm._missing_value);
+   }
 
    /*-------------------------------------------------------------
     *  Write multi-var object to SILO file.
@@ -9490,7 +9544,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
     *-------------------------------------------------------------*/
    db_InitPoint(dbfile, optlist, _pm._ndims, nels);
 
-   obj = DBMakeObject(name, DB_POINTVAR, 24);
+   obj = DBMakeObject(name, DB_POINTVAR, nvars+20);
 
    /*-------------------------------------------------------------
     *  Write variable arrays.
@@ -9539,7 +9593,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
    if (_pm._guihide)
       DBAddIntComponent(obj, "guihide", _pm._guihide);
    if (_pm._ascii_labels)
-       DBAddIntComponent(obj, "ascii_labels", _pm._ascii_labels);
+      DBAddIntComponent(obj, "ascii_labels", _pm._ascii_labels);
 
    /*-------------------------------------------------------------
     *  Process character strings: labels & units for variable.
@@ -9564,6 +9618,14 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
 
    if (_pm._extensive)
       DBAddIntComponent(obj, "extensive", _pm._extensive);
+
+   if (_pm._missing_value != DB_MISSING_VALUE_NOT_SET)
+   {
+      if (_pm._missing_value == 0.0)
+          DBAddDblComponent(obj, "missing_value", DB_MISSING_VALUE_NOT_SET);
+      else
+          DBAddDblComponent(obj, "missing_value", _pm._missing_value);
+   }
 
    /*-------------------------------------------------------------
     *  Write point-mesh object to output file.
@@ -9832,7 +9894,8 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
     *-------------------------------------------------------------*/
    db_InitQuad(_dbfile, meshname, optlist, dims, ndims);
 
-   obj = DBMakeObject(name, DB_QUADVAR, 30);
+   /*obj = DBMakeObject(name, DB_QUADVAR, (1+(mixlen!=0))*nvars + 30);*/
+   obj = DBMakeObject(name, DB_QUADVAR, 2);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -10002,6 +10065,14 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    if (_qm._extensive)
       DBAddIntComponent(obj, "extensive", _qm._extensive);
 
+
+   if (_qm._missing_value != DB_MISSING_VALUE_NOT_SET)
+   {
+      if (_qm._missing_value == 0.0)
+          DBAddDblComponent(obj, "missing_value", DB_MISSING_VALUE_NOT_SET);
+      else
+          DBAddDblComponent(obj, "missing_value", _qm._missing_value);
+   }
 
    /*-------------------------------------------------------------
     *  Write quad-var object to output file.
@@ -10181,7 +10252,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, char const *name, char const *meshname,
 
    db_InitCsg(_dbfile, (char*) name, optlist);
 
-   obj = DBMakeObject(name, DB_CSGVAR, 29);
+   obj = DBMakeObject(name, DB_CSGVAR, nvars+19);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -10282,6 +10353,14 @@ db_pdb_PutCsgvar (DBfile *_dbfile, char const *name, char const *meshname,
 
    if (_csgm._extensive)
       DBAddIntComponent(obj, "extensive", _csgm._extensive);
+
+   if (_csgm._missing_value != DB_MISSING_VALUE_NOT_SET)
+   {
+      if (_csgm._missing_value == 0.0)
+          DBAddDblComponent(obj, "missing_value", DB_MISSING_VALUE_NOT_SET);
+      else
+          DBAddDblComponent(obj, "missing_value", _csgm._missing_value);
+   }
 
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.
@@ -10827,7 +10906,7 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    db_InitUcd(_dbfile, meshname, optlist, ndims, nnodes, nzones);
 #endif
 
-   obj = DBMakeObject(name, DB_UCDVAR, 29);
+   obj = DBMakeObject(name, DB_UCDVAR, (1+(mixlen!=0)) * nvars + 22);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
@@ -10933,6 +11012,14 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
 
    if (_um._extensive)
       DBAddIntComponent(obj, "extensive", _um._extensive);
+
+   if (_um._missing_value != DB_MISSING_VALUE_NOT_SET)
+   {
+      if (_um._missing_value == 0.0)
+          DBAddDblComponent(obj, "missing_value", DB_MISSING_VALUE_NOT_SET);
+      else
+          DBAddDblComponent(obj, "missing_value", _um._missing_value);
+   }
 
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.

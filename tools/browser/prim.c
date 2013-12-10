@@ -316,6 +316,12 @@ prim_assoc_t PA_REPRBLOCK[] = {
    {-1,        "not specified"},
    {0,         NULL}};
 
+prim_assoc_t PA_MISSING_VALUE[] = {
+   {PA_NAME,                                    "missing value"},
+   {DB_MISSING_VALUE_NOT_SET, "not set"},
+   {0,                        NULL}};
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    prim_class
@@ -842,7 +848,12 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
                 break;
                 
             case BROWSER_DOUBLE:
-                if (16==obase) {
+                for (i=0; self->assoc && self->assoc[i].s; i++) {
+                    if (*((double*)mem) == self->assoc[i].n) break;
+                }
+                if (self->assoc && self->assoc[i].s) {
+                    out_printf(f, "%s", self->assoc[i].s);
+                } else if (16==obase) {
                     for (i=0; i<sizeof(double); i++) {
                         sprintf(buf+2*i, "%02x", *((unsigned char*)mem+i));
                     }

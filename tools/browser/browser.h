@@ -227,14 +227,8 @@ typedef struct walk_t {
 
 } walk_t;
 
-/*
- * I/O association tables map integer values to string constants and
- * vice versa.
- */
-#define NASSOCS         32
-
 typedef struct prim_assoc_t {
-   int          n ;                     /*integer part                  */
+   double        n ;                    /*double part                  */
    char         *s ;                    /*string part                   */
 } prim_assoc_t;
 
@@ -634,6 +628,7 @@ extern prim_assoc_t PA_BOUNDARYTYPE[];
 extern prim_assoc_t PA_REGIONOP[];
 extern prim_assoc_t PA_TOPODIM[];
 extern prim_assoc_t PA_REPRBLOCK[];
+extern prim_assoc_t PA_MISSING_VALUE[];
 
 obj_t prim_set_io_assoc (obj_t, prim_assoc_t*);
 DBdatatype prim_silotype (obj_t);

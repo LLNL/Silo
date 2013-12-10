@@ -298,6 +298,7 @@ typedef struct DBcurve_mt {
     char                xunits[256];
     char                yunits[256];
     char                reference[256];
+    double              missing_value;
 } DBcurve_mt;
 static hid_t DBcurve_mt5 = -1;
 
@@ -347,6 +348,7 @@ typedef struct DBcsgvar_mt {
     char           region_pnames[256];
     int            conserved;
     int            extensive;
+    double         missing_value;
 } DBcsgvar_mt;
 static hid_t DBcsgvar_mt5;
 
@@ -433,6 +435,7 @@ typedef struct DBquadvar_mt {
     int                 conserved;
     int                 extensive;
     int                 centering;
+    double              missing_value;
 } DBquadvar_mt;
 static hid_t    DBquadvar_mt5;
 
@@ -490,6 +493,7 @@ typedef struct DBucdvar_mt {
     char                region_pnames[256];
     int                 conserved;
     int                 extensive;
+    double              missing_value;
 } DBucdvar_mt;
 static hid_t    DBucdvar_mt5;
 
@@ -638,6 +642,7 @@ typedef struct DBmultivar_mt {
     char                empty_list[256];
     int                 empty_cnt;
     int                 repr_block_idx;
+    double              missing_value;
 } DBmultivar_mt;
 static hid_t    DBmultivar_mt5;
 
@@ -753,6 +758,7 @@ typedef struct DBpointvar_mt {
     char                region_pnames[256];
     int                 conserved;
     int                 extensive;
+    double              missing_value;
 } DBpointvar_mt;
 static hid_t    DBpointvar_mt5;
 
@@ -2076,6 +2082,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        xunits);
         MEMBER_S(str256,        yunits);
         MEMBER_S(str256,        reference);
+        MEMBER_S(double,        missing_value);
     } DEFINE;
 
     STRUCT(DBcsgmesh) {
@@ -2123,6 +2130,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        region_pnames);
         MEMBER_S(int,           conserved);
         MEMBER_S(int,           extensive);
+        MEMBER_S(double,        missing_value);
     } DEFINE;
 
     STRUCT(DBcsgzonelist) {
@@ -2205,6 +2213,7 @@ db_hdf5_init(void)
         MEMBER_S(int,           conserved);
         MEMBER_S(int,           extensive);
         MEMBER_S(int,           centering);
+        MEMBER_S(double,        missing_value);
     } DEFINE;
 
     STRUCT(DBucdmesh) {
@@ -2260,6 +2269,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        region_pnames);
         MEMBER_S(int,           conserved);
         MEMBER_S(int,           extensive);
+        MEMBER_S(double,        missing_value);
     } DEFINE;
 
     STRUCT(DBfacelist) {
@@ -2400,6 +2410,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        empty_list);
         MEMBER_S(int,           empty_cnt);
         MEMBER_S(int,           repr_block_idx);
+        MEMBER_S(double,        missing_value);
     } DEFINE;
 
     STRUCT(DBmultimat) {
@@ -2510,6 +2521,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        region_pnames);
         MEMBER_S(int,           conserved);
         MEMBER_S(int,           extensive);
+        MEMBER_S(double,        missing_value);
     } DEFINE;
 
     STRUCT(DBcompoundarray) {
@@ -7785,6 +7797,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
         m.npts = npts;
         m.guihide = _cu._guihide;
         m.coord_sys = _cu._coord_sys;
+        db_SetMissingValueForPut(m.missing_value, _cu._missing_value);
         strcpy(m.label, OPT(_cu._label));
         strcpy(m.xlabel, OPT(_cu._labels[0]));
         strcpy(m.ylabel, OPT(_cu._labels[1]));
@@ -7797,6 +7810,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
             if (m.npts) MEMBER_S(int, npts);
             if (m.guihide) MEMBER_S(int, guihide);
             if (m.coord_sys) MEMBER_S(int, coord_sys);
+            if (m.missing_value) MEMBER_S(double, missing_value);
             MEMBER_S(str(_cu._label), label);
             MEMBER_S(str(m.xvarname), xvarname);
             MEMBER_S(str(m.yvarname), yvarname);
@@ -7893,6 +7907,7 @@ db_hdf5_GetCurve(DBfile *_dbfile, char *name)
         cu->xunits = OPTDUP(m.xunits);
         cu->yunits = OPTDUP(m.yunits);
         cu->reference = OPTDUP(m.reference);
+        db_SetMissingValueForGet(cu->missing_value, m.missing_value);
         
         /* Read X and Y data */
         if (SILO_Globals.dataReadMask & DBCurveArrays)
@@ -8235,6 +8250,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
         strcpy(m.meshname, OPT(_csgm._meshname));
         strcpy(m.label, OPT(_csgm._label));
         strcpy(m.units, OPT(_csgm._unit));
+        db_SetMissingValueForPut(m.missing_value, _csgm._missing_value);
 
         /* Write header to file */
         STRUCT(DBcsgvar) {
@@ -8253,6 +8269,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
             if (_csgm._dtime_set) MEMBER_S(double, dtime);
             if (m.conserved)    MEMBER_S(int, conserved);
             if (m.extensive)    MEMBER_S(int, extensive);
+            if (m.missing_value) MEMBER_S(double, missing_value);
             MEMBER_S(str(m.region_pnames), region_pnames);
         } OUTPUT(dbfile, DB_CSGVAR, vname, &m);
 
@@ -8343,6 +8360,7 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, char const *name)
         csgv->guihide = m.guihide;
         csgv->conserved = m.conserved;
         csgv->extensive = m.extensive;
+        db_SetMissingValueForGet(csgv->missing_value, m.missing_value);
 
         /* Read the raw data */
         if (m.nvals>MAX_VARS) {
@@ -9223,6 +9241,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         _qm._planar = DB_AREA;
         _qm._use_specmf = DB_OFF;
         _qm._group_no = -1;
+        _qm._missing_value = DB_MISSING_VALUE_NOT_SET;
         db_ProcessOptlist(DB_QUADMESH, optlist); /*yes, QUADMESH*/
         _qm._meshname = STRDUP(meshname);
         _qm._nzones = _qm._nnodes = 1; /*initial value only*/
@@ -9299,6 +9318,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         strcpy(m.label, OPT(_qm._label));
         strcpy(m.units, OPT(_qm._unit));
         strcpy(m.meshid, OPT(_qm._meshname));
+        db_SetMissingValueForPut(m.missing_value, _qm._missing_value);
 
         for (i=0; i<ndims; i++) {
             m.dims[i] = _qm._dims[i];
@@ -9349,6 +9369,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             if (m.conserved)    MEMBER_S(int, conserved);
             if (m.extensive)    MEMBER_S(int, extensive);
             if (m.centering)    MEMBER_S(int, centering);
+            if (m.missing_value)MEMBER_S(double, missing_value);
             MEMBER_3(int, dims);
             MEMBER_3(int, zones);
             MEMBER_3(int, min_index);
@@ -9485,6 +9506,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char *name)
         qv->conserved = m.conserved;
         qv->extensive = m.extensive;
         qv->centering = m.centering;
+        db_SetMissingValueForGet(qv->missing_value, m.missing_value);
         for (stride=1, i=0; i<m.ndims; stride*=m.dims[i++]) {
             qv->dims[i] = m.dims[i];
             qv->stride[i] = stride;
@@ -10186,6 +10208,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         _um._planar = DB_OTHER;
         _um._use_specmf = DB_OFF;
         _um._group_no = -1;
+        _um._missing_value = DB_MISSING_VALUE_NOT_SET;
         strcpy(_um._meshname, meshname);
         db_ProcessOptlist(DB_UCDMESH, optlist); /*yes, UCDMESH*/
 
@@ -10239,6 +10262,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         m.datatype = (DB_FLOAT==datatype || DB_DOUBLE==datatype)?0:datatype;
         m.conserved = _um._conserved;
         m.extensive = _um._extensive;
+        db_SetMissingValueForGet(m.missing_value, _um._missing_value);
         strcpy(m.meshid, OPT(_um._meshname));
         strcpy(m.label, OPT(_um._label));
         strcpy(m.units, OPT(_um._unit));
@@ -10265,6 +10289,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             if (_um._hi_offset_set) MEMBER_S(int, hi_offset);
             if (m.conserved)    MEMBER_S(int, conserved);
             if (m.extensive)    MEMBER_S(int, extensive);
+            if (m.missing_value)MEMBER_S(double, missing_value);
             MEMBER_S(str(m.label), label);
             MEMBER_S(str(m.units), units);
             MEMBER_S(str(m.region_pnames), region_pnames);
@@ -10431,6 +10456,7 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char *name)
         uv->guihide = m.guihide;
         uv->conserved = m.conserved;
         uv->extensive = m.extensive;
+        db_SetMissingValueForGet(uv->missing_value, m.missing_value);
 
         /* If var is compressed, we need to do some work to decompress it */
         PrepareForUcdvarDecompression(_dbfile, name, uv->meshname?uv->meshname:"", m.value, m.nvals);
@@ -12652,6 +12678,7 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         m.block_type = _mm._block_type;
         m.empty_cnt = _mm._empty_cnt;
         m.repr_block_idx = _mm._repr_block_idx;
+        db_SetMissingValueForPut(m.missing_value, _mm._missing_value);
 
         /* Write meta data to file */
         STRUCT(DBmultivar) {
@@ -12667,6 +12694,7 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
             if (m.tensor_rank)  MEMBER_S(int, tensor_rank);
             if (m.conserved)    MEMBER_S(int, conserved);
             if (m.extensive)    MEMBER_S(int, extensive);
+            if (m.missing_value)MEMBER_S(double, missing_value);
             MEMBER_S(str(m.vartypes), vartypes);
             MEMBER_S(str(m.varnames), varnames);
             MEMBER_S(str(m.extents), extents);
@@ -12777,6 +12805,7 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char *name)
         mv->mmesh_name = OPTDUP(m.mmesh_name);
         mv->conserved = m.conserved;
         mv->extensive = m.extensive;
+        db_SetMissingValueForGet(mv->missing_value, m.missing_value);
 
         /* Read the raw data variable types and convert to mem types*/
         if (mv->extentssize>0)
@@ -13712,6 +13741,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         memset(&_pm, 0, sizeof _pm);
         _pm._ndims = _pm._nspace = saved_ndims;
         _pm._group_no = -1;
+        _pm._missing_value = DB_MISSING_VALUE_NOT_SET;
         db_ProcessOptlist(DB_POINTMESH, optlist);
         _pm._nels = nels;
         _pm._minindex = _pm._lo_offset;
@@ -13751,6 +13781,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         m.datatype = (DB_FLOAT==datatype || DB_DOUBLE==datatype)?0:datatype;
         m.conserved = _pm._conserved;
         m.extensive = _pm._extensive;
+        db_SetMissingValueForPut(m.missing_value, _pm._missing_value);
         strcpy(m.meshid, OPT(meshname));
         strcpy(m.label, OPT(_pm._label));
         strcpy(m.units, OPT(_pm._unit));
@@ -13771,6 +13802,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
             if (_pm._dtime_set) MEMBER_S(double, dtime);
             if (m.conserved)    MEMBER_S(int, conserved);
             if (m.extensive)    MEMBER_S(int, extensive);
+            if (m.missing_value) MEMBER_S(double, missing_value);
             MEMBER_S(str(m.meshid), meshid);
             MEMBER_S(str(m.label), label);
             MEMBER_S(str(m.units), units);
@@ -13870,6 +13902,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
         pv->ascii_labels = m.ascii_labels;
         pv->conserved = m.conserved;
         pv->extensive = m.extensive;
+        db_SetMissingValueForGet(pv->missing_value, m.missing_value);
 
         /* Read raw data */
         if (SILO_Globals.dataReadMask & DBPVData && m.nvals && m.nels)
