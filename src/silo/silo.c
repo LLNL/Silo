@@ -5227,6 +5227,105 @@ DBGetAtt(DBfile *dbfile, const char *varname, const char *attname)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
+/*
+This logic is necessary to support callers accessing standard (e.g. non-DB_USERDEF)
+objects via the generic interface to ensure logic for specially handled component
+values is consistent with the standard object's DBGetXXX methods.
+To ensure a zero for the component in the file means either not-present or
+not-set, certain components, especially those for which a zero value is a valid
+value for the data producer to use, special handling is required and that logic
+is sprinkled about in the DBPutXXX and DBGetXXX methods of the drivers and so
+to is it required here. Its a nasty maintenance issue.
+*/
+
+static int
+db_IsComponentNameStandardWithSpecialHandling(char const *compname)
+{
+    if (!strcmp(compname, "missing_value")) return 1;
+    if (!strcmp(compname, "topo_dim")) return 1;
+    if (!strcmp(compname, "repr_block_idx")) return 1;
+    return 0;
+}
+
+/* For use in the DBGetComponent call */
+static void
+db_AdjustSpeciallyHandledStandardObjectComponentValue(
+    void *val_ptr, int obj_type, char const *comp_name)
+{
+    if (!strcmp(comp_name, "missing_value") &&
+        (obj_type == DB_UCDVAR || obj_type == DB_QUADVAR || obj_type == DB_CURVE ||
+         obj_type == DB_POINTVAR || obj_type == DB_MULTIVAR))
+    {
+        double val_for_mem, val_from_file = *((double*)val_ptr);
+        db_SetMissingValueForGet(val_for_mem, val_from_file);
+        *((double*)val_ptr) = val_for_mem;
+    }
+    else if (!strcmp(comp_name, "repr_block_idx") &&
+        (obj_type == DB_MULTIMESH || obj_type == DB_MULTIVAR ||
+         obj_type == DB_MULTIMAT || obj_type == DB_MULTIMATSPECIES))
+    {
+        int val_for_mem, val_from_file = *((int*)val_ptr);
+        val_for_mem = val_from_file - 1;
+        *((int*)val_ptr) = val_for_mem;
+    }
+    else if (!strcmp(comp_name, "topo_dim") &&
+        (obj_type == DB_MULTIMESH || obj_type == DB_UCDMESH))
+    {
+        int val_for_mem, val_from_file = *((int*)val_ptr);
+        val_for_mem = val_from_file - 1;
+        *((int*)val_ptr) = val_for_mem;
+    }
+}
+
+/* For use in the DBGetObject call */
+static void
+db_AdjustSpeciallyHandledStandardObjectComponentValues(DBobject *obj)
+{
+    int i, obj_type = DBGetObjtypeTag(obj->type);
+
+    if (obj_type == DB_USERDEF) return;
+    for (i = 0; i < obj->ncomponents; i++)
+    {
+        char tmp[256];
+
+        if (!strcmp(obj->comp_names[i], "missing_value") &&
+            (obj_type == DB_UCDVAR || obj_type == DB_QUADVAR || obj_type == DB_CURVE ||
+             obj_type == DB_POINTVAR || obj_type == DB_MULTIVAR))
+        {
+            double val_for_mem, val_from_file = strtod(obj->pdb_names[i]+4,0);
+            db_SetMissingValueForGet(val_for_mem, val_from_file);
+            sprintf(tmp, "'<d>%.30g'", val_for_mem);
+        }
+        else if (!strcmp(obj->comp_names[i], "repr_block_idx") &&
+            (obj_type == DB_MULTIMESH || obj_type == DB_MULTIVAR ||
+             obj_type == DB_MULTIMAT || obj_type == DB_MULTIMATSPECIES))
+        {
+            int val_for_mem, val_from_file = (int) strtol(obj->pdb_names[i]+4,0,10);
+            val_for_mem = val_from_file - 1;
+            sprintf(tmp, "'<i>%d'", val_for_mem);
+        }
+        else if (!strcmp(obj->comp_names[i], "topo_dim") &&
+            (obj_type == DB_MULTIMESH || obj_type == DB_UCDMESH))
+        {
+            int val_for_mem, val_from_file = (int) strtol(obj->pdb_names[i]+4,0,10);
+            val_for_mem = val_from_file - 1;
+            sprintf(tmp, "'<i>%d'", val_for_mem);
+        }
+        else
+        {
+            continue;
+        }
+#if 0
+global node no data type
+    point mesh
+data type for optional array in groupelmap
+#endif
+
+        FREE(obj->pdb_names[i]);
+        obj->pdb_names[i] = STRDUP(tmp);
+    }
+}
+
 /*----------------------------------------------------------------------
  *  Routine                                                DBGetComponent
  *
@@ -5290,6 +5389,11 @@ DBGetComponent(DBfile *dbfile, char const *objname, char const *compname)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_comp) (dbfile, objname, compname);
+
+        if (db_IsComponentNameStandardWithSpecialHandling(compname))
+            db_AdjustSpeciallyHandledStandardObjectComponentValue(retval,
+                DBInqVarType(dbfile, objname), compname);
+
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -5814,6 +5918,7 @@ DBGetObject (DBfile *dbfile, char const *objname)
         if (!dbfile->pub.g_obj)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
         retval = (dbfile->pub.g_obj) (dbfile, (char const *)objname);
+        db_AdjustSpeciallyHandledStandardObjectComponentValues(retval);
         API_RETURN(retval);
     }
     API_END_NOPOP;                     /* BEWARE:  If API_RETURN above is
