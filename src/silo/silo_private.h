@@ -487,6 +487,7 @@ struct _pm {
     int            _conserved;
     int            _extensive;
     double         _missing_value;
+    char          *_ghost_node_labels;
 
     /*These used only by NetCDF driver */
     int            _dim_ndims;
@@ -542,6 +543,8 @@ struct _qm {
     int            _conserved;
     int            _extensive;
     double         _missing_value;
+    char          *_ghost_node_labels;
+    char          *_ghost_zone_labels;
 
     /* These are probably only used by the pdb driver */
     char           _nm_dims[64];
@@ -624,6 +627,7 @@ struct _um {
     int            _conserved;
     int            _extensive;
     double         _missing_value;
+    char          *_ghost_node_labels;
 };
 
 /*
@@ -671,6 +675,7 @@ struct _csgm {
 struct _uzl {
     int           *_gzoneno;
     int            _llong_gzoneno;
+    char          *_ghost_zone_labels;
 };
 
 /*
@@ -679,6 +684,7 @@ struct _uzl {
 struct _phzl {
     int           *_gzoneno;
     int            _llong_gzoneno;
+    char          *_ghost_zone_labels;
 };
 
 /*
@@ -819,7 +825,7 @@ typedef struct filter_t {
 
 /* Namespace struct for Silo's global variables */
 typedef struct SILO_Globals_t {
-    long dataReadMask;
+    unsigned long long dataReadMask;
     int allowOverwrites;
     int allowEmptyObjects;
     int enableChecksums;

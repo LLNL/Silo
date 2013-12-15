@@ -115,6 +115,10 @@ main(int argc, char *argv[])
     DBoptlist      *ol = 0;
     double          dtime = 0.0;
     int             hide_from_gui=0;
+    int            *gnodeno = 0;
+    int            *gzoneno = 0;
+    char           *ghostn = 0;
+    char           *ghostz = 0;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -134,6 +138,10 @@ main(int argc, char *argv[])
     ol = DBMakeOptlist(10);
     DBAddOption(ol, DBOPT_DTIME, &dtime);
     DBAddOption(ol, DBOPT_HIDE_FROM_GUI, &hide_from_gui);
+    DBAddOption(ol, DBOPT_NODENUM, gnodeno);
+    DBAddOption(ol, DBOPT_ZONENUM, gzoneno);
+    DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, ghostn);
+    DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, ghostz);
 
     /* first pass confirms we catch bad arguments; second pass confirms we permit empty objects */
     for (pass = 0; pass < 2; pass++)

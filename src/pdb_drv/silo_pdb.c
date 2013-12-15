@@ -4739,6 +4739,9 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
    DEFALL_OBJ("units1", &tmppm.units[1], DB_CHAR);
    DEFALL_OBJ("units2", &tmppm.units[2], DB_CHAR);
 
+   if (SILO_Globals.dataReadMask & DBPMGhostNodeLabels)
+       DEFALL_OBJ("ghost_node_labels", &tmppm.ghost_node_labels, DB_CHAR);
+
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_POINTMESH) < 0)
       return NULL;
    if ((pm = DBAllocPointmesh()) == NULL)
@@ -5029,6 +5032,11 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
     DEFINE_OBJ("baseindex", tmpqm.base_index, DB_INT);
     DEFINE_OBJ("guihide", &tmpqm.guihide, DB_INT);
     DEFALL_OBJ("mrgtree_name", &tmpqm.mrgtree_name, DB_CHAR);
+
+    if (SILO_Globals.dataReadMask & DBQMGhostNodeLabels)
+        DEFALL_OBJ("ghost_node_labels", &tmpqm.ghost_node_labels, DB_CHAR);
+    if (SILO_Globals.dataReadMask & DBQMGhostZoneLabels)
+        DEFALL_OBJ("ghost_zone_labels", &tmpqm.ghost_zone_labels, DB_CHAR);
 
     /* The type passed here to PJ_GetObject is NULL because quadmeshes can have
      * one of two types:  DB_COLLINEAR or DB_NONCOLLINEAR.  */
@@ -5354,6 +5362,9 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
    DEFINE_OBJ("tv_connectivity", &tmpum.tv_connectivity, DB_INT);
    DEFINE_OBJ("disjoint_mode", &tmpum.disjoint_mode, DB_INT);
 
+   if (SILO_Globals.dataReadMask & DBUMGhostNodeLabels)
+       DEFALL_OBJ("ghost_node_labels", &tmpum.ghost_node_labels, DB_CHAR);
+
    if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, DB_UCDMESH) < 0)
       return NULL;
    if ((um = DBAllocUcdmesh()) == NULL)
@@ -5459,6 +5470,9 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
       hi_offset = 0;
       DEFINE_OBJ("lo_offset", &lo_offset, DB_INT);
       DEFINE_OBJ("hi_offset", &hi_offset, DB_INT);
+ 
+      if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
+         DEFALL_OBJ("ghost_zone_labels", &tmpzones.ghost_zone_labels, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, zlname, &tmp_obj, DB_ZONELIST) < 0)
       {
@@ -6051,6 +6065,9 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
         DEFALL_OBJ("zoneno", &tmpzl.zoneno, DB_INT);
     }
 
+    if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
+        DEFALL_OBJ("ghost_zone_labels", &tmpzl.ghost_zone_labels, DB_CHAR);
+
     if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_ZONELIST) < 0)
        return NULL;
     if ((zl = DBAllocZonelist()) == NULL)
@@ -6139,6 +6156,9 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
         DEFALL_OBJ("facelist", &tmpphzl.facelist, DB_INT);
         DEFALL_OBJ("zoneno", &tmpphzl.zoneno, DB_INT);
     }
+
+    if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
+       DEFALL_OBJ("ghost_zone_labels", &tmpphzl.ghost_zone_labels, DB_CHAR);
 
     if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_PHZONELIST) < 0)
        return NULL;
@@ -9416,7 +9436,7 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
       }
    }
 
-   if (_pm._gnodeno)
+   if (nels>0 && _pm._gnodeno)
    {
        count[0] = nels;
        if (_pm._llong_gnodeno)
@@ -9479,6 +9499,13 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
 
    if (_pm._mrgtree_name != NULL)
       DBAddStrComponent(obj, "mrgtree_name", _pm._mrgtree_name);
+
+   if (nels>0 && _pm._ghost_node_labels != NULL)
+   {
+      count[0] = nels;
+      DBWriteComponent(dbfile, obj, "ghost_node_labels", name, "char",
+          _pm._ghost_node_labels, 1, count);
+   }
 
    /*-------------------------------------------------------------
     *  Write point-mesh object to output file.
@@ -9805,6 +9832,22 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
 
     if (_qm._mrgtree_name != NULL)
         DBAddStrComponent(obj, "mrgtree_name", _qm._mrgtree_name);
+
+    if (ndims>0 && _qm._ghost_node_labels != NULL)
+    {
+        for (i = 0; i < ndims; i++)
+            count[i] = dims[i];
+        DBWriteComponent(dbfile, obj, "ghost_node_labels", name, "char",
+                         _qm._ghost_node_labels, ndims, count);
+    }
+
+    if (ndims>0 && _qm._ghost_zone_labels != NULL)
+    {
+        for (i = 0; i < ndims; i++)
+            count[i] = dims[i]-1;
+        DBWriteComponent(dbfile, obj, "ghost_zone_labels", name, "char",
+                         _qm._ghost_zone_labels, ndims, count);
+    }
 
    /*-------------------------------------------------------------
     *  Write quad-mesh object to SILO file.
@@ -10651,6 +10694,13 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
    if (_um._disjoint_mode)
       DBAddIntComponent(obj, "disjoint_mode", _um._disjoint_mode);
 
+   if (nnodes>0 && _um._ghost_node_labels != NULL)
+   {
+      count[0] = nnodes;
+      DBWriteComponent(dbfile, obj, "ghost_node_labels", name, "char",
+          _um._ghost_node_labels, 1, count);
+   }
+
    /*-------------------------------------------------------------
     *  Write ucd-mesh object to output file.
     *-------------------------------------------------------------*/
@@ -11164,7 +11214,7 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
    DBWriteComponent(dbfile, obj, "shapetype", name, "integer",
                     shapetype, 1, count);
 
-   if (_uzl._gzoneno)
+   if (nzones>0 && _uzl._gzoneno)
    {
        count[0] = nzones;
        if (_uzl._llong_gzoneno)
@@ -11173,6 +11223,13 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
        else
            DBWriteComponent(dbfile, obj, "gzoneno", name, "integer",
                _uzl._gzoneno, 1, count);
+   }
+
+   if (nzones>0 && _uzl._ghost_zone_labels)
+   {
+       count[0] = nzones;
+       DBWriteComponent(dbfile, obj, "ghost_zone_labels", name, "char",
+               _uzl._ghost_zone_labels, 1, count);
    }
 
    /*-------------------------------------------------------------
@@ -11276,7 +11333,7 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
                         extface, 1, count);
    }
 
-   if (_phzl._gzoneno)
+   if (nzones>0 && _phzl._gzoneno)
    {
        count[0] = nzones;
        if (_phzl._llong_gzoneno)
@@ -11285,6 +11342,13 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
        else
            DBWriteComponent(dbfile, obj, "gzoneno", name, "integer",
                _phzl._gzoneno, 1, count);
+   }
+
+   if (nzones>0 && _phzl._ghost_zone_labels)
+   {
+       count[0] = nzones;
+       DBWriteComponent(dbfile, obj, "ghost_zone_labels", name, "char",
+               _phzl._ghost_zone_labels, 1, count);
    }
 
    /*-------------------------------------------------------------

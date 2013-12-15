@@ -1808,31 +1808,26 @@ stc_silo_types (void) {
       COMP (ndims,              "primitive 'int'");
       COMP (nspace,             "primitive 'int'");
       COMP (nnodes,             "primitive 'int'");
-      COMP (dims,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
-      COMP (min_index,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
-      COMP (max_index,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (dims,               "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (min_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (max_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (origin,             "primitive 'int'");
       COMP (datatype,           "primitive 'int'");
       IOASSOC (PA_DATATYPE);
-      COMP (min_extents,
-            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
-      COMP (max_extents,
-            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
-      COMP (labels,
-            "array 'SH3 3, self.ndims' (primitive 'string')");
-      COMP (units,
-            "array 'SH3 3, self.ndims' (primitive 'string')");
+      COMP (min_extents,        "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
+      COMP (max_extents,        "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
+      COMP (labels,             "array 'SH3 3, self.ndims' (primitive 'string')");
+      COMP (units,              "array 'SH3 3, self.ndims' (primitive 'string')");
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (base_index,         "array 3 (primitive 'int')");
       COMP (mrgtree_name,       "primitive 'string'");
-      COMP (coords,
-            "array 'SH3 3, self.ndims' "
+      COMP (coords,             "array 'SH3 3, self.ndims' "
             "(pointer (array 'SH1 self.coordtype, self.dims' "
             "(primitive 'self.datatype')))");
+      COMP (ghost_node_labels,  "pointer (array 'self.dims' (primitive 'int8'))");
+#warning FIX ARRAY SIZE FOR ZONES HERE
+      COMP (ghost_zone_labels,  "pointer (array 'SH6 -1, self.dims' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBquadvar) {
@@ -1859,8 +1854,7 @@ stc_silo_types (void) {
       COMP (min_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (max_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (origin,             "primitive 'int'");
-      COMP (align,
-            "array 'SH3 3, self.ndims' (primitive 'float')");
+      COMP (align,              "array 'SH3 3, self.ndims' (primitive 'float')");
       COMP (mixlen,             "primitive 'int'");
       COMP (use_specmf,         "primitive 'int'");
       IOASSOC (PA_ONOFF);
@@ -1902,6 +1896,8 @@ stc_silo_types (void) {
             "pointer (array 'self.nzones' (primitive 'int'))");
       COMP (gzoneno,
             "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
+      COMP (ghost_zone_labels,
+            "pointer (array 'self.nzones' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBphzonelist) {
@@ -1928,6 +1924,8 @@ stc_silo_types (void) {
             "pointer (array 'self.nzones' (primitive 'int'))");
       COMP (gzoneno,
             "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
+      COMP (ghost_zone_labels,
+            "pointer (array 'self.nzones' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBcsgzonelist) {
@@ -2099,6 +2097,8 @@ stc_silo_types (void) {
             "pointer (array 'self.nnodes' (primitive 'self.gnznodtype'))");
       COMP (nodeno,
             "pointer (array 'self.nnodes' (primitive 'int'))");
+      COMP (ghost_node_labels,
+            "pointer (array 'self.nnodes' (primitive 'int8'))");
       COMP (faces,              "pointer 'DBfacelist'");
       COMP (zones,              "pointer 'DBzonelist'");
       COMP (edges,              "pointer 'DBedgelist'");
@@ -2174,6 +2174,8 @@ stc_silo_types (void) {
             "(primitive 'self.datatype')))");
       COMP (gnodeno,
             "pointer (array 'self.nels' (primitive 'self.gnznodtype'))");
+      COMP (ghost_node_labels,
+            "pointer (array 'self.nels' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBmeshvar) {
@@ -2226,19 +2228,14 @@ stc_silo_types (void) {
       COMP (meshname,           "primitive 'string'");
       COMP (ndims,              "primitive 'int'");
       COMP (origin,             "primitive 'int'");
-      COMP (dims,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (dims,               "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (major_order,        "primitive 'int'");
       IOASSOC (PA_ORDER);
-      COMP (stride,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (stride,             "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (nmat,               "primitive 'int'");
-      COMP (matnos,
-            "pointer (array 'self.nmat' (primitive 'int'))");
-      COMP (matnames,
-            "pointer (array 'self.nmat' (primitive 'string'))");
-      COMP (matcolors,
-            "pointer (array 'self.nmat' (primitive 'string'))");
+      COMP (matnos,             "pointer (array 'self.nmat' (primitive 'int'))");
+      COMP (matnames,           "pointer (array 'self.nmat' (primitive 'string'))");
+      COMP (matcolors,          "pointer (array 'self.nmat' (primitive 'string'))");
       COMP (allowmat0,          "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (guihide,            "primitive 'int'");
@@ -2246,16 +2243,11 @@ stc_silo_types (void) {
       COMP (mixlen,             "primitive 'int'");
       COMP (datatype,           "primitive 'int'");
       IOASSOC (PA_DATATYPE);
-      COMP (matlist,
-            "pointer (array 'SH2, self.dims' (primitive 'int'))");
-      COMP (mix_vf,
-            "pointer (array 'self.mixlen' (primitive 'self.datatype'))");
-      COMP (mix_next,
-            "pointer (array 'self.mixlen' (primitive 'int'))");
-      COMP (mix_mat,
-            "pointer (array 'self.mixlen' (primitive 'int'))");
-      COMP (mix_zone,
-            "pointer (array 'self.mixlen' (primitive 'int'))");
+      COMP (matlist,            "pointer (array 'SH2, self.dims' (primitive 'int'))");
+      COMP (mix_vf,             "pointer (array 'self.mixlen' (primitive 'self.datatype'))");
+      COMP (mix_next,           "pointer (array 'self.mixlen' (primitive 'int'))");
+      COMP (mix_mat,            "pointer (array 'self.mixlen' (primitive 'int'))");
+      COMP (mix_zone,           "pointer (array 'self.mixlen' (primitive 'int'))");
    } ESTRUCT;
 
    STRUCT (DBmatspecies) {

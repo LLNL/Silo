@@ -404,6 +404,8 @@ typedef struct DBquadmesh_mt {
     char                label[3][256];
     char                units[3][256];
     char                mrgtree_name[256];
+    char                ghost_node_labels[256];
+    char                ghost_zone_labels[256];
 } DBquadmesh_mt;
 static hid_t DBquadmesh_mt5;
 
@@ -466,6 +468,7 @@ typedef struct DBucdmesh_mt {
     int                 tv_connectivity;
     int                 disjoint_mode;
     int                 gnznodtype;
+    char                ghost_node_labels[256];
 } DBucdmesh_mt;
 static hid_t    DBucdmesh_mt5;
 
@@ -527,6 +530,7 @@ typedef struct DBzonelist_mt {
     char                shapetype[256];
     char                gzoneno[256];
     int                 gnznodtype;
+    char                ghost_zone_labels[256];
 } DBzonelist_mt;
 static hid_t    DBzonelist_mt5;
 
@@ -545,6 +549,7 @@ typedef struct DBphzonelist_mt {
     char                facelist[256];
     char                gzoneno[256];
     int                 gnznodtype;
+    char                ghost_zone_labels[256];
 } DBphzonelist_mt;
 static hid_t    DBphzonelist_mt5;
 
@@ -734,6 +739,7 @@ typedef struct DBpointmesh_mt {
     char                units[3][256];
     char                gnodeno[256];
     char                mrgtree_name[256];
+    char                ghost_node_labels[256];
     int                 gnznodtype;
 } DBpointmesh_mt;
 static hid_t    DBpointmesh_mt5;
@@ -2183,6 +2189,8 @@ db_hdf5_init(void)
         MEMBER_R(str256,        label,          3);
         MEMBER_R(str256,        units,          3);
         MEMBER_S(str256,        mrgtree_name);
+        MEMBER_S(str256,        ghost_node_labels);
+        MEMBER_S(str256,        ghost_zone_labels);
     } DEFINE;
     
     STRUCT(DBquadvar) {
@@ -2243,6 +2251,7 @@ db_hdf5_init(void)
         MEMBER_S(int,           tv_connectivity);
         MEMBER_S(int,           disjoint_mode);
         MEMBER_S(int,           gnznodtype);
+        MEMBER_S(str256,        ghost_node_labels);
     } DEFINE;
     
     STRUCT(DBucdvar) {
@@ -2301,6 +2310,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        shapetype);
         MEMBER_S(str256,        gzoneno);
         MEMBER_S(int,           gnznodtype);
+        MEMBER_S(str256,        ghost_zone_labels);
     } DEFINE;
 
     STRUCT(DBphzonelist) {
@@ -2317,6 +2327,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        facecnt);
         MEMBER_S(str256,        facelist);
         MEMBER_S(int,           gnznodtype);
+        MEMBER_S(str256,        ghost_zone_labels);
     } DEFINE;
 
     STRUCT(DBmaterial) {
@@ -2499,6 +2510,7 @@ db_hdf5_init(void)
         MEMBER_S(str256,        gnodeno);
         MEMBER_S(str256,        mrgtree_name);
         MEMBER_S(int,           gnznodtype);
+        MEMBER_S(str256,        ghost_node_labels);
     } DEFINE;
 
     STRUCT(DBpointvar) {
@@ -8936,6 +8948,21 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
             }
         }
         
+        if (ndims>0 && _qm._ghost_node_labels)
+        {
+            db_hdf5_compwr(dbfile, DB_CHAR, ndims, dims, _qm._ghost_node_labels,
+                    m.ghost_node_labels/*out*/, friendly_name(name, "_ghost_node_labels", 0));
+        }
+        if (ndims>0 && _qm._ghost_zone_labels)
+        {
+            int tmpdims[3];
+            for (i = 0; i < ndims; i++)
+                tmpdims[i] = dims[i]-1;
+
+            db_hdf5_compwr(dbfile, DB_CHAR, ndims, tmpdims, _qm._ghost_zone_labels,
+                    m.ghost_zone_labels/*out*/, friendly_name(name, "_ghost_zone_labels", 0));
+        }
+
         /* Build quadmesh header in memory */
         m.ndims = ndims;
         m.coordtype = coordtype;
@@ -8985,6 +9012,8 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name, char *coordnames[],
             MEMBER_R(str(m.label[_j]), label, ndims);
             MEMBER_R(str(m.units[_j]), units, ndims);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
+            MEMBER_S(str(m.ghost_node_labels), ghost_node_labels);
+            MEMBER_S(str(m.ghost_zone_labels), ghost_zone_labels);
         } OUTPUT(dbfile, coordtype == DB_COLLINEAR ? DB_QUADRECT : DB_QUADCURV, name, &m);
 
     } CLEANUP {
@@ -9130,6 +9159,11 @@ db_hdf5_GetQuadmesh(DBfile *_dbfile, char *name)
             if (SILO_Globals.dataReadMask & DBQMCoords)
                 qm->coords[i] = db_hdf5_comprd(dbfile, m.coord[i], 0);
         }
+
+        if (SILO_Globals.dataReadMask & DBQMGhostNodeLabels)
+            qm->ghost_node_labels = db_hdf5_comprd(dbfile, m.ghost_node_labels, 0);
+        if (SILO_Globals.dataReadMask & DBQMGhostZoneLabels)
+            qm->ghost_zone_labels = db_hdf5_comprd(dbfile, m.ghost_zone_labels, 0);
 
         H5Tclose(o);
         
@@ -9697,6 +9731,12 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
                 m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0),
                 compressionFlags);
         
+        if (nnodes && _um._ghost_node_labels)
+        {
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &nnodes, _um._ghost_node_labels,
+                m.ghost_node_labels/*out*/, friendly_name(name, "_ghost_node_labels",0));
+        }
+
         /* Build ucdmesh header in memory */
         m.ndims = ndims;
         m.nnodes = nnodes;
@@ -9751,6 +9791,7 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims, char *coordnames[],
             if (m.tv_connectivity) MEMBER_S(int, tv_connectivity);
             if (m.disjoint_mode)   MEMBER_S(int, disjoint_mode);
             if (m.gnznodtype)   MEMBER_S(int, gnznodtype);
+            MEMBER_S(str(m.ghost_node_labels), ghost_node_labels);
         } OUTPUT(dbfile, DB_UCDMESH, name, &m);
         
     } CLEANUP {
@@ -10086,6 +10127,8 @@ db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name)
         if (SILO_Globals.dataReadMask & DBUMGlobNodeNo)
             um->gnodeno = db_hdf5_comprd(dbfile, m.gnodeno, 1);
         um->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
+        if (SILO_Globals.dataReadMask & DBUMGhostNodeLabels)
+            um->ghost_node_labels = db_hdf5_comprd(dbfile, m.ghost_node_labels, 1);
 
         /* Read face, zone, and edge lists */
         if (um->nnodes>0 && m.facelist[0] && (SILO_Globals.dataReadMask & DBUMFacelist)) {
@@ -10335,9 +10378,9 @@ PrepareForUcdvarDecompression(DBfile *_dbfile, char const *varname,
 
         if (haveCompressed)
         {
-            long currentMask = DBGetDataReadMask();
+            unsigned long long currentMask = DBGetDataReadMask2();
             DBucdmesh *um;
-            DBSetDataReadMask(DBUMZonelist|DBZonelistInfo);
+            DBSetDataReadMask2(DBUMZonelist|DBZonelistInfo);
             um = db_hdf5_GetUcdmesh(_dbfile, (char*) meshname);
 
             /* Note that if for some reason the zl was not compressed, then
@@ -10351,7 +10394,7 @@ PrepareForUcdvarDecompression(DBfile *_dbfile, char const *varname,
                 RegisterNodelist((DBfile_hdf5*)_dbfile, 0, meshname,
                     um->zones->ndims, um->zones->nzones, um->zones->origin,
                     um->zones->nodelist);
-                DBSetDataReadMask(currentMask);
+                DBSetDataReadMask2(currentMask);
                 DBFreeUcdmesh(um);
             }
         }
@@ -10833,6 +10876,12 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
             db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, _uzl._gzoneno,
                 m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
 
+        if (_uzl._ghost_zone_labels)
+        {
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &nzones, _uzl._ghost_zone_labels,
+                m.ghost_zone_labels/*out*/, friendly_name(name,"_ghost_zone_labels", 0));
+        }
+
         /* Build header in memory */
         m.ndims = ndims;
         m.nzones = nzones;
@@ -10858,6 +10907,7 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones, int ndims,
             MEMBER_S(str(m.shapetype), shapetype);
             MEMBER_S(str(m.gzoneno), gzoneno);
             if (m.gnznodtype)   MEMBER_S(int, gnznodtype);
+            MEMBER_S(str(m.ghost_zone_labels), ghost_zone_labels);
         } OUTPUT(dbfile, DB_ZONELIST, name, &m);
         
     } CLEANUP {
@@ -10932,6 +10982,12 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
             db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, _phzl._gzoneno,
                 m.gzoneno/*out*/, friendly_name(name,"_gzoneno", 0));
 
+        if (_phzl._ghost_zone_labels)
+        {
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &nzones, _phzl._ghost_zone_labels,
+                m.ghost_zone_labels/*out*/, friendly_name(name,"_ghost_zone_labels", 0));
+        }
+
         /* Build header in memory */
         m.nfaces = nfaces;
         m.lnodelist = lnodelist;
@@ -10958,6 +11014,7 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
             MEMBER_S(str(m.facelist), facelist);
             MEMBER_S(str(m.gzoneno), gzoneno);
             if (m.gnznodtype)   MEMBER_S(int, gnznodtype);
+            MEMBER_S(str(m.ghost_zone_labels), ghost_zone_labels);
         } OUTPUT(dbfile, DB_PHZONELIST, name, &m);
         
     } CLEANUP {
@@ -11087,6 +11144,8 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char *name)
         if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
             zl->gzoneno = db_hdf5_comprd(dbfile, m.gzoneno, 1);
         zl->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
+        if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
+            zl->ghost_zone_labels = db_hdf5_comprd(dbfile, m.ghost_zone_labels, 1);
 
         H5Tclose(o);
     } CLEANUP {
@@ -11178,6 +11237,8 @@ db_hdf5_GetPHZonelist(DBfile *_dbfile, char *name)
         }
         if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
             phzl->gzoneno = db_hdf5_comprd(dbfile, m.gzoneno, 1);
+        if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
+            phzl->ghost_zone_labels = db_hdf5_comprd(dbfile, m.ghost_zone_labels, 1);
 
         H5Tclose(o);
     } CLEANUP {
@@ -13537,6 +13598,12 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
                     m.gnodeno/*out*/, friendly_name(name, "_gnodeno", 0));
         }
 
+        if (nels>0 && _pm._ghost_node_labels)
+        {
+            db_hdf5_compwr(dbfile, DB_CHAR, 1, &nels, _pm._ghost_node_labels,
+                    m.ghost_node_labels/*out*/, friendly_name(name, "_ghost_node_labels", 0));
+        }
+
         /* Build header in memory */
         m.ndims = ndims;
         m.nspace = _pm._nspace;
@@ -13577,6 +13644,7 @@ db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims, DB_DTPTR2 _coords,
             MEMBER_S(str(m.gnodeno), gnodeno);
             MEMBER_S(str(m.mrgtree_name), mrgtree_name);
             if (m.gnznodtype    )MEMBER_S(int, gnznodtype);
+            MEMBER_S(str(m.ghost_node_labels), ghost_node_labels);
         } OUTPUT(dbfile, DB_POINTMESH, name, &m);
 
     } CLEANUP {
@@ -13684,6 +13752,11 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char *name)
         if (SILO_Globals.dataReadMask & DBPMGlobNodeNo)
             pm->gnodeno = db_hdf5_comprd(dbfile, m.gnodeno, 1);
         pm->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
+
+        if (SILO_Globals.dataReadMask & DBPMGhostNodeLabels)
+        {
+            pm->ghost_node_labels = db_hdf5_comprd(dbfile, m.ghost_node_labels, 0);
+        }
 
         H5Tclose(o);
     } CLEANUP {

@@ -518,6 +518,49 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
 
   DBPutQuadmesh(db, "Mesh", coordnames, coord, dims, 2, 
 		DB_FLOAT, DB_NONCOLLINEAR, NULL);
+
+  /* Test outputting of ghost node and zone labels */
+  {
+      int i;
+      int nnodes = mesh.nx * mesh.ny;
+      int nzones = (mesh.nx-1) * (mesh.ny-1);
+      char *gn = (char *) calloc(nnodes,1);
+      char *gz = (char *) calloc(nzones,1);
+      DBoptlist *ol = DBMakeOptlist(5);
+
+      for (i = 0; i < nnodes; i++)
+      {
+          if (!(i % 3)) gn[i] = 1;
+      }
+      for (i = 0; i < nzones; i++)
+      {
+          if (!(i % 7)) gz[i] = 1;
+      }
+
+      strcpy(coordnames[0],"xn");
+      strcpy(coordnames[1],"yn");
+      DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
+      DBPutQuadmesh(db, "Mesh_gn", coordnames, coord, dims, 2, 
+		    DB_FLOAT, DB_NONCOLLINEAR, ol);
+      DBClearOption(ol, DBOPT_GHOST_NODE_LABELS);
+
+      strcpy(coordnames[0],"xz");
+      strcpy(coordnames[1],"yz");
+      DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, gz);
+      DBPutQuadmesh(db, "Mesh_gz", coordnames, coord, dims, 2, 
+		    DB_FLOAT, DB_NONCOLLINEAR, ol);
+
+      strcpy(coordnames[0],"xnz");
+      strcpy(coordnames[1],"ynz");
+      DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
+      DBPutQuadmesh(db, "Mesh_gnz", coordnames, coord, dims, 2, 
+		    DB_FLOAT, DB_NONCOLLINEAR, ol);
+
+      DBFreeOptlist(ol);
+      free(gn);
+      free(gz);
+  }
+
   free(coordnames[0]);
   free(coordnames[1]);
 
@@ -666,6 +709,7 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
   int nzones;
   int shapesize[1];
   int shapecnt[1];
+  int shapetyp[1];
 
   /* do mesh */
   c=0;
@@ -703,11 +747,43 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
   nzones=mesh.zx*mesh.zy;
   shapesize[0]=4;
   shapecnt[0]=nzones;
+  shapetyp[0]=DB_ZONETYPE_QUAD;
 
-  DBSetDeprecateWarnings(0);
-  DBPutZonelist(db,"Mesh_zonelist",nzones,2,nl,lnodelist,0,shapesize,shapecnt,1);
-  DBSetDeprecateWarnings(3);
+  DBPutZonelist2(db,"Mesh_zonelist",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,NULL);
   DBPutUcdmesh (db,"Mesh",2,NULL,coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,NULL);
+
+  /* test output of ghost node and zone labels */
+  {
+      int i;
+      char *gn = calloc(nnodes,1);
+      char *gz = calloc(nzones,1);
+      DBoptlist *ol = DBMakeOptlist(5);
+
+      for (i = 0; i < nnodes; i++)
+      {
+          if (!(i % 3)) gn[i] = 1;
+      } 
+      for (i = 0; i < nzones; i++)
+      {
+          if (!(i % 7)) gz[i] = 1;
+      } 
+
+      DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
+      DBPutUcdmesh (db,"Mesh_gn",2,NULL,coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,ol);
+      DBClearOption(ol, DBOPT_GHOST_NODE_LABELS);
+
+      DBPutUcdmesh (db,"Mesh_gz",2,NULL,coord,nnodes,nzones,"Mesh_zonelist_gz",NULL,DB_FLOAT,NULL);
+      DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, gz);
+      DBPutZonelist2(db,"Mesh_zonelist_gz",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,ol);
+
+      DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
+      DBPutUcdmesh (db,"Mesh_gnz",2,NULL,coord,nnodes,nzones,"Mesh_zonelist_gnz",NULL,DB_FLOAT,ol);
+      DBPutZonelist2(db,"Mesh_zonelist_gnz",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,ol);
+
+      DBFreeOptlist(ol);
+      free(gn);
+      free(gz);
+  }
 
   /* do Node vars */
 

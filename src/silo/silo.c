@@ -2662,7 +2662,7 @@ DBUninstall(DBfile *dbfile)
 }
 
 /*----------------------------------------------------------------------
- * Routine:  DBSetDataReadMask
+ * Routine:  DBSetDataReadMask2
  *
  * Purpose:  Set and return the data read mask
  *
@@ -2689,16 +2689,16 @@ DBUninstall(DBfile *dbfile)
  *
  * Modifications:
  *--------------------------------------------------------------------*/
-PUBLIC long
-DBSetDataReadMask(long mask)
+PUBLIC unsigned long long
+DBSetDataReadMask2(unsigned long long mask)
 {
-    int oldmask = SILO_Globals.dataReadMask;
+    unsigned long long oldmask = SILO_Globals.dataReadMask;
     SILO_Globals.dataReadMask = mask;
     return oldmask;
 }
 
 /*----------------------------------------------------------------------
- * Routine:  DBGetDataReadMask
+ * Routine:  DBGetDataReadMask2
  *
  * Purpose:  Return the current data read mask
  *
@@ -2710,8 +2710,8 @@ DBSetDataReadMask(long mask)
  *
  * Modifications:
  *--------------------------------------------------------------------*/
-PUBLIC long
-DBGetDataReadMask(void)
+PUBLIC unsigned long long
+DBGetDataReadMask2(void)
 {
     return SILO_Globals.dataReadMask;
 }
@@ -5252,6 +5252,8 @@ static void
 db_AdjustSpeciallyHandledStandardObjectComponentValue(
     void *val_ptr, int obj_type, char const *comp_name)
 {
+    if (!val_ptr || !comp_name) return;
+
     if (!strcmp(comp_name, "missing_value") &&
         (obj_type == DB_UCDVAR || obj_type == DB_QUADVAR || obj_type == DB_CURVE ||
          obj_type == DB_POINTVAR || obj_type == DB_MULTIVAR))
@@ -5281,9 +5283,13 @@ db_AdjustSpeciallyHandledStandardObjectComponentValue(
 static void
 db_AdjustSpeciallyHandledStandardObjectComponentValues(DBobject *obj)
 {
-    int i, obj_type = DBGetObjtypeTag(obj->type);
+    int i, obj_type;
 
+    if (!obj) return;
+
+    obj_type = DBGetObjtypeTag(obj->type);
     if (obj_type == DB_USERDEF) return;
+
     for (i = 0; i < obj->ncomponents; i++)
     {
         char tmp[256];
@@ -9457,6 +9463,7 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
                 API_ERROR("lo_offset<0", E_BADARGS);
             if (hi_offset < 0)
                 API_ERROR("hi_offset<0", E_BADARGS);
+#warning HI AND LO OFFSET NOT VALID IN PRESENCE OF EXPLICIT GHOST LABELS
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
@@ -11064,6 +11071,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _pm._missing_value = DEREF(double, optlist->values[i]);
                         break;
 
+                    case DBOPT_GHOST_NODE_LABELS:
+                        _pm._ghost_node_labels = (char *)optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11206,6 +11217,14 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_MISSING_VALUE:
                         _qm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
+                    case DBOPT_GHOST_NODE_LABELS:
+                        _qm._ghost_node_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_GHOST_ZONE_LABELS:
+                        _qm._ghost_zone_labels = (char *)optlist->values[i];
                         break;
 
                     default:
@@ -11359,6 +11378,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _um._missing_value = DEREF(double, optlist->values[i]);
                         break;
 
+                    case DBOPT_GHOST_NODE_LABELS:
+                        _um._ghost_node_labels = (char *)optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11379,6 +11402,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _uzl._llong_gzoneno = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_GHOST_ZONE_LABELS:
+                        _uzl._ghost_zone_labels = (char *)optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11397,6 +11424,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_LLONGNZNUM:
                         _phzl._llong_gzoneno = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_GHOST_ZONE_LABELS:
+                        _phzl._ghost_zone_labels = (char *)optlist->values[i];
                         break;
 
                     default:

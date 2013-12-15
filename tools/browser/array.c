@@ -112,7 +112,12 @@ typedef struct obj_ary_t {
                                  * sentinal, N, where N comes from
                                  * `(array "SH5 N, ...)' 
                                  */
-#define ARY_NSH         6       /*THIS MUST BE LAST!                    */
+#define ARY_SH_6        6       /* Array dimension determined by adding next
+                                 * argument to each of the specified dimension
+                                 * sizes as in `(array SH6 -1, self.dims)'
+                                 */
+                                    
+#define ARY_NSH         7       /*THIS MUST BE LAST!                    */
 
 static int      SHFlagsEncountered[ARY_NSH];
 
@@ -1310,7 +1315,7 @@ ary_bind (obj_t _self, void *mem) {
 
    obj_ary_t    *self = MYCLASS(_self);
    char         *s, *t, *rest, buf[1024];
-   int          i, n, dim[NDIMS], max_dim0=0, sentinel;
+   int          i, n, dim[NDIMS], max_dim0=0, sentinel, dimadd=0;
    lex_t        *lex_input=NULL;
    obj_t        in=NIL, sdo=NIL;
    walk_t       wdata;
@@ -1371,6 +1376,9 @@ ary_bind (obj_t _self, void *mem) {
          } else if (ARY_SH_5==self->special_handling) {
             sentinel = strtol (rest, &rest, 0);
             self->ndims = 1;
+         } else if (ARY_SH_6==self->special_handling) {
+            self->special_handling = 0; /*completely handled here*/
+            dimadd = strtol (rest, &rest, 0);
          }
          assert (!rest || !*rest);
 
@@ -1441,7 +1449,7 @@ ary_bind (obj_t _self, void *mem) {
                    out_errorn ("too many dimensions in array type");
                    goto error;
                 }
-                self->dim[self->ndims] = n = wdata.vals[i];
+                self->dim[self->ndims] = n = wdata.vals[i] + dimadd;
                 self->ndims += 1;
                 if (n<0) {
                    out_errorn ("dimension %d is invalid: %d",

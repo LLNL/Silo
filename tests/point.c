@@ -239,6 +239,8 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     float          *coords[3], *vars[3];
     DBoptlist      *optlist = NULL;
     DBoptlist      *optlist1 = NULL;
+    char           *ghost_labels;
+    char            name2[256];
 
     int             one = 1;
     int             cycle = 44;
@@ -260,6 +262,7 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     t = ALLOC(float,N); assert_mem(t);
     itype = ALLOC(int,N); assert_mem(itype);
     litype = ALLOC(long long,N); assert_mem(litype);
+    ghost_labels = ALLOC(char,N); assert_mem(ghost_labels);
 
     optlist = DBMakeOptlist(10);
     optlist1 = DBMakeOptlist(10);
@@ -305,13 +308,21 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
         w[i] = w[i] / TwoPI;
         t[i] = pow(10., 5. * f * f);
         itype[i] = i;
+        if (i > 5 && i < 17)
+            ghost_labels[i] = 1;
     }
 
     coords[0] = x;
     coords[1] = y;
     coords[2] = z;
 
+
     DBPutPointmesh(dbfile, name, dims, coords, N, DB_FLOAT, optlist);
+
+    DBAddOption(optlist, DBOPT_GHOST_NODE_LABELS, ghost_labels);
+    sprintf(name2, "%s_wghost", name);
+    DBPutPointmesh(dbfile, name2, dims, coords, N, DB_FLOAT, optlist);
+    DBClearOption(optlist, DBOPT_GHOST_NODE_LABELS);
 
     vars[0] = d;
     DBPutPointvar(dbfile, "d", name, 1, vars, N, DB_FLOAT, optlist);

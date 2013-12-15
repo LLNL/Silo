@@ -977,19 +977,19 @@ sym_init (void)
    sym_bi_set("fmt_null",       "(null)",       "Null format",
               "This is a C printf() format string used to render null "
               "pointers in the browser output.");
-   sym_bi_set("fmt_int8",       "(int8)%hhd",   "Byte format",
+   sym_bi_set("fmt_int8",       "%hhd",   "Byte format",
               "This is a C printf() format string used to render byte "
               "values in the browser output.");
-   sym_bi_set("fmt_short",      "(short)%hd",   "Short format",
+   sym_bi_set("fmt_short",      "%hd",   "Short format",
               "This is a C printf() format string used to render short "
               "integer values in the browser output.");
    sym_bi_set("fmt_int",        "%d",           "Integer format",
               "This is a C printf() format string used to render integer "
               "values in the browser output.");
-   sym_bi_set("fmt_long",       "(long)%ld",    "Long format",
+   sym_bi_set("fmt_long",       "%ld",    "Long format",
               "This is a C printf() format string used to render long "
               "integer values in the browser output.");
-   sym_bi_set("fmt_long_long",   "(long long)%lld",         "Long long format",
+   sym_bi_set("fmt_long_long",   "%lld",         "Long long format",
               "This is a C printf() format string used to render long "
               "long integer values in the browser output.");
 
