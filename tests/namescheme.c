@@ -198,7 +198,7 @@ int main(int argc, char **argv)
         /* Use absolute path to external array; 'H' is delim char */
         char *ns2 = "Hfoo_%sH$/arr_dir/Noodle[n%3]";
         char *ns2r;
-        char *strList;
+        char *strList = 0;
         /* use paths relative to the MB mesh object in which the nameschems
            are embedded */
         char *ns3 = "|/meshes/mesh1/dom_%s_%d|$../ns_arrays/Noodle[n]|n*2+1";
@@ -221,6 +221,7 @@ int main(int argc, char **argv)
         DBStringArrayToStringList(FileNumbers, 3, &strList, &strListLen);
         dims[0] = strListLen;
         DBWrite(dbfile, "FileNumbers", strList, dims, 1, DB_CHAR);
+        free(strList);
         DBStringArrayToStringList(N, 3, &strList, &strListLen);
         dims[0] = strListLen;
         DBWrite(dbfile, "Noodle", strList, dims, 1, DB_CHAR);
@@ -245,6 +246,7 @@ int main(int argc, char **argv)
         DBMkDir(dbfile, "ns_arrays");
         dims[0] = strListLen;
         DBWrite(dbfile, "ns_arrays/Noodle", strList, dims, 1, DB_CHAR);
+        free(strList);
 
         DBMkDir(dbfile, "mesh1");
         DBSetDir(dbfile, "mesh1");
@@ -287,7 +289,6 @@ int main(int argc, char **argv)
             DBPutMultimesh(dbfile, "mmesh", 3, 0, 0, optlist);
             DBFreeOptlist(optlist);
         }
-        free(strList);
         DBClose(dbfile);
 
         dbfile = DBOpen("namescheme.silo", DB_UNKNOWN, DB_READ);
