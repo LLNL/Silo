@@ -1659,6 +1659,9 @@ stc_silo_types (void) {
             "pointer (array 'self.lgroupings' (primitive 'string'))");
    } ESTRUCT;
 
+    /* This object is handled specially in browser using the
+       browser_DBGetMultimesadj() function */
+#if 0
    STRUCT (DBmultimeshadj) {
       COMP (nblocks,            "primitive 'int'");
       COMP (blockorigin,        "primitive 'int'");
@@ -1682,6 +1685,7 @@ stc_silo_types (void) {
       COMP (lzonelists,
             "pointer (array 'self.lneighbors' (primitive 'int'))");
    } ESTRUCT;
+#endif
 
    STRUCT (DBmultivar) {
       COMP (id,                 "primitive 'int'");
@@ -1714,6 +1718,9 @@ stc_silo_types (void) {
       COMP3 (vartypes, "vartypes", tmp);
       tmp = NIL;
 
+      COMP (region_pnames,
+            "array 'SH5 0' (primitive 'string')");
+
       COMP (extents,
             "pointer (array 'self.nvars,self.extentssize' (primitive 'double'))");
    } ESTRUCT;
@@ -1734,6 +1741,13 @@ stc_silo_types (void) {
       COMP (block_ns,           "primitive 'string'");
       COMP (repr_block_idx,     "primitive 'int'");
       IOASSOC (PA_REPRBLOCK);
+      COMP (nmatnos,            "primitive 'int'");
+      COMP (matnos,
+            "pointer (array 'self.nmatnos' (primitive 'int'))");
+      COMP (material_names,
+            "pointer (array 'self.nmatnos' (primitive 'string'))");
+      COMP (matcolors,
+            "pointer (array 'self.nmatnos' (primitive 'string'))");
       COMP (empty_cnt,          "primitive 'int'");
       COMP (empty_list,
             "pointer (array 'self.empty_cnt' (primitive 'int'))");
@@ -1745,13 +1759,6 @@ stc_silo_types (void) {
             "pointer (array 'self.nmats' (primitive 'int'))");
       COMP (matlists,
             "pointer (array 'self.nmats' (primitive 'int'))");
-      COMP (nmatnos,            "primitive 'int'");
-      COMP (matnos,
-            "pointer (array 'self.nmatnos' (primitive 'int'))");
-      COMP (material_names,
-            "pointer (array 'self.nmatnos' (primitive 'string'))");
-      COMP (matcolors,
-            "pointer (array 'self.nmatnos' (primitive 'string'))");
    } ESTRUCT;
 
    STRUCT (DBmultimatspecies) {
@@ -1822,6 +1829,8 @@ stc_silo_types (void) {
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (base_index,         "array 3 (primitive 'int')");
+      COMP (start_index,        "array 3 (primitive 'int')");
+      COMP (size_index,         "array 3 (primitive 'int')");
       COMP (mrgtree_name,       "primitive 'string'");
       COMP (coords,
             "array 'SH3 3, self.ndims' "
@@ -1870,6 +1879,8 @@ stc_silo_types (void) {
       COMP (vals,
             "pointer (array 'self.nvals' (pointer (array 'self.nels' "
             "(primitive 'self.datatype'))))");
+      COMP (region_pnames,
+            "array 'SH5 0' (primitive 'string')");
    } ESTRUCT;
 
    STRUCT (DBzonelist) {
@@ -2045,6 +2056,8 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (region_pnames,
+            "array 'SH5 0' (primitive 'string')");
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");
@@ -2122,6 +2135,8 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (region_pnames,
+            "array 'SH5 0' (primitive 'string')");
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");
@@ -2201,6 +2216,8 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (region_pnames,
+            "array 'SH5 0' (primitive 'string')");
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");
@@ -2276,6 +2293,9 @@ stc_silo_types (void) {
             "pointer (array 'self.mixlen' (primitive 'int'))");
    } ESTRUCT;
 
+    /* This object is handled specially in browser using the
+       browser_DBGetCompoundarray() function */
+#if 0
    STRUCT (DBcompoundarray) {
       COMP (id,                 "primitive 'int'");
       COMP (name,               "primitive 'string'");
@@ -2290,6 +2310,7 @@ stc_silo_types (void) {
       COMP (values,
             "pointer (array 'self.nvalues' (primitive 'self.datatype'))");
    } ESTRUCT;
+#endif
 
    STRUCT (DBmrgtree) {
       WALK1 (stc_walk1_DBmrgtree);
@@ -2298,8 +2319,14 @@ stc_silo_types (void) {
       COMP (src_mesh_type,      "primitive 'int'");
       COMP (type_info_bits,     "primitive 'int'");
       COMP (num_nodes,          "primitive 'int'");
+#if 0
+#error CAN WE HANDLE DIFFS ON THIS OBJECT
+#endif
    } ESTRUCT;
 
+    /* This object is handled specially in browser using the
+       browser_DBGroupelmap() function */
+#if 0
    STRUCT(DBgroupelmap) {
       COMP (name,               "primitive 'string'");
       COMP (num_segments,       "primitive 'int'");
@@ -2324,6 +2351,7 @@ stc_silo_types (void) {
             "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
             "(primitive 'self.fracs_data_type'))))");
    } ESTRUCT;
+#endif
 
    STRUCT (DBmrgvar) {
       COMP (name,               "primitive 'string'");
