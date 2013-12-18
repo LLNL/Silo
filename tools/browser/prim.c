@@ -321,6 +321,18 @@ prim_assoc_t PA_MISSING_VALUE[] = {
    {DB_MISSING_VALUE_NOT_SET, "not set"},
    {0,                        NULL}};
 
+prim_assoc_t PA_ZONETYPE[] = {
+   {PA_NAME,                                    "zonetype"},
+   {DB_ZONETYPE_BEAM,        "BEAM"},
+   {DB_ZONETYPE_POLYGON,     "POLYGON"},
+   {DB_ZONETYPE_TRIANGLE,    "TRIANGLE"},
+   {DB_ZONETYPE_QUAD,        "QUAD"},
+   {DB_ZONETYPE_POLYHEDRON,  "POLYHEDRON"},
+   {DB_ZONETYPE_TET,         "TET"},
+   {DB_ZONETYPE_PYRAMID,     "PYRAMID"},
+   {DB_ZONETYPE_PRISM,       "PRISM"},
+   {DB_ZONETYPE_HEX,         "HEX"},
+   {0,                        NULL}};
 
 
 /*-------------------------------------------------------------------------

@@ -629,6 +629,7 @@ extern prim_assoc_t PA_REGIONOP[];
 extern prim_assoc_t PA_TOPODIM[];
 extern prim_assoc_t PA_REPRBLOCK[];
 extern prim_assoc_t PA_MISSING_VALUE[];
+extern prim_assoc_t PA_ZONETYPE[];
 
 obj_t prim_set_io_assoc (obj_t, prim_assoc_t*);
 DBdatatype prim_silotype (obj_t);

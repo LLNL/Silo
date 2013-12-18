@@ -1826,7 +1826,6 @@ stc_silo_types (void) {
             "(pointer (array 'SH1 self.coordtype, self.dims' "
             "(primitive 'self.datatype')))");
       COMP (ghost_node_labels,  "pointer (array 'self.dims' (primitive 'int8'))");
-#warning FIX ARRAY SIZE FOR ZONES HERE
       COMP (ghost_zone_labels,  "pointer (array 'SH6 -1, self.dims' (primitive 'int8'))");
    } ESTRUCT;
 
@@ -1881,23 +1880,20 @@ stc_silo_types (void) {
       COMP (origin,             "primitive 'int'");
       COMP (min_index,          "primitive 'int'");
       COMP (max_index,          "primitive 'int'");
-      COMP (gnznodtype,         "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
+      COMP (gnznodtype,         "primitive 'int'"); IOASSOC (PA_DATATYPE);
       COMP (lnodelist,          "primitive 'int'");
-      COMP (shapecnt,
-            "pointer (array 'self.nshapes' (primitive 'int'))");
-      COMP (shapesize,
-            "pointer (array 'self.nshapes' (primitive 'int'))");
-      COMP (shapetype,
-            "pointer (array 'self.nshapes' (primitive 'int'))");
-      COMP (nodelist,
-            "pointer (array 'self.lnodelist' (primitive 'int'))");
-      COMP (zoneno,
-            "pointer (array 'self.nzones' (primitive 'int'))");
-      COMP (gzoneno,
-            "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
-      COMP (ghost_zone_labels,
-            "pointer (array 'self.nzones' (primitive 'int8'))");
+      COMP (shapecnt,           "pointer (array 'self.nshapes' (primitive 'int'))");
+      COMP (shapesize,          "pointer (array 'self.nshapes' (primitive 'int'))");
+
+      tmp = obj_new (C_PRIM, "int");
+      prim_set_io_assoc (tmp, PA_ZONETYPE);
+      tmp = obj_new (C_PTR, obj_new (C_ARY, "self.nshapes", tmp));
+      COMP3 (shapetype, "shapetype", tmp);
+
+      COMP (nodelist,           "pointer (array 'self.lnodelist' (primitive 'int'))");
+      COMP (zoneno,             "pointer (array 'self.nzones' (primitive 'int'))");
+      COMP (gzoneno,            "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
+      COMP (ghost_zone_labels,  "pointer (array 'self.nzones' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBphzonelist) {
