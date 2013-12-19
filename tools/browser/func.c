@@ -781,9 +781,7 @@ obj_t
 V_exit (int argc, obj_t argv[]) {
 
 #if defined(HAVE_READLINE_HISTORY_H) && defined(HISTORY_FILE) && defined(HAVE_READLINE_HISTORY)
-   if (HistoryFile[0] && write_history (HistoryFile)) 
-      ;
-   else
+   if (!(HistoryFile[0] && !write_history (HistoryFile))) 
    {
 #ifdef HAVE_STRERROR
       out_errorn ("command history not saved in %s (%s)",
