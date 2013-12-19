@@ -1438,7 +1438,7 @@ ary_bind (obj_t _self, void *mem) {
              wdata.nvals = 0;
              wdata.maxvals = NELMTS(dim);
              obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
-             if (wdata.nvals<1) {
+             if (wdata.nvals<0) {
                 out_errorn ("array dimension has no value: %s", t);
                 self->ndims = 0;
                 goto error;
