@@ -91,10 +91,19 @@ $topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 # Silo's checksumming is done only on the dataset objects in
 # the file. So, we have to make sure that we corrupt a dataset.
 # We do this using octal dump (od) and looking for some numbers
-# we expect in a silo object (domain_23/fl)
+# we expect in a silo object (domain_23/fl). Note that od breaks
+# data up into lines of 16 bytes each. Due to variations in HDF5
+# library, the offset at which the sequence 167 179 323 211 can
+# occur can vary. So, we loop over successive starting points
+# each 4 bytes further down the file until we find one.
 #
-offset=`od -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1`
-offset=`echo $offset | cut -d' ' -f1`
+offset=0
+skip=0
+while [[ $offset -eq 0 && $skip -lt 13 ]]; do
+    offset=`od -j $skip -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1`
+    offset=`echo $offset | cut -d' ' -f1`
+    skip=$(expr $skip + 4)
+done
 size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
 
 #
@@ -131,7 +140,7 @@ fi
 #
 # Cleanup
 #
-rm -rf h5_check_files
-rm -f multi_ucd3d_corrupt.h5
+#rm -rf h5_check_files
+#rm -f multi_ucd3d_corrupt.h5
 
 exit $result 
