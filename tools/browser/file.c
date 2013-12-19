@@ -66,13 +66,13 @@ be used for advertising or product endorsement purposes.
 #include <config.h>     /*Silo configuration record*/
 #include <assert.h>
 #include <browser.h>
+#include <errno.h>
 #ifdef HAVE_FNMATCH_H
 #  include <fnmatch.h>
 #endif
-
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 
 #define CHECK_SYMBOL(A)  if (!strncmp(str, #A, strlen(str))) return A
 
@@ -928,24 +928,6 @@ browser_DBSaveObject (obj_t _self, char *unused, void *mem, obj_t type) {
 
 
 /*-------------------------------------------------------------------------
- * Function:    browser_DBGetMultimeshadj
- *
- * Purpose:     Deal with non-standard get-API for DBmultimeshadj objects 
- *
- * Return:      DBmultimeshadj 
- *
- * Programmer:  Mark C. Miller 
- *              August 24, 2005
- *
- *-------------------------------------------------------------------------
- */
-static DBmultimeshadj*
-browser_DBGetMultimeshadj(DBfile *file, char *name)
-{
-    return DBGetMultimeshadj(file, name, 0, NULL);
-}
-
-/*-------------------------------------------------------------------------
  * Function:    browser_DBFreeObject
  *
  * Purpose:     Frees a modified SILO DBobject which was created with the
@@ -990,6 +972,333 @@ browser_DBFreeObject (void *mem, obj_t type) {
    DBFreeObject (obj);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    browser_DBGetMultimeshadj
+ *
+ * Purpose:     Deal with non-standard get-API for DBmultimeshadj objects 
+ *
+ * Return:      DBmultimeshadj 
+ *
+ * Programmer:  Mark C. Miller 
+ *              August 24, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static void*
+browser_DBGetMultimeshadj(DBfile *file, char *name, obj_t *type_ptr)
+{
+   DBmultimeshadj       *mmadj;
+   char                 **b_mmadj;
+   char                 buf[64], fmt[64];
+   int                  i, at, nbytes, digits;
+   obj_t                type=NIL, tmp=NIL;
+
+   /*
+    * Read the multimeshadj and create a browser multimeshadj.  The
+    * first entry in the browser multimeshadj points to the beginning
+    * of the silo multimeshadj so we can free it later.
+    */
+   mmadj = DBGetMultimeshadj(file, name, -1, 0);
+   if (!mmadj) return NULL;
+
+   b_mmadj = calloc (2*(mmadj->lneighbors)+11, sizeof(char*));
+   type = obj_new (C_STC, NULL, NULL);
+   b_mmadj[0] = (char*)mmadj;
+
+   /*
+    * The browser multimeshadj should point to the silo multimeshadj 
+    * fields so that modifying the browser object actually modifies the
+    * silo object.
+    */
+   b_mmadj[1] = (char*)&(mmadj->nblocks);
+   stc_add (type, obj_new(C_PTR, obj_new(C_PRIM, "int")),
+            1*sizeof(char*), "nblocks");
+
+   b_mmadj[2] = (char*)&(mmadj->blockorigin);
+   stc_add (type, obj_new(C_PTR, obj_new(C_PRIM, "int")),
+            2*sizeof(char*), "blockorigin");
+
+   tmp = obj_new (C_PRIM, "int");
+   prim_set_io_assoc (tmp, PA_OBJTYPE);
+   obj_bind (tmp, NULL);
+   b_mmadj[3] = (char*)mmadj->meshtypes;
+   sprintf (buf, "%d", mmadj->nblocks);
+   stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            3*sizeof(char*), "meshtypes");
+   tmp = NIL;
+
+   tmp = obj_new (C_PRIM, "int");
+   obj_bind (tmp, NULL);
+   b_mmadj[4] = (char*)mmadj->nneighbors;
+   sprintf (buf, "%d", mmadj->nblocks);
+   stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            4*sizeof(char*), "nneighbors");
+   tmp = NIL;
+
+   b_mmadj[5] = (char*)&(mmadj->lneighbors);
+   stc_add (type, obj_new(C_PTR, obj_new(C_PRIM, "int")),
+            5*sizeof(char*), "lneighbors");
+
+   tmp = obj_new (C_PRIM, "int");
+   obj_bind (tmp, NULL);
+   b_mmadj[6] = (char*)mmadj->neighbors;
+   sprintf (buf, "%d", mmadj->lneighbors);
+   stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            6*sizeof(char*), "neighbors");
+   tmp = NIL;
+
+   if (mmadj->back) {
+       tmp = obj_new (C_PRIM, "int");
+       obj_bind (tmp, NULL);
+       b_mmadj[7] = (char*)mmadj->back;
+       sprintf (buf, "%d", mmadj->lneighbors);
+       stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            7*sizeof(char*), "back");
+       tmp = NIL;
+   }
+
+   b_mmadj[8] = (char*)&(mmadj->totlnodelists);
+   stc_add (type, obj_new(C_PTR, obj_new(C_PRIM, "int")),
+            8*sizeof(char*), "totlnodelists");
+
+   if (mmadj->lnodelists) {
+       tmp = obj_new (C_PRIM, "int");
+       obj_bind (tmp, NULL);
+       b_mmadj[9] = (char*)mmadj->lnodelists;
+       sprintf (buf, "%d", mmadj->lneighbors);
+       stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            9*sizeof(char*), "lnodelists");
+       tmp = NIL;
+   }
+
+   b_mmadj[10] = (char*)&(mmadj->totlzonelists);
+   stc_add (type, obj_new(C_PTR, obj_new(C_PRIM, "int")),
+            10*sizeof(char*), "totlzonelists");
+
+   if (mmadj->zonelists) {
+       tmp = obj_new (C_PRIM, "int");
+       obj_bind (tmp, NULL);
+       b_mmadj[11] = (char*)mmadj->lzonelists;
+       sprintf (buf, "%d", mmadj->lneighbors);
+       stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            11*sizeof(char*), "lzonelists");
+       tmp = NIL;
+    }
+
+   /*
+    * Create the sub array base type.
+    */
+   sprintf (buf, "%d", DB_INT);
+   tmp = obj_new (C_PRIM, buf);
+   obj_bind (tmp, NULL);
+   nbytes = obj_sizeof(tmp);
+   assert (nbytes>0);
+
+   /*
+    * Create browser entries for each of the sub arrays.
+    */
+   digits = (int) (log10((double)mmadj->lneighbors) + 1);
+   for (i=0; i<mmadj->lneighbors; i++) {
+      char aname[32];
+
+      /* deal with nodelist entry */
+      sprintf(fmt, "nodelist%%0%dd", digits);
+      if (mmadj->nodelists && mmadj->nodelists[i])
+      {
+          b_mmadj[2*i+11] = (char*)(mmadj->nodelists[i]);
+          sprintf (aname, fmt, i);
+          if (1==mmadj->lnodelists[i]) {
+             stc_add (type, obj_new (C_PTR, obj_copy (tmp, SHALLOW)),
+                      (2*i+11)*sizeof(char*), aname);
+          } else {
+             sprintf (buf, "%d", mmadj->lnodelists[i]);
+             stc_add (type, obj_new (C_PTR, obj_new (C_ARY, buf, obj_copy(tmp,SHALLOW))),
+                      (2*i+11)*sizeof(char*), aname);
+          }
+      }
+
+      /* deal with zonelist entry */
+      sprintf(fmt, "zonelist%%0%dd", digits);
+      if (mmadj->zonelists && mmadj->zonelists[i])
+      {
+          b_mmadj[2*i+1+11] = (char*)(mmadj->zonelists[i]);
+          sprintf (aname, fmt, i);
+          if (1==mmadj->lzonelists[i]) {
+             stc_add (type, obj_new (C_PTR, obj_copy (tmp, SHALLOW)),
+                      (2*i+1+11)*sizeof(char*), aname);
+          } else {
+             sprintf (buf, "%d", mmadj->lzonelists[i]);
+             stc_add (type, obj_new (C_PTR, obj_new (C_ARY, buf, obj_copy(tmp,SHALLOW))),
+                      (2*i+1+11)*sizeof(char*), aname);
+          }
+      }
+   }
+
+   /*
+    * Free temp data and return
+    */
+   tmp = obj_dest (tmp);
+   *type_ptr = type;
+   return b_mmadj;
+}
+
+static void
+browser_DBFreeMultimeshadj(void *mem, obj_t type) {
+
+   char                 *b_mmadj = (char*)mem;
+   DBmultimeshadj       *mmadj;
+
+   if (!b_mmadj) return;
+   mmadj = *((DBmultimeshadj**)b_mmadj);
+   if (!mmadj) return;
+   DBFreeMultimeshadj(mmadj);
+}
+
+static void *
+browser_DBGetGroupelmap(DBfile *file, char *name, obj_t *type_ptr) {
+
+   DBgroupelmap         *gm;
+   char                 **b_gm;
+   char                 buf[64], bufi[64], buff[64];
+   int                  i, at, nbytes;
+   obj_t                type=NIL, tmp=NIL, tmpi=NIL, tmpf=NIL;
+
+   /*
+    * Read the compound array and create a browser compound array.  The
+    * first entry in the browser compound array points to the beginning
+    * of the silo compound array so we can free it later.
+    */
+   gm = DBGetGroupelmap(file, name);
+   if (!gm) return NULL;
+   b_gm = calloc (2*gm->num_segments+7, sizeof(char*));
+   type = obj_new (C_STC, NULL, NULL);
+   b_gm[0] = (char*)gm;
+
+   /*
+    * The browser compound array should point to the silo compound array
+    * fields so that modifying the browser object actually modifies the
+    * silo object.
+    */
+   b_gm[1] = gm->name;
+   stc_add (type, obj_new(C_PRIM, "string"),
+            1*sizeof(char*), "name");
+
+   b_gm[2] = (char*)&(gm->num_segments);
+   stc_add (type, obj_new(C_PTR, obj_new(C_PRIM, "int")),
+            2*sizeof(char*), "num_segments");
+
+   tmp = obj_new (C_PRIM, "int");
+   prim_set_io_assoc (tmp, PA_CENTERING);
+   obj_bind (tmp, NULL);
+   b_gm[3] = (char*)gm->groupel_types;
+   sprintf (buf, "%d", gm->num_segments);
+   stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            3*sizeof(char*), "groupel_types");
+   tmp = NIL;
+
+   tmp = obj_new (C_PRIM, "int");
+   obj_bind (tmp, NULL);
+   b_gm[4] = (char*)gm->segment_lengths;
+   sprintf (buf, "%d", gm->num_segments);
+   stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            4*sizeof(char*), "segment_lengths");
+   tmp = NIL;
+
+   tmp = obj_new (C_PRIM, "int");
+   obj_bind (tmp, NULL);
+   b_gm[5] = (char*)gm->segment_ids;
+   sprintf (buf, "%d", gm->num_segments);
+   stc_add (type, obj_new(C_PTR, obj_new(C_ARY, buf, obj_copy(tmp,SHALLOW))),
+            5*sizeof(char*), "segment_ids");
+   tmp = NIL;
+
+   b_gm[6] = (char*)&(gm->fracs_data_type);
+   tmp = obj_new (C_PRIM, "int");
+   prim_set_io_assoc (tmp, PA_DATATYPE);
+   stc_add (type, obj_new(C_PTR, tmp), 6*sizeof(char*), "fracs_data_type");
+   tmp = NIL;
+
+   /*
+    * Create the sub array base type for segment_data segments
+    */
+   sprintf (bufi, "%d", DB_INT);
+   tmpi = obj_new (C_PRIM, bufi);
+   obj_bind (tmpi, NULL);
+   nbytes = obj_sizeof(tmpi);
+   assert (nbytes>0);
+
+   /*
+    * Create the sub array base type for segment_fracs segments
+    */
+   if (gm->fracs_data_type)
+   {
+       sprintf (buff, "%d", gm->fracs_data_type);
+       tmpf = obj_new (C_PRIM, buff);
+       obj_bind (tmpf, NULL);
+       nbytes = obj_sizeof(tmpf);
+       assert (nbytes>0);
+   }
+
+   /*
+    * Create browser entries for each of the sub arrays.
+    */
+   for (i=0; i<gm->num_segments; i++) {
+      char aname[32];
+      int segid = gm->segment_ids?gm->segment_ids[i]:i;
+      char *segid_label = gm->segment_ids?"":"(def)";
+
+      /* deal segment_data entry */
+      if (gm->segment_lengths[i] && gm->segment_data[i])
+      {
+          b_gm[2*i+7] = (char*)(gm->segment_data[i]);
+          sprintf (aname, "segdata(id=%05d%s)", segid, segid_label);
+          if (1==gm->segment_lengths[i]) {
+             stc_add (type, obj_new (C_PTR, obj_copy (tmpi, SHALLOW)),
+                      (2*i+7)*sizeof(char*), aname);
+          } else {
+             sprintf (bufi, "%d", gm->segment_lengths[i]);
+             stc_add (type, obj_new (C_PTR, obj_new (C_ARY, bufi, obj_copy(tmpi,SHALLOW))),
+                      (2*i+7)*sizeof(char*), aname);
+          }
+      }
+
+      /* deal with segment_fracs entry */
+      if (gm->segment_fracs && gm->segment_lengths[i] && gm->segment_fracs[i])
+      {
+          b_gm[2*i+1+7] = (char*)(gm->segment_fracs[i]);
+          sprintf (aname, "segfracs(id=%05d%s)", segid, segid_label);
+          if (1==gm->segment_lengths[i]) {
+             stc_add (type, obj_new (C_PTR, obj_copy (tmpf, SHALLOW)),
+                      (2*i+1+7)*sizeof(char*), aname);
+          } else {
+             sprintf (buff, "%d", gm->segment_lengths[i]);
+             stc_add (type, obj_new (C_PTR, obj_new (C_ARY, buff, obj_copy(tmpf,SHALLOW))),
+                      (2*i+1+7)*sizeof(char*), aname);
+          }
+      }
+   }
+
+   /*
+    * Free temp data and return
+    */
+   tmpi = obj_dest (tmpi);
+   if (tmpf) tmpf = obj_dest (tmpf);
+   *type_ptr = type;
+   return b_gm;
+}
+
+/*ARGSUSED*/
+static void
+browser_DBFreeGroupelmap(void *mem, obj_t type) {
+
+   char                 *b_gm = (char*)mem;
+   DBgroupelmap         *gm;
+
+   if (!b_gm) return;
+   gm = *((DBgroupelmap**)b_gm);
+   if (!gm) return;
+   DBFreeGroupelmap (gm);
+}
 
 /*-------------------------------------------------------------------------
  * Function:    browser_DBGetCompoundarray
@@ -1396,25 +1705,6 @@ browser_DBFreeMultimesh (void *mem, obj_t type) {
 }
 
 /*-------------------------------------------------------------------------
- * Function:    browser_DBFreeMultimeshadj
- *
- * Purpose:     Frees a DBmultimeshadj.
- *
- * Return:      void
- *
- * Programmer:  Mark C. Miller 
- *              August 24, 2005 
- *
- *-------------------------------------------------------------------------
- */
-/*ARGSUSED*/
-static void
-browser_DBFreeMultimeshadj (void *mem, obj_t type) {
-
-   DBFreeMultimeshadj ((DBmultimeshadj*)mem);
-}
-
-/*-------------------------------------------------------------------------
  * Function:    browser_DBFreeMultivar
  *
  * Purpose:     Frees a DBmultivar
@@ -1668,12 +1958,6 @@ browser_DBFreeMatspecies (void *mem, obj_t type) {
 static void 
 browser_DBFreeMrgtree(void *mem, obj_t type) {
    DBFreeMrgtree ((DBmrgtree*)mem);
-}
-
-/*ARGSUSED*/
-static void 
-browser_DBFreeGroupelmap(void *mem, obj_t type) {
-   DBFreeGroupelmap ((DBgroupelmap*)mem);
 }
 
 /*ARGSUSED*/
@@ -2147,11 +2431,14 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
 
     for (i=0; i<toc->nmultimeshadj; i++) {
         if (!strcmp(toc->multimeshadj_names[i], base)) {
-            loadfunc = (void*(*)(DBfile*,char*))browser_DBGetMultimeshadj;
+            if (Verbosity>=2) {
+                out_info("file_deref: loading DBmultimeshadj%s:%s",
+                         self->name, name);
+            }
+            r_mem = browser_DBGetMultimeshadj(file, base, &type);
             savefunc = NULL;
             freefunc = browser_DBFreeMultimeshadj;
-            typename = "DBmultimeshadj";
-            goto done;
+            if (r_mem) goto done;
         }
     }
 
@@ -2277,11 +2564,14 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
 
     for (i=0; i<toc->ngroupelmap; i++) {
         if (!strcmp(toc->groupelmap_names[i], base)) {
-            loadfunc = (void*(*)(DBfile*,char*))DBGetGroupelmap;
+            if (Verbosity>=2) {
+                out_info("file_deref: loading DBgroupelmap %s:%s",
+                         self->name, name);
+            }
+            r_mem = browser_DBGetGroupelmap(file, base, &type);
             savefunc = NULL;
             freefunc = browser_DBFreeGroupelmap;
-            typename = "DBgroupelmap";
-            goto done;
+            if (r_mem) goto done;
         }
     }
 

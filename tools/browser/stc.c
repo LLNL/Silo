@@ -1663,29 +1663,8 @@ stc_silo_types (void) {
             "pointer (array 'self.lgroupings' (primitive 'string'))");
    } ESTRUCT;
 
-   STRUCT (DBmultimeshadj) {
-      COMP (nblocks,            "primitive 'int'");
-      COMP (blockorigin,        "primitive 'int'");
-      COMP (lneighbors,         "primitive 'int'");
-      COMP (totlnodelists,      "primitive 'int'");
-      COMP (totlzonelists,      "primitive 'int'");
-
-      tmp = obj_new (C_PRIM, "int");
-      prim_set_io_assoc (tmp, PA_OBJTYPE);
-      tmp = obj_new (C_PTR, obj_new (C_ARY, "self.nblocks", tmp));
-      COMP3 (meshtypes, "meshtypes", tmp);
-
-      COMP (nneighbors,
-            "pointer (array 'self.nblocks' (primitive 'int'))");
-      COMP (neighbors,
-            "pointer (array 'self.lneighbors' (primitive 'int'))");
-      COMP (back,
-            "pointer (array 'self.lneighbors' (primitive 'int'))");
-      COMP (lnodelists,
-            "pointer (array 'self.lneighbors' (primitive 'int'))");
-      COMP (lzonelists,
-            "pointer (array 'self.lneighbors' (primitive 'int'))");
-   } ESTRUCT;
+    /* ThDBmultimeshadj object is handled specially in browser using the
+       browser_DBGetMultimesadj() function */
 
    STRUCT (DBmultivar) {
       COMP (id,                 "primitive 'int'");
@@ -1821,6 +1800,8 @@ stc_silo_types (void) {
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (base_index,         "array 3 (primitive 'int')");
+      COMP (start_index,        "array 3 (primitive 'int')");
+      COMP (size_index,         "array 3 (primitive 'int')");
       COMP (mrgtree_name,       "primitive 'string'");
       COMP (coords,             "array 'SH3 3, self.ndims' "
             "(pointer (array 'SH1 self.coordtype, self.dims' "
@@ -1871,6 +1852,8 @@ stc_silo_types (void) {
       COMP (vals,
             "pointer (array 'self.nvals' (pointer (array 'self.nels' "
             "(primitive 'self.datatype'))))");
+      COMP (region_pnames,
+            "array 'SH5 0' (primitive 'string')");
    } ESTRUCT;
 
    STRUCT (DBzonelist) {
@@ -2278,20 +2261,8 @@ stc_silo_types (void) {
             "pointer (array 'self.mixlen' (primitive 'int'))");
    } ESTRUCT;
 
-   STRUCT (DBcompoundarray) {
-      COMP (id,                 "primitive 'int'");
-      COMP (name,               "primitive 'string'");
-      COMP (nelems,             "primitive 'int'");
-      COMP (nvalues,            "primitive 'int'");
-      COMP (datatype,           "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (elemnames,
-            "pointer (array 'self.nelems' (primitive 'string'))");
-      COMP (elemlengths,
-            "pointer (array 'self.nelems' (primitive 'int'))");
-      COMP (values,
-            "pointer (array 'self.nvalues' (primitive 'self.datatype'))");
-   } ESTRUCT;
+    /* The DBcompoundarray object is handled specially in browser using the
+       browser_DBGetCompoundarray() function */
 
    STRUCT (DBmrgtree) {
       WALK1 (stc_walk1_DBmrgtree);
@@ -2302,30 +2273,8 @@ stc_silo_types (void) {
       COMP (num_nodes,          "primitive 'int'");
    } ESTRUCT;
 
-   STRUCT(DBgroupelmap) {
-      COMP (name,               "primitive 'string'");
-      COMP (num_segments,       "primitive 'int'");
-      COMP (fracs_data_type,    "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (segment_lengths,
-            "pointer (array 'self.num_segments' (primitive 'int'))");
-      COMP (groupel_types,
-            "pointer (array 'self.num_segments' (primitive 'int'))");
-      tmp = obj_new (C_PRIM, "int");
-      prim_set_io_assoc (tmp, PA_CENTERING);
-      tmp = obj_new (C_PTR, obj_new (C_ARY, "self.num_segments", tmp));
-      COMP3 (groupel_types, "groupel_types", tmp);
-      COMP (segment_ids,
-            "pointer (array 'self.num_segments' (primitive 'int'))");
-      COMP (segment_data,
-            "pointer (array 'SH3 10000, self.num_segments' "
-            "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
-            "(primitive 'int'))))");
-      COMP (segment_fracs,
-            "pointer (array 'SH3 10000, self.num_segments' "
-            "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
-            "(primitive 'self.fracs_data_type'))))");
-   } ESTRUCT;
+    /* The DBgroupelmap object is handled specially in browser using the
+       browser_DBGroupelmap() function */
 
    STRUCT (DBmrgvar) {
       COMP (name,               "primitive 'string'");
