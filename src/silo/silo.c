@@ -1115,41 +1115,16 @@ db_GetMachDataSize(int datatype)
     int            size;
     char          *me = "db_GetMachDataSize";
 
-    switch (datatype) {
-        case DB_CHAR:
-            size = sizeof(char);
-
-            break;
-        case DB_SHORT:
-            size = sizeof(short);
-
-            break;
-        case DB_INT:
-            size = sizeof(int);
-
-            break;
-        case DB_LONG:
-            size = sizeof(long);
-
-        case DB_LONG_LONG:
-            size = sizeof(long long);
-
-            break;
-        case DB_FLOAT:
-            size = sizeof(float);
-
-            break;
-        case DB_DOUBLE:
-            size = sizeof(double);
-
-            break;
-        default:
-#if 1
-            return db_perror("datatype", E_BADARGS, me);
-#else
-            size = 0;
-            break;
-#endif
+    switch (datatype)
+    {
+        case DB_CHAR:      size = sizeof(char); break;
+        case DB_SHORT:     size = sizeof(short); break;
+        case DB_INT:       size = sizeof(int); break;
+        case DB_LONG:      size = sizeof(long); break;
+        case DB_LONG_LONG: size = sizeof(long long); break;
+        case DB_FLOAT:     size = sizeof(float); break;
+        case DB_DOUBLE:    size = sizeof(double); break;
+        default:           return db_perror("datatype", E_BADARGS, me);
     }
     return (size);
 }
@@ -3228,12 +3203,17 @@ db_IncObjectComponentCount(DBobject *obj)
     if (obj->ncomponents < obj->maxcomponents)
         return 1;
 
-    new_maxcomps = obj->maxcomponents * 1.618 + 1; /* golden rule + 1 */
+    new_maxcomps = obj->maxcomponents * 1.5 + 1; /* golden rule + 1 */
     new_comp_names = REALLOC_N(obj->comp_names, char *, new_maxcomps);
-    new_pdb_names = REALLOC_N(obj->pdb_names, char *, new_maxcomps);
-
-    if (!new_comp_names || !new_pdb_names)
+    if (!new_comp_names)
     {
+        db_perror(0, E_NOMEM, "db_IncObjectComponentCount");
+        return 0;
+    }
+    new_pdb_names = REALLOC_N(obj->pdb_names, char *, new_maxcomps);
+    if (!new_pdb_names)
+    {
+        FREE(new_comp_names);
         db_perror(0, E_NOMEM, "db_IncObjectComponentCount");
         return 0;
     }
@@ -3283,12 +3263,18 @@ DBMakeObject(const char *name, int type, int maxcomps)
         object->comp_names = ALLOC_N(char *, maxcomps);
         object->pdb_names = ALLOC_N(char *, maxcomps);
 
+        if (!object->name || !object->type ||
+            !object->comp_names || !object->pdb_names)
+        {
+            FREE(object->name);
+            FREE(object->type);
+            FREE(object->comp_names);
+            FREE(object->pdb_names);
+            API_ERROR(NULL, E_NOMEM);
+        }
+
         object->ncomponents = 0;
         object->maxcomponents = maxcomps;
-
-        if (!object->name || !object->type || !object->comp_names ||
-            !object->pdb_names)
-            API_ERROR(NULL, E_NOMEM);
 
         API_RETURN(object);
     }
@@ -4826,12 +4812,16 @@ DBMakeOptlist(int maxopts)
     API_BEGIN("DBMakeOptlist", DBoptlist *, NULL) {
         if (maxopts <= 0)
             API_ERROR("maxopts", E_BADARGS);
-        if (NULL == (optlist = ALLOC(DBoptlist)))
-            API_ERROR(NULL, E_NOMEM);
-        if (NULL == (optlist->options = ALLOC_N(int, maxopts))) {
-            API_ERROR(NULL, E_NOMEM);
-        }
-        if (NULL == (optlist->values = ALLOC_N(void *, maxopts))) {
+        optlist = ALLOC(DBoptlist);
+        if (!optlist) API_ERROR(NULL, E_NOMEM);
+        optlist->options = ALLOC_N(int, maxopts);
+        optlist->values = ALLOC_N(void *, maxopts);
+
+        if (!optlist->options || !optlist->values)
+        {
+            FREE(optlist->values);
+            FREE(optlist->options);
+            FREE(optlist);
             API_ERROR(NULL, E_NOMEM);
         }
 
@@ -4963,12 +4953,16 @@ DBAddOption(DBoptlist *optlist, int option, void *value)
 
         if (optlist->numopts >= optlist->maxopts)
         {
-            int new_maxopts = optlist->maxopts * 1.618 + 1; /* golden rule + 1 */
+            int new_maxopts = optlist->maxopts * 1.5 + 1; /* golden rule + 1 */
             int *new_options = REALLOC_N(optlist->options, int, new_maxopts);
             void **new_values = REALLOC_N(optlist->values, void*, new_maxopts);
 
             if (!new_options || !new_values)
+            {
+                FREE(new_options);
+                FREE(new_values);
                 API_ERROR(0, E_NOMEM);
+            }
 
             optlist->maxopts = new_maxopts;
             optlist->options = new_options;
@@ -10891,6 +10885,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _csgm._missing_value = DEREF(double, optlist->values[i]);
                         break;
 
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _csgm._alt_nodenum_vars = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11075,6 +11073,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _pm._ghost_node_labels = (char *)optlist->values[i];
                         break;
 
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _pm._alt_nodenum_vars = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11225,6 +11227,14 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_GHOST_ZONE_LABELS:
                         _qm._ghost_zone_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _qm._alt_nodenum_vars = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _qm._alt_zonenum_vars = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -11382,6 +11392,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _um._ghost_node_labels = (char *)optlist->values[i];
                         break;
 
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _um._alt_nodenum_vars = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11404,6 +11418,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_GHOST_ZONE_LABELS:
                         _uzl._ghost_zone_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _uzl._alt_zonenum_vars = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -11430,6 +11448,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _phzl._ghost_zone_labels = (char *)optlist->values[i];
                         break;
 
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _phzl._ghost_zone_labels = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11448,6 +11470,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_ZONENAMES:
                         _csgzl._zonenames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _csgzl._alt_zonenum_vars = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -11645,6 +11671,14 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_MISSING_VALUE:
                         _mm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _mm._alt_nodenum_vars = (char**) optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _mm._alt_zonenum_vars = (char**) optlist->values[i];
                         break;
 
                     default:
@@ -11954,6 +11988,7 @@ db_SplitShapelist (DBucdmesh *um)
     {
         splits[0] = max_index + 1;
         splits[1] = nzones;
+        splits[2] = 0;
     }
 
     isplit = 0;
@@ -12477,7 +12512,7 @@ PUBLIC char **
 DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
     int skipSemicolonAtIndexZero)
 {
-    int i, l, n, add1 = 0, strLen;
+    int i, l, n, add1 = 0;
     char **retval;
     int *colonAt = 0;
     int needToSlashSwap = 0;
@@ -12494,7 +12529,6 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
                 n++;
             i++;
         }
-        strLen = i;
     }
     else
     {
@@ -12994,11 +13028,11 @@ char *db_join_path ( const char *a,
                   if (ok)
                      tmp = db_unsplit_path(t);
                }
-               t = db_cleanup_path(t);
+               db_cleanup_path(t);
             }
-            Pb = db_cleanup_path(Pb);
+            db_cleanup_path(Pb);
          }
-         Pa = db_cleanup_path(Pa);
+         db_cleanup_path(Pa);
       }
    }
    if (tmp != 0)
@@ -13144,7 +13178,7 @@ tryAgain:c = p->firstComponent;
         +-------------------------------------*/
 
          result = db_unsplit_path(p);
-         p      = db_cleanup_path(p);
+         db_cleanup_path(p);
       }
    }
    return result;
@@ -13512,13 +13546,19 @@ DBMakeMrgtree(int source_mesh_type, int type_info_bits,
             API_ERROR("type_info_bits", E_BADARGS);
         if (max_root_descendents <= 0)
             API_ERROR("max_root_descendents", E_BADARGS);
-        if (NULL == (tree = ALLOC(DBmrgtree)))
-            API_ERROR(NULL, E_NOMEM);
+        tree = ALLOC(DBmrgtree);
+        if (!tree) API_ERROR(NULL, E_NOMEM);
         memset(tree, 0, sizeof(DBmrgtree));
-        if (NULL == (root = ALLOC(DBmrgtnode)))
+        root = ALLOC(DBmrgtnode);
+        if (!root) {
+            FREE(tree);
             API_ERROR(NULL, E_NOMEM);
+        }
         memset(root, 0, sizeof(DBmrgtnode));
-        if (NULL == (root->children = ALLOC_N(DBmrgtnode*, max_root_descendents))) {
+        root->children = ALLOC_N(DBmrgtnode*, max_root_descendents);
+        if (!root->children) {
+            FREE(root);
+            FREE(tree);
             API_ERROR(NULL, E_NOMEM);
         }
 
@@ -13576,13 +13616,6 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
         if (tree->cwr->num_children >= tree->cwr->max_children) {
             API_ERROR("exceeded max_descendents", E_BADARGS);
         }
-        if (NULL == (tnode = ALLOC(DBmrgtnode)))
-            API_ERROR(NULL, E_NOMEM);
-        memset(tnode, 0, sizeof(DBmrgtnode));
-        if (NULL == (tnode->children = ALLOC_N(DBmrgtnode*, max_descendents)) &&
-            max_descendents) {
-            API_ERROR(NULL, E_NOMEM);
-        }
         if (nsegs > 0)
         {
             if (seg_ids == 0)
@@ -13591,6 +13624,14 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
                 API_ERROR("seg_lens", E_BADARGS);
             if (seg_types == 0)
                 API_ERROR("seg_types", E_BADARGS);
+        }
+        if (NULL == (tnode = ALLOC(DBmrgtnode)))
+            API_ERROR(NULL, E_NOMEM);
+        memset(tnode, 0, sizeof(DBmrgtnode));
+        if (NULL == (tnode->children = ALLOC_N(DBmrgtnode*, max_descendents)) &&
+            max_descendents) {
+            FREE(tnode);
+            API_ERROR(NULL, E_NOMEM);
         }
 
         /* update internal node info */
@@ -13610,13 +13651,19 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
         {
             int i;
 
-            if (NULL == (tnode->seg_ids = ALLOC_N(int, nsegs))) {
-                API_ERROR(NULL, E_NOMEM);
-            }
-            if (NULL == (tnode->seg_lens = ALLOC_N(int, nsegs))) {
-                API_ERROR(NULL, E_NOMEM);
-            }
-            if (NULL == (tnode->seg_types = ALLOC_N(int, nsegs))) {
+            tnode->seg_ids = ALLOC_N(int, nsegs);
+            tnode->seg_lens = ALLOC_N(int, nsegs);
+            tnode->seg_types = ALLOC_N(int, nsegs);
+ 
+            if (!tnode->seg_ids || !tnode->seg_lens || !tnode->seg_types)
+            {
+                FREE(tnode->seg_types);
+                FREE(tnode->seg_lens);
+                FREE(tnode->seg_ids);
+                FREE(tnode->maps_name);
+                FREE(tnode->name);
+                FREE(tnode->children);
+                FREE(tnode);
                 API_ERROR(NULL, E_NOMEM);
             }
 
@@ -13687,6 +13734,7 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
         if (strchr(regn_names[0], '%') != 0)
         {
             if (NULL == (tnode->names = ALLOC_N(char*, 1))) {
+                FREE(tnode);
                 API_ERROR(NULL, E_NOMEM);
             }
             tnode->names[0] = STRDUP(regn_names[0]);
@@ -13694,6 +13742,7 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
         else
         {
             if (NULL == (tnode->names = ALLOC_N(char*, nregns))) {
+                FREE(tnode);
                 API_ERROR(NULL, E_NOMEM);
             }
             for (i = 0; i < nregns; i++)
@@ -13707,14 +13756,23 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
         tnode->nsegs = nsegs;
         if (nsegs > 0)
         {
+            tnode->seg_ids = ALLOC_N(int, nsegs*nregns);
+            tnode->seg_lens = ALLOC_N(int, nsegs*nregns);
+            tnode->seg_types = ALLOC_N(int, nsegs*nregns);
 
-            if (NULL == (tnode->seg_ids = ALLOC_N(int, nsegs*nregns))) {
-                API_ERROR(NULL, E_NOMEM);
-            }
-            if (NULL == (tnode->seg_lens = ALLOC_N(int, nsegs*nregns))) {
-                API_ERROR(NULL, E_NOMEM);
-            }
-            if (NULL == (tnode->seg_types = ALLOC_N(int, nsegs*nregns))) {
+            if (!tnode->seg_ids || !tnode->seg_lens || !tnode->seg_types) {
+                FREE(tnode->seg_types);
+                FREE(tnode->seg_lens);
+                FREE(tnode->seg_ids);
+                if (strchr(regn_names[0], '%') != 0) {
+                    FREE(tnode->names[0]);
+                    FREE(tnode->names);
+                } else {
+                    for (i = 0; i < nregns; i++)
+                        FREE(tnode->names[i]);
+                    FREE(tnode->names);
+                }
+                FREE(tnode);
                 API_ERROR(NULL, E_NOMEM);
             }
 

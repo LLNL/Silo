@@ -1446,6 +1446,7 @@ V_list (int argc, obj_t argv[])
             if (DBSetDir(file, cwd)<0) return NIL;
             if (!toc || 0==nentries) {
                 out_errorn("ls: no table of contents");
+                free(selected);
                 goto error;
             }
             out_info("Listing file: %s, directory: %s:",

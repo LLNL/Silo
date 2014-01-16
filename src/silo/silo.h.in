@@ -836,6 +836,7 @@ typedef struct DBpointmesh_ {
     char          *mrgtree_name; /* optional name of assoc. mrgtree object */
     int            gnznodtype;  /* datatype for global node/zone ids */
     char          *ghost_node_labels;
+    char         **alt_nodenum_vars; 
 } DBpointmesh;
 
 /*----------------------------------------------------------------------------
@@ -871,6 +872,8 @@ typedef struct DBmultimesh_ {
     int           *empty_list;  /* list of empty block #'s (option for namescheme) */
     int            empty_cnt;   /* size of empty list */
     int            repr_block_idx; /* index of a 'representative' block */
+    char         **alt_nodenum_vars; 
+    char         **alt_zonenum_vars; 
 } DBmultimesh;
 
 /*----------------------------------------------------------------------------
@@ -1016,6 +1019,7 @@ typedef struct DBzonelist_ {
     void          *gzoneno;     /* [nzones] global zone number of each zone */
     int            gnznodtype;  /* datatype for global node/zone ids */
     char          *ghost_zone_labels;
+    char         **alt_zonenum_vars; 
 } DBzonelist;
 
 typedef struct DBphzonelist_ {
@@ -1037,6 +1041,7 @@ typedef struct DBphzonelist_ {
     void          *gzoneno;     /* [nzones] global zone number of each zone */
     int            gnznodtype;  /* datatype for global node/zone ids */
     char          *ghost_zone_labels;
+    char         **alt_zonenum_vars; 
 } DBphzonelist;
 
 typedef struct DBfacelist_ {
@@ -1120,6 +1125,8 @@ typedef struct DBquadmesh_ {
     char          *mrgtree_name; /* optional name of assoc. mrgtree object */
     char          *ghost_node_labels;
     char          *ghost_zone_labels;
+    char         **alt_nodenum_vars; 
+    char         **alt_zonenum_vars; 
 } DBquadmesh;
 
 typedef struct DBucdmesh_ {
@@ -1170,6 +1177,7 @@ typedef struct DBucdmesh_ {
     int            disjoint_mode;
     int            gnznodtype;  /* datatype for global node/zone ids */
     char          *ghost_node_labels;
+    char         **alt_nodenum_vars; 
 } DBucdmesh;
 
 /*----------------------------------------------------------------------------
@@ -1417,6 +1425,7 @@ typedef struct DBcsgzonelist_ {
 /*--------- Optional zone attributes ---------*/
     char         **regnames;   /* [nregs] names of each region */
     char         **zonenames;  /* [nzones] names of each zone */
+    char         **alt_zonenum_vars; 
 } DBcsgzonelist;
 
 typedef struct DBcsgmesh_ {
@@ -1455,6 +1464,7 @@ typedef struct DBcsgmesh_ {
     char          *mrgtree_name; /* optional name of assoc. mrgtree object */
     int            tv_connectivity;
     int            disjoint_mode;
+    char         **alt_nodenum_vars; 
 } DBcsgmesh;
 
 typedef struct DBcsgvar_ {

@@ -2226,13 +2226,13 @@ db_pdb_Create (char *name, int mode, int target, int opts_set_id, char *finfo)
     if (NULL == (dbfile->pdb = lite_PD_open(name, "w")))
     {
         FREE(dbfile->pub.name);
+        FREE(dbfile);
         db_perror(name, E_NOFILE, me);
         return NULL;
     }
 #ifdef USING_PDB_PROPER
     PD_set_track_pointers(dbfile->pdb, FALSE);
 #endif
-    lite_PD_mkdir(dbfile->pdb, "/");
     DBNewToc((DBfile *) dbfile);
     if (finfo)
     {
@@ -11527,14 +11527,18 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
     tot_children = 0;
     for (i = 0; i < num_nodes; i++)
         tot_children += ltree[i]->num_children;
-    count = tot_children;
-    intArray = (int *) malloc(tot_children * sizeof(int));
-    n = 0;
-    for (i = 0; i < num_nodes; i++)
-        for (j = 0; j < ltree[i]->num_children; j++)
-            intArray[n++] = ltree[i]->children[j]->walk_order;
-    DBWriteComponent(dbfile, obj, "children", name, "integer", intArray, 1, &count);
-    FREE(intArray);
+    if (tot_children)
+    {
+        count = tot_children;
+        intArray = (int *) malloc(tot_children * sizeof(int));
+        n = 0;
+        for (i = 0; i < num_nodes; i++)
+            for (j = 0; j < ltree[i]->num_children; j++)
+                intArray[n++] = ltree[i]->children[j]->walk_order;
+        DBWriteComponent(dbfile, obj, "children", name, "integer", intArray, 1, &count);
+        FREE(intArray);
+    }
+
     FREE(ltree);
 
     if (_mrgt._mrgvar_onames)
@@ -11623,15 +11627,18 @@ db_pdb_PutGroupelmap(DBfile *dbfile, char const *name,
    tot_len = 0;
    for (i = 0; i < num_segments; i++)
        tot_len += segment_lengths[i];
-   intArray = (int *) malloc(tot_len * sizeof(int));
-   tot_len = 0;
-   for (i = 0; i < num_segments; i++)
-       for (j = 0; j < segment_lengths[i]; j++)
-           intArray[tot_len++] = segment_data[i][j];
-   count = tot_len;
-   DBWriteComponent(dbfile, obj, "segment_data", name, "integer",
-                    intArray, 1, &count);
-   FREE(intArray);
+   if (tot_len)
+   {
+       intArray = (int *) malloc(tot_len * sizeof(int));
+       tot_len = 0;
+       for (i = 0; i < num_segments; i++)
+           for (j = 0; j < segment_lengths[i]; j++)
+               intArray[tot_len++] = segment_data[i][j];
+       count = tot_len;
+       DBWriteComponent(dbfile, obj, "segment_data", name, "integer",
+                        intArray, 1, &count);
+       FREE(intArray);
+   }
 
    /* write out fractional data if we have it */
    if (segment_fracs)
@@ -11654,35 +11661,38 @@ db_pdb_PutGroupelmap(DBfile *dbfile, char const *name,
        FREE(intArray);
 
        /* build and write out fractional data array */
-       fracsArray = (void *) malloc(tot_len * ((fracs_data_type==DB_FLOAT)?sizeof(float):sizeof(double)));
-       tot_len = 0;
-       for (i = 0; i < num_segments; i++)
+       if (tot_len)
        {
-           if (segment_fracs[i] == 0)
-               continue;
-
-           for (j = 0; j < segment_lengths[i]; j++)
+           fracsArray = (void *) malloc(tot_len * ((fracs_data_type==DB_FLOAT)?sizeof(float):sizeof(double)));
+           tot_len = 0;
+           for (i = 0; i < num_segments; i++)
            {
-               if (fracs_data_type == DB_FLOAT)
+               if (segment_fracs[i] == 0)
+                   continue;
+
+               for (j = 0; j < segment_lengths[i]; j++)
                {
-                   float *pfa = (float *) fracsArray;
-                   float *psf = (float *) segment_fracs[i];
-                   pfa[tot_len++] = psf[j];
-               }
-               else
-               {
-                   double *pfa = (double *) fracsArray;
-                   double *psf = (double *) segment_fracs[i];
-                   pfa[tot_len++] = psf[j];
+                   if (fracs_data_type == DB_FLOAT)
+                   {
+                       float *pfa = (float *) fracsArray;
+                       float *psf = (float *) segment_fracs[i];
+                       pfa[tot_len++] = psf[j];
+                   }
+                   else
+                   {
+                       double *pfa = (double *) fracsArray;
+                       double *psf = (double *) segment_fracs[i];
+                       pfa[tot_len++] = psf[j];
+                   }
                }
            }
+           count = tot_len;
+           datatype_str = db_GetDatatypeString(fracs_data_type);
+           DBWriteComponent(dbfile, obj, "segment_fracs", name, datatype_str, 
+                            fracsArray, 1, &count);
+           FREE(fracsArray);
+           FREE(datatype_str);
        }
-       count = tot_len;
-       datatype_str = db_GetDatatypeString(fracs_data_type);
-       DBWriteComponent(dbfile, obj, "segment_fracs", name, datatype_str, 
-                        fracsArray, 1, &count);
-       FREE(fracsArray);
-       FREE(datatype_str);
    }
 
    /*-------------------------------------------------------------

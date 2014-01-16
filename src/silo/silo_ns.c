@@ -325,8 +325,8 @@ EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
             case '+': return vl + vr;
             case '-': return vl - vr;
             case '*': return vl * vr;
-            case '/': return vl / vr;
-            case '%': return vl % vr;
+            case '/': return (vr != 0 ? vl / vr : 1);
+            case '%': return (vr != 0 ? vl % vr : 1);
             case '|': return vl | vr;
             case '&': return vl & vr;
             case '^': return vl ^ vr;

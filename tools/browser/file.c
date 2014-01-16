@@ -2688,6 +2688,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
                         browser_DBFreeSubarray(r_mem, type);
                         r_mem = NULL;
                         type = obj_dest(type);
+                        DBFreeCompoundarray(ca);
                         goto error;
                     } else {
                         r_mem = browser_DBGetSubarray(ca, j, &type);
@@ -2699,6 +2700,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             }
             if (r_mem) goto done;
             toc = DBGetToc(file); /*insure pointer is valid*/
+            DBFreeCompoundarray(ca);
         }
     }
 

@@ -488,6 +488,7 @@ struct _pm {
     int            _extensive;
     double         _missing_value;
     char          *_ghost_node_labels;
+    char         **_alt_nodenum_vars;
 
     /*These used only by NetCDF driver */
     int            _dim_ndims;
@@ -545,6 +546,8 @@ struct _qm {
     double         _missing_value;
     char          *_ghost_node_labels;
     char          *_ghost_zone_labels;
+    char         **_alt_nodenum_vars;
+    char         **_alt_zonenum_vars;
 
     /* These are probably only used by the pdb driver */
     char           _nm_dims[64];
@@ -628,6 +631,7 @@ struct _um {
     int            _extensive;
     double         _missing_value;
     char          *_ghost_node_labels;
+    char         **_alt_nodenum_vars;
 };
 
 /*
@@ -667,6 +671,7 @@ struct _csgm {
     int            _conserved;
     int            _extensive;
     double         _missing_value;
+    char         **_alt_nodenum_vars;
 };
 
 /*
@@ -676,6 +681,7 @@ struct _uzl {
     int           *_gzoneno;
     int            _llong_gzoneno;
     char          *_ghost_zone_labels;
+    char         **_alt_zonenum_vars;
 };
 
 /*
@@ -685,6 +691,7 @@ struct _phzl {
     int           *_gzoneno;
     int            _llong_gzoneno;
     char          *_ghost_zone_labels;
+    char         **_alt_zonenum_vars;
 };
 
 /*
@@ -693,6 +700,7 @@ struct _phzl {
 struct _csgzl {
     char         **_regnames;
     char         **_zonenames;
+    char         **_alt_zonenum_vars;
 };
 
 /*
@@ -747,6 +755,8 @@ struct _mm {
     int            _empty_cnt;
     int            _repr_block_idx;
     double         _missing_value;
+    char         **_alt_zonenum_vars;
+    char         **_alt_nodenum_vars;
 };
 
 /*

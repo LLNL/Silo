@@ -851,6 +851,8 @@ _lite_SC_pr_tok (char *s, char *delim) {
 
    int i, j;
         
+   if (!s) return NULL;
+
    i = strcspn(s, delim);
    j = strlen(s);
    if ((i == 0) && (i != j)) {
@@ -898,7 +900,6 @@ lite_SC_lasttok (char *s, char *delim) {
 
    r    = lite_SC_strrev(s);
    temp = _lite_SC_pr_tok(r, delim);
-   s    = lite_SC_strrev(r);
 
    return lite_SC_strrev (temp);
 }
