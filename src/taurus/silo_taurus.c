@@ -118,7 +118,7 @@ db_taur_InitCallbacks (DBfile *dbfile)
     dbfile->pub.r_var = db_taur_ReadVar;
     dbfile->pub.newtoc = db_taur_NewToc;
     dbfile->pub.module = db_taur_Filters;
-    dbfile->pub.inqvartype = (DBObjectType(*)(struct DBfile *, char*)) db_taur_InqVartype;
+    dbfile->pub.inqvartype = db_taur_InqVartype;
 }
 
 /*-------------------------------------------------------------------------
@@ -580,7 +580,7 @@ db_taur_NewToc(DBfile *_dbfile)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK void *
-db_taur_GetComponent(DBfile *_dbfile, char *obj_name, char *comp_name)
+db_taur_GetComponent(DBfile *_dbfile, char const *obj_name, char const *comp_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -1514,7 +1514,7 @@ db_taur_InqMeshname(DBfile *_dbfile, char *var_name, char *mesh_name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_taur_InqMeshtype(DBfile *_dbfile, char *mesh_name)
+db_taur_InqMeshtype(DBfile *_dbfile, char const *mesh_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -1596,8 +1596,8 @@ db_taur_InqMeshtype(DBfile *_dbfile, char *mesh_name)
  *
  *-------------------------------------------------------------------------
  */
-SILO_CALLBACK int
-db_taur_InqVartype(DBfile *_dbfile, char *varname)
+SILO_CALLBACK DBObjectType 
+db_taur_InqVartype(DBfile *_dbfile, char const *varname)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -1610,7 +1610,7 @@ db_taur_InqVartype(DBfile *_dbfile, char *varname)
         char *path = 0;
         int   vartype = DB_INVALID_OBJECT;
         int   changeDir = 0;
-        char *var = varname + pos;
+        char const *var = varname + pos;
         while(*var != '/' && var != varname)
             --var;
         /* If we have a slash in the name then we have a directory and 
@@ -1664,7 +1664,7 @@ db_taur_InqVartype(DBfile *_dbfile, char *varname)
  *--------------------------------------------------------------------*/
 /* ARGSUSED */
 SILO_CALLBACK int
-db_taur_InqVarExists(DBfile *_dbfile, char *varname)
+db_taur_InqVarExists(DBfile *_dbfile, char const *varname)
 {
     if (strcmp(varname, "time") == 0) {
         return (1);

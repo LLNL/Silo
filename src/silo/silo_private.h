@@ -311,9 +311,8 @@ typedef struct context_t {
                            jstat = 1 ;                                        \
                            if (NM && jdbfile && !jdbfile->pub.pathok) {       \
                               char const *jr ;                                \
-                              jold = context_switch (jdbfile,(char const *)NM,&jr) ;\
+                              jold = context_switch (jdbfile,NM,&jr) ;        \
                               if (!jold) longjmp (SILO_Globals.Jstk->jbuf, -1) ;\
-                              NM = jr ;                                       \
                            }                                                  \
                         }
 
@@ -882,7 +881,7 @@ INTERNAL int db_GetMachDataSize (int);
 INTERNAL char *DBGetObjtypeName (int);
 INTERNAL char *db_strndup (const char *, int);
 INTERNAL char *db_GetDatatypeString (int);
-INTERNAL int db_GetDatatypeID (char *);
+INTERNAL int db_GetDatatypeID (char const * const);
 INTERNAL int db_perror (char const *, int, char const *);
 INTERNAL void _DBQQCalcStride (int *, int *, int, int);
 INTERNAL void _DBQMSetStride (DBquadmesh *);
@@ -904,7 +903,7 @@ INTERNAL int _DBSubsetMinMax2 (DB_DTPTR1, int, float *, float *, int,
                                    int, int, int, int);
 INTERNAL int _DBSubsetMinMax3 (float *, int, float *, float *, int, int,
                                int, int, int, int, int, int);
-INTERNAL int db_ProcessOptlist (int, const DBoptlist *const);
+INTERNAL int db_ProcessOptlist (int, DBoptlist const * const);
 INTERNAL int db_VariableNameValid(char *);
 INTERNAL int db_SplitShapelist (DBucdmesh *um);
 INTERNAL int db_ResetGlobalData_Csgmesh ();

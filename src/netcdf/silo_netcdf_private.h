@@ -75,7 +75,7 @@ typedef struct DBfile_cdf {
 } DBfile_cdf;
 
 typedef struct {
-    char          *name[80];    /* Component name */
+    char const    *name[80];    /* Component name */
     void          *ptr[80];     /* Address of component value */
     int            type[80];    /* Datatype of component */
     unsigned char  alloced[80]; /* Sentinel: 1 == space already alloc'd */
@@ -150,7 +150,7 @@ SILO_CALLBACK int db_cdf_GetVarLength(DBfile *, char *);
 SILO_CALLBACK int db_cdf_GetVarType(DBfile *, char *);
 SILO_CALLBACK DBObjectType db_cdf_InqVarType(DBfile *, char const *);
 SILO_CALLBACK int db_cdf_InqMeshname(DBfile *, char *, char *);
-SILO_CALLBACK int db_cdf_InqMeshtype(DBfile *, char *);
+SILO_CALLBACK int db_cdf_InqMeshtype(DBfile *, char const *);
 SILO_CALLBACK int db_cdf_ReadAtt(DBfile *, char *, char *, void *);
 SILO_CALLBACK int db_cdf_ReadVar(DBfile *, char *, void *);
 SILO_CALLBACK int db_cdf_ReadVar1(DBfile *, char *, int, void *);
@@ -297,9 +297,9 @@ extern int silonetcdf_ncopen(char *, int);
 extern int silonetcdf_ncinqall(int, int *, int *, int *, int *, int *, int *);
 extern int silonetcdf_ncobjinq(int, int, char *, int *, int *);
 extern int silonetcdf_ncdirlist(int, int, int *, int *);
-extern int silonetcdf_ncvarid(int, char *);
+extern int silonetcdf_ncvarid(int, char const *);
 extern int silonetcdf_ncattinq(int, int, char *, int *, int *);
-extern int silonetcdf_ncobjid(int, char *);
+extern int silonetcdf_ncobjid(int, char const *);
 extern int silonetcdf_ncattget(int, int, char *, void *);
 extern int silonetcdf_ncdirget(int);
 extern int silonetcdf_ncclose(int);
@@ -325,10 +325,10 @@ extern int silo_GetDimCount(int, int);
 extern int silo_GetDirCount(int, int);
 extern int silo_GetDirId(int, int, char *);
 extern int silo_GetObjCount(int, int);
-extern int silo_GetObjId(int, int, char *);
+extern int silo_GetObjId(int, int, char const *);
 extern int silo_GetTables(int);
 extern int silo_GetVarCount(int, int);
-extern int silo_GetVarId(int, int, char *);
+extern int silo_GetVarId(int, int, char const *);
 
 /*obj.c */
 extern int SO_GetObject(int, int, SO_Object *);

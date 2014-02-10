@@ -71,10 +71,19 @@ typedef struct DBfile_debug {
 } DBfile_debug;
 
 SILO_CALLBACK int db_debug_close(DBfile *);
-SILO_CALLBACK DBcompoundarray *db_debug_GetCompoundarray(DBfile *, char *);
+SILO_CALLBACK DBcompoundarray *db_debug_GetCompoundarray(DBfile *, char const *);
 SILO_CALLBACK int db_debug_Filters(DBfile *, FILE *);
-SILO_CALLBACK int db_debug_PutCompoundarray(DBfile *, char *, char **, int *,
-                                       int, void *, int, int, DBoptlist *);
+SILO_CALLBACK int db_debug_PutCompoundarray(
+    DBfile *dbfile,
+    char const *name,
+    char const * const *elemnames,
+    int const *elemlens,
+    int nelems,
+    void const *elemvalues,
+    int nvalues,
+    int datatype,
+    DBoptlist const *
+);
 
 INTERNAL DBfile *db_debug_create(char *, int, int, int, char *);
 INTERNAL DBfile *db_debug_open(char *, int, int);

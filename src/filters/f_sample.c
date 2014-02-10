@@ -431,7 +431,7 @@ f_debug_GetUcdvar(DBfile *dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_InqMeshType(DBfile *dbfile, char *name)
+f_debug_InqMeshType(DBfile *dbfile, char const *name)
 {
     int            id, retval;
     char          *me = "f_debug_InqMeshType";

@@ -790,7 +790,7 @@ static struct {                 /*Variable we are intercepting  */
  *-------------------------------------------------------------------------
  */
 static int
-satisfied ( int id, char *name, char *deplist, int *slotno)
+satisfied ( int id, char const *name, char *deplist, int *slotno)
 {
     char          *me = "satisfied";
     DBtoc         *real_toc;
@@ -879,7 +879,7 @@ satisfied ( int id, char *name, char *deplist, int *slotno)
  *-------------------------------------------------------------------------
  */
 static int
-v_exists ( DBtoc *toc, char *name)
+v_exists ( DBtoc *toc, char const *name)
 {
     int            i;
 
@@ -2126,7 +2126,7 @@ f_ale3d_GetUcdvar(DBfile *dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_InqMeshType(DBfile *dbfile, char *name)
+f_ale3d_InqMeshType(DBfile *dbfile, char const *name)
 {
     int            id, inter;
     char          *me = "f_ale3d_InqMeshType";

@@ -388,7 +388,7 @@ silonetcdf_ncdirlist (int dbid, int dirid, int *ndirs, int *dirs)
  *
  *---------------------------------------------------------------------*/
 INTERNAL int
-silonetcdf_ncvarid (int dbid, char *name)
+silonetcdf_ncvarid (int dbid, char const *name)
 {
    int            id;
 
@@ -624,7 +624,7 @@ silonetcdf_ncattinq (int dbid, int varid, char *name, int *datatype, int *len)
  *      Return the object ID of the object with the given name.
  *---------------------------------------------------------------------*/
 INTERNAL int
-silonetcdf_ncobjid (int dbid, char *name)
+silonetcdf_ncobjid (int dbid, char const *name)
 {
    int            id;
 

@@ -493,7 +493,7 @@ obj_t cons_tail (obj_t);
 
 /*** file.c ***/
 DBfile *file_file (obj_t);
-int file_rdonly (obj_t);
+int file_writeable (obj_t);
 
 /*** func.c ***/
 extern diffopt_t DiffOpt;

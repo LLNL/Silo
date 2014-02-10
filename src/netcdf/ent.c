@@ -255,7 +255,7 @@ silo_GetDirId(int sid, int dirid, char *name)
  *
  *--------------------------------------------------------------------*/
 INTERNAL int
-silo_GetVarId (int sid, int dirid, char *name)
+silo_GetVarId (int sid, int dirid, char const *name)
 {
     int            i, relid = -1;
 
@@ -280,7 +280,7 @@ silo_GetVarId (int sid, int dirid, char *name)
  *      Return relative ID of object in given directory.
  *--------------------------------------------------------------------*/
 INTERNAL int
-silo_GetObjId(int sid, int dirid, char *name)
+silo_GetObjId(int sid, int dirid, char const *name)
 {
     int            i, relid = -1;
 

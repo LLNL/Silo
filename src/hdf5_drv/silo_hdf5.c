@@ -237,8 +237,8 @@ H5_VERS_INFO;
 /* some necessary forward declarations */
 PRIVATE int db_hdf5_fullname(DBfile_hdf5 *dbfile, char *name, char *full);
 PRIVATE int hdf2silo_type(hid_t type);
-PRIVATE int db_hdf5_WriteCKZ(DBfile *_dbfile, char *vname, void *var,
-              int *dims, int ndims, int datatype, int nofilters);
+PRIVATE int db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
+              int const *dims, int ndims, int datatype, int nofilters);
 
 /* callbacks prototypes for file image ops */
 #if HDF5_VERSION_GE(1,8,9)
@@ -2717,7 +2717,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
     /* Low-level object functions */
     dbfile->pub.g_obj = db_hdf5_GetObject;
     dbfile->pub.inqvartype = db_hdf5_InqVarType;
-    dbfile->pub.i_meshtype = (int (*)(struct DBfile *, char *)) db_hdf5_InqVarType; /*yes, Vartype*/
+    dbfile->pub.i_meshtype = (int (*)(struct DBfile *, char const *)) db_hdf5_InqVarType; /*yes, Vartype*/
     dbfile->pub.i_meshname = db_hdf5_InqMeshName;
     dbfile->pub.g_comp = db_hdf5_GetComponent;
     dbfile->pub.g_comptyp = db_hdf5_GetComponentType;
@@ -2839,7 +2839,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t
-build_fspace(hid_t dset, int ndims, int *offset, int *length, int *stride,
+build_fspace(hid_t dset, int ndims, int const *offset, int const *length, int const *stride,
              hsize_t *size/*out*/)
 {
     hid_t       fspace = -1;
@@ -6240,7 +6240,7 @@ db_hdf5_NewToc(DBfile *_dbfile)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_GetComponentType(DBfile *_dbfile, char *objname, char *compname)
+db_hdf5_GetComponentType(DBfile *_dbfile, char const *objname, char const *compname)
 {
     int datatype = DB_NOTYPE;
     db_hdf5_GetComponentStuff(_dbfile, objname, compname, &datatype);
@@ -6261,7 +6261,7 @@ db_hdf5_GetComponentType(DBfile *_dbfile, char *objname, char *compname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK void *
-db_hdf5_GetComponent(DBfile *_dbfile, char *objname, char *compname)
+db_hdf5_GetComponent(DBfile *_dbfile, char const *objname, char const *compname)
 {
     return db_hdf5_GetComponentStuff(_dbfile, objname, compname, 0);
 }
@@ -6314,7 +6314,7 @@ db_hdf5_GetComponent(DBfile *_dbfile, char *objname, char *compname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK void *
-db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname, char *compname,
+db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *compname,
     int *just_get_datatype)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
@@ -6810,7 +6810,7 @@ db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char const *compname,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_InqVarExists (DBfile *_dbfile, char *varname)
+db_hdf5_InqVarExists (DBfile *_dbfile, char const *varname)
 {
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile;
    herr_t       status;
@@ -7332,16 +7332,16 @@ db_hdf5_ReadVarSlice(DBfile *_dbfile, char *vname, int *offset, int *length,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_Write(DBfile *_dbfile, char *vname, void *var,
-              int *dims, int ndims, int datatype)
+db_hdf5_Write(DBfile *_dbfile, char const *vname, void const *var,
+              int const *dims, int ndims, int datatype)
 {
     const int nofilters = 0;
     return db_hdf5_WriteCKZ(_dbfile, vname, var, dims, ndims, datatype, nofilters);
 }
 
 PRIVATE int
-db_hdf5_WriteCKZ(DBfile *_dbfile, char *vname, void *var,
-              int *dims, int ndims, int datatype, int nofilters)
+db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
+              int const *dims, int ndims, int datatype, int nofilters)
 {
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile;
    static char  *me = "db_hdf5_Write";
@@ -7374,7 +7374,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char *vname, void *var,
            }
            H5Sget_simple_extent_dims(space, ds_size, NULL);
            for (i=0; i<ndims; i++) {
-               if (ds_size[i]!=(hsize_t)dims[i]) {
+               if (ds_size[i]<(hsize_t)dims[i]) {
                    db_perror("dims", E_BADARGS, me);
                    UNWIND();
                }
@@ -7466,9 +7466,17 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char *vname, void *var,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_WriteSlice(DBfile *_dbfile, char *vname, void *values, int dtype,
-                   int offset[], int length[], int stride[], int dims[],
-                   int ndims)
+db_hdf5_WriteSlice(
+    DBfile *_dbfile,
+    char const *vname,
+    void const *values,
+    int dtype,
+    int const *offset,
+    int const *length,
+    int const *stride,
+    int const *dims,
+    int ndims
+)
 {
    DBfile_hdf5  *dbfile = (DBfile_hdf5*)_dbfile ;
    static char  *me = "db_hdf5_WriteSlice" ;
@@ -7598,7 +7606,7 @@ db_hdf5_WriteSlice(DBfile *_dbfile, char *vname, void *values, int dtype,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBobject *
-db_hdf5_GetObject(DBfile *_dbfile, char *name)
+db_hdf5_GetObject(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_GetObject";
@@ -7772,8 +7780,8 @@ db_hdf5_GetObject(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
-                 int dtype, int npts, DBoptlist *opts)
+db_hdf5_PutCurve(DBfile *_dbfile, char const *name, void const *xvals, void const *yvals,
+                 int dtype, int npts, DBoptlist const *opts)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_PutCurve";
@@ -7868,7 +7876,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals, void *yvals,
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBcurve *
-db_hdf5_GetCurve(DBfile *_dbfile, char *name)
+db_hdf5_GetCurve(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetCurve";
@@ -8243,7 +8251,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
         /* output mrgtree info if we have it */
         if (_csgm._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList(_csgm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_csgm._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(vname, "_region_pnames", 0));
             FREE(s);
@@ -8465,7 +8473,7 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, char const *name, int nregs,
 
         if (_csgzl._regnames) {
             int len; char *tmp;
-            DBStringArrayToStringList(_csgzl._regnames, nregs, &tmp, &len);
+            DBStringArrayToStringList((char const * const *)_csgzl._regnames, nregs, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.regnames/*out*/, friendly_name(name, "_regnames",0));
             FREE(tmp);
@@ -8473,7 +8481,7 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, char const *name, int nregs,
 
         if (_csgzl._zonenames) {
             int len; char *tmp;
-            DBStringArrayToStringList(_csgzl._zonenames, nzones, &tmp, &len);
+            DBStringArrayToStringList((char const * const *)_csgzl._zonenames, nzones, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.zonenames/*out*/, friendly_name(name, "_zonenames",0));
             FREE(tmp);
@@ -8634,9 +8642,15 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutDefvars(DBfile *_dbfile, char const *name, int ndefs,
-                   char *names[], int const *types,
-                   char *defns[], DBoptlist *opts[])
+db_hdf5_PutDefvars(
+    DBfile *_dbfile,
+    char const *name,
+    int ndefs,
+    char const * const *names,
+    int const *types,
+    char const * const *defns,
+    DBoptlist const * const *opts
+)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_PutDefvars";
@@ -8669,7 +8683,7 @@ db_hdf5_PutDefvars(DBfile *_dbfile, char const *name, int ndefs,
     memset(&m, 0, sizeof m);
     PROTECT {
 
-        DBStringArrayToStringList(names, ndefs, &s, &len);
+        DBStringArrayToStringList((char const * const *)names, ndefs, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.names/*out*/,
             friendly_name(name, "_names",0));
         FREE(s);
@@ -8677,7 +8691,7 @@ db_hdf5_PutDefvars(DBfile *_dbfile, char const *name, int ndefs,
         db_hdf5_compwr(dbfile, DB_INT, 1, &ndefs, (void*)types, m.types/*out*/,
             friendly_name(name, "_types",0));
 
-        DBStringArrayToStringList(defns, ndefs, &s, &len);
+        DBStringArrayToStringList((char const * const *)defns, ndefs, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.defns/*out*/,
             friendly_name(name, "_defns",0));
         FREE(s);
@@ -9380,7 +9394,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* output mrgtree info if we have it */
         if (_qm._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList(_qm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_qm._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -10289,7 +10303,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* output mrgtree info if we have it */
         if (_um._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList(_um._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_um._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -11325,7 +11339,7 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
 
         if (_ma._matnames != NULL) {
             int len;
-            DBStringArrayToStringList(_ma._matnames, nmat, &s, &len);
+            DBStringArrayToStringList((char const * const *)_ma._matnames, nmat, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
                 friendly_name(name, "_matnames", 0));
             FREE(s);
@@ -11334,7 +11348,7 @@ db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname, int nmat,
 
         if (_ma._matcolors != NULL) {
             int len;
-            DBStringArrayToStringList(_ma._matcolors, nmat, &s, &len);
+            DBStringArrayToStringList((char const * const *)_ma._matcolors, nmat, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matcolors/*out*/,
                 friendly_name(name,"_matcolors", 0));
             FREE(s);
@@ -11569,7 +11583,7 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
             int len;
             for (i = 0; i < nmat; i++)
                 nstrs += nmatspec[i];
-            DBStringArrayToStringList(_ms._specnames, nstrs, &s, &len);
+            DBStringArrayToStringList((char const * const *)_ms._specnames, nstrs, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
                 friendly_name(name, "_species_names", 0));
             FREE(s);
@@ -11583,7 +11597,7 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname, int nmat,
                 for (i = 0; i < nmat; i++)
                     nstrs += nmatspec[i];
             }
-            DBStringArrayToStringList(_ms._speccolors, nstrs, &s, &len);
+            DBStringArrayToStringList((char const * const *)_ms._speccolors, nstrs, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.speccolors/*out*/,
                 friendly_name(name,"_speccolors", 0));
             FREE(s);
@@ -11853,7 +11867,7 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char const *name, int nmesh,
                 m.groupings/*out*/, friendly_name(name,"_groupings",0));
         }
         if (_mm._lgroupings > 0 && _mm._groupnames != NULL) {
-           DBStringArrayToStringList(_mm._groupnames, 
+           DBStringArrayToStringList((char const * const *)_mm._groupnames, 
                            _mm._lgroupings, &t, &len);
            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, t,
                 m.groupnames/*out*/, friendly_name(name,"_groupnames",0));
@@ -12098,9 +12112,9 @@ SILO_CALLBACK int
 db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
                   int const *meshtypes, int const *nneighbors,
                   int const *neighbors, int const *back,
-                  int const *lnodelists, int *nodelists[],
-                  int const *lzonelists, int *zonelists[],
-                  DBoptlist *optlist)
+                  int const *lnodelists, int const * const *nodelists,
+                  int const *lzonelists, int const * const *zonelists,
+                  DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBmultimeshadj_mt   m;
@@ -12706,7 +12720,7 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars, char *varnames[],
         /* output mrgtree info if we have it */
         if (_mm._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList(_mm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_mm._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -13005,7 +13019,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         }
         if (_mm._matcolors && _mm._nmatnos > 0) {
             int len; char *tmp;
-            DBStringArrayToStringList(_mm._matcolors,
+            DBStringArrayToStringList((char const * const *)_mm._matcolors,
                 _mm._nmatnos, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.mat_colors/*out*/, friendly_name(name,"_matcolors", 0));
@@ -13013,7 +13027,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats, char *matnames[],
         }
         if (_mm._matnames && _mm._nmatnos > 0) {
             int len; char *tmp;
-            DBStringArrayToStringList(_mm._matnames,
+            DBStringArrayToStringList((char const * const *)_mm._matnames,
                 _mm._nmatnos, &tmp, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.material_names/*out*/, friendly_name(name,"_material_names", 0));
@@ -13293,7 +13307,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
                 int len; char *tmp;
                 for (i=0; i < _mm._nmat; i++)
                     nstrs += _mm._nmatspec[i];
-                DBStringArrayToStringList(_mm._specnames, nstrs, &tmp, &len);
+                DBStringArrayToStringList((char const * const *)_mm._specnames, nstrs, &tmp, &len);
                 db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                     m.species_names/*out*/, friendly_name(name,"_species_names", 0));
                 FREE(tmp);
@@ -13306,7 +13320,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
                     for (i=0; i < _mm._nmat; i++)
                         nstrs += _mm._nmatspec[i];
                 }
-                DBStringArrayToStringList(_mm._speccolors, nstrs, &tmp, &len);
+                DBStringArrayToStringList((char const * const *)_mm._speccolors, nstrs, &tmp, &len);
                 db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                     m.speccolors/*out*/, friendly_name(name,"_speccolors", 0));
                 FREE(tmp);
@@ -13841,7 +13855,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname, int nvars,
         /* output mrgtree info if we have it */
         if (_pm._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList(_pm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_pm._region_pnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -14030,9 +14044,17 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char *name)
  */
 /*ARGSUSED*/
 SILO_CALLBACK int
-db_hdf5_PutCompoundarray(DBfile *_dbfile, char *name, char *elmtnames[],
-                         int elmtlen[], int nelmts, void *values,
-                         int nvalues, int datatype, DBoptlist *optlist)
+db_hdf5_PutCompoundarray(
+    DBfile *_dbfile,
+    char const *name,
+    char const * const *elmtnames,
+    int const *elmtlen,
+    int nelmts,
+    void const *values,
+    int nvalues,
+    int datatype,
+    DBoptlist const *optlist
+)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBcompoundarray_mt  m;
@@ -14106,7 +14128,7 @@ db_hdf5_PutCompoundarray(DBfile *_dbfile, char *name, char *elmtnames[],
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBcompoundarray *
-db_hdf5_GetCompoundarray(DBfile *_dbfile, char *name)
+db_hdf5_GetCompoundarray(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_GetCompoundarray";
@@ -14206,7 +14228,7 @@ db_hdf5_GetCompoundarray(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBObjectType
-db_hdf5_InqVarType(DBfile *_dbfile, char *name)
+db_hdf5_InqVarType(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_InqVarType";
@@ -14390,7 +14412,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
         
         /* output all the node names as one long dataset */
         s = 0;
-        DBStringArrayToStringList(strArray, num_nodes, &s, &len);
+        DBStringArrayToStringList((char const * const *)strArray, num_nodes, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_name/*out*/,
             friendly_name(name, "_name", 0));
         FREE(s);
@@ -14432,7 +14454,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
         if (n > 0)
         {
             s = 0;
-            DBStringArrayToStringList(strArray, n, &s, &len);
+            DBStringArrayToStringList((char const * const *)strArray, n, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_names/*out*/,
                 friendly_name(name, "_names", 0));
             FREE(s);
@@ -14445,7 +14467,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
             strArray[i] = ltree[i]->maps_name;
         s = 0;
         len = 0;
-        DBStringArrayToStringList(strArray, num_nodes, &s, &len);
+        DBStringArrayToStringList((char const * const *)strArray, num_nodes, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_maps_name/*out*/,
             friendly_name(name, "_maps_name", 0));
         FREE(s);
@@ -14510,7 +14532,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
         {
             s = 0;
             len = 0;
-            DBStringArrayToStringList(_mrgt._mrgvar_onames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_mrgt._mrgvar_onames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.mrgvar_onames/*out*/,
                 friendly_name(name, "_mrgvar_onames", 0));
             FREE(s);
@@ -14520,7 +14542,7 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
         {
             s = 0;
             len = 0;
-            DBStringArrayToStringList(_mrgt._mrgvar_rnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_mrgt._mrgvar_rnames, -1, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.mrgvar_rnames/*out*/,
                 friendly_name(name, "_mrgvar_rnames", 0));
             FREE(s);
@@ -15086,7 +15108,7 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, char const *name,
         nstrs = nregns;
         if (strchr(reg_pnames[0], '%') != 0)
             nstrs = 1;
-        DBStringArrayToStringList(reg_pnames, nstrs, &s, &len);
+        DBStringArrayToStringList((char const * const *)reg_pnames, nstrs, &s, &len);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.reg_pnames/*out*/,
                 friendly_name(name, "_reg_pnames", 0));
         FREE(s);
@@ -15094,7 +15116,7 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, char const *name,
         if (compnames)
         {
             /* output compnames */
-            DBStringArrayToStringList(compnames, ncomps, &s, &len);
+            DBStringArrayToStringList((char const * const *)compnames, ncomps, &s, &len);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.compnames/*out*/,
                     friendly_name(name, "_compnames", 0));
             FREE(s);

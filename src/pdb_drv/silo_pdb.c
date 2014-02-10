@@ -88,7 +88,7 @@ be used for advertising or product endorsement purposes.
        (int)  PJ_read_as_alt()
 */
 
-static char   *pj_fixname(PDBfile *, char *);
+static char   *pj_fixname(PDBfile *, char const *);
 
 /*-------------------------------------------------------------------------
  * Function:    PJ_read
@@ -106,7 +106,7 @@ static char   *pj_fixname(PDBfile *, char *);
  *-------------------------------------------------------------------------
  */
 INTERNAL int
-PJ_read (PDBfile *file, char *name, void *var) {
+PJ_read (PDBfile *file, char const *name, void *var) {
 
    char          *newname = pj_fixname(file, name);
 
@@ -209,7 +209,7 @@ PJ_read_as_alt (PDBfile *file, char *name, char *type, void *var, long *ind) {
  *-------------------------------------------------------------------------
  */
 INTERNAL syment *
-PJ_inquire_entry (PDBfile *file, char *name) {
+PJ_inquire_entry (PDBfile *file, char const *name) {
 
    char          *newname = pj_fixname(file, name);
 
@@ -252,7 +252,7 @@ PJ_inquire_entry (PDBfile *file, char *name) {
  *-------------------------------------------------------------------------
  */
 INTERNAL char *
-pj_fixname (PDBfile *file, char *inname) {
+pj_fixname (PDBfile *file, char const *inname) {
 
    static char    _outname[MAXLINE];
 
@@ -320,7 +320,8 @@ PJ_write_alt (PDBfile *file, char const *name, char const *type,
 
    char          *newname = pj_fixname(file, name);
 
-   return (lite_PD_write_alt(file, newname, type, var, nd, ind));
+   return (lite_PD_write_alt(file, newname, (char *) type,
+              (void *) var, nd, (long *) ind));
 }
 #endif /* PDB_WRITE */
 
@@ -343,8 +344,8 @@ PJ_write_alt (PDBfile *file, char const *name, char const *type,
  */
 #ifdef PDB_WRITE
 INTERNAL int
-PJ_write_len (PDBfile *file, char *name, char *type, void const *var, int nd,
-              long *len) {
+PJ_write_len (PDBfile *file, char const *name, char const *type, void const *var, int nd,
+              long const *len) {
 
    long           ind[15], i;
 
@@ -356,7 +357,7 @@ PJ_write_len (PDBfile *file, char *name, char *type, void const *var, int nd,
       ind[i * 3 + 2] = 1;
    }
 
-   return (lite_PD_write_alt(file, newname, type, (void*) var, nd, ind));
+   return (lite_PD_write_alt(file, newname, (char*) type, (void*) var, nd, ind));
 }
 #endif /* PDB_WRITE */
 /* END pjjacket.c */
@@ -431,7 +432,7 @@ static PJgroup *cached_group = NULL;
 static char    *cached_obj_name = NULL;
 static char    *cached_file_name = NULL;
 
-PRIVATE int db_pdb_ParseVDBSpec (char *mvdbspec, char **varname,
+PRIVATE int db_pdb_ParseVDBSpec (char const *mvdbspec, char **varname,
                                  char **filename);
 PRIVATE int pj_GetVarDatatypeID (PDBfile *file, char *varname);
 PRIVATE void reduce_path(char *path, char *npath);
@@ -565,11 +566,11 @@ PJ_NoCache ( void )
  *      match the expected_dbtype.
  *--------------------------------------------------------------------*/
 INTERNAL int
-PJ_GetObject(PDBfile *file_in, char *objname_in, PJcomplist *tobj, int expected_dbtype)
+PJ_GetObject(PDBfile *file_in, char const *objname_in, PJcomplist *tobj, int expected_dbtype)
 {
     int             i, j, error;
     char           *varname=NULL, *filename=NULL;
-    char           *objname=NULL;
+    char const     *objname=NULL;
     PDBfile        *file=NULL;
     char           *me = "PJ_GetObject";
 
@@ -792,7 +793,7 @@ PJ_ClearCache(void)
  *--------------------------------------------------------------------
  */
 INTERNAL void *
-PJ_GetComponent (PDBfile *file, char *objname, char *compname) {
+PJ_GetComponent (PDBfile *file, char const *objname, char const *compname) {
 
    char          *result = NULL;
    PJcomplist     tmp_obj;
@@ -830,7 +831,7 @@ PJ_GetComponent (PDBfile *file, char *objname, char *compname) {
  *--------------------------------------------------------------------
  */
 INTERNAL int
-PJ_GetComponentType (PDBfile *file, char *objname, char *compname)
+PJ_GetComponentType (PDBfile *file, char const *objname, char const *compname)
 {
    int  retval = DB_NOTYPE;
    char *me = "PJ_GetComponentType";
@@ -1247,7 +1248,7 @@ pj_GetVarDatatypeID (PDBfile *file, char *varname) {
  *
  *--------------------------------------------------------------------*/
 PRIVATE int
-db_pdb_ParseVDBSpec (char *mvdbspec, char **varname, char **filename)
+db_pdb_ParseVDBSpec (char const *mvdbspec, char **varname, char **filename)
 {
     int len_filename, len_varname;
 
@@ -1463,7 +1464,7 @@ reduce_path(char *path, char *npath)
 INTERNAL int
 PJ_get_group(
    PDBfile       *file,        /* PDB file pointer */
-   char          *name,        /* Name of group desc to read */
+   char const    *name,        /* Name of group desc to read */
    PJgroup      **group)       /* Variable to write into */
 {
    syment	*ep;
@@ -1471,7 +1472,7 @@ PJ_get_group(
    /*
     * Make sure the thing we're looking up is really a group.
     */
-   ep = lite_PD_inquire_entry (file, name, TRUE, NULL);
+   ep = lite_PD_inquire_entry (file, (char *) name, TRUE, NULL);
    if (!ep || strcmp(PD_entry_type(ep), "Group *")) return 0;
 
 
@@ -2350,7 +2351,7 @@ INTERNAL int
 PJ_get_fullpath(
    PDBfile       *file,
    char          *cwd,         /* Current working directory */
-   char          *path,        /* Pathname (abs or rel) to traverse */
+   char const    *path,        /* Pathname (abs or rel) to traverse */
    char          *name)        /* Returned adjusted name */
 {
     int             ierr;
@@ -3140,7 +3141,7 @@ db_pdb_NewToc (DBfile *_dbfile)
  *    Put in cast to remove compiler warning.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBObjectType
-db_pdb_InqVarType(DBfile *_dbfile, char *varname)
+db_pdb_InqVarType(DBfile *_dbfile, char const *varname)
 {
     DBfile_pdb     *dbfile = (DBfile_pdb *) _dbfile;
     PDBfile        *file = dbfile->pdb;
@@ -3150,7 +3151,7 @@ db_pdb_InqVarType(DBfile *_dbfile, char *varname)
     int             typetag;
 
     /* First, check to see if it exists */
-    entry = lite_PD_inquire_entry(file, varname, TRUE, NULL);
+    entry = lite_PD_inquire_entry(file, (char *)varname, TRUE, NULL);
     if (entry == NULL)
     {
         /* This could be a directory.  Add a "/" to the end and try again. */
@@ -3250,7 +3251,7 @@ db_pdb_GetAtt (DBfile *_dbfile, char *varname, char *attname)
  *    a leak.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBobject *
-db_pdb_GetObject (DBfile *_file, char *name)
+db_pdb_GetObject (DBfile *_file, char const *name)
 {
    PJgroup      *group=NULL;
    PDBfile      *file = ((DBfile_pdb *)_file)->pdb;
@@ -3577,7 +3578,7 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
  *      value of PJ_GetObject.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBcompoundarray *
-db_pdb_GetCompoundarray (DBfile *_dbfile, char *array_name)
+db_pdb_GetCompoundarray (DBfile *_dbfile, char const *array_name)
 {
    int            i;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -3676,7 +3677,7 @@ db_pdb_GetCompoundarray (DBfile *_dbfile, char *array_name)
  *      Added DBOPT_REFERENCE support.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBcurve *
-db_pdb_GetCurve (DBfile *_dbfile, char *name)
+db_pdb_GetCurve (DBfile *_dbfile, char const *name)
 {
    DBfile_pdb   *dbfile = (DBfile_pdb *) _dbfile ;
    DBcurve      *cu ;
@@ -3754,7 +3755,7 @@ db_pdb_GetCurve (DBfile *_dbfile, char *name)
  *     Made "me" static.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK void *
-db_pdb_GetComponent (DBfile *_dbfile, char *objname, char *compname)
+db_pdb_GetComponent (DBfile *_dbfile, char const *objname, char const *compname)
 {
    void          *result;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -3784,7 +3785,7 @@ db_pdb_GetComponent (DBfile *_dbfile, char *objname, char *compname)
  * Modifications:
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_GetComponentType (DBfile *_dbfile, char *objname, char *compname)
+db_pdb_GetComponentType (DBfile *_dbfile, char const *objname, char const *compname)
 {
    int           retval = DB_NOTYPE;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -6485,7 +6486,7 @@ db_pdb_InqMeshname (DBfile *_dbfile, char *vname, char *mname)
  *    Added code to free ctype to eliminate a memory leak.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_InqMeshtype (DBfile *_dbfile, char *mname)
+db_pdb_InqMeshtype (DBfile *_dbfile, char const *mname)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    char           tmp[256], *ctype;
@@ -6522,7 +6523,7 @@ db_pdb_InqMeshtype (DBfile *_dbfile, char *mname)
  *      weren't being used.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_InqVarExists (DBfile *_dbfile, char *varname)
+db_pdb_InqVarExists (DBfile *_dbfile, char const *varname)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    syment        *ep;
@@ -7373,9 +7374,17 @@ db_pdb_Write (DBfile *_dbfile, char const *vname, void const *var,
  *-------------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_WriteSlice (DBfile *_dbfile, char *vname, void *values, int dtype,
-                   int offset[], int length[], int stride[], int dims[],
-                   int ndims)
+db_pdb_WriteSlice(
+    DBfile *_dbfile,
+    char const *vname,
+    void const *values,
+    int dtype,
+    int const *offset,
+    int const *length,
+    int const *stride,
+    int const *dims,
+    int ndims
+)
 {
    char         *dtype_s ;
    long         dim_extents[9] ;
@@ -7389,7 +7398,7 @@ db_pdb_WriteSlice (DBfile *_dbfile, char *vname, void *values, int dtype,
       return db_perror ("db_GetDatatypeString", E_CALLFAIL, me) ;
    }
 
-   if ((ep=lite_PD_inquire_entry (dbfile->pdb, vname, TRUE, NULL))) {
+   if ((ep=lite_PD_inquire_entry (dbfile->pdb, (char*) vname, TRUE, NULL))) {
       /*
        * Variable already exists.  Make sure the supplied dimensions
        * are the same as what was originally used when space was reserved.
@@ -7419,7 +7428,7 @@ db_pdb_WriteSlice (DBfile *_dbfile, char *vname, void *values, int dtype,
          dim_extents[i*2+0] = 0 ;               /*minimum index*/
          dim_extents[i*2+1] = dims[i]-1 ;       /*maximum index*/
       }
-      if (!lite_PD_defent_alt (dbfile->pdb, vname, dtype_s, ndims,
+      if (!lite_PD_defent_alt (dbfile->pdb, (char*) vname, dtype_s, ndims,
                                dim_extents)) {
          FREE(dtype_s);
          return db_perror ("PD_defent_alt", E_CALLFAIL, me) ;
@@ -7546,15 +7555,17 @@ db_pdb_MkDir (DBfile *_dbfile, char *name)
 #ifdef PDB_WRITE
 /* ARGSUSED */
 SILO_CALLBACK int
-db_pdb_PutCompoundarray (DBfile    *_dbfile,     /*pointer to open file  */
-                         char      *array_name,  /*name of array object  */
-                         char      *elemnames[], /*simple array names  */
-                         int       *elemlengths, /*lengths of simple arrays */
-                         int       nelems,       /*number of simple arrays */
-                         void      *values,      /*vector of simple values */
-                         int       nvalues,      /*num of values (redundant) */
-                         int       datatype,     /*type of simple all values */
-                         DBoptlist *optlist)     /*option list   */
+db_pdb_PutCompoundarray (
+    DBfile *_dbfile,               /*pointer to open file  */
+    char const *array_name,        /*name of array object  */
+    char const * const *elemnames, /*simple array names  */
+    int const *elemlengths,        /*lengths of simple arrays */
+    int nelems,                    /*number of simple arrays */
+    void const *values,            /*vector of simple values */
+    int nvalues,                   /*num of values (redundant) */
+    int datatype,                  /*type of simple all values */
+    DBoptlist const *optlist       /*option list   */
+)
 {
    DBobject      *obj;
    char          *tmp, *cur;
@@ -7640,8 +7651,8 @@ db_pdb_PutCompoundarray (DBfile    *_dbfile,     /*pointer to open file  */
  *-------------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
-                 int dtype, int npts, DBoptlist *opts)
+db_pdb_PutCurve (DBfile *_dbfile, char const *name, void const *xvals, void const *yvals,
+                 int dtype, int npts, DBoptlist const *opts)
 {
    DBobject     *obj ;
    char         *dtype_s ;
@@ -7727,10 +7738,16 @@ db_pdb_PutCurve (DBfile *_dbfile, char *name, void *xvals, void *yvals,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutDefvars (DBfile *dbfile, char const *name, int ndefs,
-                     char *names[], int const types[],
-                     char *defns[], DBoptlist *optlists[]) {
-
+db_pdb_PutDefvars(
+    DBfile *dbfile,
+    char const *name,
+    int ndefs,
+    char const * const *names,
+    int const *types,
+    char const * const *defns,
+    DBoptlist const * const *optlists
+)
+{
    int            i, len;
    long           count[1];
    DBobject      *obj;
@@ -7772,7 +7789,7 @@ db_pdb_PutDefvars (DBfile *dbfile, char const *name, int ndefs,
    /*-------------------------------------------------------------
     *  Define and write variable names 
     *-------------------------------------------------------------*/
-   DBStringArrayToStringList(names, ndefs, &tmp, &len);
+   DBStringArrayToStringList((char const * const *)names, ndefs, &tmp, &len);
    count[0] = len;  
    DBWriteComponent(dbfile, obj, "names", name, "char",
                     tmp, 1, count);
@@ -7782,7 +7799,7 @@ db_pdb_PutDefvars (DBfile *dbfile, char const *name, int ndefs,
    /*-------------------------------------------------------------
     *  Define and write variable definitions 
     *-------------------------------------------------------------*/
-   DBStringArrayToStringList(defns, ndefs, &tmp, &len);
+   DBStringArrayToStringList((char const * const *)defns, ndefs, &tmp, &len);
    count[0] = len;  
    DBWriteComponent(dbfile, obj, "defns", name, "char",
                     tmp, 1, count);
@@ -8015,7 +8032,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
    if (_ma._matnames != NULL)
    {
       int len; long llen; char *tmpstr = 0;
-      DBStringArrayToStringList(_ma._matnames, nmat, &tmpstr, &len);
+      DBStringArrayToStringList((char const * const *)_ma._matnames, nmat, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matnames", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -8024,7 +8041,7 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
    if (_ma._matcolors != NULL)
    {
       int len; long llen; char *tmpstr = 0;
-      DBStringArrayToStringList(_ma._matcolors, nmat, &tmpstr, &len);
+      DBStringArrayToStringList((char const * const *)_ma._matcolors, nmat, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -8153,7 +8170,7 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
       /* count how many names we have */
       for (i=0; i < nmat; i++)
           nstrs += nmatspec[i];
-      DBStringArrayToStringList(_ms._specnames, nstrs, &tmpstr, &len);
+      DBStringArrayToStringList((char const * const *)_ms._specnames, nstrs, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "species_names", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -8169,7 +8186,7 @@ db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
           for (i=0; i < nmat; i++)
               nstrs += nmatspec[i];
       }
-      DBStringArrayToStringList(_ms._speccolors, nstrs, &tmpstr, &len);
+      DBStringArrayToStringList((char const * const *)_ms._speccolors, nstrs, &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "speccolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
@@ -8359,7 +8376,7 @@ db_pdb_PutMultimesh (DBfile *dbfile, char const *name, int nmesh,
    if (_mm._lgroupings > 0)
       DBAddIntComponent(obj, "lgroupings", _mm._lgroupings);
    if ((_mm._lgroupings  > 0) && (_mm._groupnames != NULL)) {
-      DBStringArrayToStringList(_mm._groupnames, 
+      DBStringArrayToStringList((char const * const *)_mm._groupnames, 
                     _mm._lgroupings, &gtmp, &len);
 
       count[0] = len;
@@ -8758,7 +8775,7 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
    if (_mm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        DBStringArrayToStringList(_mm._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList((char const * const *)_mm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -9051,7 +9068,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
     *-------------------------------------------------------------*/
    if (_mm._matnames && _mm._nmatnos > 0) {
       int len; long llen; char *tmpstr = 0;
-      DBStringArrayToStringList(_mm._matnames, _mm._nmatnos,
+      DBStringArrayToStringList((char const * const *)_mm._matnames, _mm._nmatnos,
           &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "material_names", name, "char", tmpstr, 1, &llen);
@@ -9063,7 +9080,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
     *-------------------------------------------------------------*/
    if (_mm._matcolors && _mm._nmatnos > 0) {
       int len; long llen; char *tmpstr = 0;
-      DBStringArrayToStringList(_mm._matcolors, _mm._nmatnos,
+      DBStringArrayToStringList((char const * const *)_mm._matcolors, _mm._nmatnos,
           &tmpstr, &len);
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
@@ -9240,7 +9257,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
          /* count how many names we have */
          for (i=0; i < _mm._nmat; i++)
              nstrs += _mm._nmatspec[i];
-         DBStringArrayToStringList(_mm._specnames, nstrs, &tmpstr, &len);
+         DBStringArrayToStringList((char const * const *)_mm._specnames, nstrs, &tmpstr, &len);
          llen = (long) len;
          DBWriteComponent(dbfile, obj, "species_names", name, "char", tmpstr, 1, &llen);
          FREE(tmpstr);
@@ -9255,7 +9272,7 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
              for (i=0; i < _mm._nmat; i++)
                  nstrs += _mm._nmatspec[i];
          }
-         DBStringArrayToStringList(_mm._speccolors, nstrs, &tmpstr, &len);
+         DBStringArrayToStringList((char const * const *)_mm._speccolors, nstrs, &tmpstr, &len);
          llen = (long) len;
          DBWriteComponent(dbfile, obj, "speccolors", name, "char", tmpstr, 1, &llen);
          FREE(tmpstr);
@@ -9634,7 +9651,7 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
    if (_pm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        DBStringArrayToStringList(_pm._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList((char const * const *)_pm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -10096,7 +10113,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    if (_qm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        DBStringArrayToStringList(_qm._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList((char const * const *)_qm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -10385,7 +10402,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, char const *name, char const *meshname,
    if (_csgm._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        DBStringArrayToStringList(_csgm._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList((char const * const *)_csgm._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -10474,7 +10491,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, char const *name, int nregs,
    if (_csgzl._regnames)
    {
        int len; char *tmp;
-       DBStringArrayToStringList(_csgzl._regnames, nregs, &tmp, &len);
+       DBStringArrayToStringList((char const * const *)_csgzl._regnames, nregs, &tmp, &len);
        count[0] = len;
        DBWriteComponent(dbfile, obj, "regnames", name, "char",
                         tmp, 1, count);
@@ -10484,7 +10501,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, char const *name, int nregs,
    if (_csgzl._zonenames)
    {
        int len; char *tmp;
-       DBStringArrayToStringList(_csgzl._zonenames, nzones, &tmp, &len);
+       DBStringArrayToStringList((char const * const *)_csgzl._zonenames, nzones, &tmp, &len);
        count[0] = len;
        DBWriteComponent(dbfile, obj, "zonenames", name, "char",
                         tmp, 1, count);
@@ -11051,7 +11068,7 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
    if (_um._region_pnames != NULL)
    {
         char *s=0; int len=0; long llen;
-        DBStringArrayToStringList(_um._region_pnames, -1, &s, &len);
+        DBStringArrayToStringList((char const * const *)_um._region_pnames, -1, &s, &len);
         llen = len;
         DBWriteComponent(_dbfile, obj, "region_pnames", name, "char", s, 1, &llen);
         FREE(s);
@@ -11427,7 +11444,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
 
     /* output all the node names as one long dataset */
     s = 0;
-    DBStringArrayToStringList(strArray, num_nodes, &s, &len);
+    DBStringArrayToStringList((char const * const *)strArray, num_nodes, &s, &len);
     count = len;
     DBWriteComponent(dbfile, obj, "name", name, "char", s, 1, &count);
     FREE(s);
@@ -11469,7 +11486,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
     if (n > 0)
     {
         s = 0;
-        DBStringArrayToStringList(strArray, n, &s, &len);
+        DBStringArrayToStringList((char const * const *)strArray, n, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "names", name, "char", s, 1, &count);
         FREE(s);
@@ -11482,7 +11499,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
         strArray[i] = ltree[i]->maps_name;
     s = 0;
     len = 0;
-    DBStringArrayToStringList(strArray, num_nodes, &s, &len);
+    DBStringArrayToStringList((char const * const *)strArray, num_nodes, &s, &len);
     count = len;
     DBWriteComponent(dbfile, obj, "maps_name", name, "char", s, 1, &count);
     FREE(s);
@@ -11545,7 +11562,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
     {
         s = 0;
         len = 0;
-        DBStringArrayToStringList(_mrgt._mrgvar_onames, -1, &s, &len);
+        DBStringArrayToStringList((char const * const *)_mrgt._mrgvar_onames, -1, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "mrgvar_onames", name, "char", s, 1, &count);
         FREE(s);
@@ -11555,7 +11572,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
     {
         s = 0;
         len = 0;
-        DBStringArrayToStringList(_mrgt._mrgvar_rnames, -1, &s, &len);
+        DBStringArrayToStringList((char const * const *)_mrgt._mrgvar_rnames, -1, &s, &len);
         count = len;
         DBWriteComponent(dbfile, obj, "mrgvar_rnames", name, "char", s, 1, &count);
         FREE(s);
@@ -11770,7 +11787,7 @@ db_pdb_PutMrgvar(DBfile *_dbfile, char const *name, char const *mrgt_name,
 
    if (compnames)
    {
-       DBStringArrayToStringList(compnames, ncomps, &s, &len);
+       DBStringArrayToStringList((char const * const *)compnames, ncomps, &s, &len);
        llen = len;
        DBWriteComponent(_dbfile, obj, "compnames", name, "char", s, 1, &llen);
        FREE(s);
@@ -11779,7 +11796,7 @@ db_pdb_PutMrgvar(DBfile *_dbfile, char const *name, char const *mrgt_name,
    nstrs = nregns;
    if (strchr(reg_pnames[0], '%') != 0)
        nstrs = 1;
-   DBStringArrayToStringList(reg_pnames, nstrs, &s, &len);
+   DBStringArrayToStringList((char const * const *)reg_pnames, nstrs, &s, &len);
    llen = len;
    DBWriteComponent(_dbfile, obj, "reg_pnames", name, "char", s, 1, &llen);
    FREE(s);
@@ -12445,7 +12462,7 @@ db_build_shared_names_ucdmesh (DBfile *_dbfile, char *meshname) {
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE void
-db_mkname (PDBfile *pdb, char *name, char *suffix, char *out)
+db_mkname (PDBfile *pdb, char const *name, char const *suffix, char *out)
 {
     char   *cwd;
 
@@ -12558,7 +12575,7 @@ db_InitMulti (DBfile *_dbfile, DBoptlist const *const optlist) {
  *-------------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE void
-db_InitCurve (DBoptlist *opts) {
+db_InitCurve (DBoptlist const * const opts) {
 
    db_ResetGlobalData_Curve () ;
    db_ProcessOptlist (DB_CURVE, opts) ;
@@ -12580,7 +12597,7 @@ db_InitCurve (DBoptlist *opts) {
  *-------------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE void
-db_InitDefvars (DBoptlist *opts) {
+db_InitDefvars (DBoptlist const *opts) {
 
    db_ResetGlobalData_Defvars () ;
    db_ProcessOptlist (DB_DEFVARS, opts) ;

@@ -77,11 +77,11 @@ typedef struct DBfile_taur {
 SILO_CALLBACK int db_taur_Close(DBfile *);
 SILO_CALLBACK int db_taur_GetDir(DBfile *, char *);
 SILO_CALLBACK int db_taur_SetDir(DBfile *, char *);
-SILO_CALLBACK void *db_taur_GetComponent(DBfile *, char *, char *);
+SILO_CALLBACK void *db_taur_GetComponent(DBfile *, char const *, char const *);
 SILO_CALLBACK int db_taur_InqMeshname(DBfile *, char *, char *);
-SILO_CALLBACK int db_taur_InqVarExists(DBfile *, char *);
-SILO_CALLBACK int db_taur_InqMeshtype(DBfile *, char *);
-SILO_CALLBACK int db_taur_InqVartype(DBfile *, char *);
+SILO_CALLBACK int db_taur_InqVarExists(DBfile *, char const *);
+SILO_CALLBACK int db_taur_InqMeshtype(DBfile *, char const *);
+SILO_CALLBACK DBObjectType db_taur_InqVartype(DBfile *, char const *);
 SILO_CALLBACK int db_taur_ReadVar(DBfile *, char *, void *);
 SILO_CALLBACK DBmaterial *db_taur_GetMaterial(DBfile *, char *);
 SILO_CALLBACK DBucdmesh *db_taur_GetUcdmesh(DBfile *, char *);

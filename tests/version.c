@@ -95,6 +95,7 @@ main(int argc, char *argv[])
     int           i, pass, driver=DB_PDB;
     static char   *filename="version.pdb";
     int            show_all_errors = FALSE;
+    int           vnos[3];
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB", 6)) {
@@ -197,6 +198,7 @@ main(int argc, char *argv[])
             dbfile = DBOpen(filename, driver, DB_READ);
         }
         
+        /* loop over all version number tests */
         for (i = 0; i < sizeof(vnos_to_sample)/sizeof(vnos_to_sample[0]); i++)
         {
             int ck = DBFileVersionGE(dbfile, vnos_to_sample[i].maj, 
@@ -214,6 +216,65 @@ main(int argc, char *argv[])
 
         DBClose(dbfile);
     }
+
+    /* Test getting version digits from file handle */
+    dbfile = DBOpen(filename, driver, DB_READ);
+    if (DBFileVersionDigits(dbfile, &vnos[0], &vnos[1], &vnos[2], 0))
+    {
+        fprintf(stderr, "Error getting file version digits\n");
+        return 1;
+    }
+    if (vnos[0] != SILO_VERS_MAJ || vnos[1] != SILO_VERS_MIN || vnos[2] != SILO_VERS_PAT)
+    {
+        fprintf(stderr, "Error in version digits returned from DBFileVersionDigits\n");
+        return 1;
+    }
+    DBClose(dbfile);
+
+    /* Test getting version digits from library */
+    if (DBVersionDigits(&vnos[0], &vnos[1], &vnos[2], 0))
+    {
+        fprintf(stderr, "Error getting library version digits\n");
+        return 1;
+    }
+    if (vnos[0] != SILO_VERS_MAJ || vnos[1] != SILO_VERS_MIN || vnos[2] != SILO_VERS_PAT)
+    {
+        fprintf(stderr, "Error in version digits returned from DBVersionDigits\n");
+        return 1;
+    }
+
+    dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
+    if (dbfile == 0)
+        dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+    if (!DBVersionGEFileVersion(dbfile))
+    {
+        fprintf(stderr, "Error comparing library version to OLD file version.\n");
+        return 1;
+    }
+    DBClose(dbfile);
+
+    dbfile = DBOpen(filename, driver, DB_APPEND);
+    if (!DBVersionGEFileVersion(dbfile))
+    {
+        fprintf(stderr, "Error comparing library version to CURRENT file version.\n");
+        return 1;
+    }
+
+    /* Ok, now overwrite version info in the file to a version number way in the
+       future and test again */
+    DBSetAllowOverwrites(1);
+    i = 5;
+    DBWrite(dbfile, SILO_VSTRING_NAME, "99.9", &i, 1, DB_CHAR);
+    DBClose(dbfile);
+    DBSetAllowOverwrites(0);
+
+    dbfile = DBOpen(filename, driver, DB_READ);
+    if (DBVersionGEFileVersion(dbfile))
+    {
+        fprintf(stderr, "Error comparing library version to FUTURE file version.\n");
+        return 1;
+    }
+    DBClose(dbfile);
 
     CleanupDriverStuff();
     return 0;

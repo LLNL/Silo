@@ -224,7 +224,7 @@ db_debug_Filters(DBfile *dbfile, FILE *stream)
  */
 /* ARGSUSED */
 SILO_CALLBACK DBcompoundarray *
-db_debug_GetCompoundarray(DBfile *_file, char *name)
+db_debug_GetCompoundarray(DBfile *_file, char const *name)
 {
 
     db_perror("Debug device driver", E_NOTIMP, "db_debug_GetCompoundarray");
@@ -251,9 +251,17 @@ db_debug_GetCompoundarray(DBfile *_file, char *name)
  */
 /* ARGSUSED */
 SILO_CALLBACK int
-db_debug_PutCompoundarray(DBfile *_dbfile, char *array_name, char **elemnames,
-                          int *elemlengths, int nelems, void *values,
-                          int nvalues, int datatype, DBoptlist *optlist)
+db_debug_PutCompoundarray(
+    DBfile *_dbfile,
+    char const *array_name,
+    char const * const *elemnames,
+    int const *elemlengths,
+    int nelems,
+    void const *values,
+    int nvalues,
+    int datatype,
+    DBoptlist const *optlist
+)
 {
 
     DBfile_debug  *dbfile = (DBfile_debug *) _dbfile;

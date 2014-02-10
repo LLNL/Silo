@@ -1728,7 +1728,7 @@ db_cdf_InqMeshname(DBfile *_dbfile, char *vname, char *mname)
  *--------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_cdf_InqMeshtype(DBfile *_dbfile, char *meshname)
+db_cdf_InqMeshtype(DBfile *_dbfile, char const *meshname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_InqMeshtype";

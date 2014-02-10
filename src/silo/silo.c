@@ -1161,7 +1161,7 @@ db_GetMachDataSize(int datatype)
  *    Made long long support UNconditionally compiled.
  *--------------------------------------------------------------------*/
 INTERNAL int
-db_GetDatatypeID(char *dataname)
+db_GetDatatypeID(char const * const dataname)
 {
     int            size;
     char          *me = "db_GetDatatypeID";
@@ -1936,8 +1936,8 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
 INTERNAL context_t *
 context_switch(DBfile *dbfile, char const *name, char const **base)
 {
-    char          *me = "context_switch";
-    char           s[256], *b;
+    char          const *me = "context_switch";
+    char          s[256], *b;
     context_t     *old = ALLOC(context_t);
 
     /*
@@ -3874,6 +3874,87 @@ DBErrlvl(void)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: db_parse_version_digits_from_string
+ *
+ * str: version string
+ * sep: separator character (typically '.')
+ * digits: array of digits to return
+ * ndigits: size of digits array
+ *
+ * returns 0 on successful convers
+ *-----------------------------------------------------------------------*/
+static int
+db_parse_version_digits_from_string(char const *str, char sep, int *digits, int ndigits)
+{
+    int i, nseps, non_digits, retval = 0;
+    char *p, *ostr;
+    
+    if (!str || !*str)
+        return 1;
+
+    ostr = strdup(str);
+    p = ostr;
+
+    /* Examine string for seperator chars and non-digits */
+    nseps = 0;
+    non_digits = 0;
+    while (*p)
+    {
+        if (*p == sep)
+        {
+            *p = '\0';
+            nseps++;
+        }
+        else if (!strncmp(p, "-pre", 4))
+        {
+            p += 3;
+            nseps++;
+        }
+        else if (*p < '0' || *p > '9')
+        {
+            non_digits = 1;
+        }
+        p++;
+    }
+    nseps++;
+
+    /* Make a second pass over string converting all the digits */
+    if (!non_digits)
+    {
+        p = ostr;
+        for (i = 0; i < (nseps+1) && ndigits; i++, ndigits--)
+        {
+            digits[i] = strtol(p, 0, 10);
+            while (*p != '\0') p++;
+            p++;
+            if (!strncmp(p, "-pre", 4)) p+=4;
+        }
+    }
+    else
+    {
+        retval = 1;
+    }
+
+    free(ostr);
+
+    return retval;
+}
+
+static int
+db_compare_version_digits(int const *a_digits, int const *b_digits, int ndigits)
+{
+    int i;
+    for (i = 0; i < ndigits; i++)
+    {
+        if (a_digits[i] < b_digits[i])
+            return -1;
+        else if (a_digits[i] > b_digits[i])
+            return 1;
+    }
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    DBVersion
  *
  * Purpose:     Return the version number of the library as a string.
@@ -3897,6 +3978,22 @@ DBVersion(void)
     return version;
 }
 
+PUBLIC int
+DBVersionDigits(int *maj, int *min, int *pat, int *pre)
+{
+    int digits[4] = {-1,-1,-1,-1};
+    if (!db_parse_version_digits_from_string(DBVersion(), '.',
+             digits, sizeof(digits)/sizeof(digits[0])))
+    {
+        if (maj) *maj = digits[0];
+        if (min) *min = digits[1];
+        if (pat) *pat = digits[2];
+        if (pre) *pre = digits[3];
+        return 0;
+    }
+    return 1;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    DBVersionGE
  *
@@ -3911,11 +4008,19 @@ DBVersion(void)
 PUBLIC int 
 DBVersionGE(int Maj, int Min, int Pat)
 {
-    if (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_PAT>=Pat)) ||
-         ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) ||
-         (SILO_VERS_MAJ>Maj))
-        return 1;
-    return 0;
+    int a_digits[3] = {SILO_VERS_MAJ, SILO_VERS_MIN, SILO_VERS_PAT};
+    int b_digits[3] = {Maj<0?0:Maj, Min<0?0:Min, Pat<0?0:Pat};
+    return db_compare_version_digits(a_digits, b_digits, 3) >= 0;
+}
+
+PUBLIC int
+DBVersionGEFileVersion(const DBfile *dbfile)
+{
+    int a_digits[3];
+    int b_digits[3] = {4, 5, 0}; /* earliest version we have version info in file */
+    DBVersionDigits(&a_digits[0], &a_digits[1], &a_digits[2], 0);
+    DBFileVersionDigits(dbfile, &b_digits[0], &b_digits[1], &b_digits[2], 0);
+    return db_compare_version_digits(a_digits, b_digits, 3) >= 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -3939,6 +4044,22 @@ DBFileVersion(const DBfile *dbfile)
     return version;
 }
 
+PUBLIC int
+DBFileVersionDigits(const DBfile *dbfile, int *maj, int *min, int *pat, int *pre)
+{
+    int digits[4] = {-1,-1,-1,-1};
+    if (!db_parse_version_digits_from_string(DBFileVersion(dbfile), '.',
+             digits, sizeof(digits)/sizeof(digits[0])))
+    {
+        if (maj) *maj = digits[0];
+        if (min) *min = digits[1];
+        if (pat) *pat = digits[2];
+        if (pre) *pre = digits[3];
+        return 0;
+    }
+    return 1;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    DBFileVersionGE
  *
@@ -3956,7 +4077,9 @@ PUBLIC int
 DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
 {
     int retval = -1;
-    int fileMaj = -1, fileMin = -1, filePat = -1;
+    int unknown = 0;
+    int a_digits[3];
+    int b_digits[3] = {Maj<0?0:Maj, Min<0?0:Min, Pat<0?0:Pat};
     char *version = STRDUP(DBFileVersion(dbfile));
 
     if (strncmp(version, "unknown", 7) == 0)
@@ -3965,64 +4088,31 @@ DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
            in version 4.5.1. So, if it is 'unknown', we can return something
            useful ONLY if the version we're comparing against is 4.5.1 or
            greater. */
-        if ((Maj==4 && Min==5 && Pat>=1) ||
-            (Maj==4 && Min>5) ||
-            (Maj>4))
-            retval = 0;
+        a_digits[0] = 4;
+        a_digits[1] = 5;
+        a_digits[2] = 0;
+        unknown = 1;
     }
     else
     {
-        int val;
-        char *token;
-
-        errno = 0;
-        token = strtok(version, ".");
-        if (token)
-            val = strtol(token, 0, 10);
-        if (token != 0 && val != 0 && errno == 0)
+        if (db_parse_version_digits_from_string(version, '.',
+                 a_digits, sizeof(a_digits)/sizeof(a_digits[0])))
         {
-            fileMaj = val;
-            token = strtok(0, ".");
-            if (token)
-                val = strtol(token, 0, 10);
-            if (token != 0 && val != 0 && errno == 0)
-            {
-                fileMin = val;
-                token = strtok(0, ".");
-                if (token)
-                    val = strtol(token, 0, 10);
-                if (token != 0 && val != 0 && errno == 0)
-                    filePat = val;
-            }
-        }
-
-        if (fileMaj != -1 && fileMin != -1 && filePat != -1)
-        {
-            if ((fileMaj==Maj && fileMin==Min && filePat>=Pat) ||
-                (fileMaj==Maj && fileMin>Min) ||
-                (fileMaj>Maj))
-                retval = 1;
-            else
-                retval = 0;
-        }
-        else if (fileMaj != -1 && fileMin != -1)
-        {
-            if ((fileMaj==Maj && fileMin>=Min) ||
-                (fileMaj>Maj))
-                retval = 1;
-            else
-                retval = 0;
-        }
-        else if (fileMaj != -1)
-        {
-            if (fileMaj>=Maj)
-                retval = 1;
-            else
-                retval = 0;
+            free(version);
+            return -1;
         }
     }
 
     free(version);
+
+    retval = db_compare_version_digits(a_digits, b_digits, 3) >= 0; 
+
+    if (unknown)
+    {
+        if (retval)
+            retval = -1;
+    }
+
     return retval;
 }
 
@@ -6123,8 +6213,8 @@ DBWrite(DBfile *dbfile, char const *vname, void const *var, int const *dims,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBWriteSlice (DBfile *dbfile, const char *vname, void *values, int dtype,
-              int offset[], int length[], int stride[], int dims[],
+DBWriteSlice (DBfile *dbfile, const char *vname, void const *values, int dtype,
+              int const *offset, int const *length, int const *stride, int const *dims,
               int ndims)
 {
     int retval;
@@ -6161,7 +6251,7 @@ DBWriteSlice (DBfile *dbfile, const char *vname, void *values, int dtype,
         if (!dbfile->pub.writeslice)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.writeslice) (dbfile, (char *)vname, values,
+        retval = (dbfile->pub.writeslice) (dbfile, vname, values,
                                            dtype, offset, length, stride,
                                            dims, ndims);
         db_FreeToc(dbfile);
@@ -6244,7 +6334,7 @@ DBReadAtt(DBfile *dbfile, const char *vname, const char *aname, void *results)
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
 PUBLIC DBcompoundarray *
-DBGetCompoundarray(DBfile *dbfile, const char *name)
+DBGetCompoundarray(DBfile *dbfile, char const *name)
 {
     DBcompoundarray *retval = NULL;
 
@@ -6282,7 +6372,7 @@ DBGetCompoundarray(DBfile *dbfile, const char *name)
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
 PUBLIC DBcurve *
-DBGetCurve (DBfile *dbfile, const char *name)
+DBGetCurve (DBfile *dbfile, char const *name)
 {
     DBcurve *retval = NULL;
 
@@ -7727,9 +7817,17 @@ DBInqMeshtype(DBfile *dbfile, const char *name)
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutCompoundarray(DBfile *dbfile, const char *name, char **elemnames,
-                   int *elemlengths, int nelems, void *values, int nvalues,
-                   int datatype, DBoptlist *opts)
+DBPutCompoundarray(
+    DBfile *dbfile,
+    char const *name,
+    char const * const *elemnames,
+    int const *elemlengths,
+    int nelems,
+    void const *values,
+    int nvalues,
+    int datatype,
+    DBoptlist const *opts
+)
 {
     int retval;
 
@@ -7806,8 +7904,15 @@ DBPutCompoundarray(DBfile *dbfile, const char *name, char **elemnames,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutCurve (DBfile *dbfile, const char *name, const void *xvals, const void *yvals,
-            int datatype, int npts, DBoptlist *opts)
+DBPutCurve(
+    DBfile *dbfile,
+    char const *name,
+    void const *xvals,
+    void const *yvals,
+    int datatype,
+    int npts,
+    DBoptlist const *opts
+)
 {
     int retval;
 
@@ -7877,9 +7982,15 @@ DBPutCurve (DBfile *dbfile, const char *name, const void *xvals, const void *yva
  *
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutDefvars (DBfile *dbfile, const char *name, int ndefs,
-              char *names[], const int *types, char *defns[],
-              DBoptlist *opts[])
+DBPutDefvars(
+    DBfile *dbfile,
+    const char *name,
+    int ndefs,
+    char const * const *names,
+    int const *types,
+    char const * const *defns,
+    DBoptlist const * const *opts
+)
 {
     int retval;
 
@@ -10766,7 +10877,7 @@ UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
  *    Added support for nameschemes options on multi-block objects.
  *-------------------------------------------------------------------------*/
 INTERNAL int
-db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
+db_ProcessOptlist(int objtype, DBoptlist const * const optlist)
 {
     int             i, j, *ip = NULL, unused = 0;
     char           *me = "db_ProcessOptlist";
@@ -11449,7 +11560,7 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         break;
 
                     case DBOPT_ALT_ZONENUM_VARS:
-                        _phzl._ghost_zone_labels = (char **) optlist->values[i];
+                        _phzl._alt_zonenum_vars = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -12420,8 +12531,12 @@ db_FullName2BaseName(const char *path)
  *    Made this function public, replacing 'db_' with 'DB' in name.
  *--------------------------------------------------------------------*/
 PUBLIC void 
-DBStringArrayToStringList(char **strArray, int n,
-                           char **strList, int *m)
+DBStringArrayToStringList(
+    char const * const *strArray,
+    int n,
+    char **strList,
+    int *m
+)
 {
     int i, len;
     char *s = NULL;

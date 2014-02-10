@@ -152,10 +152,10 @@ be used for advertising or product endorsement purposes.
 #define SILO_VERS_MAJ @SILO_VERS_MAJ@
 
 /* Minor release number of silo library. Can be empty. */
-#define SILO_VERS_MIN 0x0@SILO_VERS_MIN@
+#define SILO_VERS_MIN @SILO_VERS_MIN@
 
 /* Patch release number of silo library.  Can be empty. */
-#define SILO_VERS_PAT 0x0@SILO_VERS_PAT@
+#define SILO_VERS_PAT @SILO_VERS_PAT@
 
 /* Pre-release release number of silo library.  Can be empty. */
 #define SILO_VERS_PRE @SILO_VERS_PRE@
@@ -1648,12 +1648,15 @@ typedef struct DBfile_pub {
     int            (*w_comp)(struct DBfile *, DBobject *, char const *, char const *,
                              char const *, void const *, int, long const *);
     int            (*write) (struct DBfile *, char const *, void const *, int const *, int, int);
-
-
-
-
-    int            (*writeslice)(struct DBfile *, char *, void *, int,
-                                 int[], int[], int[], int[], int);
+    int            (*writeslice)(struct DBfile *,
+                                 char const *array_name,
+                                 void const *data,
+                                 int datatype,
+                                 int const *offsets,
+                                 int const *lens,
+                                 int const *stides,
+                                 int const *dims,
+                                 int ndim);
     void          *(*g_attr)(struct DBfile *, char *, char *);
     int            (*g_dir)(struct DBfile *, char *);
     int            (*mkdir)(struct DBfile *, char *);
@@ -1666,8 +1669,8 @@ typedef struct DBfile_pub {
     int            (*r_varslice)(struct DBfile *, char *, int *, int *, int *,
                                  int, void *);
     int            (*g_compnames)(struct DBfile *, char *, char ***, char ***);
-    DBcompoundarray *(*g_ca)(struct DBfile *, char *);
-    DBcurve       *(*g_cu)(struct DBfile *, char *);
+    DBcompoundarray *(*g_ca)(struct DBfile *, char const *);
+    DBcurve       *(*g_cu)(struct DBfile *, char const *);
     DBdefvars     *(*g_defv)(struct DBfile *, char const *);
     DBmaterial    *(*g_ma)(struct DBfile *, char *);
     DBmatspecies  *(*g_ms)(struct DBfile *, char *);
@@ -1689,14 +1692,33 @@ typedef struct DBfile_pub {
     int            (*g_vardims)(struct DBfile*, char*, int, int*); /*dims*/
     int            (*g_vartype)(struct DBfile *, char *);
     int            (*i_meshname)(struct DBfile *, char *, char *);
-    int            (*i_meshtype)(struct DBfile *, char *);
-    int            (*p_ca)(struct DBfile *, char *, char **, int *, int,
-                           void *, int, int, DBoptlist *);
-    int            (*p_cu)(struct DBfile *, char *, void *, void *, int, int,
-                           DBoptlist *);
-    int            (*p_defv)(struct DBfile *, char const *, int, 
-                           char **, int const *, char **,
-                           DBoptlist **);
+    int            (*i_meshtype)(struct DBfile *, char const *);
+    int            (*p_ca)(struct DBfile *dbfile,
+                           char const *name,
+                           char const * const *elemnames,
+                           int const *elemlens,
+                           int nelems,
+                           void const *values,
+                           int nvalues,
+                           int datatype,
+                           DBoptlist const *
+                   );
+    int            (*p_cu)(struct DBfile *dbfile,
+                           char const *name,
+                           void const *xvals,
+                           void const *yvals,
+                           int datatype,
+                           int npts,
+                           DBoptlist const *opts
+                   );
+    int            (*p_defv)(struct DBfile *dbfile,
+                             char const *name,
+                             int ndefs, 
+                             char const * const *names,
+                             int const *types,
+                             char const * const *defns,
+                             DBoptlist const * const *opts
+                   );
     int            (*p_fl)(struct DBfile *, char *, int, int, int *, int, int,
                            int *, int *, int *, int, int *, int *, int);
     int            (*p_ma)(struct DBfile *, char *, char *, int, int *, int *,
@@ -1922,8 +1944,11 @@ SILO_API extern int      DBGetDriverType(DBfile const *);
 SILO_API extern int      DBGetDriverTypeFromPath(char const *);
 SILO_API extern char    *DBJoinPath(char const *, char const *);
 SILO_API extern char    *DBVersion(void);
+SILO_API extern int      DBVersionDigits(int *Maj, int *Min, int *Pat, int *Pre);
 SILO_API extern int      DBVersionGE(int Maj, int Min, int Pat);
+SILO_API extern int      DBVersionGEFileVersion(const DBfile *dbfile);
 SILO_API extern char    *DBFileVersion(DBfile const *dbfile);
+SILO_API extern int      DBFileVersionDigits(DBfile const *dbfile, int *Maj, int *Min, int *Pat, int *Pre);
 SILO_API extern int      DBFileVersionGE(DBfile const *dbfile, int Maj, int Min, int Pat);
 SILO_API extern void     DBShowErrors(int, DBErrFunc_t);
 SILO_API extern char    *DBErrString(void);
@@ -1960,8 +1985,17 @@ SILO_API extern int      DBGetComponentType(DBfile *, char const *, char const *
 SILO_API extern int      DBWriteComponent(DBfile *, DBobject *, char const *, char const *, char const *,
                                  void const *, int, long const *);
 SILO_API extern int      DBWrite(DBfile *, char const *, void const *, int const *, int, int);
-SILO_API extern int      DBWriteSlice(DBfile *, char const *, void *, int, int[], int[],
-                             int[], int[], int);
+SILO_API extern int      DBWriteSlice(
+    DBfile *,
+    char const *array_name,
+    void const * data,
+    int datatype,
+    int const *offsets,
+    int const *lengths,
+    int const *strides,
+    int const *dims,
+    int ndims
+);
 SILO_API extern DBfacelist *DBCalcExternalFacelist(int *, int, int, int *, int *, int,
                                           int *, int);
 SILO_API extern DBfacelist *DBCalcExternalFacelist2(int *, int, int, int, int, int *,
@@ -2030,12 +2064,35 @@ SILO_API extern int      DBInqCompoundarray(DBfile *, char const *, char ***,
                                    int **, int *, int *, int *);
 SILO_API extern DBObjectType DBInqVarType(DBfile *, char const *);
 
-SILO_API extern int      DBPutCompoundarray(DBfile *, char const *, char **, int *, int,
-                                   void *, int, int, DBoptlist *);
-SILO_API extern int      DBPutCurve(DBfile *, char const *, const void *, const void *, int, int,
-                           DBoptlist *);
-SILO_API extern int      DBPutDefvars (DBfile *, char const *, int, char **, 
-                            int const *, char **, DBoptlist **);
+SILO_API extern int DBPutCompoundarray(
+    DBfile *dbfile,
+    char const *name,
+    char const * const *elemnames,
+    int const *elemlens,
+    int nelems,
+    void const *values,
+    int nvalues,
+    int datatype,
+    DBoptlist const *
+);
+SILO_API extern int DBPutCurve(
+    DBfile *dbfile,
+    char const * const name,
+    void const * const xvals,
+    void const * const yvals,
+    int datatype,
+    int npts,
+    DBoptlist const * const opts
+);
+SILO_API extern int DBPutDefvars(
+    DBfile *dbfile,
+    char const *name,
+    int,
+    char const * const *names, 
+    int const *types,
+    char const * const *defns,
+    DBoptlist const * const *opts
+);
 SILO_API extern int      DBPutFacelist(DBfile *, char const *, int, int, int *, int, int,
                             int *, int *, int *, int, int *, int *, int);
 SILO_API extern int      DBPutMaterial(DBfile *, char const *, char const *, int, int *, int *,
@@ -2143,8 +2200,12 @@ SILO_API extern int      DBFreeCompressionResources(DBfile *dbfile, char const *
 SILO_API extern DBnamescheme *DBMakeNamescheme(char const *fmt, ...);
 SILO_API char const *DBGetName(DBnamescheme *ns, int natnum);
 
-SILO_API extern void DBStringArrayToStringList(char **strArray, int n,
-                         char **strList, int *m);
+SILO_API extern void DBStringArrayToStringList(
+    char const * const *strArray,
+    int n,
+    char **strList,
+    int *m
+);
 SILO_API char ** DBStringListToStringArray(char *strList, int *n, int handleSlashSwap,
                      int skipSemicolonAtIndexZero);
 
