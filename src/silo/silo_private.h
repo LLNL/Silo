@@ -313,6 +313,7 @@ typedef struct context_t {
                               char const *jr ;                                \
                               jold = context_switch (jdbfile,NM,&jr) ;        \
                               if (!jold) longjmp (SILO_Globals.Jstk->jbuf, -1) ;\
+                              NM = jr ;                                       \
                            }                                                  \
                         }
 
