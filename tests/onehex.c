@@ -300,8 +300,7 @@ main(int argc, char *argv[])
 #endif
             var[0] = sqrt((double)-1.0);
     }
-    DBPutUcdvar1(dbfile, "v", "hex", var, 8, NULL, 0, DB_DOUBLE, DB_NODECENT,
-                 NULL);
+    DBPutUcdvar1(dbfile, "v", "hex", (DB_DTPTR1) var, 8, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
 
     nodelist[0] = 0;
     nodelist[1] = 1;

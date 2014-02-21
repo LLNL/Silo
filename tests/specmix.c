@@ -589,15 +589,15 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
     }
   }
 
-  DBPutQuadvar1(db, "u", "Mesh", f1, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "v", "Mesh", f2, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "cnvar", "Mesh", cnvar, dims, 2, NULL, 0, DB_CHAR, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "snvar", "Mesh", snvar, dims, 2, NULL, 0, DB_SHORT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "invar", "Mesh", invar, dims, 2, NULL, 0, DB_INT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "lnvar", "Mesh", lnvar, dims, 2, NULL, 0, DB_LONG, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "Lnvar", "Mesh", Lnvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "fnvar", "Mesh", fnvar, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "dnvar", "Mesh", dnvar, dims, 2, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "u", "Mesh", (DB_DTPTR1) f1, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "v", "Mesh", (DB_DTPTR1) f2, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "cnvar", "Mesh", (DB_DTPTR1) cnvar, dims, 2, NULL, 0, DB_CHAR, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "snvar", "Mesh", (DB_DTPTR1) snvar, dims, 2, NULL, 0, DB_SHORT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "invar", "Mesh", (DB_DTPTR1) invar, dims, 2, NULL, 0, DB_INT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "lnvar", "Mesh", (DB_DTPTR1) lnvar, dims, 2, NULL, 0, DB_LONG, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "Lnvar", "Mesh", (DB_DTPTR1) Lnvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "fnvar", "Mesh", (DB_DTPTR1) fnvar, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "dnvar", "Mesh", (DB_DTPTR1) dnvar, dims, 2, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
   free(cnvar);
   free(snvar);
   free(invar);
@@ -659,15 +659,15 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
     fm[mixc-2]=tmp;
   }
 
-  DBPutQuadvar1(db, "p", "Mesh", f1, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "d", "Mesh", f2, dims, 2, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "czvar", "Mesh", czvar, dims, 2, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "szvar", "Mesh", szvar, dims, 2, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "izvar", "Mesh", izvar, dims, 2, NULL, 0, DB_INT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "lzvar", "Mesh", lzvar, dims, 2, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "Lzvar", "Mesh", Lzvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "fzvar", "Mesh", fzvar, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "dzvar", "Mesh", dzvar, dims, 2, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "p", "Mesh", (DB_DTPTR1) f1, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "d", "Mesh", (DB_DTPTR1) f2, dims, 2, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "czvar", "Mesh", (DB_DTPTR1) czvar, dims, 2, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "szvar", "Mesh", (DB_DTPTR1) szvar, dims, 2, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "izvar", "Mesh", (DB_DTPTR1) izvar, dims, 2, NULL, 0, DB_INT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "lzvar", "Mesh", (DB_DTPTR1) lzvar, dims, 2, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "Lzvar", "Mesh", (DB_DTPTR1) Lzvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "fzvar", "Mesh", (DB_DTPTR1) fzvar, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "dzvar", "Mesh", (DB_DTPTR1) dzvar, dims, 2, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
   free(czvar);
   free(szvar);
   free(izvar);
@@ -816,17 +816,17 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
     int val = DB_ON;
 
     DBAddOption(opt,DBOPT_USESPECMF,&val);
-    DBPutUcdvar1(db, "u", "Mesh", f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "u", "Mesh", f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "cnvar", "Mesh", cnvar, nnodes, NULL, 0, DB_CHAR, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "snvar", "Mesh", snvar, nnodes, NULL, 0, DB_SHORT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "invar", "Mesh", invar, nnodes, NULL, 0, DB_INT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "lnvar", "Mesh", lnvar, nnodes, NULL, 0, DB_LONG, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "Lnvar", "Mesh", Lnvar, nnodes, NULL, 0, DB_LONG_LONG, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "fnvar", "Mesh", fnvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "dnvar", "Mesh", dnvar, nnodes, NULL, 0, DB_DOUBLE, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "u", "Mesh", (DB_DTPTR1) f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "v", "Mesh", (DB_DTPTR1) f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "u", "Mesh", (DB_DTPTR1) f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "v", "Mesh", (DB_DTPTR1) f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "cnvar", "Mesh", (DB_DTPTR1) cnvar, nnodes, NULL, 0, DB_CHAR, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "snvar", "Mesh", (DB_DTPTR1) snvar, nnodes, NULL, 0, DB_SHORT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "invar", "Mesh", (DB_DTPTR1) invar, nnodes, NULL, 0, DB_INT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "lnvar", "Mesh", (DB_DTPTR1) lnvar, nnodes, NULL, 0, DB_LONG, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "Lnvar", "Mesh", (DB_DTPTR1) Lnvar, nnodes, NULL, 0, DB_LONG_LONG, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "fnvar", "Mesh", (DB_DTPTR1) fnvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "dnvar", "Mesh", (DB_DTPTR1) dnvar, nnodes, NULL, 0, DB_DOUBLE, DB_NODECENT, opt);
     DBFreeOptlist(opt);
   }
   free(cnvar);
@@ -874,15 +874,15 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
     fm[mixc-2]=tmp;
   }
 
-  DBPutUcdvar1(db, "p", "Mesh", f1, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "d", "Mesh", f2, nzones, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "czvar", "Mesh", czvar, nzones, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "szvar", "Mesh", szvar, nzones, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "izvar", "Mesh", izvar, nzones, NULL, 0, DB_INT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "lzvar", "Mesh", lzvar, nzones, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "Lzvar", "Mesh", Lzvar, nzones, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "fzvar", "Mesh", fzvar, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "dzvar", "Mesh", dzvar, nzones, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "p", "Mesh", (DB_DTPTR1) f1, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "d", "Mesh", (DB_DTPTR1) f2, nzones, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "czvar", "Mesh", (DB_DTPTR1) czvar, nzones, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "szvar", "Mesh", (DB_DTPTR1) szvar, nzones, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "izvar", "Mesh", (DB_DTPTR1) izvar, nzones, NULL, 0, DB_INT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "lzvar", "Mesh", (DB_DTPTR1) lzvar, nzones, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "Lzvar", "Mesh", (DB_DTPTR1) Lzvar, nzones, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "fzvar", "Mesh", (DB_DTPTR1) fzvar, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "dzvar", "Mesh", (DB_DTPTR1) dzvar, nzones, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
   free(czvar);
   free(szvar);
   free(izvar);

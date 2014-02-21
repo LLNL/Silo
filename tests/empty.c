@@ -109,6 +109,7 @@ main(int argc, char *argv[])
     char const * const cnames[3] = {"x","y","z"};
     DB_DTPTR1       coords[3] = {(DB_DTPTR1)1,(DB_DTPTR1)2,(DB_DTPTR1)3}; /* really funky dummy pointers */
     DB_DTPTR1       vars[3] = {(DB_DTPTR1)1,(DB_DTPTR1)2,(DB_DTPTR1)3}; /* really funky dummy pointers */
+    void const * const vvars[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
     void           *var = (void*)1;
     int             iarr[3] = {1,1,1}; /* dummy int array */
     double          exts[4] = {0,0,0,0};
@@ -229,8 +230,8 @@ main(int argc, char *argv[])
         ASSERT(DBPutUcdvar(dbfile,"uvf","empty_ucdmesh1",2,     0,vars,ZZ,vars,1,dt,ct,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutUcdvar(dbfile,"uvg","empty_ucdmesh1",3,cnames,   0,ZZ,vars,1,dt,ct,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutUcdvar(dbfile,"uvh","empty_ucdmesh1",4,cnames,vars,ZZ,   0,1,dt,ct,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutUcdvar1(dbfile,"uv1a","empty_ucdmesh1",var,ZZ,vars,1,dt,ct,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutUcdvar1(dbfile,"uv1b","empty_ucdmesh1",  0,ZZ,vars,1,dt,ct,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutUcdvar1(dbfile,"uv1a","empty_ucdmesh1",var,ZZ,vars[0],1,dt,ct,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutUcdvar1(dbfile,"uv1b","empty_ucdmesh1",  0,ZZ,vars[0],1,dt,ct,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutUcdvar1(dbfile,"uv1c","empty_ucdmesh1",var,ZZ,   0,1,dt,ct,OL(ol)),retval<0,retval==0);
 
         /* csg meshes and vars */
@@ -245,19 +246,19 @@ main(int argc, char *argv[])
         ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzonelistd", 1,iarr,iarr,   0,0,0,0,ZZ,iarr,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutCSGZonelist(dbfile,"empty_csgzoneliste", 1,iarr,iarr,iarr,0,0,0,ZZ,   0,OL(ol)),retval<0,retval==0);
 
-        ASSERT(DBPutCsgvar(dbfile,"csgva","empty_csgmesh1",ZZ,cnames,vars, 1,dt,ct,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutCsgvar(dbfile,"csgvb","empty_csgmesh1",ZZ,     0,vars, 1,dt,ct,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile,"csgva","empty_csgmesh1",ZZ,cnames,vvars, 1,dt,ct,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile,"csgvb","empty_csgmesh1",ZZ,     0,vvars, 1,dt,ct,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutCsgvar(dbfile,"csgvc","empty_csgmesh1",ZZ,cnames,   0, 1,dt,ct,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutCsgvar(dbfile,"csgvd","empty_csgmesh1", 1,cnames,vars,ZZ,dt,ct,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutCsgvar(dbfile,"csgvd","empty_csgmesh1", 1,cnames,vvars,ZZ,dt,ct,OL(ol)),retval<0,retval==0);
 
         /* empty materials and species */
-        ASSERT(DBPutMaterial(dbfile,"empty_mata","foo",ZZ,iarr,iarr,iarr,1,iarr,iarr,iarr,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMaterial(dbfile,"empty_matb","foo",ZZ,   0,iarr,iarr,1,iarr,iarr,iarr,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMaterial(dbfile,"empty_matc","foo",ZZ,iarr,   0,iarr,1,iarr,iarr,iarr,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMaterial(dbfile,"empty_matd","foo",ZZ,iarr,iarr,   0,1,iarr,iarr,iarr,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMaterial(dbfile,"empty_mate","foo",ZZ,iarr,iarr,iarr,1,   0,iarr,iarr,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMaterial(dbfile,"empty_matf","foo",ZZ,iarr,iarr,iarr,1,iarr,   0,iarr,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMaterial(dbfile,"empty_matg","foo",ZZ,iarr,iarr,iarr,1,iarr,iarr,   0,iarr,1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_mata","foo",ZZ,iarr,iarr,iarr,1,iarr,iarr,iarr,vars[0],1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matb","foo",ZZ,   0,iarr,iarr,1,iarr,iarr,iarr,vars[0],1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matc","foo",ZZ,iarr,   0,iarr,1,iarr,iarr,iarr,vars[0],1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matd","foo",ZZ,iarr,iarr,   0,1,iarr,iarr,iarr,vars[0],1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_mate","foo",ZZ,iarr,iarr,iarr,1,   0,iarr,iarr,vars[0],1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matf","foo",ZZ,iarr,iarr,iarr,1,iarr,   0,iarr,vars[0],1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMaterial(dbfile,"empty_matg","foo",ZZ,iarr,iarr,iarr,1,iarr,iarr,   0,vars[0],1,dt,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutMaterial(dbfile,"empty_math","foo",ZZ,iarr,iarr,iarr,1,iarr,iarr,iarr,   0,1,dt,OL(ol)),retval<0,retval==0);
 
         ASSERT(DBPutMatspecies(dbfile,"empty_speca","empty_mata",ZZ,iarr,iarr,iarr,1,1,var,iarr,1,dt,OL(ol)),retval<0,retval==0);
