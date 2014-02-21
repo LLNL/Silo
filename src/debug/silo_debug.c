@@ -117,7 +117,7 @@ db_debug_close(DBfile *_dbfile)
  */
 /* ARGSUSED */
 INTERNAL DBfile *
-db_debug_create(char *name, int mode, int target, int subtype, char *finfo)
+db_debug_create(char const *name, int mode, int target, int subtype, char const *finfo)
 {
 
     char          *me = "db_debug_create";
@@ -173,7 +173,7 @@ db_debug_create(char *name, int mode, int target, int subtype, char *finfo)
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 INTERNAL DBfile *
-db_debug_open(char *name, int mode, int subtype)
+db_debug_open(char const *name, int mode, int subtype)
 {
 
     db_perror("Use DBCreate() instead", E_NOTIMP, "db_debug_open");

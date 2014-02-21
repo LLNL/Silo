@@ -252,7 +252,7 @@ f_debug_Close(DBfile *dbfile)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_SetDir(DBfile *dbfile, char *path)
+f_debug_SetDir(DBfile *dbfile, char const *path)
 {
     int            id, retval;
     char          *me = "f_debug_SetDir";
@@ -266,40 +266,6 @@ f_debug_SetDir(DBfile *dbfile, char *path)
     retval = FILTER_CALL(f_debug_cb[id].cd, (dbfile, path), -1, me);
 
     printf("%s: DBSetDir=%d\n",
-           f_debug_name[id], retval);
-    return retval;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    f_debug_SetDirID
- *
- * Purpose:     Print debug info for DBSetDirID.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  robb@cloud
- *              Tue Mar  7 13:18:36 EST 1995
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static int
-f_debug_SetDirID(DBfile *dbfile, int dirid)
-{
-    int            id, retval;
-    char          *me = "f_debug_SetDirID";
-
-    if ((id = FILTER_ID(dbfile, me)) < 0)
-        return -1;
-    printf("%s: DBSetDirID (dbfile=0x%lx, dirid=%d)\n",
-           f_debug_name[id], (unsigned long)dbfile, dirid);
-
-    retval = FILTER_CALL(f_debug_cb[id].cdid, (dbfile, dirid), -1, me);
-
-    printf("%s: DBSetDirID=%d\n",
            f_debug_name[id], retval);
     return retval;
 }
@@ -394,7 +360,7 @@ f_debug_NewToc(DBfile *dbfile)
  *-------------------------------------------------------------------------
  */
 static DBucdvar *
-f_debug_GetUcdvar(DBfile *dbfile, char *name)
+f_debug_GetUcdvar(DBfile *dbfile, char const *name)
 {
     int            id;
     char          *me = "f_debug_GetUcdvar";
@@ -470,7 +436,7 @@ f_debug_InqMeshType(DBfile *dbfile, char const *name)
  *-------------------------------------------------------------------------
  */
 static int
-f_debug_InqMeshName(DBfile *dbfile, char *name, char *meshname /*OUTPUT */)
+f_debug_InqMeshName(DBfile *dbfile, char const *name, char *meshname /*OUTPUT */)
 {
     int            id, retval;
     char          *me = "f_debug_InqMeshName";
@@ -572,7 +538,7 @@ f_debug_Open(DBfile *dbfile, char *filter_name)
      */
     if (f_debug_name[id])
         free(f_debug_name[id]);
-    f_debug_name[id] = safe_strdup(filter_name);
+    f_debug_name[id] = _db_safe_strdup(filter_name);
 
     /*
      * Save old callbacks.
@@ -587,7 +553,6 @@ f_debug_Open(DBfile *dbfile, char *filter_name)
     FILTER_CB(module, f_debug_Filters);
     FILTER_CB(close, f_debug_Close);
     FILTER_CB(cd, f_debug_SetDir);
-    FILTER_CB(cdid, f_debug_SetDirID);
     FILTER_CB(g_dir, f_debug_GetDir);
     FILTER_CB(newtoc, f_debug_NewToc);
     FILTER_CB(g_uv, f_debug_GetUcdvar);

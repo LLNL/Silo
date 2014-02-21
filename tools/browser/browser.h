@@ -149,10 +149,12 @@ be used for advertising or product endorsement purposes.
 #define NELMTS(X)       (sizeof(X)/sizeof(*(X)))
 
 #ifndef _WIN32
-char *safe_strdup(const char *);
+char *_db_safe_strdup(const char *);
 #endif
 #undef strdup
-#define strdup(s) safe_strdup(s)
+#undef safe_strdup
+#define strdup(s) _db_safe_strdup(s)
+#define safe_strdup(s) _db_safe_strdup(s)
 
 /*
  * The Makefile can override these constants.

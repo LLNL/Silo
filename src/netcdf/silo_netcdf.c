@@ -105,7 +105,6 @@ db_cdf_InitCallbacks (DBfile *dbfile)
 {
     dbfile->pub.close = db_cdf_Close;
     dbfile->pub.g_dir = db_cdf_GetDir;
-    dbfile->pub.g_attr = db_cdf_GetAtt;
     dbfile->pub.g_ma = db_cdf_GetMaterial;
     dbfile->pub.g_ms = db_cdf_GetMatspecies;
     dbfile->pub.g_comp = db_cdf_GetComponent;
@@ -124,11 +123,8 @@ db_cdf_InitCallbacks (DBfile *dbfile)
     dbfile->pub.exist = db_cdf_InqVarExists;
     dbfile->pub.inqvartype = db_cdf_InqVarType;
     dbfile->pub.i_meshtype = db_cdf_InqMeshtype;
-    dbfile->pub.r_att = db_cdf_ReadAtt;
     dbfile->pub.r_var = db_cdf_ReadVar;
-    dbfile->pub.r_var1 = db_cdf_ReadVar1;
     dbfile->pub.cd = db_cdf_SetDir;
-    dbfile->pub.cdid = db_cdf_SetDirID;
     dbfile->pub.newtoc = db_cdf_NewToc;
     dbfile->pub.module = db_cdf_Filters;
 }
@@ -208,7 +204,7 @@ db_cdf_Close(DBfile *_dbfile)
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 INTERNAL DBfile *
-db_cdf_Open(char *name, int mode, int subtype)
+db_cdf_Open(char const *name, int mode, int subtype)
 {
     char          *me = "db_cdf_Open";
     int            cdf;
@@ -595,47 +591,6 @@ db_cdf_NewToc(DBfile *_dbfile)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    db_cdf_GetAtt
- *
- * Purpose:     Allocate space for, and read, the given attribute of the
- *              given variable.
- *
- * Return:      Success:        pointer to result
- *
- *              Failure:        NULL
- *
- * Programmer:  matzke@viper
- *              Fri Jan  6 16:39:25 PST 1995
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-SILO_CALLBACK void *
-db_cdf_GetAtt(DBfile *_dbfile, char *varname, char *attname)
-{
-    void          *result;
-    DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
-    char          *me = "db_cdf_GetAtt";
-    int            varid, datatype, len, nbytes;
-
-    /*  Convert ascii name into SILO variable id. */
-    if ((varid = silonetcdf_ncvarid(dbfile->cdf, varname)) < 0) {
-        db_perror("silonetcdf_ncvarid", E_CALLFAIL, me);
-        return NULL;
-    }
-
-    /* Get size of attribute and allocate space for it. */
-    silonetcdf_ncattinq(dbfile->cdf, varid, attname, &datatype, &len);
-
-    nbytes = len * silo_GetDataSize(dbfile->cdf, datatype);
-    result = ALLOC_N(char, nbytes);
-
-    silonetcdf_ncattget(dbfile->cdf, varid, attname, result);
-    return result;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    db_cdf_GetMaterial
  *
  * Purpose:     Read a material-data object from a NetCDF file and return
@@ -654,7 +609,7 @@ db_cdf_GetAtt(DBfile *_dbfile, char *varname, char *attname)
  *
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBmaterial *
-db_cdf_GetMaterial(DBfile *_dbfile, char *name)
+db_cdf_GetMaterial(DBfile *_dbfile, char const *name)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetMaterial";
@@ -728,7 +683,7 @@ db_cdf_GetMaterial(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBmatspecies *
-db_cdf_GetMatspecies(DBfile *_dbfile, char *objname)
+db_cdf_GetMatspecies(DBfile *_dbfile, char const *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     DBmatspecies  *mm = DBAllocMatspecies();
@@ -861,7 +816,7 @@ db_cdf_GetComponent(DBfile *_dbfile, char const *objname, char const *compname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBmultimesh *
-db_cdf_GetMultimesh(DBfile *_dbfile, char *objname)
+db_cdf_GetMultimesh(DBfile *_dbfile, char const *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetMultimesh";
@@ -947,7 +902,7 @@ db_cdf_GetMultimesh(DBfile *_dbfile, char *objname)
  *
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBpointmesh *
-db_cdf_GetPointmesh(DBfile *_dbfile, char *objname)
+db_cdf_GetPointmesh(DBfile *_dbfile, char const *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetPointmesh";
@@ -1023,7 +978,7 @@ db_cdf_GetPointmesh(DBfile *_dbfile, char *objname)
  *
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBmeshvar *
-db_cdf_GetPointvar(DBfile *_dbfile, char *objname)
+db_cdf_GetPointvar(DBfile *_dbfile, char const *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetPointvar";
@@ -1101,7 +1056,7 @@ db_cdf_GetPointvar(DBfile *_dbfile, char *objname)
  *
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBquadmesh *
-db_cdf_GetQuadmesh(DBfile *_dbfile, char *objname)
+db_cdf_GetQuadmesh(DBfile *_dbfile, char const *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetQuadmesh";
@@ -1185,7 +1140,7 @@ db_cdf_GetQuadmesh(DBfile *_dbfile, char *objname)
  *
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBquadvar *
-db_cdf_GetQuadvar(DBfile *_dbfile, char *objname)
+db_cdf_GetQuadvar(DBfile *_dbfile, char const *objname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetQuadvar";
@@ -1295,7 +1250,7 @@ db_cdf_GetQuadvar(DBfile *_dbfile, char *objname)
  *    Handle topo_dim member correctly.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBucdmesh *
-db_cdf_GetUcdmesh(DBfile *_dbfile, char *meshname)
+db_cdf_GetUcdmesh(DBfile *_dbfile, char const *meshname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetUcdmesh";
@@ -1453,7 +1408,7 @@ db_cdf_GetUcdmesh(DBfile *_dbfile, char *meshname)
  *      Added support for the read mask stuff.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBucdvar *
-db_cdf_GetUcdvar(DBfile *_dbfile, char *varname)
+db_cdf_GetUcdvar(DBfile *_dbfile, char const *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetUcdvar";
@@ -1542,7 +1497,7 @@ db_cdf_GetUcdvar(DBfile *_dbfile, char *varname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK void *
-db_cdf_GetVar(DBfile *_dbfile, char *name)
+db_cdf_GetVar(DBfile *_dbfile, char const *name)
 {
     char          *me = "db_cdf_GetVar";
     char          *data;
@@ -1583,7 +1538,7 @@ db_cdf_GetVar(DBfile *_dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_cdf_GetVarByteLength(DBfile *_dbfile, char *varname)
+db_cdf_GetVarByteLength(DBfile *_dbfile, char const *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetVarByteLength";
@@ -1619,7 +1574,7 @@ db_cdf_GetVarByteLength(DBfile *_dbfile, char *varname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_cdf_GetVarLength(DBfile *_dbfile, char *varname)
+db_cdf_GetVarLength(DBfile *_dbfile, char const *varname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetVarLength";
@@ -1688,7 +1643,7 @@ db_cdf_InqVarType(DBfile *_dbfile, char const *varname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_cdf_InqMeshname(DBfile *_dbfile, char *vname, char *mname)
+db_cdf_InqMeshname(DBfile *_dbfile, char const *vname, char *mname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     int            meshid;
@@ -1813,7 +1768,7 @@ db_cdf_InqVarExists(DBfile *_dbfile, char const *varname)
  *--------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_cdf_GetVarType(DBfile *_dbfile, char *vname)
+db_cdf_GetVarType(DBfile *_dbfile, char const *vname)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_GetVarType";
@@ -1828,39 +1783,6 @@ db_cdf_GetVarType(DBfile *_dbfile, char *vname)
 
     silonetcdf_ncvarinq(dbfile->cdf, varid, NULL, &datatype, &ndims, dimids, &natts);
     return (datatype);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    db_cdf_ReadAtt
- *
- * Purpose:     Reads the given attribute value into the provided space.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  matzke@viper
- *              Wed Jan 11 09:14:11 PST 1995
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-SILO_CALLBACK int
-db_cdf_ReadAtt(DBfile *_dbfile, char *vname, char *aname, void *results)
-{
-    DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
-    char          *me = "db_cdf_ReadAtt";
-    int            varid;
-
-    if ((varid = silonetcdf_ncvarid(dbfile->cdf, vname)) < 0) {
-        return db_perror("silonetcdf_ncvarid", E_CALLFAIL, me);
-    }
-
-    if (silonetcdf_ncattget(dbfile->cdf, varid, aname, results) < 0) {
-        return db_perror("silonetcdf_ncattget", E_CALLFAIL, me);
-    }
-    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -1880,7 +1802,7 @@ db_cdf_ReadAtt(DBfile *_dbfile, char *vname, char *aname, void *results)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_cdf_ReadVar(DBfile *_dbfile, char *name, void *result)
+db_cdf_ReadVar(DBfile *_dbfile, char const *name, void *result)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_ReadVar";
@@ -1903,32 +1825,6 @@ db_cdf_ReadVar(DBfile *_dbfile, char *name, void *result)
     }
 
     return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    db_cdf_ReadVar1
- *
- * Purpose:     Reads one element from a variable into the provided
- *              space.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  matzke@viper
- *              Wed Jan 11 09:24:27 PST 1995
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-SILO_CALLBACK int
-db_cdf_ReadVar1(DBfile *_dbfile, char *vname, int offset, void *result)
-{
-    char          *me = "db_cdf_ReadVar1";
-
-    return db_perror("mismatched parameters to `silonetcdf_ncvarget1'", E_NOTIMP, me);
 }
 
 /*-------------------------------------------------------------------------
@@ -2015,13 +1911,14 @@ db_setdir (DBfile_cdf *dbfile, char *dirname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_cdf_SetDir(DBfile *_dbfile, char *path)
+db_cdf_SetDir(DBfile *_dbfile, char const *path)
 {
     DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
     char          *me = "db_cdf_SetDir";
     int            orig_dir = dbfile->pub.dirid;
     int            ierr=0, dirid;
     char          *subpath=NULL;
+    char          *pathcp = _db_safe_strdup(path);
 
     if (STR_EQUAL(path, "/") || STR_EQUAL(path, " ")) {
         db_setdir(dbfile, "/");
@@ -2035,7 +1932,7 @@ db_cdf_SetDir(DBfile *_dbfile, char *path)
 
         if (path[0] == '/')
             db_setdir(dbfile, "/");
-        subpath = (char *)strtok(path, "/");
+        subpath = (char *)strtok(pathcp, "/");
         while (subpath != NULL && !ierr) {
             if (db_setdir(dbfile, subpath) < 0)
                 ierr = 1;
@@ -2043,6 +1940,8 @@ db_cdf_SetDir(DBfile *_dbfile, char *path)
                 subpath = (char *)strtok(NULL, "/");
         }
     }
+
+    free(pathcp);
 
     dirid = silonetcdf_ncdirget(dbfile->cdf);
     if (ierr) {
@@ -2053,44 +1952,6 @@ db_cdf_SetDir(DBfile *_dbfile, char *path)
         dbfile->pub.dirid = dirid;
         DBNewToc(_dbfile);
     }
-
-    return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    db_cdf_SetDirID
- *
- * Purpose:     Sets the current directory withing the database.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  matzke@viper
- *              Wed Jan 11 09:39:38 PST 1995
- *
- * Modifications:
- *    Eric Brugger, Fri Jan 27 08:27:46 PST 1995
- *    I changed the call DBGetToc to db_cdf_GetToc.
- *
- *    Robb Matzke, Tue Mar 7 10:32:45 EST 1995
- *    I changed the call db_cdf_GetToc to DBNewToc.
- *
- *-------------------------------------------------------------------------
- */
-SILO_CALLBACK int
-db_cdf_SetDirID(DBfile *_dbfile, int dirid)
-{
-    DBfile_cdf    *dbfile = (DBfile_cdf *) _dbfile;
-    char          *me = "db_cdf_SetDirID";
-
-    if (silonetcdf_ncdirset(dbfile->cdf, dirid) < 0) {
-        return db_perror(NULL, E_NOTDIR, me);
-    }
-
-    /* Update directory ID and TOC */
-    dbfile->pub.dirid = silonetcdf_ncdirget(dbfile->cdf);
-    DBNewToc(_dbfile);
 
     return 0;
 }

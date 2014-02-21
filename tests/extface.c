@@ -1931,8 +1931,8 @@ main(int argc, char *argv[])
         t[i] = i;
     }
 
-    DBPutUcdmesh(dbfile, "mesh1", ndims, coordnames, (void *)coords, nnodes,
-                 nzones, "zl", "fl", DB_DOUBLE, optlist);
+    DBPutUcdmesh(dbfile, "mesh1", ndims, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, nnodes, nzones, "zl", "fl", DB_DOUBLE, optlist);
 
     matnames = (char**)malloc(sizeof(char*)*4);
     matnames[0] = strdup("Inner poles");

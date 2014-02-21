@@ -85,7 +85,7 @@ SILO_CALLBACK int db_debug_PutCompoundarray(
     DBoptlist const *
 );
 
-INTERNAL DBfile *db_debug_create(char *, int, int, int, char *);
-INTERNAL DBfile *db_debug_open(char *, int, int);
+INTERNAL DBfile *db_debug_create(char const *, int, int, int, char const *);
+INTERNAL DBfile *db_debug_open(char const *, int, int);
 
 #endif /* !DEBUG_PRIVATE_H */

@@ -62,6 +62,8 @@ in part under Contract DE-AC52-07NA27344.])
 AT_BANNER(Non-driver-specific)
 AT_SETUP(version)
 AT_DATA(expout,
+This version of the Silo library is greater than or equal to 4
+This version of the Silo library is NOT greater than or equal to 9
 This version of Silo is greater than or equal to 4.6
 This version of Silo is NOT greater than or equal to 90.5.2
 DBVersion() returns "AT_PACKAGE_VERSION"

@@ -317,44 +317,44 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     coords[2] = z;
 
 
-    DBPutPointmesh(dbfile, name, dims, coords, N, DB_FLOAT, optlist);
+    DBPutPointmesh(dbfile, name, dims, (DB_DTPTR2) coords, N, DB_FLOAT, optlist);
 
     DBAddOption(optlist, DBOPT_GHOST_NODE_LABELS, ghost_labels);
     sprintf(name2, "%s_wghost", name);
-    DBPutPointmesh(dbfile, name2, dims, coords, N, DB_FLOAT, optlist);
+    DBPutPointmesh(dbfile, name2, dims, (DB_DTPTR2) coords, N, DB_FLOAT, optlist);
     DBClearOption(optlist, DBOPT_GHOST_NODE_LABELS);
 
     vars[0] = d;
-    DBPutPointvar(dbfile, "d", name, 1, vars, N, DB_FLOAT, optlist);
+    DBPutPointvar(dbfile, "d", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
 
     vars[0] = u;
-    DBPutPointvar(dbfile, "u", name, 1, vars, N, DB_FLOAT, optlist);
+    DBPutPointvar(dbfile, "u", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
 
     vars[0] = v;
-    DBPutPointvar(dbfile, "v", name, 1, vars, N, DB_FLOAT, optlist);
+    DBPutPointvar(dbfile, "v", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
 
     vars[0] = vm1;
     DBClearOption(optlist1, DBOPT_HIDE_FROM_GUI);
-    DBPutPointvar(dbfile, "vm1", name, 1, vars, N, DB_FLOAT, optlist1);
+    DBPutPointvar(dbfile, "vm1", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist1);
 
     DBClearOption(optlist1, DBOPT_MISSING_VALUE);
     DBAddOption(optlist1, DBOPT_MISSING_VALUE, &missing_value2);
     vars[0] = vm2;
-    DBPutPointvar(dbfile, "vm2", name, 1, vars, N, DB_FLOAT, optlist1);
+    DBPutPointvar(dbfile, "vm2", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist1);
     DBClearOption(optlist1, DBOPT_MISSING_VALUE);
     DBAddOption(optlist1, DBOPT_HIDE_FROM_GUI, &one);
 
     if(dims == 3)
     {
         vars[0] = w;
-        DBPutPointvar(dbfile, "w", name, 1, vars, N, DB_FLOAT, optlist);
+        DBPutPointvar(dbfile, "w", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
     }
 
     vars[0] = (float *)itype;
-    DBPutPointvar(dbfile, "itype", name, 1, vars, N, DB_INT, optlist);
+    DBPutPointvar(dbfile, "itype", name, 1, (DB_DTPTR2) vars, N, DB_INT, optlist);
     
     vars[0] = t;
-    DBPutPointvar(dbfile, "t", name, 1, vars, N, DB_FLOAT, optlist1);
+    DBPutPointvar(dbfile, "t", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist1);
 
     build_defvars(dbfile, dims);
 
@@ -394,28 +394,28 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     DBClearOption(optlist, DBOPT_NODENUM);
     DBAddOption(optlist, DBOPT_NODENUM, litype);
     DBAddOption(optlist, DBOPT_LLONGNZNUM, &one);
-    DBPutPointmesh(dbfile, name, dims, coords, N, DB_FLOAT, optlist);
+    DBPutPointmesh(dbfile, name, dims, (DB_DTPTR2) coords, N, DB_FLOAT, optlist);
 
     vars[0] = d;
-    DBPutPointvar(dbfile, "d", name, 1, vars, N, DB_FLOAT, optlist);
+    DBPutPointvar(dbfile, "d", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
 
     vars[0] = u;
-    DBPutPointvar(dbfile, "u", name, 1, vars, N, DB_FLOAT, optlist);
+    DBPutPointvar(dbfile, "u", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
 
     vars[0] = v;
-    DBPutPointvar(dbfile, "v", name, 1, vars, N, DB_FLOAT, optlist);
+    DBPutPointvar(dbfile, "v", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
 
     if(dims == 3)
     {
         vars[0] = w;
-        DBPutPointvar(dbfile, "w", name, 1, vars, N, DB_FLOAT, optlist);
+        DBPutPointvar(dbfile, "w", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
     }
 
     vars[0] = (float *)itype;
-    DBPutPointvar(dbfile, "itype", name, 1, vars, N, DB_INT, optlist);
+    DBPutPointvar(dbfile, "itype", name, 1, (DB_DTPTR2) vars, N, DB_INT, optlist);
     
     vars[0] = t;
-    DBPutPointvar(dbfile, "t", name, 1, vars, N, DB_FLOAT, optlist);
+    DBPutPointvar(dbfile, "t", name, 1, (DB_DTPTR2) vars, N, DB_FLOAT, optlist);
 
     build_defvars(dbfile, dims);
 

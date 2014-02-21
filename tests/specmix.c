@@ -516,8 +516,8 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
   dims[0]=mesh.nx;
   dims[1]=mesh.ny;
 
-  DBPutQuadmesh(db, "Mesh", coordnames, coord, dims, 2, 
-		DB_FLOAT, DB_NONCOLLINEAR, NULL);
+  DBPutQuadmesh(db, "Mesh", (char const * const *) coordnames, (DB_DTPTR2) coord,
+      dims, 2, DB_FLOAT, DB_NONCOLLINEAR, NULL);
 
   /* Test outputting of ghost node and zone labels */
   {
@@ -540,21 +540,21 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
       strcpy(coordnames[0],"xn");
       strcpy(coordnames[1],"yn");
       DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
-      DBPutQuadmesh(db, "Mesh_gn", coordnames, coord, dims, 2, 
-		    DB_FLOAT, DB_NONCOLLINEAR, ol);
+      DBPutQuadmesh(db, "Mesh_gn", (char const * const *) coordnames,
+          (DB_DTPTR2) coord, dims, 2, DB_FLOAT, DB_NONCOLLINEAR, ol);
       DBClearOption(ol, DBOPT_GHOST_NODE_LABELS);
 
       strcpy(coordnames[0],"xz");
       strcpy(coordnames[1],"yz");
       DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, gz);
-      DBPutQuadmesh(db, "Mesh_gz", coordnames, coord, dims, 2, 
-		    DB_FLOAT, DB_NONCOLLINEAR, ol);
+      DBPutQuadmesh(db, "Mesh_gz", (char const * const *) coordnames,
+          (DB_DTPTR2) coord, dims, 2, DB_FLOAT, DB_NONCOLLINEAR, ol);
 
       strcpy(coordnames[0],"xnz");
       strcpy(coordnames[1],"ynz");
       DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
-      DBPutQuadmesh(db, "Mesh_gnz", coordnames, coord, dims, 2, 
-		    DB_FLOAT, DB_NONCOLLINEAR, ol);
+      DBPutQuadmesh(db, "Mesh_gnz", (char const * const *) coordnames,
+          (DB_DTPTR2) coord, dims, 2, DB_FLOAT, DB_NONCOLLINEAR, ol);
 
       DBFreeOptlist(ol);
       free(gn);
@@ -619,8 +619,8 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
   varbufs[3] = f2;
   varbufs[4] = f1;
   varbufs[5] = f2;
-  DBPutQuadvar(db, "manyc", "Mesh", 6, varnames, varbufs, dims, 2, NULL, 0,
-    DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar(db, "manyc", "Mesh", 6, (char const * const *) varnames,
+      (DB_DTPTR2) varbufs, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
 
   /* do Zone vars */
 
@@ -750,7 +750,7 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
   shapetyp[0]=DB_ZONETYPE_QUAD;
 
   DBPutZonelist2(db,"Mesh_zonelist",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,NULL);
-  DBPutUcdmesh (db,"Mesh",2,NULL,coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,NULL);
+  DBPutUcdmesh (db,"Mesh",2,NULL,(DB_DTPTR2)coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,NULL);
 
   /* test output of ghost node and zone labels */
   {
@@ -769,15 +769,15 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
       } 
 
       DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
-      DBPutUcdmesh (db,"Mesh_gn",2,NULL,coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,ol);
+      DBPutUcdmesh (db,"Mesh_gn",2,NULL,(DB_DTPTR2)coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,ol);
       DBClearOption(ol, DBOPT_GHOST_NODE_LABELS);
 
-      DBPutUcdmesh (db,"Mesh_gz",2,NULL,coord,nnodes,nzones,"Mesh_zonelist_gz",NULL,DB_FLOAT,NULL);
+      DBPutUcdmesh (db,"Mesh_gz",2,NULL,(DB_DTPTR2)coord,nnodes,nzones,"Mesh_zonelist_gz",NULL,DB_FLOAT,NULL);
       DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, gz);
       DBPutZonelist2(db,"Mesh_zonelist_gz",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,ol);
 
       DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
-      DBPutUcdmesh (db,"Mesh_gnz",2,NULL,coord,nnodes,nzones,"Mesh_zonelist_gnz",NULL,DB_FLOAT,ol);
+      DBPutUcdmesh (db,"Mesh_gnz",2,NULL,(DB_DTPTR2)coord,nnodes,nzones,"Mesh_zonelist_gnz",NULL,DB_FLOAT,ol);
       DBPutZonelist2(db,"Mesh_zonelist_gnz",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,ol);
 
       DBFreeOptlist(ol);
@@ -816,10 +816,8 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
     int val = DB_ON;
 
     DBAddOption(opt,DBOPT_USESPECMF,&val);
-    DBPutUcdvar1(db, "u", "Mesh", f1, nnodes, NULL, 0, DB_FLOAT,
-        DB_NODECENT, opt);
-    DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT,
-        DB_NODECENT, opt);
+    DBPutUcdvar1(db, "u", "Mesh", f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
     DBPutUcdvar1(db, "u", "Mesh", f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
     DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
     DBPutUcdvar1(db, "cnvar", "Mesh", cnvar, nnodes, NULL, 0, DB_CHAR, DB_NODECENT, opt);

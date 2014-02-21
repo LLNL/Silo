@@ -178,8 +178,8 @@ main(int argc, char *argv[])
         var[i] = x[i]+y[i]*z[i];
     }
 
-    DBPutUcdmesh(dbfile, "pyramid", 3, coordnames, coords, 5, 1, "zonelist",
-                 "facelist", DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "pyramid", 3, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 5, 1, "zonelist", "facelist", DB_FLOAT, NULL);
 
     matnos[0] = 1;
     matlist[0] = 1;

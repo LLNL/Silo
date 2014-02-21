@@ -258,7 +258,7 @@ build_ucd3(DBfile *dbfile, char *name)
       *  Write out the external facelist we defined
       *  above.
       *-------------------------------------------------*/
-    (void)DBPutFacelist(dbfile, "fl", NFACES, 3, fnodelist, LFNODELIST, 0,
+    DBPutFacelist(dbfile, "fl", NFACES, 3, fnodelist, LFNODELIST, 0,
                         fzoneno, &fshapesize, &fshapecnt, NFSHAPES,
                         NULL, NULL, 0);
 #else
@@ -269,7 +269,7 @@ build_ucd3(DBfile *dbfile, char *name)
     fl = (DBfacelist *) DBCalcExternalFacelist(znodelist, NNODES, 0,
                                        &zshapesize, &zshapecnt, NZSHAPES,
                                                matlist, 2);
-    (void)DBPutFacelist(dbfile, "fl", fl->nfaces, 3,
+    DBPutFacelist(dbfile, "fl", fl->nfaces, 3,
                         fl->nodelist, fl->lnodelist, 0,
                         fl->zoneno, fl->shapesize, fl->shapecnt,
                         fl->nshapes, NULL, NULL, 0);
@@ -279,7 +279,7 @@ build_ucd3(DBfile *dbfile, char *name)
       *  Write out the zonelist.
       *-------------------------------------------------*/
     DBSetDeprecateWarnings(0);
-    (void)DBPutZonelist(dbfile, "zl", NZONES, 3, znodelist, LZNODELIST, 0,
+    DBPutZonelist(dbfile, "zl", NZONES, 3, znodelist, LZNODELIST, 0,
                         &zshapesize, &zshapecnt, NZSHAPES);
     DBSetDeprecateWarnings(3);
 
@@ -293,26 +293,26 @@ build_ucd3(DBfile *dbfile, char *name)
     coordnames[1] = "Y";
     coordnames[2] = "Z";
 
-    meshid = DBPutUcdmesh(dbfile, name, 3, coordnames, coords,
-                          NNODES, NZONES, "zl", "fl", DB_FLOAT, NULL);
+    meshid = DBPutUcdmesh(dbfile, name, 3, (char const * const *) coordnames,
+                 (DB_DTPTR2) coords, NNODES, NZONES, "zl", "fl", DB_FLOAT, NULL);
 
      /*--------------------------------------------------
       *  Write out the material data.
       *-------------------------------------------------*/
-    (void)DBPutMaterial(dbfile, "material", name, 2, matnos, matlist,
+    DBPutMaterial(dbfile, "material", name, 2, matnos, matlist,
                         &dims, 1, NULL, NULL, NULL, NULL, 0, DB_FLOAT,
                         NULL);
 
      /*--------------------------------------------------
       *  Write out a zonal variable.
       *-------------------------------------------------*/
-    (void)DBPutUcdvar1(dbfile, "d", name, d, NZONES,
+    DBPutUcdvar1(dbfile, "d", name, d, NZONES,
                        NULL, 0, idatatype, DB_ZONECENT, NULL);
 
      /*--------------------------------------------------
       *  Write out a nodal variable.
       *-------------------------------------------------*/
-    (void)DBPutUcdvar1(dbfile, "u", name, u, NNODES,
+    DBPutUcdvar1(dbfile, "u", name, u, NNODES,
                        NULL, 0, idatatype, DB_NODECENT, NULL);
 
     return (meshid);

@@ -737,7 +737,7 @@ stc_walk1_DBmrgtree(obj_t _self, void *mem, int operation, walk_t *wdata)
        p++;
    }
 
-   DBWalkMrgtree(tree, stc_walk1_outmrgtree, wdata, DB_PREORDER);
+   DBWalkMrgtree(tree, (DBmrgwalkcb) stc_walk1_outmrgtree, wdata, DB_PREORDER);
    return;
 }
 

@@ -601,8 +601,8 @@ AC_ARG_ENABLE(optimization,
 
 dnl Conform to legacy API where datatype'd pointers are used
 SILO_DTYPPTR="void"
-SILO_DTYPPTR1="void*"
-SILO_DTYPPTR2="void*"
+SILO_DTYPPTR1="void const *"
+SILO_DTYPPTR2="void const * const *"
 AC_ARG_ENABLE(legacy-datatyped-pointers,
     AC_HELP_STRING([--enable-legacy-datatyped-pointers], 
         [compile using legacy (float) pointers for datatype'd pointers @<:@default=no@:>@]),

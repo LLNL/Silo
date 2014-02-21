@@ -712,7 +712,7 @@ uninstall-am: uninstall-binPROGRAMS
 %_moc.cpp: %.h
 	$(QT_MOC) -o $@ $<
 
-install-exec-hook: $(BUNDLE_TARGET)
+install-exec-hook: silex.app
 
 silex.app:
 	@if test -e $@; then \
@@ -723,7 +723,7 @@ silex.app:
 	mkdir $@/Contents; \
 	mkdir $@/Contents/MacOS; \
 	mkdir $@/Contents/Resources; \
-	{
+	{ \
 	  echo '<?xml version="1.0" encoding="UTF-8"?>'; \
 	  echo '<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">'; \
 	  echo '<plist version="1.0">'; \
@@ -738,7 +738,7 @@ silex.app:
 	  echo '        <string>SILX</string>'; \
 	  echo '</dict>'; \
 	  echo '</plist>'; \
-	} > $@/Contents/Info.plist
+	} > $@/Contents/Info.plist; \
 	echo 'APPLSILX' > $@/Contents/PkgInfo
 
 .PHONY: silex.app

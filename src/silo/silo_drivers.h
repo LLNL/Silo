@@ -128,7 +128,7 @@ be used for advertising or product endorsement purposes.
 #define DB_NETCDF_CREATE   NULL
 #define DB_NETCDF_FSINGLE  db_cdf_ForceSingle
 
-extern DBfile *db_cdf_Open(char *, int, int);
+extern DBfile *db_cdf_Open(char const *, int, int);
 extern int db_cdf_ForceSingle(int);
 
 #else
@@ -145,8 +145,8 @@ extern int db_cdf_ForceSingle(int);
 #define DB_PDBP_CREATE      db_pdbp_Create
 #define DB_PDBP_FSINGLE     db_pdbp_ForceSingle
 
-extern DBfile *db_pdbp_Open(char *, int, int);
-extern DBfile *db_pdbp_Create(char *, int, int, int, char *);
+extern DBfile *db_pdbp_Open(char const *, int, int);
+extern DBfile *db_pdbp_Create(char const *, int, int, int, char const *);
 extern int db_pdbp_ForceSingle(int);
 
 #else
@@ -163,8 +163,8 @@ extern int db_pdbp_ForceSingle(int);
 #define DB_PDB_CREATE      db_pdb_Create
 #define DB_PDB_FSINGLE     db_pdb_ForceSingle
 
-extern DBfile *db_pdb_Open(char *, int, int);
-extern DBfile *db_pdb_Create(char *, int, int, int, char *);
+extern DBfile *db_pdb_Open(char const *, int, int);
+extern DBfile *db_pdb_Create(char const *, int, int, int, char const *);
 extern int db_pdb_ForceSingle(int);
 
 #else
@@ -180,7 +180,7 @@ extern int db_pdb_ForceSingle(int);
 #define DB_TAURUS_CREATE   NULL
 #define DB_TAURUS_FSINGLE  NULL
 
-extern DBfile *db_taur_Open(char *, int, int);
+extern DBfile *db_taur_Open(char const *, int, int);
 
 #else
 #define DB_TAURUS_OPEN     NULL
@@ -195,7 +195,7 @@ extern DBfile *db_taur_Open(char *, int, int);
 #define DB_UNKNOWN_CREATE  NULL
 #define DB_UNKNOWN_FSINGLE NULL
 
-extern DBfile *db_unk_Open(char *, int, int);
+extern DBfile *db_unk_Open(char const *, int, int);
 
 #else
 #define DB_UNKNOWN_OPEN    NULL
@@ -210,8 +210,8 @@ extern DBfile *db_unk_Open(char *, int, int);
 #define DB_DEBUG_CREATE    db_debug_create
 #define DB_DEBUG_FSINGLE   NULL
 
-extern DBfile *db_debug_open(char *, int, int);
-extern DBfile *db_debug_create(char *, int, int, int, char *);
+extern DBfile *db_debug_open(char const *, int, int);
+extern DBfile *db_debug_create(char const *, int, int, int, char const *);
 
 #else
 #define DB_DEBUG_OPEN      NULL
@@ -226,8 +226,8 @@ extern DBfile *db_debug_create(char *, int, int, int, char *);
 #define DB_HDF5_CREATE     db_hdf5_Create
 #define DB_HDF5_FSINGLE    db_hdf5_ForceSingle
 
-extern DBfile *db_hdf5_Open(char*, int, int);
-extern DBfile *db_hdf5_Create(char*, int, int, int, char*);
+extern DBfile *db_hdf5_Open(char const *, int, int);
+extern DBfile *db_hdf5_Create(char const *, int, int, int, char const *);
 extern int db_hdf5_ForceSingle(int);
 
 #else
@@ -284,8 +284,8 @@ extern int db_hdf5_ForceSingle(int);
                          NULL,                  /*unused*/\
                          NULL}                  /*unused*/
 
-DBfile *(*DBOpenCB[DB_NFORMATS]) (char *, int, int) = DBOPENCB;
-DBfile *(*DBCreateCB[DB_NFORMATS]) (char *, int, int, int, char *) = DBCREATECB;
+DBfile *(*DBOpenCB[DB_NFORMATS]) (char const *, int, int) = DBOPENCB;
+DBfile *(*DBCreateCB[DB_NFORMATS]) (char const *, int, int, int, char const *) = DBCREATECB;
 int     (*DBFSingleCB[DB_NFORMATS]) (int) = DBFSINGLECB;
 #endif /* DB_MAIN */
 

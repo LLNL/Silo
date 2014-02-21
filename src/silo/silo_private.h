@@ -384,7 +384,7 @@ typedef struct context_t {
 #define REALLOC(P,T,N)  REALLOC_N((P),(T),(N))
 #define REALLOC_N(P,T,N)        ((T*)((N)>0?realloc((P),(size_t)((N)*sizeof(T))):0))
 #define FREE(M)         if(M){free(M);(M)=NULL;}
-#define STRDUP(S)               safe_strdup((S))
+#define STRDUP(S)               _db_safe_strdup((S))
 #define STRNDUP(S,N)            db_strndup((S),(N))
 
 #define SW_strndup(S,N) db_strndup((S),(N))
@@ -896,7 +896,7 @@ INTERNAL int db_ListDir2 (DBfile *, char **, int, int, char **,
                               int *);
 INTERNAL int CSGM_CalcExtents (int, int, int, const int*,
                                  const void *, double *, double *);
-INTERNAL int _DBQMCalcExtents (DB_DTPTR2, int, int *, int *, int *, int,
+INTERNAL int _DBQMCalcExtents (DB_DTPTR2, int, int const *, int const *, int const *, int,
                                    int, void *, void *);
 INTERNAL int UM_CalcExtents (DB_DTPTR2, int, int, int, void *,
                                  void *);
@@ -905,7 +905,7 @@ INTERNAL int _DBSubsetMinMax2 (DB_DTPTR1, int, float *, float *, int,
 INTERNAL int _DBSubsetMinMax3 (float *, int, float *, float *, int, int,
                                int, int, int, int, int, int);
 INTERNAL int db_ProcessOptlist (int, DBoptlist const * const);
-INTERNAL int db_VariableNameValid(char *);
+INTERNAL int db_VariableNameValid(char const *);
 INTERNAL int db_SplitShapelist (DBucdmesh *um);
 INTERNAL int db_ResetGlobalData_Csgmesh ();
 INTERNAL int db_ResetGlobalData_Mrgtree();
@@ -932,8 +932,8 @@ INTERNAL int   db_relative_path ( char *pathname );
 INTERNAL char *db_unsplit_path ( const db_Pathname *p );
 INTERNAL db_Pathname *db_split_path ( const char *pathname );
 INTERNAL const int *db_get_used_file_options_sets_ids();
-char   *safe_strdup (const char *);
+char   *_db_safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/
-#define strdup(s) safe_strdup(s)
+#define strdup(s) _db_safe_strdup(s)
 
 #endif /* !SILO_PRIVATE_H */

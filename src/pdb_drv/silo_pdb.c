@@ -591,7 +591,7 @@ PJ_GetObject(PDBfile *file_in, char const *objname_in, PJcomplist *tobj, int exp
     if (filename != NULL)
     {
         objname = varname;
-        if ((file = lite_PD_open(filename, "r")) == NULL)
+        if ((file = lite_PD_open((char*)filename, "r")) == NULL)
         {
             FREE (varname);
             FREE (filename);
@@ -1774,7 +1774,7 @@ static int const skipFirstSemicolon = 1;
  *      Moved here from pjobj.c so it could be made static (private).
  *--------------------------------------------------------------------*/
 PRIVATE int
-db_pdb_GetVarDatatype (PDBfile *pdb, char *varname) {
+db_pdb_GetVarDatatype (PDBfile *pdb, char const *varname) {
 
    syment        *ep;
    int            datatype;
@@ -1831,7 +1831,6 @@ db_pdb_InitCallbacks ( DBfile *dbfile )
     dbfile->pub.cd = db_pdb_SetDir;
     dbfile->pub.g_dir = db_pdb_GetDir;
     dbfile->pub.newtoc = db_pdb_NewToc;
-    dbfile->pub.cdid = NULL;            /*DBSetDirID() not supported    */
 #ifdef PDB_WRITE
     dbfile->pub.mkdir = db_pdb_MkDir;
 #endif
@@ -1842,9 +1841,6 @@ db_pdb_InitCallbacks ( DBfile *dbfile )
     dbfile->pub.g_varbl = db_pdb_GetVarByteLength;
     dbfile->pub.g_vartype = db_pdb_GetVarType;
     dbfile->pub.g_vardims = db_pdb_GetVarDims;
-    dbfile->pub.r_var1 = NULL;          /*DBReadVar1() not supported    */
-    dbfile->pub.g_attr = db_pdb_GetAtt;
-    dbfile->pub.r_att = db_pdb_ReadAtt;
 
     /* Variable I/O operations */
     dbfile->pub.g_var = db_pdb_GetVar;
@@ -2061,7 +2057,7 @@ db_pdb_close(DBfile *_dbfile)
  *    Changed error code for failure to open to E_DRVRCANTOPEN
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
-db_pdb_Open(char *name, int mode, int opts_set_id)
+db_pdb_Open(char const *name, int mode, int opts_set_id)
 {
     PDBfile        *pdb;
     DBfile_pdb     *dbfile;
@@ -2078,14 +2074,14 @@ db_pdb_Open(char *name, int mode, int opts_set_id)
     }
     if (mode == DB_READ)
     {
-        if (NULL == (pdb = lite_PD_open(name, "r")))
+        if (NULL == (pdb = lite_PD_open((char*)name, "r")))
         {
             db_perror(NULL, E_DRVRCANTOPEN, me);
             return NULL;
         }
     } else if (mode == DB_APPEND)
     {
-        if (NULL == (pdb = lite_PD_open(name, "a")))
+        if (NULL == (pdb = lite_PD_open((char*)name, "a")))
         {
             db_perror(NULL, E_DRVRCANTOPEN, me);
             return NULL;
@@ -2165,7 +2161,7 @@ db_pdb_Open(char *name, int mode, int opts_set_id)
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 INTERNAL DBfile *
-db_pdb_Create (char *name, int mode, int target, int opts_set_id, char *finfo)
+db_pdb_Create (char const *name, int mode, int target, int opts_set_id, char const *finfo)
 {
     DBfile_pdb     *dbfile;
     static char    *me = "db_pdb_create";
@@ -2224,7 +2220,7 @@ db_pdb_Create (char *name, int mode, int target, int opts_set_id, char *finfo)
 #endif
     db_pdb_InitCallbacks((DBfile *) dbfile);
 
-    if (NULL == (dbfile->pdb = lite_PD_open(name, "w")))
+    if (NULL == (dbfile->pdb = lite_PD_open((char*)name, "w")))
     {
         FREE(dbfile->pub.name);
         FREE(dbfile);
@@ -2454,7 +2450,7 @@ PJ_get_fullpath(
  *-------------------------------------------------------------------------*/
 PRIVATE int
 db_pdb_getobjinfo (PDBfile       *pdb,
-                   char          *name, /* Name of object to inquire about */
+                   char const    *name, /* Name of object to inquire about */
                    char          *type, /* Returned object type of 'name'  */
                    int           *num)  /* Returned number of elements */
 {
@@ -2510,7 +2506,7 @@ db_pdb_getobjinfo (PDBfile       *pdb,
  *-------------------------------------------------------------------------*/
 PRIVATE int
 db_pdb_getvarinfo (PDBfile       *pdb,
-                   char          *name,     /*Name of var to inquire about */
+                   char const    *name,     /*Name of var to inquire about */
                    char          *type,     /*Returned datatype of 'name' */
                    int           *num,      /*Returned number of elements */
                    int           *size,     /*Returned element size */
@@ -3195,39 +3191,6 @@ db_pdb_InqVarType(DBfile *_dbfile, char const *varname)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    db_pdb_GetAtt
- *
- * Purpose:     Allocate space for, and read, the given attribute of the
- *              given variable.
- *
- * Return:      Success:        pointer to result
- *
- *              Failure:        NULL
- *
- * Programmer:  matzke@viper
- *              Tue Nov  8 08:06:45 PST 1994
- *
- * Modifications:
- *     Sean Ahern, Sun Oct  1 03:07:41 PDT 1995
- *     Made "me" static.
- *-------------------------------------------------------------------------*/
-SILO_CALLBACK void *
-db_pdb_GetAtt (DBfile *_dbfile, char *varname, char *attname)
-{
-   void          *result;
-   DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
-   static char   *me = "db_pdb_GetAtt";
-
-   result = lite_PD_get_attribute(dbfile->pdb, varname, attname);
-   if (!result) {
-      db_perror("PD_get_attribute", E_CALLFAIL, me);
-      return NULL;
-   }
-   return result;
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:    db_pdb_GetObject
  *
  * Purpose:     Reads a group from a PDB file.
@@ -3266,15 +3229,15 @@ db_pdb_GetObject (DBfile *_file, char const *name)
     * integer type constant.
     */
    obj = malloc (sizeof (DBobject));
-   obj->name = safe_strdup (group->name);
-   obj->type = safe_strdup (group->type);
+   obj->name = _db_safe_strdup (group->name);
+   obj->type = _db_safe_strdup (group->type);
    obj->ncomponents = obj->maxcomponents = group->ncomponents;
    obj->comp_names = malloc (obj->maxcomponents * sizeof(char*));
    obj->pdb_names  = malloc (obj->maxcomponents * sizeof(char*));
 
    for (i=0; i<group->ncomponents; i++) {
-      obj->comp_names[i] = safe_strdup (group->comp_names[i]);
-      obj->pdb_names[i] = safe_strdup (group->pdb_names[i]);
+      obj->comp_names[i] = _db_safe_strdup (group->comp_names[i]);
+      obj->pdb_names[i] = _db_safe_strdup (group->pdb_names[i]);
    }
 
    PJ_rel_group (group);
@@ -3323,7 +3286,7 @@ db_pdb_GetObject (DBfile *_file, char const *name)
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBmaterial *
 db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
-                   char   *name)        /*Name of material object to return*/
+                   char   const *name)        /*Name of material object to return*/
 {
     DBmaterial *mm = NULL;
     DBfile_pdb *dbfile = (DBfile_pdb *) _dbfile;
@@ -3465,7 +3428,7 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBmatspecies *
 db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
-                      char   *objname)   /*Name of matspecies obj to return */
+                      char   const *objname)   /*Name of matspecies obj to return */
 {
    DBmatspecies  *mm;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -4008,7 +3971,7 @@ pdb_getvarinfo (PDBfile *pdbfile,
  *   Added support for namescheme/empty list options.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBmultimesh *
-db_pdb_GetMultimesh (DBfile *_dbfile, char *objname)
+db_pdb_GetMultimesh (DBfile *_dbfile, char const *objname)
 {
    DBmultimesh   *mm = NULL;
    int            ncomps, type;
@@ -4299,7 +4262,7 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
  *   Added support for namescheme/empty list options.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBmultivar *
-db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
+db_pdb_GetMultivar (DBfile *_dbfile, char const *objname)
 {
    DBmultivar    *mv = NULL;
    int            ncomps, type;
@@ -4440,7 +4403,7 @@ db_pdb_GetMultivar (DBfile *_dbfile, char *objname)
  *   Added support for namescheme/empty list options.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBmultimat *
-db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
+db_pdb_GetMultimat (DBfile *_dbfile, char const *objname)
 {
    DBmultimat    *mt = NULL;
    int            ncomps, type;
@@ -4563,7 +4526,7 @@ db_pdb_GetMultimat (DBfile *_dbfile, char *objname)
  *   Added support for namescheme/empty list options.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBmultimatspecies *
-db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
+db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
 {
    DBmultimatspecies *mms = NULL;
    int                ncomps, type;
@@ -4694,7 +4657,7 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char *objname)
  *      is whatever is stored in gnznodtype member. 
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBpointmesh *
-db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
+db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
 {
    DBpointmesh   *pm = NULL;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -4833,7 +4796,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char *objname)
  *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBmeshvar *
-db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
+db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
 {
    DBmeshvar     *mv = NULL;
    int            i;
@@ -4979,7 +4942,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char *objname)
  *      value of PJ_GetObject.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBquadmesh *
-db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
+db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
 {
     DBquadmesh     *qm = NULL;
     PJcomplist      tmp_obj;
@@ -5128,7 +5091,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char *objname)
  *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBquadvar *
-db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
+db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
 {
    DBquadvar     *qv = NULL;
    int            i;
@@ -5303,7 +5266,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char *objname)
  *      is whatever is stored in gnznodtype member. 
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBucdmesh *
-db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
+db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    DBucdmesh     *um = NULL;
@@ -5617,7 +5580,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char *meshname)
  *   db_StringListToStringArray.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK DBucdvar *
-db_pdb_GetUcdvar (DBfile *_dbfile, char *objname)
+db_pdb_GetUcdvar (DBfile *_dbfile, char const *objname)
 {
    DBucdvar      *uv = NULL;
    int            i;
@@ -5954,7 +5917,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
  *      value of PJ_GetObject.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBfacelist *
-db_pdb_GetFacelist(DBfile *_dbfile, char *objname)
+db_pdb_GetFacelist(DBfile *_dbfile, char const *objname)
 {
     DBfacelist          *fl=NULL;
     PJcomplist          tmp_obj;
@@ -6033,7 +5996,7 @@ db_pdb_GetFacelist(DBfile *_dbfile, char *objname)
  *      is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBzonelist *
-db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
+db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
 {
     DBzonelist          *zl = NULL;
     PJcomplist          tmp_obj;
@@ -6124,7 +6087,7 @@ db_pdb_GetZonelist(DBfile *_dbfile, char *objname)
  *      is whatever is stored in gnznodtype member. 
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK DBphzonelist *
-db_pdb_GetPHZonelist(DBfile *_dbfile, char *objname)
+db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
 {
     DBphzonelist          *phzl = NULL;
     PJcomplist          tmp_obj;
@@ -6291,7 +6254,7 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
  *     Made "me" static.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK void *
-db_pdb_GetVar (DBfile *_dbfile, char *name)
+db_pdb_GetVar (DBfile *_dbfile, char const *name)
 {
    static char   *me = "db_pdb_GetVar";
    char          *data;
@@ -6329,7 +6292,7 @@ db_pdb_GetVar (DBfile *_dbfile, char *name)
  * Modifications:
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_GetVarByteLength (DBfile *_dbfile, char *varname)
+db_pdb_GetVarByteLength (DBfile *_dbfile, char const *varname)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            number, size;
@@ -6359,7 +6322,7 @@ db_pdb_GetVarByteLength (DBfile *_dbfile, char *varname)
  *      weren't being used.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_GetVarDims (DBfile *_dbfile, char *varname, int maxdims, int *dims)
+db_pdb_GetVarDims (DBfile *_dbfile, char const *varname, int maxdims, int *dims)
 {
    DBfile_pdb   *dbfile = (DBfile_pdb *) _dbfile;
    static char  *me = "db_pdb_GetVarDims";
@@ -6392,7 +6355,7 @@ db_pdb_GetVarDims (DBfile *_dbfile, char *varname, int maxdims, int *dims)
  * Modifications:
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_GetVarType (DBfile *_dbfile, char *varname)
+db_pdb_GetVarType (DBfile *_dbfile, char const *varname)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            number, size;
@@ -6417,7 +6380,7 @@ db_pdb_GetVarType (DBfile *_dbfile, char *varname)
  * Modifications:
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_GetVarLength (DBfile *_dbfile, char *varname)
+db_pdb_GetVarLength (DBfile *_dbfile, char const *varname)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            number, size;
@@ -6447,7 +6410,7 @@ db_pdb_GetVarLength (DBfile *_dbfile, char *varname)
  *      Fixed a memory leak.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_InqMeshname (DBfile *_dbfile, char *vname, char *mname)
+db_pdb_InqMeshname (DBfile *_dbfile, char const *vname, char *mname)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    void          *v;
@@ -6536,35 +6499,6 @@ db_pdb_InqVarExists (DBfile *_dbfile, char const *varname)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    db_pdb_ReadAtt
- *
- * Purpose:     Reads the specified attribute value into the provided
- *              space.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  robb@cloud
- *              Mon Nov 21 21:00:56 EST 1994
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------*/
-SILO_CALLBACK int
-db_pdb_ReadAtt(DBfile *_dbfile, char *vname, char *attname, void *results)
-{
-   DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
-   char          *attval;
-
-   attval = lite_PD_get_attribute(dbfile->pdb, vname, attname);
-   memcpy(results, attval, lite_SC_arrlen(attval));
-   SFREE(attval);
-
-   return 0;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    db_pdb_ReadVar
  *
  * Purpose:     Reads a variable into the given space.
@@ -6581,7 +6515,7 @@ db_pdb_ReadAtt(DBfile *_dbfile, char *vname, char *attname, void *results)
  *     Made "me" static.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_ReadVar (DBfile *_dbfile, char *vname, void *result)
+db_pdb_ReadVar (DBfile *_dbfile, char const *vname, void *result)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    static char   *me = "db_pdb_ReadVar";
@@ -6609,8 +6543,8 @@ db_pdb_ReadVar (DBfile *_dbfile, char *vname, void *result)
  *     Made "me" static.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_ReadVarSlice (DBfile *_dbfile, char *vname, int *offset, int *length,
-                     int *stride, int ndims, void *result)
+db_pdb_ReadVarSlice (DBfile *_dbfile, char const *vname, int const *offset, int const *length,
+                     int const *stride, int ndims, void *result)
 {
    int            i;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -6623,7 +6557,7 @@ db_pdb_ReadVarSlice (DBfile *_dbfile, char *vname, int *offset, int *length,
       ind[3 * i + 2] = stride[i];
    }
 
-   if (!PJ_read_alt(dbfile->pdb, vname, result, ind)) {
+   if (!PJ_read_alt(dbfile->pdb, (char*)vname, result, ind)) {
       return db_perror("PJ_read_alt", E_CALLFAIL, me);
    }
    return 0;
@@ -6659,13 +6593,13 @@ db_pdb_ReadVarSlice (DBfile *_dbfile, char *vname, int *offset, int *length,
  *    Turned off the PJgroup cache when we change directories.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_SetDir (DBfile *_dbfile, char *path)
+db_pdb_SetDir (DBfile *_dbfile, char const *path)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    static char   *me = "db_pdb_SetDir";
    char           error_message[256];
 
-   if (1 == lite_PD_cd(dbfile->pdb, path)) {
+   if (1 == lite_PD_cd(dbfile->pdb, (char*) path)) {
       dbfile->pub.dirid = 0;
 
       /* We've changed directories, so we can't cache PJgroups any more */
@@ -6734,7 +6668,7 @@ db_pdb_Filters (DBfile *dbfile, FILE *stream)
  *    Changed strdup to safe_strdup.
  *-------------------------------------------------------------------------*/
 SILO_CALLBACK int
-db_pdb_GetComponentNames (DBfile *_dbfile, char *objname,
+db_pdb_GetComponentNames (DBfile *_dbfile, char const *objname,
                           char ***comp_names, char ***file_names)
 {
    PJgroup      *group = NULL ;
@@ -6749,7 +6683,7 @@ db_pdb_GetComponentNames (DBfile *_dbfile, char *objname,
     * First make sure that the specified object is type "Group *", otherwise
     * we'll get a segmentation fault deep within the PDB library!
     */
-   ep = lite_PD_inquire_entry (dbfile->pdb, objname, TRUE, NULL) ;
+   ep = lite_PD_inquire_entry (dbfile->pdb, (char*)objname, TRUE, NULL) ;
    if (!ep || strcmp(ep->type, "Group *")) return 0 ;
 
    /*
@@ -6769,8 +6703,8 @@ db_pdb_GetComponentNames (DBfile *_dbfile, char *objname,
    if (file_names)
        *file_names = (char**)malloc(group->ncomponents * sizeof(char *)) ;
    for (i=0; i<group->ncomponents; i++) {
-      if (comp_names) (*comp_names)[i] = safe_strdup (group->comp_names[i]) ;
-      if (file_names) (*file_names)[i] = safe_strdup (group->pdb_names[i]) ;
+      if (comp_names) (*comp_names)[i] = _db_safe_strdup (group->comp_names[i]) ;
+      if (file_names) (*file_names)[i] = _db_safe_strdup (group->pdb_names[i]) ;
    }
 
    return group->ncomponents ;
@@ -7488,12 +7422,12 @@ db_pdb_WriteSlice(
  *-------------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_MkDir (DBfile *_dbfile, char *name)
+db_pdb_MkDir (DBfile *_dbfile, char const *name)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    static char   *me = "db_pdb_MkDir";
 
-   if (!lite_PD_mkdir(dbfile->pdb, name)) {
+   if (!lite_PD_mkdir(dbfile->pdb, (char*) name)) {
       return db_perror("PD_mkdir", E_CALLFAIL, me);
    }
    return 0;
@@ -7847,10 +7781,22 @@ db_pdb_PutDefvars(
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutFacelist (DBfile *dbfile, char *name, int nfaces, int ndims,
-                    int *nodelist, int lnodelist, int origin,
-                    int *zoneno, int *shapesize, int *shapecnt, int nshapes,
-                    int *types, int *typelist, int ntypes)
+db_pdb_PutFacelist(
+    DBfile *dbfile,
+    char const *name,
+    int nfaces,
+    int ndims,
+    int const *nodelist,
+    int lnodelist,
+    int origin,
+    int const *zoneno,
+    int const *shapesize,
+    int const *shapecnt,
+    int nshapes,
+    int const *types,
+    int const *typelist,
+    int ntypes
+)
 {
    long           count[5];
    DBobject      *obj;
@@ -7954,12 +7900,23 @@ db_pdb_PutFacelist (DBfile *dbfile, char *name, int nfaces, int ndims,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
-                    int nmat, int matnos[], int matlist[],
-                    int dims[], int ndims,
-                    int mix_next[], int mix_mat[], int mix_zone[],
-                    DB_DTPTR1 mix_vf, int mixlen, int datatype,
-                    DBoptlist *optlist)
+db_pdb_PutMaterial(
+    DBfile *dbfile,
+    char const *name,
+    char const *mname,
+    int nmat,
+    int const *matnos,
+    int const *matlist,
+    int const *dims,
+    int ndims,
+    int const *mix_next,
+    int const *mix_mat,
+    int const *mix_zone,
+    DB_DTPTR1 mix_vf,
+    int mixlen,
+    int datatype,
+    DBoptlist const *optlist
+)
 {
    int            i, nels;
    long           count[3];
@@ -8097,11 +8054,11 @@ db_pdb_PutMaterial (DBfile *dbfile, char *name, char *mname,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMatspecies (DBfile *dbfile, char *name, char *matname,
-                      int nmat, int nmatspec[], int speclist[],
-                      int dims[], int ndims, int nspecies_mf,
-                      DB_DTPTR1 species_mf, int mix_speclist[],
-                      int mixlen, int datatype, DBoptlist *optlist) {
+db_pdb_PutMatspecies (DBfile *dbfile, char const *name, char const *matname,
+                      int nmat, int const *nmatspec, int const *speclist,
+                      int const *dims, int ndims, int nspecies_mf,
+                      DB_DTPTR1 species_mf, int const *mix_speclist,
+                      int mixlen, int datatype, DBoptlist const *optlist) {
 
    long           count[3];
    int            i, nels, nstrs;
@@ -8749,8 +8706,8 @@ db_pdb_PutMultimeshadj (DBfile *_dbfile, char const *name, int nmesh,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
-                    char *varnames[], int vartypes[], DBoptlist *optlist) {
+db_pdb_PutMultivar (DBfile *dbfile, char const *name, int nvars,
+                    char const * const *varnames, int const *vartypes, DBoptlist const *optlist) {
 
    int            i, len;
    long           count[3];
@@ -8951,8 +8908,8 @@ db_pdb_PutMultivar (DBfile *dbfile, char *name, int nvars,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
-                    char *matnames[], DBoptlist *optlist) {
+db_pdb_PutMultimat (DBfile *dbfile, char const *name, int nmats,
+                    char const * const *matnames, DBoptlist const *optlist) {
 
    int            i, len;
    long           count[3];
@@ -9163,8 +9120,8 @@ db_pdb_PutMultimat (DBfile *dbfile, char *name, int nmats,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
-                    char *specnames[], DBoptlist *optlist) {
+db_pdb_PutMultimatspecies (DBfile *dbfile, char const *name, int nspec,
+                    char const * const *specnames, DBoptlist const *optlist) {
 
    int            i, len, nstrs;
    long           count[3];
@@ -9370,8 +9327,8 @@ db_pdb_PutMultimatspecies (DBfile *dbfile, char *name, int nspec,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
-                     int nels, int datatype, DBoptlist *optlist) {
+db_pdb_PutPointmesh (DBfile *dbfile, char const *name, int ndims, DB_DTPTR2 _coords,
+                     int nels, int datatype, DBoptlist const *optlist) {
 
    int            i;
    long           count[3];
@@ -9572,9 +9529,9 @@ db_pdb_PutPointmesh (DBfile *dbfile, char *name, int ndims, DB_DTPTR2 _coords,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
+db_pdb_PutPointvar (DBfile *dbfile, char const *name, char const *meshname, int nvars,
                     DB_DTPTR2 _vars, int nels, int datatype,
-                    DBoptlist *optlist) {
+                    DBoptlist const *optlist) {
 
    int            i;
    long           count[3];
@@ -9729,9 +9686,9 @@ db_pdb_PutPointvar (DBfile *dbfile, char *name, char *meshname, int nvars,
 #ifdef PDB_WRITE
 /* ARGSUSED */
 SILO_CALLBACK int
-db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
-                    DB_DTPTR2 _coords, int dims[], int ndims, int datatype,
-                    int coordtype, DBoptlist *optlist)
+db_pdb_PutQuadmesh (DBfile *dbfile, char const *name, char const * const *coordnames,
+                    DB_DTPTR2 _coords, int const *dims, int ndims, int datatype,
+                    int coordtype, DBoptlist const *optlist)
 {
     int             i;
     long            count[3];
@@ -9739,7 +9696,7 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
     char           *datatype_str;
     DBobject       *obj;
     char            tmp[1024];
-    DB_DTPTR      **coords = (DB_DTPTR**) _coords;
+    DB_DTPTR2       coords = _coords;
 
     /* The following is declared as double for worst case. */
     double         min_extents[3], max_extents[3];
@@ -9934,10 +9891,10 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char *name, char *coordnames[],
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutQuadvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
-                   char *varnames[], DB_DTPTR2 _vars, int dims[], int ndims,
+db_pdb_PutQuadvar (DBfile *_dbfile, char const *name, char const *meshname, int nvars,
+                   char const * const *varnames, DB_DTPTR2 _vars, int const *dims, int ndims,
                    DB_DTPTR2 _mixvars, int mixlen, int datatype, int centering,
-                   DBoptlist *optlist) {
+                   DBoptlist const *optlist) {
 
    DBfile_pdb   *dbfile = (DBfile_pdb *) _dbfile;
    int          i, nels;
@@ -10164,7 +10121,7 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
                    int const *typeflags, int const *bndids,
                    void const *coeffs, int lcoeffs, int datatype,
                    double const *extents, char const *zlname,
-                   DBoptlist *optlist) {
+                   DBoptlist const *optlist) {
 
    long           count[3];
    DBobject      *obj;
@@ -10176,7 +10133,7 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
     *-------------------------------------------------------------*/
    strcpy(_csgm._meshname, name);
 
-   db_InitCsg(dbfile, (char*) name, optlist);
+   db_InitCsg(dbfile, name, optlist);
 
    obj = DBMakeObject(name, DB_CSGMESH, 34);
 
@@ -10299,9 +10256,9 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
 #ifdef PDB_WRITE
 SILO_CALLBACK int
 db_pdb_PutCsgvar (DBfile *_dbfile, char const *name, char const *meshname,
-                  int nvars, char *varnames[], void *vars[],
+                  int nvars, char const * const *varnames, void const * const *vars,
                   int nels, int datatype, int centering,
-                  DBoptlist *optlist) {
+                  DBoptlist const *optlist) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            i;
@@ -10310,7 +10267,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, char const *name, char const *meshname,
    char          *suffix, *datatype_str, tmp1[256], tmp2[256];
    static char   *me = "db_pdb_PutCsgvar";
 
-   db_InitCsg(_dbfile, (char*) name, optlist);
+   db_InitCsg(_dbfile, name, optlist);
 
    obj = DBMakeObject(name, DB_CSGVAR, nvars+19);
 
@@ -10451,7 +10408,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, char const *name, int nregs,
                  int const *typeflags,
                  int const *leftids, int const *rightids,
                  void const *xforms, int lxforms, int datatype,
-                 int nzones, int const *zonelist, DBoptlist *optlist) {
+                 int nzones, int const *zonelist, DBoptlist const *optlist) {
 
    long           count[1];
    DBobject      *obj;
@@ -10568,16 +10525,16 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, char const *name, int nregs,
 #ifdef PDB_WRITE
 /* ARGSUSED */
 SILO_CALLBACK int
-db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
-                   DB_DTPTR2 _coords, int nnodes, int nzones, char *zlname,
-                   char *flname, int datatype, DBoptlist *optlist) {
+db_pdb_PutUcdmesh (DBfile *dbfile, char const *name, int ndims, char const * const *coordnames,
+                   DB_DTPTR2 _coords, int nnodes, int nzones, char const *zlname,
+                   char const *flname, int datatype, DBoptlist const *optlist) {
 
    int            i;
    long           count[3];
    DBobject      *obj;
    char          *datatype_str;
    char           tmp[256];
-   DB_DTPTR     **coords = (DB_DTPTR**) _coords;
+   DB_DTPTR2      coords = _coords;
 
    /* Following is declared as double for worst case */
    double         min_extents[3], max_extents[3];
@@ -10748,9 +10705,9 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char *name, int ndims, char *coordnames[],
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
-                      int nzones, char *zlname, char *flname,
-                      DBoptlist *optlist) {
+db_pdb_PutUcdsubmesh (DBfile *dbfile, char const *name, char const *parentmesh,
+                      int nzones, char const *zlname, char const *flname,
+                      DBoptlist const *optlist) {
 
    int            i;
    DBobject      *obj;
@@ -10949,10 +10906,10 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char *name, char *parentmesh,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
-                  char *varnames[], DB_DTPTR2 _vars, int nels, DB_DTPTR2 _mixvars,
+db_pdb_PutUcdvar (DBfile *_dbfile, char const *name, char const *meshname, int nvars,
+                  char const * const *varnames, DB_DTPTR2 _vars, int nels, DB_DTPTR2 _mixvars,
                   int mixlen, int datatype, int centering,
-                  DBoptlist *optlist) {
+                  DBoptlist const *optlist) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            i;
@@ -11118,9 +11075,9 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char *name, char *meshname, int nvars,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutZonelist (DBfile *dbfile, char *name, int nzones, int ndims,
-                    int nodelist[], int lnodelist, int origin, int shapesize[],
-                    int shapecnt[], int nshapes) {
+db_pdb_PutZonelist (DBfile *dbfile, char const *name, int nzones, int ndims,
+                    int const *nodelist, int lnodelist, int origin, int const *shapesize,
+                    int const *shapecnt, int nshapes) {
 
    long           count[5];
    DBobject      *obj;
@@ -11188,11 +11145,11 @@ db_pdb_PutZonelist (DBfile *dbfile, char *name, int nzones, int ndims,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
-                     int nodelist[], int lnodelist, int origin,
-                     int lo_offset, int hi_offset, int shapetype[],
-                     int shapesize[], int shapecnt[], int nshapes,
-                     DBoptlist *optlist) {
+db_pdb_PutZonelist2 (DBfile *dbfile, char const *name, int nzones, int ndims,
+                     int const *nodelist, int lnodelist, int origin,
+                     int lo_offset, int hi_offset, int const *shapetype,
+                     int const *shapesize, int const *shapecnt, int nshapes,
+                     DBoptlist const *optlist) {
 
    long           count[5];
    DBobject      *obj;
@@ -11288,11 +11245,11 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char *name, int nzones, int ndims,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 SILO_CALLBACK int
-db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
-   int nfaces, int *nodecnt, int lnodelist, int *nodelist, char *extface,
-   int nzones, int *facecnt, int lfacelist, int *facelist,
+db_pdb_PutPHZonelist (DBfile *dbfile, char const *name,
+   int nfaces, int const *nodecnt, int lnodelist, int const *nodelist, char const *extface,
+   int nzones, int const *facecnt, int lfacelist, int const *facelist,
    int origin, int lo_offset, int hi_offset,
-   DBoptlist *optlist) {
+   DBoptlist const *optlist) {
 
    long           count[1];
    DBobject      *obj;
@@ -11399,7 +11356,7 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char *name,
 /* ARGSUSED */
 SILO_CALLBACK int
 db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
-    char const *mesh_name, DBmrgtree *tree, DBoptlist *optlist)
+    char const *mesh_name, DBmrgtree const *tree, DBoptlist const *optlist)
 {
     int                 i, j, n, len, pass, num_nodes = tree->num_nodes;
     int                 tot_segs, tot_children;
@@ -11420,7 +11377,7 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
     ltree = (DBmrgtnode **) malloc(num_nodes * sizeof(DBmrgtnode*));
 
     /* walk tree to populate the linearized list of nodes ptrs */
-    DBWalkMrgtree(tree, DBLinearizeMrgtree, ltree, DB_POSTORDER);
+    DBWalkMrgtree(tree, (DBmrgwalkcb) DBLinearizeMrgtree, ltree, DB_POSTORDER);
 
     /* form an array of the integer, scalar data at each node */
     intArray = (int *) malloc(num_nodes * sizeof(int) * 6);
@@ -11613,9 +11570,9 @@ db_pdb_PutMrgtree(DBfile *dbfile, char const *name,
 /* ARGSUSED */
 SILO_CALLBACK int
 db_pdb_PutGroupelmap(DBfile *dbfile, char const *name,
-    int num_segments, int *groupel_types, int *segment_lengths,
-    int *segment_ids, int **segment_data, void **segment_fracs,
-    int fracs_data_type, DBoptlist *opts)
+    int num_segments, int const *groupel_types, int const *segment_lengths,
+    int const *segment_ids, int const * const *segment_data, void const * const *segment_fracs,
+    int fracs_data_type, DBoptlist const *opts)
 {
    int            i, j, tot_len;
    int           *intArray;
@@ -11738,9 +11695,9 @@ db_pdb_PutGroupelmap(DBfile *dbfile, char const *name,
 #ifdef PDB_WRITE
 SILO_CALLBACK int
 db_pdb_PutMrgvar(DBfile *_dbfile, char const *name, char const *mrgt_name,
-    int ncomps, char **compnames,
-    int nregns, char **reg_pnames,
-    int datatype, void **data, DBoptlist *optlist)
+    int ncomps, char const * const *compnames,
+    int nregns, char const * const *reg_pnames,
+    int datatype, void const * const *data, DBoptlist const *optlist)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            i, nstrs;
@@ -11884,7 +11841,7 @@ db_pdb_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE int
-db_InitCsg(DBfile *_dbfile, char *meshname, DBoptlist *optlist) {
+db_InitCsg(DBfile *_dbfile, char const *meshname, DBoptlist const *optlist) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    long           count[3];
@@ -11946,7 +11903,7 @@ db_InitCsg(DBfile *_dbfile, char *meshname, DBoptlist *optlist) {
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE int
-db_InitPoint (DBfile *_dbfile, DBoptlist *optlist, int ndims, int nels) {
+db_InitPoint (DBfile *_dbfile, DBoptlist const *optlist, int ndims, int nels) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    long           count[3];
@@ -12033,8 +11990,8 @@ db_InitPoint (DBfile *_dbfile, DBoptlist *optlist, int ndims, int nels) {
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE int
-db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
-             int dims[], int ndims) {
+db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
+             int const *dims, int ndims) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            i;
@@ -12170,7 +12127,7 @@ db_InitQuad (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE int
-db_InitUcd (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
+db_InitUcd (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
             int ndims, int nnodes, int nzones) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
@@ -12267,7 +12224,7 @@ db_InitUcd (DBfile *_dbfile, char *meshname, DBoptlist *optlist,
 #ifdef PDB_WRITE
 /* ARGSUSED */
 PRIVATE int
-db_InitZonelist (DBfile *_dbfile, DBoptlist *optlist)
+db_InitZonelist (DBfile *_dbfile, DBoptlist const *optlist)
 {
    /*--------------------------------------------------
     *  Process the given option list (this function
@@ -12297,7 +12254,7 @@ db_InitZonelist (DBfile *_dbfile, DBoptlist *optlist)
 #ifdef PDB_WRITE
 /* ARGSUSED */
 PRIVATE int
-db_InitPHZonelist (DBfile *_dbfile, DBoptlist *optlist)
+db_InitPHZonelist (DBfile *_dbfile, DBoptlist const *optlist)
 {
    /*--------------------------------------------------
     *  Process the given option list (this function
@@ -12326,7 +12283,7 @@ db_InitPHZonelist (DBfile *_dbfile, DBoptlist *optlist)
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE void
-db_build_shared_names_csgmesh(DBfile *_dbfile, char *meshname) {
+db_build_shared_names_csgmesh(DBfile *_dbfile, char const *meshname) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
 
@@ -12363,7 +12320,7 @@ db_build_shared_names_csgmesh(DBfile *_dbfile, char *meshname) {
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE void
-db_build_shared_names_quadmesh (DBfile *_dbfile, char *meshname) {
+db_build_shared_names_quadmesh (DBfile *_dbfile, char const *meshname) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
 
@@ -12427,7 +12384,7 @@ db_ResetGlobalData_phzonelist (void) {
  *--------------------------------------------------------------------*/
 #ifdef PDB_WRITE
 PRIVATE void
-db_build_shared_names_ucdmesh (DBfile *_dbfile, char *meshname) {
+db_build_shared_names_ucdmesh (DBfile *_dbfile, char const *meshname) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
 

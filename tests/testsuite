@@ -1954,8 +1954,8 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 cat >expout <<'_ATEOF'
-This version of Silo is greater than or equal to 4.6
-This version of Silo is NOT greater than or equal to 90.5.2
+This version of the Silo library is greater than or equal to 4.6
+This version of the Silo library is NOT greater than or equal to 90.5.2
 DBVersion() returns "4.10.0-pre1"
 DBVersionGE(4,6,0) returns 1
 DBVersionGE(90,5,2) returns 0

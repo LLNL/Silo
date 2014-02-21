@@ -227,11 +227,10 @@ main(int argc, char *argv[])
     |
     +-------------------------------------*/
 
-    DBPutUcdmesh(dbfile, "parent", 3, coordnames, coords, 12, 2, "Pzonelist",
-                 "Pfacelist", DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "parent", 3, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 12, 2, "Pzonelist", "Pfacelist", DB_FLOAT, NULL);
 
-    DBPutUcdvar1(dbfile, "v", "parent", Pvar, 12, NULL, 0, DB_FLOAT, DB_NODECENT,
-                 NULL);
+    DBPutUcdvar1(dbfile, "v", "parent", Pvar, 12, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
 
     Pnodelist[ 0] =  0;	/* The first hex */
     Pnodelist[ 1] =  1;
@@ -281,8 +280,7 @@ main(int argc, char *argv[])
     +-------------------------------------*/
 
     DBSetDeprecateWarnings(0);
-    DBPutUcdsubmesh(dbfile, "child", "parent", 1, "Czonelist",
-                 "Cfacelist", NULL);
+    DBPutUcdsubmesh(dbfile, "child", "parent", 1, "Czonelist", "Cfacelist", NULL);
     DBSetDeprecateWarnings(3);
 
     Cnodelist[ 0] =  1;	/* Just one hex, refering to parent nodes */

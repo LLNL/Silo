@@ -248,11 +248,14 @@ BuildExprTree(const char **porig)
 }
 
 /* very simple circular cache for a handful of embedded strings */
-static int SaveInternalString(DBnamescheme *ns, const char *sval)
+static int SaveInternalString(DBnamescheme const *ns, const char *sval)
 {
-    int modn = ns->nembed++ % DB_MAX_EXPSTRS;
-    FREE(ns->embedstrs[modn]);
-    ns->embedstrs[modn] = STRDUP(sval);
+    /* The modn/embedstrs portion of a namescheme is 'internal' state
+       allowed to disobey const rules */
+    DBnamescheme *non_const_ns = (DBnamescheme*) ns;
+    int modn = non_const_ns->nembed++ % DB_MAX_EXPSTRS;
+    FREE(non_const_ns->embedstrs[modn]);
+    non_const_ns->embedstrs[modn] = STRDUP(sval);
     return modn;
 }
 
@@ -276,7 +279,7 @@ static char * SaveReturnedString(char const * retstr)
 }
 
 static int
-EvalExprTree(DBnamescheme *ns, DBexprnode *tree, int n)
+EvalExprTree(DBnamescheme const *ns, DBexprnode *tree, int n)
 {
     if (tree == 0)
         return 0;
@@ -533,7 +536,7 @@ DBMakeNamescheme(const char *fmt, ...)
 }
 
 PUBLIC const char *
-DBGetName(DBnamescheme *ns, int natnum)
+DBGetName(DBnamescheme const *ns, int natnum)
 {
     char *currentExpr, *tmpExpr;
     static char retval[1024];

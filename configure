@@ -23199,8 +23199,8 @@ fi
 
 
 SILO_DTYPPTR="void"
-SILO_DTYPPTR1="void*"
-SILO_DTYPPTR2="void*"
+SILO_DTYPPTR1="void const *"
+SILO_DTYPPTR2="void const * const *"
 # Check whether --enable-legacy-datatyped-pointers was given.
 if test "${enable_legacy_datatyped_pointers+set}" = set; then
   enableval=$enable_legacy_datatyped_pointers; if test $enableval = yes; then

@@ -219,17 +219,17 @@ build_ucd(DBfile *dbfile, char *name)
     vars[0] = d;
     varnames[0] = "d";
 
-    (void)DBPutFacelist(dbfile, "fl", NFACES, 2, fnodelist, LFNODELIST, 0,
+    DBPutFacelist(dbfile, "fl", NFACES, 2, fnodelist, LFNODELIST, 0,
                         NULL, &fshapesize, &fshapecnt, NFSHAPES,
                         NULL, NULL, 0);
 
     DBSetDeprecateWarnings(0);
-    (void)DBPutZonelist(dbfile, "zl", NZONES, 2, znodelist, LZNODELIST, 0,
+    DBPutZonelist(dbfile, "zl", NZONES, 2, znodelist, LZNODELIST, 0,
                         &zshapesize, &zshapecnt, NZSHAPES);
     DBSetDeprecateWarnings(3);
 
-    (void)DBPutUcdmesh(dbfile, name, 2, coordnames, coords,
-                       NNODES, NZONES, "zl", NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, name, 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, NNODES, NZONES, "zl", NULL, DB_FLOAT, NULL);
 
     vars[0] = d;
     varnames[0] = "d";
@@ -239,20 +239,20 @@ build_ucd(DBfile *dbfile, char *name)
 
         sprintf(vname, "d%d", i);
 
-        (void)DBPutUcdvar1(dbfile, vname, name, vars[0], NZONES,
+        DBPutUcdvar1(dbfile, vname, name, vars[0], NZONES,
                            NULL, 0, idatatype, DB_ZONECENT, NULL);
     }
 
     vars[0] = u;
     varnames[0] = "u";
 
-    (void)DBPutUcdvar(dbfile, varnames[0], name, 1, varnames, vars, NNODES,
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames, (DB_DTPTR2) vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = v;
     varnames[0] = "v";
 
-    (void)DBPutUcdvar(dbfile, varnames[0], name, 1, varnames, vars, NNODES,
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames, (DB_DTPTR2) vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = u;
@@ -260,7 +260,7 @@ build_ucd(DBfile *dbfile, char *name)
     vars[1] = v;
     varnames[1] = "vcomp";
 
-    (void)DBPutUcdvar(dbfile, "velocity", name, 2, varnames, vars, NNODES,
+    DBPutUcdvar(dbfile, "velocity", name, 2, (char const * const *) varnames, (DB_DTPTR2) vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
     /* test writing more than 2 or 3 component variable */
@@ -277,13 +277,13 @@ build_ucd(DBfile *dbfile, char *name)
     vars[5] = v;
     varnames[5] = "vcompm_copy";
 
-    (void)DBPutUcdvar(dbfile, "many_comps", name, 6, varnames, vars, NNODES,
+    DBPutUcdvar(dbfile, "many_comps", name, 6, (char const * const *) varnames, (DB_DTPTR2) vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
 
     dims = NZONES;
 
-    (void)DBPutMaterial(dbfile, "material", name, NMATS, matnos,
+    DBPutMaterial(dbfile, "material", name, NMATS, matnos,
                         matlist, &dims, 1, mix_next, mix_mat, mix_zone,
                         mix_vf, mixlen, DB_FLOAT, NULL);
 #if 0
@@ -299,7 +299,7 @@ build_ucd(DBfile *dbfile, char *name)
     DBConvertMat(NMATS, NZONES, nmix, mixedels, imatlist, matnos, vf, DB_FLOAT,
                  &mixlen, matlist, mix_next, mix_mat, mix_zone, mix_vf);
 
-    (void)DBPutMaterial(dbfile, "material", name, matnos, NMATS,
+    DBPutMaterial(dbfile, "material", name, matnos, NMATS,
                         matlist, &dims, 1, mix_next, mix_mat, mix_zone,
                         mix_vf, mixlen, DB_FLOAT, NULL);
 #endif

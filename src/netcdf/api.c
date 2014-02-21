@@ -158,7 +158,7 @@ int            _dims[30];
  */
 /* ARGSUSED */
 INTERNAL int
-silonetcdf_ncopen (char *filename, int mode)
+silonetcdf_ncopen (char const *filename, int mode)
 {
    PDBfile       *pdb_file;    /* PDB File descriptor. */
    int            dbid;        /* Database identifier. */
@@ -167,7 +167,7 @@ silonetcdf_ncopen (char *filename, int mode)
    silo_Init();
 
    /* Attempt to open file. */
-   if ((pdb_file = lite_PD_open(filename, "r")) == NULL) {
+   if ((pdb_file = lite_PD_open((char*)filename, "r")) == NULL) {
       /* Not a SILO file. */
       /* silo_Error (lite_PD_err, SILO_ERROR); */
       silo_Error("File is not a SILO file.", SILO_ERROR);

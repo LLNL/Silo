@@ -219,8 +219,8 @@ main(int argc, char *argv[])
       dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, 
          "Native Driver I/O Test", driver);
 
-    DBPutQuadmesh(dbfile, "mesh", coordnames, coords, dims, ndims,
-        DB_FLOAT, DB_NONCOLLINEAR, NULL);
+    DBPutQuadmesh(dbfile, "mesh", (char const * const *) coordnames,
+        (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_NONCOLLINEAR, NULL);
     DBPutQuadvar1(dbfile, "foo", "mesh", var, dims, ndims,
                              NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
     DBPutQuadvar1(dbfile, "bar", "mesh", var, dims, ndims,

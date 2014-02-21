@@ -106,9 +106,9 @@ main(int argc, char *argv[])
     char 	    *filename = "empty.silo";
     int             show_all_errors = FALSE;
     int             i, pass;
-    char           *cnames[3] = {"x","y","z"};
-    void           *coords[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
-    void           *vars[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
+    char const * const cnames[3] = {"x","y","z"};
+    DB_DTPTR1       coords[3] = {(DB_DTPTR1)1,(DB_DTPTR1)2,(DB_DTPTR1)3}; /* really funky dummy pointers */
+    DB_DTPTR1       vars[3] = {(DB_DTPTR1)1,(DB_DTPTR1)2,(DB_DTPTR1)3}; /* really funky dummy pointers */
     void           *var = (void*)1;
     int             iarr[3] = {1,1,1}; /* dummy int array */
     double          exts[4] = {0,0,0,0};

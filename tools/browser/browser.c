@@ -462,7 +462,7 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
  */
 #if defined(HAVE_READLINE_READLINE_H) && defined(HAVE_LIBREADLINE)
 static char *
-browser_rl_obj_generator (char *text, int state) {
+browser_rl_obj_generator (char const *text, int state) {
 
    obj_t        f1, val;
    int          i, n;
@@ -1429,7 +1429,15 @@ main(int argc, char *argv[])
     /* We have our own readline completion function that tries to complete
      * object names instead of the standard completion function that tries
      * to complete file names. */
-    rl_completion_entry_function = (char *(*)(const char *, int)) browser_rl_obj_generator;
+#ifdef RL_READLINE_VERSION
+#   if RL_READLINE_VERSION >= 0x602
+        rl_completion_entry_function = (rl_compentry_func_t *) browser_rl_obj_generator;
+#   else
+        rl_completion_entry_function = (Function *) browser_rl_obj_generator;
+#   endif
+#else
+    rl_completion_entry_function = browser_rl_obj_generator;
+#endif
 #endif /*HAVE_READLINE_READLINE_H && HAVE_LIBREADLINE*/
 
 #if defined(HAVE_READLINE_HISTORY_H) && defined(HAVE_READLINE_HISTORY)

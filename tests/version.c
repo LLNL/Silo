@@ -113,6 +113,18 @@ main(int argc, char *argv[])
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
+    /* test version macro with 1 digit version number */
+#if SILO_VERSION_GE(4,,)
+    printf("This version of the Silo library is greater than or equal to 4\n");
+#else
+    printf("This version of the Silo library is NOT greater than or equal to 4\n");
+#endif
+#if SILO_VERSION_GE(9,,)
+    printf("This version of the Silo library is greater than or equal to 9\n");
+#else
+    printf("This version of the Silo library is NOT greater than or equal to 9\n");
+#endif
+
     /* test version macro with 2 digit version number */
 #if SILO_VERSION_GE(4,6,)
     printf("This version of the Silo library is greater than or equal to 4.6\n");

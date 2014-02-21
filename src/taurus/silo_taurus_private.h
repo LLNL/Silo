@@ -76,19 +76,19 @@ typedef struct DBfile_taur {
 #ifndef SILO_NO_CALLBACKS
 SILO_CALLBACK int db_taur_Close(DBfile *);
 SILO_CALLBACK int db_taur_GetDir(DBfile *, char *);
-SILO_CALLBACK int db_taur_SetDir(DBfile *, char *);
+SILO_CALLBACK int db_taur_SetDir(DBfile *, char const *);
 SILO_CALLBACK void *db_taur_GetComponent(DBfile *, char const *, char const *);
-SILO_CALLBACK int db_taur_InqMeshname(DBfile *, char *, char *);
+SILO_CALLBACK int db_taur_InqMeshname(DBfile *, char const *, char *);
 SILO_CALLBACK int db_taur_InqVarExists(DBfile *, char const *);
 SILO_CALLBACK int db_taur_InqMeshtype(DBfile *, char const *);
 SILO_CALLBACK DBObjectType db_taur_InqVartype(DBfile *, char const *);
-SILO_CALLBACK int db_taur_ReadVar(DBfile *, char *, void *);
-SILO_CALLBACK DBmaterial *db_taur_GetMaterial(DBfile *, char *);
-SILO_CALLBACK DBucdmesh *db_taur_GetUcdmesh(DBfile *, char *);
-SILO_CALLBACK DBucdvar *db_taur_GetUcdvar(DBfile *, char *);
-SILO_CALLBACK void *db_taur_GetVar(DBfile *, char *);
-SILO_CALLBACK int db_taur_GetVarByteLength(DBfile *, char *);
-SILO_CALLBACK int db_taur_GetVarLength(DBfile *, char *);
+SILO_CALLBACK int db_taur_ReadVar(DBfile *, char const *, void *);
+SILO_CALLBACK DBmaterial *db_taur_GetMaterial(DBfile *, char const *);
+SILO_CALLBACK DBucdmesh *db_taur_GetUcdmesh(DBfile *, char const *);
+SILO_CALLBACK DBucdvar *db_taur_GetUcdvar(DBfile *, char const *);
+SILO_CALLBACK void *db_taur_GetVar(DBfile *, char const *);
+SILO_CALLBACK int db_taur_GetVarByteLength(DBfile *, char const *);
+SILO_CALLBACK int db_taur_GetVarLength(DBfile *, char const *);
 SILO_CALLBACK int db_taur_Filters(DBfile *, FILE *);
 SILO_CALLBACK int db_taur_NewToc(DBfile *);
 
@@ -99,12 +99,12 @@ SILO_CALLBACK int db_taur_NewToc(DBfile *);
  * by the Taurus device driver.
  *-------------------------------------------------------------------------
  */
-extern TAURUSfile *db_taur_open(char *);
+extern TAURUSfile *db_taur_open(char const *);
 extern int db_taur_close(TAURUSfile *);
 extern void init_coord_info(TAURUSfile *);
 extern void init_mesh_info(TAURUSfile *);
 extern void init_zone_info(TAURUSfile *);
-extern int taurus_readvar(TAURUSfile *, char *, float **, int *, int *,
+extern int taurus_readvar(TAURUSfile *, char const *, float **, int *, int *,
                           char *);
 extern void db_taur_extface(int *, int, int, int *, int **, int *, int **);
 

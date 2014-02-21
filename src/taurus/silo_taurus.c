@@ -69,7 +69,7 @@ static char   *dir_names[] =
 {"almansi", "green", "inf_strain",
  "nodal", "shell", "stress", "rates"};
 
-PRIVATE int db_taur_cd(TAURUSfile *taurus, char *path);
+PRIVATE int db_taur_cd(TAURUSfile *taurus, char const *path);
 PRIVATE int db_taur_pwd(TAURUSfile *taurus, char *path);
 INTERNAL void db_taur_extface(int *znodelist, int nnodes,
                  int nzones, int *matlist, int **fnodelist,
@@ -231,7 +231,7 @@ get_next_int (void)
  *-------------------------------------------------------------------------*/
 /* ARGSUSED */
 PUBLIC DBfile *
-db_taur_Open(char *name, int mode, int subtype)
+db_taur_Open(char const *name, int mode, int subtype)
 {
     TAURUSfile    *taurus;
     DBfile_taur   *dbfile;
@@ -348,7 +348,7 @@ db_taur_GetDir(DBfile *_dbfile, char *path)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_taur_SetDir(DBfile *_dbfile, char *path)
+db_taur_SetDir(DBfile *_dbfile, char const *path)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     char          *me = "db_taur_SetDir";
@@ -650,7 +650,7 @@ db_taur_GetComponent(DBfile *_dbfile, char const *obj_name, char const *comp_nam
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBmaterial *
-db_taur_GetMaterial(DBfile *_dbfile, char *mat_name)
+db_taur_GetMaterial(DBfile *_dbfile, char const *mat_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -789,7 +789,7 @@ db_taur_GetMaterial(DBfile *_dbfile, char *mat_name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBucdmesh *
-db_taur_GetUcdmesh(DBfile *_dbfile, char *mesh_name)
+db_taur_GetUcdmesh(DBfile *_dbfile, char const *mesh_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -1139,7 +1139,7 @@ db_taur_GetUcdmesh(DBfile *_dbfile, char *mesh_name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK DBucdvar *
-db_taur_GetUcdvar(DBfile *_dbfile, char *var_name)
+db_taur_GetUcdvar(DBfile *_dbfile, char const *var_name)
 {
     int            i, j;
     int            nhex, nshell;
@@ -1274,7 +1274,7 @@ db_taur_GetUcdvar(DBfile *_dbfile, char *var_name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK void *
-db_taur_GetVar(DBfile *_dbfile, char *varname)
+db_taur_GetVar(DBfile *_dbfile, char const *varname)
 {
     void          *ptr;
     char          *me = "db_taur_GetVar";
@@ -1315,7 +1315,7 @@ db_taur_GetVar(DBfile *_dbfile, char *varname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_taur_GetVarByteLength(DBfile *_dbfile, char *varname)
+db_taur_GetVarByteLength(DBfile *_dbfile, char const *varname)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -1370,7 +1370,7 @@ db_taur_GetVarByteLength(DBfile *_dbfile, char *varname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_taur_GetVarLength(DBfile *_dbfile, char *varname)
+db_taur_GetVarLength(DBfile *_dbfile, char const *varname)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -1424,7 +1424,7 @@ db_taur_GetVarLength(DBfile *_dbfile, char *varname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_taur_InqMeshname(DBfile *_dbfile, char *var_name, char *mesh_name)
+db_taur_InqMeshname(DBfile *_dbfile, char const *var_name, char *mesh_name)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -1716,7 +1716,7 @@ db_taur_InqVarExists(DBfile *_dbfile, char const *varname)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_taur_ReadVar(DBfile *_dbfile, char *varname, void *ptr)
+db_taur_ReadVar(DBfile *_dbfile, char const *varname, void *ptr)
 {
     DBfile_taur   *dbfile = (DBfile_taur *) _dbfile;
     TAURUSfile    *taurus = dbfile->taurus;
@@ -1769,7 +1769,7 @@ db_taur_ReadVar(DBfile *_dbfile, char *varname, void *ptr)
  *-------------------------------------------------------------------------
  */
 PRIVATE int
-db_taur_cd(TAURUSfile *taurus, char *path)
+db_taur_cd(TAURUSfile *taurus, char const *path)
 {
     int            i;
     int            state;

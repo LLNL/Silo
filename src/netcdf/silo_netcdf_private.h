@@ -132,30 +132,26 @@ typedef struct {
 SILO_CALLBACK int db_cdf_Close(DBfile *);
 SILO_CALLBACK int db_cdf_InqVarExists(DBfile *, char const *);
 SILO_CALLBACK int db_cdf_GetDir(DBfile *, char *);
-SILO_CALLBACK void *db_cdf_GetAtt(DBfile *, char *, char *);
 
 SILO_CALLBACK void *db_cdf_GetComponent(DBfile *, char const *, char const *);
-SILO_CALLBACK DBmaterial *db_cdf_GetMaterial(DBfile *, char *);
-SILO_CALLBACK DBmatspecies *db_cdf_GetMatspecies(DBfile *, char *);
-SILO_CALLBACK DBmultimesh *db_cdf_GetMultimesh(DBfile *, char *);
-SILO_CALLBACK DBpointmesh *db_cdf_GetPointmesh(DBfile *, char *);
-SILO_CALLBACK DBmeshvar *db_cdf_GetPointvar(DBfile *, char *);
-SILO_CALLBACK DBquadmesh *db_cdf_GetQuadmesh(DBfile *, char *);
-SILO_CALLBACK DBquadvar *db_cdf_GetQuadvar(DBfile *, char *);
-SILO_CALLBACK DBucdmesh *db_cdf_GetUcdmesh(DBfile *, char *);
-SILO_CALLBACK DBucdvar *db_cdf_GetUcdvar(DBfile *, char *);
-SILO_CALLBACK void *db_cdf_GetVar(DBfile *, char *);
-SILO_CALLBACK int db_cdf_GetVarByteLength(DBfile *, char *);
-SILO_CALLBACK int db_cdf_GetVarLength(DBfile *, char *);
-SILO_CALLBACK int db_cdf_GetVarType(DBfile *, char *);
+SILO_CALLBACK DBmaterial *db_cdf_GetMaterial(DBfile *, char const *);
+SILO_CALLBACK DBmatspecies *db_cdf_GetMatspecies(DBfile *, char const *);
+SILO_CALLBACK DBmultimesh *db_cdf_GetMultimesh(DBfile *, char const *);
+SILO_CALLBACK DBpointmesh *db_cdf_GetPointmesh(DBfile *, char const *);
+SILO_CALLBACK DBmeshvar *db_cdf_GetPointvar(DBfile *, char const *);
+SILO_CALLBACK DBquadmesh *db_cdf_GetQuadmesh(DBfile *, char const *);
+SILO_CALLBACK DBquadvar *db_cdf_GetQuadvar(DBfile *, char const *);
+SILO_CALLBACK DBucdmesh *db_cdf_GetUcdmesh(DBfile *, char const *);
+SILO_CALLBACK DBucdvar *db_cdf_GetUcdvar(DBfile *, char const *);
+SILO_CALLBACK void *db_cdf_GetVar(DBfile *, char const *);
+SILO_CALLBACK int db_cdf_GetVarByteLength(DBfile *, char const *);
+SILO_CALLBACK int db_cdf_GetVarLength(DBfile *, char const *);
+SILO_CALLBACK int db_cdf_GetVarType(DBfile *, char const *);
 SILO_CALLBACK DBObjectType db_cdf_InqVarType(DBfile *, char const *);
-SILO_CALLBACK int db_cdf_InqMeshname(DBfile *, char *, char *);
+SILO_CALLBACK int db_cdf_InqMeshname(DBfile *, char const *, char *);
 SILO_CALLBACK int db_cdf_InqMeshtype(DBfile *, char const *);
-SILO_CALLBACK int db_cdf_ReadAtt(DBfile *, char *, char *, void *);
-SILO_CALLBACK int db_cdf_ReadVar(DBfile *, char *, void *);
-SILO_CALLBACK int db_cdf_ReadVar1(DBfile *, char *, int, void *);
-SILO_CALLBACK int db_cdf_SetDir(DBfile *, char *);
-SILO_CALLBACK int db_cdf_SetDirID(DBfile *, int);
+SILO_CALLBACK int db_cdf_ReadVar(DBfile *, char const *, void *);
+SILO_CALLBACK int db_cdf_SetDir(DBfile *, char const *);
 SILO_CALLBACK int db_cdf_Filters(DBfile *, FILE *);
 SILO_CALLBACK int db_cdf_NewToc(DBfile *);
 
@@ -293,7 +289,7 @@ extern int silo_GetIndex1(int *, int *, int);
 extern int silo_Verify(PDBfile *);
 
 /*api.c */
-extern int silonetcdf_ncopen(char *, int);
+extern int silonetcdf_ncopen(char const *, int);
 extern int silonetcdf_ncinqall(int, int *, int *, int *, int *, int *, int *);
 extern int silonetcdf_ncobjinq(int, int, char *, int *, int *);
 extern int silonetcdf_ncdirlist(int, int, int *, int *);

@@ -107,63 +107,60 @@ SILO_CALLBACK int db_pdb_close (DBfile *);
 SILO_CALLBACK int db_pdb_InqVarExists (DBfile *, char const *);
 SILO_CALLBACK void *db_pdb_GetComponent (DBfile *, char const *, char const *);
 SILO_CALLBACK int db_pdb_GetComponentType (DBfile *, char const *, char const *);
-SILO_CALLBACK void *db_pdb_GetAtt (DBfile *, char *, char *);
 SILO_CALLBACK int db_pdb_GetDir (DBfile *, char *);
 
 SILO_CALLBACK DBobject *db_pdb_GetObject (DBfile*, char const *);
 SILO_CALLBACK DBcompoundarray *db_pdb_GetCompoundarray (DBfile *, char const *);
 SILO_CALLBACK DBcurve *db_pdb_GetCurve (DBfile *, char const *);
 SILO_CALLBACK DBdefvars *db_pdb_GetDefvars (DBfile *, char const *);
-SILO_CALLBACK DBmaterial *db_pdb_GetMaterial (DBfile *, char *);
-SILO_CALLBACK DBmatspecies *db_pdb_GetMatspecies (DBfile *, char *);
-SILO_CALLBACK DBmultimesh *db_pdb_GetMultimesh (DBfile *, char *);
+SILO_CALLBACK DBmaterial *db_pdb_GetMaterial (DBfile *, char const *);
+SILO_CALLBACK DBmatspecies *db_pdb_GetMatspecies (DBfile *, char const *);
+SILO_CALLBACK DBmultimesh *db_pdb_GetMultimesh (DBfile *, char const *);
 SILO_CALLBACK DBmultimeshadj *db_pdb_GetMultimeshadj (DBfile *, char const *,
                             int, int const *);
-SILO_CALLBACK DBmultivar *db_pdb_GetMultivar (DBfile *, char *);
-SILO_CALLBACK DBmultimat *db_pdb_GetMultimat (DBfile *, char *);
-SILO_CALLBACK DBmultimatspecies *db_pdb_GetMultimatspecies (DBfile *, char *);
-SILO_CALLBACK DBpointmesh *db_pdb_GetPointmesh (DBfile *, char *);
-SILO_CALLBACK DBmeshvar *db_pdb_GetPointvar (DBfile *, char *);
-SILO_CALLBACK DBquadmesh *db_pdb_GetQuadmesh (DBfile *, char *);
-SILO_CALLBACK DBquadvar *db_pdb_GetQuadvar (DBfile *, char *);
-SILO_CALLBACK DBucdmesh *db_pdb_GetUcdmesh (DBfile *, char *);
-SILO_CALLBACK DBucdvar *db_pdb_GetUcdvar (DBfile *, char *);
+SILO_CALLBACK DBmultivar *db_pdb_GetMultivar (DBfile *, char const *);
+SILO_CALLBACK DBmultimat *db_pdb_GetMultimat (DBfile *, char const *);
+SILO_CALLBACK DBmultimatspecies *db_pdb_GetMultimatspecies (DBfile *, char const *);
+SILO_CALLBACK DBpointmesh *db_pdb_GetPointmesh (DBfile *, char const *);
+SILO_CALLBACK DBmeshvar *db_pdb_GetPointvar (DBfile *, char const *);
+SILO_CALLBACK DBquadmesh *db_pdb_GetQuadmesh (DBfile *, char const *);
+SILO_CALLBACK DBquadvar *db_pdb_GetQuadvar (DBfile *, char const *);
+SILO_CALLBACK DBucdmesh *db_pdb_GetUcdmesh (DBfile *, char const *);
+SILO_CALLBACK DBucdvar *db_pdb_GetUcdvar (DBfile *, char const *);
 SILO_CALLBACK DBcsgmesh *db_pdb_GetCsgmesh (DBfile *, char const *);
 SILO_CALLBACK DBcsgvar *db_pdb_GetCsgvar (DBfile *, char const *);
-SILO_CALLBACK DBfacelist *db_pdb_GetFacelist(DBfile*, char*);
-SILO_CALLBACK DBzonelist *db_pdb_GetZonelist(DBfile*, char*);
-SILO_CALLBACK DBphzonelist *db_pdb_GetPHZonelist(DBfile*, char*);
-SILO_CALLBACK DBcsgzonelist *db_pdb_GetCSGZonelist(DBfile*, char const*);
+SILO_CALLBACK DBfacelist *db_pdb_GetFacelist(DBfile*, char const *);
+SILO_CALLBACK DBzonelist *db_pdb_GetZonelist(DBfile*, char const *);
+SILO_CALLBACK DBphzonelist *db_pdb_GetPHZonelist(DBfile*, char const *);
+SILO_CALLBACK DBcsgzonelist *db_pdb_GetCSGZonelist(DBfile*, char const *);
 SILO_CALLBACK DBmrgtree *db_pdb_GetMrgtree(DBfile *_dbfile, char const *name);
 SILO_CALLBACK DBmrgvar *db_pdb_GetMrgvar(DBfile *dbfile, char const *name);
 SILO_CALLBACK DBgroupelmap *db_pdb_GetGroupelmap(DBfile *dbfile, char const *name);
-SILO_CALLBACK void *db_pdb_GetVar (DBfile *, char *);
-SILO_CALLBACK int db_pdb_GetVarByteLength (DBfile *, char *);
-SILO_CALLBACK int db_pdb_GetVarLength (DBfile *, char *);
-SILO_CALLBACK int db_pdb_GetVarDims (DBfile*, char*, int, int*);
-SILO_CALLBACK int db_pdb_GetVarType (DBfile *, char *);
+SILO_CALLBACK void *db_pdb_GetVar (DBfile *, char const *);
+SILO_CALLBACK int db_pdb_GetVarByteLength (DBfile *, char const *);
+SILO_CALLBACK int db_pdb_GetVarLength (DBfile *, char const *);
+SILO_CALLBACK int db_pdb_GetVarDims (DBfile*, char const *, int, int*);
+SILO_CALLBACK int db_pdb_GetVarType (DBfile *, char const *);
 SILO_CALLBACK DBObjectType db_pdb_InqVarType (DBfile *, char const *);
-SILO_CALLBACK int db_pdb_InqMeshname (DBfile *, char *, char *);
+SILO_CALLBACK int db_pdb_InqMeshname (DBfile *, char const *, char *);
 SILO_CALLBACK int db_pdb_InqMeshtype (DBfile *, char const *);
-SILO_CALLBACK int db_pdb_ReadAtt (DBfile *, char *, char *, void *);
-SILO_CALLBACK int db_pdb_ReadVar (DBfile *, char *, void *);
-SILO_CALLBACK int db_pdb_ReadVarSlice (DBfile *, char *, int *, int *, int *,
-				  int, void *);
-SILO_CALLBACK int db_pdb_SetDir (DBfile *, char *);
+SILO_CALLBACK int db_pdb_ReadVar (DBfile *, char const *, void *);
+SILO_CALLBACK int db_pdb_ReadVarSlice (DBfile *, char const *, int const *, int const *, int const *, int, void *);
+SILO_CALLBACK int db_pdb_SetDir (DBfile *, char const *);
 SILO_CALLBACK int db_pdb_Filters (DBfile *, FILE *);
 SILO_CALLBACK int db_pdb_NewToc (DBfile *);
-SILO_CALLBACK int db_pdb_GetComponentNames (DBfile *, char *, char ***, char ***);
+SILO_CALLBACK int db_pdb_GetComponentNames (DBfile *, char const *, char ***, char ***);
 
 SILO_CALLBACK int db_pdb_FreeCompressionResources(DBfile *_dbfile, char const *meshname);
 
-PRIVATE int db_pdb_getobjinfo (PDBfile *, char *, char *, int *);
-PRIVATE int db_pdb_getvarinfo (PDBfile *, char *, char *, int *, int *, int);
+PRIVATE int db_pdb_getobjinfo (PDBfile *, char const *, char *, int *);
+PRIVATE int db_pdb_getvarinfo (PDBfile *, char const *, char *, int *, int *, int);
 
 #ifdef PDB_WRITE
 SILO_CALLBACK int db_pdb_WriteObject (DBfile *, DBobject const *, int);
 SILO_CALLBACK int db_pdb_WriteComponent (DBfile *, DBobject *, char const *,
 				    char const *, char const *, void const *, int, long const *);
-SILO_CALLBACK int db_pdb_MkDir (DBfile *, char *);
+SILO_CALLBACK int db_pdb_MkDir (DBfile *, char const *);
 SILO_CALLBACK int db_pdb_PutCompoundarray(
     DBfile * dbfile,
     char const *name,
@@ -193,78 +190,100 @@ SILO_CALLBACK int db_pdb_PutDefvars(
     char const * const *defns,
     DBoptlist const * const *opts
 );
-SILO_CALLBACK int db_pdb_PutFacelist (DBfile *, char *, int, int, int *, int,
-				 int, int *, int *, int *, int, int *,
-				 int *, int);
-SILO_CALLBACK int db_pdb_PutMaterial (DBfile *, char *, char *, int, int *,
-				 int *, int *, int, int *, int *, int *,
-				 DB_DTPTR1, int, int, DBoptlist *);
-SILO_CALLBACK int db_pdb_PutMatspecies (struct DBfile *, char *, char *, int,
-				   int *, int *, int *, int, int, DB_DTPTR1,
-				   int *, int, int, DBoptlist *);
+SILO_CALLBACK int db_pdb_PutFacelist(
+    DBfile *dbfile,
+    char const * name,
+    int nfaces,
+    int ndims,
+    int const *nodelist,
+    int lnodelist,
+    int origin,
+    int const *zoneno,
+    int const *shapesize,
+    int const *shapecnt,
+    int nshapes,
+    int const *types,
+    int const *typelist,
+    int ntypes
+);
+SILO_CALLBACK int db_pdb_PutMaterial(
+    DBfile *dbfile,
+    char const *name,
+    char const *meshname,
+    int nmat,
+    int const *matnos,
+    int const *matlist,
+    int const *dims,
+    int ndims,
+    int const *mix_next,
+    int const *mix_mat,
+    int const *mix_zone,
+    DB_DTPTR1 mix_vf,
+    int mixlen,
+    int datatype,
+    DBoptlist const *opts
+);
+SILO_CALLBACK int db_pdb_PutMatspecies (struct DBfile *, char const *, char const *, int,
+				   int const *, int const *, int const *, int, int, DB_DTPTR1,
+				   int const *, int, int, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutMultimesh (DBfile *, char const *, int, char const * const *,
                                   int const *, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutMultimeshadj (DBfile *, char const *, int, int const *,
                                int const *, int const *, int const *, int const *,
                                int const * const *, int const *, int const * const *,
                                DBoptlist const *optlist);
-SILO_CALLBACK int db_pdb_PutMultivar (DBfile *, char *, int, char **, int *,
-				 DBoptlist *);
-SILO_CALLBACK int db_pdb_PutMultimat (DBfile *, char *, int, char **,
-				 DBoptlist *);
-SILO_CALLBACK int db_pdb_PutMultimatspecies (DBfile *, char *, int, char **,
-					DBoptlist *);
-SILO_CALLBACK int db_pdb_PutPointmesh (DBfile *, char *, int, DB_DTPTR2, int,
-				  int, DBoptlist *);
-SILO_CALLBACK int db_pdb_PutPointvar (DBfile *, char *, char *, int, DB_DTPTR2,
-				 int, int, DBoptlist *);
-SILO_CALLBACK int db_pdb_PutQuadmesh (DBfile *, char *, char **, DB_DTPTR2,
-				 int *, int, int, int, DBoptlist *);
-SILO_CALLBACK int db_pdb_PutQuadvar (DBfile *, char *, char *, int, char **,
-				DB_DTPTR2, int *, int, DB_DTPTR2, int, int,
-				int, DBoptlist *);
-SILO_CALLBACK int db_pdb_PutUcdmesh (DBfile *, char *, int, char **, DB_DTPTR2,
-				int, int, char *, char *, int,
-				DBoptlist *);
-SILO_CALLBACK int db_pdb_PutUcdsubmesh (DBfile *, char *, char *,
-				int, char *, char *,
-				DBoptlist *);
-SILO_CALLBACK int db_pdb_PutUcdvar (DBfile *, char *, char *, int, char **,
-			       DB_DTPTR2, int, DB_DTPTR2, int, int, int,
-			       DBoptlist *);
+SILO_CALLBACK int db_pdb_PutMultivar (DBfile *, char const *, int, char const * const *, int const *,
+				 DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutMultimat (DBfile *, char const *, int, char const * const *,
+				 DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutMultimatspecies (DBfile *, char const *, int, char const * const *,
+					DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutPointmesh (DBfile *, char const *, int, DB_DTPTR2, int,
+				  int, DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutPointvar (DBfile *, char const *, char const *, int, DB_DTPTR2,
+				 int, int, DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutQuadmesh (DBfile *, char const *, char const * const *, DB_DTPTR2,
+				 int const *, int, int, int, DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutQuadvar (DBfile *, char const *, char const *, int, char const * const *,
+				DB_DTPTR2, int const *, int, DB_DTPTR2, int, int,
+				int, DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutUcdmesh (DBfile *, char const *, int, char const * const *, DB_DTPTR2,
+				int, int, char const *, char const *, int, DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutUcdsubmesh (DBfile *, char const *, char const *,
+				int, char const *, char const *, DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutUcdvar (DBfile *, char const *, char const *, int, char const * const *,
+			       DB_DTPTR2, int, DB_DTPTR2, int, int, int, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutCsgmesh (DBfile *, char const *, int, int,
-                                int const *, int const *,
-                                void const *, int, int, double const *,
-                                char const *, DBoptlist *);
+                                int const *, int const *, void const *,int, int,
+                                double const *, char const *, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutCsgvar (DBfile *, char const *, char const *, int,
-                               char **varnames, void **vars,
-                               int, int, int, DBoptlist *);
-SILO_CALLBACK int db_pdb_PutZonelist (DBfile *, char *, int, int, int *, int,
-				 int, int *, int *, int);
-SILO_CALLBACK int db_pdb_PutZonelist2 (DBfile *, char *, int, int, int *, int,
-				  int, int, int, int *, int *, int *, int,
-                                  DBoptlist *);
-SILO_CALLBACK int db_pdb_PutPHZonelist(DBfile *, char *,
-                                  int, int *, int, int *, char *,
-                                  int, int *, int, int *,
-                                  int, int, int, DBoptlist *);
+                               char const * const *varnames, void const * const *vars,
+                               int, int, int, DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutZonelist (DBfile *, char const *, int, int, int const *, int,
+				 int, int const *, int const *, int);
+SILO_CALLBACK int db_pdb_PutZonelist2 (DBfile *, char const *, int, int, int const *, int,
+				  int, int, int, int const *, int const *, int const *, int,
+                                  DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutPHZonelist(DBfile *, char const *,
+                                  int, int const *, int, int const *, char const *,
+                                  int, int const *, int, int const *,
+                                  int, int, int, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutCSGZonelist (DBfile *, char const *, int,
                                     int const *, int const *, int const *,
                                     void const *, int, int,
-                                    int, int const *, DBoptlist *);
-SILO_CALLBACK int db_pdb_PutMrgtree(DBfile *_dbfile, char const *name,
-                               char const *mesh_name, DBmrgtree *tree,
-                               DBoptlist *optlist);
+                                    int, int const *, DBoptlist const *);
+SILO_CALLBACK int db_pdb_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
+                                    DBmrgtree const *tree, DBoptlist const *optlist);
 SILO_CALLBACK int db_pdb_PutGroupelmap(DBfile *_dbfile, char const *map_name,
-                                  int num_segments, int *groupel_types,
-                                  int *segment_lengths, int *segment_ids,
-                                  int **segment_data, void **segment_fracs,
-                                  int fracs_data_type, DBoptlist *opts);
+                                  int num_segments, int const *groupel_types,
+                                  int const *segment_lengths, int const *segment_ids,
+                                  int const * const *segment_data, void const * const *segment_fracs,
+                                  int fracs_data_type, DBoptlist const *opts);
 SILO_CALLBACK int db_pdb_PutMrgvar(DBfile *dbfile, char const *name,
                              char const *mrgt_name,
-                             int ncomps, char **compnames,
-                             int nregns, char **reg_pnames,
-                             int datatype, void **data, DBoptlist *opts);
+                             int ncomps, char const * const *compnames,
+                             int nregns, char  const * const *reg_pnames,
+                             int datatype, void const * const *data, DBoptlist const *opts);
 
 SILO_CALLBACK int db_pdb_Write (DBfile *, char const *, void const *, int const *, int, int);
 SILO_CALLBACK int db_pdb_WriteSlice(
@@ -282,17 +301,17 @@ SILO_CALLBACK int db_pdb_WriteSlice(
 SILO_CALLBACK int db_pdb_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     char const *const *const names, int *ordering);
 
-PRIVATE int db_InitCsg (DBfile *, char *, DBoptlist *);
-PRIVATE int db_InitPoint (DBfile *, DBoptlist *, int, int);
-PRIVATE int db_InitQuad (DBfile *, char *, DBoptlist *, int *, int);
+PRIVATE int db_InitCsg (DBfile *, char const *, DBoptlist const *);
+PRIVATE int db_InitPoint (DBfile *, DBoptlist const *, int, int);
+PRIVATE int db_InitQuad (DBfile *, char const *, DBoptlist const *, int const *, int);
 PRIVATE void db_InitCurve (DBoptlist const * const);
-PRIVATE void db_build_shared_names_csgmesh (DBfile *, char *);
-PRIVATE void db_build_shared_names_quadmesh (DBfile *, char *);
-PRIVATE int db_InitUcd (DBfile *, char *, DBoptlist *, int, int, int);
-PRIVATE int db_InitZonelist (DBfile *, DBoptlist *);
+PRIVATE void db_build_shared_names_csgmesh (DBfile *, char const *);
+PRIVATE void db_build_shared_names_quadmesh (DBfile *, char const *);
+PRIVATE int db_InitUcd (DBfile *, char const *, DBoptlist const *, int, int, int);
+PRIVATE int db_InitZonelist (DBfile *, DBoptlist const *);
 PRIVATE int db_ResetGlobalData_phzonelist (void);
-PRIVATE int db_InitPHZonelist (DBfile *, DBoptlist *);
-PRIVATE void db_build_shared_names_ucdmesh (DBfile *, char *);
+PRIVATE int db_InitPHZonelist (DBfile *, DBoptlist const *);
+PRIVATE void db_build_shared_names_ucdmesh (DBfile *, char const *);
 PRIVATE void db_mkname (PDBfile*, char const *, char const *, char*);
 PRIVATE int db_InitMulti (DBfile*, DBoptlist const *const);
 PRIVATE void db_InitDefvars (DBoptlist const *);

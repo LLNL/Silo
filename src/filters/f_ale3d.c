@@ -1168,7 +1168,7 @@ f_ale3d_NewToc(DBfile *dbfile)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_SetDir(DBfile *dbfile, char *path)
+f_ale3d_SetDir(DBfile *dbfile, char const *path)
 {
     int            dirid;
     char          *me = "f_ale3d_SetDir";
@@ -1904,7 +1904,7 @@ calc_shell_other(float *result, float **data, int length, int extra)
  *-------------------------------------------------------------------------
  */
 static DBucdvar *
-f_ale3d_GetUcdvar(DBfile *dbfile, char *name)
+f_ale3d_GetUcdvar(DBfile *dbfile, char const *name)
 {
     static int     sequence = 0;
     int            id, inter, ndeps, i, j, size, offset, slice_size, stride;
@@ -2180,7 +2180,7 @@ f_ale3d_InqMeshType(DBfile *dbfile, char const *name)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_InqMeshName(DBfile *dbfile, char *name, char *meshname /*OUTPUT */)
+f_ale3d_InqMeshName(DBfile *dbfile, char const *name, char *meshname /*OUTPUT */)
 {
     int            id, inter;
     char          *me = "f_ale3d_InqMeshName";
@@ -2256,7 +2256,7 @@ f_ale3d_Open(DBfile *dbfile, char *filter_name)
         return -1;
     }
 
-    f_ale3d_name[id] = safe_strdup(filter_name);
+    f_ale3d_name[id] = _db_safe_strdup(filter_name);
     memcpy(f_ale3d_cb + id, &(dbfile->pub), sizeof(DBfile_pub));
     f_ale3d_cb[id].toc = NULL;
 
@@ -2268,7 +2268,6 @@ f_ale3d_Open(DBfile *dbfile, char *filter_name)
     FILTER_CB(close, f_ale3d_Close);
     FILTER_CB(newtoc, f_ale3d_NewToc);
     FILTER_CB(cd, f_ale3d_SetDir);
-    FILTER_CB(cdid, f_ale3d_SetDirID);
     FILTER_CB(g_dir, f_ale3d_GetDir);
     FILTER_CB(g_uv, f_ale3d_GetUcdvar);
     FILTER_CB(i_meshtype, f_ale3d_InqMeshType);
