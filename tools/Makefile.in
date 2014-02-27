@@ -86,7 +86,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@BROWSER_NEEDED_TRUE@am__append_1 = browser silock
+@BROWSER_NEEDED_TRUE@am__append_1 = browser
 @PYTHON_NEEDED_TRUE@am__append_2 = python
 @SILEX_NEEDED_TRUE@am__append_3 = silex
 subdir = tools
@@ -323,7 +323,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TOOLS_DIR = $(am__append_1) $(am__append_2) $(am__append_3)
+TOOLS_DIR = silock $(am__append_1) $(am__append_2) $(am__append_3)
 SUBDIRS = \
  . \
  $(TOOLS_DIR)

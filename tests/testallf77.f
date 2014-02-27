@@ -82,42 +82,40 @@ c...Create file named "rectf77.silo". Database ID is returned in 'dbid'.
          endif
       enddo
 
-      err = dbcreate("rectf77.silo", 12, 0, DB_LOCAL,
-     .               "file info", 9, driver, dbid)
-
       if (driver .eq. DB_HDF5 .and. compress .eq. 1) then
-          print *,'got here'
+         err = dbsetcompress("METHOD=GZIP",11)
       endif
-
-c...Write out objects for visualization 
-
-      err = buildrect2d(dbid, "rect", 4)
-
-
-c...Close data file.
-
-      err = dbclose(dbid)
-
-
-      print *,'Created file: rectf77.silo'
 
 c...Create file named "ucdf77.silo". Database ID is returned in 'dbid'.
 
       err = dbcreate("ucdf77.silo", 11, 0, DB_LOCAL,
      .               "file info", 9, driver, dbid)
 
-
 c...Write out objects for visualization
 
       err = builducd(dbid, "ucd", 3)
-
 
 c...Close data file.
 
       err = dbclose(dbid)
 
-
       print *,'Created file: ucdf77.silo'
+
+c...Test re-setting compression to off
+      err = dbsetcompress("",-1)
+
+      err = dbcreate("rectf77.silo", 12, 0, DB_LOCAL,
+     .               "file info", 9, driver, dbid)
+
+c...Write out objects for visualization 
+
+      err = buildrect2d(dbid, "rect", 4)
+
+c...Close data file.
+
+      err = dbclose(dbid)
+
+      print *,'Created file: rectf77.silo'
 
       stop
       end

@@ -10757,8 +10757,8 @@ db_hdf5_GetFacelist(DBfile *_dbfile, char const *name)
  */
 static int
 PrepareForZonelistCompression(DBfile_hdf5 *dbfile, char const *name,
-    int origin, int nshapes, int const *shapetype, int const *shapecnt,
-    int const *nodelist)
+    int origin, int ndims, int nshapes, int const *shapetype, int const *shapesize,
+    int const *shapecnt, int const *nodelist)
 {
 	int i;
     int ntopo = 0, zncnt = 0;
@@ -10769,30 +10769,60 @@ PrepareForZonelistCompression(DBfile_hdf5 *dbfile, char const *name,
     zncnt = shapecnt[0];
 #ifdef HAVE_HZIP
 
-    /* hzip supports only quad/hex meshes */
-    if (shapetype[0] == DB_ZONETYPE_QUAD)
+    if (shapetype)
     {
-        ntopo = 2;
-        for (i = 1; i < nshapes; i++)
+        /* hzip supports only quad/hex meshes */
+        if (shapetype[0] == DB_ZONETYPE_QUAD)
         {
-            zncnt += shapecnt[i];
-            if (shapetype[i] != DB_ZONETYPE_QUAD)
-                return 0;
+            ntopo = 2;
+            for (i = 1; i < nshapes; i++)
+            {
+                zncnt += shapecnt[i];
+                if (shapetype[i] != DB_ZONETYPE_QUAD)
+                    return 0;
+            }
         }
-    }
-    else if (shapetype[0] == DB_ZONETYPE_HEX)
-    {
-        ntopo = 3;
-        for (i = 1; i < nshapes; i++)
+        else if (shapetype[0] == DB_ZONETYPE_HEX)
         {
-            zncnt += shapecnt[i];
-            if (shapetype[i] != DB_ZONETYPE_HEX)
-                return 0;
+            ntopo = 3;
+            for (i = 1; i < nshapes; i++)
+            {
+                zncnt += shapecnt[i];
+                if (shapetype[i] != DB_ZONETYPE_HEX)
+                    return 0;
+            }
+        }
+        else
+        {
+            return 0;
         }
     }
     else
     {
-        return 0;
+        if (ndims == 2)
+        {
+            ntopo = 2;
+            for (i = 0; i < nshapes; i++)
+            {
+                zncnt += shapecnt[i];
+                if (shapesize[i] != 4)
+                    return 0;
+            }
+        }
+        else if (ndims == 3)
+        {
+            ntopo = 3;
+            for (i = 0; i < nshapes; i++)
+            {
+                zncnt += shapecnt[i];
+                if (shapesize[i] != 8)
+                    return 0;
+            }
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     db_hdf5_hzip_clear_params();
@@ -10887,7 +10917,7 @@ db_hdf5_PutZonelist2(DBfile *_dbfile, char const *name, int nzones, int ndims,
 
         /* Prepare for possible compression of zonelist */
         compressionFlags = PrepareForZonelistCompression(dbfile,
-            name, origin, nshapes, shapetype, shapecnt, nodelist);
+            name, origin, ndims, nshapes, shapetype, shapesize, shapecnt, nodelist);
 
         /* Write variable arrays (currently only support compression of nodelist) */
         db_hdf5_compwrz(dbfile, DB_INT, 1, &lnodelist, nodelist,

@@ -64,8 +64,8 @@ AT_SETUP(version)
 AT_DATA(expout,
 This version of the Silo library is greater than or equal to 4
 This version of the Silo library is NOT greater than or equal to 9
-This version of Silo is greater than or equal to 4.6
-This version of Silo is NOT greater than or equal to 90.5.2
+This version of the Silo library is greater than or equal to 4.6
+This version of the Silo library is NOT greater than or equal to 90.5.2
 DBVersion() returns "AT_PACKAGE_VERSION"
 DBVersionGE(4,6,0) returns 1
 DBVersionGE(90,5,2) returns 0

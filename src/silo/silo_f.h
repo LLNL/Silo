@@ -104,7 +104,6 @@ be used for advertising or product endorsement purposes.
 #define DBRDVARSLICE_FC  FC_FUNC (dbrdvarslice,DBRDVARSLICE)
 #define DBWRITESLICE_FC  FC_FUNC (dbwriteslice,DBWRITESLICE)
 #define DBSETDIR_FC      FC_FUNC (dbsetdir,DBSETDIR)
-#define DBSETDIRID_FC    FC_FUNC (dbsetdirid,DBSETDIRID)
 #define DBSHOWERRORS_FC  FC_FUNC (dbshowerrors,DBSHOWERRORS)
 #define DBWRITE_FC       FC_FUNC (dbwrite,DBWRITE)
 #define DBPUTCA_FC       FC_FUNC (dbputca,DBPUTCA)
