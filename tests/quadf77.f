@@ -91,6 +91,8 @@ c...............................................................................
           driver = DB_HDF5
       end if
 
+      err = dbset2dstrlen(1024)
+
 c...Create file.
       err = dbcreate("quadf77.silo", 12, DB_CLOBBER, DB_LOCAL,
      .               "file info", 9, driver, dbid)
@@ -155,7 +157,7 @@ c----------------------------------------------------------------------
       integer    i, meshid, varid
       integer    tcycle, mixlen, optlistid
       integer    dims(3), ndims
-      real       x(NX), y(NY), d(NZONES)
+      real       x(NX), y(NY), d(NZONES), f(2*NZONES)
       real       ttime
       double precision dttime
       character*1024 vnames(2)
@@ -167,6 +169,7 @@ c...Initializations.
       data  x/1.,2.,3.,4./
       data  y/1.,2.,3./
       data  d/1.,2.,3.,4.,5.,6./
+      data  f/1.0,1.1,1.2,1.3,1.4,1.5,2.0,2.1,2.2,2.3,2.4,2.5/
 
       ttime     = 2.345
       dttime    = 2.345
@@ -228,7 +231,7 @@ c...two different meshes
       lvnames(1) = 6
       vnames(2) = "gorfo"
       lvnames(2) = 5
-      err = dbputqv(dbid, "f", 1, name, lname, 3, vnames, lvnames,
+      err = dbputqv(dbid, "f", 1, name, lname, 2, vnames, lvnames,
      .          f, dims, ndims, DB_F77NULL, 0, DB_FLOAT, DB_ZONECENT,
      .          optlistid, varid)
 
