@@ -95,7 +95,7 @@ main(int argc, char *argv[])
     int           i, pass, driver=DB_PDB;
     static char   *filename="version.pdb";
     int            show_all_errors = FALSE;
-    int           vnos[3];
+    int           vnos[4];
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB", 6)) {
@@ -231,7 +231,7 @@ main(int argc, char *argv[])
 
     /* Test getting version digits from file handle */
     dbfile = DBOpen(filename, driver, DB_READ);
-    if (DBFileVersionDigits(dbfile, &vnos[0], &vnos[1], &vnos[2], 0))
+    if (DBFileVersionDigits(dbfile, &vnos[0], &vnos[1], &vnos[2], &vnos[3]))
     {
         fprintf(stderr, "Error getting file version digits\n");
         return 1;

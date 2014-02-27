@@ -3870,8 +3870,12 @@ db_parse_version_digits_from_string(char const *str, char sep, int *digits, int 
         }
         else if (!strncmp(p, "-pre", 4))
         {
-            p += 3;
+            *(p+0) = '\0';
+            *(p+1) = '0';
+            *(p+2) = '0';
+            *(p+3) = '0';
             nseps++;
+            p += 3;
         }
         else if (*p < '0' || *p > '9')
         {
@@ -3891,9 +3895,8 @@ db_parse_version_digits_from_string(char const *str, char sep, int *digits, int 
             digits[i] = strtol(p, 0, 10);
             while (*p != '\0') p++;
             p++;
-            if (!strncmp(p, "-pre", 4)) p+=4;
         }
-        if (!errno)
+        if (errno)
             retval = 1;
     }
     else
