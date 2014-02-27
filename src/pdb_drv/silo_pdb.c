@@ -7612,7 +7612,7 @@ db_pdb_PutCurve (DBfile *_dbfile, char const *name, void const *xvals, void cons
    if (_cu._varname[0]) {
       DBAddVarComponent (obj, "xvals", _cu._varname[0]) ;
    } else {
-      if (xvals && !_cu._reference) {
+      if (npts && xvals && !_cu._reference) {
          DBWriteComponent (_dbfile, obj, "xvals", name, dtype_s,
                         xvals, 1, &lnpts);
       }
@@ -7620,7 +7620,7 @@ db_pdb_PutCurve (DBfile *_dbfile, char const *name, void const *xvals, void cons
    if (_cu._varname[1]) {
       DBAddVarComponent (obj, "yvals", _cu._varname[1]) ;
    } else {
-      if (yvals && !_cu._reference) {
+      if (npts && yvals && !_cu._reference) {
          DBWriteComponent (_dbfile, obj, "yvals", name, dtype_s,
                         yvals, 1, &lnpts);
       }

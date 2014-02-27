@@ -2002,8 +2002,8 @@ SILO_API extern int                    DBInqMeshtype(DBfile *, char const *);
 SILO_API extern int                    DBPutCompoundarray(DBfile *dbfile, char const *name, char const * const *elemnames,
                                            int const *elemlens, int nelems, void const *values, int nvalues, int datatype,
                                            DBoptlist const *);
-SILO_API extern int                    DBPutCurve(DBfile *dbfile, char const * const name, void const * const xvals,
-                                           void const * const yvals, int datatype, int npts, DBoptlist const * const opts);
+SILO_API extern int                    DBPutCurve(DBfile *dbfile, char const * name, void const * xvals,
+                                           void const * yvals, int datatype, int npts, DBoptlist const * opts);
 SILO_API extern int                    DBPutDefvars(DBfile *dbfile, char const *name, int, char const * const *names, 
                                            int const *types, char const * const *defns, DBoptlist const * const *opts);
 SILO_API extern int                    DBPutFacelist(DBfile *dbfile, char const *, int nfaces, int ndims, int const *nodelist,
@@ -2057,11 +2057,11 @@ SILO_API extern void                   DBWalkMrgtree(DBmrgtree const *tree, DBmr
 SILO_API extern DBmrgtree *            DBMakeMrgtree(int source_mesh_type, int mrgtree_info, int max_root_descendents,
                                            DBoptlist *opts);
 SILO_API extern int                    DBAddRegion(DBmrgtree *tree, char const *region_name, int type_info_bits,
-                                           int max_descendents, char const *maps_name, int nsegs, int *seg_ids,
-                                           int *seg_sizes, int *seg_types, DBoptlist *opts);
-SILO_API extern int                    DBAddRegionArray(DBmrgtree *tree, int nregn, char **regn_names, int type_info_bits,
-                                           char const *maps_name, int nsegs, int *seg_ids, int *seg_sizes, int *seg_types,
-                                           DBoptlist *opts);
+                                           int max_descendents, char const *maps_name, int nsegs, int const *seg_ids,
+                                           int const *seg_sizes, int const *seg_types, DBoptlist const *opts);
+SILO_API extern int                    DBAddRegionArray(DBmrgtree *tree, int nregn, char const * const *regn_names,
+                                           int type_info_bits, char const *maps_name, int nsegs, int const *seg_ids,
+                                           int const *seg_sizes, int const *seg_types, DBoptlist const *opts);
 SILO_API extern int                    DBSetCwr(DBmrgtree *tree, char const *path);
 SILO_API extern char const *           DBGetCwr(DBmrgtree *tree);
 SILO_API extern int                    DBPutMrgtree(DBfile *dbfile, char const *mrg_tree_name, char const *mesh_name,

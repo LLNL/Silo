@@ -924,13 +924,11 @@ stc_walk2_DBdirectory (obj_t _a, void *a_mem, obj_t _b, void *b_mem,
             }
 
             sprintf (buf, "%s/%s", obj_name(wdata->a_sdo), a_toc[i].name);
-printf("buf for obj_a =\"%s\"\n", buf);
             sym = obj_new (C_SYM, buf);
             aobj = obj_deref (a_file, 1, &sym);
             sym = obj_dest (sym);
 
             sprintf (buf, "%s/%s", obj_name(wdata->b_sdo), b_toc[j].name);
-printf("buf for obj_b =\"%s\"\n", buf);
             sym = obj_new (C_SYM, buf);
             bobj = obj_deref (b_file, 1, &sym);
             sym = obj_dest (sym);

@@ -132,6 +132,7 @@ main(int argc, char *argv[])
 	}
     }
     
+    DBSetDeprecateWarnings(0);
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_NONE, NULL);
     printf("Creating test file \"%s\".\n", filename);
     dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "test empty silo objects", driver);

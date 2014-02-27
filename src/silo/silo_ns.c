@@ -340,7 +340,7 @@ EvalExprTree(DBnamescheme const *ns, DBexprnode *tree, int n)
 }
 
 PUBLIC DBnamescheme *
-DBMakeNamescheme(const char *fmt, ...)
+DBMakeNamescheme(char const *fmt, ...)
 {
     va_list ap;
     int i, j, k, n, pass, ncspecs, done, saved_narrefs;

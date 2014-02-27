@@ -56,7 +56,7 @@ c---------------------------------------------------------------------
 c  Purpose
 c
 c     Demonstrate use of SILO for creating unstructured cell data
-c     (UCD) objects for viewing with MeshTV.
+c     (UCD) objects for visualization.
 c
 c---------------------------------------------------------------------
       program main
@@ -80,7 +80,7 @@ c...Create file named "ucdf77.silo". Database ID is returned in 'dbid'.
      .               "file info", 9, driver, dbid)
 
 
-c...Write out necessary objects for MeshTV.
+c...Write out objects for visualization 
 
       meshid = builducd(dbid, "ucd", 3)
 

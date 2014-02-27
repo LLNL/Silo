@@ -3844,7 +3844,7 @@ DBErrlvl(void)
  * digits: array of digits to return
  * ndigits: size of digits array
  *
- * returns 0 on successful convers
+ * returns 0 on successful conversion, non-zero on failure
  *-----------------------------------------------------------------------*/
 static int
 db_parse_version_digits_from_string(char const *str, char sep, int *digits, int ndigits)
@@ -3885,13 +3885,16 @@ db_parse_version_digits_from_string(char const *str, char sep, int *digits, int 
     if (!non_digits)
     {
         p = ostr;
-        for (i = 0; i < (nseps+1) && ndigits; i++, ndigits--)
+        errno = 0;
+        for (i = 0; i < (nseps+1) && ndigits && errno == 0; i++, ndigits--)
         {
             digits[i] = strtol(p, 0, 10);
             while (*p != '\0') p++;
             p++;
             if (!strncmp(p, "-pre", 4)) p+=4;
         }
+        if (!errno)
+            retval = 1;
     }
     else
     {
@@ -3954,7 +3957,7 @@ DBVersionDigits(int *maj, int *min, int *pat, int *pre)
         if (pre) *pre = digits[3];
         return 0;
     }
-    return 1;
+    return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -4020,7 +4023,7 @@ DBFileVersionDigits(const DBfile *dbfile, int *maj, int *min, int *pat, int *pre
         if (pre) *pre = digits[3];
         return 0;
     }
-    return 1;
+    return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -5810,26 +5813,31 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBWriteComponent", E_GRABBED) ; 
+            API_ERROR("DBWriteComponent", E_GRABBED) ;
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
         if (SILO_Globals.allowEmptyObjects)
         {
-            if (!var) API_RETURN(0);
+            if (nd<=0) API_RETURN(0);
             if (!count) API_RETURN(0);
+            if (!var) API_RETURN(0);
             for(nvals=1,i=0;i<nd;i++)
                 nvals *= count[i];
-            if (!nvals) API_RETURN(0);
+            if (nvals<=0) API_RETURN(0);
         }
         if (!comp_name || !*comp_name)
             API_ERROR("component name", E_BADARGS);
-        if (db_VariableNameValid(comp_name) == 0)
+        if (db_VariableNameValid((char *)comp_name) == 0)
             API_ERROR("component name", E_INVALIDNAME);
+#if 0
+        /* We don't know what name to pass to DBInqVarExists here because it
+           is the driver that knows how to construct component names */
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, obj->name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
+#endif
         if (!prefix || !*prefix)
             API_ERROR("prefix", E_BADARGS);
-        if (db_VariableNameValid(prefix) == 0)
+        if (db_VariableNameValid((char *)prefix) == 0)
             API_ERROR("prefix", E_INVALIDNAME);
         if (!datatype || !*datatype)
             API_ERROR("data type", E_BADARGS);
@@ -5846,11 +5854,12 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
         if (nvals == 0) {
             API_ERROR("Zero-length write attempted", E_BADARGS);
         }
-        if (obj->ncomponents >= obj->maxcomponents) {
-            API_ERROR("ncomponents", E_BADARGS);
-        }
         if (!dbfile->pub.w_comp)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        /* Note that the work to add the variable component to the object is
+           handled down in the drivers due to the fact that the drivers may
+           use different rules to construct the object component names */
 
         retval = (dbfile->pub.w_comp) (dbfile, obj, comp_name, prefix,
                                        datatype, var, nd, count);
@@ -13334,8 +13343,8 @@ DBMakeMrgtree(int source_mesh_type, int type_info_bits,
 PUBLIC int
 DBAddRegion(DBmrgtree *tree, const char *region_name,
     int type_info_bits, int max_descendents, 
-    const char *maps_name, int nsegs, int *seg_ids,
-    int *seg_lens, int *seg_types, DBoptlist *opts)
+    const char *maps_name, int nsegs, int const *seg_ids,
+    int const *seg_lens, int const *seg_types, DBoptlist const *opts)
 {
     DBmrgtnode *tnode = NULL;
 
@@ -13431,9 +13440,9 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
 
 PUBLIC int
 DBAddRegionArray(DBmrgtree *tree, int nregns,
-    char **regn_names, int type_info_bits,
-    const char *maps_name, int nsegs, int *seg_ids,
-    int *seg_lens, int *seg_types, DBoptlist *opts)
+    char const * const *regn_names, int type_info_bits,
+    char const *maps_name, int nsegs, int const *seg_ids,
+    int const *seg_lens, int const *seg_types, DBoptlist const *opts)
 {
     DBmrgtnode *tnode = NULL;
     int i;
@@ -13538,7 +13547,7 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
 }
 
 PUBLIC int
-DBSetCwr(DBmrgtree *tree, const char *path)
+DBSetCwr(DBmrgtree *tree, char const *path)
 {
     int retval = -1;
 
@@ -13578,7 +13587,7 @@ DBSetCwr(DBmrgtree *tree, const char *path)
     API_END_NOPOP;  /* BEWARE: If API_RETURN above is removed use API_END */
 }
 
-PUBLIC const char *
+PUBLIC char const *
 DBGetCwr(DBmrgtree *tree)
 {
     const char *retval = NULL;
@@ -13595,7 +13604,7 @@ DBGetCwr(DBmrgtree *tree)
 }
 
 PUBLIC int
-DBPutMrgtree(DBfile *dbfile, const char *name, const char *mesh_name,
+DBPutMrgtree(DBfile *dbfile, char const *name, char const *mesh_name,
     DBmrgtree const *tree, DBoptlist const *opts)
 {
     int retval;

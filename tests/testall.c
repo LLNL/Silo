@@ -3250,10 +3250,7 @@ build_curve (DBfile *dbfile, int driver)
     * Write the `coscurve' curve. It shares x values with the `sincurve'
     * curve.
     */
-   if (driver == DB_HDF5)
-       DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
-   else
-       DBAddOption(opts, DBOPT_XVARNAME, "sincurve_x");
+   DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
    DBPutCurve (dbfile, "coscurve", NULL, y[1], DB_FLOAT, 20, opts) ;
    DBClearOption(opts, DBOPT_XVARNAME);
 

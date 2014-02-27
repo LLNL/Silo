@@ -7799,14 +7799,14 @@ db_hdf5_PutCurve(DBfile *_dbfile, char const *name, void const *xvals, void cons
         }
 
         /* Write X and Y arrays if supplied */
-        if (xvals) {
+        if (npts && xvals) {
             db_hdf5_compwr(dbfile, dtype, 1, &npts, xvals, m.xvarname/*out*/,
                 friendly_name(name, "_xvals", 0));
         } else if (_cu._varname[0]) {
             db_hdf5_fullname(dbfile, _cu._varname[0], m.xvarname/*out*/);
         }
 
-        if (yvals) {
+        if (npts && yvals) {
             db_hdf5_compwr(dbfile, dtype, 1, &npts, yvals, m.yvarname/*out*/,
                 friendly_name(name, "_yvals", 0));
         } else if (_cu._varname[1]) {
@@ -7920,8 +7920,10 @@ db_hdf5_GetCurve(DBfile *_dbfile, char const *name)
         }
         if (force_single_g) cu->datatype = DB_FLOAT;
         cu->title = OPTDUP(m.label);
-        cu->xvarname = OPTDUP(m.xvarname);
-        cu->yvarname = OPTDUP(m.yvarname);
+        if (strncmp(m.xvarname, "/.silo/#", 8))
+            cu->xvarname = OPTDUP(m.xvarname);
+        if (strncmp(m.yvarname, "/.silo/#", 8))
+            cu->yvarname = OPTDUP(m.yvarname);
         cu->xlabel = OPTDUP(m.xlabel);
         cu->ylabel = OPTDUP(m.ylabel);
         cu->xunits = OPTDUP(m.xunits);
