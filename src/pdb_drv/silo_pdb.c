@@ -9911,8 +9911,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char const *name, char const *meshname, int 
     *-------------------------------------------------------------*/
    db_InitQuad(_dbfile, meshname, optlist, dims, ndims);
 
-   /*obj = DBMakeObject(name, DB_QUADVAR, (1+(mixlen!=0))*nvars + 30);*/
-   obj = DBMakeObject(name, DB_QUADVAR, 2);
+   obj = DBMakeObject(name, DB_QUADVAR, (1+(mixlen!=0))*nvars + 30);
 
    DBAddStrComponent(obj, "meshid", meshname);
 
