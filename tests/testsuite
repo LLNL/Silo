@@ -4768,15 +4768,15 @@ $at_failed && at_func_log_failure
 $at_traceon; }
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:345: testdtypes \`pwd\` \$STARGS"
+$as_echo "$at_srcdir/testsuite.at:345: test -z \"\$BROWSER\" && exit 77 || \$VALGRIND testdtypes \`pwd\` \$STARGS"
 echo testsuite.at:345 >"$at_check_line_file"
 
 if { echo 'Not enabling shell tracing (command contains a `...` command substitution)'
    false; }; then
-  ( $at_traceon; testdtypes `pwd` $STARGS ) >"$at_stdout" 2>"$at_stder1"
+  ( $at_traceon; test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; testdtypes `pwd` $STARGS ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false

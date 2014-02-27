@@ -342,7 +342,7 @@ AT_CLEANUP
 AT_SETUP(force single)
 AT_KEYWORDS(conversions)
 AT_CHECK(specmix $STARGS,,ignore)
-AT_CHECK(testdtypes `pwd` $STARGS,,ignore)
+AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_file)
 AT_KEYWORDS(large)
