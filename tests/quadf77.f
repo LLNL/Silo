@@ -158,6 +158,8 @@ c----------------------------------------------------------------------
       real       x(NX), y(NY), d(NZONES)
       real       ttime
       double precision dttime
+      character*1024 vnames(2)
+      integer lvnames(2)
 
 
 c...Initializations.
@@ -222,6 +224,13 @@ c...two different meshes
      .                lname, d, dims, ndims,
      .                DB_F77NULL, 0, DB_FLOAT, DB_ZONECENT,
      .                optlistid, varid)
+      vnames(1) = "FooBar"
+      lvnames(1) = 6
+      vnames(2) = "gorfo"
+      lvnames(2) = 5
+      err = dbputqv(dbid, "f", 1, name, lname, 3, vnames, lvnames,
+     .          f, dims, ndims, DB_F77NULL, 0, DB_FLOAT, DB_ZONECENT,
+     .          optlistid, varid)
 
       buildquad = meshid
 
