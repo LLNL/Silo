@@ -293,8 +293,10 @@ PrintObjectComponentsType(DBfile *dbfile, FILE* outf, char *objname, char *inden
     {
         int len = DBGetVarLength(dbfile, objname);
         comptype = DBGetVarType(dbfile, objname);
-        fprintf(outf, "%sObject: \"%s\" is a simple array\n", indent, objname);
-        fprintf(outf, "    Length: %d  Type: %-11s\n", len, IntToTypename(comptype));
+        fprintf(outf, "%sObject: \"%s\"\n", indent, objname);
+        fprintf(outf, "%s    is a simple array\n", indent);
+        fprintf(outf, "%s    Length: %d  Type: %-11s\n", indent, len, IntToTypename(comptype));
+        fprintf(outf, "\n");
         return;
     }
 

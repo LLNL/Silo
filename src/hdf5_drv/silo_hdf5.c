@@ -6476,7 +6476,7 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
         H5Aclose(attr);
         H5Tclose(atype);
         H5Tclose(ftype);
-        H5Tclose(mtype);
+        if (mtype != -1) H5Tclose(mtype);
     } CLEANUP {
         /* Release objects */
         if (retval) {
@@ -6484,11 +6484,13 @@ db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname, char const *comp
             retval = NULL;
         }
         if (mnofname) free(mnofname);
-        H5Tclose(o);
-        H5Aclose(attr);
-        H5Tclose(atype);
-        H5Tclose(ftype);
-        H5Tclose(mtype);
+        H5E_BEGIN_TRY {
+            H5Tclose(o);
+            H5Aclose(attr);
+            H5Tclose(atype);
+            H5Tclose(ftype);
+            H5Tclose(mtype);
+        } H5E_END_TRY;
     } END_PROTECT;
 
     return retval;
@@ -6744,8 +6746,10 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
         H5Tclose(ftype);
         if (object) free(object);
     } CLEANUP {
-        H5Tclose(mtype);
-        H5Tclose(ftype);
+        H5E_BEGIN_TRY {
+            H5Tclose(mtype);
+            H5Tclose(ftype);
+        } H5E_END_TRY;
         if (object) free(object);
     } END_PROTECT;
     return 0;

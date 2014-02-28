@@ -4788,7 +4788,7 @@ DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
                 indx += lregn_names[i] ;
         }
 
-        *status = DBAddRegionArray(tree, *nregn, regn_nms,
+        *status = DBAddRegionArray(tree, *nregn, (char const * const *) regn_nms,
             *type_info_bits, maps_nm, *nsegs, seg_ids, seg_sizes,
              seg_types, optlist);
 
