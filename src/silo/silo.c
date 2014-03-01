@@ -12255,12 +12255,16 @@ DBStringArrayToStringList(
  *    Mark C. Miller, Fri Oct 12 22:57:23 PDT 2012
  *    Changed interface to return value for number of strings as well
  *    as accept an input value or nothing at all.
+ *
+ *    Mark C. Miller, Sat Mar  1 01:28:03 PST 2014
+ *    Add a couple of performance optimizations for really big
+ *    multi-block objects.
  *--------------------------------------------------------------------*/
 PUBLIC char **
 DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
     int skipSemicolonAtIndexZero)
 {
-    int i, l, n, add1 = 0;
+    int i, l, n, last_len, add1 = 0;
     char **retval;
     int *colonAt = 0;
     int needToSlashSwap = 0;
@@ -12286,6 +12290,7 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
     retval = (char**) calloc(n+add1, sizeof(char*));
     if (handleSlashSwap)
         colonAt = (int *) calloc(n, sizeof(int));
+    last_len = -1;
     for (i=0, l=(skipSemicolonAtIndexZero&&strList[0]==';')?1:0; i<n; i++)
     {
         if (strList[l] == ';')
@@ -12301,27 +12306,38 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
         else
         {
             int lstart = l;
-            while (strList[l] != ';' && strList[l] != '\0')
+            int len;
+            if (i < (n - 1) && last_len > 0 && strList[lstart+last_len] == ';')
             {
-                /* Since we're already marching through characters looking
-                   for a ';', if we're supposed to swap slash characters too,
-                   keep track of colons also. We keep track of the LAST ':'
-                   we see in colonAt[i]. */
-                if (handleSlashSwap)
-                {
-#if !defined(_WIN32) /* linux case */
-                    if (strList[l] == '\\')
-#else                /* windows case */
-                    if (strList[l] == '/')
-#endif
-                        needToSlashSwap = 1;
-                    if (strList[l] == ':')
-                        colonAt[i] = l-lstart;
-                }
-                l++;
+                l = lstart + last_len; /* the 'guess' worked, so fast forward */
             }
-            strList[l] = '\0';
-            retval[i] = STRDUP(&strList[lstart]);
+            else
+            {
+                while (strList[l] != ';' && strList[l] != '\0')
+                {
+                    /* Since we're already marching through characters looking
+                       for a ';', if we're supposed to swap slash characters too,
+                       keep track of colons also. We keep track of the LAST ':'
+                       we see in colonAt[i]. */
+                    if (handleSlashSwap)
+                    {
+#if !defined(_WIN32)
+                        if (strList[l] == '\\') /* linux case */
+#else
+                        if (strList[l] == '/')  /* windows case */
+#endif
+                            needToSlashSwap = 1;
+                        if (strList[l] == ':')
+                            colonAt[i] = l-lstart;
+                    }
+                    l++;
+                }
+            }
+            len = l-lstart;
+            last_len = len;
+            retval[i] = (char *) malloc(len+1);
+            memcpy(retval[i],&strList[lstart],len);
+            retval[i][len] = '\0';
             l++;
         }
     }
@@ -13819,13 +13835,16 @@ char *
 _db_safe_strdup(const char *s)
 {
     char *retval = NULL;
+    int n;
     
     if (!s) 
         return NULL;
             
-    retval = (char*)malloc(sizeof(char)*(strlen(s)+1));
-    strcpy(retval,s);
-    retval[strlen(s)] = '\0';
+    n = strlen(s);
+    retval = (char*)malloc(sizeof(char)*(n+1));
+    memcpy(retval, s, n);
+    /*strcpy(retval,s);*/
+    retval[n] = '\0';
         
     return(retval);
 }
