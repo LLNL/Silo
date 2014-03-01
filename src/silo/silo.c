@@ -3251,7 +3251,7 @@ DBMakeObject(const char *name, int type, int maxcomps)
         if (!name || !*name)
             API_ERROR("object name", E_BADARGS);
         if (db_VariableNameValid((char *)name) == 0)
-            API_ERROR("object name", E_INVALIDNAME);
+            API_ERROR(name, E_INVALIDNAME);
         if (maxcomps <= 0)
             API_ERROR("maxcomps", E_BADARGS);
         if (NULL == (object = ALLOC(DBobject)))
@@ -5996,15 +5996,31 @@ int json_object_object_length(struct json_object *o)
 
 int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
 {
-    json_object *silo_type_obj = json_object_object_get(jobj, "silo_type");
-    json_object *silo_name_obj = json_object_object_get(jobj, "silo_name");
-    DBobject *sobj = DBMakeObject( 
-                         json_object_get_string(silo_name_obj),
-                         json_object_get_int(silo_type_obj),
-                         json_object_object_length(jobj)+10
-                     );
+#warning VERY CLUGEY HERE
+    static int cnt = 0;
+    DBobject *sobj;
+    char objnm[256];
+    memset(objnm, 0, sizeof(objnm));
+    if (json_object_object_get_ex(jobj, "silo_type", 0) &&
+        json_object_object_get_ex(jobj, "silo_name", 0))
+    {
+        json_object *silo_type_obj = json_object_object_get(jobj, "silo_type");
+        json_object *silo_name_obj = json_object_object_get(jobj, "silo_name");
+        strncpy(objnm, json_object_get_string(silo_name_obj), sizeof(objnm));
+        sobj = DBMakeObject(objnm,
+            json_object_get_int(silo_type_obj),
+            json_object_object_length(jobj)+10
+        );
+    }
+    else
+    {
+printf("handling DB_USERDEF case\n");
+        snprintf(objnm, sizeof(objnm), "anon_%d", cnt++);
+        sobj = DBMakeObject(objnm, DB_USERDEF, json_object_object_length(jobj)+10);
+    }
     struct json_object_iterator jiter = json_object_iter_begin(jobj);
     struct json_object_iterator jend = json_object_iter_end(jobj);
+#warning LOOP COULD LOOK A LOT BETTER USING foreachC MACRO
     while (!json_object_iter_equal(&jiter, &jend))
     {
         struct json_object *mobj = json_object_iter_peek_value(&jiter);
@@ -6037,6 +6053,7 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
                     DBAddStrComponent(sobj, mname, json_object_get_string(mobj));
                 break;
             }
+#warning STRDUPS ARE LEAKS
             case json_type_object: /* must be extptr array reference */
             {
                 if (json_object_object_get_ex(mobj, "ptr", 0) &&
@@ -6052,13 +6069,17 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
                     struct json_object *darr = json_object_object_get(mobj, "dims");
                     for (i = 0; i < ndims; i++)
                         dims[i] = (long) json_object_get_int(json_object_array_get_idx(darr, i));
-                    DBWriteComponent(dbfile, sobj, mname, json_object_get_string(silo_name_obj),
+                    DBWriteComponent(dbfile, sobj, mname, strdup(objnm),
                         db_GetDatatypeString(datatype), p, ndims, dims);
                 }
                 else
                 {
+                    char tmp[32];
+                    snprintf(tmp, sizeof(tmp), "anon_%d", cnt);
+                    DBAddStrComponent(sobj, mname, strdup(tmp));
                     DBWriteJsonObject(dbfile, mobj);
                 }
+
                 break;
             }
         }

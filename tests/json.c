@@ -115,7 +115,6 @@ int json_object_to_binary_buf(struct json_object *obj, int flags, void **buf, in
 
 #warning SHOULD REALLY USE INT TYPE FOR THIS VALUE
             sprintf(tmp,"%-12x",pblen); /* overwrite ptr value w/buffer-offset */
-printf("storing %d vals at offset %d, (\"\%s\") to overwrite at %10s \n", nvals, pblen, tmp, (pjhdr+12));
 
             memcpy(pb->buf + (pjhdr+12-jhdr),tmp,strlen(tmp)); /* overwrite ptr value w/buffer-offset */
             pjhdr += sizeof(EXTPTR_HDRSTR);
@@ -142,7 +141,6 @@ int json_object_from_binary_buf_recurse(struct json_object *jso, void *buf)
                 json_object_object_get_ex(iter.val, "ndims", 0) &&
                 json_object_object_get_ex(iter.val, "dims", 0))
             {
-printf("processing entry \"%s\n", iter.key);
                 char strptr[128];
                 void *p;
                 int i, offset, nvals=1;
@@ -153,7 +151,6 @@ printf("processing entry \"%s\n", iter.key);
                 for (i = 0; i < ndims; i++)
                     nvals *= json_object_get_int(json_object_array_get_idx(darr, i));
                 sscanf(offstr, "%x", &offset);
-printf("looking for %d vals at offset %d (\"%s\")\n", nvals, offset, offstr);
                 p = malloc(nvals*db_GetMachDataSize(datatype));
                 memcpy(p, buf+offset, nvals*db_GetMachDataSize(datatype));
                 json_object_object_del(iter.val,"ptr");
@@ -182,7 +179,7 @@ main(int argc, char *argv[])
     int		    fd, i, driver = DB_PDB;
     char 	    *filename = "onehex.silo";
     int             show_all_errors = FALSE;
-    struct json_object *jsilo_obj, *fil_obj;
+    struct json_object *jsilo_obj, *fil_obj, *jstuff, *jarr;
     char            *binary_obj_strA;
     void            *binary_obj_strB;
 
@@ -226,9 +223,23 @@ main(int argc, char *argv[])
     }
 #endif
 
+
     json_object_to_file("onehex.json", jsilo_obj);
     fil_obj = json_object_from_file("onehex.json");
     printf("fil_obj=%s\n", json_object_to_json_string(fil_obj));
+
+    jstuff = json_object_new_object();
+    json_object_object_add(jstuff, "foo", json_object_new_boolean(0));
+    json_object_object_add(jstuff, "a_double", json_object_new_double(1.5));
+    json_object_object_add(jstuff, "b_int", json_object_new_int(33));
+
+    jarr = json_object_new_array();
+    json_object_array_add(jarr, json_object_new_double(0.5));
+    json_object_array_add(jarr, json_object_new_double(97.0));
+    json_object_array_add(jarr, json_object_new_double(21.666));
+    json_object_object_add(jstuff, "array", jarr);
+
+    json_object_object_add(fil_obj, "katie_data", jstuff);
 
     dbfile = DBCreate("onehex_from_json.pdb", DB_CLOBBER, DB_LOCAL, "test json output", DB_PDB);
     DBWriteJsonObject(dbfile, fil_obj);
