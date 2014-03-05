@@ -879,6 +879,7 @@ typedef struct DBmultimesh_ {
     int            repr_block_idx; /* index of a 'representative' block */
     char         **alt_nodenum_vars; 
     char         **alt_zonenum_vars; 
+    char          *meshnames_alloc; /* original alloc of meshnames as string list */
 } DBmultimesh;
 
 /*----------------------------------------------------------------------------
@@ -935,6 +936,7 @@ typedef struct DBmultivar_ {
     int            empty_cnt;   /* size of empty list */
     int            repr_block_idx; /* index of a 'representative' block */
     double         missing_value; /* Value to indicate var data is invalid/missing */
+    char          *varnames_alloc; /* original alloc of varnames as string list */
 } DBmultivar;
 
 /*-------------------------------------------------------------------------
@@ -963,6 +965,7 @@ typedef struct DBmultimat_ {
     int           *empty_list;  /* list of empty block #'s (option for namescheme) */
     int            empty_cnt;   /* size of empty list */
     int            repr_block_idx; /* index of a 'representative' block */
+    char          *matnames_alloc; /* original alloc of matnames as string list */
 } DBmultimat;
 
 /*-------------------------------------------------------------------------
@@ -986,6 +989,7 @@ typedef struct DBmultimatspecies_ {
     int           *empty_list;  /* list of empty block #'s (option for namescheme) */
     int            empty_cnt;   /* size of empty list */
     int            repr_block_idx; /* index of a 'representative' block */
+    char          *specnames_alloc; /* original alloc of matnames as string list */
 } DBmultimatspecies;
 
 /*----------------------------------------------------------------------
@@ -2110,8 +2114,7 @@ SILO_API extern DBfacelist *           DBCalcExternalFacelist(int *, int, int, i
 SILO_API extern DBfacelist *           DBCalcExternalFacelist2(int *, int, int, int, int, int *, int *, int *, int, int *, int);
 SILO_API extern char *                 DBJoinPath(char const *, char const *);
 SILO_API extern void                   DBStringArrayToStringList(char const * const *strArray, int n, char **strList, int *m);
-SILO_API extern char **                DBStringListToStringArray(char *strList, int *n, int handleSlashSwap,
-                                           int skipSemicolonAtIndexZero);
+SILO_API extern char **                DBStringListToStringArray(char const *strList, int *n, int skipSemicolonAtIndexZero);
 
 /* Fortran interface functions */
 SILO_API extern void *                 DBFortranAccessPointer(int value);

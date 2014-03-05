@@ -936,4 +936,6 @@ char   *_db_safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/
 #define strdup(s) _db_safe_strdup(s)
 
+INTERNAL int db_StringListToStringArrayMBOpt(char *strList, char ***strArray, char **alloc_flag, int nblocks);
+
 #endif /* !SILO_PRIVATE_H */

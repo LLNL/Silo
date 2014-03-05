@@ -12255,19 +12255,12 @@ DBStringArrayToStringList(
  *    Mark C. Miller, Fri Oct 12 22:57:23 PDT 2012
  *    Changed interface to return value for number of strings as well
  *    as accept an input value or nothing at all.
- *
- *    Mark C. Miller, Sat Mar  1 01:28:03 PST 2014
- *    Add a couple of performance optimizations for really big
- *    multi-block objects.
  *--------------------------------------------------------------------*/
 PUBLIC char **
-DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
-    int skipSemicolonAtIndexZero)
+DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndexZero)
 {
-    int i, l, n, last_len, add1 = 0;
+    int i, l, n, add1 = 0;
     char **retval;
-    int *colonAt = 0;
-    int needToSlashSwap = 0;
 
     /* if n is unspecified (<0), compute it by counting semicolons */
     if (_n == 0 || *_n < 0)
@@ -12288,9 +12281,6 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
     }
 
     retval = (char**) calloc(n+add1, sizeof(char*));
-    if (handleSlashSwap)
-        colonAt = (int *) calloc(n, sizeof(int));
-    last_len = -1;
     for (i=0, l=(skipSemicolonAtIndexZero&&strList[0]==';')?1:0; i<n; i++)
     {
         if (strList[l] == ';')
@@ -12305,36 +12295,10 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
         }
         else
         {
-            int lstart = l;
-            int len;
-            if (i < (n - 1) && last_len > 0 && strList[lstart+last_len] == ';')
-            {
-                l = lstart + last_len; /* the 'guess' worked, so fast forward */
-            }
-            else
-            {
-                while (strList[l] != ';' && strList[l] != '\0')
-                {
-                    /* Since we're already marching through characters looking
-                       for a ';', if we're supposed to swap slash characters too,
-                       keep track of colons also. We keep track of the LAST ':'
-                       we see in colonAt[i]. */
-                    if (handleSlashSwap)
-                    {
-#if !defined(_WIN32)
-                        if (strList[l] == '\\') /* linux case */
-#else
-                        if (strList[l] == '/')  /* windows case */
-#endif
-                            needToSlashSwap = 1;
-                        if (strList[l] == ':')
-                            colonAt[i] = l-lstart;
-                    }
-                    l++;
-                }
-            }
+            int len, lstart = l;
+            while (strList[l] != ';' && strList[l] != '\0')
+                l++;
             len = l-lstart;
-            last_len = len;
             retval[i] = (char *) malloc(len+1);
             memcpy(retval[i],&strList[lstart],len);
             retval[i][len] = '\0';
@@ -12343,30 +12307,90 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
     }
     if (add1) retval[i] = 0;
 
-    /* Ok, now swap slash characters if requested and needed */
-    if (handleSlashSwap)
-    {
-        if (needToSlashSwap)
-        {
-            for (i=0; i < n; i++)
-            {
-                for (l = 0; l < colonAt[i]; l++)
-                {
-#if !defined(_WIN32) /* linux case */
-                    if (retval[i][l] == '\\') retval[i][l] = '/';
-#else                /* windows case */
-                    if (retval[i][l] == '/') retval[i][l] = '\\';
-#endif
-                }
-            }
-        }
-        free(colonAt);
-    }
-
     /* Return value of n computed if requested */
     if (_n && *_n < 0) *_n = n;
 
     return retval;
+}
+
+INTERNAL int 
+db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_flag, int nblocks)
+{
+    int i=0, s=0, n=0, hasColon=0, add1=0, slashCharsToSwap[128];
+    char **strArray;
+    static char const *me = "DBStringListToStringArrayMBOpt";
+
+    if (!strList) return 0;
+
+    if (nblocks <= 0)
+        return db_perror("nblocks", E_BADARGS, me);
+
+    strArray = (char **) malloc(nblocks * sizeof(char*));
+    if (strList[0] == ';')
+    {
+        i = 1;
+        add1 = 1;
+    }
+    strArray[n++] = &strList[i];
+    while (strList[i] != '\0')
+    {
+        switch (strList[i])
+        {
+            case ';':
+            {
+                strList[i++] = '\0';
+                strArray[n++] = &strList[i];
+                if (hasColon && s)
+                {
+                    int j;
+                    for (j = 0; j < s; j++)
+#if !defined(_WIN32)
+                        strList[slashCharsToSwap[j]] = '/';
+#else
+                        strList[slashCharsToSwap[j]] = '\\';
+#endif
+                }
+                s = 0;
+                hasColon = 0;
+                break;
+            }
+#if !defined(_WIN32) /* linux case */
+            case '\\':
+#else                /* windows case */
+            case '/':
+#endif 
+            {
+                slashCharsToSwap[s++] = i;
+                if (s == sizeof(slashCharsToSwap)/sizeof(slashCharsToSwap[0]))
+                {
+                    free(strList);
+                    free(strArray);
+                    return db_perror("exceeded slashCharsToSwap size", E_INTERNAL, me);
+                }
+                break;
+            }
+            case ':':
+            {
+                hasColon = 1;
+                break;
+            }
+        }
+        i++;
+    }
+
+    if (n != nblocks + add1)
+    {
+        free(strList);
+        free(strArray);
+        return db_perror("incorrect number of block names", E_INTERNAL, me);
+    }
+
+    /* ensure we store the originally allocated pointer for later free's */
+    *alloc_flag = strList;
+
+    *retArray = strArray;
+
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -13843,8 +13867,7 @@ _db_safe_strdup(const char *s)
     n = strlen(s);
     retval = (char*)malloc(sizeof(char)*(n+1));
     memcpy(retval, s, n);
-    /*strcpy(retval,s);*/
     retval[n] = '\0';
-        
+
     return(retval);
 }

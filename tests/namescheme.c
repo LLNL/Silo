@@ -76,7 +76,7 @@ else                                                                            
     if (strcmp(DBGetName(NS, I), EXP) != 0)                                                                \
     {                                                                                                      \
         fprintf(stderr, "Namescheme at line %d failed failed for index %d. Expected \"%s\", got \"%s\"\n", \
-            __LINE__, I, DBGetName(NS, I), EXP);                                                           \
+            __LINE__, I, EXP, DBGetName(NS, I));                                                           \
         return 1;                                                                                          \
     }                                                                                                      \
 }

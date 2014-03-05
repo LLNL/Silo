@@ -89,7 +89,7 @@ void fill_bkgr(int *, int, int, int, int);
 void fill_mat(float *, float *, float *, int *, int, int, int,
     int *, int *, int *, float *, int *, int, double, double, double, double);
 
-int  build_multi(char *, int, char *, int, int, int);
+int  build_multi(char *, int, char *, int, int, int, int);
 
 void build_block_ucd3d(char *, int, char *, int, int, int);
 
@@ -112,7 +112,12 @@ main(int argc, char *argv[])
     char          *basename="ucd3d";
     char          *file_ext="pdb";
     int            driver=DB_PDB;
-    int            show_all_errors = FALSE;
+    int            show_all_errors = 0;
+#if !defined(_WIN32)
+    int            windows_style_slash = 0;
+#else
+    int            windows_style_slash = 1;
+#endif
 
     /*
      * Parse the command-line.
@@ -137,6 +142,8 @@ main(int argc, char *argv[])
             empties = 1;
         else if (!strcmp(argv[i], "show-all-errors"))
             show_all_errors = 1;
+        else if (!strcmp(argv[i], "invert-slash-style"))
+            windows_style_slash = !windows_style_slash;
 	else if (argv[i][0] != '\0')
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
     }
@@ -147,7 +154,7 @@ main(int argc, char *argv[])
     /* 
      * Create the multi-block ucd 3d mesh.
      */
-    build_multi(basename, driver, file_ext, 6, 8, 6);
+    build_multi(basename, driver, file_ext, 6, 8, 6, windows_style_slash);
 
     CleanupDriverStuff();
     return 0;
@@ -314,7 +321,8 @@ fill_mat(float *x, float *y, float *z, int *matlist, int nx,
  ***********************************************************************/
 int
 build_multi(char *basename, int driver, char *file_ext,
-            int nblocks_x, int nblocks_y, int nblocks_z)
+            int nblocks_x, int nblocks_y, int nblocks_z,
+            int windows_style_slash)
 {
     int             i;
     int             cycle;
@@ -360,11 +368,12 @@ build_multi(char *basename, int driver, char *file_ext,
 
         filenum = i / (nblocks / NFILES);
         if (multidir)
-#ifdef WIN32	
-            sprintf(prefix, "multi_file.dir\\%03d\\%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
-#else
-            sprintf(prefix, "multi_file.dir/%03d/%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
-#endif
+        {
+            if (windows_style_slash)
+                sprintf(prefix, "multi_file.dir\\%03d\\%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
+            else
+                sprintf(prefix, "multi_file.dir/%03d/%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
+        }
         else
             sprintf(prefix, "%s%d.%s:/block%d/", basename, filenum, file_ext, i);
 
@@ -395,11 +404,11 @@ build_multi(char *basename, int driver, char *file_ext,
     {
         if (multidir)
         {
-#ifdef WIN32	
-            sprintf(file_ns, "|multi_file.dir\\%%03d\\%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
-#else
-            sprintf(file_ns, "|multi_file.dir/%%03d/%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
-#endif
+            if (windows_style_slash)
+                sprintf(file_ns, "|multi_file.dir\\%%03d\\%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
+            else
+                sprintf(file_ns, "|multi_file.dir/%%03d/%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
+    
         }
         else
             sprintf(file_ns, "|%%s%%d.%%s|'%s'|n/36|'%s'", basename, file_ext);
@@ -735,7 +744,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         unlink("multi_file.dir/007/ucd3d7.h5");
         rmdir("multi_file.dir/007");
         rmdir("multi_file.dir");
-#ifndef WIN32
+#if !defined(_WIN32)
         st = mkdir("multi_file.dir",S_IRWXU|S_IRWXG|S_IRWXU);
 #else
         st = _mkdir("multi_file.dir");
@@ -977,7 +986,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
                 int st;
                 char dname[60];
                 sprintf(dname, "multi_file.dir/%03d", filenum);
-#ifndef WIN32
+#if !defined(_WIN32)
                 st = mkdir(dname, S_IRWXU|S_IRWXG|S_IRWXU);
 #else
                 st = _mkdir(dname);

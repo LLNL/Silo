@@ -496,7 +496,7 @@ DBMakeNamescheme(char const *fmt, ...)
                         {
                             char **tmp = NULL;
                             rv->arrsizes[k] = -1; /* initialize to 'unknown size' */
-                            tmp = DBStringListToStringArray((char*)rv->arrvals[k], &(rv->arrsizes[k]), 0, 0);
+                            tmp = DBStringListToStringArray((char*)rv->arrvals[k], &(rv->arrsizes[k]), 0);
                             FREE(rv->arrvals[k]);
                             rv->arrvals[k] = tmp;
                         }

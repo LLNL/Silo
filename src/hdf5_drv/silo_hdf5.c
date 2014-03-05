@@ -270,7 +270,6 @@ typedef struct {
    associated action. For HDF5 driver, we handle the slash swap
    on the 'names' member of multi-block objects only and we
    never skip first semicolon. */
-static int const        handleSlashSwap = 1;
 static int const        skipFirstSemicolon = 0;
 
 /* Use `float' for all memory floating point values? */
@@ -8176,8 +8175,7 @@ db_hdf5_GetCsgmesh(DBfile *_dbfile, char const *name)
         {
             char *tmpbndnames = db_hdf5_comprd(dbfile, m.bndnames, 1);
             if (tmpbndnames)
-                csgm->bndnames = DBStringListToStringArray(tmpbndnames, &m.nbounds,
-                                     !handleSlashSwap, !skipFirstSemicolon);
+                csgm->bndnames = DBStringListToStringArray(tmpbndnames, &m.nbounds, !skipFirstSemicolon);
             FREE(tmpbndnames);
         }
 
@@ -8403,8 +8401,7 @@ db_hdf5_GetCsgvar(DBfile *_dbfile, char const *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) csgv->region_pnames = DBStringListToStringArray(s, 0,
-                   !handleSlashSwap, !skipFirstSemicolon);
+        if (s) csgv->region_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
@@ -8599,8 +8596,7 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name)
         {
             char *tmpnames = db_hdf5_comprd(dbfile, m.regnames, 1);
             if (tmpnames)
-                zl->regnames = DBStringListToStringArray(tmpnames, &m.nregs,
-                    !handleSlashSwap, !skipFirstSemicolon);
+                zl->regnames = DBStringListToStringArray(tmpnames, &m.nregs, !skipFirstSemicolon);
             FREE(tmpnames);
         }
 
@@ -8608,8 +8604,7 @@ db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name)
         {
             char *tmpnames = db_hdf5_comprd(dbfile, m.zonenames, 1);
             if (tmpnames)
-                zl->zonenames = DBStringListToStringArray(tmpnames, &m.nzones,
-                    !handleSlashSwap, !skipFirstSemicolon);
+                zl->zonenames = DBStringListToStringArray(tmpnames, &m.nzones, !skipFirstSemicolon);
             FREE(tmpnames);
         }
 
@@ -8788,15 +8783,13 @@ db_hdf5_GetDefvars(DBfile *_dbfile, char const *name)
         defv->ndefs = m.ndefs;
 
         s = db_hdf5_comprd(dbfile, m.names, 1);
-        if (s) defv->names = DBStringListToStringArray(s, &(defv->ndefs),
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) defv->names = DBStringListToStringArray(s, &(defv->ndefs), !skipFirstSemicolon);
         FREE(s);
 
         defv->types = db_hdf5_comprd(dbfile, m.types, 1);
 
         s = db_hdf5_comprd(dbfile, m.defns, 1);
-        if (s) defv->defns = DBStringListToStringArray(s, &(defv->ndefs), 
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) defv->defns = DBStringListToStringArray(s, &(defv->ndefs), !skipFirstSemicolon);
         FREE(s);
 
         defv->guihides = db_hdf5_comprd(dbfile, m.guihides, 1);
@@ -9589,8 +9582,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) qv->region_pnames = DBStringListToStringArray(s, 0,
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) qv->region_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
@@ -10546,8 +10538,7 @@ db_hdf5_GetUcdvar(DBfile *_dbfile, char const *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) uv->region_pnames = DBStringListToStringArray(s, 0,
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) uv->region_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
@@ -11553,15 +11544,13 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char const *name)
         if (SILO_Globals.dataReadMask & DBMatMatnames)
         {
             s = db_hdf5_comprd(dbfile, m.matnames, 1);
-            if (s) ma->matnames = DBStringListToStringArray(s, &(ma->nmat),
-                !handleSlashSwap, !skipFirstSemicolon);
+            if (s) ma->matnames = DBStringListToStringArray(s, &(ma->nmat), !skipFirstSemicolon);
             FREE(s);
         }
         if (SILO_Globals.dataReadMask & DBMatMatcolors)
         {
             s = db_hdf5_comprd(dbfile, m.matcolors, 1);
-            if (s) ma->matcolors = DBStringListToStringArray(s, &(ma->nmat),
-                !handleSlashSwap, !skipFirstSemicolon);
+            if (s) ma->matcolors = DBStringListToStringArray(s, &(ma->nmat), !skipFirstSemicolon);
             FREE(s);
         }
 
@@ -11791,8 +11780,7 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char const *name)
             for (i=0; i < ms->nmat; i++)
                 nstrs += ms->nmatspec[i];
             s = db_hdf5_comprd(dbfile, m.specnames, 1);
-            if (s) ms->specnames = DBStringListToStringArray(s, &nstrs,
-                !handleSlashSwap, !skipFirstSemicolon);
+            if (s) ms->specnames = DBStringListToStringArray(s, &nstrs, !skipFirstSemicolon);
             FREE(s);
         }
         if (ms->nmatspec && SILO_Globals.dataReadMask & DBMatMatcolors)
@@ -11803,8 +11791,7 @@ db_hdf5_GetMatspecies(DBfile *_dbfile, char const *name)
                     nstrs += ms->nmatspec[i];
             }
             s = db_hdf5_comprd(dbfile, m.speccolors, 1);
-            if (s) ms->speccolors = DBStringListToStringArray(s, &nstrs,
-                !handleSlashSwap, !skipFirstSemicolon);
+            if (s) ms->speccolors = DBStringListToStringArray(s, &nstrs, !skipFirstSemicolon);
             FREE(s);
         }
 
@@ -12105,13 +12092,10 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name)
         mm->has_external_zones =  db_hdf5_comprd(dbfile, m.has_external_zones, 1);
         mm->meshtypes = db_hdf5_comprd(dbfile, m.meshtypes, 1);
         s = db_hdf5_comprd(dbfile, m.meshnames, 1);
-        if (s) mm->meshnames = DBStringListToStringArray(s, &m.nblocks,
-            handleSlashSwap, !skipFirstSemicolon);
-        FREE(s);
+        db_StringListToStringArrayMBOpt(s, &(mm->meshnames), &(mm->meshnames_alloc), m.nblocks);
         mm->groupings =  db_hdf5_comprd(dbfile, m.groupings, 1);
         t = db_hdf5_comprd(dbfile, m.groupnames, 1);
-        if (t) mm->groupnames = DBStringListToStringArray(t, &(mm->lgroupings),
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (t) mm->groupnames = DBStringListToStringArray(t, &(mm->lgroupings), !skipFirstSemicolon);
         FREE(t);
         mm->file_ns =  db_hdf5_comprd(dbfile, m.file_ns_name, 1);
         mm->block_ns =  db_hdf5_comprd(dbfile, m.block_ns_name, 1);
@@ -12953,13 +12937,10 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char const *name)
 
         /* Read the raw data variable names */
         s = db_hdf5_comprd(dbfile, m.varnames, 1);
-        if (s) mv->varnames = DBStringListToStringArray(s, &m.nvars,
-           handleSlashSwap, !skipFirstSemicolon);
-        FREE(s);
+        db_StringListToStringArrayMBOpt(s, &(mv->varnames), &(mv->varnames_alloc), m.nvars);
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) mv->region_pnames = DBStringListToStringArray(s, 0,
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) mv->region_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
         FREE(s);
 
         mv->file_ns =  db_hdf5_comprd(dbfile, m.file_ns_name, 1);
@@ -13242,19 +13223,17 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
         mm->matlists = db_hdf5_comprd(dbfile, m.matlists, 1);
         mm->matnos = db_hdf5_comprd(dbfile, m.matnos, 1);
         s = db_hdf5_comprd(dbfile, m.matnames, 1);
-        if (s) mm->matnames = DBStringListToStringArray(s, &m.nmats,
-            handleSlashSwap, !skipFirstSemicolon);
-        FREE(s);
+        db_StringListToStringArrayMBOpt(s, &(mm->matnames), &(mm->matnames_alloc), m.nmats);
 
         if (m.nmatnos > 0) {
             char *tmpmaterial_names = db_hdf5_comprd(dbfile, m.material_names, 1);
             char *tmpmat_colors = db_hdf5_comprd(dbfile, m.mat_colors, 1);
             if (tmpmaterial_names)
                 mm->material_names = DBStringListToStringArray(tmpmaterial_names,
-                    &m.nmatnos, !handleSlashSwap, !skipFirstSemicolon);
+                    &m.nmatnos, !skipFirstSemicolon);
             if (tmpmat_colors)
                 mm->matcolors = DBStringListToStringArray(tmpmat_colors,
-                    &m.nmatnos, !handleSlashSwap, !skipFirstSemicolon);
+                    &m.nmatnos, !skipFirstSemicolon);
             FREE(tmpmaterial_names);
             FREE(tmpmat_colors);
         }
@@ -13524,9 +13503,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
 
         /* Read the raw data */
         s = db_hdf5_comprd(dbfile, m.specnames, 1);
-        if (s) mm->specnames = DBStringListToStringArray(s, &m.nspec,
-            handleSlashSwap, !skipFirstSemicolon);
-        FREE(s);
+        db_StringListToStringArrayMBOpt(s, &(mm->specnames), &(mm->specnames_alloc), m.nspec);
         
         if (mm->nmat > 0 && mm->nmatspec) {
             char *tmpspecies_names = db_hdf5_comprd(dbfile, m.species_names, 1);
@@ -13536,8 +13513,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
             {
                 for (i = 0; i < mm->nmat; i++)
                     nstrs += mm->nmatspec[i];
-                mm->species_names = DBStringListToStringArray(tmpspecies_names, &nstrs,
-                    !handleSlashSwap, !skipFirstSemicolon);
+                mm->species_names = DBStringListToStringArray(tmpspecies_names, &nstrs, !skipFirstSemicolon);
             }
             if (tmpspeccolors)
             {
@@ -13546,8 +13522,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
                     for (i = 0; i < mm->nmat; i++)
                         nstrs += mm->nmatspec[i];
                 }
-                mm->speccolors = DBStringListToStringArray(tmpspeccolors, &nstrs,
-                    !handleSlashSwap, !skipFirstSemicolon);
+                mm->speccolors = DBStringListToStringArray(tmpspeccolors, &nstrs, !skipFirstSemicolon);
             }
             FREE(tmpspecies_names);
             FREE(tmpspeccolors);
@@ -14065,8 +14040,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char const *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.region_pnames, 1);
-        if (s) pv->region_pnames = DBStringListToStringArray(s, 0,
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) pv->region_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
@@ -14726,8 +14700,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
 
         /* read the node 'name' member */
         s = db_hdf5_comprd(dbfile, m.n_name, 1);
-        strArray = DBStringListToStringArray(s, &num_nodes,
-            !handleSlashSwap, !skipFirstSemicolon);
+        strArray = DBStringListToStringArray(s, &num_nodes, !skipFirstSemicolon);
         for (i = 0; (i < num_nodes) && strArray; i++)
             ltree[i]->name = strArray[i];
         FREE(s);
@@ -14737,8 +14710,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
         s = db_hdf5_comprd(dbfile, m.n_names, 1);
         if (s)
         {
-            strArray = DBStringListToStringArray(s, 0,
-                !handleSlashSwap, !skipFirstSemicolon);
+            strArray = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
             n = 0;
             for (i = 0; i < num_nodes; i++)
             {
@@ -14764,8 +14736,7 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
 
         /* read the maps_name data */
         s = db_hdf5_comprd(dbfile, m.n_maps_name, 1);
-        strArray = DBStringListToStringArray(s, &num_nodes,
-            !handleSlashSwap, !skipFirstSemicolon);
+        strArray = DBStringListToStringArray(s, &num_nodes, !skipFirstSemicolon);
         for (i = 0; i < num_nodes; i++)
             ltree[i]->maps_name = strArray[i];
         FREE(s);
@@ -14832,13 +14803,11 @@ db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name)
         FREE(intArray);
 
         s = db_hdf5_comprd(dbfile, m.mrgvar_onames, 1);
-        if (s) tree->mrgvar_onames = DBStringListToStringArray(s, 0,
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) tree->mrgvar_onames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.mrgvar_rnames, 1);
-        if (s) tree->mrgvar_rnames = DBStringListToStringArray(s, 0,
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) tree->mrgvar_rnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
         FREE(s);
 
         tree->root = ltree[m.root];
@@ -15274,13 +15243,11 @@ db_hdf5_GetMrgvar(DBfile *_dbfile, char const *name)
         }
 
         s = db_hdf5_comprd(dbfile, m.compnames, 1);
-        if (s) mrgv->compnames = DBStringListToStringArray(s, &m.ncomps,
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) mrgv->compnames = DBStringListToStringArray(s, &m.ncomps, !skipFirstSemicolon);
         FREE(s);
 
         s = db_hdf5_comprd(dbfile, m.reg_pnames, 1);
-        if (s) mrgv->reg_pnames = DBStringListToStringArray(s, 0,
-            !handleSlashSwap, !skipFirstSemicolon);
+        if (s) mrgv->reg_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
         FREE(s);
 
         H5Tclose(o);
