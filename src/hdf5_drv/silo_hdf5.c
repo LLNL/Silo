@@ -271,6 +271,7 @@ typedef struct {
    on the 'names' member of multi-block objects only and we
    never skip first semicolon. */
 static int const        skipFirstSemicolon = 0;
+static int const        embedStringLengths = 1;
 
 /* Use `float' for all memory floating point values? */
 static int              force_single_g;
@@ -3328,6 +3329,11 @@ db_hdf5_set_compression(int flags)
        }  /* if (have_szip == FALSE) */
     }
 #endif
+    else if (!SILO_Globals.backCompatNotNeeded)
+    {
+        db_perror("Advanced compression not consistent with backward compatibility", E_CALLFAIL, me);
+        return (-1);
+    }
 #ifdef HAVE_HZIP
     else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
        "METHOD=HZIP")) != (char *)NULL) 
@@ -4245,7 +4251,7 @@ db_hdf5_compckz(DBfile_hdf5 *dbfile, char *name)
     int retval = 0;
     int i;
     hid_t d = -1, plist = -1;
-    static char *me = "db_hdf5_compzkz";
+    static char *me = "db_hdf5_compckz";
 
     PROTECT {
         if (name && *name) {
@@ -8251,7 +8257,8 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
         /* output mrgtree info if we have it */
         if (_csgm._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList((char const * const *)_csgm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_csgm._region_pnames, -1, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(vname, "_region_pnames", 0));
             FREE(s);
@@ -8472,7 +8479,8 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, char const *name, int nregs,
 
         if (_csgzl._regnames) {
             int len; char *tmp;
-            DBStringArrayToStringList((char const * const *)_csgzl._regnames, nregs, &tmp, &len);
+            DBStringArrayToStringList((char const * const *)_csgzl._regnames, nregs, &tmp, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.regnames/*out*/, friendly_name(name, "_regnames",0));
             FREE(tmp);
@@ -8480,7 +8488,8 @@ db_hdf5_PutCSGZonelist(DBfile *_dbfile, char const *name, int nregs,
 
         if (_csgzl._zonenames) {
             int len; char *tmp;
-            DBStringArrayToStringList((char const * const *)_csgzl._zonenames, nzones, &tmp, &len);
+            DBStringArrayToStringList((char const * const *)_csgzl._zonenames, nzones, &tmp, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.zonenames/*out*/, friendly_name(name, "_zonenames",0));
             FREE(tmp);
@@ -8680,7 +8689,8 @@ db_hdf5_PutDefvars(
     memset(&m, 0, sizeof m);
     PROTECT {
 
-        DBStringArrayToStringList((char const * const *)names, ndefs, &s, &len);
+        DBStringArrayToStringList((char const * const *)names, ndefs, &s, &len,
+            !embedStringLengths);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.names/*out*/,
             friendly_name(name, "_names",0));
         FREE(s);
@@ -8688,7 +8698,8 @@ db_hdf5_PutDefvars(
         db_hdf5_compwr(dbfile, DB_INT, 1, &ndefs, (void*)types, m.types/*out*/,
             friendly_name(name, "_types",0));
 
-        DBStringArrayToStringList((char const * const *)defns, ndefs, &s, &len);
+        DBStringArrayToStringList((char const * const *)defns, ndefs, &s, &len,
+            !embedStringLengths);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.defns/*out*/,
             friendly_name(name, "_defns",0));
         FREE(s);
@@ -9389,7 +9400,8 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         /* output mrgtree info if we have it */
         if (_qm._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList((char const * const *)_qm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_qm._region_pnames, -1, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -10297,7 +10309,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
         /* output mrgtree info if we have it */
         if (_um._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList((char const * const *)_um._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_um._region_pnames, -1, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -11386,7 +11399,8 @@ db_hdf5_PutMaterial(
 
         if (_ma._matnames != NULL) {
             int len;
-            DBStringArrayToStringList((char const * const *)_ma._matnames, nmat, &s, &len);
+            DBStringArrayToStringList((char const * const *)_ma._matnames, nmat, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
                 friendly_name(name, "_matnames", 0));
             FREE(s);
@@ -11395,7 +11409,8 @@ db_hdf5_PutMaterial(
 
         if (_ma._matcolors != NULL) {
             int len;
-            DBStringArrayToStringList((char const * const *)_ma._matcolors, nmat, &s, &len);
+            DBStringArrayToStringList((char const * const *)_ma._matcolors, nmat, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matcolors/*out*/,
                 friendly_name(name,"_matcolors", 0));
             FREE(s);
@@ -11628,7 +11643,8 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char const *name, char const *matname, in
             int len;
             for (i = 0; i < nmat; i++)
                 nstrs += nmatspec[i];
-            DBStringArrayToStringList((char const * const *)_ms._specnames, nstrs, &s, &len);
+            DBStringArrayToStringList((char const * const *)_ms._specnames, nstrs, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
                 friendly_name(name, "_species_names", 0));
             FREE(s);
@@ -11642,7 +11658,8 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char const *name, char const *matname, in
                 for (i = 0; i < nmat; i++)
                     nstrs += nmatspec[i];
             }
-            DBStringArrayToStringList((char const * const *)_ms._speccolors, nstrs, &s, &len);
+            DBStringArrayToStringList((char const * const *)_ms._speccolors, nstrs, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.speccolors/*out*/,
                 friendly_name(name,"_speccolors", 0));
             FREE(s);
@@ -11874,16 +11891,14 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char const *name, int nmesh,
          */
         if (meshnames)
         {
-            for (i=len=0; i<nmesh; i++) len += strlen(meshnames[i])+1;
-            s = malloc(len+1);
-            for (i=len=0; i<nmesh; i++) {
-                if (i) s[len++] = ';';
-                strcpy(s+len, meshnames[i]);
-                len += strlen(meshnames[i]);
-            }
-            len++; /*count null*/
-            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
-                m.meshnames/*out*/, friendly_name(name,"_meshnames", 0));
+            char *old_compression = STRDUP(DBGetCompression());
+            DBStringArrayToStringList(meshnames, nmesh, &s, &len, embedStringLengths);
+            DBSetCompression("METHOD=GZIP LEVEL=9");
+            db_hdf5_compwrz(dbfile, DB_CHAR, 1, &len, s,
+                m.meshnames/*out*/, friendly_name(name,"_meshnames", 0), 1);
+            DBSetCompression(old_compression);
+            FREE(old_compression);
+            FREE(s);
         }
         
         /* Write raw data arrays */
@@ -11911,7 +11926,7 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char const *name, int nmesh,
         }
         if (_mm._lgroupings > 0 && _mm._groupnames != NULL) {
            DBStringArrayToStringList((char const * const *)_mm._groupnames, 
-                           _mm._lgroupings, &t, &len);
+               _mm._lgroupings, &t, &len, !embedStringLengths);
            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, t,
                 m.groupnames/*out*/, friendly_name(name,"_groupnames",0));
            FREE(t);
@@ -11983,9 +11998,6 @@ db_hdf5_PutMultimesh(DBfile *_dbfile, char const *name, int nmesh,
             if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIMESH, name, &m);
 
-        /* Free resources */
-        FREE(s);
-        
     } CLEANUP {
         FREE(s);
     } END_PROTECT;
@@ -12733,16 +12745,14 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char const *name, int nvars, char const * c
          */
         if (varnames)
         {
-            for (i=len=0; i<nvars; i++) len += strlen(varnames[i])+1;
-            s = malloc(len+1);
-            for (i=len=0; i<nvars; i++) {
-                if (i) s[len++] = ';';
-                strcpy(s+len, varnames[i]);
-                len += strlen(varnames[i]);
-            }
-            len++; /*count null*/
-            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
-                m.varnames/*out*/, friendly_name(name, "_varnames", 0));
+            char *old_compression = STRDUP(DBGetCompression());
+            DBStringArrayToStringList(varnames, nvars, &s, &len, embedStringLengths);
+            DBSetCompression("METHOD=GZIP LEVEL=9");
+            db_hdf5_compwrz(dbfile, DB_CHAR, 1, &len, s,
+                m.varnames/*out*/, friendly_name(name,"_varnames", 0), 1);
+            DBSetCompression(old_compression);
+            FREE(old_compression);
+            FREE(s);
         }
         
         /* Write raw data arrays */
@@ -12760,7 +12770,8 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char const *name, int nvars, char const * c
         /* output mrgtree info if we have it */
         if (_mm._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList((char const * const *)_mm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_mm._region_pnames, -1, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -12831,9 +12842,6 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char const *name, int nvars, char const * c
             if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIVAR, name, &m);
 
-        /* Free resources */
-        FREE(s);
-        
     } CLEANUP {
         FREE(s);
     } END_PROTECT;
@@ -13026,17 +13034,14 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
         /* Write raw data arrays */
         if (matnames)
         {
-            for (i=len=0; i<nmats; i++) len += strlen(matnames[i])+1;
-            s = malloc(len+1);
-            for (i=len=0; i<nmats; i++) {
-                if (i) s[len++] = ';';
-                strcpy(s+len, matnames[i]);
-                len += strlen(matnames[i]);
-            }
-            len++; /*count null*/
-
-            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.matnames/*out*/,
-                friendly_name(name, "_matnames", 0));
+            char *old_compression = STRDUP(DBGetCompression());
+            DBStringArrayToStringList(matnames, nmats, &s, &len, embedStringLengths);
+            DBSetCompression("METHOD=GZIP LEVEL=9");
+            db_hdf5_compwrz(dbfile, DB_CHAR, 1, &len, s,
+                m.matnames/*out*/, friendly_name(name,"_matnames", 0), 1);
+            DBSetCompression(old_compression);
+            FREE(old_compression);
+            FREE(s);
         }
         if (_mm._matnos && _mm._nmatnos > 0) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &_mm._nmatnos, _mm._matnos,
@@ -13057,7 +13062,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
         if (_mm._matcolors && _mm._nmatnos > 0) {
             int len; char *tmp;
             DBStringArrayToStringList((char const * const *)_mm._matcolors,
-                _mm._nmatnos, &tmp, &len);
+                _mm._nmatnos, &tmp, &len, !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.mat_colors/*out*/, friendly_name(name,"_matcolors", 0));
             FREE(tmp);
@@ -13065,7 +13070,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
         if (_mm._matnames && _mm._nmatnos > 0) {
             int len; char *tmp;
             DBStringArrayToStringList((char const * const *)_mm._matnames,
-                _mm._nmatnos, &tmp, &len);
+                _mm._nmatnos, &tmp, &len, !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.material_names/*out*/, friendly_name(name,"_material_names", 0));
             FREE(tmp);
@@ -13130,9 +13135,6 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIMAT, name, &m);
 
-        /* Free resources */
-        FREE(s);
-        
     } CLEANUP {
         FREE(s);
     } END_PROTECT;
@@ -13320,17 +13322,14 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char const *name, int nspec,
         /* Write raw data arrays */
         if (specnames)
         {
-            for (i=len=0; i<nspec; i++) len += strlen(specnames[i])+1;
-            s = malloc(len+1);
-            for (i=len=0; i<nspec; i++) {
-                if (i) s[len++] = ';';
-                strcpy(s+len, specnames[i]);
-                len += strlen(specnames[i]);
-            }
-            len++; /*count null*/
-
-            db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.specnames/*out*/,
-                friendly_name(name, "_specnames", 0));
+            char *old_compression = STRDUP(DBGetCompression());
+            DBStringArrayToStringList(specnames, nspec, &s, &len, embedStringLengths);
+            DBSetCompression("METHOD=GZIP LEVEL=9");
+            db_hdf5_compwrz(dbfile, DB_CHAR, 1, &len, s,
+                m.specnames/*out*/, friendly_name(name,"_specnames", 0), 1);
+            DBSetCompression(old_compression);
+            FREE(old_compression);
+            FREE(s);
         }
 
         if (_mm._nmat>0 && _mm._nmatspec) {
@@ -13342,7 +13341,8 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char const *name, int nspec,
                 int len; char *tmp;
                 for (i=0; i < _mm._nmat; i++)
                     nstrs += _mm._nmatspec[i];
-                DBStringArrayToStringList((char const * const *)_mm._specnames, nstrs, &tmp, &len);
+                DBStringArrayToStringList((char const * const *)_mm._specnames, nstrs, &tmp, &len,
+                    !embedStringLengths);
                 db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                     m.species_names/*out*/, friendly_name(name,"_species_names", 0));
                 FREE(tmp);
@@ -13355,7 +13355,8 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char const *name, int nspec,
                     for (i=0; i < _mm._nmat; i++)
                         nstrs += _mm._nmatspec[i];
                 }
-                DBStringArrayToStringList((char const * const *)_mm._speccolors, nstrs, &tmp, &len);
+                DBStringArrayToStringList((char const * const *)_mm._speccolors, nstrs, &tmp, &len,
+                    !embedStringLengths);
                 db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                     m.speccolors/*out*/, friendly_name(name,"_speccolors", 0));
                 FREE(tmp);
@@ -13416,9 +13417,6 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char const *name, int nspec,
             if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIMATSPECIES, name, &m);
 
-        /* Free resources */
-        FREE(s);
-        
     } CLEANUP {
         FREE(s);
     } END_PROTECT;
@@ -13886,7 +13884,8 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char const *name, char const *meshname, int
         /* output mrgtree info if we have it */
         if (_pm._region_pnames != NULL) {
             int len;
-            DBStringArrayToStringList((char const * const *)_pm._region_pnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_pm._region_pnames, -1, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.region_pnames/*out*/,
                 friendly_name(name, "_region_pnames", 0));
             FREE(s);
@@ -14442,7 +14441,8 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
         
         /* output all the node names as one long dataset */
         s = 0;
-        DBStringArrayToStringList((char const * const *)strArray, num_nodes, &s, &len);
+        DBStringArrayToStringList((char const * const *)strArray, num_nodes, &s, &len,
+            !embedStringLengths);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_name/*out*/,
             friendly_name(name, "_name", 0));
         FREE(s);
@@ -14484,7 +14484,8 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
         if (n > 0)
         {
             s = 0;
-            DBStringArrayToStringList((char const * const *)strArray, n, &s, &len);
+            DBStringArrayToStringList((char const * const *)strArray, n, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_names/*out*/,
                 friendly_name(name, "_names", 0));
             FREE(s);
@@ -14497,7 +14498,8 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
             strArray[i] = ltree[i]->maps_name;
         s = 0;
         len = 0;
-        DBStringArrayToStringList((char const * const *)strArray, num_nodes, &s, &len);
+        DBStringArrayToStringList((char const * const *)strArray, num_nodes, &s, &len,
+            !embedStringLengths);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.n_maps_name/*out*/,
             friendly_name(name, "_maps_name", 0));
         FREE(s);
@@ -14562,7 +14564,8 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
         {
             s = 0;
             len = 0;
-            DBStringArrayToStringList((char const * const *)_mrgt._mrgvar_onames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_mrgt._mrgvar_onames, -1, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.mrgvar_onames/*out*/,
                 friendly_name(name, "_mrgvar_onames", 0));
             FREE(s);
@@ -14572,7 +14575,8 @@ db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
         {
             s = 0;
             len = 0;
-            DBStringArrayToStringList((char const * const *)_mrgt._mrgvar_rnames, -1, &s, &len);
+            DBStringArrayToStringList((char const * const *)_mrgt._mrgvar_rnames, -1, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.mrgvar_rnames/*out*/,
                 friendly_name(name, "_mrgvar_rnames", 0));
             FREE(s);
@@ -15133,7 +15137,8 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, char const *name,
         nstrs = nregns;
         if (strchr(reg_pnames[0], '%') != 0)
             nstrs = 1;
-        DBStringArrayToStringList((char const * const *)reg_pnames, nstrs, &s, &len);
+        DBStringArrayToStringList((char const * const *)reg_pnames, nstrs, &s, &len,
+            !embedStringLengths);
         db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.reg_pnames/*out*/,
                 friendly_name(name, "_reg_pnames", 0));
         FREE(s);
@@ -15141,7 +15146,8 @@ db_hdf5_PutMrgvar(DBfile *_dbfile, char const *name,
         if (compnames)
         {
             /* output compnames */
-            DBStringArrayToStringList((char const * const *)compnames, ncomps, &s, &len);
+            DBStringArrayToStringList((char const * const *)compnames, ncomps, &s, &len,
+                !embedStringLengths);
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s, m.compnames/*out*/,
                     friendly_name(name, "_compnames", 0));
             FREE(s);

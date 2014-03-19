@@ -273,7 +273,8 @@ SILO_Globals_t SILO_Globals = {
     0,     /* _db_err_func */
     DB_NONE,/* _db_err_level_drvr */
     0,     /* Jstk */
-    DEFAULT_DRIVER_PRIORITIES
+    DEFAULT_DRIVER_PRIORITIES,
+    FALSE /* Backward compatability not needed */
 };
 
 INTERNAL int
@@ -2769,20 +2770,17 @@ PUBLIC void
 DBSetCompression(const char *s)
 {
     if (s && *s == '\0') {
-        if (SILO_Globals.compressionParams)
-            FREE(SILO_Globals.compressionParams);
+        FREE(SILO_Globals.compressionParams);
         SILO_Globals.compressionParams = ALLOC_N(char, 12);
         strcpy(SILO_Globals.compressionParams, "METHOD=GZIP");
     }   
     else if (s) {
-        if (SILO_Globals.compressionParams)
-            FREE(SILO_Globals.compressionParams);
+        FREE(SILO_Globals.compressionParams);
         SILO_Globals.compressionParams=ALLOC_N(char,strlen(s)+1);
         strcpy(SILO_Globals.compressionParams, s);
     }
     else {
-        if (SILO_Globals.compressionParams)
-            FREE(SILO_Globals.compressionParams);
+        FREE(SILO_Globals.compressionParams);
         SILO_Globals.compressionParams=0;
     }
 }
@@ -2979,6 +2977,20 @@ DBGetUnknownDriverPriorities()
     static int priorities[MAX_FILE_OPTIONS_SETS+DB_NFORMATS+1];
     memcpy(priorities, SILO_Globals.unknownDriverPriorities, sizeof(priorities));
     return priorities;
+}
+
+PUBLIC int
+DBSetBackCompatNotNeeded(int enable)
+{
+    int old_enable = SILO_Globals.backCompatNotNeeded;
+    SILO_Globals.backCompatNotNeeded = enable;
+    return old_enable;
+}
+
+PUBLIC int
+DBGetBackCompatNotNeeded()
+{
+    return SILO_Globals.backCompatNotNeeded;
 }
 
 PUBLIC int
@@ -12168,12 +12180,18 @@ DBStringArrayToStringList(
     char const * const *strArray,
     int n,
     char **strList,
-    int *m
+    int *m,
+    int embed_lens
 )
 {
     int i, len;
     char *s = NULL;
+    int *strlens = 0;
 
+    /* Ignore embed_lens if backward compatibility is needed */
+    if (!SILO_Globals.backCompatNotNeeded)
+        embed_lens = 0;
+ 
     /* if n is unspecified, determine it by counting forward until
        we get a null pointer */
     if (n < 0)
@@ -12186,20 +12204,48 @@ DBStringArrayToStringList(
     /*
      * Create a string which is a semi-colon separated list of strings
      */
+     strlens = (int *) malloc(n*sizeof(int));
      for (i=len=0; i<n; i++)
      {
          if (strArray[i])
-             len += strlen(strArray[i])+1;
+         {
+             strlens[i] = strlen(strArray[i]);
+             len += ((strlens[i]+1)+(embed_lens?4:0));
+         }
          else
+         {
+             strlens[i] = 2;
              len += 2;
+         }
      }
-     s = malloc(len+1);
-     for (i=len=0; i<n; i++) {
+     if (embed_lens)
+     {
+         s = malloc(len+1+4);
+         s[0] = '*'; s[1] = '*'; s[2] = '*'; s[3] = '*';
+         len = 4;
+     }
+     else
+     {
+         s = malloc(len+1);
+         len = 0;
+     }
+     for (i=0; i<n; i++) {
          if (i) s[len++] = ';';
          if (strArray[i])
          {
-             strcpy(s+len, strArray[i]);
-             len += strlen(strArray[i]);
+             if (embed_lens)
+             {
+                 char lenstr[5] = {'\0','\0','\0','\0','\0'};
+                 snprintf(lenstr, sizeof(lenstr), "%04d", strlens[i]);
+                 memcpy(s+len,lenstr,4);
+                 memcpy(s+len+4,strArray[i],strlens[i]);
+                 len += (4+strlens[i]);
+             }
+             else
+             {
+                 memcpy(s+len,strArray[i],strlens[i]);
+                 len += strlens[i];
+             }
          }
          else
          {
@@ -12207,6 +12253,8 @@ DBStringArrayToStringList(
          }
      }
      len++; /*count last null*/
+
+     if (strlens) free(strlens);
 
      *strList = s;
      *m = len;
@@ -12316,7 +12364,7 @@ DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndex
 INTERNAL int 
 db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_flag, int nblocks)
 {
-    int i=0, s=0, n=0, hasColon=0, add1=0, slashCharsToSwap[128];
+    int i=0, s=0, n=0, hasColon=0, add1=0, hasEmbeddedLens=0, len, slashCharsToSwap[128];
     char **strArray;
     static char const *me = "DBStringListToStringArrayMBOpt";
 
@@ -12326,7 +12374,16 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
         return db_perror("nblocks", E_BADARGS, me);
 
     strArray = (char **) malloc(nblocks * sizeof(char*));
-    if (strList[0] == ';')
+
+    if (strList[0] == '*' && strList[1] == '*' &&
+        strList[2] == '*' && strList[3] == '*')
+    {
+        hasEmbeddedLens = 1;
+        i = 4;
+        len = (int) strtol(&strList[i], 0, 10);
+        i += 4;
+    }
+    else if (strList[0] == ';')
     {
         i = 1;
         add1 = 1;
@@ -12339,7 +12396,17 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
             case ';':
             {
                 strList[i++] = '\0';
-                strArray[n++] = &strList[i];
+                if (hasEmbeddedLens)
+                {
+                    len = (int) strtol(&strList[i], 0, 10);
+                    i += 4;
+                    strArray[n++] = &strList[i];
+                    i += (len-1);
+                }
+                else
+                {
+                    strArray[n++] = &strList[i];
+                }
                 if (hasColon && s)
                 {
                     int j;

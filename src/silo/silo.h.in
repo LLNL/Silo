@@ -373,8 +373,9 @@ typedef enum {
 } DBdatatype;
 
 /* Flags for DBCreate */
-#define         DB_CLOBBER      0
-#define         DB_NOCLOBBER    1
+#define         DB_CLOBBER      1
+#define         DB_NOCLOBBER    2
+#define         DB_NOBACKCOMPAT 4
 
 /* Flags for DBOpen */
 #define         DB_READ         1
@@ -1640,6 +1641,7 @@ typedef struct DBfile_pub {
     int            Grab;        /*drive has access to low-level interface */
     void          *GrabId;      /*pointer to low-level driver descriptor */
     char          *file_lib_version; /* version of lib file was created with */
+    int            backCompatNotNeeded; /* flag indicating if file should be backward compatible */
 
     /* Public Methods */
     int            (*close)(struct DBfile *);
@@ -1857,6 +1859,7 @@ SILO_API extern int                    DBVersionGEFileVersion(DBfile const *dbfi
 SILO_API extern char const *           DBFileVersion(DBfile const *dbfile);
 SILO_API extern int                    DBFileVersionDigits(DBfile const *dbfile, int *Maj, int *Min, int *Pat, int *Pre);
 SILO_API extern int                    DBFileVersionGE(DBfile const *dbfile, int Maj, int Min, int Pat);
+SILO_API extern int                    DBGetBackCompatNotNeeded(DBfile *);
 SILO_API extern int                    DBGetDir(DBfile *, char *);
 SILO_API extern int                    DBSetDir(DBfile *, char const *);
 #define DBMkdir DBMkDir
@@ -2113,7 +2116,8 @@ SILO_API extern int                    DBAnnotateUcdmesh(DBucdmesh *);
 SILO_API extern DBfacelist *           DBCalcExternalFacelist(int *, int, int, int *, int *, int, int *, int);
 SILO_API extern DBfacelist *           DBCalcExternalFacelist2(int *, int, int, int, int, int *, int *, int *, int, int *, int);
 SILO_API extern char *                 DBJoinPath(char const *, char const *);
-SILO_API extern void                   DBStringArrayToStringList(char const * const *strArray, int n, char **strList, int *m);
+SILO_API extern void                   DBStringArrayToStringList(char const * const *strArray, int n, char **strList, int *m,
+                                           int embedStringLengths);
 SILO_API extern char **                DBStringListToStringArray(char const *strList, int *n, int skipSemicolonAtIndexZero);
 
 /* Fortran interface functions */
