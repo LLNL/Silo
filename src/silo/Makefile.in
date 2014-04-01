@@ -137,7 +137,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libsilo_silo_la_SOURCES)
 DIST_SOURCES = $(am__libsilo_silo_la_SOURCES_DIST)
-am__include_HEADERS_DIST = silo.inc pmpio.h silo_json.h
+am__include_HEADERS_DIST = silo.inc silo_exports.h pmpio.h silo_json.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -353,7 +353,7 @@ EXTRA_DIST = \
  silo_f.c \
  silo.h.in
 
-include_HEADERS = silo.inc pmpio.h $(am__append_4)
+include_HEADERS = silo.inc silo_exports.h pmpio.h $(am__append_4)
 nodist_include_HEADERS = \
  silo.h
 
