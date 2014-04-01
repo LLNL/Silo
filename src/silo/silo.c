@@ -111,16 +111,16 @@ be used for advertising or product endorsement purposes.
 #include <io.h>             /* for FileInfo funcs */
 #endif
 
-#if HAVE_JSON
-#include <json/json.h>
-#include <json/json_object_private.h>
-#include <json/printbuf.h>
-#endif
-
 /* DB_MAIN must be defined before including silo_private.h. */
 #define DB_MAIN
 #include "silo_private.h"
 #include "silo_drivers.h"
+
+#if HAVE_JSON
+#include <silo_json.h>
+#include <json/json_object_private.h>
+#include <json/printbuf.h>
+#endif
 
 /* The Silo_version_* variable is used to guarantee that code can't include
  * one version of silo.h and link with a different version of libsilo.a.  This
@@ -6000,6 +6000,7 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
     static int cnt = 0;
     DBobject *sobj;
     char objnm[256];
+    struct json_object_iterator jiter, jend; 
     memset(objnm, 0, sizeof(objnm));
     if (json_object_object_get_ex(jobj, "silo_type", 0) &&
         json_object_object_get_ex(jobj, "silo_name", 0))
@@ -6017,8 +6018,8 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
         snprintf(objnm, sizeof(objnm), "anon_%d", cnt++);
         sobj = DBMakeObject(objnm, DB_USERDEF, json_object_object_length(jobj)+10);
     }
-    struct json_object_iterator jiter = json_object_iter_begin(jobj);
-    struct json_object_iterator jend = json_object_iter_end(jobj);
+    jiter = json_object_iter_begin(jobj);
+    jend = json_object_iter_end(jobj);
 #warning LOOP COULD LOOK A LOT BETTER USING foreachC MACRO
     while (!json_object_iter_equal(&jiter, &jend))
     {

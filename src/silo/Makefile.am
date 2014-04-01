@@ -75,7 +75,12 @@ EXTRA_DIST = \
 
 include_HEADERS = \
  silo.inc \
+ silo_exports.h \
  pmpio.h
+
+if JSON_NEEDED
+ include_HEADERS += silo_json.h
+endif
 
 nodist_include_HEADERS = \
  silo.h

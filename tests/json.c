@@ -62,12 +62,10 @@ product endorsement purposes.
 
 #if HAVE_JSON
 #include <json/json.h>
-#include <json/json_util.h>
-#include <json/json_object.h>
 #warning FIX INCLUSION OF PRIVATE HEADER
 #include <json/json_object_private.h>
-#include <json/json_tokener.h>
 #include <json/printbuf.h>
+#include <silo_json.h>
 #endif
 
 #include <std.c>

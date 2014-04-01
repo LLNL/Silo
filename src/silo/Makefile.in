@@ -91,8 +91,9 @@ host_triplet = @host@
 @JSON_NEEDED_TRUE@am__append_1 = -I$(prefix)/json/include
 @FORTRAN_NEEDED_TRUE@am__append_2 = silo_f.c
 @FORTRAN_NEEDED_TRUE@am__append_3 = silo_f.h
+@JSON_NEEDED_TRUE@am__append_4 = silo_json.h
 subdir = src/silo
-DIST_COMMON = $(am__noinst_HEADERS_DIST) $(include_HEADERS) \
+DIST_COMMON = $(am__include_HEADERS_DIST) $(am__noinst_HEADERS_DIST) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/silo.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -136,6 +137,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libsilo_silo_la_SOURCES)
 DIST_SOURCES = $(am__libsilo_silo_la_SOURCES_DIST)
+am__include_HEADERS_DIST = silo.inc pmpio.h silo_json.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -351,10 +353,7 @@ EXTRA_DIST = \
  silo_f.c \
  silo.h.in
 
-include_HEADERS = \
- silo.inc \
- pmpio.h
-
+include_HEADERS = silo.inc pmpio.h $(am__append_4)
 nodist_include_HEADERS = \
  silo.h
 
