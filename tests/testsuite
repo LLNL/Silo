@@ -3820,15 +3820,15 @@ $at_failed && at_func_log_failure
 $at_traceon; }
  # don't valgrind these intermediate parts
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:247: test ! \\( -e ./json -o ../../json \\) && exit 77 || \$VALGRIND json \$STARGS"
+$as_echo "$at_srcdir/testsuite.at:247: test ! \\( -e ./json -o -e ../../json \\) && exit 77 || \$VALGRIND json \$STARGS"
 echo testsuite.at:247 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "test ! \\( -e ./json -o ../../json \\) && exit 77 || $VALGRIND json $STARGS"; then
-  ( $at_traceon; test ! \( -e ./json -o ../../json \) && exit 77 || $VALGRIND json $STARGS ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test ! \\( -e ./json -o -e ../../json \\) && exit 77 || $VALGRIND json $STARGS"; then
+  ( $at_traceon; test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; test ! \( -e ./json -o ../../json \) && exit 77 || $VALGRIND json $STARGS ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false

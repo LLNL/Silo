@@ -244,7 +244,7 @@ AT_BANNER(JSON)
 AT_SETUP(json)
 AT_KEYWORDS(json)
 AT_CHECK(onehex $STARGS,,ignore) # don't valgrind these intermediate parts
-AT_CHECK(test ! \( -e ./json -o ../../json \) && exit 77 || $VALGRIND json $STARGS,ignore,ignore)
+AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS,ignore,ignore)
 AT_CLEANUP
 
 AT_BANNER(PDB Lite)
