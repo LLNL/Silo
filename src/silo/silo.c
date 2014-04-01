@@ -112,9 +112,9 @@ be used for advertising or product endorsement purposes.
 #endif
 
 #if HAVE_JSON
-#include <json.h>
-#include <json_object_private.h>
-#include <printbuf.h>
+#include <json/json.h>
+#include <json/json_object_private.h>
+#include <json/printbuf.h>
 #endif
 
 /* DB_MAIN must be defined before including silo_private.h. */
@@ -5743,7 +5743,7 @@ static void *json_object_get_strptr(struct json_object *o)
 static struct json_object *json_object_new_strptr(void *p)
 {
     static char tmp[32];
-    snprintf(tmp, sizeof(tmp), "%p", p);
+    snprintf(tmp, sizeof(tmp), "%-.16p", p);
     return json_object_new_string(tmp);
 }
 
@@ -6014,7 +6014,6 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
     }
     else
     {
-printf("handling DB_USERDEF case\n");
         snprintf(objnm, sizeof(objnm), "anon_%d", cnt++);
         sobj = DBMakeObject(objnm, DB_USERDEF, json_object_object_length(jobj)+10);
     }
@@ -6074,9 +6073,17 @@ printf("handling DB_USERDEF case\n");
                 }
                 else
                 {
+                    json_object *silo_type_subobj=0, *silo_name_subobj=0;
+                    int has_silo_type, has_silo_name;
                     char tmp[32];
+                    has_silo_type = json_object_object_get_ex(mobj, "silo_type", &silo_type_subobj);
+                    has_silo_name = json_object_object_get_ex(mobj, "silo_name", &silo_name_subobj);
                     snprintf(tmp, sizeof(tmp), "anon_%d", cnt);
-                    DBAddStrComponent(sobj, mname, strdup(tmp));
+
+                    if (has_silo_name && has_silo_type)
+                        DBAddStrComponent(sobj, mname, strdup(json_object_get_string(silo_name_subobj)));
+                    else
+                        DBAddStrComponent(sobj, mname, strdup(tmp));
                     DBWriteJsonObject(dbfile, mobj);
                 }
 

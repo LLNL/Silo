@@ -88,8 +88,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@FORTRAN_NEEDED_TRUE@am__append_1 = silo_f.c
-@FORTRAN_NEEDED_TRUE@am__append_2 = silo_f.h
+@JSON_NEEDED_TRUE@am__append_1 = -I$(prefix)/json/include
+@FORTRAN_NEEDED_TRUE@am__append_2 = silo_f.c
+@FORTRAN_NEEDED_TRUE@am__append_3 = silo_f.h
 subdir = src/silo
 DIST_COMMON = $(am__noinst_HEADERS_DIST) $(include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -214,6 +215,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSON = @JSON@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -338,11 +340,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src $(am__append_1)
 noinst_LTLIBRARIES = libsilo_silo.la
 libsilo_silo_la_SOURCES = $(FILES)
-EXTRAFILES = $(am__append_1)
-EXTRAINCS = $(am__append_2)
+EXTRAFILES = $(am__append_2)
+EXTRAINCS = $(am__append_3)
 EXTRA_DIST = \
  silo_fcb.c \
  silo_f.h \

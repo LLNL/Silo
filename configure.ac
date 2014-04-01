@@ -461,6 +461,7 @@ DEFAULT_SILEX="silex"
 DEFAULT_HZIP="hzip"
 DEFAULT_FPZIP="fpzip"
 DEFAULT_FORTRAN="fortran"
+DEFAULT_JSON=""
 default_detect_readline="yes"
 
 dnl Source any special site-specific file
@@ -758,6 +759,46 @@ AC_ARG_ENABLE(fpzip,
 AC_SUBST(FPZIP)
 if test -n "$FPZIP"; then
     AC_DEFINE(HAVE_FPZIP,1,[Support for Lindstrom float array compression])
+fi
+
+dnl enable experimental JSON support
+AC_MSG_CHECKING(for json)
+if test -e $srcdir/tools/json/json-c-0.10.tar.gz; then
+    AC_MSG_RESULT(found)
+    JSON=$DEFAULT_JSON
+else
+    AC_MSG_RESULT(JSON support not available because json-c distribution is not in this tarball)
+    JSON=""
+fi
+AC_ARG_ENABLE(json,
+    AC_HELP_STRING([--enable-json], 
+        [enable experimental JSON features@<:@default=no@:>@]),
+    if test "$enable_json" = "yes"; then
+        AC_MSG_CHECKING(for json)
+        if test -e $srcdir/tools/json/json-c-0.10.tar.gz; then
+            AC_MSG_RESULT(found)
+            pushd $srcdir/tools/json
+            rm -rf json-c-0.10
+            gunzip < json-c-0.10.tar.gz | tar xf -
+            cd json-c-0.10
+            ./configure --prefix=${prefix}/json
+            make install
+            popd
+            if test $? -eq 0; then
+                AC_MSG_RESULT(json-c compiled and installed)
+                JSON="json"
+            else
+                AC_MSG_RESULT(JSON support disabled due to failure to install)
+                JSON=""
+            fi
+        else
+            AC_MSG_RESULT(JSON support not available because json-c distribution is not in this tarball)
+            JSON=""
+        fi
+    fi)
+AC_SUBST(JSON)
+if test -n "$JSON"; then
+    AC_DEFINE(HAVE_JSON,1,[Support for experimental JSON features])
 fi
 
 # Turn on C optimization flags
@@ -1325,6 +1366,7 @@ AM_CONDITIONAL(FORTRAN_NEEDED, test -n "$FORTRAN")
 AM_CONDITIONAL(SILEX_NEEDED, test -n "$SILEX")
 AM_CONDITIONAL(HZIP_NEEDED, test -n "$HZIP")
 AM_CONDITIONAL(FPZIP_NEEDED, test -n "$FPZIP")
+AM_CONDITIONAL(JSON_NEEDED, test -n "$JSON")
 AM_CONDITIONAL(ZLIB_AVAILABLE, test -n "$ZLIB")
 AM_CONDITIONAL(CXX_LINK_NEEDED, test "$enable_shared" = "no" -a \( -n "$FPZIP" -o -n "$HZIP" \))
 AC_CONFIG_FILES([
@@ -1352,7 +1394,9 @@ AC_CONFIG_FILES([
             tools/browser/Makefile
             tools/python/Makefile
             tools/silex/Makefile
-            tools/silock/Makefile])
+            tools/silock/Makefile
+            tools/json/Makefile
+            tools/mapred/Makefile])
 if test -n "$HZIP"; then
   AC_CONFIG_FILES([src/hzip/Makefile])
 fi

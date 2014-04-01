@@ -117,6 +117,9 @@ if HDF5_DRV_NEEDED
 else
   LDADD = ../src/libsilo.la
 endif
+if JSON_NEEDED
+  LDADD += ../tools/json/json-c-0.10/libjson.la
+endif
 
 # paths look at install directories before sources
 AM_CPPFLAGS = \
@@ -128,11 +131,15 @@ AM_CPPFLAGS = \
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
 PDBTESTS =
 if INSTALL_LITE_HEADERS
-testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
-pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
-PDBTESTS += testpdb pdbtst
+ testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+ pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+ PDBTESTS += testpdb pdbtst
 endif
-JSON_TESTS = json.c
+JSONTESTS =
+if JSON_NEEDED
+ json_CPPFLAGS = -I$(includedir)/../json/include $(AM_CPPFLAGS)
+ JSONTESTS += json
+endif
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 
@@ -229,7 +236,8 @@ check_PROGRAMS = \
  testfs \
  empty \
  majorder \
- $(PDBTESTS)
+ $(PDBTESTS) \
+ $(JSONTESTS)
 
 # Deal with need to use c++ linker whenever we've got C++
 # sources compiled with the silo library and the fact that
@@ -299,6 +307,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_testfs_SOURCES = dummy.cxx
  nodist_EXTRA_empty_SOURCES = dummy.cxx
  nodist_EXTRA_majorder_SOURCES = dummy.cxx
+ nodist_EXTRA_json_SOURCES = dummy.cxx
 endif
 
 

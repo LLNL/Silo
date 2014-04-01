@@ -88,6 +88,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = silock$(EXEEXT)
+@JSON_NEEDED_TRUE@am__append_1 = ../json/json-c-0.10/libjson.la
 subdir = tools/silock
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -110,8 +111,10 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_silock_OBJECTS = silock.$(OBJEXT)
 silock_OBJECTS = $(am_silock_OBJECTS)
-@HDF5_DRV_NEEDED_FALSE@silock_DEPENDENCIES = ../../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@silock_DEPENDENCIES = ../../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@silock_DEPENDENCIES = ../../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@silock_DEPENDENCIES = ../../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -189,6 +192,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSON = @JSON@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -316,8 +320,10 @@ top_srcdir = @top_srcdir@
 silock_SOURCES = silock.c
 @FPZIP_NEEDED_TRUE@@HDF5_DRV_NEEDED_TRUE@nodist_EXTRA_silock_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@@HZIP_NEEDED_TRUE@nodist_EXTRA_silock_SOURCES = dummy.cxx
-@HDF5_DRV_NEEDED_FALSE@silock_LDADD = ../../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@silock_LDADD = ../../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@silock_LDADD = ../../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@silock_LDADD = ../../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 AM_CPPFLAGS = -I$(top_builddir)/src/silo -I$(includedir)
 all: all-am
 

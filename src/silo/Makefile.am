@@ -53,6 +53,9 @@
 ## Procss this file with automake to create Makefile.in
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
+if JSON_NEEDED
+ AM_CPPFLAGS += -I$(prefix)/json/include
+endif
 
 noinst_LTLIBRARIES = libsilo_silo.la
 libsilo_silo_la_SOURCES = $(FILES)

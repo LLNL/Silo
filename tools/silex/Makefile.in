@@ -89,6 +89,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = silex$(EXEEXT)
+@JSON_NEEDED_TRUE@am__append_1 = ../json/json-c-0.10/libjson.la
 subdir = tools/silex
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -123,9 +124,9 @@ nodist_silex_OBJECTS = $(am__objects_2)
 silex_OBJECTS = $(am_silex_OBJECTS) $(nodist_silex_OBJECTS)
 am__DEPENDENCIES_1 =
 @HDF5_DRV_NEEDED_FALSE@silex_DEPENDENCIES = ../../src/libsilo.la \
-@HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_1)
+@HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_1) $(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@silex_DEPENDENCIES = ../../src/libsiloh5.la \
-@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
+@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_1) $(am__append_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -195,6 +196,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSON = @JSON@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -321,8 +323,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 silex_SOURCES = $(FILES)
 nodist_silex_SOURCES = $(FILES_MOC)
-@HDF5_DRV_NEEDED_FALSE@silex_LDADD = ../../src/libsilo.la $(QT_LDFLAGS) $(QT_LIBS)
-@HDF5_DRV_NEEDED_TRUE@silex_LDADD = ../../src/libsiloh5.la $(QT_LDFLAGS) $(QT_LIBS)
+@HDF5_DRV_NEEDED_FALSE@silex_LDADD = ../../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(QT_LDFLAGS) $(QT_LIBS) \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@silex_LDADD = ../../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(QT_LDFLAGS) $(QT_LIBS) $(am__append_1)
 EXTRA_DIST = \
  array.xpm \
  curve.xpm \

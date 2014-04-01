@@ -804,6 +804,8 @@ CXX_LINK_NEEDED_FALSE
 CXX_LINK_NEEDED_TRUE
 ZLIB_AVAILABLE_FALSE
 ZLIB_AVAILABLE_TRUE
+JSON_NEEDED_FALSE
+JSON_NEEDED_TRUE
 FPZIP_NEEDED_FALSE
 FPZIP_NEEDED_TRUE
 HZIP_NEEDED_FALSE
@@ -854,6 +856,7 @@ X_LIBS
 X_PRE_LIBS
 X_CFLAGS
 XMKMF
+JSON
 FPZIP
 ZLIB
 HZIP
@@ -1020,6 +1023,7 @@ enable_silex
 with_zlib
 enable_hzip
 enable_fpzip
+enable_json
 with_x
 with_Qt_dir
 with_Qt_include_dir
@@ -1708,6 +1712,7 @@ Optional Features:
                           [default=yes]
   --enable-fpzip          enable Lindstrom float 1,2,3D array compression
                           [default=yes]
+  --enable-json           enable experimental JSON features[default=no]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2944,6 +2949,7 @@ DEFAULT_SILEX="silex"
 DEFAULT_HZIP="hzip"
 DEFAULT_FPZIP="fpzip"
 DEFAULT_FORTRAN="fortran"
+DEFAULT_JSON=""
 default_detect_readline="yes"
 
 hname="`hostname`"
@@ -6938,13 +6944,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:6941: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:6947: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6944: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:6950: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:6947: output\"" >&5)
+  (eval echo "\"\$as_me:6953: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8149,7 +8155,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8152 "configure"' > conftest.$ac_ext
+  echo '#line 8158 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -11076,11 +11082,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11079: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11085: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11083: \$? = $ac_status" >&5
+   echo "$as_me:11089: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11415,11 +11421,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11418: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11424: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11422: \$? = $ac_status" >&5
+   echo "$as_me:11428: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11520,11 +11526,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11523: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11529: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11527: \$? = $ac_status" >&5
+   echo "$as_me:11533: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11575,11 +11581,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11578: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11584: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11582: \$? = $ac_status" >&5
+   echo "$as_me:11588: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14458,7 +14464,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14461 "configure"
+#line 14467 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14554,7 +14560,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14557 "configure"
+#line 14563 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16590,11 +16596,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16593: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16599: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16597: \$? = $ac_status" >&5
+   echo "$as_me:16603: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16689,11 +16695,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16692: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16698: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16696: \$? = $ac_status" >&5
+   echo "$as_me:16702: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16741,11 +16747,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16744: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16750: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16748: \$? = $ac_status" >&5
+   echo "$as_me:16754: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18164,11 +18170,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18167: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18173: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18171: \$? = $ac_status" >&5
+   echo "$as_me:18177: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18263,11 +18269,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18266: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18272: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18270: \$? = $ac_status" >&5
+   echo "$as_me:18276: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18315,11 +18321,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18318: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18324: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18322: \$? = $ac_status" >&5
+   echo "$as_me:18328: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20868,11 +20874,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20871: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20877: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:20875: \$? = $ac_status" >&5
+   echo "$as_me:20881: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -20967,11 +20973,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:20970: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:20976: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:20974: \$? = $ac_status" >&5
+   echo "$as_me:20980: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21019,11 +21025,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:21022: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:21028: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:21026: \$? = $ac_status" >&5
+   echo "$as_me:21032: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -23642,6 +23648,58 @@ if test -n "$FPZIP"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_FPZIP 1
+_ACEOF
+
+fi
+
+{ $as_echo "$as_me:$LINENO: checking for json" >&5
+$as_echo_n "checking for json... " >&6; }
+if test -e $srcdir/tools/json/json-c-0.10.tar.gz; then
+    { $as_echo "$as_me:$LINENO: result: found" >&5
+$as_echo "found" >&6; }
+    JSON=$DEFAULT_JSON
+else
+    { $as_echo "$as_me:$LINENO: result: JSON support not available because json-c distribution is not in this tarball" >&5
+$as_echo "JSON support not available because json-c distribution is not in this tarball" >&6; }
+    JSON=""
+fi
+# Check whether --enable-json was given.
+if test "${enable_json+set}" = set; then
+  enableval=$enable_json; if test "$enable_json" = "yes"; then
+        { $as_echo "$as_me:$LINENO: checking for json" >&5
+$as_echo_n "checking for json... " >&6; }
+        if test -e $srcdir/tools/json/json-c-0.10.tar.gz; then
+            { $as_echo "$as_me:$LINENO: result: found" >&5
+$as_echo "found" >&6; }
+            pushd $srcdir/tools/json
+            rm -rf json-c-0.10
+            gunzip < json-c-0.10.tar.gz | tar xf -
+            cd json-c-0.10
+            ./configure --prefix=${prefix}/json
+            make install
+            popd
+            if test $? -eq 0; then
+                { $as_echo "$as_me:$LINENO: result: json-c compiled and installed" >&5
+$as_echo "json-c compiled and installed" >&6; }
+                JSON="json"
+            else
+                { $as_echo "$as_me:$LINENO: result: JSON support disabled due to failure to install" >&5
+$as_echo "JSON support disabled due to failure to install" >&6; }
+                JSON=""
+            fi
+        else
+            { $as_echo "$as_me:$LINENO: result: JSON support not available because json-c distribution is not in this tarball" >&5
+$as_echo "JSON support not available because json-c distribution is not in this tarball" >&6; }
+            JSON=""
+        fi
+    fi
+fi
+
+
+if test -n "$JSON"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_JSON 1
 _ACEOF
 
 fi
@@ -30502,6 +30560,14 @@ else
   FPZIP_NEEDED_FALSE=
 fi
 
+ if test -n "$JSON"; then
+  JSON_NEEDED_TRUE=
+  JSON_NEEDED_FALSE='#'
+else
+  JSON_NEEDED_TRUE='#'
+  JSON_NEEDED_FALSE=
+fi
+
  if test -n "$ZLIB"; then
   ZLIB_AVAILABLE_TRUE=
   ZLIB_AVAILABLE_FALSE='#'
@@ -30518,7 +30584,7 @@ else
   CXX_LINK_NEEDED_FALSE=
 fi
 
-ac_config_files="$ac_config_files Makefile SiloWindows/Makefile svn_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/pdbp_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile"
+ac_config_files="$ac_config_files Makefile SiloWindows/Makefile svn_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/pdbp_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile tools/json/Makefile tools/mapred/Makefile"
 
 if test -n "$HZIP"; then
   ac_config_files="$ac_config_files src/hzip/Makefile"
@@ -30771,6 +30837,13 @@ if test -z "${FPZIP_NEEDED_TRUE}" && test -z "${FPZIP_NEEDED_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"FPZIP_NEEDED\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"FPZIP_NEEDED\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${JSON_NEEDED_TRUE}" && test -z "${JSON_NEEDED_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"JSON_NEEDED\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"JSON_NEEDED\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -31844,6 +31917,8 @@ do
     "tools/python/Makefile") CONFIG_FILES="$CONFIG_FILES tools/python/Makefile" ;;
     "tools/silex/Makefile") CONFIG_FILES="$CONFIG_FILES tools/silex/Makefile" ;;
     "tools/silock/Makefile") CONFIG_FILES="$CONFIG_FILES tools/silock/Makefile" ;;
+    "tools/json/Makefile") CONFIG_FILES="$CONFIG_FILES tools/json/Makefile" ;;
+    "tools/mapred/Makefile") CONFIG_FILES="$CONFIG_FILES tools/mapred/Makefile" ;;
     "src/hzip/Makefile") CONFIG_FILES="$CONFIG_FILES src/hzip/Makefile" ;;
     "src/fpzip/Makefile") CONFIG_FILES="$CONFIG_FILES src/fpzip/Makefile" ;;
     "src/libsiloh5.settings") CONFIG_FILES="$CONFIG_FILES src/libsiloh5.settings" ;;

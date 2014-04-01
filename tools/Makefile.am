@@ -71,4 +71,6 @@ DIST_SUBDIRS = \
  browser \
  python \
  silex \
- silock
+ silock \
+ mapred \
+ json
