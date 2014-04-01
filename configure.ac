@@ -783,7 +783,6 @@ AC_ARG_ENABLE(json,
             cd json-c-0.10
             ./configure --prefix=${prefix}/json
             make install
-            popd
             if test $? -eq 0; then
                 AC_MSG_RESULT(json-c compiled and installed)
                 JSON="json"
@@ -791,6 +790,7 @@ AC_ARG_ENABLE(json,
                 AC_MSG_RESULT(JSON support disabled due to failure to install)
                 JSON=""
             fi
+            popd
         else
             AC_MSG_RESULT(JSON support not available because json-c distribution is not in this tarball)
             JSON=""

@@ -23677,7 +23677,6 @@ $as_echo "found" >&6; }
             cd json-c-0.10
             ./configure --prefix=${prefix}/json
             make install
-            popd
             if test $? -eq 0; then
                 { $as_echo "$as_me:$LINENO: result: json-c compiled and installed" >&5
 $as_echo "json-c compiled and installed" >&6; }
@@ -23687,6 +23686,7 @@ $as_echo "json-c compiled and installed" >&6; }
 $as_echo "JSON support disabled due to failure to install" >&6; }
                 JSON=""
             fi
+            popd
         else
             { $as_echo "$as_me:$LINENO: result: JSON support not available because json-c distribution is not in this tarball" >&5
 $as_echo "JSON support not available because json-c distribution is not in this tarball" >&6; }
