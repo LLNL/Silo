@@ -137,7 +137,7 @@ if INSTALL_LITE_HEADERS
 endif
 JSONTESTS =
 if JSON_NEEDED
- json_CPPFLAGS = -I$(includedir)/../json/include $(AM_CPPFLAGS)
+ json_CPPFLAGS = -I$(prefix)/json/include $(AM_CPPFLAGS)
  JSONTESTS += json
 endif
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
