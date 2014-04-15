@@ -326,11 +326,11 @@ json_object_get_extptr_ptr(struct json_object *obj)
 int
 json_object_to_binary_buf(struct json_object *obj, int flags, void **buf, int *len)
 {
-    char *pjhdr;
+    char const *pjhdr;
     struct printbuf *pb = printbuf_new();
 
     /* first, stringify the json object as normal but skipping extptr data */
-    char *jhdr = json_object_to_json_string_ext(obj, flags|JSON_C_TO_STRING_EXTPTR_SKIP);
+    char const *jhdr = json_object_to_json_string_ext(obj, flags|JSON_C_TO_STRING_EXTPTR_SKIP);
     sprintbuf(pb, "%s", jhdr);
     sprintbuf(pb, "%c", '\0'); /* so header is null-terminated */
 
@@ -367,7 +367,7 @@ json_object_to_binary_buf(struct json_object *obj, int flags, void **buf, int *l
     return 0;
 }
 
-static int
+static void
 json_object_from_binary_buf_recurse(struct json_object *jso, void *buf)
 {
     /* first, reconstitute the header */
@@ -386,7 +386,7 @@ json_object_from_binary_buf_recurse(struct json_object *jso, void *buf)
                 char strptr[128];
                 void *p;
                 int i, offset, nvals=1;
-                char *offstr = json_object_get_string(json_object_object_get(iter.val, "ptr"));
+                char const *offstr = json_object_get_string(json_object_object_get(iter.val, "ptr"));
                 int datatype = json_object_get_int(json_object_object_get(iter.val, "datatype"));
                 int ndims = json_object_get_int(json_object_object_get(iter.val, "ndims"));
                 struct json_object *darr = json_object_object_get(iter.val, "dims");
@@ -469,6 +469,7 @@ json_object_to_binary_file(char const *filename, struct json_object *obj)
     write(fd, buf, len);
     close(fd);
     free(buf);
+    return 0;
 }
 
 

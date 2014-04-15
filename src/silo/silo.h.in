@@ -1880,6 +1880,7 @@ SILO_API extern char    *DBVersion(void);
 SILO_API extern int      DBVersionGE(int Maj, int Min, int Pat);
 SILO_API extern char    *DBFileVersion(DBfile const *dbfile);
 SILO_API extern int      DBFileVersionGE(DBfile const *dbfile, int Maj, int Min, int Pat);
+SILO_API extern char    *DBGetDatatypeString(int);
 SILO_API extern void     DBShowErrors(int, DBErrFunc_t);
 SILO_API extern char    *DBErrString(void);
 SILO_API extern char    *DBErrFunc(void);

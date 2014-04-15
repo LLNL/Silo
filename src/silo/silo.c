@@ -13951,3 +13951,9 @@ int db_is_different_ll (long long a, long long b, double abstol, double reltol, 
     */
    return a!=b;
 }
+
+PUBLIC char *
+DBGetDatatypeString(int dt)
+{
+    return db_GetDatatypeString(dt);
+}

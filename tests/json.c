@@ -49,6 +49,7 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -64,20 +65,22 @@ product endorsement purposes.
 
 #include <std.c>
 
-static json_object_print_extptr_header(json_object *obj)
+static void json_object_print_extptr_header(json_object *obj)
 {
     int i, ndims;
+    char *dtstr;
 
     if (!json_object_is_extptr(obj)) return;
 
-    printf("datatype = %s, ", db_GetDatatypeString(json_object_get_extptr_datatype(obj)));
+    dtstr = DBGetDatatypeString(json_object_get_extptr_datatype(obj));
+    printf("datatype = %s, ", dtstr);
+    free(dtstr);
     ndims = json_object_get_extptr_ndims(obj);
     printf("ndims = %d ", ndims);
     printf("dims = ");
     for (i = 0; i < ndims; i++)
         printf("%d, ", json_object_get_extptr_dims_idx(obj, i));
     printf("\n");
-
 }
 
 int
@@ -140,7 +143,7 @@ main(int argc, char *argv[])
 
     /* Test interface to serialize json object into an ascii string */
     {
-        char *obj_strA = json_object_to_json_string_ext(jsilo_obj, 0);
+        char const *obj_strA = json_object_to_json_string_ext(jsilo_obj, 0);
         printf("Serialize to String::BEGIN[\n");
         printf("----------------------------------------------------\n");
         printf("%s\n", obj_strA);
