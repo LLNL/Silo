@@ -58,12 +58,51 @@ be used for advertising or product endorsement purposes.
 
 #include <silo_exports.h>
 
+#define JSON_C_TO_STRING_EXTPTR_AS_BINARY (JSON_C_TO_STRING_PRETTY<<1)
+#define JSON_C_TO_STRING_EXTPTR_SKIP (JSON_C_TO_STRING_EXTPTR_AS_BINARY<<1)
+
+#define JSON_C_DIFF_ZERO_TOLS      0x00000001 /* ignore tolerances (e.g. set to zero) */
+#define JSON_C_DIFF_INCLUSIVE_ONLY 0x00000002 /* ignore exclusive members */
+#define JSON_C_DIFF_MIX_PRIM_TYPE  0x00000004 /* allow diffs of mixed primitive type */
+#define JSON_C_DIFF_TOTAL          0x00000008 /* compute a total difference including even non-differing terms. */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-SILO_API extern struct json_object *DBGetJsonObject(DBfile *, char const *);
+enum json_diff_mode { json_diff_bool, json_diff_string, json_diff_object };
+
+/* A 'strptr' json object is just a string representation
+ * (e.g. '0xFFFE60A42') of a void pointer */
+SILO_API extern struct json_object * json_object_new_strptr(void *p);
+SILO_API extern void *               json_object_get_strptr(struct json_object *o);
+
+/* An 'extptr' json object is an ensemble of 4 json objects, 
+ * (int) datatype, (int) ndims, (array) dims, (strptr) void *,
+ * that represent an array of data externally referenced from
+ * the json object. */
+SILO_API extern struct json_object * json_object_new_extptr(void *p, int ndims, int const *dims, int datatype);
+SILO_API int                         json_object_is_extptr(struct json_object *obj);
+SILO_API extern int                  json_object_get_extptr_datatype(struct json_object *obj);
+SILO_API extern int                  json_object_get_extptr_ndims(struct json_object *obj);
+SILO_API extern int                  json_object_get_extptr_dims_idx(struct json_object *obj, int idx);
+SILO_API extern void *               json_object_get_extptr_ptr(struct json_object *obj);
+
+/* Methods to serialize a json object to a binary buffer. Note that the
+ * json-c library itself can serialize Silo's json objects to a string using
+ * json_object_to_json_string(). */
+SILO_API extern int                  json_object_to_binary_buf(struct json_object *obj, int flags, void **buf, int *len);
+SILO_API extern struct json_object * json_object_from_binary_buf(void *buf, int len);
+
+/* Methods to read/write serial, json object to a file */
+SILO_API extern int                  json_object_to_binary_file(char const *filename, struct json_object *obj);
+SILO_API extern struct json_object * json_object_from_binary_file(char const *filename);
+
+SILO_API extern int json_object_diff(struct json_object *objL, struct json_object json_objR);
+
+/* Methods to read/write json objects as Silo objects */
 SILO_API extern int                 DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj);
+SILO_API extern struct json_object *DBGetJsonObject(DBfile *, char const *);
 
 #ifdef __cplusplus
 }

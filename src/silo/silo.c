@@ -116,12 +116,6 @@ be used for advertising or product endorsement purposes.
 #include "silo_private.h"
 #include "silo_drivers.h"
 
-#if HAVE_JSON
-#include <silo_json.h>
-#include <json/json_object_private.h>
-#include <json/printbuf.h>
-#endif
-
 /* The Silo_version_* variable is used to guarantee that code can't include
  * one version of silo.h and link with a different version of libsilo.a.  This
  * variable's name must change with every version of Silo.
@@ -5730,372 +5724,6 @@ DBWriteObject(DBfile *dbfile, DBobject const *obj, int freemem)
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
-
-#if HAVE_JSON
-static void *json_object_get_strptr(struct json_object *o)
-{
-    void *p;
-    char const *strptr = json_object_get_string(o);
-    sscanf(strptr, "%p", &p);
-    return p;
-}
-
-static struct json_object *json_object_new_strptr(void *p)
-{
-    static char tmp[32];
-    snprintf(tmp, sizeof(tmp), "%-.16p", p);
-    return json_object_new_string(tmp);
-}
-
-static void indent(struct printbuf *pb, int level, int flags)
-{
-        if (flags & JSON_C_TO_STRING_PRETTY)
-        {
-                printbuf_memset(pb, -1, ' ', level * 2);
-        }
-}
-
-#define JSON_C_TO_STRING_EXTPTR_AS_BINARY (JSON_C_TO_STRING_PRETTY<<1)
-#define JSON_C_TO_STRING_EXTPTR_SKIP (JSON_C_TO_STRING_EXTPTR_AS_BINARY<<1)
-
-static int json_object_extptr_to_json_string(struct json_object* jso,
-                                            struct printbuf *pb,
-                                            int level,
-                                            int flags)
-{
-        int had_children = 0;
-        int ii;
-        char *p;
-        int datatype, nvals, ndims, dims[32];
-        struct json_object *darr, *subobj;
-        int retval;
-
-
-        sprintbuf(pb, "{\"ptr\":%s", json_object_to_json_string(json_object_object_get(jso, "ptr")));
-        sprintbuf(pb, ",\"datatype\":%s", json_object_to_json_string(json_object_object_get(jso, "datatype")));
-        sprintbuf(pb, ",\"ndims\":%s", json_object_to_json_string(json_object_object_get(jso, "ndims")));
-        sprintbuf(pb, ",\"dims\":%s", json_object_to_json_string(json_object_object_get(jso, "dims")));
- 
-        p = (char*) json_object_get_strptr(json_object_object_get(jso, "ptr"));
-        datatype = json_object_get_int(json_object_object_get(jso, "datatype"));
-        ndims = json_object_get_int(json_object_object_get(jso, "ndims"));
-        darr = json_object_object_get(jso, "dims");
-        nvals = 1;
-        for (ii = 0; ii < ndims; ii++)
-        {
-            dims[ii] = json_object_get_int(json_object_array_get_idx(darr, ii));
-            nvals *= dims[ii];
-        }
-
-        if (flags & JSON_C_TO_STRING_EXTPTR_AS_BINARY)
-        {
-            sprintbuf(pb, ",\"nvals\":%d", nvals);
-            sprintbuf(pb, ",\"data\":[");
-            printbuf_memappend(pb, p, nvals*db_GetMachDataSize(datatype));
-        }
-        else if (flags & JSON_C_TO_STRING_EXTPTR_SKIP)
-        {
-            return sprintbuf(pb, "}");
-        }
-        else
-        {
-
-            sprintbuf(pb, ",\"data\":[");
-            if (flags & JSON_C_TO_STRING_PRETTY)
-                    sprintbuf(pb, "\n");
-
-            for(ii=0; ii < nvals; ii++)
-            {
-                    struct json_object *val;
-                    if (had_children)
-                    {
-                            sprintbuf(pb, ",");
-                            if (flags & JSON_C_TO_STRING_PRETTY)
-                                    sprintbuf(pb, "\n");
-                    }
-                    had_children = 1;
-                    if (flags & JSON_C_TO_STRING_SPACED)
-                            sprintbuf(pb, " ");
-                    indent(pb, level + 1, flags);
-
-                    switch (datatype)
-                    {
-                        case DB_CHAR:
-                        {
-                            sprintbuf(pb, "%c", *((char*)p));
-                            p += sizeof(char);
-                            break;
-                        }
-                        case DB_SHORT:
-                        {
-                            sprintbuf(pb, "%hd", *((short*)p));
-                            p += sizeof(short);
-                            break;
-                        }
-                        case DB_INT:
-                        {
-                            sprintbuf(pb, "%d", *((int*)p));
-                            p += sizeof(int);
-                            break;
-                        }
-                        case DB_LONG:
-                        {
-                            sprintbuf(pb, "%ld", *((long*)p));
-                            p += sizeof(long);
-                            break;
-                        }
-                        case DB_LONG_LONG:
-                        {
-                            sprintbuf(pb, "%lld", *((long long*)p));
-                            p += sizeof(long long);
-                            break;
-                        }
-                        case DB_FLOAT:
-                        {
-                            sprintbuf(pb, "%f", *((float*)p));
-                            p += sizeof(float);
-                            break;
-                        }
-                        case DB_DOUBLE:
-                        {
-                            sprintbuf(pb, "%f", *((double*)p));
-                            p += sizeof(double);
-                            break;
-                        }
-                    }
-            }
-        }
-        if (flags & JSON_C_TO_STRING_PRETTY)
-        {
-                if (had_children)
-                        sprintbuf(pb, "\n");
-                indent(pb,level,flags);
-        }
-
-        if (flags & JSON_C_TO_STRING_SPACED)
-                retval = sprintbuf(pb, " ]}");
-        else
-                retval = sprintbuf(pb, "]}");
-
-        return retval;
-}
-
-static void json_object_set_serializer(json_object *jso,
-    json_object_to_json_string_fn to_string_func,
-    void * userdata, json_object_delete_fn * user_delete)
-{
-    jso->_to_json_string = to_string_func;
-}
-
-static struct json_object *json_object_new_extptr(void *p, int ndims, int const *dims, int datatype)
-{
-    int i;
-    struct json_object *jobj = json_object_new_object();
-    struct json_object *jarr = json_object_new_array();
-
-    json_object_set_serializer(jobj, json_object_extptr_to_json_string, 0, 0);
-
-    for (i = 0; i < ndims; i++)
-        json_object_array_add(jarr, json_object_new_int(dims[i]));
-
-    json_object_object_add(jobj, "ptr", json_object_new_strptr(p));
-    json_object_object_add(jobj, "datatype", json_object_new_int(datatype));
-    json_object_object_add(jobj, "ndims", json_object_new_int(ndims));
-    json_object_object_add(jobj, "dims", jarr);
-
-#warning DO WE NEED TO DECRIMENT JARR REFS WITH PUT CALL
-
-    return jobj;
-}
-
-/* Return a Silo object as a Json Object. Bulk data passed using funky exptr */
-PUBLIC struct json_object *
-DBGetJsonObject(DBfile *dbfile, char const *objname)
-{
-    int i;
-    struct json_object *jobj = json_object_new_object();
-    DBobject *sobj = DBGetObject(dbfile, objname);
-    if (!sobj) return jobj;
-
-    json_object_object_add(jobj, "silo_name", json_object_new_string(sobj->name));
-    json_object_object_add(jobj, "silo_type", json_object_new_int(DBGetObjtypeTag(sobj->type)));
-
-    for (i = 0; i < sobj->ncomponents; i++)
-    {
-        char cat_comp_name[1024];
-        snprintf(cat_comp_name, sizeof(cat_comp_name), "%s_%s", objname, sobj->comp_names[i]);
-             if (!strncmp(sobj->pdb_names[i], "'<i>", 4))
-        {
-            json_object_object_add(jobj, sobj->comp_names[i],
-                json_object_new_int(strtol(sobj->pdb_names[i]+4, NULL, 0)));
-        }
-        else if (!strncmp(sobj->pdb_names[i], "'<f>", 4))
-        {
-            json_object_object_add(jobj, sobj->comp_names[i],
-                json_object_new_double(strtod(sobj->pdb_names[i]+4, NULL)));
-        }
-        else if (!strncmp(sobj->pdb_names[i], "'<d>", 4))
-        {
-            json_object_object_add(jobj, sobj->comp_names[i],
-                json_object_new_double(strtod(sobj->pdb_names[i]+4, NULL)));
-        }
-        else if (!strncmp(sobj->pdb_names[i], "'<s>", 4))
-        {
-            char tmp[256];
-            size_t len = strlen(sobj->pdb_names[i])-5;
-            memset(tmp, 0, sizeof(tmp));
-            strncpy(tmp, sobj->pdb_names[i]+4, len);
-            if (DBInqVarExists(dbfile, tmp))
-            {
-                json_object_object_add(jobj, sobj->comp_names[i],
-                    DBGetJsonObject(dbfile, tmp));
-            }
-            else
-            {
-                json_object_object_add(jobj, sobj->comp_names[i],
-                    json_object_new_string(tmp));
-            }
-        }
-        else if (DBInqVarType(dbfile, cat_comp_name) == DB_VARIABLE)
-        {
-            void *p;
-            int ndims, dims[32];
-            int dtype = DBGetVarType(dbfile, cat_comp_name);
-            ndims = DBGetVarDims(dbfile, cat_comp_name, sizeof(dims)/sizeof(dims[0]), dims);
-            p = DBGetVar(dbfile, cat_comp_name);
-            json_object_object_add(jobj, sobj->comp_names[i],
-                json_object_new_extptr(p, ndims, dims, dtype));
-        }
-        else if (DBInqVarExists(dbfile, sobj->comp_names[i]))
-        {
-            json_object_object_add(jobj, sobj->comp_names[i],
-                DBGetJsonObject(dbfile, sobj->comp_names[i]));
-        }
-        else /* some component we do not know how to handle */
-        {
-            json_object_object_add(jobj, sobj->comp_names[i],
-                json_object_new_string("<unknown>"));
-        }
-    }
-    return jobj;
-}
-
-static struct json_object *json_object_new_stringsafe(char const *s)
-{
-    if (!s || !*s)
-        return json_object_new_string("");
-    else
-        return json_object_new_string(s);
-}
-
-int json_object_object_length(struct json_object *o)
-{
-    struct lh_table *t = json_object_get_object(o);
-    return t->count;
-}
-
-int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
-{
-#warning VERY CLUGEY HERE
-    static int cnt = 0;
-    DBobject *sobj;
-    char objnm[256];
-    struct json_object_iterator jiter, jend; 
-    memset(objnm, 0, sizeof(objnm));
-    if (json_object_object_get_ex(jobj, "silo_type", 0) &&
-        json_object_object_get_ex(jobj, "silo_name", 0))
-    {
-        json_object *silo_type_obj = json_object_object_get(jobj, "silo_type");
-        json_object *silo_name_obj = json_object_object_get(jobj, "silo_name");
-        strncpy(objnm, json_object_get_string(silo_name_obj), sizeof(objnm));
-        sobj = DBMakeObject(objnm,
-            json_object_get_int(silo_type_obj),
-            json_object_object_length(jobj)+10
-        );
-    }
-    else
-    {
-        snprintf(objnm, sizeof(objnm), "anon_%d", cnt++);
-        sobj = DBMakeObject(objnm, DB_USERDEF, json_object_object_length(jobj)+10);
-    }
-    jiter = json_object_iter_begin(jobj);
-    jend = json_object_iter_end(jobj);
-#warning LOOP COULD LOOK A LOT BETTER USING foreachC MACRO
-    while (!json_object_iter_equal(&jiter, &jend))
-    {
-        struct json_object *mobj = json_object_iter_peek_value(&jiter);
-        char const *mname = json_object_iter_peek_name(&jiter);
-        json_type jtype = json_object_get_type(mobj);
-
-        switch (jtype)
-        {
-            case json_type_array:
-            case json_type_null: break;
-            case json_type_boolean:
-            case json_type_int:
-            {
-                int val = 0;
-                if (jtype == json_type_boolean && json_object_get_boolean(mobj))
-                    val = 1;
-                else
-                    val = json_object_get_int(mobj);
-                DBAddIntComponent(sobj, mname, val);
-                break;
-            }
-            case json_type_double:
-            {
-                DBAddDblComponent(sobj, mname, json_object_get_double(mobj));
-                break;
-            }
-            case json_type_string:
-            {
-                if (strlen(json_object_get_string(mobj)))
-                    DBAddStrComponent(sobj, mname, json_object_get_string(mobj));
-                break;
-            }
-#warning STRDUPS ARE LEAKS
-            case json_type_object: /* must be extptr array reference */
-            {
-                if (json_object_object_get_ex(mobj, "ptr", 0) &&
-                    json_object_object_get_ex(mobj, "datatype", 0) &&
-                    json_object_object_get_ex(mobj, "ndims", 0) &&
-                    json_object_object_get_ex(mobj, "dims", 0))
-                {
-                    int i;
-                    long dims[32];
-                    void *p = json_object_get_strptr(json_object_object_get(mobj, "ptr"));
-                    int datatype = json_object_get_int(json_object_object_get(mobj, "datatype"));
-                    int ndims = json_object_get_int(json_object_object_get(mobj, "ndims"));
-                    struct json_object *darr = json_object_object_get(mobj, "dims");
-                    for (i = 0; i < ndims; i++)
-                        dims[i] = (long) json_object_get_int(json_object_array_get_idx(darr, i));
-                    DBWriteComponent(dbfile, sobj, mname, strdup(objnm),
-                        db_GetDatatypeString(datatype), p, ndims, dims);
-                }
-                else
-                {
-                    json_object *silo_type_subobj=0, *silo_name_subobj=0;
-                    int has_silo_type, has_silo_name;
-                    char tmp[32];
-                    has_silo_type = json_object_object_get_ex(mobj, "silo_type", &silo_type_subobj);
-                    has_silo_name = json_object_object_get_ex(mobj, "silo_name", &silo_name_subobj);
-                    snprintf(tmp, sizeof(tmp), "anon_%d", cnt);
-
-                    if (has_silo_name && has_silo_type)
-                        DBAddStrComponent(sobj, mname, strdup(json_object_get_string(silo_name_subobj)));
-                    else
-                        DBAddStrComponent(sobj, mname, strdup(tmp));
-                    DBWriteJsonObject(dbfile, mobj);
-                }
-
-                break;
-            }
-        }
-        json_object_iter_next(&jiter);
-    }
-    return DBWriteObject(dbfile, sobj, 0);
-}
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    DBGetObject
@@ -14145,4 +13773,181 @@ safe_strdup(const char *s)
     retval[strlen(s)] = '\0';
         
     return(retval);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    different
+ *
+ * Purpose:     Determines if A and B are same or different based on an
+ *              absolute tolerance and relative tolerance.  A and B differ
+ *              if and only if
+ *
+ *                      | A-B | > ABSTOL
+ *
+ *              or
+ *
+ *                      2 | A-B |
+ *                      ---------  > RELTOL
+ *                       | A+B |
+ *
+ *              If ABSTOL or RELTOL is negative then the corresponding
+ *              test is not performed.  If both are negative then this
+ *              function degenerates to a `!=' operator.
+ *
+ * Return:      Success:        0 if same, 1 if different.
+ *
+ *              Failure:        never fails
+ *
+ * Programmer:  Robb Matzke
+ *              matzke@viper.llnl.gov
+ *              Feb  6 1997
+ *
+ * Modifications:
+ *
+ *  Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *  Added suppot for alternate relative diff option.
+ *
+ * Mark C. Miller, Tue Feb  7 15:18:38 PST 2012
+ * Made reltol_eps diff mutually exclusive with abstol || reltol diff.
+ *-------------------------------------------------------------------------
+ */
+int db_is_different_dbl (double a, double b, double abstol, double reltol, double reltol_eps)
+{
+   double       num, den;
+
+   /*
+    * First, see if we should use the alternate diff.
+    * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
+    */
+   if (reltol_eps >= 0 && reltol > 0)
+   {
+      if ((a<0 && b>0) || (b<0 && a>0)) {
+         num = fabs (a/2 - b/2);
+         den = fabs (a/2) + fabs(b/2) + reltol_eps/2;
+         reltol /= 2;
+      } else {
+         num = fabs (a - b);
+         den = fabs (a) + fabs(b) + reltol_eps;
+      }
+      if (0.0==den && num) return 1;
+      if (num/den > reltol) return 1;
+      return 0;
+   }
+   else /* use the old Abs|Rel difference test */
+   {
+      /*
+       * Now the |A-B| but make sure it doesn't overflow which can only
+       * happen if one is negative and the other is positive.
+       */
+      if (abstol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            if (fabs (a/2 - b/2) > abstol/2) return 1;
+         } else {
+            if (fabs(a-b) > abstol) return 1;
+         }
+      }
+
+      /*
+       * Now check 2|A-B|/|A+B| in a way that won't overflow.
+       */
+      if (reltol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            num = fabs (a/2 - b/2);
+            den = fabs (a/2 + b/2);
+            reltol /= 2;
+         } else {
+            num = fabs (a - b);
+            den = fabs (a/2 + b/2);
+         }
+         if (0.0==den && num) return 1;
+         if (num/den > reltol) return 1;
+      }
+
+      if (abstol>0 || reltol>0) return 0;
+   }
+
+   /*
+    * Otherwise do a normal exact comparison.
+    */
+   return a!=b;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    differentll
+ *
+ * Purpose:     Implement above difference function for long long type. 
+ *
+ * Programmer:  Mark C. Miller, Mon Dec  7 07:05:39 PST 2009
+ *
+ * Modifications:
+ *   Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *   Change conditional compilation logic to compile this routine
+ *   whenever a double is NOT sufficient to hold full precision of long
+ *   or long long.
+ *
+ *   Mark C. Miller, Mon Jan 11 16:20:16 PST 2010
+ *   Made it compiled UNconditionally.
+ *-------------------------------------------------------------------------
+ */
+#define FABS(A) ((A)<0?-(A):(A))
+int db_is_different_ll (long long a, long long b, double abstol, double reltol, double reltol_eps)
+{
+
+   long long num, den;
+
+   /*
+    * First, see if we should use the alternate diff.
+    * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
+    */
+   if (reltol_eps >= 0 && reltol > 0)
+   {
+      if ((a<0 && b>0) || (b<0 && a>0)) {
+         num = FABS (a/2 - b/2);
+         den = FABS (a/2) + FABS(b/2) + reltol_eps/2;
+         reltol /= 2;
+      } else {
+         num = FABS (a - b);
+         den = FABS (a) + FABS(b) + reltol_eps;
+      }
+      if (0.0==den && num) return 1;
+      if (num/den > reltol) return 1;
+      return 0;
+   }
+   else
+   {
+      /*
+       * Now the |A-B| but make sure it doesn't overflow which can only
+       * happen if one is negative and the other is positive.
+       */
+      if (abstol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            if (FABS(a/2 - b/2) > abstol/2) return 1;
+         } else {
+            if (FABS(a-b) > abstol) return 1;
+         }
+      }
+
+      /*
+       * Now check 2|A-B|/|A+B| in a way that won't overflow.
+       */
+      if (reltol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            num = FABS (a/2 - b/2);
+            den = FABS (a/2 + b/2);
+            reltol /= 2;
+         } else {
+            num = FABS (a - b);
+            den = FABS (a/2 + b/2);
+         }
+         if (0.0==den && num) return 1;
+         if (num/den > reltol) return 1;
+
+         if (abstol>0 || reltol>0) return 0;
+      }
+   }
+
+   /*
+    * Otherwise do a normal exact comparison.
+    */
+   return a!=b;
 }

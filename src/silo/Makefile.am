@@ -67,10 +67,15 @@ if FORTRAN_NEEDED
  EXTRAINCS += silo_f.h
 endif
 
+if JSON_NEEDED
+ EXTRAFILES += silo_json.c
+endif
+
 EXTRA_DIST = \
  silo_fcb.c \
  silo_f.h \
  silo_f.c \
+ silo_json.c \
  silo.h.in
 
 include_HEADERS = \

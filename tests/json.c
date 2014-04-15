@@ -49,7 +49,6 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
-#include <silo.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -60,115 +59,25 @@ product endorsement purposes.
 
 #include <config.h>
 
-#if HAVE_JSON
-#include <json/json.h>
-#warning FIX INCLUSION OF PRIVATE HEADER
-#include <json/json_object_private.h>
-#include <json/printbuf.h>
+#include <silo.h>
 #include <silo_json.h>
-#endif
 
 #include <std.c>
 
-#warning FIX USE OF RE-DEFINED SYMBOL
-#define JSON_C_TO_STRING_EXTPTR_AS_BINARY (JSON_C_TO_STRING_PRETTY<<1)
-#define JSON_C_TO_STRING_EXTPTR_SKIP (JSON_C_TO_STRING_EXTPTR_AS_BINARY<<1)
-
-#warning MOVE THIS METHOD TO JSON LIB
-static void *json_object_get_strptr(struct json_object *o)
+static json_object_print_extptr_header(json_object *obj)
 {
-    void *p;
-    char const *strptr = json_object_get_string(o);
-    sscanf(strptr, "%p", &p);
-    return p;
-}
+    int i, ndims;
 
-#define EXTPTR_HDRSTR "\":{\"ptr\":\"0x"
-int json_object_to_binary_buf(struct json_object *obj, int flags, void **buf, int *len)
-{
-    char *pjhdr;
-    struct printbuf *pb = printbuf_new();
+    if (!json_object_is_extptr(obj)) return;
 
-    /* first, stringify the json object as normal but skipping extptr data */
-    char *jhdr = json_object_to_json_string_ext(obj, flags|JSON_C_TO_STRING_EXTPTR_SKIP);
-    sprintbuf(pb, "%s", jhdr);
-    sprintbuf(pb, "%c", '\0'); /* so header is null-terminated */
+    printf("datatype = %s, ", db_GetDatatypeString(json_object_get_extptr_datatype(obj)));
+    ndims = json_object_get_extptr_ndims(obj);
+    printf("ndims = %d ", ndims);
+    printf("dims = ");
+    for (i = 0; i < ndims; i++)
+        printf("%d, ", json_object_get_extptr_dims_idx(obj, i));
+    printf("\n");
 
-    /* now, handle all extptr objects by appending their binary data onto the end,
-       and over-writing the "ptr" value with offset within the buffer */
-    pjhdr = jhdr;
-    while (*pjhdr)
-    {
-        if (!strncmp(pjhdr, EXTPTR_HDRSTR, sizeof(EXTPTR_HDRSTR)-1))
-        {
-            char tmp[64];
-            int pblen;
-            struct json_object *extptr_obj = json_tokener_parse(pjhdr+2); /* walk past '":' */
-            void *p = json_object_get_strptr(json_object_object_get(extptr_obj, "ptr"));
-            int datatype = json_object_get_int(json_object_object_get(extptr_obj, "datatype"));
-            int ndims = json_object_get_int(json_object_object_get(extptr_obj, "ndims"));
-            struct json_object *darr = json_object_object_get(extptr_obj, "dims");
-            int ii, nvals = 1;
-            for (ii = 0; ii < ndims; ii++)
-                nvals *= json_object_get_int(json_object_array_get_idx(darr, ii));
-            pblen = printbuf_length(pb);
-            printbuf_memappend_fast(pb, p, nvals*db_GetMachDataSize(datatype));
-            /* Use of a hexadecimal value works ok here because a scanf can read it */
-            sprintf(tmp,"%-.16x",pblen); /* overwrite ptr value w/buffer-offset */
-            memcpy(pb->buf + (pjhdr+12-jhdr),tmp,strlen(tmp)); /* overwrite ptr value w/buffer-offset */
-            pjhdr += sizeof(EXTPTR_HDRSTR);
-        }
-        pjhdr++;
-    }
-    if (len) *len = printbuf_length(pb);
-    if (buf) *buf = pb->buf;
-    return 0;
-}
-
-int json_object_from_binary_buf_recurse(struct json_object *jso, void *buf)
-{
-    /* first, reconstitute the header */
-    struct json_object_iter iter;
-
-    json_object_object_foreachC(jso, iter)
-    {
-        json_type jtype = json_object_get_type(iter.val);
-        if (jtype == json_type_object)
-        {
-            if (json_object_object_get_ex(iter.val, "ptr", 0) &&
-                json_object_object_get_ex(iter.val, "datatype", 0) &&
-                json_object_object_get_ex(iter.val, "ndims", 0) &&
-                json_object_object_get_ex(iter.val, "dims", 0))
-            {
-                char strptr[128];
-                void *p;
-                int i, offset, nvals=1;
-                char *offstr = json_object_get_string(json_object_object_get(iter.val, "ptr"));
-                int datatype = json_object_get_int(json_object_object_get(iter.val, "datatype"));
-                int ndims = json_object_get_int(json_object_object_get(iter.val, "ndims"));
-                struct json_object *darr = json_object_object_get(iter.val, "dims");
-                for (i = 0; i < ndims; i++)
-                    nvals *= json_object_get_int(json_object_array_get_idx(darr, i));
-                sscanf(offstr, "%x", &offset);
-                p = malloc(nvals*db_GetMachDataSize(datatype));
-                memcpy(p, buf+offset, nvals*db_GetMachDataSize(datatype));
-                json_object_object_del(iter.val,"ptr");
-                snprintf(strptr, sizeof(strptr), "%p", p);
-                json_object_object_add(iter.val, "ptr", json_object_new_string(strptr));
-            }
-            else
-            {
-                json_object_from_binary_buf_recurse(iter.val, buf);
-            }
-        }
-    }
-}
-
-struct json_object *json_object_from_binary_buf(void *buf, int len)
-{
-    struct json_object *retval = json_tokener_parse((char*)buf);
-    json_object_from_binary_buf_recurse(retval, buf);
-    return retval;
 }
 
 int
@@ -196,11 +105,57 @@ main(int argc, char *argv[])
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
     dbfile = DBOpen(filename, driver, DB_READ);
 
-#if HAVE_JSON
-
     /* Example of getting a Silo object from a silo file as a json object */
     jsilo_obj = DBGetJsonObject(dbfile, "hex");
     DBClose(dbfile);
+
+    /* Test interface to query extptr members from jsilo_obj */
+    {
+        json_object *jcoord_obj, *jzl_obj, *jnodelist_obj;
+        int i, ndims;
+
+        if (json_object_object_get_ex(jsilo_obj, "coord0", &jcoord_obj))
+        {
+            printf("For json member named \"coord0\": ");
+            json_object_print_extptr_header(jcoord_obj);
+        }
+        else
+        {
+            fprintf(stderr, "Failed to find json member named \"coord0\"\n");
+            return 1;
+        }
+
+        if (json_object_object_get_ex(jsilo_obj, "zonelist", &jzl_obj) &&
+            json_object_object_get_ex(jzl_obj, "nodelist", &jnodelist_obj))
+        {
+            printf("For json sub-member named \"nodelist\": ");
+            json_object_print_extptr_header(jnodelist_obj);
+        }
+        else
+        {
+            fprintf(stderr, "Failed to find json sub-member named \"nodelist\"\n");
+            return 1;
+        }
+    }
+
+    /* Test interface to serialize json object into an ascii string */
+    {
+        char *obj_strA = json_object_to_json_string_ext(jsilo_obj, 0);
+        printf("Serialize to String::BEGIN[\n");
+        printf("----------------------------------------------------\n");
+        printf("%s\n", obj_strA);
+        printf("----------------------------------------------------\n");
+        printf("Serialize to String::END]\n");
+        /*free(obj_strA); string is owned by pbuf of jsilo_obj */
+    }
+
+    /* Test interface to serialize and write to an ascii file */
+    {
+        json_object *file_obj;
+        json_object_to_file("onehex.json", jsilo_obj);
+        file_obj = json_object_from_file("onehex.json");
+        json_object_put(file_obj);
+    }
 
 #if 0
     binary_obj_strA = json_object_to_json_string_ext(jsilo_obj, JSON_C_TO_STRING_EXTPTR_AS_BINARY);
@@ -208,7 +163,8 @@ main(int argc, char *argv[])
     fd = open("onehex-A.bson", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
     write(fd, binary_obj_strA, printbuf_length(jsilo_obj->_pb));
     close(fd);
-#else
+#endif
+
     /* Example of creating a serialized, binary buffer of a Silo json object and then
        writing it to a binary file. */
     { void *buf; int len;
@@ -224,12 +180,14 @@ main(int argc, char *argv[])
     printf("bojb =%s\n", json_object_to_json_string(bobj));
     dbfile = DBCreate("onehex_from_binary_json.pdb", DB_CLOBBER, DB_LOCAL, "test binary json output", DB_PDB);
     DBWriteJsonObject(dbfile, bobj);
+    json_object_put(bobj);
     DBClose(dbfile);
+    free(buf);
     }
-#endif
 
     /* Example of taking a standard silo object and adding some arbitrary stuff to it */
     json_object_to_file("onehex.json", jsilo_obj);
+    json_object_put(jsilo_obj);
     fil_obj = json_object_from_file("onehex.json");
     printf("fil_obj=%s\n", json_object_to_json_string(fil_obj));
 
@@ -249,8 +207,7 @@ main(int argc, char *argv[])
     dbfile = DBCreate("onehex_from_json.pdb", DB_CLOBBER, DB_LOCAL, "test json output", DB_PDB);
     DBWriteJsonObject(dbfile, fil_obj);
     DBClose(dbfile);
-
-#endif
+    json_object_put(fil_obj);
 
     CleanupDriverStuff();
 

@@ -896,4 +896,7 @@ char   *safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/
 #define strdup(s) safe_strdup(s)
 
+INTERNAL int db_is_different_dbl(double a, double b, double abstol, double reltol, double reltol_eps);
+INTERNAL int db_is_different_ll(long long a, long long b, double abstol, double reltol, double reltol_eps);
+
 #endif /* !SILO_PRIVATE_H */

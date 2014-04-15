@@ -602,67 +602,9 @@ browser_rl_obj_generator (char *text, int state) {
  * Made reltol_eps diff mutually exclusive with abstol || reltol diff.
  *-------------------------------------------------------------------------
  */
-int
-different (double a, double b, double abstol, double reltol,
-    double reltol_eps) {
-
-   double       num, den;
-
-   /*
-    * First, see if we should use the alternate diff.
-    * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
-    */
-   if (reltol_eps >= 0 && reltol > 0)
-   {
-      if ((a<0 && b>0) || (b<0 && a>0)) {
-         num = fabs (a/2 - b/2);
-         den = fabs (a/2) + fabs(b/2) + reltol_eps/2;
-         reltol /= 2;
-      } else {
-         num = fabs (a - b);
-         den = fabs (a) + fabs(b) + reltol_eps;
-      }
-      if (0.0==den && num) return 1;
-      if (num/den > reltol) return 1;
-      return 0;
-   }
-   else /* use the old Abs|Rel difference test */
-   {
-      /*
-       * Now the |A-B| but make sure it doesn't overflow which can only
-       * happen if one is negative and the other is positive.
-       */
-      if (abstol>0) {
-         if ((a<0 && b>0) || (b<0 && a>0)) {
-            if (fabs (a/2 - b/2) > abstol/2) return 1;
-         } else {
-            if (fabs(a-b) > abstol) return 1;
-         }
-      }
-
-      /*
-       * Now check 2|A-B|/|A+B| in a way that won't overflow.
-       */
-      if (reltol>0) {
-         if ((a<0 && b>0) || (b<0 && a>0)) {
-            num = fabs (a/2 - b/2);
-            den = fabs (a/2 + b/2);
-            reltol /= 2;
-         } else {
-            num = fabs (a - b);
-            den = fabs (a/2 + b/2);
-         }
-         if (0.0==den && num) return 1;
-         if (num/den > reltol) return 1;
-      }
-
-      if (abstol>0 || reltol>0) return 0;
-   }
-
-   /*
-    * Otherwise do a normal exact comparison.
-    */
-   return a!=b;
+int different (double a, double b, double abstol, double reltol, double reltol_eps)
+{
+    return db_is_different_dbl(a,b,abstol,reltol,reltol_eps);
 }
 
 /*-------------------------------------------------------------------------
@@ -682,68 +624,9 @@ different (double a, double b, double abstol, double reltol,
  *   Made it compiled UNconditionally.
  *-------------------------------------------------------------------------
  */
-#define FABS(A) ((A)<0?-(A):(A))
-int
-differentll (long long a, long long b, double abstol, double reltol,
-    double reltol_eps) {
-
-   long long num, den;
-
-   /*
-    * First, see if we should use the alternate diff.
-    * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
-    */
-   if (reltol_eps >= 0 && reltol > 0)
-   {
-      if ((a<0 && b>0) || (b<0 && a>0)) {
-         num = FABS (a/2 - b/2);
-         den = FABS (a/2) + FABS(b/2) + reltol_eps/2;
-         reltol /= 2;
-      } else {
-         num = FABS (a - b);
-         den = FABS (a) + FABS(b) + reltol_eps;
-      }
-      if (0.0==den && num) return 1;
-      if (num/den > reltol) return 1;
-      return 0;
-   }
-   else
-   {
-      /*
-       * Now the |A-B| but make sure it doesn't overflow which can only
-       * happen if one is negative and the other is positive.
-       */
-      if (abstol>0) {
-         if ((a<0 && b>0) || (b<0 && a>0)) {
-            if (FABS(a/2 - b/2) > abstol/2) return 1;
-         } else {
-            if (FABS(a-b) > abstol) return 1;
-         }
-      }
-
-      /*
-       * Now check 2|A-B|/|A+B| in a way that won't overflow.
-       */
-      if (reltol>0) {
-         if ((a<0 && b>0) || (b<0 && a>0)) {
-            num = FABS (a/2 - b/2);
-            den = FABS (a/2 + b/2);
-            reltol /= 2;
-         } else {
-            num = FABS (a - b);
-            den = FABS (a/2 + b/2);
-         }
-         if (0.0==den && num) return 1;
-         if (num/den > reltol) return 1;
-
-         if (abstol>0 || reltol>0) return 0;
-      }
-   }
-
-   /*
-    * Otherwise do a normal exact comparison.
-    */
-   return a!=b;
+int differentll (long long a, long long b, double abstol, double reltol, double reltol_eps)
+{
+    return db_is_different_ll(a,b,abstol,reltol,reltol_eps);
 }
 
 /*-------------------------------------------------------------------------
