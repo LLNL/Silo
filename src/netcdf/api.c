@@ -158,7 +158,7 @@ int            _dims[30];
  */
 /* ARGSUSED */
 INTERNAL int
-silonetcdf_ncopen (char *filename, int mode)
+silonetcdf_ncopen (char const *filename, int mode)
 {
    PDBfile       *pdb_file;    /* PDB File descriptor. */
    int            dbid;        /* Database identifier. */
@@ -167,7 +167,7 @@ silonetcdf_ncopen (char *filename, int mode)
    silo_Init();
 
    /* Attempt to open file. */
-   if ((pdb_file = lite_PD_open(filename, "r")) == NULL) {
+   if ((pdb_file = lite_PD_open((char*)filename, "r")) == NULL) {
       /* Not a SILO file. */
       /* silo_Error (lite_PD_err, SILO_ERROR); */
       silo_Error("File is not a SILO file.", SILO_ERROR);
@@ -388,7 +388,7 @@ silonetcdf_ncdirlist (int dbid, int dirid, int *ndirs, int *dirs)
  *
  *---------------------------------------------------------------------*/
 INTERNAL int
-silonetcdf_ncvarid (int dbid, char *name)
+silonetcdf_ncvarid (int dbid, char const *name)
 {
    int            id;
 
@@ -624,7 +624,7 @@ silonetcdf_ncattinq (int dbid, int varid, char *name, int *datatype, int *len)
  *      Return the object ID of the object with the given name.
  *---------------------------------------------------------------------*/
 INTERNAL int
-silonetcdf_ncobjid (int dbid, char *name)
+silonetcdf_ncobjid (int dbid, char const *name)
 {
    int            id;
 

@@ -531,49 +531,50 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int nblocks_x,
     /* create the multi-block mesh */
 
     if (DBPutMultimesh(dbfile, "mesh1", nblocks,
-                       meshnames, meshtypes, optlist) == -1)
+            (char const * const *) meshnames, meshtypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi mesh\n");
         return (-1);
     }                           /* if */
     /* create the multi-block variables */
-    if (DBPutMultivar(dbfile, "d", nblocks, var1names, vartypes, optlist)
-        == -1)
+    if (DBPutMultivar(dbfile, "d", nblocks,
+            (char const * const *) var1names, vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var d\n");
         return (-1);
     }                           /* if */
-    if (DBPutMultivar(dbfile, "p", nblocks, var2names, vartypes, optlist)
-        == -1)
+    if (DBPutMultivar(dbfile, "p", nblocks,
+            (char const * const *) var2names, vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var p\n");
         return (-1);
     }                           /* if */
-    if (DBPutMultivar(dbfile, "u", nblocks, var3names, vartypes, optlist)
-        == -1)
+    if (DBPutMultivar(dbfile, "u", nblocks,
+            (char const * const *) var3names, vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var u\n");
         return (-1);
     }                           /* if */
-    if (DBPutMultivar(dbfile, "v", nblocks, var4names, vartypes, optlist)
-        == -1)
+    if (DBPutMultivar(dbfile, "v", nblocks,
+            (char const * const *) var4names, vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var v\n");
         return (-1);
     }                           /* if */
-    if (DBPutMultivar(dbfile, "w", nblocks, var5names, vartypes, optlist)
-        == -1)
+    if (DBPutMultivar(dbfile, "w", nblocks,
+            (char const * const *) var5names, vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var w\n");
         return (-1);
     }                       /* if */
-    if (DBPutMultimat(dbfile, "mat1", nblocks, matnames, optlist) == -1)
+    if (DBPutMultimat(dbfile, "mat1", nblocks,
+            (char const * const *) matnames, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi material\n");
@@ -631,7 +632,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             cycle;
     float           time;
     double          dtime;
-    char           *coordnames[3];
+    char const * const coordnames[3] = {"xcoords", "ycoords", "zcoords"};
     int             ndims;
     int             dims[3], zdims[3];
     float          *coords[3];
@@ -701,9 +702,6 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
      * Create the mesh.
      */
     meshname = "mesh1";
-    coordnames[0] = "xcoords";
-    coordnames[1] = "ycoords";
-    coordnames[2] = "zcoords";
     coords[0] = x;
     coords[1] = y;
     coords[2] = z;
@@ -923,8 +921,8 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                       (groupnum == (1+grouporigin) ? (NZ*2/3) : 0);
         DBAddOption(optlist, DBOPT_BASEINDEX, baseindex);
 
-        DBPutQuadmesh(dbfile, meshname, coordnames, coords, dims, ndims,
-                      DB_FLOAT, DB_COLLINEAR, optlist);
+        DBPutQuadmesh(dbfile, meshname, coordnames, (DB_DTPTR2) coords,
+                      dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
 
         DBPutQuadvar1(dbfile, var1name, meshname, d2, zdims, ndims,
                       NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);
@@ -1026,7 +1024,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             cycle;
     float           time;
     double          dtime;
-    char           *coordnames[3];
+    char const * const coordnames[3] = {"xcoords", "ycoords", "zcoords"};
     float          *coords[3];
     float           *x, *y, *z;
     int             nfaces, nzones, nnodes;
@@ -1216,9 +1214,6 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     dtime = 4.8;
 
     meshname = "mesh1";
-    coordnames[0] = "xcoords";
-    coordnames[1] = "ycoords";
-    coordnames[2] = "zcoords";
 
     var1name = "d";
     var2name = "p";
@@ -1465,36 +1460,36 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
          * Output the rest of the mesh and variables.
          */
         if (nfaces > 0)
-            DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
+            DBPutUcdmesh(dbfile, meshname, 3, coordnames, (DB_DTPTR2) coords,
                          nnodes, nzones, "zl1", "fl1", DB_FLOAT, optlist);
         else
-            DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
+            DBPutUcdmesh(dbfile, meshname, 3, coordnames, (DB_DTPTR2) coords,
                          nnodes, nzones, "zl1", NULL, DB_FLOAT, optlist);
 
         vars[0] = d2;
         varnames[0] = var1name;
-        DBPutUcdvar(dbfile, var1name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+        DBPutUcdvar(dbfile, var1name, meshname, 1, (char const * const *) varnames,
+            (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
         vars[0] = p2;
         varnames[0] = var2name;
-        DBPutUcdvar(dbfile, var2name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+        DBPutUcdvar(dbfile, var2name, meshname, 1, (char const * const *) varnames,
+            (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
         vars[0] = u2;
         varnames[0] = var3name;
-        DBPutUcdvar(dbfile, var3name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+        DBPutUcdvar(dbfile, var3name, meshname, 1, (char const * const *) varnames,
+            (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
         vars[0] = v2;
         varnames[0] = var4name;
-        DBPutUcdvar(dbfile, var4name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+        DBPutUcdvar(dbfile, var4name, meshname, 1, (char const * const *) varnames,
+            (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
         vars[0] = w2;
         varnames[0] = var5name;
-        DBPutUcdvar(dbfile, var5name, meshname, 1, varnames, vars,
-                    nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+        DBPutUcdvar(dbfile, var5name, meshname, 1, (char const * const *) varnames,
+            (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
         DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
                       matlist2, &nzones, 1, mix_next, mix_mat, mix_zone,
@@ -1581,7 +1576,7 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     int             cycle;
     float           time;
     double          dtime;
-    char           *coordnames[3];
+    char const * const coordnames[3] = {"xcoords", "ycoords", "zcoords"};
     float          *coords[3];
 
     float           *x;
@@ -1664,9 +1659,6 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
      * Create the mesh. 
      */
     meshname = "mesh1";
-    coordnames[0] = "xcoords";
-    coordnames[1] = "ycoords";
-    coordnames[2] = "zcoords";
     coords[0] = x;
     coords[1] = y;
     coords[2] = z;
@@ -1900,9 +1892,8 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                       (groupnum == (1+grouporigin) ? (NZ*2/3) : 0);
         DBAddOption(optlist, DBOPT_BASEINDEX, baseindex);
 
-        DBPutQuadmesh(dbfile, meshname, coordnames, coords,
-                      dims, ndims, DB_FLOAT, DB_NONCOLLINEAR,
-                      optlist);
+        DBPutQuadmesh(dbfile, meshname, coordnames, (DB_DTPTR2) coords,
+                      dims, ndims, DB_FLOAT, DB_NONCOLLINEAR, optlist);
 
         DBPutQuadvar1(dbfile, var1name, meshname, d2, zdims, ndims,
                       NULL, 0, DB_FLOAT, DB_ZONECENT, optlist);

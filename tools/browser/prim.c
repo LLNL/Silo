@@ -316,6 +316,24 @@ prim_assoc_t PA_REPRBLOCK[] = {
    {-1,        "not specified"},
    {0,         NULL}};
 
+prim_assoc_t PA_MISSING_VALUE[] = {
+   {PA_NAME,                                    "missing value"},
+   {DB_MISSING_VALUE_NOT_SET, "not set"},
+   {0,                        NULL}};
+
+prim_assoc_t PA_ZONETYPE[] = {
+   {PA_NAME,                                    "zonetype"},
+   {DB_ZONETYPE_BEAM,        "BEAM"},
+   {DB_ZONETYPE_POLYGON,     "POLYGON"},
+   {DB_ZONETYPE_TRIANGLE,    "TRIANGLE"},
+   {DB_ZONETYPE_QUAD,        "QUAD"},
+   {DB_ZONETYPE_POLYHEDRON,  "POLYHEDRON"},
+   {DB_ZONETYPE_TET,         "TET"},
+   {DB_ZONETYPE_PYRAMID,     "PYRAMID"},
+   {DB_ZONETYPE_PRISM,       "PRISM"},
+   {DB_ZONETYPE_HEX,         "HEX"},
+   {0,                        NULL}};
+
 
 /*-------------------------------------------------------------------------
  * Function:    prim_class
@@ -842,7 +860,12 @@ prim_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata)
                 break;
                 
             case BROWSER_DOUBLE:
-                if (16==obase) {
+                for (i=0; self->assoc && self->assoc[i].s; i++) {
+                    if (*((double*)mem) == self->assoc[i].n) break;
+                }
+                if (self->assoc && self->assoc[i].s) {
+                    out_printf(f, "%s", self->assoc[i].s);
+                } else if (16==obase) {
                     for (i=0; i<sizeof(double); i++) {
                         sprintf(buf+2*i, "%02x", *((unsigned char*)mem+i));
                     }
@@ -922,6 +945,7 @@ prim_getval_ll(int type, void *mem)
     case BROWSER_FLOAT:     return (long long) *((float*)mem);
     case BROWSER_DOUBLE:    return (long long) *((double*)mem);
     }
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -947,6 +971,7 @@ prim_getval(int type, void *mem)
     case BROWSER_FLOAT:     return (double) *((float*)mem);
     case BROWSER_DOUBLE:    return (double) *((double*)mem);
     }
+    return 0;
 }
 
 
@@ -1434,6 +1459,12 @@ prim_bind (obj_t _self, void *mem) {
          self->tname = safe_strdup ("double");
          self->browser_type = BROWSER_DOUBLE;
          self->nbytes = sizeof(double);
+         break;
+
+      case DB_NOTYPE:
+         self->tname = safe_strdup ("notype");
+         self->browser_type = BROWSER_INT;
+         self->nbytes = 0;
          break;
 
       default:

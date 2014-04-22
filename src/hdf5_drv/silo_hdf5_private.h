@@ -101,54 +101,76 @@ SILO_CALLBACK int db_hdf5_Close (DBfile *);
 SILO_CALLBACK int db_hdf5_Filters(DBfile *_dbfile, FILE *stream);
 
 /* Directory operations */
-SILO_CALLBACK int db_hdf5_MkDir(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_SetDir(DBfile *_dbfile, char *name);
+SILO_CALLBACK int db_hdf5_MkDir(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_SetDir(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/);
 SILO_CALLBACK int db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
                            DBfile *dstFile, char const *dstDir);
 SILO_CALLBACK int db_hdf5_NewToc(DBfile *_dbfile);
 
 /* Variable inquiries */
-SILO_CALLBACK int db_hdf5_InqVarExists (DBfile *_dbfile, char *varname);
-SILO_CALLBACK int db_hdf5_GetVarLength(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_GetVarByteLength(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_GetVarType(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_GetVarDims(DBfile *_dbfile, char *varname, int maxdims,
+SILO_CALLBACK int db_hdf5_InqVarExists (DBfile *_dbfile, char const *varname);
+SILO_CALLBACK int db_hdf5_GetVarLength(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_GetVarByteLength(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_GetVarType(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_GetVarDims(DBfile *_dbfile, char const *varname, int maxdims,
                                 int *dims/*out*/);
 
 /* Variable I/O */
-SILO_CALLBACK void *db_hdf5_GetVar(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_ReadVar (DBfile *, char *, void *);
-SILO_CALLBACK int db_hdf5_ReadVarSlice (DBfile *, char *, int *, int *, int *,
+SILO_CALLBACK void *db_hdf5_GetVar(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_ReadVar (DBfile *, char const *, void *);
+SILO_CALLBACK int db_hdf5_ReadVarSlice (DBfile *, char const *, int const *, int const *, int const *,
                                    int, void *);
-SILO_CALLBACK int db_hdf5_Write (DBfile *, char *, void *, int *, int, int);
-SILO_CALLBACK int db_hdf5_WriteSlice (DBfile*, char*, void*, int, int[], int[],
-                                 int[], int[], int);
+SILO_CALLBACK int db_hdf5_Write(
+    DBfile *dbfile,
+    char const *array_name,
+    void const *data,
+    int const *dims,
+    int ndims,
+    int datatype
+);
+SILO_CALLBACK int db_hdf5_WriteSlice(
+    DBfile *dbfile,
+    char const *array_name,
+    void const *data,
+    int datatype,
+    int const *offsets,
+    int const *lengths,
+    int const *strides,
+    int const *dims,
+    int ndims
+);
 
 /* Low-level object functions */
-SILO_CALLBACK DBobject *db_hdf5_GetObject(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_GetComponentNames(DBfile *_dbfile, char *objname,
+SILO_CALLBACK DBobject *db_hdf5_GetObject(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_GetComponentNames(DBfile *_dbfile, char const *objname,
                                        char ***comp_names, char ***file_names);
 SILO_CALLBACK int db_hdf5_WriteObject(DBfile *_dbfile, DBobject const *obj, int flags);
 SILO_CALLBACK int db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj,
                                     char const *compname, char const *prefix,
                                     char const *datatype, void const *data, int rank,
                                     long const _size[]);
-SILO_CALLBACK int db_hdf5_GetComponentType(DBfile *_dbfile, char *objname,
-                                    char *compname);
-SILO_CALLBACK void *db_hdf5_GetComponent(DBfile *_dbfile, char *objname,
-                                    char *compname);
-SILO_CALLBACK void *db_hdf5_GetComponentStuff(DBfile *_dbfile, char *objname,
-                                    char *compname, int *just_get_datatype);
-SILO_CALLBACK DBObjectType db_hdf5_InqVarType(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_InqMeshName(DBfile *_dbfile, char *name,
+SILO_CALLBACK int db_hdf5_GetComponentType(DBfile *_dbfile, char const *objname,
+                                    char const *compname);
+SILO_CALLBACK void *db_hdf5_GetComponent(DBfile *_dbfile, char const *objname,
+                                    char const *compname);
+SILO_CALLBACK void *db_hdf5_GetComponentStuff(DBfile *_dbfile, char const *objname,
+                                    char const *compname, int *just_get_datatype);
+SILO_CALLBACK DBObjectType db_hdf5_InqVarType(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_InqMeshName(DBfile *_dbfile, char const *name,
                                  char *meshname/*out*/);
 
 /* Curves */
-SILO_CALLBACK int db_hdf5_PutCurve(DBfile *_dbfile, char *name, void *xvals,
-                              void *yvals, int dtype, int npts,
-                              DBoptlist *opts);
-SILO_CALLBACK DBcurve *db_hdf5_GetCurve(DBfile *_dbfile, char *name);
+SILO_CALLBACK int db_hdf5_PutCurve(
+    DBfile *_dbfile,
+    char const *name,
+    void const *xvals,
+    void const *yvals,
+    int dtype,
+    int npts,
+    DBoptlist const *opts
+);
+SILO_CALLBACK DBcurve *db_hdf5_GetCurve(DBfile *_dbfile, char const *name);
 
 /* Csgmeshes */
 SILO_CALLBACK int db_hdf5_PutCsgmesh(DBfile *_dbfile, char const *name, int ndims,
@@ -156,157 +178,202 @@ SILO_CALLBACK int db_hdf5_PutCsgmesh(DBfile *_dbfile, char const *name, int ndim
                                 int const *bndids/*optional*/,
                                 void const *coeffs, int lcoeffs, int datatype,
                                 double const *extents, char const *zonel_name,
-                                DBoptlist *optlist);
+                                DBoptlist const *optlist);
 SILO_CALLBACK DBcsgmesh *db_hdf5_GetCsgmesh(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
-                               int nvars, char *varnames[], void *vars[],
-                               int nvals, int datatype, int centering, DBoptlist *optlist);
+                               int nvars, char const * const *varnames, void const * const *vars,
+                               int nvals, int datatype, int centering, DBoptlist const *optlist);
 SILO_CALLBACK DBcsgvar *db_hdf5_GetCsgvar(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_PutCSGZonelist(DBfile *_dbfile, char const *name, int nregs,
                                     int const *typeflags,
                                     int const *leftids, int const *rightids,
                                     void const *xforms, int lxforms, int datatype,
-                                    int nzones, int const *zonelist, DBoptlist *optlist);
+                                    int nzones, int const *zonelist, DBoptlist const *optlist);
 SILO_CALLBACK DBcsgzonelist *db_hdf5_GetCSGZonelist(DBfile *_dbfile, char const *name);
 
 /* Defvars */
-SILO_CALLBACK int db_hdf5_PutDefvars(DBfile *dbfile, char const *name, int ndefs,
-                                char *names[], int const *types,
-                                char *defns[], DBoptlist *opts[]);
+SILO_CALLBACK int db_hdf5_PutDefvars(
+    DBfile *dbfile, char const *name,
+    int ndefs,
+    char const * const *names,
+    int const *types,
+    char const * const *defns,
+    DBoptlist const * const *opts
+);
 SILO_CALLBACK DBdefvars *db_hdf5_GetDefvars(DBfile *_dbfile, char const *name);
 
 /* Quadmeshes */
-SILO_CALLBACK int db_hdf5_PutQuadmesh(DBfile *_dbfile, char *name,
-                                 char *coordnames[], DB_DTPTR2 coords,
-                                 int dims[], int ndims, int datatype,
-                                 int coordtype, DBoptlist *optlist);
-SILO_CALLBACK DBquadmesh *db_hdf5_GetQuadmesh (DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_PutQuadvar(DBfile *_dbfile, char *name, char *meshname,
-                                int nvars, char *varnames[/*nvars*/],
-                                DB_DTPTR2 vars, int dims[/*ndims*/],
+SILO_CALLBACK int db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name,
+                                 char const * const *coordnames, DB_DTPTR2 coords,
+                                 int const *dims, int ndims, int datatype,
+                                 int coordtype, DBoptlist const *optlist);
+SILO_CALLBACK DBquadmesh *db_hdf5_GetQuadmesh (DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname,
+                                int nvars, char const * const *varnames,
+                                DB_DTPTR2 vars, int const *dims,
                                 int ndims, DB_DTPTR2 mixvars,
                                 int mixlen, int datatype, int centering,
-                                DBoptlist *optlist);
-SILO_CALLBACK DBquadvar *db_hdf5_GetQuadvar(DBfile *_dbfile, char *name);
+                                DBoptlist const *optlist);
+SILO_CALLBACK DBquadvar *db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name);
 
 /* Unstructured meshes */
-SILO_CALLBACK int db_hdf5_PutUcdmesh(DBfile *_dbfile, char *name, int ndims,
-                                char *coordnames[/*ndims*/],
+SILO_CALLBACK int db_hdf5_PutUcdmesh(DBfile *_dbfile, char const *name, int ndims,
+                                char const * const *coordnames,
                                 DB_DTPTR2 coords, int nnodes,
-                                int nzones, char *zlname, char *flname,
-                                int datatype, DBoptlist *optlist);
-SILO_CALLBACK int db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char *name,
-                                   char *parentmesh, int nzones, char *zlname,
-                                   char *flname, DBoptlist *optlist);
-SILO_CALLBACK DBucdmesh *db_hdf5_GetUcdmesh(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_PutUcdvar(DBfile *_dbfile, char *name, char *meshname,
-                               int nvars, char *varnames[/*nvars*/],
+                                int nzones, char const *zlname, char const *flname,
+                                int datatype, DBoptlist const *optlist);
+SILO_CALLBACK int db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char const *name,
+                                   char const *parentmesh, int nzones, char const *zlname,
+                                   char const *flname, DBoptlist const *optlist);
+SILO_CALLBACK DBucdmesh *db_hdf5_GetUcdmesh(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname,
+                               int nvars, char const * const *varnames,
                                DB_DTPTR2 vars, int nels,
                                DB_DTPTR2 mixvars, int mixlen,
                                int datatype, int centering,
-                               DBoptlist *optlist);
-SILO_CALLBACK DBucdvar *db_hdf5_GetUcdvar(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_PutFacelist(DBfile *_dbfile, char *name, int nfaces,
-                                 int ndims, int *nodelist, int lnodelist,
-                                 int origin, int *zoneno, int *shapesize,
-                                 int *shapecnt, int nshapes, int *types,
-                                 int *typelist, int ntypes);
-SILO_CALLBACK DBfacelist *db_hdf5_GetFacelist(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_PutZonelist(DBfile *_dbfile, char *name, int nzones,
-                                 int ndims, int nodelist[], int lnodelist,
-                                 int origin, int shapesize[], int shapecnt[],
+                               DBoptlist const *optlist);
+SILO_CALLBACK DBucdvar *db_hdf5_GetUcdvar(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_PutFacelist(
+    DBfile *_dbfile,
+    char const *name,
+    int nfaces,
+    int ndims,
+    int const *nodelist,
+    int lnodelist,
+    int origin,
+    int const *zoneno,
+    int const *shapesize,
+    int const *shapecnt,
+    int nshapes,
+    int const *types,
+    int const *typelist,
+    int ntypes
+);
+SILO_CALLBACK DBfacelist *db_hdf5_GetFacelist(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_PutZonelist(DBfile *_dbfile, char const *name, int nzones,
+                                 int ndims, int const *nodelist, int lnodelist,
+                                 int origin, int const *shapesize, int const *shapecnt,
                                  int nshapes);
-SILO_CALLBACK int db_hdf5_PutZonelist2(DBfile *_dbfile, char *name, int nzones,
-                                  int ndims, int nodelist[], int lnodelist,
+SILO_CALLBACK int db_hdf5_PutZonelist2(DBfile *_dbfile, char const *name, int nzones,
+                                  int ndims, int const *nodelist, int lnodelist,
                                   int origin, int lo_offset, int hi_offset,
-                                  int shapetype[], int shapesize[],
-                                  int shapecnt[], int nshapes,
-                                  DBoptlist *optlist);
-SILO_CALLBACK int db_hdf5_PutPHZonelist(DBfile *_dbfile, char *name,
-                                  int nfaces, int *nodecnt, int lnodelist, int *nodelist,
-                                  char *extface,
-                                  int nzones, int *facecnt, int lfacelist, int *facelist,
+                                  int const *shapetype, int const *shapesize,
+                                  int const *shapecnt, int nshapes,
+                                  DBoptlist const *optlist);
+SILO_CALLBACK int db_hdf5_PutPHZonelist(DBfile *_dbfile, char const *name,
+                                  int nfaces, int const *nodecnt, int lnodelist, int const *nodelist,
+                                  char const *extface,
+                                  int nzones, int const *facecnt, int lfacelist, int const *facelist,
                                   int origin, int lo_offset, int hi_offset,
-                                  DBoptlist *optlist);
-SILO_CALLBACK DBzonelist *db_hdf5_GetZonelist(DBfile *_dbfile, char *name);
-SILO_CALLBACK DBphzonelist *db_hdf5_GetPHZonelist(DBfile *_dbfile, char *name);
+                                  DBoptlist const *optlist);
+SILO_CALLBACK DBzonelist *db_hdf5_GetZonelist(DBfile *_dbfile, char const *name);
+SILO_CALLBACK DBphzonelist *db_hdf5_GetPHZonelist(DBfile *_dbfile, char const *name);
 
 /* Materials */
-SILO_CALLBACK int db_hdf5_PutMaterial(DBfile *_dbfile, char *name, char *mname,
-                                 int nmat, int matnos[], int matlist[],
-                                 int dims[], int ndims, int mix_next[],
-                                 int mix_mat[], int mix_zone[], DB_DTPTR1 mix_vf,
-                                 int mixlen, int datatype, DBoptlist *optlist);
-SILO_CALLBACK DBmaterial *db_hdf5_GetMaterial(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_PutMatspecies(DBfile *_dbfile, char *name, char *matname,
-                                   int nmat, int nmatspec[], int speclist[],
-                                   int dims[], int ndims, int nspecies_mf,
-                                   DB_DTPTR1 species_mf, int mix_speclist[],
+SILO_CALLBACK int db_hdf5_PutMaterial(
+    DBfile *_dbfile,
+    char const *name,
+    char const *mname,
+    int nmat,
+    int const *matnos,
+    int const *matlist,
+    int const *dims,
+    int ndims,
+    int const *mix_next,
+    int const *mix_mat,
+    int const *mix_zone,
+    DB_DTPTR1 mix_vf,
+    int mixlen,
+    int datatype,
+    DBoptlist const *optlist
+);
+SILO_CALLBACK DBmaterial *db_hdf5_GetMaterial(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_PutMatspecies(DBfile *_dbfile, char const *name, char const *matname,
+                                   int nmat, int const *nmatspec, int const *speclist,
+                                   int const *dims, int ndims, int nspecies_mf,
+                                   DB_DTPTR1 species_mf, int const *mix_speclist,
                                    int mixlen, int datatype,
-                                   DBoptlist *optlist);
-SILO_CALLBACK DBmatspecies *db_hdf5_GetMatspecies(DBfile *_dbfile, char *name);
+                                   DBoptlist const *optlist);
+SILO_CALLBACK DBmatspecies *db_hdf5_GetMatspecies(DBfile *_dbfile, char const *name);
 
 /* Point meshes */
-SILO_CALLBACK int db_hdf5_PutPointmesh(DBfile *_dbfile, char *name, int ndims,
+SILO_CALLBACK int db_hdf5_PutPointmesh(DBfile *_dbfile, char const *name, int ndims,
                                   DB_DTPTR2 coords, int nels, int datatype,
-                                  DBoptlist *optlist);
-SILO_CALLBACK DBpointmesh *db_hdf5_GetPointmesh(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_PutPointvar(DBfile *_dbfile, char *name, char *meshname,
+                                  DBoptlist const *optlist);
+SILO_CALLBACK DBpointmesh *db_hdf5_GetPointmesh(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_PutPointvar(DBfile *_dbfile, char const *name, char const *meshname,
                                  int nvars, DB_DTPTR2 vars, int nels,
-                                 int datatype, DBoptlist *optlist);
-SILO_CALLBACK DBmeshvar *db_hdf5_GetPointvar(DBfile *_dbfile, char *name);
+                                 int datatype, DBoptlist const *optlist);
+SILO_CALLBACK DBmeshvar *db_hdf5_GetPointvar(DBfile *_dbfile, char const *name);
 
 /* Multiblock meshes */
 SILO_CALLBACK int db_hdf5_PutMultimesh(DBfile *_dbfile, char const *name, int nmesh,
                                   char const *const *meshnames, int const *meshtypes,
                                   DBoptlist const *optlist);
-SILO_CALLBACK int db_hdf5_PutMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
-                                     int const *meshtypes, int const *nneighbors,
-                                     int const *neighbors, int const *back,
-                                     int const *lnodelists, int *nodelists[],
-                                     int const *lzonelists, int *zonelists[],
-                                     DBoptlist *optlist);
-SILO_CALLBACK DBmultimesh *db_hdf5_GetMultimesh(DBfile *_dbfile, char *name);
+SILO_CALLBACK int db_hdf5_PutMultimeshadj(
+    DBfile *_dbfile,
+    char const *name,
+    int nmesh,
+    int const *meshtypes,
+    int const *nneighbors,
+    int const *neighbors,
+    int const *back,
+    int const *lnodelists,
+    int const * const *nodelists,
+    int const *lzonelists,
+    int const * const *zonelists,
+    DBoptlist const *optlist
+);
+SILO_CALLBACK DBmultimesh *db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name);
 SILO_CALLBACK DBmultimeshadj *db_hdf5_GetMultimeshadj(DBfile *_dbfile, char const *name, int nmesh,
                                                  int const *block_map);
-SILO_CALLBACK int db_hdf5_PutMultivar(DBfile *_dbfile, char *name, int nvars,
-                                 char *varnames[], int vartypes[],
-                                 DBoptlist *optlist);
-SILO_CALLBACK DBmultivar *db_hdf5_GetMultivar(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_PutMultimat(DBfile *_dbfile, char *name, int nmats,
-                                 char *matnames[], DBoptlist *optlist);
-SILO_CALLBACK DBmultimat *db_hdf5_GetMultimat(DBfile *_dbfile, char *name);
-SILO_CALLBACK int db_hdf5_PutMultimatspecies(DBfile *_dbfile, char *name, int nspec,
-                                        char *specnames[], DBoptlist *optlist);
+SILO_CALLBACK int db_hdf5_PutMultivar(DBfile *_dbfile, char const *name, int nvars,
+                                 char const * const *varnames, int const *vartypes,
+                                 DBoptlist const *optlist);
+SILO_CALLBACK DBmultivar *db_hdf5_GetMultivar(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats,
+                                 char const * const *matnames, DBoptlist const *optlist);
+SILO_CALLBACK DBmultimat *db_hdf5_GetMultimat(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_PutMultimatspecies(DBfile *_dbfile, char const *name, int nspec,
+                                        char const * const *specnames, DBoptlist const *optlist);
 SILO_CALLBACK DBmultimatspecies *db_hdf5_GetMultimatspecies(DBfile *_dbfile,
-                                                       char *name);
+                                                       char const *name);
 
 /* Compound arrays */
-SILO_CALLBACK int db_hdf5_PutCompoundarray(DBfile *_dbfile, char *name,
-                                      char *elmtnames[], int elmtlen[],
-                                      int nelmts, void *values, int nvalues,
-                                      int datatype, DBoptlist *optlist);
-SILO_CALLBACK DBcompoundarray *db_hdf5_GetCompoundarray(DBfile *_dbfile,
-                                                   char *name);
+SILO_CALLBACK int db_hdf5_PutCompoundarray(
+    DBfile *_dbfile,
+    char const *name,
+    char const * const *elmtnames,
+    int const *elmtlen,
+    int nelmts,
+    void const *values,
+    int nvalues,
+    int datatype,
+    DBoptlist const *optlist
+);
+SILO_CALLBACK DBcompoundarray *db_hdf5_GetCompoundarray(
+    DBfile *_dbfile,
+    char const *name
+);
 
 /* Mrgtree objects */
 SILO_CALLBACK int db_hdf5_PutMrgtree(DBfile *_dbfile, char const *name, char const *mesh_name,
-    DBmrgtree *tree, DBoptlist *optlist);
+    DBmrgtree const *tree, DBoptlist const *optlist);
 SILO_CALLBACK DBmrgtree *db_hdf5_GetMrgtree(DBfile *_dbfile, char const *name);
 
 /* groupel maps */
 SILO_CALLBACK int db_hdf5_PutGroupelmap(DBfile *_dbfile, char const *map_name,
-    int num_segments, int *groupel_types, int *segment_lengths,
-    int *segment_ids, int **segment_data, void **segment_fracs,
-    int fracs_data_type, DBoptlist *opts);
+    int num_segments, int const *groupel_types, int const *segment_lengths,
+    int const *segment_ids, int const * const *segment_data, void const * const *segment_fracs,
+    int fracs_data_type, DBoptlist const *opts);
 SILO_CALLBACK DBgroupelmap *db_hdf5_GetGroupelmap(DBfile *dbfile, char const *name);
 
 /* mrgvars */
 SILO_CALLBACK int db_hdf5_PutMrgvar(DBfile *dbfile, char const *name,
                              char const *mrgt_name,
-                             int ncomps, char **compnames,
-                             int nregns, char **reg_pnames,
-                             int datatype, void **data, DBoptlist *opts);
+                             int ncomps, char const * const *compnames,
+                             int nregns, char const * const *reg_pnames,
+                             int datatype, void const * const *data, DBoptlist const *opts);
 SILO_CALLBACK DBmrgvar *db_hdf5_GetMrgvar(DBfile *dbfile, char const *name);
 
 SILO_CALLBACK int db_hdf5_FreeCompressionResources(DBfile *_dbfile,

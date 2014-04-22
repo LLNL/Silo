@@ -53,7 +53,7 @@ This  means any objects  within a  Silo file  containing data  that is
 compressed with Hzip  or FPzip from a legacy  distribution will not be
 readable  in a BSD  distribution. Since  compression features  must be
 explicitly turned on by a  Silo application, this impact can be easily
-mitigating by  ensuring that Hzip and FPzip compression are  used only
+mitigated by  ensuring that Hzip and FPzip compression are  used  only
 for objects within Silo files not intended to be read by BSD releases.
 
 For more  information on availability  of Hzip and  FPzip compression,

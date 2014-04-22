@@ -57,13 +57,45 @@ be used for advertising or product endorsement purposes.
 #include "silo.h"
 #include <std.c>
 
+static int VersionNumberGE(int aMaj, int aMin, int aPat,
+                           int bMaj, int bMin, int bPat)
+{
+    if (aMaj < 0) aMaj = 0;
+    if (aMin < 0) aMin = 0;
+    if (aPat < 0) aPat = 0;
+
+    if (bMaj < 0) bMaj = 0;
+    if (bMin < 0) bMin = 0;
+    if (bPat < 0) bPat = 0;
+
+    if (aMaj > bMaj)
+        return 1;
+    else if (aMaj < bMaj)
+        return 0;
+    else
+    {
+        if (aMin > bMin)
+            return 1;
+        else if (aMin < bMin)
+            return 0;
+        else
+        {
+            if (aPat >= bPat)
+                return 1;
+            else
+                return 0;
+        }
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
     DBfile        *dbfile;
-    int           i, driver=DB_PDB;
+    int           i, pass, driver=DB_PDB;
     static char   *filename="version.pdb";
     int            show_all_errors = FALSE;
+    int           vnos[4];
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB", 6)) {
@@ -81,18 +113,30 @@ main(int argc, char *argv[])
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
+    /* test version macro with 1 digit version number */
+#if SILO_VERSION_GE(4,,)
+    printf("This version of the Silo library is greater than or equal to 4\n");
+#else
+    printf("This version of the Silo library is NOT greater than or equal to 4\n");
+#endif
+#if SILO_VERSION_GE(9,,)
+    printf("This version of the Silo library is greater than or equal to 9\n");
+#else
+    printf("This version of the Silo library is NOT greater than or equal to 9\n");
+#endif
+
     /* test version macro with 2 digit version number */
 #if SILO_VERSION_GE(4,6,)
-    printf("This version of Silo is greater than or equal to 4.6\n");
+    printf("This version of the Silo library is greater than or equal to 4.6\n");
 #else
-    printf("This version of Silo is NOT greater than or equal to 4.6\n");
+    printf("This version of the Silo library is NOT greater than or equal to 4.6\n");
 #endif
 
     /* test version macro with 3 digit version number */
 #if SILO_VERSION_GE(90,5,2)
-    printf("This version of Silo is greater than or equal to 90.5.2\n");
+    printf("This version of the Silo library is greater than or equal to 90.5.2\n");
 #else
-    printf("This version of Silo is NOT greater than or equal to 90.5.2\n");
+    printf("This version of the Silo library is NOT greater than or equal to 90.5.2\n");
 #endif
 
     /* test run-time version methods for lib */
@@ -131,6 +175,118 @@ main(int argc, char *argv[])
         printf("    DBFileVersionGE(90,5,2) returns %d\n", DBFileVersionGE(dbfile,90,5,2));
         DBClose(dbfile);
     }
+
+    /* Test scanning through a set of version numbers on both old and
+       new files to ensure comparisons work as expected */
+    for (pass = 0; pass < 2; pass++)
+    {
+        struct {int maj; int min; int pat; int result_old; int result_new;}
+            vnos_to_sample[] =
+            {
+                { 3, 0, 0, -1, 1},
+                { 3, 0, 1, -1, 1},
+                { 3, 1, 0, -1, 1},
+                { 3, 1, 1, -1, 1},
+                { 4, 5, 0, -1, 1},
+                { 4, 5, 1,  0, 1},
+                { 4, 5, 2,  0, 1},
+                {90, 0, 0,  0, 0},
+                {90, 0, 1,  0, 0},
+                {90, 1, 0,  0, 0},
+                {90, 1, 1,  0, 0}
+            };
+
+        /* Get a file handle for this pass */
+        if (pass == 0)
+        {
+            /* The second open attempt is to allow this test to run correctly
+               under autotest. Autotest runs its tests two levels down. */
+            dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
+            if (dbfile == 0)
+                dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+        }
+        else
+        {
+            dbfile = DBOpen(filename, driver, DB_READ);
+        }
+        
+        /* loop over all version number tests */
+        for (i = 0; i < sizeof(vnos_to_sample)/sizeof(vnos_to_sample[0]); i++)
+        {
+            int ck = DBFileVersionGE(dbfile, vnos_to_sample[i].maj, 
+                                             vnos_to_sample[i].min,
+                                             vnos_to_sample[i].pat);
+            int expected = pass==0 ? vnos_to_sample[i].result_old : vnos_to_sample[i].result_new;
+
+            if (ck != expected)
+            {
+                fprintf(stderr, "Version check failed for file version \"%s\" against %d.%d.%d, expected = %d, result = %d\n",
+                    DBFileVersion(dbfile), vnos_to_sample[i].maj, vnos_to_sample[i].min, vnos_to_sample[i].pat, expected, ck);
+                return 1;
+            }
+        }
+
+        DBClose(dbfile);
+    }
+
+    /* Test getting version digits from file handle */
+    dbfile = DBOpen(filename, driver, DB_READ);
+    if (DBFileVersionDigits(dbfile, &vnos[0], &vnos[1], &vnos[2], &vnos[3]))
+    {
+        fprintf(stderr, "Error getting file version digits\n");
+        return 1;
+    }
+    if (vnos[0] != SILO_VERS_MAJ || vnos[1] != SILO_VERS_MIN || vnos[2] != SILO_VERS_PAT)
+    {
+        fprintf(stderr, "Error in version digits returned from DBFileVersionDigits\n");
+        return 1;
+    }
+    DBClose(dbfile);
+
+    /* Test getting version digits from library */
+    if (DBVersionDigits(&vnos[0], &vnos[1], &vnos[2], 0))
+    {
+        fprintf(stderr, "Error getting library version digits\n");
+        return 1;
+    }
+    if (vnos[0] != SILO_VERS_MAJ || vnos[1] != SILO_VERS_MIN || vnos[2] != SILO_VERS_PAT)
+    {
+        fprintf(stderr, "Error in version digits returned from DBVersionDigits\n");
+        return 1;
+    }
+
+    dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
+    if (dbfile == 0)
+        dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+    if (!DBVersionGEFileVersion(dbfile))
+    {
+        fprintf(stderr, "Error comparing library version to OLD file version.\n");
+        return 1;
+    }
+    DBClose(dbfile);
+
+    dbfile = DBOpen(filename, driver, DB_APPEND);
+    if (!DBVersionGEFileVersion(dbfile))
+    {
+        fprintf(stderr, "Error comparing library version to CURRENT file version.\n");
+        return 1;
+    }
+
+    /* Ok, now overwrite version info in the file to a version number way in the
+       future and test again */
+    DBSetAllowOverwrites(1);
+    i = 5;
+    DBWrite(dbfile, SILO_VSTRING_NAME, "99.9", &i, 1, DB_CHAR);
+    DBClose(dbfile);
+    DBSetAllowOverwrites(0);
+
+    dbfile = DBOpen(filename, driver, DB_READ);
+    if (DBVersionGEFileVersion(dbfile))
+    {
+        fprintf(stderr, "Error comparing library version to FUTURE file version.\n");
+        return 1;
+    }
+    DBClose(dbfile);
 
     CleanupDriverStuff();
     return 0;

@@ -142,7 +142,7 @@ main(int argc, char *argv[])
     }
 
     DBPutCompoundarray(dbfile, "carray",  /*array */
-                       ename, esize, 3,  /*simple arrays */
+                       (char const * const *) ename, esize, 3,  /*simple arrays */
                        val, 18, DB_FLOAT,  /*values */
                        NULL);   /*options */
     i = 1;

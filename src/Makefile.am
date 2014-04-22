@@ -85,8 +85,14 @@ DRIVER_LIBS += fpzip/libsilo_fpzip.la
 endif
 SUBDIRS = score pdb silo debug \
 $(DRIVER_DIRS) unknown filters .
-DIST_SUBDIRS = . debug filters hdf5_drv hzip fpzip netcdf \
+DIST_SUBDIRS = . debug filters hdf5_drv netcdf \
 pdb pdb_drv pdbp_drv score silo taurus unknown
+if HZIP_NEEDED
+DIST_SUBDIRS += hzip
+endif
+if FPZIP_NEEDED
+DIST_SUBDIRS += fpzip
+endif
 MAKESETTINGS = make.settings
 
 if HDF5_DRV_NEEDED

@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    DBShowErrors (DB_ALL_AND_DRVR, NULL);
+    DBShowErrors(DB_NONE, NULL);
 
     /* Print the types for components in the specified files. */
     for(i = 1; i < argc; i++)
@@ -36,6 +36,7 @@ int main(int argc, char **argv)
             dbfile = DBOpenByBcast(argv[i], MPI_COMM_WORLD, 0);
             snprintf(outfile, sizeof(outfile), "%s-%05d-typelist.txt", argv[i], rank);
             outf = fopen(outfile, "w");
+            fprintf(outf, "File: %s\n", argv[i]);
             PrintFileComponentTypes(dbfile, outf);
             DBClose(dbfile);
         }

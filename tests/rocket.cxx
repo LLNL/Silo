@@ -748,7 +748,7 @@ WriteAllFormats(int argc, char **argv)
         if (!cwdir) continue;
     
         struct dirent* dent;
-        while (dent = readdir(cwdir))
+        while ((dent = readdir(cwdir)))
         {
             string dname = string(dent->d_name);
     

@@ -122,7 +122,7 @@ build_dbfile(DBfile *dbfile)
     int             meshtype=DB_QUADMESH;
     int             vartype=DB_QUADVAR;
     int             coord_type=DB_NONCOLLINEAR;
-    char           *coordnames[3];
+    char const * const coordnames[3] = {"xcoords", "ycoords", "zcoords"};
     int             ndims;
     int             dims[3], zdims[3];
     float          *coords[3];
@@ -228,9 +228,6 @@ build_dbfile(DBfile *dbfile)
      * Create the mesh.
      */
     meshname = "mesh1";
-    coordnames[0] = "xcoords";
-    coordnames[1] = "ycoords";
-    coordnames[2] = "zcoords";
     coords[0] = x;
     coords[1] = y;
     ndims = 2;
@@ -411,7 +408,7 @@ build_dbfile(DBfile *dbfile)
         DBAddOption(optlist, DBOPT_XUNITS, "cm");
         DBAddOption(optlist, DBOPT_YUNITS, "cm");
 
-        DBPutQuadmesh(dbfile, meshname, coordnames, coords, dims, ndims,
+        DBPutQuadmesh(dbfile, meshname, coordnames, (DB_DTPTR2) coords, dims, ndims,
                       DB_FLOAT, DB_NONCOLLINEAR, optlist);
 
         DBPutQuadvar1(dbfile, varname[2], meshname, u2, dims, ndims,
@@ -465,7 +462,7 @@ build_dbfile(DBfile *dbfile)
     
 
     /* create the multi-block mesh */
-    if (DBPutMultimesh(dbfile, "mesh1", nblocks, meshnames, 
+    if (DBPutMultimesh(dbfile, "mesh1", nblocks, (char const * const *) meshnames, 
                                         meshtypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
@@ -474,26 +471,26 @@ build_dbfile(DBfile *dbfile)
     }                           /* if */
  
    /* create the multi-block variables */
-    if (DBPutMultivar(dbfile, "d", nblocks, varnames[0], vartypes, optlist) == -1)
+    if (DBPutMultivar(dbfile, "d", nblocks, (char const * const *) varnames[0], vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var d\n");
         return (-1);
     }                           /* if */
-    if (DBPutMultivar(dbfile, "p", nblocks, varnames[1], vartypes, optlist) == -1)
+    if (DBPutMultivar(dbfile, "p", nblocks, (char const * const *) varnames[1], vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var p\n");
         return (-1);
     }                           /* if */
 
-    if (DBPutMultivar(dbfile, "u", nblocks, varnames[2], vartypes, optlist) == -1)
+    if (DBPutMultivar(dbfile, "u", nblocks, (char const * const *) varnames[2], vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var u\n");
         return (-1);
     }                           /* if */
-    if (DBPutMultivar(dbfile, "v", nblocks, varnames[3], vartypes, optlist) == -1)
+    if (DBPutMultivar(dbfile, "v", nblocks, (char const * const *) varnames[3], vartypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi var v\n");
@@ -501,7 +498,7 @@ build_dbfile(DBfile *dbfile)
     }                           /* if */
 
     /* create the multi-block material */
-    if (DBPutMultimat(dbfile, "mat1", nblocks, matnames, optlist) == -1)
+    if (DBPutMultimat(dbfile, "mat1", nblocks, (char const * const *) matnames, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi material\n");
@@ -509,7 +506,7 @@ build_dbfile(DBfile *dbfile)
     }                           /* if */
 
     /* create the multi-block species */
-    if (DBPutMultimatspecies(dbfile, "species1", nblocks, specnames, optlist) == -1)
+    if (DBPutMultimatspecies(dbfile, "species1", nblocks, (char const * const *) specnames, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi species\n");

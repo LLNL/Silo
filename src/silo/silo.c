@@ -131,8 +131,6 @@ int SILO_VERS_TAG = 0;
 /* No lines of  the form 'int Silo_version_Maj_Min_Pat = 0;' below
    here indicates that this version is not backwards compatible with
    any previous versions.*/
-int Silo_version_4_9 = 0;
-int Silo_version_4_9_0 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -236,8 +234,8 @@ typedef struct db_silo_stat_t {
 #endif
 } db_silo_stat_t;
 
+/* This function is used in API_BEGIN macros and so we forward declare it */
 PRIVATE int db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate);
-PRIVATE int db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id);
 
 /* Global structures for option lists.  */
 struct _ma     _ma;
@@ -559,7 +557,7 @@ DBVariableNameValid(const char *s)
 }
 /* kept this to deal with non-const qualified API */
 INTERNAL int
-db_VariableNameValid(char *s)
+db_VariableNameValid(char const *s)
 {
     return DBVariableNameValid(s);
 }
@@ -1115,41 +1113,16 @@ db_GetMachDataSize(int datatype)
     int            size;
     char          *me = "db_GetMachDataSize";
 
-    switch (datatype) {
-        case DB_CHAR:
-            size = sizeof(char);
-
-            break;
-        case DB_SHORT:
-            size = sizeof(short);
-
-            break;
-        case DB_INT:
-            size = sizeof(int);
-
-            break;
-        case DB_LONG:
-            size = sizeof(long);
-
-        case DB_LONG_LONG:
-            size = sizeof(long long);
-
-            break;
-        case DB_FLOAT:
-            size = sizeof(float);
-
-            break;
-        case DB_DOUBLE:
-            size = sizeof(double);
-
-            break;
-        default:
-#if 1
-            return db_perror("datatype", E_BADARGS, me);
-#else
-            size = 0;
-            break;
-#endif
+    switch (datatype)
+    {
+        case DB_CHAR:      size = sizeof(char); break;
+        case DB_SHORT:     size = sizeof(short); break;
+        case DB_INT:       size = sizeof(int); break;
+        case DB_LONG:      size = sizeof(long); break;
+        case DB_LONG_LONG: size = sizeof(long long); break;
+        case DB_FLOAT:     size = sizeof(float); break;
+        case DB_DOUBLE:    size = sizeof(double); break;
+        default:           return db_perror("datatype", E_BADARGS, me);
     }
     return (size);
 }
@@ -1186,7 +1159,7 @@ db_GetMachDataSize(int datatype)
  *    Made long long support UNconditionally compiled.
  *--------------------------------------------------------------------*/
 INTERNAL int
-db_GetDatatypeID(char *dataname)
+db_GetDatatypeID(char const * const dataname)
 {
     int            size;
     char          *me = "db_GetDatatypeID";
@@ -1961,8 +1934,8 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
 INTERNAL context_t *
 context_switch(DBfile *dbfile, char const *name, char const **base)
 {
-    char          *me = "context_switch";
-    char           s[256], *b;
+    char          const *me = "context_switch";
+    char          s[256], *b;
     context_t     *old = ALLOC(context_t);
 
     /*
@@ -2055,12 +2028,7 @@ context_restore(DBfile *dbfile, context_t *old)
         return 0;
     }
 
-    if (dbfile->pub.cdid) {
-        DBSetDirID(dbfile, old->dirid);
-    }
-    else {
-        DBSetDir(dbfile, old->name);
-    }
+    DBSetDir(dbfile, old->name);
 
     FREE(old->name);
     FREE(old);
@@ -2349,7 +2317,7 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
     {
         const DBoptlist *opts = SILO_Globals.fileOptionsSets[opts_set_id-NUM_DEFAULT_FILE_OPTIONS_SETS];
         void *p; int vfd = -1;
-        if (p = DBGetOption(opts, DBOPT_H5_VFD))
+        if ((p = DBGetOption(opts, DBOPT_H5_VFD)))
             vfd = *((int*)p);
         if (vfd == DB_H5VFD_FIC)
         {
@@ -2387,16 +2355,16 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
             if (opts)
             {
                 /* ignore if options set unrelated to split vfds */
-                if (p = DBGetOption(opts, DBOPT_H5_VFD))
+                if ((p = DBGetOption(opts, DBOPT_H5_VFD)))
                     vfd = *((int*)p);
 
                 if (vfd != DB_H5VFD_SPLIT)
                     continue;
 
                 /* ok, get meta/raw filenaming extension conventions */
-                if (p = DBGetOption(opts, DBOPT_H5_META_EXTENSION))
+                if ((p = DBGetOption(opts, DBOPT_H5_META_EXTENSION)))
                     meta_ext = (char *) p;
-                if (p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION))
+                if ((p = DBGetOption(opts, DBOPT_H5_RAW_EXTENSION)))
                     raw_ext = (char *) p;
             }
 
@@ -2662,7 +2630,7 @@ DBUninstall(DBfile *dbfile)
 }
 
 /*----------------------------------------------------------------------
- * Routine:  DBSetDataReadMask
+ * Routine:  DBSetDataReadMask2
  *
  * Purpose:  Set and return the data read mask
  *
@@ -2689,16 +2657,16 @@ DBUninstall(DBfile *dbfile)
  *
  * Modifications:
  *--------------------------------------------------------------------*/
-PUBLIC long
-DBSetDataReadMask(long mask)
+PUBLIC unsigned long long
+DBSetDataReadMask2(unsigned long long mask)
 {
-    int oldmask = SILO_Globals.dataReadMask;
+    unsigned long long oldmask = SILO_Globals.dataReadMask;
     SILO_Globals.dataReadMask = mask;
     return oldmask;
 }
 
 /*----------------------------------------------------------------------
- * Routine:  DBGetDataReadMask
+ * Routine:  DBGetDataReadMask2
  *
  * Purpose:  Return the current data read mask
  *
@@ -2710,8 +2678,8 @@ DBSetDataReadMask(long mask)
  *
  * Modifications:
  *--------------------------------------------------------------------*/
-PUBLIC long
-DBGetDataReadMask(void)
+PUBLIC unsigned long long
+DBGetDataReadMask2(void)
 {
     return SILO_Globals.dataReadMask;
 }
@@ -2819,7 +2787,7 @@ DBSetCompression(const char *s)
     }
 }
 
-PUBLIC char * 
+PUBLIC char const * 
 DBGetCompression()
 {
     return SILO_Globals.compressionParams;
@@ -2834,7 +2802,7 @@ DBFreeCompressionResources(DBfile *dbfile, const char *meshname)
 
         if (!dbfile->pub.free_z)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-        retval = ((dbfile->pub.free_z) (dbfile, (char *)meshname));
+        retval = ((dbfile->pub.free_z) (dbfile, meshname));
 
         API_RETURN(retval);
     }
@@ -2989,7 +2957,7 @@ DBGetDeprecateWarnings()
  * Description:  This routine sets the flag that controls whether
  *               checksums are computed on client data.
  *--------------------------------------------------------------------*/
-PUBLIC int* 
+PUBLIC int const * 
 DBSetUnknownDriverPriorities(const int *priorities)
 {
     int i = 0;
@@ -3005,7 +2973,7 @@ DBSetUnknownDriverPriorities(const int *priorities)
     return oldPriorities;
 }
 
-PUBLIC int*
+PUBLIC int const *
 DBGetUnknownDriverPriorities()
 {
     static int priorities[MAX_FILE_OPTIONS_SETS+DB_NFORMATS+1];
@@ -3217,6 +3185,39 @@ DBUngrabDriver(DBfile *file, const void *driver_handle)
     return DB_UNKNOWN;
 }
 
+static int 
+db_IncObjectComponentCount(DBobject *obj)
+{
+    int new_maxcomps = 0;
+    char **new_comp_names = 0;
+    char **new_pdb_names = 0;
+
+    obj->ncomponents++;
+    if (obj->ncomponents < obj->maxcomponents)
+        return 1;
+
+    new_maxcomps = obj->maxcomponents * 1.5 + 1; /* golden rule + 1 */
+    new_comp_names = REALLOC_N(obj->comp_names, char *, new_maxcomps);
+    if (!new_comp_names)
+    {
+        db_perror(0, E_NOMEM, "db_IncObjectComponentCount");
+        return 0;
+    }
+    new_pdb_names = REALLOC_N(obj->pdb_names, char *, new_maxcomps);
+    if (!new_pdb_names)
+    {
+        FREE(new_comp_names);
+        db_perror(0, E_NOMEM, "db_IncObjectComponentCount");
+        return 0;
+    }
+
+    obj->maxcomponents = new_maxcomps;
+    obj->comp_names = new_comp_names;
+    obj->pdb_names = new_pdb_names;
+
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Routine                                                 DBMakeObject
  *
@@ -3244,24 +3245,29 @@ DBMakeObject(const char *name, int type, int maxcomps)
 
         if (!name || !*name)
             API_ERROR("object name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR(name, E_INVALIDNAME);
-        if (maxcomps <= 0)
-            API_ERROR("maxcomps", E_BADARGS);
         if (NULL == (object = ALLOC(DBobject)))
             API_ERROR(NULL, E_NOMEM);
 
+        if (maxcomps <= 0) maxcomps = 30;
         object->name = STRDUP(name);
         object->type = STRDUP(DBGetObjtypeName(type));
         object->comp_names = ALLOC_N(char *, maxcomps);
         object->pdb_names = ALLOC_N(char *, maxcomps);
 
+        if (!object->name || !object->type ||
+            !object->comp_names || !object->pdb_names)
+        {
+            FREE(object->name);
+            FREE(object->type);
+            FREE(object->comp_names);
+            FREE(object->pdb_names);
+            API_ERROR(NULL, E_NOMEM);
+        }
+
         object->ncomponents = 0;
         object->maxcomponents = maxcomps;
-
-        if (!object->name || !object->type || !object->comp_names ||
-            !object->pdb_names)
-            API_ERROR(NULL, E_NOMEM);
 
         API_RETURN(object);
     }
@@ -3407,7 +3413,7 @@ DBAddVarComponent(DBobject *object, const char *compname, const char *pdbname)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
             API_ERROR("component name", E_BADARGS);
-        if (db_VariableNameValid((char *)compname) == 0)
+        if (db_VariableNameValid(compname) == 0)
             API_ERROR("component name", E_INVALIDNAME);
         if (!pdbname || !*pdbname)
             API_ERROR("pdb name", E_BADARGS);
@@ -3423,7 +3429,9 @@ DBAddVarComponent(DBobject *object, const char *compname, const char *pdbname)
             API_ERROR(NULL, E_NOMEM);
         }
 
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
+
     }
     API_END;
 
@@ -3468,7 +3476,7 @@ DBAddIntComponent(DBobject *object, const char *compname, int ii)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
             API_ERROR("component name", E_BADARGS);
-        if (db_VariableNameValid((char *)compname) == 0)
+        if (db_VariableNameValid(compname) == 0)
             API_ERROR("component name", E_INVALIDNAME);
         if (object->ncomponents >= object->maxcomponents) {
             API_ERROR("object ncomponents", E_BADARGS);
@@ -3484,7 +3492,9 @@ DBAddIntComponent(DBobject *object, const char *compname, int ii)
             API_ERROR(NULL, E_NOMEM);
         }
 
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
+
     }
     API_END;
 
@@ -3533,7 +3543,7 @@ DBAddFltComponent(DBobject *object, const char *compname, double ff)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
             API_ERROR("component name", E_BADARGS);
-        if (db_VariableNameValid((char *)compname) == 0)
+        if (db_VariableNameValid(compname) == 0)
             API_ERROR("component name", E_INVALIDNAME);
         if (object->ncomponents >= object->maxcomponents) {
             API_ERROR("object ncomponents", E_BADARGS);
@@ -3548,7 +3558,8 @@ DBAddFltComponent(DBobject *object, const char *compname, double ff)
             FREE(object->comp_names[object->ncomponents]);
             API_ERROR(NULL, E_NOMEM);
         }
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
     }
     API_END;
 
@@ -3584,7 +3595,7 @@ DBAddDblComponent(DBobject *object, const char *compname, double ff)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
             API_ERROR("component name", E_BADARGS);
-        if (db_VariableNameValid((char *)compname) == 0)
+        if (db_VariableNameValid(compname) == 0)
             API_ERROR("component name", E_INVALIDNAME);
         if (object->ncomponents >= object->maxcomponents) {
             API_ERROR("object ncomponents", E_BADARGS);
@@ -3599,7 +3610,8 @@ DBAddDblComponent(DBobject *object, const char *compname, double ff)
             FREE(object->comp_names[object->ncomponents]);
             API_ERROR(NULL, E_NOMEM);
         }
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
     }
     API_END;
 
@@ -3644,7 +3656,7 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
             API_ERROR("component name", E_BADARGS);
-        if (db_VariableNameValid((char *)compname) == 0)
+        if (db_VariableNameValid(compname) == 0)
             API_ERROR("component name", E_INVALIDNAME);
         if (object->ncomponents >= object->maxcomponents) {
             API_ERROR("object ncomponents", E_BADARGS);
@@ -3653,7 +3665,7 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
         {
             if (!SILO_Globals.allowEmptyObjects)
                 API_ERROR("string literal component", E_BADARGS);
-            sprintf(tmp, "'<s>null'", ss);
+            sprintf(tmp, "'<s>null'");
         }
         else
             sprintf(tmp, "'<s>%s'", ss);
@@ -3665,7 +3677,8 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
             FREE(object->comp_names[object->ncomponents]);
             API_ERROR(NULL, E_NOMEM);
         }
-        object->ncomponents++;
+        if (!db_IncObjectComponentCount(object))
+            API_ERROR(NULL, E_NOMEM);
     }
     API_END;
 
@@ -3786,10 +3799,10 @@ DBShowErrors(int level, void(*func)(char*))
  *
  * Modifications:
  *-------------------------------------------------------------------------*/
-PUBLIC char   *
+PUBLIC char const *
 DBErrString(void)
 {
-    static char    s[32];
+    static char    s[128];
 
     if (db_errno < 0 || db_errno >= NELMTS(_db_err_list)) {
         sprintf(s, "Error %d", db_errno);
@@ -3805,37 +3818,7 @@ DBErrno(void)
     return db_errno;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    DBErrFunc
- *
- * Purpose:     Return the name (as a static string) of the function
- *              that raised the last error.  This could be the function
- *              that detected the error or the top-level API function
- *              depending on the arguments to DBShowErrors().
- *
- * Return:      Success:        ptr to function name
- *
- *              Failure:        ptr to empty string
- *
- * Programmer:  robb@cloud
- *              Tue Feb 21 08:25:40 EST 1995
- *
- * Modifications:
- *   Mark C. Miller, Mon Jul 19 08:49:29 PDT 2010
- *   Changed name to DBerrFuncname as this function returns the NAME of
- *   the last Silo function that err'd. The previous name, DBErrFunc
- *   suggested it returned the pointer to the function passed in
- *   DBShowErrors. I added a new function, DBErrfunc, to return that.
- * 
- *-------------------------------------------------------------------------*/
-PUBLIC char   *
-DBErrFunc(void)
-{
-    DEPRECATE_MSG("DBErrFunc",4,8,"DBErrFuncname");
-    return db_errfunc;
-}
-
-PUBLIC char   *
+PUBLIC char const *
 DBErrFuncname(void)
 {
     return db_errfunc;
@@ -3854,6 +3837,93 @@ DBErrlvl(void)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: db_parse_version_digits_from_string
+ *
+ * str: version string
+ * sep: separator character (typically '.')
+ * digits: array of digits to return
+ * ndigits: size of digits array
+ *
+ * returns 0 on successful conversion, non-zero on failure
+ *-----------------------------------------------------------------------*/
+static int
+db_parse_version_digits_from_string(char const *str, char sep, int *digits, int ndigits)
+{
+    int i, nseps, non_digits, retval = 0;
+    char *p, *ostr;
+    
+    if (!str || !*str)
+        return 1;
+
+    ostr = strdup(str);
+    p = ostr;
+
+    /* Examine string for seperator chars and non-digits */
+    nseps = 0;
+    non_digits = 0;
+    while (*p)
+    {
+        if (*p == sep)
+        {
+            *p = '\0';
+            nseps++;
+        }
+        else if (!strncmp(p, "-pre", 4))
+        {
+            *(p+0) = '\0';
+            *(p+1) = '0';
+            *(p+2) = '0';
+            *(p+3) = '0';
+            nseps++;
+            p += 3;
+        }
+        else if (*p < '0' || *p > '9')
+        {
+            non_digits = 1;
+        }
+        p++;
+    }
+    nseps++;
+
+    /* Make a second pass over string converting all the digits */
+    if (!non_digits)
+    {
+        p = ostr;
+        errno = 0;
+        for (i = 0; i < (nseps+1) && ndigits && errno == 0; i++, ndigits--)
+        {
+            digits[i] = strtol(p, 0, 10);
+            while (*p != '\0') p++;
+            p++;
+        }
+        if (errno)
+            retval = 1;
+    }
+    else
+    {
+        retval = 1;
+    }
+
+    free(ostr);
+
+    return retval;
+}
+
+static int
+db_compare_version_digits(int const *a_digits, int const *b_digits, int ndigits)
+{
+    int i;
+    for (i = 0; i < ndigits; i++)
+    {
+        if (a_digits[i] < b_digits[i])
+            return -1;
+        else if (a_digits[i] > b_digits[i])
+            return 1;
+    }
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    DBVersion
  *
  * Purpose:     Return the version number of the library as a string.
@@ -3868,13 +3938,29 @@ DBErrlvl(void)
  *   Mark C. Miller, Tue Oct 24 12:39:31 PDT 2006
  *   Changed to use SILO_VSTRING
  *-------------------------------------------------------------------------*/
-PUBLIC char *
+PUBLIC char const *
 DBVersion(void)
 {
     static char version[256];
     strcpy(version, SILO_VSTRING);
 
     return version;
+}
+
+PUBLIC int
+DBVersionDigits(int *maj, int *min, int *pat, int *pre)
+{
+    int digits[4] = {-1,-1,-1,-1};
+    if (!db_parse_version_digits_from_string(DBVersion(), '.',
+             digits, sizeof(digits)/sizeof(digits[0])))
+    {
+        if (maj) *maj = digits[0];
+        if (min) *min = digits[1];
+        if (pat) *pat = digits[2];
+        if (pre) *pre = digits[3];
+        return 0;
+    }
+    return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -3891,11 +3977,19 @@ DBVersion(void)
 PUBLIC int 
 DBVersionGE(int Maj, int Min, int Pat)
 {
-    if (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_PAT>=Pat)) ||
-         ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) ||
-         (SILO_VERS_MAJ>Maj))
-        return 1;
-    return 0;
+    int a_digits[3] = {SILO_VERS_MAJ, SILO_VERS_MIN, SILO_VERS_PAT};
+    int b_digits[3] = {Maj<0?0:Maj, Min<0?0:Min, Pat<0?0:Pat};
+    return db_compare_version_digits(a_digits, b_digits, 3) >= 0;
+}
+
+PUBLIC int
+DBVersionGEFileVersion(const DBfile *dbfile)
+{
+    int a_digits[3];
+    int b_digits[3] = {4, 5, 0}; /* earliest version we have version info in file */
+    DBVersionDigits(&a_digits[0], &a_digits[1], &a_digits[2], 0);
+    DBFileVersionDigits(dbfile, &b_digits[0], &b_digits[1], &b_digits[2], 0);
+    return db_compare_version_digits(a_digits, b_digits, 3) >= 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -3908,7 +4002,7 @@ DBVersionGE(int Maj, int Min, int Pat)
  *
  * Programmer:  Mark C. Miller, Mon Jan 12 20:59:30 PST 2009
  *-------------------------------------------------------------------------*/
-PUBLIC char *
+PUBLIC char const *
 DBFileVersion(const DBfile *dbfile)
 {
     static char version[256];
@@ -3917,6 +4011,22 @@ DBFileVersion(const DBfile *dbfile)
     else
         strcpy(version, "unknown; 4.5 or older");
     return version;
+}
+
+PUBLIC int
+DBFileVersionDigits(const DBfile *dbfile, int *maj, int *min, int *pat, int *pre)
+{
+    int digits[4] = {-1,-1,-1,-1};
+    if (!db_parse_version_digits_from_string(DBFileVersion(dbfile), '.',
+             digits, sizeof(digits)/sizeof(digits[0])))
+    {
+        if (maj) *maj = digits[0];
+        if (min) *min = digits[1];
+        if (pat) *pat = digits[2];
+        if (pre) *pre = digits[3];
+        return 0;
+    }
+    return -1;
 }
 
 /*-------------------------------------------------------------------------
@@ -3936,7 +4046,9 @@ PUBLIC int
 DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
 {
     int retval = -1;
-    int fileMaj = -1, fileMin = -1, filePat = -1;
+    int unknown = 0;
+    int a_digits[3];
+    int b_digits[3] = {Maj<0?0:Maj, Min<0?0:Min, Pat<0?0:Pat};
     char *version = STRDUP(DBFileVersion(dbfile));
 
     if (strncmp(version, "unknown", 7) == 0)
@@ -3945,64 +4057,31 @@ DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
            in version 4.5.1. So, if it is 'unknown', we can return something
            useful ONLY if the version we're comparing against is 4.5.1 or
            greater. */
-        if ((Maj==4 && Min==5 && Pat>=1) ||
-            (Maj==4 && Min>5) ||
-            (Maj>4))
-            retval = 0;
+        a_digits[0] = 4;
+        a_digits[1] = 5;
+        a_digits[2] = 0;
+        unknown = 1;
     }
     else
     {
-        int val;
-        char *token;
-
-        errno = 0;
-        token = strtok(version, ".");
-        if (token)
-            val = strtol(token, 0, 10);
-        if (token != 0 && val != 0 && errno == 0)
+        if (db_parse_version_digits_from_string(version, '.',
+                 a_digits, sizeof(a_digits)/sizeof(a_digits[0])))
         {
-            fileMaj = val;
-            token = strtok(0, ".");
-            if (token)
-                val = strtol(token, 0, 10);
-            if (token != 0 && val != 0 && errno == 0)
-            {
-                fileMin = val;
-                token = strtok(0, ".");
-                if (token)
-                    val = strtol(token, 0, 10);
-                if (token != 0 && val != 0 && errno == 0)
-                    filePat = val;
-            }
-        }
-
-        if (fileMaj != -1 && fileMin != -1 && filePat != -1)
-        {
-            if ((fileMaj==Maj && fileMin==Min && filePat>=Pat) ||
-                (fileMaj==Maj && fileMin>Min) ||
-                (fileMaj>Maj))
-                retval = 1;
-            else
-                retval = 0;
-        }
-        else if (fileMaj != -1 && fileMin != -1)
-        {
-            if ((fileMaj==Maj && fileMin>=Min) ||
-                (fileMaj>Maj))
-                retval = 1;
-            else
-                retval = 0;
-        }
-        else if (fileMaj != -1)
-        {
-            if (fileMaj>=Maj)
-                retval = 1;
-            else
-                retval = 0;
+            free(version);
+            return -1;
         }
     }
 
     free(version);
+
+    retval = db_compare_version_digits(a_digits, b_digits, 3) >= 0; 
+
+    if (unknown)
+    {
+        if (retval)
+            retval = -1;
+    }
+
     return retval;
 }
 
@@ -4198,7 +4277,7 @@ DBOpenReal(const char *name, int type, int mode)
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)
             API_ERROR((char *)name, E_MAXOPEN);
-        if (NULL == (dbfile = (DBOpenCB[type]) ((char *)name, mode, opts_set_id)))
+        if (NULL == (dbfile = (DBOpenCB[type]) (name, mode, opts_set_id)))
         {
             _db_fstatus[fileid] = 0;
             API_RETURN(NULL);
@@ -4334,8 +4413,8 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
 
         if ((fileid = db_get_fileid(DB_ISOPEN)) < 0)
             API_ERROR((char *)name, E_MAXOPEN);
-        dbfile = ((DBCreateCB[type]) ((char *)name, mode, target, opts_set_id,
-                                      (char *)info));
+        dbfile = ((DBCreateCB[type]) (name, mode, target, opts_set_id,
+                                      info));
         if (!dbfile)
         {
             _db_fstatus[fileid] = 0;
@@ -4595,78 +4674,6 @@ DBInqFileReal(const char *filename)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
-/*-------------------------------------------------------------------------
- * Function:    DBPause
- *
- * Purpose:     Pause the specified simulation.
- *
- * Return:      Success:        0 if the driver succeeded.
- *
- *              Failure:        -1 if the driver returned failure.
- *
- * Programmer:  brugger@viper
- *              Wed Jan 25 09:21:18 PST 1995
- *
- * Modifications:
- *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
- *    I replaced API_END with API_END_NOPOP.
- *
- *    Eric Brugger, Fri Mar  3 17:37:25 PST 1995
- *    I modified the error return value to be -1, instead of NULL.
- *-------------------------------------------------------------------------*/
-PUBLIC int
-DBPause(DBfile *file)
-{
-    int retval;
-
-    API_DEPRECATE("DBPause", int, -1, 4,6,"") {
-        if (!file)
-            API_ERROR(NULL, E_NOFILE);
-        if (NULL == file->pub.pause)
-            API_ERROR(file->pub.name, E_NOTIMP);
-
-        retval = (file->pub.pause) (file);
-        API_RETURN(retval);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
-/*-------------------------------------------------------------------------
- * Function:    DBContinue
- *
- * Purpose:     Continue the specified simulation.
- *
- * Return:      Success:        0 if the driver succeeded.
- *
- *              Failure:        -1 if the driver returned failure.
- *
- * Programmer:  brugger@viper
- *              Wed Jan 25 09:23:22 PST 1995
- *
- * Modifications:
- *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
- *    I replaced API_END with API_END_NOPOP.
- *
- *    Eric Brugger, Fri Mar  3 17:37:25 PST 1995
- *    I modified the error return value to be -1, instead of NULL.
- *-------------------------------------------------------------------------*/
-PUBLIC int
-DBContinue(DBfile *file)
-{
-    int retval;
-
-    API_DEPRECATE("DBContinue", int, -1, 4,6,"") {
-        if (!file)
-            API_ERROR(NULL, E_NOFILE);
-        if (NULL == file->pub.cont)
-            API_ERROR(file->pub.name, E_NOTIMP);
-
-        retval = (file->pub.cont) (file);
-        API_RETURN(retval);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
 /*----------------------------------------------------------------------
  *  Routine                                               DBInqVarExists
  *
@@ -4791,12 +4798,16 @@ DBMakeOptlist(int maxopts)
     API_BEGIN("DBMakeOptlist", DBoptlist *, NULL) {
         if (maxopts <= 0)
             API_ERROR("maxopts", E_BADARGS);
-        if (NULL == (optlist = ALLOC(DBoptlist)))
-            API_ERROR(NULL, E_NOMEM);
-        if (NULL == (optlist->options = ALLOC_N(int, maxopts))) {
-            API_ERROR(NULL, E_NOMEM);
-        }
-        if (NULL == (optlist->values = ALLOC_N(void *, maxopts))) {
+        optlist = ALLOC(DBoptlist);
+        if (!optlist) API_ERROR(NULL, E_NOMEM);
+        optlist->options = ALLOC_N(int, maxopts);
+        optlist->values = ALLOC_N(void *, maxopts);
+
+        if (!optlist->options || !optlist->values)
+        {
+            FREE(optlist->values);
+            FREE(optlist->options);
+            FREE(optlist);
             API_ERROR(NULL, E_NOMEM);
         }
 
@@ -4925,6 +4936,25 @@ DBAddOption(DBoptlist *optlist, int option, void *value)
         optlist->options[optlist->numopts] = option;
         optlist->values[optlist->numopts] = value;
         optlist->numopts++;
+
+        if (optlist->numopts >= optlist->maxopts)
+        {
+            int new_maxopts = optlist->maxopts * 1.5 + 1; /* golden rule + 1 */
+            int *new_options = REALLOC_N(optlist->options, int, new_maxopts);
+            void **new_values = REALLOC_N(optlist->values, void*, new_maxopts);
+
+            if (!new_options || !new_values)
+            {
+                FREE(new_options);
+                FREE(new_values);
+                API_ERROR(0, E_NOMEM);
+            }
+
+            optlist->maxopts = new_maxopts;
+            optlist->options = new_options;
+            optlist->values  = new_values;
+        }
+
     }
     API_END;
 
@@ -5131,50 +5161,109 @@ DBNewToc(DBfile *dbfile)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
-/*----------------------------------------------------------------------
- *  Routine                                                     DBGetAtt
- *
- *  Purpose
- *
- *      Allocate space for, and read, the given attribute of the given
- *      variable.
- *
- *  Modified
- *    Robb Matzke, Mon Nov 14 14:18:56 EST 1994
- *    Added error mechanism.
- *
- *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
- *    I replaced API_END with API_END_NOPOP.
- *
- *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
- *    Added a check for variable name validity.
- *
- *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
- *    Made the error messages a little better.
- *
- *    Mark C. Miller, Tue Sep  6 10:57:55 PDT 2005
- *    Deprecated this function
- *--------------------------------------------------------------------*/
-PUBLIC void   *
-DBGetAtt(DBfile *dbfile, const char *varname, const char *attname)
+/*
+This logic is necessary to support callers accessing standard (e.g. non-DB_USERDEF)
+objects via the generic interface to ensure logic for specially handled component
+values is consistent with the standard object's DBGetXXX methods.
+To ensure a zero for the component in the file means either not-present or
+not-set, certain components, especially those for which a zero value is a valid
+value for the data producer to use, special handling is required and that logic
+is sprinkled about in the DBPutXXX and DBGetXXX methods of the drivers and so
+to is it required here. Its a nasty maintenance issue.
+*/
+
+static int
+db_IsComponentNameStandardWithSpecialHandling(char const *compname)
 {
-    void *retval = NULL;
+    if (!strcmp(compname, "missing_value")) return 1;
+    if (!strcmp(compname, "topo_dim")) return 1;
+    if (!strcmp(compname, "repr_block_idx")) return 1;
+    return 0;
+}
 
-    API_DEPRECATE2("DBGetAtt", void *, NULL, varname, 4,6,"") {
-        if (!dbfile)
-            API_ERROR(NULL, E_NOFILE);
-        if (!varname || !*varname)
-            API_ERROR("variable name", E_BADARGS);
-        if (!attname || !*attname)
-            API_ERROR("attribute name", E_BADARGS);
-        if (!dbfile->pub.g_attr)
-            API_ERROR(dbfile->pub.name, E_NOTIMP);
+/* For use in the DBGetComponent call */
+static void
+db_AdjustSpeciallyHandledStandardObjectComponentValue(
+    void *val_ptr, int obj_type, char const *comp_name)
+{
+    if (!val_ptr || !comp_name) return;
 
-        retval = (dbfile->pub.g_attr) (dbfile, (char *)varname,
-                                       (char *)attname);
-        API_RETURN(retval);
+    if (!strcmp(comp_name, "missing_value") &&
+        (obj_type == DB_UCDVAR || obj_type == DB_QUADVAR || obj_type == DB_CURVE ||
+         obj_type == DB_POINTVAR || obj_type == DB_MULTIVAR))
+    {
+        double val_for_mem, val_from_file = *((double*)val_ptr);
+        db_SetMissingValueForGet(val_for_mem, val_from_file);
+        *((double*)val_ptr) = val_for_mem;
     }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+    else if (!strcmp(comp_name, "repr_block_idx") &&
+        (obj_type == DB_MULTIMESH || obj_type == DB_MULTIVAR ||
+         obj_type == DB_MULTIMAT || obj_type == DB_MULTIMATSPECIES))
+    {
+        int val_for_mem, val_from_file = *((int*)val_ptr);
+        val_for_mem = val_from_file - 1;
+        *((int*)val_ptr) = val_for_mem;
+    }
+    else if (!strcmp(comp_name, "topo_dim") &&
+        (obj_type == DB_MULTIMESH || obj_type == DB_UCDMESH))
+    {
+        int val_for_mem, val_from_file = *((int*)val_ptr);
+        val_for_mem = val_from_file - 1;
+        *((int*)val_ptr) = val_for_mem;
+    }
+}
+
+/* For use in the DBGetObject call */
+static void
+db_AdjustSpeciallyHandledStandardObjectComponentValues(DBobject *obj)
+{
+    int i, obj_type;
+
+    if (!obj) return;
+
+    obj_type = DBGetObjtypeTag(obj->type);
+    if (obj_type == DB_USERDEF) return;
+
+    for (i = 0; i < obj->ncomponents; i++)
+    {
+        char tmp[256];
+
+        if (!strcmp(obj->comp_names[i], "missing_value") &&
+            (obj_type == DB_UCDVAR || obj_type == DB_QUADVAR || obj_type == DB_CURVE ||
+             obj_type == DB_POINTVAR || obj_type == DB_MULTIVAR))
+        {
+            double val_for_mem, val_from_file = strtod(obj->pdb_names[i]+4,0);
+            db_SetMissingValueForGet(val_for_mem, val_from_file);
+            sprintf(tmp, "'<d>%.30g'", val_for_mem);
+        }
+        else if (!strcmp(obj->comp_names[i], "repr_block_idx") &&
+            (obj_type == DB_MULTIMESH || obj_type == DB_MULTIVAR ||
+             obj_type == DB_MULTIMAT || obj_type == DB_MULTIMATSPECIES))
+        {
+            int val_for_mem, val_from_file = (int) strtol(obj->pdb_names[i]+4,0,10);
+            val_for_mem = val_from_file - 1;
+            sprintf(tmp, "'<i>%d'", val_for_mem);
+        }
+        else if (!strcmp(obj->comp_names[i], "topo_dim") &&
+            (obj_type == DB_MULTIMESH || obj_type == DB_UCDMESH))
+        {
+            int val_for_mem, val_from_file = (int) strtol(obj->pdb_names[i]+4,0,10);
+            val_for_mem = val_from_file - 1;
+            sprintf(tmp, "'<i>%d'", val_for_mem);
+        }
+        else
+        {
+            continue;
+        }
+#if 0
+global node no data type
+    point mesh
+data type for optional array in groupelmap
+#endif
+
+        FREE(obj->pdb_names[i]);
+        obj->pdb_names[i] = STRDUP(tmp);
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -5240,6 +5329,11 @@ DBGetComponent(DBfile *dbfile, char const *objname, char const *compname)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_comp) (dbfile, objname, compname);
+
+        if (db_IsComponentNameStandardWithSpecialHandling(compname))
+            db_AdjustSpeciallyHandledStandardObjectComponentValue(retval,
+                DBInqVarType(dbfile, objname), compname);
+
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -5383,105 +5477,8 @@ DBSetDir(DBfile *dbfile, const char *path)
         if (!dbfile->pub.cd)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.cd) (dbfile, (char *)path);
+        retval = (dbfile->pub.cd) (dbfile, path);
         db_FreeToc(dbfile);
-        API_RETURN(retval);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
-/*-------------------------------------------------------------------------
- * Function:    DBSetDirID
- *
- * Purpose:     Same as DBSetDir() except by ID instead of name.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  robb@cloud
- *              Wed Nov  9 13:15:19 EST 1994
- *
- * Modifications:
- *    Robb Matzke, Mon Nov 21 21:33:11 EST 1994
- *    Added error mechanism.
- *
- *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
- *    I replaced API_END with API_END_NOPOP.
- *
- *    Robb Matzke, 2000-05-23
- *    The old table of contents is discarded if the directory changes.
- *-------------------------------------------------------------------------*/
-PUBLIC int
-DBSetDirID(DBfile *dbfile, int dirid)
-{
-    int retval;
-
-    API_BEGIN("DBSetDirID", int, -1) {
-        if (!dbfile)
-            API_ERROR(NULL, E_NOFILE);
-        if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBSetDirID", E_GRABBED) ; 
-        if (!dbfile->pub.toc) {
-            API_ERROR("missing table of contents", E_BADARGS);
-        }
-        if (!dbfile->pub.cdid)
-            API_ERROR(dbfile->pub.name, E_NOTIMP);
-
-        retval = (dbfile->pub.cdid) (dbfile, dirid);
-        db_FreeToc(dbfile);
-        API_RETURN(retval);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
-/*-------------------------------------------------------------------------
- * Function:    DBListDir
- *
- * Purpose:     Lists the contents of the diven directories based
- *              on the listing options passed in through argv[].
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  matzke@viper
- *              Tue Nov  8 11:36:05 PST 1994
- *
- * Modifications:
- *    Robb Matzke, Mon Nov 21 21:35:29 EST 1994
- *    Added error mechanism.
- *
- *    Robb Matzke, Fri Dec 9 17:11:50 EST 1994
- *    This no longer invokes a callback.  There is nothing special to
- *    do here that depends on the device driver.  All we do is format
- *    the existing table of contents in some nice way.
- *
- *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
- *    I replaced API_END with API_END_NOPOP.
- *
- *    Mark C. Miller, Tue Sep  6 10:57:55 PDT 2005
- *    Deprecated this function
- *-------------------------------------------------------------------------*/
-PUBLIC int
-DBListDir(DBfile *dbfile, char *argv[], int argc)
-{
-    int retval;
-
-    API_DEPRECATE("DBListDir", int, -1, 4,6,"DBGetToc()") {
-        if (!dbfile)
-            API_ERROR(NULL, E_NOFILE);
-        if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBListDir", E_GRABBED) ; 
-        DBNewToc(dbfile);
-        if (!dbfile->pub.toc)
-            API_ERROR("no table of contents", E_INTERNAL);
-        if (argc < 0)
-            API_ERROR("nargs", E_BADARGS);
-        if (!argv && argc)
-            API_ERROR("args", E_BADARGS);
-
-        retval = db_ListDir2(dbfile, argv, argc, FALSE, NULL, NULL);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -5566,12 +5563,12 @@ DBMkDir(DBfile *dbfile, const char *name)
             API_ERROR("DBMkDir", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("directory name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("directory name", E_INVALIDNAME);
         if (!dbfile->pub.mkdir)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.mkdir) (dbfile, (char *)name);
+        retval = (dbfile->pub.mkdir) (dbfile, name);
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -5610,7 +5607,7 @@ DBCpDir(DBfile *dbfile, const char *srcDir,
             API_ERROR("source directory name", E_BADARGS);
         if (!dstDir || !*dstDir)
             API_ERROR("destination directory name", E_BADARGS);
-        if (db_VariableNameValid((char *)dstDir) == 0)
+        if (db_VariableNameValid(dstDir) == 0)
             API_ERROR("destination directory name", E_INVALIDNAME);
         if (!dbfile->pub.cpdir)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -5764,6 +5761,7 @@ DBGetObject (DBfile *dbfile, char const *objname)
         if (!dbfile->pub.g_obj)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
         retval = (dbfile->pub.g_obj) (dbfile, (char const *)objname);
+        db_AdjustSpeciallyHandledStandardObjectComponentValues(retval);
         API_RETURN(retval);
     }
     API_END_NOPOP;                     /* BEWARE:  If API_RETURN above is
@@ -5817,23 +5815,28 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBWriteComponent", E_GRABBED) ; 
+            API_ERROR("DBWriteComponent", E_GRABBED) ;
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
         if (SILO_Globals.allowEmptyObjects)
         {
-            if (!var) API_RETURN(0);
+            if (nd<=0) API_RETURN(0);
             if (!count) API_RETURN(0);
+            if (!var) API_RETURN(0);
             for(nvals=1,i=0;i<nd;i++)
                 nvals *= count[i];
-            if (!nvals) API_RETURN(0);
+            if (nvals<=0) API_RETURN(0);
         }
         if (!comp_name || !*comp_name)
             API_ERROR("component name", E_BADARGS);
         if (db_VariableNameValid((char *)comp_name) == 0)
             API_ERROR("component name", E_INVALIDNAME);
+#if 0
+        /* We don't know what name to pass to DBInqVarExists here because it
+           is the driver that knows how to construct component names */
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, obj->name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
+#endif
         if (!prefix || !*prefix)
             API_ERROR("prefix", E_BADARGS);
         if (db_VariableNameValid((char *)prefix) == 0)
@@ -5853,11 +5856,12 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
         if (nvals == 0) {
             API_ERROR("Zero-length write attempted", E_BADARGS);
         }
-        if (obj->ncomponents >= obj->maxcomponents) {
-            API_ERROR("ncomponents", E_BADARGS);
-        }
         if (!dbfile->pub.w_comp)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        /* Note that the work to add the variable component to the object is
+           handled down in the drivers due to the fact that the drivers may
+           use different rules to construct the object component names */
 
         retval = (dbfile->pub.w_comp) (dbfile, obj, comp_name, prefix,
                                        datatype, var, nd, count);
@@ -5913,7 +5917,7 @@ DBWrite(DBfile *dbfile, char const *vname, void const *var, int const *dims,
         if (!vname || !*vname)
             API_ERROR("variable name", E_BADARGS);
         if (strncmp("/.silo/#", vname, 8) != 0 &&
-            db_VariableNameValid((char *)vname) == 0)
+            db_VariableNameValid(vname) == 0)
             API_ERROR("variable name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -5968,8 +5972,8 @@ DBWrite(DBfile *dbfile, char const *vname, void const *var, int const *dims,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBWriteSlice (DBfile *dbfile, const char *vname, void *values, int dtype,
-              int offset[], int length[], int stride[], int dims[],
+DBWriteSlice (DBfile *dbfile, const char *vname, void const *values, int dtype,
+              int const *offset, int const *length, int const *stride, int const *dims,
               int ndims)
 {
     int retval;
@@ -5983,7 +5987,7 @@ DBWriteSlice (DBfile *dbfile, const char *vname, void *values, int dtype,
             API_ERROR("DBWriteSlice", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("variable name", E_BADARGS);
-        if (db_VariableNameValid((char *)vname) == 0)
+        if (db_VariableNameValid(vname) == 0)
             API_ERROR("variable name", E_INVALIDNAME);
         if (!values)
             API_ERROR("values", E_BADARGS);
@@ -6006,67 +6010,13 @@ DBWriteSlice (DBfile *dbfile, const char *vname, void *values, int dtype,
         if (!dbfile->pub.writeslice)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.writeslice) (dbfile, (char *)vname, values,
+        retval = (dbfile->pub.writeslice) (dbfile, vname, values,
                                            dtype, offset, length, stride,
                                            dims, ndims);
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
     API_END_NOPOP;     /* BEWARE: If API_RETURN above is removed use API_END */
-}
-
-/*-------------------------------------------------------------------------
- * Function:    DBReadAtt
- *
- * Purpose:     Reads the given attribute value into the provided space.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  robb@cloud
- *              Wed Nov  9 12:54:24 EST 1994
- *
- * Modifications:
- *    Robb Matzke, Mon Nov 21 21:44:07 EST 1994
- *    Added error mechanism.
- *
- *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
- *    I replaced API_END with API_END_NOPOP.
- *
- *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
- *    Added a check for variable name validity.
- *
- *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
- *    Made the error messages a little better.
- *
- *    Mark C. Miller, Tue Sep  6 10:57:55 PDT 2005
- *    Deprectated this function
- *-------------------------------------------------------------------------*/
-PUBLIC int
-DBReadAtt(DBfile *dbfile, const char *vname, const char *aname, void *results)
-{
-    int retval;
-
-    API_DEPRECATE2("DBReadAtt", int, -1, vname, 4,6,"") {
-        if (!dbfile)
-            API_ERROR(NULL, E_NOFILE);
-        if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBReadAtt", E_GRABBED) ; 
-        if (!vname || !*vname)
-            API_ERROR("variable name", E_BADARGS);
-        if (!aname || !*aname)
-            API_ERROR("attribute name", E_BADARGS);
-        if (!results)
-            API_ERROR("results pointer", E_BADARGS);
-        if (!dbfile->pub.r_att)
-            API_ERROR(dbfile->pub.name, E_NOTIMP);
-
-        retval = (dbfile->pub.r_att) (dbfile, (char *)vname, (char *)aname,
-                                      results);
-        API_RETURN(retval);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
 /*-------------------------------------------------------------------------
@@ -6089,7 +6039,7 @@ DBReadAtt(DBfile *dbfile, const char *vname, const char *aname, void *results)
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
 PUBLIC DBcompoundarray *
-DBGetCompoundarray(DBfile *dbfile, const char *name)
+DBGetCompoundarray(DBfile *dbfile, char const *name)
 {
     DBcompoundarray *retval = NULL;
 
@@ -6103,7 +6053,7 @@ DBGetCompoundarray(DBfile *dbfile, const char *name)
         if (NULL == dbfile->pub.g_ca)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_ca) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_ca) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6127,7 +6077,7 @@ DBGetCompoundarray(DBfile *dbfile, const char *name)
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
 PUBLIC DBcurve *
-DBGetCurve (DBfile *dbfile, const char *name)
+DBGetCurve (DBfile *dbfile, char const *name)
 {
     DBcurve *retval = NULL;
 
@@ -6142,7 +6092,7 @@ DBGetCurve (DBfile *dbfile, const char *name)
         if (NULL == dbfile->pub.g_cu)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_cu) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_cu) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP;  /* BEWARE: If API_RETURN above is removed use API_END */
@@ -6177,7 +6127,7 @@ DBGetDefvars (DBfile *dbfile, const char *name)
         if (NULL == dbfile->pub.g_defv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_defv) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_defv) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP;  /* BEWARE: If API_RETURN above is removed use API_END */
@@ -6218,7 +6168,7 @@ DBGetMaterial(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_ma)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_ma) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_ma) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6274,7 +6224,7 @@ DBGetMatspecies(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_ms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_ms) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_ms) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6319,7 +6269,7 @@ DBGetMultimesh(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_mm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_mm) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_mm) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6356,7 +6306,7 @@ DBGetMultimeshadj(DBfile *dbfile, const char *name, int nmesh,
         if (!dbfile->pub.g_mmadj)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_mmadj) (dbfile, (char *)name, nmesh,
+        retval = (dbfile->pub.g_mmadj) (dbfile, name, nmesh,
                                         block_map);
         API_RETURN(retval);
     }
@@ -6403,7 +6353,7 @@ DBGetMultivar(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_mv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_mv) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_mv) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6445,7 +6395,7 @@ DBGetMultimat(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_mt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_mt) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_mt) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6487,7 +6437,7 @@ DBGetMultimatspecies(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_mms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_mms) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_mms) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6531,7 +6481,7 @@ DBGetPointmesh(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_pm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_pm) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_pm) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6575,7 +6525,7 @@ DBGetPointvar(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_pv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_pv) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_pv) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -6623,7 +6573,7 @@ DBGetQuadmesh(DBfile *dbfile, const char *name)
             API_ERROR("quadmesh name", E_BADARGS);
         if (!dbfile->pub.g_qm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-        qm = (dbfile->pub.g_qm) (dbfile, (char *)name);
+        qm = (dbfile->pub.g_qm) (dbfile, name);
         if (!qm)
         {
             API_RETURN(NULL);
@@ -6705,71 +6655,8 @@ DBGetQuadvar(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_qv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_qv) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_qv) (dbfile, name);
         API_RETURN(retval);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
-/*-------------------------------------------------------------------------
- * Function:    DBGetQuadvar1
- *
- * Purpose:     Read a scalar quadmesh variable (inverse of DBPutQuadVar1).
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  mcabee@viper
- *              Sun Jan 7, 1995
- *
- * Modifications:
- *-------------------------------------------------------------------------*/
-PUBLIC int
-DBGetQuadvar1 (DBfile *dbfile, const char *varname, DB_DTPTR1 var, int *dims,
-               int *ndims, DB_DTPTR1 mixvar, int *mixlen, int *datatype,
-               int *centering)
-{
-    char           tmpstr[64];
-    int            nbytes, i;
-    DBquadvar     *qv = NULL;
-
-    API_DEPRECATE2 ("DBGetQuadvar1", int, -1, varname, 4,6,"DBGetQuadvar()") {
-        if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBGetQuadvar1", E_GRABBED) ; 
-        if (NULL == (qv = DBGetQuadvar (dbfile, varname)))
-            API_ERROR ("DBGetQuadvar1", E_CALLFAIL);
-
-        /*
-         * Copy the quad var into the supplied space. Assign
-         * the misc. attributes.
-         */
-        nbytes = qv->nels * db_GetMachDataSize (qv->datatype);
-        memcpy (var, qv->vals[0], nbytes);
-
-        *ndims     =  qv->ndims;
-        *centering =  (qv->align[0] == 0.0) ? DB_NODECENT : DB_ZONECENT;
-        *datatype  =  qv->datatype;
-        *mixlen    =  qv->mixlen;
-
-        for (i = 0; i < qv->ndims; i++)
-            dims[i] = qv->dims[i];
-
-        /*
-         * If there was mixed data, copy that too.
-         * Assume name of mixed component is 'varname_mix'.
-         */
-        if ((int *)mixvar != NULL) {
-            strcpy (tmpstr, varname);
-            strcat (tmpstr, "_mix");
-
-            *mixlen = DBGetVarLength (dbfile, tmpstr);
-            DBReadVar (dbfile, tmpstr, mixvar);
-        }
-
-        DBFreeQuadvar (qv);
-
-        API_RETURN (0);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
@@ -6903,7 +6790,7 @@ DBGetUcdmesh(DBfile *dbfile, const char *name)
             API_ERROR("UCDmesh name", E_BADARGS);
         if (!dbfile->pub.g_um)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-        um = ((dbfile->pub.g_um) (dbfile, (char *)name));
+        um = ((dbfile->pub.g_um) (dbfile, name));
         if (!um)
         {
             API_RETURN(NULL);
@@ -6983,7 +6870,7 @@ DBGetUcdvar(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_uv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_uv) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_uv) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7026,7 +6913,7 @@ DBGetFacelist(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_fl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_fl) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_fl) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7069,7 +6956,7 @@ DBGetZonelist(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_zl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_zl) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_zl) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7103,7 +6990,7 @@ DBGetPHZonelist(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_phzl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_phzl) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_phzl) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7144,7 +7031,7 @@ DBGetVar(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_var)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_var) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_var) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7190,49 +7077,7 @@ DBReadVar(DBfile *dbfile, const char *name, void *result)
         if (!dbfile->pub.r_var)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.r_var) (dbfile, (char *)name, result);
-        API_RETURN(retval);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
-/*-------------------------------------------------------------------------
- * Function:    DBReadVar1
- *
- * Purpose:     Reads one element form a variable into te provided space.
- *
- * Return:      Success:        0
- *
- *              Failure:        -1
- *
- * Programmer:  robb@cloud
- *              Wed Nov  9 13:03:16 EST 1994
- *
- * Modifications:
- *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
- *    Added a check for variable name validity.
- *
- *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
- *    Made the error messages a little better.
- *-------------------------------------------------------------------------*/
-PUBLIC int
-DBReadVar1(DBfile *dbfile, const char *vname, int offset, void *result)
-{
-    int retval;
-
-    API_BEGIN2("DBReadVar1", int, -1, vname) {
-        if (!dbfile)
-            API_ERROR(NULL, E_NOFILE);
-        if (SILO_Globals.enableGrabDriver == TRUE)
-            API_ERROR("DBReadVar1", E_GRABBED) ; 
-        if (!vname || !*vname)
-            API_ERROR("variable name", E_BADARGS);
-        if (!result)
-            API_ERROR("result pointer", E_BADARGS);
-        if (!dbfile->pub.r_var1)
-            API_ERROR(dbfile->pub.name, E_NOTIMP);
-
-        retval = (dbfile->pub.r_var1) (dbfile, (char *)vname, offset, result);
+        retval = (dbfile->pub.r_var) (dbfile, name, result);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7259,8 +7104,8 @@ DBReadVar1(DBfile *dbfile, const char *vname, int offset, void *result)
  *    Made the error messages a little better.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBReadVarSlice(DBfile *dbfile, const char *name, int *offset, int *length,
-               int *stride, int ndims, void *result)
+DBReadVarSlice(DBfile *dbfile, const char *name, int const *offset, int const *length,
+               int const *stride, int ndims, void *result)
 {
     int retval;
 
@@ -7284,7 +7129,7 @@ DBReadVarSlice(DBfile *dbfile, const char *name, int *offset, int *length,
         if (!dbfile->pub.r_varslice)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.r_varslice) (dbfile, (char *)name, offset,
+        retval = (dbfile->pub.r_varslice) (dbfile, name, offset,
                                            length, stride, ndims, result);
         API_RETURN(retval);
     }
@@ -7325,7 +7170,7 @@ DBGetVarByteLength(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_varbl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_varbl) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_varbl) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7365,7 +7210,7 @@ DBGetVarLength(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_varlen)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_varlen) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_varlen) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7412,7 +7257,7 @@ DBGetVarDims(DBfile *dbfile, const char *name, int maxdims, int *dims)
         if (!dbfile->pub.g_vardims)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_vardims) (dbfile, (char *)name, maxdims, dims);
+        retval = (dbfile->pub.g_vardims) (dbfile, name, maxdims, dims);
         API_RETURN(retval);
     }
     API_END_NOPOP;                     /* BEWARE: If API_RETURN above is
@@ -7453,7 +7298,7 @@ DBGetVarType(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_vartype)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_vartype) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_vartype) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7483,7 +7328,7 @@ DBGetVarType(DBfile *dbfile, const char *name)
  *    Made the error messages a little better.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBInqMeshname(DBfile *dbfile, const char *vname, const char *mname)
+DBInqMeshname(DBfile *dbfile, const char *vname, char *mname)
 {
     int retval;
 
@@ -7499,8 +7344,7 @@ DBInqMeshname(DBfile *dbfile, const char *vname, const char *mname)
         if (!dbfile->pub.i_meshname)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.i_meshname) (dbfile, (char *)vname,
-                                           (char *)mname);
+        retval = (dbfile->pub.i_meshname) (dbfile, vname, mname);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7540,7 +7384,7 @@ DBInqMeshtype(DBfile *dbfile, const char *name)
         if (!dbfile->pub.i_meshtype)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.i_meshtype) (dbfile, (char *)name);
+        retval = (dbfile->pub.i_meshtype) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7572,9 +7416,17 @@ DBInqMeshtype(DBfile *dbfile, const char *name)
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutCompoundarray(DBfile *dbfile, const char *name, char **elemnames,
-                   int *elemlengths, int nelems, void *values, int nvalues,
-                   int datatype, DBoptlist *opts)
+DBPutCompoundarray(
+    DBfile *dbfile,
+    char const *name,
+    char const * const *elemnames,
+    int const *elemlengths,
+    int nelems,
+    void const *values,
+    int nvalues,
+    int datatype,
+    DBoptlist const *opts
+)
 {
     int retval;
 
@@ -7585,22 +7437,37 @@ DBPutCompoundarray(DBfile *dbfile, const char *name, char **elemnames,
             API_ERROR("DBPutCompoundarray", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("array name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("array name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (!elemnames)
-            API_ERROR("element names", E_BADARGS);
-        if (nelems <= 0)
-            API_ERROR("number of elements", E_BADARGS);
-        if (!values)
-            API_ERROR("values pointer", E_BADARGS);
-        if (nvalues < 0)
-            API_ERROR("number of values", E_BADARGS);
+        if (nelems < 0)
+            API_ERROR("nelems<0", E_BADARGS);
+        if (nelems)
+        {
+            if (!nelems)
+                API_ERROR("nelems=0", E_BADARGS);
+            if (!elemnames)
+                API_ERROR("elemnames=0", E_BADARGS);
+            if (nvalues <= 0)
+                API_ERROR("nvalues=0", E_BADARGS);
+            if (!values)
+                API_ERROR("values=0", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nelems=0", E_EMPTYOBJECT);
+        }
+        else
+        {
+            nvalues = 0;
+        }
+
         if (NULL == dbfile->pub.p_ca)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_ca) (dbfile, (char *)name, elemnames,
+        retval = (dbfile->pub.p_ca) (dbfile, name, elemnames,
                                      elemlengths, nelems, values, nvalues,
                                      datatype, opts);
         db_FreeToc(dbfile);
@@ -7636,8 +7503,15 @@ DBPutCompoundarray(DBfile *dbfile, const char *name, char **elemnames,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutCurve (DBfile *dbfile, const char *name, const void *xvals, const void *yvals,
-            int datatype, int npts, DBoptlist *opts)
+DBPutCurve(
+    DBfile *dbfile,
+    char const *name,
+    void const *xvals,
+    void const *yvals,
+    int datatype,
+    int npts,
+    DBoptlist const *opts
+)
 {
     int retval;
 
@@ -7649,7 +7523,7 @@ DBPutCurve (DBfile *dbfile, const char *name, const void *xvals, const void *yva
             API_ERROR("DBPutCurve", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("curve name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("curve name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -7665,11 +7539,11 @@ DBPutCurve (DBfile *dbfile, const char *name, const void *xvals, const void *yva
             else
             {
                 if (!xvals && !DBGetOption(opts, DBOPT_XVARNAME))
-                    API_ERROR("xvals==0 || DBOPT_XVARNAME", E_BADARGS);
+                    API_ERROR("xvals=0 || DBOPT_XVARNAME", E_BADARGS);
                 if (xvals && DBGetOption(opts, DBOPT_XVARNAME))
                     API_ERROR("xvals!=0 && DBOPT_XVARNAME", E_BADARGS);
                 if (!yvals && !DBGetOption(opts, DBOPT_YVARNAME))
-                    API_ERROR("yvals==0 || DBOPT_YVARNAME", E_BADARGS);
+                    API_ERROR("yvals=0 || DBOPT_YVARNAME", E_BADARGS);
                 if (yvals && DBGetOption(opts, DBOPT_YVARNAME))
                     API_ERROR("yvals!=0 && DBOPT_YVARNAME", E_BADARGS);
             }
@@ -7678,13 +7552,13 @@ DBPutCurve (DBfile *dbfile, const char *name, const void *xvals, const void *yva
                  !DBGetOption(opts, DBOPT_REFERENCE))
         {
             /* this is an empty object but we don't know if it was intentional */
-            API_ERROR("npts==0", E_EMPTYOBJECT);
+            API_ERROR("npts=0", E_EMPTYOBJECT);
         }
 
         if (NULL == dbfile->pub.p_cu)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_cu) (dbfile, (char *)name, (void*)xvals, (void*)yvals,
+        retval = (dbfile->pub.p_cu) (dbfile, name, (void*)xvals, (void*)yvals,
                                      datatype, npts, opts);
 
         db_FreeToc(dbfile);
@@ -7707,9 +7581,15 @@ DBPutCurve (DBfile *dbfile, const char *name, const void *xvals, const void *yva
  *
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutDefvars (DBfile *dbfile, const char *name, int ndefs,
-              char *names[], const int *types, char *defns[],
-              DBoptlist *opts[])
+DBPutDefvars(
+    DBfile *dbfile,
+    const char *name,
+    int ndefs,
+    char const * const *names,
+    int const *types,
+    char const * const *defns,
+    DBoptlist const * const *opts
+)
 {
     int retval;
 
@@ -7721,22 +7601,31 @@ DBPutDefvars (DBfile *dbfile, const char *name, int ndefs,
             API_ERROR("DBPutDefvars", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("defvars name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("defvars name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (ndefs < 0)
             API_ERROR("ndefs", E_BADARGS);
-        if (!names)
-            API_ERROR("names", E_BADARGS);
-        if (!types)
-            API_ERROR("types", E_BADARGS);
-        if (!defns)
-            API_ERROR("defns", E_BADARGS);
+        if (ndefs)
+        {
+            if (!names)
+                API_ERROR("names=0", E_BADARGS);
+            if (!types)
+                API_ERROR("types=0", E_BADARGS);
+            if (!defns)
+                API_ERROR("defns=0", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("ndefs=0", E_EMPTYOBJECT);
+        }
+
         if (NULL == dbfile->pub.p_defv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_defv) (dbfile, (char *)name, ndefs, names,
+        retval = (dbfile->pub.p_defv) (dbfile, name, ndefs, names,
                                        types, defns, opts);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -7775,9 +7664,9 @@ DBPutDefvars (DBfile *dbfile, const char *name, int ndefs,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
-              int nodelist[], int lnodelist, int origin, int zoneno[],
-              int shapesize[], int shapecnt[], int nshapes, int types[],
-              int typelist[], int ntypes)
+              int const *nodelist, int lnodelist, int origin, int const *zoneno,
+              int const *shapesize, int const *shapecnt, int nshapes, int const *types,
+              int const *typelist, int ntypes)
 {
     int retval;
 
@@ -7788,7 +7677,7 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
             API_ERROR("DBPutFacelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("facelist name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("facelist name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -7812,6 +7701,8 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
                 API_ERROR("shapecnt==0", E_BADARGS);
             if (ntypes < 0)
                 API_ERROR("ntypes<0", E_BADARGS);
+            if (origin != 0 && origin != 1)
+                API_ERROR("origin", E_BADARGS);
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
@@ -7825,13 +7716,11 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
             nshapes = 0;
             ntypes = 0;
         }
-        if (origin != 0 && origin != 1)
-            API_ERROR("origin", E_BADARGS);
 
         if (!dbfile->pub.p_fl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_fl) (dbfile, (char *)name, nfaces, ndims,
+        retval = (dbfile->pub.p_fl) (dbfile, name, nfaces, ndims,
                                      nodelist, lnodelist, origin, zoneno,
                                      shapesize, shapecnt, nshapes, types,
                                      typelist, ntypes);
@@ -7875,10 +7764,23 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
  *    Removed an unnecessary check on mix_zone.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
-              int matnos[], int matlist[], int dims[], int ndims,
-              int mix_next[], int mix_mat[], int mix_zone[], DB_DTPTR1 mix_vf,
-              int mixlen, int datatype, DBoptlist *optlist)
+DBPutMaterial(
+    DBfile *dbfile,
+    char const *name,
+    char const *meshname,
+    int nmat,
+    int const *matnos,
+    int const *matlist,
+    int const *dims,
+    int ndims,
+    int const *mix_next,
+    int const *mix_mat,
+    int const *mix_zone,
+    DB_DTPTR1 mix_vf,
+    int mixlen,
+    int datatype,
+    DBoptlist const *optlist
+)
 {
     int retval;
 
@@ -7889,7 +7791,7 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
             API_ERROR("DBPutMaterial", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("material name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("material name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -7902,11 +7804,11 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
                 API_ERROR("ndims<0", E_BADARGS);
             for (i = 0; i < ndims && dims; i++)
                 if (dims[i] == 0) dims = 0;
-            if (!matnos) API_ERROR("matnos==0", E_BADARGS);
-            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
-            if (!matlist) API_ERROR("matlist==0", E_BADARGS);
+            if (!matnos) API_ERROR("matnos=0", E_BADARGS);
+            if (!dims) API_ERROR("dims=0 || dims[i]=0", E_BADARGS);
+            if (!matlist) API_ERROR("matlist=0", E_BADARGS);
             if (!meshname || !*meshname) API_ERROR("mesh name", E_BADARGS);
-            if (!db_VariableNameValid((char *)meshname)) API_ERROR("meshname", E_INVALIDNAME);
+            if (!db_VariableNameValid(meshname)) API_ERROR("meshname", E_INVALIDNAME);
             if (mixlen < 0)
                 API_ERROR("mixlen<0", E_BADARGS);
             if (mixlen)
@@ -7921,7 +7823,7 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
-            API_ERROR("nmat==0 || ndims==0", E_EMPTYOBJECT);
+            API_ERROR("nmat=0", E_EMPTYOBJECT);
         }
         else
         {
@@ -7933,10 +7835,11 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
         if (!dbfile->pub.p_ma)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_ma) (dbfile, (char *)name, (char *)meshname,
+        retval = (dbfile->pub.p_ma) (dbfile, name, meshname,
                                      nmat, matnos, matlist, dims, ndims,
                                      mix_next, mix_mat, mix_zone, mix_vf,
                                      mixlen, datatype, optlist);
+
         /* Zero out the _ma._matnames pointer so we can't accidentially use it
          * again. Likewise for matcolors. */
         _ma._matnames = NULL;
@@ -7988,10 +7891,10 @@ DBPutMaterial(DBfile *dbfile, const char *name, const char *meshname, int nmat,
  *--------------------------------------------------------------------*/
 PUBLIC int
 DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
-                int nmat, int nmatspec[], int speclist[], int dims[],
+                int nmat, int const *nmatspec, int const *speclist, int const *dims,
                 int ndims, int nspecies_mf, DB_DTPTR1 species_mf,
-                int mix_speclist[], int mixlen, int datatype,
-                DBoptlist *optlist)
+                int const *mix_speclist, int mixlen, int datatype,
+                DBoptlist const *optlist)
 {
     int retval;
 
@@ -8002,33 +7905,37 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
             API_ERROR("DBPutMatspecies", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("matspecies name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("matspecies name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (!matname || !*matname)
-            API_ERROR("material name", E_BADARGS);
-        if (db_VariableNameValid((char *)matname) == 0)
-            API_ERROR("material name", E_INVALIDNAME);
         if (nmat < 0)
             API_ERROR("nmat<0", E_BADARGS);
-        if (ndims < 0)
-            API_ERROR("ndims<0", E_BADARGS);
-        if (nspecies_mf < 0)
-            API_ERROR("nspecies_mf<0", E_BADARGS);
         if (nmat)
         {
             int i;
+            if (!matname || !*matname)
+                API_ERROR("material name", E_BADARGS);
+            if (db_VariableNameValid(matname) == 0)
+                API_ERROR("material name", E_INVALIDNAME);
+            if (ndims < 0)
+                API_ERROR("ndims<0", E_BADARGS);
+            if (nspecies_mf < 0)
+                API_ERROR("nspecies_mf<0", E_BADARGS);
             for (i = 0; i < ndims && dims; i++)
                 if (!dims[i]) dims = 0;
-            if (!nmatspec) API_ERROR("nmatspec==0", E_BADARGS);
-            if (!speclist) API_ERROR("speclist==0", E_BADARGS);
-            if (!dims) API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
-            if (!species_mf) API_ERROR("species_mf==0", E_BADARGS);
+            if (!nmatspec) API_ERROR("nmatspec=0", E_BADARGS);
+            if (!speclist) API_ERROR("speclist=0", E_BADARGS);
+            if (!dims) API_ERROR("dims=0 || dims[i]=0", E_BADARGS);
+            if (!species_mf) API_ERROR("species_mf=0", E_BADARGS);
+            if (mixlen < 0)
+                API_ERROR("mixlen", E_BADARGS);
+            if (!mix_speclist && mixlen)
+                API_ERROR("mix_speclist", E_BADARGS);
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
-            API_ERROR("nmat==0", E_EMPTYOBJECT);
+            API_ERROR("nmat=0", E_EMPTYOBJECT);
         }
         else
         {
@@ -8038,16 +7945,18 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
             nspecies_mf = 0;
             mixlen = 0;
         }
-        if (mixlen < 0)
-            API_ERROR("mixlen", E_BADARGS);
-        if (!mix_speclist && mixlen)
-            API_ERROR("mix_speclist", E_BADARGS);
         if (!dbfile->pub.p_ms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-        retval = (dbfile->pub.p_ms) (dbfile, (char *)name, (char *)matname,
+        retval = (dbfile->pub.p_ms) (dbfile, name, matname,
                                      nmat, nmatspec, speclist, dims, ndims,
                                      nspecies_mf, species_mf, mix_speclist,
                                      mixlen, datatype, optlist);
+
+        /* Zero out the _ma._matnames pointer so we can't accidentially use it
+         * again. Likewise for matcolors. */
+        _ms._specnames = NULL;
+        _ms._speccolors = NULL;
+
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -8086,8 +7995,9 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
  *    adjusting sanity checks for args as some can be null now.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutMultimesh(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
-               char DB_CONSTARR2 meshnames, int DB_CONSTARR1 meshtypes, DBoptlist const *optlist)
+DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
+    char const * const *meshnames, int const *meshtypes,
+    DBoptlist const *optlist)
 {
     int retval;
 
@@ -8098,7 +8008,7 @@ DBPutMultimesh(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
             API_ERROR("DBPutMultimesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("multimesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -8114,7 +8024,7 @@ DBPutMultimesh(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
         if (!dbfile->pub.p_mm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_mm) (dbfile, (char *)name, nmesh, meshnames,
+        retval = (dbfile->pub.p_mm) (dbfile, name, nmesh, meshnames,
                                      meshtypes, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8140,11 +8050,11 @@ DBPutMultimesh(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
  *
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutMultimeshadj(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
-                  int DB_CONSTARR1 meshtypes, int DB_CONSTARR1 nneighbors,
-                  int DB_CONSTARR1 neighbors, int DB_CONSTARR1 back,
-                  int DB_CONSTARR1 lnodelists, int DB_CONSTARR2 nodelists,
-                  int DB_CONSTARR1 lzonelists, int DB_CONSTARR2 zonelists,
+DBPutMultimeshadj(DBfile *dbfile, char const *name, int nmesh,
+                  int const *meshtypes, int const *nneighbors,
+                  int const *neighbors, int const *back,
+                  int const *lnodelists, int const * const *nodelists,
+                  int const *lzonelists, int const * const *zonelists,
                   DBoptlist const *optlist)
 {
     int retval;
@@ -8156,7 +8066,7 @@ DBPutMultimeshadj(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
             API_ERROR("DBPutMultimeshadj", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimeshadj name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("multimeshadj name", E_INVALIDNAME);
         if (nmesh < 0)
             API_ERROR("nmesh", E_BADARGS);
@@ -8173,7 +8083,7 @@ DBPutMultimeshadj(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
         if (!dbfile->pub.p_mmadj)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_mmadj) (dbfile, (char *)name, nmesh, meshtypes,
+        retval = (dbfile->pub.p_mmadj) (dbfile, name, nmesh, meshtypes,
                                         nneighbors, neighbors, back,
                                         lnodelists, nodelists, lzonelists, zonelists,
                                         optlist);
@@ -8214,7 +8124,7 @@ DBPutMultimeshadj(DBfile *dbfile, char DB_CONSTARR1 name, int nmesh,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
-              char *varnames[], int vartypes[], DBoptlist *optlist)
+              char const * const *varnames, int const *vartypes, DBoptlist const *optlist)
 {
     int retval;
 
@@ -8225,7 +8135,7 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
             API_ERROR("DBPutMultivar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multivar name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("multivar name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -8241,7 +8151,7 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
         if (!dbfile->pub.p_mv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_mv) (dbfile, (char *)name, nvar, varnames,
+        retval = (dbfile->pub.p_mv) (dbfile, name, nvar, varnames,
                                      vartypes, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8277,7 +8187,7 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
-              char *matnames[], DBoptlist *optlist)
+              char const * const *matnames, DBoptlist const *optlist)
 {
     int retval;
 
@@ -8288,7 +8198,7 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
             API_ERROR("DBPutMultimat", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimat name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("multimat name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -8301,8 +8211,14 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
         if (!dbfile->pub.p_mt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_mt) (dbfile, (char *)name, nmats, matnames,
+        retval = (dbfile->pub.p_mt) (dbfile, name, nmats, matnames,
                                      optlist);
+
+        /* Zero out the _mm._matnames pointer so we can't accidentially use it
+         * again. Likewise for matcolors. */
+        _mm._matnames = NULL;
+        _mm._matcolors = NULL;
+
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -8337,7 +8253,7 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
-                     char *specnames[], DBoptlist *optlist)
+                     char const * const *specnames, DBoptlist const *optlist)
 {
     int retval;
 
@@ -8348,7 +8264,7 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
             API_ERROR("DBPutMultimatspecies", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("multimatspecies name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("multimatspecies name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -8361,8 +8277,13 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
         if (!dbfile->pub.p_mms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_mms) (dbfile, (char *)name, nspec, specnames,
-                                      optlist);
+        retval = (dbfile->pub.p_mms) (dbfile, name, nspec, specnames, optlist);
+
+        /* Zero out the _ma._matnames pointer so we can't accidentially use it
+         * again. Likewise for matcolors. */
+        _mm._specnames = NULL;
+        _mm._speccolors = NULL;
+
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -8397,7 +8318,7 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
-               int nels, int datatype, DBoptlist *optlist)
+               int nels, int datatype, DBoptlist const *optlist)
 {
     int retval;
 
@@ -8408,7 +8329,7 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
             API_ERROR("DBPutPointmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("pointmesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("pointmesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -8423,7 +8344,7 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
             for (i = 0; i < ndims && coords; i++)
                 if (coords2[i] == 0) coords = 0;
             if (!coords)
-                API_ERROR("coords==0 || coords[i]==0 for some i", E_BADARGS);
+                API_ERROR("coords=0 || coords[i]=0 for some i", E_BADARGS);
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
@@ -8433,7 +8354,7 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
         if (!dbfile->pub.p_pm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_pm) (dbfile, (char *)name, ndims, coords, nels,
+        retval = (dbfile->pub.p_pm) (dbfile, name, ndims, coords, nels,
                                      datatype, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8469,7 +8390,7 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-              DB_DTPTR2 vars, int nels, int datatype, DBoptlist *optlist)
+              DB_DTPTR2 vars, int nels, int datatype, DBoptlist const *optlist)
 {
     int retval;
 
@@ -8480,36 +8401,35 @@ DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("DBPutPointvar", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("pointvar name", E_BADARGS);
-        if (db_VariableNameValid((char *)vname) == 0)
+        if (db_VariableNameValid(vname) == 0)
             API_ERROR("pointvar name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (!mname || !*mname)
-            API_ERROR("pointmesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)mname) == 0)
-            API_ERROR("pointmesh name", E_INVALIDNAME);
-        if (nvars < 0)
-            API_ERROR("nvars<0", E_BADARGS);
         if (nels < 0)
             API_ERROR("nels<0", E_BADARGS);
         if (nels)
         {
             int i;
             void **vars2 = (void**) vars;
-            if (!nvars) API_ERROR("nvars==0", E_BADARGS);
+            if (nvars <= 0)
+                API_ERROR("nvars<=0", E_BADARGS);
             for (i = 0; i < nvars && vars; i++)
                 if (!vars2[i]) vars = 0;
             if (!vars) API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+            if (!mname || !*mname)
+                API_ERROR("pointmesh name", E_BADARGS);
+            if (db_VariableNameValid(mname) == 0)
+                API_ERROR("pointmesh name", E_INVALIDNAME);
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
-            API_ERROR("nels==0", E_EMPTYOBJECT);
+            API_ERROR("nels=0", E_EMPTYOBJECT);
         }
 
         if (!dbfile->pub.p_pv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_pv) (dbfile, (char *)vname, (char *)mname,
+        retval = (dbfile->pub.p_pv) (dbfile, vname, mname,
                                      nvars, vars, nels, datatype, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8538,15 +8458,15 @@ DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutPointvar1(DBfile *dbfile, const char *vname, const char *mname,
-               DB_DTPTR1 var, int nels, int datatype, DBoptlist *optlist)
+               DB_DTPTR1 var, int nels, int datatype, DBoptlist const *optlist)
 {
-    DB_DTPTR *vars[1];
+    DB_DTPTR1 vars[1];
     int retval;
 
     API_BEGIN2("DBPutPointvar1", int, -1, vname)
     {
         vars[0] = var;
-        retval = DBPutPointvar(dbfile, (char *)vname, (char *)mname, var?1:0, vars,
+        retval = DBPutPointvar(dbfile, vname, mname, var?1:0, (DB_DTPTR2) vars,
                                nels, datatype, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8588,9 +8508,9 @@ DBPutPointvar1(DBfile *dbfile, const char *vname, const char *mname,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
-              DB_DTPTR2 coords, int dims[], int ndims, int datatype,
-              int coordtype, DBoptlist *optlist)
+DBPutQuadmesh(DBfile *dbfile, const char *name, char const * const *coordnames,
+              DB_DTPTR2 coords, int const *dims, int ndims, int datatype,
+              int coordtype, DBoptlist const *optlist)
 {
     int retval;
 
@@ -8601,7 +8521,7 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
             API_ERROR("DBPutQuadmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("quadmesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("quadmesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -8633,7 +8553,7 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
         if (!dbfile->pub.p_qm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_qm) (dbfile, (char *)name, coordnames, coords,
+        retval = (dbfile->pub.p_qm) (dbfile, name, coordnames, coords,
                                      dims, ndims, datatype, coordtype,
                                      optlist);
         db_FreeToc(dbfile);
@@ -8677,9 +8597,9 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char *coordnames[],
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-             char *varnames[], DB_DTPTR2 vars, int dims[], int ndims,
+             char const * const *varnames, DB_DTPTR2 vars, int const *dims, int ndims,
              DB_DTPTR2 mixvars, int mixlen, int datatype, int centering,
-             DBoptlist *optlist)
+             DBoptlist const *optlist)
 {
     int retval;
 
@@ -8690,13 +8610,13 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("DBPutQuadvar", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("quadvar name", E_BADARGS);
-        if (db_VariableNameValid((char *)vname) == 0)
+        if (db_VariableNameValid(vname) == 0)
             API_ERROR("quadvar name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (!mname || !*mname)
             API_ERROR("quadmesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)mname) == 0)
+        if (db_VariableNameValid(mname) == 0)
             API_ERROR("quadmesh name", E_INVALIDNAME);
         if (ndims < 0)
             API_ERROR("ndims", E_BADARGS);
@@ -8707,30 +8627,34 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             for (i = 0; i < ndims && dims; i++)
                 if (!dims[i]) dims = 0;
             if (!dims)
-                API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
+                API_ERROR("dims=0 || dims[i]=0", E_BADARGS);
             if (nvars < 1)
                 API_ERROR("nvars<1", E_BADARGS);
             for (i = 0; i < nvars && vars; i++)
                 if (!vars2[i]) vars = 0;
-            vars2 = mixvars;
+            vars2 = (void**) mixvars;
             for (i = 0; i < nvars && mixvars; i++)
                 if (!vars2[i]) mixvars = 0;
             for (i = 0; i < nvars && varnames; i++)
                 if (!varnames[i] && !*varnames[i]) varnames = 0;
             if (!vars)
-                API_ERROR("vars==0 || vars[i]==0", E_BADARGS);
+                API_ERROR("vars=0 || vars[i]=0", E_BADARGS);
             if (!varnames)
-                API_ERROR("varnames==0 || varnames[i]==0||\"\"", E_BADARGS);
+                API_ERROR("varnames=0 || varnames[i]=0||\"\"", E_BADARGS);
+            if (mixlen < 0)
+                API_ERROR("mixlen", E_BADARGS);
+            if (!mixvars && mixlen)
+                API_ERROR("mixvars", E_BADARGS);
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
             /* this is an empty object but we don't think it was intentional */
-            API_ERROR("ndims==0", E_EMPTYOBJECT);
+            API_ERROR("ndims=0", E_EMPTYOBJECT);
         }
-        if (mixlen < 0)
-            API_ERROR("mixlen", E_BADARGS);
-        if (!mixvars && mixlen)
-            API_ERROR("mixvars", E_BADARGS);
+        else
+        {
+            mixlen = 0;
+        }
         if (centering != DB_NODECENT && centering != DB_ZONECENT &&
             centering != DB_FACECENT && centering != DB_BNDCENT &&
             centering != DB_EDGECENT && centering != DB_BLOCKCENT)
@@ -8739,7 +8663,7 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
 
-        retval = (dbfile->pub.p_qv) (dbfile, (char *)vname, (char *)mname,
+        retval = (dbfile->pub.p_qv) (dbfile, vname, mname,
                                      nvars, varnames, vars, dims, ndims,
                                      mixvars, mixlen, datatype, centering,
                                      optlist);
@@ -8770,20 +8694,22 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 var,
-              int dims[], int ndims, DB_DTPTR1 mixvar, int mixlen, int datatype,
-              int centering, DBoptlist *optlist)
+              int const *dims, int ndims, DB_DTPTR1 mixvar, int mixlen, int datatype,
+              int centering, DBoptlist const *optlist)
 {
-    char          *varnames[1];
-    DB_DTPTR *vars[1], *mixvars[1];
+    char const *varnames[1];
+    DB_DTPTR1 vars[1];
+    DB_DTPTR1 mixvars[1];
     int retval;
 
     API_BEGIN2("DBPutQuadvar1", int, -1, vname) {
-        varnames[0] = (char *)vname;
+        varnames[0] = vname;
         vars[0] = var;
         mixvars[0] = mixvar;
 
-        retval = DBPutQuadvar(dbfile, (char *)vname, (char *)mname, 1,
-                              varnames, vars, dims, ndims, mixvars, mixlen,
+        retval = DBPutQuadvar(dbfile, vname, mname, 1,
+                              varnames, (DB_DTPTR2) vars, dims, ndims,
+                              (DB_DTPTR2) mixvars, mixlen,
                               datatype, centering, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8822,9 +8748,9 @@ DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 va
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
-             char *coordnames[], DB_DTPTR2 coords, int nnodes,
+             char const * const *coordnames, DB_DTPTR2 coords, int nnodes,
              int nzones, const char *zonel_name, const char *facel_name,
-             int datatype, DBoptlist *optlist)
+             int datatype, DBoptlist const *optlist)
 {
     int retval;
     char *zl_name;
@@ -8836,7 +8762,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
             API_ERROR("DBPutUcdmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("UCDmesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("UCDmesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -8854,25 +8780,25 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
                 if (coords2[i] == 0) coords = 0;;
             if (!coords)
                 API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            if (zl_name = DBGetOption(optlist, DBOPT_PHZONELIST))
+            if ((zl_name = DBGetOption(optlist, DBOPT_PHZONELIST)))
             {
                 if (!zl_name || !*zl_name)
                     API_ERROR("zonelist name specified with DBOPT_PHZONELIST is null or \"\"", E_BADARGS);
-                if (db_VariableNameValid((char *)zl_name) == 0)
+                if (db_VariableNameValid(zl_name) == 0)
                     API_ERROR("zonelist name specified with DBOPT_PHZONELIST", E_INVALIDNAME);
             }
             else if (zonel_name)
             {
                 if (!*zonel_name)
                     API_ERROR("zonel_name==\"\"", E_BADARGS);
-                if (db_VariableNameValid((char *)zonel_name) == 0)
+                if (db_VariableNameValid(zonel_name) == 0)
                     API_ERROR("zonel_name", E_INVALIDNAME);
             }
             else if (facel_name)
             {
                 if (!*facel_name)
                     API_ERROR("facel_name==\"\"", E_BADARGS);
-                if (db_VariableNameValid((char *)facel_name) == 0)
+                if (db_VariableNameValid(facel_name) == 0)
                     API_ERROR("facel_name", E_INVALIDNAME);
             }
             else
@@ -8894,9 +8820,9 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
         if (!dbfile->pub.p_um)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_um) (dbfile, (char *)name, ndims, coordnames,
+        retval = (dbfile->pub.p_um) (dbfile, name, ndims, coordnames,
                                      coords, nnodes, nzones,
-                                     (char *)zonel_name, (char *)facel_name,
+                                     zonel_name, facel_name,
                                      datatype, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8927,7 +8853,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
 PUBLIC int
 DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
                 int nzones, const char *zonel_name, const char *facel_name,
-                DBoptlist *optlist)
+                DBoptlist const *optlist)
 {
     int retval;
 
@@ -8938,13 +8864,13 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
             API_ERROR("DBPutUcdsubmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("mesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("mesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (!parentmesh || !*parentmesh)
             API_ERROR("parent mesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)parentmesh) == 0)
+        if (db_VariableNameValid(parentmesh) == 0)
             API_ERROR("parent mesh name", E_INVALIDNAME);
         if (nzones < 0)
             API_ERROR("nzones", E_BADARGS);
@@ -8952,9 +8878,9 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
 
-        retval = (dbfile->pub.p_sm) (dbfile, (char *)name, (char *)parentmesh,
-                                     nzones, (char *)zonel_name,
-                                     (char *)facel_name, optlist);
+        retval = (dbfile->pub.p_sm) (dbfile, name, parentmesh,
+                                     nzones, zonel_name,
+                                     facel_name, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -9001,8 +8927,8 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-            char *varnames[], DB_DTPTR2 vars, int nels, DB_DTPTR2 mixvars,
-            int mixlen, int datatype, int centering, DBoptlist *optlist)
+            char const * const *varnames, DB_DTPTR2 vars, int nels, DB_DTPTR2 mixvars,
+            int mixlen, int datatype, int centering, DBoptlist const *optlist)
 {
     int retval;
 
@@ -9013,13 +8939,13 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("DBPutUcdvar", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("UCDvar name", E_BADARGS);
-        if (db_VariableNameValid((char *)vname) == 0)
+        if (db_VariableNameValid(vname) == 0)
             API_ERROR("UCDvar name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (!mname || !*mname)
             API_ERROR("UCDmesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)mname) == 0)
+        if (db_VariableNameValid(mname) == 0)
             API_ERROR("UCDmesh name", E_INVALIDNAME);
         if (nvars < 0)
             API_ERROR("nvars<0", E_BADARGS);
@@ -9037,7 +8963,7 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
                 API_ERROR("mixlen", E_BADARGS);
             if (mixvars)
             {
-                vars2 = mixvars;
+                vars2 = (void**) mixvars;
                 for (i = 0; i < nvars && mixvars; i++)
                     if (vars2[i] == 0) mixvars = 0;
             }
@@ -9066,7 +8992,7 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
         if (!dbfile->pub.p_uv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_uv) (dbfile, (char *)vname, (char *)mname,
+        retval = (dbfile->pub.p_uv) (dbfile, vname, mname,
                                      nvars, varnames, vars, nels, mixvars,
                                      mixlen, datatype, centering, optlist);
         db_FreeToc(dbfile);
@@ -9097,20 +9023,21 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
 PUBLIC int
 DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 var,
              int nels, DB_DTPTR1 mixvar, int mixlen, int datatype, int centering,
-             DBoptlist *optlist)
+             DBoptlist const *optlist)
 {
-    DB_DTPTR *vars[1], *mixvars[1];
-    char          *varnames[1];
+    DB_DTPTR1 vars[1];
+    DB_DTPTR1 mixvars[1];
+    char const *varnames[1];
     int            retval;
 
     API_BEGIN2("DBPutUcdvar1", int, -1, vname)
     {
-        varnames[0] = (char *)vname;
+        varnames[0] = vname;
         vars[0] = var;
         mixvars[0] = mixvar;
-        retval = DBPutUcdvar(dbfile, (char *)vname, (char *)mname, nels==0?0:1, varnames,
-                             vars, nels, mixvars, mixlen, datatype, centering,
-                             optlist);
+        retval = DBPutUcdvar(dbfile, vname, mname, nels==0?0:1, varnames,
+                             (DB_DTPTR2) vars, nels, (DB_DTPTR2) mixvars,
+                             mixlen, datatype, centering, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -9146,8 +9073,8 @@ DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 var
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutZonelist(DBfile *dbfile, const char *name, int nzones, int ndims,
-              int nodelist[], int lnodelist, int origin, int shapesize[],
-              int shapecnt[], int nshapes)
+              int const *nodelist, int lnodelist, int origin, int const *shapesize,
+              int const *shapecnt, int nshapes)
 {
     int retval;
 
@@ -9158,7 +9085,7 @@ DBPutZonelist(DBfile *dbfile, const char *name, int nzones, int ndims,
             API_ERROR("DBPutZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("zonelist name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -9194,7 +9121,7 @@ DBPutZonelist(DBfile *dbfile, const char *name, int nzones, int ndims,
         if (!dbfile->pub.p_zl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_zl) (dbfile, (char *)name, nzones, ndims,
+        retval = (dbfile->pub.p_zl) (dbfile, name, nzones, ndims,
                                      nodelist, lnodelist, origin, shapesize,
                                      shapecnt, nshapes);
         db_FreeToc(dbfile);
@@ -9232,9 +9159,9 @@ DBPutZonelist(DBfile *dbfile, const char *name, int nzones, int ndims,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
-               int *nodelist, int lnodelist, int origin, int lo_offset,
-               int hi_offset, int *shapetype, int *shapesize, int *shapecnt,
-               int nshapes, DBoptlist *optlist)
+               int const *nodelist, int lnodelist, int origin, int lo_offset,
+               int hi_offset, int const *shapetype, int const *shapesize, int const *shapecnt,
+               int nshapes, DBoptlist const *optlist)
 {
     int retval;
 
@@ -9245,7 +9172,7 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
             API_ERROR("DBPutZonelist2", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("zonelist name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -9273,6 +9200,7 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
                 API_ERROR("lo_offset<0", E_BADARGS);
             if (hi_offset < 0)
                 API_ERROR("hi_offset<0", E_BADARGS);
+#warning HI AND LO OFFSET NOT VALID IN PRESENCE OF EXPLICIT GHOST LABELS
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
@@ -9286,7 +9214,7 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
         }
         if (!dbfile->pub.p_zl2)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-        retval = (dbfile->pub.p_zl2) (dbfile, (char *)name, nzones, ndims,
+        retval = (dbfile->pub.p_zl2) (dbfile, name, nzones, ndims,
                                       nodelist, lnodelist, origin, lo_offset,
                                       hi_offset, shapetype, shapesize,
                                       shapecnt, nshapes, optlist);
@@ -9314,10 +9242,10 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutPHZonelist(DBfile *dbfile, const char *name,
-    int nfaces, int *nodecnt, int lnodelist, int *nodelist,
-    const char *extface, int nzones, int *facecnt, int lfacelist,
-    int *facelist, int origin, int lo_offset, int hi_offset,
-    DBoptlist *optlist) 
+    int nfaces, int const *nodecnt, int lnodelist, int const *nodelist,
+    const char *extface, int nzones, int const *facecnt, int lfacelist,
+    int const *facelist, int origin, int lo_offset, int hi_offset,
+    DBoptlist const *optlist) 
 {
     int retval;
 
@@ -9329,7 +9257,7 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
             API_ERROR("DBPutPHZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("zonelist name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -9377,8 +9305,8 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
         if (!dbfile->pub.p_phzl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_phzl) (dbfile, (char *)name, nfaces, nodecnt,
-                                       lnodelist, nodelist, (char *)extface,
+        retval = (dbfile->pub.p_phzl) (dbfile, name, nfaces, nodecnt,
+                                       lnodelist, nodelist, extface,
                                        nzones, facecnt, lfacelist, facelist,
                                        origin, lo_offset, hi_offset,
                                        optlist);
@@ -9407,7 +9335,7 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
              int nbounds,
              const int *typeflags, const int *bndids/*optional*/,
              const void *coeffs, int lcoeffs, int datatype,
-             const double *extents, const char *zonel_name, DBoptlist *optlist)
+             const double *extents, const char *zonel_name, DBoptlist const *optlist)
 {
     int retval;
 
@@ -9418,7 +9346,7 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
             API_ERROR("DBPutCsgmesh", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("CSGmesh name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("CSGmesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -9436,7 +9364,7 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
             if (!coeffs) API_ERROR("coeffs==0", E_BADARGS);
             if (!extents) API_ERROR("extents==0", E_BADARGS);
             if (!zonel_name || !*zonel_name) API_ERROR("zonel_name", E_BADARGS);
-            if (db_VariableNameValid((char *)zonel_name) == 0)
+            if (db_VariableNameValid(zonel_name) == 0)
                 API_ERROR("zonelist name", E_INVALIDNAME);
         }
         else if (!SILO_Globals.allowEmptyObjects)
@@ -9453,7 +9381,7 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
         if (!dbfile->pub.p_csgm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_csgm) (dbfile, (char *)name, ndims,
+        retval = (dbfile->pub.p_csgm) (dbfile, name, ndims,
                                      nbounds, typeflags, bndids, coeffs,
                                      lcoeffs, datatype, extents, zonel_name,
                                      optlist);
@@ -9522,7 +9450,7 @@ DBPutCSGZonelist(DBfile *dbfile, const char *name, int nregs,
                  const int *typeflags,
                  const int *leftids, const int *rightids,
                  const void *xforms, int lxforms, int datatype,
-                 int nzones, const int *zonelist, DBoptlist *optlist)
+                 int nzones, const int *zonelist, DBoptlist const *optlist)
 {
     int retval;
 
@@ -9533,7 +9461,7 @@ DBPutCSGZonelist(DBfile *dbfile, const char *name, int nregs,
             API_ERROR("DBPutCSGZonelist", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("zonelist name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("zonelist name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -9570,7 +9498,7 @@ DBPutCSGZonelist(DBfile *dbfile, const char *name, int nregs,
         if (!dbfile->pub.p_csgzl)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_csgzl) (dbfile, (char *)name, nregs,
+        retval = (dbfile->pub.p_csgzl) (dbfile, name, nregs,
                                         typeflags, leftids, rightids,
                                         xforms, lxforms, datatype, 
                                         nzones, zonelist, optlist);
@@ -9633,8 +9561,8 @@ DBGetCSGZonelist(DBfile *dbfile, const char *name)
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
-            int nvars, char *varnames[], void *vars[],
-            int nvals, int datatype, int centering, DBoptlist *optlist)
+            int nvars, char const * const *varnames, void const * const *vars,
+            int nvals, int datatype, int centering, DBoptlist const *optlist)
 {
     int retval;
 
@@ -9645,7 +9573,7 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
             API_ERROR("DBPutCsgvar", E_GRABBED) ; 
         if (!vname || !*vname)
             API_ERROR("CSGvar name", E_BADARGS);
-        if (db_VariableNameValid((char *)vname) == 0)
+        if (db_VariableNameValid(vname) == 0)
             API_ERROR("CSGvar name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -9658,7 +9586,7 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
             int i;
             if (!meshname || !*meshname)
                 API_ERROR("CSGmesh name", E_BADARGS);
-            if (db_VariableNameValid((char *)meshname) == 0)
+            if (db_VariableNameValid(meshname) == 0)
                 API_ERROR("CSGmesh name", E_INVALIDNAME);
             for (i = 0; i < nvars && vars; i++)
                 if (!vars[i]) vars = 0;
@@ -10156,8 +10084,8 @@ CSGM_CalcExtents(int datatype, int ndims, int nbounds,
  *    double.
  *--------------------------------------------------------------------*/
 INTERNAL int
-_DBQMCalcExtents(DB_DTPTR2 _coord_arrays, int datatype, int *min_index,
-                 int *max_index, int *dims, int ndims, int coordtype,
+_DBQMCalcExtents(DB_DTPTR2 _coord_arrays, int datatype, int const *min_index,
+                 int const *max_index, int const *dims, int ndims, int coordtype,
                  void *min_extents, void *max_extents)
 {
     float         *x = NULL, *y = NULL, *z = NULL;
@@ -10581,7 +10509,7 @@ UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
  *    Added support for nameschemes options on multi-block objects.
  *-------------------------------------------------------------------------*/
 INTERNAL int
-db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
+db_ProcessOptlist(int objtype, DBoptlist const * const optlist)
 {
     int             i, j, *ip = NULL, unused = 0;
     char           *me = "db_ProcessOptlist";
@@ -10694,6 +10622,14 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_EXTENSIVE:
                         _csgm._extensive = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_MISSING_VALUE:
+                        _csgm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _csgm._alt_nodenum_vars = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -10872,6 +10808,18 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _pm._extensive = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MISSING_VALUE:
+                        _pm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
+                    case DBOPT_GHOST_NODE_LABELS:
+                        _pm._ghost_node_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _pm._alt_nodenum_vars = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -10900,7 +10848,7 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         break;
 
                     case DBOPT_COORDSYS:
-                        _qm._coordsys = DEREF(int, optlist->values[i]);
+                        _qm._coord_sys = DEREF(int, optlist->values[i]);
                         break;
 
                     case DBOPT_FACETYPE:
@@ -11012,6 +10960,26 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _qm._extensive = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MISSING_VALUE:
+                        _qm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
+                    case DBOPT_GHOST_NODE_LABELS:
+                        _qm._ghost_node_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_GHOST_ZONE_LABELS:
+                        _qm._ghost_zone_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _qm._alt_nodenum_vars = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _qm._alt_zonenum_vars = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11040,7 +11008,7 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         break;
 
                     case DBOPT_COORDSYS:
-                        _um._coordsys = DEREF(int, optlist->values[i]);
+                        _um._coord_sys = DEREF(int, optlist->values[i]);
                         break;
 
                     case DBOPT_TOPO_DIM:
@@ -11159,6 +11127,18 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _um._extensive = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_MISSING_VALUE:
+                        _um._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
+                    case DBOPT_GHOST_NODE_LABELS:
+                        _um._ghost_node_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _um._alt_nodenum_vars = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11177,6 +11157,14 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_LLONGNZNUM:
                         _uzl._llong_gzoneno = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_GHOST_ZONE_LABELS:
+                        _uzl._ghost_zone_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _uzl._alt_zonenum_vars = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -11199,6 +11187,14 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _phzl._llong_gzoneno = DEREF(int, optlist->values[i]);
                         break;
 
+                    case DBOPT_GHOST_ZONE_LABELS:
+                        _phzl._ghost_zone_labels = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _phzl._alt_zonenum_vars = (char **) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11217,6 +11213,10 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_ZONENAMES:
                         _csgzl._zonenames = (char **) optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _csgzl._alt_zonenum_vars = (char **) optlist->values[i];
                         break;
 
                     default:
@@ -11412,6 +11412,18 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
                         _mm._repr_block_idx = DEREF(int,optlist->values[i])+1;
                         break;
 
+                    case DBOPT_MISSING_VALUE:
+                        _mm._missing_value = DEREF(double, optlist->values[i]);
+                        break;
+
+                    case DBOPT_ALT_NODENUM_VARS:
+                        _mm._alt_nodenum_vars = (char**) optlist->values[i];
+                        break;
+
+                    case DBOPT_ALT_ZONENUM_VARS:
+                        _mm._alt_zonenum_vars = (char**) optlist->values[i];
+                        break;
+
                     default:
                         unused++;
                         break;
@@ -11458,6 +11470,14 @@ db_ProcessOptlist(int objtype, const DBoptlist *const optlist)
 
                     case DBOPT_REFERENCE:
                         _cu._reference = (char *)optlist->values[i];
+                        break;
+
+                    case DBOPT_COORDSYS:
+                        _cu._coord_sys = DEREF(int, optlist->values[i]);
+                        break;
+
+                    case DBOPT_MISSING_VALUE:
+                        _cu._missing_value = DEREF(double, optlist->values[i]);
                         break;
 
                     default:
@@ -11569,7 +11589,7 @@ DBInqCompoundarray(DBfile *dbfile, const char *array_name,
 
         if (!dbfile->pub.g_ca)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-        ca = DBGetCompoundarray(dbfile, (char *)array_name);
+        ca = DBGetCompoundarray(dbfile, array_name);
         if (!ca)
             API_ERROR("DBGetCompoundarray", E_CALLFAIL);
 
@@ -11636,7 +11656,7 @@ DBGetComponentNames(DBfile *dbfile, const char *objname,
         if (!objname || !*objname)
             API_ERROR("object name", E_BADARGS);
 
-        retval = (dbfile->pub.g_compnames) (dbfile, (char *)objname,
+        retval = (dbfile->pub.g_compnames) (dbfile, objname,
                                             comp_names, file_names);
         API_RETURN(retval);
     }
@@ -11711,6 +11731,7 @@ db_SplitShapelist (DBucdmesh *um)
     {
         splits[0] = max_index + 1;
         splits[1] = nzones;
+        splits[2] = 0;
     }
 
     isplit = 0;
@@ -11810,6 +11831,7 @@ db_ResetGlobalData_Csgmesh () {
    memset(&_csgm, 0, sizeof(_csgm));
    _csgm._use_specmf = DB_OFF;
    _csgm._group_no = -1;
+   _csgm._missing_value = DB_MISSING_VALUE_NOT_SET;
 
    return 0;
 }
@@ -11851,6 +11873,7 @@ db_ResetGlobalData_PointMesh (int ndims) {
    _pm._ndims = ndims;
    _pm._nspace = ndims;
    _pm._group_no = -1;
+   _pm._missing_value = DB_MISSING_VALUE_NOT_SET;
    return 0;
 }
 
@@ -11900,13 +11923,14 @@ db_ResetGlobalData_QuadMesh (int ndims) {
    FREE(_qm._meshname);
    memset(&_qm, 0, sizeof(_qm));
 
-   _qm._coordsys = DB_OTHER;
+   _qm._coord_sys = DB_OTHER;
    _qm._facetype = DB_RECTILINEAR;
    _qm._ndims = ndims;
    _qm._nspace = ndims;
    _qm._planar = DB_AREA;
    _qm._use_specmf = DB_OFF;
    _qm._group_no = -1;
+   _qm._missing_value = DB_MISSING_VALUE_NOT_SET;
 
    return 0;
 }
@@ -11932,6 +11956,7 @@ INTERNAL void
 db_ResetGlobalData_Curve (void) {
 
    memset (&_cu, 0, sizeof(_cu)) ;
+   _cu._missing_value = DB_MISSING_VALUE_NOT_SET;
 }
 
 /*----------------------------------------------------------------------
@@ -11984,7 +12009,7 @@ INTERNAL int
 db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones) {
 
    memset(&_um, 0, sizeof(_um));
-   _um._coordsys = DB_OTHER;
+   _um._coord_sys = DB_OTHER;
    _um._facetype = DB_RECTILINEAR;
    _um._ndims = ndims;
    _um._nnodes = nnodes;
@@ -11992,6 +12017,7 @@ db_ResetGlobalData_Ucdmesh (int ndims, int nnodes, int nzones) {
    _um._planar = DB_OTHER;
    _um._use_specmf = DB_OFF;
    _um._group_no = -1;
+   _um._missing_value = DB_MISSING_VALUE_NOT_SET;
 
    return 0;
 }
@@ -12067,6 +12093,7 @@ db_ResetGlobalData_MultiMesh (void) {
    _mm._nmat = -1;
    _mm._blockorigin = 1;
    _mm._grouporigin = 1;
+   _mm._missing_value = DB_MISSING_VALUE_NOT_SET;
    return 0;
 }
 
@@ -12136,8 +12163,12 @@ db_FullName2BaseName(const char *path)
  *    Made this function public, replacing 'db_' with 'DB' in name.
  *--------------------------------------------------------------------*/
 PUBLIC void 
-DBStringArrayToStringList(char **strArray, int n,
-                           char **strList, int *m)
+DBStringArrayToStringList(
+    char const * const *strArray,
+    int n,
+    char **strList,
+    int *m
+)
 {
     int i, len;
     char *s = NULL;
@@ -12225,13 +12256,10 @@ DBStringArrayToStringList(char **strArray, int n,
  *    as accept an input value or nothing at all.
  *--------------------------------------------------------------------*/
 PUBLIC char **
-DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
-    int skipSemicolonAtIndexZero)
+DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndexZero)
 {
-    int i, l, n, add1 = 0, strLen;
+    int i, l, n, add1 = 0;
     char **retval;
-    int *colonAt = 0;
-    int needToSlashSwap = 0;
 
     /* if n is unspecified (<0), compute it by counting semicolons */
     if (_n == 0 || *_n < 0)
@@ -12245,7 +12273,6 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
                 n++;
             i++;
         }
-        strLen = i;
     }
     else
     {
@@ -12253,8 +12280,6 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
     }
 
     retval = (char**) calloc(n+add1, sizeof(char*));
-    if (handleSlashSwap)
-        colonAt = (int *) calloc(n, sizeof(int));
     for (i=0, l=(skipSemicolonAtIndexZero&&strList[0]==';')?1:0; i<n; i++)
     {
         if (strList[l] == ';')
@@ -12269,57 +12294,102 @@ DBStringListToStringArray(char *strList, int *_n, int handleSlashSwap,
         }
         else
         {
-            int lstart = l;
+            int len, lstart = l;
             while (strList[l] != ';' && strList[l] != '\0')
-            {
-                /* Since we're already marching through characters looking
-                   for a ';', if we're supposed to swap slash characters too,
-                   keep track of colons also. We keep track of the LAST ':'
-                   we see in colonAt[i]. */
-                if (handleSlashSwap)
-                {
-#if !defined(_WIN32) /* linux case */
-                    if (strList[l] == '\\')
-#else                /* windows case */
-                    if (strList[l] == '/')
-#endif
-                        needToSlashSwap = 1;
-                    if (strList[l] == ':')
-                        colonAt[i] = l-lstart;
-                }
                 l++;
-            }
-            strList[l] = '\0';
-            retval[i] = STRDUP(&strList[lstart]);
+            len = l-lstart;
+            retval[i] = (char *) malloc(len+1);
+            memcpy(retval[i],&strList[lstart],len);
+            retval[i][len] = '\0';
             l++;
         }
     }
     if (add1) retval[i] = 0;
 
-    /* Ok, now swap slash characters if requested and needed */
-    if (handleSlashSwap)
-    {
-        if (needToSlashSwap)
-        {
-            for (i=0; i < n; i++)
-            {
-                for (l = 0; l < colonAt[i]; l++)
-                {
-#if !defined(_WIN32) /* linux case */
-                    if (retval[i][l] == '\\') retval[i][l] = '/';
-#else                /* windows case */
-                    if (retval[i][l] == '/') retval[i][l] = '\\';
-#endif
-                }
-            }
-        }
-        free(colonAt);
-    }
-
     /* Return value of n computed if requested */
     if (_n && *_n < 0) *_n = n;
 
     return retval;
+}
+
+INTERNAL int 
+db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_flag, int nblocks)
+{
+    int i=0, s=0, n=0, hasColon=0, add1=0, slashCharsToSwap[128];
+    char **strArray;
+    static char const *me = "DBStringListToStringArrayMBOpt";
+
+    if (!strList) return 0;
+
+    if (nblocks <= 0)
+        return db_perror("nblocks", E_BADARGS, me);
+
+    strArray = (char **) malloc(nblocks * sizeof(char*));
+    if (strList[0] == ';')
+    {
+        i = 1;
+        add1 = 1;
+    }
+    strArray[n++] = &strList[i];
+    while (strList[i] != '\0')
+    {
+        switch (strList[i])
+        {
+            case ';':
+            {
+                strList[i++] = '\0';
+                strArray[n++] = &strList[i];
+                if (hasColon && s)
+                {
+                    int j;
+                    for (j = 0; j < s; j++)
+#if !defined(_WIN32)
+                        strList[slashCharsToSwap[j]] = '/';
+#else
+                        strList[slashCharsToSwap[j]] = '\\';
+#endif
+                }
+                s = 0;
+                hasColon = 0;
+                break;
+            }
+#if !defined(_WIN32) /* linux case */
+            case '\\':
+#else                /* windows case */
+            case '/':
+#endif 
+            {
+                slashCharsToSwap[s++] = i;
+                if (s == sizeof(slashCharsToSwap)/sizeof(slashCharsToSwap[0]))
+                {
+                    free(strList);
+                    free(strArray);
+                    return db_perror("exceeded slashCharsToSwap size", E_INTERNAL, me);
+                }
+                break;
+            }
+            case ':':
+            {
+                hasColon = 1;
+                break;
+            }
+        }
+        i++;
+    }
+
+    if (n != nblocks + add1)
+    {
+        free(strList);
+        free(strArray);
+        return db_perror("incorrect number of block names", E_INTERNAL, me);
+    }
+
+    /* ensure we store the originally allocated pointer for later free's */
+    *alloc_flag = strList;
+
+    *retArray = strArray;
+
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -12463,11 +12533,11 @@ char *db_absoluteOf_path (const char *cwg,
       else if (cwg && strlen(cwg))
           result = db_join_path(cwg,pathname);
       else
-          result = safe_strdup("");
+          result = _db_safe_strdup("");
    }
    else
    {
-      result = safe_strdup("");
+      result = _db_safe_strdup("");
    }
    return result;
 }
@@ -12745,11 +12815,11 @@ char *db_join_path ( const char *a,
                   if (ok)
                      tmp = db_unsplit_path(t);
                }
-               t = db_cleanup_path(t);
+               db_cleanup_path(t);
             }
-            Pb = db_cleanup_path(Pb);
+            db_cleanup_path(Pb);
          }
-         Pa = db_cleanup_path(Pa);
+         db_cleanup_path(Pa);
       }
    }
    if (tmp != 0)
@@ -12895,7 +12965,7 @@ tryAgain:c = p->firstComponent;
         +-------------------------------------*/
 
          result = db_unsplit_path(p);
-         p      = db_cleanup_path(p);
+         db_cleanup_path(p);
       }
    }
    return result;
@@ -13098,7 +13168,7 @@ void DBFreeMrgtree(DBmrgtree *tree)
 {
     if (tree == 0)
         return;
-    DBWalkMrgtree(tree, DBFreeMrgnode, 0, DB_POSTORDER);
+    DBWalkMrgtree(tree, (DBmrgwalkcb) DBFreeMrgnode, 0, DB_POSTORDER);
     FREE(tree->name);
     FREE(tree->src_mesh_name);
     if (tree->mrgvar_onames)
@@ -13192,7 +13262,7 @@ DBLinearizeMrgtree(DBmrgtnode *tnode, int walk_order, void *data)
 }
 
 static void
-DBWalkMrgtree_r(DBmrgtnode *node, int *walk_order, DBmrgwalkcb wcb, void *wdata,
+DBWalkMrgtree_r(DBmrgtnode const *node, int *walk_order, DBmrgwalkcb wcb, void *wdata,
     int traversal_flags)
 {
     if (node == 0)
@@ -13230,7 +13300,7 @@ DBWalkMrgtree_r(DBmrgtnode *node, int *walk_order, DBmrgwalkcb wcb, void *wdata,
 }
 
 void
-DBWalkMrgtree(DBmrgtree *tree, DBmrgwalkcb cb, void *wdata, int traversal_flags)
+DBWalkMrgtree(DBmrgtree const *tree, DBmrgwalkcb cb, void *wdata, int traversal_flags)
 {
     int walk_order = 0;
     DBmrgtnode *start = tree->root;
@@ -13263,13 +13333,19 @@ DBMakeMrgtree(int source_mesh_type, int type_info_bits,
             API_ERROR("type_info_bits", E_BADARGS);
         if (max_root_descendents <= 0)
             API_ERROR("max_root_descendents", E_BADARGS);
-        if (NULL == (tree = ALLOC(DBmrgtree)))
-            API_ERROR(NULL, E_NOMEM);
+        tree = ALLOC(DBmrgtree);
+        if (!tree) API_ERROR(NULL, E_NOMEM);
         memset(tree, 0, sizeof(DBmrgtree));
-        if (NULL == (root = ALLOC(DBmrgtnode)))
+        root = ALLOC(DBmrgtnode);
+        if (!root) {
+            FREE(tree);
             API_ERROR(NULL, E_NOMEM);
+        }
         memset(root, 0, sizeof(DBmrgtnode));
-        if (NULL == (root->children = ALLOC_N(DBmrgtnode*, max_root_descendents))) {
+        root->children = ALLOC_N(DBmrgtnode*, max_root_descendents);
+        if (!root->children) {
+            FREE(root);
+            FREE(tree);
             API_ERROR(NULL, E_NOMEM);
         }
 
@@ -13309,8 +13385,8 @@ DBMakeMrgtree(int source_mesh_type, int type_info_bits,
 PUBLIC int
 DBAddRegion(DBmrgtree *tree, const char *region_name,
     int type_info_bits, int max_descendents, 
-    const char *maps_name, int nsegs, int *seg_ids,
-    int *seg_lens, int *seg_types, DBoptlist *opts)
+    const char *maps_name, int nsegs, int const *seg_ids,
+    int const *seg_lens, int const *seg_types, DBoptlist const *opts)
 {
     DBmrgtnode *tnode = NULL;
 
@@ -13327,13 +13403,6 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
         if (tree->cwr->num_children >= tree->cwr->max_children) {
             API_ERROR("exceeded max_descendents", E_BADARGS);
         }
-        if (NULL == (tnode = ALLOC(DBmrgtnode)))
-            API_ERROR(NULL, E_NOMEM);
-        memset(tnode, 0, sizeof(DBmrgtnode));
-        if (NULL == (tnode->children = ALLOC_N(DBmrgtnode*, max_descendents)) &&
-            max_descendents) {
-            API_ERROR(NULL, E_NOMEM);
-        }
         if (nsegs > 0)
         {
             if (seg_ids == 0)
@@ -13342,6 +13411,14 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
                 API_ERROR("seg_lens", E_BADARGS);
             if (seg_types == 0)
                 API_ERROR("seg_types", E_BADARGS);
+        }
+        if (NULL == (tnode = ALLOC(DBmrgtnode)))
+            API_ERROR(NULL, E_NOMEM);
+        memset(tnode, 0, sizeof(DBmrgtnode));
+        if (NULL == (tnode->children = ALLOC_N(DBmrgtnode*, max_descendents)) &&
+            max_descendents) {
+            FREE(tnode);
+            API_ERROR(NULL, E_NOMEM);
         }
 
         /* update internal node info */
@@ -13361,13 +13438,19 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
         {
             int i;
 
-            if (NULL == (tnode->seg_ids = ALLOC_N(int, nsegs))) {
-                API_ERROR(NULL, E_NOMEM);
-            }
-            if (NULL == (tnode->seg_lens = ALLOC_N(int, nsegs))) {
-                API_ERROR(NULL, E_NOMEM);
-            }
-            if (NULL == (tnode->seg_types = ALLOC_N(int, nsegs))) {
+            tnode->seg_ids = ALLOC_N(int, nsegs);
+            tnode->seg_lens = ALLOC_N(int, nsegs);
+            tnode->seg_types = ALLOC_N(int, nsegs);
+ 
+            if (!tnode->seg_ids || !tnode->seg_lens || !tnode->seg_types)
+            {
+                FREE(tnode->seg_types);
+                FREE(tnode->seg_lens);
+                FREE(tnode->seg_ids);
+                FREE(tnode->maps_name);
+                FREE(tnode->name);
+                FREE(tnode->children);
+                FREE(tnode);
                 API_ERROR(NULL, E_NOMEM);
             }
 
@@ -13399,9 +13482,9 @@ DBAddRegion(DBmrgtree *tree, const char *region_name,
 
 PUBLIC int
 DBAddRegionArray(DBmrgtree *tree, int nregns,
-    char **regn_names, int type_info_bits,
-    const char *maps_name, int nsegs, int *seg_ids,
-    int *seg_lens, int *seg_types, DBoptlist *opts)
+    char const * const *regn_names, int type_info_bits,
+    char const *maps_name, int nsegs, int const *seg_ids,
+    int const *seg_lens, int const *seg_types, DBoptlist const *opts)
 {
     DBmrgtnode *tnode = NULL;
     int i;
@@ -13438,6 +13521,7 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
         if (strchr(regn_names[0], '%') != 0)
         {
             if (NULL == (tnode->names = ALLOC_N(char*, 1))) {
+                FREE(tnode);
                 API_ERROR(NULL, E_NOMEM);
             }
             tnode->names[0] = STRDUP(regn_names[0]);
@@ -13445,6 +13529,7 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
         else
         {
             if (NULL == (tnode->names = ALLOC_N(char*, nregns))) {
+                FREE(tnode);
                 API_ERROR(NULL, E_NOMEM);
             }
             for (i = 0; i < nregns; i++)
@@ -13458,14 +13543,23 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
         tnode->nsegs = nsegs;
         if (nsegs > 0)
         {
+            tnode->seg_ids = ALLOC_N(int, nsegs*nregns);
+            tnode->seg_lens = ALLOC_N(int, nsegs*nregns);
+            tnode->seg_types = ALLOC_N(int, nsegs*nregns);
 
-            if (NULL == (tnode->seg_ids = ALLOC_N(int, nsegs*nregns))) {
-                API_ERROR(NULL, E_NOMEM);
-            }
-            if (NULL == (tnode->seg_lens = ALLOC_N(int, nsegs*nregns))) {
-                API_ERROR(NULL, E_NOMEM);
-            }
-            if (NULL == (tnode->seg_types = ALLOC_N(int, nsegs*nregns))) {
+            if (!tnode->seg_ids || !tnode->seg_lens || !tnode->seg_types) {
+                FREE(tnode->seg_types);
+                FREE(tnode->seg_lens);
+                FREE(tnode->seg_ids);
+                if (strchr(regn_names[0], '%') != 0) {
+                    FREE(tnode->names[0]);
+                    FREE(tnode->names);
+                } else {
+                    for (i = 0; i < nregns; i++)
+                        FREE(tnode->names[i]);
+                    FREE(tnode->names);
+                }
+                FREE(tnode);
                 API_ERROR(NULL, E_NOMEM);
             }
 
@@ -13495,7 +13589,7 @@ DBAddRegionArray(DBmrgtree *tree, int nregns,
 }
 
 PUBLIC int
-DBSetCwr(DBmrgtree *tree, const char *path)
+DBSetCwr(DBmrgtree *tree, char const *path)
 {
     int retval = -1;
 
@@ -13535,7 +13629,7 @@ DBSetCwr(DBmrgtree *tree, const char *path)
     API_END_NOPOP;  /* BEWARE: If API_RETURN above is removed use API_END */
 }
 
-PUBLIC const char *
+PUBLIC char const *
 DBGetCwr(DBmrgtree *tree)
 {
     const char *retval = NULL;
@@ -13552,8 +13646,8 @@ DBGetCwr(DBmrgtree *tree)
 }
 
 PUBLIC int
-DBPutMrgtree(DBfile *dbfile, const char *name, const char *mesh_name,
-    DBmrgtree *tree, DBoptlist *opts)
+DBPutMrgtree(DBfile *dbfile, char const *name, char const *mesh_name,
+    DBmrgtree const *tree, DBoptlist const *opts)
 {
     int retval;
 
@@ -13565,18 +13659,18 @@ DBPutMrgtree(DBfile *dbfile, const char *name, const char *mesh_name,
             API_ERROR("DBPutMrgtree", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("mrgtree name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("mrgtree name", E_INVALIDNAME);
         if (!mesh_name || !*mesh_name)
             API_ERROR("mesh_name", E_BADARGS);
-        if (db_VariableNameValid((char *)mesh_name) == 0)
+        if (db_VariableNameValid(mesh_name) == 0)
             API_ERROR("mesh_name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (NULL == dbfile->pub.p_mrgt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_mrgt) (dbfile, (char *)name, (char *)mesh_name,
+        retval = (dbfile->pub.p_mrgt) (dbfile, name, mesh_name,
                                        tree, opts); 
 
         db_FreeToc(dbfile);
@@ -13600,7 +13694,7 @@ DBGetMrgtree(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_mrgt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_mrgt) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_mrgt) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -13608,9 +13702,9 @@ DBGetMrgtree(DBfile *dbfile, const char *name)
 
 PUBLIC int
 DBPutGroupelmap(DBfile *dbfile, const char *name,
-    int num_segments, int *groupel_types, int *segment_lengths,
-    int *segment_ids, int **segment_data, void **segment_fracs,
-    int fracs_data_type, DBoptlist *opts)
+    int num_segments, int const *groupel_types, int const *segment_lengths,
+    int const *segment_ids, int const * const *segment_data, void const * const *segment_fracs,
+    int fracs_data_type, DBoptlist const *opts)
 {
     int retval;
 
@@ -13621,7 +13715,7 @@ DBPutGroupelmap(DBfile *dbfile, const char *name,
             API_ERROR("DBPutGroupelmap", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("groupel map name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("groupel map name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -13636,7 +13730,7 @@ DBPutGroupelmap(DBfile *dbfile, const char *name,
         if (!dbfile->pub.p_grplm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.p_grplm) (dbfile, (char *)name,
+        retval = (dbfile->pub.p_grplm) (dbfile, name,
             num_segments, groupel_types, segment_lengths, segment_ids,
             segment_data, segment_fracs, fracs_data_type, opts);
 
@@ -13661,7 +13755,7 @@ DBGetGroupelmap(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_grplm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_grplm) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_grplm) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -13669,8 +13763,8 @@ DBGetGroupelmap(DBfile *dbfile, const char *name)
 
 PUBLIC int
 DBPutMrgvar(DBfile *dbfile, const char *name, const char *mrgt_name,
-    int ncomps, char **compnames, int nregns, char **reg_pnames,
-    int datatype, void **data, DBoptlist *opts)
+    int ncomps, char const * const *compnames, int nregns, char const * const *reg_pnames,
+    int datatype, void const * const *data, DBoptlist const *opts)
 {
     int retval;
 
@@ -13681,11 +13775,11 @@ DBPutMrgvar(DBfile *dbfile, const char *name, const char *mrgt_name,
             API_ERROR("DBPutMrgvar", E_GRABBED) ; 
         if (!name || !*name)
             API_ERROR("mrgvar name", E_BADARGS);
-        if (db_VariableNameValid((char *)name) == 0)
+        if (db_VariableNameValid(name) == 0)
             API_ERROR("mrgvar name", E_INVALIDNAME);
         if (!mrgt_name || !*mrgt_name)
             API_ERROR("mrgt_name", E_BADARGS);
-        if (db_VariableNameValid((char *)mrgt_name) == 0)
+        if (db_VariableNameValid(mrgt_name) == 0)
             API_ERROR("mrgt_name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
@@ -13724,7 +13818,7 @@ DBGetMrgvar(DBfile *dbfile, const char *name)
         if (!dbfile->pub.g_mrgv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
-        retval = (dbfile->pub.g_mrgv) (dbfile, (char *)name);
+        retval = (dbfile->pub.g_mrgv) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -13761,17 +13855,19 @@ DBGetMrgvar(DBfile *dbfile, const char *name)
  *
  ***********************************************************************/
 char *  
-safe_strdup(const char *s)
+_db_safe_strdup(const char *s)
 {
     char *retval = NULL;
+    int n;
     
     if (!s) 
         return NULL;
             
-    retval = (char*)malloc(sizeof(char)*(strlen(s)+1));
-    strcpy(retval,s);
-    retval[strlen(s)] = '\0';
-        
+    n = strlen(s);
+    retval = (char*)malloc(sizeof(char)*(n+1));
+    memcpy(retval, s, n);
+    retval[n] = '\0';
+
     return(retval);
 }
 

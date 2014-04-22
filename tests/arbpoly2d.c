@@ -105,8 +105,8 @@ main(int argc, char *argv[])
     shapesize[0] = 3;
     shapesize[1] = 4;
     shapesize[2] = 5;
-    DBPutUcdmesh(dbfile, "mesh_zl", 2, coordnames, coords, 8, 1, "zl",
-                 NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "mesh_zl", 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 8, 1, "zl", NULL, DB_FLOAT, NULL);
     DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "zl", 3, 2, nl, LEN(nl), 0, shapesize,
                   shapecnt, 3);
@@ -119,8 +119,8 @@ main(int argc, char *argv[])
     shapesize[0] = 3;
     shapesize[1] = 4;
     shapesize[2] = 0;
-    DBPutUcdmesh(dbfile, "mesh_zl0", 2, coordnames, coords, 8, 1, "zl0",
-                 NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "mesh_zl0", 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 8, 1, "zl0", NULL, DB_FLOAT, NULL);
     DBSetDeprecateWarnings(0);
     DBPutZonelist(dbfile, "zl0", 3, 2, nl2, LEN(nl2), 0, shapesize,
                   shapecnt, 3);
@@ -135,8 +135,8 @@ main(int argc, char *argv[])
     shapetype[0] = DB_ZONETYPE_TRIANGLE;
     shapetype[1] = DB_ZONETYPE_QUAD;
     shapetype[2] = DB_ZONETYPE_POLYGON;
-    DBPutUcdmesh(dbfile, "mesh_zl2", 2, coordnames, coords, 8, 1, "zl2",
-                 NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "mesh_zl2", 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 8, 1, "zl2", NULL, DB_FLOAT, NULL);
     DBPutZonelist2(dbfile, "zl2", 3, 2, nl, LEN(nl), 0, 0, 0, shapetype,
         shapesize, shapecnt, 3, NULL);
     DBPutUcdvar1(dbfile, "v_zl2", "mesh_zl2", var, 8, NULL, 0, DB_FLOAT,
@@ -149,8 +149,8 @@ main(int argc, char *argv[])
     shapetype[0] = DB_ZONETYPE_TRIANGLE;
     shapetype[1] = DB_ZONETYPE_QUAD;
     shapetype[2] = DB_ZONETYPE_POLYGON;
-    DBPutUcdmesh(dbfile, "mesh_zl20", 2, coordnames, coords, 8, 1, "zl20",
-                 NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "mesh_zl20", 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 8, 1, "zl20", NULL, DB_FLOAT, NULL);
     DBPutZonelist2(dbfile, "zl20", 3, 2, nl2, LEN(nl2), 0, 0, 0, shapetype,
         shapesize, shapecnt, 3, NULL);
     DBPutUcdvar1(dbfile, "v_zl20", "mesh_zl20", var, 8, NULL, 0, DB_FLOAT,
@@ -163,8 +163,8 @@ main(int argc, char *argv[])
     shapetype[0] = DB_ZONETYPE_POLYGON;
     shapetype[1] = DB_ZONETYPE_POLYGON;
     shapetype[2] = DB_ZONETYPE_POLYGON;
-    DBPutUcdmesh(dbfile, "mesh_zl2p", 2, coordnames, coords, 8, 1, "zl2p",
-                 NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "mesh_zl2p", 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 8, 1, "zl2p", NULL, DB_FLOAT, NULL);
     DBPutZonelist2(dbfile, "zl2p", 3, 2, nl, LEN(nl), 0, 0, 0, shapetype,
         shapesize, shapecnt, 3, NULL);
     DBPutUcdvar1(dbfile, "v_zl2p", "mesh_zl2p", var, 8, NULL, 0, DB_FLOAT,
@@ -177,8 +177,8 @@ main(int argc, char *argv[])
     shapetype[0] = DB_ZONETYPE_POLYGON;
     shapetype[1] = DB_ZONETYPE_POLYGON;
     shapetype[2] = DB_ZONETYPE_POLYGON;
-    DBPutUcdmesh(dbfile, "mesh_zl2p0", 2, coordnames, coords, 8, 1, "zl2p0",
-                 NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "mesh_zl2p0", 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 8, 1, "zl2p0", NULL, DB_FLOAT, NULL);
     DBPutZonelist2(dbfile, "zl2p0", 3, 2, nl3, LEN(nl3), 0, 0, 0, shapetype,
         shapesize, shapecnt, 3, NULL);
     DBPutUcdvar1(dbfile, "v_zl2p0", "mesh_zl2p0", var, 8, NULL, 0, DB_FLOAT,
@@ -188,8 +188,8 @@ main(int argc, char *argv[])
     shapetype[0] = DB_ZONETYPE_TRIANGLE;
     shapetype[1] = DB_ZONETYPE_QUAD;
     shapetype[2] = DB_ZONETYPE_POLYGON;
-    DBPutUcdmesh(dbfile, "mesh_fl", 2, coordnames, coords, 8, 1, "fl",
-                 NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "mesh_fl", 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 8, 1, "fl", NULL, DB_FLOAT, NULL);
     /* note that we need to say ndims==3 to get this call to write shapesize/shapecnt */
     DBPutFacelist(dbfile, "fl", 3, 3, nl, LEN(nl), 0, NULL,
         shapesize, shapecnt, 3, shapetype, NULL, 3);
@@ -200,8 +200,8 @@ main(int argc, char *argv[])
     shapesize[0] = 3;
     shapesize[1] = 4;
     shapesize[2] = 5;
-    DBPutUcdmesh(dbfile, "mesh_phzl", 2, coordnames, coords, 8, 1, "phzl",
-                 NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "mesh_phzl", 2, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 8, 1, "phzl", NULL, DB_FLOAT, NULL);
     DBPutPHZonelist(dbfile, "phzl", 3, shapesize, LEN(nl), nl, 0,0,0,0,0,0,0,0,0);
     DBPutUcdvar1(dbfile, "v_phzl", "mesh_phzl", var, 8, NULL, 0, DB_FLOAT,
                  DB_NODECENT, NULL);

@@ -258,8 +258,6 @@ json_object_new_extptr(void *p, int ndims, int const *dims, int datatype)
     json_object_object_add(jobj, "ndims", json_object_new_int(ndims));
     json_object_object_add(jobj, "dims", jarr);
 
-#warning DO WE NEED TO DECRIMENT JARR REFS WITH PUT CALL
-
     return jobj;
 }
 

@@ -842,12 +842,12 @@ sym_init (void)
               "`comp_names' or `pdb_names' arrays since the SILO DBobject "
               "is regenerated from the user-friendly fields before being "
               "saved back to the file.");
-   sym_bi_set("rdonly",         "0",
-              "Open files for read-only access.",
+   sym_bi_set("writeable",         "0",
+              "Open files for write access.",
               "If this variable has any true value (nil, zero, and the empty "
               "string are considered false) then the browser opens files in "
-              "read-only mode regardless of the file permissions. Editing "
-              "objects in a read-only file is not allowed.");
+              "write mode if the file permissions allow it. Editing "
+              "objects in a writeable file is allowed.");
    sym_bi_set("diff",           NULL,
               "Influence behavior of `diff' function.",
               "This variable controls the details of the `diff' function. It "
@@ -977,19 +977,19 @@ sym_init (void)
    sym_bi_set("fmt_null",       "(null)",       "Null format",
               "This is a C printf() format string used to render null "
               "pointers in the browser output.");
-   sym_bi_set("fmt_int8",       "(int8)%hhd",   "Byte format",
+   sym_bi_set("fmt_int8",       "%hhd",   "Byte format",
               "This is a C printf() format string used to render byte "
               "values in the browser output.");
-   sym_bi_set("fmt_short",      "(short)%hd",   "Short format",
+   sym_bi_set("fmt_short",      "%hd",   "Short format",
               "This is a C printf() format string used to render short "
               "integer values in the browser output.");
    sym_bi_set("fmt_int",        "%d",           "Integer format",
               "This is a C printf() format string used to render integer "
               "values in the browser output.");
-   sym_bi_set("fmt_long",       "(long)%ld",    "Long format",
+   sym_bi_set("fmt_long",       "%ld",    "Long format",
               "This is a C printf() format string used to render long "
               "integer values in the browser output.");
-   sym_bi_set("fmt_long_long",   "(long long)%lld",         "Long long format",
+   sym_bi_set("fmt_long_long",   "%lld",         "Long long format",
               "This is a C printf() format string used to render long "
               "long integer values in the browser output.");
 

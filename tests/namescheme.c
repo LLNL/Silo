@@ -65,11 +65,27 @@ be used for advertising or product endorsement purposes.
 #include <std.c>
 #include <string.h>
 
+#define TEST_GET_NAME(NS,I,EXP)                                                                            \
+if (!NS)                                                                                                   \
+{                                                                                                          \
+    fprintf(stderr, "Got NULL namescheme from DBMakeNamescheme at line %d\n", __LINE__);                   \
+    return 1;                                                                                              \
+}                                                                                                          \
+else                                                                                                       \
+{                                                                                                          \
+    if (strcmp(DBGetName(NS, I), EXP) != 0)                                                                \
+    {                                                                                                      \
+        fprintf(stderr, "Namescheme at line %d failed failed for index %d. Expected \"%s\", got \"%s\"\n", \
+            __LINE__, I, EXP, DBGetName(NS, I));                                                           \
+        return 1;                                                                                          \
+    }                                                                                                      \
+}
+
 int main(int argc, char **argv)
 {
     int i;
     int P[100], U[4];
-    char *N[3];
+    char const * const N[3] = {"red","green","blue"};
     char blockName[1024];
     int driver = DB_PDB;
     int show_all_errors = 0;
@@ -92,8 +108,7 @@ int main(int argc, char **argv)
 
     /* Test a somewhat complex expression */ 
     ns = DBMakeNamescheme("@foo_%+03d@3-((n % 3)*(4+1)+1/2)+1");
-    if (strcmp(DBGetName(ns, 25), "foo_+01") != 0)
-        return 1;
+    TEST_GET_NAME(ns, 25, "foo_+01");
     DBFreeNamescheme(ns);
 
     /* test returned string is different for successive calls (Dan Laney bug) */
@@ -105,30 +120,22 @@ int main(int argc, char **argv)
 
     /* Test ?:: operator */
     ns = DBMakeNamescheme("@foo_%d@(n-5)?14:77:");
-    if (strcmp(DBGetName(ns, 5), "foo_77") != 0)
-        return 1;
-    if (strcmp(DBGetName(ns, 6), "foo_14") != 0)
-        return 1;
+    TEST_GET_NAME(ns, 5, "foo_77");
+    TEST_GET_NAME(ns, 6, "foo_14");
     DBFreeNamescheme(ns);
 
     /* Test multiple conversion specifiers */
     ns = DBMakeNamescheme("|foo_%03dx%03d|n/5|n%5");
-    if (strcmp(DBGetName(ns, 17), "foo_003x002") != 0)
-       return 1;
-    if (strcmp(DBGetName(ns, 20), "foo_004x000") != 0)
-       return 1;
-    if (strcmp(DBGetName(ns, 3), "foo_000x003") != 0)
-       return 1;
+    TEST_GET_NAME(ns, 17, "foo_003x002");
+    TEST_GET_NAME(ns, 20, "foo_004x000");
+    TEST_GET_NAME(ns, 3, "foo_000x003");
     DBFreeNamescheme(ns);
 
     /* Test embedded string value results */
     ns = DBMakeNamescheme("@foo_%s@(n-5)?'master':'slave':");
-    if (strcmp(DBGetName(ns, 4), "foo_master") != 0)
-        return 1;
-    if (strcmp(DBGetName(ns, 5), "foo_slave") != 0)
-        return 1;
-    if (strcmp(DBGetName(ns, 6), "foo_master") != 0)
-        return 1;
+    TEST_GET_NAME(ns, 4, "foo_master");
+    TEST_GET_NAME(ns, 5, "foo_slave");
+    TEST_GET_NAME(ns, 6, "foo_master");
     DBFreeNamescheme(ns);
 
     /* Test array-based references to int valued arrays and whose
@@ -138,27 +145,17 @@ int main(int argc, char **argv)
     for (i = 0; i < 4; i++)
         U[i] = i*i;
     ns = DBMakeNamescheme("@foo_%03dx%03d@#Place[n]@#Upper[n%4]", P, U);
-    if (strcmp(DBGetName(ns, 17), "foo_085x001") != 0)
-        return 1;
-    if (strcmp(DBGetName(ns, 18), "foo_090x004") != 0)
-        return 1;
-    if (strcmp(DBGetName(ns, 19), "foo_095x009") != 0)
-        return 1;
-    if (strcmp(DBGetName(ns, 20), "foo_100x000") != 0)
-        return 1;
-    if (strcmp(DBGetName(ns, 21), "foo_105x001") != 0)
-        return 1;
+    TEST_GET_NAME(ns, 17, "foo_085x001");
+    TEST_GET_NAME(ns, 18, "foo_090x004");
+    TEST_GET_NAME(ns, 19, "foo_095x009");
+    TEST_GET_NAME(ns, 20, "foo_100x000");
+    TEST_GET_NAME(ns, 21, "foo_105x001");
     DBFreeNamescheme(ns);
 
     /* Test array-based references to char* valued array */
-    N[0] = "red";
-    N[1] = "green";
-    N[2] = "blue";
     ns = DBMakeNamescheme("Hfoo_%sH$Noodle[n%3]", N);
-    if (strcmp(DBGetName(ns, 17), "foo_blue") != 0)
-        return 1;
-    if (strcmp(DBGetName(ns, 6), "foo_red") != 0)
-        return 1;
+    TEST_GET_NAME(ns, 17, "foo_blue");
+    TEST_GET_NAME(ns, 6, "foo_red");
     DBFreeNamescheme(ns);
 
     /* Test namescheme as it might be used for multi-block objects */
@@ -170,17 +167,17 @@ int main(int argc, char **argv)
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 123)); /* blockname part */
     if (strcmp(blockName, "multi_file.dir/003/ucd3d3.pdb:/block123/mesh1") != 0)
-        return 0;
+        return 1;
     strcpy(blockName, DBGetName(ns, 0)); /* filename part */
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 0)); /* blockname part */
     if (strcmp(blockName, "multi_file.dir/000/ucd3d0.pdb:/block0/mesh1") != 0)
-        return 0;
+        return 1;
     strcpy(blockName, DBGetName(ns, 287)); /* filename part */
     strcat(blockName, ":");
     strcat(blockName, DBGetName(ns2, 287)); /* blockname part */
     if (strcmp(blockName, "multi_file.dir/007/ucd3d7.pdb:/block287/mesh1") != 0)
-        return 0;
+        return 1;
     DBFreeNamescheme(ns);
     DBFreeNamescheme(ns2);
 
@@ -189,7 +186,7 @@ int main(int argc, char **argv)
         DBfile *dbfile;
         int dims[3];
         int strListLen;
-        char *FileNumbers[] = {"1","2","3"};
+        char const * const FileNumbers[] = {"1","2","3"};
 
         /* uses same namescheme as above but am placing arrays in different dir
            relative to where I will place the namesheme */
@@ -198,7 +195,7 @@ int main(int argc, char **argv)
         /* Use absolute path to external array; 'H' is delim char */
         char *ns2 = "Hfoo_%sH$/arr_dir/Noodle[n%3]";
         char *ns2r;
-        char *strList;
+        char *strList = 0;
         /* use paths relative to the MB mesh object in which the nameschems
            are embedded */
         char *ns3 = "|/meshes/mesh1/dom_%s_%d|$../ns_arrays/Noodle[n]|n*2+1";
@@ -221,6 +218,7 @@ int main(int argc, char **argv)
         DBStringArrayToStringList(FileNumbers, 3, &strList, &strListLen);
         dims[0] = strListLen;
         DBWrite(dbfile, "FileNumbers", strList, dims, 1, DB_CHAR);
+        free(strList);
         DBStringArrayToStringList(N, 3, &strList, &strListLen);
         dims[0] = strListLen;
         DBWrite(dbfile, "Noodle", strList, dims, 1, DB_CHAR);
@@ -245,6 +243,7 @@ int main(int argc, char **argv)
         DBMkDir(dbfile, "ns_arrays");
         dims[0] = strListLen;
         DBWrite(dbfile, "ns_arrays/Noodle", strList, dims, 1, DB_CHAR);
+        free(strList);
 
         DBMkDir(dbfile, "mesh1");
         DBSetDir(dbfile, "mesh1");
@@ -258,7 +257,7 @@ int main(int argc, char **argv)
             float xcoords[] = {0, 1, 2, 3};
             float ycoords[] = {0, 1};
             float *coords[2] = {xcoords, ycoords};
-            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+            DBPutQuadmesh(dbfile, "qmesh", 0, (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
         }
         DBSetDir(dbfile, "../dom_green_3");
         {
@@ -267,7 +266,7 @@ int main(int argc, char **argv)
             float xcoords[] = {0, 1, 2, 3};
             float ycoords[] = {1, 2};
             float *coords[2] = {xcoords, ycoords};
-            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+            DBPutQuadmesh(dbfile, "qmesh", 0, (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
         }
         DBSetDir(dbfile, "../dom_blue_5");
         {
@@ -276,7 +275,7 @@ int main(int argc, char **argv)
             float xcoords[] = {0, 1, 2, 3};
             float ycoords[] = {2, 3};
             float *coords[2] = {xcoords, ycoords};
-            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+            DBPutQuadmesh(dbfile, "qmesh", 0, (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
         }
         DBSetDir(dbfile, "..");
         {
@@ -287,7 +286,6 @@ int main(int argc, char **argv)
             DBPutMultimesh(dbfile, "mmesh", 3, 0, 0, optlist);
             DBFreeOptlist(optlist);
         }
-        free(strList);
         DBClose(dbfile);
 
         dbfile = DBOpen("namescheme.silo", DB_UNKNOWN, DB_READ);
@@ -298,16 +296,11 @@ int main(int argc, char **argv)
         ns = DBMakeNamescheme(ns1r, 0, dbfile, 0);
 
         /* Ok, lets test the constructed namescheme */
-        if (strcmp(DBGetName(ns, 17), "foo_085x001") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 18), "foo_090x004") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 19), "foo_095x009") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 20), "foo_100x000") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 21), "foo_105x001") != 0)
-            return 1;
+        TEST_GET_NAME(ns, 17, "foo_085x001");
+        TEST_GET_NAME(ns, 18, "foo_090x004");
+        TEST_GET_NAME(ns, 19, "foo_095x009");
+        TEST_GET_NAME(ns, 20, "foo_100x000");
+        TEST_GET_NAME(ns, 21, "foo_105x001");
         DBFreeNamescheme(ns);
         free(ns1r);
 
@@ -317,10 +310,8 @@ int main(int argc, char **argv)
         /* Use the '0, DBfile*, 0' form of args to constructor */
         ns = DBMakeNamescheme(ns2r, 0, dbfile, 0);
 
-        if (strcmp(DBGetName(ns, 17), "foo_blue") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 6), "foo_red") != 0)
-            return 1;
+        TEST_GET_NAME(ns, 17, "foo_blue");
+        TEST_GET_NAME(ns, 6, "foo_red");
         DBFreeNamescheme(ns);
         free(ns2r);
 
@@ -335,12 +326,9 @@ int main(int argc, char **argv)
         {
             DBmultimesh *mm = DBGetMultimesh(dbfile, "mmesh");
             ns = DBMakeNamescheme(mm->block_ns, 0, dbfile, "/meshes/mesh1");
-            if (strcmp(DBGetName(ns, 0), "/meshes/mesh1/dom_red_1") != 0)
-                return 1;
-            if (strcmp(DBGetName(ns, 1), "/meshes/mesh1/dom_green_3") != 0)
-                return 1;
-            if (strcmp(DBGetName(ns, 2), "/meshes/mesh1/dom_blue_5") != 0)
-                return 1;
+            TEST_GET_NAME(ns, 0, "/meshes/mesh1/dom_red_1");
+            TEST_GET_NAME(ns, 1, "/meshes/mesh1/dom_green_3");
+            TEST_GET_NAME(ns, 2, "/meshes/mesh1/dom_blue_5");
             DBFreeNamescheme(ns);
             DBFreeMultimesh(mm);
         }
@@ -349,14 +337,10 @@ int main(int argc, char **argv)
         DBSetDir(dbfile, "/");
         ns4r = DBGetVar(dbfile, "/dir_2/dir_3/ns4");
         ns = DBMakeNamescheme(ns4r, 0, dbfile, 0);
-        if (strcmp(DBGetName(ns, 0), "") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 1), "") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 4), "myfilename.1") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 15), "myfilename.3") != 0)
-            return 1;
+        TEST_GET_NAME(ns, 0, "");
+        TEST_GET_NAME(ns, 1, "");
+        TEST_GET_NAME(ns, 4, "myfilename.1");
+        TEST_GET_NAME(ns, 15, "myfilename.3");
         DBFreeNamescheme(ns);
         free(ns4r);
 
@@ -366,12 +350,9 @@ int main(int argc, char **argv)
     /* test namescheme with constant componets */
     {
         ns = DBMakeNamescheme("@foo/bar/gorfo_0@");
-        if (strcmp(DBGetName(ns, 0), "foo/bar/gorfo_0") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 1), "foo/bar/gorfo_0") != 0)
-            return 1;
-        if (strcmp(DBGetName(ns, 122), "foo/bar/gorfo_0") != 0)
-            return 1;
+        TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
         DBFreeNamescheme(ns);
     }
 

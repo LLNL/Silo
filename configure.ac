@@ -368,7 +368,7 @@ dnl also checkout and edit configure.ac
 dnl
 m4_define(SILO_VERSION, m4_esyscmd([cat VERSION | tr -d '\n']))
 m4_define(SILO_NAME, silo)
-m4_define(SILO_BUGS,visit-users@email.ornl.gov)
+m4_define(SILO_BUGS,visit-users@elist.ornl.gov)
 m4_define(SILO_TOP_SRC_DIR, `pwd`)
 
 AC_PREREQ(2.60)
@@ -602,8 +602,8 @@ AC_ARG_ENABLE(optimization,
 
 dnl Conform to legacy API where datatype'd pointers are used
 SILO_DTYPPTR="void"
-SILO_DTYPPTR1="void*"
-SILO_DTYPPTR2="void*"
+SILO_DTYPPTR1="void const *"
+SILO_DTYPPTR2="void const * const *"
 AC_ARG_ENABLE(legacy-datatyped-pointers,
     AC_HELP_STRING([--enable-legacy-datatyped-pointers], 
         [compile using legacy (float) pointers for datatype'd pointers @<:@default=no@:>@]),

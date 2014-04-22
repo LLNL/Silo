@@ -96,6 +96,12 @@ using std::cerr;
 //
 //    Mark C. Miller, Wed Sep 12 15:34:28 PDT 2012
 //    Added logic to NOT cut DB_CHAR arrays shorter than 400 chars.
+//
+//    Mark C. Miller, Thu Dec 12 13:46:12 PST 2013
+//    Changed logic for DB_CHAR arrays to first check that all values are
+//    isprint() before treating as a printable string. If not, the DB_CHAR
+//    values are instead treated like all other types execpt as unsigned
+//    ints of size char.
 // ****************************************************************************
 SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                                          QWidget *p)
@@ -116,46 +122,20 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
     int type = silo->GetVarType(name);
     int len  = silo->GetVarLength(name);
 
-    if (type != DB_CHAR)
+    bool isString= true;
+    if (type == DB_CHAR)
     {
-        // Just a bunch of numbers: one per line
-        for (int i=0; i<len; i++)
+        char *p = (char*)var;
+        for (int i=0; i<len-1 && isString; i++)
         {
-            char str[256];
-            switch (type)
-            {
-              case DB_INT:
-                sprintf(str, "%-4d: %d", i, ((int*)var)[i]);
-                break;
-              case DB_SHORT:
-                sprintf(str, "%-4d: %d", i, ((short*)var)[i]);
-                break;
-              case DB_LONG:
-                sprintf(str, "%-4d: %ld", i, ((long*)var)[i]);
-                break;
-              case DB_LONG_LONG:
-                sprintf(str, "%-4d: %lld", i, ((long long*)var)[i]);
-                break;
-              case DB_FLOAT:
-                sprintf(str, "%-4d: %g", i, ((float*)var)[i]);
-                break;
-              case DB_DOUBLE:
-                sprintf(str, "%-4d: %g", i, ((double*)var)[i]);
-                break;
-              case DB_CHAR:
-                sprintf(str, "%-4d: %c", i, ((char*)var)[i]);
-                break;
-              case DB_NOTYPE:
-                sprintf(str, "%-4d: NOTYPE", i);
-                break;
-              default:
-                sprintf(str, "%-4d: type ???", i);
-                break;
-            }
-            lb->addItem(str);
+            if (!isprint(p[i]))
+                isString = false;
         }
+        if (p[len-1] != '\0')
+            isString = false;
     }
-    else
+
+    if (type == DB_CHAR && isString)
     {
         // Guess how to split the string based on a heuristic:
         //  - If the length is short, just stick it in
@@ -247,6 +227,45 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                 lb->addItem(str);
             }
             delete[] str;
+        }
+    }
+    else
+    {
+        // Just a bunch of numbers: one per line
+        for (int i=0; i<len; i++)
+        {
+            char str[256];
+            switch (type)
+            {
+              case DB_INT:
+                sprintf(str, "%-4d: %d", i, ((int*)var)[i]);
+                break;
+              case DB_SHORT:
+                sprintf(str, "%-4d: %d", i, ((short*)var)[i]);
+                break;
+              case DB_LONG:
+                sprintf(str, "%-4d: %ld", i, ((long*)var)[i]);
+                break;
+              case DB_LONG_LONG:
+                sprintf(str, "%-4d: %lld", i, ((long long*)var)[i]);
+                break;
+              case DB_FLOAT:
+                sprintf(str, "%-4d: %g", i, ((float*)var)[i]);
+                break;
+              case DB_DOUBLE:
+                sprintf(str, "%-4d: %g", i, ((double*)var)[i]);
+                break;
+              case DB_CHAR:
+                sprintf(str, "%-4d: %hhd", i, ((char*)var)[i]);
+                break;
+              case DB_NOTYPE:
+                sprintf(str, "%-4d: NOTYPE", i);
+                break;
+              default:
+                sprintf(str, "%-4d: type ???", i);
+                break;
+            }
+            lb->addItem(str);
         }
     }
 

@@ -62,8 +62,10 @@ in part under Contract DE-AC52-07NA27344.])
 AT_BANNER(Non-driver-specific)
 AT_SETUP(version)
 AT_DATA(expout,
-This version of Silo is greater than or equal to 4.6
-This version of Silo is NOT greater than or equal to 90.5.2
+This version of the Silo library is greater than or equal to 4
+This version of the Silo library is NOT greater than or equal to 9
+This version of the Silo library is greater than or equal to 4.6
+This version of the Silo library is NOT greater than or equal to 90.5.2
 DBVersion() returns "AT_PACKAGE_VERSION"
 DBVersionGE(4,6,0) returns 1
 DBVersionGE(90,5,2) returns 0
@@ -85,6 +87,9 @@ AT_CHECK($VALGRIND version $STARGS,,expout,ignore)
 AT_CLEANUP
 AT_SETUP(namescheme)
 AT_CHECK($VALGRIND namescheme,,ignore)
+AT_CLEANUP
+AT_SETUP(realloc_obj_and_opts)
+AT_CHECK($VALGRIND realloc_obj_and_opts $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(point)
 AT_CHECK($VALGRIND point $STARGS,,ignore)
@@ -208,6 +213,10 @@ AT_CLEANUP
 AT_SETUP(empty)
 AT_CHECK($VALGRIND empty $STARGS,,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(JSON (experimental))
+AT_KEYWORDS(json)
+AT_CHECK(test ! -e ../src/silo/silo_json.o -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND json,,ignore,ignore)
+AT_CLEANUP
 
 AT_BANNER(pythonmodule)
 AT_SETUP(read)
@@ -223,10 +232,10 @@ ndir = 1
 dir_names = (a)
 
 t2='hello'
-t6= (1.2, 10.199999999999999)
+t6=1.20,10.20
 a/t8='x2'
 t9=x3
-/t5= (1.2, 10.0)
+/t5=1.20,10.00
 ])
 AT_CHECK(test -z "$PYTHON" && exit 77 || env PYTHONPATH=../../../tools/python/.libs $PYTHON ../../test_write.py,,expout,ignore)
 AT_CLEANUP
@@ -303,6 +312,10 @@ AT_SETUP(arrayf77)
 AT_KEYWORDS(fortran)
 AT_CHECK(test ! \( -f arrayf77 -o -f ../../arrayf77 \) && exit 77 || $VALGRIND arrayf77 $STARGS,,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(arrayf90)
+AT_KEYWORDS(fortran)
+AT_CHECK(test ! \( -f arrayf90 -o -f ../../arrayf90 \) && exit 77 || $VALGRIND arrayf90 $STARGS,,ignore,ignore)
+AT_CLEANUP
 AT_SETUP(curvef77)
 AT_KEYWORDS(fortran)
 AT_CHECK(test ! \( -f curvef77 -o -f ../../curvef77 \) && exit 77 || $VALGRIND curvef77 $STARGS,,ignore,ignore)
@@ -340,7 +353,7 @@ AT_CLEANUP
 AT_SETUP(force single)
 AT_KEYWORDS(conversions)
 AT_CHECK(specmix $STARGS,,ignore)
-AT_CHECK(testdtypes `pwd` $STARGS,,ignore)
+AT_CHECK(test -z "$BROWSER" && exit 77 || $VALGRIND testdtypes `pwd` $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(multi_file)
 AT_KEYWORDS(large)

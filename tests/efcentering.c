@@ -325,14 +325,14 @@ main(int argc, char *argv[])
         }
     }
 
-    DBPutQuadmesh(dbfile, "qmesh2", coordnames, coords, dims, 2, DB_FLOAT, DB_NONCOLLINEAR, 0);
-    DBPutQuadmesh(dbfile, "qmesh3", coordnames, coords, dims, 3, DB_FLOAT, DB_NONCOLLINEAR, 0);
+    DBPutQuadmesh(dbfile, "qmesh2", (char const * const *) coordnames, (DB_DTPTR2) coords, dims, 2, DB_FLOAT, DB_NONCOLLINEAR, 0);
+    DBPutQuadmesh(dbfile, "qmesh3", (char const * const *) coordnames, (DB_DTPTR2) coords, dims, 3, DB_FLOAT, DB_NONCOLLINEAR, 0);
     DBPutQuadvar1(dbfile, "qevar2", "qmesh2", evar2d, dims, 2, 0, 0, DB_FLOAT, DB_EDGECENT, 0);
     DBPutQuadvar1(dbfile, "qevar3", "qmesh3", evar3d, dims, 3, 0, 0, DB_FLOAT, DB_EDGECENT, 0);
     DBPutQuadvar1(dbfile, "qfvar3", "qmesh3", fvar3d, dims, 3, 0, 0, DB_FLOAT, DB_FACECENT, 0);
 
-    DBPutUcdmesh(dbfile, "umesh2", 2, coordnames, coords, 16, 9,  "um2zl", 0, DB_FLOAT, 0);
-    DBPutUcdmesh(dbfile, "umesh3", 3, coordnames, coords, 64, 27, "um3zl", 0, DB_FLOAT, 0);
+    DBPutUcdmesh(dbfile, "umesh2", 2, (char const * const *) coordnames, (DB_DTPTR2) coords, 16, 9,  "um2zl", 0, DB_FLOAT, 0);
+    DBPutUcdmesh(dbfile, "umesh3", 3, (char const * const *) coordnames, (DB_DTPTR2) coords, 64, 27, "um3zl", 0, DB_FLOAT, 0);
     DBPutZonelist2(dbfile, "um2zl", 9, 2, nodelist2, ss2*sc2, 0, 0, 0, &st2, &ss2, &sc2, 1, 0);
     DBPutZonelist2(dbfile, "um3zl", 27, 3, nodelist3, ss3*sc3, 0, 0, 0, &st3, &ss3, &sc3, 1, 0);
 

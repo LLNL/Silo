@@ -790,7 +790,7 @@ static struct {                 /*Variable we are intercepting  */
  *-------------------------------------------------------------------------
  */
 static int
-satisfied ( int id, char *name, char *deplist, int *slotno)
+satisfied ( int id, char const *name, char *deplist, int *slotno)
 {
     char          *me = "satisfied";
     DBtoc         *real_toc;
@@ -879,7 +879,7 @@ satisfied ( int id, char *name, char *deplist, int *slotno)
  *-------------------------------------------------------------------------
  */
 static int
-v_exists ( DBtoc *toc, char *name)
+v_exists ( DBtoc *toc, char const *name)
 {
     int            i;
 
@@ -1168,7 +1168,7 @@ f_ale3d_NewToc(DBfile *dbfile)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_SetDir(DBfile *dbfile, char *path)
+f_ale3d_SetDir(DBfile *dbfile, char const *path)
 {
     int            dirid;
     char          *me = "f_ale3d_SetDir";
@@ -1904,7 +1904,7 @@ calc_shell_other(float *result, float **data, int length, int extra)
  *-------------------------------------------------------------------------
  */
 static DBucdvar *
-f_ale3d_GetUcdvar(DBfile *dbfile, char *name)
+f_ale3d_GetUcdvar(DBfile *dbfile, char const *name)
 {
     static int     sequence = 0;
     int            id, inter, ndeps, i, j, size, offset, slice_size, stride;
@@ -2011,7 +2011,7 @@ f_ale3d_GetUcdvar(DBfile *dbfile, char *name)
     uv->name = STRDUP(name);
     uv->units = NULL;
     uv->label = NULL;
-    uv->vals = ALLOC_N(void *, 1);
+    uv->vals = ALLOC_N(DB_DTPTR1, 1);
     uv->nels = size;
     uv->datatype = DB_FLOAT;
     uv->nvals = 1;
@@ -2126,7 +2126,7 @@ f_ale3d_GetUcdvar(DBfile *dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_InqMeshType(DBfile *dbfile, char *name)
+f_ale3d_InqMeshType(DBfile *dbfile, char const *name)
 {
     int            id, inter;
     char          *me = "f_ale3d_InqMeshType";
@@ -2180,7 +2180,7 @@ f_ale3d_InqMeshType(DBfile *dbfile, char *name)
  *-------------------------------------------------------------------------
  */
 static int
-f_ale3d_InqMeshName(DBfile *dbfile, char *name, char *meshname /*OUTPUT */)
+f_ale3d_InqMeshName(DBfile *dbfile, char const *name, char *meshname /*OUTPUT */)
 {
     int            id, inter;
     char          *me = "f_ale3d_InqMeshName";
@@ -2256,7 +2256,7 @@ f_ale3d_Open(DBfile *dbfile, char *filter_name)
         return -1;
     }
 
-    f_ale3d_name[id] = safe_strdup(filter_name);
+    f_ale3d_name[id] = _db_safe_strdup(filter_name);
     memcpy(f_ale3d_cb + id, &(dbfile->pub), sizeof(DBfile_pub));
     f_ale3d_cb[id].toc = NULL;
 
@@ -2268,7 +2268,6 @@ f_ale3d_Open(DBfile *dbfile, char *filter_name)
     FILTER_CB(close, f_ale3d_Close);
     FILTER_CB(newtoc, f_ale3d_NewToc);
     FILTER_CB(cd, f_ale3d_SetDir);
-    FILTER_CB(cdid, f_ale3d_SetDirID);
     FILTER_CB(g_dir, f_ale3d_GetDir);
     FILTER_CB(g_uv, f_ale3d_GetUcdvar);
     FILTER_CB(i_meshtype, f_ale3d_InqMeshType);

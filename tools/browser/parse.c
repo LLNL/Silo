@@ -63,6 +63,7 @@ be used for advertising or product endorsement purposes.
  *
  *-------------------------------------------------------------------------
  */
+#include <config.h>
 #include <browser.h>
 #include <ctype.h>
 #include <signal.h>
@@ -172,9 +173,9 @@ parse_init (void) {
         "use of this function is with the `ls' or `diff' functions which can "
         "take file objects as arguments. For instance, the command `ls "
         "(file curv2d.pdb)' opens the file, lists the root directory, and "
-        "then closes the file. The file is opened for read-write unless "
-        "the file has only read permission or the `$rdonly' variable is "
-        "non-zero and non-nil.  See also `help open'.");
+        "then closes the file. The file is opened for read-only unless "
+        "the `$writable' variable is non-zero and non-nil and the file has "
+        "write permission. See also `help open'.");
         
    bif ("help",         V_help,         HOLDFIRST,
         "Show documentation.",

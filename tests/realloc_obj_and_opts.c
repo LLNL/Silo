@@ -49,73 +49,68 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
-#include <assert.h>
-#include <float.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-
 #include <silo.h>
-
-#include <std.c>
-
-/*
- * 2 rows and 3 columns of variable data...
- *
- *     1 2 3
- *     4 5 6
- */
-
-int row_maj_v_data[] = {1,2,3,4,5,6};
-int col_maj_v_data[] = {1,4,2,5,3,6};
-
-float row_maj_x_data[] = {-5, 5, 10, 10, -5, 0, 5, 5, -5, -1, 0, 0};
-float row_maj_y_data[] = {10, 10, 5, -5, 5, 5, 0, -5, 0, 0, -1, -5};
-
-float col_maj_x_data[] = {-5, -5, -5, 5, 0, -1, 10, 5, 0, 10, 5, 0};
-float col_maj_y_data[] = {10, 5, 0, 10, 5, 0, 5, 0, -1, -5, -5, -5};
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <float.h>
 
 int
 main(int argc, char *argv[])
 {
-    DBfile         *dbfile = NULL;
-    int             i;
-    int		    driver = DB_PDB;
-    char 	    *filename = "majorder.silo";
-    void           *coords[2];
-    int             ndims = 2;
-    int             dims[2] = {3,2}; 
-    int             dims1[2] = {4,3}; 
-    int             colmajor = DB_COLMAJOR;
-    DBoptlist      *optlist;
+    DBobject *obj;
+    DBoptlist *opts;
+    DBfile *dbfile;
+    int comp_data[] = {0,1,2,3,4,5,6,7,8,9};
+    int ndims = 1;
+    const long int dims = sizeof(comp_data)/sizeof(comp_data[0]);
+    int cycle = 1;
+    float time = 1.5;
+    double dtime = 1.515;
+    int lo_offset = 7;
+    int hi_offset = 24;
 
-    /* Parse command-line */
-    for (i=1; i<argc; i++) {
-	if (!strncmp(argv[i], "DB_", 3)) {
-	    driver = StringToDriver(argv[i]);
-	} else if (argv[i][0] != '\0') {
-	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
-	}
-    }
-    
-    dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "test major order on quad meshes and vars", driver);
+    dbfile = DBCreate("object-tests.silo", DB_CLOBBER, DB_LOCAL, "object tests", DB_PDB);
 
-    coords[0] = row_maj_x_data;
-    coords[1] = row_maj_y_data;
-    DBPutQuadmesh(dbfile, "row_major_mesh", 0, (DB_DTPTR2) coords, dims1, ndims, DB_FLOAT, DB_NONCOLLINEAR, 0);
-    DBPutQuadvar1(dbfile, "row_major_var", "row_major_mesh", (DB_DTPTR1) row_maj_v_data, dims, ndims, 0, 0, DB_INT, DB_ZONECENT, 0);
+    /* confirm can handle more components than orginal make of '3' */
+    obj = DBMakeObject("test", DB_USERDEF, 3);
+    DBAddIntComponent(obj, "oneInt", 4);
+    DBAddIntComponent(obj, "secondInt", 5);
+    DBAddFltComponent(obj, "oneFlt", 3.5);
+    DBAddDblComponent(obj, "oneDbl", 1.53776);
+    DBAddStrComponent(obj, "foo", "bar");
+    DBAddIntComponent(obj, "anotherInt", 8);
+    DBWriteComponent(dbfile, obj, "intCompA", "pre_", "integer", comp_data, 1, &dims);
+    DBAddDblComponent(obj, "Dbl2", 1.53776);
+    DBAddDblComponent(obj, "Dbl3", 1.53776);
+    DBAddDblComponent(obj, "Dbl4", 1.53776);
+    DBWriteComponent(dbfile, obj, "intCompB", "pre_", "integer", comp_data, 1, &dims);
+    DBWriteObject(dbfile, obj, 0);
+    DBFreeObject(obj);
 
-    optlist = DBMakeOptlist(1);
-    DBAddOption(optlist, DBOPT_MAJORORDER, &colmajor);
-    coords[0] = col_maj_x_data;
-    coords[1] = col_maj_y_data;
-    DBPutQuadmesh(dbfile, "col_major_mesh", 0, (DB_DTPTR2) coords, dims1, ndims, DB_FLOAT, DB_NONCOLLINEAR, optlist);
-    DBPutQuadvar1(dbfile, "col_major_var", "col_major_mesh", (DB_DTPTR1) col_maj_v_data, dims, ndims, 0, 0, DB_INT, DB_ZONECENT, optlist);
-    DBFreeOptlist(optlist);
+    opts = DBMakeOptlist(3);
+    DBAddOption(opts, DBOPT_CYCLE, &cycle);
+    DBAddOption(opts, DBOPT_TIME, &time);
+    DBAddOption(opts, DBOPT_DTIME, &dtime);
+    DBClearOption(opts, DBOPT_CYCLE);
+    DBAddOption(opts, DBOPT_LO_OFFSET, &lo_offset);
+    DBAddOption(opts, DBOPT_HI_OFFSET, &hi_offset);
+    DBClearOptlist(opts);
+    DBAddOption(opts, DBOPT_CYCLE, &cycle);
+    DBAddOption(opts, DBOPT_TIME, &time);
+    DBAddOption(opts, DBOPT_DTIME, &dtime);
+    DBAddOption(opts, DBOPT_LO_OFFSET, &lo_offset);
+    DBAddOption(opts, DBOPT_HI_OFFSET, &hi_offset);
+    DBAddOption(opts, DBOPT_COORDSYS, &cycle);
+    DBAddOption(opts, DBOPT_NMATNOS, &cycle);
+    DBAddOption(opts, DBOPT_HIDE_FROM_GUI, &cycle);
+    DBAddOption(opts, DBOPT_TOPO_DIM, &cycle);
+    DBAddOption(opts, DBOPT_ALLOWMAT0, &cycle);
+    DBAddOption(opts, DBOPT_TV_CONNECTIVITY, &cycle);
+    DBAddOption(opts, DBOPT_DISJOINT_MODE, &cycle);
+    DBFreeOptlist(opts);
 
     DBClose(dbfile);
-
-    CleanupDriverStuff();
-
+  
     return 0;
 }

@@ -221,7 +221,7 @@ static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
     DBSetCwr(mrgt, className);
 
     int seg_types[1], seg_lens[1], seg_ids[1];
-    const int *seg_data[1];
+    int *seg_data[1];
     seg_types[0] = DB_NODECENT;
     seg_ids[0] = 0;
 
@@ -265,7 +265,7 @@ static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
                 seg_data[0] = &map_data[0];
                 string mapnm = string(regnNames[i]) + "_map";
                 DBAddRegion(mrgt, regnNames[i], 0, 0, mapnm.c_str(), 1, seg_ids, seg_lens, seg_types, 0);
-                DBPutGroupelmap(dbfile, mapnm.c_str(), 1, seg_types, seg_lens, seg_ids, (int**)seg_data, 0, 0, 0);
+                DBPutGroupelmap(dbfile, mapnm.c_str(), 1, seg_types, seg_lens, seg_ids, (int**)seg_data, 0, DB_NOTYPE, 0);
             }
         }
     }
@@ -288,7 +288,7 @@ static int WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
     int nzones = zoneClasses.GetNumEntities();
 
     DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
-    DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, nnodes, nzones, "zl", 0, DB_FLOAT, ol);
+    DBPutUcdmesh(dbfile, "mesh", 3, coordnames, (DB_DTPTR2) coords, nnodes, nzones, "zl", 0, DB_FLOAT, ol);
     DBClearOptlist(ol);
 
     vector<int> shapetyp, shapesize, shapecnt;
@@ -368,7 +368,7 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
         coords[1] = &y[0];
         coords[2] = &z[0];
         DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
-        DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, nnodes2, nzones2, "zl", 0, DB_FLOAT, ol);
+        DBPutUcdmesh(dbfile, "mesh", 3, coordnames, (DB_DTPTR2) coords, nnodes2, nzones2, "zl", 0, DB_FLOAT, ol);
         DBClearOptlist(ol);
 
         vector<int> shapetyp, shapesize, shapecnt;

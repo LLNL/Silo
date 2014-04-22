@@ -69,16 +69,16 @@ product endorsement purposes.
  * Date:       Thu May 17 13:00:50 PST 2001
  *
  */
-void    printMask(FILE * fp, long mask);
-int     test_readmat(DBfile * dbfile, const char *testName, long mask);
-int     test_readpointmesh(DBfile * dbfile, long mask);
-int     test_readpointvar(DBfile * dbfile, long mask);
-int     test_readquadmesh(DBfile * dbfile, long mask);
-int     test_readquadvar(DBfile * dbfile, long mask);
-int     test_readucdmesh(DBfile * dbfile, const char *testName, long mask);
-int     test_readucdvar(DBfile * dbfile, long mask);
-int     test_readfacelist(DBfile * dbfile, long mask);
-int     test_readzonelist(DBfile * dbfile, long mask);
+void    printMask(FILE * fp, unsigned long long mask);
+int     test_readmat(DBfile * dbfile, const char *testName, unsigned long long mask);
+int     test_readpointmesh(DBfile * dbfile, unsigned long long mask);
+int     test_readpointvar(DBfile * dbfile, unsigned long long mask);
+int     test_readquadmesh(DBfile * dbfile, unsigned long long mask);
+int     test_readquadvar(DBfile * dbfile, unsigned long long mask);
+int     test_readucdmesh(DBfile * dbfile, const char *testName, unsigned long long mask);
+int     test_readucdvar(DBfile * dbfile, unsigned long long mask);
+int     test_readfacelist(DBfile * dbfile, unsigned long long mask);
+int     test_readzonelist(DBfile * dbfile, unsigned long long mask);
 
 void    ResetTime(void);
 int     ElapsedTime(void);
@@ -115,7 +115,7 @@ main(int argc, char *argv[])
     int show_all_errors = FALSE;
 
     /* Set the masks used for the tests. */
-    long    mask[] = {
+    unsigned long long mask[] = {
         DBAll,
         DBMatMatnos,
         DBMatMatlist,
@@ -178,7 +178,7 @@ main(int argc, char *argv[])
     printf("extraordinarily large.  For an accurate timing test, this cache\n");
     printf("would have to be disabled.\n\n");
 
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n\n");
 
     /**************************************************************************
@@ -357,7 +357,7 @@ main(int argc, char *argv[])
 }
 
 int
-test_readmat(DBfile * dbfile, const char *testName, long mask)
+test_readmat(DBfile * dbfile, const char *testName, unsigned long long mask)
 {
     int     ms;
     DBmaterial *mat = NULL;
@@ -365,9 +365,9 @@ test_readmat(DBfile * dbfile, const char *testName, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("%s: ", testName);
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the material list and print the material struct. */
     mat = DBGetMaterial(dbfile, "mat1");
@@ -411,7 +411,7 @@ printMaterial(const char *routine, DBmaterial * mat)
 }
 
 int
-test_readpointmesh(DBfile * dbfile, long mask)
+test_readpointmesh(DBfile * dbfile, unsigned long long mask)
 {
     int     ms;
     DBpointmesh *pmesh = NULL;
@@ -419,9 +419,9 @@ test_readpointmesh(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("test_readpointmesh: ");
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the material list and print the material struct. */
     pmesh = DBGetPointmesh(dbfile, "dir1/pmesh");
@@ -454,7 +454,7 @@ test_readpointmesh(DBfile * dbfile, long mask)
  * Removed condition on call to DBFreeMeshvar
  */
 int
-test_readpointvar(DBfile * dbfile, long mask)
+test_readpointvar(DBfile * dbfile, unsigned long long mask)
 {
     int     ms;
     DBmeshvar *mvar = NULL;
@@ -462,9 +462,9 @@ test_readpointvar(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("test_readpointvar: ");
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the material list and print the material struct. */
     mvar = DBGetPointvar(dbfile, "dir1/d");
@@ -488,7 +488,7 @@ test_readpointvar(DBfile * dbfile, long mask)
 }
 
 int
-test_readquadmesh(DBfile * dbfile, long mask)
+test_readquadmesh(DBfile * dbfile, unsigned long long mask)
 {
     int     ms;
     DBquadmesh *qmesh = NULL;
@@ -496,9 +496,9 @@ test_readquadmesh(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("test_readquadmesh: ");
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the quad mesh and print the quadmesh struct. */
     qmesh = DBGetQuadmesh(dbfile, "quadmesh2d");
@@ -531,7 +531,7 @@ test_readquadmesh(DBfile * dbfile, long mask)
  * Removed condition on DBFreeQuadvar call.
  */
 int
-test_readquadvar(DBfile * dbfile, long mask)
+test_readquadvar(DBfile * dbfile, unsigned long long mask)
 {
     int     ms;
     DBquadvar *qvar = NULL;
@@ -539,9 +539,9 @@ test_readquadvar(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("test_readquadvar: ");
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the quad var and print the struct. */
     qvar = DBGetQuadvar(dbfile, "d");
@@ -566,7 +566,7 @@ test_readquadvar(DBfile * dbfile, long mask)
 }
 
 int
-test_readucdmesh(DBfile * dbfile, const char *testName, long mask)
+test_readucdmesh(DBfile * dbfile, const char *testName, unsigned long long mask)
 {
     int     ms;
     DBucdmesh *umesh = NULL;
@@ -574,9 +574,9 @@ test_readucdmesh(DBfile * dbfile, const char *testName, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("%s: ", testName);
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the ucd mesh and print out the struct. */
     umesh = DBGetUcdmesh(dbfile, "mesh1");
@@ -613,7 +613,7 @@ test_readucdmesh(DBfile * dbfile, const char *testName, long mask)
  * Removed condition on DBFreeUcdvar call.
  */
 int
-test_readucdvar(DBfile * dbfile, long mask)
+test_readucdvar(DBfile * dbfile, unsigned long long mask)
 {
     int     ms;
     DBucdvar *uvar = NULL;
@@ -621,9 +621,9 @@ test_readucdvar(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("test_readucdvar: ");
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the quad var and print the struct. */
     uvar = DBGetUcdvar(dbfile, "u");
@@ -648,7 +648,7 @@ test_readucdvar(DBfile * dbfile, long mask)
 }
 
 int
-test_readfacelist(DBfile * dbfile, long mask)
+test_readfacelist(DBfile * dbfile, unsigned long long mask)
 {
     int     ms;
     DBfacelist *fl = NULL;
@@ -656,9 +656,9 @@ test_readfacelist(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("test_readfacelist: ");
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the face list and print the struct. */
     fl = DBGetFacelist(dbfile, "fl");
@@ -688,7 +688,7 @@ test_readfacelist(DBfile * dbfile, long mask)
 }
 
 int
-test_readzonelist(DBfile * dbfile, long mask)
+test_readzonelist(DBfile * dbfile, unsigned long long mask)
 {
     int     ms;
     DBzonelist *zl = NULL;
@@ -696,9 +696,9 @@ test_readzonelist(DBfile * dbfile, long mask)
     /* Reset the timer. */
     ResetTime();
 
-    DBSetDataReadMask(mask);
+    DBSetDataReadMask2(mask);
     printf("test_readzonelist: ");
-    printMask(stdout, DBGetDataReadMask());
+    printMask(stdout, DBGetDataReadMask2());
     printf("\n");
     /* Read the face list and print the struct. */
     zl = DBGetZonelist(dbfile, "zl");
@@ -806,7 +806,7 @@ printTimes(int *ms)
 }
 
 void
-printMask(FILE * fp, long mask)
+printMask(FILE * fp, unsigned long long mask)
 {
     fprintf(fp, "readMask={");
     if (mask == DBAll)

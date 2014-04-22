@@ -240,8 +240,8 @@ main(int argc, char *argv[])
                   facelist->nshapes, facelist->types, facelist->typelist,
                   facelist->ntypes);
 
-    DBPutUcdmesh(dbfile, "hex", 3, coordnames, coords, 12, 2, "zonelist",
-                 "facelist", DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "hex", 3, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, 12, 2, "zonelist", "facelist", DB_FLOAT, NULL);
 
     DBPutUcdvar1(dbfile, "v", "hex", var, 12, NULL, 0, DB_FLOAT, DB_NODECENT,
                  NULL);

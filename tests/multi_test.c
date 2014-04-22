@@ -96,7 +96,9 @@ product endorsement purposes.
     if (MLISTS)                                             \
        DBAddOption(optlist, DBOPT_MATLISTS, MLISTS);        \
     if (HASEXT)                                             \
-       DBAddOption(optlist, DBOPT_HAS_EXTERNAL_ZONES, HASEXT)
+       DBAddOption(optlist, DBOPT_HAS_EXTERNAL_ZONES, HASEXT);\
+    if (missing_value != DB_MISSING_VALUE_NOT_SET)\
+       DBAddOption(optlist, DBOPT_MISSING_VALUE, &missing_value)
 
 #define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
 
@@ -300,7 +302,8 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutUcdmesh(F,MN,NDS,CNMS,CS,NNS,NZS,ZLNM,FLNM,DTYPE,OL)==0);    \
+        ASSERT(DBPutUcdmesh(F,MN,NDS,(char const * const *) CNMS,        \
+            (DB_DTPTR2) CS,NNS,NZS,ZLNM,FLNM,DTYPE,OL)==0);              \
     }                                                                    \
 }
 
@@ -333,7 +336,8 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutQuadmesh(F,MN,CNMS,CS,DS,NDS,DTYPE,CTYPE,OL)==0);    \
+        ASSERT(DBPutQuadmesh(F,MN,(char const * const *) CNMS,           \
+            (DB_DTPTR2) CS,DS,NDS,DTYPE,CTYPE,OL)==0);    \
     }                                                                    \
 }
 
@@ -366,7 +370,7 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutPointmesh(F,MN,NDS,CS,NPTS,DTYPE,OL)==0);            \
+        ASSERT(DBPutPointmesh(F,MN,NDS,(DB_DTPTR2)CS,NPTS,DTYPE,OL)==0); \
     }                                                                    \
 }
 
@@ -396,11 +400,12 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutUcdvar(F,VN,MN,NV,VNMS,VP,NVALS,MXVALS,MXLEN,DTYPE,CENT,OL)==0); \
+        ASSERT(DBPutUcdvar(F,VN,MN,NV,(char const * const *)VNMS,        \
+            (DB_DTPTR2) VP,NVALS,MXVALS,MXLEN,DTYPE,CENT,OL)==0);        \
     }                                                                    \
 }
 
-#define TESTQVAR(F,VN,MN,VP,DS,NDS,VTYPE,CENT,OL)                       \
+#define TESTQVAR(F,VN,MN,VP,DS,NDS,VTYPE,CENT,OL)                        \
 {                                                                        \
     int sz = DS[0]*(NDS>=2?DS[1]:1)*(NDS==3?DS[2]:1);                    \
     if (handle_read)                                                     \
@@ -458,7 +463,7 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutPointvar(F,VN,MN,NV,VP,NPTS,DTYPE,OL)==0);           \
+        ASSERT(DBPutPointvar(F,VN,MN,NV,(DB_DTPTR2)VP,NPTS,DTYPE,OL)==0);\
     }                                                                    \
 }
 
@@ -503,6 +508,7 @@ int driver = DB_PDB;
 int check_early_close = FALSE;
 int testread = FALSE;
 int testbadread = FALSE;
+double missing_value = DB_MISSING_VALUE_NOT_SET;
 
 int           build_multi(DBfile *, int, int, int, int, int, int, int, int);
 
@@ -812,6 +818,8 @@ main(int argc, char *argv[])
             testread = 1;
         } else if (!strcmp(argv[i], "testbadread")) {
             testbadread = 1;
+        } else if (!strcmp(argv[i], "missing-value")) {
+            missing_value = strtod(argv[++i],0);
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
@@ -836,7 +844,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -867,7 +875,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5, 1, 1, DB_NONCOLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -898,7 +906,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5, 1, 1, 0, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -929,7 +937,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_COLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -960,7 +968,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_NONCOLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -992,7 +1000,7 @@ main(int argc, char *argv[])
         if (testread || testbadread)
         {
             fprintf(stdout, "reading %s\n", filename);
-            if (dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ))
+            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
             {
                 if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3, 4, 3, 0, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
@@ -1214,7 +1222,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     /* create the multi-block variables */
     extentssize = 2;
     SET_OPTIONS(extentssize,varextents[3],NULL,NULL,NULL,NULL,NULL);
-    if (DBPutMultivar(dbfile, "d", nblocks, var1names, vartypes, optlist)
+    if (DBPutMultivar(dbfile, "d", nblocks, (char const * const *) var1names, vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -1222,7 +1230,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* if */
     SET_OPTIONS(extentssize,varextents[4],NULL,NULL,NULL,NULL,NULL);
-    if (DBPutMultivar(dbfile, "p", nblocks, var2names, vartypes, optlist)
+    if (DBPutMultivar(dbfile, "p", nblocks, (char const * const *) var2names, vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -1230,7 +1238,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* if */
     SET_OPTIONS(extentssize,varextents[5],NULL,NULL,NULL,NULL,NULL);
-    if (DBPutMultivar(dbfile, "u", nblocks, var3names, vartypes, optlist)
+    if (DBPutMultivar(dbfile, "u", nblocks, (char const * const *) var3names, vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -1238,7 +1246,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* if */
     SET_OPTIONS(extentssize,varextents[6],NULL,NULL,NULL,NULL,NULL);
-    if (DBPutMultivar(dbfile, "v", nblocks, var4names, vartypes, optlist)
+    if (DBPutMultivar(dbfile, "v", nblocks, (char const * const *) var4names, vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -1248,7 +1256,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     if (dim == 3)
     {
         SET_OPTIONS(extentssize,varextents[7],NULL,NULL,NULL,NULL,NULL);
-        if (DBPutMultivar(dbfile, "w", nblocks, var5names, vartypes, optlist)
+        if (DBPutMultivar(dbfile, "w", nblocks, (char const * const *) var5names, vartypes, optlist)
             == -1)
         {
             DBFreeOptlist(optlist);
@@ -1269,7 +1277,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     SET_OPTIONS(extentssize,NULL,NULL,mixlens,matcounts,tmpList,NULL);
     if (meshtype != DB_POINTMESH)
     {
-        if (DBPutMultimat(dbfile, "mat1", nblocks, matnames, optlist) == -1)
+        if (DBPutMultimat(dbfile, "mat1", nblocks, (char const * const *) matnames, optlist) == -1)
         {
             DBFreeOptlist(optlist);
             fprintf(stderr, "Error creating multi material\n");
@@ -1284,7 +1292,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
             char *matrnames[3] = {"outer","middle","inner"};
             DBAddOption(optlist, DBOPT_MATCOLORS, colors);
             DBAddOption(optlist, DBOPT_MATNAMES, matrnames);
-            if (DBPutMultimat(dbfile, "mat2", nblocks, matnames, optlist) == -1)
+            if (DBPutMultimat(dbfile, "mat2", nblocks, (char const * const *) matnames, optlist) == -1)
             {
                 DBFreeOptlist(optlist);
                 fprintf(stderr, "Error creating multi material\n");
@@ -1326,7 +1334,8 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         sprintf(defns[2], "nmats(mat1)");
         pdefns[2] = defns[2];
 
-        DBPutDefvars(dbfile, "defvars", ndefs, pvnames, types, pdefns, 0);
+        DBPutDefvars(dbfile, "defvars", ndefs, (char const * const *) pvnames, types,
+            (char const * const *) pdefns, 0);
     }
 
     return (0);
@@ -1487,9 +1496,9 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     dims2[1] = NY;
     mixlen = 0;
     matnames = (char**)malloc(sizeof(char*)*nmats);
-    matnames[0] = safe_strdup("Shredded documents");
-    matnames[1] = safe_strdup("Marble");
-    matnames[2] = safe_strdup("Gold bullion");
+    matnames[0] = _db_safe_strdup("Shredded documents");
+    matnames[1] = _db_safe_strdup("Marble");
+    matnames[2] = _db_safe_strdup("Gold bullion");
 
     /*
      * Put in material 1.
@@ -2853,8 +2862,8 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                             (x[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] - xcenter) +
                             (y[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] - ycenter) *
                             (y[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] - ycenter));
-                d[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] = dist;
-                p[i * (NX + 1) * (NY + 1) + j * (NX + 1) + k] = 1. / (dist + .0001);
+                d[i * NX * NY + j * NX + k] = dist;
+                p[i * NX * NY + j * NX + k] = 1. / (dist + .0001);
             }
         }
     }

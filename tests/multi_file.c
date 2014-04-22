@@ -89,7 +89,7 @@ void fill_bkgr(int *, int, int, int, int);
 void fill_mat(float *, float *, float *, int *, int, int, int,
     int *, int *, int *, float *, int *, int, double, double, double, double);
 
-int  build_multi(char *, int, char *, int, int, int);
+int  build_multi(char *, int, char *, int, int, int, int);
 
 void build_block_ucd3d(char *, int, char *, int, int, int);
 
@@ -112,7 +112,12 @@ main(int argc, char *argv[])
     char          *basename="ucd3d";
     char          *file_ext="pdb";
     int            driver=DB_PDB;
-    int            show_all_errors = FALSE;
+    int            show_all_errors = 0;
+#if !defined(_WIN32)
+    int            windows_style_slash = 0;
+#else
+    int            windows_style_slash = 1;
+#endif
 
     /*
      * Parse the command-line.
@@ -137,6 +142,8 @@ main(int argc, char *argv[])
             empties = 1;
         else if (!strcmp(argv[i], "show-all-errors"))
             show_all_errors = 1;
+        else if (!strcmp(argv[i], "invert-slash-style"))
+            windows_style_slash = !windows_style_slash;
 	else if (argv[i][0] != '\0')
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
     }
@@ -147,7 +154,7 @@ main(int argc, char *argv[])
     /* 
      * Create the multi-block ucd 3d mesh.
      */
-    build_multi(basename, driver, file_ext, 6, 8, 6);
+    build_multi(basename, driver, file_ext, 6, 8, 6, windows_style_slash);
 
     CleanupDriverStuff();
     return 0;
@@ -314,7 +321,8 @@ fill_mat(float *x, float *y, float *z, int *matlist, int nx,
  ***********************************************************************/
 int
 build_multi(char *basename, int driver, char *file_ext,
-            int nblocks_x, int nblocks_y, int nblocks_z)
+            int nblocks_x, int nblocks_y, int nblocks_z,
+            int windows_style_slash)
 {
     int             i;
     int             cycle;
@@ -360,11 +368,12 @@ build_multi(char *basename, int driver, char *file_ext,
 
         filenum = i / (nblocks / NFILES);
         if (multidir)
-#ifdef WIN32	
-            sprintf(prefix, "multi_file.dir\\%03d\\%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
-#else
-            sprintf(prefix, "multi_file.dir/%03d/%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
-#endif
+        {
+            if (windows_style_slash)
+                sprintf(prefix, "multi_file.dir\\%03d\\%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
+            else
+                sprintf(prefix, "multi_file.dir/%03d/%s%d.%s:/block%d/", filenum, basename, filenum, file_ext, i);
+        }
         else
             sprintf(prefix, "%s%d.%s:/block%d/", basename, filenum, file_ext, i);
 
@@ -395,11 +404,11 @@ build_multi(char *basename, int driver, char *file_ext,
     {
         if (multidir)
         {
-#ifdef WIN32	
-            sprintf(file_ns, "|multi_file.dir\\%%03d\\%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
-#else
-            sprintf(file_ns, "|multi_file.dir/%%03d/%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
-#endif
+            if (windows_style_slash)
+                sprintf(file_ns, "|multi_file.dir\\%%03d\\%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
+            else
+                sprintf(file_ns, "|multi_file.dir/%%03d/%%s%%d.%%s|n/36|'%s'|n/36|'%s'", basename, file_ext);
+    
         }
         else
             sprintf(file_ns, "|%%s%%d.%%s|'%s'|n/36|'%s'", basename, file_ext);
@@ -454,7 +463,8 @@ build_multi(char *basename, int driver, char *file_ext,
      */
     block_type = DB_UCDMESH;
     if (DBPutMultimesh(dbfile, "mesh1", nblocks,
-                       use_ns?0:meshnames, use_ns?0:meshtypes, optlist) == -1)
+                       (char const * const *) (use_ns?0:meshnames),
+                       use_ns?0:meshtypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi mesh\n");
@@ -462,7 +472,7 @@ build_multi(char *basename, int driver, char *file_ext,
     }
     block_type = DB_UCDVAR;
     sprintf(block_ns, "|/block%%d/d|n");
-    if (DBPutMultivar(dbfile, "d", nblocks, use_ns?0:var1names, use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "d", nblocks, (char const * const *) (use_ns?0:var1names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -470,7 +480,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/p|n");
-    if (DBPutMultivar(dbfile, "p", nblocks, use_ns?0:var2names, use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "p", nblocks, (char const * const *) (use_ns?0:var2names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -478,7 +488,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/u|n");
-    if (DBPutMultivar(dbfile, "u", nblocks, use_ns?0:var3names, use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "u", nblocks, (char const * const *) (use_ns?0:var3names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -486,7 +496,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/v|n");
-    if (DBPutMultivar(dbfile, "v", nblocks, use_ns?0:var4names, use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "v", nblocks, (char const * const *) (use_ns?0:var4names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -494,7 +504,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/w|n");
-    if (DBPutMultivar(dbfile, "w", nblocks, use_ns?0:var5names, use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "w", nblocks, (char const * const *) (use_ns?0:var5names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -502,7 +512,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/mat1|n");
-    if (DBPutMultimat(dbfile, "mat1", nblocks, use_ns?0:matnames, optlist) == -1)
+    if (DBPutMultimat(dbfile, "mat1", nblocks, (char const * const *) (use_ns?0:matnames), optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi material\n");
@@ -534,7 +544,8 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     int             cycle;
     float           time;
     double          dtime;
-    char           *coordnames[3];
+    char const * const coordnames[3] = {"xcoords", "ycoords", "zcoords"};
+ 
     float          *coords[3];
     float          *x=NULL, *y=NULL, *z=NULL;
 
@@ -685,9 +696,6 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     dtime = 4.8;
 
     meshname = "mesh1";
-    coordnames[0] = "xcoords";
-    coordnames[1] = "ycoords";
-    coordnames[2] = "zcoords";
 
     var1name = "d";
     var2name = "p";
@@ -736,7 +744,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         unlink("multi_file.dir/007/ucd3d7.h5");
         rmdir("multi_file.dir/007");
         rmdir("multi_file.dir");
-#ifndef WIN32
+#if !defined(_WIN32)
         st = mkdir("multi_file.dir",S_IRWXU|S_IRWXG|S_IRWXU);
 #else
         st = _mkdir("multi_file.dir");
@@ -978,7 +986,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
                 int st;
                 char dname[60];
                 sprintf(dname, "multi_file.dir/%03d", filenum);
-#ifndef WIN32
+#if !defined(_WIN32)
                 st = mkdir(dname, S_IRWXU|S_IRWXG|S_IRWXU);
 #else
                 st = _mkdir(dname);
@@ -1076,32 +1084,32 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
             /* 
              * Output the rest of the mesh and variables.
              */
-            DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
+            DBPutUcdmesh(dbfile, meshname, 3, coordnames, (DB_DTPTR2) coords,
                          nnodes, nzones, "zl1", nfaces>0?"fl1":0, DB_FLOAT, optlist);
 
             vars[0] = d2;
             varnames[0] = var1name;
-            DBPutUcdvar(dbfile, var1name, meshname, 1, varnames, vars,
+            DBPutUcdvar(dbfile, var1name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             vars[0] = p2;
             varnames[0] = var2name;
-            DBPutUcdvar(dbfile, var2name, meshname, 1, varnames, vars,
+            DBPutUcdvar(dbfile, var2name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             vars[0] = u2;
             varnames[0] = var3name;
-            DBPutUcdvar(dbfile, var3name, meshname, 1, varnames, vars,
+            DBPutUcdvar(dbfile, var3name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             vars[0] = v2;
             varnames[0] = var4name;
-            DBPutUcdvar(dbfile, var4name, meshname, 1, varnames, vars,
+            DBPutUcdvar(dbfile, var4name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             vars[0] = w2;
             varnames[0] = var5name;
-            DBPutUcdvar(dbfile, var5name, meshname, 1, varnames, vars,
+            DBPutUcdvar(dbfile, var5name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             DBPutMaterial(dbfile, matname, meshname, nmats, matnos,

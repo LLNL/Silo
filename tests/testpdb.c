@@ -60,7 +60,7 @@ product endorsement purposes.
 #include <stdlib.h>
 #include <string.h>
 
-char *safe_strdup(const char *);
+char *_db_safe_strdup(const char *);
 
 typedef struct {
     char          *name;
@@ -113,12 +113,14 @@ float coord0_data[20] = { 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.,
                          10., 11., 12., 13., 14., 15., 16., 17., 18., 19.};
 
 
-main ()
+int main ()
 {
 
     CreateFile("abc.pdb", "mesh", "ucdmesh", 17, comp_names, pdb_names);
 
     ReadFile("abc.pdb", "mesh");
+
+    return 0;
 }
 
 void

@@ -53,9 +53,9 @@
 ## Procss this file with automake to create Makefile.in
 
 
-TOOLS_DIR =
+TOOLS_DIR = silock
 if BROWSER_NEEDED
-TOOLS_DIR += browser silock
+TOOLS_DIR += browser
 endif
 if PYTHON_NEEDED
 TOOLS_DIR += python

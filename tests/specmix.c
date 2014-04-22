@@ -86,6 +86,14 @@ product endorsement purposes.
 #define lim(a,l,h) (max(min((a),(h)),(l)))
 #define lim01(a)   (lim((a),0,1))
 
+static double difftol = 0.000001;
+static int equald(double a, double b)
+{
+    if (a == 0 && b == 0) return 1;
+    if (b == 0) return 0;
+    return fabs(a/b - 1.0) < difftol;
+}
+
 /* Structures for a 2-d problem domain: */
 
 /* Struct: Node */
@@ -102,7 +110,9 @@ typedef struct {
   int   nmats;
   int   mats[MAXMAT+1];
   float matvf[MAXMAT+1];
+  double matvfd[MAXMAT+1];
   float specmf[MAXMAT+1][MAXSPEC];
+  double specmfd[MAXMAT+1][MAXSPEC];
   Node *n[2][2];  /* the four nodes at the corners of this zone*/
 } Zone;
 
@@ -120,7 +130,8 @@ void Mesh_Create(Mesh*,int,int); /* constructor */
 /* file-writing functions */
 void writemesh_curv2d(DBfile*,int,int);
 void writemesh_ucd2d(DBfile*,int,int);
-int writematspec(DBfile*);
+typedef enum _DoSpecOp_t { doWrite, doReadAndCheck} DoSpecOp_t;
+int domatspec(DBfile*,DoSpecOp_t,int);
 
 /* problem specifics */
 enum ZVARS { ZV_P, ZV_D };
@@ -211,6 +222,9 @@ int main(int argc, char *argv[]) {
 	  reorder = 1;
       } else if (!strcmp(argv[i], "show-all-errors")) {
           show_all_errors = 1;
+      } else if (!strcmp(argv[i], "difftol")) {
+          difftol = strtod(argv[i+1], 0);
+          i++;
       } else if (argv[i][0] != '\0') {
 	  fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
       }
@@ -287,6 +301,7 @@ int main(int argc, char *argv[]) {
 	int   i,j;
 	int   c=0;
 	float vf=0.;
+        double vfd=0.;
 	const int RES=40; /* subsampling resolution */
 
 	/* Subsample the zone at RESxRES to    *
@@ -321,9 +336,12 @@ int main(int argc, char *argv[]) {
 	  }
 	}
 
+        vfd = vf;
 	vf /= (float)c;
+        vfd /= (double)c;
 
 	mesh.zone[x][y].matvf[m]=vf;
+	mesh.zone[x][y].matvfd[m]=vfd;
 	if (vf)
 	  mesh.zone[x][y].nmats++;
       }
@@ -370,43 +388,51 @@ int main(int argc, char *argv[]) {
 	    float y11=mesh.zone[x][y].n[1][1]->y;
 	    float xx=(x00+x10+x01+x11)/4.;
 	    float yy=(y00+y10+y01+y11)/4.;
+	    double xxd=(x00+x10+x01+x11)/4.;
+	    double yyd=(y00+y10+y01+y11)/4.;
 	    
-	    float mf=0;
+	    float mf=0.;
+	    double mfd=0.;
 	    float g,g1,g2; /* gradient values */
+	    double gd,g1d,g2d; /* gradient values */
 	    switch (m) {
 	    case 1:
 	      g=lim01((xx+20.)/40.);
+	      gd=lim01((xxd+20.)/40.);
 	      switch (s) {
-	      case 0: mf=g;	      break;
-	      case 1: mf=1.-g;	      break;
+	      case 0: mf=g;    mfd=gd;    break;
+	      case 1: mf=1.-g; mfd=1.-gd; break;
 	      default: exit(-1);
 	      }
 	      break;
 	    case 2:
 	      g=lim01((yy+20.)/40.);
+	      gd=lim01((yyd+20.)/40.);
 	      switch (s) {
-	      case 0: mf=.2+g/2.;     break;
-	      case 1: mf=.5-g/2.;     break;
-	      case 2: mf=.2;	      break;
-	      case 3: mf=.1;	      break;
+	      case 0: mf=.2+g/2.; mfd=.2+gd/2.; break;
+	      case 1: mf=.5-g/2.; mfd=.5-gd/2.; break;
+	      case 2: mf=.2;      mfd=.2;       break;
+	      case 3: mf=.1;      mfd=.1;       break;
 	      default: exit(-1);
 	      }
 	      break;
 	    case 3:
 	      g1=lim01((xx-5+yy+40.)/80.);
 	      g2=lim01((xx-5-yy+40.)/80.);
+	      g1d=lim01((xxd-5+yyd+40.)/80.);
+	      g2d=lim01((xxd-5-yyd+40.)/80.);
 	      switch (s) {
-	      case 0: mf=g1/2.;	      break;
-	      case 1: mf=g2/4.;	      break;
-	      case 2: mf=.5-g1/2.;    break;
-	      case 3: mf=.25-g2/4.;   break;
-	      case 4: mf=.25;	      break;
+	      case 0: mf=g1/2.;	    mfd=g1d/2.;     break;
+	      case 1: mf=g2/4.;	    mfd=g2d/4.;     break;
+	      case 2: mf=.5-g1/2.;  mfd=.5-g1d/2.;  break;
+	      case 3: mf=.25-g2/4.; mfd=.25-g2d/4.; break;
+	      case 4: mf=.25;	    mfd=.25;        break;
 	      default: exit(-1);
 	      }
 	      break;
 	    case 4:
 	      switch (s) {
-	      case 0: mf=1.0;	      break;
+	      case 0: mf=1.0; mfd=1.0;  break;
 	      default: exit(-1);
 	      }
 	      break;
@@ -416,6 +442,7 @@ int main(int argc, char *argv[]) {
 	    }
 	    
 	    mesh.zone[x][y].specmf[m][s] = mf;
+	    mesh.zone[x][y].specmfd[m][s] = mfd;
 	    mftot += mf;
 	  }
 	  if (mftot < .99 || mftot > 1.01) {
@@ -436,15 +463,26 @@ int main(int argc, char *argv[]) {
   sprintf(filename, "specmix_quad%s", file_ext);
   printf("Writing %s using curvilinear mesh.\n", filename);
   db=DBCreate(filename, DB_CLOBBER, DB_LOCAL, "Mixed zone species test", driver);
-  mixc=writematspec(db);
+  mixc=domatspec(db, doWrite, 0);
   writemesh_curv2d(db,mixc,reorder);
   DBClose(db);
 
   sprintf(filename, "specmix_ucd%s", file_ext);
   printf("Writing %s using unstructured mesh.\n", filename);
   db=DBCreate(filename, DB_CLOBBER, DB_LOCAL, "Mixed zone species test", driver);
-  mixc=writematspec(db);
+  mixc=domatspec(db, doWrite, 0);
   writemesh_ucd2d(db,mixc,reorder);
+  DBClose(db);
+
+  /* Test read-back of species */
+  printf("Reading %s with Force Single off.\n", filename);
+  db=DBOpen(filename, driver, DB_READ);
+  domatspec(db, doReadAndCheck, 0);
+  DBClose(db);
+  printf("Reading %s with Force Single ON.\n", filename);
+  DBForceSingle(1);
+  db=DBOpen(filename, driver, DB_READ);
+  domatspec(db, doReadAndCheck, 1);
   DBClose(db);
 
   printf("Done!\n");
@@ -516,8 +554,51 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
   dims[0]=mesh.nx;
   dims[1]=mesh.ny;
 
-  DBPutQuadmesh(db, "Mesh", coordnames, coord, dims, 2, 
-		DB_FLOAT, DB_NONCOLLINEAR, NULL);
+  DBPutQuadmesh(db, "Mesh", (char const * const *) coordnames, (DB_DTPTR2) coord,
+      dims, 2, DB_FLOAT, DB_NONCOLLINEAR, NULL);
+
+  /* Test outputting of ghost node and zone labels */
+  {
+      int i;
+      int nnodes = mesh.nx * mesh.ny;
+      int nzones = (mesh.nx-1) * (mesh.ny-1);
+      char *gn = (char *) calloc(nnodes,1);
+      char *gz = (char *) calloc(nzones,1);
+      DBoptlist *ol = DBMakeOptlist(5);
+
+      for (i = 0; i < nnodes; i++)
+      {
+          if (!(i % 3)) gn[i] = 1;
+      }
+      for (i = 0; i < nzones; i++)
+      {
+          if (!(i % 7)) gz[i] = 1;
+      }
+
+      strcpy(coordnames[0],"xn");
+      strcpy(coordnames[1],"yn");
+      DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
+      DBPutQuadmesh(db, "Mesh_gn", (char const * const *) coordnames,
+          (DB_DTPTR2) coord, dims, 2, DB_FLOAT, DB_NONCOLLINEAR, ol);
+      DBClearOption(ol, DBOPT_GHOST_NODE_LABELS);
+
+      strcpy(coordnames[0],"xz");
+      strcpy(coordnames[1],"yz");
+      DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, gz);
+      DBPutQuadmesh(db, "Mesh_gz", (char const * const *) coordnames,
+          (DB_DTPTR2) coord, dims, 2, DB_FLOAT, DB_NONCOLLINEAR, ol);
+
+      strcpy(coordnames[0],"xnz");
+      strcpy(coordnames[1],"ynz");
+      DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
+      DBPutQuadmesh(db, "Mesh_gnz", (char const * const *) coordnames,
+          (DB_DTPTR2) coord, dims, 2, DB_FLOAT, DB_NONCOLLINEAR, ol);
+
+      DBFreeOptlist(ol);
+      free(gn);
+      free(gz);
+  }
+
   free(coordnames[0]);
   free(coordnames[1]);
 
@@ -546,15 +627,15 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
     }
   }
 
-  DBPutQuadvar1(db, "u", "Mesh", f1, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "v", "Mesh", f2, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "cnvar", "Mesh", cnvar, dims, 2, NULL, 0, DB_CHAR, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "snvar", "Mesh", snvar, dims, 2, NULL, 0, DB_SHORT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "invar", "Mesh", invar, dims, 2, NULL, 0, DB_INT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "lnvar", "Mesh", lnvar, dims, 2, NULL, 0, DB_LONG, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "Lnvar", "Mesh", Lnvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "fnvar", "Mesh", fnvar, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
-  DBPutQuadvar1(db, "dnvar", "Mesh", dnvar, dims, 2, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "u", "Mesh", (DB_DTPTR1) f1, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "v", "Mesh", (DB_DTPTR1) f2, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "cnvar", "Mesh", (DB_DTPTR1) cnvar, dims, 2, NULL, 0, DB_CHAR, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "snvar", "Mesh", (DB_DTPTR1) snvar, dims, 2, NULL, 0, DB_SHORT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "invar", "Mesh", (DB_DTPTR1) invar, dims, 2, NULL, 0, DB_INT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "lnvar", "Mesh", (DB_DTPTR1) lnvar, dims, 2, NULL, 0, DB_LONG, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "Lnvar", "Mesh", (DB_DTPTR1) Lnvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "fnvar", "Mesh", (DB_DTPTR1) fnvar, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar1(db, "dnvar", "Mesh", (DB_DTPTR1) dnvar, dims, 2, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
   free(cnvar);
   free(snvar);
   free(invar);
@@ -576,8 +657,8 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
   varbufs[3] = f2;
   varbufs[4] = f1;
   varbufs[5] = f2;
-  DBPutQuadvar(db, "manyc", "Mesh", 6, varnames, varbufs, dims, 2, NULL, 0,
-    DB_FLOAT, DB_NODECENT, NULL);
+  DBPutQuadvar(db, "manyc", "Mesh", 6, (char const * const *) varnames,
+      (DB_DTPTR2) varbufs, dims, 2, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
 
   /* do Zone vars */
 
@@ -616,15 +697,15 @@ void writemesh_curv2d(DBfile *db, int mixc, int reorder) {
     fm[mixc-2]=tmp;
   }
 
-  DBPutQuadvar1(db, "p", "Mesh", f1, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "d", "Mesh", f2, dims, 2, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "czvar", "Mesh", czvar, dims, 2, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "szvar", "Mesh", szvar, dims, 2, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "izvar", "Mesh", izvar, dims, 2, NULL, 0, DB_INT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "lzvar", "Mesh", lzvar, dims, 2, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "Lzvar", "Mesh", Lzvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "fzvar", "Mesh", fzvar, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutQuadvar1(db, "dzvar", "Mesh", dzvar, dims, 2, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "p", "Mesh", (DB_DTPTR1) f1, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "d", "Mesh", (DB_DTPTR1) f2, dims, 2, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "czvar", "Mesh", (DB_DTPTR1) czvar, dims, 2, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "szvar", "Mesh", (DB_DTPTR1) szvar, dims, 2, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "izvar", "Mesh", (DB_DTPTR1) izvar, dims, 2, NULL, 0, DB_INT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "lzvar", "Mesh", (DB_DTPTR1) lzvar, dims, 2, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "Lzvar", "Mesh", (DB_DTPTR1) Lzvar, dims, 2, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "fzvar", "Mesh", (DB_DTPTR1) fzvar, dims, 2, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutQuadvar1(db, "dzvar", "Mesh", (DB_DTPTR1) dzvar, dims, 2, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
   free(czvar);
   free(szvar);
   free(izvar);
@@ -666,6 +747,7 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
   int nzones;
   int shapesize[1];
   int shapecnt[1];
+  int shapetyp[1];
 
   /* do mesh */
   c=0;
@@ -703,11 +785,43 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
   nzones=mesh.zx*mesh.zy;
   shapesize[0]=4;
   shapecnt[0]=nzones;
+  shapetyp[0]=DB_ZONETYPE_QUAD;
 
-  DBSetDeprecateWarnings(0);
-  DBPutZonelist(db,"Mesh_zonelist",nzones,2,nl,lnodelist,0,shapesize,shapecnt,1);
-  DBSetDeprecateWarnings(3);
-  DBPutUcdmesh (db,"Mesh",2,NULL,coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,NULL);
+  DBPutZonelist2(db,"Mesh_zonelist",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,NULL);
+  DBPutUcdmesh (db,"Mesh",2,NULL,(DB_DTPTR2)coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,NULL);
+
+  /* test output of ghost node and zone labels */
+  {
+      int i;
+      char *gn = calloc(nnodes,1);
+      char *gz = calloc(nzones,1);
+      DBoptlist *ol = DBMakeOptlist(5);
+
+      for (i = 0; i < nnodes; i++)
+      {
+          if (!(i % 3)) gn[i] = 1;
+      } 
+      for (i = 0; i < nzones; i++)
+      {
+          if (!(i % 7)) gz[i] = 1;
+      } 
+
+      DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
+      DBPutUcdmesh (db,"Mesh_gn",2,NULL,(DB_DTPTR2)coord,nnodes,nzones,"Mesh_zonelist",NULL,DB_FLOAT,ol);
+      DBClearOption(ol, DBOPT_GHOST_NODE_LABELS);
+
+      DBPutUcdmesh (db,"Mesh_gz",2,NULL,(DB_DTPTR2)coord,nnodes,nzones,"Mesh_zonelist_gz",NULL,DB_FLOAT,NULL);
+      DBAddOption(ol, DBOPT_GHOST_ZONE_LABELS, gz);
+      DBPutZonelist2(db,"Mesh_zonelist_gz",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,ol);
+
+      DBAddOption(ol, DBOPT_GHOST_NODE_LABELS, gn);
+      DBPutUcdmesh (db,"Mesh_gnz",2,NULL,(DB_DTPTR2)coord,nnodes,nzones,"Mesh_zonelist_gnz",NULL,DB_FLOAT,ol);
+      DBPutZonelist2(db,"Mesh_zonelist_gnz",nzones,2,nl,lnodelist,0,0,0,shapetyp,shapesize,shapecnt,1,ol);
+
+      DBFreeOptlist(ol);
+      free(gn);
+      free(gz);
+  }
 
   /* do Node vars */
 
@@ -740,19 +854,17 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
     int val = DB_ON;
 
     DBAddOption(opt,DBOPT_USESPECMF,&val);
-    DBPutUcdvar1(db, "u", "Mesh", f1, nnodes, NULL, 0, DB_FLOAT,
-        DB_NODECENT, opt);
-    DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT,
-        DB_NODECENT, opt);
-    DBPutUcdvar1(db, "u", "Mesh", f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "v", "Mesh", f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "cnvar", "Mesh", cnvar, nnodes, NULL, 0, DB_CHAR, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "snvar", "Mesh", snvar, nnodes, NULL, 0, DB_SHORT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "invar", "Mesh", invar, nnodes, NULL, 0, DB_INT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "lnvar", "Mesh", lnvar, nnodes, NULL, 0, DB_LONG, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "Lnvar", "Mesh", Lnvar, nnodes, NULL, 0, DB_LONG_LONG, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "fnvar", "Mesh", fnvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
-    DBPutUcdvar1(db, "dnvar", "Mesh", dnvar, nnodes, NULL, 0, DB_DOUBLE, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "u", "Mesh", (DB_DTPTR1) f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "v", "Mesh", (DB_DTPTR1) f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "u", "Mesh", (DB_DTPTR1) f1, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "v", "Mesh", (DB_DTPTR1) f2, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "cnvar", "Mesh", (DB_DTPTR1) cnvar, nnodes, NULL, 0, DB_CHAR, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "snvar", "Mesh", (DB_DTPTR1) snvar, nnodes, NULL, 0, DB_SHORT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "invar", "Mesh", (DB_DTPTR1) invar, nnodes, NULL, 0, DB_INT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "lnvar", "Mesh", (DB_DTPTR1) lnvar, nnodes, NULL, 0, DB_LONG, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "Lnvar", "Mesh", (DB_DTPTR1) Lnvar, nnodes, NULL, 0, DB_LONG_LONG, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "fnvar", "Mesh", (DB_DTPTR1) fnvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, opt);
+    DBPutUcdvar1(db, "dnvar", "Mesh", (DB_DTPTR1) dnvar, nnodes, NULL, 0, DB_DOUBLE, DB_NODECENT, opt);
     DBFreeOptlist(opt);
   }
   free(cnvar);
@@ -800,15 +912,15 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
     fm[mixc-2]=tmp;
   }
 
-  DBPutUcdvar1(db, "p", "Mesh", f1, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "d", "Mesh", f2, nzones, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "czvar", "Mesh", czvar, nzones, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "szvar", "Mesh", szvar, nzones, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "izvar", "Mesh", izvar, nzones, NULL, 0, DB_INT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "lzvar", "Mesh", lzvar, nzones, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "Lzvar", "Mesh", Lzvar, nzones, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "fzvar", "Mesh", fzvar, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-  DBPutUcdvar1(db, "dzvar", "Mesh", dzvar, nzones, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "p", "Mesh", (DB_DTPTR1) f1, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "d", "Mesh", (DB_DTPTR1) f2, nzones, fm, mixc, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "czvar", "Mesh", (DB_DTPTR1) czvar, nzones, NULL, 0, DB_CHAR, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "szvar", "Mesh", (DB_DTPTR1) szvar, nzones, NULL, 0, DB_SHORT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "izvar", "Mesh", (DB_DTPTR1) izvar, nzones, NULL, 0, DB_INT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "lzvar", "Mesh", (DB_DTPTR1) lzvar, nzones, NULL, 0, DB_LONG, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "Lzvar", "Mesh", (DB_DTPTR1) Lzvar, nzones, NULL, 0, DB_LONG_LONG, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "fzvar", "Mesh", (DB_DTPTR1) fzvar, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
+  DBPutUcdvar1(db, "dzvar", "Mesh", (DB_DTPTR1) dzvar, nzones, NULL, 0, DB_DOUBLE, DB_ZONECENT, NULL);
   free(czvar);
   free(szvar);
   free(izvar);
@@ -819,8 +931,54 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
 }
 
 
+#define CHECKIVAL(V1, V2)                                                   \
+if ((V1) != (V2))                                                           \
+{                                                                           \
+    fprintf(stderr, "ReadAndCheck failed at line %d, %s(%d) != %s(%d)\n",   \
+        __LINE__, #V1, V1, #V2, V2);                                        \
+    exit(-1);                                                               \
+}
+
+#define CHECKDVAL(V1, V2)                                                   \
+if (!equald(V1,V2))                                                         \
+{                                                                           \
+    fprintf(stderr, "ReadAndCheck failed at line %d, %s(%f) != %s(%f)\n",   \
+        __LINE__, #V1, V1, #V2, V2);                                        \
+    exit(-1);                                                               \
+}
+
+#define CHECKIARRVAL(A1,A2,I)                                               \
+if ((A1)[I] != (A2)[I])                                                     \
+{                                                                           \
+    fprintf(stderr, "ReadAndCheck failed at line %d, %s[%d](%d) != %s[%d](%d)\n",\
+        __LINE__, #A1, I, (A1)[I], #A2, I, (A2)[I]);                        \
+    exit(-1);                                                               \
+}
+
+#define CHECKDARRVAL(A1,A2,I)                                               \
+if (!equald((A1)[I], (A2)[I]))                                              \
+{                                                                           \
+    fprintf(stderr, "ReadAndCheck failed at line %d, %s[%d](%.16g) != %s[%d](%.16g)\n",\
+        __LINE__, #A1, I, (A1)[I], #A2, I, (A2)[I]);                        \
+    exit(-1);                                                               \
+}
+
+#define CHECKIARR(A1,A2,N)          \
+{                                   \
+    int i;                          \
+    for (i = 0; i < N; i++)         \
+        CHECKIARRVAL(A1,A2,i);      \
+}
+
+#define CHECKDARR(A1,A2,N)          \
+{                                   \
+    int i;                          \
+    for (i = 0; i < N; i++)         \
+        CHECKDARRVAL(A1,A2,i);      \
+}
+
 /*----------------------------------------------------------------------------
- * Function: writematspec
+ * Function: domatspec
  *
  * Inputs:   db (DBfile*): the Silo file handle
  *
@@ -834,7 +992,7 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
  *    Added material names.
  *---------------------------------------------------------------------------*/
 int
-writematspec(DBfile *db)
+domatspec(DBfile *db, DoSpecOp_t writeOrReadAndCheck, int forceSingle)
 {
     int     x, y, c;
     int     dims[2];
@@ -843,11 +1001,13 @@ writematspec(DBfile *db)
     int     mix_zone[1000];
     int     mix_next[1000];
     float   mix_vf[1000];
+    double  mix_vfd[1000];
     int     mixc;
     int     mfc;
     int     speclist[1000];
     int     mixspeclist[1000];
     float   specmf[10000];
+    double  specmfd[10000];
     DBoptlist      *optlist;
 
     dims[0] = mesh.zx;
@@ -888,6 +1048,7 @@ writematspec(DBfile *db)
                     {
                         mix_mat[mixc] = m;
                         mix_vf[mixc] = mesh.zone[x][y].matvf[m];
+                        mix_vfd[mixc] = mesh.zone[x][y].matvfd[m];
                         mix_zone[mixc] = c + 1; /* 1-origin */
                         nmats--;
                         if (nmats)
@@ -902,12 +1063,54 @@ writematspec(DBfile *db)
         }
     }
 
-    optlist = DBMakeOptlist(10);
-    DBAddOption(optlist, DBOPT_MATNAMES, matnames);
+    if (writeOrReadAndCheck == doWrite)
+    {
+        optlist = DBMakeOptlist(10);
+        DBAddOption(optlist, DBOPT_MATNAMES, matnames);
 
-    DBPutMaterial(db, "Material", "Mesh", nmat, matnos, matlist, dims, 2,
-                  mix_next, mix_mat, mix_zone, mix_vf, mixc, DB_FLOAT,
-                  optlist);
+        DBPutMaterial(db, "Material", "Mesh", nmat, matnos, matlist, dims, 2,
+                      mix_next, mix_mat, mix_zone, mix_vf, mixc, DB_FLOAT, optlist);
+        DBPutMaterial(db, "Materiald", "Mesh", nmat, matnos, matlist, dims, 2,
+                      mix_next, mix_mat, mix_zone, mix_vfd, mixc, DB_DOUBLE, optlist);
+
+    }
+    else /* doReadAndCheck */
+    {
+        int pass;
+        for (pass = 0; pass < 2; pass++)
+        {
+            DBmaterial *mat = DBGetMaterial(db, pass?"Material":"Materiald");
+            CHECKIVAL(mat->nmat, nmat);
+            CHECKIARR(mat->matnos, matnos, nmat);
+            CHECKIVAL(mat->ndims, 2);
+            CHECKIARR(mat->dims, dims, 2);
+            if (forceSingle)
+            {
+                CHECKIVAL(mat->datatype, DB_FLOAT);
+            }
+            else
+            {
+                CHECKIVAL(mat->datatype, pass?DB_FLOAT:DB_DOUBLE);
+            }
+            CHECKIVAL(mat->mixlen, mixc);
+            CHECKIARR(mat->matlist, matlist, dims[0]*dims[1]);
+            CHECKIARR(mat->mix_next, mix_next, mixc);
+            CHECKIARR(mat->mix_mat, mix_mat, mixc);
+            CHECKIARR(mat->mix_zone, mix_zone, mixc);
+            if (forceSingle)
+            {
+                CHECKDARR(((float*)mat->mix_vf), mix_vf, mixc);
+            }
+            else if (pass)
+            {
+                CHECKDARR(((float*)mat->mix_vf), mix_vf, mixc);
+            }
+            else
+            {
+                CHECKDARR(((double*)mat->mix_vf), mix_vfd, mixc);
+            }
+        }
+    }
 
     /* Okay! Now for the species! */
 
@@ -940,6 +1143,7 @@ writematspec(DBfile *db)
                     for (s = 0; s < nspec[m - 1]; s++)
                     {
                         specmf[mfc] = mesh.zone[x][y].specmf[m][s];
+                        specmfd[mfc] = mesh.zone[x][y].specmfd[m][s];
                         mfc++;
                     }
                 }
@@ -964,6 +1168,7 @@ writematspec(DBfile *db)
                             for (s = 0; s < nspec[m - 1]; s++)
                             {
                                 specmf[mfc] = mesh.zone[x][y].specmf[m][s];
+                                specmfd[mfc] = mesh.zone[x][y].specmfd[m][s];
                                 mfc++;
                             }
                         }
@@ -975,14 +1180,56 @@ writematspec(DBfile *db)
         }
     }
 
-    DBClearOptlist(optlist);
-    DBAddOption(optlist, DBOPT_SPECNAMES, specnames);
-    DBAddOption(optlist, DBOPT_SPECCOLORS, speccolors);
+    if (writeOrReadAndCheck == doWrite)
+    {
+        DBClearOptlist(optlist);
+        DBAddOption(optlist, DBOPT_SPECNAMES, specnames);
+        DBAddOption(optlist, DBOPT_SPECCOLORS, speccolors);
 
-    DBPutMatspecies(db, "Species", "Material", nmat, nspec, speclist, dims, 2,
-                    mfc, specmf, mixspeclist, mixc, DB_FLOAT, optlist);
+        DBPutMatspecies(db, "Species", "Material", nmat, nspec, speclist, dims, 2,
+                        mfc, specmf, mixspeclist, mixc, DB_FLOAT, optlist);
 
-    DBFreeOptlist(optlist);
+        DBPutMatspecies(db, "Speciesd", "Materiald", nmat, nspec, speclist, dims, 2,
+                        mfc, specmfd, mixspeclist, mixc, DB_DOUBLE, optlist);
+
+        DBFreeOptlist(optlist);
+    }
+    else /* doReadAndCheck */ 
+    {
+        int pass;
+        for (pass = 0; pass < 2; pass++)
+        {
+            DBmatspecies *spec = DBGetMatspecies(db, pass?"Species":"Speciesd");
+            CHECKIVAL(spec->nmat, nmat);
+            CHECKIARR(spec->nmatspec, nspec, nmat);
+            CHECKIVAL(spec->ndims, 2);
+            CHECKIARR(spec->dims, dims, 2);
+            if (forceSingle)
+            {
+                CHECKIVAL(spec->datatype, DB_FLOAT);
+            }
+            else
+            {
+                CHECKIVAL(spec->datatype, pass?DB_FLOAT:DB_DOUBLE);
+            }
+            CHECKIVAL(spec->mixlen, mixc);
+            CHECKIVAL(spec->nspecies_mf, mfc);
+            CHECKIARR(spec->speclist, speclist, dims[0]*dims[1]);
+            CHECKIARR(spec->mix_speclist, mixspeclist, mixc);
+            if (forceSingle)
+            {
+                CHECKDARR(((float*)spec->species_mf), specmf, mfc);
+            }
+            else if (pass)
+            {
+                CHECKDARR(((float*)spec->species_mf), specmf, mfc);
+            }
+            else
+            {
+                CHECKDARR(((double*)spec->species_mf), specmfd, mfc);
+            }
+        }
+    }
 
     return mixc;
 }

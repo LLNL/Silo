@@ -1235,6 +1235,10 @@ lite_PD_create (char *name) {
    file->system_version = PDB_SYSTEM_VERSION;
    file->date           = lite_SC_date();
 
+   /*
+    * Create the top-level directory
+    */
+   lite_PD_mkdir(file,"/");
    return(file);
 }
 #endif /* PDB_WRITE */

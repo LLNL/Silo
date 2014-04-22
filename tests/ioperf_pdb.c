@@ -74,7 +74,7 @@ static int Write_pdb(void *buf, size_t nbytes)
     int status;
     char dsname[256];
     static int n = 0;
-    sprintf(dsname, "data_%07d(%d)", n++, nbytes/sizeof(double));
+    sprintf(dsname, "data_%07d(%d)", n++, (int) (nbytes/sizeof(double)));
     status = lite_PD_write(pdbfile, dsname, "double", buf);
     if (status) return nbytes;
     return 0;

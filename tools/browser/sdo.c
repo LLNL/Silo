@@ -869,7 +869,7 @@ sdo_assign (obj_t _self, obj_t val) {
 
    obj_sdo_t    *self = MYCLASS(_self);
 
-   if (file_rdonly(self->sdo->file)) {
+   if (!file_writeable(self->sdo->file)) {
       out_errorn ("file `%s' is read-only", obj_name(self->sdo->file));
       return NIL;
    }

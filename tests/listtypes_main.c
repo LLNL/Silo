@@ -1,6 +1,7 @@
+#include <silo.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <silo.h>
+#include <string.h>
 #include <config.h>
 #ifdef HAVE_HDF5_H
 #include <hdf5.h>

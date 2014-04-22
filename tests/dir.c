@@ -84,7 +84,7 @@ extern int build_ucd_tri(DBfile *dbfile, char *name);
  *
  *-------------------------------------------------------------------------
  */
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     
     int            meshid, diridq, diridu, diridt;

@@ -463,7 +463,7 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
  */
 #if defined(HAVE_READLINE_READLINE_H) && defined(HAVE_LIBREADLINE)
 static char *
-browser_rl_obj_generator (char *text, int state) {
+browser_rl_obj_generator (char const *text, int state) {
 
    obj_t        f1, val;
    int          i, n;
@@ -1113,9 +1113,9 @@ process_switches(switches_t *switches, int pass)
         sym_bi_set("lowlevel", sw->lexeme, NULL, NULL);
     }
     
-    if ((sw=switch_find(switches, "--rdonly")) && sw->seen) {
+    if ((sw=switch_find(switches, "--writeable")) && sw->seen) {
         sprintf(tmp, "%d", sw->value.d); /*boolean*/
-        sym_bi_set("rdonly", tmp, NULL, NULL);
+        sym_bi_set("writeable", tmp, NULL, NULL);
     }
 
     if ((sw=switch_find(switches, "--single")) && sw->seen) {
@@ -1313,7 +1313,15 @@ main(int argc, char *argv[])
     /* We have our own readline completion function that tries to complete
      * object names instead of the standard completion function that tries
      * to complete file names. */
-    rl_completion_entry_function = (char *(*)(const char *, int)) browser_rl_obj_generator;
+#ifdef RL_READLINE_VERSION
+#   if RL_READLINE_VERSION >= 0x602
+        rl_completion_entry_function = (rl_compentry_func_t *) browser_rl_obj_generator;
+#   else
+        rl_completion_entry_function = (Function *) browser_rl_obj_generator;
+#   endif
+#else
+    rl_completion_entry_function = browser_rl_obj_generator;
+#endif
 #endif /*HAVE_READLINE_READLINE_H && HAVE_LIBREADLINE*/
 
 #if defined(HAVE_READLINE_HISTORY_H) && defined(HAVE_READLINE_HISTORY)
@@ -1513,11 +1521,11 @@ main(int argc, char *argv[])
                "displayed with a type-dependent printf(3C) format string "
                "which is user defined (e.g., `$fmt_int').");
 
-    switch_add(sws, "-r", "--rdonly",   "b=1",          NULL);
+    switch_add(sws, "-W", "--writeable",   "b=1",          NULL);
     switch_doc(NULL,
-               "If this switch is specified then all files will be open in "
-               "read-only mode regardless of their permissions. This switch "
-               "sets the $rdonly variable.");
+               "If this switch is specified then all files will be open with "
+               "write permission if the file permissions allow it. This switch "
+               "sets the $writeable variable.");
 
     switch_add(sws, "-s", "--single",   "b=1",          NULL);
     switch_doc(NULL,

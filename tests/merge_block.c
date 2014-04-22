@@ -81,7 +81,7 @@ void MCopyFile (char *fileName, char *meshFileName, int driver);
 void GetFileList (char *baseName, char ***files, int *nFiles);
 void ListSort (char **list, int n);
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
     int       i, driver = DB_PDB;
     int       nFiles;
@@ -134,6 +134,8 @@ main (int argc, char **argv)
     }
 
     CleanupDriverStuff();
+
+    return 0;
 }
 
 void

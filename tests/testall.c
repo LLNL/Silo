@@ -80,6 +80,7 @@ be used for advertising or product endorsement purposes.
 
 #include <math.h>
 #include <stdlib.h>
+#include <unistd.h>
 #ifdef WIN32
 #include <stdio.h>
 #include <io.h>
@@ -375,7 +376,9 @@ build_rect2d(DBfile * dbfile, int size, int order)
     char          *meshname = NULL, *var1name = NULL, *var2name = NULL;
     char          *var3name = NULL, *var4name = NULL, *matname = NULL;
 
-    float         *d=NULL, *p=NULL, *u=NULL, *v=NULL, *t=NULL, *ascii=NULL;
+    float         *d=NULL, *p=NULL, *u=NULL, *v=NULL, *t=NULL, *distarr=NULL;
+
+    char          *ascii=NULL, *asciiw=NULL;
 
     int            nmats;
     int            matnos[9];
@@ -386,8 +389,8 @@ build_rect2d(DBfile * dbfile, int size, int order)
     float         *mix_vf = NULL;
 
     DBoptlist     *optlist = NULL;
-    char **matnames = NULL;
-    char **matcolors = NULL;
+    char         **matnames = NULL;
+    char         **matcolors = NULL;
 
     int            one = 1;
     int            i, j;
@@ -417,7 +420,9 @@ build_rect2d(DBfile * dbfile, int size, int order)
     u = ALLOC_N (float, (nx + 1) * (ny + 1));
     v = ALLOC_N (float, (nx + 1) * (ny + 1));
     t = ALLOC_N (float, (nx + 1) * (ny + 1));
-    ascii = ALLOC_N (float, nx * ny);
+    distarr = ALLOC_N (float, nx * ny);
+    ascii = ALLOC_N (char, nx * ny);
+    asciiw = ALLOC_N (char, nx * ny * 9);
     matlist = ALLOC_N (int, nx * ny);
     mix_next = ALLOC_N (int, 40 * ny);
     mix_mat  = ALLOC_N (int, 40 * ny);
@@ -514,17 +519,24 @@ build_rect2d(DBfile * dbfile, int size, int order)
        ycenter = .5;
        for (i=0; i<nx; i++) {
           for (j=0; j<ny; j++) {
-            dist = sqrt ((x[i] - xcenter) * (x[i] - xcenter) +
-                         (y[j] - ycenter) * (y[j] - ycenter));
-            ascii[j*nx+i] = dist;
-            if (dist>maxdist) maxdist = dist;
+            distarr[j*nx+i] = sqrt ((x[i] - xcenter) * (x[i] - xcenter) +
+                                 (y[j] - ycenter) * (y[j] - ycenter));
+            if (distarr[j*nx+i]>maxdist) maxdist = distarr[j*nx+i];
           }
        }
        for (i=0; i<nx*ny; i++) {
-          ascii[i] = 'A' + 26*ascii[i]/maxdist;
+          ascii[i] = (char) ((int) ('A' + 26*distarr[i]/maxdist));
+          asciiw[0*nx*ny+i] = 'M';
+          asciiw[1*nx*ny+i] = 'a';
+          asciiw[2*nx*ny+i] = 'r';
+          asciiw[3*nx*ny+i] = 'k';
+          asciiw[4*nx*ny+i] = ' ';
+          asciiw[5*nx*ny+i] = 'M';
+          asciiw[6*nx*ny+i] = 'i';
+          asciiw[7*nx*ny+i] = 'l';
+          asciiw[8*nx*ny+i] = '\0';
        }
     }
-
 
     /*
      * Create the material array.
@@ -544,26 +556,26 @@ build_rect2d(DBfile * dbfile, int size, int order)
     dims2[1] = ny;
     mixlen = 0;
     matnames = (char**)malloc(sizeof(char*)*nmats);
-    matnames[0] = safe_strdup("Green eggs");
-    matnames[1] = safe_strdup("Ham");
-    matnames[2] = safe_strdup("Air");
-    matnames[3] = safe_strdup("Ozone");
-    matnames[4] = safe_strdup("Diamond");
-    matnames[5] = safe_strdup("Pure water");
-    matnames[6] = safe_strdup("C8H10N4O2");
-    matnames[7] = safe_strdup("Wood");
-    matnames[8] = safe_strdup("Nothing important");
+    matnames[0] = _db_safe_strdup("Green eggs");
+    matnames[1] = _db_safe_strdup("Ham");
+    matnames[2] = _db_safe_strdup("Air");
+    matnames[3] = _db_safe_strdup("Ozone");
+    matnames[4] = _db_safe_strdup("Diamond");
+    matnames[5] = _db_safe_strdup("Pure water");
+    matnames[6] = _db_safe_strdup("C8H10N4O2");
+    matnames[7] = _db_safe_strdup("Wood");
+    matnames[8] = _db_safe_strdup("Nothing important");
 
     matcolors = (char**)malloc(sizeof(char*)*nmats);
-    matcolors[0] = safe_strdup("Green");
-    matcolors[1] = safe_strdup("Red");
-    matcolors[2] = safe_strdup("Light Blue");
-    matcolors[3] = safe_strdup("Yellow");
-    matcolors[4] = safe_strdup("White");
-    matcolors[5] = safe_strdup("Blue");
-    matcolors[6] = safe_strdup("Black");
-    matcolors[7] = safe_strdup("Light Brown");
-    matcolors[8] = safe_strdup("#fcfcfc");
+    matcolors[0] = _db_safe_strdup("Green");
+    matcolors[1] = _db_safe_strdup("Red");
+    matcolors[2] = _db_safe_strdup("Light Blue");
+    matcolors[3] = _db_safe_strdup("Yellow");
+    matcolors[4] = _db_safe_strdup("White");
+    matcolors[5] = _db_safe_strdup("Blue");
+    matcolors[6] = _db_safe_strdup("Black");
+    matcolors[7] = _db_safe_strdup("Light Brown");
+    matcolors[8] = _db_safe_strdup("#fcfcfc");
 
     /*
      * Put in material 1 as the background then overlay materials
@@ -627,7 +639,7 @@ build_rect2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_MAJORORDER, &i);
 #endif
 
-    DBPutQuadmesh(dbfile, meshname, NULL, coords, dims, ndims,
+    DBPutQuadmesh(dbfile, meshname, NULL, (DB_DTPTR2) coords, dims, ndims,
                   DB_FLOAT, DB_COLLINEAR, optlist);
     DBPutQuadvar1(dbfile, var1name, meshname, d, zdims, ndims, NULL, 0,
                            DB_FLOAT, DB_ZONECENT, optlist);
@@ -650,9 +662,23 @@ build_rect2d(DBfile * dbfile, int size, int order)
 
     if (ascii) {
        j = true;
+       void *arr[9];
+       char *arrnames[] = {"L0","L1","L2","L3","L4","L5","L6","L7","L8"};
+
        DBAddOption (optlist, DBOPT_ASCII_LABEL, &j);
-       DBPutQuadvar1(dbfile, "ascii", meshname, ascii, zdims, ndims, NULL, 0,
-                     DB_FLOAT, DB_ZONECENT, optlist);
+       DBPutQuadvar1(dbfile, "ascii", meshname, (DB_DTPTR1) ascii, zdims, ndims, NULL, 0,
+                     DB_CHAR, DB_ZONECENT, optlist);
+       arr[0] = &asciiw[0*nx*ny];
+       arr[1] = &asciiw[1*nx*ny];
+       arr[2] = &asciiw[2*nx*ny];
+       arr[3] = &asciiw[3*nx*ny];
+       arr[4] = &asciiw[4*nx*ny];
+       arr[5] = &asciiw[5*nx*ny];
+       arr[6] = &asciiw[6*nx*ny];
+       arr[7] = &asciiw[7*nx*ny];
+       arr[8] = &asciiw[8*nx*ny];
+       DBPutQuadvar(dbfile, "asciiw", meshname, 9, (char const * const *) arrnames,
+           (DB_DTPTR2) arr, zdims, ndims, NULL, 0, DB_CHAR, DB_ZONECENT, optlist);
     }
 
     DBFreeOptlist(optlist);
@@ -667,7 +693,9 @@ build_rect2d(DBfile * dbfile, int size, int order)
     FREE (u);
     FREE (v);
     FREE (t);
+    FREE (distarr);
     FREE (ascii);
+    FREE (asciiw);
     FREE (matlist);
     FREE (mix_next);
     FREE (mix_mat);
@@ -884,9 +912,9 @@ build_curv2d(DBfile * dbfile, int size, int order)
     dims2[1] = ny;
     mixlen = 0;
     matnames = (char**)malloc(sizeof(char*)*nmats);
-    matnames[0] = safe_strdup("First circle of Hell");
-    matnames[1] = safe_strdup("Second circle of Hell");
-    matnames[2] = safe_strdup("Third circle of Hell");
+    matnames[0] = _db_safe_strdup("First circle of Hell");
+    matnames[1] = _db_safe_strdup("Second circle of Hell");
+    matnames[2] = _db_safe_strdup("Third circle of Hell");
 
     /*
      * Put in the material in 3 shells.
@@ -964,7 +992,7 @@ build_curv2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_MAJORORDER, &order);
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
 
-    DBPutQuadmesh(dbfile, meshname, NULL, coords, dims, ndims, DB_FLOAT,
+    DBPutQuadmesh(dbfile, meshname, NULL, (DB_DTPTR2) coords, dims, ndims, DB_FLOAT,
                   DB_NONCOLLINEAR, optlist);
 
     DBPutQuadvar1(dbfile, var1name, meshname, (float *)d, zdims, ndims, NULL,
@@ -1208,10 +1236,10 @@ build_ucd2d(DBfile * dbfile, int size, int order)
     materials[2] = 3;
     materials[3] = 4;
     matnames = (char**)malloc(sizeof(char*)*4);
-    matnames[0] = safe_strdup("Bottom");
-    matnames[1] = safe_strdup("Right");
-    matnames[2] = safe_strdup("Top");
-    matnames[3] = safe_strdup("Left");
+    matnames[0] = _db_safe_strdup("Bottom");
+    matnames[1] = _db_safe_strdup("Right");
+    matnames[2] = _db_safe_strdup("Top");
+    matnames[3] = _db_safe_strdup("Left");
 
 #define SET_MIX(mat1,mat2) \
     matlist[i] = -(current_mix+1); \
@@ -1283,7 +1311,7 @@ build_ucd2d(DBfile * dbfile, int size, int order)
                   zonelist_length, 0, shapesize, shapecount, 2);
     DBSetDeprecateWarnings(3);
 
-    DBPutUcdmesh(dbfile, "ucdmesh2d", 2, NULL, coords, nnodes, nzones,
+    DBPutUcdmesh(dbfile, "ucdmesh2d", 2, NULL, (DB_DTPTR2) coords, nnodes, nzones,
                  "ucd2d_zonelist", NULL, DB_FLOAT, optlist);
 
     /* Write out the material */
@@ -1537,14 +1565,14 @@ build_rect3d(DBfile * dbfile, int size, int order)
     dims2[2] = nz;
     mixlen = 0;
     matnames = (char**)malloc(sizeof(char*)*nmats);
-    matnames[0] = safe_strdup("Brocolli/Cheddar soup");
-    matnames[1] = safe_strdup("Beef");
-    matnames[2] = safe_strdup("Gray smoke");
-    matnames[3] = safe_strdup("Wax");
-    matnames[4] = safe_strdup("Soapstone");
-    matnames[5] = safe_strdup("Bubble gum");
-    matnames[6] = safe_strdup("Platinum");
-    matnames[7] = safe_strdup("Nitrozanium");
+    matnames[0] = _db_safe_strdup("Brocolli/Cheddar soup");
+    matnames[1] = _db_safe_strdup("Beef");
+    matnames[2] = _db_safe_strdup("Gray smoke");
+    matnames[3] = _db_safe_strdup("Wax");
+    matnames[4] = _db_safe_strdup("Soapstone");
+    matnames[5] = _db_safe_strdup("Bubble gum");
+    matnames[6] = _db_safe_strdup("Platinum");
+    matnames[7] = _db_safe_strdup("Nitrozanium");
 
     /*
      * Put in material 1 as the background then overlay materials
@@ -1605,7 +1633,7 @@ build_rect3d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_MAJORORDER, &i);
 #endif
 
-    DBPutQuadmesh(dbfile, meshname, NULL, coords, dims, ndims, DB_FLOAT,
+    DBPutQuadmesh(dbfile, meshname, NULL, (DB_DTPTR2) coords, dims, ndims, DB_FLOAT,
                   DB_COLLINEAR, optlist);
 #ifndef WIN32
     binf = open("rect3dz.bin", O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
@@ -1991,9 +2019,9 @@ build_curv3d(DBfile * dbfile, int size, int order)
     dims2[1] = ny;
     dims2[2] = nz;
     matnames = (char**)malloc(sizeof(char*)*nmats);
-    matnames[0] = safe_strdup("Greed");
-    matnames[1] = safe_strdup("Charity");
-    matnames[2] = safe_strdup("Apathy");
+    matnames[0] = _db_safe_strdup("Greed");
+    matnames[1] = _db_safe_strdup("Charity");
+    matnames[2] = _db_safe_strdup("Apathy");
 
     mixlen = 0;
 
@@ -2049,7 +2077,7 @@ build_curv3d(DBfile * dbfile, int size, int order)
     DBAddOption (optlist, DBOPT_MAJORORDER, &i);
 #endif
 
-    DBPutQuadmesh (dbfile, meshname, NULL, coords, dims, ndims,
+    DBPutQuadmesh (dbfile, meshname, NULL, (DB_DTPTR2) coords, dims, ndims,
                    DB_FLOAT, DB_NONCOLLINEAR, optlist);
 
     DBPutQuadvar1 (dbfile, var1name, meshname, d, zdims, ndims, NULL, 0,
@@ -2384,9 +2412,9 @@ build_ucd3d(DBfile * dbfile, int size, int order)
     matnos[2] = 9;
     mixlen = 0;
     matnames = (char**)malloc(sizeof(char*)*4);
-    matnames[0] = safe_strdup("Inner goop");
-    matnames[1] = safe_strdup("Middle stuff");
-    matnames[2] = safe_strdup("Outer junk");
+    matnames[0] = _db_safe_strdup("Inner goop");
+    matnames[1] = _db_safe_strdup("Middle stuff");
+    matnames[2] = _db_safe_strdup("Outer junk");
 
     /*
      * Material 1 has 2 species at static concentrations 0.1 and 0.9
@@ -2521,43 +2549,43 @@ build_ucd3d(DBfile * dbfile, int size, int order)
                   &zshapesize, &zshapecnt, 1);
     DBSetDeprecateWarnings(3);
 
-    DBPutUcdmesh(dbfile, meshname, 3, NULL, coords, nnodes, nzones,
+    DBPutUcdmesh(dbfile, meshname, 3, NULL, (DB_DTPTR2) coords, nnodes, nzones,
                  "zl1", "fl1", DB_FLOAT, optlist);
 
     vars[0] = d;
     varnames[0] = var1name;
 
-    DBPutUcdvar(dbfile, var1name, meshname, 1, varnames, vars, nnodes, NULL,
-                0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var1name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0] = p;
     varnames[0] = var2name;
 
-    DBPutUcdvar(dbfile, var2name, meshname, 1, varnames, vars, nnodes, NULL,
-                0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var2name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0] = u;
     varnames[0] = var3name;
 
-    DBPutUcdvar(dbfile, var3name, meshname, 1, varnames, vars, nnodes, NULL,
-                0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var3name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0] = v;
     varnames[0] = var4name;
 
-    DBPutUcdvar(dbfile, var4name, meshname, 1, varnames, vars, nnodes, NULL,
-                0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var4name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0] = w;
     varnames[0] = var5name;
 
-    DBPutUcdvar(dbfile, var5name, meshname, 1, varnames, vars, nnodes, NULL,
-                0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var5name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0]     = t;
     varnames[0] = "t";
-    DBPutUcdvar(dbfile, "t", meshname, 1, varnames, vars, nnodes, NULL, 0,
-                DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, "t", meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     DBPutMaterial(dbfile, matname, meshname, nmats, matnos, matlist, &nzones,
                   1, mix_next, mix_mat, mix_zone, mix_vf, mixlen, DB_FLOAT,
@@ -2570,8 +2598,8 @@ build_ucd3d(DBfile * dbfile, int size, int order)
     vars[0] = (float*) ascii;
     varnames[0] = var6name;
     DBAddOption(optlist, DBOPT_ASCII_LABEL, &onvalue);
-    DBPutUcdvar(dbfile, var6name, meshname, 1, varnames, vars, nnodes, NULL,
-                0, DB_CHAR, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var6name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_CHAR, DB_NODECENT, optlist);
 
     DBFreeOptlist(optlist);
 
@@ -2965,9 +2993,9 @@ build_poly3d(DBfile *dbfile, int size, int order)
     matnos[2] = 3;
     mixlen = 0;
     matnames = (char**)malloc(sizeof(char*)*nmats);
-    matnames[0] = safe_strdup("Something important");
-    matnames[1] = safe_strdup("Of little interest");
-    matnames[2] = safe_strdup("Notable");
+    matnames[0] = _db_safe_strdup("Something important");
+    matnames[1] = _db_safe_strdup("Of little interest");
+    matnames[2] = _db_safe_strdup("Notable");
 
     /*
      * Put in the material in 3 shells.
@@ -3051,53 +3079,53 @@ build_poly3d(DBfile *dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_ZUNITS, "cm");
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
 
-    (void)DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
+    DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
                         zoneno, fshapesize, fshapecnt, nfshapes,
                         NULL, NULL, 0);
 
-    (void)DBPutZonelist2(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
+    DBPutZonelist2(dbfile, "zl1", nzones, 3, zonelist, lzonelist, 0,
                          lo_offset, hi_offset, zshapetype, zshapesize,
                          zshapecnt, nzshapes, NULL);
 
-    (void)DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
-                       nnodes, nzones, "zl1", "fl1", DB_FLOAT, optlist);
+    DBPutUcdmesh(dbfile, meshname, 3, (char const * const *) coordnames,
+        (DB_DTPTR2) coords, nnodes, nzones, "zl1", "fl1", DB_FLOAT, optlist);
 
     vars[0] = d;
     varnames[0] = var1name;
 
-    (void)DBPutUcdvar(dbfile, var1name, meshname, 1, varnames, vars,
-                      nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var1name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0] = p;
     varnames[0] = var2name;
 
-    (void)DBPutUcdvar(dbfile, var2name, meshname, 1, varnames, vars,
-                      nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var2name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0] = u;
     varnames[0] = var3name;
 
-    (void)DBPutUcdvar(dbfile, var3name, meshname, 1, varnames, vars,
-                      nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var3name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0] = v;
     varnames[0] = var4name;
 
-    (void)DBPutUcdvar(dbfile, var4name, meshname, 1, varnames, vars,
-                      nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var4name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0] = w;
     varnames[0] = var5name;
 
-    (void)DBPutUcdvar(dbfile, var5name, meshname, 1, varnames, vars,
-                      nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, var5name, meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     vars[0]     = t;
     varnames[0] = "t";
-    (void)DBPutUcdvar(dbfile, "t", meshname, 1, varnames, vars,
-                      nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutUcdvar(dbfile, "t", meshname, 1, (char const * const *) varnames,
+        (DB_DTPTR2) vars, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
-    (void)DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
+    DBPutMaterial(dbfile, matname, meshname, nmats, matnos,
                         matlist, &nzones, 1, NULL, NULL, NULL,
                         NULL, mixlen, DB_FLOAT, optlist);
 
@@ -3143,7 +3171,7 @@ build_poly3d(DBfile *dbfile, int size, int order)
 static void
 build_carray(DBfile * dbfile)
 {
-    char          *ename[3];
+    char const    *ename[3];
     int            esize[3];
     float          val[18];
     int            i;
@@ -3190,7 +3218,8 @@ static void
 build_curve (DBfile *dbfile, int driver)
 {
    float        x[20], y[2][20] ;
-   int          i, one=1;
+   float        r[40], theta[40] ;
+   int          i, one=1, coord_sys = DB_SPHERICAL;
    DBoptlist    *opts ;
 
    /*
@@ -3221,15 +3250,27 @@ build_curve (DBfile *dbfile, int driver)
     * Write the `coscurve' curve. It shares x values with the `sincurve'
     * curve.
     */
-   if (driver == DB_HDF5)
-       DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
-   else
-       DBAddOption(opts, DBOPT_XVARNAME, "sincurve_x");
+   DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
    DBPutCurve (dbfile, "coscurve", NULL, y[1], DB_FLOAT, 20, opts) ;
    DBClearOption(opts, DBOPT_XVARNAME);
 
    DBAddOption (opts, DBOPT_REFERENCE, "sincurve") ;
    DBPutCurve (dbfile, "sincurv1", NULL, NULL, DB_FLOAT, 20, opts);
+
+   DBClearOptlist(opts);
+   DBAddOption (opts, DBOPT_XLABEL, "radius") ;
+   DBAddOption (opts, DBOPT_YLABEL, "angle") ;
+   DBAddOption (opts, DBOPT_XUNITS, "radians") ;
+   DBAddOption (opts, DBOPT_YUNITS, "meters") ;
+   DBAddOption (opts, DBOPT_COORDSYS, &coord_sys );
+  
+   for (i=0; i<40; i++) {
+      r[i] = 1.0;
+      theta[i] = 2 * M_PI * (float) (i / 39.0);
+   }
+
+   DBPutCurve (dbfile, "circle", r, theta, DB_FLOAT, 40, opts);
+
    DBFreeOptlist (opts) ;
    DBSetFriendlyHDF5Names(0);
 }

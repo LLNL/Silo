@@ -55,7 +55,7 @@ c---------------------------------------------------------------------
 c  Purpose
 c
 c     Demonstrate use of SILO for creating unstructured cell data
-c     (UCD) objects for viewing with MeshTV.
+c     (UCD) objects for visualization.
 c
 c---------------------------------------------------------------------
       program main
@@ -63,7 +63,7 @@ c---------------------------------------------------------------------
       implicit none
 
       include "silo.inc"
-      integer  dbid, meshid, err, driver, nargs
+      integer  dbid, meshid, err, driver, nargs, i, compress
       character*256 cloption 
 
       integer buildrect2d
@@ -72,45 +72,50 @@ c---------------------------------------------------------------------
 c...Create file named "rectf77.silo". Database ID is returned in 'dbid'.
 
       driver = DB_PDB
-      nargs = iargc()
-      call getarg(1, cloption)
-      if (cloption .eq. "DB_HDF5") then
-          driver = DB_HDF5
-      end if
+      compress = 0
+      do i = 1, iargc()
+         call getarg(i, cloption)
+         if (cloption .eq. "DB_HDF5") then
+             driver = DB_HDF5
+         else if (cloption .eq. "compress") then
+             compress = 1
+         endif
+      enddo
 
-      err = dbcreate("rectf77.silo", 12, 0, DB_LOCAL,
-     .               "file info", 9, driver, dbid)
-
-
-c...Write out necessary objects for MeshTV.
-
-      err = buildrect2d(dbid, "rect", 4)
-
-
-c...Close data file.
-
-      err = dbclose(dbid)
-
-
-      print *,'Created file: rectf77.silo'
+      if (driver .eq. DB_HDF5 .and. compress .eq. 1) then
+         err = dbsetcompress("METHOD=GZIP",11)
+      endif
 
 c...Create file named "ucdf77.silo". Database ID is returned in 'dbid'.
 
       err = dbcreate("ucdf77.silo", 11, 0, DB_LOCAL,
      .               "file info", 9, driver, dbid)
 
-
-c...Write out necessary objects for MeshTV.
+c...Write out objects for visualization
 
       err = builducd(dbid, "ucd", 3)
-
 
 c...Close data file.
 
       err = dbclose(dbid)
 
-
       print *,'Created file: ucdf77.silo'
+
+c...Test re-setting compression to off
+      err = dbsetcompress("",-1)
+
+      err = dbcreate("rectf77.silo", 12, 0, DB_LOCAL,
+     .               "file info", 9, driver, dbid)
+
+c...Write out objects for visualization 
+
+      err = buildrect2d(dbid, "rect", 4)
+
+c...Close data file.
+
+      err = dbclose(dbid)
+
+      print *,'Created file: rectf77.silo'
 
       stop
       end

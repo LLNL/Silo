@@ -113,8 +113,9 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	dir$(EXEEXT) quad$(EXEEXT) version$(EXEEXT) \
 	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
 	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
-	empty$(EXEEXT) majorder$(EXEEXT) $(am__EXEEXT_2) \
-	$(am__EXEEXT_4) $(am__EXEEXT_6) $(am__EXEEXT_8)
+	empty$(EXEEXT) majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
+	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_6) \
+	$(am__EXEEXT_8)
 @HDF5_DRV_NEEDED_TRUE@am__append_4 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_5 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_6 = $(HDF5CKLTLIBS)
@@ -183,9 +184,9 @@ am__EXEEXT_2 = $(am__EXEEXT_1)
 am__EXEEXT_4 = $(am__EXEEXT_3)
 am__EXEEXT_5 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
 @HDF5_DRV_NEEDED_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
-am__EXEEXT_7 = arrayf77$(EXEEXT) curvef77$(EXEEXT) matf77$(EXEEXT) \
-	pointf77$(EXEEXT) quadf77$(EXEEXT) ucdf77$(EXEEXT) \
-	testallf77$(EXEEXT) csgmesh$(EXEEXT)
+am__EXEEXT_7 = arrayf77$(EXEEXT) arrayf90$(EXEEXT) curvef77$(EXEEXT) \
+	matf77$(EXEEXT) pointf77$(EXEEXT) quadf77$(EXEEXT) \
+	ucdf77$(EXEEXT) testallf77$(EXEEXT) csgmesh$(EXEEXT)
 @FORTRAN_NEEDED_TRUE@am__EXEEXT_8 = $(am__EXEEXT_7)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
@@ -227,6 +228,11 @@ am__arrayf77_SOURCES_DIST = arrayf77.f
 arrayf77_OBJECTS = $(am_arrayf77_OBJECTS)
 am__DEPENDENCIES_1 =
 @FORTRAN_NEEDED_TRUE@arrayf77_DEPENDENCIES = $(LDADD) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
+am__arrayf90_SOURCES_DIST = arrayf90.f90
+@FORTRAN_NEEDED_TRUE@am_arrayf90_OBJECTS = arrayf90.$(OBJEXT)
+arrayf90_OBJECTS = $(am_arrayf90_OBJECTS)
+@FORTRAN_NEEDED_TRUE@arrayf90_DEPENDENCIES = $(LDADD) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
 am__compression_SOURCES_DIST = compression.c
 @HDF5_DRV_NEEDED_TRUE@am_compression_OBJECTS = compression.$(OBJEXT)
@@ -485,6 +491,13 @@ readstuff_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@readstuff_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
+realloc_obj_and_opts_SOURCES = realloc_obj_and_opts.c
+realloc_obj_and_opts_OBJECTS = realloc_obj_and_opts.$(OBJEXT)
+realloc_obj_and_opts_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@realloc_obj_and_opts_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_FALSE@	../src/libsilo.la $(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@realloc_obj_and_opts_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_TRUE@	../src/libsiloh5.la $(am__append_1)
 am_rocket_OBJECTS = rocket-rocket.$(OBJEXT)
 rocket_OBJECTS = $(am_rocket_OBJECTS)
 rocket_LDADD = $(LDADD)
@@ -632,6 +645,13 @@ F77LD = $(F77)
 F77LINK = $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(F77LD) $(AM_FFLAGS) $(FFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
+FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+LTFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+FCLD = $(FC)
+FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	ioperf_stdio.c $(rocket_silo_la_SOURCES) \
 	$(nodist_EXTRA_TestReadMask_SOURCES) TestReadMask.c \
@@ -639,7 +659,8 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_arbpoly_SOURCES) arbpoly.c \
 	$(nodist_EXTRA_arbpoly2d_SOURCES) arbpoly2d.c \
 	$(nodist_EXTRA_array_SOURCES) array.c $(arrayf77_SOURCES) \
-	$(nodist_EXTRA_arrayf77_SOURCES) $(compression_SOURCES) \
+	$(nodist_EXTRA_arrayf77_SOURCES) $(arrayf90_SOURCES) \
+	$(nodist_EXTRA_arrayf90_SOURCES) $(compression_SOURCES) \
 	$(nodist_EXTRA_compression_SOURCES) \
 	$(nodist_EXTRA_cpz1plt_SOURCES) cpz1plt.c \
 	$(nodist_EXTRA_csg_SOURCES) csg.c $(csgmesh_SOURCES) \
@@ -678,7 +699,9 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_quad_SOURCES) $(quadf77_SOURCES) \
 	$(nodist_EXTRA_quadf77_SOURCES) \
 	$(nodist_EXTRA_readstuff_SOURCES) readstuff.c \
-	$(rocket_SOURCES) $(nodist_EXTRA_sami_SOURCES) sami.c \
+	$(nodist_EXTRA_realloc_obj_and_opts_SOURCES) \
+	realloc_obj_and_opts.c $(rocket_SOURCES) \
+	$(nodist_EXTRA_sami_SOURCES) sami.c \
 	$(nodist_EXTRA_simple_SOURCES) simple.c \
 	$(nodist_EXTRA_spec_SOURCES) spec.c \
 	$(nodist_EXTRA_specmix_SOURCES) specmix.c \
@@ -697,21 +720,23 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	ioperf_stdio.c $(rocket_silo_la_SOURCES) TestReadMask.c \
 	alltypes.c arbpoly.c arbpoly2d.c array.c \
-	$(am__arrayf77_SOURCES_DIST) $(am__compression_SOURCES_DIST) \
-	cpz1plt.c csg.c $(am__csgmesh_SOURCES_DIST) \
-	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) efcentering.c \
-	empty.c extface.c $(am__grab_SOURCES_DIST) group_test.c \
-	ioperf.c json.c largefile.c $(listtypes_SOURCES) majorder.c \
-	mat3d_3across.c $(am__matf77_SOURCES_DIST) merge_block.c \
+	$(am__arrayf77_SOURCES_DIST) $(am__arrayf90_SOURCES_DIST) \
+	$(am__compression_SOURCES_DIST) cpz1plt.c csg.c \
+	$(am__csgmesh_SOURCES_DIST) $(am__curvef77_SOURCES_DIST) \
+	$(dir_SOURCES) efcentering.c empty.c extface.c \
+	$(am__grab_SOURCES_DIST) group_test.c ioperf.c json.c \
+	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
+	$(am__matf77_SOURCES_DIST) merge_block.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
 	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
 	onehex.c oneprism.c onepyramid.c onetet.c partial_io.c \
 	pdbtst.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
 	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) readstuff.c \
-	$(rocket_SOURCES) sami.c simple.c spec.c specmix.c subhex.c \
-	testall.c $(am__testallf77_SOURCES_DIST) testfs.c testpdb.c \
-	twohex.c ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c \
-	version.c wave.c
+	realloc_obj_and_opts.c $(rocket_SOURCES) sami.c simple.c \
+	spec.c specmix.c subhex.c testall.c \
+	$(am__testallf77_SOURCES_DIST) testfs.c testpdb.c twohex.c \
+	ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c \
+	wave.c
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -936,6 +961,7 @@ EXTRA_DIST = \
  Make_ioperf \
  ioperf_tests \
  std.c \
+ bcastopen.c \
  zeros.dat \
  $(check_SCRIPTS) \
  $(check_DATA)
@@ -984,8 +1010,9 @@ JSONTESTS = $(am__append_3)
 @JSON_NEEDED_TRUE@json_CPPFLAGS = -I$(prefix)/json/include $(AM_CPPFLAGS)
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
+AM_FCFLAGS = $(AM_CPPFLAGS)
 HDF5PROGS = compression grab mk_nasf_h5
-FCPROGS = arrayf77 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
+FCPROGS = arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
          csgmesh
 
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
@@ -994,8 +1021,8 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	group_test listtypes alltypes wave multi_file polyzl csg \
 	rocket mmadjacency largefile version namescheme efcentering \
 	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
-	merge_block empty majorder $(PDBTESTS) $(JSONTESTS) \
-	$(am__append_4) $(am__append_7)
+	merge_block empty majorder realloc_obj_and_opts $(PDBTESTS) \
+	$(JSONTESTS) $(am__append_4) $(am__append_7)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 bcastopen_SOURCES = bcastopen.c bcastopen_test.c
@@ -1073,6 +1100,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_version_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_namescheme_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arrayf77_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arrayf90_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_curvef77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_matf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_pointf77_SOURCES = dummy.cxx
@@ -1089,6 +1117,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testfs_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_empty_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_majorder_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_json_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
@@ -1098,6 +1127,8 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @HDF5_DRV_NEEDED_TRUE@mk_nasf_h5_LDADD = $(LDADD)
 @FORTRAN_NEEDED_TRUE@arrayf77_SOURCES = arrayf77.f
 @FORTRAN_NEEDED_TRUE@arrayf77_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@arrayf90_SOURCES = arrayf90.f90
+@FORTRAN_NEEDED_TRUE@arrayf90_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@curvef77_SOURCES = curvef77.f
 @FORTRAN_NEEDED_TRUE@curvef77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@matf77_SOURCES = matf77.f
@@ -1115,7 +1146,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cxx .f .lo .o .obj
+.SUFFIXES: .c .cxx .f .f90 .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -1194,6 +1225,9 @@ array$(EXEEXT): $(array_OBJECTS) $(array_DEPENDENCIES)
 arrayf77$(EXEEXT): $(arrayf77_OBJECTS) $(arrayf77_DEPENDENCIES) 
 	@rm -f arrayf77$(EXEEXT)
 	$(CXXLINK) $(arrayf77_OBJECTS) $(arrayf77_LDADD) $(LIBS)
+arrayf90$(EXEEXT): $(arrayf90_OBJECTS) $(arrayf90_DEPENDENCIES) 
+	@rm -f arrayf90$(EXEEXT)
+	$(CXXLINK) $(arrayf90_OBJECTS) $(arrayf90_LDADD) $(LIBS)
 compression$(EXEEXT): $(compression_OBJECTS) $(compression_DEPENDENCIES) 
 	@rm -f compression$(EXEEXT)
 	$(CXXLINK) $(compression_OBJECTS) $(compression_LDADD) $(LIBS)
@@ -1311,6 +1345,9 @@ quadf77$(EXEEXT): $(quadf77_OBJECTS) $(quadf77_DEPENDENCIES)
 readstuff$(EXEEXT): $(readstuff_OBJECTS) $(readstuff_DEPENDENCIES) 
 	@rm -f readstuff$(EXEEXT)
 	$(CXXLINK) $(readstuff_OBJECTS) $(readstuff_LDADD) $(LIBS)
+realloc_obj_and_opts$(EXEEXT): $(realloc_obj_and_opts_OBJECTS) $(realloc_obj_and_opts_DEPENDENCIES) 
+	@rm -f realloc_obj_and_opts$(EXEEXT)
+	$(CXXLINK) $(realloc_obj_and_opts_OBJECTS) $(realloc_obj_and_opts_LDADD) $(LIBS)
 rocket$(EXEEXT): $(rocket_OBJECTS) $(rocket_DEPENDENCIES) 
 	@rm -f rocket$(EXEEXT)
 	$(rocket_LINK) $(rocket_OBJECTS) $(rocket_LDADD) $(LIBS)
@@ -1417,6 +1454,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polyzl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readstuff.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/realloc_obj_and_opts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket-rocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket_silo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sami.Po@am__quote@
@@ -1584,6 +1622,15 @@ testpdb-dummy.obj: dummy.cxx
 
 .f.lo:
 	$(LTF77COMPILE) -c -o $@ $<
+
+.f90.o:
+	$(FCCOMPILE) -c -o $@ $<
+
+.f90.obj:
+	$(FCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.f90.lo:
+	$(LTFCCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo

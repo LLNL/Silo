@@ -737,7 +737,7 @@ stc_walk1_DBmrgtree(obj_t _self, void *mem, int operation, walk_t *wdata)
        p++;
    }
 
-   DBWalkMrgtree(tree, stc_walk1_outmrgtree, wdata, DB_PREORDER);
+   DBWalkMrgtree(tree, (DBmrgwalkcb) stc_walk1_outmrgtree, wdata, DB_PREORDER);
    return;
 }
 
@@ -1014,6 +1014,14 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
    int          nsame=0, ndiffer=0, nonlya=0, nonlyb=0;
 
    /*
+    * If both types have localized their walk2 functions, then call that
+    * function instead.
+    */
+   if (a->walk2 && a->walk2==b->walk2) {
+      return (a->walk2)(_a, a_mem, _b, b_mem, wdata);
+   }
+
+   /*
     * Clear the difference indicators by setting them each to -999.
     * When A differs from B, a_diff will contain the index of B and
     * b_diff will contain the index of A.
@@ -1024,21 +1032,17 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
    for (i=0; i<b->ncomps; i++) b_diff[i] = -999;
 
    /*
-    * If both types have localized their walk2 functions, then call that
-    * function instead.
-    */
-   if (a->walk2 && a->walk2==b->walk2) {
-      return (a->walk2)(_a, a_mem, _b, b_mem, wdata);
-   }
-
-   /*
     * Figure out which fields appear only in A (a_diff[i]==b->ncomps),
     * which appear only in B (b_diff[i]==a->ncomps), which appear in both
     * but differ (a_diff[i]=j, b_diff[j]=i, i>=0, j>=0), and which are
     * the same in both.
     */
    for (i=0; i<a->ncomps; i++) {
-      if (out_brokenpipe(f)) return -1;
+      if (out_brokenpipe(f)) {
+          free(a_diff);
+          free(b_diff);
+          return -1;
+      }
       for (j=0; j<b->ncomps; j++) {
          if (!strcmp(a->compname[i], b->compname[j])) {
 
@@ -1061,6 +1065,8 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
                 }
                 break;
             case DIFF_REP_SUMMARY:
+                free(a_diff);
+                free(b_diff);
                 return 1;
             }
             break;
@@ -1079,7 +1085,11 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
               }
               break;
           case DIFF_REP_SUMMARY:
-              if (!DiffOpt.ignore_dels) return 2;
+              if (!DiffOpt.ignore_dels) {
+                  free(a_diff);
+                  free(b_diff);
+                  return 2;
+              }
               nsame++;
               break;
           }
@@ -1102,7 +1112,11 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
               }
               break;
           case DIFF_REP_SUMMARY:
-              if (!DiffOpt.ignore_adds) return 2;
+              if (!DiffOpt.ignore_adds) {
+                  free(a_diff);
+                  free(b_diff);
+                  return 2;
+              }
               nsame++;
               break;
           }
@@ -1111,7 +1125,11 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
 
    /* Print the A side of things */
    for (i=na=0; i<a->ncomps; i++) {
-       if (out_brokenpipe(f)) return -1;
+       if (out_brokenpipe(f)) {
+           free(a_diff);
+           free(b_diff);
+           return -1;
+       }
        if (a_diff[i]==b->ncomps && !DiffOpt.ignore_dels) {
            switch (DiffOpt.report) {
            case DIFF_REP_ALL:
@@ -1136,6 +1154,8 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
                out_pop(f);
                break;
            case DIFF_REP_SUMMARY:
+               free(a_diff);
+               free(b_diff);
                return 2;
            }
            na++;
@@ -1165,6 +1185,8 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
                out_pop(f);
                break;
            case DIFF_REP_SUMMARY:
+               free(a_diff);
+               free(b_diff);
                return 2;
            }
            na++;
@@ -1173,7 +1195,11 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
 
    /* Print the B side of things */
    for (i=nb=0; i<b->ncomps; i++) {
-       if (out_brokenpipe(f)) return -1;
+       if (out_brokenpipe(f)) {
+           free(a_diff);
+           free(b_diff);
+           return -1;
+       }
        if (b_diff[i]==a->ncomps && !DiffOpt.ignore_adds) {
            switch (DiffOpt.report) {
            case DIFF_REP_ALL:
@@ -1201,6 +1227,8 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
                out_pop(f);
                break;
            case DIFF_REP_SUMMARY:
+               free(a_diff);
+               free(b_diff);
                return 2;
            }
            nb++;
@@ -1224,6 +1252,8 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
            case DIFF_REP_BRIEF:
                break; /*already printed*/
            case DIFF_REP_SUMMARY:
+               free(a_diff);
+               free(b_diff);
                return 2;
            }
            nb++;
@@ -1232,6 +1262,9 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
    if ((na || nb) && DIFF_REP_ALL==DiffOpt.report && !DiffOpt.two_column) {
        out_line (f, "***************");
    }
+
+   free(a_diff);
+   free(b_diff);
 
    /* Return */
    if (ndiffer) {
@@ -1590,6 +1623,10 @@ stc_silo_types (void) {
       COMP (reference,          "primitive 'string'");
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
+      COMP (coord_sys,          "primitive 'int'");
+      IOASSOC (PA_COORDSYS);
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
       COMP (x,
             "pointer (array 'self.npts' (primitive 'self.datatype'))");
       COMP (y,
@@ -1616,72 +1653,41 @@ stc_silo_types (void) {
       COMP (id,                 "primitive 'int'");
       COMP (nblocks,            "primitive 'int'");
       COMP (ngroups,            "primitive 'int'");
-      COMP (guihide,            "primitive 'int'");
-      IOASSOC (PA_BOOLEAN);
+      COMP (guihide,            "primitive 'int'"); IOASSOC (PA_BOOLEAN);
       COMP (blockorigin,        "primitive 'int'");
       COMP (grouporigin,        "primitive 'int'");
       COMP (extentssize,        "primitive 'int'");
       COMP (mrgtree_name,       "primitive 'string'");
       COMP (tv_connectivity,    "primitive 'int'");
       COMP (disjoint_mode,      "primitive 'int'");
-      COMP (topo_dim,           "primitive 'int'");
-      IOASSOC (PA_TOPODIM);
+      COMP (topo_dim,           "primitive 'int'"); IOASSOC (PA_TOPODIM);
       COMP (file_ns,            "primitive 'string'");
       COMP (block_ns,           "primitive 'string'");
       COMP (block_type,         "primitive 'int'");
-      COMP (repr_block_idx,     "primitive 'int'");
-      IOASSOC (PA_REPRBLOCK);
+      COMP (repr_block_idx,     "primitive 'int'"); IOASSOC (PA_REPRBLOCK);
+      COMP (alt_nodenum_vars,   "pointer (array 'SH5 0, self.alt_nodenum_vars' (primitive 'string'))");
+      COMP (alt_zonenum_vars,   "pointer (array 'SH5 0, self.alt_zonenum_vars' (primitive 'string'))");
       COMP (empty_cnt,          "primitive 'int'");
-      COMP (empty_list,
-            "pointer (array 'self.empty_cnt' (primitive 'int'))");
-      COMP (meshids,
-            "pointer (array 'self.nblocks' (primitive 'int'))");
-      COMP (meshnames,
-            "pointer (array 'self.nblocks' (primitive 'string'))");
+      COMP (empty_list,         "pointer (array 'self.empty_cnt' (primitive 'int'))");
+      COMP (meshids,            "pointer (array 'self.nblocks' (primitive 'int'))");
+      COMP (meshnames,          "pointer (array 'self.nblocks' (primitive 'string'))");
 
       tmp = obj_new (C_PRIM, "int");
       prim_set_io_assoc (tmp, PA_OBJTYPE);
       tmp = obj_new (C_PTR, obj_new (C_ARY, "self.nblocks", tmp));
       COMP3 (meshtypes, "meshtypes", tmp);
 
-      COMP (dirids,
-            "pointer (array 'self.nblocks' (primitive 'int'))");
-      COMP (extents,
-            "pointer (array 'self.nblocks,self.extentssize' (primitive 'double'))");
-      COMP (zonecounts,
-            "pointer (array 'self.nblocks' (primitive 'int'))");
-      COMP (has_external_zones,
-            "pointer (array 'self.nblocks' (primitive 'int'))");
-      COMP (lgroupings,        "primitive 'int'");
-      COMP (groupings,
-            "pointer (array 'self.lgroupings' (primitive 'int'))");
-      COMP (groupnames,
-            "pointer (array 'self.lgroupings' (primitive 'string'))");
+      COMP (dirids,             "pointer (array 'self.nblocks' (primitive 'int'))");
+      COMP (extents,            "pointer (array 'self.nblocks,self.extentssize' (primitive 'double'))");
+      COMP (zonecounts,         "pointer (array 'self.nblocks' (primitive 'int'))");
+      COMP (has_external_zones, "pointer (array 'self.nblocks' (primitive 'int'))");
+      COMP (lgroupings,         "primitive 'int'");
+      COMP (groupings,          "pointer (array 'self.lgroupings' (primitive 'int'))");
+      COMP (groupnames,         "pointer (array 'self.lgroupings' (primitive 'string'))");
    } ESTRUCT;
 
-   STRUCT (DBmultimeshadj) {
-      COMP (nblocks,            "primitive 'int'");
-      COMP (blockorigin,        "primitive 'int'");
-      COMP (lneighbors,         "primitive 'int'");
-      COMP (totlnodelists,      "primitive 'int'");
-      COMP (totlzonelists,      "primitive 'int'");
-
-      tmp = obj_new (C_PRIM, "int");
-      prim_set_io_assoc (tmp, PA_OBJTYPE);
-      tmp = obj_new (C_PTR, obj_new (C_ARY, "self.nblocks", tmp));
-      COMP3 (meshtypes, "meshtypes", tmp);
-
-      COMP (nneighbors,
-            "pointer (array 'self.nblocks' (primitive 'int'))");
-      COMP (neighbors,
-            "pointer (array 'self.lneighbors' (primitive 'int'))");
-      COMP (back,
-            "pointer (array 'self.lneighbors' (primitive 'int'))");
-      COMP (lnodelists,
-            "pointer (array 'self.lneighbors' (primitive 'int'))");
-      COMP (lzonelists,
-            "pointer (array 'self.lneighbors' (primitive 'int'))");
-   } ESTRUCT;
+    /* ThDBmultimeshadj object is handled specially in browser using the
+       browser_DBGetMultimesadj() function */
 
    STRUCT (DBmultivar) {
       COMP (id,                 "primitive 'int'");
@@ -1702,6 +1708,8 @@ stc_silo_types (void) {
       COMP (block_type,         "primitive 'int'");
       COMP (repr_block_idx,     "primitive 'int'");
       IOASSOC (PA_REPRBLOCK);
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
       COMP (empty_cnt,          "primitive 'int'");
       COMP (empty_list,
             "pointer (array 'self.empty_cnt' (primitive 'int'))");
@@ -1788,45 +1796,36 @@ stc_silo_types (void) {
       COMP (cycle,              "primitive 'int'");
       COMP (time,               "primitive 'float'");
       COMP (dtime,              "primitive 'double'");
-      COMP (coord_sys,          "primitive 'int'");
-      IOASSOC (PA_COORDSYS);
-      COMP (major_order,        "primitive 'int'");
-      IOASSOC (PA_ORDER);
+      COMP (coord_sys,          "primitive 'int'"); IOASSOC (PA_COORDSYS);
+      COMP (major_order,        "primitive 'int'"); IOASSOC (PA_ORDER);
       COMP (stride,             "array 3 (primitive 'int')");
-      COMP (coordtype,          "primitive 'int'");
-      IOASSOC (PA_COORDTYPE);
-      COMP (facetype,           "primitive 'int'");
-      IOASSOC (PA_FACETYPE);
-      COMP (planar,             "primitive 'int'");
-      IOASSOC (PA_PLANAR);
+      COMP (coordtype,          "primitive 'int'"); IOASSOC (PA_COORDTYPE);
+      COMP (facetype,           "primitive 'int'"); IOASSOC (PA_FACETYPE);
+      COMP (planar,             "primitive 'int'"); IOASSOC (PA_PLANAR);
       COMP (ndims,              "primitive 'int'");
       COMP (nspace,             "primitive 'int'");
       COMP (nnodes,             "primitive 'int'");
-      COMP (dims,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
-      COMP (min_index,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
-      COMP (max_index,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (dims,               "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (min_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (max_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (origin,             "primitive 'int'");
-      COMP (datatype,           "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (min_extents,
-            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
-      COMP (max_extents,
-            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
-      COMP (labels,
-            "array 'SH3 3, self.ndims' (primitive 'string')");
-      COMP (units,
-            "array 'SH3 3, self.ndims' (primitive 'string')");
-      COMP (guihide,            "primitive 'int'");
-      IOASSOC (PA_BOOLEAN);
+      COMP (datatype,           "primitive 'int'"); IOASSOC (PA_DATATYPE);
+      COMP (min_extents,        "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
+      COMP (max_extents,        "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
+      COMP (labels,             "array 'SH3 3, self.ndims' (primitive 'string')");
+      COMP (units,              "array 'SH3 3, self.ndims' (primitive 'string')");
+      COMP (guihide,            "primitive 'int'"); IOASSOC (PA_BOOLEAN);
       COMP (base_index,         "array 3 (primitive 'int')");
+      COMP (start_index,        "array 3 (primitive 'int')");
+      COMP (size_index,         "array 3 (primitive 'int')");
       COMP (mrgtree_name,       "primitive 'string'");
-      COMP (coords,
-            "array 'SH3 3, self.ndims' "
+      COMP (alt_nodenum_vars,   "pointer (array 'SH5 0, self.alt_nodenum_vars' (primitive 'string'))");
+      COMP (alt_zonenum_vars,   "pointer (array 'SH5 0, self.alt_zonenum_vars' (primitive 'string'))");
+      COMP (coords,             "array 'SH3 3, self.ndims' "
             "(pointer (array 'SH1 self.coordtype, self.dims' "
             "(primitive 'self.datatype')))");
+      COMP (ghost_node_labels,  "pointer (array 'self.dims' (primitive 'int8'))");
+      COMP (ghost_zone_labels,  "pointer (array 'SH6 -1, self.dims' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBquadvar) {
@@ -1839,36 +1838,29 @@ stc_silo_types (void) {
       COMP (time,               "primitive 'float'");
       COMP (dtime,              "primitive 'double'");
       COMP (meshid,             "primitive 'int'");
-      COMP (datatype,           "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (centering,          "primitive 'int'");
-      IOASSOC (PA_CENTERING);
+      COMP (datatype,           "primitive 'int'"); IOASSOC (PA_DATATYPE);
+      COMP (centering,          "primitive 'int'"); IOASSOC (PA_CENTERING);
       COMP (nels,               "primitive 'int'");
       COMP (nvals,              "primitive 'int'");
       COMP (ndims,              "primitive 'int'");
       COMP (dims,               "array 'SH3 3, self.ndims' (primitive 'int')");
-      COMP (major_order,        "primitive 'int'");
-      IOASSOC (PA_ORDER);
+      COMP (major_order,        "primitive 'int'"); IOASSOC (PA_ORDER);
       COMP (stride,             "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (min_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (max_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (origin,             "primitive 'int'");
-      COMP (align,
-            "array 'SH3 3, self.ndims' (primitive 'float')");
+      COMP (align,              "array 'SH3 3, self.ndims' (primitive 'float')");
       COMP (mixlen,             "primitive 'int'");
-      COMP (use_specmf,         "primitive 'int'");
-      IOASSOC (PA_ONOFF);
-      COMP (ascii_labels,       "primitive 'int'");
-      IOASSOC (PA_BOOLEAN);
-      COMP (guihide,            "primitive 'int'");
-      IOASSOC (PA_BOOLEAN);
+      COMP (use_specmf,         "primitive 'int'"); IOASSOC (PA_ONOFF);
+      COMP (ascii_labels,       "primitive 'int'"); IOASSOC (PA_BOOLEAN);
+      COMP (guihide,            "primitive 'int'"); IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
-      COMP (mixvals,
-            "pointer (array 'self.nvals' (pointer (array 'self.mixlen' "
+      COMP (missing_value,      "primitive 'double'"); IOASSOC (PA_MISSING_VALUE);
+      COMP (region_pnames,      "pointer (array 'SH5 0, self.region_pnames' (primitive 'string'))");
+      COMP (mixvals,            "pointer (array 'self.nvals' (pointer (array 'self.mixlen' "
             "(primitive 'self.datatype'))))");
-      COMP (vals,
-            "pointer (array 'self.nvals' (pointer (array 'self.nels' "
+      COMP (vals,               "pointer (array 'self.nvals' (pointer (array 'self.nels' "
             "(primitive 'self.datatype'))))");
    } ESTRUCT;
 
@@ -1879,21 +1871,20 @@ stc_silo_types (void) {
       COMP (origin,             "primitive 'int'");
       COMP (min_index,          "primitive 'int'");
       COMP (max_index,          "primitive 'int'");
-      COMP (gnznodtype,         "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
+      COMP (gnznodtype,         "primitive 'int'"); IOASSOC (PA_DATATYPE);
       COMP (lnodelist,          "primitive 'int'");
-      COMP (shapecnt,
-            "pointer (array 'self.nshapes' (primitive 'int'))");
-      COMP (shapesize,
-            "pointer (array 'self.nshapes' (primitive 'int'))");
-      COMP (shapetype,
-            "pointer (array 'self.nshapes' (primitive 'int'))");
-      COMP (nodelist,
-            "pointer (array 'self.lnodelist' (primitive 'int'))");
-      COMP (zoneno,
-            "pointer (array 'self.nzones' (primitive 'int'))");
-      COMP (gzoneno,
-            "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
+      COMP (shapecnt,           "pointer (array 'self.nshapes' (primitive 'int'))");
+      COMP (shapesize,          "pointer (array 'self.nshapes' (primitive 'int'))");
+
+      tmp = obj_new (C_PRIM, "int");
+      prim_set_io_assoc (tmp, PA_ZONETYPE);
+      tmp = obj_new (C_PTR, obj_new (C_ARY, "self.nshapes", tmp));
+      COMP3 (shapetype, "shapetype", tmp);
+
+      COMP (nodelist,           "pointer (array 'self.lnodelist' (primitive 'int'))");
+      COMP (zoneno,             "pointer (array 'self.nzones' (primitive 'int'))");
+      COMP (gzoneno,            "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
+      COMP (ghost_zone_labels,  "pointer (array 'self.nzones' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBphzonelist) {
@@ -1904,22 +1895,16 @@ stc_silo_types (void) {
       COMP (hi_offset,          "primitive 'int'");
       COMP (lnodelist,          "primitive 'int'");
       COMP (lfacelist,          "primitive 'int'");
-      COMP (gnznodtype,         "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (nodecnt,
-            "pointer (array 'self.nfaces' (primitive 'int'))");
-      COMP (nodelist,
-            "pointer (array 'self.lnodelist' (primitive 'int'))");
-      COMP (extface,
-            "pointer (array 'self.nfaces' (primitive 'int8'))");
-      COMP (facecnt,
-            "pointer (array 'self.nzones' (primitive 'int'))");
-      COMP (facelist,
-            "pointer (array 'self.lfacelist' (primitive 'int'))");
-      COMP (zoneno,
-            "pointer (array 'self.nzones' (primitive 'int'))");
-      COMP (gzoneno,
-            "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
+      COMP (gnznodtype,         "primitive 'int'"); IOASSOC (PA_DATATYPE);
+      COMP (alt_zonenum_vars,   "pointer (array 'SH5 0, self.alt_zonenum_vars' (primitive 'string'))");
+      COMP (nodecnt,            "pointer (array 'self.nfaces' (primitive 'int'))");
+      COMP (nodelist,           "pointer (array 'self.lnodelist' (primitive 'int'))");
+      COMP (extface,            "pointer (array 'self.nfaces' (primitive 'int8'))");
+      COMP (facecnt,            "pointer (array 'self.nzones' (primitive 'int'))");
+      COMP (facelist,           "pointer (array 'self.lfacelist' (primitive 'int'))");
+      COMP (zoneno,             "pointer (array 'self.nzones' (primitive 'int'))");
+      COMP (gzoneno,            "pointer (array 'self.nzones' (primitive 'self.gnznodtype'))");
+      COMP (ghost_zone_labels,  "pointer (array 'self.nzones' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBcsgzonelist) {
@@ -1930,6 +1915,7 @@ stc_silo_types (void) {
       COMP (datatype,          "primitive 'int'");
       COMP (min_index,         "primitive 'int'");
       COMP (max_index,         "primitive 'int'");
+      COMP (alt_zonenum_vars,  "pointer (array 'SH5 0, self.alt_zonenum_vars' (primitive 'string'))");
 
       tmp = obj_new (C_PRIM, "int");
       prim_set_io_assoc (tmp, PA_REGIONOP);
@@ -2008,6 +1994,7 @@ stc_silo_types (void) {
       COMP (disjoint_mode,      "primitive 'int'");
       COMP (lcoeffs,            "primitive 'int'");
       COMP (datatype,           "primitive 'int'");
+      COMP (alt_nodenum_vars,   "pointer (array 'SH5 0, self.alt_nodenum_vars' (primitive 'string'))");
 
       tmp = obj_new (C_PRIM, "int");
       prim_set_io_assoc (tmp, PA_BOUNDARYTYPE);
@@ -2045,6 +2032,9 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
+      COMP (region_pnames,      "pointer (array 'SH5 0, self.region_pnames' (primitive 'string'))");
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");
@@ -2058,37 +2048,27 @@ stc_silo_types (void) {
       COMP (cycle,              "primitive 'int'");
       COMP (time,               "primitive 'float'");
       COMP (dtime,              "primitive 'double'");
-      COMP (coord_sys,          "primitive 'int'");
-      IOASSOC (PA_COORDSYS);
-      COMP (topo_dim,           "primitive 'int'");
-      IOASSOC (PA_TOPODIM);
+      COMP (coord_sys,          "primitive 'int'"); IOASSOC (PA_COORDSYS);
+      COMP (topo_dim,           "primitive 'int'"); IOASSOC (PA_TOPODIM);
       COMP (ndims,              "primitive 'int'");
       COMP (nnodes,             "primitive 'int'");
       COMP (origin,             "primitive 'int'");
-      COMP (datatype,           "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (units,
-            "array 'SH3 3, self.ndims' (primitive 'string')");
-      COMP (labels,
-            "array 'SH3 3, self.ndims' (primitive 'string')");
-      COMP (guihide,            "primitive 'int'");
-      IOASSOC (PA_BOOLEAN);
-      COMP (mrgtree_name,      "primitive 'string'");
-      COMP (tv_connectivity,   "primitive 'int'");
-      COMP (disjoint_mode,     "primitive 'int'");
-      COMP (gnznodtype,        "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (min_extents,
-            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
-      COMP (max_extents,
-            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
-      COMP (coords,
-            "array 'SH3 3, self.ndims' (pointer (array 'self.nnodes' "
+      COMP (datatype,           "primitive 'int'"); IOASSOC (PA_DATATYPE);
+      COMP (units,              "array 'SH3 3, self.ndims' (primitive 'string')");
+      COMP (labels,             "array 'SH3 3, self.ndims' (primitive 'string')");
+      COMP (guihide,            "primitive 'int'"); IOASSOC (PA_BOOLEAN);
+      COMP (mrgtree_name,       "primitive 'string'");
+      COMP (tv_connectivity,    "primitive 'int'");
+      COMP (disjoint_mode,      "primitive 'int'");
+      COMP (gnznodtype,         "primitive 'int'"); IOASSOC (PA_DATATYPE);
+      COMP (min_extents,        "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
+      COMP (max_extents,        "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
+      COMP (alt_nodenum_vars,   "pointer (array 'SH5 0, self.alt_nodenum_vars' (primitive 'string'))");
+      COMP (coords,             "array 'SH3 3, self.ndims' (pointer (array 'self.nnodes' "
             "(primitive 'self.datatype')))");
-      COMP (gnodeno,
-            "pointer (array 'self.nnodes' (primitive 'self.gnznodtype'))");
-      COMP (nodeno,
-            "pointer (array 'self.nnodes' (primitive 'int'))");
+      COMP (gnodeno,            "pointer (array 'self.nnodes' (primitive 'self.gnznodtype'))");
+      COMP (nodeno,             "pointer (array 'self.nnodes' (primitive 'int'))");
+      COMP (ghost_node_labels,  "pointer (array 'self.nnodes' (primitive 'int8'))");
       COMP (faces,              "pointer 'DBfacelist'");
       COMP (zones,              "pointer 'DBzonelist'");
       COMP (edges,              "pointer 'DBedgelist'");
@@ -2122,6 +2102,9 @@ stc_silo_types (void) {
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
+      COMP (region_pnames,      "pointer (array 'SH5 0, self.region_pnames' (primitive 'string'))");
       COMP (vals,
             "pointer (array 'self.nvals' (pointer "
             "(array 'self.nels' (primitive 'self.datatype'))))");
@@ -2144,24 +2127,20 @@ stc_silo_types (void) {
       COMP (ndims,              "primitive 'int'");
       COMP (nels,               "primitive 'int'");
       COMP (origin,             "primitive 'int'");
-      COMP (units,
-            "array 'SH3 3, self.ndims' (primitive 'string')");
-      COMP (labels,
-            "array 'SH3 3, self.ndims' (primitive 'string')");
+      COMP (units,              "array 'SH3 3, self.ndims' (primitive 'string')");
+      COMP (labels,             "array 'SH3 3, self.ndims' (primitive 'string')");
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (mrgtree_name,       "primitive 'string'");
       COMP (gnznodtype,         "primitive 'int'");
       IOASSOC (PA_DATATYPE);
-      COMP (min_extents,
-            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
-      COMP (max_extents,
-            "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
-      COMP (coords,
-            "array 'self.ndims' (pointer (array 'self.nels' "
+      COMP (min_extents,        "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
+      COMP (max_extents,        "array 'SH3 3, self.ndims' (primitive 'self.datatype')");
+      COMP (alt_nodenum_vars,   "pointer (array 'SH5 0, self.alt_nodenum_vars' (primitive 'string'))");
+      COMP (coords,             "array 'self.ndims' (pointer (array 'self.nels' "
             "(primitive 'self.datatype')))");
-      COMP (gnodeno,
-            "pointer (array 'self.nels' (primitive 'self.gnznodtype'))");
+      COMP (gnodeno,            "pointer (array 'self.nels' (primitive 'self.gnznodtype'))");
+      COMP (ghost_node_labels,  "pointer (array 'self.nels' (primitive 'int8'))");
    } ESTRUCT;
 
    STRUCT (DBmeshvar) {
@@ -2183,27 +2162,24 @@ stc_silo_types (void) {
       COMP (origin,             "primitive 'int'");
       COMP (centering,          "primitive 'int'");
       IOASSOC (PA_CENTERING);
-      COMP (align,
-            "array 'SH3 3, self.ndims' (primitive 'float')");
-      COMP (dims,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (align,              "array 'SH3 3, self.ndims' (primitive 'float')");
+      COMP (dims,               "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (major_order,        "primitive 'int'");
       IOASSOC (PA_ORDER);
-      COMP (stride,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
-      COMP (min_index,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
-      COMP (max_index,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (stride,             "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (min_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (max_index,          "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (ascii_labels,       "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (conserved,          "primitive 'int'");
       COMP (extensive,          "primitive 'int'");
-      COMP (vals,
-            "pointer (array 'self.nvals' (pointer "
-            "(array 'self.nels' (primitive 'self.datatype'))))");
+      COMP (missing_value,      "primitive 'double'");
+      IOASSOC (PA_MISSING_VALUE);
+      COMP (region_pnames,      "pointer (array 'SH5 0, self.region_pnames' (primitive 'string'))");
+      COMP (vals,               "pointer (array 'self.nvals' (pointer "
+                                "(array 'self.nels' (primitive 'self.datatype'))))");
    } ESTRUCT;
 
    STRUCT (DBmaterial) {
@@ -2212,19 +2188,14 @@ stc_silo_types (void) {
       COMP (meshname,           "primitive 'string'");
       COMP (ndims,              "primitive 'int'");
       COMP (origin,             "primitive 'int'");
-      COMP (dims,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (dims,               "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (major_order,        "primitive 'int'");
       IOASSOC (PA_ORDER);
-      COMP (stride,
-            "array 'SH3 3, self.ndims' (primitive 'int')");
+      COMP (stride,             "array 'SH3 3, self.ndims' (primitive 'int')");
       COMP (nmat,               "primitive 'int'");
-      COMP (matnos,
-            "pointer (array 'self.nmat' (primitive 'int'))");
-      COMP (matnames,
-            "pointer (array 'self.nmat' (primitive 'string'))");
-      COMP (matcolors,
-            "pointer (array 'self.nmat' (primitive 'string'))");
+      COMP (matnos,             "pointer (array 'self.nmat' (primitive 'int'))");
+      COMP (matnames,           "pointer (array 'self.nmat' (primitive 'string'))");
+      COMP (matcolors,          "pointer (array 'self.nmat' (primitive 'string'))");
       COMP (allowmat0,          "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (guihide,            "primitive 'int'");
@@ -2232,16 +2203,11 @@ stc_silo_types (void) {
       COMP (mixlen,             "primitive 'int'");
       COMP (datatype,           "primitive 'int'");
       IOASSOC (PA_DATATYPE);
-      COMP (matlist,
-            "pointer (array 'SH2, self.dims' (primitive 'int'))");
-      COMP (mix_vf,
-            "pointer (array 'self.mixlen' (primitive 'self.datatype'))");
-      COMP (mix_next,
-            "pointer (array 'self.mixlen' (primitive 'int'))");
-      COMP (mix_mat,
-            "pointer (array 'self.mixlen' (primitive 'int'))");
-      COMP (mix_zone,
-            "pointer (array 'self.mixlen' (primitive 'int'))");
+      COMP (matlist,            "pointer (array 'SH2, self.dims' (primitive 'int'))");
+      COMP (mix_vf,             "pointer (array 'self.mixlen' (primitive 'self.datatype'))");
+      COMP (mix_next,           "pointer (array 'self.mixlen' (primitive 'int'))");
+      COMP (mix_mat,            "pointer (array 'self.mixlen' (primitive 'int'))");
+      COMP (mix_zone,           "pointer (array 'self.mixlen' (primitive 'int'))");
    } ESTRUCT;
 
    STRUCT (DBmatspecies) {
@@ -2276,20 +2242,8 @@ stc_silo_types (void) {
             "pointer (array 'self.mixlen' (primitive 'int'))");
    } ESTRUCT;
 
-   STRUCT (DBcompoundarray) {
-      COMP (id,                 "primitive 'int'");
-      COMP (name,               "primitive 'string'");
-      COMP (nelems,             "primitive 'int'");
-      COMP (nvalues,            "primitive 'int'");
-      COMP (datatype,           "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (elemnames,
-            "pointer (array 'self.nelems' (primitive 'string'))");
-      COMP (elemlengths,
-            "pointer (array 'self.nelems' (primitive 'int'))");
-      COMP (values,
-            "pointer (array 'self.nvalues' (primitive 'self.datatype'))");
-   } ESTRUCT;
+    /* The DBcompoundarray object is handled specially in browser using the
+       browser_DBGetCompoundarray() function */
 
    STRUCT (DBmrgtree) {
       WALK1 (stc_walk1_DBmrgtree);
@@ -2300,30 +2254,8 @@ stc_silo_types (void) {
       COMP (num_nodes,          "primitive 'int'");
    } ESTRUCT;
 
-   STRUCT(DBgroupelmap) {
-      COMP (name,               "primitive 'string'");
-      COMP (num_segments,       "primitive 'int'");
-      COMP (fracs_data_type,    "primitive 'int'");
-      IOASSOC (PA_DATATYPE);
-      COMP (segment_lengths,
-            "pointer (array 'self.num_segments' (primitive 'int'))");
-      COMP (groupel_types,
-            "pointer (array 'self.num_segments' (primitive 'int'))");
-      tmp = obj_new (C_PRIM, "int");
-      prim_set_io_assoc (tmp, PA_CENTERING);
-      tmp = obj_new (C_PTR, obj_new (C_ARY, "self.num_segments", tmp));
-      COMP3 (groupel_types, "groupel_types", tmp);
-      COMP (segment_ids,
-            "pointer (array 'self.num_segments' (primitive 'int'))");
-      COMP (segment_data,
-            "pointer (array 'SH3 1000, self.num_segments' "
-            "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
-            "(primitive 'int'))))");
-      COMP (segment_fracs,
-            "pointer (array 'SH3 1000, self.num_segments' "
-            "(pointer (array 'SH1 DB_COLLINEAR, self.segment_lengths' "
-            "(primitive 'self.fracs_data_type'))))");
-   } ESTRUCT;
+    /* The DBgroupelmap object is handled specially in browser using the
+       browser_DBGroupelmap() function */
 
    STRUCT (DBmrgvar) {
       COMP (name,               "primitive 'string'");
@@ -2332,13 +2264,10 @@ stc_silo_types (void) {
       COMP (nregns,             "primitive 'int'");
       COMP (datatype,           "primitive 'int'");
       IOASSOC (PA_DATATYPE);
-      COMP (compnames,
-            "pointer (array 'self.ncomps' (primitive 'string'))");
-      COMP (reg_pnames,
-            "pointer (array '1' (primitive 'string'))");
-      COMP (data,
-            "pointer (array 'self.ncomps' (pointer "
-            "(array 'self.nregns' (primitive 'self.datatype'))))");
+      COMP (compnames,          "pointer (array 'self.ncomps' (primitive 'string'))");
+      COMP (reg_pnames,         "pointer (array 'SH5 0, self.reg_pnames' (primitive 'string'))");
+      COMP (data,               "pointer (array 'self.ncomps' (pointer "
+                                "(array 'self.nregns' (primitive 'self.datatype'))))");
    } ESTRUCT;
 
    STRUCT (toc_t) {
@@ -2351,14 +2280,12 @@ stc_silo_types (void) {
       WALK1 (stc_walk1_DBdirectory);
       WALK2 (stc_walk2_DBdirectory);
       COMP (nsyms,              "primitive 'int'");
-      COMP (entry_ptr,
-            "pointer (array 'self.nsyms' (pointer 'toc_t'))");
+      COMP (entry_ptr,          "pointer (array 'self.nsyms' (pointer 'toc_t'))");
    } ESTRUCT;
 
    STRUCT (DBtoc) {
       COMP (ncurve,             "primitive 'int'");
-      COMP (curve_names,
-            "pointer (array 'self.ncurve' (primitive 'string'))");
+      COMP (curve_names,        "pointer (array 'self.ncurve' (primitive 'string'))");
       COMP (ndefvars,           "primitive 'int'");
       COMP (defvars_names,
             "pointer (array 'self.ndefvars' (primitive 'string'))");

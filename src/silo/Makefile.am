@@ -80,7 +80,8 @@ EXTRA_DIST = \
 
 include_HEADERS = \
  silo.inc \
- silo_exports.h \
+ silo_f77.inc \
+ silo_f9x.inc \
  pmpio.h
 
 if JSON_NEEDED
@@ -103,7 +104,7 @@ FILES = \
  silo_ns.c \
  $(EXTRAFILES)
 
-BUILT_SOURCES = silo.inc
+BUILT_SOURCES = silo.inc silo_f9x.inc
 DISTCLEANFILES = silo_version.h
 
 # built if it doesn't exit, could cause problem with VPATH
@@ -111,3 +112,10 @@ DISTCLEANFILES = silo_version.h
 silo.inc: silo.h.in silo_f.h
 	if test ! -e $@; then \
 	  cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; fi
+
+silo_f77.inc: silo.inc
+	@ln -s $< $@ 2>/dev/null
+
+silo_f9x.inc: silo.h.in silo_f.h
+	if test ! -e $@; then \
+	  cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc --f90 > $@; fi

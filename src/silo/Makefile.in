@@ -139,7 +139,8 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libsilo_silo_la_SOURCES)
 DIST_SOURCES = $(am__libsilo_silo_la_SOURCES_DIST)
-am__include_HEADERS_DIST = silo.inc silo_exports.h pmpio.h silo_json.h
+am__include_HEADERS_DIST = silo.inc silo_f77.inc silo_f9x.inc pmpio.h \
+	silo_json.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -356,7 +357,8 @@ EXTRA_DIST = \
  silo_json.c \
  silo.h.in
 
-include_HEADERS = silo.inc silo_exports.h pmpio.h $(am__append_5)
+include_HEADERS = silo.inc silo_f77.inc silo_f9x.inc pmpio.h \
+	$(am__append_5)
 nodist_include_HEADERS = \
  silo.h
 
@@ -373,7 +375,7 @@ FILES = \
  silo_ns.c \
  $(EXTRAFILES)
 
-BUILT_SOURCES = silo.inc
+BUILT_SOURCES = silo.inc silo_f9x.inc
 DISTCLEANFILES = silo_version.h
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -716,6 +718,13 @@ uninstall-am: uninstall-includeHEADERS uninstall-nodist_includeHEADERS
 silo.inc: silo.h.in silo_f.h
 	if test ! -e $@; then \
 	  cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@; fi
+
+silo_f77.inc: silo.inc
+	@ln -s $< $@ 2>/dev/null
+
+silo_f9x.inc: silo.h.in silo_f.h
+	if test ! -e $@; then \
+	  cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc --f90 > $@; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -459,7 +459,11 @@ DBFreeMultimesh(DBmultimesh *msh)
     if (msh == NULL)
         return;
 
-    if (msh->meshnames)
+    if (msh->meshnames_alloc)
+    {
+        FREE(msh->meshnames_alloc);
+    }
+    else if (msh->meshnames)
     {
         for (i = 0; i < msh->nblocks; i++) {
             FREE(msh->meshnames[i]);
@@ -560,7 +564,11 @@ DBFreeMultivar (DBmultivar *mv)
      if (mv == NULL)
           return;
 
-     if (mv->varnames)
+     if (mv->varnames_alloc)
+     {
+         FREE(mv->varnames_alloc);
+     }
+     else if (mv->varnames)
      {
          for (i = 0; i < mv->nvars; i++) {
               FREE(mv->varnames[i]);
@@ -616,7 +624,11 @@ DBFreeMultimat (DBmultimat *mat)
      if (mat == NULL)
           return;
 
-     if (mat->matnames)
+     if (mat->matnames_alloc)
+     {
+         FREE(mat->matnames_alloc);
+     }
+     else if (mat->matnames)
      {
          for (i = 0; i < mat->nmats; i++) {
               FREE(mat->matnames[i]);
@@ -699,7 +711,11 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
          FREE(spec->speccolors);
      }
 
-     if (spec->specnames)
+     if (spec->specnames_alloc)
+     {
+         FREE(spec->specnames_alloc);
+     }
+     else if (spec->specnames)
      {
          for (i = 0; i < spec->nspec; i++) {
               FREE(spec->specnames[i]);
@@ -1027,7 +1043,7 @@ DBIsEmptyMeshvar(DBmeshvar const *var)
 {
     if (!var) return 0;
     if (var->nels!=0) return 0;
-    if (var->nvals!=0) return 0;
+  /*if (var->nvals!=0) return 0; */
     if (var->vals!=0) return 0;
   /*if (var->ndims!=0) return 0; long standing bug/assumption in Silo */
     if (var->dims[0]!=0) return 0;

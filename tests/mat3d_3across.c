@@ -127,9 +127,9 @@ int     dims[3];
 int main(int argc, char **argv) {
     DBfile *db;
     int            i, driver = DB_PDB;
-    char          *filename = "csg.pdb";
+    char          *filename = "mat3d_3across.pdb";
     int            show_all_errors = FALSE;
-    char  *coordnames[3];
+    char const * const coordnames[3] = {"x", "y", "z"};
     float *coord[3];
 
     for (i=1; i<argc; i++) {
@@ -148,10 +148,6 @@ int main(int argc, char **argv) {
 
   if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
 
-  coordnames[0]=strdup("x");
-  coordnames[1]=strdup("y");
-  coordnames[2]=strdup("z");
-
   coord[0] = x;
   coord[1] = y;
   coord[2] = z;
@@ -163,7 +159,7 @@ int main(int argc, char **argv) {
   db=DBCreate(filename, DB_CLOBBER, DB_LOCAL,
               "Mixed zone 3d test", driver);
 
-  DBPutQuadmesh(db, "mesh", coordnames, coord, dims, 3, 
+  DBPutQuadmesh(db, "mesh", coordnames, (DB_DTPTR2) coord, dims, 3, 
                 DB_FLOAT, DB_NONCOLLINEAR, NULL);
 
   dims[0]=zx;
@@ -175,10 +171,6 @@ int main(int argc, char **argv) {
 
   DBClose(db);
  
-  free(coordnames[0]);
-  free(coordnames[1]);
-  free(coordnames[2]);
-
   CleanupDriverStuff();
   return 0;
 }

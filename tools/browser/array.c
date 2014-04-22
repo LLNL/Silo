@@ -112,7 +112,12 @@ typedef struct obj_ary_t {
                                  * sentinal, N, where N comes from
                                  * `(array "SH5 N, ...)' 
                                  */
-#define ARY_NSH         6       /*THIS MUST BE LAST!                    */
+#define ARY_SH_6        6       /* Array dimension determined by adding next
+                                 * argument to each of the specified dimension
+                                 * sizes as in `(array SH6 -1, self.dims)'
+                                 */
+                                    
+#define ARY_NSH         7       /*THIS MUST BE LAST!                    */
 
 static int      SHFlagsEncountered[ARY_NSH];
 
@@ -493,7 +498,7 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
    if ((nbytes=obj_sizeof(self->sub))<=0) {
       /* Total hack to make SH5 case work */
       if (ARY_SH_5==self->special_handling) {
-          nbytes=sizeof(int);
+          nbytes=sizeof(void*);
       } else {
           out_error ("unable to determine size of: ", self->sub);
           return;
@@ -593,24 +598,12 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
       if (wdata->nvals<0) return ;      /*error already detected*/
       if (wdata->vals == 0)
       {
-          /* Total hack to make SH5 case work */
-          wdata->vals = (int *) malloc(10*sizeof(int));
-          wdata->nvals = 0;
-          wdata->maxvals = 10;
+          int sentinel = wdata->maxvals;
+          void **memtmp = (void**) mem;
           i = 0;
-          while (1)
-          {
-              if (wdata->nvals == wdata->maxvals)
-              {
-                  wdata->maxvals *= 1.5;
-                  wdata->vals = (int *) realloc(wdata->vals, wdata->maxvals*sizeof(int));
-              }
-              wdata->vals[i] = *((int*)((char*)mem+i*nbytes));
-              wdata->nvals++;
-              if (wdata->vals[i] == -1)
-                  break;
+          while ((void*) sentinel != memtmp[i])
               i++;
-          }
+          wdata->nvals = i;
       }
       else
       {
@@ -1310,7 +1303,7 @@ ary_bind (obj_t _self, void *mem) {
 
    obj_ary_t    *self = MYCLASS(_self);
    char         *s, *t, *rest, buf[1024];
-   int          i, n, dim[NDIMS], max_dim0=0, sentinel;
+   int          i, n, dim[NDIMS], max_dim0=0, sentinel=0, dimadd=0;
    lex_t        *lex_input=NULL;
    obj_t        in=NIL, sdo=NIL;
    walk_t       wdata;
@@ -1370,7 +1363,10 @@ ary_bind (obj_t _self, void *mem) {
             max_dim0 = strtol (rest, &rest, 0);
          } else if (ARY_SH_5==self->special_handling) {
             sentinel = strtol (rest, &rest, 0);
-            self->ndims = 1;
+             self->ndims = 1;
+         } else if (ARY_SH_6==self->special_handling) {
+            self->special_handling = 0; /*completely handled here*/
+            dimadd = strtol (rest, &rest, 0);
          }
          assert (!rest || !*rest);
 
@@ -1413,16 +1409,18 @@ ary_bind (obj_t _self, void *mem) {
          {
              wdata.vals = 0;
              wdata.nvals = 0;
-             wdata.maxvals = 0;
+             wdata.maxvals = sentinel;
              obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
-             if (wdata.nvals<1) {
-                out_errorn ("array dimension has no value: %s", t);
+             if (wdata.nvals<1)
+             {
                 self->ndims = 0;
-                goto error;
+             }
+             else
+             {
+                 self->ndims = 1;
+                 self->dim[0] = wdata.nvals;
              }
              sdo = obj_dest (sdo);
-             self->ndims = 1;
-             self->dim[0] = wdata.nvals;
          }
          else
          {
@@ -1430,7 +1428,7 @@ ary_bind (obj_t _self, void *mem) {
              wdata.nvals = 0;
              wdata.maxvals = NELMTS(dim);
              obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
-             if (wdata.nvals<1) {
+             if (wdata.nvals<0) {
                 out_errorn ("array dimension has no value: %s", t);
                 self->ndims = 0;
                 goto error;
@@ -1441,7 +1439,7 @@ ary_bind (obj_t _self, void *mem) {
                    out_errorn ("too many dimensions in array type");
                    goto error;
                 }
-                self->dim[self->ndims] = n = wdata.vals[i];
+                self->dim[self->ndims] = n = wdata.vals[i] + dimadd;
                 self->ndims += 1;
                 if (n<0) {
                    out_errorn ("dimension %d is invalid: %d",

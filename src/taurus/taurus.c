@@ -1592,7 +1592,7 @@ taurus_readblockvar (TAURUSfile *taurus, int var_id, int val_id, float *var)
  *-------------------------------------------------------------------------
  */
 TAURUSfile *
-db_taur_open (char *basename)
+db_taur_open (char const *basename)
 {
     int            fd;
     int            loc, size;
@@ -2289,7 +2289,7 @@ init_zone_info (TAURUSfile *taurus)
  *-------------------------------------------------------------------------
  */
 int
-taurus_readvar (TAURUSfile *taurus, char *varname, float **var, int *length,
+taurus_readvar (TAURUSfile *taurus, char const *varname, float **var, int *length,
                 int *center, char *meshname)
 {
     int            i;

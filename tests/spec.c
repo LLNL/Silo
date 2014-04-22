@@ -137,8 +137,8 @@ main(int argc, char *argv[])
     }
 
     /* Name the coordinate axes 'X' and 'Y' */
-    coordnames[0] = (char *) safe_strdup("X");
-    coordnames[1] = (char *) safe_strdup("Y");
+    coordnames[0] = (char *) _db_safe_strdup("X");
+    coordnames[1] = (char *) _db_safe_strdup("Y");
 
     /* Set up the coordinate values */
 
@@ -158,8 +158,8 @@ main(int argc, char *argv[])
     dims[1] = NY + 1;
 
     /* Write out the mesh to the file */
-    DBPutQuadmesh(file, "quad_mesh", coordnames, coordinates, dims, 2,
-                  DB_FLOAT, DB_COLLINEAR, NULL);
+    DBPutQuadmesh(file, "quad_mesh", (char const * const *) coordnames,
+        (DB_DTPTR2) coordinates, dims, 2, DB_FLOAT, DB_COLLINEAR, NULL);
 
     /* Set up the material and species information */
 

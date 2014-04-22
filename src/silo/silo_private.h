@@ -76,9 +76,6 @@ be used for advertising or product endorsement purposes.
 #include <unistd.h> /*for access() F_OK, R_OK */
 #endif
 #endif
-/* define USE_CONST_DB_CONSTARR so that when we compile Silo
-   we are sure to get the CONST versions of DB_CONSTARR symbols */
-#define USE_CONST_DB_CONSTARR
 #include "silo.h"
 
 /*
@@ -314,7 +311,7 @@ typedef struct context_t {
                            jstat = 1 ;                                        \
                            if (NM && jdbfile && !jdbfile->pub.pathok) {       \
                               char const *jr ;                                \
-                              jold = context_switch (jdbfile,(char const *)NM,&jr) ;\
+                              jold = context_switch (jdbfile,NM,&jr) ;        \
                               if (!jold) longjmp (SILO_Globals.Jstk->jbuf, -1) ;\
                               NM = jr ;                                       \
                            }                                                  \
@@ -387,7 +384,7 @@ typedef struct context_t {
 #define REALLOC(P,T,N)  REALLOC_N((P),(T),(N))
 #define REALLOC_N(P,T,N)        ((T*)((N)>0?realloc((P),(size_t)((N)*sizeof(T))):0))
 #define FREE(M)         if(M){free(M);(M)=NULL;}
-#define STRDUP(S)               safe_strdup((S))
+#define STRDUP(S)               _db_safe_strdup((S))
 #define STRNDUP(S,N)            db_strndup((S),(N))
 
 #define SW_strndup(S,N) db_strndup((S),(N))
@@ -412,6 +409,26 @@ typedef struct context_t {
  * File status, maintained by DBOpen, DBCreate, and DBClose.
  */
 #define DB_ISOPEN       0x01          /*database is open; ID is in use */
+
+#define db_SetMissingValueForGet(DST, SRC) \
+{                                          \
+    DST = SRC;                             \
+    if (DST == DB_MISSING_VALUE_NOT_SET)   \
+        DST = 0.0;                         \
+    else if (DST == 0.0)                   \
+        DST = DB_MISSING_VALUE_NOT_SET;    \
+}
+
+#define db_SetMissingValueForPut(DST, SRC) \
+{                                          \
+    if (SRC != DB_MISSING_VALUE_NOT_SET)   \
+    {                                      \
+        if (SRC == 0)                      \
+            DST = DB_MISSING_VALUE_NOT_SET;\
+        else                               \
+            DST = SRC;                     \
+    }                                      \
+}
 
 /*
  * Global data for Material
@@ -469,6 +486,9 @@ struct _pm {
     int            _llong_gnodeno;
     int            _conserved;
     int            _extensive;
+    double         _missing_value;
+    char          *_ghost_node_labels;
+    char         **_alt_nodenum_vars;
 
     /*These used only by NetCDF driver */
     int            _dim_ndims;
@@ -491,7 +511,7 @@ struct _qm {
     int            _dtime_set;
     float          _align[3];
     int            _cycle;
-    int            _coordsys;
+    int            _coord_sys;
     int            _facetype;
     int            _hi_offset[3];
     int            _lo_offset[3];
@@ -523,6 +543,11 @@ struct _qm {
     char         **_region_pnames;
     int            _conserved;
     int            _extensive;
+    double         _missing_value;
+    char          *_ghost_node_labels;
+    char          *_ghost_zone_labels;
+    char         **_alt_nodenum_vars;
+    char         **_alt_zonenum_vars;
 
     /* These are probably only used by the pdb driver */
     char           _nm_dims[64];
@@ -567,7 +592,7 @@ struct _um {
     int            _lo_offset;
     int            _hi_offset_set;
     int            _lo_offset_set;
-    int            _coordsys;
+    int            _coord_sys;
     int            _topo_dim;
     int            _facetype;
     int            _ndims;
@@ -604,6 +629,9 @@ struct _um {
     int            _llong_gnodeno;
     int            _conserved;
     int            _extensive;
+    double         _missing_value;
+    char          *_ghost_node_labels;
+    char         **_alt_nodenum_vars;
 };
 
 /*
@@ -642,6 +670,8 @@ struct _csgm {
     int            _disjoint_mode;
     int            _conserved;
     int            _extensive;
+    double         _missing_value;
+    char         **_alt_nodenum_vars;
 };
 
 /*
@@ -650,6 +680,8 @@ struct _csgm {
 struct _uzl {
     int           *_gzoneno;
     int            _llong_gzoneno;
+    char          *_ghost_zone_labels;
+    char         **_alt_zonenum_vars;
 };
 
 /*
@@ -658,6 +690,8 @@ struct _uzl {
 struct _phzl {
     int           *_gzoneno;
     int            _llong_gzoneno;
+    char          *_ghost_zone_labels;
+    char         **_alt_zonenum_vars;
 };
 
 /*
@@ -666,6 +700,7 @@ struct _phzl {
 struct _csgzl {
     char         **_regnames;
     char         **_zonenames;
+    char         **_alt_zonenum_vars;
 };
 
 /*
@@ -719,6 +754,9 @@ struct _mm {
     int           *_empty_list;
     int            _empty_cnt;
     int            _repr_block_idx;
+    double         _missing_value;
+    char         **_alt_zonenum_vars;
+    char         **_alt_nodenum_vars;
 };
 
 /*
@@ -731,6 +769,8 @@ struct _cu {
    char         *_units[2] ;
     int          _guihide;
    char         *_reference ;
+    int          _coord_sys ;
+    double       _missing_value;
 };
 
 /*
@@ -795,7 +835,7 @@ typedef struct filter_t {
 
 /* Namespace struct for Silo's global variables */
 typedef struct SILO_Globals_t {
-    long dataReadMask;
+    unsigned long long dataReadMask;
     int allowOverwrites;
     int allowEmptyObjects;
     int enableChecksums;
@@ -842,7 +882,7 @@ INTERNAL int db_GetMachDataSize (int);
 INTERNAL char *DBGetObjtypeName (int);
 INTERNAL char *db_strndup (const char *, int);
 INTERNAL char *db_GetDatatypeString (int);
-INTERNAL int db_GetDatatypeID (char *);
+INTERNAL int db_GetDatatypeID (char const * const);
 INTERNAL int db_perror (char const *, int, char const *);
 INTERNAL void _DBQQCalcStride (int *, int *, int, int);
 INTERNAL void _DBQMSetStride (DBquadmesh *);
@@ -856,7 +896,7 @@ INTERNAL int db_ListDir2 (DBfile *, char **, int, int, char **,
                               int *);
 INTERNAL int CSGM_CalcExtents (int, int, int, const int*,
                                  const void *, double *, double *);
-INTERNAL int _DBQMCalcExtents (DB_DTPTR2, int, int *, int *, int *, int,
+INTERNAL int _DBQMCalcExtents (DB_DTPTR2, int, int const *, int const *, int const *, int,
                                    int, void *, void *);
 INTERNAL int UM_CalcExtents (DB_DTPTR2, int, int, int, void *,
                                  void *);
@@ -864,8 +904,8 @@ INTERNAL int _DBSubsetMinMax2 (DB_DTPTR1, int, float *, float *, int,
                                    int, int, int, int);
 INTERNAL int _DBSubsetMinMax3 (float *, int, float *, float *, int, int,
                                int, int, int, int, int, int);
-INTERNAL int db_ProcessOptlist (int, const DBoptlist *const);
-INTERNAL int db_VariableNameValid(char *);
+INTERNAL int db_ProcessOptlist (int, DBoptlist const * const);
+INTERNAL int db_VariableNameValid(char const *);
 INTERNAL int db_SplitShapelist (DBucdmesh *um);
 INTERNAL int db_ResetGlobalData_Csgmesh ();
 INTERNAL int db_ResetGlobalData_Mrgtree();
@@ -892,11 +932,10 @@ INTERNAL int   db_relative_path ( char *pathname );
 INTERNAL char *db_unsplit_path ( const db_Pathname *p );
 INTERNAL db_Pathname *db_split_path ( const char *pathname );
 INTERNAL const int *db_get_used_file_options_sets_ids();
-char   *safe_strdup (const char *);
+char   *_db_safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/
-#define strdup(s) safe_strdup(s)
+#define strdup(s) _db_safe_strdup(s)
 
-INTERNAL int db_is_different_dbl(double a, double b, double abstol, double reltol, double reltol_eps);
-INTERNAL int db_is_different_ll(long long a, long long b, double abstol, double reltol, double reltol_eps);
+INTERNAL int db_StringListToStringArrayMBOpt(char *strList, char ***strArray, char **alloc_flag, int nblocks);
 
 #endif /* !SILO_PRIVATE_H */

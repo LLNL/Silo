@@ -85,7 +85,7 @@ if test -z "$tmpDir"; then
     fi
 fi
 optError=0
-browserOptsDef="-l 0 -r"
+browserOptsDef="-l 0"
 browserOpts=""
 arg1=
 arg2=
