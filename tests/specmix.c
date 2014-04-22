@@ -1097,20 +1097,17 @@ domatspec(DBfile *db, DoSpecOp_t writeOrReadAndCheck, int forceSingle)
             CHECKIARR(mat->mix_next, mix_next, mixc);
             CHECKIARR(mat->mix_mat, mix_mat, mixc);
             CHECKIARR(mat->mix_zone, mix_zone, mixc);
-            if (pass)
+            if (forceSingle)
             {
-                CHECKDARR(mat->mix_vf, mix_vf, mixc);
+                CHECKDARR(((float*)mat->mix_vf), mix_vf, mixc);
+            }
+            else if (pass)
+            {
+                CHECKDARR(((float*)mat->mix_vf), mix_vf, mixc);
             }
             else
             {
-                if (forceSingle)
-                {
-                    CHECKDARR(mat->mix_vf, mix_vf, mixc);
-                }
-                else
-                {
-                    CHECKDARR(((double*)mat->mix_vf), mix_vfd, mixc);
-                }
+                CHECKDARR(((double*)mat->mix_vf), mix_vfd, mixc);
             }
         }
     }
@@ -1219,20 +1216,17 @@ domatspec(DBfile *db, DoSpecOp_t writeOrReadAndCheck, int forceSingle)
             CHECKIVAL(spec->nspecies_mf, mfc);
             CHECKIARR(spec->speclist, speclist, dims[0]*dims[1]);
             CHECKIARR(spec->mix_speclist, mixspeclist, mixc);
-            if (pass)
+            if (forceSingle)
             {
-                CHECKDARR(spec->species_mf, specmf, mfc);
+                CHECKDARR(((float*)spec->species_mf), specmf, mfc);
+            }
+            else if (pass)
+            {
+                CHECKDARR(((float*)spec->species_mf), specmf, mfc);
             }
             else
             {
-                if (forceSingle)
-                {
-                    CHECKDARR(spec->species_mf, specmf, mfc);
-                }
-                else
-                {
-                    CHECKDARR(((double*)spec->species_mf), specmfd, mfc);
-                }
+                CHECKDARR(((double*)spec->species_mf), specmfd, mfc);
             }
         }
     }

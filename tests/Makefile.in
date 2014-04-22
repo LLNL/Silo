@@ -95,7 +95,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@INSTALL_LITE_HEADERS_TRUE@am__append_1 = testpdb pdbtst
+@JSON_NEEDED_TRUE@am__append_1 = ../tools/json/json-c-0.10/libjson.la
+@INSTALL_LITE_HEADERS_TRUE@am__append_2 = testpdb pdbtst
+@JSON_NEEDED_TRUE@am__append_3 = json
 check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	extface$(EXEEXT) multi_test$(EXEEXT) partial_io$(EXEEXT) \
 	point$(EXEEXT) group_test$(EXEEXT) listtypes$(EXEEXT) \
@@ -112,12 +114,13 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
 	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
 	empty$(EXEEXT) majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_6)
-@HDF5_DRV_NEEDED_TRUE@am__append_2 = $(HDF5PROGS)
-@HDF5_DRV_NEEDED_TRUE@am__append_3 = $(HDF5PROGS)
-@HDF5_DRV_NEEDED_TRUE@am__append_4 = $(HDF5CKLTLIBS)
-@FORTRAN_NEEDED_TRUE@am__append_5 = $(FCPROGS)
-@FORTRAN_NEEDED_TRUE@am__append_6 = $(FCPROGS)
+	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_6) \
+	$(am__EXEEXT_8)
+@HDF5_DRV_NEEDED_TRUE@am__append_4 = $(HDF5PROGS)
+@HDF5_DRV_NEEDED_TRUE@am__append_5 = $(HDF5PROGS)
+@HDF5_DRV_NEEDED_TRUE@am__append_6 = $(HDF5CKLTLIBS)
+@FORTRAN_NEEDED_TRUE@am__append_7 = $(FCPROGS)
+@FORTRAN_NEEDED_TRUE@am__append_8 = $(FCPROGS)
 subdir = tests
 DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -177,37 +180,49 @@ rocket_silo_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 @INSTALL_LITE_HEADERS_TRUE@am__EXEEXT_1 = testpdb$(EXEEXT) \
 @INSTALL_LITE_HEADERS_TRUE@	pdbtst$(EXEEXT)
 am__EXEEXT_2 = $(am__EXEEXT_1)
-am__EXEEXT_3 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
-@HDF5_DRV_NEEDED_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
-am__EXEEXT_5 = arrayf77$(EXEEXT) arrayf90$(EXEEXT) curvef77$(EXEEXT) \
+@JSON_NEEDED_TRUE@am__EXEEXT_3 = json$(EXEEXT)
+am__EXEEXT_4 = $(am__EXEEXT_3)
+am__EXEEXT_5 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
+@HDF5_DRV_NEEDED_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
+am__EXEEXT_7 = arrayf77$(EXEEXT) arrayf90$(EXEEXT) curvef77$(EXEEXT) \
 	matf77$(EXEEXT) pointf77$(EXEEXT) quadf77$(EXEEXT) \
 	ucdf77$(EXEEXT) testallf77$(EXEEXT) csgmesh$(EXEEXT)
-@FORTRAN_NEEDED_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
+@FORTRAN_NEEDED_TRUE@am__EXEEXT_8 = $(am__EXEEXT_7)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
 TestReadMask_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@TestReadMask_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@TestReadMask_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@TestReadMask_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@TestReadMask_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 alltypes_SOURCES = alltypes.c
 alltypes_OBJECTS = alltypes.$(OBJEXT)
 alltypes_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@alltypes_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@alltypes_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@alltypes_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@alltypes_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 arbpoly_SOURCES = arbpoly.c
 arbpoly_OBJECTS = arbpoly.$(OBJEXT)
 arbpoly_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@arbpoly_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@arbpoly_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@arbpoly_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@arbpoly_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 arbpoly2d_SOURCES = arbpoly2d.c
 arbpoly2d_OBJECTS = arbpoly2d.$(OBJEXT)
 arbpoly2d_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@arbpoly2d_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@arbpoly2d_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@arbpoly2d_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@arbpoly2d_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 array_SOURCES = array.c
 array_OBJECTS = array.$(OBJEXT)
 array_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@array_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@array_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@array_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@array_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__arrayf77_SOURCES_DIST = arrayf77.f
 @FORTRAN_NEEDED_TRUE@am_arrayf77_OBJECTS = arrayf77.$(OBJEXT)
 arrayf77_OBJECTS = $(am_arrayf77_OBJECTS)
@@ -226,13 +241,17 @@ compression_OBJECTS = $(am_compression_OBJECTS)
 cpz1plt_SOURCES = cpz1plt.c
 cpz1plt_OBJECTS = cpz1plt.$(OBJEXT)
 cpz1plt_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@cpz1plt_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@cpz1plt_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@cpz1plt_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@cpz1plt_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 csg_SOURCES = csg.c
 csg_OBJECTS = csg.$(OBJEXT)
 csg_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@csg_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@csg_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@csg_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@csg_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__csgmesh_SOURCES_DIST = csgmesh.f
 @FORTRAN_NEEDED_TRUE@am_csgmesh_OBJECTS = csgmesh.$(OBJEXT)
 csgmesh_OBJECTS = $(am_csgmesh_OBJECTS)
@@ -246,23 +265,31 @@ curvef77_OBJECTS = $(am_curvef77_OBJECTS)
 am_dir_OBJECTS = dir.$(OBJEXT) testlib.$(OBJEXT)
 dir_OBJECTS = $(am_dir_OBJECTS)
 dir_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@dir_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@dir_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@dir_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@dir_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 efcentering_SOURCES = efcentering.c
 efcentering_OBJECTS = efcentering.$(OBJEXT)
 efcentering_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@efcentering_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@efcentering_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@efcentering_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@efcentering_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 empty_SOURCES = empty.c
 empty_OBJECTS = empty.$(OBJEXT)
 empty_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@empty_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@empty_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@empty_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@empty_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 extface_SOURCES = extface.c
 extface_OBJECTS = extface.$(OBJEXT)
 extface_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@extface_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@extface_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@extface_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@extface_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__grab_SOURCES_DIST = grab.c
 @HDF5_DRV_NEEDED_TRUE@am_grab_OBJECTS = grab.$(OBJEXT)
 grab_OBJECTS = $(am_grab_OBJECTS)
@@ -270,37 +297,55 @@ grab_OBJECTS = $(am_grab_OBJECTS)
 group_test_SOURCES = group_test.c
 group_test_OBJECTS = group_test.$(OBJEXT)
 group_test_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@group_test_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@group_test_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@group_test_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@group_test_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 ioperf_SOURCES = ioperf.c
 ioperf_OBJECTS = ioperf.$(OBJEXT)
 ioperf_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@ioperf_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@ioperf_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@ioperf_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@ioperf_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 ioperf_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(ioperf_LDFLAGS) $(LDFLAGS) -o $@
+json_SOURCES = json.c
+json_OBJECTS = json-json.$(OBJEXT)
+json_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@json_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@json_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 largefile_SOURCES = largefile.c
 largefile_OBJECTS = largefile.$(OBJEXT)
 largefile_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@largefile_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@largefile_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@largefile_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@largefile_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am_listtypes_OBJECTS = listtypes.$(OBJEXT) listtypes_main.$(OBJEXT)
 listtypes_OBJECTS = $(am_listtypes_OBJECTS)
 listtypes_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@listtypes_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@listtypes_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@listtypes_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@listtypes_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 majorder_SOURCES = majorder.c
 majorder_OBJECTS = majorder.$(OBJEXT)
 majorder_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@majorder_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@majorder_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@majorder_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@majorder_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 mat3d_3across_SOURCES = mat3d_3across.c
 mat3d_3across_OBJECTS = mat3d_3across.$(OBJEXT)
 mat3d_3across_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@mat3d_3across_DEPENDENCIES = ../src/libsilo.la
+@HDF5_DRV_NEEDED_FALSE@mat3d_3across_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@mat3d_3across_DEPENDENCIES =  \
-@HDF5_DRV_NEEDED_TRUE@	../src/libsiloh5.la
+@HDF5_DRV_NEEDED_TRUE@	../src/libsiloh5.la $(am__append_1)
 am__matf77_SOURCES_DIST = matf77.f
 @FORTRAN_NEEDED_TRUE@am_matf77_OBJECTS = matf77.$(OBJEXT)
 matf77_OBJECTS = $(am_matf77_OBJECTS)
@@ -309,8 +354,10 @@ matf77_OBJECTS = $(am_matf77_OBJECTS)
 merge_block_SOURCES = merge_block.c
 merge_block_OBJECTS = merge_block.$(OBJEXT)
 merge_block_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@merge_block_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@merge_block_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@merge_block_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@merge_block_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__mk_nasf_h5_SOURCES_DIST = mk_nasf_h5.c
 @HDF5_DRV_NEEDED_TRUE@am_mk_nasf_h5_OBJECTS = mk_nasf_h5.$(OBJEXT)
 mk_nasf_h5_OBJECTS = $(am_mk_nasf_h5_OBJECTS)
@@ -318,73 +365,101 @@ mk_nasf_h5_OBJECTS = $(am_mk_nasf_h5_OBJECTS)
 mk_nasf_pdb_SOURCES = mk_nasf_pdb.c
 mk_nasf_pdb_OBJECTS = mk_nasf_pdb.$(OBJEXT)
 mk_nasf_pdb_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@mk_nasf_pdb_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@mk_nasf_pdb_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@mk_nasf_pdb_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@mk_nasf_pdb_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 mmadjacency_SOURCES = mmadjacency.c
 mmadjacency_OBJECTS = mmadjacency.$(OBJEXT)
 mmadjacency_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@mmadjacency_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@mmadjacency_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@mmadjacency_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@mmadjacency_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 multi_file_SOURCES = multi_file.c
 multi_file_OBJECTS = multi_file.$(OBJEXT)
 multi_file_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@multi_file_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@multi_file_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@multi_file_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@multi_file_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 multi_test_SOURCES = multi_test.c
 multi_test_OBJECTS = multi_test.$(OBJEXT)
 multi_test_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@multi_test_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@multi_test_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@multi_test_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@multi_test_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 multispec_SOURCES = multispec.c
 multispec_OBJECTS = multispec.$(OBJEXT)
 multispec_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@multispec_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@multispec_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@multispec_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@multispec_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 namescheme_SOURCES = namescheme.c
 namescheme_OBJECTS = namescheme.$(OBJEXT)
 namescheme_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@namescheme_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@namescheme_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@namescheme_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@namescheme_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 obj_SOURCES = obj.c
 obj_OBJECTS = obj.$(OBJEXT)
 obj_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@obj_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@obj_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@obj_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@obj_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 onehex_SOURCES = onehex.c
 onehex_OBJECTS = onehex.$(OBJEXT)
 onehex_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@onehex_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@onehex_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@onehex_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@onehex_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 oneprism_SOURCES = oneprism.c
 oneprism_OBJECTS = oneprism.$(OBJEXT)
 oneprism_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@oneprism_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@oneprism_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@oneprism_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@oneprism_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 onepyramid_SOURCES = onepyramid.c
 onepyramid_OBJECTS = onepyramid.$(OBJEXT)
 onepyramid_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@onepyramid_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@onepyramid_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@onepyramid_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@onepyramid_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 onetet_SOURCES = onetet.c
 onetet_OBJECTS = onetet.$(OBJEXT)
 onetet_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@onetet_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@onetet_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@onetet_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@onetet_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 partial_io_SOURCES = partial_io.c
 partial_io_OBJECTS = partial_io.$(OBJEXT)
 partial_io_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@partial_io_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@partial_io_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@partial_io_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@partial_io_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 pdbtst_SOURCES = pdbtst.c
 pdbtst_OBJECTS = pdbtst-pdbtst.$(OBJEXT)
 pdbtst_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@pdbtst_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@pdbtst_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@pdbtst_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@pdbtst_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 point_SOURCES = point.c
 point_OBJECTS = point.$(OBJEXT)
 point_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@point_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@point_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@point_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@point_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__pointf77_SOURCES_DIST = pointf77.f
 @FORTRAN_NEEDED_TRUE@am_pointf77_OBJECTS = pointf77.$(OBJEXT)
 pointf77_OBJECTS = $(am_pointf77_OBJECTS)
@@ -393,13 +468,17 @@ pointf77_OBJECTS = $(am_pointf77_OBJECTS)
 polyzl_SOURCES = polyzl.c
 polyzl_OBJECTS = polyzl.$(OBJEXT)
 polyzl_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@polyzl_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@polyzl_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@polyzl_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@polyzl_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am_quad_OBJECTS = quad.$(OBJEXT) testlib.$(OBJEXT)
 quad_OBJECTS = $(am_quad_OBJECTS)
 quad_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@quad_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@quad_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@quad_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@quad_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__quadf77_SOURCES_DIST = quadf77.f
 @FORTRAN_NEEDED_TRUE@am_quadf77_OBJECTS = quadf77.$(OBJEXT)
 quadf77_OBJECTS = $(am_quadf77_OBJECTS)
@@ -408,53 +487,69 @@ quadf77_OBJECTS = $(am_quadf77_OBJECTS)
 readstuff_SOURCES = readstuff.c
 readstuff_OBJECTS = readstuff.$(OBJEXT)
 readstuff_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@readstuff_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@readstuff_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@readstuff_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@readstuff_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 realloc_obj_and_opts_SOURCES = realloc_obj_and_opts.c
 realloc_obj_and_opts_OBJECTS = realloc_obj_and_opts.$(OBJEXT)
 realloc_obj_and_opts_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@realloc_obj_and_opts_DEPENDENCIES =  \
-@HDF5_DRV_NEEDED_FALSE@	../src/libsilo.la
+@HDF5_DRV_NEEDED_FALSE@	../src/libsilo.la $(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@realloc_obj_and_opts_DEPENDENCIES =  \
-@HDF5_DRV_NEEDED_TRUE@	../src/libsiloh5.la
+@HDF5_DRV_NEEDED_TRUE@	../src/libsiloh5.la $(am__append_1)
 am_rocket_OBJECTS = rocket-rocket.$(OBJEXT)
 rocket_OBJECTS = $(am_rocket_OBJECTS)
 rocket_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@rocket_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@rocket_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@rocket_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@rocket_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 rocket_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(rocket_CXXFLAGS) $(CXXFLAGS) \
 	$(rocket_LDFLAGS) $(LDFLAGS) -o $@
 sami_SOURCES = sami.c
 sami_OBJECTS = sami.$(OBJEXT)
 sami_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@sami_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@sami_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@sami_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@sami_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 simple_SOURCES = simple.c
 simple_OBJECTS = simple.$(OBJEXT)
 simple_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@simple_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@simple_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@simple_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@simple_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 spec_SOURCES = spec.c
 spec_OBJECTS = spec.$(OBJEXT)
 spec_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@spec_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@spec_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@spec_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@spec_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 specmix_SOURCES = specmix.c
 specmix_OBJECTS = specmix.$(OBJEXT)
 specmix_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@specmix_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@specmix_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@specmix_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@specmix_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 subhex_SOURCES = subhex.c
 subhex_OBJECTS = subhex.$(OBJEXT)
 subhex_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@subhex_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@subhex_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@subhex_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@subhex_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 testall_SOURCES = testall.c
 testall_OBJECTS = testall.$(OBJEXT)
 testall_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@testall_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@testall_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@testall_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@testall_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__testallf77_SOURCES_DIST = testallf77.f
 @FORTRAN_NEEDED_TRUE@am_testallf77_OBJECTS = testallf77.$(OBJEXT)
 testallf77_OBJECTS = $(am_testallf77_OBJECTS)
@@ -463,28 +558,38 @@ testallf77_OBJECTS = $(am_testallf77_OBJECTS)
 testfs_SOURCES = testfs.c
 testfs_OBJECTS = testfs.$(OBJEXT)
 testfs_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@testfs_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@testfs_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@testfs_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@testfs_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 testpdb_SOURCES = testpdb.c
 testpdb_OBJECTS = testpdb-testpdb.$(OBJEXT)
 testpdb_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@testpdb_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@testpdb_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@testpdb_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@testpdb_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 twohex_SOURCES = twohex.c
 twohex_OBJECTS = twohex.$(OBJEXT)
 twohex_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@twohex_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@twohex_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@twohex_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@twohex_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 ucd_SOURCES = ucd.c
 ucd_OBJECTS = ucd.$(OBJEXT)
 ucd_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@ucd_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@ucd_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@ucd_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@ucd_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 ucd1d_SOURCES = ucd1d.c
 ucd1d_OBJECTS = ucd1d.$(OBJEXT)
 ucd1d_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@ucd1d_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@ucd1d_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@ucd1d_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@ucd1d_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__ucdf77_SOURCES_DIST = ucdf77.f
 @FORTRAN_NEEDED_TRUE@am_ucdf77_OBJECTS = ucdf77.$(OBJEXT)
 ucdf77_OBJECTS = $(am_ucdf77_OBJECTS)
@@ -493,18 +598,24 @@ ucdf77_OBJECTS = $(am_ucdf77_OBJECTS)
 ucdsamp3_SOURCES = ucdsamp3.c
 ucdsamp3_OBJECTS = ucdsamp3.$(OBJEXT)
 ucdsamp3_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@ucdsamp3_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@ucdsamp3_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@ucdsamp3_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@ucdsamp3_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 version_SOURCES = version.c
 version_OBJECTS = version.$(OBJEXT)
 version_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@version_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@version_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@version_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@version_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 wave_SOURCES = wave.c
 wave_OBJECTS = wave.$(OBJEXT)
 wave_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@wave_DEPENDENCIES = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@wave_DEPENDENCIES = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@wave_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@wave_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -562,6 +673,7 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_grab_SOURCES) \
 	$(nodist_EXTRA_group_test_SOURCES) group_test.c \
 	$(nodist_EXTRA_ioperf_SOURCES) ioperf.c \
+	$(nodist_EXTRA_json_SOURCES) json.c \
 	$(nodist_EXTRA_largefile_SOURCES) largefile.c \
 	$(listtypes_SOURCES) $(nodist_EXTRA_listtypes_SOURCES) \
 	$(nodist_EXTRA_majorder_SOURCES) majorder.c \
@@ -612,8 +724,8 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(am__compression_SOURCES_DIST) cpz1plt.c csg.c \
 	$(am__csgmesh_SOURCES_DIST) $(am__curvef77_SOURCES_DIST) \
 	$(dir_SOURCES) efcentering.c empty.c extface.c \
-	$(am__grab_SOURCES_DIST) group_test.c ioperf.c largefile.c \
-	$(listtypes_SOURCES) majorder.c mat3d_3across.c \
+	$(am__grab_SOURCES_DIST) group_test.c ioperf.c json.c \
+	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
 	$(am__matf77_SOURCES_DIST) merge_block.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
 	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
@@ -701,6 +813,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSON = @JSON@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -878,8 +991,8 @@ DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 TESTSUITE = $(srcdir)/testsuite
-@HDF5_DRV_NEEDED_FALSE@LDADD = ../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@LDADD = ../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@LDADD = ../src/libsilo.la $(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@LDADD = ../src/libsiloh5.la $(am__append_1)
 
 # paths look at install directories before sources
 AM_CPPFLAGS = \
@@ -890,9 +1003,11 @@ AM_CPPFLAGS = \
  -I$(includedir)
 
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
-PDBTESTS = $(am__append_1)
+PDBTESTS = $(am__append_2)
 @INSTALL_LITE_HEADERS_TRUE@testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
 @INSTALL_LITE_HEADERS_TRUE@pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+JSONTESTS = $(am__append_3)
+@JSON_NEEDED_TRUE@json_CPPFLAGS = -I$(prefix)/json/include $(AM_CPPFLAGS)
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
@@ -907,7 +1022,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	rocket mmadjacency largefile version namescheme efcentering \
 	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
 	merge_block empty majorder realloc_obj_and_opts $(PDBTESTS) \
-	$(am__append_2) $(am__append_5)
+	$(JSONTESTS) $(am__append_4) $(am__append_7)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 bcastopen_SOURCES = bcastopen.c bcastopen_test.c
@@ -920,7 +1035,7 @@ EXTRA_rocket_DEPENDENCIES = rocket_silo.la
 # plugins for rocket and for ioperf
 HDF5CKLTLIBS = ioperf_hdf5.la
 check_LTLIBRARIES = rocket_silo.la ioperf_silo.la ioperf_pdb.la \
-	ioperf_sec2.la ioperf_stdio.la $(am__append_4)
+	ioperf_sec2.la ioperf_stdio.la $(am__append_6)
 rocket_silo_la_SOURCES = rocket_silo.cxx
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
 rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
@@ -1003,6 +1118,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_empty_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_majorder_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_json_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -1148,6 +1264,9 @@ group_test$(EXEEXT): $(group_test_OBJECTS) $(group_test_DEPENDENCIES)
 ioperf$(EXEEXT): $(ioperf_OBJECTS) $(ioperf_DEPENDENCIES) 
 	@rm -f ioperf$(EXEEXT)
 	$(ioperf_LINK) $(ioperf_OBJECTS) $(ioperf_LDADD) $(LIBS)
+json$(EXEEXT): $(json_OBJECTS) $(json_DEPENDENCIES) 
+	@rm -f json$(EXEEXT)
+	$(CXXLINK) $(json_OBJECTS) $(json_LDADD) $(LIBS)
 largefile$(EXEEXT): $(largefile_OBJECTS) $(largefile_DEPENDENCIES) 
 	@rm -f largefile$(EXEEXT)
 	$(CXXLINK) $(largefile_OBJECTS) $(largefile_LDADD) $(LIBS)
@@ -1308,6 +1427,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_sec2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_silo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ioperf_stdio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/json-dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/json-json.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/largefile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes_main.Po@am__quote@
@@ -1374,6 +1495,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
+json-json.o: json.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT json-json.o -MD -MP -MF $(DEPDIR)/json-json.Tpo -c -o json-json.o `test -f 'json.c' || echo '$(srcdir)/'`json.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/json-json.Tpo $(DEPDIR)/json-json.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='json.c' object='json-json.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o json-json.o `test -f 'json.c' || echo '$(srcdir)/'`json.c
+
+json-json.obj: json.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT json-json.obj -MD -MP -MF $(DEPDIR)/json-json.Tpo -c -o json-json.obj `if test -f 'json.c'; then $(CYGPATH_W) 'json.c'; else $(CYGPATH_W) '$(srcdir)/json.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/json-json.Tpo $(DEPDIR)/json-json.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='json.c' object='json-json.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o json-json.obj `if test -f 'json.c'; then $(CYGPATH_W) 'json.c'; else $(CYGPATH_W) '$(srcdir)/json.c'; fi`
+
 pdbtst-pdbtst.o: pdbtst.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pdbtst-pdbtst.o -MD -MP -MF $(DEPDIR)/pdbtst-pdbtst.Tpo -c -o pdbtst-pdbtst.o `test -f 'pdbtst.c' || echo '$(srcdir)/'`pdbtst.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pdbtst-pdbtst.Tpo $(DEPDIR)/pdbtst-pdbtst.Po
@@ -1422,6 +1557,20 @@ testpdb-testpdb.obj: testpdb.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+json-dummy.o: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT json-dummy.o -MD -MP -MF $(DEPDIR)/json-dummy.Tpo -c -o json-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/json-dummy.Tpo $(DEPDIR)/json-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='json-dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o json-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+
+json-dummy.obj: dummy.cxx
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT json-dummy.obj -MD -MP -MF $(DEPDIR)/json-dummy.Tpo -c -o json-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/json-dummy.Tpo $(DEPDIR)/json-dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dummy.cxx' object='json-dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o json-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
 
 pdbtst-dummy.o: dummy.cxx
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pdbtst-dummy.o -MD -MP -MF $(DEPDIR)/pdbtst-dummy.Tpo -c -o pdbtst-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx

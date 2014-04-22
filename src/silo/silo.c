@@ -4705,7 +4705,6 @@ DBInqVarExists(DBfile *dbfile, const char *varname)
             API_ERROR("variable name", E_BADARGS);
         if (dbfile->pub.exist == NULL)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
-
         retval = (dbfile->pub.exist) (dbfile, varname);
         API_RETURN(retval);
     }
@@ -13870,4 +13869,187 @@ _db_safe_strdup(const char *s)
     retval[n] = '\0';
 
     return(retval);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    different
+ *
+ * Purpose:     Determines if A and B are same or different based on an
+ *              absolute tolerance and relative tolerance.  A and B differ
+ *              if and only if
+ *
+ *                      | A-B | > ABSTOL
+ *
+ *              or
+ *
+ *                      2 | A-B |
+ *                      ---------  > RELTOL
+ *                       | A+B |
+ *
+ *              If ABSTOL or RELTOL is negative then the corresponding
+ *              test is not performed.  If both are negative then this
+ *              function degenerates to a `!=' operator.
+ *
+ * Return:      Success:        0 if same, 1 if different.
+ *
+ *              Failure:        never fails
+ *
+ * Programmer:  Robb Matzke
+ *              matzke@viper.llnl.gov
+ *              Feb  6 1997
+ *
+ * Modifications:
+ *
+ *  Mark C. Miller, Wed Nov 11 22:18:17 PST 2009
+ *  Added suppot for alternate relative diff option.
+ *
+ * Mark C. Miller, Tue Feb  7 15:18:38 PST 2012
+ * Made reltol_eps diff mutually exclusive with abstol || reltol diff.
+ *-------------------------------------------------------------------------
+ */
+int db_is_different_dbl (double a, double b, double abstol, double reltol, double reltol_eps)
+{
+   double       num, den;
+
+   /*
+    * First, see if we should use the alternate diff.
+    * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
+    */
+   if (reltol_eps >= 0 && reltol > 0)
+   {
+      if ((a<0 && b>0) || (b<0 && a>0)) {
+         num = fabs (a/2 - b/2);
+         den = fabs (a/2) + fabs(b/2) + reltol_eps/2;
+         reltol /= 2;
+      } else {
+         num = fabs (a - b);
+         den = fabs (a) + fabs(b) + reltol_eps;
+      }
+      if (0.0==den && num) return 1;
+      if (num/den > reltol) return 1;
+      return 0;
+   }
+   else /* use the old Abs|Rel difference test */
+   {
+      /*
+       * Now the |A-B| but make sure it doesn't overflow which can only
+       * happen if one is negative and the other is positive.
+       */
+      if (abstol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            if (fabs (a/2 - b/2) > abstol/2) return 1;
+         } else {
+            if (fabs(a-b) > abstol) return 1;
+         }
+      }
+
+      /*
+       * Now check 2|A-B|/|A+B| in a way that won't overflow.
+       */
+      if (reltol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            num = fabs (a/2 - b/2);
+            den = fabs (a/2 + b/2);
+            reltol /= 2;
+         } else {
+            num = fabs (a - b);
+            den = fabs (a/2 + b/2);
+         }
+         if (0.0==den && num) return 1;
+         if (num/den > reltol) return 1;
+      }
+
+      if (abstol>0 || reltol>0) return 0;
+   }
+
+   /*
+    * Otherwise do a normal exact comparison.
+    */
+   return a!=b;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    differentll
+ *
+ * Purpose:     Implement above difference function for long long type. 
+ *
+ * Programmer:  Mark C. Miller, Mon Dec  7 07:05:39 PST 2009
+ *
+ * Modifications:
+ *   Mark C. Miller, Mon Dec  7 09:50:19 PST 2009
+ *   Change conditional compilation logic to compile this routine
+ *   whenever a double is NOT sufficient to hold full precision of long
+ *   or long long.
+ *
+ *   Mark C. Miller, Mon Jan 11 16:20:16 PST 2010
+ *   Made it compiled UNconditionally.
+ *-------------------------------------------------------------------------
+ */
+#define FABS(A) ((A)<0?-(A):(A))
+int db_is_different_ll (long long a, long long b, double abstol, double reltol, double reltol_eps)
+{
+
+   long long num, den;
+
+   /*
+    * First, see if we should use the alternate diff.
+    * check |A-B|/(|A|+|B|+EPS) in a way that won't overflow.
+    */
+   if (reltol_eps >= 0 && reltol > 0)
+   {
+      if ((a<0 && b>0) || (b<0 && a>0)) {
+         num = FABS (a/2 - b/2);
+         den = FABS (a/2) + FABS(b/2) + reltol_eps/2;
+         reltol /= 2;
+      } else {
+         num = FABS (a - b);
+         den = FABS (a) + FABS(b) + reltol_eps;
+      }
+      if (0.0==den && num) return 1;
+      if (num/den > reltol) return 1;
+      return 0;
+   }
+   else
+   {
+      /*
+       * Now the |A-B| but make sure it doesn't overflow which can only
+       * happen if one is negative and the other is positive.
+       */
+      if (abstol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            if (FABS(a/2 - b/2) > abstol/2) return 1;
+         } else {
+            if (FABS(a-b) > abstol) return 1;
+         }
+      }
+
+      /*
+       * Now check 2|A-B|/|A+B| in a way that won't overflow.
+       */
+      if (reltol>0) {
+         if ((a<0 && b>0) || (b<0 && a>0)) {
+            num = FABS (a/2 - b/2);
+            den = FABS (a/2 + b/2);
+            reltol /= 2;
+         } else {
+            num = FABS (a - b);
+            den = FABS (a/2 + b/2);
+         }
+         if (0.0==den && num) return 1;
+         if (num/den > reltol) return 1;
+
+         if (abstol>0 || reltol>0) return 0;
+      }
+   }
+
+   /*
+    * Otherwise do a normal exact comparison.
+    */
+   return a!=b;
+}
+
+PUBLIC char *
+DBGetDatatypeString(int dt)
+{
+    return db_GetDatatypeString(dt);
 }

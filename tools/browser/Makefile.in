@@ -90,6 +90,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = browser$(EXEEXT)
+@JSON_NEEDED_TRUE@am__append_1 = ../json/json-c-0.10/libjson.la
 subdir = tools/browser
 DIST_COMMON = $(dist_bin_SCRIPTS) $(noinst_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -120,9 +121,9 @@ am_browser_OBJECTS = $(am__objects_1)
 browser_OBJECTS = $(am_browser_OBJECTS)
 am__DEPENDENCIES_1 =
 @HDF5_DRV_NEEDED_FALSE@browser_DEPENDENCIES = ../../src/libsilo.la \
-@HDF5_DRV_NEEDED_FALSE@	$(am__DEPENDENCIES_1)
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1) $(am__DEPENDENCIES_1)
 @HDF5_DRV_NEEDED_TRUE@browser_DEPENDENCIES = ../../src/libsiloh5.la \
-@HDF5_DRV_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1) $(am__DEPENDENCIES_1)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -235,6 +236,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSON = @JSON@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -367,9 +369,9 @@ browser_SOURCES = $(FILES)
 @FPZIP_NEEDED_TRUE@@HDF5_DRV_NEEDED_TRUE@nodist_EXTRA_browser_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@@HZIP_NEEDED_TRUE@nodist_EXTRA_browser_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_FALSE@browser_LDADD = ../../src/libsilo.la \
-@HDF5_DRV_NEEDED_FALSE@	$(READLINE_LIBS)
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1) $(READLINE_LIBS)
 @HDF5_DRV_NEEDED_TRUE@browser_LDADD = ../../src/libsiloh5.la \
-@HDF5_DRV_NEEDED_TRUE@	$(READLINE_LIBS)
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1) $(READLINE_LIBS)
 info_TEXINFOS = browser.texi
 AM_MAKEINFOHTMLFLAGS = --no-split
 AM_CPPFLAGS = \

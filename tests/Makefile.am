@@ -118,6 +118,9 @@ if HDF5_DRV_NEEDED
 else
   LDADD = ../src/libsilo.la
 endif
+if JSON_NEEDED
+  LDADD += ../tools/json/json-c-0.10/libjson.la
+endif
 
 # paths look at install directories before sources
 AM_CPPFLAGS = \
@@ -129,9 +132,14 @@ AM_CPPFLAGS = \
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
 PDBTESTS =
 if INSTALL_LITE_HEADERS
-testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
-pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
-PDBTESTS += testpdb pdbtst
+ testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+ pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+ PDBTESTS += testpdb pdbtst
+endif
+JSONTESTS =
+if JSON_NEEDED
+ json_CPPFLAGS = -I$(prefix)/json/include $(AM_CPPFLAGS)
+ JSONTESTS += json
 endif
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
 AM_FFLAGS = $(AM_CPPFLAGS)
@@ -146,7 +154,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      empty majorder realloc_obj_and_opts $(PDBTESTS)
+      empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS)
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
@@ -231,7 +239,8 @@ check_PROGRAMS = \
  empty \
  majorder \
  realloc_obj_and_opts \
- $(PDBTESTS)
+ $(PDBTESTS) \
+ $(JSONTESTS)
 
 # Deal with need to use c++ linker whenever we've got C++
 # sources compiled with the silo library and the fact that
@@ -303,6 +312,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_empty_SOURCES = dummy.cxx
  nodist_EXTRA_majorder_SOURCES = dummy.cxx
  nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
+ nodist_EXTRA_json_SOURCES = dummy.cxx
 endif
 
 

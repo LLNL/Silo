@@ -88,6 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@JSON_NEEDED_TRUE@am__append_1 = ../json/json-c-0.10/libjson.la
 subdir = tools/python
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -130,8 +131,10 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-@HDF5_DRV_NEEDED_FALSE@Silo_la_DEPENDENCIES = ../../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@Silo_la_DEPENDENCIES = ../../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@Silo_la_DEPENDENCIES = ../../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@Silo_la_DEPENDENCIES = ../../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__objects_1 = pydbfile.lo pydbtoc.lo pysilo.lo
 am_Silo_la_OBJECTS = $(am__objects_1)
 Silo_la_OBJECTS = $(am_Silo_la_OBJECTS)
@@ -216,6 +219,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSON = @JSON@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -343,8 +347,10 @@ top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = Silo.la
 Silo_la_SOURCES = $(FILES)
 Silo_la_LDFLAGS = -module -avoid-version
-@HDF5_DRV_NEEDED_FALSE@Silo_la_LIBADD = ../../src/libsilo.la
-@HDF5_DRV_NEEDED_TRUE@Silo_la_LIBADD = ../../src/libsiloh5.la
+@HDF5_DRV_NEEDED_FALSE@Silo_la_LIBADD = ../../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@Silo_la_LIBADD = ../../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(top_builddir)/src/silo -I$(top_srcdir)/src/silo -I$(includedir)
 noinst_HEADERS = \
  pydbfile.h \

@@ -146,7 +146,9 @@ be used for advertising or product endorsement purposes.
 #define DEEP            1
 #define NIL             ((obj_t)0)
 #define NDIMS           10
+#ifndef NELEMTS
 #define NELMTS(X)       (sizeof(X)/sizeof(*(X)))
+#endif
 
 #ifndef _WIN32
 char *_db_safe_strdup(const char *);

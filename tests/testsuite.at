@@ -245,6 +245,13 @@ AT_KEYWORDS(python)
 AT_CHECK(test -z "$PYTHON" -o -z "$BROWSER" && exit 77 || $VALGRIND testonehex `pwd`,,ignore,ignore)
 AT_CLEANUP
 
+AT_BANNER(JSON (experimental))
+AT_SETUP(json)
+AT_KEYWORDS(json)
+AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || onehex $STARGS,,ignore) # don't valgrind these intermediate parts
+AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS,ignore,ignore)
+AT_CLEANUP
+
 AT_BANNER(PDB Lite)
 AT_SETUP(testpdb)
 AT_CHECK(test ! \( -e ../src/score/lite_score.h -o -e ../../../src/pdb/lite_pdb.h \) -o "$STARGS" = DB_HDF5 && exit 77 || $VALGRIND testpdb,ignore,ignore)

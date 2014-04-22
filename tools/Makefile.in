@@ -199,6 +199,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSON = @JSON@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -333,7 +334,9 @@ DIST_SUBDIRS = \
  browser \
  python \
  silex \
- silock
+ silock \
+ mapred \
+ json
 
 all: all-recursive
 

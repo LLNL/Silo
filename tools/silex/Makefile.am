@@ -61,6 +61,9 @@ if HDF5_DRV_NEEDED
 else
   silex_LDADD = ../../src/libsilo.la $(QT_LDFLAGS) $(QT_LIBS)
 endif
+if JSON_NEEDED
+  silex_LDADD += ../json/json-c-0.10/libjson.la
+endif
 
 EXTRA_DIST = \
  array.xpm \

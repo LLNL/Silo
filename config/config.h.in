@@ -77,6 +77,9 @@
 /* Define to 1 if you have the `isnan' function. */
 #undef HAVE_ISNAN
 
+/* Support for experimental JSON features */
+#undef HAVE_JSON
+
 /* Define to 1 if you have the `hdf5' library (-lhdf5). */
 #undef HAVE_LIBHDF5
 

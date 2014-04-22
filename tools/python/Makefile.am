@@ -61,6 +61,9 @@ if HDF5_DRV_NEEDED
 else
   Silo_la_LIBADD = ../../src/libsilo.la
 endif
+if JSON_NEEDED
+  Silo_la_LIBADD += ../json/json-c-0.10/libjson.la
+endif
 
 AM_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(top_builddir)/src/silo -I$(top_srcdir)/src/silo -I$(includedir)
 

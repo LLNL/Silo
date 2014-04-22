@@ -72,24 +72,7 @@ be used for advertising or product endorsement purposes.
 
 #include <stdio.h> /* for FILE* datatype for filters */
 
-/*
- * SILO exports for WIN32
- */
-#ifndef SILO_API
-  #ifdef _WIN32
-    #ifdef SILO_STATIC_LIBRARY
-      #define SILO_API
-    #else
-      #ifdef SILO_EXPORTS
-        #define SILO_API __declspec(dllexport)
-      #else
-        #define SILO_API __declspec(dllimport)
-      #endif
-    #endif
-  #else
-    #define SILO_API
-  #endif
-#endif
+#include <silo_exports.h>
 
 /* Set the base type for datatype'd pointers (that is pointers whose
    ultimate type is deteremined by an additional 'int datatype' function

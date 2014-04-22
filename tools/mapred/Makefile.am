@@ -52,23 +52,6 @@
 #
 ## Procss this file with automake to create Makefile.in
 
+# See https://visitbugs.ornl.gov/projects/silo/wiki/Silo_Hadoop_and_VisIt
 
-bin_PROGRAMS = silock
-silock_SOURCES = silock.c
-if HDF5_DRV_NEEDED
-if HZIP_NEEDED
-  # Dummy C++ source to cause C++ linking.
-  nodist_EXTRA_silock_SOURCES = dummy.cxx
-endif
-if FPZIP_NEEDED
-  # Dummy C++ source to cause C++ linking.
-  nodist_EXTRA_silock_SOURCES = dummy.cxx
-endif
-  silock_LDADD = ../../src/libsiloh5.la
-else
-  silock_LDADD = ../../src/libsilo.la
-endif
-if JSON_NEEDED
-  silock_LDADD += ../json/json-c-0.10/libjson.la
-endif
-AM_CPPFLAGS = -I$(top_builddir)/src/silo -I$(includedir)
+EXTRA_DIST = mapper.py reducer.py stream_silo.c

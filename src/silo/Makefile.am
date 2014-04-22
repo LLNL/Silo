@@ -53,6 +53,9 @@
 ## Procss this file with automake to create Makefile.in
 
 AM_CPPFLAGS = -I$(top_srcdir)/src
+if JSON_NEEDED
+ AM_CPPFLAGS += -I$(prefix)/json/include
+endif
 
 noinst_LTLIBRARIES = libsilo_silo.la
 libsilo_silo_la_SOURCES = $(FILES)
@@ -64,10 +67,15 @@ if FORTRAN_NEEDED
  EXTRAINCS += silo_f.h
 endif
 
+if JSON_NEEDED
+ EXTRAFILES += silo_json.c
+endif
+
 EXTRA_DIST = \
  silo_fcb.c \
  silo_f.h \
  silo_f.c \
+ silo_json.c \
  silo.h.in
 
 include_HEADERS = \
@@ -75,6 +83,10 @@ include_HEADERS = \
  silo_f77.inc \
  silo_f9x.inc \
  pmpio.h
+
+if JSON_NEEDED
+ include_HEADERS += silo_json.h
+endif
 
 nodist_include_HEADERS = \
  silo.h

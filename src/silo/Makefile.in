@@ -88,10 +88,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@FORTRAN_NEEDED_TRUE@am__append_1 = silo_f.c
-@FORTRAN_NEEDED_TRUE@am__append_2 = silo_f.h
+@JSON_NEEDED_TRUE@am__append_1 = -I$(prefix)/json/include
+@FORTRAN_NEEDED_TRUE@am__append_2 = silo_f.c
+@FORTRAN_NEEDED_TRUE@am__append_3 = silo_f.h
+@JSON_NEEDED_TRUE@am__append_4 = silo_json.c
+@JSON_NEEDED_TRUE@am__append_5 = silo_json.h
 subdir = src/silo
-DIST_COMMON = $(am__noinst_HEADERS_DIST) $(include_HEADERS) \
+DIST_COMMON = $(am__include_HEADERS_DIST) $(am__noinst_HEADERS_DIST) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/silo.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -113,12 +116,13 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_silo_la_LIBADD =
 am__libsilo_silo_la_SOURCES_DIST = alloc.c extface.c silo.c silo_ns.c \
-	silo_f.c
+	silo_f.c silo_json.c
 @FORTRAN_NEEDED_TRUE@am__objects_1 = silo_f.lo
-am__objects_2 = $(am__objects_1)
-am__objects_3 = alloc.lo extface.lo silo.lo silo_ns.lo \
-	$(am__objects_2)
-am_libsilo_silo_la_OBJECTS = $(am__objects_3)
+@JSON_NEEDED_TRUE@am__objects_2 = silo_json.lo
+am__objects_3 = $(am__objects_1) $(am__objects_2)
+am__objects_4 = alloc.lo extface.lo silo.lo silo_ns.lo \
+	$(am__objects_3)
+am_libsilo_silo_la_OBJECTS = $(am__objects_4)
 libsilo_silo_la_OBJECTS = $(am_libsilo_silo_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -135,6 +139,8 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libsilo_silo_la_SOURCES)
 DIST_SOURCES = $(am__libsilo_silo_la_SOURCES_DIST)
+am__include_HEADERS_DIST = silo.inc silo_f77.inc silo_f9x.inc pmpio.h \
+	silo_json.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -214,6 +220,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JSON = @JSON@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -338,23 +345,20 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(top_srcdir)/src $(am__append_1)
 noinst_LTLIBRARIES = libsilo_silo.la
 libsilo_silo_la_SOURCES = $(FILES)
-EXTRAFILES = $(am__append_1)
-EXTRAINCS = $(am__append_2)
+EXTRAFILES = $(am__append_2) $(am__append_4)
+EXTRAINCS = $(am__append_3)
 EXTRA_DIST = \
  silo_fcb.c \
  silo_f.h \
  silo_f.c \
+ silo_json.c \
  silo.h.in
 
-include_HEADERS = \
- silo.inc \
- silo_f77.inc \
- silo_f9x.inc \
- pmpio.h
-
+include_HEADERS = silo.inc silo_f77.inc silo_f9x.inc pmpio.h \
+	$(am__append_5)
 nodist_include_HEADERS = \
  silo.h
 
@@ -432,6 +436,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_f.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_json.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_ns.Plo@am__quote@
 
 .c.o:
