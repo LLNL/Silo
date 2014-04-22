@@ -65,6 +65,11 @@ be used for advertising or product endorsement purposes.
 #define JSON_C_DIFF_INCLUSIVE_ONLY 0x00000002 /* ignore exclusive members */
 #define JSON_C_DIFF_MIX_PRIM_TYPE  0x00000004 /* allow diffs of mixed primitive type */
 #define JSON_C_DIFF_TOTAL          0x00000008 /* compute a total difference including even non-differing terms. */
+#define JSON_C_DIFF_REVERSE_LR     0x00000010 /* INTERNAL USE ONLY (left/right operands are reversed) */
+#define JSON_C_DIFF_RADIX_BINARY   0x00000020 /* radix at which to print numerical values 2,8,10,16 */
+#define JSON_C_DIFF_RADIX_OCTAL    0x00000040 /* radix at which to print numerical values 2,8,10,16 */
+#define JSON_C_DIFF_RADIX_DECIMAL  0x00000080 /* radix at which to print numerical values 2,8,10,16 */
+#define JSON_C_DIFF_RADIX_HEX      0x00000100 /* radix at which to print numerical values 2,8,10,16 */
 
 #ifdef __cplusplus
 extern "C" {

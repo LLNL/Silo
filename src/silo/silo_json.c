@@ -99,7 +99,6 @@ static void
 json_object_extptr_delete(struct json_object *jso)
 {
     void *extptr = json_object_get_extptr_ptr(jso);
-printf("skipping free of %p\n", extptr);
     if (extptr) free(extptr);
     json_object_put(jso);
 }
@@ -554,10 +553,185 @@ json_object_to_binary_file(char const *filename, struct json_object *obj)
  *      As an object... holds only the difference 'values'
  *      {foo:0, bar:0.1, gorfo:{a:0, b:0.0006, c:"==!", additions:{s:41.1}}, q:"!===", p:0}
  *
+ *
+ *               null     boolean     int     double     string     extpr    array     object
+ *
+ *       null     ok        REV       REV      REV        REV        REV      REV       REV
+
+ *    boolean     ok        ok        REV      REV        REV        REV      REV       REV
+
+ *        int     ok      non-zero    ok       REV        REV        REV      REV       REV
+
+ *     double     ok      non-zero    cast     ok         REV        REV      REV       REV
+
+ *     string     ok      non-empty   strtol  strtod      ok         REV      REV       REV
+
+ *      extpr     trunc   non-empty   size=1  size=1      chars      ok       REV       REV
+
+ *      array     trunc   non-empty   size=1  size=1      chars    diff       ok        REV
+
+ *     object     trunc   non-empty   size=1  size=1      ???      diff      diff       MAIN
+ *
+ *     There is a 2D array of function pointers, diff_matrix_funcs, which holds pointers
+ *     to all functions. The REV functions are just calls to the symmetric method with
+ *     left/right reversed and a flag to indicate a reversal was made.
+ *
+ *     The object/object method is main entry point for caller. The object/array and object/
+ *     object methods are also called recursively. Extptr is not a recursive call. Note that 
+ *     things like object names, depth of recursion, reversal flag, etc. need to get passed
+ *     recusively. This stuff is not appropriate for caller to worry about so need some kind
+ *     of wrapper method for caller that turns around and calls the main recursive entry
+ *     here.
+ *
+ *     An object/non-object method is a clear diff. If diff-only is desired return value, then
+ *     execution is complete at that point. If inclusive only, the execution is complete then
+ *     too. Otherwise, it would descend recursively on the object and null on the other.
+ *
+ *     When does recursion complete? When both objects' precedence <= 4; 
+ *
+ *     Need to know when diffs are strict or not (is a boolean 1 same as an int 1, depends
+ *     on strictness)?
  *    
+ *     Naming of functions in the matrix
+ *
+ *     json_diff_<left-type>_<right-type>();
+ *
+ *     json_diff_null_null()
+ *     json_diff_null_bool(), e.g. json_diff_bool_null is a REV-wrapper to json_diff_null_bool()
+ *     json_diff_null_int()
+ *     json_diff_null_double()
+ *     json_diff_null_string()
+ *     json_diff_null_extptr()
+ *     json_diff_null_array()  will have to recurse on array members 
+ *     json_diff_null_object() will have to recurse on object members but so too for int_object
+ *         and double_object, etc. Thats a lot of duplicated code. We need to punt here.
+ *
+ *     More involved methods
+ *
+ *     json_diff_extptr_extptr() /* non-recursive but like an int/int or double/double or maybe int/double */
+ *     json_diff_extptr_array()  /* left is a 'datatype'd number; right is a json object which might be a number */
+ *     json_diff_extptr_object()
+ *     json_diff_array_array()   /* recurses on both left and right */
+ *     json_diff_array_object()  /* recurses on both left and right */
+ *     json_diff_object_object() /* recurses on both left and right */
+
+ *
+ *     Args these methods need to take...
+ *     left object, right object, left-name, right-name,
+ *     depth, mode, flags (incl rev), tolerances, retval
+ *
+ *     Caller's call to wrapper turns around and uses "LEFT-OBJECT" "RIGHT-OBJECT" names.
+ *     depth=0, mode, flags and tolerances determined by caller.
+ *
+ *     Need a way to set/push return 'value' (int 0/1, printbuf-str, object). Might be
+ *     best as macro'd code. At the point where you know you have a diff of some kind 
+ *     you then 'handle-diff' which may be an early return, printing to a buffer or
+ *     constructing 'additions'/'deletions' of an object. Macro'd code allows for 
+ *     logic handling early return to be written only once.
  *
  *
  */
+
+#define HANDLE_DIFF()
+{ \
+    int *ret_intp                =                (int *) retval;
+    struct printbuf *ret_pbuf   =    (struct printbuf *) retval;
+    struct json_object *ret_obj = (struct json_object *) retval;
+
+    if (mode == json_diff_bool)
+    {
+        *ret_intp = is_diff;
+    }
+    else if (mode == json_diff_string)
+    {
+        if (is_diff || (flags & JSON_C_DIFF_TOTAL))
+        {
+            if (flags & JSON_C_DIFF_REVERSE_LR)
+            {
+            }
+            else
+            {
+                if (flags & JSON_C_DIFF_RADIX_DECIMAL)
+                    sprintbuf(ret_pbuf, "%s%-20s int    %20d%20d%20d\n", indent[depth], name, lval, rval, dval);
+                else if (flags & JSON_C_DIFF_RADIX_BINARY)
+            }
+        }
+    }
+    else if (mode == json_diff_object)
+    {
+        if (is_diff || (flags & JSON_C_DIFF_TOTAL))
+        {
+            if (flags & JSON_C_DIFF_REVERS_LR)
+            {
+            }
+            else
+            {
+                if (json_object_get_type(lobj) == json_type_null &&
+                    json_object_get_type(robj) != json_type_null)
+                {
+                    struct json_object *adds_obj;
+                    if (!json_object_object_get_ex(ret_obj, "additions", &adds_obj))
+                    {
+                        adds_obj = json_object_new_object();
+                        json_object_object_add(ret_obj, "additions", adds_obj);
+                    }
+                    
+                    /* add robj to additions */
+                    json_object_object_add(adds_obj, rkey, robj);
+                }
+                else if (json_object_get_type(lobj) != json_type_null &&
+                         json_object_get_type(robj) == json_type_null)
+                {
+                    struct json_object *dels_obj;
+                    if (!json_object_object_get_ex(ret_obj, "deletions", &dels_obj))
+                    {
+                        dels_obj = json_object_new_object();
+                        json_object_object_add(ret_obj, "deletions", dels_obj);
+                    }
+                    
+                    /* add lobj deletions */
+                    json_object_object_add(dels_obj, lkey, lobj);
+                }
+                else
+                {
+                    /* add normal */
+                    json_object_object_add(ret_obj, lkey, diff_obj);
+                }
+            }
+        }
+    }
+}
+
+void json_diff_null_null(
+    struct json_object const *lobj, char const *lkey,
+    struct json_object const *robj, char const *rkey,
+    int depth, enum json_diff_mode dmode, int flags,
+    double const tols[3], void *retval)
+{
+    HANDLE_DIFF();
+}
+
+void json_diff_int_int(
+    struct json_object const *lobj, char const *ltag,
+    struct json_object const *robj, char const *rtag,
+    int depth, enum json_diff_mode dmode, int flags,
+    double const tols[3], void *retval)
+{
+    int lval = json_object_get_int(lobj);
+    int rval = json_object_get_int(robj);
+    int dval = lval - rval;
+
+    if (flags & JSON_C_DIFF_REVERSE_LR) dval = -dval;
+
+    is_diff = db_is_different_ll(lval, rval, tols[0], tols[1], tols[2]);
+
+    HANDLE_DIFF();
+}
+
+
+
+
+
 void json_object_int_diff(
     int depth, char const *tag,
     struct json_object *lobj, struct json_object *robj,
@@ -601,13 +775,45 @@ void json_object_int_diff(
     }
 }
 
-void json_object_null_diff(
-    int depth,
-    struct json_object *left, char const *lnm,
-    struct json_object *right, char const *rnm,
-    enum json_diff_mode mode, int flags,
-    void *retthing)
+/* Return type precedence of json object according to generality of type */
+int json_object_type_precedence(struct json_object *obj)
 {
+    switch (json_object_get_type(obj))
+    {
+        case json_type_null:                return 0; /* primitive */
+        case json_type_boolean:             return 1; /* primitive */
+        case json_type_int:                 return 2; /* primitive */
+        case json_type_double:              return 3; /* primitive */
+        case json_type_string:              return 4; /* primitive */
+        case json_type_array:               return 6; /* recursive */
+        case json_type_object:
+        {
+            if (json_object_is_extptr(obj)) return 5; /* primitive */
+                                            return 7; /* recursive */
+        }
+    }
+    return -1;
+}
+
+void json_object_diff(struct json_object *lobj, struct json_object *robj,
+    enum json_diff_mode dmode, int flags, double const tols[3],
+    void *retval)
+{
+    if (retval == 0) return;
+
+    /* zero the tolerances if we need to */
+    if (flags & JSON_C_DIFF_ZERO_TOLS)
+        tols[0] = tols[1] = tols[2] = 0;
+
+    lprec = json_type_precedence(lobj);
+    rprec = json_type_precedence(robj);
+
+    /* Call correct json_object differencing function */
+    (*diff_matrix_func)(lobj, robj,
+
+
+    
+
 }
 
 void json_object_diff(
