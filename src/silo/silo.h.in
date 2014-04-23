@@ -1790,6 +1790,7 @@ SILO_API extern int                    DBErrlvl(void);
 #define DBGetDataReadMask() ,DBGetDataReadMask_is_replaced_with_DBGetDataReadMask2_using_unsigned_long_long
 SILO_API extern unsigned long long     DBSetDataReadMask2(unsigned long long);
 SILO_API extern unsigned long long     DBGetDataReadMask2(void);
+SILO_API extern char *                 DBGetDatatypeString(int datatype);
 SILO_API extern int                    DBSetAllowOverwrites(int allow);
 SILO_API extern int                    DBGetAllowOverwrites(void);
 SILO_API extern int                    DBSetAllowEmptyObjects(int allow);

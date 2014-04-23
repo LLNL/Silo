@@ -50,13 +50,14 @@ National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
 
-#include <stdio.h>
 #include <math.h>
-#include <string.h>
+#include <fcntl.h>
 #include <float.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 #include <config.h>
 
