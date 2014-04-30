@@ -87,6 +87,9 @@ SILO_API extern void *               json_object_get_strptr(struct json_object *
  * that represent an array of data externally referenced from
  * the json object. */
 SILO_API extern struct json_object * json_object_new_extptr(void *p, int ndims, int const *dims, int datatype);
+SILO_API extern void                 json_object_extptr_delete(struct json_object *jso);
+
+/* Inspect members of an extptr object */
 SILO_API int                         json_object_is_extptr(struct json_object *obj);
 SILO_API extern int                  json_object_get_extptr_datatype(struct json_object *obj);
 SILO_API extern int                  json_object_get_extptr_ndims(struct json_object *obj);

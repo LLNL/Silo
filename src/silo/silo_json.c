@@ -95,7 +95,7 @@ static void json_object_set_deleter(json_object *jso,
     jso->_delete = delete_func;
 }
 
-static void
+void
 json_object_extptr_delete(struct json_object *jso)
 {
     void *extptr = json_object_get_extptr_ptr(jso);
@@ -1582,6 +1582,7 @@ int DBWriteJsonObject(DBfile *dbfile, struct json_object *jobj)
         {
             case json_type_array:
             case json_type_null: break;
+
             case json_type_boolean:
             case json_type_int:
             {
