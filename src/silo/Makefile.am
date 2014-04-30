@@ -82,7 +82,8 @@ include_HEADERS = \
  silo.inc \
  silo_f77.inc \
  silo_f9x.inc \
- pmpio.h
+ pmpio.h \
+ silo_exports.h
 
 if JSON_NEEDED
  include_HEADERS += silo_json.h
