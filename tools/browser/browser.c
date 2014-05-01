@@ -605,7 +605,7 @@ browser_rl_obj_generator (char const *text, int state) {
  */
 int different (double a, double b, double abstol, double reltol, double reltol_eps)
 {
-    return db_is_different_dbl(a,b,abstol,reltol,reltol_eps);
+    return DBIsDifferentDouble(a,b,abstol,reltol,reltol_eps);
 }
 
 /*-------------------------------------------------------------------------
@@ -627,7 +627,7 @@ int different (double a, double b, double abstol, double reltol, double reltol_e
  */
 int differentll (long long a, long long b, double abstol, double reltol, double reltol_eps)
 {
-    return db_is_different_ll(a,b,abstol,reltol,reltol_eps);
+    return DBIsDifferentLongLong(a,b,abstol,reltol,reltol_eps);
 }
 
 /*-------------------------------------------------------------------------
