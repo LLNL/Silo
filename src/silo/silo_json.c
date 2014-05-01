@@ -721,7 +721,7 @@ void json_diff_int_int(
 
     if (flags & JSON_C_DIFF_REVERSE_LR) dval = -dval;
 
-    is_diff = db_is_different_ll(lval, rval, tols[0], tols[1], tols[2]);
+    is_diff = DBIsDifferentLongLong(lval, rval, tols[0], tols[1], tols[2]);
 
     HANDLE_DIFF();
 }
@@ -755,7 +755,7 @@ void json_object_int_diff(
     rval = json_object_get_int(robj);
     dval = lval - rval;
 
-    is_diff = db_is_different_dbl(lval, rval, abstol, reltol, reltol_eps);
+    is_diff = DBIsDifferentDouble(lval, rval, abstol, reltol, reltol_eps);
 
     switch (mode) 
     {
@@ -1146,7 +1146,7 @@ int json_object_get_int_diff(struct json_object *left, struct json_object *right
     leftval = json_object_get_int(left);
     rightval = json_object_get_int(right);
     diff = leftval - rightval;
-    if (db_is_different_dbl(leftval, rightval, abstol, reltol, reltol_eps))
+    if (DBIsDifferentDouble(leftval, rightval, abstol, reltol, reltol_eps))
         return diff;
     return 0;
 }
@@ -1163,7 +1163,7 @@ double json_object_get_double_diff(struct json_object *left, struct json_object 
     leftval = json_object_get_double(left);
     rightval = json_object_get_double(right);
     diff = leftval - rightval;
-    if (db_is_different_dbl(leftval, rightval, abstol, reltol, reltol_eps))
+    if (DBIsDifferentDouble(leftval, rightval, abstol, reltol, reltol_eps))
         return diff;
     return 0;
 }

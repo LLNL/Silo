@@ -13907,7 +13907,7 @@ _db_safe_strdup(const char *s)
  * Made reltol_eps diff mutually exclusive with abstol || reltol diff.
  *-------------------------------------------------------------------------
  */
-int db_is_different_dbl (double a, double b, double abstol, double reltol, double reltol_eps)
+int DBIsDifferentDouble(double a, double b, double abstol, double reltol, double reltol_eps)
 {
    double       num, den;
 
@@ -13986,7 +13986,7 @@ int db_is_different_dbl (double a, double b, double abstol, double reltol, doubl
  *-------------------------------------------------------------------------
  */
 #define FABS(A) ((A)<0?-(A):(A))
-int db_is_different_ll (long long a, long long b, double abstol, double reltol, double reltol_eps)
+int DBIsDifferentLongLong(long long a, long long b, double abstol, double reltol, double reltol_eps)
 {
 
    long long num, den;
