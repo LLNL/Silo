@@ -80,7 +80,6 @@ be used for advertising or product endorsement purposes.
 #include "config.h"     /*MeshTV configuration record*/
 
 #include <silo.h>
-#include <silo_private.h>
 
 #include <stdio.h>
 #include <stdlib.h>

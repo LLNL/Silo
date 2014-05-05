@@ -71,4 +71,4 @@ endif
 if JSON_NEEDED
   silock_LDADD += ../json/json-c-0.10/libjson.la
 endif
-AM_CPPFLAGS = -I$(top_builddir)/src/silo -I$(includedir)
+AM_CPPFLAGS = -I$(top_builddir)/src/silo -I$(top_srcdir)/src/silo -I$(includedir)
