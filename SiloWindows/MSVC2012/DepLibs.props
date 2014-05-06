@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <HDF5_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.7\include</HDF5_INC_DIR>
+    <HDF5_INC_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.7\include</HDF5_INC_DIR_X64>
+    <HDF5_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.7\lib</HDF5_LIB_DIR>
+    <HDF5_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.7\lib</HDF5_LIB_DIR_X64>
+    <SZIP_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\szip\2.0\include</SZIP_INC_DIR>
+    <SZIP_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\szip\2.0\lib</SZIP_LIB_DIR>
+    <SZIP_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\szip\2.0\lib</SZIP_LIB_DIR_X64>
+    <ZLIB_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\zlib\1.2.8\include</ZLIB_INC_DIR>
+    <ZLIB_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\zlib\1.2.8\lib</ZLIB_LIB_DIR>
+    <ZLIB_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\zlib\1.2.8\lib</ZLIB_LIB_DIR_X64>
+    <QT_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\Qt\4.8.3\include</QT_INC_DIR>
+    <QT_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\Qt\4.8.3\lib</QT_LIB_DIR>
+    <QT_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\Qt\4.8.3\lib</QT_LIB_DIR_X64>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <BuildMacro Include="HDF5_INC_DIR">
+      <Value>$(HDF5_INC_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="HDF5_INC_DIR_X64">
+      <Value>$(HDF5_INC_DIR_X64)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="HDF5_LIB_DIR">
+      <Value>$(HDF5_LIB_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="HDF5_LIB_DIR_X64">
+      <Value>$(HDF5_LIB_DIR_X64)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="SZIP_INC_DIR">
+      <Value>$(SZIP_INC_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="SZIP_LIB_DIR">
+      <Value>$(SZIP_LIB_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="SZIP_LIB_DIR_X64">
+      <Value>$(SZIP_LIB_DIR_X64)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ZLIB_INC_DIR">
+      <Value>$(ZLIB_INC_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ZLIB_LIB_DIR">
+      <Value>$(ZLIB_LIB_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="ZLIB_LIB_DIR_X64">
+      <Value>$(ZLIB_LIB_DIR_X64)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="QT_INC_DIR">
+      <Value>$(QT_INC_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="QT_LIB_DIR">
+      <Value>$(QT_LIB_DIR)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="QT_LIB_DIR_X64">
+      <Value>$(QT_LIB_DIR_X64)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
+</Project>
