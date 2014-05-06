@@ -133,12 +133,12 @@ obj_new (class_t cls, ...) {
    /*
     * Initialize the object if a constructor is defined.
     */
-   if (cls->new) {
+   if (cls->newobj) {
       va_start (ap, cls);
-      self = (cls->new)(ap);
+      self = (cls->newobj)(ap);
       va_end (ap);
    } else {
-      self = calloc (1, sizeof(*self));
+      self = (obj_t)calloc (1, sizeof(*self));
    }
 
    /*
@@ -175,32 +175,32 @@ obj_new (class_t cls, ...) {
 obj_t
 obj_copy (obj_t self, int flag) {
 
-   obj_t        new=NIL;
+   obj_t        new_obj=NIL;
    int          oldref;
 
    if (self) {
       oldref = self->pub.ref;
       
       if (self->pub.cls->copy) {
-         new = (self->pub.cls->copy)(self, flag);
+         new_obj = (self->pub.cls->copy)(self, flag);
       } else {
          assert (SHALLOW==flag);
-         new = self;
+         new_obj = self;
       }
       
-      if (new==self) {
-         assert (new->pub.ref==oldref);
-         new->pub.ref += 1;
+      if (new_obj==self) {
+         assert (new_obj->pub.ref==oldref);
+         new_obj->pub.ref += 1;
       } else {
-         assert (0==new->pub.ref    || 1==new->pub.ref);
-         assert (NULL==new->pub.cls || self->pub.cls==new->pub.cls);
-         new->pub.cls = self->pub.cls;
-         new->pub.ref = 1;
+         assert (0==new_obj->pub.ref    || 1==new_obj->pub.ref);
+         assert (NULL==new_obj->pub.cls || self->pub.cls==new_obj->pub.cls);
+         new_obj->pub.cls = self->pub.cls;
+         new_obj->pub.ref = 1;
       }
    }
 
-   if (new) NObjs++;
-   return new;
+   if (new_obj) NObjs++;
+   return new_obj;
 }
 
 

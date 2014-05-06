@@ -60,7 +60,6 @@ product endorsement purposes.
 #include <stdlib.h>
 #include <string.h>
 
-char *_db_safe_strdup(const char *);
 
 typedef struct {
     char          *name;

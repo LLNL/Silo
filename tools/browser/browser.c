@@ -296,7 +296,7 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
            toc->nobj + toc->ndir + toc->narray + toc->ndefvars +
            toc->ncsgmesh + toc->ncsgvar + toc->nmultimeshadj +
            toc->nmrgtree + toc->ngroupelmap + toc->nmrgvar;
-   if (total) retval = malloc (total * sizeof(toc_t));
+   if (total) retval = (toc_t *)malloc (total * sizeof(toc_t));
 
    /*
     * Load the various types of objects into the new structure.
@@ -1394,7 +1394,7 @@ main(int argc, char *argv[])
         if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL,
                                   SHGFP_TYPE_CURRENT, szPath)))
         {
-            ExpandEnvironmentStrings(userhome, szPath, 1024);
+            ExpandEnvironmentStrings((LPCWSTR)userhome, szPath, 1024);
             sprintf(init_file_buf, "%s\\%s", userhome, INIT_FILE);
             if (access(init_file_buf, F_OK)>=0) init_file = init_file_buf;
         }

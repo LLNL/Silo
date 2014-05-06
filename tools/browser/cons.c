@@ -104,10 +104,10 @@ static obj_t    cons_deref(obj_t, int, obj_t*);
 class_t
 cons_class (void)
 {
-    class_t     cls = calloc(1, sizeof(*cls));
+    class_t     cls = (class_t)calloc(1, sizeof(*cls));
 
     cls->name = safe_strdup("CONS");
-    cls->new = cons_new;
+    cls->newobj = cons_new;
     cls->dest = cons_dest;
     cls->copy = cons_copy;
     cls->print = cons_print;
@@ -138,7 +138,7 @@ cons_class (void)
 static obj_t
 cons_new (va_list ap) {
 
-   obj_cons_t   *self = calloc (1, sizeof(obj_cons_t));
+   obj_cons_t   *self = (obj_cons_t *)calloc (1, sizeof(obj_cons_t));
 
    assert (self);
    self->head = va_arg (ap, obj_t);

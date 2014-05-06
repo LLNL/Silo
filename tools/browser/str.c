@@ -101,10 +101,10 @@ static int      str_diff (obj_t, obj_t);
 class_t
 str_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = strdup ("STR");
-   cls->new = str_new;
+   cls->newobj = str_new;
    cls->copy = str_copy;
    cls->dest = str_dest;
    cls->print = str_print;
@@ -135,7 +135,7 @@ static obj_t
 str_new (va_list ap) {
 
    char         *s;
-   obj_str_t    *self = calloc (1, sizeof(obj_str_t));
+   obj_str_t    *self = (obj_str_t *)calloc (1, sizeof(obj_str_t));
 
    assert (self);
    s = va_arg (ap, char*);
@@ -171,7 +171,7 @@ str_copy (obj_t _self, int flag) {
       retval = self;
 
    } else {
-      retval = calloc (1, sizeof(obj_str_t));
+      retval = (obj_str_t *)calloc (1, sizeof(obj_str_t));
       retval->s = strdup (self->s);
    }
    return (obj_t)retval;

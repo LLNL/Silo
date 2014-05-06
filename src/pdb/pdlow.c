@@ -1757,13 +1757,13 @@ void
 _lite_PD_eod (PDBfile *file) {
 
    FILE *fp;
-   long old, new;
+   long old_one, new_one;
 
    fp  = file->stream;
-   old = file->chrtaddr;
-   new = io_tell(fp);
+   old_one = file->chrtaddr;
+   new_one = io_tell(fp);
 
-   file->chrtaddr = MAX(old, new);
+   file->chrtaddr = MAX(old_one, new_one);
 }
 #endif /* PDB_WRITE */
 

@@ -2372,7 +2372,7 @@ DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
 	/* Now convert the Fortran data arrays into C arrays of data */
 
 	if ((*(int *)vars) != DB_F77NULL) {
-	  cvars = malloc(sizeof(DB_DTPTR*) * (*nvars));
+	  cvars = (void **)malloc(sizeof(DB_DTPTR*) * (*nvars));
 	  /* Make pointers to Fortran address in vars array */
 	  for (i=0;i<*nvars;i++) {
 	    cvars[i] = (DB_DTPTR*)((char*) vars + i*indx);
@@ -2382,7 +2382,7 @@ DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
 	}
 	if ((*(int *)mixvar) != DB_F77NULL) {
 	  /* Now convert the Fortran data array into a C array of data */
-	  cmixvar = malloc(sizeof(DB_DTPTR*) * (*nvars));
+	  cmixvar = (void **)malloc(sizeof(DB_DTPTR*) * (*nvars));
 	  /* Make pointers to Fortran address in vars array */
 	  for (i=0;i<*nvars;i++) {
 	    cmixvar[i] = (DB_DTPTR*)((char*) mixvar + i*indx);
@@ -5000,7 +5000,7 @@ DBPUTGRPLMAP_FC (int *dbid, FCD_DB map_name, int *lmap_name,
         /* convert array of segment data ids to their pointers */
         segment_data = (int**) malloc(*num_segments * sizeof(int*));
         for (i = 0; i < *num_segments; i++)
-            segment_data[i] = DBFortranAccessPointer(segment_data_ids[i]);
+            segment_data[i] = (int *)DBFortranAccessPointer(segment_data_ids[i]);
 
         /* convert array of segment fracs ids to their pointers */
         if (*segment_fracs_ids)

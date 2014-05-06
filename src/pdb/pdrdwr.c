@@ -297,7 +297,7 @@ _lite_PD_hyper_read (PDBfile *file, char *name, char *outtype,
     */
    tep = _lite_PD_mk_syment(NULL, 0L, 0L, &(ep->indirects), NULL);
 
-   nrd = _PD_rd_hyper_index(file, tep, vr, pi,
+   nrd = _PD_rd_hyper_index(file, tep, (char *)vr, pi,
                             PD_entry_type(ep), outtype,
                             PD_entry_address(ep),
                             PD_entry_blocks(ep), hbyt, fbyt);
@@ -1356,7 +1356,7 @@ _lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, lite_SC_byte *vr,
    slen = strlen(s);
    c = slen > 0 ? s[slen-1] : 0;
    if (((c != ')') && (c != ']')) || (dims == NULL)) {
-      return(_lite_PD_wr_syment(file, vr, PD_entry_number(ep),
+      return(_lite_PD_wr_syment(file, (char *)vr, PD_entry_number(ep),
                                 intype, PD_entry_type(ep)));
    }
 
@@ -1395,7 +1395,7 @@ _lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, lite_SC_byte *vr,
                     PD_WRITE);
    }
 
-   _PD_wr_hyper_index(file, vr, pi, intype,
+   _PD_wr_hyper_index(file, (char *)vr, pi, intype,
                       PD_entry_type(ep), PD_entry_address(ep),
                       PD_entry_blocks(ep), hbyt, fbyt);
 
@@ -1727,7 +1727,7 @@ _PD_wr_leaf_members (PDBfile *file, char *intype, char *outtype,
                        PD_WRITE);
       }
       vbuf     = buf;
-      svr      = vr;
+      svr      = (char *)vr;
       in_offs  = 0L;
       out_offs = 0L;
       lite_PD_convert(&vbuf, &svr, intype, outtype, nitems,

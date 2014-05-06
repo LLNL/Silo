@@ -150,9 +150,9 @@ be used for advertising or product endorsement purposes.
 #define NELMTS(X)       (sizeof(X)/sizeof(*(X)))
 #endif
 
-#ifndef _WIN32
-char *_db_safe_strdup(const char *);
-#endif
+//#ifndef _WIN32
+//extern char *_db_safe_strdup(const char *);
+//#endif
 #undef strdup
 #undef safe_strdup
 #define strdup(s) _db_safe_strdup(s)
@@ -241,7 +241,7 @@ typedef struct prim_assoc_t {
  */
 struct class_t {
    char                 *name ;                 /*class name            */
-   obj_t                (*new)(va_list);        /*constructor           */
+   obj_t                (*newobj)(va_list);        /*constructor           */
    obj_t                (*dest)(obj_t);         /*destructor            */
    obj_t                (*copy)(obj_t,int);     /*copy constructor      */
    void                 (*print)(obj_t,struct out_t*);  /*print object  */

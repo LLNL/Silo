@@ -228,10 +228,10 @@ static int      file_diff (obj_t, obj_t);
 class_t
 file_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("FILE");
-   cls->new = file_new;
+   cls->newobj = file_new;
    cls->dest = file_dest;
    cls->copy = NULL;
    cls->print = file_print;
@@ -443,7 +443,7 @@ file_new (va_list ap)
    }
 
    if (!f) return NIL ; /*error already printed*/
-   self = calloc (1, sizeof(obj_file_t));
+   self = (obj_file_t *)calloc (1, sizeof(obj_file_t));
    self->name = safe_strdup (fname);
    self->f = f;
    self->writeable = writeable;
@@ -600,7 +600,7 @@ fix_objdups(DBobject *obj)
     int         i, j, occur;
     
     if (!obj) return NULL;
-    new_names = calloc(obj->ncomponents, sizeof(char*));
+    new_names = (char **)calloc(obj->ncomponents, sizeof(char*));
 
     /* Look for duplicates and generate new names */
     for (i=1; i<obj->ncomponents; i++) {
@@ -617,7 +617,7 @@ fix_objdups(DBobject *obj)
             } else {
                 sprintf(suffix, " [%dth occurrence]", occur);
             }
-            new_names[i] = malloc(strlen(obj->comp_names[i])+strlen(suffix)+1);
+            new_names[i] = (char *)malloc(strlen(obj->comp_names[i])+strlen(suffix)+1);
             strcpy(new_names[i], obj->comp_names[i]);
             strcat(new_names[i], suffix);
         }
@@ -736,11 +736,11 @@ browser_DBGetObject (DBfile *file, char *name, obj_t *type_ptr)
      * fields (four pointers and an integer) are properly aligned when packed.
      */
     assert(sizeof(char*)==sizeof(void*));
-    b_obj = malloc (need);
+    b_obj = (char *)malloc (need);
     *((DBobject**)b_obj) = obj;
     *((char**)(b_obj+sizeof(void*))) = obj->name;
     *((char**)(b_obj+2*sizeof(void*))) = obj->type;
-    flags = calloc (obj->ncomponents, sizeof(int));
+    flags = (int *)calloc (obj->ncomponents, sizeof(int));
     *((int**)(b_obj+3*sizeof(void*))) = flags;
     *((int*)(b_obj+4*sizeof(void*))) = obj->ncomponents;
     offset = 4 * sizeof(void*) + sizeof(int);
@@ -907,7 +907,7 @@ browser_DBSaveObject (obj_t _self, char *unused, void *mem, obj_t type) {
          s = *((char**)(b_obj+offset));
          if (strncmp(obj->pdb_names[i]+4, s, strlen(s))) {
             free (obj->pdb_names[i]);
-            obj->pdb_names[i] = malloc (strlen(s)+5);
+            obj->pdb_names[i] = (char *)malloc (strlen(s)+5);
             strcpy (obj->pdb_names[i], "'<s>");
             strcpy (obj->pdb_names[i]+4, s);
             nchanges++;
@@ -990,7 +990,7 @@ browser_DBGetMultimeshadj(DBfile *file, char *name, obj_t *type_ptr)
    DBmultimeshadj       *mmadj;
    char                 **b_mmadj;
    char                 buf[64], fmt[64];
-   int                  i, at, nbytes, digits;
+   int                  i, nbytes, digits;
    obj_t                type=NIL, tmp=NIL;
 
    /*
@@ -1001,7 +1001,7 @@ browser_DBGetMultimeshadj(DBfile *file, char *name, obj_t *type_ptr)
    mmadj = DBGetMultimeshadj(file, name, -1, 0);
    if (!mmadj) return NULL;
 
-   b_mmadj = calloc (2*(mmadj->lneighbors)+11, sizeof(char*));
+   b_mmadj = (char **)calloc (2*(mmadj->lneighbors)+11, sizeof(char*));
    type = obj_new (C_STC, NULL, NULL);
    b_mmadj[0] = (char*)mmadj;
 
@@ -1160,7 +1160,7 @@ browser_DBGetGroupelmap(DBfile *file, char *name, obj_t *type_ptr) {
    DBgroupelmap         *gm;
    char                 **b_gm;
    char                 buf[64], bufi[64], buff[64];
-   int                  i, at, nbytes;
+   int                  i, nbytes;
    obj_t                type=NIL, tmp=NIL, tmpi=NIL, tmpf=NIL;
 
    /*
@@ -1170,7 +1170,7 @@ browser_DBGetGroupelmap(DBfile *file, char *name, obj_t *type_ptr) {
     */
    gm = DBGetGroupelmap(file, name);
    if (!gm) return NULL;
-   b_gm = calloc (2*gm->num_segments+7, sizeof(char*));
+   b_gm = (char **)calloc (2*gm->num_segments+7, sizeof(char*));
    type = obj_new (C_STC, NULL, NULL);
    b_gm[0] = (char*)gm;
 
@@ -1334,7 +1334,7 @@ browser_DBGetCompoundarray (DBfile *file, char *name, obj_t *type_ptr) {
     */
    ca = DBGetCompoundarray (file, name);
    if (!ca) return NULL;
-   b_ca = calloc (ca->nelems+7, sizeof(char*));
+   b_ca = (char **)calloc (ca->nelems+7, sizeof(char*));
    type = obj_new (C_STC, NULL, NULL);
    b_ca[0] = (char*)ca;
 
@@ -1476,10 +1476,10 @@ browser_DBGetDirectory (DBfile *file, char *name)
    toc = browser_DBGetToc (file, &nentries, sort_toc_by_type);
    if (DBSetDir (file, cwd)<0) return NULL;
 
-   dir = calloc (1, sizeof(DBdirectory));
+   dir = (DBdirectory *)calloc (1, sizeof(DBdirectory));
    dir->nsyms = nentries;
    dir->toc = toc;
-   if (nentries) dir->entry_ptr = calloc (nentries, sizeof (toc_t *));
+   if (nentries) dir->entry_ptr = (toc_t **)calloc (nentries, sizeof (toc_t *));
    for (i=0; i<nentries; i++) {
       dir->entry_ptr[i] = dir->toc + i;
    }
@@ -1521,7 +1521,7 @@ browser_DBGetSubarray (DBcompoundarray *ca, int elmtno, obj_t *type_ptr) {
    assert (ca);
    assert (elmtno>=0 && elmtno<ca->nelems);
 
-   b_ca = calloc (2, sizeof(char*));
+   b_ca = (char **)calloc (2, sizeof(char*));
    b_ca[1] = (char*)ca;
 
    /*
@@ -2199,7 +2199,7 @@ file_deref_DBdirectory (obj_t _self, int argc, obj_t argv[])
    char         *name=NULL, buf[4096];
    obj_t        retval=NIL, tmp_argv[1];
 
-   dir = sdo_mem (_self);
+   dir = (DBdirectory *)sdo_mem (_self);
    name = obj_name (argv[0]);
 
    /*
@@ -2280,7 +2280,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
     obj_file_t  *self = MYCLASS(_self);
     char        *name=NULL, *orig=NULL, cwd[1024], fullname[1024];
     char        path[1024], *base=NULL, buf[1024];
-    char        *typename=NULL;
+    char        *type_name=NULL;
     DBfile      *file=NULL;
     DBtoc       *toc=NULL;
     void        *r_mem=NULL;
@@ -2343,7 +2343,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
         savefunc = NULL;
         freefunc = browser_DBFreeDirectory;
         dereffunc = file_deref_DBdirectory;
-        typename = "DBdirectory";
+        type_name = "DBdirectory";
         goto done;
     }
 
@@ -2384,7 +2384,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetCurve;
             savefunc = NULL;
             freefunc = browser_DBFreeCurve;
-            typename = "DBcurve";
+            type_name = "DBcurve";
             goto done;
         }
     }
@@ -2394,7 +2394,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetCsgmesh;
             savefunc = NULL;
             freefunc = browser_DBFreeCsgmesh;
-            typename = "DBcsgmesh";
+            type_name = "DBcsgmesh";
             goto done;
         }
     }
@@ -2404,7 +2404,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetCsgvar;
             savefunc = NULL;
             freefunc = browser_DBFreeCsgvar;
-            typename = "DBcsgvar";
+            type_name = "DBcsgvar";
             goto done;
         }
     }
@@ -2414,7 +2414,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetDefvars;
             savefunc = NULL;
             freefunc = browser_DBFreeDefvars;
-            typename = "DBdefvars";
+            type_name = "DBdefvars";
             goto done;
         }
     }
@@ -2424,7 +2424,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMultimesh;
             savefunc = NULL;
             freefunc = browser_DBFreeMultimesh;
-            typename = "DBmultimesh";
+            type_name = "DBmultimesh";
             goto done;
         }
     }
@@ -2447,7 +2447,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMultivar;
             savefunc = NULL;
             freefunc = browser_DBFreeMultivar;
-            typename = "DBmultivar";
+            type_name = "DBmultivar";
             goto done;
         }
     }
@@ -2457,7 +2457,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMultimat;
             savefunc = NULL;
             freefunc = browser_DBFreeMultimat;
-            typename = "DBmultimat";
+            type_name = "DBmultimat";
             goto done;
         }
     }
@@ -2467,7 +2467,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMultimatspecies;
             savefunc = NULL;
             freefunc = browser_DBFreeMultimatspecies;
-            typename = "DBmultimatspecies";
+            type_name = "DBmultimatspecies";
             goto done;
         }
     }
@@ -2477,7 +2477,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetQuadmesh;
             savefunc = NULL;
             freefunc = browser_DBFreeQuadmesh;
-            typename = "DBquadmesh";
+            type_name = "DBquadmesh";
             goto done;
         }
     }
@@ -2487,7 +2487,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetQuadvar;
             savefunc = NULL;
             freefunc = browser_DBFreeQuadvar;
-            typename = "DBquadvar";
+            type_name = "DBquadvar";
             goto done;
         }
     }
@@ -2497,7 +2497,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetUcdmesh;
             savefunc = NULL;
             freefunc = browser_DBFreeUcdmesh;
-            typename = "DBucdmesh";
+            type_name = "DBucdmesh";
             goto done;
         }
     }
@@ -2507,7 +2507,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetUcdvar;
             savefunc = NULL;
             freefunc = browser_DBFreeUcdvar;
-            typename = "DBucdvar";
+            type_name = "DBucdvar";
             goto done;
         }
     }
@@ -2517,7 +2517,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetPointmesh;
             savefunc = NULL;
             freefunc = browser_DBFreePointmesh;
-            typename = "DBpointmesh";
+            type_name = "DBpointmesh";
             goto done;
         }
     }
@@ -2527,7 +2527,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetPointvar;
             savefunc = NULL;
             freefunc = browser_DBFreeMeshvar;
-            typename = "DBmeshvar";
+            type_name = "DBmeshvar";
             goto done;
         }
     }
@@ -2537,7 +2537,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMaterial;
             savefunc = NULL;
             freefunc = browser_DBFreeMaterial;
-            typename = "DBmaterial";
+            type_name = "DBmaterial";
             goto done;
         }
     }
@@ -2547,7 +2547,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMatspecies;
             savefunc = NULL;
             freefunc = browser_DBFreeMatspecies;
-            typename = "DBmatspecies";
+            type_name = "DBmatspecies";
             goto done;
         }
     }
@@ -2557,7 +2557,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMrgtree;
             savefunc = NULL;
             freefunc = browser_DBFreeMrgtree;
-            typename = "DBmrgtree";
+            type_name = "DBmrgtree";
             goto done;
         }
     }
@@ -2580,7 +2580,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*,char*))DBGetMrgvar;
             savefunc = NULL;
             freefunc = browser_DBFreeMrgvar;
-            typename = "DBmrgvar";
+            type_name = "DBmrgvar";
             goto done;
         }
     }
@@ -2610,7 +2610,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             savefunc = NULL;
             freefunc = browser_DBFreeDirectory;
             dereffunc = file_deref_DBdirectory;
-            typename = "DBdirectory";
+            type_name = "DBdirectory";
             if (r_mem) goto done;
         }
     }
@@ -2634,8 +2634,8 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
                  * Add a null terminator just to be sure.  Also make the data
                  * a pointer to a string instead of the string itself.
                  */
-                char **s_ptr = malloc(sizeof(char*));
-                *s_ptr = malloc(nelmts+1);
+                char **s_ptr = (char **)malloc(sizeof(char*));
+                *s_ptr = (char *)malloc(nelmts+1);
                 memcpy(*s_ptr, r_mem, nelmts);
                 (*s_ptr)[nelmts] = '\0';
                 free(r_mem);
@@ -2662,7 +2662,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             }
 
             lex_in = lex_string(buf);
-            typename = NULL;
+            type_name = NULL;
             in = parse_stmt(lex_in, false);
             lex_in = lex_close(lex_in);
             type = obj_eval(in);
@@ -2713,25 +2713,25 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             loadfunc = (void*(*)(DBfile*, char*))DBGetFacelist;
             savefunc = NULL;
             freefunc = browser_DBFreeFacelist;
-            typename = "DBfacelist";
+            type_name = "DBfacelist";
             goto done;
         } else if (!strcmp(obj->type, "zonelist")) {
             loadfunc = (void*(*)(DBfile*, char*))DBGetZonelist;
             savefunc = NULL;
             freefunc = browser_DBFreeZonelist;
-            typename = "DBzonelist";
+            type_name = "DBzonelist";
             goto done;
         } else if (!strcmp(obj->type, "polyhedral-zonelist")) {
             loadfunc = (void*(*)(DBfile*, char*))DBGetPHZonelist;
             savefunc = NULL;
             freefunc = browser_DBFreePHZonelist;
-            typename = "DBphzonelist";
+            type_name = "DBphzonelist";
             goto done;
         } else if (!strcmp(obj->type, "csgzonelist")) {
             loadfunc = (void*(*)(DBfile*, char*))DBGetCSGZonelist;
             savefunc = NULL;
             freefunc = browser_DBFreeCSGZonelist;
-            typename = "DBcsgzonelist";
+            type_name = "DBcsgzonelist";
             goto done;
         } else if (!strcmp(obj->type, "edgelist")) {
             out_info("file_deref: edgelists are retrieved with DBGetObject() "
@@ -2745,7 +2745,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
      */
     DBShowErrors(DB_SUSPEND, NULL);
     r_mem = browser_DBGetObject(file, base, &type);
-    typename = NULL;
+    type_name = NULL;
     savefunc = browser_DBSaveObject;
     freefunc = browser_DBFreeObject;
     DBShowErrors(DB_RESUME, NULL);
@@ -2776,7 +2776,7 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
     if (!r_mem) {
         if (Verbosity>=2) {
             out_info("file_deref: loading %s %s:%s",
-                     typename?typename:"void type", self->name, name);
+                     type_name?type_name:"void type", self->name, name);
         }
         r_mem = (loadfunc)(file, name);
         if (!r_mem) goto error;
@@ -2787,8 +2787,8 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
                    cwd, self->name);
     }
 
-    if (typename) {
-        in = obj_new(C_SYM, typename);
+    if (type_name) {
+        in = obj_new(C_SYM, type_name);
         type = obj_copy(tmp=sym_vboundp(in), DEEP);
         tmp = obj_dest(tmp);
         in = obj_dest(in);

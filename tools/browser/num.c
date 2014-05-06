@@ -108,10 +108,10 @@ static int      num_diff (obj_t, obj_t);
 class_t
 num_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("NUM");
-   cls->new = num_new;
+   cls->newobj = num_new;
    cls->dest = NULL;
    cls->copy = NULL;
    cls->print = num_print;
@@ -143,7 +143,7 @@ num_class (void) {
 static obj_t
 num_new (va_list ap) {
 
-   obj_num_t    *self = calloc (1, sizeof(obj_num_t));
+   obj_num_t    *self = (obj_num_t *)calloc (1, sizeof(obj_num_t));
    char         *lexeme;
 
    lexeme = va_arg (ap, char*);

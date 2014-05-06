@@ -81,7 +81,7 @@ static char *switch_synopsis(switch_t *sw, char *buffer);
 switches_t *
 switch_new(void)
 {
-    return calloc(1, sizeof(switches_t));
+    return (switches_t *)calloc(1, sizeof(switches_t));
 }
 
 /*---------------------------------------------------------------------------
@@ -111,7 +111,7 @@ switch_add(switches_t *switches, const char *short_name, const char *long_name,
     } else {
         if (switches->nused+1>=switches->nalloc) {
             switches->nalloc = MAX(100, 2*switches->nalloc);
-            switches->sw = realloc(switches->sw,
+            switches->sw = (switch_t *)realloc(switches->sw,
                                    switches->nalloc*sizeof(switch_t));
         }
         found = switches->sw + switches->nused++;
@@ -155,7 +155,7 @@ switch_info(switch_t *sw, void *info)
 void
 switch_doc(switch_t *sw, const char *doc_string)
 {
-    char        *fulldoc = malloc(8192);
+    char        *fulldoc = (char *)malloc(8192);
 
     /* Set switch info */
     if (!sw) sw = switch_latest;

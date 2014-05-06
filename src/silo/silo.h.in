@@ -2106,6 +2106,7 @@ SILO_API extern int                    DBIsDifferentLongLong(long long a, long l
 SILO_API extern void *                 DBFortranAccessPointer(int value);
 SILO_API extern int                    DBFortranAllocPointer(void *pointer);
 SILO_API extern void                   DBFortranRemovePointer(int value);
+SILO_API extern char *                 _db_safe_strdup(const char *);
 
 #ifdef __cplusplus
 }

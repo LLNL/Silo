@@ -249,5 +249,3 @@ static int StringToDriver(const char *str)
     exit(-1);
 }
 
-/* internal method from Silo used by many tests */
-char * _db_safe_strdup(const char *s);

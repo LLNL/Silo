@@ -102,10 +102,10 @@ static int      range_diff (obj_t, obj_t);
 class_t
 range_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("RANGE");
-   cls->new = range_new;
+   cls->newobj = range_new;
    cls->print = range_print;
    cls->diff = range_diff;
    return cls;
@@ -133,7 +133,7 @@ range_class (void) {
 static obj_t
 range_new (va_list ap) {
 
-   obj_range_t  *self = calloc (1, sizeof(obj_range_t));
+   obj_range_t  *self = (obj_range_t *)calloc (1, sizeof(obj_range_t));
    int          tmp;
 
    self->lo = va_arg (ap, int);

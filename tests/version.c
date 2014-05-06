@@ -166,6 +166,10 @@ main(int argc, char *argv[])
     dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
     if (dbfile == 0)
         dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+#ifdef _MSC_VER
+    if (dbfile == 0)
+        dbfile = DBOpen("..\\..\\..\\tests\\pion0244.silo", DB_UNKNOWN, DB_READ);
+#endif
     if (dbfile)
     {
         printf("On old silo file handle returned from DBOpen...\n");
@@ -204,6 +208,10 @@ main(int argc, char *argv[])
             dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
             if (dbfile == 0)
                 dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+#ifdef _MSC_VER
+    if (dbfile == 0)
+        dbfile = DBOpen("..\\..\\..\\tests\\pion0244.silo", DB_UNKNOWN, DB_READ);
+#endif
         }
         else
         {
@@ -258,6 +266,10 @@ main(int argc, char *argv[])
     dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
     if (dbfile == 0)
         dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
+#ifdef _MSC_VER
+    if (dbfile == 0)
+        dbfile = DBOpen("..\\..\\..\\tests\\pion0244.silo", DB_UNKNOWN, DB_READ);
+#endif
     if (!DBVersionGEFileVersion(dbfile))
     {
         fprintf(stderr, "Error comparing library version to OLD file version.\n");

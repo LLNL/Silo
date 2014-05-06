@@ -109,10 +109,10 @@ static int      ptr_diff (obj_t, obj_t);
 class_t
 ptr_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("POINTER");
-   cls->new = ptr_new;
+   cls->newobj = ptr_new;
    cls->copy = ptr_copy;
    cls->dest = ptr_dest;
    cls->apply = ptr_apply;
@@ -147,7 +147,7 @@ ptr_class (void) {
 static obj_t
 ptr_new (va_list ap) {
 
-   obj_ptr_t    *self = calloc (1, sizeof(obj_ptr_t));
+   obj_ptr_t    *self = (obj_ptr_t *)calloc (1, sizeof(obj_ptr_t));
    
    assert (self);
    self->sub = va_arg (ap, obj_t);
@@ -185,7 +185,7 @@ ptr_copy (obj_t _self, int flag) {
       retval = self;
 
    } else {
-      retval = calloc (1, sizeof(obj_ptr_t));
+      retval = (obj_ptr_t *)calloc (1, sizeof(obj_ptr_t));
       retval->sub = obj_copy (self->sub, DEEP);
    }
 

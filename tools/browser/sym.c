@@ -123,10 +123,10 @@ static char *   sym_name (obj_t);
 class_t
 sym_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("SYM");
-   cls->new = sym_new;
+   cls->newobj = sym_new;
    cls->dest = NULL;
    cls->copy = NULL;
    cls->print = sym_print;
@@ -180,10 +180,10 @@ sym_new (va_list ap) {
    if (!sym && unused<0) {
       if (!Symbol) {
          NSymbols = 1024;
-         Symbol = calloc (NSymbols, sizeof(sym_t));
+         Symbol = (sym_t*)calloc (NSymbols, sizeof(sym_t));
          unused = 0;
       } else {
-         Symbol = realloc (Symbol, (NSymbols+1024) * sizeof(sym_t));
+         Symbol = (sym_t*)realloc (Symbol, (NSymbols+1024) * sizeof(sym_t));
          memset (Symbol+NSymbols, 0, 1024*sizeof(sym_t));
          unused = NSymbols;
          NSymbols += 1024;
@@ -195,7 +195,7 @@ sym_new (va_list ap) {
       sym->name = safe_strdup (name);
    }
 
-   self = calloc (1, sizeof(obj_sym_t));
+   self = (obj_sym_t*)calloc (1, sizeof(obj_sym_t));
    self->sym = sym;
    return (obj_t)self;
 }

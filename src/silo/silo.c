@@ -515,7 +515,7 @@ DBVariableNameValid(const char *s)
     /* If there's a ':' in the name, allow anything before the ':'.  After the 
      * ':' we have to be more strict. */
 
-    p = strchr(s,':');
+    p = (char *)strchr(s,':');
     if (p == NULL)
         p = (char *)s;
     else
@@ -1197,7 +1197,7 @@ db_GetDatatypeID(char const * const dataname)
  *
  *  Parameters
  *
- *      typename         {In}    {Name of object type to inquire about}
+ *      type_name         {In}    {Name of object type to inquire about}
  *
  *  Notes
  *
@@ -1219,7 +1219,7 @@ db_GetDatatypeID(char const * const dataname)
  *    Added `zonelist' and `facelist' and `edgelist'
  *
  *    Eric Brugger, Tue Feb  7 11:05:39 PST 1995
- *    I modified the routine to return DB_USERDEF if the typename
+ *    I modified the routine to return DB_USERDEF if the type_name
  *    is not known.
  *
  *    Katherine Price, Thu May 25 10:00:50 PDT 1995
@@ -1229,102 +1229,102 @@ db_GetDatatypeID(char const * const dataname)
  *    Added multi-block material species.
  *--------------------------------------------------------------------*/
 PUBLIC int
-DBGetObjtypeTag(char const *typename)
+DBGetObjtypeTag(char const *type_name)
 {
     int            tag;
     char          *me = "DBGetObjtypeTag";
 
-    if (!typename || !*typename)
+    if (!type_name || !*type_name)
         return db_perror("type name", E_BADARGS, me);
 
-    if (typename[0] == 'D' && typename[1] == 'B')
-        typename += 2;
+    if (type_name[0] == 'D' && type_name[1] == 'B')
+        type_name += 2;
 
-    if (STR_EQUAL(typename, "multiblockmesh") ||
-        STR_EQUAL(typename, "multimesh"))
+    if (STR_EQUAL(type_name, "multiblockmesh") ||
+        STR_EQUAL(type_name, "multimesh"))
         tag = DB_MULTIMESH;
 
-    else if (STR_EQUAL(typename, "multimeshadj"))
+    else if (STR_EQUAL(type_name, "multimeshadj"))
         tag = DB_MULTIMESHADJ;
 
-    else if (STR_EQUAL(typename, "multiblockvar") ||
-             STR_EQUAL(typename, "multivar"))
+    else if (STR_EQUAL(type_name, "multiblockvar") ||
+             STR_EQUAL(type_name, "multivar"))
         tag = DB_MULTIVAR;
 
-    else if (STR_EQUAL(typename, "multiblockmat") ||
-             STR_EQUAL(typename, "multimat"))
+    else if (STR_EQUAL(type_name, "multiblockmat") ||
+             STR_EQUAL(type_name, "multimat"))
         tag = DB_MULTIMAT;
 
-    else if (STR_EQUAL(typename, "multimatspecies"))
+    else if (STR_EQUAL(type_name, "multimatspecies"))
         tag = DB_MULTIMATSPECIES;
 
-    else if (STR_EQUAL(typename, "quadmesh-rect"))
+    else if (STR_EQUAL(type_name, "quadmesh-rect"))
         tag = DB_QUAD_RECT;
 
-    else if (STR_EQUAL(typename, "quadmesh-curv"))
+    else if (STR_EQUAL(type_name, "quadmesh-curv"))
         tag = DB_QUAD_CURV;
 
-    else if (STR_EQUAL(typename, "csgmesh"))
+    else if (STR_EQUAL(type_name, "csgmesh"))
         tag = DB_CSGMESH;
 
-    else if (STR_EQUAL(typename, "csgvar"))
+    else if (STR_EQUAL(type_name, "csgvar"))
         tag = DB_CSGVAR;
 
-    else if (STR_EQUAL(typename, "defvars"))
+    else if (STR_EQUAL(type_name, "defvars"))
         tag = DB_DEFVARS;
 
-    else if (STR_EQUAL(typename, "quadmesh"))
+    else if (STR_EQUAL(type_name, "quadmesh"))
         tag = DB_QUADMESH;
 
-    else if (STR_EQUAL(typename, "quadvar"))
+    else if (STR_EQUAL(type_name, "quadvar"))
         tag = DB_QUADVAR;
 
-    else if (STR_EQUAL(typename, "ucdmesh"))
+    else if (STR_EQUAL(type_name, "ucdmesh"))
         tag = DB_UCDMESH;
 
-    else if (STR_EQUAL(typename, "ucdvar"))
+    else if (STR_EQUAL(type_name, "ucdvar"))
         tag = DB_UCDVAR;
 
-    else if (STR_EQUAL(typename, "pointmesh"))
+    else if (STR_EQUAL(type_name, "pointmesh"))
         tag = DB_POINTMESH;
 
-    else if (STR_EQUAL(typename, "pointvar"))
+    else if (STR_EQUAL(type_name, "pointvar"))
         tag = DB_POINTVAR;
 
-    else if (STR_EQUAL(typename, "curve"))
+    else if (STR_EQUAL(type_name, "curve"))
         tag = DB_CURVE;
 
-    else if (STR_EQUAL(typename, "material"))
+    else if (STR_EQUAL(type_name, "material"))
         tag = DB_MATERIAL;
 
-    else if (STR_EQUAL(typename, "matspecies"))
+    else if (STR_EQUAL(type_name, "matspecies"))
         tag = DB_MATSPECIES;
 
-    else if (STR_EQUAL(typename, "compoundarray"))
+    else if (STR_EQUAL(type_name, "compoundarray"))
         tag = DB_ARRAY;
 
-    else if (STR_EQUAL(typename, "facelist"))
+    else if (STR_EQUAL(type_name, "facelist"))
         tag = DB_FACELIST;
 
-    else if (STR_EQUAL(typename, "zonelist"))
+    else if (STR_EQUAL(type_name, "zonelist"))
         tag = DB_ZONELIST;
 
-    else if (STR_EQUAL(typename, "polyhedral-zonelist"))
+    else if (STR_EQUAL(type_name, "polyhedral-zonelist"))
         tag = DB_PHZONELIST;
 
-    else if (STR_EQUAL(typename, "csgzonelist"))
+    else if (STR_EQUAL(type_name, "csgzonelist"))
         tag = DB_CSGZONELIST;
 
-    else if (STR_EQUAL(typename, "edgelist"))
+    else if (STR_EQUAL(type_name, "edgelist"))
         tag = DB_EDGELIST;
 
-    else if (STR_EQUAL(typename, "mrgtree"))
+    else if (STR_EQUAL(type_name, "mrgtree"))
         tag = DB_MRGTREE;
 
-    else if (STR_EQUAL(typename, "groupelmap"))
+    else if (STR_EQUAL(type_name, "groupelmap"))
         tag = DB_GROUPELMAP;
 
-    else if (STR_EQUAL(typename, "mrgvar"))
+    else if (STR_EQUAL(type_name, "mrgvar"))
         tag = DB_MRGVAR;
 
     else
@@ -1961,7 +1961,7 @@ context_switch(DBfile *dbfile, char const *name, char const **base)
      * is the stuff after the last `/'.  If the base name is empty
      * then we should raise an E_NOTFOUND right away.
      */
-    b = strrchr(name, '/');
+    b = (char *)strrchr(name, '/');
     if (!b || !b[1]) {
         FREE(old->name);
         FREE(old);
@@ -2451,7 +2451,7 @@ db_filter_install ( DBfile *dbfile )
     len = DBGetVarLength(dbfile, "_filters");
     if (len <= 0)
         return 0;               /*no filters requested */
-    if (NULL == (var = DBGetVar(dbfile, "_filters")))
+    if (NULL == (var = (char*)DBGetVar(dbfile, "_filters")))
         return -1;
 
     /*
@@ -4296,7 +4296,7 @@ DBOpenReal(const char *name, int type, int mode)
         }
         db_filter_install(dbfile);
         if (DBInqVarExists(dbfile, SILO_VSTRING_NAME))
-            dbfile->pub.file_lib_version = DBGetVar(dbfile, SILO_VSTRING_NAME);
+            dbfile->pub.file_lib_version = (char*)DBGetVar(dbfile, SILO_VSTRING_NAME);
 
         API_RETURN(dbfile);
     }
@@ -8780,7 +8780,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
                 if (coords2[i] == 0) coords = 0;;
             if (!coords)
                 API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            if ((zl_name = DBGetOption(optlist, DBOPT_PHZONELIST)))
+            if ((zl_name = (char*)DBGetOption(optlist, DBOPT_PHZONELIST)))
             {
                 if (!zl_name || !*zl_name)
                     API_ERROR("zonelist name specified with DBOPT_PHZONELIST is null or \"\"", E_BADARGS);
@@ -9200,7 +9200,9 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
                 API_ERROR("lo_offset<0", E_BADARGS);
             if (hi_offset < 0)
                 API_ERROR("hi_offset<0", E_BADARGS);
+#ifndef _MSC_VER
 #warning HI AND LO OFFSET NOT VALID IN PRESENCE OF EXPLICIT GHOST LABELS
+#endif
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
@@ -10121,13 +10123,13 @@ _DBQMCalcExtents(DB_DTPTR2 _coord_arrays, int datatype, int const *min_index,
     /* Read default coordinate variables. */
     switch (ndims) {
         case 3:
-            z = coord_arrays[2];
+            z = (float*)coord_arrays[2];
             /* Fall through */
         case 2:
-            y = coord_arrays[1];
+            y = (float*)coord_arrays[1];
             /* Fall through */
         case 1:
-            x = coord_arrays[0];
+            x = (float*)coord_arrays[0];
             break;
         default:
             break;
@@ -10593,7 +10595,7 @@ db_ProcessOptlist(int objtype, DBoptlist const * const optlist)
                         break;
 
                     case DBOPT_BNDNAMES:
-                        _csgm._bndnames = optlist->values[i];
+                        _csgm._bndnames = (char **)optlist->values[i];
                         break;
 
                     case DBOPT_HIDE_FROM_GUI:
@@ -12192,7 +12194,7 @@ DBStringArrayToStringList(
          else
              len += 2;
      }
-     s = malloc(len+1);
+     s = (char*)malloc(len+1);
      for (i=len=0; i<n; i++) {
          if (i) s[len++] = ';';
          if (strArray[i])

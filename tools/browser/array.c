@@ -160,10 +160,10 @@ int             AryNProcessed;          /*num args used by ary_deref()  */
 class_t
 ary_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("ARRAY");
-   cls->new = ary_new;
+   cls->newobj = ary_new;
    cls->copy = ary_copy;
    cls->dest = ary_dest;
    cls->apply = ary_apply;
@@ -203,7 +203,7 @@ ary_class (void) {
 static obj_t
 ary_new (va_list ap) {
 
-   obj_ary_t    *self = calloc (1, sizeof(obj_ary_t));
+   obj_ary_t    *self = (obj_ary_t*)calloc (1, sizeof(obj_ary_t));
    char         *s;
 
    assert (self);
@@ -248,7 +248,7 @@ ary_copy (obj_t _self, int flag) {
       retval = self;
 
    } else {
-      retval = calloc (1, sizeof(obj_ary_t));
+      retval = (obj_ary_t*)calloc (1, sizeof(obj_ary_t));
       retval->ascii_dims = safe_strdup (self->ascii_dims);
       retval->byte_offset = self->byte_offset;
       retval->ndims = self->ndims;

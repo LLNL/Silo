@@ -573,7 +573,7 @@ static void update_hotblock_stats(H5FD_silo_t *file, hsize_t id, int dir, float 
         if (file->stats.num_hot_blocks == file->stats.max_hot_blocks)
         {
             int new_max = file->stats.max_hot_blocks * 2 + 1;
-            hbl = realloc(file->stats.hot_block_list, sizeof(silo_vfd_hot_block_stats_t)*new_max);
+            hbl = (silo_vfd_hot_block_stats_t *)realloc(file->stats.hot_block_list, sizeof(silo_vfd_hot_block_stats_t)*new_max);
             file->stats.max_hot_blocks = new_max;
             file->stats.hot_block_list = hbl;
         }

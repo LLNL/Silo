@@ -932,7 +932,7 @@ INTERNAL int   db_relative_path ( char *pathname );
 INTERNAL char *db_unsplit_path ( const db_Pathname *p );
 INTERNAL db_Pathname *db_split_path ( const char *pathname );
 INTERNAL const int *db_get_used_file_options_sets_ids();
-char   *_db_safe_strdup (const char *);
+//char   *_db_safe_strdup (const char *);
 #undef strdup /*prevent a warning for the following definition*/
 #define strdup(s) _db_safe_strdup(s)
 

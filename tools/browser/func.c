@@ -1399,7 +1399,7 @@ V_list (int argc, obj_t argv[])
         }
 
         /* Prune the table of contents based on the arguments supplied. */    
-        selected = calloc(nentries, sizeof(int));
+        selected = (int *)calloc(nentries, sizeof(int));
         if (first_arg==argc) {
             for (i=0; i<nentries; i++) selected[i] = true;
         } else {
@@ -1457,7 +1457,7 @@ V_list (int argc, obj_t argv[])
 
             /* select all entries of that directory for display */
             free(selected);
-            selected = calloc(nentries, sizeof(int));
+            selected = (int *)calloc(nentries, sizeof(int));
             for (i=0; i<nentries; i++) selected[i] = true;
         } else {
             out_info("Listing from file %s", obj_name(fileobj));

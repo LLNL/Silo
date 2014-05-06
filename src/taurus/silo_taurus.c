@@ -1182,7 +1182,7 @@ db_taur_GetUcdvar(DBfile *_dbfile, char const *var_name)
 
     if (SILO_Globals.dataReadMask & DBUVData)
     {
-        uv->vals = ALLOC_N(DB_DTPTR1, 1);
+        uv->vals = (void **)ALLOC_N(DB_DTPTR1, 1);
         if (taurus_readvar(taurus, var_name, &(((float **)(uv->vals))[0]), &uv->nels,
                            &uv->centering, meshname) < 0) {
             db_perror("taurus_readvar", E_CALLFAIL, me);
@@ -1197,7 +1197,7 @@ db_taur_GetUcdvar(DBfile *_dbfile, char const *var_name)
          */
         if (taurus->activ >= 1000 && taurus->activ <= 1005) {
             if (uv->centering != 0) {
-                buf = uv->vals[0];
+                buf = (float *)uv->vals[0];
                 if (strcmp (meshname, "hs_mesh") == 0) {
                     for (i = 0, j = 0; i < taurus->nhex; i++) {
                         if (taurus->hex_activ [i] != 0) {
@@ -1641,10 +1641,11 @@ db_taur_InqVartype(DBfile *_dbfile, char const *varname)
         if(changeDir)
             db_taur_cd(taurus, pwd);
 
-        return vartype;
+        return (DBObjectType)vartype;
     }
     
-    return db_perror(varname, E_NOTFOUND, me);
+    db_perror(varname, E_NOTFOUND, me);
+    return DB_INVALID_OBJECT;
 }
 
 /*----------------------------------------------------------------------

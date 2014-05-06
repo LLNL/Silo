@@ -165,10 +165,10 @@ static obj_t    stc_bind (obj_t, void*);
 class_t
 stc_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("STRUCT");
-   cls->new = stc_new;
+   cls->newobj = stc_new;
    cls->copy = stc_copy;
    cls->dest = stc_dest;
    cls->feval = stc_feval;
@@ -213,7 +213,7 @@ stc_class (void) {
 static obj_t
 stc_new (va_list ap) {
 
-   obj_stc_t    *self = calloc (1, sizeof(obj_stc_t));
+   obj_stc_t    *self = (obj_stc_t *)calloc (1, sizeof(obj_stc_t));
    obj_t        _self = (obj_t)self;
    obj_t        sub;
    int          offset;
@@ -281,13 +281,13 @@ stc_add (obj_t _self, obj_t sub, int offset, const char *name) {
    if (self->ncomps>=self->acomps) {
       self->acomps = MAX (2*self->acomps, 30);
       if (self->sub) {
-         self->offset = realloc (self->offset, self->acomps*sizeof(int));
-         self->compname = realloc (self->compname, self->acomps*sizeof(char*));
-         self->sub = realloc (self->sub, self->acomps*sizeof(obj_t));
+         self->offset = (int *)realloc (self->offset, self->acomps*sizeof(int));
+         self->compname = (char **)realloc (self->compname, self->acomps*sizeof(char*));
+         self->sub = (obj_t *)realloc (self->sub, self->acomps*sizeof(obj_t));
       } else {
-         self->offset = malloc (self->acomps*sizeof(int));
-         self->compname = malloc (self->acomps*sizeof(char*));
-         self->sub = malloc (self->acomps*sizeof(obj_t));
+         self->offset = (int *)malloc (self->acomps*sizeof(int));
+         self->compname = (char **)malloc (self->acomps*sizeof(char*));
+         self->sub = (obj_t *)malloc (self->acomps*sizeof(obj_t));
       }
       assert (self->offset);
       assert (self->compname);
@@ -345,14 +345,14 @@ stc_copy (obj_t _self, int flag) {
       retval = self;
 
    } else {
-      retval = calloc (1, sizeof(obj_stc_t));
+      retval = (obj_stc_t *)calloc (1, sizeof(obj_stc_t));
       retval->walk1 = self->walk1;
       retval->walk2 = self->walk2;
       retval->name = safe_strdup (self->name);
       retval->acomps = self->ncomps;    /*save some memory*/
-      retval->sub = malloc (retval->acomps * sizeof(obj_t));
-      retval->offset = malloc (retval->acomps * sizeof(int));
-      retval->compname = malloc (retval->acomps * sizeof(char*));
+      retval->sub = (obj_t *)malloc (retval->acomps * sizeof(obj_t));
+      retval->offset = (int *)malloc (retval->acomps * sizeof(int));
+      retval->compname = (char **)malloc (retval->acomps * sizeof(char*));
       retval->ncomps = self->ncomps;
       
       for (i=0; i<self->ncomps; i++) {
@@ -1026,9 +1026,9 @@ stc_walk2 (obj_t _a, void *a_mem, obj_t _b, void *b_mem, walk_t *wdata) {
     * When A differs from B, a_diff will contain the index of B and
     * b_diff will contain the index of A.
     */
-   a_diff = calloc (a->ncomps, sizeof(int));
+   a_diff = (int *)calloc (a->ncomps, sizeof(int));
    for (i=0; i<a->ncomps; i++) a_diff[i] = -999;
-   b_diff = calloc (b->ncomps, sizeof(int));
+   b_diff = (int *)calloc (b->ncomps, sizeof(int));
    for (i=0; i<b->ncomps; i++) b_diff[i] = -999;
 
    /*

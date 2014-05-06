@@ -3227,12 +3227,12 @@ db_pdb_GetObject (DBfile *_file, char const *name)
     * because we have a character string type name instead of an
     * integer type constant.
     */
-   obj = malloc (sizeof (DBobject));
+   obj = (DBobject *)malloc (sizeof (DBobject));
    obj->name = _db_safe_strdup (group->name);
    obj->type = _db_safe_strdup (group->type);
    obj->ncomponents = obj->maxcomponents = group->ncomponents;
-   obj->comp_names = malloc (obj->maxcomponents * sizeof(char*));
-   obj->pdb_names  = malloc (obj->maxcomponents * sizeof(char*));
+   obj->comp_names = (char **)malloc (obj->maxcomponents * sizeof(char*));
+   obj->pdb_names  = (char **)malloc (obj->maxcomponents * sizeof(char*));
 
    for (i=0; i<group->ncomponents; i++) {
       obj->comp_names[i] = _db_safe_strdup (group->comp_names[i]);
@@ -6334,10 +6334,10 @@ db_pdb_GetVarType (DBfile *_dbfile, char const *varname)
 {
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    int            number, size;
-   char           typename[256];
+   char           type_name[256];
 
-   db_pdb_getvarinfo(dbfile->pdb, varname, typename, &number, &size, 0);
-   return db_GetDatatypeID(typename);
+   db_pdb_getvarinfo(dbfile->pdb, varname, type_name, &number, &size, 0);
+   return db_GetDatatypeID(type_name);
 }
 
 /*-------------------------------------------------------------------------
@@ -6970,7 +6970,7 @@ db_pdb_GetGroupelmap(DBfile *_dbfile, char const *name)
     /* unflatten frac data if we have it */
     if (fracLengths != NULL)
     {
-        gm->segment_fracs = malloc(gm->num_segments * sizeof(void*));
+        gm->segment_fracs = (void **)malloc(gm->num_segments * sizeof(void*));
         n = 0;
         for (i = 0; i < gm->num_segments; i++)
         {
@@ -9335,11 +9335,11 @@ db_pdb_PutPointmesh (DBfile *dbfile, char const *name, int ndims, DB_DTPTR2 _coo
       case DB_FLOAT:
          switch (ndims) {
          case 3:
-            _DBarrminmax(coords[2], nels, &fmin_extents[2], &fmax_extents[2]);
+            _DBarrminmax((float*)coords[2], nels, &fmin_extents[2], &fmax_extents[2]);
          case 2:
-            _DBarrminmax(coords[1], nels, &fmin_extents[1], &fmax_extents[1]);
+            _DBarrminmax((float*)coords[1], nels, &fmin_extents[1], &fmax_extents[1]);
          case 1:
-            _DBarrminmax(coords[0], nels, &fmin_extents[0], &fmax_extents[0]);
+            _DBarrminmax((float*)coords[0], nels, &fmin_extents[0], &fmax_extents[0]);
             break;
          default:
             return db_perror("ndims", E_BADARGS, me);
@@ -10687,11 +10687,11 @@ db_pdb_PutUcdsubmesh (DBfile *dbfile, char const *name, char const *parentmesh,
     *  Of course this had better succeed...
     *-------------------------------------------------------------*/
 
-   Pndims       = DBGetComponent(dbfile,parentmesh,"ndims");
+   Pndims       = (int *)DBGetComponent(dbfile,parentmesh,"ndims");
           ndims = *Pndims;
-   Pnnodes      = DBGetComponent(dbfile,parentmesh,"nnodes");
+   Pnnodes      = (int *)DBGetComponent(dbfile,parentmesh,"nnodes");
          nnodes = *Pnnodes;
-   Pdatatype    = DBGetComponent(dbfile,parentmesh,"datatype");
+   Pdatatype    = (int *)DBGetComponent(dbfile,parentmesh,"datatype");
        datatype = *Pdatatype;
 
    /*-------------------------------------------------------------
@@ -12029,7 +12029,7 @@ db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
 
    count[0] = ndims;
    /*  File name contained within meshname */
-   p = strchr(meshname, ':');
+   p = (char *)strchr(meshname, ':');
    if (p == NULL && count[0]) {
       PJ_write_len(dbfile->pdb, _qm._nm_dims, "integer", dims, 1, count);
       PJ_write_len(dbfile->pdb, _qm._nm_zones, "integer", _qm._zones,
@@ -12143,7 +12143,7 @@ db_InitUcd (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
     * there is possibily another  mesh that may be pointing to,
     * so we'll use that meshes discriptions.
     *-----------------------------------------------------*/
-   p = strchr(meshname, ':');
+   p = (char *)strchr(meshname, ':');
    if (p == NULL && count[0]) {
       a[0] = a[1] = a[2] = 0.5;
       PJ_write_len(dbfile->pdb, _um._nm_alignz, "float", a, 1, count);

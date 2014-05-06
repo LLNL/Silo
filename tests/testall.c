@@ -80,8 +80,9 @@ be used for advertising or product endorsement purposes.
 
 #include <math.h>
 #include <stdlib.h>
+#ifndef WIN32
 #include <unistd.h>
-#ifdef WIN32
+#else
 #include <stdio.h>
 #include <io.h>
 #endif
@@ -661,9 +662,9 @@ build_rect2d(DBfile * dbfile, int size, int order)
                   DB_FLOAT, optlist);
 
     if (ascii) {
-       j = true;
        void *arr[9];
        char *arrnames[] = {"L0","L1","L2","L3","L4","L5","L6","L7","L8"};
+       j = true;
 
        DBAddOption (optlist, DBOPT_ASCII_LABEL, &j);
        DBPutQuadvar1(dbfile, "ascii", meshname, (DB_DTPTR1) ascii, zdims, ndims, NULL, 0,

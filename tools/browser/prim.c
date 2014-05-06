@@ -358,10 +358,10 @@ prim_assoc_t PA_ZONETYPE[] = {
 class_t
 prim_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("PRIM");
-   cls->new = prim_new;
+   cls->newobj = prim_new;
    cls->copy = prim_copy;
    cls->dest = prim_dest;
    cls->objname = prim_name;
@@ -401,7 +401,7 @@ prim_class (void) {
 static obj_t
 prim_new (va_list ap) {
 
-   obj_prim_t   *self = calloc (1, sizeof(obj_prim_t));
+   obj_prim_t   *self = (obj_prim_t *)calloc (1, sizeof(obj_prim_t));
    char         *s;
 
    assert (self);
@@ -441,7 +441,7 @@ prim_copy (obj_t _self, int flag) {
       retval = self;
 
    } else {
-      retval = calloc (1, sizeof(obj_prim_t));
+      retval = (obj_prim_t *)calloc (1, sizeof(obj_prim_t));
       retval->name = safe_strdup (self->name);
       retval->tname = self->tname ? safe_strdup (self->tname) : NULL;
       retval->browser_type = self->browser_type;

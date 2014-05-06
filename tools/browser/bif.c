@@ -104,10 +104,10 @@ static obj_t    bif_apply (obj_t,obj_t);
 class_t
 bif_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("BIF");
-   cls->new = bif_new;
+   cls->newobj = bif_new;
    cls->apply = bif_apply;
    cls->dest = NULL;
    cls->copy = NULL;
@@ -137,7 +137,7 @@ bif_class (void) {
 static obj_t
 bif_new (va_list ap) {
 
-   obj_bif_t    *self = calloc (1, sizeof(obj_bif_t));
+   obj_bif_t    *self = (obj_bif_t *)calloc (1, sizeof(obj_bif_t));
    int          flags ; 
 
    assert (self);

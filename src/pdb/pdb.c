@@ -1057,7 +1057,7 @@ _PD_write (PDBfile *file, char *name, char *intype, char *outtype,
    if (file->virtual_internal) {
       SC_address ad;
 
-      ad.memaddr = vr;
+      ad.memaddr = (char *)vr;
       ep->blocks->diskaddr = ad.diskaddr;
       lite_SC_mark(vr, 1);
       ep = lite_PD_copy_syment(ep);

@@ -142,10 +142,10 @@ static char     *sdo_name (obj_t);
 class_t
 sdo_class (void) {
 
-   class_t      cls = calloc (1, sizeof(*cls));
+   class_t      cls = (class_t)calloc (1, sizeof(*cls));
 
    cls->name = safe_strdup ("SDO");
-   cls->new = sdo_new;
+   cls->newobj = sdo_new;
    cls->dest = sdo_dest;
    cls->copy = sdo_copy;
    cls->print = sdo_print;
@@ -263,10 +263,10 @@ sdo_new (va_list ap) {
        */
       if (!Sdo) {
          NSdos = 1024;
-         Sdo = calloc (NSdos, sizeof(sdo_t));
+         Sdo = (sdo_t *)calloc (NSdos, sizeof(sdo_t));
          unused = 0;
       } else {
-         Sdo = realloc (Sdo, (NSdos+1024) * sizeof(sdo_t));
+         Sdo = (sdo_t *)realloc (Sdo, (NSdos+1024) * sizeof(sdo_t));
          memset (Sdo+NSdos, 0, 1024*sizeof(sdo_t));
          unused = NSdos;
          NSdos += 1024;
@@ -300,7 +300,7 @@ sdo_new (va_list ap) {
       }
    }
 
-   self = calloc (1, sizeof(obj_sdo_t));
+   self = (obj_sdo_t *)calloc (1, sizeof(obj_sdo_t));
    self->sdo = sdo;
    self->r_type = obj_copy(r_type, SHALLOW);
    self->c_mem = c_mem;

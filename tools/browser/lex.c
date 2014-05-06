@@ -181,7 +181,7 @@ lex_open(const char *fname)
     }
 
     /* Create the lex file pointer */
-    f = calloc(1, sizeof(lex_t));
+    f = (lex_t *)calloc(1, sizeof(lex_t));
     assert(f);
     f->f = stream;
     f->prompt = LEX_PROMPT;
@@ -213,7 +213,7 @@ lex_open(const char *fname)
 lex_t *
 lex_stream(FILE *stream)
 {
-    lex_t        *f = calloc(1, sizeof(lex_t));
+    lex_t        *f = (lex_t *)calloc(1, sizeof(lex_t));
 
     assert (f);
     if (NULL==(f->f=fdopen(fileno(stream), "r"))) {
@@ -256,7 +256,7 @@ lex_stream(FILE *stream)
 lex_t *
 lex_string(const char *s)
 {
-    lex_t        *f = calloc(1, sizeof(lex_t));
+    lex_t        *f = (lex_t *)calloc(1, sizeof(lex_t));
 
     assert(f);
     f->s = safe_strdup(s?s:"");
@@ -280,7 +280,7 @@ lex_string(const char *s)
 lex_t *
 lex_stack(void)
 {
-    lex_t       *f = calloc(1, sizeof(lex_t));
+    lex_t       *f = (lex_t *)calloc(1, sizeof(lex_t));
     if (!LEX_STDIN) LEX_STDIN = f;
     return f;
 }
@@ -483,7 +483,7 @@ lex_ungetc(lex_t *f, int c)
 
     } else {
         /* Allocate a buffer for the pushback */
-        f->s = malloc(2);
+        f->s = (char *)malloc(2);
         f->s[0] = c;
         f->s[1] = '\0';
         f->at = 0;

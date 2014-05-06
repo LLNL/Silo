@@ -1223,7 +1223,7 @@ out_reset (out_t *f) {
 out_t *
 out_stream (FILE *stream) {
 
-   out_t        *f = calloc (1, sizeof(out_t));
+   out_t        *f = (out_t *)calloc (1, sizeof(out_t));
 
    assert (f);
    if (NULL==(f->f=fdopen(fileno(stream), "w"))) {
