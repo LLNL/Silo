@@ -185,6 +185,12 @@
     <ClCompile Include="..\..\src\hzip\hznread.cpp" />
     <ClCompile Include="..\..\src\hzip\hznwrite.cpp" />
     <ClCompile Include="..\..\src\hzip\hzutil.cpp" />
+    <ClCompile Include="..\..\src\netcdf\api.c" />
+    <ClCompile Include="..\..\src\netcdf\ent.c" />
+    <ClCompile Include="..\..\src\netcdf\netcdf.c" />
+    <ClCompile Include="..\..\src\netcdf\obj.c" />
+    <ClCompile Include="..\..\src\netcdf\silo_netcdf.c" />
+    <ClCompile Include="..\..\src\netcdf\table.c" />
     <ClCompile Include="..\..\src\pdb\pdb.c" />
     <ClCompile Include="..\..\src\pdb\pdbdir.c" />
     <ClCompile Include="..\..\src\pdb\pdbio.c" />

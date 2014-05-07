@@ -793,8 +793,8 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
   /* test output of ghost node and zone labels */
   {
       int i;
-      char *gn = calloc(nnodes,1);
-      char *gz = calloc(nzones,1);
+      char *gn = (char*)calloc(nnodes,1);
+      char *gz = (char*)calloc(nzones,1);
       DBoptlist *ol = DBMakeOptlist(5);
 
       for (i = 0; i < nnodes; i++)

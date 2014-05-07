@@ -381,7 +381,7 @@ test_get_all(DBfile *dbfile)
     
     /* 1d char */
     puts("    1d_char");
-    if (NULL==(cdata_in=DBGetVar(dbfile, "1d_char"))) {
+    if (NULL==(cdata_in=(char *)DBGetVar(dbfile, "1d_char"))) {
 	puts("        DBGetVar() failed");
 	nerrors++;
     } else {
@@ -397,7 +397,7 @@ test_get_all(DBfile *dbfile)
 
     /* 2d short */
     puts("    2d_short");
-    if (NULL==(sdata_in=DBGetVar(dbfile, "2d_short"))) {
+    if (NULL==(sdata_in=(short*)DBGetVar(dbfile, "2d_short"))) {
 	puts("        DBGetVar() failed");
 	nerrors++;
     } else {
@@ -414,7 +414,7 @@ test_get_all(DBfile *dbfile)
 
     /* 3d int */
     puts("    3d_int");
-    if (NULL==(idata_in=DBGetVar(dbfile, "3d_int"))) {
+    if (NULL==(idata_in=(int*)DBGetVar(dbfile, "3d_int"))) {
 	puts("        DBGetVar() failed");
 	nerrors++;
     } else {
@@ -429,7 +429,7 @@ test_get_all(DBfile *dbfile)
 
     /* 3d long */
     puts("    3d_long");
-    if (NULL==(ldata_in=DBGetVar(dbfile, "3d_long"))) {
+    if (NULL==(ldata_in=(long*)DBGetVar(dbfile, "3d_long"))) {
 	puts("        DBGetVar() failed");
 	nerrors++;
     } else {
@@ -445,7 +445,7 @@ test_get_all(DBfile *dbfile)
     /* 4d float */
     DBForceSingle(TRUE);
     puts("    4d_float");
-    if (NULL==(fdata_in=DBGetVar(dbfile, "4d_float"))) {
+    if (NULL==(fdata_in=(float*)DBGetVar(dbfile, "4d_float"))) {
 	puts("        DBGetVar() failed");
 	nerrors++;
     } else {
@@ -462,7 +462,7 @@ test_get_all(DBfile *dbfile)
 
     /* 5d double */
     puts("    5d_double");
-    if (NULL==(ddata_in=DBGetVar(dbfile, "5d_double"))) {
+    if (NULL==(ddata_in=(double*)DBGetVar(dbfile, "5d_double"))) {
 	puts("        DBGetVar() failed");
 	nerrors++;
     } else {

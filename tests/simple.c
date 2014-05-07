@@ -211,7 +211,7 @@ main(int argc, char *argv[])
         val2[i] = 0;
 
     DBReadVarSlice(dbfile, "simple", offset, length, stride, ndims, val2);
-    lval2 = DBGetVar(dbfile, "longlong");
+    lval2 = (long long *)DBGetVar(dbfile, "longlong");
 
     DBClose(dbfile);
 

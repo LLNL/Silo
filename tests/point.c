@@ -106,9 +106,7 @@ static void build_defvars(DBfile *dbfile, int dims);
  *-------------------------------------------------------------------------
  */
 double
-randf(rmin, rmax)
-    double          rmin;
-    double          rmax;
+randf(double rmin, double rmax)
 {   
     unsigned long   acc;
     static double   divisor = 0;

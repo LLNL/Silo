@@ -102,7 +102,7 @@
 #define HAVE_MEMORY_H 1
 
 /* Support for NetCDF */
-/* #undef HAVE_NETCDF_DRIVER */
+#define HAVE_NETCDF_DRIVER
 
 /* Support for PDB Proper */
 /* #undef HAVE_PDBP_DRIVER */

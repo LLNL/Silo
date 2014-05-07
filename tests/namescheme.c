@@ -290,7 +290,7 @@ int main(int argc, char **argv)
 
         dbfile = DBOpen("namescheme.silo", DB_UNKNOWN, DB_READ);
         DBSetDir(dbfile, "dir_1");
-        ns1r = DBGetVar(dbfile, "ns1");
+        ns1r = (char*)DBGetVar(dbfile, "ns1");
 
         /* Use the '0, DBfile*, 0' form of args to constructor */
         ns = DBMakeNamescheme(ns1r, 0, dbfile, 0);
@@ -305,7 +305,7 @@ int main(int argc, char **argv)
         free(ns1r);
 
         DBSetDir(dbfile, "/dir_2/dir_3");
-        ns2r = DBGetVar(dbfile, "ns2");
+        ns2r = (char *)DBGetVar(dbfile, "ns2");
 
         /* Use the '0, DBfile*, 0' form of args to constructor */
         ns = DBMakeNamescheme(ns2r, 0, dbfile, 0);
@@ -335,7 +335,7 @@ int main(int argc, char **argv)
 
         /* Test McCandless' example */
         DBSetDir(dbfile, "/");
-        ns4r = DBGetVar(dbfile, "/dir_2/dir_3/ns4");
+        ns4r = (char *)DBGetVar(dbfile, "/dir_2/dir_3/ns4");
         ns = DBMakeNamescheme(ns4r, 0, dbfile, 0);
         TEST_GET_NAME(ns, 0, "");
         TEST_GET_NAME(ns, 1, "");

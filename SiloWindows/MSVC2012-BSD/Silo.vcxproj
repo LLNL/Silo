@@ -165,6 +165,12 @@
     <ClCompile Include="..\..\src\filters\f_sample.c" />
     <ClCompile Include="..\..\src\hdf5_drv\H5FDsilo.c" />
     <ClCompile Include="..\..\src\hdf5_drv\silo_hdf5.c" />
+    <ClCompile Include="..\..\src\netcdf\api.c" />
+    <ClCompile Include="..\..\src\netcdf\ent.c" />
+    <ClCompile Include="..\..\src\netcdf\netcdf.c" />
+    <ClCompile Include="..\..\src\netcdf\obj.c" />
+    <ClCompile Include="..\..\src\netcdf\silo_netcdf.c" />
+    <ClCompile Include="..\..\src\netcdf\table.c" />
     <ClCompile Include="..\..\src\pdb\pdb.c" />
     <ClCompile Include="..\..\src\pdb\pdbdir.c" />
     <ClCompile Include="..\..\src\pdb\pdbio.c" />

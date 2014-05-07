@@ -561,7 +561,7 @@ silo_GetHypercube(void *sink, void *source, int *dims, int ndims, int *start,
    char          *local_sink, *local_source; /* Index by bytes */
 
    local_sink = (char*)sink;
-   local_source = source;
+   local_source = (char *)source;
 
    /* If sink is 1D, just do a memory copy from source */
    if (ndims == 1) {

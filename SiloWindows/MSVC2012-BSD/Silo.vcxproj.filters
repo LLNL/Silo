@@ -63,6 +63,9 @@
     <Filter Include="Header Files\debug">
       <UniqueIdentifier>{bed62ec2-c976-4850-8d57-bd00ec661159}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\netcdf">
+      <UniqueIdentifier>{b32bd034-316c-4299-9839-7d2be066ae55}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\silo\silo_ns.c">
@@ -151,6 +154,24 @@
     </ClCompile>
     <ClCompile Include="..\..\src\debug\silo_debug.c">
       <Filter>Source Files\debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\netcdf\api.c">
+      <Filter>Source Files\netcdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\netcdf\ent.c">
+      <Filter>Source Files\netcdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\netcdf\netcdf.c">
+      <Filter>Source Files\netcdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\netcdf\obj.c">
+      <Filter>Source Files\netcdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\netcdf\silo_netcdf.c">
+      <Filter>Source Files\netcdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\netcdf\table.c">
+      <Filter>Source Files\netcdf</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

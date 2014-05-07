@@ -181,7 +181,7 @@ main(int argc, char *argv[])
         }
 
         printf("   values... (float)\n");
-        for (show = ca->values, i = 0; i < ca->nvalues; i++) {
+        for (show = (float*)ca->values, i = 0; i < ca->nvalues; i++) {
             printf(" value %d is %g\n", i, show[i]);
         }
     }
