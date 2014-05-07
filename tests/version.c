@@ -166,10 +166,6 @@ main(int argc, char *argv[])
     dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
     if (dbfile == 0)
         dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
-#ifdef _MSC_VER
-    if (dbfile == 0)
-        dbfile = DBOpen("..\\..\\..\\tests\\pion0244.silo", DB_UNKNOWN, DB_READ);
-#endif
     if (dbfile)
     {
         printf("On old silo file handle returned from DBOpen...\n");
@@ -208,14 +204,16 @@ main(int argc, char *argv[])
             dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
             if (dbfile == 0)
                 dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
-#ifdef _MSC_VER
-    if (dbfile == 0)
-        dbfile = DBOpen("..\\..\\..\\tests\\pion0244.silo", DB_UNKNOWN, DB_READ);
-#endif
         }
         else
         {
             dbfile = DBOpen(filename, driver, DB_READ);
+        }
+
+        if (dbfile == 0)
+        {
+            fprintf(stderr, "Could not open file.\n");
+            return 1;
         }
         
         /* loop over all version number tests */
@@ -239,6 +237,11 @@ main(int argc, char *argv[])
 
     /* Test getting version digits from file handle */
     dbfile = DBOpen(filename, driver, DB_READ);
+    if (dbfile == 0)
+    {
+        fprintf(stderr, "Could not open file.\n");
+        return 1;
+    }
     if (DBFileVersionDigits(dbfile, &vnos[0], &vnos[1], &vnos[2], &vnos[3]))
     {
         fprintf(stderr, "Error getting file version digits\n");
@@ -266,10 +269,11 @@ main(int argc, char *argv[])
     dbfile = DBOpen("pion0244.silo", DB_UNKNOWN, DB_READ);
     if (dbfile == 0)
         dbfile = DBOpen("../../pion0244.silo", DB_UNKNOWN, DB_READ);
-#ifdef _MSC_VER
     if (dbfile == 0)
-        dbfile = DBOpen("..\\..\\..\\tests\\pion0244.silo", DB_UNKNOWN, DB_READ);
-#endif
+    {
+        fprintf(stderr, "Could not open file.\n");
+        return 1;
+    }
     if (!DBVersionGEFileVersion(dbfile))
     {
         fprintf(stderr, "Error comparing library version to OLD file version.\n");
@@ -278,6 +282,11 @@ main(int argc, char *argv[])
     DBClose(dbfile);
 
     dbfile = DBOpen(filename, driver, DB_APPEND);
+    if (dbfile == 0)
+    {
+        fprintf(stderr, "Could not open file.\n");
+        return 1;
+    }
     if (!DBVersionGEFileVersion(dbfile))
     {
         fprintf(stderr, "Error comparing library version to CURRENT file version.\n");
@@ -293,6 +302,11 @@ main(int argc, char *argv[])
     DBSetAllowOverwrites(0);
 
     dbfile = DBOpen(filename, driver, DB_READ);
+    if (dbfile == 0)
+    {
+        fprintf(stderr, "Could not open file.\n");
+        return 1;
+    }
     if (DBVersionGEFileVersion(dbfile))
     {
         fprintf(stderr, "Error comparing library version to FUTURE file version.\n");
