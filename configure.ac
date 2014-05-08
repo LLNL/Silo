@@ -762,27 +762,27 @@ if test -n "$FPZIP"; then
 fi
 
 dnl enable experimental JSON support
-AC_MSG_CHECKING(for json)
-if test -e $srcdir/tools/json/json-c-0.10.tar.gz; then
-    AC_MSG_RESULT(found)
-    JSON=$DEFAULT_JSON
-else
-    AC_MSG_RESULT(JSON support not available because json-c distribution is not in this tarball)
-    JSON=""
-fi
 AC_ARG_ENABLE(json,
     AC_HELP_STRING([--enable-json], 
         [enable experimental JSON features@<:@default=no@:>@]),
     if test "$enable_json" = "yes"; then
-        AC_MSG_CHECKING(for json)
-        if test -e $srcdir/tools/json/json-c-0.10.tar.gz; then
-            AC_MSG_RESULT(found)
-            pushd $srcdir/tools/json
+        AC_MSG_CHECKING(Enabling json...)
+        if test -e ${ac_abs_confdir}/tools/json/json-c-0.10.tar.gz; then
+            if test ! -e ./tools/json; then
+                mkdir tools 1>/dev/null 2>&1
+                mkdir tools/json 1>/dev/null 2>&1
+            fi
+            pushd tools/json 1>/dev/null 2>&1
             rm -rf json-c-0.10
-            gunzip < json-c-0.10.tar.gz | tar xf -
+            gunzip < ${ac_abs_confdir}/tools/json/json-c-0.10.tar.gz | tar xf -
             cd json-c-0.10
-            ./configure --prefix=${prefix}/json
-            make install
+            if test ! "${prefix}" = "NONE"; then
+                ./configure --prefix=${prefix}/json
+                make install
+            else
+                ./configure
+                make
+            fi
             if test $? -eq 0; then
                 AC_MSG_RESULT(json-c compiled and installed)
                 JSON="json"
@@ -790,7 +790,7 @@ AC_ARG_ENABLE(json,
                 AC_MSG_RESULT(JSON support disabled due to failure to install)
                 JSON=""
             fi
-            popd
+            popd 1>/dev/null 2>&1
         else
             AC_MSG_RESULT(JSON support not available because json-c distribution is not in this tarball)
             JSON=""

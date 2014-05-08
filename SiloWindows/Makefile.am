@@ -76,7 +76,7 @@ EXTRA_DIST = \
 ./MSVC2012/Tests/array_f.vfproj\
 ./MSVC2012/Tests/compression.vcxproj\
 ./MSVC2012/Tests/csg.vcxproj\
-./MSVC2012/Tests/csgmesh_f.vcxproj\
+./MSVC2012/Tests/csgmesh_f.vfproj\
 ./MSVC2012/Tests/curve_f.vfproj\
 ./MSVC2012/Tests/dirtest.vcxproj\
 ./MSVC2012/Tests/empty.vcxproj\
@@ -167,4 +167,4 @@ EXTRA_DIST = \
 ./MSVC2012-BSD/silex.vcxproj.filters\
 ./MSVC2012-BSD/Silo.vcxproj\
 ./MSVC2012-BSD/Silo.vcxproj.filters\
-./MSVC2012-BSD/Silo.sln\
+./MSVC2012-BSD/Silo.sln

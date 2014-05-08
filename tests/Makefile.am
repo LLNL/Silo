@@ -124,16 +124,14 @@ endif
 
 # paths look at install directories before sources
 AM_CPPFLAGS = \
- -I$(srcdir)/../src/pdb \
- -I$(srcdir)/../src/score \
  -I$(builddir)/../src/silo \
  -I$(srcdir)/../src/silo \
  -I$(includedir)
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
 PDBTESTS =
 if INSTALL_LITE_HEADERS
- testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
- pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS)
+ testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
+ pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
  PDBTESTS += testpdb pdbtst
 endif
 JSONTESTS =
@@ -142,6 +140,7 @@ if JSON_NEEDED
  JSONTESTS += json
 endif
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
+mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
 
@@ -182,6 +181,7 @@ EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_hdf5.la ioperf_pdb.la ioperf_s
 ioperf_LDFLAGS = -ldl
 ioperf_CXXFALGS = -rdynamic
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
+ioperf_pdb_la_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 ioperf_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 ioperf_hdf5_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 ioperf_pdb_la_LDFLAGS = -module -avoid-version -rpath /nowhere
