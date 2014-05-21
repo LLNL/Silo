@@ -257,7 +257,7 @@ int main(int argc, char **argv)
             float xcoords[] = {0, 1, 2, 3};
             float ycoords[] = {0, 1};
             float *coords[2] = {xcoords, ycoords};
-            DBPutQuadmesh(dbfile, "qmesh", 0, (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
         }
         DBSetDir(dbfile, "../dom_green_3");
         {
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
             float xcoords[] = {0, 1, 2, 3};
             float ycoords[] = {1, 2};
             float *coords[2] = {xcoords, ycoords};
-            DBPutQuadmesh(dbfile, "qmesh", 0, (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
         }
         DBSetDir(dbfile, "../dom_blue_5");
         {
@@ -275,7 +275,7 @@ int main(int argc, char **argv)
             float xcoords[] = {0, 1, 2, 3};
             float ycoords[] = {2, 3};
             float *coords[2] = {xcoords, ycoords};
-            DBPutQuadmesh(dbfile, "qmesh", 0, (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
+            DBPutQuadmesh(dbfile, "qmesh", 0, coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, 0);
         }
         DBSetDir(dbfile, "..");
         {

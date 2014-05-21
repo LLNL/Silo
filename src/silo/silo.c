@@ -7776,7 +7776,7 @@ DBPutMaterial(
     int const *mix_next,
     int const *mix_mat,
     int const *mix_zone,
-    DB_DTPTR1 mix_vf,
+    DBVCP1_t mix_vf,
     int mixlen,
     int datatype,
     DBoptlist const *optlist
@@ -7892,7 +7892,7 @@ DBPutMaterial(
 PUBLIC int
 DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
                 int nmat, int const *nmatspec, int const *speclist, int const *dims,
-                int ndims, int nspecies_mf, DB_DTPTR1 species_mf,
+                int ndims, int nspecies_mf, DBVCP1_t species_mf,
                 int const *mix_speclist, int mixlen, int datatype,
                 DBoptlist const *optlist)
 {
@@ -8317,7 +8317,7 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
+DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DBVCP2_t coords,
                int nels, int datatype, DBoptlist const *optlist)
 {
     int retval;
@@ -8390,7 +8390,7 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DB_DTPTR2 coords,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-              DB_DTPTR2 vars, int nels, int datatype, DBoptlist const *optlist)
+              DBVCP2_t vars, int nels, int datatype, DBoptlist const *optlist)
 {
     int retval;
 
@@ -8458,15 +8458,14 @@ DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutPointvar1(DBfile *dbfile, const char *vname, const char *mname,
-               DB_DTPTR1 var, int nels, int datatype, DBoptlist const *optlist)
+               DBVCP1_t var, int nels, int datatype, DBoptlist const *optlist)
 {
-    DB_DTPTR1 vars[1];
+    DBVCP1_t vars[1] = {var};
     int retval;
 
     API_BEGIN2("DBPutPointvar1", int, -1, vname)
     {
-        vars[0] = var;
-        retval = DBPutPointvar(dbfile, vname, mname, var?1:0, (DB_DTPTR2) vars,
+        retval = DBPutPointvar(dbfile, vname, mname, var?1:0, vars,
                                nels, datatype, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8509,7 +8508,7 @@ DBPutPointvar1(DBfile *dbfile, const char *vname, const char *mname,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadmesh(DBfile *dbfile, const char *name, char const * const *coordnames,
-              DB_DTPTR2 coords, int const *dims, int ndims, int datatype,
+              DBVCP2_t coords, int const *dims, int ndims, int datatype,
               int coordtype, DBoptlist const *optlist)
 {
     int retval;
@@ -8597,8 +8596,8 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char const * const *coordnames,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-             char const * const *varnames, DB_DTPTR2 vars, int const *dims, int ndims,
-             DB_DTPTR2 mixvars, int mixlen, int datatype, int centering,
+             char const * const *varnames, DBVCP2_t vars, int const *dims, int ndims,
+             DBVCP2_t mixvars, int mixlen, int datatype, int centering,
              DBoptlist const *optlist)
 {
     int retval;
@@ -8693,13 +8692,13 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 var,
-              int const *dims, int ndims, DB_DTPTR1 mixvar, int mixlen, int datatype,
+DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, void const *var,
+              int const *dims, int ndims, void const *mixvar, int mixlen, int datatype,
               int centering, DBoptlist const *optlist)
 {
     char const *varnames[1];
-    DB_DTPTR1 vars[1];
-    DB_DTPTR1 mixvars[1];
+    void const *vars[1] = {var};
+    void const *mixvars[1] = {var};
     int retval;
 
     API_BEGIN2("DBPutQuadvar1", int, -1, vname) {
@@ -8708,8 +8707,8 @@ DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 va
         mixvars[0] = mixvar;
 
         retval = DBPutQuadvar(dbfile, vname, mname, 1,
-                              varnames, (DB_DTPTR2) vars, dims, ndims,
-                              (DB_DTPTR2) mixvars, mixlen,
+                              varnames, vars, dims, ndims,
+                              mixvars, mixlen,
                               datatype, centering, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8748,7 +8747,7 @@ DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 va
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
-             char const * const *coordnames, DB_DTPTR2 coords, int nnodes,
+             char const * const *coordnames, DBVCP2_t coords, int nnodes,
              int nzones, const char *zonel_name, const char *facel_name,
              int datatype, DBoptlist const *optlist)
 {
@@ -8927,7 +8926,7 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
-            char const * const *varnames, DB_DTPTR2 vars, int nels, DB_DTPTR2 mixvars,
+            char const * const *varnames, DBVCP2_t vars, int nels, DBVCP2_t mixvars,
             int mixlen, int datatype, int centering, DBoptlist const *optlist)
 {
     int retval;
@@ -9021,12 +9020,12 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
  *    The old table of contents is discarded if the directory changes.
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 var,
-             int nels, DB_DTPTR1 mixvar, int mixlen, int datatype, int centering,
+DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, void const *var,
+             int nels, void const *mixvar, int mixlen, int datatype, int centering,
              DBoptlist const *optlist)
 {
-    DB_DTPTR1 vars[1];
-    DB_DTPTR1 mixvars[1];
+    void const *vars[1] = {var};
+    void const *mixvars[1] = {mixvar};
     char const *varnames[1];
     int            retval;
 
@@ -9035,9 +9034,8 @@ DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, DB_DTPTR1 var
         varnames[0] = vname;
         vars[0] = var;
         mixvars[0] = mixvar;
-        retval = DBPutUcdvar(dbfile, vname, mname, nels==0?0:1, varnames,
-                             (DB_DTPTR2) vars, nels, (DB_DTPTR2) mixvars,
-                             mixlen, datatype, centering, optlist);
+        retval = DBPutUcdvar(dbfile, vname, mname, nels==0?0:1, varnames, vars,
+                     nels, mixvars, mixlen, datatype, centering, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -9563,10 +9561,11 @@ DBGetCSGZonelist(DBfile *dbfile, const char *name)
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
-            int nvars, char const * const *varnames, void const * const *vars,
+            int nvars, char const * const *varnames, DBVCP2_t _vars,
             int nvals, int datatype, int centering, DBoptlist const *optlist)
 {
     int retval;
+    void const * const *vars = (void const * const *) _vars;
 
     API_BEGIN2("DBPutCsgvar", int, -1, vname) {
         if (!dbfile)
@@ -10086,7 +10085,7 @@ CSGM_CalcExtents(int datatype, int ndims, int nbounds,
  *    double.
  *--------------------------------------------------------------------*/
 INTERNAL int
-_DBQMCalcExtents(DB_DTPTR2 _coord_arrays, int datatype, int const *min_index,
+_DBQMCalcExtents(DBVCP2_t coord_arrays, int datatype, int const *min_index,
                  int const *max_index, int const *dims, int ndims, int coordtype,
                  void *min_extents, void *max_extents)
 {
@@ -10096,7 +10095,6 @@ _DBQMCalcExtents(DB_DTPTR2 _coord_arrays, int datatype, int const *min_index,
     float         *fmin_extents = NULL, *fmax_extents = NULL;
     int            i;
     char          *me = "_DBQMCalcExtents";
-    DB_DTPTR**    coord_arrays = (DB_DTPTR**) _coord_arrays;
 
     if (datatype == DB_FLOAT)
     {
@@ -10123,13 +10121,13 @@ _DBQMCalcExtents(DB_DTPTR2 _coord_arrays, int datatype, int const *min_index,
     /* Read default coordinate variables. */
     switch (ndims) {
         case 3:
-            z = (float*)coord_arrays[2];
+            z = ((float**)coord_arrays)[2];
             /* Fall through */
         case 2:
-            y = (float*)coord_arrays[1];
+            y = ((float**)coord_arrays)[1];
             /* Fall through */
         case 1:
-            x = (float*)coord_arrays[0];
+            x = ((float**)coord_arrays)[0];
             break;
         default:
             break;
@@ -10296,7 +10294,7 @@ _DBQMCalcExtents(DB_DTPTR2 _coord_arrays, int datatype, int const *min_index,
  *    I removed the unused argument ny.
  *--------------------------------------------------------------------------*/
 INTERNAL int
-_DBSubsetMinMax2(DB_DTPTR1 arr, int datatype, float *amin, float *amax, int nx,
+_DBSubsetMinMax2(void const *arr, int datatype, float *amin, float *amax, int nx,
                  int ixmin, int ixmax, int iymin, int iymax)
 {
     int            k, j, index;
@@ -10366,7 +10364,7 @@ _DBSubsetMinMax2(DB_DTPTR1 arr, int datatype, float *amin, float *amax, int nx,
  *      passed in as void* variables.
  *--------------------------------------------------------------------*/
 INTERNAL int
-UM_CalcExtents(DB_DTPTR2 coord_arrays, int datatype, int ndims, int nnodes,
+UM_CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int nnodes,
                void *min_extents, void *max_extents)
 {
     int            i, j;
@@ -13705,7 +13703,7 @@ DBGetMrgtree(DBfile *dbfile, const char *name)
 PUBLIC int
 DBPutGroupelmap(DBfile *dbfile, const char *name,
     int num_segments, int const *groupel_types, int const *segment_lengths,
-    int const *segment_ids, int const * const *segment_data, void const * const *segment_fracs,
+    int const *segment_ids, int const * const *segment_data, DBVCP2_t segment_fracs,
     int fracs_data_type, DBoptlist const *opts)
 {
     int retval;
@@ -13766,7 +13764,7 @@ DBGetGroupelmap(DBfile *dbfile, const char *name)
 PUBLIC int
 DBPutMrgvar(DBfile *dbfile, const char *name, const char *mrgt_name,
     int ncomps, char const * const *compnames, int nregns, char const * const *reg_pnames,
-    int datatype, void const * const *data, DBoptlist const *opts)
+    int datatype, DBVCP2_t data, DBoptlist const *opts)
 {
     int retval;
 

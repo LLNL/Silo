@@ -57,22 +57,6 @@ product endorsement purposes.
 
 #define LEN(A)	(sizeof(A)/sizeof(A[0]))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int
 main(int argc, char *argv[])
 {
@@ -217,7 +201,7 @@ main(int argc, char *argv[])
             }
 
             /* Typical 2D mesh with obsolete zonelist method */
-            DBPutUcdmesh(dbfile, "mesh1_zl1", pass, coordnames, coords, LEN(x), 11, "zl1",
+            DBPutUcdmesh(dbfile, "mesh1_zl1", pass, (DBCAS_t) coordnames, coords, LEN(x), 11, "zl1",
                 NULL, DB_FLOAT, NULL);
             DBSetDeprecateWarnings(0);
             DBPutZonelist(dbfile, "zl1", 11, 2, nl, LEN(nl), 0, shapesize,
@@ -229,7 +213,7 @@ main(int argc, char *argv[])
                 DB_ZONECENT, NULL);
 
             /* Same as above except using DBPutZonelist2 (newer method) */
-            DBPutUcdmesh(dbfile, "mesh1_zl2", pass, coordnames, coords, LEN(x), 11, "zl2",
+            DBPutUcdmesh(dbfile, "mesh1_zl2", pass, (DBCAS_t) coordnames, coords, LEN(x), 11, "zl2",
                 NULL, DB_FLOAT, NULL);
             DBPutZonelist2(dbfile, "zl2", 11, 2, nl, LEN(nl), 0, 0, 0, shapetype,
                 shapesize2, shapecnt, 5, 0);
@@ -239,7 +223,7 @@ main(int argc, char *argv[])
                 DB_ZONECENT, NULL);
 
             /* Same as above except with some ghost zones */
-            DBPutUcdmesh(dbfile, "mesh1g_zl2", pass, coordnames, coords, LEN(x), 11, "zlg2",
+            DBPutUcdmesh(dbfile, "mesh1g_zl2", pass, (DBCAS_t) coordnames, coords, LEN(x), 11, "zlg2",
                 NULL, DB_FLOAT, NULL);
             DBPutZonelist2(dbfile, "zlg2", 11, 2, nl, LEN(nl), 0, 3, 3, shapetype,
                 shapesize2, shapecnt, 5, 0);
@@ -251,7 +235,7 @@ main(int argc, char *argv[])
             /* same using ph-zonelist of faces only */
             ol = DBMakeOptlist(3);
             DBAddOption(ol, DBOPT_PHZONELIST, "phzl");
-            DBPutUcdmesh(dbfile, "mesh1_phzl", pass, coordnames, coords, LEN(x), 11, 0,
+            DBPutUcdmesh(dbfile, "mesh1_phzl", pass, (DBCAS_t) coordnames, coords, LEN(x), 11, 0,
                 NULL, DB_FLOAT, ol);
             DBFreeOptlist(ol);
             DBPutPHZonelist(dbfile, "phzl", 11, ndcnts_phzl1, LEN(nl_phzl1), nl_phzl1, 0,0,0,0,0,0,0,10,0);
@@ -263,7 +247,7 @@ main(int argc, char *argv[])
             /* same using ph-zonelist with explicit edge list */
             ol = DBMakeOptlist(3);
             DBAddOption(ol, DBOPT_PHZONELIST, "phzl2");
-            DBPutUcdmesh(dbfile, "mesh1_phzl2", pass, coordnames, coords, LEN(x), 11, 0,
+            DBPutUcdmesh(dbfile, "mesh1_phzl2", pass, (DBCAS_t) coordnames, coords, LEN(x), 11, 0,
                 NULL, DB_FLOAT, ol);
             DBFreeOptlist(ol);
             DBPutPHZonelist(dbfile, "phzl2", LEN(nl_phzl2)/2, ndcnts_phzl2, LEN(nl_phzl2), nl_phzl2, 0,
@@ -602,13 +586,13 @@ main(int argc, char *argv[])
         DBSetDir(dbfile, "3D");
     
         /* Use DBPutzonelist and DBPutZonelist2 */
-        DBPutUcdmesh(dbfile, "mesh1", 3, coordnames, coords, nnodes, nzones, "zl1", 0, DB_FLOAT, 0);
+        DBPutUcdmesh(dbfile, "mesh1", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, "zl1", 0, DB_FLOAT, 0);
         DBPutUcdvar1(dbfile, "n1", "mesh1", nvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
         DBPutUcdvar1(dbfile, "z1", "mesh1", zvar, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-        DBPutUcdmesh(dbfile, "mesh2", 3, coordnames, coords, nnodes, nzones, "zl2", 0, DB_FLOAT, 0);
+        DBPutUcdmesh(dbfile, "mesh2", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, "zl2", 0, DB_FLOAT, 0);
         DBPutUcdvar1(dbfile, "n2", "mesh2", nvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
         DBPutUcdvar1(dbfile, "z2", "mesh2", zvar, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
-        DBPutUcdmesh(dbfile, "mesh2g", 3, coordnames, coords, nnodes, nzones, "zl2g", 0, DB_FLOAT, 0);
+        DBPutUcdmesh(dbfile, "mesh2g", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, "zl2g", 0, DB_FLOAT, 0);
         DBPutUcdvar1(dbfile, "n2g", "mesh2g", nvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
         DBPutUcdvar1(dbfile, "z2g", "mesh2g", zvar, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
         {
@@ -670,7 +654,7 @@ main(int argc, char *argv[])
 
         ol = DBMakeOptlist(3);
         DBAddOption(ol, DBOPT_PHZONELIST, "phzl");
-        DBPutUcdmesh(dbfile, "mesh3", 3, coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
+        DBPutUcdmesh(dbfile, "mesh3", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
         DBFreeOptlist(ol);
         DBPutUcdvar1(dbfile, "n3", "mesh3", nvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
         DBPutUcdvar1(dbfile, "z3", "mesh3", zvar2, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);
@@ -682,7 +666,7 @@ main(int argc, char *argv[])
     
         ol = DBMakeOptlist(3);
         DBAddOption(ol, DBOPT_PHZONELIST, "phzl_r");
-        DBPutUcdmesh(dbfile, "mesh3r", 3, coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
+        DBPutUcdmesh(dbfile, "mesh3r", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
         DBFreeOptlist(ol);
         DBPutUcdvar1(dbfile, "n3r", "mesh3r", nvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
         DBPutUcdvar1(dbfile, "z3r", "mesh3r", zvar2, nzones, NULL, 0, DB_FLOAT, DB_ZONECENT, NULL);

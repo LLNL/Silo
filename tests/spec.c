@@ -158,8 +158,8 @@ main(int argc, char *argv[])
     dims[1] = NY + 1;
 
     /* Write out the mesh to the file */
-    DBPutQuadmesh(file, "quad_mesh", (char const * const *) coordnames,
-        (DB_DTPTR2) coordinates, dims, 2, DB_FLOAT, DB_COLLINEAR, NULL);
+    DBPutQuadmesh(file, "quad_mesh", (DBCAS_t) coordnames,
+        coordinates, dims, 2, DB_FLOAT, DB_COLLINEAR, NULL);
 
     /* Set up the material and species information */
 

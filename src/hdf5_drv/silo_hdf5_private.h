@@ -204,14 +204,14 @@ SILO_CALLBACK DBdefvars *db_hdf5_GetDefvars(DBfile *_dbfile, char const *name);
 
 /* Quadmeshes */
 SILO_CALLBACK int db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name,
-                                 char const * const *coordnames, DB_DTPTR2 coords,
+                                 char const * const *coordnames, DBVCP2_t coords,
                                  int const *dims, int ndims, int datatype,
                                  int coordtype, DBoptlist const *optlist);
 SILO_CALLBACK DBquadmesh *db_hdf5_GetQuadmesh (DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname,
                                 int nvars, char const * const *varnames,
-                                DB_DTPTR2 vars, int const *dims,
-                                int ndims, DB_DTPTR2 mixvars,
+                                DBVCP2_t vars, int const *dims,
+                                int ndims, DBVCP2_t mixvars,
                                 int mixlen, int datatype, int centering,
                                 DBoptlist const *optlist);
 SILO_CALLBACK DBquadvar *db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name);
@@ -219,7 +219,7 @@ SILO_CALLBACK DBquadvar *db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name);
 /* Unstructured meshes */
 SILO_CALLBACK int db_hdf5_PutUcdmesh(DBfile *_dbfile, char const *name, int ndims,
                                 char const * const *coordnames,
-                                DB_DTPTR2 coords, int nnodes,
+                                DBVCP2_t coords, int nnodes,
                                 int nzones, char const *zlname, char const *flname,
                                 int datatype, DBoptlist const *optlist);
 SILO_CALLBACK int db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char const *name,
@@ -228,8 +228,8 @@ SILO_CALLBACK int db_hdf5_PutUcdsubmesh(DBfile *_dbfile, char const *name,
 SILO_CALLBACK DBucdmesh *db_hdf5_GetUcdmesh(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname,
                                int nvars, char const * const *varnames,
-                               DB_DTPTR2 vars, int nels,
-                               DB_DTPTR2 mixvars, int mixlen,
+                               DBVCP2_t vars, int nels,
+                               DBVCP2_t mixvars, int mixlen,
                                int datatype, int centering,
                                DBoptlist const *optlist);
 SILO_CALLBACK DBucdvar *db_hdf5_GetUcdvar(DBfile *_dbfile, char const *name);
@@ -282,7 +282,7 @@ SILO_CALLBACK int db_hdf5_PutMaterial(
     int const *mix_next,
     int const *mix_mat,
     int const *mix_zone,
-    DB_DTPTR1 mix_vf,
+    void const *mix_vf,
     int mixlen,
     int datatype,
     DBoptlist const *optlist
@@ -291,18 +291,18 @@ SILO_CALLBACK DBmaterial *db_hdf5_GetMaterial(DBfile *_dbfile, char const *name)
 SILO_CALLBACK int db_hdf5_PutMatspecies(DBfile *_dbfile, char const *name, char const *matname,
                                    int nmat, int const *nmatspec, int const *speclist,
                                    int const *dims, int ndims, int nspecies_mf,
-                                   DB_DTPTR1 species_mf, int const *mix_speclist,
+                                   void const *species_mf, int const *mix_speclist,
                                    int mixlen, int datatype,
                                    DBoptlist const *optlist);
 SILO_CALLBACK DBmatspecies *db_hdf5_GetMatspecies(DBfile *_dbfile, char const *name);
 
 /* Point meshes */
 SILO_CALLBACK int db_hdf5_PutPointmesh(DBfile *_dbfile, char const *name, int ndims,
-                                  DB_DTPTR2 coords, int nels, int datatype,
+                                  DBVCP2_t coords, int nels, int datatype,
                                   DBoptlist const *optlist);
 SILO_CALLBACK DBpointmesh *db_hdf5_GetPointmesh(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_PutPointvar(DBfile *_dbfile, char const *name, char const *meshname,
-                                 int nvars, DB_DTPTR2 vars, int nels,
+                                 int nvars, DBVCP2_t vars, int nels,
                                  int datatype, DBoptlist const *optlist);
 SILO_CALLBACK DBmeshvar *db_hdf5_GetPointvar(DBfile *_dbfile, char const *name);
 

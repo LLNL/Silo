@@ -134,8 +134,8 @@ build_quad(DBfile *dbfile, char *name)
     for (i = 0; i < dims[1]; i++)
         y[i] = (float)i + .1;
 
-    meshid = DBPutQuadmesh(dbfile, name, (char const * const *) coordnames,
-                 (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
+    meshid = DBPutQuadmesh(dbfile, name, (DBCAS_t) coordnames,
+                 coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
 
     varnames[0] = "d";
     vars[0] = d;
@@ -163,8 +163,8 @@ build_quad(DBfile *dbfile, char *name)
     varnames[0] = "u";
     varnames[1] = "v";
 
-    DBPutQuadvar(dbfile, "velocity", name, 2, (char const * const *) varnames,
-        (DB_DTPTR2) vars, dims, ndims, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutQuadvar(dbfile, "velocity", name, 2, (DBCAS_t) varnames,
+        vars, dims, ndims, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     /*
      *  Build material data.
@@ -254,8 +254,8 @@ build_quad3(DBfile *dbfile, char *name)
     for (i = 0; i < dims[2]; i++)
         z[i] = (float)i;
 
-    meshid = DBPutQuadmesh(dbfile, name, (char const * const *) coordnames,
-                 (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
+    meshid = DBPutQuadmesh(dbfile, name, (DBCAS_t) coordnames,
+                 coords, dims, ndims, DB_FLOAT, DB_COLLINEAR, optlist);
 
     varnames[0] = "d";
     vars[0] = d;
@@ -291,8 +291,8 @@ build_quad3(DBfile *dbfile, char *name)
     varnames[1] = "v";
     varnames[2] = "w";
 
-    DBPutQuadvar(dbfile, "velocity", name, 3, (char const * const *) varnames,
-        (DB_DTPTR2) vars, dims, ndims, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
+    DBPutQuadvar(dbfile, "velocity", name, 3, (DBCAS_t) varnames,
+        vars, dims, ndims, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
     /*
      *  Bulid material data.
@@ -448,33 +448,33 @@ build_ucd(DBfile *dbfile, char *name)
     DBPutZonelist(dbfile, "zl", NZONES, 2, znodelist, LZNODELIST, 0,
                         &zshapesize, &zshapecnt, NZSHAPES);
 
-    meshid = DBPutUcdmesh(dbfile, name, 2, (char const * const *) coordnames,
-                 (DB_DTPTR2) coords, NNODES, NZONES, "zl", "fl", DB_FLOAT, NULL);
+    meshid = DBPutUcdmesh(dbfile, name, 2, (DBCAS_t) coordnames,
+                 coords, NNODES, NZONES, "zl", "fl", DB_FLOAT, NULL);
 
     vars[0] = d;
     varnames[0] = "d";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NZONES, NULL, 0, idatatype, DB_ZONECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, NZONES, NULL, 0, idatatype, DB_ZONECENT, NULL);
     vars[0] = u;
     varnames[0] = "u";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = v;
     varnames[0] = "v";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = u;
     varnames[0] = "ucomp";
     vars[1] = v;
     varnames[1] = "vcomp";
 
-    DBPutUcdvar(dbfile, "velocity", name, 2, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
+    DBPutUcdvar(dbfile, "velocity", name, 2, (DBCAS_t) varnames,
+        vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
 
     dims = NZONES;
 
@@ -703,8 +703,8 @@ build_ucd3(DBfile *dbfile, char *name)
     DBPutZonelist(dbfile, "zl", NZONES, 3, znodelist, LZNODELIST, 0,
                         &zshapesize, &zshapecnt, NZSHAPES);
 
-    meshid = DBPutUcdmesh(dbfile, name, 3, (char const * const *) coordnames,
-        (DB_DTPTR2) coords, NNODES, NZONES, "zl", "fl", DB_FLOAT, NULL);
+    meshid = DBPutUcdmesh(dbfile, name, 3, (DBCAS_t) coordnames,
+        coords, NNODES, NZONES, "zl", "fl", DB_FLOAT, NULL);
 
     DBPutMaterial(dbfile, "material", name, 2, matnos, matlist,
                         &dims, 1, NULL, NULL, NULL, NULL, 0, DB_FLOAT,
@@ -713,25 +713,25 @@ build_ucd3(DBfile *dbfile, char *name)
     vars[0] = d;
     varnames[0] = "d";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NZONES, NULL, 0, idatatype, DB_ZONECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, NZONES, NULL, 0, idatatype, DB_ZONECENT, NULL);
     vars[0] = u;
     varnames[0] = "u";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = v;
     varnames[0] = "v";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = w;
     varnames[0] = "w";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = u;
     varnames[0] = "ucomp";
@@ -740,8 +740,8 @@ build_ucd3(DBfile *dbfile, char *name)
     vars[2] = w;
     varnames[2] = "wcomp";
 
-    DBPutUcdvar(dbfile, "velocity", name, 3, (char const * const *) varnames,
-        (DB_DTPTR2) vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
+    DBPutUcdvar(dbfile, "velocity", name, 3, (DBCAS_t) varnames,
+        vars, NNODES, NULL, 0, idatatype, DB_NODECENT, NULL);
 
     return (meshid);
 }
@@ -842,19 +842,19 @@ build_ucd_tri(DBfile *dbfile, char *name)
     DBPutZonelist(dbfile, "zl", nzones, 2, znodelist, lznodelist, 0,
                         &zshapesize, &zshapecnt, nzshapes);
 
-    meshid = DBPutUcdmesh(dbfile, name, 2, (char const * const *) coordnames,
-        (DB_DTPTR2) coords, nnodes, nzones, "zl", "fl", DB_FLOAT, NULL);
+    meshid = DBPutUcdmesh(dbfile, name, 2, (DBCAS_t) coordnames,
+        coords, nnodes, nzones, "zl", "fl", DB_FLOAT, NULL);
 
     vars[0] = d;
     varnames[0] = "d";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, nzones, NULL, 0, idatatype, DB_ZONECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, nzones, NULL, 0, idatatype, DB_ZONECENT, NULL);
     vars[0] = u;
     varnames[0] = "u";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames,
-        (DB_DTPTR2) vars, nnodes, NULL, 0, idatatype, DB_NODECENT, NULL);
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames,
+        vars, nnodes, NULL, 0, idatatype, DB_NODECENT, NULL);
 
     return (meshid);
 }

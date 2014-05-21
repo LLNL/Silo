@@ -992,14 +992,14 @@ test_quadmesh(DBfile *dbfile)
     DBMkDir(dbfile, "/quad");
     DBSetDir(dbfile, "/quad");
 
-    if (DBPutQuadmesh(dbfile, "qm1", NULL, (DB_DTPTR2) coords, dims, 2, DB_FLOAT,
+    if (DBPutQuadmesh(dbfile, "qm1", NULL, coords, dims, 2, DB_FLOAT,
 		      DB_COLLINEAR, NULL)<0) {
 	puts("DBPutQuadmesh(qm1) failed");
 	nerrors++;
     }
 
-    if (DBPutQuadvar(dbfile, "qv1", "qm1", 3, (char const * const *) varnames,
-        (DB_DTPTR2) vars, dims, 2, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL)<0) {
+    if (DBPutQuadvar(dbfile, "qv1", "qm1", 3, (DBCAS_t) varnames,
+        vars, dims, 2, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL)<0) {
 	puts("DBPutQuadmesh(qv1) failed");
 	nerrors++;
     }
@@ -1063,8 +1063,8 @@ test_ucdmesh(DBfile *dbfile)
     DBSetDir(dbfile, "/ucd");
 
     /* Mesh */
-    if (DBPutUcdmesh(dbfile, "um1", ndims, (char const * const *) coordnames,
-           (DB_DTPTR2) coords, nnodes, nzones, "zl1", "fl1", DB_DOUBLE, NULL)<0) {
+    if (DBPutUcdmesh(dbfile, "um1", ndims, (DBCAS_t) coordnames,
+           coords, nnodes, nzones, "zl1", "fl1", DB_DOUBLE, NULL)<0) {
 	puts("DBPutUcdmesh(um1) failed");
 	nerrors++;
     }
@@ -1074,8 +1074,8 @@ test_ucdmesh(DBfile *dbfile)
     }
     
     /* Variable */
-    if (DBPutUcdvar(dbfile, "uv1", "um1", nvars, (char const * const *) varnames,
-        (DB_DTPTR2) vars, nels, (DB_DTPTR2) mixvars, mixlen, DB_FLOAT, DB_NODECENT, NULL)<0) {
+    if (DBPutUcdvar(dbfile, "uv1", "um1", nvars, (DBCAS_t) varnames,
+        vars, nels, mixvars, mixlen, DB_FLOAT, DB_NODECENT, NULL)<0) {
 	puts("DBPutUcdvar(uv1) failed");
 	nerrors++;
     }

@@ -288,7 +288,7 @@ static int WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
     int nzones = zoneClasses.GetNumEntities();
 
     DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
-    DBPutUcdmesh(dbfile, "mesh", 3, coordnames, (DB_DTPTR2) coords, nnodes, nzones, "zl", 0, DB_FLOAT, ol);
+    DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, nnodes, nzones, "zl", 0, DB_FLOAT, ol);
     DBClearOptlist(ol);
 
     vector<int> shapetyp, shapesize, shapecnt;
@@ -368,7 +368,7 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
         coords[1] = &y[0];
         coords[2] = &z[0];
         DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
-        DBPutUcdmesh(dbfile, "mesh", 3, coordnames, (DB_DTPTR2) coords, nnodes2, nzones2, "zl", 0, DB_FLOAT, ol);
+        DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, nnodes2, nzones2, "zl", 0, DB_FLOAT, ol);
         DBClearOptlist(ol);
 
         vector<int> shapetyp, shapesize, shapecnt;

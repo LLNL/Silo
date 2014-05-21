@@ -52,7 +52,6 @@ Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
 
-#warning MAKE THIS CONDITIONAL LATER
 #define HAVE_SILO
 
 #ifdef __sgi    /* IRIX C++ bug */

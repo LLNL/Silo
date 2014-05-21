@@ -170,7 +170,7 @@ build_csg(DBfile *dbfile, char *name)
         pv[0] = (void*) var1_data;
         pname[0] = name1;
 
-        DBPutCsgvar(dbfile, "var1", "csgmesh", 1, (char const * const *) pname,
+        DBPutCsgvar(dbfile, "var1", "csgmesh", 1, (DBCAS_t) pname,
             (void const * const *) pv, 2, DB_DOUBLE, DB_ZONECENT, 0);
 
         DBFreeCsgvar(DBGetCsgvar(dbfile, "var1"));

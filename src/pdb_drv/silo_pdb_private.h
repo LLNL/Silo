@@ -218,13 +218,13 @@ SILO_CALLBACK int db_pdb_PutMaterial(
     int const *mix_next,
     int const *mix_mat,
     int const *mix_zone,
-    DB_DTPTR1 mix_vf,
+    void const *mix_vf,
     int mixlen,
     int datatype,
     DBoptlist const *opts
 );
 SILO_CALLBACK int db_pdb_PutMatspecies (struct DBfile *, char const *, char const *, int,
-				   int const *, int const *, int const *, int, int, DB_DTPTR1,
+				   int const *, int const *, int const *, int, int, void const *,
 				   int const *, int, int, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutMultimesh (DBfile *, char const *, int, char const * const *,
                                   int const *, DBoptlist const *);
@@ -238,21 +238,21 @@ SILO_CALLBACK int db_pdb_PutMultimat (DBfile *, char const *, int, char const * 
 				 DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutMultimatspecies (DBfile *, char const *, int, char const * const *,
 					DBoptlist const *);
-SILO_CALLBACK int db_pdb_PutPointmesh (DBfile *, char const *, int, DB_DTPTR2, int,
+SILO_CALLBACK int db_pdb_PutPointmesh (DBfile *, char const *, int, DBVCP2_t, int,
 				  int, DBoptlist const *);
-SILO_CALLBACK int db_pdb_PutPointvar (DBfile *, char const *, char const *, int, DB_DTPTR2,
+SILO_CALLBACK int db_pdb_PutPointvar (DBfile *, char const *, char const *, int, DBVCP2_t,
 				 int, int, DBoptlist const *);
-SILO_CALLBACK int db_pdb_PutQuadmesh (DBfile *, char const *, char const * const *, DB_DTPTR2,
+SILO_CALLBACK int db_pdb_PutQuadmesh (DBfile *, char const *, char const * const *, DBVCP2_t,
 				 int const *, int, int, int, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutQuadvar (DBfile *, char const *, char const *, int, char const * const *,
-				DB_DTPTR2, int const *, int, DB_DTPTR2, int, int,
+				DBVCP2_t, int const *, int, DBVCP2_t, int, int,
 				int, DBoptlist const *);
-SILO_CALLBACK int db_pdb_PutUcdmesh (DBfile *, char const *, int, char const * const *, DB_DTPTR2,
+SILO_CALLBACK int db_pdb_PutUcdmesh (DBfile *, char const *, int, char const * const *, DBVCP2_t,
 				int, int, char const *, char const *, int, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutUcdsubmesh (DBfile *, char const *, char const *,
 				int, char const *, char const *, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutUcdvar (DBfile *, char const *, char const *, int, char const * const *,
-			       DB_DTPTR2, int, DB_DTPTR2, int, int, int, DBoptlist const *);
+			       DBVCP2_t, int, DBVCP2_t, int, int, int, DBoptlist const *);
 SILO_CALLBACK int db_pdb_PutCsgmesh (DBfile *, char const *, int, int,
                                 int const *, int const *, void const *,int, int,
                                 double const *, char const *, DBoptlist const *);

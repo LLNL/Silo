@@ -463,7 +463,7 @@ build_multi(char *basename, int driver, char *file_ext,
      */
     block_type = DB_UCDMESH;
     if (DBPutMultimesh(dbfile, "mesh1", nblocks,
-                       (char const * const *) (use_ns?0:meshnames),
+                       (DBCAS_t) (use_ns?0:meshnames),
                        use_ns?0:meshtypes, optlist) == -1)
     {
         DBFreeOptlist(optlist);
@@ -472,7 +472,7 @@ build_multi(char *basename, int driver, char *file_ext,
     }
     block_type = DB_UCDVAR;
     sprintf(block_ns, "|/block%%d/d|n");
-    if (DBPutMultivar(dbfile, "d", nblocks, (char const * const *) (use_ns?0:var1names), use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "d", nblocks, (DBCAS_t) (use_ns?0:var1names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -480,7 +480,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/p|n");
-    if (DBPutMultivar(dbfile, "p", nblocks, (char const * const *) (use_ns?0:var2names), use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "p", nblocks, (DBCAS_t) (use_ns?0:var2names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -488,7 +488,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/u|n");
-    if (DBPutMultivar(dbfile, "u", nblocks, (char const * const *) (use_ns?0:var3names), use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "u", nblocks, (DBCAS_t) (use_ns?0:var3names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -496,7 +496,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/v|n");
-    if (DBPutMultivar(dbfile, "v", nblocks, (char const * const *) (use_ns?0:var4names), use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "v", nblocks, (DBCAS_t) (use_ns?0:var4names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -504,7 +504,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/w|n");
-    if (DBPutMultivar(dbfile, "w", nblocks, (char const * const *) (use_ns?0:var5names), use_ns?0:vartypes, optlist)
+    if (DBPutMultivar(dbfile, "w", nblocks, (DBCAS_t) (use_ns?0:var5names), use_ns?0:vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -512,7 +512,7 @@ build_multi(char *basename, int driver, char *file_ext,
         return -1;
     }
     sprintf(block_ns, "|/block%%d/mat1|n");
-    if (DBPutMultimat(dbfile, "mat1", nblocks, (char const * const *) (use_ns?0:matnames), optlist) == -1)
+    if (DBPutMultimat(dbfile, "mat1", nblocks, (DBCAS_t) (use_ns?0:matnames), optlist) == -1)
     {
         DBFreeOptlist(optlist);
         fprintf(stderr, "Error creating multi material\n");
@@ -1084,32 +1084,32 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
             /* 
              * Output the rest of the mesh and variables.
              */
-            DBPutUcdmesh(dbfile, meshname, 3, coordnames, (DB_DTPTR2) coords,
+            DBPutUcdmesh(dbfile, meshname, 3, coordnames, coords,
                          nnodes, nzones, "zl1", nfaces>0?"fl1":0, DB_FLOAT, optlist);
 
             vars[0] = d2;
             varnames[0] = var1name;
-            DBPutUcdvar(dbfile, var1name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
+            DBPutUcdvar(dbfile, var1name, meshname, 1, (DBCAS_t) varnames, vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             vars[0] = p2;
             varnames[0] = var2name;
-            DBPutUcdvar(dbfile, var2name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
+            DBPutUcdvar(dbfile, var2name, meshname, 1, (DBCAS_t) varnames, vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             vars[0] = u2;
             varnames[0] = var3name;
-            DBPutUcdvar(dbfile, var3name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
+            DBPutUcdvar(dbfile, var3name, meshname, 1, (DBCAS_t) varnames, vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             vars[0] = v2;
             varnames[0] = var4name;
-            DBPutUcdvar(dbfile, var4name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
+            DBPutUcdvar(dbfile, var4name, meshname, 1, (DBCAS_t) varnames, vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             vars[0] = w2;
             varnames[0] = var5name;
-            DBPutUcdvar(dbfile, var5name, meshname, 1, (char const * const *) varnames, (DB_DTPTR2) vars,
+            DBPutUcdvar(dbfile, var5name, meshname, 1, (DBCAS_t) varnames, vars,
                         nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, optlist);
 
             DBPutMaterial(dbfile, matname, meshname, nmats, matnos,

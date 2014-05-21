@@ -102,15 +102,15 @@ main(int argc, char *argv[])
 
     coords[0] = row_maj_x_data;
     coords[1] = row_maj_y_data;
-    DBPutQuadmesh(dbfile, "row_major_mesh", 0, (DB_DTPTR2) coords, dims1, ndims, DB_FLOAT, DB_NONCOLLINEAR, 0);
-    DBPutQuadvar1(dbfile, "row_major_var", "row_major_mesh", (DB_DTPTR1) row_maj_v_data, dims, ndims, 0, 0, DB_INT, DB_ZONECENT, 0);
+    DBPutQuadmesh(dbfile, "row_major_mesh", 0, coords, dims1, ndims, DB_FLOAT, DB_NONCOLLINEAR, 0);
+    DBPutQuadvar1(dbfile, "row_major_var", "row_major_mesh", row_maj_v_data, dims, ndims, 0, 0, DB_INT, DB_ZONECENT, 0);
 
     optlist = DBMakeOptlist(1);
     DBAddOption(optlist, DBOPT_MAJORORDER, &colmajor);
     coords[0] = col_maj_x_data;
     coords[1] = col_maj_y_data;
-    DBPutQuadmesh(dbfile, "col_major_mesh", 0, (DB_DTPTR2) coords, dims1, ndims, DB_FLOAT, DB_NONCOLLINEAR, optlist);
-    DBPutQuadvar1(dbfile, "col_major_var", "col_major_mesh", (DB_DTPTR1) col_maj_v_data, dims, ndims, 0, 0, DB_INT, DB_ZONECENT, optlist);
+    DBPutQuadmesh(dbfile, "col_major_mesh", 0, coords, dims1, ndims, DB_FLOAT, DB_NONCOLLINEAR, optlist);
+    DBPutQuadvar1(dbfile, "col_major_var", "col_major_mesh", col_maj_v_data, dims, ndims, 0, 0, DB_INT, DB_ZONECENT, optlist);
     DBFreeOptlist(optlist);
 
     DBClose(dbfile);

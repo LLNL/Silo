@@ -600,22 +600,6 @@ AC_ARG_ENABLE(optimization,
     esac],
     [USING_DEBUG="yes"])
 
-dnl Conform to legacy API where datatype'd pointers are used
-SILO_DTYPPTR="void"
-SILO_DTYPPTR1="void const *"
-SILO_DTYPPTR2="void const * const *"
-AC_ARG_ENABLE(legacy-datatyped-pointers,
-    AC_HELP_STRING([--enable-legacy-datatyped-pointers], 
-        [compile using legacy (float) pointers for datatype'd pointers @<:@default=no@:>@]),
-    if test $enableval = yes; then
-        SILO_DTYPPTR="float"
-        SILO_DTYPPTR1="float*"
-        SILO_DTYPPTR2="float**"
-    fi)
-AC_SUBST(SILO_DTYPPTR)
-AC_SUBST(SILO_DTYPPTR1)
-AC_SUBST(SILO_DTYPPTR2)
-
 dnl Switch to disable score lite memory header optimizations
 AC_ARG_ENABLE(normal-sclite-mem-headers,
     AC_HELP_STRING([--enable-normal-sclite-mem-headers],

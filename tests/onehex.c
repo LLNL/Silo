@@ -277,7 +277,7 @@ main(int argc, char *argv[])
         var[i] = x[i]+y[i]*z[i];
     }
 
-    DBPutUcdmesh(dbfile, "hex", 3, coordnames, (DB_DTPTR2) coords, 8, 1, "zonelist",
+    DBPutUcdmesh(dbfile, "hex", 3, coordnames, coords, 8, 1, "zonelist",
                  "facelist", DB_DOUBLE, NULL);
 
     matnos[0] = 1;
@@ -300,7 +300,7 @@ main(int argc, char *argv[])
 #endif
             var[0] = sqrt((double)-1.0);
     }
-    DBPutUcdvar1(dbfile, "v", "hex", (DB_DTPTR1) var, 8, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
+    DBPutUcdvar1(dbfile, "v", "hex", var, 8, NULL, 0, DB_DOUBLE, DB_NODECENT, NULL);
 
     nodelist[0] = 0;
     nodelist[1] = 1;

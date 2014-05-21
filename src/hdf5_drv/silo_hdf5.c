@@ -8871,7 +8871,7 @@ static int PrepareForQuadmeshCompression()
 /*ARGSUSED*/
 SILO_CALLBACK int
 db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coordnames,
-                    DB_DTPTR2 _coords, int const *dims, int ndims, int datatype,
+                    DBVCP2_t _coords, int const *dims, int ndims, int datatype,
                     int coordtype, DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -8879,7 +8879,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
     int                 i;
     DBquadmesh_mt       m;
     int                 compressionFlags;
-    DB_DTPTR2           coords = _coords;
+    void const * const *coords = (void const * const *) _coords;
 
     FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
@@ -9263,8 +9263,8 @@ PrepareForQuadvarCompression(int centering, int datatype)
 /*ARGSUSED*/
 SILO_CALLBACK int
 db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int nvars,
-                   char const * const *varnames, DB_DTPTR2 _vars,
-                   int const *dims, int ndims, DB_DTPTR2 _mixvars,
+                   char const * const *varnames, DBVCP2_t _vars,
+                   int const *dims, int ndims, DBVCP2_t _mixvars,
                    int mixlen, int datatype, int centering, DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -9273,8 +9273,8 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
     DBquadvar_mt        m;
     int                 i, nels;
     int                 compressionFlags;
-    DB_DTPTR          **vars = (DB_DTPTR**) _vars;
-    DB_DTPTR          **mixvars = (DB_DTPTR**) _mixvars;
+    void const * const    *vars = (void const * const *) _vars;
+    void const * const *mixvars = (void const * const *) _mixvars;
 
     FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
@@ -9676,14 +9676,14 @@ static int PrepareForUcdmeshCompression(DBfile_hdf5 *dbfile,
 /*ARGSUSED*/
 SILO_CALLBACK int
 db_hdf5_PutUcdmesh(DBfile *_dbfile, char const *name, int ndims, char const * const *coordnames,
-                   DB_DTPTR2 _coords, int nnodes, int nzones, char const *zlname,
+                   DBVCP2_t _coords, int nnodes, int nzones, char const *zlname,
                    char const *flname, int datatype, DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutUcdmesh";
     DBucdmesh_mt        m;
     int                 i, compressionFlags;
-    DB_DTPTR2           coords = _coords;
+    void const * const *coords = (void const * const *) _coords;
 
     memset(&_um, 0, sizeof _um);
     memset(&m, 0, sizeof m);
@@ -10237,8 +10237,8 @@ PrepareForUcdvarCompression(DBfile_hdf5 *dbfile, char const *varname,
 /*ARGSUSED*/
 SILO_CALLBACK int
 db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int nvars,
-                  char const * const *varnames, DB_DTPTR2 _vars,
-                  int nels, DB_DTPTR2 _mixvars, int mixlen,
+                  char const * const *varnames, DBVCP2_t _vars,
+                  int nels, DBVCP2_t _mixvars, int mixlen,
                   int datatype, int centering, DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -10247,8 +10247,8 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
     DBucdvar_mt         m;
     int                 i, saved_ndims, saved_nnodes, saved_nzones;
     int                 compressionFlags;
-    DB_DTPTR          **vars = (DB_DTPTR**) _vars;
-    DB_DTPTR          **mixvars = (DB_DTPTR**) _mixvars;
+    void const * const    *vars = (void const * const *) _vars;
+    void const * const *mixvars = (void const * const *) _mixvars;
 
     memset(&m, 0, sizeof m);
 
@@ -11350,7 +11350,7 @@ db_hdf5_PutMaterial(
     int const *mix_next,
     int const *mix_mat,
     int const *mix_zone,
-    DB_DTPTR1 mix_vf,
+    void const *mix_vf,
     int mixlen,
     int datatype,
     DBoptlist const *optlist
@@ -11599,7 +11599,7 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char const *name)
 SILO_CALLBACK int
 db_hdf5_PutMatspecies(DBfile *_dbfile, char const *name, char const *matname, int nmat,
                       int const *nmatspec, int const *speclist, int const *dims, int ndims,
-                      int nspecies_mf, DB_DTPTR1 species_mf, int const *mix_speclist,
+                      int nspecies_mf, void const *species_mf, int const *mix_speclist,
                       int mixlen, int datatype, DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
@@ -13586,14 +13586,14 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
-db_hdf5_PutPointmesh(DBfile *_dbfile, char const *name, int ndims, DB_DTPTR2 _coords,
+db_hdf5_PutPointmesh(DBfile *_dbfile, char const *name, int ndims, DBVCP2_t _coords,
                      int nels, int datatype, DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutPointmesh";
     DBpointmesh_mt      m;
     int                 i;
-    DB_DTPTR          **coords = (DB_DTPTR**) _coords;
+    void const * const *coords = (void const * const *) _coords;
     
     memset(&m, 0, sizeof m);
     PROTECT {
@@ -13852,13 +13852,13 @@ db_hdf5_GetPointmesh(DBfile *_dbfile, char const *name)
  */
 SILO_CALLBACK int
 db_hdf5_PutPointvar(DBfile *_dbfile, char const *name, char const *meshname, int nvars,
-                    DB_DTPTR2 _vars, int nels, int datatype, DBoptlist const *optlist)
+                    DBVCP2_t _vars, int nels, int datatype, DBoptlist const *optlist)
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBpointvar_mt       m;
     int                 i, saved_ndims;
     char               *s = 0;
-    DB_DTPTR          **vars = (DB_DTPTR**) _vars;
+    void const * const *vars = (void const * const *) _vars;
 
     memset(&m, 0, sizeof m);
     PROTECT {

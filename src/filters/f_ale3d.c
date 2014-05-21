@@ -2011,7 +2011,7 @@ f_ale3d_GetUcdvar(DBfile *dbfile, char const *name)
     uv->name = STRDUP(name);
     uv->units = NULL;
     uv->label = NULL;
-    uv->vals = (void **)ALLOC_N(DB_DTPTR1, 1);
+    uv->vals = (void **)ALLOC_N(void*, 1);
     uv->nels = size;
     uv->datatype = DB_FLOAT;
     uv->nvals = 1;

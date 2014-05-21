@@ -184,8 +184,8 @@ SWriteFile(double time, int cycle, int driver)
     DBAddOption(optList, DBOPT_DTIME, &time);
     DBAddOption(optList, DBOPT_CYCLE, &cycle);
     
-    DBPutQuadmesh(dbfile, "quadmesh", (char const * const *) coordnames,
-         (DB_DTPTR2) coords, dims, ndims, DB_FLOAT, DB_NONCOLLINEAR, optList);
+    DBPutQuadmesh(dbfile, "quadmesh", (DBCAS_t) coordnames,
+         coords, dims, ndims, DB_FLOAT, DB_NONCOLLINEAR, optList);
 
     DBPutQuadvar1(dbfile, "pressure", "quadmesh", var, dims, ndims, NULL,
                   0, DB_FLOAT, DB_NODECENT, optList);

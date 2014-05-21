@@ -1182,7 +1182,7 @@ db_taur_GetUcdvar(DBfile *_dbfile, char const *var_name)
 
     if (SILO_Globals.dataReadMask & DBUVData)
     {
-        uv->vals = (void **)ALLOC_N(DB_DTPTR1, 1);
+        uv->vals = (void **)ALLOC_N(void*, 1);
         if (taurus_readvar(taurus, var_name, &(((float **)(uv->vals))[0]), &uv->nels,
                            &uv->centering, meshname) < 0) {
             db_perror("taurus_readvar", E_CALLFAIL, me);

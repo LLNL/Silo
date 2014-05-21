@@ -228,8 +228,8 @@ build_ucd(DBfile *dbfile, char *name)
                         &zshapesize, &zshapecnt, NZSHAPES);
     DBSetDeprecateWarnings(3);
 
-    DBPutUcdmesh(dbfile, name, 2, (char const * const *) coordnames,
-        (DB_DTPTR2) coords, NNODES, NZONES, "zl", NULL, DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, name, 2, (DBCAS_t) coordnames,
+        coords, NNODES, NZONES, "zl", NULL, DB_FLOAT, NULL);
 
     vars[0] = d;
     varnames[0] = "d";
@@ -246,13 +246,13 @@ build_ucd(DBfile *dbfile, char *name)
     vars[0] = u;
     varnames[0] = "u";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames, (DB_DTPTR2) vars, NNODES,
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames, vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = v;
     varnames[0] = "v";
 
-    DBPutUcdvar(dbfile, varnames[0], name, 1, (char const * const *) varnames, (DB_DTPTR2) vars, NNODES,
+    DBPutUcdvar(dbfile, varnames[0], name, 1, (DBCAS_t) varnames, vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
     vars[0] = u;
@@ -260,7 +260,7 @@ build_ucd(DBfile *dbfile, char *name)
     vars[1] = v;
     varnames[1] = "vcomp";
 
-    DBPutUcdvar(dbfile, "velocity", name, 2, (char const * const *) varnames, (DB_DTPTR2) vars, NNODES,
+    DBPutUcdvar(dbfile, "velocity", name, 2, (DBCAS_t) varnames, vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
     /* test writing more than 2 or 3 component variable */
@@ -277,7 +277,7 @@ build_ucd(DBfile *dbfile, char *name)
     vars[5] = v;
     varnames[5] = "vcompm_copy";
 
-    DBPutUcdvar(dbfile, "many_comps", name, 6, (char const * const *) varnames, (DB_DTPTR2) vars, NNODES,
+    DBPutUcdvar(dbfile, "many_comps", name, 6, (DBCAS_t) varnames, vars, NNODES,
                       NULL, 0, idatatype, DB_NODECENT, NULL);
 
 

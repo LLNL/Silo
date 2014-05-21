@@ -189,8 +189,8 @@ main(int argc, char *argv[])
         var[i] = x[i]+y[i]*z[i];
     }
 
-    DBPutUcdmesh(dbfile, "prism", 3, (char const * const *) coordnames,
-        (DB_DTPTR2) coords, 6, 1, "zonelist", "facelist", DB_FLOAT, NULL);
+    DBPutUcdmesh(dbfile, "prism", 3, (DBCAS_t) coordnames,
+        coords, 6, 1, "zonelist", "facelist", DB_FLOAT, NULL);
 
     matnos[0] = 1;
     matlist[0] = 1;

@@ -89,7 +89,7 @@ static int Write_silo(void *buf, size_t nbytes)
         void *coords[3] = {0, 0, 0};
         coords[0] = buf;
         has_mesh = 1;
-        status = DBPutQuadmesh(dbfile, "mesh", coordnames, coords, dims, 1, DB_DOUBLE, DB_COLLINEAR, 0);
+        status = DBPutQuadmesh(dbfile, "mesh", (DBCAS_t) coordnames, coords, dims, 1, DB_DOUBLE, DB_COLLINEAR, 0);
     }
     else
     {

@@ -688,7 +688,7 @@ SILO_API FORTRAN
 DBPUTMAT_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
            int *nmat, int *matnos, int *matlist, int *dims, int *ndims,
-           int *mix_next, int *mix_mat, int *mix_zone, DB_DTPTR1 mix_vf,
+           int *mix_next, int *mix_mat, int *mix_zone, void const *mix_vf,
            int *mixlen, int *datatype, int *optlist_id, int *status)
 {
     int           *mixz = NULL;
@@ -777,7 +777,7 @@ DBPUTMAT_FC (int *dbid, FCD_DB name,
 SILO_API FORTRAN
 DBPUTMSP_FC (int *dbid, FCD_DB name, int *lname, FCD_DB matname, int *lmatname,
            int *nmat, int *nmatspec, int *speclist, int *dims, int *ndims,
-           int *nspecies_mf, DB_DTPTR1 species_mf, int *mix_speclist, int *mixlen,
+           int *nspecies_mf, void const *species_mf, int *mix_speclist, int *mixlen,
            int *datatype, int *optlist_id, int *status)
 {
     char          *nm = NULL, *mnm = NULL;
@@ -1901,12 +1901,12 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
  *
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
-DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPTR1 y,
-          DB_DTPTR1 z, int *nels, int *datatype, int *optlist_id, int *status)
+DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, void const *x, void const *y,
+          void const *z, int *nels, int *datatype, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
     char          *nm = NULL;
-    DB_DTPTR const *coords[3];
+    void const *coords[3];
     DBoptlist     *optlist = NULL;
 
     API_BEGIN("dbputpm", int, -1) {
@@ -1979,7 +1979,7 @@ DBPUTPM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPT
 SILO_API FORTRAN
 DBPUTPV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
-           DB_DTPTR1 var, int *nels, int *datatype, int *optlist_id, int *status)
+           void const *var, int *nels, int *datatype, int *optlist_id, int *status)
 {
     char          *nm = NULL, *mnm = NULL;
     DBfile        *dbfile = NULL;
@@ -2072,13 +2072,13 @@ DBPUTPV1_FC (int *dbid, FCD_DB name,
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTQM_FC (int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
-          FCD_DB yname, int *lyname, FCD_DB zname, int *lzname, DB_DTPTR1 x,
-          DB_DTPTR1 y, DB_DTPTR1 z, int *dims, int *ndims, int *datatype,
+          FCD_DB yname, int *lyname, FCD_DB zname, int *lzname, void const *x,
+          void const *y, void const *z, int *dims, int *ndims, int *datatype,
           int *coordtype, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
     int            i;
-    DB_DTPTR const *coords[3];
+    void const *coords[3];
     char          *coordnames[3], *nm = NULL;
     DBoptlist     *optlist = NULL;
 
@@ -2212,7 +2212,7 @@ DBPUTQM_FC (int *dbid, FCD_DB name, int *lname, FCD_DB xname, int *lxname,
 SILO_API FORTRAN
 DBPUTQV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
-           DB_DTPTR1 var, int *dims, int *ndims, DB_DTPTR1 mixvar, int *mixlen,
+           void const *var, int *dims, int *ndims, void const *mixvar, int *mixlen,
            int *datatype, int *centering, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -2287,7 +2287,7 @@ DBPUTQV1_FC (int *dbid, FCD_DB name,
 SILO_API FORTRAN
 DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
 	    int *nvars, FCD_DB varnames, int* lvarnames,
-	    DB_DTPTR1 vars, int *dims, int *ndims, DB_DTPTR1 mixvar, int *mixlen,
+	    void const *vars, int *dims, int *ndims, void const *mixvar, int *mixlen,
 	    int *datatype, int *centering, int *optlist_id, int *status)
 {
     DBfile        *dbfile = NULL;
@@ -2296,8 +2296,8 @@ DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
     char          **cvarnames = NULL;
     char          *names = NULL;
     int           indx, i, j;
-    DB_DTPTR    **cvars = NULL ;
-    DB_DTPTR    **cmixvar = NULL ;
+    void        **cvars = NULL ;
+    void        **cmixvar = NULL ;
 
     API_BEGIN("dbputqv", int, -1) {
         optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
@@ -2372,28 +2372,28 @@ DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
 	/* Now convert the Fortran data arrays into C arrays of data */
 
 	if ((*(int *)vars) != DB_F77NULL) {
-	  cvars = (void **)malloc(sizeof(DB_DTPTR*) * (*nvars));
+	  cvars = (void **)malloc(sizeof(void*) * (*nvars));
 	  /* Make pointers to Fortran address in vars array */
 	  for (i=0;i<*nvars;i++) {
-	    cvars[i] = (DB_DTPTR*)((char*) vars + i*indx);
+	    cvars[i] = (void*)((char*) vars + i*indx);
 	  }
 	} else {
 	  API_ERROR("vars", E_BADARGS);
 	}
 	if ((*(int *)mixvar) != DB_F77NULL) {
 	  /* Now convert the Fortran data array into a C array of data */
-	  cmixvar = (void **)malloc(sizeof(DB_DTPTR*) * (*nvars));
+	  cmixvar = (void **)malloc(sizeof(void*) * (*nvars));
 	  /* Make pointers to Fortran address in vars array */
 	  for (i=0;i<*nvars;i++) {
-	    cmixvar[i] = (DB_DTPTR*)((char*) mixvar + i*indx);
+	    cmixvar[i] = (void*)((char*) mixvar + i*indx);
 	  }
 	}
 
         dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
 
         *status = DBPutQuadvar(dbfile, cvname, cmname, *nvars,
-                      (char const * const *) cvarnames, (DB_DTPTR2) cvars, dims, *ndims,
-                      (DB_DTPTR2) cmixvar, *mixlen, *datatype, *centering, optlist);
+                      (char const * const *) cvarnames, cvars, dims, *ndims,
+                      cmixvar, *mixlen, *datatype, *centering, optlist);
 
 	/* Remove pointers to pointers arrays */
 	if (cmixvar != NULL) 
@@ -2449,14 +2449,14 @@ DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
  *
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
-DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPTR1 y,
-          DB_DTPTR1 z, FCD_DB xname, int *lxname, FCD_DB yname, int *lyname,
+DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, void const *x, void const *y,
+          void const *z, FCD_DB xname, int *lxname, FCD_DB yname, int *lyname,
           FCD_DB zname, int *lzname, int *datatype, int *nnodes, int *nzones,
           FCD_DB zlname, int *lzlname, FCD_DB flname, int *lflname,
           int *optlist_id, int *status)
 {
     char          *nm = NULL, *zlnm = NULL, *flnm = NULL, *coordnames[3];
-    DB_DTPTR const *coords[3];
+    void const    *coords[3];
     DBfile        *dbfile = NULL;
     DBoptlist     *optlist = NULL;
 
@@ -2621,7 +2621,7 @@ DBPUTUM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, DB_DTPTR1 x, DB_DTPT
 SILO_API FORTRAN
 DBPUTUV1_FC (int *dbid, FCD_DB name,
            int *lname, FCD_DB meshname, int *lmeshname,
-           DB_DTPTR1 var, int *nels, DB_DTPTR1 mixvar, int *mixlen, int *datatype,
+           void const *var, int *nels, void const *mixvar, int *mixlen, int *datatype,
            int *centering, int *optlist_id, int *status)
 {
     char          *nm = NULL, *mnm = NULL;
@@ -3512,7 +3512,7 @@ DBFGETCA_FC (int *dbid, FCD_DB _name, int *lname, void *values, int *nvalues)
  *
  *------------------------------------------------------------------------- */
 SILO_API FORTRAN
-DBPUTCURVE_FC (int *dbid, FCD_DB _name, int *lname, DB_DTPTR1 xvals, DB_DTPTR1 yvals,
+DBPUTCURVE_FC (int *dbid, FCD_DB _name, int *lname, void const *xvals, void const *yvals,
               int *datatype, int *npts, int *optlist_id, int *status)
 {
 

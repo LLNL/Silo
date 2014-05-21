@@ -74,50 +74,42 @@ be used for advertising or product endorsement purposes.
 
 #include <silo_exports.h>
 
-/* Set the base type for datatype'd pointers (that is pointers whose
-   ultimate type is deteremined by an additional 'int datatype' function
-   argument or struct member) as float (legacy) and void (modern). The
-   DB_DTPTR is the base type. The '1' and '2' variants are for singley
-   subscripted and doubley subscripted arrays, respectively. If the
-   definitions of DB_DTPTR below reference 'float', then this silo.h
-   header file was configured with --enable-legacy-datatyped-pointers
-   and it represents the legacy (float) pointers that the silo
-   library has always had since its original writing. If, instead,
-   you see 'void' (the default configuration), then this silo.h header
-   file is using the modern (void) pointers. In that case, note also
-   that because C compiler's often do not handle correctly nor
-   distinguish between a void* and a void**, both the singley and
-   doubley subscripted variants will have only a single star. Rest
-   assured they are still treated as doubley subscripted in the
-   implementation. */
-#define DB_DTPTR  @SILO_DTYPPTR@  /* NO_FORTRAN_DEFINE */
-#define DB_DTPTR1 @SILO_DTYPPTR1@ /* NO_FORTRAN_DEFINE */
-#define DB_DTPTR2 @SILO_DTYPPTR2@ /* NO_FORTRAN_DEFINE */
+/* Why these Void Const Pointer (VCP) typedefs? (see below)... */
+typedef void const *                 DBVCP1_t; /* single level array */
+typedef void const *                 DBVCP2_t; /* double level array */
+typedef void const *                 DBVCP3_t; /* triple level array */
 
-/* Permit client to explicitly require the legacy mode
-   for datatyped pointers */
-#ifdef DB_USE_LEGACY_DTPTR
-#ifdef DB_USE_MODERN_DTPTR
-#error cannot specify BOTH legacy and modern datatyped pointers 
-#endif
-#undef DB_DTPTR  /* NO_FORTRAN_DEFINE */
-#undef DB_DTPTR1 /* NO_FORTRAN_DEFINE */
-#undef DB_DTPTR2 /* NO_FORTRAN_DEFINE */
-#define DB_DTPTR  float   /* NO_FORTRAN_DEFINE */
-#define DB_DTPTR1 float const *  /* NO_FORTRAN_DEFINE */
-#define DB_DTPTR2 float const * const * /* NO_FORTRAN_DEFINE */
-#endif
+/* And not these...
+typedef void const *                 DBVCP1_t;    single level array
+typedef void const * const *         DBVCP2_t;    double level array
+typedef void const * const * const * DBVCP3_t;    triple level array
 
-/* Permit client to explicitly require the modern mode
-   for datatyped pointers */
-#ifdef DB_USE_MODERN_DTPTR
-#undef DB_DTPTR  /* NO_FORTRAN_DEFINE */
-#undef DB_DTPTR1 /* NO_FORTRAN_DEFINE */
-#undef DB_DTPTR2 /* NO_FORTRAN_DEFINE */
-#define DB_DTPTR  void  /* NO_FORTRAN_DEFINE */
-#define DB_DTPTR1 void const * /* NO_FORTRAN_DEFINE */
-#define DB_DTPTR2 void const * const */* NO_FORTRAN_DEFINE */
-#endif
+Ideally, the later typedefs would be used in the Silo API wherever a caller
+needs to pass a single, double or triple level array of arbitrary type.
+
+However, for multi-level arrays (e.g. more than a single star*), if the caller
+doesn't explicitly cast a non-void pointer to the exact type including the
+const qualifiers, the later definitions create obscure and non-intuitive compiler
+warnings for C callers and outright errors for C++ callers.
+
+Basically, as counter-intuitive as it sounds neither C nor C++ compilers can handle
+passing something like a 'double **' as an argument to a function expecting a
+'void const * const *'.
+
+A good reference on this issue for C is http://c-faq.com/ansi/constmismatch.html
+A good reference for C++ is
+http://www.embedded.com/electronics-blogs/programming-pointers/4025641/Qualifiers-in-multilevel-pointers
+
+Therefore, we introduce the DBVCPX_t typedefs, where 'X' is 1, 2 or 3, to
+indicate the number of levels in the array the Silo library is expecting the
+caller to pass. Even though the typedef resolves to a 'void const *' for all
+X, the underlying implementation will wind up treating it as a 'void const *' for
+X=1 (e.g. DBVCP1_t), a 'void const * const *' for X=2 (e.g. DBVCP2_t), etc.
+
+*/
+
+/* For the char-specific to facilitate explicit casts */
+typedef char const * const *         DBCAS_t;
 
 #ifndef FALSE
 #define FALSE   0
@@ -775,8 +767,8 @@ typedef struct DBcurve_ {
     char          *ylabel;      /* Label for y-axis */
     char          *xunits;      /* Units for domain */
     char          *yunits;      /* Units for range  */
-    DB_DTPTR      *x;           /* Domain values for curve */
-    DB_DTPTR      *y;           /* Range  values for curve */
+    void          *x;           /* Domain values for curve */
+    void          *y;           /* Range  values for curve */
     int            npts;        /* Number of points in curve */
     int            guihide;     /* Flag to hide from post-processor's GUI */
     char          *reference;   /* Label to reference object */
@@ -804,7 +796,7 @@ typedef struct DBpointmesh_ {
     char          *labels[3];   /* Labels for each axis */
     char          *title;       /* Title for curve */
 
-    DB_DTPTR      *coords[3];   /* Coordinate values */
+    void          *coords[3];   /* Coordinate values */
     float          time;        /* Problem time */
     double         dtime;       /* Problem time, double data type */
    /*
@@ -1084,7 +1076,7 @@ typedef struct DBquadmesh_ {
     int            facetype;    /* Zone face type: rect, curv */
     int            planar;      /* Sentinel: zones represent area or volume? */
 
-    DB_DTPTR      *coords[3];   /* Mesh node coordinate ptrs [ndims] */
+    void          *coords[3];   /* Mesh node coordinate ptrs [ndims] */
     int            datatype;    /* Type of coordinate arrays (double,float) */
     float          time;        /* Problem time */
     double         dtime;       /* Problem time, double data type */
@@ -1133,7 +1125,7 @@ typedef struct DBucdmesh_ {
     char          *units[3];    /* Units for variable, e.g, 'mm/ms' */
     char          *labels[3];   /* Label associated with each dimension */
 
-    DB_DTPTR      *coords[3];   /* Mesh node coordinates */
+    void          *coords[3];   /* Mesh node coordinates */
     int            datatype;    /* Type of coordinate arrays (double,float) */
     float          time;        /* Problem time */
     double         dtime;       /* Problem time, double data type */
@@ -1185,7 +1177,7 @@ typedef struct DBquadvar_ {
     int            cycle;       /* Problem cycle number */
     int            meshid;      /* Identifier for associated mesh (Deprecated Sep2005) */
 
-    DB_DTPTR     **vals;        /* Array of pointers to data arrays */
+    void         **vals;        /* Array of pointers to data arrays */
     int            datatype;    /* Type of data pointed to by 'val' */
     int            nels;        /* Number of elements in each array */
     int            nvals;       /* Number of arrays pointed to by 'vals' */
@@ -1208,7 +1200,7 @@ typedef struct DBquadvar_ {
     */
     float          align[6];    /* Centering and alignment per dimension */
 
-    DB_DTPTR     **mixvals;     /* nvals ptrs to data arrays for mixed zones */
+    void         **mixvals;     /* nvals ptrs to data arrays for mixed zones */
     int            mixlen;      /* Num of elmts in each mixed zone data
                                  * array */
 
@@ -1241,7 +1233,7 @@ typedef struct DBucdvar_ {
     double         dtime;       /* Problem time, double data type */
     int            meshid;      /* Identifier for associated mesh (Deprecated Sep2005) */
 
-    DB_DTPTR     **vals;        /* Array of pointers to data arrays */
+    void         **vals;        /* Array of pointers to data arrays */
     int            datatype;    /* Type of data pointed to by 'vals' */
     int            nels;        /* Number of elements in each array */
     int            nvals;       /* Number of arrays pointed to by 'vals' */
@@ -1249,7 +1241,7 @@ typedef struct DBucdvar_ {
     int            origin;      /* '0' or '1' */
 
     int            centering;   /* Centering within mesh (nodal or zonal) */
-    DB_DTPTR     **mixvals;     /* nvals ptrs to data arrays for mixed zones */
+    void         **mixvals;     /* nvals ptrs to data arrays for mixed zones */
     int            mixlen;      /* Num of elmts in each mixed zone data
                                  * array */
 
@@ -1277,7 +1269,7 @@ typedef struct DBmeshvar_ {
     int            cycle;       /* Problem cycle number */
     int            meshid;      /* Identifier for associated mesh (Deprecated Sep2005) */
 
-    DB_DTPTR     **vals;        /* Array of pointers to data arrays */
+    void         **vals;        /* Array of pointers to data arrays */
     int            datatype;    /* Type of data pointed to by 'val' */
     int            nels;        /* Number of elements in each array */
     int            nvals;       /* Number of arrays pointed to by 'vals' */
@@ -1340,7 +1332,7 @@ typedef struct DBmaterial_ {
     int           *matlist;     /* Array[nzone] w/ mat. number or mix index */
     int            mixlen;      /* Length of mixed data arrays (mix_xxx) */
     int            datatype;    /* Type of volume-fractions (double,float) */
-    DB_DTPTR      *mix_vf;      /* Array [mixlen] of volume fractions */
+    void          *mix_vf;      /* Array [mixlen] of volume fractions */
     int           *mix_next;    /* Array [mixlen] of mixed data indeces */
     int           *mix_mat;     /* Array [mixlen] of material numbers */
     int           *mix_zone;    /* Array [mixlen] of back pointers to mesh */
@@ -1367,7 +1359,7 @@ typedef struct DBmatspecies_ {
     int            stride[3];   /* Offsts to adjacent elmts in 'speclist'  */
 
     int            nspecies_mf; /* Total number of species mass fractions. */
-    DB_DTPTR      *species_mf;  /* Array of length nspecies_mf of mass
+    void          *species_mf;  /* Array of length nspecies_mf of mass
                                  * frations of the material species. */
     int           *speclist;    /* Zone array of dimensions described by ndims
                                  * and dims.  Each element of the array is an
@@ -1688,28 +1680,28 @@ typedef struct DBfile_pub {
     int            (*p_ma)(struct DBfile *dbfile, char const *name, char const *meshname,
                        int nmat, int const *matnos, int const *matlist, int const *dims,
                        int ndims, int const *mix_next, int const *mix_mat, int const *mix_zone,
-                       DB_DTPTR1 mix_vf, int mixlen, int datatype, DBoptlist const *);
+                       DBVCP1_t mix_vf, int mixlen, int datatype, DBoptlist const *);
     int            (*p_ms)(struct DBfile *, char const *, char const *, int, int const *, int const *,
-                       int const *, int, int, DB_DTPTR1, int const *, int, int, DBoptlist const *);
+                       int const *, int, int, DBVCP1_t, int const *, int, int, DBoptlist const *);
     int            (*p_mm)(struct DBfile *, char const *, int, char const * const *, int const *,
                        DBoptlist const *);
     int            (*p_mv)(struct DBfile *, char const *, int, char const * const *, int const *,
                        DBoptlist const *);
     int            (*p_mt)(struct DBfile *, char const *, int, char const * const *, DBoptlist const *);
     int            (*p_mms)(struct DBfile *, char const *, int, char const * const *, DBoptlist const *);
-    int            (*p_pm)(struct DBfile *, char const *, int, DB_DTPTR2, int, int, DBoptlist const *);
-    int            (*p_pv)(struct DBfile *, char const *, char const *, int, DB_DTPTR2, int,
+    int            (*p_pm)(struct DBfile *, char const *, int, DBVCP2_t, int, int, DBoptlist const *);
+    int            (*p_pv)(struct DBfile *, char const *, char const *, int, DBVCP2_t, int,
                        int, DBoptlist const *);
-    int            (*p_qm)(struct DBfile *, char const *, char const * const *, DB_DTPTR2, int const *,
+    int            (*p_qm)(struct DBfile *, char const *, char const * const *, DBVCP2_t, int const *,
                        int, int, int, DBoptlist const *);
-    int            (*p_qv)(struct DBfile *, char const *, char const *, int, char const * const *, DB_DTPTR2,
-                       int const *, int, DB_DTPTR2, int, int, int, DBoptlist const *);
-    int            (*p_um)(struct DBfile *, char const *, int, char const * const *, DB_DTPTR2,
+    int            (*p_qv)(struct DBfile *, char const *, char const *, int, char const * const *, DBVCP2_t,
+                       int const *, int, DBVCP2_t, int, int, int, DBoptlist const *);
+    int            (*p_um)(struct DBfile *, char const *, int, char const * const *, DBVCP2_t,
                        int, int, char const *, char const *, int, DBoptlist const *);
     int            (*p_sm)(struct DBfile *, char const *, char const *,
                        int, char const *, char const *, DBoptlist const *);
     int            (*p_uv)(struct DBfile *, char const *, char const *, int, char const * const *,
-                       DB_DTPTR2, int, DB_DTPTR2, int, int, int, DBoptlist const *);
+                       DBVCP2_t, int, DBVCP2_t, int, int, int, DBoptlist const *);
     int            (*p_zl)(struct DBfile *, char const *, int, int, int const *, int, int,
                        int const *, int const *, int);
     int            (*p_zl2)(struct DBfile *, char const *, int, int, int const *, int, int,
@@ -1851,8 +1843,7 @@ SILO_API extern int                    DBGuessHasFriendlyHDF5Names(DBfile *f);
 SILO_API extern int                    DBInqVarExists(DBfile *, char const *);
 SILO_API extern int                    DBUninstall(DBfile *);
 SILO_API extern int                    DBFreeCompressionResources(DBfile *dbfile, char const *meshname);
-SILO_API extern int                    DBSortObjectsByOffset(DBfile *, int nobjs,
-                                           char const * const *obj_names, int *ranks);
+SILO_API extern int                    DBSortObjectsByOffset(DBfile *, int nobjs, char const * const *obj_names, int *ranks);
 SILO_API extern int                    DBFilters(DBfile *, FILE *);
 SILO_API extern int                    DBFilterRegistration(char const *, int (*init) (DBfile *, char *),
                                            int (*open) (DBfile *, char *));
@@ -1999,30 +1990,30 @@ SILO_API extern int                    DBPutFacelist(DBfile *dbfile, char const 
                                            int const *shapecnt, int nshapes, int const *types, int const *typelist, int ntypes);
 SILO_API extern int                    DBPutMaterial(DBfile *dbfile, char const *name, char const *meshname, int nmat,
                                            int const *matnos, int const *matlist, int const *dims, int ndims,
-                                           int const *mix_next, int const *mix_mat, int const *mix_zone, DB_DTPTR1 mix_vf,
+                                           int const *mix_next, int const *mix_mat, int const *mix_zone, DBVCP1_t mix_vf,
                                            int mixlen, int datatype, DBoptlist const *opts);
 SILO_API extern int                    DBPutMatspecies(struct DBfile *dbfile, char const *name, char const *matnam,
                                            int nmat, int const *nmatspec, int const *speclist, int const *dims,
-                                           int ndims, int nspecies_mf, DB_DTPTR1 species_mf, int const *mix_speclist,
+                                           int ndims, int nspecies_mf, DBVCP1_t species_mf, int const *mix_speclist,
                                            int mixlen, int datatype, DBoptlist const *optlist);
-SILO_API extern int                    DBPutPointmesh(DBfile *, char const *, int, DB_DTPTR2, int, int, DBoptlist const *);
-SILO_API extern int                    DBPutPointvar(DBfile *, char const *, char const *, int, DB_DTPTR2, int, int,
+SILO_API extern int                    DBPutPointmesh(DBfile *, char const *, int, DBVCP2_t, int, int, DBoptlist const *);
+SILO_API extern int                    DBPutPointvar(DBfile *, char const *, char const *, int, DBVCP2_t, int, int,
                                            DBoptlist const *);
-SILO_API extern int                    DBPutPointvar1(DBfile *, char const *, char const *, DB_DTPTR1, int, int,
+SILO_API extern int                    DBPutPointvar1(DBfile *, char const *, char const *, DBVCP1_t, int, int,
                                            DBoptlist const *);
-SILO_API extern int                    DBPutQuadmesh(DBfile *, char const *, char const * const *, DB_DTPTR2, int const *, int,
+SILO_API extern int                    DBPutQuadmesh(DBfile *, char const *, char const * const *, DBVCP2_t, int const *, int,
                                            int, int, DBoptlist const *);
-SILO_API extern int                    DBPutQuadvar(DBfile *, char const *, char const *, int, char const * const *, DB_DTPTR2,
-                                           int const *, int, DB_DTPTR2, int, int, int, DBoptlist const *);
-SILO_API extern int                    DBPutQuadvar1(DBfile *, char const *, char const *, DB_DTPTR1, int const *, int,
-                                           DB_DTPTR1, int, int, int, DBoptlist const *);
-SILO_API extern int                    DBPutUcdmesh(DBfile *, char const *, int, char const * const *, DB_DTPTR2, int,
+SILO_API extern int                    DBPutQuadvar(DBfile *, char const *, char const *, int, char const * const *, DBVCP2_t,
+                                           int const *, int, DBVCP2_t, int, int, int, DBoptlist const *);
+SILO_API extern int                    DBPutQuadvar1(DBfile *, char const *, char const *, DBVCP1_t, int const *, int,
+                                           DBVCP1_t, int, int, int, DBoptlist const *);
+SILO_API extern int                    DBPutUcdmesh(DBfile *, char const *, int, char const * const *, DBVCP2_t, int,
                                            int, char const *, char const *, int, DBoptlist const *);
 SILO_API extern int                    DBPutUcdsubmesh(DBfile *, char const *, char const *, int,
                                            char const *, char const *, DBoptlist const *);
-SILO_API extern int                    DBPutUcdvar(DBfile *, char const *, char const *, int, char const * const *, DB_DTPTR2,
-                                           int, DB_DTPTR2, int, int, int, DBoptlist const *);
-SILO_API extern int                    DBPutUcdvar1(DBfile *, char const *, char const *, DB_DTPTR1, int, DB_DTPTR1,
+SILO_API extern int                    DBPutUcdvar(DBfile *, char const *, char const *, int, char const * const *, DBVCP2_t,
+                                           int, DBVCP2_t, int, int, int, DBoptlist const *);
+SILO_API extern int                    DBPutUcdvar1(DBfile *, char const *, char const *, DBVCP1_t, int, DBVCP1_t,
                                            int, int, int, DBoptlist const *);
 SILO_API extern int                    DBPutZonelist(DBfile *, char const *, int, int, int const *, int, int,
                                            int const *, int const *, int);
@@ -2036,7 +2027,7 @@ SILO_API extern int                    DBPutCSGZonelist(DBfile *, char const *, 
                                            int const *, int const *, void const *, int, int, int, int const *,
                                            DBoptlist const *);
 SILO_API extern int                    DBPutCsgvar(DBfile *, char const *, char const *, int, char const * const *,
-                                           void const * const *, int, int, int, DBoptlist const *);
+                                           DBVCP2_t, int, int, int, DBoptlist const *);
 
 /* Part Assemblies, AMR, Slide Surfaces, Nodesets and Other Arbitrary Mesh Subsets */
 SILO_API extern void                   DBPrintMrgtree(DBmrgtnode *tnode, int walk_order, void *data);
@@ -2056,11 +2047,11 @@ SILO_API extern int                    DBPutMrgtree(DBfile *dbfile, char const *
                                            DBmrgtree const *tree, DBoptlist const *opts);
 SILO_API extern int                    DBPutMrgvar(DBfile *dbfile, char const *name, char const *mrgt_name,
 			                   int ncomps, char const * const *compnames, int nregns,
-                                           char const * const *reg_pnames, int datatype, void const * const *data,
+                                           char const * const *reg_pnames, int datatype, DBVCP2_t data,
                                            DBoptlist const *opts);
 SILO_API extern int                    DBPutGroupelmap(DBfile *dbfile, char const *map_name, int num_segments,
                                            int const *groupel_types, int const *segment_lengths, int const *segment_ids,
-                                           int const * const *segment_data, void const * const *segment_fracs,
+                                           int const * const *segment_data, DBVCP2_t segment_fracs,
                                            int fracs_data_type, DBoptlist const *opts);
 SILO_API extern DBmrgtree *            DBGetMrgtree(DBfile *dbfile, char const *mrg_tree_name);
 SILO_API extern DBgroupelmap *         DBGetGroupelmap(DBfile *dbfile, char const *name);
@@ -2111,5 +2102,6 @@ SILO_API extern char *                 _db_safe_strdup(const char *);
 #ifdef __cplusplus
 }
 #endif
+
 #undef NO_FORTRAN_DEFINE
 #endif /* !SILO_H */

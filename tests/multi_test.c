@@ -302,8 +302,8 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutUcdmesh(F,MN,NDS,(char const * const *) CNMS,        \
-            (DB_DTPTR2) CS,NNS,NZS,ZLNM,FLNM,DTYPE,OL)==0);              \
+        ASSERT(DBPutUcdmesh(F,MN,NDS,(DBCAS_t) CNMS,        \
+            CS,NNS,NZS,ZLNM,FLNM,DTYPE,OL)==0);                          \
     }                                                                    \
 }
 
@@ -336,8 +336,8 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutQuadmesh(F,MN,(char const * const *) CNMS,           \
-            (DB_DTPTR2) CS,DS,NDS,DTYPE,CTYPE,OL)==0);    \
+        ASSERT(DBPutQuadmesh(F,MN,(DBCAS_t) CNMS,           \
+            CS,DS,NDS,DTYPE,CTYPE,OL)==0);                               \
     }                                                                    \
 }
 
@@ -370,7 +370,7 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutPointmesh(F,MN,NDS,(DB_DTPTR2)CS,NPTS,DTYPE,OL)==0); \
+        ASSERT(DBPutPointmesh(F,MN,NDS,CS,NPTS,DTYPE,OL)==0);            \
     }                                                                    \
 }
 
@@ -400,8 +400,8 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutUcdvar(F,VN,MN,NV,(char const * const *)VNMS,        \
-            (DB_DTPTR2) VP,NVALS,MXVALS,MXLEN,DTYPE,CENT,OL)==0);        \
+        ASSERT(DBPutUcdvar(F,VN,MN,NV,(DBCAS_t)VNMS,        \
+            VP,NVALS,MXVALS,MXLEN,DTYPE,CENT,OL)==0);                    \
     }                                                                    \
 }
 
@@ -463,7 +463,7 @@ static int check_struct(char *struct1, char *struct2, size_t struct_size, ...)
     }                                                                    \
     else                                                                 \
     {                                                                    \
-        ASSERT(DBPutPointvar(F,VN,MN,NV,(DB_DTPTR2)VP,NPTS,DTYPE,OL)==0);\
+        ASSERT(DBPutPointvar(F,VN,MN,NV,VP,NPTS,DTYPE,OL)==0);           \
     }                                                                    \
 }
 
@@ -1222,7 +1222,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     /* create the multi-block variables */
     extentssize = 2;
     SET_OPTIONS(extentssize,varextents[3],NULL,NULL,NULL,NULL,NULL);
-    if (DBPutMultivar(dbfile, "d", nblocks, (char const * const *) var1names, vartypes, optlist)
+    if (DBPutMultivar(dbfile, "d", nblocks, (DBCAS_t) var1names, vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -1230,7 +1230,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* if */
     SET_OPTIONS(extentssize,varextents[4],NULL,NULL,NULL,NULL,NULL);
-    if (DBPutMultivar(dbfile, "p", nblocks, (char const * const *) var2names, vartypes, optlist)
+    if (DBPutMultivar(dbfile, "p", nblocks, (DBCAS_t) var2names, vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -1238,7 +1238,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* if */
     SET_OPTIONS(extentssize,varextents[5],NULL,NULL,NULL,NULL,NULL);
-    if (DBPutMultivar(dbfile, "u", nblocks, (char const * const *) var3names, vartypes, optlist)
+    if (DBPutMultivar(dbfile, "u", nblocks, (DBCAS_t) var3names, vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -1246,7 +1246,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         return (-1);
     }                                  /* if */
     SET_OPTIONS(extentssize,varextents[6],NULL,NULL,NULL,NULL,NULL);
-    if (DBPutMultivar(dbfile, "v", nblocks, (char const * const *) var4names, vartypes, optlist)
+    if (DBPutMultivar(dbfile, "v", nblocks, (DBCAS_t) var4names, vartypes, optlist)
         == -1)
     {
         DBFreeOptlist(optlist);
@@ -1256,7 +1256,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     if (dim == 3)
     {
         SET_OPTIONS(extentssize,varextents[7],NULL,NULL,NULL,NULL,NULL);
-        if (DBPutMultivar(dbfile, "w", nblocks, (char const * const *) var5names, vartypes, optlist)
+        if (DBPutMultivar(dbfile, "w", nblocks, (DBCAS_t) var5names, vartypes, optlist)
             == -1)
         {
             DBFreeOptlist(optlist);
@@ -1277,7 +1277,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     SET_OPTIONS(extentssize,NULL,NULL,mixlens,matcounts,tmpList,NULL);
     if (meshtype != DB_POINTMESH)
     {
-        if (DBPutMultimat(dbfile, "mat1", nblocks, (char const * const *) matnames, optlist) == -1)
+        if (DBPutMultimat(dbfile, "mat1", nblocks, (DBCAS_t) matnames, optlist) == -1)
         {
             DBFreeOptlist(optlist);
             fprintf(stderr, "Error creating multi material\n");
@@ -1292,7 +1292,7 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
             char *matrnames[3] = {"outer","middle","inner"};
             DBAddOption(optlist, DBOPT_MATCOLORS, colors);
             DBAddOption(optlist, DBOPT_MATNAMES, matrnames);
-            if (DBPutMultimat(dbfile, "mat2", nblocks, (char const * const *) matnames, optlist) == -1)
+            if (DBPutMultimat(dbfile, "mat2", nblocks, (DBCAS_t) matnames, optlist) == -1)
             {
                 DBFreeOptlist(optlist);
                 fprintf(stderr, "Error creating multi material\n");
@@ -1334,8 +1334,8 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
         sprintf(defns[2], "nmats(mat1)");
         pdefns[2] = defns[2];
 
-        DBPutDefvars(dbfile, "defvars", ndefs, (char const * const *) pvnames, types,
-            (char const * const *) pdefns, 0);
+        DBPutDefvars(dbfile, "defvars", ndefs, (DBCAS_t) pvnames, types,
+            (DBCAS_t) pdefns, 0);
     }
 
     return (0);

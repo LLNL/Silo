@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
   db=DBCreate(filename, DB_CLOBBER, DB_LOCAL,
               "Mixed zone 3d test", driver);
 
-  DBPutQuadmesh(db, "mesh", coordnames, (DB_DTPTR2) coord, dims, 3, 
+  DBPutQuadmesh(db, "mesh", coordnames, coord, dims, 3, 
                 DB_FLOAT, DB_NONCOLLINEAR, NULL);
 
   dims[0]=zx;

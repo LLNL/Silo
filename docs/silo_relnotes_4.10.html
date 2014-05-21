@@ -22,6 +22,8 @@ https://wci.llnl.gov/codes/silo/media/pdf/LLNL-SM-XXXXXX.pdf</a></li>
   <li>Important information regarding this release.</li>
   <li>Bugs fixed in this release.</li>
   <li>New features in this release.</li>
+  <li>Removal of Legacy Datatype'd pointers.</li>
+  <li>Const qualification and multi-level arrays.</li>
 </ol>
 
 <h3>1. Important information regarding this release.</h3>
@@ -69,7 +71,7 @@ https://wci.llnl.gov/codes/silo/media/pdf/LLNL-SM-XXXXXX.pdf</a></li>
 
 </ul>
 
-<h3>4. New features in this release</h3>
+<h3>3. New features in this release</h3>
 <ul>
 <li>The entire Silo interface has been const-qualified where appropriate.</li>
 <li>It is now possible for PDBLite API to be exported publicly as part of a Silo installation. Use the --enable-install-lite-headers configuration option to enable this. This frees applications which have been using PDBLite interface for some time to have to maintain their own CPP mapping macros.</li>
@@ -87,5 +89,14 @@ https://wci.llnl.gov/codes/silo/media/pdf/LLNL-SM-XXXXXX.pdf</a></li>
 <li>DBVersionGEFileVersion was added to compare library version with file version.</li>
 <li>JSON support was added to Silo using the <a href="https://github.com/json-c/json-c">json-c</a> library. This interface permits Silo applications to manipulate their Silo objects as JSON objects. The implementation includes extensions to json-c for efficient handling of problem-sized array data in Silo objects. This interface should be considered experimental and is likely to change, perhaps in dramatic ways, in future releases.</li>
 <li>Improved display of character array data in silex.</li>
+<li>netCDF driver was enabled on Windows.</li>
 </ul>
+
+<h3>4. Removal of Legacy Datatype'd pointers.</h3>
+The configuration option --enable-legacy-datatyped-pointers has been eliminated along with the convenience macros DB_DTPTRx (for x=1, 2 and 3).
+
+If you have been in the habit of using the --enable-legacy-datatyped-pointers configuration option and are wondering what will
+happen when you try to use Silo 4.10 in your application, the most likely biggest issue you will face is to remove cases where
+have cast certain array arguments in Silo calls to (float**)ZZ
+
 </body></html>

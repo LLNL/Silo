@@ -293,8 +293,8 @@ build_ucd3(DBfile *dbfile, char *name)
     coordnames[1] = "Y";
     coordnames[2] = "Z";
 
-    meshid = DBPutUcdmesh(dbfile, name, 3, (char const * const *) coordnames,
-                 (DB_DTPTR2) coords, NNODES, NZONES, "zl", "fl", DB_FLOAT, NULL);
+    meshid = DBPutUcdmesh(dbfile, name, 3, (DBCAS_t) coordnames,
+                 coords, NNODES, NZONES, "zl", "fl", DB_FLOAT, NULL);
 
      /*--------------------------------------------------
       *  Write out the material data.

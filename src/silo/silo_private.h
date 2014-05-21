@@ -896,11 +896,11 @@ INTERNAL int db_ListDir2 (DBfile *, char **, int, int, char **,
                               int *);
 INTERNAL int CSGM_CalcExtents (int, int, int, const int*,
                                  const void *, double *, double *);
-INTERNAL int _DBQMCalcExtents (DB_DTPTR2, int, int const *, int const *, int const *, int,
+INTERNAL int _DBQMCalcExtents (DBVCP2_t, int, int const *, int const *, int const *, int,
                                    int, void *, void *);
-INTERNAL int UM_CalcExtents (DB_DTPTR2, int, int, int, void *,
+INTERNAL int UM_CalcExtents (DBVCP2_t, int, int, int, void *,
                                  void *);
-INTERNAL int _DBSubsetMinMax2 (DB_DTPTR1, int, float *, float *, int,
+INTERNAL int _DBSubsetMinMax2 (DBVCP1_t, int, float *, float *, int,
                                    int, int, int, int);
 INTERNAL int _DBSubsetMinMax3 (float *, int, float *, float *, int, int,
                                int, int, int, int, int, int);
