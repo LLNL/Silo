@@ -12338,7 +12338,8 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
             case ';':
             {
                 strList[i++] = '\0';
-                strArray[n++] = &strList[i];
+                if (strList[i] != '\0')
+                    strArray[n++] = &strList[i];
                 if (hasColon && s)
                 {
                     int j;
@@ -12377,7 +12378,7 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
         i++;
     }
 
-    if (n != nblocks + add1)
+    if (n != nblocks-1 + add1)
     {
         free(strList);
         free(strArray);
