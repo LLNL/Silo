@@ -12375,12 +12375,12 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
                 break;
             }
         }
-        i++;
+        if (strList[i] != '\0')
+            i++;
     }
 
-    if (n != nblocks-1 + add1)
+    if (n != nblocks)
     {
-        free(strList);
         free(strArray);
         return db_perror("incorrect number of block names", E_INTERNAL, me);
     }

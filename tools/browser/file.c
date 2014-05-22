@@ -2932,6 +2932,8 @@ file_diff (obj_t a, obj_t b)
                         }
                         break;
                     case DIFF_REP_SUMMARY:
+                        free(atoc);
+                        free(btoc);
                         return 1;
                     }
                 } else if (Verbosity>=2) {
@@ -2966,6 +2968,8 @@ file_diff (obj_t a, obj_t b)
                         }
                         break;
                     case DIFF_REP_SUMMARY:
+                        free(atoc);
+                        free(btoc);
                         return 1;
                     }
                 } else if (Verbosity>=2) {
@@ -3004,7 +3008,12 @@ file_diff (obj_t a, obj_t b)
 
                     if (status) {
                         ndiff++;
-                        if (DIFF_REP_SUMMARY==DiffOpt.report) return 1;
+                        if (DIFF_REP_SUMMARY==DiffOpt.report)
+                        {
+                            free(atoc);
+                            free(btoc);
+                            return 1;
+                        }
                     }
                 }
             } else if (Verbosity>=2) {
@@ -3054,6 +3063,8 @@ file_diff (obj_t a, obj_t b)
                         aobj = obj_dest (aobj);
                         bobj = obj_dest (bobj);
                         out_progress(NULL);
+                        free(atoc);
+                        free(btoc);
                         return 1;
                     }
                     break;
@@ -3070,6 +3081,8 @@ file_diff (obj_t a, obj_t b)
     }
 
     out_progress (NULL);
+    free(atoc);
+    free(btoc);
     return ndiff ? 1 : 0;
 }
 

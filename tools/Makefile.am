@@ -63,6 +63,9 @@ endif
 if SILEX_NEEDED
 TOOLS_DIR += silex
 endif
+if JSON_NEEDED
+TOOLS_DIR += json
+endif
 SUBDIRS = \
  . \
  $(TOOLS_DIR)

@@ -12034,8 +12034,8 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name)
     int                 _objtype;
     DBmultimesh_mt      m;
     DBmultimesh         *mm=NULL;
-    char                *s=NULL;
     char                *t=NULL;
+    char                *meshnames=NULL;
 
     PROTECT {
         /* Open object and make sure it's a multimesh */
@@ -12091,8 +12091,8 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name)
         mm->zonecounts =  (int *)db_hdf5_comprd(dbfile, m.zonecounts, 1);
         mm->has_external_zones =  (int *)db_hdf5_comprd(dbfile, m.has_external_zones, 1);
         mm->meshtypes = (int *)db_hdf5_comprd(dbfile, m.meshtypes, 1);
-        s = (char *)db_hdf5_comprd(dbfile, m.meshnames, 1);
-        db_StringListToStringArrayMBOpt(s, &(mm->meshnames), &(mm->meshnames_alloc), m.nblocks);
+        meshnames = (char *)db_hdf5_comprd(dbfile, m.meshnames, 1);
+        db_StringListToStringArrayMBOpt(meshnames, &(mm->meshnames), &(mm->meshnames_alloc), m.nblocks);
         mm->groupings =  (int *)db_hdf5_comprd(dbfile, m.groupings, 1);
         t = (char *)db_hdf5_comprd(dbfile, m.groupnames, 1);
         if (t) mm->groupnames = DBStringListToStringArray(t, &(mm->lgroupings), !skipFirstSemicolon);
@@ -12112,7 +12112,6 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name)
         } H5E_END_TRY;
         DBFreeMultimesh(mm);
         FREE(t);
-        FREE(s);
     } END_PROTECT;
     return mm;
 }
@@ -12889,6 +12888,7 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char const *name)
     DBmultivar_mt       m;
     DBmultivar          *mv=NULL;
     char                *s=NULL;
+    char                *mvnames=NULL;
 
     PROTECT {
         /* Open object and make sure it's a multivar */
@@ -12936,8 +12936,8 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char const *name)
         mv->vartypes = (int *)db_hdf5_comprd(dbfile, m.vartypes, 1);
 
         /* Read the raw data variable names */
-        s = (char *)db_hdf5_comprd(dbfile, m.varnames, 1);
-        db_StringListToStringArrayMBOpt(s, &(mv->varnames), &(mv->varnames_alloc), m.nvars);
+        mvnames = (char *)db_hdf5_comprd(dbfile, m.varnames, 1);
+        db_StringListToStringArrayMBOpt(mvnames, &(mv->varnames), &(mv->varnames_alloc), m.nvars);
 
         s = (char *)db_hdf5_comprd(dbfile, m.region_pnames, 1);
         if (s) mv->region_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
@@ -13178,7 +13178,7 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
     int                 _objtype;
     DBmultimat_mt       m;
     DBmultimat          *mm=NULL;
-    char                *s=NULL;
+    char                *matnames=NULL;
 
     PROTECT {
         /* Open object and make sure it's a multimat */
@@ -13222,8 +13222,8 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
         mm->matcounts = (int *)db_hdf5_comprd(dbfile, m.matcounts, 1);
         mm->matlists = (int *)db_hdf5_comprd(dbfile, m.matlists, 1);
         mm->matnos = (int *)db_hdf5_comprd(dbfile, m.matnos, 1);
-        s = (char *)db_hdf5_comprd(dbfile, m.matnames, 1);
-        db_StringListToStringArrayMBOpt(s, &(mm->matnames), &(mm->matnames_alloc), m.nmats);
+        matnames = (char *)db_hdf5_comprd(dbfile, m.matnames, 1);
+        db_StringListToStringArrayMBOpt(matnames, &(mm->matnames), &(mm->matnames_alloc), m.nmats);
 
         if (m.nmatnos > 0) {
             char *tmpmaterial_names = (char *)db_hdf5_comprd(dbfile, m.material_names, 1);
@@ -13252,7 +13252,6 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
             H5Tclose(o);
         } H5E_END_TRY;
         DBFreeMultimat(mm);
-        FREE(s);
     } END_PROTECT;
     return mm;
 }
@@ -13463,7 +13462,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
     int                 _objtype, i, nstrs=0;
     DBmultimatspecies_mt m;
     DBmultimatspecies   *mm=NULL;
-    char                *s=NULL;
+    char                *specnames=NULL;
 
     PROTECT {
         /* Open object and make sure it's a multimatspecies */
@@ -13502,8 +13501,8 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
         mm->nmatspec = (int *)db_hdf5_comprd(dbfile, m.nmatspec, 1);
 
         /* Read the raw data */
-        s = (char *)db_hdf5_comprd(dbfile, m.specnames, 1);
-        db_StringListToStringArrayMBOpt(s, &(mm->specnames), &(mm->specnames_alloc), m.nspec);
+        specnames = (char *)db_hdf5_comprd(dbfile, m.specnames, 1);
+        db_StringListToStringArrayMBOpt(specnames, &(mm->specnames), &(mm->specnames_alloc), m.nspec);
         
         if (mm->nmat > 0 && mm->nmatspec) {
             char *tmpspecies_names = (char *)db_hdf5_comprd(dbfile, m.species_names, 1);
@@ -13542,7 +13541,6 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
             H5Tclose(o);
         } H5E_END_TRY;
         DBFreeMultimatspecies(mm);
-        FREE(s);
     } END_PROTECT;
     return mm;
 }

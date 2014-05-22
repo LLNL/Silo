@@ -49,7 +49,6 @@
 # reflect those  of the United  States Government or  Lawrence Livermore
 # National  Security, LLC,  and shall  not  be used  for advertising  or
 # product endorsement purposes.
-set -x
 
 # -----------------------------------------------------------------------------
 # Test hzip compression capability in silo by generating compressed data
@@ -82,7 +81,7 @@ fi
 $topDir/multi_test DB_HDF5 hzip 1>/dev/null 2>&1
 rm -rf h5_hzip_files
 mkdir h5_hzip_files
-mv *.h5 h5_hzip_files/.
+mv multi_*d.h5 h5_hzip_files/.
 
 #
 # Create data without compression 
@@ -114,7 +113,7 @@ done
 #
 # Cleanup
 #
-#rm -rf h5_hzip_files
-#rm -f testhzip.out
+rm -rf h5_hzip_files
+rm -f testhzip.out
 
 exit $result 

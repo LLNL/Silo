@@ -53,3 +53,6 @@
 ## Procss this file with automake to create Makefile.in
 
 EXTRA_DIST = json-c-0.10.tar.gz jsonify_silo_example.c
+
+distclean-local:
+	rm -rf json-c-0.10

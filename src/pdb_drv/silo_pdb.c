@@ -1095,6 +1095,7 @@ PJ_ReadVariable(PDBfile *file,
          {
             if (act_datatype == DB_CHAR)
             {
+printf("Allocating %d chars\n", num);
                 *var = ALLOC_N (char, (num+1) * size);
                 (*var)[num] = '\0';
             }

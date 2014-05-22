@@ -227,7 +227,13 @@ struct json_object *
 json_object_new_strptr(void *p)
 {
     static char tmp[32];
-    snprintf(tmp, sizeof(tmp), "%-.16p", p);
+    if (sizeof(p) == sizeof(unsigned))
+        snprintf(tmp, sizeof(tmp), "0x%016x", (unsigned) p);
+    else if (sizeof(p) == sizeof(unsigned long))
+        snprintf(tmp, sizeof(tmp), "0x%016lx", (unsigned long) p);
+    else if (sizeof(p) == sizeof(unsigned long long))
+        snprintf(tmp, sizeof(tmp), "0x%016llx", (unsigned long long) p);
+
     return json_object_new_string(tmp);
 }
 
@@ -236,8 +242,10 @@ json_object_get_strptr(struct json_object *o)
 {
     void *p;
     char const *strptr = json_object_get_string(o);
-    sscanf(strptr, "%p", &p);
-    return p;
+    if (sscanf(strptr, "%p", &p) == 1)
+        return p;
+    else
+        return 0;
 }
 
 struct json_object *

@@ -55,217 +55,6 @@ dnl Mar 18, 1996
 dnl
 dnl Modifications:
 dnl
-dnl     Robb Matzke, 5 Mar 1997
-dnl     Replaced `touch X' with `echo something > X' because touch doesn't
-dnl     update the mtime when touching an empty file on some old BSD systems
-dnl     (and neither do other commands that open an empty file for read/write
-dnl     access).
-dnl
-dnl     Robb Matzke, 6 Mar 1997
-dnl     Added checks for `-lXpm' and `-lXext' needed by meshtv and meshtvx.
-dnl
-dnl     Robb Matzke, 19 Mar 1997
-dnl     Added a check for a site configuration file based on the host
-dnl     name.  If `hostname` returns X, then the configuration file
-dnl     ./cofig-site/X.conf is sourced.  The file contains envronment
-dnl     variable settings which would have normally appeared on the
-dnl     command line so that when make reruns configure the appropriate
-dnl     variables are set.  For instance, when I work on maya.nuance.mdn.com
-dnl     I use the GNU gcc compiler and I want to turn on warnings and generate
-dnl     debug tables.  This is done by adding the line
-dnl
-dnl           export CFLAGS="-Wall -g"
-dnl
-dnl     to the ./config-site/maya.nuance.mdn.com.conf file.  These personal
-dnl     site configuration files should not be part of a distribution.
-dnl
-dnl     Robb Matzke, 20 Mar 1997
-dnl     The builtin `pwd' command fails on some systems, so we use
-dnl     `/bin/pwd' instead if available.
-dnl
-dnl     Robb Matzke, 20 Mar 1997
-dnl     Added the `-f /dev/null' option to the GNU make test in case
-dnl     a valid makefile accidently exists.
-dnl
-dnl     Robb Matzke, 2 Apr 1997
-dnl     Removed the AC_FUNC_MMAP check since nothing uses it.
-dnl
-dnl     Robb Matzke, 15 May 1997
-dnl     Removed OS_TYPE as a config.h constant since it was never added to
-dnl     acconfig.h anyway.
-dnl
-dnl     Quincey Koziol, 15 May 1997
-dnl     Added link checking for FreeBSD.
-dnl
-dnl     Sean Ahern, 18 June 1997
-dnl     Added the ability to have a config-site configuration file that is
-dnl     named the same as the operating system.  Configure now checks
-dnl     automatically for this (using uname(1)).  For example, I added
-dnl     config-site/OSF1.conf for DEC machines.  Any configuration needed for
-dnl     that operating system should go in that file.
-dnl
-dnl     Robb Matzke, 19 Jun 1997
-dnl     Changed the default from `test -L' to `test -h'.
-dnl
-dnl	Robb Matzke, 27 Aug 1997
-dnl	Added -I/usr/local/include and -L/usr/local/lib to the compile
-dnl	command so we have a better chance of finding the readline
-dnl	library.
-dnl
-dnl     Robb Matzke, 23 Dec 1997
-dnl	Added ability to turn off checking for the GNU readline since lots
-dnl     of systems have the software but it's misconfigured, causing
-dnl     configure to detect it's presence and causing make to fail.  Say
-dnl     `--without-readline' to turn detection off.
-dnl
-dnl	Robb Matzke, 4 Feb 1998
-dnl	Combined GNU target file with non-GNU target file and put the results
-dnl	in include/make-targets.in with the other targets.
-dnl
-dnl     Eric Brugger, Wed Aug 12 15:50:27 PDT 1998
-dnl     I made the libraries load static on Linux since most people do not
-dnl     have Motif.  Added a check for the Motif includes and libraries
-dnl     being found without an explicit include or lib path and added one
-dnl     one if it didn't work.  I changed the CPPFLAGS and LDFLAGS to
-dnl     append /usr/local/include and /usr/local/lib instead of setting it
-dnl     if they weren't already set.  I modified LDFLAGS to contain $tmplib
-dnl     at the beginning so that libraries will be found in the local lib
-dnl     directory before the public lib directories.
-dnl
-dnl     Eric Brugger, Thu Aug 13 13:18:43 PDT 1998
-dnl     I corrected a bug with the checking of the knowledge of the Motif
-dnl     libraries where the test always returned false.
-dnl
-dnl     Eric Brugger, Fri Aug 28 16:43:46 PDT 1998
-dnl     I added support for parallel meshtv.
-dnl
-dnl     Sean Ahern, Wed Dec  2 11:29:54 PST 1998
-dnl     Added a check for "clearmake".  If we're running clearmake,
-dnl     set the verbosity to 0.  Also, create a line for the
-dnl     compile target in the Makefiles so that clearmake only
-dnl     winks in object files that have been created on the same OS
-dnl     type.
-dnl
-dnl     Eric Brugger, Mon Dec 28 09:51:18 PST 1998
-dnl     I removed checks for basename and dirname.  The behavior of both
-dnl     is poorly defined and varies between OSes.  We could check for a
-dnl     specific behavior and then use the system one in that case that
-dnl     is a lot of work when using our own is much simpler.
-dnl
-dnl	Robb Matzke, Tue Feb  9 10:38:54 EST 1999
-dnl	Check for location of hdf5 headers and libraries.
-dnl
-dnl	Robb Matzke, Tue Mar  2 16:35:48 EST 1999
-dnl	Check for location of vbt, dsl, and dmf headers and libraries.
-dnl
-dnl     Eric Brugger, Mon Mar 15 11:39:40 PST 1999
-dnl     Made the silo netcdf, pdb and taurus drivers optional.
-dnl
-dnl	Mark Miller, Thu Mar 25 17:11:34 PST 1999
-dnl     Made dmf and hdf5 drivers optional as Eric did above
-dnl
-dnl     Jeremy Meredith, Thu May 20 15:56:45 PDT 1999
-dnl     Added a check for a site config with the first field of hostname
-dnl     removed.  This allows a single site config for node-addressable
-dnl     machines such as the IBM SP2.  Also reordered the hostname and
-dnl     OSname config checks so that a single machine can override the
-dnl     OS-based default configuration.
-dnl
-dnl     Brad Whitlock, Wed Jun 23 15:30:34 PST 1999
-dnl     Added a check for the VDL libraries. If the environment variable
-dnl     "VDL" is set, then the CFLAGS of meshtvx and Spi are modified
-dnl     to include -DVDL and -I$(VDL)/include and -L$(VDL)/lib.
-dnl
-dnl     Jeremy Meredith, Tue Jul 27 18:27:37 PDT 1999
-dnl     Added code to clear MPI_LIBS if we did not --enable-parallel.
-dnl
-dnl     Eric Brugger, Wed Aug 11 13:11:45 PDT 1999
-dnl     I removed the check for -lXpm.  I modified the script to only
-dnl     check for -lXext on Linux.  I modified the script to only check
-dnl     for -lnsl and -lsocket on Solaris.
-dnl
-dnl     Brad Whitlock, Wed Jul 7 15:29:45 PST 1999
-dnl     Added a check for parallel when the VDL libraries are being 
-dnl     checked. If parallel is enabled at that time, then the VDLP
-dnl     driver will be compiled.
-dnl
-dnl     Eric Brugger, Fri Oct  8 14:12:27 PDT 1999
-dnl     I added a check for -lXp on Linux.
-dnl
-dnl     Brad Whitlock, Fri Nov 5 14:53:17 PST 1999
-dnl     Removed the GL driver from SpiLib.
-dnl
-dnl     Jeremy Meredith, Thu Nov 11 13:35:02 PST 1999
-dnl     Added ability to have dynamic libraries on Linux systems.
-dnl
-dnl     Brad Whitlock, Thu Oct 14 10:23:34 PDT 1999
-dnl     Added build target for the spectrum widget.
-dnl
-dnl     Jeremy Meredith and Sean Ahern, Mon Dec 13 14:24:28 PST 1999
-dnl     Allow override of MPI_LIBS by external configuration.
-dnl
-dnl     Jeremy Meredith, Fri Jan  7 10:19:39 PST 2000
-dnl     Check for existence of Mesa.  If it's not there: error if we need it,
-dnl     don't try to build it if we don't need it.
-dnl
-dnl     Brad Whitlock, Thu Feb 17 15:17:41 PST 2000
-dnl     I added -lpt to the meshtvx link line when using VDL. This makes
-dnl     meshtv work with the new VDL library.
-dnl
-dnl     Sean Ahern, Mon Jan 10 16:26:31 PST 2000
-dnl     I put in logic to read the version number in from a file.
-dnl
-dnl     Brad Whitlock, Thu Feb 10 16:47:50 PST 2000
-dnl     Added --disable-sdx flag. Also added a variable called
-dnl     tflops_override which will be set to yes on TFLOPS systems.
-dnl     (ASCI Red) This bypasses some function tests. Added --disable_gui
-dnl     flag. This disables all X and motif stuff from meshtvx and Spi.
-dnl     Added --disable-browser so it does not have to be compiled.
-dnl
-dnl     Brad Whitlock, Fri Mar 31 16:41:33 PST 2000
-dnl     Fixed a bug that caused a parallel compiler to be used all the time
-dnl     on some platforms.
-dnl
-dnl     Eric Brugger, Mon May 15 12:02:59 PDT 2000
-dnl     I changed references of -lpt to -lptutil to account for the name
-dnl     change of the library.
-dnl
-dnl     Mark Miller, Wed Aug 23 15:38:27 PDT 2000 
-dnl     I changed the logic for lib hdf5 to deal correctly with presence or
-dnl     absence of zlib. 
-dnl
-dnl     Eric Brugger, Fri Apr  6 17:52:30 PDT 2001
-dnl     I added -lXext to the meshtvx link line when using VDL. This makes
-dnl     meshtv work with the new VDL library.
-dnl
-dnl     Brad Whitlock, Tue Jan 22 16:42:30 PST 2002
-dnl     I added options for building JPEG support.
-dnl
-dnl     Eric Brugger, Tue Mar 12 10:44:02 PST 2002
-dnl     I made the tests for jpeg and glr support more robust.  I also added
-dnl     a check which adds the dynamic link library (-ldl) on Linux.
-dnl
-dnl     Jeremy Meredith, Wed Apr 24 11:17:24 PDT 2002
-dnl     I changed the SunOS linker flags for the jpeg library.
-dnl
-dnl     Mark Miller, Tue Oct  1 12:27:07 PDT 2002
-dnl     I removed the old dmf-driver checks 
-dnl	I fixed the check for hdf5 libs to only change $LIB if HDF5 was
-dnl	requested AND found.
-dnl	I removed the checks for GLR
-dnl
-dnl     Eric Brugger, Fri Nov  8 15:15:26 PST 2002
-dnl     I removed the logic that statically loaded the libraries on Linux
-dnl     systems.
-dnl
-dnl     Eric Brugger, Thu Dec  5 13:27:13 PST 2002 
-dnl     I reordered some of the tests to avoid a problem with hdf5 and the
-dnl     size tests.
-dnl
-dnl     Eric Brugger, Thu Sep  4 13:05:39 PDT 2003
-dnl     I corrected a bug with --without-exodus not disabling the exodus
-dnl     driver.
-dnl
 dnl     Eric Brugger, Tue Mar  2 12:41:32 PST 2004
 dnl     I modified the hdf5 library logic to statically link the hdf5
 dnl     library to avoid LD_LIBRARY_PATH problems and having to distribute
@@ -752,29 +541,34 @@ AC_ARG_ENABLE(json,
     if test "$enable_json" = "yes"; then
         AC_MSG_CHECKING(Enabling json...)
         if test -e ${ac_abs_confdir}/tools/json/json-c-0.10.tar.gz; then
-            if test ! -e ./tools/json; then
-                mkdir tools 1>/dev/null 2>&1
-                mkdir tools/json 1>/dev/null 2>&1
-            fi
-            pushd tools/json 1>/dev/null 2>&1
-            rm -rf json-c-0.10
-            gunzip < ${ac_abs_confdir}/tools/json/json-c-0.10.tar.gz | tar xf -
-            cd json-c-0.10
-            if test ! "${prefix}" = "NONE"; then
-                ./configure --prefix=${prefix}/json
-                make install
+            if test -z "$(find tools/json/json-c-0.10 -name libjson.so -o -name libjson.a -o -name libjson.dylib)"; then
+                if test ! -e ./tools/json; then
+                    mkdir tools 1>/dev/null 2>&1
+                    mkdir tools/json 1>/dev/null 2>&1
+                fi
+                pushd tools/json 1>/dev/null 2>&1
+                rm -rf json-c-0.10
+                gunzip < ${ac_abs_confdir}/tools/json/json-c-0.10.tar.gz | tar xf -
+                cd json-c-0.10
+                if test ! "${prefix}" = "NONE"; then
+                    ./configure --prefix=${prefix}/json
+                    make install
+                else
+                    ./configure
+                    make
+                fi
+                if test $? -eq 0; then
+                    AC_MSG_RESULT(json-c compiled and installed)
+                    JSON="json"
+                else
+                    AC_MSG_RESULT(JSON support disabled due to failure to install)
+                    JSON=""
+                fi
+                popd 1>/dev/null 2>&1
             else
-                ./configure
-                make
-            fi
-            if test $? -eq 0; then
                 AC_MSG_RESULT(json-c compiled and installed)
                 JSON="json"
-            else
-                AC_MSG_RESULT(JSON support disabled due to failure to install)
-                JSON=""
             fi
-            popd 1>/dev/null 2>&1
         else
             AC_MSG_RESULT(JSON support not available because json-c distribution is not in this tarball)
             JSON=""
@@ -1269,7 +1063,7 @@ else
 fi
 
 AC_ARG_WITH(pdb-proper,
-    AC_HELP_STRING([--with-pdb-proper],[directory where PDB proper is installed @<:@default=no@:>@]),
+    AC_HELP_STRING([--with-pdb-proper],[Turns on PDB proper driver by specifying directory where PDB proper is installed @<:@default=no@:>@]),
     if test $withval != yes; then
         PDBP_DRV="pdbp_drv"
         AC_DEFINE(HAVE_PDBP_DRIVER,1,[Support for PDB Proper])

@@ -167,6 +167,7 @@ public:
   }
   ~IBSTREAMzlib()
   {
+    inflateEnd(&zstream);
     delete[] in;
     delete[] out;
     if (ibstream)
