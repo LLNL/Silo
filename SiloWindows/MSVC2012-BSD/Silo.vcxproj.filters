@@ -66,6 +66,9 @@
     <Filter Include="Source Files\netcdf">
       <UniqueIdentifier>{b32bd034-316c-4299-9839-7d2be066ae55}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\netcdf">
+      <UniqueIdentifier>{a912ddf3-dd06-417f-a708-bc075541a3d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\silo\silo_ns.c">
@@ -219,6 +222,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\debug\silo_debug_private.h">
       <Filter>Header Files\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\netcdf\silo_netcdf_private.h">
+      <Filter>Header Files\netcdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\netcdf\table.h">
+      <Filter>Header Files\netcdf</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

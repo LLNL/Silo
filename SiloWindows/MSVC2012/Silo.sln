@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Silo", "Silo.vcxproj", "{3A796AF3-3578-B923-4A26-3E27F5305DC9}"
 	ProjectSection(ProjectDependencies) = postProject

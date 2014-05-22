@@ -9,10 +9,10 @@ set gp=(version.exe namescheme.exe point.exe empty.exe extface.exe testall.exe T
 
 
 :: copy necessary dlls to this executable directory
-if not exist .\silohdf5.dll  copy %buildDir%\silohdf5.dll .
-if not exist .\hdf5dll.dll   copy %HDF5_LIB_DIR%\hdf5dll.dll 
-if not exist .\zlib1.dll     copy %ZLIB_LIB_DIR%\zlib1.dll .
-if not exist .\szlibdll.dll  copy %SZIP_LIB_DIR%\szlibdll.dll .
+::if not exist .\silohdf5.dll  copy %buildDir%\silohdf5.dll .
+::if not exist .\hdf5.dll   copy %HDF5_BIN_DIR%\hdf5.dll 
+::if not exist .\zlib.dll     copy %ZLIB_LIB_DIR%\zlib.dll .
+::if not exist .\szlibdll.dll  copy %SZIP_LIB_DIR%\szlibdll.dll .
 
 if exist %resultsfile% (del %resultsfile%)
 

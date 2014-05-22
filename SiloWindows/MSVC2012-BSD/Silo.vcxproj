@@ -201,6 +201,8 @@
     <ClInclude Include="..\..\src\filters\filter.h" />
     <ClInclude Include="..\..\src\hdf5_drv\H5FDsilo.h" />
     <ClInclude Include="..\..\src\hdf5_drv\silo_hdf5_private.h" />
+    <ClInclude Include="..\..\src\netcdf\silo_netcdf_private.h" />
+    <ClInclude Include="..\..\src\netcdf\table.h" />
     <ClInclude Include="..\..\src\pdb\pdb.h" />
     <ClInclude Include="..\..\src\pdb_drv\silo_pdb_private.h" />
     <ClInclude Include="..\..\src\score\score.h" />

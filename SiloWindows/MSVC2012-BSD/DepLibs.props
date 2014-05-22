@@ -2,18 +2,20 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <HDF5_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.7\include</HDF5_INC_DIR>
-    <HDF5_INC_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.7\include</HDF5_INC_DIR_X64>
-    <HDF5_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.7\lib</HDF5_LIB_DIR>
-    <HDF5_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.7\lib</HDF5_LIB_DIR_X64>
-    <SZIP_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\szip\2.0\include</SZIP_INC_DIR>
-    <SZIP_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\szip\2.0\lib</SZIP_LIB_DIR>
-    <SZIP_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\szip\2.0\lib</SZIP_LIB_DIR_X64>
-    <ZLIB_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\zlib\1.2.8\include</ZLIB_INC_DIR>
-    <ZLIB_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\zlib\1.2.8\lib</ZLIB_LIB_DIR>
+    <HDF5_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012\hdf5\1.8.12\include</HDF5_INC_DIR>
+    <HDF5_INC_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.12\include</HDF5_INC_DIR_X64>
+    <HDF5_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012\hdf5\1.8.12\lib</HDF5_LIB_DIR>
+    <HDF5_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.12\lib</HDF5_LIB_DIR_X64>
+    <HDF5_BIN_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012\hdf5\1.8.12\bin</HDF5_BIN_DIR>
+    <HDF5_BIN_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\hdf5\1.8.12\bin</HDF5_BIN_DIR_X64>
+    <SZIP_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012\szip\2.1\include</SZIP_INC_DIR>
+    <SZIP_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012\szip\2.1\lib</SZIP_LIB_DIR>
+    <SZIP_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\szip\2.1\lib</SZIP_LIB_DIR_X64>
+    <ZLIB_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012\zlib\1.2.8\include</ZLIB_INC_DIR>
+    <ZLIB_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012\zlib\1.2.8\lib</ZLIB_LIB_DIR>
     <ZLIB_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\zlib\1.2.8\lib</ZLIB_LIB_DIR_X64>
     <QT_INC_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\Qt\4.8.3\include</QT_INC_DIR>
-    <QT_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\Qt\4.8.3\lib</QT_LIB_DIR>
+    <QT_LIB_DIR>C:\A_VisIt\trunk\windowsbuild\MSVC2012\Qt\4.8.3\lib</QT_LIB_DIR>
     <QT_LIB_DIR_X64>C:\A_VisIt\trunk\windowsbuild\MSVC2012-x64\Qt\4.8.3\lib</QT_LIB_DIR_X64>
   </PropertyGroup>
   <PropertyGroup />

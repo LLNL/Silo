@@ -1,11 +1,11 @@
 @echo off
-set HDF5_IN=%1\hdf5dll.dll
-set ZLIB_IN=%2\zlib1.dll
+set HDF5_IN=%1\hdf5.dll
+set ZLIB_IN=%2\zlib.dll
 set SZIP_IN=%3\szlibdll.dll
 set SILO_IN=%4\silohdf5.dll
 
-set HDF5_OUT=%5\hdf5dll.dll
-set ZLIB_OUT=%5\zlib1.dll
+set HDF5_OUT=%5\hdf5.dll
+set ZLIB_OUT=%5\zlib.dll
 set SZIP_OUT=%5\szlibdll.dll
 set SILO_OUT=%5\silohdf5.dll
 

@@ -91,12 +91,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>CopyTestDependencies.bat $(HDF5_LIB_DIR) $(ZLIB_LIB_DIR) $(SZIP_LIB_DIR) $(SolutionDir)..\$(Platform)\$(Configuration) $(SolutionDir)..\bin</Command>
+      <Command>CopyTestDependencies.bat $(HDF5_BIN_DIR) $(ZLIB_LIB_DIR) $(SZIP_LIB_DIR) $(SolutionDir)..\$(Platform)\$(Configuration) $(SolutionDir)..\bin</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Command>CopyTestDependencies.bat $(HDF5_LIB_DIR_X64) $(ZLIB_LIB_DIR_X64) $(SZIP_LIB_DIR_X64) $(SolutionDir)..\$(Platform)\$(Configuration) $(SolutionDir)..\bin</Command>
+      <Command>CopyTestDependencies.bat $(HDF5_BIN_DIR_X64) $(ZLIB_LIB_DIR_X64) $(SZIP_LIB_DIR_X64) $(SolutionDir)..\$(Platform)\$(Configuration) $(SolutionDir)..\bin</Command>
     </PreBuildEvent>
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
@@ -104,12 +104,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>CopyTestDependencies.bat $(HDF5_LIB_DIR) $(ZLIB_LIB_DIR) $(SZIP_LIB_DIR) $(SolutionDir)..\$(Platform)\$(Configuration) $(SolutionDir)..\bin</Command>
+      <Command>CopyTestDependencies.bat $(HDF5_BIN_DIR) $(ZLIB_LIB_DIR) $(SZIP_LIB_DIR) $(SolutionDir)..\$(Platform)\$(Configuration) $(SolutionDir)..\bin</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Command>CopyTestDependencies.bat $(HDF5_LIB_DIR_X64) $(ZLIB_LIB_DIR_X64) $(SZIP_LIB_DIR_X64) $(SolutionDir)..\$(Platform)\$(Configuration) $(SolutionDir)..\bin</Command>
+      <Command>CopyTestDependencies.bat $(HDF5_BIN_DIR_X64) $(ZLIB_LIB_DIR_X64) $(SZIP_LIB_DIR_X64) $(SolutionDir)..\$(Platform)\$(Configuration) $(SolutionDir)..\bin</Command>
     </PreBuildEvent>
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
