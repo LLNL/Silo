@@ -1092,7 +1092,17 @@ PJ_ReadVariable(PDBfile *file,
          if (forcing)
             *var = ALLOC_N (char, num * sizeof(float));
          else
-            *var = ALLOC_N (char, num * size);
+         {
+            if (act_datatype == DB_CHAR)
+            {
+                *var = ALLOC_N (char, (num+1) * size);
+                (*var)[num] = '\0';
+            }
+            else
+            {
+                *var = ALLOC_N (char, num * size);
+            }
+         }
 
          alloced = 1;
       }
