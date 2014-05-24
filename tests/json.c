@@ -193,6 +193,7 @@ main(int argc, char *argv[])
     json_object_to_file("onehex.json", jsilo_obj);
     json_object_put(jsilo_obj);
     fil_obj = json_object_from_file("onehex.json");
+    json_object_reconstitute_extptrs(fil_obj);
     printf("fil_obj=%s\n", json_object_to_json_string(fil_obj));
 
     jstuff = json_object_new_object();

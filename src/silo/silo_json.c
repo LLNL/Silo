@@ -477,6 +477,103 @@ json_object_to_binary_file(char const *filename, struct json_object *obj)
     return 0;
 }
 
+int
+json_object_reconstitute_extptrs(struct json_object *obj)
+{
+    struct json_object_iter jiter;
+
+    json_object_object_foreachC(obj, jiter)
+    {
+        struct json_object *ptr_obj, *datatype_obj, *ndims_obj, *dims_obj, *data_obj;
+
+        struct json_object *mobj = jiter.val;
+        char const *mname = jiter.key;
+
+        if (json_object_get_type(mobj) != json_type_object)
+            continue;
+
+        if (!(json_object_object_get_ex(mobj, "ptr", &ptr_obj ) &&
+              json_object_object_get_ex(mobj, "datatype", &datatype_obj) &&
+              json_object_object_get_ex(mobj, "ndims", &ndims_obj) &&
+              json_object_object_get_ex(mobj, "dims", &dims_obj) &&
+              json_object_object_get_ex(mobj, "data", &data_obj)))
+        {
+            json_object_reconstitute_extptrs(mobj);
+            continue;
+        }
+
+        if (!(json_object_get_type(ptr_obj) == json_type_string &&
+              json_object_get_type(datatype_obj) == json_type_int &&
+              json_object_get_type(ndims_obj) == json_type_int &&
+              json_object_get_type(dims_obj) == json_type_array &&
+              json_object_get_type(data_obj) == json_type_array))
+        {
+            json_object_reconstitute_extptrs(mobj);
+            continue;
+        }
+
+        /* We're at an extptr object that was serialized to a 'standard' json string.
+         * So, lets reconstitute it. */
+        {
+            int i, n = 1;
+            int datatype = json_object_get_int(datatype_obj);
+            int ndims = json_object_get_int(ndims_obj);
+            int *dims = (int *) malloc(ndims * sizeof(int));
+            int jdtype = json_object_get_type(json_object_array_get_idx(data_obj, 0));
+            char *p;
+            void *pdata;
+
+            /* get the array dimension sizes */
+            for (i = 0; i < ndims; i++)
+            {
+                dims[i] = json_object_get_int(json_object_array_get_idx(dims_obj, i));
+                n *= dims[i];
+            }
+
+            /* get the array data */
+            pdata = (void *) malloc(n * db_GetMachDataSize(datatype));
+            for (i = 0, p = pdata; i < n; i++, p += db_GetMachDataSize(datatype))
+            {
+                switch (jdtype)
+                {
+                    case json_type_int:
+                    {
+                        int ival = json_object_get_int(json_object_array_get_idx(data_obj, i));
+                        if (datatype == DB_CHAR)
+                            *((char*)p) = (unsigned char) ival;
+                        else if (datatype == DB_SHORT)
+                            *((short*)p) = (short) ival;
+                        else if (datatype == DB_INT)
+                            *((int*)p) = ival;
+                        else if (datatype == DB_LONG)
+                            *((long*)p) = (long) ival;
+                        break;
+                    }
+                    case json_type_double:
+                    {
+                        double dval = json_object_get_double(json_object_array_get_idx(data_obj, i));
+                        if (datatype == DB_DOUBLE)
+                            *((double*)p) = dval;
+                        else
+                            *((float*)p) = (float) dval;
+                        break;
+                    }
+                }
+            }
+printf("reconstituting member named \"%s\"\n", mname);
+                    
+            /* delete the old object */
+            json_object_object_del(obj, mname);
+
+
+            /* Add the reconstituted extptr object */
+            json_object_object_add(obj, mname,
+                json_object_new_extptr(pdata, ndims, dims, datatype));
+        }
+    }
+
+    return 0;
+}
 
 #if 0
 /* Difference methods

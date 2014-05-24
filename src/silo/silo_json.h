@@ -95,6 +95,7 @@ SILO_API extern int                  json_object_get_extptr_datatype(struct json
 SILO_API extern int                  json_object_get_extptr_ndims(struct json_object *obj);
 SILO_API extern int                  json_object_get_extptr_dims_idx(struct json_object *obj, int idx);
 SILO_API extern void *               json_object_get_extptr_ptr(struct json_object *obj);
+SILO_API extern int                  json_object_reconstitute_extptrs(struct json_object *obj);
 
 /* Methods to serialize a json object to a binary buffer. Note that the
  * json-c library itself can serialize Silo's json objects to a string using
