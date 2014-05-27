@@ -82,6 +82,18 @@ static int json_object_object_length(struct json_object *o)
     return t->count;
 }
 
+static int json_object_object_get_member_count(struct json_object *o)
+{
+    int n = 0;
+    struct json_object_iter jiter;
+    json_object_object_foreachC(o, jiter)
+    {
+        n++;
+        json_object_iter_next(&jiter);
+    }
+    return n;
+}
+
 static void json_object_set_serializer(json_object *jso,
     json_object_to_json_string_fn to_string_func,
     void * userdata, json_object_delete_fn * user_delete)
@@ -481,6 +493,9 @@ int
 json_object_reconstitute_extptrs(struct json_object *obj)
 {
     struct json_object_iter jiter;
+    struct json_object *parent_jobjs_with_extptr_members[1000];
+    char const *extptr_member_keys[1000];
+    int k, num_to_remove = 0;
 
     json_object_object_foreachC(obj, jiter)
     {
@@ -511,6 +526,28 @@ json_object_reconstitute_extptrs(struct json_object *obj)
             json_object_reconstitute_extptrs(mobj);
             continue;
         }
+
+        if (json_object_object_get_member_count(mobj) != 5)
+            continue;
+
+        extptr_member_keys[num_to_remove] = mname;
+        parent_jobjs_with_extptr_members[num_to_remove] = obj;
+        num_to_remove++;
+    }
+
+    for (k = 0; k < num_to_remove; k++)
+    {
+        struct json_object *ptr_obj, *datatype_obj, *ndims_obj, *dims_obj, *data_obj;
+        char *mname = strdup(extptr_member_keys[k]);
+        struct json_object *pobj = parent_jobjs_with_extptr_members[k];
+        struct json_object *extptr_obj;
+
+        json_object_object_get_ex(pobj, mname, &extptr_obj);
+        json_object_object_get_ex(extptr_obj, "ptr", &ptr_obj );
+        json_object_object_get_ex(extptr_obj, "datatype", &datatype_obj);
+        json_object_object_get_ex(extptr_obj, "ndims", &ndims_obj);
+        json_object_object_get_ex(extptr_obj, "dims", &dims_obj);
+        json_object_object_get_ex(extptr_obj, "data", &data_obj);
 
         /* We're at an extptr object that was serialized to a 'standard' json string.
          * So, lets reconstitute it. */
@@ -560,15 +597,15 @@ json_object_reconstitute_extptrs(struct json_object *obj)
                     }
                 }
             }
-printf("reconstituting member named \"%s\"\n", mname);
                     
             /* delete the old object */
-            json_object_object_del(obj, mname);
-
+            json_object_object_del(pobj, mname);
 
             /* Add the reconstituted extptr object */
-            json_object_object_add(obj, mname,
+            json_object_object_add(pobj, mname,
                 json_object_new_extptr(pdata, ndims, dims, datatype));
+
+            free(mname);
         }
     }
 
