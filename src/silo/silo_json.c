@@ -89,7 +89,6 @@ static int json_object_object_get_member_count(struct json_object *o)
     json_object_object_foreachC(o, jiter)
     {
         n++;
-        json_object_iter_next(&jiter);
     }
     return n;
 }
