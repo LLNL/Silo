@@ -6,7 +6,6 @@
 #include "fpzip.h"
 #include "codec.h"
 #include "write.h"
-#include "fpzip_error.h"
 
 #if FPZIP_FP == FPZIP_FP_FAST || FPZIP_FP == FPZIP_FP_SAFE
 // compress 3D array at specified precision using floating-point arithmetic
@@ -130,9 +129,15 @@ compress3d(
 }
 #endif
 
+// compress p-bit float, 2p-bit double
+#define compress_case(p)\
+  case subsize(T, p):\
+    compress3d<T, subsize(T, p)>(re, data, nx, ny, nz);\
+    break
+
 // compress 4D array
 template <typename T>
-static void
+static bool
 compress4d(
   RCencoder* re,   // entropy encoder
   const T*   data, // flattened 4D array to compress
@@ -148,24 +153,44 @@ compress4d(
     int bits = prec ? prec[i] : CHAR_BIT * (int)sizeof(T);
     re->encode(bits, 32);
     switch (bits) {
-      case subsize(T, 1): //  8-bit float, 16-bit double
-        compress3d<T, subsize(T, 1)>(re, data, nx, ny, nz);
-        break;
-      case subsize(T, 2): // 16-bit float, 32-bit double
-        compress3d<T, subsize(T, 2)>(re, data, nx, ny, nz);
-        break;
-      case subsize(T, 3): // 24-bit float, 48-bit double
-        compress3d<T, subsize(T, 3)>(re, data, nx, ny, nz);
-        break;
-      case subsize(T, 4): // 32-bit float, 64-bit double
-        compress3d<T, subsize(T, 4)>(re, data, nx, ny, nz);
-        break;
+      compress_case( 2);
+      compress_case( 3);
+      compress_case( 4);
+      compress_case( 5);
+      compress_case( 6);
+      compress_case( 7);
+      compress_case( 8);
+      compress_case( 9);
+      compress_case(10);
+      compress_case(11);
+      compress_case(12);
+      compress_case(13);
+      compress_case(14);
+      compress_case(15);
+      compress_case(16);
+      compress_case(17);
+      compress_case(18);
+      compress_case(19);
+      compress_case(20);
+      compress_case(21);
+      compress_case(22);
+      compress_case(23);
+      compress_case(24);
+      compress_case(25);
+      compress_case(26);
+      compress_case(27);
+      compress_case(28);
+      compress_case(29);
+      compress_case(30);
+      compress_case(31);
+      compress_case(32);
       default:
-        fpzip_errno = FPZIP_BAD_PRECISION;
-        break;
+        fpzip_errno = fpzipErrorBadPrecision;
+        return false;
     }
     data += nx * ny * nz;
   }
+  return true;
 }
 
 static void
@@ -179,10 +204,10 @@ write_header(
 )
 {
   // magic
-  re->encode('f', 8);
-  re->encode('p', 8);
-  re->encode('z', 8);
-  re->encode('\0', 8);
+  re->encode((unsigned)'f', 8);
+  re->encode((unsigned)'p', 8);
+  re->encode((unsigned)'z', 8);
+  re->encode((unsigned)'\0', 8);
 
   // format version
   re->encode(FPZ_MAJ_VERSION, 16);
@@ -198,7 +223,7 @@ write_header(
   re->encode(!!dp);
 }
 
-static void
+static bool
 fpzip_stream_write(
   RCencoder*  re,   // entropy encoder
   const void* data, // array to write
@@ -211,15 +236,17 @@ fpzip_stream_write(
 )
 {
   write_header(re, nx, ny, nz, nf, dp);
+  bool status;
   if (dp)
-    compress4d(re, (const double*)data, prec, nx, ny, nz, nf);
+    status = compress4d(re, (const double*)data, prec, nx, ny, nz, nf);
   else
-    compress4d(re, (const float*)data, prec, nx, ny, nz, nf);
+    status = compress4d(re, (const float*)data, prec, nx, ny, nz, nf);
   re->finish();
+  return status;
 }
 
 // compress and write a single or double precision 4D array to file
-unsigned
+size_t
 fpzip_file_write(
   FILE*       file, // binary output stream
   const void* data, // array to write
@@ -231,19 +258,25 @@ fpzip_file_write(
   unsigned    nf    // number of fields
 )
 {
+  fpzip_errno = fpzipSuccess;
+  size_t bytes = 0;
   RCfileencoder* re = new RCfileencoder(file);
-  fpzip_stream_write(re, data, prec, dp, nx, ny, nz, nf);
-  re->flush();
-  unsigned bytes = re->error ? 0 : re->bytes();
+  if (fpzip_stream_write(re, data, prec, dp, nx, ny, nz, nf)) {
+    re->flush();
+    if (re->error)
+      fpzip_errno = fpzipErrorWriteStream;
+    else
+      bytes = re->bytes();
+  }
   delete re;
   return bytes;
 }
 
 // compress and write a single or double precision 4D array to file
-unsigned
+size_t
 fpzip_memory_write(
   void*       buffer, // pointer to compressed data
-  unsigned    size,   // size of allocated storage
+  size_t      size,   // size of allocated storage
   const void* data,   // array to write
   const int*  prec,   // per field bits of precision
   int         dp,     // double precision array if nonzero
@@ -253,9 +286,17 @@ fpzip_memory_write(
   unsigned    nf      // number of fields
 )
 {
+  fpzip_errno = fpzipSuccess;
+  size_t bytes = 0;
   RCmemencoder* re = new RCmemencoder(buffer, size);
-  fpzip_stream_write(re, data, prec, dp, nx, ny, nz, nf);
-  unsigned bytes = re->error ? 0 : re->bytes();
+  if (fpzip_stream_write(re, data, prec, dp, nx, ny, nz, nf)) {
+    if (re->error) {
+      if (!fpzip_errno)
+        fpzip_errno = fpzipErrorWriteStream;
+    }
+    else
+      bytes = re->bytes();
+  }
   delete re;
   return bytes;
 }
@@ -274,8 +315,10 @@ fpzip_file_write_f(
 )
 {
   FILE* file = fopen(path, "wb");
-  if (!file)
+  if (!file) {
+    fpzip_errno = fpzipErrorCreateFile;
     return;
+  }
   fpzip_file_write(file, data, prec, *dp, *nx, *ny, *nz, *nf);
   fclose(file);
 }

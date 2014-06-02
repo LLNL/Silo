@@ -87,10 +87,10 @@ noinst_HEADERS = \
  rcqsmodel.inl \
  read.h \
  write.h \
- fpzip.h \
- fpzip_error.h
+ fpzip.h
 
 FILES = \
+ error.cpp \
  rcdecoder.cpp \
  rcencoder.cpp \
  rcqsmodel.cpp \

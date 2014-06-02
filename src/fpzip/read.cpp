@@ -6,7 +6,6 @@
 #include "fpzip.h"
 #include "codec.h"
 #include "read.h"
-#include "fpzip_error.h"
 
 #if FPZIP_FP == FPZIP_FP_FAST || FPZIP_FP == FPZIP_FP_SAFE
 // decompress 3D array at specified precision using floating-point arithmetic
@@ -130,9 +129,15 @@ decompress3d(
 }
 #endif
 
+// decompress p-bit float, 2p-bit double
+#define decompress_case(p)\
+  case subsize(T, p):\
+    decompress3d<T, subsize(T, p)>(rd, data, nx, ny, nz);\
+    break
+
 // decompress 4D array
 template <typename T>
-static void
+static bool
 decompress4d(
   RCdecoder* rd,   // entropy decoder
   T*         data, // flattened 4D array to decompress to
@@ -149,28 +154,47 @@ decompress4d(
     if (prec)
       prec[i] = bits;
     switch (bits) {
-      case subsize(T, 1): //  8-bit float, 16-bit double
-        decompress3d<T, subsize(T, 1)>(rd, data, nx, ny, nz);
-        break;
-      case subsize(T, 2): // 16-bit float, 32-bit double
-        decompress3d<T, subsize(T, 2)>(rd, data, nx, ny, nz);
-        break;
-      case subsize(T, 3): // 24-bit float, 48-bit double
-        decompress3d<T, subsize(T, 3)>(rd, data, nx, ny, nz);
-        break;
-      case subsize(T, 4): // 32-bit float, 64-bit double
-        decompress3d<T, subsize(T, 4)>(rd, data, nx, ny, nz);
-        break;
+      decompress_case( 2);
+      decompress_case( 3);
+      decompress_case( 4);
+      decompress_case( 5);
+      decompress_case( 6);
+      decompress_case( 7);
+      decompress_case( 8);
+      decompress_case( 9);
+      decompress_case(10);
+      decompress_case(11);
+      decompress_case(12);
+      decompress_case(13);
+      decompress_case(14);
+      decompress_case(15);
+      decompress_case(16);
+      decompress_case(17);
+      decompress_case(18);
+      decompress_case(19);
+      decompress_case(20);
+      decompress_case(21);
+      decompress_case(22);
+      decompress_case(23);
+      decompress_case(24);
+      decompress_case(25);
+      decompress_case(26);
+      decompress_case(27);
+      decompress_case(28);
+      decompress_case(29);
+      decompress_case(30);
+      decompress_case(31);
+      decompress_case(32);
       default:
-        fpzip_errno = FPZIP_BAD_PRECISION;
-        return; 
-        break;
+        fpzip_errno = fpzipErrorBadPrecision;
+        return false;
     }
     data += nx * ny * nz;
   }
+  return true;
 }
 
-void
+static bool
 read_header(
   RCdecoder* rd,
   unsigned   *nx,
@@ -185,15 +209,15 @@ read_header(
       rd->decode<unsigned>(8) != 'p' ||
       rd->decode<unsigned>(8) != 'z' ||
       rd->decode<unsigned>(8) != '\0') {
-    fpzip_errno = FPZIP_BAD_MAGIC;
-    return;
+    fpzip_errno = fpzipErrorBadFormat;
+    return false;
   }
 
   // format version
   if (rd->decode<unsigned>(16) != FPZ_MAJ_VERSION ||
       rd->decode<unsigned>(16) != FPZ_MIN_VERSION) {
-    fpzip_errno = FPZIP_BAD_FORMAT_VERSION;
-    return;
+    fpzip_errno = fpzipErrorBadVersion;
+    return false;
   }
 
   // array dimensions
@@ -204,9 +228,10 @@ read_header(
 
   // single or double precision
   *dp = rd->decode();
+  return true;
 }
 
-static void
+static bool
 fpzip_stream_read(
   RCdecoder* rd,   // entropy decoder
   void*      data, // array to read
@@ -219,17 +244,16 @@ fpzip_stream_read(
 )
 {
   rd->init();
-  read_header(rd, nx, ny, nz, nf, dp);
-  if (data == 0)
-    return;
-  if (*dp)
-    decompress4d(rd, (double*)data, prec, *nx, *ny, *nz, *nf);
+  if (!read_header(rd, nx, ny, nz, nf, dp))
+    return false;
+  if (dp)
+    return decompress4d(rd, (double*)data, prec, *nx, *ny, *nz, *nf);
   else
-    decompress4d(rd, (float*)data, prec, *nx, *ny, *nz, *nf);
+    return decompress4d(rd, (float*)data, prec, *nx, *ny, *nz, *nf);
 }
 
 // read and decompress a single or double precision 4D array from file
-unsigned
+size_t
 fpzip_file_read(
   FILE*       file, // binary input stream
   void*       data, // array to read
@@ -241,17 +265,21 @@ fpzip_file_read(
   unsigned    *nf   // number of fields
 )
 {
+  fpzip_errno = fpzipSuccess;
+  size_t bytes = 0;
   RCfiledecoder* rd = new RCfiledecoder(file);
-  fpzip_stream_read(rd, data, prec, dp, nx, ny, nz, nf);
-  unsigned bytes = 0;
-  if (data != 0)
-    bytes  = rd->error ? 0 : rd->bytes();
+  if (fpzip_stream_read(rd, data, prec, dp, nx, ny, nz, nf)) {
+    if (rd->error)
+      fpzip_errno = fpzipErrorReadStream;
+    else
+      bytes = rd->bytes();
+  }
   delete rd;
   return bytes;
 }
 
 // read and decompress a single or double precision 4D array from file
-unsigned
+size_t
 fpzip_memory_read(
   const void* buffer, // pointer to compressed data
   void*       data,   // array to read
@@ -263,11 +291,14 @@ fpzip_memory_read(
   unsigned    *nf     // number of fields
 )
 {
+  fpzip_errno = fpzipSuccess;
   RCmemdecoder* rd = new RCmemdecoder(buffer);
   fpzip_stream_read(rd, data, prec, dp, nx, ny, nz, nf);
-  unsigned bytes = 0;
-  if (data != 0)
-    bytes = rd->error ? 0 : rd->bytes();
+  size_t bytes = 0;
+  if (rd->error)
+    fpzip_errno = fpzipErrorReadStream;
+  else
+    bytes = rd->bytes();
   delete rd;
   return bytes;
 }
@@ -285,11 +316,15 @@ fpzip_file_read_f(
   int*        nf    // number of fields
 )
 {
+  unsigned unx=0, uny=0, unz=0, unf=0;
+  size_t status=0;
   FILE* file = fopen(path, "rb");
-  unsigned unx=0, uny=0, unz=0, unf=0, status=0;
+  fpzip_errno = fpzipSuccess;
   *nx = *ny = *nz = *nf = 0;
-  if (!file)
+  if (!file) {
+    fpzip_errno = fpzipErrorOpenFile;
     return;
+  }
   status = fpzip_file_read(file, data, prec, dp, &unx, &uny, &unz, &unf);
   if (!(data != 0 && status == 0))
   {

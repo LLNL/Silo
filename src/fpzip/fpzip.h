@@ -1,5 +1,5 @@
 /*
-** fpzip version 1.0.1, August 7, 2008
+** fpzip version 1.0.2, May 30, 2014
 ** Part of the LOCAL Toolkit, UCRL-CODE-232243
 ** Written by Peter Lindstrom, Lawrence Livermore National Laboratory
 **
@@ -12,22 +12,29 @@
 ** the algorithm has primarily be designed to exploit higher-dimensional
 ** structure in the data, and may not perform well on 1D data.  The
 ** library supports compression to either a file or to main memory, and
-** allows specifying how many bits of precision to retain.  (Currently
-** the precision is limited to 8, 16, 24, or 32 bits for floats and
-** 16, 32, 48, or 64 bits for doubles.)  The decompressed data is
-** returned in full precision, possibly with the least significant bits
-** zeroed.  Because floating-point arithmetic may be affected by factors
-** such as register precision, rounding mode, and compiler optimizations,
-** precautions have been taken to ensure correctness and portability via
-** a set of compile-time switches.  For example, it is possible to specify
-** that floating-point operations be emulated via integer arithmetic, or to
-** treat the binary representation of floating-point numbers as integers.
-** Please consult the Makefile for choosing among these settings.  The
-** compressor works correctly on the IEEE 754 floating-point format,
-** though no particular assumption is made on the floating-point
-** representation other than the most significant bit being the sign bit.
-** Special values such as infinities, NaNs, and denormalized numbers
-** should be handled correctly by the compressor.
+** allows specifying how many bits of precision to retain; remaining
+** least significant bits are truncated.  The precision is limited to
+** integers 2-32 for floats and 4-64, in increments of two bits, for
+** doubles.  The decompressed data is returned in full precision, possibly
+** with the least significant bits zeroed.  Because floating-point
+** arithmetic may be affected by factors such as register precision,
+** rounding mode, and compiler optimizations, precautions have been taken
+** to ensure correctness and portability via a set of compile-time
+** switches.  For example, it is possible to specify that floating-point
+** operations be emulated via integer arithmetic, or to treat the binary
+** representation of floating-point numbers as integers.  Please consult
+** the Makefile for choosing among these settings.  The compressor works
+** correctly on the IEEE 754 floating-point format, though no particular
+** assumption is made on the floating-point representation other than the
+** most significant bit being the sign bit.  Special values such as
+** infinities, NaNs, and denormalized numbers should be handled correctly
+** by the compressor in lossless mode.  The C functions return zero in
+** case of an error, in which case fpzip_errno can be examined to determine
+** the cause.
+**
+** The code has been modified in minor ways to support its use within Silo.
+** Some assert calls were removed. Some error codes were added. The read
+** interface was ajdusted to return sizing information. - MCM 01Jun14
 **
 ** fpzip was developed as part of the LOCAL LDRD project at LLNL, and may
 ** be freely used and distributed for noncommercial purposes.  The core
@@ -73,14 +80,14 @@
 #ifndef FPZIP_H
 #define FPZIP_H
 
+#include <stddef.h>
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* for error codes */
-#include "fpzip_error.h"
-
-unsigned
+size_t                /* number of compressed bytes read (zero = error) */
 fpzip_file_read(
   FILE*       file,   /* binary input stream */
   void*       data,   /* array to read */
@@ -92,7 +99,7 @@ fpzip_file_read(
   unsigned    *nf     /* returned number of fields */
 );
 
-unsigned
+size_t                /* number of compressed bytes read (zero = error) */
 fpzip_memory_read(
   const void* buffer, /* pointer to compressed data */
   void*       data,   /* array to read */
@@ -104,7 +111,7 @@ fpzip_memory_read(
   unsigned    *nf     /* returned number of fields */
 );
 
-unsigned
+size_t                /* number of compressed bytes written (zero = error) */
 fpzip_file_write(
   FILE*       file,   /* binary output stream */
   const void* data,   /* array to write */
@@ -116,10 +123,10 @@ fpzip_file_write(
   unsigned    nf      /* number of fields */
 );
 
-unsigned
+size_t                /* number of compressed bytes written (zero = error) */
 fpzip_memory_write(
   void*       buffer, /* pointer to compressed data */
-  unsigned    size,   /* size of allocated storage */
+  size_t      size,   /* size of allocated storage */
   const void* data,   /* array to write */
   const int*  prec,   /* per field bits of precision (null = full precision) */
   int         dp,     /* double precision array if nonzero */
@@ -180,6 +187,29 @@ fpzip_file_write_f_(
   const int*  nz,   /* number of z samples */
   const int*  nf    /* number of fields */
 );
+
+/*
+** Error codes.
+*/
+
+typedef enum {
+  fpzipSuccess             =  0, /* no error */
+  fpzipErrorOpenFile       =  1, /* cannot open file for reading */
+  fpzipErrorCreateFile     =  2, /* cannot create file for writing */
+  fpzipErrorReadStream     =  3, /* cannot read stream */
+  fpzipErrorWriteStream    =  4, /* cannot write stream */
+  fpzipErrorBadFormat      =  5, /* magic mismatch; not an fpz stream */
+  fpzipErrorBadVersion     =  6, /* fpz format version not supported */
+  fpzipErrorBadDimensions  =  7, /* array dimensions do not match */
+  fpzipErrorBadType        =  8, /* floating-point types do not match */
+  fpzipErrorBadPrecision   =  9, /* precision not supported */
+  fpzipErrorBufferOverflow = 10, /* compressed buffer overflow */
+  fpzipErrorBitsTooLarge   = 11,
+  fpzipErrorTargetRescaleTooLarge = 12
+} fpzipError;
+
+extern fpzipError fpzip_errno;     /* error code */
+extern const char* fpzip_errstr[]; /* error message indexed by fpzip_errno */
 
 #ifdef __cplusplus
 }

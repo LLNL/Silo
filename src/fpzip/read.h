@@ -1,7 +1,7 @@
 #ifndef FPZIP_READ_H
 #define FPZIP_READ_H
 
-#define subsize(T, n) (CHAR_BIT * sizeof(T) * (n) / 4)
+#define subsize(T, n) (CHAR_BIT * sizeof(T) * (n) / 32)
 
 // file reader for compressed data
 #if FPZIP_BLOCK_SIZE > 1
@@ -22,13 +22,13 @@ public:
     }
     return buffer[index++];
   }
-  unsigned bytes() const { return count; }
+  size_t bytes() const { return count; }
   bool error;
 private:
   FILE* file;
-  unsigned count;
-  unsigned index;
-  unsigned size;
+  size_t count;
+  size_t index;
+  size_t size;
   unsigned char buffer[FPZIP_BLOCK_SIZE];
 };
 #else
@@ -44,11 +44,11 @@ public:
       count++;
     return byte;
   }
-  unsigned bytes() const { return count; }
+  size_t bytes() const { return count; }
   bool error;
 private:
   FILE* file;
-  unsigned count;
+  size_t count;
 };
 #endif
 
@@ -56,7 +56,7 @@ class RCmemdecoder : public RCdecoder {
 public:
   RCmemdecoder(const void* buffer) : RCdecoder(), error(false), ptr((const unsigned char*)buffer), begin(ptr) {}
   unsigned getbyte() { return *ptr++; }
-  unsigned bytes() const { return ptr - begin; }
+  size_t bytes() const { return ptr - begin; }
   bool error;
 private:
   const unsigned char* ptr;

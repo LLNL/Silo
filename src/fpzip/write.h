@@ -1,7 +1,9 @@
 #ifndef FPZIP_WRITE_H
 #define FPZIP_WRITE_H
 
-#define subsize(T, n) (CHAR_BIT * sizeof(T) * (n) / 4)
+#include <fpzip.h>
+
+#define subsize(T, n) (CHAR_BIT * sizeof(T) * (n) / 32)
 
 // file writer for compressed data
 #if FPZIP_BLOCK_SIZE > 1
@@ -23,12 +25,12 @@ public:
       count += size;
     size = 0;
   }
-  unsigned bytes() const { return count; }
+  size_t bytes() const { return count; }
   bool error;
 private:
   FILE* file;
-  unsigned count;
-  unsigned size;
+  size_t count;
+  size_t size;
   unsigned char buffer[FPZIP_BLOCK_SIZE];
 };
 #else
@@ -43,26 +45,28 @@ public:
       count++;
   }
   void flush() {}
-  unsigned bytes() const { return count; }
+  size_t bytes() const { return count; }
   bool error;
 private:
   FILE* file;
-  unsigned count;
+  size_t count;
 };
 #endif
 
 // memory writer for compressed data
 class RCmemencoder : public RCencoder {
 public:
-  RCmemencoder(void* buffer, unsigned size) : RCencoder(), error(false), ptr((unsigned char*)buffer), begin(ptr), end(ptr + size) {}
+  RCmemencoder(void* buffer, size_t size) : RCencoder(), error(false), ptr((unsigned char*)buffer), begin(ptr), end(ptr + size) {}
   void putbyte(unsigned byte)
   {
-    if (ptr == end)
+    if (ptr == end) {
       error = true;
+      fpzip_errno = fpzipErrorBufferOverflow;
+    }
     else
       *ptr++ = (unsigned char)byte;
   }
-  unsigned bytes() const { return ptr - begin; }
+  size_t bytes() const { return ptr - begin; }
   bool error;
 private:
   unsigned char* ptr;

@@ -1,20 +1,17 @@
-#include <cassert>
 #include "rcqsmodel.h"
-#include "fpzip_error.h"
+#include "fpzip.h"
 
 // table size for binary search
 #define TBLSHIFT 7
 
-int fpzip_errno = 0;
-
 RCqsmodel::RCqsmodel(bool compress, unsigned symbols, unsigned bits, unsigned period) : RCmodel(symbols), bits(bits), targetrescale(period)
 {
   if (bits > 16) {
-    fpzip_errno = FPZIP_BITS_TOO_LARGE;
+    fpzip_errno = fpzipErrorBitsTooLarge;
     return;
   }
   if (targetrescale >= (1u << (bits + 1))) {
-    fpzip_errno = FPZIP_TARGETSCALE_TOO_LARGE;
+    fpzip_errno = fpzipErrorTargetRescaleTooLarge;
     return;
   }
   
@@ -23,10 +20,9 @@ RCqsmodel::RCqsmodel(bool compress, unsigned symbols, unsigned bits, unsigned pe
   cumf = new unsigned[n + 1];
   cumf[0] = 0;
   cumf[n] = 1 << bits;
-  if (compress) {
-    searchshift = 0;
+  if (compress)
     search = 0;
-  } else {
+  else {
     searchshift = bits - TBLSHIFT;
     search = new unsigned[(1 << TBLSHIFT) + 1];
   }
@@ -105,7 +101,6 @@ void RCqsmodel::update()
     count -= sf;
     symf[i] = sf;
   }
-  // assert(cf == 0);
 
   // count is now difference between target cumf[n] and sum of symf;
   // next actual rescale happens when sum of symf equals cumf[n]
