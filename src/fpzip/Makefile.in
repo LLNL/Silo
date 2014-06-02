@@ -109,8 +109,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_fpzip_la_LIBADD =
-am__objects_1 = rcdecoder.lo rcencoder.lo rcqsmodel.lo read.lo \
-	write.lo
+am__objects_1 = error.lo rcdecoder.lo rcencoder.lo rcqsmodel.lo \
+	read.lo write.lo
 am_libsilo_fpzip_la_OBJECTS = $(am__objects_1)
 libsilo_fpzip_la_OBJECTS = $(am_libsilo_fpzip_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -338,10 +338,10 @@ noinst_HEADERS = \
  rcqsmodel.inl \
  read.h \
  write.h \
- fpzip.h \
- fpzip_error.h
+ fpzip.h
 
 FILES = \
+ error.cpp \
  rcdecoder.cpp \
  rcencoder.cpp \
  rcqsmodel.cpp \
@@ -400,6 +400,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rcdecoder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rcencoder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rcqsmodel.Plo@am__quote@

@@ -246,6 +246,8 @@ fpzip_stream_read(
   rd->init();
   if (!read_header(rd, nx, ny, nz, nf, dp))
     return false;
+  if (data == 0)
+    return true;
   if (dp)
     return decompress4d(rd, (double*)data, prec, *nx, *ny, *nz, *nf);
   else
@@ -269,10 +271,10 @@ fpzip_file_read(
   size_t bytes = 0;
   RCfiledecoder* rd = new RCfiledecoder(file);
   if (fpzip_stream_read(rd, data, prec, dp, nx, ny, nz, nf)) {
+    if (data != 0)
+      bytes  = rd->error ? 0 : rd->bytes();
     if (rd->error)
       fpzip_errno = fpzipErrorReadStream;
-    else
-      bytes = rd->bytes();
   }
   delete rd;
   return bytes;
@@ -295,10 +297,10 @@ fpzip_memory_read(
   RCmemdecoder* rd = new RCmemdecoder(buffer);
   fpzip_stream_read(rd, data, prec, dp, nx, ny, nz, nf);
   size_t bytes = 0;
+  if (data != 0)
+    bytes = rd->error ? 0 : rd->bytes();
   if (rd->error)
     fpzip_errno = fpzipErrorReadStream;
-  else
-    bytes = rd->bytes();
   delete rd;
   return bytes;
 }
