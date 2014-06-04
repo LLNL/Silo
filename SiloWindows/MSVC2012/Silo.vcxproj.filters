@@ -191,6 +191,9 @@
     <ClCompile Include="..\..\src\hdf5_drv\silo_hdf5.c">
       <Filter>Source Files\hdf5_drv</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\fpzip\error.cpp">
+      <Filter>Source Files\fpzip</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\fpzip\rcdecoder.cpp">
       <Filter>Source Files\fpzip</Filter>
     </ClCompile>
@@ -278,9 +281,6 @@
       <Filter>Header Files\fpzip</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\fpzip\fpzip.h">
-      <Filter>Header Files\fpzip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\fpzip\fpzip_error.h">
       <Filter>Header Files\fpzip</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\fpzip\front.h">
