@@ -884,16 +884,18 @@ DBFreeQuadmesh(DBquadmesh *msh)
 PUBLIC int
 DBIsEmptyQuadmesh(DBquadmesh const *msh)
 {
+    int i, is_empty = 1;
+
     if (!msh) return 0;
-    if (msh->nnodes!=0) return 0;
-    if (msh->coords[0]!=0) return 0;
-    if (msh->coords[1]!=0) return 0;
-    if (msh->coords[2]!=0) return 0;
-    if (msh->ndims!=0) return 0;
-    if (msh->dims[0]!=0) return 0;
-    if (msh->dims[1]!=0) return 0;
-    if (msh->dims[2]!=0) return 0;
-    return 1;
+    for (i = 0; i < msh->ndims; i++)
+    {
+        if (msh->dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
+    return is_empty;
 }
 
 /*----------------------------------------------------------------------
@@ -1154,8 +1156,6 @@ PUBLIC int
 DBIsEmptyUcdmesh(DBucdmesh const *msh)
 {
     if (!msh) return 0;
-    if (msh->ndims!=0) return 0;
-    if (msh->topo_dim!=-1) return 0; /* unique case; -1 means 'unset' */
     if (msh->nnodes!=0) return 0;
     if (msh->coords[0]!=0) return 0;
     if (msh->coords[1]!=0) return 0;

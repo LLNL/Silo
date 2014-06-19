@@ -5009,7 +5009,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     if (qm->base_index[0] == -99999)
     {
         int       i;
-
+        qm->base_index[0] = 0;
         for (i = 0; i < qm->ndims; i++)
         {
             qm->base_index[i] = qm->origin;
@@ -9676,9 +9676,10 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char const *name, char const * const *coordn
     DBobject       *obj;
     char            tmp[1024];
     void const * const *coords = (void const * const *) _coords;
+    int             is_empty = 1;
 
     /* The following is declared as double for worst case. */
-    double         min_extents[3], max_extents[3];
+    double         min_extents[3]={0,0,0}, max_extents[3]={0,0,0};
 
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
@@ -9690,6 +9691,15 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char const *name, char const * const *coordn
     *  Write coordinate arrays.
     *-------------------------------------------------------------*/
     for (i = 0; i < ndims; i++)
+    {
+        if (dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
+
+    for (i = 0; i < ndims; i++)
         count[i] = dims[i];
     if (coordtype == DB_COLLINEAR)
         nd = 1;
@@ -9697,7 +9707,7 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char const *name, char const * const *coordn
         nd = ndims;
 
     datatype_str = db_GetDatatypeString(datatype);
-    for (i = 0; i < ndims; i++)
+    for (i = 0; (i < ndims) && !is_empty; i++)
     {
         if (coordtype == DB_COLLINEAR)
             count[0] = dims[i];
@@ -9786,7 +9796,7 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char const *name, char const * const *coordn
     if (_qm._mrgtree_name != NULL)
         DBAddStrComponent(obj, "mrgtree_name", _qm._mrgtree_name);
 
-    if (ndims>0 && _qm._ghost_node_labels != NULL)
+    if (!is_empty && _qm._ghost_node_labels != NULL)
     {
         for (i = 0; i < ndims; i++)
             count[i] = dims[i];
@@ -9794,7 +9804,7 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char const *name, char const * const *coordn
                          _qm._ghost_node_labels, ndims, count);
     }
 
-    if (ndims>0 && _qm._ghost_zone_labels != NULL)
+    if (!is_empty && _qm._ghost_zone_labels != NULL)
     {
         for (i = 0; i < ndims; i++)
             count[i] = dims[i]-1;
@@ -10515,7 +10525,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char const *name, int ndims, char const * con
    void const * const *coords = (void const * const *) _coords;
 
    /* Following is declared as double for worst case */
-   double         min_extents[3], max_extents[3];
+   double         min_extents[3]={0,0,0}, max_extents[3]={0,0,0};
 
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
@@ -10535,7 +10545,7 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char const *name, int ndims, char const * con
    datatype_str = db_GetDatatypeString(datatype);
    count[0] = nnodes;
 
-   for (i = 0; i < ndims; i++) {
+   for (i = 0; (i < ndims) && (nnodes > 0); i++) {
 
       sprintf(tmp, "coord%d", i);
 
@@ -11972,7 +11982,7 @@ db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
              int const *dims, int ndims) {
 
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
-   int            i;
+   int            i, is_empty = 1;
    int            nzones, nnodes;
    long           count[3];
    float          a[3];
@@ -11987,6 +11997,8 @@ db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
    for (i = 0; i < ndims; i++) {
       nzones *= (dims[i] - 1);
       nnodes *= dims[i];
+      if (dims[i] > 0)
+          is_empty = 0;
    }
 
    /*--------------------------------------------------
@@ -12041,7 +12053,7 @@ db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
    count[0] = ndims;
    /*  File name contained within meshname */
    p = (char *)strchr(meshname, ':');
-   if (p == NULL && count[0]) {
+   if (p == NULL && !is_empty) {
       PJ_write_len(dbfile->pdb, _qm._nm_dims, "integer", dims, 1, count);
       PJ_write_len(dbfile->pdb, _qm._nm_zones, "integer", _qm._zones,
                 1, count);

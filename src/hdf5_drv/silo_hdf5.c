@@ -8876,7 +8876,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     static char         *me = "db_hdf5_PutQuadmesh";
-    int                 i;
+    int                 i, is_empty = 1;
     DBquadmesh_mt       m;
     int                 compressionFlags;
     void const * const *coords = (void const * const *) _coords;
@@ -8884,6 +8884,15 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
     FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
     memset(&m, 0, sizeof m); 
+
+    for (i = 0; i < ndims; i++)
+    {
+        if (dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
     
     PROTECT {
         /* Check datatype */
@@ -8913,7 +8922,7 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
          * Number of zones and nodes. We have to do this because
          * _DBQMCalcExtents uses this global information.
          */
-        for (_qm._nzones=_qm._nnodes=(ndims?1:0), i=0; i<ndims; i++) {
+        for (_qm._nzones=_qm._nnodes=(is_empty?0:1), i=0; i<ndims; i++) {
             _qm._nzones *= (dims[i]-1);
             _qm._nnodes *= dims[i];
             _qm._dims[i] = dims[i];
@@ -8925,13 +8934,16 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
         
         /* Calculate extents, stored as DB_DOUBLE */
         if (DB_DOUBLE==datatype) {
+            int ii;
+            for (ii = 0; ii < 3; ii++)
+                m.min_extents[ii] = m.max_extents[ii] = 0;
             _DBQMCalcExtents(coords, datatype, _qm._minindex, _qm._maxindex_n,
                              dims, ndims, coordtype,
                              &(m.min_extents)/*out*/,
                              &(m.max_extents)/*out*/);
         } else {
-            float       min_extents[3];
-            float       max_extents[3];
+            float       min_extents[3] = {0,0,0};
+            float       max_extents[3] = {0,0,0};
             _DBQMCalcExtents(coords, datatype, _qm._minindex, _qm._maxindex_n,
                              dims, ndims, coordtype,
                              min_extents/*out*/, max_extents/*out*/);
@@ -8948,25 +8960,28 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
         compressionFlags = PrepareForQuadmeshCompression();
         
         /* Write coordinate arrays */
-        if (DB_COLLINEAR==coordtype) {
-            for (i=0; i<ndims; i++) {
-                db_hdf5_compwr(dbfile, datatype, 1, dims+i, coords[i],
-                    m.coord[i]/*out*/, friendly_name(name, "_coord%d",&i));
-            }
-        } else {
-            for (i=0; i<ndims; i++) {
-                db_hdf5_compwrz(dbfile, datatype, ndims, dims, coords[i],
-                    m.coord[i]/*out*/, friendly_name(name, "_coord%d",&i),
-                    compressionFlags);
+        if (!is_empty)
+        {
+            if (DB_COLLINEAR==coordtype) {
+                for (i=0; i<ndims; i++) {
+                    db_hdf5_compwr(dbfile, datatype, 1, dims+i, coords[i],
+                        m.coord[i]/*out*/, friendly_name(name, "_coord%d",&i));
+                }
+            } else {
+                for (i=0; i<ndims; i++) {
+                    db_hdf5_compwrz(dbfile, datatype, ndims, dims, coords[i],
+                        m.coord[i]/*out*/, friendly_name(name, "_coord%d",&i),
+                        compressionFlags);
+                }
             }
         }
         
-        if (ndims>0 && _qm._ghost_node_labels)
+        if (!is_empty && _qm._ghost_node_labels)
         {
             db_hdf5_compwr(dbfile, DB_CHAR, ndims, dims, _qm._ghost_node_labels,
                     m.ghost_node_labels/*out*/, friendly_name(name, "_ghost_node_labels", 0));
         }
-        if (ndims>0 && _qm._ghost_zone_labels)
+        if (!is_empty && _qm._ghost_zone_labels)
         {
             int tmpdims[3];
             for (i = 0; i < ndims; i++)
@@ -9730,15 +9745,15 @@ db_hdf5_PutUcdmesh(DBfile *_dbfile, char const *name, int ndims, char const * co
         }
         
         /* Write variable arrays: coords[], gnodeno[] */
-        for (i=0; i<ndims; i++) {
+        for (i=0; (i<ndims) && (nnodes>0); i++) {
             db_hdf5_compwrz(dbfile, datatype, 1, &nnodes, coords[i],
                 m.coord[i]/*out*/, friendly_name(name, "_coord%d", &i), 
                 compressionFlags);
         }
-        if (_um._llong_gnodeno)
+        if (_um._llong_gnodeno && (nnodes > 0))
             db_hdf5_compwr(dbfile, DB_LONG_LONG, 1, &nnodes, _um._gnodeno,
                 m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0));
-        else
+        else if (nnodes > 0)
             db_hdf5_compwrz(dbfile, DB_INT, 1, &nnodes, _um._gnodeno,
                 m.gnodeno/*out*/, friendly_name(name, "_gnodeno",0),
                 compressionFlags);

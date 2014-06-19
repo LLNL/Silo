@@ -1441,9 +1441,9 @@ ary_bind (obj_t _self, void *mem) {
                 }
                 self->dim[self->ndims] = n = wdata.vals[i] + dimadd;
                 self->ndims += 1;
-                if (n<0) {
-                   out_errorn ("dimension %d is invalid: %d",
-                               self->ndims, n);
+                if (n<0 && !(wdata.vals[i]==0 && dimadd==-1)) {
+                   out_errorn ("dimension %d is invalid: %d (%s)",
+                               self->ndims, n, t);
                    goto error;
                 }
              }

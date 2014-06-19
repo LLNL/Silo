@@ -5255,11 +5255,6 @@ db_AdjustSpeciallyHandledStandardObjectComponentValues(DBobject *obj)
         {
             continue;
         }
-#if 0
-global node no data type
-    point mesh
-data type for optional array in groupelmap
-#endif
 
         FREE(obj->pdb_names[i]);
         obj->pdb_names[i] = STRDUP(tmp);
@@ -8511,7 +8506,7 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char const * const *coordnames,
               DBVCP2_t coords, int const *dims, int ndims, int datatype,
               int coordtype, DBoptlist const *optlist)
 {
-    int retval;
+    int i, retval, is_empty=1;
 
     API_BEGIN2("DBPutQuadmesh", int, -1, name) {
         if (!dbfile)
@@ -8524,31 +8519,33 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char const * const *coordnames,
             API_ERROR("quadmesh name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
+        if ((coordtype != DB_COLLINEAR) && (coordtype != DB_NONCOLLINEAR))
+            API_ERROR("coordtype must be DB_COLLINEAR or DB_NONCOLLINEAR", E_BADARGS);
         if (ndims < 0)
             API_ERROR("ndims", E_BADARGS);
-        if (ndims)
+        if (!dims)
+            API_ERROR("dims==0", E_BADARGS);
+        for (i = 0; i < ndims; i++)
         {
-            int i;
+            if (dims[i] != 0)
+            {
+                is_empty = 0;
+                break;
+            }
+        }
+        if (!is_empty)
+        {
             void **coords2 = (void**) coords;
             for (i = 0; i < ndims && coords; i++)
                 if (!coords2[i]) coords = 0;
-            for (i = 0; i < ndims && dims; i++)
-                if (!dims[i]) dims = 0;
             if (!coords)
                 API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
-            if (!dims)
-                API_ERROR("dims==0 || dims[i]==0", E_BADARGS);
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
             /* this is an empty object but we don't think it was intentional */
-            API_ERROR("ndims==0", E_EMPTYOBJECT);
+            API_ERROR("dims[i]==0 for all i", E_EMPTYOBJECT);
         }
-
-        if ((datatype != DB_FLOAT) && (datatype != DB_DOUBLE))
-            API_ERROR("datatype must be DB_FLOAT or DB_DOUBLE", E_BADARGS);
-        if ((coordtype != DB_COLLINEAR) && (coordtype != DB_NONCOLLINEAR))
-            API_ERROR("coordtype must be DB_COLLINEAR or DB_NONCOLLINEAR", E_BADARGS);
         if (!dbfile->pub.p_qm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8769,7 +8766,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
             API_ERROR("ndims<0", E_BADARGS);
         if (nnodes < 0)
             API_ERROR("nnodes<0", E_BADARGS);
-        if (ndims && nnodes)
+        if (nnodes)
         {
             int i;
             void **coords2 = (void**) coords;
@@ -8809,11 +8806,6 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("ndims==0 || nnodes==0", E_EMPTYOBJECT);
-        }
-        else
-        {
-            ndims = 0;
-            nnodes = 0;
         }
 
         if (!dbfile->pub.p_um)
@@ -10093,8 +10085,19 @@ _DBQMCalcExtents(DBVCP2_t coord_arrays, int datatype, int const *min_index,
     double        *dx = NULL, *dy = NULL, *dz = NULL;
     double        *dmin_extents = NULL, *dmax_extents = NULL;
     float         *fmin_extents = NULL, *fmax_extents = NULL;
-    int            i;
+    int            i, is_empty = 1;
     char          *me = "_DBQMCalcExtents";
+
+    for (i = 0; i < ndims; i++)
+    {
+        if (dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
+
+    if (is_empty) return 0;
 
     if (datatype == DB_FLOAT)
     {
@@ -10372,6 +10375,8 @@ UM_CalcExtents(DBVCP2_t coord_arrays, int datatype, int ndims, int nnodes,
     double        *dmin_extents = NULL, *dmax_extents = NULL;
     float         *fmin_extents = NULL, *fmax_extents = NULL;
     float        **fcoord_arrays = NULL;
+
+    if (nnodes <= 0) return 0;
 
     if (datatype == DB_DOUBLE) {
 
