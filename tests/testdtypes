@@ -75,7 +75,7 @@ else
 fi
 
 smode="pdb"
-if test "${2:0:7}" = "DB_HDF5"; then
+if test -n "$(echo $2 | grep DB_HDF5)"; then
     smode="h5"
 fi
 
