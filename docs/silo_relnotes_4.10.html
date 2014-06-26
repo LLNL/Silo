@@ -38,7 +38,7 @@ available at...
   </li>
   <li>Version 4.10 is <b>NOT</b> link-time compatible with any previous version. You will need to re-compile and re-link your applications.</li>
   <li>In some cases, passing a 'make check' requires adding 'LIBS=-lstdc++' to the make command line (e.g. 'make check LIBS=-lstdc++'.</li>
-  <li>The rocket test will fail during 'make check' on OSX. I've yet to 
+  <li>The rocket test will fail during 'make check' on OSX. We've yet to 
 learn how to handle dlopen and shared libs there. For similar reasons, 
 Silo's python module has yet to be tested on a OSX.</li>
 </ul>
@@ -101,24 +101,33 @@ option count specified.</li>
 about exceeding maximum number of object components specified in 
 DBMakeObject. Now, Silo will silently reallocate to accomodate going 
 beyond the maximum component count specified.</li>
-<li>Added support to all variable writing routines for missing data using DBOPT_MISSING_VALUE option.</li>
+<li>Added support to all variable writing routines for missing data using the
+DBOPT_MISSING_VALUE optlist option. Support for this Silo feature has also
+been added to VisIt and will be available in VisIt 2.8.</li>
 <li>Added support for data producer to specify ghosting of meshes by 
 writing extra mesh (or generic var) data and using 
 DBOPT_GHOST_NODE_LABELS and/or DBOPT_GHOST_ZONE_LABELS optlist options. 
 This is as an alternative to hi/lo indexing method previously used for 
-ghost zone enumeration.</li>
+ghost zone enumeration. Support for this Silo feature is not yet available
+in VisIt but will be added after VisIt 2.8 is released.</li>
+<li>Added support for data producer to specify alternative node or zone
+numberings using DBOPT_ALT_ZONENUM_VARS and DBOPT_ALT_NODENUM_VARS optlist options.
+Support for this Silo feature is not yet available
+in VisIt but will be added after VisIt 2.8 is released.</li>
 <li>Changed browser's default setting to open files for read-only instead of read-write.</li>
-<li>Added opening a Silo "file" from a buffer of bytes (e.g. the 
+<li>Added ability to open a Silo "file" from a buffer of bytes (e.g. the 
 File-In-Core). Note, this is different from the "core" file driver where
  a file is first read entirely into core before it is opened because it 
-does not require or start a file on disk.</li>
-<li>Added an convenient DBOpenByBcast() method for parallel applications
+does not require or start from a file on disk.</li>
+<li>Added a convenience method, DBOpenByBcast(), for parallel applications
  to open and process a root or master file. This method will open the 
 file on a single processor and then broadcast its entire contents to all
  processors all of which turn around and open the resulting buffer of 
 bytes as a Silo file. Note that this requires HDF5-1.8.10 or later.</li>
 <li>Added support for Silo curves in polar coordinates.</li>
-<li>Improved time and space performance of DBGetMultiXXX calls' processing long lists of catenated strings at large block counts.</li>
+<li>Improved time and space performance of DBGetMultiXXX calls' processing long
+lists of catenated strings at large block counts. Reads of legacy files containing these
+objects should be faster. Writes of such objects should be faster too.</li>
 <li>DB[Set|Get]DataReadMask using long type was replaced with DB[Set|Get]DataReadMask2 using long long type.</li>
 <li>DBVersionDigits and DBFileVersionDigits were added to return integer major, minor, patch and pre-release version digits.</li>
 <li>DBVersionGEFileVersion was added to compare library version with file version.</li>
@@ -137,19 +146,18 @@ to change, perhaps in dramatic ways, in future releases.</li>
 <h4>In a Nutshell...</h4>
 This applies mainly to very old Silo applications prior to version 4.6.
 Explicitly casting to float** two-level arrays in calls to some of the older Silo functions
-(e.g. DBPutUcd{mesh|var} or DBPutQuad{mesh|var}) is no longer required and will create compiler warnings for C callers and
-compiler errors for C++ callers.
+(e.g. DBPutUcd{mesh|var} or DBPutQuad{mesh|var}) is no longer required and will now result in
+ compiler warnings for C callers and compiler errors for C++ callers.
 
 <h4>The details...</h4>
 In the early years of Silo's development, several functions designed to accept two-level arrays of arbitrary type nonetheless
-defined the function's formal parameters as float** instead of void**. These were changed to void** years ago. However, the
+defined the function's formal arguments as float** instead of void**. These were changed to void** years ago. However, the
 configuration option, --enable-legacy-datatyped-pointers, was provided to maintain backward compatability with this old
 interface.</p>
 
 As part of the work to const qualify the Silo interface, continuing to maintain this backward compatability was becoming too
 complex. The configuration option --enable-legacy-datatyped-pointers has been eliminated along with the convenience macros
-DB_DTPTRx (for x=1, 2 and 3). Where two-level arrays of arbitrary type are handled, now they will always be treated as type
-void const * const *.</p>
+DB_DTPTRx (for x=1, 2 and 3).</p>
 
 If you have been in the habit of using the --enable-legacy-datatyped-pointers configuration option and are wondering what will
 happen when you try to use Silo 4.10 in your application, the most likely biggest issue you will face is to remove cases where

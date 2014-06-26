@@ -108,7 +108,7 @@ X=1 (e.g. DBVCP1_t), a 'void const * const *' for X=2 (e.g. DBVCP2_t), etc.
 
 */
 
-/* For the char-specific to facilitate explicit casts */
+/* For the char-specific case of a constant array of strings, to facilitate explicit casts */
 typedef char const * const *         DBCAS_t;
 
 #ifndef FALSE

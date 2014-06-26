@@ -4657,6 +4657,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    static char *me = "db_pdb_GetPointmesh";
    DBpointmesh tmppm;
    PJcomplist    *_tcl;
+   char          *tmpannums = 0;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -4697,12 +4698,19 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
 
    if (SILO_Globals.dataReadMask & DBPMGhostNodeLabels)
        DEFALL_OBJ("ghost_node_labels", &tmppm.ghost_node_labels, DB_CHAR);
+   DEFALL_OBJ("alt_nodenum_vars",  &tmpannums,  DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_POINTMESH) < 0)
       return NULL;
    if ((pm = DBAllocPointmesh()) == NULL)
       return NULL;
    *pm = tmppm;
+
+   if (tmpannums != NULL)
+   {
+       pm->alt_nodenum_vars = DBStringListToStringArray(tmpannums, 0, !skipFirstSemicolon);
+       FREE(tmpannums);
+   }
 
    /*
     *  Read the remainder of the object: loop over all values
@@ -4941,6 +4949,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     static char *me = "db_pdb_GetQuadmesh";
     DBquadmesh tmpqm;
     PJcomplist    *_tcl;
+    char           *tmpannum = 0, *tmpaznum = 0;
 
     memset(&tmpqm, 0, sizeof(DBquadmesh));
     tmpqm.base_index[0] = -99999;
@@ -4992,6 +5001,8 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
         DEFALL_OBJ("ghost_node_labels", &tmpqm.ghost_node_labels, DB_CHAR);
     if (SILO_Globals.dataReadMask & DBQMGhostZoneLabels)
         DEFALL_OBJ("ghost_zone_labels", &tmpqm.ghost_zone_labels, DB_CHAR);
+    DEFALL_OBJ("alt_nodenum_vars", &tmpannum, DB_CHAR);
+    DEFALL_OBJ("alt_zonenum_vars", &tmpaznum, DB_CHAR);
 
     /* The type passed here to PJ_GetObject is NULL because quadmeshes can have
      * one of two types:  DB_COLLINEAR or DB_NONCOLLINEAR.  */
@@ -5000,6 +5011,17 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     if ((qm = DBAllocQuadmesh()) == NULL)
        return NULL;
     *qm = tmpqm;
+
+    if (tmpannum)
+    {
+        qm->alt_nodenum_vars = DBStringListToStringArray(tmpannum, 0, !skipFirstSemicolon);
+        FREE(tmpannum);
+    }
+    if (tmpaznum)
+    {
+        qm->alt_zonenum_vars = DBStringListToStringArray(tmpaznum, 0, !skipFirstSemicolon);
+        FREE(tmpaznum);
+    }
 
     /*
      * If base_index was not set with the PJ_GetObject call, then
@@ -5267,6 +5289,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    static char *me = "db_pdb_GetUcdmesh";
    DBucdmesh tmpum;
    PJcomplist    *_tcl;
+   char          *tmpannum = 0;
 
    /*------------------------------------------------------------*/
    /*          Comp. Name        Comp. Address     Data Type     */
@@ -5318,12 +5341,19 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
 
    if (SILO_Globals.dataReadMask & DBUMGhostNodeLabels)
        DEFALL_OBJ("ghost_node_labels", &tmpum.ghost_node_labels, DB_CHAR);
+   DEFALL_OBJ("alt_nodenum_vars", &tmpannum, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, meshname, &tmp_obj, DB_UCDMESH) < 0)
       return NULL;
    if ((um = DBAllocUcdmesh()) == NULL)
       return NULL;
    *um = tmpum;
+
+   if (tmpannum)
+   {
+       um->alt_nodenum_vars = DBStringListToStringArray(tmpannum, 0, !skipFirstSemicolon);
+       FREE(tmpannum);
+   }
 
    if (PJ_InqForceSingle() == TRUE)
       um->datatype = DB_FLOAT;
@@ -5991,6 +6021,7 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
     static char         *me = "db_pdb_GetZonelist";
     DBzonelist           tmpzl;
     PJcomplist          *_tcl;
+    char                *tmpaznum = 0;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
@@ -6018,12 +6049,19 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
 
     if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
         DEFALL_OBJ("ghost_zone_labels", &tmpzl.ghost_zone_labels, DB_CHAR);
+    DEFALL_OBJ("alt_zonenum_vars", &tmpaznum, DB_CHAR);
 
     if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_ZONELIST) < 0)
        return NULL;
     if ((zl = DBAllocZonelist()) == NULL)
        return NULL;
     *zl = tmpzl;
+
+    if (tmpaznum)
+    {
+        zl->alt_zonenum_vars = DBStringListToStringArray(tmpaznum, 0, !skipFirstSemicolon);
+        FREE(tmpaznum);
+    }
 
     /* optional global zone numbers */
     zl->gnznodtype = zl->gnznodtype?zl->gnznodtype:DB_INT;
@@ -6082,6 +6120,7 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
     static char         *me = "db_pdb_GetPHZonelist";
     DBphzonelist         tmpphzl;
     PJcomplist          *_tcl;
+    char                *tmpaznum = 0;
 
     /*------------------------------------------------------------*/
     /*          Comp. Name        Comp. Address     Data Type     */
@@ -6110,12 +6149,19 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
 
     if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
        DEFALL_OBJ("ghost_zone_labels", &tmpphzl.ghost_zone_labels, DB_CHAR);
+    DEFALL_OBJ("alt_zonenum_vars", &tmpaznum, DB_CHAR);
 
     if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_PHZONELIST) < 0)
        return NULL;
     if ((phzl = DBAllocPHZonelist()) == NULL)
        return NULL;
     *phzl = tmpphzl;
+
+    if (tmpaznum)
+    {
+        phzl->alt_zonenum_vars = DBStringListToStringArray(tmpaznum, 0, !skipFirstSemicolon);
+        FREE(tmpaznum);
+    }
 
     /* optional global zone numbers */
     phzl->gnznodtype = phzl->gnznodtype?phzl->gnznodtype:DB_INT;
@@ -6152,7 +6198,7 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
 SILO_CALLBACK DBcsgzonelist *
 db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
 {
-    char *tmprnames = 0, *tmpznames = 0;
+    char *tmprnames = 0, *tmpznames = 0, *tmpaznums = 0;
     DBcsgzonelist      *zl = NULL;
     PJcomplist          tmp_obj;
     DBfile_pdb         *dbfile = (DBfile_pdb*)_dbfile;
@@ -6185,6 +6231,7 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
         DEFALL_OBJ("regnames", &tmprnames, DB_CHAR);
     if (SILO_Globals.dataReadMask & DBCSGZonelistZoneNames)
         DEFALL_OBJ("zonenames", &tmpznames, DB_CHAR);
+    DEFALL_OBJ("alt_zonenum_vars", &tmpaznums, DB_CHAR);
 
     if (PJ_GetObject(dbfile->pdb, (char*) objname, &tmp_obj, DB_CSGZONELIST) < 0)
        return NULL;
@@ -6212,6 +6259,12 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
     {
         tmpzl.zonenames = DBStringListToStringArray(tmpznames, &tmpzl.nzones, !skipFirstSemicolon);
         FREE(tmpznames);
+    }
+
+    if (tmpaznums != NULL)
+    {
+        tmpzl.alt_zonenum_vars = DBStringListToStringArray(tmpaznums, 0, !skipFirstSemicolon);
+        FREE(tmpaznums);
     }
 
     if ((zl = DBAllocCSGZonelist()) == NULL)
@@ -9459,6 +9512,15 @@ db_pdb_PutPointmesh (DBfile *dbfile, char const *name, int ndims, DBVCP2_t _coor
           _pm._ghost_node_labels, 1, count);
    }
 
+   if (nels>0 && _pm._alt_nodenum_vars)
+   {
+      int nvars=-1, len; long llen; char *tmpstr = 0;
+      DBStringArrayToStringList((char const * const *)_pm._alt_nodenum_vars, nvars, &tmpstr, &len);
+      llen = (long) len;
+      DBWriteComponent(dbfile, obj, "alt_nodenum_vars", name, "char", tmpstr, 1, &llen);
+      FREE(tmpstr);
+   }
+
    /*-------------------------------------------------------------
     *  Write point-mesh object to output file.
     *-------------------------------------------------------------*/
@@ -9809,6 +9871,24 @@ db_pdb_PutQuadmesh (DBfile *dbfile, char const *name, char const * const *coordn
             count[i] = dims[i]-1;
         DBWriteComponent(dbfile, obj, "ghost_zone_labels", name, "char",
                          _qm._ghost_zone_labels, ndims, count);
+    }
+
+    if (!is_empty && _qm._alt_nodenum_vars)
+    {
+       int nvars=-1, len; long llen; char *tmpstr = 0;
+       DBStringArrayToStringList((char const * const *)_qm._alt_nodenum_vars, nvars, &tmpstr, &len);
+       llen = (long) len;
+       DBWriteComponent(dbfile, obj, "alt_nodenum_vars", name, "char", tmpstr, 1, &llen);
+       FREE(tmpstr);
+    }
+
+    if (!is_empty && _qm._alt_zonenum_vars)
+    {
+       int nvars=-1, len; long llen; char *tmpstr = 0;
+       DBStringArrayToStringList((char const * const *)_qm._alt_zonenum_vars, nvars, &tmpstr, &len);
+       llen = (long) len;
+       DBWriteComponent(dbfile, obj, "alt_zonenum_vars", name, "char", tmpstr, 1, &llen);
+       FREE(tmpstr);
     }
 
    /*-------------------------------------------------------------
@@ -10428,8 +10508,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, char const *name, int nregs,
    {
        char *datatype_str = db_GetDatatypeString(datatype);
        count[0] = lxforms;
-       DBWriteComponent(dbfile, obj, "xforms", name, datatype_str,
-                           xforms, 1, count);
+       DBWriteComponent(dbfile, obj, "xforms", name, datatype_str, xforms, 1, count);
    }
 
    if (_csgzl._regnames)
@@ -10437,8 +10516,7 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, char const *name, int nregs,
        int len; char *tmp;
        DBStringArrayToStringList((char const * const *)_csgzl._regnames, nregs, &tmp, &len);
        count[0] = len;
-       DBWriteComponent(dbfile, obj, "regnames", name, "char",
-                        tmp, 1, count);
+       DBWriteComponent(dbfile, obj, "regnames", name, "char", tmp, 1, count);
        FREE(tmp);
    }
 
@@ -10447,8 +10525,16 @@ db_pdb_PutCSGZonelist (DBfile *dbfile, char const *name, int nregs,
        int len; char *tmp;
        DBStringArrayToStringList((char const * const *)_csgzl._zonenames, nzones, &tmp, &len);
        count[0] = len;
-       DBWriteComponent(dbfile, obj, "zonenames", name, "char",
-                        tmp, 1, count);
+       DBWriteComponent(dbfile, obj, "zonenames", name, "char", tmp, 1, count);
+       FREE(tmp);
+   }
+
+   if (_csgzl._alt_zonenum_vars)
+   {
+       int nvars=-1, len; char *tmp;
+       DBStringArrayToStringList((char const * const *)_csgzl._alt_zonenum_vars, nvars, &tmp, &len);
+       count[0] = len;
+       DBWriteComponent(dbfile, obj, "alt_zonenum_vars", name, "char", tmp, 1, count);
        FREE(tmp);
    }
 
@@ -10660,6 +10746,15 @@ db_pdb_PutUcdmesh (DBfile *dbfile, char const *name, int ndims, char const * con
       count[0] = nnodes;
       DBWriteComponent(dbfile, obj, "ghost_node_labels", name, "char",
           _um._ghost_node_labels, 1, count);
+   }
+
+   if (nnodes>0 && _um._alt_nodenum_vars)
+   {
+      int nvars=-1, len; long llen; char *tmpstr = 0;
+      DBStringArrayToStringList((char const * const *)_um._alt_nodenum_vars, nvars, &tmpstr, &len);
+      llen = (long) len;
+      DBWriteComponent(dbfile, obj, "alt_nodenum_vars", name, "char", tmpstr, 1, &llen);
+      FREE(tmpstr);
    }
 
    /*-------------------------------------------------------------
@@ -11193,6 +11288,15 @@ db_pdb_PutZonelist2 (DBfile *dbfile, char const *name, int nzones, int ndims,
                _uzl._ghost_zone_labels, 1, count);
    }
 
+   if (nzones>0 && _uzl._alt_zonenum_vars)
+   {
+      int nvars=-1, len; long llen; char *tmpstr = 0;
+      DBStringArrayToStringList((char const * const *)_uzl._alt_zonenum_vars, nvars, &tmpstr, &len);
+      llen = (long) len;
+      DBWriteComponent(dbfile, obj, "alt_zonenum_vars", name, "char", tmpstr, 1, &llen);
+      FREE(tmpstr);
+   }
+
    /*-------------------------------------------------------------
     *  Write object to output file.
     *-------------------------------------------------------------*/
@@ -11310,6 +11414,15 @@ db_pdb_PutPHZonelist (DBfile *dbfile, char const *name,
        count[0] = nzones;
        DBWriteComponent(dbfile, obj, "ghost_zone_labels", name, "char",
                _phzl._ghost_zone_labels, 1, count);
+   }
+
+   if (nzones>0 && _phzl._alt_zonenum_vars)
+   {
+      int nvars=-1, len; long llen; char *tmpstr = 0;
+      DBStringArrayToStringList((char const * const *)_phzl._alt_zonenum_vars, nvars, &tmpstr, &len);
+      llen = (long) len;
+      DBWriteComponent(dbfile, obj, "alt_zonenum_vars", name, "char", tmpstr, 1, &llen);
+      FREE(tmpstr);
    }
 
    /*-------------------------------------------------------------

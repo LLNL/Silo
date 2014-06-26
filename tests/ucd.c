@@ -202,7 +202,9 @@ build_ucd(DBfile *dbfile, char *name)
 #endif
 
     float         *coords[3], *vars[8];
-    char          *coordnames[3], *varnames[8];
+    char          *coordnames[3], *varnames[8], *alt_nodenum_varnames[5];
+
+    DBoptlist     *opts;
 
     fshapesize = 2;
     fshapecnt = NFACES;
@@ -218,6 +220,11 @@ build_ucd(DBfile *dbfile, char *name)
     coordnames[1] = "Y";
     vars[0] = d;
     varnames[0] = "d";
+    alt_nodenum_varnames[0] = "foo";
+    alt_nodenum_varnames[1] = "bar";
+    alt_nodenum_varnames[2] = "gorfo";
+    alt_nodenum_varnames[3] = "qwerty";
+    alt_nodenum_varnames[4] = 0;
 
     DBPutFacelist(dbfile, "fl", NFACES, 2, fnodelist, LFNODELIST, 0,
                         NULL, &fshapesize, &fshapecnt, NFSHAPES,
@@ -228,8 +235,11 @@ build_ucd(DBfile *dbfile, char *name)
                         &zshapesize, &zshapecnt, NZSHAPES);
     DBSetDeprecateWarnings(3);
 
+    opts = DBMakeOptlist(3);
+    DBAddOption(opts, DBOPT_ALT_NODENUM_VARS, alt_nodenum_varnames);
     DBPutUcdmesh(dbfile, name, 2, (DBCAS_t) coordnames,
-        coords, NNODES, NZONES, "zl", NULL, DB_FLOAT, NULL);
+        coords, NNODES, NZONES, "zl", NULL, DB_FLOAT, opts);
+    DBFreeOptlist(opts);
 
     vars[0] = d;
     varnames[0] = "d";
