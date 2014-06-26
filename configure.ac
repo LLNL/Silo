@@ -246,7 +246,7 @@ dnl while non-empty string means it is enabled.
 dnl
 DEFAULT_PYTHONMODULE=""
 DEFAULT_BROWSER="browser"
-DEFAULT_SILEX="silex"
+DEFAULT_SILEX=""
 DEFAULT_HZIP="hzip"
 DEFAULT_FPZIP="fpzip"
 DEFAULT_FORTRAN="fortran"
@@ -451,8 +451,8 @@ SILEX=$DEFAULT_SILEX
 AC_ARG_ENABLE(silex,
     AC_HELP_STRING([--enable-silex], 
         [build the silex browser @<:@default=no@:>@]),
-    if test "$enable_silex" = "no"; then
-        SILEX=""
+    if test "$enable_silex" = "yes"; then
+        SILEX="silex"
     fi)
 AC_SUBST(SILEX)
 

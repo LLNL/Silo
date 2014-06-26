@@ -2939,7 +2939,7 @@ fi
 
 DEFAULT_PYTHONMODULE=""
 DEFAULT_BROWSER="browser"
-DEFAULT_SILEX="silex"
+DEFAULT_SILEX=""
 DEFAULT_HZIP="hzip"
 DEFAULT_FPZIP="fpzip"
 DEFAULT_FORTRAN="fortran"
@@ -23276,8 +23276,8 @@ fi
 SILEX=$DEFAULT_SILEX
 # Check whether --enable-silex was given.
 if test "${enable_silex+set}" = set; then
-  enableval=$enable_silex; if test "$enable_silex" = "no"; then
-        SILEX=""
+  enableval=$enable_silex; if test "$enable_silex" = "yes"; then
+        SILEX="silex"
     fi
 fi
 
