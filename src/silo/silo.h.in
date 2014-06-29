@@ -665,6 +665,17 @@ typedef enum {
 #define I3D(s,i,j,k)   (k)*s[2]+(j)*s[1]+(i)*s[0]
 #define I2D(s,i,j)     (j)*s[1]+(i)*s[0]
 
+/* Note we should not use MAX_DOUBLE here as its definition could be different
+   from one machine to the next. We need something that is a constant across
+   all machines we will operate on. And, yes, it means this particular number
+   cannot be used for any real data values or for the missing data value. I
+   think the risk of problems is minimal. Also, we want a zero in the file
+   to represent the fact that a missing value is NOT SET. Nonetheless, we
+   want Silo clients to be able to specify that zero represents the missing
+   value. So, we adjust the interpretation of missing values on write and 
+   on read to/from the file. On write, NOT_SET in mem gets mapped to zero in
+   the file and zero in mem gets mapped to NOT_SET in the file. On read, this
+   mapping is reversed. */
 #define DB_MISSING_VALUE_NOT_SET ((double) (1.0e+308))
 
 /*-------------------------------------------------------------------------

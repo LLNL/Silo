@@ -7797,6 +7797,7 @@ db_hdf5_PutCurve(DBfile *_dbfile, char const *name, void const *xvals, void cons
         
         /* Reset global curve options */
         memset(&_cu, 0, sizeof _cu);
+        _cu._missing_value = DB_MISSING_VALUE_NOT_SET;
         if (0!=db_ProcessOptlist(DB_CURVE, opts)) {
             db_perror("bad options", E_CALLFAIL, me);
             UNWIND();
@@ -10427,7 +10428,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
         m.datatype = (DB_FLOAT==datatype || DB_DOUBLE==datatype)?0:datatype;
         m.conserved = _um._conserved;
         m.extensive = _um._extensive;
-        db_SetMissingValueForGet(m.missing_value, _um._missing_value);
+        db_SetMissingValueForPut(m.missing_value, _um._missing_value);
         strcpy(m.meshid, OPT(_um._meshname));
         strcpy(m.label, OPT(_um._label));
         strcpy(m.units, OPT(_um._unit));

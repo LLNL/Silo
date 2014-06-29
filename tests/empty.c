@@ -112,7 +112,7 @@ main(int argc, char *argv[])
     void const * const vvars[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
     void           *var = (void*)1;
     int             iarr[3] = {1,1,1}; /* dummy int array */
-    int             qmdims[3] = {0,0,0};
+    int             QMDIMS[3] = {0,0,0};
     double          exts[4] = {0,0,0,0};
     DBoptlist      *ol = 0;
     double          dtime = 0.0;
@@ -174,10 +174,10 @@ main(int argc, char *argv[])
         ASSERT(DBPutPointvar1(dbfile,"pv1a","empty_pointmesha",var,ZZ,dt,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutPointvar1(dbfile,"pv1b","empty_pointmesha",  0,ZZ,dt,OL(ol)),retval<0,retval==0);
 
-        /* empty quad meshes and vars (qmdims is the magic zero'ing arg) */
-        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmesha",     0,coords,qmdims,1,dt,DB_COLLINEAR,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmeshb",cnames,     0,qmdims,2,dt,DB_COLLINEAR,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmeshc",cnames,coords,qmdims,3,dt,DB_COLLINEAR,OL(ol)),retval<0,retval==0);
+        /* empty quad meshes and vars (QMDIMS is the magic zero'ing arg) */
+        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmesha",     0,coords,QMDIMS,1,dt,DB_COLLINEAR,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmeshb",cnames,     0,QMDIMS,2,dt,DB_COLLINEAR,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutQuadmesh(dbfile,"empty_quadmeshc",cnames,coords,QMDIMS,3,dt,DB_COLLINEAR,OL(ol)),retval<0,retval==0);
 
         ASSERT(DBPutQuadvar(dbfile,"qva","empty_quadmesha",1,cnames,vars,iarr,ZZ,0,0,dt,ct,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutQuadvar(dbfile,"qvb","empty_quadmesha",2,     0,vars,iarr,ZZ,0,0,dt,ct,OL(ol)),retval<0,retval==0);
