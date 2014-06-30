@@ -104,7 +104,7 @@ for df in multi_*.h5; do
     # do a diff on the files
     rm -f testhzip.out
     $topDir/../tools/browser/browser -q -e diff $df h5_hzip_files/$df 1>testhzip.out 2>&1
-    if test `wc -l testhzip.out | tr -s ' ' | cut -d' ' -f2` -gt 0; then
+    if test `cat testhzip.out | wc -l | tr -d ' '` -gt 0; then
         result=1
         break
     fi

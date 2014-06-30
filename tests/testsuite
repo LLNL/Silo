@@ -955,7 +955,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF || at_write_fail=1
-silo 4.10.0-pre5 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS" test groups:
+silo 4.10.0-pre6 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS" test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -984,7 +984,7 @@ _ATEOF
   exit $at_write_fail
 fi
 if $at_version_p; then
-  $as_echo "$as_me (silo 4.10.0-pre5)" &&
+  $as_echo "$as_me (silo 4.10.0-pre6)" &&
   cat <<\_ACEOF || at_write_fail=1
 
 Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
@@ -1193,11 +1193,11 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 sed 'h;s/./-/g;s/^.../## /;s/...$/ ##/;p;x;p;x' <<_ASBOX
-## silo 4.10.0-pre5 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
+## silo 4.10.0-pre6 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
 _ASBOX
 {
   sed 'h;s/./-/g;s/^.../## /;s/...$/ ##/;p;x;p;x' <<_ASBOX
-## silo 4.10.0-pre5 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
+## silo 4.10.0-pre6 test suite: VALGRIND="$VALGRIND" STARGS="$STARGS". ##
 _ASBOX
   echo
 
@@ -1928,7 +1928,7 @@ _ASBOX
   $as_echo "Please send \`${at_testdir+${at_testdir}/}$as_me.log' and all information you think might help:
 
    To: <visit-users@elist.ornl.gov>
-   Subject: [silo 4.10.0-pre5] $as_me: $at_fail_list${at_fail_list:+ failed${at_xpass_list:+, }}$at_xpass_list${at_xpass_list:+ passed unexpectedly}
+   Subject: [silo 4.10.0-pre6] $as_me: $at_fail_list${at_fail_list:+ failed${at_xpass_list:+, }}$at_xpass_list${at_xpass_list:+ passed unexpectedly}
 "
   if test $at_debug_p = false; then
     echo
@@ -1962,15 +1962,15 @@ This version of the Silo library is greater than or equal to 4
 This version of the Silo library is NOT greater than or equal to 9
 This version of the Silo library is greater than or equal to 4.6
 This version of the Silo library is NOT greater than or equal to 90.5.2
-DBVersion() returns "4.10.0-pre5"
+DBVersion() returns "4.10.0-pre6"
 DBVersionGE(4,6,0) returns 1
 DBVersionGE(90,5,2) returns 0
 On file handle returned from DBCreate...
-    DBFileVersion() returns "4.10.0-pre5"
+    DBFileVersion() returns "4.10.0-pre6"
     DBFileVersionGE(4,6,0) returns 1
     DBFileVersionGE(90,5,2) returns 0
 On file handle returned from DBOpen...
-    DBFileVersion() returns "4.10.0-pre5"
+    DBFileVersion() returns "4.10.0-pre6"
     DBFileVersionGE(4,6,0) returns 1
     DBFileVersionGE(90,5,2) returns 0
 On old silo file handle returned from DBOpen...
