@@ -129,6 +129,7 @@ int main(int argc, char **argv) {
     int            i, driver = DB_PDB;
     char          *filename = "mat3d_3across.pdb";
     int            show_all_errors = FALSE;
+    int            custom_mat = FALSE;
     char const * const coordnames[3] = {"x", "y", "z"};
     float *coord[3];
 
@@ -141,6 +142,8 @@ int main(int argc, char **argv) {
             filename = "mat3d_3across.h5";
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
+        } else if (!strcmp(argv[i], "custom-mat")) {
+            custom_mat = 1;
 	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
@@ -168,6 +171,58 @@ int main(int argc, char **argv) {
 
   DBPutMaterial(db, "material", "mesh", nmat, matnos, matlist, dims, 3, 
 		mix_next, mix_mat, mix_zone, mix_vf, mixlen, DB_FLOAT, NULL);
+
+  if (custom_mat)
+  {
+      long count[3]; 
+      DBobject *udef_matobj = DBMakeObject("userdef_material", DB_MATERIAL, 20);
+
+      /* Standard material stuf (in order of args to DBPutMaterial but that doesn't matter) */
+      DBAddStrComponent(udef_matobj, "mesh", "mesh");
+      DBAddIntComponent(udef_matobj, "nmat", nmat);
+      count[0] = nmat;
+      DBWriteComponent(db, udef_matobj, "matnos", "userdef_material", "integer", matnos, 1, count);
+      count[0] = dims[0]; count[1] = dims[1]; count[2] = dims[2];
+      DBWriteComponent(db, udef_matobj, "matlist", "userdef_material", "integer", matlist, 3, count);
+      count[0] = 3;
+      DBWriteComponent(db, udef_matobj, "dims", "userdef_material", "integer", dims, 1, count);
+      DBAddIntComponent(udef_matobj, "ndims", 3);
+      count[0] = mixlen;
+      DBWriteComponent(db, udef_matobj, "mix_next", "userdef_material", "integer", mix_next, 1, count);
+      DBWriteComponent(db, udef_matobj, "mix_mat", "userdef_material", "integer", mix_mat, 1, count);
+      DBWriteComponent(db, udef_matobj, "mix_zone", "userdef_material", "integer", mix_zone, 1, count);
+      DBWriteComponent(db, udef_matobj, "mix_vf", "userdef_material", "float", mix_vf, 1, count);
+      DBAddIntComponent(udef_matobj, "mixlen", mixlen);
+      DBAddIntComponent(udef_matobj, "datatype", DB_FLOAT);
+
+      /* Ok, lets write some extra arrays with interesting stuff */
+      {
+          char *strArray[] = {"mark","sandy","fred","steve","sue","JayLo"};
+          char *tmpList = 0;
+          int len;
+
+          /* Add a simple integer valued scalar member */
+          DBAddIntComponent(udef_matobj, "foo", 42);
+
+          /* Add a simple double valued scalar member */
+          DBAddDblComponent(udef_matobj, "M_PI", 3.1415926);
+
+          /* Add a string valued component */
+          DBAddStrComponent(udef_matobj, "make", "Toyota");
+
+          /* Add an array of strings (Katie's case) */
+          DBStringArrayToStringList((DBCAS_t) strArray, 6, &tmpList, &len);
+          count[0] = len;
+          DBWriteComponent(db, udef_matobj, "Katies_Names", "userdef_material", "char", tmpList, 1, count);
+          free(tmpList);
+      }
+
+      /* Finally, write the generic object to the file */
+      DBWriteObject(db, udef_matobj, 0);
+
+      DBFreeObject(udef_matobj);
+  }
+
 
   DBClose(db);
  

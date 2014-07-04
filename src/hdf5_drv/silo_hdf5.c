@@ -756,6 +756,7 @@ static hid_t    DBpointmesh_mt5;
 typedef struct DBpointvar_mt {
     int                 nvals;
     int                 nels;
+    int                 ndims;
     int                 nspace;
     int                 origin;
     int                 min_index;
@@ -2525,6 +2526,7 @@ db_hdf5_init(void)
     STRUCT(DBpointvar) {
         MEMBER_S(int,           nvals);
         MEMBER_S(int,           nels);
+        MEMBER_S(int,           ndims);
         MEMBER_S(int,           nspace);
         MEMBER_S(int,           origin);
         MEMBER_S(int,           min_index);
@@ -6783,8 +6785,9 @@ db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char const *compname,
     int         datatype = db_GetDatatypeID(dataname);
     
     for (i=0; i<rank; i++) size[i] = _size[i];
+    varname[0] = '\0';
     db_hdf5_compwr(dbfile, datatype, rank, size, data, varname,
-        friendly_name(obj->name, varname, 0));
+        friendly_name(obj->name, compname, 0));
     DBAddVarComponent(obj, compname, varname);
     return 0;
 }
@@ -8023,13 +8026,13 @@ db_hdf5_PutCsgmesh(DBfile *_dbfile, char const *name, int ndims,
             m.max_extents[2] = extents[5];
         }
 
-        db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)typeflags,m.typeflags/*out*/,
-            friendly_name(name, "_typeflags", 0));
-        if (bndids)
-            db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)bndids,m.bndids/*out*/,
-                friendly_name(name, "_bndids", 0));
-        db_hdf5_compwr(dbfile,datatype,1,&lcoeffs,(void*)coeffs,m.coeffs/*out*/,
-            friendly_name(name, "_coeffs", 0));
+        if (nbounds)
+        {
+            db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)typeflags,m.typeflags/*out*/, friendly_name(name, "_typeflags", 0));
+            if (bndids)
+                db_hdf5_compwr(dbfile,DB_INT,1,&nbounds,(void*)bndids,m.bndids/*out*/, friendly_name(name, "_bndids", 0));
+            db_hdf5_compwr(dbfile,datatype,1,&lcoeffs,(void*)coeffs,m.coeffs/*out*/, friendly_name(name, "_coeffs", 0));
+        }
 
         /* Build csgmesh header in memory */
         m.ndims = ndims;
@@ -8263,7 +8266,7 @@ db_hdf5_PutCsgvar(DBfile *_dbfile, char const *vname, char const *meshname,
             db_perror("too many variables", E_BADARGS, me);
             UNWIND();
         }
-        for (i=0; i<nvars; i++) {
+        for (i=0; i<nvars && nvals; i++) {
             db_hdf5_compwr(dbfile, datatype, 1, &nvals, (void*)vars[i],
                 m.vals[i]/*out*/, friendly_name(varnames[i], "_data", 0));
         }
@@ -9360,10 +9363,19 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
     static char         *me = "db_hdf5_PutQuadvar";
     char                *s = 0;
     DBquadvar_mt        m;
-    int                 i, nels;
+    int                 i, nels, is_empty = 1;
     int                 compressionFlags;
     void const * const    *vars = (void const * const *) _vars;
     void const * const *mixvars = (void const * const *) _mixvars;
+
+    for (i = 0; i < ndims; i++)
+    {
+        if (dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
 
     FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
@@ -9408,7 +9420,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
             db_perror("too many subvariables", E_BADARGS, me);
             UNWIND();
         }
-        for (i=0; i<nvars && ndims; i++) {
+        for (i=0; i<nvars && !is_empty; i++) {
             /* Handle adjustment for edge/face centerings */
             if ((ndims > 1 && centering == DB_EDGECENT) ||
                 (ndims > 2 && centering == DB_FACECENT))
@@ -10391,7 +10403,7 @@ db_hdf5_PutUcdvar(DBfile *_dbfile, char const *name, char const *meshname, int n
             db_perror("too many variables", E_BADARGS, me);
             UNWIND();
         }
-        for (i=0; i<nvars; i++) {
+        for (i=0; i<nvars && nels; i++) {
             db_hdf5_compwrz(dbfile, datatype, 1, &nels, vars[i],
                 m.value[i]/*out*/, friendly_name(varnames[i], "_data", 0), compressionFlags);
 //#warning WHY NOT COMPRESS MIX DATA TOO
@@ -11500,22 +11512,31 @@ db_hdf5_PutMaterial(
 {
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBmaterial_mt       m;
-    int                 i, nels;
+    int                 i, nels, is_empty = 1;
     char               *s = NULL;
+
+    for (i = 0; i < ndims; i++)
+    {
+        if (dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }   
 
     memset(&m, 0, sizeof m);
     PROTECT {
         /* Set global options */
         db_ProcessOptlist(DB_MATERIAL, optlist);
-        nels = nmat==0?0:1;
+        nels = 1;
         for (i=0; i<ndims; i++) nels *= dims[i];
 
         /* Write raw data arrays */
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nels, matlist,
-            m.matlist/*out*/, friendly_name(name,"_matlist", 0));
+        if (!is_empty)
+            db_hdf5_compwr(dbfile, DB_INT, 1, &nels, matlist, m.matlist/*out*/, friendly_name(name,"_matlist", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nmat, matnos,
             m.matnos/*out*/, friendly_name(name,"_matnos", 0));
-        if (mixlen>0) {
+        if (!is_empty && mixlen>0) {
             db_hdf5_compwr(dbfile, datatype, 1, &mixlen, mix_vf,
                 m.mix_vf/*out*/, friendly_name(name,"_mix_vf", 0));
             db_hdf5_compwr(dbfile, DB_INT, 1, &mixlen, mix_next,
@@ -11747,7 +11768,16 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char const *name, char const *matname, in
     DBfile_hdf5         *dbfile = (DBfile_hdf5*)_dbfile;
     DBmatspecies_mt     m;
     char               *s = NULL;
-    int                 i, nels, nstrs = 0;
+    int                 i, nels, nstrs = 0, is_empty = 1;
+
+    for (i = 0; i < ndims; i++)
+    {
+        if (dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }   
     
     memset(&m, 0, sizeof m);
     PROTECT {
@@ -11755,16 +11785,19 @@ db_hdf5_PutMatspecies(DBfile *_dbfile, char const *name, char const *matname, in
         db_ProcessOptlist(DB_MATSPECIES, optlist);
 
         /* Write raw data arrays */
-        nels = nmat==0?0:1;
+        nels = 1;
         for (i=0; i<ndims; i++) nels *= dims[i];
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nels, speclist, m.speclist/*out*/,
-            friendly_name(name,"_speclist", 0));
+        if (!is_empty)
+            db_hdf5_compwr(dbfile, DB_INT, 1, &nels, speclist, m.speclist/*out*/, friendly_name(name,"_speclist", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nmat, nmatspec, m.nmatspec/*out*/,
             friendly_name(name,"_nmatspec", 0));
-        db_hdf5_compwr(dbfile, datatype, 1, &nspecies_mf, species_mf,
-            m.species_mf/*out*/, friendly_name(name,"_species_mf", 0));
-        db_hdf5_compwr(dbfile, DB_INT, 1, &mixlen, mix_speclist,
-            m.mix_speclist/*out*/, friendly_name(name,"_mix_speclist", 0));
+        if (!is_empty)
+        {
+            db_hdf5_compwr(dbfile, datatype, 1, &nspecies_mf, species_mf, m.species_mf/*out*/,
+                friendly_name(name,"_species_mf", 0));
+            db_hdf5_compwr(dbfile, DB_INT, 1, &mixlen, mix_speclist, m.mix_speclist/*out*/,
+                friendly_name(name,"_mix_speclist", 0));
+        }
         
         if (_ms._specnames != NULL) {
             int len;
@@ -14059,7 +14092,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char const *name, char const *meshname, int
         /* Set global options */
         saved_ndims = _pm._ndims;
         memset(&_pm, 0, sizeof _pm);
-        _pm._ndims = _pm._nspace = saved_ndims;
+        _pm._ndims = saved_ndims;
         _pm._group_no = -1;
         _pm._missing_value = DB_MISSING_VALUE_NOT_SET;
         db_ProcessOptlist(DB_POINTMESH, optlist);
@@ -14089,6 +14122,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char const *name, char const *meshname, int
         /* Build header in memory */
         m.nvals = nvars;
         m.nels = nels;
+        m.ndims = _pm._ndims;
         m.nspace = _pm._nspace;
         m.origin = _pm._origin;
         m.min_index = _pm._minindex;
@@ -14110,6 +14144,7 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char const *name, char const *meshname, int
         STRUCT(DBpointvar) {
             if (m.nvals)        MEMBER_S(int, nvals);
             if (m.nels)         MEMBER_S(int, nels);
+            if (m.ndims)        MEMBER_S(int, ndims);
             if (m.nspace)       MEMBER_S(int, nspace);
             if (m.origin)       MEMBER_S(int, origin);
             if (m.datatype)     MEMBER_S(int, datatype);
@@ -14212,7 +14247,7 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char const *name)
         pv->nels = m.nels;
         pv->nvals = m.nvals;
         pv->nspace = m.nspace;
-        pv->ndims = m.nvals;
+        pv->ndims = m.ndims;
         pv->origin = m.origin;
         pv->time = m.time;
         pv->dtime = m.dtime;

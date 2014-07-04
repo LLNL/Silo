@@ -7953,6 +7953,16 @@ db_pdb_PutMaterial(
    long           count[3];
    DBobject      *obj;
    char          *datatype_str;
+   int            is_empty = 1;
+
+   for (i = 0; i < ndims; i++)
+   {
+       if (dims[i] > 0)
+       {
+           is_empty = 0;
+           break;
+       }
+   }
 
    /*-------------------------------------------------------------
     *  Process option list; build object description.
@@ -7988,16 +7998,15 @@ db_pdb_PutMaterial(
       nels *= dims[i];
 
    count[0] = nels;
-   DBWriteComponent(dbfile, obj, "matlist", name, "integer",
-                    matlist, 1, count);
+   if (!is_empty)
+       DBWriteComponent(dbfile, obj, "matlist", name, "integer", matlist, 1, count);
 
    /* Do material numbers list */
    count[0] = nmat;
-   DBWriteComponent(dbfile, obj, "matnos", name, "integer",
-                    matnos, 1, count);
+   DBWriteComponent(dbfile, obj, "matnos", name, "integer", matnos, 1, count);
 
    /* Now do mixed data arrays (mix_zone is optional) */
-   if (mixlen > 0) {
+   if (!is_empty && mixlen > 0) {
 
       datatype_str = db_GetDatatypeString(datatype);
       count[0] = mixlen;
@@ -8095,6 +8104,16 @@ db_pdb_PutMatspecies (DBfile *dbfile, char const *name, char const *matname,
    int            i, nels, nstrs;
    DBobject      *obj;
    char          *datatype_str;
+   int            is_empty = 1;
+
+   for (i = 0; i < ndims; i++)
+   {
+       if (dims[i] > 0)
+       {
+           is_empty = 0;
+           break;
+       }
+   }
 
    /*-------------------------------------------------------------
     *  Process option list; build object description.
@@ -8127,23 +8146,22 @@ db_pdb_PutMatspecies (DBfile *dbfile, char const *name, char const *matname,
       nels *= dims[i];
 
    count[0] = nels;
-   DBWriteComponent(dbfile, obj, "speclist", name, "integer",
-                    speclist, 1, count);
+   if (!is_empty)
+       DBWriteComponent(dbfile, obj, "speclist", name, "integer", speclist, 1, count);
 
    /* Do material species count per material list */
    count[0] = nmat;
-   DBWriteComponent(dbfile, obj, "nmatspec", name, "integer",
-                    nmatspec, 1, count);
+   DBWriteComponent(dbfile, obj, "nmatspec", name, "integer", nmatspec, 1, count);
 
    /* Do material species mass fractions */
    datatype_str = db_GetDatatypeString(datatype);
    count[0] = nspecies_mf;
-   DBWriteComponent(dbfile, obj, "species_mf", name, datatype_str,
-                    species_mf, 1, count);
+   if (!is_empty)
+       DBWriteComponent(dbfile, obj, "species_mf", name, datatype_str, species_mf, 1, count);
    FREE(datatype_str);
 
    /* Now do mixed data arrays */
-   if (mixlen > 0) {
+   if (!is_empty && mixlen > 0) {
       count[0] = mixlen;
       DBWriteComponent(dbfile, obj, "mix_speclist", name, "integer",
                        mix_speclist, 1, count);
@@ -9973,6 +9991,16 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char const *name, char const *meshname, int 
    int          maxindex[3] ;
    void const * const    *vars = (void const * const *) _vars;
    void const * const *mixvars = (void const * const *) _mixvars;
+   int          is_empty = 1;
+
+   for (i = 0; i < ndims; i++)
+   {
+       if (dims[i] > 0)
+       {
+           is_empty = 0;
+           break;
+       }
+   }
 
    /*-------------------------------------------------------------
     *  Initialize global data, and process options.
@@ -9987,7 +10015,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char const *name, char const *meshname, int 
     *  Write variable arrays.
     *  Set index variables and counters.
     *-----------------------------------------------------------*/
-   nels = ndims?1:0;
+   nels = !is_empty?1:0;
    for (i = 0; i < ndims; i++) {
       count[i] = dims[i];
       nels *= dims[i];
@@ -10051,7 +10079,7 @@ db_pdb_PutQuadvar (DBfile *_dbfile, char const *name, char const *meshname, int 
    suffix = "data";
 
    datatype_str = db_GetDatatypeString(datatype);
-   for (i = 0; i < nvars && ndims; i++) {
+   for (i = 0; i < nvars && !is_empty; i++) {
 
       db_mkname(dbfile->pdb, varnames[i], suffix, tmp2);
       if ((ndims > 1 && centering == DB_EDGECENT) ||
@@ -10206,17 +10234,16 @@ db_pdb_PutCsgmesh (DBfile *dbfile, char const *name, int ndims,
 
    count[0] = nbounds;
 
-   DBWriteComponent(dbfile, obj, "typeflags", name, "integer",
-                    typeflags, 1, count);
+   if (nbounds)
+       DBWriteComponent(dbfile, obj, "typeflags", name, "integer", typeflags, 1, count);
 
-   if (bndids)
-       DBWriteComponent(dbfile, obj, "bndids", name, "integer",
-                        bndids, 1, count);
+   if (nbounds && bndids)
+       DBWriteComponent(dbfile, obj, "bndids", name, "integer", bndids, 1, count);
 
    datatype_str = db_GetDatatypeString(datatype);
    count[0] = lcoeffs;
-   DBWriteComponent(dbfile, obj, "coeffs", name, datatype_str,
-                       coeffs, 1, count);
+   if (nbounds)
+       DBWriteComponent(dbfile, obj, "coeffs", name, datatype_str, coeffs, 1, count);
    FREE(datatype_str);
 
    if (extents)
@@ -10366,7 +10393,7 @@ db_pdb_PutCsgvar (DBfile *_dbfile, char const *name, char const *meshname,
    suffix = "data";
    datatype_str = db_GetDatatypeString(datatype);
 
-   for (i = 0; i < nvars; i++) {
+   for (i = 0; i < nvars && nels; i++) {
 
       db_mkname(dbfile->pdb, (char*) varnames[i], suffix, tmp2);
       PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i],
@@ -11032,7 +11059,7 @@ db_pdb_PutUcdvar (DBfile *_dbfile, char const *name, char const *meshname, int n
    suffix = "data";
    datatype_str = db_GetDatatypeString(datatype);
 
-   for (i = 0; i < nvars; i++) {
+   for (i = 0; i < nvars && nels; i++) {
 
       db_mkname(dbfile->pdb, varnames[i], suffix, tmp2);
       PJ_write_len(dbfile->pdb, tmp2, datatype_str, vars[i],
@@ -12165,22 +12192,15 @@ db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
    count[0] = ndims;
    /*  File name contained within meshname */
    p = (char *)strchr(meshname, ':');
-   if (p == NULL && !is_empty) {
+   if (p == NULL) {
       PJ_write_len(dbfile->pdb, _qm._nm_dims, "integer", dims, 1, count);
-      PJ_write_len(dbfile->pdb, _qm._nm_zones, "integer", _qm._zones,
-                1, count);
-      PJ_write_len(dbfile->pdb, _qm._nm_maxindex_n, "integer",
-                _qm._maxindex_n, 1, count);
-      PJ_write_len(dbfile->pdb, _qm._nm_maxindex_z, "integer",
-                _qm._maxindex_z, 1, count);
-      PJ_write_len(dbfile->pdb, _qm._nm_minindex, "integer",
-                _qm._minindex, 1, count);
-      PJ_write_len(dbfile->pdb, _qm._nm_baseindex, "integer",
-                _qm._baseindex, 1, count);
-
+      PJ_write_len(dbfile->pdb, _qm._nm_zones, "integer", _qm._zones, 1, count);
+      PJ_write_len(dbfile->pdb, _qm._nm_maxindex_n, "integer", _qm._maxindex_n, 1, count);
+      PJ_write_len(dbfile->pdb, _qm._nm_maxindex_z, "integer", _qm._maxindex_z, 1, count);
+      PJ_write_len(dbfile->pdb, _qm._nm_minindex, "integer", _qm._minindex, 1, count);
+      PJ_write_len(dbfile->pdb, _qm._nm_baseindex, "integer", _qm._baseindex, 1, count);
       a[0] = a[1] = a[2] = 0.5;
       PJ_write_len(dbfile->pdb, _qm._nm_alignz, "float", a, 1, count);
-
       a[0] = a[1] = a[2] = 0.0;
       PJ_write_len(dbfile->pdb, _qm._nm_alignn, "float", a, 1, count);
    }
