@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
       DBobject *udef_matobj = DBMakeObject("userdef_material", DB_MATERIAL, 20);
 
       /* Standard material stuf (in order of args to DBPutMaterial but that doesn't matter) */
-      DBAddStrComponent(udef_matobj, "mesh", "mesh");
+      DBAddStrComponent(udef_matobj, "meshid", "mesh");
       DBAddIntComponent(udef_matobj, "nmat", nmat);
       count[0] = nmat;
       DBWriteComponent(db, udef_matobj, "matnos", "userdef_material", "integer", matnos, 1, count);
@@ -216,10 +216,6 @@ int main(int argc, char **argv) {
           DBWriteComponent(db, udef_matobj, "Katies_Names", "userdef_material", "char", tmpList, 1, count);
           free(tmpList);
       }
-
-      /* for HDF5 driver, have to add this, and at end of structure */
-      if (driver != DB_PDB)
-          DBAddStrComponent(udef_matobj, "meshid", "mesh");
 
       /* Finally, write the generic object to the file */
       DBWriteObject(db, udef_matobj, 0);
