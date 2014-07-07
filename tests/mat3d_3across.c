@@ -217,6 +217,10 @@ int main(int argc, char **argv) {
           free(tmpList);
       }
 
+      /* for HDF5 driver, have to add this, and at end of structure */
+      if (driver != DB_PDB)
+          DBAddStrComponent(udef_matobj, "meshid", "mesh");
+
       /* Finally, write the generic object to the file */
       DBWriteObject(db, udef_matobj, 0);
 

@@ -82,7 +82,6 @@ produced by silodiff.</li>
 <li>Fixed file and library version comparison (GE) functions and macros.</li>
 <li>Fixed a leak in HZIP compression library.</li>
 <li>Fixed some leaks in browser tool using 'diff' operator.</li>
-
 </ul>
 
 <h3>3. New features in this release</h3>
@@ -146,6 +145,11 @@ browser using the --enable-silex configuration switch (Thanks to Alex Henrie).</
 <li>Improved silodiff tool's ability to process directories. It previously required files
 in both directories to have the same names. Now, it simply diffs files in two directories
 in reverse order of time of last modification.</li>
+<li>Enhanced both PDB and HDF5 drivers to support customization of
+standard objects; that is the ability to create an object via DBMakeObject/DBWriteObject that would have
+otherwise been created via a DBPutXxxx (e.g. DBPutQuadvar) call, such that callers of DBGetXxxx will
+see the object as they ordinarily would. This permits Silo clients to create user-defined
+customizations to Silo's standard objects.</li>
 </ul>
 
 <h3>4. Removal of Legacy Datatype'd pointers.</h3>

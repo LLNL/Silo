@@ -531,6 +531,7 @@ typedef enum {
 #define     E_MAXFILEOPTSETS 32 /*Too many file options sets */
 #define     E_NOHDF5 33         /*HDF5 driver not available */
 #define     E_EMPTYOBJECT 34    /*Empty object not currently permitted*/
+#define     E_OBJBUFFULL  35    /*No more temp. buffer space for object */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
@@ -1520,6 +1521,7 @@ typedef struct DBoptlist_ {
 
 } DBoptlist;
 
+#define DB_MAX_H5_OBJ_VALS 64
 typedef struct DBobject_ {
 
     char          *name;
@@ -1529,6 +1531,13 @@ typedef struct DBobject_ {
     int            ncomponents; /* Number of components */
     int            maxcomponents;  /* Max number of components */
 
+    /* fields below are a hack for HDF5 driver to handle
+       customization of 'standard' objects */
+    char           h5_vals[DB_MAX_H5_OBJ_VALS*3*sizeof(double)];
+    int            h5_offs[DB_MAX_H5_OBJ_VALS];
+    int            h5_sizes[DB_MAX_H5_OBJ_VALS];
+    int            h5_types[DB_MAX_H5_OBJ_VALS];
+    char          *h5_names[DB_MAX_H5_OBJ_VALS];
 } DBobject;
 
 typedef struct _DBmrgtnode {

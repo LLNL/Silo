@@ -180,6 +180,7 @@ PUBLIC char   *_db_err_list[] =
     "of HDF5 already on your sytem, you will also need\n"
     "to obtain HDF5 from www.hdfgroup.org and install it.", /* 33 */
     "Empty objects not permitted. See DBSetAllowEmptyObjects()." /* 34 */
+    "No more tiny array buffer space for custom object." /* 35 */
 };
 
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
@@ -3315,6 +3316,9 @@ DBFreeObject(DBobject *object)
         for (i = 0; i < object->ncomponents; i++) {
             FREE(object->comp_names[i]);
             FREE(object->pdb_names[i]);
+        }
+        for (i = 0; i < DB_MAX_H5_OBJ_VALS; i++) {
+            FREE(object->h5_names[i]);
         }
 
         FREE(object->comp_names);

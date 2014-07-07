@@ -1,4 +1,5 @@
 /*
+                            hsize_t _size = 3;
 Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
@@ -944,7 +945,7 @@ static hid_t    P_ckrdprops = -1;
         if (_f && (_tmp_f=_f->T_##TYPE)>=0) {                                 \
             hid_t _f_ary = H5Tarray_create(_tmp_f, 1, &_size, NULL);          \
             db_hdf5_put_cmemb(_ft, #NAME, _f_off, 0, NULL, _f_ary);           \
-            _f_off += 3*H5Tget_size(_f_ary);                                  \
+            _f_off += H5Tget_size(_f_ary);                                    \
             H5Tclose(_f_ary);                                                 \
         }                                                                     \
     }                                                                         \
@@ -6588,47 +6589,6 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
             } H5E_END_TRY;
         }
         
-        /* With the exception of a zonelist object, the HDF5 driver
-         * only handles user-defined objects. Otherwise,
-         * if the user were allowed to use DBMakeObject() to bybass the
-         * normal object creation functions, the user would need to know
-         * implementation details of the driver. Some of the silo
-         * confidence tests think they know implementation details when in
-         * fact they don't -- those tests will fail. */
-        if (!strcmp(obj->type, "zonelist")) {
-
-            /* make sure we recognize every component name in this object */
-            int recognizeComponent = 1;
-            for (i=0; (i<obj->ncomponents) && recognizeComponent; i++)
-            {
-                recognizeComponent = 0;
-                if ((strcmp(obj->comp_names[i], "ndims") == 0) ||
-                    (strcmp(obj->comp_names[i], "nzones") == 0) ||
-                    (strcmp(obj->comp_names[i], "nshapes") == 0) ||
-                    (strcmp(obj->comp_names[i], "lnodelist") == 0) ||
-                    (strcmp(obj->comp_names[i], "origin") == 0) ||
-                    (strcmp(obj->comp_names[i], "lo_offset") == 0) ||
-                    (strcmp(obj->comp_names[i], "hi_offset") == 0) ||
-                    (strcmp(obj->comp_names[i], "nodelist") == 0) ||
-                    (strcmp(obj->comp_names[i], "shapecnt") == 0) ||
-                    (strcmp(obj->comp_names[i], "shapesize") == 0) ||
-                    (strcmp(obj->comp_names[i], "shapetype") == 0) ||
-                    (strcmp(obj->comp_names[i], "gzoneno") == 0))
-                {
-                    recognizeComponent = 1;
-                }
-            }
-
-            if (!recognizeComponent)
-            {
-                char msg[256];
-                sprintf(msg, "Unrecognized component, \"%s\", in zonelist object",
-                    obj->comp_names[i]);
-                db_perror(msg, E_BADARGS, me);
-                UNWIND();
-            }
-        }
-
         /* How much memory do we need? Align all components */
         for (i=0, msize=fsize=0; i<obj->ncomponents; i++) {
             if (!strncmp(obj->pdb_names[i], "'<i>", 4)) {
@@ -6648,9 +6608,78 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 db_perror(obj->pdb_names[i], E_INVALIDNAME, me);
                 UNWIND();
             } else {
-                /* variable added by DBAddVarComponent() */
-                msize += strlen(obj->pdb_names[i]) + 1;
-                fsize += strlen(obj->pdb_names[i]) + 1;
+                /* Its possible this is a 'special' tiny array 'var' component.
+                 * So, first, search for it in obj->h5_names and if found, handle
+                 * it as such */
+                int j, off=0, found=0;
+                for (j = 0; obj->h5_names[j]; j++)
+                {
+                    off += obj->h5_sizes[j] * db_GetMachDataSize(obj->h5_types[j]);
+                    if (!strcmp(obj->comp_names[i], obj->h5_names[j]))
+                    {
+                        found = 1;
+                        break;
+                    }
+                }
+                if (found)
+                {
+                    switch (obj->h5_types[j])
+                    {
+                        case DB_INT:
+                        {
+                            int dummy[3];
+                            hsize_t _size = 3;
+                            hid_t _f_ary;
+                            msize = ALIGN(msize, sizeof(dummy)) + sizeof(dummy);
+#if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
+                            _f_ary = H5Tarray_create(dbfile->T_int, 1, &_size, NULL);
+                            fsize += H5Tget_size(_f_ary);
+                            H5Tclose(_f_ary);
+#else
+                            fsize += 3*H5Tget_size(dbfile->T_int);
+#endif
+                            break;
+                        }
+                        case DB_FLOAT:
+                        {
+                            float dummy[3];
+                            hsize_t _size = 3;
+                            hid_t _f_ary;
+                            msize = ALIGN(msize, sizeof(dummy)) + sizeof(dummy);
+#if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
+                            _f_ary = H5Tarray_create(dbfile->T_float, 1, &_size, NULL);
+                            fsize += H5Tget_size(_f_ary);
+                            H5Tclose(_f_ary);
+#else
+                            fsize += 3*H5Tget_size(dbfile->T_float);
+#endif
+                            break;
+                        }
+                        case DB_DOUBLE:
+                        {
+                            double dummy[3];
+                            hsize_t _size = 3;
+                            hid_t _f_ary;
+                            msize = ALIGN(msize, sizeof(dummy)) + sizeof(dummy);
+#if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
+                            _f_ary = H5Tarray_create(dbfile->T_double, 1, &_size, NULL);
+                            fsize += H5Tget_size(_f_ary);
+                            H5Tclose(_f_ary);
+#else
+                            fsize += 3*H5Tget_size(dbfile->T_double);
+#endif
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    /* variable added by DBAddVarComponent() */
+                    msize += strlen(obj->pdb_names[i]) + 1;
+                    fsize += strlen(obj->pdb_names[i]) + 1;
+                }
             }
         }
 
@@ -6723,20 +6752,116 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 moffset += len;
                 foffset += len;
             } else {
-                size_t len = strlen(obj->pdb_names[i])+1;
-                hid_t str_type = H5Tcopy(H5T_C_S1);
-                H5Tset_size(str_type, len);
-                if (H5Tinsert(mtype, obj->comp_names[i], moffset,
-                              str_type)<0 ||
-                    H5Tinsert(ftype, obj->comp_names[i], foffset,
-                              str_type)<0) {
-                    db_perror("H5Tinsert", E_CALLFAIL, me);
-                    UNWIND();
+                /* Its possible this is a 'special' tiny array 'var' component.
+                 * So, first, search for it in obj->h5_names and if found, handle
+                 * it as such */
+                int j, found=0;
+                for (j = 0; obj->h5_names[j]; j++)
+                {
+                    if (!strcmp(obj->comp_names[i], obj->h5_names[j]))
+                    {
+                        found = 1;
+                        break;
+                    }
                 }
-                H5Tclose(str_type);
-                strcpy((char*)(object+moffset), obj->pdb_names[i]);
-                moffset += len;
-                foffset += len;
+                if (found)
+                {
+                    switch (obj->h5_types[j])
+                    {
+                        case DB_INT:
+                        {
+                            int dummy[3];
+                            hid_t _m_ary, _f_ary;
+                            hsize_t _size = 3;
+                            moffset = ALIGN(moffset, sizeof(dummy));
+#if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
+                            _m_ary = H5Tarray_create(H5T_NATIVE_INT, 1, &_size, NULL);
+                            _f_ary = H5Tarray_create(dbfile->T_int, 1, &_size, NULL);
+                            if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
+                                H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                db_perror("H5Tinsert", E_CALLFAIL, me);
+                                UNWIND();
+                            }
+                            foffset += H5Tget_size(_f_ary);
+                            H5Tclose(_f_ary);
+                            H5Tclose(_m_ary);
+#else
+                            db_perror("Cannot customize standard object", E_CALLFAIL, me);
+                            UNWIND();
+#endif
+                            memcpy(object+moffset, &obj->h5_vals[obj->h5_offs[j]], sizeof(dummy));
+                            moffset += sizeof(dummy);
+                            break;
+                        }
+                        case DB_FLOAT:
+                        {
+                            float dummy[3];
+                            hid_t _m_ary, _f_ary;
+                            hsize_t _size = 3;
+                            moffset = ALIGN(moffset, sizeof(dummy));
+#if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
+                            _m_ary = H5Tarray_create(H5T_NATIVE_FLOAT, 1, &_size, NULL);
+                            _f_ary = H5Tarray_create(dbfile->T_float, 1, &_size, NULL);
+                            if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
+                                H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                db_perror("H5Tinsert", E_CALLFAIL, me);
+                                UNWIND();
+                            }
+                            foffset += H5Tget_size(_f_ary);
+                            H5Tclose(_f_ary);
+                            H5Tclose(_m_ary);
+#else
+                            db_perror("Cannot customize standard object", E_CALLFAIL, me);
+                            UNWIND();
+#endif
+                            memcpy(object+moffset, &obj->h5_vals[obj->h5_offs[j]], sizeof(dummy));
+                            moffset += sizeof(dummy);
+                            break;
+                        }
+                        case DB_DOUBLE:
+                        {
+                            double dummy[3];
+                            hid_t _m_ary, _f_ary;
+                            hsize_t _size = 3;
+                            moffset = ALIGN(moffset, sizeof(dummy));
+#if H5_VERS_MAJOR>=1 && H5_VERS_MINOR>=4
+                            _m_ary = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, &_size, NULL);
+                            _f_ary = H5Tarray_create(dbfile->T_double, 1, &_size, NULL);
+                            if (H5Tinsert(mtype, obj->comp_names[i], moffset, _m_ary)<0 ||
+                                H5Tinsert(ftype, obj->comp_names[i], foffset, _f_ary)<0) {
+                                db_perror("H5Tinsert", E_CALLFAIL, me);
+                                UNWIND();
+                            }
+                            foffset += H5Tget_size(_f_ary);
+                            H5Tclose(_f_ary);
+                            H5Tclose(_m_ary);
+#else
+                            db_perror("Cannot customize standard object", E_CALLFAIL, me);
+                            UNWIND();
+#endif
+                            memcpy(object+moffset, &obj->h5_vals[obj->h5_offs[j]], sizeof(dummy));
+                            moffset += sizeof(dummy);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    size_t len = strlen(obj->pdb_names[i])+1;
+                    hid_t str_type = H5Tcopy(H5T_C_S1);
+                    H5Tset_size(str_type, len);
+                    if (H5Tinsert(mtype, obj->comp_names[i], moffset,
+                                  str_type)<0 ||
+                        H5Tinsert(ftype, obj->comp_names[i], foffset,
+                              str_type)<0) {
+                        db_perror("H5Tinsert", E_CALLFAIL, me);
+                        UNWIND();
+                    }
+                    H5Tclose(str_type);
+                    strcpy((char*)(object+moffset), obj->pdb_names[i]);
+                    moffset += len;
+                    foffset += len;
+                }
             }
         }
 
@@ -6780,11 +6905,97 @@ db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char const *compname,
                        int rank, long const *_size)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
-    int         size[32], i;
+    int         size[32], i, totsize;
     char        varname[256];
     int         datatype = db_GetDatatypeID(dataname);
+
+    /*
+     * We have to be careful here to deal with possible customization of
+     * 'standard' objects. The HDF5 driver handles small arrays of things
+     * like dimensions, extents, alignment, etc. as 'array' members of
+     * the attribute 'header' struct. So, we cannot arbitrarily decide to
+     * write every component we see here to the file. Sometimes, we'll have
+     * to avert that operation and instead store the data to the DBobject
+     * struct, temporarily, for eventual write via DBWriteObject
+     */
     
-    for (i=0; i<rank; i++) size[i] = _size[i];
+    totsize = 1;
+    for (i=0; i<rank; i++) {
+        size[i] = _size[i];
+        totsize *= size[i];
+    }
+
+    if (totsize == 3)
+    {
+        int add_it = 0;
+        DBObjectType objtype = (DBObjectType) DBGetObjtypeTag(obj->type);
+
+        switch (objtype)
+        {
+            case DB_CSGMESH:
+            {
+                add_it |= !strcmp(compname, "min_extents");
+                add_it |= !strcmp(compname, "max_extents");
+                break;
+            }
+            case DB_QUADMESH:
+            case DB_QUADCURV:
+            case DB_QUADRECT:
+            {
+                add_it |= !strcmp(compname, "min_extents");
+                add_it |= !strcmp(compname, "max_extents");
+                add_it |= !strcmp(compname, "dims");
+                add_it |= !strcmp(compname, "min_index");
+                add_it |= !strcmp(compname, "max_index");
+                add_it |= !strcmp(compname, "base_index");
+                break;
+            }
+            case DB_QUADVAR:
+            {
+                add_it |= !strcmp(compname, "zones");
+                add_it |= !strcmp(compname, "align");
+                add_it |= !strcmp(compname, "dims");
+                add_it |= !strcmp(compname, "min_index");
+                add_it |= !strcmp(compname, "max_index");
+                break;
+            }
+            case DB_UCDMESH:
+            {
+                add_it |= !strcmp(compname, "min_extents");
+                add_it |= !strcmp(compname, "max_extents");
+                break;
+            }
+            case DB_MATERIAL:
+            case DB_MATSPECIES:
+            {
+                add_it |= !strcmp(compname, "dims");
+                break;
+            } 
+            case DB_POINTMESH:
+            {
+                add_it |= !strcmp(compname, "min_extents");
+                add_it |= !strcmp(compname, "max_extents");
+                break;
+            }
+            default: break;
+        }
+
+        if (add_it)
+        {
+            int i;
+            for (i = 0; obj->h5_names[i]; i++);
+            obj->h5_names[i] = strdup(compname);
+            obj->h5_types[i] = datatype;
+            obj->h5_sizes[i] = totsize;
+            obj->h5_offs[i] = i==0?0:obj->h5_offs[i-1]+totsize*db_GetMachDataSize(datatype);
+            if (obj->h5_offs[i] + totsize * db_GetMachDataSize(datatype) > sizeof(obj->h5_vals))
+                return db_perror(compname, E_OBJBUFFULL, "db_hdf5_WriteComponent");
+            memcpy(&obj->h5_vals[obj->h5_offs[i]], data, totsize * db_GetMachDataSize(datatype));
+            DBAddVarComponent(obj, compname, compname);
+            return 0;
+        }
+    }
+
     varname[0] = '\0';
     db_hdf5_compwr(dbfile, datatype, rank, size, data, varname,
         friendly_name(obj->name, compname, 0));
