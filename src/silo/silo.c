@@ -8465,7 +8465,7 @@ DBPutPointvar1(DBfile *dbfile, const char *vname, const char *mname,
 
     API_BEGIN2("DBPutPointvar1", int, -1, vname)
     {
-        retval = DBPutPointvar(dbfile, vname, mname, var?1:0, vars,
+        retval = DBPutPointvar(dbfile, vname, mname, 1, vars,
                                nels, datatype, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -9031,7 +9031,7 @@ DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, void const *v
         varnames[0] = vname;
         vars[0] = var;
         mixvars[0] = mixvar;
-        retval = DBPutUcdvar(dbfile, vname, mname, nels==0?0:1, varnames, vars,
+        retval = DBPutUcdvar(dbfile, vname, mname, 1, varnames, vars,
                      nels, mixvars, mixlen, datatype, centering, optlist);
         db_FreeToc(dbfile);
         API_RETURN(retval);
