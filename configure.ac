@@ -1186,9 +1186,9 @@ if test -n "$HDF5_DRV"; then
 else
   AC_CONFIG_FILES([src/libsilo.settings])
 fi
-CC_FULLPATH=$(which $(echo $CC | cut -d' ' -f1))
-CXX_FULLPATH=$(which $(echo $CXX | cut -d' ' -f1))
-FC_FULLPATH=$(which $(echo $FC | cut -d' ' -f1))
+CC_FULLPATH=$(which $(echo ${CC:-"nocc"} | cut -d' ' -f1))
+CXX_FULLPATH=$(which $(echo ${CXX:-"nocxx"} | cut -d' ' -f1))
+FC_FULLPATH=$(which $(echo ${FC:-"nofc"} | cut -d' ' -f1))
 AC_SUBST(CC_FULLPATH)
 AC_SUBST(CXX_FULLPATH)
 AC_SUBST(FC_FULLPATH)
