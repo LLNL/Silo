@@ -3954,7 +3954,7 @@ DBVersion(void)
 PUBLIC int
 DBVersionDigits(int *maj, int *min, int *pat, int *pre)
 {
-    int digits[4] = {-1,-1,-1,-1};
+    int digits[4] = {0,0,0,0};
 
     if (!db_parse_version_digits_from_string(DBVersion(), '.',
              digits, sizeof(digits)/sizeof(digits[0])))
@@ -4021,7 +4021,7 @@ DBFileVersion(const DBfile *dbfile)
 PUBLIC int
 DBFileVersionDigits(const DBfile *dbfile, int *maj, int *min, int *pat, int *pre)
 {
-    int digits[4] = {-1,-1,-1,-1};
+    int digits[4] = {0,0,0,0};
     if (!db_parse_version_digits_from_string(DBFileVersion(dbfile), '.',
              digits, sizeof(digits)/sizeof(digits[0])))
     {

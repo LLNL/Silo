@@ -125,20 +125,36 @@ typedef char const * const *         DBCAS_t;
    number to work-around issues with possible blanks. */
 
 /* Major release number of silo library. */
+#define _SILO_VERS_MAJ_@SILO_VERS_MAJ@
+#ifdef _SILO_VERS_MAJ_
+#define SILO_VERS_MAJ 0
+#else
 #define SILO_VERS_MAJ @SILO_VERS_MAJ@
-#define SILO_VERS_MAJ_B16 0x0@SILO_VERS_MAJ@
+#endif
 
 /* Minor release number of silo library. Can be empty. */
+#define _SILO_VERS_MIN_@SILO_VERS_MIN@
+#ifdef _SILO_VERS_MIN_
+#define SILO_VERS_MIN 0
+#else
 #define SILO_VERS_MIN @SILO_VERS_MIN@
-#define SILO_VERS_MIN_B16 0x0@SILO_VERS_MIN@
+#endif
 
 /* Patch release number of silo library.  Can be empty. */
+#define _SILO_VERS_PAT_@SILO_VERS_PAT@
+#ifdef _SILO_VERS_PAT_
+#define SILO_VERS_PAT 0
+#else
 #define SILO_VERS_PAT @SILO_VERS_PAT@
-#define SILO_VERS_PAT_B16 0x0@SILO_VERS_PAT@
+#endif
 
 /* Pre-release release number of silo library.  Can be empty. */
+#define _SILO_VERS_PRE_@SILO_VERS_PRE@
+#ifdef _SILO_VERS_PRE_
+#define SILO_VERS_PRE 0
+#else
 #define SILO_VERS_PRE @SILO_VERS_PRE@
-#define SILO_VERS_PRE_B16 0x0@SILO_VERS_PRE@
+#endif
 
 /* The symbol Silo uses to enforce link-time
    header/object version compatibility */
@@ -146,9 +162,9 @@ typedef char const * const *         DBCAS_t;
 
 /* Useful macro for comparing Silo versions (and DB_ alias) */
 #define SILO_VERSION_GE(Maj,Min,Pat)  \
-        (((SILO_VERS_MAJ_B16==0x0 ## Maj) && (SILO_VERS_MIN_B16==0x0 ## Min) && (SILO_VERS_PAT_B16>=0x0 ## Pat)) || \
-         ((SILO_VERS_MAJ_B16==0x0 ## Maj) && (SILO_VERS_MIN_B16>0x0 ## Min)) || \
-         (SILO_VERS_MAJ_B16>0x0 ## Maj))
+        (((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN==Min) && (SILO_VERS_PAT>=Pat)) || \
+         ((SILO_VERS_MAJ==Maj) && (SILO_VERS_MIN>Min)) || \
+         (SILO_VERS_MAJ>Maj))
 #define DB_VERSION_GE(Maj,Min,Pat) SILO_VERSION_GE(Maj,Min,Pat)
 
 /*-------------------------------------------------------------------------
