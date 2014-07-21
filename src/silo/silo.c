@@ -3894,7 +3894,7 @@ db_parse_version_digits_from_string(char const *str, char sep, int *digits, int 
     {
         p = ostr;
         errno = 0;
-        for (i = 0; i < (nseps+1) && ndigits && errno == 0; i++, ndigits--)
+        for (i = 0; i < nseps && ndigits && errno == 0; i++, ndigits--)
         {
             digits[i] = strtol(p, 0, 10);
             while (*p != '\0') p++;
@@ -3955,6 +3955,7 @@ PUBLIC int
 DBVersionDigits(int *maj, int *min, int *pat, int *pre)
 {
     int digits[4] = {-1,-1,-1,-1};
+
     if (!db_parse_version_digits_from_string(DBVersion(), '.',
              digits, sizeof(digits)/sizeof(digits[0])))
     {
