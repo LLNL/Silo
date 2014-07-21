@@ -6983,7 +6983,9 @@ db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char const *compname,
         if (add_it)
         {
             int i;
-            for (i = 0; obj->h5_names[i]; i++);
+            for (i = 0; obj->h5_names[i] && i < DB_MAX_H5_OBJ_VALS; i++); /* find first open slot */
+            if (i >= DB_MAX_H5_OBJ_VALS)
+                return db_perror(compname, E_OBJBUFFULL, "db_hdf5_WriteComponent");
             obj->h5_names[i] = strdup(compname);
             obj->h5_types[i] = datatype;
             obj->h5_sizes[i] = totsize;
