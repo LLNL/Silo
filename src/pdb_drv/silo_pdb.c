@@ -3237,7 +3237,7 @@ db_pdb_GetObject (DBfile *_file, char const *name)
     * because we have a character string type name instead of an
     * integer type constant.
     */
-   obj = (DBobject *)malloc (sizeof (DBobject));
+   obj = (DBobject *)calloc (1, sizeof (DBobject));
    obj->name = _db_safe_strdup (group->name);
    obj->type = _db_safe_strdup (group->type);
    obj->ncomponents = obj->maxcomponents = group->ncomponents;
