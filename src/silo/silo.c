@@ -12301,7 +12301,7 @@ DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndex
 INTERNAL int 
 db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_flag, int nblocks)
 {
-    int i=0, s=0, n=0, hasColon=0, add1=0, slashCharsToSwap[128];
+    int i=0, s=0, n=0, hasColon=0, nearlyDone = 0, completelyDone = 0, slashCharsToSwap[128];
     char **strArray;
     static char const *me = "DBStringListToStringArrayMBOpt";
 
@@ -12312,24 +12312,24 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
 
     strArray = (char **) malloc(nblocks * sizeof(char*));
     if (strList[0] == ';')
-    {
         i = 1;
-        add1 = 1;
-    }
     strArray[n++] = &strList[i];
-    while (strList[i] != '\0')
+    while (!completelyDone)
     {
         switch (strList[i])
         {
+            case '\0':
+                completelyDone = 1; // note fall-through to next case
             case ';':
             {
-                strList[i++] = '\0';
+                strList[i] = '\0';
+                if (!completelyDone) i++;
                 if (strList[i] != '\0')
                     strArray[n++] = &strList[i];
-                if (hasColon && s)
+                if (hasColon)
                 {
                     int j;
-                    for (j = 0; j < s; j++)
+                    for (j = 0; j < hasColon; j++)
 #if !defined(_WIN32)
                         strList[slashCharsToSwap[j]] = '/';
 #else
@@ -12346,6 +12346,8 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
             case '/':
 #endif 
             {
+                if (hasColon)
+                    break;
                 slashCharsToSwap[s++] = i;
                 if (s == sizeof(slashCharsToSwap)/sizeof(slashCharsToSwap[0]))
                 {
@@ -12357,12 +12359,17 @@ db_StringListToStringArrayMBOpt(char *strList, char ***retArray, char **alloc_fl
             }
             case ':':
             {
-                hasColon = 1;
+                hasColon = s;
                 break;
             }
         }
-        if (strList[i] != '\0')
-            i++;
+        if (!completelyDone)
+        {
+            if (strList[i] != '\0')
+                i++;
+            if (strList[i] == '\0')
+                nearlyDone = 1;
+        }
     }
 
     if (n != nblocks)
