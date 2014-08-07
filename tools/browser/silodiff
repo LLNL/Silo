@@ -153,7 +153,10 @@ else
         fi
     fi
 fi
-
+sfexe=silofile
+if test -x ${sddir}/silofile; then
+    sfexe=${sddir}/silofile
+fi
 if test $optError = 1 -o -z "$arg1" -o -z "$arg2"; then
     echo "Usage:  $0 <file|dir> <file|dir> <options>"
     echo ""
@@ -184,28 +187,60 @@ if test $optError = 1 -o -z "$arg1" -o -z "$arg2"; then
 fi
 
 if test -d $arg1 -a -d $arg2; then # both are dirs
-    arg1_files=`ls -1rt $arg1`
-    arg2_files=`ls -1rt $arg2`
-    filen=1
-    for f in $arg1_files; do
-        file1=`echo $arg1_files | cut -d' ' -f$filen`
-        file2=`echo $arg2_files | cut -d' ' -f$filen`
-        if test -d $arg1/$file1 -a -d $arg2/$file2 -a $recurse -eq 1; then
-            if test $verbose = 1; then
-                echo "Recusively diffing directories \"$arg1/$file1\" and \"$arg2/$file2\"..."
-                $0 -recurse -verbose $browserOpts $arg1/$file1 $arg2/$file2
+    if test $recurse -eq 1 -a $verbose -eq 1; then
+        echo "Recursively diffing directories..."
+    fi
+    # Iterate through all members of dir $arg1 finding
+    # those in or not in common with dir $arg2
+    arg1_files_tmp=`ls -1rt $arg1`
+    common_members=""
+    not_common_members=""
+    for f in $arg1_files_tmp; do
+        if test -d $arg1/$f -a -d $arg2/$f -a $recurse -eq 1; then
+            common_members="$f $common_members"
+        elif test -f $arg1/$f -a -f $arg2/$f; then
+            if test -n "$($sfexe $arg1/$f | grep PDB\\\|HDF)"; then
+                common_members="$f $common_members"
             else
-                $0 -recurse $browserOpts $arg1/$file1 $arg2/$file2
+                not_common_members="$arg1/$f $not_common_members"
             fi
-        elif test -f $arg1/$file1 -a -f $arg2/$file2; then
-            test $verbose = 1 && echo "Diffing files \"$arg1/$file1\" and \"$arg2/$file2\"..."
-            $brexe $browserOptsDef $browserOpts -e diff $arg1/$file1 $arg2/$file2
         else
-            if test $verbose = 1; then
-                echo "Skipping diff of \"$arg1/$file1\" and \"$arg2/$file2\" because one is a file and the other a directory."
+            if test $verbose -eq 1; then
+                not_common_members="$arg1/$f $not_common_members"
             fi
         fi
-        filen=`expr $filen + 1`
+    done
+    # If in verbose mode, continue to iterate through dir $arg2
+    # finding everything else not in common with dir $arg1
+    if test $verbose -eq 1; then
+        arg2_files_tmp=`ls -1rt $arg2`
+        for f in $arg2_files_tmp; do
+            if test -d $arg1/$f -a -d $arg2/$f -a $recurse -eq 1; then
+               true
+            elif test -f $arg1/$f -a -f $arg2/$f; then
+               true
+            else
+                not_common_members="$arg2/$f $not_common_members"
+            fi
+        done
+        for f in $not_common_members; do
+            echo "    Skipping \"$f\"."
+        done
+    fi
+    for f in $common_members; do
+        if test -d $arg1/$f -a -d $arg2/$f -a $recurse -eq 1; then
+            if test $verbose -eq 1; then
+                echo "Recusively diffing directories \"$arg1/$f\" and \"$arg2/$f\"..."
+                $0 -recurse -verbose $browserOpts $arg1/$f $arg2/$f
+            else
+                $0 -recurse $browserOpts $arg1/$f $arg2/$f
+            fi
+        elif test -f $arg1/$f -a -f $arg2/$f; then
+            test $verbose -eq 1 && echo "Diffing files \"$arg1/$f\" and \"$arg2/$f\"..."
+            $brexe $browserOptsDef $browserOpts -e diff $arg1/$f $arg2/$f
+        else
+            true
+        fi
     done
 elif test -d $arg1 -o -d $arg2; then # one is dir
     if test -d $arg1; then
