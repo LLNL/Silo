@@ -65,24 +65,21 @@
 #
 unknownFiles=
 for f in $*; do
-    headerBytes=$(od -c -N 10 $f)
-    if test -n "$(echo $headerBytes | tr -d ' ' | grep '<<PDB:')"; then
-        echo "$f: Portable Database (PDB) data"
-    elif test -n "$(echo $headerBytes | tr -d ' \\' | grep 'HDFrn032')"; then
-        echo "$f: Hierarchical Data Format version 5 (HDF5) data"
-    else
-        headerBytes=$(od -t x1 -N 4 $f)
-        if test -n "$(echo $headerBytes | grep '0000000 0e 03 13 01')"; then
-            echo "$f: Hierarchical Data Format version 4 (HDF4) data"
+    if test -f $f; then
+        headerBytes=$(od -a -N 10 $f)
+        if test -n "$(echo $headerBytes | tr -d ' ' | grep '<<PDB:')"; then
+            echo "$f: Portable Database (PDB) data"
+        elif test -n "$(echo $headerBytes | tr -d ' \\' | grep 'HDFcrnl')"; then
+            echo "$f: Hierarchical Data Format version 5 (HDF5) data"
         else
-	    unknownFiles="$unknownFiles $f"
+            headerBytes=$(od -t x1 -N 4 $f)
+            if test -n "$(echo $headerBytes | grep '0000000 0e 03 13 01')"; then
+                echo "$f: Hierarchical Data Format version 4 (HDF4) data"
+            else
+                file $f
+            fi
         fi
+    else # not a regular file
+        file $f
     fi
 done
-
-#
-# If we have any unknown files, use the ordinary file command on them.
-#
-if test -n "$unknownFiles"; then
-    file $unknownFiles
-fi
