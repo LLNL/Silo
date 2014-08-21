@@ -2,7 +2,7 @@
 ! 
 !      SILO include file for Fortan applications.
 ! 
-!  Programmer:   miller86 Mon Nov 25 14:06:40 PST 2013
+!  Programmer:   miller86 Thu Aug 21 10:39:59 PDT 2014
 ! 
 !  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !     This file is generated automatically from C header files in the
@@ -90,7 +90,6 @@
       integer, external :: dbsetcwr
       integer, external :: dbsetdepwarn
       integer, external :: dbsetdir
-      integer, external :: dbsetdirid
       integer, external :: dbsetemptyok
       integer, external :: dbsethdfnms
       integer, external :: dbsetovrwrt
@@ -103,9 +102,13 @@
 
 
 !...Parameters.
+      integer, parameter :: SILO_VERS_MAJ = 0
       integer, parameter :: SILO_VERS_MAJ = 4
-      integer, parameter :: SILO_VERS_MIN = 9
-      integer, parameter :: SILO_VERS_PAT = 1
+      integer, parameter :: SILO_VERS_MIN = 0
+      integer, parameter :: SILO_VERS_MIN = 10
+      integer, parameter :: SILO_VERS_PAT = 0
+      integer, parameter :: SILO_VERS_PAT = 0
+      integer, parameter :: SILO_VERS_PRE = 0
       integer, parameter :: SILO_VERS_PRE = 0
       integer, parameter :: DB_NETCDF = 0
       integer, parameter :: DB_PDB = 2
@@ -291,6 +294,11 @@
       integer, parameter :: DBOPT_MB_EMPTY_LIST = 334
       integer, parameter :: DBOPT_MB_EMPTY_COUNT = 335
       integer, parameter :: DBOPT_MB_REPR_BLOCK_IDX = 336
+      integer, parameter :: DBOPT_MISSING_VALUE = 337
+      integer, parameter :: DBOPT_ALT_ZONENUM_VARS = 338
+      integer, parameter :: DBOPT_ALT_NODENUM_VARS = 339
+      integer, parameter :: DBOPT_GHOST_NODE_LABELS = 340
+      integer, parameter :: DBOPT_GHOST_ZONE_LABELS = 341
       integer, parameter :: DBOPT_LAST = 499
       integer, parameter :: DBOPT_H5_FIRST = 500
       integer, parameter :: DBOPT_H5_VFD = 500
@@ -364,6 +372,8 @@
       integer, parameter :: DB_VARTYPE_MATERIAL = 205
       integer, parameter :: DB_VARTYPE_SPECIES = 206
       integer, parameter :: DB_VARTYPE_LABEL = 207
+      integer, parameter :: DB_GHOSTTYPE_NOGHOST = 0
+      integer, parameter :: DB_GHOSTTYPE_INTDUP = 1
       integer, parameter :: DBCSG_QUADRIC_G = 16777216
       integer, parameter :: DBCSG_SPHERE_PR = 33619968
       integer, parameter :: DBCSG_ELLIPSOID_PRRR = 33685504
@@ -410,6 +420,7 @@
       integer, parameter :: DB_POSTORDER = 2
       integer, parameter :: DB_FROMCWR = 4
       integer, parameter :: DB_F77NULL = (-99)
+      integer, parameter :: DB_MISSING_VALUE_NOT_SET = 1e+308
       integer, parameter :: DB_ZONETYPE_BEAM = 10
       integer, parameter :: DB_ZONETYPE_POLYGON = 20
       integer, parameter :: DB_ZONETYPE_TRIANGLE = 23
@@ -419,6 +430,7 @@
       integer, parameter :: DB_ZONETYPE_PYRAMID = 35
       integer, parameter :: DB_ZONETYPE_PRISM = 36
       integer, parameter :: DB_ZONETYPE_HEX = 38
+      integer, parameter :: DB_MAX_H5_OBJ_VALS = 64
       character (len=10), parameter :: DB_F77NULLSTRING = "NULLSTRING"
 
 

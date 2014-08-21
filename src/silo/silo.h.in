@@ -597,8 +597,8 @@ typedef enum {
 #define DB_VARTYPE_LABEL                207
 
 /* Definitions for ghost labels */
-#define DB_GHOSTTYPE_NOGHOST ((char) 0x00)
-#define DB_GHOSTTYPE_INTDUP ((char) 0x01)
+#define DB_GHOSTTYPE_NOGHOST ((char)0x00)
+#define DB_GHOSTTYPE_INTDUP ((char)0x01)
 
 /* Definitions for CSG boundary types 
    Designed so low-order 16 bits are unused.
@@ -693,7 +693,7 @@ typedef enum {
    on read to/from the file. On write, NOT_SET in mem gets mapped to zero in
    the file and zero in mem gets mapped to NOT_SET in the file. On read, this
    mapping is reversed. */
-#define DB_MISSING_VALUE_NOT_SET ((double) (1.0e+308))
+#define DB_MISSING_VALUE_NOT_SET ((double)1.0e+308)
 
 /*-------------------------------------------------------------------------
  * Structures (just the public parts).
