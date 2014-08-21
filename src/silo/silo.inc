@@ -2,7 +2,7 @@ Ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 C 
 C      SILO include file for Fortan applications.
 C 
-C  Programmer:   miller86 Thu Aug 21 10:40:09 PDT 2014
+C  Programmer:   miller86 Thu Aug 21 11:02:21 PDT 2014
 C 
 C  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 C     This file is generated automatically from C header files in the
@@ -506,20 +506,14 @@ C...Parameters.
       INTEGER  DB_ZONETYPE_TET
       INTEGER  DB_ZONETYPE_TRIANGLE
       INTEGER  SILO_VERS_MAJ
-      INTEGER  SILO_VERS_MAJ
       INTEGER  SILO_VERS_MIN
-      INTEGER  SILO_VERS_MIN
-      INTEGER  SILO_VERS_PAT
       INTEGER  SILO_VERS_PAT
       INTEGER  SILO_VERS_PRE
       INTEGER  SILO_VERS_PRE
       CHARACTER*10  DB_F77NULLSTRING
 
-      PARAMETER (SILO_VERS_MAJ=0)
       PARAMETER (SILO_VERS_MAJ=4)
-      PARAMETER (SILO_VERS_MIN=0)
       PARAMETER (SILO_VERS_MIN=10)
-      PARAMETER (SILO_VERS_PAT=0)
       PARAMETER (SILO_VERS_PAT=0)
       PARAMETER (SILO_VERS_PRE=0)
       PARAMETER (SILO_VERS_PRE=0)

@@ -2,7 +2,7 @@
 ! 
 !      SILO include file for Fortan applications.
 ! 
-!  Programmer:   miller86 Thu Aug 21 10:39:59 PDT 2014
+!  Programmer:   miller86 Thu Aug 21 11:02:21 PDT 2014
 ! 
 !  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !     This file is generated automatically from C header files in the
@@ -102,11 +102,8 @@
 
 
 !...Parameters.
-      integer, parameter :: SILO_VERS_MAJ = 0
       integer, parameter :: SILO_VERS_MAJ = 4
-      integer, parameter :: SILO_VERS_MIN = 0
       integer, parameter :: SILO_VERS_MIN = 10
-      integer, parameter :: SILO_VERS_PAT = 0
       integer, parameter :: SILO_VERS_PAT = 0
       integer, parameter :: SILO_VERS_PRE = 0
       integer, parameter :: SILO_VERS_PRE = 0
