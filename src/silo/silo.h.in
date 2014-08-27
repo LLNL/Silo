@@ -151,7 +151,7 @@ typedef char const * const *         DBCAS_t;
 /* Pre-release release number of silo library.  Can be empty. */
 #define _SILO_VERS_PRE_@SILO_VERS_PRE@
 #ifdef _SILO_VERS_PRE_
-#define SILO_VERS_PRE 0
+#define SILO_VERS_PRE 0 /* NO_FORTRAN_DEFINE */
 #else
 #define SILO_VERS_PRE @SILO_VERS_PRE@
 #endif

@@ -2,7 +2,7 @@
 ! 
 !      SILO include file for Fortan applications.
 ! 
-!  Programmer:   miller86 Thu Aug 21 11:02:21 PDT 2014
+!  Programmer:   miller86 Tue Aug 26 19:53:13 PDT 2014
 ! 
 !  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !     This file is generated automatically from C header files in the
@@ -105,7 +105,6 @@
       integer, parameter :: SILO_VERS_MAJ = 4
       integer, parameter :: SILO_VERS_MIN = 10
       integer, parameter :: SILO_VERS_PAT = 0
-      integer, parameter :: SILO_VERS_PRE = 0
       integer, parameter :: SILO_VERS_PRE = 0
       integer, parameter :: DB_NETCDF = 0
       integer, parameter :: DB_PDB = 2
@@ -417,7 +416,7 @@
       integer, parameter :: DB_POSTORDER = 2
       integer, parameter :: DB_FROMCWR = 4
       integer, parameter :: DB_F77NULL = (-99)
-      integer, parameter :: DB_MISSING_VALUE_NOT_SET = 1e+308
+      real, kind = 8, parameter :: DB_MISSING_VALUE_NOT_SET = 1.0D+308
       integer, parameter :: DB_ZONETYPE_BEAM = 10
       integer, parameter :: DB_ZONETYPE_POLYGON = 20
       integer, parameter :: DB_ZONETYPE_TRIANGLE = 23

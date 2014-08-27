@@ -173,7 +173,8 @@ if (length(@ARGV) >= 1) {
 ### Gather the info...
 while (<>) {
     next if (/NO_FORTRAN_DEFINE/);
-    if (/^#[ \t]*define[ \t]+((SILO_VERS|DB|SDX)(OPT|CSG)?_\w+)[ \t]+([^ \t\n]*)/) {
+    if (/^#[ \t]*define[ \t]+((SILO_VERS|DB|SDX)(OPT|CSG)?_\w+)[ \t]+([^ \t\n]*)/)
+    {
         local ($name, $value) = ($1, $4);
         $sdx=1 if ($name=~/^SDX/);
         $name =~ s/^SDX_//;
@@ -188,6 +189,10 @@ while (<>) {
 	{
 	    $value = 0;
 	}
+        if ($value eq "1.0e+308") 
+        {
+            $value = "1.0D+308";
+        }
         if (/FORTRAN STRING/)
         {
             push (@strings, join(':',$name,$value));
@@ -293,7 +298,11 @@ if (not $opt_f90) {
     $line = "";
     foreach $var (sort @parameters) {
         local ($name, $value) = split (':', $var);
-        print "      INTEGER  " . uc($name) . "\n";
+        if ($value =~ /\./) {
+            print "      DOUBLE PRECISION " . uc($name) . "\n";
+        } else {
+            print "      INTEGER  " . uc($name) . "\n";
+        }
     }
 
 ### Write `character' statements for the constants...
@@ -335,7 +344,7 @@ foreach $var (@temparray) {
         $value = "DB_HDF5X+$g1*2048";
     }
     # Evaluate the RHS using array %vals:
-    if ($value =~ /^\d+$/) {
+    if ($value =~ /^\d*\.?\d*([DE]\+)?\d+$/) {
       $vals{$name} = $value ;
     } else {
       # Let us look at the RHS expression:
@@ -377,6 +386,9 @@ foreach $var (@temparray) {
             $fstrlen = length($tmpstr);
 
             $ftype = 'character (len=' . $fstrlen . ')'
+        }
+        elsif ($value =~ /\./) {
+            $ftype = 'real, kind = 8';
         } else {
             $ftype = 'integer';
         }
