@@ -388,7 +388,7 @@ foreach $var (@temparray) {
             $ftype = 'character (len=' . $fstrlen . ')'
         }
         elsif ($value =~ /\./) {
-            $ftype = 'real, kind = 8';
+            $ftype = 'real (kind=8)';
         } else {
             $ftype = 'integer';
         }

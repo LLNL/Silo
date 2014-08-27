@@ -78,10 +78,13 @@
 
     real :: g_values(100)
     real :: foo(100000000)
+    real (kind=8) :: dummy
 
     data elemnames/"x","y","z"/
     data elemlengths/4,6,8/
 
+    dummy = DB_MISSING_VALUE_NOT_SET
+    write (*,*) "dummy = ", dummy
     driver = DB_PDB
     nargs = iargc()
     call getarg(1, cloption)
