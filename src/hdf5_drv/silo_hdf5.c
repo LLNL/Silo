@@ -14313,6 +14313,11 @@ db_hdf5_PutPointvar(DBfile *_dbfile, char const *name, char const *meshname, int
         _pm._minindex = _pm._lo_offset;
         _pm._maxindex = nels - _pm._hi_offset - 1;
 
+        if (nvars>MAX_VARS) {
+            db_perror("too many variables", E_BADARGS, "db_hdf5_PutPointvar");
+            UNWIND();
+        }
+
         /* hack to maintain backward compatibility with pdb driver */
         db_hdf5_handle_ctdt(dbfile, _pm._time_set, _pm._time,
             _pm._dtime_set, _pm._dtime, _pm._cycle);
@@ -14471,6 +14476,11 @@ db_hdf5_GetPointvar(DBfile *_dbfile, char const *name)
         pv->conserved = m.conserved;
         pv->extensive = m.extensive;
         db_SetMissingValueForGet(pv->missing_value, m.missing_value);
+
+        if (pv->nvals>MAX_VARS) {
+            db_perror("too many variables", E_BADARGS, me);
+            UNWIND();
+        }
 
         /* Read raw data */
         if (SILO_Globals.dataReadMask & DBPVData && m.nvals && m.nels)
