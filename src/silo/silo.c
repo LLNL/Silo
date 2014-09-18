@@ -319,7 +319,14 @@ INTERNAL int
 db_perror(char const *s, int errorno, char const *fname)
 {
     int            call_abort = 0;
-    static char    old_s[256];
+    static char    old_s[256] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
     /*
      * Save error number and function name so application
@@ -7897,7 +7904,7 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
                 int const *mix_speclist, int mixlen, int datatype,
                 DBoptlist const *optlist)
 {
-    int i, retval, is_empty = 1;
+    int i, retval, is_empty=1;
 
     API_BEGIN2("DBPutMatspecies", int, -1, name) {
         if (!dbfile)
@@ -7916,6 +7923,8 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
             API_ERROR("ndims<0", E_BADARGS);
         if (!dims)
             API_ERROR("dims=0", E_BADARGS);
+        if (nspecies_mf < 0)
+            API_ERROR("nspecies_mf<0", E_BADARGS);
         for (i = 0; i < ndims; i++)
         {
             if (dims[i] != 0)
@@ -7924,16 +7933,15 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
                 break;
             }
         }
-        if (!is_empty)
+        if (!is_empty && nspecies_mf > 0)
         {
             if (!matname || !*matname)
                 API_ERROR("material name", E_BADARGS);
             if (db_VariableNameValid(matname) == 0)
                 API_ERROR("material name", E_INVALIDNAME);
-            if (nspecies_mf < 0)
-                API_ERROR("nspecies_mf<0", E_BADARGS);
-            for (i = 0; i < ndims && dims; i++)
-                if (!dims[i]) dims = 0;
+            if (ndims == 1 && dims[0] <= 0) API_ERROR("dims[0]<=0", E_BADARGS);
+            if (ndims == 2 && dims[1] <= 0) API_ERROR("dims[1]<=0", E_BADARGS);
+            if (ndims == 3 && dims[2] <= 0) API_ERROR("dims[2]<=0", E_BADARGS);
             if (!nmatspec) API_ERROR("nmatspec=0", E_BADARGS);
             if (!speclist) API_ERROR("speclist=0", E_BADARGS);
             if (!species_mf) API_ERROR("species_mf=0", E_BADARGS);
@@ -7944,7 +7952,7 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
         }
         else if (!SILO_Globals.allowEmptyObjects)
         {
-            API_ERROR("nmat=0", E_EMPTYOBJECT);
+            API_ERROR("dims[i]==0 for all i || nspecies_mf==0", E_EMPTYOBJECT);
         }
         if (!dbfile->pub.p_ms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);

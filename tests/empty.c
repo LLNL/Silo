@@ -253,10 +253,18 @@ main(int argc, char *argv[])
         ASSERT(DBPutMaterial(dbfile,"empty_matf","foo",1,iarr,iarr,ZDIMS,1,iarr,iarr,   0,vars[0],1,dt,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutMaterial(dbfile,"empty_matg","foo",1,iarr,iarr,ZDIMS,1,iarr,iarr,iarr,   0,1,dt,OL(ol)),retval<0,retval==0);
 
+        /* empty matspecies via dims[i] == 0 */
         ASSERT(DBPutMatspecies(dbfile,"empty_speca","empty_mata",1,iarr,iarr,ZDIMS,1,1,var,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMatspecies(dbfile,"empty_specb","empty_mata",1,iarr,   0,ZDIMS,1,1,var,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMatspecies(dbfile,"empty_specc","empty_mata",1,iarr,iarr,ZDIMS,1,1,  0,iarr,1,dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutMatspecies(dbfile,"empty_specd","empty_mata",1,iarr,iarr,ZDIMS,1,1,var,   0,1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specb","empty_mata",1,iarr,iarr,ZDIMS,2,1,var,iarr,1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specc","empty_mata",1,iarr,iarr,ZDIMS,3,1,var,iarr,1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specd","empty_mata",1,iarr,iarr,ZDIMS,1,1,  0,iarr,1,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_spece","empty_mata",1,iarr,iarr,ZDIMS,1,1,var,   0,0,dt,OL(ol)),retval<0,retval==0);
+
+        /* empty matspeces via nspecies_mf==0 */
+        { int nd=2, d[2]={3,2}, slm[6]={0,0,-1,-3,0,0}, ml=4, msl[4]={1,2,1,2}, slc[6]={0,0,0,0,0,0};
+        ASSERT(DBPutMatspecies(dbfile,"empty_specf","empty_mata",1,iarr,slc,d,nd,ZZ,var,  0, 0,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMatspecies(dbfile,"empty_specg","empty_mata",1,iarr,slm,d,nd,ZZ,var,msl,ml,dt,OL(ol)),retval<0,retval==0);
+        }
     }
 
     DBClose(dbfile);
@@ -431,7 +439,8 @@ main(int argc, char *argv[])
         DBSetDir(dbfile, "..");
     }
     {   int i=0; char *vnames[] = {"empty_speca", "empty_specb", "empty_specc",
-                                   "empty_specd", 0};
+                                   "empty_specd", "empty_spece", "empty_specf", 
+                                   "empty_specg", 0};
         DBSetDir(dbfile, "DBPutMatspecies");
         while (vnames[i])
         {

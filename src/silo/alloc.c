@@ -1867,6 +1867,9 @@ DBIsEmptyMatspecies(DBmatspecies const *species)
 {
     int i, is_empty = 1;
 
+    if (species->nspecies_mf == 0)
+        return 1;
+
     for (i = 0; species && i < species->ndims; i++)
     {
         if (species->dims[i] > 0)
