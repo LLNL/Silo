@@ -11367,7 +11367,7 @@ db_hdf5_PutPHZonelist(DBfile *_dbfile, char const *name,
             m.nodecnt/*out*/, friendly_name(name,"_nodecnt", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &lnodelist, nodelist,
             m.nodelist/*out*/, friendly_name(name,"_nodelist", 0));
-        db_hdf5_compwr(dbfile, DB_INT, 1, &nfaces, extface,
+        db_hdf5_compwr(dbfile, DB_CHAR, 1, &nfaces, extface,
             m.extface/*out*/, friendly_name(name,"_extface", 0));
         db_hdf5_compwr(dbfile, DB_INT, 1, &nzones, facecnt,
             m.facecnt/*out*/, friendly_name(name,"_facecnt", 0));
