@@ -118,12 +118,6 @@ typedef char const * const *         DBCAS_t;
 #define TRUE    1
 #endif
 
-/* In the definitions for parts of the _B16 version numbers, below,
-   we use leading '0x0' to deal with possible blank minor and/or patch
-   version number. The _B16 variants are not really for Silo client
-   consumption. We use them here just allow for use of '0x0' leading
-   number to work-around issues with possible blanks. */
-
 /* Major release number of silo library. */
 #define _SILO_VERS_MAJ_@SILO_VERS_MAJ@
 #ifdef _SILO_VERS_MAJ_
@@ -1801,6 +1795,9 @@ SILO_API extern int     (*DBFSingleCB[])(int);
 #define SILO_VSTRING PACKAGE_VERSION
 SILO_API extern int SILO_VERS_TAG;
 #define SiloCheckVersion SILO_VERS_TAG = 1
+
+/* define versions of Silo this version is backward ABI compatible with */
+SILO_API extern int Silo_version_4_10;
 
 /*
  * SILO API FUNCTIONS 
