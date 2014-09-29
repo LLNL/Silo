@@ -1766,7 +1766,6 @@ stc_silo_types (void) {
       COMP (id,                 "primitive 'int'");
       COMP (nspec,              "primitive 'int'");
       COMP (ngroups,            "primitive 'int'");
-      COMP (matname,            "primitive 'string'");
       COMP (guihide,            "primitive 'int'");
       IOASSOC (PA_BOOLEAN);
       COMP (blockorigin,        "primitive 'int'");
