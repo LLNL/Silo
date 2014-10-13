@@ -46,6 +46,7 @@ Silo's python module has yet to be tested on a OSX.</li>
 <li>Fixed problems compiling some 64 bit literal constants used for data read masks by adding 'ULL' suffix to indicate to the compiler that they should be treated as unsigned long long.</li>
 <li>Fixed problems with Fortran header file generation.</li>
 <li>Fixed incorrect handling of datatype for extface argument of DBPutPHZonelist in HDF5 driver (Thanks to Jeffrey Johnson for the fix!).
+<li>Fixed a UMR causing corrupted zonetype array data for the zonelist read as part of a DBGetUcdmesh call on the HDF5 driver.</li>
 </ul>
 
 </body></html>
