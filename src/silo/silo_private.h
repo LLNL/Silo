@@ -841,6 +841,7 @@ typedef struct SILO_Globals_t {
     int enableChecksums;
     int enableFriendlyHDF5Names;
     int enableGrabDriver;
+    int darshanEnabled;
     int maxDeprecateWarnings;
     char *compressionParams;
     float compressionMinratio;

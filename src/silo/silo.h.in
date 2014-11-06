@@ -1828,6 +1828,8 @@ SILO_API extern int                    DBSetFriendlyHDF5Names(int enable);
 SILO_API extern int                    DBGetFriendlyHDF5Names(void);
 SILO_API extern int                    DBSetDeprecateWarnings(int max);
 SILO_API extern int                    DBGetDeprecateWarnings();
+SILO_API extern int                    DBSetEnableDarshan(int enable);
+SILO_API extern int                    DBGetEnableDarshan();
 SILO_API extern int const *            DBSetUnknownDriverPriorities(int const *);
 SILO_API extern int const *            DBGetUnknownDriverPriorities();
 SILO_API extern int                    DBRegisterFileOptionsSet(DBoptlist const *opts);

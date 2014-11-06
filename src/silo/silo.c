@@ -110,6 +110,9 @@ be used for advertising or product endorsement purposes.
 #include <windows.h>        /* for FileInfo funcs */
 #include <io.h>             /* for FileInfo funcs */
 #endif
+#ifdef __DARSHAN_LOG_FORMAT_H
+#include <darshan-ext.h>
+#endif
 
 /* DB_MAIN must be defined before including silo_private.h. */
 #define DB_MAIN
@@ -227,7 +230,8 @@ typedef struct db_silo_stat_t {
 #error missing definition for SIZEOF_OFF64_T in silo_private.h
 #else
 #if SIZEOF_OFF64_T > 4
-    struct stat64 s;
+#warning FIXME
+    struct stat s;
 #else
     struct stat s;
 #endif
@@ -263,6 +267,7 @@ SILO_Globals_t SILO_Globals = {
     FALSE, /* enableChecksums */
     FALSE,  /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
+    FALSE, /* darshanEnabled */
     3,     /* maxDeprecateWarnings */
     0,     /* compressionParams (null) */
     2.0,   /* compressionMinratio */
@@ -2176,6 +2181,7 @@ PRIVATE int
 db_register_file(DBfile *dbfile, const db_silo_stat_t *filestate, int writeable)
 {
     int i;
+    int reg_file_cnt = 0;
     for (i = 0; i < DB_NFILES; i++)
     {
         if (_db_regstatus[i].f == 0)
@@ -2191,7 +2197,17 @@ db_register_file(DBfile *dbfile, const db_silo_stat_t *filestate, int writeable)
             _db_regstatus[i].f = dbfile;
             _db_regstatus[i].n = hval; 
             _db_regstatus[i].w = writeable;
+
+#ifdef __DARSHAN_LOG_FORMAT_H
+            if (SILO_Globals.darshanEnabled && !reg_file_cnt)
+                darshan_start_epoch();
+#endif
+
             return i;
+        }
+        else
+        {
+            reg_file_cnt++;
         }
     }
     return -1;
@@ -2201,6 +2217,16 @@ PRIVATE int
 db_unregister_file(DBfile *dbfile)
 {
     int i;
+
+#ifdef __DARSHAN_LOG_FORMAT_H
+    int reg_file_cnt = 0;
+    for (i = 0; i < DB_NFILES && SILO_Globals.darshanEnabled; i++)
+    {
+        if (!_db_regstatus[i].f)
+            reg_file_cnt++;
+    }
+#endif
+
     for (i = 0; i < DB_NFILES; i++)
     {
         if (_db_regstatus[i].f == dbfile)
@@ -2214,6 +2240,12 @@ db_unregister_file(DBfile *dbfile)
                 _db_regstatus[j].w = _db_regstatus[j+1].w;
             }
             _db_regstatus[j].f = 0;
+
+#ifdef __DARSHAN_LOG_FORMAT_H
+            if (SILO_Globals.darshanEnabled && reg_file_cnt == 1)
+                darshan_end_epoch();
+#endif
+
             return i;
         }
     }
@@ -2956,6 +2988,32 @@ PUBLIC int
 DBGetDeprecateWarnings()
 {
     return SILO_Globals.maxDeprecateWarnings;
+}
+
+/*----------------------------------------------------------------------
+ * Routine:  DBSetEnableDarshan
+ *
+ * Purpose:  Set flag to create friendly HDF5 dataset names 
+ *
+ * Programmer: Mark C. Miller, Wed Nov  5 09:32:43 PST 2014
+ *
+ * Description:  Sets flag to run with Darshan instrumentaion library
+ * enabled.
+ *--------------------------------------------------------------------*/
+PUBLIC int
+DBSetEnableDarshan(int enable)
+{
+    int oldEnable = SILO_Globals.darshanEnabled;
+#ifdef __DARSHAN_LOG_FORMAT_H
+    SILO_Globals.darshanEnabled = enable;
+#endif
+    return oldEnable;
+}
+
+PUBLIC int
+DBGetEnableDarshan()
+{
+    return SILO_Globals.darshanEnabled;
 }
 
 /*----------------------------------------------------------------------
@@ -4526,6 +4584,7 @@ DBClose(DBfile *dbfile)
         if (dbfile->pub.file_lib_version)
             free(dbfile->pub.file_lib_version);
         db_unregister_file(dbfile);
+
         retval = (dbfile->pub.close) (dbfile);
         API_RETURN(retval);
     }
