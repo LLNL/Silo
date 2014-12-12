@@ -87,7 +87,7 @@ UpdateTree(DBexprnode *tree, const char t, int v, char *s)
         if (s)
             strncpy(newnode->sval, s, sizeof(newnode->sval)-1);
         else
-            strcpy(newnode->sval, "(null)");
+            newnode->sval[0] = '\0';
     }
 
     newnode->left = 0;
@@ -250,12 +250,13 @@ BuildExprTree(const char **porig)
 /* very simple circular cache for a handful of embedded strings */
 static int SaveInternalString(DBnamescheme const *ns, const char *sval)
 {
-    /* The modn/embedstrs portion of a namescheme is 'internal' state
+    /* The modn/embedns portion of a namescheme is 'internal' state
        allowed to disobey const rules */
     DBnamescheme *non_const_ns = (DBnamescheme*) ns;
-    int modn = non_const_ns->nembed++ % DB_MAX_EXPSTRS;
-    FREE(non_const_ns->embedstrs[modn]);
-    non_const_ns->embedstrs[modn] = STRDUP(sval);
+    int modn = non_const_ns->nembed++ % DB_MAX_EXPNS;
+    if (non_const_ns->embedns[modn])
+        DBFreeNamescheme(non_const_ns->embedns[modn]);
+    non_const_ns->embedns[modn] = DBMakeNamescheme(sval);
     return modn;
 }
 
@@ -308,7 +309,7 @@ EvalExprTree(DBnamescheme const *ns, DBexprnode *tree, int n)
     }
     else if (tree->left != 0 && tree->right != 0)
     {
-        int vc = 0, vl, vr;
+        int vc = 0, vl = 0, vr = 0;
         if (tree->type == '?')
         {
             vc = EvalExprTree(ns, tree->left, n);
@@ -354,10 +355,20 @@ DBMakeNamescheme(char const *fmt, ...)
 
     /* Start by allocating an empty name scheme */
     rv = DBAllocNamescheme();
-    
-    /* set the delimeter character */
-    rv->delim = fmt[0];
 
+    // set the delimeter character
+    n = 0;
+    while (fmt[n] != '\0')
+    {
+        if (fmt[n] == '%' && fmt[n+1] != '%')
+            break;
+        n++;
+    }
+    if (fmt[n] == '%') // have at least one conversion spec
+        rv->delim = fmt[0];
+    else
+        rv->delim = '\0';
+    
     /* compute length up to max of 4096 of initial segment of fmt representing
        the printf-style format string. */
     n = 1;
@@ -395,8 +406,14 @@ DBMakeNamescheme(char const *fmt, ...)
     rv->fmtptrs[rv->ncspecs] = &(rv->fmt[n+1]);
 
     /* If there are no conversion specs., we have nothing to do */
+    /* However, in this case, assume the first char is a real char. */
     if (rv->ncspecs == 0)
+    {
+        free(rv->fmt);
+        rv->fmt = STRNDUP(&fmt[0],n);
+        rv->fmtlen = n;
         return rv;
+    }
 
     /* Make a pass through rest of fmt string to count array refs in the
        expression substrings. */
@@ -517,8 +534,7 @@ DBMakeNamescheme(char const *fmt, ...)
         {
             rv->exprstrs[ncspecs] = STRNDUP(&fmt[n+1],i-(n+1));
             ncspecs++;
-            if (fmt[i] == '\0' ||
-                (fmt[i] == rv->delim && fmt[i] == '\0'))
+            if (fmt[i] == '\0')
                 done = 1;
             n = i;
         }
@@ -539,12 +555,14 @@ PUBLIC const char *
 DBGetName(DBnamescheme const *ns, int natnum)
 {
     char *currentExpr, *tmpExpr;
-    static char retval[1024];
+    char retval[1024];
     int i;
 
     /* a hackish way to cleanup the saved returned string buffer */
-    if (ns == 0 && natnum == 0) return SaveReturnedString(0);
+    if (ns == 0 && natnum == -1) return SaveReturnedString(0);
     if (ns == 0) return SaveReturnedString("");
+
+    if (!ns->fmt) return "";
 
     retval[0] = '\0';
     strncat(retval, ns->fmt, ns->fmtptrs[0] - ns->fmt);
@@ -568,8 +586,8 @@ DBGetName(DBnamescheme const *ns, int natnum)
         theVal = EvalExprTree(ns, exprtree, natnum);
         FreeTree(exprtree);
         strncpy(tmpfmt, ns->fmtptrs[i], ns->fmtptrs[i+1] - ns->fmtptrs[i]);
-        if (strncmp(tmpfmt, "%s", 2) == 0 && 0 <= theVal && theVal < DB_MAX_EXPSTRS)
-            sprintf(tmp, tmpfmt, ns->embedstrs[theVal]);
+        if (strncmp(tmpfmt, "%s", 2) == 0 && 0 <= theVal && theVal < DB_MAX_EXPNS)
+            sprintf(tmp, tmpfmt, DBGetName(ns->embedns[theVal],natnum));
         else
             sprintf(tmp, tmpfmt, theVal);
         strcat(retval, tmp);

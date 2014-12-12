@@ -106,6 +106,15 @@ int main(int argc, char **argv)
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
 
+    /* test namescheme with constant componets */
+    {
+        ns = DBMakeNamescheme("foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
+        DBFreeNamescheme(ns);
+    }
+
     /* Test a somewhat complex expression */ 
     ns = DBMakeNamescheme("@foo_%+03d@3-((n % 3)*(4+1)+1/2)+1");
     TEST_GET_NAME(ns, 25, "foo_+01");
@@ -347,17 +356,25 @@ int main(int argc, char **argv)
         DBClose(dbfile);
     }
 
-    /* test namescheme with constant componets */
-    {
-        ns = DBMakeNamescheme("@foo/bar/gorfo_0@");
-        TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
-        TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
-        TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
-        DBFreeNamescheme(ns);
-    }
+    // Test McCandless' example (new way)
+    ns = DBMakeNamescheme("@%s@(n/4)?'&myfilename.%d&n/4':'':@");
+    TEST_GET_NAME(ns, 0, "");
+    TEST_GET_NAME(ns, 1, "");
+    TEST_GET_NAME(ns, 4, "myfilename.1");
+    TEST_GET_NAME(ns, 15, "myfilename.3");
+    DBFreeNamescheme(ns);
+
+    // Text Exodus material volume fraction variable convention
+    ns = DBMakeNamescheme("@%s@n>?'&VOLFRC_%d&n':'VOID_FRC':@");
+    TEST_GET_NAME(ns, 0, "VOID_FRC");
+    TEST_GET_NAME(ns, 1, "VOLFRC_1");
+    TEST_GET_NAME(ns, 2, "VOLFRC_2");
+    TEST_GET_NAME(ns, 10, "VOLFRC_10");
+    TEST_GET_NAME(ns, 2746, "VOLFRC_2746");
+    DBFreeNamescheme(ns);
 
     /* hackish way to cleanup the circular cache used internally */
-    DBGetName(0,0);
+    DBGetName(0,-1);
     
     CleanupDriverStuff();
 

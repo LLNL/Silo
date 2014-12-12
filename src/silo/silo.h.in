@@ -1606,8 +1606,8 @@ typedef struct _DBgroupelmap {
     int fracs_data_type;
 } DBgroupelmap;
 
-#if !defined(DB_MAX_EXPSTRS) /* NO_FORTRAN_DEFINE */
-#define DB_MAX_EXPSTRS 8 /* NO_FORTRAN_DEFINE */
+#if !defined(DB_MAX_EXPNS) /* NO_FORTRAN_DEFINE */
+#define DB_MAX_EXPNS 32 /* NO_FORTRAN_DEFINE */
 #endif
 
 typedef struct _DBnamescheme
@@ -1617,8 +1617,8 @@ typedef struct _DBnamescheme
     int fmtlen;             /* len of first part of fmt */
     int ncspecs;            /* # of conversion specs in first part of fmt */
     char delim;             /* delimiter char used for parts of fmt */
-    int nembed;             /* number of last embedded string encountered (used in eval process) */
-    char *embedstrs[DB_MAX_EXPSTRS]; /* ptrs to copies of embedded strings (used in eval process) */
+    int nembed;             /* number of last embedded namescheme encountered (used in eval process) */
+    struct _DBnamescheme *embedns[DB_MAX_EXPNS]; /* ptrs to copies of embedded nameschemes */
     int arralloc;           /* flag indicating if Silo allocated the arrays or not */
     int narrefs;            /* number of array refs in conversion specs */
     char **arrnames;        /* array names used by array refs */
