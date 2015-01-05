@@ -78,7 +78,7 @@
       include "silo.inc"
 
       integer  buildquad
-      integer  dbid, meshid, err, driver, nargs
+      integer  dbid, meshid, err, driver, nargs, anint
       integer  iarr(20)
       real*8   darr(20)
       character*8 cname
@@ -111,6 +111,15 @@
 
 !...Read stuff.
       err = dbopen ("quadf77.silo", 12, driver, DB_READ, dbid)
+
+      err = dbinqlen(dbid, "quad_coord0", 11, anint)
+      if (err .ne. 0) print *, 'Unable to read quad_coord0 length'
+      if (anint .ne. 4) print *, 'Error reading quad_coord0 length'
+
+      err = dbinqdtyp(dbid, "quad_coord0", 11, anint)
+      if (err .ne. 0) print *, 'Unable to read quad_coord0 data type'
+      if (anint .ne. DB_FLOAT)
+     .    print *, 'Error reading quad_coord0 data type'
 
       err = dbrdvar (dbid, "hcom2", 5, iarr)
       if (err .ne. 0) print *, 'Error reading hcom2'
