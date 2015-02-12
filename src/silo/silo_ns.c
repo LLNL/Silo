@@ -534,7 +534,8 @@ DBMakeNamescheme(char const *fmt, ...)
         {
             rv->exprstrs[ncspecs] = STRNDUP(&fmt[n+1],i-(n+1));
             ncspecs++;
-            if (fmt[i] == '\0')
+            if ((fmt[i] == '\0') ||
+                (fmt[i] == rv->delim && fmt[i+1] == '\0'))
                 done = 1;
             n = i;
         }

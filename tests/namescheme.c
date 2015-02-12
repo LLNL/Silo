@@ -365,7 +365,7 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     // Text Exodus material volume fraction variable convention
-    ns = DBMakeNamescheme("@%s@n>?'&VOLFRC_%d&n':'VOID_FRC':@");
+    ns = DBMakeNamescheme("@%s@n?'&VOLFRC_%d&n':'VOID_FRC':@");
     TEST_GET_NAME(ns, 0, "VOID_FRC");
     TEST_GET_NAME(ns, 1, "VOLFRC_1");
     TEST_GET_NAME(ns, 2, "VOLFRC_2");
