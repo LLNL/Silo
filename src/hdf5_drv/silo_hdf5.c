@@ -59,6 +59,8 @@ be used for advertising or product endorsement purposes.
    version 1.8 and thereafter. When, and if, the HDF5 code in this file
    is explicitly upgraded to the 1.8 API, this symbol should be removed. */
 #define H5_USE_16_API
+#include <h5pubconf.h>
+#include <hdf5.h>
 
 #include <errno.h>
 #include <assert.h>
@@ -4755,7 +4757,12 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
         case DB_FILE_OPTS_H5_DEFAULT_MPIP:
         {
 #ifdef H5_HAVE_PARALLEL
+#if HDF5_VERSION_GE(1,8,13)
+            H5Pclose(retval);
+            return db_perror("HDF5 MPIPOSIX VFD not available in >HDF5-1.8.12", E_NOTENABLEDINBUILD, me);
+#else
             h5status |= H5Pset_fapl_mpiposix(retval, MPI_COMM_SELF, TRUE);
+#endif
 #else
             H5Pclose(retval);
             return db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
@@ -5076,7 +5083,12 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     }
                     else
                     {
+#if HDF5_VERSION_GE(1,8,13)
+                        H5Pclose(retval);
+                        return db_perror("HDF5 MPIPOSIX VFD not available in >HDF5-1.8.12", E_NOTENABLEDINBUILD, me);
+#else
                         h5status |= H5Pset_fapl_mpiposix(retval, mpi_comm, use_gpfs_hints);
+#endif
                     }
 #else 
                     H5Pclose(retval);
