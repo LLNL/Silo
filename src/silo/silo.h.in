@@ -1798,6 +1798,7 @@ SILO_API extern int SILO_VERS_TAG;
 
 /* define versions of Silo this version is backward ABI compatible with */
 SILO_API extern int Silo_version_4_10;
+SILO_API extern int Silo_version_4_10_2;
 
 /*
  * SILO API FUNCTIONS 

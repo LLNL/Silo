@@ -2,7 +2,7 @@ Ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 C 
 C      SILO include file for Fortan applications.
 C 
-C  Programmer:   miller86 Mon Sep 29 07:01:26 PDT 2014
+C  Programmer:   miller86 Thu Mar 26 12:11:22 PDT 2015
 C 
 C  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 C     This file is generated automatically from C header files in the
@@ -513,7 +513,7 @@ C...Parameters.
 
       PARAMETER (SILO_VERS_MAJ=4)
       PARAMETER (SILO_VERS_MIN=10)
-      PARAMETER (SILO_VERS_PAT=0)
+      PARAMETER (SILO_VERS_PAT=3)
       PARAMETER (SILO_VERS_PRE=0)
       PARAMETER (DB_NETCDF=0)
       PARAMETER (DB_PDB=2)

@@ -1137,7 +1137,12 @@ DBFreeUcdmesh(DBucdmesh *msh)
 PUBLIC int
 DBIsEmptyUcdmesh(DBucdmesh const *msh)
 {
-    if (msh && msh->nnodes!=0) return 0;
+    if (msh)
+    {
+        /* This logic supports Kerbel's funky empty ucdmesh */
+        if (msh->nnodes == 1 && ((msh->zones == 0 || msh->zones->nzones == 0))) return 1;
+        if (msh->nnodes > 0) return 0;
+    }
     return 1;
 }
 
