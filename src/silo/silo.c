@@ -137,6 +137,8 @@ int SILO_VERS_TAG = 0;
 int Silo_version_4_10 = 0;
 int Silo_version_4_10_0 = 0;
 int Silo_version_4_10_1 = 0;
+int Silo_version_4_10_2 = 0;
+int Silo_version_4_10_3 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -8825,6 +8827,10 @@ DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, void const *
  *
  *    Robb Matzke, 2000-05-23
  *    The old table of contents is discarded if the directory changes.
+ *
+ *    Mark C. Miller, Thu Mar 26 12:40:20 PDT 2015
+ *    Add logic to support Kerbel's funky empty ucd mesh with a single
+ *    node and no zones.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
@@ -8854,7 +8860,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
         {
             int i;
             void **coords2 = (void**) coords;
-            if (nzones <= 0)
+            if (nnodes > 1 && nzones <= 0)
                 API_ERROR("nzones<=0", E_BADARGS);
             for (i = 0; i < ndims && coords; i++)
                 if (coords2[i] == 0) coords = 0;;
@@ -8881,7 +8887,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
                 if (db_VariableNameValid(facel_name) == 0)
                     API_ERROR("facel_name", E_INVALIDNAME);
             }
-            else
+            else if (nzones > 0)
             {
                 API_ERROR("no zonelist or facelist specified", E_BADARGS);
             }

@@ -108,6 +108,8 @@ main(int argc, char *argv[])
     int             i, pass;
     char const * const cnames[3] = {"x","y","z"};
     void           *coords[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
+    float           zero = 0.0;
+    void           *coordsK[3] = {(void*)&zero,(void*)&zero,(void*)&zero}; /* funky pointers for Kerbel case */
     void           *vars[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
     void const * const vvars[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
     void           *var = (void*)1;
@@ -189,7 +191,9 @@ main(int argc, char *argv[])
         ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh1",3,cnames,coords,ZZ,1,"foo","bar",dt,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh2",1,     0,coords,ZZ,1,"foo","bar",dt,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh3",2,cnames,     0,ZZ,0,"foo","bar",dt,OL(ol)),retval<0,retval==0);
-        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh3",0,     0,     0,ZZ,0,    0,    0,dt,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh4",0,     0,     0,ZZ,0,    0,    0,dt,OL(ol)),retval<0,retval==0);
+        /* Test funky Kerbel case */
+        ASSERT(DBPutUcdmesh(dbfile,"empty_ucdmesh5",3,cnames,coordsK,1,ZZ,0,0,dt,OL(ol)),retval>=0,retval==0);
 
         ASSERT(DBPutFacelist(dbfile,"empty_facelista",ZZ,0,iarr,1,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
         ASSERT(DBPutFacelist(dbfile,"empty_facelistb",ZZ,0,   0,1,1,iarr,iarr,iarr,1,iarr,iarr,1),retval<0,retval==0);
@@ -330,7 +334,8 @@ main(int argc, char *argv[])
     }
 
     /* test read back of empty ucd meshes, zonelists and vars */
-    {   int i=0; char *mnames[] = {"empty_ucdmesh1", "empty_ucdmesh2", "empty_ucdmesh3", 0};
+    {   int i=0; char *mnames[] = {"empty_ucdmesh1", "empty_ucdmesh2", "empty_ucdmesh3",
+                                   "empty_ucdmesh4", "empty_ucdmesh5", 0};
         DBSetDir(dbfile, "DBPutUcdmesh");
         while (mnames[i])
         {

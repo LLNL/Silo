@@ -836,6 +836,9 @@ WriteAllFormats(int argc, char **argv)
 #ifdef HAVE_SILO
 extern int WriteFormat_silo(int argc, const char *const *const argv);
 #endif
+#ifdef HAVE_VTK
+extern int WriteFormat_vtk(int argc, const char *const *const argv);
+#endif
 
 #endif
 
@@ -861,6 +864,9 @@ main(int argc, char **argv)
 
 #ifdef HAVE_SILO
     nerrors += WriteFormat_silo(argc, argv);
+#endif
+#ifdef HAVE_VTK
+    nerrors += WriteFormat_vtk(argc, argv);
 #endif
 
 #else // STATIC_PLUGINS
