@@ -3664,7 +3664,7 @@ DBAddDblComponent(DBobject *object, const char *compname, double ff)
 PUBLIC int
 DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
 {
-    char           tmp[256];
+    char *tmp = 0;
 
     API_BEGIN("DBAddStrComponent", int, -1) {
         if (!object)
@@ -3683,17 +3683,25 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
             sprintf(tmp, "'<s>null'");
         }
         else
+        {
+            tmp = malloc(strlen(ss)+6);
             sprintf(tmp, "'<s>%s'", ss);
+        }
 
         if (NULL == (object->comp_names[object->ncomponents] =
                      STRDUP(compname)) ||
             NULL == (object->pdb_names[object->ncomponents] =
                      STRDUP(tmp))) {
+            FREE(tmp);
             FREE(object->comp_names[object->ncomponents]);
             API_ERROR(NULL, E_NOMEM);
         }
         if (!db_IncObjectComponentCount(object))
+        {
+            FREE(tmp);
             API_ERROR(NULL, E_NOMEM);
+        }
+        FREE(tmp);
     }
     API_END;
 
