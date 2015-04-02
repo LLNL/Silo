@@ -3660,6 +3660,9 @@ DBAddDblComponent(DBobject *object, const char *compname, double ff)
  *
  *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
  *    Made the error messages a little better.
+ *
+ *    Mark C. Miller, Thu Apr  2 09:48:57 PDT 2015
+ *    Added Al Nichols' enhancement for arb. length str components.
  *--------------------------------------------------------------------*/
 PUBLIC int
 DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
