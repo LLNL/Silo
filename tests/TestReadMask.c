@@ -53,6 +53,7 @@ product endorsement purposes.
 #include <silo.h>
 #ifndef WIN32
 #include <sys/time.h>
+#include <time.h>
 #else
 #include <string.h>
 #include <time.h>

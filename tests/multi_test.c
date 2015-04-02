@@ -1706,10 +1706,10 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
         DBAddOption(optlist, DBOPT_MATNAMES, matnames);
 
         /* populate optional data arrays */
@@ -2022,10 +2022,10 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
 
         put_extents(x2,dims[0]*dims[1],varextents[0],block);
         put_extents(y2,dims[0]*dims[1],varextents[1],block);
@@ -2251,10 +2251,10 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
 
         put_extents(x2,npts,varextents[0],block);
         put_extents(y2,npts,varextents[1],block);
@@ -2618,12 +2618,12 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
-        DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
 
         /* populate varextetnts optional data array */
         put_extents(x2,dims[0],varextents[0],block);
@@ -3112,12 +3112,12 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
-        DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
         DBAddOption(optlist, DBOPT_HI_OFFSET, &hi_off);
 
         if (nfaces > 0)
@@ -3549,12 +3549,12 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
-        DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
 
         put_extents(x2,dims[0]*dims[1]*dims[2],varextents[0],block);
         put_extents(y2,dims[0]*dims[1]*dims[2],varextents[1],block);

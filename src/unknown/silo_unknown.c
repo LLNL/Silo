@@ -121,7 +121,7 @@ be used for advertising or product endorsement purposes.
  *     to interface layer, silo.c
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
-db_unk_Open(char *name, int mode, int subtype_dummy)
+db_unk_Open(char const *name, int mode, int subtype_dummy)
 {
     DBfile        *opened = NULL;
     DBErrFunc_t    oldErrfunc = 0;

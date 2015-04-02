@@ -57,9 +57,9 @@ bin_PROGRAMS = silex
 silex_SOURCES = $(FILES)
 nodist_silex_SOURCES = $(FILES_MOC)
 if HDF5_DRV_NEEDED
-  silex_LDADD = ../../src/libsiloh5.la $(QT_LDFLAGS) $(QT_LIBS)
+  silex_LDADD = ../../src/libsiloh5.la $(QT_LDFLAGS) $(QT_LIBS) -lQt5Gui
 else
-  silex_LDADD = ../../src/libsilo.la $(QT_LDFLAGS) $(QT_LIBS)
+  silex_LDADD = ../../src/libsilo.la $(QT_LDFLAGS) $(QT_LIBS) -lQt5Gui
 endif
 if JSON_NEEDED
   silex_LDADD += ../json/json-c-0.10/libjson.la

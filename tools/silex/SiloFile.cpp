@@ -97,7 +97,7 @@ SiloDir::SiloDir(DBfile *db, const QString &name_, const QString &path_)
     int drt = DBGetDriverType(db);
     if (canCallFreeCompression[drt] && DBFreeCompressionResources(db,0) == -1)
         canCallFreeCompression[drt] = false;
-    DBSetDir(db, (const char*)path.toAscii());
+    DBSetDir(db, (const char*)path.toLatin1());
     DBtoc *toc = DBGetToc(db);
 
     int i;
@@ -204,7 +204,7 @@ SiloDir::~SiloDir()
 // ****************************************************************************
 SiloFile::SiloFile(const QString &name)
 {
-    db = DBOpen((const char*)name.toAscii(), DB_UNKNOWN, DB_READ);
+    db = DBOpen((const char*)name.toLatin1(), DB_UNKNOWN, DB_READ);
     if (db)
         root = new SiloDir(db, "/", "/");
     else
@@ -247,47 +247,47 @@ SiloFile::~SiloFile()
 void*
 SiloFile::GetVar(const QString &name)
 {
-    return DBGetVar(db, (const char*)name.toAscii());
+    return DBGetVar(db, (const char*)name.toLatin1());
 }
 
 int
 SiloFile::GetVarType(const QString &name)
 {
-    return DBGetVarType(db, (const char*)name.toAscii());
+    return DBGetVarType(db, (const char*)name.toLatin1());
 }
 
 int
 SiloFile::GetVarLength(const QString &name)
 {
-    return DBGetVarLength(db, (const char*)name.toAscii());
+    return DBGetVarLength(db, (const char*)name.toLatin1());
 }
 
 DBobject*
 SiloFile::GetObject(const QString &name)
 {
-    return DBGetObject(db, (const char*)name.toAscii());
+    return DBGetObject(db, (const char*)name.toLatin1());
 }
 
 void*
 SiloFile::GetComponent(const QString &oname, const QString &cname)
 {
-    return DBGetComponent(db, (const char*)oname.toAscii(), (const char*)cname.toAscii());
+    return DBGetComponent(db, (const char*)oname.toLatin1(), (const char*)cname.toLatin1());
 }
 
 int
 SiloFile::GetComponentType(const QString &oname, const QString &cname)
 {
-    return DBGetComponentType(db, (const char*)oname.toAscii(), (const char*)cname.toAscii());
+    return DBGetComponentType(db, (const char*)oname.toLatin1(), (const char*)cname.toLatin1());
 }
 
 DBObjectType
 SiloFile::InqVarType(const QString &name)
 {
-    return DBInqVarType(db, (const char*)name.toAscii());
+    return DBInqVarType(db, (const char*)name.toLatin1());
 }
 
 bool
 SiloFile::InqVarExists(const QString &name)
 {
-    return DBInqVarExists(db, (const char*)name.toAscii());
+    return DBInqVarExists(db, (const char*)name.toLatin1());
 }

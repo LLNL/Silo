@@ -90,18 +90,18 @@ build_curve (DBfile *dbfile, int driver)
    }
 
    opts = DBMakeOptlist (10) ;
-   DBAddOption (opts, DBOPT_XLABEL, "X Axis") ;
-   DBAddOption (opts, DBOPT_YLABEL, "Y Axis") ;
-   DBAddOption (opts, DBOPT_XUNITS, "radians") ;
+   DBAddOption (opts, DBOPT_XLABEL, (char *) "X Axis") ;
+   DBAddOption (opts, DBOPT_YLABEL, (char *) "Y Axis") ;
+   DBAddOption (opts, DBOPT_XUNITS, (char *) "radians") ;
 
    /*
     * Write the 'sincurve' curve. The hdf5 driver allows the user to specify
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   if (DB_HDF5==(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (DB_HDF5==(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
-   if (DB_HDF5!=(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (DB_HDF5!=(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
 
    /*
     * Write the 'coscurve' curve. It shares x values with the 'sincurve'

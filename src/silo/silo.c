@@ -13815,7 +13815,7 @@ DBPutGroupelmap(DBfile *dbfile, const char *name,
 
         retval = (dbfile->pub.p_grplm) (dbfile, name,
             num_segments, groupel_types, segment_lengths, segment_ids,
-            segment_data, segment_fracs, fracs_data_type, opts);
+            segment_data, (void const * const *) segment_fracs, fracs_data_type, opts);
 
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -13878,7 +13878,7 @@ DBPutMrgvar(DBfile *dbfile, const char *name, const char *mrgt_name,
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.p_mrgv) (dbfile, name, mrgt_name, ncomps,
-            compnames, nregns, reg_pnames, datatype, data, opts);
+            compnames, nregns, reg_pnames, datatype, (void const * const *) data, opts);
 
         db_FreeToc(dbfile);
         API_RETURN(retval);

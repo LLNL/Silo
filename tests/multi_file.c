@@ -1036,12 +1036,12 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
-        DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
         DBAddOption(optlist, DBOPT_HI_OFFSET, &hi_off);
 
         if (empties && block == empty_blocks[eb])
