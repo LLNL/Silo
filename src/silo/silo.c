@@ -113,6 +113,7 @@ be used for advertising or product endorsement purposes.
 #ifdef __DARSHAN_LOG_FORMAT_H
 #include <darshan-ext.h>
 #endif
+#include <assert.h>
 
 /* DB_MAIN must be defined before including silo_private.h. */
 #define DB_MAIN
@@ -3746,6 +3747,16 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
         }
         else
         {
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
+            assert(strlen(ss)<1024);
             tmp = malloc(strlen(ss)+6);
             sprintf(tmp, "'<s>%s'", ss);
         }
