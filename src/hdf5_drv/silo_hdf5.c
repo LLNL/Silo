@@ -7838,7 +7838,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
 {
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_GetObject";
-    hid_t       o=-1, attr=-1, atype=-1, s1024=-1;
+    hid_t       o=-1, attr=-1, atype=-1, h5str=-1;
     char        *file_value=NULL, *mem_value=NULL, *bkg=NULL, bigname[1024];
     DBObjectType objtype;
     int         _objtype, nmembs, i, j, memb_size[4];
@@ -7873,9 +7873,9 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
         }
         asize = H5Tget_size(atype);
         msize = MAX(asize, 3*1024);
-        if (NULL==(file_value=(char *)malloc(asize)) ||
-            NULL==(mem_value=(char *)malloc(msize)) ||
-            NULL==(bkg=(char *)malloc(msize))) {
+        if (NULL==(file_value=(char *)calloc(1,asize)) ||
+            NULL==(mem_value=(char *)calloc(1,msize)) ||
+            NULL==(bkg=(char *)calloc(1,msize))) {
             db_perror(name, E_NOMEM, me);
             UNWIND();
         }
@@ -7892,8 +7892,6 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
         }
 
         /* Add members to the DBobject */
-        s1024 = H5Tcopy(H5T_C_S1);
-        H5Tset_size(s1024, 1024);
         for (i=0; i<nmembs; i++) {
             int ndims = 0;
             hid_t member_type = db_hdf5_get_cmemb(atype, i, &ndims, memb_size);
@@ -7934,7 +7932,9 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                 break;
 
             case H5T_STRING:
-                db_hdf5_put_cmemb(mtype, name, 0, ndims, memb_size, s1024);
+                h5str = H5Tcopy(H5T_C_S1);
+                H5Tset_size(h5str, H5Tget_size(member_type));
+                db_hdf5_put_cmemb(mtype, name, 0, ndims, memb_size, h5str);
                 memcpy(mem_value, file_value, H5Tget_size(atype));
                 H5Tconvert(atype, mtype, 1, mem_value, bkg, H5P_DEFAULT);
                 if (1==nelmts) {
@@ -7943,9 +7943,11 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                     for (j=0; (size_t)j<nelmts; j++) {
                         sprintf(bigname, "%s%d", name, j+1);
                         DBAddStrComponent(obj, bigname,
-                                          mem_value+j*1024);
+                                          mem_value+j*H5Tget_size(member_type));
                     }
                 }
+                H5Tclose(h5str);
+                h5str = -1;
                 break;
 
             default:
@@ -7961,7 +7963,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
 
         /* Cleanup */
         H5Tclose(atype);
-        H5Tclose(s1024);
+        H5Tclose(h5str);
         H5Aclose(attr);
         H5Tclose(o);
         free(file_value);
@@ -7971,7 +7973,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
     } CLEANUP {
         H5E_BEGIN_TRY {
             H5Tclose(atype);
-            H5Tclose(s1024);
+            H5Tclose(h5str);
             H5Aclose(attr);
             H5Tclose(o);
         } H5E_END_TRY;

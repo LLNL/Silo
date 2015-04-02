@@ -100,7 +100,7 @@ build_objs(DBfile *dbfile)
 
    if (dbfile != NULL)
    {
-      if ((o=DBMakeObject("first",DB_USERDEF,11)) != NULL)
+      if ((o=DBMakeObject("first",DB_USERDEF,12)) != NULL)
       {  int got;
 
 	 DBAddIntComponent(o,"member_0",0);
@@ -114,6 +114,24 @@ build_objs(DBfile *dbfile)
 	 DBAddVarComponent(o,"member_8","eight");
 	 DBAddIntComponent(o,"member_9",9);
          DBAddDblComponent(o,"member_10",10.10101010101010);
+         DBAddStrComponent(o,"member_11",
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "VeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryVery"
+             "LongString");
 	 got = DBWriteObject(dbfile,o,0);
 	 DBFreeObject(o);
 	 if (got < 0)
