@@ -6749,7 +6749,13 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 foffset += H5Tget_size(dbfile->T_double);
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
                 size_t len = strlen(obj->pdb_names[i]+4)-1;
-                hid_t str_type = H5Tcopy(H5T_C_S1);
+                hid_t str_type;
+                if (len > 1024 && !SILO_Globals.allowLongStrComponents)
+                {
+                    db_perror("encountered Str component > 1024 chars", E_CALLFAIL, me);
+                    UNWIND();
+                }
+                str_type = H5Tcopy(H5T_C_S1);
                 H5Tset_size(str_type, len);
                 if (H5Tinsert(mtype, obj->comp_names[i], moffset,
                               str_type)<0 ||

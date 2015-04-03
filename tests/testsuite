@@ -2596,15 +2596,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:134: \$VALGRIND obj \$STARGS"
+$as_echo "$at_srcdir/testsuite.at:134: test \"\$STARGS\" = DB_HDF5 && \$VALGRIND obj \$STARGS allow-long-str-components || \$VALGRIND obj \$STARGS"
 echo testsuite.at:134 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "$VALGRIND obj $STARGS"; then
-  ( $at_traceon; $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "test \"$STARGS\" = DB_HDF5 && $VALGRIND obj $STARGS allow-long-str-components || $VALGRIND obj $STARGS"; then
+  ( $at_traceon; test "$STARGS" = DB_HDF5 && $VALGRIND obj $STARGS allow-long-str-components || $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stderr"
+  ( :; test "$STARGS" = DB_HDF5 && $VALGRIND obj $STARGS allow-long-str-components || $VALGRIND obj $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false

@@ -131,7 +131,7 @@ AT_SETUP(testall -small -fortran)
 AT_CHECK($VALGRIND testall -small -fortran $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(obj)
-AT_CHECK($VALGRIND obj $STARGS,,ignore)
+AT_CHECK(test "$STARGS" = DB_HDF5 && $VALGRIND obj $STARGS allow-long-str-components || $VALGRIND obj $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(onehex)
 AT_CHECK($VALGRIND onehex $STARGS,,ignore)

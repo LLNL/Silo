@@ -268,9 +268,10 @@ SILO_Globals_t SILO_Globals = {
     TRUE,  /* allowOverwrites */
     FALSE, /* allowEmptyObjects */
     FALSE, /* enableChecksums */
-    FALSE,  /* enableFriendlyHDF5Names */
+    FALSE, /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
     FALSE, /* darshanEnabled */
+    FALSE, /* allowLongStrComponents */
     3,     /* maxDeprecateWarnings */
     0,     /* compressionParams (null) */
     2.0,   /* compressionMinratio */
@@ -3020,6 +3021,33 @@ DBGetEnableDarshan()
 }
 
 /*----------------------------------------------------------------------
+ * Routine:  DBSetAllowLongStrComponents
+ *
+ * Purpose:  Set and return the allow long Str components flag
+ *
+ * Programmer:  Mark C. Miller, April 2, 2015
+ *
+ * Description:  This routine sets the flag that controls whether
+ *               long Str components. By default, they are not.
+ *               Note that long Str components can badly break older
+ *               (pre-4.10.3) Silo library's and tool's ability
+ *               to read such objects resulting in SEGVs.
+ *--------------------------------------------------------------------*/
+PUBLIC int 
+DBSetAllowLongStrComponents(int allow)
+{
+    int oldAllow = SILO_Globals.allowLongStrComponents;
+    SILO_Globals.allowLongStrComponents = allow;
+    return oldAllow;
+}
+
+PUBLIC int 
+DBGetAllowLongStrComponents()
+{
+    return SILO_Globals.allowLongStrComponents;
+}
+
+/*----------------------------------------------------------------------
  * Routine:  DBSetUnknownDriverPriority
  *
  * Purpose:  Set priority order of drivers used by unknown driver. 
@@ -3747,16 +3775,6 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
         }
         else
         {
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-#warning REMOVE THIS ASSERTION WHEN WE DECIDE ON AL NICHOLS SOLUTION
-            assert(strlen(ss)<1024);
             tmp = malloc(strlen(ss)+6);
             sprintf(tmp, "'<s>%s'", ss);
         }
