@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
     int			i, nerrors=0,  driver=DB_PDB;
     char		*filename="newsami-test.sami";
     int                 show_all_errors = FALSE;
-    int                 arch_g;
+    int                 arch_g = DB_LOCAL;
     int                 seed = 0;
     int                 nhexes = 1000;
     int                 ndirs = 2;

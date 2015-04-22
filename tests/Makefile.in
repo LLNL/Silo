@@ -106,7 +106,7 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	onehex$(EXEEXT) oneprism$(EXEEXT) onepyramid$(EXEEXT) \
 	onetet$(EXEEXT) TestReadMask$(EXEEXT) subhex$(EXEEXT) \
 	twohex$(EXEEXT) multispec$(EXEEXT) specmix$(EXEEXT) \
-	sami$(EXEEXT) spec$(EXEEXT) cpz1plt$(EXEEXT) \
+	misc$(EXEEXT) newsami$(EXEEXT) spec$(EXEEXT) cpz1plt$(EXEEXT) \
 	merge_block$(EXEEXT) mat3d_3across$(EXEEXT) ucd1d$(EXEEXT) \
 	wave$(EXEEXT) multi_file$(EXEEXT) polyzl$(EXEEXT) csg$(EXEEXT) \
 	rocket$(EXEEXT) mmadjacency$(EXEEXT) largefile$(EXEEXT) \
@@ -358,6 +358,13 @@ merge_block_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@merge_block_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
+misc_SOURCES = misc.c
+misc_OBJECTS = misc.$(OBJEXT)
+misc_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@misc_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@misc_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__mk_nasf_h5_SOURCES_DIST = mk_nasf_h5.c
 @HDF5_DRV_NEEDED_TRUE@am_mk_nasf_h5_OBJECTS = mk_nasf_h5.$(OBJEXT)
 mk_nasf_h5_OBJECTS = $(am_mk_nasf_h5_OBJECTS)
@@ -403,6 +410,13 @@ namescheme_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@namescheme_DEPENDENCIES = ../src/libsilo.la \
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@namescheme_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
+newsami_SOURCES = newsami.c
+newsami_OBJECTS = newsami.$(OBJEXT)
+newsami_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@newsami_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@newsami_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 obj_SOURCES = obj.c
 obj_OBJECTS = obj.$(OBJEXT)
@@ -508,13 +522,6 @@ rocket_LDADD = $(LDADD)
 rocket_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(rocket_CXXFLAGS) $(CXXFLAGS) \
 	$(rocket_LDFLAGS) $(LDFLAGS) -o $@
-sami_SOURCES = sami.c
-sami_OBJECTS = sami.$(OBJEXT)
-sami_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@sami_DEPENDENCIES = ../src/libsilo.la \
-@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
-@HDF5_DRV_NEEDED_TRUE@sami_DEPENDENCIES = ../src/libsiloh5.la \
-@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 simple_SOURCES = simple.c
 simple_OBJECTS = simple.$(OBJEXT)
 simple_LDADD = $(LDADD)
@@ -680,12 +687,14 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
 	$(matf77_SOURCES) $(nodist_EXTRA_matf77_SOURCES) \
 	$(nodist_EXTRA_merge_block_SOURCES) merge_block.c \
-	$(mk_nasf_h5_SOURCES) $(nodist_EXTRA_mk_nasf_pdb_SOURCES) \
-	mk_nasf_pdb.c $(nodist_EXTRA_mmadjacency_SOURCES) \
-	mmadjacency.c $(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
+	$(nodist_EXTRA_misc_SOURCES) misc.c $(mk_nasf_h5_SOURCES) \
+	$(nodist_EXTRA_mk_nasf_pdb_SOURCES) mk_nasf_pdb.c \
+	$(nodist_EXTRA_mmadjacency_SOURCES) mmadjacency.c \
+	$(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
 	$(nodist_EXTRA_multi_test_SOURCES) multi_test.c \
 	$(nodist_EXTRA_multispec_SOURCES) multispec.c \
 	$(nodist_EXTRA_namescheme_SOURCES) namescheme.c \
+	$(nodist_EXTRA_newsami_SOURCES) newsami.c \
 	$(nodist_EXTRA_obj_SOURCES) obj.c \
 	$(nodist_EXTRA_onehex_SOURCES) onehex.c \
 	$(nodist_EXTRA_oneprism_SOURCES) oneprism.c \
@@ -701,7 +710,6 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_readstuff_SOURCES) readstuff.c \
 	$(nodist_EXTRA_realloc_obj_and_opts_SOURCES) \
 	realloc_obj_and_opts.c $(rocket_SOURCES) \
-	$(nodist_EXTRA_sami_SOURCES) sami.c \
 	$(nodist_EXTRA_simple_SOURCES) simple.c \
 	$(nodist_EXTRA_spec_SOURCES) spec.c \
 	$(nodist_EXTRA_specmix_SOURCES) specmix.c \
@@ -726,17 +734,16 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(dir_SOURCES) efcentering.c empty.c extface.c \
 	$(am__grab_SOURCES_DIST) group_test.c ioperf.c json.c \
 	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
-	$(am__matf77_SOURCES_DIST) merge_block.c \
+	$(am__matf77_SOURCES_DIST) merge_block.c misc.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
-	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
-	onehex.c oneprism.c onepyramid.c onetet.c partial_io.c \
+	multi_file.c multi_test.c multispec.c namescheme.c newsami.c \
+	obj.c onehex.c oneprism.c onepyramid.c onetet.c partial_io.c \
 	pdbtst.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
 	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) readstuff.c \
-	realloc_obj_and_opts.c $(rocket_SOURCES) sami.c simple.c \
-	spec.c specmix.c subhex.c testall.c \
-	$(am__testallf77_SOURCES_DIST) testfs.c testpdb.c twohex.c \
-	ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c \
-	wave.c
+	realloc_obj_and_opts.c $(rocket_SOURCES) simple.c spec.c \
+	specmix.c subhex.c testall.c $(am__testallf77_SOURCES_DIST) \
+	testfs.c testpdb.c twohex.c ucd.c ucd1d.c \
+	$(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -1013,12 +1020,12 @@ FCPROGS = arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
 
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
-	TestReadMask twohex multispec sami specmix spec cpz1plt \
-	group_test listtypes alltypes wave multi_file polyzl csg \
-	rocket mmadjacency largefile version namescheme efcentering \
-	mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across \
-	merge_block empty majorder realloc_obj_and_opts $(PDBTESTS) \
-	$(JSONTESTS) $(am__append_4) $(am__append_7)
+	TestReadMask twohex multispec misc newsami specmix spec \
+	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
+	csg rocket mmadjacency largefile version namescheme \
+	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
+	mat3d_3across merge_block empty majorder realloc_obj_and_opts \
+	$(PDBTESTS) $(JSONTESTS) $(am__append_4) $(am__append_7)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 bcastopen_SOURCES = bcastopen.c bcastopen_test.c
@@ -1078,7 +1085,8 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_specmix_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testpdb_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_pdbtst_SOURCES = dummy.cxx
-@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_sami_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_misc_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_newsami_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_spec_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_merge_block_SOURCES = dummy.cxx
@@ -1282,6 +1290,9 @@ matf77$(EXEEXT): $(matf77_OBJECTS) $(matf77_DEPENDENCIES)
 merge_block$(EXEEXT): $(merge_block_OBJECTS) $(merge_block_DEPENDENCIES) 
 	@rm -f merge_block$(EXEEXT)
 	$(CXXLINK) $(merge_block_OBJECTS) $(merge_block_LDADD) $(LIBS)
+misc$(EXEEXT): $(misc_OBJECTS) $(misc_DEPENDENCIES) 
+	@rm -f misc$(EXEEXT)
+	$(CXXLINK) $(misc_OBJECTS) $(misc_LDADD) $(LIBS)
 mk_nasf_h5$(EXEEXT): $(mk_nasf_h5_OBJECTS) $(mk_nasf_h5_DEPENDENCIES) 
 	@rm -f mk_nasf_h5$(EXEEXT)
 	$(LINK) $(mk_nasf_h5_OBJECTS) $(mk_nasf_h5_LDADD) $(LIBS)
@@ -1303,6 +1314,9 @@ multispec$(EXEEXT): $(multispec_OBJECTS) $(multispec_DEPENDENCIES)
 namescheme$(EXEEXT): $(namescheme_OBJECTS) $(namescheme_DEPENDENCIES) 
 	@rm -f namescheme$(EXEEXT)
 	$(CXXLINK) $(namescheme_OBJECTS) $(namescheme_LDADD) $(LIBS)
+newsami$(EXEEXT): $(newsami_OBJECTS) $(newsami_DEPENDENCIES) 
+	@rm -f newsami$(EXEEXT)
+	$(CXXLINK) $(newsami_OBJECTS) $(newsami_LDADD) $(LIBS)
 obj$(EXEEXT): $(obj_OBJECTS) $(obj_DEPENDENCIES) 
 	@rm -f obj$(EXEEXT)
 	$(CXXLINK) $(obj_OBJECTS) $(obj_LDADD) $(LIBS)
@@ -1348,9 +1362,6 @@ realloc_obj_and_opts$(EXEEXT): $(realloc_obj_and_opts_OBJECTS) $(realloc_obj_and
 rocket$(EXEEXT): $(rocket_OBJECTS) $(rocket_DEPENDENCIES) 
 	@rm -f rocket$(EXEEXT)
 	$(rocket_LINK) $(rocket_OBJECTS) $(rocket_LDADD) $(LIBS)
-sami$(EXEEXT): $(sami_OBJECTS) $(sami_DEPENDENCIES) 
-	@rm -f sami$(EXEEXT)
-	$(CXXLINK) $(sami_OBJECTS) $(sami_LDADD) $(LIBS)
 simple$(EXEEXT): $(simple_OBJECTS) $(simple_DEPENDENCIES) 
 	@rm -f simple$(EXEEXT)
 	$(CXXLINK) $(simple_OBJECTS) $(simple_LDADD) $(LIBS)
@@ -1432,6 +1443,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/majorder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge_block.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_h5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_pdb-dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_pdb-mk_nasf_pdb.Po@am__quote@
@@ -1440,6 +1452,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multi_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multispec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/namescheme.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newsami.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/obj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onehex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oneprism.Po@am__quote@
@@ -1455,7 +1468,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/realloc_obj_and_opts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket-rocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket_silo.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sami.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/specmix.Po@am__quote@
