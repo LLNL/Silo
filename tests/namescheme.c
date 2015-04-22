@@ -75,7 +75,7 @@ else                                                                            
 {                                                                                                          \
     if (strcmp(DBGetName(NS, I), EXP) != 0)                                                                \
     {                                                                                                      \
-        fprintf(stderr, "Namescheme at line %d failed failed for index %d. Expected \"%s\", got \"%s\"\n", \
+        fprintf(stderr, "Namescheme at line %d failed for index %d. Expected \"%s\", got \"%s\"\n", \
             __LINE__, I, EXP, DBGetName(NS, I));                                                           \
         return 1;                                                                                          \
     }                                                                                                      \
@@ -356,7 +356,7 @@ int main(int argc, char **argv)
         DBClose(dbfile);
     }
 
-    // Test McCandless' example (new way)
+    /* Test McCandless' example (new way) */
     ns = DBMakeNamescheme("@%s@(n/4)?'&myfilename.%d&n/4':'':@");
     TEST_GET_NAME(ns, 0, "");
     TEST_GET_NAME(ns, 1, "");
@@ -364,7 +364,7 @@ int main(int argc, char **argv)
     TEST_GET_NAME(ns, 15, "myfilename.3");
     DBFreeNamescheme(ns);
 
-    // Text Exodus material volume fraction variable convention
+    /* Text Exodus material volume fraction variable convention */
     ns = DBMakeNamescheme("@%s@n?'&VOLFRC_%d&n':'VOID_FRC':@");
     TEST_GET_NAME(ns, 0, "VOID_FRC");
     TEST_GET_NAME(ns, 1, "VOLFRC_1");

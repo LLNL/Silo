@@ -55,7 +55,7 @@ be used for advertising or product endorsement purposes.
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, February  9, 1999
  *
- * Purpose:	Tests reading and writing SAMI files using the HDF5 driver
+ * Purpose:	Tests reading and writing misc files using the HDF5 driver
  *		under silo.
  */
 #include <silo.h>
@@ -1126,7 +1126,7 @@ main(int argc, char *argv[])
 {
     DBfile		*dbfile;
     int			i, nerrors=0,  driver=DB_PDB;
-    char		*filename="sami.silo";
+    char		*filename="misc.silo";
     int                 show_all_errors = FALSE;
     
     for (i=1; i<argc; i++) {
@@ -1162,7 +1162,7 @@ main(int argc, char *argv[])
      */
     puts("=== Creating file ===");
     if (NULL==(dbfile=DBCreate(filename, DB_CLOBBER, arch_g,
-			       "testing SAMI HDF5 silo driver", driver))) {
+			       "testing misc HDF5 silo driver", driver))) {
 	puts("DBCreate() failed");
 	nerrors++;
     }
@@ -1235,7 +1235,7 @@ main(int argc, char *argv[])
     if (nerrors) {
 	printf("*** %d error%s detected ***\n", nerrors, 1==nerrors?"":"s");
     } else {
-	puts("All sami tests passed.");
+	puts("All tests passed.");
     }
     CleanupDriverStuff();
     return nerrors?1:0;

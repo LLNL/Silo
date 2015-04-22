@@ -149,7 +149,7 @@ FCPROGS= arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
          csgmesh
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
-      TestReadMask twohex multispec sami specmix spec \
+      TestReadMask twohex multispec misc newsami specmix spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
@@ -214,7 +214,8 @@ check_PROGRAMS = \
  twohex \
  multispec \
  specmix \
- sami \
+ misc \
+ newsami \
  spec \
  cpz1plt \
  merge_block \
@@ -275,7 +276,8 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_specmix_SOURCES = dummy.cxx
  nodist_EXTRA_testpdb_SOURCES = dummy.cxx
  nodist_EXTRA_pdbtst_SOURCES = dummy.cxx
- nodist_EXTRA_sami_SOURCES = dummy.cxx
+ nodist_EXTRA_misc_SOURCES = dummy.cxx
+ nodist_EXTRA_newsami_SOURCES = dummy.cxx
  nodist_EXTRA_spec_SOURCES = dummy.cxx
  nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx
  nodist_EXTRA_merge_block_SOURCES = dummy.cxx
