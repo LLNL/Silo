@@ -147,8 +147,8 @@ static void add_vert(map<coord_t, int>& coord_map, coord_t c, int& id, bool& new
     new_vert = true;
 }
 
-static void add_hex(int i, int j, int k, map<coord_t, int>& coord_map,
-    vector<int> (&nodeids)[8], bool& at_least_one_new_vert)
+static void add_hex(int i, int j, int k, int mat, map<coord_t, int>& coord_map,
+    vector<int> (&nodeids)[8], vector<int>& mats, bool& at_least_one_new_vert)
 {
     static int const hex_vert_offsets[3][8] = {
         0, 0, 1, 1, 0, 0, 1, 1,
@@ -172,19 +172,21 @@ static void add_hex(int i, int j, int k, map<coord_t, int>& coord_map,
     {
         for (int i = 0; i < 8; i++)
             nodeids[i].push_back(ids[i]);
+        mats.push_back(mat);
     }
 }
 
-static void random_walk_hexes(int seed, int nhexes, int ndirs, vector<double> (&coords)[3], vector<int> (&nodeids)[8])
+static void random_walk_hexes(int seed, int nhexes, int nmats, int ndirs,
+    vector<double> (&coords)[3], vector<int> (&nodeids)[8], vector<int>& mats)
 {
-    int i=0, j=0, k=0, h=0;
+    int i=0, j=0, k=0, h=0, mat=1;
     map<coord_t, int> coord_map;
 
     srandom(seed);
     while (h < nhexes)
     {
         bool did_add = false;
-        add_hex(i, j, k, coord_map, nodeids, did_add);
+        add_hex(i, j, k, nmats * h / nhexes + 1, coord_map, nodeids, mats, did_add);
         move_random_dir(ndirs, i, j, k);
         if (did_add) h++;
     }
@@ -210,9 +212,11 @@ int main(int argc, char *argv[])
     int                 arch_g = DB_LOCAL;
     int                 seed = 0;
     int                 nhexes = 1000;
+    int                 nmats = 5;
     int                 ndirs = 2;
     vector<double>      coords[3];
     vector<int>         nodeids[8];
+    vector<int>         mats;
     
     for (i=1; i<argc; i++) {
 	if (!strcmp(argv[i], "DB_LOCAL")) {
@@ -231,6 +235,8 @@ int main(int argc, char *argv[])
             driver = StringToDriver(argv[i]);
 	} else if (!strncmp(argv[i], "nhexes=", 7)) {
             nhexes = (int) strtol(argv[i]+7,0,10);
+	} else if (!strncmp(argv[i], "nmats=", 6)) {
+            nmats = (int) strtol(argv[i]+6,0,10);
 	} else if (!strncmp(argv[i], "ndirs=", 6)) {
             ndirs = (int) strtol(argv[i]+6,0,10);
 	} else if (!strncmp(argv[i], "seed=", 5)) {
@@ -243,7 +249,7 @@ int main(int argc, char *argv[])
     }
 
     /* Create random walk of hexahedral elements */
-    random_walk_hexes(seed, nhexes, ndirs, coords, nodeids);
+    random_walk_hexes(seed, nhexes, nmats, ndirs, coords, nodeids, mats);
     
     if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
 
@@ -276,8 +282,11 @@ int main(int argc, char *argv[])
         DBWrite(dbfile, tmpname, &nodeids[i][0], &nzones, 1, DB_INT);
     }
 
-                       /* #zones, #shells, #beams, #nodes, #mants, #slides, index-origin, ndims */
-    int mesh_data[8] = {  nzones,       0,      0, nnodes,      0,       0,            0,     3};
+    /* Write the material data */
+    DBWrite(dbfile, "brick_material", &mats[0], &nzones, 1, DB_INT);
+
+                       /* #zones, #shells, #beams, #nodes,  #mats, #slides, index-origin, ndims */
+    int mesh_data[8] = {  nzones,       0,      0, nnodes,  nmats,       0,            0,     3};
     int len = 8;
     DBWrite(dbfile, "mesh_data", mesh_data, &len, 1, DB_INT);
 

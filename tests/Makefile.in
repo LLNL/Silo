@@ -411,8 +411,8 @@ namescheme_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@namescheme_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
-newsami_SOURCES = newsami.c
-newsami_OBJECTS = newsami.$(OBJEXT)
+am_newsami_OBJECTS = newsami.$(OBJEXT)
+newsami_OBJECTS = $(am_newsami_OBJECTS)
 newsami_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@newsami_DEPENDENCIES = ../src/libsilo.la \
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
@@ -694,7 +694,7 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_multi_test_SOURCES) multi_test.c \
 	$(nodist_EXTRA_multispec_SOURCES) multispec.c \
 	$(nodist_EXTRA_namescheme_SOURCES) namescheme.c \
-	$(nodist_EXTRA_newsami_SOURCES) newsami.c \
+	$(newsami_SOURCES) $(nodist_EXTRA_newsami_SOURCES) \
 	$(nodist_EXTRA_obj_SOURCES) obj.c \
 	$(nodist_EXTRA_onehex_SOURCES) onehex.c \
 	$(nodist_EXTRA_oneprism_SOURCES) oneprism.c \
@@ -736,14 +736,15 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
 	$(am__matf77_SOURCES_DIST) merge_block.c misc.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
-	multi_file.c multi_test.c multispec.c namescheme.c newsami.c \
-	obj.c onehex.c oneprism.c onepyramid.c onetet.c partial_io.c \
-	pdbtst.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
-	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) readstuff.c \
-	realloc_obj_and_opts.c $(rocket_SOURCES) simple.c spec.c \
-	specmix.c subhex.c testall.c $(am__testallf77_SOURCES_DIST) \
-	testfs.c testpdb.c twohex.c ucd.c ucd1d.c \
-	$(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
+	multi_file.c multi_test.c multispec.c namescheme.c \
+	$(newsami_SOURCES) obj.c onehex.c oneprism.c onepyramid.c \
+	onetet.c partial_io.c pdbtst.c point.c \
+	$(am__pointf77_SOURCES_DIST) polyzl.c $(quad_SOURCES) \
+	$(am__quadf77_SOURCES_DIST) readstuff.c realloc_obj_and_opts.c \
+	$(rocket_SOURCES) simple.c spec.c specmix.c subhex.c testall.c \
+	$(am__testallf77_SOURCES_DIST) testfs.c testpdb.c twohex.c \
+	ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c \
+	wave.c
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -1034,6 +1035,7 @@ rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl
 rocket_CXXFLAGS = -rdynamic
 EXTRA_rocket_DEPENDENCIES = rocket_silo.la
+newsami_SOURCES = newsami.cxx
 
 # plugins for rocket and for ioperf
 HDF5CKLTLIBS = ioperf_hdf5.la

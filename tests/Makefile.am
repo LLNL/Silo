@@ -163,6 +163,7 @@ rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl
 rocket_CXXFLAGS = -rdynamic
 EXTRA_rocket_DEPENDENCIES = rocket_silo.la
+newsami_SOURCES = newsami.cxx
 
 # plugins for rocket and for ioperf
 HDF5CKLTLIBS = ioperf_hdf5.la
