@@ -580,7 +580,7 @@ static void error(int n, FILE *fp, char *fmt, ...)
 
     io_printf(fp, "%s", t);
 
-    exit(1);
+    exit(EXIT_SUCCESS);
 
     return;}
 

@@ -291,6 +291,8 @@ typedef char const * const *         DBCAS_t;
 #define DBQMGhostZoneLabels       0x0000000040000000ULL
 #define DBUMGhostNodeLabels       0x0000000080000000ULL
 #define DBZonelistGhostZoneLabels 0x0000000100000000ULL
+#define DBMBNamesAndTypes         0x0000000200000000ULL
+#define DBMBOptions               0x0000000400000000ULL
 
 /* Definitions for COORD_TYPE */
 /* Placed before DBObjectType enum because the
@@ -593,6 +595,10 @@ typedef enum {
 /* Definitions for ghost labels */
 #define DB_GHOSTTYPE_NOGHOST ((char)0x00)
 #define DB_GHOSTTYPE_INTDUP ((char)0x01)
+
+/* Definitions for compatability mode */
+#define DB_MAX_COMPATABILITY            0
+#define DB_MAX_PERFORMANCE              1
 
 /* Definitions for CSG boundary types 
    Designed so low-order 16 bits are unused.
@@ -1645,6 +1651,7 @@ typedef struct DBfile_pub {
     int            Grab;        /*drive has access to low-level interface */
     void          *GrabId;      /*pointer to low-level driver descriptor */
     char          *file_lib_version; /* version of lib file was created with */
+    struct SILO_Globals_t *file_scope_globals;
 
     /* Public Methods */
     int            (*close)(struct DBfile *);
@@ -1768,6 +1775,7 @@ typedef struct DBfile_pub {
     int            (*free_z)(struct DBfile *, char const *);
     int            (*cpdir)(struct DBfile *, char const *, struct DBfile *, char const *);
     int            (*sort_obo)(struct DBfile *dbfile, int nobjs, char const *const *obj_names, int *ranks);
+    int            (*flush)(struct DBfile *);
 } DBfile_pub;
 
 typedef struct DBfile {
@@ -1815,23 +1823,42 @@ SILO_API extern int                    DBErrlvl(void);
 #define DBGetDataReadMask() ,DBGetDataReadMask_is_replaced_with_DBGetDataReadMask2_using_unsigned_long_long
 SILO_API extern unsigned long long     DBSetDataReadMask2(unsigned long long);
 SILO_API extern unsigned long long     DBGetDataReadMask2(void);
+SILO_API extern unsigned long long     DBSetDataReadMask2File(DBfile *f, unsigned long long);
+SILO_API extern unsigned long long     DBGetDataReadMask2File(DBfile *f);
 SILO_API extern char *                 DBGetDatatypeString(int datatype);
 SILO_API extern int                    DBSetAllowOverwrites(int allow);
 SILO_API extern int                    DBGetAllowOverwrites(void);
+SILO_API extern int                    DBSetAllowOverwritesFile(DBfile *f, int allow);
+SILO_API extern int                    DBGetAllowOverwritesFile(DBfile *f);
 SILO_API extern int                    DBSetAllowEmptyObjects(int allow);
 SILO_API extern int                    DBGetAllowEmptyObjects(void);
+SILO_API extern int                    DBSetAllowEmptyObjectsFile(DBfile *f, int allow);
+SILO_API extern int                    DBGetAllowEmptyObjectsFile(DBfile *f);
 SILO_API extern int                    DBSetEnableChecksums(int enable);
 SILO_API extern int                    DBGetEnableChecksums(void);
+SILO_API extern int                    DBSetEnableChecksumsFile(DBfile *f, int enable);
+SILO_API extern int                    DBGetEnableChecksumsFile(DBfile *f);
 SILO_API extern void                   DBSetCompression(char const *);
 SILO_API extern char const *           DBGetCompression(void);
+SILO_API extern void                   DBSetCompressionFile(DBfile *f, char const *);
+SILO_API extern char const *           DBGetCompressionFile(DBfile *f);
 SILO_API extern int                    DBSetFriendlyHDF5Names(int enable);
 SILO_API extern int                    DBGetFriendlyHDF5Names(void);
+SILO_API extern int                    DBSetFriendlyHDF5NamesFile(DBfile *f, int enable);
+SILO_API extern int                    DBGetFriendlyHDF5NamesFile(DBfile *f);
 SILO_API extern int                    DBSetDeprecateWarnings(int max);
-SILO_API extern int                    DBGetDeprecateWarnings();
+SILO_API extern int                    DBGetDeprecateWarnings(void);
+SILO_API extern int                    DBSetDeprecateWarningsFile(DBfile *f, int max);
+SILO_API extern int                    DBGetDeprecateWarningsFile(DBfile *f);
 SILO_API extern int                    DBSetEnableDarshan(int enable);
-SILO_API extern int                    DBGetEnableDarshan();
+SILO_API extern int                    DBGetEnableDarshan(void);
+SILO_API extern int                    DBSetEnableDarshanFile(DBfile *f, int enable);
+SILO_API extern int                    DBGetEnableDarshanFile(DBfile *f);
 SILO_API extern int                    DBSetAllowLongStrComponents(int allow);
 SILO_API extern int                    DBGetAllowLongStrComponents(void);
+SILO_API extern int                    DBSetAllowLongStrComponentsFile(DBfile *f, int allow);
+SILO_API extern int                    DBGetAllowLongStrComponentsFile(DBfile *f);
+
 SILO_API extern int const *            DBSetUnknownDriverPriorities(int const *);
 SILO_API extern int const *            DBGetUnknownDriverPriorities();
 SILO_API extern int                    DBRegisterFileOptionsSet(DBoptlist const *opts);
@@ -1859,6 +1886,7 @@ SILO_API extern int                    DBInqFileReal(char const *name);
 #define DBOpen(NM, DR, MD)            (SiloCheckVersion, DBOpenReal(NM, DR, MD))
 #define DBCreate(NM, MD, TG, NF, DR)  (SiloCheckVersion, DBCreateReal(NM, MD, TG, NF, DR))
 #define DBInqFile(NM)                 (SiloCheckVersion, DBInqFileReal(NM))
+SILO_API extern int                    DBFlush(DBfile *);
 SILO_API extern int                    DBClose(DBfile *);
 SILO_API extern DBtoc *                DBGetToc(DBfile *);
 SILO_API extern int                    DBNewToc(DBfile *);
@@ -1874,6 +1902,7 @@ SILO_API extern int                    DBGetDir(DBfile *, char *);
 SILO_API extern int                    DBSetDir(DBfile *, char const *);
 #define DBMkdir DBMkDir
 SILO_API extern int                    DBMkDir(DBfile *, char const *);
+SILO_API extern int                    DBMkDir2(DBfile *, char const *, DBoptlist *);
 SILO_API extern int                    DBCpDir(DBfile *dbfile, char const *srcDir,
                                            DBfile *dstFile, char const *dstDir);
 SILO_API extern int                    DBGuessHasFriendlyHDF5Names(DBfile *f);

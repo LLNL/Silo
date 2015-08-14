@@ -133,7 +133,7 @@ main(int argc, char *argv[])
 			 driver)) == NULL)
     {
         fprintf(stderr, "Unable to create SILO file\n");
-        exit(1);
+        exit(EXIT_SUCCESS);
     }
 
     /* Name the coordinate axes 'X' and 'Y' */

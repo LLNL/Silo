@@ -603,7 +603,7 @@ build_rect2d(DBfile * dbfile, int size, int order)
 
     if (mixlen > 40 * ny) {
         printf ("mixlen = %d\n", mixlen);
-        exit (1);
+        exit(EXIT_SUCCESS);
     }
 
     /*
@@ -1598,7 +1598,7 @@ build_rect3d(DBfile * dbfile, int size, int order)
 
     if (mixlen > 50 * nx * ny) {
         printf ("mixlen = %d\n", mixlen);
-        exit (1);
+        exit(EXIT_SUCCESS);
     }
 
     /*

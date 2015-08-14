@@ -2,7 +2,7 @@
 ! 
 !      SILO include file for Fortan applications.
 ! 
-!  Programmer:   miller86 Thu Apr  2 17:28:38 PDT 2015
+!  Programmer:   miller86 Fri Aug 14 11:49:33 PDT 2015
 ! 
 !  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !     This file is generated automatically from C header files in the
@@ -374,6 +374,8 @@
       integer, parameter :: DB_VARTYPE_LABEL = 207
       integer, parameter :: DB_GHOSTTYPE_NOGHOST = 0
       integer, parameter :: DB_GHOSTTYPE_INTDUP = 1
+      integer, parameter :: DB_MAX_COMPATABILITY = 0
+      integer, parameter :: DB_MAX_PERFORMANCE = 1
       integer, parameter :: DBCSG_QUADRIC_G = 16777216
       integer, parameter :: DBCSG_SPHERE_PR = 33619968
       integer, parameter :: DBCSG_ELLIPSOID_PRRR = 33685504

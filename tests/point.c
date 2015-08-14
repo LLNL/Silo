@@ -70,12 +70,12 @@ be used for advertising or product endorsement purposes.
 #define assert(x)   if (!(x)) \
                     { \
                         fprintf(stderr,"point: assertion failed at line %d.\n",__LINE__); \
-                        exit(1); \
+                        exit(EXIT_SUCCESS); \
                     }
 #define assert_mem(x)   if ((x) == NULL) \
                         { \
                             fprintf(stderr,"point: out of memory at line %d.\n",__LINE__); \
-                            exit(1); \
+                            exit(EXIT_SUCCESS); \
                         }
 
 

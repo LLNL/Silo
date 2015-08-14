@@ -186,7 +186,7 @@ main(int argc, char *argv[])
         if (DBWrite(dbfile, tmpname, val, dims, ndims, DB_FLOAT) != 0)
         {
             DBClose(dbfile);
-            exit(1);
+            exit(EXIT_SUCCESS);
         }
     }
 
@@ -207,7 +207,7 @@ main(int argc, char *argv[])
     if (dbfile == 0)
     {
         printf("Unable to Reopen file for reading\n");
-        exit(1);
+        exit(EXIT_SUCCESS);
     }
 
     /*

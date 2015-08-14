@@ -51,7 +51,8 @@ product endorsement purposes.
 */
 #include <stdlib.h>
 #include <string.h>
-#include <pdb.h> /* below we are using lite_ functions */
+#define HAVE_MEMMOVE
+#include <lite_pdb.h> /* below we are using lite_ functions */
 #include <ioperf.h>
 
 /*

@@ -99,6 +99,7 @@ typedef struct DBfile_hdf5 {
 /* File operations */
 SILO_CALLBACK int db_hdf5_Close (DBfile *);
 SILO_CALLBACK int db_hdf5_Filters(DBfile *_dbfile, FILE *stream);
+SILO_CALLBACK int db_hdf5_Flush (DBfile *);
 
 /* Directory operations */
 SILO_CALLBACK int db_hdf5_MkDir(DBfile *_dbfile, char const *name);

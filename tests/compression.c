@@ -118,7 +118,7 @@ main(int argc, char *argv[])
     for (i=1; i<argc; i++) {
        if (!strncmp(argv[i], "DB_PDB",6)) {
           fprintf(stderr, "This test only supported on HDF5 driver\n");
-          exit(1);
+          exit(EXIT_SUCCESS);
        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
           driver = StringToDriver(argv[i]);
           filename = "compression.h5";
@@ -263,7 +263,7 @@ main(int argc, char *argv[])
     if (dbfile == 0)
     {
         printf("Unable to Open file for reading\n");
-        exit(1);
+        exit(EXIT_SUCCESS);
     }
 
 #if !defined(_WIN32)

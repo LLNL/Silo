@@ -110,5 +110,5 @@ main (int argc, char *argv[])
 
     DBClose(dbfile);
     CleanupDriverStuff();
-    exit(0);
+    exit(EXIT_SUCCESS);
 }

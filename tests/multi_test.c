@@ -508,6 +508,8 @@ int driver = DB_PDB;
 int check_early_close = FALSE;
 int testread = FALSE;
 int testbadread = FALSE;
+int testflush = FALSE;
+int testflushread = FALSE;
 double missing_value = DB_MISSING_VALUE_NOT_SET;
 
 int           build_multi(DBfile *, int, int, int, int, int, int, int, int);
@@ -815,9 +817,13 @@ main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "hdf-friendly-hard")) {
             hdfriendly = 2;
         } else if (!strcmp(argv[i], "testread")) {
-            testread = 1;
+            testread = TRUE;
         } else if (!strcmp(argv[i], "testbadread")) {
-            testbadread = 1;
+            testbadread = TRUE;
+        } else if (!strcmp(argv[i], "testflush")) {
+            testflush = TRUE;
+        } else if (!strcmp(argv[i], "testflushread")) {
+            testflushread = TRUE;
         } else if (!strcmp(argv[i], "missing-value")) {
             missing_value = strtod(argv[++i],0);
         } else {
@@ -832,16 +838,37 @@ main(int argc, char *argv[])
 
     /*
      * Create the multi-block rectilinear 2d mesh.
+     *
+     * testfush and testflushread functionality here is designed to test
+     * DBFlush and then re-reading the flushed but not closed file into
+     * a new execv'd process.
      */
     sprintf(filename, "multi_rect2d%s", file_ext);
-    fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
+    if (testflushread || 
+        (dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
     {
-        if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 0) == -1)
-            fprintf(stderr, "Error building contents for '%s'.\n", filename);
-        DBClose(dbfile);
+        if (!testflushread)
+        {
+            fprintf(stdout, "creating %s\n", filename);
+            if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 0) == -1)
+                fprintf(stderr, "Error building contents for '%s'.\n", filename);
+            if (testflush)
+            {
+                int qq;
+                char **newargv = (char **) calloc(argc+2,sizeof(char*));
+                for (qq = 0; qq < argc; qq++)
+                    newargv[qq] = argv[qq];
+                newargv[qq++] = strdup("testflushread");
+                DBFlush(dbfile);
+                execv(argv[0], newargv);
+            }
+            else
+            {
+                DBClose(dbfile);
+            }
+        }
         dbfile = 0;
-        if (testread || testbadread)
+        if (testread || testbadread || testflushread)
         {
             fprintf(stdout, "reading %s\n", filename);
             if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
@@ -849,10 +876,14 @@ main(int argc, char *argv[])
                 if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 1) == -1)
                     fprintf(stderr, "Error reading contents of '%s'.\n", filename);
                 DBClose(dbfile);
+                if (testflushread)
+                    exit(EXIT_SUCCESS);
             }
             else
             {
                 fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+                if (testflushread)
+                    exit(EXIT_FAILURE);
             }
         }
     }
@@ -2513,7 +2544,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     if (mixlen > MIXMAX)
     {
         printf("memory overwrite: mixlen = %d > %d\n", mixlen, MIXMAX);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
     /* 
      * Now extract the data for this block.
@@ -2908,7 +2939,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     if (mixlen > 4500)
     {
         printf("memory overwrite: mixlen = %d > 4500\n", mixlen);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
     /* 
      * Set up variables that are independent of the block number.

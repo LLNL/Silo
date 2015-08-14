@@ -686,7 +686,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     if (mixlen > 85000)
     {
         printf("memory overwrite: mixlen = %d > 85000\n", mixlen);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
     /* 
      * Set up variables that are independent of the block number.

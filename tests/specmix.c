@@ -362,7 +362,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  if (err) exit(err);
+  if (err) exit(EXIT_FAILURE);
 
 
   /* -=-=-=-=-=-=-=-=-=- */
@@ -402,7 +402,7 @@ int main(int argc, char *argv[]) {
 	      switch (s) {
 	      case 0: mf=g;    mfd=gd;    break;
 	      case 1: mf=1.-g; mfd=1.-gd; break;
-	      default: exit(-1);
+	      default: exit(EXIT_FAILURE);
 	      }
 	      break;
 	    case 2:
@@ -413,7 +413,7 @@ int main(int argc, char *argv[]) {
 	      case 1: mf=.5-g/2.; mfd=.5-gd/2.; break;
 	      case 2: mf=.2;      mfd=.2;       break;
 	      case 3: mf=.1;      mfd=.1;       break;
-	      default: exit(-1);
+	      default: exit(EXIT_FAILURE);
 	      }
 	      break;
 	    case 3:
@@ -427,17 +427,17 @@ int main(int argc, char *argv[]) {
 	      case 2: mf=.5-g1/2.;  mfd=.5-g1d/2.;  break;
 	      case 3: mf=.25-g2/4.; mfd=.25-g2d/4.; break;
 	      case 4: mf=.25;	    mfd=.25;        break;
-	      default: exit(-1);
+	      default: exit(EXIT_FAILURE);
 	      }
 	      break;
 	    case 4:
 	      switch (s) {
 	      case 0: mf=1.0; mfd=1.0;  break;
-	      default: exit(-1);
+	      default: exit(EXIT_FAILURE);
 	      }
 	      break;
 	    default:
-		exit(-1);
+		exit(EXIT_FAILURE);
 	      break;
 	    }
 	    
@@ -453,7 +453,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
-  if (err) exit(err);
+  if (err) exit(EXIT_FAILURE);
 
 
   /* -=-=-=-=-=-=-=-=-=- */
@@ -757,7 +757,7 @@ void writemesh_ucd2d(DBfile *db, int mixc, int reorder) {
       f2[c]=mesh.node[x][y].y;
       if (mesh.node[x][y].c != c) {
 	printf("Node mismatch! mesh.c=%d c=%d\n",mesh.node[x][y].c,c);
-	exit(-1);
+	exit(EXIT_FAILURE);
       }
       c++;
     }
@@ -936,7 +936,7 @@ if ((V1) != (V2))                                                           \
 {                                                                           \
     fprintf(stderr, "ReadAndCheck failed at line %d, %s(%d) != %s(%d)\n",   \
         __LINE__, #V1, V1, #V2, V2);                                        \
-    exit(-1);                                                               \
+    exit(EXIT_FAILURE);                                                               \
 }
 
 #define CHECKDVAL(V1, V2)                                                   \
@@ -944,7 +944,7 @@ if (!equald(V1,V2))                                                         \
 {                                                                           \
     fprintf(stderr, "ReadAndCheck failed at line %d, %s(%f) != %s(%f)\n",   \
         __LINE__, #V1, V1, #V2, V2);                                        \
-    exit(-1);                                                               \
+    exit(EXIT_FAILURE);                                                               \
 }
 
 #define CHECKIARRVAL(A1,A2,I)                                               \
@@ -952,7 +952,7 @@ if ((A1)[I] != (A2)[I])                                                     \
 {                                                                           \
     fprintf(stderr, "ReadAndCheck failed at line %d, %s[%d](%d) != %s[%d](%d)\n",\
         __LINE__, #A1, I, (A1)[I], #A2, I, (A2)[I]);                        \
-    exit(-1);                                                               \
+    exit(EXIT_FAILURE);                                                               \
 }
 
 #define CHECKDARRVAL(A1,A2,I)                                               \
@@ -960,7 +960,7 @@ if (!equald((A1)[I], (A2)[I]))                                              \
 {                                                                           \
     fprintf(stderr, "ReadAndCheck failed at line %d, %s[%d](%.16g) != %s[%d](%.16g)\n",\
         __LINE__, #A1, I, (A1)[I], #A2, I, (A2)[I]);                        \
-    exit(-1);                                                               \
+    exit(EXIT_FAILURE);                                                               \
 }
 
 #define CHECKIARR(A1,A2,N)          \
@@ -1033,7 +1033,7 @@ domatspec(DBfile *db, DoSpecOp_t writeOrReadAndCheck, int forceSingle)
                 if (m < 0)
                 {
                     printf("Internal error!\n");
-                    exit(-1);
+                    exit(EXIT_FAILURE);
                 };
                 matlist[c] = m;
                 c++;
@@ -1131,7 +1131,7 @@ domatspec(DBfile *db, DoSpecOp_t writeOrReadAndCheck, int forceSingle)
                 if (m < 0)
                 {
                     printf("Internal error!\n");
-                    exit(-1);
+                    exit(EXIT_FAILURE);
                 };
 
                 if (nspec[m - 1] == 1)

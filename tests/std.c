@@ -229,14 +229,14 @@ static int StringToDriver(const char *str)
             if (!got_it)
             {
                 fprintf(stderr, "Unable to determine driver from string \"%s\"\n", tok);
-	        exit(-1);
+	        exit(EXIT_FAILURE);
             }
 
 	    tok = strtok(0, ",)");
 	    if (errno != 0)
 	    {
                 fprintf(stderr, "Unable to determine driver from string \"%s\"\n", tok);
-	        exit(-1);
+	        exit(EXIT_FAILURE);
 	    }
         }
 
@@ -246,6 +246,6 @@ static int StringToDriver(const char *str)
     }
 
     fprintf(stderr, "Unable to determine driver from string \"%s\"\n", str);
-    exit(-1);
+    exit(EXIT_FAILURE);
 }
 

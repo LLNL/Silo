@@ -276,6 +276,7 @@ SILO_Globals_t SILO_Globals = {
     0,     /* compressionParams (null) */
     2.0,   /* compressionMinratio */
     0,     /* compressionErrmode (fallback) */
+    DB_MAX_COMPATABILITY, /* compatability mode */
     {      /* file options sets [32 of them] */
         0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -2755,6 +2756,23 @@ DBGetAllowOverwrites()
     return SILO_Globals.allowOverwrites;
 }
 
+PUBLIC int 
+DBSetAllowOverwritesFile(DBfile *f, int allow)
+{
+    int oldAllow;
+    if (!f) return DBSetAllowOverwrites(allow);
+    oldAllow = f->pub.file_scope_globals->allowOverwrites;
+    f->pub.file_scope_globals->allowOverwrites = allow;
+    return oldAllow;
+}
+
+PUBLIC int 
+DBGetAllowOverwritesFile(DBfile *f)
+{
+    if (!f) return DBGetAllowOverwrites();
+    return f->pub.file_scope_globals->allowOverwrites; 
+}
+
 /*----------------------------------------------------------------------
  * Routine:  DBSetAllowEmptyObjects
  *
@@ -4628,6 +4646,55 @@ DBClose(DBfile *dbfile)
         db_unregister_file(dbfile);
 
         retval = (dbfile->pub.close) (dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    DBClose
+ *
+ * Purpose:     Close the specified data file and return NULL.
+ *
+ * Return:      Success:        NULL
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  matzke@viper
+ *              Mon Nov  7 10:31:41 PST 1994
+ *
+ * Modifications:
+ *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
+ *    I replaced API_END with API_END_NOPOP.
+ *
+ *    Eric Brugger, Mon Feb 27 15:03:01 PST 1995
+ *    I changed the return value to be an integer instead of a pointer
+ *    to a DBfile.
+ *
+ *    Robb Matzke, Tue Feb 28 10:57:57 EST 1995
+ *    The file status slot is cleared so it can be reused.
+ *
+ *    Eric Brugger, Mon Jul 10 07:42:24 PDT 1995
+ *    I moved the reseting of _db_fstatus to before the return statement,
+ *    so that the instruction would get executed.
+ *
+ *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
+ *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
+ *    Added code to UNregister the given file pointer.
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBFlush(DBfile *dbfile)
+{
+    int            id;
+    int            retval;
+
+    API_BEGIN2("DBFlush", int, -1, api_dummy) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (NULL == dbfile->pub.flush)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+        retval = (dbfile->pub.flush) (dbfile);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */

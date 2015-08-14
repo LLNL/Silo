@@ -104,6 +104,7 @@ typedef struct {
 
 #ifndef SILO_NO_CALLBACKS
 SILO_CALLBACK int db_pdb_close (DBfile *);
+SILO_CALLBACK int db_pdb_flush (DBfile *);
 SILO_CALLBACK int db_pdb_InqVarExists (DBfile *, char const *);
 SILO_CALLBACK void *db_pdb_GetComponent (DBfile *, char const *, char const *);
 SILO_CALLBACK int db_pdb_GetComponentType (DBfile *, char const *, char const *);

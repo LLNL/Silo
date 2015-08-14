@@ -264,7 +264,7 @@ Usage: %s <blockorigin> <grouporigin> <zoneorigin>\n\
        line to indicate the file driver to use: DB_PDB (the default),\n\
        or DB_HDF5.\n", progname);
     
-    exit(1);
+    exit(EXIT_SUCCESS);
 }
 
 /*-------------------------------------------------------------------------
@@ -796,7 +796,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     if (mixlen > 20000)
     {
          printf ("memory overwrite: mixlen = %d > 20000\n", mixlen);
-         exit (-1);
+         exit (EXIT_FAILURE);
     }
 
     /*
@@ -1203,7 +1203,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     if (mixlen > 4500)
     {
          printf ("memory overwrite: mixlen = %d > 4500\n", mixlen);
-         exit (-1);
+         exit (EXIT_FAILURE);
     }
 
     /*

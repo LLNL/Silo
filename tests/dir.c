@@ -184,12 +184,12 @@ int main(int argc, char *argv[])
     /* this should fail because file is open for write */
     dbfile4 = DBOpen(filename2, driver, DB_READ);
     if (dbfile4 != 0 || db_errno != E_CONCURRENT)
-        exit(1);
+        exit(EXIT_SUCCESS);
 
     /* this should fail because filename is already open */
     dbfile5 = DBOpen(filename, driver, DB_APPEND);
     if (dbfile5 != 0 || db_errno != E_CONCURRENT)
-        exit(1);
+        exit(EXIT_SUCCESS);
 
     DBClose(dbfile);
     DBClose(dbfile2);
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
     dbfile2 = DBCreate("dir-test-foo", DB_NOCLOBBER, DB_LOCAL, "dir test file", driver);
     unlink("dir-test-foo");
     if (dbfile2 != 0)
-        exit(1);
+        exit(EXIT_SUCCESS);
 #ifndef WIN32
     mkdir("dir-test-foo", 0777);
 #else
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
     dbfile2 = DBCreate("dir-test-foo", DB_CLOBBER, DB_LOCAL, "dir test file", driver);
     unlink("dir-test-foo");
     if (dbfile2 != 0)
-        exit(1);
+        exit(EXIT_SUCCESS);
 
     CleanupDriverStuff();
     return 0;

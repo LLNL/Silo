@@ -2693,6 +2693,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
     /* File operations */
     dbfile->pub.close = db_hdf5_Close;
     dbfile->pub.module = db_hdf5_Filters;
+    dbfile->pub.flush = db_hdf5_Flush;
 
     /* Directory operations */
     dbfile->pub.cd = db_hdf5_SetDir;
@@ -5635,6 +5636,9 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     *fidp = fid;
     dbfile->pub.GrabId = (void*) fidp;
     dbfile->fid = fid;
+#if 0
+    *(dbfile->pub.file_scope_globals) = SILO_Globals;
+#endif
     return db_hdf5_finish_create(dbfile, target, finfo);
 }
 
@@ -5700,6 +5704,37 @@ db_hdf5_Close(DBfile *_dbfile)
         H5close();
     }
 #endif
+
+    return retval;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_Flush
+ *
+ * Purpose:     Flushes an HDF5 file
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer: Mark C. Miller, Fri Aug 14 11:49:05 PDT 2015
+ *-------------------------------------------------------------------------
+ */
+SILO_CALLBACK int
+db_hdf5_Flush(DBfile *_dbfile)
+{
+    int retval = -1;
+    DBfile_hdf5    *dbfile = (DBfile_hdf5*)_dbfile;
+    static char *me = "db_hdf5_Flush";
+
+    if (!dbfile)
+        return retval;
+
+    PROTECT {
+        if (H5Fflush(dbfile->fid, H5F_SCOPE_LOCAL)>=0)
+            retval = 0;
+    } CLEANUP {
+    } END_PROTECT;
 
     return retval;
 }
@@ -12512,17 +12547,27 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name)
         mm->repr_block_idx = m.repr_block_idx - 1;
 
         /* Read the raw data */
-        if (mm->extentssize>0)
-           mm->extents = (double*)db_hdf5_comprd(dbfile, m.extents, 1);
-        mm->zonecounts =  (int *)db_hdf5_comprd(dbfile, m.zonecounts, 1);
-        mm->has_external_zones =  (int *)db_hdf5_comprd(dbfile, m.has_external_zones, 1);
-        mm->meshtypes = (int *)db_hdf5_comprd(dbfile, m.meshtypes, 1);
-        meshnames = (char *)db_hdf5_comprd(dbfile, m.meshnames, 1);
-        db_StringListToStringArrayMBOpt(meshnames, &(mm->meshnames), &(mm->meshnames_alloc), m.nblocks);
-        mm->groupings =  (int *)db_hdf5_comprd(dbfile, m.groupings, 1);
-        t = (char *)db_hdf5_comprd(dbfile, m.groupnames, 1);
-        if (t) mm->groupnames = DBStringListToStringArray(t, &(mm->lgroupings), !skipFirstSemicolon);
-        FREE(t);
+        if (mm->nblocks>0 && (SILO_Globals.dataReadMask & DBMBNamesAndTypes))
+        {
+            mm->meshtypes = (int *)db_hdf5_comprd(dbfile, m.meshtypes, 1);
+            meshnames = (char *)db_hdf5_comprd(dbfile, m.meshnames, 1);
+            db_StringListToStringArrayMBOpt(meshnames, &(mm->meshnames), &(mm->meshnames_alloc), m.nblocks);
+        }
+
+        /* Read optional data */
+        if (mm->nblocks>0 && (SILO_Globals.dataReadMask & DBMBOptions))
+        {
+            if (mm->extentssize>0)
+               mm->extents = (double*)db_hdf5_comprd(dbfile, m.extents, 1);
+            mm->zonecounts =  (int *)db_hdf5_comprd(dbfile, m.zonecounts, 1);
+            mm->has_external_zones =  (int *)db_hdf5_comprd(dbfile, m.has_external_zones, 1);
+            mm->groupings =  (int *)db_hdf5_comprd(dbfile, m.groupings, 1);
+            t = (char *)db_hdf5_comprd(dbfile, m.groupnames, 1);
+            if (t) mm->groupnames = DBStringListToStringArray(t, &(mm->lgroupings), !skipFirstSemicolon);
+            FREE(t);
+        }
+
+        /* Namescheme related stuff */
         mm->file_ns =  (char *)db_hdf5_comprd(dbfile, m.file_ns_name, 1);
         mm->block_ns =  (char *)db_hdf5_comprd(dbfile, m.block_ns_name, 1);
         mm->block_type = m.block_type;
@@ -13374,14 +13419,16 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char const *name)
         mv->extensive = m.extensive;
         db_SetMissingValueForGet(mv->missing_value, m.missing_value);
 
-        /* Read the raw data variable types and convert to mem types*/
-        if (mv->extentssize>0)
-           mv->extents = (double *)db_hdf5_comprd(dbfile, m.extents, 1);
-        mv->vartypes = (int *)db_hdf5_comprd(dbfile, m.vartypes, 1);
-
         /* Read the raw data variable names */
-        mvnames = (char *)db_hdf5_comprd(dbfile, m.varnames, 1);
-        db_StringListToStringArrayMBOpt(mvnames, &(mv->varnames), &(mv->varnames_alloc), m.nvars);
+        if (mv->nvars>0 && (SILO_Globals.dataReadMask & DBMBNamesAndTypes))
+        {
+            mv->vartypes = (int *)db_hdf5_comprd(dbfile, m.vartypes, 1);
+            mvnames = (char *)db_hdf5_comprd(dbfile, m.varnames, 1);
+            db_StringListToStringArrayMBOpt(mvnames, &(mv->varnames), &(mv->varnames_alloc), m.nvars);
+        }
+
+        if (mv->extentssize>0 && (SILO_Globals.dataReadMask & DBMBOptions))
+           mv->extents = (double *)db_hdf5_comprd(dbfile, m.extents, 1);
 
         s = (char *)db_hdf5_comprd(dbfile, m.region_pnames, 1);
         if (s) mv->region_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
@@ -13666,6 +13713,7 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
         mm->matcounts = (int *)db_hdf5_comprd(dbfile, m.matcounts, 1);
         mm->matlists = (int *)db_hdf5_comprd(dbfile, m.matlists, 1);
         mm->matnos = (int *)db_hdf5_comprd(dbfile, m.matnos, 1);
+
         matnames = (char *)db_hdf5_comprd(dbfile, m.matnames, 1);
         db_StringListToStringArrayMBOpt(matnames, &(mm->matnames), &(mm->matnames_alloc), m.nmats);
 
