@@ -453,6 +453,11 @@ build_multi(char *basename, int driver, char *file_ext,
     {
         DBAddOption(optlist, DBOPT_MB_FILE_NS, file_ns);
         DBAddOption(optlist, DBOPT_MB_BLOCK_NS, block_ns);
+        /* Ugly: Am just capturing pointer to block_type value here
+           (before block_type itsel has even been set). This "work"
+           because the pointer isn't read until a DBPutXXX call in
+           which the optlist appears and block_type is set before
+           this optlist is used in a call.*/
         DBAddOption(optlist, DBOPT_MB_BLOCK_TYPE, &block_type);
     }
     repr_block_idx = 9;

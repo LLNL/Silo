@@ -127,6 +127,8 @@
       integer  dims(2), err, optlist, lmeshnms(3)
       integer  meshtypes(3)
 
+      integer btype, ol
+
 
       data matlist /2, 2, 0, 0, 1, 1/
       data mixedels/3, 4, 3, 4/
@@ -234,12 +236,18 @@
       lmeshnms(1) = 5
       meshnms(2)  = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       lmeshnms(2) = 40
-      meshtypes(1) = DB_UCD
-      meshtypes(2) = DB_UCD
-      meshtypes(3) = DB_UCD
+      meshtypes(1) = DB_UCDMESH
+      meshtypes(2) = DB_UCDMESH
+      meshtypes(3) = DB_UCDMESH
       err = dbputmmesh (dbid, "multimesh", 9, 3,
      .                  meshnms, lmeshnms, meshtypes,
      .                  DB_F77NULL, id)
+      btype = DB_UCDMESH
+      err = dbmkoptlist (5, ol)
+      err = dbaddiopt   (ol, DBOPT_MB_BLOCK_TYPE, btype)  ! integer
+      err = dbputmmesh (dbid, "multimesh2", 10, 3,
+     .                  meshnms, lmeshnms, DB_F77NULL,
+     .                  ol, id)
 
 !...Test out multi mesh. (Special case, since nmesh == 1.) Ordinarily
 !...you would have to provide arrays for the 'ids', 'types' and 'dirs'.

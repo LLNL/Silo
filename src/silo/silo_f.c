@@ -1553,7 +1553,8 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
          *  Invoke the C function to do the work.
          *---------------------------------------*/
         *status = DBPutMultimesh(dbfile, nm, *nmesh,
-                      (char const * const *) meshnms, meshtypes, optlist);
+                      (char const * const *) meshnms,
+                  *meshtypes==DB_F77NULL?0:meshtypes, optlist);
 
         for (i = 0; i < *nmesh; i++)
             FREE(meshnms[i]);
@@ -1844,7 +1845,7 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
     int            i, indx;
     DBoptlist     *optlist = NULL;
 
-    API_BEGIN("dbputmmesh", int, -1) {
+    API_BEGIN("dbputmmat", int, -1) {
         optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
         /*------------------------------
          *  Duplicate all ascii strings.
