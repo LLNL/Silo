@@ -146,7 +146,7 @@ AM_FCFLAGS = $(AM_CPPFLAGS)
 
 HDF5PROGS=compression grab mk_nasf_h5
 FCPROGS= arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
-         csgmesh qmeshmatf77
+         csgmesh qmeshmat2df77
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec misc newsami specmix spec \
@@ -305,7 +305,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_ucdf77_SOURCES = dummy.cxx
  nodist_EXTRA_testallf77_SOURCES = dummy.cxx
  nodist_EXTRA_csgmesh_SOURCES = dummy.cxx
- nodist_EXTRA_qmeshmatf77_SOURCES = dummy.cxx
+ nodist_EXTRA_qmeshmat2df77_SOURCES = dummy.cxx
  nodist_EXTRA_compression_SOURCES = dummy.cxx
  nodist_EXTRA_grab_SOURCES = dummy.cxx
  nodist_EXTRA_efcentering_SOURCES = dummy.cxx
@@ -353,8 +353,8 @@ if FORTRAN_NEEDED
   testallf77_LDADD = $(LDADD) $(FCLIBS)
   csgmesh_SOURCES = csgmesh.f
   csgmesh_LDADD = $(LDADD) $(FCLIBS)
-  qmeshmatf77_SOURCES = qmeshmatf77.f
-  qmeshmatf77_LDADD = $(LDADD) $(FCLIBS)
+  qmeshmat2df77_SOURCES = qmeshmat2df77.f
+  qmeshmat2df77_LDADD = $(LDADD) $(FCLIBS)
 endif
 
 all-local:

@@ -104,7 +104,15 @@
 !          +--------+-/------+-------+
 !
 ! using 2D Fortran arrays A(#rows,#cols) stored column major (e.g.
-! row index varies fastest as you march through A's memory)
+! row index varies fastest as you march through A's memory). Note
+! that #rows is size in Y direction while #cols is size in X
+! direction. So, A is dimensioned (nY,nX). In Fortran, the left-most
+! dimension in an array declaration varies fastest when marching 
+! through array elements in memory. However, the 'dims' array in
+! Silo's DBPut calls is arranged such that dims[0] is the size in
+! X, dims[1] the size in Y and dims[2], if applicable, the size in Z.
+! So, although we have declarations for A(3,4), the dims array is
+! passed in as dims[0] = 4, dims[1] = 3
 !----------------------------------------------------------------------
 !c      implicit double precision (a-h,o-z)
 
@@ -119,10 +127,12 @@
       integer  tcycle
       real     ttime
       real     x(3,4), y(3,4)
+!...For co-linear case
+      real xcl(4), ycl(3)
 
-      integer  matlist(2,3)
-      integer  dims(2)
-      integer  zdims(2)
+      integer  matlist(2,3), matlistcl(3,2)
+      integer  dims(2), dimscl(2)
+      integer  zdims(2), zdimscl(2)
 
       integer  matnos(2)
       integer  mix_next(4)
@@ -131,10 +141,19 @@
       real     mix_vf(4)
 
       data matlist/1, 1, -1, -3, 2, 2/
+!      data matlistcl/1, -1, 2, 1, -3, 2/
+      data matlistcl/1, -3, 2, 1, -1, 2/
+!      data dims/4,3/
       data dims/3,4/
+      data dimscl/4,3/
+!      data zdims/3,2/
       data zdims/2,3/
+      data zdims/2,3/
+      data zdimscl/3,2/
       data x/1.0,1.0,1.0,2.0,2.0,2.0,3.0,3.0,3.0,4.0,4.0,4.0/
       data y/3.0,2.0,1.0,3.0,2.0,1.0,3.0,2.0,1.0,3.0,2.0,1.0/
+      data xcl/1.0,2.0,3.0,4.0/
+      data ycl/1.0,2.0,3.0/
       data mix_next/2,0,4,0/
       data mix_zone/2,2,4,4/
       data mix_mat/1,2,1,2/
@@ -159,15 +178,20 @@
      . x, y, DB_F77NULL, dims, 2, DB_FLOAT, DB_NONCOLLINEAR,
      . DB_F77NULL, dbstat)
 
+      err = dbputqm(dbid, "qmeshcl", 7, "xcl", 3, "ycl", 3,
+     . DB_F77NULLSTRING, 0,
+     . xcl, ycl, DB_F77NULL, dimscl, 2, DB_FLOAT, DB_COLLINEAR,
+     . DB_F77NULL, dbstat)
+
       err = dbputmat (dbid, "mat", 3, "qmesh", 5,
      . 2, matnos, matlist, zdims, 2,
      . mix_next, mix_mat, mix_zone, mix_vf, 4,
      . DB_FLOAT, DB_F77NULL, dbstat)
 
-
-!     err = dbputuv1 (dbid, "d", 1, "mesh1", 5,
-!    .                d, inzones, dfnew, mixlen,
-!    .                idatatype, DB_ZONECENT, optlist, id)
+      err = dbputmat (dbid, "matcl", 5, "qmeshcl", 7,
+     . 2, matnos, matlistcl, zdimscl, 2,
+     . mix_next, mix_mat, mix_zone, mix_vf, 4,
+     . DB_FLOAT, DB_F77NULL, dbstat)
 
 !...Close file before quitting.
 
