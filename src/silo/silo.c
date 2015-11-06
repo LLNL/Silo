@@ -4653,35 +4653,17 @@ DBClose(DBfile *dbfile)
 
 
 /*-------------------------------------------------------------------------
- * Function:    DBClose
+ * Function:    DBFlush
  *
- * Purpose:     Close the specified data file and return NULL.
+ * Purpose:     Flush the specified file contents to disk.
  *
  * Return:      Success:        NULL
  *
  *              Failure:        NULL
  *
- * Programmer:  matzke@viper
- *              Mon Nov  7 10:31:41 PST 1994
+ * Programmer:  Mark C. Miller, Fri Nov  6 09:38:05 PST 2015
  *
  * Modifications:
- *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
- *    I replaced API_END with API_END_NOPOP.
- *
- *    Eric Brugger, Mon Feb 27 15:03:01 PST 1995
- *    I changed the return value to be an integer instead of a pointer
- *    to a DBfile.
- *
- *    Robb Matzke, Tue Feb 28 10:57:57 EST 1995
- *    The file status slot is cleared so it can be reused.
- *
- *    Eric Brugger, Mon Jul 10 07:42:24 PDT 1995
- *    I moved the reseting of _db_fstatus to before the return statement,
- *    so that the instruction would get executed.
- *
- *    Mark C. Miller, Wed Jul 23 00:15:15 PDT 2008
- *    Changed to API_BEGIN2 to help detect attempted ops on closed files.
- *    Added code to UNregister the given file pointer.
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBFlush(DBfile *dbfile)

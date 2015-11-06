@@ -112,6 +112,9 @@ AT_CLEANUP
 AT_SETUP(multi_test testread)
 AT_CHECK($VALGRIND multi_test testread $STARGS,,ignore)
 AT_CLEANUP
+AT_SETUP(multi_test testflush)
+AT_CHECK($VALGRIND multi_test testflush $STARGS,,ignore)
+AT_CLEANUP
 AT_SETUP(multi_test earlyclose)
 AT_CHECK($VALGRIND multi_test earlyclose $STARGS,,ignore,ignore)
 AT_CLEANUP

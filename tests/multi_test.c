@@ -57,6 +57,8 @@ product endorsement purposes.
 #include "silo.h"
 #include "std.c"
 
+/* These are the number of *zones* in each dimension. Note that the
+   number of nodes is +1. */
 #define NX 30
 #define NY 40
 #define NZ 30
@@ -656,6 +658,8 @@ fill_rect3d_mat(float x[], float y[], float z[], int matlist[], int nx,
 
     itemp = ALLOC_N(int, (nx + 1) * (ny + 1) * (nz + 1));
 
+    /* Loop over nodes (corners of zones) to establish whether each
+       node is inside or outside of the sphere */
     for (i = 0; i < nx+1; i++)
     {
         for (j = 0; j < ny+1; j++)
@@ -670,12 +674,31 @@ fill_rect3d_mat(float x[], float y[], float z[], int matlist[], int nx,
             }
         }
     }
+
+    /* Now, loop over zones and count the number of corners (nodes) of a zone that
+       are inside the sphere. If count is 0, zone is wholly outside and has already
+       been filled by background value(s). If count is 8, zone is wholly inside and
+       if count is between 1 and 7, inclusive, zone is mixed. */
     for (i = 0; i < nx; i++)
     {
         for (j = 0; j < ny; j++)
         {
             for (k = 0; k < nz; k++)
             {
+                /* Sum the zone's 8 corner values;
+                    1) 0,0,0  ...  3) 0,0,1
+                    .
+                    .
+                    .
+                    2) 0,1,0  ...  4) 0,1,1
+
+                 and
+
+                    5) 1,0,0  ...  7) 1,0,1
+                    .
+                    .
+                    .
+                    6) 1,1,0  ...  8) 1,1,1 */
                 cnt = itemp[(k + 0) * (nx + 1) * (ny + 1) + (j + 0) * (nx + 1) + i + 0] +
                       itemp[(k + 0) * (nx + 1) * (ny + 1) + (j + 1) * (nx + 1) + i + 0] +
                       itemp[(k + 0) * (nx + 1) * (ny + 1) + (j + 1) * (nx + 1) + i + 1] +
@@ -692,6 +715,10 @@ fill_rect3d_mat(float x[], float y[], float z[], int matlist[], int nx,
                     matlist[k * nx * ny + j * nx + i] = matno;
                 } else
                 {
+                    /* Sample the spatial box of the zone on a 10x10x10
+                       grid and for each sample establish whether its in
+                       or out of the sphere. Use the count as an estimate
+                       of the volume fraction. */
                     dx = (x[i + 1] - x[i]) / 11.;
                     dy = (y[j + 1] - y[j]) / 11.;
                     dz = (z[k + 1] - z[k]) / 11.;
@@ -2789,9 +2816,9 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
     int             nmats;
     int             matnos[3];
-    int             *matlist;
+    int             *matlist, *mix_zone_map;
     int             mixlen;
-    int             *mix_next, *mix_mat, *mix_zone;
+    int             *mix_next, *mix_mat, *mix_zone, *mix_zone2;
     float           *mix_vf;
     float           xstrip[NX + NY + NZ], ystrip[NX + NY + NZ], zstrip[NX + NY + NZ];
 
@@ -2828,9 +2855,11 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     facelist = ALLOC_N(int, 10000);
     zoneno = ALLOC_N(int, 2000);
     matlist = ALLOC_N(int, NX * NY * NZ);
+    mix_zone_map = ALLOC_N(int, NX * NY * NZ);
     mix_next = ALLOC_N(int, 4500);
     mix_mat = ALLOC_N(int, 4500);
     mix_zone = ALLOC_N(int, 4500);
+    mix_zone2 = ALLOC_N(int, 4500);
     matlist2 = ALLOC_N(int, 2000);
     ghost = ALLOC_N(int, 2000);
 
@@ -3039,6 +3068,8 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
 
                     matlist2[k * (nx - 1) * (ny - 1) + j * (nx - 1) + i] =
                         matlist[n_z * NX * NY + n_y * NX + n_x];
+                    mix_zone_map[n_z * NX * NY + n_y * NX + n_x] =
+                        k * (nx - 1) * (ny - 1) + j * (nx - 1) + i;
 
                     if (((k == 0 || n_z == kmax - 2) &&
                          (n_z != 0 && n_z != NZ - 1)) ||
@@ -3051,9 +3082,14 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                         ghost[k * (nx - 1) * (ny - 1) + j * (nx - 1) + i] = 0;
                 }
 
+        /*
+         * Compute mix_zone2 array from mix_zone array and mix_zone_map
+         */
+        for (i = 0; i < mixlen; i++)
+            mix_zone2[i] = mix_zone_map[mix_zone[i]];
+
         /* 
-         * Resort the zonelist, matlist so that the ghost zones are at the
-         * end.
+         * Resort the zonelist, matlist so that the ghost zones are at the end.
          */
         nzones = (nx - 1) * (ny - 1) * (nz - 1);
         nreal = nzones;
@@ -3215,7 +3251,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
             int dims[1];
             dims[0] = nzones;
             TESTMAT(dbfile, matname, meshname, nmats, matnos, matlist2, dims,
-                    1, mix_next, mix_mat, mix_zone, mix_vf, mixlen, DB_FLOAT, optlist);
+                    1, mix_next, mix_mat, mix_zone2, mix_vf, mixlen, DB_FLOAT, optlist);
         }
 
         DBFreeOptlist(optlist);
