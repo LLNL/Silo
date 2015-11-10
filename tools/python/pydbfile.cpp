@@ -507,7 +507,6 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
     if (!ncomps) return NULL;
     int objtype = DBGetObjtypeTag(PyString_AsString(PyDict_GetItemString((PyObject*)dictobj, "type")));
     DBobject *siloobj = DBMakeObject(objname, objtype, ncomps);
-printf("writing objname = \"%s\"\n", objname);
     PyObject *key, *value;
 #if PY_VERSION_GE(2,5,0)
     Py_ssize_t pos = 0;
