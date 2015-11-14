@@ -99,9 +99,9 @@ build_curve (DBfile *dbfile, int driver)
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   if (DB_HDF5==(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
+   if (DB_HDF5==driver) DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
-   if (DB_HDF5!=(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
+   if (DB_HDF5!=driver) DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
 
    /*
     * Write the 'coscurve' curve. It shares x values with the 'sincurve'
@@ -141,22 +141,24 @@ main(int argc, char *argv[])
     char          *filename="largefile.silo";
     int            show_all_errors = FALSE;
     DBfile        *dbfile;
-    int            nIters = 2500;
+    int            nIters = 2500, cIters;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB",6)) {
             driver = StringToDriver(argv[i]);
-            if (sizeof(int)<8)
+            if (sizeof(int)<8 && nIters > 2000)
             {
                 fprintf(stderr, "Looks like PDB cannot support >2Gig files. Will stop at 1.990 Gigs\n");
-                nIters = 1990;
+                nIters = nIters > 2000 ? 1990 : nIters;
             }
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
-            filename = "largefile.h5";
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
+        } else if (!strcmp(argv[i], "-niters")) {
+            nIters = strtol(argv[i+1],0,10);
+            i++;
 	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument '%s'\n", argv[0], argv[i]);
         }
@@ -175,8 +177,8 @@ main(int argc, char *argv[])
     {
         char tmpname[64];
 
-        if (j % 100 == 0)
-            printf("Iterations %04d to %04d of %04d\n", j, j+100-1, nIters);
+        if (j % (nIters / 20) == 0)
+            printf("Iterations %04d to %04d of %04d\n", j, j+nIters/20-1, nIters);
 
         sprintf(tmpname, "simple_%04d", j);
 
@@ -211,14 +213,16 @@ main(int argc, char *argv[])
     }
 
     /*
-     * Randomly examine 50 arrays from the first and last 500
+     * Randomly examine 1% of the arrays from the first and last 10%
      */
     srand(0xBabeFace);
-    for (j = 0; j < 100; j++)
+    cIters = nIters/100+5;
+    for (j = 0; j < cIters; j++)
     {
         char tmpname[64];
-
-        int n = rand() % 500 + (j >= 50 ? (nIters-500) : 0);
+        int n = rand() % (nIters / 10);
+        if (j > cIters / 2)
+            n = nIters - 1 - n;
 
         sprintf(tmpname, "simple_%04d", n);
 

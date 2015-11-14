@@ -8081,6 +8081,8 @@ db_hdf5_PutCurve(DBfile *_dbfile, char const *name, void const *xvals, void cons
 
         /* Write X and Y arrays if supplied */
         if (npts && xvals) {
+            if (_cu._varname[0])
+                db_hdf5_fullname(dbfile, _cu._varname[0], m.xvarname/*out*/);
             db_hdf5_compwr(dbfile, dtype, 1, &npts, xvals, m.xvarname/*out*/,
                 friendly_name(name, "_xvals", 0));
         } else if (_cu._varname[0]) {
@@ -8088,6 +8090,8 @@ db_hdf5_PutCurve(DBfile *_dbfile, char const *name, void const *xvals, void cons
         }
 
         if (npts && yvals) {
+            if (_cu._varname[1])
+                db_hdf5_fullname(dbfile, _cu._varname[1], m.yvarname/*out*/);
             db_hdf5_compwr(dbfile, dtype, 1, &npts, yvals, m.yvarname/*out*/,
                 friendly_name(name, "_yvals", 0));
         } else if (_cu._varname[1]) {

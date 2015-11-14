@@ -2979,7 +2979,7 @@ DBGuessHasFriendlyHDF5Names(DBfile *f)
     char cwd[1024];
     int retval;
 
-    if (DBGetDriverType(f) != 7 /* DB_HDF5X */)
+    if (DBGetDriverType(f) != DB_HDF5X)
         return 0;
 
     DBGetDir(f, cwd);
@@ -3261,9 +3261,9 @@ DBGetDriverTypeFromPath(const char *path)
    }
    (void) close(fd);
    if (strstr(buf, "PDB"))
-      return 2; /* can't use DB_PDB here */
+      return DB_PDB;
    if (strstr(buf, "HDF"))
-      return 7; /* can't use DB_HDF5X here. */
+      return DB_HDF5X;
    return DB_UNKNOWN;
 }
 
@@ -7702,11 +7702,11 @@ DBPutCurve(
             {
                 if (!xvals && !DBGetOption(opts, DBOPT_XVARNAME))
                     API_ERROR("xvals=0 || DBOPT_XVARNAME", E_BADARGS);
-                if (xvals && DBGetOption(opts, DBOPT_XVARNAME))
+                if (DBGetDriverType(dbfile) != DB_HDF5X && xvals && DBGetOption(opts, DBOPT_XVARNAME))
                     API_ERROR("xvals!=0 && DBOPT_XVARNAME", E_BADARGS);
                 if (!yvals && !DBGetOption(opts, DBOPT_YVARNAME))
                     API_ERROR("yvals=0 || DBOPT_YVARNAME", E_BADARGS);
-                if (yvals && DBGetOption(opts, DBOPT_YVARNAME))
+                if (DBGetDriverType(dbfile) != DB_HDF5X && yvals && DBGetOption(opts, DBOPT_YVARNAME))
                     API_ERROR("yvals!=0 && DBOPT_YVARNAME", E_BADARGS);
             }
         }
