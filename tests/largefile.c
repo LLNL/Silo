@@ -141,7 +141,7 @@ main(int argc, char *argv[])
     char          *filename="largefile.silo";
     int            show_all_errors = FALSE;
     DBfile        *dbfile;
-    int            nIters = 2500, cIters;
+    int            nIters = 5000, cIters;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
