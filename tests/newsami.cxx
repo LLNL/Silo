@@ -74,7 +74,11 @@ static void move_random_dir(int ndirs, int& i, int& j, int& k)
     else                 /* edge, face or vert connected */
         mod = 26;
 
+#ifdef _WIN32
+    int dir = rand() % mod;
+#else
     int dir = random() % mod;
+#endif
     switch (dir)
     {
         /* face connected cases */
@@ -181,8 +185,11 @@ static void random_walk_hexes(int seed, int nhexes, int nmats, int ndirs,
 {
     int i=0, j=0, k=0, h=0, mat=1;
     map<coord_t, int> coord_map;
-
+#ifdef _WIN32
+    srand(seed);
+#else
     srandom(seed);
+#endif
     while (h < nhexes)
     {
         bool did_add = false;
