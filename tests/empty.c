@@ -107,6 +107,7 @@ main(int argc, char *argv[])
     int             show_all_errors = FALSE;
     int             i, pass;
     char const * const cnames[3] = {"x","y","z"};
+    char const * const mnames[3] = {"dom000/mesh","dom001/mesh","dom002/mesh"};
     void           *coords[3] = {(void*)1,(void*)2,(void*)3}; /* really funky dummy pointers */
     float           zero = 0.0;
     void           *coordsK[3] = {(void*)&zero,(void*)&zero,(void*)&zero}; /* funky pointers for Kerbel case */
@@ -269,6 +270,27 @@ main(int argc, char *argv[])
         ASSERT(DBPutMatspecies(dbfile,"empty_specf","empty_mata",1,iarr,slc,d,nd,ZZ,var,  0, 0,dt,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutMatspecies(dbfile,"empty_specg","empty_mata",1,iarr,slm,d,nd,ZZ,var,msl,ml,dt,OL(ol)),retval<0,retval==0);
         }
+
+        /* empty multi-block objects */
+        ASSERT(DBPutMultimesh(dbfile,"empty_mmesha",ZZ,mnames,iarr,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimesh(dbfile,"empty_mmeshb",ZZ,     0,iarr,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimesh(dbfile,"empty_mmeshc",ZZ,mnames,     0,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimesh(dbfile,"empty_mmeshd",ZZ,     0,     0,OL(ol)),retval<0,retval==0);
+
+        ASSERT(DBPutMultivar(dbfile,"empty_mvara",ZZ,mnames,iarr,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultivar(dbfile,"empty_mvarb",ZZ,     0,iarr,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultivar(dbfile,"empty_mvarc",ZZ,mnames,     0,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultivar(dbfile,"empty_mvard",ZZ,     0,     0,OL(ol)),retval<0,retval==0);
+
+        ASSERT(DBPutMultimat(dbfile,"empty_mmata",ZZ,mnames,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimat(dbfile,"empty_mmatb",ZZ,     0,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimat(dbfile,"empty_mmatc",ZZ,mnames,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimat(dbfile,"empty_mmatd",ZZ,     0,OL(ol)),retval<0,retval==0);
+
+        ASSERT(DBPutMultimatspecies(dbfile,"empty_mmatspeca",ZZ,mnames,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimatspecies(dbfile,"empty_mmatspecb",ZZ,     0,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimatspecies(dbfile,"empty_mmatspecc",ZZ,mnames,OL(ol)),retval<0,retval==0);
+        ASSERT(DBPutMultimatspecies(dbfile,"empty_mmatspecd",ZZ,     0,OL(ol)),retval<0,retval==0);
     }
 
     DBClose(dbfile);
@@ -452,6 +474,48 @@ main(int argc, char *argv[])
             DBmatspecies *spec = DBGetMatspecies(dbfile, vnames[i++]);
             assert(DBIsEmptyMatspecies(spec));
             DBFreeMatspecies(spec);
+        }
+        DBSetDir(dbfile, "..");
+    }
+
+    /* test read back of empty multi-block objects */
+    {   int i=0; char *vnames[] = {"empty_mmesha", "empty_mmeshb", "empty_mmeshc", "empty_mmeshd", 0};
+        DBSetDir(dbfile, "DBPutMultimesh");
+        while (vnames[i])
+        {
+            DBmultimesh *mmesh = DBGetMultimesh(dbfile, vnames[i++]);
+            assert(DBIsEmptyMultimesh(mmesh));
+            DBFreeMultimesh(mmesh);
+        }
+        DBSetDir(dbfile, "..");
+    }
+    {   int i=0; char *vnames[] = {"empty_mvara", "empty_mvarb", "empty_mvarc", "empty_mvard", 0};
+        DBSetDir(dbfile, "DBPutMultivar");
+        while (vnames[i])
+        {
+            DBmultivar *mvar = DBGetMultivar(dbfile, vnames[i++]);
+            assert(DBIsEmptyMultivar(mvar));
+            DBFreeMultivar(mvar);
+        }
+        DBSetDir(dbfile, "..");
+    }
+    {   int i=0; char *vnames[] = {"empty_mmata", "empty_mmatb", "empty_mmatc", "empty_mmatd", 0};
+        DBSetDir(dbfile, "DBPutMultimat");
+        while (vnames[i])
+        {
+            DBmultimat *mmat = DBGetMultimat(dbfile, vnames[i++]);
+            assert(DBIsEmptyMultimat(mmat));
+            DBFreeMultimat(mmat);
+        }
+        DBSetDir(dbfile, "..");
+    }
+    {   int i=0; char *vnames[] = {"empty_mmatspeca", "empty_mmatspecb", "empty_mmatspecc", "empty_mmatspecd", 0};
+        DBSetDir(dbfile, "DBPutMultimatspecies");
+        while (vnames[i])
+        {
+            DBmultimatspecies *mmatspecies = DBGetMultimatspecies(dbfile, vnames[i++]);
+            assert(DBIsEmptyMultimatspecies(mmatspecies));
+            DBFreeMultimatspecies(mmatspecies);
         }
         DBSetDir(dbfile, "..");
     }

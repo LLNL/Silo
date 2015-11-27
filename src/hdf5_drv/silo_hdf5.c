@@ -13524,7 +13524,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
          * material names.
          */
         /* Write raw data arrays */
-        if (matnames)
+        if (nmats > 0 && matnames)
         {
             for (i=len=0; i<nmats; i++) len += strlen(matnames[i])+1;
             s = (char *)malloc(len+1);
@@ -13818,7 +13818,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char const *name, int nspec,
          * material names.
          */
         /* Write raw data arrays */
-        if (specnames)
+        if (nspec > 0 && specnames)
         {
             for (i=len=0; i<nspec; i++) len += strlen(specnames[i])+1;
             s = (char *)malloc(len+1);

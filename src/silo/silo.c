@@ -8177,13 +8177,21 @@ DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmesh < 0)
             API_ERROR("nmesh", E_BADARGS);
-        if (!meshnames && nmesh && (!optlist || 
-            (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
-             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
-            API_ERROR("mesh names", E_BADARGS);
-        if (!meshtypes && nmesh && (!optlist ||
-             !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
-            API_ERROR("mesh types", E_BADARGS);
+        if (nmesh)
+        {
+            if (!meshnames && (!optlist || 
+                (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
+                 !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
+                API_ERROR("mesh names", E_BADARGS);
+            if (!meshtypes && (!optlist ||
+                 !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
+                API_ERROR("mesh types", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nmesh==0", E_EMPTYOBJECT);
+        }
         if (!dbfile->pub.p_mm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8304,13 +8312,21 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nvar < 0)
             API_ERROR("nvar", E_BADARGS);
-        if (!varnames && nvar && (!optlist ||
-             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
-              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
-            API_ERROR("varnames", E_BADARGS);
-        if (!vartypes && nvar && (!optlist ||
-             !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
-            API_ERROR("vartypes", E_BADARGS);
+        if (nvar)
+        {
+            if (!varnames && (!optlist ||
+                 (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
+                  !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
+                API_ERROR("varnames", E_BADARGS);
+            if (!vartypes && (!optlist ||
+                 !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
+                API_ERROR("vartypes", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nvar==0", E_EMPTYOBJECT);
+        }
         if (!dbfile->pub.p_mv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8367,10 +8383,18 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmats < 0)
             API_ERROR("nmats", E_BADARGS);
-        if (!matnames && nmats && (!optlist ||
-             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
-              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
-            API_ERROR("material-names", E_BADARGS);
+        if (nmats)
+        {
+            if (!matnames && (!optlist ||
+                 (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
+                  !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
+                API_ERROR("material-names", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nmats==0", E_EMPTYOBJECT);
+        }
         if (!dbfile->pub.p_mt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8433,10 +8457,18 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nspec < 0)
             API_ERROR("nspec", E_BADARGS);
-        if (!specnames && nspec && (!optlist ||
-             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
-              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
-            API_ERROR("species-names", E_BADARGS);
+        if (nspec)
+        {
+            if (!specnames && (!optlist ||
+                 (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
+                  !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
+                API_ERROR("species-names", E_BADARGS);
+        }
+        else if (!SILO_Globals.allowEmptyObjects)
+        {
+            /* this is an empty object but we don't know if it was intentional */
+            API_ERROR("nspec==0", E_EMPTYOBJECT);
+        }
         if (!dbfile->pub.p_mms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
