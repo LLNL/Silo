@@ -547,9 +547,19 @@ static void
 put_extents(float *arr, int len, double *ext_arr, int block)
 {
    int i;
-   double min = arr[0], max = min;
+   double min, max;
    for (i = 0; i < len; i++)
    {
+      if (missing_value != DB_MISSING_VALUE_NOT_SET && arr[i] == missing_value)
+          continue;
+      break;
+   }
+   min = arr[i];
+   max = min;
+   for (i = i+1; i < len; i++)
+   {
+      if (missing_value != DB_MISSING_VALUE_NOT_SET && arr[i] == missing_value)
+          continue;
       if (arr[i] < min)
          min = arr[i];
       if (arr[i] > max)
@@ -3597,6 +3607,12 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
                         d[n_z * NX * NY + n_y * NX + n_x];
                     p2[k * delta_x * delta_y + j * delta_x + i] =
                         p[n_z * NX * NY + n_y * NX + n_x];
+                    if (missing_value != DB_MISSING_VALUE_NOT_SET)
+                    {
+                        if (i == j && j == k && k == 0)
+                            p2[k * delta_x * delta_y + j * delta_x + i] = missing_value;
+                       
+                    }
                     matlist2[k * delta_x * delta_y + j * delta_x + i] =
                         matlist[n_z * NX * NY + n_y * NX + n_x];
                 }
