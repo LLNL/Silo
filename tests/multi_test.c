@@ -513,6 +513,8 @@ int testbadread = FALSE;
 int testflush = FALSE;
 int testflushread = FALSE;
 double missing_value = DB_MISSING_VALUE_NOT_SET;
+int time_series = 1;
+int emptymb = 0;
 
 int           build_multi(DBfile *, int, int, int, int, int, int, int, int);
 
@@ -813,7 +815,7 @@ main(int argc, char *argv[])
 {
     DBfile         *dbfile;
     char           filename[256], *file_ext=".pdb";
-    int            i;
+    int            i, t;
     int            dochecks = FALSE;
     int            hdfriendly = FALSE;
 
@@ -845,6 +847,7 @@ main(int argc, char *argv[])
             DBSetCompression("METHOD=FPZIP LOSS=3");
         } else if (!strcmp(argv[i], "fpziplossless")) {
             DBSetCompression("METHOD=FPZIP");
+        /* Tests that Silo library responds well if file object is closed pre-maturely */
         } else if (!strcmp(argv[i], "earlyclose")) {
             check_early_close = TRUE;
         } else if (!strcmp(argv[i], "check")) {
@@ -853,18 +856,26 @@ main(int argc, char *argv[])
             hdfriendly = TRUE;
         } else if (!strcmp(argv[i], "hdf-friendly-hard")) {
             hdfriendly = 2;
+        /* Tests read-back of written objects */
         } else if (!strcmp(argv[i], "testread")) {
             testread = TRUE;
+        /* Tests attempts to read correctly named object using wrong DBGet method */
         } else if (!strcmp(argv[i], "testbadread")) {
             testbadread = TRUE;
+        /* Tests DBFlush functionality, by execv'ing and re-reading */
         } else if (!strcmp(argv[i], "testflush")) {
             testflush = TRUE;
         } else if (!strcmp(argv[i], "testflushread")) {
             testflushread = TRUE;
         } else if (!strcmp(argv[i], "missing-value")) {
             missing_value = strtod(argv[++i],0);
+        } else if (!strcmp(argv[i], "time-series")) {
+            time_series = strtol(argv[++i],0,10);
+        } else if (!strcmp(argv[i], "emptymb")) {
+            emptymb = strtol(argv[++i],0,10);
         } else {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+            exit(1);
         }
     }
 
@@ -872,6 +883,7 @@ main(int argc, char *argv[])
     if (testread || testbadread) DBShowErrors(DB_NONE, NULL);
     DBSetEnableChecksums(dochecks);
     DBSetFriendlyHDF5Names(hdfriendly);
+    if (emptymb > 0) DBSetAllowEmptyObjects(1);
 
     /*
      * Create the multi-block rectilinear 2d mesh.
@@ -880,209 +892,263 @@ main(int argc, char *argv[])
      * DBFlush and then re-reading the flushed but not closed file into
      * a new execv'd process.
      */
-    sprintf(filename, "multi_rect2d%s", file_ext);
-    if (testflushread || 
-        (dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
+    for (t = 0; t < time_series; t++)
     {
-        if (!testflushread)
-        {
-            fprintf(stdout, "creating %s\n", filename);
-            if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 0) == -1)
-                fprintf(stderr, "Error building contents for '%s'.\n", filename);
-            if (testflush)
-            {
-                int qq;
-                char **newargv = (char **) calloc(argc+2,sizeof(char*));
-                for (qq = 0; qq < argc; qq++)
-                    newargv[qq] = argv[qq];
-                newargv[qq++] = strdup("testflushread");
-                DBFlush(dbfile);
-                execv(argv[0], newargv);
-            }
-            else
-            {
-                DBClose(dbfile);
-            }
-        }
-        dbfile = 0;
-        if (testread || testbadread || testflushread)
-        {
-            fprintf(stdout, "reading %s\n", filename);
-            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
-            {
-                if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3, 4, 1, DB_COLLINEAR, 1) == -1)
-                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
-                DBClose(dbfile);
-                if (testflushread)
-                    exit(EXIT_SUCCESS);
-            }
-            else
-            {
-                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
-                if (testflushread)
-                    exit(EXIT_FAILURE);
-            }
-        }
-    }
-    else
-    {
-        fprintf(stderr, "Error in creating file '%s'.\n", filename);
+       int emb = 1;
+       if (emptymb > 0 && (t % emptymb == 0))
+           emb = 0;
+       if (time_series == 1)
+           sprintf(filename, "multi_rect2d%s", file_ext);
+       else
+           sprintf(filename, "multi_rect2d_%03d%s", t, file_ext);
+       if (testflushread || 
+           (dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 2d test file", driver)))
+       {
+           if (!testflushread)
+           {
+               fprintf(stdout, "creating %s\n", filename);
+               if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3*emb, 4*emb, 1*emb, DB_COLLINEAR, 0) == -1)
+                   fprintf(stderr, "Error building contents for '%s'.\n", filename);
+               if (testflush)
+               {
+                   int qq;
+                   char **newargv = (char **) calloc(argc+2,sizeof(char*));
+                   for (qq = 0; qq < argc; qq++)
+                       newargv[qq] = argv[qq];
+                   newargv[qq++] = strdup("testflushread");
+                   DBFlush(dbfile);
+                   execv(argv[0], newargv);
+               }
+               else
+               {
+                   DBClose(dbfile);
+               }
+           }
+           dbfile = 0;
+           if (testread || testbadread || testflushread)
+           {
+               fprintf(stdout, "reading %s\n", filename);
+               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
+               {
+                   if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 3*emb, 4*emb, 1*emb, DB_COLLINEAR, 1) == -1)
+                       fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                   DBClose(dbfile);
+                   if (testflushread)
+                       exit(EXIT_SUCCESS);
+               }
+               else
+               {
+                   fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+                   if (testflushread)
+                       exit(EXIT_FAILURE);
+               }
+           }
+       }
+       else
+       {
+           fprintf(stderr, "Error in creating file '%s'.\n", filename);
+       }
     }
 
     /* 
      * Create the multi-block curvilinear 2d mesh.
      */
-    sprintf(filename, "multi_curv2d%s", file_ext);
-    fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block curvilinear 2d test file", driver)))
+    for (t = 0; t < time_series; t++)
     {
-        if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5, 1, 1, DB_NONCOLLINEAR, 0) == -1)
-            fprintf(stderr, "Could not create '%s'.\n", filename);
-        DBClose(dbfile);
-        dbfile = 0;
-        if (testread || testbadread)
-        {
-            fprintf(stdout, "reading %s\n", filename);
-            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
-            {
-                if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5, 1, 1, DB_NONCOLLINEAR, 1) == -1)
-                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
-                DBClose(dbfile);
-            }
-            else
-            {
-                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
-            }
-        }
-    }
-    else
-    {
-        fprintf(stderr, "Error in creating '%s'.\n", filename);
+       int emb = 1;
+       if (emptymb > 0 && (t % emptymb == 0))
+           emb = 0;
+       if (time_series == 1)
+           sprintf(filename, "multi_curv2d%s", file_ext);
+       else
+           sprintf(filename, "multi_curv2d_%03d%s", t, file_ext);
+       fprintf(stdout, "creating %s\n", filename);
+       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block curvilinear 2d test file", driver)))
+       {
+           if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5*emb, 1*emb, 1*emb, DB_NONCOLLINEAR, 0) == -1)
+               fprintf(stderr, "Could not create '%s'.\n", filename);
+           DBClose(dbfile);
+           dbfile = 0;
+           if (testread || testbadread)
+           {
+               fprintf(stdout, "reading %s\n", filename);
+               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
+               {
+                   if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 2, 5*emb, 1*emb, 1*emb, DB_NONCOLLINEAR, 1) == -1)
+                       fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                   DBClose(dbfile);
+               }
+               else
+               {
+                   fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+               }
+           }
+       }
+       else
+       {
+           fprintf(stderr, "Error in creating '%s'.\n", filename);
+       }
     }
 
     /* 
      * Create the multi-block point 2d mesh.
      */
-    sprintf(filename, "multi_point2d%s", file_ext);
-    fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block point 2d test file", driver)))
+    for (t = 0; t < time_series; t++)
     {
-        if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5, 1, 1, 0, 0) == -1)
-            fprintf(stderr, "Could not create '%s'.\n", filename);
-        DBClose(dbfile);
-        dbfile = 0;
-        if (testread || testbadread)
-        {
-            fprintf(stdout, "reading %s\n", filename);
-            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
-            {
-                if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5, 1, 1, 0, 1) == -1)
-                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
-                DBClose(dbfile);
-            }
-            else
-            {
-                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
-            }
-        }
-    }
-    else
-    {
-        fprintf(stderr, "Error in creating '%s'.\n", filename);
+       int emb = 1;
+       if (emptymb > 0 && (t % emptymb == 0))
+           emb = 0;
+       if (time_series == 1)
+           sprintf(filename, "multi_point2d%s", file_ext);
+       else
+           sprintf(filename, "multi_point2d_%03d%s", t, file_ext);
+       fprintf(stdout, "creating %s\n", filename);
+       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block point 2d test file", driver)))
+       {
+           if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5*emb, 1*emb, 1*emb, 0, 0) == -1)
+               fprintf(stderr, "Could not create '%s'.\n", filename);
+           DBClose(dbfile);
+           dbfile = 0;
+           if (testread || testbadread)
+           {
+               fprintf(stdout, "reading %s\n", filename);
+               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
+               {
+                   if (build_multi(dbfile, DB_POINTMESH, DB_POINTVAR, 2, 5*emb, 1*emb, 1*emb, 0, 1) == -1)
+                       fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                   DBClose(dbfile);
+               }
+               else
+               {
+                   fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+               }
+           }
+       }
+       else
+       {
+           fprintf(stderr, "Error in creating '%s'.\n", filename);
+       }
     }
 
     /* 
      * Create the multi-block rectilinear 3d mesh.
      */
-    sprintf(filename, "multi_rect3d%s", file_ext);
-    fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 3d test file", driver)))
+    for (t = 0; t < time_series; t++)
     {
-        if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_COLLINEAR, 0) == -1)
-            fprintf(stderr, "Could not create '%s'.\n", filename);
-        DBClose(dbfile);
-        dbfile = 0;
-        if (testread || testbadread)
-        {
-            fprintf(stdout, "reading %s\n", filename);
-            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
-            {
-                if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_COLLINEAR, 1) == -1)
-                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
-                DBClose(dbfile);
-            }
-            else
-            {
-                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
-            }
-        }
-    }
-    else
-    {
-        fprintf(stderr, "Error in creating '%s'.\n", filename);
+       int emb = 1;
+       if (emptymb > 0 && (t % emptymb == 0))
+           emb = 0;
+       if (time_series == 1)
+           sprintf(filename, "multi_rect3d%s", file_ext);
+       else
+           sprintf(filename, "multi_rect3d_%03d%s", t, file_ext);
+       fprintf(stdout, "creating %s\n", filename);
+       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block rectilinear 3d test file", driver)))
+       {
+           if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3*emb, 4*emb, 3*emb, DB_COLLINEAR, 0) == -1)
+               fprintf(stderr, "Could not create '%s'.\n", filename);
+           DBClose(dbfile);
+           dbfile = 0;
+           if (testread || testbadread)
+           {
+               fprintf(stdout, "reading %s\n", filename);
+               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
+               {
+                   if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3*emb, 4*emb, 3*emb, DB_COLLINEAR, 1) == -1)
+                       fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                   DBClose(dbfile);
+               }
+               else
+               {
+                   fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+               }
+           }
+       }
+       else
+       {
+           fprintf(stderr, "Error in creating '%s'.\n", filename);
+       }
     }
 
     /* 
      * Create the multi-block curvilinear 3d mesh.
      */
-    sprintf(filename, "multi_curv3d%s", file_ext);
-    fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block curvilinear 3d test file", driver)))
+    for (t = 0; t < time_series; t++)
     {
-        if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_NONCOLLINEAR, 0) == -1)
-            fprintf(stderr, "Could not create '%s'.\n", filename);
-        DBClose(dbfile);
-        dbfile = 0;
-        if (testread || testbadread)
-        {
-            fprintf(stdout, "reading %s\n", filename);
-            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
-            {
-                if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3, 4, 3, DB_NONCOLLINEAR, 1) == -1)
-                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
-                DBClose(dbfile);
-            }
-            else
-            {
-                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
-            }
-        }
-    }
-    else
-    {
-        fprintf(stderr, "Error in creating '%s'.\n", filename);
+       int emb = 1;
+       if (emptymb > 0 && (t % emptymb == 0))
+           emb = 0;
+       if (time_series == 1)
+           sprintf(filename, "multi_curv3d%s", file_ext);
+       else
+           sprintf(filename, "multi_curv3d_%03d%s", t, file_ext);
+       fprintf(stdout, "creating %s\n", filename);
+       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block curvilinear 3d test file", driver)))
+       {
+           if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3*emb, 4*emb, 3*emb, DB_NONCOLLINEAR, 0) == -1)
+               fprintf(stderr, "Could not create '%s'.\n", filename);
+           DBClose(dbfile);
+           dbfile = 0;
+           if (testread || testbadread)
+           {
+               fprintf(stdout, "reading %s\n", filename);
+               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
+               {
+                   if (build_multi(dbfile, DB_QUADMESH, DB_QUADVAR, 3, 3*emb, 4*emb, 3*emb, DB_NONCOLLINEAR, 1) == -1)
+                       fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                   DBClose(dbfile);
+               }
+               else
+               {
+                   fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+               }
+           }
+       }
+       else
+       {
+           fprintf(stderr, "Error in creating '%s'.\n", filename);
+       }
     }
 
 
     /* 
      * Create the multi-block ucd 3d mesh.
      */
-    sprintf(filename, "multi_ucd3d%s", file_ext);
-    fprintf(stdout, "creating %s\n", filename);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block ucd 3d test file", driver)))
+    for (t = 0; t < time_series; t++)
     {
-        if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3, 4, 3, 0, 0) == -1)
-            fprintf(stderr, "Could not create '%s'.\n", filename);
-        DBClose(dbfile);
-        dbfile = 0;
-        if (testread || testbadread)
-        {
-            fprintf(stdout, "reading %s\n", filename);
-            if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
-            {
-                if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3, 4, 3, 0, 1) == -1)
-                    fprintf(stderr, "Error reading contents of '%s'.\n", filename);
-                DBClose(dbfile);
-            }
-            else
-            {
-                fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
-            }
-        }
-    }
-    else
-    {
-        fprintf(stderr, "Error in creating '%s'.\n", filename);
+       int emb = 1;
+       if (emptymb > 0 && (t % emptymb == 0))
+           emb = 0;
+       if (time_series == 1)
+           sprintf(filename, "multi_ucd3d%s", file_ext);
+       else
+           sprintf(filename, "multi_ucd3d_%03d%s", t, file_ext);
+       fprintf(stdout, "creating %s\n", filename);
+       if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "multi-block ucd 3d test file", driver)))
+       {
+           if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3*emb, 4*emb, 3*emb, 0, 0) == -1)
+               fprintf(stderr, "Could not create '%s'.\n", filename);
+           DBClose(dbfile);
+           dbfile = 0;
+           if (testread || testbadread)
+           {
+               fprintf(stdout, "reading %s\n", filename);
+               if ((dbfile = DBOpen(filename, DB_UNKNOWN, DB_READ)))
+               {
+                   if (build_multi(dbfile, DB_UCDMESH, DB_UCDVAR, 3, 3*emb, 4*emb, 3*emb, 0, 1) == -1)
+                       fprintf(stderr, "Error reading contents of '%s'.\n", filename);
+                   DBClose(dbfile);
+               }
+               else
+               {
+                   fprintf(stderr, "Unable to open \"%s\" for reading\n", filename);
+               }
+           }
+       }
+       else
+       {
+           fprintf(stderr, "Error in creating '%s'.\n", filename);
+       }
     }
 
     CleanupDriverStuff();
@@ -1259,6 +1325,12 @@ build_multi(DBfile *dbfile, int meshtype, int vartype, int dim, int nblocks_x,
     matnos[0] = 1;
     matnos[1] = 2;
     matnos[2] = 3;
+
+    if (emptymb)
+    {
+        int val = 1;
+        DBWrite(dbfile, "MetadataIsTimeVarying", &val, &val, 1, DB_INT);
+    }
 
     /* create the multi-block mesh, reformat extents for coords */
     extentssize = 2 * dim;
@@ -1697,8 +1769,8 @@ build_block_rect2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     time = 4.8;
     dtime = 4.8;
 
-    delta_x = NX / nblocks_x;
-    delta_y = NY / nblocks_y;
+    delta_x = nblocks_x ? NX / nblocks_x : 1;
+    delta_y = nblocks_y ? NY / nblocks_y : 1;
 
     coords[0] = x2;
     coords[1] = y2;
@@ -2030,8 +2102,8 @@ build_block_curv2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         }
     }
 
-    delta_x = NX / nblocks_x;
-    delta_y = NY / nblocks_y;
+    delta_x = nblocks_x ? NX / nblocks_x : 1;
+    delta_y = nblocks_y ? NY / nblocks_y : 1;
 
     coords[0] = x2;
     coords[1] = y2;
@@ -2269,8 +2341,8 @@ build_block_point2d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         }
     }
 
-    delta_x = NX / nblocks_x;
-    delta_y = NY / nblocks_y;
+    delta_x = nblocks_x ? NX / nblocks_x : 1;
+    delta_y = nblocks_y ? NY / nblocks_y : 1;
 
     coords[0] = x2;
     coords[1] = y2;
@@ -2587,9 +2659,9 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
      * Now extract the data for this block.
      */
 
-    delta_x = NX / nblocks_x;
-    delta_y = NY / nblocks_y;
-    delta_z = NZ / nblocks_z;
+    delta_x = nblocks_x ? NX / nblocks_x : 1;
+    delta_y = nblocks_y ? NY / nblocks_y : 1;
+    delta_z = nblocks_z ? NZ / nblocks_z : 1;
 
     coords[0] = x2;
     coords[1] = y2;
@@ -3007,9 +3079,9 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     /* 
      * Now extract the data for this block.
      */
-    delta_x = NX / nblocks_x;
-    delta_y = NY / nblocks_y;
-    delta_z = NZ / nblocks_z;
+    delta_x = nblocks_x ? NX / nblocks_x : 1;
+    delta_y = nblocks_y ? NY / nblocks_y : 1;
+    delta_z = nblocks_z ? NZ / nblocks_z : 1;
 
     coords[0] = x2;
     coords[1] = y2;
@@ -3548,9 +3620,9 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
      * Now extract the data for this block.
      */
 
-    delta_x = NX / nblocks_x;
-    delta_y = NY / nblocks_y;
-    delta_z = NZ / nblocks_z;
+    delta_x = nblocks_x ? NX / nblocks_x : 1;
+    delta_y = nblocks_y ? NY / nblocks_y : 1;
+    delta_z = nblocks_z ? NZ / nblocks_z : 1;
 
     coords[0] = x2;
     coords[1] = y2;
