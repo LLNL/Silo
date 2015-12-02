@@ -342,9 +342,10 @@ AT_CLEANUP
 AT_SETUP(csgmesh)
 AT_KEYWORDS(fortran)
 AT_CHECK(test ! \( -f csgmesh -o -f ../../csgmesh \) && exit 77 || $VALGRIND csgmesh $STARGS,,ignore,ignore)
-AT_SETUP(qmeshmatf77)
+AT_CLEANUP
+AT_SETUP(qmeshmat2df77)
 AT_KEYWORDS(fortran)
-AT_CHECK(test ! \( -f qmeshmatf77 -o -f ../../qmeshmatf77 \) && exit 77 || $VALGRIND qmeshmatf77 $STARGS,,ignore,ignore)
+AT_CHECK(test ! \( -f qmeshmat2df77 -o -f ../../qmeshmat2df77 \) && exit 77 || $VALGRIND qmeshmat2df77 $STARGS,,ignore,ignore)
 AT_CLEANUP
 
 AT_BANNER(Special)

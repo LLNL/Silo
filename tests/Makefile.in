@@ -186,7 +186,8 @@ am__EXEEXT_5 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
 @HDF5_DRV_NEEDED_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
 am__EXEEXT_7 = arrayf77$(EXEEXT) arrayf90$(EXEEXT) curvef77$(EXEEXT) \
 	matf77$(EXEEXT) pointf77$(EXEEXT) quadf77$(EXEEXT) \
-	ucdf77$(EXEEXT) testallf77$(EXEEXT) csgmesh$(EXEEXT)
+	ucdf77$(EXEEXT) testallf77$(EXEEXT) csgmesh$(EXEEXT) \
+	qmeshmat2df77$(EXEEXT)
 @FORTRAN_NEEDED_TRUE@am__EXEEXT_8 = $(am__EXEEXT_7)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
@@ -486,6 +487,12 @@ polyzl_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@polyzl_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
+am__qmeshmat2df77_SOURCES_DIST = qmeshmat2df77.f
+@FORTRAN_NEEDED_TRUE@am_qmeshmat2df77_OBJECTS =  \
+@FORTRAN_NEEDED_TRUE@	qmeshmat2df77.$(OBJEXT)
+qmeshmat2df77_OBJECTS = $(am_qmeshmat2df77_OBJECTS)
+@FORTRAN_NEEDED_TRUE@qmeshmat2df77_DEPENDENCIES = $(LDADD) \
+@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
 am_quad_OBJECTS = quad.$(OBJEXT) testlib.$(OBJEXT)
 quad_OBJECTS = $(am_quad_OBJECTS)
 quad_LDADD = $(LDADD)
@@ -704,9 +711,10 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_pdbtst_SOURCES) pdbtst.c \
 	$(nodist_EXTRA_point_SOURCES) point.c $(pointf77_SOURCES) \
 	$(nodist_EXTRA_pointf77_SOURCES) \
-	$(nodist_EXTRA_polyzl_SOURCES) polyzl.c $(quad_SOURCES) \
-	$(nodist_EXTRA_quad_SOURCES) $(quadf77_SOURCES) \
-	$(nodist_EXTRA_quadf77_SOURCES) \
+	$(nodist_EXTRA_polyzl_SOURCES) polyzl.c \
+	$(qmeshmat2df77_SOURCES) $(nodist_EXTRA_qmeshmat2df77_SOURCES) \
+	$(quad_SOURCES) $(nodist_EXTRA_quad_SOURCES) \
+	$(quadf77_SOURCES) $(nodist_EXTRA_quadf77_SOURCES) \
 	$(nodist_EXTRA_readstuff_SOURCES) readstuff.c \
 	$(nodist_EXTRA_realloc_obj_and_opts_SOURCES) \
 	realloc_obj_and_opts.c $(rocket_SOURCES) \
@@ -739,7 +747,8 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	multi_file.c multi_test.c multispec.c namescheme.c \
 	$(newsami_SOURCES) obj.c onehex.c oneprism.c onepyramid.c \
 	onetet.c partial_io.c pdbtst.c point.c \
-	$(am__pointf77_SOURCES_DIST) polyzl.c $(quad_SOURCES) \
+	$(am__pointf77_SOURCES_DIST) polyzl.c \
+	$(am__qmeshmat2df77_SOURCES_DIST) $(quad_SOURCES) \
 	$(am__quadf77_SOURCES_DIST) readstuff.c realloc_obj_and_opts.c \
 	$(rocket_SOURCES) simple.c spec.c specmix.c subhex.c testall.c \
 	$(am__testallf77_SOURCES_DIST) testfs.c testpdb.c twohex.c \
@@ -1017,7 +1026,7 @@ AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
 HDF5PROGS = compression grab mk_nasf_h5
 FCPROGS = arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
-         csgmesh
+         csgmesh qmeshmat2df77
 
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
@@ -1115,6 +1124,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ucdf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testallf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_csgmesh_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_qmeshmat2df77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_compression_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_grab_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_efcentering_SOURCES = dummy.cxx
@@ -1150,6 +1160,8 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @FORTRAN_NEEDED_TRUE@testallf77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@csgmesh_SOURCES = csgmesh.f
 @FORTRAN_NEEDED_TRUE@csgmesh_LDADD = $(LDADD) $(FCLIBS)
+@FORTRAN_NEEDED_TRUE@qmeshmat2df77_SOURCES = qmeshmat2df77.f
+@FORTRAN_NEEDED_TRUE@qmeshmat2df77_LDADD = $(LDADD) $(FCLIBS)
 all: all-am
 
 .SUFFIXES:
@@ -1349,6 +1361,9 @@ pointf77$(EXEEXT): $(pointf77_OBJECTS) $(pointf77_DEPENDENCIES)
 polyzl$(EXEEXT): $(polyzl_OBJECTS) $(polyzl_DEPENDENCIES) 
 	@rm -f polyzl$(EXEEXT)
 	$(CXXLINK) $(polyzl_OBJECTS) $(polyzl_LDADD) $(LIBS)
+qmeshmat2df77$(EXEEXT): $(qmeshmat2df77_OBJECTS) $(qmeshmat2df77_DEPENDENCIES) 
+	@rm -f qmeshmat2df77$(EXEEXT)
+	$(CXXLINK) $(qmeshmat2df77_OBJECTS) $(qmeshmat2df77_LDADD) $(LIBS)
 quad$(EXEEXT): $(quad_OBJECTS) $(quad_DEPENDENCIES) 
 	@rm -f quad$(EXEEXT)
 	$(CXXLINK) $(quad_OBJECTS) $(quad_LDADD) $(LIBS)
