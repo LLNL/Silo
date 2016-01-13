@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
     char          *filename2 = "dir2.pdb";
     int            i, driver = DB_PDB;
     int            show_all_errors = FALSE;
+    int            ndirs = 0;
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB",6)) {
@@ -107,6 +108,8 @@ int main(int argc, char *argv[])
             filename2 = "dir2.h5";
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
+        } else if (!strncmp(argv[i], "ndirs=", 6)) {
+            ndirs = (int) strtol(argv[i]+6,0,10);
 	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
@@ -114,6 +117,7 @@ int main(int argc, char *argv[])
     
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
+#if 0
     dbfile = DBCreate(filename, 0, DB_LOCAL, "dir test file", driver);
     printf("Creating file: '%s'...\n", filename);
 
@@ -215,6 +219,29 @@ int main(int argc, char *argv[])
     unlink("dir-test-foo");
     if (dbfile2 != 0)
         exit(EXIT_SUCCESS);
+#endif
+
+    /* Test many dirs */
+    if (ndirs)
+    {
+        double t0 = GetTime();
+        dbfile = DBCreate(driver==DB_PDB?"many-dirs.pdb":"many-dirs.hdf5", DB_CLOBBER, DB_LOCAL, "large dir count test", driver);
+        for (i = 0; i < ndirs; i++)
+        {
+            int dims = 1;
+            char tmpDir[32];
+            int ival = i;
+            double dval = i;
+            snprintf(tmpDir, sizeof(tmpDir), "one_of_many_dirs_%06d", i);
+            DBMkDir(dbfile, tmpDir);
+            DBSetDir(dbfile, tmpDir);
+            DBWrite(dbfile, "anInt", &ival, &dims, 1, DB_INT);
+            DBWrite(dbfile, "aDouble", &dval, &dims, 1, DB_DOUBLE);
+            DBSetDir(dbfile, "..");
+        }
+        DBClose(dbfile);
+        printf("time to create %d dirs = %g seconds\n", ndirs, (GetTime() - t0) / 1e6);
+    }
 
     CleanupDriverStuff();
     return 0;

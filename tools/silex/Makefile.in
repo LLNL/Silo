@@ -321,11 +321,10 @@ top_srcdir = @top_srcdir@
 silex_SOURCES = $(FILES)
 nodist_silex_SOURCES = $(FILES_MOC)
 @HDF5_DRV_NEEDED_FALSE@silex_LDADD = ../../src/libsilo.la \
-@HDF5_DRV_NEEDED_FALSE@	$(QT_LDFLAGS) $(QT_LIBS) -lQt5Gui \
+@HDF5_DRV_NEEDED_FALSE@	$(QT_LDFLAGS) $(QT_LIBS) \
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@silex_LDADD = ../../src/libsiloh5.la \
-@HDF5_DRV_NEEDED_TRUE@	$(QT_LDFLAGS) $(QT_LIBS) -lQt5Gui \
-@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@	$(QT_LDFLAGS) $(QT_LIBS) $(am__append_1)
 EXTRA_DIST = \
  array.xpm \
  curve.xpm \

@@ -182,7 +182,8 @@ rocket_silo_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 am__EXEEXT_2 = $(am__EXEEXT_1)
 @JSON_NEEDED_TRUE@am__EXEEXT_3 = json$(EXEEXT)
 am__EXEEXT_4 = $(am__EXEEXT_3)
-am__EXEEXT_5 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
+am__EXEEXT_5 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT) \
+	testhdf5$(EXEEXT)
 @HDF5_DRV_NEEDED_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
 am__EXEEXT_7 = arrayf77$(EXEEXT) arrayf90$(EXEEXT) curvef77$(EXEEXT) \
 	matf77$(EXEEXT) pointf77$(EXEEXT) quadf77$(EXEEXT) \
@@ -576,6 +577,10 @@ testfs_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@testfs_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
+am__testhdf5_SOURCES_DIST = testhdf5.c
+@HDF5_DRV_NEEDED_TRUE@am_testhdf5_OBJECTS = testhdf5.$(OBJEXT)
+testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
+@HDF5_DRV_NEEDED_TRUE@testhdf5_DEPENDENCIES = $(LDADD)
 testpdb_SOURCES = testpdb.c
 testpdb_OBJECTS = testpdb-testpdb.$(OBJEXT)
 testpdb_LDADD = $(LDADD)
@@ -724,7 +729,7 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_subhex_SOURCES) subhex.c \
 	$(nodist_EXTRA_testall_SOURCES) testall.c \
 	$(testallf77_SOURCES) $(nodist_EXTRA_testallf77_SOURCES) \
-	$(nodist_EXTRA_testfs_SOURCES) testfs.c \
+	$(nodist_EXTRA_testfs_SOURCES) testfs.c $(testhdf5_SOURCES) \
 	$(nodist_EXTRA_testpdb_SOURCES) testpdb.c \
 	$(nodist_EXTRA_twohex_SOURCES) twohex.c \
 	$(nodist_EXTRA_ucd_SOURCES) ucd.c \
@@ -751,9 +756,9 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(am__qmeshmat2df77_SOURCES_DIST) $(quad_SOURCES) \
 	$(am__quadf77_SOURCES_DIST) readstuff.c realloc_obj_and_opts.c \
 	$(rocket_SOURCES) simple.c spec.c specmix.c subhex.c testall.c \
-	$(am__testallf77_SOURCES_DIST) testfs.c testpdb.c twohex.c \
-	ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c \
-	wave.c
+	$(am__testallf77_SOURCES_DIST) testfs.c \
+	$(am__testhdf5_SOURCES_DIST) testpdb.c twohex.c ucd.c ucd1d.c \
+	$(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -977,6 +982,7 @@ EXTRA_DIST = \
  std.c \
  bcastopen.c \
  zeros.dat \
+ testhdf5.c \
  $(check_SCRIPTS) \
  $(check_DATA)
 
@@ -993,6 +999,7 @@ check_SCRIPTS = \
  test_error.py \
  test_read.py \
  test_write.py \
+ onehex.py \
  testonehex \
  testsilock \
  testdtypes
@@ -1024,7 +1031,7 @@ JSONTESTS = $(am__append_3)
 mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
-HDF5PROGS = compression grab mk_nasf_h5
+HDF5PROGS = compression grab mk_nasf_h5 testhdf5
 FCPROGS = arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
          csgmesh qmeshmat2df77
 
@@ -1142,6 +1149,8 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @HDF5_DRV_NEEDED_TRUE@grab_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@mk_nasf_h5_SOURCES = mk_nasf_h5.c
 @HDF5_DRV_NEEDED_TRUE@mk_nasf_h5_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_TRUE@testhdf5_SOURCES = testhdf5.c
+@HDF5_DRV_NEEDED_TRUE@testhdf5_LDADD = $(LDADD)
 @FORTRAN_NEEDED_TRUE@arrayf77_SOURCES = arrayf77.f
 @FORTRAN_NEEDED_TRUE@arrayf77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@arrayf90_SOURCES = arrayf90.f90
@@ -1400,6 +1409,9 @@ testallf77$(EXEEXT): $(testallf77_OBJECTS) $(testallf77_DEPENDENCIES)
 testfs$(EXEEXT): $(testfs_OBJECTS) $(testfs_DEPENDENCIES) 
 	@rm -f testfs$(EXEEXT)
 	$(CXXLINK) $(testfs_OBJECTS) $(testfs_LDADD) $(LIBS)
+testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES) 
+	@rm -f testhdf5$(EXEEXT)
+	$(LINK) $(testhdf5_OBJECTS) $(testhdf5_LDADD) $(LIBS)
 testpdb$(EXEEXT): $(testpdb_OBJECTS) $(testpdb_DEPENDENCIES) 
 	@rm -f testpdb$(EXEEXT)
 	$(CXXLINK) $(testpdb_OBJECTS) $(testpdb_LDADD) $(LIBS)
@@ -1491,6 +1503,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subhex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testall.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testhdf5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpdb-dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpdb-testpdb.Po@am__quote@

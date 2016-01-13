@@ -85,6 +85,7 @@ EXTRA_DIST= \
  std.c \
  bcastopen.c \
  zeros.dat \
+ testhdf5.c \
  $(check_SCRIPTS) \
  $(check_DATA)
 
@@ -100,6 +101,7 @@ check_SCRIPTS= \
  test_error.py \
  test_read.py \
  test_write.py \
+ onehex.py \
  testonehex \
  testsilock \
  testdtypes
@@ -144,7 +146,7 @@ mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
 
-HDF5PROGS=compression grab mk_nasf_h5
+HDF5PROGS=compression grab mk_nasf_h5 testhdf5
 FCPROGS= arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
          csgmesh qmeshmat2df77
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
@@ -330,6 +332,8 @@ if HDF5_DRV_NEEDED
   grab_LDADD = $(LDADD)
   mk_nasf_h5_SOURCES = mk_nasf_h5.c
   mk_nasf_h5_LDADD = $(LDADD)
+  testhdf5_SOURCES = testhdf5.c
+  testhdf5_LDADD = $(LDADD)
 endif
 
 if FORTRAN_NEEDED
