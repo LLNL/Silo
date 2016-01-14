@@ -125,14 +125,15 @@ double GetTime()
     return (t1-t0)/1e+6;
 }
 
-static void create_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
+/* Write (or read) a 1D dataset of doubles */
+static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
     int zip, int noise, int *running_count, double *running_time)
 {
     char dsname[32];
     static double *dbuf = 0, *rbuf = 0;
     int i, ndims = 1;
     hsize_t dims = dsize; 
-    hid_t double_ds_id = 0;
+    hid_t double_ds_id = -1;
     hid_t double_space_id;
     hid_t dcprops;
     double *bufp;
@@ -178,16 +179,20 @@ static void create_dataset(int idx, hid_t grp, int doread, int contig, int dsize
         double_space_id = H5Screate_simple(ndims, &dims, 0);
 
         dcprops = H5Pcreate(H5P_DATASET_CREATE);
+#if HDF5_VERSION_GE(1,6,0)
         if (contig || dsize >= 8192)
             H5Pset_layout(dcprops, H5D_CONTIGUOUS);
         else
             H5Pset_layout(dcprops, H5D_COMPACT);
+#endif
 
         if (zip)
         {
             H5Pset_layout(dcprops, H5D_CHUNKED);
             H5Pset_chunk(dcprops, ndims, &dims);
+#if HDF5_VERSION_GE(1,6,0)
             H5Pset_shuffle(dcprops);
+#endif
             H5Pset_deflate(dcprops, zip);
         }
     }
@@ -196,18 +201,38 @@ static void create_dataset(int idx, hid_t grp, int doread, int contig, int dsize
 
     if (doread)
     {
+        /* UNconditionally initialize t0 here, to avoid possibly adding garbage to running_time */
+        t0 = GetTime();
+
+#if HDF5_VERSION_GE(1,8,3)
         if (H5Iis_valid(grp) > 0)
-            double_ds_id = H5Dopen2(grp, dsname, H5P_DEFAULT);
-        if (H5Iis_valid(double_ds_id) > 0)
+#else
+        if (grp > 0)
+#endif
         {
-            t0 = GetTime();
+#if HDF5_VERSION_GE(1,8,0)
+            double_ds_id = H5Dopen(grp, dsname, H5P_DEFAULT);
+#else
+            double_ds_id = H5Dopen(grp, dsname);
+#endif
+        }
+
+#if HDF5_VERSION_GE(1,8,3)
+        if (H5Iis_valid(double_ds_id) > 0)
+#else
+        if (double_ds_id > 0)
+#endif
+        {
             H5Dread(double_ds_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
             if (doread > 1)
             {
                 if (memcmp(rbuf, noise?&dbuf[random()%dsize]:dbuf, dsize*sizeof(double)) != 0)
                 {
                     char dirname[512];
+                    snprintf(dirname, sizeof(dirname), "unknown");
+#if HDF5_VERSION_GE(1,6,0)
                     H5Iget_name(grp, dirname, sizeof(dirname));
+#endif
                     printf("Verification failed on dataset \"%s\" in dir \"%s\"\n", dsname, dirname);
                 }
             }
@@ -216,8 +241,16 @@ static void create_dataset(int idx, hid_t grp, int doread, int contig, int dsize
         {
             char dirname[512];
             snprintf(dirname, sizeof(dirname), "unknown");
+#if HDF5_VERSION_GE(1,8,3)
             if (H5Iis_valid(grp) > 0)
+#else
+            if (grp > 0)
+#endif
+            {
+#if HDF5_VERSION_GE(1,6,0)
                 H5Iget_name(grp, dirname, sizeof(dirname));
+#endif
+            }
             printf("Verification failed on dataset \"%s\" in dir \"%s\"\n", dsname, dirname);
         }
     }
@@ -229,14 +262,19 @@ static void create_dataset(int idx, hid_t grp, int doread, int contig, int dsize
         t0 = GetTime();
         H5Dwrite(double_ds_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, noise?&dbuf[random()%dsize]:dbuf);
     }
+#if HDF5_VERSION_GE(1,8,3)
     if (H5Iis_valid(double_ds_id) > 0)
+#else
+    if (double_ds_id > 0)
+#endif
         H5Dclose(double_ds_id);
 
     *running_time = *running_time + GetTime() - t0;
     *running_count = *running_count + 1;
 }
 
-static hid_t create_group(hid_t gid, int idx, int level, int doread, int estlink, int maxlink,
+/* Create (or open) a group */
+static hid_t do_group(hid_t gid, int idx, int level, int doread, int estlink, int maxlink,
     char const *parent, char *newdir, int *running_count)
 {
     hid_t gcprops, grp;
@@ -247,19 +285,37 @@ static hid_t create_group(hid_t gid, int idx, int level, int doread, int estlink
 
     if (doread)
     {
+#if HDF5_VERSION_GE(1,8,3)
         if (H5Iis_valid(gid) > 0)
+#else
+        if (gid > 0)
+#endif
         {
             H5E_BEGIN_TRY {
-                grp = H5Gopen2(gid, tmpDir, H5P_DEFAULT);
+#if HDF5_VERSION_GE(1,8,3)
+                grp = H5Gopen(gid, tmpDir, H5P_DEFAULT);
+#else
+                grp = H5Gopen(gid, tmpDir);
+#endif
             } H5E_END_TRY;
         }
     }
     else
     {
+#if HDF5_VERSION_GE(1,8,0)
         gcprops = H5Pcreate(H5P_GROUP_CREATE);
         if (estlink)
             H5Pset_est_link_info(gcprops, maxlink, 16);
-        grp = H5Gcreate2(gid, tmpDir, H5P_DEFAULT, gcprops, H5P_DEFAULT);
+#else
+        gcprops = H5P_DEFAULT;
+#endif
+
+#if HDF5_VERSION_GE(1,8,0)
+        grp = H5Gcreate(gid, tmpDir, H5P_DEFAULT, gcprops, H5P_DEFAULT);
+#else
+        grp = H5Gcreate(gid, tmpDir, estlink?maxlink:0);
+#endif
+
         H5Pclose(gcprops);
         H5Glink(grp, H5G_LINK_SOFT, parent, "..");
     }
@@ -274,8 +330,10 @@ static hid_t file_create_props(int estlink, int maxlink)
 
     H5Pset_istore_k(retval, 1);
 
+#if HDF5_VERSION_GE(1,8,0)
     if (estlink)
         H5Pset_est_link_info(retval, maxlink, 16);
+#endif
 
     return retval;
 }
@@ -336,15 +394,28 @@ static hid_t reopen_file(hid_t fid, int compat, int cache, char const *filename)
     return fid;
 }
 
-static void progress(int n, int totn, hid_t fid, double dstm, double *minr, double *maxr)
+static void progress(int n, int totn, hid_t fid, double dstm, double *minr, double *maxr,
+    double t0, int tlim)
 {
     static int lastn = 0;
     static double lastt = 0;
     static double lastdstm = 0;
 
+    /* make sure we've done at least enough iterations that logic below is ok */
     if (n < 2) return;
     if (totn < 20) return;
 
+    /* We don't wanna be calling GetTime every iteration. We do it every 1000 */
+    if (!(n%1000))
+    {
+        if ((GetTime() - t0) > tlim*60)
+        {
+            fprintf(stderr, "Time limit of %d minutes exceeded\n", tlim);
+            exit(1);
+        }
+    }
+
+    /* Issue progress updates in incriments of ~5% completion */
     if (!(n % (totn/20)))
     {
         double t = GetTime();
@@ -361,6 +432,7 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
 #else
         printf("\n");
 #endif
+        fflush(stdout);
 
         if (*minr == 0) *minr = rate;
         if (*maxr == 0) *maxr = rate;
@@ -398,7 +470,7 @@ int main(int argc, char **argv)
     int closef = 0;
     int cache = 0;
     int dsize = 1;
-    int maxlink, maxlink1, maxlink2;
+    int maxlink=0, maxlink1=0, maxlink2=0;
     int dircnt = 0, dscnt = 0;
     int zip=0;
     int noise=0;
@@ -408,8 +480,9 @@ int main(int argc, char **argv)
     hid_t fcprops, faprops;
     hid_t fid;
     unsigned h5majno=-1, h5minno=-1, h5patno=-1;
+    int tlim = 20;
 
-    setbuf(stdout, 0);
+    setvbuf(stdout, 0, _IOLBF, 0);
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "nd=", 3)) {
             char *p = argv[i], *q;
@@ -455,9 +528,11 @@ int main(int argc, char **argv)
             noise = (int) strtol(argv[i]+6,0,10);
         } else if (!strncmp(argv[i], "doread=", 7)) {
             doread = (int) strtol(argv[i]+7,0,10);
+        } else if (!strncmp(argv[i], "tlim=", 5)) {
+            tlim = (int) strtol(argv[i]+5,0,10);
         } else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: unknown argument `%s'\n", argv[0], argv[i]);
-            exit(-1);
+            exit(1);
         }
     }
 
@@ -466,9 +541,11 @@ int main(int argc, char **argv)
     if (nd2) totn += nd0*nd1*nd2;
     if (nd3) totn += nd0*nd1*nd2*nd3;
 
+#if HDF5_VERSION_GE(1,8,0)
     maxlink = nd0>65535?65535:nd0;
     maxlink1 = nd1>65535?65535:nd1;
     maxlink2 = nd2>65535?65535:nd2;
+#endif
 
     printf("Creates a 1, 2, or 3 level dir hierarchy with datasets at the bottom\n");
     H5get_libversion(&h5majno, &h5minno, &h5patno);
@@ -497,6 +574,8 @@ int main(int argc, char **argv)
     PRINT_VAL(dontae, do not atexit|close (helps with valgrind));
     PRINT_VAL(cache, set cache object (<=1.6.4) or byte (>1.6.4) count);
     PRINT_VAL(freelim, set free list limits to 1<<(<freelim>));
+    PRINT_VAL(tlim, limit test to <tlim> minutes);
+    fflush(stdout);
 
     if (dontae)
         H5dont_atexit();
@@ -523,67 +602,86 @@ int main(int argc, char **argv)
         H5Glink(fid, H5G_LINK_SOFT, "/", "..");
     }
 
-    /* main loop */
+    /* Main loop nested as much as 4 deep to create groups and at the leaves, datasets */
     t0 = GetTime();
-    for (i = 0; i < nd0; i++, progress(n++,totn,fid,dstm,&minrate,&maxrate))
+    for (i = 0; i < nd0; i++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
     {
         char dirName[40];
-        hid_t grp1 = nd1 ? create_group(fid, i, 1, doread, estlink, maxlink, "/", dirName, &dircnt) : 0;
+        hid_t grp1 = nd1 ? do_group(fid, i, 1, doread, estlink, maxlink, "/", dirName, &dircnt) : -1;
 
-        for (j = 0; j < nd1; j++, progress(n++,totn,fid,dstm,&minrate,&maxrate))
+        for (j = 0; j < nd1; j++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
         {
             char dirName1[80];
-            hid_t grp2 = nd2 ? create_group(grp1, j, 2, doread, estlink, maxlink1, dirName, dirName1, &dircnt) : 0;
+            hid_t grp2 = nd2 ? do_group(grp1, j, 2, doread, estlink, maxlink1, dirName, dirName1, &dircnt) : -1;
 
-            for (k = 0; k < nd2; k++, progress(n++,totn,fid,dstm,&minrate,&maxrate))
+            for (k = 0; k < nd2; k++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
             {
                 char dirName2[120];
-                hid_t grp3 = nd3 ? create_group(grp2, k, 3, doread, estlink, maxlink2, dirName1, dirName2, &dircnt) : 0;
+                hid_t grp3 = nd3 ? do_group(grp2, k, 3, doread, estlink, maxlink2, dirName1, dirName2, &dircnt) : -1;
 
-                for (l = 0; l < nd3; l++, progress(n++,totn,fid,dstm,&minrate,&maxrate))
+                for (l = 0; l < nd3; l++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
                 {
-                    create_dataset(l, grp3, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                    do_dataset(l, grp3, doread, contig, dsize, zip, noise, &dscnt, &dstm);
                     if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                     if (gc && !(n%gc)) H5garbage_collect();
                     if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
                 }
 
                 if (!nd3)
-                    create_dataset(k, grp2, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                    do_dataset(k, grp2, doread, contig, dsize, zip, noise, &dscnt, &dstm);
 
+#if HDF5_VERSION_GE(1,8,3)
                 if (H5Iis_valid(grp3) > 0) H5Gclose(grp3);
+#else
+                if (grp3 > 0) H5Gclose(grp3);
+#endif
                 if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                 if (gc && !(n%gc)) H5garbage_collect();
                 if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
             }
 
             if (!nd2)
-                create_dataset(j, grp1, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                do_dataset(j, grp1, doread, contig, dsize, zip, noise, &dscnt, &dstm);
 
+#if HDF5_VERSION_GE(1,8,3)
             if (H5Iis_valid(grp2) > 0) H5Gclose(grp2);
+#else
+            if (grp2 > 0) H5Gclose(grp2);
+#endif
             if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
             if (gc && !(n%gc)) H5garbage_collect();
             if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
         }
 
         if (!nd1)
-            create_dataset(i, fid, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+            do_dataset(i, fid, doread, contig, dsize, zip, noise, &dscnt, &dstm);
 
+#if HDF5_VERSION_GE(1,8,3)
         if (H5Iis_valid(grp1) > 0) H5Gclose(grp1);
+#else
+        if (grp1 > 0) H5Gclose(grp1);
+#endif
         if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
         if (gc && !(n%gc)) H5garbage_collect();
         if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
 
     }
-    create_dataset(-1, fid, doread, contig, dsize, zip, noise, &dscnt, &dstm); /* free static buffer in this func */
+
+    /* This last call just frees static buffer(s) in this func */
+    do_dataset(-1, fid, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+
 #if HDF5_VERSION_GE(1,6,4)
     printf("Upon close, number of open objects is %d\n", (int) H5Fget_obj_count(fid, H5F_OBJ_ALL));
 #endif
     if (flush) H5Fflush(fid, H5F_SCOPE_GLOBAL);
     if (gc) H5garbage_collect();
     if (!dontae)
+    {
         H5Fclose(fid);
+        H5close();
+    }
 
+    /* Output some information about the performance */
     {
     double t1 = GetTime();
     struct stat sbuf;
@@ -594,10 +692,34 @@ int main(int argc, char **argv)
     unsigned long long all_bytes = sbuf.st_size;
     unsigned long long raw_bytes = dscnt*dsize*sizeof(double);
     unsigned long long other_bytes = all_bytes - raw_bytes;
+    unsigned long long vmhwm = 0;
+    unsigned long long mypid = getpid();
     double raw_percent = 100 * (double) raw_bytes / (double) all_bytes;
     double other_percent = 100 - raw_percent; 
+    char procCmd[256];
+    FILE *procStats;
 
-    printf("Total time = %8.4f seconds, dataset write time = %8.4f, other time = %8.4f (%4.2f %% of tot) seconds\n",
+    /* Attempt to get some memory info from the system */
+    snprintf(procCmd, sizeof(procCmd), "grep VmHWM /proc/%llu/status", mypid);
+    procStats = popen(procCmd, "r");
+    if (procStats)
+    {
+        char linbuf[256];
+        while (fgets(linbuf, sizeof(linbuf), procStats))
+        {
+            char valbuf[32], unitsbuf[32];
+            if (sscanf(linbuf, "VmHWM: %s %s", valbuf, unitsbuf) == 2)
+            {
+                vmhwm = strtol(valbuf,0,10);
+                vmhwm *= 1024; /* units are in KiB *always* */
+                break;
+            }
+        }
+        pclose(procStats);
+    }
+
+    printf("Virtual memory high water mark (VmWHM) was %llu bytes\n", vmhwm);
+    printf("Total time = %8.4f seconds, dataset time = %8.4f, other time = %8.4f (%4.2f %% of tot) seconds\n",
         totsecs, dstm, mdsecs, mdsecs/totsecs*100);
     printf("Total objects = %d: %d dirs, %d datasets (%4.2f %% of tot)\n",
         n, dircnt, dscnt, dscnt*100.0/n);
