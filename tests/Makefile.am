@@ -319,6 +319,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_majorder_SOURCES = dummy.cxx
  nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
  nodist_EXTRA_json_SOURCES = dummy.cxx
+ nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
 endif
 
 

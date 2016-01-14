@@ -730,6 +730,7 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_testall_SOURCES) testall.c \
 	$(testallf77_SOURCES) $(nodist_EXTRA_testallf77_SOURCES) \
 	$(nodist_EXTRA_testfs_SOURCES) testfs.c $(testhdf5_SOURCES) \
+	$(nodist_EXTRA_testhdf5_SOURCES) \
 	$(nodist_EXTRA_testpdb_SOURCES) testpdb.c \
 	$(nodist_EXTRA_twohex_SOURCES) twohex.c \
 	$(nodist_EXTRA_ucd_SOURCES) ucd.c \
@@ -1143,6 +1144,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_majorder_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_json_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -1411,7 +1413,7 @@ testfs$(EXEEXT): $(testfs_OBJECTS) $(testfs_DEPENDENCIES)
 	$(CXXLINK) $(testfs_OBJECTS) $(testfs_LDADD) $(LIBS)
 testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES) 
 	@rm -f testhdf5$(EXEEXT)
-	$(LINK) $(testhdf5_OBJECTS) $(testhdf5_LDADD) $(LIBS)
+	$(CXXLINK) $(testhdf5_OBJECTS) $(testhdf5_LDADD) $(LIBS)
 testpdb$(EXEEXT): $(testpdb_OBJECTS) $(testpdb_DEPENDENCIES) 
 	@rm -f testpdb$(EXEEXT)
 	$(CXXLINK) $(testpdb_OBJECTS) $(testpdb_LDADD) $(LIBS)

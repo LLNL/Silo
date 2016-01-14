@@ -50,9 +50,11 @@ National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
 #define H5_USE_16_API
-#include <math.h>
-
 #include <hdf5.h>
+
+#include <libgen.h>
+#include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -202,7 +204,7 @@ static void create_dataset(int idx, hid_t grp, int doread, int contig, int dsize
             H5Dread(double_ds_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
             if (doread > 1)
             {
-                if (memcmp(rbuf, dbuf, dsize*sizeof(double)) != 0)
+                if (memcmp(rbuf, noise?&dbuf[random()%dsize]:dbuf, dsize*sizeof(double)) != 0)
                 {
                     char dirname[512];
                     H5Iget_name(grp, dirname, sizeof(dirname));
@@ -402,10 +404,12 @@ int main(int argc, char **argv)
     int noise=0;
     int doread=0;
     double minrate = 0, maxrate = 0;
-    double dstm = 0;
+    double t0, dstm = 0;
     hid_t fcprops, faprops;
     hid_t fid;
+    unsigned h5majno=-1, h5minno=-1, h5patno=-1;
 
+    setbuf(stdout, 0);
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "nd=", 3)) {
             char *p = argv[i], *q;
@@ -452,7 +456,8 @@ int main(int argc, char **argv)
         } else if (!strncmp(argv[i], "doread=", 7)) {
             doread = (int) strtol(argv[i]+7,0,10);
         } else if (argv[i][0] != '\0') {
-            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+            fprintf(stderr, "%s: unknown argument `%s'\n", argv[0], argv[i]);
+            exit(-1);
         }
     }
 
@@ -466,7 +471,12 @@ int main(int argc, char **argv)
     maxlink2 = nd2>65535?65535:nd2;
 
     printf("Creates a 1, 2, or 3 level dir hierarchy with datasets at the bottom\n");
-    printf("Test parameters...\n");
+    H5get_libversion(&h5majno, &h5minno, &h5patno);
+    printf("HDF5 Library version = %u.%u.%u\n", h5majno, h5minno, h5patno);
+    printf("Command-line...\n    ");
+    for (i=0; i<argc; i++)
+        printf("%s ", i==0?basename(argv[i]):argv[i]);
+    printf("\nTest parameters...\n");
     PRINT_VAL(doread, do a read instead of a write test);
     PRINT_VAL(nd0, level 0 dir|dataset count);
     PRINT_VAL(nd1, level 1 dir|dataset count);
@@ -514,7 +524,7 @@ int main(int argc, char **argv)
     }
 
     /* main loop */
-    double t0 = GetTime();
+    t0 = GetTime();
     for (i = 0; i < nd0; i++, progress(n++,totn,fid,dstm,&minrate,&maxrate))
     {
         char dirName[40];
