@@ -49,7 +49,6 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
-#define H5_USE_16_API
 #include <hdf5.h>
 
 #include <libgen.h>
@@ -256,7 +255,11 @@ static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
     }
     else
     {
+#if HDF5_VERSION_GE(1,8,0)
+        double_ds_id = H5Dcreate(grp, dsname, H5T_NATIVE_DOUBLE, double_space_id, H5P_DEFAULT, dcprops, H5P_DEFAULT);
+#else
         double_ds_id = H5Dcreate(grp, dsname, H5T_NATIVE_DOUBLE, double_space_id, dcprops);
+#endif
         H5Sclose(double_space_id);
         H5Pclose(dcprops);
         t0 = GetTime();
@@ -411,7 +414,7 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
         if ((GetTime() - t0) > tlim*60)
         {
             fprintf(stderr, "Time limit of %d minutes exceeded\n", tlim);
-            exit(1);
+            exit(2);
         }
     }
 
@@ -718,12 +721,12 @@ int main(int argc, char **argv)
         pclose(procStats);
     }
 
-    printf("Virtual memory high water mark (VmWHM) was %llu bytes\n", vmhwm);
+    printf("Virtual memory high water mark (VmHWM) was %llu bytes\n", vmhwm);
     printf("Total time = %8.4f seconds, dataset time = %8.4f, other time = %8.4f (%4.2f %% of tot) seconds\n",
         totsecs, dstm, mdsecs, mdsecs/totsecs*100);
     printf("Total objects = %d: %d dirs, %d datasets (%4.2f %% of tot)\n",
         n, dircnt, dscnt, dscnt*100.0/n);
-    printf("Object creation rate = %8.4f objs/sec, min=%8.4f, max=%8.4f, skew = %4.2f\n",
+    printf("Object operation rate = %8.4f objs/sec, min=%8.4f, max=%8.4f, skew = %4.2f\n",
         n/mdsecs, minrate, maxrate, maxrate/minrate);
     if (zip && other_bytes > all_bytes)
     {
@@ -738,5 +741,5 @@ int main(int argc, char **argv)
     }
     }
     }
-
+    return 0;
 }
