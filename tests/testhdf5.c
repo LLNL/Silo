@@ -223,7 +223,7 @@ static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
 #endif
         {
             H5Dread(double_ds_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
-            if (doread > 1)
+            if (doread == 2)
             {
                 if (memcmp(rbuf, noise?&dbuf[random()%dsize]:dbuf, dsize*sizeof(double)) != 0)
                 {
@@ -236,7 +236,7 @@ static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
                 }
             }
         }
-        else if (doread > 1)
+        else if (doread == 2)
         {
             char dirname[512];
             snprintf(dirname, sizeof(dirname), "unknown");
@@ -429,7 +429,7 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
         dt = t-lastt-(dstm-lastdstm);
         rate = dn/dt;
 
-        printf("%3d%% complete, dt=%f secs, rate = %f objs/sec", 100*n/totn, dt, rate);
+        printf("%3d%% complete, meta-time=%f secs, rate = %f objs/sec", 100*n/totn, dt, rate);
 #if HDF5_VERSION_GE(1,6,4)
         printf(", number of open objects is %d\n", (int) H5Fget_obj_count(fid, H5F_OBJ_ALL));
 #else
@@ -445,6 +445,18 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
         lastn = n;
         lastt = t;
         lastdstm = dstm;
+    }
+}
+
+static void randomize_map(int *map, int n)
+{
+    int i, j;
+    for (i = 0; i < n/2; i++)
+    {
+        int tmp = map[i];
+        j = n/2 + random() % (n/2);
+        map[i] = map[j];
+        map[j] = tmp;
     }
 }
 
@@ -484,6 +496,7 @@ int main(int argc, char **argv)
     hid_t fid;
     unsigned h5majno=-1, h5minno=-1, h5patno=-1;
     int tlim = 20;
+    int *maps[4] = {0, 0, 0, 0};
 
     setvbuf(stdout, 0, _IOLBF, 0);
     for (i=1; i<argc; i++) {
@@ -551,29 +564,29 @@ int main(int argc, char **argv)
 #endif
 
     printf("Creates a 1, 2, or 3 level dir hierarchy with datasets at the bottom\n");
-    H5get_libversion(&h5majno, &h5minno, &h5patno);
-    printf("HDF5 Library version = %u.%u.%u\n", h5majno, h5minno, h5patno);
     printf("Command-line...\n    ");
     for (i=0; i<argc; i++)
         printf("%s ", i==0?basename(argv[i]):argv[i]);
     printf("\nTest parameters...\n");
-    PRINT_VAL(doread, do a read instead of a write test);
+    H5get_libversion(&h5majno, &h5minno, &h5patno);
+    printf("    HDF5 Library version = %u.%u.%u\n", h5majno, h5minno, h5patno);
+    PRINT_VAL(compat, turn on earliest libver compatability);
+    PRINT_VAL(doread, =1(read)|=2(&verify)|=3(rev)|=4(rand));
+    PRINT_VAL(estlink, turn on link count estimation);
+    PRINT_VAL(maxlink, computed value);
+    PRINT_VAL(maxlink1, computed value);
+    PRINT_VAL(maxlink2, computed value);
     PRINT_VAL(nd0, level 0 dir|dataset count);
     PRINT_VAL(nd1, level 1 dir|dataset count);
     PRINT_VAL(nd2, level 2 dir|dataset count);
     PRINT_VAL(nd3, level 3 dataset count);
     PRINT_VAL(dsize, dataset size in # doubles);
-    PRINT_VAL(estlink, turn on link count estimation);
-    PRINT_VAL(maxlink, computed value);
-    PRINT_VAL(maxlink1, computed value);
-    PRINT_VAL(maxlink2, computed value);
-    PRINT_VAL(compat, turn on earliest libver compatability);
+    PRINT_VAL(contig, turn on contiguous datasets);
     PRINT_VAL(zip, turn on dataset compression);
     PRINT_VAL(noise, turn on dataset value randomizing);
-    PRINT_VAL(gc, call garbabe collect after every <gc> objects);
-    PRINT_VAL(flush, call flush after every <flush> objects);
-    PRINT_VAL(closef, close and re-open file after every <closef> objects);
-    PRINT_VAL(contig, turn on contiguous datasets);
+    PRINT_VAL(gc, call garbabe collect every <gc> objects);
+    PRINT_VAL(flush, call flush every <flush> objects);
+    PRINT_VAL(closef, close/re-open file every <closef> objects);
     PRINT_VAL(dontae, do not atexit|close (helps with valgrind));
     PRINT_VAL(cache, set cache object (<=1.6.4) or byte (>1.6.4) count);
     PRINT_VAL(freelim, set free list limits to 1<<(<freelim>));
@@ -605,33 +618,58 @@ int main(int argc, char **argv)
         H5Glink(fid, H5G_LINK_SOFT, "/", "..");
     }
 
+    maps[0] = (int *) malloc(nd0 * sizeof(int));
+    for (i = 0; i < nd0; maps[0][i] = i, i++);
+    maps[1] = (int *) malloc(nd1 * sizeof(int));
+    for (i = 0; i < nd1; maps[1][i] = i, i++);
+    maps[2] = (int *) malloc(nd2 * sizeof(int));
+    for (i = 0; i < nd2; maps[2][i] = i, i++);
+    maps[3] = (int *) malloc(nd3 * sizeof(int));
+    for (i = 0; i < nd3; maps[3][i] = i, i++);
+
+    if (doread == 3) /* read in reverse order of create */
+    {
+        for (i = 0; i < nd0; maps[0][nd0-1-i] = i, i++);
+        for (i = 0; i < nd1; maps[1][nd1-1-i] = i, i++);
+        for (i = 0; i < nd2; maps[2][nd2-1-i] = i, i++);
+        for (i = 0; i < nd3; maps[3][nd3-1-i] = i, i++);
+    }
+    else if (doread == 4) /* read in random order */
+    {
+        srandom(0xDeadBeef);
+        randomize_map(maps[0], nd0);
+        randomize_map(maps[1], nd1);
+        randomize_map(maps[2], nd2);
+        randomize_map(maps[3], nd3);
+    }
+
     /* Main loop nested as much as 4 deep to create groups and at the leaves, datasets */
     t0 = GetTime();
     for (i = 0; i < nd0; i++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
     {
         char dirName[40];
-        hid_t grp1 = nd1 ? do_group(fid, i, 1, doread, estlink, maxlink, "/", dirName, &dircnt) : -1;
+        hid_t grp1 = nd1 ? do_group(fid, maps[0][i], 1, doread, estlink, maxlink, "/", dirName, &dircnt) : -1;
 
         for (j = 0; j < nd1; j++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
         {
             char dirName1[80];
-            hid_t grp2 = nd2 ? do_group(grp1, j, 2, doread, estlink, maxlink1, dirName, dirName1, &dircnt) : -1;
+            hid_t grp2 = nd2 ? do_group(grp1, maps[1][j], 2, doread, estlink, maxlink1, dirName, dirName1, &dircnt) : -1;
 
             for (k = 0; k < nd2; k++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
             {
                 char dirName2[120];
-                hid_t grp3 = nd3 ? do_group(grp2, k, 3, doread, estlink, maxlink2, dirName1, dirName2, &dircnt) : -1;
+                hid_t grp3 = nd3 ? do_group(grp2, maps[2][k], 3, doread, estlink, maxlink2, dirName1, dirName2, &dircnt) : -1;
 
                 for (l = 0; l < nd3; l++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
                 {
-                    do_dataset(l, grp3, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                    do_dataset(maps[3][l], grp3, doread, contig, dsize, zip, noise, &dscnt, &dstm);
                     if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                     if (gc && !(n%gc)) H5garbage_collect();
                     if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
                 }
 
                 if (!nd3)
-                    do_dataset(k, grp2, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                    do_dataset(maps[2][k], grp2, doread, contig, dsize, zip, noise, &dscnt, &dstm);
 
 #if HDF5_VERSION_GE(1,8,3)
                 if (H5Iis_valid(grp3) > 0) H5Gclose(grp3);
@@ -644,7 +682,7 @@ int main(int argc, char **argv)
             }
 
             if (!nd2)
-                do_dataset(j, grp1, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                do_dataset(maps[1][j], grp1, doread, contig, dsize, zip, noise, &dscnt, &dstm);
 
 #if HDF5_VERSION_GE(1,8,3)
             if (H5Iis_valid(grp2) > 0) H5Gclose(grp2);
@@ -657,7 +695,7 @@ int main(int argc, char **argv)
         }
 
         if (!nd1)
-            do_dataset(i, fid, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+            do_dataset(maps[0][i], fid, doread, contig, dsize, zip, noise, &dscnt, &dstm);
 
 #if HDF5_VERSION_GE(1,8,3)
         if (H5Iis_valid(grp1) > 0) H5Gclose(grp1);
@@ -683,6 +721,7 @@ int main(int argc, char **argv)
         H5Fclose(fid);
         H5close();
     }
+    for (i = 0; i < 4; free(maps[i]), i++);
 
     /* Output some information about the performance */
     {
