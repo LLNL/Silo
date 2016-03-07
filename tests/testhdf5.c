@@ -58,6 +58,7 @@ product endorsement purposes.
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 /* useful macro for comparing HDF5 versions */
 #define HDF5_VERSION_GE(Maj,Min,Rel)  \
@@ -387,13 +388,50 @@ static hid_t file_access_props(int compat, int cache)
     return retval;
 }
 
-static hid_t reopen_file(hid_t fid, int compat, int cache, char const *filename)
+static hid_t do_file(int n, int closef, int newf,
+    int doread, int estlink, int maxlink, int compat, int cache,
+    char const *filename, hid_t fid)
 {
-    hid_t faprops;
-    H5Fclose(fid);
-    faprops = file_access_props(compat, cache);
-    fid = H5Fopen(filename, H5F_ACC_RDWR, faprops);
-    H5Pclose(faprops);
+    if (newf && !(n%newf))
+    {
+        static int file_cnt = 0;
+
+        hid_t faprops = file_access_props(compat, cache);
+        char filename_base[64];
+        char filename_tmp[128];
+
+        /* get orig filename without extension */
+        strncpy(filename_base, filename, sizeof(filename_base));
+        filename_base[strlen(filename_base)-3] = '\0';
+        snprintf(filename_tmp, sizeof(filename_tmp), "%s_%06d.h5", filename_base, file_cnt);
+
+        H5Fclose(fid);
+
+        if (doread)
+        {
+            fid = H5Fopen(filename_tmp, H5F_ACC_RDWR, faprops);
+        }
+        else
+        {
+            hid_t fcprops = file_create_props(estlink, maxlink);
+            fid = H5Fcreate(filename_tmp, H5F_ACC_TRUNC, fcprops, faprops);
+            H5Pclose(fcprops);
+        }
+
+        file_cnt++;
+        H5Pclose(faprops);
+        return fid;
+    }
+
+    if (closef && !(n%closef))
+    {
+        hid_t faprops = file_access_props(compat, cache);
+        H5Fclose(fid);
+        fid = H5Fopen(filename, H5F_ACC_RDWR, faprops);
+        H5Pclose(faprops);
+        return fid;
+    }
+
     return fid;
 }
 
@@ -403,6 +441,7 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
     static int lastn = 0;
     static double lastt = 0;
     static double lastdstm = 0;
+    static void *lastbrk = 0;
 
     /* make sure we've done at least enough iterations that logic below is ok */
     if (n < 2) return;
@@ -423,13 +462,15 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
     {
         double t = GetTime();
         double rate;
-        double dn, dt;
+        double dn, dt, dbrk;
+        void *currentbrk = sbrk(0);
 
         dn = n-lastn;
         dt = t-lastt-(dstm-lastdstm);
+        dbrk = currentbrk - lastbrk;
         rate = dn/dt;
 
-        printf("%3d%% complete, meta-time=%f secs, rate = %f objs/sec", 100*n/totn, dt, rate);
+        printf("%3d%% complete, meta-time=%f secs, rate = %f objs/sec, dbrk=%f", 100*n/totn, dt, rate, dbrk);
 #if HDF5_VERSION_GE(1,6,4)
         printf(", number of open objects is %d\n", (int) H5Fget_obj_count(fid, H5F_OBJ_ALL));
 #else
@@ -448,13 +489,14 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
     }
 }
 
+/* randomly swap entries in map n times */
 static void randomize_map(int *map, int n)
 {
     int i, j;
-    for (i = 0; i < n/2; i++)
+    for (i = 0; i < n; i++)
     {
         int tmp = map[i];
-        j = n/2 + random() % (n/2);
+        j = random() % n;
         map[i] = map[j];
         map[j] = tmp;
     }
@@ -469,7 +511,7 @@ static void randomize_map(int *map, int n)
 
 int main(int argc, char **argv)
 {
-    char const *filename = "test-hdf5-dirs.h5";
+    char const *filename = "testhdf5.h5";
     int i, j, k, l, n=0, totn;
     int nd0 = 1000;
     int nd1 = 0;
@@ -483,6 +525,7 @@ int main(int argc, char **argv)
     int gc = 0;
     int flush = 0;
     int closef = 0;
+    int newf = 0;
     int cache = 0;
     int dsize = 1;
     int maxlink=0, maxlink1=0, maxlink2=0;
@@ -497,6 +540,7 @@ int main(int argc, char **argv)
     unsigned h5majno=-1, h5minno=-1, h5patno=-1;
     int tlim = 20;
     int *maps[4] = {0, 0, 0, 0};
+    int help = 0;
 
     setvbuf(stdout, 0, _IOLBF, 0);
     for (i=1; i<argc; i++) {
@@ -546,6 +590,10 @@ int main(int argc, char **argv)
             doread = (int) strtol(argv[i]+7,0,10);
         } else if (!strncmp(argv[i], "tlim=", 5)) {
             tlim = (int) strtol(argv[i]+5,0,10);
+        } else if (!strncmp(argv[i], "newf=", 5)) {
+            newf = (int) strtol(argv[i]+5,0,10);
+        } else if (strstr(argv[i], "help")) {
+            help = 1;
         } else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: unknown argument `%s'\n", argv[0], argv[i]);
             exit(1);
@@ -576,7 +624,7 @@ int main(int argc, char **argv)
     PRINT_VAL(maxlink, computed value);
     PRINT_VAL(maxlink1, computed value);
     PRINT_VAL(maxlink2, computed value);
-    PRINT_VAL(nd0, level 0 dir|dataset count);
+    PRINT_VAL(nd0, level 0 dir|dataset|file count);
     PRINT_VAL(nd1, level 1 dir|dataset count);
     PRINT_VAL(nd2, level 2 dir|dataset count);
     PRINT_VAL(nd3, level 3 dataset count);
@@ -585,6 +633,7 @@ int main(int argc, char **argv)
     PRINT_VAL(zip, turn on dataset compression);
     PRINT_VAL(noise, turn on dataset value randomizing);
     PRINT_VAL(gc, call garbabe collect every <gc> objects);
+    PRINT_VAL(newf, start a new file every <newf> objects)
     PRINT_VAL(flush, call flush every <flush> objects);
     PRINT_VAL(closef, close/re-open file every <closef> objects);
     PRINT_VAL(dontae, do not atexit|close (helps with valgrind));
@@ -592,6 +641,16 @@ int main(int argc, char **argv)
     PRINT_VAL(freelim, set free list limits to 1<<(<freelim>));
     PRINT_VAL(tlim, limit test to <tlim> minutes);
     fflush(stdout);
+    if (help) 
+    {
+        printf("Examples...\n");
+        printf("Create 10,000 datasets in a single level dir hierarchy...\n");
+        printf("        ./testhdf5 nd=10000\n");
+        printf("Create 100x100, 2-level dir-hierarchy; total 10,000 contiguous\n");
+        printf("datasets of 100 doubles with earliest lib compatability\n");
+        printf("    ./testhdf5 nd=100,100 dsize=100 contig=1 compat=1\n");
+        exit(1);
+    }
 
     if (dontae)
         H5dont_atexit();
@@ -610,14 +669,20 @@ int main(int argc, char **argv)
     }
     else
     {
+        int ncid;
         faprops = file_access_props(compat, cache);
         fcprops = file_create_props(estlink, maxlink);
         fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcprops, faprops);
+        /*
+        nc_create("netcdf-test.nc", NC_CLASSIC_MODEL, &ncid);
+        nc_close(ncid);
+        */
         H5Pclose(fcprops);
         H5Pclose(faprops);
         H5Glink(fid, H5G_LINK_SOFT, "/", "..");
     }
 
+    /* Setup dataset name/number indexing (identify set) */
     maps[0] = (int *) malloc(nd0 * sizeof(int));
     for (i = 0; i < nd0; maps[0][i] = i, i++);
     maps[1] = (int *) malloc(nd1 * sizeof(int));
@@ -665,7 +730,7 @@ int main(int argc, char **argv)
                     do_dataset(maps[3][l], grp3, doread, contig, dsize, zip, noise, &dscnt, &dstm);
                     if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                     if (gc && !(n%gc)) H5garbage_collect();
-                    if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
+                    do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
                 }
 
                 if (!nd3)
@@ -678,7 +743,7 @@ int main(int argc, char **argv)
 #endif
                 if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                 if (gc && !(n%gc)) H5garbage_collect();
-                if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
+                do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
             }
 
             if (!nd2)
@@ -691,7 +756,7 @@ int main(int argc, char **argv)
 #endif
             if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
             if (gc && !(n%gc)) H5garbage_collect();
-            if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
+            do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
         }
 
         if (!nd1)
@@ -704,8 +769,7 @@ int main(int argc, char **argv)
 #endif
         if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
         if (gc && !(n%gc)) H5garbage_collect();
-        if (closef && !(n%closef)) fid = reopen_file(fid, compat, cache, filename);
-
+        do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
     }
 
     /* This last call just frees static buffer(s) in this func */
