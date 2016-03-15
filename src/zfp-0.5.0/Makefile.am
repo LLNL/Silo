@@ -55,7 +55,7 @@
 noinst_LTLIBRARIES = libsilo_zfp.la
 libsilo_zfp_la_SOURCES = $(FILES)
 
-AM_CPPFLAGS += -O3
+AM_CPPFLAGS = -DUSE_C_STRUCTSPACE
 
 EXTRA_DIST = \
   API \
@@ -77,13 +77,7 @@ noinst_HEADERS = \
   zfp_types.h \
   inline/inline.h \
   template/codec.h \
-  template/template.h
-
-FILES = \
-  bitstream.c \
-  decode.c \
-  encode.c \
-  zfp.c \
+  template/template.h \
   inline/bitstream.c \
   template/codec1.c \
   template/codec2.c \
@@ -100,3 +94,9 @@ FILES = \
   template/encode2.c \
   template/encode3.c \
   template/encode_utils.c
+
+FILES = \
+  main_bitstream.c \
+  main_decode.c \
+  main_encode.c \
+  main_zfp.c

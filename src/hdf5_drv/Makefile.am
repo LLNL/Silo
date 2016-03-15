@@ -65,6 +65,10 @@ if FPZIP_NEEDED
 AM_CPPFLAGS += -I$(srcdir)/../fpzip 
 endif
 
+if ZFP_NEEDED
+AM_CPPFLAGS += -I$(srcdir)/../zfp-0.5.0
+endif
+
 noinst_HEADERS = \
  silo_hdf5_private.h \
  H5FDsilo.h
