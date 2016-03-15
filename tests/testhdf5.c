@@ -364,7 +364,16 @@ static hid_t file_access_props(int compat, int cache)
         /* Acquire a default mdc config struct */
         config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
         H5Pget_mdc_config(retval, &config);
+#define MAINZER_PARAMS 1
+#if MAINZER_PARAMS
+        config.set_initial_size = (hbool_t) 1;
+        config.initial_size = 16 * 1024;
+        config.min_size = 8 * 1024;
+        config.epoch_length = 3000;
+        config.lower_hr_threshold = 0.95;
+#endif
 
+#if 0
         config.set_initial_size = (hbool_t) 1;
         config.initial_size = cache;
         config.min_size = cache;
@@ -372,6 +381,7 @@ static hid_t file_access_props(int compat, int cache)
         config.incr_mode = H5C_incr__off;
         config.flash_incr_mode = H5C_flash_incr__off;
         config.decr_mode = H5C_decr__off;
+#endif
 
 #if 0
         config.incr_mode = H5C_incr__threshold;
@@ -462,15 +472,13 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
     {
         double t = GetTime();
         double rate;
-        double dn, dt, dbrk;
-        void *currentbrk = sbrk(0);
+        double dn, dt;
 
         dn = n-lastn;
         dt = t-lastt-(dstm-lastdstm);
-        dbrk = currentbrk - lastbrk;
         rate = dn/dt;
 
-        printf("%3d%% complete, meta-time=%f secs, rate = %f objs/sec, dbrk=%f", 100*n/totn, dt, rate, dbrk);
+        printf("%3d%% complete, meta-time=%f secs, rate = %f objs/sec", 100*n/totn, dt, rate);
 #if HDF5_VERSION_GE(1,6,4)
         printf(", number of open objects is %d\n", (int) H5Fget_obj_count(fid, H5F_OBJ_ALL));
 #else
