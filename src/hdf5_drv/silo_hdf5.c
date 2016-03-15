@@ -1,5 +1,4 @@
 /*
-                            hsize_t _size = 3;
 Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.

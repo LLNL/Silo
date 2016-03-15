@@ -83,6 +83,10 @@ if FPZIP_NEEDED
 DRIVER_DIRS += fpzip
 DRIVER_LIBS += fpzip/libsilo_fpzip.la
 endif
+if ZFP_NEEDED
+DRIVER_DIRS += zfp-0.5.0
+DRIVER_LIBS += zfp-0.5.0/libsilo_zfp.la
+endif
 SUBDIRS = score pdb silo debug \
 $(DRIVER_DIRS) unknown filters .
 DIST_SUBDIRS = . debug filters hdf5_drv netcdf \
@@ -92,6 +96,9 @@ DIST_SUBDIRS += hzip
 endif
 if FPZIP_NEEDED
 DIST_SUBDIRS += fpzip
+endif
+if ZFP_NEEDED
+DIST_SUBDIRS += zfp-0.5.0
 endif
 MAKESETTINGS = make.settings
 
