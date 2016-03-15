@@ -1651,6 +1651,8 @@ typedef struct DBfile_pub {
     int            Grab;        /*drive has access to low-level interface */
     void          *GrabId;      /*pointer to low-level driver descriptor */
     char          *file_lib_version; /* version of lib file was created with */
+    /* we use pointer to struct here to avoid having to include private type
+       information in the public header file */
     struct SILO_Globals_t *file_scope_globals;
 
     /* Public Methods */

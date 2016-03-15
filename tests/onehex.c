@@ -206,24 +206,6 @@ main(int argc, char *argv[])
 	}
     }
 
-{
-    DBoptlist *drvr_opts = 0;
-    int drvr_id = -1;
-    int block_size = (1<<20);
-    int block_count = 32;
-    int block_driver = DB_H5VFD_SILO;
-
-    MakeDriverOpts(&drvr_opts, &drvr_id);
-    DBAddOption(drvr_opts, DBOPT_H5_VFD, &block_driver);
-    DBAddOption(drvr_opts, DBOPT_H5_SILO_BLOCK_SIZE, &block_size);
-    DBAddOption(drvr_opts, DBOPT_H5_SILO_BLOCK_COUNT, &block_count);
-
-    driver = DB_HDF5_OPTS(drvr_id);
-}
-
-printf("driver = %d\n", driver);
-
-    
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
     printf("Creating test file \"%s\".\n", filename);
     if (append)

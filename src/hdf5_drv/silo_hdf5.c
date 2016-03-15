@@ -5641,9 +5641,9 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     *fidp = fid;
     dbfile->pub.GrabId = (void*) fidp;
     dbfile->fid = fid;
-#if 0
+/*
     *(dbfile->pub.file_scope_globals) = SILO_Globals;
-#endif
+*/
     return db_hdf5_finish_create(dbfile, target, finfo);
 }
 
@@ -14032,7 +14032,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
         mm->block_ns =  (char *)db_hdf5_comprd(dbfile, m.block_ns_name, 1);
         mm->empty_list =  (int *)db_hdf5_comprd(dbfile, m.empty_list, 1);
         mm->empty_cnt = m.empty_cnt;
-        mm->repr_block_idx = m.repr_block_idx;
+        mm->repr_block_idx = m.repr_block_idx - 1;
 
         H5Tclose(o);
         

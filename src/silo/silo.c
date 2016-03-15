@@ -1186,6 +1186,8 @@ db_GetDatatypeID(char const * const dataname)
 
     if (STR_BEGINSWITH(dataname, "integer"))
         size = DB_INT;
+    else if (STR_BEGINSWITH(dataname, "int"))
+        size = DB_INT;
     else if (STR_BEGINSWITH(dataname, "short"))
         size = DB_SHORT;
     else if (STR_BEGINSWITH(dataname, "long_long"))
