@@ -531,6 +531,8 @@ DEF_FUNC(void,zfp_demote_int32_to_uint8,(uint8* oblock, const int32* iblock, uin
 DEF_FUNC(void,zfp_demote_int32_to_int16,(int16* oblock, const int32* iblock, uint dims))
 DEF_FUNC(void,zfp_demote_int32_to_uint16,(uint16* oblock, const int32* iblock, uint dims))
 
+DEF_FUNC(void,zfp_init,(void))
+
 #ifndef INIT_C_STRUCTSPACE
 /* low-level API: encoder -------------------------------------------------- */
 
@@ -627,7 +629,6 @@ DEF_FUNC(uint,zfp_decode_partial_block_strided_double_3,(zfp_stream* stream, dou
 
 #ifdef USE_C_STRUCTSPACE /* } fake a C++-like namespace */
 };
-extern void zfp_init();
 extern struct zfp_structspace zfp;
 #endif
 #undef DEF_FUNC

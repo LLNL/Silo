@@ -740,16 +740,19 @@ zfp_read_header(zfp_stream* zfp, zfp_field* field, uint mask)
 }
 
 #ifdef USE_C_STRUCTSPACE
-#define INIT_C_STRUCTSPACE
-#include "zfp.h"
-
 extern void zfp_init_encode();
 extern void zfp_init_decode();
 
-void zfp_init(void)
+static void zfp_init(void)
 {
+   static int initialized = 0;
+   if (initialized) return;
    zfp_init_encode();
    zfp_init_decode();
+   initialized = 1;
 }
+
+#define INIT_C_STRUCTSPACE
+#include "zfp.h"
 
 #endif

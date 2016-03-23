@@ -136,6 +136,8 @@ main(int argc, char *argv[])
           DBSetCompression("METHOD=GZIP");
        } else if (!strcmp(argv[i], "fpzip")) {
           DBSetCompression("METHOD=FPZIP");
+       } else if (!strcmp(argv[i], "zfp")) {
+          DBSetCompression("METHOD=ZFP RATE=8.5");
        } else if (!strcmp(argv[i], "single")) {
           usefloat = 1;
        } else if (!strcmp(argv[i], "verbose")) {
