@@ -104,6 +104,28 @@ product endorsement purposes.
            of size 50,000 doubles at the bottom.
 */
 
+#ifdef HAVE_GPERFTOOLS
+#include <gperftools/heap-profiler.h>
+static void th5_mem_profiler_dump(int percent_complete)
+{
+    char tmp[256];
+    snprintf(tmp, sizeof(tmp), "%3d%% complete", percent_complete);
+    HeapProfilerDump(tmp);
+}
+static void th5_mem_profiler_start(char const *prefix)
+{
+    HeapProfilerStart(prefix);
+}
+static void th5_mem_profiler_stop()
+{
+    HeapProfilerStop();
+}
+#else
+static void th5_mem_profiler_dump(int percent_complete) {}
+static void th5_mem_profiler_start(char const *prefix) {}
+static void th5_mem_profiler_stop() {}
+#endif
+
 /* returns time in seconds */
 double GetTime()
 {
@@ -486,6 +508,8 @@ static void progress(int n, int totn, hid_t fid, double dstm, double *minr, doub
 #endif
         fflush(stdout);
 
+        th5_mem_profiler_dump(100*n/totn);
+
         if (*minr == 0) *minr = rate;
         if (*maxr == 0) *maxr = rate;
         if (rate < *minr) *minr = rate;
@@ -549,6 +573,8 @@ int main(int argc, char **argv)
     int tlim = 20;
     int *maps[4] = {0, 0, 0, 0};
     int help = 0;
+
+    th5_mem_profiler_start("testhdf5_tcmalloc");
 
     setvbuf(stdout, 0, _IOLBF, 0);
     for (i=1; i<argc; i++) {
@@ -718,6 +744,7 @@ int main(int argc, char **argv)
 
     /* Main loop nested as much as 4 deep to create groups and at the leaves, datasets */
     t0 = GetTime();
+    th5_mem_profiler_dump(0);
     for (i = 0; i < nd0; i++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
     {
         char dirName[40];
@@ -778,6 +805,7 @@ int main(int argc, char **argv)
         if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
         if (gc && !(n%gc)) H5garbage_collect();
         do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
+
     }
 
     /* This last call just frees static buffer(s) in this func */
@@ -794,6 +822,7 @@ int main(int argc, char **argv)
         H5close();
     }
     for (i = 0; i < 4; free(maps[i]), i++);
+    th5_mem_profiler_stop();
 
     /* Output some information about the performance */
     {
