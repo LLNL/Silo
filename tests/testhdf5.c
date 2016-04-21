@@ -153,6 +153,15 @@ double GetTime()
         else                                                
 #endif
 
+#define READ_MDC_STR(HTYPE,MEMNM,CS)       \
+    if (sscanf(line,#MEMNM"="CS,tmp) == 1) \
+    {                                      \
+        strncpy(h5_mdc_config.MEMNM,tmp,   \
+            sizeof(h5_mdc_config.MEMNM));  \
+        had_error = 0;                     \
+        continue;                          \
+    }
+
 #define READ_MDC_PARAM(HTYPE,MEMNM,CS)                  \
     if (sscanf(line,#MEMNM"="CS,tmp) == 1)              \
     {                                                   \
@@ -197,7 +206,7 @@ void th5_set_mdc_config(char *mdc_config_filename,
         READ_MDC_PARAM(hbool_t, rpt_fcn_enabled, "%d");
         READ_MDC_PARAM(hbool_t, open_trace_file, "%d");
         READ_MDC_PARAM(hbool_t, close_trace_file, "%d");
-        /*READ_MDC_PARAM(char *, trace_file_name, "%s");*/
+        READ_MDC_STR(char *, trace_file_name, "%s");
         READ_MDC_PARAM(hbool_t, evictions_enabled, "%d");
         READ_MDC_PARAM(hbool_t, set_initial_size, "%d");
         READ_MDC_PARAM(size_t, initial_size, "%d");
