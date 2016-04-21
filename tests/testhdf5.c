@@ -147,6 +147,100 @@ double GetTime()
     return (t1-t0)/1e+6;
 }
 
+#if 0
+        if (!strcmp(CS,"%s"))                               \
+            h5_mdc_config->MEMNM = (HTYPE) strdup(tmp);     \
+        else                                                
+#endif
+
+#define READ_MDC_PARAM(HTYPE,MEMNM,CS)                  \
+    if (sscanf(line,#MEMNM"="CS,tmp) == 1)              \
+    {                                                   \
+        h5_mdc_config.MEMNM = (HTYPE) *((HTYPE*)tmp);   \
+        had_error = 0;                                  \
+        continue;                                       \
+    }
+
+#define READ_MDC_ENUM(HTYPE,MEMNM,ENUM)    \
+    if (!strcmp(line,#MEMNM"="#ENUM))      \
+    {                                      \
+        h5_mdc_config.MEMNM = ENUM;        \
+        had_error = 0;                     \
+        continue;                          \
+    }
+
+void th5_set_mdc_config(char *mdc_config_filename,
+    H5AC_cache_config_t **h5_mdc_config_ptr)
+{
+    static H5AC_cache_config_t h5_mdc_config;
+    FILE *mdcf = 0;
+    hid_t faprops = H5Pcreate(H5P_FILE_ACCESS);
+    char line[256];
+    unsigned char tmp[256];
+    int had_error = 0;
+
+    h5_mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+    H5Pget_mdc_config(faprops, &h5_mdc_config);
+    H5Pclose(faprops);
+
+    if (strlen(mdc_config_filename) == 0)
+    {
+        *h5_mdc_config_ptr = 0;
+        return;
+    }
+
+    mdcf = fopen(mdc_config_filename, "r");
+    while (!had_error && fgets(line, sizeof(line), mdcf))
+    {
+        line[strcspn(line, "\r\n")] = 0;
+        had_error = 1;
+        READ_MDC_PARAM(hbool_t, rpt_fcn_enabled, "%d");
+        READ_MDC_PARAM(hbool_t, open_trace_file, "%d");
+        READ_MDC_PARAM(hbool_t, close_trace_file, "%d");
+        /*READ_MDC_PARAM(char *, trace_file_name, "%s");*/
+        READ_MDC_PARAM(hbool_t, evictions_enabled, "%d");
+        READ_MDC_PARAM(hbool_t, set_initial_size, "%d");
+        READ_MDC_PARAM(size_t, initial_size, "%d");
+        READ_MDC_PARAM(double, min_clean_fraction, "%lf");
+        READ_MDC_PARAM(size_t, max_size, "%d");
+        READ_MDC_PARAM(size_t, min_size, "%d");
+        READ_MDC_PARAM(int, epoch_length, "%d");
+        READ_MDC_ENUM(enum H5C_cache_incr_mode, incr_mode, H5C_incr__off);
+        READ_MDC_ENUM(enum H5C_cache_incr_mode, incr_mode, H5C_incr__threshold);
+        READ_MDC_PARAM(double, lower_hr_threshold , "%lf");
+        READ_MDC_PARAM(double, increment , "%lf");
+        READ_MDC_PARAM(hbool_t, apply_max_increment, "%d");
+        READ_MDC_PARAM(size_t, max_increment, "%d");
+        READ_MDC_ENUM(enum H5C_cache_flash_incr_mode, flash_incr_mode, H5C_flash_incr__off);
+        READ_MDC_ENUM(enum H5C_cache_flash_incr_mode, flash_incr_mode, H5C_flash_incr__add_space);
+        READ_MDC_PARAM(double, flash_threshold, "%lf");
+        READ_MDC_PARAM(double, flash_multiple, "%lf");
+        READ_MDC_ENUM(enum H5C_cache_decr_mode, decr_mode, H5C_decr__off);
+        READ_MDC_ENUM(enum H5C_cache_decr_mode, decr_mode, H5C_decr__threshold);
+        READ_MDC_ENUM(enum H5C_cache_decr_mode, decr_mode, H5C_decr__age_out);
+        READ_MDC_ENUM(enum H5C_cache_decr_mode, decr_mode, H5C_decr__age_out_with_threshold);
+        READ_MDC_PARAM(double, upper_hr_threshold, "%lf");
+        READ_MDC_PARAM(double, decrement , "%lf");
+        READ_MDC_PARAM(hbool_t, apply_max_decrement, "%d");
+        READ_MDC_PARAM(size_t, max_decrement, "%d");
+        READ_MDC_PARAM(int, epochs_before_eviction, "%d");
+        READ_MDC_PARAM(hbool_t, apply_empty_reserve, "%d");
+        READ_MDC_PARAM(double, empty_reserve, "%lf");
+        READ_MDC_PARAM(int, dirty_bytes_threshold, "%d");
+    }
+
+    if (had_error)
+    {
+        fprintf(stderr, "Error at or near line \"%s\" from mdc_config file \"%s\"\n",
+            line, mdc_config_filename);
+        exit(3);
+    }
+
+    fclose(mdcf);
+    free(mdc_config_filename);
+    *h5_mdc_config_ptr = &h5_mdc_config;
+}
+
 /* Write (or read) a 1D dataset of doubles */
 static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
     int zip, int noise, int *running_count, double *running_time)
@@ -365,7 +459,7 @@ static hid_t file_create_props(int estlink, int maxlink)
 }
 
 
-static hid_t file_access_props(int compat, int cache)
+static hid_t file_access_props(int compat, int cache, H5AC_cache_config_t *mdc_config)
 {
     hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
 
@@ -380,55 +474,21 @@ static hid_t file_access_props(int compat, int cache)
 #if !HDF5_VERSION_GE(1,6,4)
     H5Pset_cache(retval, cache, 1000, 10000, 0.5);
 #elif HDF5_VERSION_GE(1,8,0)
-    {
-        H5AC_cache_config_t config;
-
-        /* Acquire a default mdc config struct */
-        config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-        H5Pget_mdc_config(retval, &config);
-#define MAINZER_PARAMS 1
-#if MAINZER_PARAMS
-        config.set_initial_size = (hbool_t) 1;
-        config.initial_size = 16 * 1024;
-        config.min_size = 8 * 1024;
-        config.epoch_length = 3000;
-        config.lower_hr_threshold = 0.95;
+    if (mdc_config)
+        H5Pset_mdc_config(retval, mdc_config);
 #endif
-
-#if 0
-        config.set_initial_size = (hbool_t) 1;
-        config.initial_size = cache;
-        config.min_size = cache;
-        config.max_size = cache;
-        config.incr_mode = H5C_incr__off;
-        config.flash_incr_mode = H5C_flash_incr__off;
-        config.decr_mode = H5C_decr__off;
-#endif
-
-#if 0
-        config.incr_mode = H5C_incr__threshold;
-        config.lower_hr_threshold = 0.9;
-        config.increment = 2.0;
-        config.decr_mode = H5C_decr__age_out;
-        config.epoch_length = 1000;
-        config.epochs_before_eviction = 2;
-#endif
-        H5Pset_mdc_config(retval, &config);
-    }
-#endif
-
     return retval;
 }
 
 static hid_t do_file(int n, int closef, int newf,
     int doread, int estlink, int maxlink, int compat, int cache,
-    char const *filename, hid_t fid)
+    char const *filename, hid_t fid, H5AC_cache_config_t *mdc_config)
 {
     if (newf && !(n%newf))
     {
         static int file_cnt = 0;
 
-        hid_t faprops = file_access_props(compat, cache);
+        hid_t faprops = file_access_props(compat, cache, mdc_config);
         char filename_base[64];
         char filename_tmp[128];
 
@@ -457,7 +517,7 @@ static hid_t do_file(int n, int closef, int newf,
 
     if (closef && !(n%closef))
     {
-        hid_t faprops = file_access_props(compat, cache);
+        hid_t faprops = file_access_props(compat, cache, mdc_config);
         H5Fclose(fid);
         fid = H5Fopen(filename, H5F_ACC_RDWR, faprops);
         H5Pclose(faprops);
@@ -541,9 +601,17 @@ static void randomize_map(int *map, int n)
     printf("    %s=%d %*s\n",#A,A,60-len,#HELP); \
 }
 
+#define PRINT_STRVAL(A,HELP)                   \
+{                                              \
+    char tmpstr[64];                           \
+    int len = snprintf(tmpstr, sizeof(tmpstr), "%s=%s", #A, A); \
+    printf("    %s=\"%s\" %*s\n",#A,A,60-len-2,#HELP); \
+}
+
 int main(int argc, char **argv)
 {
     char const *filename = "testhdf5.h5";
+    char *mdc_config = "";
     int i, j, k, l, n=0, totn;
     int nd0 = 1000;
     int nd1 = 0;
@@ -573,8 +641,7 @@ int main(int argc, char **argv)
     int tlim = 20;
     int *maps[4] = {0, 0, 0, 0};
     int help = 0;
-
-    th5_mem_profiler_start("testhdf5_tcmalloc");
+    H5AC_cache_config_t *h5_mdc_config_ptr = 0;
 
     setvbuf(stdout, 0, _IOLBF, 0);
     for (i=1; i<argc; i++) {
@@ -626,6 +693,8 @@ int main(int argc, char **argv)
             tlim = (int) strtol(argv[i]+5,0,10);
         } else if (!strncmp(argv[i], "newf=", 5)) {
             newf = (int) strtol(argv[i]+5,0,10);
+        } else if (!strncmp(argv[i], "mdc_config=",11)) {
+            mdc_config = strdup(argv[i]+11);
         } else if (strstr(argv[i], "help")) {
             help = 1;
         } else if (argv[i][0] != '\0') {
@@ -674,6 +743,7 @@ int main(int argc, char **argv)
     PRINT_VAL(cache, set cache object (<=1.6.4) or byte (>1.6.4) count);
     PRINT_VAL(freelim, set free list limits to 1<<(<freelim>));
     PRINT_VAL(tlim, limit test to <tlim> minutes);
+    PRINT_STRVAL(mdc_config, txt file of mdc config params);
     fflush(stdout);
     if (help) 
     {
@@ -686,25 +756,32 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    th5_mem_profiler_start("testhdf5_tcmalloc");
+
+    /* explicitly handle lib initialization */
     if (dontae)
         H5dont_atexit();
     H5open();
+
+    th5_set_mdc_config(mdc_config, &h5_mdc_config_ptr);
+
     if (freelim)
     {
         int val = (1<<freelim);
         H5set_free_list_limits(val, val, val, val, val, val);
     }
 
+
     if (doread)
     {
-        faprops = file_access_props(compat, cache);
+        faprops = file_access_props(compat, cache, h5_mdc_config_ptr);
         fid = H5Fopen(filename, H5F_ACC_RDONLY, faprops);
         H5Pclose(faprops);
     }
     else
     {
         int ncid;
-        faprops = file_access_props(compat, cache);
+        faprops = file_access_props(compat, cache, h5_mdc_config_ptr);
         fcprops = file_create_props(estlink, maxlink);
         fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcprops, faprops);
         /*
@@ -765,7 +842,7 @@ int main(int argc, char **argv)
                     do_dataset(maps[3][l], grp3, doread, contig, dsize, zip, noise, &dscnt, &dstm);
                     if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                     if (gc && !(n%gc)) H5garbage_collect();
-                    do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
+                    do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid, h5_mdc_config_ptr);
                 }
 
                 if (!nd3)
@@ -778,7 +855,7 @@ int main(int argc, char **argv)
 #endif
                 if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                 if (gc && !(n%gc)) H5garbage_collect();
-                do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
+                do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid, h5_mdc_config_ptr);
             }
 
             if (!nd2)
@@ -791,7 +868,7 @@ int main(int argc, char **argv)
 #endif
             if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
             if (gc && !(n%gc)) H5garbage_collect();
-            do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
+            do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid, h5_mdc_config_ptr);
         }
 
         if (!nd1)
@@ -804,7 +881,7 @@ int main(int argc, char **argv)
 #endif
         if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
         if (gc && !(n%gc)) H5garbage_collect();
-        do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid);
+        do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid, h5_mdc_config_ptr);
 
     }
 
