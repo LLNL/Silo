@@ -103,7 +103,7 @@ char		lite_PD_err[MAXLINE];
 int		lite_PD_buffer_size = -1;
 ReaderFuncType	lite_pdb_rd_hook = NULL;
 WriterFuncType	lite_pdb_wr_hook = NULL;
-char           *lite_PD_DEF_CREATM = "w";
+char           *lite_PD_DEF_CREATM = "wx";
 
 #ifdef PDB_WRITE
 static int	_append_flag = FALSE ;
