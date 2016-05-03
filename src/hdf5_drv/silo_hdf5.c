@@ -1736,30 +1736,17 @@ typedef union zfp_cdvals_t_ {
     cd_values[4]: lower 32 bits of zfp 'meta'
     cd_values[5]: upper 32 bits of zfp 'meta'
 */
-#define ZFP_CDVIDX_INFO   0
-#define ZFP_CDVIDX_SIZETH 1
+#define ZFP_CDVIDX_LOINFO 0
+#define ZFP_CDVIDX_HIINFO 1
 #define ZFP_CDVIDX_LOMODE 2
 #define ZFP_CDVIDX_HIMODE 3
 #define ZFP_CDVIDX_LOMETA 4
 #define ZFP_CDVIDX_HIMETA 5
-#define ZFP_CDVAL_ENDIAN_BIG 1
-#define ZFP_CDVAL_ENDIAN_LIT 2
 
 #define ZFP_CDVIDX_MODE   0
 
-#define ZFP_CDVIDX_RATE0 1
-#define ZFP_CDVIDX_RATE1 2
-
-#define ZFP_CDVIDX_PRECISION 1
-
-#define ZFP_CDVIDX_ACCURACY0 1
-#define ZFP_CDVIDX_ACCURACY1 2
-
-#define ZFP_CDVIDX_MINBITS 1
-#define ZFP_CDVIDX_MAXBITS 2
-#define ZFP_CDVIDX_MAXPREC 3
-#define ZFP_CDVIDX_MINEXP 4
-
+#define ZFP_CDVAL_ENDIAN_BIG 1
+#define ZFP_CDVAL_ENDIAN_LIT 2
 #define ZFP_CDVAL_MODE_RATE 1
 #define ZFP_CDVAL_MODE_PRECISION 2
 #define ZFP_CDVAL_MODE_ACCURACY 3
@@ -1792,9 +1779,12 @@ db_hdf5_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     }
 
     /* get current filter cd_values for size threshold */
+#warning FIX THIS BROKEN REFERENCE TO SIZE THRESHOLD
+#if 0
     H5Pget_filter_by_id(dcpl_id, DB_HDF5_ZFP_ID, &flags, &cd_nelmts, cd_values, 0, NULL);
     bytecnt_threshold = cd_values[ZFP_CDVIDX_SIZETH];
     if (nvals*dsize < bytecnt_threshold) return 0;
+#endif
 
     return 1;
 }
@@ -1870,13 +1860,8 @@ db_hdf5_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     zfpbs.stream_close(dummy_bstr);
 
     /* populate cd_values with stuff we don't burden caller of H5Zset_filter with */
-    cd_values[ZFP_CDVIDX_INFO] = (endian<<16) | ZFP_VERSION;
-    cd_values[ZFP_CDVIDX_SIZETH] = 0;
-#warning FIX THIS
-#if 0
-    cd_values[ZFP_CDVIDX_SIZETH] = SILO_Globals.compressionMinsize;
-#endif
-#warning USE MEMCPY OR POINTER ASSIGNMENT TO DO THIS INSTEAD
+    cd_values[ZFP_CDVIDX_LOINFO] = (endian<<16) | ZFP_VERSION;
+    cd_values[ZFP_CDVIDX_HIINFO] = 0x0; /* unused */
     cd_values[ZFP_CDVIDX_LOMODE] = (unsigned int) (      zfp_mode & 0x00000000FFFFFFFF);
     cd_values[ZFP_CDVIDX_HIMODE] = (unsigned int) ((zfp_mode>>32) & 0x00000000FFFFFFFF);
     cd_values[ZFP_CDVIDX_LOMETA] = (unsigned int) (      zfp_meta & 0x00000000FFFFFFFF);
@@ -1897,10 +1882,10 @@ db_hdf5_zfp_filter_op(unsigned int flags, size_t cd_nelmts,
 #warning WHAT ABOUT ENDIANNESS HERE
     uint64 lomode = cd_values[ZFP_CDVIDX_LOMODE];
     uint64 himode = cd_values[ZFP_CDVIDX_HIMODE];
-    uint64 zfp_mode = ((himode<<32)&0xFFFFFFFF00000000) | lomode;
+    uint64 zfp_mode = ((himode<<32) & 0xFFFFFFFF00000000) | lomode & 0x00000000FFFFFFFF;
     uint64 lometa = cd_values[ZFP_CDVIDX_LOMETA];
     uint64 himeta = cd_values[ZFP_CDVIDX_HIMETA];
-    uint64 zfp_meta = ((himeta<<32)&0xFFFFFFFF00000000) | lometa;
+    uint64 zfp_meta = ((himeta<<32) & 0xFFFFFFFF00000000) | lometa & 0x00000000FFFFFFFF;
 
     if (flags & H5Z_FLAG_REVERSE) /* decompression */
     {
@@ -1970,7 +1955,10 @@ db_hdf5_zfp_filter_op(unsigned int flags, size_t cd_nelmts,
         zfpbs.stream_close(bstr);
 
         if (zsize == 0)
+        {
+            free(newbuf);
             return 0;
+        }
 
         free(*buf);
         *buf = newbuf;
