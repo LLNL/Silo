@@ -51,6 +51,7 @@ product endorsement purposes.
 */
 #include <hdf5.h>
 
+#include <errno.h>
 #include <libgen.h>
 #include <math.h>
 #include <stdio.h>
@@ -147,35 +148,29 @@ double GetTime()
     return (t1-t0)/1e+6;
 }
 
-#if 0
-        if (!strcmp(CS,"%s"))                               \
-            h5_mdc_config->MEMNM = (HTYPE) strdup(tmp);     \
-        else                                                
-#endif
-
-#define READ_MDC_STR(HTYPE,MEMNM,CS)       \
-    if (sscanf(line,#MEMNM"="CS,tmp) == 1) \
-    {                                      \
-        strncpy(h5_mdc_config.MEMNM,tmp,   \
-            sizeof(h5_mdc_config.MEMNM));  \
-        had_error = 0;                     \
-        continue;                          \
+#define READ_MDC_STR(HTYPE,MEMNM,CS)                 \
+    if (sscanf(line,#MEMNM"="CS,tmp) == 1 && !errno) \
+    {                                                \
+        strncpy(h5_mdc_config.MEMNM,tmp,             \
+            sizeof(h5_mdc_config.MEMNM));            \
+        had_error = 0;                               \
+        continue;                                    \
     }
 
-#define READ_MDC_PARAM(HTYPE,MEMNM,CS)                  \
-    if (sscanf(line,#MEMNM"="CS,tmp) == 1)              \
-    {                                                   \
-        h5_mdc_config.MEMNM = (HTYPE) *((HTYPE*)tmp);   \
-        had_error = 0;                                  \
-        continue;                                       \
+#define READ_MDC_PARAM(HTYPE,MEMNM,CS)               \
+    if (sscanf(line,#MEMNM"="CS,tmp) == 1 && !errno) \
+    {                                                \
+        h5_mdc_config.MEMNM = (HTYPE) *((HTYPE*)tmp);\
+        had_error = 0;                               \
+        continue;                                    \
     }
 
-#define READ_MDC_ENUM(HTYPE,MEMNM,ENUM)    \
-    if (!strcmp(line,#MEMNM"="#ENUM))      \
-    {                                      \
-        h5_mdc_config.MEMNM = ENUM;        \
-        had_error = 0;                     \
-        continue;                          \
+#define READ_MDC_ENUM(HTYPE,MEMNM,ENUM)         \
+    if (!strcmp(line,#MEMNM"="#ENUM) && !errno) \
+    {                                           \
+        h5_mdc_config.MEMNM = ENUM;             \
+        had_error = 0;                          \
+        continue;                               \
     }
 
 void th5_set_mdc_config(char *mdc_config_filename,
@@ -203,6 +198,7 @@ void th5_set_mdc_config(char *mdc_config_filename,
     {
         line[strcspn(line, "\r\n")] = 0;
         had_error = 1;
+        errno = 0;
         READ_MDC_PARAM(hbool_t, rpt_fcn_enabled, "%d");
         READ_MDC_PARAM(hbool_t, open_trace_file, "%d");
         READ_MDC_PARAM(hbool_t, close_trace_file, "%d");
@@ -236,6 +232,13 @@ void th5_set_mdc_config(char *mdc_config_filename,
         READ_MDC_PARAM(hbool_t, apply_empty_reserve, "%d");
         READ_MDC_PARAM(double, empty_reserve, "%lf");
         READ_MDC_PARAM(int, dirty_bytes_threshold, "%d");
+        if (!errno) /* this logic is broken due to errno resetting */
+        {
+            int errno_tmp = errno;
+            fprintf(stderr, "Error \"%s\" at or near line \"%s\" from mdc_config file \"%s\"\n",
+                strerror(errno_tmp), line, mdc_config_filename);
+            exit(4);
+        }
     }
 
     if (had_error)
