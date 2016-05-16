@@ -485,21 +485,16 @@ DBMakeNamescheme(char const *fmt, ...)
                 if (strncmp(&fmt[i+1],rv->arrnames[k],j-1) == 0)
                     break;
             }
-            if (k == rv->narrefs)
+            if (k < rv->narrefs) /* this ext. array name has already been */
+            {                    /* seen and is being used multiple times. */
+                saved_narrefs--;
+            }
+            else
             {
                 rv->arrnames[k] = STRNDUP(&fmt[i+1], j-1);
                 if (!dbfile)
                 {
                     rv->arrvals[k] = va_arg(ap, void *);
-#if 0
-                    if (rv->arrvals[k] < (void*) 0x0000FFFF)
-                    {
-                        DBFreeNamescheme(rv);
-                        rv = 0;
-                        done = 1;
-                        continue;
-                    }
-#endif
                 }
                 else
                 {

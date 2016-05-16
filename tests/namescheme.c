@@ -84,7 +84,7 @@ else                                                                            
 int main(int argc, char **argv)
 {
     int i;
-    int P[100], U[4];
+    int P[100], U[4], PFS[4] = {0,1,2,3};
     char const * const N[3] = {"red","green","blue"};
     char blockName[1024];
     int driver = DB_PDB;
@@ -371,6 +371,19 @@ int main(int argc, char **argv)
     TEST_GET_NAME(ns, 2, "VOLFRC_2");
     TEST_GET_NAME(ns, 10, "VOLFRC_10");
     TEST_GET_NAME(ns, 2746, "VOLFRC_2746");
+    DBFreeNamescheme(ns);
+
+    /* Test Al Nichol's case of using same external array multiple times */
+    ns = DBMakeNamescheme("|chemA_016_00000%s%.0d|#PFS[(n/4) % 4]?'.':'':|#PFS[(n/4) % 4]", PFS);
+    TEST_GET_NAME(ns, 0, "chemA_016_00000");
+    TEST_GET_NAME(ns, 1, "chemA_016_00000");
+    TEST_GET_NAME(ns, 2, "chemA_016_00000");
+    TEST_GET_NAME(ns, 3, "chemA_016_00000");
+    TEST_GET_NAME(ns, 4, "chemA_016_00000.1");
+    TEST_GET_NAME(ns, 5, "chemA_016_00000.1");
+    TEST_GET_NAME(ns, 8, "chemA_016_00000.2");
+    TEST_GET_NAME(ns, 11, "chemA_016_00000.2");
+    TEST_GET_NAME(ns, 15, "chemA_016_00000.3");
     DBFreeNamescheme(ns);
 
     /* hackish way to cleanup the circular cache used internally */
