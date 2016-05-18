@@ -232,8 +232,6 @@ ${ccmt}cccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 ${ccmt} 
 ${ccmt}      $title include file for Fortan applications.
 ${ccmt} 
-${ccmt}  Programmer:   $user $date
-${ccmt} 
 ${ccmt}  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 ${ccmt}     This file is generated automatically from C header files in the
 ${ccmt}     SILO distribution.  Do not make changes to this file manually,
