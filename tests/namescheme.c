@@ -81,6 +81,22 @@ else                                                                            
     }                                                                                                      \
 }
 
+#define TEST_GET_INDEX(NS,I,IND)                                                                           \
+if (!NS)                                                                                                   \
+{                                                                                                          \
+    fprintf(stderr, "Got NULL namescheme from DBMakeNamescheme at line %d\n", __LINE__);                   \
+    return 1;                                                                                              \
+}                                                                                                          \
+else                                                                                                       \
+{                                                                                                          \
+    if (DBGetIndex(NS, I) != IND)                                                                          \
+    {                                                                                                      \
+        fprintf(stderr, "Namescheme at line %d failed for index %d. Expected %d, got %d\n",                \
+            __LINE__, I, IND, DBGetIndex(NS, I));                                                          \
+        return 1;                                                                                          \
+    }                                                                                                      \
+}
+
 int main(int argc, char **argv)
 {
     int i;
@@ -384,6 +400,15 @@ int main(int argc, char **argv)
     TEST_GET_NAME(ns, 8, "chemA_016_00000.2");
     TEST_GET_NAME(ns, 11, "chemA_016_00000.2");
     TEST_GET_NAME(ns, 15, "chemA_016_00000.3");
+    DBFreeNamescheme(ns);
+
+    /* Test using namescheme as a simple integer mapping */
+    ns = DBMakeNamescheme("|chemA_%04X|n%3");
+    TEST_GET_INDEX(ns, 0, 0);
+    TEST_GET_INDEX(ns, 1, 1);
+    TEST_GET_INDEX(ns, 2, 2);
+    TEST_GET_INDEX(ns, 3, 0);
+    TEST_GET_INDEX(ns, 4, 1);
     DBFreeNamescheme(ns);
 
     /* hackish way to cleanup the circular cache used internally */

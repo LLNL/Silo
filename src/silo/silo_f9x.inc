@@ -2,8 +2,6 @@
 ! 
 !      SILO include file for Fortan applications.
 ! 
-!  Programmer:   miller86 Fri Dec  4 23:25:12 PST 2015
-! 
 !  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !     This file is generated automatically from C header files in the
 !     SILO distribution.  Do not make changes to this file manually,

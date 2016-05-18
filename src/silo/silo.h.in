@@ -2130,6 +2130,7 @@ SILO_API extern DBgroupelmap *         DBGetGroupelmap(DBfile *dbfile, char cons
 SILO_API extern DBmrgvar *             DBGetMrgvar(DBfile *dbfile, char const *name);
 SILO_API extern DBnamescheme *         DBMakeNamescheme(char const *fmt, ...);
 SILO_API extern char const *           DBGetName(DBnamescheme const *ns, int natnum);
+SILO_API int                           DBGetIndex(DBnamescheme const *ns, int natnum);
 
 /* Multi-block objects and parallel I/O */
 SILO_API extern DBmultimesh *          DBGetMultimesh(DBfile *, char const *);
