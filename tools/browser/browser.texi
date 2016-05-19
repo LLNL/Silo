@@ -10,7 +10,7 @@
 @ifinfo
 This file documents the Silo browser.
 
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -81,7 +81,7 @@ Government or Lawrence Livermore National Security, LLC, and shall not
 @author by Robb Matzke
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright @copyright{} (c) 1994-2016, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -161,7 +161,7 @@ files.
 @c ===========================================================================
 @node Copying, Invocation, Top, Top
 @unnumbered Copyright
-Copyright @copyright{} (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright @copyright{} (c) 1994-2016, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
