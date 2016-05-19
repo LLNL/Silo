@@ -107,7 +107,8 @@ main(int argc, char *argv[])
     }
     
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
-    dbfile = DBOpen("multi_ucd3d.pdb", DB_PDB, DB_READ);
+    dbfile = DBOpen("../../multi_ucd3d.pdb", DB_PDB, DB_READ);
+    if (!dbfile) dbfile = DBOpen("multi_ucd3d.pdb", DB_PDB, DB_READ);
 
     /* Example of getting a Silo object from a silo file as a json object */
     jsilo_obj = DBGetJsonObject(dbfile, "mesh1");

@@ -657,7 +657,7 @@ at_help_all="1;testsuite.at:63;version;;
 22;testsuite.at:151;subhex;;
 23;testsuite.at:154;twohex;;
 24;testsuite.at:157;multispec;;
-25;testsuite.at:160;sami;;
+25;testsuite.at:160;newsami;;
 26;testsuite.at:163;specmix;;
 27;testsuite.at:166;spec;;
 28;testsuite.at:169;group_test;;
@@ -2919,11 +2919,11 @@ $at_traceon; }
 at_status=`cat "$at_status_file"`
 #AT_STOP_24
 #AT_START_25
-# 25. testsuite.at:160: sami
+# 25. testsuite.at:160: newsami
 at_setup_line='testsuite.at:160'
 at_func_banner 1
-at_desc="sami"
-$at_quiet $as_echo_n " 25: $at_desc                                           "
+at_desc="newsami"
+$at_quiet $as_echo_n " 25: $at_desc                                        "
 at_xfail=no
 echo "#                             -*- compilation -*-" >> "$at_group_log"
 (
@@ -2931,15 +2931,15 @@ echo "#                             -*- compilation -*-" >> "$at_group_log"
   $at_traceon
 
 { $at_traceoff
-$as_echo "$at_srcdir/testsuite.at:161: \$VALGRIND sami \$STARGS"
+$as_echo "$at_srcdir/testsuite.at:161: \$VALGRIND newsami \$STARGS"
 echo testsuite.at:161 >"$at_check_line_file"
 
 if test -n "$at_traceon" \
-  && at_func_check_newline "$VALGRIND sami $STARGS"; then
-  ( $at_traceon; $VALGRIND sami $STARGS ) >"$at_stdout" 2>"$at_stder1"
+  && at_func_check_newline "$VALGRIND newsami $STARGS"; then
+  ( $at_traceon; $VALGRIND newsami $STARGS ) >"$at_stdout" 2>"$at_stder1"
   at_func_filter_trace $?
 else
-  ( :; $VALGRIND sami $STARGS ) >"$at_stdout" 2>"$at_stderr"
+  ( :; $VALGRIND newsami $STARGS ) >"$at_stdout" 2>"$at_stderr"
 fi
 at_status=$?
 at_failed=false

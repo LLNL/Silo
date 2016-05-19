@@ -157,8 +157,8 @@ AT_CLEANUP
 AT_SETUP(multispec)
 AT_CHECK($VALGRIND multispec $STARGS,,ignore)
 AT_CLEANUP
-AT_SETUP(sami)
-AT_CHECK($VALGRIND sami $STARGS,,ignore,ignore)
+AT_SETUP(newsami)
+AT_CHECK($VALGRIND newsami $STARGS,,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(specmix)
 AT_CHECK($VALGRIND specmix $STARGS,,ignore)
