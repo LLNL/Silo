@@ -1897,6 +1897,7 @@ SILO_API extern int                    DBUngrabDriver(DBfile *, void const *);
 SILO_API extern int                    DBGetDriverType(DBfile const *);
 SILO_API extern int                    DBGetDriverTypeFromPath(char const *);
 SILO_API extern int                    DBVersionGEFileVersion(DBfile const *dbfile);
+SILO_API extern char const *           DBFileName(DBfile const *dbfile);
 SILO_API extern char const *           DBFileVersion(DBfile const *dbfile);
 SILO_API extern int                    DBFileVersionDigits(DBfile const *dbfile, int *Maj, int *Min, int *Pat, int *Pre);
 SILO_API extern int                    DBFileVersionGE(DBfile const *dbfile, int Maj, int Min, int Pat);

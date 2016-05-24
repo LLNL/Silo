@@ -4222,6 +4222,27 @@ DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    DBFileName
+ *
+ * Purpose:     Return the name of the associated file.
+ *
+ * Returns:     ptr to version number
+ *
+ * Programmer:  Mark C. Miller, Tue May 24 12:45:53 PDT 2016
+ *-------------------------------------------------------------------------*/
+PUBLIC char const *
+DBFileName(const DBfile *dbfile)
+{
+    static char name[256];
+    if (dbfile->pub.name)
+        strcpy(name, dbfile->pub.name);
+    else
+        strcpy(name, "unknown");
+    return name;
+
+}
+
+/*-------------------------------------------------------------------------
  * Function:    DBOpen
  *
  * Purpose:     Open a data file.
@@ -4385,8 +4406,10 @@ DBOpenReal(const char *name, int type, int mode)
         i = db_isregistered_file(0, &filestate);
         if (i != -1)
         {
+#if 0
             if (_db_regstatus[i].w != 0 || mode != DB_READ)
                 API_ERROR(name, E_CONCURRENT);
+#endif
         }
 
         if( ( filestate.s.st_mode & S_IFDIR ) != 0 )
@@ -4531,7 +4554,9 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             i = db_isregistered_file(0, &filestate);
             if (i != -1)
             {
+#if 0
                 API_ERROR(name, E_CONCURRENT);
+#endif
             }
         }
 
@@ -5762,8 +5787,11 @@ DBCpDir(DBfile *dbfile, const char *srcDir,
             API_ERROR(NULL, E_NOFILE);
         if (!dstFile)
             API_ERROR(NULL, E_NOFILE);
+#warning FIX ME
+#if 0
         if (db_isregistered_file(dstFile,0)==-1)
             API_ERROR(NULL, E_NOTREG);
+#endif
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR(NULL, E_GRABBED) ; 
         if (!srcDir || !*srcDir)

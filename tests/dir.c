@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 {
     
     int            meshid, diridq, diridu, diridt;
-    int            meshtypes[3], /*mmid,*/ nmesh;
+    int            meshtypes[3], nmesh;
     char          *meshnames[3], original_dir[128];
     DBfile        *dbfile, *dbfile2, *dbfile3, *dbfile4, *dbfile5;
     char          *filename = "dir.pdb";
@@ -117,7 +117,6 @@ int main(int argc, char *argv[])
     
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
-#if 0
     dbfile = DBCreate(filename, 0, DB_LOCAL, "dir test file", driver);
     printf("Creating file: '%s'...\n", filename);
 
@@ -158,11 +157,8 @@ int main(int argc, char *argv[])
     meshnames[2] = "/tri_dir/trimesh";
     nmesh++;
 
-#if 0
     DBSetDir(dbfile, original_dir);
-    mmid = DBPutMultimesh(dbfile, "mmesh", nmesh, meshnames,
-                          meshtypes, NULL);
-#endif
+    DBPutMultimesh(dbfile, "mmesh", nmesh, meshnames, meshtypes, NULL);
 
     DBClose(dbfile);
 
@@ -219,7 +215,6 @@ int main(int argc, char *argv[])
     unlink("dir-test-foo");
     if (dbfile2 != 0)
         exit(EXIT_SUCCESS);
-#endif
 
     /* Test many dirs */
     if (ndirs)
