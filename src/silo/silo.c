@@ -4406,10 +4406,8 @@ DBOpenReal(const char *name, int type, int mode)
         i = db_isregistered_file(0, &filestate);
         if (i != -1)
         {
-#if 0
             if (_db_regstatus[i].w != 0 || mode != DB_READ)
                 API_ERROR(name, E_CONCURRENT);
-#endif
         }
 
         if( ( filestate.s.st_mode & S_IFDIR ) != 0 )
@@ -4554,9 +4552,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             i = db_isregistered_file(0, &filestate);
             if (i != -1)
             {
-#if 0
                 API_ERROR(name, E_CONCURRENT);
-#endif
             }
         }
 
@@ -5787,11 +5783,8 @@ DBCpDir(DBfile *dbfile, const char *srcDir,
             API_ERROR(NULL, E_NOFILE);
         if (!dstFile)
             API_ERROR(NULL, E_NOFILE);
-#warning FIX ME
-#if 0
         if (db_isregistered_file(dstFile,0)==-1)
             API_ERROR(NULL, E_NOTREG);
-#endif
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR(NULL, E_GRABBED) ; 
         if (!srcDir || !*srcDir)
