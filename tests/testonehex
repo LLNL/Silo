@@ -72,14 +72,14 @@ fi
 #
 # Create data with no special features 
 #
-env PYTHONPATH=$topDir/../tools/python/.libs python onehex.py 1>/dev/null 2>&1
+env PYTHONPATH=$topDir/../tools/python/.libs python $topDir/onehex.py 1>/dev/null 2>&1
 $topDir/onehex 1>/dev/null 2>&1
 
 #
 # Now, run browser and make sure we don't get any errors in the diff
 #
 result=0
-$topDir/../tools/browser/browser -R 0.00001 -q -e diff $topDir/onehex.silo $topDir/onehexpy.silo 1>testonehex.out 2>&1
+$topDir/../tools/browser/browser -R 0.00001 -q -e diff onehex.silo onehexpy.silo 1>testonehex.out 2>&1
 if test `grep -v 'appears only in' testonehex.out | wc -l | tr -s ' ' | cut -d' ' -f2` -gt 5; then
     result=1
 fi

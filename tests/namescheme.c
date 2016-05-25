@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -75,8 +75,24 @@ else                                                                            
 {                                                                                                          \
     if (strcmp(DBGetName(NS, I), EXP) != 0)                                                                \
     {                                                                                                      \
-        fprintf(stderr, "Namescheme at line %d failed failed for index %d. Expected \"%s\", got \"%s\"\n", \
+        fprintf(stderr, "Namescheme at line %d failed for index %d. Expected \"%s\", got \"%s\"\n", \
             __LINE__, I, EXP, DBGetName(NS, I));                                                           \
+        return 1;                                                                                          \
+    }                                                                                                      \
+}
+
+#define TEST_GET_INDEX(NS,I,IND)                                                                           \
+if (!NS)                                                                                                   \
+{                                                                                                          \
+    fprintf(stderr, "Got NULL namescheme from DBMakeNamescheme at line %d\n", __LINE__);                   \
+    return 1;                                                                                              \
+}                                                                                                          \
+else                                                                                                       \
+{                                                                                                          \
+    if (DBGetIndex(NS, I) != IND)                                                                          \
+    {                                                                                                      \
+        fprintf(stderr, "Namescheme at line %d failed for index %d. Expected %d, got %d\n",                \
+            __LINE__, I, IND, DBGetIndex(NS, I));                                                          \
         return 1;                                                                                          \
     }                                                                                                      \
 }
@@ -84,7 +100,7 @@ else                                                                            
 int main(int argc, char **argv)
 {
     int i;
-    int P[100], U[4];
+    int P[100], U[4], PFS[4] = {0,1,2,3};
     char const * const N[3] = {"red","green","blue"};
     char blockName[1024];
     int driver = DB_PDB;
@@ -105,6 +121,15 @@ int main(int argc, char **argv)
     }
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
+
+    /* test namescheme with constant componets */
+    {
+        ns = DBMakeNamescheme("foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
+        TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
+        DBFreeNamescheme(ns);
+    }
 
     /* Test a somewhat complex expression */ 
     ns = DBMakeNamescheme("@foo_%+03d@3-((n % 3)*(4+1)+1/2)+1");
@@ -347,17 +372,47 @@ int main(int argc, char **argv)
         DBClose(dbfile);
     }
 
-    /* test namescheme with constant componets */
-    {
-        ns = DBMakeNamescheme("@foo/bar/gorfo_0@");
-        TEST_GET_NAME(ns, 0, "foo/bar/gorfo_0");
-        TEST_GET_NAME(ns, 1, "foo/bar/gorfo_0");
-        TEST_GET_NAME(ns, 122, "foo/bar/gorfo_0");
-        DBFreeNamescheme(ns);
-    }
+    /* Test McCandless' example (new way) */
+    ns = DBMakeNamescheme("@%s@(n/4)?'&myfilename.%d&n/4':'':@");
+    TEST_GET_NAME(ns, 0, "");
+    TEST_GET_NAME(ns, 1, "");
+    TEST_GET_NAME(ns, 4, "myfilename.1");
+    TEST_GET_NAME(ns, 15, "myfilename.3");
+    DBFreeNamescheme(ns);
+
+    /* Text Exodus material volume fraction variable convention */
+    ns = DBMakeNamescheme("@%s@n?'&VOLFRC_%d&n':'VOID_FRC':@");
+    TEST_GET_NAME(ns, 0, "VOID_FRC");
+    TEST_GET_NAME(ns, 1, "VOLFRC_1");
+    TEST_GET_NAME(ns, 2, "VOLFRC_2");
+    TEST_GET_NAME(ns, 10, "VOLFRC_10");
+    TEST_GET_NAME(ns, 2746, "VOLFRC_2746");
+    DBFreeNamescheme(ns);
+
+    /* Test Al Nichol's case of using same external array multiple times */
+    ns = DBMakeNamescheme("|chemA_016_00000%s%.0d|#PFS[(n/4) % 4]?'.':'':|#PFS[(n/4) % 4]", PFS);
+    TEST_GET_NAME(ns, 0, "chemA_016_00000");
+    TEST_GET_NAME(ns, 1, "chemA_016_00000");
+    TEST_GET_NAME(ns, 2, "chemA_016_00000");
+    TEST_GET_NAME(ns, 3, "chemA_016_00000");
+    TEST_GET_NAME(ns, 4, "chemA_016_00000.1");
+    TEST_GET_NAME(ns, 5, "chemA_016_00000.1");
+    TEST_GET_NAME(ns, 8, "chemA_016_00000.2");
+    TEST_GET_NAME(ns, 11, "chemA_016_00000.2");
+    TEST_GET_NAME(ns, 15, "chemA_016_00000.3");
+    DBFreeNamescheme(ns);
+
+    /* Test using namescheme as a simple integer mapping */
+    ns = DBMakeNamescheme("|chemA_%04X|n%3");
+    TEST_GET_INDEX(ns, 0, 0);
+    TEST_GET_INDEX(ns, 1, 1);
+    TEST_GET_INDEX(ns, 2, 2);
+    TEST_GET_INDEX(ns, 3, 0);
+    TEST_GET_INDEX(ns, 4, 1);
+    DBFreeNamescheme(ns);
 
     /* hackish way to cleanup the circular cache used internally */
-    DBGetName(0,0);
+    DBGetName(0,-1);
     
     CleanupDriverStuff();
 
