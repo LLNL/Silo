@@ -1178,6 +1178,8 @@ db_GetDatatypeID(char const * const dataname)
 
     if (STR_BEGINSWITH(dataname, "integer"))
         size = DB_INT;
+    else if (STR_BEGINSWITH(dataname, "int"))
+        size = DB_INT;
     else if (STR_BEGINSWITH(dataname, "short"))
         size = DB_SHORT;
     else if (STR_BEGINSWITH(dataname, "long_long"))
@@ -3894,7 +3896,8 @@ db_parse_version_digits_from_string(char const *str, char sep, int *digits, int 
             *p = '\0';
             nseps++;
         }
-        else if (!strncmp(p, "-pre", 4))
+        else if (!strncmp(p, "-pre", 4) ||
+                 !strncmp(p, "-pos", 4))
         {
             *(p+0) = '\0';
             *(p+1) = '0';
@@ -4112,6 +4115,27 @@ DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
     }
 
     return retval;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBFileName
+ *
+ * Purpose:     Return the name of the associated file.
+ *
+ * Returns:     ptr to version number
+ *
+ * Programmer:  Mark C. Miller, Tue May 24 12:45:53 PDT 2016
+ *-------------------------------------------------------------------------*/
+PUBLIC char const *
+DBFileName(const DBfile *dbfile)
+{
+    static char name[256];
+    if (dbfile->pub.name)
+        strcpy(name, dbfile->pub.name);
+    else
+        strcpy(name, "unknown");
+    return name;
+
 }
 
 /*-------------------------------------------------------------------------
@@ -4539,6 +4563,37 @@ DBClose(DBfile *dbfile)
             free(dbfile->pub.file_lib_version);
         db_unregister_file(dbfile);
         retval = (dbfile->pub.close) (dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    DBFlush
+ *
+ * Purpose:     Flush the specified file contents to disk.
+ *
+ * Return:      Success:        NULL
+ *
+ *              Failure:        NULL
+ *
+ * Programmer:  Mark C. Miller, Fri Nov  6 09:38:05 PST 2015
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBFlush(DBfile *dbfile)
+{
+    int            id;
+    int            retval;
+
+    API_BEGIN2("DBFlush", int, -1, api_dummy) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (NULL == dbfile->pub.flush)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+        retval = (dbfile->pub.flush) (dbfile);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */

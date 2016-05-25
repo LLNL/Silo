@@ -1606,8 +1606,8 @@ typedef struct _DBgroupelmap {
     int fracs_data_type;
 } DBgroupelmap;
 
-#if !defined(DB_MAX_EXPSTRS) /* NO_FORTRAN_DEFINE */
-#define DB_MAX_EXPSTRS 8 /* NO_FORTRAN_DEFINE */
+#if !defined(DB_MAX_EXPNS) /* NO_FORTRAN_DEFINE */
+#define DB_MAX_EXPNS 32 /* NO_FORTRAN_DEFINE */
 #endif
 
 typedef struct _DBnamescheme
@@ -1617,8 +1617,8 @@ typedef struct _DBnamescheme
     int fmtlen;             /* len of first part of fmt */
     int ncspecs;            /* # of conversion specs in first part of fmt */
     char delim;             /* delimiter char used for parts of fmt */
-    int nembed;             /* number of last embedded string encountered (used in eval process) */
-    char *embedstrs[DB_MAX_EXPSTRS]; /* ptrs to copies of embedded strings (used in eval process) */
+    int nembed;             /* number of last embedded namescheme encountered (used in eval process) */
+    struct _DBnamescheme *embedns[DB_MAX_EXPNS]; /* ptrs to copies of embedded nameschemes */
     int arralloc;           /* flag indicating if Silo allocated the arrays or not */
     int narrefs;            /* number of array refs in conversion specs */
     char **arrnames;        /* array names used by array refs */
@@ -1768,6 +1768,7 @@ typedef struct DBfile_pub {
     int            (*free_z)(struct DBfile *, char const *);
     int            (*cpdir)(struct DBfile *, char const *, struct DBfile *, char const *);
     int            (*sort_obo)(struct DBfile *dbfile, int nobjs, char const *const *obj_names, int *ranks);
+    int            (*flush)(struct DBfile *);
 } DBfile_pub;
 
 typedef struct DBfile {
@@ -1855,6 +1856,7 @@ SILO_API extern int                    DBInqFileReal(char const *name);
 #define DBOpen(NM, DR, MD)            (SiloCheckVersion, DBOpenReal(NM, DR, MD))
 #define DBCreate(NM, MD, TG, NF, DR)  (SiloCheckVersion, DBCreateReal(NM, MD, TG, NF, DR))
 #define DBInqFile(NM)                 (SiloCheckVersion, DBInqFileReal(NM))
+SILO_API extern int                    DBFlush(DBfile *);
 SILO_API extern int                    DBClose(DBfile *);
 SILO_API extern DBtoc *                DBGetToc(DBfile *);
 SILO_API extern int                    DBNewToc(DBfile *);
@@ -1863,6 +1865,7 @@ SILO_API extern int                    DBUngrabDriver(DBfile *, void const *);
 SILO_API extern int                    DBGetDriverType(DBfile const *);
 SILO_API extern int                    DBGetDriverTypeFromPath(char const *);
 SILO_API extern int                    DBVersionGEFileVersion(DBfile const *dbfile);
+SILO_API extern char const *           DBFileName(DBfile const *dbfile);
 SILO_API extern char const *           DBFileVersion(DBfile const *dbfile);
 SILO_API extern int                    DBFileVersionDigits(DBfile const *dbfile, int *Maj, int *Min, int *Pat, int *Pre);
 SILO_API extern int                    DBFileVersionGE(DBfile const *dbfile, int Maj, int Min, int Pat);
@@ -1870,6 +1873,7 @@ SILO_API extern int                    DBGetDir(DBfile *, char *);
 SILO_API extern int                    DBSetDir(DBfile *, char const *);
 #define DBMkdir DBMkDir
 SILO_API extern int                    DBMkDir(DBfile *, char const *);
+SILO_API extern int                    DBMkDir2(DBfile *, char const *, DBoptlist *);
 SILO_API extern int                    DBCpDir(DBfile *dbfile, char const *srcDir,
                                            DBfile *dstFile, char const *dstDir);
 SILO_API extern int                    DBGuessHasFriendlyHDF5Names(DBfile *f);
@@ -2091,6 +2095,7 @@ SILO_API extern DBgroupelmap *         DBGetGroupelmap(DBfile *dbfile, char cons
 SILO_API extern DBmrgvar *             DBGetMrgvar(DBfile *dbfile, char const *name);
 SILO_API extern DBnamescheme *         DBMakeNamescheme(char const *fmt, ...);
 SILO_API extern char const *           DBGetName(DBnamescheme const *ns, int natnum);
+SILO_API int                           DBGetIndex(DBnamescheme const *ns, int natnum);
 
 /* Multi-block objects and parallel I/O */
 SILO_API extern DBmultimesh *          DBGetMultimesh(DBfile *, char const *);

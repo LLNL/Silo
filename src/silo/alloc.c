@@ -2109,8 +2109,11 @@ DBFreeNamescheme(DBnamescheme *ns)
     FREE(ns->arrsizes);
     FREE(ns->fmt);
     FREE(ns->fmtptrs);
-    for (i = 0; i < DB_MAX_EXPSTRS; i++)
-        FREE(ns->embedstrs[i]);
+    for (i = 0; i < DB_MAX_EXPNS; i++)
+    {
+        if (ns->embedns[i])
+            DBFreeNamescheme(ns->embedns[i]);
+    }
     for (i = 0; i < ns->ncspecs; i++)
         FREE(ns->exprstrs[i]);
     FREE(ns->exprstrs);
