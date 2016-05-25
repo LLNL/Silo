@@ -435,6 +435,9 @@ build_point(DBfile *dbfile, char *name, int N, int dims)
     FREE(t);
     FREE(itype);
     FREE(litype);
+    FREE(vm1);
+    FREE(vm2);
+    FREE(ghost_labels);
 }
 
 static void
