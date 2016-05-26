@@ -291,6 +291,11 @@ AT_SETUP(compression minratio1000)
 AT_KEYWORDS(compression)
 AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression minratio1000,1,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(compression zfp)
+AT_KEYWORDS(compression)
+AT_CHECK(test ! \( -e ../src/zfp-0.5.0/main_encode.o -o -e ../../../src/zfp-0.5.0/main_encode.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression zfp,,ignore,ignore)
+AT_CHECK(test ! \( -e ../src/zfp-0.5.0/main_encode.o -o -e ../../../src/zfp-0.5.0/main_encode.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,50,ignore,ignore)
+AT_CLEANUP
 AT_SETUP(testhzip)
 AT_KEYWORDS(compression)
 AT_CHECK(test ! \( -e ../src/hzip/hzutil.o -o -e ../../../src/hzip/hzutil.o \) -o -z "$BROWSER" -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND testhzip `pwd`,,ignore,ignore)

@@ -138,6 +138,7 @@ main(int argc, char *argv[])
           DBSetCompression("METHOD=FPZIP");
        } else if (!strcmp(argv[i], "zfp")) {
           DBSetCompression("METHOD=ZFP RATE=8.5");
+          has_loss = 1;
        } else if (!strcmp(argv[i], "single")) {
           usefloat = 1;
        } else if (!strcmp(argv[i], "verbose")) {
@@ -293,6 +294,19 @@ main(int argc, char *argv[])
              fval[i] = (float) fdims[0] * j + i;
              if (fval[i] != frval[i])
              {
+                if (!strcmp(DBGetCompression(), "METHOD=ZFP RATE=8.5"))
+                {
+                    double rel_err = 0;
+                    if (fval[i] != 0) rel_err = (fval[i] - frval[i]) / fval[i];
+                    if (rel_err < 0) rel_err = -rel_err;
+                    if (rel_err > 0.01 && nerrors <= 10)
+                    {
+                        printf("Read error above tolerance \"%s\" at position %04d. "
+                            "Expected %f, got %f, err = %f\n", fval[i], frval[i], rel_err);
+                        if (nerrors == 10) printf("Further errors will be suppressed\n");
+                        nerrors++;
+                    }
+                }
                 if (!has_loss) nerrors++;
                 if (!has_loss && nerrors <= 10) 
                     printf("Read error in \"%s\" at position %04d. Expected %f, got %f\n",
