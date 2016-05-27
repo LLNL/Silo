@@ -646,6 +646,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     int             delta_x, delta_y, delta_z;
     int             empty_blocks[] = {0,1,2,3,4,5,6,7,8,16,47,122,241};
 
+    char            filename[120];
     DBfile         *dbfile;
 
     /* variables related to parallel operation */
@@ -871,7 +872,6 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     {
         char            dirname[80];
         int             filenum;
-        char            filename[120];
 
         int             imin, imax, jmin, jmax, kmin, kmax;
         int             nnx, nny, nnz;
@@ -1306,10 +1306,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         }
         else
         {
-            /* writers need to leave their files open
-               if there are fewer files than ranks */
-            if (nfiles >= comm_size)
-                DBClose(dbfile);
+            DBClose(dbfile);
         }
 
         /* Before starting next iteration of the loop,
@@ -1340,74 +1337,69 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         /* Loop receiving blocks_per_rank blocks from writer_group_size-1 other
            ranks. But do so using Iprobe to first find an available message */
         int blocks_to_do = blocks_per_rank*(writer_group_size-1);
+        dbfile = DBOpen(filename, driver, DB_APPEND);
         DBSetDir(dbfile, "/");
         while (blocks_to_do)
         {
-            for (i = 0; i < blocks_per_rank*(writer_group_size-1); i++)
+            int flag;
+            MPI_Status status;
+
+            MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+
+            if (flag)
             {
-                int block_id_to_probe = my_block_end + i;
-                int src_rank_to_probe = block_id_to_probe / blocks_per_rank;
-                int flag = 0;
-                MPI_Status status;
+                int file_len;
+                int fic_vfd = DB_H5VFD_FIC;
+                int fic_optset;
+                void *file_buf;
+                DBoptlist *file_optlist;
+                DBfile *block_file;
+                char block_dir[64];
+                MPI_Status recv_status;
+                int mpi_err;
 
-                /*MPI_Iprobe(src_rank_to_probe, block_id_to_probe, MPI_COMM_WORLD, &flag, &status);*/
-                MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+                MPI_Get_count(&status, MPI_CHAR, &file_len);
+                file_buf = malloc(file_len);
 
-                if (flag)
+                mpi_err = MPI_Recv(file_buf, file_len, MPI_CHAR,
+                   status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &recv_status);
+                if (mpi_err != MPI_SUCCESS)
                 {
-                    int file_len;
-                    int fic_vfd = DB_H5VFD_FIC;
-                    int fic_optset;
-                    void *file_buf;
-                    DBoptlist *file_optlist;
-                    DBfile *block_file;
-                    char block_dir[64];
-                    MPI_Status recv_status;
-                    int mpi_err;
-
-                    MPI_Get_count(&status, MPI_CHAR, &file_len);
-                    file_buf = malloc(file_len);
-
-                    mpi_err = MPI_Recv(file_buf, file_len, MPI_CHAR,
-                       status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &recv_status);
-                    if (mpi_err != MPI_SUCCESS)
-                    {
-                        int msglen;
-                        char errmsg[MPI_MAX_ERROR_STRING+1]; 
-                        MPI_Error_string(mpi_err, errmsg, &msglen);
-                        fprintf(stderr,"recv failed with error \"%s\"\n", errmsg);
-                        MPI_Abort(MPI_COMM_WORLD, 1);
-                    }
-
-                    /* Set up a file options set to use this buffer as the file */
-                    file_optlist = DBMakeOptlist(10);
-                    DBAddOption(file_optlist, DBOPT_H5_VFD, &fic_vfd);
-                    DBAddOption(file_optlist, DBOPT_H5_FIC_SIZE, &file_len);
-                    DBAddOption(file_optlist, DBOPT_H5_FIC_BUF, file_buf);
-                    fic_optset = DBRegisterFileOptionsSet(file_optlist);
-
-                    /* Ok, now have Silo open this buffer */
-                    snprintf(block_dir, sizeof(block_dir), "block%d", status.MPI_TAG);
-                    block_file = DBOpen(block_dir, DB_HDF5_OPTS(fic_optset), DB_READ);
-
-                    /* Copy the block file's dir into the writer's file */
-                    if (block_file)
-                    {
-                        DBCpDir(block_file, block_dir, dbfile, block_dir);
-                        DBClose(block_file);
-                        blocks_to_do--;
-                    }
-                    else
-                    {
-                        fprintf(stderr,"unable to open core file on rank %d\n", comm_rank);
-                        MPI_Abort(MPI_COMM_WORLD, 1);
-                    }
-
-                    /* free up the file options set */
-                    DBUnregisterFileOptionsSet(fic_optset);
-                    DBFreeOptlist(file_optlist);
-                    break;
+                    int msglen;
+                    char errmsg[MPI_MAX_ERROR_STRING+1]; 
+                    MPI_Error_string(mpi_err, errmsg, &msglen);
+                    fprintf(stderr,"recv failed with error \"%s\"\n", errmsg);
+                    MPI_Abort(MPI_COMM_WORLD, 1);
                 }
+
+                /* Set up a file options set to use this buffer as the file */
+                file_optlist = DBMakeOptlist(10);
+                DBAddOption(file_optlist, DBOPT_H5_VFD, &fic_vfd);
+                DBAddOption(file_optlist, DBOPT_H5_FIC_SIZE, &file_len);
+                DBAddOption(file_optlist, DBOPT_H5_FIC_BUF, file_buf);
+                fic_optset = DBRegisterFileOptionsSet(file_optlist);
+
+                /* Ok, now have Silo open this buffer */
+                snprintf(block_dir, sizeof(block_dir), "block%d", status.MPI_TAG);
+                block_file = DBOpen(block_dir, DB_HDF5_OPTS(fic_optset), DB_READ);
+
+                /* Copy the block file's dir into the writer's file */
+                if (block_file)
+                {
+                    DBCpDir(block_file, block_dir, dbfile, block_dir);
+                    DBClose(block_file);
+                    blocks_to_do--;
+                }
+                else
+                {
+                    fprintf(stderr,"unable to open core file on rank %d\n", comm_rank);
+                    MPI_Abort(MPI_COMM_WORLD, 1);
+                }
+
+                /* free up the file options set */
+                DBUnregisterFileOptionsSet(fic_optset);
+                DBFreeOptlist(file_optlist);
+                /*free(file_buf);*/
             }
             usleep(1000);
         }

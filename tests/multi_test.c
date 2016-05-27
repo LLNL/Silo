@@ -1151,6 +1151,7 @@ main(int argc, char *argv[])
        }
     }
 
+    DBSetCompression(0);
     CleanupDriverStuff();
     return (0);
 }                                      /* main */

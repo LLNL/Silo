@@ -361,6 +361,7 @@ main(int argc, char *argv[])
     free(dval);
     free(drval);
 
+    DBSetCompression(0);
     CleanupDriverStuff();
     return nerrors;
 }

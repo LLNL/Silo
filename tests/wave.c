@@ -97,8 +97,16 @@ main(int argc, char *argv[])
             driver = StringToDriver(argv[i]);
         } else if (!strcmp(argv[i], "hzip")) {
             DBSetCompression("METHOD=HZIP");
+            driver = DB_HDF5;
         } else if (!strcmp(argv[i], "fpzip")) {
             DBSetCompression("METHOD=FPZIP");
+            driver = DB_HDF5;
+        } else if (!strcmp(argv[i], "zfp")) {
+            char msg[256];
+            double rate = strtod(argv[++i],0);
+            snprintf(msg, sizeof(msg), "METHOD=ZFP RATE=%g", rate);
+            DBSetCompression(msg);
+            driver = DB_HDF5;
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
@@ -115,6 +123,7 @@ main(int argc, char *argv[])
         SWriteFile (time, cycle, driver);
     }
 
+    DBSetCompression(0);
     CleanupDriverStuff();
     return 0;
 }
