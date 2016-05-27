@@ -218,11 +218,12 @@ main(int argc, char *argv[])
     build_multi(basename, driver, file_ext, 6, 8, 6, windows_style_slash);
 
     CleanupDriverStuff();
-    return 0;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
+
+    return 0;
 }
 
 /***********************************************************************      
@@ -662,11 +663,12 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
 
 #ifdef HAVE_MPI
     /* Initialize request info for all blocks */
-    struct _sendinfo {MPI_Request req; DBfile* dbfile;} sendinfo[288]; 
+    struct _sendinfo {MPI_Request req; DBfile* dbfile; void *buf;} sendinfo[288]; 
     for (i = 0; i < sizeof(sendinfo)/sizeof(sendinfo[0]); i++)
     {
         sendinfo[i].req = MPI_REQUEST_NULL;
         sendinfo[i].dbfile = 0;
+        sendinfo[i].buf = 0;
     }
 #endif
 
@@ -1302,6 +1304,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
             MPI_Isend(file_buf_ptr, (int) hdf5_file_size, MPI_CHAR, my_writer_rank,
                 block, MPI_COMM_WORLD, &(sendinfo[block].req));
             sendinfo[block].dbfile = dbfile;
+            sendinfo[block].buf = file_buf_ptr;
 #endif
         }
         else
@@ -1324,8 +1327,10 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
             if (flag)
             {
                 DBClose(sendinfo[i].dbfile);
+                free(sendinfo[i].buf);
                 sendinfo[i].req = MPI_REQUEST_NULL;
                 sendinfo[i].dbfile = 0;
+                sendinfo[i].buf = 0;
             }
         }
 #endif
@@ -1387,7 +1392,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
                 if (block_file)
                 {
                     DBCpDir(block_file, block_dir, dbfile, block_dir);
-                    DBClose(block_file);
+                    DBClose(block_file); /* buffer is free'd too */
                     blocks_to_do--;
                 }
                 else
@@ -1399,7 +1404,6 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
                 /* free up the file options set */
                 DBUnregisterFileOptionsSet(fic_optset);
                 DBFreeOptlist(file_optlist);
-                /*free(file_buf);*/
             }
             usleep(1000);
         }
@@ -1421,8 +1425,10 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
                 if (flag)
                 {
                     DBClose(sendinfo[i].dbfile);
+                    free(sendinfo[i].buf);
                     sendinfo[i].req = MPI_REQUEST_NULL;
                     sendinfo[i].dbfile = 0;
+                    sendinfo[i].buf = 0;
                     continue;
                 }
                 done = 0;
