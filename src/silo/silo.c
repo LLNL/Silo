@@ -4226,7 +4226,7 @@ DBFileVersionGE(const DBfile *dbfile, int Maj, int Min, int Pat)
  *
  * Purpose:     Return the name of the associated file.
  *
- * Returns:     ptr to version number
+ * Returns:     ptr to string holding the name of the file or "unknown".
  *
  * Programmer:  Mark C. Miller, Tue May 24 12:45:53 PDT 2016
  *-------------------------------------------------------------------------*/
@@ -4239,7 +4239,41 @@ DBFileName(const DBfile *dbfile)
     else
         strcpy(name, "unknown");
     return name;
+}
 
+/*-------------------------------------------------------------------------
+ * Function:    DBMakeBufinfo / DBFreeBufinfo
+ *
+ * Purpose:     Functions to allocate / free a DBbufinfo object used for
+ *              processing in-memory (core) files.
+ *
+ * Mark C. Miller, Wed Jun 15 13:55:28 PDT 2016
+ *------------------------------------------------------------------------- */
+PUBLIC DBbufinfo *
+DBMakeBufinfo(void *buf, size_t size, size_t max_size, unsigned int flags)
+{
+    DBbufinfo *retval = 0;
+    API_BEGIN("DBMakeBufinfo", DBbufinfo *, NULL) {
+        retval  = malloc(sizeof(DBbufinfo));
+        if (!retval)
+            API_ERROR("DBMakeBufinfo", E_NOMEM);
+        retval->buf = buf;
+        retval->size = size;
+        retval->max_size = max_size;
+        retval->flags = flags;
+        retval->ref_count = 0;
+
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+PUBLIC int
+DBFreeBufinfo(DBbufinfo *binfo)
+{
+    if (!binfo) return -1;
+    free(binfo);
+    return 1;
 }
 
 /*-------------------------------------------------------------------------
@@ -7319,6 +7353,62 @@ DBReadVarSlice(DBfile *dbfile, const char *name, int const *offset, int const *l
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
+/*-------------------------------------------------------------------------
+ * Function:    DBReadVarVals
+ *
+ * Purpose:     Like DBReadVarSlice() except the user can read a specifc
+ *              set of values of the variable.
+ *
+ *              mode can be either DB_PARTIO_POINTS or DB_PARTIO_HSLABS.
+ *
+ *              For DB_PARTIO_POINTS case, the indices array is treated as
+ *              NVALS x NDIMS values, each specifying the logical
+ *              coordinates of a single point in the array. A total of
+ *              NVALS values are returned in the same order as their
+ *              associated logical indices are specified.
+ *
+ *              For DB_PARTIO_HSLABS case, the indices array is treated as
+ *              NVALS x NDIMS x 3. NVALS is the number of hyper slabs.
+ *              NDIMS is the dimensionality of each hyper slab and 3 is
+ *              for a <start,count,stride> 3-tuple for each dimension
+ *              of a hyperslab. The number of returned values is the sum
+ *              of the sizes of the hyperslabs.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer : Mark C. Miller, Sat Jun  4 17:40:23 PDT 2016
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBReadVarVals(DBfile *dbfile, const char *name, int mode, int nvals,
+    int ndims, int const *indices, void **result, int *ncomps, int *nitems)
+{
+    int retval;
+
+    API_BEGIN2("DBReadVarVals", int, -1, name) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBReadVarVals", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("variable name", E_BADARGS);
+        if (nvals <= 0)
+            API_ERROR("nvals", E_BADARGS);
+        if (ndims <= 0)
+            API_ERROR("ndims", E_BADARGS);
+        if (!result)
+            API_ERROR("result pointer", E_BADARGS);
+        if (!dbfile->pub.r_varvals)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.r_varvals) (dbfile, name, mode,
+            nvals, ndims, indices, result, ncomps, nitems);
+
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
 
 /*-------------------------------------------------------------------------
  * Function:    DBGetVarByteLength
@@ -8922,20 +9012,18 @@ DBPutQuadvar1(DBfile *dbfile, const char *vname, const char *mname, void const *
               int const *dims, int ndims, void const *mixvar, int mixlen, int datatype,
               int centering, DBoptlist const *optlist)
 {
-    char const *varnames[1];
+    char const *varnames[1] = {vname};
     void const *vars[1] = {var};
-    void const *mixvars[1] = {var};
+    void const *mixvars[1] = {mixvar};
     int retval;
 
     API_BEGIN2("DBPutQuadvar1", int, -1, vname) {
-        varnames[0] = vname;
-        vars[0] = var;
-        mixvars[0] = mixvar;
 
         retval = DBPutQuadvar(dbfile, vname, mname, 1,
                               varnames, vars, dims, ndims,
                               mixvars, mixlen,
                               datatype, centering, optlist);
+
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -9245,16 +9333,15 @@ DBPutUcdvar1(DBfile *dbfile, const char *vname, const char *mname, void const *v
 {
     void const *vars[1] = {var};
     void const *mixvars[1] = {mixvar};
-    char const *varnames[1];
+    char const *varnames[1] = {vname};
     int            retval;
 
     API_BEGIN2("DBPutUcdvar1", int, -1, vname)
     {
-        varnames[0] = vname;
-        vars[0] = var;
-        mixvars[0] = mixvar;
+
         retval = DBPutUcdvar(dbfile, vname, mname, 1, varnames, vars,
                      nels, mixvars, mixlen, datatype, centering, optlist);
+
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }

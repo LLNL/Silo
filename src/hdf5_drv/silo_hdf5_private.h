@@ -122,6 +122,8 @@ SILO_CALLBACK void *db_hdf5_GetVar(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_ReadVar (DBfile *, char const *, void *);
 SILO_CALLBACK int db_hdf5_ReadVarSlice (DBfile *, char const *, int const *, int const *, int const *,
                                    int, void *);
+SILO_CALLBACK int db_hdf5_ReadVarVals (DBfile *, char const *, int, int, int, int const *, void **, int*, int*);
+
 SILO_CALLBACK int db_hdf5_Write(
     DBfile *dbfile,
     char const *array_name,

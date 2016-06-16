@@ -332,6 +332,11 @@
       integer, parameter :: DBOPT_H5_SILO_USE_DIRECT = 530
       integer, parameter :: DBOPT_H5_FIC_SIZE = 531
       integer, parameter :: DBOPT_H5_FIC_BUF = 532
+      integer, parameter :: DBOPT_H5_CORE_CREAT_BUFINFO = 533
+      integer, parameter :: DBOPT_H5_CORE_OPEN_BUFINFO = 534
+      integer, parameter :: DBOPT_H5_CORE_CLOSE_BUFINFO = 535
+      integer, parameter :: DBOPT_H5_FCPL_HID_T = 536
+      integer, parameter :: DBOPT_H5_FAPL_HID_T = 537
       integer, parameter :: DBOPT_H5_LAST = 599
       integer, parameter :: DB_TOP = 0
       integer, parameter :: DB_NONE = 1
@@ -420,6 +425,8 @@
       integer, parameter :: DB_POSTORDER = 2
       integer, parameter :: DB_FROMCWR = 4
       integer, parameter :: DB_F77NULL = (-99)
+      integer, parameter :: DB_PARTIO_POINTS = 1
+      integer, parameter :: DB_PARTIO_HSLABS = 2
       real (kind=8), parameter :: DB_MISSING_VALUE_NOT_SET = 1.0D+308
       integer, parameter :: DB_ZONETYPE_BEAM = 10
       integer, parameter :: DB_ZONETYPE_POLYGON = 20

@@ -267,6 +267,12 @@ AT_BANNER(HDF5 Driver Specific)
 AT_SETUP(grab)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND grab,,ignore,ignore)
 AT_CLEANUP
+AT_SETUP(onehex with split driver)
+AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex split,,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(onehex with custom fapl/fcpl)
+AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex custom,,ignore,ignore)
+AT_CLEANUP
 AT_SETUP(compression gzip)
 AT_KEYWORDS(compression)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip,,ignore,ignore)

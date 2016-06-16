@@ -1856,6 +1856,7 @@ db_pdb_InitCallbacks ( DBfile *dbfile )
     dbfile->pub.g_var = db_pdb_GetVar;
     dbfile->pub.r_var = db_pdb_ReadVar;
     dbfile->pub.r_varslice = db_pdb_ReadVarSlice;
+    dbfile->pub.r_varvals = db_pdb_ReadVarVals;
 #ifdef PDB_WRITE
     dbfile->pub.write = db_pdb_Write;
     dbfile->pub.writeslice = db_pdb_WriteSlice;
@@ -6626,6 +6627,149 @@ db_pdb_ReadVarSlice (DBfile *_dbfile, char const *vname, int const *offset, int 
       return db_perror("PJ_read_alt", E_CALLFAIL, me);
    }
    return 0;
+}
+
+#define DSNAMES_CASE(OTYPE, FMTSTR) \
+        case OTYPE: \
+        { \
+            PJgroup *group=NULL; \
+            if (!PJ_get_group(pdbfile, name, &group)) \
+            { \
+                PJ_rel_group(group); \
+                return 0; \
+            } \
+            for (pass = 0; pass < 2; pass++) \
+            { \
+                if (pass == 1) \
+                { \
+                    _dsnames = (char **) malloc(n * sizeof(char*)); \
+                    n = 0; \
+                } \
+                for (i=0; i<group->ncomponents; i++) \
+                { \
+                    char tmp[32]; \
+                    snprintf(tmp, sizeof(tmp), FMTSTR, n); \
+                    if (!strcmp(group->comp_names[i], tmp)) \
+                    { \
+                        if (pass == 1) \
+                            _dsnames[n] = _db_safe_strdup(group->pdb_names[i]); \
+                        n++; \
+                    } \
+                } \
+                if (n == 0) \
+                { \
+                    PJ_rel_group(group); \
+                    return 0; \
+                } \
+            } \
+            PJ_rel_group(group); \
+            break; \
+        }
+
+
+PRIVATE int
+db_pdb_get_obj_dsnames(DBfile *_dbfile, char const *name, DBObjectType *otype,
+    int *dscount, char ***dsnames)
+{
+    int i, pass, n = 0;
+    char **_dsnames = 0;
+    static char const *me = "db_pdb_get_obj_dsnames";
+    DBObjectType _otype = db_pdb_InqVarType(_dbfile, name);
+    PDBfile *pdbfile = ((DBfile_pdb *)_dbfile)->pdb;
+#if 0
+curve: xvals yvals
+material: matlist, mix_vf, mix_mat, mix_next, mix_zone
+pointvar _data or %d_data
+meshes: coord%d
+vars: value%d and mixed_value%d
+facelist, zonelist: nodelist+others
+csgzonelist
+mrgtree stuff?
+#endif
+
+    switch (_otype)
+    {
+        DSNAMES_CASE(DB_QUADVAR, "value%d");
+        DSNAMES_CASE(DB_QUADMESH, "coord%d");
+        DSNAMES_CASE(DB_QUADCURV, "coord%d");
+        DSNAMES_CASE(DB_QUADRECT, "coord%d");
+        DSNAMES_CASE(DB_UCDVAR, "value%d");
+        DSNAMES_CASE(DB_UCDMESH, "coord%d");
+    }
+    if (otype) *otype = _otype;
+    if (dscount) *dscount = n;
+    if (dsnames) *dsnames = _dsnames;
+    return 1;
+}
+
+SILO_CALLBACK int
+db_pdb_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
+    int nvals, int ndims, int const *indices, void **result,
+    int *ncomps, int *nitems)
+{
+    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
+    static char const *me = "db_pdb_ReadVarVals";
+    DBObjectType objtype;
+    int dscount = 0;
+    char **dsnames = 0;
+    int db_type, db_type_size;
+    int i, j, k;
+    char *p;
+
+
+    if (db_pdb_get_obj_dsnames(_dbfile, vname, &objtype, &dscount, &dsnames) < 0)
+        return db_perror(vname, E_CALLFAIL, me);
+
+    if (dscount <= 0)
+        return db_perror(vname, E_CALLFAIL, me);;
+
+    db_type = db_pdb_GetVarType(_dbfile, dsnames[0]);
+    if (db_type < 0)
+        return db_perror(vname, E_CALLFAIL, me);
+    db_type_size = db_GetMachDataSize(db_type);
+
+    /* If result space isn't already allocated, allocate it */
+    if (!*result)
+    {
+        *result = malloc(nvals*dscount*db_type_size);
+        if (!*result)
+            return db_perror(vname, E_NOMEM, me);
+    }
+
+    /* Loop to read the equivalent value(s) from each dataset */
+    p = (char *) *result;
+    for (j = 0; j < nvals; j++)
+    {
+        for (i = 0; i < dscount; i++)
+        {
+            if (objtype == DB_QUADRECT) /* really dscount sep. 1D arrays */
+            {
+                long ind[3];
+                ind[0] = indices[j*ndims+i];
+                ind[1] = indices[j*ndims+i];
+                ind[2] = 1;
+                if (!PJ_read_alt(dbfile->pdb, (char*)dsnames[i], p, ind))
+                    return db_perror("PJ_read_alt", E_CALLFAIL, me);
+            }
+            else
+            {
+                long ind[3 * MAXDIMS_VARWRITE];
+                for (k = 0; k < ndims && k < MAXDIMS_VARWRITE; k++)
+                {
+                    ind[3 * k    ] = indices[j*ndims+k];
+                    ind[3 * k + 1] = indices[j*ndims+k];
+                    ind[3 * k + 2] = 1;
+                }
+                if (!PJ_read_alt(dbfile->pdb, (char*)dsnames[i], p, ind))
+                   return db_perror("PJ_read_alt", E_CALLFAIL, me);
+            }
+            p += db_type_size;
+        }
+    }
+    if (ncomps) *ncomps = dscount;
+    if (nitems) *nitems = nvals;
+
+    return 0;
 }
 
 /*-------------------------------------------------------------------------

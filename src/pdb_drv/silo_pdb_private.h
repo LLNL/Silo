@@ -147,12 +147,15 @@ SILO_CALLBACK int db_pdb_InqMeshname (DBfile *, char const *, char *);
 SILO_CALLBACK int db_pdb_InqMeshtype (DBfile *, char const *);
 SILO_CALLBACK int db_pdb_ReadVar (DBfile *, char const *, void *);
 SILO_CALLBACK int db_pdb_ReadVarSlice (DBfile *, char const *, int const *, int const *, int const *, int, void *);
+SILO_CALLBACK int db_pdb_ReadVarVals(DBfile *_dbfile, char const *vname, int mode, int nvals, int ndims, int const *indices, void **result, int *ncomps, int *nitems);
 SILO_CALLBACK int db_pdb_SetDir (DBfile *, char const *);
 SILO_CALLBACK int db_pdb_Filters (DBfile *, FILE *);
 SILO_CALLBACK int db_pdb_NewToc (DBfile *);
 SILO_CALLBACK int db_pdb_GetComponentNames (DBfile *, char const *, char ***, char ***);
 
 SILO_CALLBACK int db_pdb_FreeCompressionResources(DBfile *_dbfile, char const *meshname);
+
+
 
 PRIVATE int db_pdb_getobjinfo (PDBfile *, char const *, char *, int *);
 PRIVATE int db_pdb_getvarinfo (PDBfile *, char const *, char *, int *, int *, int);

@@ -495,8 +495,13 @@ typedef enum {
 #define DBOPT_H5_SILO_BLOCK_COUNT   528
 #define DBOPT_H5_SILO_LOG_STATS     529
 #define DBOPT_H5_SILO_USE_DIRECT    530
-#define DBOPT_H5_FIC_SIZE           531
-#define DBOPT_H5_FIC_BUF            532
+#define DBOPT_H5_FIC_SIZE           531 /* Obsolete. Use CORE_OPEN_BUFINFO. */
+#define DBOPT_H5_FIC_BUF            532 /* Obsolete. Use CORE_OPEN_BUFINFO. */
+#define DBOPT_H5_CORE_CREAT_BUFINFO 533
+#define DBOPT_H5_CORE_OPEN_BUFINFO  534
+#define DBOPT_H5_CORE_CLOSE_BUFINFO 535
+#define DBOPT_H5_FCPL_HID_T         536
+#define DBOPT_H5_FAPL_HID_T         537
 #define DBOPT_H5_LAST               599
 
 /* Error trapping method */
@@ -673,6 +678,10 @@ typedef enum {
 /* Miscellaneous constants */
 #define     DB_F77NULL  (-99)   /*Fortran NULL pointer      */
 #define     DB_F77NULLSTRING  "NULLSTRING"  /* FORTRAN STRING */
+
+/* Mode constants for partial I/O operations */
+#define DB_PARTIO_POINTS 0x1
+#define DB_PARTIO_HSLABS 0x2
 
 /*-------------------------------------------------------------------------
  * Index selection macros
@@ -1633,6 +1642,15 @@ typedef struct _DBnamescheme
     char **exprstrs;        /* expressions to be evaluated for each conv. spec. */
 } DBnamescheme;
 
+typedef struct _DBbufinfo
+{
+    void *buf;
+    size_t size;
+    size_t max_size;
+    unsigned int flags;
+    int ref_count;
+} DBbufinfo;
+
 typedef struct DBfile *___DUMMY_TYPE;  /* Satisfy ANSI scope rules */
 
 /*
@@ -1778,6 +1796,7 @@ typedef struct DBfile_pub {
     int            (*cpdir)(struct DBfile *, char const *, struct DBfile *, char const *);
     int            (*sort_obo)(struct DBfile *dbfile, int nobjs, char const *const *obj_names, int *ranks);
     int            (*flush)(struct DBfile *);
+    int            (*r_varvals)(struct DBfile *, char const *, int, int, int, int const *, void **, int*, int*);
 } DBfile_pub;
 
 typedef struct DBfile {
@@ -1873,6 +1892,9 @@ SILO_API extern int                    DBVariableNameValid(char const *s);
 SILO_API extern int                    DBForceSingle(int);
 
 /* Functions involving files, file structure and file inquiries */
+SILO_API extern DBbufinfo *            DBMakeBufinfo(void *buf, size_t size, size_t max_size,
+                                           unsigned int flags);
+SILO_API extern int                    DBFreeBufinfo(DBbufinfo *binfo);
 SILO_API extern DBfile *               DBOpenReal(char const *name, int dbtype, int mode);
 SILO_API extern DBfile *               DBCreateReal(char const *name, int mode, int targ, char const *info, int dbtype);
 SILO_API extern int                    DBInqFileReal(char const *name);
@@ -2023,6 +2045,8 @@ SILO_API extern int                    DBWriteSlice(DBfile *dbfile, char const *
 SILO_API extern int                    DBRead(DBfile *, char const *, void *);
 SILO_API extern int                    DBReadVar(DBfile *, char const *, void *);
 SILO_API extern int                    DBReadVarSlice(DBfile *, char const *, int const *, int const *, int const *, int, void *);
+SILO_API extern int                    DBReadVarVals(DBfile *, char const *, int mode, int nvals, int ndims,
+                                           int const *indices, void **vals, int *ncomps, int *nitems);
 SILO_API extern DBcompoundarray *      DBGetCompoundarray(DBfile *, char const *);
 SILO_API extern int                    DBInqCompoundarray(DBfile *, char const *, char ***, int **, int *, int *, int *);
 SILO_API extern void *                 DBGetVar(DBfile *, char const *);

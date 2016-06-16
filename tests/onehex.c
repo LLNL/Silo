@@ -55,6 +55,17 @@ product endorsement purposes.
 #include <string.h>
 #include <float.h>
 
+#include <config.h>
+#ifdef HAVE_HDF5_H
+/* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
+   in this file uses version 1.6 of the HDF5 API. This is harmless for
+   versions of HDF5 before 1.8 and ensures correct compilation with
+   version 1.8 and thereafter. When, and if, the HDF5 code in this file
+   is explicitly upgraded to the 1.8 API, this symbol should be removed. */
+#define H5_USE_16_API
+#include <hdf5.h>
+#endif
+
 #define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
 
 #define IND(i,j) i-1][j-1
@@ -136,8 +147,11 @@ main(int argc, char *argv[])
 
     int alloc_inc, vfd, core_vfd;
     char *mext, *rext;
-    int meta_opts_id, raw_opts_id, split_opts_id;
-    DBoptlist *core_opts = 0, *split_opts = 0;
+    int meta_opts_id, raw_opts_id, split_opts_id, custom_opts_id;
+    DBoptlist *core_opts = 0, *split_opts = 0, *custom_opts = 0;
+#ifdef HAVE_HDF5_H
+    hid_t fapl, fcpl;
+#endif
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -199,6 +213,26 @@ main(int argc, char *argv[])
             setinf = 1;
 	} else if (!strcmp(argv[i], "nan")) {
             setnan = 1;
+#ifdef HAVE_HDF5_H
+	} else if (!strcmp(argv[i], "custom")) {
+
+            /* Test passing custom FAPL/FCPL to HDF5 driver by 
+               setting some ridiculous values. Note that this
+               client (onehex) generates a small enough file
+               that '2' for sizes won't cause failures. */
+            fapl = H5Pcreate(H5P_FILE_ACCESS);
+            H5Pset_alignment(fapl, 0, 1024);
+            fcpl = H5Pcreate(H5P_FILE_CREATE);
+            H5Pset_sizes(fcpl, 2, 2);
+
+            custom_opts = DBMakeOptlist(2);
+            DBAddOption(custom_opts, DBOPT_H5_FAPL_HID_T, &fapl);
+            DBAddOption(custom_opts, DBOPT_H5_FCPL_HID_T, &fcpl);
+
+            custom_opts_id = DBRegisterFileOptionsSet(custom_opts); 
+
+            driver = DB_HDF5_OPTS(custom_opts_id);
+#endif
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
@@ -233,7 +267,11 @@ main(int argc, char *argv[])
         DBUnregisterFileOptionsSet(split_opts_id);
         DBFreeOptlist(split_opts);
     }
-
+    if (custom_opts)
+    {
+        DBUnregisterFileOptionsSet(custom_opts_id);
+        DBFreeOptlist(custom_opts);
+    }
 
     x[0] = 0; y[0] = 0; z[0] = 0;
     x[1] = 1; y[1] = 0; z[1] = 0;

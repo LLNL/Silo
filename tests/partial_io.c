@@ -158,9 +158,12 @@ main (int argc, char *argv[]) {
    char		vname[8], mesg[64] ;
    int		driver = DB_PDB;
    char		*filename = "partial.pdb";
+   char		filename2[256];
+   char         varname2[256];
    int          show_all_errors = FALSE;
 
    /* Parse command-line */
+   filename2[0] = '\0';
    for (i=1; i<argc; i++) {
        if (!strncmp(argv[i], "DB_PDB", 6)) {
 	   driver = StringToDriver(argv[i]);
@@ -170,6 +173,14 @@ main (int argc, char *argv[]) {
 	   filename = "partial.h5";
        } else if (!strcmp(argv[i], "show-all-errors")) {
            show_all_errors = 1;
+       } else if (!strcmp(argv[i], "point-query")) {
+           if (i+2 >= argc)
+           {
+	       fprintf(stderr, "%s: missing options to `%s'\n", argv[0], argv[i]);
+               exit(1);
+           }
+           strncpy(filename2, argv[++i], sizeof(filename2));
+           strncpy(varname2, argv[++i], sizeof(filename2));
        } else if (argv[i][0] != '\0') {
 	   fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
        }
@@ -177,8 +188,6 @@ main (int argc, char *argv[]) {
     
    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
    DBForceSingle(1);
-
-
 
    db = DBCreate (filename, 0, DB_LOCAL, "Partial I/O test file", driver);
    dims[0] = NX ;
@@ -364,8 +373,34 @@ main (int argc, char *argv[]) {
       check (mesg, values[i], buf[i], NY) ;
    }
       
-   
    DBClose(db);
+
+   if (strlen(filename2))
+   {
+       int indices[3*10] = {0,0,0,  1,1,1,  2,2,2,  3,3,3,  4,4,4,
+                            5,5,5,  6,6,6,  7,7,7,  8,8,8,  9,9,9};
+       float *vals = 0;
+       int nitems, ncomps;
+
+       db = DBOpen(filename2, driver, DB_READ);
+       if (!db)
+       {
+           fprintf(stderr, "Unable to open input file \"%s\"\n", filename2);
+           exit(1);
+       }
+
+       DBReadVarVals(db, varname2, DB_PARTIO_POINTS, 10, 3, indices, &vals, &ncomps, &nitems);
+       for (i = 0; i < nitems; i++)
+       {
+           printf("val[%d][%d][%d] = ", indices[i*3+0], indices[i*3+1], indices[i*3+2]);
+           for (j = 0; j < ncomps; j++)
+               printf("%f%s", vals[i*ncomps+j], (j<(ncomps-1))?", ":"");
+           printf("\n");
+       }
+ 
+       free(vals);
+       DBClose(db);
+   }
 
    printf ("test passed, but check `%s' anyway with the browser.\n",
 	   filename) ;
