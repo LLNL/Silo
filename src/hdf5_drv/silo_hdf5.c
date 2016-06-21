@@ -5277,7 +5277,8 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         {
 #ifdef H5_HAVE_PARALLEL
             MPI_Info info;
-            if (!MPI_Initialized())
+            int flag = 0;
+            if (MPI_Initialized(&flag) == MPI_SUCCESS && flag)
                 return db_perror("HDF5 MPI VFD -- MPI not initialized", E_CALLFAIL, me);
             MPI_Info_create(&info);
             h5status |= H5Pset_fapl_mpio(retval, MPI_COMM_SELF, info);
@@ -5576,8 +5577,9 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                     MPI_Info mpi_info; 
                     int created_info = 0;
                     hbool_t use_gpfs_hints = TRUE;
+                    int flag = 0;
 
-                    if (!MPI_Initialized())
+                    if (MPI_Initialized(&flag) == MPI_SUCCESS && flag)
                         return db_perror("HDF5 MPI VFD -- MPI not initialized", E_CALLFAIL, me);
 
                     /* get the communicator */
