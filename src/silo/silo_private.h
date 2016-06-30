@@ -940,5 +940,6 @@ INTERNAL const int *db_get_used_file_options_sets_ids();
 #define strdup(s) _db_safe_strdup(s)
 
 INTERNAL int db_StringListToStringArrayMBOpt(char *strList, char ***strArray, char **alloc_flag, int nblocks);
+INTERNAL int db_fix_obsolete_centering(int ndims, float const *align, int carfm);
 
 #endif /* !SILO_PRIVATE_H */

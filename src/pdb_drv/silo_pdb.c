@@ -5183,9 +5183,15 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_QUADVAR) < 0)
       return NULL;
+
+   /* Patch up "centering" if it wasn't present in file but align is.
+      Align only worked for node/zone centering. */
+   tmpqv.centering = db_fix_obsolete_centering(tmpqv.ndims, tmpqv.align, tmpqv.centering);
+
    if ((qv = DBAllocQuadvar()) == NULL)
       return NULL;
    *qv = tmpqv;
+
 
    /*
     *  Read the remainder of the object: loop over all values

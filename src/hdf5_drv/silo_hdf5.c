@@ -10578,7 +10578,7 @@ db_hdf5_GetQuadvar(DBfile *_dbfile, char const *name)
         qv->guihide = m.guihide;
         qv->conserved = m.conserved;
         qv->extensive = m.extensive;
-        qv->centering = m.centering;
+        qv->centering = db_fix_obsolete_centering(m.ndims, m.align, m.centering);
         db_SetMissingValueForGet(qv->missing_value, m.missing_value);
         for (stride=1, i=0; i<m.ndims; stride*=m.dims[i++]) {
             qv->dims[i] = m.dims[i];

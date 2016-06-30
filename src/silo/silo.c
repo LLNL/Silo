@@ -14355,3 +14355,34 @@ DBGetDatatypeString(int dt)
 {
     return db_GetDatatypeString(dt);
 }
+
+PUBLIC int
+db_fix_obsolete_centering(int ndims, float const *align, int carfm)
+{
+   int centering = carfm;
+   if (carfm== DB_NOTCENT && align)
+   {
+       if (ndims == 1)
+       {
+           if (align[0] == 0)
+               centering = DB_NODECENT;
+           else if (align[0] == 0.5)
+               centering = DB_ZONECENT;
+       }
+       else if (ndims == 2)
+       {
+           if (align[0] == 0 && align[1] == 0)
+               centering = DB_NODECENT;
+           else if (align[0] == 0.5 && align[1] == 0.5)
+               centering = DB_ZONECENT;
+       }
+       else if (ndims == 3)
+       {
+           if (align[0] == 0 && align[1] == 0 && align[2] == 0)
+               centering = DB_NODECENT;
+           else if (align[0] == 0.5 && align[1] == 0.5 && align[2] == 0.5)
+               centering = DB_ZONECENT;
+       }
+   }
+   return centering;
+}
