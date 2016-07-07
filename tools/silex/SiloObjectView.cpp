@@ -289,6 +289,7 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
                 if (ival == DB_INT)          strcat(value, " (DB_INT)");
                 if (ival == DB_SHORT)        strcat(value, " (DB_SHORT)");
                 if (ival == DB_LONG)         strcat(value, " (DB_LONG)");
+                if (ival == DB_LONG_LONG)    strcat(value, " (DB_LONG_LONG)");
                 if (ival == DB_FLOAT)        strcat(value, " (DB_FLOAT)");
                 if (ival == DB_DOUBLE)       strcat(value, " (DB_DOUBLE)");
                 if (ival == DB_CHAR)         strcat(value, " (DB_CHAR)");
