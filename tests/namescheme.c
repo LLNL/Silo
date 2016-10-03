@@ -411,6 +411,14 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(ns, 4, 1);
     DBFreeNamescheme(ns);
 
+    ns = DBMakeNamescheme("|%04d_domain|n-2");
+    TEST_GET_INDEX(ns, 0, -2);
+    TEST_GET_INDEX(ns, 1, -1);
+    TEST_GET_INDEX(ns, 2, 0);
+    TEST_GET_INDEX(ns, 3, 1);
+    TEST_GET_INDEX(ns, 4, 2);
+    DBFreeNamescheme(ns);
+
     /* hackish way to cleanup the circular cache used internally */
     DBGetName(0,-1);
     

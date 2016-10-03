@@ -5940,6 +5940,35 @@ DBWriteObject(DBfile *dbfile, DBobject const *obj, int freemem)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
+PUBLIC void *
+DBGetPartialObject(DBfile *dbfile, char const *name, int nvals, int ndims,
+    int index_mode, void const *indices, DBoptlist *options)
+{
+
+
+
+
+    /* call directly down into driver */
+
+    /* get type */
+    DBObjectType otype = DBInqVarType(dbfile, name);
+
+    /* set mask and read object header */
+
+    /* get list of datasets */
+
+    /* If dense, do partial I/O on the datasets */
+    /* Else... do object specific partial I/O */
+    /* Handle mixed values on variables */
+}
+
+PUBLIC DBmaterial *
+DBGetPartialMaterial(DBfile *dbfile, char const *name, int mode, int nvals,
+    int ndims, void const *indices, DBoptlist *options)
+{
+    return (DBmaterial *) DBGetPartialObject(dbfile, name, mode, nvals, ndims, indices, options);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    DBGetObject
  *
@@ -7372,7 +7401,8 @@ DBReadVarSlice(DBfile *dbfile, const char *name, int const *offset, int const *l
  *              NDIMS is the dimensionality of each hyper slab and 3 is
  *              for a <start,count,stride> 3-tuple for each dimension
  *              of a hyperslab. The number of returned values is the sum
- *              of the sizes of the hyperslabs.
+ *              of the sizes of the hyperslabs. If hyperslabs overlap,
+ *              values will be repeated in the results.
  *
  * Return:      Success:        0
  *
@@ -7382,7 +7412,7 @@ DBReadVarSlice(DBfile *dbfile, const char *name, int const *offset, int const *l
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBReadVarVals(DBfile *dbfile, const char *name, int mode, int nvals,
-    int ndims, int const *indices, void **result, int *ncomps, int *nitems)
+    int ndims, void const *indices, void **result, int *ncomps, int *nitems)
 {
     int retval;
 

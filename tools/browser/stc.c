@@ -1751,6 +1751,7 @@ stc_silo_types (void) {
             "pointer (array 'self.nmats' (primitive 'int'))");
       COMP (matcounts,
             "pointer (array 'self.nmats' (primitive 'int'))");
+      /* This matlists entry is wrong...its size is the sum of matcounts */
       COMP (matlists,
             "pointer (array 'self.nmats' (primitive 'int'))");
       COMP (nmatnos,            "primitive 'int'");

@@ -57,6 +57,7 @@ be used for advertising or product endorsement purposes.
 
 #define NEED_SCORE_MM
 #include "silo_pdb_private.h"
+#include <float.h>
 
 /* The code between BEGIN/END monikers used to reside in a separate
  * file, 'pjjacket.c' but was moved here to reduce polution of the
@@ -6635,9 +6636,16 @@ db_pdb_ReadVarSlice (DBfile *_dbfile, char const *vname, int const *offset, int 
    return 0;
 }
 
-#define DSNAMES_CASE(OTYPE, FMTSTR) \
+#define FSTRS1(A) ={#A}
+#define FSTRS2(A,B) ={#A,#B}
+#define FSTRS3(A,B,C) ={#A,#B,#C}
+#define FSTRS4(A,B,C,D) ={#A,#B,#C,#D}
+#define FSTRS5(A,B,C,D,E) ={#A,#B,#C,#D,#E}
+#define DSNAMES_CASE(OTYPE, FMTSTRS) \
         case OTYPE: \
         { \
+            int i, j, pass; \
+            char const *fmtstrs[] FMTSTRS; \
             PJgroup *group=NULL; \
             if (!PJ_get_group(pdbfile, name, &group)) \
             { \
@@ -6653,13 +6661,16 @@ db_pdb_ReadVarSlice (DBfile *_dbfile, char const *vname, int const *offset, int 
                 } \
                 for (i=0; i<group->ncomponents; i++) \
                 { \
-                    char tmp[32]; \
-                    snprintf(tmp, sizeof(tmp), FMTSTR, n); \
-                    if (!strcmp(group->comp_names[i], tmp)) \
+                    for (j=0; j < sizeof(fmtstrs)/sizeof(fmtstrs[0]); j++) \
                     { \
-                        if (pass == 1) \
-                            _dsnames[n] = _db_safe_strdup(group->pdb_names[i]); \
-                        n++; \
+                        char tmp[32]; \
+                        snprintf(tmp, sizeof(tmp), fmtstrs[j], n); \
+                        if (!strcmp(group->comp_names[i], tmp)) \
+                        { \
+                            if (pass == 1) \
+                                _dsnames[n] = _db_safe_strdup(group->pdb_names[i]); \
+                            n++; \
+                        } \
                     } \
                 } \
                 if (n == 0) \
@@ -6677,57 +6688,56 @@ PRIVATE int
 db_pdb_get_obj_dsnames(DBfile *_dbfile, char const *name, DBObjectType *otype,
     int *dscount, char ***dsnames)
 {
-    int i, pass, n = 0;
+    int n = 0;
     char **_dsnames = 0;
     static char const *me = "db_pdb_get_obj_dsnames";
     DBObjectType _otype = db_pdb_InqVarType(_dbfile, name);
     PDBfile *pdbfile = ((DBfile_pdb *)_dbfile)->pdb;
-#if 0
-curve: xvals yvals
-material: matlist, mix_vf, mix_mat, mix_next, mix_zone
-pointvar _data or %d_data
-meshes: coord%d
-vars: value%d and mixed_value%d
-facelist, zonelist: nodelist+others
-csgzonelist
-mrgtree stuff?
-#endif
 
+    *otype = _otype;
     switch (_otype)
     {
-        DSNAMES_CASE(DB_QUADVAR, "value%d");
-        DSNAMES_CASE(DB_QUADMESH, "coord%d");
-        DSNAMES_CASE(DB_QUADCURV, "coord%d");
-        DSNAMES_CASE(DB_QUADRECT, "coord%d");
-        DSNAMES_CASE(DB_UCDVAR, "value%d");
-        DSNAMES_CASE(DB_UCDMESH, "coord%d");
+        DSNAMES_CASE(DB_CURVE,           FSTRS2(xvals,yvals));
+        DSNAMES_CASE(DB_QUADVAR,         FSTRS2(value%d,mixed_value%d));
+        DSNAMES_CASE(DB_QUADMESH,        FSTRS1(coord%d));
+        DSNAMES_CASE(DB_QUADCURV,        FSTRS1(coord%d));
+        DSNAMES_CASE(DB_QUADRECT,        FSTRS1(coord%d));
+        DSNAMES_CASE(DB_UCDVAR,          FSTRS1(value%d));
+        DSNAMES_CASE(DB_UCDMESH,         FSTRS1(coord%d));
+        DSNAMES_CASE(DB_POINTMESH,       FSTRS1(coord%d));
+        DSNAMES_CASE(DB_POINTVAR,        FSTRS2(_data,%d_data));
+        DSNAMES_CASE(DB_MULTIMESH,       FSTRS4(meshtypes,meshnames,extents,zonecounts));
+        DSNAMES_CASE(DB_MULTIVAR,        FSTRS3(vartypes,varnames,extents));
+        DSNAMES_CASE(DB_MULTIMAT,        FSTRS3(matnames,mixlens,matcounts));
+        DSNAMES_CASE(DB_MULTIMATSPECIES, FSTRS1(specnames));
+        DSNAMES_CASE(DB_MATERIAL,        FSTRS5(matlist,mix_next,mix_vf,mix_mat,mix_zone));
+        DSNAMES_CASE(DB_MATSPECIES,      FSTRS4(speclist,species_mf,nmatspec,mix_speclist));
+        DSNAMES_CASE(DB_ZONELIST,        FSTRS4(nodelist,shapecnt,shapesize,shapetype));
+        DSNAMES_CASE(DB_FACELIST,        FSTRS4(nodelist,shapecnt,shapesize,zoneno));
+        DSNAMES_CASE(DB_ARRAY,           FSTRS3(elemnames,elemlengths,values));
+        case DB_VARIABLE:
+        {
+            n = 1;
+            _dsnames = (char**) malloc(n*sizeof(char*));
+            _dsnames[0] = _db_safe_strdup(name);
+            break;
+        }
     }
-    if (otype) *otype = _otype;
-    if (dscount) *dscount = n;
-    if (dsnames) *dsnames = _dsnames;
+    *dscount = n;
+    *dsnames = _dsnames;
     return 1;
 }
 
-SILO_CALLBACK int
-db_pdb_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
-    int nvals, int ndims, int const *indices, void **result,
-    int *ncomps, int *nitems)
+PRIVATE int
+db_pdb_ReadDenseArrayVals(DBfile *_dbfile, char const *vname, int objtype,
+    int dscount, char const * const *dsnames, int nvals, int ndims, int const *indices,
+    void **result, int *ncomps, int *nitems)
 {
-    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
-    static char const *me = "db_pdb_ReadVarVals";
-    DBObjectType objtype;
-    int dscount = 0;
-    char **dsnames = 0;
+    static char const *me = "db_pdb_ReadDenseArrayVals";
+    DBfile_pdb *dbfile = (DBfile_pdb *) _dbfile;
     int db_type, db_type_size;
     int i, j, k;
     char *p;
-
-
-    if (db_pdb_get_obj_dsnames(_dbfile, vname, &objtype, &dscount, &dsnames) < 0)
-        return db_perror(vname, E_CALLFAIL, me);
-
-    if (dscount <= 0)
-        return db_perror(vname, E_CALLFAIL, me);;
 
     db_type = db_pdb_GetVarType(_dbfile, dsnames[0]);
     if (db_type < 0)
@@ -6774,8 +6784,146 @@ db_pdb_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
     }
     if (ncomps) *ncomps = dscount;
     if (nitems) *nitems = nvals;
-
     return 0;
+}
+
+PRIVATE int
+db_pdb_ReadMatVals(DBfile *_dbfile, char const *vname, int objtype,
+    int dscount, char const * const *dsnames, int nvals, int ndims, int const *indices,
+    void **result, int *ncomps, int *nitems)
+{
+    static char const *me = "db_pdb_ReadMatVals";
+    DBfile_pdb *dbfile = (DBfile_pdb *) _dbfile;
+    int i, have_mixed = 0;
+    int *matlist_result = 0;
+    DBmaterial *origmat = 0, *mat = 0;
+    unsigned long long oldmask;
+
+    /*        0       1        2      3       4           */
+    /* FSTRS5(matlist,mix_next,mix_vf,mix_mat,mix_zone)); */
+    oldmask = DBSetDataReadMask2(DBNone);
+    origmat = db_pdb_GetMaterial(_dbfile, vname);
+    DBSetDataReadMask2(oldmask);
+
+    /* Do partial I/O on matlist */
+    if (db_pdb_ReadDenseArrayVals(_dbfile, vname, objtype, 1,
+            (char const * const *) &dsnames[0],
+            nvals, ndims, indices, &matlist_result, 0, nitems) < 0)
+        return db_perror(dsnames[0], E_CALLFAIL, me);
+
+    if (!*result)
+    {
+        *result = DBAllocMaterial();
+        if (!*result)
+            return db_perror(vname, E_NOMEM, me);
+    }
+    mat = *result;
+
+    mat->matlist = matlist_result;
+    mat->ndims = 1;
+    mat->dims[0] = nvals;
+
+    /* If none are negative values, we're done */
+    for (i = 0; i < *nitems && !have_mixed; i++)
+        have_mixed = matlist_result[i] < 0;
+    if (!have_mixed)
+    {
+        if (ncomps) *ncomps = 1;
+        if (nitems) *nitems = 1;
+        return 0;
+    }
+
+    /* For negative matlist entries, need to follow the links for mix_next, mix_mat, mix_vf */
+    for (i = 0; i < *nitems; i++)
+    {
+        long ind[3];
+        int mixidx;
+        int mix_next, mix_mat, mix_zone;
+        double const dbl_max = DBL_MAX;
+        int const halfn = (int const) sizeof(double)/2;
+        double mix_vf = dbl_max;
+        float *fp = (float*) &mix_vf;
+        void const *halfa = (void*) &mix_vf;
+        void const *halfb = (void*) ((char*) &mix_vf + halfn);
+        void const *halfc = (void*) &dbl_max;
+        void const *halfd = (void*) ((char*) &dbl_max + halfn);
+
+        if (mat->matlist[i] >= 0) continue;
+
+        mixidx = -(mat->matlist[i]);
+printf("mixidx = %d\n", mixidx);
+printf("dsname[1] = \"%s\"\n", dsnames[1]);
+printf("dsname[2] = \"%s\"\n", dsnames[2]);
+printf("dsname[3] = \"%s\"\n", dsnames[3]);
+
+        while (mixidx != 0)
+        {
+            ind[0] = mixidx-1; ind[1] = mixidx-1; ind[2] = 1;
+            PJ_read_alt(dbfile->pdb, (char*)dsnames[2], &mix_next, ind);
+printf("ind[0]=%ld,ind[1]=%ld,ind[2]=%ld\n",ind[0],ind[1],ind[2]);
+printf("mix_next = %d\n",mix_next);
+            PJ_read_alt(dbfile->pdb, (char*)dsnames[1], &mix_vf, ind);
+            if (memcmp(halfa,halfc,halfn) == 0 || memcmp(halfb,halfd,halfn) == 0)
+            {
+                printf("looks like float, *fp=%f\n",*fp);
+                mix_vf = (double) *fp;
+            }
+            PJ_read_alt(dbfile->pdb, (char*)dsnames[3], &mix_mat, ind);
+            mixidx = mix_next;
+            printf("got mat=%d, vf = %f, mixidx=%d\n", mix_mat, mix_vf, mixidx);
+            mix_vf = dbl_max;
+#if 0
+        if (dscount > 4)
+            PJ_read_alt(dbfile->pdb, (char*)dsnames[4], &mix_zone, ind);
+#endif
+        }
+    }
+
+    return db_perror(vname, E_CALLFAIL, me);
+}
+
+SILO_CALLBACK int
+db_pdb_ReadVarVals(DBfile *_dbfile, char const *vname, int mode,
+    int nvals, int ndims, void const *_indices, void **result,
+    int *ncomps, int *nitems)
+{
+    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
+    static char const *me = "db_pdb_ReadVarVals";
+    DBObjectType objtype;
+    int dscount = 0;
+    char **dsnames = 0;
+    int db_type, db_type_size;
+    int i, j, k;
+    char *p;
+    int const *indices = (int const *) _indices;
+
+    if (db_pdb_get_obj_dsnames(_dbfile, vname, &objtype, &dscount, &dsnames) < 0)
+        return db_perror(vname, E_CALLFAIL, me);
+
+    if (dscount <= 0)
+        return db_perror(vname, E_CALLFAIL, me);
+
+    /* There are two basic cases here. One is a simple (dense) array.
+       The other is some non-dense "object" (e.g. the coordinates of
+       a rectilinear mesh, a zonelist, a material, etc.) These latter
+       objects cannot be handled by PDB's simple partial I/O interface
+       and require special handling. All the special cases we handle
+       in the switch. */
+    switch (objtype)
+    {
+        case DB_MATERIAL: return db_pdb_ReadMatVals(_dbfile, vname, objtype, dscount,
+                                     (char const * const *) dsnames,
+                                     nvals, ndims, indices, result, ncomps, nitems);
+#if 0
+        case DB_ZONELIST: return db_pdb_ReadZonelistVals(_dbfile, vname, dscount, dsnames,
+                                     nvals, ndims, indices, result, ncomps, nitems);
+#endif
+        default:     return db_pdb_ReadDenseArrayVals(_dbfile, vname, objtype, dscount,
+                            (char const * const *) dsnames, nvals, ndims, indices,
+                            result, ncomps, nitems);
+    }
+
+    return db_perror(vname, E_CALLFAIL, me);
 }
 
 /*-------------------------------------------------------------------------

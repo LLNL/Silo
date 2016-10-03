@@ -308,22 +308,42 @@ PrintObjectComponentsType(DBfile *dbfile, FILE* outf, char *objname, char *inden
         /* For each component, read its type and print it. */
         for(i = 0; i < obj->ncomponents; i++)
         {
+            int dims[5] = {0,0,0,0,0};
             comptype = DBGetComponentType(dbfile, objname, obj->comp_names[i]);
 
             comp = NULL;
             if(comptype != DB_VARIABLE)
                 comp = DBGetComponent(dbfile, objname, obj->comp_names[i]);
+            else
+            {
+                if (DBGetVarDims(dbfile, obj->pdb_names[i], 5, dims) < 0)
+                {
+                    char tmpnm[256];
+                    snprintf(tmpnm, sizeof(tmpnm), &(obj->pdb_names[i][4]));
+                    tmpnm[strlen(tmpnm)-1] = '\0';
+                    DBGetVarDims(dbfile, tmpnm, 5, dims);
+                }
+            }
 
             fprintf(outf, "    %sComponent: %-15s  Type: %-11s",
                    indent, obj->comp_names[i], IntToTypename(comptype));
 
-            if(comp != NULL)
+            if(comp != NULL || comptype == DB_VARIABLE)
             {
                 /* Use the type information returned by DBGetComponentType 
                  * to correctly process the component data.
                  */
                 switch(comptype)
                 {
+                case DB_VARIABLE:
+                    {
+                        int qq = 0;
+                        fprintf(outf, " Dims ");
+                        while (dims[qq])
+                            fprintf(outf, ":%d", dims[qq++]);
+                        fprintf(outf, "\n");
+                        break;
+                    }
                 case DB_INT:
                     fprintf(outf, " Value: %d\n", *((int *)comp));
                     break;

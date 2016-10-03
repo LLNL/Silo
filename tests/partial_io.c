@@ -161,6 +161,7 @@ main (int argc, char *argv[]) {
    char		filename2[256];
    char         varname2[256];
    int          show_all_errors = FALSE;
+   int          npoints = 0;
 
    /* Parse command-line */
    filename2[0] = '\0';
@@ -181,6 +182,9 @@ main (int argc, char *argv[]) {
            }
            strncpy(filename2, argv[++i], sizeof(filename2));
            strncpy(varname2, argv[++i], sizeof(filename2));
+#if 0
+           npoints = (int) strtol(argv[++i],0,10);
+#endif
        } else if (argv[i][0] != '\0') {
 	   fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
        }
@@ -375,12 +379,21 @@ main (int argc, char *argv[]) {
       
    DBClose(db);
 
+   /*
+    * Test partail read of arbitrary samples 
+    */
    if (strlen(filename2))
    {
+       DBobject *dbobj;
+#if 1
        int indices[3*10] = {0,0,0,  1,1,1,  2,2,2,  3,3,3,  4,4,4,
                             5,5,5,  6,6,6,  7,7,7,  8,8,8,  9,9,9};
-       float *vals = 0;
-       int nitems, ncomps;
+#else
+       int indices[3*4] = {0,0,0,  1,1,1,  2,2,2,  3,3,3};
+#endif
+
+       void *_vals = 0;
+       int nitems = 0, ncomps = 0;
 
        db = DBOpen(filename2, driver, DB_READ);
        if (!db)
@@ -389,16 +402,39 @@ main (int argc, char *argv[]) {
            exit(1);
        }
 
-       DBReadVarVals(db, varname2, DB_PARTIO_POINTS, 10, 3, indices, &vals, &ncomps, &nitems);
+#if 0
+       /* Read the full object as a generic object */
+       dbobj = DBGetObject(db, varname2); 
+       if (!dbobj)
+       {
+           fprintf(stderr, "Unable to read object \"%s\"\n", varname2);
+           exit(1);
+       }
+#endif
+
+       /* compare values read with ReadVarVals to same entries in full object */
+
+       /* generate a random set of ndim indices to read */
+
+       DBReadVarVals(db, varname2, DB_PARTIO_POINTS, 10, 3, indices, &_vals, &ncomps, &nitems);
+
+      {
+          DBmaterial *mat = (DBmaterial *) _vals;
+          for (i = 0; i < mat->dims[0]; i++)
+              printf("matlist[%d] = %d\n", i, mat->matlist[i]);
+      }
+#if 0
        for (i = 0; i < nitems; i++)
        {
+           float *vals = (float *) _vals;
            printf("val[%d][%d][%d] = ", indices[i*3+0], indices[i*3+1], indices[i*3+2]);
            for (j = 0; j < ncomps; j++)
                printf("%f%s", vals[i*ncomps+j], (j<(ncomps-1))?", ":"");
            printf("\n");
        }
+#endif
  
-       free(vals);
+       free(_vals);
        DBClose(db);
    }
 
