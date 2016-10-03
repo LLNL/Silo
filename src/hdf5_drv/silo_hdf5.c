@@ -58,8 +58,8 @@ be used for advertising or product endorsement purposes.
    version 1.8 and thereafter. When, and if, the HDF5 code in this file
    is explicitly upgraded to the 1.8 API, this symbol should be removed. */
 #define H5_USE_16_API
-#include <H5pubconf.h>
-#include <hdf5.h>
+#include "H5pubconf.h"
+#include "hdf5.h"
 
 #include <errno.h>
 #include <assert.h>
@@ -185,7 +185,7 @@ be used for advertising or product endorsement purposes.
 #define DB_HDF5_HZIP_ID (H5Z_FILTER_RESERVED+1)
 #define DB_HDF5_FPZIP_ID (H5Z_FILTER_RESERVED+2)
 #ifdef HAVE_HZIP
-#include <hzip.h>
+#include "hzip.h"
 #ifdef HAVE_LIBZ
 static struct HZMCODECzlib db_hdf5_hzip_zlib_codec_params;
 #endif
@@ -193,11 +193,12 @@ static struct HZMCODECbase db_hdf5_hzip_base_codec_params;
 static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)), ((unsigned) (0x65217430))};
 #endif
 #ifdef HAVE_FPZIP
-#include <fpzip.h>
+#include "fpzip.h"
 #endif
 #ifdef HAVE_ZFP
+#include "H5Zzfp.h"
 #define USE_C_STRUCTSPACE
-#include <zfp.h>
+#include "zfp.h"
 #endif
 
 /* Defining these to check overhead of PROTECT */
@@ -1705,34 +1706,6 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
 static H5Z_class_t db_hdf5_hzip_class;
 #endif /* !HAVE_HZIP } */
 
-#ifdef HAVE_ZFP /* { */
-
-static htri_t
-db_hdf5_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
-{   
-#warning FILL THIS METHOD IN
-    return 1;
-}
-
-static herr_t
-db_hdf5_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t space_id)
-{   
-#warning FILL THIS METHOD IN
-    return 1;
-}
-
-static size_t
-db_hdf5_zfp_filter_op(unsigned int flags, size_t cd_nelmts,
-    const unsigned int cd_values[], size_t nbytes,
-    size_t *buf_size, void **buf)
-{
-#warning FILL THIS METHOD IN
-    return 0;
-}
-
-static H5Z_class_t db_hdf5_zfp_class;
-#endif /* HAVE_ZFP } */
-
 INTERNAL char const *
 friendly_name(char const *base_name, char const *fmtstr, void const *val)
 {
@@ -2193,7 +2166,7 @@ db_hdf5_init(void)
 
 #ifdef HAVE_ZFP /* { */
     H5Z_zfp_register();
-    zfp.zfp_init(); /* init the zfp API */
+    zfp.zfp_init();
 #endif /* HAVE_ZFP } */
 
     /* Define compound data types */

@@ -105,7 +105,7 @@ CD[0]=H5Z_ZFP_MODE_RATE; *p=R; N=4;}} while(0)
 #define H5Pset_zfp_precision_cdata(P, N, CD)  \
 do { if (N>=3) {CD[0]=CD[1]=CD[2];            \
 CD[0]=H5Z_ZFP_MODE_PRECISION;                 \
-CD[2]=P; N=3}} while(0)
+CD[2]=P; N=3;}} while(0)
 
 #define H5Pget_zfp_precision_cdata(N, CD) \
 ((double)(((N>=3)&&(CD[0]==H5Z_ZFP_MODE_ACCURACY))?CD[2]:-1))
@@ -113,7 +113,7 @@ CD[2]=P; N=3}} while(0)
 #define H5Pset_zfp_accuracy_cdata(A, N, CD)      \
 do { if (N>=4) {double *p = (double *) &CD[2];   \
 CD[0]=CD[1]=CD[2]=CD[3]=0;                       \
-CD[0]=H5Z_ZFP_MODE_ACCURACY; *p=A; N=4} while(0)
+CD[0]=H5Z_ZFP_MODE_ACCURACY; *p=A; N=4;}} while(0)
 
 #define H5Pget_zfp_accuracy_cdata(N, CD) \
 ((double)(((N>=4)&&(CD[0]==H5Z_ZFP_MODE_ACCURACY))?*((double *) &CD[2]):-1))
@@ -122,7 +122,7 @@ CD[0]=H5Z_ZFP_MODE_ACCURACY; *p=A; N=4} while(0)
 do { if (N>=6) { CD[0]=CD[1]=CD[2]=CD[3]=CD[4]=CD[5]=0;    \
 CD[0]=H5Z_ZFP_MODE_EXPERT;                                 \
 CD[2]=MiB; CD[3]=MaB; CD[4]=MaP;                           \
-CD[5]=(unsigned int)MiE; N=6 } while(0)
+CD[5]=(unsigned int)MiE; N=6;}} while(0)
 
 #define H5Pget_zfp_expert_cdata(N, CD, MiB, MaB, MaP, MiE) \
 do {                                                    \
@@ -137,7 +137,7 @@ do {                                                    \
 } while(0)
 
 #ifdef AS_SILO_BUILTIN
-herr_t H5Z_zfp_register(void);
+extern void H5Z_zfp_register(void);
 #endif
 
 #endif

@@ -55,7 +55,9 @@
 noinst_LTLIBRARIES = libsilo_zfp.la
 libsilo_zfp_la_SOURCES = $(FILES)
 
-AM_CPPFLAGS = -DUSE_C_STRUCTSPACE
+# In order for ZFP's stream to be portable, ZFP library *must* be
+# compiled with stream word bit size of 8.
+AM_CPPFLAGS = -DUSE_C_STRUCTSPACE -DBIT_STREAM_WORD_TYPE=uint8
 
 EXTRA_DIST = \
   API \

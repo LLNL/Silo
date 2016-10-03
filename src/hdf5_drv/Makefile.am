@@ -66,7 +66,7 @@ AM_CPPFLAGS += -I$(srcdir)/../fpzip
 endif
 
 if ZFP_NEEDED
-AM_CPPFLAGS += -I$(srcdir)/../zfp-0.5.0
+AM_CPPFLAGS += -DH5_HAVE_FILTER_ZFP -DAS_SILO_BUILTIN -I$(srcdir)/../zfp-0.5.0
 endif
 
 noinst_HEADERS = \

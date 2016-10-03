@@ -307,7 +307,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libsilo_zfp.la
 libsilo_zfp_la_SOURCES = $(FILES)
-AM_CPPFLAGS = -DUSE_C_STRUCTSPACE
+AM_CPPFLAGS = -DUSE_C_STRUCTSPACE -DBIT_STREAM_WORD_TYPE=uint8
 EXTRA_DIST = \
   API \
   FAQ \

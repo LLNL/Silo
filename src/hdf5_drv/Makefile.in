@@ -90,7 +90,7 @@ build_triplet = @build@
 host_triplet = @host@
 @HZIP_NEEDED_TRUE@am__append_1 = -I$(srcdir)/../hzip
 @FPZIP_NEEDED_TRUE@am__append_2 = -I$(srcdir)/../fpzip 
-@ZFP_NEEDED_TRUE@am__append_3 = -I$(srcdir)/../zfp-0.5.0
+@ZFP_NEEDED_TRUE@am__append_3 = -DH5_HAVE_FILTER_ZFP -DAS_SILO_BUILTIN -I$(srcdir)/../zfp-0.5.0
 subdir = src/hdf5_drv
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -112,7 +112,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_hdf5_drv_la_LIBADD =
-am_libsilo_hdf5_drv_la_OBJECTS = silo_hdf5.lo H5FDsilo.lo
+am_libsilo_hdf5_drv_la_OBJECTS = silo_hdf5.lo H5FDsilo.lo H5Zzfp.lo
 libsilo_hdf5_drv_la_OBJECTS = $(am_libsilo_hdf5_drv_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -307,13 +307,14 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libsilo_hdf5_drv.la
-libsilo_hdf5_drv_la_SOURCES = silo_hdf5.c H5FDsilo.c
+libsilo_hdf5_drv_la_SOURCES = silo_hdf5.c H5FDsilo.c H5Zzfp.c
 #libsilo_H5FDsilo_la_SOURCES = H5FDsilo.c
 AM_CPPFLAGS = -I$(builddir)/../silo -I$(srcdir)/../silo \
 	$(am__append_1) $(am__append_2) $(am__append_3)
 noinst_HEADERS = \
  silo_hdf5_private.h \
- H5FDsilo.h
+ H5FDsilo.h \
+ H5Zzfp.h
 
 all: all-am
 
@@ -368,6 +369,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDsilo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zzfp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_hdf5.Plo@am__quote@
 
 .c.o:

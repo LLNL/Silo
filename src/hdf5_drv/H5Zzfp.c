@@ -57,31 +57,32 @@ be used for advertising or product endorsement purposes.
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef ZFP
-#undef ZFP
+#ifdef Z
+#undef Z
 #endif
 
-#ifdef ZFPBS
-#undef ZFPBS
+#ifdef B 
+#undef B
 #endif
 
 #ifdef AS_SILO_BUILTIN
+#include "hdf5.h"
 #define USE_C_STRUCTSPACE
 #include "zfp.h"
-#define ZFP zfp.
-#define ZFPBS zfpbs.
+#define Z zfp.
+#define B zfpbs.
 #else
 #include "H5PLextern.h"
 #include "H5Spublic.h"
 #include "zfp.h"
 #include "bitstream.h"
-#define ZFP
-#define ZFPBS
+#define Z
+#define B 
 #endif
 
 #include "H5Zzfp.h"
 
-/* Convenient CPP logic to capture ZFP version numbers as string and hex number */
+/* Convenient CPP logic to capture Z version numbers as string and hex number */
 #define ZFP_VERSION_STR__(Maj,Min,Rel) #Maj "." #Min "." #Rel
 #define ZFP_VERSION_STR_(Maj,Min,Rel)  ZFP_VERSION_STR__(Maj,Min,Rel)
 #define ZFP_VERSION_STR                ZFP_VERSION_STR_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
@@ -93,7 +94,7 @@ be used for advertising or product endorsement purposes.
 #define H5Z_ZFP_PUSH_AND_GOTO(MAJ, MIN, RET, MSG)                \
 do                                                               \
 {                                                                \
-    H5Epush(H5Eget_current_stack(),__FILE__,_funcname_,__LINE__, \
+    H5Epush(H5E_DEFAULT,__FILE__,_funcname_,__LINE__,            \
         H5Z_ZFP_ERRCLASS,MAJ,MIN,MSG);                           \
     retval = RET;                                                \
     goto done;                                                   \
@@ -121,7 +122,7 @@ const H5Z_class2_t H5Z_ZFP[1] = {{
 }};
 
 #ifdef AS_SILO_BUILTIN
-herr_t      H5Z_zfp_register(void) { return H5Zregister(H5Z_ZFP); }
+void        H5Z_zfp_register(void) { H5Zregister(H5Z_ZFP); }
 #else
 H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
 const void *H5PLget_plugin_info(void) {return H5Z_ZFP;}
@@ -147,7 +148,7 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
 
     /* Disable the ZFP filter entirely if it looks like the ZFP library
        hasn't been compiled for 8-bit stream word size */
-    if (stream_word_bits != 8)
+    if (B stream_word_bits != 8)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, -1,
             "ZFP lib not compiled with -DBIT_STREAM_WORD_TYPE=uint8");
 
@@ -241,9 +242,9 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     /* set up dummy zfp field to compute meta header */
     switch (ndims_used)
     {
-        case 1: dummy_field = ZFP zfp_field_1d(0, zt, dims_used[0]); break;
-        case 2: dummy_field = ZFP ZFP zfp_field_2d(0, zt, dims_used[0], dims_used[1]); break;
-        case 3: dummy_field = ZFP ZFP zfp_field_3d(0, zt, dims_used[0], dims_used[1], dims_used[2]); break;
+        case 1: dummy_field = Z zfp_field_1d(0, zt, dims_used[0]); break;
+        case 2: dummy_field = Z zfp_field_2d(0, zt, dims_used[0], dims_used[1]); break;
+        case 3: dummy_field = Z zfp_field_3d(0, zt, dims_used[0], dims_used[1], dims_used[2]); break;
         default: H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
                      "requires chunking have 1,2 or 3 non-unity dimensions");
     }
@@ -269,26 +270,26 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     /* Into hdr_cd_values, we encode ZFP library and H5Z-ZFP plugin version info at
        entry 0 and use remaining entries as a tiny buffer to write ZFP native header. */
     hdr_cd_values[0] = (unsigned int) ((ZFP_VERSION_NO<<16) | H5Z_FILTER_ZFP_VERSION_NO);
-    if (0 == (dummy_bstr = ZFPBS stream_open(&hdr_cd_values[1], sizeof(hdr_cd_values))))
+    if (0 == (dummy_bstr = B stream_open(&hdr_cd_values[1], sizeof(hdr_cd_values))))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "stream_open() failed");
 
-    if (0 == (dummy_zstr = ZFP zfp_stream_open(dummy_bstr)))
+    if (0 == (dummy_zstr = Z zfp_stream_open(dummy_bstr)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_stream_open() failed");
 
     /* Set the ZFP stream basic mode from mem_cd_values[0] */
     switch (mem_cd_values[0])
     {
         case H5Z_ZFP_MODE_RATE:
-            ZFP zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims, 0);
+            Z zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims, 0);
             break;
         case H5Z_ZFP_MODE_PRECISION:
-            ZFP zfp_stream_set_precision(dummy_zstr, mem_cd_values[2], zt);
+            Z zfp_stream_set_precision(dummy_zstr, mem_cd_values[2], zt);
             break;
         case H5Z_ZFP_MODE_ACCURACY:
-            ZFP zfp_stream_set_accuracy(dummy_zstr, *((double*) &mem_cd_values[2]), zt);
+            Z zfp_stream_set_accuracy(dummy_zstr, *((double*) &mem_cd_values[2]), zt);
             break;
         case H5Z_ZFP_MODE_EXPERT:
-            ZFP zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
+            Z zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
                 mem_cd_values[4], (int) mem_cd_values[5]);
             break;
         default:
@@ -296,7 +297,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     }
 
     /* Use ZFP's write_header method to write the ZFP header into hdr_cd_values array */
-    if (0 == (hdr_bits = ZFP zfp_write_header(dummy_zstr, dummy_field, ZFP_HEADER_FULL)))
+    if (0 == (hdr_bits = Z zfp_write_header(dummy_zstr, dummy_field, ZFP_HEADER_FULL)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, 0, "unable to write header");
 
     /* compute necessary hdr_cd_values size */
@@ -313,17 +314,17 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
             "failed to modify cd_values");
 
     /* cleanup the dummy ZFP stuff we used to generate the header */
-    ZFP zfp_field_free(dummy_field); dummy_field = 0;
-    ZFP zfp_stream_close(dummy_zstr); dummy_zstr = 0;
-    ZFPBS stream_close(dummy_bstr); dummy_bstr = 0;
+    Z zfp_field_free(dummy_field); dummy_field = 0;
+    Z zfp_stream_close(dummy_zstr); dummy_zstr = 0;
+    B stream_close(dummy_bstr); dummy_bstr = 0;
 
     retval = 1;
 
 done:
 
-    if (dummy_field) ZFP zfp_field_free(dummy_field);
-    if (dummy_zstr) ZFP zfp_stream_close(dummy_zstr);
-    if (dummy_bstr) ZFPBS stream_close(dummy_bstr);
+    if (dummy_field) Z zfp_field_free(dummy_field);
+    if (dummy_zstr) Z zfp_stream_close(dummy_zstr);
+    if (dummy_bstr) B stream_close(dummy_bstr);
     return retval;
 }
 
@@ -345,18 +346,18 @@ get_zfp_info_from_cd_values_0x0020(size_t cd_nelmts, unsigned int const *cd_valu
     memcpy(cd_values_copy, cd_values, cd_nelmts * sizeof(cd_values[0]));
 
     /* treat the cd_values as a zfp bitstream buffer */
-    if (0 == (bstr = ZFPBS stream_open(&cd_values_copy[0], sizeof(cd_values_copy[0]) * cd_nelmts)))
+    if (0 == (bstr = B stream_open(&cd_values_copy[0], sizeof(cd_values_copy[0]) * cd_nelmts)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "opening header bitstream failed");
 
-    if (0 == (zstr = ZFP zfp_stream_open(bstr)))
+    if (0 == (zstr = Z zfp_stream_open(bstr)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "opening header zfp stream failed");
 
     /* Allocate the field object */
-    if (0 == (zfld = ZFP zfp_field_alloc()))
+    if (0 == (zfld = Z zfp_field_alloc()))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "allocating field failed");
 
     /* Read ZFP header */
-    if (0 == (ZFP zfp_read_header(zstr, zfld, ZFP_HEADER_FULL)))
+    if (0 == (Z zfp_read_header(zstr, zfld, ZFP_HEADER_FULL)))
     {
         herr_t conv;
 
@@ -369,25 +370,25 @@ get_zfp_info_from_cd_values_0x0020(size_t cd_nelmts, unsigned int const *cd_valu
         if (conv < 0)
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "header endian-swap failed");
 
-        ZFP zfp_stream_rewind(zstr);
-        if (0 == (ZFP zfp_read_header(zstr, zfld, ZFP_HEADER_FULL)))
+        Z zfp_stream_rewind(zstr);
+        if (0 == (Z zfp_read_header(zstr, zfld, ZFP_HEADER_FULL)))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTGET, 0, "reading header failed");
     }
 
     /* Get ZFP stream mode and field meta */
-    *zfp_mode = ZFP zfp_stream_mode(zstr);
-    *zfp_meta = ZFP zfp_field_metadata(zfld);
+    *zfp_mode = Z zfp_stream_mode(zstr);
+    *zfp_meta = Z zfp_field_metadata(zfld);
 
     /* cleanup */
-    ZFP zfp_field_free(zfld); zfld = 0;
-    ZFP zfp_stream_close(zstr); zstr = 0;
-    ZFPBS stream_close(bstr); bstr = 0;
+    Z zfp_field_free(zfld); zfld = 0;
+    Z zfp_stream_close(zstr); zstr = 0;
+    B stream_close(bstr); bstr = 0;
     retval = 1;
 
 done:
-    if (zfld) ZFP zfp_field_free(zfld);
-    if (zstr) ZFP zfp_stream_close(zstr);
-    if (bstr) ZFPBS stream_close(bstr);
+    if (zfld) Z zfp_field_free(zfld);
+    if (zstr) Z zfp_stream_close(zstr);
+    if (bstr) B stream_close(bstr);
 
     return retval;
 }
@@ -434,13 +435,13 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
                 ZFP_VERSION_STR ", too old to decompress this data");
 
         /* Set up the ZFP field object */
-        if (0 == (zfld = ZFP zfp_field_alloc()))
+        if (0 == (zfld = Z zfp_field_alloc()))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "field alloc failed");
 
-        ZFP zfp_field_set_metadata(zfld, zfp_meta);
+        Z zfp_field_set_metadata(zfld, zfp_meta);
 
-        bsize = ZFP zfp_field_size(zfld, 0);
-        switch (ZFP zfp_field_type(zfld))
+        bsize = Z zfp_field_size(zfld, 0);
+        switch (Z zfp_field_type(zfld))
         {
             case zfp_type_int32: case zfp_type_float:  dsize = 4; break;
             case zfp_type_int64: case zfp_type_double: dsize = 8; break;
@@ -452,24 +453,24 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0,
                 "memory allocation failed for ZFP decompression");
 
-        ZFP zfp_field_set_pointer(zfld, newbuf);
+        Z zfp_field_set_pointer(zfld, newbuf);
 
         /* Setup the ZFP stream object */
-        if (0 == (bstr = ZFPBS stream_open(*buf, *buf_size)))
+        if (0 == (bstr = B stream_open(*buf, *buf_size)))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "bitstream open failed");
 
-        if (0 == (zstr = ZFP zfp_stream_open(bstr)))
+        if (0 == (zstr = Z zfp_stream_open(bstr)))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp stream open failed");
 
-        ZFP zfp_stream_set_mode(zstr, zfp_mode);
+        Z zfp_stream_set_mode(zstr, zfp_mode);
 
         /* Do the ZFP decompression operation */
-        status = ZFP zfp_decompress(zstr, zfld);
+        status = Z zfp_decompress(zstr, zfld);
 
         /* clean up */
-        ZFP zfp_field_free(zfld); zfld = 0;
-        ZFP zfp_stream_close(zstr); zstr = 0;
-        ZFPBS stream_close(bstr); bstr = 0;
+        Z zfp_field_free(zfld); zfld = 0;
+        Z zfp_stream_close(zstr); zstr = 0;
+        B stream_close(bstr); bstr = 0;
 
         if (!status)
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTFILTER, 0, "decompression failed");
@@ -499,17 +500,17 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         size_t msize, zsize;
 
         /* Set up the ZFP field object */
-        if (0 == (zfld = ZFP zfp_field_alloc()))
+        if (0 == (zfld = Z zfp_field_alloc()))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "field alloc failed");
 
-        ZFP zfp_field_set_pointer(zfld, *buf);
-        ZFP zfp_field_set_metadata(zfld, zfp_meta);
+        Z zfp_field_set_pointer(zfld, *buf);
+        Z zfp_field_set_metadata(zfld, zfp_meta);
 
         /* Set up the ZFP stream object for real compression now */
-        if (0 == (zstr = ZFP zfp_stream_open(0)))
+        if (0 == (zstr = Z zfp_stream_open(0)))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp stream open failed");
 
-        ZFP zfp_stream_set_mode(zstr, zfp_mode);
+        Z zfp_stream_set_mode(zstr, zfp_mode);
         msize = Z zfp_stream_maximum_size(zstr, zfld);
 
         /* Set up the bitstream object */
@@ -517,18 +518,18 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0,
                 "memory allocation failed for ZFP compression");
 
-        if (0 == (bstr = ZFPBS stream_open(newbuf, msize)))
+        if (0 == (bstr = B stream_open(newbuf, msize)))
             H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "bitstream open failed");
 
-        ZFP zfp_stream_set_bit_stream(zstr, bstr);
+        Z zfp_stream_set_bit_stream(zstr, bstr);
 
         /* Do the compression */
-        zsize = ZFP zfp_compress(zstr, zfld);
+        zsize = Z zfp_compress(zstr, zfld);
 
         /* clean up */
-        ZFP zfp_field_free(zfld); zfld = 0;
-        ZFP zfp_stream_close(zstr); zstr = 0;
-        ZFPBS stream_close(bstr); bstr = 0;
+        Z zfp_field_free(zfld); zfld = 0;
+        Z zfp_stream_close(zstr); zstr = 0;
+        B stream_close(bstr); bstr = 0;
 
         if (zsize == 0)
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTFILTER, 0, "compression failed");
@@ -544,9 +545,9 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
     }
 
 done:
-    if (zfld) ZFP zfp_field_free(zfld);
-    if (zstr) ZFP zfp_stream_close(zstr);
-    if (bstr) ZFPBS stream_close(bstr);
+    if (zfld) Z zfp_field_free(zfld);
+    if (zstr) Z zfp_stream_close(zstr);
+    if (bstr) B stream_close(bstr);
     if (newbuf) free(newbuf);
     return retval ;
 }
