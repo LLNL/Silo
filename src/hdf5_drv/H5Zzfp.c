@@ -57,32 +57,46 @@ be used for advertising or product endorsement purposes.
 #include <stdlib.h>
 #include <string.h>
 
+/* The logic here for 'Z' and 'B' macros as well as there use within
+   the code to call ZFP library methods is due to this filter being
+   part of the Silo library but also supported as a stand-alone
+   package. In Silo, the ZFP library is embedded inside a C struct
+   to avoid pollution of the global namespace as well as collision
+   with any other implementation of ZFP a Silo executable may be
+   linked with. Calls to ZFP lib methods are preface with 'Z ' 
+   and calls to bitstream methods with 'B ' as in
+
+       Z zfp_stream_open(...);
+       B sream_open(...);
+
+*/
+
 #ifdef Z
 #undef Z
 #endif
 
-#ifdef B 
+#ifdef B
 #undef B
 #endif
 
-#ifdef AS_SILO_BUILTIN
+#ifdef AS_SILO_BUILTIN /* [ */
 #include "hdf5.h"
 #define USE_C_STRUCTSPACE
 #include "zfp.h"
 #define Z zfp.
 #define B zfpbs.
-#else
+#else /* ] AS_SILO_BUILTIN [ */
 #include "H5PLextern.h"
 #include "H5Spublic.h"
 #include "zfp.h"
 #include "bitstream.h"
 #define Z
 #define B 
-#endif
+#endif /* ] AS_SILO_BUILTIN */
 
 #include "H5Zzfp.h"
 
-/* Convenient CPP logic to capture Z version numbers as string and hex number */
+/* Convenient CPP logic to capture Z version numbers as compile time string and hex number */
 #define ZFP_VERSION_STR__(Maj,Min,Rel) #Maj "." #Min "." #Rel
 #define ZFP_VERSION_STR_(Maj,Min,Rel)  ZFP_VERSION_STR__(Maj,Min,Rel)
 #define ZFP_VERSION_STR                ZFP_VERSION_STR_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
@@ -91,13 +105,13 @@ be used for advertising or product endorsement purposes.
 #define ZFP_VERSION_NO_(Maj,Min,Rel)   ZFP_VERSION_NO__(Maj,Min,Rel)
 #define ZFP_VERSION_NO                 ZFP_VERSION_NO_(ZFP_VERSION_MAJOR,ZFP_VERSION_MINOR,ZFP_VERSION_RELEASE)
 
-#define H5Z_ZFP_PUSH_AND_GOTO(MAJ, MIN, RET, MSG)                \
-do                                                               \
-{                                                                \
-    H5Epush(H5E_DEFAULT,__FILE__,_funcname_,__LINE__,            \
-        H5Z_ZFP_ERRCLASS,MAJ,MIN,MSG);                           \
-    retval = RET;                                                \
-    goto done;                                                   \
+#define H5Z_ZFP_PUSH_AND_GOTO(MAJ, MIN, RET, MSG)     \
+do                                                    \
+{                                                     \
+    H5Epush(H5E_DEFAULT,__FILE__,_funcname_,__LINE__, \
+        H5Z_ZFP_ERRCLASS,MAJ,MIN,MSG);                \
+    retval = RET;                                     \
+    goto done;                                        \
 } while(0)
 
 static size_t H5Z_filter_zfp   (unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[],
@@ -129,6 +143,26 @@ const void *H5PLget_plugin_info(void) {return H5Z_ZFP;}
 #endif
 
 static hid_t H5Z_ZFP_ERRCLASS = -1;
+static void H5Z_zfp_finalize(void)
+{
+    if (H5Z_ZFP_ERRCLASS == -1)
+        H5Eunregister_class(H5Z_ZFP_ERRCLASS);
+    H5Z_ZFP_ERRCLASS = -1;
+}
+
+static void H5Z_zfp_init(void)
+{
+    /* Register the error class */
+    if (H5Z_ZFP_ERRCLASS == -1)
+    {
+        H5Z_ZFP_ERRCLASS = H5Eregister_class("H5Z-ZFP", "ZFP-" ZFP_VERSION_STR,
+                                             "H5Z-ZFP-" H5Z_FILTER_ZFP_VERSION_STR);
+#if !defined(AS_SILO_BUILTIN) && !defined(NDEBUG)
+        /* helps to eliminate resource leak for memory analysis */
+        atexit(H5Z_zfp_finalize);
+#endif
+    }
+}
 
 static htri_t
 H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
@@ -140,11 +174,7 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     hsize_t dims[H5S_MAX_RANK];
     H5T_class_t dclass;
 
-    /* Register the error class in can_apply as it is first function here
-       to ever be called if this filter is activated */
-    if (H5Z_ZFP_ERRCLASS == -1)
-        H5Z_ZFP_ERRCLASS = H5Eregister_class("H5Z-ZFP", "ZFP-" ZFP_VERSION_STR,
-                                             "H5Z-ZFP-" H5Z_FILTER_ZFP_VERSION_STR);
+    H5Z_zfp_init();
 
     /* Disable the ZFP filter entirely if it looks like the ZFP library
        hasn't been compiled for 8-bit stream word size */
@@ -208,6 +238,8 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     bitstream *dummy_bstr = 0;
     zfp_stream *dummy_zstr = 0;
 
+    H5Z_zfp_init();
+
     if (0 > (dclass = H5Tget_class(type_id)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_ARGS, H5E_BADTYPE, -1, "not a datatype");
 
@@ -246,7 +278,7 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         case 2: dummy_field = Z zfp_field_2d(0, zt, dims_used[0], dims_used[1]); break;
         case 3: dummy_field = Z zfp_field_3d(0, zt, dims_used[0], dims_used[1], dims_used[2]); break;
         default: H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
-                     "requires chunking have 1,2 or 3 non-unity dimensions");
+                     "requires chunks w/1,2 or 3 non-unity dims");
     }
     if (!dummy_field)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_field_Xd() failed");
@@ -254,17 +286,11 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     /* get current cd_values and re-map to new cd_value set */
     H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_ZFP, &flags, &mem_cd_nelmts, mem_cd_values, 0, NULL, NULL);
 
-    /* Handle default cause when no cd_values are passed */
-    if (mem_cd_nelmts != H5Z_ZFP_CD_NELMTS_MEM)
+    /* Handle default case when no cd_values are passed by using ZFP library defaults. */
+    if (mem_cd_nelmts == 0)
     {
-        double acc = 0;
-
-        if (mem_cd_nelmts != 0)
-            H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid cd_nelmts");
-
-        /* treat zero length cd_values as accuracy mode with zero tolerance */
-        mem_cd_values[0] = H5Z_ZFP_MODE_ACCURACY;
-        memcpy(&mem_cd_values[2], &acc, sizeof(double));
+        mem_cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM;
+        H5Pset_zfp_expert_cdata(ZFP_MIN_BITS, ZFP_MAX_BITS, ZFP_MAX_PREC, ZFP_MIN_EXP, mem_cd_nelmts, mem_cd_values);
     }
         
     /* Into hdr_cd_values, we encode ZFP library and H5Z-ZFP plugin version info at
@@ -329,10 +355,10 @@ done:
 }
 
 static int
-get_zfp_info_from_cd_values_0x0020(size_t cd_nelmts, unsigned int const *cd_values,
+get_zfp_info_from_cd_values_0x0030(size_t cd_nelmts, unsigned int const *cd_values,
     uint64 *zfp_mode, uint64 *zfp_meta, H5T_order_t *swap)
 {
-    static char const *_funcname_ = "get_zfp_info_from_cd_values_0x0020";
+    static char const *_funcname_ = "get_zfp_info_from_cd_values_0x0030";
     unsigned int cd_values_copy[H5Z_ZFP_CD_NELMTS_MAX];
     int retval = 0;
     bitstream *bstr = 0;
@@ -399,9 +425,15 @@ get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
     uint64 *zfp_mode, uint64 *zfp_meta, H5T_order_t *swap)
 {
     unsigned int const h5z_zfp_version_no = cd_values[0]&0x0000FFFF;
+    int retval = 0;
 
-    if (h5z_zfp_version_no == 0x0020)
-        return get_zfp_info_from_cd_values_0x0020(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
+    H5Z_zfp_init();
+
+    if (0x0030 == h5z_zfp_version_no || 0x0020 == h5z_zfp_version_no)
+        return get_zfp_info_from_cd_values_0x0030(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
+
+    H5Epush(H5E_DEFAULT, __FILE__, "", __LINE__, H5Z_ZFP_ERRCLASS, H5E_PLINE, H5E_BADVALUE,
+        "version mismatch: (file) 0x0%x <-> 0x0%x (code)", h5z_zfp_version_no, H5Z_FILTER_ZFP_VERSION_NO);
 
     return 0;
 }
@@ -551,5 +583,8 @@ done:
     if (newbuf) free(newbuf);
     return retval ;
 }
+
+#undef Z
+#undef B
 
 #endif /* } H5_HAVE_FILTER_ZFP */

@@ -1,4 +1,3 @@
-
 /*
 Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-XXXXXX; part of LLNL-CODE-425250.
@@ -59,7 +58,7 @@ be used for advertising or product endorsement purposes.
 #define H5Z_FILTER_ZFP 32013
 
 #define H5Z_FILTER_ZFP_VERSION_MAJOR 0
-#define H5Z_FILTER_ZFP_VERSION_MINOR 2
+#define H5Z_FILTER_ZFP_VERSION_MINOR 3
 #define H5Z_FILTER_ZFP_VERSION_PATCH 0
 
 /* Convenient CPP logic to capture H5Z_ZFP Filter version numbers as string and hex number */

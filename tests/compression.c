@@ -66,7 +66,7 @@ be used for advertising or product endorsement purposes.
 #include <stdlib.h>
 
 #define ONE_MEG 1048576
-#define INTERATE 50
+#define ITERATE 50
 
 #include <std.c>
 
@@ -113,6 +113,7 @@ main(int argc, char *argv[])
     off_t          fsize;
     int            has_loss = 0;
     int            show_errors = DB_TOP;
+    double         noise = 0.3;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -195,18 +196,23 @@ main(int argc, char *argv[])
       gettimeofday(&tim, NULL);
       t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 #endif
+      srandom(0xDeadBeef);
       if (usefloat)
       {
-         for (j = 0; j < INTERATE; j++)
+         for (j = 0; j < ITERATE; j++)
          {
             if (verbose)
              if (j % 100 == 0)
-               printf("Iterations %04d to %04d of %04d\n", j,j+100-1,INTERATE);
+               printf("Iterations %04d to %04d of %04d\n", j,j+100-1,ITERATE);
 
             sprintf(tmpname, "compression_%04d", j);
 
             for (i = 0; i < fdims[0]; i++)
-               fval[i] = (float) fdims[0] * j + i;
+            {
+                double x = 2 * M_PI * (double) i / (double) (fdims[0]-1);
+                double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
+                fval[i] = (float) ((j+1) * (1 + sin(x)) + n);
+            }
 
             if (DBWrite(dbfile, tmpname, fval, fdims, ndims, DB_FLOAT) < 0)
             {
@@ -217,16 +223,20 @@ main(int argc, char *argv[])
       }
       else
       {
-         for (j = 0; j < INTERATE; j++)
+         for (j = 0; j < ITERATE; j++)
          {
             if (verbose)
                if (j % 100 == 0)
-                 printf("Iterations %04d to %04d of %04d\n",j,j+100-1,INTERATE);
+                 printf("Iterations %04d to %04d of %04d\n",j,j+100-1,ITERATE);
 
             sprintf(tmpname, "compression_%04d", j);
 
             for (i = 0; i < ddims[0]; i++)
-               dval[i] = (double) ddims[0] * j + i;
+            {
+                double x = 2 * M_PI * (double) i / (double) (ddims[0]-1);
+                double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
+                dval[i] = (double) ((j+1) * (1 + sin(x)) + n);
+            }
 
             if (DBWrite(dbfile, tmpname, dval, ddims, ndims, DB_DOUBLE) < 0)
             {
@@ -273,13 +283,14 @@ main(int argc, char *argv[])
     gettimeofday(&tim, NULL);
     t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 #endif
+    srandom(0xDeadBeef);
     if (usefloat)
     {
-       for (j = 0; j < INTERATE; j++)
+       for (j = 0; j < ITERATE; j++)
        {
           if (verbose)
              if (j % 100 == 0)
-                printf("Iterations %04d to %04d of %04d\n", j,j+100-1,INTERATE);
+                printf("Iterations %04d to %04d of %04d\n", j,j+100-1,ITERATE);
 
           sprintf(tmpname, "compression_%04d", j);
 
@@ -291,7 +302,9 @@ main(int argc, char *argv[])
           }
           for (i = 0; i < fdims[0]; i++)
           {
-             fval[i] = (float) fdims[0] * j + i;
+             double x = 2 * M_PI * (double) i / (double) (fdims[0]-1);
+             double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
+             fval[i] = (float) ((j+1) * (1 + sin(x)) + n);
              if (fval[i] != frval[i])
              {
                 if (!strcmp(DBGetCompression(), "METHOD=ZFP RATE=8.5"))
@@ -299,10 +312,10 @@ main(int argc, char *argv[])
                     double rel_err = 0;
                     if (fval[i] != 0) rel_err = (fval[i] - frval[i]) / fval[i];
                     if (rel_err < 0) rel_err = -rel_err;
-                    if (rel_err > 0.01 && nerrors <= 10)
+                    if (rel_err > 0.001 && nerrors <= 10)
                     {
-                        printf("Read error above tolerance \"%s\" at position %04d. "
-                            "Expected %f, got %f, err = %f\n", fval[i], frval[i], rel_err);
+                        printf("Read error above tolerance in \"%s\" at position %04d. "
+                            "Expected %f, got %f, err = %f\n", tmpname, i, fval[i], frval[i], rel_err);
                         if (nerrors == 10) printf("Further errors will be suppressed\n");
                         nerrors++;
                     }
@@ -319,11 +332,11 @@ main(int argc, char *argv[])
     }
     else
     {
-       for (j = 0; j < INTERATE; j++)
+       for (j = 0; j < ITERATE; j++)
        {
           if (verbose)
              if (j % 100 == 0)
-                printf("Iterations %04d to %04d of %04d\n",j,j+100-1,INTERATE);
+                printf("Iterations %04d to %04d of %04d\n",j,j+100-1,ITERATE);
 
           sprintf(tmpname, "compression_%04d", j);
 
@@ -335,7 +348,9 @@ main(int argc, char *argv[])
           }
           for (i = 0; i < ddims[0]; i++)
           {
-             dval[i] = (double) ddims[0] * j + i;
+             double x = 2 * M_PI * (double) i / (double) (ddims[0]-1);
+             double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
+             dval[i] = (double) ((j+1) * (1 + sin(x)) + n);
              if (dval[i] != drval[i])
              {
                 if (!has_loss) nerrors++;
