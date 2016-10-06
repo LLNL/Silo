@@ -77,7 +77,7 @@ product endorsement purposes.
    Datasets are written at the leaves of a 1, 2 or 3-level deep group hierarchy.
 
    Datasets may be compressed (only zlib is currently used) and may be written
-   int compact or contiguous mode.
+   in compact or contiguous mode.
 
    Running the program with no args, does a default run of 1000 datasets, all in
    the root directory. Each dataset is a single double. The program *always* prints
@@ -157,8 +157,16 @@ double GetTime()
         continue;                                    \
     }
 
+#define READ_MDC_BOOL(HTYPE,MEMNM,CS)                \
+    if (sscanf(line,#MEMNM"="CS,(int *)tmp) == 1 && !errno) \
+    {                                                \
+        h5_mdc_config.MEMNM = (HTYPE) *((HTYPE*)tmp);\
+        had_error = 0;                               \
+        continue;                                    \
+    }
+
 #define READ_MDC_PARAM(HTYPE,MEMNM,CS)               \
-    if (sscanf(line,#MEMNM"="CS,tmp) == 1 && !errno) \
+    if (sscanf(line,#MEMNM"="CS,(HTYPE *)tmp) == 1 && !errno) \
     {                                                \
         h5_mdc_config.MEMNM = (HTYPE) *((HTYPE*)tmp);\
         had_error = 0;                               \
@@ -180,7 +188,7 @@ void th5_set_mdc_config(char *mdc_config_filename,
     FILE *mdcf = 0;
     hid_t faprops = H5Pcreate(H5P_FILE_ACCESS);
     char line[256];
-    unsigned char tmp[256];
+    char tmp[256];
     int had_error = 0;
 
     h5_mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -199,23 +207,23 @@ void th5_set_mdc_config(char *mdc_config_filename,
         line[strcspn(line, "\r\n")] = 0;
         had_error = 1;
         errno = 0;
-        READ_MDC_PARAM(hbool_t, rpt_fcn_enabled, "%d");
-        READ_MDC_PARAM(hbool_t, open_trace_file, "%d");
-        READ_MDC_PARAM(hbool_t, close_trace_file, "%d");
+        READ_MDC_BOOL(hbool_t, rpt_fcn_enabled, "%d");
+        READ_MDC_BOOL(hbool_t, open_trace_file, "%d");
+        READ_MDC_BOOL(hbool_t, close_trace_file, "%d");
         READ_MDC_STR(char *, trace_file_name, "%s");
-        READ_MDC_PARAM(hbool_t, evictions_enabled, "%d");
-        READ_MDC_PARAM(hbool_t, set_initial_size, "%d");
-        READ_MDC_PARAM(size_t, initial_size, "%d");
+        READ_MDC_BOOL(hbool_t, evictions_enabled, "%d");
+        READ_MDC_BOOL(hbool_t, set_initial_size, "%d");
+        READ_MDC_PARAM(size_t, initial_size, "%zu");
         READ_MDC_PARAM(double, min_clean_fraction, "%lf");
-        READ_MDC_PARAM(size_t, max_size, "%d");
-        READ_MDC_PARAM(size_t, min_size, "%d");
+        READ_MDC_PARAM(size_t, max_size, "%zu");
+        READ_MDC_PARAM(size_t, min_size, "%zu");
         READ_MDC_PARAM(int, epoch_length, "%d");
         READ_MDC_ENUM(enum H5C_cache_incr_mode, incr_mode, H5C_incr__off);
         READ_MDC_ENUM(enum H5C_cache_incr_mode, incr_mode, H5C_incr__threshold);
         READ_MDC_PARAM(double, lower_hr_threshold , "%lf");
         READ_MDC_PARAM(double, increment , "%lf");
-        READ_MDC_PARAM(hbool_t, apply_max_increment, "%d");
-        READ_MDC_PARAM(size_t, max_increment, "%d");
+        READ_MDC_BOOL(hbool_t, apply_max_increment, "%d");
+        READ_MDC_PARAM(size_t, max_increment, "%zu");
         READ_MDC_ENUM(enum H5C_cache_flash_incr_mode, flash_incr_mode, H5C_flash_incr__off);
         READ_MDC_ENUM(enum H5C_cache_flash_incr_mode, flash_incr_mode, H5C_flash_incr__add_space);
         READ_MDC_PARAM(double, flash_threshold, "%lf");
@@ -226,10 +234,10 @@ void th5_set_mdc_config(char *mdc_config_filename,
         READ_MDC_ENUM(enum H5C_cache_decr_mode, decr_mode, H5C_decr__age_out_with_threshold);
         READ_MDC_PARAM(double, upper_hr_threshold, "%lf");
         READ_MDC_PARAM(double, decrement , "%lf");
-        READ_MDC_PARAM(hbool_t, apply_max_decrement, "%d");
-        READ_MDC_PARAM(size_t, max_decrement, "%d");
+        READ_MDC_BOOL(hbool_t, apply_max_decrement, "%d");
+        READ_MDC_PARAM(size_t, max_decrement, "%zu");
         READ_MDC_PARAM(int, epochs_before_eviction, "%d");
-        READ_MDC_PARAM(hbool_t, apply_empty_reserve, "%d");
+        READ_MDC_BOOL(hbool_t, apply_empty_reserve, "%d");
         READ_MDC_PARAM(double, empty_reserve, "%lf");
         READ_MDC_PARAM(int, dirty_bytes_threshold, "%d");
         if (!errno) /* this logic is broken due to errno resetting */
@@ -471,13 +479,18 @@ static hid_t file_create_props(int estlink, int maxlink)
 }
 
 
-static hid_t file_access_props(int compat, int cache, H5AC_cache_config_t *mdc_config)
+static hid_t file_access_props(int compat, int cache, int eoc, H5AC_cache_config_t *mdc_config)
 {
     hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
 
 #if HDF5_VERSION_GE(1,6,0)
     if (!compat)
         H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+#endif
+
+#if HDF5_VERSION_GE(1,9,0)
+    if (eoc)
+        H5Pset_evict_on_close(retval, (hbool_t)1);
 #endif
 
     if (!cache)
@@ -493,14 +506,14 @@ static hid_t file_access_props(int compat, int cache, H5AC_cache_config_t *mdc_c
 }
 
 static hid_t do_file(int n, int closef, int newf,
-    int doread, int estlink, int maxlink, int compat, int cache,
+    int doread, int estlink, int maxlink, int compat, int cache, int eoc,
     char const *filename, hid_t fid, H5AC_cache_config_t *mdc_config)
 {
     if (newf && !(n%newf))
     {
         static int file_cnt = 0;
 
-        hid_t faprops = file_access_props(compat, cache, mdc_config);
+        hid_t faprops = file_access_props(compat, cache, eoc, mdc_config);
         char filename_base[64];
         char filename_tmp[128];
 
@@ -529,7 +542,7 @@ static hid_t do_file(int n, int closef, int newf,
 
     if (closef && !(n%closef))
     {
-        hid_t faprops = file_access_props(compat, cache, mdc_config);
+        hid_t faprops = file_access_props(compat, cache, eoc, mdc_config);
         H5Fclose(fid);
         fid = H5Fopen(filename, H5F_ACC_RDWR, faprops);
         H5Pclose(faprops);
@@ -630,7 +643,7 @@ int main(int argc, char **argv)
     int nd2 = 0;
     int nd3 = 0;
     int compat = 0;
-    int contig = 0;
+    int contig = 1;
     int dontae = 0;
     int estlink = 0;
     int freelim = 0;
@@ -645,6 +658,7 @@ int main(int argc, char **argv)
     int zip=0;
     int noise=0;
     int doread=0;
+    int eoc = 0;
     double minrate = 0, maxrate = 0;
     double t0, dstm = 0;
     hid_t fcprops, faprops;
@@ -705,6 +719,8 @@ int main(int argc, char **argv)
             tlim = (int) strtol(argv[i]+5,0,10);
         } else if (!strncmp(argv[i], "newf=", 5)) {
             newf = (int) strtol(argv[i]+5,0,10);
+        } else if (!strncmp(argv[i], "eoc=",4)) {
+            eoc = (int) strtol(argv[i]+4,0,10);
         } else if (!strncmp(argv[i], "mdc_config=",11)) {
             mdc_config = strdup(argv[i]+11);
         } else if (strstr(argv[i], "help")) {
@@ -755,6 +771,7 @@ int main(int argc, char **argv)
     PRINT_VAL(cache, set cache object (<=1.6.4) or byte (>1.6.4) count);
     PRINT_VAL(freelim, set free list limits to 1<<(<freelim>));
     PRINT_VAL(tlim, limit test to <tlim> minutes);
+    PRINT_VAL(eoc, turn on evict-on-close);
     PRINT_STRVAL(mdc_config, txt file of mdc config params);
     fflush(stdout);
     if (help) 
@@ -786,14 +803,14 @@ int main(int argc, char **argv)
 
     if (doread)
     {
-        faprops = file_access_props(compat, cache, h5_mdc_config_ptr);
+        faprops = file_access_props(compat, cache, eoc, h5_mdc_config_ptr);
         fid = H5Fopen(filename, H5F_ACC_RDONLY, faprops);
         H5Pclose(faprops);
     }
     else
     {
         int ncid;
-        faprops = file_access_props(compat, cache, h5_mdc_config_ptr);
+        faprops = file_access_props(compat, cache, eoc, h5_mdc_config_ptr);
         fcprops = file_create_props(estlink, maxlink);
         fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcprops, faprops);
         /*
@@ -854,7 +871,7 @@ int main(int argc, char **argv)
                     do_dataset(maps[3][l], grp3, doread, contig, dsize, zip, noise, &dscnt, &dstm);
                     if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                     if (gc && !(n%gc)) H5garbage_collect();
-                    do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid, h5_mdc_config_ptr);
+                    do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, eoc, filename, fid, h5_mdc_config_ptr);
                 }
 
                 if (!nd3)
@@ -867,7 +884,7 @@ int main(int argc, char **argv)
 #endif
                 if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                 if (gc && !(n%gc)) H5garbage_collect();
-                do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid, h5_mdc_config_ptr);
+                do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, eoc, filename, fid, h5_mdc_config_ptr);
             }
 
             if (!nd2)
@@ -880,7 +897,7 @@ int main(int argc, char **argv)
 #endif
             if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
             if (gc && !(n%gc)) H5garbage_collect();
-            do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid, h5_mdc_config_ptr);
+            do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, eoc, filename, fid, h5_mdc_config_ptr);
         }
 
         if (!nd1)
@@ -893,7 +910,7 @@ int main(int argc, char **argv)
 #endif
         if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
         if (gc && !(n%gc)) H5garbage_collect();
-        do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, filename, fid, h5_mdc_config_ptr);
+        do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, eoc, filename, fid, h5_mdc_config_ptr);
 
     }
 
@@ -932,15 +949,15 @@ int main(int argc, char **argv)
     FILE *procStats;
 
     /* Attempt to get some memory info from the system */
-    snprintf(procCmd, sizeof(procCmd), "grep VmHWM /proc/%llu/status", mypid);
+    snprintf(procCmd, sizeof(procCmd), "grep VmHWM /proc/%llu/status 2>/dev/null", mypid);
     procStats = popen(procCmd, "r");
-    if (procStats)
+    if (procStats && !errno)
     {
         char linbuf[256];
         while (fgets(linbuf, sizeof(linbuf), procStats))
         {
             char valbuf[32], unitsbuf[32];
-            if (sscanf(linbuf, "VmHWM: %s %s", valbuf, unitsbuf) == 2)
+            if (sscanf(linbuf, "VmHWM: %s %s", valbuf, unitsbuf) == 2 && !errno)
             {
                 vmhwm = strtol(valbuf,0,10);
                 vmhwm *= 1024; /* units are in KiB *always* */
@@ -950,13 +967,18 @@ int main(int argc, char **argv)
         pclose(procStats);
     }
 
-    printf("Virtual memory high water mark (VmHWM) was %llu bytes\n", vmhwm);
-    printf("Total time = %8.4f seconds, dataset time = %8.4f, other time = %8.4f (%4.2f %% of tot) seconds\n",
-        totsecs, dstm, mdsecs, mdsecs/totsecs*100);
-    printf("Total objects = %d: %d dirs, %d datasets (%4.2f %% of tot)\n",
-        n, dircnt, dscnt, dscnt*100.0/n);
-    printf("Object operation rate = %8.4f objs/sec, min=%8.4f, max=%8.4f, skew = %4.2f\n",
-        n/mdsecs, minrate, maxrate, maxrate/minrate);
+    if (vmhwm > 0)
+        printf("Virtual memory high water mark (VmHWM) was %llu bytes\n", vmhwm);
+    printf("Total time = %8.4f seconds...\n", totsecs);
+    printf("    other time   = %8.4f (%4.2f %%) seconds\n", mdsecs, mdsecs/totsecs*100);
+    printf("    dataset time = %8.4f (%4.2f %%)\n", dstm, dstm/totsecs*100);
+    printf("Total objects = %d...\n", n);
+    printf("    dirs = %8d     (%4.2f %%)\n", dircnt, dircnt*100.0/n);
+    printf("    datasets = %8d (%4.2f %%)\n", dscnt, dscnt*100.0/n);
+    printf("Object operation rate = %8.4f objs/sec...\n", n/mdsecs);
+    printf("    min = %8.4f\n", minrate);
+    printf("    max = %8.4f\n", maxrate);
+    printf("   skew = %4.2f\n", maxrate/minrate);
     if (zip && other_bytes > all_bytes)
     {
         printf("File size = %llu (compressed), overall zip ratio (w/overheads) = %4.2f : 1\n",
@@ -964,8 +986,9 @@ int main(int argc, char **argv)
     } 
     else
     {
-        printf("File size = %llu, raw = %llu (%4.2f %%), other = %llu (%4.2f %%)\n",
-            (unsigned long long) sbuf.st_size, raw_bytes, raw_percent, other_bytes, other_percent);
+        printf("File size = %llu...\n", (unsigned long long) sbuf.st_size);
+        printf("    raw = %llu (%4.2f %%)\n", raw_bytes, raw_percent);
+        printf("  other = %llu (%4.2f %%)\n", other_bytes, other_percent); 
         printf("Average object overhead is ~%llu bytes\n", (all_bytes - raw_bytes) / n);
     }
     }

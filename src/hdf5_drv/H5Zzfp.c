@@ -143,7 +143,11 @@ const void *H5PLget_plugin_info(void) {return H5Z_ZFP;}
 #endif
 
 static hid_t H5Z_ZFP_ERRCLASS = -1;
+#ifdef AS_SILO_BUILTIN
+void H5Z_zfp_finalize(void)
+#else
 static void H5Z_zfp_finalize(void)
+#endif
 {
     if (H5Z_ZFP_ERRCLASS == -1)
         H5Eunregister_class(H5Z_ZFP_ERRCLASS);

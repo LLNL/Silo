@@ -137,6 +137,7 @@ do {                                                    \
 
 #ifdef AS_SILO_BUILTIN
 extern void H5Z_zfp_register(void);
+extern void H5Z_zfp_finalize(void);
 #endif
 
 #endif
