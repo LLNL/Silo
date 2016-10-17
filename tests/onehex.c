@@ -63,7 +63,7 @@ product endorsement purposes.
    version 1.8 and thereafter. When, and if, the HDF5 code in this file
    is explicitly upgraded to the 1.8 API, this symbol should be removed. */
 #define H5_USE_16_API
-#include <hdf5.h>
+#include <hdf5.h> /* for testing custom fapl/fcpl options */
 #endif
 
 #define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}

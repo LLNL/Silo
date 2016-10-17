@@ -2190,6 +2190,7 @@ SILO_API extern void                   DBStringArrayToStringList(char const * co
 SILO_API extern char **                DBStringListToStringArray(char const *strList, int *n, int skipSemicolonAtIndexZero);
 SILO_API extern int                    DBIsDifferentDouble(double a, double b, double abstol, double reltol, double reltol_eps);
 SILO_API extern int                    DBIsDifferentLongLong(long long a, long long b, double abstol, double reltol, double reltol_eps);
+SILO_API extern int                    DBCalcDenseArraysFromMaterial(DBmaterial const *mat, int datatype, int *narrs, void ***vfracs);
 
 /* Fortran interface functions */
 SILO_API extern void *                 DBFortranAccessPointer(int value);

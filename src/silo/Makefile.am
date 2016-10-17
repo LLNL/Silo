@@ -103,6 +103,7 @@ FILES = \
  extface.c \
  silo.c  \
  silo_ns.c \
+ utils.c \
  $(EXTRAFILES)
 
 BUILT_SOURCES = silo.inc silo_f9x.inc

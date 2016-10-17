@@ -116,7 +116,7 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_silo_la_LIBADD =
 am__libsilo_silo_la_SOURCES_DIST = alloc.c extface.c silo.c silo_ns.c \
-	silo_f.c silo_json.c
+	silo_f.c silo_json.c utils.c
 @FORTRAN_NEEDED_TRUE@am__objects_1 = silo_f.lo
 @JSON_NEEDED_TRUE@am__objects_2 = silo_json.lo
 am__objects_3 = $(am__objects_1) $(am__objects_2)
@@ -371,6 +371,7 @@ FILES = \
  extface.c \
  silo.c  \
  silo_ns.c \
+ utils.c \
  $(EXTRAFILES)
 
 BUILT_SOURCES = silo.inc silo_f9x.inc

@@ -906,17 +906,14 @@ DBFreeQuadmesh(DBquadmesh *msh)
 PUBLIC int
 DBIsEmptyQuadmesh(DBquadmesh const *msh)
 {
-    int i, is_empty = 1;
+    int i;
 
-    for (i = 0; msh && i < msh->ndims; i++)
-    {
-        if (msh->dims[i] > 0)
-        {
-            is_empty = 0;
-            break;
-        }
-    }
-    return is_empty;
+    if (!msh) return 1;
+
+    for (i = 0; i < msh->ndims; i++)
+        if (msh->dims[i] <= 0) return 1;
+
+    return 0;
 }
 
 /*----------------------------------------------------------------------
@@ -1329,17 +1326,14 @@ DBFreeQuadvar(DBquadvar *var)
 PUBLIC int
 DBIsEmptyQuadvar(DBquadvar const *var)
 {
-    int i, is_empty = 1;
+    int i;
 
-    for (i = 0; var && i < var->ndims; i++)
-    {
-        if (var->dims[i] > 0)
-        {
-            is_empty = 0;
-            break;
-        }
-    }
-    return is_empty;
+    if (!var) return 1;
+
+    for (i = 0; i < var->ndims; i++)
+        if (var->dims[i] <= 0) return 1;
+
+    return 0;
 }
 
 /*----------------------------------------------------------------------
@@ -1804,17 +1798,14 @@ DBFreeMaterial(DBmaterial *mats)
 PUBLIC int
 DBIsEmptyMaterial(DBmaterial const *mats)
 {
-    int i, is_empty = 1;
+    int i;
 
-    for (i = 0; mats && i < mats->ndims; i++)
-    {
-        if (mats->dims[i] > 0)
-        {
-            is_empty = 0;
-            break;
-        }
-    }
-    return is_empty;
+    if (!mats) return 1;
+
+    for (i = 0; i < mats->ndims; i++)
+        if (mats->dims[i] <= 0) return 1;
+
+    return 0;
 }
 
 /*----------------------------------------------------------------------
@@ -1898,20 +1889,17 @@ DBFreeMatspecies(DBmatspecies *species)
 PUBLIC int
 DBIsEmptyMatspecies(DBmatspecies const *species)
 {
-    int i, is_empty = 1;
+    int i;
 
-    if (species->nspecies_mf == 0)
+    if (!species) return 1;
+
+    if (species->nspecies_mf <= 0)
         return 1;
 
-    for (i = 0; species && i < species->ndims; i++)
-    {
-        if (species->dims[i] > 0)
-        {
-            is_empty = 0;
-            break;
-        }
-    }
-    return is_empty;
+    for (i = 0; i < species->ndims; i++)
+        if (species->dims[i] <= 0) return 1;
+
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
