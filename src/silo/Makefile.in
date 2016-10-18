@@ -116,11 +116,11 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_silo_la_LIBADD =
 am__libsilo_silo_la_SOURCES_DIST = alloc.c extface.c silo.c silo_ns.c \
-	silo_f.c silo_json.c utils.c
+	utils.c silo_f.c silo_json.c
 @FORTRAN_NEEDED_TRUE@am__objects_1 = silo_f.lo
 @JSON_NEEDED_TRUE@am__objects_2 = silo_json.lo
 am__objects_3 = $(am__objects_1) $(am__objects_2)
-am__objects_4 = alloc.lo extface.lo silo.lo silo_ns.lo \
+am__objects_4 = alloc.lo extface.lo silo.lo silo_ns.lo utils.lo \
 	$(am__objects_3)
 am_libsilo_silo_la_OBJECTS = $(am__objects_4)
 libsilo_silo_la_OBJECTS = $(am_libsilo_silo_la_OBJECTS)
@@ -437,6 +437,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_f.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_json.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/silo_ns.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

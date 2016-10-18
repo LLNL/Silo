@@ -139,7 +139,7 @@ enum NVARS { NV_U, NV_V };
 int nmat = 4;
 int nspec[]={2,4,5,1};
 int matnos[]={1,2,3,4};
-char *matnames[]={"Top", "Lower right", "Bottom", "Left"};
+char *matnames[]={"Top", "Lower_right", "Bottom", "Left"};
 char *specnames[]={"Brad","Kathleen","Mark","Hank","Eric",
                    "Jeremy","Cyrus","Sean","Dave","Randy",
                    "Gunther","Tom"};

@@ -493,11 +493,9 @@ static hid_t file_access_props(int compat, int cache, int eoc, H5AC_cache_config
         H5Pset_evict_on_close(retval, (hbool_t)1);
 #endif
 
-    if (!cache)
-        return retval;
-
 #if !HDF5_VERSION_GE(1,6,4)
-    H5Pset_cache(retval, cache, 1000, 10000, 0.5);
+    if (cache)
+        H5Pset_cache(retval, cache, 1000, 10000, 0.5);
 #elif HDF5_VERSION_GE(1,8,0)
     if (mdc_config)
         H5Pset_mdc_config(retval, mdc_config);

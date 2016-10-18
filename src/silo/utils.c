@@ -53,13 +53,195 @@ be used for advertising or product endorsement purposes.
 */
 
 #include <assert.h>
+#include <limits.h>
 
 #include "silo_private.h"
 
-PUBLIC
-DBmaterial *DBCalcMaterialFromDenseArrays(int narrs, int const *matnos, int datatype, DBVCP2_t vfracs)
-{ 
+static double get_frac(int m, int i, int dtype, DBVCP2_t const vfracs)
+{
+    if (dtype == DB_FLOAT)
+    {
+        float const **ffracs = (float const **) vfracs;
+        if (!ffracs[m]) return 0;
+        return ffracs[m][i];
+    }
+    else if (dtype == DB_DOUBLE)
+    {
+        double const **dfracs = (double const **) vfracs;
+        if (!dfracs[m]) return 0;
+        return dfracs[m][i];
+    }
     return 0;
+}
+
+static void put_frac(void *mix_vf, int mixlen, int dtype, double vf)
+{
+    if (dtype == DB_FLOAT)
+    {
+        float *fmix_vf = (float *) mix_vf;
+        fmix_vf[mixlen] = (float) vf;
+    }
+    else if (dtype == DB_DOUBLE)
+    {
+        double *dmix_vf = (double *) mix_vf;
+        dmix_vf[mixlen] = vf;
+    }
+}
+
+static
+DBmaterial *db_CalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims,
+    int const *matnos, int dtype, DBVCP2_t const vfracs)
+{
+    const int notSet = INT_MAX;
+    int i,m,z,nzones = 1;
+    int *matlist = 0, mixlen = 0, *mix_mat = 0;
+    int *mix_zone = 0, *mix_next = 0;
+    int *matnos_copy = 0;
+    void *mix_vf = 0;
+    DBmaterial *mat = 0;
+
+    /* copy matnos (we'll need it for returned material object anyways) */
+    matnos_copy = (int *) malloc(narrs * sizeof(int));
+    if (!matnos_copy) goto cleanup;
+    memcpy(matnos_copy, matnos, narrs * sizeof(int));
+
+    /* compute number of zones (and array length) */
+    for (i = 0; i < ndims; i++)
+        nzones *= dims[i];
+
+    /* allocate and fill matlist array with the 'notSet' value */
+    matlist = (int *) malloc(nzones * sizeof(int)); 
+    if (!matlist) goto cleanup;
+
+    for (i = 0; i < nzones; i++)
+        matlist[i] = notSet;
+
+    /* pre-compute size of mix arrays */
+    for (m = 0; m < narrs; m++)
+    {
+        for (z = 0; z < nzones; z++)
+        {
+            double vf = get_frac(m, z, dtype, vfracs);
+            if (0 < vf && vf < 1)
+                mixlen++;
+        }
+    }
+
+    /* allocate mix arrays */
+    mix_vf   = malloc(mixlen * (dtype==DB_FLOAT?sizeof(float):sizeof(double))); 
+    if (!mix_vf) goto cleanup;
+    mix_mat  = (int *) malloc(mixlen * sizeof(int));
+    if (!mix_mat) goto cleanup;
+    mix_zone = (int *) malloc(mixlen * sizeof(int));
+    if (!mix_zone) goto cleanup;
+    mix_next = (int *) malloc(mixlen * sizeof(int));
+    if (!mix_next) goto cleanup;
+
+    mixlen = 0;
+    for (m = 0; m < narrs; m++)
+    {
+        for (z = 0; z < nzones; z++)
+        {
+            double vf = get_frac(m, z, dtype, vfracs);
+
+            if (vf >= 1.0)
+            {
+                matlist[z] = matnos[m];
+            }
+            else if (vf > 0.0)
+            {
+                if (matlist[z] == notSet)
+                {
+                    /* put the first entry in the list for this zone */
+                    matlist[z] = -(mixlen+1); 
+                    mix_mat [mixlen] = matnos[m];
+                    put_frac(mix_vf, mixlen, dtype, vf);
+                    mix_zone[mixlen] = z;
+                    mix_next[mixlen] = 0;
+                }
+                else if (matlist[z] < 0)
+                {
+                    /* walk forward through the list for this zone */
+                    int j = -(matlist[z]+1);
+                    while (mix_next[j]!=0)
+                        j = mix_next[j]-1;
+
+                    /* link up last entry in list with the new entry */
+                    mix_next[j] = mixlen+1;
+
+                    /* put in the new entry */
+                    mix_mat [mixlen] = matnos[m];
+                    put_frac(mix_vf, mixlen, dtype, vf);
+                    mix_zone[mixlen] = z;
+                    mix_next[mixlen] = 0;
+                }
+                else
+                {
+                    /* We've encountered a zone with a frac>=1 *AND* another
+                       frac > 0. We ignore the frac>0 since we already have
+                       marked the zone clean for the frac>=1. We effectively
+                       put a placeholder entry into the mix arrays here. */
+                    mix_mat [mixlen] = matnos[m];
+                    put_frac(mix_vf, mixlen, dtype, vf);
+                    mix_zone[mixlen] = z;
+                    mix_next[mixlen] = 0;
+                }
+                mixlen++;
+            }
+        }
+    }
+
+    /* create material object to return */
+    mat = DBAllocMaterial();
+    mat->origin = 0;
+    mat->ndims = ndims;
+    for (i = 0; i < ndims; i++)
+        mat->dims[i] = dims[i];
+    mat->nmat = narrs;
+    mat->matnos = matnos_copy;
+    mat->matlist = matlist;
+    mat->datatype = dtype;
+    mat->mix_vf = mix_vf;
+    mat->mix_next = mix_next;
+    mat->mix_mat = mix_mat;
+    mat->mix_zone = mix_zone;
+    mat->mixlen = mixlen;
+
+    return(mat);
+
+cleanup:
+
+    FREE(matnos_copy);
+    FREE(matlist); 
+    FREE(mix_vf);
+    FREE(mix_mat);
+    FREE(mix_zone);
+    FREE(mix_next);
+
+    return 0;
+}
+
+PUBLIC
+DBmaterial *DBCalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims,
+    int const *matnos, int dtype, DBVCP2_t const vfracs)
+{
+    DBmaterial *retval = 0;
+
+    API_BEGIN("DBCalcMaterialFromDenseArrays", DBmaterial*, 0) {
+        if (narrs<=0)
+            API_ERROR("narrs<=0", E_BADARGS);
+        if (ndims<=0)
+            API_ERROR("ndims<=0", E_BADARGS);
+        if (!dims)
+            API_ERROR("dims==0", E_BADARGS);
+        if (!matnos)
+            API_ERROR("matnos==0", E_BADARGS);
+        if (!vfracs)
+            API_ERROR("vfracs==0", E_BADARGS);
+        retval = db_CalcMaterialFromDenseArrays(narrs, ndims, dims, matnos, dtype, vfracs);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP;
 }
 
 PUBLIC

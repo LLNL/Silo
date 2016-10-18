@@ -114,8 +114,8 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
 	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
 	empty$(EXEEXT) majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_6) \
-	$(am__EXEEXT_8)
+	test_mat_compression$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4) \
+	$(am__EXEEXT_6) $(am__EXEEXT_8)
 @HDF5_DRV_NEEDED_TRUE@am__append_4 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_5 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_6 = $(HDF5CKLTLIBS)
@@ -558,6 +558,13 @@ subhex_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@subhex_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
+test_mat_compression_SOURCES = test_mat_compression.c
+test_mat_compression_OBJECTS = test_mat_compression.$(OBJEXT)
+test_mat_compression_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@test_mat_compression_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_FALSE@	../src/libsilo.la $(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@test_mat_compression_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_TRUE@	../src/libsiloh5.la $(am__append_1)
 testall_SOURCES = testall.c
 testall_OBJECTS = testall.$(OBJEXT)
 testall_LDADD = $(LDADD)
@@ -727,8 +734,10 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_spec_SOURCES) spec.c \
 	$(nodist_EXTRA_specmix_SOURCES) specmix.c \
 	$(nodist_EXTRA_subhex_SOURCES) subhex.c \
-	$(nodist_EXTRA_testall_SOURCES) testall.c \
-	$(testallf77_SOURCES) $(nodist_EXTRA_testallf77_SOURCES) \
+	$(nodist_EXTRA_test_mat_compression_SOURCES) \
+	test_mat_compression.c $(nodist_EXTRA_testall_SOURCES) \
+	testall.c $(testallf77_SOURCES) \
+	$(nodist_EXTRA_testallf77_SOURCES) \
 	$(nodist_EXTRA_testfs_SOURCES) testfs.c $(testhdf5_SOURCES) \
 	$(nodist_EXTRA_testhdf5_SOURCES) \
 	$(nodist_EXTRA_testpdb_SOURCES) testpdb.c \
@@ -756,7 +765,8 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(am__pointf77_SOURCES_DIST) polyzl.c \
 	$(am__qmeshmat2df77_SOURCES_DIST) $(quad_SOURCES) \
 	$(am__quadf77_SOURCES_DIST) readstuff.c realloc_obj_and_opts.c \
-	$(rocket_SOURCES) simple.c spec.c specmix.c subhex.c testall.c \
+	$(rocket_SOURCES) simple.c spec.c specmix.c subhex.c \
+	test_mat_compression.c testall.c \
 	$(am__testallf77_SOURCES_DIST) testfs.c \
 	$(am__testhdf5_SOURCES_DIST) testpdb.c twohex.c ucd.c ucd1d.c \
 	$(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
@@ -1043,8 +1053,9 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
 	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
-	mat3d_3across merge_block empty majorder realloc_obj_and_opts \
-	$(PDBTESTS) $(JSONTESTS) $(am__append_4) $(am__append_7)
+	mat3d_3across merge_block test_mat_compression empty majorder \
+	realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS) $(am__append_4) \
+	$(am__append_7)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 bcastopen_SOURCES = bcastopen.c bcastopen_test.c
@@ -1146,6 +1157,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_json_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_test_mat_compression_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -1403,6 +1415,9 @@ specmix$(EXEEXT): $(specmix_OBJECTS) $(specmix_DEPENDENCIES)
 subhex$(EXEEXT): $(subhex_OBJECTS) $(subhex_DEPENDENCIES) 
 	@rm -f subhex$(EXEEXT)
 	$(CXXLINK) $(subhex_OBJECTS) $(subhex_LDADD) $(LIBS)
+test_mat_compression$(EXEEXT): $(test_mat_compression_OBJECTS) $(test_mat_compression_DEPENDENCIES) 
+	@rm -f test_mat_compression$(EXEEXT)
+	$(CXXLINK) $(test_mat_compression_OBJECTS) $(test_mat_compression_LDADD) $(LIBS)
 testall$(EXEEXT): $(testall_OBJECTS) $(testall_DEPENDENCIES) 
 	@rm -f testall$(EXEEXT)
 	$(CXXLINK) $(testall_OBJECTS) $(testall_LDADD) $(LIBS)
@@ -1504,6 +1519,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/specmix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subhex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_mat_compression.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testall.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testhdf5.Po@am__quote@

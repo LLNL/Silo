@@ -155,6 +155,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
+      test_mat_compression \
       empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS)
 
 dir_SOURCES = dir.c testlib.c
@@ -243,6 +244,7 @@ check_PROGRAMS = \
  empty \
  majorder \
  realloc_obj_and_opts \
+ test_mat_compression \
  $(PDBTESTS) \
  $(JSONTESTS)
 
@@ -320,6 +322,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
  nodist_EXTRA_json_SOURCES = dummy.cxx
  nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
+ nodist_EXTRA_test_mat_compression_SOURCES = dummy.cxx
 endif
 
 

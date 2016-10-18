@@ -62,6 +62,7 @@ product endorsement purposes.
 
 #define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
 #define ERROR(ARGS) { __line__ = __LINE__; print_error ARGS; exit(1); }
+#define FREE(x) if ( (x) != NULL) {free(x);(x)=NULL;}
 
 static int __line__ = 0;
 static void print_error(char *msg, ...)
@@ -81,7 +82,53 @@ static void print_error(char *msg, ...)
  * This test takes as input a filename and a material object name in that
  * file. It will then extract that material object and write it to a new
  * file using any one of a variety of options.
+ *
+ * Usage Examples
+ *
+ * ./test_mat_compression in=<file>:<obj> out=<file>:<obj> extra=<file> \
+ *     dense=<int> compress=<string> <driver>
+ *
+ * in= specifies Silo file name and material object name sep by ':'
+ * out= specifies output Silo file name and material object name sep by ':'
+ * compress= specify the compression algorithm and parameters string as
+ *     input to DBSetCompression().
+ * extra= specifies output Silo file with a number of extra objects to
+ *     facilitate analysis. This includes the original mesh object, the
+ *     unaltered dense volume fractions as mesh variables, the re-constructed
+ *     dense volume fractions as mesh variables and the material object
+ *     formed from the reconstructed dense volume fractions. This material
+ *     object represents what VisIt would 'see' after compression and
+ *     decompression.
+ * dense=<int> specifies whether to output dense material fractions (def=0)
+ * driver a Silo file driver such as DB_HDF5 (default) or DB_PDB or other
+ *     HDF5 variants. Note, compression works *only* with HDF5 variants.
+ *
+ * To extract a material object and put it in its own file...
+ *
+ *     ./test_mat_compression in=foo.pdb:Material out=bar.h5:Material
+ *
+ * To extract a material object and store it as dense volume fractions
+ * to its own file (no compression)...
+ *
+ *     ./test_mat_compression in=foo.pdb:Material out=bar.h5:Material dense=1
  * 
+ * To extract a material object and store it as dense volume fractions
+ * to its own file using GZIP compression level 3...
+ *
+ *     ./test_mat_compression in=foo.pdb:Material out=bar.h5:Material dense=1\
+ *     compress="METHOD=GZIP LEVEL=3"
+ *
+ * Note the quotes around the space-separated arg to compress option
+ *
+ * To extract a material object and store it as dense volume fractions
+ * to its own file using ZFP ACCURACY mode of 0.001
+ *
+ *     ./test_mat_compression in=foo.pdb:Material out=bar.h5:Material dense=1\
+ *     compress="METHOD=ZFP ACCURACY=0.001"
+ *
+ * Be aware that only Silo Quadmesh objects support multi-dimensional dense
+ * material volume fraction arrays. Ucdmesh objects will be only 1D.
+ *
  *****************************************************************************/
 
 int
@@ -92,12 +139,16 @@ main(int argc, char *argv[])
     int             driver = DB_HDF5;
     char            ifile[256], imat[256];
     char            ofile[256], omat[256];
-    int             ifileSet = 0, ofileSet = 0;
+    char            efile[256];
+    int             ifileSet = 0, ofileSet = 0, efileSet = 0;
     int             outputDense = 0;
     int             show_all_errors = 0;
     DBoptlist      *mat_opts = DBMakeOptlist(10);
     DBmaterial     *mat;
-    
+    int             narrs = 0;
+    void          **vfracs = 0;
+    char          **vfrac_varnames = 0;
+
     /* Parse command-line */
     for (i=1; i<argc; i++) {
 	if (!strncmp(argv[i], "DB_", 3)) {
@@ -124,6 +175,11 @@ main(int argc, char *argv[])
             ofile[sizeof(ofile)-1] = '\0';
             omat[sizeof(omat)-1] = '\0';
             ofileSet = 1;
+        } else if (!strncmp(argv[i], "extra=", 6)) {
+            char *fname = argv[i]+6;
+            strncpy(efile, fname, sizeof(efile));
+            efileSet = 1;
+            outputDense = 1;
         } else if (!strncmp(argv[i], "dense=", 6)) {
             outputDense = (int) strtol(argv[i]+6,0,10);
         } else if (!strncmp(argv[i], "compress=", 9)) {
@@ -157,18 +213,17 @@ main(int argc, char *argv[])
 
     if (outputDense)
     {
-        int narrs = 0;
-        void **vfracs = 0;
         DBCalcDenseArraysFromMaterial(mat, mat->datatype, &narrs, &vfracs);
         ASSERT(narrs = mat->nmat);
+        vfrac_varnames = (char **) malloc(narrs * sizeof(char*));
         for (i = 0; i < narrs; i++)
         {
-            char varname[64];
+            vfrac_varnames[i] = (char *) malloc(256*sizeof(char));
             if (mat->matnames && mat->matnames[i])
-                snprintf(varname, sizeof(varname), "%s_%s_%d_vfracs", omat, mat->matnames[i], mat->matnos[i]); 
+                snprintf(vfrac_varnames[i], 256, "%s_%s_%d_vfracs", omat, mat->matnames[i], mat->matnos[i]); 
             else
-                snprintf(varname, sizeof(varname), "%s_%d_vfracs", omat, mat->matnos[i]); 
-            DBWrite(outfile, varname, vfracs[i], mat->dims, mat->ndims, mat->datatype);
+                snprintf(vfrac_varnames[i], 256, "%s_%d_vfracs", omat, mat->matnos[i]); 
+            DBWrite(outfile, vfrac_varnames[i], vfracs[i], mat->dims, mat->ndims, mat->datatype);
         }
     }
     else
@@ -176,6 +231,131 @@ main(int argc, char *argv[])
         DBPutMaterial(outfile, omat, "unknown", mat->nmat, mat->matnos, mat->matlist, mat->dims, mat->ndims,
             mat->mix_next, mat->mix_mat, mat->mix_zone, mat->mix_vf, mat->mixlen, mat->datatype, mat_opts);
     }
+
+    /* Output an extra file with mesh vfracs as mesh variables 
+     * and reconstructed material object */
+    DBSetCompression(0);
+    if (efileSet)
+    {
+        int mtype;
+
+        DBfile *extrafile = DBOpen(efile, DB_UNKNOWN, DB_APPEND);
+        if (!extrafile )
+        {
+            extrafile  = DBCreate(efile, DB_CLOBBER, DB_LOCAL, "Material compression test; reconstructed data", driver);
+            if (!extrafile ) ERROR(("unable to open/create file \"%s\"\n", efile));
+        }
+
+        /* copy mesh from input file to extra file */
+        mtype = DBInqMeshtype(infile, mat->meshname);
+        if (mtype == DB_QUADRECT || mtype == DB_QUADCURV)
+        {
+            char const *coordnames[] = {"X","Y","Z"};
+            char meshname[256];
+            DBmaterial *cmat;
+
+            DBquadmesh *qm = DBGetQuadmesh(infile, mat->meshname);
+            if (!qm) ERROR(("unable to read mesh \"%s\" from file \"%s\"", mat->meshname, ifile));
+
+            /* copy the original mesh over */
+            DBPutQuadmesh(extrafile, mat->meshname, coordnames, qm->coords,
+                qm->dims, qm->nspace, qm->datatype, qm->coordtype, 0);
+
+            /* output original dense data as mesh variables */
+            snprintf(meshname, sizeof(meshname), "/%s", mat->meshname);
+            DBMkDir(extrafile, "original_dense");
+            DBSetDir(extrafile, "original_dense");
+            for (i = 0; i < narrs; i++)
+            {
+                DBPutQuadvar1(extrafile, vfrac_varnames[i], meshname, vfracs[i],
+                    mat->dims, mat->ndims, 0, 0, mat->datatype, DB_ZONECENT, 0);
+            }
+            DBSetDir(extrafile, "..");
+
+            /* read compressed dense and output as material object */
+            DBMkDir(extrafile, "compressed_dense");
+            DBSetDir(extrafile, "compressed_dense");
+            for (i = 0; i < narrs; i++)
+            {
+                free(vfracs[i]);
+                vfracs[i] = DBGetVar(outfile, vfrac_varnames[i]);
+                DBPutQuadvar1(extrafile, vfrac_varnames[i], meshname, vfracs[i],
+                    mat->dims, mat->ndims, 0, 0, mat->datatype, DB_ZONECENT, 0);
+            }
+            DBSetDir(extrafile, "..");
+
+            /* output compressed dense data as mesh variables */
+            cmat = DBCalcMaterialFromDenseArrays(narrs, mat->ndims, mat->dims, mat->matnos,
+                mat->datatype, vfracs);
+            DBPutMaterial(extrafile, omat, mat->meshname, cmat->nmat, cmat->matnos, cmat->matlist,
+                cmat->dims, cmat->ndims, cmat->mix_next, cmat->mix_mat, cmat->mix_zone, cmat->mix_vf,
+                cmat->mixlen, cmat->datatype, mat_opts);
+            DBFreeMaterial(cmat);
+        }
+        else if (mtype == DB_UCDMESH)
+        {
+            char const *coordnames[] = {"X","Y","Z"};
+            char meshname[256];
+            DBmaterial *cmat;
+            int nzones = 0;
+            DBzonelist *zl = 0;
+
+            DBucdmesh *um = DBGetUcdmesh(infile, mat->meshname);
+            if (!um) ERROR(("unable to read mesh \"%s\" from file \"%s\"", mat->meshname, ifile));
+
+            zl = um->zones?um->zones:0;
+            nzones = zl?zl->nzones:0;
+            DBPutUcdmesh(extrafile, mat->meshname, um->ndims, coordnames, um->coords, um->nnodes,
+                nzones, "zonelist", 0, um->datatype, 0);
+
+            if (zl)
+                DBPutZonelist2(extrafile, "zonelist", nzones, zl->ndims, zl->nodelist, zl->lnodelist,
+                    0, 0, 0, zl->shapetype, zl->shapesize, zl->shapecnt, zl->nshapes, 0);
+
+            /* output original dense data as mesh variables */
+            snprintf(meshname, sizeof(meshname), "/%s", mat->meshname);
+            DBMkDir(extrafile, "original_dense");
+            DBSetDir(extrafile, "original_dense");
+            for (i = 0; i < narrs; i++)
+            {
+                DBPutUcdvar1(extrafile, vfrac_varnames[i], meshname, vfracs[i],
+                    nzones, 0, 0, mat->datatype, DB_ZONECENT, 0);
+            }
+            DBSetDir(extrafile, "..");
+
+            /* read compressed dense and output as material object */
+            DBMkDir(extrafile, "compressed_dense");
+            DBSetDir(extrafile, "compressed_dense");
+            for (i = 0; i < narrs; i++)
+            {
+                free(vfracs[i]);
+                vfracs[i] = DBGetVar(outfile, vfrac_varnames[i]);
+                DBPutUcdvar1(extrafile, vfrac_varnames[i], meshname, vfracs[i],
+                    nzones, 0, 0, mat->datatype, DB_ZONECENT, 0);
+            }
+            DBSetDir(extrafile, "..");
+
+            /* output compressed dense data as mesh variables */
+            cmat = DBCalcMaterialFromDenseArrays(narrs, mat->ndims, mat->dims, mat->matnos,
+                mat->datatype, vfracs);
+            DBPutMaterial(extrafile, omat, mat->meshname, cmat->nmat, cmat->matnos, cmat->matlist,
+                cmat->dims, cmat->ndims, cmat->mix_next, cmat->mix_mat, cmat->mix_zone, cmat->mix_vf,
+                cmat->mixlen, cmat->datatype, mat_opts);
+            DBFreeMaterial(cmat);
+        }
+        DBClose(extrafile);
+    }
+
+    DBClose(infile);
+    DBClose(outfile);
+
+    for (i = 0; i < narrs; i++)
+    {
+        FREE(vfrac_varnames[i]);
+        FREE(vfracs[i]);
+    }
+    FREE(vfrac_varnames);
+    FREE(vfracs);
 
     DBFreeOptlist(mat_opts);
     CleanupDriverStuff();
