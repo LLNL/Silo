@@ -1797,6 +1797,7 @@ typedef struct DBfile_pub {
     int            (*sort_obo)(struct DBfile *dbfile, int nobjs, char const *const *obj_names, int *ranks);
     int            (*flush)(struct DBfile *);
     int            (*r_varvals)(struct DBfile *, char const *, int, int, int, void const *, void **, int*, int*);
+    int            (*g_varblf)(struct DBfile *, char const *);  /*byte length in file */
 } DBfile_pub;
 
 typedef struct DBfile {
@@ -2051,6 +2052,7 @@ SILO_API extern DBcompoundarray *      DBGetCompoundarray(DBfile *, char const *
 SILO_API extern int                    DBInqCompoundarray(DBfile *, char const *, char ***, int **, int *, int *, int *);
 SILO_API extern void *                 DBGetVar(DBfile *, char const *);
 SILO_API extern int                    DBGetVarByteLength(DBfile *, char const *);
+SILO_API extern int                    DBGetVarByteLengthInFile(DBfile *, char const *);
 SILO_API extern int                    DBGetVarLength(DBfile *, char const *);
 SILO_API extern int                    DBGetVarDims(DBfile *, char const *, int, int *);
 SILO_API extern int                    DBGetVarType(DBfile *, char const *);

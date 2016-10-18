@@ -213,6 +213,9 @@ main(int argc, char *argv[])
 
     if (outputDense)
     {
+        int total_file_bytes = 0;
+        int total_mem_bytes = 0;
+
         DBCalcDenseArraysFromMaterial(mat, mat->datatype, &narrs, &vfracs);
         ASSERT(narrs = mat->nmat);
         vfrac_varnames = (char **) malloc(narrs * sizeof(char*));
@@ -224,7 +227,11 @@ main(int argc, char *argv[])
             else
                 snprintf(vfrac_varnames[i], 256, "%s_%d_vfracs", omat, mat->matnos[i]); 
             DBWrite(outfile, vfrac_varnames[i], vfracs[i], mat->dims, mat->ndims, mat->datatype);
+            total_file_bytes += DBGetVarByteLengthInFile(outfile, vfrac_varnames[i]);
+            total_mem_bytes += DBGetVarByteLength(outfile, vfrac_varnames[i]);
         }
+        printf("Dense Volume Fractions = %d bytes in file, %d bytes in mem, compression = %g:1\n",
+            total_file_bytes, total_mem_bytes, (double) total_mem_bytes / total_file_bytes);
     }
     else
     {

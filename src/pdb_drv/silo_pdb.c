@@ -6353,7 +6353,7 @@ db_pdb_GetVar (DBfile *_dbfile, char const *name)
 /*-------------------------------------------------------------------------
  * Function:    db_pdb_GetVarByteLength
  *
- * Purpose:     Returns the length of the given variable in bytes.
+ * Purpose:     Returns the in-memory length of the given variable in bytes.
  *
  * Return:      Success:        length of variable in bytes
  *

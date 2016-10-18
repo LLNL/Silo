@@ -113,6 +113,7 @@ SILO_CALLBACK int db_hdf5_NewToc(DBfile *_dbfile);
 SILO_CALLBACK int db_hdf5_InqVarExists (DBfile *_dbfile, char const *varname);
 SILO_CALLBACK int db_hdf5_GetVarLength(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_GetVarByteLength(DBfile *_dbfile, char const *name);
+SILO_CALLBACK int db_hdf5_GetVarByteLengthInFile(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_GetVarType(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_GetVarDims(DBfile *_dbfile, char const *varname, int maxdims,
                                 int *dims/*out*/);

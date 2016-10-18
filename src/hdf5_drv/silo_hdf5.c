@@ -58,7 +58,7 @@ be used for advertising or product endorsement purposes.
    version 1.8 and thereafter. When, and if, the HDF5 code in this file
    is explicitly upgraded to the 1.8 API, this symbol should be removed. */
 #define H5_USE_16_API
-#include "H5pubconf.h"
+/*#include "H5pubconf.h"*/
 #include "hdf5.h"
 
 #include <errno.h>
@@ -2797,6 +2797,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
     dbfile->pub.exist = db_hdf5_InqVarExists;
     dbfile->pub.g_varlen = db_hdf5_GetVarLength;
     dbfile->pub.g_varbl = db_hdf5_GetVarByteLength;
+    dbfile->pub.g_varblf = db_hdf5_GetVarByteLengthInFile;
     dbfile->pub.g_vartype = db_hdf5_GetVarType;
     dbfile->pub.g_vardims = db_hdf5_GetVarDims;
 
@@ -3726,13 +3727,14 @@ db_hdf5_set_properties(int rank, hsize_t size[])
  */
 PRIVATE int
 db_hdf5_get_comp_var(hid_t fileid, char const *name, hsize_t *nelmts,
-    size_t *elsize, hid_t *datatype, void **buf)
+    size_t *elsize, hsize_t *fsize, hid_t *datatype, void **buf)
 {
     hid_t type_id = -1, stypeid = -1, attr = -1, comptype = -1, memtype = -1;
     int membno = -1;
     int retval = 0;
     hsize_t numvals = 0;
     size_t valsize = 0;
+    hsize_t filesize = 0;
 
     /* loop trying different typename, member name combinations */
     char *tmpname = STRDUP(name);
@@ -3830,6 +3832,7 @@ db_hdf5_get_comp_var(hid_t fileid, char const *name, hsize_t *nelmts,
 
                 d = H5Dopen(fileid, tmp);
                 fspace = H5Dget_space(d);
+                filesize = H5Dget_storage_size(d);               
                 numvals = H5Sget_simple_extent_npoints(fspace);
                 ftype = H5Dget_type(d);
                 mtype = hdf2hdf_type(ftype);
@@ -3897,6 +3900,8 @@ db_hdf5_get_comp_var(hid_t fileid, char const *name, hsize_t *nelmts,
                 *elsize = valsize; 
             if (datatype)
                 *datatype = comptype;
+            if (fsize)
+                *fsize = filesize;
         }
     }
 
@@ -7371,7 +7376,7 @@ db_hdf5_GetVarLength(DBfile *_dbfile, char const *name)
         else
         {
             if (!db_hdf5_get_comp_var(dbfile->cwg, name, &nelmts,
-                 NULL, NULL, NULL)) {
+                 NULL, NULL, NULL, NULL)) {
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
             }
@@ -7384,6 +7389,69 @@ db_hdf5_GetVarLength(DBfile *_dbfile, char const *name)
     } END_PROTECT;
 
     return nelmts;
+}
+
+PRIVATE int
+db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size)
+{
+    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
+    static char *me = "db_hdf5_GetVarByteLength";
+    hid_t       dset=-1, ftype=-1, mtype=-1, space=-1;
+    hsize_t     nbytes_big;
+    int         nbytes_small=-1;
+
+    PROTECT {
+        /* Open the dataset */
+        if ((dset=H5Dopen(dbfile->cwg, name))>=0) {
+        
+            /* Get data type and space */
+            if ((ftype=H5Dget_type(dset))<0 ||
+                (mtype=hdf2hdf_type(ftype))<0 ||
+                (space=H5Dget_space(dset))<0) {
+                db_perror(name, E_CALLFAIL, me);
+                UNWIND();
+            }
+
+            /* Get total size in bytes and check for overflow */
+            if (use_file_size)
+                nbytes_big = H5Dget_storage_size(dset);
+            else
+                nbytes_big = H5Sget_simple_extent_npoints(space) * H5Tget_size(mtype);
+            nbytes_small = (int)nbytes_big;
+            if (nbytes_big!=(hsize_t)nbytes_small) {
+                db_perror("overflow", E_INTERNAL, me);
+                UNWIND();
+            }
+
+            /* Release resources */
+            H5Tclose(ftype);
+            H5Sclose(space);
+            H5Dclose(dset);
+        }
+        else
+        {
+            hsize_t nelmts;
+            hsize_t fsize;
+            size_t elsize;
+            if (!db_hdf5_get_comp_var(dbfile->cwg, name, &nelmts,
+                 &elsize, &fsize, NULL, NULL)) {
+                db_perror(name, E_CALLFAIL, me);
+                UNWIND();
+            }
+            if (use_file_size)
+                nbytes_small = (int) fsize;
+            else
+                nbytes_small = (int)(nelmts * elsize);
+        }
+    } CLEANUP {
+        H5E_BEGIN_TRY {
+            H5Tclose(ftype);
+            H5Sclose(space);
+            H5Dclose(dset);
+        } H5E_END_TRY;
+    } END_PROTECT;
+
+    return nbytes_small;
 }
 
 /*-------------------------------------------------------------------------
@@ -7406,57 +7474,14 @@ db_hdf5_GetVarLength(DBfile *_dbfile, char const *name)
 SILO_CALLBACK int
 db_hdf5_GetVarByteLength(DBfile *_dbfile, char const *name)
 {
-    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
-    static char *me = "db_hdf5_GetVarByteLength";
-    hid_t       dset=-1, ftype=-1, mtype=-1, space=-1;
-    hsize_t     nbytes_big;
-    int         nbytes_small=-1;
+    int const use_file_size = 0;
+    return db_hdf5_get_var_byte_length(_dbfile, name, use_file_size);
+}
 
-    PROTECT {
-        /* Open the dataset */
-        if ((dset=H5Dopen(dbfile->cwg, name))>=0) {
-        
-            /* Get data type and space */
-            if ((ftype=H5Dget_type(dset))<0 ||
-                (mtype=hdf2hdf_type(ftype))<0 ||
-                (space=H5Dget_space(dset))<0) {
-                db_perror(name, E_CALLFAIL, me);
-                UNWIND();
-            }
-
-            /* Get total size in bytes and check for overflow */
-            nbytes_big = H5Sget_simple_extent_npoints(space) * H5Tget_size(mtype);
-            nbytes_small = (int)nbytes_big;
-            if (nbytes_big!=(hsize_t)nbytes_small) {
-                db_perror("overflow", E_INTERNAL, me);
-                UNWIND();
-            }
-
-            /* Release resources */
-            H5Tclose(ftype);
-            H5Sclose(space);
-            H5Dclose(dset);
-        }
-        else
-        {
-            hsize_t nelmts;
-            size_t elsize;
-            if (!db_hdf5_get_comp_var(dbfile->cwg, name, &nelmts,
-                 &elsize, NULL, NULL)) {
-                db_perror(name, E_CALLFAIL, me);
-                UNWIND();
-            }
-            nbytes_small = (int)(nelmts * elsize);
-        }
-    } CLEANUP {
-        H5E_BEGIN_TRY {
-            H5Tclose(ftype);
-            H5Sclose(space);
-            H5Dclose(dset);
-        } H5E_END_TRY;
-    } END_PROTECT;
-
-    return nbytes_small;
+db_hdf5_GetVarByteLengthInFile(DBfile *_dbfile, char const *name)
+{
+    int const use_file_size = 1;
+    return db_hdf5_get_var_byte_length(_dbfile, name, use_file_size);
 }
 
 /*-------------------------------------------------------------------------
@@ -7506,7 +7531,7 @@ db_hdf5_GetVarType(DBfile *_dbfile, char const *name)
         else
         {
             if (!db_hdf5_get_comp_var(dbfile->cwg, name, NULL,
-                 NULL, &ftype, NULL)) {
+                 NULL, NULL, &ftype, NULL)) {
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
             }
@@ -7644,7 +7669,7 @@ db_hdf5_GetVar(DBfile *_dbfile, char const *name)
         else
         {
             if (!db_hdf5_get_comp_var(dbfile->cwg, name, NULL,
-                 NULL, NULL, &result)) {
+                 NULL, NULL, NULL, &result)) {
                 db_perror(name, E_CALLFAIL, me);
                 UNWIND();
             }
@@ -7720,7 +7745,7 @@ db_hdf5_ReadVar(DBfile *_dbfile, char const *vname, void *result)
         else
         {
             if (!db_hdf5_get_comp_var(dbfile->cwg, vname, NULL,
-                 NULL, NULL, &result)) {
+                 NULL, NULL, NULL, &result)) {
                 db_perror(vname, E_CALLFAIL, me);
                 UNWIND();
             }

@@ -7443,7 +7443,8 @@ DBReadVarVals(DBfile *dbfile, const char *name, int mode, int nvals,
 /*-------------------------------------------------------------------------
  * Function:    DBGetVarByteLength
  *
- * Purpose:     Returns the length of the requested variable, in bytes.
+ * Purpose:     Returns the in-memory length of the requested variable,
+ *              in bytes.
  *
  * Return:      Success:        length of variable in bytes.
  *
@@ -7475,6 +7476,47 @@ DBGetVarByteLength(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_varbl) (dbfile, name);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBGetVarByteLengthInFile
+ *
+ * Purpose:     Returns the in-file length of the requested variable,
+ *              in bytes.
+ *
+ * Return:      Success:        length of variable in bytes.
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  matzke@viper
+ *              Tue Nov  8 11:18:35 PST 1994
+ *
+ * Modifications:
+ *    Eric Brugger, Tue Feb  7 08:09:26 PST 1995
+ *    I replaced API_END with API_END_NOPOP.
+ *
+ *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
+ *    Added a check for variable name validity.
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBGetVarByteLengthInFile(DBfile *dbfile, const char *name)
+{
+    int retval;
+
+    API_BEGIN2("DBGetVarByteLengthInFile", int, -1, name) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetVarByteLengthInFile", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("variable name", E_BADARGS);
+        if (!dbfile->pub.g_varblf)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.g_varblf) (dbfile, name);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
