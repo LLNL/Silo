@@ -76,7 +76,27 @@ static void print_error(char *msg, ...)
     va_end(ap);
     fprintf(stderr, "\n");
 }
- 
+
+static int calc_material_object_size(DBmaterial const *mat)
+{
+    int i;
+    int retval = 0;
+    int nzones = 1;
+
+    for (i = 0; i < mat->ndims; i++)
+        nzones *= mat->dims[i];
+
+    /* for matlist */
+    retval += nzones * sizeof(int);
+
+    /* for mix_mat, mix_zone, mix_next */
+    retval += mat->mixlen * (3 * sizeof(int));
+
+    /* for mix_vf */
+    retval += mat->mixlen * (mat->datatype == DB_FLOAT)?sizeof(float):sizeof(double);
+
+    return retval;
+}
 
 /******************************************************************************
  * Test various approaches to compressing material data.
@@ -217,6 +237,7 @@ main(int argc, char *argv[])
     {
         int total_file_bytes = 0;
         int total_mem_bytes = 0;
+        int mat_bytes = calc_material_object_size(mat);
 
         DBCalcDenseArraysFromMaterial(mat, mat->datatype, &narrs, &vfracs);
         ASSERT(narrs = mat->nmat);
@@ -232,8 +253,10 @@ main(int argc, char *argv[])
             total_file_bytes += DBGetVarByteLengthInFile(outfile, vfrac_varnames[i]);
             total_mem_bytes += DBGetVarByteLength(outfile, vfrac_varnames[i]);
         }
-        printf("Dense Volume Fractions = %d bytes in file, %d bytes in mem, compression = %g:1\n",
+        printf("Dense Volume Fractions = %d bytes, %d bytes in mem, compression = %g:1\n",
             total_file_bytes, total_mem_bytes, (double) total_mem_bytes / total_file_bytes);
+        printf("Dense Volume Fractions = %d bytes; Original material object = %d bytes, compression = %g:1\n",
+            total_file_bytes, mat_bytes, (double) mat_bytes / total_file_bytes);
     }
     else
     {
