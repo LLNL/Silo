@@ -49,16 +49,18 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
-#include <silo.h>
+#include "silo.h"
+
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <float.h>
 
-#include <config.h>
+#include "config.h"
 
-#include <std.c>
+#include "std.c"
 
 #define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
 #define ERROR(ARGS) { __line__ = __LINE__; print_error ARGS; exit(1); }
@@ -142,7 +144,7 @@ main(int argc, char *argv[])
     char            efile[256];
     int             ifileSet = 0, ofileSet = 0, efileSet = 0;
     int             outputDense = 0;
-    int             show_all_errors = 0;
+    int             show_all_errors = 1;
     DBoptlist      *mat_opts = DBMakeOptlist(10);
     DBmaterial     *mat;
     int             narrs = 0;
@@ -153,8 +155,8 @@ main(int argc, char *argv[])
     for (i=1; i<argc; i++) {
 	if (!strncmp(argv[i], "DB_", 3)) {
 	    driver = StringToDriver(argv[i]);
-        } else if (!strcmp(argv[i], "show-all-errors")) {
-            show_all_errors = 1;
+        } else if (!strcmp(argv[i], "no-show-all-errors")) {
+            show_all_errors = 0;
         } else if (!strncmp(argv[i], "in=", 3)) {
             char *fname = argv[i]+3;
             char *mname = strchr(fname, ':');
@@ -286,6 +288,7 @@ main(int argc, char *argv[])
             {
                 free(vfracs[i]);
                 vfracs[i] = DBGetVar(outfile, vfrac_varnames[i]);
+                assert(vfracs[i]);
                 DBPutQuadvar1(extrafile, vfrac_varnames[i], meshname, vfracs[i],
                     mat->dims, mat->ndims, 0, 0, mat->datatype, DB_ZONECENT, 0);
             }

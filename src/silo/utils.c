@@ -92,7 +92,7 @@ static
 DBmaterial *db_CalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims,
     int const *matnos, int dtype, DBVCP2_t const vfracs)
 {
-    const int notSet = INT_MAX;
+    const int notSet = -INT_MAX;
     int i,m,z,nzones = 1;
     int *matlist = 0, mixlen = 0, *mix_mat = 0;
     int *mix_zone = 0, *mix_next = 0;
@@ -138,25 +138,28 @@ DBmaterial *db_CalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims
     if (!mix_next) goto cleanup;
 
     mixlen = 0;
-    for (m = 0; m < narrs; m++)
+    for (z = 0; z < nzones; z++)
     {
-        for (z = 0; z < nzones; z++)
+        int nmixing = 0;
+        for (m = 0; m < narrs; m++)
         {
             double vf = get_frac(m, z, dtype, vfracs);
 
             if (vf >= 1.0)
             {
+                assert(matlist[z] == notSet);
                 matlist[z] = matnos[m];
             }
             else if (vf > 0.0)
             {
+                nmixing++;
                 if (matlist[z] == notSet)
                 {
                     /* put the first entry in the list for this zone */
                     matlist[z] = -(mixlen+1); 
                     mix_mat [mixlen] = matnos[m];
                     put_frac(mix_vf, mixlen, dtype, vf);
-                    mix_zone[mixlen] = z;
+                    mix_zone[mixlen] = z+1; /* one origin */
                     mix_next[mixlen] = 0;
                 }
                 else if (matlist[z] < 0)
@@ -172,7 +175,7 @@ DBmaterial *db_CalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims
                     /* put in the new entry */
                     mix_mat [mixlen] = matnos[m];
                     put_frac(mix_vf, mixlen, dtype, vf);
-                    mix_zone[mixlen] = z;
+                    mix_zone[mixlen] = z+1; /* one origin */
                     mix_next[mixlen] = 0;
                 }
                 else
@@ -183,12 +186,13 @@ DBmaterial *db_CalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims
                        put a placeholder entry into the mix arrays here. */
                     mix_mat [mixlen] = matnos[m];
                     put_frac(mix_vf, mixlen, dtype, vf);
-                    mix_zone[mixlen] = z;
+                    mix_zone[mixlen] = z+1; /* one origin */
                     mix_next[mixlen] = 0;
                 }
                 mixlen++;
             }
         }
+        assert(nmixing==0 || nmixing>=2);
     }
 
     /* create material object to return */
@@ -290,9 +294,10 @@ int mat_index(int nmat_nums, int const *mat_nums, int mat_num)
     /* Any real inputs should never get here. But,
        an input to force reset of last num/idx will.
        We want this logic here instead of at top to
-       avoid having to add a test to execut it *every*
+       avoid having to test whether to execut it *every*
        lookup. A call of mat_index(0,0,-1) is sufficient
        to cause this reset code to execute. */
+    assert(nmat_nums==0 && mat_nums==0 && mat_num==-1);
     last_mat_num = -1;
     last_mat_idx = 0;
     return -1;
@@ -361,7 +366,7 @@ int db_CalcDenseArraysFromMaterial(DBmaterial const *mat, int datatype, int *nar
         else /* mixing case */
         {
             int mix_idx = -mat->matlist[i] - 1;
-            while(mix_idx >=0)
+            while(mix_idx >= 0)
             {
                 int matno = mat->mix_mat[mix_idx];
                 int idx = mat_index(mat->nmat, matnos_sorted, matno);
