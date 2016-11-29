@@ -97,6 +97,14 @@ else                                                                            
     }                                                                                                      \
 }
 
+#define TEST_STR(A,B)                                                                                      \
+if (strcmp(A,B))                                                                                           \
+{                                                                                                          \
+    fprintf(stderr, "String comparison failed at line %d. Expected \"%s\", got \"%s\"\n",                  \
+            __LINE__, A, B);                                                                               \
+    return 1;                                                                                              \
+}
+
 int main(int argc, char **argv)
 {
     int i;
@@ -419,6 +427,12 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(ns, 4, 2);
     DBFreeNamescheme(ns);
 
+    /* Test the convenience method, DBsnprintf */
+    snprintf(teststr, sizeof(teststr), "%s, %s",
+        DBsnprintf("block_%d,level_%04d", 505, 17),
+        DBsnprintf("side_%s_%cx%g", "master",'z',1.0/3));
+    TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
+    
     /* hackish way to cleanup the circular cache used internally */
     DBGetName(0,-1);
     

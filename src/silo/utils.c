@@ -59,6 +59,7 @@ be used for advertising or product endorsement purposes.
 
 static double get_frac(int m, int i, int dtype, DBVCP2_t const vfracs)
 {
+    assert(dtype==DB_FLOAT || dtype==DB_DOUBLE);
     if (dtype == DB_FLOAT)
     {
         float const **ffracs = (float const **) vfracs;
@@ -76,6 +77,9 @@ static double get_frac(int m, int i, int dtype, DBVCP2_t const vfracs)
 
 static void put_frac(void *mix_vf, int mixlen, int dtype, double vf)
 {
+    assert(mix_vf);
+    assert(dtype==DB_FLOAT || dtype==DB_DOUBLE);
+    assert(0 <= vf && vf <= 1);
     if (dtype == DB_FLOAT)
     {
         float *fmix_vf = (float *) mix_vf;
@@ -137,6 +141,8 @@ DBmaterial *db_CalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims
     mix_next = (int *) malloc(mixlen * sizeof(int));
     if (!mix_next) goto cleanup;
 
+    /* Loop over zones, then materials to ensure this operation
+       will faithfully invert the companion operation. */
     mixlen = 0;
     for (z = 0; z < nzones; z++)
     {
@@ -248,12 +254,6 @@ DBmaterial *DBCalcMaterialFromDenseArrays(int narrs, int ndims, int const *dims,
     API_END_NOPOP;
 }
 
-PUBLIC
-DBmaterial *DBCalcMaterialFromCleanAndMixedLists()
-{
-    return 0;
-}
-
 PRIVATE
 int compar_ints(void const *ia, void const *ib)
 {
@@ -262,6 +262,8 @@ int compar_ints(void const *ia, void const *ib)
     return 0;
 }
 
+/* Binary search for a given material number in the sorted
+   list of material numbers. */
 PRIVATE
 int mat_index(int nmat_nums, int const *mat_nums, int mat_num)
 {
@@ -271,7 +273,7 @@ int mat_index(int nmat_nums, int const *mat_nums, int mat_num)
     static int last_mat_num = -1;
     static int last_mat_idx = 0;
 
-    /* quick acclerator */
+    /* quick acclerator (see below for reset logic) */
     if (mat_num == last_mat_num)
         return last_mat_idx;
 
@@ -446,10 +448,4 @@ int DBCalcDenseArraysFromMaterial(DBmaterial const *mat, int datatype, int *narr
         API_RETURN(retval);
     }
     API_END_NOPOP;
-}
-
-PUBLIC
-int DBCalcCleanAndMixedListsFromMaterial()
-{
-    return 0;
 }

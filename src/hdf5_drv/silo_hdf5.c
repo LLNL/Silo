@@ -7478,6 +7478,7 @@ db_hdf5_GetVarByteLength(DBfile *_dbfile, char const *name)
     return db_hdf5_get_var_byte_length(_dbfile, name, use_file_size);
 }
 
+SILO_CALLBACK int
 db_hdf5_GetVarByteLengthInFile(DBfile *_dbfile, char const *name)
 {
     int const use_file_size = 1;
@@ -8081,11 +8082,12 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
+       if (dset_type != -1)
+           H5Tclose(dset_type);
        if (mclass != fclass) {
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
-       H5Tclose(dset_type);
 #endif
 
        /* Write data */
@@ -8101,7 +8103,8 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
        H5E_BEGIN_TRY {
            H5Dclose(dset);
            H5Sclose(space);
-           H5Tclose(dset_type);
+           if (dset_type != -1)
+               H5Tclose(dset_type);
        } H5E_END_TRY;
    } END_PROTECT;
    
@@ -8395,7 +8398,6 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
 
         /* Cleanup */
         H5Tclose(atype);
-        H5Tclose(h5str);
         H5Aclose(attr);
         H5Tclose(o);
         free(file_value);

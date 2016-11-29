@@ -1,23 +1,28 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
-LLNL-CODE-XXXXXX; part of LLNL-CODE-425250.
-All rights reserved.
+    Copyright (c) 2016, Lawrence Livermore National Security, LLC.
+        Produced at the Lawrence Livermore National Laboratory
+           Written by Mark C. Miller, miller86@llnl.gov
+               LLNL-CODE-707197 All rights reserved.
 
-This file is part of Silo. For details, see silo.llnl.gov.
+This file  is part  of H5Z-ZFP.  For details, see
+https://github.com/LLNL/H5Z-ZFP.  Please  also  read  the   Additional
+BSD Notice.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
+Redistribution and  use in  source and binary  forms, with  or without
+modification, are permitted provided that the following conditions are
+met:
 
-   * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the disclaimer below.
-   * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the disclaimer (as noted
-     below) in the documentation and/or other materials provided with
-     the distribution.
-   * Neither the name of the LLNS/LLNL nor the names of its
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+* Redistributions  of  source code  must  retain  the above  copyright
+  notice, this list of conditions and the disclaimer below.
+
+* Redistributions in  binary form  must reproduce the  above copyright
+  notice, this list of conditions  and the disclaimer (as noted below)
+  in  the  documentation  and/or  other materials  provided  with  the
+  distribution.
+
+* Neither the name of the  LLNS/LLNL nor the names of its contributors
+  may  be  used to  endorse  or  promote  products derived  from  this
+  software without specific prior written permission.
 
 THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
 "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
@@ -32,27 +37,30 @@ LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
 NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-This work was produced at Lawrence Livermore National Laboratory under
-Contract No.  DE-AC52-07NA27344 with the DOE.
+Additional BSD Notice
 
-Neither the  United States Government nor  Lawrence Livermore National
-Security, LLC nor any of  their employees, makes any warranty, express
-or  implied,  or  assumes  any  liability or  responsibility  for  the
+1. This notice is required to  be provided under our contract with the
+U.S. Department  of Energy (DOE).  This work was produced  at Lawrence
+Livermore  National Laboratory  under  Contract No.  DE-AC52-07NA27344
+with the DOE.
+
+2.  Neither  the  United  States  Government  nor  Lawrence  Livermore
+National Security, LLC nor any of their employees, makes any warranty,
+express or implied, or assumes any liability or responsibility for the
 accuracy, completeness,  or usefulness of  any information, apparatus,
 product, or  process disclosed, or  represents that its use  would not
 infringe privately-owned rights.
 
-Any reference herein to  any specific commercial products, process, or
-services by trade name,  trademark, manufacturer or otherwise does not
-necessarily  constitute or imply  its endorsement,  recommendation, or
-favoring  by  the  United  States  Government  or  Lawrence  Livermore
-National Security,  LLC. The views  and opinions of  authors expressed
-herein do not necessarily state  or reflect those of the United States
-Government or Lawrence Livermore National Security, LLC, and shall not
-be used for advertising or product endorsement purposes.
+3.  Also,  reference  herein  to  any  specific  commercial  products,
+process,  or  services  by  trade  name,  trademark,  manufacturer  or
+otherwise does  not necessarily  constitute or imply  its endorsement,
+recommendation,  or  favoring  by  the  United  States  Government  or
+Lawrence Livermore  National Security, LLC. The views  and opinions of
+authors expressed herein do not  necessarily state or reflect those of
+the United States Government  or Lawrence Livermore National Security,
+LLC,  and shall  not be  used for  advertising or  product endorsement
+purposes.
 */
-
-#ifdef H5_HAVE_FILTER_ZFP /* { */
 
 #include <stdlib.h>
 #include <string.h>
@@ -143,13 +151,12 @@ const void *H5PLget_plugin_info(void) {return H5Z_ZFP;}
 #endif
 
 static hid_t H5Z_ZFP_ERRCLASS = -1;
-#ifdef AS_SILO_BUILTIN
-void H5Z_zfp_finalize(void)
-#else
-static void H5Z_zfp_finalize(void)
+#ifndef AS_SILO_BUILTIN
+static
 #endif
+void H5Z_zfp_finalize(void)
 {
-    if (H5Z_ZFP_ERRCLASS == -1)
+    if (H5Z_ZFP_ERRCLASS != -1 && H5Z_ZFP_ERRCLASS != H5E_ERR_CLS_g)
         H5Eunregister_class(H5Z_ZFP_ERRCLASS);
     H5Z_ZFP_ERRCLASS = -1;
 }
@@ -159,12 +166,19 @@ static void H5Z_zfp_init(void)
     /* Register the error class */
     if (H5Z_ZFP_ERRCLASS == -1)
     {
-        H5Z_ZFP_ERRCLASS = H5Eregister_class("H5Z-ZFP", "ZFP-" ZFP_VERSION_STR,
-                                             "H5Z-ZFP-" H5Z_FILTER_ZFP_VERSION_STR);
+        if (H5Eget_class_name(H5E_ERR_CLS_g,0,0) < 0)
+        {
+            H5Z_ZFP_ERRCLASS = H5Eregister_class("H5Z-ZFP", "ZFP-" ZFP_VERSION_STR,
+                                                 "H5Z-ZFP-" H5Z_FILTER_ZFP_VERSION_STR);
 #if !defined(AS_SILO_BUILTIN) && !defined(NDEBUG)
         /* helps to eliminate resource leak for memory analysis */
-        atexit(H5Z_zfp_finalize);
+            atexit(H5Z_zfp_finalize);
 #endif
+        }
+        else
+        {
+            H5Z_ZFP_ERRCLASS = H5E_ERR_CLS_g;
+        }
     }
 }
 
@@ -177,6 +191,7 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     htri_t retval = 0;
     hsize_t dims[H5S_MAX_RANK];
     H5T_class_t dclass;
+    hid_t native_type_id;
 
     H5Z_zfp_init();
 
@@ -216,6 +231,12 @@ H5Z_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
             "chunk must have only 1-3 non-unity dimensions");
 
+    /* if caller is doing "endian targetting", disallow that */
+    native_type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND);
+    if (H5Tget_order(type_id) != H5Tget_order(native_type_id))
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADTYPE, 0,
+            "endian targetting non-sensical in conjunction with ZFP filter");
+
     retval = 1;
 
 done:
@@ -241,6 +262,8 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     zfp_field *dummy_field = 0;
     bitstream *dummy_bstr = 0;
     zfp_stream *dummy_zstr = 0;
+    int have_zfp_controls = 0;
+    h5z_zfp_controls_t ctrls;
 
     H5Z_zfp_init();
 
@@ -279,8 +302,8 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
     switch (ndims_used)
     {
         case 1: dummy_field = Z zfp_field_1d(0, zt, dims_used[0]); break;
-        case 2: dummy_field = Z zfp_field_2d(0, zt, dims_used[0], dims_used[1]); break;
-        case 3: dummy_field = Z zfp_field_3d(0, zt, dims_used[0], dims_used[1], dims_used[2]); break;
+        case 2: dummy_field = Z zfp_field_2d(0, zt, dims_used[1], dims_used[0]); break;
+        case 3: dummy_field = Z zfp_field_3d(0, zt, dims_used[2], dims_used[1], dims_used[0]); break;
         default: H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0,
                      "requires chunks w/1,2 or 3 non-unity dims");
     }
@@ -288,13 +311,24 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_field_Xd() failed");
 
     /* get current cd_values and re-map to new cd_value set */
-    H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_ZFP, &flags, &mem_cd_nelmts, mem_cd_values, 0, NULL, NULL);
+    if (0 > H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_ZFP, &flags, &mem_cd_nelmts, mem_cd_values, 0, NULL, NULL))
+        H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTGET, 0, "unable to get current ZFP cd_values");
 
     /* Handle default case when no cd_values are passed by using ZFP library defaults. */
     if (mem_cd_nelmts == 0)
     {
-        mem_cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM;
-        H5Pset_zfp_expert_cdata(ZFP_MIN_BITS, ZFP_MAX_BITS, ZFP_MAX_PREC, ZFP_MIN_EXP, mem_cd_nelmts, mem_cd_values);
+        /* check for filter controls in the properites */
+        if (0 < H5Pexist(dcpl_id, "zfp_controls"))
+        {
+            if (0 > H5Pget(dcpl_id, "zfp_controls", &ctrls))
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTGET, 0, "unable to get ZFP controls");
+            have_zfp_controls = 1;
+        }
+        else // just use ZFP library defaults
+        {
+            mem_cd_nelmts = H5Z_ZFP_CD_NELMTS_MEM;
+            H5Pset_zfp_expert_cdata(ZFP_MIN_BITS, ZFP_MAX_BITS, ZFP_MAX_PREC, ZFP_MIN_EXP, mem_cd_nelmts, mem_cd_values);
+        }
     }
         
     /* Into hdr_cd_values, we encode ZFP library and H5Z-ZFP plugin version info at
@@ -307,28 +341,56 @@ H5Z_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t chunk_space_id)
         H5Z_ZFP_PUSH_AND_GOTO(H5E_RESOURCE, H5E_NOSPACE, 0, "zfp_stream_open() failed");
 
     /* Set the ZFP stream basic mode from mem_cd_values[0] */
-    switch (mem_cd_values[0])
+    if (have_zfp_controls)
     {
-        case H5Z_ZFP_MODE_RATE:
-            Z zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims, 0);
-            break;
-        case H5Z_ZFP_MODE_PRECISION:
-            Z zfp_stream_set_precision(dummy_zstr, mem_cd_values[2], zt);
-            break;
-        case H5Z_ZFP_MODE_ACCURACY:
-            Z zfp_stream_set_accuracy(dummy_zstr, *((double*) &mem_cd_values[2]), zt);
-            break;
-        case H5Z_ZFP_MODE_EXPERT:
-            Z zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
-                mem_cd_values[4], (int) mem_cd_values[5]);
-            break;
-        default:
-            H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid ZFP mode");
+        switch (ctrls.mode)
+        {
+            case H5Z_ZFP_MODE_RATE:
+                Z zfp_stream_set_rate(dummy_zstr, ctrls.details.rate, zt, ndims, 0);
+                break;
+            case H5Z_ZFP_MODE_PRECISION:
+                Z zfp_stream_set_precision(dummy_zstr, ctrls.details.prec, zt);
+                break;
+            case H5Z_ZFP_MODE_ACCURACY:
+                Z zfp_stream_set_accuracy(dummy_zstr, ctrls.details.acc, zt);
+                break;
+            case H5Z_ZFP_MODE_EXPERT:
+                Z zfp_stream_set_params(dummy_zstr, ctrls.details.expert.minbits,
+                    ctrls.details.expert.maxbits, ctrls.details.expert.maxprec,
+                    ctrls.details.expert.minexp);
+                break;
+            default:
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid ZFP mode");
+        }
+    }
+    else
+    {
+        switch (mem_cd_values[0])
+        {
+            case H5Z_ZFP_MODE_RATE:
+                Z zfp_stream_set_rate(dummy_zstr, *((double*) &mem_cd_values[2]), zt, ndims, 0);
+                break;
+            case H5Z_ZFP_MODE_PRECISION:
+                Z zfp_stream_set_precision(dummy_zstr, mem_cd_values[2], zt);
+                break;
+            case H5Z_ZFP_MODE_ACCURACY:
+                Z zfp_stream_set_accuracy(dummy_zstr, *((double*) &mem_cd_values[2]), zt);
+                break;
+            case H5Z_ZFP_MODE_EXPERT:
+                Z zfp_stream_set_params(dummy_zstr, mem_cd_values[2], mem_cd_values[3],
+                    mem_cd_values[4], (int) mem_cd_values[5]);
+                break;
+            default:
+                H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_BADVALUE, 0, "invalid ZFP mode");
+        }
     }
 
     /* Use ZFP's write_header method to write the ZFP header into hdr_cd_values array */
     if (0 == (hdr_bits = Z zfp_write_header(dummy_zstr, dummy_field, ZFP_HEADER_FULL)))
         H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTINIT, 0, "unable to write header");
+
+    /* Flush the ZFP stream */
+    Z zfp_stream_flush(dummy_zstr);
 
     /* compute necessary hdr_cd_values size */
     hdr_bytes     = 1 + ((hdr_bits  - 1) / 8);
@@ -433,7 +495,7 @@ get_zfp_info_from_cd_values(size_t cd_nelmts, unsigned int const *cd_values,
 
     H5Z_zfp_init();
 
-    if (0x0030 == h5z_zfp_version_no || 0x0020 == h5z_zfp_version_no)
+    if (0x0020 <= h5z_zfp_version_no && h5z_zfp_version_no <= 0x0040)
         return get_zfp_info_from_cd_values_0x0030(cd_nelmts-1, &cd_values[1], zfp_mode, zfp_meta, swap);
 
     H5Epush(H5E_DEFAULT, __FILE__, "", __LINE__, H5Z_ZFP_ERRCLASS, H5E_PLINE, H5E_BADVALUE,
@@ -511,8 +573,10 @@ H5Z_filter_zfp(unsigned int flags, size_t cd_nelmts,
         if (!status)
             H5Z_ZFP_PUSH_AND_GOTO(H5E_PLINE, H5E_CANTFILTER, 0, "decompression failed");
 
-	/* ZFP will byte-swap for endian-ness changes. We need to undue that
-           here because HDF5 is expecting to do it. We use HDF5's built-in
+	/* ZFP is an endian-independent format. It will produce correct endian-ness
+           during decompress regardless of endian-ness differences between reader 
+           and writer. However, the HDF5 library will not be expecting that. So,
+           we need to undue the correct endian-ness here. We use HDF5's built-in
            byte-swapping here. Because we know we need only to endian-swap,
            we treat the data as unsigned. */
         if (swap != H5T_ORDER_NONE)
@@ -590,5 +654,3 @@ done:
 
 #undef Z
 #undef B
-
-#endif /* } H5_HAVE_FILTER_ZFP */

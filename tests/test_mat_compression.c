@@ -105,7 +105,7 @@ static int calc_material_object_size(DBmaterial const *mat)
  * file. It will then extract that material object and write it to a new
  * file using any one of a variety of options.
  *
- * Usage Examples
+ * Usage and Examples
  *
  * ./test_mat_compression in=<file>:<obj> out=<file>:<obj> extra=<file> \
  *     dense=<int> compress=<string> <driver>
@@ -317,7 +317,7 @@ main(int argc, char *argv[])
             }
             DBSetDir(extrafile, "..");
 
-            /* output compressed dense data as mesh variables */
+            /* output compressed dense data as material object */
             cmat = DBCalcMaterialFromDenseArrays(narrs, mat->ndims, mat->dims, mat->matnos,
                 mat->datatype, vfracs);
             DBPutMaterial(extrafile, omat, mat->meshname, cmat->nmat, cmat->matnos, cmat->matlist,
@@ -356,7 +356,7 @@ main(int argc, char *argv[])
             }
             DBSetDir(extrafile, "..");
 
-            /* read compressed dense and output as material object */
+            /* read compressed dense data and output as mesh variables */
             DBMkDir(extrafile, "compressed_dense");
             DBSetDir(extrafile, "compressed_dense");
             for (i = 0; i < narrs; i++)
@@ -368,13 +368,17 @@ main(int argc, char *argv[])
             }
             DBSetDir(extrafile, "..");
 
-            /* output compressed dense data as mesh variables */
+            /* output compressed dense data as material object */
             cmat = DBCalcMaterialFromDenseArrays(narrs, mat->ndims, mat->dims, mat->matnos,
                 mat->datatype, vfracs);
             DBPutMaterial(extrafile, omat, mat->meshname, cmat->nmat, cmat->matnos, cmat->matlist,
                 cmat->dims, cmat->ndims, cmat->mix_next, cmat->mix_mat, cmat->mix_zone, cmat->mix_vf,
                 cmat->mixlen, cmat->datatype, mat_opts);
             DBFreeMaterial(cmat);
+        }
+        else
+        {
+            ERROR(("Don't know how to deal with mesh type %d\n", mtype));
         }
         DBClose(extrafile);
     }

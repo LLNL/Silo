@@ -608,3 +608,24 @@ DBGetIndex(DBnamescheme const *ns, int natnum)
 
     return (int) strtol(&name_str[i], 0, 10);
 }
+
+PUBLIC char const *
+DBsnprintf(char const *fmt, ...)
+{
+    static char strbuf[2048];
+    static size_t const nmax = sizeof(strbuf);
+    va_list ap;
+    int n, en;
+
+    if (!fmt) return SaveReturnedString(0);
+
+    va_start(ap, fmt);
+    n = vsnprintf(strbuf, nmax, fmt, ap);
+    en = errno;
+    va_end(ap);
+
+    if (n < 0)
+        snprintf(strbuf, nmax, "DBprintf_failed_with_error: %s", strerror(en));
+
+    return SaveReturnedString(strbuf);
+}
