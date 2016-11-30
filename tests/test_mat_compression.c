@@ -229,6 +229,7 @@ main(int argc, char *argv[])
     outfile = DBOpen(ofile, DB_UNKNOWN, DB_APPEND);
     if (!outfile)
     {
+        fprintf(stderr, "Appending to \"%s\" failed. Creating anew...\n", ofile);
         outfile = DBCreate(ofile, DB_CLOBBER, DB_LOCAL, "Material compression test", driver);
         if (!outfile) ERROR(("unable to open/create file \"%s\"\n", ofile));
     }
@@ -276,6 +277,7 @@ main(int argc, char *argv[])
         DBfile *extrafile = DBOpen(efile, DB_UNKNOWN, DB_APPEND);
         if (!extrafile )
         {
+            fprintf(stderr, "Appending to \"%s\" failed. Creating anew...\n", efile);
             extrafile  = DBCreate(efile, DB_CLOBBER, DB_LOCAL, "Material compression test; reconstructed data", driver);
             if (!extrafile ) ERROR(("unable to open/create file \"%s\"\n", efile));
         }
