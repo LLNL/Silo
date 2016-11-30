@@ -270,6 +270,8 @@ main(int argc, char *argv[])
     if (efileSet)
     {
         int mtype;
+        char imat_copy[256];
+        char *pslash;
 
         DBfile *extrafile = DBOpen(efile, DB_UNKNOWN, DB_APPEND);
         if (!extrafile )
@@ -279,6 +281,13 @@ main(int argc, char *argv[])
         }
 
         /* copy mesh from input file to extra file */
+        memcpy(imat_copy, imat, strlen(imat));
+        pslash = strrchr(imat_copy, '/');
+        if (pslash)
+        {
+            *pslash = '\0';
+             DBSetDir(infile, imat_copy);
+        }
         mtype = DBInqMeshtype(infile, mat->meshname);
         if (mtype == DB_QUADRECT || mtype == DB_QUADCURV)
         {
