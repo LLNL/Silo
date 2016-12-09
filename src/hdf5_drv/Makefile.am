@@ -66,10 +66,14 @@ AM_CPPFLAGS += -I$(srcdir)/../fpzip
 endif
 
 if ZFP_NEEDED
-AM_CPPFLAGS += -DH5_HAVE_FILTER_ZFP -DAS_SILO_BUILTIN -I$(srcdir)/../zfp-0.5.0
+AM_CPPFLAGS += -DH5_HAVE_FILTER_ZFP -DH5Z_ZFP_AS_LIB -DAS_SILO_BUILTIN -I$(srcdir)/../zfp-0.5.0
 endif
 
 noinst_HEADERS = \
  silo_hdf5_private.h \
  H5FDsilo.h \
- H5Zzfp.h
+ H5Zzfp.h \
+ H5Zzfp_lib.h \
+ H5Zzfp_plugin.h \
+ H5Zzfp_props.h \
+ H5Zzfp_props_private.h

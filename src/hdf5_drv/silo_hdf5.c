@@ -2165,7 +2165,7 @@ db_hdf5_init(void)
 #endif /* HAVE_HZIP } */
 
 #ifdef HAVE_ZFP /* { */
-    H5Z_zfp_register();
+    H5Z_zfp_initialize();
     zfp.zfp_init();
 #endif /* HAVE_ZFP } */
 
