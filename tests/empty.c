@@ -291,6 +291,9 @@ main(int argc, char *argv[])
         ASSERT(DBPutMultimatspecies(dbfile,"empty_mmatspecb",ZZ,     0,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutMultimatspecies(dbfile,"empty_mmatspecc",ZZ,mnames,OL(ol)),retval<0,retval==0);
         ASSERT(DBPutMultimatspecies(dbfile,"empty_mmatspecd",ZZ,     0,OL(ol)),retval<0,retval==0);
+
+        ASSERT(DBWrite(dbfile,"empty_writea",0,ZDIMS, 3,DB_FLOAT),retval<0,retval==0);
+        /*ASSERT(DBWrite(dbfile,"empty_writeb",0,    0,ZZ,DB_FLOAT),retval<0,retval==0);*/
     }
 
     DBClose(dbfile);
@@ -516,6 +519,15 @@ main(int argc, char *argv[])
             DBmultimatspecies *mmatspecies = DBGetMultimatspecies(dbfile, vnames[i++]);
             assert(DBIsEmptyMultimatspecies(mmatspecies));
             DBFreeMultimatspecies(mmatspecies);
+        }
+        DBSetDir(dbfile, "..");
+    }
+    {   int i=0; char *vnames[] = {"empty_writea", 0};
+        DBSetDir(dbfile, "DBWrite");
+        while (vnames[i])
+        {
+            void *data = DBGetVar(dbfile, vnames[i++]);
+            assert(data==0);
         }
         DBSetDir(dbfile, "..");
     }

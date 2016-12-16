@@ -3325,8 +3325,10 @@ db_hdf5_set_compression(int flags)
 #endif
         if (H5Z_FILTER_DEFLATE==filtn)     
             have_gzip = TRUE;
+#ifdef H5_HAVE_FILTER_SZIP
         if (H5Z_FILTER_SZIP==filtn)     
             have_szip = TRUE;
+#endif
         if (DB_HDF5_FPZIP_ID==filtn)
             have_fpzip = TRUE;
         if (DB_HDF5_HZIP_ID==filtn)
@@ -4669,7 +4671,16 @@ db_hdf5_resolvename(DBfile *_dbfile,
     char *parent_fullname = 0;
     char *child_fullname = 0;
 
+printf("In resolvename with parent=\"%s\", child = \"%s\", ", parent_objname, child_objname?child_objname:"");
+    if (!child_objname || !*child_objname)
+    {
+printf("\n");
+        result[0] = '\0';
+        return result;
+    }
+
     db_hdf5_GetDir(_dbfile, cwgname);
+printf(" cwg = \"%s\"\n", cwgname);
     parent_objdirname = db_dirname(parent_objname);
     if (parent_objdirname)
         parent_fullname = db_join_path(cwgname, parent_objdirname);
@@ -4864,6 +4875,32 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     static char *me = "db_hdf5_process_file_options";
     hid_t retval = H5Pcreate(H5P_FILE_ACCESS);
     herr_t h5status = 0;
+#warning FIXME
+#if 0
+#if HDF5_VERSION_GE(1,8,4)
+    H5AC_cache_config_t h5mdc_config;
+#endif
+
+    /* Performance optimizations for memory footprint */
+#if HDF5_VERSION_GE(1,8,0)
+#warning FIX ME...THIS NEEDS TO BE CONDITION ON COMPAT MODE
+    H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+
+    /* First, initialize our copy of h5mdc_config */
+    h5mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+    H5Pget_mdc_config(retval, &h5mdc_config);
+
+    /* Setup Mainzer mdc config params */
+    h5mdc_config.set_initial_size = 1;
+    h5mdc_config.initial_size = 16384;
+    h5mdc_config.min_size = 8192;
+    h5mdc_config.epoch_length = 3000;
+    h5mdc_config.lower_hr_threshold = 1e-5;
+
+    /* Set mdc config params */
+    H5Pset_mdc_config(retval, &h5mdc_config);
+#endif
+#endif
 
     /* This property effects how HDF5 deals with objects that are left
        open when the file containing them is closed. The SEMI setting
@@ -5845,7 +5882,8 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
         if (fcprops == -1)
         {
             fcprops = H5Pcreate(H5P_FILE_CREATE);
-            H5Pset_istore_k(fcprops, 1);
+#warning BACKWARD COMPAT ISSUE FOR HDF5
+            /*H5Pset_istore_k(fcprops, 1);*/
             created_fcprops = 1;
         }
         fid = H5Fcreate(name, H5F_ACC_TRUNC, fcprops, faprops);
@@ -7627,6 +7665,7 @@ db_hdf5_GetVar(DBfile *_dbfile, char const *name)
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     static char *me = "db_hdf5_GetVar";
     hid_t       dset=-1, ftype=-1, mtype=-1, space=-1;
+    hsize_t     np;
     void        *result=NULL;
 
     PROTECT {
@@ -7646,20 +7685,23 @@ db_hdf5_GetVar(DBfile *_dbfile, char const *name)
             }
         
             /* Allocate space for the result */
-            if (NULL==(result=malloc(H5Sget_simple_extent_npoints(space)*
-                                     H5Tget_size(mtype)))) {
-                db_perror(NULL, E_NOMEM, me);
-                UNWIND();
-            }
+            np = H5Sget_simple_extent_npoints(space);
 
-            P_rdprops = H5P_DEFAULT;
-            if (!SILO_Globals.enableChecksums)
-                P_rdprops = P_ckrdprops;
+            if (np) {
+                if (NULL==(result=malloc(np * H5Tget_size(mtype)))) {
+                    db_perror(NULL, E_NOMEM, me);
+                    UNWIND();
+                }
 
-            /* Read entire variable */
-            if (H5Dread(dset, mtype, H5S_ALL, H5S_ALL, P_rdprops, result)<0) {
-                hdf5_to_silo_error(name, me);
-                UNWIND();
+                P_rdprops = H5P_DEFAULT;
+                if (!SILO_Globals.enableChecksums)
+                    P_rdprops = P_ckrdprops;
+
+                /* Read entire variable */
+                if (H5Dread(dset, mtype, H5S_ALL, H5S_ALL, P_rdprops, result)<0) {
+                    hdf5_to_silo_error(name, me);
+                    UNWIND();
+                }
             }
 
             /* Close everything */
@@ -11994,21 +12036,34 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char const *name)
         /* Read the raw data */
         if (SILO_Globals.dataReadMask & DBZonelistInfo)
         {
-            zl->shapecnt = (int *)db_hdf5_comprd(dbfile, m.shapecnt, 1);
-            zl->shapesize = (int *)db_hdf5_comprd(dbfile, m.shapesize, 1);
-            zl->shapetype = (int *)db_hdf5_comprd(dbfile, m.shapetype, 1);
-            zl->nodelist = (int *)db_hdf5_comprd(dbfile, m.nodelist, 1);
+printf("name = \"%s\"\n", name);
+db_hdf5_resolvename(_dbfile, name, m.shapecnt);
+printf("name = \"%s\"\n", name);
+db_hdf5_resolvename(_dbfile, name, m.shapesize);
+printf("name = \"%s\"\n", name);
+db_hdf5_resolvename(_dbfile, name, m.shapetype);
+printf("name = \"%s\"\n", name);
+db_hdf5_resolvename(_dbfile, name, m.nodelist);
+printf("name = \"%s\"\n", name);
+            zl->shapecnt = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapecnt), 1);
+printf("name = \"%s\"\n", name);
+            zl->shapesize = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapesize), 1);
+printf("name = \"%s\"\n", name);
+            zl->shapetype = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapetype), 1);
+printf("name = \"%s\"\n", name);
+            zl->nodelist = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.nodelist), 1);
+printf("name = \"%s\"\n", name);
         }
         if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
-            zl->gzoneno = db_hdf5_comprd(dbfile, m.gzoneno, 1);
+            zl->gzoneno = db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.gzoneno), 1);
         zl->gnznodtype = m.gnznodtype?m.gnznodtype:DB_INT;
         if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
-            zl->ghost_zone_labels = (char *)db_hdf5_comprd(dbfile, m.ghost_zone_labels, 1);
+            zl->ghost_zone_labels = (char *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.ghost_zone_labels), 1);
 
         /* alternate zone number variables */
         {
             int nvars = -1;
-            char *tmpnames = (char *)db_hdf5_comprd(dbfile, m.alt_zonenum_vars, 1);
+            char *tmpnames = (char *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.alt_zonenum_vars), 1);
             if (tmpnames)
                 zl->alt_zonenum_vars = DBStringListToStringArray(tmpnames, &nvars, !skipFirstSemicolon);
             FREE(tmpnames);

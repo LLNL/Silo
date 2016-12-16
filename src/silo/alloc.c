@@ -1330,6 +1330,8 @@ DBIsEmptyQuadvar(DBquadvar const *var)
 
     if (!var) return 1;
 
+    if (var->ndims == 0) return 1;
+
     for (i = 0; i < var->ndims; i++)
         if (var->dims[i] <= 0) return 1;
 

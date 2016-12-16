@@ -1904,8 +1904,8 @@ _lite_PD_wr_symt (PDBfile *file) {
          for (lst = PD_entry_dimensions(ep); lst != NULL; lst = lst->next) {
             if ((flag == ROW_MAJOR_ORDER) ||
                 ((flag == COLUMN_MAJOR_ORDER) && (lst->next == NULL))) {
-               stride = nt/(lst->number);
-               ne     = nb/stride;
+               stride = lst->number?nt/(lst->number):0;
+               ne     = stride?nb/stride:0;
                flag   = FALSE;
             } else {
                ne = lst->number;

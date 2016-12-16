@@ -2980,8 +2980,10 @@ DBGuessHasFriendlyHDF5Names(DBfile *f)
     char cwd[1024];
     int retval;
 
+#ifdef DB_HDF5X
     if (DBGetDriverType(f) != DB_HDF5X)
         return 0;
+#endif
 
     DBGetDir(f, cwd);
     retval = db_guess_has_friendly_HDF5_names_r(f);
@@ -3263,8 +3265,10 @@ DBGetDriverTypeFromPath(const char *path)
    (void) close(fd);
    if (strstr(buf, "PDB"))
       return DB_PDB;
+#ifdef DB_HDF5X
    if (strstr(buf, "HDF"))
       return DB_HDF5X;
+#endif
    return DB_UNKNOWN;
 }
 
@@ -6168,16 +6172,16 @@ DBWrite(DBfile *dbfile, char const *vname, void const *var, int const *dims,
             API_ERROR("variable name", E_INVALIDNAME);
         if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
-        if (ndims <= 0)
+        if (ndims < 0)
             API_ERROR("ndims", E_BADARGS);
+        if (ndims == 0 && !SILO_Globals.allowEmptyObjects)
+            API_ERROR("ndims==0", E_EMPTYOBJECT);
         if (!dims && ndims)
             API_ERROR("dims", E_BADARGS);
-        for(nvals=1,i=0;i<ndims;i++)
-        {
+        for(nvals=ndims>0?1:0,i=0;i<ndims;i++)
             nvals *= dims[i];
-        }
-        if (nvals == 0)
-            API_ERROR("Zero length write attempted", E_BADARGS);
+        if (nvals == 0 && !SILO_Globals.allowEmptyObjects)
+            API_ERROR("Zero length write attempted", E_EMPTYOBJECT);
         if (db_FullyDeprecatedConvention(vname))
             API_ERROR(dbfile->pub.name, E_NOTIMP);
         if (!dbfile->pub.write)
@@ -6185,6 +6189,10 @@ DBWrite(DBfile *dbfile, char const *vname, void const *var, int const *dims,
 
         retval = (dbfile->pub.write) (dbfile, vname, var, dims,
                                       ndims, datatype);
+
+        /* diddle with retval if its an empty case */
+        if ((ndims == 0 || nvals == 0) && retval == 1) retval = 0;
+
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -7886,12 +7894,19 @@ DBPutCurve(
             {
                 if (!xvals && !DBGetOption(opts, DBOPT_XVARNAME))
                     API_ERROR("xvals=0 || DBOPT_XVARNAME", E_BADARGS);
-                if (DBGetDriverType(dbfile) != DB_HDF5X && xvals && DBGetOption(opts, DBOPT_XVARNAME))
-                    API_ERROR("xvals!=0 && DBOPT_XVARNAME", E_BADARGS);
                 if (!yvals && !DBGetOption(opts, DBOPT_YVARNAME))
                     API_ERROR("yvals=0 || DBOPT_YVARNAME", E_BADARGS);
+#ifndef DB_HDF5X
+                if (xvals && DBGetOption(opts, DBOPT_XVARNAME))
+                    API_ERROR("xvals!=0 && DBOPT_XVARNAME", E_BADARGS);
+                if (yvals && DBGetOption(opts, DBOPT_YVARNAME))
+                    API_ERROR("yvals!=0 && DBOPT_YVARNAME", E_BADARGS);
+#else
+                if (DBGetDriverType(dbfile) != DB_HDF5X && xvals && DBGetOption(opts, DBOPT_XVARNAME))
+                    API_ERROR("xvals!=0 && DBOPT_XVARNAME", E_BADARGS);
                 if (DBGetDriverType(dbfile) != DB_HDF5X && yvals && DBGetOption(opts, DBOPT_YVARNAME))
                     API_ERROR("yvals!=0 && DBOPT_YVARNAME", E_BADARGS);
+#endif
             }
         }
         else if (!SILO_Globals.allowEmptyObjects &&

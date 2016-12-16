@@ -1340,6 +1340,21 @@ _PD_compute_hyper_strides (PDBfile *file, char *ind, dimdes *dims, int *pnd) {
  *-------------------------------------------------------------------------
  */
 #ifdef PDB_WRITE
+static int is_empty_case(lite_SC_byte const *vr, dimdes const *dims, long num)
+{
+    if (vr == 0 && dims == 0 && num == 1) return 1;
+
+    if (vr != 0) return 0;
+    if (num > 0) return 0;
+    if (!dims) {printf("empty case for !dims\n"); return 1;}
+    while (dims)
+    {
+        if (dims->number>0) return 0;
+        dims = dims->next;
+    }
+    return 1;
+}
+
 int
 _lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, lite_SC_byte *vr,
                       char *intype) {
@@ -1356,8 +1371,18 @@ _lite_PD_hyper_write (PDBfile *file, char *name, syment *ep, lite_SC_byte *vr,
    slen = strlen(s);
    c = slen > 0 ? s[slen-1] : 0;
    if (((c != ')') && (c != ']')) || (dims == NULL)) {
-      return(_lite_PD_wr_syment(file, (char *)vr, PD_entry_number(ep),
+      if (is_empty_case(vr, dims, PD_entry_number(ep)))
+      {
+          long ret = _lite_PD_wr_syment(file, (char *)vr, 0,
+                                intype, PD_entry_type(ep));
+          PD_entry_number(ep) = 0;
+          return ret==0;
+      }
+      else
+      {
+          return(_lite_PD_wr_syment(file, (char *)vr, PD_entry_number(ep),
                                 intype, PD_entry_type(ep)));
+      }
    }
 
    if (_lite_PD_indirection(PD_entry_type(ep))) {

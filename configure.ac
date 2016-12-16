@@ -786,9 +786,11 @@ case $withval in
     if test "$HAVE_SZLIB" = "yes" ; then
       AC_MSG_CHECKING([default szlib path provided])
       AC_MSG_RESULT([$szlib_lib])
+      AC_DEFINE(HAVE_LIBSZ,1,[szip library])
     else
       AC_MSG_CHECKING([for szlib])
       AC_MSG_RESULT([suppressed])
+      AC_DEFINE(HAVE_LIBSZ,0,[szip library])
     fi
     ;;
   yes)
@@ -814,16 +816,19 @@ case $withval in
     if test "$HAVE_SZLIB" = "yes" ; then
       AC_MSG_CHECKING([using szlib path provided])
       AC_MSG_RESULT([$szlib_lib])
+      AC_DEFINE(HAVE_LIBSZ,1,[szip library])
     else
       AC_MSG_ERROR([expect to find szlib environment variables])
       AC_MSG_CHECKING([for szlib])
       AC_MSG_RESULT([suppressed])
+      AC_DEFINE(HAVE_LIBSZ,0,[szip library])
     fi
     ;;
   no)
     HAVE_SZLIB="no"
     AC_MSG_CHECKING([for szlib])
     AC_MSG_RESULT([suppressed])
+    AC_DEFINE(HAVE_LIBSZ,0,[szip library])
     ;;
   *)
     HAVE_SZLIB="yes"
@@ -843,6 +848,9 @@ case $withval in
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find szlib library])
+      AC_DEFINE(HAVE_LIBSZ,0,[szip library])
+    else
+      AC_DEFINE(HAVE_LIBSZ,1,[szip library])
     fi
     ;;
 esac

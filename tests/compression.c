@@ -135,6 +135,8 @@ main(int argc, char *argv[])
           DBSetCompression("METHOD=SZIP");
        } else if (!strcmp(argv[i], "gzip")) {
           DBSetCompression("METHOD=GZIP");
+       } else if (!strcmp(argv[i], "gzip9")) {
+          DBSetCompression("METHOD=GZIP LEVEL=9");
        } else if (!strcmp(argv[i], "fpzip")) {
           DBSetCompression("METHOD=FPZIP");
        } else if (!strcmp(argv[i], "zfp")) {

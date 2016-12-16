@@ -7624,6 +7624,8 @@ db_pdb_Write (DBfile *_dbfile, char const *vname, void const *var,
    long           ind[3 * MAXDIMS_VARWRITE];
    static char   *me = "db_pdb_Write";
 
+   for (i = 0; i < 3 * MAXDIMS_VARWRITE; i++)
+      ind[i] = 0;
    for (i = 0; i < ndims; i++) {
       ind[3 * i] = 0;
       ind[3 * i + 1] = dims[i] - 1;
