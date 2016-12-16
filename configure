@@ -28445,11 +28445,21 @@ case $withval in
 $as_echo_n "checking default szlib path provided... " >&6; }
       { $as_echo "$as_me:$LINENO: result: $szlib_lib" >&5
 $as_echo "$szlib_lib" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBSZ 1
+_ACEOF
+
     else
       { $as_echo "$as_me:$LINENO: checking for szlib" >&5
 $as_echo_n "checking for szlib... " >&6; }
       { $as_echo "$as_me:$LINENO: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBSZ 0
+_ACEOF
+
     fi
     ;;
   yes)
@@ -28477,6 +28487,11 @@ $as_echo "suppressed" >&6; }
 $as_echo_n "checking using szlib path provided... " >&6; }
       { $as_echo "$as_me:$LINENO: result: $szlib_lib" >&5
 $as_echo "$szlib_lib" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBSZ 1
+_ACEOF
+
     else
       { { $as_echo "$as_me:$LINENO: error: expect to find szlib environment variables" >&5
 $as_echo "$as_me: error: expect to find szlib environment variables" >&2;}
@@ -28485,6 +28500,11 @@ $as_echo "$as_me: error: expect to find szlib environment variables" >&2;}
 $as_echo_n "checking for szlib... " >&6; }
       { $as_echo "$as_me:$LINENO: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBSZ 0
+_ACEOF
+
     fi
     ;;
   no)
@@ -28493,6 +28513,11 @@ $as_echo "suppressed" >&6; }
 $as_echo_n "checking for szlib... " >&6; }
     { $as_echo "$as_me:$LINENO: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBSZ 0
+_ACEOF
+
     ;;
   *)
     HAVE_SZLIB="yes"
@@ -28597,6 +28622,17 @@ fi
       { { $as_echo "$as_me:$LINENO: error: couldn't find szlib library" >&5
 $as_echo "$as_me: error: couldn't find szlib library" >&2;}
    { (exit 1); exit 1; }; }
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBSZ 0
+_ACEOF
+
+    else
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBSZ 1
+_ACEOF
+
     fi
     ;;
 esac

@@ -4665,35 +4665,52 @@ db_hdf5_resolvename(DBfile *_dbfile,
                     char const *parent_objname,
                     char const *child_objname)
 {
+#define SAVE_AND_RETURN(S,FREES)  \
+{                                 \
+    if (cbuf[n]) free(cbuf[n]);   \
+    cbuf[n] = strdup(S);          \
+    if (FREES) free(S);           \
+    n = (n + 1) % nmax;           \
+    return cbuf[n?n-1:nmax-1];    \
+}
+    static int n = 0;
+    static int const nmax = 32;
+    static char *cbuf[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     static char cwgname[4096];
-    static char result[4096];
     char *parent_objdirname = 0;
     char *parent_fullname = 0;
     char *child_fullname = 0;
 
-printf("In resolvename with parent=\"%s\", child = \"%s\", ", parent_objname, child_objname?child_objname:"");
-    if (!child_objname || !*child_objname)
+    if (!_dbfile && !parent_objname && !child_objname)
     {
-printf("\n");
-        result[0] = '\0';
-        return result;
+        int i;
+        for (i = 0; i < nmax; i++)
+        {
+            if (cbuf[i]) free(cbuf[i]);
+            cbuf[i] = 0;
+        }
+        return 0;
     }
 
+    if (!child_objname || !*child_objname)
+        SAVE_AND_RETURN("",0);
+
     db_hdf5_GetDir(_dbfile, cwgname);
-printf(" cwg = \"%s\"\n", cwgname);
     parent_objdirname = db_dirname(parent_objname);
     if (parent_objdirname)
         parent_fullname = db_join_path(cwgname, parent_objdirname);
     if (parent_fullname)
         child_fullname = db_join_path(parent_fullname, child_objname);
-    if (child_fullname)
-        strcpy(result, child_fullname);
-    else
-        result[0] = '\0';
+
     if (parent_objdirname) free(parent_objdirname);
     if (parent_fullname) free(parent_fullname);
-    if (child_fullname) free(child_fullname);
-    return result;
+
+    if (child_fullname)
+        SAVE_AND_RETURN(child_fullname,1);
+
+    SAVE_AND_RETURN("",0);
+#undef SAVE_AND_RETURN
 }
 
 /*-------------------------------------------------------------------------
