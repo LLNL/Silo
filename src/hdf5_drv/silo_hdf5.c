@@ -15187,7 +15187,14 @@ db_hdf5_InqVarType(DBfile *_dbfile, char const *name)
         /* Open object */
         if ((o=H5Topen(dbfile->cwg, name))<0) {
             if ((o=H5Gopen(dbfile->cwg, name))<0) {
-                _objtype = DB_VARIABLE;
+                if (o=H5Dopen(dbfile->cwg, name)<0) {
+                    _objtype = DB_INVALID_OBJECT;
+                }
+                else
+                {
+                    _objtype = DB_VARIABLE;
+                    H5Dclose(o);
+                }
             }
             else
             {
@@ -15201,7 +15208,7 @@ db_hdf5_InqVarType(DBfile *_dbfile, char const *name)
             if ((attr=H5Aopen_name(o, "silo_type"))<0 ||
                 H5Aread(attr, H5T_NATIVE_INT, &_objtype)<0 ||
                 H5Aclose(attr)<0) {
-                _objtype = DB_VARIABLE;
+                _objtype = DB_INVALID_OBJECT;
             }
             H5Tclose(o);
         }
