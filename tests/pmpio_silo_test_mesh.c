@@ -56,7 +56,10 @@ product endorsement purposes.
 #include <stdlib.h>
 
 void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
-    const char *file_ext);
+    const char *file_ext, int driver);
+
+void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, PMPIO_baton_t *bat, int size,
+    int numGroups, const char *file_ext, int driver);
 
 
 /*-----------------------------------------------------------------------------
@@ -142,6 +145,8 @@ int main(int argc, char **argv)
     int size, rank;
     int numGroups = -1;
     int driver = DB_PDB;
+    int use_ns = 0;
+    int separate_root = 0;
     DBfile *siloFile;
     char *file_ext = "pdb";
     char fileName[256], nsName[256];
@@ -155,7 +160,15 @@ int main(int argc, char **argv)
     /* specify the number of Silo files to create and driver */
     for (i = 1; i < argc; i++)
     {
-        if (!strcmp(argv[i], "DB_HDF5"))
+        if (!strcmp(argv[i], "use-ns"))
+        {
+            use_ns = 1;
+        }
+        else if (!strcmp(argv[i], "separate-root"))
+        {
+            separate_root = 1;
+        }
+        else if (!strcmp(argv[i], "DB_HDF5"))
         {
             driver = DB_HDF5;
             file_ext = "h5";
@@ -177,7 +190,12 @@ int main(int argc, char **argv)
     if (rank == 0)
     {
         if (numGroups < 0)
-            numGroups = 3; 
+            numGroups = size<3?size:3; 
+    }
+    if (use_ns)
+    {
+        if ((double)size/numGroups != size/numGroups)
+            use_ns = 0;
     }
 
     /* Ensure all procs agree on numGroups, driver and file_ext */
@@ -268,8 +286,13 @@ int main(int argc, char **argv)
 
     /* If this is the 'root' processor, also write Silo's multi-XXX objects */
     if (rank == 0)
-        WriteMultiXXXObjects(siloFile, bat, size, file_ext);
-
+    {
+        DBfile *usefile = separate_root?0:siloFile;
+        if (use_ns)
+            WriteMultiXXXObjectsUsingNameschemes(usefile, bat, size, numGroups, file_ext, driver);
+        else
+            WriteMultiXXXObjects(usefile, bat, size, file_ext, driver);
+    }
     /* Hand off the baton to the next processor. This winds up closing
      * the file so that the next processor that opens it can be assured
      * of getting a consistent and up to date view of the file's contents. */
@@ -286,9 +309,10 @@ int main(int argc, char **argv)
 
 
 void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
-    const char *file_ext)
+    const char *file_ext, int driver)
 {
-    int i;
+    int i, sep_root = 0;
+    char filename[32];
     char **meshBlockNames = (char **) malloc(size * sizeof(char*));
     char **tempBlockNames = (char **) malloc(size * sizeof(char*));
     char **velBlockNames = (char **) malloc(size * sizeof(char*));
@@ -296,7 +320,14 @@ void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
     int *varTypes = (int *) malloc(size * sizeof(int));
 
     /* Go to root directory in the silo file */
-    DBSetDir(siloFile, "/");
+    if (siloFile)
+        DBSetDir(siloFile, "/");
+    else
+    {
+        snprintf(filename, sizeof(filename), "silo_root.%s", file_ext);
+        siloFile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "pmpio testing", driver);
+        sep_root = 1;
+    }
 
     /* Construct the lists of individual object names */
     for (i = 0; i < size; i++)
@@ -305,7 +336,7 @@ void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
         meshBlockNames[i] = (char *) malloc(1024);
         velBlockNames[i] = (char *) malloc(1024);
         tempBlockNames[i] = (char *) malloc(1024);
-        if (groupRank == 0)
+        if (!sep_root && groupRank == 0)
         {
             /* this mesh block is in the file 'root' owns */
             sprintf(meshBlockNames[i], "/domain_%03d/qmesh", i);
@@ -343,4 +374,44 @@ void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
     free(tempBlockNames);
     free(blockTypes);
     free(varTypes);
+
+    if (sep_root)
+        DBClose(siloFile);
+}
+
+void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, PMPIO_baton_t *bat, int size,
+    int numGroups, const char *file_ext, int driver)
+{
+    int i;
+    int blockType;
+    char filename[32];
+    char file_ns[128];
+    char block_ns[128];
+    DBoptlist *optlist = DBMakeOptlist(10);
+
+    DBAddOption(optlist, DBOPT_MB_BLOCK_NS, block_ns);
+    DBAddOption(optlist, DBOPT_MB_FILE_NS, file_ns);
+    DBAddOption(optlist, DBOPT_MB_BLOCK_TYPE, &blockType);
+
+    /* set file-level namescheme */
+    snprintf(file_ns, sizeof(file_ns), "@silo_%%03d.%s@n/%d@", file_ext, size/numGroups);
+
+    snprintf(filename, sizeof(filename), "silo_root.%s", file_ext);
+    siloFile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "pmpio testing", driver);
+
+    /* Write the multi-mesh */
+    blockType = DB_QUADMESH;
+    snprintf(block_ns, sizeof(block_ns), "@/domain_%%03d/qmesh@n@");
+    DBPutMultimesh(siloFile, "multi_qmesh", size, 0, 0, optlist);
+
+    /* Write the multi-vars */
+    blockType = DB_QUADVAR;
+    snprintf(block_ns, sizeof(block_ns), "@/domain_%%03d/velocity@n@");
+    DBPutMultivar(siloFile, "multi_velocity", size, 0, 0, optlist);
+
+    blockType = DB_QUADVAR;
+    snprintf(block_ns, sizeof(block_ns), "@/domain_%%03d/temp@n@");
+    DBPutMultivar(siloFile, "multi_temp", size, 0, 0, optlist);
+
+    DBClose(siloFile);
 }
