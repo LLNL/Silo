@@ -413,5 +413,7 @@ void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, PMPIO_baton_t *bat, 
     snprintf(block_ns, sizeof(block_ns), "@/domain_%%03d/temp@n@");
     DBPutMultivar(siloFile, "multi_temp", size, 0, 0, optlist);
 
+    DBFreeOptlist(optlist);
+
     DBClose(siloFile);
 }
