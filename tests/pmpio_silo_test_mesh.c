@@ -50,15 +50,20 @@ National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
 #include <mpi.h>
+
 #include <silo.h>
 #include <pmpio.h>
-#include <string.h>
-#include <stdlib.h>
 
-void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+
+
+static void WriteMultiXXXObjects(DBfile *siloFile, int block_dir, PMPIO_baton_t *bat, int size,
     const char *file_ext, int driver);
 
-void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, PMPIO_baton_t *bat, int size,
+static void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, int block_dir, PMPIO_baton_t *bat, int size,
     int numGroups, const char *file_ext, int driver);
 
 
@@ -69,7 +74,7 @@ void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, PMPIO_baton_t *bat, 
  *              data; a void pointer to the driver determined in main.
  *-----------------------------------------------------------------------------
  */
-void *CreateSiloFile(const char *fname, const char *nsname, void *userData)
+static void *CreateSiloFile(const char *fname, const char *nsname, void *userData)
 {
     int driver = *((int*) userData);
     DBfile *siloFile = DBCreate(fname, DB_CLOBBER, DB_LOCAL, "pmpio testing", driver);
@@ -87,7 +92,7 @@ void *CreateSiloFile(const char *fname, const char *nsname, void *userData)
  *              directory or, for read, just cd into the right directory.
  *-----------------------------------------------------------------------------
  */
-void *OpenSiloFile(const char *fname, const char *nsname, PMPIO_iomode_t ioMode,
+static void *OpenSiloFile(const char *fname, const char *nsname, PMPIO_iomode_t ioMode,
     void *userData)
 {
     DBfile *siloFile = DBOpen(fname, DB_UNKNOWN,
@@ -105,11 +110,233 @@ void *OpenSiloFile(const char *fname, const char *nsname, PMPIO_iomode_t ioMode,
  * Purpose:     Impliment the close callback for pmpio
  *-----------------------------------------------------------------------------
  */
-void CloseSiloFile(void *file, void *userData)
+static void CloseSiloFile(void *file, void *userData)
 {
     DBfile *siloFile = (DBfile *) file;
     if (siloFile)
         DBClose(siloFile);
+}
+
+static void BroadcastMultistuff(int *nblocks, char ***names, int **types,
+    char **file_ns, char **block_ns, int *block_type)
+{
+    int len;
+    int rank;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    MPI_Bcast(nblocks, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    len = (!rank&&*file_ns)?strlen(*file_ns):0;
+    MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (len)
+    {
+        /* Broadcast file and block nameschemes */
+        if (rank)
+            *file_ns = (char *) malloc(len+1);
+        MPI_Bcast(*file_ns, len+1, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+        len = (!rank&&*block_ns)?strlen(*block_ns):0;
+        MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+        if (rank)
+            *block_ns = (char *) malloc(len+1);
+        MPI_Bcast(*block_ns, len+1, MPI_CHAR, 0, MPI_COMM_WORLD);
+        MPI_Bcast(block_type, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        char *strlist;
+
+        /* Broadcast the explicit list of names and blocktypes */
+        if (!rank)
+            DBStringArrayToStringList(*names, *nblocks, &strlist, &len);
+        MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        if (rank)
+        {
+            *types = (int *) malloc(*nblocks*sizeof(int));
+            strlist = (char *) malloc(len+1);
+        }
+        MPI_Bcast(*types, *nblocks, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Bcast(strlist, len+1, MPI_CHAR, 0, MPI_COMM_WORLD);
+        len = *nblocks;
+        if (rank)
+            *names = DBStringListToStringArray(strlist, &len, 0);
+        free(strlist);
+    }
+}
+
+static DBmultimesh *BroadcastMultimesh(DBmultimesh *mm)
+{
+    int rank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if (rank)
+        mm = DBAllocMultimesh(0); /* 0 because we'll handle allocs */
+
+    BroadcastMultistuff(&mm->nblocks, &mm->meshnames, &mm->meshtypes,
+        &mm->file_ns, &mm->block_ns, &mm->block_type);
+
+    return mm;
+}
+
+static DBmultivar *BroadcastMultivar(DBmultivar *mv)
+{
+    int rank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if (rank)
+        mv = DBAllocMultivar(0); /* 0 because we'll handle allocs */
+
+    BroadcastMultistuff(&mv->nvars, &mv->varnames, &mv->vartypes,
+        &mv->file_ns, &mv->block_ns, &mv->block_type);
+
+    return mv;
+}
+
+static void ComputeBlocksThisRankOwns(int rank, int size, int nblocks, int *b0, int *nb)
+{
+    int blocksPerRank = nblocks / size;
+    int numRanksWithPlusOneBlock = nblocks % size;
+    int blocksPerRankPlusOne = blocksPerRank + 1;
+    int startingBlockThisRankOwns;
+    if (rank < numRanksWithPlusOneBlock)
+        startingBlockThisRankOwns = rank * blocksPerRankPlusOne;
+    else
+        startingBlockThisRankOwns = numRanksWithPlusOneBlock * blocksPerRankPlusOne +
+            (rank - numRanksWithPlusOneBlock) * blocksPerRank;
+    *b0 = startingBlockThisRankOwns;
+    *nb = rank<numRanksWithPlusOneBlock?blocksPerRankPlusOne:blocksPerRank;
+}
+
+static void GetFileAndPathForBlock(char const * const *names, char const *file_ns, char const *block_ns,
+    int nblocks, int b, char const *root_name, char *blockFileName, char *blockPathName)
+{
+    assert(b<nblocks);
+    assert(names || (file_ns && block_ns));
+
+    if (names)
+    {
+        char *pcolon = strchr(names[b],':');
+        if (blockFileName)
+        {
+            if (pcolon)
+                strncpy(blockFileName, names[b], pcolon-names[b]);
+            else
+                strcpy(blockFileName, root_name);
+         }
+         if (blockPathName)
+         {
+             if (pcolon)
+                strcpy(blockPathName, pcolon+1);
+            else
+                strcpy(blockPathName, names[b]);
+         }
+    }
+    else
+    {
+        if (blockFileName)
+        {
+            DBnamescheme *fns = DBMakeNamescheme(file_ns);
+            strcpy(blockFileName, DBGetName(fns, b));
+            DBFreeNamescheme(fns);
+        }
+        if (blockPathName)
+        {
+            DBnamescheme *bns = DBMakeNamescheme(block_ns);
+            strcpy(blockPathName, DBGetName(bns, b));
+            DBFreeNamescheme(bns);
+        }
+    }
+}
+
+static int ReadSiloWithPMPIO(char const *fname, int driver)
+{
+    int b, rank=0, size=1;
+    int block_start, block_count;
+    DBmultimesh *mm = 0;
+    DBmultivar *mv_vel = 0;
+    DBmultivar *mv_temp = 0;
+    DBquadmesh **qms;
+    DBquadvar **vels, **temps;
+    DBfile *siloFile = 0;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    /* rank zero opens root and determine's block count.
+       We can do also be reading whole file onto proc0 and
+       broadcasting whole file, but not until next version of Silo */
+    if (rank == 0)
+    {
+        siloFile = DBOpen(fname, driver, DB_READ);
+        mm = DBGetMultimesh(siloFile, "multi_qmesh");        
+        mv_vel = DBGetMultivar(siloFile, "multi_velocity");
+        mv_temp = DBGetMultivar(siloFile, "multi_temp");
+        DBClose(siloFile);
+        siloFile = 0;
+    }
+
+    /* broadcast multivar info (better than all ranks reading it) */
+    mm = BroadcastMultimesh(mm);
+    mv_vel = BroadcastMultivar(mv_vel);
+    mv_temp = BroadcastMultivar(mv_temp);
+
+    ComputeBlocksThisRankOwns(rank, size, mm->nblocks, &block_start, &block_count);
+    printf("Rank %d: block_start=%d, block_count=%d\n", rank, block_start, block_count);
+
+    /* allocate object pointers for all the blocks this rank will read */
+    qms = (DBquadmesh**) malloc(block_count * sizeof(DBquadmesh*)); 
+    vels = (DBquadvar**) malloc(block_count * sizeof(DBquadvar*)); 
+    temps = (DBquadvar**) malloc(block_count * sizeof(DBquadvar*)); 
+
+    /* loop to read this processor's blocks */
+    for (b = block_start; b < block_start + block_count; b++)
+    {
+        char blockFileName[256], blockPathName[256];
+sleep(1); /*why?*/
+        /* Get filename for this block (assume its same for all multi-block objects) */
+        GetFileAndPathForBlock(mm->meshnames, mm->file_ns, mm->block_ns, mm->nblocks,
+            b, fname, blockFileName, blockPathName);
+
+        /* If filename is different from current, close current */
+        if (siloFile && strlen(blockFileName) && strcmp(DBFileName(siloFile), blockFileName))
+        {
+            DBClose(siloFile);
+            siloFile = 0;
+        }
+
+        /* If we have no open file, open it */
+        if (!siloFile)
+            siloFile = DBOpen(blockFileName, driver, DB_READ);
+
+        /* Read the block-level objects */
+        printf("Rank %03d reading mesh \"%s\" from file \"%s\"\n", rank, blockPathName, DBFileName(siloFile));
+        qms[b-block_start] = DBGetQuadmesh(siloFile, blockPathName);
+
+        GetFileAndPathForBlock(mv_vel->varnames, mv_vel->file_ns, mv_vel->block_ns, mv_vel->nvars,
+            b, fname, 0, &blockPathName);
+        printf("Rank %03d reading var \"%s\" from file \"%s\"\n", rank, blockPathName, DBFileName(siloFile));
+        vels[b-block_start] = DBGetQuadvar(siloFile, blockPathName);
+ 
+        GetFileAndPathForBlock(mv_temp->varnames, mv_temp->file_ns, mv_temp->block_ns, mv_temp->nvars,
+            b, fname, 0, &blockPathName);
+        printf("Rank %03d reading var \"%s\" from file \"%s\"\n", rank, blockPathName, DBFileName(siloFile));
+        temps[b-block_start] = DBGetQuadvar(siloFile, blockPathName);
+    }
+    if (siloFile)
+        DBClose(siloFile);
+
+    /* We're done reading this rank's objects into
+       qms, vels, and temps object pointer arrays */
+
+    /*
+     * Work on this rank
+     */
+
+    /* Standard MPI finalization */
+    MPI_Finalize();
+
+    return 0;
 }
 
 /*-----------------------------------------------------------------------------
@@ -147,6 +374,8 @@ int main(int argc, char **argv)
     int driver = DB_PDB;
     int use_ns = 0;
     int separate_root = 0;
+    int separate_block_dir = 0;
+    int do_read = 0;
     DBfile *siloFile;
     char *file_ext = "pdb";
     char fileName[256], nsName[256];
@@ -168,6 +397,11 @@ int main(int argc, char **argv)
         {
             separate_root = 1;
         }
+        else if (!strcmp(argv[i], "separate-block-dir"))
+        {
+            separate_block_dir = 1;
+            separate_root = 1;
+        }
         else if (!strcmp(argv[i], "DB_HDF5"))
         {
             driver = DB_HDF5;
@@ -179,8 +413,25 @@ int main(int argc, char **argv)
         }
 	else if (argv[i][0] != '\0')
         {
-            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+            struct stat statbuf;
+            if (!stat(argv[i], &statbuf))
+            {
+                strncpy(fileName, argv[i], sizeof(fileName));
+                do_read = 1;
+            }
+            else
+                fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
         }
+    }
+
+    /* For reads, everything is discovered from root file */
+    if (do_read)
+    {
+        numGroups = 0;
+        use_ns = 0;
+        separate_root = 0;
+        separate_block_dir = 0;
+        driver = DB_UNKNOWN;
     }
 
     /* standard MPI initialization stuff */
@@ -189,6 +440,8 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     if (rank == 0)
     {
+        if (separate_block_dir)
+            assert(!mkdir("silo_block_dir",0777));
         if (numGroups < 0)
             numGroups = size<3?size:3; 
     }
@@ -199,10 +452,17 @@ int main(int argc, char **argv)
     }
 
     /* Ensure all procs agree on numGroups, driver and file_ext */
+    MPI_Bcast(&do_read, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&numGroups, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&driver, 1, MPI_INT, 0, MPI_COMM_WORLD);
     if (driver == DB_HDF5)
         file_ext = "h5";
+
+    if (do_read)
+        return ReadSiloWithPMPIO(fileName, driver);
+
+    if (separate_block_dir)
+        assert(!chdir("silo_block_dir"));
 
     /* Initialize PMPIO, pass a pointer to the driver type as the
        user data. */
@@ -288,11 +548,19 @@ int main(int argc, char **argv)
     if (rank == 0)
     {
         DBfile *usefile = separate_root?0:siloFile;
+
+        if (separate_block_dir)
+            assert(!chdir(".."));
+
         if (use_ns)
-            WriteMultiXXXObjectsUsingNameschemes(usefile, bat, size, numGroups, file_ext, driver);
+            WriteMultiXXXObjectsUsingNameschemes(usefile, separate_block_dir, bat, size, numGroups, file_ext, driver);
         else
-            WriteMultiXXXObjects(usefile, bat, size, file_ext, driver);
+            WriteMultiXXXObjects(usefile, separate_block_dir, bat, size, file_ext, driver);
+
+        if (separate_block_dir)
+            assert(!chdir("silo_block_dir"));
     }
+
     /* Hand off the baton to the next processor. This winds up closing
      * the file so that the next processor that opens it can be assured
      * of getting a consistent and up to date view of the file's contents. */
@@ -308,7 +576,7 @@ int main(int argc, char **argv)
 }
 
 
-void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
+static void WriteMultiXXXObjects(DBfile *siloFile, int sep_dir, PMPIO_baton_t *bat, int size,
     const char *file_ext, int driver)
 {
     int i, sep_root = 0;
@@ -346,12 +614,12 @@ void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
         else
         {
             /* this mesh block is another file */ 
-            sprintf(meshBlockNames[i], "silo_%03d.%s:/domain_%03d/qmesh",
-                groupRank, file_ext, i);
-            sprintf(velBlockNames[i], "silo_%03d.%s:/domain_%03d/velocity",
-                groupRank, file_ext, i);
-            sprintf(tempBlockNames[i], "silo_%03d.%s:/domain_%03d/temp",
-                groupRank, file_ext, i);
+            sprintf(meshBlockNames[i], "%ssilo_%03d.%s:/domain_%03d/qmesh",
+                sep_dir?"silo_block_dir/":"", groupRank, file_ext, i);
+            sprintf(velBlockNames[i], "%ssilo_%03d.%s:/domain_%03d/velocity",
+                sep_dir?"silo_block_dir/":"", groupRank, file_ext, i);
+            sprintf(tempBlockNames[i], "%ssilo_%03d.%s:/domain_%03d/temp",
+                sep_dir?"silo_block_dir/":"", groupRank, file_ext, i);
         }
         blockTypes[i] = DB_QUADMESH;
         varTypes[i] = DB_QUADVAR;
@@ -379,7 +647,7 @@ void WriteMultiXXXObjects(DBfile *siloFile, PMPIO_baton_t *bat, int size,
         DBClose(siloFile);
 }
 
-void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, PMPIO_baton_t *bat, int size,
+static void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, int sep_dir, PMPIO_baton_t *bat, int size,
     int numGroups, const char *file_ext, int driver)
 {
     int i;
@@ -394,7 +662,10 @@ void WriteMultiXXXObjectsUsingNameschemes(DBfile *siloFile, PMPIO_baton_t *bat, 
     DBAddOption(optlist, DBOPT_MB_BLOCK_TYPE, &blockType);
 
     /* set file-level namescheme */
-    snprintf(file_ns, sizeof(file_ns), "@silo_%%03d.%s@n/%d@", file_ext, size/numGroups);
+    if (sep_dir)
+        snprintf(file_ns, sizeof(file_ns), "@silo_block_dir/silo_%%03d.%s@n/%d@", file_ext, size/numGroups);
+    else
+        snprintf(file_ns, sizeof(file_ns), "@silo_%%03d.%s@n/%d@", file_ext, size/numGroups);
 
     snprintf(filename, sizeof(filename), "silo_root.%s", file_ext);
     siloFile = DBCreate(filename, DB_CLOBBER, DB_LOCAL, "pmpio testing", driver);
