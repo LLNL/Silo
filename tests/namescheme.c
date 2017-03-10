@@ -427,13 +427,14 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(ns, 4, 2);
     DBFreeNamescheme(ns);
 
-    /* Test the convenience method, DBsnprintf */
+    /* Test the convenience method, DBsprintf */
     snprintf(teststr, sizeof(teststr), "%s, %s",
-        DBsnprintf("block_%d,level_%04d", 505, 17),
-        DBsnprintf("side_%s_%cx%g", "master",'z',1.0/3));
+        DBsprintf("block_%d,level_%04d", 505, 17),
+        DBsprintf("side_%s_%cx%g", "master",'z',1.0/3));
     TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
     
     /* hackish way to cleanup the circular cache used internally */
+    DBsprintf(0);
     DBGetName(0,-1);
     
     CleanupDriverStuff();

@@ -58,7 +58,7 @@ product endorsement purposes.
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-
+#include <time.h>
 
 static void WriteMultiXXXObjects(DBfile *siloFile, int block_dir, PMPIO_baton_t *bat, int size,
     const char *file_ext, int driver);
@@ -117,6 +117,10 @@ static void CloseSiloFile(void *file, void *userData)
         DBClose(siloFile);
 }
 
+/*-----------------------------------------------------------------------------
+ * Purpose:     Broadcast relevant bits of multi-block object (for read)
+ *-----------------------------------------------------------------------------
+ */
 static void BroadcastMultistuff(int *nblocks, char ***names, int **types,
     char **file_ns, char **block_ns, int *block_type)
 {
@@ -165,6 +169,10 @@ static void BroadcastMultistuff(int *nblocks, char ***names, int **types,
     }
 }
 
+/*-----------------------------------------------------------------------------
+ * Purpose:     Wrapper to broadcast a multimesh object (for read)
+ *-----------------------------------------------------------------------------
+ */
 static DBmultimesh *BroadcastMultimesh(DBmultimesh *mm)
 {
     int rank = 0;
@@ -179,6 +187,10 @@ static DBmultimesh *BroadcastMultimesh(DBmultimesh *mm)
     return mm;
 }
 
+/*-----------------------------------------------------------------------------
+ * Purpose:     Wrapper to broadcast a multivar object (for read)
+ *-----------------------------------------------------------------------------
+ */
 static DBmultivar *BroadcastMultivar(DBmultivar *mv)
 {
     int rank = 0;
@@ -193,28 +205,39 @@ static DBmultivar *BroadcastMultivar(DBmultivar *mv)
     return mv;
 }
 
+/*-----------------------------------------------------------------------------
+ * Purpose:     Assign file blocks to MPI ranks (for read)
+ *-----------------------------------------------------------------------------
+ */
 static void ComputeBlocksThisRankOwns(int rank, int size, int nblocks, int *b0, int *nb)
 {
-    int blocksPerRank = nblocks / size;
-    int numRanksWithPlusOneBlock = nblocks % size;
+    int blocksPerRank = nblocks / size;            /* nominal value */
+    int numRanksWithPlusOneBlock = nblocks % size; /* some procs get extra block */
     int blocksPerRankPlusOne = blocksPerRank + 1;
     int startingBlockThisRankOwns;
+
     if (rank < numRanksWithPlusOneBlock)
         startingBlockThisRankOwns = rank * blocksPerRankPlusOne;
     else
         startingBlockThisRankOwns = numRanksWithPlusOneBlock * blocksPerRankPlusOne +
             (rank - numRanksWithPlusOneBlock) * blocksPerRank;
+
     *b0 = startingBlockThisRankOwns;
-    *nb = rank<numRanksWithPlusOneBlock?blocksPerRankPlusOne:blocksPerRank;
+    *nb = rank < numRanksWithPlusOneBlock ? blocksPerRankPlusOne : blocksPerRank;
 }
 
+/*-----------------------------------------------------------------------------
+ * Purpose:     Given a block, b, and multi-block names, determine filename
+ *              and block path name for the block-level object (for read).
+ *-----------------------------------------------------------------------------
+ */
 static void GetFileAndPathForBlock(char const * const *names, char const *file_ns, char const *block_ns,
     int nblocks, int b, char const *root_name, char *blockFileName, char *blockPathName)
 {
     assert(b<nblocks);
     assert(names || (file_ns && block_ns));
 
-    if (names)
+    if (names) /* handle via explicit list of names */
     {
         char *pcolon = strchr(names[b],':');
         if (blockFileName)
@@ -232,7 +255,7 @@ static void GetFileAndPathForBlock(char const * const *names, char const *file_n
                 strcpy(blockPathName, names[b]);
          }
     }
-    else
+    else /* handle via nameschemes */
     {
         if (blockFileName)
         {
@@ -249,7 +272,13 @@ static void GetFileAndPathForBlock(char const * const *names, char const *file_n
     }
 }
 
-static int ReadSiloWithPMPIO(char const *fname, int driver)
+/*-----------------------------------------------------------------------------
+ * Purpose:     Demonstrate read back of Silo objects in parallel.
+ *              Note: PMPIO is not really needed to do it especially if #ranks
+ *              for write is different from #ranks for read.
+ *-----------------------------------------------------------------------------
+ */
+static int ReadSiloWithoutPMPIO(char const *fname, int driver)
 {
     int b, rank=0, size=1;
     int block_start, block_count;
@@ -292,8 +321,11 @@ static int ReadSiloWithPMPIO(char const *fname, int driver)
     /* loop to read this processor's blocks */
     for (b = block_start; b < block_start + block_count; b++)
     {
+        struct timespec ts = {0, 500}; /* 500 nano-seconds */
         char blockFileName[256], blockPathName[256];
-sleep(1); /*why?*/
+
+        nanosleep(&ts, 0); /* Why? Maybe only necessary on non-parallel filesystem */
+
         /* Get filename for this block (assume its same for all multi-block objects) */
         GetFileAndPathForBlock(mm->meshnames, mm->file_ns, mm->block_ns, mm->nblocks,
             b, fname, blockFileName, blockPathName);
@@ -358,6 +390,15 @@ sleep(1); /*why?*/
  * "DB_HDF5" anywhere on the command line, it will use the HDF5 driver. Any
  * integer appearing on the command line is taken to be the total number of
  * files.
+ *
+ * There are several options
+ *
+ *     <int> specifies number of groups (concurrent files being written).
+ *     use-ns means to use nameschemes instead of explicitly listed names.
+ *     separate-root means to create multi-block objects in sep. file
+ *     separate-block-dir means to put block-level files in sep. directory.
+ *     <root-filename> means to exercise a read scenario.
+ *     <driver-spec> means to use the specified Silo driver.
  *
  * An example of how you would invoke this example is...
  *
@@ -459,7 +500,7 @@ int main(int argc, char **argv)
         file_ext = "h5";
 
     if (do_read)
-        return ReadSiloWithPMPIO(fileName, driver);
+        return ReadSiloWithoutPMPIO(fileName, driver);
 
     if (separate_block_dir)
         assert(!chdir("silo_block_dir"));
