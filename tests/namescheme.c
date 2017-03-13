@@ -433,6 +433,10 @@ int main(int argc, char **argv)
         DBsprintf("side_%s_%cx%g", "master",'z',1.0/3));
     TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
     
+    /* Test case where fewer expressions that conversion specs */
+    ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");
+    if (ns) return 1;
+
     /* hackish way to cleanup the circular cache used internally */
     DBsprintf(0);
     DBGetName(0,-1);
