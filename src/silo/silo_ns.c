@@ -544,6 +544,16 @@ DBMakeNamescheme(char const *fmt, ...)
         rv = 0;
     }
 
+    for (i = 0; rv && i < rv->ncspecs; i++)
+    {
+        if (!rv->exprstrs[i])
+        {
+            DBFreeNamescheme(rv);
+            rv = 0;
+            break;
+        }
+    }
+
     return rv;
 }
 
@@ -610,7 +620,7 @@ DBGetIndex(DBnamescheme const *ns, int natnum)
 }
 
 PUBLIC char const *
-DBsnprintf(char const *fmt, ...)
+DBsprintf(char const *fmt, ...)
 {
     static char strbuf[2048];
     static size_t const nmax = sizeof(strbuf);
