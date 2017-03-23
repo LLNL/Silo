@@ -64,9 +64,14 @@ be used for advertising or product endorsement purposes.
 #include <time.h>
 #include "score.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 /* Prototypes for other external functions. */
 #ifndef WIN32
 extern char *ctime(const time_t *);
+#else
+#include <unistd.h>
 #endif
 
 int	*lite_LAST ;
@@ -214,3 +219,26 @@ lite_SC_date (void) {
    return lite_SC_strsavef (strtok(t, "\n"), "char*:SC_DATE:time");
 }
 
+int
+lite_SC_isfile(char *name) {
+    int statval;
+#if defined(_WIN32)
+  #if defined(_WIN64)
+    struct _stat64 sbuf;
+    statval = _stat64(name, &sbuf);
+  #else
+    struct _stat sbuf;
+    statval = _stat(name, &sbuf);
+  #endif
+#else
+    struct stat sbuf;
+    statval = stat(name, &sbuf);
+#endif
+    if (statval == 0)
+    {
+        if (!S_ISREG(sbuf.st_mode)) return FALSE;
+        if (!(sbuf.st_mode & (S_IRUSR | S_IROTH))) return FALSE;
+        return TRUE;
+    }
+    return FALSE;
+}

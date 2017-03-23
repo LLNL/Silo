@@ -164,7 +164,7 @@ extern "C" {
 #define SC_USER_I        	22	/*first user defined index available */
 
 #define UNCOLLECT       	SHRT_MAX
-#define MAXLINE			    FILENAME_MAX
+#define MAXLINE			4096
 
 #undef PRINT
 #define PRINT (*putln)
@@ -378,6 +378,8 @@ LITE_API extern char *	lite_SC_strsavef (char*,char*);
 extern hashel *         _lite_SC_install (char*,lite_SC_byte*,char*,HASHTAB*);
 extern char *		_lite_SC_pr_tok (char*,char*);
 extern long int		_lite_SC_strtol (char*,char**,int);
+/* Added 22Mar17 for Managan */
+LITE_API extern int     lite_SC_isfile(char *name);
 
 #ifndef HAVE_MEMMOVE
 LITE_API extern void *	memmove (void*,const void*,size_t) ;

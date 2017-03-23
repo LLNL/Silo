@@ -80,6 +80,7 @@ be used for advertising or product endorsement purposes.
 #include <silo_win32_compatibility.h>
 #endif
 #include <assert.h>
+#include <errno.h>
 #include "pdb.h"
 
 
@@ -99,6 +100,7 @@ jmp_buf		_lite_PD_trace_err ;
 jmp_buf		_lite_PD_close_err ;
 jmp_buf		_lite_PD_write_err ;
 jmp_buf		_lite_PD_create_err ;
+jmp_buf		_lite_PD_generic_err ;
 char		lite_PD_err[MAXLINE];
 int		lite_PD_buffer_size = -1;
 ReaderFuncType	lite_pdb_rd_hook = NULL;
@@ -241,6 +243,8 @@ lite_PD_error(char *s, int n) {
       longjmp(_lite_PD_write_err, ABORT);
    case PD_CREATE:
       longjmp(_lite_PD_create_err, ABORT);
+   case PD_GENERIC:
+      longjmp(_lite_PD_generic_err, ABORT);
    default:
       abort() ;
    }
@@ -1794,3 +1798,347 @@ void lite_PD_set_major_order( PDBfile* file, int type) {
   PD_set_major_order( file, type ) ;
 }
 #endif /* PDB_WRITE */
+
+/* added 21Mar17 for Collette */
+int lite_PD_set_buffer_size(int s)
+{
+    lite_PD_buffer_size = s;
+    return lite_PD_buffer_size;
+}
+
+#warning MOVE TO PDLOW.C
+char *lite_PD_get_error(void)
+{
+    return lite_PD_err;
+}
+
+#warning MOVE TO PDMEMB.C
+syment *lite_PD_query_entry(PDBfile *file, char *name, char *fullname)
+{
+    return lite_PD_inquire_entry(file, name, TRUE, fullname);
+}
+
+#warning MOVE TO PDLOW.C
+int lite_PD_get_entry_info(syment *ep, char **ptyp, long *pni, int *pnd, long **pdim)
+{
+  /* code courtesy of Rob Managan */
+  int rv;
+  long nd;
+  long *dims;
+  dimdes *pd;
+
+  if (ep != NULL) { 
+
+    *ptyp = lite_SC_strsavef(PD_entry_type(ep), "PD_GET_ENTRY_INFO:ptyp");
+    *pni  = PD_entry_number(ep);
+
+    /* count dimensions */
+    for (nd = 0, pd = PD_entry_dimensions(ep);
+	 pd != NULL;
+	 nd++, pd = pd->next);
+
+    *pnd = nd;
+
+    dims = FMAKE_N(long, 2*nd, "PD_GET_ENTRY_INFO:dims");
+
+    /* copy dimensions */
+    for (nd = 0, pd = PD_entry_dimensions(ep);
+	 pd != NULL;
+	 pd = pd->next)	{
+
+      dims[nd++] = pd->index_min;
+      dims[nd++] = pd->index_max;
+    }
+
+    *pdim = dims;
+
+    rv = TRUE;
+
+  } else {
+
+    *ptyp = NULL;
+    *pni  = -1;
+    *pnd  = -1;
+    *pdim = NULL;
+
+    rv = FALSE;
+  }
+
+  return(rv);
+}
+
+#warning MOVE TO PDLOW.C
+void lite_PD_free_entry_info(char *typ, long *pdim)
+{
+  SFREE(typ);
+  SFREE(pdim);
+}
+
+#warning MOVE TO PDLOW.C
+void lite_PD_rel_entry_info(syment *ep, char *type, long *dims)
+{
+    lite_PD_free_entry_info(type, dims);
+    _lite_PD_rl_syment(ep);
+}
+
+/* 21Mar17 for Rob Managan */
+#warning MOVE TO PDBDIR.C
+int lite_PD_ln(PDBfile *file, char *oldname, char *newname)
+{
+  /* Courtesy of Rob Managan */
+  syment *oldep;
+#warning MAYBE INCREASE MAXLINE FOR LEOSPACT
+  char newpath[MAXLINE], oldpath[MAXLINE], dirname[MAXLINE];
+  char *nname, *s;
+
+  if (file == NULL) {
+
+    lite_PD_error("BAD FILE ID - PD_LN", PD_GENERIC);
+    return(FALSE);
+  }
+
+  if (oldname == NULL) {
+
+    lite_PD_error("VARIABLE NAME NULL - PD_LN", PD_GENERIC);
+    return(FALSE);
+  }
+
+  /* if opened in read-only mode */
+  if (file->mode == PD_OPEN) {
+
+    lite_PD_error("FILE OPENED READ-ONLY - PD_LN", PD_GENERIC);
+    return(FALSE);
+  }
+     
+  /* Implementation of _PD_var_namef */
+  /*char *_PD_var_namef(PDBfile *file, char *name, char *bf)  */
+  { 
+    char* name = newname;
+    char* bf   = newpath;
+
+    int nc;
+    char *s;
+
+    strcpy(bf,_lite_PD_fixname(file, name));
+
+    nc = strlen(bf);
+
+    if ((strchr(bf, '{') != NULL) && (bf[nc-1] == '}')) {
+
+      s = bf;
+
+    } else {
+
+      /*      s = SC_strtok(bf, ".([", p);  */
+      s = strtok(bf, ".([");
+    }
+
+    nname = s;
+  }
+
+  strcpy(oldpath, _lite_PD_fixname(file, oldname));
+
+  /* make sure the directory in newname already exists */
+  strcpy(dirname, nname);
+
+  s = strrchr(dirname, '/');
+
+  if ( ( s != NULL ) && ( PD_has_directories( file ) ) ) { 
+
+    s[1] = '\0';
+
+    if ( lite_PD_inquire_entry(file, dirname, FALSE, NULL) == NULL) {
+
+      return(FALSE);
+    }
+  }
+
+  oldep = lite_PD_inquire_entry(file, oldpath, TRUE, NULL);
+
+  if ( oldep == NULL ) { return(FALSE); }
+           
+  _lite_PD_e_install( nname, oldep, file->symtab);
+
+  return(TRUE);
+}
+
+#warning SHOULD GO IN PDBMM.c`
+void *_lite_PD_alloc_entry(PDBfile *file, char *type, long nitems)
+{
+  void *vr;
+  long len, bpi;
+  defstr *dp;
+
+  if ( _lite_PD_indirection(type) ) {
+
+    vr = (char *) FMAKE_N(char *, nitems, "_PD_ALLOC_ENTRY:char *");
+
+  } else {
+
+    dp = PD_inquire_host_type(file, type);
+
+    if (dp == NULL) {
+      return(NULL);
+    }
+
+    /* add extra space to chars - one for '\0' and one in case SC_firsttok
+     * is applied to this string
+     */
+    if (strcmp(type, lite_SC_CHAR_S) == 0) { nitems += 2; }
+
+    bpi = dp->size;
+    len = nitems * bpi;
+    vr  = lite_SC_alloc(len, 1L, NULL);
+  }
+
+  return(vr);
+}
+
+#warning SHOULD PROBABLY GO IN DIFF SOURCE FILE
+defstr *lite_PD_defstr_alt(PDBfile *file, char *name, int nmemb, char **members)
+{
+    int i, doffs;
+    char *nxt, *ptype, *type;
+    HASHTAB *fchrt;
+    memdes *desc, *lst, *prev;
+    defstr *dp, *dp2;
+ 
+    prev  = NULL;
+    lst   = NULL;
+    fchrt = file->chart;
+    doffs = file->default_offset;
+    for (i = 0; i < nmemb; i++)
+    {    nxt   = members[i];
+         desc  = _lite_PD_mk_descriptor(nxt, doffs);
+         type  = lite_SC_strsavef(nxt, "char*:PD_DEFSTR_ALT:nxt");
+         ptype = lite_SC_firsttok(type, " \n");
+         if (ptype != NULL)
+         {
+             if (lite_SC_lookup(ptype, fchrt) == NULL)
+             {
+                 if ((strcmp(ptype, name) != 0) || !_lite_PD_indirection(nxt))
+                 {
+                     sprintf(lite_PD_err, "ERROR: %s BAD MEMBER TYPE - PD_DEFSTR_ALT\n", nxt);
+                     return(NULL);
+                 }
+             }
+ 
+             dp2 = PD_inquire_table_type(fchrt, ptype);
+             if ((dp2 != NULL)  && !(_lite_PD_indirection(desc->type)))
+             {
+                 if (dp2->n_indirects > 0)
+                 {
+                     sprintf(lite_PD_err, "ERROR: STATIC MEMBER STRUCT %s CANNOT CONTAIN INDIRECTS\n", ptype);
+                     return(NULL);
+                 }
+             }
+ 
+             SFREE(type);
+             if (lst == NULL)
+                 lst = desc;
+             else
+                 prev->next = desc;
+ 
+             prev = desc;
+         }
+    }
+ 
+    /* install the type in all charts */
+    dp = _lite_PD_defstr_inst(name, lst, -1, NULL, NULL, fchrt,
+             file->host_chart, file->align, file->host_align, FALSE);
+ 
+    if (dp == NULL)
+        lite_PD_error("CAN'T HANDLE PRIMITIVE TYPE - PD_DEFSTR_ALT", PD_GENERIC);
+ 
+    return(dp);
+}
+
+#define NewHeadTok           "!<<PDB:"
+#define OldHeadTok           "!<><PDB><>!"
+
+int _lite_PD_identify_version(char *s)
+{
+    int vers = -1;
+    char *p, *r, *t;
+
+    p = strstr(s, NewHeadTok);
+    if (p != NULL)
+    {
+        t = strtok(p+7, ">");
+	if (t != NULL)
+	{
+            if (strcmp(t, "II") == 0)
+	        vers = 2;
+	    else
+            {
+                vers = (int) strtol(t, 0, 10);
+                if (errno != 0)
+                    vers = -1;
+            }
+         }
+    }
+    else if (strncmp(s, OldHeadTok, strlen(OldHeadTok)) == 0)
+       vers = 1;
+
+    return(vers);
+}
+
+static int _lite_PD_id_file(FILE *fp)
+{
+    int vers, nb;
+    char str[MAXLINE];
+
+    memset(str, 0, MAXLINE);
+
+    /* attempt to read an ASCII header */
+    if (io_seek(fp,  0, SEEK_SET))
+       lite_PD_error("FSEEK FAILED TO FIND ORIGIN - _lite_PD_ID_FILE", PD_OPEN);
+
+    if (_lite_PD_rfgets(str, MAXLINE, fp) == NULL)
+       vers = -1;
+    else
+    {
+        str[MAXLINE-1] = '\0';
+
+        /* the first token should be the identifying header token */
+	vers = _lite_PD_identify_version(str);
+
+        /* if the header does not give us a version, try the trailer */
+	if (vers < 1)
+        {
+            /* attempt to read an ASCII trailer */
+	    if (io_seek(fp,  -32, SEEK_END))
+	       lite_PD_error("FSEEK FAILED TO END - _lite_PD_ID_FILE", PD_OPEN);
+
+	    nb = io_read(str, (size_t) 1, (size_t) 32, fp);
+            assert(nb == 32);
+
+	    str[32] = '\0';
+
+	    vers = _lite_PD_identify_version(str);
+        }
+    }
+
+    return(vers);
+}
+
+int lite_PD_isfile(char *fname)
+{
+    int vers, ok;
+    FILE *fp;
+
+    ok = FALSE;
+
+    if (fname != NULL)
+    {
+        fp = io_open(fname, "r");
+	if (fp != NULL)
+	{
+            vers = _lite_PD_id_file(fp);
+	    ok = (vers > 0);
+	    io_close(fp);
+        }
+    }
+
+    return(ok);
+}
