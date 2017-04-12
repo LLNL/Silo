@@ -13700,6 +13700,7 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char const *name, int nvars, char const * c
             len++; /*count null*/
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, s,
                 m.varnames/*out*/, friendly_name(name, "_varnames", 0));
+            FREE(s);
         }
         
         /* Write raw data arrays */
@@ -13788,7 +13789,6 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char const *name, int nvars, char const * c
             if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIVAR, name, &m);
 
-        /* Free resources */
         FREE(s);
         
     } CLEANUP {
