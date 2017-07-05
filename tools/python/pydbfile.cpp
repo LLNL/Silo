@@ -1,4 +1,4 @@
-// Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+// Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 // LLNL-CODE-425250.
 // All rights reserved.
 // 
@@ -139,67 +139,62 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
     void *var = DBGetVar(db,str);
     if (len == 1 || type == DB_CHAR)
     {
+        PyObject *tmp;
         switch (type)
         {
           case DB_INT:
-            return PyInt_FromLong(*((int*)var));
+            tmp = PyInt_FromLong((long)*((int*)var)); break;
           case DB_SHORT:
-            return PyInt_FromLong(*((short*)var));
+            tmp = PyInt_FromLong((long)*((short*)var)); break;
           case DB_LONG:
-            return PyInt_FromLong(*((long*)var));
+            tmp = PyInt_FromLong(*((long*)var)); break;
           case DB_FLOAT:
-            return PyFloat_FromDouble(*((float*)var));
+            tmp = PyFloat_FromDouble((double)*((float*)var)); break;
           case DB_DOUBLE:
-            return PyFloat_FromDouble(*((double*)var));
+            tmp = PyFloat_FromDouble(*((double*)var)); break;
           case DB_CHAR:
             if (len == 1)
-                return PyInt_FromLong(*((char*)var));
+                tmp = PyInt_FromLong((long)*((char*)var));
             else
             {
                 // strip trailing null if one exists
                 char *p = (char *) var;
                 if (p[len-1] == '\0') len--;
-                return PyString_FromStringAndSize((char*)var, len);
+                tmp = PyString_FromStringAndSize((char*)var, len);
             }
+            break;
           default:
             SiloErrorFunc("Unknown variable type.");
-            return NULL;
+            tmp = NULL;
+            break;
         }
+        if (var) free(var);
+        return tmp;
     }
     else
     {
-        PyObject *retval = PyTuple_New(len);
+        PyObject *retval = len>0?PyTuple_New(len):NULL;
         for (int i=0; i<len; i++)
         {    
             PyObject *tmp;
             switch (type)
             {
-              case DB_INT:
-                tmp = PyInt_FromLong(((int*)var)[i]);
-                break;
-              case DB_SHORT:
-                tmp = PyInt_FromLong(((short*)var)[i]);
-                break;
-              case DB_LONG:
-                tmp = PyInt_FromLong(((long*)var)[i]);
-                break;
-              case DB_FLOAT:
-                tmp = PyFloat_FromDouble(((float*)var)[i]);
-                break;
-              case DB_DOUBLE:
-                tmp = PyFloat_FromDouble(((double*)var)[i]);
-                break;
-              case DB_CHAR:
-                tmp = PyInt_FromLong(((char*)var)[i]);
-                break;
+              case DB_INT:    tmp = PyInt_FromLong((long)((int*)var)[i]); break;
+              case DB_SHORT:  tmp = PyInt_FromLong((long)((short*)var)[i]); break;
+              case DB_LONG:   tmp = PyInt_FromLong(((long*)var)[i]); break;
+              case DB_FLOAT:  tmp = PyFloat_FromDouble((double)((float*)var)[i]); break;
+              case DB_DOUBLE: tmp = PyFloat_FromDouble(((double*)var)[i]); break;
+              case DB_CHAR:   tmp = PyInt_FromLong((long)((char*)var)[i]); break;
               default:
                 SiloErrorFunc("Unknown variable type.");
                 return NULL;
             }
             PyTuple_SET_ITEM(retval, i, tmp);
         }
+        if (var) free(var);
         return retval;
     }
+    return NULL;
 }
 
 // ****************************************************************************
@@ -258,15 +253,21 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
     {
         string compname = silo_obj->comp_names[i];
         string pdbname  = silo_obj->pdb_names[i];
-        void *comp = DBGetComponent(db, str, compname.c_str());
-        if (!comp)
-        {
-            char msg[256];
-            snprintf(msg, sizeof(msg), "Unable to get component \"%s\" for object \%s\"", compname.c_str(), str);
-            SiloErrorFunc(msg);
-            continue;
-        }
         int type = DBGetComponentType(db, str, compname.c_str());
+        void *comp = 0;
+
+        if (type == DB_INT || type == DB_SHORT || type == DB_LONG || type == DB_LONG_LONG ||
+            type == DB_FLOAT || type == DB_DOUBLE || type == DB_CHAR)
+        {
+            comp  = DBGetComponent(db, str, compname.c_str());
+            if (!comp)
+            {
+                char msg[256];
+                snprintf(msg, sizeof(msg), "Unable to get component \"%s\" for object \%s\"", compname.c_str(), str);
+                SiloErrorFunc(msg);
+                continue;
+            }
+        }
         string typestr = "";
         int ival = -1;
         switch (type)
@@ -293,7 +294,7 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             break;
           case DB_FLOAT:
             typestr = "float";
-            PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble(*((float*)comp)));
+            PyDict_SetItemString(retval, compname.c_str(), PyFloat_FromDouble((double)*((float*)comp)));
             break;
           case DB_DOUBLE:
             typestr = "double";
@@ -321,12 +322,18 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             {
 
                 PyObject *argTuple = PyTuple_New(1);
-                PyTuple_SetItem(argTuple, 0, PyString_FromString(valStr.c_str()));
+                PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(valStr.c_str()));
                 PyObject *dobj = DBfile_DBGetVar(self, argTuple);
+                Py_DECREF(argTuple);
                 if (dobj)
+                {
                     PyDict_SetItemString(retval, compname.c_str(), dobj);
+                    Py_DECREF(dobj);
+                }
                 else
+                {
                     PyDict_SetItemString(retval, compname.c_str(), PyString_FromString(valStr.c_str()));
+                }
             }
             else
             {
@@ -336,7 +343,7 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
         }
 
         // No such call as "DBFreeComponent".  Maybe there should be one!
-        free(comp);
+        if (comp) free(comp);
         comp = NULL;
 
     }
@@ -346,10 +353,10 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
 }
 
 // ****************************************************************************
-//  Method:  DBfile_DBGetVar
+//  Method:  DBfile_DBWrite
 //
 //  Purpose:
-//    Encapsulates DBGetVar
+//    Encapsulates DBWrite
 //
 //  Python Arguments:
 //    form 1: varname, integer
@@ -507,7 +514,6 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
     if (!ncomps) return NULL;
     int objtype = DBGetObjtypeTag(PyString_AsString(PyDict_GetItemString((PyObject*)dictobj, "type")));
     DBobject *siloobj = DBMakeObject(objname, objtype, ncomps);
-printf("writing objname = \"%s\"\n", objname);
     PyObject *key, *value;
 #if PY_VERSION_GE(2,5,0)
     Py_ssize_t pos = 0;
