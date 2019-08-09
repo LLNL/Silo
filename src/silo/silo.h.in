@@ -2158,7 +2158,7 @@ SILO_API extern DBmrgvar *             DBGetMrgvar(DBfile *dbfile, char const *n
 SILO_API extern DBnamescheme *         DBMakeNamescheme(char const *fmt, ...);
 SILO_API extern char const *           DBGetName(DBnamescheme const *ns, int natnum);
 SILO_API int                           DBGetIndex(DBnamescheme const *ns, int natnum);
-SILO_API extern char const *           DBsnprintf(char const *fmt, ...);
+SILO_API extern char const *           DBsprintf(char const *fmt, ...);
 
 /* Multi-block objects and parallel I/O */
 SILO_API extern DBmultimesh *          DBGetMultimesh(DBfile *, char const *);

@@ -12053,23 +12053,10 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char const *name)
         /* Read the raw data */
         if (SILO_Globals.dataReadMask & DBZonelistInfo)
         {
-printf("name = \"%s\"\n", name);
-db_hdf5_resolvename(_dbfile, name, m.shapecnt);
-printf("name = \"%s\"\n", name);
-db_hdf5_resolvename(_dbfile, name, m.shapesize);
-printf("name = \"%s\"\n", name);
-db_hdf5_resolvename(_dbfile, name, m.shapetype);
-printf("name = \"%s\"\n", name);
-db_hdf5_resolvename(_dbfile, name, m.nodelist);
-printf("name = \"%s\"\n", name);
             zl->shapecnt = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapecnt), 1);
-printf("name = \"%s\"\n", name);
             zl->shapesize = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapesize), 1);
-printf("name = \"%s\"\n", name);
             zl->shapetype = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapetype), 1);
-printf("name = \"%s\"\n", name);
             zl->nodelist = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.nodelist), 1);
-printf("name = \"%s\"\n", name);
         }
         if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
             zl->gzoneno = db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.gzoneno), 1);
