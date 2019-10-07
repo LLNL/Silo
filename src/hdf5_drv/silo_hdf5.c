@@ -2166,7 +2166,7 @@ db_hdf5_init(void)
 
 #ifdef HAVE_ZFP /* { */
     H5Z_zfp_initialize();
-    zfp.zfp_init();
+    zfp_init_zfp();
 #endif /* HAVE_ZFP } */
 
     /* Define compound data types */

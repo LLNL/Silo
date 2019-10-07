@@ -249,7 +249,7 @@ DEFAULT_BROWSER="browser"
 DEFAULT_SILEX=""
 DEFAULT_HZIP="hzip"
 DEFAULT_FPZIP="fpzip"
-DEFAULT_ZFP="zfp-0.5.0"
+DEFAULT_ZFP="zfp-0.5.5"
 DEFAULT_FORTRAN="fortran"
 DEFAULT_JSON=""
 default_detect_readline="yes"
@@ -537,7 +537,7 @@ fi
 
 dnl enable Peter Lindstrom's ZFP compression stuff 
 AC_MSG_CHECKING(for zfp)
-if test -d $srcdir/src/zfp-0.5.0; then
+if test -d $srcdir/src/zfp-0.5.5; then
     AC_MSG_RESULT(found)
     ZFP=$DEFAULT_ZFP
 else
@@ -546,7 +546,7 @@ else
 fi
 AC_ARG_ENABLE(zfp,
     AC_HELP_STRING([--enable-zfp],
-        [enable Lindstrom 1,2,3D array compression @<:@default=yes@:>@]),
+        [enable Lindstrom array compression @<:@default=yes@:>@]),
     if test "$enable_zfp" = "no"; then
         ZFP=""
     fi)
@@ -1212,7 +1212,7 @@ if test -n "$FPZIP"; then
   AC_CONFIG_FILES([src/fpzip/Makefile])
 fi
 if test -n "$ZFP"; then
-  AC_CONFIG_FILES([src/zfp-0.5.0/Makefile])
+  AC_CONFIG_FILES([src/zfp-0.5.5/Makefile])
 fi
 if test -n "$HDF5_DRV"; then
   AC_CONFIG_FILES([src/libsiloh5.settings])
