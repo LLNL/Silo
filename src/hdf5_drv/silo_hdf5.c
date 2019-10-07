@@ -3630,6 +3630,11 @@ db_hdf5_set_compression(int flags)
              if (nvals == 4 && errno == 0)
                  H5Pset_zfp_expert_cdata(minbits, maxbits, maxprec, minexp, cd_nelmts, cd_values);
           }
+          if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+             "REVERSIBLE")) != (char *)NULL)
+          {
+              H5Pset_zfp_reversible_cdata(cd_nelmts, cd_values);
+          }
           else
           {
               db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
