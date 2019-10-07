@@ -263,7 +263,7 @@ void th5_set_mdc_config(char *mdc_config_filename,
 
 /* Write (or read) a 1D dataset of doubles */
 static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
-    int zip, int noise, int *running_count, double *running_time)
+    int atts, int zip, int noise, int *running_count, double *running_time)
 {
     char dsname[32];
     static double *dbuf = 0, *rbuf = 0;
@@ -346,11 +346,18 @@ static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
         if (grp > 0)
 #endif
         {
+            if (atts)
+            {
+                double_ds_id = H5Aopen(grp, dsname, H5P_DEFAULT);
+            }
+            else
+            {
 #if HDF5_VERSION_GE(1,8,0)
-            double_ds_id = H5Dopen(grp, dsname, H5P_DEFAULT);
+                double_ds_id = H5Dopen(grp, dsname, H5P_DEFAULT);
 #else
-            double_ds_id = H5Dopen(grp, dsname);
+                double_ds_id = H5Dopen(grp, dsname);
 #endif
+            }
         }
 
 #if HDF5_VERSION_GE(1,8,3)
@@ -359,7 +366,10 @@ static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
         if (double_ds_id > 0)
 #endif
         {
-            H5Dread(double_ds_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+            if (atts)
+                H5Aread(double_ds_id, H5T_NATIVE_DOUBLE, rbuf);
+            else
+                H5Dread(double_ds_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
             if (doread == 2)
             {
                 if (memcmp(rbuf, noise?&dbuf[random()%dsize]:dbuf, dsize*sizeof(double)) != 0)
@@ -392,22 +402,42 @@ static void do_dataset(int idx, hid_t grp, int doread, int contig, int dsize,
     }
     else
     {
-#if HDF5_VERSION_GE(1,8,0)
-        double_ds_id = H5Dcreate(grp, dsname, H5T_NATIVE_DOUBLE, double_space_id, H5P_DEFAULT, dcprops, H5P_DEFAULT);
+        if (atts)
+        {
+#if HDF5_VERSION_GE(1,6,0)
+            double_ds_id = H5Acreate(grp, dsname, H5T_NATIVE_DOUBLE, double_space_id, H5P_DEFAULT, H5P_DEFAULT);
 #else
-        double_ds_id = H5Dcreate(grp, dsname, H5T_NATIVE_DOUBLE, double_space_id, dcprops);
+            double_ds_id = H5Acreate(grp, dsname, H5T_NATIVE_DOUBLE, double_space_id, H5P_DEFAULT);
 #endif
-        H5Sclose(double_space_id);
-        H5Pclose(dcprops);
-        t0 = GetTime();
-        H5Dwrite(double_ds_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, noise?&dbuf[random()%dsize]:dbuf);
+            H5Sclose(double_space_id);
+            H5Pclose(dcprops);
+            t0 = GetTime();
+            H5Awrite(double_ds_id, H5T_NATIVE_DOUBLE, noise?&dbuf[random()%dsize]:dbuf);
+        }
+        else
+        {
+#if HDF5_VERSION_GE(1,8,0)
+            double_ds_id = H5Dcreate(grp, dsname, H5T_NATIVE_DOUBLE, double_space_id, H5P_DEFAULT, dcprops, H5P_DEFAULT);
+#else
+            double_ds_id = H5Dcreate(grp, dsname, H5T_NATIVE_DOUBLE, double_space_id, dcprops);
+#endif
+            H5Sclose(double_space_id);
+            H5Pclose(dcprops);
+            t0 = GetTime();
+            H5Dwrite(double_ds_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, noise?&dbuf[random()%dsize]:dbuf);
+        }
     }
 #if HDF5_VERSION_GE(1,8,3)
     if (H5Iis_valid(double_ds_id) > 0)
 #else
     if (double_ds_id > 0)
 #endif
-        H5Dclose(double_ds_id);
+    {
+        if (atts)
+            H5Aclose(double_ds_id);
+        else
+            H5Dclose(double_ds_id);
+    }
 
     *running_time = *running_time + GetTime() - t0;
     *running_count = *running_count + 1;
@@ -651,6 +681,7 @@ int main(int argc, char **argv)
     int newf = 0;
     int cache = 0;
     int dsize = 1;
+    int atts = 0;
     int maxlink=0, maxlink1=0, maxlink2=0;
     int dircnt = 0, dscnt = 0;
     int zip=0;
@@ -721,6 +752,8 @@ int main(int argc, char **argv)
             eoc = (int) strtol(argv[i]+4,0,10);
         } else if (!strncmp(argv[i], "mdc_config=",11)) {
             mdc_config = strdup(argv[i]+11);
+        } else if (!strncmp(argv[i], "atts=",5)) {
+            atts = (int) strtol(argv[i]+5,0,10);
         } else if (strstr(argv[i], "help")) {
             help = 1;
         } else if (argv[i][0] != '\0') {
@@ -733,6 +766,9 @@ int main(int argc, char **argv)
     if (nd1) totn += nd0*nd1;
     if (nd2) totn += nd0*nd1*nd2;
     if (nd3) totn += nd0*nd1*nd2*nd3;
+
+    if (atts && dsize > 64)
+        dsize = 64;
 
 #if HDF5_VERSION_GE(1,8,0)
     maxlink = nd0>65535?65535:nd0;
@@ -758,6 +794,7 @@ int main(int argc, char **argv)
     PRINT_VAL(nd2, level 2 dir|dataset count);
     PRINT_VAL(nd3, level 3 dataset count);
     PRINT_VAL(dsize, dataset size in # doubles);
+    PRINT_VAL(atts, use attributes NOT datasets);
     PRINT_VAL(contig, turn on contiguous datasets);
     PRINT_VAL(zip, turn on dataset compression);
     PRINT_VAL(noise, turn on dataset value randomizing);
@@ -797,7 +834,6 @@ int main(int argc, char **argv)
         int val = (1<<freelim);
         H5set_free_list_limits(val, val, val, val, val, val);
     }
-
 
     if (doread)
     {
@@ -866,14 +902,14 @@ int main(int argc, char **argv)
 
                 for (l = 0; l < nd3; l++, progress(n++,totn,fid,dstm,&minrate,&maxrate,t0,tlim))
                 {
-                    do_dataset(maps[3][l], grp3, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                    do_dataset(maps[3][l], grp3, doread, contig, dsize, atts, zip, noise, &dscnt, &dstm);
                     if (flush && !(n%flush)) H5Fflush(fid, H5F_SCOPE_GLOBAL);
                     if (gc && !(n%gc)) H5garbage_collect();
                     do_file(n, closef, newf, doread, estlink, maxlink, compat, cache, eoc, filename, fid, h5_mdc_config_ptr);
                 }
 
                 if (!nd3)
-                    do_dataset(maps[2][k], grp2, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                    do_dataset(maps[2][k], grp2, doread, contig, dsize, atts, zip, noise, &dscnt, &dstm);
 
 #if HDF5_VERSION_GE(1,8,3)
                 if (H5Iis_valid(grp3) > 0) H5Gclose(grp3);
@@ -886,7 +922,7 @@ int main(int argc, char **argv)
             }
 
             if (!nd2)
-                do_dataset(maps[1][j], grp1, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+                do_dataset(maps[1][j], grp1, doread, contig, dsize, atts, zip, noise, &dscnt, &dstm);
 
 #if HDF5_VERSION_GE(1,8,3)
             if (H5Iis_valid(grp2) > 0) H5Gclose(grp2);
@@ -899,7 +935,7 @@ int main(int argc, char **argv)
         }
 
         if (!nd1)
-            do_dataset(maps[0][i], fid, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+            do_dataset(maps[0][i], fid, doread, contig, dsize, atts, zip, noise, &dscnt, &dstm);
 
 #if HDF5_VERSION_GE(1,8,3)
         if (H5Iis_valid(grp1) > 0) H5Gclose(grp1);
@@ -913,7 +949,7 @@ int main(int argc, char **argv)
     }
 
     /* This last call just frees static buffer(s) in this func */
-    do_dataset(-1, fid, doread, contig, dsize, zip, noise, &dscnt, &dstm);
+    do_dataset(-1, fid, doread, contig, dsize, atts, zip, noise, &dscnt, &dstm);
 
 #if HDF5_VERSION_GE(1,6,4)
     printf("Upon close, number of open objects is %d\n", (int) H5Fget_obj_count(fid, H5F_OBJ_ALL));
