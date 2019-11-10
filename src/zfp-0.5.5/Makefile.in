@@ -423,7 +423,7 @@ top_srcdir = @top_srcdir@
 # be used for advertising or product endorsement purposes.
 #
 AUTOMAKE_OPTIONS = subdir-objects
-AM_CPPFLAGS = -I$(srcdir)/include
+AM_CPPFLAGS = -DBIT_STREAM_WORD_TYPE=uint8 -I$(srcdir)/include
 noinst_LTLIBRARIES = libsilo_zfp.la
 libsilo_zfp_la_SOURCES = $(FILES)
 EXTRA_DIST = \

@@ -197,8 +197,6 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
 #endif
 #ifdef HAVE_ZFP
 #include "H5Zzfp.h"
-#define USE_C_STRUCTSPACE
-#include "zfp.h"
 #endif
 
 /* Defining these to check overhead of PROTECT */
@@ -3630,7 +3628,7 @@ db_hdf5_set_compression(int flags)
              if (nvals == 4 && errno == 0)
                  H5Pset_zfp_expert_cdata(minbits, maxbits, maxprec, minexp, cd_nelmts, cd_values);
           }
-          if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+          else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
              "REVERSIBLE")) != (char *)NULL)
           {
               H5Pset_zfp_reversible_cdata(cd_nelmts, cd_values);

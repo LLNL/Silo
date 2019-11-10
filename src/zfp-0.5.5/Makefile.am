@@ -53,7 +53,7 @@
 ## Procss this file with automake to create Makefile.in
 AUTOMAKE_OPTIONS = subdir-objects
 
-AM_CPPFLAGS = -I$(srcdir)/include
+AM_CPPFLAGS = -DBIT_STREAM_WORD_TYPE=uint8 -I$(srcdir)/include
 
 noinst_LTLIBRARIES = libsilo_zfp.la
 libsilo_zfp_la_SOURCES = $(FILES)
