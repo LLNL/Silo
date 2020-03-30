@@ -2,7 +2,7 @@
 ! 
 !      SILO include file for Fortan applications.
 ! 
-!  Programmer:   miller86 Tue May 24 16:54:37 PDT 2016
+!  Programmer:   miller86 Mon Sep  3 19:34:48 PDT 2018
 ! 
 !  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 !     This file is generated automatically from C header files in the
@@ -189,6 +189,7 @@
       integer, parameter :: DB_POINTVAR = 571
       integer, parameter :: DB_ARRAY = 580
       integer, parameter :: DB_DIR = 600
+      integer, parameter :: DB_SYMLINK = 601
       integer, parameter :: DB_VARIABLE = 610
       integer, parameter :: DB_MRGTREE = 611
       integer, parameter :: DB_GROUPELMAP = 612
