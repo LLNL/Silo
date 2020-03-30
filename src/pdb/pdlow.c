@@ -1344,6 +1344,9 @@ _lite_PD_init_chrt (PDBfile *file) {
  *   Mark C. Miller, Tue Nov 17 22:23:42 PST 2009
  *   Changed support for long long to match more closely what PDB
  *   proper does.
+ *
+ *   Mark C. Miller, Fri May 11 15:59:35 PDT 2018
+ *   Added "char *" entry per Dale Slone.
  *-------------------------------------------------------------------------
  */
 void
@@ -1367,6 +1370,14 @@ _lite_PD_setup_chart (HASHTAB *chart, data_standard *fstd, data_standard *hstd,
       conv = FALSE;
    }
    _lite_PD_defstr(chart, "char", falign->char_alignment,
+                   1L, -1, conv, NULL, NULL);
+
+  if (flag) {
+      PD_COMPARE_CHAR_STD(conv, fstd, hstd, falign, halign);
+   } else {
+      conv = FALSE;
+   }
+   _lite_PD_defstr(chart, "char *", falign->char_alignment,
                    1L, -1, conv, NULL, NULL);
 
    if (flag) {
