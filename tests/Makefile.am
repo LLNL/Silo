@@ -153,11 +153,12 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
+      bcastopen \
       empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS)
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
-bcastopen_SOURCES = bcastopen.c bcastopen_test.c
+bcastopen_SOURCES = bcastopen.c bcastopen_main.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl
@@ -239,6 +240,7 @@ check_PROGRAMS = \
  empty \
  majorder \
  realloc_obj_and_opts \
+ bcastopen \
  $(PDBTESTS) \
  $(JSONTESTS)
 
@@ -313,6 +315,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_majorder_SOURCES = dummy.cxx
  nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
  nodist_EXTRA_json_SOURCES = dummy.cxx
+ nodist_EXTRA_bcastopen_SOURCES = dummy.cxx
 endif
 
 
