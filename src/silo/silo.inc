@@ -2,7 +2,7 @@ Ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 C 
 C      SILO include file for Fortan applications.
 C 
-C  Programmer:   miller86 Tue May 24 16:54:37 PDT 2016
+C  Programmer:   miller86 Mon Sep  3 19:34:48 PDT 2018
 C 
 C  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 C     This file is generated automatically from C header files in the
@@ -478,6 +478,7 @@ C...Parameters.
       INTEGER  DB_SUN3
       INTEGER  DB_SUN4
       INTEGER  DB_SUSPEND
+      INTEGER  DB_SYMLINK
       INTEGER  DB_TAURUS
       INTEGER  DB_TOP
       INTEGER  DB_UCDMESH
@@ -598,6 +599,7 @@ C...Parameters.
       PARAMETER (DB_POINTVAR=571)
       PARAMETER (DB_ARRAY=580)
       PARAMETER (DB_DIR=600)
+      PARAMETER (DB_SYMLINK=601)
       PARAMETER (DB_VARIABLE=610)
       PARAMETER (DB_MRGTREE=611)
       PARAMETER (DB_GROUPELMAP=612)
