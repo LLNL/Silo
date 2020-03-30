@@ -578,8 +578,8 @@ DBFreeMultivar (DBmultivar *mv)
      if (mv->region_pnames)
      {
          for (i = 0; mv->region_pnames[i]; i++)
-             free(mv->region_pnames[i]);
-         free(mv->region_pnames);
+             FREE(mv->region_pnames[i]);
+         FREE(mv->region_pnames);
      }
 
      FREE(mv->varnames);
@@ -1021,6 +1021,13 @@ DBFreeMeshvar(DBmeshvar *var)
         }
     }
 
+    if (var->region_pnames)
+    {
+        for (i = 0; var->region_pnames[i]; i++)
+            FREE(var->region_pnames[i]);
+        FREE(var->region_pnames);
+    }
+
     FREE(var->vals);
     FREE(var->name);
     FREE(var->units);
@@ -1197,6 +1204,13 @@ DBFreeCsgvar(DBcsgvar *var)
         }
     }
 
+    if (var->region_pnames)
+    {
+        for (i = 0; var->region_pnames[i]; i++)
+            FREE(var->region_pnames[i]);
+        FREE(var->region_pnames);
+    }
+
     FREE(var->vals);
     FREE(var->name);
     FREE(var->label);
@@ -1287,6 +1301,13 @@ DBFreeQuadvar(DBquadvar *var)
             if (var->mixvals != NULL)
                 FREE(var->mixvals[i]);
         }
+    }
+
+    if (var->region_pnames)
+    {
+        for (i = 0; var->region_pnames[i]; i++)
+            FREE(var->region_pnames[i]);
+        FREE(var->region_pnames);
     }
 
     FREE(var->vals);
@@ -1389,6 +1410,13 @@ DBFreeUcdvar(DBucdvar *var)
             if (var->mixvals != NULL)
                 FREE(var->mixvals[i]);
         }
+    }
+
+    if (var->region_pnames)
+    {
+        for (i = 0; var->region_pnames[i]; i++)
+            FREE(var->region_pnames[i]);
+        FREE(var->region_pnames);
     }
 
     FREE(var->vals);
