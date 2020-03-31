@@ -136,6 +136,7 @@ prim_assoc_t    PA_BR_OBJTYPE[] = {
    {BROWSER_DB_MRGTREE,         "mrgtree"},
    {BROWSER_DB_GROUPELMAP,      "groupelmap"},
    {BROWSER_DB_MRGVAR,          "mrgvar"},
+   {BROWSER_DB_SYMLINK,         "symlink"},
    {0,                          NULL}};
 
 prim_assoc_t    PA_OBJTYPE[] = {
