@@ -150,8 +150,8 @@ V_array (int argc, obj_t argv[]) {
 
    buf[0] = '\0';
    for (i=0; i<argc-1; i++) {
-      if (argv[i] && C_NUM==argv[i]->pub.cls) {
-         sprintf (buf+at, "%s%d", at?", ":"", num_int (argv[i]));
+      if (argv[i] && C_NUM==argv[i]->pub.cls && num_int(argv[i])>0) {
+         sprintf (buf+at, "%s%d", at?", ":"", num_int(argv[i]));
          at += strlen (buf+at);
 
       } else if (argv[i] && (s=obj_name(argv[i]))) {
@@ -1328,6 +1328,16 @@ V_list (int argc, obj_t argv[])
 {
     obj_t       fileobjs=NIL, ptr=NIL;
     int         first_arg = 0;
+    int         minus_l = 0;
+
+    if (argc>=1 && C_SYM==argv[0]->pub.cls && !strcmp("-l",obj_name(argv[0]))) {
+        /* Is the first symbol a -l modifier? If so, gobble it up here. */
+        int i;
+        minus_l = 1;
+        for (i = 0; i < argc-1; i++)
+            argv[i] = argv[i+1];
+        argc--;
+    }
 
     if (argc>=1 && C_SYM==argv[0]->pub.cls) {
         /* Is the first symbol bound to a file or is it a special symbol
@@ -1375,6 +1385,7 @@ V_list (int argc, obj_t argv[])
 
     for (ptr=fileobjs; ptr; ptr=cons_tail(ptr)) {
         DBfile  *file;
+        DBtoc   *dbtoc;
         toc_t   *toc;
         int     i, nentries, width, old_type=(-1);
         int     argno, nprint;
@@ -1397,11 +1408,14 @@ V_list (int argc, obj_t argv[])
             out_errorn("ls: no table of contents");
             goto error;
         }
+        dbtoc = DBGetToc(file);
 
         /* Prune the table of contents based on the arguments supplied. */    
         selected = (int *)calloc(nentries, sizeof(int));
         if (first_arg==argc) {
-            for (i=0; i<nentries; i++) selected[i] = true;
+            for (i=0; i<nentries; i++) {
+                selected[i] = true;
+            }
         } else {
             for (argno=first_arg; argno<argc; argno++) {
                 if (NULL==(needle=obj_name(argv[argno]))) {
@@ -1476,6 +1490,7 @@ V_list (int argc, obj_t argv[])
          * has a prefix only on the first line. */
         if (width>0) {
             for (i=nprint=0; i<nentries && !out_brokenpipe(OUT_STDOUT); i++) {
+                char const *target = DBIsSymlink(dbtoc, toc[i].name);
                 if (!selected[i]) continue;
                 if (toc[i].type!=old_type) {
                     if (nprint) {
@@ -1485,7 +1500,18 @@ V_list (int argc, obj_t argv[])
                     sprintf(buf, "%s(s)", ObjTypeName[toc[i].type]);
                     out_push(OUT_STDOUT, buf);
                 }
-                out_printf(OUT_STDOUT, " %-*s", width, toc[i].name);
+                if (target && !minus_l)
+                {
+                    char tmp[256];
+                    snprintf(tmp, sizeof(tmp)-2, "%s@", toc[i].name);
+                    out_printf(OUT_STDOUT, " %-*s", width, tmp);
+                }
+                else
+                    out_printf(OUT_STDOUT, " %-*s", width, toc[i].name);
+                if (minus_l) {
+                    if (target)
+                        out_printf(OUT_STDOUT, " -> %-*s", width, target?target:"***Error***");
+                }
                 if (toc[i].type!=old_type) {
                     out_pop(OUT_STDOUT);
                     old_type = toc[i].type;
@@ -1499,6 +1525,7 @@ V_list (int argc, obj_t argv[])
         for (i=0; i<nentries; i++) free(toc[i].name);
         free(toc);
         free(selected);
+        /* no free for dbtoc */
     }
     return NIL;
 
