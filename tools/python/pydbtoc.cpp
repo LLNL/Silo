@@ -49,6 +49,7 @@
 // product endorsement purposes.
 
 #include "pydbtoc.h"
+#include "pysilo.h"
 
 // ****************************************************************************
 //  Method:  DBtoc_dealloc
@@ -340,8 +341,7 @@ PyTypeObject DBtocType =
     //
     // Type header
     //
-    PyObject_HEAD_INIT(&PyType_Type)
-    0,                                   // ob_size
+    PyVarObject_HEAD_INIT(&PyType_Type,0)
     "DBtoc",                    // tp_name
     sizeof(DBtocObject),        // tp_basicsize
     0,                                   // tp_itemsize
@@ -352,7 +352,7 @@ PyTypeObject DBtocType =
     (printfunc)DBtoc_print,     // tp_print
     (getattrfunc)DBtoc_getattr, // tp_getattr
     0,//(setattrfunc)DBtoc_setattr, // tp_setattr -- this object is read-only
-    (cmpfunc)DBtoc_compare,     // tp_compare
+    0,     // tp_compare
     (reprfunc)0,                         // tp_repr
     //
     // Type categories
@@ -369,7 +369,7 @@ PyTypeObject DBtocType =
     0,                                   // tp_getattro
     0,                                   // tp_setattro
     0,                                   // tp_as_buffer
-    Py_TPFLAGS_CHECKTYPES,               // tp_flags
+    0,               // tp_flags
     "This class wraps a Silo DBtoc object.", // tp_doc
     0,                                   // tp_traverse
     0,                                   // tp_clear
