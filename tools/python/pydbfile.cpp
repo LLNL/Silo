@@ -552,6 +552,7 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
                         vals[i] = PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
                     }
                 }
+#warning WE ARE POSSIBLE BREAKING THE DIMENSIONALITY OF THE ORIGINAL ARRAY DATA
                 DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "integer", vals, 1, &len);
                 delete [] vals;
             }
@@ -565,9 +566,11 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
                     else
                         vals[i] = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
                 }
+#warning WE ARE POSSIBLE BREAKING THE DIMENSIONALITY OF THE ORIGINAL ARRAY DATA
                 DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "double", vals, 1, &len);
                 delete [] vals;
             }
+#warning WE ARE MISSING THE CASE WHERE THE NEXT MEMBER IS ITSELF A DICT OBJECT REQUIRING RECURSION ON THAT OBJECT
         }
     }
     DBWriteObject(db, siloobj, 1);
@@ -812,6 +815,7 @@ static int DBfile_print(PyObject *self, FILE *fp, int flags)
 // ****************************************************************************
 static PyObject *DBfile_getattr(PyObject *self, char *name)
 {
+    int i;
     DBfileObject *obj = (DBfileObject*)self;
 
     if (!obj->db)
@@ -832,7 +836,23 @@ static PyObject *DBfile_getattr(PyObject *self, char *name)
         }
     }
 
+#if PY_VERSION_GE(3,0,0)
+    for (i = 0; DBfile_methods[i].ml_name; i++)
+    {
+        if (!strcmp(name, DBfile_methods[i].ml_name))
+        {
+            PyObject *result = PyCFunction_New(&DBfile_methods[i], self);
+            if (result == NULL)
+                result = Py_None;
+            Py_INCREF(result);
+            return result;
+        }
+    }
+    return PyObject_GenericGetAttr(self, PyString_FromString(name));
+#else
     return Py_FindMethod(DBfile_methods, self, name);
+#endif
+
 }
 
 // ****************************************************************************
@@ -868,8 +888,7 @@ PyTypeObject DBfileType =
     //
     // Type header
     //
-    PyObject_HEAD_INIT(&PyType_Type)
-    0,                                   // ob_size
+    PyVarObject_HEAD_INIT(&PyType_Type,0)
     "DBfile",                    // tp_name
     sizeof(DBfileObject),        // tp_basicsize
     0,                                   // tp_itemsize
@@ -880,7 +899,7 @@ PyTypeObject DBfileType =
     (printfunc)DBfile_print,     // tp_print
     (getattrfunc)DBfile_getattr, // tp_getattr
     0,//(setattrfunc)DBfile_setattr, // tp_setattr -- this object is read-only
-    (cmpfunc)DBfile_compare,     // tp_compare
+    0,     // tp_compare
     (reprfunc)0,                         // tp_repr
     //
     // Type categories
@@ -897,7 +916,7 @@ PyTypeObject DBfileType =
     0,                                   // tp_getattro
     0,                                   // tp_setattro
     0,                                   // tp_as_buffer
-    Py_TPFLAGS_CHECKTYPES,               // tp_flags
+    0,               // tp_flags
     "This class wraps a Silo DBfile object.", // tp_doc
     0,                                   // tp_traverse
     0,                                   // tp_clear
