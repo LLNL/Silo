@@ -67,4 +67,39 @@
 
 void SiloErrorFunc(const char *errString);
 
+// Python 2/3 compatability macros
+// From http://python3porting.com/cextensions.html
+#ifndef PyVarObject_HEAD_INIT
+    #define PyVarObject_HEAD_INIT(type, size) \
+        PyObject_HEAD_INIT(type) size,
+#endif
+
+#ifndef Py_TYPE
+    #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+#endif
+
+#if PY_VERSION_GE(3,0,0)
+    #define PY_SILO_MOD_DEF(ob, name, methods) \
+        static struct PyModuleDef moduledef = { \
+            PyModuleDef_HEAD_INIT, name, NULL, -1, methods }; \
+        ob = PyModule_Create(&moduledef);
+#else
+    #define PY_SILO_MOD_DEF(ob, name, methods) \
+        ob = Py_InitModule(name, methods);
+#endif
+
+#if PY_VERSION_GE(3,0,0)
+    #define PyInt_FromLong PyLong_FromLong
+    #define PyInt_AS_LONG PyLong_AS_LONG
+    #define PyInt_Check PyLong_Check
+#endif
+
+#if PY_VERSION_GE(3,0,0)
+    #define PyString_FromString PyUnicode_FromString
+    #define PyString_Check PyUnicode_Check
+    #define PyString_FromStringAndSize PyUnicode_FromStringAndSize
+    #define PyString_AsString PyBytes_AS_STRING
+#endif
+
+
 #endif
