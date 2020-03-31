@@ -2352,5 +2352,8 @@ stc_silo_types (void) {
       COMP (nmrgvar,               "primitive 'int'");
       COMP (mrgvar_names,
             "pointer (array 'self.nmrgvar' (primitive 'string'))");
+      COMP (nsymlink,               "primitive 'int'");
+      COMP (symlink_names,
+            "pointer (array 'self.nsymlink' (primitive 'string'))");
    } ESTRUCT;
 }
