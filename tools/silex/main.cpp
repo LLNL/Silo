@@ -88,6 +88,7 @@ be used for advertising or product endorsement purposes.
 
 int main( int argc, char **argv )
 {
+    QCoreApplication::setLibraryPaths(QStringList()); // work-around Qt bug
     QApplication::setColorSpec(QApplication::ManyColor);
     QApplication a(argc, argv);
 #ifndef Q_WS_MACX
