@@ -141,7 +141,7 @@ char    *ObjTypeName[BROWSER_NOBJTYPES] = {
    "curve", "multimesh", "multivar", "multimat", "multispecies", "qmesh", 
    "qvar", "ucdmesh", "ucdvar", "ptmesh", "ptvar", "mat", "matspecies", "var",
    "obj", "dir", "array", "defvars", "csgmesh", "csgvar", "multimeshadj",
-   "mrgtree", "groupelmap", "mrgvar"
+   "mrgtree", "groupelmap", "mrgvar", "symlink"
 };
 
 /*
@@ -280,6 +280,13 @@ sort_toc_by_type (toc_t *a, toc_t *b) {
  *    Avoid calls to malloc(0) since the result isn't defined by Posix.
  *-------------------------------------------------------------------------
  */
+#define TOC_MEMBERS(kind,KIND) \
+   for (i=0; i<toc->n ## kind; i++,at++) { \
+      char const *target = DBIsSymlink(toc, toc->kind ## _names[i]);\
+      retval[at].name = safe_strdup (toc->kind ## _names[i]); \
+      retval[at].type = BROWSER_DB_ ## KIND; \
+   }
+
 toc_t *
 browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
 
@@ -301,10 +308,13 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
    /*
     * Load the various types of objects into the new structure.
     */
+#if 0
    for (i=0; i<toc->ndefvars; i++,at++) {
       retval[at].name = safe_strdup (toc->defvars_names[i]);
       retval[at].type = BROWSER_DB_DEFVARS;
    }
+#endif
+   TOC_MEMBERS(defvars, DEFVARS);
 
    for (i=0; i<toc->ncsgmesh; i++,at++) {
       retval[at].name = safe_strdup (toc->csgmesh_names[i]);
