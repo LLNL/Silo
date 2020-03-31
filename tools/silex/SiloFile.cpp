@@ -126,7 +126,19 @@ SiloDir::SiloDir(DBfile *db, const QString &name_, const QString &path_)
     for (i=0; i<toc->nmultimatspecies; i++)
         multimatspecies.push_back(toc->multimatspecies_names[i]);
     for (i=0; i<toc->nqmesh; i++)
-        qmesh.push_back(toc->qmesh_names[i]);
+{
+        char const *targ = DBIsSymlink(toc, toc->qmesh_names[i]);
+        if (targ)
+        {
+            char tmp[256];
+            snprintf(tmp, sizeof(tmp), "%s --> %s", toc->qmesh_names[i], targ);
+            qmesh.push_back(tmp);
+        }
+        else
+        {
+            qmesh.push_back(toc->qmesh_names[i]);
+        }
+}
     for (i=0; i<toc->nqvar; i++)
         qvar.push_back(toc->qvar_names[i]);
     for (i=0; i<toc->nucdmesh; i++)
