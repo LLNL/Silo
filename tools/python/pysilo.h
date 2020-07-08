@@ -98,7 +98,7 @@ void SiloErrorFunc(const char *errString);
     #define PyString_FromString PyUnicode_FromString
     #define PyString_Check PyUnicode_Check
     #define PyString_FromStringAndSize PyUnicode_FromStringAndSize
-    #define PyString_AsString PyBytes_AS_STRING
+    #define PyString_AsString PyUnicode_AsUTF8
 #endif
 
 
