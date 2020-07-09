@@ -157,10 +157,25 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
                 tmp = PyInt_FromLong((long)*((char*)var));
             else
             {
-                // strip trailing null if one exists
-                char *p = (char *) var;
-                if (p[len-1] == '\0') len--;
-                tmp = PyString_FromStringAndSize((char*)var, len);
+                int narr = -1;
+                char **strArr = DBStringListToStringArray((char*)var, &narr, 0);
+                if (narr > 0 && strArr)
+                {
+                    tmp = PyTuple_New(narr);
+                    for (int i = 0; i < narr; i++)
+                    {
+                        PyTuple_SET_ITEM(tmp, i, PyString_FromString(strArr[i]));
+                        FREE(strArr[i]);
+                    }
+                    FREE(strArr);
+                }
+                else
+                {
+                    // strip trailing null if one exists
+                    char *p = (char *) var;
+                    if (p[len-1] == '\0') len--;
+                    tmp = PyString_FromStringAndSize((char*)var, len);
+                }
             }
             break;
           default:
@@ -522,6 +537,12 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
 #endif
     while (PyDict_Next((PyObject*)dictobj, &pos, &key, &value))
     {
+        /* skip name and type values */
+        if (!strncmp(PyString_AsString(key), "type", 4))
+            continue;
+        if (!strncmp(PyString_AsString(key), "name", 4))
+            continue;
+
         if (PyInt_Check(value))
             DBAddIntComponent(siloobj, PyString_AsString(key), PyInt_AS_LONG(value));
         else if (PyFloat_Check(value))
@@ -531,46 +552,50 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
         else if (PyTuple_Check(value))
         {
             long len = PyTuple_Size(value);
-            bool allint = true;
-            for (int i = 0; i < len && allint; i++)
+            if (PyString_Check(PyTuple_GET_ITEM(value,0)))
             {
-                if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
-                    allint = false;
-            }
-            if (allint)
-            {
-                int *vals = new int[len];
+                int len2;
+                long count[1];
+                char *tmp = 0;
+                char** vals = new char*[len];
                 for (int i = 0; i < len; i++)
-                {
-                    if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
-                    {
-                        double dval = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
-                        vals[i] = (int) dval;
-                    }
-                    else
-                    {
-                        vals[i] = PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
-                    }
-                }
-#warning WE ARE POSSIBLE BREAKING THE DIMENSIONALITY OF THE ORIGINAL ARRAY DATA
-                DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "integer", vals, 1, &len);
+                    vals[i] = PyString_AsString(PyTuple_GET_ITEM(value,i));
+                DBStringArrayToStringList((char const * const *)vals, len, &tmp, &len2);
+                count[0] = (long) len2;
+                DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "char", tmp, 1, count);
                 delete [] vals;
+                FREE(tmp);
             }
             else
             {
-                double *vals = new double[len];
-                for (int i = 0; i < len; i++)
+                bool allint = true;
+                for (int i = 0; i < len && allint; i++)
                 {
-                    if (PyInt_Check(PyTuple_GET_ITEM(value,i)))
-                        vals[i] = (double) PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
-                    else
-                        vals[i] = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                    if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
+                        allint = false;
                 }
-#warning WE ARE POSSIBLE BREAKING THE DIMENSIONALITY OF THE ORIGINAL ARRAY DATA
-                DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "double", vals, 1, &len);
-                delete [] vals;
+                if (allint)
+                {
+                    int *vals = new int[len];
+                    for (int i = 0; i < len; i++)
+                        vals[i] = PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
+                    DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "integer", vals, 1, &len);
+                    delete [] vals;
+                }
+                else
+                {
+                    double *vals = new double[len];
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (PyInt_Check(PyTuple_GET_ITEM(value,i)))
+                            vals[i] = (double) PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
+                        else
+                            vals[i] = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                    }
+                    DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "double", vals, 1, &len);
+                    delete [] vals;
+                }
             }
-#warning WE ARE MISSING THE CASE WHERE THE NEXT MEMBER IS ITSELF A DICT OBJECT REQUIRING RECURSION ON THAT OBJECT
         }
     }
     DBWriteObject(db, siloobj, 1);
@@ -793,9 +818,9 @@ static PyObject *DBfile_str(PyObject *self)
 // ****************************************************************************
 static int DBfile_print(PyObject *self, FILE *fp, int flags)
 {
-    char str[1000];
+    char str[10000];
     DBfile_as_string(self, str);
-    fprintf(fp, str);
+    fprintf(fp, "%s\n", str);
     return 0;
 }
 
