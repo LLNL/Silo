@@ -178,7 +178,7 @@ while (<>) {
         local ($name, $value) = ($1, $4);
         $sdx=1 if ($name=~/^SDX/);
         $name =~ s/^SDX_//;
-        if ($value =~ /\(\((char|int|double)\)(.*)\)/) {
+        if ($value =~ /\(\((char|int|double|void\*)\)(.*)\)/) {
             $value = $2;
         }
 	if ($name eq "SILO_VERS_TAG")
