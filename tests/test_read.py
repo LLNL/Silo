@@ -98,7 +98,7 @@ print("\n-- TOC --\n",toc)
 print("cycle='%d'"%db.GetVar("cycle"))
 print("time='%f'"%db.GetVar("time"))
 print("_fileinfo='%s'"%db.GetVar("_fileinfo"))
-print("defvars_defns='%s'"%db.GetVar("defvars_defns"))
+print("defvars_defns=",db.GetVar("defvars_defns"))
 
 db.SetDir("block0")
 toc = db.GetToc()

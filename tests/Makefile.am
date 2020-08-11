@@ -55,11 +55,6 @@
 # making use of the autotest features in autoconf
 # 
 
-# some example commands to compile ioperf plugins
-# gcc -shared -I. ioperf_sec2.c -o libiop_sec2.so
-# gcc -shared -I. ioperf_stdio.c -o libiop_stdio.so
-# gcc -shared -I. -I/usr/gapps/silo/hdf5/1.8.1/i686_Linux_ELsmp/include ioperf_hdf5.c -o libiop_hdf5.so /usr/gapps/silo/hdf5/1.8.1/i686_Linux_ELsmp/lib/libhdf5.a
-
 EXTRA_DIST= \
  package.m4 \
  pdbcmp.csh \
@@ -74,22 +69,14 @@ EXTRA_DIST= \
  amr3d_mesh_config.xml \
  not_a_silo_file.h5 \
  not_a_silo_file.pdb \
- ioperf_sec2.c \
- ioperf_stdio.c \
- ioperf_hdf5.c \
- ioperf_pdb.c \
- ioperf_silo.c \
  rocket.h \
- Make_ioperf \
- ioperf_tests \
  std.c \
+ resample.c \
  bcastopen.c \
+ bcastopen_main.c \
  zeros.dat \
  $(check_SCRIPTS) \
  $(check_DATA)
-
-include_HEADERS = \
- ioperf.h
 
 # Note: use top entry in check_SCRIPTS as sole target to
 # copy all scripts and data in one rule
@@ -106,7 +93,8 @@ check_SCRIPTS= \
 
 check_DATA= \
  xvers_data.tar.bz2 \
- pion0244.silo
+ pion0244.silo \
+ zeros.dat
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
@@ -152,43 +140,23 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       TestReadMask twohex multispec sami specmix spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
-      mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      bcastopen \
+      mk_nasf_pdb arbpoly2d readstuff mat3d_3across merge_block \
       empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS)
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
-bcastopen_SOURCES = bcastopen.c bcastopen_main.c
+#bcastopen_SOURCES = bcastopen.c bcastopen_main.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl
 rocket_CXXFLAGS = -rdynamic
 EXTRA_rocket_DEPENDENCIES = rocket_silo.la
 
-# plugins for rocket and for ioperf
-HDF5CKLTLIBS = ioperf_hdf5.la
-check_LTLIBRARIES = \
-    rocket_silo.la \
-    ioperf_silo.la \
-    ioperf_pdb.la \
-    ioperf_sec2.la \
-    ioperf_stdio.la
+check_LTLIBRARIES = rocket_silo.la
 
 rocket_silo_la_SOURCES = rocket_silo.cxx
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
 rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
-
-EXTRA_ioperf_DEPENDENCIES = ioperf_silo.la ioperf_hdf5.la ioperf_pdb.la ioperf_sec2.la ioperf_stdio.la
-ioperf_LDFLAGS = -ldl
-ioperf_CXXFALGS = -rdynamic
-# the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
-ioperf_pdb_la_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
-ioperf_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
-ioperf_hdf5_la_LDFLAGS = -module -avoid-version -rpath /nowhere
-ioperf_pdb_la_LDFLAGS = -module -avoid-version -rpath /nowhere
-ioperf_sec2_la_LDFLAGS = -module -avoid-version -rpath /nowhere
-ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
-
 
 check_PROGRAMS = \
  arbpoly \
@@ -234,13 +202,11 @@ check_PROGRAMS = \
  namescheme \
  efcentering \
  mk_nasf_pdb \
- ioperf \
  readstuff \
  testfs \
  empty \
  majorder \
  realloc_obj_and_opts \
- bcastopen \
  $(PDBTESTS) \
  $(JSONTESTS)
 
@@ -308,21 +274,19 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_grab_SOURCES = dummy.cxx
  nodist_EXTRA_efcentering_SOURCES = dummy.cxx
  nodist_EXTRA_mk_nasf_pdb_SOURCES = dummy.cxx
- nodist_EXTRA_ioperf_SOURCES = dummy.cxx
  nodist_EXTRA_readstuff_SOURCES = dummy.cxx
  nodist_EXTRA_testfs_SOURCES = dummy.cxx
  nodist_EXTRA_empty_SOURCES = dummy.cxx
  nodist_EXTRA_majorder_SOURCES = dummy.cxx
  nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
  nodist_EXTRA_json_SOURCES = dummy.cxx
- nodist_EXTRA_bcastopen_SOURCES = dummy.cxx
+# nodist_EXTRA_bcastopen_SOURCES = dummy.cxx
 endif
 
 
 if HDF5_DRV_NEEDED
   PROGS += $(HDF5PROGS)
   check_PROGRAMS += $(HDF5PROGS)
-  check_LTLIBRARIES += $(HDF5CKLTLIBS)
   compression_SOURCES = compression.c
   compression_LDADD = $(LDADD)
   grab_SOURCES = grab.c

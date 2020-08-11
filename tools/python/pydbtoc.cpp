@@ -192,7 +192,7 @@ static int DBtoc_print(PyObject *self, FILE *fp, int flags)
     int len = DBtoc_as_string(self, 0);
     char *str = new char[len]; 
     DBtoc_as_string(self, str);
-    fprintf(fp, str);
+    fprintf(fp, "%s\n", str);
     delete [] str;
     return 0;
 }

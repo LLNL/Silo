@@ -12102,7 +12102,7 @@ db_hdf5_PutMaterial(
         
         /* Write header to file */
         STRUCT(DBmaterial) {
-            if (m.dims)         MEMBER_S(int, ndims);
+            if (m.ndims)        MEMBER_S(int, ndims);
             if (m.nmat)         MEMBER_S(int, nmat);
             if (m.mixlen)       MEMBER_S(int, mixlen);
             if (m.origin)       MEMBER_S(int, origin);
@@ -15030,8 +15030,14 @@ db_hdf5_InqVarType(DBfile *_dbfile, char const *name)
         /* Open object */
         if ((o=H5Topen(dbfile->cwg, name))<0) {
             if ((o=H5Gopen(dbfile->cwg, name))<0) {
-                /*_objtype = DB_VARIABLE;*/
-                _objtype = DB_INVALID_OBJECT;
+                if ((o=H5Dopen(dbfile->cwg, name))<0) {
+                    _objtype = DB_INVALID_OBJECT;
+                }
+                else
+                {
+                    _objtype = DB_VARIABLE;
+                    H5Dclose(o);
+                }
             }
             else
             {

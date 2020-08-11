@@ -269,11 +269,11 @@ AT_KEYWORDS(compression)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression gzip,,ignore,ignore)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
 AT_CLEANUP
-AT_SETUP(compression szip)
-AT_KEYWORDS(compression)
-AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip,,ignore,ignore)
-AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
-AT_CLEANUP
+#AT_SETUP(compression szip)
+#AT_KEYWORDS(compression)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression szip,,ignore,ignore)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly,,ignore,ignore)
+#AT_CLEANUP
 AT_SETUP(compression fpzip)
 AT_KEYWORDS(compression)
 AT_CHECK(test ! \( -e ../src/fpzip/read.o -o -e ../../../src/fpzip/read.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression fpzip,,ignore,ignore)

@@ -1,6 +1,6 @@
-# generated automatically by aclocal 1.13.4 -*- Autoconf -*-
+# generated automatically by aclocal 1.15 -*- Autoconf -*-
 
-# Copyright (C) 1996-2013 Free Software Foundation, Inc.
+# Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -20,718 +20,7 @@ You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically 'autoreconf'.])])
 
-# ===========================================================================
-#       https://www.gnu.org/software/autoconf-archive/ax_cc_maxopt.html
-# ===========================================================================
-#
-# SYNOPSIS
-#
-#   AX_CC_MAXOPT
-#
-# DESCRIPTION
-#
-#   Try to turn on "good" C optimization flags for various compilers and
-#   architectures, for some definition of "good". (In our case, good for
-#   FFTW and hopefully for other scientific codes. Modify as needed.)
-#
-#   The user can override the flags by setting the CFLAGS environment
-#   variable. The user can also specify --enable-portable-binary in order to
-#   disable any optimization flags that might result in a binary that only
-#   runs on the host architecture.
-#
-#   Note also that the flags assume that ANSI C aliasing rules are followed
-#   by the code (e.g. for gcc's -fstrict-aliasing), and that floating-point
-#   computations can be re-ordered as needed.
-#
-#   Requires macros: AX_CHECK_COMPILE_FLAG, AX_COMPILER_VENDOR,
-#   AX_GCC_ARCHFLAG, AX_GCC_X86_CPUID.
-#
-# LICENSE
-#
-#   Copyright (c) 2008 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2008 Matteo Frigo
-#
-#   This program is free software: you can redistribute it and/or modify it
-#   under the terms of the GNU General Public License as published by the
-#   Free Software Foundation, either version 3 of the License, or (at your
-#   option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-#   Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License along
-#   with this program. If not, see <https://www.gnu.org/licenses/>.
-#
-#   As a special exception, the respective Autoconf Macro's copyright owner
-#   gives unlimited permission to copy, distribute and modify the configure
-#   scripts that are the output of Autoconf when processing the Macro. You
-#   need not follow the terms of the GNU General Public License when using
-#   or distributing such scripts, even though portions of the text of the
-#   Macro appear in them. The GNU General Public License (GPL) does govern
-#   all other use of the material that constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the Autoconf
-#   Macro released by the Autoconf Archive. When you make and distribute a
-#   modified version of the Autoconf Macro, you may extend this special
-#   exception to the GPL to apply to your modified version as well.
-
-#serial 17
-
-AC_DEFUN([AX_CC_MAXOPT],
-[
-AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([AX_COMPILER_VENDOR])
-AC_REQUIRE([AC_CANONICAL_HOST])
-
-AC_ARG_ENABLE(portable-binary, [AS_HELP_STRING([--enable-portable-binary], [disable compiler optimizations that would produce unportable binaries])],
-	acx_maxopt_portable=$enableval, acx_maxopt_portable=no)
-
-# Try to determine "good" native compiler flags if none specified via CFLAGS
-if test "$ac_test_CFLAGS" != "set"; then
-  CFLAGS=""
-  case $ax_cv_c_compiler_vendor in
-    dec) CFLAGS="-newc -w0 -O5 -ansi_alias -ansi_args -fp_reorder -tune host"
-	 if test "x$acx_maxopt_portable" = xno; then
-           CFLAGS="$CFLAGS -arch host"
-         fi;;
-
-    sun) CFLAGS="-native -fast -xO5 -dalign"
-	 if test "x$acx_maxopt_portable" = xyes; then
-	   CFLAGS="$CFLAGS -xarch=generic"
-         fi;;
-
-    hp)  CFLAGS="+Oall +Optrs_ansi +DSnative"
-	 if test "x$acx_maxopt_portable" = xyes; then
-	   CFLAGS="$CFLAGS +DAportable"
-	 fi;;
-
-    ibm) if test "x$acx_maxopt_portable" = xno; then
-           xlc_opt="-qarch=auto -qtune=auto"
-	 else
-           xlc_opt="-qtune=auto"
-	 fi
-         AX_CHECK_COMPILE_FLAG($xlc_opt,
-		CFLAGS="-O3 -qansialias -w $xlc_opt",
-               [CFLAGS="-O3 -qansialias -w"
-                echo "******************************************************"
-                echo "*  You seem to have the IBM  C compiler.  It is      *"
-                echo "*  recommended for best performance that you use:    *"
-                echo "*                                                    *"
-                echo "*    CFLAGS=-O3 -qarch=xxx -qtune=xxx -qansialias -w *"
-                echo "*                      ^^^        ^^^                *"
-                echo "*  where xxx is pwr2, pwr3, 604, or whatever kind of *"
-                echo "*  CPU you have.  (Set the CFLAGS environment var.   *"
-                echo "*  and re-run configure.)  For more info, man cc.    *"
-                echo "******************************************************"])
-         ;;
-
-    intel) CFLAGS="-O3 -ansi_alias"
-	if test "x$acx_maxopt_portable" = xno; then
-	  icc_archflag=unknown
-	  icc_flags=""
-	  case $host_cpu in
-	    i686*|x86_64*)
-              # icc accepts gcc assembly syntax, so these should work:
-	      AX_GCC_X86_CPUID(0)
-              AX_GCC_X86_CPUID(1)
-	      case $ax_cv_gcc_x86_cpuid_0 in # see AX_GCC_ARCHFLAG
-                *:756e6547:6c65746e:49656e69) # Intel
-                  case $ax_cv_gcc_x86_cpuid_1 in
-		    *0?6[[78ab]]?:*:*:*|?6[[78ab]]?:*:*:*|6[[78ab]]?:*:*:*) icc_flags="-xK" ;;
-		    *0?6[[9d]]?:*:*:*|?6[[9d]]?:*:*:*|6[[9d]]?:*:*:*|*1?65?:*:*:*) icc_flags="-xSSE2 -xB -xK" ;;
-		    *0?6e?:*:*:*|?6e?:*:*:*|6e?:*:*:*) icc_flags="-xSSE3 -xP -xO -xB -xK" ;;
-		    *0?6f?:*:*:*|?6f?:*:*:*|6f?:*:*:*|*1?66?:*:*:*) icc_flags="-xSSSE3 -xT -xB -xK" ;;
-		    *1?6[[7d]]?:*:*:*) icc_flags="-xSSE4.1 -xS -xT -xB -xK" ;;
-		    *1?6[[aef]]?:*:*:*|*2?6[[5cef]]?:*:*:*) icc_flags="-xSSE4.2 -xS -xT -xB -xK" ;;
-		    *2?6[[ad]]?:*:*:*) icc_flags="-xAVX -SSE4.2 -xS -xT -xB -xK" ;;
-		    *3?6[[ae]]?:*:*:*) icc_flags="-xCORE-AVX-I -xAVX -SSE4.2 -xS -xT -xB -xK" ;;
-		    *3?6[[cf]]?:*:*:*|*4?6[[56]]?:*:*:*) icc_flags="-xCORE-AVX2 -xCORE-AVX-I -xAVX -SSE4.2 -xS -xT -xB -xK" ;;
-		    *000?f[[346]]?:*:*:*|?f[[346]]?:*:*:*|f[[346]]?:*:*:*) icc_flags="-xSSE3 -xP -xO -xN -xW -xK" ;;
-		    *00??f??:*:*:*|??f??:*:*:*|?f??:*:*:*|f??:*:*:*) icc_flags="-xSSE2 -xN -xW -xK" ;;
-                  esac ;;
-              esac ;;
-          esac
-          if test "x$icc_flags" != x; then
-            for flag in $icc_flags; do
-              AX_CHECK_COMPILE_FLAG($flag, [icc_archflag=$flag; break])
-            done
-          fi
-          AC_MSG_CHECKING([for icc architecture flag])
-	  AC_MSG_RESULT($icc_archflag)
-          if test "x$icc_archflag" != xunknown; then
-            CFLAGS="$CFLAGS $icc_archflag"
-          fi
-        fi
-	;;
-
-    gnu)
-     # default optimization flags for gcc on all systems
-     CFLAGS="-O3 -fomit-frame-pointer"
-
-     # -malign-double for x86 systems
-     AX_CHECK_COMPILE_FLAG(-malign-double, CFLAGS="$CFLAGS -malign-double")
-
-     #  -fstrict-aliasing for gcc-2.95+
-     AX_CHECK_COMPILE_FLAG(-fstrict-aliasing,
-	CFLAGS="$CFLAGS -fstrict-aliasing")
-
-     # note that we enable "unsafe" fp optimization with other compilers, too
-     AX_CHECK_COMPILE_FLAG(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
-
-     AX_GCC_ARCHFLAG($acx_maxopt_portable)
-     ;;
-
-    microsoft)
-     # default optimization flags for MSVC opt builds
-     CFLAGS="-O2"
-     ;;
-  esac
-
-  if test -z "$CFLAGS"; then
-	echo ""
-	echo "********************************************************"
-        echo "* WARNING: Don't know the best CFLAGS for this system  *"
-        echo "* Use ./configure CFLAGS=... to specify your own flags *"
-	echo "* (otherwise, a default of CFLAGS=-O3 will be used)    *"
-	echo "********************************************************"
-	echo ""
-        CFLAGS="-O3"
-  fi
-
-  AX_CHECK_COMPILE_FLAG($CFLAGS, [], [
-	echo ""
-        echo "********************************************************"
-        echo "* WARNING: The guessed CFLAGS don't seem to work with  *"
-        echo "* your compiler.                                       *"
-        echo "* Use ./configure CFLAGS=... to specify your own flags *"
-        echo "********************************************************"
-        echo ""
-        CFLAGS=""
-  ])
-
-fi
-])
-
-# ===========================================================================
-#  https://www.gnu.org/software/autoconf-archive/ax_check_compile_flag.html
-# ===========================================================================
-#
-# SYNOPSIS
-#
-#   AX_CHECK_COMPILE_FLAG(FLAG, [ACTION-SUCCESS], [ACTION-FAILURE], [EXTRA-FLAGS], [INPUT])
-#
-# DESCRIPTION
-#
-#   Check whether the given FLAG works with the current language's compiler
-#   or gives an error.  (Warnings, however, are ignored)
-#
-#   ACTION-SUCCESS/ACTION-FAILURE are shell commands to execute on
-#   success/failure.
-#
-#   If EXTRA-FLAGS is defined, it is added to the current language's default
-#   flags (e.g. CFLAGS) when the check is done.  The check is thus made with
-#   the flags: "CFLAGS EXTRA-FLAGS FLAG".  This can for example be used to
-#   force the compiler to issue an error when a bad flag is given.
-#
-#   INPUT gives an alternative input source to AC_COMPILE_IFELSE.
-#
-#   NOTE: Implementation based on AX_CFLAGS_GCC_OPTION. Please keep this
-#   macro in sync with AX_CHECK_{PREPROC,LINK}_FLAG.
-#
-# LICENSE
-#
-#   Copyright (c) 2008 Guido U. Draheim <guidod@gmx.de>
-#   Copyright (c) 2011 Maarten Bosmans <mkbosmans@gmail.com>
-#
-#   This program is free software: you can redistribute it and/or modify it
-#   under the terms of the GNU General Public License as published by the
-#   Free Software Foundation, either version 3 of the License, or (at your
-#   option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-#   Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License along
-#   with this program. If not, see <https://www.gnu.org/licenses/>.
-#
-#   As a special exception, the respective Autoconf Macro's copyright owner
-#   gives unlimited permission to copy, distribute and modify the configure
-#   scripts that are the output of Autoconf when processing the Macro. You
-#   need not follow the terms of the GNU General Public License when using
-#   or distributing such scripts, even though portions of the text of the
-#   Macro appear in them. The GNU General Public License (GPL) does govern
-#   all other use of the material that constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the Autoconf
-#   Macro released by the Autoconf Archive. When you make and distribute a
-#   modified version of the Autoconf Macro, you may extend this special
-#   exception to the GPL to apply to your modified version as well.
-
-#serial 5
-
-AC_DEFUN([AX_CHECK_COMPILE_FLAG],
-[AC_PREREQ(2.64)dnl for _AC_LANG_PREFIX and AS_VAR_IF
-AS_VAR_PUSHDEF([CACHEVAR],[ax_cv_check_[]_AC_LANG_ABBREV[]flags_$4_$1])dnl
-AC_CACHE_CHECK([whether _AC_LANG compiler accepts $1], CACHEVAR, [
-  ax_check_save_flags=$[]_AC_LANG_PREFIX[]FLAGS
-  _AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS $4 $1"
-  AC_COMPILE_IFELSE([m4_default([$5],[AC_LANG_PROGRAM()])],
-    [AS_VAR_SET(CACHEVAR,[yes])],
-    [AS_VAR_SET(CACHEVAR,[no])])
-  _AC_LANG_PREFIX[]FLAGS=$ax_check_save_flags])
-AS_VAR_IF(CACHEVAR,yes,
-  [m4_default([$2], :)],
-  [m4_default([$3], :)])
-AS_VAR_POPDEF([CACHEVAR])dnl
-])dnl AX_CHECK_COMPILE_FLAGS
-
-# ===========================================================================
-#    https://www.gnu.org/software/autoconf-archive/ax_compiler_vendor.html
-# ===========================================================================
-#
-# SYNOPSIS
-#
-#   AX_COMPILER_VENDOR
-#
-# DESCRIPTION
-#
-#   Determine the vendor of the C/C++ compiler, e.g., gnu, intel, ibm, sun,
-#   hp, borland, comeau, dec, cray, kai, lcc, metrowerks, sgi, microsoft,
-#   watcom, etc. The vendor is returned in the cache variable
-#   $ax_cv_c_compiler_vendor for C and $ax_cv_cxx_compiler_vendor for C++.
-#
-# LICENSE
-#
-#   Copyright (c) 2008 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2008 Matteo Frigo
-#
-#   This program is free software: you can redistribute it and/or modify it
-#   under the terms of the GNU General Public License as published by the
-#   Free Software Foundation, either version 3 of the License, or (at your
-#   option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-#   Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License along
-#   with this program. If not, see <https://www.gnu.org/licenses/>.
-#
-#   As a special exception, the respective Autoconf Macro's copyright owner
-#   gives unlimited permission to copy, distribute and modify the configure
-#   scripts that are the output of Autoconf when processing the Macro. You
-#   need not follow the terms of the GNU General Public License when using
-#   or distributing such scripts, even though portions of the text of the
-#   Macro appear in them. The GNU General Public License (GPL) does govern
-#   all other use of the material that constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the Autoconf
-#   Macro released by the Autoconf Archive. When you make and distribute a
-#   modified version of the Autoconf Macro, you may extend this special
-#   exception to the GPL to apply to your modified version as well.
-
-#serial 16
-
-AC_DEFUN([AX_COMPILER_VENDOR],
-[AC_CACHE_CHECK([for _AC_LANG compiler vendor], ax_cv_[]_AC_LANG_ABBREV[]_compiler_vendor,
-  dnl Please add if possible support to ax_compiler_version.m4
-  [# note: don't check for gcc first since some other compilers define __GNUC__
-  vendors="intel:     __ICC,__ECC,__INTEL_COMPILER
-           ibm:       __xlc__,__xlC__,__IBMC__,__IBMCPP__
-           pathscale: __PATHCC__,__PATHSCALE__
-           clang:     __clang__
-           cray:      _CRAYC
-           fujitsu:   __FUJITSU
-           gnu:       __GNUC__
-           sun:       __SUNPRO_C,__SUNPRO_CC
-           hp:        __HP_cc,__HP_aCC
-           dec:       __DECC,__DECCXX,__DECC_VER,__DECCXX_VER
-           borland:   __BORLANDC__,__CODEGEARC__,__TURBOC__
-           comeau:    __COMO__
-           kai:       __KCC
-           lcc:       __LCC__
-           sgi:       __sgi,sgi
-           microsoft: _MSC_VER
-           metrowerks: __MWERKS__
-           watcom:    __WATCOMC__
-           portland:  __PGI
-	   tcc:       __TINYC__
-           unknown:   UNKNOWN"
-  for ventest in $vendors; do
-    case $ventest in
-      *:) vendor=$ventest; continue ;;
-      *)  vencpp="defined("`echo $ventest | sed 's/,/) || defined(/g'`")" ;;
-    esac
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,[
-      #if !($vencpp)
-        thisisanerror;
-      #endif
-    ])], [break])
-  done
-  ax_cv_[]_AC_LANG_ABBREV[]_compiler_vendor=`echo $vendor | cut -d: -f1`
- ])
-])
-
-# ===========================================================================
-#     https://www.gnu.org/software/autoconf-archive/ax_gcc_archflag.html
-# ===========================================================================
-#
-# SYNOPSIS
-#
-#   AX_GCC_ARCHFLAG([PORTABLE?], [ACTION-SUCCESS], [ACTION-FAILURE])
-#
-# DESCRIPTION
-#
-#   This macro tries to guess the "native" arch corresponding to the target
-#   architecture for use with gcc's -march=arch or -mtune=arch flags. If
-#   found, the cache variable $ax_cv_gcc_archflag is set to this flag and
-#   ACTION-SUCCESS is executed; otherwise $ax_cv_gcc_archflag is set to
-#   "unknown" and ACTION-FAILURE is executed. The default ACTION-SUCCESS is
-#   to add $ax_cv_gcc_archflag to the end of $CFLAGS.
-#
-#   PORTABLE? should be either [yes] (default) or [no]. In the former case,
-#   the flag is set to -mtune (or equivalent) so that the architecture is
-#   only used for tuning, but the instruction set used is still portable. In
-#   the latter case, the flag is set to -march (or equivalent) so that
-#   architecture-specific instructions are enabled.
-#
-#   The user can specify --with-gcc-arch=<arch> in order to override the
-#   macro's choice of architecture, or --without-gcc-arch to disable this.
-#
-#   When cross-compiling, or if $CC is not gcc, then ACTION-FAILURE is
-#   called unless the user specified --with-gcc-arch manually.
-#
-#   Requires macros: AX_CHECK_COMPILE_FLAG, AX_GCC_X86_CPUID
-#
-#   (The main emphasis here is on recent CPUs, on the principle that doing
-#   high-performance computing on old hardware is uncommon.)
-#
-# LICENSE
-#
-#   Copyright (c) 2008 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2008 Matteo Frigo
-#   Copyright (c) 2014 Tsukasa Oi
-#   Copyright (c) 2017 Alexey Kopytov
-#
-#   This program is free software: you can redistribute it and/or modify it
-#   under the terms of the GNU General Public License as published by the
-#   Free Software Foundation, either version 3 of the License, or (at your
-#   option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-#   Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License along
-#   with this program. If not, see <https://www.gnu.org/licenses/>.
-#
-#   As a special exception, the respective Autoconf Macro's copyright owner
-#   gives unlimited permission to copy, distribute and modify the configure
-#   scripts that are the output of Autoconf when processing the Macro. You
-#   need not follow the terms of the GNU General Public License when using
-#   or distributing such scripts, even though portions of the text of the
-#   Macro appear in them. The GNU General Public License (GPL) does govern
-#   all other use of the material that constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the Autoconf
-#   Macro released by the Autoconf Archive. When you make and distribute a
-#   modified version of the Autoconf Macro, you may extend this special
-#   exception to the GPL to apply to your modified version as well.
-
-#serial 20
-
-AC_DEFUN([AX_GCC_ARCHFLAG],
-[AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([AC_CANONICAL_HOST])
-AC_REQUIRE([AC_PROG_SED])
-AC_REQUIRE([AX_COMPILER_VENDOR])
-
-AC_ARG_WITH(gcc-arch, [AS_HELP_STRING([--with-gcc-arch=<arch>], [use architecture <arch> for gcc -march/-mtune, instead of guessing])],
-	ax_gcc_arch=$withval, ax_gcc_arch=yes)
-
-AC_MSG_CHECKING([for gcc architecture flag])
-AC_MSG_RESULT([])
-AC_CACHE_VAL(ax_cv_gcc_archflag,
-[
-ax_cv_gcc_archflag="unknown"
-
-if test "$GCC" = yes; then
-
-if test "x$ax_gcc_arch" = xyes; then
-ax_gcc_arch=""
-if test "$cross_compiling" = no; then
-case $host_cpu in
-  i[[3456]]86*|x86_64*|amd64*) # use cpuid codes
-     AX_GCC_X86_CPUID(0)
-     AX_GCC_X86_CPUID(1)
-     case $ax_cv_gcc_x86_cpuid_0 in
-       *:756e6547:6c65746e:49656e69) # Intel
-          case $ax_cv_gcc_x86_cpuid_1 in
-	    *5[[4578]]?:*:*:*) ax_gcc_arch="pentium-mmx pentium" ;;
-	    *5[[123]]?:*:*:*) ax_gcc_arch=pentium ;;
-	    *0?61?:*:*:*|?61?:*:*:*|61?:*:*:*) ax_gcc_arch=pentiumpro ;;
-	    *0?6[[356]]?:*:*:*|?6[[356]]?:*:*:*|6[[356]]?:*:*:*) ax_gcc_arch="pentium2 pentiumpro" ;;
-	    *0?6[[78ab]]?:*:*:*|?6[[78ab]]?:*:*:*|6[[78ab]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
-	    *0?6[[9d]]?:*:*:*|?6[[9d]]?:*:*:*|6[[9d]]?:*:*:*|*1?65?:*:*:*) ax_gcc_arch="pentium-m pentium3 pentiumpro" ;;
-	    *0?6e?:*:*:*|?6e?:*:*:*|6e?:*:*:*) ax_gcc_arch="yonah pentium-m pentium3 pentiumpro" ;;
-	    *0?6f?:*:*:*|?6f?:*:*:*|6f?:*:*:*|*1?66?:*:*:*) ax_gcc_arch="core2 pentium-m pentium3 pentiumpro" ;;
-	    *1?6[[7d]]?:*:*:*) ax_gcc_arch="penryn core2 pentium-m pentium3 pentiumpro" ;;
-	    *1?6[[aef]]?:*:*:*|*2?6e?:*:*:*) ax_gcc_arch="nehalem corei7 core2 pentium-m pentium3 pentiumpro" ;;
-	    *2?6[[5cf]]?:*:*:*) ax_gcc_arch="westmere corei7 core2 pentium-m pentium3 pentiumpro" ;;
-	    *2?6[[ad]]?:*:*:*) ax_gcc_arch="sandybridge corei7-avx corei7 core2 pentium-m pentium3 pentiumpro" ;;
-	    *3?6[[ae]]?:*:*:*) ax_gcc_arch="ivybridge core-avx-i corei7-avx corei7 core2 pentium-m pentium3 pentiumpro" ;;
-	    *3?6[[cf]]?:*:*:*|*4?6[[56]]?:*:*:*) ax_gcc_arch="haswell core-avx2 core-avx-i corei7-avx corei7 core2 pentium-m pentium3 pentiumpro" ;;
-	    *3?6d?:*:*:*) ax_gcc_arch="broadwell core-avx2 core-avx-i corei7-avx corei7 core2 pentium-m pentium3 pentiumpro" ;;
-	    *1?6c?:*:*:*|*2?6[[67]]?:*:*:*|*3?6[[56]]?:*:*:*) ax_gcc_arch="bonnell atom core2 pentium-m pentium3 pentiumpro" ;;
-	    *3?67?:*:*:*|*[[45]]?6[[ad]]?:*:*:*) ax_gcc_arch="silvermont atom core2 pentium-m pentium3 pentiumpro" ;;
-	    *000?f[[012]]?:*:*:*|?f[[012]]?:*:*:*|f[[012]]?:*:*:*) ax_gcc_arch="pentium4 pentiumpro" ;;
-	    *000?f[[346]]?:*:*:*|?f[[346]]?:*:*:*|f[[346]]?:*:*:*) ax_gcc_arch="nocona prescott pentium4 pentiumpro" ;;
-	    # fallback
-	    *5??:*:*:*) ax_gcc_arch=pentium ;;
-	    *??6??:*:*:*) ax_gcc_arch="core2 pentiumpro" ;;
-	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
-	    *00??f??:*:*:*|??f??:*:*:*|?f??:*:*:*|f??:*:*:*) ax_gcc_arch="pentium4 pentiumpro" ;;
-          esac ;;
-       *:68747541:444d4163:69746e65) # AMD
-          case $ax_cv_gcc_x86_cpuid_1 in
-	    *5[[67]]?:*:*:*) ax_gcc_arch=k6 ;;
-	    *5[[8]]?:*:*:*) ax_gcc_arch="k6-2 k6" ;;
-	    *5[[9d]]?:*:*:*) ax_gcc_arch="k6-3 k6" ;;
-	    *6[[12]]?:*:*:*) ax_gcc_arch="athlon k7" ;;
-	    *6[[34]]?:*:*:*) ax_gcc_arch="athlon-tbird k7" ;;
-	    *6[[678a]]?:*:*:*) ax_gcc_arch="athlon-xp athlon-4 athlon k7" ;;
-	    *000?f[[4578bcef]]?:*:*:*|?f[[4578bcef]]?:*:*:*|f[[4578bcef]]?:*:*:*|*001?f[[4578bcf]]?:*:*:*|1?f[[4578bcf]]?:*:*:*) ax_gcc_arch="athlon64 k8" ;;
-	    *002?f[[13457bcf]]?:*:*:*|2?f[[13457bcf]]?:*:*:*|*004?f[[138bcf]]?:*:*:*|4?f[[138bcf]]?:*:*:*|*005?f[[df]]?:*:*:*|5?f[[df]]?:*:*:*|*006?f[[8bcf]]?:*:*:*|6?f[[8bcf]]?:*:*:*|*007?f[[cf]]?:*:*:*|7?f[[cf]]?:*:*:*|*00c?f1?:*:*:*|c?f1?:*:*:*|*020?f3?:*:*:*|20?f3?:*:*:*) ax_gcc_arch="athlon64-sse3 k8-sse3 athlon64 k8" ;;
-	    *010?f[[245689a]]?:*:*:*|10?f[[245689a]]?:*:*:*|*030?f1?:*:*:*|30?f1?:*:*:*) ax_gcc_arch="barcelona amdfam10 k8" ;;
-	    *050?f[[12]]?:*:*:*|50?f[[12]]?:*:*:*) ax_gcc_arch="btver1 amdfam10 k8" ;;
-	    *060?f1?:*:*:*|60?f1?:*:*:*) ax_gcc_arch="bdver1 amdfam10 k8" ;;
-	    *060?f2?:*:*:*|60?f2?:*:*:*|*061?f[[03]]?:*:*:*|61?f[[03]]?:*:*:*) ax_gcc_arch="bdver2 bdver1 amdfam10 k8" ;;
-	    *063?f0?:*:*:*|63?f0?:*:*:*) ax_gcc_arch="bdver3 bdver2 bdver1 amdfam10 k8" ;;
-	    *07[[03]]?f0?:*:*:*|7[[03]]?f0?:*:*:*) ax_gcc_arch="btver2 btver1 amdfam10 k8" ;;
-	    # fallback
-	    *0[[13]]??f??:*:*:*|[[13]]??f??:*:*:*) ax_gcc_arch="barcelona amdfam10 k8" ;;
-	    *020?f??:*:*:*|20?f??:*:*:*) ax_gcc_arch="athlon64-sse3 k8-sse3 athlon64 k8" ;;
-	    *05??f??:*:*:*|5??f??:*:*:*) ax_gcc_arch="btver1 amdfam10 k8" ;;
-	    *060?f??:*:*:*|60?f??:*:*:*) ax_gcc_arch="bdver1 amdfam10 k8" ;;
-	    *061?f??:*:*:*|61?f??:*:*:*) ax_gcc_arch="bdver2 bdver1 amdfam10 k8" ;;
-	    *06??f??:*:*:*|6??f??:*:*:*) ax_gcc_arch="bdver3 bdver2 bdver1 amdfam10 k8" ;;
-	    *070?f??:*:*:*|70?f??:*:*:*) ax_gcc_arch="btver2 btver1 amdfam10 k8" ;;
-	    *???f??:*:*:*) ax_gcc_arch="amdfam10 k8" ;;
-          esac ;;
-	*:746e6543:736c7561:48727561) # IDT / VIA (Centaur)
-	   case $ax_cv_gcc_x86_cpuid_1 in
-	     *54?:*:*:*) ax_gcc_arch=winchip-c6 ;;
-	     *5[[89]]?:*:*:*) ax_gcc_arch=winchip2 ;;
-	     *66?:*:*:*) ax_gcc_arch=winchip2 ;;
-	     *6[[78]]?:*:*:*) ax_gcc_arch=c3 ;;
-	     *6[[9adf]]?:*:*:*) ax_gcc_arch="c3-2 c3" ;;
-	   esac ;;
-     esac
-     if test x"$ax_gcc_arch" = x; then # fallback
-	case $host_cpu in
-	  i586*) ax_gcc_arch=pentium ;;
-	  i686*) ax_gcc_arch=pentiumpro ;;
-        esac
-     fi
-     ;;
-
-  sparc*)
-     AC_PATH_PROG([PRTDIAG], [prtdiag], [prtdiag], [$PATH:/usr/platform/`uname -i`/sbin/:/usr/platform/`uname -m`/sbin/])
-     cputype=`(((grep cpu /proc/cpuinfo | cut -d: -f2) ; ($PRTDIAG -v |grep -i sparc) ; grep -i cpu /var/run/dmesg.boot ) | head -n 1) 2> /dev/null`
-     cputype=`echo "$cputype" | tr -d ' -' | $SED 's/SPARCIIi/SPARCII/' |tr $as_cr_LETTERS $as_cr_letters`
-     case $cputype in
-         *ultrasparciv*) ax_gcc_arch="ultrasparc4 ultrasparc3 ultrasparc v9" ;;
-         *ultrasparciii*) ax_gcc_arch="ultrasparc3 ultrasparc v9" ;;
-         *ultrasparc*) ax_gcc_arch="ultrasparc v9" ;;
-         *supersparc*|*tms390z5[[05]]*) ax_gcc_arch="supersparc v8" ;;
-         *hypersparc*|*rt62[[056]]*) ax_gcc_arch="hypersparc v8" ;;
-         *cypress*) ax_gcc_arch=cypress ;;
-     esac ;;
-
-  alphaev5) ax_gcc_arch=ev5 ;;
-  alphaev56) ax_gcc_arch=ev56 ;;
-  alphapca56) ax_gcc_arch="pca56 ev56" ;;
-  alphapca57) ax_gcc_arch="pca57 pca56 ev56" ;;
-  alphaev6) ax_gcc_arch=ev6 ;;
-  alphaev67) ax_gcc_arch=ev67 ;;
-  alphaev68) ax_gcc_arch="ev68 ev67" ;;
-  alphaev69) ax_gcc_arch="ev69 ev68 ev67" ;;
-  alphaev7) ax_gcc_arch="ev7 ev69 ev68 ev67" ;;
-  alphaev79) ax_gcc_arch="ev79 ev7 ev69 ev68 ev67" ;;
-
-  powerpc*)
-     cputype=`((grep cpu /proc/cpuinfo | head -n 1 | cut -d: -f2 | cut -d, -f1 | $SED 's/ //g') ; /usr/bin/machine ; /bin/machine; grep CPU /var/run/dmesg.boot | head -n 1 | cut -d" " -f2) 2> /dev/null`
-     cputype=`echo $cputype | $SED -e 's/ppc//g;s/ *//g'`
-     case $cputype in
-       *750*) ax_gcc_arch="750 G3" ;;
-       *740[[0-9]]*) ax_gcc_arch="$cputype 7400 G4" ;;
-       *74[[4-5]][[0-9]]*) ax_gcc_arch="$cputype 7450 G4" ;;
-       *74[[0-9]][[0-9]]*) ax_gcc_arch="$cputype G4" ;;
-       *970*) ax_gcc_arch="970 G5 power4";;
-       *POWER4*|*power4*|*gq*) ax_gcc_arch="power4 970";;
-       *POWER5*|*power5*|*gr*|*gs*) ax_gcc_arch="power5 power4 970";;
-       603ev|8240) ax_gcc_arch="$cputype 603e 603";;
-       *) ax_gcc_arch=$cputype ;;
-     esac
-     ax_gcc_arch="$ax_gcc_arch powerpc"
-     ;;
-  aarch64)
-     cpuimpl=`grep 'CPU implementer' /proc/cpuinfo 2> /dev/null | cut -d: -f2 | tr -d " " | head -n 1`
-     cpuarch=`grep 'CPU architecture' /proc/cpuinfo 2> /dev/null | cut -d: -f2 | tr -d " " | head -n 1`
-     cpuvar=`grep 'CPU variant' /proc/cpuinfo 2> /dev/null | cut -d: -f2 | tr -d " " | head -n 1`
-     case $cpuimpl in
-       0x42) case $cpuarch in
-               8) case $cpuvar in
-                    0x0) ax_gcc_arch="thunderx2t99 vulcan armv8.1-a armv8-a+lse armv8-a native" ;;
-                  esac
-                  ;;
-             esac
-             ;;
-       0x43) case $cpuarch in
-               8) case $cpuvar in
-                    0x0) ax_gcc_arch="thunderx armv8-a native" ;;
-                    0x1) ax_gcc_arch="thunderx+lse armv8.1-a armv8-a+lse armv8-a native" ;;
-                  esac
-                  ;;
-             esac
-             ;;
-      esac
-      ;;
-esac
-fi # not cross-compiling
-fi # guess arch
-
-if test "x$ax_gcc_arch" != x -a "x$ax_gcc_arch" != xno; then
-if test "x[]m4_default([$1],yes)" = xyes; then # if we require portable code
-  flag_prefixes="-mtune="
-  if test "x$ax_cv_[]_AC_LANG_ABBREV[]_compiler_vendor" = xclang; then flag_prefixes="-march="; fi
-  # -mcpu=$arch and m$arch generate nonportable code on every arch except
-  # x86.  And some other arches (e.g. Alpha) don't accept -mtune.  Grrr.
-  case $host_cpu in i*86|x86_64*|amd64*) flag_prefixes="$flag_prefixes -mcpu= -m";; esac
-else
-  flag_prefixes="-march= -mcpu= -m"
-fi
-for flag_prefix in $flag_prefixes; do
-  for arch in $ax_gcc_arch; do
-    flag="$flag_prefix$arch"
-    AX_CHECK_COMPILE_FLAG($flag, [if test "x$ax_cv_[]_AC_LANG_ABBREV[]_compiler_vendor" = xclang; then
-      if test "x[]m4_default([$1],yes)" = xyes; then
-	if test "x$flag" = "x-march=$arch"; then flag=-mtune=$arch; fi
-      fi
-    fi; ax_cv_gcc_archflag=$flag; break])
-  done
-  test "x$ax_cv_gcc_archflag" = xunknown || break
-done
-fi
-
-fi # $GCC=yes
-])
-AC_MSG_CHECKING([for gcc architecture flag])
-AC_MSG_RESULT($ax_cv_gcc_archflag)
-if test "x$ax_cv_gcc_archflag" = xunknown; then
-  m4_default([$3],:)
-else
-  m4_default([$2], [CFLAGS="$CFLAGS $ax_cv_gcc_archflag"])
-fi
-])
-
-# ===========================================================================
-#     https://www.gnu.org/software/autoconf-archive/ax_gcc_x86_cpuid.html
-# ===========================================================================
-#
-# SYNOPSIS
-#
-#   AX_GCC_X86_CPUID(OP)
-#   AX_GCC_X86_CPUID_COUNT(OP, COUNT)
-#
-# DESCRIPTION
-#
-#   On Pentium and later x86 processors, with gcc or a compiler that has a
-#   compatible syntax for inline assembly instructions, run a small program
-#   that executes the cpuid instruction with input OP. This can be used to
-#   detect the CPU type. AX_GCC_X86_CPUID_COUNT takes an additional COUNT
-#   parameter that gets passed into register ECX before calling cpuid.
-#
-#   On output, the values of the eax, ebx, ecx, and edx registers are stored
-#   as hexadecimal strings as "eax:ebx:ecx:edx" in the cache variable
-#   ax_cv_gcc_x86_cpuid_OP.
-#
-#   If the cpuid instruction fails (because you are running a
-#   cross-compiler, or because you are not using gcc, or because you are on
-#   a processor that doesn't have this instruction), ax_cv_gcc_x86_cpuid_OP
-#   is set to the string "unknown".
-#
-#   This macro mainly exists to be used in AX_GCC_ARCHFLAG.
-#
-# LICENSE
-#
-#   Copyright (c) 2008 Steven G. Johnson <stevenj@alum.mit.edu>
-#   Copyright (c) 2008 Matteo Frigo
-#   Copyright (c) 2015 Michael Petch <mpetch@capp-sysware.com>
-#
-#   This program is free software: you can redistribute it and/or modify it
-#   under the terms of the GNU General Public License as published by the
-#   Free Software Foundation, either version 3 of the License, or (at your
-#   option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but
-#   WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-#   Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License along
-#   with this program. If not, see <https://www.gnu.org/licenses/>.
-#
-#   As a special exception, the respective Autoconf Macro's copyright owner
-#   gives unlimited permission to copy, distribute and modify the configure
-#   scripts that are the output of Autoconf when processing the Macro. You
-#   need not follow the terms of the GNU General Public License when using
-#   or distributing such scripts, even though portions of the text of the
-#   Macro appear in them. The GNU General Public License (GPL) does govern
-#   all other use of the material that constitutes the Autoconf Macro.
-#
-#   This special exception to the GPL applies to versions of the Autoconf
-#   Macro released by the Autoconf Archive. When you make and distribute a
-#   modified version of the Autoconf Macro, you may extend this special
-#   exception to the GPL to apply to your modified version as well.
-
-#serial 10
-
-AC_DEFUN([AX_GCC_X86_CPUID],
-[AX_GCC_X86_CPUID_COUNT($1, 0)
-])
-
-AC_DEFUN([AX_GCC_X86_CPUID_COUNT],
-[AC_REQUIRE([AC_PROG_CC])
-AC_LANG_PUSH([C])
-AC_CACHE_CHECK(for x86 cpuid $1 output, ax_cv_gcc_x86_cpuid_$1,
- [AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <stdio.h>], [
-     int op = $1, level = $2, eax, ebx, ecx, edx;
-     FILE *f;
-      __asm__ __volatile__ ("xchg %%ebx, %1\n"
-        "cpuid\n"
-        "xchg %%ebx, %1\n"
-        : "=a" (eax), "=r" (ebx), "=c" (ecx), "=d" (edx)
-        : "a" (op), "2" (level));
-
-     f = fopen("conftest_cpuid", "w"); if (!f) return 1;
-     fprintf(f, "%x:%x:%x:%x\n", eax, ebx, ecx, edx);
-     fclose(f);
-     return 0;
-])],
-     [ax_cv_gcc_x86_cpuid_$1=`cat conftest_cpuid`; rm -f conftest_cpuid],
-     [ax_cv_gcc_x86_cpuid_$1=unknown; rm -f conftest_cpuid],
-     [ax_cv_gcc_x86_cpuid_$1=unknown])])
-AC_LANG_POP([C])
-])
-
-# Copyright (C) 2002-2013 Free Software Foundation, Inc.
+# Copyright (C) 2002-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -743,10 +32,10 @@ AC_LANG_POP([C])
 # generated from the m4 files accompanying Automake X.Y.
 # (This private macro should not be called outside this file.)
 AC_DEFUN([AM_AUTOMAKE_VERSION],
-[am__api_version='1.13'
+[am__api_version='1.15'
 dnl Some users find AM_AUTOMAKE_VERSION and mistake it for a way to
 dnl require some minimum version.  Point them to the right macro.
-m4_if([$1], [1.13.4], [],
+m4_if([$1], [1.15], [],
       [AC_FATAL([Do not call $0, use AM_INIT_AUTOMAKE([$1]).])])dnl
 ])
 
@@ -762,14 +51,14 @@ m4_define([_AM_AUTOCONF_VERSION], [])
 # Call AM_AUTOMAKE_VERSION and AM_AUTOMAKE_VERSION so they can be traced.
 # This function is AC_REQUIREd by AM_INIT_AUTOMAKE.
 AC_DEFUN([AM_SET_CURRENT_AUTOMAKE_VERSION],
-[AM_AUTOMAKE_VERSION([1.13.4])dnl
+[AM_AUTOMAKE_VERSION([1.15])dnl
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
 _AM_AUTOCONF_VERSION(m4_defn([AC_AUTOCONF_VERSION]))])
 
 # AM_AUX_DIR_EXPAND                                         -*- Autoconf -*-
 
-# Copyright (C) 2001-2013 Free Software Foundation, Inc.
+# Copyright (C) 2001-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -814,15 +103,14 @@ _AM_AUTOCONF_VERSION(m4_defn([AC_AUTOCONF_VERSION]))])
 # configured tree to be moved without reconfiguration.
 
 AC_DEFUN([AM_AUX_DIR_EXPAND],
-[dnl Rely on autoconf to set up CDPATH properly.
-AC_PREREQ([2.50])dnl
-# expand $ac_aux_dir to an absolute path
-am_aux_dir=`cd $ac_aux_dir && pwd`
+[AC_REQUIRE([AC_CONFIG_AUX_DIR_DEFAULT])dnl
+# Expand $ac_aux_dir to an absolute path.
+am_aux_dir=`cd "$ac_aux_dir" && pwd`
 ])
 
 # AM_CONDITIONAL                                            -*- Autoconf -*-
 
-# Copyright (C) 1997-2013 Free Software Foundation, Inc.
+# Copyright (C) 1997-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -853,7 +141,7 @@ AC_CONFIG_COMMANDS_PRE(
 Usually this means the macro was only invoked conditionally.]])
 fi])])
 
-# Copyright (C) 1999-2013 Free Software Foundation, Inc.
+# Copyright (C) 1999-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1044,7 +332,7 @@ _AM_SUBST_NOTMAKE([am__nodep])dnl
 
 # Generate code to set up dependency tracking.              -*- Autoconf -*-
 
-# Copyright (C) 1999-2013 Free Software Foundation, Inc.
+# Copyright (C) 1999-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1120,7 +408,7 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
 
 # Do all the work for Automake.                             -*- Autoconf -*-
 
-# Copyright (C) 1996-2013 Free Software Foundation, Inc.
+# Copyright (C) 1996-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1128,6 +416,12 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
 
 # This macro actually does too much.  Some checks are only needed if
 # your package does certain things.  But this isn't really a big deal.
+
+dnl Redefine AC_PROG_CC to automatically invoke _AM_PROG_CC_C_O.
+m4_define([AC_PROG_CC],
+m4_defn([AC_PROG_CC])
+[_AM_PROG_CC_C_O
+])
 
 # AM_INIT_AUTOMAKE(PACKAGE, VERSION, [NO-DEFINE])
 # AM_INIT_AUTOMAKE([OPTIONS])
@@ -1204,8 +498,8 @@ AC_REQUIRE([AC_PROG_MKDIR_P])dnl
 # <http://lists.gnu.org/archive/html/automake/2012-07/msg00001.html>
 # <http://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
 AC_SUBST([mkdir_p], ['$(MKDIR_P)'])
-# We need awk for the "check" target.  The system "awk" is bad on
-# some platforms.
+# We need awk for the "check" target (and possibly the TAP driver).  The
+# system "awk" is bad on some platforms.
 AC_REQUIRE([AC_PROG_AWK])dnl
 AC_REQUIRE([AC_PROG_MAKE_SET])dnl
 AC_REQUIRE([AM_SET_LEADING_DOT])dnl
@@ -1237,6 +531,51 @@ dnl macro is hooked onto _AC_COMPILER_EXEEXT early, see below.
 AC_CONFIG_COMMANDS_PRE(dnl
 [m4_provide_if([_AM_COMPILER_EXEEXT],
   [AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])])])dnl
+
+# POSIX will say in a future version that running "rm -f" with no argument
+# is OK; and we want to be able to make that assumption in our Makefile
+# recipes.  So use an aggressive probe to check that the usage we want is
+# actually supported "in the wild" to an acceptable degree.
+# See automake bug#10828.
+# To make any issue more visible, cause the running configure to be aborted
+# by default if the 'rm' program in use doesn't match our expectations; the
+# user can still override this though.
+if rm -f && rm -fr && rm -rf; then : OK; else
+  cat >&2 <<'END'
+Oops!
+
+Your 'rm' program seems unable to run without file operands specified
+on the command line, even when the '-f' option is present.  This is contrary
+to the behaviour of most rm programs out there, and not conforming with
+the upcoming POSIX standard: <http://austingroupbugs.net/view.php?id=542>
+
+Please tell bug-automake@gnu.org about your system, including the value
+of your $PATH and any error possibly output before this message.  This
+can help us improve future automake versions.
+
+END
+  if test x"$ACCEPT_INFERIOR_RM_PROGRAM" = x"yes"; then
+    echo 'Configuration will proceed anyway, since you have set the' >&2
+    echo 'ACCEPT_INFERIOR_RM_PROGRAM variable to "yes"' >&2
+    echo >&2
+  else
+    cat >&2 <<'END'
+Aborting the configuration process, to ensure you take notice of the issue.
+
+You can download and install GNU coreutils to get an 'rm' implementation
+that behaves properly: <http://www.gnu.org/software/coreutils/>.
+
+If you want to complete the configuration process using your problematic
+'rm' anyway, export the environment variable ACCEPT_INFERIOR_RM_PROGRAM
+to "yes", and re-run configure.
+
+END
+    AC_MSG_ERROR([Your 'rm' program is bad, sorry.])
+  fi
+fi
+dnl The trailing newline in this macro's definition is deliberate, for
+dnl backward compatibility and to allow trailing 'dnl'-style comments
+dnl after the AM_INIT_AUTOMAKE invocation. See automake bug#16841.
 ])
 
 dnl Hook into '_AC_COMPILER_EXEEXT' early to learn its expansion.  Do not
@@ -1244,7 +583,6 @@ dnl add the conditional right here, as _AC_COMPILER_EXEEXT may be further
 dnl mangled by Autoconf and run in a shell conditional statement.
 m4_define([_AC_COMPILER_EXEEXT],
 m4_defn([_AC_COMPILER_EXEEXT])[m4_provide([_AM_COMPILER_EXEEXT])])
-
 
 # When config.status generates a header, we must update the stamp-h file.
 # This file resides in the same directory as the config header
@@ -1267,7 +605,7 @@ for _am_header in $config_headers :; do
 done
 echo "timestamp for $_am_arg" >`AS_DIRNAME(["$_am_arg"])`/stamp-h[]$_am_stamp_count])
 
-# Copyright (C) 2001-2013 Free Software Foundation, Inc.
+# Copyright (C) 2001-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1278,7 +616,7 @@ echo "timestamp for $_am_arg" >`AS_DIRNAME(["$_am_arg"])`/stamp-h[]$_am_stamp_co
 # Define $install_sh.
 AC_DEFUN([AM_PROG_INSTALL_SH],
 [AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
-if test x"${install_sh}" != xset; then
+if test x"${install_sh+set}" != xset; then
   case $am_aux_dir in
   *\ * | *\	*)
     install_sh="\${SHELL} '$am_aux_dir/install-sh'" ;;
@@ -1288,7 +626,7 @@ if test x"${install_sh}" != xset; then
 fi
 AC_SUBST([install_sh])])
 
-# Copyright (C) 2003-2013 Free Software Foundation, Inc.
+# Copyright (C) 2003-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1310,7 +648,7 @@ AC_SUBST([am__leading_dot])])
 # Add --enable-maintainer-mode option to configure.         -*- Autoconf -*-
 # From Jim Meyering
 
-# Copyright (C) 1996-2013 Free Software Foundation, Inc.
+# Copyright (C) 1996-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1345,7 +683,7 @@ AC_MSG_CHECKING([whether to enable maintainer-specific portions of Makefiles])
 
 # Check to see how 'make' treats includes.	            -*- Autoconf -*-
 
-# Copyright (C) 2001-2013 Free Software Foundation, Inc.
+# Copyright (C) 2001-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1395,7 +733,7 @@ rm -f confinc confmf
 
 # Fake the existence of programs that GNU maintainers use.  -*- Autoconf -*-
 
-# Copyright (C) 1997-2013 Free Software Foundation, Inc.
+# Copyright (C) 1997-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1434,7 +772,7 @@ fi
 
 # Helper functions for option handling.                     -*- Autoconf -*-
 
-# Copyright (C) 2001-2013 Free Software Foundation, Inc.
+# Copyright (C) 2001-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1463,7 +801,54 @@ AC_DEFUN([_AM_SET_OPTIONS],
 AC_DEFUN([_AM_IF_OPTION],
 [m4_ifset(_AM_MANGLE_OPTION([$1]), [$2], [$3])])
 
-# Copyright (C) 1999-2013 Free Software Foundation, Inc.
+# Copyright (C) 1999-2014 Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# _AM_PROG_CC_C_O
+# ---------------
+# Like AC_PROG_CC_C_O, but changed for automake.  We rewrite AC_PROG_CC
+# to automatically call this.
+AC_DEFUN([_AM_PROG_CC_C_O],
+[AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
+AC_REQUIRE_AUX_FILE([compile])dnl
+AC_LANG_PUSH([C])dnl
+AC_CACHE_CHECK(
+  [whether $CC understands -c and -o together],
+  [am_cv_prog_cc_c_o],
+  [AC_LANG_CONFTEST([AC_LANG_PROGRAM([])])
+  # Make sure it works both with $CC and with simple cc.
+  # Following AC_PROG_CC_C_O, we do the test twice because some
+  # compilers refuse to overwrite an existing .o file with -o,
+  # though they will create one.
+  am_cv_prog_cc_c_o=yes
+  for am_i in 1 2; do
+    if AM_RUN_LOG([$CC -c conftest.$ac_ext -o conftest2.$ac_objext]) \
+         && test -f conftest2.$ac_objext; then
+      : OK
+    else
+      am_cv_prog_cc_c_o=no
+      break
+    fi
+  done
+  rm -f core conftest*
+  unset am_i])
+if test "$am_cv_prog_cc_c_o" != yes; then
+   # Losing compiler, so override with the script.
+   # FIXME: It is wrong to rewrite CC.
+   # But if we don't then we get into trouble of one sort or another.
+   # A longer-term fix would be to have automake use am__CC in this case,
+   # and then we could set am__CC="\$(top_srcdir)/compile \$(CC)"
+   CC="$am_aux_dir/compile $CC"
+fi
+AC_LANG_POP([C])])
+
+# For backward compatibility.
+AC_DEFUN_ONCE([AM_PROG_CC_C_O], [AC_REQUIRE([AC_PROG_CC])])
+
+# Copyright (C) 1999-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1698,7 +1083,7 @@ for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[[i]]
 sys.exit(sys.hexversion < minverhex)"
   AS_IF([AM_RUN_LOG([$1 -c "$prog"])], [$3], [$4])])
 
-# Copyright (C) 2001-2013 Free Software Foundation, Inc.
+# Copyright (C) 2001-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1717,7 +1102,7 @@ AC_DEFUN([AM_RUN_LOG],
 
 # Check to make sure that the build environment is sane.    -*- Autoconf -*-
 
-# Copyright (C) 1996-2013 Free Software Foundation, Inc.
+# Copyright (C) 1996-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1798,7 +1183,7 @@ AC_CONFIG_COMMANDS_PRE(
 rm -f conftest.file
 ])
 
-# Copyright (C) 2009-2013 Free Software Foundation, Inc.
+# Copyright (C) 2009-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1858,7 +1243,7 @@ AC_SUBST([AM_BACKSLASH])dnl
 _AM_SUBST_NOTMAKE([AM_BACKSLASH])dnl
 ])
 
-# Copyright (C) 2001-2013 Free Software Foundation, Inc.
+# Copyright (C) 2001-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1886,7 +1271,7 @@ fi
 INSTALL_STRIP_PROGRAM="\$(install_sh) -c -s"
 AC_SUBST([INSTALL_STRIP_PROGRAM])])
 
-# Copyright (C) 2006-2013 Free Software Foundation, Inc.
+# Copyright (C) 2006-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -1905,7 +1290,7 @@ AC_DEFUN([AM_SUBST_NOTMAKE], [_AM_SUBST_NOTMAKE($@)])
 
 # Check how to create a tarball.                            -*- Autoconf -*-
 
-# Copyright (C) 2004-2013 Free Software Foundation, Inc.
+# Copyright (C) 2004-2014 Free Software Foundation, Inc.
 #
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,

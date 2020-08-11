@@ -9070,6 +9070,7 @@ DBPutMaterial(
 )
 {
     int i, retval, is_empty = 1;
+    int const zdims[10] = {0,0,0,0,0,0,0,0,0,0};
 
     API_BEGIN2("DBPutMaterial", int, -1, name) {
         if (!dbfile)
@@ -9098,8 +9099,8 @@ DBPutMaterial(
         }
         if (!is_empty)
         {
-            for (i = 0; i < ndims && dims; i++)
-                if (dims[i] == 0) dims = 0;
+            for (i = 0; i < ndims && dims!=zdims; i++)
+                if (dims[i] == 0) dims = zdims;
             if (!matnos) API_ERROR("matnos=0", E_BADARGS);
             if (!matlist) API_ERROR("matlist=0", E_BADARGS);
             if (!meshname || !*meshname) API_ERROR("mesh name", E_BADARGS);
