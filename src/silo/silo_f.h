@@ -148,12 +148,13 @@ be used for advertising or product endorsement purposes.
 #define DBMKPTR_FC       FC_FUNC (dbmkptr,DBMKPTR)
 #define DBRMPTR_FC       FC_FUNC (dbrmptr,DBRMPTR)
 #define DBPMRGV_FC       FC_FUNC (dbpmrgv,DBPMRGV)
-#define DBERRNO_FC       FC_FUNC (dberrno, DBERRNO)
-#define DBREGFOPTS_FC	 FC_FUNC (dbregfopts, DBREGFOPTS)
-#define DBUNREGFOPTS_FC  FC_FUNC (dbunregfopts, DBUNREGFOPTS)
-#define DBUNREGAFOPTS_FC FC_FUNC (dbunregafopts, DBUNREGAFOPTS)
-#define DBSETEMPTYOK_FC  FC_FUNC (dbsetemptyok, DBSETEMPTYOK)
-#define DBGETEMPTYOK_FC  FC_FUNC (dbgetemptyok, DBGETEMPTYOK)
+#define DBERRNO_FC       FC_FUNC (dberrno,DBERRNO)
+#define DBERRLVL_FC      FC_FUNC (dberrlvl,DBERRLVL)
+#define DBREGFOPTS_FC	 FC_FUNC (dbregfopts,DBREGFOPTS)
+#define DBUNREGFOPTS_FC  FC_FUNC (dbunregfopts,DBUNREGFOPTS)
+#define DBUNREGAFOPTS_FC FC_FUNC (dbunregafopts,DBUNREGAFOPTS)
+#define DBSETEMPTYOK_FC  FC_FUNC (dbsetemptyok,DBSETEMPTYOK)
+#define DBGETEMPTYOK_FC  FC_FUNC (dbgetemptyok,DBGETEMPTYOK)
 
 void    *DBFortranAccessPointer(int value);
 
