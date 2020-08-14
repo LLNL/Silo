@@ -1606,6 +1606,11 @@ main(int argc, char *argv[])
         ((sw=switch_find(sws, "--version")) && sw->seen && 2==argc)) {
         exit(0);
     }
+
+    if (DBDebugAPI >= 2 || Verbosity >= 2)
+        DBSetDeprecateWarnings(100);
+    else
+        DBSetDeprecateWarnings(0);
   
     /* Register the ale3d and debug filters. */    
     DBFilterRegistration("ale3d", NULL, f_ale3d_Open);
