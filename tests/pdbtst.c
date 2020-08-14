@@ -65,23 +65,27 @@ and intentions of tests as much as possible and use the CPP to re-map
 any methods from the original code to their equivalents in PDB Lite.
 In cases where there were no equivalents, a few different strategies
 were employed...
+
    * Existing functionality was disabled; this works fine for cosmetic
      things such as memory utilization and performance tracking as
      similar data can be obtained from tools like valgrind.
    * Customized alternative methods were coded here in this file.
    * The logic of the original test was altered slightly.
    * Some tests were completely disabled.
-There is no "lite_" pre-pending any symbol names here becasue part of
-the intention of this test is to test the exported lite_pdb.h and
-lite_score.h header files. Those files included CPP macros to remap
-PDB Proper symbol names to their PDB Lite equivalents.
+
+The only symbols with "lite_" pre-pending them are the numeric format
+symbols that are unique to PDB Lite. Otherwise, any symbol names here
+retain their original (PDB Proper) names becasue part of the intention
+of this test is to test the exported lite_pdb.h and lite_score.h header
+files. Those files include CPP macros to remap PDB Proper symbol names
+to their PDB Lite equivalents.
 
 In some tests, we leak memory for certain data ('ca' in test 2 and
 'tab4_r' in test 4.
 
 Note that in PDB Lite, by default, we compile it with a reduced SCORE
 memory header to save memory useage for some libraries. Nonetheless,
-this test will passes with these reduced SCORE headers. If you are
+this test will pass with these reduced SCORE headers. If you are
 running into problems with this test, you can always re-configure to
 --enable-normal-sclite-mem-headers and see if that fixes the problems.
 */
