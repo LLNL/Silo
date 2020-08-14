@@ -106,15 +106,14 @@ main(int argc, char *argv[])
 	}
     }
     
-    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
-    dbfile = DBOpen("../../multi_ucd3d.pdb", DB_PDB, DB_READ);
-    if (!dbfile) dbfile = DBOpen("multi_ucd3d.pdb", DB_PDB, DB_READ);
+    DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
+    dbfile = DBOpen("../../onehex.silo", DB_PDB, DB_READ);
+    if (!dbfile) dbfile = DBOpen("onehex.silo", DB_PDB, DB_READ);
 
     /* Example of getting a Silo object from a silo file as a json object */
-    jsilo_obj = DBGetJsonObject(dbfile, "mesh1");
+    jsilo_obj = DBGetJsonObject(dbfile, "hex");
     printf("%s\n", json_object_to_json_string_ext(jsilo_obj, 0));
     DBClose(dbfile);
-    exit(EXIT_SUCCESS);
 
     /* Test interface to query extptr members from jsilo_obj */
     {
