@@ -3247,6 +3247,25 @@ build_curve (DBfile *dbfile, int driver)
     */
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
 
+   {
+       int j, dims=1;
+       one=0;
+       for (j = 0; j < 10; j++)
+       {
+           char tmp[32];
+           double t = j;
+           for (i=0; i<20; i++)
+              y[0][i] *= ((float) (19-i))/19;
+           snprintf(tmp,sizeof(tmp),"time_series%02d", j);
+           DBMkDir(dbfile, tmp);
+           snprintf(tmp,sizeof(tmp),"time_series%02d/sincurve", j);
+           DBPutCurve (dbfile, tmp, x, y[0], DB_FLOAT, 20, opts);
+           snprintf(tmp,sizeof(tmp),"time_series%02d/dtime", j);
+           DBWrite(dbfile, tmp, &t, &dims, 1, DB_DOUBLE);
+       }
+       one=1;
+   }
+
    /*
     * Write the `coscurve' curve. It shares x values with the `sincurve'
     * curve.
