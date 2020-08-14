@@ -427,10 +427,10 @@ int main(int argc, char **argv)
     TEST_GET_INDEX(ns, 4, 2);
     DBFreeNamescheme(ns);
 
-    /* Test the convenience method, DBsprintf */
+    /* Test the convenience method, DBSPrintf */
     snprintf(teststr, sizeof(teststr), "%s, %s",
-        DBsprintf("block_%d,level_%04d", 505, 17),
-        DBsprintf("side_%s_%cx%g", "master",'z',1.0/3));
+        DBSPrintf("block_%d,level_%04d", 505, 17),
+        DBSPrintf("side_%s_%cx%g", "master",'z',1.0/3));
     TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
     
     /* Test case where fewer expressions that conversion specs */
@@ -438,7 +438,7 @@ int main(int argc, char **argv)
     if (ns) return 1;
 
     /* hackish way to cleanup the circular cache used internally */
-    DBsprintf(0);
+    DBSPrintf(0);
     DBGetName(0,-1);
     
     CleanupDriverStuff();
