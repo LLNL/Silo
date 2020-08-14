@@ -620,7 +620,7 @@ DBGetIndex(DBnamescheme const *ns, int natnum)
 }
 
 PUBLIC char const *
-DBsprintf(char const *fmt, ...)
+DBSPrintf(char const *fmt, ...)
 {
     static char strbuf[2048];
     static size_t const nmax = sizeof(strbuf);
@@ -635,7 +635,7 @@ DBsprintf(char const *fmt, ...)
     va_end(ap);
 
     if (n < 0)
-        snprintf(strbuf, nmax, "DBprintf_failed_with_error: %s", strerror(en));
+        snprintf(strbuf, nmax, "DBsprintf_failed_with_error_%s", strerror(en));
 
     return SaveReturnedString(strbuf);
 }
