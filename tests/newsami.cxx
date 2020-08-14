@@ -119,6 +119,7 @@ class coord_t
 {
   public:
     coord_t(double _c[3]) {c[0]=_c[0]; c[1]=_c[1]; c[2]=_c[2];};
+    coord_t(int _c[3]) {c[0]=_c[0]; c[1]=_c[1]; c[2]=_c[2];};
     double operator[](int i) const {return c[i];};
     bool operator==(const coord_t& _c) const { return _c[0]==c[0] && _c[1]==c[1] && _c[2]==c[2]; };
     coord_t operator=(const coord_t& _c) { c[0]=_c[0]; c[1]=_c[1]; c[2]=_c[2]; return *this; };
@@ -164,9 +165,9 @@ static void add_hex(int i, int j, int k, int mat, map<coord_t, int>& coord_map,
     for (int n = 0; n < 8; n++)
     {
         bool new_vert;
-        double c[3] = {i + hex_vert_offsets[0][n],
-                       j + hex_vert_offsets[1][n],
-                       k + hex_vert_offsets[2][n]};
+        int c[3] = {i + hex_vert_offsets[0][n],
+                    j + hex_vert_offsets[1][n],
+                    k + hex_vert_offsets[2][n]};
 
         add_vert(coord_map, c, ids[n], new_vert);
         if (new_vert) at_least_one_new_vert = true;
