@@ -186,6 +186,10 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                 *p = '\0';
                 lb->addItem(str);
             }
+            else
+            {
+                lb->addItem("(null)");
+            }
             delete[] str;
         }
         else
@@ -214,6 +218,10 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
                         *p = '\0';
                         lb->addItem(str);
                     }
+                    else
+                    {
+                        lb->addItem("(null)");
+                    }
                     p = str;
                 }
                 else
@@ -225,6 +233,10 @@ SiloArrayViewWindow::SiloArrayViewWindow(SiloFile *s, const QString &n,
             {
                 *p = '\0';
                 lb->addItem(str);
+            }
+            else
+            {
+                lb->addItem("(null)");
             }
             delete[] str;
         }
