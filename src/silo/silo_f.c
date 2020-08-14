@@ -3178,7 +3178,19 @@ DBSHOWERRORS_FC (int *mode)
 SILO_API FORTRAN
 DBERRNO_FC()
 {
-    return DBErrno();
+    API_BEGIN("dberrno", int, -1) {
+        API_RETURN(DBErrno());
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+SILO_API FORTRAN
+DBERRLVL_FC()
+{
+    API_BEGIN("dberrlvl", int, -1) {
+        API_RETURN(DBErrlvl());
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
 /*-------------------------------------------------------------------------
