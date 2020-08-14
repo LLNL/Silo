@@ -832,7 +832,6 @@ typedef struct filter_t {
         0, 0, 0 \
     }
 
-
 /* Namespace struct for Silo's global variables */
 typedef struct SILO_Globals_t {
     unsigned long long dataReadMask;
@@ -873,7 +872,7 @@ struct db_PathnameTag
 typedef struct db_PathnameTag            db_Pathname;
 
 /*
- * Private functions.
+ * Private functions that need to be shared among compilation modules.
  */
 INTERNAL context_t *context_switch (DBfile *, char const *, char const **);
 INTERNAL int context_restore (DBfile *, context_t *);
