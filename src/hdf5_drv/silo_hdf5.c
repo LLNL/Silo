@@ -4688,7 +4688,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
 #warning FIX ME...THIS NEEDS TO BE CONDITION ON COMPAT MODE WORKS FOR 1.8.0
     H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
 
-#if HDF5_VERSION_GE(1,9,0)
+#if HDF5_VERSION_GE(1,10,1)
     H5Pset_evict_on_close(retval, (hbool_t)1);
 #endif
 
