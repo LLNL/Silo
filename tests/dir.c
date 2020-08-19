@@ -217,8 +217,11 @@ int main(int argc, char *argv[])
        To compare two wholly different objects in silo's browser...
            diff (file dir.pdb).tri_dir.trimesh (file dir2.h5).foogar
     */
-    DBCp("-r", dbfile, dbfile2, "/quad_dir", "/", DB_EOA);
 
+    DBSetDir(dbfile, "/tri_dir");
+    DBMkDirP(dbfile2, "gorfo/foo/bar");
+    DBSetDir(dbfile2, "gorfo/foo");
+    DBCp(0, dbfile, dbfile2, "trimesh", "trimesh_copy", DB_EOA);
     DBClose(dbfile);
     DBClose(dbfile2);
 

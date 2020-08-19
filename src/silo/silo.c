@@ -6085,116 +6085,166 @@ db_validate_copy_step(int pass, int recurse,
         FREE(NAM[q]);                                            \
     FREE(NAM);
 
+/*-------------------------------------------------------------------------
+ * Function:   db_copy_single_object_abspath
+ *
+ * Purpose: Copy a single source *object* to a destination object or
+ * directory using the generic object routines. The source cannot be a
+ * directory. If destination does not exist, ensure its parent is an
+ * existing directory. If destination is a pre-existing object, overwrite
+ * that object as per options and as long as it fits. If destination is a
+ * pre-existing directory, copy the source object *into* that directory.
+ *
+ * Programmer:  Mark C. Miller, Wed Apr 18 09:23:55  PDT 2018
+ *
+ *-------------------------------------------------------------------------*/
 static int
-db_copy_object_abspath(char const *opts,
-    DBfile *srcFile, char const *srcObjAbsName,
-    DBfile *dstFile, char const *dstObjAbsName)
+db_copy_single_object_abspath(char const *opts,
+    DBfile *srcFile, char const *srcObjAbsName, DBObjectType srcType,
+    DBfile *dstFile, char const *dstObjAbsName, DBObjectType dstType)
 {
-#if 0
-    - if destination specifies a pre-existing directory, copy src *into* that directory
-    - if all components of destination's path exist, copy it
-    - else error
+    int q;
+    char *_dstObjAbsName;
+    DBobject *dstObj, *srcObj;
 
-    recurse_on_dirs = (strchr(opts, 'r')?1:0);
+#warning CHECK ARGS HERE. ALLOW FOR NULL dstFile AND dstObjAbsName
+#warning WHY CHECK dstType HERE
 
-    if (strchr(opts, 'r')) recurse_on_dirs = 1;
-    if (strchr(opts, 'R')) recurse_on_dirs = 1;
-    if (strchr(opts, 's')) dont_copy_just_symlink = 1;
-    if (strchr(opts, 'l')) dont_copy_just_hardlink = 1;
-    if (strchr(opts, 'p')) preserve_links = 1;
+    /* Query type information if not already known */
+    if (srcType == DB_INVALID_OBJECT)
+        srcType = DBInqVarType(srcFile, srcObjAbsName);
+    if (dstType == DB_INVALID_OBJECT)
+        dstType = DBInqVarType(dstFile, dstObjAbsName);
 
-        DBobject *dstObj, *srcObj = DBGetObject(srcFile, srcObjAbsName);
+    /* Source object cannot be a directory */
+    if (srcType == DB_INVALID_OBJECT || srcType == DB_DIR)
+        return 0;
 
-        /* Handle funniness with quadmesh type strings */
-        if (srcType == DB_QUADMESH)
+    /* If destination is a directory, dstObjAbsName needs to be adjusted
+       to append last component of srcObjAbsName */
+    if (dstType == DB_DIR)
+    {
+        char *bname = db_basename(srcObjAbsName);
+        _dstObjAbsName = db_join_path(dstObjAbsName, bname);
+        FREE(bname);
+    }
+    /* If destination is a pre-existing non-directory object, this implies
+       it will be overwritten by source. But, in that case, source needs
+       to be small enough to fit into the space the destination object
+       occupies and the dstFile needs to allow overwrites. */
+    else if (dstType != DB_INVALID_OBJECT)
+    {
+#warning USE FILE-BASED FUNCTION WHEN AVAILABLE
+        if (!DBGetAllowOverwrites())
         {
-            if (strstr(srcObj->type, "rect"))
-                srcType = DB_QUADRECT;
-            else if (strstr(srcObj->type, "curv"))
-                srcType = DB_QUADCURV;
+            db_perror("overwrite of pre-existing dst prevented due "
+                "to DBSetAllowOverwrites(0)", E_BADARGS, dstObjAbsName);
+            return 0;
         }
+#warning ADD LOGIC TO ASSESS SRC AND DST OBJECT SIZES HERE
+    }
+    else
+    {
+        _dstObjAbsName = STRDUP(dstObjAbsName);
+    }
 
-        dstObj = DBMakeObject(dstObjAbsName?dstObjAbsName:srcObjAbsName,
-                     srcType, srcObj->ncomponents);
+    /* Access the source object using generic interface */
+    srcObj = DBGetObject(srcFile, srcObjAbsName);
+    if (!srcObj)
+    {
+        db_perror("Unable to access source object for copy operation",
+            E_NOTFOUND, srcObjAbsName);
+        return 0;
+    }
 
-        for (int q = 0; q < srcObj->ncomponents; q++)
+    /* Handle funniness with quadmesh type strings */
+    if (srcType == DB_QUADMESH)
+    {
+        if (strstr(srcObj->type, "rect"))
+            srcType = DB_QUAD_RECT;
+        else if (strstr(srcObj->type, "curv"))
+            srcType = DB_QUAD_CURV;
+    }
+
+    /* Ok, lets do what we came here to do...create the
+       destination object */
+    dstObj = DBMakeObject(_dstObjAbsName, srcType, srcObj->ncomponents);
+    for (q = 0; q < srcObj->ncomponents; q++)
+    {
+        int isser = 0, nser = 0;
+        char *sernm = 0, *sertstr = 0;
+        void *serd = 0;
+        CheckForComponentSeries(srcObj, q, &isser, &nser, &sernm, &sertstr, &serd);
+        if (isser)
         {
-            int isser = 0, nser = 0;
-            char *sernm = 0, *sertstr = 0;
-            void *serd = 0;
-            CheckForComponentSeries(srcObj, q, &isser, &nser, &sernm, &sertstr, &serd);
-            if (isser)
-            {
-                long tmpn = (long) nser;
-                DBWriteComponent(dstFile, dstObj, sernm,
-                    dstObj->name, sertstr, serd, 1, &tmpn);
-                free(sernm);
-                free(sertstr);
-                free(serd);
-                q += (nser-1);
-            }
-            else if (!strncmp(srcObj->pdb_names[q], "'<i>", 4))
-                DBAddIntComponent(dstObj, srcObj->comp_names[q],
-                    (int) strtol(srcObj->pdb_names[q]+4, NULL, 0));
-            else if (!strncmp(srcObj->pdb_names[q], "'<f>", 4))
-                DBAddFltComponent(dstObj, srcObj->comp_names[q],
-                    (float) strtod(srcObj->pdb_names[q]+4, NULL));
-            else if (!strncmp(srcObj->pdb_names[q], "'<d>", 4))
-                DBAddDblComponent(dstObj, srcObj->comp_names[q],
-                    strtod(srcObj->pdb_names[q]+4, NULL));
-            else
-            {
-                int subDbType;
-                char *subObjName;
-                char *srcObjDirName, *srcSubObjAbsName;
+            long tmpn = (long) nser;
+            DBWriteComponent(dstFile, dstObj, sernm,
+                dstObj->name, sertstr, serd, 1, &tmpn);
+            free(sernm);
+            free(sertstr);
+            free(serd);
+            q += (nser-1);
+        }
+        else if (!strncmp(srcObj->pdb_names[q], "'<i>", 4))
+            DBAddIntComponent(dstObj, srcObj->comp_names[q],
+                (int) strtol(srcObj->pdb_names[q]+4, NULL, 0));
+        else if (!strncmp(srcObj->pdb_names[q], "'<f>", 4))
+            DBAddFltComponent(dstObj, srcObj->comp_names[q],
+                (float) strtod(srcObj->pdb_names[q]+4, NULL));
+        else if (!strncmp(srcObj->pdb_names[q], "'<d>", 4))
+            DBAddDblComponent(dstObj, srcObj->comp_names[q],
+                strtod(srcObj->pdb_names[q]+4, NULL));
+        else
+        {
+            int subDbType;
+            char *subObjName;
+            char *srcObjDirName, *srcSubObjAbsName;
              
-                if (!strncmp(srcObj->pdb_names[q], "'<s>", 4))
-                    subObjName = db_strndup(srcObj->pdb_names[q]+4, strlen(srcObj->pdb_names[q])-5);
-                else
-                    subObjName = db_strndup(srcObj->pdb_names[q], strlen(srcObj->pdb_names[q]));
+            if (!strncmp(srcObj->pdb_names[q], "'<s>", 4))
+                subObjName = db_strndup(srcObj->pdb_names[q]+4, strlen(srcObj->pdb_names[q])-5);
+            else
+                subObjName = db_strndup(srcObj->pdb_names[q], strlen(srcObj->pdb_names[q]));
 
 printf("subObjName = \"%s\", len=%d\n", subObjName, strlen(subObjName));
 
-                srcObjDirName = db_dirname(srcObjAbsName);
-                srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
+            srcObjDirName = db_dirname(srcObjAbsName);
+            srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
 
-                subDbType = DBInqVarType(srcFile, srcSubObjAbsName);
-                if (subDbType == DB_VARIABLE) /* raw data copy */
-                {
-                    int j, dims[32];
-                    long ldims[32];
-                    int idtype = DBGetVarType(srcFile, srcSubObjAbsName);
-                    int ndims = DBGetVarDims(srcFile, srcSubObjAbsName, 32, dims);
-                    void *data = DBGetVar(srcFile, srcSubObjAbsName);
-                    char *dtype = db_GetDatatypeString(idtype);
-                    for (j = 0; j < ndims; ldims[j] = (long) dims[j], j++);
-                    DBWriteComponent(dstFile, dstObj, srcObj->comp_names[q],
-                            dstObj->name, dtype, data, ndims, ldims);
-                    free(dtype);
-                    free(data);
-                }
-                else if (subDbType != DB_INVALID_OBJECT) /* recurse on sub-object */
-                {
-#if 0
-                    char *dstObjDirName = db_dirname(dstObjAbsName);
-                    char *dstSubObjAbsName = db_join_path(dstObjDirName, subObjName);
-                    DBCpObject(srcFile, srcSubObjAbsName, dstFile, dstSubObjAbsName);
-                    DBAddStrComponent(dstObj, srcObj->comp_names[q], subObjName);
-                    free(dstSubObjAbsName);
-#endif
-                }
-                free(subObjName);
-                free(srcObjDirName);
-                free(srcSubObjAbsName);
+            subDbType = DBInqVarType(srcFile, srcSubObjAbsName);
+            if (subDbType == DB_VARIABLE) /* raw data copy */
+            {
+                int j, dims[32];
+                long ldims[32];
+                int idtype = DBGetVarType(srcFile, srcSubObjAbsName);
+                int ndims = DBGetVarDims(srcFile, srcSubObjAbsName, 32, dims);
+                void *data = DBGetVar(srcFile, srcSubObjAbsName);
+                char *dtype = db_GetDatatypeString(idtype);
+                for (j = 0; j < ndims; ldims[j] = (long) dims[j], j++);
+                DBWriteComponent(dstFile, dstObj, srcObj->comp_names[q],
+                    dstObj->name, dtype, data, ndims, ldims);
+                free(dtype);
+                free(data);
             }
-        }
-{
-    for (int qq = 0; qq < dstObj->ncomponents; qq++)
-        printf("%d: \"%s\" --> \"%s\"\n", qq, dstObj->comp_names[qq], dstObj->pdb_names[qq]);
-}
-        DBWriteObject(dstFile, dstObj, SILO_Globals.allowOverwrites);
-        DBFreeObject(dstObj);
+            else if (subDbType != DB_INVALID_OBJECT) /* recurse on sub-object */
+            {
+#warning HANDLE RECURSIVE OBJECT MEMBERS HERE
+#if 0
+                char *dstObjDirName = db_dirname(dstObjAbsName);
+                char *dstSubObjAbsName = db_join_path(dstObjDirName, subObjName);
+                DBCpObject(srcFile, srcSubObjAbsName, dstFile, dstSubObjAbsName);
+                DBAddStrComponent(dstObj, srcObj->comp_names[q], subObjName);
+                free(dstSubObjAbsName);
 #endif
+            }
+            free(subObjName);
+            free(srcObjDirName);
+            free(srcSubObjAbsName);
+        }
+    }
+
+    DBWriteObject(dstFile, dstObj, SILO_Globals.allowOverwrites);
+    DBFreeObject(dstObj);
+    FREE(_dstObjAbsName);
 }
 
 /*-------------------------------------------------------------------------
@@ -6285,7 +6335,7 @@ printf("subObjName = \"%s\", len=%d\n", subObjName, strlen(subObjName));
 PUBLIC int
 DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
 {
-#if 0
+#warning WHAT ABOUT -f (force) OPTION
     char const *me = "DBCp";
     int i, j, pass, all_ok;
     int recurse_on_dirs = 0;
@@ -6406,8 +6456,9 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
 
     if (many_to_one_dir)
     {
+        int q;
         dstPathNames = (char const **) malloc(N * sizeof(char const *));
-        for (int q = 0; q < N; q++)
+        for (q = 0; q < N; q++)
             dstPathNames[q] = many_to_one_dir;
     }
 
@@ -6437,6 +6488,8 @@ if (many_to_one_dir)
        cannot account for failures outside of our control mid-way through the 2nd
        pass. */
     char srccwg[1024], dstcwg[1024];
+    DBObjectType srcType, dstType;
+    char *srcObjAbsName, *dstObjAbsName;
 
     srccwg[0] = '\0';
     DBGetDir(srcFile, srccwg);
@@ -6444,6 +6497,18 @@ if (many_to_one_dir)
     dstcwg[0] = '\0';
     DBGetDir(dstFile, dstcwg);
 
+    i = 0;
+    srcObjAbsName = db_join_path(srccwg, srcPathNames[i]);
+    srcType = DBInqVarType(srcFile, srcObjAbsName);
+
+    dstObjAbsName = db_join_path(dstcwg, dstPathNames[i]?dstPathNames[i]:srcPathNames[i]);
+    dstType = DBInqVarType(dstFile, dstObjAbsName);
+
+    return db_copy_single_object_abspath(opts, 
+        srcFile, srcObjAbsName, srcType,
+        dstFile, dstObjAbsName, dstType);
+
+#if 0
     /* First pass validates each copy operation and makes any necessary
        directories in the dst file. */
     for (int pass = 0; pass < 2; pass++)
