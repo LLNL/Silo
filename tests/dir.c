@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
     char          *filename2 = "dir2.pdb";
     int            i, driver = DB_PDB, driver2 = DB_PDB;
     int            show_all_errors = FALSE;
+    char          *objname = 0;
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB",6)) {
@@ -113,7 +114,8 @@ int main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
-            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+            objname = strdup(argv[i]);
+/*            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);*/
         }
     }
     
@@ -222,6 +224,9 @@ int main(int argc, char *argv[])
     DBMkDirP(dbfile2, "gorfo/foo/bar");
     DBSetDir(dbfile2, "gorfo/foo");
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh_copy", DB_EOA);
+    meshid = build_ucd(dbfile2, "foomesh");
+    DBSetDir(dbfile, "/ucd_dir");
+    DBCp(0, dbfile, dbfile2, "ucdmesh", "foomesh", DB_EOA);
     DBClose(dbfile);
     DBClose(dbfile2);
 

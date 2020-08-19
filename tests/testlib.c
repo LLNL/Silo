@@ -837,16 +837,16 @@ build_ucd_tri(DBfile *dbfile, char *name, int nofl)
 
     if (!nofl)
     {
-        DBPutFacelist(dbfile, "fl", nfaces, 2, fnodelist, lfnodelist, 0,
+        DBPutFacelist(dbfile, "tri_fl", nfaces, 2, fnodelist, lfnodelist, 0,
                       NULL, &fshapesize, &fshapecnt, nfshapes,
                       NULL, NULL, 0);
     }
 
-    DBPutZonelist(dbfile, "zl", nzones, 2, znodelist, lznodelist, 0,
+    DBPutZonelist(dbfile, "tri_zl", nzones, 2, znodelist, lznodelist, 0,
                         &zshapesize, &zshapecnt, nzshapes);
 
     meshid = DBPutUcdmesh(dbfile, name, 2, (DBCAS_t) coordnames,
-        coords, nnodes, nzones, "zl", nofl?NULL:"fl", DB_FLOAT, NULL);
+        coords, nnodes, nzones, "tri_zl", nofl?NULL:"tri_fl", DB_FLOAT, NULL);
 
     vars[0] = d;
     varnames[0] = "d";

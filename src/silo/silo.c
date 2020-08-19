@@ -6085,6 +6085,100 @@ db_validate_copy_step(int pass, int recurse,
         FREE(NAM[q]);                                            \
     FREE(NAM);
 
+static int
+db_can_overwrite_dstobj_with_srcobj(
+    DBfile *srcFile, char const *srcAbsName,
+    DBfile *dstFile, char const *dstAbsName)
+{
+    int q;
+    int retval = 0; /* assume it won't work */
+    DBobject *srcObj = 0;
+    DBobject *dstObj = 0;
+
+    srcObj = DBGetObject(srcFile, srcAbsName);
+    if (!srcObj) goto done;
+
+    dstObj = DBGetObject(dstFile, dstAbsName);
+    if (!dstObj) goto done;
+
+    for (q = 0; q < srcObj->ncomponents; q++)
+    {
+        int r, dstr = -1;;
+        char const *curr_compname = srcObj->comp_names[q];
+
+        for (r = 0; r < dstObj->ncomponents && dstr==-1; r++)
+            if (!strcmp(curr_compname, dstObj->comp_names[r]))
+                dstr = r;
+       
+        if (dstr == -1) goto done; /* no matching comp in dst */
+
+        if (!strncmp(srcObj->pdb_names[q], "'<i>", 4))
+            continue;
+        else if (!strncmp(srcObj->pdb_names[q], "'<f>", 4))
+            continue;
+        else if (!strncmp(srcObj->pdb_names[q], "'<d>", 4))
+            continue;
+        else /* possible sub-object */
+        {
+            int srcLen, dstLen, can_overwrite;
+            DBObjectType srcSubObjType, dstSubObjType;
+            char *srcSubObjName, *srcSubObjDirName, *srcSubObjAbsName;
+            char *dstSubObjName, *dstSubObjDirName, *dstSubObjAbsName;
+             
+            if (!strncmp(srcObj->pdb_names[q], "'<s>", 4))
+                srcSubObjName = db_strndup(srcObj->pdb_names[q]+4, strlen(srcObj->pdb_names[q])-5);
+            else
+                srcSubObjName = db_strndup(srcObj->pdb_names[q], strlen(srcObj->pdb_names[q]));
+            srcSubObjDirName = db_dirname(srcAbsName);
+            srcSubObjAbsName = db_join_path(srcSubObjDirName, srcSubObjName);
+
+            if (!strncmp(dstObj->pdb_names[dstr], "'<s>", 4))
+                dstSubObjName = db_strndup(dstObj->pdb_names[dstr]+4, strlen(dstObj->pdb_names[dstr])-5);
+            else
+                dstSubObjName = db_strndup(dstObj->pdb_names[dstr], strlen(dstObj->pdb_names[dstr]));
+            dstSubObjDirName = db_dirname(dstAbsName);
+            dstSubObjAbsName = db_join_path(dstSubObjDirName, dstSubObjName);
+
+            srcSubObjType = DBInqVarType(srcFile, srcSubObjAbsName);
+            srcLen = DBGetVarByteLength(srcFile, srcSubObjAbsName);
+            dstSubObjType = DBInqVarType(dstFile, dstSubObjAbsName);
+            dstLen = DBGetVarByteLength(dstFile, dstSubObjAbsName);
+            can_overwrite = db_can_overwrite_dstobj_with_srcobj(srcFile, srcSubObjAbsName,
+                dstFile, dstSubObjAbsName);
+
+            FREE(srcSubObjName);
+            FREE(srcSubObjDirName);
+            FREE(srcSubObjAbsName);
+            FREE(dstSubObjName);
+            FREE(dstSubObjDirName);
+            FREE(dstSubObjAbsName);
+
+            if (srcSubObjType == DB_VARIABLE && dstSubObjType == DB_VARIABLE)
+            {
+                if (srcLen > dstLen) goto done;
+            }
+            else if (srcSubObjType != DB_VARIABLE && dstSubObjType != DB_VARIABLE)
+            {
+                if (!can_overwrite) goto done;
+            }
+            else
+            {
+                goto done;
+            }
+        }
+    }
+
+    /* indicate it will work */
+    retval = 1;
+
+done:
+
+    if (srcObj) DBFreeObject(srcObj);
+    if (dstObj) DBFreeObject(dstObj);
+
+    return retval;
+}
+
 /*-------------------------------------------------------------------------
  * Function:   db_copy_single_object_abspath
  *
@@ -6129,11 +6223,12 @@ db_copy_single_object_abspath(char const *opts,
         FREE(bname);
     }
     /* If destination is a pre-existing non-directory object, this implies
-       it will be overwritten by source. But, in that case, source needs
-       to be small enough to fit into the space the destination object
-       occupies and the dstFile needs to allow overwrites. */
+       it will be overwritten by source. But, in that case, dstFile needs
+       to allow overwrites and the source needs to be small enough to fit
+       into the space the destination object occupies. */
     else if (dstType != DB_INVALID_OBJECT)
     {
+        int srcSize, dstSize;
 #warning USE FILE-BASED FUNCTION WHEN AVAILABLE
         if (!DBGetAllowOverwrites())
         {
@@ -6141,7 +6236,14 @@ db_copy_single_object_abspath(char const *opts,
                 "to DBSetAllowOverwrites(0)", E_BADARGS, dstObjAbsName);
             return 0;
         }
-#warning ADD LOGIC TO ASSESS SRC AND DST OBJECT SIZES HERE
+        if (!db_can_overwrite_dstobj_with_srcobj(
+             srcFile, srcObjAbsName, dstFile, dstObjAbsName))
+        {
+            db_perror("overwrite of pre-existing dst prevented due "
+                "to insufficient space for src object", E_BADARGS, dstObjAbsName);
+            return 0;
+        }
+        _dstObjAbsName = STRDUP(dstObjAbsName);
     }
     else
     {
@@ -6205,8 +6307,6 @@ db_copy_single_object_abspath(char const *opts,
             else
                 subObjName = db_strndup(srcObj->pdb_names[q], strlen(srcObj->pdb_names[q]));
 
-printf("subObjName = \"%s\", len=%d\n", subObjName, strlen(subObjName));
-
             srcObjDirName = db_dirname(srcObjAbsName);
             srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
 
@@ -6230,7 +6330,7 @@ printf("subObjName = \"%s\", len=%d\n", subObjName, strlen(subObjName));
                 char *dstObjDirName = db_dirname(dstObjAbsName);
                 char *dstSubObjAbsName = db_join_path(dstObjDirName, subObjName);
 
-#warning WHAT IF SUB-OBJECT REFERENCES A NON-EXISTENT DIRECTORY
+#warning WHAT IF SUB-OBJECT REFERENCES A NON-EXISTENT DIRECTORY IN DESTINATION
 
                 db_copy_single_object_abspath(opts,
                    srcFile, srcSubObjAbsName, subObjType,
@@ -6248,6 +6348,7 @@ printf("subObjName = \"%s\", len=%d\n", subObjName, strlen(subObjName));
     }
 
     DBWriteObject(dstFile, dstObj, SILO_Globals.allowOverwrites);
+    DBFreeObject(srcObj);
     DBFreeObject(dstObj);
     FREE(_dstObjAbsName);
 }
@@ -8512,6 +8613,42 @@ DBReadVarSlice(DBfile *dbfile, const char *name, int const *offset, int const *l
  *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
+static size_t
+db_get_obj_byte_length(DBfile *dbfile, char const *name)
+{
+    int q;
+    size_t sum = 0;
+    DBobject *srcObj = DBGetObject(dbfile, name);
+    if (!srcObj) return 0;
+
+    for (q = 0; q < srcObj->ncomponents; q++)
+    {
+        if (!strncmp(srcObj->pdb_names[q], "'<i>", 4))
+            sum += sizeof(int);
+        else if (!strncmp(srcObj->pdb_names[q], "'<f>", 4))
+            sum += sizeof(float);
+        else if (!strncmp(srcObj->pdb_names[q], "'<d>", 4))
+            sum += sizeof(double);
+        else /* possible sub-object */
+        {
+            int bytlen;
+            char *subObjName, *srcObjDirName, *srcSubObjAbsName;
+             
+            if (!strncmp(srcObj->pdb_names[q], "'<s>", 4))
+                subObjName = db_strndup(srcObj->pdb_names[q]+4, strlen(srcObj->pdb_names[q])-5);
+            else
+                subObjName = db_strndup(srcObj->pdb_names[q], strlen(srcObj->pdb_names[q]));
+
+            srcObjDirName = db_dirname(name);
+            srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
+
+            bytlen = DBGetVarByteLength(dbfile, srcSubObjAbsName); /* recursion */
+            if (bytlen > 0) sum += bytlen;
+        }
+    }
+    return sum;
+}
+
 PUBLIC int
 DBGetVarByteLength(DBfile *dbfile, const char *name)
 {
@@ -8528,6 +8665,10 @@ DBGetVarByteLength(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_varbl) (dbfile, name);
+
+        if (retval < 0)
+            retval = (int) db_get_obj_byte_length(dbfile, name);
+
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
