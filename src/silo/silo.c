@@ -6196,7 +6196,7 @@ db_copy_single_object_abspath(char const *opts,
                 strtod(srcObj->pdb_names[q]+4, NULL));
         else
         {
-            int subDbType;
+            DBObjectType subObjType;
             char *subObjName;
             char *srcObjDirName, *srcSubObjAbsName;
              
@@ -6210,8 +6210,8 @@ printf("subObjName = \"%s\", len=%d\n", subObjName, strlen(subObjName));
             srcObjDirName = db_dirname(srcObjAbsName);
             srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
 
-            subDbType = DBInqVarType(srcFile, srcSubObjAbsName);
-            if (subDbType == DB_VARIABLE) /* raw data copy */
+            subObjType = DBInqVarType(srcFile, srcSubObjAbsName);
+            if (subObjType == DB_VARIABLE) /* raw data copy */
             {
                 int j, dims[32];
                 long ldims[32];
@@ -6222,19 +6222,24 @@ printf("subObjName = \"%s\", len=%d\n", subObjName, strlen(subObjName));
                 for (j = 0; j < ndims; ldims[j] = (long) dims[j], j++);
                 DBWriteComponent(dstFile, dstObj, srcObj->comp_names[q],
                     dstObj->name, dtype, data, ndims, ldims);
-                free(dtype);
-                free(data);
+                FREE(dtype);
+                FREE(data);
             }
-            else if (subDbType != DB_INVALID_OBJECT) /* recurse on sub-object */
+            else if (subObjType != DB_INVALID_OBJECT) /* recurse on sub-object */
             {
-#warning HANDLE RECURSIVE OBJECT MEMBERS HERE
-#if 0
                 char *dstObjDirName = db_dirname(dstObjAbsName);
                 char *dstSubObjAbsName = db_join_path(dstObjDirName, subObjName);
-                DBCpObject(srcFile, srcSubObjAbsName, dstFile, dstSubObjAbsName);
+
+#warning WHAT IF SUB-OBJECT REFERENCES A NON-EXISTENT DIRECTORY
+
+                db_copy_single_object_abspath(opts,
+                   srcFile, srcSubObjAbsName, subObjType,
+                   dstFile, dstSubObjAbsName, DB_INVALID_OBJECT);
+
                 DBAddStrComponent(dstObj, srcObj->comp_names[q], subObjName);
-                free(dstSubObjAbsName);
-#endif
+
+                FREE(dstObjDirName);
+                FREE(dstSubObjAbsName);
             }
             free(subObjName);
             free(srcObjDirName);
