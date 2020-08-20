@@ -229,6 +229,23 @@ int main(int argc, char *argv[])
     build_ucd_tri(dbfile2, "trimesh", 0x1);
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh", DB_EOA);
 
+{
+    char *list[100];
+    int i, nlist  = (int) sizeof(list)/sizeof(list[0]);
+    DBSetDir(dbfile, "/");
+    for (i = 0; i < nlist; i++) list[i] = 0;
+    DBLs(dbfile, 0, 0, 0, &nlist);
+    printf("Got nlist=%d\n", nlist);
+    DBLs(dbfile, 0, 0, list, &nlist);
+    for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
+
+    nlist  = (int) sizeof(list)/sizeof(list[0]);
+    DBSetDir(dbfile, "/tri_dir");
+    for (i = 0; i < nlist; i++) list[i] = 0;
+    DBLs(dbfile, 0, 0, list, &nlist);
+    for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
+}
+
     DBClose(dbfile);
     DBClose(dbfile2);
 

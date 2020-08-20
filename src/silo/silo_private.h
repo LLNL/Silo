@@ -892,8 +892,6 @@ INTERNAL int _DBarrminmax (float *, int, float *, float *);
 INTERNAL int _DBiarrminmax (int *, int, int *, int *);
 INTERNAL int _DBdarrminmax (double *, int, double *, double *);
 INTERNAL char *db_strerror (int);
-INTERNAL int db_ListDir2 (DBfile *, char **, int, int, char **,
-                              int *);
 INTERNAL int CSGM_CalcExtents (int, int, int, const int*,
                                  const void *, double *, double *);
 INTERNAL int _DBQMCalcExtents (DBVCP2_t, int, int const *, int const *, int const *, int,

@@ -780,6 +780,7 @@ typedef struct DBtoc_ {
     char         **symlink_names; /* copies of other members; never free'd */
 
 } DBtoc;
+#define DB_NOBJ_TYPES ((int)(sizeof(DBtoc)/sizeof(struct{char **p;int n;})))
 
 /*----------------------------------------------------------------------------
  * Database Curve Object
@@ -1871,6 +1872,7 @@ SILO_API extern int                    DBFlush(DBfile *);
 SILO_API extern int                    DBClose(DBfile *);
 SILO_API extern DBtoc *                DBGetToc(DBfile *);
 SILO_API extern int                    DBNewToc(DBfile *);
+SILO_API extern int                    DBLs(DBfile *_dbfile, char *args[], int nargs, char *list[], int *nlist);
 SILO_API extern void *                 DBGrabDriver(DBfile *);
 SILO_API extern int                    DBUngrabDriver(DBfile *, void const *);
 SILO_API extern int                    DBGetDriverType(DBfile const *);
