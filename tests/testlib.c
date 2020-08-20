@@ -766,16 +766,17 @@ build_ucd3(DBfile *dbfile, char *name)
  *
  *--------------------------------------------------------------------*/
 int
-build_ucd_tri(DBfile *dbfile, char *name, int nofl)
+build_ucd_tri(DBfile *dbfile, char *name, int flags)
 {
-
-    int            nzones = 6;
-    int            nfaces = 6;
-    int            nnodes = 7;
+    int            nofl = flags & 0x00000001;
+    int            z7 = flags & 0x00000002;
+    int            nzones = z7?7:6;
+    int            nfaces = z7?7:6;
+    int            nnodes = z7?8:7;
     int            nzshapes = 1;
     int            nfshapes = 1;
-    int            lznodelist = 18;
-    int            lfnodelist = 12;
+    int            lznodelist = z7?21:18;
+    int            lfnodelist = z7?14:12;
 
    /*----------------------------------------------------------------------
        The test mesh looks like this:
@@ -784,39 +785,36 @@ build_ucd_tri(DBfile *dbfile, char *name, int nofl)
                 |
         3.      |       2               6
                 |
-        2.      |               0
+        2.      |               0              7 (only if z7)
                 |
         1.      |       3               5
                 |
                 |               4
         0.      ---------------------------
 
-                        0.      2.      4.
+                       11.     13.     15.    17.
      *---------------------------------------------------------------------*/
 
     int meshid;
 
     static float   x[] =
-    {13., 13., 11., 11., 13., 15., 15.};
+    {13., 13., 11., 11., 13., 15., 15., 17.};
     static float   y[] =
-    {2., 4., 3., 1., 0., 1., 3.};
+    {2., 4., 3., 1., 0., 1., 3., 2.};
     static float   u[] =
-    {0., .5, 1., 1.5, 2., 2.5, 3.};
+    {0., .5, 1., 1.5, 2., 2.5, 3., 2.75};
     static float   d[] =
-    {1., 2., 3., 4., 5., 6.};
+    {1., 2., 3., 4., 5., 6., 7.};
 
     static int     fnodelist[] =
     {1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 1};
+    static int     fnodelistz7[] =
+    {1, 2, 2, 3, 3, 4, 4, 5, 5, 7, 7, 6, 6, 1};
     static int     znodelist[] =
-    {0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 1};
+    {0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 0, 5, 6, 0, 6, 1, 5, 7, 6};
 
     int            fshapesize, fshapecnt, zshapesize, zshapecnt;
     int            idatatype;
-#if 0
-    double         ttime = 2.345;
-    int            tcycle = 200;
-    int            mixlen = MAXMIX;
-#endif
 
     float         *coords[3], *vars[1];
     char          *coordnames[3], *varnames[1];

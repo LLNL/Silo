@@ -6139,12 +6139,14 @@ db_can_overwrite_dstobj_with_srcobj(
             dstSubObjDirName = db_dirname(dstAbsName);
             dstSubObjAbsName = db_join_path(dstSubObjDirName, dstSubObjName);
 
+            /* To make exiting and cleanup logic here a tad simpler, we do all
+               the work we *might* want to on the strings and then free them. */
             srcSubObjType = DBInqVarType(srcFile, srcSubObjAbsName);
             srcLen = DBGetVarByteLength(srcFile, srcSubObjAbsName);
             dstSubObjType = DBInqVarType(dstFile, dstSubObjAbsName);
             dstLen = DBGetVarByteLength(dstFile, dstSubObjAbsName);
             can_overwrite = db_can_overwrite_dstobj_with_srcobj(srcFile, srcSubObjAbsName,
-                dstFile, dstSubObjAbsName);
+                dstFile, dstSubObjAbsName); /* recursive call */
 
             FREE(srcSubObjName);
             FREE(srcSubObjDirName);
@@ -6153,17 +6155,18 @@ db_can_overwrite_dstobj_with_srcobj(
             FREE(dstSubObjDirName);
             FREE(dstSubObjAbsName);
 
+            /* decide if its ok to proceed or not */
             if (srcSubObjType == DB_VARIABLE && dstSubObjType == DB_VARIABLE)
             {
-                if (srcLen > dstLen) goto done;
+                if (srcLen > dstLen) goto done; /* simple src var doesn't fit in dst */
             }
             else if (srcSubObjType != DB_VARIABLE && dstSubObjType != DB_VARIABLE)
             {
-                if (!can_overwrite) goto done;
+                if (!can_overwrite) goto done; /* src object doesn't fit in dst */
             }
             else
             {
-                goto done;
+                goto done; /* src and dst don't agree on their type */
             }
         }
     }

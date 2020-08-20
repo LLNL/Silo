@@ -65,7 +65,7 @@ be used for advertising or product endorsement purposes.
 #include <std.c>
 extern int build_quad(DBfile *dbfile, char *name);
 extern int build_ucd(DBfile *dbfile, char *name);
-extern int build_ucd_tri(DBfile *dbfile, char *name, int nofl);
+extern int build_ucd_tri(DBfile *dbfile, char *name, int flags);
 
 
 
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     nmesh++;
 
     DBSetDir(dbfile, "/tri_dir");
-    meshid = build_ucd_tri(dbfile, "trimesh", 1);
+    meshid = build_ucd_tri(dbfile, "trimesh", 0x2);
 
     meshtypes[2] = DB_UCDMESH;
     meshnames[2] = "/tri_dir/trimesh";
@@ -224,9 +224,11 @@ int main(int argc, char *argv[])
     DBMkDirP(dbfile2, "gorfo/foo/bar");
     DBSetDir(dbfile2, "gorfo/foo");
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh_copy", DB_EOA);
-    meshid = build_ucd(dbfile2, "foomesh");
-    DBSetDir(dbfile, "/ucd_dir");
-    DBCp(0, dbfile, dbfile2, "ucdmesh", "foomesh", DB_EOA);
+
+    DBSetDir(dbfile2, "..");
+    build_ucd_tri(dbfile2, "trimesh", 0x1);
+    DBCp(0, dbfile, dbfile2, "trimesh", "trimesh", DB_EOA);
+
     DBClose(dbfile);
     DBClose(dbfile2);
 
