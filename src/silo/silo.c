@@ -240,7 +240,7 @@ typedef struct db_silo_stat_t {
 #endif
 } db_silo_stat_t;
 
-/* This function is used in API_BEGIN macros and so we forward declare it */
+/* Forward declarations */
 PRIVATE int db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate);
 
 /* Global structures for option lists.  */
@@ -1510,10 +1510,12 @@ DBGetObjtypeName(int type)
  *    Mark C. Miller, Thu Aug 20 14:20:25 PDT 2020
  *    Changed name from db_ListDir2 to DBLs and made it a public function.
  *    Macro-ized much of the internal logic.
- *    Changed list filtering logic.
+ *    Changed list filtering logic. "-a -d" means everything *but* dirs
+ *    whereas "-d" without the preceding "-a" means dirs. Same behavior fo
+ *    all other options after a "-a".
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBLs(DBfile *_dbfile, char *args[], int nargs, char *list[], int *nlist)
+DBLs(DBfile *_dbfile, char const *cl_args, char *list[], int *nlist)
 {
     int            i, k, npaths, nopts;
     int            ls_mesh, ls_var, ls_mat, ls_curve, ls_multi, ls_dir;
@@ -1523,7 +1525,8 @@ DBLs(DBfile *_dbfile, char *args[], int nargs, char *list[], int *nlist)
     DBtoc         *toc = NULL;
     int            left_margin, col_margin, line_width;
     char          *me = "DBLs";
-    int            _nlist_orig;
+    int            _nlist_orig, has_opt_a = FALSE, nargs;
+    char         **args;
 
      /*----------------------------------------
       *  Parse input options and pathnames.
@@ -1540,6 +1543,8 @@ DBLs(DBfile *_dbfile, char *args[], int nargs, char *list[], int *nlist)
 
     npaths = 0;
     nopts = 0;
+    nargs = -1;
+    args = db_StringListToStringArray(cl_args, &nargs, ' ', 0);
 
     for (i = 0; i < nargs; i++) {
 
@@ -1556,6 +1561,7 @@ DBLs(DBfile *_dbfile, char *args[], int nargs, char *list[], int *nlist)
                 break;
         }
     }
+    DBFreeStringArray(args, nargs);
 
      /*----------------------------------------
       *  Set listing options based on input.
@@ -1577,39 +1583,40 @@ DBLs(DBfile *_dbfile, char *args[], int nargs, char *list[], int *nlist)
             case 'a':
                 ls_mesh = ls_var = ls_mat = ls_curve = ls_multi = ls_dir = TRUE;
                 ls_low = ls_obj = ls_arr = ls_link = ls_mrg = TRUE;
+                has_opt_a = TRUE;
                 break;
             case 'A':
-                ls_arr = TRUE;
+                ls_arr = has_opt_a ? FALSE : TRUE;
                 break;
             case 'c':
-                ls_curve = TRUE;
+                ls_curve = has_opt_a ? FALSE : TRUE;
                 break;
             case 'd':
-                ls_dir = TRUE;
+                ls_dir = has_opt_a ? FALSE : TRUE;
                 break;
             case 'l':
-                ls_link = TRUE;
+                ls_link = has_opt_a ? FALSE : TRUE;
                 break;
             case 'm':
-                ls_mesh = TRUE;
+                ls_mesh = has_opt_a ? FALSE : TRUE;
                 break;
             case 'M':
-                ls_multi = TRUE;
+                ls_multi = has_opt_a ? FALSE : TRUE;
                 break;
             case 'o':
-                ls_obj = TRUE;
+                ls_obj = has_opt_a ? FALSE : TRUE;
                 break;
             case 'r':
-                ls_mat = TRUE;
+                ls_mat = has_opt_a ? FALSE : TRUE;
                 break;
             case 't':
-                ls_mrg = TRUE;
+                ls_mrg = has_opt_a ? FALSE : TRUE;
                 break;
             case 'v':
-                ls_var = TRUE;
+                ls_var = has_opt_a ? FALSE : TRUE;
                 break;
             case 'x':
-                ls_low = TRUE;
+                ls_low = has_opt_a ? FALSE : TRUE;
                 break;
             default:
                 return db_perror("invalid list option", E_BADARGS, me);
@@ -6377,14 +6384,14 @@ if (many_to_one_dir)
         char *srcObjAbsName, *dstObjAbsName;
         char savcwg[1024], srccwg[1024], dstcwg[1024];
         char opts2[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        DBtoc *toc2;
+        char **dirItems, **otherItems;
+        int  dirItemCount, otherItemCount;
 
         srcObjAbsName = db_join_path(srccwg, srcPathNames[i]);
         srcType = DBInqVarType(srcFile, srcObjAbsName);
 
         dstObjAbsName = db_join_path(dstcwg, dstPathNames[i]?dstPathNames[i]:srcPathNames[i]);
         dstType = DBInqVarType(dstFile, dstObjAbsName);
-#if 0
 
         if (srcType != DB_DIR)
         {
@@ -6406,11 +6413,14 @@ if (many_to_one_dir)
             goto endLoop;
         }
 
-        /* get the list of contents of this dir */
-        DBGetDir(srcFile, savcwg);
-        DBSetDir(srcFile, srcObjAbsName);
-        srcToc = DBGetToc(srcFile,);
-        DBSetDir(srcFile, savcwg);
+        /* get the contents of this dir in two lists; all the dirs, everything else */
+        DBLs(srcFile, DBSPrintf("-d %s", srcObjAbsName), 0, &dirItemCount); /* just count it first */
+        dirItems = ALLOC_N(char*, ++dirItemCount);
+        DBLs(srcFile, DBSPrintf("-d %s", srcObjAbsName), dirItems, &dirItemCount);
+
+        DBLs(srcFile, DBSPrintf("-a -d %s", srcObjAbsName), 0, &otherItemCount); /* just count it first */
+        otherItems = ALLOC_N(char*, ++otherItemCount);
+        DBLs(srcFile, DBSPrintf("-a -d %s", srcObjAbsName), otherItems, &otherItemCount);
 
         if (dstType != DB_INVALID_OBJECT && dstType != DB_DIR)
         {
@@ -6432,6 +6442,7 @@ if (many_to_one_dir)
              /* copy into */
         }
 
+#if 0
         /* Add the '-5' option to indicate its a recursive call to DBCp() if it
            is not already there */
         strncpy(opts2, recursive_call?opts:DBSPrintf("%s5", opts), sizeof(opts2)-1);
@@ -6484,6 +6495,10 @@ if (many_to_one_dir)
             }
 
 #endif
+
+endLoop:
+    ;
+
     }
 }
 
@@ -8074,7 +8089,7 @@ DBReadVarSlice(DBfile *dbfile, const char *name, int const *offset, int const *l
  *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
-static size_t
+PRIVATE size_t
 db_get_obj_byte_length(DBfile *dbfile, char const *name)
 {
     int q;
@@ -13159,7 +13174,7 @@ DBStringArrayToStringList(
 /*----------------------------------------------------------------------
  * Purpose
  *
- *    Decompose a single, semicolon seperated string list into an array
+ *    Decompose a single, sep-char seperated string list into an array
  *    of strings
  *
  * Programmer
@@ -13200,21 +13215,21 @@ DBStringArrayToStringList(
  *    Changed interface to return value for number of strings as well
  *    as accept an input value or nothing at all.
  *--------------------------------------------------------------------*/
-PUBLIC char **
-DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndexZero)
+INTERNAL char **
+db_StringListToStringArray(char const *strList, int *_n, char sep, int skipSepAtIndexZero)
 {
     int i, l, n, add1 = 0;
     char **retval;
 
-    /* if n is unspecified (<0), compute it by counting semicolons */
+    /* if n is unspecified (<0), compute it by counting sep chars */
     if (_n == 0 || *_n < 0)
     {
         add1 = 1;
         n = 1;
-        i = (skipSemicolonAtIndexZero&&strList[0]==';')?1:0;
+        i = (skipSepAtIndexZero&&strList[0]==sep)?1:0;
         while (strList[i] != '\0')
         {
-            if (strList[i] == ';')
+            if (strList[i] == sep)
                 n++;
             i++;
         }
@@ -13225,9 +13240,9 @@ DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndex
     }
 
     retval = (char**) calloc(n+add1, sizeof(char*));
-    for (i=0, l=(skipSemicolonAtIndexZero&&strList[0]==';')?1:0; i<n; i++)
+    for (i=0, l=(skipSepAtIndexZero&&strList[0]==sep)?1:0; i<n; i++)
     {
-        if (strList[l] == ';')
+        if (strList[l] == sep)
         {
             retval[i] = STRDUP(""); 
             l += 1;
@@ -13240,7 +13255,7 @@ DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndex
         else
         {
             int len, lstart = l;
-            while (strList[l] != ';' && strList[l] != '\0')
+            while (strList[l] != sep && strList[l] != '\0')
                 l++;
             len = l-lstart;
             retval[i] = (char *) malloc(len+1);
@@ -13255,6 +13270,29 @@ DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndex
     if (_n && *_n < 0) *_n = n;
 
     return retval;
+}
+
+PUBLIC char **
+DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndexZero)
+{
+    return db_StringListToStringArray(strList, _n, ';', skipSemicolonAtIndexZero);
+}
+
+PUBLIC void
+DBFreeStringArray(char **strArray, int n)
+{
+    int i;
+    if (n < 0)
+    {
+        for (i = 0; strArray[i]; i++)
+            FREE(strArray[i]);
+    }
+    else
+    {
+        for (i = 0; i < n; i++)
+            FREE(strArray[i]);
+    }
+    FREE(strArray);
 }
 
 INTERNAL int 

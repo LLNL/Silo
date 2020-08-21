@@ -1872,7 +1872,7 @@ SILO_API extern int                    DBFlush(DBfile *);
 SILO_API extern int                    DBClose(DBfile *);
 SILO_API extern DBtoc *                DBGetToc(DBfile *);
 SILO_API extern int                    DBNewToc(DBfile *);
-SILO_API extern int                    DBLs(DBfile *_dbfile, char *args[], int nargs, char *list[], int *nlist);
+SILO_API extern int                    DBLs(DBfile *_dbfile, char const *cl_args, char *list[], int *nlist);
 SILO_API extern void *                 DBGrabDriver(DBfile *);
 SILO_API extern int                    DBUngrabDriver(DBfile *, void const *);
 SILO_API extern int                    DBGetDriverType(DBfile const *);
@@ -2152,6 +2152,7 @@ SILO_API extern DBfacelist *           DBCalcExternalFacelist2(int *, int, int, 
 SILO_API extern char *                 DBJoinPath(char const *, char const *);
 SILO_API extern void                   DBStringArrayToStringList(char const * const *strArray, int n, char **strList, int *m);
 SILO_API extern char **                DBStringListToStringArray(char const *strList, int *n, int skipSemicolonAtIndexZero);
+SILO_API extern void                   DBFreeStringArray(char **strArray, int n);
 SILO_API extern int                    DBIsDifferentDouble(double a, double b, double abstol, double reltol, double reltol_eps);
 SILO_API extern int                    DBIsDifferentLongLong(long long a, long long b, double abstol, double reltol, double reltol_eps);
 
