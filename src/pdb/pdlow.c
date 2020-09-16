@@ -492,6 +492,10 @@ _lite_PD_rd_symt (PDBfile *file) {
  * Modifications:
  *      Sean Ahern, Wed Apr 12 10:49:15 PDT 2000
  *      Removed some compiler warnings.
+ *
+ *      Mark C. Miller, Tue Sep 15 18:35:42 PDT 2020
+ *      Create temp. copy of _PD_cast_lst to avoid memory corruption
+ *      when its used in both file and host charts.
  *-------------------------------------------------------------------------*/
 int
 _lite_PD_rd_chrt (PDBfile *file) {
@@ -500,6 +504,7 @@ _lite_PD_rd_chrt (PDBfile *file) {
    FILE *fp;
    memdes *desc, *lst, *prev;
    long i, chrt_sz;
+   char **_PD_cast_lst_cpy;
 
    fp = file->stream;
 
@@ -541,14 +546,24 @@ _lite_PD_rd_chrt (PDBfile *file) {
    _PD_has_dirs = FALSE;
 
    /*
+    * Copy the cast list.
+    */
+   _PD_cast_lst_cpy = FMAKE_N(char *, _PD_n_casts, "_PD_RD_CHART:cast-list-copy");
+   for (i = 0L; i < _PD_n_casts; i += 3) {
+      _PD_cast_lst_cpy[i  ] = lite_SC_strsavef(_PD_cast_lst[i  ], "char*:_PD_RD_CHART:cast-list-copy-local1");
+      _PD_cast_lst_cpy[i+1] = lite_SC_strsavef(_PD_cast_lst[i+1], "char*:_PD_RD_CHART:cast-list-copy-local2");
+      _PD_cast_lst_cpy[i+2] = lite_SC_strsavef(_PD_cast_lst[i+2], "char*:_PD_RD_CHART:cast-list-copy-local3");
+   }
+
+   /*
     * Check the casts for the file->chart.
     */
    _lite_PD_check_casts(file->chart, _PD_cast_lst, _PD_n_casts);
 
    /*
-    * Check the casts for the file->host_chart.
+    * Check the casts for the file->host_chart using the copied cast list.
     */
-   _lite_PD_check_casts(file->host_chart, _PD_cast_lst, _PD_n_casts);
+   _lite_PD_check_casts(file->host_chart, _PD_cast_lst_cpy, _PD_n_casts);
 
    /*
     * Clean up the mess.
@@ -556,8 +571,11 @@ _lite_PD_rd_chrt (PDBfile *file) {
    for (i = 0L; i < _PD_n_casts; i += 3) {
       SFREE(_PD_cast_lst[i]);
       SFREE(_PD_cast_lst[i+1]);
+      SFREE(_PD_cast_lst_cpy[i]);
+      SFREE(_PD_cast_lst_cpy[i+1]);
    }
    SFREE(_PD_cast_lst);
+   SFREE(_PD_cast_lst_cpy);
    _PD_n_casts = 0L;
 
    SFREE(_lite_PD_tbuffer);
