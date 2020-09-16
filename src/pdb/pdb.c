@@ -1994,7 +1994,8 @@ void *_lite_PD_alloc_entry(PDBfile *file, char *type, long nitems)
   return(vr);
 }
 
-#warning SHOULD PROBABLY GO IN DIFF SOURCE FILE
+/* Originally copied code from PACT for this method but then decided to
+ * make it more like lite_PD_defstr */
 defstr *lite_PD_defstr_alt(PDBfile *file, char *name, int nmemb, char **members)
 {
     int i, doffs;
@@ -2002,7 +2003,7 @@ defstr *lite_PD_defstr_alt(PDBfile *file, char *name, int nmemb, char **members)
     HASHTAB *fchrt;
     memdes *desc, *lst, *prev;
     defstr *dp, *dp2;
- 
+
     prev  = NULL;
     lst   = NULL;
     fchrt = file->chart;
@@ -2010,37 +2011,18 @@ defstr *lite_PD_defstr_alt(PDBfile *file, char *name, int nmemb, char **members)
     for (i = 0; i < nmemb; i++)
     {    nxt   = members[i];
          desc  = _lite_PD_mk_descriptor(nxt, doffs);
-         type  = lite_SC_strsavef(nxt, "char*:PD_DEFSTR_ALT:nxt");
-         ptype = lite_SC_firsttok(type, " \n");
-         if (ptype != NULL)
-         {
-             if (lite_SC_lookup(ptype, fchrt) == NULL)
-             {
-                 if ((strcmp(ptype, name) != 0) || !_lite_PD_indirection(nxt))
-                 {
-                     sprintf(lite_PD_err, "ERROR: %s BAD MEMBER TYPE - PD_DEFSTR_ALT\n", nxt);
-                     return(NULL);
-                 }
-             }
- 
-             dp2 = PD_inquire_table_type(fchrt, ptype);
-             if ((dp2 != NULL)  && !(_lite_PD_indirection(desc->type)))
-             {
-                 if (dp2->n_indirects > 0)
-                 {
-                     sprintf(lite_PD_err, "ERROR: STATIC MEMBER STRUCT %s CANNOT CONTAIN INDIRECTS\n", ptype);
-                     return(NULL);
-                 }
-             }
- 
-             SFREE(type);
-             if (lst == NULL)
-                 lst = desc;
-             else
-                 prev->next = desc;
- 
-             prev = desc;
+         ptype = desc->base_type;
+         if (lite_SC_lookup(ptype, fchrt) == NULL) {
+            if ((strcmp(ptype, name) != 0) || !_lite_PD_indirection(nxt)) {
+               sprintf(lite_PD_err, "ERROR: %s BAD MEMBER TYPE - PD_DEFSTR\n",
+                       nxt);
+               return(NULL);
+            }
          }
+
+         if (lst == NULL) lst = desc;
+         else prev->next = desc;
+         prev = desc;
     }
  
     /* install the type in all charts */
