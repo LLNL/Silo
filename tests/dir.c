@@ -223,7 +223,17 @@ int main(int argc, char *argv[])
     DBSetDir(dbfile, "/tri_dir");
     DBMkDirP(dbfile2, "gorfo/foo/bar");
     DBSetDir(dbfile2, "gorfo/foo");
+    /* Just copy a mesh and its sub-objects */
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh_copy", DB_EOA);
+
+    DBSetDir(dbfile2, "/");
+    /* Try a recursive copy */
+    DBCp("-r", dbfile, dbfile2, "/quad_dir", "quad_dir_copy", DB_EOA);
+
+    DBClose(dbfile);
+    DBClose(dbfile2);
+
+exit(0);
 
     DBSetDir(dbfile2, "..");
     build_ucd_tri(dbfile2, "trimesh", 0x1);
@@ -234,22 +244,21 @@ int main(int argc, char *argv[])
     int i, nlist  = (int) sizeof(list)/sizeof(list[0]);
     DBSetDir(dbfile, "/");
     for (i = 0; i < nlist; i++) list[i] = 0;
-    DBLs(dbfile, 0, 0, 0, &nlist);
+    DBLs(dbfile, 0, 0, &nlist);
     printf("Got nlist=%d\n", nlist);
-    DBLs(dbfile, 0, 0, list, &nlist);
+    DBLs(dbfile, 0, list, &nlist);
     for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
 
     nlist  = (int) sizeof(list)/sizeof(list[0]);
     DBSetDir(dbfile, "/tri_dir");
     for (i = 0; i < nlist; i++) list[i] = 0;
-    DBLs(dbfile, 0, 0, list, &nlist);
+    DBLs(dbfile, 0, list, &nlist);
     for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
 }
 
     DBClose(dbfile);
     DBClose(dbfile2);
 
-exit(0);
 
     dbfile = DBOpen(filename, driver, DB_READ);
     dbfile2 = DBOpen(filename2, driver2, DB_APPEND);

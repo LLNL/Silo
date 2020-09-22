@@ -780,7 +780,7 @@ typedef struct DBtoc_ {
     char         **symlink_names; /* copies of other members; never free'd */
 
 } DBtoc;
-#define DB_NOBJ_TYPES ((int)(sizeof(DBtoc)/sizeof(struct{char **p;int n;})))
+#define DB_NOBJ_TYPES  25
 
 /*----------------------------------------------------------------------------
  * Database Curve Object

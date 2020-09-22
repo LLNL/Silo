@@ -188,6 +188,9 @@ PUBLIC char   *_db_err_list[] =
     "No more tiny array buffer space for custom object." /* 35 */
 };
 
+/* Table of contents object count */
+static int _db_nobj_types = ((int)(sizeof(DBtoc)/sizeof(struct{char **p;int n;})));
+
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
 typedef struct reg_status_t {
     DBfile *f;
@@ -1511,8 +1514,8 @@ DBGetObjtypeName(int type)
  *    Changed name from db_ListDir2 to DBLs and made it a public function.
  *    Macro-ized much of the internal logic.
  *    Changed list filtering logic. "-a -d" means everything *but* dirs
- *    whereas "-d" without the preceding "-a" means dirs. Same behavior fo
- *    all other options after a "-a".
+ *    whereas "-d" without the preceding "-a" means dirs. Same behavior
+ *    for all other options after a "-a".
  *-------------------------------------------------------------------------*/
 PUBLIC int
 DBLs(DBfile *_dbfile, char const *cl_args, char *list[], int *nlist)
@@ -1545,7 +1548,6 @@ DBLs(DBfile *_dbfile, char const *cl_args, char *list[], int *nlist)
     nopts = 0;
     nargs = -1;
     args = db_StringListToStringArray(cl_args, &nargs, ' ', 0);
-
     for (i = 0; i < nargs; i++) {
 
         switch (args[i][0]) {
@@ -1561,7 +1563,6 @@ DBLs(DBfile *_dbfile, char const *cl_args, char *list[], int *nlist)
                 break;
         }
     }
-    DBFreeStringArray(args, nargs);
 
      /*----------------------------------------
       *  Set listing options based on input.
@@ -1652,6 +1653,7 @@ if (LS_VAR && toc->n##CAT > 0) { \
     else if (build_list) { \
         for (i = 0; i < toc->n##CAT && *nlist<_nlist_orig; i++) { \
             list[*nlist] = ALLOC_N(char, strlen(toc->CAT##_names[i]) + 1); \
+printf("...entry %d is \"%s\"\n", *nlist, toc->CAT##_names[i]);\
             strcpy(list[(*nlist)++], toc->CAT##_names[i]); \
         } \
     } \
@@ -1675,6 +1677,9 @@ if (LS_VAR && toc->n##CAT > 0) { \
         toc = DBGetToc(_dbfile);
         if (!toc)
             return db_perror("unable to get toc", E_INTERNAL, me);
+
+if (build_list)
+printf("%d: for clargs=\"%s\", path=\"%s\"...\n", k, cl_args, paths[k], nlist?*nlist:-1);
 
         PROCESS_LIST(ls_curve, curve);
         PROCESS_LIST(ls_low, var); /* misc. vars */
@@ -1702,6 +1707,9 @@ if (LS_VAR && toc->n##CAT > 0) { \
         PROCESS_LIST(ls_obj, obj); /* misc. objects */
         PROCESS_LIST(ls_link, symlink);
 
+if (build_list)
+printf("Total entries = %d\n", nlist?*nlist:-1);
+
         /*
          * Return to original directory, since next path may
          * be relative to it.
@@ -1709,6 +1717,9 @@ if (LS_VAR && toc->n##CAT > 0) { \
         DBSetDir(_dbfile, orig_dir);
 
     }
+
+#warning CLEAN UP IS LOST IN ABOVE EARLY RETURNS
+    DBFreeStringArray(args, nargs);
 
     if (nlist && (*nlist >= _nlist_orig))
         return -1;
@@ -4074,6 +4085,9 @@ DBOpenReal(const char *name, int type, int mode)
     db_silo_stat_t filestate;
 
     API_BEGIN("DBOpen", DBfile *, NULL) {
+        if (DB_NOBJ_TYPES != _db_nobj_types)
+            API_ERROR("Silo TOC not configured corretly", E_INTERNAL);
+
         if (!name)
             API_ERROR(NULL, E_NOFILE);
 
@@ -4272,6 +4286,9 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     db_silo_stat_t filestate;
 
     API_BEGIN("DBCreate", DBfile *, NULL) {
+        if (DB_NOBJ_TYPES != _db_nobj_types)
+            API_ERROR("Silo TOC not configured corretly", E_INTERNAL);
+
         if (!name)
             API_ERROR(NULL, E_NOFILE);
 
@@ -6387,11 +6404,23 @@ if (many_to_one_dir)
         char **dirItems, **otherItems;
         int  dirItemCount, otherItemCount;
 
+        if (i == 0)
+        {
+            DBGetDir(srcFile, srccwg);
+            DBGetDir(dstFile, dstcwg);
+        }
+
         srcObjAbsName = db_join_path(srccwg, srcPathNames[i]);
         srcType = DBInqVarType(srcFile, srcObjAbsName);
 
         dstObjAbsName = db_join_path(dstcwg, dstPathNames[i]?dstPathNames[i]:srcPathNames[i]);
         dstType = DBInqVarType(dstFile, dstObjAbsName);
+
+        if (srcType == DB_INVALID_OBJECT)
+        {
+            db_perror(DBSPrintf("\"%s\" invalid object", srcObjAbsName), E_BADARGS, me);
+            goto endLoop;
+        }
 
         if (srcType != DB_DIR)
         {
@@ -6405,14 +6434,22 @@ if (many_to_one_dir)
             continue;
         }
 
-        /* If we get this far into the loop body, then src is a dir */
-
+        /* If we get this far into the loop body here, then src is a dir */
         if (!recurse_on_dirs)
         {
-            db_perror("Attempted copy of dir without -r flag", E_BADARGS, me);
+            db_perror(DBSPrintf("Cannot copy dir \"%s\" without -r flag",
+                srcObjAbsName), E_BADARGS, me);
             goto endLoop;
         }
 
+        if (dstType != DB_INVALID_OBJECT && dstType != DB_DIR)
+        {
+            db_perror(DBSPrintf("Cannot copy dir \"%s\" onto pre-existing non-dir \"%s\"",
+                srcObjAbsName, dstObjAbsName), E_BADARGS, me);
+            goto endLoop;
+        }
+
+#if 0
         /* get the contents of this dir in two lists; all the dirs, everything else */
         DBLs(srcFile, DBSPrintf("-d %s", srcObjAbsName), 0, &dirItemCount); /* just count it first */
         dirItems = ALLOC_N(char*, ++dirItemCount);
@@ -6421,82 +6458,29 @@ if (many_to_one_dir)
         DBLs(srcFile, DBSPrintf("-a -d %s", srcObjAbsName), 0, &otherItemCount); /* just count it first */
         otherItems = ALLOC_N(char*, ++otherItemCount);
         DBLs(srcFile, DBSPrintf("-a -d %s", srcObjAbsName), otherItems, &otherItemCount);
-
-        if (dstType != DB_INVALID_OBJECT && dstType != DB_DIR)
-        {
-            db_perror("Attempted copy of dir to pre-existing non-dir", E_BADARGS, me);
-            goto endLoop;
-        }
-        else if (dstType == DB_INVALID_OBJECT && many_to_one_dir && i == 0)
-        {
-             /* make directory */
-             /* copy into */
-        }
-        else if (dstType == DB_INVALID_OBJECT)
-        {
-             /* make directory */
-             /* copy ONTO - contents of source into newly created dir */
-        }
-        else if (dstType == DB_DIR)
-        {
-             /* copy into */
-        }
-
-#if 0
-        /* Add the '-5' option to indicate its a recursive call to DBCp() if it
-           is not already there */
-        strncpy(opts2, recursive_call?opts:DBSPrintf("%s5", opts), sizeof(opts2)-1);
-        if (opts2[sizeof(opts2)-1] != '\0')
-            return db_perror("option string is too long", E_BADARGS, me);
-
-        DBSetDir(srcFile, srcObjAbsName);
-
-        toc2 = recurse_on_dirs ? DBGetToc(srcFile) : 0;
-
-        /* recurse on dir members first */
-        if (toc2 && toc2->ndir)
-        {
-            int retval;
-            int nobj;
-            char **obj_names;
-            COPY_TOC_ENTRY(toc2, dir, nobj, obj_names);
-            retval = DBCp(opts2, srcFile, dstFile, nobj, obj_names, dstObjAbsName, DB_EOA);
-            FREE_COPIED_TOC_ENTRY(nobj, obj_names);
-            if (retval != 0) return retval;
-
-            if (pass == 1)
-            {
-                COPY_TOC_ENTRY(toc2, qmesh, nobj, obj_names);
-                retval = DBCp(opts2, srcFile, dstFile, nobj, obj_names, dstObjAbsName, DB_EOA);
-                FREE_COPIED_TOC_ENTRY(nobj, obj_names);
-                if (retval != 0) return retval;
-            }
-        }
-        else if (pass == 1)
-
-
-                /* Recurse if this is a dir */
-                if (srcType == DB_DIR)
-                {
-                    char savcwg[1024];
-                    char opts2[32];
-                    DBtoc *toc2;
-
-                    DBGetDir(srcFile, savcwg);
-                    DBSetDir(srcFile, srcObjAbsName);
-                    toc2 = DBGetToc(srcFile);
-
-                    /* recurse on dir members first */
-                    DBCp(opts, srcFile, dstFile, toc2->ndir, toc2->dir_names,
-                        dstObjAbsName, DB_EOA);
-
-                    DBSetDir(srcFile, savcwg);
-                }
-            }
-
 #endif
+        /* get the contents of this dir */
+        DBSetDir(srcFile, srcObjAbsName);
+        DBLs(srcFile, "-a -x", 0, &dirItemCount); /* just count it first */
+        dirItems = ALLOC_N(char*, dirItemCount);
+        DBLs(srcFile, "-a -x", dirItems, &dirItemCount);
+
+        if (dstType == DB_INVALID_OBJECT)
+            DBMkDir(dstFile, dstObjAbsName);
+
+        DBSetDir(dstFile, dstObjAbsName);
+
+        if (n_src_dir_triple)
+            DBCp(opts, srcFile, dstFile, dirItemCount, dirItems, dstObjAbsName);
+        else
+            DBCp(DBSPrintf("%s -4", opts), srcFile, dstFile, dirItemCount, dirItems, dstObjAbsName);
+
+        DBSetDir(srcFile, "..");
+        DBSetDir(dstFile, "..");
 
 endLoop:
+        FREE(srcObjAbsName);
+        FREE(dstObjAbsName);
     ;
 
     }

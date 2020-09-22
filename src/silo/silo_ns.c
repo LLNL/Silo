@@ -267,7 +267,13 @@ static char * SaveReturnedString(char const * retstr)
 {
     static unsigned int n = 0;
     int modn = n++ % DB_MAX_RETSTRS;
-    if (retstr == 0)
+    if (n == 0)
+    {
+        for (n = 0; n < DB_MAX_RETSTRS; n++)
+            retstrbuf[n] = 0;
+        n = 0;
+    }
+    else if (retstr == 0)
     {
         for (n = 0; n < DB_MAX_RETSTRS; n++)
             FREE(retstrbuf[n]);
