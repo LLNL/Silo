@@ -9079,6 +9079,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char const *name, int nmats,
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "material_names", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+      _mm._matnames = 0;
    }
 
    /*-------------------------------------------------------------
@@ -9091,6 +9092,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char const *name, int nmats,
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+      _mm._matcolors = 0;
    }
 
    /*-------------------------------------------------------------
@@ -12169,8 +12171,6 @@ db_InitQuad (DBfile *_dbfile, char const *meshname, DBoptlist const *optlist,
     *--------------------------------------------------*/
    _qm._nzones = nzones;
    _qm._nnodes = nnodes;
-   FREE(_qm._meshname);
-   _qm._meshname = STRDUP(meshname);
 
    for (i = 0; i < ndims; i++) {
       _qm._dims[i] = dims[i];

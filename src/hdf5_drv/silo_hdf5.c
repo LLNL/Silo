@@ -9443,7 +9443,6 @@ db_hdf5_PutQuadmesh(DBfile *_dbfile, char const *name, char const * const *coord
     int                 compressionFlags;
     void const * const *coords = (void const * const *) _coords;
 
-    FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
     memset(&m, 0, sizeof m); 
 
@@ -9898,7 +9897,6 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         }
     }
 
-    FREE(_qm._meshname);
     memset(&_qm, 0, sizeof _qm);
     memset(&m, 0, sizeof m);
 
@@ -9912,7 +9910,6 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         _qm._group_no = -1;
         _qm._missing_value = DB_MISSING_VALUE_NOT_SET;
         db_ProcessOptlist(DB_QUADMESH, optlist); /*yes, QUADMESH*/
-        _qm._meshname = STRDUP(meshname);
         _qm._nzones = _qm._nnodes = 1; /*initial value only*/
         for (nels=(ndims?1:0), i=0; i<ndims; i++) {
             nels *= dims[i];
@@ -9986,7 +9983,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
         m.centering = centering;
         strcpy(m.label, OPT(_qm._label));
         strcpy(m.units, OPT(_qm._unit));
-        strcpy(m.meshid, OPT(_qm._meshname));
+        strcpy(m.meshid, OPT(meshname));
         db_SetMissingValueForPut(m.missing_value, _qm._missing_value);
 
         for (i=0; i<ndims; i++) {
@@ -10049,9 +10046,7 @@ db_hdf5_PutQuadvar(DBfile *_dbfile, char const *name, char const *meshname, int 
             MEMBER_S(str(m.region_pnames), region_pnames);
         } OUTPUT(dbfile, DB_QUADVAR, name, &m);
         
-        FREE(_qm._meshname);
     } CLEANUP {
-        FREE(_qm._meshname);
         /*void*/
     } END_PROTECT;
     return 0;
@@ -13793,6 +13788,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.mat_colors/*out*/, friendly_name(name,"_matcolors", 0));
             FREE(tmp);
+            _mm._matcolors = 0;
         }
         if (_mm._matnames && _mm._nmatnos > 0) {
             int len; char *tmp;
@@ -13801,6 +13797,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.material_names/*out*/, friendly_name(name,"_material_names", 0));
             FREE(tmp);
+            _mm._matnames = 0;
         }
         /* output nameschemes if we have 'em */
         if (_mm._file_ns)

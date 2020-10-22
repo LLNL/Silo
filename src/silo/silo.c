@@ -8800,11 +8800,6 @@ DBPutMaterial(
                                      mix_next, mix_mat, mix_zone, mix_vf,
                                      mixlen, datatype, optlist);
 
-        /* Zero out the _ma._matnames pointer so we can't accidentially use it
-         * again. Likewise for matcolors. */
-        _ma._matnames = NULL;
-        _ma._matcolors = NULL;
-
         db_FreeToc(dbfile);
         API_RETURN(retval);
     }
@@ -9174,11 +9169,6 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
 
         retval = (dbfile->pub.p_mt) (dbfile, name, nmats, matnames,
                                      optlist);
-
-        /* Zero out the _mm._matnames pointer so we can't accidentially use it
-         * again. Likewise for matcolors. */
-        _mm._matnames = NULL;
-        _mm._matcolors = NULL;
 
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -12870,7 +12860,6 @@ db_ResetGlobalData_PointMesh (int ndims) {
 INTERNAL int
 db_ResetGlobalData_QuadMesh (int ndims) {
 
-   FREE(_qm._meshname);
    memset(&_qm, 0, sizeof(_qm));
 
    _qm._coord_sys = DB_OTHER;

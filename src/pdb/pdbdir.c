@@ -335,15 +335,8 @@ lite_PD_pwd(PDBfile *file) {
       return(NULL);
    }
 
-   if ((file->current_prefix == NULL) ||
-       (strcmp(file->current_prefix, "/") == 0)) {
-      strcpy(cwd, "/");
-   } else {
-      int cwdlen;
-      strcpy(cwd, file->current_prefix);
-      cwdlen = strlen(cwd);
-      cwd[cwdlen?cwdlen-1:0] = '\0';
-   }
+   strcpy(cwd, file->current_prefix?file->current_prefix:"/");
+
    return(cwd);
 }
 

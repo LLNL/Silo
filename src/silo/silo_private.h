@@ -534,7 +534,6 @@ struct _qm {
     char          *_unit;
     char          *_labels[3];
     char          *_units[3];
-    char          *_meshname;
     int            _baseindex[3];
     int            _baseindex_set;
     int            _group_no;
