@@ -543,6 +543,7 @@ typedef enum {
 #define     E_NOHDF5 33         /*HDF5 driver not available */
 #define     E_EMPTYOBJECT 34    /*Empty object not currently permitted*/
 #define     E_OBJBUFFULL  35    /*No more temp. buffer space for object */
+#define     E_NOSILOHDF5 36     /*Not HDF5 silo produced by silo */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
