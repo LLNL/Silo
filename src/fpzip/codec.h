@@ -16,13 +16,13 @@
 // identity map for integer arithmetic
 template <typename T, unsigned width>
 struct PCmap<T, width, T> {
-  typedef T DOMAIN;
-  typedef T RANGE;
+  typedef T FPZIP_Domain_t;
+  typedef T FPZIP_Range_t;
   static const unsigned bits = width;
   static const T        mask = ~T(0) >> (bitsizeof(T) - bits);
-  RANGE forward(DOMAIN d) const { return d & mask; }
-  DOMAIN inverse(RANGE r) const { return r & mask; }
-  DOMAIN identity(DOMAIN d) const { return d & mask; }
+  FPZIP_Range_t forward(FPZIP_Domain_t d) const { return d & mask; }
+  FPZIP_Domain_t inverse(FPZIP_Range_t r) const { return r & mask; }
+  FPZIP_Domain_t identity(FPZIP_Domain_t d) const { return d & mask; }
 };
 #endif
 
