@@ -135,6 +135,7 @@ static int DBtoc_as_string(PyObject *self, char *s)
     PRINT_OBJS(qmesh);
     PRINT_OBJS(qvar);
     PRINT_OBJS(ucdmesh);
+    PRINT_OBJS(obj);
     PRINT_OBJS(ucdvar);
     PRINT_OBJS(ptmesh);
     PRINT_OBJS(ptvar);

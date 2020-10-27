@@ -3388,6 +3388,10 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
 
     mm->id = 0;
     mm->name = STRDUP(name);
+    if (0 >= mm->mixlen)
+    {
+        mm->datatype = DB_NOTYPE;
+    }
     if (DB_DOUBLE == mm->datatype && PJ_InqForceSingle())
     {
         mm->datatype = DB_FLOAT;

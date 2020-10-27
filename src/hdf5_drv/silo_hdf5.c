@@ -5292,8 +5292,8 @@ db_hdf5_finish_open(DBfile_hdf5 *dbfile)
     H5E_BEGIN_TRY {
         link = H5Gopen(dbfile->fid, LINKGRP);
     } H5E_END_TRY;
-    if (link<0 && (link=H5Gcreate(dbfile->fid, LINKGRP, 0))<0) {
-        db_perror("link group", E_CALLFAIL, me);
+    if (link<0) {
+        db_perror("link group", E_NOSILOHDF5, me);
         return silo_db_close((DBfile*) dbfile);
     }
 
@@ -12199,8 +12199,10 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char const *name)
         ma->guihide = m.guihide;
         ma->nmat = m.nmat;
         ma->mixlen = m.mixlen;
-        if ((ma->datatype = db_hdf5_GetVarType(_dbfile, m.mix_vf)) < 0)
-            ma->datatype = DB_DOUBLE;  /* PDB driver assumes double */
+        if (ma->mixlen == 0)
+            ma->datatype = DB_NOTYPE;
+        else if ((ma->datatype = db_hdf5_GetVarType(_dbfile, m.mix_vf)) < 0)
+            ma->datatype = DB_NOTYPE;
         if (force_single_g) ma->datatype = DB_FLOAT;
         for (nels=1, i=0; i<m.ndims; i++) {
             ma->dims[i] = m.dims[i];
@@ -14260,7 +14262,7 @@ db_hdf5_GetMultimatspecies(DBfile *_dbfile, char const *name)
         mm->block_ns =  (char *)db_hdf5_comprd(dbfile, m.block_ns_name, 1);
         mm->empty_list =  (int *)db_hdf5_comprd(dbfile, m.empty_list, 1);
         mm->empty_cnt = m.empty_cnt;
-        mm->repr_block_idx = m.repr_block_idx;
+        mm->repr_block_idx = m.repr_block_idx - 1;
 
         H5Tclose(o);
         
