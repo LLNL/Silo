@@ -19,7 +19,7 @@ template <typename T, class M>
 T PCdecoder<T, M, false>::decode(T pred, unsigned context)
 {
   // map type T to unsigned integer type
-  typedef typename M::RANGE U;
+  typedef typename M::FPZIP_Range_t U;
   U p = map.forward(pred);
   // entropy decode d = r - p
   U r = p + rd->decode(rm[context]) - bias;
@@ -46,7 +46,7 @@ private:
 template <typename T, class M>
 T PCdecoder<T, M, true>::decode(T pred, unsigned context)
 {
-  typedef typename M::RANGE U;
+  typedef typename M::FPZIP_Range_t U;
   unsigned s = rd->decode(rm[context]);
   if (s > bias) {      // underprediction
     unsigned k = s - bias - 1;
