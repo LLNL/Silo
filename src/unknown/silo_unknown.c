@@ -123,6 +123,7 @@ be used for advertising or product endorsement purposes.
 INTERNAL DBfile *
 db_unk_Open(char *name, int mode, int subtype_dummy)
 {
+    char          *me = "db_unk_Open";
     DBfile        *opened = NULL;
     DBErrFunc_t    oldErrfunc = 0;
     int            oldErrlvl;
@@ -131,7 +132,6 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     int            default_driver_priorities[MAX_FILE_OPTIONS_SETS+10+1] =
                        DEFAULT_DRIVER_PRIORITIES;
     int            priorities_are_set_to_default = 1;
-    char          *me = "db_unk_Open";
     char           tried[1024], ascii[32];
     const int *opts_set_ids = db_get_used_file_options_sets_ids();
     static const char *hierarchy_names[] = {"NetCDF", "PDB Proper", "PDB",
@@ -141,7 +141,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     oldErrlvl = DBErrlvl();
     oldErrfunc = DBErrfunc();
     DBShowErrors(DB_SUSPEND, NULL);
-    strcpy(tried, "attempted SILO drivers:");
+    strcpy(tried, "\nAttempted SILO drivers:");
 
     /* Initialize list of driver ids we've already tried */
     for (i = 0; i < sizeof(driver_types_already_tried)/sizeof(driver_types_already_tried[0]); i++)
@@ -178,7 +178,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
                 continue;
             if (DBOpenCB[driverId] == NULL)
                 continue;
-            sprintf(ascii, " %s", hierarchy_names[driverId]);
+            sprintf(ascii, "\n...%s,", hierarchy_names[driverId]);
             strcat(tried, ascii);
             PROTECT {
                 opened = (DBOpenCB[driverId]) (name, mode, subtype_dummy);
@@ -217,7 +217,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
             /* skip the 'default' ones */
             if (opts_set_ids[i] < NUM_DEFAULT_FILE_OPTIONS_SETS)
                 continue;
-            sprintf(ascii, " DB_HDF5_OPTS(%d)", opts_set_ids[i]);
+            sprintf(ascii, "\n...DB_HDF5_OPTS(%d),", opts_set_ids[i]);
             strcat(tried, ascii);
             PROTECT {
                 opened = (DBOpenCB[DB_HDF5X]) (name, mode, opts_set_ids[i]);
@@ -254,7 +254,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
                 continue;
             if (DBOpenCB[driverId] == NULL)
                 continue;
-            sprintf(ascii, " %s", hierarchy_names[driverId]);
+            sprintf(ascii, "\n...%s,", hierarchy_names[driverId]);
             strcat(tried, ascii);
             PROTECT {
                 opened = (DBOpenCB[driverId]) (name, mode, subtype_dummy);
@@ -291,7 +291,7 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
             /* skip the 'default' ones */
             if (opts_set_ids[i] >= NUM_DEFAULT_FILE_OPTIONS_SETS)
                 continue;
-            sprintf(ascii, " DB_HDF5_OPTS(%d)", opts_set_ids[i]);
+            sprintf(ascii, "\n...DB_HDF5_OPTS(%d),", opts_set_ids[i]);
             strcat(tried, ascii);
             PROTECT {
                 opened = (DBOpenCB[DB_HDF5X]) (name, mode, opts_set_ids[i]);
@@ -311,7 +311,14 @@ db_unk_Open(char *name, int mode, int subtype_dummy)
     {
         if (DBGetDriverTypeFromPath(name) == DB_HDF5X)
         {
-            db_perror(tried, E_NOHDF5, me);
+            if (DBOpenCB[DB_HDF5X])
+            {
+                db_perror(tried, E_NOSILOHDF5, me);
+            }
+            else
+            {
+                db_perror(tried, E_NOHDF5, me);
+            }
         }
         else
         {
