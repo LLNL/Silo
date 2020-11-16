@@ -126,17 +126,54 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    char *str;
-    if(!PyArg_ParseTuple(args, "s", &str))
-        return NULL;
+    char *str, *iestr=0;
+    int dontErrInSanityChecks= 0;
+    if(!PyArg_ParseTuple(args, "ss", &str, &iestr))
+    {
+        if(!PyArg_ParseTuple(args, "s", &str))
+        {
+            SiloErrorFunc("A string argument is required.");
+            return NULL;
+        }
+    }
+    if (iestr && !strcmp(iestr, "dont-throw-errors-in-sanity-checks"))
+        dontErrInSanityChecks = 1;
+    char msg[256];
+    snprintf(msg, sizeof(msg), "Problem with DBInqVarType   for variable \"%s\"", str);
 
     int vartype = DBInqVarType(db, str);
     if (vartype != DB_VARIABLE)
+    {
+        if (!dontErrInSanityChecks)
+            SiloErrorFunc(msg);
         return NULL;
+    }
 
     int len = DBGetVarLength(db,str);
+    if (len < 0)
+    {
+        sprintf(&msg[13], "DBGetVarLength");
+        if (!dontErrInSanityChecks)
+            SiloErrorFunc(msg);
+        return NULL;
+    }
     int type = DBGetVarType(db,str);
+    if (type < 0)
+    {
+        sprintf(&msg[13], "DBGetVarType");
+        if (!dontErrInSanityChecks)
+            SiloErrorFunc(msg);
+        return NULL;
+    }
     void *var = DBGetVar(db,str);
+    if (!var)
+    {
+        sprintf(&msg[13], "DBGetVar");
+        if (!dontErrInSanityChecks)
+            SiloErrorFunc(msg);
+        return NULL;
+    }
+
     if (len == 1 || type == DB_CHAR)
     {
         PyObject *tmp;
@@ -209,6 +246,7 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
         if (var) free(var);
         return retval;
     }
+    SiloErrorFunc("An unknown Silo error occurred.");
     return NULL;
 }
 
@@ -336,8 +374,9 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             if (get_data_flag)
             {
 
-                PyObject *argTuple = PyTuple_New(1);
+                PyObject *argTuple = PyTuple_New(2);
                 PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(valStr.c_str()));
+                PyTuple_SET_ITEM(argTuple, 1, PyString_FromString("dont-throw-errors-in-sanity-checks"));
                 PyObject *dobj = DBfile_DBGetVar(self, argTuple);
                 Py_DECREF(argTuple);
                 if (dobj)
@@ -557,7 +596,7 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
                 int len2;
                 long count[1];
                 char *tmp = 0;
-                char** vals = new char*[len];
+                char const **vals = new char const *[len];
                 for (int i = 0; i < len; i++)
                     vals[i] = PyString_AsString(PyTuple_GET_ITEM(value,i));
                 DBStringArrayToStringList((char const * const *)vals, len, &tmp, &len2);
