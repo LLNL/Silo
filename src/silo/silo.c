@@ -1517,7 +1517,7 @@ DBGetObjtypeName(int type)
  *    Changed name from db_ListDir2 to DBLs and made it a public function.
  *    Macro-ized much of the internal logic.
  *    Changed list filtering logic. "-a -d" means everything *but* dirs
- *    whereas "-d" without the preceding "-a" means dirs. Same behavior
+ *    whereas "-d" without the preceding "-a" means only dirs. Same behavior
  *    for all other options after a "-a".
  *-------------------------------------------------------------------------*/
 PUBLIC int
@@ -6074,6 +6074,9 @@ db_copy_single_object_abspath(char const *opts,
             srcType = DB_QUAD_CURV;
     }
 
+printf("Doing single object copy from \"%s\" to \"%s\"\n",
+    srcObjAbsName, _dstObjAbsName);
+
     /* Ok, lets do what we came here to do...create the dst object and
        start populating it */
     dstObj = DBMakeObject(_dstObjAbsName, srcType, srcObj->ncomponents);
@@ -6131,12 +6134,16 @@ db_copy_single_object_abspath(char const *opts,
                 FREE(dtype);
                 FREE(data);
             }
-            else if (subObjType != DB_INVALID_OBJECT) /* recurse on sub-object */
+            else if (((srcType == DB_UCDMESH) && /* possible recurse on sub-object */
+                      (subObjType == DB_FACELIST || subObjType == DB_EDGELIST ||
+                       subObjType == DB_ZONELIST || subObjType == DB_PHZONELIST)) ||
+                     (srcType == DB_CSGMESH && subObjType == DB_CSGZONELIST)) 
             {
                 char *dstObjDirName = db_dirname(dstObjAbsName);
                 char *dstSubObjAbsName = db_join_path(dstObjDirName, subObjName);
 
-#warning WHAT IF SUB-OBJECT REFERENCES A NON-EXISTENT DIRECTORY IN DESTINATION
+printf("        recursive sub-object copy of \"%s\" to \"%s\"\n",
+    srcSubObjAbsName, dstSubObjAbsName);
 
                 db_copy_single_object_abspath(opts, /* recursive call */
                    srcFile, srcSubObjAbsName, subObjType,
@@ -6419,6 +6426,9 @@ if (many_to_one_dir)
         dstObjAbsName = db_join_path(dstcwg, dstPathNames[i]?dstPathNames[i]:srcPathNames[i]);
         dstType = DBInqVarType(dstFile, dstObjAbsName);
 
+printf("    processing copy of \"%s\" to %s \"%s\"\n",
+    srcObjAbsName, dstType == DB_INVALID_OBJECT ? "new" : "pre-existing", dstObjAbsName);
+
         if (srcType == DB_INVALID_OBJECT)
         {
             db_perror(DBSPrintf("\"%s\" invalid object", srcObjAbsName), E_BADARGS, me);
@@ -6427,6 +6437,7 @@ if (many_to_one_dir)
 
         if (srcType != DB_DIR)
         {
+printf("        handling as db_copy_single_object_abspath()\n");
             if (!db_copy_single_object_abspath(opts, 
                     srcFile, srcObjAbsName, srcType,
                     dstFile, dstObjAbsName, dstType))
@@ -6451,6 +6462,7 @@ if (many_to_one_dir)
                 srcObjAbsName, dstObjAbsName), E_BADARGS, me);
             goto endLoop;
         }
+printf("        the object to be copied is a dir...starting a recursion\n");
 
 #if 0
         /* get the contents of this dir in two lists; all the dirs, everything else */
@@ -6463,20 +6475,37 @@ if (many_to_one_dir)
         DBLs(srcFile, DBSPrintf("-a -d %s", srcObjAbsName), otherItems, &otherItemCount);
 #endif
         /* get the contents of this dir */
+printf("        descending src file into directory \"%s\"\n", srcObjAbsName);
         DBSetDir(srcFile, srcObjAbsName);
         DBLs(srcFile, "-a -x", 0, &dirItemCount); /* just count it first */
         dirItems = ALLOC_N(char*, dirItemCount);
         DBLs(srcFile, "-a -x", dirItems, &dirItemCount);
 
         if (dstType == DB_INVALID_OBJECT)
+{
+printf("        making dst file directory \"%s\"\n", dstObjAbsName);
             DBMkDir(dstFile, dstObjAbsName);
-
-        DBSetDir(dstFile, dstObjAbsName);
+printf("        descending dst file into directory \"%s\"\n", dstObjAbsName);
+            DBSetDir(dstFile, dstObjAbsName);
+}
+else if (dstType == DB_DIR)
+{
+            char const *srcDirBaseName = db_basename(srcObjAbsName);
+printf("        making dst file directory \"%s\"\n", srcDirBaseName);
+            DBMkDir(dstFile, srcDirBaseName);
+printf("        descending dst file into directory \"%s\"\n", srcDirBaseName);
+            DBSetDir(dstFile, srcDirBaseName);
+            free(srcDirBaseName);
+}
+else
+{
+printf("\n\n\n***ERROR***\n\n\n");
+}
 
         if (n_src_dir_triple)
-            DBCp(opts, srcFile, dstFile, dirItemCount, dirItems, dstObjAbsName);
+            DBCp(opts, srcFile, dstFile, dirItemCount, dirItems, ".");
         else
-            DBCp(DBSPrintf("%s -4", opts), srcFile, dstFile, dirItemCount, dirItems, dstObjAbsName);
+            DBCp(DBSPrintf("%s -4", opts), srcFile, dstFile, dirItemCount, dirItems, ".");
 
         DBSetDir(srcFile, "..");
         DBSetDir(dstFile, "..");
