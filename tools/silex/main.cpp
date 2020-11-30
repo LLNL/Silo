@@ -52,14 +52,14 @@ Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 *****************************************************************************/
 
-#include "qapplication.h"
+#include <QApplication>
 #include "Explorer.h"
 
 #include <cstdlib>
 
-#include "QStyle"
-#include "qfiledialog.h"
-#include "qstring.h"
+#include <QStyle>
+#include <QFileDialog>
+#include <QString>
 #include <iostream>
 
 // ****************************************************************************
@@ -86,7 +86,6 @@ be used for advertising or product endorsement purposes.
 
 int main( int argc, char **argv )
 {
-    QCoreApplication::setLibraryPaths(QStringList()); // work-around Qt bug
     QApplication::setColorSpec(QApplication::ManyColor);
     QApplication a(argc, argv);
     a.setStyle(QApplication::style());

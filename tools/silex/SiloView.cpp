@@ -109,8 +109,8 @@ SiloView::SiloView(const QString &file, QWidget *p)
         dirTreeView->OpenRootDir();
         dirView->Set(silo->root);
 
-        dirTreeView->header()->setResizeMode(QHeaderView::Interactive);
-        dirView->header()->setResizeMode(QHeaderView::Interactive);
+        dirTreeView->header()->setSectionResizeMode(QHeaderView::Interactive);
+        dirView->header()->setSectionResizeMode(QHeaderView::Interactive);
     }
 }
 
