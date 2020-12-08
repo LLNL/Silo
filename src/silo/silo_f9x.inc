@@ -30,6 +30,7 @@
       integer, external :: dbcalcfl
       integer, external :: dbclose
       integer, external :: dbcreate
+      integer, external :: dberrlvl
       integer, external :: dberrno
       integer, external :: dbfgetca
       integer, external :: dbfreemrgtree
