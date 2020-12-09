@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#ifdef HAVE_MPI
 #include <mpi.h>
+#endif
 #include <hdf5.h>
 #include <silo.h>
 
@@ -13,7 +15,9 @@ DBfile *DBOpenByBcast(char const *filename, MPI_Comm comm, int rank_of_root)
     int fic_vfd;
     int fic_optset;
 
+#ifdef HAVE_MPI
     MPI_Comm_rank(comm, &rank);
+#endif
 
     if (rank == rank_of_root)
     {
@@ -29,20 +33,24 @@ DBfile *DBOpenByBcast(char const *filename, MPI_Comm comm, int rank_of_root)
         read_len = H5Fget_file_image(fid, file_buf, (size_t)file_len);
         H5Fclose(fid);
 
+#ifdef HAVE_MPI
         /* bcast the size */
         MPI_Bcast(&file_len, 1, MPI_INT, rank_of_root, comm);
 
         /* bcast the buffer */
         MPI_Bcast(file_buf, file_len, MPI_BYTE, rank_of_root, comm);
+#endif
     }
     else
     {
+#ifdef HAVE_MPI
         /* recv the size */
         MPI_Bcast(&file_len, 1, MPI_INT, rank_of_root, comm);
 
         /* recv the buffer */
         file_buf = (void *) malloc(file_len);
         MPI_Bcast(file_buf, file_len, MPI_BYTE, rank_of_root, comm);
+#endif
     }
 
     /* Set up a file options set to use this buffer as the file */

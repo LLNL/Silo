@@ -168,8 +168,9 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	namescheme$(EXEEXT) efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) \
 	ioperf$(EXEEXT) readstuff$(EXEEXT) testfs$(EXEEXT) \
 	empty$(EXEEXT) majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
-	test_mat_compression$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4) \
-	$(am__EXEEXT_6) $(am__EXEEXT_8)
+	test_mat_compression$(EXEEXT) bcastopen$(EXEEXT) \
+	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_6) \
+	$(am__EXEEXT_8)
 @HDF5_DRV_NEEDED_TRUE@am__append_4 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_5 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_6 = $(HDF5CKLTLIBS)
@@ -299,6 +300,13 @@ am__arrayf90_SOURCES_DIST = arrayf90.f90
 arrayf90_OBJECTS = $(am_arrayf90_OBJECTS)
 @FORTRAN_NEEDED_TRUE@arrayf90_DEPENDENCIES = $(LDADD) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
+am_bcastopen_OBJECTS = bcastopen.$(OBJEXT) bcastopen_test.$(OBJEXT)
+bcastopen_OBJECTS = $(am_bcastopen_OBJECTS)
+bcastopen_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@bcastopen_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@bcastopen_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__compression_SOURCES_DIST = compression.c
 @HDF5_DRV_NEEDED_TRUE@am_compression_OBJECTS = compression.$(OBJEXT)
 compression_OBJECTS = $(am_compression_OBJECTS)
@@ -795,7 +803,8 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_arbpoly2d_SOURCES) arbpoly2d.c \
 	$(nodist_EXTRA_array_SOURCES) array.c $(arrayf77_SOURCES) \
 	$(nodist_EXTRA_arrayf77_SOURCES) $(arrayf90_SOURCES) \
-	$(nodist_EXTRA_arrayf90_SOURCES) $(compression_SOURCES) \
+	$(nodist_EXTRA_arrayf90_SOURCES) $(bcastopen_SOURCES) \
+	$(nodist_EXTRA_bcastopen_SOURCES) $(compression_SOURCES) \
 	$(nodist_EXTRA_compression_SOURCES) \
 	$(nodist_EXTRA_cpz1plt_SOURCES) cpz1plt.c \
 	$(nodist_EXTRA_csg_SOURCES) csg.c $(csgmesh_SOURCES) \
@@ -861,8 +870,8 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	ioperf_stdio.c $(rocket_silo_la_SOURCES) TestReadMask.c \
 	alltypes.c arbpoly.c arbpoly2d.c array.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__arrayf90_SOURCES_DIST) \
-	$(am__compression_SOURCES_DIST) cpz1plt.c csg.c \
-	$(am__csgmesh_SOURCES_DIST) $(am__curvef77_SOURCES_DIST) \
+	$(bcastopen_SOURCES) $(am__compression_SOURCES_DIST) cpz1plt.c \
+	csg.c $(am__csgmesh_SOURCES_DIST) $(am__curvef77_SOURCES_DIST) \
 	$(dir_SOURCES) efcentering.c empty.c extface.c \
 	$(am__grab_SOURCES_DIST) group_test.c ioperf.c json.c \
 	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
@@ -1031,6 +1040,7 @@ QT_LIBS = @QT_LIBS@
 QT_LRELEASE = @QT_LRELEASE@
 QT_LUPDATE = @QT_LUPDATE@
 QT_MOC = @QT_MOC@
+QT_RCC = @QT_RCC@
 QT_UIC = @QT_UIC@
 RANLIB = @RANLIB@
 READLINE_LIBS = @READLINE_LIBS@
@@ -1196,9 +1206,9 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
 	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
-	mat3d_3across merge_block test_mat_compression empty majorder \
-	realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS) $(am__append_4) \
-	$(am__append_7)
+	mat3d_3across merge_block test_mat_compression bcastopen empty \
+	majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS) \
+	$(am__append_4) $(am__append_7)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 bcastopen_SOURCES = bcastopen.c bcastopen_test.c
@@ -1301,6 +1311,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_json_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_test_mat_compression_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_bcastopen_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -1428,6 +1439,10 @@ arrayf77$(EXEEXT): $(arrayf77_OBJECTS) $(arrayf77_DEPENDENCIES) $(EXTRA_arrayf77
 arrayf90$(EXEEXT): $(arrayf90_OBJECTS) $(arrayf90_DEPENDENCIES) $(EXTRA_arrayf90_DEPENDENCIES) 
 	@rm -f arrayf90$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(arrayf90_OBJECTS) $(arrayf90_LDADD) $(LIBS)
+
+bcastopen$(EXEEXT): $(bcastopen_OBJECTS) $(bcastopen_DEPENDENCIES) $(EXTRA_bcastopen_DEPENDENCIES) 
+	@rm -f bcastopen$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(bcastopen_OBJECTS) $(bcastopen_LDADD) $(LIBS)
 
 compression$(EXEEXT): $(compression_OBJECTS) $(compression_DEPENDENCIES) $(EXTRA_compression_DEPENDENCIES) 
 	@rm -f compression$(EXEEXT)
@@ -1684,6 +1699,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly2d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bcastopen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bcastopen_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpz1plt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csg.Po@am__quote@

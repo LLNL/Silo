@@ -694,6 +694,7 @@ PDBP_DRV
 LIBM
 QT_LUPDATE
 QT_LRELEASE
+QT_RCC
 QT_MOC
 QT_UIC
 QT_LIBS
@@ -883,11 +884,6 @@ enable_fpzip
 enable_zfp
 enable_json
 with_x
-with_Qt_dir
-with_Qt_include_dir
-with_Qt_bin_dir
-with_Qt_lib_dir
-with_Qt_lib
 with_szlib
 with_hdf5
 with_pdb_proper
@@ -1579,16 +1575,6 @@ Optional Packages:
   --with-readline         enable detection of GNU readline [default=yes]
   --with-zlib=INC,DIR     Use the GNU zlib compression [default=yes]
   --with-x                use the X Window System
-  --with-Qt-dir=DIR       DIR is equal to $QTDIR if you have followed the
-                          installation instructions of Trolltech. Header files
-                          are in DIR/include, binary utilities are in DIR/bin.
-                          The library is in DIR/lib, unless --with-Qt-lib-dir
-                          is also set.
-  --with-Qt-include-dir=DIR
-                          Qt header files are in DIR
-  --with-Qt-bin-dir=DIR   Qt utilities such as moc and uic are in DIR
-  --with-Qt-lib-dir=DIR   The Qt library is in DIR
-  --with-Qt-lib=LIB       Use -lLIB to link with the Qt library
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
                           [default=no]
   --with-hdf5=INC,LIB     Location of HDF5 header and library
@@ -25738,415 +25724,69 @@ fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Qt" >&5
 $as_echo_n "checking for Qt... " >&6; }
-
-
-# Check whether --with-Qt-dir was given.
-if test "${with_Qt_dir+set}" = set; then :
-  withval=$with_Qt_dir;
-fi
-
-
-# Check whether --with-Qt-include-dir was given.
-if test "${with_Qt_include_dir+set}" = set; then :
-  withval=$with_Qt_include_dir;
-fi
-
-
-# Check whether --with-Qt-bin-dir was given.
-if test "${with_Qt_bin_dir+set}" = set; then :
-  withval=$with_Qt_bin_dir;
-fi
-
-
-# Check whether --with-Qt-lib-dir was given.
-if test "${with_Qt_lib_dir+set}" = set; then :
-  withval=$with_Qt_lib_dir;
-fi
-
-
-# Check whether --with-Qt-lib was given.
-if test "${with_Qt_lib+set}" = set; then :
-  withval=$with_Qt_lib;
-fi
-
-  if test x"$with_Qt_dir" = x"no" ||
-     test x"$with_Qt_include-dir" = x"no" ||
-     test x"$with_Qt_bin_dir" = x"no" ||
-     test x"$with_Qt_lib_dir" = x"no" ||
-     test x"$with_Qt_lib" = x"no"; then
-    # user disabled Qt. Leave cache alone.
-    have_qt="User disabled Qt."
-  else
-    # "yes" is a bogus option
-    if test x"$with_Qt_dir" = xyes; then
-      with_Qt_dir=
-    fi
-    if test x"$with_Qt_include_dir" = xyes; then
-      with_Qt_include_dir=
-    fi
-    if test x"$with_Qt_bin_dir" = xyes; then
-      with_Qt_bin_dir=
-    fi
-    if test x"$with_Qt_lib_dir" = xyes; then
-      with_Qt_lib_dir=
-    fi
-    if test x"$with_Qt_lib" = xyes; then
-      with_Qt_lib=
-    fi
-    # No Qt unless we discover otherwise
-    have_qt=no
-    # Check whether we are requested to link with a specific version
-    if test x"$with_Qt_lib" != x; then
-      ax_qt_lib="$with_Qt_lib"
-    fi
-    # Check whether we were supplied with an answer already
-    if test x"$with_Qt_dir" != x; then
-      have_qt=yes
-      ax_qt_dir="$with_Qt_dir"
-      ax_qt_include_dir="$with_Qt_dir/include"
-      ax_qt_bin_dir="$with_Qt_dir/bin"
-      ax_qt_lib_dir="$with_Qt_dir/lib"
-      # Only search for the lib if the user did not define one already
-      if test x"$ax_qt_lib" = x; then
-        ax_qt_lib="`ls $ax_qt_lib_dir/libQt* | sed -n 1p |
-                     sed s@$ax_qt_lib_dir/lib@@ | sed s@[.].*@@`"
-      fi
-      ax_qt_LIBS="-L$ax_qt_lib_dir -l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-    else
-      # Use cached value or do search, starting with suggestions from
-      # the command line
-      if ${ax_cv_have_qt+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-        # We are not given a solution and there is no cached value.
-        ax_qt_dir=NO
-        ax_qt_include_dir=NO
-        ax_qt_lib_dir=NO
-        if test x"$ax_qt_lib" = x; then
-          ax_qt_lib=NO
-        fi
-
-  ## Binary utilities ##
-  if test x"$with_Qt_bin_dir" != x; then
-    ax_qt_bin_dir=$with_Qt_bin_dir
-  fi
-  ## Look for header files ##
-  if test x"$with_Qt_include_dir" != x; then
-    ax_qt_include_dir="$with_Qt_include_dir"
-  else
-    # The following header file is expected to define QT_VERSION.
-    qt_direct_test_header=qglobal.h
-    # Look for the header file in a standard set of common directories.
-    ax_include_path_list="
-      /usr/include
-      `ls -dr ${QTDIR}/include 2>/dev/null`
-      `ls -dr /usr/include/qt* 2>/dev/null`
-      `ls -dr /usr/lib/qt*/include 2>/dev/null`
-      `ls -dr /usr/local/qt*/include 2>/dev/null`
-      `ls -dr /opt/qt*/include 2>/dev/null`
-      `ls -dr /Developer/qt*/include 2>/dev/null`
-    "
-    for ax_dir in $ax_include_path_list; do
-      if test -r "$ax_dir/$qt_direct_test_header"; then
-        ax_dirs="$ax_dirs $ax_dir"
-      fi
-    done
-    # Now look for the newest in this list
-    ax_prev_ver=0
-    for ax_dir in $ax_dirs; do
-      ax_this_ver=`egrep -w '#define QT_VERSION' $ax_dir/$qt_direct_test_header | sed s/'#define QT_VERSION'//`
-      if expr $ax_this_ver '>' $ax_prev_ver > /dev/null; then
-        ax_qt_include_dir=$ax_dir
-        ax_prev_ver=$ax_this_ver
-      fi
-    done
-  fi
-  # Are these headers located in a traditional Trolltech installation?
-  # That would be $ax_qt_include_dir stripped from its last element:
-  ax_possible_qt_dir=`dirname $ax_qt_include_dir`
-  if (test -x $ax_possible_qt_dir/bin/moc) &&
-     ((ls $ax_possible_qt_dir/lib/libQt* > /dev/null 2>/dev/null) ||
-      (ls $ax_possible_qt_dir/lib64/libQt* > /dev/null 2>/dev/null)); then
-    # Then the rest is a piece of cake
-    ax_qt_dir=$ax_possible_qt_dir
-    ax_qt_bin_dir="$ax_qt_dir/bin"
-    if test x"$with_Qt_lib_dir" != x; then
-      ax_qt_lib_dir="$with_Qt_lib_dir"
-    else
-      if (test -d $ax_qt_dir/lib64); then
-	ax_qt_lib_dir="$ax_qt_dir/lib64"
-      else
-	ax_qt_lib_dir="$ax_qt_dir/lib"
-      fi
-    fi
-    # Only look for lib if the user did not supply it already
-    if test x"$ax_qt_lib" = xNO; then
-      ax_qt_lib="`ls $ax_qt_lib_dir/libQt* | sed -n 1p |
-                   sed s@$ax_qt_lib_dir/lib@@ | sed s@[.].*@@`"
-    fi
-    ax_qt_LIBS="-L$ax_qt_lib_dir -l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-  else
-    # There is no valid definition for $QTDIR as Trolltech likes to see it
-    ax_qt_dir=
-    ## Look for Qt library ##
-    if test x"$with_Qt_lib_dir" != x; then
-      ax_qt_lib_dir="$with_Qt_lib_dir"
-      # Only look for lib if the user did not supply it already
-      if test x"$ax_qt_lib" = xNO; then
-        ax_qt_lib="`ls $ax_qt_lib_dir/libQt* | sed -n 1p |
-                     sed s@$ax_qt_lib_dir/lib@@ | sed s@[.].*@@`"
-      fi
-      ax_qt_LIBS="-L$ax_qt_lib_dir -l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-    else
-      # Normally, when there is no traditional Trolltech installation,
-      # the library is installed in a place where the linker finds it
-      # automatically.
-      # If the user did not define the library name, try with qt
-      if test x"$ax_qt_lib" = xNO; then
-        ax_qt_lib=qt
-      fi
-      qt_direct_test_header=qapplication.h
-      qt_direct_test_main="
-        int argc;
-        char ** argv;
-        QApplication app(argc,argv);
-      "
-      # See if we find the library without any special options.
-      # Don't add top $LIBS permanently yet
-      ax_save_LIBS="$LIBS"
-      LIBS="-l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-      ax_qt_LIBS="$LIBS"
-      ax_save_CXXFLAGS="$CXXFLAGS"
-      CXXFLAGS="-I$ax_qt_include_dir -I$ax_qt_include_dir/Qt -I$ax_qt_include_dir/QtCore -I$ax_qt_include_dir/QtGui"
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <$qt_direct_test_header>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-$qt_direct_test_main
-  ;
-  return 0;
+  # If we have Qt5 or later in the path, we're golden
+  ver=`qmake --version | grep -o "Qt version ."`
+  if test "$ver" ">" "Qt version 4"; then
+    have_qt=yes
+    # This pro file dumps qmake's variables, but it only works on Qt 5 or later
+    am_have_qt_dir=`mktemp -d`
+    am_have_qt_pro="$am_have_qt_dir/test.pro"
+    am_have_qt_makefile="$am_have_qt_dir/Makefile"
+    # http://qt-project.org/doc/qt-5/qmake-variable-reference.html#qt
+    cat > $am_have_qt_pro << EOF
+win32 {
+    CONFIG -= debug_and_release
+    CONFIG += release
 }
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+qtHaveModule(axcontainer):       QT += axcontainer
+qtHaveModule(axserver):          QT += axserver
+qtHaveModule(concurrent):        QT += concurrent
+qtHaveModule(core):              QT += core
+qtHaveModule(dbus):              QT += dbus
+qtHaveModule(declarative):       QT += declarative
+qtHaveModule(designer):          QT += designer
+qtHaveModule(gui):               QT += gui
+qtHaveModule(help):              QT += help
+qtHaveModule(multimedia):        QT += multimedia
+qtHaveModule(multimediawidgets): QT += multimediawidgets
+qtHaveModule(network):           QT += network
+qtHaveModule(opengl):            QT += opengl
+qtHaveModule(printsupport):      QT += printsupport
+qtHaveModule(qml):               QT += qml
+qtHaveModule(qmltest):           QT += qmltest
+qtHaveModule(x11extras):         QT += x11extras
+qtHaveModule(script):            QT += script
+qtHaveModule(scripttools):       QT += scripttools
+qtHaveModule(sensors):           QT += sensors
+qtHaveModule(serialport):        QT += serialport
+qtHaveModule(sql):               QT += sql
+qtHaveModule(svg):               QT += svg
+qtHaveModule(testlib):           QT += testlib
+qtHaveModule(uitools):           QT += uitools
+qtHaveModule(webkit):            QT += webkit
+qtHaveModule(webkitwidgets):     QT += webkitwidgets
+qtHaveModule(xml):               QT += xml
+qtHaveModule(xmlpatterns):       QT += xmlpatterns
+percent.target = %
+percent.commands = @echo -n "\$(\$(@))\ "
+QMAKE_EXTRA_TARGETS += percent
+EOF
+    qmake $am_have_qt_pro -o $am_have_qt_makefile
+    QT_CXXFLAGS=`cd $am_have_qt_dir; make -s -f $am_have_qt_makefile CXXFLAGS INCPATH | tr -d '"'`
+    QT_LIBS=`cd $am_have_qt_dir; make -s -f $am_have_qt_makefile LIBS`
+    rm $am_have_qt_pro $am_have_qt_makefile
+    rmdir $am_have_qt_dir
 
-        # Success.
-        # We can link with no special library directory.
-        ax_qt_lib_dir=
+    # Look for specific tools in $PATH
+    QT_MOC=`which moc`
+    QT_UIC=`which uic`
+    QT_RCC=`which rcc`
+    QT_LRELEASE=`which lrelease`
+    QT_LUPDATE=`which lupdate`
 
-else
+    # Get Qt version from qmake
+    QT_DIR=`qmake --version | grep -o -E /.+`
 
-        # That did not work. Try the multi-threaded version
-        echo "Non-critical error, please neglect the above." >&5
-        ax_qt_lib=qt-mt
-        LIBS="-l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <$qt_direct_test_header>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-$qt_direct_test_main
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-          # Success.
-          # We can link with no special library directory.
-          ax_qt_lib_dir=
-
-else
-
-          # That did not work. Try the OpenGL version
-          echo "Non-critical error, please neglect the above." >&5
-          ax_qt_lib=qt-gl
-          LIBS="-l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <$qt_direct_test_header>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-$qt_direct_test_main
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-            # Success.
-            # We can link with no special library directory.
-            ax_qt_lib_dir=
-
-else
-
-            # That did not work. Maybe a library version I don't know about?
-            echo "Non-critical error, please neglect the above." >&5
-            # Look for some Qt lib in a standard set of common directories.
-            ax_dir_list="
-              `echo $ax_qt_includes | sed ss/includess`
-              /lib
-	      /usr/lib64
-              /usr/lib
-	      /usr/local/lib64
-              /usr/local/lib
-	      /opt/lib64
-              /opt/lib
-              `ls -dr /usr/lib64/qt* 2>/dev/null`
-              `ls -dr /usr/lib64/qt*/lib64 2>/dev/null`
-              `ls -dr /usr/lib/qt* 2>/dev/null`
-              `ls -dr /usr/local/qt* 2>/dev/null`
-              `ls -dr /opt/qt* 2>/dev/null`
-            "
-            for ax_dir in $ax_dir_list; do
-              if ls $ax_dir/libQt* >/dev/null 2>/dev/null; then
-                # Gamble that it's the first one...
-                ax_qt_lib="`ls $ax_dir/libQt* | sed -n 1p |
-                            sed s@$ax_dir/lib@@ | sed s/[.].*//`"
-                ax_qt_lib_dir="$ax_dir"
-                break
-              fi
-            done
-            # Try with that one
-            LIBS="-l$ax_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
-            cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <$qt_direct_test_header>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-$qt_direct_test_main
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-              # Success.
-              # We can link with no special library directory.
-              ax_qt_lib_dir=
-
-else
-
-             : # Leave ax_qt_lib_dir defined
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-      if test x"$ax_qt_lib_dir" != x; then
-        ax_qt_LIBS="-L$ax_qt_lib_dir $LIBS"
-      else
-        ax_qt_LIBS="$LIBS"
-      fi
-      LIBS="$ax_save_LIBS"
-      CXXFLAGS="$ax_save_CXXFLAGS"
-    fi   fi
-        if test "$ax_qt_dir" = NO ||
-           test "$ax_qt_include_dir" = NO ||
-           test "$ax_qt_lib_dir" = NO ||
-           test "$ax_qt_lib" = NO; then
-          # Problem with finding complete Qt.  Cache the known absence of Qt.
-          ax_cv_have_qt="have_qt=no"
-        else
-          # Record where we found Qt for the cache.
-          ax_cv_have_qt="have_qt=yes                  \
-                       ax_qt_dir=$ax_qt_dir          \
-               ax_qt_include_dir=$ax_qt_include_dir  \
-                   ax_qt_bin_dir=$ax_qt_bin_dir      \
-                      ax_qt_LIBS=\"$ax_qt_LIBS\""
-        fi
-
-fi
-      eval "$ax_cv_have_qt"
-    fi # all $ax_qt_* are set
-  fi   # $have_qt reflects the system status
-  if test x"$have_qt" = xyes; then
-    QT_CXXFLAGS="-I$ax_qt_include_dir -I$ax_qt_include_dir/Qt -I$ax_qt_include_dir/QtCore -I$ax_qt_include_dir/QtGui"
-    if test x"$ax_qt_lib" = xqt-mt; then
-        QT_CXXFLAGS="$QT_CXXFLAGS -DQT_THREAD_SUPPORT"
-    fi
-    QT_DIR="$ax_qt_dir"
-    QT_LIBS="$ax_qt_LIBS"
-    # If ax_qt_dir is defined, utilities are expected to be in the
-    # bin subdirectory
-    if test x"$ax_qt_dir" != x; then
-        if test -x "$ax_qt_dir/bin/uic"; then
-          QT_UIC="$ax_qt_dir/bin/uic"
-        else
-          # Old versions of Qt don't have uic
-          QT_UIC=
-        fi
-      QT_MOC="$ax_qt_dir/bin/moc"
-      QT_LRELEASE="$ax_qt_dir/bin/lrelease"
-      QT_LUPDATE="$ax_qt_dir/bin/lupdate"
-    else
-      # Or maybe we are told where to look for the utilities
-      if test x"$ax_qt_bin_dir" != x; then
-        if test -x "$ax_qt_bin_dir/uic"; then
-          QT_UIC="$ax_qt_bin_dir/uic"
-        else
-          # Old versions of Qt don't have uic
-          QT_UIC=
-        fi
-        QT_MOC="$ax_qt_bin_dir/moc"
-        QT_LRELEASE="$ax_qt_bin_dir/lrelease"
-        QT_LUPDATE="$ax_qt_bin_dir/lupdate"
-      else
-      # Last possibility is that they are in $PATH
-        QT_UIC="`which uic`"
-        QT_MOC="`which moc`"
-        QT_LRELEASE="`which lrelease`"
-        QT_LUPDATE="`which lupdate`"
-      fi
-    fi
     # All variables are defined, report the result
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_qt:
     QT_CXXFLAGS=$QT_CXXFLAGS
@@ -26154,6 +25794,7 @@ fi
     QT_LIBS=$QT_LIBS
     QT_UIC=$QT_UIC
     QT_MOC=$QT_MOC
+    QT_RCC=$QT_RCC
     QT_LRELEASE=$QT_LRELEASE
     QT_LUPDATE=$QT_LUPDATE" >&5
 $as_echo "$have_qt:
@@ -26162,20 +25803,24 @@ $as_echo "$have_qt:
     QT_LIBS=$QT_LIBS
     QT_UIC=$QT_UIC
     QT_MOC=$QT_MOC
+    QT_RCC=$QT_RCC
     QT_LRELEASE=$QT_LRELEASE
     QT_LUPDATE=$QT_LUPDATE" >&6; }
   else
     # Qt was not found
+    have_qt=no
     QT_CXXFLAGS=
     QT_DIR=
     QT_LIBS=
     QT_UIC=
     QT_MOC=
+    QT_RCC=
     QT_LRELEASE=
     QT_LUPDATE=
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_qt" >&5
 $as_echo "$have_qt" >&6; }
   fi
+
 
 
 
@@ -26193,7 +25838,7 @@ $as_echo_n "checking correct functioning of Qt installation... " >&6; }
 else
 
       cat > ax_qt_test.h << EOF
-#include <QObject>
+#include <qobject.h>
 class Test : public QObject
 {
 Q_OBJECT
@@ -26209,7 +25854,7 @@ EOF
 
       cat > ax_qt_main.$ac_ext << EOF
 #include "ax_qt_test.h"
-#include <QApplication>
+#include <qapplication.h>
 int main( int argc, char **argv )
 {
   QApplication app( argc, argv );
@@ -26219,7 +25864,7 @@ int main( int argc, char **argv )
 EOF
 
       ax_cv_qt_test_result="failure"
-      ax_try_1="$QT_MOC ax_qt_test.h -o moc_ax_qt_test.$ac_ext"
+      ax_try_1="$QT_MOC ax_qt_test.h -o moc_ax_qt_test.$ac_ext >/dev/null 2>/dev/null"
       { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ax_try_1\""; } >&5
   (eval $ax_try_1) 2>&5
   ac_status=$?
@@ -26230,7 +25875,7 @@ EOF
         echo "configure: could not run $QT_MOC on:" >&5
         cat ax_qt_test.h >&5
       else
-        ax_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_ax_qt_test.o moc_ax_qt_test.$ac_ext"
+        ax_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_ax_qt_test.o moc_ax_qt_test.$ac_ext >/dev/null 2>/dev/null"
         { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ax_try_2\""; } >&5
   (eval $ax_try_2) 2>&5
   ac_status=$?
@@ -26241,7 +25886,7 @@ EOF
           echo "configure: could not compile:" >&5
           cat moc_ax_qt_test.$ac_ext >&5
         else
-          ax_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o ax_qt_main.o ax_qt_main.$ac_ext"
+          ax_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o ax_qt_main.o ax_qt_main.$ac_ext >/dev/null 2>/dev/null"
           { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ax_try_3\""; } >&5
   (eval $ax_try_3) 2>&5
   ac_status=$?
@@ -26252,7 +25897,7 @@ EOF
             echo "configure: could not compile:" >&5
             cat ax_qt_main.$ac_ext >&5
           else
-            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS"
+            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS >/dev/null 2>/dev/null"
             { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ax_try_4\""; } >&5
   (eval $ax_try_4) 2>&5
   ac_status=$?
