@@ -88,7 +88,7 @@ const H5Z_class2_t H5Z_ZFP[1] = {{
     H5Z_FILTER_ZFP,         /* Filter id number             */
     1,                      /* encoder_present flag         */
     1,                      /* decoder_present flag         */
-    "H5Z-ZFP"               /* Filter name for debugging    */
+    "SILO-H5Z-ZFP"          /* Filter name for debugging    */
     "-" H5Z_FILTER_ZFP_VERSION_STR
     " (ZFP-" ZFP_VERSION_STR ")",
     H5Z_zfp_can_apply,      /* The "can apply" callback     */
