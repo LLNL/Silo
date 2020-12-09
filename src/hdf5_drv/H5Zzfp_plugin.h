@@ -4,14 +4,15 @@
 /* Filter ID number registered with The HDF Group */
 #define H5Z_FILTER_ZFP 32013
 
-#define H5Z_FILTER_ZFP_VERSION_MAJOR 0
-#define H5Z_FILTER_ZFP_VERSION_MINOR 6
-#define H5Z_FILTER_ZFP_VERSION_PATCH 0
+#define H5Z_FILTER_ZFP_VERSION_MAJOR 1
+#define H5Z_FILTER_ZFP_VERSION_MINOR 0
+#define H5Z_FILTER_ZFP_VERSION_PATCH 1
 
 #define H5Z_ZFP_MODE_RATE      1
 #define H5Z_ZFP_MODE_PRECISION 2
 #define H5Z_ZFP_MODE_ACCURACY  3
 #define H5Z_ZFP_MODE_EXPERT    4
+#define H5Z_ZFP_MODE_REVERSIBLE 5
 
 #define H5Z_ZFP_CD_NELMTS_MEM ((size_t) 6) /* used in public API to filter */
 #define H5Z_ZFP_CD_NELMTS_MAX ((size_t) 6) /* max, over all versions, used in dataset header */
@@ -72,5 +73,12 @@ do {                                                    \
         q = MiE; *q = (int) CD[5];                      \
     }                                                   \
 } while(0)
+
+#define H5Pset_zfp_reversible_cdata(N, CD)       \
+do { if (N>=1) {                                 \
+CD[0]=H5Z_ZFP_MODE_REVERSIBLE; N=1;}} while(0)
+
+#define H5Pget_zfp_reversible_cdata(N, CD) \
+((int)(((N>=1)&&(CD[0]==H5Z_ZFP_MODE_REVERSIBLE))?1:-1))
 
 #endif

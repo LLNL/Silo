@@ -49,7 +49,12 @@ reflect those  of the United  States Government or  Lawrence Livermore
 National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
+
+#ifdef PDB_LITE
 #include <lite_pdb.h>
+#else
+#include <pdb.h>
+#endif
 
 int main()
 {

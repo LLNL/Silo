@@ -265,8 +265,10 @@ static int SaveInternalString(DBnamescheme const *ns, const char *sval)
 static char * retstrbuf[DB_MAX_RETSTRS];
 static char * SaveReturnedString(char const * retstr)
 {
-    static unsigned int n = 0;
-    int modn = n++ % DB_MAX_RETSTRS;
+    static size_t n = 0;
+    size_t modn;
+
+    /* Hack to cleanup when really needed */
     if (retstr == 0)
     {
         for (n = 0; n < DB_MAX_RETSTRS; n++)
@@ -274,6 +276,9 @@ static char * SaveReturnedString(char const * retstr)
         n = 0;
         return 0;
     }
+
+    modn = n % DB_MAX_RETSTRS;
+    n++;
     FREE(retstrbuf[modn]);
     retstrbuf[modn] = STRDUP(retstr);
     return retstrbuf[modn];

@@ -197,8 +197,6 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
 #endif
 #ifdef HAVE_ZFP
 #include "H5Zzfp.h"
-#define USE_C_STRUCTSPACE
-#include "zfp.h"
 #endif
 
 /* Defining these to check overhead of PROTECT */
@@ -2166,7 +2164,7 @@ db_hdf5_init(void)
 
 #ifdef HAVE_ZFP /* { */
     H5Z_zfp_initialize();
-    zfp.zfp_init();
+    zfp_init_zfp();
 #endif /* HAVE_ZFP } */
 
     /* Define compound data types */
@@ -3629,6 +3627,11 @@ db_hdf5_set_compression(int flags)
              nvals = sscanf(chararray, "%u,%u,%u,%d", &minbits, &maxbits, &maxprec, &minexp);
              if (nvals == 4 && errno == 0)
                  H5Pset_zfp_expert_cdata(minbits, maxbits, maxprec, minexp, cd_nelmts, cd_values);
+          }
+          else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+             "REVERSIBLE")) != (char *)NULL)
+          {
+              H5Pset_zfp_reversible_cdata(cd_nelmts, cd_values);
           }
           else
           {
@@ -12053,23 +12056,10 @@ db_hdf5_GetZonelist(DBfile *_dbfile, char const *name)
         /* Read the raw data */
         if (SILO_Globals.dataReadMask & DBZonelistInfo)
         {
-printf("name = \"%s\"\n", name);
-db_hdf5_resolvename(_dbfile, name, m.shapecnt);
-printf("name = \"%s\"\n", name);
-db_hdf5_resolvename(_dbfile, name, m.shapesize);
-printf("name = \"%s\"\n", name);
-db_hdf5_resolvename(_dbfile, name, m.shapetype);
-printf("name = \"%s\"\n", name);
-db_hdf5_resolvename(_dbfile, name, m.nodelist);
-printf("name = \"%s\"\n", name);
             zl->shapecnt = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapecnt), 1);
-printf("name = \"%s\"\n", name);
             zl->shapesize = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapesize), 1);
-printf("name = \"%s\"\n", name);
             zl->shapetype = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.shapetype), 1);
-printf("name = \"%s\"\n", name);
             zl->nodelist = (int *)db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.nodelist), 1);
-printf("name = \"%s\"\n", name);
         }
         if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo)
             zl->gzoneno = db_hdf5_comprd(dbfile, db_hdf5_resolvename(_dbfile, name, m.gzoneno), 1);

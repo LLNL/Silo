@@ -252,6 +252,7 @@ AT_BANNER(JSON (experimental))
 AT_SETUP(json)
 AT_KEYWORDS(json)
 AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || onehex $STARGS,,ignore) # don't valgrind these intermediate parts
+AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || multi_test $STARGS,,ignore) # don't valgrind these intermediate parts
 AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS,ignore,ignore)
 AT_CLEANUP
 

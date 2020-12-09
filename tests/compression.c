@@ -65,6 +65,7 @@ be used for advertising or product endorsement purposes.
 #endif
 #include <stdlib.h>
 
+#define GNU_AUTOTEST_SKIP_CODE 77
 #define ONE_MEG 1048576
 #define ITERATE 50
 
@@ -218,6 +219,8 @@ main(int argc, char *argv[])
 
             if (DBWrite(dbfile, tmpname, fval, fdims, ndims, DB_FLOAT) < 0)
             {
+                if (DBErrno() == E_COMPRESSION)
+                    return GNU_AUTOTEST_SKIP_CODE; /* compression requested not supported in this build */
                 nerrors++;
                 break;
             }
@@ -242,6 +245,8 @@ main(int argc, char *argv[])
 
             if (DBWrite(dbfile, tmpname, dval, ddims, ndims, DB_DOUBLE) < 0)
             {
+                if (DBErrno() == E_COMPRESSION)
+                    return GNU_AUTOTEST_SKIP_CODE; /* compression requested not supported in this build */
                 nerrors++;
                 break;
             }
