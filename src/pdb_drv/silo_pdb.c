@@ -6808,7 +6808,7 @@ db_pdb_ReadMatVals(DBfile *_dbfile, char const *vname, int objtype,
     /* Do partial I/O on matlist */
     if (db_pdb_ReadDenseArrayVals(_dbfile, vname, objtype, 1,
             (char const * const *) &dsnames[0],
-            nvals, ndims, indices, &matlist_result, 0, nitems) < 0)
+            nvals, ndims, indices, (void**) &matlist_result, 0, nitems) < 0)
         return db_perror(dsnames[0], E_CALLFAIL, me);
 
     if (!*result)
