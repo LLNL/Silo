@@ -25738,35 +25738,13 @@ win32 {
     CONFIG -= debug_and_release
     CONFIG += release
 }
-qtHaveModule(axcontainer):       QT += axcontainer
-qtHaveModule(axserver):          QT += axserver
-qtHaveModule(concurrent):        QT += concurrent
 qtHaveModule(core):              QT += core
-qtHaveModule(dbus):              QT += dbus
-qtHaveModule(declarative):       QT += declarative
-qtHaveModule(designer):          QT += designer
 qtHaveModule(gui):               QT += gui
 qtHaveModule(help):              QT += help
-qtHaveModule(multimedia):        QT += multimedia
-qtHaveModule(multimediawidgets): QT += multimediawidgets
-qtHaveModule(network):           QT += network
 qtHaveModule(opengl):            QT += opengl
 qtHaveModule(printsupport):      QT += printsupport
-qtHaveModule(qml):               QT += qml
-qtHaveModule(qmltest):           QT += qmltest
 qtHaveModule(x11extras):         QT += x11extras
-qtHaveModule(script):            QT += script
-qtHaveModule(scripttools):       QT += scripttools
-qtHaveModule(sensors):           QT += sensors
-qtHaveModule(serialport):        QT += serialport
-qtHaveModule(sql):               QT += sql
-qtHaveModule(svg):               QT += svg
 qtHaveModule(testlib):           QT += testlib
-qtHaveModule(uitools):           QT += uitools
-qtHaveModule(webkit):            QT += webkit
-qtHaveModule(webkitwidgets):     QT += webkitwidgets
-qtHaveModule(xml):               QT += xml
-qtHaveModule(xmlpatterns):       QT += xmlpatterns
 percent.target = %
 percent.commands = @echo -n "\$(\$(@))\ "
 QMAKE_EXTRA_TARGETS += percent
@@ -25897,7 +25875,7 @@ EOF
             echo "configure: could not compile:" >&5
             cat ax_qt_main.$ac_ext >&5
           else
-            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS >/dev/null 2>/dev/null"
+            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS >make.out 2>make.out"
             { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ax_try_4\""; } >&5
   (eval $ax_try_4) 2>&5
   ac_status=$?
