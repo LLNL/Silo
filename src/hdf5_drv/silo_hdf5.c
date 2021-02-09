@@ -1,5 +1,4 @@
 /*
-                            hsize_t _size = 3;
 Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
@@ -3723,16 +3722,25 @@ load_toc(hid_t grp, char const *name, H5L_info_t const *dummy, void *_toc)
 {
     DBtoc               *toc = (DBtoc*)_toc;
     H5G_stat_t          sb;
+    H5L_info_t          lb;
     DBObjectType        objtype = DB_INVALID_OBJECT;
     int                 *nvals=NULL, _objtype, islink=0;
     char                ***names=NULL;
     hid_t               obj=-1, attr=-1;
 
     if (H5Gget_objinfo(grp, name, FALSE, &sb)<0) return -1;
+    if (H5Lget_info(grp, name, &lb, H5P_DEFAULT)<0) return -1;
     if (sb.type == H5G_LINK)
     {
-        if (H5Gget_objinfo(grp, name, TRUE, &sb)<0) return -1;
         islink = 1;
+        if (H5Gget_objinfo(grp, name, TRUE, &sb)<0) return -1;
+    }
+    else if (lb.type == H5L_TYPE_EXTERNAL)
+    {
+        /* external links are presently constrained to work
+           only for group tagets */
+        islink = 1;
+        sb.type = H5G_GROUP;
     }
     switch (sb.type) {
     case H5G_GROUP:
@@ -5495,7 +5503,7 @@ db_hdf5_initiate_close(DBfile *_dbfile)
             {
                 char name[256], tmp[256];
                 H5Iget_name(ooids[i], name, sizeof(name));
-                sprintf(tmp, "\"%.235s\" (id=%d), ", name, ooids[i]);
+                sprintf(tmp, "\"%.235s\" (id=%llu), ", name, (unsigned long long) ooids[i]);
                 if ((strlen(msg) + strlen(tmp) + 1) >= sizeof(msg))
                     break;
                 strcat(msg, tmp);
