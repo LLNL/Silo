@@ -265,21 +265,31 @@ static int SaveInternalString(DBnamescheme const *ns, const char *sval)
 static char * retstrbuf[DB_MAX_RETSTRS];
 static char * SaveReturnedString(char const * retstr)
 {
+    static char *empty_string = "";
+    static int first = 1;
     static unsigned int n = 0;
     int modn = n++ % DB_MAX_RETSTRS;
-    if (n == 0)
+
+    if (first)                  /* initialize upon first use */
     {
         for (n = 0; n < DB_MAX_RETSTRS; n++)
             retstrbuf[n] = 0;
-        n = 0;
+        first = 0;
     }
-    else if (retstr == 0)
+
+    if (retstr == 0)            /* back door to free memory */
     {
         for (n = 0; n < DB_MAX_RETSTRS; n++)
             FREE(retstrbuf[n]);
         n = 0;
-        return 0;
+        return empty_string;
     }
+    else if (retstr[0] == '\0') /* special case for "" */
+    {
+        return empty_string;
+    }
+
+    /* For everything else, dup the string and store in circ buf  */
     FREE(retstrbuf[modn]);
     retstrbuf[modn] = STRDUP(retstr);
     return retstrbuf[modn];
@@ -355,9 +365,11 @@ DBMakeNamescheme(char const *fmt, ...)
     DBfile *dbfile = 0;
     char const *relpath = 0;
 
+API_BEGIN("DBMakeNamescheme", DBnamescheme*, 0) {
+
     /* We have nothing to do for a null or empty format string */
     if (fmt == 0 || *fmt == '\0')
-        return 0;
+        API_RETURN(0);
 
     /* Start by allocating an empty name scheme */
     rv = DBAllocNamescheme();
@@ -383,7 +395,7 @@ DBMakeNamescheme(char const *fmt, ...)
     if (n == 4096) /* we pick arb. upper bound in length of 4096 */
     {
         DBFreeNamescheme(rv);
-        return 0;
+        API_RETURN(0)
     }
 
     /* grab just the part of fmt that is the printf-style format string */
@@ -418,7 +430,7 @@ DBMakeNamescheme(char const *fmt, ...)
         free(rv->fmt);
         rv->fmt = STRNDUP(&fmt[0],n);
         rv->fmtlen = n;
-        return rv;
+        API_RETURN(rv);
     }
 
     /* Make a pass through rest of fmt string to count array refs in the
@@ -433,7 +445,7 @@ DBMakeNamescheme(char const *fmt, ...)
     if (i == 4096)
     {
         DBFreeNamescheme(rv);
-        return 0;
+        API_RETURN(0);
     }
 
     /* allocate various arrays needed by the naming scheme */
@@ -550,7 +562,11 @@ DBMakeNamescheme(char const *fmt, ...)
         rv = 0;
     }
 
-    return rv;
+    API_RETURN(rv);
+
+}
+API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+
 }
 
 PUBLIC const char *
@@ -560,11 +576,24 @@ DBGetName(DBnamescheme const *ns, int natnum)
     char retval[1024];
     int i;
 
-    /* a hackish way to cleanup the saved returned string buffer */
-    if (ns == 0 && natnum == -1) return SaveReturnedString(0);
-    if (ns == 0) return SaveReturnedString("");
+API_BEGIN("DBGetName", const char*, SaveReturnedString("")) {
 
-    if (!ns->fmt) return "";
+    /* a backdoor to cleanup the saved returned string buffer */
+    if (ns == 0 && natnum == -1)
+    {
+        SaveReturnedString(0);
+        API_RETURN(SaveReturnedString(""));
+    }
+
+    if (ns == 0)
+    {
+        API_RETURN(SaveReturnedString(""));
+    }
+
+    if (!ns->fmt)
+    {
+        API_RETURN(SaveReturnedString(""));
+    }
 
     retval[0] = '\0';
     strncat(retval, ns->fmt, ns->fmtptrs[0] - ns->fmt);
@@ -595,7 +624,11 @@ DBGetName(DBnamescheme const *ns, int natnum)
         strcat(retval, tmp);
         FREE(tmpExpr);
     }
-    return SaveReturnedString(retval);
+
+    API_RETURN(SaveReturnedString(retval));
+
+}
+API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
 PUBLIC int
