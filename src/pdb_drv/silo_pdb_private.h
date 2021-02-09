@@ -338,7 +338,7 @@ PRIVATE void db_InitDefvars (DBoptlist const *);
  *-------------------------------------------------------------------------
  */
 PRIVATE char **PJ_ls (PDBfile *, char *, char *, int *);
-PRIVATE int PJ_get_fullpath (PDBfile *, char *, char const *, char *);
+PRIVATE int PJ_get_fullpath (char *, char const *, char *);
 
 PRIVATE int PJ_read (PDBfile *, char const *, void *);
 PRIVATE int PJ_read_alt (PDBfile *, char *, void *, long *);
