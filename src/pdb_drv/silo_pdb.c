@@ -265,7 +265,7 @@ pj_fixname (PDBfile *file, char const *inname) {
       _outname[sizeof(_outname)-1] = '\0';
    }
    else {
-      PJ_get_fullpath(file, lite_PD_pwd(file), inname, _outname);
+      PJ_get_fullpath(lite_PD_pwd(file), inname, _outname);
    }
 
    return (_outname);
@@ -1697,7 +1697,7 @@ PJ_put_group (
    /*----------------------------------------
     *  Build an absolute pathname.
     *---------------------------------------*/
-   PJ_get_fullpath(file, lite_PD_pwd(file), group->name, name);
+   PJ_get_fullpath(lite_PD_pwd(file), group->name, name);
 
    /*----------------------------------------
     *  Make sure this group description hasn't
@@ -2354,80 +2354,18 @@ PJ_ls (PDBfile       *file, /* PDB file pointer */
  *--------------------------------------------------------------------*/
 INTERNAL int
 PJ_get_fullpath(
-   PDBfile       *file,
    char          *cwd,         /* Current working directory */
    char const    *path,        /* Pathname (abs or rel) to traverse */
    char          *name)        /* Returned adjusted name */
 {
-    int             ierr;
-    char           *subpath;
-    char            tmpstr[1024];
+    char *abspath;
 
-    if (file == NULL || cwd == NULL || path == NULL || name == NULL)
+    if (cwd == NULL || path == NULL || name == NULL)
         return (FALSE);
 
-    ierr = 0;
-    name[0] = '\0';
-
-    /*
-     *  If using an absolute path just copy verbatim.
-     */
-    if (path[0] == '/')
-    {
-        strcpy(name, path);
-    } else
-    {
-
-        /*
-         *  Using a relative path.
-         *  Break path into slash-separated tokens, and process
-         *  each subpath individually.
-         */
-
-        strcpy(name, cwd);
-        strcpy(tmpstr, path);
-
-        subpath = (char *)strtok(tmpstr, "/");
-
-        while (subpath != NULL && !ierr)
-        {
-
-            if (STR_EQUAL("/", subpath))
-            {
-
-                /* No-op */
-
-            } else if (STR_EQUAL(".", subpath))
-            {
-
-                /* No-op */
-
-            } else if (STR_EQUAL("..", subpath))
-            {
-
-                /* Go up one level, unless already at top */
-                if (!STR_EQUAL("/", cwd))
-                {
-                    char           *s;
-
-                    s = strrchr(name, '/');
-                    if (s != NULL)
-                        s[0] = '\0';
-                }
-            } else
-            {
-
-                /* Append to end of current path */
-                if (STR_LASTCHAR(name) != '/')
-                    strcat(name, "/");
-                strcat(name, subpath);
-            }
-            subpath = (char *)strtok(NULL, "/");
-        }
-    }
-
-    if (name[0] == '\0')
-        strcpy(name, "/");
+    abspath = db_absoluteOf_path(cwd, path);
+    strcpy(name, abspath);
+    free(abspath);
 
     return (TRUE);
 }
