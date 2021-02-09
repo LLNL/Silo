@@ -227,8 +227,8 @@ int main(int argc, char *argv[])
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh_copy", DB_EOA);
 
     DBSetDir(dbfile2, "/");
-    /* Try a recursive copy */
-    DBCp("-r", dbfile, dbfile2, "/quad_dir", "quad_dir_copy", DB_EOA);
+    /* Try a recursive copy
+    DBCp("-r", dbfile, dbfile2, "/quad_dir", "quad_dir_copy", DB_EOA); */
 
     DBClose(dbfile);
     DBClose(dbfile2);
