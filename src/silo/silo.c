@@ -1656,7 +1656,6 @@ if (LS_VAR && toc->n##CAT > 0) { \
     else if (build_list) { \
         for (i = 0; i < toc->n##CAT && *nlist<_nlist_orig; i++) { \
             list[*nlist] = ALLOC_N(char, strlen(toc->CAT##_names[i]) + 1); \
-printf("...entry %d is \"%s\"\n", *nlist, toc->CAT##_names[i]);\
             strcpy(list[(*nlist)++], toc->CAT##_names[i]); \
         } \
     } \
@@ -1680,9 +1679,6 @@ printf("...entry %d is \"%s\"\n", *nlist, toc->CAT##_names[i]);\
         toc = DBGetToc(_dbfile);
         if (!toc)
             return db_perror("unable to get toc", E_INTERNAL, me);
-
-if (build_list)
-printf("%d: for clargs=\"%s\", path=\"%s\"...\n", k, cl_args, paths[k], nlist?*nlist:-1);
 
         PROCESS_LIST(ls_curve, curve);
         PROCESS_LIST(ls_low, var); /* misc. vars */
@@ -1709,9 +1705,6 @@ printf("%d: for clargs=\"%s\", path=\"%s\"...\n", k, cl_args, paths[k], nlist?*n
         PROCESS_LIST(ls_var, mrgvar);
         PROCESS_LIST(ls_obj, obj); /* misc. objects */
         PROCESS_LIST(ls_link, symlink);
-
-if (build_list)
-printf("Total entries = %d\n", nlist?*nlist:-1);
 
         /*
          * Return to original directory, since next path may
@@ -6074,9 +6067,6 @@ db_copy_single_object_abspath(char const *opts,
             srcType = DB_QUAD_CURV;
     }
 
-printf("Doing single object copy from \"%s\" to \"%s\"\n",
-    srcObjAbsName, _dstObjAbsName);
-
     /* Ok, lets do what we came here to do...create the dst object and
        start populating it */
     dstObj = DBMakeObject(_dstObjAbsName, srcType, srcObj->ncomponents);
@@ -6141,9 +6131,6 @@ printf("Doing single object copy from \"%s\" to \"%s\"\n",
             {
                 char *dstObjDirName = db_dirname(dstObjAbsName);
                 char *dstSubObjAbsName = db_join_path(dstObjDirName, subObjName);
-
-printf("        recursive sub-object copy of \"%s\" to \"%s\"\n",
-    srcSubObjAbsName, dstSubObjAbsName);
 
                 db_copy_single_object_abspath(opts, /* recursive call */
                    srcFile, srcSubObjAbsName, subObjType,
@@ -6384,27 +6371,6 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
             dstPathNames[q] = many_to_one_dir; /* all point to same char* */
     }
 
-printf("\n\nopts = \"%s\"\n", opts);
-printf("recurse_on_dirs = %d\n", recurse_on_dirs);
-printf("preserve_links = %d\n", preserve_links);
-printf("deref_links = %d\n", deref_links);
-printf("never_deref_links = %d\n", never_deref_links);
-printf("dont_copy_just_symlink = %d\n", dont_copy_just_symlink);
-printf("dont_copy_just_hardlink = %d\n", dont_copy_just_hardlink);
-printf("src_dst_pairs = %d\n", src_dst_pairs);
-printf("srcs_only = %d\n", srcs_only);
-printf("n_src_dst_triple = %d\n", n_src_dst_triple);
-printf("n_src_dir_triple = %d\n", n_src_dir_triple);
-printf("got N = %d\n", N);
-for (i = 0; i < N; i++)
-{
-    printf("srcPathNames[%d] = \"%s\"\n", i, srcPathNames[i]);
-    if (dstPathNames)
-        printf("dstPathNames[%d] = \"%s\"\n", i, dstPathNames[i]?dstPathNames[i]:"null");
-}
-if (many_to_one_dir)
-    printf("many_to_one_dir = \"%s\"\n", many_to_one_dir);
-
     for (i = 0; i < N; i++)
     {
         DBObjectType srcType, dstType;
@@ -6426,9 +6392,6 @@ if (many_to_one_dir)
         dstObjAbsName = db_join_path(dstcwg, dstPathNames[i]?dstPathNames[i]:srcPathNames[i]);
         dstType = DBInqVarType(dstFile, dstObjAbsName);
 
-printf("    processing copy of \"%s\" to %s \"%s\"\n",
-    srcObjAbsName, dstType == DB_INVALID_OBJECT ? "new" : "pre-existing", dstObjAbsName);
-
         if (srcType == DB_INVALID_OBJECT)
         {
             db_perror(DBSPrintf("\"%s\" invalid object", srcObjAbsName), E_BADARGS, me);
@@ -6437,7 +6400,6 @@ printf("    processing copy of \"%s\" to %s \"%s\"\n",
 
         if (srcType != DB_DIR)
         {
-printf("        handling as db_copy_single_object_abspath()\n");
             if (!db_copy_single_object_abspath(opts, 
                     srcFile, srcObjAbsName, srcType,
                     dstFile, dstObjAbsName, dstType))
@@ -6462,7 +6424,6 @@ printf("        handling as db_copy_single_object_abspath()\n");
                 srcObjAbsName, dstObjAbsName), E_BADARGS, me);
             goto endLoop;
         }
-printf("        the object to be copied is a dir...starting a recursion\n");
 
 #if 0
         /* get the contents of this dir in two lists; all the dirs, everything else */
@@ -6475,32 +6436,23 @@ printf("        the object to be copied is a dir...starting a recursion\n");
         DBLs(srcFile, DBSPrintf("-a -d %s", srcObjAbsName), otherItems, &otherItemCount);
 #endif
         /* get the contents of this dir */
-printf("        descending src file into directory \"%s\"\n", srcObjAbsName);
         DBSetDir(srcFile, srcObjAbsName);
         DBLs(srcFile, "-a -x", 0, &dirItemCount); /* just count it first */
         dirItems = ALLOC_N(char*, dirItemCount);
         DBLs(srcFile, "-a -x", dirItems, &dirItemCount);
 
         if (dstType == DB_INVALID_OBJECT)
-{
-printf("        making dst file directory \"%s\"\n", dstObjAbsName);
+        {
             DBMkDir(dstFile, dstObjAbsName);
-printf("        descending dst file into directory \"%s\"\n", dstObjAbsName);
             DBSetDir(dstFile, dstObjAbsName);
-}
-else if (dstType == DB_DIR)
-{
+        }
+        else if (dstType == DB_DIR)
+        {
             char const *srcDirBaseName = db_basename(srcObjAbsName);
-printf("        making dst file directory \"%s\"\n", srcDirBaseName);
             DBMkDir(dstFile, srcDirBaseName);
-printf("        descending dst file into directory \"%s\"\n", srcDirBaseName);
             DBSetDir(dstFile, srcDirBaseName);
             free(srcDirBaseName);
-}
-else
-{
-printf("\n\n\n***ERROR***\n\n\n");
-}
+        }
 
         if (n_src_dir_triple)
             DBCp(opts, srcFile, dstFile, dirItemCount, dirItems, ".");
