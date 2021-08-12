@@ -25875,7 +25875,7 @@ EOF
             echo "configure: could not compile:" >&5
             cat ax_qt_main.$ac_ext >&5
           else
-            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS >make.out 2>make.out"
+            ax_try_4="$CXX -o ax_qt_main ax_qt_main.o moc_ax_qt_test.o $QT_LIBS $LIBS >/dev/null 2>/dev/null"
             { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ax_try_4\""; } >&5
   (eval $ax_try_4) 2>&5
   ac_status=$?

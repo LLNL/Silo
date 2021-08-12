@@ -1,10 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#ifdef HAVE_MPI
 #include <mpi.h>
+#endif
 #include <silo.h>
 
 extern void PrintFileComponentTypes(DBfile *dbfile, FILE* outf);
+#ifdef HAVE_MPI
 extern DBfile *DBOpenByBcast(char const *, MPI_Comm, int);
+#else
+extern DBfile *DBOpenByBcast(char const *, int, int);
+#endif
 
 int main(int argc, char **argv)
 {
@@ -17,8 +24,10 @@ int main(int argc, char **argv)
         exit(0);
     }
 
+#ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
 
     DBShowErrors(DB_NONE, NULL);
 
@@ -33,7 +42,9 @@ int main(int argc, char **argv)
             char outfile[256];
             FILE* outf;
 
+#ifdef HAVE_MPI
             dbfile = DBOpenByBcast(argv[i], MPI_COMM_WORLD, 0);
+#endif
             snprintf(outfile, sizeof(outfile), "%s-%05d-typelist.txt", argv[i], rank);
             outf = fopen(outfile, "w");
             fprintf(outf, "File: %s\n", argv[i]);
@@ -42,7 +53,9 @@ int main(int argc, char **argv)
         }
     }
 
+#ifdef HAVE_MPI
     MPI_Finalize();
+#endif
 
     return 0;
 }

@@ -134,6 +134,7 @@ PDBTESTS =
 if INSTALL_LITE_HEADERS
  testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
  pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
+ mk_nasf_pdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
  PDBTESTS += testpdb pdbtst
 endif
 JSONTESTS =
@@ -142,7 +143,6 @@ if JSON_NEEDED
  JSONTESTS += json
 endif
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
-mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
 
@@ -160,7 +160,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
-bcastopen_SOURCES = bcastopen.c bcastopen_test.c
+bcastopen_SOURCES = listtypes.c bcastopen.c bcastopen_test.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl

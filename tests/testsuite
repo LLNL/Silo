@@ -3826,9 +3826,9 @@ at_xfail=no
 
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:303: test ! \\( -e ../src/zfp-0.5.0/main_encode.o -o -e ../../../src/zfp-0.5.0/main_encode.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression zfp"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/zfp-0.5.0/main_encode.o -o -e ../../../src/zfp-0.5.0/main_encode.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression zfp" "testsuite.at:303"
-( $at_check_trace; test ! \( -e ../src/zfp-0.5.0/main_encode.o -o -e ../../../src/zfp-0.5.0/main_encode.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression zfp
+$as_echo "$at_srcdir/testsuite.at:303: test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression zfp"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression zfp" "testsuite.at:303"
+( $at_check_trace; test ! \( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression zfp
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3839,9 +3839,9 @@ $at_failed && at_fn_log_failure
 $at_traceon; }
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:304: test ! \\( -e ../src/zfp-0.5.0/main_encode.o -o -e ../../../src/zfp-0.5.0/main_encode.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
-at_fn_check_prepare_dynamic "test ! \\( -e ../src/zfp-0.5.0/main_encode.o -o -e ../../../src/zfp-0.5.0/main_encode.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:304"
-( $at_check_trace; test ! \( -e ../src/zfp-0.5.0/main_encode.o -o -e ../../../src/zfp-0.5.0/main_encode.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
+$as_echo "$at_srcdir/testsuite.at:304: test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"\$STARGS\" != DB_HDF5 && exit 77 || \$VALGRIND compression readonly"
+at_fn_check_prepare_dynamic "test ! \\( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \\) -o \"$STARGS\" != DB_HDF5 && exit 77 || $VALGRIND compression readonly" "testsuite.at:304"
+( $at_check_trace; test ! \( -e ../src/zfp-0.5.5/src/bitstream.o -o -e ../../../src/zfp-0.5.5/src/bitstream.o \) -o "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND compression readonly
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter

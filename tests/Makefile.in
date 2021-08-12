@@ -300,7 +300,8 @@ am__arrayf90_SOURCES_DIST = arrayf90.f90
 arrayf90_OBJECTS = $(am_arrayf90_OBJECTS)
 @FORTRAN_NEEDED_TRUE@arrayf90_DEPENDENCIES = $(LDADD) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
-am_bcastopen_OBJECTS = bcastopen.$(OBJEXT) bcastopen_test.$(OBJEXT)
+am_bcastopen_OBJECTS = listtypes.$(OBJEXT) bcastopen.$(OBJEXT) \
+	bcastopen_test.$(OBJEXT)
 bcastopen_OBJECTS = $(am_bcastopen_OBJECTS)
 bcastopen_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@bcastopen_DEPENDENCIES = ../src/libsilo.la \
@@ -1190,10 +1191,10 @@ AM_CPPFLAGS = \
 PDBTESTS = $(am__append_2)
 @INSTALL_LITE_HEADERS_TRUE@testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 @INSTALL_LITE_HEADERS_TRUE@pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
+@INSTALL_LITE_HEADERS_TRUE@mk_nasf_pdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 JSONTESTS = $(am__append_3)
 @JSON_NEEDED_TRUE@json_CPPFLAGS = -I$(prefix)/json/include $(AM_CPPFLAGS)
 #TestReadMask_CPPFLAGS = $(AM_CPPFLAGS)
-mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
 HDF5PROGS = compression grab mk_nasf_h5 testhdf5
@@ -1211,7 +1212,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	$(am__append_4) $(am__append_7)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
-bcastopen_SOURCES = bcastopen.c bcastopen_test.c
+bcastopen_SOURCES = listtypes.c bcastopen.c bcastopen_test.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl

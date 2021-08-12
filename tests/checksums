@@ -113,7 +113,7 @@ size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
 #
 rm -f multi_ucd3d_corrupt.h5
 head -c $offset h5_check_files/multi_ucd3d.h5 > multi_ucd3d_corrupt.h5
-cat $topDir/zeros.dat >> multi_ucd3d_corrupt.h5
+cat $topDir/../../tests/zeros.dat >> multi_ucd3d_corrupt.h5
 leftover=`expr $size - $offset - 16`
 tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 

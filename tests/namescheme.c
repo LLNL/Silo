@@ -428,10 +428,12 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test the convenience method, DBSPrintf */
+#if 0
     snprintf(teststr, sizeof(teststr), "%s, %s",
         DBSPrintf("block_%d,level_%04d", 505, 17),
         DBSPrintf("side_%s_%cx%g", "master",'z',1.0/3));
     TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
+#endif
     
     /* Test case where fewer expressions that conversion specs */
     ns = DBMakeNamescheme("|/domain_%03d/laser_beam_power_%d|n/1|");

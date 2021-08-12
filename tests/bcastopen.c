@@ -5,7 +5,11 @@
 #include <hdf5.h>
 #include <silo.h>
 
+#ifdef HAVE_MPI
 DBfile *DBOpenByBcast(char const *filename, MPI_Comm comm, int rank_of_root)
+#else
+DBfile *DBOpenByBcast(char const *filename, int comm, int rank_of_root)
+#endif
 {
     int rank;
     int file_len;
