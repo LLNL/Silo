@@ -99,9 +99,11 @@ build_curve (DBfile *dbfile, int driver)
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   if (DB_HDF5==(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
-   if (DB_HDF5!=(driver&0xF)) DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   if (driver == DB_PDB)
+       DBAddOption(opts, DBOPT_XVARNAME, "/sincurve_xvals");
+   else
+       DBAddOption(opts, DBOPT_XVARNAME, "/.silo/#000001");
 
    /*
     * Write the 'coscurve' curve. It shares x values with the 'sincurve'
@@ -137,7 +139,7 @@ main(int argc, char *argv[])
     
     int            nerrors = 0;
     int            i, j, ndims=1; 
-    int            driver=DB_HDF5;
+    int            driver=DB_PDB;
     char          *filename="largefile.silo";
     int            show_all_errors = FALSE;
     DBfile        *dbfile;
@@ -154,7 +156,6 @@ main(int argc, char *argv[])
             }
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
-            filename = "largefile.h5";
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
