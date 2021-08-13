@@ -52,16 +52,16 @@
 ! be used for advertising or product endorsement purposes.
 !***********************************************************************
 
-c-------------------------------------------------------------------------
-c Fortran test program for simple CSG mesh contributed by
-c
-c Author: Robert Salko, rks171@gmail.com, Penn State University
-c Mon Nov  5 16:10:14 PST 2012
-c
-c Modifications
-c   Mark C. Miller, Mon Nov  5 16:11:04 PST 2012
-c   Adjusted for intergration with Silo's test suite
-c-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+! Fortran test program for simple CSG mesh contributed by
+!
+! Author: Robert Salko, rks171@gmail.com, Penn State University
+! Mon Nov  5 16:10:14 PST 2012
+!
+! Modifications
+!   Mark C. Miller, Mon Nov  5 16:11:04 PST 2012
+!   Adjusted for intergration with Silo's test suite
+!-------------------------------------------------------------------------
       program csgmesh
       
       implicit none

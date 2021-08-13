@@ -233,7 +233,8 @@ typedef struct db_silo_stat_t {
 #error missing definition for SIZEOF_OFF64_T in silo_private.h
 #else
 #if SIZEOF_OFF64_T > 4
-    struct stat64 s;
+#warning FIXME
+    struct stat s;
 #else
     struct stat s;
 #endif

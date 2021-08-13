@@ -157,7 +157,7 @@ local($arg0) = '';
 local($opt_f90) = 0;
 
 # Fortran comment character; use 'C' for F77, '!' for F90 and later
-local($ccmt) = 'C';
+local($ccmt) = '!';
 
 # Get command-line option (if any) to select F77 or F9x+ formatting
 # There are better ways of doing this; just not in Perl4 style as of 2013...

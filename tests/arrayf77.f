@@ -52,12 +52,12 @@
 ! be used for advertising or product endorsement purposes.
 !***********************************************************************
 
-c-------------------------------------------------------------------------
-c Purpose
-c
-c   Demonstrate use of SILO for creating compound array objects.
-c
-c-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+! Purpose
+!
+!   Demonstrate use of SILO for creating compound array objects.
+!
+!-------------------------------------------------------------------------
 
       program main
 
@@ -88,7 +88,7 @@ c-------------------------------------------------------------------------
 
       err = dbshowerrors(DB_ABORT)
 
-c...Create file named "robb.pdb".  Database ID is returned in 'dbid'.
+!...Create file named "robb.pdb".  Database ID is returned in 'dbid'.
 
       err = dbcreate("arrayf77.silo", 13, 0, DB_LOCAL, "file info",
      $     9, driver, dbid)
@@ -104,9 +104,9 @@ c...Create file named "robb.pdb".  Database ID is returned in 'dbid'.
       err = dbclose (dbid)
 
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-C  Now try to read from the file...
-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+!  Now try to read from the file...
+!CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
       err = dbopen ("arrayf77.silo", 13, DB_UNKNOWN, DB_READ, dbid)
 

@@ -17,7 +17,7 @@ C
 C cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 
-C...Functions.
+!...Functions.
       EXTERNAL  DBADDCAOPT
       EXTERNAL  DBADDCCMP
       EXTERNAL  DBADDCOPT
@@ -191,7 +191,7 @@ C...Functions.
       INTEGER  DBWRTFL
 
 
-C...Parameters.
+!...Parameters.
       INTEGER  DBCSG_ANGLE_PNLA
       INTEGER  DBCSG_ANGLE_PPA
       INTEGER  DBCSG_BOX_XYXY
@@ -849,4 +849,4 @@ C...Parameters.
       PARAMETER (DB_F77NULLSTRING="NULLSTRING")
 
 
-C End.
+! End.
