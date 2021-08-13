@@ -92,23 +92,23 @@ using std::vector;
 static int SiloZoneType(const string& ztstr)
 {
     // 3D zone types
-    if (ztstr == "hex") return DB_ZONETYPE_HEX;
-    if (ztstr == "tet") return DB_ZONETYPE_TET;
-    if (ztstr == "wedge") return DB_ZONETYPE_PRISM;
-    if (ztstr == "prism") return DB_ZONETYPE_PRISM;
-    if (ztstr == "pyramid") return DB_ZONETYPE_PYRAMID;
-    if (ztstr == "polyhedron") return DB_ZONETYPE_POLYHEDRON;
+    if (ztstr == "Hex") return DB_ZONETYPE_HEX;
+    if (ztstr == "Tet") return DB_ZONETYPE_TET;
+    if (ztstr == "Wedge") return DB_ZONETYPE_PRISM;
+    if (ztstr == "Prism") return DB_ZONETYPE_PRISM;
+    if (ztstr == "Pyramid") return DB_ZONETYPE_PYRAMID;
+    if (ztstr == "Polyhedron") return DB_ZONETYPE_POLYHEDRON;
 
     // 2D zone types
-    if (ztstr == "quad") return DB_ZONETYPE_QUAD;
-    if (ztstr == "tri") return DB_ZONETYPE_TRIANGLE;
-    if (ztstr == "polygon") return DB_ZONETYPE_POLYGON;
+    if (ztstr == "Quad") return DB_ZONETYPE_QUAD;
+    if (ztstr == "Tri") return DB_ZONETYPE_TRIANGLE;
+    if (ztstr == "Polygon") return DB_ZONETYPE_POLYGON;
 
     // 1D zone types
-    if (ztstr == "line") return DB_ZONETYPE_BEAM;
+    if (ztstr == "Line") return DB_ZONETYPE_BEAM;
 
     // 0D zone types
-    if (ztstr == "point") return 0; // no silo zone-type for this
+    if (ztstr == "Point") return 0; // no silo zone-type for this
 
     return -1; 
 }
@@ -241,7 +241,7 @@ static int AddRegions(DBfile *dbfile, DBmrgtree *mrgt,
             if (remapForProci >= 0)
             {
                 stringstream procClassName;
-                procClassName << "domain" << remapForProci;
+                procClassName << "Domain" << remapForProci;
                 vector<int> upn, dnn, upz, dnz;
                 GetUpDownMapsForZoneClass(procClassName.str(), upn, dnn, upz, dnz);
                 vector<int> map_data2;
@@ -286,6 +286,7 @@ static int WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
     coordnames[2] = "Z";
     int nnodes = nodeClasses.GetNumEntities();
     int nzones = zoneClasses.GetNumEntities();
+    int nmats = 5;
 
     DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
     DBPutUcdmesh(dbfile, "mesh", 3, coordnames, coords, nnodes, nzones, "zl", 0, DB_FLOAT, ol);
@@ -301,6 +302,19 @@ static int WriteSiloSingleMesh(DBfile *dbfile, DBoptlist *ol,
     vector<int> dom_map;
     zoneClasses.GetEntitiesPartitionedByClasses(dom_classes, dom_map);
     DBPutUcdvar1(dbfile, "proc_map", "mesh", (float*) &dom_map[0], nzones, 0, 0, DB_INT, DB_ZONECENT, 0);
+
+    vector<int> matlist;
+    vector<string> mat_classes(matNames, matNames + nmats);
+    zoneClasses.GetEntitiesPartitionedByClasses(mat_classes, matlist);
+    for (int i = 0; i < (int) matlist.size(); i++)
+        matlist[i] = matlist[i] + 1;
+    DBClearOptlist(ol);
+    DBAddOption(ol, DBOPT_NMATNOS, &nmats);
+    DBAddOption(ol, DBOPT_MATNOS, matnos);
+    DBAddOption(ol, DBOPT_MATNAMES, matNames);
+    DBAddOption(ol, DBOPT_MATCOLORS, matColors);
+    DBPutMaterial(dbfile, "materials", "mesh", 5, matnos,
+        &matlist[0], &nzones, 1, 0, 0, 0, 0, 0, DB_FLOAT, ol);
 
     // Create MRG Tree 
     DBmrgtree *mrgt = DBMakeMrgtree(DB_UCDMESH, 0x0, 4, 0);
@@ -331,6 +345,7 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
     coordnames[1] = "Y";
     coordnames[2] = "Z";
 
+    int nmats = 5;
     int ndoms = dom_classes.size();
 
     for (int i = 0; i < ndoms; i++)
@@ -350,9 +365,18 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
 
         // Map the Zonelist object's nodelist
         vector<int> nl;
+        vector<int> matlist;
         for (int j = 0; j < upz.size(); j++)
         {
             int gzid = upz[j];
+            for (int k = 0; k < 5; k++)
+            {
+                if (zoneClasses.IsEntityMemberOf(gzid, matNames[k]))
+                {
+                    matlist.push_back(k+1);
+                    break;
+                }
+            }
             int k0 = nodestarts_g[gzid];
             int cnt = nodecnts_g[gzid];
             for (int k = 0; k < cnt; k++)
@@ -375,6 +399,14 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
         SiloZonelistStuff(dom_classes[i], shapetyp, shapesize, shapecnt);
         DBPutZonelist2(dbfile, "zl", nzones2, 3, &nl[0], (int) nl.size(), 0, 0, 0,
             &shapetyp[0], &shapesize[0], &shapecnt[0], (int) shapetyp.size(), 0);
+
+        DBClearOptlist(ol);
+        DBAddOption(ol, DBOPT_NMATNOS, &nmats);
+        DBAddOption(ol, DBOPT_MATNOS, matnos);
+        DBAddOption(ol, DBOPT_MATNAMES, matNames);
+        DBAddOption(ol, DBOPT_MATCOLORS, matColors);
+        DBPutMaterial(dbfile, "materials", "mesh", 5, matnos,
+            &matlist[0], &nzones2, 1, 0, 0, 0, 0, 0, DB_FLOAT, ol);
 
         // Create MRG Tree 
         DBmrgtree *mrgt = DBMakeMrgtree(DB_UCDMESH, 0x0, 4, 0);
@@ -400,15 +432,23 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
 
     int mtypes[ndoms];
     char *mnames[ndoms];
+    char *matnames[ndoms];
     for (int i = 0; i < ndoms; i++)
     {
         mtypes[i] = DB_UCDMESH;
         string mname = "/UseCaseB/"+dom_classes[i]+"/mesh";
         mnames[i] = strdup(mname.c_str());
+        matnames[i] = strdup(string("/UseCaseB/"+dom_classes[i]+"/materials").c_str());
     }
 
     DBAddOption(ol, DBOPT_MRGTREE_NAME, (void*) "mrgtree");
     DBPutMultimesh(dbfile, "mmesh", ndoms, mnames, mtypes, ol);
+    DBClearOptlist(ol);
+    DBAddOption(ol, DBOPT_NMATNOS, &nmats);
+    DBAddOption(ol, DBOPT_MATNOS, matnos);
+    DBAddOption(ol, DBOPT_MATNAMES, matNames);
+    DBAddOption(ol, DBOPT_MATCOLORS, matColors);
+    DBPutMultimat(dbfile, "mmat", 5, matnames, ol);
     DBClearOptlist(ol);
 
     // Create MRG Tree 
@@ -432,7 +472,10 @@ static int WriteSiloMultiMesh(DBfile *dbfile, DBoptlist *ol,
     DBFreeMrgtree(mrgt);
 
     for (int i = 0; i < ndoms; i++)
+    {
         free(mnames[i]);
+        free(matnames[i]);
+    }
 }
 
 static int WriteFormatReal(int argc, const char *const *const argv)
@@ -445,9 +488,10 @@ static int WriteFormatReal(int argc, const char *const *const argv)
         return 1;
     }
 
-    char *dclasses[] = {"domain0", "domain1", "domain2", "domain3", "domain4"};
+    char *dclasses[] = {"Domain0", "Domain1", "Domain2", "Domain3", "Domain4"};
     int ndoms = sizeof(dclasses) / sizeof(dclasses[0]);
     vector<string> dom_classes(dclasses, dclasses + ndoms);
+    int nmats = 5;
 
     DBfile *dbfile = DBCreate("rocket.silo", DB_CLOBBER, DB_LOCAL,
                       "3D mesh with many interesting subsets", silo_driver);

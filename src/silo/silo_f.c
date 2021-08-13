@@ -1066,12 +1066,12 @@ DBCREATE_FC (FCD_DB pathname, int *lpathname, int *mode, int *target,
  *
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
-DBINQLEN_FC (int *dbid, FCD_DB varname, int *lvarname, int *len)
+DBINQINT_FC (int *dbid, FCD_DB varname, int *lvarname, void *tag, int *theInt)
 {
     char          *varnm = NULL;
     DBfile        *dbfile = NULL;
 
-    API_BEGIN("dbinqlen", int, -1) {
+    API_BEGIN("dbinqint", int, -1) {
         /*------------------------------
          *  Duplicate all ascii strings.
          *-----------------------------*/
@@ -1091,18 +1091,60 @@ DBINQLEN_FC (int *dbid, FCD_DB varname, int *lvarname, int *len)
 #endif
 
         dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
-        *len = DBGetVarLength(dbfile, varnm);
+
+        if (tag == (void*) DBGetVarLength)
+            *theInt = DBGetVarLength(dbfile, varnm);
+        else if (tag == (void*) DBGetVarByteLength)
+            *theInt = DBGetVarByteLength(dbfile, varnm);
+        else if (tag == (void*) DBGetVarType)
+            *theInt = DBGetVarType(dbfile, varnm);
+        else if (tag == (void*) DBInqVarType)
+            *theInt = DBInqVarType(dbfile, varnm);
+        else if (tag == (void*) DBInqMeshtype)
+            *theInt = DBInqMeshtype(dbfile, varnm);
+        else
+            *theInt = -1;
 
         FREE(varnm);
 
-        if (*len < 0) {
-            *len = 0;
+        if (*theInt < 0) {
+            *theInt = 0;
             API_RETURN(-1);
         }
         else
             API_RETURN(0);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+SILO_API FORTRAN
+DBINQLEN_FC(int *dbid, FCD_DB varname, int *lvarname, int *len)
+{
+    return DBINQINT_FC(dbid, varname, lvarname, DBGetVarLength, len);
+}
+
+SILO_API FORTRAN
+DBINQBLEN_FC(int *dbid, FCD_DB varname, int *lvarname, int *blen)
+{
+    return DBINQINT_FC(dbid, varname, lvarname, DBGetVarByteLength, blen);
+}
+
+SILO_API FORTRAN
+DBINQDTYP_FC(int *dbid, FCD_DB varname, int *lvarname, int *dtyp)
+{
+    return DBINQINT_FC(dbid, varname, lvarname, DBGetVarType, dtyp);
+}
+
+SILO_API FORTRAN
+DBINQVTYP_FC(int *dbid, FCD_DB varname, int *lvarname, int *vtyp)
+{
+    return DBINQINT_FC(dbid, varname, lvarname, DBInqVarType, vtyp);
+}
+
+SILO_API FORTRAN
+DBINQMTYP_FC(int *dbid, FCD_DB varname, int *lvarname, int *mtyp)
+{
+    return DBINQINT_FC(dbid, varname, lvarname, DBInqMeshtype, mtyp);
 }
 
 /*-------------------------------------------------------------------------

@@ -47,9 +47,13 @@
       integer, external :: dbgethdfnms
       integer, external :: dbgetovrwrt
       integer, external :: dbgetqv1
+      integer, external :: dbinqblen
       integer, external :: dbinqca
+      integer, external :: dbinqdtyp
       integer, external :: dbinqfile
       integer, external :: dbinqlen
+      integer, external :: dbinqmtyp
+      integer, external :: dbinqvtyp
       integer, external :: dbmkdir
       integer, external :: dbmkmrgtree
       integer, external :: dbmkobject

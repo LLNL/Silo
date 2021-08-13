@@ -153,8 +153,14 @@ char *matNames[] =
     "Electronics",
     "Body"
 };
-map<string, int> matMap;
-vector<int> matlist_g;
+char *matColors[] =
+{
+    "Red",
+    "Magenta",
+    "Green",
+    "Black",
+    "Gray"
+};
 
 EntityClassifier nodeClasses, zoneClasses;
 
@@ -165,7 +171,7 @@ static int AddNode(float x, float y, float z, int level)
     zvals_g.push_back(z);
     stringstream tmp;
     tmp << level;
-    string lname = "level" + tmp.str();
+    string lname = "Level" + tmp.str();
     int idx = nodeClasses.AddEntity();
     nodeClasses.MakeEntityMemberOf(idx, lname);
     return idx;
@@ -173,11 +179,11 @@ static int AddNode(float x, float y, float z, int level)
 
 static int AddZone(string ztype, const vector<int>& nlist, int level)
 {
-    assert((ztype=="hex" && nlist.size()==8) ||
-           (ztype=="wedge" && nlist.size()==6) ||
-           (ztype=="prism" && nlist.size()==6) ||
-           (ztype=="pyramid" && nlist.size()==5) ||
-           (ztype=="tet" && nlist.size()==4));
+    assert((ztype=="Hex" && nlist.size()==8) ||
+           (ztype=="Wedge" && nlist.size()==6) ||
+           (ztype=="Prism" && nlist.size()==6) ||
+           (ztype=="Pyramid" && nlist.size()==5) ||
+           (ztype=="Tet" && nlist.size()==4));
     nodestarts_g.push_back(nodelist_g.size());
     nodecnts_g.push_back(nlist.size());
     for (int i = 0; i < nlist.size(); i++)
@@ -189,7 +195,7 @@ static int AddZone(string ztype, const vector<int>& nlist, int level)
     zoneClasses.MakeEntityMemberOf(idx, ztype);
     stringstream tmp;
     tmp << level;
-    string lname = "level" + tmp.str();
+    string lname = "Level" + tmp.str();
     zoneClasses.MakeEntityMemberOf(idx, lname);
     return idx;
 }
@@ -278,10 +284,10 @@ static void make_base_layer()
     for (int i = 0; i < layerNNodes; i++)
     {
         int id = AddNode(layerXVals[i], layerYVals[i], 0.0, 0);
-        if (i==0) nodeClasses.MakeEntityMemberOf(id, "midline");
-        if (i<9) nodeClasses.MakeEntityMemberOf(id, "internal");
-        else nodeClasses.MakeEntityMemberOf(id, "external");
-        nodeClasses.MakeEntityMemberOf(id, "stage1");
+        if (i==0) nodeClasses.MakeEntityMemberOf(id, "Midline");
+        if (i<9) nodeClasses.MakeEntityMemberOf(id, "Internal");
+        else nodeClasses.MakeEntityMemberOf(id, "External");
+        nodeClasses.MakeEntityMemberOf(id, "Stage1");
     }
 }
 
@@ -295,14 +301,14 @@ static void add_layer(int stage, int zval)
 
     stringstream tmp;
     tmp << stage;
-    string stage_name = "stage"+tmp.str();
+    string stage_name = "Stage"+tmp.str();
 
     for (i = 0; i < layerNNodes; i++)
     {
         int nid = AddNode(layerXVals[i], layerYVals[i], zval, 0);
-        if (i==0) nodeClasses.MakeEntityMemberOf(nid, "midline");
-        if (i<9) nodeClasses.MakeEntityMemberOf(nid, "internal");
-        else nodeClasses.MakeEntityMemberOf(nid, "external");
+        if (i==0) nodeClasses.MakeEntityMemberOf(nid, "Midline");
+        if (i<9) nodeClasses.MakeEntityMemberOf(nid, "Internal");
+        else nodeClasses.MakeEntityMemberOf(nid, "External");
         nodeClasses.MakeEntityMemberOf(nid, stage_name);
     }
     for (i = 0; i < layerNZones; i++)
@@ -313,9 +319,17 @@ static void add_layer(int stage, int zval)
             nl.push_back(layerNodelist[i*4+j] + (zval-1)*layerNNodes);
         for (j = 0; j < 4; j++)
             nl.push_back(layerNodelist[i*4+j] + zval*layerNNodes);
-        int zid = AddZone("hex", nl, 0);
-        if (i<4) zoneClasses.MakeEntityMemberOf(zid, "internal");
-        else zoneClasses.MakeEntityMemberOf(zid, "external");
+        int zid = AddZone("Hex", nl, 0);
+        if (i<4)
+        {
+            zoneClasses.MakeEntityMemberOf(zid, "Internal");
+            zoneClasses.MakeEntityMemberOf(zid, "Solid Propellant");
+        }
+        else
+        {
+            zoneClasses.MakeEntityMemberOf(zid, "External");
+            zoneClasses.MakeEntityMemberOf(zid, "Body");
+        }
         zoneClasses.MakeEntityMemberOf(zid, stage_name);
     }
 }
@@ -330,7 +344,7 @@ void add_nose(int stage, int zval)
 
     stringstream tmp;
     tmp << stage;
-    string stage_name = "stage" + tmp.str();
+    string stage_name = "Stage" + tmp.str();
 
     // add central core nodes at this zval
     int layer1NoseStart = xvals_g.size();
@@ -339,18 +353,18 @@ void add_nose(int stage, int zval)
         int nid = AddNode(layerXVals[i], layerYVals[i], zval, 0);
         if (i==0)
         {
-            nodeClasses.MakeEntityMemberOf(nid, "midline");
-            nodeClasses.MakeEntityMemberOf(nid, "internal");
+            nodeClasses.MakeEntityMemberOf(nid, "Midline");
+            nodeClasses.MakeEntityMemberOf(nid, "Internal");
         }
-        else nodeClasses.MakeEntityMemberOf(nid, "external");
+        else nodeClasses.MakeEntityMemberOf(nid, "External");
         nodeClasses.MakeEntityMemberOf(nid, stage_name);
     }
 
     // add nose end node at zval + 1
     int noseApex = xvals_g.size();
     int nid2 = AddNode(0.0, 0.0, (float)zval+1.0, 0);
-    nodeClasses.MakeEntityMemberOf(nid2, "midline");
-    nodeClasses.MakeEntityMemberOf(nid2, "external");
+    nodeClasses.MakeEntityMemberOf(nid2, "Midline");
+    nodeClasses.MakeEntityMemberOf(nid2, "External");
     nodeClasses.MakeEntityMemberOf(nid2, stage_name);
 
     // add central core hexes
@@ -361,11 +375,12 @@ void add_nose(int stage, int zval)
             nl.push_back(layerNodelist[i*4+j] + (zval-1)*layerNNodes);
         for (j = 0; j < 4; j++)
             nl.push_back(layerNodelist[i*4+j] + zval*layerNNodes);
-        int zid = AddZone("hex", nl, 0);
-        zoneClasses.MakeEntityMemberOf(zid, "internal");
-        zoneClasses.MakeEntityMemberOf(zid, "nose");
-        zoneClasses.MakeEntityMemberOf(zid, "guidance");
+        int zid = AddZone("Hex", nl, 0);
+        zoneClasses.MakeEntityMemberOf(zid, "Internal");
+        zoneClasses.MakeEntityMemberOf(zid, "Nose");
+        zoneClasses.MakeEntityMemberOf(zid, "Guidance");
         zoneClasses.MakeEntityMemberOf(zid, stage_name);
+        zoneClasses.MakeEntityMemberOf(zid, "Liquid Propellant");
     }
 
     // add external wedges
@@ -387,11 +402,12 @@ void add_nose(int stage, int zval)
             nl.push_back(k);
         }
         k++;
-        int zid = AddZone("wedge", nl, 0);
-        zoneClasses.MakeEntityMemberOf(zid, "external");
-        zoneClasses.MakeEntityMemberOf(zid, "nose");
-        zoneClasses.MakeEntityMemberOf(zid, "ring");
+        int zid = AddZone("Wedge", nl, 0);
+        zoneClasses.MakeEntityMemberOf(zid, "External");
+        zoneClasses.MakeEntityMemberOf(zid, "Nose");
+        zoneClasses.MakeEntityMemberOf(zid, "Ring");
         zoneClasses.MakeEntityMemberOf(zid, stage_name);
+        zoneClasses.MakeEntityMemberOf(zid, i%2 ? "Electronics" : "Body");
     }
 
     // add top-level pyramids
@@ -401,14 +417,15 @@ void add_nose(int stage, int zval)
         for (j = 0; j < 4; j++)
             nl.push_back(layerNodelist[i*4+permute[j]] + layer1NoseStart);
         nl.push_back(noseApex);
-        int zid = AddZone("pyramid", nl, 0);
-        zoneClasses.MakeEntityMemberOf(zid, "external");
-        zoneClasses.MakeEntityMemberOf(zid, "nose");
-        zoneClasses.MakeEntityMemberOf(zid, "mirvs");
+        int zid = AddZone("Pyramid", nl, 0);
+        zoneClasses.MakeEntityMemberOf(zid, "External");
+        zoneClasses.MakeEntityMemberOf(zid, "Nose");
+        zoneClasses.MakeEntityMemberOf(zid, "Mirvs");
         stringstream tmp;
         tmp << i+1;
-        zoneClasses.MakeEntityMemberOf(zid, "mirv"+tmp.str());
+        zoneClasses.MakeEntityMemberOf(zid, "Mirv"+tmp.str());
         zoneClasses.MakeEntityMemberOf(zid, stage_name);
+        zoneClasses.MakeEntityMemberOf(zid, "High Explosive");
     }
 }
 
@@ -427,20 +444,20 @@ void add_fins()
     {
         int nid;
         nid = AddNode(-finX, finY, (float)i, 0);
-        nodeClasses.MakeEntityMemberOf(nid, "fin1");
-        nodeClasses.MakeEntityMemberOf(nid, "fins");
+        nodeClasses.MakeEntityMemberOf(nid, "Fin1");
+        nodeClasses.MakeEntityMemberOf(nid, "Fins");
 
         nid = AddNode(finY, finX, (float)i, 0);
-        nodeClasses.MakeEntityMemberOf(nid, "fin2");
-        nodeClasses.MakeEntityMemberOf(nid, "fins");
+        nodeClasses.MakeEntityMemberOf(nid, "Fin2");
+        nodeClasses.MakeEntityMemberOf(nid, "Fins");
 
         nid = AddNode(finX, -finY, (float)i, 0);
-        nodeClasses.MakeEntityMemberOf(nid, "fin3");
-        nodeClasses.MakeEntityMemberOf(nid, "fins");
+        nodeClasses.MakeEntityMemberOf(nid, "Fin3");
+        nodeClasses.MakeEntityMemberOf(nid, "Fins");
 
         nid = AddNode(-finY, -finX, (float)i, 0);
-        nodeClasses.MakeEntityMemberOf(nid, "fin4");
-        nodeClasses.MakeEntityMemberOf(nid, "fins");
+        nodeClasses.MakeEntityMemberOf(nid, "Fin4");
+        nodeClasses.MakeEntityMemberOf(nid, "Fins");
     }
 
     // add fin bottoms (wedges) on layer 0 and 1
@@ -455,11 +472,12 @@ void add_fins()
         nl.push_back(n);
         nl.push_back(finNodesStart+i);
         nl.push_back(finNodesStart+i+4);
-        int zid = AddZone("wedge", nl, 0);
-        zoneClasses.MakeEntityMemberOf(zid, "fins");
+        int zid = AddZone("Wedge", nl, 0);
+        zoneClasses.MakeEntityMemberOf(zid, "Fins");
         stringstream tmp;
         tmp << i%4+1;
-        zoneClasses.MakeEntityMemberOf(zid, "fin"+tmp.str());
+        zoneClasses.MakeEntityMemberOf(zid, "Fin"+tmp.str());
+        zoneClasses.MakeEntityMemberOf(zid, "Body");
     }
 
     // add fin tops (pyramids) on layer 2
@@ -472,11 +490,12 @@ void add_fins()
         nl.push_back(n+layerNNodes);
         nl.push_back(n);
         nl.push_back(finNodesStart+i+8);
-        int zid = AddZone("pyramid", nl, 0);
-        zoneClasses.MakeEntityMemberOf(zid, "fins");
+        int zid = AddZone("Pyramid", nl, 0);
+        zoneClasses.MakeEntityMemberOf(zid, "Fins");
         stringstream tmp;
         tmp << i+1;
-        zoneClasses.MakeEntityMemberOf(zid, "fin"+tmp.str());
+        zoneClasses.MakeEntityMemberOf(zid, "Fin"+tmp.str());
+        zoneClasses.MakeEntityMemberOf(zid, "Body");
     }
 }
 
@@ -518,14 +537,14 @@ static void ParallelDecompose()
         if (zcenter < zhalf)
         {
             float ycenter = (ymin + ymax) / 2.0;
-            if (ycenter < 0) zoneClasses.MakeEntityMemberOf(i, "domain0");
-            else zoneClasses.MakeEntityMemberOf(i, "domain1");
+            if (ycenter < 0) zoneClasses.MakeEntityMemberOf(i, "Domain0");
+            else zoneClasses.MakeEntityMemberOf(i, "Domain1");
         }
         else
         {
-            if (zcenter < (zhalf + z3)) zoneClasses.MakeEntityMemberOf(i, "domain2");
-            else if (zcenter < (zhalf + 2*z3)) zoneClasses.MakeEntityMemberOf(i, "domain3");
-            else zoneClasses.MakeEntityMemberOf(i, "domain4");
+            if (zcenter < (zhalf + z3)) zoneClasses.MakeEntityMemberOf(i, "Domain2");
+            else if (zcenter < (zhalf + 2*z3)) zoneClasses.MakeEntityMemberOf(i, "Domain3");
+            else zoneClasses.MakeEntityMemberOf(i, "Domain4");
         }
     }
 }
@@ -647,74 +666,80 @@ static void AMRRefine()
     for (int i = 0; i < zoneClasses.GetNumEntities(); i++)
     {
         string ztn = zoneClasses.ZoneType(i);
-        if (ztn == "hex")
+        if (ztn == "Hex")
     }
 }
 #endif
 
 static void DefineNodeClasses()
 {
-    nodeClasses.AddClass("point");
+    nodeClasses.AddClass("Point");
 
-    nodeClasses.AddClass("midline");
-    nodeClasses.AddClass("internal");
-    nodeClasses.AddClass("external");
-    nodeClasses.AddClass("nose");
-    nodeClasses.AddClass("fins");
-    nodeClasses.AddClass("fin1");
-    nodeClasses.AddClass("fin2");
-    nodeClasses.AddClass("fin3");
-    nodeClasses.AddClass("fin4");
-    nodeClasses.AddClass("stage1");
-    nodeClasses.AddClass("stage2");
-    nodeClasses.AddClass("stage3");
-    nodeClasses.AddClass("stage4");
-    nodeClasses.AddClass("stage5");
+    nodeClasses.AddClass("Midline");
+    nodeClasses.AddClass("Internal");
+    nodeClasses.AddClass("External");
+    nodeClasses.AddClass("Nose");
+    nodeClasses.AddClass("Fins");
+    nodeClasses.AddClass("Fin1");
+    nodeClasses.AddClass("Fin2");
+    nodeClasses.AddClass("Fin3");
+    nodeClasses.AddClass("Fin4");
+    nodeClasses.AddClass("Stage1");
+    nodeClasses.AddClass("Stage2");
+    nodeClasses.AddClass("Stage3");
+    nodeClasses.AddClass("Stage4");
+    nodeClasses.AddClass("Stage5");
 
-    nodeClasses.AddClass("level0");
-    nodeClasses.AddClass("level1");
-    nodeClasses.AddClass("level2");
+    nodeClasses.AddClass("Level0");
+    nodeClasses.AddClass("Level1");
+    nodeClasses.AddClass("Level2");
 }
 
 static void DefineZoneClasses()
 {
-    zoneClasses.AddClass("hex");
-    zoneClasses.AddClass("wedge");
-    zoneClasses.AddClass("pyramid");
-    zoneClasses.AddClass("tet");
+    zoneClasses.AddClass("Hex");
+    zoneClasses.AddClass("Wedge");
+    zoneClasses.AddClass("Pyramid");
+    zoneClasses.AddClass("Tet");
 
-    zoneClasses.AddClass("domain0");
-    zoneClasses.AddClass("domain1");
-    zoneClasses.AddClass("domain2");
-    zoneClasses.AddClass("domain3");
-    zoneClasses.AddClass("domain4");
+    zoneClasses.AddClass("Domain0");
+    zoneClasses.AddClass("Domain1");
+    zoneClasses.AddClass("Domain2");
+    zoneClasses.AddClass("Domain3");
+    zoneClasses.AddClass("Domain4");
 
-    zoneClasses.AddClass("internal");
-    zoneClasses.AddClass("external");
+    zoneClasses.AddClass("Internal");
+    zoneClasses.AddClass("External");
 
-    zoneClasses.AddClass("stage1");
-    zoneClasses.AddClass("stage2");
-    zoneClasses.AddClass("stage3");
-    zoneClasses.AddClass("stage4");
-    zoneClasses.AddClass("stage5");
+    zoneClasses.AddClass("Stage1");
+    zoneClasses.AddClass("Stage2");
+    zoneClasses.AddClass("Stage3");
+    zoneClasses.AddClass("Stage4");
+    zoneClasses.AddClass("Stage5");
 
-    zoneClasses.AddClass("nose");
-    zoneClasses.AddClass("ring");
-    zoneClasses.AddClass("fins");
-    zoneClasses.AddClass("fin1");
-    zoneClasses.AddClass("fin2");
-    zoneClasses.AddClass("fin3");
-    zoneClasses.AddClass("fin4");
-    zoneClasses.AddClass("mirvs");
-    zoneClasses.AddClass("mirv1");
-    zoneClasses.AddClass("mirv2");
-    zoneClasses.AddClass("mirv3");
-    zoneClasses.AddClass("mirv4");
-    zoneClasses.AddClass("guidance");
+    zoneClasses.AddClass("Nose");
+    zoneClasses.AddClass("Ring");
+    zoneClasses.AddClass("Fins");
+    zoneClasses.AddClass("Fin1");
+    zoneClasses.AddClass("Fin2");
+    zoneClasses.AddClass("Fin3");
+    zoneClasses.AddClass("Fin4");
+    zoneClasses.AddClass("Mirvs");
+    zoneClasses.AddClass("Mirv1");
+    zoneClasses.AddClass("Mirv2");
+    zoneClasses.AddClass("Mirv3");
+    zoneClasses.AddClass("Mirv4");
+    zoneClasses.AddClass("Guidance");
 
-    zoneClasses.AddClass("level0");
-    zoneClasses.AddClass("level1");
-    zoneClasses.AddClass("level2");
+    zoneClasses.AddClass("Level0");
+    zoneClasses.AddClass("Level1");
+    zoneClasses.AddClass("Level2");
+
+    zoneClasses.AddClass("High Explosive");
+    zoneClasses.AddClass("Solid Propellant");
+    zoneClasses.AddClass("Liquid Propellant");
+    zoneClasses.AddClass("Electronics");
+    zoneClasses.AddClass("Body");
 }
 
 //
@@ -817,7 +842,7 @@ extern int WriteFormat_silo(int argc, const char *const *const argv);
 int
 main(int argc, char **argv)
 {
-    int nerrors = 0;
+    int i, nerrors = 0;
 
     DefineNodeClasses();
     DefineZoneClasses();

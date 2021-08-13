@@ -508,7 +508,7 @@ PMPIO_DefaultCreate(const char *fname, const char *nsname, void *userData)
     if (driver != DB_PDB && driver != DB_HDF5)
         driver = DB_PDB;
     siloFile = DBCreate(fname, DB_CLOBBER, DB_LOCAL, "PMPIO_DefaultCreate", driver);
-    if (siloFile)
+    if (siloFile && nsname)
     {
         DBMkDir(siloFile, nsname);
         DBSetDir(siloFile, nsname);
@@ -527,7 +527,7 @@ PMPIO_DefaultOpen(const char *fname, const char *nsname, PMPIO_iomode_t ioMode, 
 {
     DBfile *siloFile = DBOpen(fname, DB_UNKNOWN,
         ioMode == PMPIO_WRITE ? DB_APPEND : DB_READ);
-    if (siloFile)
+    if (siloFile && nsname)
     {
         if (ioMode == PMPIO_WRITE)
             DBMkDir(siloFile, nsname);
