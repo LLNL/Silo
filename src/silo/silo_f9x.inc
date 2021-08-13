@@ -108,7 +108,7 @@
 !...Parameters.
       integer, parameter :: SILO_VERS_MAJ = 4
       integer, parameter :: SILO_VERS_MIN = 10
-      integer, parameter :: SILO_VERS_PAT = 3
+      integer, parameter :: SILO_VERS_PAT = 4
       integer, parameter :: SILO_VERS_PRE = 0
       integer, parameter :: DB_NETCDF = 0
       integer, parameter :: DB_PDB = 2
