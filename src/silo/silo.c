@@ -3768,11 +3768,14 @@ DBAddDblComponent(DBobject *object, const char *compname, double ff)
  *
  *    Sean Ahern, Tue Sep 28 11:00:13 PDT 1999
  *    Made the error messages a little better.
+ *
+ *    Mark C. Miller, Thu Apr  2 09:48:57 PDT 2015
+ *    Added Al Nichols' enhancement for arb. length str components.
  *--------------------------------------------------------------------*/
 PUBLIC int
 DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
 {
-    char           tmp[256];
+    char *tmp = 0;
 
     API_BEGIN("DBAddStrComponent", int, -1) {
         if (!object)
@@ -3791,17 +3794,25 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
             sprintf(tmp, "'<s>null'");
         }
         else
+        {
+            tmp = malloc(strlen(ss)+6);
             sprintf(tmp, "'<s>%s'", ss);
+        }
 
         if (NULL == (object->comp_names[object->ncomponents] =
                      STRDUP(compname)) ||
             NULL == (object->pdb_names[object->ncomponents] =
                      STRDUP(tmp))) {
+            FREE(tmp);
             FREE(object->comp_names[object->ncomponents]);
             API_ERROR(NULL, E_NOMEM);
         }
         if (!db_IncObjectComponentCount(object))
+        {
+            FREE(tmp);
             API_ERROR(NULL, E_NOMEM);
+        }
+        FREE(tmp);
     }
     API_END;
 
