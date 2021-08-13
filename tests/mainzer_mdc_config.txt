@@ -1,0 +1,5 @@
+set_initial_size=1
+initial_size=16384
+min_size=8192
+epoch_length=3000
+lower_hr_threshold=1e-5

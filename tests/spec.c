@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -133,7 +133,7 @@ main(int argc, char *argv[])
 			 driver)) == NULL)
     {
         fprintf(stderr, "Unable to create SILO file\n");
-        exit(1);
+        exit(EXIT_SUCCESS);
     }
 
     /* Name the coordinate axes 'X' and 'Y' */

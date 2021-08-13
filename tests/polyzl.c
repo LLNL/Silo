@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -143,7 +143,7 @@ main(int argc, char *argv[])
     dbfile = DBCreate(filename,0,DB_LOCAL,"Polyhedral Zonelist Test",driver);
 
     optlist = DBMakeOptlist(3);
-    DBAddOption(optlist, DBOPT_PHZONELIST, "polyzl");
+    DBAddOption(optlist, DBOPT_PHZONELIST, (char *) "polyzl");
 
     DBPutUcdmesh(dbfile, "ucdmesh", 3, (DBCAS_t) coordnames,
         coords, NNODES, NZONES, NULL, NULL, DB_FLOAT, optlist);

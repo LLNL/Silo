@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -603,7 +603,7 @@ build_rect2d(DBfile * dbfile, int size, int order)
 
     if (mixlen > 40 * ny) {
         printf ("mixlen = %d\n", mixlen);
-        exit (1);
+        exit(EXIT_SUCCESS);
     }
 
     /*
@@ -628,10 +628,10 @@ build_rect2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
-    DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-    DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-    DBAddOption(optlist, DBOPT_XUNITS, "cm");
-    DBAddOption(optlist, DBOPT_YUNITS, "cm");
+    DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+    DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+    DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
     DBAddOption(optlist, DBOPT_ALLOWMAT0, &one);
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
     DBAddOption(optlist, DBOPT_MATCOLORS, matcolors);
@@ -984,10 +984,10 @@ build_curv2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
-    DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-    DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-    DBAddOption(optlist, DBOPT_XUNITS, "cm");
-    DBAddOption(optlist, DBOPT_YUNITS, "cm");
+    DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+    DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+    DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
     DBAddOption(optlist, DBOPT_LO_OFFSET, &lo_off);
     DBAddOption(optlist, DBOPT_HI_OFFSET, &hi_off);
     DBAddOption(optlist, DBOPT_MAJORORDER, &order);
@@ -1296,12 +1296,12 @@ build_ucd2d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
     DBAddOption(optlist, DBOPT_TOPO_DIM, (void *)&td);
-    DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-    DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-    DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-    DBAddOption(optlist, DBOPT_XUNITS, "cm");
-    DBAddOption(optlist, DBOPT_YUNITS, "cm");
-    DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+    DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+    DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+    DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+    DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
     topo_dim = 2;
     DBAddOption(optlist, DBOPT_TOPO_DIM, &topo_dim);
@@ -1598,7 +1598,7 @@ build_rect3d(DBfile * dbfile, int size, int order)
 
     if (mixlen > 50 * nx * ny) {
         printf ("mixlen = %d\n", mixlen);
-        exit (1);
+        exit(EXIT_SUCCESS);
     }
 
     /*
@@ -1622,12 +1622,12 @@ build_rect3d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
-    DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-    DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-    DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-    DBAddOption(optlist, DBOPT_XUNITS, "cm");
-    DBAddOption(optlist, DBOPT_YUNITS, "cm");
-    DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+    DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+    DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+    DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+    DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
 #if 0
     i = DB_COLMAJOR;
@@ -2065,12 +2065,12 @@ build_curv3d(DBfile * dbfile, int size, int order)
     DBAddOption (optlist, DBOPT_CYCLE, &cycle);
     DBAddOption (optlist, DBOPT_TIME , &time);
     DBAddOption (optlist, DBOPT_DTIME, &dtime);
-    DBAddOption (optlist, DBOPT_XLABEL, "X Axis");
-    DBAddOption (optlist, DBOPT_YLABEL, "Y Axis");
-    DBAddOption (optlist, DBOPT_ZLABEL, "Z Axis");
-    DBAddOption (optlist, DBOPT_XUNITS, "cm");
-    DBAddOption (optlist, DBOPT_YUNITS, "cm");
-    DBAddOption (optlist, DBOPT_ZUNITS, "cm");
+    DBAddOption (optlist, DBOPT_XLABEL, (char *) "X Axis");
+    DBAddOption (optlist, DBOPT_YLABEL, (char *) "Y Axis");
+    DBAddOption (optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+    DBAddOption (optlist, DBOPT_XUNITS, (char *) "cm");
+    DBAddOption (optlist, DBOPT_YUNITS, (char *) "cm");
+    DBAddOption (optlist, DBOPT_ZUNITS, (char *) "cm");
     DBAddOption (optlist, DBOPT_MATNAMES, matnames);
 
 #if 0
@@ -2534,12 +2534,12 @@ build_ucd3d(DBfile * dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
     DBAddOption(optlist, DBOPT_TOPO_DIM, (void *)&td);
-    DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-    DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-    DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-    DBAddOption(optlist, DBOPT_XUNITS, "cm");
-    DBAddOption(optlist, DBOPT_YUNITS, "cm");
-    DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+    DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+    DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+    DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+    DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
 
     DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0, zoneno,
@@ -3072,12 +3072,12 @@ build_poly3d(DBfile *dbfile, int size, int order)
     DBAddOption(optlist, DBOPT_CYCLE, &cycle);
     DBAddOption(optlist, DBOPT_TIME, &time);
     DBAddOption(optlist, DBOPT_DTIME, &dtime);
-    DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-    DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-    DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-    DBAddOption(optlist, DBOPT_XUNITS, "cm");
-    DBAddOption(optlist, DBOPT_YUNITS, "cm");
-    DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+    DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+    DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+    DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+    DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+    DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
     DBAddOption(optlist, DBOPT_MATNAMES, matnames);
 
     DBPutFacelist(dbfile, "fl1", nfaces, 3, facelist, lfacelist, 0,
@@ -3235,9 +3235,9 @@ build_curve (DBfile *dbfile, int driver)
 
    DBSetFriendlyHDF5Names(1);
    opts = DBMakeOptlist (10) ;
-   DBAddOption (opts, DBOPT_XLABEL, "X Axis") ;
-   DBAddOption (opts, DBOPT_YLABEL, "Y Axis") ;
-   DBAddOption (opts, DBOPT_XUNITS, "radians") ;
+   DBAddOption (opts, DBOPT_XLABEL, (char *) "X Axis") ;
+   DBAddOption (opts, DBOPT_YLABEL, (char *) "Y Axis") ;
+   DBAddOption (opts, DBOPT_XUNITS, (char *) "radians") ;
    DBAddOption (opts, DBOPT_HIDE_FROM_GUI, &one) ;
 
    /*
@@ -3251,18 +3251,18 @@ build_curve (DBfile *dbfile, int driver)
     * Write the `coscurve' curve. It shares x values with the `sincurve'
     * curve.
     */
-   DBAddOption(opts, DBOPT_XVARNAME, "sincurve_xvals");
+   DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
    DBPutCurve (dbfile, "coscurve", NULL, y[1], DB_FLOAT, 20, opts) ;
    DBClearOption(opts, DBOPT_XVARNAME);
 
-   DBAddOption (opts, DBOPT_REFERENCE, "sincurve") ;
+   DBAddOption (opts, DBOPT_REFERENCE, (char *) "sincurve") ;
    DBPutCurve (dbfile, "sincurv1", NULL, NULL, DB_FLOAT, 20, opts);
 
    DBClearOptlist(opts);
-   DBAddOption (opts, DBOPT_XLABEL, "radius") ;
-   DBAddOption (opts, DBOPT_YLABEL, "angle") ;
-   DBAddOption (opts, DBOPT_XUNITS, "radians") ;
-   DBAddOption (opts, DBOPT_YUNITS, "meters") ;
+   DBAddOption (opts, DBOPT_XLABEL, (char *) "radius") ;
+   DBAddOption (opts, DBOPT_YLABEL, (char *) "angle") ;
+   DBAddOption (opts, DBOPT_XUNITS, (char *) "radians") ;
+   DBAddOption (opts, DBOPT_YUNITS, (char *) "meters") ;
    DBAddOption (opts, DBOPT_COORDSYS, &coord_sys );
   
    for (i=0; i<40; i++) {

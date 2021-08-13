@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -177,8 +177,8 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
         void *comp = silo->GetComponent(name, compname);
         if (!comp)
         {
-            const char *asciiname = name.toAscii();
-            const char *asciicomp = compname.toAscii();
+            const char *asciiname = name.toLatin1();
+            const char *asciicomp = compname.toLatin1();
             std::cerr << "ERROR: DBGetComponent failed for object '"
                       << asciiname
                       <<"', component '"
@@ -230,11 +230,11 @@ SiloObjectView::SiloObjectView(SiloFile *s, const QString &n, QWidget *p)
             break;
           default:
             typestr = "var";
-            std::string valStr = std::string(pdbname.toAscii());
+            std::string valStr = std::string(pdbname.toLatin1());
             if (pdbname.indexOf("'<s>") == 0)
             {
                 int len = pdbname.length();
-                valStr = std::string((const char*)(pdbname.toAscii()),4,len-5);
+                valStr = std::string((const char*)(pdbname.toLatin1()),4,len-5);
             }
             sprintf(value, "%s", valStr.c_str());
             break;

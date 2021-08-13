@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -205,7 +205,7 @@ main(int argc, char *argv[])
 	    fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
 	}
     }
-    
+
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
     printf("Creating test file \"%s\".\n", filename);
     if (append)

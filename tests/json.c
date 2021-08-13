@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -107,11 +107,14 @@ main(int argc, char *argv[])
     }
     
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ABORT, NULL);
-    dbfile = DBOpen(filename, driver, DB_READ);
+    dbfile = DBOpen("../../multi_ucd3d.pdb", DB_PDB, DB_READ);
+    if (!dbfile) dbfile = DBOpen("multi_ucd3d.pdb", DB_PDB, DB_READ);
 
     /* Example of getting a Silo object from a silo file as a json object */
-    jsilo_obj = DBGetJsonObject(dbfile, "hex");
+    jsilo_obj = DBGetJsonObject(dbfile, "mesh1");
+    printf("%s\n", json_object_to_json_string_ext(jsilo_obj, 0));
     DBClose(dbfile);
+    exit(EXIT_SUCCESS);
 
     /* Test interface to query extptr members from jsilo_obj */
     {

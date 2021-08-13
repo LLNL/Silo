@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -403,10 +403,10 @@ build_dbfile(DBfile *dbfile)
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
 
         DBPutQuadmesh(dbfile, meshname, coordnames, coords, dims, ndims,
                       DB_FLOAT, DB_NONCOLLINEAR, optlist);
@@ -454,7 +454,7 @@ build_dbfile(DBfile *dbfile)
     DBAddOption(optlist, DBOPT_NMATNOS, &nmats);
     DBAddOption(optlist, DBOPT_MATNOS, matnos);
     /* For multi-species: */
-    DBAddOption(optlist, DBOPT_MATNAME, "mat1");
+    DBAddOption(optlist, DBOPT_MATNAME, (char *) "mat1");
     DBAddOption(optlist, DBOPT_NMAT, &nmats);
     DBAddOption(optlist, DBOPT_NMATSPEC, nmatspec);
     DBAddOption(optlist, DBOPT_SPECNAMES, species_names);

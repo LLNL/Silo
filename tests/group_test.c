@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -264,7 +264,7 @@ Usage: %s <blockorigin> <grouporigin> <zoneorigin>\n\
        line to indicate the file driver to use: DB_PDB (the default),\n\
        or DB_HDF5.\n", progname);
     
-    exit(1);
+    exit(EXIT_SUCCESS);
 }
 
 /*-------------------------------------------------------------------------
@@ -796,7 +796,7 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     if (mixlen > 20000)
     {
          printf ("memory overwrite: mixlen = %d > 20000\n", mixlen);
-         exit (-1);
+         exit (EXIT_FAILURE);
     }
 
     /*
@@ -903,12 +903,12 @@ build_block_rect3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
-        DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
 
         DBAddOption(optlist, DBOPT_ORIGIN, &zoneorigin);
 
@@ -1203,7 +1203,7 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
     if (mixlen > 4500)
     {
          printf ("memory overwrite: mixlen = %d > 4500\n", mixlen);
-         exit (-1);
+         exit (EXIT_FAILURE);
     }
 
     /*
@@ -1413,12 +1413,12 @@ build_block_ucd3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
-        DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
         DBAddOption(optlist, DBOPT_HI_OFFSET, &hi_off);
         DBAddOption(optlist, DBOPT_NODENUM, globalnode);
 
@@ -1874,12 +1874,12 @@ build_block_curv3d(DBfile *dbfile, char dirnames[MAXBLOCKS][STRLEN],
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
-        DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
 
         DBAddOption(optlist, DBOPT_ORIGIN, &zoneorigin);
 

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -184,6 +184,7 @@ be used for advertising or product endorsement purposes.
 /* For Lindstrom compression libs */
 #define DB_HDF5_HZIP_ID (H5Z_FILTER_RESERVED+1)
 #define DB_HDF5_FPZIP_ID (H5Z_FILTER_RESERVED+2)
+#define DB_HDF5_ZFP_ID (H5Z_FILTER_RESERVED+3)
 #ifdef HAVE_HZIP
 #include <hzip.h>
 #ifdef HAVE_LIBZ
@@ -194,6 +195,10 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
 #endif
 #ifdef HAVE_FPZIP
 #include <fpzip.h>
+#endif
+#ifdef HAVE_ZFP
+#define USE_C_STRUCTSPACE
+#include <zfp.h>
 #endif
 
 /* Defining these to check overhead of PROTECT */
@@ -1007,7 +1012,7 @@ INTERNAL void
 suppress_set_but_not_used_warning(void const *ptr)
 {}
 
-#ifdef HAVE_FPZIP
+#ifdef HAVE_FPZIP /* { */
 
 /* The following section of code are HDF5 filters to implement FPZIP
    compression algorithms
@@ -1151,9 +1156,9 @@ db_hdf5_fpzip_filter_op(unsigned int flags, size_t cd_nelmts,
     }
 }
 static H5Z_class_t db_hdf5_fpzip_class;
-#endif
+#endif /* HAVE_FPZIP } */
 
-#ifndef HAVE_HZIP
+#ifndef HAVE_HZIP /* { */
 /*ARGSUSED*/
 static void
 FreeNodelists(DBfile_hdf5 *dbfile, char const *meshname) {}
@@ -1700,7 +1705,273 @@ db_hdf5_hzip_filter_op(unsigned int flags, size_t cd_nelmts,
     }
 }
 static H5Z_class_t db_hdf5_hzip_class;
+#endif /* !HAVE_HZIP } */
+
+#ifdef HAVE_ZFP /* { */
+
+typedef union zfp_cdvals_t_ {
+    struct zfp_params_ {
+        unsigned int mode;
+        union {
+            double rate;
+            double acc;
+            uint prec;
+            struct expert_ {
+                uint minbits;
+                uint maxbits;
+                uint maxprec;
+                int minexp;
+            } expert;
+        } params;
+    } zfp_stuff;
+    unsigned int cd_values[10];
+} zfp_cdvals_t;
+
+/*
+    unsigned int cd_values[6];
+
+    cd_values[0]: ZFP version + endienness magic
+    cd_values[1] : size threshold
+    cd_values[2]: lower 32 bits of zfp 'mode'
+    cd_values[3]: upper 32 bits of zfp 'mode'
+    cd_values[4]: lower 32 bits of zfp 'meta'
+    cd_values[5]: upper 32 bits of zfp 'meta'
+*/
+#define ZFP_CDVIDX_LOINFO 0
+#define ZFP_CDVIDX_HIINFO 1
+#define ZFP_CDVIDX_LOMODE 2
+#define ZFP_CDVIDX_HIMODE 3
+#define ZFP_CDVIDX_LOMETA 4
+#define ZFP_CDVIDX_HIMETA 5
+
+#define ZFP_CDVIDX_MODE   0
+
+#define ZFP_CDVAL_ENDIAN_BIG 1
+#define ZFP_CDVAL_ENDIAN_LIT 2
+#define ZFP_CDVAL_MODE_RATE 1
+#define ZFP_CDVAL_MODE_PRECISION 2
+#define ZFP_CDVAL_MODE_ACCURACY 3
+#define ZFP_CDVAL_MODE_EXPERT 3
+
+static herr_t
+db_hdf5_zfp_can_apply(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+{   
+    hsize_t dims[3];
+    hid_t dclass = H5Tget_class(type_id);
+    size_t dsize = H5Tget_size(type_id);
+    size_t ndims = H5Sget_simple_extent_ndims(space_id);
+    unsigned int cd_values[6] = {0,0,0,0,0,0};
+    size_t cd_nelmts = sizeof(cd_values)/sizeof(cd_values[0]);
+    unsigned int bytecnt_threshold;
+    unsigned int flags;
+    size_t nvals = 1;
+    size_t i;
+
+    /* zfp works on 1,2 and 3D arrays of 32 or 64 bit float or integer data */
+    if (!(dclass == H5T_FLOAT || dclass == H5T_INTEGER)) return 0;
+    if (!(dsize == 4 || dsize == 8)) return 0;
+    if (ndims == 0 || ndims > 3) return 0;
+
+    H5Sget_simple_extent_dims(space_id, dims, NULL);
+    for (i = 0; i < ndims; i++)
+    {
+        if (dims[i] == 0) return 0;
+        nvals *= dims[i];
+    }
+
+    /* get current filter cd_values for size threshold */
+#warning FIX THIS BROKEN REFERENCE TO SIZE THRESHOLD
+#if 0
+    H5Pget_filter_by_id(dcpl_id, DB_HDF5_ZFP_ID, &flags, &cd_nelmts, cd_values, 0, NULL);
+    bytecnt_threshold = cd_values[ZFP_CDVIDX_SIZETH];
+    if (nvals*dsize < bytecnt_threshold) return 0;
 #endif
+
+    return 1;
+}
+
+/* Re-interprets the cd_values from the user-level interface (e.g. mode,)
+ * and creates new cd_values encoding the filter params. Note that
+ * initial call to setup filter, H5Zset_filter is responsible *only* for
+ * setting valid data in the 'mode' subfields of cd_values. Other entries
+ * in cd_values should be considered garbage here and are overwritten here
+ * with valid values. Finally, this happens *only* on the compression half
+ * of the process. On the decompression half, we use *only* the cd_values
+ * array in the dataset header to manage the decompression.
+ */
+static herr_t
+db_hdf5_zfp_set_local(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+{   
+    hsize_t dims[3];
+    H5T_order_t endian = H5Tget_order(type_id);
+    hid_t dclass = H5Tget_class(type_id);
+    size_t dsize = H5Tget_size(type_id);
+    size_t ndims = H5Sget_simple_extent_ndims(space_id);
+    size_t cd_nelmts = 10;
+    unsigned int cd_values[10];
+    unsigned int bytecnt_threshold;
+    unsigned int flags;
+    zfp_type zt;
+    uint64 zfp_meta, zfp_mode;
+    zfp_cdvals_t zfp_cdvals;
+    zfp_field *dummy_field;
+    bitstream *dummy_bstr = zfpbs.stream_open(0,0);
+    zfp_stream *dummy_zstr = zfp.zfp_stream_open(dummy_bstr);
+
+    H5Sget_simple_extent_dims(space_id, dims, NULL);
+
+    /* setup zfp data type for meta header */
+    if (dclass == H5T_FLOAT)
+    {
+        zt = (dsize == 4) ? zfp_type_float : zfp_type_double;
+    }
+    else if (dclass == H5T_INTEGER)
+    {
+        zt = (dsize == 4) ? zfp_type_int32 : zfp_type_int64;
+    }
+
+    /* set up dummy zfp field to compute meta header */
+    if (ndims == 1)
+        dummy_field = zfp.zfp_field_1d(0, zt, dims[0]);
+    else if (ndims == 2)
+        dummy_field = zfp.zfp_field_2d(0, zt, dims[0], dims[1]);
+    else if (ndims == 3)
+        dummy_field = zfp.zfp_field_3d(0, zt, dims[0], dims[1], dims[2]);
+
+    /* get the meta header from the dummy field and free it */
+    zfp_meta = zfp.zfp_field_metadata(dummy_field); 
+    zfp.zfp_field_free(dummy_field);
+
+    /* get current cd_values and re-map to new cd_value set */
+    H5Pget_filter_by_id(dcpl_id, DB_HDF5_ZFP_ID, &flags, &cd_nelmts, zfp_cdvals.cd_values, 0, NULL);
+    if (zfp_cdvals.zfp_stuff.mode == ZFP_CDVAL_MODE_RATE)
+        zfp.zfp_stream_set_rate(dummy_zstr, zfp_cdvals.zfp_stuff.params.rate, zt, ndims, 0);
+    else if (zfp_cdvals.zfp_stuff.mode == ZFP_CDVAL_MODE_PRECISION)
+        zfp.zfp_stream_set_precision(dummy_zstr, zfp_cdvals.zfp_stuff.params.prec, zt);
+    else if (zfp_cdvals.zfp_stuff.mode == ZFP_CDVAL_MODE_ACCURACY)
+        zfp.zfp_stream_set_accuracy(dummy_zstr, zfp_cdvals.zfp_stuff.params.acc, zt);
+    else if (zfp_cdvals.zfp_stuff.mode == ZFP_CDVAL_MODE_EXPERT)
+        zfp.zfp_stream_set_params(dummy_zstr, zfp_cdvals.zfp_stuff.params.expert.minbits,
+                                              zfp_cdvals.zfp_stuff.params.expert.maxbits,
+                                              zfp_cdvals.zfp_stuff.params.expert.maxprec,
+                                              zfp_cdvals.zfp_stuff.params.expert.minexp);
+
+    zfp_mode = zfp.zfp_stream_mode(dummy_zstr);
+    zfp.zfp_stream_close(dummy_zstr);
+    zfpbs.stream_close(dummy_bstr);
+
+    /* populate cd_values with stuff we don't burden caller of H5Zset_filter with */
+    cd_values[ZFP_CDVIDX_LOINFO] = (endian<<16) | ZFP_VERSION;
+    cd_values[ZFP_CDVIDX_HIINFO] = 0x0; /* unused */
+    cd_values[ZFP_CDVIDX_LOMODE] = (unsigned int) (      zfp_mode & 0x00000000FFFFFFFF);
+    cd_values[ZFP_CDVIDX_HIMODE] = (unsigned int) ((zfp_mode>>32) & 0x00000000FFFFFFFF);
+    cd_values[ZFP_CDVIDX_LOMETA] = (unsigned int) (      zfp_meta & 0x00000000FFFFFFFF);
+    cd_values[ZFP_CDVIDX_HIMETA] = (unsigned int) ((zfp_meta>>32) & 0x00000000FFFFFFFF);
+    cd_nelmts = 6;
+
+    /* update cd_values */
+    H5Pmodify_filter(dcpl_id, DB_HDF5_ZFP_ID, flags, cd_nelmts, cd_values);
+
+    return 1;
+}
+
+static size_t
+db_hdf5_zfp_filter_op(unsigned int flags, size_t cd_nelmts,
+    const unsigned int cd_values[], size_t nbytes,
+    size_t *buf_size, void **buf)
+{
+#warning WHAT ABOUT ENDIANNESS HERE
+    uint64 lomode = cd_values[ZFP_CDVIDX_LOMODE];
+    uint64 himode = cd_values[ZFP_CDVIDX_HIMODE];
+    uint64 zfp_mode = ((himode<<32) & 0xFFFFFFFF00000000) | lomode & 0x00000000FFFFFFFF;
+    uint64 lometa = cd_values[ZFP_CDVIDX_LOMETA];
+    uint64 himeta = cd_values[ZFP_CDVIDX_HIMETA];
+    uint64 zfp_meta = ((himeta<<32) & 0xFFFFFFFF00000000) | lometa & 0x00000000FFFFFFFF;
+
+    if (flags & H5Z_FLAG_REVERSE) /* decompression */
+    {
+        bitstream *bstr = zfpbs.stream_open(*buf, *buf_size);
+        zfp_stream *zstr = zfp.zfp_stream_open(bstr);
+        zfp_field *zfld = zfp.zfp_field_alloc();
+        void *new_buf;
+        size_t bsize;
+        int status;
+
+        zfp.zfp_field_set_metadata(zfld, zfp_meta);
+        bsize = zfp.zfp_field_size(zfld, 0);
+        switch (zfp.zfp_field_type(zfld))
+        {
+            case zfp_type_int32:
+            case zfp_type_float:
+                bsize *= 4;
+                break;
+            case zfp_type_int64:
+            case zfp_type_double:
+                bsize *= 8;
+                break;
+        }
+        new_buf = malloc(bsize);
+
+        zfp.zfp_field_set_pointer(zfld, new_buf);
+
+        status = zfp.zfp_decompress(zstr, zfld);
+
+        zfp.zfp_field_free(zfld);
+        zfp.zfp_stream_close(zstr);
+        zfpbs.stream_close(bstr);
+
+        if (!status)
+        {
+            free(new_buf);
+            return 0;
+        }
+       
+        free(*buf);
+        *buf = new_buf;
+        *buf_size = bsize; 
+        return bsize;
+    }
+    else /* compression */
+    {
+        size_t msize, zsize;
+        void *newbuf;
+        bitstream *bstr;
+        zfp_stream *zstr = zfp.zfp_stream_open(0);
+        zfp_field *zfld = zfp.zfp_field_alloc();
+
+        zfp.zfp_field_set_pointer(zfld, *buf);
+        zfp.zfp_field_set_metadata(zfld, zfp_meta);
+
+        zfp.zfp_stream_set_mode(zstr, zfp_mode);
+
+        msize = zfp.zfp_stream_maximum_size(zstr, zfld);
+        newbuf = malloc(msize);
+        bstr = zfpbs.stream_open(newbuf, msize);
+        zfp.zfp_stream_set_bit_stream(zstr, bstr);
+
+        zsize = zfp.zfp_compress(zstr, zfld);
+
+        zfp.zfp_stream_close(zstr);
+        zfp.zfp_field_free(zfld);
+        zfpbs.stream_close(bstr);
+
+        if (zsize == 0)
+        {
+            free(newbuf);
+            return 0;
+        }
+
+        free(*buf);
+        *buf = newbuf;
+        *buf_size = zsize;
+        return zsize;
+    }
+
+    return 0;
+}
+
+static H5Z_class_t db_hdf5_zfp_class;
+#endif /* HAVE_ZFP } */
 
 INTERNAL char const *
 friendly_name(char const *base_name, char const *fmtstr, void const *val)
@@ -2029,11 +2300,11 @@ db_hdf5_init(void)
     P_ckrdprops = H5Pcreate(H5P_DATASET_XFER);   /* never freed */
     H5Pset_edc_check(P_ckrdprops, H5Z_DISABLE_EDC);
 
-#ifdef HAVE_FPZIP
+#ifdef HAVE_FPZIP /* { */
     db_hdf5_fpzip_params.loss = 0;
 #if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
     db_hdf5_fpzip_class.version = H5Z_CLASS_T_VERS;
-    db_hdf5_fpzip_class.encoder_present = 1;
+    db_hdf5_fpzip_class.encoder_present = 0;
     db_hdf5_fpzip_class.decoder_present = 1;
 #endif
     db_hdf5_fpzip_class.id = DB_HDF5_FPZIP_ID;
@@ -2042,14 +2313,15 @@ db_hdf5_init(void)
     db_hdf5_fpzip_class.set_local = db_hdf5_fpzip_set_local;
     db_hdf5_fpzip_class.filter = db_hdf5_fpzip_filter_op;
     H5Zregister(&db_hdf5_fpzip_class);
-#endif
+#endif /* HAVE_FPZIP } */
 
-#ifdef HAVE_HZIP
+#ifdef HAVE_HZIP /* { */
 
 #ifdef HAVE_LIBZ
     db_hdf5_hzip_zlib_codec_params = hzm_codec_zlib;
-#endif
+#else
     db_hdf5_hzip_base_codec_params = hzm_codec_base;
+#endif
 
 #ifdef HAVE_LIBZ
     db_hdf5_hzip_params.codec = HZM_CODEC_ZLIB;
@@ -2063,7 +2335,7 @@ db_hdf5_init(void)
 
 #if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
     db_hdf5_hzip_class.version = H5Z_CLASS_T_VERS;
-    db_hdf5_hzip_class.encoder_present = 1;
+    db_hdf5_hzip_class.encoder_present = 0;
     db_hdf5_hzip_class.decoder_present = 1;
 #endif
     db_hdf5_hzip_class.id = DB_HDF5_HZIP_ID;
@@ -2076,7 +2348,23 @@ db_hdf5_init(void)
     /* Initialize support data structures for hzip */
     memset(keptNodelistInfos, 0x0, sizeof(keptNodelistInfos));
 
+#endif /* HAVE_HZIP } */
+
+#ifdef HAVE_ZFP /* { */
+
+#if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
+    db_hdf5_zfp_class.version = H5Z_CLASS_T_VERS;
+    db_hdf5_zfp_class.encoder_present = 1;
+    db_hdf5_zfp_class.decoder_present = 1;
 #endif
+    db_hdf5_zfp_class.id = DB_HDF5_ZFP_ID;
+    db_hdf5_zfp_class.name = "Lindstrom-zfp";
+    db_hdf5_zfp_class.can_apply = db_hdf5_zfp_can_apply;
+    db_hdf5_zfp_class.set_local = db_hdf5_zfp_set_local;
+    db_hdf5_zfp_class.filter = db_hdf5_zfp_filter_op;
+    H5Zregister(&db_hdf5_zfp_class);
+    zfp.zfp_init(); /* init the zfp API */
+#endif /* HAVE_ZFP } */
 
     /* Define compound data types */
     STRUCT(DBcurve) {
@@ -2693,6 +2981,7 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
     /* File operations */
     dbfile->pub.close = db_hdf5_Close;
     dbfile->pub.module = db_hdf5_Filters;
+    dbfile->pub.flush = db_hdf5_Flush;
 
     /* Directory operations */
     dbfile->pub.cd = db_hdf5_SetDir;
@@ -3169,14 +3458,16 @@ db_hdf5_set_compression(int flags)
     char *check;
     int level, block, nfilters;
     int nbits, prec;
-    int have_gzip, have_szip, have_fpzip, have_hzip, i;
+    int have_gzip, have_szip, have_fpzip, have_hzip, have_zfp, i;
     H5Z_filter_t filtn;
-    unsigned int filter_config_flags;
-/* Check what filters already exist */
+    unsigned int filter_config_flags, opt_flag;
+
+    /* Check what filters already exist */
     have_gzip = FALSE;
     have_szip = FALSE;
     have_fpzip = FALSE;
     have_hzip = FALSE;
+    have_zfp = FALSE;
     if ((nfilters = H5Pget_nfilters(P_ckcrprops))<0)
     {
        db_perror("H5Pget_nfilters", E_CALLFAIL, me);
@@ -3196,6 +3487,8 @@ db_hdf5_set_compression(int flags)
             have_fpzip = TRUE;
         if (DB_HDF5_HZIP_ID==filtn)
             have_hzip = TRUE;
+        if (DB_HDF5_ZFP_ID==filtn)
+            have_zfp = TRUE;
     }
 /* Handle some global compression parameters */
     if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
@@ -3227,8 +3520,28 @@ db_hdf5_set_compression(int flags)
             return (-1);
         }
     }
+#warning FIX MISSING .compressionMinsize member
+#if 0
+    if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+       "MINSIZE=")) != (char *)NULL) 
+    {
+        unsigned int minsize;
+        strncpy(chararray, ptr+8, 8); 
+        minsize = strtol(chararray, &check, 10);
+        if (minsize > 0)
+            SILO_Globals.compressionMinsize = minsize;
+        else
+        {
+            db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
+            return -1;
+        }
+    }
+#endif
 
-/* Select the compression algorthm */
+    opt_flag = SILO_Globals.compressionErrmode == COMPRESSION_ERRMODE_FALLBACK ?
+                   H5Z_FLAG_OPTIONAL : H5Z_FLAG_MANDATORY;
+
+    /* Select the compression algorthm */
     if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
        "METHOD=GZIP")) != (char *)NULL) 
     {
@@ -3389,9 +3702,7 @@ db_hdf5_set_compression(int flags)
               }
            }
 
-           if (H5Pset_filter(P_ckcrprops, DB_HDF5_HZIP_ID,
-                   SILO_Globals.compressionErrmode == COMPRESSION_ERRMODE_FALLBACK ?
-                       H5Z_FLAG_OPTIONAL : H5Z_FLAG_MANDATORY, 0, 0)<0)
+           if (H5Pset_filter(P_ckcrprops, DB_HDF5_HZIP_ID, opt_flag, 0, 0)<0)
            {
                db_perror("hzip filter setup", E_CALLFAIL, me);
                return (-1);
@@ -3421,9 +3732,80 @@ db_hdf5_set_compression(int flags)
              }
           }
 
-          if (H5Pset_filter(P_ckcrprops, DB_HDF5_FPZIP_ID,
-                   SILO_Globals.compressionErrmode == COMPRESSION_ERRMODE_FALLBACK ?
-                       H5Z_FLAG_OPTIONAL : H5Z_FLAG_MANDATORY, 0, 0)<0)
+          if (H5Pset_filter(P_ckcrprops, DB_HDF5_FPZIP_ID, opt_flag, 0, 0)<0)
+          {
+              db_perror("H5Pset_filter", E_CALLFAIL, me);
+              return (-1);
+          }
+       }
+    }
+#endif
+#ifdef HAVE_ZFP
+    else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+       "METHOD=ZFP")) != (char *)NULL) 
+    {
+       if (have_zfp == FALSE)
+       {
+          double tmpdbl = -1;
+          uint tmpuint = 0;
+          zfp_cdvals_t zfp_cdvals; 
+          size_t const cd_nelmts = sizeof(zfp_cdvals.cd_values)/sizeof(zfp_cdvals.cd_values[0]);
+          
+          if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+             "RATE=")) != (char *)NULL)
+          {
+             strncpy(chararray, ptr+5, 8); 
+             tmpdbl = strtod(chararray, &check);
+             if (chararray != check && errno == 0 && tmpdbl > 0)
+             {
+                 zfp_cdvals.zfp_stuff.mode = ZFP_CDVAL_MODE_RATE;
+                 zfp_cdvals.zfp_stuff.params.rate = tmpdbl;
+             }
+          }
+          else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+             "PRECISION=")) != (char *)NULL)
+          {
+             strncpy(chararray, ptr+10, 2); 
+             tmpuint = (uint) strtoul(chararray, &check, 10);
+             if (chararray != check && errno == 0 && tmpuint > 0)
+             {
+                 zfp_cdvals.zfp_stuff.mode = ZFP_CDVAL_MODE_PRECISION;
+                 zfp_cdvals.zfp_stuff.params.prec = tmpuint;
+             }
+          }
+          else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+             "ACCURACY=")) != (char *)NULL)
+          {
+             strncpy(chararray, ptr+9, 8); 
+             tmpdbl = strtod(chararray, &check);
+             if (chararray != check && errno == 0 && tmpdbl > 0)
+             {
+                 zfp_cdvals.zfp_stuff.mode = ZFP_CDVAL_MODE_ACCURACY;
+                 zfp_cdvals.zfp_stuff.params.acc = tmpdbl;
+             }
+          }
+          else if ((ptr=(char *)strstr(SILO_Globals.compressionParams, 
+             "EXPERT=")) != (char *)NULL)
+          {
+             int nvals, minexp; unsigned int minbits, maxbits, maxprec;
+             strncpy(chararray, ptr+7, 20); 
+             nvals = sscanf(chararray, "%u,%u,%u,%d", &minbits, &maxbits, &maxprec, &minexp);
+             if (nvals == 4 && errno == 0)
+             {
+                 zfp_cdvals.zfp_stuff.mode = ZFP_CDVAL_MODE_EXPERT;
+                 zfp_cdvals.zfp_stuff.params.expert.minbits = minbits;
+                 zfp_cdvals.zfp_stuff.params.expert.maxbits = maxbits;
+                 zfp_cdvals.zfp_stuff.params.expert.maxprec = maxprec;
+                 zfp_cdvals.zfp_stuff.params.expert.minexp = minexp;
+             }
+          }
+          else
+          {
+              db_perror(SILO_Globals.compressionParams, E_COMPRESSION, me);
+              return -1;
+          }
+
+          if (H5Pset_filter(P_ckcrprops, DB_HDF5_ZFP_ID, opt_flag, cd_nelmts, zfp_cdvals.cd_values)<0)
           {
               db_perror("H5Pset_filter", E_CALLFAIL, me);
               return (-1);
@@ -4825,6 +5207,8 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
         {
 #ifdef H5_HAVE_PARALLEL
             MPI_Info info;
+            if (!MPI_Initialized())
+                return db_perror("HDF5 MPI VFD -- MPI not initialized", E_CALLFAIL, me);
             MPI_Info_create(&info);
             h5status |= H5Pset_fapl_mpio(retval, MPI_COMM_SELF, info);
             MPI_Info_free(&info);
@@ -5096,6 +5480,9 @@ db_hdf5_process_file_options(int opts_set_id, int mode)
                     MPI_Info mpi_info; 
                     int created_info = 0;
                     hbool_t use_gpfs_hints = TRUE;
+
+                    if (!MPI_Initialized())
+                        return db_perror("HDF5 MPI VFD -- MPI not initialized", E_CALLFAIL, me);
 
                     /* get the communicator */
                     if ((p = DBGetOption(opts, DBOPT_H5_MPIO_COMM)))
@@ -5687,6 +6074,9 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     *fidp = fid;
     dbfile->pub.GrabId = (void*) fidp;
     dbfile->fid = fid;
+/*
+    *(dbfile->pub.file_scope_globals) = SILO_Globals;
+*/
     return db_hdf5_finish_create(dbfile, target, finfo);
 }
 
@@ -5752,6 +6142,37 @@ db_hdf5_Close(DBfile *_dbfile)
         H5close();
     }
 #endif
+
+    return retval;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    db_hdf5_Flush
+ *
+ * Purpose:     Flushes an HDF5 file
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer: Mark C. Miller, Fri Aug 14 11:49:05 PDT 2015
+ *-------------------------------------------------------------------------
+ */
+SILO_CALLBACK int
+db_hdf5_Flush(DBfile *_dbfile)
+{
+    int retval = -1;
+    DBfile_hdf5    *dbfile = (DBfile_hdf5*)_dbfile;
+    static char *me = "db_hdf5_Flush";
+
+    if (!dbfile)
+        return retval;
+
+    PROTECT {
+        if (H5Fflush(dbfile->fid, H5F_SCOPE_LOCAL)>=0)
+            retval = 0;
+    } CLEANUP {
+    } END_PROTECT;
 
     return retval;
 }
@@ -6575,6 +6996,7 @@ db_hdf5_GetComponent(DBfile *_dbfile, char const *objname, char const *compname)
  *   in silex displaying these vector-based components.
  *
  *   Mark C. Miller, Tue Apr 28 15:57:43 PDT 2009
+ *   printf("rate = %f\n", *rate_ptr);
  *   Added missing statement to set mnofname = 0 after free'ing it.
  *
  *   Mark C. Miller, Tue Oct  6 10:24:01 PDT 2009
@@ -7021,7 +7443,13 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 foffset += H5Tget_size(dbfile->T_double);
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
                 size_t len = strlen(obj->pdb_names[i]+4);
-                hid_t str_type = H5Tcopy(H5T_C_S1);
+                hid_t str_type;
+                if (len > 1024 && !SILO_Globals.allowLongStrComponents)
+                {
+                    db_perror("encountered Str component > 1024 chars", E_CALLFAIL, me);
+                    UNWIND();
+                }
+                str_type = H5Tcopy(H5T_C_S1);
                 H5Tset_size(str_type, len);
                 if (H5Tinsert(mtype, obj->comp_names[i], moffset,
                               str_type)<0 ||
@@ -8337,6 +8765,8 @@ db_hdf5_PutCurve(DBfile *_dbfile, char const *name, void const *xvals, void cons
 
         /* Write X and Y arrays if supplied */
         if (npts && xvals) {
+            if (_cu._varname[0])
+                db_hdf5_fullname(dbfile, _cu._varname[0], m.xvarname/*out*/);
             db_hdf5_compwr(dbfile, dtype, 1, &npts, xvals, m.xvarname/*out*/,
                 friendly_name(name, "_xvals", 0));
         } else if (_cu._varname[0]) {
@@ -8344,6 +8774,8 @@ db_hdf5_PutCurve(DBfile *_dbfile, char const *name, void const *xvals, void cons
         }
 
         if (npts && yvals) {
+            if (_cu._varname[1])
+                db_hdf5_fullname(dbfile, _cu._varname[1], m.yvarname/*out*/);
             db_hdf5_compwr(dbfile, dtype, 1, &npts, yvals, m.yvarname/*out*/,
                 friendly_name(name, "_yvals", 0));
         } else if (_cu._varname[1]) {
@@ -12805,17 +13237,27 @@ db_hdf5_GetMultimesh(DBfile *_dbfile, char const *name)
         mm->repr_block_idx = m.repr_block_idx - 1;
 
         /* Read the raw data */
-        if (mm->extentssize>0)
-           mm->extents = (double*)db_hdf5_comprd(dbfile, m.extents, 1);
-        mm->zonecounts =  (int *)db_hdf5_comprd(dbfile, m.zonecounts, 1);
-        mm->has_external_zones =  (int *)db_hdf5_comprd(dbfile, m.has_external_zones, 1);
-        mm->meshtypes = (int *)db_hdf5_comprd(dbfile, m.meshtypes, 1);
-        meshnames = (char *)db_hdf5_comprd(dbfile, m.meshnames, 1);
-        db_StringListToStringArrayMBOpt(meshnames, &(mm->meshnames), &(mm->meshnames_alloc), m.nblocks);
-        mm->groupings =  (int *)db_hdf5_comprd(dbfile, m.groupings, 1);
-        t = (char *)db_hdf5_comprd(dbfile, m.groupnames, 1);
-        if (t) mm->groupnames = DBStringListToStringArray(t, &(mm->lgroupings), !skipFirstSemicolon);
-        FREE(t);
+        if (mm->nblocks>0 && (SILO_Globals.dataReadMask & DBMBNamesAndTypes))
+        {
+            mm->meshtypes = (int *)db_hdf5_comprd(dbfile, m.meshtypes, 1);
+            meshnames = (char *)db_hdf5_comprd(dbfile, m.meshnames, 1);
+            db_StringListToStringArrayMBOpt(meshnames, &(mm->meshnames), &(mm->meshnames_alloc), m.nblocks);
+        }
+
+        /* Read optional data */
+        if (mm->nblocks>0 && (SILO_Globals.dataReadMask & DBMBOptions))
+        {
+            if (mm->extentssize>0)
+               mm->extents = (double*)db_hdf5_comprd(dbfile, m.extents, 1);
+            mm->zonecounts =  (int *)db_hdf5_comprd(dbfile, m.zonecounts, 1);
+            mm->has_external_zones =  (int *)db_hdf5_comprd(dbfile, m.has_external_zones, 1);
+            mm->groupings =  (int *)db_hdf5_comprd(dbfile, m.groupings, 1);
+            t = (char *)db_hdf5_comprd(dbfile, m.groupnames, 1);
+            if (t) mm->groupnames = DBStringListToStringArray(t, &(mm->lgroupings), !skipFirstSemicolon);
+            FREE(t);
+        }
+
+        /* Namescheme related stuff */
         mm->file_ns =  (char *)db_hdf5_comprd(dbfile, m.file_ns_name, 1);
         mm->block_ns =  (char *)db_hdf5_comprd(dbfile, m.block_ns_name, 1);
         mm->block_type = m.block_type;
@@ -13667,14 +14109,16 @@ db_hdf5_GetMultivar(DBfile *_dbfile, char const *name)
         mv->extensive = m.extensive;
         db_SetMissingValueForGet(mv->missing_value, m.missing_value);
 
-        /* Read the raw data variable types and convert to mem types*/
-        if (mv->extentssize>0)
-           mv->extents = (double *)db_hdf5_comprd(dbfile, m.extents, 1);
-        mv->vartypes = (int *)db_hdf5_comprd(dbfile, m.vartypes, 1);
-
         /* Read the raw data variable names */
-        mvnames = (char *)db_hdf5_comprd(dbfile, m.varnames, 1);
-        db_StringListToStringArrayMBOpt(mvnames, &(mv->varnames), &(mv->varnames_alloc), m.nvars);
+        if (mv->nvars>0 && (SILO_Globals.dataReadMask & DBMBNamesAndTypes))
+        {
+            mv->vartypes = (int *)db_hdf5_comprd(dbfile, m.vartypes, 1);
+            mvnames = (char *)db_hdf5_comprd(dbfile, m.varnames, 1);
+            db_StringListToStringArrayMBOpt(mvnames, &(mv->varnames), &(mv->varnames_alloc), m.nvars);
+        }
+
+        if (mv->extentssize>0 && (SILO_Globals.dataReadMask & DBMBOptions))
+           mv->extents = (double *)db_hdf5_comprd(dbfile, m.extents, 1);
 
         s = (char *)db_hdf5_comprd(dbfile, m.region_pnames, 1);
         if (s) mv->region_pnames = DBStringListToStringArray(s, 0, !skipFirstSemicolon);
@@ -13761,7 +14205,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
          * material names.
          */
         /* Write raw data arrays */
-        if (matnames)
+        if (nmats > 0 && matnames)
         {
             for (i=len=0; i<nmats; i++) len += strlen(matnames[i])+1;
             s = (char *)malloc(len+1);
@@ -13961,6 +14405,7 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
         mm->matcounts = (int *)db_hdf5_comprd(dbfile, m.matcounts, 1);
         mm->matlists = (int *)db_hdf5_comprd(dbfile, m.matlists, 1);
         mm->matnos = (int *)db_hdf5_comprd(dbfile, m.matnos, 1);
+
         matnames = (char *)db_hdf5_comprd(dbfile, m.matnames, 1);
         db_StringListToStringArrayMBOpt(matnames, &(mm->matnames), &(mm->matnames_alloc), m.nmats);
 
@@ -14056,7 +14501,7 @@ db_hdf5_PutMultimatspecies(DBfile *_dbfile, char const *name, int nspec,
          * material names.
          */
         /* Write raw data arrays */
-        if (specnames)
+        if (nspec > 0 && specnames)
         {
             for (i=len=0; i<nspec; i++) len += strlen(specnames[i])+1;
             s = (char *)malloc(len+1);

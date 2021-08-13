@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -57,9 +57,7 @@ be used for advertising or product endorsement purposes.
 
 #include <cstdlib>
 
-#ifndef Q_WS_MACX
-#include "qwindowsstyle.h"
-#endif
+#include "QStyle"
 #include "qfiledialog.h"
 #include "qstring.h"
 #include <iostream>
@@ -91,9 +89,7 @@ int main( int argc, char **argv )
     QCoreApplication::setLibraryPaths(QStringList()); // work-around Qt bug
     QApplication::setColorSpec(QApplication::ManyColor);
     QApplication a(argc, argv);
-#ifndef Q_WS_MACX
-    a.setStyle(new QWindowsStyle);
-#endif
+    a.setStyle(QApplication::style());
     Explorer *w = 0;
     if (argc > 1)
     {

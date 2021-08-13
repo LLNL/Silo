@@ -1,4 +1,4 @@
-# Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+# Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
 # All rights reserved.
 # 
@@ -88,11 +88,13 @@ EXTRA_DIST = \
 ./MSVC2012/Tests/mat3d_3across.vcxproj\
 ./MSVC2012/Tests/mat_f.vfproj\
 ./MSVC2012/Tests/merge_block.vcxproj\
+./MSVC2012/Tests/misc.vcxproj\
 ./MSVC2012/Tests/mmadjacency.vcxproj\
 ./MSVC2012/Tests/multi_file.vcxproj\
 ./MSVC2012/Tests/multi_test.vcxproj\
 ./MSVC2012/Tests/multispec.vcxproj\
 ./MSVC2012/Tests/namescheme.vcxproj\
+./MSVC2012/Tests/newsami.vcxproj\
 ./MSVC2012/Tests/obj.vcxproj\
 ./MSVC2012/Tests/onehex.vcxproj\
 ./MSVC2012/Tests/oneprism.vcxproj\
@@ -103,9 +105,9 @@ EXTRA_DIST = \
 ./MSVC2012/Tests/point_f.vfproj\
 ./MSVC2012/Tests/polyzl.vcxproj\
 ./MSVC2012/Tests/Preparation.vcxproj\
+./MSVC2012/Tests/qmeshmat2df77.vfproj\
 ./MSVC2012/Tests/quad.vcxproj\
 ./MSVC2012/Tests/quad_f.vfproj\
-./MSVC2012/Tests/sami.vcxproj\
 ./MSVC2012/Tests/simple.vcxproj\
 ./MSVC2012/Tests/spec.vcxproj\
 ./MSVC2012/Tests/specmix.vcxproj\

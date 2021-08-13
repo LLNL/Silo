@@ -19,7 +19,7 @@ $0 = shift @ARGV;
 
 #!/usr/bin/perl
 #########################################################################
-# Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
 # All rights reserved.
 # 
@@ -231,8 +231,6 @@ print <<"EOF";
 ${ccmt}cccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 ${ccmt} 
 ${ccmt}      $title include file for Fortan applications.
-${ccmt} 
-${ccmt}  Programmer:   $user $date
 ${ccmt} 
 ${ccmt}  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 ${ccmt}     This file is generated automatically from C header files in the

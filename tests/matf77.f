@@ -1,62 +1,62 @@
-************************************************************************
-* Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
-* LLNL-CODE-425250.
-* All rights reserved.
-* 
-* This file is part of Silo. For details, see silo.llnl.gov.
-* 
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions
-* are met:
-* 
-*    * Redistributions of source code must retain the above copyright
-*      notice, this list of conditions and the disclaimer below.
-*    * Redistributions in binary form must reproduce the above copyright
-*      notice, this list of conditions and the disclaimer (as noted
-*      below) in the documentation and/or other materials provided with
-*      the distribution.
-*    * Neither the name of the LLNS/LLNL nor the names of its
-*      contributors may be used to endorse or promote products derived
-*      from this software without specific prior written permission.
-* 
-* THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
-* "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
-* LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-* A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
-* LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
-* CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-* EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
-* PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
-* PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-* LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
-* NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-* 
-* This work was produced at Lawrence Livermore National Laboratory under
-* Contract No.  DE-AC52-07NA27344 with the DOE.
-* 
-* Neither the  United States Government nor  Lawrence Livermore National
-* Security, LLC nor any of  their employees, makes any warranty, express
-* or  implied,  or  assumes  any  liability or  responsibility  for  the
-* accuracy, completeness,  or usefulness of  any information, apparatus,
-* product, or  process disclosed, or  represents that its use  would not
-* infringe privately-owned rights.
-* 
-* Any reference herein to  any specific commercial products, process, or
-* services by trade name,  trademark, manufacturer or otherwise does not
-* necessarily  constitute or imply  its endorsement,  recommendation, or
-* favoring  by  the  United  States  Government  or  Lawrence  Livermore
-* National Security,  LLC. The views  and opinions of  authors expressed
-* herein do not necessarily state  or reflect those of the United States
-* Government or Lawrence Livermore National Security, LLC, and shall not
-* be used for advertising or product endorsement purposes.
-************************************************************************
+!***********************************************************************
+! Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+! LLNL-CODE-425250.
+! All rights reserved.
+! 
+! This file is part of Silo. For details, see silo.llnl.gov.
+! 
+! Redistribution and use in source and binary forms, with or without
+! modification, are permitted provided that the following conditions
+! are met:
+! 
+!    * Redistributions of source code must retain the above copyright
+!      notice, this list of conditions and the disclaimer below.
+!    * Redistributions in binary form must reproduce the above copyright
+!      notice, this list of conditions and the disclaimer (as noted
+!      below) in the documentation and/or other materials provided with
+!      the distribution.
+!    * Neither the name of the LLNS/LLNL nor the names of its
+!      contributors may be used to endorse or promote products derived
+!      from this software without specific prior written permission.
+! 
+! THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
+! "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
+! LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+! A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
+! LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
+! CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+! EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
+! PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
+! PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+! LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
+! NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
+! SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+! 
+! This work was produced at Lawrence Livermore National Laboratory under
+! Contract No.  DE-AC52-07NA27344 with the DOE.
+! 
+! Neither the  United States Government nor  Lawrence Livermore National
+! Security, LLC nor any of  their employees, makes any warranty, express
+! or  implied,  or  assumes  any  liability or  responsibility  for  the
+! accuracy, completeness,  or usefulness of  any information, apparatus,
+! product, or  process disclosed, or  represents that its use  would not
+! infringe privately-owned rights.
+! 
+! Any reference herein to  any specific commercial products, process, or
+! services by trade name,  trademark, manufacturer or otherwise does not
+! necessarily  constitute or imply  its endorsement,  recommendation, or
+! favoring  by  the  United  States  Government  or  Lawrence  Livermore
+! National Security,  LLC. The views  and opinions of  authors expressed
+! herein do not necessarily state  or reflect those of the United States
+! Government or Lawrence Livermore National Security, LLC, and shall not
+! be used for advertising or product endorsement purposes.
+!***********************************************************************
 
       program testmat
 
 
-c...This program tests the use of the UCD Fortran jacket routines, plus
-c...the underlying UCD C routines.
+!...This program tests the use of the UCD Fortran jacket routines, plus
+!...the underlying UCD C routines.
       include 'silo.inc'
       integer driver, nargs
       character*256 cloption
@@ -76,15 +76,15 @@ c...the underlying UCD C routines.
       end
 
       subroutine writeit (fname, drvr)
-c----------------------------------------------------------------------
-c----------------------------------------------------------------------
-c----------------------------------------------------------------------
-c----------------------------------------------------------------------
-c----------------------------------------------------------------------
-cc      implicit double precision (a-h,o-z)
+!----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!c      implicit double precision (a-h,o-z)
 
 
-c...Include SILO definitions.
+!...Include SILO definitions.
 
       include 'silo.inc'
 
@@ -127,6 +127,8 @@ c...Include SILO definitions.
       integer  dims(2), err, optlist, lmeshnms(3)
       integer  meshtypes(3)
 
+      integer btype, ol
+
 
       data matlist /2, 2, 0, 0, 1, 1/
       data mixedels/3, 4, 3, 4/
@@ -149,13 +151,13 @@ c...Include SILO definitions.
 
 
       ttime = 2.345
-cc      idatatype = 20       ! double
+!c      idatatype = 20       ! double
       idatatype = 19       ! float
 
       err = dbshowerrors(DB_ABORT)
       err = dbset2dstrlen(1024)
 
-c...Create option list for use with functions that want it.
+!...Create option list for use with functions that want it.
 
       err = dbmkoptlist (5, optlist)
       err = dbaddiopt   (optlist, DBOPT_CYCLE, tcycle)  ! integer
@@ -192,7 +194,7 @@ c...Create option list for use with functions that want it.
 
 
 
-c...Test material conversion functions, and write results.
+!...Test material conversion functions, and write results.
 
       do 10 i = 1 , MAXMIX
          mix_mat(i)  = -99
@@ -226,75 +228,81 @@ c...Test material conversion functions, and write results.
      .                d, inzones, dfnew, mixlen,
      .                idatatype, DB_ZONECENT, optlist, id)
 
-c...This is a bugus multi-mesh but it tests the interface,
-c...particularly with strings larger than 32 chars
+!...This is a bugus multi-mesh but it tests the interface,
+!...particularly with strings larger than 32 chars
       meshnms(3)  = "foobargorfo"
       lmeshnms(3) = 11
       meshnms(1)  = "mesh1"
       lmeshnms(1) = 5
       meshnms(2)  = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       lmeshnms(2) = 40
-      meshtypes(1) = DB_UCD
-      meshtypes(2) = DB_UCD
-      meshtypes(3) = DB_UCD
+      meshtypes(1) = DB_UCDMESH
+      meshtypes(2) = DB_UCDMESH
+      meshtypes(3) = DB_UCDMESH
       err = dbputmmesh (dbid, "multimesh", 9, 3,
      .                  meshnms, lmeshnms, meshtypes,
      .                  DB_F77NULL, id)
+      btype = DB_UCDMESH
+      err = dbmkoptlist (5, ol)
+      err = dbaddiopt   (ol, DBOPT_MB_BLOCK_TYPE, btype)  ! integer
+      err = dbputmmesh (dbid, "multimesh2", 10, 3,
+     .                  meshnms, lmeshnms, DB_F77NULL,
+     .                  ol, id)
 
-c...Test out multi mesh. (Special case, since nmesh == 1.) Ordinarily
-c...you would have to provide arrays for the 'ids', 'types' and 'dirs'.
+!...Test out multi mesh. (Special case, since nmesh == 1.) Ordinarily
+!...you would have to provide arrays for the 'ids', 'types' and 'dirs'.
 
-c     meshnms(1)  = "mesh1"
-c     lmeshnms(1) = 5
-c
-c     err = dbputmulti (dbid, "multimesh", 9, 1, meshid,
-c    .                  meshnms, lmeshnms, DB_UCD, 0,
-c    .                  DB_F77NULL, id)
+!     meshnms(1)  = "mesh1"
+!     lmeshnms(1) = 5
+!
+!     err = dbputmulti (dbid, "multimesh", 9, 1, meshid,
+!    .                  meshnms, lmeshnms, DB_UCD, 0,
+!    .                  DB_F77NULL, id)
 
-c...Close file before quitting.
+!...Close file before quitting.
 
       err = dbclose(dbid)
 
       return
       end
 
-c ******************************************************************************
-c *  Routine                                                            convtmat
-c *
-c *  Purpose
-c *
-c * 	Convert from by-material representation of material data to by-zone.
-c *
-c *  Programmer
-c *
-c *     Jeff Long, NSSD/B
-c *
-c *  Notes
-c *
-c *     The SILO material routines expect data to be stored in a by-zone
-c *     fashion. This function converts from the ALE3D representation to
-c *     the SILO representation.
-c *
-c ******************************************************************************
+! ******************************************************************************
+! *  Routine                                                            convtmat
+! *
+! *  Purpose
+! *
+! *     Convert from by-material representation of material data to by-zone.
+! *
+! *  Programmer
+! *
+! *     Jeff Long, NSSD/B
+! *
+! *  Notes
+! *
+! *     The SILO material routines expect data to be stored in a by-zone
+! *     fashion. This function converts from the ALE3D representation to
+! *     the SILO representation.
+! *
+! ******************************************************************************
 
       function convtmat (mixed_els, nmix, matlist, matnos, matlist_out,
      .                   mix_next, mix_mat, mix_zone, mixlen, datatype,
      .                   nmats, nzones, vf, mix_vf)
 
                                 ! Input variables
-      integer  nmats		! Number of materials
-      integer  nzones		! Number of zones
-      integer  mixed_els(*)	! [sumnmix]: mat-1 mixed els, mat-2, etc.
-      integer  nmix(*)		! [nmats]: number of mixed els per mat
+      integer  nmats            ! Number of materials
+      integer  nzones           ! Number of zones
+      integer  mixed_els(*)     ! [sumnmix]: mat-1 mixed els, mat-2, etc.
+      integer  nmix(*)          ! [nmats]: number of mixed els per mat
       integer  matlist(*)       ! [nzone]: material id, else 0 for mixed
       integer  matnos(*)        ! [nmats]: material ID's
-      real     vf(*)		! [sumnmix]: mat-1 vf's, mat-2, etc.
-      integer  datatype		! Datatype indicator for volume fractions
+      real     vf(*)            ! [sumnmix]: mat-1 vf's, mat-2, etc.
+      integer  datatype         ! Datatype indicator for volume fractions
 
 
                                 ! Output variables
-      integer  mixlen		! Length of output mixed-data arrays
-      integer  matlist_out(*)	! [nzone]: material id, else <0 for mixed
+      integer  mixlen           ! Length of output mixed-data arrays
+      integer  matlist_out(*)   ! [nzone]: material id, else <0 for mixed
       integer  mix_next(*)      ! [mixlen]: index of next entry for this zone
       integer  mix_mat(*)       ! [mixlen]: material ID
       integer  mix_zone(*)      ! [mixlen]: back pointer to original zone
@@ -311,14 +319,14 @@ c ******************************************************************************
       ! Count total number of mixed elements
       sumnmix = 0
       do i = 1, nmats
-  	  sumnmix = sumnmix + nmix(i)
+          sumnmix = sumnmix + nmix(i)
       enddo
 
 
-c     *------------------------------------------------------------
-c     * Build a mixed-length variable which contains the material
-c     * number for that entry.
-c     *-----------------------------------------------------------
+!     *------------------------------------------------------------
+!     * Build a mixed-length variable which contains the material
+!     * number for that entry.
+!     *-----------------------------------------------------------
 
        iz = 1
        do i = 1 , nmats
@@ -329,45 +337,45 @@ c     *-----------------------------------------------------------
        enddo
 
 
-c      *------------------------------------------------------------
-c      *  Loop over all mixed zones, setting mixed-data arrays in
-c      *  process. Connect the various mixed entries for each zone
-c      *  via the mix_next array, and modify 'matlist' to have the
-c      *  negative index into mixed data arrays instead of merely
-c      *  '0' to indicate mixed zones.
-c      *------------------------------------------------------------
+!      *------------------------------------------------------------
+!      *  Loop over all mixed zones, setting mixed-data arrays in
+!      *  process. Connect the various mixed entries for each zone
+!      *  via the mix_next array, and modify 'matlist' to have the
+!      *  negative index into mixed data arrays instead of merely
+!      *  '0' to indicate mixed zones.
+!      *------------------------------------------------------------
 
-       imix = 1	  ! Use 1-origin indexing
+       imix = 1   ! Use 1-origin indexing
 
        do i = 1 , nzones
 
-  	  matlist_out(i) = matlist(i)
+          matlist_out(i) = matlist(i)
 
-  	  if (matlist(i) .le. 0) then	! Mixed zone
+          if (matlist(i) .le. 0) then   ! Mixed zone
 
-  	       ifirst = -1
+               ifirst = -1
 
-  	       do j = 1 , sumnmix
+               do j = 1 , sumnmix
 
-  		    if (mixed_els(j) .eq. i) then
+                    if (mixed_els(j) .eq. i) then
 
-  			 if (ifirst .eq. -1) then ! 1st el in linked list
+                         if (ifirst .eq. -1) then ! 1st el in linked list
                             ifirst = imix
-  			 else			! Set prev el to point to this
+                         else                   ! Set prev el to point to this
                             mix_next(imix-1) = imix
                          endif
 
-  			 mix_vf(imix)   = vf(j)
-  			 mix_mat(imix)  = mat(j)
-  			 mix_next(imix) = 0
-  			 mix_zone(imix) = i
+                         mix_vf(imix)   = vf(j)
+                         mix_mat(imix)  = mat(j)
+                         mix_next(imix) = 0
+                         mix_zone(imix) = i
 
-  			 imix = imix + 1
-  		    endif
-  	       enddo
-  	       if (ifirst .gt. 0) matlist_out(i) = -ifirst
+                         imix = imix + 1
+                    endif
+               enddo
+               if (ifirst .gt. 0) matlist_out(i) = -ifirst
 
-  	  endif
+          endif
        enddo
 
        mixlen = sumnmix
@@ -377,40 +385,40 @@ c      *------------------------------------------------------------
        end
 
 
-c *****************************************************************************
-c *  Routine                                                            convtmix
-c *
-c *  Purpose
-c *
-c * 	Convert a mixed data array from by-material to by-zone format.
-c *
-c *  Programmer
-c *
-c *     Jeff Long, NSSD/B
-c *
-c *  Notes
-c *
-c *     The SILO material routines expect data to be stored in a by-zone
-c *     fashion. This function converts from the ALE3D representation to
-c *     the SILO representation.
-c *
-c *****************************************************************************
+! *****************************************************************************
+! *  Routine                                                            convtmix
+! *
+! *  Purpose
+! *
+! *     Convert a mixed data array from by-material to by-zone format.
+! *
+! *  Programmer
+! *
+! *     Jeff Long, NSSD/B
+! *
+! *  Notes
+! *
+! *     The SILO material routines expect data to be stored in a by-zone
+! *     fashion. This function converts from the ALE3D representation to
+! *     the SILO representation.
+! *
+! *****************************************************************************
 
       function convtmix (mixvar, datatype, mixed_els, nmix, nmats,
-     . 	                 matlist, nzones, mixf, mixlen)
+     .                   matlist, nzones, mixf, mixlen)
 
                                 ! Input variables
-       real     mixvar(*)	! (sumnmix): mat-1 mix-data, mat-2, etc.
-       integer  datatype	! Real    or int
-       integer  mixed_els(*)	! (sumnmix): mat-1 mixed els, mat-2, etc.
-       integer  nmix(*)		! (nmats): number of mixed els per mat
-       integer  nmats		! Number of materials
-       integer  matlist(*)	! (nzone): material id, else 0 for mixed
-       integer  nzones		! Number of zones
+       real     mixvar(*)       ! (sumnmix): mat-1 mix-data, mat-2, etc.
+       integer  datatype        ! Real    or int
+       integer  mixed_els(*)    ! (sumnmix): mat-1 mixed els, mat-2, etc.
+       integer  nmix(*)         ! (nmats): number of mixed els per mat
+       integer  nmats           ! Number of materials
+       integer  matlist(*)      ! (nzone): material id, else 0 for mixed
+       integer  nzones          ! Number of zones
 
                                 ! Output variables
-       real     mixf(*)		! (mixlen): mixed data in new format
-       integer  mixlen		! Returned length of output mixed-data array
+       real     mixf(*)         ! (mixlen): mixed data in new format
+       integer  mixlen          ! Returned length of output mixed-data array
 
 
        integer  i, j, sumnmix
@@ -426,10 +434,10 @@ c *****************************************************************************
        enddo
 
 
-c      *------------------------------------------------------------
-c      *  Loop over all mixed zones, setting mixed-data array in
-c      *  process.
-c      *------------------------------------------------------------
+!      *------------------------------------------------------------
+!      *  Loop over all mixed zones, setting mixed-data array in
+!      *  process.
+!      *------------------------------------------------------------
        imix = 1
        do i = 1 , nzones
 

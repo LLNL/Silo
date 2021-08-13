@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -840,10 +840,12 @@ typedef struct SILO_Globals_t {
     int enableChecksums;
     int enableFriendlyHDF5Names;
     int enableGrabDriver;
+    int allowLongStrComponents;
     int maxDeprecateWarnings;
     char *compressionParams;
     float compressionMinratio;
     int compressionErrmode;
+    int compatabilityMode;
     const DBoptlist *fileOptionsSets[MAX_FILE_OPTIONS_SETS];
     int _db_err_level;
     void  (*_db_err_func)(char *);

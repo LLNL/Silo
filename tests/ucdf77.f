@@ -1,64 +1,64 @@
-************************************************************************
-* Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
-* LLNL-CODE-425250.
-* All rights reserved.
-* 
-* This file is part of Silo. For details, see silo.llnl.gov.
-* 
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions
-* are met:
-* 
-*    * Redistributions of source code must retain the above copyright
-*      notice, this list of conditions and the disclaimer below.
-*    * Redistributions in binary form must reproduce the above copyright
-*      notice, this list of conditions and the disclaimer (as noted
-*      below) in the documentation and/or other materials provided with
-*      the distribution.
-*    * Neither the name of the LLNS/LLNL nor the names of its
-*      contributors may be used to endorse or promote products derived
-*      from this software without specific prior written permission.
-* 
-* THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
-* "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
-* LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-* A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
-* LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
-* CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-* EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
-* PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
-* PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-* LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
-* NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-* 
-* This work was produced at Lawrence Livermore National Laboratory under
-* Contract No.  DE-AC52-07NA27344 with the DOE.
-* 
-* Neither the  United States Government nor  Lawrence Livermore National
-* Security, LLC nor any of  their employees, makes any warranty, express
-* or  implied,  or  assumes  any  liability or  responsibility  for  the
-* accuracy, completeness,  or usefulness of  any information, apparatus,
-* product, or  process disclosed, or  represents that its use  would not
-* infringe privately-owned rights.
-* 
-* Any reference herein to  any specific commercial products, process, or
-* services by trade name,  trademark, manufacturer or otherwise does not
-* necessarily  constitute or imply  its endorsement,  recommendation, or
-* favoring  by  the  United  States  Government  or  Lawrence  Livermore
-* National Security,  LLC. The views  and opinions of  authors expressed
-* herein do not necessarily state  or reflect those of the United States
-* Government or Lawrence Livermore National Security, LLC, and shall not
-* be used for advertising or product endorsement purposes.
-************************************************************************
+!***********************************************************************
+! Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+! LLNL-CODE-425250.
+! All rights reserved.
+! 
+! This file is part of Silo. For details, see silo.llnl.gov.
+! 
+! Redistribution and use in source and binary forms, with or without
+! modification, are permitted provided that the following conditions
+! are met:
+! 
+!    * Redistributions of source code must retain the above copyright
+!      notice, this list of conditions and the disclaimer below.
+!    * Redistributions in binary form must reproduce the above copyright
+!      notice, this list of conditions and the disclaimer (as noted
+!      below) in the documentation and/or other materials provided with
+!      the distribution.
+!    * Neither the name of the LLNS/LLNL nor the names of its
+!      contributors may be used to endorse or promote products derived
+!      from this software without specific prior written permission.
+! 
+! THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
+! "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
+! LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+! A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
+! LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
+! CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+! EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
+! PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
+! PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+! LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
+! NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
+! SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+! 
+! This work was produced at Lawrence Livermore National Laboratory under
+! Contract No.  DE-AC52-07NA27344 with the DOE.
+! 
+! Neither the  United States Government nor  Lawrence Livermore National
+! Security, LLC nor any of  their employees, makes any warranty, express
+! or  implied,  or  assumes  any  liability or  responsibility  for  the
+! accuracy, completeness,  or usefulness of  any information, apparatus,
+! product, or  process disclosed, or  represents that its use  would not
+! infringe privately-owned rights.
+! 
+! Any reference herein to  any specific commercial products, process, or
+! services by trade name,  trademark, manufacturer or otherwise does not
+! necessarily  constitute or imply  its endorsement,  recommendation, or
+! favoring  by  the  United  States  Government  or  Lawrence  Livermore
+! National Security,  LLC. The views  and opinions of  authors expressed
+! herein do not necessarily state  or reflect those of the United States
+! Government or Lawrence Livermore National Security, LLC, and shall not
+! be used for advertising or product endorsement purposes.
+!***********************************************************************
 
-c---------------------------------------------------------------------
-c  Purpose
-c
-c     Demonstrate use of SILO for creating unstructured cell data
-c     (UCD) objects for visualization.
-c
-c---------------------------------------------------------------------
+!---------------------------------------------------------------------
+!  Purpose
+!
+!     Demonstrate use of SILO for creating unstructured cell data
+!     (UCD) objects for visualization.
+!
+!---------------------------------------------------------------------
       program main
 
       implicit none
@@ -74,18 +74,18 @@ c---------------------------------------------------------------------
           driver = DB_HDF5
       end if
 
-c...Create file named "ucdf77.silo". Database ID is returned in 'dbid'.
+!...Create file named "ucdf77.silo". Database ID is returned in 'dbid'.
 
       err = dbcreate("ucdf77.silo", 11, 0, DB_LOCAL,
      .               "file info", 9, driver, dbid)
 
 
-c...Write out objects for visualization 
+!...Write out objects for visualization 
 
       meshid = builducd(dbid, "ucd", 3)
 
 
-c...Close data file.
+!...Close data file.
 
       err = dbclose(dbid)
 
@@ -97,20 +97,20 @@ c...Close data file.
 
 
       integer function builducd (dbid, name, lname)
-c----------------------------------------------------------------------
-c  Routine						      builducd
-c
-c  Purpose
-c
-c	Build ucd-mesh, ucd-var, facelist and zonelist, and return
-c	the mesh ID.
-c
-c  Modifications:
-c    Kathleen Bonnell, Wed Sep 2 16:12:15 PDT 20099
-c    Changed 'character*8 name' to 'character*(*) name' to remove 
-c    'Character length argument mismatch' compiler error.
-c
-c-----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!  Routine                                                    builducd
+!
+!  Purpose
+!
+!       Build ucd-mesh, ucd-var, facelist and zonelist, and return
+!       the mesh ID.
+!
+!  Modifications:
+!    Kathleen Bonnell, Wed Sep 2 16:12:15 PDT 20099
+!    Changed 'character*8 name' to 'character*(*) name' to remove 
+!    'Character length argument mismatch' compiler error.
+!
+!-----------------------------------------------------------------------
 
       integer  dbid             ! Database identifier
       character*(*) name        ! Name of mesh to build
@@ -130,32 +130,32 @@ c-----------------------------------------------------------------------
       parameter  (LZNODELIST= 27) ! Length of zone nodelist
       parameter  (LFNODELIST= 24) ! Length of face nodelist
 
-c----------------------------------------------------------------------
-c       The NODES in this 2D mesh looks like this:
-c
-c  	  	0	4	8
-c
-c  	  	1	5	9
-c                                       12
-c  	  	2	6	10
-c
-c  	  	3	7	11
-c
-c
-c       The ZONES in the mesh look like this:
-c       (there are six rectangle zones and one triangle zone)
-c
-c
-c               -----------------\
-c               |   0   |   1   | \
-c               -----------------  \
-c               |   2   |   3   | 6 >
-c               -----------------  /
-c               |   4   |   5   | /
-c               -----------------/
-c
-c
-c-----------------------------------------------------------------------
+!----------------------------------------------------------------------
+!       The NODES in this 2D mesh looks like this:
+!
+!               0       4       8
+!
+!               1       5       9
+!                                       12
+!               2       6       10
+!
+!               3       7       11
+!
+!
+!       The ZONES in the mesh look like this:
+!       (there are six rectangle zones and one triangle zone)
+!
+!
+!               -----------------\
+!               |   0   |   1   | \
+!               -----------------  \
+!               |   2   |   3   | 6 >
+!               -----------------  /
+!               |   4   |   5   | /
+!               -----------------/
+!
+!
+!-----------------------------------------------------------------------
 
       integer      i, flid, zlid, meshid, varid, matid, optlistid
       integer      matlist(NZONES), matnos(NMATS)
@@ -171,13 +171,13 @@ c-----------------------------------------------------------------------
       integer  fshapesize, fshapecnt
       integer  tcycle, mixlen
       integer  dims
-c     real*8   ttime
+!     real*8   ttime
       real*4   ttime
       real*4   rtime
       real     dfnew(MAXMIX)
 
 
-c...Initialize material data */
+!...Initialize material data */
       data  matlist/1,-1, 2, 1,-3, 2, 2/
       data  matnos/1, 2/
       data  mix_vf/.6, .8, .4, .2/
@@ -185,14 +185,14 @@ c...Initialize material data */
       data  mix_mat/1, 2, 1, 2/
       data  mix_zone/0, 0, 3, 3/
 
-c...Initialize coordinate and zonal data.
+!...Initialize coordinate and zonal data.
       data  x/9.,9.,9.,9.,10.,10.,10.,10.,11.,11.,11.,11.,12./
       data  y/3.,2.,1.,0., 3., 2., 1., 0., 3., 2., 1., 0.,1.5/
       data  d/1.,2.,3.,4.,5.,6.,7./
       data  u/0.,0.,0.,0.,1.,1.,1.,1.,2.,2.,2.,2.,3./
       data  df/.58,.78,.42,.22/
 
-c...Initialize facelist and zonelist.
+!...Initialize facelist and zonelist.
       data fnodelist/0,1,1,2,2,3,3,7,7,11,11,10,10,9,9,8,8,4,4,0,8,12,
      .               12,11/
       data znodelist/0,1,5,4,4,5,9,8,1,2,6,5,5,6,10,9,2,3,7,6,6,7,11,10,
@@ -204,22 +204,22 @@ c...Initialize facelist and zonelist.
       data fshapecnt  /NFACES/  ! NFACES faces are shape 1
 
       ttime  = 2.345
-c     rtime  = sngl(ttime)
+!     rtime  = sngl(ttime)
       rtime  = ttime
       tcycle = 200
       mixlen = MAXMIX
 
 
-c...Create a rudimentary option list.
+!...Create a rudimentary option list.
 
       ierr = dbmkoptlist(3, optlistid)                   ! Create the option list
       ierr = dbaddiopt  (optlistid, DBOPT_CYCLE, tcycle) ! Add integer opt
       ierr = dbaddropt  (optlistid, DBOPT_TIME, rtime)   ! Add real opt
 
 
-c...Start by writing the external face list. This contains all of the
-c...faces which are on the external surface of the mesh. For 2D
-c...meshes, this is not really necessary, but for 3D it is essential.
+!...Start by writing the external face list. This contains all of the
+!...faces which are on the external surface of the mesh. For 2D
+!...meshes, this is not really necessary, but for 3D it is essential.
 
       err = dbputfl(dbid, 'Facelist', 8, NFACES, 2, fnodelist,
      .              LFNODELIST, 0,
@@ -228,9 +228,9 @@ c...meshes, this is not really necessary, but for 3D it is essential.
 
 
 
-c...Write zone list. This contains the information which describes each
-c...of the zones in the mesh. The nodelist must be organized such that
-c...zones of each shape are described consecutively.
+!...Write zone list. This contains the information which describes each
+!...of the zones in the mesh. The nodelist must be organized such that
+!...zones of each shape are described consecutively.
 
       err = dbputzl(dbid, 'Zonelist', 8, NZONES, 2, znodelist,
      .              LZNODELIST, 0,
@@ -238,8 +238,8 @@ c...zones of each shape are described consecutively.
 
 
 
-c...Write the UCD mesh. For any arguments which are not applicable,
-c...use the DB_F77NULL argument. The mesh id is returned in 'meshid'.
+!...Write the UCD mesh. For any arguments which are not applicable,
+!...use the DB_F77NULL argument. The mesh id is returned in 'meshid'.
 
       err = dbputum(dbid, name, lname, 2, x, y, DB_F77NULL,
      .              "X", 1, "Y", 1, DB_F77NULLSTRING, 0, DB_FLOAT,
@@ -248,8 +248,8 @@ c...use the DB_F77NULL argument. The mesh id is returned in 'meshid'.
 
 
 
-c...Write out a UCD variable. Use dbputuv1 for scalar (non-vector)
-c...arrays. The variable ID is returned in 'varid'.
+!...Write out a UCD variable. Use dbputuv1 for scalar (non-vector)
+!...arrays. The variable ID is returned in 'varid'.
 
       err = dbputuv1 (dbid, "d", 1, name, lname, d, NZONES, DB_F77NULL,
      .                0, DB_FLOAT, DB_ZONECENT, DB_F77NULL, varid)

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -88,14 +88,14 @@ int main(int argc, char *argv[])
 {
     
     int            meshid, diridq, diridu, diridt;
-    int            meshtypes[3], /*mmid,*/ nmesh;
+    int            meshtypes[3], nmesh;
     char          *meshnames[3], original_dir[128];
     DBfile        *dbfile, *dbfile2, *dbfile3, *dbfile4, *dbfile5;
     char          *filename = "dir.pdb";
     char          *filename2 = "dir2.pdb";
     int            i, driver = DB_PDB, driver2 = DB_PDB;
     int            show_all_errors = FALSE;
-    char          *objname = 0;
+    int            ndirs = 0;
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB",6)) {
@@ -113,6 +113,8 @@ int main(int argc, char *argv[])
             filename2 = driver == DB_HDF5 ? "dir2.pdb" : "dir2.h5";
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
+        } else if (!strncmp(argv[i], "ndirs=", 6)) {
+            ndirs = (int) strtol(argv[i]+6,0,10);
 	} else if (argv[i][0] != '\0') {
             objname = strdup(argv[i]);
 /*            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);*/
@@ -174,6 +176,9 @@ int main(int argc, char *argv[])
     meshtypes[2] = DB_UCDMESH;
     meshnames[2] = "/tri_dir/trimesh";
     nmesh++;
+
+    DBSetDir(dbfile, original_dir);
+    DBPutMultimesh(dbfile, "mmesh", nmesh, meshnames, meshtypes, NULL);
 
     DBClose(dbfile);
 
@@ -273,12 +278,12 @@ exit(0);
     /* this should fail because file is open for write */
     dbfile4 = DBOpen(filename2, driver, DB_READ);
     if (dbfile4 != 0 || db_errno != E_CONCURRENT)
-        exit(1);
+        exit(EXIT_SUCCESS);
 
     /* this should fail because filename is already open */
     dbfile5 = DBOpen(filename, driver, DB_APPEND);
     if (dbfile5 != 0 || db_errno != E_CONCURRENT)
-        exit(1);
+        exit(EXIT_SUCCESS);
 
     DBClose(dbfile);
     DBClose(dbfile2);
@@ -294,7 +299,7 @@ exit(0);
     dbfile2 = DBCreate("dir-test-foo", DB_NOCLOBBER, DB_LOCAL, "dir test file", driver2);
     unlink("dir-test-foo");
     if (dbfile2 != 0)
-        exit(1);
+        exit(EXIT_SUCCESS);
 #ifndef WIN32
     mkdir("dir-test-foo", 0777);
 #else
@@ -303,7 +308,29 @@ exit(0);
     dbfile2 = DBCreate("dir-test-foo", DB_CLOBBER, DB_LOCAL, "dir test file", driver2);
     unlink("dir-test-foo");
     if (dbfile2 != 0)
-        exit(1);
+        exit(EXIT_SUCCESS);
+
+    /* Test many dirs */
+    if (ndirs)
+    {
+        double t0 = GetTime();
+        dbfile = DBCreate(driver==DB_PDB?"many-dirs.pdb":"many-dirs.hdf5", DB_CLOBBER, DB_LOCAL, "large dir count test", driver);
+        for (i = 0; i < ndirs; i++)
+        {
+            int dims = 1;
+            char tmpDir[32];
+            int ival = i;
+            double dval = i;
+            snprintf(tmpDir, sizeof(tmpDir), "one_of_many_dirs_%06d", i);
+            DBMkDir(dbfile, tmpDir);
+            DBSetDir(dbfile, tmpDir);
+            DBWrite(dbfile, "anInt", &ival, &dims, 1, DB_INT);
+            DBWrite(dbfile, "aDouble", &dval, &dims, 1, DB_DOUBLE);
+            DBSetDir(dbfile, "..");
+        }
+        DBClose(dbfile);
+        printf("time to create %d dirs = %g seconds\n", ndirs, (GetTime() - t0) / 1e6);
+    }
 
     CleanupDriverStuff();
     return 0;

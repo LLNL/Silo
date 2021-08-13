@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -493,6 +493,13 @@ DBFreeMultimesh(DBmultimesh *msh)
     FREE(msh);
 }
 
+PUBLIC int
+DBIsEmptyMultimesh(DBmultimesh const *mmsh)
+{
+    if (mmsh && mmsh->nblocks!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                          DBFreeMultimeshadj
  *
@@ -592,6 +599,13 @@ DBFreeMultivar (DBmultivar *mv)
      FREE(mv);
 }
 
+PUBLIC int
+DBIsEmptyMultivar(DBmultivar const *mvar)
+{
+    if (mvar && mvar->nvars!=0) return 0;
+    return 1;
+}
+
 /*----------------------------------------------------------------------
  *  Function                                             DBFreeMultimat
  *
@@ -657,6 +671,13 @@ DBFreeMultimat (DBmultimat *mat)
      FREE(mat->block_ns);
      FREE(mat->empty_list);
      FREE(mat);
+}
+
+PUBLIC int
+DBIsEmptyMultimat(DBmultimat const *mmat)
+{
+    if (mmat && mmat->nmats!=0) return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------
@@ -728,6 +749,13 @@ DBFreeMultimatspecies (DBmultimatspecies *spec)
      FREE(spec->block_ns);
      FREE(spec->empty_list);
      FREE(spec);
+}
+
+PUBLIC int
+DBIsEmptyMultimatspecies(DBmultimatspecies const *mspec)
+{
+    if (mspec && mspec->nspec!=0) return 0;
+    return 1;
 }
 
 /*----------------------------------------------------------------------

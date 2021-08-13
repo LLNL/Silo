@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -54,6 +54,7 @@ product endorsement purposes.
  *
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -67,13 +68,39 @@ product endorsement purposes.
 #  include <unistd.h>
 #endif
 
+#include <hdf5.h>
 #include <silo.h>
 #include <std.c>
+
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
+#ifdef HAVE_MPI
+#define ASSERT(A) \
+{ \
+    if (!(A)) \
+    { \
+        fprintf(stderr, "%s:%d[rank=%d]: %s: Assertion \"%s\" failed.\n", \
+            __FILE__, __LINE__, comm_rank, __func__, #A); \
+        MPI_Abort(MPI_COMM_WORLD, 1); \
+    } \
+}
+#else
+#define ASSERT(A) \
+{ \
+    if (!(A)) \
+    { \
+        fprintf(stderr, "%s:%d[rank=%d]: %s: Assertion \"%s\" failed.\n", \
+            __FILE__, __LINE__, comm_rank, __func__, #A); \
+        abort(); \
+    } \
+}
+#endif
 
 #define MAXBLOCKS       400       /* Maximum number of blocks in an object */
 #define STRLEN          60
 #define MIXMAX          20000     /* Maximum length of the mixed arrays */
-#define NFILES          8         /* The number of files to create */
 
 #define MIN(x, y) (x) < (y) ? (x) : (y)
 #define MAX(x, y) (x) > (y) ? (x) : (y)
@@ -84,6 +111,9 @@ product endorsement purposes.
 int multidir = 0;
 int use_ns = 0;
 int empties = 0;
+int nfiles = 8;
+int comm_size = 1;
+int comm_rank = 0;
 
 void fill_bkgr(int *, int, int, int, int);
 void fill_mat(float *, float *, float *, int *, int, int, int,
@@ -119,6 +149,13 @@ main(int argc, char *argv[])
     int            windows_style_slash = 1;
 #endif
 
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+    nfiles = comm_size;
+#endif
+
     /*
      * Parse the command-line.
      */
@@ -144,8 +181,32 @@ main(int argc, char *argv[])
             show_all_errors = 1;
         else if (!strcmp(argv[i], "invert-slash-style"))
             windows_style_slash = !windows_style_slash;
+        else if (!strncmp(argv[i], "nfiles=", 7))
+            nfiles = (int) strtol(argv[i]+7,0,10);
 	else if (argv[i][0] != '\0')
             fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+    }
+
+#ifdef HAVE_MPI
+    if (comm_size % nfiles)
+    {
+        if (!comm_rank)
+            fprintf(stderr, "nfiles (%d) must evenly divide comm. size (%d)\n",
+                nfiles, comm_size);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+#endif
+
+    if (comm_size > 1 && nfiles != comm_size && driver == DB_PDB)
+    {
+        if (!comm_rank)
+            fprintf(stderr, "If nfiles (%d) != comm. size (%d), must use the HDF5 driver\n",
+                nfiles, comm_size);
+#ifdef HAVE_MPI
+        MPI_Abort(MPI_COMM_WORLD, 1);
+#else
+        abort();
+#endif
     }
 
     if (show_all_errors) DBShowErrors(DB_ALL_AND_DRVR, 0);
@@ -158,6 +219,10 @@ main(int argc, char *argv[])
 
     CleanupDriverStuff();
     return 0;
+
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
 }
 
 /***********************************************************************      
@@ -366,7 +431,7 @@ build_multi(char *basename, int driver, char *file_ext,
         int       filenum;
         char      prefix[120];
 
-        filenum = i / (nblocks / NFILES);
+        filenum = i / (nblocks / nfiles);
         if (multidir)
         {
             if (windows_style_slash)
@@ -421,16 +486,16 @@ build_multi(char *basename, int driver, char *file_ext,
     build_block_ucd3d(basename, driver, file_ext, 
                       nblocks_x, nblocks_y, nblocks_z);
 
+    /* Only the root process continues past this point */
+    if (comm_rank)
+        return 0;
+
     /*
-     * Create the file.
+     * Create the root file.
      */
     sprintf(filename, "%s_root.%s", basename, file_ext);
-    if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
-        "multi-file ucd 3d test file", driver)) == NULL)
-    {
-        fprintf(stderr, "Could not create '%s'.\n", filename);
-        return -1;
-    }
+    ASSERT(dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
+        "multi-file ucd 3d test file", driver));
 
     /*
      * Create the option lists for the multi-block calls.
@@ -453,6 +518,11 @@ build_multi(char *basename, int driver, char *file_ext,
     {
         DBAddOption(optlist, DBOPT_MB_FILE_NS, file_ns);
         DBAddOption(optlist, DBOPT_MB_BLOCK_NS, block_ns);
+        /* Ugly: Am just capturing pointer to block_type value here
+           (before block_type itsel has even been set). This "work"
+           because the pointer isn't read until a DBPutXXX call in
+           which the optlist appears and block_type is set before
+           this optlist is used in a call.*/
         DBAddOption(optlist, DBOPT_MB_BLOCK_TYPE, &block_type);
     }
     repr_block_idx = 9;
@@ -576,6 +646,41 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     int             delta_x, delta_y, delta_z;
     int             empty_blocks[] = {0,1,2,3,4,5,6,7,8,16,47,122,241};
 
+    DBfile         *dbfile;
+
+    /* variables related to parallel operation */
+    int             blocks_per_rank = nblocks_x * nblocks_y * nblocks_z / comm_size;
+    int             my_block_start = comm_rank * blocks_per_rank;
+    int             my_block_end    = (comm_rank+1) * blocks_per_rank - 1;
+    int             writer_group_size = comm_size > nfiles ? comm_size / nfiles : 1;
+    int             i_am_a_writer = (comm_rank % writer_group_size) == 0;
+    int             my_writer_rank = (comm_rank / writer_group_size) * writer_group_size;
+    int             max_rank_i_write_for = my_writer_rank + writer_group_size - 1;
+    int             max_block_end = (max_rank_i_write_for+1) * blocks_per_rank - 1;
+    int             done;
+
+#ifdef HAVE_MPI
+    /* Initialize request info for all blocks */
+    struct _sendinfo {MPI_Request req; DBfile* dbfile;} sendinfo[288]; 
+    for (i = 0; i < sizeof(sendinfo)/sizeof(sendinfo[0]); i++)
+    {
+        sendinfo[i].req = MPI_REQUEST_NULL;
+        sendinfo[i].dbfile = 0;
+    }
+#endif
+
+    if ((nblocks_x * nblocks_y * nblocks_z) % comm_size)
+    {
+        if (!comm_rank)
+            fprintf(stderr, "Comm_size (%d) must divide block count (%d) evenly\n", 
+                comm_size, nblocks_x * nblocks_y * nblocks_z);
+#ifdef HAVE_MPI
+        MPI_Abort(MPI_COMM_WORLD, 1);
+#else
+        abort();
+#endif
+    }
+
     nx = 120;
     ny = 160;
     nz = 120;
@@ -686,7 +791,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     if (mixlen > 85000)
     {
         printf("memory overwrite: mixlen = %d > 85000\n", mixlen);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
     /* 
      * Set up variables that are independent of the block number.
@@ -716,7 +821,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     delta_y = ny / nblocks_y;
     delta_z = nz / nblocks_z;
 
-    if (multidir)
+    if (multidir && !comm_rank)
     {
         int st;
         unlink("multi_file.dir/000/ucd3d0.pdb");
@@ -761,6 +866,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
      * Create the blocks for the multi-block object.
      */
 
+    blocks_per_rank = nblocks_x * nblocks_y * nblocks_z / comm_size;
     for (block = 0, eb = 0; block < nblocks_x * nblocks_y * nblocks_z; block++)
     {
         char            dirname[80];
@@ -795,10 +901,38 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
 
         DBoptlist      *optlist=NULL;
         DBobject       *obj=NULL;
-        DBfile         *dbfile;
+
+        /* skip this block if its not supposed to be handled by
+           this processor but take care to handle other relevant
+           loop variables and behaviors here. */
+        if (block < my_block_start || block > my_block_end)
+        {
+            if (empties && block == empty_blocks[eb])
+                eb++;
+
+            if (multidir && !comm_rank)
+            {
+                int st;
+                char dname[60];
+                sprintf(dname, "multi_file.dir/%03d", filenum);
+#if !defined(_WIN32)
+                st = mkdir(dname, S_IRWXU|S_IRWXG|S_IRWXU);
+#else
+                st = _mkdir(dname);
+#endif
+                if (st < 0)
+                {
+                    fprintf(stderr, "Unable to make directory \"%s\"\n", dname);
+                    return;
+                }
+                fprintf(stdout, "\tMade directory %s\n", dname);
+            }
+
+            continue;
+        }
 
         sprintf(dirname, "/block%d", block);
-        filenum = block / ((nblocks_x * nblocks_y * nblocks_z) / NFILES);
+        filenum = block / ((nblocks_x * nblocks_y * nblocks_z) / nfiles);
         if (multidir)
             sprintf(filename, "multi_file.dir/%03d/%s%d.%s", filenum, basename, filenum, file_ext);
         else
@@ -975,45 +1109,51 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         DBFreeFacelist(fl);
 
         /*
-         * If the block number is devisible by 1/NFILES of the total number
+         * If the block number is devisible by 1/nfiles of the total number
          * of blocks then create the file, otherwise just open the file
          * since it has already been created.
          */
-        if (block % ((nblocks_x * nblocks_y * nblocks_z) / NFILES) == 0)
-        {
-            if (multidir)
-            {
-                int st;
-                char dname[60];
-                sprintf(dname, "multi_file.dir/%03d", filenum);
-#if !defined(_WIN32)
-                st = mkdir(dname, S_IRWXU|S_IRWXG|S_IRWXU);
-#else
-                st = _mkdir(dname);
-#endif
-                if (st < 0)
-                {
-                    fprintf(stderr, "Unable to make directory \"%s\"\n", dname);
-                    return;
-                }
-                fprintf(stdout, "\tMade directory %s\n", dname);
-            }
+        if (i_am_a_writer)
 
-            if ((dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
-                "multi-file ucd 3d test file", driver)) == NULL)
+        {
+            if (block % ((nblocks_x * nblocks_y * nblocks_z) / nfiles) == 0)
             {
-                fprintf(stderr, "Could not create '%s'.\n", filename);
-                return;
+                dbfile = DBCreate(filename, DB_CLOBBER, DB_LOCAL,
+                    "multi-file ucd 3d test file", driver);
+            }
+            else
+            {
+                dbfile = DBOpen(filename, driver, DB_APPEND);
             }
         }
         else
         {
-            if ((dbfile = DBOpen(filename, driver, DB_APPEND)) == NULL)
+            if (nfiles < comm_size) /* this rank writes its file to memory
+                                       and sends it to its writer. */
             {
-                fprintf(stderr, "Could not open '%s'.\n", filename);
-                return;
+                DBoptlist *file_optlist = DBMakeOptlist(10);
+                int core_vfd = DB_H5VFD_CORE;
+                int no_back_store = 1;
+                int core_optset;
+                char dummy_filename[64];
+
+                DBAddOption(file_optlist, DBOPT_H5_VFD, &core_vfd);
+                DBAddOption(file_optlist, DBOPT_H5_CORE_NO_BACK_STORE, &no_back_store);
+                core_optset = DBRegisterFileOptionsSet(file_optlist);
+
+                snprintf(dummy_filename, sizeof(dummy_filename), "dummy_%d", block);
+                dbfile = DBCreate(dummy_filename, DB_CLOBBER, DB_LOCAL,
+                    "multi-file ucd 3d test file", DB_HDF5_OPTS(core_optset));
+
+                DBUnregisterFileOptionsSet(core_optset);
+                DBFreeOptlist(file_optlist);
+            }
+            else /* this rank handles this block itself */
+            {
+                dbfile = DBOpen(filename, driver, DB_APPEND);
             }
         }
+        ASSERT(dbfile);
 
         /*
          * Make the directory for the block and cd into it.
@@ -1036,12 +1176,12 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         DBAddOption(optlist, DBOPT_CYCLE, &cycle);
         DBAddOption(optlist, DBOPT_TIME, &time);
         DBAddOption(optlist, DBOPT_DTIME, &dtime);
-        DBAddOption(optlist, DBOPT_XLABEL, "X Axis");
-        DBAddOption(optlist, DBOPT_YLABEL, "Y Axis");
-        DBAddOption(optlist, DBOPT_ZLABEL, "Z Axis");
-        DBAddOption(optlist, DBOPT_XUNITS, "cm");
-        DBAddOption(optlist, DBOPT_YUNITS, "cm");
-        DBAddOption(optlist, DBOPT_ZUNITS, "cm");
+        DBAddOption(optlist, DBOPT_XLABEL, (char *) "X Axis");
+        DBAddOption(optlist, DBOPT_YLABEL, (char *) "Y Axis");
+        DBAddOption(optlist, DBOPT_ZLABEL, (char *) "Z Axis");
+        DBAddOption(optlist, DBOPT_XUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_YUNITS, (char *) "cm");
+        DBAddOption(optlist, DBOPT_ZUNITS, (char *) "cm");
         DBAddOption(optlist, DBOPT_HI_OFFSET, &hi_off);
 
         if (empties && block == empty_blocks[eb])
@@ -1137,8 +1277,168 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
         /*
          * Close the file.
          */
+        if (!i_am_a_writer) /* this rank sends its block to its writer */
+        {
+            hid_t hdf5_file_id;
+            void *file_buf_ptr = 0;
+            hsize_t hdf5_file_size = 0;
+
+            DBFlush(dbfile);
+
+            hdf5_file_id = *((hid_t*) DBGrabDriver(dbfile));
+
+#if 0
+            H5Fget_vfd_handle(hdf5_file_id, H5P_DEFAULT, &file_buf_ptr);
+            H5Fget_filesize(hdf5_file_id, &hdf5_file_size);
+#else
+            hdf5_file_size = H5Fget_file_image(hdf5_file_id, NULL, 0);
+            file_buf_ptr = malloc(hdf5_file_size);
+            H5Fget_file_image(hdf5_file_id, file_buf_ptr, hdf5_file_size);
+#endif
+            DBUngrabDriver(dbfile,0);
+
+
+#ifdef HAVE_MPI
+            MPI_Isend(file_buf_ptr, (int) hdf5_file_size, MPI_CHAR, my_writer_rank,
+                block, MPI_COMM_WORLD, &(sendinfo[block].req));
+            sendinfo[block].dbfile = dbfile;
+#endif
+        }
+        else
+        {
+            /* writers need to leave their files open
+               if there are fewer files than ranks */
+            if (nfiles >= comm_size)
+                DBClose(dbfile);
+        }
+
+        /* Before starting next iteration of the loop,
+           see if any pending Isend's have completed
+           and free memory by DBClosing the associated
+           file if so. */
+#ifdef HAVE_MPI
+        for (i = 0; i < 288 && !i_am_a_writer; i++)
+        {
+            int flag;
+            MPI_Status status;
+            if (sendinfo[i].req == MPI_REQUEST_NULL) continue;
+            if (sendinfo[i].dbfile == 0) continue;
+            MPI_Test(&sendinfo[i].req,&flag,&status);
+            if (flag)
+            {
+                DBClose(sendinfo[i].dbfile);
+                sendinfo[i].req = MPI_REQUEST_NULL;
+                sendinfo[i].dbfile = 0;
+            }
+        }
+#endif
+    }
+
+#ifdef HAVE_MPI
+    if (i_am_a_writer && (nfiles < comm_size))
+    {
+        /* Loop receiving blocks_per_rank blocks from writer_group_size-1 other
+           ranks. But do so using Iprobe to first find an available message */
+        int blocks_to_do = blocks_per_rank*(writer_group_size-1);
+        DBSetDir(dbfile, "/");
+        while (blocks_to_do)
+        {
+            for (i = 0; i < blocks_per_rank*(writer_group_size-1); i++)
+            {
+                int block_id_to_probe = my_block_end + i;
+                int src_rank_to_probe = block_id_to_probe / blocks_per_rank;
+                int flag = 0;
+                MPI_Status status;
+
+                /*MPI_Iprobe(src_rank_to_probe, block_id_to_probe, MPI_COMM_WORLD, &flag, &status);*/
+                MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+
+                if (flag)
+                {
+                    int file_len;
+                    int fic_vfd = DB_H5VFD_FIC;
+                    int fic_optset;
+                    void *file_buf;
+                    DBoptlist *file_optlist;
+                    DBfile *block_file;
+                    char block_dir[64];
+                    MPI_Status recv_status;
+                    int mpi_err;
+
+                    MPI_Get_count(&status, MPI_CHAR, &file_len);
+                    file_buf = malloc(file_len);
+
+                    mpi_err = MPI_Recv(file_buf, file_len, MPI_CHAR,
+                       status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &recv_status);
+                    if (mpi_err != MPI_SUCCESS)
+                    {
+                        int msglen;
+                        char errmsg[MPI_MAX_ERROR_STRING+1]; 
+                        MPI_Error_string(mpi_err, errmsg, &msglen);
+                        fprintf(stderr,"recv failed with error \"%s\"\n", errmsg);
+                        MPI_Abort(MPI_COMM_WORLD, 1);
+                    }
+
+                    /* Set up a file options set to use this buffer as the file */
+                    file_optlist = DBMakeOptlist(10);
+                    DBAddOption(file_optlist, DBOPT_H5_VFD, &fic_vfd);
+                    DBAddOption(file_optlist, DBOPT_H5_FIC_SIZE, &file_len);
+                    DBAddOption(file_optlist, DBOPT_H5_FIC_BUF, file_buf);
+                    fic_optset = DBRegisterFileOptionsSet(file_optlist);
+
+                    /* Ok, now have Silo open this buffer */
+                    snprintf(block_dir, sizeof(block_dir), "block%d", status.MPI_TAG);
+                    block_file = DBOpen(block_dir, DB_HDF5_OPTS(fic_optset), DB_READ);
+
+                    /* Copy the block file's dir into the writer's file */
+                    if (block_file)
+                    {
+                        DBCpDir(block_file, block_dir, dbfile, block_dir);
+                        DBClose(block_file);
+                        blocks_to_do--;
+                    }
+                    else
+                    {
+                        fprintf(stderr,"unable to open core file on rank %d\n", comm_rank);
+                        MPI_Abort(MPI_COMM_WORLD, 1);
+                    }
+
+                    /* free up the file options set */
+                    DBUnregisterFileOptionsSet(fic_optset);
+                    DBFreeOptlist(file_optlist);
+                    break;
+                }
+            }
+            usleep(1000);
+        }
         DBClose(dbfile);
     }
+    else
+    {
+        /* Handle any remaining outstanding Isends in a polling loop. */
+        done = 0;
+        while (!done && !i_am_a_writer)
+        {
+            done = 1;
+            for (i = 0; i < 288; i++)
+            {
+                int flag; MPI_Status status;
+                if (sendinfo[i].req == MPI_REQUEST_NULL) continue;
+                if (sendinfo[i].dbfile == 0) continue;
+                MPI_Test(&sendinfo[i].req,&flag,&status);
+                if (flag)
+                {
+                    DBClose(sendinfo[i].dbfile);
+                    sendinfo[i].req = MPI_REQUEST_NULL;
+                    sendinfo[i].dbfile = 0;
+                    continue;
+                }
+                done = 0;
+            }
+            usleep(1000);
+        }
+    }
+#endif
 
     FREE(x);
     FREE(y);

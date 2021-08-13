@@ -1,4 +1,4 @@
-# Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+# Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
 # All rights reserved.
 # 
@@ -75,6 +75,7 @@ EXTRA_DIST= \
  bcastopen.c \
  bcastopen_main.c \
  zeros.dat \
+ testhdf5.c \
  $(check_SCRIPTS) \
  $(check_DATA)
 
@@ -87,6 +88,7 @@ check_SCRIPTS= \
  test_error.py \
  test_read.py \
  test_write.py \
+ onehex.py \
  testonehex \
  testsilock \
  testdtypes
@@ -132,12 +134,12 @@ mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
 
-HDF5PROGS=compression grab mk_nasf_h5
+HDF5PROGS=compression grab mk_nasf_h5 testhdf5
 FCPROGS= arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
-         csgmesh
+         csgmesh qmeshmat2df77
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
-      TestReadMask twohex multispec sami specmix spec \
+      TestReadMask twohex multispec misc newsami specmix spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb arbpoly2d readstuff mat3d_3across merge_block \
@@ -151,6 +153,7 @@ rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl
 rocket_CXXFLAGS = -rdynamic
 EXTRA_rocket_DEPENDENCIES = rocket_silo.la
+newsami_SOURCES = newsami.cxx
 
 check_LTLIBRARIES = rocket_silo.la
 
@@ -183,7 +186,8 @@ check_PROGRAMS = \
  twohex \
  multispec \
  specmix \
- sami \
+ misc \
+ newsami \
  spec \
  cpz1plt \
  merge_block \
@@ -243,7 +247,8 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_specmix_SOURCES = dummy.cxx
  nodist_EXTRA_testpdb_SOURCES = dummy.cxx
  nodist_EXTRA_pdbtst_SOURCES = dummy.cxx
- nodist_EXTRA_sami_SOURCES = dummy.cxx
+ nodist_EXTRA_misc_SOURCES = dummy.cxx
+ nodist_EXTRA_newsami_SOURCES = dummy.cxx
  nodist_EXTRA_spec_SOURCES = dummy.cxx
  nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx
  nodist_EXTRA_merge_block_SOURCES = dummy.cxx
@@ -270,6 +275,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_ucdf77_SOURCES = dummy.cxx
  nodist_EXTRA_testallf77_SOURCES = dummy.cxx
  nodist_EXTRA_csgmesh_SOURCES = dummy.cxx
+ nodist_EXTRA_qmeshmat2df77_SOURCES = dummy.cxx
  nodist_EXTRA_compression_SOURCES = dummy.cxx
  nodist_EXTRA_grab_SOURCES = dummy.cxx
  nodist_EXTRA_efcentering_SOURCES = dummy.cxx
@@ -280,7 +286,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_majorder_SOURCES = dummy.cxx
  nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
  nodist_EXTRA_json_SOURCES = dummy.cxx
-# nodist_EXTRA_bcastopen_SOURCES = dummy.cxx
+ nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
 endif
 
 
@@ -293,6 +299,8 @@ if HDF5_DRV_NEEDED
   grab_LDADD = $(LDADD)
   mk_nasf_h5_SOURCES = mk_nasf_h5.c
   mk_nasf_h5_LDADD = $(LDADD)
+  testhdf5_SOURCES = testhdf5.c
+  testhdf5_LDADD = $(LDADD)
 endif
 
 if FORTRAN_NEEDED
@@ -316,6 +324,8 @@ if FORTRAN_NEEDED
   testallf77_LDADD = $(LDADD) $(FCLIBS)
   csgmesh_SOURCES = csgmesh.f
   csgmesh_LDADD = $(LDADD) $(FCLIBS)
+  qmeshmat2df77_SOURCES = qmeshmat2df77.f
+  qmeshmat2df77_LDADD = $(LDADD) $(FCLIBS)
 endif
 
 all-local:

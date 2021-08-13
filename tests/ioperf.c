@@ -1,5 +1,5 @@
 /*
-Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -288,7 +288,7 @@ static int ProcessCommandLine(int argc, char *argv[], options_t *opts)
 fail:
 	    fprintf(stderr, "%s: bad argument `%s' (\"%s\")\n", argv[0], argv[i],
                 errno?strerror(errno):"");
-            exit(1);
+            exit(EXIT_SUCCESS);
 	}
     }
 
@@ -349,11 +349,12 @@ static iointerface_t* GetIOInterface(int argi, int argc, char *argv[], const opt
         for (d = 0; d < sizeof(dirs)/sizeof(dirs[0]) && !foundIt; d++)
         {
             char libfilename[256];
+            CreateInterfaceFunc createFunc;
             sprintf(libfilename, "%s/ioperf_%s.so", dirs[d], ifacename);
             dlhandle = dlopen(libfilename, RTLD_LAZY);
             if (!dlhandle) continue;
 
-            CreateInterfaceFunc createFunc = (CreateInterfaceFunc) dlsym(dlhandle, "CreateInterface");
+            createFunc = (CreateInterfaceFunc) dlsym(dlhandle, "CreateInterface");
             if (!createFunc) continue;
 
             /* we allow the io-interface plugin to process command line args too */
@@ -366,7 +367,7 @@ static iointerface_t* GetIOInterface(int argi, int argc, char *argv[], const opt
     if (!retval)
     {
         fprintf(stderr,"Encountered error instantiating IO interface\n");
-        exit(1);
+        exit(EXIT_SUCCESS);
     }
 
     /* store off the handle to this plugin so we can close it later */
@@ -569,7 +570,7 @@ main(int argc, char *argv[])
     if (!ioiface->Open(0))
     {
         fprintf(stderr, "Problem opening file\n");
-        exit(1);
+        exit(EXIT_SUCCESS);
     }
     t1 = ioiface->Time();
     AddTimingInfo(OP_OPEN, 0, t0, t1);
