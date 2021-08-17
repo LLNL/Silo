@@ -130,6 +130,7 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
     int dontErrInSanityChecks= 0;
     if(!PyArg_ParseTuple(args, "ss", &str, &iestr))
     {
+        PyErr_Clear();
         if(!PyArg_ParseTuple(args, "s", &str))
         {
             SiloErrorFunc("A string argument is required.");
