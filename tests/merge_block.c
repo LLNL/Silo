@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -93,7 +93,7 @@ int main (int argc, char **argv)
     if (argc != 3 && argc != 4)
     {
         printf ("usage: merge_blocks basename meshfilename [DB_HDF5 | DB_PDB]\n");
-        exit(EXIT_SUCCESS);
+        exit (1);
     }
     if (argc == 4)
     {
@@ -234,20 +234,20 @@ MCopyFile (char *fileName, char *meshFileName, int driver)
         if ((um[i] = DBGetUcdmesh (dbfile1, tmpstr)) == NULL)
         {
             printf ("Error reading mesh %d.\n", i);
-            exit(EXIT_SUCCESS);
+            exit (1);
         }
         sprintf (tmpstr, "/domain_%d/global_node_map", i);
         local_global_map[i] = ALLOC_N (int, um[i]->nnodes);
         if (DBReadVar (dbfile2, tmpstr, local_global_map[i]) != 0)
         {
             printf ("Error reading local global map %d.\n", i);
-            exit(EXIT_SUCCESS);
+            exit (1);
         }
         sprintf (tmpstr, "/domain_%d/material", i);
         if ((mat[i] = DBGetMaterial (dbfile1, tmpstr)) == NULL)
         {
             printf ("Error reading material %d.\n", i);
-            exit(EXIT_SUCCESS);
+            exit (1);
         }
     }
     printf ("mesh and materials read.\n");
@@ -601,7 +601,7 @@ MCopyFile (char *fileName, char *meshFileName, int driver)
             if ((uv[j] = DBGetUcdvar (dbfile1, tmpstr)) == NULL)
             {
                 printf ("Error reading variable %s mesh %d.\n", vars[i], j);
-                exit(EXIT_SUCCESS);
+                exit (1);
             }
         }
         printf ("variable %s read.\n", vars[i]);

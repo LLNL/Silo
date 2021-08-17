@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -53,7 +53,6 @@ product endorsement purposes.
 #include <silo.h>
 #ifndef WIN32
 #include <sys/time.h>
-#include <time.h>
 #else
 #include <string.h>
 #include <time.h>

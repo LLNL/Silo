@@ -182,14 +182,8 @@
 /* include the file that has the version defines */
 #include "siloversion.h"
 
-/* `off64_t' does not exist on windows, so cannot take 'sizeof' */
-/*  Set it to '4' if building for a 32-bit system, and '8' if */
-/*  building for 64-bit. */
-#ifdef _WIN64
-  #define SIZEOF_OFF64_T 8
-#else
-  #define SIZEOF_OFF64_T 4
-#endif
+/* The size of `off64_t', as computed by sizeof. */
+#define SIZEOF_OFF64_T 4
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

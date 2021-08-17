@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -121,7 +121,7 @@ be used for advertising or product endorsement purposes.
  *     to interface layer, silo.c
  *-------------------------------------------------------------------------*/
 INTERNAL DBfile *
-db_unk_Open(char const *name, int mode, int subtype_dummy)
+db_unk_Open(char *name, int mode, int subtype_dummy)
 {
     char          *me = "db_unk_Open";
     DBfile        *opened = NULL;

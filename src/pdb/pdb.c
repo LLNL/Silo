@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -105,7 +105,7 @@ char		lite_PD_err[MAXLINE];
 int		lite_PD_buffer_size = -1;
 ReaderFuncType	lite_pdb_rd_hook = NULL;
 WriterFuncType	lite_pdb_wr_hook = NULL;
-char           *lite_PD_DEF_CREATM = "wx";
+char           *lite_PD_DEF_CREATM = "w";
 
 #ifdef PDB_WRITE
 static int	_append_flag = FALSE ;

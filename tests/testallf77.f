@@ -1,63 +1,63 @@
-!***********************************************************************
-! Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
-! LLNL-CODE-425250.
-! All rights reserved.
-! 
-! This file is part of Silo. For details, see silo.llnl.gov.
-! 
-! Redistribution and use in source and binary forms, with or without
-! modification, are permitted provided that the following conditions
-! are met:
-! 
-!    * Redistributions of source code must retain the above copyright
-!      notice, this list of conditions and the disclaimer below.
-!    * Redistributions in binary form must reproduce the above copyright
-!      notice, this list of conditions and the disclaimer (as noted
-!      below) in the documentation and/or other materials provided with
-!      the distribution.
-!    * Neither the name of the LLNS/LLNL nor the names of its
-!      contributors may be used to endorse or promote products derived
-!      from this software without specific prior written permission.
-! 
-! THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
-! "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
-! LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-! A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
-! LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
-! CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-! EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
-! PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
-! PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-! LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
-! NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
-! SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-! 
-! This work was produced at Lawrence Livermore National Laboratory under
-! Contract No.  DE-AC52-07NA27344 with the DOE.
-! 
-! Neither the  United States Government nor  Lawrence Livermore National
-! Security, LLC nor any of  their employees, makes any warranty, express
-! or  implied,  or  assumes  any  liability or  responsibility  for  the
-! accuracy, completeness,  or usefulness of  any information, apparatus,
-! product, or  process disclosed, or  represents that its use  would not
-! infringe privately-owned rights.
-! 
-! Any reference herein to  any specific commercial products, process, or
-! services by trade name,  trademark, manufacturer or otherwise does not
-! necessarily  constitute or imply  its endorsement,  recommendation, or
-! favoring  by  the  United  States  Government  or  Lawrence  Livermore
-! National Security,  LLC. The views  and opinions of  authors expressed
-! herein do not necessarily state  or reflect those of the United States
-! Government or Lawrence Livermore National Security, LLC, and shall not
-! ***********************************************************************
+************************************************************************
+* Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
+* LLNL-CODE-425250.
+* All rights reserved.
+* 
+* This file is part of Silo. For details, see silo.llnl.gov.
+* 
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
+* 
+*    * Redistributions of source code must retain the above copyright
+*      notice, this list of conditions and the disclaimer below.
+*    * Redistributions in binary form must reproduce the above copyright
+*      notice, this list of conditions and the disclaimer (as noted
+*      below) in the documentation and/or other materials provided with
+*      the distribution.
+*    * Neither the name of the LLNS/LLNL nor the names of its
+*      contributors may be used to endorse or promote products derived
+*      from this software without specific prior written permission.
+* 
+* THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
+* "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
+* LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+* A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
+* LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
+* CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+* EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
+* PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
+* PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+* LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
+* NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
+* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+* 
+* This work was produced at Lawrence Livermore National Laboratory under
+* Contract No.  DE-AC52-07NA27344 with the DOE.
+* 
+* Neither the  United States Government nor  Lawrence Livermore National
+* Security, LLC nor any of  their employees, makes any warranty, express
+* or  implied,  or  assumes  any  liability or  responsibility  for  the
+* accuracy, completeness,  or usefulness of  any information, apparatus,
+* product, or  process disclosed, or  represents that its use  would not
+* infringe privately-owned rights.
+* 
+* Any reference herein to  any specific commercial products, process, or
+* services by trade name,  trademark, manufacturer or otherwise does not
+* necessarily  constitute or imply  its endorsement,  recommendation, or
+* favoring  by  the  United  States  Government  or  Lawrence  Livermore
+* National Security,  LLC. The views  and opinions of  authors expressed
+* herein do not necessarily state  or reflect those of the United States
+* Government or Lawrence Livermore National Security, LLC, and shall not
+* ***********************************************************************
 
-!---------------------------------------------------------------------
-!  Purpose
-!
-!     Demonstrate use of SILO for creating unstructured cell data
-!     (UCD) objects for visualization.
-!
-!---------------------------------------------------------------------
+c---------------------------------------------------------------------
+c  Purpose
+c
+c     Demonstrate use of SILO for creating unstructured cell data
+c     (UCD) objects for visualization.
+c
+c---------------------------------------------------------------------
       program main
 
       implicit none
@@ -69,7 +69,7 @@
       integer buildrect2d
       integer builducd
 
-!...Create file named "rectf77.silo". Database ID is returned in 'dbid'.
+c...Create file named "rectf77.silo". Database ID is returned in 'dbid'.
 
       driver = DB_PDB
       compress = 0
@@ -86,32 +86,32 @@
          err = dbsetcompress("METHOD=GZIP",11)
       endif
 
-!...Create file named "ucdf77.silo". Database ID is returned in 'dbid'.
+c...Create file named "ucdf77.silo". Database ID is returned in 'dbid'.
 
       err = dbcreate("ucdf77.silo", 11, 0, DB_LOCAL,
      .               "file info", 9, driver, dbid)
 
-!...Write out objects for visualization
+c...Write out objects for visualization
 
       err = builducd(dbid, "ucd", 3)
 
-!...Close data file.
+c...Close data file.
 
       err = dbclose(dbid)
 
       print *,'Created file: ucdf77.silo'
 
-!...Test re-setting compression to off
+c...Test re-setting compression to off
       err = dbsetcompress("",-1)
 
       err = dbcreate("rectf77.silo", 12, 0, DB_LOCAL,
      .               "file info", 9, driver, dbid)
 
-!...Write out objects for visualization 
+c...Write out objects for visualization 
 
       err = buildrect2d(dbid, "rect", 4)
 
-!...Close data file.
+c...Close data file.
 
       err = dbclose(dbid)
 
@@ -121,19 +121,19 @@
       end
 
       integer function buildrect2d (dbid, name, lname)
-!----------------------------------------------------------------------
-!  Routine                                                 buildrect2d
-!
-!  Purpose
-!
-!       Build rect-mesh, rect-var, and return the mesh ID.
-!
-!  Modifications:
-!    Kathleen Bonnell, Wed Sep 2 16:12:15 PDT 20099
-!    Changed 'character*8 name' to 'character*(*) name' to remove 
-!    'Character length argument mismatch' compiler error.
-!
-!-----------------------------------------------------------------------
+c----------------------------------------------------------------------
+c  Routine                                                 buildrect2d
+c
+c  Purpose
+c
+c       Build rect-mesh, rect-var, and return the mesh ID.
+c
+c  Modifications:
+c    Kathleen Bonnell, Wed Sep 2 16:12:15 PDT 20099
+c    Changed 'character*8 name' to 'character*(*) name' to remove 
+c    'Character length argument mismatch' compiler error.
+c
+c-----------------------------------------------------------------------
 
       implicit none
 
@@ -154,9 +154,9 @@
 
       integer        i
 
-!
-!     Create the mesh.
-!
+c
+c     Create the mesh.
+c
       ndims = 2
       dims (1) = 30
       dims (2) = 40
@@ -168,9 +168,9 @@
 110   continue
 
 
-!
-!     Write out the variables.
-!
+c
+c     Write out the variables.
+c
       cycle = 48
       time = 4.8
 
@@ -191,20 +191,20 @@
       end
 
       integer function builducd (dbid, name, lname)
-!----------------------------------------------------------------------
-!  Routine                                                    builducd
-!
-!  Purpose
-!
-!       Build ucd-mesh, ucd-var, facelist and zonelist, and return
-!       the mesh ID.
-! 
-!  Modifications:
-!    Kathleen Bonnell, Wed Sep 2 16:12:15 PDT 20099
-!    Changed 'character*8 name' to 'character*(*) name' to remove 
-!    'Character length argument mismatch' compiler error.
-!
-!-----------------------------------------------------------------------
+c----------------------------------------------------------------------
+c  Routine						      builducd
+c
+c  Purpose
+c
+c	Build ucd-mesh, ucd-var, facelist and zonelist, and return
+c	the mesh ID.
+c 
+c  Modifications:
+c    Kathleen Bonnell, Wed Sep 2 16:12:15 PDT 20099
+c    Changed 'character*8 name' to 'character*(*) name' to remove 
+c    'Character length argument mismatch' compiler error.
+c
+c-----------------------------------------------------------------------
 
       implicit none
 
@@ -248,8 +248,8 @@
       integer        lmnames(3)
       character*1024 colors(3)
       integer        lcolors(3)
-!     Create the mesh.
-!
+c     Create the mesh.
+c
       ndims = 3
       nnodes = 21 * 21 * 6
       nzones = 20 * 20 * 5
@@ -294,9 +294,9 @@
 210      continue
 200   continue
 
-!
-!     Create the density and pressure arrays.
-!
+c
+c     Create the density and pressure arrays.
+c
       xcenter = 0.
       ycenter = 0.
       do 300 i = 0, 20
@@ -312,9 +312,9 @@
 310      continue
 300   continue
 
-!
-!     Create the velocity component arrays.
-!
+c
+c     Create the velocity component arrays.
+c
       xcenter = 0.
       ycenter = 0.
       do 400 i = 0, 20
@@ -329,18 +329,18 @@
 410      continue
 400   continue
 
-!
-!     Create the material array.
-!
+c
+c     Create the material array.
+c
       nmats = 3
       matnos(1) = 1
       matnos(2) = 2
       matnos(3) = 3
       mixlen = 0
 
-!
-!     Put in the material in 3 shells.
-!
+c
+c     Put in the material in 3 shells.
+c
       do 500 i = 0, 19
          do 510 j = 0, 19
             do 520 k = 0, 1
@@ -355,9 +355,9 @@
 510      continue
 500   continue
 
-!
-!     Write out the variables.
-!
+c
+c     Write out the variables.
+c
       cycle = 48
       time = 4.8
       one = 1

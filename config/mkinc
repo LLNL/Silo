@@ -19,7 +19,7 @@ $0 = shift @ARGV;
 
 #!/usr/bin/perl
 #########################################################################
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+# Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
 # All rights reserved.
 # 
@@ -157,7 +157,7 @@ local($arg0) = '';
 local($opt_f90) = 0;
 
 # Fortran comment character; use 'C' for F77, '!' for F90 and later
-local($ccmt) = '!';
+local($ccmt) = 'C';
 
 # Get command-line option (if any) to select F77 or F9x+ formatting
 # There are better ways of doing this; just not in Perl4 style as of 2013...
@@ -231,6 +231,8 @@ print <<"EOF";
 ${ccmt}cccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 ${ccmt} 
 ${ccmt}      $title include file for Fortan applications.
+${ccmt} 
+${ccmt}  Programmer:   $user $date
 ${ccmt} 
 ${ccmt}  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 ${ccmt}     This file is generated automatically from C header files in the

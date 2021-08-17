@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -74,6 +74,7 @@ be used for advertising or product endorsement purposes.
 /* Private SILO functions.  */
 #include "config.h" /* For a possible redefinition of setjmp/longjmp.
                        Also for SDX driver detection.  */
+#include <stdarg.h>
 #include <stdio.h>
 #include <float.h>
 #include <math.h>
@@ -110,10 +111,6 @@ be used for advertising or product endorsement purposes.
 #include <windows.h>        /* for FileInfo funcs */
 #include <io.h>             /* for FileInfo funcs */
 #endif
-#ifdef __DARSHAN_LOG_FORMAT_H
-#include <darshan-ext.h>
-#endif
-#include <assert.h>
 
 /* DB_MAIN must be defined before including silo_private.h. */
 #define DB_MAIN
@@ -139,7 +136,6 @@ int Silo_version_4_10 = 0;
 int Silo_version_4_10_0 = 0;
 int Silo_version_4_10_1 = 0;
 int Silo_version_4_10_2 = 0;
-int Silo_version_4_10_3 = 0;
 
 /* Symbols for error handling */
 PUBLIC int     DBDebugAPI = 0;  /*file desc for API debug messages      */
@@ -188,9 +184,15 @@ PUBLIC char   *_db_err_list[] =
     "re-install Silo. If you do not have an installation\n"
     "of HDF5 already on your sytem, you will also need\n"
     "to obtain HDF5 from www.hdfgroup.org and install it.", /* 33 */
-    "Empty objects not permitted. See DBSetAllowEmptyObjects()." /* 34 */
-    "No more tiny array buffer space for custom object." /* 35 */
+    "Empty objects not permitted. See DBSetAllowEmptyObjects().", /* 34 */
+    "No more tiny array buffer space for custom object.", /* 35 */
+    "Although this appears to be an HDF5 file,\n"
+    "it does not appear to be one produced by Silo\n"
+    "and so cannot be open and read by Silo." /* 36 */
 };
+
+/* Table of contents object count */
+static int _db_nobj_types = ((int)(sizeof(DBtoc)/sizeof(struct{char **p;int n;})));
 
 PRIVATE unsigned char _db_fstatus[DB_NFILES];  /*file status  */
 typedef struct reg_status_t {
@@ -233,8 +235,7 @@ typedef struct db_silo_stat_t {
 #error missing definition for SIZEOF_OFF64_T in silo_private.h
 #else
 #if SIZEOF_OFF64_T > 4
-#warning FIXME
-    struct stat s;
+    struct stat64 s;
 #else
     struct stat s;
 #endif
@@ -245,7 +246,7 @@ typedef struct db_silo_stat_t {
 #endif
 } db_silo_stat_t;
 
-/* This function is used in API_BEGIN macros and so we forward declare it */
+/* Forward declarations */
 PRIVATE int db_isregistered_file(DBfile *dbfile, const db_silo_stat_t *filestate);
 
 /* Global structures for option lists.  */
@@ -270,13 +271,10 @@ SILO_Globals_t SILO_Globals = {
     FALSE, /* enableChecksums */
     FALSE, /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
-    FALSE, /* darshanEnabled */
-    FALSE, /* allowLongStrComponents */
     3,     /* maxDeprecateWarnings */
     0,     /* compressionParams (null) */
     2.0,   /* compressionMinratio */
     0,     /* compressionErrmode (fallback) */
-    DB_MAX_COMPATABILITY, /* compatability mode */
     {      /* file options sets [32 of them] */
         0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
@@ -849,6 +847,10 @@ db_AllocToc(void)
     toc->mrgvar_names = NULL;
     toc->nmrgvar = 0;
 
+    toc->symlink_target_names = NULL;
+    toc->nsymlink = 0;
+    toc->symlink_names = NULL;
+
     return(toc);
 }
 
@@ -1098,6 +1100,18 @@ db_FreeToc(DBfile *dbfile)
             }
             FREE(toc->mrgvar_names);
         }
+    }
+
+    if (toc->nsymlink > 0)
+    {
+        if (toc->symlink_target_names) {
+            for (i = 0; i < toc->nsymlink; i++)
+                FREE(toc->symlink_target_names[i]);
+            FREE(toc->symlink_target_names);
+        }
+#warning WE SHOULD PROBABLY JUST EITHER MAKE THIS CONSISTENT OR PERHAPS COPY ALL CHARS INTO LINK@TARGET format
+        /* toc->symlink_names is just copy of other members here.
+           So, we don't free it here. */
     }
 
     FREE(dbfile->pub.toc);
@@ -1350,6 +1364,9 @@ DBGetObjtypeTag(char const *type_name)
     else if (STR_EQUAL(type_name, "mrgvar"))
         tag = DB_MRGVAR;
 
+    else if (STR_EQUAL(type_name, "symlink"))
+        tag = DB_SYMLINK;
+
     else
         tag = DB_USERDEF;
 
@@ -1455,6 +1472,8 @@ DBGetObjtypeName(int type)
             return ("groupelmap");
         case DB_MRGVAR:
             return ("mrgvar");
+        case DB_SYMLINK:
+            return ("symlink");
         case DB_USERDEF:
             return ("unknown");
     }
@@ -1464,7 +1483,7 @@ DBGetObjtypeName(int type)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    db_ListDir2
+ * Function:    DBLs
  *
  * Purpose:     Lists the contents of the given directories based on the
  *              listing options set in the `args' array.  Directory path
@@ -1493,29 +1512,45 @@ DBGetObjtypeName(int type)
  *
  *    Jeremy Meredith, Sept 18 1998
  *    Added multimatspecies to the toc
+ *    
+ *    Mark C. Miller, Thu Aug 20 14:20:25 PDT 2020
+ *    Changed name from db_ListDir2 to DBLs and made it a public function.
+ *    Macro-ized much of the internal logic.
+ *    Changed list filtering logic. "-a -d" means everything *but* dirs
+ *    whereas "-d" without the preceding "-a" means only dirs. Same behavior
+ *    for all other options after a "-a".
  *-------------------------------------------------------------------------*/
-INTERNAL int
-db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
-            char *list[], int *nlist)
+PUBLIC int
+DBLs(DBfile *_dbfile, char const *cl_args, char *list[], int *nlist)
 {
     int            i, k, npaths, nopts;
-    int            ls_mesh, ls_var, ls_dir;
-    int            ls_multimesh, ls_multivar, ls_multimat, ls_curve, ls_mat;
-    int            ls_matspecies, ls_multimatspecies, ls_low, ls_array;
+    int            ls_mesh, ls_var, ls_mat, ls_curve, ls_multi, ls_dir;
+    int            ls_low, ls_obj, ls_arr, ls_link, ls_mrg;
+    int            count_list = FALSE, build_list = FALSE, print_list = FALSE;
     char           opts[256], cwd[256], orig_dir[256], *paths[64];
     DBtoc         *toc = NULL;
     int            left_margin, col_margin, line_width;
-    char          *me = "db_ListDir2";
+    char          *me = "DBLs";
+    int            _nlist_orig, has_opt_a = FALSE, nargs;
+    char         **args;
 
      /*----------------------------------------
       *  Parse input options and pathnames.
       *----------------------------------------*/
 
-    if (!list || !nlist) return -1;
+    if (!list && nlist)
+        count_list = TRUE;
+    else if (list && nlist)
+        build_list = TRUE;
+    else if (!list && !nlist)
+        print_list = TRUE;
+    else
+        return -1;
 
     npaths = 0;
     nopts = 0;
-
+    nargs = -1;
+    args = db_StringListToStringArray(cl_args, &nargs, ' ', 0);
     for (i = 0; i < nargs; i++) {
 
         switch (args[i][0]) {
@@ -1536,63 +1571,56 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
       *  Set listing options based on input.
       *----------------------------------------*/
     if (nopts > 0) {
-        ls_mesh = ls_var = ls_dir = FALSE;
-        ls_curve = ls_mat = ls_matspecies = ls_low = ls_array = FALSE;
-        ls_multimat = ls_multimatspecies = FALSE;
+        ls_mesh = ls_var = ls_mat = ls_curve = ls_multi = ls_dir = FALSE;
+        ls_low = ls_obj = ls_arr = ls_link = ls_mrg = FALSE;
     }
     else {
         /* Default values */
-        ls_mesh = ls_var = ls_dir = ls_multimesh = ls_multivar = TRUE;
-        ls_curve = ls_mat = ls_matspecies = ls_low = ls_array = FALSE;
-        ls_multimat = ls_multimatspecies = FALSE;
+        ls_mesh = ls_var = ls_multi = ls_dir = TRUE;
+        ls_mat = ls_curve = FALSE;
+        ls_low = ls_obj = ls_arr = ls_link = ls_mrg = FALSE;
     }
 
     for (i = 0; i < nopts; i++) {
 
         switch (opts[i]) {
             case 'a':
-                ls_curve = TRUE;
-                ls_dir = TRUE;
-                ls_low = TRUE;
-                ls_mat = TRUE;
-                ls_matspecies = TRUE;
-                ls_mesh = TRUE;
-                ls_var = TRUE;
-                ls_multimesh = TRUE;
-                ls_multivar = TRUE;
-                ls_multimat = TRUE;
-                ls_multimatspecies = TRUE;
-                ls_array = TRUE;
+                ls_mesh = ls_var = ls_mat = ls_curve = ls_multi = ls_dir = TRUE;
+                ls_low = ls_obj = ls_arr = ls_link = ls_mrg = TRUE;
+                has_opt_a = TRUE;
                 break;
             case 'A':
-                ls_array = TRUE;
+                ls_arr = has_opt_a ? FALSE : TRUE;
                 break;
             case 'c':
-                ls_curve = TRUE;
+                ls_curve = has_opt_a ? FALSE : TRUE;
                 break;
             case 'd':
-                ls_dir = TRUE;
+                ls_dir = has_opt_a ? FALSE : TRUE;
+                break;
+            case 'l':
+                ls_link = has_opt_a ? FALSE : TRUE;
                 break;
             case 'm':
-                ls_mesh = TRUE;
+                ls_mesh = has_opt_a ? FALSE : TRUE;
                 break;
             case 'M':
-                ls_multimesh = TRUE;
-                ls_multivar = TRUE;
-                ls_multimat  = TRUE;
-                ls_multimatspecies = TRUE;
+                ls_multi = has_opt_a ? FALSE : TRUE;
+                break;
+            case 'o':
+                ls_obj = has_opt_a ? FALSE : TRUE;
                 break;
             case 'r':
-                ls_mat = TRUE;
+                ls_mat = has_opt_a ? FALSE : TRUE;
                 break;
-            case 's':
-                ls_matspecies = TRUE;
+            case 't':
+                ls_mrg = has_opt_a ? FALSE : TRUE;
                 break;
             case 'v':
-                ls_var = TRUE;
+                ls_var = has_opt_a ? FALSE : TRUE;
                 break;
             case 'x':
-                ls_low = TRUE;
+                ls_low = has_opt_a ? FALSE : TRUE;
                 break;
             default:
                 return db_perror("invalid list option", E_BADARGS, me);
@@ -1615,7 +1643,29 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
     line_width = 80;
 
     if (nlist)
+    {
+        _nlist_orig = *nlist;
         *nlist = 0;
+    }
+
+#define PROCESS_LIST(LS_VAR, CAT) \
+if (LS_VAR && toc->n##CAT > 0) { \
+    if (count_list) {\
+        *nlist += toc->n##CAT; \
+    } \
+    else if (build_list) { \
+        for (i = 0; i < toc->n##CAT && *nlist<_nlist_orig; i++) { \
+            list[*nlist] = ALLOC_N(char, strlen(toc->CAT##_names[i]) + 1); \
+            strcpy(list[(*nlist)++], toc->CAT##_names[i]); \
+        } \
+    } \
+    else if (print_list) { \
+        printf("%7d "#CAT"s:\n", toc->n##CAT); \
+        _DBstrprint(stdout, toc->CAT##_names, toc->n##CAT, \
+                    'c', left_margin, col_margin, line_width); \
+        printf("\n"); \
+    } \
+}
 
     for (k = 0; k < npaths; k++) {
 
@@ -1630,289 +1680,31 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
         if (!toc)
             return db_perror("unable to get toc", E_INTERNAL, me);
 
-        if (ls_curve && toc->ncurve > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->ncurve; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                               strlen         (toc->curve_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->curve_names[i]);
-                }
-            }
-            else {
-                printf("%7d curves:\n", toc->ncurve);
-                _DBstrprint(stdout, toc->curve_names, toc->ncurve,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_low && toc->nvar > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nvar; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                                 strlen         (toc->var_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->var_names[i]);
-                }
-            }
-            else {
-                printf("%7d miscellaneous vars:\n", toc->nvar);
-                _DBstrprint(stdout, toc->var_names, toc->nvar,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_mat && toc->nmat > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nmat; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                                 strlen         (toc->mat_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->mat_names[i]);
-                }
-            }
-            else {
-                printf("%7d material vars:\n", toc->nmat);
-                _DBstrprint(stdout, toc->mat_names, toc->nmat,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_matspecies && toc->nmatspecies > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nmatspecies; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                          strlen         (toc->matspecies_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->matspecies_names[i]);
-                }
-            }
-            else {
-                printf("%7d material species vars:\n", toc->nmatspecies);
-                _DBstrprint(stdout, toc->matspecies_names,
-                            toc->nmatspecies,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_array && toc->narray > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->narray; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                               strlen         (toc->array_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->array_names[i]);
-                }
-            }
-            else {
-                printf("%7d compound arrays:\n", toc->narray);
-                _DBstrprint(stdout, toc->array_names, toc->narray,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_dir && toc->ndir > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->ndir; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                                 strlen         (toc->dir_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->dir_names[i]);
-                }
-            }
-            else {
-                printf("%7d directories:\n", toc->ndir);
-                _DBstrprint(stdout, toc->dir_names, toc->ndir,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_multimesh && toc->nmultimesh > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nmultimesh; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                           strlen         (toc->multimesh_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->multimesh_names[i]);
-                }
-            }
-            else {
-                printf("%7d multi-block meshes:\n", toc->nmultimesh);
-                _DBstrprint(stdout, toc->multimesh_names, toc->nmultimesh,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_mesh && toc->nqmesh > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nqmesh; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                               strlen         (toc->qmesh_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->qmesh_names[i]);
-                }
-            }
-            else {
-                printf("%7d quad meshes:\n", toc->nqmesh);
-                _DBstrprint(stdout, toc->qmesh_names, toc->nqmesh,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-        if (ls_mesh && toc->nucdmesh > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nucdmesh; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                             strlen         (toc->ucdmesh_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->ucdmesh_names[i]);
-                }
-            }
-            else {
-                printf("%7d UCD meshes:\n", toc->nucdmesh);
-                _DBstrprint(stdout, toc->ucdmesh_names, toc->nucdmesh,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-        if (ls_mesh && toc->nptmesh > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nptmesh; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                              strlen         (toc->ptmesh_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->ptmesh_names[i]);
-                }
-            }
-            else {
-                printf("%7d Point meshes:\n", toc->nptmesh);
-                _DBstrprint(stdout, toc->ptmesh_names, toc->nptmesh,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_multivar && toc->nmultivar > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nmultivar; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                            strlen         (toc->multivar_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->multivar_names[i]);
-                }
-            }
-            else {
-                printf("%7d multi-block vars:\n", toc->nmultivar);
-                _DBstrprint(stdout, toc->multivar_names, toc->nmultivar,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_multimat  && toc->nmultimat > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nmultimat; i++) {
-                    list[*nlist] = ALLOC_N (char,
-                       strlen (toc->multimat_names[i]) + 1);
-                    strcpy (list[(*nlist)++], toc->multimat_names[i]);
-                }
-            }
-            else {
-                printf("%7d multi-block materials:\n", toc->nmultimat);
-                _DBstrprint (stdout, toc->multimat_names, toc->nmultimat,
-                             'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_multimatspecies  && toc->nmultimatspecies > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nmultimatspecies; i++) {
-                    list[*nlist] = ALLOC_N (char,
-                       strlen (toc->multimatspecies_names[i]) + 1);
-                    strcpy (list[(*nlist)++], toc->multimatspecies_names[i]);
-                }
-            }
-            else {
-                printf("%7d multi-block material species:\n", toc->nmultimatspecies);
-                _DBstrprint (stdout, toc->multimatspecies_names, 
-                             toc->nmultimatspecies,
-                             'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-
-        if (ls_var && toc->nqvar > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nqvar; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                                strlen         (toc->qvar_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->qvar_names[i]);
-                }
-            }
-            else {
-                printf("%7d quad vars:\n", toc->nqvar);
-                _DBstrprint(stdout, toc->qvar_names, toc->nqvar,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-        if (ls_var && toc->nucdvar > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nucdvar; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                              strlen         (toc->ucdvar_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->ucdvar_names[i]);
-                }
-            }
-            else {
-                printf("%7d UCD vars:\n", toc->nucdvar);
-                _DBstrprint(stdout, toc->ucdvar_names, toc->nucdvar,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-        if (ls_var && toc->nptvar > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nptvar; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                               strlen         (toc->ptvar_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->ptvar_names[i]);
-                }
-            }
-            else {
-                printf("%7d Point vars:\n", toc->nptvar);
-                _DBstrprint(stdout, toc->ptvar_names, toc->nptvar,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
-        if (ls_var && toc->nobj > 0) {
-            if (build_list) {
-                for (i = 0; i < toc->nobj; i++) {
-                    list[*nlist] = ALLOC_N(char,
-                                 strlen         (toc->obj_names[i]) + 1);
-
-                    strcpy(list[(*nlist)++], toc->obj_names[i]);
-                }
-            }
-            else {
-                printf("%7d miscellaneous objects:\n", toc->nobj);
-                _DBstrprint(stdout, toc->obj_names, toc->nobj,
-                            'c', left_margin, col_margin, line_width);
-                printf("\n");
-            }
-        }
+        PROCESS_LIST(ls_curve, curve);
+        PROCESS_LIST(ls_low, var); /* misc. vars */
+        PROCESS_LIST(ls_mat, mat);
+        PROCESS_LIST(ls_mat, matspecies);
+        PROCESS_LIST(ls_arr, array); /* compound arrays */
+        PROCESS_LIST(ls_dir, dir);
+        PROCESS_LIST(ls_multi && ls_mesh, multimesh);
+        PROCESS_LIST(ls_multi && ls_mesh, multimeshadj);
+        PROCESS_LIST(ls_mesh, qmesh);
+        PROCESS_LIST(ls_mesh, ucdmesh);
+        PROCESS_LIST(ls_mesh, ptmesh);
+        PROCESS_LIST(ls_mesh, csgmesh);
+        PROCESS_LIST(ls_mrg, mrgtree);
+        PROCESS_LIST(ls_mrg, groupelmap);
+        PROCESS_LIST(ls_multi && ls_var, multivar);
+        PROCESS_LIST(ls_multi && ls_mat, multimat);
+        PROCESS_LIST(ls_multi && ls_mat, multimatspecies);
+        PROCESS_LIST(ls_var, qvar);
+        PROCESS_LIST(ls_var, ucdvar);
+        PROCESS_LIST(ls_var, ptvar);
+        PROCESS_LIST(ls_var, csgvar);
+        PROCESS_LIST(ls_var, defvars);
+        PROCESS_LIST(ls_var, mrgvar);
+        PROCESS_LIST(ls_obj, obj); /* misc. objects */
+        PROCESS_LIST(ls_link, symlink);
 
         /*
          * Return to original directory, since next path may
@@ -1921,6 +1713,12 @@ db_ListDir2(DBfile *_dbfile, char *args[], int nargs, int build_list,
         DBSetDir(_dbfile, orig_dir);
 
     }
+
+#warning CLEAN UP IS LOST IN ABOVE EARLY RETURNS
+    DBFreeStringArray(args, nargs);
+
+    if (nlist && (*nlist >= _nlist_orig))
+        return -1;
 
     return 0;
 }
@@ -2188,7 +1986,6 @@ PRIVATE int
 db_register_file(DBfile *dbfile, const db_silo_stat_t *filestate, int writeable)
 {
     int i;
-    int reg_file_cnt = 0;
     for (i = 0; i < DB_NFILES; i++)
     {
         if (_db_regstatus[i].f == 0)
@@ -2204,17 +2001,7 @@ db_register_file(DBfile *dbfile, const db_silo_stat_t *filestate, int writeable)
             _db_regstatus[i].f = dbfile;
             _db_regstatus[i].n = hval; 
             _db_regstatus[i].w = writeable;
-
-#ifdef __DARSHAN_LOG_FORMAT_H
-            if (SILO_Globals.darshanEnabled && !reg_file_cnt)
-                darshan_start_epoch();
-#endif
-
             return i;
-        }
-        else
-        {
-            reg_file_cnt++;
         }
     }
     return -1;
@@ -2224,16 +2011,6 @@ PRIVATE int
 db_unregister_file(DBfile *dbfile)
 {
     int i;
-
-#ifdef __DARSHAN_LOG_FORMAT_H
-    int reg_file_cnt = 0;
-    for (i = 0; i < DB_NFILES && SILO_Globals.darshanEnabled; i++)
-    {
-        if (!_db_regstatus[i].f)
-            reg_file_cnt++;
-    }
-#endif
-
     for (i = 0; i < DB_NFILES; i++)
     {
         if (_db_regstatus[i].f == dbfile)
@@ -2247,12 +2024,6 @@ db_unregister_file(DBfile *dbfile)
                 _db_regstatus[j].w = _db_regstatus[j+1].w;
             }
             _db_regstatus[j].f = 0;
-
-#ifdef __DARSHAN_LOG_FORMAT_H
-            if (SILO_Globals.darshanEnabled && reg_file_cnt == 1)
-                darshan_end_epoch();
-#endif
-
             return i;
         }
     }
@@ -2758,23 +2529,6 @@ DBGetAllowOverwrites()
     return SILO_Globals.allowOverwrites;
 }
 
-PUBLIC int 
-DBSetAllowOverwritesFile(DBfile *f, int allow)
-{
-    int oldAllow;
-    if (!f) return DBSetAllowOverwrites(allow);
-    oldAllow = f->pub.file_scope_globals->allowOverwrites;
-    f->pub.file_scope_globals->allowOverwrites = allow;
-    return oldAllow;
-}
-
-PUBLIC int 
-DBGetAllowOverwritesFile(DBfile *f)
-{
-    if (!f) return DBGetAllowOverwrites();
-    return f->pub.file_scope_globals->allowOverwrites; 
-}
-
 /*----------------------------------------------------------------------
  * Routine:  DBSetAllowEmptyObjects
  *
@@ -2981,7 +2735,7 @@ DBGuessHasFriendlyHDF5Names(DBfile *f)
     char cwd[1024];
     int retval;
 
-    if (DBGetDriverType(f) != DB_HDF5X)
+    if (DBGetDriverType(f) != 7 /* DB_HDF5X */)
         return 0;
 
     DBGetDir(f, cwd);
@@ -3012,59 +2766,6 @@ PUBLIC int
 DBGetDeprecateWarnings()
 {
     return SILO_Globals.maxDeprecateWarnings;
-}
-
-/*----------------------------------------------------------------------
- * Routine:  DBSetEnableDarshan
- *
- * Purpose:  Set flag to create friendly HDF5 dataset names 
- *
- * Programmer: Mark C. Miller, Wed Nov  5 09:32:43 PST 2014
- *
- * Description:  Sets flag to run with Darshan instrumentaion library
- * enabled.
- *--------------------------------------------------------------------*/
-PUBLIC int
-DBSetEnableDarshan(int enable)
-{
-    int oldEnable = SILO_Globals.darshanEnabled;
-#ifdef __DARSHAN_LOG_FORMAT_H
-    SILO_Globals.darshanEnabled = enable;
-#endif
-    return oldEnable;
-}
-
-PUBLIC int
-DBGetEnableDarshan()
-{
-    return SILO_Globals.darshanEnabled;
-}
-
-/*----------------------------------------------------------------------
- * Routine:  DBSetAllowLongStrComponents
- *
- * Purpose:  Set and return the allow long Str components flag
- *
- * Programmer:  Mark C. Miller, April 2, 2015
- *
- * Description:  This routine sets the flag that controls whether
- *               long Str components. By default, they are not.
- *               Note that long Str components can badly break older
- *               (pre-4.10.3) Silo library's and tool's ability
- *               to read such objects resulting in SEGVs.
- *--------------------------------------------------------------------*/
-PUBLIC int 
-DBSetAllowLongStrComponents(int allow)
-{
-    int oldAllow = SILO_Globals.allowLongStrComponents;
-    SILO_Globals.allowLongStrComponents = allow;
-    return oldAllow;
-}
-
-PUBLIC int 
-DBGetAllowLongStrComponents()
-{
-    return SILO_Globals.allowLongStrComponents;
 }
 
 /*----------------------------------------------------------------------
@@ -3263,9 +2964,9 @@ DBGetDriverTypeFromPath(const char *path)
    }
    (void) close(fd);
    if (strstr(buf, "PDB"))
-      return DB_PDB;
+      return 2; /* can't use DB_PDB here */
    if (strstr(buf, "HDF"))
-      return DB_HDF5X;
+      return 7; /* can't use DB_HDF5X here. */
    return DB_UNKNOWN;
 }
 
@@ -3592,6 +3293,13 @@ DBAddVarComponent(DBobject *object, const char *compname, const char *pdbname)
 PUBLIC int
 DBAddIntComponent(DBobject *object, const char *compname, int ii)
 {
+    return DBAddIntNComponent(object, compname, 1, &ii);
+}
+
+PUBLIC int
+DBAddIntNComponent(DBobject *object, const char *compname, int n, int const *ii)
+{
+    int            i;
     char           tmp[256];
 
     API_BEGIN("DBAddIntComponent", int, -1) {
@@ -3601,11 +3309,21 @@ DBAddIntComponent(DBobject *object, const char *compname, int ii)
             API_ERROR("component name", E_BADARGS);
         if (db_VariableNameValid(compname) == 0)
             API_ERROR("component name", E_INVALIDNAME);
-        if (object->ncomponents >= object->maxcomponents) {
+        if (n < 1)
+            API_ERROR("n", E_BADARGS);
+        if (!ii)
+            API_ERROR("ii array", E_BADARGS);
+        if (object->ncomponents >= object->maxcomponents)
             API_ERROR("object ncomponents", E_BADARGS);
-        }
 
-        sprintf(tmp, "'<i>%d'", ii);
+        sprintf(tmp, "'<i>%d", ii[0]);
+        for (i = 1; i < n; i++)
+        {
+            char tmp2[32];
+            snprintf(tmp2, sizeof(tmp2), ",%d", ii[i]);
+            strcat(tmp, tmp2);
+        }
+        strcat(tmp, "'");
 
         if (NULL == (object->comp_names[object->ncomponents] =
                      STRDUP(compname)) ||
@@ -3659,6 +3377,13 @@ DBAddIntComponent(DBobject *object, const char *compname, int ii)
 PUBLIC int
 DBAddFltComponent(DBobject *object, const char *compname, double ff)
 {
+    return DBAddFltNComponent(object, compname, 1, &ff);
+}
+
+PUBLIC int
+DBAddFltNComponent(DBobject *object, const char *compname, int n, double const *ff)
+{
+    int            i;
     char           tmp[256];
 
     API_BEGIN("DBAddFltComponent", int, -1) {
@@ -3666,13 +3391,23 @@ DBAddFltComponent(DBobject *object, const char *compname, double ff)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
             API_ERROR("component name", E_BADARGS);
+        if (n < 1)
+            API_ERROR("n", E_BADARGS);
+        if (!ff)
+            API_ERROR("ff array", E_BADARGS);
         if (db_VariableNameValid(compname) == 0)
             API_ERROR("component name", E_INVALIDNAME);
         if (object->ncomponents >= object->maxcomponents) {
             API_ERROR("object ncomponents", E_BADARGS);
         }
 
-        sprintf(tmp, "'<f>%g'", ff);
+        sprintf(tmp, "'<f>%g", ff[0]);
+        for (i = 1; i < n; i++)
+        {
+            char tmp2[32];
+            snprintf(tmp2, sizeof(tmp2), ",%g", ff[i]);
+        }
+        strcat(tmp, "'");
 
         if (NULL == (object->comp_names[object->ncomponents] =
                      STRDUP(compname)) ||
@@ -3709,8 +3444,15 @@ DBAddFltComponent(DBobject *object, const char *compname, double ff)
  *
  *--------------------------------------------------------------------*/
 PUBLIC int
-DBAddDblComponent(DBobject *object, const char *compname, double ff)
+DBAddDblComponent(DBobject *object, const char *compname, double dd)
 {
+    return DBAddDblNComponent(object, compname, 1, &dd);
+}
+
+PUBLIC int
+DBAddDblNComponent(DBobject *object, const char *compname, int n, double const *dd)
+{
+    int            i;
     char           tmp[256];
 
     API_BEGIN("DBAddDblComponent", int, -1) {
@@ -3718,13 +3460,23 @@ DBAddDblComponent(DBobject *object, const char *compname, double ff)
             API_ERROR("object pointer", E_BADARGS);
         if (!compname || !*compname)
             API_ERROR("component name", E_BADARGS);
+        if (n < 1)
+            API_ERROR("n", E_BADARGS);
+        if (!dd)
+            API_ERROR("dd array", E_BADARGS);
         if (db_VariableNameValid(compname) == 0)
             API_ERROR("component name", E_INVALIDNAME);
         if (object->ncomponents >= object->maxcomponents) {
             API_ERROR("object ncomponents", E_BADARGS);
         }
 
-        sprintf(tmp, "'<d>%.30g'", ff);
+        sprintf(tmp, "'<d>%.30g", dd[0]);
+        for (i = 1; i < n; i++)
+        {
+            char tmp2[64];
+            snprintf(tmp2, sizeof(tmp2), ",%.30g", dd[i]);
+        }
+        strcat(tmp, "'");
 
         if (NULL == (object->comp_names[object->ncomponents] =
                      STRDUP(compname)) ||
@@ -4002,7 +3754,8 @@ db_parse_version_digits_from_string(char const *str, char sep, int *digits, int 
             *p = '\0';
             nseps++;
         }
-        else if (!strncmp(p, "-pre", 4))
+        else if (!strncmp(p, "-pre", 4) ||
+                 !strncmp(p, "-pos", 4))
         {
             *(p+0) = '\0';
             *(p+1) = '0';
@@ -4328,6 +4081,9 @@ DBOpenReal(const char *name, int type, int mode)
     db_silo_stat_t filestate;
 
     API_BEGIN("DBOpen", DBfile *, NULL) {
+        if (DB_NOBJ_TYPES != _db_nobj_types)
+            API_ERROR("Silo TOC not configured corretly", E_INTERNAL);
+
         if (!name)
             API_ERROR(NULL, E_NOFILE);
 
@@ -4407,10 +4163,8 @@ DBOpenReal(const char *name, int type, int mode)
         i = db_isregistered_file(0, &filestate);
         if (i != -1)
         {
-#if 0
             if (_db_regstatus[i].w != 0 || mode != DB_READ)
                 API_ERROR(name, E_CONCURRENT);
-#endif
         }
 
         if( ( filestate.s.st_mode & S_IFDIR ) != 0 )
@@ -4528,6 +4282,9 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     db_silo_stat_t filestate;
 
     API_BEGIN("DBCreate", DBfile *, NULL) {
+        if (DB_NOBJ_TYPES != _db_nobj_types)
+            API_ERROR("Silo TOC not configured corretly", E_INTERNAL);
+
         if (!name)
             API_ERROR(NULL, E_NOFILE);
 
@@ -4555,9 +4312,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             i = db_isregistered_file(0, &filestate);
             if (i != -1)
             {
-#if 0
                 API_ERROR(name, E_CONCURRENT);
-#endif
             }
         }
 
@@ -4671,7 +4426,6 @@ DBClose(DBfile *dbfile)
         if (dbfile->pub.file_lib_version)
             free(dbfile->pub.file_lib_version);
         db_unregister_file(dbfile);
-
         retval = (dbfile->pub.close) (dbfile);
         API_RETURN(retval);
     }
@@ -5713,9 +5467,12 @@ DBFilters(DBfile *dbfile, FILE *stream)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    DBMkDir
+ * Function:    DBMkDir & DBMkDirP
  *
- * Purpose:     Creates a new directory in the database.
+ * Purpose:     Creates a new directory in the database. The P variant
+ *              obeys unix `mkdir -p` semantics making parent directories
+ *              as necessary as does so *above* any specific driver using
+ *              calls to DBGetDir(), DBSetDir() and DBMkDir().
  *
  * Return:      Success:        directory ID
  *
@@ -5764,6 +5521,59 @@ DBMkDir(DBfile *dbfile, const char *name)
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
 
+PUBLIC int
+DBMkDirP(DBfile *dbfile, const char *name)
+{
+    char        cwg[1024], *p;
+    char       *abspath = 0;
+    int         abslen = 0;
+    int         retval = 0;
+
+    API_BEGIN2("DBMkDirP", int, -1, api_dummy) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBMkDir", E_GRABBED) ; 
+        if (!name || !*name)
+            API_ERROR("directory name", E_BADARGS);
+        if (db_VariableNameValid(name) == 0)
+            API_ERROR("directory name", E_INVALIDNAME);
+
+        /* Save cwg */
+        cwg[0] = '\0';
+        DBGetDir(dbfile, cwg);
+        abspath = db_absoluteOf_path(cwg,name);
+        abslen = strlen(abspath);
+
+        /* iterate setting and making one dir */
+        p = abspath+abslen;
+
+        /* Walk up path finding nearest existing parent */
+        while (p > abspath)
+        {
+            if (DBInqVarType(dbfile, abspath[0]=='\0'?"/":abspath) == DB_DIR) break;
+            while (p>abspath && '/'!=*p) p--;
+            *p = '\0';
+        }
+
+        /* Walk down path creating missing parents */
+        while (!retval && p < abspath+abslen)
+        {
+            DBSetDir(dbfile, abspath[0]=='\0'?"/":abspath);
+            retval = DBMkDir(dbfile, p+1);
+            *p = '/';
+            while (p<abspath+abslen && '\0'!=*p) p++;
+        }
+
+        /* restore cwg */
+        DBSetDir(dbfile, cwg);
+        free(abspath);
+
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    DBCpDir
@@ -5778,8 +5588,8 @@ DBMkDir(DBfile *dbfile, const char *name)
  *
  *-------------------------------------------------------------------------*/
 PUBLIC int
-DBCpDir(DBfile *dbfile, const char *srcDir,
-        DBfile *dstFile, const char *dstDir)
+DBCpDir(DBfile *dbfile, char const *srcDir,
+        DBfile *dstFile, char const *dstDir)
 {
     int retval;
 
@@ -5788,11 +5598,8 @@ DBCpDir(DBfile *dbfile, const char *srcDir,
             API_ERROR(NULL, E_NOFILE);
         if (!dstFile)
             API_ERROR(NULL, E_NOFILE);
-#warning FIX ME
-#if 0
         if (db_isregistered_file(dstFile,0)==-1)
             API_ERROR(NULL, E_NOTREG);
-#endif
         if (SILO_Globals.enableGrabDriver == TRUE)
             API_ERROR(NULL, E_GRABBED) ; 
         if (!srcDir || !*srcDir)
@@ -5810,6 +5617,909 @@ DBCpDir(DBfile *dbfile, const char *srcDir,
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    DBMkSymlink
+ *
+ * Purpose:     Create symbolic link in silo file's CWD with name link and 
+ *              referencing target. If target string contains ':', then
+ *              chars before ':' are interpreted as another silo file
+ *              and chars after ':' are interpreted as object within that
+ *              file. If file part specifies a relative path, then path is
+ *              relative to directory in which dbfile exists in
+ *              file system.
+ *
+ * Return:      Success:        directory ID
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Mark C. Miller, Mon Apr 16 14:52:05 PDT 2018
+ *
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBMkSymlink(DBfile *dbfile, char const *target, char const *link)
+{
+    int retval;
+
+    API_BEGIN2("DBMkSymlink", int, -1, api_dummy) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBMkDir", E_GRABBED) ; 
+        if (!target || !*target)
+            API_ERROR("target", E_BADARGS);
+        if (db_VariableNameValid(target) == 0)
+            API_ERROR("target", E_INVALIDNAME);
+        if (!link || !*link)
+            API_ERROR("link", E_BADARGS);
+        if (db_VariableNameValid(link) == 0)
+            API_ERROR("link", E_INVALIDNAME);
+        if (!dbfile->pub.mksymlink)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.mksymlink) (dbfile, target, link);
+        db_FreeToc(dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/* return 0 if the toc_entry is not a symlink or the target of the
+ * symlink if it is */
+PUBLIC char const *
+DBIsSymlink(DBtoc const *toc, char const *toc_entry)
+{
+    int i;
+
+    if (!toc) return 0;
+    if (!toc_entry || !*toc_entry) return 0;
+
+    /* note: could use pointer compare instead of string
+       compare if could guarantee the toc_entry is one of
+       the members from this toc because symlink_name entry
+       is really just a copy of other toc entry's name
+       pointers */
+
+    for (i = 0; i < toc->nsymlink; i++)
+    {
+        if (!strcmp(toc->symlink_names[i], toc_entry))
+            return toc->symlink_target_names[i];
+    }
+
+    return 0;
+}
+
+PUBLIC int
+DBGetSymlink(DBfile *dbfile, char const *in_candidate_link, char *out_target)
+{
+    int retval;
+    API_BEGIN2("DBGetSymlink", int, -1, api_dummy) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR("DBGetSymlink", E_GRABBED);
+        if (!in_candidate_link || !*in_candidate_link)
+            API_ERROR("in_candidate_link", E_BADARGS);
+        if (!dbfile->pub.g_symlink)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+
+        retval = (dbfile->pub.g_symlink) (dbfile, in_candidate_link, out_target);
+        db_FreeToc(dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+PRIVATE void
+CheckForComponentSeries(DBobject const *srcObj, int i,
+    int *isser, int *nser, char **sernm, char **sertstr, void **serd)
+{
+    char *p = 0;
+    int pass = 0;
+    int dtyp = DB_NOTYPE;
+    int i0 = i;
+    int nd = (int) strcspn(srcObj->comp_names[i0], "0123456789");
+
+    /* advance while component names match in first nd chars */
+    i++;
+    while (i < srcObj->ncomponents)
+    {
+        if (strncmp(srcObj->comp_names[i], srcObj->comp_names[i0], nd) ||
+            strncmp(srcObj->pdb_names[i], "'<", 2) ||
+           !strncmp(srcObj->pdb_names[i], "'<s>/.silo/#", 12))
+            break;
+        i++;
+    }
+
+    /* If the series is of length one (or less) its not a series */
+    if ((i-i0) <= 1)
+    {
+        *isser = 0;
+        return;
+    }
+
+    *isser = 1;
+    *nser = i-i0;
+    *sernm = db_strndup(srcObj->comp_names[i0], nd);
+
+    /* first pass get size, second pass fill buffer */
+    for (pass = 0; pass < 2; pass++)
+    {
+        int j;
+
+        if (pass == 1)
+        {
+            p = (char *) malloc((size_t)p);
+            *serd = p;
+        }
+
+        for (j = i0; j < i; j++)
+        {
+            if      (!strncmp(srcObj->pdb_names[j], "'<i>", 4))
+            {
+                if (pass == 1)
+                    *((int*)p) = (int) strtol(srcObj->pdb_names[j]+4, NULL, 0);
+                p += sizeof(int);
+                if (dtyp == DB_NOTYPE) dtyp = DB_INT;
+            }
+            else if (!strncmp(srcObj->pdb_names[j], "'<f>", 4))
+            {
+                if (pass == 1)
+                     *((float*)p) = (float) strtod(srcObj->pdb_names[j]+4, NULL);
+                p += sizeof(float);
+                if (dtyp == DB_NOTYPE) dtyp = DB_FLOAT;
+            }
+            else if (!strncmp(srcObj->pdb_names[j], "'<d>", 4))
+            {
+                if (pass == 1)
+                    *((double*)p) = strtod(srcObj->pdb_names[j]+4, NULL);
+                p += sizeof(double);
+                if (dtyp == DB_NOTYPE) dtyp = DB_DOUBLE;
+            }
+            else if (!strncmp(srcObj->pdb_names[j], "'<s>", 4))
+            {
+                int len = (int) strlen(srcObj->pdb_names[j])-5;
+                if (pass == 1)
+                {
+                     strcpy(p, srcObj->pdb_names[j]+4);
+                     p[len] = '\0';
+                }
+                p += (len+1);
+                if (dtyp == DB_NOTYPE) dtyp = DB_CHAR;
+            }
+            else
+            {
+                int len = (int) strlen(srcObj->pdb_names[j]);
+                if (pass == 1)
+                     strcpy(p, srcObj->pdb_names[j]);
+                p += (len+1);
+            }
+        }
+    }
+
+    *sertstr = db_GetDatatypeString(dtyp);
+}
+
+static int
+db_validate_copy_step(int pass, int recurse,
+    char const *srcName, char const *srcAbsName, int srcType,
+    char const *dstName, char const *dstAbsName, int dstType)
+{
+    /* We validate everything 1rst pass so on 2nd, just ignore */
+    if (pass == 1) return 1;
+
+    /* Validate source object first */
+    if (srcType == DB_INVALID_OBJECT)
+    {
+        db_perror("src object does not exist", E_BADARGS, srcName);
+        return 0;
+    }
+
+    if (srcType == DB_DIR && !recurse)
+    {
+        db_perror("src is a directory (not copied)", E_BADARGS, srcName);
+        return 0;
+    }
+
+    /* If destination does not exist, that is fine */
+    if (dstType == DB_INVALID_OBJECT)
+        return 1;
+
+    /* If pre-existing destination type isn't same as src, that is a problem */
+    if (dstType != srcType)
+    {
+        db_perror("pre-existing dst object type mismatch with src", E_BADARGS,
+            dstName?dstName:srcName);
+        return 0;
+    }
+
+    /* If we get here, we're overwriting the destination object and that
+       is ok only if AllowOverwrites is enabled *and* the src object
+       can fit within the space used by the dst object, the latter piece
+       of logic we cannot currently check. */
+    if (!DBGetAllowOverwrites())
+    {
+#warning ONLY IF SRC SIZE SMALLER THAN DST SIZE
+        db_perror("overwrite of pre-existing dst prevented due "
+            "to DBSetAllowOverwrites(0)", E_BADARGS, dstName?dstName:srcName);
+        return 0;
+    }
+
+    return 1;
+}
+
+#define COPY_TOC_ENTRY(TOC, NM, NUM, NAM)                        \
+    NUM = TOC->n ## NM;                                          \
+    NAM = (char **) malloc(NUM * sizeof(char*));                 \
+    for (int q = 0 ; q < NUM; q++)                               \
+    {                                                            \
+        int len = strlen(TOC->NM ## _names[q]);                  \
+        NAM[q] = (char*) calloc(len+1,1);                        \
+        strncpy(NAM[q], TOC->NM ## _names[q],len);               \
+    }
+
+#define FREE_COPIED_TOC_ENTRY(NUM, NAM)                          \
+    for (int q = 0; q < NUM; q++)                                \
+        FREE(NAM[q]);                                            \
+    FREE(NAM);
+
+/*-------------------------------------------------------------------------
+ * Function: db_can_overwrite_dstobj_with_srcobj
+ *
+ * Purpose: Compare two objects, member-by-member, to ensure the source
+ * object is smaller than (e.g. will fit into the same file space as) the
+ * destination object. There is possible recursion if the object contains
+ * sub-objects (e.g. a zonelist object within an ucd mesh object).
+ *
+ * Returns: 1 if source object matches destination object *and* fits in
+ *            in same space destination object occupies.
+ *          0 otherwise.
+ *
+ * Programmer:  Mark C. Miller, Wed Apr 18 09:23:55  PDT 2018
+ *
+ *-------------------------------------------------------------------------*/
+static int
+db_can_overwrite_dstobj_with_srcobj(
+    DBfile *srcFile, char const *srcAbsName,
+    DBfile *dstFile, char const *dstAbsName)
+{
+    int q;
+    int retval = 0; /* assume it won't work */
+    DBobject *srcObj = 0;
+    DBobject *dstObj = 0;
+
+    srcObj = DBGetObject(srcFile, srcAbsName);
+    if (!srcObj) goto done;
+
+    dstObj = DBGetObject(dstFile, dstAbsName);
+    if (!dstObj) goto done;
+
+    for (q = 0; q < srcObj->ncomponents; q++)
+    {
+        int r, dstr = -1;;
+        char const *curr_compname = srcObj->comp_names[q];
+
+        for (r = 0; r < dstObj->ncomponents && dstr==-1; r++)
+            if (!strcmp(curr_compname, dstObj->comp_names[r]))
+                dstr = r;
+       
+        if (dstr == -1) goto done; /* no matching comp in dst */
+
+        if (!strncmp(srcObj->pdb_names[q], "'<i>", 4))
+            continue;
+        else if (!strncmp(srcObj->pdb_names[q], "'<f>", 4))
+            continue;
+        else if (!strncmp(srcObj->pdb_names[q], "'<d>", 4))
+            continue;
+        else /* possible sub-object */
+        {
+            int srcLen, dstLen, can_overwrite;
+            DBObjectType srcSubObjType, dstSubObjType;
+            char *srcSubObjName, *srcSubObjDirName, *srcSubObjAbsName;
+            char *dstSubObjName, *dstSubObjDirName, *dstSubObjAbsName;
+             
+            if (!strncmp(srcObj->pdb_names[q], "'<s>", 4))
+                srcSubObjName = db_strndup(srcObj->pdb_names[q]+4, strlen(srcObj->pdb_names[q])-5);
+            else
+                srcSubObjName = db_strndup(srcObj->pdb_names[q], strlen(srcObj->pdb_names[q]));
+            srcSubObjDirName = db_dirname(srcAbsName);
+            srcSubObjAbsName = db_join_path(srcSubObjDirName, srcSubObjName);
+
+            if (!strncmp(dstObj->pdb_names[dstr], "'<s>", 4))
+                dstSubObjName = db_strndup(dstObj->pdb_names[dstr]+4, strlen(dstObj->pdb_names[dstr])-5);
+            else
+                dstSubObjName = db_strndup(dstObj->pdb_names[dstr], strlen(dstObj->pdb_names[dstr]));
+            dstSubObjDirName = db_dirname(dstAbsName);
+            dstSubObjAbsName = db_join_path(dstSubObjDirName, dstSubObjName);
+
+            /* To make exiting and cleanup logic here a tad simpler, we do all
+               the work we *might* need to with the strings and then free them. */
+            srcSubObjType = DBInqVarType(srcFile, srcSubObjAbsName);
+            srcLen = DBGetVarByteLength(srcFile, srcSubObjAbsName);
+            dstSubObjType = DBInqVarType(dstFile, dstSubObjAbsName);
+            dstLen = DBGetVarByteLength(dstFile, dstSubObjAbsName);
+            can_overwrite = db_can_overwrite_dstobj_with_srcobj(srcFile, srcSubObjAbsName,
+                dstFile, dstSubObjAbsName); /* recursive call */
+
+            FREE(srcSubObjName);
+            FREE(srcSubObjDirName);
+            FREE(srcSubObjAbsName);
+            FREE(dstSubObjName);
+            FREE(dstSubObjDirName);
+            FREE(dstSubObjAbsName);
+
+            /* decide if its ok to proceed or not */
+            if (srcSubObjType == DB_VARIABLE && dstSubObjType == DB_VARIABLE)
+            {
+                if (srcLen > dstLen) goto done; /* simple src var doesn't fit in dst */
+            }
+            else if (srcSubObjType == dstSubObjType)
+            {
+                if (!can_overwrite) goto done; /* src object doesn't fit in dst */
+            }
+            else
+            {
+                goto done; /* src & dst disagree on subobject's type */
+            }
+        }
+    }
+
+    /* indicate it will work */
+    retval = 1;
+
+done:
+
+    if (srcObj) DBFreeObject(srcObj);
+    if (dstObj) DBFreeObject(dstObj);
+
+    return retval;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:   db_copy_single_object_abspath
+ *
+ * Purpose: Copy a single source *object* to a destination object or
+ * directory using the generic object routines. The source cannot be a
+ * directory. If destination does not exist, ensure its parent is an
+ * existing directory. If destination is a pre-existing object, overwrite
+ * that object as per options and as long as it fits. If destination is a
+ * pre-existing directory, copy the source object *into* that directory.
+ *
+ * Returns: 1 If the copy succeeds.
+ *          0 Otherwise.
+ *
+ * Programmer:  Mark C. Miller, Wed Apr 18 09:23:55  PDT 2018
+ *
+ *-------------------------------------------------------------------------*/
+static int
+db_copy_single_object_abspath(char const *opts,
+    DBfile *srcFile, char const *srcObjAbsName, DBObjectType srcType,
+    DBfile *dstFile, char const *dstObjAbsName, DBObjectType dstType)
+{
+    int q;
+    char *_dstObjAbsName;
+    DBobject *dstObj, *srcObj;
+
+#warning CHECK ARGS HERE. ALLOW FOR NULL dstFile AND dstObjAbsName
+#warning WHY CHECK dstType HERE
+
+    /* Query type information if not already known */
+    if (srcType == DB_INVALID_OBJECT)
+        srcType = DBInqVarType(srcFile, srcObjAbsName);
+    if (dstType == DB_INVALID_OBJECT)
+        dstType = DBInqVarType(dstFile, dstObjAbsName);
+
+    /* Source object cannot be a directory */
+    if (srcType == DB_INVALID_OBJECT || srcType == DB_DIR)
+        return 0;
+
+    /* If destination is a directory, dstObjAbsName needs to be adjusted
+       to append last component of srcObjAbsName */
+    if (dstType == DB_DIR)
+    {
+        char *bname = db_basename(srcObjAbsName);
+        _dstObjAbsName = db_join_path(dstObjAbsName, bname);
+        FREE(bname);
+    }
+    /* If destination is a pre-existing non-directory object, this implies
+       it will be overwritten by source. But, in that case, dstFile needs
+       to allow overwrites and the source needs to be small enough to fit
+       into the space the destination object occupies. */
+    else if (dstType != DB_INVALID_OBJECT)
+    {
+        int srcSize, dstSize;
+#warning USE FILE-BASED FUNCTION WHEN AVAILABLE
+        if (!DBGetAllowOverwrites())
+        {
+            db_perror("overwrite of pre-existing dst prevented due "
+                "to DBSetAllowOverwrites(0)", E_BADARGS, dstObjAbsName);
+            return 0;
+        }
+        if (!db_can_overwrite_dstobj_with_srcobj(
+             srcFile, srcObjAbsName, dstFile, dstObjAbsName))
+        {
+            db_perror("overwrite of pre-existing dst prevented due "
+                "to insufficient space for src object", E_BADARGS, dstObjAbsName);
+            return 0;
+        }
+        _dstObjAbsName = STRDUP(dstObjAbsName);
+    }
+    else
+    {
+        _dstObjAbsName = STRDUP(dstObjAbsName);
+    }
+
+    /* Access the source object using generic interface */
+    srcObj = DBGetObject(srcFile, srcObjAbsName);
+    if (!srcObj)
+    {
+        db_perror("Unable to access source object for copy operation",
+            E_NOTFOUND, srcObjAbsName);
+        return 0;
+    }
+
+    /* Handle funniness with quadmesh type strings */
+    if (srcType == DB_QUADMESH)
+    {
+        if (strstr(srcObj->type, "rect"))
+            srcType = DB_QUAD_RECT;
+        else if (strstr(srcObj->type, "curv"))
+            srcType = DB_QUAD_CURV;
+    }
+
+    /* Ok, lets do what we came here to do...create the dst object and
+       start populating it */
+    dstObj = DBMakeObject(_dstObjAbsName, srcType, srcObj->ncomponents);
+    for (q = 0; q < srcObj->ncomponents; q++)
+    {
+        int isser = 0, nser = 0;
+        char *sernm = 0, *sertstr = 0;
+        void *serd = 0;
+        CheckForComponentSeries(srcObj, q, &isser, &nser, &sernm, &sertstr, &serd);
+        if (isser)
+        {
+            long tmpn = (long) nser;
+            DBWriteComponent(dstFile, dstObj, sernm,
+                dstObj->name, sertstr, serd, 1, &tmpn);
+            free(sernm);
+            free(sertstr);
+            free(serd);
+            q += (nser-1);
+        }
+        else if (!strncmp(srcObj->pdb_names[q], "'<i>", 4))
+            DBAddIntComponent(dstObj, srcObj->comp_names[q],
+                (int) strtol(srcObj->pdb_names[q]+4, NULL, 0));
+        else if (!strncmp(srcObj->pdb_names[q], "'<f>", 4))
+            DBAddFltComponent(dstObj, srcObj->comp_names[q],
+                (float) strtod(srcObj->pdb_names[q]+4, NULL));
+        else if (!strncmp(srcObj->pdb_names[q], "'<d>", 4))
+            DBAddDblComponent(dstObj, srcObj->comp_names[q],
+                strtod(srcObj->pdb_names[q]+4, NULL));
+        else
+        {
+            DBObjectType subObjType;
+            char *subObjName;
+            char *srcObjDirName, *srcSubObjAbsName;
+             
+            if (!strncmp(srcObj->pdb_names[q], "'<s>", 4))
+                subObjName = db_strndup(srcObj->pdb_names[q]+4, strlen(srcObj->pdb_names[q])-5);
+            else
+                subObjName = db_strndup(srcObj->pdb_names[q], strlen(srcObj->pdb_names[q]));
+
+            srcObjDirName = db_dirname(srcObjAbsName);
+            srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
+
+            subObjType = DBInqVarType(srcFile, srcSubObjAbsName);
+            if (subObjType == DB_VARIABLE) /* raw data copy */
+            {
+                int j, dims[32];
+                long ldims[32];
+                int idtype = DBGetVarType(srcFile, srcSubObjAbsName);
+                int ndims = DBGetVarDims(srcFile, srcSubObjAbsName, 32, dims);
+                void *data = DBGetVar(srcFile, srcSubObjAbsName);
+                char *dtype = db_GetDatatypeString(idtype);
+                for (j = 0; j < ndims; ldims[j] = (long) dims[j], j++);
+                DBWriteComponent(dstFile, dstObj, srcObj->comp_names[q],
+                    dstObj->name, dtype, data, ndims, ldims);
+                FREE(dtype);
+                FREE(data);
+            }
+            else if (((srcType == DB_UCDMESH) && /* possible recurse on sub-object */
+                      (subObjType == DB_FACELIST || subObjType == DB_EDGELIST ||
+                       subObjType == DB_ZONELIST || subObjType == DB_PHZONELIST)) ||
+                     (srcType == DB_CSGMESH && subObjType == DB_CSGZONELIST)) 
+            {
+                char *dstObjDirName = db_dirname(dstObjAbsName);
+                char *dstSubObjAbsName = db_join_path(dstObjDirName, subObjName);
+
+                db_copy_single_object_abspath(opts, /* recursive call */
+                   srcFile, srcSubObjAbsName, subObjType,
+                   dstFile, dstSubObjAbsName, DB_INVALID_OBJECT);
+
+                DBAddStrComponent(dstObj, srcObj->comp_names[q], subObjName);
+
+                FREE(dstObjDirName);
+                FREE(dstSubObjAbsName);
+            }
+            free(subObjName);
+            free(srcObjDirName);
+            free(srcSubObjAbsName);
+        }
+    }
+
+    DBWriteObject(dstFile, dstObj, SILO_Globals.allowOverwrites);
+    DBFreeObject(srcObj);
+    DBFreeObject(dstObj);
+    FREE(_dstObjAbsName);
+
+    return 1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    DBCp
+ *
+ * Purpose:     The Silo equivalent of a unix `cp` command obeying all unix
+ *              semantics and applicable flags. In particular...
+ *
+ *    Single src object to single dst object
+ *        DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile,
+ *            char const *srcPATH, char const *dstPATH, DB_EOA);
+ *
+ *    Multiple src objects to single dst (dir) object
+ *        DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile,
+ *            char const *srcPATH1, char const *srcPATH2, ...,
+ *            char const *dstDIR, DB_EOA);
+ *
+ *    Multiple src objects to multiple dst objects
+ *        DBCp("-2...", DBfile *srcFile, DBfile *dstFile,
+ *            char const *srcPATH1, char const *dstPATH1,
+ *            char const *srcPATH2, char const *dstPATH2,
+ *            char const *srcPATH3, char const *dstPATH3, ..., DB_EOA);
+ *
+ *    srcFile and dstFile may be the same Silo file. srcFile cannot be null.
+ *    dstFile may be null in which case it is assumed same as srcFile.
+ *    The argument list *must* be terminated by the DB_EOA sentinel. Just as
+ *    for unix `cp`, the options and their meanings are...
+ *
+ *      -R/-r recurse on any directory objects
+ *      -L/-P dereference links / never dereference links
+ *      -d    preserve links
+ *      -s/-l don't actually copy, just sym/hard link
+ *            (only possible when srcFile==dstFile)
+ *
+ *    Other rules:
+ *       * If any src is a dir, then it is an error without -R/-r.
+ *       * If cooresponding dst exists and is a dir, src is copied
+ *         into (e.g. becomes a child of) dst.
+ *       * If cooresponding dst exists and is not a dir (e.g. is just a
+ *         normal Silo object), then it is an error if src is not also the 
+ *         same kind of Silo object. The copy overwrites (destructive) dst.
+ *         However, if the file space dst object occupies is smaller than
+ *         that needed to copy src, behavior is indeterminate but most 
+ *         likely will result the dst file (not just the dst object) being
+ *         corrupted.
+ *
+ *    The following options are specific to Silo's DBCp method and are
+ *    mutually exclusive...
+ *
+ *      -2 treat varargs list of args as src/dst path pairs and where any
+ *         null dst is inferred to have same path as associated src except
+           that relative paths are interpreted relative to dst files cwg.
+ *      -1 like -2 except caller passes only src paths. All dst paths are
+ *         inferred to be same as associated src path. The dst file's cwg
+ *         will then determine how any relative src paths are interpreted.
+ *      -3 only 3 args follow the dstFile arg...
+ *         int N                number of objects in the following lists
+ *         DBCAS_t srcPathNames list of N source path names
+ *         DBCAS_t dstPathNames list of N destination path names
+ *      -4 Like -3, except 3rd arg is treated as a single dest. dir name
+ *         int N                number of paths in srcPathNames
+ *         DBCAS_t srcPathNames list of N source path names
+ *         char const *dstDIR   pre-existing destination dir path name.
+ *      -5 Internal use only...like -4 except used only internally when
+ *         DBCp recursively calls itself.
+ *
+ *      If none of the preceding numeric arguments are specified, then
+ *      the varags list of args is treated as (default) where the last
+ *      is a pre-existing destination directory and all the others are
+ *      the paths of source objects to be copied into that directory.
+ *
+ *      Relative path names are interpreted relative to the current working
+ *      directory of the associated (src or dst) file when DBCp is invoked.
+ *
+ *      In all the different ways this function can be invoked, there are
+ *      really just two fundamentally different interpretations of the list(s)
+ *      of names. Either each source path is paired also with a destination
+ *      path or all source paths go into a single destination path which, just
+ *      as for linux cp, must then also be a directory already present in the
+ *      destination.
+ *
+ * Return:      Success:        0
+ *              Failure:       -1
+ *
+ * Programmer:  Mark C. Miller, Wed Apr 18 09:23:55  PDT 2018
+ *
+ *-------------------------------------------------------------------------*/
+PUBLIC int
+DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
+{
+#warning WHAT ABOUT API MACROS. MAYBE NOT NEEDED SINCE NOT CALLING DOWN INTO DRIVERS
+#warning WHAT ABOUT -f (force) OPTION
+    char const *me = "DBCp";
+    int i, j, pass, all_ok;
+    int recurse_on_dirs = 0;
+    int preserve_links = 0;
+    int deref_links = 0;
+    int never_deref_links = 0;
+    int dont_copy_just_symlink = 0;
+    int dont_copy_just_hardlink = 0;
+    int src_dst_pairs = 0;
+    int srcs_only = 0;
+    int n_src_dst_triple = 0;
+    int n_src_dir_triple = 0;
+    int recursive_call = 0;
+    char const *many_to_one_dir = 0;
+    int N = 0;
+    char const **srcPathNames = 0, **dstPathNames = 0;
+
+    /* process any options in the opts string */
+    for (i = 0; opts && opts[i]; i++)
+    {
+        switch (opts[i])
+        {
+            case ' ':
+            case '-': continue;
+            case 'R':
+            case 'r': recurse_on_dirs = 1; break;
+            case 'd': preserve_links = 1; break;
+            case 'L': deref_links = 1; break;
+            case 'P': never_deref_links = 1; break;
+            case 's': dont_copy_just_symlink = 1; break;
+            case 'l': dont_copy_just_hardlink = 1; break;
+            case '2': src_dst_pairs = 1; break;
+            case '1': srcs_only = 1; break;
+            case '3': n_src_dst_triple = 1; break;
+            case '4': n_src_dir_triple = 1; break;
+            case '5': n_src_dir_triple = 1; recursive_call = 1; break;
+            default: return db_perror(&opts[i], E_BADARGS, me);
+        }
+    }
+
+    /* Sanity checks */
+    if (!dstFile)
+        dstFile = srcFile;
+
+    if (!srcFile)
+        return db_perror("srcFile cannot be null", E_BADARGS, me);
+
+    if ((dont_copy_just_symlink || dont_copy_just_hardlink) && srcFile != dstFile)
+        return db_perror("srcFile and dstFile must be same for -s or -l", E_BADARGS, me);
+
+
+    if (n_src_dst_triple || n_src_dir_triple) // -3 or -4
+    {
+        va_list ap;
+        va_start(ap, dstFile);
+        N = va_arg(ap, int);
+        srcPathNames = va_arg(ap, char const **);
+        if (n_src_dst_triple)
+            dstPathNames = va_arg(ap, char const **);
+        else
+            many_to_one_dir = va_arg(ap, char const *);
+        va_end(ap);
+    }
+    else
+    {
+        /* Process varargs in two passes. Pass 1, count them. Pass 2
+           allocate space and capture them. */
+        int pass;
+
+        for (pass = 0; pass < 2; pass++)
+        {
+            int n = 0;
+            char const *arg;
+            va_list ap;
+            va_start(ap, dstFile);
+            if (pass == 1)
+            {
+                srcPathNames = (char const **) malloc(N * sizeof(char const *));
+                if (src_dst_pairs)
+                    dstPathNames = (char const **) malloc(N * sizeof(char const *));
+            }
+            while ((arg = va_arg(ap, char const *)) != DB_EOA)
+            {
+                if (pass == 1)
+                {
+                    if (src_dst_pairs)
+                    {
+                        if (n%2) dstPathNames[n/2] = arg;
+                        else     srcPathNames[n/2] = arg;
+                    }
+                    else
+                    {
+                        srcPathNames[n] = arg;
+                    }
+                }
+                n++;
+            }
+            va_end(ap);
+            N = src_dst_pairs?n/2:n;
+        }
+    }
+
+#warning FIX LEAKS WITH EARLY RETURN HERE
+
+    if (n_src_dir_triple && N == 0)
+        return 0;
+    if (!n_src_dir_triple && N < 2)
+        return db_perror("src or dst unspecified", E_BADARGS, me);
+    if (src_dst_pairs && N%2)
+        return db_perror("non-even arg count for -2 option", E_BADARGS, me);
+
+    /* target dir is at end of list of sources */
+    if (!many_to_one_dir && !src_dst_pairs && !n_src_dst_triple && !n_src_dir_triple)
+    {
+        many_to_one_dir = srcPathNames[N-1];
+        N--;
+    }
+
+    if (many_to_one_dir)
+    {
+        int q;
+        dstPathNames = (char const **) malloc(N * sizeof(char const *));
+        for (q = 0; q < N; q++)
+            dstPathNames[q] = many_to_one_dir; /* all point to same char* */
+    }
+
+    for (i = 0; i < N; i++)
+    {
+        DBObjectType srcType, dstType;
+        char *srcObjAbsName, *dstObjAbsName;
+        char savcwg[1024], srccwg[1024], dstcwg[1024];
+        char opts2[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        char **dirItems, **otherItems;
+        int  dirItemCount, otherItemCount;
+
+        if (i == 0)
+        {
+            DBGetDir(srcFile, srccwg);
+            DBGetDir(dstFile, dstcwg);
+        }
+
+        srcObjAbsName = db_join_path(srccwg, srcPathNames[i]);
+        srcType = DBInqVarType(srcFile, srcObjAbsName);
+
+        dstObjAbsName = db_join_path(dstcwg, dstPathNames[i]?dstPathNames[i]:srcPathNames[i]);
+        dstType = DBInqVarType(dstFile, dstObjAbsName);
+
+        if (srcType == DB_INVALID_OBJECT)
+        {
+            db_perror(DBSPrintf("\"%s\" invalid object", srcObjAbsName), E_BADARGS, me);
+            goto endLoop;
+        }
+
+        if (srcType != DB_DIR)
+        {
+            if (!db_copy_single_object_abspath(opts, 
+                    srcFile, srcObjAbsName, srcType,
+                    dstFile, dstObjAbsName, dstType))
+            {
+                db_perror("Object copy failed", E_CALLFAIL, me);
+                goto endLoop;
+            }
+            continue;
+        }
+
+        /* If we get this far into the loop body here, then src is a dir */
+        if (!recurse_on_dirs)
+        {
+            db_perror(DBSPrintf("Cannot copy dir \"%s\" without -r flag",
+                srcObjAbsName), E_BADARGS, me);
+            goto endLoop;
+        }
+
+        if (dstType != DB_INVALID_OBJECT && dstType != DB_DIR)
+        {
+            db_perror(DBSPrintf("Cannot copy dir \"%s\" onto pre-existing non-dir \"%s\"",
+                srcObjAbsName, dstObjAbsName), E_BADARGS, me);
+            goto endLoop;
+        }
+
+#if 0
+        /* get the contents of this dir in two lists; all the dirs, everything else */
+        DBLs(srcFile, DBSPrintf("-d %s", srcObjAbsName), 0, &dirItemCount); /* just count it first */
+        dirItems = ALLOC_N(char*, ++dirItemCount);
+        DBLs(srcFile, DBSPrintf("-d %s", srcObjAbsName), dirItems, &dirItemCount);
+
+        DBLs(srcFile, DBSPrintf("-a -d %s", srcObjAbsName), 0, &otherItemCount); /* just count it first */
+        otherItems = ALLOC_N(char*, ++otherItemCount);
+        DBLs(srcFile, DBSPrintf("-a -d %s", srcObjAbsName), otherItems, &otherItemCount);
+#endif
+        /* get the contents of this dir */
+        DBSetDir(srcFile, srcObjAbsName);
+        DBLs(srcFile, "-a -x", 0, &dirItemCount); /* just count it first */
+        dirItems = ALLOC_N(char*, dirItemCount);
+        DBLs(srcFile, "-a -x", dirItems, &dirItemCount);
+
+        if (dstType == DB_INVALID_OBJECT)
+        {
+            DBMkDir(dstFile, dstObjAbsName);
+            DBSetDir(dstFile, dstObjAbsName);
+        }
+        else if (dstType == DB_DIR)
+        {
+            char const *srcDirBaseName = db_basename(srcObjAbsName);
+            DBMkDir(dstFile, srcDirBaseName);
+            DBSetDir(dstFile, srcDirBaseName);
+            free(srcDirBaseName);
+        }
+
+        if (n_src_dir_triple)
+            DBCp(opts, srcFile, dstFile, dirItemCount, dirItems, ".");
+        else
+            DBCp(DBSPrintf("%s -4", opts), srcFile, dstFile, dirItemCount, dirItems, ".");
+
+        DBSetDir(srcFile, "..");
+        DBSetDir(dstFile, "..");
+
+endLoop:
+        FREE(srcObjAbsName);
+        FREE(dstObjAbsName);
+    ;
+
+    }
+}
+
+#if 1
+PUBLIC int
+DBCpListedObjects(int nobjs,
+    DBfile *dbfile, char const * const *srcObjs,
+    DBfile *dstFile, char const * const *dstObjs)
+{
+    int retval;
+
+    API_BEGIN2("DBCpListedObjects", int, -1, api_dummy) {
+        if (!dbfile)
+            API_ERROR(NULL, E_NOFILE);
+        if (!dstFile)
+            API_ERROR(NULL, E_NOFILE);
+        if (db_isregistered_file(dstFile,0)==-1)
+            API_ERROR(NULL, E_NOTREG);
+        if (SILO_Globals.enableGrabDriver == TRUE)
+            API_ERROR(NULL, E_GRABBED); 
+        if (nobjs > 0)
+        {
+            if (!srcObjs)
+                API_ERROR("source object names list", E_BADARGS);
+            if (dstObjs)
+            {
+                int i;
+                for (i = 0; i < nobjs; i++)
+                {
+                    if (dstObjs[i] == 0 || dstObjs[i][0] == '\0')
+                        continue;
+                    if (db_VariableNameValid(dstObjs[i]) == 0)
+                        API_ERROR(dstObjs[i], E_INVALIDNAME);
+                }
+            }
+        }
+        if (!dbfile->pub.cpnobjs)
+            API_ERROR(dbfile->pub.name, E_NOTIMP);
+        retval = (dbfile->pub.cpnobjs) (nobjs, dbfile, srcObjs, dstFile, dstObjs);
+        db_FreeToc(dbfile);
+        API_RETURN(retval);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+#else
+#warning REMOVE ABOVE IF STATEMENT
+PUBLIC int
+DBCpListedObjects(int nobjs,
+    DBfile *dbfile, char const * const *srcObjs,
+    DBfile *dstFile, char const * const *dstObjs)
+{
+}
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    DBChangeObject
@@ -7347,6 +8057,42 @@ DBReadVarSlice(DBfile *dbfile, const char *name, int const *offset, int const *l
  *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
+PRIVATE size_t
+db_get_obj_byte_length(DBfile *dbfile, char const *name)
+{
+    int q;
+    size_t sum = 0;
+    DBobject *srcObj = DBGetObject(dbfile, name);
+    if (!srcObj) return 0;
+
+    for (q = 0; q < srcObj->ncomponents; q++)
+    {
+        if (!strncmp(srcObj->pdb_names[q], "'<i>", 4))
+            sum += sizeof(int);
+        else if (!strncmp(srcObj->pdb_names[q], "'<f>", 4))
+            sum += sizeof(float);
+        else if (!strncmp(srcObj->pdb_names[q], "'<d>", 4))
+            sum += sizeof(double);
+        else /* possible sub-object */
+        {
+            int bytlen;
+            char *subObjName, *srcObjDirName, *srcSubObjAbsName;
+             
+            if (!strncmp(srcObj->pdb_names[q], "'<s>", 4))
+                subObjName = db_strndup(srcObj->pdb_names[q]+4, strlen(srcObj->pdb_names[q])-5);
+            else
+                subObjName = db_strndup(srcObj->pdb_names[q], strlen(srcObj->pdb_names[q]));
+
+            srcObjDirName = db_dirname(name);
+            srcSubObjAbsName = db_join_path(srcObjDirName, subObjName);
+
+            bytlen = DBGetVarByteLength(dbfile, srcSubObjAbsName); /* recursion */
+            if (bytlen > 0) sum += bytlen;
+        }
+    }
+    return sum;
+}
+
 PUBLIC int
 DBGetVarByteLength(DBfile *dbfile, const char *name)
 {
@@ -7363,6 +8109,10 @@ DBGetVarByteLength(DBfile *dbfile, const char *name)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.g_varbl) (dbfile, name);
+
+        if (retval < 0)
+            retval = (int) db_get_obj_byte_length(dbfile, name);
+
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -7732,11 +8482,11 @@ DBPutCurve(
             {
                 if (!xvals && !DBGetOption(opts, DBOPT_XVARNAME))
                     API_ERROR("xvals=0 || DBOPT_XVARNAME", E_BADARGS);
-                if (DBGetDriverType(dbfile) != DB_HDF5X && xvals && DBGetOption(opts, DBOPT_XVARNAME))
+                if (xvals && DBGetOption(opts, DBOPT_XVARNAME))
                     API_ERROR("xvals!=0 && DBOPT_XVARNAME", E_BADARGS);
                 if (!yvals && !DBGetOption(opts, DBOPT_YVARNAME))
                     API_ERROR("yvals=0 || DBOPT_YVARNAME", E_BADARGS);
-                if (DBGetDriverType(dbfile) != DB_HDF5X && yvals && DBGetOption(opts, DBOPT_YVARNAME))
+                if (yvals && DBGetOption(opts, DBOPT_YVARNAME))
                     API_ERROR("yvals!=0 && DBOPT_YVARNAME", E_BADARGS);
             }
         }
@@ -7975,6 +8725,7 @@ DBPutMaterial(
 )
 {
     int i, retval, is_empty = 1;
+    int const zdims[10] = {0,0,0,0,0,0,0,0,0,0};
 
     API_BEGIN2("DBPutMaterial", int, -1, name) {
         if (!dbfile)
@@ -8003,8 +8754,8 @@ DBPutMaterial(
         }
         if (!is_empty)
         {
-            for (i = 0; i < ndims && dims; i++)
-                if (dims[i] == 0) dims = 0;
+            for (i = 0; i < ndims && dims!=zdims; i++)
+                if (dims[i] == 0) dims = zdims;
             if (!matnos) API_ERROR("matnos=0", E_BADARGS);
             if (!matlist) API_ERROR("matlist=0", E_BADARGS);
             if (!meshname || !*meshname) API_ERROR("mesh name", E_BADARGS);
@@ -8032,11 +8783,6 @@ DBPutMaterial(
                                      nmat, matnos, matlist, dims, ndims,
                                      mix_next, mix_mat, mix_zone, mix_vf,
                                      mixlen, datatype, optlist);
-
-        /* Zero out the _ma._matnames pointer so we can't accidentially use it
-         * again. Likewise for matcolors. */
-        _ma._matnames = NULL;
-        _ma._matcolors = NULL;
 
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8208,21 +8954,13 @@ DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmesh < 0)
             API_ERROR("nmesh", E_BADARGS);
-        if (nmesh)
-        {
-            if (!meshnames && (!optlist || 
-                (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
-                 !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
-                API_ERROR("mesh names", E_BADARGS);
-            if (!meshtypes && (!optlist ||
-                 !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
-                API_ERROR("mesh types", E_BADARGS);
-        }
-        else if (!SILO_Globals.allowEmptyObjects)
-        {
-            /* this is an empty object but we don't know if it was intentional */
-            API_ERROR("nmesh==0", E_EMPTYOBJECT);
-        }
+        if (!meshnames && nmesh && (!optlist || 
+            (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
+            API_ERROR("mesh names", E_BADARGS);
+        if (!meshtypes && nmesh && (!optlist ||
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
+            API_ERROR("mesh types", E_BADARGS);
         if (!dbfile->pub.p_mm)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8343,21 +9081,13 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nvar < 0)
             API_ERROR("nvar", E_BADARGS);
-        if (nvar)
-        {
-            if (!varnames && (!optlist ||
-                 (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
-                  !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
-                API_ERROR("varnames", E_BADARGS);
-            if (!vartypes && (!optlist ||
-                 !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
-                API_ERROR("vartypes", E_BADARGS);
-        }
-        else if (!SILO_Globals.allowEmptyObjects)
-        {
-            /* this is an empty object but we don't know if it was intentional */
-            API_ERROR("nvar==0", E_EMPTYOBJECT);
-        }
+        if (!varnames && nvar && (!optlist ||
+             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) &&
+              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
+            API_ERROR("varnames", E_BADARGS);
+        if (!vartypes && nvar && (!optlist ||
+             !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
+            API_ERROR("vartypes", E_BADARGS);
         if (!dbfile->pub.p_mv)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -8414,28 +9144,15 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmats < 0)
             API_ERROR("nmats", E_BADARGS);
-        if (nmats)
-        {
-            if (!matnames && (!optlist ||
-                 (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
-                  !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
-                API_ERROR("material-names", E_BADARGS);
-        }
-        else if (!SILO_Globals.allowEmptyObjects)
-        {
-            /* this is an empty object but we don't know if it was intentional */
-            API_ERROR("nmats==0", E_EMPTYOBJECT);
-        }
+        if (!matnames && nmats && (!optlist ||
+             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
+              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
+            API_ERROR("material-names", E_BADARGS);
         if (!dbfile->pub.p_mt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.p_mt) (dbfile, name, nmats, matnames,
                                      optlist);
-
-        /* Zero out the _mm._matnames pointer so we can't accidentially use it
-         * again. Likewise for matcolors. */
-        _mm._matnames = NULL;
-        _mm._matcolors = NULL;
 
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -8488,18 +9205,10 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nspec < 0)
             API_ERROR("nspec", E_BADARGS);
-        if (nspec)
-        {
-            if (!specnames && (!optlist ||
-                 (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
-                  !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
-                API_ERROR("species-names", E_BADARGS);
-        }
-        else if (!SILO_Globals.allowEmptyObjects)
-        {
-            /* this is an empty object but we don't know if it was intentional */
-            API_ERROR("nspec==0", E_EMPTYOBJECT);
-        }
+        if (!specnames && nspec && (!optlist ||
+             (!DBGetOption(optlist, DBOPT_MB_FILE_NS) && 
+              !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
+            API_ERROR("species-names", E_BADARGS);
         if (!dbfile->pub.p_mms)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
@@ -12135,7 +12844,6 @@ db_ResetGlobalData_PointMesh (int ndims) {
 INTERNAL int
 db_ResetGlobalData_QuadMesh (int ndims) {
 
-   FREE(_qm._meshname);
    memset(&_qm, 0, sizeof(_qm));
 
    _qm._coord_sys = DB_OTHER;
@@ -12409,16 +13117,10 @@ DBStringArrayToStringList(
      }
      s = (char*)malloc(len+1);
      for (i=len=0; i<n; i++) {
+         char const *p = strArray[i]?strArray[i]:"\n";
          if (i) s[len++] = ';';
-         if (strArray[i])
-         {
-             strcpy(s+len, strArray[i]);
-             len += strlen(strArray[i]);
-         }
-         else
-         {
-             s[len++] = '\n';
-         }
+         strcpy(s+len, p);
+         len += strlen(p);
      }
      len++; /*count last null*/
 
@@ -12429,7 +13131,7 @@ DBStringArrayToStringList(
 /*----------------------------------------------------------------------
  * Purpose
  *
- *    Decompose a single, semicolon seperated string list into an array
+ *    Decompose a single, sep-char seperated string list into an array
  *    of strings
  *
  * Programmer
@@ -12470,21 +13172,21 @@ DBStringArrayToStringList(
  *    Changed interface to return value for number of strings as well
  *    as accept an input value or nothing at all.
  *--------------------------------------------------------------------*/
-PUBLIC char **
-DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndexZero)
+INTERNAL char **
+db_StringListToStringArray(char const *strList, int *_n, char sep, int skipSepAtIndexZero)
 {
     int i, l, n, add1 = 0;
     char **retval;
 
-    /* if n is unspecified (<0), compute it by counting semicolons */
+    /* if n is unspecified (<0), compute it by counting sep chars */
     if (_n == 0 || *_n < 0)
     {
         add1 = 1;
         n = 1;
-        i = (skipSemicolonAtIndexZero&&strList[0]==';')?1:0;
+        i = (skipSepAtIndexZero&&strList[0]==sep)?1:0;
         while (strList[i] != '\0')
         {
-            if (strList[i] == ';')
+            if (strList[i] == sep)
                 n++;
             i++;
         }
@@ -12495,9 +13197,9 @@ DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndex
     }
 
     retval = (char**) calloc(n+add1, sizeof(char*));
-    for (i=0, l=(skipSemicolonAtIndexZero&&strList[0]==';')?1:0; i<n; i++)
+    for (i=0, l=(skipSepAtIndexZero&&strList[0]==sep)?1:0; i<n; i++)
     {
-        if (strList[l] == ';')
+        if (strList[l] == sep)
         {
             retval[i] = STRDUP(""); 
             l += 1;
@@ -12510,7 +13212,7 @@ DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndex
         else
         {
             int len, lstart = l;
-            while (strList[l] != ';' && strList[l] != '\0')
+            while (strList[l] != sep && strList[l] != '\0')
                 l++;
             len = l-lstart;
             retval[i] = (char *) malloc(len+1);
@@ -12525,6 +13227,29 @@ DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndex
     if (_n && *_n < 0) *_n = n;
 
     return retval;
+}
+
+PUBLIC char **
+DBStringListToStringArray(char const *strList, int *_n, int skipSemicolonAtIndexZero)
+{
+    return db_StringListToStringArray(strList, _n, ';', skipSemicolonAtIndexZero);
+}
+
+PUBLIC void
+DBFreeStringArray(char **strArray, int n)
+{
+    int i;
+    if (n < 0)
+    {
+        for (i = 0; strArray[i]; i++)
+            FREE(strArray[i]);
+    }
+    else
+    {
+        for (i = 0; i < n; i++)
+            FREE(strArray[i]);
+    }
+    FREE(strArray);
 }
 
 INTERNAL int 
@@ -12853,7 +13578,7 @@ db_Pathname *db_cleanup_path ( db_Pathname *p )
 |                that special cases arise...
 |
 |                    pathname == 0            Return value is 0.
-|                    pathname == "/"            Return value is "".
+|                    pathname == "/"            Return value is "/".
 |                    pathname == "/base"        Return value is "/".
 |                    pathname == "base"         Return value is ".".
 |                    pathname == "path/base"    Return value is "path".
@@ -12868,16 +13593,17 @@ db_Pathname *db_cleanup_path ( db_Pathname *p )
 
 char *db_dirname ( const char *pathname )
 {  char *result;
+   char *tmp_pathname = db_normalize_path(pathname);
 
    result = 0;
-   {  if (0 < strlen(pathname))
-      {  if (strcmp(pathname,"/") == 0)
-            result = STRDUP("");
+   {  if (0 < strlen(tmp_pathname))
+      {  if (strcmp(tmp_pathname,"/") == 0)
+            result = STRDUP("/");
          else
          {  int  i;
             char tmp[32767];
 
-            strcpy(tmp,pathname);
+            strcpy(tmp,tmp_pathname);
             for (i=(int)strlen(tmp)-1; 0<=i; --i)
                if (tmp[i] == '/')
                {  if (i == 0)
@@ -12892,6 +13618,7 @@ char *db_dirname ( const char *pathname )
       }
    }
 theExit:
+   free(tmp_pathname);
    return result;
 }
 
@@ -13955,7 +14682,7 @@ DBPutGroupelmap(DBfile *dbfile, const char *name,
 
         retval = (dbfile->pub.p_grplm) (dbfile, name,
             num_segments, groupel_types, segment_lengths, segment_ids,
-            segment_data, (void const * const *) segment_fracs, fracs_data_type, opts);
+            segment_data, segment_fracs, fracs_data_type, opts);
 
         db_FreeToc(dbfile);
         API_RETURN(retval);
@@ -14018,7 +14745,7 @@ DBPutMrgvar(DBfile *dbfile, const char *name, const char *mrgt_name,
             API_ERROR(dbfile->pub.name, E_NOTIMP);
 
         retval = (dbfile->pub.p_mrgv) (dbfile, name, mrgt_name, ncomps,
-            compnames, nregns, reg_pnames, datatype, (void const * const *) data, opts);
+            compnames, nregns, reg_pnames, datatype, data, opts);
 
         db_FreeToc(dbfile);
         API_RETURN(retval);

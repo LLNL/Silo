@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-# Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+# Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
 # All rights reserved.
 # 
@@ -154,7 +154,7 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	onehex$(EXEEXT) oneprism$(EXEEXT) onepyramid$(EXEEXT) \
 	onetet$(EXEEXT) TestReadMask$(EXEEXT) subhex$(EXEEXT) \
 	twohex$(EXEEXT) multispec$(EXEEXT) specmix$(EXEEXT) \
-	misc$(EXEEXT) newsami$(EXEEXT) spec$(EXEEXT) cpz1plt$(EXEEXT) \
+	sami$(EXEEXT) spec$(EXEEXT) cpz1plt$(EXEEXT) \
 	merge_block$(EXEEXT) mat3d_3across$(EXEEXT) ucd1d$(EXEEXT) \
 	wave$(EXEEXT) multi_file$(EXEEXT) polyzl$(EXEEXT) csg$(EXEEXT) \
 	rocket$(EXEEXT) mmadjacency$(EXEEXT) largefile$(EXEEXT) \
@@ -164,6 +164,7 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
 	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_6) \
 	$(am__EXEEXT_8)
+# nodist_EXTRA_bcastopen_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@am__append_4 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_5 = $(HDF5PROGS)
 @FORTRAN_NEEDED_TRUE@am__append_6 = $(FCPROGS)
@@ -202,13 +203,11 @@ rocket_silo_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 am__EXEEXT_2 = $(am__EXEEXT_1)
 @JSON_NEEDED_TRUE@am__EXEEXT_3 = json$(EXEEXT)
 am__EXEEXT_4 = $(am__EXEEXT_3)
-am__EXEEXT_5 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT) \
-	testhdf5$(EXEEXT)
+am__EXEEXT_5 = compression$(EXEEXT) grab$(EXEEXT) mk_nasf_h5$(EXEEXT)
 @HDF5_DRV_NEEDED_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
 am__EXEEXT_7 = arrayf77$(EXEEXT) arrayf90$(EXEEXT) curvef77$(EXEEXT) \
 	matf77$(EXEEXT) pointf77$(EXEEXT) quadf77$(EXEEXT) \
-	ucdf77$(EXEEXT) testallf77$(EXEEXT) csgmesh$(EXEEXT) \
-	qmeshmat2df77$(EXEEXT)
+	ucdf77$(EXEEXT) testallf77$(EXEEXT) csgmesh$(EXEEXT)
 @FORTRAN_NEEDED_TRUE@am__EXEEXT_8 = $(am__EXEEXT_7)
 TestReadMask_SOURCES = TestReadMask.c
 TestReadMask_OBJECTS = TestReadMask.$(OBJEXT)
@@ -370,13 +369,6 @@ merge_block_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@merge_block_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
-misc_SOURCES = misc.c
-misc_OBJECTS = misc.$(OBJEXT)
-misc_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@misc_DEPENDENCIES = ../src/libsilo.la \
-@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
-@HDF5_DRV_NEEDED_TRUE@misc_DEPENDENCIES = ../src/libsiloh5.la \
-@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am__mk_nasf_h5_SOURCES_DIST = mk_nasf_h5.c
 @HDF5_DRV_NEEDED_TRUE@am_mk_nasf_h5_OBJECTS = mk_nasf_h5.$(OBJEXT)
 mk_nasf_h5_OBJECTS = $(am_mk_nasf_h5_OBJECTS)
@@ -422,13 +414,6 @@ namescheme_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@namescheme_DEPENDENCIES = ../src/libsilo.la \
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@namescheme_DEPENDENCIES = ../src/libsiloh5.la \
-@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
-am_newsami_OBJECTS = newsami.$(OBJEXT)
-newsami_OBJECTS = $(am_newsami_OBJECTS)
-newsami_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@newsami_DEPENDENCIES = ../src/libsilo.la \
-@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
-@HDF5_DRV_NEEDED_TRUE@newsami_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 obj_SOURCES = obj.c
 obj_OBJECTS = obj.$(OBJEXT)
@@ -498,12 +483,6 @@ polyzl_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@polyzl_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
-am__qmeshmat2df77_SOURCES_DIST = qmeshmat2df77.f
-@FORTRAN_NEEDED_TRUE@am_qmeshmat2df77_OBJECTS =  \
-@FORTRAN_NEEDED_TRUE@	qmeshmat2df77.$(OBJEXT)
-qmeshmat2df77_OBJECTS = $(am_qmeshmat2df77_OBJECTS)
-@FORTRAN_NEEDED_TRUE@qmeshmat2df77_DEPENDENCIES = $(LDADD) \
-@FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
 am_quad_OBJECTS = quad.$(OBJEXT) testlib.$(OBJEXT)
 quad_OBJECTS = $(am_quad_OBJECTS)
 quad_LDADD = $(LDADD)
@@ -540,6 +519,13 @@ rocket_LDADD = $(LDADD)
 rocket_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(rocket_CXXFLAGS) \
 	$(CXXFLAGS) $(rocket_LDFLAGS) $(LDFLAGS) -o $@
+sami_SOURCES = sami.c
+sami_OBJECTS = sami.$(OBJEXT)
+sami_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@sami_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@sami_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 simple_SOURCES = simple.c
 simple_OBJECTS = simple.$(OBJEXT)
 simple_LDADD = $(LDADD)
@@ -587,10 +573,6 @@ testfs_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@testfs_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
-am__testhdf5_SOURCES_DIST = testhdf5.c
-@HDF5_DRV_NEEDED_TRUE@am_testhdf5_OBJECTS = testhdf5.$(OBJEXT)
-testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
-@HDF5_DRV_NEEDED_TRUE@testhdf5_DEPENDENCIES = $(LDADD)
 testpdb_SOURCES = testpdb.c
 testpdb_OBJECTS = testpdb-testpdb.$(OBJEXT)
 testpdb_LDADD = $(LDADD)
@@ -658,9 +640,8 @@ am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-am__depfiles_maybe = depfiles
-am__mv = mv -f
+depcomp =
+am__depfiles_maybe =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -753,14 +734,12 @@ SOURCES = $(rocket_silo_la_SOURCES) \
 	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
 	$(matf77_SOURCES) $(nodist_EXTRA_matf77_SOURCES) \
 	$(nodist_EXTRA_merge_block_SOURCES) merge_block.c \
-	$(nodist_EXTRA_misc_SOURCES) misc.c $(mk_nasf_h5_SOURCES) \
-	$(nodist_EXTRA_mk_nasf_pdb_SOURCES) mk_nasf_pdb.c \
-	$(nodist_EXTRA_mmadjacency_SOURCES) mmadjacency.c \
-	$(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
+	$(mk_nasf_h5_SOURCES) $(nodist_EXTRA_mk_nasf_pdb_SOURCES) \
+	mk_nasf_pdb.c $(nodist_EXTRA_mmadjacency_SOURCES) \
+	mmadjacency.c $(nodist_EXTRA_multi_file_SOURCES) multi_file.c \
 	$(nodist_EXTRA_multi_test_SOURCES) multi_test.c \
 	$(nodist_EXTRA_multispec_SOURCES) multispec.c \
 	$(nodist_EXTRA_namescheme_SOURCES) namescheme.c \
-	$(newsami_SOURCES) $(nodist_EXTRA_newsami_SOURCES) \
 	$(nodist_EXTRA_obj_SOURCES) obj.c \
 	$(nodist_EXTRA_onehex_SOURCES) onehex.c \
 	$(nodist_EXTRA_oneprism_SOURCES) oneprism.c \
@@ -770,21 +749,20 @@ SOURCES = $(rocket_silo_la_SOURCES) \
 	$(nodist_EXTRA_pdbtst_SOURCES) pdbtst.c \
 	$(nodist_EXTRA_point_SOURCES) point.c $(pointf77_SOURCES) \
 	$(nodist_EXTRA_pointf77_SOURCES) \
-	$(nodist_EXTRA_polyzl_SOURCES) polyzl.c \
-	$(qmeshmat2df77_SOURCES) $(nodist_EXTRA_qmeshmat2df77_SOURCES) \
-	$(quad_SOURCES) $(nodist_EXTRA_quad_SOURCES) \
-	$(quadf77_SOURCES) $(nodist_EXTRA_quadf77_SOURCES) \
+	$(nodist_EXTRA_polyzl_SOURCES) polyzl.c $(quad_SOURCES) \
+	$(nodist_EXTRA_quad_SOURCES) $(quadf77_SOURCES) \
+	$(nodist_EXTRA_quadf77_SOURCES) \
 	$(nodist_EXTRA_readstuff_SOURCES) readstuff.c \
 	$(nodist_EXTRA_realloc_obj_and_opts_SOURCES) \
 	realloc_obj_and_opts.c $(rocket_SOURCES) \
+	$(nodist_EXTRA_sami_SOURCES) sami.c \
 	$(nodist_EXTRA_simple_SOURCES) simple.c \
 	$(nodist_EXTRA_spec_SOURCES) spec.c \
 	$(nodist_EXTRA_specmix_SOURCES) specmix.c \
 	$(nodist_EXTRA_subhex_SOURCES) subhex.c \
 	$(nodist_EXTRA_testall_SOURCES) testall.c \
 	$(testallf77_SOURCES) $(nodist_EXTRA_testallf77_SOURCES) \
-	$(nodist_EXTRA_testfs_SOURCES) testfs.c $(testhdf5_SOURCES) \
-	$(nodist_EXTRA_testhdf5_SOURCES) \
+	$(nodist_EXTRA_testfs_SOURCES) testfs.c \
 	$(nodist_EXTRA_testpdb_SOURCES) testpdb.c \
 	$(nodist_EXTRA_twohex_SOURCES) twohex.c \
 	$(nodist_EXTRA_ucd_SOURCES) ucd.c \
@@ -800,18 +778,17 @@ DIST_SOURCES = $(rocket_silo_la_SOURCES) TestReadMask.c alltypes.c \
 	$(am__curvef77_SOURCES_DIST) $(dir_SOURCES) efcentering.c \
 	empty.c extface.c $(am__grab_SOURCES_DIST) group_test.c json.c \
 	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
-	$(am__matf77_SOURCES_DIST) merge_block.c misc.c \
+	$(am__matf77_SOURCES_DIST) merge_block.c \
 	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
-	multi_file.c multi_test.c multispec.c namescheme.c \
-	$(newsami_SOURCES) obj.c onehex.c oneprism.c onepyramid.c \
-	onetet.c partial_io.c pdbtst.c point.c \
-	$(am__pointf77_SOURCES_DIST) polyzl.c \
-	$(am__qmeshmat2df77_SOURCES_DIST) $(quad_SOURCES) \
-	$(am__quadf77_SOURCES_DIST) readstuff.c realloc_obj_and_opts.c \
-	$(rocket_SOURCES) simple.c spec.c specmix.c subhex.c testall.c \
-	$(am__testallf77_SOURCES_DIST) testfs.c \
-	$(am__testhdf5_SOURCES_DIST) testpdb.c twohex.c ucd.c ucd1d.c \
-	$(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
+	multi_file.c multi_test.c multispec.c namescheme.c obj.c \
+	onehex.c oneprism.c onepyramid.c onetet.c partial_io.c \
+	pdbtst.c point.c $(am__pointf77_SOURCES_DIST) polyzl.c \
+	$(quad_SOURCES) $(am__quadf77_SOURCES_DIST) readstuff.c \
+	realloc_obj_and_opts.c $(rocket_SOURCES) sami.c simple.c \
+	spec.c specmix.c subhex.c testall.c \
+	$(am__testallf77_SOURCES_DIST) testfs.c testpdb.c twohex.c \
+	ucd.c ucd1d.c $(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c \
+	wave.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -836,7 +813,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/config/depcomp
+am__DIST_COMMON = $(srcdir)/Makefile.in
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -955,7 +932,6 @@ X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
 X_LIBS = @X_LIBS@
 X_PRE_LIBS = @X_PRE_LIBS@
-ZFP = @ZFP@
 ZLIB = @ZLIB@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -1036,7 +1012,6 @@ EXTRA_DIST = \
  bcastopen.c \
  bcastopen_main.c \
  zeros.dat \
- testhdf5.c \
  $(check_SCRIPTS) \
  $(check_DATA)
 
@@ -1050,7 +1025,6 @@ check_SCRIPTS = \
  test_error.py \
  test_read.py \
  test_write.py \
- onehex.py \
  testonehex \
  testsilock \
  testdtypes
@@ -1083,18 +1057,18 @@ JSONTESTS = $(am__append_3)
 mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 AM_FFLAGS = $(AM_CPPFLAGS)
 AM_FCFLAGS = $(AM_CPPFLAGS)
-HDF5PROGS = compression grab mk_nasf_h5 testhdf5
+HDF5PROGS = compression grab mk_nasf_h5
 FCPROGS = arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
-         csgmesh qmeshmat2df77
+         csgmesh
 
 PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
-	TestReadMask twohex multispec misc newsami specmix spec \
-	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
-	csg rocket mmadjacency largefile version namescheme \
-	efcentering mk_nasf_pdb arbpoly2d readstuff mat3d_3across \
-	merge_block empty majorder realloc_obj_and_opts $(PDBTESTS) \
-	$(JSONTESTS) $(am__append_4) $(am__append_6)
+	TestReadMask twohex multispec sami specmix spec cpz1plt \
+	group_test listtypes alltypes wave multi_file polyzl csg \
+	rocket mmadjacency largefile version namescheme efcentering \
+	mk_nasf_pdb arbpoly2d readstuff mat3d_3across merge_block \
+	empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS) \
+	$(am__append_4) $(am__append_6)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 #bcastopen_SOURCES = bcastopen.c bcastopen_main.c
@@ -1103,7 +1077,6 @@ rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl
 rocket_CXXFLAGS = -rdynamic
 EXTRA_rocket_DEPENDENCIES = rocket_silo.la
-newsami_SOURCES = newsami.cxx
 check_LTLIBRARIES = rocket_silo.la
 rocket_silo_la_SOURCES = rocket_silo.cxx
 # the '-rpath /nowhere' is some trick to force libtool to produce a shared lib
@@ -1141,8 +1114,7 @@ rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_specmix_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testpdb_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_pdbtst_SOURCES = dummy.cxx
-@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_misc_SOURCES = dummy.cxx
-@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_newsami_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_sami_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_spec_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_merge_block_SOURCES = dummy.cxx
@@ -1169,7 +1141,6 @@ rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_ucdf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testallf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_csgmesh_SOURCES = dummy.cxx
-@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_qmeshmat2df77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_compression_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_grab_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_efcentering_SOURCES = dummy.cxx
@@ -1180,15 +1151,12 @@ rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_majorder_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_realloc_obj_and_opts_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_json_SOURCES = dummy.cxx
-@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
 @HDF5_DRV_NEEDED_TRUE@grab_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@mk_nasf_h5_SOURCES = mk_nasf_h5.c
 @HDF5_DRV_NEEDED_TRUE@mk_nasf_h5_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_TRUE@testhdf5_SOURCES = testhdf5.c
-@HDF5_DRV_NEEDED_TRUE@testhdf5_LDADD = $(LDADD)
 @FORTRAN_NEEDED_TRUE@arrayf77_SOURCES = arrayf77.f
 @FORTRAN_NEEDED_TRUE@arrayf77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@arrayf90_SOURCES = arrayf90.f90
@@ -1207,8 +1175,6 @@ rocket_silo_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @FORTRAN_NEEDED_TRUE@testallf77_LDADD = $(LDADD) $(FCLIBS)
 @FORTRAN_NEEDED_TRUE@csgmesh_SOURCES = csgmesh.f
 @FORTRAN_NEEDED_TRUE@csgmesh_LDADD = $(LDADD) $(FCLIBS)
-@FORTRAN_NEEDED_TRUE@qmeshmat2df77_SOURCES = qmeshmat2df77.f
-@FORTRAN_NEEDED_TRUE@qmeshmat2df77_LDADD = $(LDADD) $(FCLIBS)
 all: all-am
 
 .SUFFIXES:
@@ -1222,9 +1188,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tests/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign --ignore-deps tests/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign tests/Makefile
+	  $(AUTOMAKE) --foreign --ignore-deps tests/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -1366,10 +1332,6 @@ merge_block$(EXEEXT): $(merge_block_OBJECTS) $(merge_block_DEPENDENCIES) $(EXTRA
 	@rm -f merge_block$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(merge_block_OBJECTS) $(merge_block_LDADD) $(LIBS)
 
-misc$(EXEEXT): $(misc_OBJECTS) $(misc_DEPENDENCIES) $(EXTRA_misc_DEPENDENCIES) 
-	@rm -f misc$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(misc_OBJECTS) $(misc_LDADD) $(LIBS)
-
 mk_nasf_h5$(EXEEXT): $(mk_nasf_h5_OBJECTS) $(mk_nasf_h5_DEPENDENCIES) $(EXTRA_mk_nasf_h5_DEPENDENCIES) 
 	@rm -f mk_nasf_h5$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(mk_nasf_h5_OBJECTS) $(mk_nasf_h5_LDADD) $(LIBS)
@@ -1397,10 +1359,6 @@ multispec$(EXEEXT): $(multispec_OBJECTS) $(multispec_DEPENDENCIES) $(EXTRA_multi
 namescheme$(EXEEXT): $(namescheme_OBJECTS) $(namescheme_DEPENDENCIES) $(EXTRA_namescheme_DEPENDENCIES) 
 	@rm -f namescheme$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(namescheme_OBJECTS) $(namescheme_LDADD) $(LIBS)
-
-newsami$(EXEEXT): $(newsami_OBJECTS) $(newsami_DEPENDENCIES) $(EXTRA_newsami_DEPENDENCIES) 
-	@rm -f newsami$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(newsami_OBJECTS) $(newsami_LDADD) $(LIBS)
 
 obj$(EXEEXT): $(obj_OBJECTS) $(obj_DEPENDENCIES) $(EXTRA_obj_DEPENDENCIES) 
 	@rm -f obj$(EXEEXT)
@@ -1442,10 +1400,6 @@ polyzl$(EXEEXT): $(polyzl_OBJECTS) $(polyzl_DEPENDENCIES) $(EXTRA_polyzl_DEPENDE
 	@rm -f polyzl$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(polyzl_OBJECTS) $(polyzl_LDADD) $(LIBS)
 
-qmeshmat2df77$(EXEEXT): $(qmeshmat2df77_OBJECTS) $(qmeshmat2df77_DEPENDENCIES) $(EXTRA_qmeshmat2df77_DEPENDENCIES) 
-	@rm -f qmeshmat2df77$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(qmeshmat2df77_OBJECTS) $(qmeshmat2df77_LDADD) $(LIBS)
-
 quad$(EXEEXT): $(quad_OBJECTS) $(quad_DEPENDENCIES) $(EXTRA_quad_DEPENDENCIES) 
 	@rm -f quad$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(quad_OBJECTS) $(quad_LDADD) $(LIBS)
@@ -1465,6 +1419,10 @@ realloc_obj_and_opts$(EXEEXT): $(realloc_obj_and_opts_OBJECTS) $(realloc_obj_and
 rocket$(EXEEXT): $(rocket_OBJECTS) $(rocket_DEPENDENCIES) $(EXTRA_rocket_DEPENDENCIES) 
 	@rm -f rocket$(EXEEXT)
 	$(AM_V_CXXLD)$(rocket_LINK) $(rocket_OBJECTS) $(rocket_LDADD) $(LIBS)
+
+sami$(EXEEXT): $(sami_OBJECTS) $(sami_DEPENDENCIES) $(EXTRA_sami_DEPENDENCIES) 
+	@rm -f sami$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(sami_OBJECTS) $(sami_LDADD) $(LIBS)
 
 simple$(EXEEXT): $(simple_OBJECTS) $(simple_DEPENDENCIES) $(EXTRA_simple_DEPENDENCIES) 
 	@rm -f simple$(EXEEXT)
@@ -1493,10 +1451,6 @@ testallf77$(EXEEXT): $(testallf77_OBJECTS) $(testallf77_DEPENDENCIES) $(EXTRA_te
 testfs$(EXEEXT): $(testfs_OBJECTS) $(testfs_DEPENDENCIES) $(EXTRA_testfs_DEPENDENCIES) 
 	@rm -f testfs$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(testfs_OBJECTS) $(testfs_LDADD) $(LIBS)
-
-testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES) $(EXTRA_testhdf5_DEPENDENCIES) 
-	@rm -f testhdf5$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(testhdf5_OBJECTS) $(testhdf5_LDADD) $(LIBS)
 
 testpdb$(EXEEXT): $(testpdb_OBJECTS) $(testpdb_DEPENDENCIES) $(EXTRA_testpdb_DEPENDENCIES) 
 	@rm -f testpdb$(EXEEXT)
@@ -1536,238 +1490,77 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TestReadMask.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alltypes.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arbpoly2d.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/array.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpz1plt.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csg.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dir.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efcentering.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/empty.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extface.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/grab.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/json-dummy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/json-json.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/largefile.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/majorder.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge_block.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_h5.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_pdb-dummy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_pdb-mk_nasf_pdb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmadjacency.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multi_file.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multi_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/multispec.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/namescheme.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/newsami.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/obj.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onehex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oneprism.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onepyramid.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onetet.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/partial_io.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdbtst-dummy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdbtst-pdbtst.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polyzl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quad.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readstuff.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/realloc_obj_and_opts.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket-rocket.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rocket_silo.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spec.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/specmix.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subhex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testall.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfs.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testhdf5.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testlib.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpdb-dummy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpdb-testpdb.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/twohex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucd1d.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucdsamp3.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wave.Po@am__quote@
-
 .c.o:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ $<
+	$(AM_V_CC)$(COMPILE) -c -o $@ $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+	$(AM_V_CC)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $<
 
 json-json.o: json.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT json-json.o -MD -MP -MF $(DEPDIR)/json-json.Tpo -c -o json-json.o `test -f 'json.c' || echo '$(srcdir)/'`json.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/json-json.Tpo $(DEPDIR)/json-json.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='json.c' object='json-json.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o json-json.o `test -f 'json.c' || echo '$(srcdir)/'`json.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o json-json.o `test -f 'json.c' || echo '$(srcdir)/'`json.c
 
 json-json.obj: json.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT json-json.obj -MD -MP -MF $(DEPDIR)/json-json.Tpo -c -o json-json.obj `if test -f 'json.c'; then $(CYGPATH_W) 'json.c'; else $(CYGPATH_W) '$(srcdir)/json.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/json-json.Tpo $(DEPDIR)/json-json.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='json.c' object='json-json.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o json-json.obj `if test -f 'json.c'; then $(CYGPATH_W) 'json.c'; else $(CYGPATH_W) '$(srcdir)/json.c'; fi`
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o json-json.obj `if test -f 'json.c'; then $(CYGPATH_W) 'json.c'; else $(CYGPATH_W) '$(srcdir)/json.c'; fi`
 
 mk_nasf_pdb-mk_nasf_pdb.o: mk_nasf_pdb.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mk_nasf_pdb-mk_nasf_pdb.o -MD -MP -MF $(DEPDIR)/mk_nasf_pdb-mk_nasf_pdb.Tpo -c -o mk_nasf_pdb-mk_nasf_pdb.o `test -f 'mk_nasf_pdb.c' || echo '$(srcdir)/'`mk_nasf_pdb.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mk_nasf_pdb-mk_nasf_pdb.Tpo $(DEPDIR)/mk_nasf_pdb-mk_nasf_pdb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mk_nasf_pdb.c' object='mk_nasf_pdb-mk_nasf_pdb.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mk_nasf_pdb-mk_nasf_pdb.o `test -f 'mk_nasf_pdb.c' || echo '$(srcdir)/'`mk_nasf_pdb.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mk_nasf_pdb-mk_nasf_pdb.o `test -f 'mk_nasf_pdb.c' || echo '$(srcdir)/'`mk_nasf_pdb.c
 
 mk_nasf_pdb-mk_nasf_pdb.obj: mk_nasf_pdb.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mk_nasf_pdb-mk_nasf_pdb.obj -MD -MP -MF $(DEPDIR)/mk_nasf_pdb-mk_nasf_pdb.Tpo -c -o mk_nasf_pdb-mk_nasf_pdb.obj `if test -f 'mk_nasf_pdb.c'; then $(CYGPATH_W) 'mk_nasf_pdb.c'; else $(CYGPATH_W) '$(srcdir)/mk_nasf_pdb.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mk_nasf_pdb-mk_nasf_pdb.Tpo $(DEPDIR)/mk_nasf_pdb-mk_nasf_pdb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mk_nasf_pdb.c' object='mk_nasf_pdb-mk_nasf_pdb.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mk_nasf_pdb-mk_nasf_pdb.obj `if test -f 'mk_nasf_pdb.c'; then $(CYGPATH_W) 'mk_nasf_pdb.c'; else $(CYGPATH_W) '$(srcdir)/mk_nasf_pdb.c'; fi`
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mk_nasf_pdb-mk_nasf_pdb.obj `if test -f 'mk_nasf_pdb.c'; then $(CYGPATH_W) 'mk_nasf_pdb.c'; else $(CYGPATH_W) '$(srcdir)/mk_nasf_pdb.c'; fi`
 
 pdbtst-pdbtst.o: pdbtst.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pdbtst-pdbtst.o -MD -MP -MF $(DEPDIR)/pdbtst-pdbtst.Tpo -c -o pdbtst-pdbtst.o `test -f 'pdbtst.c' || echo '$(srcdir)/'`pdbtst.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pdbtst-pdbtst.Tpo $(DEPDIR)/pdbtst-pdbtst.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pdbtst.c' object='pdbtst-pdbtst.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pdbtst-pdbtst.o `test -f 'pdbtst.c' || echo '$(srcdir)/'`pdbtst.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pdbtst-pdbtst.o `test -f 'pdbtst.c' || echo '$(srcdir)/'`pdbtst.c
 
 pdbtst-pdbtst.obj: pdbtst.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pdbtst-pdbtst.obj -MD -MP -MF $(DEPDIR)/pdbtst-pdbtst.Tpo -c -o pdbtst-pdbtst.obj `if test -f 'pdbtst.c'; then $(CYGPATH_W) 'pdbtst.c'; else $(CYGPATH_W) '$(srcdir)/pdbtst.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pdbtst-pdbtst.Tpo $(DEPDIR)/pdbtst-pdbtst.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pdbtst.c' object='pdbtst-pdbtst.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pdbtst-pdbtst.obj `if test -f 'pdbtst.c'; then $(CYGPATH_W) 'pdbtst.c'; else $(CYGPATH_W) '$(srcdir)/pdbtst.c'; fi`
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pdbtst-pdbtst.obj `if test -f 'pdbtst.c'; then $(CYGPATH_W) 'pdbtst.c'; else $(CYGPATH_W) '$(srcdir)/pdbtst.c'; fi`
 
 testpdb-testpdb.o: testpdb.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testpdb-testpdb.o -MD -MP -MF $(DEPDIR)/testpdb-testpdb.Tpo -c -o testpdb-testpdb.o `test -f 'testpdb.c' || echo '$(srcdir)/'`testpdb.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testpdb-testpdb.Tpo $(DEPDIR)/testpdb-testpdb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testpdb.c' object='testpdb-testpdb.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testpdb-testpdb.o `test -f 'testpdb.c' || echo '$(srcdir)/'`testpdb.c
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testpdb-testpdb.o `test -f 'testpdb.c' || echo '$(srcdir)/'`testpdb.c
 
 testpdb-testpdb.obj: testpdb.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testpdb-testpdb.obj -MD -MP -MF $(DEPDIR)/testpdb-testpdb.Tpo -c -o testpdb-testpdb.obj `if test -f 'testpdb.c'; then $(CYGPATH_W) 'testpdb.c'; else $(CYGPATH_W) '$(srcdir)/testpdb.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testpdb-testpdb.Tpo $(DEPDIR)/testpdb-testpdb.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='testpdb.c' object='testpdb-testpdb.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testpdb-testpdb.obj `if test -f 'testpdb.c'; then $(CYGPATH_W) 'testpdb.c'; else $(CYGPATH_W) '$(srcdir)/testpdb.c'; fi`
+	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o testpdb-testpdb.obj `if test -f 'testpdb.c'; then $(CYGPATH_W) 'testpdb.c'; else $(CYGPATH_W) '$(srcdir)/testpdb.c'; fi`
 
 .cxx.o:
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ $<
+	$(AM_V_CXX)$(CXXCOMPILE) -c -o $@ $<
 
 .cxx.obj:
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+	$(AM_V_CXX)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .cxx.lo:
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
+	$(AM_V_CXX)$(LTCXXCOMPILE) -c -o $@ $<
 
 json-dummy.o: dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT json-dummy.o -MD -MP -MF $(DEPDIR)/json-dummy.Tpo -c -o json-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/json-dummy.Tpo $(DEPDIR)/json-dummy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dummy.cxx' object='json-dummy.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o json-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o json-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
 
 json-dummy.obj: dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT json-dummy.obj -MD -MP -MF $(DEPDIR)/json-dummy.Tpo -c -o json-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/json-dummy.Tpo $(DEPDIR)/json-dummy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dummy.cxx' object='json-dummy.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o json-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(json_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o json-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
 
 mk_nasf_pdb-dummy.o: dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mk_nasf_pdb-dummy.o -MD -MP -MF $(DEPDIR)/mk_nasf_pdb-dummy.Tpo -c -o mk_nasf_pdb-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mk_nasf_pdb-dummy.Tpo $(DEPDIR)/mk_nasf_pdb-dummy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dummy.cxx' object='mk_nasf_pdb-dummy.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mk_nasf_pdb-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mk_nasf_pdb-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
 
 mk_nasf_pdb-dummy.obj: dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mk_nasf_pdb-dummy.obj -MD -MP -MF $(DEPDIR)/mk_nasf_pdb-dummy.Tpo -c -o mk_nasf_pdb-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mk_nasf_pdb-dummy.Tpo $(DEPDIR)/mk_nasf_pdb-dummy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dummy.cxx' object='mk_nasf_pdb-dummy.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mk_nasf_pdb-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mk_nasf_pdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mk_nasf_pdb-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
 
 pdbtst-dummy.o: dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pdbtst-dummy.o -MD -MP -MF $(DEPDIR)/pdbtst-dummy.Tpo -c -o pdbtst-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pdbtst-dummy.Tpo $(DEPDIR)/pdbtst-dummy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dummy.cxx' object='pdbtst-dummy.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pdbtst-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pdbtst-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
 
 pdbtst-dummy.obj: dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pdbtst-dummy.obj -MD -MP -MF $(DEPDIR)/pdbtst-dummy.Tpo -c -o pdbtst-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pdbtst-dummy.Tpo $(DEPDIR)/pdbtst-dummy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dummy.cxx' object='pdbtst-dummy.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pdbtst-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdbtst_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o pdbtst-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
 
 rocket-rocket.o: rocket.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -MT rocket-rocket.o -MD -MP -MF $(DEPDIR)/rocket-rocket.Tpo -c -o rocket-rocket.o `test -f 'rocket.cxx' || echo '$(srcdir)/'`rocket.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/rocket-rocket.Tpo $(DEPDIR)/rocket-rocket.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='rocket.cxx' object='rocket-rocket.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-rocket.o `test -f 'rocket.cxx' || echo '$(srcdir)/'`rocket.cxx
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-rocket.o `test -f 'rocket.cxx' || echo '$(srcdir)/'`rocket.cxx
 
 rocket-rocket.obj: rocket.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -MT rocket-rocket.obj -MD -MP -MF $(DEPDIR)/rocket-rocket.Tpo -c -o rocket-rocket.obj `if test -f 'rocket.cxx'; then $(CYGPATH_W) 'rocket.cxx'; else $(CYGPATH_W) '$(srcdir)/rocket.cxx'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/rocket-rocket.Tpo $(DEPDIR)/rocket-rocket.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='rocket.cxx' object='rocket-rocket.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-rocket.obj `if test -f 'rocket.cxx'; then $(CYGPATH_W) 'rocket.cxx'; else $(CYGPATH_W) '$(srcdir)/rocket.cxx'; fi`
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(rocket_CXXFLAGS) $(CXXFLAGS) -c -o rocket-rocket.obj `if test -f 'rocket.cxx'; then $(CYGPATH_W) 'rocket.cxx'; else $(CYGPATH_W) '$(srcdir)/rocket.cxx'; fi`
 
 testpdb-dummy.o: dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT testpdb-dummy.o -MD -MP -MF $(DEPDIR)/testpdb-dummy.Tpo -c -o testpdb-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testpdb-dummy.Tpo $(DEPDIR)/testpdb-dummy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dummy.cxx' object='testpdb-dummy.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o testpdb-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o testpdb-dummy.o `test -f 'dummy.cxx' || echo '$(srcdir)/'`dummy.cxx
 
 testpdb-dummy.obj: dummy.cxx
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT testpdb-dummy.obj -MD -MP -MF $(DEPDIR)/testpdb-dummy.Tpo -c -o testpdb-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/testpdb-dummy.Tpo $(DEPDIR)/testpdb-dummy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dummy.cxx' object='testpdb-dummy.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o testpdb-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testpdb_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o testpdb-dummy.obj `if test -f 'dummy.cxx'; then $(CYGPATH_W) 'dummy.cxx'; else $(CYGPATH_W) '$(srcdir)/dummy.cxx'; fi`
 
 .f.o:
 	$(AM_V_F77)$(F77COMPILE) -c -o $@ $<
@@ -1919,7 +1712,6 @@ clean-am: clean-checkLTLIBRARIES clean-checkPROGRAMS clean-generic \
 	clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1965,7 +1757,6 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

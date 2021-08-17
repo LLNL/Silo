@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -90,16 +90,15 @@ build_curve (DBfile *dbfile, int driver)
    }
 
    opts = DBMakeOptlist (10) ;
-   DBAddOption (opts, DBOPT_XLABEL, (char *) "X Axis") ;
-   DBAddOption (opts, DBOPT_YLABEL, (char *) "Y Axis") ;
-   DBAddOption (opts, DBOPT_XUNITS, (char *) "radians") ;
+   DBAddOption (opts, DBOPT_XLABEL, "X Axis") ;
+   DBAddOption (opts, DBOPT_YLABEL, "Y Axis") ;
+   DBAddOption (opts, DBOPT_XUNITS, "radians") ;
 
    /*
     * Write the 'sincurve' curve. The hdf5 driver allows the user to specify
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
    if (driver == DB_PDB)
        DBAddOption(opts, DBOPT_XVARNAME, "/sincurve_xvals");
@@ -144,24 +143,21 @@ main(int argc, char *argv[])
     char          *filename="largefile.silo";
     int            show_all_errors = FALSE;
     DBfile        *dbfile;
-    int            nIters = 5000, cIters;
+    int            nIters = 2500;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB",6)) {
             driver = StringToDriver(argv[i]);
-            if (sizeof(int)<8 && nIters > 2000)
+            if (sizeof(int)<8)
             {
                 fprintf(stderr, "Looks like PDB cannot support >2Gig files. Will stop at 1.990 Gigs\n");
-                nIters = nIters > 2000 ? 1990 : nIters;
+                nIters = 1990;
             }
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
-        } else if (!strcmp(argv[i], "-niters")) {
-            nIters = strtol(argv[i+1],0,10);
-            i++;
 	} else if (argv[i][0] != '\0') {
             fprintf(stderr, "%s: ignored argument '%s'\n", argv[0], argv[i]);
         }
@@ -180,8 +176,8 @@ main(int argc, char *argv[])
     {
         char tmpname[64];
 
-        if (j % (nIters / 20) == 0)
-            printf("Iterations %04d to %04d of %04d\n", j, j+nIters/20-1, nIters);
+        if (j % 100 == 0)
+            printf("Iterations %04d to %04d of %04d\n", j, j+100-1, nIters);
 
         sprintf(tmpname, "simple_%04d", j);
 
@@ -191,7 +187,7 @@ main(int argc, char *argv[])
         if (DBWrite(dbfile, tmpname, val, dims, ndims, DB_FLOAT) != 0)
         {
             DBClose(dbfile);
-            exit(EXIT_SUCCESS);
+            exit(1);
         }
     }
 
@@ -212,20 +208,18 @@ main(int argc, char *argv[])
     if (dbfile == 0)
     {
         printf("Unable to Reopen file for reading\n");
-        exit(EXIT_SUCCESS);
+        exit(1);
     }
 
     /*
-     * Randomly examine 1% of the arrays from the first and last 10%
+     * Randomly examine 50 arrays from the first and last 500
      */
     srand(0xBabeFace);
-    cIters = nIters/100+5;
-    for (j = 0; j < cIters; j++)
+    for (j = 0; j < 100; j++)
     {
         char tmpname[64];
-        int n = rand() % (nIters / 10);
-        if (j > cIters / 2)
-            n = nIters - 1 - n;
+
+        int n = rand() % 500 + (j >= 50 ? (nIters-500) : 0);
 
         sprintf(tmpname, "simple_%04d", n);
 

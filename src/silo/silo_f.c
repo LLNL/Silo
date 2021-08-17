@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -1066,12 +1066,12 @@ DBCREATE_FC (FCD_DB pathname, int *lpathname, int *mode, int *target,
  *
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
-DBINQINT_FC (int *dbid, FCD_DB varname, int *lvarname, void *tag, int *theInt)
+DBINQLEN_FC (int *dbid, FCD_DB varname, int *lvarname, int *len)
 {
     char          *varnm = NULL;
     DBfile        *dbfile = NULL;
 
-    API_BEGIN("dbinqint", int, -1) {
+    API_BEGIN("dbinqlen", int, -1) {
         /*------------------------------
          *  Duplicate all ascii strings.
          *-----------------------------*/
@@ -1091,60 +1091,18 @@ DBINQINT_FC (int *dbid, FCD_DB varname, int *lvarname, void *tag, int *theInt)
 #endif
 
         dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
-
-        if (tag == (void*) DBGetVarLength)
-            *theInt = DBGetVarLength(dbfile, varnm);
-        else if (tag == (void*) DBGetVarByteLength)
-            *theInt = DBGetVarByteLength(dbfile, varnm);
-        else if (tag == (void*) DBGetVarType)
-            *theInt = DBGetVarType(dbfile, varnm);
-        else if (tag == (void*) DBInqVarType)
-            *theInt = DBInqVarType(dbfile, varnm);
-        else if (tag == (void*) DBInqMeshtype)
-            *theInt = DBInqMeshtype(dbfile, varnm);
-        else
-            *theInt = -1;
+        *len = DBGetVarLength(dbfile, varnm);
 
         FREE(varnm);
 
-        if (*theInt < 0) {
-            *theInt = 0;
+        if (*len < 0) {
+            *len = 0;
             API_RETURN(-1);
         }
         else
             API_RETURN(0);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
-SILO_API FORTRAN
-DBINQLEN_FC(int *dbid, FCD_DB varname, int *lvarname, int *len)
-{
-    return DBINQINT_FC(dbid, varname, lvarname, DBGetVarLength, len);
-}
-
-SILO_API FORTRAN
-DBINQBLEN_FC(int *dbid, FCD_DB varname, int *lvarname, int *blen)
-{
-    return DBINQINT_FC(dbid, varname, lvarname, DBGetVarByteLength, blen);
-}
-
-SILO_API FORTRAN
-DBINQDTYP_FC(int *dbid, FCD_DB varname, int *lvarname, int *dtyp)
-{
-    return DBINQINT_FC(dbid, varname, lvarname, DBGetVarType, dtyp);
-}
-
-SILO_API FORTRAN
-DBINQVTYP_FC(int *dbid, FCD_DB varname, int *lvarname, int *vtyp)
-{
-    return DBINQINT_FC(dbid, varname, lvarname, DBInqVarType, vtyp);
-}
-
-SILO_API FORTRAN
-DBINQMTYP_FC(int *dbid, FCD_DB varname, int *lvarname, int *mtyp)
-{
-    return DBINQINT_FC(dbid, varname, lvarname, DBInqMeshtype, mtyp);
 }
 
 /*-------------------------------------------------------------------------
@@ -1553,8 +1511,7 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
          *  Invoke the C function to do the work.
          *---------------------------------------*/
         *status = DBPutMultimesh(dbfile, nm, *nmesh,
-                      (char const * const *) meshnms,
-                  *meshtypes==DB_F77NULL?0:meshtypes, optlist);
+                      (char const * const *) meshnms, meshtypes, optlist);
 
         for (i = 0; i < *nmesh; i++)
             FREE(meshnms[i]);
@@ -1845,7 +1802,7 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
     int            i, indx;
     DBoptlist     *optlist = NULL;
 
-    API_BEGIN("dbputmmat", int, -1) {
+    API_BEGIN("dbputmmesh", int, -1) {
         optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
         /*------------------------------
          *  Duplicate all ascii strings.

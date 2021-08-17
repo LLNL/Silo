@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -88,7 +88,7 @@ be used for advertising or product endorsement purposes.
 
 /* Set larger default values for BG architectures */
 /* These CPP symbols are defined only for bg... compilers */
-#if defined(__bgq__) || defined(__bgp__) || defined(__bgl__)
+#if defined(__bgp__) || defined(__bgl__)
 #define H5FD_SILO_DEFAULT_BLOCK_COUNT 32 
 #define H5FD_SILO_DEFAULT_BLOCK_SIZE (1<<20) 
 #else

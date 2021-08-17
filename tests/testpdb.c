@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -141,7 +141,7 @@ ReadFile (char *filename, char *name)
     if ((file = PD_open(filename, "rli")) == NULL)
     {
         printf("Error opening file.\n");
-        exit(EXIT_FAILURE);
+        exit(-1);
     }
 
     /*
@@ -230,7 +230,7 @@ CreateFile (char *filename, char *name, char *type, int num,
     if ((file = PD_create(filename)) == NULL)
     {
         printf("Error creating file.\n");
-        exit(EXIT_FAILURE);
+        exit(-1);
     }
 
     /*
@@ -248,7 +248,7 @@ CreateFile (char *filename, char *name, char *type, int num,
                        null_ptr) == NULL)
     {
         printf("Error defining Group structure.\n");
-        exit(EXIT_FAILURE);
+        exit(-1);
     }
 
     SFREE(null_ptr);
@@ -277,7 +277,7 @@ CreateFile (char *filename, char *name, char *type, int num,
     if (PD_write(file, name, "Group *", &group) == 0)
     {
         printf("Error writing group.\n");
-        exit(EXIT_FAILURE);
+        exit(-1);
     }
 
     /*
@@ -308,7 +308,7 @@ CreateFile (char *filename, char *name, char *type, int num,
     if (PD_write_alt(file, "coord0", "float", coord0, 2, ind) == 0)
     {
         printf("Error writing array.\n");
-        exit(EXIT_FAILURE);
+        exit(-1);
     }
 
     SFREE(coord0);

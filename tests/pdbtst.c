@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 2010, Lawrence Livermore National Security, LLC.
 Produced at the Lawrence Livermore National Laboratory
 Written by Stewart Brown (brown50@llnl.gov).
 CODE-422942.
@@ -579,7 +579,7 @@ static void error(int n, FILE *fp, char *fmt, ...)
 
     io_printf(fp, "%s", t);
 
-    exit(EXIT_SUCCESS);
+    exit(1);
 
     return;}
 

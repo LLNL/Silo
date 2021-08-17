@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -104,7 +104,6 @@ typedef struct {
 
 #ifndef SILO_NO_CALLBACKS
 SILO_CALLBACK int db_pdb_close (DBfile *);
-SILO_CALLBACK int db_pdb_flush (DBfile *);
 SILO_CALLBACK int db_pdb_InqVarExists (DBfile *, char const *);
 SILO_CALLBACK void *db_pdb_GetComponent (DBfile *, char const *, char const *);
 SILO_CALLBACK int db_pdb_GetComponentType (DBfile *, char const *, char const *);

@@ -60,7 +60,7 @@ ProcessSiloFile(char const *filename, int test_fic_vfd)
 #else
 
         fprintf(stderr, "Cannot test FIC vfd without HDF5 library\n");
-        exit(EXIT_FAILURE);
+        exit(-1);
 
 #endif
 

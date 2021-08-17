@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -55,7 +55,7 @@ be used for advertising or product endorsement purposes.
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, February  9, 1999
  *
- * Purpose:	Tests reading and writing misc files using the HDF5 driver
+ * Purpose:	Tests reading and writing SAMI files using the HDF5 driver
  *		under silo.
  */
 #include <silo.h>
@@ -876,7 +876,7 @@ test_dirs(DBfile *dbfile)
 	puts("DBWrite(d1c_A) failed");
 	nerrors++;
     }
-    if (DBGetDir(dbfile, curdir)<0 || strcmp(curdir, "/dir1/d1c")) {
+    if (DBGetDir(dbfile, curdir)<0 || strncmp(curdir, "/dir1/d1c", 9)) {
 	puts("DBGetDir() failed");
 	nerrors++;
     }
@@ -1126,7 +1126,7 @@ main(int argc, char *argv[])
 {
     DBfile		*dbfile;
     int			i, nerrors=0,  driver=DB_PDB;
-    char		*filename="misc.silo";
+    char		*filename="sami.silo";
     int                 show_all_errors = FALSE;
     
     for (i=1; i<argc; i++) {
@@ -1162,7 +1162,7 @@ main(int argc, char *argv[])
      */
     puts("=== Creating file ===");
     if (NULL==(dbfile=DBCreate(filename, DB_CLOBBER, arch_g,
-			       "testing misc HDF5 silo driver", driver))) {
+			       "testing SAMI HDF5 silo driver", driver))) {
 	puts("DBCreate() failed");
 	nerrors++;
     }
@@ -1235,7 +1235,7 @@ main(int argc, char *argv[])
     if (nerrors) {
 	printf("*** %d error%s detected ***\n", nerrors, 1==nerrors?"":"s");
     } else {
-	puts("All tests passed.");
+	puts("All sami tests passed.");
     }
     CleanupDriverStuff();
     return nerrors?1:0;

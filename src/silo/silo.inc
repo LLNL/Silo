@@ -17,7 +17,7 @@ C
 C cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 
-!...Functions.
+C...Functions.
       EXTERNAL  DBADDCAOPT
       EXTERNAL  DBADDCCMP
       EXTERNAL  DBADDCOPT
@@ -47,13 +47,9 @@ C cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       EXTERNAL  DBGETHDFNMS
       EXTERNAL  DBGETOVRWRT
       EXTERNAL  DBGETQV1
-      EXTERNAL  DBINQBLEN
       EXTERNAL  DBINQCA
-      EXTERNAL  DBINQDTYP
       EXTERNAL  DBINQFILE
       EXTERNAL  DBINQLEN
-      EXTERNAL  DBINQMTYP
-      EXTERNAL  DBINQVTYP
       EXTERNAL  DBMKDIR
       EXTERNAL  DBMKMRGTREE
       EXTERNAL  DBMKOBJECT
@@ -133,13 +129,9 @@ C cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       INTEGER  DBGETHDFNMS
       INTEGER  DBGETOVRWRT
       INTEGER  DBGETQV1
-      INTEGER  DBINQBLEN
       INTEGER  DBINQCA
-      INTEGER  DBINQDTYP
       INTEGER  DBINQFILE
       INTEGER  DBINQLEN
-      INTEGER  DBINQMTYP
-      INTEGER  DBINQVTYP
       INTEGER  DBMKDIR
       INTEGER  DBMKMRGTREE
       INTEGER  DBMKOBJECT
@@ -191,7 +183,7 @@ C cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       INTEGER  DBWRTFL
 
 
-!...Parameters.
+C...Parameters.
       INTEGER  DBCSG_ANGLE_PNLA
       INTEGER  DBCSG_ANGLE_PPA
       INTEGER  DBCSG_BOX_XYXY
@@ -522,7 +514,7 @@ C cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       PARAMETER (SILO_VERS_MAJ=4)
       PARAMETER (SILO_VERS_MIN=10)
-      PARAMETER (SILO_VERS_PAT=4)
+      PARAMETER (SILO_VERS_PAT=3)
       PARAMETER (SILO_VERS_PRE=0)
       PARAMETER (DB_NETCDF=0)
       PARAMETER (DB_PDB=2)
@@ -849,4 +841,4 @@ C cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       PARAMETER (DB_F77NULLSTRING="NULLSTRING")
 
 
-! End.
+C End.

@@ -1,4 +1,4 @@
-# Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+# Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
 # All rights reserved.
 # 
@@ -63,10 +63,6 @@ endif
 
 if FPZIP_NEEDED
 AM_CPPFLAGS += -I$(srcdir)/../fpzip 
-endif
-
-if ZFP_NEEDED
-AM_CPPFLAGS += -I$(srcdir)/../zfp-0.5.0
 endif
 
 noinst_HEADERS = \

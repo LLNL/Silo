@@ -47,13 +47,9 @@
       integer, external :: dbgethdfnms
       integer, external :: dbgetovrwrt
       integer, external :: dbgetqv1
-      integer, external :: dbinqblen
       integer, external :: dbinqca
-      integer, external :: dbinqdtyp
       integer, external :: dbinqfile
       integer, external :: dbinqlen
-      integer, external :: dbinqmtyp
-      integer, external :: dbinqvtyp
       integer, external :: dbmkdir
       integer, external :: dbmkmrgtree
       integer, external :: dbmkobject
@@ -108,7 +104,7 @@
 !...Parameters.
       integer, parameter :: SILO_VERS_MAJ = 4
       integer, parameter :: SILO_VERS_MIN = 10
-      integer, parameter :: SILO_VERS_PAT = 4
+      integer, parameter :: SILO_VERS_PAT = 3
       integer, parameter :: SILO_VERS_PRE = 0
       integer, parameter :: DB_NETCDF = 0
       integer, parameter :: DB_PDB = 2

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -51,7 +51,6 @@ product endorsement purposes.
 */
 #include <stdlib.h>
 #include <string.h>
-#define HAVE_MEMMOVE
 #include <lite_pdb.h> /* below we are using lite_ functions */
 #include <ioperf.h>
 

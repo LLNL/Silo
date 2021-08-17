@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -155,7 +155,7 @@ main(int argc, char *argv[])
     for (i=1; i<argc; i++) {
        if (!strncmp(argv[i], "DB_PDB",6)) {
           fprintf(stderr, "This test only supported on HDF5 driver\n");
-          exit(EXIT_SUCCESS);
+          exit(1);
        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
           driver = StringToDriver(argv[i]);
           filename = "grab.h5";

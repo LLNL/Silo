@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -105,7 +105,7 @@ main(int argc, char *argv[])
     DBClose(dbfile);
 
     CleanupDriverStuff();
-    exit(EXIT_SUCCESS);
+    exit(0);
 }
 /*----------------------------------------------------------------------
  *  Routine                                                   build_ucd3

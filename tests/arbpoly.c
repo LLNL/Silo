@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -234,7 +234,7 @@ main(int argc, char *argv[])
 
             /* same using ph-zonelist of faces only */
             ol = DBMakeOptlist(3);
-            DBAddOption(ol, DBOPT_PHZONELIST, (char *) "phzl");
+            DBAddOption(ol, DBOPT_PHZONELIST, "phzl");
             DBPutUcdmesh(dbfile, "mesh1_phzl", pass, (DBCAS_t) coordnames, coords, LEN(x), 11, 0,
                 NULL, DB_FLOAT, ol);
             DBFreeOptlist(ol);
@@ -246,7 +246,7 @@ main(int argc, char *argv[])
 
             /* same using ph-zonelist with explicit edge list */
             ol = DBMakeOptlist(3);
-            DBAddOption(ol, DBOPT_PHZONELIST, (char *) "phzl2");
+            DBAddOption(ol, DBOPT_PHZONELIST, "phzl2");
             DBPutUcdmesh(dbfile, "mesh1_phzl2", pass, (DBCAS_t) coordnames, coords, LEN(x), 11, 0,
                 NULL, DB_FLOAT, ol);
             DBFreeOptlist(ol);
@@ -653,7 +653,7 @@ main(int argc, char *argv[])
         }
 
         ol = DBMakeOptlist(3);
-        DBAddOption(ol, DBOPT_PHZONELIST, (char *) "phzl");
+        DBAddOption(ol, DBOPT_PHZONELIST, "phzl");
         DBPutUcdmesh(dbfile, "mesh3", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
         DBFreeOptlist(ol);
         DBPutUcdvar1(dbfile, "n3", "mesh3", nvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);
@@ -665,7 +665,7 @@ main(int argc, char *argv[])
             0, nzones-1, 0);
     
         ol = DBMakeOptlist(3);
-        DBAddOption(ol, DBOPT_PHZONELIST, (char *) "phzl_r");
+        DBAddOption(ol, DBOPT_PHZONELIST, "phzl_r");
         DBPutUcdmesh(dbfile, "mesh3r", 3, (DBCAS_t) coordnames, coords, nnodes, nzones, 0, 0, DB_FLOAT, ol);
         DBFreeOptlist(ol);
         DBPutUcdvar1(dbfile, "n3r", "mesh3r", nvar, nnodes, NULL, 0, DB_FLOAT, DB_NODECENT, NULL);

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -99,7 +99,6 @@ extern std::vector<int> nodelist_g, nodecnts_g, nodestarts_g;
 // 
 extern int matnos[];
 extern char *matNames[];
-extern char *matColors[];
 extern std::map<std::string, int> matMap;
 extern std::vector<int> matlist_g;
 
@@ -133,18 +132,6 @@ class EntityClassifier
             const unsigned long long mask = class_masks.at(cname);
             return entity_masks[idx] & mask;
         }
-        bool IsEntityMemberOf(int idx, const std::vector<std::string>& cnames, int& ci) const
-        {
-            for (int i = 0; i < (int) cnames.size(); i++)
-            {
-                if (IsEntityMemberOf(idx, cnames[i]))
-                {
-                    ci = i;
-                    return true;
-                }
-            }
-            return false;
-        }
         int GetNumEntities() const
         {
             return (int) entity_masks.size();
@@ -152,13 +139,13 @@ class EntityClassifier
         const std::string ZoneType(int idx) const
         {
             static const char* zt_classes[] = {
-                "Hex", "Tet", "Wedge", "Prism", "Pyramid", "Polyhedron", // 3D
-                "Quad", "Tri", "Polygon",                                // 2D
-                "Beam",                                                  // 1D
-                "Point"};                                                // 0D
+                "hex", "tet", "wedge", "prism", "pyramid", "polyhedron", // 3D
+                "quad", "tri", "polygon",                                // 2D
+                "beam",                                                  // 1D
+                "point"};                                                // 0D
             for (int i = 0; i < sizeof(zt_classes)/sizeof(zt_classes[0]); i++)
                 if (IsEntityMemberOf(idx, zt_classes[i])) return zt_classes[i];
-            return "Unknown"; 
+            return "unknown"; 
         }
         // Gets list of entities in all specified classes
         void GetEntitiesInClasses(const std::vector<std::string>& cnames, std::vector<int>& elist) const

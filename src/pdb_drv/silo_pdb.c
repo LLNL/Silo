@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -1835,7 +1835,6 @@ db_pdb_InitCallbacks ( DBfile *dbfile )
     /* File operations */
     dbfile->pub.close = db_pdb_close;
     dbfile->pub.module = db_pdb_Filters;
-    dbfile->pub.flush = db_pdb_flush;
 
     /* Directory operations */
     dbfile->pub.cd = db_pdb_SetDir;
@@ -2026,31 +2025,6 @@ db_pdb_close(DBfile *_dbfile)
       PJ_ClearCache();
    }
    return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    db_pdb_flush
- *
- * Purpose:     Flushes a PDB file to disk.
- *
- * Return:      Success:        0
- *              Fail:          -1
- *
- * Programmer: Mark C. Miller, Fri Aug 14 11:47:56 PDT 2015
- *-------------------------------------------------------------------------*/
-SILO_CALLBACK int
-db_pdb_flush(DBfile *_dbfile)
-{
-   int retval = -1;
-   DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
-
-   if (!dbfile)
-      return retval;
-
-   if (lite_PD_flush(dbfile->pdb) == TRUE)
-      retval = 0;
-
-   return retval;
 }
 
 /*-------------------------------------------------------------------------
@@ -2253,7 +2227,6 @@ db_pdb_Create (char const *name, int mode, int target, int opts_set_id, char con
 #ifdef USING_PDB_PROPER
     dbfile->pub.type = DB_PDBP;
 #endif
-    /*db_InitFileScopeGlobals(dbfile);*/
     db_pdb_InitCallbacks((DBfile *) dbfile);
 
     if (NULL == (dbfile->pdb = lite_PD_open((char*)name, "w")))

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -53,7 +53,6 @@ product endorsement purposes.
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <sys/time.h>
 #ifdef _WIN32
   #ifndef WINDOWS_LEAN_AND_MEAN
     #define WINDOWS_LEAN_AND_MEAN
@@ -230,14 +229,14 @@ static int StringToDriver(const char *str)
             if (!got_it)
             {
                 fprintf(stderr, "Unable to determine driver from string \"%s\"\n", tok);
-	        exit(EXIT_FAILURE);
+	        exit(-1);
             }
 
 	    tok = strtok(0, ",)");
 	    if (errno != 0)
 	    {
                 fprintf(stderr, "Unable to determine driver from string \"%s\"\n", tok);
-	        exit(EXIT_FAILURE);
+	        exit(-1);
 	    }
         }
 
@@ -247,25 +246,6 @@ static int StringToDriver(const char *str)
     }
 
     fprintf(stderr, "Unable to determine driver from string \"%s\"\n", str);
-    exit(EXIT_FAILURE);
+    exit(-1);
 }
 
-double GetTime()
-{
-    static double t0 = -1;
-    double t1;
-    struct timeval tv1;
-
-    if (t0<0)
-    {
-        struct timeval tv0;
-        gettimeofday(&tv0, 0);
-        t0 = (double)tv0.tv_sec*1e+6+(double)tv0.tv_usec;
-        return 0;
-    }
-
-    gettimeofday(&tv1, 0);
-    t1 = (double)tv1.tv_sec*1e+6+(double)tv1.tv_usec;
-
-    return t1-t0;
-}

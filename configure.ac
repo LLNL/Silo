@@ -1,4 +1,4 @@
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+dnl Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 dnl LLNL-CODE-425250.
 dnl All rights reserved.
 dnl 
@@ -249,7 +249,6 @@ DEFAULT_BROWSER="browser"
 DEFAULT_SILEX=""
 DEFAULT_HZIP="hzip"
 DEFAULT_FPZIP="fpzip"
-DEFAULT_ZFP="zfp-0.5.0"
 DEFAULT_FORTRAN="fortran"
 DEFAULT_JSON=""
 default_detect_readline="yes"
@@ -533,26 +532,6 @@ AC_ARG_ENABLE(fpzip,
 AC_SUBST(FPZIP)
 if test -n "$FPZIP"; then
     AC_DEFINE(HAVE_FPZIP,1,[Support for Lindstrom float array compression])
-fi
-
-dnl enable Peter Lindstrom's ZFP compression stuff 
-AC_MSG_CHECKING(for zfp)
-if test -d $srcdir/src/zfp-0.5.0; then
-    AC_MSG_RESULT(found)
-    ZFP=$DEFAULT_ZFP
-else
-    AC_MSG_RESULT(zfp compression not available)
-    ZFP=""
-fi
-AC_ARG_ENABLE(zfp,
-    AC_HELP_STRING([--enable-zfp],
-        [enable Lindstrom 1,2,3D array compression @<:@default=yes@:>@]),
-    if test "$enable_zfp" = "no"; then
-        ZFP=""
-    fi)
-AC_SUBST(ZFP)
-if test -n "$ZFP"; then
-    AC_DEFINE(HAVE_ZFP,1,[Support for Lindstrom array compression])
 fi
 
 dnl enable experimental JSON support
@@ -1165,7 +1144,6 @@ AM_CONDITIONAL(FORTRAN_NEEDED, test -n "$FORTRAN")
 AM_CONDITIONAL(SILEX_NEEDED, test -n "$SILEX")
 AM_CONDITIONAL(HZIP_NEEDED, test -n "$HZIP")
 AM_CONDITIONAL(FPZIP_NEEDED, test -n "$FPZIP")
-AM_CONDITIONAL(ZFP_NEEDED, test -n "$ZFP")
 AM_CONDITIONAL(JSON_NEEDED, test -n "$JSON")
 AM_CONDITIONAL(ZLIB_AVAILABLE, test -n "$ZLIB")
 AM_CONDITIONAL(CXX_LINK_NEEDED, test "$enable_shared" = "no" -a \( -n "$FPZIP" -o -n "$HZIP" \))
@@ -1202,9 +1180,6 @@ if test -n "$HZIP"; then
 fi
 if test -n "$FPZIP"; then
   AC_CONFIG_FILES([src/fpzip/Makefile])
-fi
-if test -n "$ZFP"; then
-  AC_CONFIG_FILES([src/zfp-0.5.0/Makefile])
 fi
 if test -n "$HDF5_DRV"; then
   AC_CONFIG_FILES([src/libsiloh5.settings])

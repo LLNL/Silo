@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -83,10 +83,6 @@ be used for advertising or product endorsement purposes.
 #define DBCLOSE_FC       FC_FUNC (dbclose,DBCLOSE)
 #define DBCREATE_FC      FC_FUNC (dbcreate,DBCREATE)
 #define DBINQLEN_FC      FC_FUNC (dbinqlen,DBINQLEN)
-#define DBINQBLEN_FC     FC_FUNC (dbinqblen,DBINQBLEN)
-#define DBINQDTYP_FC     FC_FUNC (dbinqdtyp,DBINQDTYP)
-#define DBINQVTYP_FC     FC_FUNC (dbinqvtyp,DBINQVTYP)
-#define DBINQMTYP_FC     FC_FUNC (dbinqmtyp,DBINQMTYP)
 #define DBMKDIR_FC       FC_FUNC (dbmkdir,DBMKDIR)
 #define DBOPEN_FC        FC_FUNC (dbopen,DBOPEN)
 #define DBPUTFL_FC       FC_FUNC (dbputfl,DBPUTFL)

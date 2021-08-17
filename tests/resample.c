@@ -1,5 +1,5 @@
 /*
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+Copyright (c) 1994 - 2010, Lawrence Livermore National Security, LLC.
 LLNL-CODE-425250.
 All rights reserved.
 
@@ -530,7 +530,7 @@ DBfile *create_file(char *filename, DBquadmesh *qm, driver)
   if (output_file == NULL)
   {
       fprintf (stderr, "Error opening file %s\n", filename);
-      quit_me(EXIT_FAILURE);
+      quit_me(1);
   }
 
   DBPutQuadmesh(output_file, qm->name, NULL, qm->coords, qm->dims, qm->ndims,
@@ -572,7 +572,7 @@ DBfile *open_file(char *filename)
   if (the_file == NULL)
   {
       fprintf (stderr, "Error opening file %s\n", filename);
-      quit_me(EXIT_FAILURE);
+      quit_me(1);
   }
     
   return the_file;
@@ -687,7 +687,7 @@ DBucdmesh **get_mmeshes(char **mmesh_name)
   if (num_Meshes == 0)
   {
    fprintf(stderr, "The file did not have any data to convert.\n");
-   quit_me(EXIT_FAILURE);
+   quit_me(1);
   }
  
   /*
@@ -702,7 +702,7 @@ DBucdmesh **get_mmeshes(char **mmesh_name)
      fprintf(stderr, "\tKeep the number of processes below or equal");
      fprintf(stderr, " to %d.\n", num_Meshes);
    }
-   quit_me(EXIT_FAILURE);
+   quit_me(1);
   }
   else
    for (i = my_rank; i < num_Meshes; i += procs) 
@@ -725,7 +725,7 @@ DBucdmesh **get_mmeshes(char **mmesh_name)
       if (mMesh->meshtypes[i] != DB_UCDMESH)
       {
         fprintf(stderr, "Mesh %d is not an ucd mesh. Cannot handle\n", i);
-        quit_me(EXIT_FAILURE);
+        quit_me(1);
       }
       else
         ucdmesh[j++] = DBGetUcdmesh(the_file, mMesh->meshnames[i]);
@@ -761,13 +761,13 @@ DBucdmesh **get_smeshes(DBtoc *local_TOC)
   if (local_TOC->nucdmesh == 0)
   {
       fprintf(stderr, "The file didn't have a mesh to convert.\n");
-      quit_me(EXIT_FAILURE);
+      quit_me(1);
   }
 
   if (local_TOC->nucdmesh + local_TOC->nucdvar + local_TOC->nmat <=0)
   {
       fprintf(stderr, "The file didn't have any data to convert.\n");
-      quit_me(EXIT_FAILURE);
+      quit_me(1);
   }
   /*
    * Allocate space for the DBucdmesh
@@ -820,7 +820,7 @@ DBucdvar **get_mvars(char **var_name, int *var_types)
       if (var_types[i] != DB_UCDVAR)
       {
         fprintf(stderr, "Variable %d is not an ucd var. Cannot handle\n", i);
-        quit_me(EXIT_FAILURE);
+        quit_me(1);
       }
       else 
       {
@@ -863,7 +863,7 @@ void check_ucdVars(void)
      {
         fprintf(stderr, "nvals = %d (!= 1), exiting program\n",
                 ucdVar[i]->nvals);
-        quit_me(EXIT_FAILURE);
+        quit_me(1);
      }
 
     /*
@@ -876,7 +876,7 @@ void check_ucdVars(void)
        fprintf(stderr, "ucdvar %s is not zone centered, it's %d\n",
                ucdVar[i]->name, ucdVar[i]->centering);
        fprintf(stderr, "\texiting program\n");
-       quit_me(EXIT_FAILURE);
+       quit_me(1);
      } 
   } /* end of for loop */ 
 
@@ -1366,7 +1366,7 @@ void setup_zone_value(Cell_t *cell, DBucdvar **ucd_var,
   else
   {
     fprintf(stderr, "Bad centering value\n");
-    quit_me(EXIT_FAILURE);
+    quit_me(1);
   }
 
 } /* end of setup_zone_value */
