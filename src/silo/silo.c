@@ -262,6 +262,19 @@ struct _cu     _cu;
 struct _dv     _dv;
 struct _mrgt   _mrgt;
 
+static char const *db_static_char_ptr_not_set = "db_static_char_ptr_not_set";
+static void const *db_static_void_ptr_not_set = (void*) "db_static_void_ptr_not_set";
+
+/* magic memory value for optlists */
+#define DBOPT_MAGIC ((unsigned long long)0x5ca1ab1eDa7aBa5eULL)
+
+/* NOT SET values for global and file properties */
+#define DB_MASK_NOT_SET ((unsigned long long)0xAAAAAAAAAAAAAAAAULL)
+#define DB_INTBOOL_NOT_SET ((int) -1)
+#define DB_FLOAT_NOT_SET ((float) FLT_MIN)
+#define DB_CHAR_PTR_NOT_SET ((char const *)db_static_char_ptr_not_set)
+#define DB_VOID_PTR_NOT_SET ((void const *)db_static_void_ptr_not_set)
+
 SILO_Globals_t SILO_Globals = {
     DBAll, /* dataReadMask */
     TRUE,  /* allowOverwrites */
@@ -2679,147 +2692,88 @@ DBUninstall(DBfile *dbfile)
 }
 
 /*----------------------------------------------------------------------
- * Routine:  DBSetDataReadMask2
- *
- * Purpose:  Set and return the data read mask
- *
- * Programmer:  Sean Ahern, Fri Jan 26 17:28:06 PST 2001
- *
- * Description:  This routine sets the data read mask.  It returns the
- *               previous data read mask.  The data read mask is used to
- *               tailor how the various driver functions read their data.
- *               All of them are required to populate the metadata in the
- *               returned structures.  Ordinarily, they also read all of
- *               the "real" data.  If they honor the data read flag (see
- *               DBDataReadFlagHonored()), the user can set, by way of this
- *               function, the mask of "real" data to read.  This allows
- *               the user to decide not to read in the zonelist array of a
- *               UCD mesh, for instance, if he knows that it will not be
- *               useful to him (i.e. constant connectivity over a
- *               time-varying dataset.)
- *
- * Note: Many of these DBSet/Get routines DO NOT include the standard
- * API_BEGIN/API_END macros. This is primarily due to the fact that
- * these calls CANNOT fail. For others, that can fail, we do indeed
- * use the API_BEGIN/API_END macros as per instructions in
- * silo_private.h
- *
- * Modifications:
+ * Purpose: Macro to build set/get global and per-file property
+ * methods. These are designed so that a file's properties are
+ * initially NOT set. So operations on the file will obey
+ * whatever the *current* library global properties are. However,
+ * if a given property is set specifically on the file with a
+ * call to the DBSetXxxFile() method, then that property will
+ * no longer obey *global* library settings and will instead
+ * be forever more controlled only by calls to the DBSetxxxFile()
+ * method. In this way, files "inheret" the old behavior of the
+ * library global settings until they have been specifically set
+ * otherwise. And, this is true, independently for each property.
  *--------------------------------------------------------------------*/
-PUBLIC unsigned long long
-DBSetDataReadMask2(unsigned long long mask)
-{
-    unsigned long long oldmask = SILO_Globals.dataReadMask;
-    SILO_Globals.dataReadMask = mask;
-    return oldmask;
+#define DB_SETGET(Typ,NM,nM,NotSet)                             \
+PUBLIC Typ DBSet ## NM(Typ val)                                 \
+{                                                               \
+    Typ oldVal = SILO_Globals.nM;                               \
+    SILO_Globals.nM = val;                                      \
+    return oldVal;                                              \
+}                                                               \
+                                                                \
+PUBLIC Typ DBGet ## NM(void)                                    \
+{                                                               \
+    return SILO_Globals.nM;                                     \
+}                                                               \
+                                                                \
+static Typ db_SetGet ## NM ## File(DBfile *f, Typ val, int set) \
+{                                                               \
+    Typ retval;                                                 \
+    API_BEGIN("DB(Set|Get)" #NM "File", Typ, -1) {              \
+        if (!f)                                                 \
+            API_ERROR("DBfile*", E_BADARGS);                    \
+        retval = f->pub.file_scope_globals->nM;                 \
+        if (set)                                                \
+            f->pub.file_scope_globals->nM = val;                \
+        if (retval == NotSet)                                   \
+            retval = DBGet ## NM();                             \
+        API_RETURN(retval);                                     \
+    }                                                           \
+    API_END_NOPOP;                                              \
+}                                                               \
+                                                                \
+PUBLIC Typ DBSet ## NM ## File(DBfile *f, Typ val)              \
+{                                                               \
+    return db_SetGet ## NM ## File(f, val, 1);                  \
+}                                                               \
+                                                                \
+PUBLIC Typ DBGet ## NM ## File(DBfile *f)                       \
+{                                                               \
+    return db_SetGet ## NM ## File(f, 0, 0);                    \
 }
 
-/*----------------------------------------------------------------------
- * Routine:  DBGetDataReadMask2
- *
- * Purpose:  Return the current data read mask
- *
- * Programmer:  Sean Ahern, Thu Mar  1 12:02:48 PST 2001
- *
- * Description:  This routine returns the current data read mask.
- *               The data read mask is used to tailor how the various
- *               driver functions read their data.
- *
- * Modifications:
- *--------------------------------------------------------------------*/
-PUBLIC unsigned long long
-DBGetDataReadMask2(void)
-{
-    return SILO_Globals.dataReadMask;
-}
+/* Define global and file-level set/get property methods */
+DB_SETGET(int, AllowOverwrites, allowOverwrites, DB_INTBOOL_NOT_SET) 
+DB_SETGET(int, AllowEmptyObjects, allowEmptyObjects, DB_INTBOOL_NOT_SET) 
+DB_SETGET(int, EnableChecksums, enableChecksums, DB_INTBOOL_NOT_SET) 
+DB_SETGET(int, FriendlyHDF5Names, enableFriendlyHDF5Names, DB_INTBOOL_NOT_SET) 
+DB_SETGET(int, DeprecateWarnings, maxDeprecateWarnings, DB_INTBOOL_NOT_SET) 
+DB_SETGET(int, EnableDarshan, darshanEnabled, DB_INTBOOL_NOT_SET) 
+DB_SETGET(int, AllowLongStrComponents, allowLongStrComponents, DB_INTBOOL_NOT_SET) 
+DB_SETGET(unsigned long long, DataReadMask2, dataReadMask, DB_MASK_NOT_SET) 
+#warning WHAT ABOUT FORCESINGLE SHOWERRORS
 
-/*----------------------------------------------------------------------
- * Routine:  DBSetAllowOverwrites
- *
- * Purpose:  Set and return the allow overwrites flags 
- *
- * Programmer:  Mark C. Miller, August 23, 3005 
- *
- * Description:  This routine sets the flag that controls whether
- *               overwrites are allowed.
- *--------------------------------------------------------------------*/
-PUBLIC int 
-DBSetAllowOverwrites(int allow)
+/* The compression stuff has some custom initialization */
+static void _db_set_compression_params(char **dst, char const *s)
 {
-    int oldAllow = SILO_Globals.allowOverwrites;
-    SILO_Globals.allowOverwrites = allow;
-    return oldAllow;
-}
-
-PUBLIC int 
-DBGetAllowOverwrites()
-{
-    return SILO_Globals.allowOverwrites;
-}
-
-PUBLIC int 
-DBSetAllowOverwritesFile(DBfile *f, int allow)
-{
-    int oldAllow;
-    if (!f) return DBSetAllowOverwrites(allow);
-    oldAllow = f->pub.file_scope_globals->allowOverwrites;
-    f->pub.file_scope_globals->allowOverwrites = allow;
-    return oldAllow;
-}
-
-PUBLIC int 
-DBGetAllowOverwritesFile(DBfile *f)
-{
-    if (!f) return DBGetAllowOverwrites();
-    return f->pub.file_scope_globals->allowOverwrites; 
-}
-
-/*----------------------------------------------------------------------
- * Routine:  DBSetAllowEmptyObjects
- *
- * Purpose:  Set and return the allow empty objects flags 
- *
- * Programmer:  Mark C. Miller, January 9, 2013
- *
- * Description:  This routine sets the flag that controls whether
- *               empty objects are allowed. By default, they are not.
- *--------------------------------------------------------------------*/
-PUBLIC int 
-DBSetAllowEmptyObjects(int allow)
-{
-    int oldAllow = SILO_Globals.allowEmptyObjects;
-    SILO_Globals.allowEmptyObjects = allow;
-    return oldAllow;
-}
-
-PUBLIC int 
-DBGetAllowEmptyObjects()
-{
-    return SILO_Globals.allowEmptyObjects;
-}
-
-/*----------------------------------------------------------------------
- * Routine:  DBSetEnableChecksums
- *
- * Purpose:  Set and return the enable checksums flags 
- *
- * Programmer:  Mark C. Miller, May 1, 2006 
- *
- * Description:  This routine sets the flag that controls whether
- *               checksums are computed on client data.
- *--------------------------------------------------------------------*/
-PUBLIC int 
-DBSetEnableChecksums(int enable)
-{
-    int oldEnable = SILO_Globals.enableChecksums;
-    SILO_Globals.enableChecksums = enable;
-    return oldEnable;
-}
-
-PUBLIC int 
-DBGetEnableChecksums()
-{
-    return SILO_Globals.enableChecksums;
+    if (s && *s == '\0') {
+        if (*dst)
+            FREE(*dst);
+        *dst = ALLOC_N(char, 12);
+        strcpy(*dst, "METHOD=GZIP");
+    }   
+    else if (s) {
+        if (*dst)
+            FREE(*dst);
+        *dst = ALLOC_N(char,strlen(s)+1);
+        strcpy(*dst, s);
+    }
+    else {
+        if (*dst)
+            FREE(*dst);
+        *dst=0;
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -2831,32 +2785,44 @@ DBGetEnableChecksums()
  *
  * Description:  This routine enters the compression method information.
  *--------------------------------------------------------------------*/
-PUBLIC void 
+PUBLIC void
 DBSetCompression(const char *s)
 {
-    if (s && *s == '\0') {
-        if (SILO_Globals.compressionParams)
-            FREE(SILO_Globals.compressionParams);
-        SILO_Globals.compressionParams = ALLOC_N(char, 12);
-        strcpy(SILO_Globals.compressionParams, "METHOD=GZIP");
-    }   
-    else if (s) {
-        if (SILO_Globals.compressionParams)
-            FREE(SILO_Globals.compressionParams);
-        SILO_Globals.compressionParams=ALLOC_N(char,strlen(s)+1);
-        strcpy(SILO_Globals.compressionParams, s);
-    }
-    else {
-        if (SILO_Globals.compressionParams)
-            FREE(SILO_Globals.compressionParams);
-        SILO_Globals.compressionParams=0;
-    }
+    return _db_set_compression_params(&SILO_Globals.compressionParams, s);
 }
 
 PUBLIC char const * 
 DBGetCompression()
 {
     return SILO_Globals.compressionParams;
+}
+
+static char const *db_SetGetCompressionFile(DBfile *f, char const *val, int set)
+{
+    char const *retval;
+    API_BEGIN("DB(Set|Get)CompressionFile", char const *, 0) {
+        if (!f)
+            API_ERROR("DBfile*", E_BADARGS);
+        retval = f->pub.file_scope_globals->compressionParams;
+        if (set)
+            _db_set_compression_params(&(f->pub.file_scope_globals->compressionParams), val);
+        if (retval == DB_CHAR_PTR_NOT_SET)
+            retval = DBGetCompression();
+        API_RETURN(retval);
+    }
+    API_END_NOPOP;
+}
+
+PUBLIC void
+DBSetCompressionFile(DBfile *f, char const *s)
+{
+    db_SetGetCompressionFile(f, s, 1);
+}
+
+PUBLIC char const * 
+DBGetCompressionFile(DBfile *f)
+{
+    return db_SetGetCompressionFile(f, 0, 0);
 }
 
 PUBLIC int
@@ -2873,31 +2839,6 @@ DBFreeCompressionResources(DBfile *dbfile, const char *meshname)
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
-
-
-/*----------------------------------------------------------------------
- * Routine:  DBSetFriendlyHDF5Names
- *
- * Purpose:  Set flag to create friendly HDF5 dataset names 
- *
- * Programmer:  Mark C. Miller, Thu Apr 19 15:17:05 PDT 2007 
- *
- * Description:  Sets flag for HDF5 driver to control production of
- * friendly dataset names. Returns value of old setting.
- *--------------------------------------------------------------------*/
-PUBLIC int
-DBSetFriendlyHDF5Names(int enable)
-{
-    int oldEnable = SILO_Globals.enableFriendlyHDF5Names;
-    SILO_Globals.enableFriendlyHDF5Names = enable;
-    return oldEnable;
-}
-
-PUBLIC int 
-DBGetFriendlyHDF5Names()
-{
-    return SILO_Globals.enableFriendlyHDF5Names;
 }
 
 #define CHECK_FOR_FRIENDLY(ON,SU)					\
@@ -2993,82 +2934,6 @@ DBGuessHasFriendlyHDF5Names(DBfile *f)
 }
 
 /*----------------------------------------------------------------------
- * Routine:  DBSetDeprecateWarnings
- *
- * Purpose:  Set number of deprecate warnings Silo should print.
- *           Default is 3. Setting to zero effectively disables.
- *
- * Programmer:  Mark C. Miller, Thu Oct 11 16:50:12 PDT 2007
- *
- *--------------------------------------------------------------------*/
-PUBLIC int
-DBSetDeprecateWarnings(int count)
-{
-    int oldCount = SILO_Globals.maxDeprecateWarnings;
-    SILO_Globals.maxDeprecateWarnings = count;
-    return oldCount;
-}
-
-PUBLIC int
-DBGetDeprecateWarnings()
-{
-    return SILO_Globals.maxDeprecateWarnings;
-}
-
-/*----------------------------------------------------------------------
- * Routine:  DBSetEnableDarshan
- *
- * Purpose:  Set flag to create friendly HDF5 dataset names 
- *
- * Programmer: Mark C. Miller, Wed Nov  5 09:32:43 PST 2014
- *
- * Description:  Sets flag to run with Darshan instrumentaion library
- * enabled.
- *--------------------------------------------------------------------*/
-PUBLIC int
-DBSetEnableDarshan(int enable)
-{
-    int oldEnable = SILO_Globals.darshanEnabled;
-#ifdef __DARSHAN_LOG_FORMAT_H
-    SILO_Globals.darshanEnabled = enable;
-#endif
-    return oldEnable;
-}
-
-PUBLIC int
-DBGetEnableDarshan()
-{
-    return SILO_Globals.darshanEnabled;
-}
-
-/*----------------------------------------------------------------------
- * Routine:  DBSetAllowLongStrComponents
- *
- * Purpose:  Set and return the allow long Str components flag
- *
- * Programmer:  Mark C. Miller, April 2, 2015
- *
- * Description:  This routine sets the flag that controls whether
- *               long Str components. By default, they are not.
- *               Note that long Str components can badly break older
- *               (pre-4.10.3) Silo library's and tool's ability
- *               to read such objects resulting in SEGVs.
- *--------------------------------------------------------------------*/
-PUBLIC int 
-DBSetAllowLongStrComponents(int allow)
-{
-    int oldAllow = SILO_Globals.allowLongStrComponents;
-    SILO_Globals.allowLongStrComponents = allow;
-    return oldAllow;
-}
-
-PUBLIC int 
-DBGetAllowLongStrComponents()
-{
-    return SILO_Globals.allowLongStrComponents;
-}
-
-/*----------------------------------------------------------------------
  * Routine:  DBSetUnknownDriverPriority
  *
  * Purpose:  Set priority order of drivers used by unknown driver. 
@@ -3142,7 +3007,7 @@ DBUnregisterAllFileOptionsSets()
 
     for (i = 0; i < MAX_FILE_OPTIONS_SETS; i++)
         SILO_Globals.fileOptionsSets[i] = 0;
-} 
+}
 
 const int* db_get_used_file_options_sets_ids()
 {
@@ -3792,8 +3657,9 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
         }
         if (!ss)
         {
-            if (!SILO_Globals.allowEmptyObjects)
+            if (!DBGetAllowEmptyObjects())
                 API_ERROR("string literal component", E_BADARGS);
+            tmp = malloc(10);
             sprintf(tmp, "'<s>null'");
         }
         else
@@ -3884,6 +3750,7 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
  *    messages would work correctly.
  *
  *-------------------------------------------------------------------------*/
+#warning ADD DBSHOWERRORSFILE
 PUBLIC void
 DBShowErrors(int level, void(*func)(char*))
 {
@@ -3898,6 +3765,7 @@ DBShowErrors(int level, void(*func)(char*))
 	SILO_Globals._db_err_level_drvr = DB_ALL;
     }
 
+#warning GET RID OF SUSPEND/RESUME STUFF
     switch (level) {
         case DB_SUSPEND:
             if (nested_suspend++ == 0)
@@ -4245,39 +4113,46 @@ DBFileName(const DBfile *dbfile)
     return name;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    DBMakeBufinfo / DBFreeBufinfo
- *
- * Purpose:     Functions to allocate / free a DBbufinfo object used for
- *              processing in-memory (core) files.
- *
- * Mark C. Miller, Wed Jun 15 13:55:28 PDT 2016
- *------------------------------------------------------------------------- */
-PUBLIC DBbufinfo *
-DBMakeBufinfo(void *buf, size_t size, size_t max_size, unsigned int flags)
+static void
+db_InitFileGlobals(DBfile *dbfile)
 {
-    DBbufinfo *retval = 0;
-    API_BEGIN("DBMakeBufinfo", DBbufinfo *, NULL) {
-        retval  = malloc(sizeof(DBbufinfo));
-        if (!retval)
-            API_ERROR("DBMakeBufinfo", E_NOMEM);
-        retval->buf = buf;
-        retval->size = size;
-        retval->max_size = max_size;
-        retval->flags = flags;
-        retval->ref_count = 0;
+    int i;
 
-        API_RETURN(retval);
-    }
-    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
-}
+    dbfile->pub.file_scope_globals = (SILO_Globals_t*) malloc(sizeof(SILO_Globals_t));
+    /* since most entries are ints and we want to init them to the NOT-SET value
+       this call averts *some* mistakes where SILO_Globals_t might get updated with
+       new int members but failed to be explicitly initialize here. Setting to all
+       0xFF has effect of setting all ints to -1, the DB_INTBOOL_NOT_SET value. */
+    memset(dbfile->pub.file_scope_globals, 0xFF, sizeof(SILO_Globals_t));
 
-PUBLIC int
-DBFreeBufinfo(DBbufinfo *binfo)
-{
-    if (!binfo) return -1;
-    free(binfo);
-    return 1;
+    /* Initialize to NOT-SET values so that, initially, a file is set to
+       inheret *and* track all behaviors from Silo's globals. The first time
+       any of these values are changed to a NOT_SET value, then forevermore, 
+       that particular behavior for the file */
+    dbfile->pub.file_scope_globals->dataReadMask            = DB_MASK_NOT_SET;
+    dbfile->pub.file_scope_globals->allowOverwrites         = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->allowEmptyObjects       = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->enableChecksums         = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->enableFriendlyHDF5Names = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->enableGrabDriver        = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->darshanEnabled          = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->allowLongStrComponents  = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->maxDeprecateWarnings    = DB_INTBOOL_NOT_SET;
+#warning ADD compressionMinSize
+    dbfile->pub.file_scope_globals->compressionMinratio     = DB_FLOAT_NOT_SET;
+#warning CORRECT INITIALIZATION OF compressionErrmode
+    dbfile->pub.file_scope_globals->compressionErrmode      = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->compatabilityMode       = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->compressionParams       = DB_CHAR_PTR_NOT_SET;
+    dbfile->pub.file_scope_globals->_db_err_level           = DB_INTBOOL_NOT_SET;
+    dbfile->pub.file_scope_globals->_db_err_func            = DB_VOID_PTR_NOT_SET;
+    dbfile->pub.file_scope_globals->_db_err_level_drvr      = DB_INTBOOL_NOT_SET;
+
+    /* Jstk only relevant for lib as a whole, not specific to a file */
+    dbfile->pub.file_scope_globals->Jstk = 0;
+
+    for (i = 0; i < MAX_FILE_OPTIONS_SETS; i++)
+        dbfile->pub.file_scope_globals->fileOptionsSets[i] = 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -4478,6 +4353,7 @@ DBOpenReal(const char *name, int type, int mode)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
+        db_InitFileGlobals(dbfile);
         db_register_file(dbfile, &filestate, mode!=DB_READ);
 
         /*
@@ -4559,7 +4435,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
     DBfile        *dbfile;
     int            fileid, i, n;
     int            origtype = type;
-    int            opts_set_id;
+    int            opts_set_id = 0;
     db_silo_stat_t filestate;
 
     API_BEGIN("DBCreate", DBfile *, NULL) {
@@ -4616,6 +4492,7 @@ DBCreateReal(const char *name, int mode, int target, const char *info, int type)
             API_RETURN(NULL);
         }
         dbfile->pub.fileid = fileid;
+        db_InitFileGlobals(dbfile);
         db_silo_stat(name, &filestate, opts_set_id);
         db_register_file(dbfile, &filestate, 1);
 
@@ -4697,6 +4574,7 @@ DBClose(DBfile *dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (NULL == dbfile->pub.close)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
+#warning IS ORDER OF OPS CORRECT HERE
         id = dbfile->pub.fileid;
         if (id >= 0 && id < DB_NFILES)
             _db_fstatus[id] = 0;
@@ -4706,6 +4584,7 @@ DBClose(DBfile *dbfile)
         db_unregister_file(dbfile);
 
         retval = (dbfile->pub.close) (dbfile);
+        free(dbfile->pub.file_scope_globals);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -5933,7 +5812,7 @@ DBWriteObject(DBfile *dbfile, DBobject const *obj, int freemem)
             API_ERROR("DBWriteObject", E_GRABBED) ; 
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, obj->name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, obj->name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (!dbfile->pub.w_obj)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -6069,7 +5948,7 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
             API_ERROR("DBWriteComponent", E_GRABBED) ;
         if (!obj)
             API_ERROR("object pointer", E_BADARGS);
-        if (SILO_Globals.allowEmptyObjects)
+        if (DBGetAllowEmptyObjectsFile(dbfile))
         {
             if (nd<=0) API_RETURN(0);
             if (!count) API_RETURN(0);
@@ -6085,7 +5964,7 @@ DBWriteComponent(DBfile *dbfile, DBobject *obj, char const *comp_name,
 #if 0
         /* We don't know what name to pass to DBInqVarExists here because it
            is the driver that knows how to construct component names */
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, obj->name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, obj->name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
 #endif
         if (!prefix || !*prefix)
@@ -6170,17 +6049,17 @@ DBWrite(DBfile *dbfile, char const *vname, void const *var, int const *dims,
         if (strncmp("/.silo/#", vname, 8) != 0 &&
             db_VariableNameValid(vname) == 0)
             API_ERROR("variable name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (ndims < 0)
             API_ERROR("ndims", E_BADARGS);
-        if (ndims == 0 && !SILO_Globals.allowEmptyObjects)
+        if (ndims == 0 && !DBGetAllowEmptyObjectsFile(dbfile))
             API_ERROR("ndims==0", E_EMPTYOBJECT);
         if (!dims && ndims)
             API_ERROR("dims", E_BADARGS);
         for(nvals=ndims>0?1:0,i=0;i<ndims;i++)
             nvals *= dims[i];
-        if (nvals == 0 && !SILO_Globals.allowEmptyObjects)
+        if (nvals == 0 && !DBGetAllowEmptyObjectsFile(dbfile))
             API_ERROR("Zero length write attempted", E_EMPTYOBJECT);
         if (db_FullyDeprecatedConvention(vname))
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -7793,7 +7672,7 @@ DBPutCompoundarray(
             API_ERROR("array name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("array name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nelems < 0)
             API_ERROR("nelems<0", E_BADARGS);
@@ -7808,7 +7687,7 @@ DBPutCompoundarray(
             if (!values)
                 API_ERROR("values=0", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nelems=0", E_EMPTYOBJECT);
@@ -7879,7 +7758,7 @@ DBPutCurve(
             API_ERROR("curve name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("curve name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (npts < 0)
             API_ERROR("npts<0", E_BADARGS);
@@ -7909,7 +7788,7 @@ DBPutCurve(
 #endif
             }
         }
-        else if (!SILO_Globals.allowEmptyObjects &&
+        else if (!DBGetAllowEmptyObjectsFile(dbfile) &&
                  !DBGetOption(opts, DBOPT_REFERENCE))
         {
             /* this is an empty object but we don't know if it was intentional */
@@ -7964,7 +7843,7 @@ DBPutDefvars(
             API_ERROR("defvars name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("defvars name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (ndefs < 0)
             API_ERROR("ndefs", E_BADARGS);
@@ -7977,7 +7856,7 @@ DBPutDefvars(
             if (!defns)
                 API_ERROR("defns=0", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("ndefs=0", E_EMPTYOBJECT);
@@ -8040,7 +7919,7 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
             API_ERROR("facelist name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("facelist name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nfaces < 0)
             API_ERROR("nfaces<0", E_BADARGS);
@@ -8065,7 +7944,7 @@ DBPutFacelist(DBfile *dbfile, const char *name, int nfaces, int ndims,
             if (origin != 0 && origin != 1)
                 API_ERROR("origin", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nfaces=0", E_EMPTYOBJECT);
@@ -8154,7 +8033,7 @@ DBPutMaterial(
             API_ERROR("material name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("material name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmat < 0)
             API_ERROR("nmat<0", E_BADARGS);
@@ -8190,7 +8069,7 @@ DBPutMaterial(
                     API_ERROR("mix_vf=0", E_BADARGS);
             }
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             API_ERROR("nmat=0", E_EMPTYOBJECT);
         }
@@ -8269,7 +8148,7 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
             API_ERROR("matspecies name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("matspecies name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmat < 0)
             API_ERROR("nmat<0", E_BADARGS);
@@ -8304,7 +8183,7 @@ DBPutMatspecies(DBfile *dbfile, const char *name, const char *matname,
             if (!mix_speclist && mixlen)
                 API_ERROR("mix_speclist", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             API_ERROR("dims[i]==0 for all i || nspecies_mf==0", E_EMPTYOBJECT);
         }
@@ -8373,7 +8252,7 @@ DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
             API_ERROR("multimesh name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("multimesh name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmesh < 0)
             API_ERROR("nmesh", E_BADARGS);
@@ -8387,7 +8266,7 @@ DBPutMultimesh(DBfile *dbfile, char const *name, int nmesh,
                  !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
                 API_ERROR("mesh types", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nmesh==0", E_EMPTYOBJECT);
@@ -8508,7 +8387,7 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
             API_ERROR("multivar name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("multivar name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nvar < 0)
             API_ERROR("nvar", E_BADARGS);
@@ -8522,7 +8401,7 @@ DBPutMultivar(DBfile *dbfile, const char *name, int nvar,
                  !DBGetOption(optlist, DBOPT_MB_BLOCK_TYPE)))
                 API_ERROR("vartypes", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nvar==0", E_EMPTYOBJECT);
@@ -8579,7 +8458,7 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
             API_ERROR("multimat name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("multimat name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nmats < 0)
             API_ERROR("nmats", E_BADARGS);
@@ -8590,7 +8469,7 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
                   !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
                 API_ERROR("material-names", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nmats==0", E_EMPTYOBJECT);
@@ -8653,7 +8532,7 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
             API_ERROR("multimatspecies name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("multimatspecies name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nspec < 0)
             API_ERROR("nspec", E_BADARGS);
@@ -8664,7 +8543,7 @@ DBPutMultimatspecies(DBfile *dbfile, const char *name, int nspec,
                   !DBGetOption(optlist, DBOPT_MB_BLOCK_NS))))
                 API_ERROR("species-names", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nspec==0", E_EMPTYOBJECT);
@@ -8726,7 +8605,7 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DBVCP2_t coords,
             API_ERROR("pointmesh name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("pointmesh name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nels < 0)
             API_ERROR("nels<0", E_BADARGS);
@@ -8741,7 +8620,7 @@ DBPutPointmesh(DBfile *dbfile, const char *name, int ndims, DBVCP2_t coords,
             if (!coords)
                 API_ERROR("coords=0 || coords[i]=0 for some i", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             API_ERROR("nels==0", E_EMPTYOBJECT);
         }
@@ -8798,7 +8677,7 @@ DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("pointvar name", E_BADARGS);
         if (db_VariableNameValid(vname) == 0)
             API_ERROR("pointvar name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nels < 0)
             API_ERROR("nels<0", E_BADARGS);
@@ -8816,7 +8695,7 @@ DBPutPointvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             if (db_VariableNameValid(mname) == 0)
                 API_ERROR("pointmesh name", E_INVALIDNAME);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             API_ERROR("nels=0", E_EMPTYOBJECT);
         }
@@ -8917,7 +8796,7 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char const * const *coordnames,
             API_ERROR("quadmesh name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("quadmesh name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if ((coordtype != DB_COLLINEAR) && (coordtype != DB_NONCOLLINEAR))
             API_ERROR("coordtype must be DB_COLLINEAR or DB_NONCOLLINEAR", E_BADARGS);
@@ -8941,7 +8820,7 @@ DBPutQuadmesh(DBfile *dbfile, const char *name, char const * const *coordnames,
             if (!coords)
                 API_ERROR("coords==0 || coords[i]==0", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't think it was intentional */
             API_ERROR("dims[i]==0 for all i", E_EMPTYOBJECT);
@@ -9008,7 +8887,7 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("quadvar name", E_BADARGS);
         if (db_VariableNameValid(vname) == 0)
             API_ERROR("quadvar name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (!mname || !*mname)
             API_ERROR("quadmesh name", E_BADARGS);
@@ -9052,7 +8931,7 @@ DBPutQuadvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             if (!mixvars && mixlen)
                 API_ERROR("mixvars", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't think it was intentional */
             API_ERROR("ndims=0", E_EMPTYOBJECT);
@@ -9168,7 +9047,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
             API_ERROR("UCDmesh name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("UCDmesh name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (ndims < 0)
             API_ERROR("ndims<0", E_BADARGS);
@@ -9210,7 +9089,7 @@ DBPutUcdmesh(DBfile *dbfile, const char *name, int ndims,
                 API_ERROR("no zonelist or facelist specified", E_BADARGS);
             }
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("ndims==0 || nnodes==0", E_EMPTYOBJECT);
@@ -9265,7 +9144,7 @@ DBPutUcdsubmesh(DBfile *dbfile, const char *name, const char *parentmesh,
             API_ERROR("mesh name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("mesh name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (!parentmesh || !*parentmesh)
             API_ERROR("parent mesh name", E_BADARGS);
@@ -9340,7 +9219,7 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             API_ERROR("UCDvar name", E_BADARGS);
         if (db_VariableNameValid(vname) == 0)
             API_ERROR("UCDvar name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (!mname || !*mname)
             API_ERROR("UCDmesh name", E_BADARGS);
@@ -9373,7 +9252,7 @@ DBPutUcdvar(DBfile *dbfile, const char *vname, const char *mname, int nvars,
             if (mixlen && !mixvars)
                 API_ERROR("mixvars=0 || mixvars[i]=0", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nvars=0 || nels==0", E_EMPTYOBJECT);
@@ -9478,7 +9357,7 @@ DBPutZonelist(DBfile *dbfile, const char *name, int nzones, int ndims,
             API_ERROR("zonelist name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("zonelist name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nzones < 0)
             API_ERROR("nzones", E_BADARGS);
@@ -9499,7 +9378,7 @@ DBPutZonelist(DBfile *dbfile, const char *name, int nzones, int ndims,
             if (!shapecnt)
                 API_ERROR("shapecnt=0", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nzones=0", E_EMPTYOBJECT);
@@ -9565,7 +9444,7 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
             API_ERROR("zonelist name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("zonelist name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nzones < 0)
             API_ERROR("nzones", E_BADARGS);
@@ -9595,7 +9474,7 @@ DBPutZonelist2(DBfile *dbfile, const char *name, int nzones, int ndims,
 #warning HI AND LO OFFSET NOT VALID IN PRESENCE OF EXPLICIT GHOST LABELS
 #endif
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nzones=0", E_EMPTYOBJECT);
@@ -9652,7 +9531,7 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
             API_ERROR("zonelist name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("zonelist name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nfaces < 0)
             API_ERROR("nfaces<0", E_BADARGS);
@@ -9684,7 +9563,7 @@ DBPutPHZonelist(DBfile *dbfile, const char *name,
                     API_ERROR("facelist==0", E_BADARGS);
             }
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nfaces==0", E_EMPTYOBJECT);
@@ -9735,7 +9614,7 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
             API_ERROR("CSGmesh name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("CSGmesh name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nbounds < 0)
             API_ERROR("nbounds<0", E_BADARGS);
@@ -9754,7 +9633,7 @@ DBPutCsgmesh(DBfile *dbfile, const char *name, int ndims,
             if (db_VariableNameValid(zonel_name) == 0)
                 API_ERROR("zonelist name", E_INVALIDNAME);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             API_ERROR("nbounds==0 || ndims==0 || lcoeffs==0", E_EMPTYOBJECT);
         }
@@ -9843,7 +9722,7 @@ DBPutCSGZonelist(DBfile *dbfile, const char *name, int nregs,
             API_ERROR("zonelist name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("zonelist name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nzones)
         {
@@ -9862,7 +9741,7 @@ DBPutCSGZonelist(DBfile *dbfile, const char *name, int nregs,
             if ((xforms && lxforms <= 0) || (!xforms && lxforms > 0))
                 API_ERROR("xforms and lxforms", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             /* this is an empty object but we don't know if it was intentional */
             API_ERROR("nregs==0 || nzones==0", E_EMPTYOBJECT);
@@ -9949,7 +9828,7 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
             API_ERROR("CSGvar name", E_BADARGS);
         if (db_VariableNameValid(vname) == 0)
             API_ERROR("CSGvar name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, vname))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, vname))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nvals < 0)
             API_ERROR("nvals<0", E_BADARGS);
@@ -9971,7 +9850,7 @@ DBPutCsgvar(DBfile *dbfile, const char *vname, const char *meshname,
             if (!(centering == DB_ZONECENT || centering == DB_BNDCENT)) 
                 API_ERROR("centering", E_BADARGS);
         }
-        else if (!SILO_Globals.allowEmptyObjects)
+        else if (!DBGetAllowEmptyObjectsFile(dbfile))
         {
             API_ERROR("nvars=0 || nvals=0", E_EMPTYOBJECT);
         }
@@ -12868,6 +12747,13 @@ db_DriverTypeAndFileOptionsSetId(int driver, int *type, int *_opts_set_id)
 
     if (driver > DB_NFORMATS)
     {
+
+#warning TURN OFF WHEN FROM UNKNOWN DRIVER
+#if 0
+        DEPRECATE_MSG("File options sets", 4, 11,
+            "DB_ADVANCED_OPTIONS flag in DBOpen/DBCreate");
+#endif
+
         opts_set_id = (driver&0x1F800)>>11;
 #ifdef DB_HDF5X
         if (theType == DB_HDF5X)
@@ -14054,7 +13940,7 @@ DBPutMrgtree(DBfile *dbfile, char const *name, char const *mesh_name,
             API_ERROR("mesh_name", E_BADARGS);
         if (db_VariableNameValid(mesh_name) == 0)
             API_ERROR("mesh_name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (NULL == dbfile->pub.p_mrgt)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
@@ -14106,7 +13992,7 @@ DBPutGroupelmap(DBfile *dbfile, const char *name,
             API_ERROR("groupel map name", E_BADARGS);
         if (db_VariableNameValid(name) == 0)
             API_ERROR("groupel map name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (num_segments < 0)
             API_ERROR("num_segments", E_BADARGS);
@@ -14170,7 +14056,7 @@ DBPutMrgvar(DBfile *dbfile, const char *name, const char *mrgt_name,
             API_ERROR("mrgt_name", E_BADARGS);
         if (db_VariableNameValid(mrgt_name) == 0)
             API_ERROR("mrgt_name", E_INVALIDNAME);
-        if (!SILO_Globals.allowOverwrites && DBInqVarExists(dbfile, name))
+        if (!DBGetAllowOverwritesFile(dbfile) && DBInqVarExists(dbfile, name))
             API_ERROR("overwrite not allowed", E_NOOVERWRITE);
         if (nregns < 0)
             API_ERROR("nregns", E_BADARGS);
