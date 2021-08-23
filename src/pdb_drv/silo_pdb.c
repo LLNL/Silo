@@ -3351,15 +3351,15 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
     DEFINE_OBJ("mixlen",      &tmpmm.mixlen,      DB_INT);
     DEFINE_OBJ("datatype",    &tmpmm.datatype,    DB_INT);
 
-    if (SILO_Globals.dataReadMask & DBMatMatnos)
+    if (DBGetDataReadMask2File(_dbfile) & DBMatMatnos)
         DEFALL_OBJ("matnos",      &tmpmm.matnos,      DB_INT);
-    if (SILO_Globals.dataReadMask & DBMatMatnames)
+    if (DBGetDataReadMask2File(_dbfile) & DBMatMatnames)
         DEFALL_OBJ("matnames",    &tmpnames,        DB_CHAR);
-    if (SILO_Globals.dataReadMask & DBMatMatcolors)
+    if (DBGetDataReadMask2File(_dbfile) & DBMatMatcolors)
         DEFALL_OBJ("matcolors",    &tmpcolors,        DB_CHAR);
-    if (SILO_Globals.dataReadMask & DBMatMatlist)
+    if (DBGetDataReadMask2File(_dbfile) & DBMatMatlist)
         DEFALL_OBJ("matlist",     &tmpmm.matlist,     DB_INT);
-    if (SILO_Globals.dataReadMask & DBMatMixList)
+    if (DBGetDataReadMask2File(_dbfile) & DBMatMixList)
     {
         DEFALL_OBJ("mix_mat",     &tmpmm.mix_mat,     DB_INT);
         DEFALL_OBJ("mix_next",    &tmpmm.mix_next,    DB_INT);
@@ -3496,9 +3496,9 @@ db_pdb_GetMatspecies (DBfile *_dbfile,   /*DB file pointer */
    DEFINE_OBJ("mixlen", &tmpmm.mixlen, DB_INT);
    DEFALL_OBJ("mix_speclist", &tmpmm.mix_speclist, DB_INT);
    DEFINE_OBJ("guihide", &tmpmm.guihide, DB_INT);
-   if (SILO_Globals.dataReadMask & DBMatMatnames)
+   if (DBGetDataReadMask2File(_dbfile) & DBMatMatnames)
        DEFALL_OBJ("species_names",    &tmpnames,        DB_CHAR);
-   if (SILO_Globals.dataReadMask & DBMatMatcolors)
+   if (DBGetDataReadMask2File(_dbfile) & DBMatMatcolors)
        DEFALL_OBJ("speccolors",    &tmpcolors,        DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, objname, &tmp_obj, DB_MATSPECIES) < 0)
@@ -3710,7 +3710,7 @@ db_pdb_GetCurve (DBfile *_dbfile, char const *name)
    /*
     * Read the x and y arrays.
     */
-   if (SILO_Globals.dataReadMask & DBCurveArrays)
+   if (DBGetDataReadMask2File(_dbfile) & DBCurveArrays)
    {
       if (cu->reference && (cu->x || cu->y)) {
          db_perror ("x and y not NULL", E_BADARGS, me) ;
@@ -4146,7 +4146,7 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
            lneighbors += mmadj->nneighbors[i];
        }
 
-       if (mmadj->lnodelists && (SILO_Globals.dataReadMask & DBMMADJNodelists))
+       if (mmadj->lnodelists && (DBGetDataReadMask2File(_dbfile) & DBMMADJNodelists))
        {
           mmadj->nodelists = ALLOC_N(int *, lneighbors); 
           offsetmapn = ALLOC_N(int, mmadj->nblocks);
@@ -4159,7 +4159,7 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
           }
        }
 
-       if (mmadj->lzonelists && (SILO_Globals.dataReadMask & DBMMADJZonelists))
+       if (mmadj->lzonelists && (DBGetDataReadMask2File(_dbfile) & DBMMADJZonelists))
        {
           mmadj->zonelists = ALLOC_N(int *, lneighbors); 
           offsetmapz = ALLOC_N(int, mmadj->nblocks);
@@ -4181,11 +4181,11 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
           a single call. But then we'd have to split it into separate
           arrays duplicating memory */
        for (i = 0; (i < tmpnmesh) &&
-                   (SILO_Globals.dataReadMask & (DBMMADJNodelists|DBMMADJZonelists)); i++)
+                   (DBGetDataReadMask2File(_dbfile) & (DBMMADJNodelists|DBMMADJZonelists)); i++)
        {
           int blockno = block_map ? block_map[i] : i;
 
-          if (mmadj->lnodelists && (SILO_Globals.dataReadMask & DBMMADJNodelists))
+          if (mmadj->lnodelists && (DBGetDataReadMask2File(_dbfile) & DBMMADJNodelists))
           {
              tmpoff = offsetmapn[blockno];
              for (j = 0; j < mmadj->nneighbors[blockno]; j++)
@@ -4210,7 +4210,7 @@ db_pdb_GetMultimeshadj (DBfile *_dbfile, char const *objname, int nmesh,
              }
           }
 
-          if (mmadj->lzonelists && (SILO_Globals.dataReadMask & DBMMADJZonelists))
+          if (mmadj->lzonelists && (DBGetDataReadMask2File(_dbfile) & DBMMADJZonelists))
           {
              tmpoff = offsetmapz[blockno];
              for (j = 0; j < mmadj->nneighbors[blockno]; j++)
@@ -4581,9 +4581,9 @@ db_pdb_GetMultimatspecies (DBfile *_dbfile, char const *objname)
       DEFINE_OBJ("guihide", &tmpmms.guihide, DB_INT);
       DEFINE_OBJ("nmat", &tmpmms.nmat, DB_INT);
       DEFALL_OBJ("nmatspec", &tmpmms.nmatspec, DB_INT);
-      if (SILO_Globals.dataReadMask & DBMatMatnames)
+      if (DBGetDataReadMask2File(_dbfile) & DBMatMatnames)
          DEFALL_OBJ("species_names", &tmpspecnames, DB_CHAR);
-      if (SILO_Globals.dataReadMask & DBMatMatcolors)
+      if (DBGetDataReadMask2File(_dbfile) & DBMatMatcolors)
          DEFALL_OBJ("speccolors", &tmpcolors, DB_CHAR);
       DEFALL_OBJ("file_ns", &tmpmms.file_ns, DB_CHAR);
       DEFALL_OBJ("block_ns", &tmpmms.block_ns, DB_CHAR);
@@ -4711,7 +4711,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    DEFINE_OBJ("guihide", &tmppm.guihide, DB_INT);
    DEFALL_OBJ("mrgtree_name", &tmppm.mrgtree_name, DB_CHAR);
 
-   if (SILO_Globals.dataReadMask & DBPMCoords)
+   if (DBGetDataReadMask2File(_dbfile) & DBPMCoords)
    {
        DEFALL_OBJ("coord0", &tmppm.coords[0], DB_FLOAT);
        DEFALL_OBJ("coord1", &tmppm.coords[1], DB_FLOAT);
@@ -4725,7 +4725,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
    DEFALL_OBJ("units1", &tmppm.units[1], DB_CHAR);
    DEFALL_OBJ("units2", &tmppm.units[2], DB_CHAR);
 
-   if (SILO_Globals.dataReadMask & DBPMGhostNodeLabels)
+   if (DBGetDataReadMask2File(_dbfile) & DBPMGhostNodeLabels)
        DEFALL_OBJ("ghost_node_labels", &tmppm.ghost_node_labels, DB_CHAR);
    DEFALL_OBJ("alt_nodenum_vars",  &tmpannums,  DB_CHAR);
 
@@ -4746,7 +4746,7 @@ db_pdb_GetPointmesh (DBfile *_dbfile, char const *objname)
     *  associated with this variable.
     */
    pm->gnznodtype = tmppm.gnznodtype?tmppm.gnznodtype:DB_INT;
-   if (SILO_Globals.dataReadMask & DBPMGlobNodeNo) {
+   if (DBGetDataReadMask2File(_dbfile) & DBPMGlobNodeNo) {
       INIT_OBJ(&tmp_obj);
       DEFALL_OBJ("gnodeno", &tmppm.gnodeno, pm->gnznodtype);
       pm->gnodeno = 0;
@@ -4872,7 +4872,7 @@ db_pdb_GetPointvar (DBfile *_dbfile, char const *objname)
     *  associated with this variable.
     */
 
-   if (mv->ndims>0 && mv->nels>0 && mv->nvals>0 && (SILO_Globals.dataReadMask & DBPVData)) {
+   if (mv->ndims>0 && mv->nels>0 && mv->nvals>0 && (DBGetDataReadMask2File(_dbfile) & DBPVData)) {
       INIT_OBJ(&tmp_obj);
 
       mv->vals = ALLOC_N(void*, mv->nvals);
@@ -5004,7 +5004,7 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     DEFINE_OBJ("major_order", &tmpqm.major_order, DB_INT);
     DEFINE_OBJ("origin", &tmpqm.origin, DB_INT);
 
-    if (SILO_Globals.dataReadMask & DBQMCoords)
+    if (DBGetDataReadMask2File(_dbfile) & DBQMCoords)
     {
         DEFALL_OBJ("coord0", &tmpqm.coords[0], DB_FLOAT);
         DEFALL_OBJ("coord1", &tmpqm.coords[1], DB_FLOAT);
@@ -5026,9 +5026,9 @@ db_pdb_GetQuadmesh (DBfile *_dbfile, char const *objname)
     DEFINE_OBJ("guihide", &tmpqm.guihide, DB_INT);
     DEFALL_OBJ("mrgtree_name", &tmpqm.mrgtree_name, DB_CHAR);
 
-    if (SILO_Globals.dataReadMask & DBQMGhostNodeLabels)
+    if (DBGetDataReadMask2File(_dbfile) & DBQMGhostNodeLabels)
         DEFALL_OBJ("ghost_node_labels", &tmpqm.ghost_node_labels, DB_CHAR);
-    if (SILO_Globals.dataReadMask & DBQMGhostZoneLabels)
+    if (DBGetDataReadMask2File(_dbfile) & DBQMGhostZoneLabels)
         DEFALL_OBJ("ghost_zone_labels", &tmpqm.ghost_zone_labels, DB_CHAR);
     DEFALL_OBJ("alt_nodenum_vars", &tmpannum, DB_CHAR);
     DEFALL_OBJ("alt_zonenum_vars", &tmpaznum, DB_CHAR);
@@ -5199,7 +5199,7 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
     *  associated with this variable.
     */
 
-   if ((qv->ndims>0) && (qv->nvals > 0) && (SILO_Globals.dataReadMask & DBQVData)) {
+   if ((qv->ndims>0) && (qv->nvals > 0) && (DBGetDataReadMask2File(_dbfile) & DBQVData)) {
       INIT_OBJ(&tmp_obj);
 
       qv->vals = ALLOC_N(void*, qv->nvals);
@@ -5347,7 +5347,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    DEFINE_OBJ("min_extents", tmpum.min_extents, DB_FLOAT);
    DEFINE_OBJ("max_extents", tmpum.max_extents, DB_FLOAT);
 
-   if (SILO_Globals.dataReadMask & DBUMCoords)
+   if (DBGetDataReadMask2File(_dbfile) & DBUMCoords)
    {
        DEFALL_OBJ("coord0", &tmpum.coords[0], DB_FLOAT);
        DEFALL_OBJ("coord1", &tmpum.coords[1], DB_FLOAT);
@@ -5374,7 +5374,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    DEFINE_OBJ("tv_connectivity", &tmpum.tv_connectivity, DB_INT);
    DEFINE_OBJ("disjoint_mode", &tmpum.disjoint_mode, DB_INT);
 
-   if (SILO_Globals.dataReadMask & DBUMGhostNodeLabels)
+   if (DBGetDataReadMask2File(_dbfile) & DBUMGhostNodeLabels)
        DEFALL_OBJ("ghost_node_labels", &tmpum.ghost_node_labels, DB_CHAR);
    DEFALL_OBJ("alt_nodenum_vars", &tmpannum, DB_CHAR);
 
@@ -5409,7 +5409,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
 
    /* Optional global node number */
    um->gnznodtype = um->gnznodtype?um->gnznodtype:DB_INT;
-   if (um->nnodes>0 && (SILO_Globals.dataReadMask & DBUMGlobNodeNo)) {
+   if (um->nnodes>0 && (DBGetDataReadMask2File(_dbfile) & DBUMGlobNodeNo)) {
       INIT_OBJ(&tmp_obj);
       DEFALL_OBJ("gnodeno", &tmpum.gnodeno, um->gnznodtype);
       um->gnodeno = 0;
@@ -5420,7 +5420,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    /* Read facelist, zonelist, and edgelist */
 
    if (um->nnodes>0 && (flname != NULL && strlen(flname) > 0)
-       && (SILO_Globals.dataReadMask & DBUMFacelist))
+       && (DBGetDataReadMask2File(_dbfile) & DBUMFacelist))
    {
       DBfacelist tmpfaces;
       memset(&tmpfaces, 0, sizeof(DBfacelist));
@@ -5460,7 +5460,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
    }
 
    if (um->nnodes>0 && (zlname != NULL && strlen(zlname) > 0)
-       && (SILO_Globals.dataReadMask & DBUMZonelist))
+       && (DBGetDataReadMask2File(_dbfile) & DBUMZonelist))
    {
       DBzonelist tmpzones;
       memset(&tmpzones, 0, sizeof(DBzonelist));
@@ -5490,7 +5490,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
       DEFINE_OBJ("lo_offset", &lo_offset, DB_INT);
       DEFINE_OBJ("hi_offset", &hi_offset, DB_INT);
  
-      if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
+      if (DBGetDataReadMask2File(_dbfile) & DBZonelistGhostZoneLabels)
          DEFALL_OBJ("ghost_zone_labels", &tmpzones.ghost_zone_labels, DB_CHAR);
 
       if (PJ_GetObject(dbfile->pdb, zlname, &tmp_obj, DB_ZONELIST) < 0)
@@ -5515,14 +5515,14 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
       /* for applications.                                        */
       /*----------------------------------------------------------*/
       if ((lo_offset != 0 || hi_offset != 0) &&
-          SILO_Globals.dataReadMask & DBZonelistInfo)
+          DBGetDataReadMask2File(_dbfile) & DBZonelistInfo)
       {
           db_SplitShapelist (um);
       }
 
       /* Read optional global zone numbers */
       um->zones->gnznodtype = um->zones->gnznodtype?um->zones->gnznodtype:DB_INT;
-      if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
+      if (DBGetDataReadMask2File(_dbfile) & DBZonelistGlobZoneNo) {
           INIT_OBJ(&tmp_obj);
           DEFALL_OBJ("gzoneno", &tmpzones.gzoneno, um->zones->gnznodtype);
           um->zones->gzoneno = 0;
@@ -5562,7 +5562,7 @@ db_pdb_GetUcdmesh (DBfile *_dbfile, char const *meshname)
       *(um->edges) = tmpedges;
    }
 
-   if (um->nnodes>0 && phzlname && *phzlname && (SILO_Globals.dataReadMask & DBUMZonelist)) {
+   if (um->nnodes>0 && phzlname && *phzlname && (DBGetDataReadMask2File(_dbfile) & DBUMZonelist)) {
       um->phzones = db_pdb_GetPHZonelist(_dbfile, phzlname);
    }
 
@@ -5685,7 +5685,7 @@ db_pdb_GetUcdvar (DBfile *_dbfile, char const *objname)
     *  Read the remainder of the object: loop over all values
     *  associated with this variable.
     */
-   if ((uv->nvals > 0) && (SILO_Globals.dataReadMask & DBUVData)) {
+   if ((uv->nvals > 0) && (DBGetDataReadMask2File(_dbfile) & DBUVData)) {
       INIT_OBJ(&tmp_obj);
 
       uv->vals = ALLOC_N(void*, uv->nvals);
@@ -5794,14 +5794,14 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
    DEFINE_OBJ("tv_connectivity", &tmpcsgm.tv_connectivity, DB_INT);
    DEFINE_OBJ("disjoint_mode", &tmpcsgm.disjoint_mode, DB_INT);
 
-   if (SILO_Globals.dataReadMask & DBCSGMBoundaryInfo)
+   if (DBGetDataReadMask2File(_dbfile) & DBCSGMBoundaryInfo)
    {
        DEFALL_OBJ("typeflags", &tmpcsgm.typeflags, DB_INT);
        DEFALL_OBJ("bndids", &tmpcsgm.bndids, DB_INT);
    }
 
    /* Optional boundary names */
-   if (SILO_Globals.dataReadMask & DBCSGMBoundaryNames)
+   if (DBGetDataReadMask2File(_dbfile) & DBCSGMBoundaryNames)
        DEFALL_OBJ("bndnames", &tmpbndnames, DB_CHAR);
 
    if (PJ_GetObject(dbfile->pdb, (char*) meshname, &tmp_obj, DB_CSGMESH) < 0)
@@ -5809,7 +5809,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
 
     /* now that we know the object's data type, we can correctly
        read the coeffs */
-    if ((SILO_Globals.dataReadMask & DBCSGMBoundaryInfo) && (tmpcsgm.lcoeffs > 0))
+    if ((DBGetDataReadMask2File(_dbfile) & DBCSGMBoundaryInfo) && (tmpcsgm.lcoeffs > 0))
     {
         INIT_OBJ(&tmp_obj);
         if (DB_DOUBLE == tmpcsgm.datatype && PJ_InqForceSingle()) {
@@ -5829,7 +5829,7 @@ db_pdb_GetCsgmesh (DBfile *_dbfile, char const *meshname)
    tmpcsgm.name = STRDUP(meshname);
 
    if ((tmpcsgm.nbounds > 0 && zlname && *zlname &&
-        (SILO_Globals.dataReadMask & DBCSGMZonelist)))
+        (DBGetDataReadMask2File(_dbfile) & DBCSGMZonelist)))
       tmpcsgm.zones = db_pdb_GetCSGZonelist(_dbfile, zlname);
   
    if ((csgm = DBAllocCsgmesh()) == NULL)
@@ -5899,7 +5899,7 @@ db_pdb_GetCsgvar (DBfile *_dbfile, char const *objname)
     *  Read the remainder of the object: loop over all values
     *  associated with this variable.
     */
-   if ((tmpcsgv.nvals > 0) && (SILO_Globals.dataReadMask & DBCSGVData)) {
+   if ((tmpcsgv.nvals > 0) && (DBGetDataReadMask2File(_dbfile) & DBCSGVData)) {
       INIT_OBJ(&tmp_obj);
 
       tmpcsgv.vals = ALLOC_N(void *, tmpcsgv.nvals);
@@ -5991,7 +5991,7 @@ db_pdb_GetFacelist(DBfile *_dbfile, char const *objname)
     DEFINE_OBJ("nshapes", &tmpfl.nshapes, DB_INT);
     DEFINE_OBJ("ntypes", &tmpfl.ntypes, DB_INT);
 
-    if (SILO_Globals.dataReadMask & DBFacelistInfo)
+    if (DBGetDataReadMask2File(_dbfile) & DBFacelistInfo)
     {
         DEFALL_OBJ("nodelist", &tmpfl.nodelist, DB_INT);
         DEFALL_OBJ("shapecnt", &tmpfl.shapecnt, DB_INT);
@@ -6073,7 +6073,7 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
     DEFINE_OBJ("max_index", &tmpzl.max_index, DB_INT);
     DEFINE_OBJ("gnznodtype", &tmpzl.gnznodtype, DB_INT);
 
-    if (SILO_Globals.dataReadMask & DBZonelistInfo)
+    if (DBGetDataReadMask2File(_dbfile) & DBZonelistInfo)
     {
         DEFALL_OBJ("shapecnt", &tmpzl.shapecnt, DB_INT);
         DEFALL_OBJ("shapesize", &tmpzl.shapesize, DB_INT);
@@ -6082,7 +6082,7 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
         DEFALL_OBJ("zoneno", &tmpzl.zoneno, DB_INT);
     }
 
-    if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
+    if (DBGetDataReadMask2File(_dbfile) & DBZonelistGhostZoneLabels)
         DEFALL_OBJ("ghost_zone_labels", &tmpzl.ghost_zone_labels, DB_CHAR);
     DEFALL_OBJ("alt_zonenum_vars", &tmpaznum, DB_CHAR);
 
@@ -6100,7 +6100,7 @@ db_pdb_GetZonelist(DBfile *_dbfile, char const *objname)
 
     /* optional global zone numbers */
     zl->gnznodtype = zl->gnznodtype?zl->gnznodtype:DB_INT;
-    if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
+    if (DBGetDataReadMask2File(_dbfile) & DBZonelistGlobZoneNo) {
        INIT_OBJ(&tmp_obj);
        DEFALL_OBJ("gzoneno", &tmpzl.gzoneno, zl->gnznodtype);
        zl->gzoneno = 0;
@@ -6172,7 +6172,7 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
     DEFINE_OBJ("hi_offset", &tmpphzl.hi_offset, DB_INT);
     DEFINE_OBJ("gnznodtype", &tmpphzl.gnznodtype, DB_INT);
 
-    if (SILO_Globals.dataReadMask & DBZonelistInfo)
+    if (DBGetDataReadMask2File(_dbfile) & DBZonelistInfo)
     {
         DEFALL_OBJ("nodecnt", &tmpphzl.nodecnt, DB_INT);
         DEFALL_OBJ("nodelist", &tmpphzl.nodelist, DB_INT);
@@ -6182,7 +6182,7 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
         DEFALL_OBJ("zoneno", &tmpphzl.zoneno, DB_INT);
     }
 
-    if (SILO_Globals.dataReadMask & DBZonelistGhostZoneLabels)
+    if (DBGetDataReadMask2File(_dbfile) & DBZonelistGhostZoneLabels)
        DEFALL_OBJ("ghost_zone_labels", &tmpphzl.ghost_zone_labels, DB_CHAR);
     DEFALL_OBJ("alt_zonenum_vars", &tmpaznum, DB_CHAR);
 
@@ -6200,7 +6200,7 @@ db_pdb_GetPHZonelist(DBfile *_dbfile, char const *objname)
 
     /* optional global zone numbers */
     phzl->gnznodtype = phzl->gnznodtype?phzl->gnznodtype:DB_INT;
-    if (SILO_Globals.dataReadMask & DBZonelistGlobZoneNo) {
+    if (DBGetDataReadMask2File(_dbfile) & DBZonelistGlobZoneNo) {
        INIT_OBJ(&tmp_obj);
        DEFALL_OBJ("gzoneno", &tmpphzl.gzoneno, phzl->gnznodtype);
        phzl->gzoneno = 0;
@@ -6255,16 +6255,16 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
     DEFINE_OBJ("min_index", &tmpzl.min_index, DB_INT);
     DEFINE_OBJ("max_index", &tmpzl.max_index, DB_INT);
 
-    if (SILO_Globals.dataReadMask & DBZonelistInfo)
+    if (DBGetDataReadMask2File(_dbfile) & DBZonelistInfo)
     {
         DEFALL_OBJ("typeflags", &tmpzl.typeflags, DB_INT);
         DEFALL_OBJ("leftids", &tmpzl.leftids, DB_INT);
         DEFALL_OBJ("rightids", &tmpzl.rightids, DB_INT);
         DEFALL_OBJ("zonelist", &tmpzl.zonelist, DB_INT);
     }
-    if (SILO_Globals.dataReadMask & DBCSGZonelistRegNames)
+    if (DBGetDataReadMask2File(_dbfile) & DBCSGZonelistRegNames)
         DEFALL_OBJ("regnames", &tmprnames, DB_CHAR);
-    if (SILO_Globals.dataReadMask & DBCSGZonelistZoneNames)
+    if (DBGetDataReadMask2File(_dbfile) & DBCSGZonelistZoneNames)
         DEFALL_OBJ("zonenames", &tmpznames, DB_CHAR);
     DEFALL_OBJ("alt_zonenum_vars", &tmpaznums, DB_CHAR);
 
@@ -6273,7 +6273,7 @@ db_pdb_GetCSGZonelist(DBfile *_dbfile, char const *objname)
 
     /* now that we know the object's data type, we can correctly
        read the xforms */
-    if ((SILO_Globals.dataReadMask & DBZonelistInfo) && (tmpzl.lxform > 0))
+    if ((DBGetDataReadMask2File(_dbfile) & DBZonelistInfo) && (tmpzl.lxform > 0))
     {
         INIT_OBJ(&tmp_obj);
         if (DB_DOUBLE == tmpzl.datatype && PJ_InqForceSingle()) {
@@ -6801,9 +6801,9 @@ db_pdb_ReadMatVals(DBfile *_dbfile, char const *vname, int objtype,
 
     /*        0       1        2      3       4           */
     /* FSTRS5(matlist,mix_next,mix_vf,mix_mat,mix_zone)); */
-    oldmask = DBSetDataReadMask2(DBNone);
+    oldmask = DBSetDataReadMask2File(_dbfile, DBNone);
     origmat = db_pdb_GetMaterial(_dbfile, vname);
-    DBSetDataReadMask2(oldmask);
+    DBSetDataReadMask2File(_dbfile, oldmask);
 
     /* Do partial I/O on matlist */
     if (db_pdb_ReadDenseArrayVals(_dbfile, vname, objtype, 1,
