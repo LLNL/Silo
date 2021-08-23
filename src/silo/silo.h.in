@@ -71,6 +71,7 @@ be used for advertising or product endorsement purposes.
 #define SILO_H
 
 #include <stdio.h> /* for FILE* datatype for filters */
+#include <sys/stat.h>
 
 #include <silo_exports.h>
 
@@ -502,6 +503,13 @@ typedef enum {
 #define DBOPT_H5_CORE_CLOSE_BUFINFO 535
 #define DBOPT_H5_FCPL_HID_T         536
 #define DBOPT_H5_FAPL_HID_T         537
+#define DBOPT_H5_MEMFILE_INITIAL_BUFINFO  538
+#define DBOPT_H5_MEMFILE_FINAL_BUFINFO    539
+#define DBOPT_H5_MEMFILE_REALLOC_CALLBACK 540
+#define DBOPT_H5_MEMFILE_FREE_CALLBACK    541
+#define DBOPT_H5_MEMFILE_USER_DATA        542
+#define DBOPT_H5_MEMFILE_BACKING_STORE    543
+#define DBOPT_H5_MEMFILE_ALLOC_INC        544
 #define DBOPT_H5_LAST               599
 
 /* Error trapping method */
@@ -1642,14 +1650,12 @@ typedef struct _DBnamescheme
     char **exprstrs;        /* expressions to be evaluated for each conv. spec. */
 } DBnamescheme;
 
-typedef struct _DBbufinfo
+typedef struct _DBmemfile_bufinfo
 {
     void *buf;
     size_t size;
-    size_t max_size;
-    unsigned int flags;
-    int ref_count;
-} DBbufinfo;
+    size_t used;
+} DBmemfile_bufinfo;
 
 typedef struct DBfile *___DUMMY_TYPE;  /* Satisfy ANSI scope rules */
 
@@ -1835,11 +1841,11 @@ SILO_API extern int Silo_version_4_10;
 
 /* Error handling and other global library behavior */
 SILO_API extern void                   DBShowErrors(int, DBErrFunc_t);
-SILO_API extern char const *           DBErrString(void);
-SILO_API extern char const *           DBErrFuncname(void);
 SILO_API extern DBErrFunc_t            DBErrfunc(void);
-SILO_API extern int                    DBErrno(void);
 SILO_API extern int                    DBErrlvl(void);
+SILO_API extern char const *           DBErrString(void);   /* last error string */
+SILO_API extern char const *           DBErrFuncname(void); /* last error'ing function */
+SILO_API extern int                    DBErrno(void);       /* last error number */
 /* Designed to prevent accidental use of old interface by forcing a human readable compile time error */
 #define DBSetDataReadMask(A) ,DBSetDataReadMask_is_replaced_with_DBSetDataReadMask2_using_unsigned_long_long
 #define DBGetDataReadMask() ,DBGetDataReadMask_is_replaced_with_DBGetDataReadMask2_using_unsigned_long_long
@@ -1892,10 +1898,13 @@ SILO_API extern int                    DBVersionGE(int Maj, int Min, int Pat);
 SILO_API extern int                    DBVariableNameValid(char const *s);
 SILO_API extern int                    DBForceSingle(int);
 
+#warning FIXME
 /* Functions involving files, file structure and file inquiries */
+#if 0
 SILO_API extern DBbufinfo *            DBMakeBufinfo(void *buf, size_t size, size_t max_size,
                                            unsigned int flags);
 SILO_API extern int                    DBFreeBufinfo(DBbufinfo *binfo);
+#endif
 SILO_API extern DBfile *               DBOpenReal(char const *name, int dbtype, int mode);
 SILO_API extern DBfile *               DBCreateReal(char const *name, int mode, int targ, char const *info, int dbtype);
 SILO_API extern int                    DBInqFileReal(char const *name);
@@ -2158,7 +2167,7 @@ SILO_API extern DBmrgvar *             DBGetMrgvar(DBfile *dbfile, char const *n
 SILO_API extern DBnamescheme *         DBMakeNamescheme(char const *fmt, ...);
 SILO_API extern char const *           DBGetName(DBnamescheme const *ns, int natnum);
 SILO_API int                           DBGetIndex(DBnamescheme const *ns, int natnum);
-SILO_API extern char const *           DBsprintf(char const *fmt, ...);
+SILO_API extern char const *           DBSPrintf(char const *fmt, ...);
 
 /* Multi-block objects and parallel I/O */
 SILO_API extern DBmultimesh *          DBGetMultimesh(DBfile *, char const *);
