@@ -527,7 +527,10 @@ json_object_reconstitute_extptrs(struct json_object *obj)
         }
 
         if (json_object_object_get_member_count(mobj) != 5)
+        {
+            json_object_reconstitute_extptrs(mobj);
             continue;
+        }
 
         extptr_member_keys[num_to_remove] = mname;
         parent_jobjs_with_extptr_members[num_to_remove] = obj;
@@ -1604,6 +1607,7 @@ PUBLIC struct json_object *
 DBGetJsonObject(DBfile *dbfile, char const *objname)
 {
     int i;
+    char *obj_dirname;
     struct json_object *jobj = json_object_new_object();
     DBobject *sobj = DBGetObject(dbfile, objname);
     if (!sobj) return jobj;
@@ -1611,10 +1615,12 @@ DBGetJsonObject(DBfile *dbfile, char const *objname)
     json_object_object_add(jobj, "silo_name", json_object_new_string(sobj->name));
     json_object_object_add(jobj, "silo_type", json_object_new_int(DBGetObjtypeTag(sobj->type)));
 
+    obj_dirname = db_dirname(objname);
     for (i = 0; i < sobj->ncomponents; i++)
     {
-        char cat_comp_name[1024];
+        char cat_comp_name[1024], *cat_path;
         snprintf(cat_comp_name, sizeof(cat_comp_name), "%s_%s", objname, sobj->comp_names[i]);
+        cat_path = db_join_path(obj_dirname, cat_comp_name);
              if (!strncmp(sobj->pdb_names[i], "'<i>", 4))
         {
             json_object_object_add(jobj, sobj->comp_names[i],
@@ -1636,22 +1642,23 @@ DBGetJsonObject(DBfile *dbfile, char const *objname)
             size_t len = strlen(sobj->pdb_names[i])-5;
             memset(tmp, 0, sizeof(tmp));
             strncpy(tmp, sobj->pdb_names[i]+4, len);
-            if (DBInqVarExists(dbfile, tmp))
+            char *tmp_path = db_join_path(obj_dirname, tmp);
+            if (DBInqVarExists(dbfile, tmp_path))
             {
-                if (DBInqVarType(dbfile, tmp) == DB_VARIABLE)
+                if (DBInqVarType(dbfile, tmp_path) == DB_VARIABLE)
                 {
                     void *p;
                     int ndims, dims[32];
-                    int dtype = DBGetVarType(dbfile, tmp);
-                    ndims = DBGetVarDims(dbfile, tmp, sizeof(dims)/sizeof(dims[0]), dims);
-                    p = DBGetVar(dbfile, tmp);
+                    int dtype = DBGetVarType(dbfile, tmp_path);
+                    ndims = DBGetVarDims(dbfile, tmp_path, sizeof(dims)/sizeof(dims[0]), dims);
+                    p = DBGetVar(dbfile, tmp_path);
                     json_object_object_add(jobj, sobj->comp_names[i],
                         json_object_new_extptr(p, ndims, dims, dtype));
                 }
                 else
                 {
                     json_object_object_add(jobj, sobj->comp_names[i],
-                        DBGetJsonObject(dbfile, tmp));
+                        DBGetJsonObject(dbfile, tmp_path));
                 }
             }
             else
@@ -1659,14 +1666,15 @@ DBGetJsonObject(DBfile *dbfile, char const *objname)
                 json_object_object_add(jobj, sobj->comp_names[i],
                     json_object_new_string(tmp));
             }
+            FREE(tmp_path);
         }
-        else if (DBInqVarType(dbfile, cat_comp_name) == DB_VARIABLE)
+        else if (DBInqVarType(dbfile, cat_path) == DB_VARIABLE)
         {
             void *p;
             int ndims, dims[32];
-            int dtype = DBGetVarType(dbfile, cat_comp_name);
-            ndims = DBGetVarDims(dbfile, cat_comp_name, sizeof(dims)/sizeof(dims[0]), dims);
-            p = DBGetVar(dbfile, cat_comp_name);
+            int dtype = DBGetVarType(dbfile, cat_path);
+            ndims = DBGetVarDims(dbfile, cat_path, sizeof(dims)/sizeof(dims[0]), dims);
+            p = DBGetVar(dbfile, cat_path);
             json_object_object_add(jobj, sobj->comp_names[i],
                 json_object_new_extptr(p, ndims, dims, dtype));
         }
@@ -1677,10 +1685,23 @@ DBGetJsonObject(DBfile *dbfile, char const *objname)
         }
         else /* some component we do not know how to handle */
         {
-            json_object_object_add(jobj, sobj->comp_names[i],
-                json_object_new_string("<unknown>"));
+            char *path = db_join_path(obj_dirname, sobj->comp_names[i]);
+            if (DBInqVarExists(dbfile, path))
+            {
+                json_object_object_add(jobj, sobj->comp_names[i],
+                    DBGetJsonObject(dbfile, path));
+            }
+            else
+            {
+                json_object_object_add(jobj, sobj->comp_names[i],
+                    json_object_new_string("<unknown>"));
+            }
+            FREE(path);
         }
+        FREE(cat_path);
     }
+
+    FREE(obj_dirname);
     DBFreeObject(sobj);
     return jobj;
 }
