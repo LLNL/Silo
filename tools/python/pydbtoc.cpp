@@ -238,6 +238,7 @@ GET_FUNC_DEFS(array);
 GET_FUNC_DEFS(mrgtree);
 GET_FUNC_DEFS(mrgvar);
 GET_FUNC_DEFS(groupelmap);
+GET_FUNC_DEFS(obj);
 
 #define GET_FUNC_N(nm) if (!strcmp(name, "n" #nm)) return DBtoc_GetN ## nm(self, NULL);
 #define GET_FUNC_NAMES(nm) if (!strcmp(name, #nm "_names")) return DBtoc_Get ## nm ## names(self, NULL);
@@ -282,6 +283,7 @@ static PyObject *DBtoc_getattr(PyObject *self, char *name)
     GET_FUNC_N(mrgtree);
     GET_FUNC_N(mrgvar);
     GET_FUNC_N(groupelmap);
+    GET_FUNC_N(obj);
 
     GET_FUNC_NAMES(var);
     GET_FUNC_NAMES(dir);
@@ -305,6 +307,7 @@ static PyObject *DBtoc_getattr(PyObject *self, char *name)
     GET_FUNC_NAMES(mrgtree);
     GET_FUNC_NAMES(mrgvar);
     GET_FUNC_NAMES(groupelmap);
+    GET_FUNC_NAMES(obj);
 
     return 0;
 }

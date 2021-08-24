@@ -339,6 +339,15 @@ void initSilo(void)
     ADD_CONSTANT(DB_ZONETYPE_HEX);
 
 #if PY_VERSION_GE(3,0,0)
+
+    Py_INCREF(&DBfileType);
+    if (PyModule_AddObject(siloModule, "DBfile", (PyObject *) &DBfileType) < 0) {
+        Py_DECREF(&DBfileType);
+        Py_DECREF(siloModule);
+        return NULL;
+    }
+
+
     return siloModule;
 #endif
 }

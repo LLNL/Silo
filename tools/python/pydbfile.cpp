@@ -771,13 +771,51 @@ static PyObject *DBfile_DBClose(PyObject *self, PyObject *args)
 //
 // ****************************************************************************
 static struct PyMethodDef DBfile_methods[] = {
-    {"GetToc", DBfile_DBGetToc, METH_VARARGS},
-    {"GetVar", DBfile_DBGetVar, METH_VARARGS},
-    {"GetVarInfo", DBfile_DBGetVarInfo, METH_VARARGS},
-    {"Write", DBfile_DBWrite, METH_VARARGS},
-    {"WriteObject", DBfile_DBWriteObject, METH_VARARGS},
-    {"MkDir", DBfile_DBMkDir, METH_VARARGS},
-    {"SetDir", DBfile_DBSetDir, METH_VARARGS},
+    {"GetToc", DBfile_DBGetToc, METH_VARARGS,
+        "Return the table of contents for the current working directory of the "
+        "Silo file as a struct-like object. For example...\n"
+        ">>> db = Silo.Open('globe.silo')\n"
+        ">>> x = db.GetToc()\n"
+        ">>> x.nucdvar\n"
+        "7\n"
+        ">>> x.ucdvar_names\n"
+        "('dx', 'dy', 'dz', 't', 'u', 'v', 'w')\n"},
+    {"GetVar", DBfile_DBGetVar, METH_VARARGS,
+        "Return a scalar Silo variable as a python scalar value. For example...\n"
+        ">>> db = Silo.Open('globe.silo')\n"
+        ">>> x = db.GetVar('cycle')\n"
+        ">>> print(x)\n"
+        "48\n"},
+    {"GetVarInfo", DBfile_DBGetVarInfo, METH_VARARGS,
+        "Return either metadata or metadata+rawdata for any Silo object. For example...\n"
+        ">>> db = Silo.Open('globe.silo')\n"
+        ">>> dx_meta = db.GetVarInfo('dx', 0) # use 0 to get just meta data\n"
+        ">>> print(dx_meta)\n"
+        "{'name': 'dx', 'type': 'ucdvar', 'meshid': 'mesh1', 'value0': '/dx_data',\n"
+        " 'ndims': 3, 'nvals': 1, 'nels': 1200, 'centering': 111, 'origin': 0, 'mixlen': 0,\n"
+        " 'datatype': 20, 'time': '/time', 'cycle': 0, 'use_specmf': -1000}\n"
+        ">>> dx_meta_and_raw = db.GetVarInfo('dx', 1) # use non-zero to also get raw data\n"
+        ">>> print(dx_meta_and_raw)\n"
+        "{'name': 'dx', 'type': 'ucdvar', 'meshid': 'mesh1',\n"
+        " 'value0': (0.125606125, 0.113311, 0.089924125, 0.057734875, ...\n"},
+    {"Write", DBfile_DBWrite, METH_VARARGS,
+        "Write a miscellaneous scalar or array to a Silo file. For example...\n"
+        ">>> db = Silo.Create('foo.silo', 'no comment', Silo.DB_PDB, Silo.DB_CLOBBER)\n"
+        ">>> x=(1,2,3,4)\n"
+        ">>> db.Write('x', x)\n"
+        ">>> db.Close()\n"},
+    {"WriteObject", DBfile_DBWriteObject, METH_VARARGS,
+        "Write a Silo object to a Silo file. For example...\n"
+        ">>> nodelist = (0, 1, 2, 3, 4, 5, 6, 7)\n"
+        ">>> shapecnt = (1,)\n"
+        ">>> shapesize = (8,)\n"
+        ">>> zonelist = {'name':'zonelist','type':'DBzonelist','ndims':3,'nzones':1,'nshapes':1,\\\n"
+        "'shapecnt':shapecnt,'shapesize':shapesize,'lnodelist':len(nodelist),'nodelist':nodelist}\n"
+        ">>> db.WriteObject('zonelist', zonelist)\n"},
+    {"MkDir", DBfile_DBMkDir, METH_VARARGS,
+        "Create a directory in the Silo file. Works with absolute or relative path names."},
+    {"SetDir", DBfile_DBSetDir, METH_VARARGS,
+        "Set the current working directory of the Silo file. Works with absolute or relative path names"},
     {"Close", DBfile_DBClose, METH_VARARGS},
     {NULL, NULL}
 };
@@ -890,18 +928,18 @@ static PyObject *DBfile_getattr(PyObject *self, char *name)
     }
 
     if (!strcmp(name, "filename"))
-    {
-        if (obj->db)
-        {
-            return PyString_FromString(obj->db->pub.name);
-        }
-        else
-        {
-            return PyString_FromString("<closed file>");
-        }
-    }
+        return PyString_FromString(obj->db->pub.name);
 
 #if PY_VERSION_GE(3,0,0)
+    if (!strcmp(name, "__dict__"))
+    {
+        PyObject *result= PyDict_New();
+        for (i = 0; DBfile_methods[i].ml_meth; i++)
+            PyDict_SetItem(result, PyString_FromString(DBfile_methods[i].ml_name), PyString_FromString(DBfile_methods[i].ml_name));
+        Py_INCREF(result);
+        return result;
+    }
+
     for (i = 0; DBfile_methods[i].ml_name; i++)
     {
         if (!strcmp(name, DBfile_methods[i].ml_name))
