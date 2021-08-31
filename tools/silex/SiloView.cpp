@@ -301,5 +301,10 @@ SiloView::ShowItem(QTreeWidgetItem *i, int)
         name += "/";
     name += item->name;
 
+    // Deal with possible symlink embedded in string
+    int n = name.indexOf(" --> ");
+    if (n != -1)
+        name.truncate(n);
+
     ShowUnknown(name);
 }
