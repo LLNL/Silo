@@ -51,6 +51,7 @@
 #include <Python.h>
 #include <silo.h>
 #include "pydbfile.h"
+#include "pysilo.h"
 
 #include <vector>
 #include <string>
@@ -211,7 +212,6 @@ PyObject *silo_Create(PyObject *self, PyObject *args)
 // ****************************************************************************
 //  Method:  initSilo
 //
-
 //    Called by python to initialize the Silo module.
 //
 //  Arguments:
@@ -227,7 +227,12 @@ PyObject *silo_Create(PyObject *self, PyObject *args)
 //
 // ****************************************************************************
 #define ADD_CONSTANT(C)  PyDict_SetItemString(d, #C, PyInt_FromLong(C))
-extern "C" void initSilo()
+extern "C"
+#if PY_VERSION_GE(3,0,0)
+PyObject * PyInit_Silo(void)
+#else
+void initSilo(void)
+#endif
 {
     AddMethod("Open", silo_Open,
               "Usage: Open(filename [, DB_READ|DB_APPEND]])");
@@ -236,7 +241,7 @@ extern "C" void initSilo()
     AddMethod(NULL, NULL);
 
 
-    siloModule = Py_InitModule("Silo", &SiloMethods[0]);
+    PY_SILO_MOD_DEF(siloModule, "Silo", &SiloMethods[0]);
 
     PyObject *d;
     d = PyModule_GetDict(siloModule);
@@ -322,4 +327,27 @@ extern "C" void initSilo()
     ADD_CONSTANT(DB_VARTYPE_MATERIAL);
     ADD_CONSTANT(DB_VARTYPE_SPECIES);
     ADD_CONSTANT(DB_VARTYPE_LABEL);
+
+    ADD_CONSTANT(DB_ZONETYPE_BEAM);
+    ADD_CONSTANT(DB_ZONETYPE_POLYGON);
+    ADD_CONSTANT(DB_ZONETYPE_TRIANGLE);
+    ADD_CONSTANT(DB_ZONETYPE_QUAD);
+    ADD_CONSTANT(DB_ZONETYPE_POLYHEDRON);
+    ADD_CONSTANT(DB_ZONETYPE_TET);
+    ADD_CONSTANT(DB_ZONETYPE_PYRAMID);
+    ADD_CONSTANT(DB_ZONETYPE_PRISM);
+    ADD_CONSTANT(DB_ZONETYPE_HEX);
+
+#if PY_VERSION_GE(3,0,0)
+
+    Py_INCREF(&DBfileType);
+    if (PyModule_AddObject(siloModule, "DBfile", (PyObject *) &DBfileType) < 0) {
+        Py_DECREF(&DBfileType);
+        Py_DECREF(siloModule);
+        return NULL;
+    }
+
+
+    return siloModule;
+#endif
 }

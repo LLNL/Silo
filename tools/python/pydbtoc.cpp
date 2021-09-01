@@ -49,6 +49,7 @@
 // product endorsement purposes.
 
 #include "pydbtoc.h"
+#include "pysilo.h"
 
 // ****************************************************************************
 //  Method:  DBtoc_dealloc
@@ -134,6 +135,7 @@ static int DBtoc_as_string(PyObject *self, char *s)
     PRINT_OBJS(qmesh);
     PRINT_OBJS(qvar);
     PRINT_OBJS(ucdmesh);
+    PRINT_OBJS(obj);
     PRINT_OBJS(ucdvar);
     PRINT_OBJS(ptmesh);
     PRINT_OBJS(ptvar);
@@ -191,7 +193,7 @@ static int DBtoc_print(PyObject *self, FILE *fp, int flags)
     int len = DBtoc_as_string(self, 0);
     char *str = new char[len]; 
     DBtoc_as_string(self, str);
-    fprintf(fp, str);
+    fprintf(fp, "%s\n", str);
     delete [] str;
     return 0;
 }
@@ -236,6 +238,7 @@ GET_FUNC_DEFS(array);
 GET_FUNC_DEFS(mrgtree);
 GET_FUNC_DEFS(mrgvar);
 GET_FUNC_DEFS(groupelmap);
+GET_FUNC_DEFS(obj);
 
 #define GET_FUNC_N(nm) if (!strcmp(name, "n" #nm)) return DBtoc_GetN ## nm(self, NULL);
 #define GET_FUNC_NAMES(nm) if (!strcmp(name, #nm "_names")) return DBtoc_Get ## nm ## names(self, NULL);
@@ -280,6 +283,7 @@ static PyObject *DBtoc_getattr(PyObject *self, char *name)
     GET_FUNC_N(mrgtree);
     GET_FUNC_N(mrgvar);
     GET_FUNC_N(groupelmap);
+    GET_FUNC_N(obj);
 
     GET_FUNC_NAMES(var);
     GET_FUNC_NAMES(dir);
@@ -303,30 +307,10 @@ static PyObject *DBtoc_getattr(PyObject *self, char *name)
     GET_FUNC_NAMES(mrgtree);
     GET_FUNC_NAMES(mrgvar);
     GET_FUNC_NAMES(groupelmap);
+    GET_FUNC_NAMES(obj);
 
     return 0;
 }
-
-// ****************************************************************************
-//  Method:  DBtoc_compare
-//
-//  Purpose:
-//    Compare two DBtocObjects.
-//
-//  Arguments:
-//    u, v       the objects to compare
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    July 12, 2005
-//
-// ****************************************************************************
-static int DBtoc_compare(PyObject *v, PyObject *w)
-{
-    DBtoc *a = ((DBtocObject *)v)->toc;
-    DBtoc *b = ((DBtocObject *)w)->toc;
-    return (a<b) ? -1 : ((a==b) ? 0 : +1);
-}
-
 
 // ****************************************************************************
 //  DBtoc Python Type Object
@@ -340,41 +324,44 @@ PyTypeObject DBtocType =
     //
     // Type header
     //
-    PyObject_HEAD_INIT(&PyType_Type)
-    0,                                   // ob_size
-    "DBtoc",                    // tp_name
-    sizeof(DBtocObject),        // tp_basicsize
+    PyVarObject_HEAD_INIT(&PyType_Type,0)
+    "DBtoc",                             // tp_name
+    sizeof(DBtocObject),                 // tp_basicsize
     0,                                   // tp_itemsize
+
     //
     // Standard methods
     //
-    (destructor)DBtoc_dealloc,  // tp_dealloc
-    (printfunc)DBtoc_print,     // tp_print
-    (getattrfunc)DBtoc_getattr, // tp_getattr
-    0,//(setattrfunc)DBtoc_setattr, // tp_setattr -- this object is read-only
-    (cmpfunc)DBtoc_compare,     // tp_compare
+    (destructor)DBtoc_dealloc,           // tp_dealloc
+    (printfunc)DBtoc_print,              // tp_print
+    (getattrfunc)DBtoc_getattr,          // tp_getattr
+    0,                                   // tp_setattr -- this object is read-only
+    0,                                   // tp_compare -- removed in python 3
     (reprfunc)0,                         // tp_repr
+
     //
     // Type categories
     //
     0,                                   // tp_as_number
     0,                                   // tp_as_sequence
     0,                                   // tp_as_mapping
+
     //
     // More methods
     //
     0,                                   // tp_hash
     0,                                   // tp_call
-    (reprfunc)DBtoc_str,        // tp_str
+    (reprfunc)DBtoc_str,                 // tp_str
     0,                                   // tp_getattro
     0,                                   // tp_setattro
     0,                                   // tp_as_buffer
-    Py_TPFLAGS_CHECKTYPES,               // tp_flags
+    0,                                   // tp_flags
     "This class wraps a Silo DBtoc object.", // tp_doc
     0,                                   // tp_traverse
     0,                                   // tp_clear
     0,                                   // tp_richcompare
     0                                    // tp_weaklistoffset
+
     // PYTHON 2.2 FROM HERE
     ,
     0,

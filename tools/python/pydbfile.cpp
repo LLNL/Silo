@@ -126,17 +126,55 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    char *str;
-    if(!PyArg_ParseTuple(args, "s", &str))
-        return NULL;
+    char *str, *iestr=0;
+    int dontErrInSanityChecks= 0;
+    if(!PyArg_ParseTuple(args, "ss", &str, &iestr))
+    {
+        PyErr_Clear();
+        if(!PyArg_ParseTuple(args, "s", &str))
+        {
+            SiloErrorFunc("A string argument is required.");
+            return NULL;
+        }
+    }
+    if (iestr && !strcmp(iestr, "dont-throw-errors-in-sanity-checks"))
+        dontErrInSanityChecks = 1;
+    char msg[256];
+    snprintf(msg, sizeof(msg), "Problem with DBInqVarType   for variable \"%s\"", str);
 
     int vartype = DBInqVarType(db, str);
     if (vartype != DB_VARIABLE)
+    {
+        if (!dontErrInSanityChecks)
+            SiloErrorFunc(msg);
         return NULL;
+    }
 
     int len = DBGetVarLength(db,str);
+    if (len < 0)
+    {
+        sprintf(&msg[13], "DBGetVarLength");
+        if (!dontErrInSanityChecks)
+            SiloErrorFunc(msg);
+        return NULL;
+    }
     int type = DBGetVarType(db,str);
+    if (type < 0)
+    {
+        sprintf(&msg[13], "DBGetVarType");
+        if (!dontErrInSanityChecks)
+            SiloErrorFunc(msg);
+        return NULL;
+    }
     void *var = DBGetVar(db,str);
+    if (!var)
+    {
+        sprintf(&msg[13], "DBGetVar");
+        if (!dontErrInSanityChecks)
+            SiloErrorFunc(msg);
+        return NULL;
+    }
+
     if (len == 1 || type == DB_CHAR)
     {
         PyObject *tmp;
@@ -209,6 +247,7 @@ static PyObject *DBfile_DBGetVar(PyObject *self, PyObject *args)
         if (var) free(var);
         return retval;
     }
+    SiloErrorFunc("An unknown Silo error occurred.");
     return NULL;
 }
 
@@ -336,8 +375,9 @@ static PyObject *DBfile_DBGetVarInfo(PyObject *self, PyObject *args)
             if (get_data_flag)
             {
 
-                PyObject *argTuple = PyTuple_New(1);
+                PyObject *argTuple = PyTuple_New(2);
                 PyTuple_SET_ITEM(argTuple, 0, PyString_FromString(valStr.c_str()));
+                PyTuple_SET_ITEM(argTuple, 1, PyString_FromString("dont-throw-errors-in-sanity-checks"));
                 PyObject *dobj = DBfile_DBGetVar(self, argTuple);
                 Py_DECREF(argTuple);
                 if (dobj)
@@ -537,33 +577,54 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
 #endif
     while (PyDict_Next((PyObject*)dictobj, &pos, &key, &value))
     {
-        /* skip name and type values */
+        // skip name and type values
         if (!strncmp(PyString_AsString(key), "type", 4))
             continue;
         if (!strncmp(PyString_AsString(key), "name", 4))
             continue;
 
-        if (PyInt_Check(value))
-            DBAddIntComponent(siloobj, PyString_AsString(key), PyInt_AS_LONG(value));
-        else if (PyFloat_Check(value))
-            DBAddDblComponent(siloobj, PyString_AsString(key), PyFloat_AS_DOUBLE(value));
-        else if (PyString_Check(value))
-            DBAddStrComponent(siloobj, PyString_AsString(key), PyString_AsString(value));
-        else if (PyTuple_Check(value))
+        // handle some special cases Silo treats as either float or double explicitly
+        if (!strncmp(PyString_AsString(key), "time", 4) ||
+            !strncmp(PyString_AsString(key), "align", 5))
         {
-            long len = PyTuple_Size(value);
-            if (PyString_Check(PyTuple_GET_ITEM(value,0)))
+            DBAddFltComponent(siloobj, PyString_AsString(key), (float) PyFloat_AS_DOUBLE(value));
+            continue;
+        }
+        if (!strncmp(PyString_AsString(key), "missing_value", 13) ||
+            !strncmp(PyString_AsString(key), "extents", 7) ||
+            !strncmp(PyString_AsString(key), "dtime", 5))
+        {
+            DBAddDblComponent(siloobj, PyString_AsString(key), PyFloat_AS_DOUBLE(value));
+            continue;
+        }
+
+        if (PyInt_Check(value)) // scalar integer
+            DBAddIntComponent(siloobj, PyString_AsString(key), PyInt_AS_LONG(value));
+        else if (PyFloat_Check(value)) // scalar floating point which we treat as double
+            DBAddDblComponent(siloobj, PyString_AsString(key), PyFloat_AS_DOUBLE(value));
+        else if (PyString_Check(value)) // scalar string
+            DBAddStrComponent(siloobj, PyString_AsString(key), PyString_AsString(value));
+        else if (PySequence_Check(value)) // tuple or list (e.g. a variable)
+        {
+            long len = PySequence_Size(value);
+            PyObject *itemZero = PySequence_GetItem(value, 0);
+
+            if (PyString_Check(itemZero))
             {
                 int len2;
                 long count[1];
                 char *tmp = 0;
-                char** vals = new char*[len];
+                char const **vals = new char const *[len];
                 for (int i = 0; i < len; i++)
-                    vals[i] = PyString_AsString(PyTuple_GET_ITEM(value,i));
-                delete [] vals;
+                {
+                    PyObject *item = PySequence_GetItem(value, i);
+                    vals[i] = PyString_AsString(item);
+                    Py_DECREF(item);
+                }
                 DBStringArrayToStringList((char const * const *)vals, len, &tmp, &len2);
                 count[0] = (long) len2;
                 DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "char", tmp, 1, count);
+                delete [] vals;
                 FREE(tmp);
             }
             else
@@ -571,23 +632,27 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
                 bool allint = true;
                 for (int i = 0; i < len && allint; i++)
                 {
-                    if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
+                    PyObject *item = PySequence_GetItem(value, i);
+                    if (PyFloat_Check(item))
                         allint = false;
+                    Py_DECREF(item);
                 }
                 if (allint)
                 {
                     int *vals = new int[len];
                     for (int i = 0; i < len; i++)
                     {
-                        if (PyFloat_Check(PyTuple_GET_ITEM(value,i)))
+                        PyObject *item = PySequence_GetItem(value, i);
+                        if (PyFloat_Check(item))
                         {
-                            double dval = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                            double dval = PyFloat_AS_DOUBLE(item);
                             vals[i] = (int) dval;
                         }
                         else
                         {
-                            vals[i] = PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
+                            vals[i] = PyInt_AS_LONG(item);
                         }
+                        Py_DECREF(item);
                     }
                     DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "integer", vals, 1, &len);
                     delete [] vals;
@@ -597,21 +662,27 @@ static PyObject *DBfile_DBWriteObject(PyObject *self, PyObject *args)
                     double *vals = new double[len];
                     for (int i = 0; i < len; i++)
                     {
-                        if (PyInt_Check(PyTuple_GET_ITEM(value,i)))
-                            vals[i] = (double) PyInt_AS_LONG(PyTuple_GET_ITEM(value,i));
+                        PyObject *item = PySequence_GetItem(value, i);
+                        if (PyInt_Check(item))
+                            vals[i] = (double) PyInt_AS_LONG(item);
                         else
-                            vals[i] = PyFloat_AS_DOUBLE(PyTuple_GET_ITEM(value,i));
+                            vals[i] = PyFloat_AS_DOUBLE(item);
+                        Py_DECREF(item);
                     }
                     DBWriteComponent(db, siloobj, PyString_AsString(key), objname, "double", vals, 1, &len);
                     delete [] vals;
                 }
             }
         }
-else
-{
-printf("   don't have anything to handle this case\n");
-}
+        // don't know what to do with this python type. So, we'll add it to the Silo
+        // object as a *string* with value indicating it is a type we can't handle.
+        else
+        {
+            DBAddStrComponent(siloobj, PyString_AsString(key), "unmappable python type");
+        }
     }
+
+    // Ok, we've built up the object, now write it
     DBWriteObject(db, siloobj, 1);
 
     PyErr_Clear();
@@ -745,13 +816,51 @@ static PyObject *DBfile_DBClose(PyObject *self, PyObject *args)
 //
 // ****************************************************************************
 static struct PyMethodDef DBfile_methods[] = {
-    {"GetToc", DBfile_DBGetToc, METH_VARARGS},
-    {"GetVar", DBfile_DBGetVar, METH_VARARGS},
-    {"GetVarInfo", DBfile_DBGetVarInfo, METH_VARARGS},
-    {"Write", DBfile_DBWrite, METH_VARARGS},
-    {"WriteObject", DBfile_DBWriteObject, METH_VARARGS},
-    {"MkDir", DBfile_DBMkDir, METH_VARARGS},
-    {"SetDir", DBfile_DBSetDir, METH_VARARGS},
+    {"GetToc", DBfile_DBGetToc, METH_VARARGS,
+        "Return the table of contents for the current working directory of the "
+        "Silo file as a struct-like object. For example...\n"
+        ">>> db = Silo.Open('globe.silo')\n"
+        ">>> x = db.GetToc()\n"
+        ">>> x.nucdvar\n"
+        "7\n"
+        ">>> x.ucdvar_names\n"
+        "('dx', 'dy', 'dz', 't', 'u', 'v', 'w')\n"},
+    {"GetVar", DBfile_DBGetVar, METH_VARARGS,
+        "Return a scalar Silo variable as a python scalar value. For example...\n"
+        ">>> db = Silo.Open('globe.silo')\n"
+        ">>> x = db.GetVar('cycle')\n"
+        ">>> print(x)\n"
+        "48\n"},
+    {"GetVarInfo", DBfile_DBGetVarInfo, METH_VARARGS,
+        "Return either metadata or metadata+rawdata for any Silo object. For example...\n"
+        ">>> db = Silo.Open('globe.silo')\n"
+        ">>> dx_meta = db.GetVarInfo('dx', 0) # use 0 to get just meta data\n"
+        ">>> print(dx_meta)\n"
+        "{'name': 'dx', 'type': 'ucdvar', 'meshid': 'mesh1', 'value0': '/dx_data',\n"
+        " 'ndims': 3, 'nvals': 1, 'nels': 1200, 'centering': 111, 'origin': 0, 'mixlen': 0,\n"
+        " 'datatype': 20, 'time': '/time', 'cycle': 0, 'use_specmf': -1000}\n"
+        ">>> dx_meta_and_raw = db.GetVarInfo('dx', 1) # use non-zero to also get raw data\n"
+        ">>> print(dx_meta_and_raw)\n"
+        "{'name': 'dx', 'type': 'ucdvar', 'meshid': 'mesh1',\n"
+        " 'value0': (0.125606125, 0.113311, 0.089924125, 0.057734875, ...\n"},
+    {"Write", DBfile_DBWrite, METH_VARARGS,
+        "Write a miscellaneous scalar or array to a Silo file. For example...\n"
+        ">>> db = Silo.Create('foo.silo', 'no comment', Silo.DB_PDB, Silo.DB_CLOBBER)\n"
+        ">>> x=(1,2,3,4)\n"
+        ">>> db.Write('x', x)\n"
+        ">>> db.Close()\n"},
+    {"WriteObject", DBfile_DBWriteObject, METH_VARARGS,
+        "Write a Silo object to a Silo file. For example...\n"
+        ">>> nodelist = (0, 1, 2, 3, 4, 5, 6, 7)\n"
+        ">>> shapecnt = (1,)\n"
+        ">>> shapesize = (8,)\n"
+        ">>> zonelist = {'name':'zonelist','type':'DBzonelist','ndims':3,'nzones':1,'nshapes':1,\\\n"
+        "'shapecnt':shapecnt,'shapesize':shapesize,'lnodelist':len(nodelist),'nodelist':nodelist}\n"
+        ">>> db.WriteObject('zonelist', zonelist)\n"},
+    {"MkDir", DBfile_DBMkDir, METH_VARARGS,
+        "Create a directory in the Silo file. Works with absolute or relative path names."},
+    {"SetDir", DBfile_DBSetDir, METH_VARARGS,
+        "Set the current working directory of the Silo file. Works with absolute or relative path names"},
     {"Close", DBfile_DBClose, METH_VARARGS},
     {NULL, NULL}
 };
@@ -834,7 +943,7 @@ static int DBfile_print(PyObject *self, FILE *fp, int flags)
 {
     char str[1000];
     DBfile_as_string(self, str);
-    fprintf(fp, str);
+    fprintf(fp, "%s\n", str);
     return 0;
 }
 
@@ -854,6 +963,7 @@ static int DBfile_print(PyObject *self, FILE *fp, int flags)
 // ****************************************************************************
 static PyObject *DBfile_getattr(PyObject *self, char *name)
 {
+    int i;
     DBfileObject *obj = (DBfileObject*)self;
 
     if (!obj->db)
@@ -863,40 +973,35 @@ static PyObject *DBfile_getattr(PyObject *self, char *name)
     }
 
     if (!strcmp(name, "filename"))
+        return PyString_FromString(obj->db->pub.name);
+
+#if PY_VERSION_GE(3,0,0)
+    if (!strcmp(name, "__dict__"))
     {
-        if (obj->db)
-        {
-            return PyString_FromString(obj->db->pub.name);
-        }
-        else
-        {
-            return PyString_FromString("<closed file>");
-        }
+        PyObject *result= PyDict_New();
+        for (i = 0; DBfile_methods[i].ml_meth; i++)
+            PyDict_SetItem(result, PyString_FromString(DBfile_methods[i].ml_name), PyString_FromString(DBfile_methods[i].ml_name));
+        Py_INCREF(result);
+        return result;
     }
 
+    for (i = 0; DBfile_methods[i].ml_name; i++)
+    {
+        if (!strcmp(name, DBfile_methods[i].ml_name))
+        {
+            PyObject *result = PyCFunction_New(&DBfile_methods[i], self);
+            if (result == NULL)
+                result = Py_None;
+            Py_INCREF(result);
+            return result;
+        }
+    }
+    return PyObject_GenericGetAttr(self, PyString_FromString(name));
+#else
     return Py_FindMethod(DBfile_methods, self, name);
-}
+#endif
 
-// ****************************************************************************
-//  Method:  DBfile_compare
-//
-//  Purpose:
-//    Compare two DBfileObjects.
-//
-//  Arguments:
-//    u, v       the objects to compare
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    July 12, 2005
-//
-// ****************************************************************************
-static int DBfile_compare(PyObject *v, PyObject *w)
-{
-    DBfile *a = ((DBfileObject *)v)->db;
-    DBfile *b = ((DBfileObject *)w)->db;
-    return (a<b) ? -1 : ((a==b) ? 0 : +1);
 }
-
 
 // ****************************************************************************
 //  DBfile Python Type Object
@@ -910,37 +1015,39 @@ PyTypeObject DBfileType =
     //
     // Type header
     //
-    PyObject_HEAD_INIT(&PyType_Type)
-    0,                                   // ob_size
-    "DBfile",                    // tp_name
-    sizeof(DBfileObject),        // tp_basicsize
+    PyVarObject_HEAD_INIT(&PyType_Type,0)
+    "DBfile",                            // tp_name
+    sizeof(DBfileObject),                // tp_basicsize
     0,                                   // tp_itemsize
+
     //
     // Standard methods
     //
-    (destructor)DBfile_dealloc,  // tp_dealloc
-    (printfunc)DBfile_print,     // tp_print
-    (getattrfunc)DBfile_getattr, // tp_getattr
-    0,//(setattrfunc)DBfile_setattr, // tp_setattr -- this object is read-only
-    (cmpfunc)DBfile_compare,     // tp_compare
+    (destructor)DBfile_dealloc,          // tp_dealloc
+    (printfunc)DBfile_print,             // tp_print
+    (getattrfunc)DBfile_getattr,         // tp_getattr
+    0,                                   // tp_setattr -- this object is read-only
+    0,                                   // tp_compare -- removed in python 3
     (reprfunc)0,                         // tp_repr
+
     //
     // Type categories
     //
     0,                                   // tp_as_number
     0,                                   // tp_as_sequence
     0,                                   // tp_as_mapping
+
     //
     // More methods
     //
     0,                                   // tp_hash
     0,                                   // tp_call
-    (reprfunc)DBfile_str,        // tp_str
+    (reprfunc)DBfile_str,                // tp_str
     0,                                   // tp_getattro
     0,                                   // tp_setattro
     0,                                   // tp_as_buffer
-    Py_TPFLAGS_CHECKTYPES,               // tp_flags
-    "This class wraps a Silo DBfile object.", // tp_doc
+    0,                                   // tp_flags
+    "Wrapper for a Silo DBfile object.", // tp_doc
     0,                                   // tp_traverse
     0,                                   // tp_clear
     0,                                   // tp_richcompare
