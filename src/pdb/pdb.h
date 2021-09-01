@@ -80,11 +80,11 @@ extern "C" {
 /* FILENAME_MAX.  HP's is only 14, so correct that here. */
 
 #ifndef MAXLINE
-  #define MAXLINE 1024
+  #define MAXLINE 4096
 #else
-  #if MAXLINE < 1024
+  #if MAXLINE < 4096
      #undef MAXLINE
-     #define MAXLINE 1024
+     #define MAXLINE 4096
   #endif
 #endif
 
@@ -124,6 +124,7 @@ extern "C" {
 #define PD_CLOSE  5
 #define PD_TRACE  6
 #define PD_PRINT  7
+#define PD_GENERIC 8
 
 #define ROW_MAJOR_ORDER     101
 #define COLUMN_MAJOR_ORDER  102
@@ -610,6 +611,19 @@ LITE_API extern int      lite_PD_append_alt (PDBfile*,char*,void*,int,long*);
 LITE_API extern int      lite_PD_append(PDBfile *file, char *name, void *vr);
 LITE_API extern int      lite_PD_append_as(PDBfile *file, char *name, char *intype, void *vr);
 LITE_API extern int      lite_PD_append_as_alt(PDBfile *file, char *name, char *intype, void *vr, int nd, long *ind);
+/* added 21Mar17 for Collette */
+LITE_API extern int      lite_PD_set_buffer_size(int s);
+LITE_API extern char    *lite_PD_get_error(void);
+LITE_API extern syment  *lite_PD_query_entry(PDBfile *file, char *name, char *fullname);
+LITE_API extern int      lite_PD_get_entry_info(syment *ep, char **type, long *size, int *ndims, long **dims);
+LITE_API extern void     lite_PD_rel_entry_info(syment *ep, char *type, long *dims);
+/* added 21Mar17 for Managan */
+LITE_API extern int      lite_PD_ln(PDBfile *file, char *oldname, char *newname);
+LITE_API extern void     lite_PD_free_entry_info(char *typ, long *pdim);
+LITE_API extern void   *_lite_PD_alloc_entry(PDBfile *file, char *type, long nitems);
+LITE_API extern defstr  *lite_PD_defstr_alt(PDBfile *file, char *name, int nmemb, char **members);
+LITE_API extern int     _lite_PD_identify_version(char *s);
+LITE_API extern int      lite_PD_isfile(char *fname);
 
 extern int		_lite_PD_adj_dimensions (PDBfile*,char*,syment*);
 extern int		_lite_PD_add_block (PDBfile*,syment*,dimdes*);
