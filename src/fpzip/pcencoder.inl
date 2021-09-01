@@ -18,7 +18,7 @@ template <typename T, class M>
 T PCencoder<T, M, false>::encode(T real, T pred, unsigned context)
 {
   // map type T to unsigned integer type
-  typedef typename M::RANGE U;
+  typedef typename M::FPZIP_Range_t U;
   U r = map.forward(real);
   U p = map.forward(pred);
   // entropy encode d = r - p
@@ -47,7 +47,7 @@ template <typename T, class M>
 T PCencoder<T, M, true>::encode(T real, T pred, unsigned context)
 {
   // map type T to unsigned integer type
-  typedef typename M::RANGE U;
+  typedef typename M::FPZIP_Range_t U;
   U r = map.forward(real);
   U p = map.forward(pred);
   // compute (-1)^s (2^k + m) = r - p, entropy code (s, k),

@@ -103,7 +103,7 @@ decompress3d(
 {
   // initialize decompressor
   typedef PCmap<T, bits> TMAP;
-  typedef typename TMAP::RANGE U;
+  typedef typename TMAP::FPZIP_Range_t U;
   typedef PCmap<U, bits, U> UMAP;
   RCmodel* rm = new RCqsmodel(false, PCdecoder<U, UMAP>::symbols);
   PCdecoder<U, UMAP>* fd = new PCdecoder<U, UMAP>(rd, &rm);
