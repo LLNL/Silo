@@ -141,7 +141,7 @@ char    *ObjTypeName[BROWSER_NOBJTYPES] = {
    "curve", "multimesh", "multivar", "multimat", "multispecies", "qmesh", 
    "qvar", "ucdmesh", "ucdvar", "ptmesh", "ptvar", "mat", "matspecies", "var",
    "obj", "dir", "array", "defvars", "csgmesh", "csgvar", "multimeshadj",
-   "mrgtree", "groupelmap", "mrgvar"
+   "mrgtree", "groupelmap", "mrgvar", "symlink"
 };
 
 /*
@@ -280,6 +280,13 @@ sort_toc_by_type (toc_t *a, toc_t *b) {
  *    Avoid calls to malloc(0) since the result isn't defined by Posix.
  *-------------------------------------------------------------------------
  */
+#define TOC_MEMBERS(kind,KIND) \
+   for (i=0; i<toc->n ## kind; i++,at++) { \
+      char const *target = DBIsSymlink(toc, toc->kind ## _names[i]);\
+      retval[at].name = safe_strdup (toc->kind ## _names[i]); \
+      retval[at].type = BROWSER_DB_ ## KIND; \
+   }
+
 toc_t *
 browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
 
@@ -301,125 +308,31 @@ browser_DBGetToc (DBfile *file, int *nentries, int (*sorter)(toc_t*,toc_t*)) {
    /*
     * Load the various types of objects into the new structure.
     */
-   for (i=0; i<toc->ndefvars; i++,at++) {
-      retval[at].name = safe_strdup (toc->defvars_names[i]);
-      retval[at].type = BROWSER_DB_DEFVARS;
-   }
 
-   for (i=0; i<toc->ncsgmesh; i++,at++) {
-      retval[at].name = safe_strdup (toc->csgmesh_names[i]);
-      retval[at].type = BROWSER_DB_CSGMESH;
-   }
-
-   for (i=0; i<toc->ncsgvar; i++,at++) {
-      retval[at].name = safe_strdup (toc->csgvar_names[i]);
-      retval[at].type = BROWSER_DB_CSGVAR;
-   }
-
-   for (i=0; i<toc->ncurve; i++,at++) {
-      retval[at].name = safe_strdup (toc->curve_names[i]);
-      retval[at].type = BROWSER_DB_CURVE;
-   }
-
-   for (i=0; i<toc->nmultimesh; i++,at++) {
-      retval[at].name = safe_strdup (toc->multimesh_names[i]);
-      retval[at].type = BROWSER_DB_MULTIMESH;
-   }
-
-   for (i=0; i<toc->nmultimeshadj; i++,at++) {
-      retval[at].name = safe_strdup (toc->multimeshadj_names[i]);
-      retval[at].type = BROWSER_DB_MULTIMESHADJ;
-   }
-
-   for (i=0; i<toc->nmultivar; i++,at++) {
-      retval[at].name = safe_strdup (toc->multivar_names[i]);
-      retval[at].type = BROWSER_DB_MULTIVAR;
-   }
-
-   for (i=0; i<toc->nmultimat; i++,at++) {
-      retval[at].name = safe_strdup (toc->multimat_names[i]);
-      retval[at].type = BROWSER_DB_MULTIMAT;
-   }
-
-   for (i=0; i<toc->nmultimatspecies; i++,at++) {
-      retval[at].name = safe_strdup (toc->multimatspecies_names[i]);
-      retval[at].type = BROWSER_DB_MULTIMATSPECIES;
-   }
-
-   for (i=0; i<toc->nqmesh; i++,at++) {
-      retval[at].name = safe_strdup (toc->qmesh_names[i]);
-      retval[at].type = BROWSER_DB_QMESH;
-   }
-
-   for (i=0; i<toc->nqvar; i++,at++) {
-      retval[at].name = safe_strdup (toc->qvar_names[i]);
-      retval[at].type = BROWSER_DB_QVAR;
-   }
-
-   for (i=0; i<toc->nucdmesh; i++,at++) {
-      retval[at].name = safe_strdup (toc->ucdmesh_names[i]);
-      retval[at].type = BROWSER_DB_UCDMESH;
-   }
-
-   for (i=0; i<toc->nucdvar; i++,at++) {
-      retval[at].name = safe_strdup (toc->ucdvar_names[i]);
-      retval[at].type = BROWSER_DB_UCDVAR;
-   }
-
-   for (i=0; i<toc->nptmesh; i++,at++) {
-      retval[at].name = safe_strdup (toc->ptmesh_names[i]);
-      retval[at].type = BROWSER_DB_PTMESH;
-   }
-
-   for (i=0; i<toc->nptvar; i++,at++) {
-      retval[at].name = safe_strdup (toc->ptvar_names[i]);
-      retval[at].type = BROWSER_DB_PTVAR;
-   }
-
-   for (i=0; i<toc->nmat; i++,at++) {
-      retval[at].name = safe_strdup (toc->mat_names[i]);
-      retval[at].type = BROWSER_DB_MAT;
-   }
-
-   for (i=0; i<toc->nmatspecies; i++,at++) {
-      retval[at].name = safe_strdup (toc->matspecies_names[i]);
-      retval[at].type = BROWSER_DB_MATSPECIES;
-   }
-
-   for (i=0; i<toc->nvar; i++,at++) {
-      retval[at].name = safe_strdup (toc->var_names[i]);
-      retval[at].type = BROWSER_DB_VAR;
-   }
-
-   for (i=0; i<toc->nobj; i++,at++) {
-      retval[at].name = safe_strdup (toc->obj_names[i]);
-      retval[at].type = BROWSER_DB_OBJ;
-   }
-
-   for (i=0; i<toc->ndir; i++,at++) {
-      retval[at].name = safe_strdup (toc->dir_names[i]);
-      retval[at].type = BROWSER_DB_DIR;
-   }
-
-   for (i=0; i<toc->narray; i++,at++) {
-      retval[at].name = safe_strdup (toc->array_names[i]);
-      retval[at].type = BROWSER_DB_ARRAY;
-   }
-
-   for (i=0; i<toc->nmrgtree; i++,at++) {
-      retval[at].name = safe_strdup (toc->mrgtree_names[i]);
-      retval[at].type = BROWSER_DB_MRGTREE;
-   }
-
-   for (i=0; i<toc->ngroupelmap; i++,at++) {
-      retval[at].name = safe_strdup (toc->groupelmap_names[i]);
-      retval[at].type = BROWSER_DB_GROUPELMAP;
-   }
-
-   for (i=0; i<toc->nmrgvar; i++,at++) {
-      retval[at].name = safe_strdup (toc->mrgvar_names[i]);
-      retval[at].type = BROWSER_DB_MRGVAR;
-   }
+   TOC_MEMBERS(defvars, DEFVARS);
+   TOC_MEMBERS(csgmesh, CSGMESH);
+   TOC_MEMBERS(csgvar, CSGVAR);
+   TOC_MEMBERS(curve, CURVE);
+   TOC_MEMBERS(multimesh, MULTIMESH);
+   TOC_MEMBERS(multimeshadj, MULTIMESHADJ);
+   TOC_MEMBERS(multivar, MULTIVAR);
+   TOC_MEMBERS(multimat, MULTIMAT);
+   TOC_MEMBERS(multimatspecies, MULTIMATSPECIES);
+   TOC_MEMBERS(qmesh, QMESH);
+   TOC_MEMBERS(qvar, QVAR);
+   TOC_MEMBERS(ucdmesh, UCDMESH);
+   TOC_MEMBERS(ucdvar, UCDVAR);
+   TOC_MEMBERS(ptmesh, PTMESH);
+   TOC_MEMBERS(ptvar, PTVAR);
+   TOC_MEMBERS(mat, MAT);
+   TOC_MEMBERS(matspecies, MATSPECIES);
+   TOC_MEMBERS(var, VAR);
+   TOC_MEMBERS(obj, OBJ);
+   TOC_MEMBERS(dir, DIR);
+   TOC_MEMBERS(array, ARRAY);
+   TOC_MEMBERS(mrgtree, MRGTREE);
+   TOC_MEMBERS(groupelmap, GROUPELMAP);
+   TOC_MEMBERS(mrgvar, MRGVAR);
 
    assert (at==total);
 
@@ -1606,11 +1519,6 @@ main(int argc, char *argv[])
         ((sw=switch_find(sws, "--version")) && sw->seen && 2==argc)) {
         exit(0);
     }
-
-    if (DBDebugAPI >= 2 || Verbosity >= 2)
-        DBSetDeprecateWarnings(100);
-    else
-        DBSetDeprecateWarnings(0);
   
     /* Register the ale3d and debug filters. */    
     DBFilterRegistration("ale3d", NULL, f_ale3d_Open);

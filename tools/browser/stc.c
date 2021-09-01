@@ -1751,9 +1751,9 @@ stc_silo_types (void) {
             "pointer (array 'self.nmats' (primitive 'int'))");
       COMP (matcounts,
             "pointer (array 'self.nmats' (primitive 'int'))");
-      /* This matlists entry is wrong...its size is the sum of matcounts */
+#warning CHECK BEHAVIOR OF THIS MEMBER
       COMP (matlists,
-            "pointer (array 'self.nmats' (primitive 'int'))");
+            "pointer (array 'SH4, self.matcounts' (primitive 'int'))");
       COMP (nmatnos,            "primitive 'int'");
       COMP (matnos,
             "pointer (array 'self.nmatnos' (primitive 'int'))");
@@ -2353,5 +2353,8 @@ stc_silo_types (void) {
       COMP (nmrgvar,               "primitive 'int'");
       COMP (mrgvar_names,
             "pointer (array 'self.nmrgvar' (primitive 'string'))");
+      COMP (nsymlink,               "primitive 'int'");
+      COMP (symlink_names,
+            "pointer (array 'self.nsymlink' (primitive 'string'))");
    } ESTRUCT;
 }

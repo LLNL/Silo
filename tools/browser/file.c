@@ -1415,7 +1415,6 @@ browser_DBGetCompoundarray (DBfile *file, char *name, obj_t *type_ptr) {
    return b_ca;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    browser_DBFreeCompoundarray
  *
@@ -1444,6 +1443,24 @@ browser_DBFreeCompoundarray (void *mem, obj_t type) {
    if (!ca) return;
    DBFreeCompoundarray (ca);
 }
+
+static void *
+browser_DBGetSymlink(DBfile *file, char *name, obj_t *type_ptr) {
+   obj_t type=NIL;
+   char target[2*256];
+   char **retval;
+
+   if (DBGetSymlink(file, name, target) != 0) return NULL;
+   retval = (char **) calloc(1,sizeof(char*));
+   *type_ptr = obj_new (C_PRIM, "string");
+   *retval = safe_strdup(target);
+   return retval;
+}
+
+static void
+browser_DBFreeSymlink(void *mem, obj_t type) {
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -2594,6 +2611,15 @@ file_deref (obj_t _self, int argc, obj_t argv[]) {
             r_mem = browser_DBGetCompoundarray(file, base, &type);
             savefunc = NULL;
             freefunc = browser_DBFreeCompoundarray;
+            if (r_mem) goto done;
+        }
+    }
+
+    for (i=0; i<toc->nsymlink; i++) {
+        if (!strcmp(toc->symlink_names[i], base)) {
+            r_mem = browser_DBGetSymlink(file, base, &type);
+            savefunc = NULL;
+            freefunc = browser_DBFreeSymlink;
             if (r_mem) goto done;
         }
     }

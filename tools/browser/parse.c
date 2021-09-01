@@ -199,8 +199,9 @@ parse_init (void) {
    
    bif ("ls",           V_list,         HOLD,
         "List directory contents.",
-        "Lists the current working directory (CWD) of the specified file. If "
-        "no file is specified then list the CWD of the file represented by "
+        "Lists the current working directory (CWD) of the specified file. "
+        "Pass a -l option to expand any symbolic links to show their targets. "
+        "If no file is specified then list the CWD of the file represented by "
         "browser internal variable `$1'. Subsequent arguments are the names "
         "of the objects to be listed. If no names are supplied then all "
         "objects of the CWD are listed. Shell wild-cards are allowed in the "

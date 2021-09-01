@@ -566,8 +566,8 @@ int
 lex_token(lex_t *f, char **lexeme, int skipnl)
 {
     int          c, at, quote, inDotSiloDir=0;
-    static const char *symcharsA = "_$/*?";
-    static const char *symcharsB = "_$/*?#";
+    static const char *symcharsA = "_$/*?@";
+    static const char *symcharsB = "_$/*?#@";
     const char *symchars = symcharsA;
 
     /* Return the current token if appropriate. */    

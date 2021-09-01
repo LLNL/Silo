@@ -75,6 +75,7 @@ be used for advertising or product endorsement purposes.
 #include <assert.h>
 #include <browser.h>
 #include <ctype.h>
+#include <stdint.h>
 #define MYCLASS(X)      ((obj_ary_t*)(X))
 
 typedef struct obj_ary_t {
@@ -596,12 +597,21 @@ ary_walk1 (obj_t _self, void *mem, int operation, walk_t *wdata) {
 
    case WALK_RETRIEVE:
       if (wdata->nvals<0) return ;      /*error already detected*/
-      if (wdata->vals == 0)
+      if (wdata->maxvals == -1)
+      {
+          wdata->vals = malloc(n*nbytes);
+          wdata->nvals = 0;
+          wdata->maxvals = n;
+          for (i=0; i<n; i++) {
+             obj_walk1 (self->sub, (char*)mem+i*nbytes, operation, wdata);
+          }
+      }
+      else if (wdata->vals == 0)
       {
           int sentinel = wdata->maxvals;
           void **memtmp = (void**) mem;
           i = 0;
-          while ((void*) sentinel != memtmp[i])
+          while (sentinel != (intptr_t) memtmp[i])
               i++;
           wdata->nvals = i;
       }
@@ -1361,6 +1371,8 @@ ary_bind (obj_t _self, void *mem) {
          } else if (ARY_SH_3==self->special_handling) {
             self->special_handling = 0; /*completely handled here*/
             max_dim0 = strtol (rest, &rest, 0);
+         } else if (ARY_SH_4==self->special_handling) {
+             ((void) 0); /* NO-OP */
          } else if (ARY_SH_5==self->special_handling) {
             sentinel = strtol (rest, &rest, 0);
              self->ndims = 1;
@@ -1405,7 +1417,25 @@ ary_bind (obj_t _self, void *mem) {
             self->ndims = 0;
             goto error;
          }
-         if (ARY_SH_5==self->special_handling)
+
+         if (ARY_SH_4==self->special_handling)
+         {
+             /* retriev underlying array and sum its values */
+             wdata.vals = 0;
+             wdata.nvals = 0;
+             wdata.maxvals = -1;
+             obj_walk1 (sdo, NULL, WALK_RETRIEVE, &wdata);
+             self->ndims = 1;
+             self->dim[0] = 0;
+             if (wdata.vals && wdata.nvals > 0)
+             {
+                 for (i=0; i<wdata.nvals; i++)
+                     self->dim[0] += wdata.vals[i];
+                 free(wdata.vals);
+             }
+             sdo = obj_dest (sdo);
+         }
+         else if (ARY_SH_5==self->special_handling)
          {
              wdata.vals = 0;
              wdata.nvals = 0;
