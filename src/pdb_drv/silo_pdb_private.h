@@ -156,8 +156,6 @@ SILO_CALLBACK int db_pdb_GetComponentNames (DBfile *, char const *, char ***, ch
 
 SILO_CALLBACK int db_pdb_FreeCompressionResources(DBfile *_dbfile, char const *meshname);
 
-
-
 PRIVATE int db_pdb_getobjinfo (PDBfile *, char const *, char *, int *);
 PRIVATE int db_pdb_getvarinfo (PDBfile *, char const *, char *, int *, int *, int);
 
@@ -343,7 +341,7 @@ PRIVATE void db_InitDefvars (DBoptlist const *);
  *-------------------------------------------------------------------------
  */
 PRIVATE char **PJ_ls (PDBfile *, char *, char *, int *);
-PRIVATE int PJ_get_fullpath (PDBfile *, char *, char const *, char *);
+PRIVATE int PJ_get_fullpath (char *, char const *, char *);
 
 PRIVATE int PJ_read (PDBfile *, char const *, void *);
 PRIVATE int PJ_read_alt (PDBfile *, char *, void *, long *);

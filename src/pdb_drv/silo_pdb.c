@@ -266,7 +266,7 @@ pj_fixname (PDBfile *file, char const *inname) {
       _outname[sizeof(_outname)-1] = '\0';
    }
    else {
-      PJ_get_fullpath(file, lite_PD_pwd(file), inname, _outname);
+      PJ_get_fullpath(lite_PD_pwd(file), inname, _outname);
    }
 
    return (_outname);
@@ -1698,7 +1698,7 @@ PJ_put_group (
    /*----------------------------------------
     *  Build an absolute pathname.
     *---------------------------------------*/
-   PJ_get_fullpath(file, lite_PD_pwd(file), group->name, name);
+   PJ_get_fullpath(lite_PD_pwd(file), group->name, name);
 
    /*----------------------------------------
     *  Make sure this group description hasn't
@@ -2255,7 +2255,8 @@ db_pdb_Create (char const *name, int mode, int target, int opts_set_id, char con
 #ifdef USING_PDB_PROPER
     dbfile->pub.type = DB_PDBP;
 #endif
-    /*db_InitFileScopeGlobals(dbfile);*/
+#warning db_InitFileScopeGlobals was commented out
+    db_InitFileScopeGlobals(dbfile);
     db_pdb_InitCallbacks((DBfile *) dbfile);
 
     if (NULL == (dbfile->pdb = lite_PD_open((char*)name, "w")))
@@ -2383,80 +2384,18 @@ PJ_ls (PDBfile       *file, /* PDB file pointer */
  *--------------------------------------------------------------------*/
 INTERNAL int
 PJ_get_fullpath(
-   PDBfile       *file,
    char          *cwd,         /* Current working directory */
    char const    *path,        /* Pathname (abs or rel) to traverse */
    char          *name)        /* Returned adjusted name */
 {
-    int             ierr;
-    char           *subpath;
-    char            tmpstr[1024];
+    char *abspath;
 
-    if (file == NULL || cwd == NULL || path == NULL || name == NULL)
+    if (cwd == NULL || path == NULL || name == NULL)
         return (FALSE);
 
-    ierr = 0;
-    name[0] = '\0';
-
-    /*
-     *  If using an absolute path just copy verbatim.
-     */
-    if (path[0] == '/')
-    {
-        strcpy(name, path);
-    } else
-    {
-
-        /*
-         *  Using a relative path.
-         *  Break path into slash-separated tokens, and process
-         *  each subpath individually.
-         */
-
-        strcpy(name, cwd);
-        strcpy(tmpstr, path);
-
-        subpath = (char *)strtok(tmpstr, "/");
-
-        while (subpath != NULL && !ierr)
-        {
-
-            if (STR_EQUAL("/", subpath))
-            {
-
-                /* No-op */
-
-            } else if (STR_EQUAL(".", subpath))
-            {
-
-                /* No-op */
-
-            } else if (STR_EQUAL("..", subpath))
-            {
-
-                /* Go up one level, unless already at top */
-                if (!STR_EQUAL("/", cwd))
-                {
-                    char           *s;
-
-                    s = strrchr(name, '/');
-                    if (s != NULL)
-                        s[0] = '\0';
-                }
-            } else
-            {
-
-                /* Append to end of current path */
-                if (STR_LASTCHAR(name) != '/')
-                    strcat(name, "/");
-                strcat(name, subpath);
-            }
-            subpath = (char *)strtok(NULL, "/");
-        }
-    }
-
-    if (name[0] == '\0')
-        strcpy(name, "/");
+    abspath = db_absoluteOf_path(cwd, path);
+    strcpy(name, abspath);
+    free(abspath);
 
     return (TRUE);
 }
@@ -3417,6 +3356,10 @@ db_pdb_GetMaterial(DBfile *_dbfile,     /*DB file pointer */
 
     mm->id = 0;
     mm->name = STRDUP(name);
+    if (0 >= mm->mixlen)
+    {
+        mm->datatype = DB_NOTYPE;
+    }
     if (DB_DOUBLE == mm->datatype && PJ_InqForceSingle())
     {
         mm->datatype = DB_FLOAT;
@@ -5192,7 +5135,6 @@ db_pdb_GetQuadvar (DBfile *_dbfile, char const *objname)
    if ((qv = DBAllocQuadvar()) == NULL)
       return NULL;
    *qv = tmpqv;
-
 
    /*
     *  Read the remainder of the object: loop over all values
@@ -9406,6 +9348,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char const *name, int nmats,
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "material_names", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+      _mm._matnames = 0;
    }
 
    /*-------------------------------------------------------------
@@ -9418,6 +9361,7 @@ db_pdb_PutMultimat (DBfile *dbfile, char const *name, int nmats,
       llen = (long) len;
       DBWriteComponent(dbfile, obj, "matcolors", name, "char", tmpstr, 1, &llen);
       FREE(tmpstr);
+      _mm._matcolors = 0;
    }
 
    /*-------------------------------------------------------------
