@@ -1,62 +1,62 @@
-!***********************************************************************
-! Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
-! LLNL-CODE-425250.
-! All rights reserved.
-! 
-! This file is part of Silo. For details, see silo.llnl.gov.
-! 
-! Redistribution and use in source and binary forms, with or without
-! modification, are permitted provided that the following conditions
-! are met:
-! 
-!    * Redistributions of source code must retain the above copyright
-!      notice, this list of conditions and the disclaimer below.
-!    * Redistributions in binary form must reproduce the above copyright
-!      notice, this list of conditions and the disclaimer (as noted
-!      below) in the documentation and/or other materials provided with
-!      the distribution.
-!    * Neither the name of the LLNS/LLNL nor the names of its
-!      contributors may be used to endorse or promote products derived
-!      from this software without specific prior written permission.
-! 
-! THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
-! "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
-! LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-! A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
-! LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
-! CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-! EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
-! PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
-! PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-! LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
-! NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
-! SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-! 
-! This work was produced at Lawrence Livermore National Laboratory under
-! Contract No.  DE-AC52-07NA27344 with the DOE.
-! 
-! Neither the  United States Government nor  Lawrence Livermore National
-! Security, LLC nor any of  their employees, makes any warranty, express
-! or  implied,  or  assumes  any  liability or  responsibility  for  the
-! accuracy, completeness,  or usefulness of  any information, apparatus,
-! product, or  process disclosed, or  represents that its use  would not
-! infringe privately-owned rights.
-! 
-! Any reference herein to  any specific commercial products, process, or
-! services by trade name,  trademark, manufacturer or otherwise does not
-! necessarily  constitute or imply  its endorsement,  recommendation, or
-! favoring  by  the  United  States  Government  or  Lawrence  Livermore
-! National Security,  LLC. The views  and opinions of  authors expressed
-! herein do not necessarily state  or reflect those of the United States
-! Government or Lawrence Livermore National Security, LLC, and shall not
-! be used for advertising or product endorsement purposes.
-!***********************************************************************
+C***********************************************************************
+C Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+C LLNL-CODE-425250.
+C All rights reserved.
+C 
+C This file is part of Silo. For details, see silo.llnl.gov.
+C 
+C Redistribution and use in source and binary forms, with or without
+C modification, are permitted provided that the following conditions
+C are met:
+C 
+C    * Redistributions of source code must retain the above copyright
+C      notice, this list of conditions and the disclaimer below.
+C    * Redistributions in binary form must reproduce the above copyright
+C      notice, this list of conditions and the disclaimer (as noted
+C      below) in the documentation and/or other materials provided with
+C      the distribution.
+C    * Neither the name of the LLNS/LLNL nor the names of its
+C      contributors may be used to endorse or promote products derived
+C      from this software without specific prior written permission.
+C 
+C THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
+C "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
+C LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+C A  PARTICULAR  PURPOSE ARE  DISCLAIMED.  IN  NO  EVENT SHALL  LAWRENCE
+C LIVERMORE  NATIONAL SECURITY, LLC,  THE U.S.  DEPARTMENT OF  ENERGY OR
+C CONTRIBUTORS BE LIABLE FOR  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+C EXEMPLARY, OR  CONSEQUENTIAL DAMAGES  (INCLUDING, BUT NOT  LIMITED TO,
+C PROCUREMENT OF  SUBSTITUTE GOODS  OR SERVICES; LOSS  OF USE,  DATA, OR
+C PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+C LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
+C NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
+C SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+C 
+C This work was produced at Lawrence Livermore National Laboratory under
+C Contract No.  DE-AC52-07NA27344 with the DOE.
+C 
+C Neither the  United States Government nor  Lawrence Livermore National
+C Security, LLC nor any of  their employees, makes any warranty, express
+C or  implied,  or  assumes  any  liability or  responsibility  for  the
+C accuracy, completeness,  or usefulness of  any information, apparatus,
+C product, or  process disclosed, or  represents that its use  would not
+C infringe privately-owned rights.
+C 
+C Any reference herein to  any specific commercial products, process, or
+C services by trade name,  trademark, manufacturer or otherwise does not
+C necessarily  constitute or imply  its endorsement,  recommendation, or
+C favoring  by  the  United  States  Government  or  Lawrence  Livermore
+C National Security,  LLC. The views  and opinions of  authors expressed
+C herein do not necessarily state  or reflect those of the United States
+C Government or Lawrence Livermore National Security, LLC, and shall not
+C be used for advertising or product endorsement purposes.
+C***********************************************************************
 
       program testmat
 
 
-!...This program tests the use of the UCD Fortran jacket routines, plus
-!...the underlying UCD C routines.
+C...This program tests the use of the UCD Fortran jacket routines, plus
+C...the underlying UCD C routines.
       include 'silo.inc'
       integer driver, nargs
       character*256 cloption
@@ -75,49 +75,49 @@
       end
 
       subroutine writeit (fname, drvr)
-!----------------------------------------------------------------------
-!----------------------------------------------------------------------
-!----------------------------------------------------------------------
-!----------------------------------------------------------------------
-! Writes the following 2x3 quadmesh (note colmajor ordering)
-!
-!    ^Y axis
-!    |
-!   3-     1--------4--------7-------10
-!    |     |        |        |       |
-!    |     |   1    |   3    |   5   |
-!   2-     2--------5--------8-------11
-!    |     |        |        |       |
-!    |     |   2    |   4    |   6   |
-!   1-     3--------6--------9-------12
-!    |
-!   0------1--------2--------3-------4-->X axis
-!    
-! with 2-material composition. . .
-!
-!          +--------+-------/+-------+
-!          |   1    |  1   / |       |
-!          |        |     / 2|   2   |
-!          +--------+----/---+-------+
-!          |   1    | 1 /    |       |
-!          |        |  /  2  |   2   |
-!          +--------+-/------+-------+
-!
-! using 2D Fortran arrays A(#rows,#cols) stored column major (e.g.
-! row index varies fastest as you march through A's memory). Note
-! that #rows is size in Y direction while #cols is size in X
-! direction. So, A is dimensioned (nY,nX). In Fortran, the left-most
-! dimension in an array declaration varies fastest when marching 
-! through array elements in memory. However, the 'dims' array in
-! Silo's DBPut calls is arranged such that dims[0] is the size in
-! X, dims[1] the size in Y and dims[2], if applicable, the size in Z.
-! So, although we have declarations for A(3,4), the dims array is
-! passed in as dims[0] = 4, dims[1] = 3
-!----------------------------------------------------------------------
-!c      implicit double precision (a-h,o-z)
+C----------------------------------------------------------------------
+C----------------------------------------------------------------------
+C----------------------------------------------------------------------
+C----------------------------------------------------------------------
+C Writes the following 2x3 quadmesh (note colmajor ordering)
+C
+C    ^Y axis
+C    |
+C   3-     1--------4--------7-------10
+C    |     |        |        |       |
+C    |     |   1    |   3    |   5   |
+C   2-     2--------5--------8-------11
+C    |     |        |        |       |
+C    |     |   2    |   4    |   6   |
+C   1-     3--------6--------9-------12
+C    |
+C   0------1--------2--------3-------4-->X axis
+C    
+C with 2-material composition. . .
+C
+C          +--------+-------/+-------+
+C          |   1    |  1   / |       |
+C          |        |     / 2|   2   |
+C          +--------+----/---+-------+
+C          |   1    | 1 /    |       |
+C          |        |  /  2  |   2   |
+C          +--------+-/------+-------+
+C
+C using 2D Fortran arrays A(#rows,#cols) stored column major (e.g.
+C row index varies fastest as you march through A's memory). Note
+C that #rows is size in Y direction while #cols is size in X
+C direction. So, A is dimensioned (nY,nX). In Fortran, the left-most
+C dimension in an array declaration varies fastest when marching 
+C through array elements in memory. However, the 'dims' array in
+C Silo's DBPut calls is arranged such that dims[0] is the size in
+C X, dims[1] the size in Y and dims[2], if applicable, the size in Z.
+C So, although we have declarations for A(3,4), the dims array is
+C passed in as dims[0] = 4, dims[1] = 3
+C----------------------------------------------------------------------
+Cc      implicit double precision (a-h,o-z)
 
 
-!...Include SILO definitions.
+C...Include SILO definitions.
 
       include 'silo.inc'
 
@@ -127,7 +127,7 @@
       integer  tcycle
       real     ttime
       real     x(3,4), y(3,4)
-!...For co-linear case
+C...For co-linear case
       real xcl(4), ycl(3)
 
       integer  matlist(2,3), matlistcl(3,2)
@@ -141,12 +141,12 @@
       real     mix_vf(4)
 
       data matlist/1, 1, -1, -3, 2, 2/
-!      data matlistcl/1, -1, 2, 1, -3, 2/
+C      data matlistcl/1, -1, 2, 1, -3, 2/
       data matlistcl/1, -3, 2, 1, -1, 2/
-!      data dims/4,3/
+C      data dims/4,3/
       data dims/3,4/
       data dimscl/4,3/
-!      data zdims/3,2/
+C      data zdims/3,2/
       data zdims/2,3/
       data zdims/2,3/
       data zdimscl/3,2/
@@ -193,7 +193,7 @@
      . mix_next, mix_mat, mix_zone, mix_vf, 4,
      . DB_FLOAT, DB_F77NULL, dbstat)
 
-!...Close file before quitting.
+C...Close file before quitting.
 
       err = dbclose(dbid)
 

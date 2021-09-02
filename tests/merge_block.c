@@ -93,7 +93,7 @@ int main (int argc, char **argv)
     if (argc != 3 && argc != 4)
     {
         printf ("usage: merge_blocks basename meshfilename [DB_HDF5 | DB_PDB]\n");
-        exit(EXIT_SUCCESS);
+        exit (1);
     }
     if (argc == 4)
     {

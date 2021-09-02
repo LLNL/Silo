@@ -58,8 +58,9 @@ be used for advertising or product endorsement purposes.
    version 1.8 and thereafter. When, and if, the HDF5 code in this file
    is explicitly upgraded to the 1.8 API, this symbol should be removed. */
 #define H5_USE_16_API
-/*#include "H5pubconf.h"*/
-#include "hdf5.h"
+#warning DO WE NEED THIS HEADER FILE
+#include <H5pubconf.h>
+#include <hdf5.h>
 
 #include <errno.h>
 #include <assert.h>
@@ -244,6 +245,7 @@ PRIVATE int db_hdf5_fullname(DBfile_hdf5 *dbfile, char *name, char *full);
 PRIVATE int hdf2silo_type(hid_t type);
 PRIVATE int db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
               int const *dims, int ndims, int datatype, int nofilters);
+PRIVATE int db_hdf5_getslink(hid_t cwg, char const *in_candidate_link, char *out_target);
 
 /* callbacks prototypes for file image ops */
 #if HDF5_VERSION_GE(1,8,9)
@@ -2116,7 +2118,7 @@ db_hdf5_init(void)
     db_hdf5_fpzip_params.loss = 0;
 #if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
     db_hdf5_fpzip_class.version = H5Z_CLASS_T_VERS;
-    db_hdf5_fpzip_class.encoder_present = 0;
+    db_hdf5_fpzip_class.encoder_present = 1;
     db_hdf5_fpzip_class.decoder_present = 1;
 #endif
     db_hdf5_fpzip_class.id = DB_HDF5_FPZIP_ID;
@@ -2147,7 +2149,8 @@ db_hdf5_init(void)
 
 #if HDF5_VERSION_GE(1,8,0) && !defined(H5_USE_16_API)
     db_hdf5_hzip_class.version = H5Z_CLASS_T_VERS;
-    db_hdf5_hzip_class.encoder_present = 0;
+#warning SHOULD WE DISABLE HZIP AND FPZIP ENCODING
+    db_hdf5_hzip_class.encoder_present = 1;
     db_hdf5_hzip_class.decoder_present = 1;
 #endif
     db_hdf5_hzip_class.id = DB_HDF5_HZIP_ID;
@@ -2790,6 +2793,10 @@ db_hdf5_InitCallbacks(DBfile_hdf5 *dbfile, int target)
     dbfile->pub.newtoc = db_hdf5_NewToc;
     dbfile->pub.mkdir = db_hdf5_MkDir;
     dbfile->pub.cpdir = db_hdf5_CpDir;
+#warning GET RID OF CPLISTEDOBJECTS
+    dbfile->pub.cpnobjs = db_hdf5_CpListedObjects;
+    dbfile->pub.mksymlink = db_hdf5_MkSymlink;
+    dbfile->pub.g_symlink = db_hdf5_GetSymlink;
 
     /* Variable inquiries */
     dbfile->pub.exist = db_hdf5_InqVarExists;
@@ -3383,6 +3390,7 @@ db_hdf5_set_compression(DBfile *dbfile, int flags)
     }
 #endif
 
+#warning QUERY FILE LEVEL COMPRESSION PARAMS HERE
     opt_flag = SILO_Globals.compressionErrmode == COMPRESSION_ERRMODE_FALLBACK ?
                    H5Z_FLAG_OPTIONAL : H5Z_FLAG_MANDATORY;
 
@@ -3941,16 +3949,30 @@ db_hdf5_get_comp_var(DBfile *_dbfile, char const *name, hsize_t *nelmts,
  *-------------------------------------------------------------------------
  */
 PRIVATE herr_t
-load_toc(hid_t grp, char const *name, void *_toc)
+load_toc(hid_t grp, char const *name, H5L_info_t const *dummy, void *_toc)
 {
     DBtoc               *toc = (DBtoc*)_toc;
     H5G_stat_t          sb;
+    H5L_info_t          lb;
     DBObjectType        objtype = DB_INVALID_OBJECT;
-    int                 n, *nvals=NULL, _objtype;
+    int                 *nvals=NULL, _objtype, islink=0;
     char                ***names=NULL;
     hid_t               obj=-1, attr=-1;
 
-    if (H5Gget_objinfo(grp, name, TRUE, &sb)<0) return -1;
+    if (H5Gget_objinfo(grp, name, FALSE, &sb)<0) return -1;
+    if (H5Lget_info(grp, name, &lb, H5P_DEFAULT)<0) return -1;
+    if (sb.type == H5G_LINK)
+    {
+        islink = 1;
+        if (H5Gget_objinfo(grp, name, TRUE, &sb)<0) return -1;
+    }
+    else if (lb.type == H5L_TYPE_EXTERNAL)
+    {
+        /* external links are presently constrained to work
+           only for group tagets */
+        islink = 1;
+        sb.type = H5G_GROUP;
+    }
     switch (sb.type) {
     case H5G_GROUP:
         /*
@@ -3975,6 +3997,7 @@ load_toc(hid_t grp, char const *name, void *_toc)
 
     case H5G_DATASET:
         objtype = DB_VARIABLE;
+        islink = 0; /* ignore links on raw data */
         break;
 
     default:
@@ -4092,10 +4115,34 @@ load_toc(hid_t grp, char const *name, void *_toc)
     }
 
     /* Append to table of contents */
-    if (names && nvals) {
-        n = (*nvals)++;
+#warning REVISIT THIS CODE BLOCK
+#if 0
+    if (islink) {
+        int n = toc->nsymlink++;
+        toc->symlink_names = (char **) realloc(toc->symlink_names, (n+1)*sizeof(char*));
+        toc->symlink_names[n] = STRDUP(name);
+    }
+    else if (names && nvals) {
+        int n = (*nvals)++;
         *names = (char **)realloc(*names, *nvals*sizeof(char*));
         (*names)[n] = STRDUP(name);
+    }
+#endif
+    if (names && nvals) {
+        int n1 = (*nvals)++;
+        *names = (char **)realloc(*names, *nvals*sizeof(char*));
+        (*names)[n1] = STRDUP(name);
+        if (islink) {
+            char target[2*256];
+            int n2 = toc->nsymlink++;
+            toc->symlink_names = (char **) realloc(toc->symlink_names, (n2+1)*sizeof(char*));
+            toc->symlink_names[n2] = (*names)[n1]; /* note: copy of the pointer */
+            toc->symlink_target_names = (char **) realloc(toc->symlink_target_names, (n2+1)*sizeof(char*));
+            if (db_hdf5_getslink(grp, name, target) == 0)
+                toc->symlink_target_names[n2] = STRDUP(target);
+            else
+                toc->symlink_target_names[n2] = STRDUP("unknown");
+        }
     }
 
     return 0;
@@ -4683,6 +4730,7 @@ db_hdf5_resolvename(DBfile *_dbfile,
     static int const nmax = 32;
     static char *cbuf[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                              0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+#warning HARD CODED SIZE HERE
     static char cwgname[4096];
     char *parent_objdirname = 0;
     char *parent_fullname = 0;
@@ -4904,19 +4952,17 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     H5AC_cache_config_t h5mdc_config;
 #endif
 
-#if 0
-
     /* Performance optimizations for memory footprint */
 #if HDF5_VERSION_GE(1,8,0)
 #warning FIX ME...THIS NEEDS TO BE CONDITION ON COMPAT MODE WORKS FOR 1.8.0
     H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
 
-#if HDF5_VERSION_GE(1,9,0)
+#if HDF5_VERSION_GE(1,10,1)
     H5Pset_evict_on_close(retval, (hbool_t)1);
 #endif
 
 #warning SET FRIENDLY NAMES TO 2 but only at file level
-    DBGetFriendlyHDF5NamesFile((DBfile*)dbfile) = 2;
+    /*DBGetFriendlyHDF5NamesFile((DBfile*)dbfile) = 2;*/
 
     /* First, initialize our copy of h5mdc_config */
     h5mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -4933,9 +4979,6 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     H5Pset_mdc_config(retval, &h5mdc_config);
 #endif
 
-
-#endif
-
     /* This property effects how HDF5 deals with objects that are left
        open when the file containing them is closed. The SEMI setting
        means that HDF5 will flag it is an error. The STRONG setting
@@ -4948,7 +4991,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     else
         h5status |= H5Pset_fclose_degree(retval, H5F_CLOSE_STRONG);
 
-    /* Disable chunk caching */
+    /* Disable chunk caching since we single chunk */
     H5Pset_cache(retval, 0, 0, 0, 0);
 
     /* Handle cases where we are running on Windows. If a client
@@ -5045,6 +5088,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         /* default HDF5 mpi drivers */
         case DB_FILE_OPTS_H5_DEFAULT_MPIP:
         {
+#warning DO WE STILL NEED THIS
             H5Pclose(retval);
             return db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
             break;
@@ -5383,6 +5427,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                     }
                     else
                     {
+#warning DO WE STILL NEED THIS
                         H5Pclose(retval);
                         return db_perror("HDF5 MPIPOSIX VFD not available in >HDF5-1.8.12", E_NOTENABLEDINBUILD, me);
                     }
@@ -5466,6 +5511,23 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         }
     }
 
+#warning FIX THIS
+#if 0
+    /* Handle cases where we are running on Windows. We need to ensure
+       that fapl VFD is windows. So, we re-set fapl here if running on windows.
+       The intent is that all other fapl properties that are not specific to
+       the VFD will pass through ok but that anything that winds up setting
+       non-windows VFD on windows is reverted here. This has the effect of
+       dis-allowing things like core, split or family VFDs on windows which
+       might otherwise work there fine. All of this is in the hopes of
+       resolving file locking issues on Windows where a code like Ale3d
+       creates a Silo file there and then VisIt cannot open that file until
+       Ale3d exits. */
+#if defined(_WIN32)
+    h5status |= H5Pset_fapl_windows(retval);
+#endif
+#endif
+
     if (h5status < 0)
     {
         H5Pclose(retval);
@@ -5476,7 +5538,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    db_hdf5_file_props 
+ * Function:    db_hdf5_file_accprops 
  *
  * Purpose:     Create file access property lists 
  *
@@ -5495,7 +5557,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
  *-------------------------------------------------------------------------
  */
 PRIVATE hid_t 
-db_hdf5_file_props(int subtype, int mode, hid_t *fcpl)
+db_hdf5_file_accprops(int subtype, int mode, hid_t *fcpl)
 {
     int opts_set_id = subtype & 0x0000003F;
     return db_hdf5_process_file_options(opts_set_id, mode, fcpl);
@@ -5747,7 +5809,7 @@ db_hdf5_initiate_close(DBfile *_dbfile)
             {
                 char name[256], tmp[256];
                 H5Iget_name(ooids[i], name, sizeof(name));
-                sprintf(tmp, "\"%.235s\" (id=%d), ", name, ooids[i]);
+                sprintf(tmp, "\"%.235s\" (id=%llu), ", name, (unsigned long long) ooids[i]);
                 if ((strlen(msg) + strlen(tmp) + 1) >= sizeof(msg))
                     break;
                 strcat(msg, tmp);
@@ -5821,7 +5883,7 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
         return NULL;
     }
 
-    faprops = db_hdf5_file_props(opts_set_id, mode, 0); 
+    faprops = db_hdf5_file_accprops(opts_set_id, mode, 0);
 
     /* Open existing hdf5 file */
     if ((fid=H5Fopen(name, hmode, faprops))<0) {
@@ -5891,7 +5953,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     else
         H5Eset_auto(NULL, NULL);
 
-    faprops = db_hdf5_file_props(opts_set_id, mode, &fcprops);
+    faprops = db_hdf5_file_accprops(opts_set_id, mode, &fcprops);
 
         /* Create or open hdf5 file */
     if (DB_CLOBBER==mode) {
@@ -5938,7 +6000,7 @@ db_hdf5_Create(char const *name, int mode, int target, int opts_set_id, char con
     *fidp = fid;
     dbfile->pub.GrabId = (void*) fidp;
     dbfile->fid = fid;
-#warning FIXME
+#warning FIX FILE SCOPE GLOBAL INITIALIZATION
 #if 0
     *(dbfile->pub.file_scope_globals) = SILO_Globals;
 #endif
@@ -6079,9 +6141,9 @@ db_hdf5_Filters(DBfile *_dbfile, FILE *stream)
  *              Wednesday, February 10, 1999
  *
  * Modifications:
- *              Robb Matzke, 1999-10-13
- *              Uses the current working group instead of the root group when
- *              adding the `..' entry.
+ *     Robb Matzke, 1999-10-13
+ *     Uses the current working group instead of the root group when
+ *     adding the `..' entry.
  *-------------------------------------------------------------------------
  */
 SILO_CALLBACK int
@@ -6093,6 +6155,7 @@ db_hdf5_MkDir(DBfile *_dbfile, char const *name)
     hid_t       grp = -1;
 
     PROTECT {
+
         /* Create the new group */
         if ((grp=H5Gcreate(dbfile->cwg, name, 0))<0) {
             db_perror(name, E_CALLFAIL, me);
@@ -6119,15 +6182,15 @@ db_hdf5_MkDir(DBfile *_dbfile, char const *name)
 
         /* Close everything */
         H5Gclose(grp);
-        free(dotdot);
-        free(parent);
-        
+        FREE(dotdot);
+        FREE(parent);
+
     } CLEANUP {
         H5E_BEGIN_TRY {
             H5Gclose(grp);
         } H5E_END_TRY;
-        if (dotdot) free(dotdot);
-        if (parent) free(parent);
+        FREE(dotdot);
+        FREE(parent);
     } END_PROTECT;
 
     return 0;
@@ -6172,7 +6235,7 @@ db_hdf5_SetDir(DBfile *_dbfile, char const *name)
         dbfile->cwg = newdir;
 
         if (dbfile->cwg_name) {
-            char *new_cwg_name = db_absoluteOf_path(dbfile->cwg_name, name);
+            char *new_cwg_name = db_absoluteOf_path(dbfile->cwg_name?dbfile->cwg_name:"/", name);
             free(dbfile->cwg_name);
             dbfile->cwg_name = new_cwg_name;
         }
@@ -6310,7 +6373,7 @@ db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    copy_dir 
+ * Function:    copy_obj
  *
  * Purpose:     Support, recursive function, for CpDir using HDF5's
  *              H5Giterate method.
@@ -6323,29 +6386,31 @@ db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/)
  *
  *-------------------------------------------------------------------------
  */
-typedef struct copy_dir_data_t {
-    DBfile *dstFile;
-} copy_dir_data_t;
+typedef struct copy_obj_data_t {
+    DBfile     *dstFile;
+    char const *dstName;
+} copy_obj_data_t;
 
 static herr_t 
-copy_dir(hid_t grp, char const *name, void *op_data)
+copy_obj(hid_t hobj, char const *name, void *op_data)
 {
-    static char         *me = "copy_dir";
+    static char         *me = "copy_obj";
 #if HDF5_VERSION_GE(1,8,0)
     H5G_stat_t          sb;
     hid_t               obj;
     int                 objtype = -1;
-    copy_dir_data_t *cp_data = (copy_dir_data_t *)op_data;
+    copy_obj_data_t *cp_data = (copy_obj_data_t *)op_data;
     DBfile_hdf5 *dstfile = (DBfile_hdf5*)cp_data->dstFile;
+    char const  *dstName = cp_data->dstName ? cp_data->dstName : name;
 
-    if (H5Gget_objinfo(grp, name, TRUE, &sb)<0) return -1;
+    if (H5Gget_objinfo(hobj, name, TRUE, &sb)<0) return -1;
     switch (sb.type) {
     case H5G_GROUP:
         /*
          * Any group which has a `..' entry is a silo directory. The `..'
          * names do not appear in the silo table of contents.
          */
-        if (!strcmp(name, "..") || (obj=H5Gopen(grp, name))<0) break;
+        if (!strcmp(name, "..") || (obj=H5Gopen(hobj, name))<0) break;
         H5E_BEGIN_TRY {
             if (H5Gget_objinfo(obj, "..", FALSE, NULL)>=0) objtype = DB_DIR;
         } H5E_END_TRY;
@@ -6357,7 +6422,7 @@ copy_dir(hid_t grp, char const *name, void *op_data)
             db_hdf5_SetDir(cp_data->dstFile, (char*) name);
 
             /* recurse on the members of this group */
-            H5Giterate(grp, name, 0, copy_dir, op_data);
+            H5Giterate(hobj, name, 0, copy_obj, op_data);
 
             db_hdf5_SetDir(cp_data->dstFile, "..");
         }
@@ -6374,7 +6439,7 @@ copy_dir(hid_t grp, char const *name, void *op_data)
         size_t      asize, nelmts, msize;
 
         /* Open the object as a named data type */
-        if ((o=H5Topen(grp, name))<0) {
+        if ((o=H5Topen(hobj, name))<0) {
             db_perror(name, E_NOTFOUND, me);
             UNWIND();
         }
@@ -6399,6 +6464,7 @@ copy_dir(hid_t grp, char const *name, void *op_data)
             UNWIND();
         }
         asize = H5Tget_size(atype);
+#warning WHY THIS SIZE
         msize = MAX(asize, 3*1024);
         if (NULL==(file_value=(char *)malloc(asize)) ||
             NULL==(mem_value=(char *)malloc(msize)) ||
@@ -6442,10 +6508,28 @@ copy_dir(hid_t grp, char const *name, void *op_data)
                     db_hdf5_compname(dstfile, cname);
 
                     /* copy this dataset to /.silo dir in dst file */
-                    H5Ocopy(grp, mem_value, dstfile->link, cname, H5P_DEFAULT, H5P_DEFAULT);
+                    H5Ocopy(hobj, mem_value, dstfile->link, cname, H5P_DEFAULT, H5P_DEFAULT);
 
                     /* update this attribute's entry with name for this dataset */
                     sprintf(file_value+offset, "%s%s", LINKGRP, cname);
+                }
+                else
+                {
+                    hid_t tid;
+                    char *srcSubObjDirName = db_dirname(name);
+                    char *srcSubObjAbsName = db_join_path(srcSubObjDirName, mem_value);
+                    char *dstSubObjDirName = db_dirname(dstName);
+                    char *dstSubObjAbsName = db_join_path(dstSubObjDirName, mem_value);
+                    if (strcmp(srcSubObjDirName, ".") && ((tid = H5Topen(hobj, srcSubObjAbsName)) >= 0))
+                    {
+                        copy_obj_data_t cp_data2 = {cp_data->dstFile, dstSubObjAbsName};
+                        H5Tclose(tid);
+                        copy_obj(hobj, srcSubObjAbsName, &cp_data2);
+                    }
+                    free(srcSubObjDirName);
+                    free(srcSubObjAbsName);
+                    free(dstSubObjDirName);
+                    free(dstSubObjAbsName);
                 }
 
                 free(memname);
@@ -6457,7 +6541,7 @@ copy_dir(hid_t grp, char const *name, void *op_data)
         }
 
         /* write the header for this silo object */
-        db_hdf5_hdrwr(dstfile, (char *)name, atype, atype, file_value, objtype);
+        db_hdf5_hdrwr(dstfile, (char *)dstName, atype, atype, file_value, objtype);
 
         /* Cleanup */
         H5Tclose(atype);
@@ -6472,7 +6556,7 @@ copy_dir(hid_t grp, char const *name, void *op_data)
     }
 
     case H5G_DATASET:
-        H5Ocopy(grp, name, dstfile->cwg, name, H5P_DEFAULT, H5P_DEFAULT);
+        H5Ocopy(hobj, name, dstfile->cwg, name, H5P_DEFAULT, H5P_DEFAULT);
         break;
 
     default:
@@ -6508,7 +6592,7 @@ db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     DBfile_hdf5 *dstfile = (DBfile_hdf5*)dstFile;
     static char *me = "db_hdf5_CpDir";
-    copy_dir_data_t cp_data;
+    copy_obj_data_t cp_data = {0,0};
     char dstcwg[256], srccwg[256];
 
     srccwg[0] = '\0';
@@ -6529,9 +6613,9 @@ db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
         db_hdf5_MkDir(dstFile, (char*)dstDir);
         db_hdf5_SetDir(dstFile, (char*)dstDir);
 
-        /* Enter the recursion to make copy the directory */
+        /* Enter the recursion to make copy of the directory */
         cp_data.dstFile = dstFile;
-        H5Giterate(dbfile->cwg, srcDir, 0, copy_dir, &cp_data);
+        H5Giterate(dbfile->cwg, srcDir, 0, copy_obj, &cp_data);
 
         /* Restore current dirs for src and dst files */
         db_hdf5_SetDir(_dbfile, srccwg);
@@ -6548,6 +6632,190 @@ db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
 
     return 0;
 }
+
+#warning REMOVE THIS MAYBE
+SILO_CALLBACK int
+db_hdf5_CpListedObjects(int nobjs,
+    DBfile *_dbfile, char const * const *srcObjs,
+    DBfile *dstFile, char const * const *dstObjs)
+{
+    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
+    DBfile_hdf5 *dstfile = (DBfile_hdf5*)dstFile;
+    static char *me = "db_hdf5_CpListedObjects";
+    char *srcAbsName = 0, *dstAbsName = 0;
+    char *dirPresent = 0;
+    char dstcwg[256], srccwg[256];
+
+    srccwg[0] = '\0';
+    dstcwg[0] = '\0';
+
+    db_hdf5_GetDir(_dbfile, srccwg);
+    db_hdf5_GetDir(dstFile, dstcwg);
+
+#if !HDF5_VERSION_GE(1,8,0)
+    db_perror("Requires HDF5-1.8 or later", E_CALLFAIL, me);
+    return -1;
+#endif
+
+    PROTECT {
+        int i, pass;
+         
+        /* pass 0 ==> ensure all needed dst dirs are made, pass 1 ==> do the copies */
+        dirPresent = (char *) calloc(nobjs,1);
+        for (pass = 0; pass < 2; pass++)
+        {
+            for (i = 0; i < nobjs; i++)
+            {
+                DBObjectType _objtype;
+
+                srcAbsName = db_join_path(srccwg, srcObjs[i]);
+
+                if (dstObjs==0||dstObjs[i]==0||dstObjs[i][0]=='\0')
+                    dstAbsName = db_join_path(dstcwg, srcObjs[i]);
+                else
+                {
+                    int n = (int) strlen(dstObjs[i]);
+                    dstAbsName = db_join_path(dstcwg, dstObjs[i]);
+                    if ('/'==dstObjs[i][n-1] ||
+                        (pass==0 && DB_DIR==DBInqVarType(dstFile, dstAbsName)) ||
+                        (pass==1 && 0x0!=dirPresent[i]))
+                    {
+                        char *srcBaseName = db_basename(srcAbsName);
+                        char *dstAbsName2 = db_join_path(dstAbsName, srcBaseName);
+                        FREE(dstAbsName);
+                        FREE(srcBaseName);
+                        dstAbsName = dstAbsName2;
+                        dirPresent[i] = 0x1;
+                    }
+                }
+
+                _objtype = DBInqVarType(_dbfile, srcAbsName);
+
+                if (_objtype == DB_DIR && pass==0)
+                    db_hdf5_CpDir(_dbfile, srcAbsName, dstFile, dstAbsName);
+                else
+                {
+                    copy_obj_data_t cp_data = {dstFile, dstAbsName};
+                    if (pass == 0)
+                    {
+                        char *dname = db_dirname(dstAbsName); 
+                        DBMkDirP(dstFile, dname);
+                        FREE(dname);
+                    }
+                    else
+                        copy_obj(dbfile->cwg, srcAbsName, &cp_data);
+                }
+
+                FREE(srcAbsName);
+                FREE(dstAbsName);
+            }
+        }
+
+    } CLEANUP {
+        FREE(srcAbsName);
+        FREE(dstAbsName);
+        FREE(dirPresent);
+    } END_PROTECT;
+
+    return 0;
+}
+
+SILO_CALLBACK int
+db_hdf5_MkSymlink(DBfile *_dbfile, char const *target, char const *link)
+{
+    char const *me = "db_hdf5_MkSymlink";
+    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
+    char *p = strchr(target, ':');
+    char *tmp = 0;
+
+    PROTECT
+    {   
+        if (p)
+        {
+            int n = (int) (p - target);
+            tmp = strdup(target);
+            tmp[n] = '\0';
+            if (H5Lcreate_external(tmp, &tmp[n+1], dbfile->cwg, link, H5P_DEFAULT, H5P_DEFAULT)<0) {
+                db_perror(link, E_CALLFAIL, me);
+                UNWIND();
+            }
+            free(tmp);
+            tmp = 0;
+        }
+        else
+        {
+            if (H5Lcreate_soft(target, dbfile->cwg, link, H5P_DEFAULT, H5P_DEFAULT)<0) {
+                db_perror(link, E_CALLFAIL, me);
+                UNWIND();
+            }
+        }
+    } CLEANUP {
+        FREE(tmp);
+    } END_PROTECT;
+
+    return 0;
+}
+
+PRIVATE int
+db_hdf5_getslink(hid_t cwg, char const *in_candidate_link, char *out_target)
+{
+    char const *me = "db_hdf5_GetSymlink";
+    H5L_info_t h5linfo;
+    char lval[2*256];
+    herr_t info;
+
+    /* protect attempt get link info to allow this method to be used to query of a
+       given name is a symlink or not */
+    H5E_BEGIN_TRY {
+        info  = H5Lget_info(cwg, in_candidate_link, &h5linfo, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if (info < 0 || h5linfo.type == H5L_TYPE_ERROR) return -1;
+    if (!out_target) return 0;
+    if (h5linfo.u.val_size > sizeof(lval)) return -1;
+
+    PROTECT
+    {   
+        if (H5Lget_val(cwg, in_candidate_link, lval, h5linfo.u.val_size, H5P_DEFAULT)<0) {
+            db_perror(in_candidate_link, E_CALLFAIL, me);
+            UNWIND();
+        }
+
+        if (h5linfo.type == H5L_TYPE_EXTERNAL)
+        {
+            char const *f=0,*p=0;
+            if (H5Lunpack_elink_val(lval, h5linfo.u.val_size, 0, &f, &p)<0)
+            {
+                db_perror(in_candidate_link, E_CALLFAIL, me);
+                UNWIND();
+            }
+            *out_target = '\0';
+            if (f)
+            {
+                strcat(out_target, f);
+                strcat(out_target, ":");
+            }
+            if (p)
+                strcat(out_target, p);
+        }
+        else
+        {
+            *out_target = '\0';
+            strncpy(out_target, lval, h5linfo.u.val_size);
+        }
+    } CLEANUP {
+    } END_PROTECT;
+
+    return 0;
+
+}
+
+SILO_CALLBACK int
+db_hdf5_GetSymlink(DBfile *_dbfile, char const *in_candidate_link, char *out_target)
+{
+    DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
+    return db_hdf5_getslink(dbfile->cwg, in_candidate_link, out_target);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    db_hdf5_NewToc
@@ -6575,7 +6843,8 @@ db_hdf5_NewToc(DBfile *_dbfile)
     db_FreeToc(_dbfile);
     dbfile->pub.toc = toc = db_AllocToc();
 
-    if (H5Giterate(dbfile->cwg, ".", NULL, load_toc, toc)<0) return -1;
+    if (H5Literate(dbfile->cwg, H5_INDEX_NAME, H5_ITER_INC, NULL, load_toc, toc)<0) return -1;
+
     return 0;
 }
 
@@ -6655,7 +6924,6 @@ db_hdf5_GetComponent(DBfile *_dbfile, char const *objname, char const *compname)
  *   in silex displaying these vector-based components.
  *
  *   Mark C. Miller, Tue Apr 28 15:57:43 PDT 2009
- *   printf("rate = %f\n", *rate_ptr);
  *   Added missing statement to set mnofname = 0 after free'ing it.
  *
  *   Mark C. Miller, Tue Oct  6 10:24:01 PDT 2009
@@ -6919,6 +7187,18 @@ db_hdf5_GetComponentNames(DBfile *_dbfile, char const *objname, char ***comp_nam
  *   standard Silo object.
  *-------------------------------------------------------------------------
  */
+static int count_commas(char const *str)
+{
+    int n = 0;
+    char const *p = strchr(str, ',');
+    while (p)
+    {
+        n++;
+        p = strchr(p, ',');
+    }
+    return n;
+}
+
 SILO_CALLBACK int
 db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                     DBobject const *obj,/*Object description to write out */
@@ -6942,18 +7222,19 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
         
         /* How much memory do we need? Align all components */
         for (i=0, msize=fsize=0; i<obj->ncomponents; i++) {
+            int nvals = count_commas(obj->pdb_names[i]) + 1;
             if (!strncmp(obj->pdb_names[i], "'<i>", 4)) {
-                msize = ALIGN(msize, sizeof(int)) + sizeof(int);
-                fsize += H5Tget_size(dbfile->T_int);
+                msize = ALIGN(msize, sizeof(int)) + nvals * sizeof(int);
+                fsize += (nvals * H5Tget_size(dbfile->T_int));
             } else if (!strncmp(obj->pdb_names[i], "'<f>", 4)) {
-                msize = ALIGN(msize, sizeof(float)) + sizeof(float);
-                fsize += H5Tget_size(dbfile->T_float);
+                msize = ALIGN(msize, sizeof(float)) + nvals * sizeof(float);
+                fsize += (nvals * H5Tget_size(dbfile->T_float));
             } else if (!strncmp(obj->pdb_names[i], "'<d>", 4)) {
-                msize = ALIGN(msize, sizeof(double)) + sizeof(double);
-                fsize += H5Tget_size(dbfile->T_double);
+                msize = ALIGN(msize, sizeof(double)) + nvals * sizeof(double);
+                fsize += (nvals * H5Tget_size(dbfile->T_double));
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
-                msize += strlen(obj->pdb_names[i]+4);
-                fsize += strlen(obj->pdb_names[i]+4);
+                msize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' */
+                fsize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' */
             } else if (obj->pdb_names[i][0]=='\'') {
                 /* variable has invalid name or we don't handle type */
                 db_perror(obj->pdb_names[i], E_INVALIDNAME, me);
@@ -7050,6 +7331,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
             UNWIND();
         }
         for (i=0, moffset=foffset=0; i<obj->ncomponents; i++) {
+            int nvals = count_commas(obj->pdb_names[i]) + 1;
             if (!strncmp(obj->pdb_names[i], "'<i>", 4)) {
                 moffset = ALIGN(moffset, sizeof(int));
                 if (H5Tinsert(mtype, obj->comp_names[i], moffset,
@@ -7088,6 +7370,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 foffset += H5Tget_size(dbfile->T_double);
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
                 size_t len = strlen(obj->pdb_names[i]+4)-1;
+#warning COMPATABILITY ISSUE
                 hid_t str_type;
                 if (len > 1024 && !DBGetAllowLongStrComponentsFile(_dbfile))
                 {
@@ -7105,7 +7388,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 }
                 H5Tclose(str_type);
                 strncpy((char*)(object+moffset), obj->pdb_names[i]+4, len);
-                object[moffset+len] = '\0'; /*overwrite quote*/
+                object[moffset+len-1] = '\0'; /*overwrite quote*/
                 moffset += len;
                 foffset += len;
             } else {
@@ -7282,7 +7565,7 @@ db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char const *compname,
         totsize *= size[i];
     }
 
-    if (totsize == 3)
+    if (totsize <= 3)
     {
         int add_it = 0;
         DBObjectType objtype = (DBObjectType) DBGetObjtypeTag(obj->type);
@@ -7304,7 +7587,7 @@ db_hdf5_WriteComponent(DBfile *_dbfile, DBobject *obj, char const *compname,
                 add_it |= !strcmp(compname, "dims");
                 add_it |= !strcmp(compname, "min_index");
                 add_it |= !strcmp(compname, "max_index");
-                add_it |= !strcmp(compname, "base_index");
+                add_it |= !strcmp(compname, "baseindex");
                 break;
             }
             case DB_QUADVAR:
@@ -8146,6 +8429,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
            db_perror(vname, E_CALLFAIL, me);
            UNWIND();
        }
+#warning COMPARE TO -1 OR TO NEGATIVE
        if (dset_type != -1)
            H5Tclose(dset_type);
        if (mclass != fclass) {
@@ -8167,6 +8451,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
        H5E_BEGIN_TRY {
            H5Dclose(dset);
            H5Sclose(space);
+#warning COMPARE TO -1 OR NEGATIVE
            if (dset_type != -1)
                H5Tclose(dset_type);
        } H5E_END_TRY;
@@ -8391,6 +8676,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
         }
 
         /* Add members to the DBobject */
+#warning THIS IFDEFD CODE IS IN TRANSITION TO BETTER GENERIC OBJECTS
         for (i=0; i<nmembs; i++) {
             int ndims = 0;
             hid_t member_type = db_hdf5_get_cmemb(atype, i, &ndims, memb_size);
@@ -8404,6 +8690,9 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                                   H5T_NATIVE_INT);
                 memcpy(mem_value, file_value, H5Tget_size(atype));
                 H5Tconvert(atype, mtype, 1, mem_value, bkg, H5P_DEFAULT);
+#if 0
+                DBAddIntNComponent(obj, name, nelmts, (int*)mem_value);
+#else
                 if (1==nelmts) {
                     DBAddIntComponent(obj, name, *((int*)mem_value));
                 } else {
@@ -8412,6 +8701,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                         DBAddIntComponent(obj, bigname, ((int*)mem_value)[j]);
                     }
                 }
+#endif
                 break;
 
             case H5T_FLOAT:
@@ -8419,14 +8709,37 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
                                   H5T_NATIVE_DOUBLE);
                 memcpy(mem_value, file_value, H5Tget_size(atype));
                 H5Tconvert(atype, mtype, 1, mem_value, bkg, H5P_DEFAULT);
-                if (1==nelmts) {
-                    DBAddFltComponent(obj, name, *((double*)mem_value));
-                } else {
-                    for (j=0; (size_t)j<nelmts; j++) {
-                        sprintf(bigname, "%s%d", name, j+1);
-                        DBAddFltComponent(obj, bigname,
-                                          ((double*)mem_value)[j]);
+                if (4 == (int) H5Tget_size(member_type))
+                {
+#if 0
+                    DBAddFltNComponent(obj, name, nelmts, (double*)mem_value);
+#else
+                    if (1==nelmts) {
+                        DBAddFltComponent(obj, name, *((double*)mem_value));
+                    } else {
+                        for (j=0; (size_t)j<nelmts; j++) {
+                            sprintf(bigname, "%s%d", name, j+1);
+                            DBAddFltComponent(obj, bigname,
+                                              ((double*)mem_value)[j]);
+                        }
                     }
+#endif
+                }
+                else
+                {
+#if 0
+                    DBAddDblNComponent(obj, name, nelmts, (double*)mem_value);
+#else
+                    if (1==nelmts) {
+                        DBAddDblComponent(obj, name, *((double*)mem_value));
+                    } else {
+                        for (j=0; (size_t)j<nelmts; j++) {
+                            sprintf(bigname, "%s%d", name, j+1);
+                            DBAddDblComponent(obj, bigname,
+                                              ((double*)mem_value)[j]);
+                        }
+                    }
+#endif
                 }
                 break;
 
@@ -8460,10 +8773,12 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
             H5Tclose(member_type);
         }
 
+#warning REVISIT THIS CLEANUP CODE. IS THERE A BETTER SYMBOLIC VALUE THAN -1
         /* Cleanup */
         H5Tclose(atype);
         H5Aclose(attr);
         H5Tclose(o);
+#warning USE FREE() MACRO HERE
         free(file_value);
         free(mem_value);
         free(bkg);
@@ -8475,6 +8790,7 @@ db_hdf5_GetObject(DBfile *_dbfile, char const *name)
             H5Aclose(attr);
             H5Tclose(o);
         } H5E_END_TRY;
+#warning USE FREE() MACRO HERE
         if (file_value) free(file_value);
         if (mem_value) free(mem_value);
         if (bkg) free(bkg);
@@ -12412,8 +12728,10 @@ db_hdf5_GetMaterial(DBfile *_dbfile, char const *name)
         ma->guihide = m.guihide;
         ma->nmat = m.nmat;
         ma->mixlen = m.mixlen;
-        if ((ma->datatype = db_hdf5_GetVarType(_dbfile, m.mix_vf)) < 0)
-            ma->datatype = DB_DOUBLE;  /* PDB driver assumes double */
+        if (ma->mixlen == 0)
+            ma->datatype = DB_NOTYPE;
+        else if ((ma->datatype = db_hdf5_GetVarType(_dbfile, m.mix_vf)) < 0)
+            ma->datatype = DB_NOTYPE;
         if (force_single_g) ma->datatype = DB_FLOAT;
         for (nels=1, i=0; i<m.ndims; i++) {
             ma->dims[i] = m.dims[i];
@@ -13782,6 +14100,7 @@ db_hdf5_PutMultivar(DBfile *_dbfile, char const *name, int nvars, char const * c
             if (m.repr_block_idx)   MEMBER_S(int, repr_block_idx);
         } OUTPUT(dbfile, DB_MULTIVAR, name, &m);
 
+        /* Free resources */
         FREE(s);
         
     } CLEANUP {
@@ -13977,6 +14296,7 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
          * material names.
          */
         /* Write raw data arrays */
+#warning REPLACE WITH STRING UTILITIES
         if (nmats > 0 && matnames)
         {
             for (i=len=0; i<nmats; i++) len += strlen(matnames[i])+1;
@@ -14014,6 +14334,8 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.mat_colors/*out*/, friendly_name(_dbfile,name,"_matcolors", 0));
             FREE(tmp);
+#warning IS THIS TAKEN CARE OF ELSEWHERE
+            _mm._matcolors = 0;
         }
         if (_mm._matnames && _mm._nmatnos > 0) {
             int len; char *tmp;
@@ -14022,6 +14344,8 @@ db_hdf5_PutMultimat(DBfile *_dbfile, char const *name, int nmats, char const * c
             db_hdf5_compwr(dbfile, DB_CHAR, 1, &len, tmp,
                 m.material_names/*out*/, friendly_name(_dbfile,name,"_material_names", 0));
             FREE(tmp);
+#warning IS THIS TAKEN CARE OF ELSEWHERE
+            _mm._matnames = 0;
         }
         /* output nameschemes if we have 'em */
         if (_mm._file_ns)
@@ -14175,7 +14499,6 @@ db_hdf5_GetMultimat(DBfile *_dbfile, char const *name)
         mm->matcounts = (int *)db_hdf5_comprd(dbfile, m.matcounts, 1);
         mm->matlists = (int *)db_hdf5_comprd(dbfile, m.matlists, 1);
         mm->matnos = (int *)db_hdf5_comprd(dbfile, m.matnos, 1);
-
         matnames = (char *)db_hdf5_comprd(dbfile, m.matnames, 1);
         db_StringListToStringArrayMBOpt(matnames, &(mm->matnames), &(mm->matnames_alloc), m.nmats);
 

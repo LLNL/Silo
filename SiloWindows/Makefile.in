@@ -413,6 +413,8 @@ EXTRA_DIST = \
 ./MSVC2012/Tests/qmeshmat2df77.vfproj\
 ./MSVC2012/Tests/quad.vcxproj\
 ./MSVC2012/Tests/quad_f.vfproj\
+./MSVC2012/Tests/sami.vcxproj\
+./MSVC2012/Tests/newsami.vcxproj\
 ./MSVC2012/Tests/simple.vcxproj\
 ./MSVC2012/Tests/spec.vcxproj\
 ./MSVC2012/Tests/specmix.vcxproj\

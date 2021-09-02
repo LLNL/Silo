@@ -65,7 +65,7 @@ be used for advertising or product endorsement purposes.
 #include <std.c>
 extern int build_quad(DBfile *dbfile, char *name);
 extern int build_ucd(DBfile *dbfile, char *name);
-extern int build_ucd_tri(DBfile *dbfile, char *name);
+extern int build_ucd_tri(DBfile *dbfile, char *name, int flags);
 
 
 
@@ -93,28 +93,37 @@ int main(int argc, char *argv[])
     DBfile        *dbfile, *dbfile2, *dbfile3, *dbfile4, *dbfile5;
     char          *filename = "dir.pdb";
     char          *filename2 = "dir2.pdb";
-    int            i, driver = DB_PDB;
+    int            i, driver = DB_PDB, driver2 = DB_PDB;
     int            show_all_errors = FALSE;
+    char          *objname = 0;
     int            ndirs = 0;
 
     for (i=1; i<argc; i++) {
         if (!strncmp(argv[i], "DB_PDB",6)) {
             driver = StringToDriver(argv[i]);
+            driver2 = driver;
             filename = "dir.pdb";
             filename2 = "dir2.pdb";
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);
+            driver2 = driver;
             filename = "dir.h5";
             filename2 = "dir2.h5";
+        } else if (!strcmp(argv[i], "mix-driver-copy")) {
+            driver2 = driver == DB_HDF5 ? DB_PDB : DB_HDF5;
+            filename2 = driver == DB_HDF5 ? "dir2.pdb" : "dir2.h5";
         } else if (!strcmp(argv[i], "show-all-errors")) {
             show_all_errors = 1;
         } else if (!strncmp(argv[i], "ndirs=", 6)) {
             ndirs = (int) strtol(argv[i]+6,0,10);
 	} else if (argv[i][0] != '\0') {
-            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
+            objname = strdup(argv[i]);
+#warning SEEMS LIKE HACK TO TEST SOMETHING
+/*            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);*/
         }
     }
     
+    DBSetFriendlyHDF5Names(1);
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_ALL, NULL);
 
     dbfile = DBCreate(filename, 0, DB_LOCAL, "dir test file", driver);
@@ -123,6 +132,15 @@ int main(int argc, char *argv[])
     diridq = DBMkdir(dbfile, "quad_dir");
     diridu = DBMkdir(dbfile, "ucd_dir");
     diridt = DBMkdir(dbfile, "tri_dir");
+
+    /* Test MkDirP */ 
+    DBMkDirP(dbfile, "gorfo/foo/bar/bin/baz");
+    DBSetDir(dbfile, "/gorfo/foo/bar");
+    DBMkDirP(dbfile, "../baz/bin");
+    DBMkDirP(dbfile, "../bah/bin");
+    DBSetDir(dbfile, "/");
+    DBMkDirP(dbfile, "/");
+    DBMkDirP(dbfile, "gorfo/foo/bar");
 
     DBGetDir(dbfile, original_dir);
 
@@ -133,10 +151,14 @@ int main(int argc, char *argv[])
     build_quad(dbfile, "quadmesh");
     DBMkdir(dbfile, "quad_subdir2");
     DBSetDir(dbfile, "quad_subdir2");
+    DBMkSymlink(dbfile, "/quad_dir/quadmesh", "qmlink");
+    DBMkSymlink(dbfile, "../../quadmesh", "qm2link");
     build_quad(dbfile, "quadmesh");
     DBSetDir(dbfile, "../..");
     DBMkdir(dbfile, "quad_subdir3");
     DBSetDir(dbfile, "quad_subdir3");
+    DBMkSymlink(dbfile, "/quad_dir/quad_subdir1", "dirlink");
+    DBMkSymlink(dbfile, "dir2.h5:/gorfo", "extlink");
     build_quad(dbfile, "quadmesh");
 
     meshtypes[0] = DB_QUAD_RECT;
@@ -151,7 +173,7 @@ int main(int argc, char *argv[])
     nmesh++;
 
     DBSetDir(dbfile, "/tri_dir");
-    meshid = build_ucd_tri(dbfile, "trimesh");
+    meshid = build_ucd_tri(dbfile, "trimesh", 0x2);
 
     meshtypes[2] = DB_UCDMESH;
     meshnames[2] = "/tri_dir/trimesh";
@@ -163,16 +185,90 @@ int main(int argc, char *argv[])
     DBClose(dbfile);
 
     dbfile = DBOpen(filename, driver, DB_READ);
-    dbfile2 = DBCreate(filename2, 0, DB_LOCAL, "dir test file", driver);
+    dbfile2 = DBCreate(filename2, 0, DB_LOCAL, "dir test file", driver2);
 
+#if 0
     if ((driver&0xF) == DB_HDF5)
+    {
+        char *srcObjs[] = {"trimesh", "../ucd_dir/ucdmesh", "/quad_dir/quadmesh"};
+        char *dstObjs[] = {"/tmp/foo/bar/gorfo", "../foogar", 0};
         DBCpDir(dbfile, "quad_dir/quad_subdir1", dbfile2, "gorfo");
+        DBSetDir(dbfile, "tri_dir");
+        DBMkDir(dbfile2, "tmp");
+        DBSetDir(dbfile2, "tmp");
+        DBCpListedObjects(3, dbfile, srcObjs, dbfile2, dstObjs);
+        DBSetDir(dbfile, "/");
+        DBSetDir(dbfile2, "/");
+    }
+#endif
+    {
+#if 0
+        char *srcObjs[] = {"trimesh", "../ucd_dir/ucdmesh", "/quad_dir/quadmesh"};
+        char *dstObjs[] = {"/tmp/foo/bar/gorfo", "../foogar", 0};
+        DBCp("", dbfile, dbfile2, "/tri_dir/trimesh", "foogar", DB_EOA);
+        DBCp("", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../gorfo/banana", "outdir", DB_EOA);
+        DBCp("-2", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../ucd_dir/ucdmesh", "foogar", DB_EOA);
+        DBCp("-1", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../ucd_dir/ucdmesh", "foogar", DB_EOA);
+        DBCp("-3", dbfile, dbfile2, 3, srcObjs, dstObjs);
+        DBCp("-3", dbfile, dbfile2, 3, srcObjs, dstObjs, DB_EOA);
+        DBCp("-4", dbfile, dbfile2, 3, srcObjs, "gorfo");
+        DBCp("-4", dbfile, dbfile2, 3, srcObjs, "gorfo", DB_EOA);
+        DBCp("-2 -d -s", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../ucd_dir/ucdmesh", "foogar", DB_EOA);
+        DBCp("-2ds", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../ucd_dir/ucdmesh", "foogar", DB_EOA);
+        DBCp("", dbfile, dbfile2, "/tri_dir", "gorfo", DB_EOA);
+        DBCp(0, dbfile, dbfile2, "/tri_dir", "gorfo", DB_EOA);
+        DBCp("-r", dbfile, dbfile2, "/tri_dir", "gorfo", DB_EOA);
+#endif
+
+    }
+    /*
+    DBCpObject(dbfile, "/tri_dir/trimesh", dbfile2, "foogar");
+       To compare two wholly different objects in silo's browser...
+           diff (file dir.pdb).tri_dir.trimesh (file dir2.h5).foogar
+    */
+
+    DBSetDir(dbfile, "/tri_dir");
+    DBMkDirP(dbfile2, "gorfo/foo/bar");
+    DBSetDir(dbfile2, "gorfo/foo");
+    /* Just copy a mesh and its sub-objects */
+    DBCp(0, dbfile, dbfile2, "trimesh", "trimesh_copy", DB_EOA);
+
+    DBSetDir(dbfile2, "/");
+    /* Try a recursive copy
+    DBCp("-r", dbfile, dbfile2, "/quad_dir", "quad_dir_copy", DB_EOA); */
 
     DBClose(dbfile);
     DBClose(dbfile2);
 
+exit(0);
+
+    DBSetDir(dbfile2, "..");
+    build_ucd_tri(dbfile2, "trimesh", 0x1);
+    DBCp(0, dbfile, dbfile2, "trimesh", "trimesh", DB_EOA);
+
+{
+    char *list[100];
+    int i, nlist  = (int) sizeof(list)/sizeof(list[0]);
+    DBSetDir(dbfile, "/");
+    for (i = 0; i < nlist; i++) list[i] = 0;
+    DBLs(dbfile, 0, 0, &nlist);
+    printf("Got nlist=%d\n", nlist);
+    DBLs(dbfile, 0, list, &nlist);
+    for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
+
+    nlist  = (int) sizeof(list)/sizeof(list[0]);
+    DBSetDir(dbfile, "/tri_dir");
+    for (i = 0; i < nlist; i++) list[i] = 0;
+    DBLs(dbfile, 0, list, &nlist);
+    for (i = 0; i < nlist; i++) printf("\"%s\"\n", list[i]);
+}
+
+    DBClose(dbfile);
+    DBClose(dbfile2);
+
+
     dbfile = DBOpen(filename, driver, DB_READ);
-    dbfile2 = DBOpen(filename2, driver, DB_APPEND);
+    dbfile2 = DBOpen(filename2, driver2, DB_APPEND);
 
     if ((driver&0xF) == DB_HDF5)
         DBCpDir(dbfile, "ucd_dir", dbfile2, "gorfo/foobar");
@@ -202,7 +298,7 @@ int main(int argc, char *argv[])
 #else
     mkdir("dir-test-foo");
 #endif
-    dbfile2 = DBCreate("dir-test-foo", DB_NOCLOBBER, DB_LOCAL, "dir test file", driver);
+    dbfile2 = DBCreate("dir-test-foo", DB_NOCLOBBER, DB_LOCAL, "dir test file", driver2);
     unlink("dir-test-foo");
     if (dbfile2 != 0)
         exit(EXIT_FAILURE);
@@ -211,46 +307,10 @@ int main(int argc, char *argv[])
 #else
     mkdir("dir-test-foo");
 #endif
-    dbfile2 = DBCreate("dir-test-foo", DB_CLOBBER, DB_LOCAL, "dir test file", driver);
+    dbfile2 = DBCreate("dir-test-foo", DB_CLOBBER, DB_LOCAL, "dir test file", driver2);
     unlink("dir-test-foo");
     if (dbfile2 != 0)
-        exit(EXIT_FAILURE);
-
-    /* Test InqVarExists with relative and absolute paths */
-    dbfile = DBOpen(filename, driver, DB_READ);
-    DBSetDir(dbfile, "quad_dir/quad_subdir1");
-    if (!DBInqVarExists(dbfile, "../quad_subdir3/material"))
-        exit(EXIT_FAILURE);
-    if (!DBInqVarExists(dbfile, "/quad_dir/quad_subdir3/material"))
-        exit(EXIT_FAILURE);
-    DBSetDir(dbfile, "/");
-    if (!DBInqVarExists(dbfile, "quad_dir/quad_subdir3/material"))
-        exit(EXIT_FAILURE);
-    if (!DBInqVarExists(dbfile, "/quad_dir/quad_subdir3/material"))
-        exit(EXIT_FAILURE);
-    DBClose(dbfile);
-
-    /* Test many dirs */
-    if (ndirs)
-    {
-        double t0 = GetTime();
-        dbfile = DBCreate(driver==DB_PDB?"many-dirs.pdb":"many-dirs.hdf5", DB_CLOBBER, DB_LOCAL, "large dir count test", driver);
-        for (i = 0; i < ndirs; i++)
-        {
-            int dims = 1;
-            char tmpDir[32];
-            int ival = i;
-            double dval = i;
-            snprintf(tmpDir, sizeof(tmpDir), "one_of_many_dirs_%06d", i);
-            DBMkDir(dbfile, tmpDir);
-            DBSetDir(dbfile, tmpDir);
-            DBWrite(dbfile, "anInt", &ival, &dims, 1, DB_INT);
-            DBWrite(dbfile, "aDouble", &dval, &dims, 1, DB_DOUBLE);
-            DBSetDir(dbfile, "..");
-        }
-        DBClose(dbfile);
-        printf("time to create %d dirs = %g seconds\n", ndirs, (GetTime() - t0) / 1e6);
-    }
+        exit(1);
 
     CleanupDriverStuff();
     return 0;

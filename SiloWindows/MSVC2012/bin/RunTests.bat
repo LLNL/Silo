@@ -5,7 +5,7 @@ set resultsfile=.\results.txt
 set drivers=(DB_PDB DB_HDF5)
 set buildDir=..\x64\Release\
 
-set gp=(version.exe namescheme.exe point.exe empty.exe extface.exe testall.exe TesReadMask.exe array.exe multi_test.exe partial_io.exe simple.exe ucd.exe ucdsamp3.exe obj.exe onehex.exe oneprism.exe onepyramid.exe onetet.exe subhex.exe twohex.exe multispec.exe newsami.exe specmix.exe spec.exe alltypes.exe wave.exe polyzl.exe csg.exe mmadjacency.exe mat3d_3across.exe ucd1d.exe dirtest.exe quad.exe namescheme.exe arbpoly.exe arbpoly3d.exe testfs.exe efcentering.exe arbpoly2d.exe majorder.exe misc.exe)
+set gp=(version.exe namescheme.exe point.exe empty.exe extface.exe testall.exe TesReadMask.exe array.exe multi_test.exe partial_io.exe simple.exe ucd.exe ucdsamp3.exe obj.exe onehex.exe oneprism.exe onepyramid.exe onetet.exe subhex.exe twohex.exe multispec.exe sami.exe newsami.exe specmix.exe spec.exe alltypes.exe wave.exe polyzl.exe csg.exe mmadjacency.exe mat3d_3across.exe ucd1d.exe dirtest.exe quad.exe namescheme.exe arbpoly.exe arbpoly3d.exe testfs.exe efcentering.exe arbpoly2d.exe majorder.exe misc.exe)
 
 
 :: copy necessary dlls to this executable directory

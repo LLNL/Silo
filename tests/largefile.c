@@ -99,9 +99,11 @@ build_curve (DBfile *dbfile, int driver)
     * the name which will be used to store the x values, but the pdb driver
     * requires us to know where the values were stored.
     */
-   if (DB_HDF5==driver) DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
-   if (DB_HDF5!=driver) DBAddOption(opts, DBOPT_XVARNAME, (char *) "sincurve_xvals");
+   if (driver == DB_PDB)
+       DBAddOption(opts, DBOPT_XVARNAME, "/sincurve_xvals");
+   else
+       DBAddOption(opts, DBOPT_XVARNAME, "/.silo/#000001");
 
    /*
     * Write the 'coscurve' curve. It shares x values with the 'sincurve'
@@ -137,11 +139,11 @@ main(int argc, char *argv[])
     
     int            nerrors = 0;
     int            i, j, ndims=1; 
-    int            driver=DB_HDF5;
+    int            driver=DB_PDB;
     char          *filename="largefile.silo";
     int            show_all_errors = FALSE;
     DBfile        *dbfile;
-    int            nIters = 5000, cIters;
+    int            nIters = 2500, cIters;
 
     /* Parse command-line */
     for (i=1; i<argc; i++) {
@@ -150,7 +152,7 @@ main(int argc, char *argv[])
             if (sizeof(int)<8 && nIters > 2000)
             {
                 fprintf(stderr, "Looks like PDB cannot support >2Gig files. Will stop at 1.990 Gigs\n");
-                nIters = nIters > 2000 ? 1990 : nIters;
+                nIters = 1990;
             }
         } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
             driver = StringToDriver(argv[i]);

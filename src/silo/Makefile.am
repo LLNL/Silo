@@ -115,7 +115,7 @@ silo.inc: silo.h.in silo_f.h
 	cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc > $@
 
 silo_f77.inc: silo.inc
-	@ln -s $< $@ 2>/dev/null
+	@ln -fs $< $@ 2>/dev/null
 
 silo_f9x.inc: silo.h.in silo_f.h
 	cat ./silo.h $(srcdir)/silo_f.h | $(top_srcdir)/config/mkinc --f90 > $@

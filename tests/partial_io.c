@@ -159,9 +159,9 @@ main (int argc, char *argv[]) {
    int		driver = DB_PDB;
    char		*filename = "partial.pdb";
    char		filename2[256];
-   char         varname2[256];
-   int          show_all_errors = FALSE;
-   int          npoints = 0;
+   char     varname2[256];
+   int      show_all_errors = FALSE;
+   int      npoints = 0;
 
    /* Parse command-line */
    filename2[0] = '\0';

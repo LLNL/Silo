@@ -550,7 +550,7 @@ static void
 put_extents(float *arr, int len, double *ext_arr, int block)
 {
    int i;
-   double min, max;
+   double min = arr[0], max = min;
    for (i = 0; i < len; i++)
    {
       if (missing_value != DB_MISSING_VALUE_NOT_SET && arr[i] == missing_value)

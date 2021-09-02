@@ -585,8 +585,8 @@ DBFreeMultivar (DBmultivar *mv)
      if (mv->region_pnames)
      {
          for (i = 0; mv->region_pnames[i]; i++)
-             free(mv->region_pnames[i]);
-         free(mv->region_pnames);
+             FREE(mv->region_pnames[i]);
+         FREE(mv->region_pnames);
      }
 
      FREE(mv->varnames);
@@ -906,14 +906,18 @@ DBFreeQuadmesh(DBquadmesh *msh)
 PUBLIC int
 DBIsEmptyQuadmesh(DBquadmesh const *msh)
 {
-    int i;
+#warning CHECK THIS LOGIC. IF ANY DIM>0, IT IS NOT EMPTY
+    int i, is_empty = 1;
 
-    if (!msh) return 1;
-
-    for (i = 0; i < msh->ndims; i++)
-        if (msh->dims[i] <= 0) return 1;
-
-    return 0;
+    for (i = 0; msh && i < msh->ndims; i++)
+    {
+        if (msh->dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
+    return is_empty;
 }
 
 /*----------------------------------------------------------------------
@@ -1044,6 +1048,13 @@ DBFreeMeshvar(DBmeshvar *var)
         for (i = 0; i < var->nvals; i++) {
             FREE(var->vals[i]);
         }
+    }
+
+    if (var->region_pnames)
+    {
+        for (i = 0; var->region_pnames[i]; i++)
+            FREE(var->region_pnames[i]);
+        FREE(var->region_pnames);
     }
 
     FREE(var->vals);
@@ -1222,6 +1233,13 @@ DBFreeCsgvar(DBcsgvar *var)
         }
     }
 
+    if (var->region_pnames)
+    {
+        for (i = 0; var->region_pnames[i]; i++)
+            FREE(var->region_pnames[i]);
+        FREE(var->region_pnames);
+    }
+
     FREE(var->vals);
     FREE(var->name);
     FREE(var->label);
@@ -1314,6 +1332,13 @@ DBFreeQuadvar(DBquadvar *var)
         }
     }
 
+    if (var->region_pnames)
+    {
+        for (i = 0; var->region_pnames[i]; i++)
+            FREE(var->region_pnames[i]);
+        FREE(var->region_pnames);
+    }
+
     FREE(var->vals);
     FREE(var->mixvals);
     FREE(var->name);
@@ -1326,16 +1351,18 @@ DBFreeQuadvar(DBquadvar *var)
 PUBLIC int
 DBIsEmptyQuadvar(DBquadvar const *var)
 {
-    int i;
+#warning CHECK THIS LOGIC
+    int i, is_empty = 1;
 
-    if (!var) return 1;
-
-    if (var->ndims == 0) return 1;
-
-    for (i = 0; i < var->ndims; i++)
-        if (var->dims[i] <= 0) return 1;
-
-    return 0;
+    for (i = 0; var && i < var->ndims; i++)
+    {
+        if (var->dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
+    return is_empty;
 }
 
 /*----------------------------------------------------------------------
@@ -1413,6 +1440,13 @@ DBFreeUcdvar(DBucdvar *var)
             if (var->mixvals != NULL)
                 FREE(var->mixvals[i]);
         }
+    }
+
+    if (var->region_pnames)
+    {
+        for (i = 0; var->region_pnames[i]; i++)
+            FREE(var->region_pnames[i]);
+        FREE(var->region_pnames);
     }
 
     FREE(var->vals);
@@ -1800,14 +1834,17 @@ DBFreeMaterial(DBmaterial *mats)
 PUBLIC int
 DBIsEmptyMaterial(DBmaterial const *mats)
 {
-    int i;
+    int i, is_empty = 1;
 
-    if (!mats) return 1;
-
-    for (i = 0; i < mats->ndims; i++)
-        if (mats->dims[i] <= 0) return 1;
-
-    return 0;
+    for (i = 0; mats && i < mats->ndims; i++)
+    {
+        if (mats->dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
+    return is_empty;
 }
 
 /*----------------------------------------------------------------------
@@ -1891,17 +1928,20 @@ DBFreeMatspecies(DBmatspecies *species)
 PUBLIC int
 DBIsEmptyMatspecies(DBmatspecies const *species)
 {
-    int i;
+    int i, is_empty = 1;
 
-    if (!species) return 1;
-
-    if (species->nspecies_mf <= 0)
+    if (species->nspecies_mf == 0)
         return 1;
 
-    for (i = 0; i < species->ndims; i++)
-        if (species->dims[i] <= 0) return 1;
-
-    return 0;
+    for (i = 0; species && i < species->ndims; i++)
+    {
+        if (species->dims[i] > 0)
+        {
+            is_empty = 0;
+            break;
+        }
+    }
+    return is_empty;
 }
 
 /*-------------------------------------------------------------------------

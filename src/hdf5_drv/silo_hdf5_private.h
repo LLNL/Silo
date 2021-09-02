@@ -107,6 +107,14 @@ SILO_CALLBACK int db_hdf5_SetDir(DBfile *_dbfile, char const *name);
 SILO_CALLBACK int db_hdf5_GetDir(DBfile *_dbfile, char *name/*out*/);
 SILO_CALLBACK int db_hdf5_CpDir(DBfile *_dbfile, char const *srcDir,
                            DBfile *dstFile, char const *dstDir);
+#warning REMOVE db_hdf5_CpListedObjects
+SILO_CALLBACK int db_hdf5_CpListedObjects(int nobjs,
+                           DBfile *_dbfile, char const * const *srcObjs,
+                           DBfile *dstFile, char const * const *dstObjs);
+SILO_CALLBACK int db_hdf5_MkSymlink(DBfile *_dbfile,
+                          char const *target, char const *link);
+SILO_CALLBACK int db_hdf5_GetSymlink(DBfile *_dbfile,
+                          char const *in_candidate_link, char *out_target);
 SILO_CALLBACK int db_hdf5_NewToc(DBfile *_dbfile);
 
 /* Variable inquiries */

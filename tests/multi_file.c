@@ -874,6 +874,7 @@ build_block_ucd3d(char *basename, int driver, char *file_ext,
     {
         char            dirname[80];
         int             filenum;
+        char            filename[120];
 
         int             imin, imax, jmin, jmax, kmin, kmax;
         int             nnx, nny, nnz;

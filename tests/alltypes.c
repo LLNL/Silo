@@ -113,7 +113,7 @@ main(int argc, char *argv[])
             show_all_errors = 1;
 	} else if (argv[i][0] != '\0') {
 	    fprintf(stderr, "unknown option: %s\n", argv[i]);
-	    exit(EXIT_SUCCESS);
+	    exit(1);
 	}
     }
 

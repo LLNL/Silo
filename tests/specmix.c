@@ -1109,6 +1109,7 @@ domatspec(DBfile *db, DoSpecOp_t writeOrReadAndCheck, int forceSingle)
             {
                 CHECKDARR(((double*)mat->mix_vf), mix_vfd, mixc);
             }
+            DBFreeMaterial(mat);
         }
     }
 
@@ -1228,6 +1229,7 @@ domatspec(DBfile *db, DoSpecOp_t writeOrReadAndCheck, int forceSingle)
             {
                 CHECKDARR(((double*)spec->species_mf), specmfd, mfc);
             }
+            DBFreeMatspecies(spec);
         }
     }
 

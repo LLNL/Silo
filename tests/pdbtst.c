@@ -754,6 +754,12 @@ static int test_0(char *base, char *tgt, int n)
               "l_frame view",
                LAST);
 
+    {
+         char *members[] = {"plot foo(3)", "int a(5)", "double b", "long long bar"};
+         int nmemb = sizeof(members)/sizeof(members[0]);
+         PD_defstr_alt(strm, "foobar", nmemb, members);
+    }
+
 /* compare the original data with that read in */
     err = compare_test_0_data(strm, fp);
 
@@ -3373,6 +3379,13 @@ static int test_7(char *base, char *tgt, int n)
     if (PD_close(strm) == FALSE)
        error(2, fp, "Test couldn't close file %s\r\n", datfile);
     PRINT(fp, "File %s closed\n", datfile);
+
+/* test isfile method */
+    if (!SC_isfile(datfile))
+       error(2, fp, "SC_isfile failed for %s\r\n", datfile);
+
+    if (SC_isfile("/.foobar-gorfo"))
+       error(2, fp, "SC_isfile succeeded for /.foobar-gorfo but should have failed.");
 
 /* clean up test data memory */
     cleanup_test_7();

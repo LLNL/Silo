@@ -95,14 +95,14 @@ $topDir/multi_test DB_HDF5 1>/dev/null 2>&1
 # data up into lines of 16 bytes each. Due to variations in HDF5
 # library, the offset at which the sequence 167 179 323 211 can
 # occur can vary. So, we loop over successive starting points
-# each 4 bytes further down the file until we find one.
+# each 1 byte further down the file until we find one.
 #
 offset=0
 skip=0
-while [[ $offset -eq 0 && $skip -lt 13 ]]; do
+while [[ $offset -eq 0 && $skip -lt 9 ]]; do
     offset=`od -j $skip -A d4 -t d4 h5_check_files/multi_ucd3d.h5 | tr '\t' ' ' | tr -s ' ' | grep '167 179 323 311' | cut -d' ' -f1`
-    offset=`echo $offset | cut -d' ' -f1`
-    skip=$(expr $skip + 4)
+    offset=`echo $offset | cut -d' ' -f1 | sed 's/^0*//'`
+    skip=$(expr $skip + 1)
 done
 size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
 
@@ -113,7 +113,7 @@ size=`ls -l h5_check_files/multi_ucd3d.h5 | tr -s ' ' | cut -d' ' -f5`
 #
 rm -f multi_ucd3d_corrupt.h5
 head -c $offset h5_check_files/multi_ucd3d.h5 > multi_ucd3d_corrupt.h5
-cat $topDir/../../tests/zeros.dat >> multi_ucd3d_corrupt.h5
+cat $topDir/zeros.dat >> multi_ucd3d_corrupt.h5
 leftover=`expr $size - $offset - 16`
 tail -c $leftover h5_check_files/multi_ucd3d.h5 >> multi_ucd3d_corrupt.h5
 

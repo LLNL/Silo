@@ -161,6 +161,8 @@ char *matColors[] =
     "Black",
     "Gray"
 };
+map<string, int> matMap;
+vector<int> matlist_g;
 
 EntityClassifier nodeClasses, zoneClasses;
 

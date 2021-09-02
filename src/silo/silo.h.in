@@ -71,6 +71,7 @@ be used for advertising or product endorsement purposes.
 #define SILO_H
 
 #include <stdio.h> /* for FILE* datatype for filters */
+#warning DO WE NEED SYS/STAT.H
 #include <sys/stat.h>
 
 #include <silo_exports.h>
@@ -341,6 +342,7 @@ typedef enum {
     DB_POINTVAR=571,
     DB_ARRAY=580,
     DB_DIR=600,
+    DB_SYMLINK=601,
     DB_VARIABLE=610,
     DB_MRGTREE=611,
     DB_GROUPELMAP=612,
@@ -496,8 +498,10 @@ typedef enum {
 #define DBOPT_H5_SILO_BLOCK_COUNT   528
 #define DBOPT_H5_SILO_LOG_STATS     529
 #define DBOPT_H5_SILO_USE_DIRECT    530
+#warning FIX THESE SYMBOLS
 #define DBOPT_H5_FIC_SIZE           531 /* Obsolete. Use CORE_OPEN_BUFINFO. */
 #define DBOPT_H5_FIC_BUF            532 /* Obsolete. Use CORE_OPEN_BUFINFO. */
+#warning REMOVE UNNECESSARY SYMBOLS
 #define DBOPT_H5_CORE_CREAT_BUFINFO 533
 #define DBOPT_H5_CORE_OPEN_BUFINFO  534
 #define DBOPT_H5_CORE_CLOSE_BUFINFO 535
@@ -557,6 +561,7 @@ typedef enum {
 #define     E_NOHDF5 33         /*HDF5 driver not available */
 #define     E_EMPTYOBJECT 34    /*Empty object not currently permitted*/
 #define     E_OBJBUFFULL  35    /*No more temp. buffer space for object */
+#define     E_NOSILOHDF5 36     /*Not HDF5 silo produced by silo */
 #define     E_NERRORS   50
 
 /* Definitions for MAJOR_ORDER */
@@ -712,6 +717,9 @@ typedef enum {
    mapping is reversed. */
 #define DB_MISSING_VALUE_NOT_SET ((double)1.0e+308)
 
+/* End-of-args for terminating some varargs lists */
+#define DB_EOA ((void*)0)
+
 /*-------------------------------------------------------------------------
  * Structures (just the public parts).
  *-------------------------------------------------------------------------
@@ -794,7 +802,13 @@ typedef struct DBtoc_ {
     char         **mrgvar_names;
     int            nmrgvar;
 
+    char         **symlink_target_names;
+    int            nsymlink;
+    char         **symlink_names; /* copies of other members; never free'd */
+
 } DBtoc;
+#warning WHAT IS REALLY BEING TESTED HERE
+#define DB_NOBJ_TYPES  25
 
 /*----------------------------------------------------------------------------
  * Database Curve Object
@@ -1804,6 +1818,9 @@ typedef struct DBfile_pub {
     int            (*flush)(struct DBfile *);
     int            (*r_varvals)(struct DBfile *, char const *, int, int, int, void const *, void **, int*, int*);
     int            (*g_varblf)(struct DBfile *, char const *);  /*byte length in file */
+    int            (*cpnobjs)(int, struct DBfile *, char const * const *, struct DBfile *, char const * const *);
+    int            (*mksymlink)(struct DBfile *, char const *, char const *);
+    int            (*g_symlink)(struct DBfile *, char const *, char *);
 } DBfile_pub;
 
 typedef struct DBfile {
@@ -1879,6 +1896,7 @@ SILO_API extern int                    DBGetDeprecateWarnings(void);
 SILO_API extern int                    DBSetDeprecateWarningsFile(DBfile *f, int max);
 SILO_API extern int                    DBGetDeprecateWarningsFile(DBfile *f);
 SILO_API extern int                    DBSetEnableDarshan(int enable);
+#warning GET RID OF DARSHAN STUFF
 SILO_API extern int                    DBGetEnableDarshan(void);
 SILO_API extern int                    DBSetEnableDarshanFile(DBfile *f, int enable);
 SILO_API extern int                    DBGetEnableDarshanFile(DBfile *f);
@@ -1924,6 +1942,7 @@ SILO_API extern int                    DBFlush(DBfile *);
 SILO_API extern int                    DBClose(DBfile *);
 SILO_API extern DBtoc *                DBGetToc(DBfile *);
 SILO_API extern int                    DBNewToc(DBfile *);
+SILO_API extern int                    DBLs(DBfile *_dbfile, char const *cl_args, char *list[], int *nlist);
 SILO_API extern void *                 DBGrabDriver(DBfile *);
 SILO_API extern int                    DBUngrabDriver(DBfile *, void const *);
 SILO_API extern int                    DBGetDriverType(DBfile const *);
@@ -1937,9 +1956,16 @@ SILO_API extern int                    DBGetDir(DBfile *, char *);
 SILO_API extern int                    DBSetDir(DBfile *, char const *);
 #define DBMkdir DBMkDir
 SILO_API extern int                    DBMkDir(DBfile *, char const *);
-SILO_API extern int                    DBMkDir2(DBfile *, char const *, DBoptlist *);
-SILO_API extern int                    DBCpDir(DBfile *dbfile, char const *srcDir,
+SILO_API extern int                    DBMkDirP(DBfile *, char const *);
+SILO_API extern int                    DBCpDir(DBfile *srcFile, char const *srcDir,
                                            DBfile *dstFile, char const *dstDir);
+SILO_API extern int                    DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...);
+SILO_API extern int                    DBCpListedObject(int nobjs,
+                                           DBfile *srcFile, char const * const *srcObjectList,
+                                           DBfile *dstFile, char const * const *dstObjectList);
+SILO_API extern int                    DBGetSymlink(DBfile *db, char const *in_candidate_link, char *out_target);
+SILO_API extern char const *           DBIsSymlink(DBtoc const *toc, char const *toc_entry);
+SILO_API extern int                    DBMkSymlink(DBfile *db, char const *target, char const *link);
 SILO_API extern int                    DBGuessHasFriendlyHDF5Names(DBfile *f);
 SILO_API extern int                    DBInqVarExists(DBfile *, char const *);
 SILO_API extern int                    DBUninstall(DBfile *);
@@ -2036,8 +2062,11 @@ SILO_API extern int                    DBFreeObject(DBobject *);
 SILO_API extern int                    DBClearObject(DBobject *);
 SILO_API extern int                    DBAddVarComponent(DBobject *, char const *, char const *);
 SILO_API extern int                    DBAddIntComponent(DBobject *, char const *, int);
+SILO_API extern int                    DBAddIntNComponent(DBobject *, char const *, int, int const *);
 SILO_API extern int                    DBAddFltComponent(DBobject *, char const *, double);
+SILO_API extern int                    DBAddFltNComponent(DBobject *, char const *, int, double const *);
 SILO_API extern int                    DBAddDblComponent(DBobject *, char const *, double);
+SILO_API extern int                    DBAddDblNComponent(DBobject *, char const *, int, double const *);
 SILO_API extern int                    DBAddStrComponent(DBobject *, char const *, char const *);
 SILO_API extern int                    DBGetComponentNames(DBfile *, char const *, char ***, char ***);
 SILO_API extern DBobject *             DBGetObject(DBfile *, char const *);
@@ -2200,6 +2229,7 @@ SILO_API extern DBfacelist *           DBCalcExternalFacelist2(int *, int, int, 
 SILO_API extern char *                 DBJoinPath(char const *, char const *);
 SILO_API extern void                   DBStringArrayToStringList(char const * const *strArray, int n, char **strList, int *m);
 SILO_API extern char **                DBStringListToStringArray(char const *strList, int *n, int skipSemicolonAtIndexZero);
+SILO_API extern void                   DBFreeStringArray(char **strArray, int n);
 SILO_API extern int                    DBIsDifferentDouble(double a, double b, double abstol, double reltol, double reltol_eps);
 SILO_API extern int                    DBIsDifferentLongLong(long long a, long long b, double abstol, double reltol, double reltol_eps);
 SILO_API extern int                    DBCalcDenseArraysFromMaterial(DBmaterial const *mat, int datatype, int *narrs, void ***vfracs);

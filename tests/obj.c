@@ -64,8 +64,8 @@ static void build_objs(DBfile *dbfile);
 
 int main(int argc, char **argv)
 {  
-    DBfile      *dbfile;
-    int          i, driver = DB_PDB;
+    DBfile        *dbfile;
+    int         i, driver = DB_PDB;
     char        *filename = "ucd.pdb";
     int          show_all_errors = FALSE;
     int          allow_long_str_components = FALSE;

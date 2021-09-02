@@ -318,6 +318,9 @@ PMPIO_Init(
     if (rankInGroup > 0)
         procBeforeMe = rankInComm - 1;
 
+    if (createCb == 0 || openCb == 0 || closeCb == 0)
+        return 0;
+
     ret = (PMPIO_baton_t *) malloc(sizeof(PMPIO_baton_t));
     ret->ioMode = ioMode;
     ret->commSize = commSize;

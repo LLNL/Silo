@@ -83,7 +83,9 @@ EXTRA_DIST= \
  Make_ioperf \
  ioperf_tests \
  std.c \
+ resample.c \
  bcastopen.c \
+ bcastopen_main.c \
  zeros.dat \
  testhdf5.c \
  $(check_SCRIPTS) \
@@ -108,7 +110,8 @@ check_SCRIPTS= \
 
 check_DATA= \
  xvers_data.tar.bz2 \
- pion0244.silo
+ pion0244.silo \
+ zeros.dat
 
 DISTCLEANFILES = atconfig
 AUTOM4TE = autom4te
@@ -130,11 +133,14 @@ AM_CPPFLAGS = \
  -I$(srcdir)/../src/silo \
  -I$(includedir)
 #quad_CPPFLAGS = $(AM_CPPFLAGS)
+testpdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
+pdbtst_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
+mk_nasf_pdb_CPPFLAGS = $(AM_CPPFLAGS) -I../src/pdb -I../src/score
 PDBTESTS =
 if INSTALL_LITE_HEADERS
- testpdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
- pdbtst_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
- mk_nasf_pdb_CPPFLAGS = -DPDB_LITE $(AM_CPPFLAGS) -I../src/pdb -I../src/score
+ testpdb_CPPFLAGS += -DPDB_LITE
+ pdbtst_CPPFLAGS += -DPDB_LITE
+ mk_nasf_pdb_CPPFLAGS += -DPDB_LITE
  PDBTESTS += testpdb pdbtst
 endif
 JSONTESTS =
@@ -151,7 +157,7 @@ FCPROGS= arrayf77 arrayf90 curvef77 matf77 pointf77 quadf77 ucdf77 testallf77 \
          csgmesh qmeshmat2df77
 PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
-      TestReadMask twohex multispec misc newsami specmix spec \
+      TestReadMask twohex multispec misc sami newsami specmix spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
@@ -160,7 +166,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
 
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
-bcastopen_SOURCES = listtypes.c bcastopen.c bcastopen_test.c
+bcastopen_SOURCES = listtypes.c bcastopen.c bcastopen_main.c
 quad_SOURCES = quad.c testlib.c
 rocket_SOURCES = rocket.cxx
 rocket_LDFLAGS = -ldl
@@ -219,6 +225,7 @@ check_PROGRAMS = \
  multispec \
  specmix \
  misc \
+ sami \
  newsami \
  spec \
  cpz1plt \
@@ -283,6 +290,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_testpdb_SOURCES = dummy.cxx
  nodist_EXTRA_pdbtst_SOURCES = dummy.cxx
  nodist_EXTRA_misc_SOURCES = dummy.cxx
+ nodist_EXTRA_sami_SOURCES = dummy.cxx
  nodist_EXTRA_newsami_SOURCES = dummy.cxx
  nodist_EXTRA_spec_SOURCES = dummy.cxx
  nodist_EXTRA_cpz1plt_SOURCES = dummy.cxx

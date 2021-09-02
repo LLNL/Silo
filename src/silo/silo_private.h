@@ -920,7 +920,7 @@ INTERNAL int db_ResetGlobalData_MultiMesh (void);
 INTERNAL int db_ResetGlobalData_Defvars(void);
 INTERNAL char *db_FullName2BaseName(const char *);
 INTERNAL void db_StringArrayToStringList(char**, int, char **, int*);
-INTERNAL char ** db_StringListToStringArray(char *, int, int, int);
+INTERNAL char ** db_StringListToStringArray(char const *, int *, char, int);
 INTERNAL void db_DriverTypeAndFileOptionsSetId(int driver, int *type,
                                                int *opts_set_id);
 INTERNAL char *db_absoluteOf_path ( const char *cwg, const char *pathname );

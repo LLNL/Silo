@@ -157,7 +157,8 @@ local($arg0) = '';
 local($opt_f90) = 0;
 
 # Fortran comment character; use 'C' for F77, '!' for F90 and later
-local($ccmt) = '!';
+# '!' is also used for end of line comments in F77 (non-std)
+local($ccmt) = 'C';
 
 # Get command-line option (if any) to select F77 or F9x+ formatting
 # There are better ways of doing this; just not in Perl4 style as of 2013...
@@ -178,7 +179,7 @@ while (<>) {
         local ($name, $value) = ($1, $4);
         $sdx=1 if ($name=~/^SDX/);
         $name =~ s/^SDX_//;
-        if ($value =~ /\(\((char|int|double)\)(.*)\)/) {
+        if ($value =~ /\(\((char|int|double|void\*)\)(.*)\)/) {
             $value = $2;
         }
 	if ($name eq "SILO_VERS_TAG")
@@ -232,6 +233,8 @@ ${ccmt}cccccccccccccccccccccccccccccccccccccccccccccccccccccccc -*- fortran -*-
 ${ccmt} 
 ${ccmt}      $title include file for Fortan applications.
 ${ccmt} 
+${ccmt}  Programmer:   $user $date
+${ccmt} 
 ${ccmt}  WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 ${ccmt}     This file is generated automatically from C header files in the
 ${ccmt}     SILO distribution.  Do not make changes to this file manually,
@@ -281,7 +284,7 @@ if (not $opt_f90) {
     print "\n";
     $line = "";
     foreach $var (sort @functions) {
-        print "      INTEGER*4  " . uc($var) . "\n";
+        print "      INTEGER  " . uc($var) . "\n";
     }
 }
 
@@ -299,7 +302,7 @@ if (not $opt_f90) {
         if ($value =~ /\./) {
             print "      DOUBLE PRECISION " . uc($name) . "\n";
         } else {
-            print "      INTEGER*4  " . uc($name) . "\n";
+            print "      INTEGER  " . uc($name) . "\n";
         }
     }
 

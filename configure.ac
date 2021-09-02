@@ -1,4 +1,4 @@
-Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
+dnl Copyright (C) 1994-2016 Lawrence Livermore National Security, LLC.
 dnl LLNL-CODE-425250.
 dnl All rights reserved.
 dnl 

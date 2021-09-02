@@ -50,6 +50,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "polyzl", "polyzl.vcxproj", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quad", "quad.vcxproj", "{4D5EA26A-8356-4665-A13D-51CCEE2BA7F4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sami", "sami.vcxproj", "{B3C7F964-68B8-4F8C-B5E7-7607836FB101}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simple", "simple.vcxproj", "{7AB46C61-04D5-4E77-AD3F-E7726F3E173A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "spec", "spec.vcxproj", "{7A5F618C-F98A-4F8E-BBC7-C4F5C6BCD5A4}"
