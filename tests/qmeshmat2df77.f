@@ -122,6 +122,7 @@ C...Include SILO definitions.
       include 'silo.inc'
 
       character*(*) fname
+      integer       drvr
 
       integer  dbid, dbstat
       integer  tcycle

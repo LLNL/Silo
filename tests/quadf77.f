@@ -153,8 +153,9 @@ C    'Character length argument mismatch' compiler error.
 C
 C----------------------------------------------------------------------
 
-      integer  dbid, lname
+      integer  dbid
       character*(*) name
+      integer lname
 
       parameter  (NX     = 4)
       parameter  (NY     = 3)

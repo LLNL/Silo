@@ -90,6 +90,7 @@ C...Include SILO definitions.
 
 
       character*(*) fname
+      integer       drvr
 
       parameter (NMATS  = 2)
       parameter (NZONES = 6)
