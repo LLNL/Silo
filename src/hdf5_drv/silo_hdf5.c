@@ -227,10 +227,7 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
 #define db_hdf5_H5LT_FILE_IMAGE_DONT_RELEASE 0x0004
 
 /* useful macro for comparing HDF5 versions */
-#define HDF5_VERSION_GE(Maj,Min,Rel)  \
-        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
-         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
-         (H5_VERS_MAJOR>Maj))
+#include "hdf5_version_ge.h"
 
 /* to encode the version of the hdf5 library in any silo executable */
 char SILO_built_with_H5_lib_vers_info_g[] = "SILO built with "
@@ -8387,7 +8384,7 @@ db_hdf5_WriteCKZ(DBfile *_dbfile, char const *vname, void const *var,
                    UNWIND();
                }
            }
-//#warning WHAT IF EXISTING DATASET WAS COMPRESSED
+#warning WHAT IF EXISTING DATASET WAS COMPRESSED
        } else {
            /* Create memory and file data space (both identical) */
            for (i=0; i<ndims; i++) ds_size[i] = dims[i];
@@ -16618,7 +16615,6 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     char const *const *const names, int *ordering)
 {
     static char *me = "db_hdf5_SortObjectsByOffset";
-#if HDF5_VERSION_GE(1,8,0)
     DBfile_hdf5 *dbfile = (DBfile_hdf5*)_dbfile;
     index_offset_pair_t *iop = (index_offset_pair_t*)
         malloc(nobjs * sizeof(index_offset_pair_t));
@@ -16630,17 +16626,15 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     for (i = 0; i < nobjs; i++)
     {
         iop[i].index = i;
-        if (strchr(names[i], ':')) iop[i].offset = HADDR_MAX;
+        if (strchr(names[i], ':'))
+            iop[i].offset = HADDR_MAX;
         else
         {
-            H5O_info_t oinfo;
-            hid_t oid;
-            if ((oid=H5Oopen(dbfile->cwg, names[i], H5P_DEFAULT))<0 ||
-                 H5Oget_info(oid, &oinfo)<0 ||
-                 H5Oclose(oid)<0)
+            hid_t dsid;
+            if ((dsid=H5Dopen(dbfile->cwg, names[i]))<0 ||
+                (iop[i].offset=H5Dget_offset(dsid))==HADDR_UNDEF ||
+                H5Dclose(dsid)<0)
                 iop[i].offset = HADDR_MAX;
-            else
-                iop[i].offset = oinfo.addr;
         }
     }
 
@@ -16654,9 +16648,6 @@ db_hdf5_SortObjectsByOffset(DBfile *_dbfile, int nobjs,
     free(iop);
 
     return 0;
-#else
-    return db_perror("H5O API for sort", E_NOTENABLEDINBUILD, me);
-#endif
 }
 
 #if HDF5_VERSION_GE(1,8,9)

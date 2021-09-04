@@ -75,10 +75,7 @@ be used for advertising or product endorsement purposes.
 #include "hdf5.h"
 
 /* useful macro for comparing HDF5 versions */
-#define HDF5_VERSION_GE(Maj,Min,Rel)  \
-        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE>=Rel)) || \
-         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR>Min)) || \
-         (H5_VERS_MAJOR>Maj))
+#include "hdf5_version_ge.h"
 
 #if HDF5_VERSION_GE(1,8,4)
 
