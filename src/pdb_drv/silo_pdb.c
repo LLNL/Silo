@@ -2255,8 +2255,6 @@ db_pdb_Create (char const *name, int mode, int target, int opts_set_id, char con
 #ifdef USING_PDB_PROPER
     dbfile->pub.type = DB_PDBP;
 #endif
-#warning db_InitFileScopeGlobals was commented out
-    db_InitFileScopeGlobals(dbfile);
     db_pdb_InitCallbacks((DBfile *) dbfile);
 
     if (NULL == (dbfile->pdb = lite_PD_open((char*)name, "w")))
