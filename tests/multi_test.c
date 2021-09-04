@@ -835,7 +835,8 @@ main(int argc, char *argv[])
         if (!strncmp(argv[i], "DB_PDB", 6)) {
             driver = StringToDriver(argv[i]);
             file_ext = ".pdb";
-        } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
+        } else if (!strncmp(argv[i], "DB_HDF5", 7) ||
+                   !strncmp(argv[i], "DB_H5VFD", 8)) {
             driver = StringToDriver(argv[i]);
             file_ext = ".h5";
         } else if (!strcmp(argv[i], "gzip1")) {

@@ -77,6 +77,7 @@ if test -n "$1"; then
     topDir=$1
     if test -e $topDir/../../multi_test; then
         topDir=$1/../..
+        set -x
     fi
 else
     topDir=.
@@ -95,6 +96,10 @@ if test $vmin -eq 6; then
     vtest=8
 elif test $vmin -eq 8; then
     vtest=6
+elif test $vmin -eq 10; then
+    vtest=10
+elif test $vmin -eq 12; then
+    vtest=12
 else
     echo "Did not find expected hdf5 minor version number"
     exit 1

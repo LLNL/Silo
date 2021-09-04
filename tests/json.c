@@ -107,8 +107,8 @@ main(int argc, char *argv[])
     }
     
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_TOP, NULL);
-    dbfile = DBOpen("../../onehex.silo", DB_PDB, DB_READ);
-    if (!dbfile) dbfile = DBOpen("onehex.silo", DB_PDB, DB_READ);
+    dbfile = DBOpen("../../onehex.silo", driver, DB_READ);
+    if (!dbfile) dbfile = DBOpen("onehex.silo", driver, DB_READ);
 
     /* Example of getting a Silo object from a silo file as a json object */
     jsilo_obj = DBGetJsonObject(dbfile, "hex");
@@ -184,7 +184,7 @@ main(int argc, char *argv[])
        and writing it to a Silo file using DBWriteJsonObject */
     bobj = json_object_from_binary_buf(buf, len);
     printf("bojb =%s\n", json_object_to_json_string(bobj));
-    dbfile = DBCreate("onehex_from_binary_json.pdb", DB_CLOBBER, DB_LOCAL, "test binary json output", DB_PDB);
+    dbfile = DBCreate("onehex_from_binary_json.pdb", DB_CLOBBER, DB_LOCAL, "test binary json output", driver);
     DBWriteJsonObject(dbfile, bobj);
     json_object_put(bobj);
     DBClose(dbfile);
@@ -211,7 +211,7 @@ main(int argc, char *argv[])
 
     json_object_object_add(fil_obj, "katie_data", jstuff);
 
-    dbfile = DBCreate("onehex_from_json.pdb", DB_CLOBBER, DB_LOCAL, "test json output", DB_PDB);
+    dbfile = DBCreate("onehex_from_json.pdb", DB_CLOBBER, DB_LOCAL, "test json output", driver);
     DBWriteJsonObject(dbfile, fil_obj);
     DBClose(dbfile);
     json_object_put(fil_obj);
