@@ -87,7 +87,6 @@ extern int build_ucd_tri(DBfile *dbfile, char *name, int flags);
 int main(int argc, char *argv[])
 {
     
-    int            meshid, diridq, diridu, diridt;
     int            meshtypes[3], nmesh;
     char          *meshnames[3], original_dir[128];
     DBfile        *dbfile, *dbfile2, *dbfile3, *dbfile4, *dbfile5;
@@ -129,9 +128,9 @@ int main(int argc, char *argv[])
     dbfile = DBCreate(filename, 0, DB_LOCAL, "dir test file", driver);
     printf("Creating file: '%s'...\n", filename);
 
-    diridq = DBMkdir(dbfile, "quad_dir");
-    diridu = DBMkdir(dbfile, "ucd_dir");
-    diridt = DBMkdir(dbfile, "tri_dir");
+    DBMkdir(dbfile, "quad_dir");
+    DBMkdir(dbfile, "ucd_dir");
+    DBMkdir(dbfile, "tri_dir");
 
     /* Test MkDirP */ 
     DBMkDirP(dbfile, "gorfo/foo/bar/bin/baz");
@@ -145,7 +144,7 @@ int main(int argc, char *argv[])
     DBGetDir(dbfile, original_dir);
 
     DBSetDir(dbfile, "/quad_dir");
-    meshid = build_quad(dbfile, "quadmesh");
+    build_quad(dbfile, "quadmesh");
     DBMkdir(dbfile, "quad_subdir1");
     DBSetDir(dbfile, "quad_subdir1");
     build_quad(dbfile, "quadmesh");
@@ -157,6 +156,7 @@ int main(int argc, char *argv[])
     DBSetDir(dbfile, "../..");
     DBMkdir(dbfile, "quad_subdir3");
     DBSetDir(dbfile, "quad_subdir3");
+#warning CONFIRM COPY HANDLES LINK CORRECTLY
     DBMkSymlink(dbfile, "/quad_dir/quad_subdir1", "dirlink");
     DBMkSymlink(dbfile, "dir2.h5:/gorfo", "extlink");
     build_quad(dbfile, "quadmesh");
@@ -166,14 +166,14 @@ int main(int argc, char *argv[])
     nmesh = 1;
 
     DBSetDir(dbfile, "/ucd_dir");
-    meshid = build_ucd(dbfile, "ucdmesh");
+    build_ucd(dbfile, "ucdmesh");
 
     meshtypes[1] = DB_UCDMESH;
     meshnames[1] = "/ucd_dir/ucdmesh";
     nmesh++;
 
     DBSetDir(dbfile, "/tri_dir");
-    meshid = build_ucd_tri(dbfile, "trimesh", 0x2);
+    build_ucd_tri(dbfile, "trimesh", 0x0); /* make a smaller trimesh here */
 
     meshtypes[2] = DB_UCDMESH;
     meshnames[2] = "/tri_dir/trimesh";
@@ -187,63 +187,23 @@ int main(int argc, char *argv[])
     dbfile = DBOpen(filename, driver, DB_READ);
     dbfile2 = DBCreate(filename2, 0, DB_LOCAL, "dir test file", driver2);
 
-#if 0
-    if ((driver&0xF) == DB_HDF5)
-    {
-        char *srcObjs[] = {"trimesh", "../ucd_dir/ucdmesh", "/quad_dir/quadmesh"};
-        char *dstObjs[] = {"/tmp/foo/bar/gorfo", "../foogar", 0};
-        DBCpDir(dbfile, "quad_dir/quad_subdir1", dbfile2, "gorfo");
-        DBSetDir(dbfile, "tri_dir");
-        DBMkDir(dbfile2, "tmp");
-        DBSetDir(dbfile2, "tmp");
-        DBCpListedObjects(3, dbfile, srcObjs, dbfile2, dstObjs);
-        DBSetDir(dbfile, "/");
-        DBSetDir(dbfile2, "/");
-    }
-#endif
-    {
-#if 0
-        char *srcObjs[] = {"trimesh", "../ucd_dir/ucdmesh", "/quad_dir/quadmesh"};
-        char *dstObjs[] = {"/tmp/foo/bar/gorfo", "../foogar", 0};
-        DBCp("", dbfile, dbfile2, "/tri_dir/trimesh", "foogar", DB_EOA);
-        DBCp("", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../gorfo/banana", "outdir", DB_EOA);
-        DBCp("-2", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../ucd_dir/ucdmesh", "foogar", DB_EOA);
-        DBCp("-1", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../ucd_dir/ucdmesh", "foogar", DB_EOA);
-        DBCp("-3", dbfile, dbfile2, 3, srcObjs, dstObjs);
-        DBCp("-3", dbfile, dbfile2, 3, srcObjs, dstObjs, DB_EOA);
-        DBCp("-4", dbfile, dbfile2, 3, srcObjs, "gorfo");
-        DBCp("-4", dbfile, dbfile2, 3, srcObjs, "gorfo", DB_EOA);
-        DBCp("-2 -d -s", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../ucd_dir/ucdmesh", "foogar", DB_EOA);
-        DBCp("-2ds", dbfile, dbfile2, "/tri_dir/trimesh", "/foo/bar", "../ucd_dir/ucdmesh", "foogar", DB_EOA);
-        DBCp("", dbfile, dbfile2, "/tri_dir", "gorfo", DB_EOA);
-        DBCp(0, dbfile, dbfile2, "/tri_dir", "gorfo", DB_EOA);
-        DBCp("-r", dbfile, dbfile2, "/tri_dir", "gorfo", DB_EOA);
-#endif
-
-    }
-    /*
-    DBCpObject(dbfile, "/tri_dir/trimesh", dbfile2, "foogar");
-       To compare two wholly different objects in silo's browser...
-           diff (file dir.pdb).tri_dir.trimesh (file dir2.h5).foogar
-    */
-
     DBSetDir(dbfile, "/tri_dir");
     DBMkDirP(dbfile2, "gorfo/foo/bar");
     DBSetDir(dbfile2, "gorfo/foo");
+
     /* Just copy a mesh and its sub-objects */
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh_copy", DB_EOA);
 
     DBSetDir(dbfile2, "/");
-    /* Try a recursive copy
-    DBCp("-r", dbfile, dbfile2, "/quad_dir", "quad_dir_copy", DB_EOA); */
 
-    DBClose(dbfile);
-    DBClose(dbfile2);
-
-exit(0);
+    /* Try a recursive copy */
+    DBCp("-r", dbfile, dbfile2, "/quad_dir/quad_subdir1", "quad_dir_copy", DB_EOA);
 
     DBSetDir(dbfile2, "..");
-    build_ucd_tri(dbfile2, "trimesh", 0x1);
+
+    build_ucd_tri(dbfile2, "trimesh", 0x2); /* make a larger tri mesh here */
+
+    /* try to copy the smaller trimesh on top of the larger one */
     DBCp(0, dbfile, dbfile2, "trimesh", "trimesh", DB_EOA);
 
 {
@@ -265,7 +225,6 @@ exit(0);
 
     DBClose(dbfile);
     DBClose(dbfile2);
-
 
     dbfile = DBOpen(filename, driver, DB_READ);
     dbfile2 = DBOpen(filename2, driver2, DB_APPEND);

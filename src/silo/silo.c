@@ -1731,7 +1731,8 @@ if (LS_VAR && toc->n##CAT > 0) { \
     }
 
 #warning CLEAN UP IS LOST IN ABOVE EARLY RETURNS
-    DBFreeStringArray(args, nargs);
+    if (args)
+        DBFreeStringArray(args, nargs);
 
     if (nlist && (*nlist >= _nlist_orig))
         return -1;
@@ -5893,7 +5894,7 @@ db_can_overwrite_dstobj_with_srcobj(
         for (r = 0; r < dstObj->ncomponents && dstr==-1; r++)
             if (!strcmp(curr_compname, dstObj->comp_names[r]))
                 dstr = r;
-       
+
         if (dstr == -1) goto done; /* no matching comp in dst */
 
         if (!strncmp(srcObj->pdb_names[q], "'<i>", 4))
@@ -5908,7 +5909,7 @@ db_can_overwrite_dstobj_with_srcobj(
             DBObjectType srcSubObjType, dstSubObjType;
             char *srcSubObjName, *srcSubObjDirName, *srcSubObjAbsName;
             char *dstSubObjName, *dstSubObjDirName, *dstSubObjAbsName;
-             
+
             if (!strncmp(srcObj->pdb_names[q], "'<s>", 4))
                 srcSubObjName = db_strndup(srcObj->pdb_names[q]+4, strlen(srcObj->pdb_names[q])-5);
             else
@@ -5925,12 +5926,22 @@ db_can_overwrite_dstobj_with_srcobj(
 
             /* To make exiting and cleanup logic here a tad simpler, we do all
                the work we *might* need to with the strings and then free them. */
+#warning SHOULDNT WE USE FILE LENGTH FUNCTIONS HERE
             srcSubObjType = DBInqVarType(srcFile, srcSubObjAbsName);
             srcLen = DBGetVarByteLength(srcFile, srcSubObjAbsName);
             dstSubObjType = DBInqVarType(dstFile, dstSubObjAbsName);
             dstLen = DBGetVarByteLength(dstFile, dstSubObjAbsName);
-            can_overwrite = db_can_overwrite_dstobj_with_srcobj(srcFile, srcSubObjAbsName,
-                dstFile, dstSubObjAbsName); /* recursive call */
+
+            if (dstSubObjType == DB_VARIABLE)
+                can_overwrite = 1;
+            else if (dstSubObjType == DB_DIR)
+                can_overwrite = 0;
+#warning DISALLOW SIMLINKS FOR NOW
+            else if (dstSubObjType == DB_SYMLINK)
+                can_overwrite = 0;
+            else
+                can_overwrite = db_can_overwrite_dstobj_with_srcobj(
+                    srcFile, srcSubObjAbsName, dstFile, dstSubObjAbsName); /* recursive call */
 
             FREE(srcSubObjName);
             FREE(srcSubObjDirName);
@@ -6252,6 +6263,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
     char const *many_to_one_dir = 0;
     int N = 0;
     char const **srcPathNames = 0, **dstPathNames = 0;
+    char srcStartCwg[1024], dstStartCwg[1024];
 
 #warning WARN ABOUT CERTAIN OPTIONS NOT YET SUPPORTED
     /* process any options in the opts string */
@@ -6363,6 +6375,9 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
             dstPathNames[q] = many_to_one_dir; /* all point to same char* */
     }
 
+    DBGetDir(srcFile, srcStartCwg);
+    DBGetDir(dstFile, dstStartCwg);
+
     for (i = 0; i < N; i++)
     {
         DBObjectType srcType, dstType;
@@ -6457,9 +6472,10 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
 endLoop:
         FREE(srcObjAbsName);
         FREE(dstObjAbsName);
-    ;
-
     }
+
+    DBSetDir(srcFile, srcStartCwg);
+    DBSetDir(dstFile, dstStartCwg);
 }
 
 #if 1
@@ -13350,6 +13366,13 @@ db_StringListToStringArray(char const *strList, int *_n, char sep, int skipSepAt
 {
     int i, l, n, add1 = 0;
     char **retval;
+
+    /* handle null case */
+    if (!strList)
+    {
+        if (_n && *_n < 0) *_n = 0;
+        return 0;
+    }
 
     /* if n is unspecified (<0), compute it by counting sep chars */
     if (_n == 0 || *_n < 0)
