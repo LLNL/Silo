@@ -7740,6 +7740,7 @@ db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size
     hsize_t     nbytes_big;
     int         nbytes_small=-1;
 
+#warning REMOVED db_perror CALLS
     PROTECT {
         /* Open the dataset */
         if ((dset=H5Dopen(dbfile->cwg, name))>=0) {
@@ -7748,7 +7749,7 @@ db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size
             if ((ftype=H5Dget_type(dset))<0 ||
                 (mtype=hdf2hdf_type(ftype))<0 ||
                 (space=H5Dget_space(dset))<0) {
-                db_perror(name, E_CALLFAIL, me);
+                /*db_perror(name, E_CALLFAIL, me);*/
                 UNWIND();
             }
 
@@ -7759,7 +7760,7 @@ db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size
                 nbytes_big = H5Sget_simple_extent_npoints(space) * H5Tget_size(mtype);
             nbytes_small = (int)nbytes_big;
             if (nbytes_big!=(hsize_t)nbytes_small) {
-                db_perror("overflow", E_INTERNAL, me);
+                /*db_perror("overflow", E_INTERNAL, me);*/
                 UNWIND();
             }
 
@@ -7775,7 +7776,7 @@ db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size
             size_t elsize;
             if (!db_hdf5_get_comp_var(_dbfile, name, &nelmts,
                  &elsize, &fsize, NULL, NULL)) {
-                db_perror(name, E_CALLFAIL, me);
+                /*db_perror(name, E_CALLFAIL, me);*/
                 UNWIND();
             }
             if (use_file_size)
@@ -7789,6 +7790,7 @@ db_hdf5_get_var_byte_length(DBfile *_dbfile, char const *name, int use_file_size
             H5Sclose(space);
             H5Dclose(dset);
         } H5E_END_TRY;
+        CANCEL_UNWIND;
     } END_PROTECT;
 
     return nbytes_small;
