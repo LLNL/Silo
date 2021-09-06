@@ -563,7 +563,7 @@ DBVariableNameValid(const char *s)
     {
         int  okay = 0;
 
-        if (isalnum(p[i]) || (p[i] == '_') || (p[i] == '/'))
+        if (isalnum(p[i]) || (p[i] == '_') || (p[i] == '/') || p[i] == '.')
         {
             okay = 1;
         }
