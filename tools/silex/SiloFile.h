@@ -110,6 +110,9 @@ class SiloDir
     vector<QString>  obj;
     vector<QString>  array;
     vector<QString>  dir;
+    vector<QString>  mrgtree;
+    vector<QString>  mrgvar;
+    vector<QString>  groupelmap;
   public:
     SiloDir(DBfile *db, const QString &name, const QString &path);
     ~SiloDir();

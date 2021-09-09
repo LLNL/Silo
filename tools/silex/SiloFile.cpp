@@ -100,73 +100,53 @@ SiloDir::SiloDir(DBfile *db, const QString &name_, const QString &path_)
     DBSetDir(db, (const char*)path.toLatin1());
     DBtoc *toc = DBGetToc(db);
 
+#define HANDLE_OBJ(BNAME) \
+    for (i=0; i<toc->n ## BNAME; i++) \
+    { \
+        char const *targ = DBIsSymlink(toc, toc->BNAME ## _names[i]); \
+        if (targ) \
+        { \
+            char tmp[256]; \
+            snprintf(tmp, sizeof(tmp), "%s --> %s", toc->BNAME ## _names[i], targ); \
+            BNAME.push_back(tmp); \
+        } \
+        else \
+        { \
+            BNAME.push_back(toc->BNAME ## _names[i]); \
+        } \
+    }
+
     int i;
-    for (i=0; i<toc->ncurve; i++)
-        curve.push_back(toc->curve_names[i]);
+    HANDLE_OBJ(curve)
 #ifdef DBCSG_QUADRIC_G
-    for (i=0; i<toc->ncsgmesh; i++)
-        csgmesh.push_back(toc->csgmesh_names[i]);
-    for (i=0; i<toc->ncsgvar; i++)
-        csgvar.push_back(toc->csgvar_names[i]);
+    HANDLE_OBJ(csgmesh)
+    HANDLE_OBJ(csgvar)
 #endif
 #ifdef DB_VARTYPE_SCALAR
-    for (i=0; i<toc->ndefvars; i++)
-        defvars.push_back(toc->defvars_names[i]);
+    HANDLE_OBJ(defvars)
 #endif
-    for (i=0; i<toc->nmultimesh; i++)
-        multimesh.push_back(toc->multimesh_names[i]);
-    for (i=0; i<toc->nmultivar; i++)
-        multivar.push_back(toc->multivar_names[i]);
+    HANDLE_OBJ(multimesh)
+    HANDLE_OBJ(multivar)
 #ifdef DBCSG_QUADRIC_G // mmadj came into Silo same time as CSG stuff
-    for (i=0; i<toc->nmultimeshadj; i++)
-        multimeshadj.push_back(toc->multimeshadj_names[i]);
+    HANDLE_OBJ(multimeshadj)
 #endif
-    for (i=0; i<toc->nmultimat; i++)
-        multimat.push_back(toc->multimat_names[i]);
-    for (i=0; i<toc->nmultimatspecies; i++)
-        multimatspecies.push_back(toc->multimatspecies_names[i]);
-    for (i=0; i<toc->nqmesh; i++)
-{
-        char const *targ = DBIsSymlink(toc, toc->qmesh_names[i]);
-        if (targ)
-        {
-            char tmp[256];
-            snprintf(tmp, sizeof(tmp), "%s --> %s", toc->qmesh_names[i], targ);
-            qmesh.push_back(tmp);
-        }
-        else
-        {
-            qmesh.push_back(toc->qmesh_names[i]);
-        }
-}
-    for (i=0; i<toc->nqvar; i++)
-        qvar.push_back(toc->qvar_names[i]);
-    for (i=0; i<toc->nucdmesh; i++)
-        ucdmesh.push_back(toc->ucdmesh_names[i]);
-    for (i=0; i<toc->nucdvar; i++)
-        ucdvar.push_back(toc->ucdvar_names[i]);
-    for (i=0; i<toc->nptmesh; i++)
-        ptmesh.push_back(toc->ptmesh_names[i]);
-    for (i=0; i<toc->nptvar; i++)
-        ptvar.push_back(toc->ptvar_names[i]);
-    for (i=0; i<toc->nmat; i++)
-        mat.push_back(toc->mat_names[i]);
-    for (i=0; i<toc->nmatspecies; i++)
-        matspecies.push_back(toc->matspecies_names[i]);
-    for (i=0; i<toc->nvar; i++)
-        var.push_back(toc->var_names[i]);
-    for (i=0; i<toc->nobj; i++)
-        obj.push_back(toc->obj_names[i]);
-    for (i=0; i<toc->narray; i++)
-        array.push_back(toc->array_names[i]);
-    for (i=0; i<toc->ndir; i++)
-        dir.push_back(toc->dir_names[i]);
-    for (i=0; i<toc->nmrgtree; i++)
-        dir.push_back(toc->mrgtree_names[i]);
-    for (i=0; i<toc->nmrgvar; i++)
-        dir.push_back(toc->mrgvar_names[i]);
-    for (i=0; i<toc->ngroupelmap; i++)
-        dir.push_back(toc->groupelmap_names[i]);
+    HANDLE_OBJ(multimat)
+    HANDLE_OBJ(multimatspecies)
+    HANDLE_OBJ(qmesh)
+    HANDLE_OBJ(qvar)
+    HANDLE_OBJ(ucdmesh)
+    HANDLE_OBJ(ucdvar)
+    HANDLE_OBJ(ptmesh)
+    HANDLE_OBJ(ptvar)
+    HANDLE_OBJ(mat)
+    HANDLE_OBJ(matspecies)
+    HANDLE_OBJ(var)
+    HANDLE_OBJ(obj)
+    HANDLE_OBJ(array)
+    HANDLE_OBJ(dir)
+    HANDLE_OBJ(mrgtree)
+    HANDLE_OBJ(mrgvar)
+    HANDLE_OBJ(groupelmap)
 
     for (unsigned int i=0; i<dir.size(); i++)
     {
