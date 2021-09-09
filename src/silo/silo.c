@@ -226,6 +226,7 @@ PRIVATE reg_status_t _db_regstatus[DB_NFILES] = /* DB_NFILES triples of zeros */
      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 PRIVATE filter_t _db_filter[DB_NFILTERS];
+#warning REDUCE USE OF THIS CONSTRUCT
 const static char *api_dummy = 0;
 
 /* stat struct definition */
@@ -2159,8 +2160,11 @@ db_silo_stat(const char *name, db_silo_stat_t *statbuf, int opts_set_id)
             vfd = *((int*)p);
         if (vfd == DB_H5VFD_FIC)
         {
+            static int n = 0;
             statbuf->s.st_mode = 0x0;
             statbuf->s.st_mode |= S_IREAD;
+            statbuf->s.st_dev = (dev_t) n++;
+            statbuf->s.st_ino = (ino_t) n++;
             return 0;
         }
     }
@@ -2525,7 +2529,7 @@ DB_SETGET(int, AllowEmptyObjects, allowEmptyObjects, DB_INTBOOL_NOT_SET)
 DB_SETGET(int, EnableChecksums, enableChecksums, DB_INTBOOL_NOT_SET) 
 DB_SETGET(int, FriendlyHDF5Names, enableFriendlyHDF5Names, DB_INTBOOL_NOT_SET) 
 DB_SETGET(int, DeprecateWarnings, maxDeprecateWarnings, DB_INTBOOL_NOT_SET) 
-DB_SETGET(int, EnableDarshan, darshanEnabled, DB_INTBOOL_NOT_SET) 
+/*DB_SETGET(int, EnableDarshan, darshanEnabled, DB_INTBOOL_NOT_SET) */
 DB_SETGET(int, AllowLongStrComponents, allowLongStrComponents, DB_INTBOOL_NOT_SET) 
 DB_SETGET(unsigned long long, DataReadMask2, dataReadMask, DB_MASK_NOT_SET) 
 #warning WHAT ABOUT FORCESINGLE SHOWERRORS
@@ -2837,6 +2841,7 @@ DBGrabDriver(DBfile *file)
        if (file->pub.GrabId > (void *) 0) {
           int grab_val = 1;
           DBWrite(file, "/_was_grabbed", &grab_val, &grab_val, 1, DB_INT);
+#warning FIX GLOBAL LOCK
           SILO_Globals.enableGrabDriver = TRUE;
           rtn = (void *) file->pub.GrabId;
        }
@@ -5585,7 +5590,7 @@ DBCpDir(DBfile *dbfile, char const *srcDir,
 {
     int retval;
 
-    API_BEGIN2("DBCpDir", int, -1, api_dummy) {
+    API_DEPRECATE2("DBCpDir", int, -1, api_dummy, 4, 11, "DBCp") {
         if (!dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (!dstFile)
