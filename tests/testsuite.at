@@ -256,7 +256,7 @@ AT_SETUP(json)
 AT_KEYWORDS(json)
 AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || onehex $STARGS,,ignore) # don't valgrind these intermediate parts
 AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || multi_test $STARGS,,ignore) # don't valgrind these intermediate parts
-AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS,ignore,ignore)
+AT_CHECK(test ! \( -e ./json -o -e ../../json \) && exit 77 || $VALGRIND json $STARGS,,ignore,ignore)
 AT_CLEANUP
 
 AT_BANNER(PDB Lite)
@@ -276,6 +276,14 @@ AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex split,,ignore,
 AT_CLEANUP
 AT_SETUP(onehex with custom fapl/fcpl)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND onehex custom,,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(partial_io with rect3d point query)
+AT_CHECK(testall $STARGS,,ignore)
+AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query rect3d.h5 d 10 [0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9],,ignore,ignore)
+AT_CLEANUP
+AT_SETUP(partial_io with ucd3d point query)
+AT_CHECK(testall $STARGS,,ignore)
+AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND partial_io DB_HDF5 point-query ucd3d.h5 d 5 [0,26,234,1482,2574],,ignore,ignore)
 AT_CLEANUP
 AT_SETUP(compression gzip)
 AT_KEYWORDS(compression)
@@ -320,6 +328,10 @@ AT_SETUP(largefile)
 AT_KEYWORDS(large)
 AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND largefile,,ignore,ignore)
 AT_CLEANUP
+#AT_SETUP(memfile_simple)
+#AT_CHECK(testall -small $STARGS,,ignore)
+#AT_CHECK(test "$STARGS" != DB_HDF5 && exit 77 || $VALGRIND memfile_simple $STARGS,,ignore,ignore)
+#AT_CLEANUP
 
 AT_BANNER(Fortran)
 AT_SETUP(arrayf77)
