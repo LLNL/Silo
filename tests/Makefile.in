@@ -173,8 +173,8 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	readstuff$(EXEEXT) testfs$(EXEEXT) empty$(EXEEXT) \
 	majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
 	test_mat_compression$(EXEEXT) bcastopen$(EXEEXT) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_6) \
-	$(am__EXEEXT_8)
+	memfile_simple$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_4) \
+	$(am__EXEEXT_6) $(am__EXEEXT_8)
 @HDF5_DRV_NEEDED_TRUE@am__append_7 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_8 = $(HDF5PROGS)
 @HDF5_DRV_NEEDED_TRUE@am__append_9 = $(HDF5CKLTLIBS)
@@ -429,6 +429,13 @@ am__matf77_SOURCES_DIST = matf77.f
 matf77_OBJECTS = $(am_matf77_OBJECTS)
 @FORTRAN_NEEDED_TRUE@matf77_DEPENDENCIES = $(LDADD) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
+memfile_simple_SOURCES = memfile_simple.c
+memfile_simple_OBJECTS = memfile_simple.$(OBJEXT)
+memfile_simple_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@memfile_simple_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_FALSE@	../src/libsilo.la $(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@memfile_simple_DEPENDENCIES =  \
+@HDF5_DRV_NEEDED_TRUE@	../src/libsiloh5.la $(am__append_1)
 merge_block_SOURCES = merge_block.c
 merge_block_OBJECTS = merge_block.$(OBJEXT)
 merge_block_LDADD = $(LDADD)
@@ -835,6 +842,7 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_majorder_SOURCES) majorder.c \
 	$(nodist_EXTRA_mat3d_3across_SOURCES) mat3d_3across.c \
 	$(matf77_SOURCES) $(nodist_EXTRA_matf77_SOURCES) \
+	$(nodist_EXTRA_memfile_simple_SOURCES) memfile_simple.c \
 	$(nodist_EXTRA_merge_block_SOURCES) merge_block.c \
 	$(nodist_EXTRA_misc_SOURCES) misc.c $(mk_nasf_h5_SOURCES) \
 	$(nodist_EXTRA_mk_nasf_pdb_SOURCES) mk_nasf_pdb.c \
@@ -888,11 +896,11 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(dir_SOURCES) efcentering.c empty.c extface.c \
 	$(am__grab_SOURCES_DIST) group_test.c ioperf.c json.c \
 	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
-	$(am__matf77_SOURCES_DIST) merge_block.c misc.c \
-	$(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c mmadjacency.c \
-	multi_file.c multi_test.c multispec.c namescheme.c \
-	$(newsami_SOURCES) obj.c onehex.c oneprism.c onepyramid.c \
-	onetet.c partial_io.c pdbtst.c point.c \
+	$(am__matf77_SOURCES_DIST) memfile_simple.c merge_block.c \
+	misc.c $(am__mk_nasf_h5_SOURCES_DIST) mk_nasf_pdb.c \
+	mmadjacency.c multi_file.c multi_test.c multispec.c \
+	namescheme.c $(newsami_SOURCES) obj.c onehex.c oneprism.c \
+	onepyramid.c onetet.c partial_io.c pdbtst.c point.c \
 	$(am__pointf77_SOURCES_DIST) polyzl.c \
 	$(am__qmeshmat2df77_SOURCES_DIST) $(quad_SOURCES) \
 	$(am__quadf77_SOURCES_DIST) readstuff.c realloc_obj_and_opts.c \
@@ -1161,6 +1169,7 @@ EXTRA_DIST = \
  resample.c \
  bcastopen.c \
  bcastopen_main.c \
+ memfile_simple.c \
  zeros.dat \
  testhdf5.c \
  $(check_SCRIPTS) \
@@ -1225,9 +1234,9 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
 	csg rocket mmadjacency largefile version namescheme \
 	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
-	mat3d_3across merge_block test_mat_compression bcastopen empty \
-	majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS) \
-	$(am__append_7) $(am__append_10)
+	mat3d_3across merge_block test_mat_compression bcastopen \
+	memfile_simple empty majorder realloc_obj_and_opts $(PDBTESTS) \
+	$(JSONTESTS) $(am__append_7) $(am__append_10)
 dir_SOURCES = dir.c testlib.c
 listtypes_SOURCES = listtypes.c listtypes_main.c
 bcastopen_SOURCES = listtypes.c bcastopen.c bcastopen_main.c
@@ -1332,6 +1341,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_test_mat_compression_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_bcastopen_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_memfile_simple_SOURCES = dummy.cxx
 @HDF5_DRV_NEEDED_TRUE@compression_SOURCES = compression.c
 @HDF5_DRV_NEEDED_TRUE@compression_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_TRUE@grab_SOURCES = grab.c
@@ -1535,6 +1545,10 @@ mat3d_3across$(EXEEXT): $(mat3d_3across_OBJECTS) $(mat3d_3across_DEPENDENCIES) $
 matf77$(EXEEXT): $(matf77_OBJECTS) $(matf77_DEPENDENCIES) $(EXTRA_matf77_DEPENDENCIES) 
 	@rm -f matf77$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(matf77_OBJECTS) $(matf77_LDADD) $(LIBS)
+
+memfile_simple$(EXEEXT): $(memfile_simple_OBJECTS) $(memfile_simple_DEPENDENCIES) $(EXTRA_memfile_simple_DEPENDENCIES) 
+	@rm -f memfile_simple$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(memfile_simple_OBJECTS) $(memfile_simple_LDADD) $(LIBS)
 
 merge_block$(EXEEXT): $(merge_block_OBJECTS) $(merge_block_DEPENDENCIES) $(EXTRA_merge_block_DEPENDENCIES) 
 	@rm -f merge_block$(EXEEXT)
@@ -1748,6 +1762,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/listtypes_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/majorder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mat3d_3across.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memfile_simple.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge_block.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_nasf_h5.Po@am__quote@

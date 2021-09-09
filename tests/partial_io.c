@@ -50,6 +50,7 @@ National  Security, LLC,  and shall  not  be used  for advertising  or
 product endorsement purposes.
 */
 #include <silo.h>
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>     /* For abort() */
 #include <std.c>
@@ -159,9 +160,11 @@ main (int argc, char *argv[]) {
    int		driver = DB_PDB;
    char		*filename = "partial.pdb";
    char		filename2[256];
-   char     varname2[256];
-   int      show_all_errors = FALSE;
-   int      npoints = 0;
+   char         varname2[256];
+   int          show_all_errors = FALSE;
+   int          indices[100];
+   int          npoints = 0;
+   int          ndims = 0;
 
    /* Parse command-line */
    filename2[0] = '\0';
@@ -175,16 +178,21 @@ main (int argc, char *argv[]) {
        } else if (!strcmp(argv[i], "show-all-errors")) {
            show_all_errors = 1;
        } else if (!strcmp(argv[i], "point-query")) {
-           if (i+2 >= argc)
+           int j;
+           char *val, *brkt;
+           if (i+4 >= argc)
            {
 	       fprintf(stderr, "%s: missing options to `%s'\n", argv[0], argv[i]);
+	       fprintf(stderr, "required options are <filename> <varname> <npts> <int>,<int>,...\n");
                exit(1);
            }
            strncpy(filename2, argv[++i], sizeof(filename2));
-           strncpy(varname2, argv[++i], sizeof(filename2));
-#if 0
+           strncpy(varname2, argv[++i], sizeof(varname2));
            npoints = (int) strtol(argv[++i],0,10);
-#endif
+           assert(3*npoints < sizeof(indices)/sizeof(indices[0]));
+           for (j = 0, val = strtok_r(argv[++i], ",", &brkt); val; j++, val = strtok_r(0, ",", &brkt))
+               indices[j] = (int) strtol(val,0,10);
+           ndims = j / npoints;
        } else if (argv[i][0] != '\0') {
 	   fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);
        }
@@ -384,14 +392,6 @@ main (int argc, char *argv[]) {
     */
    if (strlen(filename2))
    {
-       DBobject *dbobj;
-#if 1
-       int indices[3*10] = {0,0,0,  1,1,1,  2,2,2,  3,3,3,  4,4,4,
-                            5,5,5,  6,6,6,  7,7,7,  8,8,8,  9,9,9};
-#else
-       int indices[3*4] = {0,0,0,  1,1,1,  2,2,2,  3,3,3};
-#endif
-
        void *_vals = 0;
        int nitems = 0, ncomps = 0;
 
@@ -402,32 +402,34 @@ main (int argc, char *argv[]) {
            exit(1);
        }
 
-#if 0
-       /* Read the full object as a generic object */
-       dbobj = DBGetObject(db, varname2); 
-       if (!dbobj)
-       {
-           fprintf(stderr, "Unable to read object \"%s\"\n", varname2);
-           exit(1);
-       }
-#endif
-
+#warning IMPLEMENT THIS COMPARISON
        /* compare values read with ReadVarVals to same entries in full object */
 
        /* generate a random set of ndim indices to read */
 
-       DBReadVarVals(db, varname2, DB_PARTIO_POINTS, 10, 3, indices, &_vals, &ncomps, &nitems);
+       DBReadVarVals(db, varname2, DB_PARTIO_POINTS, npoints, ndims, indices, &_vals, &ncomps, &nitems);
 
+#if 0
       {
           DBmaterial *mat = (DBmaterial *) _vals;
           for (i = 0; i < mat->dims[0]; i++)
               printf("matlist[%d] = %d\n", i, mat->matlist[i]);
       }
-#if 0
+#else
        for (i = 0; i < nitems; i++)
        {
            float *vals = (float *) _vals;
-           printf("val[%d][%d][%d] = ", indices[i*3+0], indices[i*3+1], indices[i*3+2]);
+           switch (ndims) {
+           case 1:
+               printf("val[%d] = ", indices[i*1+0]);
+               break;
+           case 2:
+               printf("val[%d][%d] = ", indices[i*2+0], indices[i*2+1]);
+               break;
+           case 3:
+               printf("val[%d][%d][%d] = ", indices[i*3+0], indices[i*3+1], indices[i*3+2]);
+               break;
+           }
            for (j = 0; j < ncomps; j++)
                printf("%f%s", vals[i*ncomps+j], (j<(ncomps-1))?", ":"");
            printf("\n");

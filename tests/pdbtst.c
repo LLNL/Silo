@@ -171,6 +171,7 @@ running into problems with this test, you can always re-configure to
 #define PD_open_vif(A) /*void*/
 #define PD_set_fmt_version(A) /*void*/
 #define PD_set_track_pointers(A,B) /*void*/
+#undef PD_set_buffer_size
 #define PD_set_buffer_size(A) /*void*/
 #define SC_hasharr_rekey(A,B) /*void*/
 
@@ -4015,7 +4016,7 @@ static int run_test(PFTest test, int n, char *host, int native)
           n, bytaa, bytfa, bytaa - bytfa, time);
 #else
     PRINT(STDOUT,
-          "\t\t     %3lld    %8lld  %8lld   %7lld     %.2g\n",
+          "\t\t     %3d    %8lld  %8lld   %7lld     %.2g\n",
           n, bytaa, bytfa, bytaa - bytfa, time);
 #endif
 

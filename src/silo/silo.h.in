@@ -71,8 +71,6 @@ be used for advertising or product endorsement purposes.
 #define SILO_H
 
 #include <stdio.h> /* for FILE* datatype for filters */
-#warning DO WE NEED SYS/STAT.H
-#include <sys/stat.h>
 
 #include <silo_exports.h>
 
@@ -498,22 +496,10 @@ typedef enum {
 #define DBOPT_H5_SILO_BLOCK_COUNT   528
 #define DBOPT_H5_SILO_LOG_STATS     529
 #define DBOPT_H5_SILO_USE_DIRECT    530
-#warning FIX THESE SYMBOLS
-#define DBOPT_H5_FIC_SIZE           531 /* Obsolete. Use CORE_OPEN_BUFINFO. */
-#define DBOPT_H5_FIC_BUF            532 /* Obsolete. Use CORE_OPEN_BUFINFO. */
-#warning REMOVE UNNECESSARY SYMBOLS
-#define DBOPT_H5_CORE_CREAT_BUFINFO 533
-#define DBOPT_H5_CORE_OPEN_BUFINFO  534
-#define DBOPT_H5_CORE_CLOSE_BUFINFO 535
-#define DBOPT_H5_FCPL_HID_T         536
-#define DBOPT_H5_FAPL_HID_T         537
-#define DBOPT_H5_MEMFILE_INITIAL_BUFINFO  538
-#define DBOPT_H5_MEMFILE_FINAL_BUFINFO    539
-#define DBOPT_H5_MEMFILE_REALLOC_CALLBACK 540
-#define DBOPT_H5_MEMFILE_FREE_CALLBACK    541
-#define DBOPT_H5_MEMFILE_USER_DATA        542
-#define DBOPT_H5_MEMFILE_BACKING_STORE    543
-#define DBOPT_H5_MEMFILE_ALLOC_INC        544
+#define DBOPT_H5_FIC_SIZE           531
+#define DBOPT_H5_FIC_BUF            532
+#define DBOPT_H5_FCPL_HID_T         533
+#define DBOPT_H5_FAPL_HID_T         534
 #define DBOPT_H5_LAST               599
 
 /* Error trapping method */
@@ -807,7 +793,6 @@ typedef struct DBtoc_ {
     char         **symlink_names; /* copies of other members; never free'd */
 
 } DBtoc;
-#warning WHAT IS REALLY BEING TESTED HERE
 #define DB_NOBJ_TYPES  25
 
 /*----------------------------------------------------------------------------
@@ -1895,11 +1880,6 @@ SILO_API extern int                    DBSetDeprecateWarnings(int max);
 SILO_API extern int                    DBGetDeprecateWarnings(void);
 SILO_API extern int                    DBSetDeprecateWarningsFile(DBfile *f, int max);
 SILO_API extern int                    DBGetDeprecateWarningsFile(DBfile *f);
-SILO_API extern int                    DBSetEnableDarshan(int enable);
-#warning GET RID OF DARSHAN STUFF
-SILO_API extern int                    DBGetEnableDarshan(void);
-SILO_API extern int                    DBSetEnableDarshanFile(DBfile *f, int enable);
-SILO_API extern int                    DBGetEnableDarshanFile(DBfile *f);
 SILO_API extern int                    DBSetAllowLongStrComponents(int allow);
 SILO_API extern int                    DBGetAllowLongStrComponents(void);
 SILO_API extern int                    DBSetAllowLongStrComponentsFile(DBfile *f, int allow);
@@ -1915,14 +1895,6 @@ SILO_API extern int                    DBVersionDigits(int *Maj, int *Min, int *
 SILO_API extern int                    DBVersionGE(int Maj, int Min, int Pat);
 SILO_API extern int                    DBVariableNameValid(char const *s);
 SILO_API extern int                    DBForceSingle(int);
-
-#warning FIXME
-/* Functions involving files, file structure and file inquiries */
-#if 0
-SILO_API extern DBbufinfo *            DBMakeBufinfo(void *buf, size_t size, size_t max_size,
-                                           unsigned int flags);
-SILO_API extern int                    DBFreeBufinfo(DBbufinfo *binfo);
-#endif
 SILO_API extern DBfile *               DBOpenReal(char const *name, int dbtype, int mode);
 SILO_API extern DBfile *               DBCreateReal(char const *name, int mode, int targ, char const *info, int dbtype);
 SILO_API extern int                    DBInqFileReal(char const *name);

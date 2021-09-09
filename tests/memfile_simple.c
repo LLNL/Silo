@@ -54,6 +54,9 @@ product endorsement purposes.
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
 #include <silo.h>
 #include <std.c>
@@ -68,24 +71,39 @@ product endorsement purposes.
     } \
 }
 
+/*
+typedef struct _DBmemfile_bufinfo
+{
+    void *buf;
+    size_t size;
+    size_t used;
+} DBmemfile_bufinfo;
+*/
+
+static DBmemfile_bufinfo DBAssignbufinfo(void *buf, size_t size, size_t used)
+{
+    DBmemfile_bufinfo bi = {buf, size, used};
+    return bi;
+}
+
 static int
-ReadWholeFileToMem(char const *filename, size_t extrasize, DBMemfile_bufinfo *bi)
+ReadWholeFileToMem(char const *filename, size_t extrasize, DBmemfile_bufinfo *bi)
 {
     struct stat statbuf;
     void *buf;
     int fd;
 
     /* get size of required buffer */
-    ASSERT(!stat(filename, &statbuf),);
+    ASSERT(!stat(filename, &statbuf),"");
 
     /* allocate a buffer to read the whole file into */
-    ASSERT(buf = malloc(statbuf.st_size+extrasize),);
+    ASSERT(buf = malloc(statbuf.st_size+extrasize),"");
 
     /* open and read the whole file into the buffer */
-    ASSERT((fd = open(filename, O_RDONLY)) >= 0,);
+    ASSERT((fd = open(filename, O_RDONLY)) >= 0,"");
 
     /* read the whole file contents into memory */
-    ASSERT(read(fd, buf, statbuf.st_size) == statbuf.st_size,);
+    ASSERT(read(fd, buf, statbuf.st_size) == statbuf.st_size,"");
 
     close(fd);
 
@@ -95,20 +113,20 @@ ReadWholeFileToMem(char const *filename, size_t extrasize, DBMemfile_bufinfo *bi
 }
 
 static int
-WriteWholeFileFromMem(char const *filename, DBMemfile_bufinfo const *bi)
+WriteWholeFileFromMem(char const *filename, DBmemfile_bufinfo const *bi)
 {
     int fd;
     struct stat statbuf;
 
-    ASSERT((fd = open(filename, O_CREAT|O_TRUNC|O_WRONLY)) >= 0,);
+    ASSERT((fd = open(filename, O_CREAT|O_TRUNC|O_WRONLY)) >= 0,"");
 
-    ASSERT(write(fd, bi->buf, bi->used) == used,);
+    ASSERT(write(fd, bi->buf, bi->used) == bi->used,"");
 
     close(fd);
 
-    ASSERT(!stat(filename, &statbuf),);
+    ASSERT(!stat(filename, &statbuf),"");
 
-    ASSERT(statbuf.st_size == bi->used,);
+    ASSERT(statbuf.st_size == bi->used,"");
 
     return 0;
 }
@@ -122,11 +140,16 @@ main(int argc, char *argv[])
     char          *file_ext = "silo";
     int            show_all_errors = 0;
     char const    *filename = "rect2d.h5";
-    DBMemfile_bufinfo srcbuf;
-    DBMemfile_bufinfo dstbuf;
+    DBmemfile_bufinfo srcbuf;
+    DBmemfile_bufinfo dstbuf;
     DBfile        *srcdb, *dstdb, *dbfile;
     DBquadmesh    *qm;
     DBquadvar     *qv;
+    DBoptlist *src_file_optlist;
+    int fic_vfd = DB_H5VFD_FIC;
+    int src_fic_optset;
+    DBoptlist *dst_file_optlist;
+    int dst_fic_optset;
 
     /*
      * Parse the command-line.
@@ -147,45 +170,70 @@ main(int argc, char *argv[])
 
     /* create a buffer for a new memory file we intend to copy into */
     dstbuf = DBAssignbufinfo(malloc(srcbuf.size),srcbuf.size,0);
-    ASSERT(dstbuf.buf);
+    ASSERT(dstbuf.buf,"");
 
     /* Open the "file" we read into a memory buffer above, and then copy
        its contents into the newly created memory file using cpbuf...
        This works because I've been sure to allocate the destination 
        buffer large enough that no reallocs will be needed. */
 #warning WHAT ABOUT THE FILENAMES USED HERE. ONLY TIME RELEVANT IS BACKING_STORE ON 
-    ASSERT(srcdb = DBOpen("dummy.silo", DB_UNKNOWN|DB_MEMFILE_INITIAL_BUFINFO,
-        DB_READ, srcbuf), DB_UNKNOWN and DB_READ);
+    src_file_optlist = DBMakeOptlist(10);
+    DBAddOption(src_file_optlist, DBOPT_H5_VFD, &fic_vfd);
+    DBAddOption(src_file_optlist, DBOPT_H5_FIC_SIZE, &(srcbuf.size));
+    DBAddOption(src_file_optlist, DBOPT_H5_FIC_BUF, srcbuf.buf);
+    src_fic_optset = DBRegisterFileOptionsSet(src_file_optlist);
 
-    ASSERT(dstdb = DBCreate(DBsprintf("%s.copy",filename), 0, DB_LOCAL,
-        "Copy", DB_HDF5|DB_MEMFILE_FINAL_BUFINFO|DB_MEMFILE_BACKING_STORE, &dstbuf),);
+    /* Ok, now have Silo open this buffer */
+    ASSERT(srcdb = DBOpen("dummy.silo", DB_HDF5_OPTS(src_fic_optset), DB_READ),"");
 
-    ASSERT(DBCpDir(srcdb, "/", dstdb, "/") >= 0,);
+    dst_file_optlist = DBMakeOptlist(10);
+    DBAddOption(dst_file_optlist, DBOPT_H5_VFD, &fic_vfd);
+    DBAddOption(dst_file_optlist, DBOPT_H5_FIC_SIZE, &(dstbuf.size));
+    DBAddOption(dst_file_optlist, DBOPT_H5_FIC_BUF, dstbuf.buf);
+    dst_fic_optset = DBRegisterFileOptionsSet(dst_file_optlist);
+
+    ASSERT(dstdb = DBCreate("foo.silo", DB_CLOBBER, DB_LOCAL,
+        "Copy", DB_HDF5_OPTS(dst_fic_optset)),"");
+    {
+        int i = 5;
+        int nvals = 256;
+        int vals[256]; /* 1 kilobyte worth of data */
+        DBWrite(dstdb, DBSPrintf("foo_%02d",i), vals, &nvals, 1, DB_INT);
+    }
+    /*ASSERT(DBCp("-r", srcdb, dstdb, "mat1", "foo", DB_EOA) >= 0, "");*/
 
     DBClose(srcdb);
     DBClose(dstdb);
 #warning MAYBE NEED ALLOC/FREE METHODS FOR BUFINFOs
-    free(dstbuf.buf);
+    /*free(dstbuf.buf);*/
+    exit(1);
 
     /* open origional file again, just to make sure the buffer is still ok */
-    ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5|DB_MEMFILE_INITIAL_BUFINFO, DB_READ, srcbuf),2nd open w/DB_READ);
+    ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5_OPTS(src_fic_optset), DB_READ),"2nd open w/DB_READ");
 
-    ASSERT(qm = DBGetQuadmesh(dbfile, "quadmesh2d"),);
-    /* DBFreeQuadmesh(qm); we'll use the qm below */
+    ASSERT(qm = DBGetQuadmesh(dbfile, "quadmesh2d"),"");
+    DBFreeQuadmesh(qm); /* we should use the qm below */
     DBClose(dbfile);
 
+    /* free up the file options set */
+    DBUnregisterFileOptionsSet(src_fic_optset);
+    DBFreeOptlist(src_file_optlist);
+    DBUnregisterFileOptionsSet(dst_fic_optset);
+    DBFreeOptlist(dst_file_optlist);
+
+#if 0
     /* Now, open for append and write something to it */
     ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5|DB_MEMFILE_INITIAL_BUFINFO|DB_MEMFILE_FINAL_BUFINFO,
                      DB_APPEND, srcbuf, &dstbuf), DB_APPEND);
 
     /* Try to write something to this file, but not so big it would cause a realloc */
     ASSERT(DBPutQuadmesh(dbfile "quadmesh2d_dup", 0, qm->coords, qm->dims, qm->ndims,
-        qm->datatype, qm->coordtype, 0),);
+        qm->datatype, qm->coordtype, 0),"");
 
     DBClose(dbfile);
 
     /* The memfile buffer should be larger */
-    ASSERT(dstbuf.size == srcbuf.size && dstbuf.used > srcbuf.used,);
+    ASSERT(dstbuf.size == srcbuf.size && dstbuf.used > srcbuf.used,"");
 
     /* Ok, now open again for append and write so much we cause a realloc */
     ASSERT(dbfile = DBOpen("dummy.silo", DB_HDF5|DB_MEMFILE_INITIAL_BUFINFO|DB_MEMFILE_FINAL_BUFINFO, DB_APPEND,
@@ -201,6 +249,7 @@ main(int argc, char *argv[])
     }
 
     DBClose(dbfile);
+#endif
 
     return 0;
 }

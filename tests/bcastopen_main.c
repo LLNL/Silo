@@ -54,6 +54,9 @@ int main(int argc, char **argv)
         }
     }
 
+    if (argc > 1 && rank == 0)
+        printf("Examine results in files with names of the form \"%s-%05d-typelist.txt\"\n", argv[1], 0);
+
 #if HAVE_MPI
     MPI_Finalize();
 #endif

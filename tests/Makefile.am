@@ -86,6 +86,7 @@ EXTRA_DIST= \
  resample.c \
  bcastopen.c \
  bcastopen_main.c \
+ memfile_simple.c \
  zeros.dat \
  testhdf5.c \
  $(check_SCRIPTS) \
@@ -161,7 +162,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
       rocket mmadjacency largefile version namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
-      test_mat_compression bcastopen \
+      test_mat_compression bcastopen memfile_simple \
       empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS)
 
 dir_SOURCES = dir.c testlib.c
@@ -253,6 +254,7 @@ check_PROGRAMS = \
  realloc_obj_and_opts \
  test_mat_compression \
  bcastopen \
+ memfile_simple \
  $(PDBTESTS) \
  $(JSONTESTS)
 
@@ -333,6 +335,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_testhdf5_SOURCES = dummy.cxx
  nodist_EXTRA_test_mat_compression_SOURCES = dummy.cxx
  nodist_EXTRA_bcastopen_SOURCES = dummy.cxx
+ nodist_EXTRA_memfile_simple_SOURCES = dummy.cxx
 endif
 
 

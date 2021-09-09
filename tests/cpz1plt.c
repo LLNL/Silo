@@ -87,16 +87,16 @@ main(int argc, char **argv)
      int       ithirtyfour = 34;
 
      int            driver = DB_PDB;
-     char          *filename = "z1plt.pdb";
+     char          *filename = "z1plt.silo";
      int            show_all_errors = FALSE;
 
      for (i=1; i<argc; i++) {
          if (!strncmp(argv[i], "DB_PDB",6)) {
              driver = StringToDriver(argv[i]);
-             filename = "z1plt.pdb";
+             filename = "z1plt.silo";
          } else if (!strncmp(argv[i], "DB_HDF5", 7)) {
              driver = StringToDriver(argv[i]);
-             filename = "z1plt.h5";
+             filename = "z1plt.silo";
          } else if (!strcmp(argv[i], "show-all-errors")) {
              show_all_errors = 1;
 	 } else if (argv[i][0] != '\0') {
@@ -112,7 +112,7 @@ main(int argc, char **argv)
      /*
       * Open the old file.
       */
-     dbfile1 = DBOpen ("z1plt", DB_UNKNOWN, DB_READ);
+     dbfile1 = DBOpen ("z1plt.silo", DB_UNKNOWN, DB_READ);
      if (dbfile1 == NULL)
      {
          fprintf(stderr, "Missing input file \"z1plt\", cannot continue.\n");
