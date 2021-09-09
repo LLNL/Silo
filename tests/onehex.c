@@ -188,7 +188,7 @@ main(int argc, char *argv[])
             DBAddOption(split_opts, DBOPT_H5_META_FILE_OPTS, &meta_opts_id);
 
             /* indicate the meta file extension */
-            mext = "silo-meta";
+            mext = ".meta.h5";
             DBAddOption(split_opts, DBOPT_H5_META_EXTENSION, mext);
 
             /* indicate the raw file options set */
@@ -196,7 +196,7 @@ main(int argc, char *argv[])
 
             /* indicate the raw file extension */
             /* Note, this is NOT an extension but an sprintf name pattern */
-            rext = "silo_%s_raw.dat";
+            rext = "%s.raw.dat";
             DBAddOption(split_opts, DBOPT_H5_RAW_EXTENSION, rext);
 
             /* register the split file options set with the library */
