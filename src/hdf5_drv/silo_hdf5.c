@@ -1858,9 +1858,15 @@ db_hdf5_get_obj_dsnames(DBfile *_dbfile, char const *name, int *dscount, char **
         switch(_objtype)
         {
             DB_OBJ_CASE(DB_QUADVAR, DBquadvar_mt, nvals, value)
+            /*DB_OBJ_CASE(DB_QUAD_RECT, DBquadmesh_mt, nspace, coord) wont work for rect case */
+            DB_OBJ_CASE(DB_QUAD_CURV, DBquadmesh_mt, nspace, coord)
+            DB_OBJ_CASE(DB_QUADMESH, DBquadmesh_mt, nspace, coord)
             DB_OBJ_CASE(DB_UCDVAR, DBucdvar_mt, nvals, value)
+            DB_OBJ_CASE(DB_UCDMESH, DBucdmesh_mt, ndims, coord)
             DB_OBJ_CASE(DB_POINTVAR, DBpointvar_mt, nvals, data)
-#warning ADD OTHER OBJECT TYPE CASES HERE
+            DB_OBJ_CASE(DB_POINTMESH, DBpointmesh_mt, ndims, coord)
+            DB_OBJ_CASE(DB_CSGVAR, DBcsgvar_mt, nvals, vals)
+            DB_OBJ_CASE(DB_CURVE, DBcurve_mt, npts?1:1, yvarname)
         }
         H5Tclose(o);
 
@@ -4952,14 +4958,14 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
     /* Performance optimizations for memory footprint */
 #if HDF5_VERSION_GE(1,8,0)
 #warning FIX ME...THIS NEEDS TO BE CONDITION ON COMPAT MODE WORKS FOR 1.8.0
-    H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    /*H5Pset_libver_bounds(retval, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);*/
 
 #if HDF5_VERSION_GE(1,10,1)
     H5Pset_evict_on_close(retval, (hbool_t)1);
 #endif
 
 #warning SET FRIENDLY NAMES TO 2 but only at file level
-    /*DBGetFriendlyHDF5NamesFile((DBfile*)dbfile) = 2;*/
+    /*DBSetFriendlyHDF5NamesFile((DBfile*)dbfile, 2);*/
 
     /* First, initialize our copy of h5mdc_config */
     h5mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
@@ -5279,12 +5285,12 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                         udata->app_image_size = size;
                         udata->fapl_image_ptr = NULL;
                         udata->fapl_image_size = 0;
-                        udata->fapl_ref_count = 0;
+                        udata->fapl_ref_count = 0; /* corresponding to the first FAPL */
                         udata->vfd_image_ptr = NULL;
                         udata->vfd_image_size = 0;
                         udata->vfd_ref_count = 0;
                         udata->flags = db_hdf5_H5LT_FILE_IMAGE_DONT_COPY;
-                        udata->ref_count = 1; /* corresponding to the first FAPL */
+                        udata->ref_count = 1;
 
                         /* copy address of udata into callbacks */
                         callbacks.udata = (void *)udata;
