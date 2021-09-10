@@ -84,6 +84,7 @@ qtHaveModule(help):              QT += help
 qtHaveModule(opengl):            QT += opengl
 qtHaveModule(printsupport):      QT += printsupport
 qtHaveModule(x11extras):         QT += x11extras
+qtHaveModule(network):           QT += network
 qtHaveModule(testlib):           QT += testlib
 percent.target = %
 percent.commands = @echo -n "\$(\$(@))\ "
