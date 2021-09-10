@@ -750,12 +750,12 @@ json_object_reconstitute_extptrs(struct json_object *obj)
  *
  *     More involved methods
  *
- *     json_diff_extptr_extptr() /* non-recursive but like an int/int or double/double or maybe int/double */
- *     json_diff_extptr_array()  /* left is a 'datatype'd number; right is a json object which might be a number */
+ *     json_diff_extptr_extptr()
+ *     json_diff_extptr_array()
  *     json_diff_extptr_object()
- *     json_diff_array_array()   /* recurses on both left and right */
- *     json_diff_array_object()  /* recurses on both left and right */
- *     json_diff_object_object() /* recurses on both left and right */
+ *     json_diff_array_array()
+ *     json_diff_array_object()
+ *     json_diff_object_object()
 
  *
  *     Args these methods need to take...
