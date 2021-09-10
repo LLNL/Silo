@@ -449,6 +449,8 @@ noinst_HEADERS = \
   include/zfp/types.h \
   src/inline/inline.h \
   src/inline/bitstream.c \
+  src/share/parallel.c \
+  src/share/omp.c \
   src/template/codec.h \
   src/template/template.h \
   src/template/codec1.c \
