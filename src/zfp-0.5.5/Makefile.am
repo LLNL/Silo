@@ -67,19 +67,21 @@ noinst_HEADERS = \
   src/block1.h \
   src/block2.h \
   src/block3.h \
+  src/block4.h \
   src/traitsd.h \
+  src/traitsf.h \
   src/traitsi.h \
   src/traitsl.h \
-  src/traitsf.h \
+  src/undefall.h \
   include/zfp.h \
   include/bitstream.h \
   include/zfp/macros.h \
   include/zfp/system.h \
   include/zfp/types.h \
   src/inline/inline.h \
+  src/inline/bitstream.c \
   src/template/codec.h \
   src/template/template.h \
-  src/inline/bitstream.c \
   src/template/codec1.c \
   src/template/codec2.c \
   src/template/codec3.c \
