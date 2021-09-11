@@ -5274,6 +5274,7 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                         }
 
                         /* Allocate buffer to communicate user data to callbacks */
+#warning PUT UDATA POINTER IN DBFILE pointer so it can be freed with file is closed.
                         if (NULL == (udata = (db_hdf5_H5LT_file_image_ud_t *)malloc(sizeof(db_hdf5_H5LT_file_image_ud_t))))
                         {
                             H5Pclose(retval);
