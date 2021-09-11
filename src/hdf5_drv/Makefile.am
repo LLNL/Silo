@@ -71,6 +71,7 @@ endif
 
 noinst_HEADERS = \
  silo_hdf5_private.h \
+ hdf5_version_ge.h \
  H5FDsilo.h \
  H5Zzfp.h \
  H5Zzfp_lib.h \

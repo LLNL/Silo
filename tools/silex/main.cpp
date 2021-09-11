@@ -86,8 +86,10 @@ be used for advertising or product endorsement purposes.
 
 int main( int argc, char **argv )
 {
+#if 0
     QCoreApplication::setLibraryPaths(QStringList()); // work-around Qt bug
     QApplication::setColorSpec(QApplication::ManyColor);
+#endif
     QApplication a(argc, argv);
     a.setStyle(QApplication::style());
     Explorer *w = 0;
