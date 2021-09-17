@@ -5599,8 +5599,10 @@ db_hdf5_finish_open(DBfile_hdf5 *dbfile)
     
     /* Open "/" as current working group */
     if ((cwg=H5Gopen(dbfile->fid, "/"))<0) {
+        H5Fclose(dbfile->fid);
+        silo_db_close((DBfile*) dbfile);
         db_perror("root group", E_CALLFAIL, me);
-        return silo_db_close((DBfile*) dbfile);
+        return 0;
     }
 
     /*
@@ -5611,8 +5613,10 @@ db_hdf5_finish_open(DBfile_hdf5 *dbfile)
         link = H5Gopen(dbfile->fid, LINKGRP);
     } H5E_END_TRY;
     if (link<0 && (link=H5Gcreate(dbfile->fid, LINKGRP, 0))<0) {
+        H5Fclose(dbfile->fid);
+        silo_db_close((DBfile*) dbfile);
         db_perror("link group", E_CALLFAIL, me);
-        return silo_db_close((DBfile*) dbfile);
+        return 0;
     }
 
     /*
