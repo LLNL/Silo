@@ -71,7 +71,9 @@ be used for advertising or product endorsement purposes.
  *  Added backward compatible symbols
  */
 
+#ifndef _WIN32
 #warning SIMPLIFY HEADER INCLUSION LOGIC
+#endif
 
 /* Private SILO functions.  */
 #include "config.h" /* For a possible redefinition of setjmp/longjmp.
@@ -226,7 +228,9 @@ PRIVATE reg_status_t _db_regstatus[DB_NFILES] = /* DB_NFILES triples of zeros */
      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 PRIVATE filter_t _db_filter[DB_NFILTERS];
+#ifndef _WIN32
 #warning REDUCE USE OF THIS CONSTRUCT
+#endif
 const static char *api_dummy = 0;
 
 /* stat struct definition */
@@ -284,7 +288,9 @@ SILO_Globals_t SILO_Globals = {
     FALSE, /* enableChecksums */
     FALSE, /* enableFriendlyHDF5Names */
     FALSE, /* enableGrabDriver */
+#ifndef _WIN32
 #warning FIX THIS
+#endif
     FALSE, /* darshanEnabled */
     FALSE, /* allowLongStrComponents */
     3,     /* maxDeprecateWarnings */
@@ -1126,7 +1132,9 @@ db_FreeToc(DBfile *dbfile)
                 FREE(toc->symlink_target_names[i]);
             FREE(toc->symlink_target_names);
         }
+#ifndef _WIN32
 #warning WE SHOULD PROBABLY JUST EITHER MAKE THIS CONSISTENT OR PERHAPS COPY ALL CHARS INTO LINK@TARGET format
+#endif
         /* toc->symlink_names is just copy of other members here.
            So, we don't free it here. */
     }
@@ -1731,7 +1739,9 @@ if (LS_VAR && toc->n##CAT > 0) { \
 
     }
 
+#ifndef _WIN32
 #warning CLEAN UP IS LOST IN ABOVE EARLY RETURNS
+#endif
     if (args)
         DBFreeStringArray(args, nargs);
 
@@ -2532,7 +2542,9 @@ DB_SETGET(int, DeprecateWarnings, maxDeprecateWarnings, DB_INTBOOL_NOT_SET)
 /*DB_SETGET(int, EnableDarshan, darshanEnabled, DB_INTBOOL_NOT_SET) */
 DB_SETGET(int, AllowLongStrComponents, allowLongStrComponents, DB_INTBOOL_NOT_SET) 
 DB_SETGET(unsigned long long, DataReadMask2, dataReadMask, DB_MASK_NOT_SET) 
+#ifndef _WIN32
 #warning WHAT ABOUT FORCESINGLE SHOWERRORS
+#endif
 
 /* The compression stuff has some custom initialization */
 static void _db_set_compression_params(char **dst, char const *s)
@@ -2841,7 +2853,9 @@ DBGrabDriver(DBfile *file)
        if (file->pub.GrabId > (void *) 0) {
           int grab_val = 1;
           DBWrite(file, "/_was_grabbed", &grab_val, &grab_val, 1, DB_INT);
+#ifndef _WIN32
 #warning FIX GLOBAL LOCK
+#endif
           SILO_Globals.enableGrabDriver = TRUE;
           rtn = (void *) file->pub.GrabId;
        }
@@ -3582,7 +3596,9 @@ DBAddStrComponent(DBobject *object, const char *compname, const char *ss)
  *    messages would work correctly.
  *
  *-------------------------------------------------------------------------*/
+#ifndef _WIN32
 #warning ADD DBSHOWERRORSFILE
+#endif
 PUBLIC void
 DBShowErrors(int level, void(*func)(char*))
 {
@@ -3597,7 +3613,9 @@ DBShowErrors(int level, void(*func)(char*))
 	SILO_Globals._db_err_level_drvr = DB_ALL;
     }
 
+#ifndef _WIN32
 #warning GET RID OF SUSPEND/RESUME STUFF
+#endif
     switch (level) {
         case DB_SUSPEND:
             if (nested_suspend++ == 0)
@@ -3971,9 +3989,13 @@ db_InitFileGlobals(DBfile *dbfile)
     dbfile->pub.file_scope_globals->darshanEnabled          = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->allowLongStrComponents  = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->maxDeprecateWarnings    = DB_INTBOOL_NOT_SET;
+#ifndef _WIN32
 #warning ADD compressionMinSize
+#endif
     dbfile->pub.file_scope_globals->compressionMinratio     = DB_FLOAT_NOT_SET;
+#ifndef _WIN32
 #warning CORRECT INITIALIZATION OF compressionErrmode
+#endif
     dbfile->pub.file_scope_globals->compressionErrmode      = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->compatabilityMode       = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->compressionParams       = DB_CHAR_PTR_NOT_SET;
@@ -4413,7 +4435,9 @@ DBClose(DBfile *dbfile)
             API_ERROR(NULL, E_NOFILE);
         if (NULL == dbfile->pub.close)
             API_ERROR(dbfile->pub.name, E_NOTIMP);
+#ifndef _WIN32
 #warning IS ORDER OF OPS CORRECT HERE
+#endif
         id = dbfile->pub.fileid;
         if (id >= 0 && id < DB_NFILES)
             _db_fstatus[id] = 0;
@@ -5836,7 +5860,9 @@ db_validate_copy_step(int pass, int recurse,
        of logic we cannot currently check. */
     if (!DBGetAllowOverwrites())
     {
+#ifndef _WIN32
 #warning ONLY IF SRC SIZE SMALLER THAN DST SIZE
+#endif
         db_perror("overwrite of pre-existing dst prevented due "
             "to DBSetAllowOverwrites(0)", E_BADARGS, dstName?dstName:srcName);
         return 0;
@@ -5931,7 +5957,9 @@ db_can_overwrite_dstobj_with_srcobj(
 
             /* To make exiting and cleanup logic here a tad simpler, we do all
                the work we *might* need to with the strings and then free them. */
+#ifndef _WIN32
 #warning SHOULDNT WE USE FILE LENGTH FUNCTIONS HERE
+#endif
             srcSubObjType = DBInqVarType(srcFile, srcSubObjAbsName);
             srcLen = DBGetVarByteLength(srcFile, srcSubObjAbsName);
             dstSubObjType = DBInqVarType(dstFile, dstSubObjAbsName);
@@ -5941,7 +5969,9 @@ db_can_overwrite_dstobj_with_srcobj(
                 can_overwrite = 1;
             else if (dstSubObjType == DB_DIR)
                 can_overwrite = 0;
+#ifndef _WIN32
 #warning DISALLOW SIMLINKS FOR NOW
+#endif
             else if (dstSubObjType == DB_SYMLINK)
                 can_overwrite = 0;
             else
@@ -6007,8 +6037,10 @@ db_copy_single_object_abspath(char const *opts,
     char *_dstObjAbsName;
     DBobject *dstObj, *srcObj;
 
+#ifndef _WIN32
 #warning CHECK ARGS HERE. ALLOW FOR NULL dstFile AND dstObjAbsName
 #warning WHY CHECK dstType HERE
+#endif
 
     /* Query type information if not already known */
     if (srcType == DB_INVALID_OBJECT)
@@ -6035,7 +6067,9 @@ db_copy_single_object_abspath(char const *opts,
     else if (dstType != DB_INVALID_OBJECT)
     {
         int srcSize, dstSize;
+#ifndef _WIN32
 #warning USE FILE-BASED FUNCTION WHEN AVAILABLE
+#endif
         if (!DBGetAllowOverwrites())
         {
             db_perror("overwrite of pre-existing dst prevented due "
@@ -6250,8 +6284,10 @@ db_copy_single_object_abspath(char const *opts,
 PUBLIC int
 DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
 {
+#ifndef _WIN32
 #warning WHAT ABOUT API MACROS. MAYBE NOT NEEDED SINCE NOT CALLING DOWN INTO DRIVERS
 #warning WHAT ABOUT -f (force) OPTION
+#endif
     char const *me = "DBCp";
     int i, j, pass, all_ok;
     int recurse_on_dirs = 0;
@@ -6270,7 +6306,9 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
     char const **srcPathNames = 0, **dstPathNames = 0;
     char srcStartCwg[1024], dstStartCwg[1024];
 
+#ifndef _WIN32
 #warning WARN ABOUT CERTAIN OPTIONS NOT YET SUPPORTED
+#endif
     /* process any options in the opts string */
     for (i = 0; opts && opts[i]; i++)
     {
@@ -6356,7 +6394,9 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         }
     }
 
+#ifndef _WIN32
 #warning FIX LEAKS WITH EARLY RETURN HERE
+#endif
 
     if (n_src_dir_triple && N == 0)
         return 0;
@@ -6641,7 +6681,9 @@ PUBLIC void *
 DBGetPartialObject(DBfile *dbfile, char const *name, int nvals, int ndims,
     int index_mode, void const *indices, DBoptlist *options)
 {
+#ifndef _WIN32
 #warning FIX THIS METHOD
+#endif
 
 
 
@@ -8161,7 +8203,9 @@ DBReadVarVals(DBfile *dbfile, const char *name, int mode, int nvals,
  *    Sean Ahern, Tue Sep 28 10:48:06 PDT 1999
  *    Added a check for variable name validity.
  *-------------------------------------------------------------------------*/
+#ifndef _WIN32
 #warning DO WE NEED THIS METHOD
+#endif
 PRIVATE size_t
 db_get_obj_byte_length(DBfile *dbfile, char const *name)
 {
@@ -8936,7 +8980,9 @@ DBPutMaterial(
                                      nmat, matnos, matlist, dims, ndims,
                                      mix_next, mix_mat, mix_zone, mix_vf,
                                      mixlen, datatype, optlist);
+#ifndef _WIN32
 #warning BETTER PLACE TO NULL THESE
+#endif
         /* Zero out the _ma._matnames pointer so we can't accidentially use it
          * again. Likewise for matcolors. */
         _ma._matnames = NULL;
@@ -9335,7 +9381,9 @@ DBPutMultimat(DBfile *dbfile, const char *name, int nmats,
 
         retval = (dbfile->pub.p_mt) (dbfile, name, nmats, matnames,
                                      optlist);
+#ifndef _WIN32
 #warning BETTER PLACE TO NULL THESE
+#endif
         /* Zero out the _mm._matnames pointer so we can't accidentially use it
          * again. Likewise for matcolors. */
         _mm._matnames = NULL;
@@ -13309,7 +13357,9 @@ DBStringArrayToStringList(
              len += 2;
      }
      s = (char*)malloc(len+1);
+#ifndef _WIN32
 #warning TEST THIS LOGIC
+#endif
      for (i=len=0; i<n; i++) {
          char const *p = strArray[i]?strArray[i]:"\n";
          if (i) s[len++] = ';';

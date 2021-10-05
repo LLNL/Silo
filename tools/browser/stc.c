@@ -1751,7 +1751,9 @@ stc_silo_types (void) {
             "pointer (array 'self.nmats' (primitive 'int'))");
       COMP (matcounts,
             "pointer (array 'self.nmats' (primitive 'int'))");
+#ifndef _WIN32
 #warning CHECK BEHAVIOR OF THIS MEMBER
+#endif
       COMP (matlists,
             "pointer (array 'SH4, self.matcounts' (primitive 'int'))");
       COMP (nmatnos,            "primitive 'int'");
