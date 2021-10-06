@@ -68,9 +68,10 @@ be used for advertising or product endorsement purposes.
 #include <sys/stat.h>
 
 /* Prototypes for other external functions. */
-#ifndef WIN32
+#ifndef _WIN32
 extern char *ctime(const time_t *);
-#else
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 

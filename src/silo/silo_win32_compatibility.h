@@ -12,7 +12,6 @@
 #define pclose    _pclose
 #define popen     _popen
 #define read      _read
-#define snprintf  _snprintf
 #define stat      _stat
 #define stat64    _stat64
 #define write     _write

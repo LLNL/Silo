@@ -3347,8 +3347,10 @@ db_hdf5_set_compression(DBfile *dbfile, int flags)
             have_fpzip = TRUE;
         if (DB_HDF5_HZIP_ID==filtn)
             have_hzip = TRUE;
+#ifdef HAVE_ZFP
         if (H5Z_FILTER_ZFP==filtn)
             have_zfp = TRUE;
+#endif
     }
 #ifndef _WIN32
 #warning WHAT ABOUT NULL RETURN FROM DBGETCOMPRESSION
