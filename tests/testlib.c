@@ -815,7 +815,9 @@ build_ucd_tri(DBfile *dbfile, char *name, int flags)
 
     int            fshapesize, fshapecnt, zshapesize, zshapecnt;
     int            idatatype;
+#ifndef _WIN32
 #warning IS THIS NEEDED
+#endif
 #if 0
     double         ttime = 2.345;
     int            tcycle = 200;

@@ -79,7 +79,9 @@ static void *CreateSiloFile(const char *fname, const char *nsname, void *userDat
 {
     int driver = *((int*) userData);
     DBfile *siloFile = DBCreate(fname, DB_CLOBBER, DB_LOCAL, "pmpio testing", driver);
+#ifndef _WIN32
 #warning NOTE THIS CONDITION NOW INCLUDES NON-NULL NSNAME
+#endif
     if (siloFile && nsname)
     {
         DBMkDir(siloFile, nsname);
@@ -99,7 +101,9 @@ static void *OpenSiloFile(const char *fname, const char *nsname, PMPIO_iomode_t 
 {
     DBfile *siloFile = DBOpen(fname, DB_UNKNOWN,
         ioMode == PMPIO_WRITE ? DB_APPEND : DB_READ);
+#ifndef _WIN32
 #warning NOTE THIS CONDITION NOW INCLUDES NON-NULL NSNAME
+#endif
     if (siloFile && nsname)
     {
         if (ioMode == PMPIO_WRITE)

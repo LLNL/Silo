@@ -176,7 +176,9 @@ main(int argc, char *argv[])
        its contents into the newly created memory file using cpbuf...
        This works because I've been sure to allocate the destination 
        buffer large enough that no reallocs will be needed. */
+#ifndef _WIN32
 #warning WHAT ABOUT THE FILENAMES USED HERE. ONLY TIME RELEVANT IS BACKING_STORE ON 
+#endif
     src_file_optlist = DBMakeOptlist(10);
     DBAddOption(src_file_optlist, DBOPT_H5_VFD, &fic_vfd);
     DBAddOption(src_file_optlist, DBOPT_H5_FIC_SIZE, &(srcbuf.size));
@@ -204,7 +206,9 @@ main(int argc, char *argv[])
 
     DBClose(srcdb);
     DBClose(dstdb);
+#ifndef _WIN32
 #warning MAYBE NEED ALLOC/FREE METHODS FOR BUFINFOs
+#endif
     /*free(dstbuf.buf);*/
     exit(1);
 

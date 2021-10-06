@@ -52,7 +52,9 @@ Government or Lawrence Livermore National Security, LLC, and shall not
 be used for advertising or product endorsement purposes.
 */
 
+#ifndef _WIN32
 #warning MAKE THIS CONDITIONAL LATER
+#endif
 #define HAVE_SILO
 //#define STATIC_PLUGINS
 

@@ -83,7 +83,9 @@ struct json_object *json_object_new_extptr(void *p, int ndims, int const *dims, 
     json_object_object_add(jobj, "ndims", json_object_new_int(ndims));
     json_object_object_add(jobj, "dims", jarr);
 
+#ifndef _WIN32
 #warning DO WE NEED TO DECRIMENT JARR REFS WITH PUT CALL
+#endif
 
     return jobj;
 }
@@ -247,7 +249,9 @@ int main(int argc, char **argv)
       jsilo_curve = json_object_new_object();
 
       json_object_object_add(jsilo_curve, "silo_type", json_object_new_int(DB_CURVE));
+#ifndef _WIN32
 #warning BINDING OBJECT NAME HERE MANUALLY
+#endif
       json_object_object_add(jsilo_curve, "silo_name", json_object_new_string("sincurve"));
       json_object_object_add(jsilo_curve, "id", json_object_new_int(curve->id));
       json_object_object_add(jsilo_curve, "datatype", json_object_new_int(curve->datatype));
