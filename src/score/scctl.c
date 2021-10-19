@@ -231,10 +231,16 @@ lite_SC_isfile(char *name) {
     struct _stat sbuf;
     statval = _stat(name, &sbuf);
   #endif
+    if (statval == 0)
+    {
+        if (!(sbuf.st_mode & _S_IFREG)) return FALSE;
+        if (!(sbuf.st_mode & _S_IREAD)) return FALSE;
+        return TRUE;
+    }
+    return FALSE;
 #else
     struct stat sbuf;
     statval = stat(name, &sbuf);
-#endif
     if (statval == 0)
     {
         if (!S_ISREG(sbuf.st_mode)) return FALSE;
@@ -242,4 +248,5 @@ lite_SC_isfile(char *name) {
         return TRUE;
     }
     return FALSE;
+#endif
 }

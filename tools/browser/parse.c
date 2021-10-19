@@ -67,7 +67,7 @@ be used for advertising or product endorsement purposes.
 #include <browser.h>
 #include <ctype.h>
 #include <signal.h>
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
 

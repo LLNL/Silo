@@ -78,7 +78,7 @@ be used for advertising or product endorsement purposes.
 #  include <sys/ioctl.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
 
