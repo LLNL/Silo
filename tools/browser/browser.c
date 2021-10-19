@@ -126,7 +126,7 @@ extern int read_history ();
 #ifdef HAVE_SYS_STAT_H
 #  include <sys/stat.h>
 #endif /* HAVE_SYS_STAT_H */
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #  include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
