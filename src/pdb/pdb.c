@@ -1806,19 +1806,25 @@ int lite_PD_set_buffer_size(int s)
     return lite_PD_buffer_size;
 }
 
+#ifndef _WIN32
 #warning MOVE TO PDLOW.C
+#endif
 char *lite_PD_get_error(void)
 {
     return lite_PD_err;
 }
 
+#ifndef _WIN32
 #warning MOVE TO PDMEMB.C
+#endif
 syment *lite_PD_query_entry(PDBfile *file, char *name, char *fullname)
 {
     return lite_PD_inquire_entry(file, name, TRUE, fullname);
 }
 
+#ifndef _WIN32
 #warning MOVE TO PDLOW.C
+#endif
 int lite_PD_get_entry_info(syment *ep, char **ptyp, long *pni, int *pnd, long **pdim)
 {
   /* code courtesy of Rob Managan */
@@ -1867,14 +1873,18 @@ int lite_PD_get_entry_info(syment *ep, char **ptyp, long *pni, int *pnd, long **
   return(rv);
 }
 
+#ifndef _WIN32
 #warning MOVE TO PDLOW.C
+#endif
 void lite_PD_free_entry_info(char *typ, long *pdim)
 {
   SFREE(typ);
   SFREE(pdim);
 }
 
+#ifndef _WIN32
 #warning MOVE TO PDLOW.C
+#endif
 void lite_PD_rel_entry_info(syment *ep, char *type, long *dims)
 {
     lite_PD_free_entry_info(type, dims);
@@ -1882,12 +1892,16 @@ void lite_PD_rel_entry_info(syment *ep, char *type, long *dims)
 }
 
 /* 21Mar17 for Rob Managan */
+#ifndef _WIN32
 #warning MOVE TO PDBDIR.C
+#endif
 int lite_PD_ln(PDBfile *file, char *oldname, char *newname)
 {
   /* Courtesy of Rob Managan */
   syment *oldep;
+#ifndef _WIN32
 #warning MAYBE INCREASE MAXLINE FOR LEOSPACT
+#endif
   char newpath[MAXLINE], oldpath[MAXLINE], dirname[MAXLINE];
   char *nname, *s;
 
@@ -1962,7 +1976,9 @@ int lite_PD_ln(PDBfile *file, char *oldname, char *newname)
   return(TRUE);
 }
 
+#ifndef _WIN32
 #warning SHOULD GO IN PDBMM.c
+#endif
 void *_lite_PD_alloc_entry(PDBfile *file, char *type, long nitems)
 {
   void *vr;

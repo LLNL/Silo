@@ -68,9 +68,10 @@ be used for advertising or product endorsement purposes.
 #include <sys/stat.h>
 
 /* Prototypes for other external functions. */
-#ifndef WIN32
+#ifndef _WIN32
 extern char *ctime(const time_t *);
-#else
+#endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -230,10 +231,16 @@ lite_SC_isfile(char *name) {
     struct _stat sbuf;
     statval = _stat(name, &sbuf);
   #endif
+    if (statval == 0)
+    {
+        if (!(sbuf.st_mode & _S_IFREG)) return FALSE;
+        if (!(sbuf.st_mode & _S_IREAD)) return FALSE;
+        return TRUE;
+    }
+    return FALSE;
 #else
     struct stat sbuf;
     statval = stat(name, &sbuf);
-#endif
     if (statval == 0)
     {
         if (!S_ISREG(sbuf.st_mode)) return FALSE;
@@ -241,4 +248,5 @@ lite_SC_isfile(char *name) {
         return TRUE;
     }
     return FALSE;
+#endif
 }

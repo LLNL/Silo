@@ -401,8 +401,9 @@ main (int argc, char *argv[]) {
            fprintf(stderr, "Unable to open input file \"%s\"\n", filename2);
            exit(1);
        }
-
+#ifndef _WIN32
 #warning IMPLEMENT THIS COMPARISON
+#endif
        /* compare values read with ReadVarVals to same entries in full object */
 
        /* generate a random set of ndim indices to read */

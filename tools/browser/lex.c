@@ -100,7 +100,7 @@ extern int read_history ();
 #  endif /* defined(HAVE_READLINE_HISTORY_H) */
   /* no history */
 #endif /* HAVE_READLINE_HISTORY */
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_SYS_STAT_H

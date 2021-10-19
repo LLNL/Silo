@@ -117,7 +117,9 @@ int main(int argc, char *argv[])
             ndirs = (int) strtol(argv[i]+6,0,10);
 	} else if (argv[i][0] != '\0') {
             objname = strdup(argv[i]);
+#ifndef _WIN32
 #warning SEEMS LIKE HACK TO TEST SOMETHING
+#endif
 /*            fprintf(stderr, "%s: ignored argument `%s'\n", argv[0], argv[i]);*/
         }
     }
@@ -156,7 +158,9 @@ int main(int argc, char *argv[])
     DBSetDir(dbfile, "../..");
     DBMkdir(dbfile, "quad_subdir3");
     DBSetDir(dbfile, "quad_subdir3");
+#ifndef _WIN32
 #warning CONFIRM COPY HANDLES LINK CORRECTLY
+#endif
     DBMkSymlink(dbfile, "/quad_dir/quad_subdir1", "dirlink");
     DBMkSymlink(dbfile, "dir2.h5:/gorfo", "extlink");
     build_quad(dbfile, "quadmesh");

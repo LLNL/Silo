@@ -95,7 +95,7 @@ extern int read_history ();
 #ifndef _WIN32
   #include <sys/wait.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
   #include <unistd.h>
 #endif
 

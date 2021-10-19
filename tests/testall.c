@@ -3247,7 +3247,9 @@ build_curve (DBfile *dbfile, int driver)
     */
    DBPutCurve (dbfile, "sincurve", x, y[0], DB_FLOAT, 20, opts);
 
+#ifndef _WIN32
 #warning NEW FUNCTIONALITY TO LOOK AT
+#endif
    {
        int j, dims=1;
        one=0;
