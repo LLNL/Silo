@@ -479,7 +479,7 @@ DBADDCOPT_FC (int *optlist_id, int *option, FCD_DB cvalue, int *lcvalue)
  *     Added SILO_API so symbols are correctly exported on windows.
  *
  *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
- *     Added patch by Olivier Cessanat to allow variable length strings.
+ *     Added patch by Olivier Cessenat to allow variable length strings.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBADDCAOPT_FC (int *optlist_id, int *option,
@@ -488,7 +488,8 @@ DBADDCAOPT_FC (int *optlist_id, int *option,
     char          **cval = NULL;
     char          *names = NULL;
     DBoptlist     *optlist = NULL;
-    int           indx, i;
+    int           i;
+    long long     indx;
 
     API_BEGIN("dbaddaopt", int, -1) {
         optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
@@ -1488,7 +1489,10 @@ DBWRTFL_FC (int *dbid, FCD_DB name, int *lname, int *object_id, int *status)
  *     Added SILO_API so symbols are correctly exported on windows.
  *
  *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
- *     Added patch by Olivier Cessanat to allow variable length strings.
+ *     Added patch by Olivier Cessenat to allow variable length strings.
+ *
+ *     Mark C. Miller, Sun Oct 25 14:15:00 CET 2020
+ *     Added patch by Olivier Cessenat to allow nameschemes.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
@@ -1498,7 +1502,8 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
     char         **meshnms = NULL;
     char          *nm = NULL;
     char          *realmeshnames = NULL;
-    int            i, indx;
+    int            i;
+    long long      indx;
     DBoptlist     *optlist = NULL;
 
     API_BEGIN("dbputmmesh", int, -1) {
@@ -1537,30 +1542,42 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
 
         if (*nmesh <= 0)
             API_ERROR("nmesh", E_BADARGS);
-        meshnms = ALLOC_N(char *, *nmesh);
 
-        for (indx = 0, i = 0; i < *nmesh; i++) {
-            if (lmeshnames[i] < 0)
-                API_ERROR("lmeshnames", E_BADARGS);
-            meshnms[i] = (char *) SW_strndup(&realmeshnames[indx], lmeshnames[i]);
-            if (fortran2DStrLen > 0)
-                indx += fortran2DStrLen;
-            else
-                indx += lmeshnames[i];
+        if (realmeshnames == NULL)
+        {
+            /*----------------------------------------
+             *  Invoke the C function to do the work : using namescheme probably !
+             *---------------------------------------*/
+            *status = DBPutMultimesh(dbfile, nm, *nmesh,
+                                     NULL, NULL, optlist);
+            
         }
+        else
+        {
+            meshnms = ALLOC_N(char *, *nmesh);
+            
+            for (indx = 0, i = 0; i < *nmesh; i++) {
+                if (lmeshnames[i] < 0)
+                    API_ERROR("lmeshnames", E_BADARGS);
+                meshnms[i] = (char *) SW_strndup(&realmeshnames[indx], lmeshnames[i]);
+                if (fortran2DStrLen > 0)
+                    indx += fortran2DStrLen;
+                else
+                    indx += lmeshnames[i];
+            }
 
-        /*----------------------------------------
-         *  Invoke the C function to do the work.
-         *---------------------------------------*/
-        *status = DBPutMultimesh(dbfile, nm, *nmesh,
-                      (char const * const *) meshnms,
-                  *meshtypes==DB_F77NULL?0:meshtypes, optlist);
+            /*----------------------------------------
+             *  Invoke the C function to do the work.
+             *---------------------------------------*/
+            *status = DBPutMultimesh(dbfile, nm, *nmesh,
+                                     (char const * const *) meshnms, meshtypes, optlist);
+            
+            for (i = 0; i < *nmesh; i++)
+                FREE(meshnms[i]);
+            FREE(meshnms);
 
-        for (i = 0; i < *nmesh; i++)
-            FREE(meshnms[i]);
+        }
         FREE(nm);
-        FREE(meshnms);
-
         API_RETURN((*status < 0) ? (-1) : 0);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
@@ -1590,7 +1607,7 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
  *     Added SILO_API so symbols are correctly exported on windows.
  *
  *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
- *     Added patch by Olivier Cessanat to allow variable length strings.
+ *     Added patch by Olivier Cessenat to allow variable length strings.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
@@ -1600,7 +1617,8 @@ DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
     DBfile        *dbfile = NULL;
     char         **nms = NULL, **defs = NULL, *nm = NULL;
     char          *realnms = NULL, *realdefs = NULL;
-    int            i, indx;
+    int            i;
+    long long      indx;
     DBoptlist     **optlists = NULL;
 
     API_BEGIN("dbputdefvars", int, -1) {
@@ -1735,7 +1753,10 @@ DBPUTDEFVARS_FC (int *dbid, FCD_DB name, int *lname, int *ndefs, FCD_DB names,
  *     Added SILO_API so symbols are correctly exported on windows.
  *
  *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
- *     Added patch by Olivier Cessanat to allow variable length strings.
+ *     Added patch by Olivier Cessenat to allow variable length strings.
+ *
+ *     Mark C. Miller, Sun Oct 25 14:15:00 CET 2020
+ *     Added patch by Olivier Cessenat to allow nameschemes.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
@@ -1744,7 +1765,8 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
     DBfile        *dbfile = NULL;
     char         **varnms = NULL, *nm = NULL;
     char          *realvarnames = NULL;
-    int            i, indx;
+    int            i;
+    long long      indx;
     DBoptlist     *optlist = NULL;
 
     API_BEGIN("dbputmvar", int, -1) {
@@ -1782,27 +1804,35 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
 
         if (*nvar <= 0)
             API_ERROR("nvar", E_BADARGS);
-        varnms = ALLOC_N(char *, *nvar);
 
-        for(indx = 0, i = 0; i< *nvar; i++) {
-            if (lvarnames[i] < 0)
-                API_ERROR("lvarnames", E_BADARGS);
-            varnms[i] = SW_strndup(&realvarnames[indx], lvarnames[i]);
-            if (fortran2DStrLen > 0)
-                indx += fortran2DStrLen;
-            else
-                indx += lvarnames[i];
+        if (realvarnames == NULL)
+        {
+            /* Invoke the C function to do the work : using namescheme probably. */
+            *status = DBPutMultivar(dbfile, nm, *nvar, NULL, NULL, optlist);
         }
+        else
+        {
+            varnms = ALLOC_N(char *, *nvar);
 
-        /* Invoke the C function to do the work. */
-        *status = DBPutMultivar(dbfile, nm, *nvar, (char const * const *) varnms,
-                      vartypes, optlist);
+            for(indx = 0, i = 0; i< *nvar; i++) {
+                if (lvarnames[i] < 0)
+                    API_ERROR("lvarnames", E_BADARGS);
+                varnms[i] = SW_strndup(&realvarnames[indx], lvarnames[i]);
+                if (fortran2DStrLen > 0)
+                    indx += fortran2DStrLen;
+                else
+                    indx += lvarnames[i];
+            }
 
-        for(i=0;i<*nvar;i++)
-            FREE(varnms[i]);
+            /* Invoke the C function to do the work. */
+            *status = DBPutMultivar(dbfile, nm, *nvar, (char const * const *) varnms,
+                                    vartypes, optlist);
+
+            for(i=0;i<*nvar;i++)
+                FREE(varnms[i]);
+            FREE(varnms);
+        }
         FREE(nm);
-        FREE(varnms);
-
         API_RETURN(*status < 0 ? (-1) : 0);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */ ;
@@ -1833,7 +1863,10 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
  *     Added SILO_API so symbols are correctly exported on windows.
  *
  *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
- *     Added patch by Olivier Cessanat to allow variable length strings.
+ *     Added patch by Olivier Cessenat to allow variable length strings.
+ *
+ *     Mark C. Miller, Sun Oct 25 14:15:00 CET 2020
+ *     Added patch by Olivier Cessenat to allow nameschemes.
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
@@ -1842,10 +1875,11 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
     DBfile        *dbfile = NULL;
     char         **matnms = NULL, *nm = NULL;
     char          *realmatnames = NULL;
-    int            i, indx;
+    int            i;
+    long long      indx;
     DBoptlist     *optlist = NULL;
 
-    API_BEGIN("dbputmmat", int, -1) {
+    API_BEGIN("dbputmmesh", int, -1) {
         optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
         /*------------------------------
          *  Duplicate all ascii strings.
@@ -1881,27 +1915,141 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
 
         if (*nmat <= 0)
             API_ERROR("nmat", E_BADARGS);
-        matnms = ALLOC_N(char *, *nmat);
 
-        for (indx = 0, i = 0; i < *nmat; i++) {
-            if (lmatnames[i] < 0)
-                API_ERROR("lmatnames", E_BADARGS);
-            matnms[i] = SW_strndup(&realmatnames[indx], lmatnames[i]);
-            if (fortran2DStrLen > 0)
-                indx += fortran2DStrLen;
-            else
-                indx += lmatnames[i];
+        if (realmatnames == NULL)
+        {
+            /*----------------------------------------
+             *  Invoke the C function to do the work : using namescheme probably.
+             *---------------------------------------*/
+            *status = DBPutMultimat(dbfile, nm, *nmat, NULL, optlist);
         }
+        else
+        {
+            matnms = ALLOC_N(char *, *nmat);
 
-        /*----------------------------------------
-         *  Invoke the C function to do the work.
-         *---------------------------------------*/
-        *status = DBPutMultimat(dbfile, nm, *nmat, (char const * const *) matnms, optlist);
-
-        for (i = 0; i < *nmat; i++)
-            FREE(matnms[i]);
+            for (indx = 0, i = 0; i < *nmat; i++) {
+                if (lmatnames[i] < 0)
+                    API_ERROR("lmatnames", E_BADARGS);
+                matnms[i] = SW_strndup(&realmatnames[indx], lmatnames[i]);
+                if (fortran2DStrLen > 0)
+                    indx += fortran2DStrLen;
+                else
+                    indx += lmatnames[i];
+            }
+            
+            /*----------------------------------------
+             *  Invoke the C function to do the work.
+             *---------------------------------------*/
+            *status = DBPutMultimat(dbfile, nm, *nmat, (char const * const *) matnms, optlist);
+            
+            for (i = 0; i < *nmat; i++)
+                FREE(matnms[i]);
+            FREE(matnms);
+        }
         FREE(nm);
-        FREE(matnms);
+
+        API_RETURN((*status < 0) ? (-1) : 0);
+    }
+    API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
+}
+
+/*-------------------------------------------------------------------------
+ * Routine                                                     DBPUTMMATSPECIES_FC
+ *
+ * Purpose
+ *     Write a multi-block species object into a Silo file.
+ *
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Olivier Cessenat, Sun Oct 25 12:51:41 CET 2020
+ *     Added the Fortran equivalent to the C DBPutMultimatspecies with
+ *     namescheme.
+ *
+ *-------------------------------------------------------------------------*/
+SILO_API FORTRAN
+DBPUTMMATSPECIES_FC (int *dbid, FCD_DB name, int *lname, int *nspec, FCD_DB specnames,
+            int *lspecnames, int *optlist_id, int *status)
+{
+    DBfile        *dbfile = NULL;
+    char         **specnms = NULL, *nm = NULL;
+    char          *realspecnames = NULL;
+    int            i;
+    long long      indx;
+    DBoptlist     *optlist = NULL;
+
+    API_BEGIN("dbputmmesh", int, -1) {
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+        /*------------------------------
+         *  Duplicate all ascii strings.
+         *-----------------------------*/
+        if (*lname <= 0)
+            API_ERROR("lname", E_BADARGS);
+
+#ifdef CRAY
+        if (strcmp(_fcdtocp(name), DB_F77NULLSTRING) == 0)
+            nm = NULL;
+        else
+            nm = SW_strndup(_fcdtocp(name), *lname);
+#else
+        if (strcmp(name, DB_F77NULLSTRING) == 0)
+            nm = NULL;
+        else
+            nm = SW_strndup(name, *lname);
+#endif
+
+#ifdef CRAY
+        if (strcmp(_fcdtocp(specnames), DB_F77NULLSTRING) == 0)
+            realspecnames = NULL;
+        else
+            realspecnames = _fcdtocp(specnames);
+#else
+        if (strcmp(specnames, DB_F77NULLSTRING) == 0)
+            realspecnames = NULL;
+        else
+            realspecnames = specnames;
+#endif
+
+        dbfile = (DBfile *) DBFortranAccessPointer(*dbid);
+
+        if (*nspec <= 0)
+            API_ERROR("nspec", E_BADARGS);
+
+        if (realspecnames == NULL)
+        {
+            /*----------------------------------------
+             *  Invoke the C function to do the work : using namescheme probably.
+             *---------------------------------------*/
+            *status = DBPutMultimatspecies(dbfile, nm, *nspec, NULL, optlist);
+        }
+        else
+        {
+            specnms = ALLOC_N(char *, *nspec);
+
+            for (indx = 0, i = 0; i < *nspec; i++) {
+                if (lspecnames[i] < 0)
+                    API_ERROR("lspecnames", E_BADARGS);
+                specnms[i] = SW_strndup(&realspecnames[indx], lspecnames[i]);
+                if (fortran2DStrLen > 0)
+                    indx += fortran2DStrLen;
+                else
+                    indx += lspecnames[i];
+            }
+            
+            /*----------------------------------------
+             *  Invoke the C function to do the work.
+             *---------------------------------------*/
+            *status = DBPutMultimatspecies(dbfile, nm, *nspec, (char const * const *) specnms, optlist);
+            
+            for (i = 0; i < *nspec; i++)
+                FREE(specnms[i]);
+            FREE(specnms);
+        }
+        FREE(nm);
 
         API_RETURN((*status < 0) ? (-1) : 0);
     }
@@ -2338,7 +2486,8 @@ DBPUTQV_FC (int *dbid, FCD_DB vname, int *lvname, FCD_DB mname, int *lmname,
     DBoptlist     *optlist = NULL;
     char          **cvarnames = NULL;
     char          *names = NULL;
-    int           indx, i, j;
+    int           i, j;
+    long long     indx;
     void        **cvars = NULL ;
     void        **cmixvar = NULL ;
 
@@ -4784,7 +4933,7 @@ DBADDREGION_FC (int *tree_id, FCD_DB region_name, int *lregion_name,
  *     Added SILO_API so symbols are correctly exported on windows.
  *
  *     Mark C. Miller, Thu Feb  4 10:10:28 PST 2010
- *     Added patch by Olivier Cessanat to allow variable length strings.
+ *     Added patch by Olivier Cessenat to allow variable length strings.
  *--------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
@@ -4795,7 +4944,8 @@ DBADDREGIONA_FC (int *tree_id, int *nregn, FCD_DB regn_names, int *lregn_names,
     DBoptlist *optlist = NULL;
     char **regn_nms = NULL, *maps_nm = NULL;
     char *realregn_names = NULL;
-    int indx, i;
+    int       i;
+    long long indx;
 
     API_BEGIN("dbaddregiona", int, -1) {
         if (*lmaps_name<=0)
@@ -5336,7 +5486,8 @@ DBPMRGV_FC (int *dbid, FCD_DB name, int *lname, FCD_DB tname, int *ltname,
     char          *realcompnames = NULL;
     char          *realregnnames = NULL;
     void         **data = NULL;
-    int            i, indx;
+    int            i;
+    long long      indx;
     DBoptlist     *optlist = NULL;
 
     API_BEGIN("dbpmrgv", int, -1) {
