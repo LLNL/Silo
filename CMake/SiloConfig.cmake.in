@@ -1,0 +1,78 @@
+#-----------------------------------------------------------------------------
+# SILO Config file for compiling against SILO build directory
+#-----------------------------------------------------------------------------
+@PACKAGE_INIT@
+
+set(SILO_PACKAGE_NAME "SILO")
+
+set (${SILO_PACKAGE_NAME}_VALID_COMPONENTS static shared)
+
+#-----------------------------------------------------------------------------
+# User Options
+#-----------------------------------------------------------------------------
+set (${SILO_PACKAGE_NAME}_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
+
+set(SILO_BUILD_SILEX @SILO_BUILD_SILEX@)
+set(SILO_BUILD_BROWSER @SILO_BUILD_BROWSER@)
+set(SILO_ENABLE_FORTRAN @SILO_ENABLE_FORTRAN@)
+set(SILO_ENABLE_HDF5 @SILO_ENABLE_HDF5@)
+set(SILO_ENABLE_JSON @SILO_ENABLE_JSON@)
+set(SILO_ENABLE_PYTHON @SILO_ENABLE_PYTHON@)
+set(SILO_ENABLE_NETCDF @SILO_ENABLE_NETCDF@)
+set(SILO_ENABLE_TESTS @SILO_ENABLE_TESTS@)
+set(SILO_ENABLE_TESTS_INSTALL @SILO_ENABLE_TESTS_INSTALL@)
+set(SILO_BUILD_FOR_BSD_LICENSE @SILO_BUILD_FOR_BSD_LICENSE@)
+
+if(NOT SILO_BUILD_FOR_BSD_LICENSE)
+  set(SILO_ENABLE_FPZIP @SILO_ENABLE_FPZIP@)
+  set(SILO_ENABLE_HZIP @SILO_ENABLE_HZIP@)
+endif()
+
+set(BUILD_SHARED_LIBS ${SILO_BUILD_SHARED})
+
+#-----------------------------------------------------------------------------
+# Directories
+#-----------------------------------------------------------------------------
+set (${SILO_PACKAGE_NAME}_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
+
+set (${SILO_PACKAGE_NAME}_SHARE_DIR "@PACKAGE_SHARE_INSTALL_DIR@")
+set_and_check (${SILO_PACKAGE_NAME}_BUILD_DIR "@PACKAGE_CURRENT_BUILD_DIR@")
+
+#-----------------------------------------------------------------------------
+# Version Strings
+#-----------------------------------------------------------------------------
+set (${SILO_PACKAGE_NAME}_VERSION_STRING @SILO_VERSION_STRING@)
+set (${SILO_PACKAGE_NAME}_VERSION_MAJOR  @SILO_VERSION_MAJOR@)
+set (${SILO_PACKAGE_NAME}_VERSION_MINOR  @SILO_VERSION_MINOR@)
+
+#-----------------------------------------------------------------------------
+# Don't include targets if this file is being picked up by another
+# project which has already build SILO as a subproject
+#-----------------------------------------------------------------------------
+if (NOT TARGET "@SILO_PACKAGE@")
+  include (${PACKAGE_PREFIX_DIR}/cmake/Silo-targets.cmake)
+endif ()
+
+# should the default here be shared?
+
+# Handle default component(static) :
+if (NOT ${SILO_PACKAGE_NAME}_FIND_COMPONENTS)
+    set (${SILO_PACKAGE_NAME}_FIND_COMPONENTS static)
+    set (${SILO_PACKAGE_NAME}_FIND_REQUIRED_static true)
+endif ()
+
+# Handle requested components:
+list (REMOVE_DUPLICATES ${SILO_PACKAGE_NAME}_FIND_COMPONENTS)
+foreach (comp IN LISTS ${SILO_PACKAGE_NAME}_FIND_COMPONENTS)
+    list (FIND ${SILO_PACKAGE_NAME}_EXPORT_LIBRARIES "@SILO_LIB_CORENAME@-${comp}" HAVE_COMP) 
+    if (${HAVE_COMP} LESS 0) 
+      set (${SILO_PACKAGE_NAME}_${comp}_FOUND 0)
+    else ()
+      set (${SILO_PACKAGE_NAME}_${comp}_FOUND 1)
+      string(TOUPPER ${SILO_PACKAGE_NAME}_${comp}_LIBRARY COMP_LIBRARY)
+      set (${COMP_LIBRARY} ${${COMP_LIBRARY}} @SILO_LIB_CORENAME@-${comp})
+    endif ()
+endforeach ()
+
+check_required_components (${SILO_PACKAGE_NAME})
+

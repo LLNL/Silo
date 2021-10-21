@@ -5922,8 +5922,6 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
     }
 
     faprops = db_hdf5_file_accprops(opts_set_id, mode, 0);
-#warning QUERY FILE IMAGE STUFF HERE TO GET UDATA PTR
-
 #ifndef _WIN32
 #warning QUERY FILE IMAGE STUFF HERE TO GET UDATA PTR
 #endif
