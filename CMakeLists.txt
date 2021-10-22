@@ -48,10 +48,22 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ###---------------------------------------------------------------------------
 include(SiloHelpers)
 
-if(EXISTS ${Silo_SOURCE_DIR}/config-site/$ENV{HOST}.cmake)
-    include(${Silo_SOURCE_DIR}/config-site/$ENV{HOST}.cmake)
-elseif(EXISTS ${Silo_SOURCE_DIR}/config-site/$ENV{HOSTNAME}.cmake)
-    include(${Silo_SOURCE_DIR}/config-site/$ENV{HOSTNAME}.cmake)
+# if user passed -DSILO_CONFIG_SITE to cmake, use it, otherwise
+# see if there is a config-site file for this host
+if(DEFINED SILO_CONFIG_SITE AND EXISTS ${SILO_CONFIG_SITE})
+    include(${SILO_CONFIG_SITE})
+else()
+    if(WIN32)
+        if(EXISTS ${Silo_SOURCE_DIR}/config-site/$ENV{COMPUTERNAME}.cmake)
+            include(${Silo_SOURCE_DIR}/config-site/$ENV{COMPUTERNAME}.cmake)
+        endif()
+    else()
+        if(EXISTS ${Silo_SOURCE_DIR}/config-site/$ENV{HOST}.cmake)
+            include(${Silo_SOURCE_DIR}/config-site/$ENV{HOST}.cmake)
+        elseif(EXISTS ${Silo_SOURCE_DIR}/config-site/$ENV{HOSTNAME}.cmake)
+            include(${Silo_SOURCE_DIR}/config-site/$ENV{HOSTNAME}.cmake)
+        endif()
+    endif()
 endif()
 
 

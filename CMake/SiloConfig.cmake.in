@@ -53,9 +53,6 @@ if (NOT TARGET "@SILO_PACKAGE@")
   include (${PACKAGE_PREFIX_DIR}/cmake/Silo-targets.cmake)
 endif ()
 
-# share the options used to build silo? SILO_ENABLE_HDF5 etc?
-
-
 # should the default component here be shared?
 
 # Handle default component(static) :
