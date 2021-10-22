@@ -1,17 +1,38 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-#
+###
 # grab the version string
-#
+###
 file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/VERSION SILO_VERSION)
 
-#
+###
 # project command will automatically create cmake vars for major, minor,
 # patch and tweak from passed VERSION 
-#
+###
 project(Silo VERSION ${SILO_VERSION} LANGUAGES CXX C)
 
-# turn on folders
+###
+# location for Silo CMake includes 
+###
+set(CMAKE_MODULE_PATH ${Silo_SOURCE_DIR}/CMake)
+
+###-----------------------------------------------------------------------------
+# Output directories.
+#####-----------------------------------------------------------------------------
+
+if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY lib CACHE INTERNAL "Output directory for libraries.")
+endif()
+
+if(NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY lib CACHE INTERNAL "Output directory for archives.")
+endif()
+
+if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin CACHE INTERNAL "Output directory for executables.")
+endif()
+
+# turn on folders (VS IDE, ignored otherwise)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #
@@ -20,13 +41,18 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 #  as ${CMAKE_CURRENT_SOURCE_DIR} unless some things are moved into subdirs.
 #
 
-#
-#  For linux/MacOS may want to include cmake-ified config-site files here to set
-#     CFLAGS, CXXFLAGS, LDFLAGS
-#     SILO_HDF5_DIR
-#     SILO_ZLIB_DIR
-#     SILO_QT5_DIR
-#
+###---------------------------------------------------------------------------
+# Include any config-site <host>.cmake files if available
+#    the config-site file can override any of the default SILO_ settings
+#    as well as CMAKE_INSTALL_PREFIX
+###---------------------------------------------------------------------------
+include(SiloHelpers)
+
+if(EXISTS ${Silo_SOURCE_DIR}/config-site/$ENV{HOST}.cmake)
+    include(${Silo_SOURCE_DIR}/config-site/$ENV{HOST}.cmake)
+elseif(EXISTS ${Silo_SOURCE_DIR}/config-site/$ENV{HOSTNAME}.cmake)
+    include(${Silo_SOURCE_DIR}/config-site/$ENV{HOSTNAME}.cmake)
+endif()
 
 
 #
@@ -45,8 +71,9 @@ option(SILO_BUILD_BROWSER "Enable building of browser" ON)
 option(SILO_ENABLE_FORTRAN "Enable Fortran support" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable json support" OFF)
-option(SILO_ENABLE_PYTHON "Enable python support" OFF)
-option(SILO_ENABLE_NETCDF "Enable netcdf support" OFF)
+# what will enabling python actually do?
+option(SILO_ENABLE_PYTHON "Enable python support" OFF) 
+option(SILO_ENABLE_NETCDF "Enable netcdf support" ON)
 option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
 option(SILO_ENABLE_TESTS_INSTALL "Enable installation of tests." OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
@@ -56,6 +83,12 @@ CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable fpzip compression" ON
                        "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
 CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable hzip compression" ON
                        "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
+
+##
+#  Set up a default INSTALL prefix that is peer to the build directory
+##
+set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
+
 
 set(BUILD_SHARED_LIBS ${SILO_BUILD_SHARED})
 
@@ -73,116 +106,23 @@ find_program(perl_exe NAMES perl perl.exe REQUIRED)
 # HDF5
 ##
 if(SILO_ENABLE_HDF5)
-    # Is there a minimum version that should be requested? 
-    set(SILO_HDF5_DIR "" CACHE PATH "Directory for hdf5 package (location of hdf5-config.cmake if exists, otherwise root).")
-    if(EXISTS ${SILO_HDF5_DIR}/hdf5-config.cmake)
-        # This works for HDF5 built with CMake.
-        find_package(hdf5 PATHS ${SILO_HDF5_DIR} CONFIG)
-        if(TARGET hdf5)
-            # needed for config.h
-            set(HAVE_HDF5_H 1)
-            set(HAVE_HDF5_DRIVER 1)
-            set(HAVE_LIBHDF5 1)
-
-            # was zlib or szip support enabled?
-            if(HDF5_ENABLE_Z_LIB_SUPPORT)
-                set(hdf5_needs_zlib ON)
-            else()
-                set(hdf5_needs_zlib OFF)
-            endif()
-            if(HDF5_ENABLE_SZIP_SUPPORT)
-                set(hdf5_needs_szip ON)
-            else()
-                set(hdf5_needs_szip OFF)
-            endif()
- 
-            # On Windows need to have hdf5's dll installed with browser/silex
-            # in order for the executables to work
-            if(WIN32 AND (SILO_ENABLE_SILEX OR SILEX_ENABLE_BROWSER))
-                get_target_property(HDF5_DLL hdf5 IMPORTED_LOCATION_RELEASE )
-                install(FILES ${HDF5_DLL} DESTINATION bin
-                        PERMISSIONS OWNER_READ OWNER_WRITE
-                                    GROUP_READ GROUP_WRITE
-                                    WORLD_READ) 
-            endif()
-        endif()
-    else()
-        # use CMake's built-in Find module for HDF5
-        if(EXISTS ${SILO_HDF5_DIR})
-            # help cmake find the hdf5 we want to use
-            set(HDF5_ROOT ${SILO_HDF5_DIR})
-        endif()
-        find_package(HDF5 )
-        if(HDF5_FOUND)
-            # needed for config.h
-            set(HAVE_HDF5_H 1)
-            set(HAVE_HDF5_DRIVER 1)
-            set(HAVE_LIBHDF5 1)
-        else()
-            message(FATAL_ERROR "Could not find hdf5, you may want to try setting SILO_HDF5_DIR") 
-        endif()
-    endif()
+    include(SiloFindHDF5)
 endif()
 
 ##
-# Zlib  needed for hzip (non-BSD) or if HDF5 was built with zlib support
+# Zlib  needed for hzip (non-BSD)
+#     May also need if HDF5 was built with zlib support
+#         but how to know it used system zlib, or SILO_ZLIB_DIR needs to be provided?
 ##
-if(SILO_ENABLE_HZIP OR hdf5_needs_zlib)
-    set(SILO_ZLIB_DIR "" CACHE PATH "Directory of zlib package (location of zlib-config.cmake, or zlib root")
-    if(EXISTS ${SILO_ZLIB_DIR}/zlib-config.cmake) 
-        # this works for zlib with CMake
-        find_package(ZLIB PATHS ${SILO_ZLIB_DIR} CONFIG)
-    else()
-        if(EXISTS ${SILO_ZLIB_DIR})
-            # help CMake find the specified zlib
-            set(ZLIB_ROOT ${SILO_ZLIB_DIR})
-        endif()
-        find_package(ZLIB )
-    endif()
-    if(ZLIB_FOUND)
-        # needed for config.h
-        set(HAVE_LIBZ 1)
-        set(HAVE_ZLIB_H 1)
-        if(WIN32 AND (SILO_BUILD_SILEX OR SILEX_BUILD_BROWSER))
-            get_target_property(ZLIB_DLL zlib IMPORTED_LOCATION_RELEASE )
-            install(FILES ${ZLIB_DLL} DESTINATION bin
-                PERMISSIONS OWNER_READ OWNER_WRITE
-                            GROUP_READ GROUP_WRITE
-                            WORLD_READ) 
-        endif()
-    else()
-        message(FATAL_ERROR "Could not find zlib, you may want to try setting SILO_ZLIB_DIR") 
-    endif()
+if(SILO_ENABLE_HZIP OR DEFINED SILO_ZLIB_DIR)# OR hdf5_needs_zlib)
+    include(SiloFindZlib)
 endif()
 
 ##
 # szip  if HDF5 was built with szip support
 ##
-if( hdf5_needs_szip)
-    set(SILO_SZIP_DIR "" CACHE PATH "Directory of szip package (location of szip-config.cmake, or szip root")
-    if(EXISTS ${SILO_SZIP_DIR}/szip-config.cmake) 
-        # this works for szip with CMake
-        find_package(SZIP PATHS ${SILO_SZIP_DIR} CONFIG)
-    else()
-        if(EXISTS ${SILO_SZIP_DIR})
-            # help CMake find the specified szip
-            set(SZIP_ROOT ${SILO_SZIP_DIR})
-        endif()
-        find_package(SZIP)
-    endif()
-    if(SZIP_FOUND)
-        # needed for config.h
-        set(HAVE_LIBSZ 1)
-        if(WIN32 AND (SILO_BUILD_SILEX OR SILEX_BUILD_BROWSER))
-            get_target_property(SZIP_DLL szip IMPORTED_LOCATION_RELEASE )
-            install(FILES ${SZIP_DLL} DESTINATION bin
-                PERMISSIONS OWNER_READ OWNER_WRITE
-                            GROUP_READ GROUP_WRITE
-                            WORLD_READ) 
-        endif()
-    else()
-        message(FATAL_ERROR "Could not find szip, you may want to try setting SILO_SZIP_DIR") 
-    endif()
+if(hdf5_needs_szip)
+    include(SiloFindSzip)
 endif()
 
 ##
@@ -190,17 +130,7 @@ endif()
 ##
 
 if(SILO_BUILD_SILEX)
-    find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED PATHS ${SILO_QT5_DIR} CONFIG)
-    if(Qt5_FOUND AND WIN32)
-        get_target_property(Qt5Core_DLL Qt5::Core IMPORTED_LOCATION_RELEASE)
-        get_target_property(Qt5Gui_DLL Qt5::Gui IMPORTED_LOCATION_RELEASE)
-        get_target_property(Qt5Widgets_DLL Qt5::Widgets IMPORTED_LOCATION_RELEASE)
-        install(FILES ${Qt5Core_DLL} ${Qt5Gui_DLL} ${Qt5Widget_DLL}
-                DESTINATION bin
-                PERMISSIONS OWNER_READ OWNER_WRITE
-                            GROUP_READ GROUP_WRITE
-                            WORLD_READ) 
-    endif()
+    include(SiloFindQt5)
 endif()
 
 ###-----------------------------------------------------------------------------
@@ -224,9 +154,9 @@ endif()
 ##
 # Add the needed CMake modules 
 ##
-include(${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
-include(${CMAKE_ROOT}/Modules/CheckIncludeFile.cmake)
-include(${CMAKE_ROOT}/Modules/CheckSymbolExists.cmake)
+include(CheckFunctionExists)
+include(CheckIncludeFile)
+include(CheckSymbolExists)
 
 ##
 # check_include_file
@@ -276,6 +206,25 @@ check_symbol_exists(memmove "memory.h" HAVE_MEMMOVE)
 check_symbol_exists(add_history "readline.h" HAVE_READLINE_HISTORY)
 
 
+
+###-----------------------------------------------------------------------------
+# Set flags & options from config-site files after everything is set up since
+# setting them beforehand can upset some of CMake's own find routines. 
+###-----------------------------------------------------------------------------
+if(DEFINED SILO_C_FLAGS)
+    string(APPEND CMAKE_C_FLAGS " ${SILO_C_FLAGS}")
+endif()
+
+if(DEFINED SILO_CXX_FLAGS)
+    string(APPEND CMAKE_CXX_FLAGS " ${SILO_CXX_FLAGS}")
+endif()
+
+# will this be needed?
+#if(DEFINED SILO_EXE_LINKER_FLAGS)
+#    string(APPEND CMAKE_EXE_LINKER_FLAGS " ${SILO_EXE_LINKER_FLAGS}")
+#endif()
+
+
 ###-----------------------------------------------------------------------------
 # Create siloh from silo.h.in
 ###-----------------------------------------------------------------------------
@@ -297,7 +246,7 @@ configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
 
 if(SILO_ENABLE_FORTRAN)
     enable_language(Fortran)
-    include(${CMAKE_ROOT}/Modules/FortranCInterface.cmake)
+    include(FortranCInterface)
     FortranCInterface_HEADER(${silo_build_include_dir}/silo_FC.h MACRO_NAMESPACE "FC_")
     if(EXISTS ${silo_build_include_dir}/silo_FC.h)
         set(HAVE_SILO_FC_H 1)
@@ -315,10 +264,9 @@ set(SILO_NAME "silo")
 set(SILO_TARNAME "silo")
 set(SILO_URL "https://wci.llnl.gov/simulation/computer-codes/silo")
 
-# Always defined, BSD or not
-set(HAVE_NETCDF_DRIVER 1)
+# Always defined ?
 set(HAVE_PDB_DRIVER 1)
-set(HAVE_TAURUS_DRIVER 1)
+set(HAVE_TAURUS_DRIVER 1)  # should there be an option to disable taurus?
 
 set(STDC_HEADERS 1)
 
@@ -383,12 +331,6 @@ set(silo_library_sources
     ${Silo_SOURCE_DIR}/src/debug/silo_debug.c
     ${Silo_SOURCE_DIR}/src/filters/f_ale3d.c
     ${Silo_SOURCE_DIR}/src/filters/f_sample.c
-    ${Silo_SOURCE_DIR}/src/netcdf/api.c
-    ${Silo_SOURCE_DIR}/src/netcdf/ent.c
-    ${Silo_SOURCE_DIR}/src/netcdf/netcdf.c
-    ${Silo_SOURCE_DIR}/src/netcdf/obj.c
-    ${Silo_SOURCE_DIR}/src/netcdf/silo_netcdf.c
-    ${Silo_SOURCE_DIR}/src/netcdf/table.c
     ${Silo_SOURCE_DIR}/src/pdb/pdb.c
     ${Silo_SOURCE_DIR}/src/pdb/pdbdir.c
     ${Silo_SOURCE_DIR}/src/pdb/pdbio.c
@@ -414,8 +356,24 @@ set(silo_library_sources
     ${Silo_SOURCE_DIR}/src/taurus/taurus.c
     ${Silo_SOURCE_DIR}/src/unknown/silo_unknown.c)
 
+if(SILO_ENABLE_NETCDF)
+    set(HAVE_NETCDF_DRIVER 1)
+    list(APPEND silo_library_sources 
+        ${Silo_SOURCE_DIR}/src/netcdf/api.c
+        ${Silo_SOURCE_DIR}/src/netcdf/ent.c
+        ${Silo_SOURCE_DIR}/src/netcdf/netcdf.c
+        ${Silo_SOURCE_DIR}/src/netcdf/obj.c
+        ${Silo_SOURCE_DIR}/src/netcdf/silo_netcdf.c
+        ${Silo_SOURCE_DIR}/src/netcdf/table.c)
+endif()
+
 if(SILO_ENABLE_FORTRAN)
     list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_f.c)
+endif()
+
+if(SILO_ENABLE_JSON)
+# is there more to be done to get this to compile?
+#    list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
 endif()
 
 set(silo_library_include_dirs 
@@ -606,6 +564,21 @@ if(SILO_BUILD_SILEX AND Qt5_FOUND)
              ${Silo_SOURCE_DIR}/SiloWindows/resources/silex.rc)
     endif()
     add_executable(silex  ${silex_src_files})
+    if(LINUX) # ??
+       # only necessary for install?
+
+       # change output name to silex.exe
+       # write silex script that sets LD_LIBRARY_PATH appropriately as in:
+       #!/bin/sh
+       #env LD_LIBRARY_PATH=/usr/gapps/silo/4.11/toss_3_x86_64_ib_gcc.6.1.0/libso:/usr/workspace/visit/visit/thirdparty_shared/3.2.0/toss3/qt/5.14.2/linux-x86_64_gcc-6.1/lib /usr/gapps/silo/4.11/toss_3_x86_64_ib_gcc.6.1.0/bin/silex.exe
+
+       # should we copy Qt's .so's or go ahead and extract the lib path somehow for use
+       # in the script?
+
+       # can possibly use configure_file and @CMAKE_INSTALL_PREFIX@ @QT5_LIB_DIR@
+
+    endif()
+
     add_dependencies(silex silo)
     set_target_properties(silex PROPERTIES AUTOMOC ON)
     target_link_libraries(silex $<TARGET_LINKER_FILE:silo>
@@ -698,10 +671,6 @@ endif()
 # INSTALL
 #-----------------------------------------------------------------------------
 
-#
-#  Set up a default INSTALL prefix that is peer to the build directory
-#
-set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
 
 
 install(EXPORT ${silo_targets_name} DESTINATION cmake)

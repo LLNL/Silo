@@ -47,13 +47,16 @@ set (${SILO_PACKAGE_NAME}_VERSION_MINOR  @SILO_VERSION_MINOR@)
 
 #-----------------------------------------------------------------------------
 # Don't include targets if this file is being picked up by another
-# project which has already build SILO as a subproject
+# project which has already built SILO as a subproject
 #-----------------------------------------------------------------------------
 if (NOT TARGET "@SILO_PACKAGE@")
   include (${PACKAGE_PREFIX_DIR}/cmake/Silo-targets.cmake)
 endif ()
 
-# should the default here be shared?
+# share the options used to build silo? SILO_ENABLE_HDF5 etc?
+
+
+# should the default component here be shared?
 
 # Handle default component(static) :
 if (NOT ${SILO_PACKAGE_NAME}_FIND_COMPONENTS)
