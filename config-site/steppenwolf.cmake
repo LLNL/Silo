@@ -45,7 +45,7 @@ silo_option_default(VAR SILO_ENABLE_TESTS VALUE ON TYPE BOOL)
 macro(silo_replace_flag OLD_FLAG NEW_FLAG FLAG_TYPE FLAG_STRING)
     string(REPLACE "${OLD_FLAG}" "${NEW_FLAG}" TMP "${${FLAG_TYPE}}")
     set(${FLAG_TYPE} "${TMP}" CACHE STRING "${FLAG_STRING}" FORCE)
-endmacro(REPLACE_FLAG)
+endmacro()
 
 # Change /MDd to /MD for debug builds
 silo_replace_flag("/MDd" "/MD" CMAKE_CXX_FLAGS_DEBUG

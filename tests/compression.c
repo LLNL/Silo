@@ -198,8 +198,10 @@ main(int argc, char *argv[])
 #if !defined(_WIN32)
       gettimeofday(&tim, NULL);
       t1=tim.tv_sec+(tim.tv_usec/1000000.0);
-#endif
       srandom(0xDeadBeef);
+#else
+      srand(0xDeadBeef);
+#endif
       if (usefloat)
       {
          for (j = 0; j < ITERATE; j++)
@@ -213,7 +215,11 @@ main(int argc, char *argv[])
             for (i = 0; i < fdims[0]; i++)
             {
                 double x = 2 * M_PI * (double) i / (double) (fdims[0]-1);
+#ifndef _WIN32
                 double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
+#else
+                double n = noise * ((double) rand() / ((double)(1<<31)-1) - 0.5);
+#endif
                 fval[i] = (float) ((j+1) * (1 + sin(x)) + n);
             }
 
@@ -239,7 +245,11 @@ main(int argc, char *argv[])
             for (i = 0; i < ddims[0]; i++)
             {
                 double x = 2 * M_PI * (double) i / (double) (ddims[0]-1);
+#ifndef _WIN32
                 double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
+#else
+                double n = noise * ((double) rand() / ((double)(1<<31)-1) - 0.5);
+#endif
                 dval[i] = (double) ((j+1) * (1 + sin(x)) + n);
             }
 
@@ -289,8 +299,10 @@ main(int argc, char *argv[])
 #if !defined(_WIN32)
     gettimeofday(&tim, NULL);
     t1=tim.tv_sec+(tim.tv_usec/1000000.0);
-#endif
     srandom(0xDeadBeef);
+#else
+    srand(0xDeadBeef);
+#endif
     if (usefloat)
     {
        for (j = 0; j < ITERATE; j++)
@@ -310,7 +322,11 @@ main(int argc, char *argv[])
           for (i = 0; i < fdims[0]; i++)
           {
              double x = 2 * M_PI * (double) i / (double) (fdims[0]-1);
+#ifndef _WIN32
              double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
+#else
+             double n = noise * ((double) rand() / ((double)(1<<31)-1) - 0.5);
+#endif
              fval[i] = (float) ((j+1) * (1 + sin(x)) + n);
              if (fval[i] != frval[i])
              {
@@ -356,7 +372,11 @@ main(int argc, char *argv[])
           for (i = 0; i < ddims[0]; i++)
           {
              double x = 2 * M_PI * (double) i / (double) (ddims[0]-1);
+#ifndef _WIN32
              double n = noise * ((double) random() / ((double)(1<<31)-1) - 0.5);
+#else
+             double n = noise * ((double) rand() / ((double)(1<<31)-1) - 0.5);
+#endif
              dval[i] = (double) ((j+1) * (1 + sin(x)) + n);
              if (dval[i] != drval[i])
              {
