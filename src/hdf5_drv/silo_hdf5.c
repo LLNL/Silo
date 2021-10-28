@@ -61,7 +61,7 @@ be used for advertising or product endorsement purposes.
 #ifndef _WIN32
 #warning DO WE NEED THIS HEADER FILE
 #endif
-#include <H5pubconf.h>
+#include <H5public.h>
 #include <hdf5.h>
 
 #include <errno.h>
