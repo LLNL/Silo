@@ -248,7 +248,7 @@ endif()
 
 
 ###-----------------------------------------------------------------------------
-# Create siloh from silo.h.in
+# Create silo.h from silo.h.in
 ###-----------------------------------------------------------------------------
 set(SILO_VERS_MAJ ${Silo_VERSION_MAJOR})
 set(SILO_VERS_MIN ${Silo_VERSION_MINOR})
