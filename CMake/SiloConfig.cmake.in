@@ -3,14 +3,14 @@
 #-----------------------------------------------------------------------------
 @PACKAGE_INIT@
 
-set(SILO_PACKAGE_NAME "SILO")
+set(SILO_PACKAGE_NAME "Silo")
 
 set (${SILO_PACKAGE_NAME}_VALID_COMPONENTS static shared)
 
 #-----------------------------------------------------------------------------
 # User Options
 #-----------------------------------------------------------------------------
-set (${SILO_PACKAGE_NAME}_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
+set (SILO_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
 
 set(SILO_BUILD_SILEX @SILO_BUILD_SILEX@)
 set(SILO_BUILD_BROWSER @SILO_BUILD_BROWSER@)
