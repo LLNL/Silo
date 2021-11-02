@@ -58,10 +58,7 @@ be used for advertising or product endorsement purposes.
    version 1.8 and thereafter. When, and if, the HDF5 code in this file
    is explicitly upgraded to the 1.8 API, this symbol should be removed. */
 #define H5_USE_16_API
-#ifndef _WIN32
-#warning DO WE NEED THIS HEADER FILE
-#endif
-#include <H5public.h>
+
 #include <hdf5.h>
 
 #include <errno.h>
