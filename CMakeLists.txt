@@ -50,6 +50,44 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 #  as ${CMAKE_CURRENT_SOURCE_DIR} unless some things are moved into subdirs.
 #
 
+#
+# create an include dir for generated include files
+#
+set(silo_build_include_dir ${Silo_BINARY_DIR}/include)
+file(MAKE_DIRECTORY ${silo_build_include_dir})
+
+###---------------------------------------------------------------------------
+# User options
+###---------------------------------------------------------------------------
+
+option(SILO_ENABLE_SHARED  "Build silo shared library." ON)
+option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt5)" OFF)
+option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
+option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
+option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
+option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
+# what will enabling python actually do?
+option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF) 
+option(SILO_ENABLE_NETCDF "Enable netcdf support" ON)
+option(SILO_ENABLE_ZFP "Enable Lindstrom array compression" ON)
+option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
+option(SILO_ENABLE_TESTS_INSTALL "Enable installation of tests." OFF)
+option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
+
+include(CMakeDependentOption)
+CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable Lindstrom float 1,2,3D array compression" ON
+                       "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
+CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compression" ON
+                       "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
+
+##
+#  Set up a default INSTALL prefix that is peer to the build directory
+##
+set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
+
+
+set(BUILD_SHARED_LIBS ${SILO_ENABLE_SHARED})
+
 ###---------------------------------------------------------------------------
 # Include any config-site <host>.cmake files if available
 #    the config-site file can override any of the default SILO_ settings
@@ -74,46 +112,6 @@ else()
         endif()
     endif()
 endif()
-
-
-#
-# create an include dir for generated include files
-#
-set(silo_build_include_dir ${Silo_BINARY_DIR}/include)
-file(MAKE_DIRECTORY ${silo_build_include_dir})
-
-###---------------------------------------------------------------------------
-# User options
-###---------------------------------------------------------------------------
-
-
-option(SILO_BUILD_SHARED  "Build silo as a shared library." ON)
-option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt5)" OFF)
-option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
-option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
-option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
-option(SILO_ENABLE_JSON "Enable experimental json support" OFF)
-# what will enabling python actually do?
-option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF) 
-option(SILO_ENABLE_NETCDF "Enable netcdf support" ON)
-option(SILO_ENABLE_ZFP "Enable Lindstrom array compression" ON)
-option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
-option(SILO_ENABLE_TESTS_INSTALL "Enable installation of tests." OFF)
-option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
-
-include(CMakeDependentOption)
-CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable Lindstrom float 1,2,3D array compression" ON
-                       "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
-CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compression" ON
-                       "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
-
-##
-#  Set up a default INSTALL prefix that is peer to the build directory
-##
-set(CMAKE_INSTALL_PREFIX ${Silo_BINARY_DIR}/../SiloInstall  CACHE PATH "install prefix" FORCE)
-
-
-set(BUILD_SHARED_LIBS ${SILO_BUILD_SHARED})
 
 ###---------------------------------------------------------------------------
 # Find necessary packages
