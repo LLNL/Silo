@@ -88,22 +88,23 @@ file(MAKE_DIRECTORY ${silo_build_include_dir})
 
 
 option(SILO_BUILD_SHARED  "Build silo as a shared library." ON)
-option(SILO_BUILD_SILEX "Enable building of silex (requires Qt5)" OFF)
-option(SILO_BUILD_BROWSER "Enable building of browser" ON)
-option(SILO_ENABLE_FORTRAN "Enable Fortran support" ON)
+option(SILO_ENABLE_SILEX "Enable building of silex (requires Qt5)" OFF)
+option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
+option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
-option(SILO_ENABLE_JSON "Enable json support" OFF)
+option(SILO_ENABLE_JSON "Enable experimental json support" OFF)
 # what will enabling python actually do?
-option(SILO_ENABLE_PYTHON "Enable python support" OFF) 
+option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF) 
 option(SILO_ENABLE_NETCDF "Enable netcdf support" ON)
+option(SILO_ENABLE_ZFP "Enable Lindstrom array compression" ON)
 option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
 option(SILO_ENABLE_TESTS_INSTALL "Enable installation of tests." OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
 
 include(CMakeDependentOption)
-CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable fpzip compression" ON
+CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable Lindstrom float 1,2,3D array compression" ON
                        "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
-CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable hzip compression" ON
+CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compression" ON
                        "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
 
 ##
@@ -151,7 +152,7 @@ endif()
 # Qt5
 ##
 
-if(SILO_BUILD_SILEX)
+if(SILO_ENABLE_SILEX)
     include(SiloFindQt5)
 endif()
 
@@ -269,13 +270,10 @@ configure_file(${Silo_SOURCE_DIR}/src/silo/silo.h.in
 if(SILO_ENABLE_FORTRAN)
     enable_language(Fortran)
     include(FortranCInterface)
-    FortranCInterface_HEADER(${silo_build_include_dir}/silo_FC.h MACRO_NAMESPACE "FC_")
-    if(EXISTS ${silo_build_include_dir}/silo_FC.h)
-        set(HAVE_SILO_FC_H 1)
-        install(FILES ${silo_build_include_dir}/silo_FC.h DESTINATION include
-                PERMISSIONS OWNER_READ OWNER_WRITE
-                            GROUP_READ GROUP_WRITE
-                            WORLD_READ) 
+    # for config.h
+    if(FortranCInterface_GLOBAL_FOUND)
+        set(FC_FUNC "FC_FUNC(name,NAME) ${FortranCInterface_GLOBAL_PREFIX} name ## ${FortranCInterface_GLOBAL_SUFFIX}")
+        set(FC_FUNC_ "FC_FUNC)(name,NAME) ${FortranCInterface__GLOBAL_PREFIX} name ## ${FortranCInterface__GLOBAL_SUFFIX}")
     endif()
 endif()
 
@@ -416,59 +414,64 @@ set(SILO_COMPILE_DEFINES SILO_EXPORTS LITE_EXPORTS)
 # Add hdf5 support
 ##
 if(SILO_ENABLE_HDF5 AND (TARGET hdf5 OR HDF5_FOUND))
-    # zfp has its own CMake build system that could possibly be used here
-    # (via add_subdirectory) instead of specifying the files by hand, but it
-    # would require more of zfp's files to be added to the silo repo.
-    set(HAVE_ZFP 1)
     list(APPEND silo_library_sources 
         ${Silo_SOURCE_DIR}/src/hdf5_drv/H5FDsilo.c
-        ${Silo_SOURCE_DIR}/src/hdf5_drv/H5Zzfp.c
-        ${Silo_SOURCE_DIR}/src/hdf5_drv/silo_hdf5.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/bitstream.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1d.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1f.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1i.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1l.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode2d.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode2f.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode2i.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode2l.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode3d.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode3f.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode3i.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode3l.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode4d.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode4f.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode4i.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode4l.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode1d.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode1f.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode1i.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode1l.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode2d.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode2f.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode2i.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode2l.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode3d.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode3f.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode3i.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode3l.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode4d.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode4f.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode4i.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode4l.c
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/zfp.c)
+        ${Silo_SOURCE_DIR}/src/hdf5_drv/silo_hdf5.c)
 
     list(APPEND silo_library_include_dirs
-        ${Silo_SOURCE_DIR}/src/hdf5_drv
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/include
-        ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src)
+        ${Silo_SOURCE_DIR}/src/hdf5_drv)
 
     list(APPEND SILO_COMPILE_DEFINES
-        H5_HAVE_FILTER_ZFP
-        H5Z_ZFP_AS_LIB 
         AS_SILO_BUILTIN
         BIT_STREAM_WORD_TYPE=uint8)
+
+    if(SILO_ENABLE_ZFP)
+        set(HAVE_ZFP 1)
+        list(APPEND silo_library_sources 
+            ${Silo_SOURCE_DIR}/src/hdf5_drv/H5Zzfp.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/bitstream.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1d.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1f.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1i.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1l.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode2d.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode2f.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode2i.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode2l.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode3d.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode3f.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode3i.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode3l.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode4d.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode4f.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode4i.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode4l.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode1d.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode1f.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode1i.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode1l.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode2d.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode2f.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode2i.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode2l.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode3d.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode3f.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode3i.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode3l.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode4d.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode4f.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode4i.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/encode4l.c
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/zfp.c)
+
+        list(APPEND silo_library_include_dirs
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/include
+            ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src)
+
+        list(APPEND SILO_COMPILE_DEFINES
+            H5_HAVE_FILTER_ZFP
+            H5Z_ZFP_AS_LIB)
+    endif()
 
     if(SILO_ENABLE_FPZIP)
         list(APPEND SILO_COMPILE_DEFINES
@@ -484,6 +487,7 @@ if(SILO_ENABLE_HDF5 AND (TARGET hdf5 OR HDF5_FOUND))
         list(APPEND silo_library_include_dirs 
             ${Silo_SOURCE_DIR}/src/fpzip)
     endif()
+
     if(SILO_ENABLE_HZIP)
         list(APPEND SILO_COMPILE_DEFINES HAVE_HZIP)
       
@@ -569,7 +573,7 @@ install(TARGETS silo EXPORT ${silo_targets_name}
 # silex
 ##
 
-if(SILO_BUILD_SILEX AND Qt5_FOUND)
+if(SILO_ENABLE_SILEX AND Qt5_FOUND)
     set(silex_src_files
         ${Silo_SOURCE_DIR}/tools/silex/Explorer.cpp
         ${Silo_SOURCE_DIR}/tools/silex/main.cpp
@@ -619,7 +623,7 @@ endif()
 # browser
 ##
 
-if(SILO_BUILD_BROWSER)
+if(SILO_ENABLE_BROWSER)
     add_executable(browser
         ${Silo_SOURCE_DIR}/tools/browser/array.c
         ${Silo_SOURCE_DIR}/tools/browser/bif.c
