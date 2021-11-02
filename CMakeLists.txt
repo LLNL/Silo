@@ -5,20 +5,29 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 ###
 file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/VERSION SILO_VERSION)
 
-###
+###-----------------------------------------------------------------------------
 # project command will automatically create cmake vars for major, minor,
 # patch and tweak from passed VERSION 
-###
+###-----------------------------------------------------------------------------
 project(Silo VERSION ${SILO_VERSION} LANGUAGES CXX C)
 
-###
+###-----------------------------------------------------------------------------
 # location for Silo CMake includes 
-###
+###-----------------------------------------------------------------------------
 set(CMAKE_MODULE_PATH ${Silo_SOURCE_DIR}/CMake)
 
 ###-----------------------------------------------------------------------------
+# If not already set, use a default build type of Release
+###-----------------------------------------------------------------------------
+
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build,
+options are: Debug Release RelWithDebInfo MinSizeRel.")
+endif()
+
+###-----------------------------------------------------------------------------
 # Output directories.
-#####-----------------------------------------------------------------------------
+###-----------------------------------------------------------------------------
 
 if(NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY lib CACHE INTERNAL "Output directory for libraries.")
@@ -76,6 +85,7 @@ file(MAKE_DIRECTORY ${silo_build_include_dir})
 ###---------------------------------------------------------------------------
 # User options
 ###---------------------------------------------------------------------------
+
 
 option(SILO_BUILD_SHARED  "Build silo as a shared library." ON)
 option(SILO_BUILD_SILEX "Enable building of silex (requires Qt5)" OFF)
@@ -276,7 +286,6 @@ set(SILO_NAME "silo")
 set(SILO_TARNAME "silo")
 set(SILO_URL "https://wci.llnl.gov/simulation/computer-codes/silo")
 
-# Always defined ?
 set(HAVE_PDB_DRIVER 1)
 set(HAVE_TAURUS_DRIVER 1)  # should there be an option to disable taurus?
 
