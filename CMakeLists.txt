@@ -146,13 +146,6 @@ if(hdf5_needs_szip)
     include(SiloFindSzip)
 endif()
 
-##
-# Qt5
-##
-
-if(SILO_ENABLE_SILEX)
-    include(SiloFindQt5)
-endif()
 
 ###-----------------------------------------------------------------------------
 # check for needed includes/functions/symbols
@@ -571,7 +564,7 @@ install(TARGETS silo EXPORT ${silo_targets_name}
 # silex
 ##
 
-if(SILO_ENABLE_SILEX AND Qt5_FOUND)
+if(SILO_ENABLE_SILEX)
     add_subdirectory(tools/silex)
 endif()
 
