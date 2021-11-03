@@ -572,49 +572,7 @@ install(TARGETS silo EXPORT ${silo_targets_name}
 ##
 
 if(SILO_ENABLE_SILEX AND Qt5_FOUND)
-    set(silex_src_files
-        ${Silo_SOURCE_DIR}/tools/silex/Explorer.cpp
-        ${Silo_SOURCE_DIR}/tools/silex/main.cpp
-        ${Silo_SOURCE_DIR}/tools/silex/SiloArrayView.cpp
-        ${Silo_SOURCE_DIR}/tools/silex/SiloDirTreeView.cpp
-        ${Silo_SOURCE_DIR}/tools/silex/SiloDirView.cpp
-        ${Silo_SOURCE_DIR}/tools/silex/SiloFile.cpp
-        ${Silo_SOURCE_DIR}/tools/silex/SiloObjectView.cpp
-        ${Silo_SOURCE_DIR}/tools/silex/SiloValueView.cpp
-        ${Silo_SOURCE_DIR}/tools/silex/SiloView.cpp)
-    if(WIN32)
-        list(APPEND silex_src_files
-             ${Silo_SOURCE_DIR}/SiloWindows/resources/silex.rc)
-    endif()
-    add_executable(silex  ${silex_src_files})
-    if(LINUX) # ??
-       # only necessary for install?
-
-       # change output name to silex.exe
-       # write silex script that sets LD_LIBRARY_PATH appropriately as in:
-       #!/bin/sh
-       #env LD_LIBRARY_PATH=/usr/gapps/silo/4.11/toss_3_x86_64_ib_gcc.6.1.0/libso:/usr/workspace/visit/visit/thirdparty_shared/3.2.0/toss3/qt/5.14.2/linux-x86_64_gcc-6.1/lib /usr/gapps/silo/4.11/toss_3_x86_64_ib_gcc.6.1.0/bin/silex.exe
-
-       # should we copy Qt's .so's or go ahead and extract the lib path somehow for use
-       # in the script?
-
-       # can possibly use configure_file and @CMAKE_INSTALL_PREFIX@ @QT5_LIB_DIR@
-
-    endif()
-
-    add_dependencies(silex silo)
-    set_target_properties(silex PROPERTIES AUTOMOC ON)
-    target_link_libraries(silex $<TARGET_LINKER_FILE:silo>
-        Qt5::Core Qt5::Gui Qt5::Widgets)
-    target_include_directories(silex PRIVATE
-         ${silo_build_include_dir}
-         ${Silo_SOURCE_DIR}/src/silo
-         ${Silo_SOURCE_DIR}/tools/silex)
-
-    install(TARGETS silex DESTINATION bin EXPORT ${silo_targets_name}
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                        GROUP_READ GROUP_WRITE GROUP_EXECUTE
-                        WORLD_READ             WORLD_EXECUTE)
+    add_subdirectory(tools/silex)
 endif()
 
 ##
@@ -622,46 +580,7 @@ endif()
 ##
 
 if(SILO_ENABLE_BROWSER)
-    add_executable(browser
-        ${Silo_SOURCE_DIR}/tools/browser/array.c
-        ${Silo_SOURCE_DIR}/tools/browser/bif.c
-        ${Silo_SOURCE_DIR}/tools/browser/browser.c
-        ${Silo_SOURCE_DIR}/tools/browser/cons.c
-        ${Silo_SOURCE_DIR}/tools/browser/file.c
-        ${Silo_SOURCE_DIR}/tools/browser/func.c
-        ${Silo_SOURCE_DIR}/tools/browser/lex.c
-        ${Silo_SOURCE_DIR}/tools/browser/num.c
-        ${Silo_SOURCE_DIR}/tools/browser/obj.c
-        ${Silo_SOURCE_DIR}/tools/browser/output.c
-        ${Silo_SOURCE_DIR}/tools/browser/parse.c
-        ${Silo_SOURCE_DIR}/tools/browser/prim.c
-        ${Silo_SOURCE_DIR}/tools/browser/ptr.c
-        ${Silo_SOURCE_DIR}/tools/browser/range.c
-        ${Silo_SOURCE_DIR}/tools/browser/sdo.c
-        ${Silo_SOURCE_DIR}/tools/browser/stc.c
-        ${Silo_SOURCE_DIR}/tools/browser/str.c
-        ${Silo_SOURCE_DIR}/tools/browser/switch.c
-        ${Silo_SOURCE_DIR}/tools/browser/sym.c)
-    add_dependencies(browser silo)
-    target_include_directories(browser PRIVATE
-        ${silo_build_include_dir}
-        ${Silo_SOURCE_DIR}/tools/browser
-        ${Silo_SOURCE_DIR}/src/silo
-        ${Silo_SOURCE_DIR}/src/filters)
-    target_link_libraries(browser $<TARGET_LINKER_FILE:silo>)
-    if(NOT TARGET hdf5)
-        target_link_libraries(browser ${HDF5_LIBRARIES})
-    endif()
-    install(TARGETS browser DESTINATION bin EXPORT ${silo_targets_name}
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                        GROUP_READ GROUP_WRITE GROUP_EXECUTE
-                        WORLD_READ             WORLD_EXECUTE)
-    install(FILES ${Silo_SOURCE_DIR}/tools/browser/silodiff
-                  ${Silo_SOURCE_DIR}/tools/browser/silofile
-            DESTINATION bin
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                        GROUP_READ GROUP_WRITE GROUP_EXECUTE
-                        WORLD_READ             WORLD_EXECUTE)
+    add_subdirectory(tools/browser)
 endif()
 
 

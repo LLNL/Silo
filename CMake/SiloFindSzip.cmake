@@ -20,7 +20,7 @@ endif()
 if(SZIP_FOUND)
     # needed for config.h
     set(HAVE_LIBSZ 1)
-    if(WIN32 AND (SILO_BUILD_SILEX OR SILEX_BUILD_BROWSER))
+    if(WIN32 AND (SILO_ENABLE_SILEX OR SILEX_ENABLE_BROWSER))
         get_target_property(SZIP_DLL szip IMPORTED_LOCATION_RELEASE )
         install(FILES ${SZIP_DLL} DESTINATION bin
                 PERMISSIONS OWNER_READ OWNER_WRITE

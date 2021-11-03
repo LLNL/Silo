@@ -20,7 +20,7 @@ if(ZLIB_FOUND)
     # needed for config.h
     set(HAVE_LIBZ 1)
     set(HAVE_ZLIB_H 1)
-    if(WIN32 AND (SILO_BUILD_SILEX OR SILEX_BUILD_BROWSER))
+    if(WIN32 AND (SILO_ENABLE_SILEX OR SILEX_ENABLE_BROWSER))
         get_target_property(ZLIB_DLL zlib IMPORTED_LOCATION_RELEASE )
         install(FILES ${ZLIB_DLL} DESTINATION bin
                 PERMISSIONS OWNER_READ OWNER_WRITE
