@@ -195,7 +195,8 @@ endif()
 ##
 # Zlib  needed for hzip (non-BSD)
 #     May also need if HDF5 was built with zlib support
-#         but how to know it used system zlib, or SILO_ZLIB_DIR needs to be provided?
+#         but how to know if it used system zlib,
+#         or if SILO_ZLIB_DIR needs to be provided?
 ##
 if(SILO_ENABLE_HZIP OR DEFINED SILO_ZLIB_DIR)# OR hdf5_needs_zlib)
     include(SiloFindZlib)
@@ -204,7 +205,8 @@ endif()
 ##
 # szip  if HDF5 was built with szip support
 ##
-if(hdf5_needs_szip)
+# Don't think this is necessary except on Windows
+if(WIN32 AND hdf5_needs_szip)
     include(SiloFindSzip)
 endif()
 
