@@ -110,5 +110,28 @@ foreach(driver DB_PDB DB_HDF5)
     silo_add_make_check_runner(NAME testall ARGS -large ${driver})
 endforeach()
 
+##
+# Python tests
+##
+if(EXISTS ${PY})
+    set(ENV{PYTHONPATH} ${LD})
+    execute_process(COMMAND multi_test hdf-friendly
+                    WORKING_DIRECTORY ${WD}
+                    OUTPUT_QUIET
+                    ERROR_QUIET
+                    RESULT_VARIABLE check_RESULTS)
 
+    foreach(t test_read.py test_write.py test_error.py)
 
+        execute_process(COMMAND ${PY} ${t}
+                        WORKING_DIRECTORY ${WD}
+                        OUTPUT_QUIET
+                        ERROR_QUIET
+                        RESULT_VARIABLE check_RESULTS)
+        if(check_RESULTS EQUAL 0)
+            message("${t} \t\t\t\t okay")
+        else()
+            message("${t} \t\t\t\t fail")
+        endif()
+    endforeach()
+endif()

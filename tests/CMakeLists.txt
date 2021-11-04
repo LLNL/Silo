@@ -12,6 +12,7 @@ if(WIN32)
     # subdir directly off build-dir
     ##
     set(silo_test_output_dir ${Silo_BINARY_DIR}/all_tests/)
+    file(MAKE_DIRECTORY ${silo_test_output_dir})
 else()
     # runtime output dir is bin, so append bin to current binary dir
     set(silo_test_output_dir ${CMAKE_CURRENT_BINARY_DIR}/bin)
@@ -79,6 +80,22 @@ add_custom_command(TARGET copy_test_data POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/z1plt.silo
     ${silo_test_output_dir})
+
+if(SILO_ENABLE_PYTHON_MODULE)
+    # also need the python test files
+    add_custom_command(TARGET copy_test_data POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_read.py
+        ${silo_test_output_dir})
+    add_custom_command(TARGET copy_test_data POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_write.py
+        ${silo_test_output_dir})
+    add_custom_command(TARGET copy_test_data POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_error.py
+        ${silo_test_output_dir})
+endif()
 
 ###-----------------------------------------------------------------------------------------
 # Create test targets
@@ -180,9 +197,6 @@ if(SILO_ENABLE_FORTRAN AND CMAKE_Fortran_COMPILER)
     silo_add_test(NAME arrayf90 SRC arrayf90.f90)
 endif()
 
-if(SILO_ENABLE_PYTHON)
-endif()
-
 
 ###-----------------------------------------------------------------------------------------
 # Create check target that calls SiloMakeCheckRunner.
@@ -194,6 +208,8 @@ endif()
 add_custom_target(check
         COMMAND ${CMAKE_COMMAND}
           -DWD=${silo_test_output_dir}
+          -DPY=${Python_EXECUTABLE}
+          -DLD=${Silo_BINARY_DIR}/bin/$<CONFIG>
           -P ${SILO_TESTS_SOURCE_DIR}/CMake/SiloMakeCheckRunner.cmake
         WORKING_DIRECTORY ${silo_test_output_dir}
         COMMENT "Running makecheck")

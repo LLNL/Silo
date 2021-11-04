@@ -66,7 +66,6 @@ option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
 option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
-# what will enabling python actually do?
 option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF) 
 option(SILO_ENABLE_NETCDF "Enable netcdf support" ON)
 option(SILO_ENABLE_ZFP "Enable Lindstrom array compression" ON)
@@ -608,6 +607,13 @@ if(NOT WIN32)
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                         GROUP_READ GROUP_WRITE GROUP_EXECUTE
                         WORLD_READ             WORLD_EXECUTE)
+endif()
+
+##
+# Python module
+##
+if(SILO_ENABLE_PYTHON_MODULE)
+   add_subdirectory(tools/python)
 endif()
 
 #-----------------------------------------------------------------------------
