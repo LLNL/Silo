@@ -100,10 +100,12 @@ install(TARGETS browser DESTINATION bin EXPORT ${silo_targets_name}
                     GROUP_READ GROUP_WRITE GROUP_EXECUTE
                     WORLD_READ             WORLD_EXECUTE)
 
-install(FILES silodiff silofile
-        DESTINATION bin
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_WRITE GROUP_EXECUTE
-                    WORLD_READ             WORLD_EXECUTE)
+if(NOT WIN32)
+    install(FILES silodiff silofile
+            DESTINATION bin
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                        GROUP_READ GROUP_WRITE GROUP_EXECUTE
+                        WORLD_READ             WORLD_EXECUTE)
+endif()
 
 

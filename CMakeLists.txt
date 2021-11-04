@@ -591,7 +591,7 @@ set(silo_headers
 if(WIN32)
     list(APPEND silo_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
     # Also install silodiff.bat into bin
-    install(FILES ${Silo_SOURCE_DIR}/SiloWindows/silodiff.bat DESTINATION bin
+    install(FILES ${Silo_SOURCE_DIR}/resources/silodiff.bat DESTINATION bin
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                         GROUP_READ GROUP_WRITE GROUP_EXECUTE
                         WORLD_READ             WORLD_EXECUTE)
