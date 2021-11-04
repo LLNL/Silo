@@ -202,6 +202,13 @@ endif()
 # Create check target that calls SiloMakeCheckRunner.
 # SiloMakeCheckRunner will run each test, check its output status and write the results.
 #
+# Any CMAKE vars or other information needs to be passed as -D defines
+#
+#  WD working directory
+#  PY Python executable
+#  PYPATH  what to use for PYTHONPATH env var
+#  ADD_FORT  add fortran tests
+#
 # To run, call 'make check'
 ###-----------------------------------------------------------------------------------------
 
@@ -209,7 +216,8 @@ add_custom_target(check
         COMMAND ${CMAKE_COMMAND}
           -DWD=${silo_test_output_dir}
           -DPY=${Python_EXECUTABLE}
-          -DLD=${Silo_BINARY_DIR}/bin/$<CONFIG>
+          -DPYPATH=${Silo_BINARY_DIR}/bin/$<CONFIG>
+          -DADD_FORT=${SILO_ENABLE_FORTRAN}
           -P ${SILO_TESTS_SOURCE_DIR}/CMake/SiloMakeCheckRunner.cmake
         WORKING_DIRECTORY ${silo_test_output_dir}
         COMMENT "Running makecheck")

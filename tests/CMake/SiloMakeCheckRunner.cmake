@@ -110,11 +110,22 @@ foreach(driver DB_PDB DB_HDF5)
     silo_add_make_check_runner(NAME testall ARGS -large ${driver})
 endforeach()
 
+if(${ADD_FORT})
+    silo_add_make_check_runner(NAME arrayf77)
+    silo_add_make_check_runner(NAME arrayf90)
+    silo_add_make_check_runner(NAME curvef77)
+    silo_add_make_check_runner(NAME matf77)
+    silo_add_make_check_runner(NAME quadf77 )
+    silo_add_make_check_runner(NAME testallf77 )
+    silo_add_make_check_runner(NAME ucdf77 )
+    silo_add_make_check_runner(NAME qmeshmat2df77)
+endif()
+
 ##
 # Python tests
 ##
 if(EXISTS ${PY})
-    set(ENV{PYTHONPATH} ${LD})
+    set(ENV{PYTHONPATH} ${PYPATH})
     execute_process(COMMAND multi_test hdf-friendly
                     WORKING_DIRECTORY ${WD}
                     OUTPUT_QUIET
