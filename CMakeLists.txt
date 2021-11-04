@@ -270,9 +270,13 @@ if(SILO_ENABLE_FORTRAN)
     enable_language(Fortran)
     include(FortranCInterface)
     # for config.h
-    if(FortranCInterface_GLOBAL_FOUND)
-        set(FC_FUNC "FC_FUNC(name,NAME) ${FortranCInterface_GLOBAL_PREFIX} name ## ${FortranCInterface_GLOBAL_SUFFIX}")
-        set(FC_FUNC_ "FC_FUNC)(name,NAME) ${FortranCInterface__GLOBAL_PREFIX} name ## ${FortranCInterface__GLOBAL_SUFFIX}")
+    FortranCInterface_HEADER(${silo_build_include_dir}/silo_FC.h MACRO_NAMESPACE "FC_")
+    if(EXISTS ${silo_build_include_dir}/silo_FC.h)
+        set(HAVE_SILO_FC_H 1)
+        install(FILES ${silo_build_include_dir}/silo_FC.h DESTINATION include
+                PERMISSIONS OWNER_READ OWNER_WRITE
+                            GROUP_READ GROUP_WRITE
+                            WORLD_READ) 
     endif()
 endif()
 

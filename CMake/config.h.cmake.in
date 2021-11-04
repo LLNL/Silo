@@ -7,12 +7,16 @@
 /* Define if F77 and FC dummy `main' functions are identical. */
 #cmakedefine FC_DUMMY_MAIN_EQ_F77
 
+
+#cmakedefine HAVE_SILO_FC_H
+#ifdef HAVE_SILO_FC_H
+#include "silo_FC.h"
 /* Define to a macro mangling the given C identifier (in lower and upper
    case), which must not contain underscores, for linking with Fortran. */
-#cmakedefine FC_FUNC @FC_FUNC@
-
+#define FC_FUNC(name,NAME) FC_GLOBAL(name,NAME)
 /* As FC_FUNC, but for C identifiers containing underscores. */
-#cmakedefine FC_FUNC_ @FC_FUNC_@
+#define FC_FUNC_(name,NAME) FC_GLOBAL_(name,NAME)
+#endif
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 /* #cmakedefine HAVE_DLFCN_H */
