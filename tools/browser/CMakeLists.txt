@@ -27,6 +27,10 @@ add_executable(browser
 
 add_dependencies(browser silo)
 
+# make it put the executable in the root bin dir not a tools/browser subdir
+set_target_properties(browser PROPERTIES
+                      RUNTIME_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/bin)
+
 target_include_directories(browser PRIVATE
     ${silo_build_include_dir}
     ${CMAKE_CURRENT_SOURCE_DIR}

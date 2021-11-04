@@ -26,6 +26,11 @@ if(ZLIB_FOUND)
                 PERMISSIONS OWNER_READ OWNER_WRITE
                             GROUP_READ GROUP_WRITE
                             WORLD_READ) 
+
+        add_custom_command(TARGET copy_deps POST_BUILD
+             COMMAND ${CMAKE_COMMAND} -E copy_if_different
+             ${ZLIB_DLL} ${Silo_BINARY_DIR}/bin/$<CONFIG>)
+
     endif()
 else()
     message(FATAL_ERROR "Could not find zlib, you may want to try setting SILO_ZLIB_DIR") 

@@ -114,6 +114,15 @@ else()
 endif()
 
 ###---------------------------------------------------------------------------
+# Create a custom target to copy dendencies on Windows
+###---------------------------------------------------------------------------
+
+if(WIN32 AND (SILO_ENABLE_SILEX OR SILO_ENABLE_BROWSER))
+    add_custom_target(copy_deps ALL)
+    set_target_properties(copy_deps PROPERTIES FOLDER utility)
+endif()
+
+###---------------------------------------------------------------------------
 # Find necessary packages
 ###---------------------------------------------------------------------------
 
@@ -529,6 +538,13 @@ if(WIN32)
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                         GROUP_READ GROUP_WRITE GROUP_EXECUTE
                         WORLD_READ             WORLD_EXECUTE)
+
+    if(SILO_ENABLE_SILEX OR SILO_ENABLE_BROWSER)
+        # copy silo dll to build/bin dir
+        add_custom_command(TARGET copy_deps POST_BUILD
+             COMMAND ${CMAKE_COMMAND} -E copy_if_different
+             $<TARGET_FILE:silo> ${Silo_BINARY_DIR}/bin/$<CONFIG>)
+    endif()
 endif()
 
 install(FILES ${silo_headers} DESTINATION include

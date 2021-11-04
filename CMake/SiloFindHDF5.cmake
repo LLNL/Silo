@@ -35,6 +35,11 @@ if(DEFINED SILO_HDF5_DIR AND EXISTS ${SILO_HDF5_DIR}/hdf5-config.cmake)
                     PERMISSIONS OWNER_READ OWNER_WRITE
                                 GROUP_READ GROUP_WRITE
                                 WORLD_READ) 
+
+            add_custom_command(TARGET copy_deps POST_BUILD
+                 COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                 ${HDF5_DLL} ${Silo_BINARY_DIR}/bin/$<CONFIG>)
+
         endif()
     endif()
 else()
