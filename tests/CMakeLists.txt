@@ -271,7 +271,7 @@ add_custom_target(check
         COMMAND ${CMAKE_COMMAND}
           -DWD=${silo_test_output_dir}
           -DPY=${Python_EXECUTABLE}
-          -DPYPATH=${Silo_BINARY_DIR}/bin/$<CONFIG>
+          -DPYPATH=$<TARGET_FILE_DIR:Silo>
           -DADD_FORT=${SILO_ENABLE_FORTRAN}
           -P ${SILO_TESTS_SOURCE_DIR}/CMake/SiloMakeCheckRunner.cmake
         WORKING_DIRECTORY ${silo_test_output_dir}

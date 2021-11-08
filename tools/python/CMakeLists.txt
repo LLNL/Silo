@@ -72,9 +72,14 @@ Python_add_library(Silo MODULE
     pysilo.cpp)
 
 # Have the output be relative to the root build dir, not in tools/python subdir
-set_target_properties(Silo PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/bin
-                      LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/bin)
+if(WIN32)
+    # on Windows, the module should live alongside the silo dll, so put it in bin
+    set_target_properties(Silo PROPERTIES
+                          LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/bin)
+else()
+    set_target_properties(Silo PROPERTIES
+                          LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/lib)
+endif()
 
 add_dependencies(Silo silo)
 target_link_libraries(Silo PRIVATE silo)
@@ -90,9 +95,15 @@ install(FILES s2ex.py DESTINATION lib
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
-
-add_custom_command(TARGET Silo POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
-        ${Silo_BINARY_DIR}/bin/$<CONFIG>)
+if(WIN32)
+    add_custom_command(TARGET Silo POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
+            ${Silo_BINARY_DIR}/bin/$<CONFIG>)
+else()
+    add_custom_command(TARGET Silo POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/s2ex.py
+            ${Silo_BINARY_DIR}/bin/)
+endif()
 
