@@ -86,36 +86,23 @@ if(WIN32)
          $<TARGET_FILE:silo> ${silo_test_output_dir})
 
     # zlib
-    if(ZLIB_FOUND)
-        get_target_property(ZLIB_DLL zlib IMPORTED_LOCATION_RELEASE)
-        get_filename_component(ZLIB_NAME ${ZLIB_DLL} NAME)
+    if(ZLIB_FOUND AND DEFINED ZLIB_DLL)
         add_custom_command(TARGET copy_test_deps POST_BUILD
              COMMAND ${CMAKE_COMMAND} -E copy_if_different
              ${ZLIB_DLL} ${silo_test_output_dir})
     endif()
 
     # szip
-    if(SZIP_FOUND)
-        get_target_property(SZIP_DLL szip IMPORTED_LOCATION_RELEASE)
-        get_filename_component(SZIP_NAME ${SZIP_DLL} NAME)
+    if(SZIP_FOUND AND DEFINED SZIP_DLL)
         add_custom_command(TARGET copy_test_deps POST_BUILD
              COMMAND ${CMAKE_COMMAND} -E copy_if_different
              ${SZIP_DLL} ${silo_test_output_dir})
     endif()
 
-    if(TARGET hdf5)
-        get_target_property(HDF5_DLL hdf5 IMPORTED_LOCATION_RELEASE)
-        get_filename_component(HDF5_NAME ${HDF5_DLL} NAME)
-        add_custom_command(TARGET copy_test_deps POST_BUILD
-             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-             ${HDF5_DLL} ${silo_test_output_dir})
-    elseif(HDF5_FOUND)
-        foreach(hlib ${HDF5_LIBRARIES})
-            get_filename_component(hlib_NAME ${hlib} NAME)
+    if(HDF5_FOUND AND DEFINED HDF5_DLL)
             add_custom_command(TARGET copy_test_deps POST_BUILD
                  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                 ${hlib} ${silo_test_output_dir})
-        endforeach()
+                 ${HDF5_DLL} ${silo_test_output_dir})
     endif()
 
 endif()
@@ -188,10 +175,14 @@ silo_add_test(NAME listtypes SRC listtypes.c listtypes_main.c)
 silo_add_test(NAME majorder SRC majorder.c)
 silo_add_test(NAME mat3d_3across SRC mat3d_3across.c)
 silo_add_test(NAME misc SRC misc.c)
-silo_add_test(NAME mk_nasf_hf5 SRC mk_nasf_h5.c)
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    silo_add_test(NAME mk_nasf_hf5 SRC mk_nasf_h5.c)
+endif()
 silo_add_test(NAME mk_nasf_pdb SRC mk_nasf_pdb.c)
 silo_add_test(NAME mmadjacency SRC mmadjacency.c)
-silo_add_test(NAME multi_file SRC multi_file.c)
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    silo_add_test(NAME multi_file SRC multi_file.c)
+endif()
 silo_add_test(NAME multi_test SRC multi_test.c)
 silo_add_test(NAME multispec SRC multispec.c)
 silo_add_test(NAME newsami SRC newsami.cxx)
@@ -230,7 +221,9 @@ if(NOT WIN32)
     silo_add_test(NAME pdbtst SRC pdbtst.c)
     target_include_directories(pdbtst PRIVATE ${Silo_SOURCE_DIR}/src/pdb ${Silo_SOURCE_DIR}/src/score)
     silo_add_test(NAME rocket SRC rocket.cxx)
-    silo_add_test(NAME testhdf5 SRC testhdf5.c)
+    if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+        silo_add_test(NAME testhdf5 SRC testhdf5.c)
+    endif()
 endif()
 
 if(SILO_ENABLE_JSON)
@@ -260,6 +253,7 @@ endif()
 # Any CMAKE vars or other information needs to be passed as -D defines
 #
 #  WD working directory
+#  HDF5 Use hdf5 driver for tests
 #  PY Python executable
 #  PYPATH  what to use for PYTHONPATH env var
 #  ADD_FORT  add fortran tests
@@ -270,6 +264,7 @@ endif()
 add_custom_target(check
         COMMAND ${CMAKE_COMMAND}
           -DWD=${silo_test_output_dir}
+          -DHDF5=${SILO_ENABLE_HDF5}
           -DPY=${Python_EXECUTABLE}
           -DPYPATH=$<TARGET_FILE_DIR:Silo>
           -DADD_FORT=${SILO_ENABLE_FORTRAN}

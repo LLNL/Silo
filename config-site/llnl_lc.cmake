@@ -67,7 +67,8 @@ set(SILO_ARCH $ENV{SYS_TYPE}_gcc.6.1.0)
 ##
 # HDF5
 ##
-silo_option_default(VAR SILO_HDF5_DIR VALUE ${SILO_HOME}/hdf5/1.8.16/${SILO_ARCH})
+# all the tests being passed DB_HDF5 fail when this version of hdf5 is used
+#silo_option_default(VAR SILO_HDF5_DIR VALUE ${SILO_HOME}/hdf5/1.8.16/${SILO_ARCH})
 
 ##
 # SZIP

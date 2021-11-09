@@ -75,8 +75,7 @@ set(CMAKE_MODULE_PATH ${Silo_SOURCE_DIR}/CMake)
 ###-----------------------------------------------------------------------------
 
 if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build,
-options are: Debug Release RelWithDebInfo MinSizeRel.")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
 ###-----------------------------------------------------------------------------
@@ -121,17 +120,27 @@ option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
 option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF) 
-option(SILO_ENABLE_NETCDF "Enable netcdf support" ON)
-option(SILO_ENABLE_ZFP "Enable Lindstrom array compression" ON)
 option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
-option(SILO_ENABLE_TESTS_INSTALL "Enable installation of tests." OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
 
 include(CMakeDependentOption)
+
+# only turn on the visibility of SILO_ENABLE_ZFP if SILO_ENABLE_HDF5 is ON
+# in which case SILO_ENABLE_ZFP defaults to ON
+CMAKE_DEPENDENT_OPTION(SILO_ENABLE_ZFP "Enable Lindstrom array compression" ON
+                       SILO_ENABLE_HDF5 OFF)
+
+# only turn on the visibility of SILO_ENABLE_FPZIP if
+# SILO_BUILD_FOR_BSD is OFF AND SILO_ENABLE_HDF5 is ON
+# in which case SILO_ENABLE_FPZIP defaults to ON
 CMAKE_DEPENDENT_OPTION(SILO_ENABLE_FPZIP "Enable Lindstrom float 1,2,3D array compression" ON
-                       "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
+                       "NOT SILO_BUILD_FOR_BSD_LICENSE;SILO_ENABLE_HDF5" OFF)
+
+# only turn on the visibility of SILO_ENABLE_HZIP if
+# SILO_BUILD_FOR_BSD is OFF AND SILO_ENABLE_HDF5 is ON
+# in which case SILO_ENABLE_FPZIP defaults to ON
 CMAKE_DEPENDENT_OPTION(SILO_ENABLE_HZIP "Enable Lindstrom hex/quad mesh compression" ON
-                       "NOT SILO_BUILD_FOR_BSD_LICENSE" OFF)
+                       "NOT SILO_BUILD_FOR_BSD_LICENSE;SILO_ENABLE_HDF5" OFF)
 
 ##
 #  Set up a default INSTALL prefix that is peer to the build directory
@@ -194,19 +203,17 @@ endif()
 
 ##
 # Zlib  needed for hzip (non-BSD)
-#     May also need if HDF5 was built with zlib support
-#         but how to know if it used system zlib,
-#         or if SILO_ZLIB_DIR needs to be provided?
+#     On Windows, if HDF5 was built with zlib support, need to find the zlib package
+#     so that the correct path to the dll can be found and copied to the necessary places
 ##
-if(SILO_ENABLE_HZIP OR DEFINED SILO_ZLIB_DIR)# OR hdf5_needs_zlib)
+if(SILO_ENABLE_HZIP OR (WIN32 AND HDF5_ENABLE_Z_LIB_SUPPORT))
     include(SiloFindZlib)
 endif()
 
 ##
-# szip  if HDF5 was built with szip support
+# szip  if HDF5 was built with szip support on Windows (needed to find dll's)
 ##
-# Don't think this is necessary except on Windows
-if(WIN32 AND hdf5_needs_szip)
+if(WIN32 AND HDF5_ENABLE_SZIP_SUPPORT)
     include(SiloFindSzip)
 endif()
 
@@ -284,7 +291,6 @@ check_symbol_exists(memmove "memory.h" HAVE_MEMMOVE)
 check_symbol_exists(add_history "readline.h" HAVE_READLINE_HISTORY)
 
 
-
 ###-----------------------------------------------------------------------------
 # Set flags & options from config-site files after everything is set up since
 # setting them beforehand can upset some of CMake's own find routines. 
@@ -296,11 +302,6 @@ endif()
 if(DEFINED SILO_CXX_FLAGS)
     string(APPEND CMAKE_CXX_FLAGS " ${SILO_CXX_FLAGS}")
 endif()
-
-# will this be needed?
-#if(DEFINED SILO_EXE_LINKER_FLAGS)
-#    string(APPEND CMAKE_EXE_LINKER_FLAGS " ${SILO_EXE_LINKER_FLAGS}")
-#endif()
 
 
 ###-----------------------------------------------------------------------------
@@ -343,8 +344,10 @@ set(SILO_NAME "silo")
 set(SILO_TARNAME "silo")
 set(SILO_URL "https://wci.llnl.gov/simulation/computer-codes/silo")
 
+# these are always defined
 set(HAVE_PDB_DRIVER 1)
-set(HAVE_TAURUS_DRIVER 1)  # should there be an option to disable taurus?
+set(HAVE_NETCDF_DRIVER 1)
+set(HAVE_TAURUS_DRIVER 1)
 
 set(STDC_HEADERS 1)
 
@@ -409,6 +412,12 @@ set(silo_library_sources
     ${Silo_SOURCE_DIR}/src/debug/silo_debug.c
     ${Silo_SOURCE_DIR}/src/filters/f_ale3d.c
     ${Silo_SOURCE_DIR}/src/filters/f_sample.c
+    ${Silo_SOURCE_DIR}/src/netcdf/api.c
+    ${Silo_SOURCE_DIR}/src/netcdf/ent.c
+    ${Silo_SOURCE_DIR}/src/netcdf/netcdf.c
+    ${Silo_SOURCE_DIR}/src/netcdf/obj.c
+    ${Silo_SOURCE_DIR}/src/netcdf/silo_netcdf.c
+    ${Silo_SOURCE_DIR}/src/netcdf/table.c
     ${Silo_SOURCE_DIR}/src/pdb/pdb.c
     ${Silo_SOURCE_DIR}/src/pdb/pdbdir.c
     ${Silo_SOURCE_DIR}/src/pdb/pdbio.c
@@ -434,23 +443,13 @@ set(silo_library_sources
     ${Silo_SOURCE_DIR}/src/taurus/taurus.c
     ${Silo_SOURCE_DIR}/src/unknown/silo_unknown.c)
 
-if(SILO_ENABLE_NETCDF)
-    set(HAVE_NETCDF_DRIVER 1)
-    list(APPEND silo_library_sources 
-        ${Silo_SOURCE_DIR}/src/netcdf/api.c
-        ${Silo_SOURCE_DIR}/src/netcdf/ent.c
-        ${Silo_SOURCE_DIR}/src/netcdf/netcdf.c
-        ${Silo_SOURCE_DIR}/src/netcdf/obj.c
-        ${Silo_SOURCE_DIR}/src/netcdf/silo_netcdf.c
-        ${Silo_SOURCE_DIR}/src/netcdf/table.c)
-endif()
-
 if(SILO_ENABLE_FORTRAN)
     list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_f.c)
 endif()
 
 if(SILO_ENABLE_JSON)
-# is there more to be done to get this to compile?
+# Does the json source need to be untarred and compiled?
+# Or is a call to find_package(json ...) require?
 #    list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
 endif()
 
@@ -472,7 +471,7 @@ set(SILO_COMPILE_DEFINES SILO_EXPORTS LITE_EXPORTS)
 ##
 # Add hdf5 support
 ##
-if(SILO_ENABLE_HDF5 AND (TARGET hdf5 OR HDF5_FOUND))
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     list(APPEND silo_library_sources 
         ${Silo_SOURCE_DIR}/src/hdf5_drv/H5FDsilo.c
         ${Silo_SOURCE_DIR}/src/hdf5_drv/silo_hdf5.c)
@@ -580,6 +579,10 @@ target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
 add_dependencies(silo pdb_detect)
 target_include_directories(silo PRIVATE ${silo_library_include_dirs})
 
+if(UNIX)
+    target_link_libraries(silo m)
+endif()
+
 # add list of public headers to be installed
 set(silo_headers
     ${silo_build_include_dir}/lite_pdb.h
@@ -612,20 +615,13 @@ install(FILES ${silo_headers} DESTINATION include
                     WORLD_READ)
 
 
-if(SILO_ENABLE_HDF5 AND (TARGET hdf5 OR HDF5_FOUND))
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     # since we change the ouputname from silo to siloh5 when building
     # with HDF5, will use $<TARGET_LINKER_FILE:silo> in place of plain 'silo'
     # when telling broswer and silex to link with silo
     set_target_properties(silo PROPERTIES OUTPUT_NAME siloh5)
-    if(TARGET hdf5)
-        target_link_libraries(silo hdf5)
-    else()
-        target_include_directories(silo PRIVATE ${HDF5_INCLUDE_DIRS})
-        target_link_libraries(silo ${HDF5_LIBRARIES})
-    endif()
-    if( zlib_FOUND)
-        target_link_libraries(silo zlib)
-    endif()
+    target_link_libraries(silo PUBLIC ${HDF5_C_LIBRARIES})
+    target_include_directories(silo PRIVATE ${HDF5_INCLUDE_DIRS})
 endif()
 
 # setting up for installing Silo CMake config files

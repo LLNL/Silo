@@ -91,8 +91,12 @@ target_include_directories(browser PRIVATE
 
 target_link_libraries(browser $<TARGET_LINKER_FILE:silo>)
 
-if(NOT TARGET hdf5)
-    target_link_libraries(browser ${HDF5_LIBRARIES})
+if(UNIX)
+    target_link_libraries(browser m)
+endif()
+
+if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
+    target_link_libraries(browser ${HDF5_C_LIBRARIES})
 endif()
 
 install(TARGETS browser DESTINATION bin EXPORT ${silo_targets_name}
