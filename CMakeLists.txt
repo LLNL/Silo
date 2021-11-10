@@ -1,13 +1,13 @@
 # Copyright (C) 1994-2021 Lawrence Livermore National Security, LLC.
 # LLNL-CODE-425250.
 # All rights reserved.
-# 
+#
 # This file is part of Silo. For details, see silo.llnl.gov.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
 # are met:
-# 
+#
 #    * Redistributions of source code must retain the above copyright
 #      notice, this list of conditions and the disclaimer below.
 #    * Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
 #    * Neither the name of the LLNS/LLNL nor the names of its
 #      contributors may be used to endorse or promote products derived
 #      from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE  IS PROVIDED BY  THE COPYRIGHT HOLDERS  AND CONTRIBUTORS
 # "AS  IS" AND  ANY EXPRESS  OR IMPLIED  WARRANTIES, INCLUDING,  BUT NOT
 # LIMITED TO, THE IMPLIED  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -30,17 +30,17 @@
 # LIABILITY, WHETHER  IN CONTRACT, STRICT LIABILITY,  OR TORT (INCLUDING
 # NEGLIGENCE OR  OTHERWISE) ARISING IN  ANY WAY OUT  OF THE USE  OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # This work was produced at Lawrence Livermore National Laboratory under
 # Contract No.  DE-AC52-07NA27344 with the DOE.
-# 
+#
 # Neither the  United States Government nor  Lawrence Livermore National
 # Security, LLC nor any of  their employees, makes any warranty, express
 # or  implied,  or  assumes  any  liability or  responsibility  for  the
 # accuracy, completeness,  or usefulness of  any information, apparatus,
 # product, or  process disclosed, or  represents that its use  would not
 # infringe privately-owned rights.
-# 
+#
 # Any reference herein to  any specific commercial products, process, or
 # services by trade name,  trademark, manufacturer or otherwise does not
 # necessarily  constitute or imply  its endorsement,  recommendation, or
@@ -61,12 +61,12 @@ file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/VERSION SILO_VERSION)
 
 ###-----------------------------------------------------------------------------
 # project command will automatically create cmake vars for major, minor,
-# patch and tweak from passed VERSION 
+# patch and tweak from passed VERSION
 ###-----------------------------------------------------------------------------
 project(Silo VERSION ${SILO_VERSION} LANGUAGES CXX C)
 
 ###-----------------------------------------------------------------------------
-# location for Silo CMake includes 
+# location for Silo CMake includes
 ###-----------------------------------------------------------------------------
 set(CMAKE_MODULE_PATH ${Silo_SOURCE_DIR}/CMake)
 
@@ -119,7 +119,7 @@ option(SILO_ENABLE_BROWSER "Enable building of browser" ON)
 option(SILO_ENABLE_FORTRAN "Enable Fortran interface to Silo" ON)
 option(SILO_ENABLE_HDF5 "Enable hdf5 support" ON)
 option(SILO_ENABLE_JSON "Enable experimental json features" OFF)
-option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF) 
+option(SILO_ENABLE_PYTHON_MODULE "Enable python module" OFF)
 option(SILO_ENABLE_TESTS "Enable building of tests." OFF)
 option(SILO_BUILD_FOR_BSD_LICENSE  "Build BSD licensed version of Silo" ON)
 
@@ -237,7 +237,7 @@ endif()
 
 
 ##
-# Add the needed CMake modules 
+# Add the needed CMake modules
 ##
 include(CheckFunctionExists)
 include(CheckIncludeFile)
@@ -293,7 +293,7 @@ check_symbol_exists(add_history "readline.h" HAVE_READLINE_HISTORY)
 
 ###-----------------------------------------------------------------------------
 # Set flags & options from config-site files after everything is set up since
-# setting them beforehand can upset some of CMake's own find routines. 
+# setting them beforehand can upset some of CMake's own find routines.
 ###-----------------------------------------------------------------------------
 if(DEFINED SILO_C_FLAGS)
     string(APPEND CMAKE_C_FLAGS " ${SILO_C_FLAGS}")
@@ -333,7 +333,7 @@ if(SILO_ENABLE_FORTRAN)
         install(FILES ${silo_build_include_dir}/silo_FC.h DESTINATION include
                 PERMISSIONS OWNER_READ OWNER_WRITE
                             GROUP_READ GROUP_WRITE
-                            WORLD_READ) 
+                            WORLD_READ)
     endif()
 endif()
 
@@ -393,7 +393,7 @@ add_custom_command(TARGET pdb_detect POST_BUILD
     COMMENT "Creating lite_pdb.h using mklite"
     VERBATIM
     USES_TERMINAL)
-      
+
 add_custom_command(TARGET pdb_detect POST_BUILD
     COMMAND  ${perl_exe} ${Silo_SOURCE_DIR}/config/mklite ${Silo_SOURCE_DIR}/src/score/score.h lite_score.h
     BYPRODUCTS ${silo_build_include_dir}/lite_score.h
@@ -452,7 +452,7 @@ if(SILO_ENABLE_JSON)
 #    list(APPEND silo_library_sources ${Silo_SOURCE_DIR}/src/silo/silo_json.c)
 endif()
 
-set(silo_library_include_dirs 
+set(silo_library_include_dirs
     ${silo_build_include_dir}
     ${Silo_SOURCE_DIR}/src/debug
     ${Silo_SOURCE_DIR}/src/filters
@@ -464,14 +464,14 @@ set(silo_library_include_dirs
     ${Silo_SOURCE_DIR}/src/taurus_drv
     ${Silo_SOURCE_DIR}/src/unknown)
 
-set(SILO_COMPILE_DEFINES SILO_EXPORTS LITE_EXPORTS) 
+set(SILO_COMPILE_DEFINES SILO_EXPORTS LITE_EXPORTS)
 
 
 ##
 # Add hdf5 support
 ##
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
-    list(APPEND silo_library_sources 
+    list(APPEND silo_library_sources
         ${Silo_SOURCE_DIR}/src/hdf5_drv/H5FDsilo.c
         ${Silo_SOURCE_DIR}/src/hdf5_drv/silo_hdf5.c)
 
@@ -484,7 +484,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
 
     if(SILO_ENABLE_ZFP)
         set(HAVE_ZFP 1)
-        list(APPEND silo_library_sources 
+        list(APPEND silo_library_sources
             ${Silo_SOURCE_DIR}/src/hdf5_drv/H5Zzfp.c
             ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/bitstream.c
             ${Silo_SOURCE_DIR}/src/zfp-0.5.5/src/decode1d.c
@@ -541,13 +541,13 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
             ${Silo_SOURCE_DIR}/src/fpzip/rcqsmodel.cpp
             ${Silo_SOURCE_DIR}/src/fpzip/read.cpp
             ${Silo_SOURCE_DIR}/src/fpzip/write.cpp)
-        list(APPEND silo_library_include_dirs 
+        list(APPEND silo_library_include_dirs
             ${Silo_SOURCE_DIR}/src/fpzip)
     endif()
 
     if(SILO_ENABLE_HZIP)
         list(APPEND SILO_COMPILE_DEFINES HAVE_HZIP)
-      
+
         list(APPEND silo_library_sources
             ${Silo_SOURCE_DIR}/src/hzip/hzmdecoder.cpp
             ${Silo_SOURCE_DIR}/src/hzip/hzmencoder.cpp
@@ -561,7 +561,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
             ${Silo_SOURCE_DIR}/src/hzip/hznwrite.cpp
             ${Silo_SOURCE_DIR}/src/hzip/hzutil.cpp)
 
-        list(APPEND silo_library_include_dirs 
+        list(APPEND silo_library_include_dirs
             ${Silo_SOURCE_DIR}/src/hzip)
     endif()
 

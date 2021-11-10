@@ -159,7 +159,7 @@
 #cmakedefine01 HAVE_SYS_TYPES_H
 
 /* Support for Taurus */
-#cmakedefine HAVE_TAURUS_DRIVER 
+#cmakedefine HAVE_TAURUS_DRIVER
 
 /* Define if you have the <unistd.h> header file. */
 #cmakedefine01 HAVE_UNISTD_H
