@@ -338,7 +338,6 @@ if(SILO_ENABLE_FORTRAN)
 endif()
 
 # set up some vars to be passed to config.h.in
-set(SILO_VERSION ${Silo_VERSION})
 set(SILO_BUG "miller86@llnl.gov")
 set(SILO_NAME "silo")
 set(SILO_TARNAME "silo")
@@ -573,7 +572,6 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     endif()
 endif()
 
-
 add_library(silo ${silo_library_sources})
 target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
 add_dependencies(silo pdb_detect)
@@ -625,7 +623,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
 endif()
 
 # setting up for installing Silo CMake config files
-set(silo_targets_name "Silo-targets")
+set(silo_targets_name "SiloTargets")
 install(TARGETS silo EXPORT ${silo_targets_name}
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
@@ -684,24 +682,30 @@ endif()
 # INSTALL
 #-----------------------------------------------------------------------------
 
-
-
 install(EXPORT ${silo_targets_name} DESTINATION cmake)
 
 include(${CMAKE_ROOT}/Modules/CMakePackageConfigHelpers.cmake)
 
+###
+# Set up the include install location for use with the package config files
+###
+set(INCLUDE_INSTALL_DIR include)
+
 configure_package_config_file(${Silo_SOURCE_DIR}/CMake/SiloConfig.cmake.in
-  ${Silo_BINARY_DIR}/SiloConfig.cmake
-  INSTALL_DESTINATION cmake)
+  ${Silo_BINARY_DIR}/cmake/SiloConfig.cmake
+  INSTALL_DESTINATION cmake
+  PATH_VARS INCLUDE_INSTALL_DIR
+  )
 
 write_basic_package_version_file(
-    ${Silo_BINARY_DIR}/SiloConfigVersion.cmake
+    ${Silo_BINARY_DIR}/cmake/SiloConfigVersion.cmake
+    VERSION ${SILO_VERSION}
     COMPATIBILITY SameMajorVersion)
 # should compatibility be something else? available values are:
 # COMPATIBILITY <AnyNewerVersion|SameMajorVersion|SameMinorVersion|ExactVersion
 
-install(FILES ${Silo_BINARY_DIR}/SiloConfig.cmake
-              ${Silo_BINARY_DIR}/SiloConfigVersion.cmake
+install(FILES ${Silo_BINARY_DIR}/cmake/SiloConfig.cmake
+              ${Silo_BINARY_DIR}/cmake/SiloConfigVersion.cmake
         DESTINATION cmake
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE

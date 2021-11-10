@@ -59,12 +59,12 @@
 ###
 # Helpers for TP lib location
 ###
-set(TP_DIR C:/A_VisIt/ForRegression/visit-deps/windowsbuild/MSVC2017)
+set(TP_DIR C:/A_Visit/ForRegression/visit-deps/windowsbuild/MSVC2017)
 
 ##
 # HDF5
 ##
-silo_option_default(VAR SILO_HDF5_DIR VALUE ${TP_DIR}/hdf5/1.8.19/cmake)
+silo_option_default(VAR SILO_HDF5_DIR VALUE ${TP_DIR}/hdf5/1.8.19)
 
 ##
 # SZIP
@@ -92,8 +92,11 @@ silo_option_default(VAR SILO_ENABLE_SILEX VALUE ON TYPE BOOL)
 # disable fortran
 silo_option_default(VAR SILO_ENABLE_FORTRAN VALUE OFF TYPE BOOL)
 
+# enable python mnodule
+silo_option_default(VAR SILO_ENABLE_PYTHON_MODULE VALUE ON TYPE BOOL)
+
 # enable tests
-#silo_option_default(VAR SILO_ENABLE_TESTS VALUE ON TYPE BOOL)
+silo_option_default(VAR SILO_ENABLE_TESTS VALUE ON TYPE BOOL)
 
 
 

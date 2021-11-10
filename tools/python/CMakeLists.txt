@@ -73,13 +73,14 @@ Python_add_library(Silo MODULE
 
 # Have the output be relative to the root build dir, not in tools/python subdir
 if(WIN32)
-    # on Windows, the module should live alongside the silo dll, so put it in bin
-    set_target_properties(Silo PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/bin)
+  # on Windows, the module should live alongside the silo dll, so put it in bin
+  set(mod_dest bin)
 else()
-    set_target_properties(Silo PROPERTIES
-                          LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/lib)
+  set(mod_dest lib)
 endif()
+
+set_target_properties(Silo PROPERTIES
+                      LIBRARY_OUTPUT_DIRECTORY ${Silo_BINARY_DIR}/${mod_dest})
 
 add_dependencies(Silo silo)
 target_link_libraries(Silo PRIVATE silo)
@@ -87,11 +88,12 @@ target_include_directories(Silo PRIVATE
      ${Silo_SOURCE_DIR}/src/silo
      ${silo_build_include_dir})
 
-install(TARGETS Silo DESTINATION lib EXPORT ${silo_targets_name}
+install(TARGETS Silo DESTINATION ${mod_dest} EXPORT ${silo_targets_name}
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
                     GROUP_READ GROUP_WRITE GROUP_EXECUTE
                     WORLD_READ             WORLD_EXECUTE)
-install(FILES s2ex.py DESTINATION lib 
+
+install(FILES s2ex.py DESTINATION bin
         PERMISSIONS OWNER_READ OWNER_WRITE
                     GROUP_READ GROUP_WRITE
                     WORLD_READ)
