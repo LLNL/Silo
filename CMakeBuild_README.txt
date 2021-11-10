@@ -16,13 +16,14 @@ SILO_ENABLE_FORTRAN         Enable Fortran interface to Silo         DEFAULT : O
 SILO_ENABLE_HDF5            Enable hdf5 support                      DEFAULT : ON 
 SILO_ENABLE_JSON            Enable experimental json features        DEFAULT : OFF
 SILO_ENABLE_PYTHON_MODULE   Enable python module                     DEFAULT : OFF
-SILO_ENABLE_NETCDF          Enable netcdf support                    DEFAULT : ON
-SILO_ENABLE_ZFP             Enable Lindstrom array compression       DEFAULT : ON
 SILO_ENABLE_TESTS           Enable building of tests.                DEFAULT : OFF
-SILO_ENABLE_TESTS_INSTALL   Enable installation of tests.            DEFAULT : OFF
 SILO_BUILD_FOR_BSD_LICENSE  Build BSD licensed version of Silo       DEFAULT : ON
 
-These are enabled when SILO_BUILD_FOR_BSD_LICENSE is OFF:
+This is enabled when SILO_ENABLE_HDF5 is ON:
+
+SILO_ENABLE_ZFP             Enable Lindstrom array compression       DEFAULT : ON
+
+These are enabled when SILO_BUILD_FOR_BSD_LICENSE is OFF and SILO_ENABLE_HDF5 is ON:
 
 SILO_ENABLE_FPZIP    Enable Lindstrom float 1,2,3D array compression DEFAULT : ON
 SILO_ENABLE_HZIP     Enable Lindstrom hex/quad mesh compression      DEFAULT : ON
@@ -42,8 +43,5 @@ SILO_SZIP_DIR     Path to szip-config.cmake if szip was built with CMake,
 
 SILO_ZLIB_DIR     Path to zlib-config.cmake if szip was built with CMake, 
                   root of zlib installation otherwise
-
-
-
 
 
