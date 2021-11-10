@@ -612,7 +612,7 @@ if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     # with HDF5, will use $<TARGET_LINKER_FILE:silo> in place of plain 'silo'
     # when telling broswer and silex to link with silo
     set_target_properties(silo PROPERTIES OUTPUT_NAME siloh5)
-    target_link_libraries(silo PUBLIC ${HDF5_C_LIBRARIES})
+    target_link_libraries(silo ${HDF5_C_LIBRARIES})
     target_include_directories(silo PRIVATE ${HDF5_INCLUDE_DIRS})
 endif()
 
