@@ -98,12 +98,6 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #
-#  NOTE Currently doing everything from this one CMakeLists.txt
-#  So everything is relative to as ${Silo_SOURCE_DIR} which will be the same
-#  as ${CMAKE_CURRENT_SOURCE_DIR} unless some things are moved into subdirs.
-#
-
-#
 # create an include dir for generated include files
 #
 set(silo_build_include_dir ${Silo_BINARY_DIR}/include)
@@ -338,10 +332,10 @@ if(SILO_ENABLE_FORTRAN)
 endif()
 
 # set up some vars to be passed to config.h.in
-set(SILO_BUG "miller86@llnl.gov")
+set(SILO_BUG "https://github.com/LLNL/Silo/discussions")
 set(SILO_NAME "silo")
 set(SILO_TARNAME "silo")
-set(SILO_URL "https://wci.llnl.gov/simulation/computer-codes/silo")
+set(SILO_URL "https://silo.llnl.gov")
 
 # these are always defined
 set(HAVE_PDB_DRIVER 1)
