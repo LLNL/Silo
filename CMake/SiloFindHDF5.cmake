@@ -86,6 +86,6 @@ if(HDF5_FOUND)
     endif()
 
 else()
-    message(FATAL_ERROR "Could not find hdf5, you may want to try setting SILO_HDF5_DIR")
+    message(FATAL_ERROR "An explicit request for HDF5 was made but HDF5 was not found. You may want to try setting SILO_HDF5_DIR")
 endif()
 

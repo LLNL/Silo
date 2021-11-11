@@ -67,6 +67,6 @@ find_package(Python COMPONENTS Interpreter Development)
 
 if(Python_FOUND)
 else()
-    message(FATAL_ERROR "Could not find python, you may want to try setting SILO_PYTHON_DIR")
+    message(FATAL_ERROR "An explicit request for Silo's python module was made but python could not be found. You may want to try setting SILO_PYTHON_DIR")
 endif()
 
