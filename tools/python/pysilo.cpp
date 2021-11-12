@@ -67,6 +67,19 @@ static PyObject             *siloModule = 0;
 
 std::vector<PyMethodDef> SiloMethods;
 
+#if defined(_WIN32)
+# if defined(Silo_EXPORTS)
+#  define SILOMODULE_API __declspec(dllexport)
+# else
+#  define SILOMODULE_API __declspec(dllimport)
+# endif
+#else
+# if __GNUC__ >= 4
+#   define SILOMODULE_API __attribute__ ((visibility("default")))
+# else
+#   define SILOMODULE_API /* not affected */
+# endif
+#endif
 
 // ****************************************************************************
 // Function: SiloErrorFunc
@@ -229,9 +242,9 @@ PyObject *silo_Create(PyObject *self, PyObject *args)
 #define ADD_CONSTANT(C)  PyDict_SetItemString(d, #C, PyInt_FromLong(C))
 extern "C"
 #if PY_VERSION_GE(3,0,0)
-PyObject * PyInit_Silo(void)
+SILOMODULE_API PyObject * PyInit_Silo(void)
 #else
-void initSilo(void)
+void SILOMODULE_API initSilo(void)
 #endif
 {
     AddMethod("Open", silo_Open,

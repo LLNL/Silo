@@ -94,7 +94,9 @@ running into problems with this test, you can always re-configure to
 #include <lite_pdb.h>
 
 #include <assert.h>
+#ifndef _WIN32
 #include <dirent.h>
+#endif
 #include <math.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -102,9 +104,13 @@ running into problems with this test, you can always re-configure to
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #include <sys/types.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 /* Constant and macro definitions taken from PDB proper */
 #define SC_HA_NAME_KEY "by-name"

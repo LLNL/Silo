@@ -62,6 +62,9 @@ be used for advertising or product endorsement purposes.
 #if !defined(_WIN32)
 #include <sys/time.h>
 #include <unistd.h>
+#else
+#define random rand
+#define srandom srand
 #endif
 #include <stdlib.h>
 
