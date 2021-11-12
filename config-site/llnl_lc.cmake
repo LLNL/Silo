@@ -73,7 +73,7 @@ set(SILO_ARCH $ENV{SYS_TYPE}_gcc.6.1.0)
 ##
 # SZIP
 ##
-silo_option_default(VAR SILO_SZIP_DIR VALUE ${SILO_HOME}/szip/2.1/${SILO_ARCH})
+#silo_option_default(VAR SILO_HDF5_SZIP_DIR VALUE ${SILO_HOME}/szip/2.1/${SILO_ARCH})
 
 ##
 # QT5 (must be the location of Qt5Config.cmake)

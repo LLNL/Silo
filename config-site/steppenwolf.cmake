@@ -69,7 +69,7 @@ silo_option_default(VAR SILO_HDF5_DIR VALUE ${TP_DIR}/hdf5/1.8.19)
 ##
 # SZIP
 ##
-silo_option_default(VAR SILO_SZIP_DIR VALUE ${TP_DIR}/szip/2.1.1/cmake)
+silo_option_default(VAR SILO__HDF_SZIP_DIR VALUE ${TP_DIR}/szip/2.1.1/cmake)
 
 ##
 # ZLIB

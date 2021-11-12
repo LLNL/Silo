@@ -54,18 +54,18 @@
 
 ###
 # Uses find_package to find the szip library
-#   If SILO_SZIP_DIR is defined, uses it to tell CMake where to look.
+#   If SILO_HDF5_SZIP_DIR is defined, uses it to tell CMake where to look.
 #   Use CONFIG version of find_package if szip-config.cmake exists.
 ###
 
 
-if(DEFINED SILO_SZIP_DIR AND EXISTS ${SILO_SZIP_DIR}/szip-config.cmake)
+if(DEFINED SILO_HDF5_SZIP_DIR AND EXISTS ${SILO_HDF5_SZIP_DIR}/szip-config.cmake)
     # this works for szip with CMake
-    find_package(SZIP PATHS ${SILO_SZIP_DIR} CONFIG)
+    find_package(SZIP PATHS ${SILO_HDF5_SZIP_DIR} CONFIG)
 else()
-    if(DEFINED SILO_SZIP_DIR AND EXISTS ${SILO_SZIP_DIR})
+    if(DEFINED SILO_HDF5_SZIP_DIR AND EXISTS ${SILO_HDF5_SZIP_DIR})
         # help CMake find the specified szip
-        set(SZIP_ROOT ${SILO_SZIP_DIR})
+        set(SZIP_ROOT ${SILO_HDF5_SZIP_DIR})
     endif()
     find_package(SZIP)
 endif()
@@ -86,6 +86,6 @@ if(SZIP_FOUND)
 
     endif()
 else()
-    message(FATAL_ERROR "Could not find szip, you may want to try setting SILO_SZIP_DIR")
+    message(FATAL_ERROR "Could not find szip, you may want to try setting SILO_HDF5_SZIP_DIR")
 endif()
 

@@ -34,12 +34,16 @@ These OPTIONAL vars can be used to help Silo/CMake find specific third party lib
 SILO_HDF5_DIR     Path to hdf5-config.cmake if hdf5 was built with CMake,
                   root of hdf5 installation otherwise
 
+SILO_HDF5_SZIP_DIR   Path to szip-config.cmake if szip was built with CMake,
+                     root of szip installation otherwise
+                     Needed only to satisfy the indirect dependency from HDF5.
+                     May only be needed on Windows in order to locate and copy the szip
+                     dll's.
+
 SILO_PYTHON_DIR   Path to root of Python installation
 
 SILO_QT5_DIR      Path to Qt5Config.cmake
 
-SILO_SZIP_DIR     Path to szip-config.cmake if szip was built with CMake,
-                  root of szip installation otherwise
 
 SILO_ZLIB_DIR     Path to zlib-config.cmake if szip was built with CMake, 
                   root of zlib installation otherwise
