@@ -66,7 +66,7 @@ endif()
 find_package(Qt5 COMPONENTS Core Gui Widgets CONFIG)
 
 if(NOT Qt5_FOUND)
-    message(WARNING "Could not find Qt5, you may want to try setting SILO_QT5_DIR")
+    message(WARNING "An explicit request for silex was made and it requires Qt, but Qt could not be found.  You may want to try setting SILO_QT5_DIR")
 endif()
 
 
