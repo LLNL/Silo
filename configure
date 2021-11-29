@@ -27340,7 +27340,7 @@ else
   CXX_LINK_NEEDED_FALSE=
 fi
 
-ac_config_files="$ac_config_files Makefile SiloWindows/Makefile svn_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/pdbp_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile tools/json/Makefile tools/mapred/Makefile"
+ac_config_files="$ac_config_files Makefile svn_bin/Makefile config/Makefile config-site/Makefile docs/Makefile src/Makefile src/score/Makefile src/pdb/Makefile src/silo/Makefile src/silo/silo.h src/debug/Makefile src/netcdf/Makefile src/pdb_drv/Makefile src/pdbp_drv/Makefile src/hdf5_drv/Makefile src/taurus/Makefile src/unknown/Makefile src/filters/Makefile tests/Makefile tools/Makefile tools/browser/Makefile tools/python/Makefile tools/silex/Makefile tools/silock/Makefile tools/json/Makefile tools/mapred/Makefile"
 
 if test -n "$HZIP"; then
   ac_config_files="$ac_config_files src/hzip/Makefile"
@@ -28723,7 +28723,6 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "SiloWindows/Makefile") CONFIG_FILES="$CONFIG_FILES SiloWindows/Makefile" ;;
     "svn_bin/Makefile") CONFIG_FILES="$CONFIG_FILES svn_bin/Makefile" ;;
     "config/Makefile") CONFIG_FILES="$CONFIG_FILES config/Makefile" ;;
     "config-site/Makefile") CONFIG_FILES="$CONFIG_FILES config-site/Makefile" ;;
