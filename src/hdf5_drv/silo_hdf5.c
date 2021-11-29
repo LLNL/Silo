@@ -197,6 +197,7 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
 #endif
 #ifdef HAVE_ZFP
 #include "H5Zzfp.h"
+extern void zfp_init_zfp();
 #endif
 
 /* Defining these to check overhead of PROTECT */
