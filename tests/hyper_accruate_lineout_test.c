@@ -192,7 +192,7 @@ static char *DBPrintf(char const *fmt, ...)
     char dummy[256];
     va_list ap;
     static int const str_cache_size = 20;
-    static char *str_cache[str_cache_size];
+    static char *str_cache[20];
     static int cache_idx = 0;
     static int first = 1;
 

@@ -55,6 +55,10 @@ product endorsement purposes.
 #include <stdlib.h>     /* For abort() */
 #include <std.c>
 
+#ifdef WIN32
+#define strtok_r(s,sep,lasts) (*(lasts)=strtok((s),(sep)))
+#endif
+
 #define NX	10
 #define NY	3
 

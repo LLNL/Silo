@@ -58,10 +58,7 @@ be used for advertising or product endorsement purposes.
    version 1.8 and thereafter. When, and if, the HDF5 code in this file
    is explicitly upgraded to the 1.8 API, this symbol should be removed. */
 #define H5_USE_16_API
-#ifndef _WIN32
-#warning DO WE NEED THIS HEADER FILE
-#endif
-#include <H5pubconf.h>
+
 #include <hdf5.h>
 
 #include <errno.h>
@@ -5922,8 +5919,6 @@ db_hdf5_Open(char const *name, int mode, int opts_set_id)
     }
 
     faprops = db_hdf5_file_accprops(opts_set_id, mode, 0);
-#warning QUERY FILE IMAGE STUFF HERE TO GET UDATA PTR
-
 #ifndef _WIN32
 #warning QUERY FILE IMAGE STUFF HERE TO GET UDATA PTR
 #endif

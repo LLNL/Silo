@@ -53,7 +53,9 @@ product endorsement purposes.
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #ifdef _WIN32
   #ifndef WINDOWS_LEAN_AND_MEAN
     #define WINDOWS_LEAN_AND_MEAN
@@ -252,6 +254,7 @@ static int StringToDriver(const char *str)
 
 double GetTime()
 {
+#if HAVE_SYS_TIME_H
     static double t0 = -1;
     double t1;
     struct timeval tv1;
@@ -268,4 +271,8 @@ double GetTime()
     t1 = (double)tv1.tv_sec*1e+6+(double)tv1.tv_usec;
 
     return t1-t0;
+#else
+    /* What to do here ? */
+    return 0.0;
+#endif
 }
