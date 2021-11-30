@@ -63,7 +63,8 @@ product endorsement purposes.
 #include "std.c"
 
 #define ASSERT(PRED) if(!(PRED)){fprintf(stderr,"Assertion \"%s\" at line %d failed\n",#PRED,__LINE__);abort();}
-#define ERROR(ARGS) { __line__ = __LINE__; print_error ARGS; exit(1); }
+/* ERROR is a macro on WINDOWS, so rename for this file */
+#define tmcERROR(ARGS) { __line__ = __LINE__; print_error ARGS; exit(1); }
 #define FREE(x) if ( (x) != NULL) {free(x);(x)=NULL;}
 
 static int __line__ = 0;
@@ -180,7 +181,7 @@ main(int argc, char *argv[])
         } else if (!strncmp(argv[i], "in=", 3)) {
             char *fname = argv[i]+3;
             char *mname = strchr(fname, ':');
-	    if (!mname) ERROR(("no path to material object in \"%s\"",argv[i]));
+	    if (!mname) tmcERROR(("no path to material object in \"%s\"",argv[i]));
             *mname = '\0';
             strncpy(ifile, fname, sizeof(ifile));
             strncpy(imat, mname+1, sizeof(imat));
@@ -190,7 +191,7 @@ main(int argc, char *argv[])
         } else if (!strncmp(argv[i], "out=", 4)) {
             char *fname = argv[i]+4;
             char *mname = strchr(fname, ':');
-	    if (!mname) ERROR(("no path to material object in \"%s\"",argv[i]));
+	    if (!mname) tmcERROR(("no path to material object in \"%s\"",argv[i]));
             *mname = '\0';
             strncpy(ofile, fname, sizeof(ofile));
             strncpy(omat, mname+1, sizeof(omat));
@@ -211,16 +212,16 @@ main(int argc, char *argv[])
 	}
     }
 
-    if (!ifileSet) ERROR(("input file and material object path not specified"));
-    if (!ofileSet) ERROR(("output file and material object path not specified"));
+    if (!ifileSet) tmcERROR(("input file and material object path not specified"));
+    if (!ofileSet) tmcERROR(("output file and material object path not specified"));
 
     DBShowErrors(show_all_errors?DB_ALL_AND_DRVR:DB_NONE, NULL);
 
     infile = DBOpen(ifile, DB_UNKNOWN, DB_READ);
-    if (!infile) ERROR(("unable to open file \"%s\"\n", ifile));
+    if (!infile) tmcERROR(("unable to open file \"%s\"\n", ifile));
 
     mat = DBGetMaterial(infile, imat);
-    if (!mat) ERROR(("unable to read material object at path \"%s\" in file \"%s\"", imat, ifile));
+    if (!mat) tmcERROR(("unable to read material object at path \"%s\" in file \"%s\"", imat, ifile));
     if (mat->matcolors)
         DBAddOption(mat_opts, DBOPT_MATCOLORS, mat->matcolors);
     if (mat->matnames)
@@ -231,7 +232,7 @@ main(int argc, char *argv[])
     {
         fprintf(stderr, "Appending to \"%s\" failed. Creating anew...\n", ofile);
         outfile = DBCreate(ofile, DB_CLOBBER, DB_LOCAL, "Material compression test", driver);
-        if (!outfile) ERROR(("unable to open/create file \"%s\"\n", ofile));
+        if (!outfile) tmcERROR(("unable to open/create file \"%s\"\n", ofile));
     }
 
     if (outputDense)
@@ -279,7 +280,7 @@ main(int argc, char *argv[])
         {
             fprintf(stderr, "Appending to \"%s\" failed. Creating anew...\n", efile);
             extrafile  = DBCreate(efile, DB_CLOBBER, DB_LOCAL, "Material compression test; reconstructed data", driver);
-            if (!extrafile ) ERROR(("unable to open/create file \"%s\"\n", efile));
+            if (!extrafile ) tmcERROR(("unable to open/create file \"%s\"\n", efile));
         }
 
         /* copy mesh from input file to extra file */
@@ -298,7 +299,7 @@ main(int argc, char *argv[])
             DBmaterial *cmat;
 
             DBquadmesh *qm = DBGetQuadmesh(infile, mat->meshname);
-            if (!qm) ERROR(("unable to read mesh \"%s\" from file \"%s\"", mat->meshname, ifile));
+            if (!qm) tmcERROR(("unable to read mesh \"%s\" from file \"%s\"", mat->meshname, ifile));
 
             /* copy the original mesh over */
             DBPutQuadmesh(extrafile, mat->meshname, coordnames, qm->coords,
@@ -345,7 +346,7 @@ main(int argc, char *argv[])
             DBzonelist *zl = 0;
 
             DBucdmesh *um = DBGetUcdmesh(infile, mat->meshname);
-            if (!um) ERROR(("unable to read mesh \"%s\" from file \"%s\"", mat->meshname, ifile));
+            if (!um) tmcERROR(("unable to read mesh \"%s\" from file \"%s\"", mat->meshname, ifile));
 
             zl = um->zones?um->zones:0;
             nzones = zl?zl->nzones:0;
@@ -389,7 +390,7 @@ main(int argc, char *argv[])
         }
         else
         {
-            ERROR(("Don't know how to deal with mesh type %d\n", mtype));
+            tmcERROR(("Don't know how to deal with mesh type %d\n", mtype));
         }
         DBClose(extrafile);
     }

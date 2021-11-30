@@ -275,7 +275,7 @@ static char *DBPrintf(char const *fmt, ...)
 }
 
 /* Sweep Nc lineouts around the center of the qmesh evenly spaced in angle */
-static int build_analytic_lineout_curves(
+static void build_analytic_lineout_curves(
     DBfile *dbfile,
     int Nt, int Nc,
     int Nx, int Ny,
@@ -331,7 +331,7 @@ static int build_analytic_lineout_curves(
 
 }
 
-static int build_hyper_accurate_lineout_curves(
+static void build_hyper_accurate_lineout_curves(
     DBfile *dbfile,
     int Nt, int Nc,
     int Nx, int Ny,

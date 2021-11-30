@@ -1179,7 +1179,6 @@ AM_CONDITIONAL(ZLIB_AVAILABLE, test -n "$ZLIB")
 AM_CONDITIONAL(CXX_LINK_NEEDED, test "$enable_shared" = "no" -a \( -n "$FPZIP" -o -n "$HZIP" \))
 AC_CONFIG_FILES([
             Makefile
-            SiloWindows/Makefile
             svn_bin/Makefile
             config/Makefile
             config-site/Makefile
