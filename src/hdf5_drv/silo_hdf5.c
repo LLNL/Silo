@@ -197,6 +197,7 @@ static const unsigned SILO_HZIP_PERMUTATION[4] = {0,0,((unsigned) (0x00002130)),
 #endif
 #ifdef HAVE_ZFP
 #include "H5Zzfp.h"
+extern void zfp_init_zfp();
 #endif
 
 /* Defining these to check overhead of PROTECT */
@@ -5121,13 +5122,8 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
         case DB_FILE_OPTS_H5_DEFAULT_MPIO:
         {
 #ifdef H5_HAVE_PARALLEL
-            MPI_Info info;
-            int flag = 0;
-            if (!(MPI_Initialized(&flag) == MPI_SUCCESS && flag))
-                return db_perror("HDF5 MPI VFD -- MPI not initialized", E_CALLFAIL, me);
-            MPI_Info_create(&info);
+            MPI_Info info = MPI_INFO_NULL;
             h5status |= H5Pset_fapl_mpio(retval, MPI_COMM_SELF, info);
-            MPI_Info_free(&info);
 #else
             H5Pclose(retval);
             return db_perror("HDF5 MPI VFD", E_NOTENABLEDINBUILD, me);
@@ -5422,13 +5418,9 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                 {
 #ifdef H5_HAVE_PARALLEL
                     MPI_Comm mpi_comm = MPI_COMM_SELF;
-                    MPI_Info mpi_info; 
-                    int created_info = 0;
+                    MPI_Info mpi_info = MPI_INFO_NULL; 
                     hbool_t use_gpfs_hints = TRUE;
                     int flag = 0;
-
-                    if (!(MPI_Initialized(&flag) == MPI_SUCCESS && flag))
-                        return db_perror("HDF5 MPI VFD -- MPI not initialized", E_CALLFAIL, me);
 
                     /* get the communicator */
                     if ((p = DBGetOption(opts, DBOPT_H5_MPIO_COMM)))
@@ -5437,11 +5429,6 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                     /* get the info */
                     if ((p = DBGetOption(opts, DBOPT_H5_MPIO_INFO)))
                         mpi_info = *((MPI_Info *)p);
-                    else
-                    {
-                        MPI_Info_create(&mpi_info);
-                        created_info = 1;
-                    }
 
                     /* get use_gpfs_hints flag */
                     if ((p = DBGetOption(opts, DBOPT_H5_MPIP_NO_GPFS_HINTS)))
@@ -5450,7 +5437,6 @@ db_hdf5_process_file_options(int opts_set_id, int mode, hid_t *fcpl)
                     if (vfd == DB_H5VFD_MPIO)
                     {
                         h5status |= H5Pset_fapl_mpio(retval, mpi_comm, mpi_info);
-                        if (created_info) MPI_Info_free(&mpi_info);
                     }
                     else
                     {
