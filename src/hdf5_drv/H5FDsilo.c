@@ -244,21 +244,28 @@ static const char *flavors(H5F_mem_t m)
 }
 
 
+/* Set semicolon termination for H5Epush_ret */
+#if HDF5_VERSION_GE(1,12,1)
+#define H5EPR_SEMICOLON ;
+#else
+#define H5EPR_SEMICOLON
+#endif
+
 #ifdef H5_HAVE_SNPRINTF
 #define H5E_PUSH_HELPER(Func,Cls,Maj,Min,Msg,Ret,Errno)			\
 {									\
     char msg[256];							\
     if (Errno != 0)							\
-        snprintf(msg, sizeof(msg), Msg "(errno=%d, \"%s\")",	\
+        snprintf(msg, sizeof(msg), Msg "(errno=%d, \"%s\")",	        \
             Errno, strerror(Errno));					\
     ret_value = Ret;							\
-    H5Epush_ret(Func, Cls, Maj, Min, msg, Ret)				\
+    H5Epush_ret(Func, Cls, Maj, Min, msg, Ret) H5EPR_SEMICOLON		\
 }
 #else
 #define H5E_PUSH_HELPER(Func,Cls,Maj,Min,Msg,Ret,Errno)			\
 {									\
     ret_value = Ret;							\
-    H5Epush_ret(Func, Cls, Maj, Min, Msg, Ret)				\
+    H5Epush_ret(Func, Cls, Maj, Min, Msg, Ret) H5EPR_SEMICOLON		\
 }
 #endif
 
@@ -1357,7 +1364,7 @@ H5FD_silo_sb_encode(H5FD_t *_file, char *name/*out*/,
     assert(sizeof(hsize_t)<=8);
     memcpy(p, &file->block_size, sizeof(hsize_t));
     if (H5Tconvert(H5T_NATIVE_HSIZE, H5T_STD_U64LE, 1, buf+8, NULL, H5P_DEFAULT)<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1) H5EPR_SEMICOLON
 
     return 0;
 }
@@ -1385,14 +1392,14 @@ H5FD_silo_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Make sure the name/version number is correct */
     if (strcmp(name, "LLNLsilo"))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid silo superblock", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid silo superblock", -1) H5EPR_SEMICOLON
 
     buf += 8;
     /* Decode block size */
     assert(sizeof(hsize_t)<=8);
     memcpy(x, buf, 8);
     if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HSIZE, 1, x, NULL, H5P_DEFAULT)<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1) H5EPR_SEMICOLON
     ap = (hsize_t*)x;
     /*file->block_size = *ap; ignore stored value for now */
 
