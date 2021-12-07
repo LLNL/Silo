@@ -245,7 +245,7 @@ static const char *flavors(H5F_mem_t m)
 
 
 /* Set semicolon termination for H5Epush_ret */
-#if HDF5_VERSION_GE(1,12,1)
+#if HDF5_VERSION_GE(1,10,8)
 #define H5EPR_SEMICOLON ;
 #else
 #define H5EPR_SEMICOLON
@@ -492,7 +492,7 @@ static int H5FD_silo_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_silo_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_silo_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_silo_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-#if HDF5_VERSION_GE(1,10,4)
+#if HDF5_VERSION_GE(1,10,0)
 static haddr_t H5FD_silo_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 #else
 static haddr_t H5FD_silo_get_eof(const H5FD_t *_file);
@@ -553,7 +553,7 @@ static const H5FD_class_t H5FD_silo_g = {
     "silo",				        /*name			*/
     MAXADDR,				        /*maxaddr		*/
     H5F_CLOSE_WEAK,				/* fc_degree		*/
-#if HDF5_VERSION_GE(1,10,4)
+#if HDF5_VERSION_GE(1,10,0)
     0,                                          /* terminate            */
 #endif
     H5FD_silo_sb_size,                          /*sb_size               */
@@ -1981,7 +1981,7 @@ H5FD_silo_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-#if HDF5_VERSION_GE(1,10,4)
+#if HDF5_VERSION_GE(1,10,0)
 H5FD_silo_get_eof(const H5FD_t *_file, H5FD_mem_t type)
 #else
 H5FD_silo_get_eof(const H5FD_t *_file)
