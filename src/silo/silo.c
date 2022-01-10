@@ -183,7 +183,7 @@ PUBLIC char   *_db_err_list[] =
     "You need to configure the Silo library using the\n"
     "--with-hdf5=<INC,LIB> option and re-compile and\n"
     "re-install Silo. If you do not have an installation\n"
-    "of HDF5 already on your sytem, you will also need\n"
+    "of HDF5 already on your system, you will also need\n"
     "to obtain HDF5 from www.hdfgroup.org and install it.", /* 33 */
     "Empty objects not permitted. See DBSetAllowEmptyObjects().", /* 34 */
     "No more tiny array buffer space for custom object.", /* 35 */
