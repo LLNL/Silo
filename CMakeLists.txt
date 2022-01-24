@@ -227,6 +227,9 @@ else()
     include(${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
     set(CMAKE_REQUIRED_DEFINITIONS -D_LARGEFILE64_SOURCE)
     check_type_size("off64_t" SIZEOF_OFF64_T)
+    if(NOT SIZEOF_OFF64_T)
+        set(SIZEOF_OFF64_T ${CMAKE_SIZEOF_VOID_P})
+    endif()
 endif()
 
 
