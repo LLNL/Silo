@@ -1,0 +1,138 @@
+## Python Interface
+
+It is probably easiest to understand the Python interface to Silo by examining some examples and tests. 
+In the source code distribution, you can find some examples in tools/python and tests in tests directories. 
+Here, we briefly describe Silo’s Python interface.
+
+In order for an installation of Silo to have the Python interface, Silo must have been configured with --enable-pythonmodule and NOT with --disable-shared Autoconf configuration switches.
+
+The Python interface will be in the lib dir of the Silo installation, named Silo.
+so. 
+To use it, Python needs to be told where to find it. 
+You can do this a couple of ways; through the PYTHONPATH environment variable or by explicitly adding the Silo installation lib dir to Python’s path using sys.
+path.
+append(). 
+For example, if Silo is installed to /foo/bar, this works...
+
+% env PYTHONPATH=/foo/bar/lib python
+Python 2.
+7.
+10 (default, Oct 23 2015, 19:19:21) 
+[GCC 4.
+2.
+1 Compatible Apple LLVM 7.
+0.
+0] on darwin
+Type "help", "copyright", "credits" or "license" for more info.
+
+>>> import Silo
+Or, if you prefer to use sys.
+path.
+append...
+
+python
+Python 2.
+7.
+10 (default, Oct 23 2015, 19:19:21) 
+[GCC 4.
+2.
+1 Compatible Apple LLVM 7.
+0.
+0] on darwin
+Type "help", "copyright", "credits" or "license" for more info.
+
+>>> import sys
+>>> sys.
+path.
+append(“/foo/bar/lib”)
+>>> import Silo
+
+### `Silo.Open()` - Open a Silo file (See DBOpen)
+
+#### C Signature
+```
+DBfile Silo.Open(filename, flags);
+```
+
+### `Silo.Open()` - Open a Silo file (See DBOpen)
+
+#### C Signature
+```
+DBfile Silo.Open(filename, flags);
+```
+
+### `Silo.Create()` - Create a new silo file (See DBCreate)
+
+#### C Signature
+```
+DBfile Silo.Create(filename, info, driver, clobber)
+```
+
+### `<DBfile>.GetToc()` - Get the table of contents
+
+#### C Signature
+```
+DBtoc <DBfile>.GetToc()
+    Description:
+    Returns a DBToc object as a Python object. This probably should really be a Python dictionary object but it is not presently. There are no methods defined for a DBToc object but if you print it, you can get the list of objects in the current working directory in the file.
+    <DBfile>.GetVarInfo
+    —Get metadata and bulk data of any object (See DBGetObject)
+    Synopsis:
+    dict <DBfile>.GetVarInfo(name, flag)
+```
+
+### `<DBfile>.GetVarInfo()` - Get metadata and bulk data of any object (See DBGetObject)
+
+#### C Signature
+```
+dict <DBfile>.GetVarInfo(name, flag)
+```
+
+### `<DBfile>.GetVar()` - Get a primitive array (See DBReadVar)
+
+#### C Signature
+```
+tuple <DBfile>.GetVar(name)
+```
+
+### `<DBfile>.SetDir()` - Set current working directory of the Silo file (See DBSetDir)
+
+#### C Signature
+```
+NoneType <DBfile>.SetDir(name)
+```
+
+### `<DBfile>.Close()` - Close the Silo file
+
+#### C Signature
+```
+NoneType <DBfile>.Close()
+    Description:
+    Close the Silo file
+    <DBfile>.WriteObject
+    —Write a Python dictionary as a Silo object (See DBWriteObject)
+    Synopsis:
+    NoneType <DBfile>.WriteObject(name, obj_dict)
+```
+
+### `<DBfile>.WriteObject()` - Write a Python dictionary as a Silo object (See DBWriteObject)
+
+#### C Signature
+```
+NoneType <DBfile>.WriteObject(name, obj_dict)
+```
+
+### `<DBfile>.Write()` - Write primitive array data to a Silo file (see DBWrite)
+
+#### C Signature
+```
+NoneType <DBfile>.Write(name, data)
+```
+
+### `<DBfile>.MkDir()` - Make a directory in a Silo file
+
+#### C Signature
+```
+NoneType <DBfile>.MkDir(name)
+```
+
