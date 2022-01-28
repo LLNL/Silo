@@ -49,6 +49,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutMultimesh returns zero on success and -1 on failure.
+
 ### `DBGetMultimesh()` - Read a multi-block mesh from a Silo database.
 
 #### C Signature
@@ -67,6 +68,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetMultimesh returns a pointer to a DBmultimesh structure on success and NULL on failure.
+
 ### `DBPutMultimeshadj()` - Write some or all of a multi-mesh adjacency object into a Silo file.
 
 #### C Signature
@@ -120,6 +122,7 @@ Arg name | Description
 
 #### Returned value:
 A pointer to a fully or partially populated DBmultimeshadj object or NULL on failure.
+
 ### `DBPutMultivar()` - Write a multi-block variable object into a Silo file.
 
 #### C Signature
@@ -146,6 +149,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutMultivar returns zero on success and -1 on failure.
+
 ### `DBGetMultivar()` - Read a multi-block variable definition from a Silo database.
 
 #### C Signature
@@ -164,6 +168,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetMultivar returns a pointer to a DBmultivar structure on success and NULL on failure.
+
 ### `DBPutMultimat()` - Write a multi-block material object into a Silo file.
 
 #### C Signature
@@ -187,6 +192,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutMultimat returns zero on success and -1 on error.
+
 ### `DBGetMultimat()` - Read a multi-block material object from a Silo database
 
 #### C Signature
@@ -205,6 +211,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetMultimat returns a pointer to a DBmultimat structure on success and NULL on failure.
+
 ### `DBPutMultimatspecies()` - Write a multi-block species object into a Silo file.
 
 #### C Signature
@@ -228,6 +235,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutMultimatspecies returns zero on success and -1 on failure.
+
 ### `DBGetMultimatspecies()` - Read a multi-block species from a Silo database.
 
 #### C Signature
@@ -247,6 +255,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetMultimatspecies returns a pointer to a DBmultimatspecies structure on success and NULL on failure.
+
 ### `DBOpenByBcast()` - Specialized, read-only open method for parallel applications needing all processors to read all (or most of) a given Silo file
 
 #### C Signature
@@ -267,6 +276,7 @@ Arg name | Description
 
 #### Returned value:
 A Silo database file handle just as returned from DBOpen or DBCreate except that the file is read-only. Available only for reading Silo files produced via the HDF5 driver.
+
 ### `PMPIO_Init()` - Initialize a Poor Man’s Parallel I/O interaction with the Silo library
 
 #### C Signature
@@ -296,6 +306,7 @@ Arg name | Description
 
 #### Returned value:
 A pointer to a PMPIO_baton_t object to be used in subsequent PMPIO calls on success. NULL on failure.
+
 ### `PMPIO_CreateFileCallBack()` - The PMPIO file creation callback
 
 #### C Signature
@@ -316,6 +327,7 @@ Arg name | Description
 
 #### Returned value:
 A void pointer to the created file handle.
+
 ### `PMPIO_OpenFileCallBack()` - The PMPIO file open callback
 
 #### C Signature
@@ -337,6 +349,7 @@ Arg name | Description
 
 #### Returned value:
 A void pointer to the opened file handle that was.
+
 ### `PMPIO_CloseFileCallBack()` - The PMPIO file close callback
 
 #### C Signature
@@ -354,7 +367,7 @@ Arg name | Description
 `udata` | A pointer to any additional user data. This is the pointer passed as the userData argument to PMPIO_Init().
 
 #### Returned value:
-None.
+void
 ### `PMPIO_WaitForBaton()` - Wait for exclusive access to a Silo file
 
 #### C Signature
@@ -375,6 +388,7 @@ Arg name | Description
 
 #### Returned value:
 NULL (0) on failure. Otherwise, for PMPIO_WRITE operations the return value is whatever the create or open file callback functions return. For PMPIO_READ operations, the return value is whatever the open file callback function returns.
+
 ### `PMPIO_HandOffBaton()` - Give up all access to a Silo file
 
 #### C Signature
@@ -393,7 +407,7 @@ Arg name | Description
 `file` | A void pointer to the Silo DBfile object.
 
 #### Returned value:
-None.
+void
 ### `PMPIO_Finish()` - Finish a Poor Man’s Parallel I/O interaction with the Silo library
 
 #### C Signature
@@ -410,7 +424,7 @@ Arg name | Description
 `bat` | The PMPIO baton handle obtained via a call to PMPIO_Init().
 
 #### Returned value:
-None.
+void
 ### `PMPIO_GroupRank()` - Obtain ‘group rank’ of a processor
 
 #### C Signature
@@ -429,6 +443,7 @@ Arg name | Description
 
 #### Returned value:
 The ‘group rank’ of the queiried processor. In other words, the group number of the queried processor, indexed from zero.
+
 ### `PMPIO_RankInGroup()` - Obtain the rank of a processor within its PMPIO group
 
 #### C Signature
@@ -447,3 +462,4 @@ Arg name | Description
 
 #### Returned value:
 The rank of the queried processor within its PMPIO group.
+

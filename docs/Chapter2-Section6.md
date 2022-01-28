@@ -32,6 +32,7 @@ Arg name | Description
 
 #### Returned value:
 DBCalcExternalFacelist returns a DBfacelist pointer on success and NULL on failure.
+
 ### `DBCalcExternalFacelist2()` - Calculate an external facelist for a UCD mesh containing ghost zones.
 
 #### C Signature
@@ -62,6 +63,7 @@ Arg name | Description
 
 #### Returned value:
 DBCalcExternalFacelist2 returns a DBfacelist pointer on success and NULL on failure.
+
 ### `DBStringArrayToStringList()` - Utility to catentate a group of strings into a single, semi-colon delimited string.
 
 #### C Signature

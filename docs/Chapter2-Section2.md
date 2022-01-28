@@ -45,6 +45,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutCurve returns zero on success and -1 on failure.
+
 ### `DBGetCurve()` - Read a curve from a Silo database. 
 
 #### C Signature
@@ -64,6 +65,7 @@ Arg name | Description
 
 #### Returned value:
 DBCurve returns a pointer to a DBcurve structure on success and NULL on failure.
+
 ### `DBPutPointmesh()` - Write a point mesh object into a Silo file.
 
 #### C Signature
@@ -92,6 +94,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutPointmesh returns zero on success and -1 on failure.
+
 ### `DBGetPointmesh()` - Read a point mesh from a Silo database.
 
 #### C Signature
@@ -106,6 +109,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetPointmesh returns a pointer to a DBpointmesh structure on success and NULL on failure.
+
 ### `DBPutPointvar()` - Write a vector/tensor point variable object into a Silo file.
 
 #### C Signature
@@ -131,6 +135,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutPointvar returns zero on success and -1 on failure.
+
 ### `DBPutPointvar1()` - Write a scalar point variable object into a Silo file.
 
 #### C Signature
@@ -157,6 +162,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutPointvar1 returns zero on success and -1 on failure.
+
 ### `DBGetPointvar()` - Read a point variable from a Silo database.
 
 #### C Signature
@@ -175,6 +181,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetPointvar returns a pointer to a DBmeshvar structure on success and NULL on failure.
+
 ### `DBPutQuadmesh()` - Write a quad mesh object into a Silo file.
 
 #### C Signature
@@ -208,6 +215,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutQuadmesh returns zero on success and -1 on failure.
+
 ### `DBGetQuadmesh()` - Read a quadrilateral mesh from a Silo database.
 
 #### C Signature
@@ -226,6 +234,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetQuadmesh returns a pointer to a DBquadmesh structure on success and NULL on failure.
+
 ### `DBPutQuadvar()` - Write a vector/tensor quad variable object into a Silo file.
 
 #### C Signature
@@ -266,6 +275,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutQuadvar returns zero on success and -1 on failure.
+
 ### `DBPutQuadvar1()` -  Write a scalar quad variable object into a Silo file.
 
 #### C Signature
@@ -298,6 +308,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutQuadvar1 returns zero on success and -1 on failure.
+
 ### `DBGetQuadvar()` - Read a quadrilateral variable from a Silo database.
 
 #### C Signature
@@ -316,6 +327,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetQuadvar returns a pointer to a DBquadvar structure on success and NULL on failure.
+
 ### `DBPutUcdmesh()` - Write a UCD mesh object into a Silo file.
 
 #### C Signature
@@ -353,6 +365,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutUcdmesh returns zero on success and -1 on failure.
+
 ### `DBPutUcdsubmesh()` - Write a subset of a parent, ucd mesh, to a Silo file
 
 #### C Signature
@@ -378,6 +391,7 @@ Arg name | Description
 
 #### Returned value:
 A positive number on success; -1 on failure
+
 ### `DBGetUcdmesh()` - Read a UCD mesh from a Silo database.
 
 #### C Signature
@@ -396,6 +410,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetUcdmesh returns a pointer to a DBucdmesh structure on success and NULL on failure.
+
 ### `DBPutZonelist()` - Write a zonelist object into a Silo file.
 
 #### C Signature
@@ -426,6 +441,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutZonelist returns zero on success or -1 on failure.
+
 ### `DBPutZonelist2()` - Write a zonelist object containing ghost zones into a Silo file.
 
 #### C Signature
@@ -462,6 +478,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutZonelist2 returns zero on success or -1 on failure.
+
 ### `DBPutPHZonelist()` - Write an arbitrary, polyhedral zonelist object into a Silo file.
 
 #### C Signature
@@ -496,6 +513,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutPHZonelist returns zero on success or -1 on failure.
+
 ### `DBGetPHZonelist()` - Read a polyhedral-zonelist from a Silo database.
 
 #### C Signature
@@ -515,6 +533,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetPHZonelist returns a pointer to a DBphzonelist structure on success and NULL on failure.
+
 ### `DBPutFacelist()` - Write a facelist object into a Silo file.
 
 #### C Signature
@@ -551,6 +570,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutFacelist returns zero on success or -1 on failure.
+
 ### `DBPutUcdvar()` - Write a vector/tensor UCD variable object into a Silo file.
 
 #### C Signature
@@ -583,6 +603,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutUcdvar returns zero on success and -1 on failure.
+
 ### `DBPutUcdvar1()` - Write a scalar UCD variable object into a Silo file.
 
 #### C Signature
@@ -614,6 +635,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutUcdvar1 returns zero on success and -1 on failure.
+
 ### `DBGetUcdvar()` - Read a UCD variable from a Silo database.
 
 #### C Signature
@@ -632,6 +654,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetUcdvar returns a pointer to a DBucdvar structure on success and NULL on failure.
+
 ### `DBPutCsgmesh()` - Write a CSG mesh object to a Silo file
 
 #### C Signature
@@ -667,6 +690,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutCsgMesh returns zero on success and -1 on failure.
+
 ### `DBGetCsgmesh()` - Get a CSG mesh object from a Silo file
 
 #### C Signature
@@ -729,6 +753,7 @@ optlist
 Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use NULL if there are no options.
 Returns:
 DBPutCSGZonelist returns zero on success and -1 on failure.
+
 ### `DBPutCSGZonelist()` - Put a CSG zonelist object in a Silo file.
 
 #### C Signature
@@ -766,6 +791,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutCSGZonelist returns zero on success and -1 on failure.
+
 ### `DBGetCSGZonelist()` - Read a CSG mesh zonelist from a Silo file
 
 #### C Signature
@@ -819,6 +845,7 @@ centering
 The centering of the CSG variable (DB_ZONECENT or DB_BNDCENT)
 optlist
 Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use NULL if there are no options
+
 ### `DBPutCsgvar()` - Write a CSG mesh variable to a Silo file
 
 #### C Signature
@@ -915,6 +942,7 @@ optlist
 Pointer to an option list structure containing additional information to be included in the material object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use NULL for this argument.
 Returns:
 DBPutMaterial returns zero on success and -1 on failure.
+
 ### `DBPutMaterial()` - Write a material data object into a Silo file.
 
 #### C Signature
@@ -955,6 +983,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutMaterial returns zero on success and -1 on failure.
+
 ### `DBGetMaterial()` - Read material data from a Silo database.
 
 #### C Signature
@@ -973,6 +1002,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetMaterial returns a pointer to a DBmaterial structure on success and NULL on failure.
+
 ### `DBPutMatspecies()` - Write a material species data object into a Silo file.
 
 #### C Signature
@@ -1011,6 +1041,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutMatspecies returns zero on success and -1 on failure.
+
 ### `DBGetMatspecies()` - Read material species data from a Silo database.
 
 #### C Signature
@@ -1030,6 +1061,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetMatspecies returns a pointer to a DBmatspecies structure on success and NULL on failure.
+
 ### `DBPutDefvars()` - Write a derived variable definition(s) object into a Silo file.
 
 #### C Signature
@@ -1059,6 +1091,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutDefvars returns zero on success and -1 on failure.
+
 ### `DBGetDefvars()` - Get a derived variables definition object from a Silo file.
 
 #### C Signature
@@ -1077,6 +1110,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetDefvars returns a pointer to a DBdefvars structure on success and NULL on failure.
+
 ### `DBInqMeshname()` - Inquire the mesh name associated with a variable.
 
 #### C Signature
@@ -1097,6 +1131,7 @@ Arg name | Description
 
 #### Returned value:
 DBInqMeshname returns zero on success and -1 on failure.
+
 ### `DBInqMeshtype()` - Inquire the mesh type of a mesh.
 
 #### C Signature
@@ -1115,3 +1150,4 @@ Arg name | Description
 
 #### Returned value:
 DBInqMeshtype returns the mesh type on success and -1 on failure.
+

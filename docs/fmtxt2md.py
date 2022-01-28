@@ -123,6 +123,7 @@ def ProcessSynopsis(mdfile, i, lines):
                     mdfile.write("\n")
                 i += 1
             mdfile.write("```\n")
+    mdfile.write("\n")
     return i
 
 def ProcessArgumentListBlock(mdfile, i, lines):
@@ -152,6 +153,7 @@ def ProcessArgumentListBlock(mdfile, i, lines):
         mdfile.write("`%s` | %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
         j += 2
     mdfile.write("\n")
+    print(lines[i])
     return i
 
 def ProcessReturnBlock(mdfile, i, lines):
@@ -169,7 +171,8 @@ def ProcessReturnBlock(mdfile, i, lines):
             mdfile.write("\n")
             j += 1
     else:
-        mdfile.write("None.\n");
+        mdfile.write("void");
+    mdfile.write("\n")
     return i
 
 
@@ -179,7 +182,6 @@ def ProcessMethod(mdfile, i, lines):
     while i < len(lines) and not IsMethodHeader(i, lines):
         if re.search(r'^Synopsis:$', lines[i]):
             i = ProcessSynopsis(mdfile, i, lines)
-            mdfile.write("\n")    
         if re.search(r'^Arguments:$', lines[i]):
             i = ProcessArgumentListBlock(mdfile, i, lines)
         if re.search(r'^Returns:$', lines[i]):

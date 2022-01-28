@@ -30,6 +30,7 @@ Arg name | Description
 
 #### Returned value:
 DBWrite returns zero on success and -1 on failure.
+
 ### `DBWriteSlice()` - Write a (hyper)slab of a simple variable
 
 #### C Signature
@@ -59,6 +60,7 @@ Arg name | Description
 
 #### Returned value:
 DBWriteSlice returns zero on success and -1 on failure.
+
 ### `DBReadVar()` - Read a simple Silo variable.
 
 #### C Signature
@@ -78,6 +80,7 @@ Arg name | Description
 
 #### Returned value:
 DBReadVar returns zero on success and -1 on failure.
+
 ### `DBReadVarSlice()` - Read a (hyper)slab of data from a simple variable.
 
 #### C Signature
@@ -104,6 +107,7 @@ Arg name | Description
 
 #### Returned value:
 DBReadVarSlice returns zero on success and -1 on failure.
+
 ### `DBGetVar()` - Allocate space for, and return, a simple variable.
 
 #### C Signature
@@ -122,6 +126,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetVar returns a pointer to newly allocated space on success and NULL on failure.
+
 ### `DBInqVarExists()` - Queries variable existence
 
 #### C Signature
@@ -140,6 +145,7 @@ Arg name | Description
 
 #### Returned value:
 DBInqVarExists returns non-zero if the object exists in the file. Zero otherwise.
+
 ### `DBInqVarType()` - Return the type of the given object
 
 #### C Signature
@@ -158,6 +164,7 @@ Arg name | Description
 
 #### Returned value:
 DBInqVarType returns the DBObjectType corresponding to the given object.
+
 ### `DBGetVarByteLength()` - Return the byte length of a simple variable.
 
 #### C Signature
@@ -176,6 +183,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetVarByteLength returns the length of the given simple variable in bytes on success and -1 on failure.
+
 ### `DBGetVarDims()` - Get dimension information of a variable in a Silo file
 
 #### C Signature
@@ -197,6 +205,7 @@ Arg name | Description
 
 #### Returned value:
 The number of dimensions on success; -1 on failure
+
 ### `DBGetVarLength()` - Return the number of elements in a simple variable.
 
 #### C Signature
@@ -215,6 +224,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetVarLength returns the number of elements in the given simple variable on success and -1 on failure.
+
 ### `DBGetVarType()` - Return the Silo datatype of a simple variable.
 
 #### C Signature
@@ -233,6 +243,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetVarType returns the Silo datatype of the given simple variable on success and -1 on failure.
+
 ### `DBPutCompoundarray()` - Write a Compound Array object into a Silo file.
 
 #### C Signature
@@ -264,6 +275,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutCompoundarray returns zero on success and -1 on failure.
+
 ### `DBInqCompoundarray()` - Inquire Compound Array attributes.
 
 #### C Signature
@@ -290,6 +302,7 @@ Arg name | Description
 
 #### Returned value:
 DBInqCompoundarray returns zero on success and -1 on failure.
+
 ### `DBGetCompoundarray()` - Read a compound array from a Silo database.
 
 #### C Signature
@@ -310,6 +323,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetCompoundarray returns a pointer to a DBcompoundarray structure on success and NULL on failure.
+
 ### `DBMakeObject()` - Allocate an object of the specified length and initialize it.
 
 #### C Signature
@@ -330,6 +344,7 @@ Arg name | Description
 
 #### Returned value:
 DBMakeObject returns a pointer to the newly allocated and initialized object on success and NULL on failure.
+
 ### `DBFreeObject()` - Free memory associated with an object.
 
 #### C Signature
@@ -347,6 +362,7 @@ Arg name | Description
 
 #### Returned value:
 DBFreeObject returns zero on success and -1 on failure.
+
 ### `DBChangeObject()` - Overwrite an existing object in a Silo file with a new object
 
 #### C Signature
@@ -365,6 +381,7 @@ Arg name | Description
 
 #### Returned value:
 Zero on succes; -1 on failure
+
 ### `DBClearObject()` - Clear an object.
 
 #### C Signature
@@ -382,6 +399,7 @@ Arg name | Description
 
 #### Returned value:
 DBClearObject returns zero on success and -1 on failure.
+
 ### `DBAddDblComponent()` - Add a double precision floating point component to an object.
 
 #### C Signature
@@ -402,6 +420,7 @@ Arg name | Description
 
 #### Returned value:
 DBAddDblComponent returns zero on success and -1 on failure.
+
 ### `DBAddFltComponent()` - Add a floating point component to an object.
 
 #### C Signature
@@ -422,6 +441,7 @@ Arg name | Description
 
 #### Returned value:
 DBAddFltComponent returns zero on success and -1 on failure.
+
 ### `DBAddIntComponent()` - Add an integer component to an object.
 
 #### C Signature
@@ -442,6 +462,7 @@ Arg name | Description
 
 #### Returned value:
 DBAddIntComponent returns zero on success and -1 on failure.
+
 ### `DBAddStrComponent()` - Add a string component to an object.
 
 #### C Signature
@@ -462,6 +483,7 @@ Arg name | Description
 
 #### Returned value:
 DBAddStrComponent returns zero on success and -1 on failure.
+
 ### `DBAddVarComponent()` - Add a variable component to an object.
 
 #### C Signature
@@ -482,6 +504,7 @@ Arg name | Description
 
 #### Returned value:
 DBAddVarComponent returns zero on success and -1 on failure.
+
 ### `DBWriteComponent()` - Add a variable component to an object and write the associated data.
 
 #### C Signature
@@ -509,6 +532,7 @@ Arg name | Description
 
 #### Returned value:
 DBWriteComponent returns zero on success and -1 on failure.
+
 ### `DBWriteObject()` - Write an object into a Silo file.
 
 #### C Signature
@@ -529,6 +553,7 @@ Arg name | Description
 
 #### Returned value:
 DBWriteObject returns zero on success and -1 on failure.
+
 ### `DBGetObject()` - Read an object from a Silo file as a generic object
 
 #### C Signature
@@ -547,6 +572,7 @@ Arg name | Description
 
 #### Returned value:
 On success, a pointer to a DBobject struct containing the object’s data. NULL on failure.
+
 ### `DBGetComponent()` - Allocate space for, and return, an object component.
 
 #### C Signature
@@ -567,6 +593,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetComponent returns a pointer to newly allocated space containing the component value on success, and NULL on failure.
+
 ### `DBGetComponentType()` - Return the type of an object component.
 
 #### C Signature
@@ -589,3 +616,4 @@ Arg name | Description
 The values that are returned depend on the component’s type and how the component was written into the object. The component types and their corresponding return values are listed in the table below.
 Component Type	Integer	Float	Double	String	Variable	all others
 Return value	DB_INT	DB_FLOAT	DB_DOUBLE	DB_CHAR	DB_VARIABLE	DB_NOTYPE
+

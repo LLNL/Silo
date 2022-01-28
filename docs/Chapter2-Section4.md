@@ -44,6 +44,7 @@ Arg name | Description
 
 #### Returned value:
 A pointer to a new DBmrgtree object on success and NULL on failure
+
 ### `DBAddRegion()` - Add a region to an MRG tree
 
 #### C Signature
@@ -75,6 +76,7 @@ Arg name | Description
 
 #### Returned value:
 A positive number on success; -1 on failure
+
 ### `DBAddRegionArray()` - Efficiently add multiple, like-kind regions to an MRG tree
 
 #### C Signature
@@ -107,6 +109,7 @@ Arg name | Description
 
 #### Returned value:
 A positive number on success; -1 on failure
+
 ### `DBSetCwr()` - Set the current working region for an MRG tree
 
 #### C Signature
@@ -125,6 +128,7 @@ Arg name | Description
 
 #### Returned value:
 Positive, depth in tree, on success, -1 on failure.
+
 ### `DBGetCwr()` - Get the current working region of an MRG tree
 
 #### C Signature
@@ -138,6 +142,7 @@ Arg name | Description
 
 #### Returned value:
 A pointer to a string representing the name of the current working region (not the full path name, just current region name) on success; NULL (0) on failure.
+
 ### `DBPutMrgtree()` - Write a completed MRG tree object to a Silo file
 
 #### C Signature
@@ -162,6 +167,7 @@ Arg name | Description
 
 #### Returned value:
 Positive or zero on success, -1 on failure.
+
 ### `DBGetMrgtree()` - Read an MRG tree object from a Silo file
 
 #### C Signature
@@ -180,6 +186,7 @@ Arg name | Description
 
 #### Returned value:
 A pointer to a DBmrgtree object on success; NULL (0) on failure.
+
 ### `DBFreeMrgtree()` - Free the memory associated by an MRG tree object
 
 #### C Signature
@@ -196,7 +203,7 @@ Arg name | Description
 `tree` | The MRG tree object to free.
 
 #### Returned value:
-None.
+void
 ### `DBMakeNamescheme()` - Create a DBnamescheme object for on-demand name generation
 
 #### C Signature
@@ -230,6 +237,7 @@ Arg name | Description
 
 #### Returned value:
 A string representing the generated name. If there are problems with the namescheme, the string could be of length zero (e.g. the first character is a null terminator).
+
 ### `DBPutMrgvar()` - Write variable data to be associated with (some) regions in an MRG tree
 
 #### C Signature
@@ -265,6 +273,7 @@ Arg name | Description
 
 #### Returned value:
 Zero on success; -1 on failure.
+
 ### `DBGetMrgvar()` - Retrieve an MRG variable object from a silo file
 
 #### C Signature
@@ -320,6 +329,7 @@ opts
 Additional options
 Returns:
 Zero on success; -1 on failure.
+
 ### `DBPutGroupelmap()` - Write a groupel map object to a Silo file
 
 #### C Signature
@@ -354,6 +364,7 @@ Arg name | Description
 
 #### Returned value:
 Zero on success; -1 on failure.
+
 ### `DBGetGroupelmap()` - Read a groupel map object from a Silo file
 
 #### C Signature
@@ -383,6 +394,7 @@ Arguments:
 map
 Pointer to a DBgroupel map object.
 Returns:
+
 ### `DBFreeGroupelmap()` - Free memory associated with a groupel map object
 
 #### C Signature
@@ -399,7 +411,7 @@ Arg name | Description
 `map` | Pointer to a DBgroupel map object.
 
 #### Returned value:
-None.
+void
 ### `DBOPT_REGION_PNAMES()` - option for defining variables on specific regions of a mesh
 
 #### C Signature
@@ -461,3 +473,4 @@ None
 
 #### Returned value:
 These allocation functions return a pointer to a newly allocated and initialized structure on success and NULL on failure.
+

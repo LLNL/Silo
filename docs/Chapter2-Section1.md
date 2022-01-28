@@ -39,6 +39,7 @@ Arg name | Description
 
 #### Returned value:
 -1 on failure. Otherwise, the integer index of a registered file options set is returned.
+
 ### `DBUnregisterFileOptionsSet()` - Unregister a registered file options set
 
 #### C Signature
@@ -55,6 +56,7 @@ Arg name | Description
 
 #### Returned value:
 Zero on success. -1 on failure.
+
 ### `DBUnregisterAllFileOptionsSets()` - Unregister all file options sets
 
 #### C Signature
@@ -68,6 +70,7 @@ int DBUnregisterAllFileOptionsSets()
 #### Arguments: None
 #### Returned value:
 Zero on success, -1 on failure.
+
 ### `DBSetUnknownDriverPriorities()` - Set driver priorities for opening files with the DB_UNKNOWN driver.
 
 #### C Signature
@@ -85,6 +88,7 @@ Arg name | Description
 
 #### Returned value:
 The previous
+
 ### `DBGetUnknownDriverPriorities()` - Return the currently defined ordering of drivers the DB_UNKNOWN driver will attempt.
 
 #### C Signature
@@ -120,6 +124,7 @@ Arg name | Description
 
 #### Returned value:
 DBCreate returns a DBfile pointer on success and NULL on failure. Note that DBCreate creates only the file part of the pathname. Any pathname components specifying directories must already exist in the filesystem.
+
 ### `DBOpen()` - Open an existing Silo file.
 
 #### C Signature
@@ -141,6 +146,7 @@ Arg name | Description
 
 #### Returned value:
 DBOpen returns a DBfile pointer on success and a NULL on failure.
+
 ### `DBClose()` - Close a Silo database.
 
 #### C Signature
@@ -158,6 +164,7 @@ Arg name | Description
 
 #### Returned value:
 DBClose returns zero on success and -1 on failure.
+
 ### `DBGetToc()` - Get the table of contents of a Silo database.
 
 #### C Signature
@@ -175,6 +182,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetToc returns a pointer to a DBtoc structure on success and NULL on error.
+
 ### `DBFileVersion()` - Version of the Silo library used to create the specified file
 
 #### C Signature
@@ -192,6 +200,7 @@ Arg name | Description
 
 #### Returned value:
 A character string representation of the version number of the Silo library that was used to create the Silo file. The caller should NOT free the returned string.
+
 ### `DBFileVersionDigits()` - Return integer digits of file version number
 
 #### C Signature
@@ -251,6 +260,7 @@ ordering
 Returned integer array of relative order of occurence in the file of each object. For example, if ordering[i]==k, that means the object whose name is obj_names[i] occurs kth when the objects are ordered according to offset at which they exist in the file.
 Returns:
 0 on succes; -1 on failure. The only possible reason for failure is if the HDF5 driver is being used to read the file and Silo is not compiled with HDF5 version 1.8 or later.
+
 ### `DBFileVersionGE()` - Greater than or equal comparison for version of the Silo library a given file was created with
 
 #### C Signature
@@ -296,6 +306,7 @@ ordering
 Returned integer array of relative order of occurence in the file of each object. For example, if ordering[i]==k, that means the object whose name is obj_names[i] occurs kth when the objects are ordered according to offset at which they exist in the file.
 Returns:
 0 on succes; -1 on failure. The only possible reason for failure is if the HDF5 driver is being used to read the file and Silo is not compiled with HDF5 version 1.8 or later.
+
 ### `DBVersionGEFileVersion()` - Compare library version with file version
 
 #### C Signature
@@ -328,6 +339,7 @@ ordering
 Returned integer array of relative order of occurence in the file of each object. For example, if ordering[i]==k, that means the object whose name is obj_names[i] occurs kth when the objects are ordered according to offset at which they exist in the file.
 Returns:
 0 on succes; -1 on failure. The only possible reason for failure is if the HDF5 driver is being used to read the file and Silo is not compiled with HDF5 version 1.8 or later.
+
 ### `DBSortObjectsByOffset()` - Sort list of object names by order of offset in the file
 
 #### C Signature
@@ -348,6 +360,7 @@ Arg name | Description
 
 #### Returned value:
 0 on succes; -1 on failure. The only possible reason for failure is if the HDF5 driver is being used to read the file and Silo is not compiled with HDF5 version 1.8 or later.
+
 ### `DBMkDir()` - Create a new directory in a Silo file.
 
 #### C Signature
@@ -366,6 +379,7 @@ Arg name | Description
 
 #### Returned value:
 DBMkDir returns zero on success and -1 on failure.
+
 ### `DBSetDir()` - Set the current directory within the Silo database.
 
 #### C Signature
@@ -384,6 +398,7 @@ Arg name | Description
 
 #### Returned value:
 DBSetDir returns zero on success and -1 on failure.
+
 ### `DBGetDir()` - Get the name of the current directory.
 
 #### C Signature
@@ -402,6 +417,7 @@ Arg name | Description
 
 #### Returned value:
 DBGetDir returns zero on success and -1 on failure.
+
 ### `DBCpDir()` - Copy a directory hierarchy from one Silo file to another.
 
 #### C Signature
@@ -423,6 +439,7 @@ Arg name | Description
 
 #### Returned value:
 DBCpDir returns 0 on success, -1 on failure
+
 ### `DBCpListedObjects()` - Copy lists of objects from one Silo database to another
 
 #### C Signature
@@ -446,6 +463,7 @@ Arg name | Description
 
 #### Returned value:
 Returns 0 on success, -1 on failure
+
 ### `DBGrabDriver()` - Obtain the low-level driver file handle
 
 #### C Signature
@@ -463,6 +481,7 @@ Arg name | Description
 
 #### Returned value:
 A void pointer to the low-level driver’s file handle on success. NULL(0) on failure.
+
 ### `DBUngrabDriver()` - Ungrab the low-level file driver
 
 #### C Signature
@@ -481,6 +500,7 @@ Arg name | Description
 
 #### Returned value:
 The driver type on success, DB_UNKNOWN on failure.
+
 ### `DBGetDriverType()` - Get the type of driver for the specified file
 
 #### C Signature
@@ -498,6 +518,7 @@ Arg name | Description
 
 #### Returned value:
 DB_UNKNOWN for failure. Otherwise, the specified driver type is returned
+
 ### `DBGetDriverTypeFromPath()` - Guess the driver type used by a file with the given pathname
 
 #### C Signature
@@ -515,6 +536,7 @@ Arg name | Description
 
 #### Returned value:
 DB_UNKNOWN on failure to determine type. Otherwise, the driver type such as DB_PDB, DB_HDF5.
+
 ### `DBInqFile()` - Inquire if filename is a Silo file.
 
 #### C Signature
@@ -532,6 +554,7 @@ Arg name | Description
 
 #### Returned value:
 DBInqFile returns 0 if filename is not a Silo file, a positive number if filename is a Silo file, and a negative number if an error occurred.
+
 ### `DBInqFileHasObjects()` - Determine if an open file has any Silo objects
 
 #### C Signature
@@ -643,6 +666,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutCurve returns zero on success and -1 on failure.
+
 ### `_hdf5libinfo()` - character array written by Silo to root directory indicating the HDF5 library version number used to generate the file
 
 #### C Signature
@@ -729,6 +753,7 @@ Arg name | Description
 
 #### Returned value:
 DBPutCurve returns zero on success and -1 on failure.
+
 ### `_was_grabbed()` - single integer written by Silo to root directory whenever a Silo file has been grabbed.
 
 #### C Signature
@@ -805,3 +830,4 @@ Arg name | Description
 
 #### Returned value:
 DBPutCurve returns zero on success and -1 on failure.
+

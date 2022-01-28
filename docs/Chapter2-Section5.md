@@ -44,6 +44,7 @@ None
 
 #### Returned value:
 These allocation functions return a pointer to a newly allocated and initialized structure on success and NULL on failure.
+
 ### `DBFree…()` - Release memory associated with a Silo structure.
 
 #### C Signature
@@ -84,6 +85,7 @@ Arg name | Description
 
 #### Returned value:
 These free functions return zero on success and -1 on failure.
+
 ### `DBIsEmpty()` - Query a object returned from Silo for “emptiness”
 
 #### C Signature

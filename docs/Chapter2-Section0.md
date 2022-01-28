@@ -19,6 +19,7 @@ None
 
 #### Returned value:
 DBErrfuncname returns a char const * containing the name of the function that generated the last error. It cannot fail.
+
 ### `DBErrno()` - Get internal error number.
 
 #### C Signature
@@ -32,6 +33,7 @@ integer function dberrno()
 
 #### Returned value:
 DBErrno returns the internal error number of the last error. It cannot fail.
+
 ### `DBErrString()` - Get error message.
 
 #### C Signature
@@ -45,6 +47,7 @@ None
 
 #### Returned value:
 DBErrString returns a char const * containing the last error message. It cannot fail.
+
 ### `DBShowErrors()` - Set the error reporting mode.
 
 #### C Signature
@@ -63,6 +66,7 @@ Arg name | Description
 
 #### Returned value:
 DBShowErrors returns nothing (void). It cannot fail.
+
 ### `DBErrlvl()` - Return current error level setting of the library
 
 #### C Signature
@@ -81,6 +85,7 @@ DBErrfunc
 Synopsis:
 void (*func)(char*) DBErrfunc(void);
 Fortran Equivalent:
+
 ### `DBErrfunc()` - Get current error function set by DBShowErrors()
 
 #### C Signature
@@ -109,6 +114,7 @@ Arg name | Description
 
 #### Returned value:
 non-zero if the given character string represents a valid Silo variable name; zero otherwise
+
 ### `DBVersion()` - Get the version of the Silo library.
 
 #### C Signature
@@ -122,6 +128,7 @@ None
 
 #### Returned value:
 DBVersion returns the version as a character string.
+
 ### `DBVersionDigits()` - Return the integer version digits of the library
 
 #### C Signature
@@ -156,6 +163,7 @@ Pat
 Integer, patch version number
 Returns:
 One (1) if the library’s version number is greater than or equal to the version number specified by Maj, Min, Pat arguments, zero (0) otherwise.
+
 ### `DBVersionGE()` - Greater than or equal comparison for version of the Silo library
 
 #### C Signature
@@ -175,6 +183,7 @@ Arg name | Description
 
 #### Returned value:
 One (1) if the library’s version number is greater than or equal to the version number specified by Maj, Min, Pat arguments, zero (0) otherwise.
+
 ### `DBSetAllowOverwrites()` - Allow library to over-write existing objects in Silo files
 
 #### C Signature
@@ -192,6 +201,7 @@ Arg name | Description
 
 #### Returned value:
 Returns the previous setting of the value.
+
 ### `DBGetAllowOverwrites()` - Get current setting for the allow overwrites flag
 
 #### C Signature
@@ -205,6 +215,7 @@ integer function dbgetovrwrt()
 
 #### Returned value:
 Returns the current setting for the allow overwrites flag
+
 ### `DBSetAllowEmptyObjects()` - Permit the creation of empty silo objects
 
 #### C Signature
@@ -222,6 +233,7 @@ Arg name | Description
 
 #### Returned value:
 The previous setting of this value is returned.
+
 ### `DBGetAllowEmptyObjects()` - Get current setting for the allow empty objects flag
 
 #### C Signature
@@ -251,6 +263,7 @@ Arg name | Description
 
 #### Returned value:
 Zero on success. -1 on failure
+
 ### `DBGetDatatypeString()` - Return a string name for a given Silo datatype
 
 #### C Signature
@@ -268,6 +281,7 @@ Arg name | Description
 
 #### Returned value:
 A pointer to a newly allocated string representing the data type name. The caller must free the returned string.
+
 ### `DBSetDataReadMask2()` - Set the data read mask
 
 #### C Signature
@@ -285,6 +299,7 @@ Arg name | Description
 
 #### Returned value:
 DBSetDataReadMask2 returns the previous data read mask.
+
 ### `DBGetDataReadMask2()` - Get the current data read mask
 
 #### C Signature
@@ -298,6 +313,7 @@ None
 
 #### Returned value:
 DBGetDataReadMask2 returns the current data read mask.
+
 ### `DBSetEnableChecksums()` - Set flag controlling checksum checks
 
 #### C Signature
@@ -315,6 +331,7 @@ Arg name | Description
 
 #### Returned value:
 Returns the previous setting for checksum behavior.
+
 ### `DBGetEnableChecksums()` - Get current state of flag controlling checksumming
 
 #### C Signature
@@ -328,6 +345,7 @@ integer function dbgetcksums()
 
 #### Returned value:
 Zero if checksumming is not currently enabled. Non-zero if checksumming is currently enabled.
+
 ### `DBSetCompression()` - Set compression options for succeeding writes of Silo data
 
 Arg name | Description
@@ -336,6 +354,7 @@ Arg name | Description
 
 #### Returned value:
 Returns the previous value set for compression behavior.
+
 ### `DBGetCompression()` - Get current compression parameters
 
 #### C Signature
@@ -350,6 +369,7 @@ integer function dbgetcompress(options, loptions)
 #### Arguments: None
 #### Returned value:
 NULL if no compress parameters have been set. A string of compression parameters if compression has been set
+
 ### `DBSetFriendlyHDF5Names()` - Set flag to indicate Silo should create friendly names for HDF5 datasets
 
 #### C Signature
@@ -367,6 +387,7 @@ Arg name | Description
 
 #### Returned value:
 Old setting for this flag
+
 ### `DBGetFriendlyHDF5Names()` - Get setting for friendly HDF5 names flag
 
 #### C Signature
@@ -381,6 +402,7 @@ integer function dbgethdfnms()
 #### Arguments: None
 #### Returned value:
 The current setting for the HDF5 friendly names flag.
+
 ### `DBSetDeprecateWarnings()` - Set maximum number of deprecate warnings Silo will issue for any one function, option or convention
 
 #### C Signature
@@ -398,6 +420,7 @@ Arg name | Description
 
 #### Returned value:
 The old maximum number of deprecate warnings
+
 ### `DBGetDeprecateWarnings()` - Get maximum number of deprecated function warnings Silo will issue
 
 #### C Signature
@@ -412,6 +435,7 @@ integer function dbgetdepwarn()
 #### Arguments: None
 #### Returned value:
 The current maximum number of deprecate warnings
+
 ### `DB_VERSION_GE()` - Compile time macro to test silo version number
 
 #### C Signature
@@ -427,3 +451,4 @@ Arg name | Description
 
 #### Returned value:
 True (non-zero) if the combination of major, minor and patch digits results in a version number of the Silo library that is greater (e.g. newer) than or equal to the version of the Silo library being compiled against. False (zero), otherwise.
+

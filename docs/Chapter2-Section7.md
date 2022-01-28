@@ -27,6 +27,7 @@ Arg name | Description
 
 #### Returned value:
 DBMakeOptlist returns a pointer to an option list on success and NULL on failure.
+
 ### `DBAddOption()` - Add an option to an option list.
 
 #### C Signature
@@ -56,6 +57,7 @@ Arg name | Description
 
 #### Returned value:
 DBAddOption returns a zero on success and -1 on failure.
+
 ### `DBClearOption()` - Remove an option from an option list
 
 #### C Signature
@@ -74,6 +76,7 @@ Arg name | Description
 
 #### Returned value:
 DBClearOption returns zero on success and -1 on failure.
+
 ### `DBGetOption()` - Retrieve the value set for an option in an option list
 
 #### C Signature
@@ -92,6 +95,7 @@ Arg name | Description
 
 #### Returned value:
 Returns the pointer value set for a given option or NULL if the option is not defined in the given option list.
+
 ### `DBFreeOptlist()` - Free memory associated with an option list.
 
 #### C Signature
@@ -109,6 +113,7 @@ Arg name | Description
 
 #### Returned value:
 DBFreeOptlist returns a zero on success and -1 on failure.
+
 ### `DBClearOptlist()` - Clear an optlist.
 
 #### C Signature
@@ -126,3 +131,4 @@ Arg name | Description
 
 #### Returned value:
 DBClearOptlist returns zero on success and -1 on failure.
+

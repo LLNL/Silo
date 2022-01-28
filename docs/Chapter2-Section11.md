@@ -24,6 +24,7 @@ Arg name | Description
 
 #### Returned value:
 the integer pointer id to associate with the pointer
+
 ### `dbrmptr()` - remove an old and no longer needed pointer-id
 
 #### C Signature
@@ -47,6 +48,7 @@ len
 The length to set
 Returns:
 Returns the previously set value.
+
 ### `dbset2dstrlen()` - Set the size of a ‘row’ for pointers to ‘arrays’ of strings
 
 #### C Signature
@@ -62,6 +64,7 @@ Arg name | Description
 
 #### Returned value:
 Returns the previously set value.
+
 ### `dbget2dstrlen()` - Get the size of a ‘row’ for pointers to ‘arrays’ of character strings
 
 #### C Signature
@@ -81,6 +84,7 @@ pointer
 A pointer to a Silo object for which a Fortran identifier is needed
 Returns:
 DBFortranAllocPointer returns an integer that Fortran code can use to reference the given Silo object.
+
 ### `DBFortranAllocPointer()` - Facilitates accessing C objects through Fortran
 
 #### C Signature
@@ -94,6 +98,7 @@ Arg name | Description
 
 #### Returned value:
 DBFortranAllocPointer returns an integer that Fortran code can use to reference the given Silo object.
+
 ### `DBFortranAccessPointer()` - Access Silo objects created through the Fortran Silo interface.
 
 #### C Signature
@@ -107,6 +112,7 @@ Arg name | Description
 
 #### Returned value:
 DBFortranAccessPointer returns a pointer to a Silo object (which must be cast to the appropriate type) on success, and NULL on failure.
+
 ### `DBFortranRemovePointer()` - Removes a pointer from the Fortran-C index table
 
 #### C Signature
@@ -120,6 +126,7 @@ Arg name | Description
 
 #### Returned value:
 Nothing
+
 ### `dbwrtfl()` - Write a facelist object referenced by its object_id to a silo file
 
 #### C Signature
@@ -137,3 +144,4 @@ Arg name | Description
 
 #### Returned value:
 Nothing
+
