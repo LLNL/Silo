@@ -160,6 +160,8 @@ def ProcessMethod(mdfile, i, lines):
             mdfile.write("\n")    
         elif re.search(r'^Arguments:$', lines[i]):
             i = ProcessArgumentListBlock(mdfile, i, lines)
+        elif re.search(r'^Return:$', lines[i]):
+            i = ProcessReturnBlock(mdfile, i, lines)
         else:
             i += 1
     return i

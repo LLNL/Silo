@@ -15,6 +15,8 @@ Silo supports multiple I/O drivers, the two most common of which are the HDF5 (H
 
 [Read more](./history.md) about Silo.
 
+[Manual](./manual.md)
+
 #### Contacts
 
 The SILO team uses the LLNL listserv list system to make announcements. To join the announcement list, send an e-mail message to LISTSERV@LISTSERV.LLNL.GOV with no subject line and a message body containing:
