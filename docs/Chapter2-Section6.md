@@ -20,7 +20,7 @@ returns the pointer-id of the created object in flid.
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `nodelist` | Array of node indices describing mesh zones.
 `nnodes` | Number of nodes in associated mesh.
 `origin` | Origin for indices in the nodelist array. Should be zero or one.
@@ -30,6 +30,8 @@ Arg name | Description
 `matlist` | Array containing material numbers for each zone (else NULL).
 `bnd_method` | Method to use for calculating external faces. See description below.
 
+#### Returned value:
+DBCalcExternalFacelist returns a DBfacelist pointer on success and NULL on failure.
 ### `DBCalcExternalFacelist2()` - Calculate an external facelist for a UCD mesh containing ghost zones.
 
 #### C Signature
@@ -45,7 +47,7 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `nodelist` | Array of node indices describing mesh zones.
 `nnodes` | Number of nodes in associated mesh.
 `lo_offset` | The number of ghost zones at the beginning of the nodelist.
@@ -58,6 +60,8 @@ Arg name | Description
 `matlist` | Array containing material numbers for each zone (else NULL).
 `bnd_method` | Method to use for calculating external faces. See description below.
 
+#### Returned value:
+DBCalcExternalFacelist2 returns a DBfacelist pointer on success and NULL on failure.
 ### `DBStringArrayToStringList()` - Utility to catentate a group of strings into a single, semi-colon delimited string.
 
 #### C Signature
@@ -71,7 +75,7 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `strArray` | Array of strings to catenate together. Note that it can be ok if some entries in strArray are the empty string, “” or NULL (0).
 `n` | The number of entries in strArray. Passing -1 here indicates that the function should count entries in strArray until reaching the first NULL entry. In this case, embedded NULLs (0s) in strArray are, of course, not allowed.
 `strList` | The returned catenated, semi-colon separated, single, string.
@@ -90,7 +94,7 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `strList` | A semi-colon separated, single string. Note that this string is modified by the call. If the caller doesn’t want this, it will have to make a copy before calling.
 `n` | The expected number of individual strings in strList. Pass -1 here if you have no aprior knowledge of this number. Knowing the number saves an additional pass over strList.
 `handleSlashSwap` | a boolean to indicate if slash characters should be swapped as per differences in windows/linux filesystems.

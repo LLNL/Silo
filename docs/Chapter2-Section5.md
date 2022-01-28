@@ -42,6 +42,8 @@ DBcompoundarray  *DBAllocCompoundarray (void)
 None
 ```
 
+#### Returned value:
+These allocation functions return a pointer to a newly allocated and initialized structure on success and NULL on failure.
 ### `DBFree…()` - Release memory associated with a Silo structure.
 
 #### C Signature
@@ -76,10 +78,12 @@ void DBFreeCompoundarray (DBcompoundarray *x)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
 `Fortran Equivalent:` | None
 
+#### Returned value:
+These free functions return zero on success and -1 on failure.
 ### `DBIsEmpty()` - Query a object returned from Silo for “emptiness”
 
 #### C Signature
@@ -103,6 +107,6 @@ Arg name | Description
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `x` | Pointer to a silo object structure to be queried
 

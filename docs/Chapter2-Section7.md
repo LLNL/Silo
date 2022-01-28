@@ -22,9 +22,11 @@ returns created optlist pointer-id in optlist_id
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `maxopts` | Initial maximum number of options expected in the optlist. If this maximum is exceeded, the library will silently re-allocate more space using the golden-rule.
 
+#### Returned value:
+DBMakeOptlist returns a pointer to an option list on success and NULL on failure.
 ### `DBAddOption()` - Add an option to an option list.
 
 #### C Signature
@@ -47,11 +49,13 @@ character*N cvalue (See “dbset2dstrlen” on page 288.)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
 `option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an option list.
 `value` | Pointer to the value associated with the provided option description. The data type is implied by option.
 
+#### Returned value:
+DBAddOption returns a zero on success and -1 on failure.
 ### `DBClearOption()` - Remove an option from an option list
 
 #### C Signature
@@ -64,10 +68,12 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `optlist` | The option list object for which you wish to remove an option
 `optid` | The option id of the option you would like to remove
 
+#### Returned value:
+DBClearOption returns zero on success and -1 on failure.
 ### `DBGetOption()` - Retrieve the value set for an option in an option list
 
 #### C Signature
@@ -80,10 +86,12 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `optlist` | The optlist to query
 `optid` | The option id to query the value for
 
+#### Returned value:
+Returns the pointer value set for a given option or NULL if the option is not defined in the given option list.
 ### `DBFreeOptlist()` - Free memory associated with an option list.
 
 #### C Signature
@@ -96,9 +104,11 @@ integer function dbfreeoptlist(optlist_id)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
 
+#### Returned value:
+DBFreeOptlist returns a zero on success and -1 on failure.
 ### `DBClearOptlist()` - Clear an optlist.
 
 #### C Signature
@@ -111,6 +121,8 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
 
+#### Returned value:
+DBClearOptlist returns zero on success and -1 on failure.

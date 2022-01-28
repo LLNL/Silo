@@ -106,9 +106,11 @@ int n;
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `p` | pointer for which a pointer-id is needed
 
+#### Returned value:
+the integer pointer id to associate with the pointer
 ### `_visit_searchpath()` - directory order to search when opening a Silo file
 
 #### C Signature
@@ -188,9 +190,11 @@ int n;
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `p` | pointer for which a pointer-id is needed
 
+#### Returned value:
+the integer pointer id to associate with the pointer
 ### `_visit_domain_groups()` - method for grouping blocks in a multi-block mesh
 
 #### C Signature
@@ -259,9 +263,11 @@ int domToGroupMap[16];
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `p` | pointer for which a pointer-id is needed
 
+#### Returned value:
+the integer pointer id to associate with the pointer
 ### `AlphabetizeVariables()` - flag to tell post-processor to alphabetize variable lists
 
 #### C Signature
@@ -319,9 +325,11 @@ int doAlpha = 1;
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `p` | pointer for which a pointer-id is needed
 
+#### Returned value:
+the integer pointer id to associate with the pointer
 ### `ConnectivityIsTimeVarying()` - flag telling post-processor if connectivity of meshes in the Silo file is time varying or not
 
 #### C Signature
@@ -371,9 +379,11 @@ int isTimeVarying = 1;
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `p` | pointer for which a pointer-id is needed
 
+#### Returned value:
+the integer pointer id to associate with the pointer
 ### `MultivarToMultimeshMap_vars()` - list of multivars to be associated with multimeshes
 
 #### C Signature
@@ -415,9 +425,11 @@ int len;
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `p` | pointer for which a pointer-id is needed
 
+#### Returned value:
+the integer pointer id to associate with the pointer
 ### `MultivarToMultimeshMap_meshes()` - list of multimeshes to be associated with multivars
 
 #### C Signature
@@ -448,6 +460,8 @@ int len;
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `p` | pointer for which a pointer-id is needed
 
+#### Returned value:
+the integer pointer id to associate with the pointer

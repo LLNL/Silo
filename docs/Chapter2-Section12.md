@@ -55,7 +55,7 @@ DBfile Silo.Open(filename, flags);
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `filename` | Name of the Silo file to open
 `flags` | Pass either Silo.DB_READ if you will only read objects from the file or Silo.DB_APPEND if you need to also write data to the file.
 
@@ -67,7 +67,7 @@ DBfile Silo.Open(filename, flags);
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `filename` | Name of the Silo file to open
 `flags` | Pass either Silo.DB_READ if you will only read objects from the file or Silo.DB_APPEND if you need to also write data to the file.
 
@@ -79,7 +79,7 @@ DBfile Silo.Create(filename, info, driver, clobber)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `filename` | [required string] name of the file to create
 `info` | [required string] comment to be stored in the file
 `driver` | [optional int] which driver to use. Pass either Silo.DB_PDB or Silo.DB_HDF5. Note that advanced driver features are not available through the Python interface. Default is Silo.DB_PDB.
@@ -99,7 +99,7 @@ DBtoc <DBfile>.GetToc()
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `name` | [required string] name of object to read
 `flag` | [optional int] flag to indicate if object bulk/raw data should be included. Pass 0 to NOT also read object bulk/raw data. Pass non-zero to also read object bulk/raw data. Default is 0.
 
@@ -111,7 +111,7 @@ dict <DBfile>.GetVarInfo(name, flag)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `name` | [required string] name of object to read
 `flag` | [optional int] flag to indicate if object bulk/raw data should be included. Pass 0 to NOT also read object bulk/raw data. Pass non-zero to also read object bulk/raw data. Default is 0.
 
@@ -123,7 +123,7 @@ tuple <DBfile>.GetVar(name)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `name` | [required string] name of primitive array to read
 
 ### `<DBfile>.SetDir()` - Set current working directory of the Silo file (See DBSetDir)
@@ -134,7 +134,7 @@ NoneType <DBfile>.SetDir(name)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `name` | [required string] name of directory to set
 
 ### `<DBfile>.Close()` - Close the Silo file
@@ -151,7 +151,7 @@ NoneType <DBfile>.Close()
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `name` | [required string] name of the new object to write
 `obj_dict` | [required dict] Python dictionary containing object data
 
@@ -163,7 +163,7 @@ NoneType <DBfile>.WriteObject(name, obj_dict)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `name` | [required string] name of the new object to write
 `obj_dict` | [required dict] Python dictionary containing object data
 
@@ -175,7 +175,7 @@ NoneType <DBfile>.Write(name, data)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `name` | [required string] name of the primitive array
 `data` | [required tuple] the data to write
 
@@ -187,6 +187,6 @@ NoneType <DBfile>.MkDir(name)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `name` | [required string] name of the directory to create
 

@@ -140,8 +140,11 @@ def ProcessArgumentListBlock(mdfile, i, lines):
     if len(args) % 2 != 0:
         print("***ARGS PROBLEM***\n")
         print(args)
+    # use non-breaking spaces to enforce table width
+    #mdfile.write("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Arg name | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n")
+    #mdfile.write("------Arg name | Description--------------------------------------------------------------------------------\n")
     mdfile.write("Arg name | Description\n")
-    mdfile.write("---:|:---\n")
+    mdfile.write(":--|:---\n")
     j = 0
     while j < len(args):
 #        mdfile.write("* `%s` : %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
@@ -151,6 +154,25 @@ def ProcessArgumentListBlock(mdfile, i, lines):
     mdfile.write("\n")
     return i
 
+def ProcessReturnBlock(mdfile, i, lines):
+    i += 1
+    retlines = []
+    while i < len(lines) and not re.search(r'^Description:$', lines[i]):
+        if lines[i].strip() != '' and lines[i].strip().lower()[:4] != 'none':
+            retlines += [lines[i]]
+        i += 1
+    mdfile.write("#### Returned value:\n")
+    if len(retlines):
+        j = 0
+        while j < len(retlines):
+            mdfile.write(retlines[j].strip())
+            mdfile.write("\n")
+            j += 1
+    else:
+        mdfile.write("None.\n");
+    return i
+
+
 def ProcessMethod(mdfile, i, lines):
     mdfile.write("### `%s()` - %s\n"%(lines[i][:-1], lines[i+1][1:]))
     i += 2
@@ -158,12 +180,11 @@ def ProcessMethod(mdfile, i, lines):
         if re.search(r'^Synopsis:$', lines[i]):
             i = ProcessSynopsis(mdfile, i, lines)
             mdfile.write("\n")    
-        elif re.search(r'^Arguments:$', lines[i]):
+        if re.search(r'^Arguments:$', lines[i]):
             i = ProcessArgumentListBlock(mdfile, i, lines)
-        elif re.search(r'^Return:$', lines[i]):
+        if re.search(r'^Returns:$', lines[i]):
             i = ProcessReturnBlock(mdfile, i, lines)
-        else:
-            i += 1
+        i += 1
     return i
 
 #

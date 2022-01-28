@@ -36,12 +36,14 @@ returns handle to newly created tree in tree_id.
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `mesh_type` | The type of mesh object the MRG tree will be associated with. An example would be DB_MULTIMESH, DB_QUADMESH, DB_UCDMESH.
 `info_bits` | UNUSED
 `max_children` | Maximum number of immediate children of the root.
 `opts` | Additional options
 
+#### Returned value:
+A pointer to a new DBmrgtree object on success and NULL on failure
 ### `DBAddRegion()` - Add a region to an MRG tree
 
 #### C Signature
@@ -59,7 +61,7 @@ integer function dbaddregion(tree_id, reg_name, lregname, info_bits,
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `tree` | The MRG tree object to add a region to.
 `reg_name` | The name of the new region.
 `info_bits` | UNUSED
@@ -71,6 +73,8 @@ Arg name | Description
 `seg_types` | [OPT] Integer array of length nsegs of groupel map segment element types. Pass NULL (0) if none. These types are the same as the centering options for variables; DB_ZONECENT, DB_NODECENT, DB_EDGECENT, DB_FACECENT and DB_BLOCKCENT (for the blocks of a multimesh)
 `opts` | [OPT] Additional options. Pass NULL (0) if none.
 
+#### Returned value:
+A positive number on success; -1 on failure
 ### `DBAddRegionArray()` - Efficiently add multiple, like-kind regions to an MRG tree
 
 #### C Signature
@@ -89,7 +93,7 @@ integer function dbaddregiona(tree_id, nregn, regn_names, 	lregn_names,
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `tree` | The MRG tree object to add the regions to.
 `nregn` | The number of regions to add.
 `regn_names` | This is either an array of nregn pointers to character string names for each region or it is an array of 1 pointer to a character string specifying a printf-style naming scheme for the regions. The existence of a percent character (‘%’) (used to introduce conversion specifications) anywhere in regn_names[0] will indicate the latter mode.The latter mode is almost always preferable, especially if nergn is large (say more than 100). See below for the format of the printf-style naming string.
@@ -101,6 +105,8 @@ Arg name | Description
 `seg_types` | [OPT] Integer array of length nsegs*nregn specifying the groupel types of each segment. In cases where some regions will have fewer than nsegs groupel map segments associated with them, pass 0 for the corresponding segment lengths. Pass NULL (0) if none.
 `opts` | [OPT] Additional options. Pass NULL (0) if none.
 
+#### Returned value:
+A positive number on success; -1 on failure
 ### `DBSetCwr()` - Set the current working region for an MRG tree
 
 #### C Signature
@@ -113,10 +119,12 @@ integer function dbsetcwr(tree, path, lpath)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `tree` | The MRG tree object.
 `path` | The path to set.
 
+#### Returned value:
+Positive, depth in tree, on success, -1 on failure.
 ### `DBGetCwr()` - Get the current working region of an MRG tree
 
 #### C Signature
@@ -125,9 +133,11 @@ char const *GetCwr(DBmrgtree *tree)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `tree` | The MRG tree.
 
+#### Returned value:
+A pointer to a string representing the name of the current working region (not the full path name, just current region name) on success; NULL (0) on failure.
 ### `DBPutMrgtree()` - Write a completed MRG tree object to a Silo file
 
 #### C Signature
@@ -143,13 +153,15 @@ int dbputmrgtree(dbid, name, lname, mesh_name,
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `file` | The Silo file handle
 `name` | The name of the MRG tree object in the file.
 `mesh_name` | The name of the mesh the MRG tree object is associated with.
 `tree` | The MRG tree object to write.
 `opts` | [OPT] Additional options. Pass NULL (0) if none.
 
+#### Returned value:
+Positive or zero on success, -1 on failure.
 ### `DBGetMrgtree()` - Read an MRG tree object from a Silo file
 
 #### C Signature
@@ -162,10 +174,12 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `file` | The Silo database file handle
 `name` | The name of the MRG tree object in the file.
 
+#### Returned value:
+A pointer to a DBmrgtree object on success; NULL (0) on failure.
 ### `DBFreeMrgtree()` - Free the memory associated by an MRG tree object
 
 #### C Signature
@@ -178,9 +192,11 @@ integer function dbfreemrgtree(tree_id)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `tree` | The MRG tree object to free.
 
+#### Returned value:
+None.
 ### `DBMakeNamescheme()` - Create a DBnamescheme object for on-demand name generation
 
 #### C Signature
@@ -193,7 +209,7 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `ns_str` | The namescheme string as described below.
 `...` | The remaining arguments take one of three forms depending on how the caller wants external array references, if any are present in the format substring of ns_str to be handled.  In the first form, the format substring of ns_str involves no externally referenced arrays and so there are no additional arguments other than the ns_str string itself.  In the second form, the caller has all externally referenced arrays needed in the format substring of ns_str already in memory and simply passes their pointers here as the remaining arguments in the same order in which they appear in the format substring of ns_str. The arrays are bound to the returned namescheme object and should not be freed until after the caller is done using the returned namescheme object. In this case, DBFreeNamescheme() does not free these arrays and the caller is required to explicitly free them.  In the third form, the caller makes a request for the Silo library to find in a given file, read and bind to the returned namescheme object all externally referenced arrays in the format substring of ns_str. To achieve this, the caller passes a 3-tuple of the form...  “(void*) 0, (DBfile*) file, (char*) mbobjpath” as the remaining arguments. The initial (void*)0 is required. The (DBfile*)file is the database handle of the Silo file in which all externally referenced arrays exist. The third (char*)mbobjpath, which may be 0/NULL, is the path within the file, either relative to the file’s current working directory, or absolute, at which the multi-block object holding the ns_str was found in the file. All necessary externally referenced arrays must exist within the specified file using either relative paths from multi-block object’s home directory or the file’s current working directory or absolute paths. In this case DBFreeNamescheme() also frees memory associated with these arrays.
 
@@ -209,9 +225,11 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `natnum` | Natural number of the entry in a namescheme to be generated. Must be greater than or equal to zero.
 
+#### Returned value:
+A string representing the generated name. If there are problems with the namescheme, the string could be of length zero (e.g. the first character is a null terminator).
 ### `DBPutMrgvar()` - Write variable data to be associated with (some) regions in an MRG tree
 
 #### C Signature
@@ -234,7 +252,7 @@ int* data_ids (use dbmkptr to get id for each pointer)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `file` | Silo database file handle.
 `name` | Name of this mrgvar object.
 `tname` | name of the mrg tree this variable is associated with.
@@ -245,6 +263,8 @@ Arg name | Description
 `data` | Array of ncomps pointers to variable data. The pointer, data[i] points to an array of nregns values of type datatype.
 `opts` | Additional options.
 
+#### Returned value:
+Zero on success; -1 on failure.
 ### `DBGetMrgvar()` - Retrieve an MRG variable object from a silo file
 
 #### C Signature
@@ -257,10 +277,49 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `file` | Silo database file handle.
 `name` | The name of the region variable object to retrieve.
 
+#### Returned value:
+A pointer to a DBmrgvar object on success; NULL (0) on failure.
+Notes:
+For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
+DBPutGroupelmap
+—Write a groupel map object to a Silo file
+Synopsis:
+int DBPutGroupelmap(DBfile *file, char const *name,
+int num_segs, int const *seg_types, int const *seg_lens,
+int const *seg_ids, int const * const *seg_data,
+void const * const *seg_fracs, int fracs_type,
+DBoptlist const *opts)
+Fortran Equivalent:
+integer function dbputgrplmap(dbid, name, lname, num_segs, seg_types, seg_lens, seg_ids, seg_data_ids, seg_fracs_ids, fracs_type, optlist_id, status)
+integer* seg_data_ids (use dbmkptr to get id for each pointer)
+integer* seg_fracs_ids (use dbmkptr to get id for each pointer)
+Arguments:
+file
+The Silo database file handle.
+name
+The name of the groupel map object in the file.
+nsegs
+The number of segments in the map.
+seg_types
+Integer array of length nsegs indicating the groupel type associated with each segment of the map; one of DB_BLOCKCENT, DB_NODECENT, DB_ZONECENT, DB_EDGECENT, DB_FACECENT.
+seg_lens
+Integer array of length nsegs indicating the length of each segment
+seg_ids
+[OPT] Integer array of length nsegs indicating the identifier to associate with each segment. By default, segment identifiers are 0...negs-1. If default identifiers are sufficient, pass NULL (0) here. Otherwise, pass an explicit list of integer identifiers.
+seg_data
+The groupel map data, itself. An array of nsegs pointers to arrays of integers where array seg_data[i] is of length seg_lens[i].
+seg_fracs
+[OPT] Array of nsegs pointers to floating point values indicating fractional inclusion for the associated groupels. Pass NULL (0) if fractional inclusions are not required. If, however, fractional inclusions are required but on only some of the segments, pass an array of pointers such that if segment i has no fractional inclusions, seg_fracs[i]=NULL(0). Fractional inclusions are useful for, among other things, defining groupel maps involving mixing materials.
+fracs_type
+[OPT] data type of the fractional parts of the segments. Ignored if seg_fracs is NULL (0).
+opts
+Additional options
+Returns:
+Zero on success; -1 on failure.
 ### `DBPutGroupelmap()` - Write a groupel map object to a Silo file
 
 #### C Signature
@@ -281,7 +340,7 @@ integer* seg_fracs_ids (use dbmkptr to get id for each pointer)
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `file` | The Silo database file handle.
 `name` | The name of the groupel map object in the file.
 `nsegs` | The number of segments in the map.
@@ -293,6 +352,8 @@ Arg name | Description
 `fracs_type` | [OPT] data type of the fractional parts of the segments. Ignored if seg_fracs is NULL (0).
 `opts` | Additional options
 
+#### Returned value:
+Zero on success; -1 on failure.
 ### `DBGetGroupelmap()` - Read a groupel map object from a Silo file
 
 #### C Signature
@@ -305,10 +366,23 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `file` | The Silo database file handle.
 `name` | The name of the groupel map object to read.
 
+#### Returned value:
+A pointer to a DBgroupelmap object on success. NULL (0) on failure.
+Notes:
+For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
+DBFreeGroupelmap
+—Free memory associated with a groupel map object
+Synopsis:
+void DBFreeGroupelmap(DBgroupelmap *map)
+Fortran Equivalent:
+Arguments:
+map
+Pointer to a DBgroupel map object.
+Returns:
 ### `DBFreeGroupelmap()` - Free memory associated with a groupel map object
 
 #### C Signature
@@ -321,9 +395,11 @@ None
 ```
 
 Arg name | Description
----:|:---
+:--|:---
 `map` | Pointer to a DBgroupel map object.
 
+#### Returned value:
+None.
 ### `DBOPT_REGION_PNAMES()` - option for defining variables on specific regions of a mesh
 
 #### C Signature
@@ -383,3 +459,5 @@ DBOPT_REGION_PNAMES
 None
 ```
 
+#### Returned value:
+These allocation functions return a pointer to a newly allocated and initialized structure on success and NULL on failure.
