@@ -75,6 +75,11 @@ void DBFreeCompoundarray (DBcompoundarray *x)
     void DBFreeGroupelmap(DBgroupelmap *map);
 ```
 
+Arg name | Description
+---:|:---
+`x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
+`Fortran Equivalent:` | None
+
 ### `DBIsEmpty()` - Query a object returned from Silo for “emptiness”
 
 #### C Signature
@@ -96,4 +101,8 @@ void DBFreeCompoundarray (DBcompoundarray *x)
     int     DBIsEmptyMaterial(DBmaterial const *mat);
     int     DBIsEmptyMatspecies(DBmatspecies const *spec);
 ```
+
+Arg name | Description
+---:|:---
+`x` | Pointer to a silo object structure to be queried
 

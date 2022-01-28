@@ -125,6 +125,32 @@ def ProcessSynopsis(mdfile, i, lines):
             mdfile.write("```\n")
     return i
 
+def ProcessArgumentListBlock(mdfile, i, lines):
+    i += 1
+    args = []
+    while i < len(lines) and not \
+        (re.search(r'^Returns:$', lines[i]) or \
+         re.search(r'^Description:$', lines[i])):
+        if lines[i].strip() != '':
+            args += [lines[i]]
+        i += 1
+    if len(args) < 2:
+        mdfile.write("#### Arguments: None\n")
+        return i
+    if len(args) % 2 != 0:
+        print("***ARGS PROBLEM***\n")
+        print(args)
+    mdfile.write("Arg name | Description\n")
+    mdfile.write("---:|:---\n")
+    j = 0
+    while j < len(args):
+#        mdfile.write("* `%s` : %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
+#        mdfile.write("\n`%s` : %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
+        mdfile.write("`%s` | %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
+        j += 2
+    mdfile.write("\n")
+    return i
+
 def ProcessMethod(mdfile, i, lines):
     mdfile.write("### `%s()` - %s\n"%(lines[i][:-1], lines[i+1][1:]))
     i += 2
@@ -133,7 +159,7 @@ def ProcessMethod(mdfile, i, lines):
             i = ProcessSynopsis(mdfile, i, lines)
             mdfile.write("\n")    
         elif re.search(r'^Arguments:$', lines[i]):
-            i = ProcessArguments(mdfile, i, lines)
+            i = ProcessArgumentListBlock(mdfile, i, lines)
         else:
             i += 1
     return i

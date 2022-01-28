@@ -19,6 +19,15 @@ int DBWrite (DBfile *dbfile, char const *varname, void const *var,
 ```
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`varname` | Name of the simple variable.
+`var` | Array defining the values associated with the variable.
+`dims` | Array of length ndims which describes the dimensionality of the variable. Each value in the dims array indicates the number of elements contained in the variable along that dimension.
+`ndims` | Number of dimensions.
+`datatype` | Datatype of the variable. One of the predefined Silo data types.
+
 ### `DBWriteSlice()` - Write a (hyper)slab of a simple variable
 
 #### C Signature
@@ -34,6 +43,18 @@ integer function dbwriteslice(dbid, varname, lvarname, var,
    datatype, offset, length, stride, dims, ndims)
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`varname` | Name of the simple variable.
+`var` | Array defining the values associated with the slab.
+`datatype` | Datatype of the variable. One of the predefined Silo data types.
+`offset` | Array of length ndims of offsets in each dimension of the variable. This is the 0-origin position from which to begin writing the slice.
+`length` | Array of length ndims of lengths of data in each dimension to write to the variable. All lengths must be positive.
+`stride` | Array of length ndims of stride steps in each dimension. If no striding is desired, zeroes should be passed in this array.
+`dims` | Array of length ndims which describes the dimensionality of the entire variable. Each value in the dims array indicates the number of elements contained in the entire variable along that dimension.
+`ndims` | Number of dimensions.
+
 ### `DBReadVar()` - Read a simple Silo variable.
 
 #### C Signature
@@ -44,6 +65,12 @@ int DBReadVar (DBfile *dbfile, char const *varname, void *result)
 ```
 integer function dbrdvar(dbid, varname, lvarname, ptr)
 ```
+
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`varname` | Name of the simple variable.
+`result` | Pointer to memory into which the variable should be read. It is up to the application to provide sufficient space in which to read the variable.
 
 ### `DBReadVarSlice()` - Read a (hyper)slab of data from a simple variable.
 
@@ -59,6 +86,16 @@ integer function dbrdvarslice(dbid, varname, lvarname, offset,
    length, stride, ndims, ptr)
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`varname` | Name of the simple variable.
+`offset` | Array of length ndims of offsets in each dimension of the variable. This is the 0-origin position from which to begin reading the slice.
+`length` | Array of length ndims of lengths of data in each dimension to read from the variable. All lengths must be positive.
+`stride` | Array of length ndims of stride steps in each dimension. If no striding is desired, zeroes should be passed in this array.
+`ndims` | Number of dimensions in the variable.
+`result` | Pointer to location where the slice is to be written. It is up to the application to provide sufficient space in which to read the variable.
+
 ### `DBGetVar()` - Allocate space for, and return, a simple variable.
 
 #### C Signature
@@ -69,6 +106,11 @@ void *DBGetVar (DBfile *dbfile, char const *varname)
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`varname` | Name of the variable
 
 ### `DBInqVarExists()` - Queries variable existence
 
@@ -81,6 +123,11 @@ int DBInqVarExists (DBfile *dbfile, char const *name);
 None
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`name` | Object name.
+
 ### `DBInqVarType()` - Return the type of the given object
 
 #### C Signature
@@ -92,6 +139,11 @@ DBObjectType DBInqVarType (DBfile *dbfile, char const *name);
 None
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`name` | Object name.
+
 ### `DBGetVarByteLength()` - Return the byte length of a simple variable.
 
 #### C Signature
@@ -102,6 +154,11 @@ int DBGetVarByteLength (DBfile *dbfile, char const *varname)
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`varname` | Variable name.
 
 ### `DBGetVarDims()` - Get dimension information of a variable in a Silo file
 
@@ -115,6 +172,13 @@ int DBGetVarDims(DBfile *file, const char const *name, int
 None
 ```
 
+Arg name | Description
+---:|:---
+`file` | The Silo database file handle.
+`name` | The name of the Silo object to obtain dimension information for.
+`maxdims` | The maximum size of dims.
+`dims` | An array of maxdims integer values to be populated with the dimension information returned by this call.
+
 ### `DBGetVarLength()` - Return the number of elements in a simple variable.
 
 #### C Signature
@@ -126,6 +190,11 @@ int DBGetVarLength (DBfile *dbfile, char const *varname)
 integer function dbinqlen(dbid, varname, lvarname, len)
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`varname` | Variable name.
+
 ### `DBGetVarType()` - Return the Silo datatype of a simple variable.
 
 #### C Signature
@@ -136,6 +205,11 @@ int DBGetVarType (DBfile *dbfile, char const *varname)
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`varname` | Variable name.
 
 ### `DBPutCompoundarray()` - Write a Compound Array object into a Silo file.
 
@@ -154,6 +228,18 @@ integer function dbputca(dbid, name, lname, elemnames,
 character*N elemnames (See “dbset2dstrlen” on page 288.)
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer
+`name` | Name of the compound array structure.
+`elemnames` | Array of length nelems containing pointers to the names of the elements.
+`elemlengths` | Array of length nelems containing the lengths of the elements.
+`nelems` | Number of simple array elements.
+`values` | Array whose length is determined by nelems and elemlengths containing the values of the simple array elements.
+`nvalues` | Total length of the values array.
+`datatype` | Data type of the values array. One of the predefined Silo types.
+`optlist` | Pointer to an option list structure containing additional information to be included in the compound array object written into the Silo file. Use NULL is there are no options.
+
 ### `DBInqCompoundarray()` - Inquire Compound Array attributes.
 
 #### C Signature
@@ -168,6 +254,16 @@ integer function dbinqca(dbid, name, lname, maxwidth,
    nelems, nvalues, datatype)
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`name` | Name of the compound array.
+`elemnames` | Returned array of length nelems containing pointers to the names of the array elements.
+`elemlengths` | Returned array of length nelems containing the lengths of the array elements.
+`nelems` | Returned number of array elements.
+`nvalues` | Returned number of total values in the compound array.
+`datatype` | Datatype of the data values. One of the predefined Silo data types.
+
 ### `DBGetCompoundarray()` - Read a compound array from a Silo database.
 
 #### C Signature
@@ -181,6 +277,11 @@ integer function dbgetca(dbid, name, lname, lelemnames,
    elemnames, elemlengths, nelems, values, nvalues, datatype)
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`arrayname` | Name of the compound array.
+
 ### `DBMakeObject()` - Allocate an object of the specified length and initialize it.
 
 #### C Signature
@@ -193,6 +294,12 @@ DBobject *DBMakeObject (char const *objname, int objtype,
 None
 ```
 
+Arg name | Description
+---:|:---
+`objname` | Name of the object.
+`objtype` | Type of object. One of the predefined types: DB_QUADMESH, DB_QUAD_RECT, DB_QUAD_CURV, DB_DEFVARS, DB_QUADVAR, DB_UCDMESH, DB_UCDVAR, DB_POINTMESH, DB_POINTVAR, DB_CSGMESH, DB_CSGVAR, DB_MULTIMESH, DB_MULTIVAR, DB_MULTIADJ, DB_MATERIAL, DB_MATSPECIES, DB_FACELIST, DB_ZONELIST, DB_PHZONELIST, DB_EDGELIST, DB_CURVE, DB_ARRAY, or DB_USERDEF.
+`maxcomps` | Initial maximum number of components needed for this object. If this number is exceeded, the library will silently re-allocate more space using the golden rule.
+
 ### `DBFreeObject()` - Free memory associated with an object.
 
 #### C Signature
@@ -203,6 +310,10 @@ int DBFreeObject (DBobject *object)
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`object` | Pointer to the object to be freed. This object is created with the DBMakeObject function.
 
 ### `DBChangeObject()` - Overwrite an existing object in a Silo file with a new object
 
@@ -215,6 +326,11 @@ int DBChangeObject(DBfile *file, DBobject *obj)
 None
 ```
 
+Arg name | Description
+---:|:---
+`file` | The Silo database file handle.
+`obj` | The new DBobject object (which knows its name) to write to the file.
+
 ### `DBClearObject()` - Clear an object.
 
 #### C Signature
@@ -225,6 +341,10 @@ int DBClearObject (DBobject *object)
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`object` | Pointer to the object to be cleared. This object is created with the DBMakeObject function.
 
 ### `DBAddDblComponent()` - Add a double precision floating point component to an object.
 
@@ -238,6 +358,12 @@ int DBAddDblComponent (DBobject *object, char const *compname,
 None
 ```
 
+Arg name | Description
+---:|:---
+`object` | Pointer to an object. This object is created with the DBMakeObject function.
+`compname` | The component name.
+`d` | The value of the double precision floating point component.
+
 ### `DBAddFltComponent()` - Add a floating point component to an object.
 
 #### C Signature
@@ -249,6 +375,12 @@ int DBAddFltComponent (DBobject *object, char const *compname,
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`object` | Pointer to an object. This object is created with the DBMakeObject function.
+`compname` | The component name.
+`f` | The value of the floating point component.
 
 ### `DBAddIntComponent()` - Add an integer component to an object.
 
@@ -262,6 +394,12 @@ int DBAddIntComponent (DBobject *object, char const *compname,
 None
 ```
 
+Arg name | Description
+---:|:---
+`object` | Pointer to an object. This object is created with the DBMakeObject function.
+`compname` | The component name.
+`i` | The value of the integer component.
+
 ### `DBAddStrComponent()` - Add a string component to an object.
 
 #### C Signature
@@ -274,6 +412,12 @@ int DBAddStrComponent (DBobject *object, char const *compname,
 None
 ```
 
+Arg name | Description
+---:|:---
+`object` | Pointer to the object. This object is created with the DBMakeObject function.
+`compname` | The component name.
+`s` | The value of the string component. Silo copies the contents of the string.
+
 ### `DBAddVarComponent()` - Add a variable component to an object.
 
 #### C Signature
@@ -285,6 +429,12 @@ int DBAddVarComponent (DBobject *object, char const *compname,
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`object` | Pointer to the object. This object is created with the DBMakeObject function.
+`compname` | Component name.
+`vardata` | Name of the variable object associated with the component (see Description).
 
 ### `DBWriteComponent()` - Add a variable component to an object and write the associated data.
 
@@ -300,6 +450,17 @@ int DBWriteComponent (DBfile *dbfile, DBobject *object,
 None
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`object` | Pointer to the object.
+`compname` | Component name.
+`prefix` | Path name prefix of the object.
+`datatype` | Data type of the component’s data. One of: “short”, “integer”, “long”, “float”, “double”, “char”.
+`var` | Pointer to the component’s data.
+`nd` | Number of dimensions of the component.
+`count` | An array of length nd containing the length of the component in each of its dimensions.
+
 ### `DBWriteObject()` - Write an object into a Silo file.
 
 #### C Signature
@@ -312,6 +473,12 @@ int DBWriteObject (DBfile *dbfile, DBobject const *object,
 None
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`object` | Object created with DBMakeObject and populated with DBAddFltComponent, DBAddIntComponent, DBAddStrComponent, and DBAddVarComponent.
+`freemem` | If non-zero, then the object will be freed after writing.
+
 ### `DBGetObject()` - Read an object from a Silo file as a generic object
 
 #### C Signature
@@ -322,6 +489,11 @@ DBobject *DBGetObject(DBfile *file, char const *objname)
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`file` | The Silo database file handle.
+`objname` | The name of the object to get.
 
 ### `DBGetComponent()` - Allocate space for, and return, an object component.
 
@@ -335,6 +507,12 @@ void *DBGetComponent (DBfile *dbfile, char const *objname,
 None
 ```
 
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`objname` | Object name.
+`compname` | Component name.
+
 ### `DBGetComponentType()` - Return the type of an object component.
 
 #### C Signature
@@ -346,4 +524,10 @@ int DBGetComponentType (DBfile *dbfile, char const *objname,
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`dbfile` | Database file pointer.
+`objname` | Object name.
+`compname` | Component name.
 

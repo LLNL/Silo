@@ -549,8 +549,7 @@ Arguments:
 pathname
 Path name of file to create. This can be either an absolute or relative path.
 mode
-Creation mode. One of the predefined Silo modes: DB_CLOBBER or
-DB_NOCLOBBER.
+Creation mode. One of the predefined Silo modes: DB_CLOBBER or DB_NOCLOBBER.
 target
 Destination file format. One of the predefined types: DB_LOCAL, DB_SUN3, DB_SUN4, DB_SGI, DB_RS6000, or DB_CRAY.
 fileinfo
@@ -2456,9 +2455,7 @@ The number of mesh pieces in the corresponding multi-mesh object. This value mus
 mesh_types
 Integer array of length nmesh indicating the type of each mesh in the corresponding multi-mesh object. This array must be identical to that which is passed in the DBPutMultimesh call and in repeated calls to DBPutMultimeshadj.
 nneighbors
-Integer array of length nmesh indicating the number of neighbors for each mesh piece. This array must be identical in repeated calls to DBPutMultimeshadj. 
-
-In the argument descriptions to follow, let . That is, let  be the sum of the first k entries in the nneighbors array.
+Integer array of length nmesh indicating the number of neighbors for each mesh piece. This array must be identical in repeated calls to DBPutMultimeshadj.  In the argument descriptions to follow, let . That is, let  be the sum of the first k entries in the nneighbors array.
 neighbors
 Array of  integers enumerating for each mesh piece all other mesh pieces that neighbor it. Entries from index  to index  enumerate the neighbors of mesh piece k. This array must be identical in repeated calls to DBPutMultimeshadj.
 back
@@ -3135,15 +3132,7 @@ Arguments:
 ns_str
 The namescheme string as described below.
 ...
-The remaining arguments take one of three forms depending on how the caller wants external array references, if any are present in the format substring of ns_str to be handled.
-
-In the first form, the format substring of ns_str involves no externally referenced arrays and so there are no additional arguments other than the ns_str string itself.
-
-In the second form, the caller has all externally referenced arrays needed in the format substring of ns_str already in memory and simply passes their pointers here as the remaining arguments in the same order in which they appear in the format substring of ns_str. The arrays are bound to the returned namescheme object and should not be freed until after the caller is done using the returned namescheme object. In this case, DBFreeNamescheme() does not free these arrays and the caller is required to explicitly free them.
-
-In the third form, the caller makes a request for the Silo library to find in a given file, read and bind to the returned namescheme object all externally referenced arrays in the format substring of ns_str. To achieve this, the caller passes a 3-tuple of the form...
-“(void*) 0, (DBfile*) file, (char*) mbobjpath”
-as the remaining arguments. The initial (void*)0 is required. The (DBfile*)file is the database handle of the Silo file in which all externally referenced arrays exist. The third (char*)mbobjpath, which may be 0/NULL, is the path within the file, either relative to the file’s current working directory, or absolute, at which the multi-block object holding the ns_str was found in the file. All necessary externally referenced arrays must exist within the specified file using either relative paths from multi-block object’s home directory or the file’s current working directory or absolute paths. In this case DBFreeNamescheme() also frees memory associated with these arrays.
+The remaining arguments take one of three forms depending on how the caller wants external array references, if any are present in the format substring of ns_str to be handled.  In the first form, the format substring of ns_str involves no externally referenced arrays and so there are no additional arguments other than the ns_str string itself.  In the second form, the caller has all externally referenced arrays needed in the format substring of ns_str already in memory and simply passes their pointers here as the remaining arguments in the same order in which they appear in the format substring of ns_str. The arrays are bound to the returned namescheme object and should not be freed until after the caller is done using the returned namescheme object. In this case, DBFreeNamescheme() does not free these arrays and the caller is required to explicitly free them.  In the third form, the caller makes a request for the Silo library to find in a given file, read and bind to the returned namescheme object all externally referenced arrays in the format substring of ns_str. To achieve this, the caller passes a 3-tuple of the form...  “(void*) 0, (DBfile*) file, (char*) mbobjpath” as the remaining arguments. The initial (void*)0 is required. The (DBfile*)file is the database handle of the Silo file in which all externally referenced arrays exist. The third (char*)mbobjpath, which may be 0/NULL, is the path within the file, either relative to the file’s current working directory, or absolute, at which the multi-block object holding the ns_str was found in the file. All necessary externally referenced arrays must exist within the specified file using either relative paths from multi-block object’s home directory or the file’s current working directory or absolute paths. In this case DBFreeNamescheme() also frees memory associated with these arrays.
 Description:
 A namescheme defines a mapping between the non-negative integers (e.g. the natural numbers) and a sequence of strings such that each string to be associated with a given integer (n) can be generated from printf-style formatting involving simple expressions. Nameschemes are most often used to define names of regions in region arrays or to define names of multi-block objects.
 The format of a printf-style namescheme is as follows. The first character of fmt is treated as delimiter character definition. Wherever this delimiter character appears (except as the first character), this will indicate the end of one substring within fmt and the beginning of a next substring. The delimiter character cannot be any of the characters used in the expression language (see below) for defining expressions to generate names of a namescheme.

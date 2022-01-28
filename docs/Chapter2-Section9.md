@@ -86,6 +86,11 @@ DBWriteJsonObject(DBfile *db, json_object *jobj)
 None
 ```
 
+Arg name | Description
+---:|:---
+`db` | Silo database file handle
+`jobj` | JSON object pointer
+
 ### `DBGetJsonObject()` - Get an object from a Silo file as a JSON object
 
 #### C Signature
@@ -96,4 +101,9 @@ json_object *DBGetJsonObject(DBfile *db, char const *name)
 ```
 None
 ```
+
+Arg name | Description
+---:|:---
+`db` | Silo database file handle
+`name` | Name of object to read
 

@@ -105,6 +105,10 @@ int n;
     integer function dbmkptr(void p)
 ```
 
+Arg name | Description
+---:|:---
+`p` | pointer for which a pointer-id is needed
+
 ### `_visit_searchpath()` - directory order to search when opening a Silo file
 
 #### C Signature
@@ -183,6 +187,10 @@ int n;
     integer function dbmkptr(void p)
 ```
 
+Arg name | Description
+---:|:---
+`p` | pointer for which a pointer-id is needed
+
 ### `_visit_domain_groups()` - method for grouping blocks in a multi-block mesh
 
 #### C Signature
@@ -250,6 +258,10 @@ int domToGroupMap[16];
     integer function dbmkptr(void p)
 ```
 
+Arg name | Description
+---:|:---
+`p` | pointer for which a pointer-id is needed
+
 ### `AlphabetizeVariables()` - flag to tell post-processor to alphabetize variable lists
 
 #### C Signature
@@ -306,6 +318,10 @@ int doAlpha = 1;
     integer function dbmkptr(void p)
 ```
 
+Arg name | Description
+---:|:---
+`p` | pointer for which a pointer-id is needed
+
 ### `ConnectivityIsTimeVarying()` - flag telling post-processor if connectivity of meshes in the Silo file is time varying or not
 
 #### C Signature
@@ -354,6 +370,10 @@ int isTimeVarying = 1;
     integer function dbmkptr(void p)
 ```
 
+Arg name | Description
+---:|:---
+`p` | pointer for which a pointer-id is needed
+
 ### `MultivarToMultimeshMap_vars()` - list of multivars to be associated with multimeshes
 
 #### C Signature
@@ -394,6 +414,10 @@ int len;
     integer function dbmkptr(void p)
 ```
 
+Arg name | Description
+---:|:---
+`p` | pointer for which a pointer-id is needed
+
 ### `MultivarToMultimeshMap_meshes()` - list of multimeshes to be associated with multivars
 
 #### C Signature
@@ -422,4 +446,8 @@ int len;
     Synopsis:
     integer function dbmkptr(void p)
 ```
+
+Arg name | Description
+---:|:---
+`p` | pointer for which a pointer-id is needed
 
