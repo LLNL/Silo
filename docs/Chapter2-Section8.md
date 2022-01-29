@@ -31,16 +31,20 @@ Arg name | Description
 
 `dbfile`
 : Database file pointer.
+
 `varname`
 : Name of the simple variable.
+
 `var`
 : Array defining the values associated with the variable.
+
 `dims`
 : Array of length ndims which describes the dimensionality of the variable. Each value in the dims array indicates the number of elements contained in the variable along that dimension.
 
 `ndims`
 : Number of dimensions.
   Another sentence.
+  
 `datatype`
 : Datatype of the variable. One of the predefined Silo data types.
 
