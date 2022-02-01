@@ -1290,7 +1290,7 @@ Number of nodes in this UCD mesh.
 nzones
 Number of zones in this UCD mesh.
 zonel_name
-Name of the zonelist structure associated with this variable [written with DBPutZonelist]. If no association is to be made or if the mesh is composed solely of arbitrary, polyhedral elements, this value should be NULL. If a polyhedral-zonelist is to be associated with the mesh, DO NOT pass the name of the polyhedral-zonelist here. Instead, use the DBOPT_PHZONELIST option described below. For more information on arbitrary, polyhedral zonelists, see below and also see the documentation for DBPutPHZonelist.
+Name of the zonelist structure associated with this variable [written with DBPutZonelist]. If no association is to be made or if the mesh is composed solely of arbitrary, polyhedral elements, this value should be NULL. If a polyhedral-zonelist is to be associated with the mesh, do not pass the name of the polyhedral-zonelist here. Instead, use the DBOPT_PHZONELIST option described below. For more information on arbitrary, polyhedral zonelists, see below and also see the documentation for DBPutPHZonelist.
 facel_name
 Name of the facelist structure associated with this variable [written with DBPutFacelist]. If no association is to be made, this value should be NULL.
 datatype
@@ -1349,7 +1349,7 @@ Additional options.
 Returns:
 A positive number on success; -1 on failure
 Description:
-DO NOT USE THIS METHOD.
+Do not use this method.
 It is an extremely limited, inefficient and soon to be retired way of trying to define subsets of a ucd mesh. Instead, use a Mesh Region Grouping (MRG) tree. See “DBMakeMrgtree” on page 196.
 DBGetUcdmesh
 —Read a UCD mesh from a Silo database.
@@ -4481,6 +4481,8 @@ Description:
 Creates a new directory in a Silo file
 14 API Section	Deprecated Functions
 The following functions were deprecated from Silo in version 4.6. Attempts to call these methods in later versions may still succeed. However, deprecation warnings will be generated on stderr (See “DBSetDeprecateWarnings” on page 35.). There is no guarantee that these methods will exist in later versions of Silo.
+DUMMY
+—DUMMY
 DBGetComponentNames
 DBGetAtt (completely removed in version 4.10)
 DBListDir  (completely removed in version 4.10)

@@ -1,11 +1,11 @@
 ## User Defined (Generic) Data and Objects
 
-If you want to create data that other applications (not written by you or someone working closely with you) can read and understand, these are NOT the right functions to use. 
+If you want to create data that other applications (not written by you or someone working closely with you) can read and understand, these are `NOT` the right functions to use.
 That is because the data that these functions create is not self-describing and inherently non-shareable.
 
-However, if you need to write data that only you (or someone working closely with you) will read such as for restart purposes, the functions described here may be helpful. 
-The functions described here allow users to read and write arbitrary arrays of raw data as well as user-defined Silo objects.
 
+However, if you need to write data that only you (or someone working closely with you) will read such as for restart purposes, the functions described here may be helpful.
+The functions described here allow users to read and write arbitrary arrays of raw data as well as user-defined Silo objects.
 
 ### `DBWrite()` - Write a simple variable.
 
@@ -30,9 +30,11 @@ Arg name | Description
 #### Returned value:
 DBWrite returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBWrite function writes a simple variable into a Silo file.
+The `DBWrite` function writes a simple variable into a Silo file.
+
 
 ### `DBWriteSlice()` - Write a (hyper)slab of a simple variable
 
@@ -64,20 +66,22 @@ Arg name | Description
 #### Returned value:
 DBWriteSlice returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBWriteSlice function writes a slab of data to a simple variable from the data provided in the var pointer.
+The `DBWriteSlice` function writes a slab of data to a simple variable from the data provided in the var pointer.
 Any hyperslab of data may be written.
 
-The size of the entire variable (after all slabs have been written) must be known when the DBWriteSlice function is called.
+The size of the entire variable (after all slabs have been written) must be known when the `DBWriteSlice` function is called.
 The data in the var parameter is written into the entire variable using the location specified in the offset, length, and stride parameters.
-The data that makes up the entire variable may be written with one or more calls to DBWriteSlice.
+The data that makes up the entire variable may be written with one or more calls to `DBWriteSlice`.
 
-The minimum length value is 1 and the minimum stride value is one.
+The minimum length value is `1` and the minimum stride value is one.
 
-A one-dimensional array slice:.
+A one-dimensional array slice:
 
-Figure 0-11: Array slice.
+Figure 0-11: Array slice
+
 
 ### `DBReadVar()` - Read a simple Silo variable.
 
@@ -99,13 +103,15 @@ Arg name | Description
 #### Returned value:
 DBReadVar returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBReadVar function reads a simple variable into the given space.
+The `DBReadVar` function reads a simple variable into the given space.
 
-Notes:.
+Notes:
 
-See DBGetVar for a memory-allocating version of this function.
+See `DBGetVar` for a memory-allocating version of this function.
+
 
 ### `DBReadVarSlice()` - Read a (hyper)slab of data from a simple variable.
 
@@ -134,16 +140,18 @@ Arg name | Description
 #### Returned value:
 DBReadVarSlice returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBReadVarSlice function reads a slab of data from a simple variable into a location provided in the result pointer.
+The `DBReadVarSlice` function reads a slab of data from a simple variable into a location provided in the result pointer.
 Any hyperslab of data may be read.
 
-Note that the minimum length value is 1 and the minimum stride value is one.
+Note that the minimum length value is `1` and the minimum stride value is one.
 
-A one-dimensional array slice:.
+A one-dimensional array slice:
 
-Figure 0-12: Array slice.
+Figure 0-12: Array slice
+
 
 ### `DBGetVar()` - Allocate space for, and return, a simple variable.
 
@@ -162,17 +170,19 @@ Arg name | Description
 `varname` | Name of the variable
 
 #### Returned value:
-DBGetVar returns a pointer to newly allocated space on success and NULL on failure.
+DBGetVar returns a pointer to newly allocated space on success and `NULL` on failure.
+
 
 #### Description:
 
-The DBGetVar function allocates space for a simple variable, reads the variable from the Silo database, and returns a pointer to the new space.
-If an error occurs, NULL is returned.
+The `DBGetVar` function allocates space for a simple variable, reads the variable from the Silo database, and returns a pointer to the new space.
+If an error occurs, `NULL` is returned.
 It is up to the application to cast the returned pointer to the correct data type.
 
-Notes:.
+Notes:
 
-See DBReadVar and DBReadVar1 for non-memory allocating versions of this function.
+See `DBReadVar` and `DBReadVar1` for non-memory allocating versions of this function.
+
 
 ### `DBInqVarExists()` - Queries variable existence
 
@@ -191,13 +201,16 @@ Arg name | Description
 `name` | Object name.
 
 #### Returned value:
-DBInqVarExists returns non-zero if the object exists in the file. Zero otherwise.
+DBInqVarExists returns non-zero if the object exists in the file.
+Zero otherwise.
+
 
 #### Description:
 
-The DBInqVarExists function is used to check for existence of an object in the given file.
+The `DBInqVarExists` function is used to check for existence of an object in the given file.
 
-If an object was written to a file, but the file has yet to be DBClose’d, the results of this function querying that variable are undefined.
+If an object was written to a file, but the file has yet to be DBClose'd, the results of this function querying that variable are undefined.
+
 
 ### `DBInqVarType()` - Return the type of the given object
 
@@ -216,12 +229,13 @@ Arg name | Description
 `name` | Object name.
 
 #### Returned value:
-DBInqVarType returns the DBObjectType corresponding to the given object.
+DBInqVarType returns the `DBObjectType` corresponding to the given object.
+
 
 #### Description:
 
-The DBInqVarType function returns the DBObjectType of the given object.
-The value returned is described in the following table:.
+The `DBInqVarType` function returns the `DBObjectType` of the given object.
+The value returned is described in the following table:
 
 
 Object Type|Returned Value
@@ -254,12 +268,14 @@ Other variable (one written out using DBWrite.)|DB_VARIABLE
 User-defined|DB_USERDEF
 
 
+
 The function will signal an error if the given name does not exist in the file.
 
-Notes:.
+Notes:
 
 For the details of the data structured returned by this function, see the Silo library header file, silo.
 h, also attached to the end of this manual.
+
 
 ### `DBGetVarByteLength()` - Return the byte length of a simple variable.
 
@@ -280,11 +296,13 @@ Arg name | Description
 #### Returned value:
 DBGetVarByteLength returns the length of the given simple variable in bytes on success and -1 on failure.
 
+
 #### Description:
 
-The DBGetVarByteLength function returns the length of the requested simple variable, in bytes.
-This is useful for determining how much memory to allocate before reading a simple variable with DBReadVar.
-Note that this would not be a concern if one used the DBGetVar function, which allocates space itself.
+The `DBGetVarByteLength` function returns the length of the requested simple variable, in bytes.
+This is useful for determining how much memory to allocate before reading a simple variable with `DBReadVar`.
+Note that this would not be a concern if one used the `DBGetVar` function, which allocates space itself.
+
 
 ### `DBGetVarDims()` - Get dimension information of a variable in a Silo file
 
@@ -308,10 +326,12 @@ Arg name | Description
 #### Returned value:
 The number of dimensions on success; -1 on failure
 
+
 #### Description:
 
 This function will populate the dims array up to a maximum of maxdims values with dimension information of the specified Silo variable (object) name.
-The number of dimensions is returned as the function’s return value.
+The number of dimensions is returned as the function's return value.
+
 
 ### `DBGetVarLength()` - Return the number of elements in a simple variable.
 
@@ -332,10 +352,12 @@ Arg name | Description
 #### Returned value:
 DBGetVarLength returns the number of elements in the given simple variable on success and -1 on failure.
 
+
 #### Description:
 
-The DBGetVarLength function returns the length of the requested simple variable, in number of elements.
-For example a 16 byte array containing 4 floats has 4 elements.
+The `DBGetVarLength` function returns the length of the requested simple variable, in number of elements.
+For example a `16` byte array containing `4` floats has `4` elements.
+
 
 ### `DBGetVarType()` - Return the Silo datatype of a simple variable.
 
@@ -356,15 +378,17 @@ Arg name | Description
 #### Returned value:
 DBGetVarType returns the Silo datatype of the given simple variable on success and -1 on failure.
 
+
 #### Description:
 
-The DBGetVarType function returns the Silo datatype of the requested simple variable.
-For example, DB_FLOAT for float variables.
+The `DBGetVarType` function returns the Silo datatype of the requested simple variable.
+For example, `DB_FLOAT` for float variables.
 
-Notes:.
+Notes:
 
-This only works for simple Silo variables (those written using DBWrite or DBWriteSlice).
-To query the type of other variables, use DBInqVarType instead.
+This only works for simple Silo variables (those written using `DBWrite` or DBWriteSlice). To query the type of other variables, use `DBInqVarType` instead.
+
+
 
 
 ### `DBPutCompoundarray()` - Write a Compound Array object into a Silo file.
@@ -381,7 +405,7 @@ int DBPutCompoundarray (DBfile *dbfile, char const *name,
 integer function dbputca(dbid, name, lname, elemnames,
    lelemnames, elemlengths, nelems, values, datatype, optlist_id,
    status)
-character*N elemnames (See “dbset2dstrlen” on page 288.)
+character*N elemnames (See "dbset2dstrlen" on page 288.)
 ```
 
 Arg name | Description
@@ -399,15 +423,17 @@ Arg name | Description
 #### Returned value:
 DBPutCompoundarray returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBPutCompoundarray function writes a compound array object into a Silo file.
-Acompound array is an array whose elements are simple arrays.
+The `DBPutCompoundarray` function writes a compound array object into a Silo file.
+A compound array is an array whose elements are simple arrays.
 All of the simple arrays have elements of the same data type, and each have a name.
 
 Often, an application will partition a block of memory into named pieces, but write the block to a database as a single entity.
 Fortran common blocks are used in this way.
 The compound array object is an abstraction of this partitioned memory block.
+
 
 ### `DBInqCompoundarray()` - Inquire Compound Array attributes.
 
@@ -436,10 +462,12 @@ Arg name | Description
 #### Returned value:
 DBInqCompoundarray returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBInqCompoundarray function returns information about the compound array.
-It does not return the data values themselves; use DBGetCompoundarray instead.
+The `DBInqCompoundarray` function returns information about the compound array.
+It does not return the data values themselves; use `DBGetCompoundarray` instead.
+
 
 ### `DBGetCompoundarray()` - Read a compound array from a Silo database.
 
@@ -460,17 +488,19 @@ Arg name | Description
 `arrayname` | Name of the compound array.
 
 #### Returned value:
-DBGetCompoundarray returns a pointer to a DBcompoundarray structure on success and NULL on failure.
+DBGetCompoundarray returns a pointer to a `DBcompoundarray` structure on success and `NULL` on failure.
+
 
 #### Description:
 
-The DBGetCompoundarray function allocates a DBcompoundarray structure, reads a compound array from the Silo database, and returns a pointer to that structure.
-If an error occurs, NULL is returned.
+The `DBGetCompoundarray` function allocates a `DBcompoundarray` structure, reads a compound array from the Silo database, and returns a pointer to that structure.
+If an error occurs, `NULL` is returned.
 
-Notes:.
+Notes:
 
 For the details of the data structured returned by this function, see the Silo library header file, silo.
 h, also attached to the end of this manual.
+
 
 ### `DBMakeObject()` - Allocate an object of the specified length and initialize it.
 
@@ -491,17 +521,19 @@ Arg name | Description
 `maxcomps` | Initial maximum number of components needed for this object. If this number is exceeded, the library will silently re-allocate more space using the golden rule.
 
 #### Returned value:
-DBMakeObject returns a pointer to the newly allocated and initialized object on success and NULL on failure.
+DBMakeObject returns a pointer to the newly allocated and initialized object on success and `NULL` on failure.
+
 
 #### Description:
 
-The DBMakeObject function allocates space for an object of maxcomps components.
+The `DBMakeObject` function allocates space for an object of maxcomps components.
 
-In releases of the Silo library prior to 4.
-10, if a DBobject ever had more components added to it than the maxcomps it was created with, an error would be generated and the operation to add a component would fail.
-However, starting in version 4.
+In releases of the Silo library prior to `4`.
+10, if a `DBobject` ever had more components added to it than the maxcomps it was created with, an error would be generated and the operation to add a component would fail.
+However, starting in version `4`.
 10, the maxcomps argument is used only for the initial object creation.
 If a caller attempts to add more than this number of components to an object, Silo will simply re-allocate the object to accomodate the additional components.
+
 
 ### `DBFreeObject()` - Free memory associated with an object.
 
@@ -521,12 +553,14 @@ Arg name | Description
 #### Returned value:
 DBFreeObject returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBFreeObject function releases the memory associated with the given object.
-The data associated with the object’s components is not released.
+The `DBFreeObject` function releases the memory associated with the given object.
+The data associated with the object's components is not released.
 
-DBFreeObject will not fail if a NULL pointer is passed to it.
+DBFreeObject will not fail if a `NULL` pointer is passed to it.
+
 
 ### `DBChangeObject()` - Overwrite an existing object in a Silo file with a new object
 
@@ -547,9 +581,11 @@ Arg name | Description
 #### Returned value:
 Zero on succes; -1 on failure
 
+
 #### Description:
 
-DBChangeObject writes a new DBobject object to a file, replacing the object in the file with the same name.
+DBChangeObject writes a new `DBobject` object to a file, replacing the object in the file with the same name.
+
 
 ### `DBClearObject()` - Clear an object.
 
@@ -569,10 +605,12 @@ Arg name | Description
 #### Returned value:
 DBClearObject returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBClearObject function clears an existing object.
+The `DBClearObject` function clears an existing object.
 The number of components associated with the object is set to zero.
+
 
 ### `DBAddDblComponent()` - Add a double precision floating point component to an object.
 
@@ -595,9 +633,11 @@ Arg name | Description
 #### Returned value:
 DBAddDblComponent returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBAddDblComponent function adds a component of double precision floating point data to an existing object.
+The `DBAddDblComponent` function adds a component of double precision floating point data to an existing object.
+
 
 ### `DBAddFltComponent()` - Add a floating point component to an object.
 
@@ -620,9 +660,11 @@ Arg name | Description
 #### Returned value:
 DBAddFltComponent returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBAddFltComponent function adds a component of floating point data to an existing object.
+The `DBAddFltComponent` function adds a component of floating point data to an existing object.
+
 
 ### `DBAddIntComponent()` - Add an integer component to an object.
 
@@ -645,9 +687,11 @@ Arg name | Description
 #### Returned value:
 DBAddIntComponent returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBAddIntComponent function adds a component of integer data to an existing object.
+The `DBAddIntComponent` function adds a component of integer data to an existing object.
+
 
 ### `DBAddStrComponent()` - Add a string component to an object.
 
@@ -670,9 +714,11 @@ Arg name | Description
 #### Returned value:
 DBAddStrComponent returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBAddStrComponent function adds a component of string data to an existing object.
+The `DBAddStrComponent` function adds a component of string data to an existing object.
+
 
 ### `DBAddVarComponent()` - Add a variable component to an object.
 
@@ -695,12 +741,14 @@ Arg name | Description
 #### Returned value:
 DBAddVarComponent returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBAddVarComponent function adds a component of the variable type to an existing object.
+The `DBAddVarComponent` function adds a component of the variable type to an existing object.
 
 The variable in vardata is stored verbatim into the object.
 No translation or typing is done on the variable as it is added to the object.
+
 
 ### `DBWriteComponent()` - Add a variable component to an object and write the associated data.
 
@@ -722,17 +770,19 @@ Arg name | Description
 `object` | Pointer to the object.
 `compname` | Component name.
 `prefix` | Path name prefix of the object.
-`datatype` | Data type of the component’s data. One of: “short”, “integer”, “long”, “float”, “double”, “char”.
-`var` | Pointer to the component’s data.
+`datatype` | Data type of the component's data. One of: "short", "integer", "long", "float", "double", "char".
+`var` | Pointer to the component's data.
 `nd` | Number of dimensions of the component.
 `count` | An array of length nd containing the length of the component in each of its dimensions.
 
 #### Returned value:
 DBWriteComponent returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBWriteComponent function adds a component to an existing object and also writes the component’s data to a Silo file.
+The `DBWriteComponent` function adds a component to an existing object and also writes the component's data to a Silo file.
+
 
 ### `DBWriteObject()` - Write an object into a Silo file.
 
@@ -755,11 +805,13 @@ Arg name | Description
 #### Returned value:
 DBWriteObject returns zero on success and -1 on failure.
 
+
 #### Description:
 
-The DBWriteObject function writes an object into a Silo file.
+The `DBWriteObject` function writes an object into a Silo file.
 This is a user-defined object that consists of various components.
 They are used when the basic Silo structures are not sufficient.
+
 
 ### `DBGetObject()` - Read an object from a Silo file as a generic object
 
@@ -778,21 +830,24 @@ Arg name | Description
 `objname` | The name of the object to get.
 
 #### Returned value:
-On success, a pointer to a DBobject struct containing the object’s data. NULL on failure.
+On success, a pointer to a `DBobject` struct containing the object's data.
+NULL on failure.
+
 
 #### Description:
 
-Each of the object Silo supports has corresponding methods to both write them to a Silo database file (DBPut.
-) and get them from a file (DBGet.
+Each of the object Silo supports has corresponding methods to both write them to a Silo database file (DBPut...
+) and get them from a file (DBGet...
 ).
 
 However, Silo objects can also be accessed as generic objects through the generic object interface.
 This is recommended only for objects that were written with DBWriteObject() method.
 
-Notes:.
+Notes:
 
 For the details of the data structured returned by this function, see the Silo library header file, silo.
 h, also attached to the end of this manual.
+
 
 ### `DBGetComponent()` - Allocate space for, and return, an object component.
 
@@ -813,13 +868,15 @@ Arg name | Description
 `compname` | Component name.
 
 #### Returned value:
-DBGetComponent returns a pointer to newly allocated space containing the component value on success, and NULL on failure.
+DBGetComponent returns a pointer to newly allocated space containing the component value on success, and `NULL` on failure.
+
 
 #### Description:
 
-The DBGetComponent function allocates space for one object component, reads the component, and returns a pointer to that space.
-If either the object or component does not exist, NULL is returned.
+The `DBGetComponent` function allocates space for one object component, reads the component, and returns a pointer to that space.
+If either the object or component does not exist, `NULL` is returned.
 It is up to the application to cast the returned pointer to the appropriate type.
+
 
 ### `DBGetComponentType()` - Return the type of an object component.
 
@@ -840,13 +897,18 @@ Arg name | Description
 `compname` | Component name.
 
 #### Returned value:
-The values that are returned depend on the component’s type and how the component was written into the object. The component types and their corresponding return values are listed in the table below.
+The values that are returned depend on the component's type and how the component was written into the object.
+The component types and their corresponding return values are listed in the table below.
+
 Component Type	Integer	Float	Double	String	Variable	all others
-Return value	DB_INT	DB_FLOAT	DB_DOUBLE	DB_CHAR	DB_VARIABLE	DB_NOTYPE
+
+Return value	`DB_INT`	`DB_FLOAT`	`DB_DOUBLE`	`DB_CHAR`	`DB_VARIABLE`	DB_NOTYPE
+
 
 #### Description:
 
-The DBGetComponentType function reads the component’s type and returns it.
-If either the object or component does not exist, DB_NOTYPE is returned.
+The `DBGetComponentType` function reads the component's type and returns it.
+If either the object or component does not exist, `DB_NOTYPE` is returned.
 This function allows the application to process the component without having to know its type in advance.
+
 

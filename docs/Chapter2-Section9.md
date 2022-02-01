@@ -1,50 +1,59 @@
 ## Python Interface
 
-It is probably easiest to understand the Python interface to Silo by examining some examples and tests. 
-In the source code distribution, you can find some examples in tools/python and tests in tests directories. 
-Here, we briefly describe Silo’s Python interface.
+It is probably easiest to understand the Python interface to Silo by examining some examples and tests.
+In the source code distribution, you can find some examples in tools/python and tests in tests directories.
+Here, we briefly describe Silo's Python interface.
 
-In order for an installation of Silo to have the Python interface, Silo must have been configured with --enable-pythonmodule and NOT with --disable-shared Autoconf configuration switches.
+In order for an installation of Silo to have the Python interface, Silo must have been configured with --enable-pythonmodule and `NOT` with --disable-shared Autoconf configuration switches.
 
 The Python interface will be in the lib dir of the Silo installation, named Silo.
-so. 
-To use it, Python needs to be told where to find it. 
-You can do this a couple of ways; through the PYTHONPATH environment variable or by explicitly adding the Silo installation lib dir to Python’s path using sys.
+so.
+To use it, Python needs to be told where to find it.
+You can do this a couple of ways; through the `PYTHONPATH` environment variable or by explicitly adding the Silo installation lib dir to Python's path using sys.
 path.
-append(). 
-For example, if Silo is installed to /foo/bar, this works...
+append(). For example, if Silo is installed to /foo/bar, this works...
 
 % env PYTHONPATH=/foo/bar/lib python
-Python 2.
+
+Python `2`.
 7.
-10 (default, Oct 23 2015, 19:19:21) 
-[GCC 4.
+10 (default, Oct `23` 2015, 19:19:21)
+
+[GCC `4`.
 2.
-1 Compatible Apple LLVM 7.
+1 Compatible Apple `LLVM` 7.
 0.
 0] on darwin
+
 Type "help", "copyright", "credits" or "license" for more info.
 
 >>> import Silo
+
 Or, if you prefer to use sys.
 path.
 append...
 
 python
-Python 2.
+
+Python `2`.
 7.
-10 (default, Oct 23 2015, 19:19:21) 
-[GCC 4.
+10 (default, Oct `23` 2015, 19:19:21)
+
+[GCC `4`.
 2.
-1 Compatible Apple LLVM 7.
+1 Compatible Apple `LLVM` 7.
 0.
 0] on darwin
+
 Type "help", "copyright", "credits" or "license" for more info.
 
 >>> import sys
+
 >>> sys.
 path.
-append(“/foo/bar/lib”)
+append("/foo/bar/lib")
+
+
 >>> import Silo
 
 ### `Silo.Open()` - Open a Silo file (See DBOpen)
@@ -61,7 +70,8 @@ Arg name | Description
 
 #### Description:
 
-Returns a DBfile object as a Python object.
+Returns a `DBfile` object as a Python object
+
 
 ### `Silo.Create()` - Create a new silo file (See DBCreate)
 
@@ -79,7 +89,8 @@ Arg name | Description
 
 #### Description:
 
-Returns a DBfile object as a Python object.
+Returns a `DBfile` object as a Python object
+
 
 ### `<DBfile>.GetToc()` - Get the table of contents
 
@@ -106,15 +117,14 @@ Arg name | Description
 
 Returns a Python dictionary object for a Silo high level object (e.
 g.
-not a primitive array).
-This method cannot be used to read the contents of a primitive array.
-It can be used for any object the Silo C interface’s DBGetObject() would also be used.
+not a primitive array). This method cannot be used to read the contents of a primitive array.
+It can be used for any object the Silo `C` interface's DBGetObject() would also be used.
 If object bulk data is not also read, then the dictionary members for those sub-objects will contain a string holding the path of either a sub-object or a primitive array.
-Note that on the HDF5 driver, if friendly HDF5 names were not used to create the file, then the string paths for these sub-objects are often cryptic references to primitive arrays in the hidden /.
-silo directory.
+Note that on the HDF5 driver, if friendly HDF5 names were not used to create the file, then the string paths for these sub-objects are often cryptic references to primitive arrays in the hidden /.silo directory.
 
 This method is poorly named.
-Abetter name is probably GetObject.
+A better name is probably GetObject.
+
 
 ### `<DBfile>.GetVar()` - Get a primitive array (See DBReadVar)
 
@@ -129,7 +139,8 @@ Arg name | Description
 
 #### Description:
 
-This method returns a primitive array as a Python tuple.
+This method returns a primitive array as a Python tuple
+
 
 ### `<DBfile>.SetDir()` - Set current working directory of the Silo file (See DBSetDir)
 
@@ -144,7 +155,8 @@ Arg name | Description
 
 #### Description:
 
-Sets the current working directory of the Silo file.
+Sets the current working directory of the Silo file
+
 
 ### `<DBfile>.Close()` - Close the Silo file
 
@@ -170,23 +182,24 @@ Arg name | Description
 #### Description:
 
 This method will write any Python dictionary object to a Silo file as a Silo object.
-Here’s the rub.
-Readers employing Silo’s high level interface (e.
+Here's the rub.
+Readers employing Silo's high level interface (e.
 g.
 DBGetUcdmesh, DBGetQuadvar, etc.
-) will be able recognize an object so written if and only if the dict object’s structure matches a known high-level Silo object.
+) will be able recognize an object so written if and only if the dict object's structure matches a known high-level Silo object.
 
-So, you can use this method to write objects that can be read later via Silo’s high-level object methods such DBGetUcdmesh and DBGetMaterial, etc.
-as long as the Python dictionary’s members match what Silo expects.
+So, you can use this method to write objects that can be read later via Silo's high-level object methods such `DBGetUcdmesh` and DBGetMaterial, etc.
+as long as the Python dictionary's members match what Silo expects.
 
 Often, the easiest way to decode how a given Python dict object should be structured to match a Silo object is to find an example object in some file and read it into Python with GetVarInfo().
 
 It is fine to create a dict object with additional members too.
-For example, if you create a dict object that is intended to be a Silo material object, you can add additional members to it and readers will still be able to read it via DBGetMaterial.
+For example, if you create a dict object that is intended to be a Silo material object, you can add additional members to it and readers will still be able to read it via `DBGetMaterial`.
 Of course, such readers will not be aware of any additional members so handled.
 
-It is also fine to create wholly new kinds of Silo objects for which there are no corresponding high-level interface methods such as GetUcdmesh or GetQuadvar in the C language interface.
-Such an object can be read by the generic object, DBGetObject() C language interface method.
+It is also fine to create wholly new kinds of Silo objects for which there are no corresponding high-level interface methods such as GetUcdmesh or GetQuadvar in the `C` language interface.
+Such an object can be read by the generic object, DBGetObject() `C` language interface method.
+
 
 ### `<DBfile>.Write()` - Write primitive array data to a Silo file (see DBWrite)
 
@@ -208,6 +221,7 @@ Furthermore, the tuples must be consistent in type (e.
 g.
 all floats or all ints).
 
+
 ### `<DBfile>.MkDir()` - Make a directory in a Silo file
 
 #### C Signature
@@ -221,5 +235,6 @@ Arg name | Description
 
 #### Description:
 
-Creates a new directory in a Silo file.
+Creates a new directory in a Silo file
+
 

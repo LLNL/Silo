@@ -7,31 +7,6 @@ def GetFileLines(fname):
     with open(fname) as txtfile:
         return txtfile.readlines()
 
-#
-# Begin a new API section (new md file)
-#
-def StartNewSection(i, s, lines):
-    mdfile = open("Chapter2-Section%d.md"%s,"wt")
-    s += 1
-    hs = re.search(r'^[0-9]*\s*API Section\s*(.*)',lines[i])
-    if len(hs.groups()) > 0:
-        mdfile.write("## %s"%hs.groups()[0])
-    else:
-        mdfile.write("## Unknown")
-    mdfile.write("\n\n")
-    i += 1
-    while i < len(lines) and \
-        not re.search(r'^_visit_defvars\s*275$', lines[i]) and \
-        not re.search(r'^dbmkptr\s*283$', lines[i]) and \
-        not re.search(r'^Silo.Open$', lines[i]) and \
-        not re.search(r'^DBGetComponentNames$', lines[i]) and \
-        not re.search(r'^DB[A-Za-z0-9]*\s*[0-9]*$', lines[i]):
-        as_sentences = re.sub(r'(?!\.\.)([\.!?]\s*(?!\)))',r'\1\n',lines[i])
-        mdfile.writelines(as_sentences)
-        i += 1
-    mdfile.write("\n")
-    return i, s, mdfile
-
 def IsMethodHeader(i, lines):
     if i < len(lines)-1 and re.search(r'^—', lines[i+1]):
         return True
@@ -41,6 +16,67 @@ def IsAPISectionHeader(line):
     if re.search(r'^[0-9]* API Section', line):
         return True
     return False
+
+def ReplaceCurlyQuotes(s):
+
+    s = re.sub(r'“',r'"',s) # left double curly/smart
+    s = re.sub(r'”',r'"',s) # right double curly/smart
+    s = re.sub(r'‘',r"'",s) # left single curly/smart
+    s = re.sub(r'’',r"'",s) # right single curly/smart
+
+    return s
+
+#
+# Handle various issues with typesetting an output line
+#
+def OutputLineWithFormatting(mdfile, line, kwnames=[]):
+
+    sentences = re.sub(r'([a-zA-Z0-9_]\.\.\.|[a-zA-Z0-9_]\.|[a-zA-Z0-9_]\?|[a-zA-Z0-9_]!)\s*',r'\1\n',line).strip()
+    sentences = sentences.split('\n')
+
+    for s in sentences:
+
+        # Get rid of single and double curly quotes
+        s = ReplaceCurlyQuotes(s)
+
+        # Backtick any keyword words
+        for kw in kwnames:
+            s = re.sub(r'(\s+)%s(\s+|[\.?!])'%kw,r'\1`%s`\2'%kw,s)
+
+        # Backtick any DBxxx... words
+        s = re.sub(r'(\s+)DB([a-zA-Z0-9_]+)(\s+|[\.?!])',r'\1`DB\2`\3',s)
+
+        # Backtick any all caps words
+        s = re.sub(r'(\s+)([A-Z0-9_]+)(\s+|[\.?!])',r'\1`\2`\3',s)
+
+        # Undo backticking for some cases
+        s = re.sub(r'`HDF5`',r'HDF5',s)
+
+        mdfile.write(s.strip())
+        mdfile.write("\n")
+
+    mdfile.write("\n")
+
+#
+# Begin a new API section (new md file)
+#
+def StartNewSection(i, s, lines):
+    mdfile = open("Chapter2-Section%d.md"%s,"wt")
+    s += 1
+    hs = re.search(r'^[0-9]*\s*API Section\s*(.*)',lines[i])
+    if len(hs.groups()) > 0:
+        mdfile.write("## %s"%ReplaceCurlyQuotes(hs.groups()[0]))
+    else:
+        mdfile.write("## Unknown")
+    mdfile.write("\n\n")
+    i += 1
+
+    while i < len(lines) and not IsMethodHeader(i+1, lines):
+        OutputLineWithFormatting(mdfile, lines[i])
+        i += 1
+    mdfile.write("\n")
+
+    return i, s, mdfile
 
 def ProcessSynopsis(mdfile, i, lines):
     i += 1
@@ -54,7 +90,7 @@ def ProcessSynopsis(mdfile, i, lines):
          re.search(r'^Returns:$', lines[i]) or \
          re.search(r'^Arguments:$', lines[i])):
         indented_line = '    ' + lines[i].strip()
-        mdfile.write(indented_line)
+        mdfile.write(ReplaceCurlyQuotes(indented_line))
         mdfile.write("\n")
         i += 1
     mdfile.write("```\n")
@@ -90,7 +126,7 @@ def ProcessSynopsis(mdfile, i, lines):
                     fort_args = []
                     fort_args_done = True
                 elif fort_args_done:
-                    mdfile.write(lines[i].strip(' \n'))
+                    mdfile.write(ReplaceCurlyQuotes(lines[i].strip(' \n')))
                     mdfile.write("\n")
                 i += 1
             mdfile.write("```\n")
@@ -123,7 +159,7 @@ def ProcessArgumentListBlock(mdfile, i, lines):
     while j < len(args):
 #        mdfile.write("* `%s` : %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
 #        mdfile.write("\n`%s` : %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
-        mdfile.write("`%s` | %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
+        mdfile.write("`%s` | %s\n"%(args[j].strip(), ReplaceCurlyQuotes(args[j+1].strip()) if j+1<len(args) else "ARGS PROBLEM"))
         j += 2
     mdfile.write("\n")
     return i
@@ -145,8 +181,7 @@ def ProcessReturnBlock(mdfile, i, lines):
     if len(retlines):
         j = 0
         while j < len(retlines):
-            mdfile.write(retlines[j].strip())
-            mdfile.write("\n")
+            OutputLineWithFormatting(mdfile,retlines[j])
             j += 1
     else:
         mdfile.write("void");
@@ -165,28 +200,6 @@ def ReadLinesInTabBlock(target_ntabs, i, desclines):
     complete_line = re.sub("\n","<br>", complete_line)
     return i, [complete_line.split('\t')]
 
-def OutputLineAsSentencePerLine(mdfile, line):
-
-    # break into sentences
-    split_line = re.split("\.( ?[A-Z]?)", line.strip())
-    split_line = [w.strip() for w in split_line if w.strip()]
-    new_split_line = []
-    k = 0
-    while k < len(split_line):
-        if k < len(split_line)-1 and len(split_line[k]) == 1 and split_line[k][0].isupper():
-            new_split_line += [split_line[k] + split_line[k+1]]
-            k+=1
-        else:
-            new_split_line += [split_line[k]]
-        k+=1
-
-    # output sentences, one per line
-    for sent in new_split_line:
-        mdfile.write(sent)
-        mdfile.write(".\n")
-
-    mdfile.write("\n")
-
 def OutputGatheredColumnsAsTable(mdfile, cols):
 
     cols = list(map(list, itertools.zip_longest(*cols, fillvalue=None)))
@@ -198,7 +211,7 @@ def OutputGatheredColumnsAsTable(mdfile, cols):
 
     for c in cols[1:]:
         c = [x if x else '' for x in c]
-        mdfile.write('|'.join(c))
+        mdfile.write(ReplaceCurlyQuotes('|'.join(c))) # FIXME
         mdfile.write("\n")
 
     mdfile.write("\n")
@@ -216,7 +229,6 @@ def ProcessDescription(mdfile, i, lines):
     if not desclines:
         return i
 
-    print(i, len(desclines), desclines[0])
     mdfile.write("#### Description:\n\n")
 
     j = 0
@@ -230,7 +242,7 @@ def ProcessDescription(mdfile, i, lines):
 
                 # Output a normal "line" (which may be multiple sentences)
                 # in description
-                OutputLineAsSentencePerLine(mdfile, desclines[j])
+                OutputLineWithFormatting(mdfile, desclines[j])
                 j += 1
 
             else:
@@ -253,7 +265,7 @@ def ProcessDescription(mdfile, i, lines):
                 target_ntabs = 0
 
                 # Now, output the current line
-                OutputLineAsSentencePerLine(mdfile, desclines[j])
+                OutputLineWithFormatting(mdfile, desclines[j])
                 j += 1
 
             else:
@@ -264,6 +276,8 @@ def ProcessDescription(mdfile, i, lines):
 
     if tabcols:
         OutputGatheredColumnsAsTable(mdfile, tabcols)
+
+    mdfile.write("\n")
 
     return i
 
@@ -287,7 +301,7 @@ def ProcessMethod(mdfile, i, lines):
             i = ProcessDescription(mdfile, i, lines)
             handled_line = True
         if not handled_line:
-            OutputLineAsSentencePerLine(mdfile, lines[i])
+            OutputLineWithFormatting(mdfile, lines[i])
             i += 1
     return i
 
@@ -299,7 +313,6 @@ lines = GetFileLines("Chapter2-man_pages2.txt")
 i = 0
 s = 0
 while i < len(lines):
-    print(i, lines[i])
     handled_line = False
     if IsAPISectionHeader(lines[i]):
         i, s, mdfile = StartNewSection(i, s, lines)
@@ -308,5 +321,5 @@ while i < len(lines):
         i = ProcessMethod(mdfile, i, lines)
         handled_line = True
     if not handled_line:
-        OutputLineAsSentencePerLine(mdfile, lines[i])
+        OutputLineWithFormatting(mdfile, lines[i])
         i += 1
