@@ -1,33 +1,5 @@
 1 API Section	Error Handling and Other Global Library Behavior
 The functions described in this section of the Silo Application Programming Interface (API) manual, are those that effect behavior of the library, globally, for any file(s) that are or will be open. These include such things as error handling, requiring Silo to do extra work to warn of and avoid overwrites, to compute and warn of checksum errors and to compress data before writing it to disk.
-The functions described here are...
-DBErrfuncname	8
-DBErrno	9
-DBErrString	10
-DBShowErrors	11
-DBErrlvl	12
-DBErrfunc	13
-DBVariableNameValid	14
-DBVersion	15
-DBVersionDigits	16
-DBVersionGE	17
-DBSetAllowOverwrites	18
-DBGetAllowOverwrites	19
-DBSetAllowEmptyObjects	20
-DBGetAllowEmptyObjects	21
-DBForceSingle	22
-DBGetDatatypeString	23
-DBSetDataReadMask2	24
-DBGetDataReadMask2	26
-DBSetEnableChecksums	27
-DBGetEnableChecksums	28
-DBSetCompression	29
-DBGetCompression	32
-DBSetFriendlyHDF5Names	33
-DBGetFriendlyHDF5Names	34
-DBSetDeprecateWarnings	35
-DBGetDeprecateWarnings	36
-DB_VERSION_GE	37
 DBErrfuncname
 —Get name of error-generating function
 Synopsis:
@@ -415,34 +387,6 @@ The Silo API is implemented on a number of different low-level drivers. These dr
 In addition, Silo files can themselves have directories. That is, within a single Silo file, one can create directory hierarchies for storage of various objects. These directory hierarchies are analogous to the Unix filesystem. Directories serve to divide the name space of a Silo file so the user can organize content within a Silo file in a way that is natural to the application.
 Note that the organization of objects into directories within a Silo file may have direct implications for how these collections of objects are presented to users by post-processing tools. For example, except for directories used to store multi-block objects (See “Multi-Block Objects, Parallelism and Poor-Man’s Parallel I/O” on page 157.), VisIt will use directories in a Silo file to create submenus within its Graphical User Interface (GUI). For example, if VisIt opens a Silo file with two directories called “foo” and “bar” and there are various meshes and variables in each of these directories, then many of VisIt’s GUI menus will contain submenus named “foo” and “bar” where the objects found in those directories will be placed in the GUI.
 Silo also supports the concept of grabbing the low-level driver. For example, if Silo is using the HDF5 driver, an application can obtain the actual HDF5 file id and then use the native HDF5 API with that file id.
-The functions described in this section of the interface are...
-DBRegisterFileOptionsSet	40
-DBUnregisterFileOptionsSet	44
-DBUnregisterAllFileOptionsSets	45
-DBSetUnknownDriverPriorities	46
-DBGetUnknownDriverPriorities	47
-DBCreate	48
-DBOpen	53
-DBClose	55
-DBGetToc	56
-DBFileVersion	57
-DBFileVersionDigits	58
-DBFileVersionGE	59
-DBVersionGEFileVersion	60
-DBSortObjectsByOffset	61
-DBMkDir	62
-DBSetDir	63
-DBGetDir	64
-DBCpDir	65
-DBGrabDriver	66
-DBUngrabDriver	67
-DBGetDriverType	68
-DBGetDriverTypeFromPath	69
-DBInqFile	70
-DBInqFileHasObjects	71
-_silolibinfo	72
-_hdf5libinfo	73
-_was_grabbed	74
 DBRegisterFileOptionsSet
 —Register a set of options for advanced control of the low-level I/O driver
 Synopsis:
@@ -945,44 +889,6 @@ If you are interested in learning how to deal with these objects in parallel, Se
 This section of the Silo API manual describes all the high-level Silo objects that are sufficiently self-describing as to be easily shared between a variety of applications.
 Silo supports a variety of mesh types including simple 1D curves, structured meshes including block-structured Adaptive Mesh Refinement (AMR) meshes, point (or gridless) meshes consisting entirely of points, unstructured meshes consisting of the standard zoo of element types, fully arbitrary polyhedral meshes and Constructive Solid Geometry “meshes” described by boolean operations of primitive quadric surfaces.
 In addition, Silo supports both piecewise constant (e.g. zone-centered) and piecewise-linear (e.g. node-centered) variables (e.g. fields) defined on these meshes. Silo also supports the decomposition of these meshes into materials (and material species) including cases where multiple materials are mixing within a single mesh element. Finally, Silo also supports the specification of expressions representing derived variables.
-The functions described in this section of the manual include...
-DBPutCurve	77
-DBGetCurve	79
-DBPutPointmesh	80
-DBGetPointmesh	83
-DBPutPointvar	84
-DBPutPointvar1	86
-DBGetPointvar	87
-DBPutQuadmesh	88
-DBGetQuadmesh	91
-DBPutQuadvar	92
-DBPutQuadvar1	96
-DBGetQuadvar	98
-DBPutUcdmesh	99
-DBPutUcdsubmesh	107
-DBGetUcdmesh	108
-DBPutZonelist	109
-DBPutZonelist2	110
-DBPutPHZonelist	112
-DBGetPHZonelist	116
-DBPutFacelist	117
-DBPutUcdvar	119
-DBPutUcdvar1	122
-DBGetUcdvar	124
-DBPutCsgmesh	125
-DBGetCsgmesh	130
-DBPutCSGZonelist	131
-DBGetCSGZonelist	136
-DBPutCsgvar	137
-DBGetCsgvar	139
-DBPutMaterial	140
-DBGetMaterial	144
-DBPutMatspecies	145
-DBGetMatspecies	148
-DBPutDefvars	149
-DBGetDefvars	151
-DBInqMeshname	152
-DBInqMeshtype	153
 DBPutCurve
 —Write a curve object into a Silo file
 Synopsis:
@@ -2343,26 +2249,6 @@ A key feature of multi-block object is that references to the individual pieces 
 The fact that multi-block objects can reference individual pieces that reside in different Silo files means that Silo, a serial I/O library, can be used very effectively and scalably in parallel without resorting to writing a file per processor. The “technique” used to affect parallel I/O in this manner with Silo is affectionately called Poor Man’s Parallel I/O (PMPIO).
 A separate convenience interface, PMPIO, is provided for this purpose. The PMPIO interface provides almost all of the functionality necessary to use Silo in a Poor Man’s Parallel way. The application is required to implement a few callback functions. The PMPIO interface is described at the end of this section.
 The functions described in this section of the manual include...
-DBPutMultimesh	156
-DBGetMultimesh	161
-DBPutMultimeshadj	162
-DBGetMultimeshadj	165
-DBPutMultivar	166
-DBGetMultivar	170
-DBPutMultimat	171
-DBGetMultimat	174
-DBPutMultimatspecies	175
-DBGetMultimatspecies	178
-DBOpenByBcast	179
-PMPIO_Init	181
-PMPIO_CreateFileCallBack	184
-PMPIO_OpenFileCallBack	185
-PMPIO_CloseFileCallBack	186
-PMPIO_WaitForBaton	187
-PMPIO_HandOffBaton	188
-PMPIO_Finish	189
-PMPIO_GroupRank	190
-PMPIO_RankInGroup	191
 DBPutMultimesh
 —Write a multi-block mesh object into a Silo file.
 Synopsis:
@@ -2897,22 +2783,6 @@ In addition, once an MRG tree has been defined for a mesh, variables to be assoc
 Because MRG trees can be used to represent a wide variety of subsetting functionality and because applications have still to gain experience using MRG trees to describe their subsetting applications, the methods defined here are design to be as free-form as possible with few or no limitations on, for example, naming conventions of the various types of subsets. It is simply impossible to know a priori all the different ways in which applications may wish to apply MRG trees to construct subsetting information.
 For this reason, where a specific application of MRG trees is desired (to represent materials for example), we document the naming convention an application must use to affect the representation.
 The functions described in this section of the API manual are...
-DBMakeMrgtree	193
-DBAddRegion	197
-DBAddRegionArray	199
-DBSetCwr	201
-DBGetCwr	202
-DBPutMrgtree	203
-DBGetMrgtree	204
-DBFreeMrgtree	205
-DBMakeNamescheme	206
-DBGetName	210
-DBPutMrgvar	211
-DBGetMrgvar	213
-DBPutGroupelmap	214
-DBGetGroupelmap	216
-DBFreeGroupelmap	217
-DBOPT_REGION_PNAMES	218
 DBMakeMrgtree
 —Create and initialize an empty mesh region grouping tree
 Synopsis:
@@ -3318,10 +3188,7 @@ For DBOPT_EDGECENT and DBOPT_FACECENT variables, the traversal is handled simila
 For Quad meshes, there is no explicit list of zones (or nodes) comprising the mesh. So, the notion of traversing the zones (or nodes) of a Quad mesh requires further explanation. If the mesh’s nodes (or zones) were to be traversed, which would be the first? Which would be the second?
 Unless the DBOPT_MAJORORDER option was used, the answer is that the traversal is identical to the standard C programming language storage convention for multi-dimensional arrays often called row-major storage order. That is, was we traverse through the list of nodes (or zones) of a Quad mesh, we encounter first node with logical index [0,0,0], then [0,0,1], then [0,0,2]...[0,1,0]...etc. A traversal of zones would behave similarly. Traversal of edges or faces of a quad mesh would follow the description with “DBPutQuadvar” on page 2-94.
 6 API Section	Object Allocation, Free and IsEmpty
-This section describes methods to allocate and initialize many of Silo’s objects. The functions described here are...
-DBAlloc…	221
-DBFree…	222
-DBIsEmpty	223
+This section describes methods to allocate and initialize many of Silo’s objects.
 DBAlloc…
 —Allocate and initialize a Silo structure.
 Synopsis:
@@ -3422,10 +3289,6 @@ Description:
 These functions return non-zero if the object is indeed empty and zero otherwise. When DBSetAllowEmptyObjects() is enabled by a writer, it can produce objects in the file which contain useful metadata but no “problems-sized” data. These methods can be used by a reader to determine if an object read from a file is empty.
 7 API Section	Calculational and Utility
 This section of the API manual describes functions that can be used to compute things such as Facelists as well as utility functions to, for example, catentate an array of strings into a single string for simple output with DBWrite().
-DBCalcExternalFacelist	225
-DBCalcExternalFacelist2	227
-DBStringArrayToStringList	229
-DBStringListToStringArray	230
 DBCalcExternalFacelist
 —Calculate an external facelist for a UCD mesh.
 Synopsis:
@@ -3551,13 +3414,7 @@ This function performs the reverse of DBStringArrayToStringList.
 8 API Section	Optlists
 Many Silo functions take as a last argument a pointer to an Options List or optlist. This is intended to permit the Silo API to grow and evolve as necessary without requiring substantial changes to the API itself.
 In the documentation associated with each function, the list of available options and their meaning is described.
-This section of the manual describes only the functions to create and manage options lists. These are...
-DBMakeOptlist	232
-DBAddOption	233
-DBClearOption	234
-DBGetOption	235
-DBFreeOptlist	236
-DBClearOptlist	237
+This section of the manual describes only the functions to create and manage options lists.
 DBMakeOptlist
 —Allocate an option list.
 Synopsis:
@@ -3664,35 +3521,7 @@ The DBClearOptlist function removes all options from the given option list.
 
 9 API Section	User Defined (Generic) Data and Objects
 If you want to create data that other applications (not written by you or someone working closely with you) can read and understand, these are NOT the right functions to use. That is because the data that these functions create is not self-describing and inherently non-shareable.
-However, if you need to write data that only you (or someone working closely with you) will read such as for restart purposes, the functions described here may be helpful. The functions described here allow users to read and write arbitrary arrays of raw data as well as user-defined Silo objects. These include...
-DBWrite	239
-DBWriteSlice	240
-DBReadVar	242
-DBReadVarSlice	243
-DBGetVar	244
-DBInqVarExists	245
-DBInqVarType	246
-DBGetVarByteLength	248
-DBGetVarDims	249
-DBGetVarLength	250
-DBGetVarType	251
-DBPutCompoundarray	252
-DBInqCompoundarray	253
-DBGetCompoundarray	254
-DBMakeObject	255
-DBFreeObject	256
-DBChangeObject	257
-DBClearObject	258
-DBAddDblComponent	259
-DBAddFltComponent	260
-DBAddIntComponent	261
-DBAddStrComponent	262
-DBAddVarComponent	263
-DBWriteComponent	264
-DBWriteObject	265
-DBGetObject	266
-DBGetComponent	267
-DBGetComponentType	268
+However, if you need to write data that only you (or someone working closely with you) will read such as for restart purposes, the functions described here may be helpful. The functions described here allow users to read and write arbitrary arrays of raw data as well as user-defined Silo objects.
 DBWrite
 —Write a simple variable.
 Synopsis:
@@ -4274,9 +4103,6 @@ The extpr object is used for all Silo data representing problem-sized array data
 Another extension of JSON we have defined for Silo is a binary format for serialized JSON objects and methods to serialize and unserialize a JSON object to a binary buffer. Although JSON implementations other than json-c also define a binary format (see for example, BSON) we have defined one here as an extension to json-c. Silo’s binary format can be used, for example, by a parallel application to conveniently send Silo objects between processors by serializing to a binary buffer at the sender and then unserializing at the receiver.
 Any application wishing to use the JSON Silo interface must include the silo_json.h header file.
 In this section we describe only those methods we have defined beyond those that come with the json-c library. The functions in this part of the library are
-json-c extensions	271
-DBWriteJsonObject	272
-DBGetJsonObject	273
 json-c extensions
 —Extensions to json-c library to support Silo
 Synopsis:
@@ -4344,13 +4170,6 @@ Note, however, that any problem-sized data associate with the object is returned
 Silo is a relatively old library. It was originally developed in the early 1990’s. Over the years, a number of use conventions have emerged and taken root and are now firmly entrenched in a variety of applications using Silo. 
 This section of the API manual simply tries to enumerate all these conventions and their meanings. In a few cases, a long-standing use convention has been subsumed by the recent introduction of formalized Silo objects or options to implement the convention. These cases are documented and the user is encouraged to use the formal Silo approach.
 Since everything documented in this section of the Silo API is a convention on the use of Silo, where one would ordinarily see a function call prototype, instead example call(s) to the Silo that implement the convention are described.
-_visit_defvars	275
-_visit_searchpath	276
-_visit_domain_groups	277
-AlphabetizeVariables	278
-ConnectivityIsTimeVarying	279
-MultivarToMultimeshMap_vars	280
-MultivarToMultimeshMap_meshes	281
 _visit_defvars
 —convention for derived variable definitions
 Synopsis:
@@ -4428,16 +4247,6 @@ Description:
 See “MultivarToMultimeshMap_vars” on page 283.
 12 API Section	Fortran Interface
 The functions described in this section are either unique to the Fortran interface or facilitate the mixing of C/C++ and Fortran within a single application interacting with a Silo file. Note that when Silo was originally written, the vision was that only visualization/post-processing tools would ever attempt to read the contents of Silo files. Therefore, the Fortran interface has never included all the companion functions to read objects. That said, it is possible to write simple fortran callable wrappers to the C functions much like the write interface already implemented. Have a look in the source file silo_f.c for examples. 
-
-The functions described here are...
-dbmkptr	283
-dbrmptr	284
-dbset2dstrlen	285
-dbget2dstrlen	286
-DBFortranAllocPointer	287
-DBFortranAccessPointer	288
-DBFortranRemovePointer	289
-dbwrtfl	290
 dbmkptr
 —create a pointer-id from a pointer
 Synopsis:
