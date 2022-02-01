@@ -3119,7 +3119,7 @@ The table below illustrates examples of the contents of the various array argume
 2|“<stress/sz>”|DB_VARTYPE_SCALAR|“-<stress/sx>-<stress/sy>”
 3|“vel”|DB_VARTYPE_VECTOR|“{Vx, Vy, Vz}”
 4|“speed”|DB_VARTYPE_SCALAR|“magntidue(vel)”
-|“dev_stress”|DB_VARTYPE_TENSOR|“{{<stress/sx>,<stress/txy>,<stress/txz>}, {                 0, <stress/sy>,<stress/tyz>}, {                 0,                 0, <stress/sz>}}”
+|“dev_stress”|DB_VARTYPE_TENSOR|“{ {<stress/sx>,<stress/txy>,<stress/txz>}, {                 0, <stress/sy>,<stress/tyz>}, {                 0,                 0, <stress/sz>} }”
 
 
 The first entry (0) defines a derived scalar variable named “totaltemp” which is the sum of variables whose names are “nodet” and “zonetemp”.
