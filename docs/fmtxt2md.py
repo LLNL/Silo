@@ -157,7 +157,6 @@ def ReadLinesInTabBlock(target_ntabs, i, desclines):
 
     complete_line = ''
     while complete_line.count('\t') < target_ntabs and i < len(desclines):
-        #complete_line += desclines[i].strip(" \n")
         complete_line += desclines[i]
         i += 1
     if complete_line.count('\t') != target_ntabs:
@@ -205,6 +204,7 @@ def OutputGatheredColumnsAsTable(mdfile, cols):
     mdfile.write("\n")
 
 def ProcessDescription(mdfile, i, lines):
+
     i += 1
     desclines = []
     while i < len(lines) and \
@@ -213,9 +213,10 @@ def ProcessDescription(mdfile, i, lines):
         desclines += [lines[i]]
         i += 1
 
-    if not len(desclines):
+    if not desclines:
         return i
 
+    print(i, len(desclines), desclines[0])
     mdfile.write("#### Description:\n\n")
 
     j = 0
@@ -246,6 +247,7 @@ def ProcessDescription(mdfile, i, lines):
                 # We've come to the end of current tab block.
                 # First, output the current table.
                 OutputGatheredColumnsAsTable(mdfile, tabcols)
+                tabcols = []
 
                 # Indicate we're done with current table
                 target_ntabs = 0
@@ -260,7 +262,7 @@ def ProcessDescription(mdfile, i, lines):
                 j, newcol = ReadLinesInTabBlock(target_ntabs, j, desclines)
                 tabcols += newcol
 
-    if target_ntabs:
+    if tabcols:
         OutputGatheredColumnsAsTable(mdfile, tabcols)
 
     return i
@@ -271,15 +273,22 @@ def ProcessMethod(mdfile, i, lines):
     while i < len(lines) and \
         not IsMethodHeader(i, lines) and \
         not IsAPISectionHeader(lines[i]):
+        handled_line = False
         if re.search(r'^Synopsis:$', lines[i]):
             i = ProcessSynopsis(mdfile, i, lines)
+            handled_line = True
         if re.search(r'^Arguments:$', lines[i]):
             i = ProcessArgumentListBlock(mdfile, i, lines)
+            handled_line = True
         if re.search(r'^Returns:$', lines[i]):
             i = ProcessReturnBlock(mdfile, i, lines)
+            handled_line = True
         if re.search(r'^Description:$', lines[i]):
             i = ProcessDescription(mdfile, i, lines)
-        i += 1
+            handled_line = True
+        if not handled_line:
+            OutputLineAsSentencePerLine(mdfile, lines[i])
+            i += 1
     return i
 
 #
@@ -287,9 +296,17 @@ def ProcessMethod(mdfile, i, lines):
 #
 lines = GetFileLines("Chapter2-man_pages2.txt")
 
+i = 0
 s = 0
-for i in range(len(lines)):
+while i < len(lines):
+    print(i, lines[i])
+    handled_line = False
     if IsAPISectionHeader(lines[i]):
         i, s, mdfile = StartNewSection(i, s, lines)
+        handled_line = True
     if IsMethodHeader(i, lines):
         i = ProcessMethod(mdfile, i, lines)
+        handled_line = True
+    if not handled_line:
+        OutputLineAsSentencePerLine(mdfile, lines[i])
+        i += 1

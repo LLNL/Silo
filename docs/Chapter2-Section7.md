@@ -1,83 +1,90 @@
-## Optlists
+## JSON Interface to Silo Objects
 
-Many Silo functions take as a last argument a pointer to an Options List or optlist. 
-This is intended to permit the Silo API to grow and evolve as necessary without requiring substantial changes to the API itself.
+WARNING: JSON support in Silo is experimental. 
+The interface may be dramatically re-worked, eliminated or replaced with something like Conduit. 
+The Silo library must be configured with --enable-json option to enable these JSON support functions. 
+When this option is enabled, the json-c library is compiled with Silo and installed to a json sub-directory at the same install point as the Silo library. 
+In addition, applications using Silo’s JSON interface will have to link with the json-c library
+(-I<silo-install>/json/include -L<silo-install>/json/lib -ljson).
 
-In the documentation associated with each function, the list of available options and their meaning is described.
+JSON stands for JavaScript Object Notation. 
+You can learn more about JSON at json.
+org. 
+You can learn more about the json-c library at https://github.
+com/json-c/json-c/wiki.
 
-This section of the manual describes only the functions to create and manage options lists.
+Silo’s JSON interface consists of two parts. 
+The first part is just the json-c library interface which includes methods such as json_object_new_int() which creates a new integer valued JSON object and json_object_to_json_string() which returns an ascii string representation of a JSON object as well as many other methods. 
+This interface is documented with the json-c library and is not documented here.
+
+The second part is some extensions to the json-c library we have defined for the purposes of providing a higher performance JSON interface for Silo objects. 
+This includes the definition of a new JSON object type; a pointer to an external array. 
+This is called an extptr object and is actually a specific assemblage of the following 4 JSON sub-objects.
+
+Member name	“datatype”	“ndims”	“dims”	“ptr”
+JSON type	json_type_int	json_type_int	json_type_array	json_type_string
+Meaning	An integer value representing one of the Silo types DB_FLOAT, DB_INT, DB_DOUBLE, etc.	
+number of dimensions in the external array	array of json_type_ints indicating size in each dimension	The ascii hexidecimal representation of a void* pointer holding the data of the array
+
+The extpr object is used for all Silo data representing problem-sized array data. 
+For example, it is used to hold coordinate data for a mesh object, or variable data for a variable object or nodelist data for a zonelist object.
+
+Another extension of JSON we have defined for Silo is a binary format for serialized JSON objects and methods to serialize and unserialize a JSON object to a binary buffer. 
+Although JSON implementations other than json-c also define a binary format (see for example, BSON) we have defined one here as an extension to json-c. 
+Silo’s binary format can be used, for example, by a parallel application to conveniently send Silo objects between processors by serializing to a binary buffer at the sender and then unserializing at the receiver.
+
+Any application wishing to use the JSON Silo interface must include the silo_json.
+h header file.
+
+In this section we describe only those methods we have defined beyond those that come with the json-c library. 
+The functions in this part of the library are
+json-c extensions
+—Extensions to json-c library to support Silo
+Synopsis:
+/* Create/delete extptr object */
+json_object* json_object_new_extptr(void *p, int ndims,
+                 int const *dims, int datatype);
+void json_object_extptr_delete(json_object *jso);
+
+/* Inspect various members of an extptr object */
+int json_object_is_extptr(json_object *obj);
+int json_object_get_extptr_datatype(json_object *obj);
+int json_object_get_extptr_ndims(json_object *obj);
+int json_object_get_extptr_dims_idx(json_object *obj, int idx);
+void* json_object_get_extptr_ptr(json_object *obj);
+
+/* binary serialization */
+int json_object_to_binary_buf(json_object *obj, int flags,
+        void **buf, int *len);
+json_object* json_object_from_binary_buf(void *buf, int len);
+
+/* Read/Write raw binary data to a file */
+int json_object_to_binary_file(char const *filename,
+        json_object *obj);
+json_object* json_object_from_binary_file(char const *filename);
+
+/* Fix extptr members that were ascii-fied via standard json
+   string serialization */
+void json_object_reconstitute_extptrs(json_object *o);
+Fortran Equivalent:
+None
+Description:
+As described in the introduction to this Silo API section, Silo defines a new JSON object type called an extptr object. 
+It is a pointer to an external array of data. 
+Because the json-c library Silo uses permits us to override the delete method for a JSON object, if you use the standard json-c method of deleting a JSON object, json_object_put(), it will have the effect of deleting any external arrays referenced by extptr objects.
+
+Note that the binary serialization defined here can be UN-serialized only by this (Silo) implementation of JSON. 
+If you serialize to a standard JSON string using the json-c library’s json_object_to_json_string() the resulting serialization can be correctly interpreted by *any* JSON implementation. 
+However, in so doing, all extptr objects (which are unique to Silo) are converted to the standard JSON array type. 
+All performance advantages of extptr objects are lost. 
+They can, however, be re-constituted after UN-serializing a standard JSON string by the  json_object_reconstitute_extprs() method.
 
 
-### `DBMakeOptlist()` - Allocate an option list.
+### `DBWriteJsonObject()` - Write a JSON object to a Silo file
 
 #### C Signature
 ```
-DBoptlist *DBMakeOptlist (int maxopts)
-```
-#### Fortran Signature
-```
-integer function dbmkoptlist(maxopts, optlist_id)
-returns created optlist pointer-id in optlist_id
-```
-
-Arg name | Description
-:--|:---
-`maxopts` | Initial maximum number of options expected in the optlist. If this maximum is exceeded, the library will silently re-allocate more space using the golden-rule.
-
-#### Returned value:
-DBMakeOptlist returns a pointer to an option list on success and NULL on failure.
-
-#### Description:
-
-The DBMakeOptlist function allocates memory for an option list and initializes it.
-Use the function DBAddOption to populate the option list structure, and DBFreeOptlist to free it.
-
-In releases of Silo prior to 4.
-10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
-However, in version 4.
-10, the library will silently just re-allocate the optlist to accommodate more options.
-
-#### C Signature
-```
-int DBAddOption (DBoptlist *optlist, int option, void *value)
-```
-#### Fortran Signature
-```
-integer function dbaddcopt (optlist_id, option, cvalue, lcvalue)
-integer function dbaddcaopt (optlist_id, option, nval, cvalue,
-lcvalue)
-integer function dbadddopt (optlist_id, option, dvalue)
-integer function dbaddiopt (optlist_id, option, ivalue)
-integer function dbaddropt (optlist_id, option, rvalue)
-
-integer ivalue, optlist_id, option, lcvalue, nval
-double precision dvalue
-real rvalue
-character*N cvalue (See “dbset2dstrlen” on page 288.)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-`option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an option list.
-`value` | Pointer to the value associated with the provided option description. The data type is implied by option.
-
-#### Returned value:
-DBAddOption returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBAddOption function adds an option/value pair to an option list.
-Several of the output functions accept option lists to provide information of an optional nature.
-
-In releases of Silo prior to 4.
-10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
-However, in version 4.
-10, the library will silently just re-allocate the optlist to accommodate more options.
-
-#### C Signature
-```
-int DBClearOption(DBoptlist *optlist, int optid)
+DBWriteJsonObject(DBfile *db, json_object *jobj)
 ```
 #### Fortran Signature:
 ```
@@ -86,25 +93,27 @@ None
 
 Arg name | Description
 :--|:---
-`optlist` | The option list object for which you wish to remove an option
-`optid` | The option id of the option you would like to remove
-
-#### Returned value:
-DBClearOption returns zero on success and -1 on failure.
+`db` | Silo database file handle
+`jobj` | JSON object pointer
 
 #### Description:
 
-This function can be used to remove options from an option list.
-If the option specified by optid exists in the given option list, that option is removed from the list and the total number of options in the list is reduced by one.
+This call takes a JSON object pointer and writes the object to a Silo file.
 
-This method can be used together with DBAddOption to modify an existing option in an option list.
-To modify an existing option in an option list, first call DBClearOption for the option to be modified and then call DBAddOption to re-add it with a new definition.
+If the object is constructed so as to match one of Silo’s standard objects (any Silo object ordinarily written with a DBPutXXX() call), then the JSON object will be written to the file such that any Silo reader calling the matching DBGetXXX() method will successfully read the object.
+In other words, it is possible to use this method to write first-class Silo objects to a file such as a ucd-mesh or a quad-var, etc.
+All that is required is that the JSON object be constructed in such a way that it holds all the metadata members Silo requires/uses for that specific object.
+See documentation for the companion DBGetJsonObject().
 
-There is also a function to query for the value of an option in an option list, DBGetOption.
+Note that because there is no char const *name argument to this method, the JSON object itself must indicate the name of the object.
+This is done by defining a string valued member with key “silo_name”.
+
+
+### `DBGetJsonObject()` - Get an object from a Silo file as a JSON object
 
 #### C Signature
 ```
-void *DBGetOption(DBoptlist *optlist, int optid)
+json_object *DBGetJsonObject(DBfile *db, char const *name)
 ```
 #### Fortran Signature:
 ```
@@ -113,594 +122,14 @@ None
 
 Arg name | Description
 :--|:---
-`optlist` | The optlist to query
-`optid` | The option id to query the value for
-
-#### Returned value:
-Returns the pointer value set for a given option or NULL if the option is not defined in the given option list.
+`db` | Silo database file handle
+`name` | Name of object to read
 
 #### Description:
 
-This function can be used to query the contents of an optlist.
-If the given optlist has an option of the given optid, then this function will return the pointer associated with the given optid.
-Otherwise, it will return NULL indicating the optlist does not contain an option with the given optid.
-
-#### C Signature
-```
-int DBFreeOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature
-```
-integer function dbfreeoptlist(optlist_id)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBFreeOptlist returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBFreeOptlist function releases the memory associated with the given option list.
-The individual option values are not freed.
-
-DBFreeOptlist will not fail if a NULL pointer is passed to it.
-
-
-#### C Signature
-```
-int DBClearOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBClearOptlist returns zero on success and -1 on failure.
-
-#### Description:
-
-The DBClearOptlist function removes all options from the given option list.
-
-
-### `DBMakeOptlist()` - Allocate an option list.
-
-#### C Signature
-```
-DBoptlist *DBMakeOptlist (int maxopts)
-```
-#### Fortran Signature
-```
-integer function dbmkoptlist(maxopts, optlist_id)
-returns created optlist pointer-id in optlist_id
-```
-
-Arg name | Description
-:--|:---
-`maxopts` | Initial maximum number of options expected in the optlist. If this maximum is exceeded, the library will silently re-allocate more space using the golden-rule.
-
-#### Returned value:
-DBMakeOptlist returns a pointer to an option list on success and NULL on failure.
-
-#### Description:
-
-The DBMakeOptlist function allocates memory for an option list and initializes it.
-Use the function DBAddOption to populate the option list structure, and DBFreeOptlist to free it.
-
-In releases of Silo prior to 4.
-10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
-However, in version 4.
-10, the library will silently just re-allocate the optlist to accommodate more options.
-
-#### C Signature
-```
-int DBAddOption (DBoptlist *optlist, int option, void *value)
-```
-#### Fortran Signature
-```
-integer function dbaddcopt (optlist_id, option, cvalue, lcvalue)
-integer function dbaddcaopt (optlist_id, option, nval, cvalue,
-lcvalue)
-integer function dbadddopt (optlist_id, option, dvalue)
-integer function dbaddiopt (optlist_id, option, ivalue)
-integer function dbaddropt (optlist_id, option, rvalue)
-
-integer ivalue, optlist_id, option, lcvalue, nval
-double precision dvalue
-real rvalue
-character*N cvalue (See “dbset2dstrlen” on page 288.)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-`option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an option list.
-`value` | Pointer to the value associated with the provided option description. The data type is implied by option.
-
-#### Returned value:
-DBAddOption returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBAddOption function adds an option/value pair to an option list.
-Several of the output functions accept option lists to provide information of an optional nature.
-
-In releases of Silo prior to 4.
-10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
-However, in version 4.
-10, the library will silently just re-allocate the optlist to accommodate more options.
-
-#### C Signature
-```
-int DBClearOption(DBoptlist *optlist, int optid)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | The option list object for which you wish to remove an option
-`optid` | The option id of the option you would like to remove
-
-#### Returned value:
-DBClearOption returns zero on success and -1 on failure.
-
-#### Description:
-
-This function can be used to remove options from an option list.
-If the option specified by optid exists in the given option list, that option is removed from the list and the total number of options in the list is reduced by one.
-
-This method can be used together with DBAddOption to modify an existing option in an option list.
-To modify an existing option in an option list, first call DBClearOption for the option to be modified and then call DBAddOption to re-add it with a new definition.
-
-There is also a function to query for the value of an option in an option list, DBGetOption.
-
-#### C Signature
-```
-void *DBGetOption(DBoptlist *optlist, int optid)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | The optlist to query
-`optid` | The option id to query the value for
-
-#### Returned value:
-Returns the pointer value set for a given option or NULL if the option is not defined in the given option list.
-
-#### Description:
-
-This function can be used to query the contents of an optlist.
-If the given optlist has an option of the given optid, then this function will return the pointer associated with the given optid.
-Otherwise, it will return NULL indicating the optlist does not contain an option with the given optid.
-
-#### C Signature
-```
-int DBFreeOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature
-```
-integer function dbfreeoptlist(optlist_id)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBFreeOptlist returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBFreeOptlist function releases the memory associated with the given option list.
-The individual option values are not freed.
-
-DBFreeOptlist will not fail if a NULL pointer is passed to it.
-
-
-#### C Signature
-```
-int DBClearOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBClearOptlist returns zero on success and -1 on failure.
-
-#### Description:
-
-The DBClearOptlist function removes all options from the given option list.
-
-
-### `DBAddOption()` - Add an option to an option list.
-
-#### C Signature
-```
-int DBAddOption (DBoptlist *optlist, int option, void *value)
-```
-#### Fortran Signature
-```
-integer function dbaddcopt (optlist_id, option, cvalue, lcvalue)
-integer function dbaddcaopt (optlist_id, option, nval, cvalue,
-lcvalue)
-integer function dbadddopt (optlist_id, option, dvalue)
-integer function dbaddiopt (optlist_id, option, ivalue)
-integer function dbaddropt (optlist_id, option, rvalue)
-
-integer ivalue, optlist_id, option, lcvalue, nval
-double precision dvalue
-real rvalue
-character*N cvalue (See “dbset2dstrlen” on page 288.)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-`option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an option list.
-`value` | Pointer to the value associated with the provided option description. The data type is implied by option.
-
-#### Returned value:
-DBAddOption returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBAddOption function adds an option/value pair to an option list.
-Several of the output functions accept option lists to provide information of an optional nature.
-
-In releases of Silo prior to 4.
-10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
-However, in version 4.
-10, the library will silently just re-allocate the optlist to accommodate more options.
-
-#### C Signature
-```
-int DBClearOption(DBoptlist *optlist, int optid)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | The option list object for which you wish to remove an option
-`optid` | The option id of the option you would like to remove
-
-#### Returned value:
-DBClearOption returns zero on success and -1 on failure.
-
-#### Description:
-
-This function can be used to remove options from an option list.
-If the option specified by optid exists in the given option list, that option is removed from the list and the total number of options in the list is reduced by one.
-
-This method can be used together with DBAddOption to modify an existing option in an option list.
-To modify an existing option in an option list, first call DBClearOption for the option to be modified and then call DBAddOption to re-add it with a new definition.
-
-There is also a function to query for the value of an option in an option list, DBGetOption.
-
-#### C Signature
-```
-void *DBGetOption(DBoptlist *optlist, int optid)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | The optlist to query
-`optid` | The option id to query the value for
-
-#### Returned value:
-Returns the pointer value set for a given option or NULL if the option is not defined in the given option list.
-
-#### Description:
-
-This function can be used to query the contents of an optlist.
-If the given optlist has an option of the given optid, then this function will return the pointer associated with the given optid.
-Otherwise, it will return NULL indicating the optlist does not contain an option with the given optid.
-
-#### C Signature
-```
-int DBFreeOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature
-```
-integer function dbfreeoptlist(optlist_id)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBFreeOptlist returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBFreeOptlist function releases the memory associated with the given option list.
-The individual option values are not freed.
-
-DBFreeOptlist will not fail if a NULL pointer is passed to it.
-
-
-#### C Signature
-```
-int DBClearOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBClearOptlist returns zero on success and -1 on failure.
-
-#### Description:
-
-The DBClearOptlist function removes all options from the given option list.
-
-
-### `DBClearOption()` - Remove an option from an option list
-
-#### C Signature
-```
-int DBClearOption(DBoptlist *optlist, int optid)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | The option list object for which you wish to remove an option
-`optid` | The option id of the option you would like to remove
-
-#### Returned value:
-DBClearOption returns zero on success and -1 on failure.
-
-#### Description:
-
-This function can be used to remove options from an option list.
-If the option specified by optid exists in the given option list, that option is removed from the list and the total number of options in the list is reduced by one.
-
-This method can be used together with DBAddOption to modify an existing option in an option list.
-To modify an existing option in an option list, first call DBClearOption for the option to be modified and then call DBAddOption to re-add it with a new definition.
-
-There is also a function to query for the value of an option in an option list, DBGetOption.
-
-#### C Signature
-```
-void *DBGetOption(DBoptlist *optlist, int optid)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | The optlist to query
-`optid` | The option id to query the value for
-
-#### Returned value:
-Returns the pointer value set for a given option or NULL if the option is not defined in the given option list.
-
-#### Description:
-
-This function can be used to query the contents of an optlist.
-If the given optlist has an option of the given optid, then this function will return the pointer associated with the given optid.
-Otherwise, it will return NULL indicating the optlist does not contain an option with the given optid.
-
-#### C Signature
-```
-int DBFreeOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature
-```
-integer function dbfreeoptlist(optlist_id)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBFreeOptlist returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBFreeOptlist function releases the memory associated with the given option list.
-The individual option values are not freed.
-
-DBFreeOptlist will not fail if a NULL pointer is passed to it.
-
-
-#### C Signature
-```
-int DBClearOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBClearOptlist returns zero on success and -1 on failure.
-
-#### Description:
-
-The DBClearOptlist function removes all options from the given option list.
-
-
-### `DBGetOption()` - Retrieve the value set for an option in an option list
-
-#### C Signature
-```
-void *DBGetOption(DBoptlist *optlist, int optid)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | The optlist to query
-`optid` | The option id to query the value for
-
-#### Returned value:
-Returns the pointer value set for a given option or NULL if the option is not defined in the given option list.
-
-#### Description:
-
-This function can be used to query the contents of an optlist.
-If the given optlist has an option of the given optid, then this function will return the pointer associated with the given optid.
-Otherwise, it will return NULL indicating the optlist does not contain an option with the given optid.
-
-#### C Signature
-```
-int DBFreeOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature
-```
-integer function dbfreeoptlist(optlist_id)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBFreeOptlist returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBFreeOptlist function releases the memory associated with the given option list.
-The individual option values are not freed.
-
-DBFreeOptlist will not fail if a NULL pointer is passed to it.
-
-
-#### C Signature
-```
-int DBClearOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBClearOptlist returns zero on success and -1 on failure.
-
-#### Description:
-
-The DBClearOptlist function removes all options from the given option list.
-
-
-### `DBFreeOptlist()` - Free memory associated with an option list.
-
-#### C Signature
-```
-int DBFreeOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature
-```
-integer function dbfreeoptlist(optlist_id)
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBFreeOptlist returns a zero on success and -1 on failure.
-
-#### Description:
-
-The DBFreeOptlist function releases the memory associated with the given option list.
-The individual option values are not freed.
-
-DBFreeOptlist will not fail if a NULL pointer is passed to it.
-
-
-#### C Signature
-```
-int DBClearOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBClearOptlist returns zero on success and -1 on failure.
-
-#### Description:
-
-The DBClearOptlist function removes all options from the given option list.
-
-
-### `DBClearOptlist()` - Clear an optlist.
-
-#### C Signature
-```
-int DBClearOptlist (DBoptlist *optlist)
-```
-#### Fortran Signature:
-```
-None
-```
-
-Arg name | Description
-:--|:---
-`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
-
-#### Returned value:
-DBClearOptlist returns zero on success and -1 on failure.
-
-#### Description:
-
-The DBClearOptlist function removes all options from the given option list.
-
+This method will read an object from a Silo file and return it as a JSON object.
+It can read *any* Silo object from a Silo file including objects written to the file using DBPutXXX().
+
+Note, however, that any problem-sized data associate with the object is returned as extptr sub-objects.
+See introduction to this API section for a description of extptr objects.
 

@@ -1,353 +1,182 @@
-## Object Allocation, Free and IsEmpty
+## Optlists
 
-This section describes methods to allocate and initialize many of Silo’s objects.
+Many Silo functions take as a last argument a pointer to an Options List or optlist. 
+This is intended to permit the Silo API to grow and evolve as necessary without requiring substantial changes to the API itself.
 
-DBAlloc…
-—Allocate and initialize a Silo structure.
+In the documentation associated with each function, the list of available options and their meaning is described.
 
-Synopsis:
-DBcompoundarray  *DBAllocCompoundarray (void)
-DBcsgmesh        *DBAllocCsgmesh (void)
-DBcsgvar         *DBAllocCsgvar (void)
-DBcurve          *DBAllocCurve (void)
-DBcsgzonelist    *DBAllocCSGZonelist (void)
-DBdefvars        *DBAllocDefvars (void)
-DBedgelist       *DBAllocEdgelist (void)
-DBfacelist       *DBAllocFacelist (void)
-DBmaterial       *DBAllocMaterial (void)
-DBmatspecies     *DBAllocMatspecies (void)
-DBmeshvar        *DBAllocMeshvar (void)
-DBmultimat       *DBAllocMultimat (void)
-DBmultimatspecies *DBAllocMultimatspecies (void)
-DBmultimesh      *DBAllocMultimesh (void)
-DBmultimeshadj   *DBAllocMultimeshadj (void)
-DBmultivar       *DBAllocMultivar (void)
-DBpointmesh      *DBAllocPointmesh (void)
-DBquadmesh       *DBAllocQuadmesh (void)
-DBquadvar        *DBAllocQuadvar (void)
-DBucdmesh        *DBAllocUcdmesh (void)
-DBucdvar         *DBAllocUcdvar (void)
-DBzonelist       *DBAllocZonelist (void)
-DBphzonelist     *DBAllocPHZonelist (void)
-DBnamescheme     *DBAllocNamescheme(void);
-DBgroupelmap     *DBAllocGroupelmap(int, DBdatatype);
-
-Fortran Equivalent:
-None
-Returns:
-These allocation functions return a pointer to a newly allocated and initialized structure on success and NULL on failure. 
-
-Description:
-The allocation functions allocate a new structure of the requested type, and initialize all values to NULL or zero. 
-There are counterpart functions for freeing structures of a given type (see DBFree….
-
-DBFree…
-—Release memory associated with a Silo structure.
-
-Synopsis:
-void DBFreeCompoundarray (DBcompoundarray *x)
-void DBFreeCsgmesh (DBcsgmesh *x)
-void DBFreeCsgvar (DBcsgvar *x)
-void DBFreeCSGZonelist (DBcsgzonelist *x)
-void DBFreeCurve(DBcurve *);
-void DBFreeDefvars (DBdefvars *x)
-void DBFreeEdgelist (DBedgelist *x)
-void DBFreeFacelist (DBfacelist *x)
-void DBFreeMaterial (DBmaterial *x)
-void DBFreeMatspecies (DBmatspecies *x)
-void DBFreeMeshvar (DBmeshvar *x)
-void DBFreeMultimesh (DBmultimesh *x)
-void DBFreeMultimeshadj (DBmultimeshadj *x)
-void DBFreeMultivar (DBmultivar *x)
-void DBFreeMultimat(DBmultimat *);
-void DBFreeMultimatspecies(DBmultimatspecies *);
-void DBFreePointmesh (DBpointmesh *x)
-void DBFreeQuadmesh (DBquadmesh *x)
-void DBFreeQuadvar (DBquadvar *x)
-void DBFreeUcdmesh (DBucdmesh *x)
-void DBFreeUcdvar (DBucdvar *x)
-void DBFreeZonelist (DBzonelist *x)
-void DBFreePHZonelist (DBphzonelist *x)
-void DBFreeNamescheme(DBnamescheme *);
-void DBFreeMrgvar(DBmrgvar *mrgv);
-void DBFreeMrgtree(DBmrgtree *tree);
-void DBFreeGroupelmap(DBgroupelmap *map);
-Arguments:
-x
-A pointer to a structure which is to be freed. 
-Its type must correspond to the type in the function name.
-
-Fortran Equivalent:
-None
-Returns:
-These free functions return zero on success and -1 on failure.
-
-Description:
-The free functions release the given structure as well as all memory pointed to by these structures. 
-This is the preferred method for releasing these structures. 
-There are counterpart functions for allocating structures of a given type (see DBAlloc…). 
-The functions will not fail if a NULL pointer is passed to them.
+This section of the manual describes only the functions to create and manage options lists.
 
 
-### `DBIsEmpty()` - Query a object returned from Silo for “emptiness”
+### `DBMakeOptlist()` - Allocate an option list.
 
 #### C Signature
 ```
- int     DBIsEmptyCurve(DBcurve const *curve);
-    int     DBIsEmptyPointmesh(DBpointmesh const *msh);
-    int     DBIsEmptyPointvar(DBpointvar const *var);
-    int     DBIsEmptyMeshvar(DBmeshvar const *var);
-    int     DBIsEmptyQuadmesh(DBquadmesh const *msh);
-    int     DBIsEmptyQuadvar(DBquadvar const *var);
-    int     DBIsEmptyUcdmesh(DBucdmesh const *msh);
-    int     DBIsEmptyFacelist(DBfacelist const *fl);
-    int     DBIsEmptyZonelist(DBzonelist const *zl);
-    int     DBIsEmptyPHZonelist(DBphzonelist const *zl);
-    int     DBIsEmptyUcdvar(DBucdvar const *var);
-    int     DBIsEmptyCsgmesh(DBcsgmesh const *msh);
-    int     DBIsEmptyCSGZonelist(DBcsgzonelist const *zl);
-    int     DBIsEmptyCsgvar(DBcsgvar const *var);
-    int     DBIsEmptyMaterial(DBmaterial const *mat);
-    int     DBIsEmptyMatspecies(DBmatspecies const *spec);
+DBoptlist *DBMakeOptlist (int maxopts)
+```
+#### Fortran Signature
+```
+integer function dbmkoptlist(maxopts, optlist_id)
+returns created optlist pointer-id in optlist_id
 ```
 
 Arg name | Description
 :--|:---
-`x` | Pointer to a silo object structure to be queried
+`maxopts` | Initial maximum number of options expected in the optlist. If this maximum is exceeded, the library will silently re-allocate more space using the golden-rule.
+
+#### Returned value:
+DBMakeOptlist returns a pointer to an option list on success and NULL on failure.
 
 #### Description:
 
-These functions return non-zero if the object is indeed empty and zero otherwise.
-When DBSetAllowEmptyObjects() is enabled by a writer, it can produce objects in the file which contain useful metadata but no “problems-sized” data.
-These methods can be used by a reader to determine if an object read from a file is empty.
+The DBMakeOptlist function allocates memory for an option list and initializes it.
+Use the function DBAddOption to populate the option list structure, and DBFreeOptlist to free it.
 
-### `DBAlloc…()` - Allocate and initialize a Silo structure.
+In releases of Silo prior to 4.
+10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
+However, in version 4.
+10, the library will silently just re-allocate the optlist to accommodate more options.
+
+### `DBAddOption()` - Add an option to an option list.
 
 #### C Signature
 ```
-DBcompoundarray  *DBAllocCompoundarray (void)
-    DBcsgmesh        *DBAllocCsgmesh (void)
-    DBcsgvar         *DBAllocCsgvar (void)
-    DBcurve          *DBAllocCurve (void)
-    DBcsgzonelist    *DBAllocCSGZonelist (void)
-    DBdefvars        *DBAllocDefvars (void)
-    DBedgelist       *DBAllocEdgelist (void)
-    DBfacelist       *DBAllocFacelist (void)
-    DBmaterial       *DBAllocMaterial (void)
-    DBmatspecies     *DBAllocMatspecies (void)
-    DBmeshvar        *DBAllocMeshvar (void)
-    DBmultimat       *DBAllocMultimat (void)
-    DBmultimatspecies *DBAllocMultimatspecies (void)
-    DBmultimesh      *DBAllocMultimesh (void)
-    DBmultimeshadj   *DBAllocMultimeshadj (void)
-    DBmultivar       *DBAllocMultivar (void)
-    DBpointmesh      *DBAllocPointmesh (void)
-    DBquadmesh       *DBAllocQuadmesh (void)
-    DBquadvar        *DBAllocQuadvar (void)
-    DBucdmesh        *DBAllocUcdmesh (void)
-    DBucdvar         *DBAllocUcdvar (void)
-    DBzonelist       *DBAllocZonelist (void)
-    DBphzonelist     *DBAllocPHZonelist (void)
-    DBnamescheme     *DBAllocNamescheme(void);
-    DBgroupelmap     *DBAllocGroupelmap(int, DBdatatype);
-    
+int DBAddOption (DBoptlist *optlist, int option, void *value)
+```
+#### Fortran Signature
+```
+integer function dbaddcopt (optlist_id, option, cvalue, lcvalue)
+integer function dbaddcaopt (optlist_id, option, nval, cvalue,
+lcvalue)
+integer function dbadddopt (optlist_id, option, dvalue)
+integer function dbaddiopt (optlist_id, option, ivalue)
+integer function dbaddropt (optlist_id, option, rvalue)
+
+integer ivalue, optlist_id, option, lcvalue, nval
+double precision dvalue
+real rvalue
+character*N cvalue (See “dbset2dstrlen” on page 288.)
+```
+
+Arg name | Description
+:--|:---
+`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
+`option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an option list.
+`value` | Pointer to the value associated with the provided option description. The data type is implied by option.
+
+#### Returned value:
+DBAddOption returns a zero on success and -1 on failure.
+
+#### Description:
+
+The DBAddOption function adds an option/value pair to an option list.
+Several of the output functions accept option lists to provide information of an optional nature.
+
+In releases of Silo prior to 4.
+10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
+However, in version 4.
+10, the library will silently just re-allocate the optlist to accommodate more options.
+
+### `DBClearOption()` - Remove an option from an option list
+
+#### C Signature
+```
+int DBClearOption(DBoptlist *optlist, int optid)
 ```
 #### Fortran Signature:
 ```
 None
 ```
 
-#### Returned value:
-These allocation functions return a pointer to a newly allocated and initialized structure on success and NULL on failure.
-
-#### Description:
-
-The allocation functions allocate a new structure of the requested type, and initialize all values to NULL or zero.
-There are counterpart functions for freeing structures of a given type (see DBFree….
-
-#### C Signature
-```
-void DBFreeCompoundarray (DBcompoundarray *x)
-    void DBFreeCsgmesh (DBcsgmesh *x)
-    void DBFreeCsgvar (DBcsgvar *x)
-    void DBFreeCSGZonelist (DBcsgzonelist *x)
-    void DBFreeCurve(DBcurve *);
-    void DBFreeDefvars (DBdefvars *x)
-    void DBFreeEdgelist (DBedgelist *x)
-    void DBFreeFacelist (DBfacelist *x)
-    void DBFreeMaterial (DBmaterial *x)
-    void DBFreeMatspecies (DBmatspecies *x)
-    void DBFreeMeshvar (DBmeshvar *x)
-    void DBFreeMultimesh (DBmultimesh *x)
-    void DBFreeMultimeshadj (DBmultimeshadj *x)
-    void DBFreeMultivar (DBmultivar *x)
-    void DBFreeMultimat(DBmultimat *);
-    void DBFreeMultimatspecies(DBmultimatspecies *);
-    void DBFreePointmesh (DBpointmesh *x)
-    void DBFreeQuadmesh (DBquadmesh *x)
-    void DBFreeQuadvar (DBquadvar *x)
-    void DBFreeUcdmesh (DBucdmesh *x)
-    void DBFreeUcdvar (DBucdvar *x)
-    void DBFreeZonelist (DBzonelist *x)
-    void DBFreePHZonelist (DBphzonelist *x)
-    void DBFreeNamescheme(DBnamescheme *);
-    void DBFreeMrgvar(DBmrgvar *mrgv);
-    void DBFreeMrgtree(DBmrgtree *tree);
-    void DBFreeGroupelmap(DBgroupelmap *map);
-```
-
 Arg name | Description
 :--|:---
-`x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
-`Fortran Equivalent:` | None
+`optlist` | The option list object for which you wish to remove an option
+`optid` | The option id of the option you would like to remove
 
 #### Returned value:
-These free functions return zero on success and -1 on failure.
+DBClearOption returns zero on success and -1 on failure.
 
 #### Description:
 
-The free functions release the given structure as well as all memory pointed to by these structures.
-This is the preferred method for releasing these structures.
-There are counterpart functions for allocating structures of a given type (see DBAlloc…).
-The functions will not fail if a NULL pointer is passed to them.
+This function can be used to remove options from an option list.
+If the option specified by optid exists in the given option list, that option is removed from the list and the total number of options in the list is reduced by one.
+
+This method can be used together with DBAddOption to modify an existing option in an option list.
+To modify an existing option in an option list, first call DBClearOption for the option to be modified and then call DBAddOption to re-add it with a new definition.
+
+There is also a function to query for the value of an option in an option list, DBGetOption.
+
+### `DBGetOption()` - Retrieve the value set for an option in an option list
 
 #### C Signature
 ```
- int     DBIsEmptyCurve(DBcurve const *curve);
-    int     DBIsEmptyPointmesh(DBpointmesh const *msh);
-    int     DBIsEmptyPointvar(DBpointvar const *var);
-    int     DBIsEmptyMeshvar(DBmeshvar const *var);
-    int     DBIsEmptyQuadmesh(DBquadmesh const *msh);
-    int     DBIsEmptyQuadvar(DBquadvar const *var);
-    int     DBIsEmptyUcdmesh(DBucdmesh const *msh);
-    int     DBIsEmptyFacelist(DBfacelist const *fl);
-    int     DBIsEmptyZonelist(DBzonelist const *zl);
-    int     DBIsEmptyPHZonelist(DBphzonelist const *zl);
-    int     DBIsEmptyUcdvar(DBucdvar const *var);
-    int     DBIsEmptyCsgmesh(DBcsgmesh const *msh);
-    int     DBIsEmptyCSGZonelist(DBcsgzonelist const *zl);
-    int     DBIsEmptyCsgvar(DBcsgvar const *var);
-    int     DBIsEmptyMaterial(DBmaterial const *mat);
-    int     DBIsEmptyMatspecies(DBmatspecies const *spec);
+void *DBGetOption(DBoptlist *optlist, int optid)
+```
+#### Fortran Signature:
+```
+None
 ```
 
 Arg name | Description
 :--|:---
-`x` | Pointer to a silo object structure to be queried
-
-#### Description:
-
-These functions return non-zero if the object is indeed empty and zero otherwise.
-When DBSetAllowEmptyObjects() is enabled by a writer, it can produce objects in the file which contain useful metadata but no “problems-sized” data.
-These methods can be used by a reader to determine if an object read from a file is empty.
-
-### `DBFree…()` - Release memory associated with a Silo structure.
-
-#### C Signature
-```
-void DBFreeCompoundarray (DBcompoundarray *x)
-    void DBFreeCsgmesh (DBcsgmesh *x)
-    void DBFreeCsgvar (DBcsgvar *x)
-    void DBFreeCSGZonelist (DBcsgzonelist *x)
-    void DBFreeCurve(DBcurve *);
-    void DBFreeDefvars (DBdefvars *x)
-    void DBFreeEdgelist (DBedgelist *x)
-    void DBFreeFacelist (DBfacelist *x)
-    void DBFreeMaterial (DBmaterial *x)
-    void DBFreeMatspecies (DBmatspecies *x)
-    void DBFreeMeshvar (DBmeshvar *x)
-    void DBFreeMultimesh (DBmultimesh *x)
-    void DBFreeMultimeshadj (DBmultimeshadj *x)
-    void DBFreeMultivar (DBmultivar *x)
-    void DBFreeMultimat(DBmultimat *);
-    void DBFreeMultimatspecies(DBmultimatspecies *);
-    void DBFreePointmesh (DBpointmesh *x)
-    void DBFreeQuadmesh (DBquadmesh *x)
-    void DBFreeQuadvar (DBquadvar *x)
-    void DBFreeUcdmesh (DBucdmesh *x)
-    void DBFreeUcdvar (DBucdvar *x)
-    void DBFreeZonelist (DBzonelist *x)
-    void DBFreePHZonelist (DBphzonelist *x)
-    void DBFreeNamescheme(DBnamescheme *);
-    void DBFreeMrgvar(DBmrgvar *mrgv);
-    void DBFreeMrgtree(DBmrgtree *tree);
-    void DBFreeGroupelmap(DBgroupelmap *map);
-```
-
-Arg name | Description
-:--|:---
-`x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
-`Fortran Equivalent:` | None
+`optlist` | The optlist to query
+`optid` | The option id to query the value for
 
 #### Returned value:
-These free functions return zero on success and -1 on failure.
+Returns the pointer value set for a given option or NULL if the option is not defined in the given option list.
 
 #### Description:
 
-The free functions release the given structure as well as all memory pointed to by these structures.
-This is the preferred method for releasing these structures.
-There are counterpart functions for allocating structures of a given type (see DBAlloc…).
-The functions will not fail if a NULL pointer is passed to them.
+This function can be used to query the contents of an optlist.
+If the given optlist has an option of the given optid, then this function will return the pointer associated with the given optid.
+Otherwise, it will return NULL indicating the optlist does not contain an option with the given optid.
+
+### `DBFreeOptlist()` - Free memory associated with an option list.
 
 #### C Signature
 ```
- int     DBIsEmptyCurve(DBcurve const *curve);
-    int     DBIsEmptyPointmesh(DBpointmesh const *msh);
-    int     DBIsEmptyPointvar(DBpointvar const *var);
-    int     DBIsEmptyMeshvar(DBmeshvar const *var);
-    int     DBIsEmptyQuadmesh(DBquadmesh const *msh);
-    int     DBIsEmptyQuadvar(DBquadvar const *var);
-    int     DBIsEmptyUcdmesh(DBucdmesh const *msh);
-    int     DBIsEmptyFacelist(DBfacelist const *fl);
-    int     DBIsEmptyZonelist(DBzonelist const *zl);
-    int     DBIsEmptyPHZonelist(DBphzonelist const *zl);
-    int     DBIsEmptyUcdvar(DBucdvar const *var);
-    int     DBIsEmptyCsgmesh(DBcsgmesh const *msh);
-    int     DBIsEmptyCSGZonelist(DBcsgzonelist const *zl);
-    int     DBIsEmptyCsgvar(DBcsgvar const *var);
-    int     DBIsEmptyMaterial(DBmaterial const *mat);
-    int     DBIsEmptyMatspecies(DBmatspecies const *spec);
+int DBFreeOptlist (DBoptlist *optlist)
+```
+#### Fortran Signature
+```
+integer function dbfreeoptlist(optlist_id)
 ```
 
 Arg name | Description
 :--|:---
-`x` | Pointer to a silo object structure to be queried
+`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
+
+#### Returned value:
+DBFreeOptlist returns a zero on success and -1 on failure.
 
 #### Description:
 
-These functions return non-zero if the object is indeed empty and zero otherwise.
-When DBSetAllowEmptyObjects() is enabled by a writer, it can produce objects in the file which contain useful metadata but no “problems-sized” data.
-These methods can be used by a reader to determine if an object read from a file is empty.
+The DBFreeOptlist function releases the memory associated with the given option list.
+The individual option values are not freed.
 
-### `DBIsEmpty()` - Query a object returned from Silo for “emptiness”
+DBFreeOptlist will not fail if a NULL pointer is passed to it.
+
+
+### `DBClearOptlist()` - Clear an optlist.
 
 #### C Signature
 ```
- int     DBIsEmptyCurve(DBcurve const *curve);
-    int     DBIsEmptyPointmesh(DBpointmesh const *msh);
-    int     DBIsEmptyPointvar(DBpointvar const *var);
-    int     DBIsEmptyMeshvar(DBmeshvar const *var);
-    int     DBIsEmptyQuadmesh(DBquadmesh const *msh);
-    int     DBIsEmptyQuadvar(DBquadvar const *var);
-    int     DBIsEmptyUcdmesh(DBucdmesh const *msh);
-    int     DBIsEmptyFacelist(DBfacelist const *fl);
-    int     DBIsEmptyZonelist(DBzonelist const *zl);
-    int     DBIsEmptyPHZonelist(DBphzonelist const *zl);
-    int     DBIsEmptyUcdvar(DBucdvar const *var);
-    int     DBIsEmptyCsgmesh(DBcsgmesh const *msh);
-    int     DBIsEmptyCSGZonelist(DBcsgzonelist const *zl);
-    int     DBIsEmptyCsgvar(DBcsgvar const *var);
-    int     DBIsEmptyMaterial(DBmaterial const *mat);
-    int     DBIsEmptyMatspecies(DBmatspecies const *spec);
+int DBClearOptlist (DBoptlist *optlist)
+```
+#### Fortran Signature:
+```
+None
 ```
 
 Arg name | Description
 :--|:---
-`x` | Pointer to a silo object structure to be queried
+`optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
+
+#### Returned value:
+DBClearOptlist returns zero on success and -1 on failure.
 
 #### Description:
 
-These functions return non-zero if the object is indeed empty and zero otherwise.
-When DBSetAllowEmptyObjects() is enabled by a writer, it can produce objects in the file which contain useful metadata but no “problems-sized” data.
-These methods can be used by a reader to determine if an object read from a file is empty.
+The DBClearOptlist function removes all options from the given option list.
+
 

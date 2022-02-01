@@ -2181,9 +2181,7 @@ The table below illustrates examples of the contents of the various array argume
 	0	1	2	3	4
 names	“totaltemp”	“<stress/sz>”	“vel”	“speed”	“dev_stress”
 types	DB_VARTYPE_SCALAR	DB_VARTYPE_SCALAR	DB_VARTYPE_VECTOR	DB_VARTYPE_SCALAR	DB_VARTYPE_TENSOR
-defns	“nodet+zonetemp”	“-<stress/sx>-<stress/sy>”	“{Vx, Vy, Vz}”	“magntidue(vel)”	“{{<stress/sx>,<stress/txy>,<stress/txz>},
-  {                 0, <stress/sy>,<stress/tyz>},
-  {                 0,                 0, <stress/sz>}}”
+defns	“nodet+zonetemp”	“-<stress/sx>-<stress/sy>”	“{Vx, Vy, Vz}”	“magntidue(vel)”	“{{<stress/sx>,<stress/txy>,<stress/txz>}, {                 0, <stress/sy>,<stress/tyz>}, {                 0,                 0, <stress/sz>}}”
 
 The first entry (0) defines a derived scalar variable named “totaltemp” which is the sum of variables whose names are “nodet” and “zonetemp”. The next entry (1) defines a derived scalar variable named “sz” in a group of variables named “stress” (the slash character (‘/’) is used to group variable names much the way file pathnames are grouped in Linux). Note also that the definition of “sz” uses the special bracketing characters (‘<‘) and (‘>’) for the variable references due to the fact that these variable references have a slash character (‘/’) in them.
 The third entry (2) defines a derived vector variable named “vel” from three scalar variables named “Vx”, “Vy”, and “Vz” while the fourth entry (3) defines a scalar variable, “speed” to be the magnitude of the vector variable named “vel”. The last entry (4) defines a deviatoric stress tensor. These last two cases demonstrate that derived variable definitions may reference other derived variables.
