@@ -117,7 +117,7 @@ integer function dbmkptr(void p)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `p` | pointer for which a pointer-id is needed
 
 #### Returned value:
@@ -143,7 +143,7 @@ integer function dbrmptr(ptr_id)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `ptr_id` | the pointer-id to remove
 
 #### Returned value:
@@ -160,7 +160,7 @@ integer function dbset2dstrlen(int len)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `len` | The length to set
 
 #### Returned value:
@@ -196,7 +196,7 @@ int DBFortranAllocPointer (void *pointer)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `pointer` | A pointer to a Silo object for which a Fortran identifier is needed
 
 #### Returned value:
@@ -251,7 +251,7 @@ void *DBFortranAccessPointer (int value)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `value` | The value returned by a Silo Fortran function, referencing a Silo object.
 
 #### Returned value:
@@ -275,7 +275,7 @@ void DBFortranRemovePointer (int value)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `value` | An integer returned by DBFortranAllocPointer
 
 #### Returned value:
@@ -301,7 +301,7 @@ dbwrtfl(dbid, name, lname, object_id, status)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbid` | The identifier for the Silo database to write the object to.
 `name` | The name to be assigned to the object in the file.
 `lname` | The length of the name argument.

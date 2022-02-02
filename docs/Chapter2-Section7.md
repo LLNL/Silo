@@ -105,7 +105,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `db` | Silo database file handle
 `jobj` | JSON object pointer
 
@@ -136,7 +136,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `db` | Silo database file handle
 `name` | Name of object to read
 

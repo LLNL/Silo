@@ -21,7 +21,7 @@ returns created optlist pointer-id in optlist_id
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `maxopts` | Initial maximum number of options expected in the optlist. If this maximum is exceeded, the library will silently re-allocate more space using the golden-rule.
 
 #### Returned value:
@@ -61,7 +61,7 @@ character*N cvalue (See "dbset2dstrlen" on page 288.)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
 `option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an option list.
 `value` | Pointer to the value associated with the provided option description. The data type is implied by option.
@@ -93,7 +93,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `optlist` | The option list object for which you wish to remove an option
 `optid` | The option id of the option you would like to remove
 
@@ -124,7 +124,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `optlist` | The optlist to query
 `optid` | The option id to query the value for
 
@@ -151,7 +151,7 @@ integer function dbfreeoptlist(optlist_id)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
 
 #### Returned value:
@@ -180,7 +180,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the DBMakeOptlist function.
 
 #### Returned value:

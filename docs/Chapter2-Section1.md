@@ -32,7 +32,7 @@ int dbregfopts(int optlist_id)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `opts` | an options list object obtained from a DBMakeOptlist() call
 
 #### Returned value:
@@ -121,7 +121,7 @@ int DBUnregisterFileOptionsSet(int opts_set_id)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `opts_set_id` | The identifer (obtained from a previous call to DBRegisterFileOptionsSet()) of a file options set to unregister.
 
 #### Returned value:
@@ -166,7 +166,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `driver_ids` | A -1 terminated list of driver ids such as DB_HDF5, DB_PDB, DB_HDF5_CORE, or any driver id constructed with the DB_HDF5_OPTS() macro.
 
 #### Returned value:
@@ -213,7 +213,7 @@ returns created database file handle in dbid
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `pathname` | Path name of file to create. This can be either an absolute or relative path.
 `mode` | Creation mode. One of the predefined Silo modes: DB_CLOBBER or DB_NOCLOBBER.
 `target` | Destination file format. One of the predefined types: DB_LOCAL, DB_SUN3, DB_SUN4, DB_SGI, DB_RS6000, or DB_CRAY.
@@ -384,7 +384,7 @@ returns database file handle in dbid.
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `name` | Name of the file to open. Can be either an absolute or relative path.
 `type` | The type of file to open. One of the predefined types, typically DB_UNKNOWN, DB_PDB, or DB_HDF5. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
 `mode` | The mode of the file to open. One of the values DB_READ or DB_APPEND.
@@ -429,7 +429,7 @@ integer function dbclose(dbid)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 
 #### Returned value:
@@ -453,7 +453,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 
 #### Returned value:
@@ -484,7 +484,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file handle
 
 #### Returned value:
@@ -515,7 +515,7 @@ int DBFileVersionDigits(const DBfile *dbfile,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Silo database file handle
 `maj` | Pointer to returned major version digit
 `min` | Pointer to returned minor version digit
@@ -539,7 +539,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file handle
 `Maj` | Integer major version number
 `Min` | Integer minor version number
@@ -562,7 +562,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Silo database file handle obtained with a call to DBOpen
 
 #### Returned value:
@@ -583,7 +583,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `DBfile` | Database file pointer.
 `nobjs` | Number of object names in obj_names.
 `ordering` | Returned integer array of relative order of occurence in the file of each object. For example, if ordering[i]==k, that means the object whose name is obj_names[i] occurs kth when the objects are ordered according to offset at which they exist in the file.
@@ -613,7 +613,7 @@ integer function dbmkdir(dbid, dirname, ldirname, status)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `dirname` | Name of the directory to create.
 
@@ -638,7 +638,7 @@ integer function dbsetdir(dbid, pathname, lpathname)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `pathname` | Path name of the directory. This can be either an absolute or relative path name.
 
@@ -665,7 +665,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `dirname` | Returned current directory name. The caller must allocate space for the returned name. The maximum space used is 256 characters, including the NULL terminator.
 
@@ -691,7 +691,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `srcFile` | Source database file pointer.
 `srcDir` | Name of the directory within the source database file to copy.
 `dstFile` | Destination database file pointer.
@@ -725,7 +725,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `nobjs` | The number of objects to be copied (e.g. number of strings in srcObjList)
 `srcDb` | The Silo database to be used as the source of the copies
 `srcObjList` | An array of nobj strings of the (path) names of objects to be copied. See description for interpretation of relative path names.
@@ -821,7 +821,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle.
 
 #### Returned value:
@@ -863,7 +863,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle.
 `drvr_hndl` | The low-level driver handle.
 
@@ -888,7 +888,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | A Silo database file handle.
 
 #### Returned value:
@@ -914,7 +914,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `path` | Path to a file on the filesystem
 
 #### Returned value:
@@ -950,7 +950,7 @@ integer function dbinqfile(filename, lfilename, is_file)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `filename` | Name of file.
 
 #### Returned value:
@@ -989,7 +989,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | The Silo database file handle
 
 #### Description:
@@ -1053,7 +1053,7 @@ integer function dbputcurve(dbid, curvename, lcurvename, xvals,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer
 `curvename` | Name of the curve object
 `xvals` | Array of length npoints containing the x-axis data values. Must be NULL when either DBOPT_XVARNAME or DBOPT_REFERENCE is used.
@@ -1113,7 +1113,7 @@ integer function dbgetcurve(dbid, curvename, lcurvename, maxpts,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `curvename` | Name of the curve to read.
 
@@ -1149,7 +1149,7 @@ void* x, y, z (if ndims<3, z=0 ok, if ndims<2, y=0 ok)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the mesh.
 `ndims` | Number of dimensions.
@@ -1210,7 +1210,7 @@ DBpointmesh *DBGetPointmesh (DBfile *dbfile, char const *meshname)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `meshname` | Name of the mesh.
 
@@ -1242,7 +1242,7 @@ int DBPutPointvar (DBfile *dbfile, char const *name,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the variable set.
 `meshname` | Name of the associated point mesh.
@@ -1309,7 +1309,7 @@ integer function dbputpv1(dbid, name, lname, meshname,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the variable.
 `meshname` | Name of the associated point mesh.
@@ -1346,7 +1346,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Name of the variable.
 
@@ -1385,7 +1385,7 @@ character* xname, yname, zname (if ndims<3, zname=0 ok, etc.)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the mesh.
 `coordnames` | Array of length ndims containing pointers to the names to be provided when writing out the coordinate arrays. This parameter is currently ignored and can be set as NULL.
@@ -1477,7 +1477,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `meshname` | Name of the mesh.
 
@@ -1519,7 +1519,7 @@ var is essentially a matrix of size <nvars> x <var-size> where var-size is deter
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the variable.
 `meshname` | Name of the mesh associated with this variable (written with DBPutQuadmesh or DBPutUcdmesh). If no association is to be made, this value should be NULL.
@@ -1623,7 +1623,7 @@ integer function dbputqv1(dbid, name, lname, meshname,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the variable.
 `meshname` | Name of the mesh associated with this variable (written with DBPutQuadmesh or DBPutUcdmesh.) If no association is to be made, this value should be NULL.
@@ -1666,7 +1666,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Name of the variable.
 
@@ -1707,7 +1707,7 @@ character* xname,yname,zname (same rules)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the mesh.
 `ndims` | Number of spatial dimensions represented by this UCD mesh.
@@ -1837,7 +1837,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle.
 `name` | The name of the ucd submesh object to create.
 `parentmesh` | The name of the parent ucd mesh this submesh is a portion of.
@@ -1871,7 +1871,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `meshname` | Name of the mesh.
 
@@ -1906,7 +1906,7 @@ integer function dbputzl(dbid, name, lname, nzones,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the zonelist structure.
 `nzones` | Number of zones in associated mesh.
@@ -1953,7 +1953,7 @@ integer function dbputzl2(dbid, name, lname, nzones,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the zonelist structure.
 `nzones` | Number of zones in associated mesh.
@@ -2030,7 +2030,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the zonelist structure.
 `nfaces` | Number of faces in the zonelist. Note that faces shared between zones should only be counted once.
@@ -2186,7 +2186,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `phzlname` | Name of the polyhedral-zonelist.
 
@@ -2223,7 +2223,7 @@ integer function dbputfl(dbid, name, lname, ndims nodelist,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the facelist structure.
 `nfaces` | Number of external faces in associated mesh.
@@ -2269,7 +2269,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the variable.
 `meshname` | Name of the mesh associated with this variable (written with DBPutUcdmesh).
@@ -2363,7 +2363,7 @@ integer function dbputuv1(dbid, name, lname, meshname,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the variable.
 `meshname` | Name of the mesh associated with this variable (written with either DBPutUcdmesh).
@@ -2403,7 +2403,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Name of the variable.
 
@@ -2441,7 +2441,7 @@ integer function dbputcsgm(dbid, name, lname, ndims,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer
 `name` | Name to associate with this DBcsgmesh object
 `ndims` | Number of spatial and topological dimensions of the CSG mesh object
@@ -2570,7 +2570,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer
 `meshname` | Name of the CSG mesh object to read
 
@@ -2602,7 +2602,7 @@ integer function dbputcsgzl(dbid, name, lname, nregs,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer
 `name` | Name to associate with the DBcsgzonelist object
 `nregs` | The number of regions in the regionlist.
@@ -2795,7 +2795,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer
 `zlname` | Name of the CSG mesh zonelist object to read
 
@@ -2827,7 +2827,7 @@ integer* var_ids (array of "pointer ids" created using dbmkptr)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer
 `vname` | The name to be associated with this DBcsgvar object
 `meshname` | The name of the CSG mesh this variable is associated with
@@ -2881,7 +2881,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer
 `varname` | Name of CSG variable object to read
 
@@ -2915,7 +2915,7 @@ void* mix_vf
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the material data object.
 `meshname` | Name of the mesh associated with this information.
@@ -3010,7 +3010,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `mat_name` | Name of the material variable to read.
 
@@ -3049,7 +3049,7 @@ void *species_mf
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the material species data object.
 `matname` | Name of the material object with which the material species object is associated.
@@ -3185,7 +3185,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `ms_name` | Name of the material species data to read.
 
@@ -3222,7 +3222,7 @@ character*N defns (See "dbset2dstrlen" on page 288.)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the derived variable definition(s) object.
 `ndefs` | number of derived variable definitions.
@@ -3285,7 +3285,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | The name of the DBdefvars object to read
 
@@ -3317,7 +3317,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Variable name.
 `meshname` | Returned mesh name. The caller must allocate space for the returned name. The maximum space used is 256 characters, including the NULL terminator.
@@ -3344,7 +3344,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `meshname` | Mesh name.
 

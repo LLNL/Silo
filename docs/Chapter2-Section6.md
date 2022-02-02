@@ -19,7 +19,7 @@ int DBWrite (DBfile *dbfile, char const *varname, void const *var,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Name of the simple variable.
 `var` | Array defining the values associated with the variable.
@@ -52,7 +52,7 @@ integer function dbwriteslice(dbid, varname, lvarname, var,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Name of the simple variable.
 `var` | Array defining the values associated with the slab.
@@ -95,7 +95,7 @@ integer function dbrdvar(dbid, varname, lvarname, ptr)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Name of the simple variable.
 `result` | Pointer to memory into which the variable should be read. It is up to the application to provide sufficient space in which to read the variable.
@@ -128,7 +128,7 @@ integer function dbrdvarslice(dbid, varname, lvarname, offset,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Name of the simple variable.
 `offset` | Array of length ndims of offsets in each dimension of the variable. This is the 0-origin position from which to begin reading the slice.
@@ -165,7 +165,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Name of the variable
 
@@ -196,7 +196,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Object name.
 
@@ -224,7 +224,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Object name.
 
@@ -289,7 +289,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Variable name.
 
@@ -317,7 +317,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle.
 `name` | The name of the Silo object to obtain dimension information for.
 `maxdims` | The maximum size of dims.
@@ -345,7 +345,7 @@ integer function dbinqlen(dbid, varname, lvarname, len)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Variable name.
 
@@ -371,7 +371,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `varname` | Variable name.
 
@@ -409,7 +409,7 @@ character*N elemnames (See "dbset2dstrlen" on page 288.)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer
 `name` | Name of the compound array structure.
 `elemnames` | Array of length nelems containing pointers to the names of the elements.
@@ -450,7 +450,7 @@ integer function dbinqca(dbid, name, lname, maxwidth,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `name` | Name of the compound array.
 `elemnames` | Returned array of length nelems containing pointers to the names of the array elements.
@@ -483,7 +483,7 @@ integer function dbgetca(dbid, name, lname, lelemnames,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `arrayname` | Name of the compound array.
 
@@ -515,7 +515,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `objname` | Name of the object.
 `objtype` | Type of object. One of the predefined types: DB_QUADMESH, DB_QUAD_RECT, DB_QUAD_CURV, DB_DEFVARS, DB_QUADVAR, DB_UCDMESH, DB_UCDVAR, DB_POINTMESH, DB_POINTVAR, DB_CSGMESH, DB_CSGVAR, DB_MULTIMESH, DB_MULTIVAR, DB_MULTIADJ, DB_MATERIAL, DB_MATSPECIES, DB_FACELIST, DB_ZONELIST, DB_PHZONELIST, DB_EDGELIST, DB_CURVE, DB_ARRAY, or DB_USERDEF.
 `maxcomps` | Initial maximum number of components needed for this object. If this number is exceeded, the library will silently re-allocate more space using the golden rule.
@@ -547,7 +547,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `object` | Pointer to the object to be freed. This object is created with the DBMakeObject function.
 
 #### Returned value:
@@ -574,7 +574,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle.
 `obj` | The new DBobject object (which knows its name) to write to the file.
 
@@ -599,7 +599,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `object` | Pointer to the object to be cleared. This object is created with the DBMakeObject function.
 
 #### Returned value:
@@ -625,7 +625,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `object` | Pointer to an object. This object is created with the DBMakeObject function.
 `compname` | The component name.
 `d` | The value of the double precision floating point component.
@@ -652,7 +652,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `object` | Pointer to an object. This object is created with the DBMakeObject function.
 `compname` | The component name.
 `f` | The value of the floating point component.
@@ -679,7 +679,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `object` | Pointer to an object. This object is created with the DBMakeObject function.
 `compname` | The component name.
 `i` | The value of the integer component.
@@ -706,7 +706,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `object` | Pointer to the object. This object is created with the DBMakeObject function.
 `compname` | The component name.
 `s` | The value of the string component. Silo copies the contents of the string.
@@ -733,7 +733,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `object` | Pointer to the object. This object is created with the DBMakeObject function.
 `compname` | Component name.
 `vardata` | Name of the variable object associated with the component (see Description).
@@ -765,7 +765,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `object` | Pointer to the object.
 `compname` | Component name.
@@ -797,7 +797,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `object` | Object created with DBMakeObject and populated with DBAddFltComponent, DBAddIntComponent, DBAddStrComponent, and DBAddVarComponent.
 `freemem` | If non-zero, then the object will be freed after writing.
@@ -825,7 +825,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle.
 `objname` | The name of the object to get.
 
@@ -862,7 +862,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `objname` | Object name.
 `compname` | Component name.
@@ -891,7 +891,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `dbfile` | Database file pointer.
 `objname` | Object name.
 `compname` | Component name.

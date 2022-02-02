@@ -37,7 +37,7 @@ returns handle to newly created tree in tree_id.
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `mesh_type` | The type of mesh object the MRG tree will be associated with. An example would be DB_MULTIMESH, DB_QUADMESH, DB_UCDMESH.
 `info_bits` | UNUSED
 `max_children` | Maximum number of immediate children of the root.
@@ -165,7 +165,7 @@ integer function dbaddregion(tree_id, reg_name, lregname, info_bits,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `tree` | The MRG tree object to add a region to.
 `reg_name` | The name of the new region.
 `info_bits` | UNUSED
@@ -230,7 +230,7 @@ integer function dbaddregiona(tree_id, nregn, regn_names, 	lregn_names,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `tree` | The MRG tree object to add the regions to.
 `nregn` | The number of regions to add.
 `regn_names` | This is either an array of nregn pointers to character string names for each region or it is an array of 1 pointer to a character string specifying a printf-style naming scheme for the regions. The existence of a percent character ('%') (used to introduce conversion specifications) anywhere in regn_names[0] will indicate the latter mode.The latter mode is almost always preferable, especially if nergn is large (say more than 100). See below for the format of the printf-style naming string.
@@ -274,7 +274,7 @@ integer function dbsetcwr(tree, path, lpath)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `tree` | The MRG tree object.
 `path` | The path to set.
 
@@ -301,7 +301,7 @@ char const *GetCwr(DBmrgtree *tree)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `tree` | The MRG tree.
 
 #### Returned value:
@@ -323,7 +323,7 @@ int dbputmrgtree(dbid, name, lname, mesh_name,
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo file handle
 `name` | The name of the MRG tree object in the file.
 `mesh_name` | The name of the mesh the MRG tree object is associated with.
@@ -351,7 +351,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle
 `name` | The name of the MRG tree object in the file.
 
@@ -379,7 +379,7 @@ integer function dbfreemrgtree(tree_id)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `tree` | The MRG tree object to free.
 
 #### Returned value:
@@ -401,7 +401,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `ns_str` | The namescheme string as described below.
 `...` | The remaining arguments take one of three forms depending on how the caller wants external array references, if any are present in the format substring of ns_str to be handled.  In the first form, the format substring of ns_str involves no externally referenced arrays and so there are no additional arguments other than the ns_str string itself.  In the second form, the caller has all externally referenced arrays needed in the format substring of ns_str already in memory and simply passes their pointers here as the remaining arguments in the same order in which they appear in the format substring of ns_str. The arrays are bound to the returned namescheme object and should not be freed until after the caller is done using the returned namescheme object. In this case, DBFreeNamescheme() does not free these arrays and the caller is required to explicitly free them.  In the third form, the caller makes a request for the Silo library to find in a given file, read and bind to the returned namescheme object all externally referenced arrays in the format substring of ns_str. To achieve this, the caller passes a 3-tuple of the form...  "(void*) 0, (DBfile*) file, (char*) mbobjpath" as the remaining arguments. The initial (void*)0 is required. The (DBfile*)file is the database handle of the Silo file in which all externally referenced arrays exist. The third (char*)mbobjpath, which may be 0/NULL, is the path within the file, either relative to the file's current working directory, or absolute, at which the multi-block object holding the ns_str was found in the file. All necessary externally referenced arrays must exist within the specified file using either relative paths from multi-block object's home directory or the file's current working directory or absolute paths. In this case DBFreeNamescheme() also frees memory associated with these arrays.
 
@@ -475,7 +475,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `natnum` | Natural number of the entry in a namescheme to be generated. Must be greater than or equal to zero.
 
 #### Returned value:
@@ -516,7 +516,7 @@ int* data_ids (use dbmkptr to get id for each pointer)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | Silo database file handle.
 `name` | Name of this mrgvar object.
 `tname` | name of the mrg tree this variable is associated with.
@@ -576,7 +576,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | Silo database file handle.
 `name` | The name of the region variable object to retrieve.
 
@@ -609,7 +609,7 @@ integer* seg_fracs_ids (use dbmkptr to get id for each pointer)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle.
 `name` | The name of the groupel map object in the file.
 `nsegs` | The number of segments in the map.
@@ -660,7 +660,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `file` | The Silo database file handle.
 `name` | The name of the groupel map object to read.
 
@@ -686,7 +686,7 @@ None
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `map` | Pointer to a DBgroupel map object.
 
 #### Returned value:
@@ -794,7 +794,7 @@ void DBFreeCompoundarray (DBcompoundarray *x)
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
 `Fortran Equivalent:` | None
 
@@ -809,7 +809,7 @@ This is the preferred method for releasing these structures.
 There are counterpart functions for allocating structures of a given type (see DBAlloc…). The functions will not fail if a `NULL` pointer is passed to them.
 
 
-### `DBIsEmpty()` - Query a object returned from Silo for "emptiness"
+### `DBIsEmpty()` - Query a object returned from Silo for “emptiness”
 
 #### C Signature
 ```
@@ -832,7 +832,7 @@ There are counterpart functions for allocating structures of a given type (see D
 ```
 
 Arg name | Description
-:--|:---
+:---|:---
 `x` | Pointer to a silo object structure to be queried
 
 #### Description:

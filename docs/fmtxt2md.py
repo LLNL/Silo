@@ -17,12 +17,13 @@ def IsAPISectionHeader(line):
         return True
     return False
 
-def ReplaceCurlyQuotes(s):
+def ReplaceCurlyQuotesAndEmDash(s):
 
     s = re.sub(r'“',r'"',s) # left double curly/smart
     s = re.sub(r'”',r'"',s) # right double curly/smart
     s = re.sub(r'‘',r"'",s) # left single curly/smart
     s = re.sub(r'’',r"'",s) # right single curly/smart
+    s = re.sub(r'—',r'-',s) # emdash
 
     return s
 
@@ -37,7 +38,7 @@ def OutputLineWithFormatting(mdfile, line, kwnames=[]):
     for s in sentences:
 
         # Get rid of single and double curly quotes
-        s = ReplaceCurlyQuotes(s)
+        s = ReplaceCurlyQuotesAndEmDash(s)
 
         # Backtick any keyword words
         for kw in kwnames:
@@ -65,7 +66,7 @@ def StartNewSection(i, s, lines):
     s += 1
     hs = re.search(r'^[0-9]*\s*API Section\s*(.*)',lines[i])
     if len(hs.groups()) > 0:
-        mdfile.write("## %s"%ReplaceCurlyQuotes(hs.groups()[0]))
+        mdfile.write("## %s"%ReplaceCurlyQuotesAndEmDash(hs.groups()[0]))
     else:
         mdfile.write("## Unknown")
     mdfile.write("\n\n")
@@ -90,7 +91,7 @@ def ProcessSynopsis(mdfile, i, lines):
          re.search(r'^Returns:$', lines[i]) or \
          re.search(r'^Arguments:$', lines[i])):
         indented_line = '    ' + lines[i].strip()
-        mdfile.write(ReplaceCurlyQuotes(indented_line))
+        mdfile.write(ReplaceCurlyQuotesAndEmDash(indented_line))
         mdfile.write("\n")
         i += 1
     mdfile.write("```\n")
@@ -126,7 +127,7 @@ def ProcessSynopsis(mdfile, i, lines):
                     fort_args = []
                     fort_args_done = True
                 elif fort_args_done:
-                    mdfile.write(ReplaceCurlyQuotes(lines[i].strip(' \n')))
+                    mdfile.write(ReplaceCurlyQuotesAndEmDash(lines[i].strip(' \n')))
                     mdfile.write("\n")
                 i += 1
             mdfile.write("```\n")
@@ -154,12 +155,12 @@ def ProcessArgumentListBlock(mdfile, i, lines):
     #mdfile.write("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Arg name | Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n")
     #mdfile.write("------Arg name | Description--------------------------------------------------------------------------------\n")
     mdfile.write("Arg name | Description\n")
-    mdfile.write(":--|:---\n")
+    mdfile.write(":---|:---\n")
     j = 0
     while j < len(args):
 #        mdfile.write("* `%s` : %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
 #        mdfile.write("\n`%s` : %s\n"%(args[j].strip(), args[j+1].strip() if j+1<len(args) else "ARGS PROBLEM"))
-        mdfile.write("`%s` | %s\n"%(args[j].strip(), ReplaceCurlyQuotes(args[j+1].strip()) if j+1<len(args) else "ARGS PROBLEM"))
+        mdfile.write("`%s` | %s\n"%(args[j].strip(), ReplaceCurlyQuotesAndEmDash(args[j+1].strip()) if j+1<len(args) else "ARGS PROBLEM"))
         j += 2
     mdfile.write("\n")
     return i
@@ -211,7 +212,7 @@ def OutputGatheredColumnsAsTable(mdfile, cols):
 
     for c in cols[1:]:
         c = [x if x else '' for x in c]
-        mdfile.write(ReplaceCurlyQuotes('|'.join(c))) # FIXME
+        mdfile.write(ReplaceCurlyQuotesAndEmDash('|'.join(c))) # FIXME
         mdfile.write("\n")
 
     mdfile.write("\n")
