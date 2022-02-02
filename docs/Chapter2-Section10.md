@@ -1,32 +1,35 @@
 ## Deprecated Functions
 
 
-The following functions were deprecated from Silo in version `4`.
+The following functions were deprecated from Silo in version 4.
 6.
 Attempts to call these methods in later versions may still succeed.
-However, deprecation warnings will be generated on stderr (See "DBSetDeprecateWarnings" on page `35`.
+However, deprecation warnings will be generated on stderr (See "DBSetDeprecateWarnings" on page 35.
 ). There is no guarantee that these methods will exist in later versions of Silo.
 
-### `DUMMY()` - DUMMY
+### `DUMMY()`
+
+* **Summary:** DUMMY
+
 
 DBGetComponentNames
 
-DBGetAtt (completely removed in version `4`.
+DBGetAtt (completely removed in version 4.
 10)
 
-DBListDir  (completely removed in version `4`.
+DBListDir  (completely removed in version 4.
 10)
 
-DBReadAtt  (completely removed in version `4`.
+DBReadAtt  (completely removed in version 4.
 10)
 
-DBGetQuadvar1  (completely removed in version `4`.
+DBGetQuadvar1  (completely removed in version 4.
 10)
 
-DBcontinue  (completely removed in version `4`.
+DBcontinue  (completely removed in version 4.
 10)
 
-DBPause  (completely removed in version `4`.
+DBPause  (completely removed in version 4.
 10)
 
 DBPutZonelist
