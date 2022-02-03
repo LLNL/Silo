@@ -38,6 +38,7 @@ def FormatText(s, kwnames=[]):
     # Undo backticking for some cases
     s = re.sub(r'`HDF(4|5)`',r'HDF\1',s)
     s = re.sub(r'`PDB`',r'PDB',s)
+    s = re.sub(r'`NOT`',r'**not**',s)
 
     return s
 

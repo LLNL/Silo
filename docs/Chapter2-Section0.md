@@ -235,23 +235,26 @@ The returned string should `NOT` be free'd by the caller.
 
 * **Summary:** Return the integer version digits of the library
 
+  ```
+  int DBVersionDigits(int *Maj, int *Min, int *Pat, int *Pre);
+  ```
 
-* **C Signature:**
-  ```
-int DBVersionDigits(int *Maj, int *Min, int *Pat, int *Pre);
-  ```
 * **Fortran Signature:**
+
   ```
   None
   ```
 
 * **Arguments:**
-  Arg name | Description
-  :---|:---
-  `Maj` | Pointer to returned major version digit
-  `Min` | Pointer to returned minor version digit
-  `Pat` | Pointer to returned patch version digit
-  `Pre` | Pointer to returned pre-release version digit (if any)
+  * First item
+  * Arg name | Description
+    :---|:---
+    `Maj` | Pointer to returned major version digit
+    `Min` | Pointer to returned minor version digit
+    `Pat` | Pointer to returned patch version digit
+    `Pre` | Pointer to returned pre-release version digit (if any)
+
+    Some other remarks
 
 * **Returned value:**
 
@@ -294,37 +297,40 @@ This function is the run-time equivalent of the `DB_VERSION_GE` macro.
 
 * **Summary:** Allow library to over-write existing objects in Silo files
 
-
-* **C Signature:**
   ```
-int DBSetAllowOverwrites(int allow)
+  int DBSetAllowOverwrites(int allow)
   ```
 * **Fortran Signature:**
+
   ```
-integer function dbsetovrwrt(allow)
+  integer function dbsetovrwrt(allow)
   ```
 
 * **Arguments:**
-  Arg name | Description
+  Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
   :---|:---
   `allow` | Integer value controlling the Silo library's overwrite behavior. A non-zero value sets the Silo library to permit overwrites of existing objects. A zero value disables overwrites. By default, Silo does `NOT` permit overwrites.
 
 * **Returned value:**
 
-Returns the previous setting of the value.
+  Returns the previous setting of the value.
 
 
-#### Description:
+* **Description:**
 
-By default, Silo permits a caller to over-write existing objects in a Silo file.
-However, overwrites are supported in Silo only when the new object involves individual member data that is no bigger than the original member data.
-If this condition is violated, then behavior is undefined and will likely lead to corrupted data.
+  By default, Silo permits a caller to over-write existing objects in a Silo file.
+  However, overwrites are supported in Silo only when the new object involves individual member data that is no bigger than the original member data.
+  If this condition is violated, then behavior is undefined and will likely lead to corrupted data.
 
-If you suspect you have a case where unintended overwrites are occurring, it can be useful to turn off overwrites.
-Then, you can watch for any errors reported by the Silo library and determine if and where overwrites might be occurring.
+  If you suspect you have a case where unintended overwrites are occurring, it can be useful to turn off overwrites.
+  Then, you can watch for any errors reported by the Silo library and determine if and where overwrites might be occurring.
 
-Note that there is currently a bug in the HDF5 driver where overwrites wind up orphaning existing data in the file rather than in fact overwriting that data.
+  Note that there is currently a bug in the HDF5 driver where overwrites wind up orphaning existing data in the file rather than in fact overwriting that data.
 
+---
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
 ### `DBGetAllowOverwrites()`
 
