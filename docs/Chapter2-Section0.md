@@ -307,9 +307,10 @@ This function is the run-time equivalent of the `DB_VERSION_GE` macro.
   ```
 
 * **Arguments:**
-  Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-  :---|:---
-  `allow` | Integer value controlling the Silo library's overwrite behavior. A non-zero value sets the Silo library to permit overwrites of existing objects. A zero value disables overwrites. By default, Silo does `NOT` permit overwrites.
+  * @nbsp;
+  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
+    :---|:---
+    `allow` | Integer value controlling the Silo library's overwrite behavior. A non-zero value sets the Silo library to permit overwrites of existing objects. A zero value disables overwrites. By default, Silo does `NOT` permit overwrites.
 
 * **Returned value:**
 

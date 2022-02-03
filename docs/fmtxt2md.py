@@ -35,7 +35,7 @@ def FormatText(s, kwnames=[]):
     # Backtick any all caps words
     s = re.sub(r'(\s+)([A-Z0-9_]{3,})(\s+|[\.?!])',r'\1`\2`\3',s)
 
-    # Undo backticking for some cases
+    # Undo all-caps backticking for some special cases
     s = re.sub(r'`HDF(4|5)`',r'HDF\1',s)
     s = re.sub(r'`PDB`',r'PDB',s)
     s = re.sub(r'`NOT`',r'**not**',s)
