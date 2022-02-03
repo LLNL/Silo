@@ -59,8 +59,7 @@ append("/foo/bar/lib")
 
 ### `Silo.Open()`
 
-* **Summary:** Open a Silo file (See `DBOpen`)
-
+* **Summary:** Open a Silo file (See DBOpen)
 
 * **C Signature:**
 
@@ -70,11 +69,10 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `filename` | Name of the Silo file to open
-    `flags` | Pass either Silo.DB_READ if you will only read objects from the file or Silo.DB_APPEND if you need to also write data to the file.
+  Arg name | Description
+  :---|:---
+  `filename` | Name of the Silo file to open
+  `flags` | Pass either Silo.DB_READ if you will only read objects from the file or Silo.DB_APPEND if you need to also write data to the file.
 
 
 * **Description:**
@@ -86,8 +84,7 @@ append("/foo/bar/lib")
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `Silo.Create()`
 
-* **Summary:** Create a new silo file (See `DBCreate`)
-
+* **Summary:** Create a new silo file (See DBCreate)
 
 * **C Signature:**
 
@@ -97,13 +94,12 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `filename` | [required string] name of the file to create
-    `info` | [required string] comment to be stored in the file
-    `driver` | [optional int] which `driver` to use. Pass either Silo.DB_PDB or Silo.DB_HDF5. Note that advanced `driver` features are not available through the Python interface. Default is Silo.DB_PDB.
-    `clobber` | [optional int] indicate whether any existing file should be clobbered. Pass either Silo.DB_CLOBBER or Silo.DB_NOCLOBBER. Default is Silo.DB_CLOBBER.
+  Arg name | Description
+  :---|:---
+  `filename` | [required string] name of the file to create
+  `info` | [required string] comment to be stored in the file
+  `driver` | [optional int] which `driver` to use. Pass either Silo.DB_PDB or Silo.DB_HDF5. Note that advanced `driver` features are not available through the Python interface. Default is Silo.DB_PDB.
+  `clobber` | [optional int] indicate whether any existing file should be clobbered. Pass either Silo.DB_CLOBBER or Silo.DB_NOCLOBBER. Default is Silo.DB_CLOBBER.
 
 
 * **Description:**
@@ -117,7 +113,6 @@ append("/foo/bar/lib")
 
 * **Summary:** Get the table of contents
 
-
 * **C Signature:**
 
   ```
@@ -130,8 +125,7 @@ append("/foo/bar/lib")
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `<DBfile>.GetVarInfo()`
 
-* **Summary:** Get metadata and bulk data of any object (See `DBGetObject`)
-
+* **Summary:** Get metadata and bulk data of any object (See DBGetObject)
 
 * **C Signature:**
 
@@ -141,11 +135,10 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `name` | [required string] `name` of object to read
-    `flag` | [optional int] `flag` to indicate if object bulk/raw data should be included. Pass 0 to **not** also read object bulk/raw data. Pass non-zero to also read object bulk/raw data. Default is 0.
+  Arg name | Description
+  :---|:---
+  `name` | [required string] `name` of object to read
+  `flag` | [optional int] `flag` to indicate if object bulk/raw data should be included. Pass 0 to **not** also read object bulk/raw data. Pass non-zero to also read object bulk/raw data. Default is 0.
 
 
 * **Description:**
@@ -153,7 +146,7 @@ append("/foo/bar/lib")
   Returns a Python dictionary object for a Silo high level object (e.
   g.
   not a primitive array). This method cannot be used to read the contents of a primitive array.
-  It can be used for any object the Silo C interface's `DBGetObject`() would also be used.
+  It can be used for any object the Silo C interface's `DBGetObject()` would also be used.
   If object bulk data is not also read, then the dictionary members for those sub-objects will contain a string holding the path of either a sub-object or a primitive array.
   Note that on the HDF5 driver, if friendly HDF5 names were not used to create the file, then the string paths for these sub-objects are often cryptic references to primitive arrays in the hidden /.silo directory.
 
@@ -165,8 +158,7 @@ append("/foo/bar/lib")
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `<DBfile>.GetVar()`
 
-* **Summary:** Get a primitive array (See `DBReadVar`)
-
+* **Summary:** Get a primitive array (See DBReadVar)
 
 * **C Signature:**
 
@@ -176,10 +168,9 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `name` | [required string] `name` of primitive array to read
+  Arg name | Description
+  :---|:---
+  `name` | [required string] `name` of primitive array to read
 
 
 * **Description:**
@@ -191,8 +182,7 @@ append("/foo/bar/lib")
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `<DBfile>.SetDir()`
 
-* **Summary:** Set current working directory of the Silo file (See `DBSetDir`)
-
+* **Summary:** Set current working directory of the Silo file (See DBSetDir)
 
 * **C Signature:**
 
@@ -202,10 +192,9 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `name` | [required string] `name` of directory to set
+  Arg name | Description
+  :---|:---
+  `name` | [required string] `name` of directory to set
 
 
 * **Description:**
@@ -219,7 +208,6 @@ append("/foo/bar/lib")
 
 * **Summary:** Close the Silo file
 
-
 * **C Signature:**
 
   ```
@@ -232,8 +220,7 @@ append("/foo/bar/lib")
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `<DBfile>.WriteObject()`
 
-* **Summary:** Write a Python dictionary as a Silo object (See `DBWriteObject`)
-
+* **Summary:** Write a Python dictionary as a Silo object (See DBWriteObject)
 
 * **C Signature:**
 
@@ -243,11 +230,10 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `name` | [required string] `name` of the new object to write
-    `obj_dict` | [required dict] Python dictionary containing object data
+  Arg name | Description
+  :---|:---
+  `name` | [required string] `name` of the new object to write
+  `obj_dict` | [required dict] Python dictionary containing object data
 
 
 * **Description:**
@@ -256,10 +242,10 @@ append("/foo/bar/lib")
   Here's the rub.
   Readers employing Silo's high level interface (e.
   g.
-  DBGetUcdmesh, `DBGetQuadvar`, etc.
+  DBGetUcdmesh, DBGetQuadvar, etc.
   ) will be able recognize an object so written if and only if the dict object's structure matches a known high-level Silo object.
 
-  So, you can use this method to write objects that can be read later via Silo's high-level object methods such `DBGetUcdmesh` and `DBGetMaterial`, etc.
+  So, you can use this method to write objects that can be read later via Silo's high-level object methods such `DBGetUcdmesh` and DBGetMaterial, etc.
   as long as the Python dictionary's members match what Silo expects.
 
   Often, the easiest way to decode how a given Python dict object should be structured to match a Silo object is to find an example object in some file and read it into Python with GetVarInfo().
@@ -269,15 +255,14 @@ append("/foo/bar/lib")
   Of course, such readers will not be aware of any additional members so handled.
 
   It is also fine to create wholly new kinds of Silo objects for which there are no corresponding high-level interface methods such as GetUcdmesh or GetQuadvar in the C language interface.
-  Such an object can be read by the generic object, `DBGetObject`() C language interface method.
+  Such an object can be read by the generic object, `DBGetObject()` C language interface method.
 
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `<DBfile>.Write()`
 
-* **Summary:** Write primitive array data to a Silo file (see `DBWrite`)
-
+* **Summary:** Write primitive array data to a Silo file (see DBWrite)
 
 * **C Signature:**
 
@@ -287,11 +272,10 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `name` | [required string] `name` of the primitive array
-    `data` | [required tuple] the `data` to write
+  Arg name | Description
+  :---|:---
+  `name` | [required string] `name` of the primitive array
+  `data` | [required tuple] the `data` to write
 
 
 * **Description:**
@@ -309,7 +293,6 @@ append("/foo/bar/lib")
 
 * **Summary:** Make a directory in a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -318,10 +301,9 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `name` | [required string] `name` of the directory to create
+  Arg name | Description
+  :---|:---
+  `name` | [required string] `name` of the directory to create
 
 
 * **Description:**

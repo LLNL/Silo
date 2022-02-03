@@ -16,7 +16,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** convention for derived variable definitions
 
-
 * **C Signature:**
 
   ```
@@ -41,7 +40,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** directory order to search when opening a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -60,7 +58,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 ### `_visit_domain_groups()`
 
 * **Summary:** method for grouping blocks in a multi-block mesh
-
 
 * **C Signature:**
 
@@ -81,7 +78,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** flag to tell post-processor to alphabetize variable lists
 
-
 * **C Signature:**
 
   ```
@@ -98,7 +94,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** flag telling post-processor if connectivity of meshes in the Silo file is time varying or not
 
-
 * **C Signature:**
 
   ```
@@ -114,7 +109,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 ### `MultivarToMultimeshMap_vars()`
 
 * **Summary:** list of multivars to be associated with multimeshes
-
 
 * **C Signature:**
 
@@ -134,7 +128,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 ### `MultivarToMultimeshMap_meshes()`
 
 * **Summary:** list of multimeshes to be associated with multivars
-
 
 * **C Signature:**
 
@@ -156,7 +149,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** create a pointer-id from a pointer
 
-
 * **C Signature:**
 
   ```
@@ -165,10 +157,9 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `p` | pointer for which a pointer-id is needed
+  Arg name | Description
+  :---|:---
+  `p` | pointer for which a pointer-id is needed
 
 
 * **Returned value:**
@@ -180,7 +171,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 * **Description:**
 
   In cases where the C interface returns to the application a pointer to an abstract Silo object, in the Fortran interface an integer pointer-id is created and returned instead.
-  In addition, in cases where the C interface would accept an array of pointers, such as in `DBPutCsgvar`(), the Fortran interface accepts an array of pointer-ids.
+  In addition, in cases where the C interface would accept an array of pointers, such as in DBPutCsgvar(), the Fortran interface accepts an array of pointer-ids.
   This function is used to create a pointer-id from a pointer.
 
   A table of pointers is maintained internally in the Fortran wrapper library.
@@ -194,7 +185,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** remove an old and no longer needed pointer-id
 
-
 * **C Signature:**
 
   ```
@@ -203,10 +193,9 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `ptr_id` | the pointer-id to remove
+  Arg name | Description
+  :---|:---
+  `ptr_id` | the pointer-id to remove
 
 
 * **Returned value:**
@@ -221,7 +210,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** Set the size of a 'row' for pointers to 'arrays' of strings
 
-
 * **C Signature:**
 
   ```
@@ -232,10 +220,9 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `len` | The length to set
+  Arg name | Description
+  :---|:---
+  `len` | The length to set
 
 
 * **Returned value:**
@@ -259,7 +246,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** Get the size of a 'row' for pointers to 'arrays' of character strings
 
-
 * **C Signature:**
 
   ```
@@ -268,10 +254,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  * &nbsp;
-  * ```
-    None
-    ```
+  `None`
 * **Returned value:**
 
   The current setting for the 2D string length.
@@ -284,7 +267,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** Facilitates accessing C objects through Fortran
 
-
 * **C Signature:**
 
   ```
@@ -293,10 +275,9 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `pointer` | A `pointer` to a Silo object for which a Fortran identifier is needed
+  Arg name | Description
+  :---|:---
+  `pointer` | A `pointer` to a Silo object for which a Fortran identifier is needed
 
 
 * **Returned value:**
@@ -317,10 +298,10 @@ Since everything documented in this section of the Silo `API` is a convention on
 
   See "DBFortranAccessPointer" on page 2-291 and "DBFortranRemovePointer" on page 2-292 for more information about how to use Silo objects in code that uses C and Fortran together.
 
-  For example, if you have a `DBfile`* `pointer` for a Silo database file and wish to pass this object to some Fortran function(s), the coding pattern would look like the following...
+  For example, if you have a DBfile* `pointer` for a Silo database file and wish to pass this object to some Fortran function(s), the coding pattern would look like the following...
 
-  DBfile *db = `DBOpen`("foo.
-  silo", `DB_UNKNOWN`, `DB_APPEND`);
+  DBfile *db = DBOpen("foo.
+  silo", DB_UNKNOWN, DB_APPEND);
 
   .
 
@@ -330,7 +311,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
   /* create entry in Fortran wrappers for this Silo Object */
 
-  int dbid = `DBFortranAllocPointer`(db);
+  int dbid = DBFortranAllocPointer(db);
 
   .
 
@@ -351,7 +332,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** Access Silo objects created through the Fortran Silo interface.
 
-
 * **C Signature:**
 
   ```
@@ -360,10 +340,9 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `value` | The `value` returned by a Silo Fortran function, referencing a Silo object.
+  Arg name | Description
+  :---|:---
+  `value` | The `value` returned by a Silo Fortran function, referencing a Silo object.
 
 
 * **Returned value:**
@@ -387,7 +366,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** Removes a pointer from the Fortran-C index table
 
-
 * **C Signature:**
 
   ```
@@ -396,10 +374,9 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `value` | An integer returned by `DBFortranAllocPointer`
+  Arg name | Description
+  :---|:---
+  `value` | An integer returned by DBFortranAllocPointer
 
 
 * **Returned value:**
@@ -425,7 +402,6 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Summary:** Write a facelist object referenced by its object_id to a silo file
 
-
 * **C Signature:**
 
   ```
@@ -434,14 +410,13 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbid` | The identifier for the Silo database to write the object to.
-    `name` | The `name` to be assigned to the object in the file.
-    `lname` | The length of the `name` argument.
-    `object_id` | The identifier for the facelist object, obtained via dbcalcfl.
-    `status` | Return value indicating success or failure of the operation; 0 on success, -1 on failure.
+  Arg name | Description
+  :---|:---
+  `dbid` | The identifier for the Silo database to write the object to.
+  `name` | The `name` to be assigned to the object in the file.
+  `lname` | The length of the `name` argument.
+  `object_id` | The identifier for the facelist object, obtained via dbcalcfl.
+  `status` | Return value indicating success or failure of the operation; 0 on success, -1 on failure.
 
 
 * **Returned value:**

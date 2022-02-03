@@ -13,7 +13,6 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Summary:** Allocate an option list.
 
-
 * **C Signature:**
 
   ```
@@ -30,10 +29,9 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `maxopts` | Initial maximum number of options expected in the optlist. If this maximum is exceeded, the library will silently re-allocate more space using the golden-rule.
+  Arg name | Description
+  :---|:---
+  `maxopts` | Initial maximum number of options expected in the optlist. If this maximum is exceeded, the library will silently re-allocate more space using the golden-rule.
 
 
 * **Returned value:**
@@ -58,7 +56,6 @@ This section of the manual describes only the functions to create and manage opt
 ### `DBAddOption()`
 
 * **Summary:** Add an option to an option list.
-
 
 * **C Signature:**
 
@@ -85,12 +82,11 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `optlist` | Pointer to an `option` list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
-    `option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an `option` list.
-    `value` | Pointer to the `value` associated with the provided `option` description. The data type is implied by `option`.
+  Arg name | Description
+  :---|:---
+  `optlist` | Pointer to an `option` list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
+  `option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an `option` list.
+  `value` | Pointer to the `value` associated with the provided `option` description. The data type is implied by `option`.
 
 
 * **Returned value:**
@@ -116,7 +112,6 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Summary:** Remove an option from an option list
 
-
 * **C Signature:**
 
   ```
@@ -131,11 +126,10 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `optlist` | The option list object for which you wish to remove an option
-    `optid` | The option id of the option you would like to remove
+  Arg name | Description
+  :---|:---
+  `optlist` | The option list object for which you wish to remove an option
+  `optid` | The option id of the option you would like to remove
 
 
 * **Returned value:**
@@ -161,7 +155,6 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Summary:** Retrieve the value set for an option in an option list
 
-
 * **C Signature:**
 
   ```
@@ -176,11 +169,10 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `optlist` | The `optlist` to query
-    `optid` | The option id to query the value for
+  Arg name | Description
+  :---|:---
+  `optlist` | The `optlist` to query
+  `optid` | The option id to query the value for
 
 
 * **Returned value:**
@@ -202,7 +194,6 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Summary:** Free memory associated with an option list.
 
-
 * **C Signature:**
 
   ```
@@ -218,10 +209,9 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
+  Arg name | Description
+  :---|:---
+  `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
 
 
 * **Returned value:**
@@ -246,7 +236,6 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Summary:** Clear an optlist.
 
-
 * **C Signature:**
 
   ```
@@ -261,10 +250,9 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
+  Arg name | Description
+  :---|:---
+  `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
 
 
 * **Returned value:**

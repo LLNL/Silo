@@ -12,7 +12,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Write a simple variable.
 
-
 * **C Signature:**
 
   ```
@@ -26,15 +25,14 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the simple variable.
-    `var` | Array defining the values associated with the variable.
-    `dims` | Array of length `ndims` which describes the dimensionality of the variable. Each value in the `dims` array indicates the number of elements contained in the variable along that dimension.
-    `ndims` | Number of dimensions.
-    `datatype` | Datatype of the variable. One of the predefined Silo data types.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the simple variable.
+  `var` | Array defining the values associated with the variable.
+  `dims` | Array of length `ndims` which describes the dimensionality of the variable. Each value in the `dims` array indicates the number of elements contained in the variable along that dimension.
+  `ndims` | Number of dimensions.
+  `datatype` | Datatype of the variable. One of the predefined Silo data types.
 
 
 * **Returned value:**
@@ -53,7 +51,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 ### `DBWriteSlice()`
 
 * **Summary:** Write a (hyper)slab of a simple variable
-
 
 * **C Signature:**
 
@@ -74,18 +71,17 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the simple variable.
-    `var` | Array defining the values associated with the slab.
-    `datatype` | Datatype of the variable. One of the predefined Silo data types.
-    `offset` | Array of `length` `ndims` of offsets in each dimension of the variable. This is the 0-origin position from which to begin writing the slice.
-    `length` | Array of `length` `ndims` of lengths of data in each dimension to write to the variable. All lengths must be positive.
-    `stride` | Array of `length` `ndims` of `stride` steps in each dimension. If no striding is desired, zeroes should be passed in this array.
-    `dims` | Array of `length` `ndims` which describes the dimensionality of the entire variable. Each value in the `dims` array indicates the number of elements contained in the entire variable along that dimension.
-    `ndims` | Number of dimensions.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the simple variable.
+  `var` | Array defining the values associated with the slab.
+  `datatype` | Datatype of the variable. One of the predefined Silo data types.
+  `offset` | Array of `length` `ndims` of offsets in each dimension of the variable. This is the 0-origin position from which to begin writing the slice.
+  `length` | Array of `length` `ndims` of lengths of data in each dimension to write to the variable. All lengths must be positive.
+  `stride` | Array of `length` `ndims` of `stride` steps in each dimension. If no striding is desired, zeroes should be passed in this array.
+  `dims` | Array of `length` `ndims` which describes the dimensionality of the entire variable. Each value in the `dims` array indicates the number of elements contained in the entire variable along that dimension.
+  `ndims` | Number of dimensions.
 
 
 * **Returned value:**
@@ -116,7 +112,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Read a simple Silo variable.
 
-
 * **C Signature:**
 
   ```
@@ -132,12 +127,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the simple variable.
-    `result` | Pointer to memory into which the variable should be read. It is up to the application to provide sufficient space in which to read the variable.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the simple variable.
+  `result` | Pointer to memory into which the variable should be read. It is up to the application to provide sufficient space in which to read the variable.
 
 
 * **Returned value:**
@@ -161,7 +155,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Read a (hyper)slab of data from a simple variable.
 
-
 * **C Signature:**
 
   ```
@@ -180,16 +173,15 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the simple variable.
-    `offset` | Array of `length` `ndims` of offsets in each dimension of the variable. This is the 0-origin position from which to begin reading the slice.
-    `length` | Array of `length` `ndims` of lengths of data in each dimension to read from the variable. All lengths must be positive.
-    `stride` | Array of `length` `ndims` of `stride` steps in each dimension. If no striding is desired, zeroes should be passed in this array.
-    `ndims` | Number of dimensions in the variable.
-    `result` | Pointer to location where the slice is to be written. It is up to the application to provide sufficient space in which to read the variable.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the simple variable.
+  `offset` | Array of `length` `ndims` of offsets in each dimension of the variable. This is the 0-origin position from which to begin reading the slice.
+  `length` | Array of `length` `ndims` of lengths of data in each dimension to read from the variable. All lengths must be positive.
+  `stride` | Array of `length` `ndims` of `stride` steps in each dimension. If no striding is desired, zeroes should be passed in this array.
+  `ndims` | Number of dimensions in the variable.
+  `result` | Pointer to location where the slice is to be written. It is up to the application to provide sufficient space in which to read the variable.
 
 
 * **Returned value:**
@@ -216,7 +208,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Allocate space for, and return, a simple variable.
 
-
 * **C Signature:**
 
   ```
@@ -231,11 +222,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the variable
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the variable
 
 
 * **Returned value:**
@@ -261,7 +251,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Queries variable existence
 
-
 * **C Signature:**
 
   ```
@@ -276,11 +265,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Object `name`.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Object `name`.
 
 
 * **Returned value:**
@@ -294,7 +282,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   The `DBInqVarExists` function is used to check for existence of an object in the given file.
 
-  If an object was written to a file, but the file has yet to be `DBClose`'d, the results of this function querying that variable are undefined.
+  If an object was written to a file, but the file has yet to be DBClose'd, the results of this function querying that variable are undefined.
 
 
 ---
@@ -302,7 +290,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 ### `DBInqVarType()`
 
 * **Summary:** Return the type of the given object
-
 
 * **C Signature:**
 
@@ -318,11 +305,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Object `name`.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Object `name`.
 
 
 * **Returned value:**
@@ -336,9 +322,9 @@ The functions described here allow users to read and write arbitrary arrays of r
   The `DBInqVarType` function returns the `DBObjectType` of the given object.
   The value returned is described in the following table:
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Object Type|Returned Value
+  Object Type|Returned Value
     :---|:---
   Invalid object or the object was not found in the file.|DB_INVALID_OBJECT
   Quadmesh|DB_QUADMESH
@@ -384,7 +370,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Return the byte length of a simple variable.
 
-
 * **C Signature:**
 
   ```
@@ -399,11 +384,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Variable name.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Variable name.
 
 
 * **Returned value:**
@@ -425,7 +409,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Get dimension information of a variable in a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -441,13 +424,12 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle.
-    `name` | The `name` of the Silo object to obtain dimension information for.
-    `maxdims` | The maximum size of `dims`.
-    `dims` | An array of `maxdims` integer values to be populated with the dimension information returned by this call.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle.
+  `name` | The `name` of the Silo object to obtain dimension information for.
+  `maxdims` | The maximum size of `dims`.
+  `dims` | An array of `maxdims` integer values to be populated with the dimension information returned by this call.
 
 
 * **Returned value:**
@@ -468,7 +450,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Return the number of elements in a simple variable.
 
-
 * **C Signature:**
 
   ```
@@ -484,11 +465,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Variable name.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Variable name.
 
 
 * **Returned value:**
@@ -509,7 +489,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Return the Silo datatype of a simple variable.
 
-
 * **C Signature:**
 
   ```
@@ -524,11 +503,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Variable name.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Variable name.
 
 
 * **Returned value:**
@@ -544,7 +522,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   Notes:
 
-  This only works for simple Silo variables (those written using `DBWrite` or `DBWriteSlice`). To query the type of other variables, use `DBInqVarType` instead.
+  This only works for simple Silo variables (those written using `DBWrite` or DBWriteSlice). To query the type of other variables, use `DBInqVarType` instead.
 
   
 
@@ -554,7 +532,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 ### `DBPutCompoundarray()`
 
 * **Summary:** Write a Compound Array object into a Silo file.
-
 
 * **C Signature:**
 
@@ -577,18 +554,17 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `name` | Name of the compound array structure.
-    `elemnames` | Array of length `nelems` containing pointers to the names of the elements.
-    `elemlengths` | Array of length `nelems` containing the lengths of the elements.
-    `nelems` | Number of simple array elements.
-    `values` | Array whose length is determined by `nelems` and `elemlengths` containing the `values` of the simple array elements.
-    `nvalues` | Total length of the `values` array.
-    `datatype` | Data type of the `values` array. One of the predefined Silo types.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the compound array object written into the Silo file. Use `NULL` is there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `name` | Name of the compound array structure.
+  `elemnames` | Array of length `nelems` containing pointers to the names of the elements.
+  `elemlengths` | Array of length `nelems` containing the lengths of the elements.
+  `nelems` | Number of simple array elements.
+  `values` | Array whose length is determined by `nelems` and `elemlengths` containing the `values` of the simple array elements.
+  `nvalues` | Total length of the `values` array.
+  `datatype` | Data type of the `values` array. One of the predefined Silo types.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the compound array object written into the Silo file. Use `NULL` is there are no options.
 
 
 * **Returned value:**
@@ -614,7 +590,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Inquire Compound Array attributes.
 
-
 * **C Signature:**
 
   ```
@@ -633,16 +608,15 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the compound array.
-    `elemnames` | Returned array of length `nelems` containing pointers to the names of the array elements.
-    `elemlengths` | Returned array of length `nelems` containing the lengths of the array elements.
-    `nelems` | Returned number of array elements.
-    `nvalues` | Returned number of total values in the compound array.
-    `datatype` | Datatype of the data values. One of the predefined Silo data types.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the compound array.
+  `elemnames` | Returned array of length `nelems` containing pointers to the names of the array elements.
+  `elemlengths` | Returned array of length `nelems` containing the lengths of the array elements.
+  `nelems` | Returned number of array elements.
+  `nvalues` | Returned number of total values in the compound array.
+  `datatype` | Datatype of the data values. One of the predefined Silo data types.
 
 
 * **Returned value:**
@@ -663,7 +637,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Read a compound array from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -681,11 +654,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `arrayname` | Name of the compound array.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `arrayname` | Name of the compound array.
 
 
 * **Returned value:**
@@ -711,7 +683,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Allocate an object of the specified length and initialize it.
 
-
 * **C Signature:**
 
   ```
@@ -727,12 +698,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `objname` | Name of the object.
-    `objtype` | Type of object. One of the predefined types: `DB_QUADMESH`, `DB_QUAD_RECT`, `DB_QUAD_CURV`, `DB_DEFVARS`, `DB_QUADVAR`, `DB_UCDMESH`, `DB_UCDVAR`, `DB_POINTMESH`, `DB_POINTVAR`, `DB_CSGMESH`, `DB_CSGVAR`, `DB_MULTIMESH`, `DB_MULTIVAR`, `DB_MULTIADJ`, `DB_MATERIAL`, `DB_MATSPECIES`, `DB_FACELIST`, `DB_ZONELIST`, `DB_PHZONELIST`, `DB_EDGELIST`, `DB_CURVE`, `DB_ARRAY`, or `DB_USERDEF`.
-    `maxcomps` | Initial maximum number of components needed for this object. If this number is exceeded, the library will silently re-allocate more space using the golden rule.
+  Arg name | Description
+  :---|:---
+  `objname` | Name of the object.
+  `objtype` | Type of object. One of the predefined types: DB_QUADMESH, DB_QUAD_RECT, DB_QUAD_CURV, DB_DEFVARS, DB_QUADVAR, DB_UCDMESH, DB_UCDVAR, DB_POINTMESH, DB_POINTVAR, DB_CSGMESH, DB_CSGVAR, DB_MULTIMESH, DB_MULTIVAR, DB_MULTIADJ, DB_MATERIAL, DB_MATSPECIES, DB_FACELIST, DB_ZONELIST, DB_PHZONELIST, DB_EDGELIST, DB_CURVE, DB_ARRAY, or `DB_USERDEF`.
+  `maxcomps` | Initial maximum number of components needed for this object. If this number is exceeded, the library will silently re-allocate more space using the golden rule.
 
 
 * **Returned value:**
@@ -758,7 +728,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Free memory associated with an object.
 
-
 * **C Signature:**
 
   ```
@@ -773,10 +742,9 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `object` | Pointer to the `object` to be freed. This `object` is created with the `DBMakeObject` function.
+  Arg name | Description
+  :---|:---
+  `object` | Pointer to the `object` to be freed. This `object` is created with the `DBMakeObject` function.
 
 
 * **Returned value:**
@@ -799,7 +767,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Overwrite an existing object in a Silo file with a new object
 
-
 * **C Signature:**
 
   ```
@@ -814,11 +781,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle.
-    `obj` | The new `DBobject` object (which knows its name) to write to the `file`.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle.
+  `obj` | The new `DBobject` object (which knows its name) to write to the `file`.
 
 
 * **Returned value:**
@@ -838,7 +804,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Clear an object.
 
-
 * **C Signature:**
 
   ```
@@ -853,10 +818,9 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `object` | Pointer to the `object` to be cleared. This `object` is created with the `DBMakeObject` function.
+  Arg name | Description
+  :---|:---
+  `object` | Pointer to the `object` to be cleared. This `object` is created with the `DBMakeObject` function.
 
 
 * **Returned value:**
@@ -877,7 +841,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Add a double precision floating point component to an object.
 
-
 * **C Signature:**
 
   ```
@@ -893,12 +856,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
-    `compname` | The component name.
-    `d` | The value of the double precision floating point component.
+  Arg name | Description
+  :---|:---
+  `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
+  `compname` | The component name.
+  `d` | The value of the double precision floating point component.
 
 
 * **Returned value:**
@@ -918,7 +880,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Add a floating point component to an object.
 
-
 * **C Signature:**
 
   ```
@@ -934,12 +895,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
-    `compname` | The component name.
-    `f` | The value of the floating point component.
+  Arg name | Description
+  :---|:---
+  `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
+  `compname` | The component name.
+  `f` | The value of the floating point component.
 
 
 * **Returned value:**
@@ -959,7 +919,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Add an integer component to an object.
 
-
 * **C Signature:**
 
   ```
@@ -975,12 +934,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
-    `compname` | The component name.
-    `i` | The value of the integer component.
+  Arg name | Description
+  :---|:---
+  `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
+  `compname` | The component name.
+  `i` | The value of the integer component.
 
 
 * **Returned value:**
@@ -1000,7 +958,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Add a string component to an object.
 
-
 * **C Signature:**
 
   ```
@@ -1016,12 +973,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `object` | Pointer to the `object`. This `object` is created with the `DBMakeObject` function.
-    `compname` | The component name.
-    `s` | The value of the string component. Silo copies the contents of the string.
+  Arg name | Description
+  :---|:---
+  `object` | Pointer to the `object`. This `object` is created with the `DBMakeObject` function.
+  `compname` | The component name.
+  `s` | The value of the string component. Silo copies the contents of the string.
 
 
 * **Returned value:**
@@ -1041,7 +997,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Add a variable component to an object.
 
-
 * **C Signature:**
 
   ```
@@ -1057,12 +1012,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `object` | Pointer to the `object`. This `object` is created with the `DBMakeObject` function.
-    `compname` | Component name.
-    `vardata` | Name of the variable `object` associated with the component (see Description).
+  Arg name | Description
+  :---|:---
+  `object` | Pointer to the `object`. This `object` is created with the `DBMakeObject` function.
+  `compname` | Component name.
+  `vardata` | Name of the variable `object` associated with the component (see Description).
 
 
 * **Returned value:**
@@ -1085,7 +1039,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Add a variable component to an object and write the associated data.
 
-
 * **C Signature:**
 
   ```
@@ -1103,17 +1056,16 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `object` | Pointer to the `object`.
-    `compname` | Component name.
-    `prefix` | Path name `prefix` of the `object`.
-    `datatype` | Data type of the component's data. One of: "short", "integer", "long", "float", "double", "char".
-    `var` | Pointer to the component's data.
-    `nd` | Number of dimensions of the component.
-    `count` | An array of length `nd` containing the length of the component in each of its dimensions.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `object` | Pointer to the `object`.
+  `compname` | Component name.
+  `prefix` | Path name `prefix` of the `object`.
+  `datatype` | Data type of the component's data. One of: "short", "integer", "long", "float", "double", "char".
+  `var` | Pointer to the component's data.
+  `nd` | Number of dimensions of the component.
+  `count` | An array of length `nd` containing the length of the component in each of its dimensions.
 
 
 * **Returned value:**
@@ -1133,7 +1085,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Write an object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -1149,12 +1100,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `object` | Object created with `DBMakeObject` and populated with `DBAddFltComponent`, `DBAddIntComponent`, `DBAddStrComponent`, and `DBAddVarComponent`.
-    `freemem` | If non-zero, then the `object` will be freed after writing.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `object` | Object created with `DBMakeObject` and populated with DBAddFltComponent, DBAddIntComponent, DBAddStrComponent, and `DBAddVarComponent`.
+  `freemem` | If non-zero, then the `object` will be freed after writing.
 
 
 * **Returned value:**
@@ -1176,7 +1126,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Read an object from a Silo file as a generic object
 
-
 * **C Signature:**
 
   ```
@@ -1191,11 +1140,10 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle.
-    `objname` | The name of the object to get.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle.
+  `objname` | The name of the object to get.
 
 
 * **Returned value:**
@@ -1212,7 +1160,7 @@ The functions described here allow users to read and write arbitrary arrays of r
   ).
 
   However, Silo objects can also be accessed as generic objects through the generic object interface.
-  This is recommended only for objects that were written with `DBWriteObject`() method.
+  This is recommended only for objects that were written with `DBWriteObject()` method.
 
   Notes:
 
@@ -1225,7 +1173,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 ### `DBGetComponent()`
 
 * **Summary:** Allocate space for, and return, an object component.
-
 
 * **C Signature:**
 
@@ -1242,12 +1189,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `objname` | Object name.
-    `compname` | Component name.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `objname` | Object name.
+  `compname` | Component name.
 
 
 * **Returned value:**
@@ -1269,7 +1215,6 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Summary:** Return the type of an object component.
 
-
 * **C Signature:**
 
   ```
@@ -1285,12 +1230,11 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `objname` | Object name.
-    `compname` | Component name.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `objname` | Object name.
+  `compname` | Component name.
 
 
 * **Returned value:**

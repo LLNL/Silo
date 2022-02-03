@@ -26,7 +26,7 @@ Member name	"datatype"	"ndims"	"dims"	"ptr"
 
 JSON type	json_type_int	json_type_int	json_type_array	json_type_string
 
-Meaning	An integer value representing one of the Silo types `DB_FLOAT`, `DB_INT`, `DB_DOUBLE`, etc.
+Meaning	An integer value representing one of the Silo types DB_FLOAT, DB_INT, DB_DOUBLE, etc.
 number of dimensions in the external array	array of json_type_ints indicating size in each dimension	The ascii hexidecimal representation of a void* pointer holding the data of the array
 
 
@@ -49,7 +49,6 @@ The functions in this part of the library are
 ### `json-c extensions()`
 
 * **Summary:** Extensions to json-c library to support Silo
-
 
 * **C Signature:**
 
@@ -106,7 +105,6 @@ The functions in this part of the library are
 
 * **Summary:** Write a `JSON` object to a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -121,21 +119,20 @@ The functions in this part of the library are
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `db` | Silo database file handle
-    `jobj` | JSON object pointer
+  Arg name | Description
+  :---|:---
+  `db` | Silo database file handle
+  `jobj` | JSON object pointer
 
 
 * **Description:**
 
   This call takes a `JSON` object pointer and writes the object to a Silo file.
 
-  If the object is constructed so as to match one of Silo's standard objects (any Silo object ordinarily written with a `DBPutXXX`() call), then the `JSON` object will be written to the file such that any Silo reader calling the matching `DBGetXXX`() method will successfully read the object.
+  If the object is constructed so as to match one of Silo's standard objects (any Silo object ordinarily written with a `DBPutXXX()` call), then the `JSON` object will be written to the file such that any Silo reader calling the matching `DBGetXXX()` method will successfully read the object.
   In other words, it is possible to use this method to write first-class Silo objects to a file such as a ucd-mesh or a quad-var, etc.
   All that is required is that the `JSON` object be constructed in such a way that it holds all the metadata members Silo requires/uses for that specific object.
-  See documentation for the companion `DBGetJsonObject`().
+  See documentation for the companion `DBGetJsonObject()`.
 
   Note that because there is no char const *name argument to this method, the `JSON` object itself must indicate the name of the object.
   This is done by defining a string valued member with key "silo_name".
@@ -148,7 +145,6 @@ The functions in this part of the library are
 ### `DBGetJsonObject()`
 
 * **Summary:** Get an object from a Silo file as a `JSON` object
-
 
 * **C Signature:**
 
@@ -164,17 +160,16 @@ The functions in this part of the library are
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `db` | Silo database file handle
-    `name` | Name of object to read
+  Arg name | Description
+  :---|:---
+  `db` | Silo database file handle
+  `name` | Name of object to read
 
 
 * **Description:**
 
   This method will read an object from a Silo file and return it as a `JSON` object.
-  It can read *any* Silo object from a Silo file including objects written to the file using `DBPutXXX`().
+  It can read *any* Silo object from a Silo file including objects written to the file using `DBPutXXX()`.
 
   Note, however, that any problem-sized data associate with the object is returned as extptr sub-objects.
   See introduction to this `API` section for a description of extptr objects.

@@ -12,7 +12,6 @@ However, deprecation warnings will be generated on stderr (See "DBSetDeprecateWa
 
 * **Summary:** DUMMY
 
-
   DBGetComponentNames
 
   DBGetAtt (completely removed in version 4.

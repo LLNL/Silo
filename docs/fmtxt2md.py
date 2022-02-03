@@ -30,7 +30,7 @@ def FormatText(s, kwnames=[]):
         s = re.sub(r'(\s+)%s(\s+|[\.?!])'%kw,r'\1`%s`\2'%kw,s)
 
     # Backtick any DBxxx... words
-    s = re.sub(r'(\s+)DB([a-zA-Z0-9_]{3,})(\s+||\(\)[\.?!])',r'\1`DB\2`\3',s)
+    s = re.sub(r'(\s+)DB([a-zA-Z0-9_]{3,})(\(\))?(\s+|[\.?!])',r'\1`DB\2\3`\4',s)
 
     # Backtick any all caps words
     s = re.sub(r'(\s+)([A-Z0-9_]{3,})(\s+|[\.?!])',r'\1`\2`\3',s)
@@ -150,23 +150,20 @@ def ProcessArgumentListBlock(mdfile, i, lines):
         i += 1
     if len(args) < 2:
         mdfile.write("* **Arguments:**\n\n")
-        mdfile.write("  * &nbsp;\n")
-        mdfile.write("  * ```\n")
-        mdfile.write("    None\n")
-        mdfile.write("    ```\n")
+        mdfile.write("  `None`\n")
         return i, []
     mdfile.write("* **Arguments:**\n\n")
     if len(args) % 2 != 0:
         print("***ARGS PROBLEM***\n")
         print(args)
     # use non-breaking spaces to enforce min table width for args column
-    mdfile.write("  * &nbsp;\n")
-    mdfile.write("  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;\n")
-    mdfile.write("    :---|:---\n")
+    #mdfile.write("  Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;\n")
+    mdfile.write("  Arg name | Description\n")
+    mdfile.write("  :---|:---\n")
     argnames = [args[2*j].strip() for j in range(int(len(args)/2))]
     j = 0
     while j < len(args):
-        mdfile.write("    `%s` | %s\n"%(args[j].strip(), FormatText(args[j+1].strip(),argnames) if j+1<len(args) else "ARGS PROBLEM"))
+        mdfile.write("  `%s` | %s\n"%(args[j].strip(), FormatText(args[j+1].strip(),argnames) if j+1<len(args) else "ARGS PROBLEM"))
         j += 2
     mdfile.write("\n\n")
     return i, argnames
@@ -210,8 +207,8 @@ def ReadLinesInTabBlock(target_ntabs, i, desclines):
 def OutputGatheredColumnsAsTable(mdfile, cols, argnames=[], tabtitle=""):
 
     cols = list(map(list, itertools.zip_longest(*cols, fillvalue=None)))
-    mdfile.write("  * **%s:**\n\n"%(tabtitle if tabtitle else "&nbsp;"))
-    mdfile.write('  * ' + '|'.join(cols[0]))
+    mdfile.write("  **%s**\n\n"%(tabtitle+":" if tabtitle else "&nbsp;"))
+    mdfile.write('  ' + '|'.join(cols[0]))
     mdfile.write("\n")
     mdfile.write('    ' + ":---|"*(len(cols[0])-1))
     mdfile.write(":---\n")
@@ -241,6 +238,7 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
     j = 0
     target_ntabs = 0
     tabcols = []
+    first_table = True
     while j < len(desclines):
 
         if target_ntabs == 0:
@@ -265,7 +263,11 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
 
                 # We've come to the end of current tab block.
                 # First, output the current table.
-                OutputGatheredColumnsAsTable(mdfile, tabcols, argnames)
+                tabtitle = ""
+                if first_table and argnames[-1] == 'optlist':
+                    tabtitle = "Optlist options"
+                OutputGatheredColumnsAsTable(mdfile, tabcols, argnames, tabtitle)
+                first_table = False
                 tabcols = []
 
                 # Indicate we're done with current table
@@ -282,7 +284,11 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
                 tabcols += newcol
 
     if tabcols:
-        OutputGatheredColumnsAsTable(mdfile, tabcols, argnames)
+       
+        tabtitle = ""
+        if first_table and argnames[-1] == 'optlist':
+            tabtitle = "Optlist options"
+        OutputGatheredColumnsAsTable(mdfile, tabcols, argnames, tabtitle)
 
     mdfile.write("\n")
 
@@ -291,7 +297,7 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
 def ProcessMethod(mdfile, i, lines):
     mdfile.write("### `%s()`\n\n"%lines[i][:-1])
     #mdfile.write("> %s\n"%lines[i+1][1:])
-    mdfile.write("* **Summary:** %s\n\n"%FormatText(lines[i+1][1:]))
+    mdfile.write("* **Summary:** %s\n\n"%FormatText(lines[i+1][1:].strip()))
     i += 2
     while i < len(lines) and \
         not IsMethodHeader(i, lines) and \

@@ -25,7 +25,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Register a set of options for advanced control of the low-level I/O driver
 
-
 * **C Signature:**
 
   ```
@@ -41,10 +40,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `opts` | an options list object obtained from a `DBMakeOptlist`() call
+  Arg name | Description
+  :---|:---
+  `opts` | an options list object obtained from a `DBMakeOptlist()` call
 
 
 * **Returned value:**
@@ -56,7 +54,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Description:**
 
-  File options sets are used in concert with the `DB_HDF5_OPTS`() macro in `DBCreate` or `DBOpen` calls to provide advanced and fine-tuned control over the behavior of the underlying driver library and may be needed to affect memory usage and I/O performance as well as vary the behavior of the underlying I/O driver away from its default mode of operation.
+  File options sets are used in concert with the `DB_HDF5_OPTS()` macro in `DBCreate` or `DBOpen` calls to provide advanced and fine-tuned control over the behavior of the underlying driver library and may be needed to affect memory usage and I/O performance as well as vary the behavior of the underlying I/O driver away from its default mode of operation.
 
   A file options set is nothing more than an optlist object (see "Optlists" on page 2-234), populated with file driver related options.
   A registered file options set is such an optlist that has been registered with the Silo library via a call to this method, `DBRegisterFileOptionsSet`.
@@ -84,14 +82,14 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Note that all option names listed in left-most column of the table below have had their prefix "DBOPT_H5_" removed to save space in the table.
   So, for example, the real name of the `CORE_ALLOC_INC` option is `DBOPT_H5_CORE_ALLOC_INC`.
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Option Name, DBOPT_H5_...|Scope|Type|Option Meaning|Default Value
+  Option Name, DBOPT_H5_...|Scope|Type|Option Meaning|Default Value
     :---|:---|:---|:---|:---
   VFD|VFD|int|Specifies which Virtual File Driver (VFD) the HDF5 library should use.<br>Set the integer value for this option to one of the following values.<br>DB_H5VFD_DEFAULT, (use HDF5 default driver)<br>DB_H5VFD_SEC2 (use HDF5 sec2 driver)<br>DB_H5VFD_STDIO, (use HDF5 stdio driver)<br>DB_H5VFD_CORE, (use HDF5 core driver)<br>DB_H5VFD_LOG, (use HDF5 log river)<br>DB_H5VFD_SPLIT, (use HDF5 split driver)<br>DB_H5VFD_DIRECT, (use HDF5 direct i/o driver)<br>DB_H5VFD_FAMILY, (use HDF5 family driver)<br>DB_H5VFD_MPIO, (use HDF5 mpi-io driver)<br>DB_H5VFD_MPIP, (use HDF5 mpi posix driver)<br>DB_H5VFD_SILO, (use `SILO` BG/Q driver)<br>DB_H5VFD_FIC (use `SILO` file in core driver)<br>Many of the reamining options described in this table apply to only certain of the above VFDs.|DB_H5VFD_DEFAULT
   RAW_FILE_OPTS|VFD|int|Applies only for the split `VFD`. Specifies a file options set to use for the raw data file. May be any value returned from a call to<br>DBRegisterFileOptionsSet() or can be any one of the following pre-defined file options sets...<br>DB_FILE_OPTS_H5_DEFAULT_...<br>DEFAULT, SEC2, STDIO, CORE, LOG, SPLIT, DIRECT, FAMILY, MPIO, MPIP, `SILO`.<br>See HDF5 reference manual for H5Pset_fapl_split|DB_FILE_OPTS_H5_DEFAULT_DEFAULT
-  RAW_EXTENSION|VFD|char*|Applies only for the split `VFD`. Specifies the file extension/naming convention for raw data file. If the string contains a '%s' printf-like conversion specifier, that will be replaced with the name of the file passed in the `DBCreate`/DBOpen call. If the string does **not** contain a '%s' printf-like conversion specifier, it is treated as an 'extension' which is appended to the name of the file passed in `DBCreate`/DBopen call.<br>See HDF5 reference manual for H5Pset_fapl_split|"-raw"
-  META_FILE_OPTS|VFD|int|Same as `DBOPT_H5_RAW_FILE_OPTS`, above, except for meta data file. See HDF5 reference manual for H5Pset_fapl_split.|DB_FILE_OPTS_H5_DEFAULT_CORE
+  RAW_EXTENSION|VFD|char*|Applies only for the split `VFD`. Specifies the file extension/naming convention for raw data file. If the string contains a '%s' printf-like conversion specifier, that will be replaced with the name of the file passed in the DBCreate/DBOpen call. If the string does **not** contain a '%s' printf-like conversion specifier, it is treated as an 'extension' which is appended to the name of the file passed in DBCreate/DBopen call.<br>See HDF5 reference manual for H5Pset_fapl_split|"-raw"
+  META_FILE_OPTS|VFD|int|Same as DBOPT_H5_RAW_FILE_OPTS, above, except for meta data file. See HDF5 reference manual for H5Pset_fapl_split.|DB_FILE_OPTS_H5_DEFAULT_CORE
   META_EXTENSION|VFD||Same as `DBOPT_H5_RAW_EXTENSION` above, except for meta data file. See HDF5 reference manual for H5Pset_fapl_split.|""
   CORE_ALLOC_INC|VFD|int|Applies only for core `VFD`. Specifies allocation increment. See HDF5 reference manual for H5Pset_fapl_core.|(1<<20)
   CORE_NO_BACK_STORE|VFD|int|Applies only for core `VFD`. Specifies whether or not to store the file on close. See HDF5 reference manual for H5Pset_fapl_core.|FALSE
@@ -119,8 +117,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   SILO_BLOCK_COUNT|VFD|int|Block count option for Silo `VFD`. This is the maximum number of blocks the Silo `VFD` will maintain in memory at any one time.|32
   SILO_LOG_STATS|VFD|int|Flag to indicate if Silo `VFD` should gather I/O performance statistics. This is primarily for debugging and performance tuning of the Silo `VFD`.|0
   SILO_USE_DIRECT|VFD|int|Flag to indicate if Silo `VFD` should attempt to use direct I/O. Tells the Silo `VFD` to use direct I/O where it can. Note, if it cannot, this option will be siliently ignored.|0
-  FIC_BUF|VFD|void*|The buffer of bytes to be used as the "file in core" to be opened in a `DBOpen`() call.|none
-  FIC_SIZE|VFD|int|Size of the buffer of bytes to be used as the "file in core" to be opened in a `DBOpen`() call.|none
+  FIC_BUF|VFD|void*|The buffer of bytes to be used as the "file in core" to be opened in a `DBOpen()` call.|none
+  FIC_SIZE|VFD|int|Size of the buffer of bytes to be used as the "file in core" to be opened in a `DBOpen()` call.|none
 
 
   
@@ -131,7 +129,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBUnregisterFileOptionsSet()`
 
 * **Summary:** Unregister a registered file options set
-
 
 * **C Signature:**
 
@@ -145,10 +142,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `opts_set_id` | The identifer (obtained from a previous call to `DBRegisterFileOptionsSet`()) of a file options set to unregister.
+  Arg name | Description
+  :---|:---
+  `opts_set_id` | The identifer (obtained from a previous call to DBRegisterFileOptionsSet()) of a file options set to unregister.
 
 
 * **Returned value:**
@@ -169,7 +165,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Unregister all file options sets
 
-
 * **C Signature:**
 
   ```
@@ -182,10 +177,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * ```
-    None
-    ```
+  `None`
 * **Returned value:**
 
   Zero on success, -1 on failure.
@@ -203,7 +195,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Set driver priorities for opening files with the `DB_UNKNOWN` driver.
 
-
 * **C Signature:**
 
   ```
@@ -218,10 +209,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `driver_ids` | A -1 terminated list of driver ids such as `DB_HDF5`, `DB_PDB`, `DB_HDF5_CORE`, or any driver id constructed with the `DB_HDF5_OPTS`() macro.
+  Arg name | Description
+  :---|:---
+  `driver_ids` | A -1 terminated list of driver ids such as DB_HDF5, DB_PDB, DB_HDF5_CORE, or any driver id constructed with the `DB_HDF5_OPTS()` macro.
 
 
 * **Returned value:**
@@ -236,7 +226,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   This call can be used to affect the order in which driver ids are attempted and can improve behavior and performance for opening files using `DB_UNKNOWN` driver.
 
-  If any of the driver ids specified in `driver_ids` is constructed using the `DB_HDF5_OPTS`() macro, then the associated file options set must be registered with the Silo library.
+  If any of the driver ids specified in `driver_ids` is constructed using the `DB_HDF5_OPTS()` macro, then the associated file options set must be registered with the Silo library.
 
 
 ---
@@ -244,7 +234,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBGetUnknownDriverPriorities()`
 
 * **Summary:** Return the currently defined ordering of drivers the `DB_UNKNOWN` driver will attempt.
-
 
 * **C Signature:**
 
@@ -269,7 +258,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Create a Silo output file.
 
-
 * **C Signature:**
 
   ```
@@ -288,14 +276,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `pathname` | Path name of file to create. This can be either an absolute or relative path.
-    `mode` | Creation `mode`. One of the predefined Silo modes: `DB_CLOBBER` or `DB_NOCLOBBER`.
-    `target` | Destination file format. One of the predefined types: `DB_LOCAL`, `DB_SUN3`, `DB_SUN4`, `DB_SGI`, `DB_RS6000`, or `DB_CRAY`.
-    `fileinfo` | Character string containing descriptive information about the file's contents. This information is usually printed by applications when this file is opened. If no such information is needed, pass `NULL` for this argument.
-    `filetype` | Destination file type. Applications typically use one of either `DB_PDB`, which will create PDB files, or `DB_HDF5`, which will create HDF5 files. Other options include `DB_PDBP`, `DB_HDF5_SEC2`, `DB_HDF5_STDIO`, `DB_HDF5_CORE`, `DB_HDF5_SPLIT` or `DB_FILE_OPTS`(optlist_id) where optlist_id is a registered file options set. For a description of the meaning of these options as well as many other advanced features and control of underlying I/O behavior, see "DBRegisterFileOptionsSet" on page 2-40.
+  Arg name | Description
+  :---|:---
+  `pathname` | Path name of file to create. This can be either an absolute or relative path.
+  `mode` | Creation `mode`. One of the predefined Silo modes: `DB_CLOBBER` or `DB_NOCLOBBER`.
+  `target` | Destination file format. One of the predefined types: DB_LOCAL, DB_SUN3, DB_SUN4, DB_SGI, DB_RS6000, or `DB_CRAY`.
+  `fileinfo` | Character string containing descriptive information about the file's contents. This information is usually printed by applications when this file is opened. If no such information is needed, pass `NULL` for this argument.
+  `filetype` | Destination file type. Applications typically use one of either DB_PDB, which will create PDB files, or DB_HDF5, which will create HDF5 files. Other options include DB_PDBP, DB_HDF5_SEC2, DB_HDF5_STDIO, DB_HDF5_CORE, `DB_HDF5_SPLIT` or DB_FILE_OPTS(optlist_id) where optlist_id is a registered file options set. For a description of the meaning of these options as well as many other advanced features and control of underlying I/O behavior, see "DBRegisterFileOptionsSet" on page 2-40.
 
 
 * **Returned value:**
@@ -376,7 +363,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   DB_HDF5_SPLIT: Splits HDF5 I/O operations across two VFDs.
   One `VFD` is used for all raw data while the other `VFD` is used for everything else (e.
   g.
-  meta data). For example, in Silo's `DBPutPointvar`() call, the data the caller passes in the vars argument is raw data.
+  meta data). For example, in Silo's `DBPutPointvar()` call, the data the caller passes in the vars argument is raw data.
   Everything else including the object's name, number of points, datatype, optlist options, etc.
   including all underlying HDF5 metadata gets treated as meta data.
   This is a `VFD` that comes pre-packaged with the HDF5 library.
@@ -433,7 +420,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   By default, the silo `VFD` uses a block size of 16 Kilobytes (1<<14) and a block count also of 16.
   To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set (see "DBRegisterFileOptionsSet" on page 2-40).
 
-  DB_HDF5_MPIO and `DB_HDF5_MPIOP`: These have been removed from Silo as of version 4.
+  DB_HDF5_MPIO and DB_HDF5_MPIOP: These have been removed from Silo as of version 4.
   10.
   3.
 
@@ -456,7 +443,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Open an existing Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -474,12 +460,11 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `name` | Name of the file to open. Can be either an absolute or relative path.
-    `type` | The `type` of file to open. One of the predefined types, typically `DB_UNKNOWN`, `DB_PDB`, or `DB_HDF5`. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
-    `mode` | The `mode` of the file to open. One of the values `DB_READ` or `DB_APPEND`.
+  Arg name | Description
+  :---|:---
+  `name` | Name of the file to open. Can be either an absolute or relative path.
+  `type` | The `type` of file to open. One of the predefined types, typically DB_UNKNOWN, DB_PDB, or `DB_HDF5`. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
+  `mode` | The `mode` of the file to open. One of the values `DB_READ` or `DB_APPEND`.
 
 
 * **Returned value:**
@@ -491,17 +476,17 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 * **Description:**
 
   The `DBOpen` function opens an existing Silo file.
-  If the file `type` passed here is `DB_UNKNOWN`, Silo will attempt to guess at the file `type` by iterating through the known types attempting to open the file with each driver until it succeeds.
+  If the file `type` passed here is DB_UNKNOWN, Silo will attempt to guess at the file `type` by iterating through the known types attempting to open the file with each driver until it succeeds.
   This iteration does incur a small performance penalty.
   In addition, use of `DB_UNKNOWN` can have other undesireable behavior described below.
   So, if at all possible, it is best to open using a specific `type`.
-  See `DBGetDriverTypeFromPath`() for a function that uses cheap heuristics to determine the driver `type` given a candiate filename.
+  See `DBGetDriverTypeFromPath()` for a function that uses cheap heuristics to determine the driver `type` given a candiate filename.
 
   When writing general purpose code to read Silo files and you cannot know for certain ahead of time what the correct driver to use is, there are a few options.
 
-  First, you can iterate over the available driver ids, calling `DBOpen`() using each one until one of them succeds.
+  First, you can iterate over the available driver ids, calling `DBOpen()` using each one until one of them succeds.
   But, that is exactly what the `DB_UNKNOWN` driver does so there is no need for a Silo client to have to write that code.
-  In addition, if you have a specific preference of order of drivers, you can use `DBSetUnknownDriverPriorities`()to specify that ordering.
+  In addition, if you have a specific preference of order of drivers, you can use DBSetUnknownDriverPriorities()to specify that ordering.
 
   Undesireable behavior with `DB_UNKNOWN` can occur when the specified file can be successfully opened using multiple of the available drivers and/or file options sets and it succceds with the wrong one or one using options the caller neither expected or intended.
   See "DBSetUnknownDriverPriorities" on page 2-46 for a way to specify the order of drivers tried by the `DB_UNKNOWN` driver.
@@ -509,7 +494,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Indeed, in order to use a specific `VFD` (see "DBCreate" on page 2-48) in HDF5, it is necessary to pass the specific `DB_HDF5_XXX` argument in this call or to set the unknown driver priorities such that whatever specific HDF5 VFD(s) are desired are tried first before falling back to other, perhaps less desirable ones.
 
   The `mode` parameter allows a user to append to an existing Silo file.
-  If a file is `DBOpen`'ed with a `mode` of `DB_APPEND`, the file will support write operations as well as read operations.
+  If a file is DBOpen'ed with a `mode` of DB_APPEND, the file will support write operations as well as read operations.
 
 
 ---
@@ -517,7 +502,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBClose()`
 
 * **Summary:** Close a Silo database.
-
 
 * **C Signature:**
 
@@ -534,10 +518,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
 
 
 * **Returned value:**
@@ -557,7 +540,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Get the table of contents of a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -572,10 +554,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
 
 
 * **Returned value:**
@@ -602,7 +583,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Version of the Silo library used to create the specified file
 
-
 * **C Signature:**
 
   ```
@@ -617,10 +597,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file handle
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file handle
 
 
 * **Returned value:**
@@ -634,14 +613,14 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Note, that this is distinct from (e.
   g.
-  can be the same or different from) the version of the Silo library returned by the `DBVersion`() function.
+  can be the same or different from) the version of the Silo library returned by the `DBVersion()` function.
 
-  DBFileVersion, here, returns the version of the Silo library that was used when `DBCreate`() was called on the specified file.
+  DBFileVersion, here, returns the version of the Silo library that was used when `DBCreate()` was called on the specified file.
   DBVersion() returns the version of the Silo library the executable is currently linked with.
 
   Most often, these two will be the same.
   But, not always.
-  Also note that although is possible that a single Silo file may have contents created within it from multiple versions of the Silo library, a call to this function will return `ONLY` the version that was in use when `DBCreate`() was called; that is when the file was first created.
+  Also note that although is possible that a single Silo file may have contents created within it from multiple versions of the Silo library, a call to this function will return `ONLY` the version that was in use when `DBCreate()` was called; that is when the file was first created.
 
 
 ---
@@ -649,7 +628,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBFileVersionDigits()`
 
 * **Summary:** Return integer digits of file version number
-
 
 * **C Signature:**
 
@@ -660,14 +638,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Silo database file handle
-    `maj` | Pointer to returned major version digit
-    `min` | Pointer to returned minor version digit
-    `pat` | Pointer to returned patch version digit
-    `pre` | Pointer to returned pre-release version digit (if any)
+  Arg name | Description
+  :---|:---
+  `dbfile` | Silo database file handle
+  `maj` | Pointer to returned major version digit
+  `min` | Pointer to returned minor version digit
+  `pat` | Pointer to returned patch version digit
+  `pre` | Pointer to returned pre-release version digit (if any)
 
 
 * **Returned value:**
@@ -683,7 +660,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Greater than or equal comparison for version of the Silo library a given file was created with
 
-
 * **C Signature:**
 
   ```
@@ -698,13 +674,12 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file handle
-    `Maj` | Integer major version number
-    `Min` | Integer minor version number
-    `Pat` | Integer patch version number
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file handle
+  `Maj` | Integer major version number
+  `Min` | Integer minor version number
+  `Pat` | Integer patch version number
 
 
 * **Returned value:**
@@ -720,7 +695,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Compare library version with file version
 
-
 * **C Signature:**
 
   ```
@@ -735,10 +709,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Silo database file handle obtained with a call to `DBOpen`
+  Arg name | Description
+  :---|:---
+  `dbfile` | Silo database file handle obtained with a call to DBOpen
 
 
 * **Returned value:**
@@ -753,7 +726,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBSortObjectsByOffset()`
 
 * **Summary:** Sort list of object names by order of offset in the file
-
 
 * **C Signature:**
 
@@ -770,12 +742,11 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `DBfile` | Database file pointer.
-    `nobjs` | Number of object names in obj_names.
-    `ordering` | Returned integer array of relative order of occurence in the file of each object. For example, if ordering[i]==k, that means the object whose name is obj_names[i] occurs kth when the objects are ordered according to offset at which they exist in the file.
+  Arg name | Description
+  :---|:---
+  `DBfile` | Database file pointer.
+  `nobjs` | Number of object names in obj_names.
+  `ordering` | Returned integer array of relative order of occurence in the file of each object. For example, if ordering[i]==k, that means the object whose name is obj_names[i] occurs kth when the objects are ordered according to offset at which they exist in the file.
 
 
 * **Returned value:**
@@ -799,7 +770,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Create a new directory in a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -815,11 +785,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `dirname` | Name of the directory to create.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `dirname` | Name of the directory to create.
 
 
 * **Returned value:**
@@ -830,7 +799,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Description:**
 
-  The `DBMkDir` function creates a new directory in the Silo file as a child of the current directory (see `DBSetDir`). The directory name may be an absolute path name similar to "/dir/subdir", or may be a relative path name similar to "../../dir/subdir".
+  The `DBMkDir` function creates a new directory in the Silo file as a child of the current directory (see DBSetDir). The directory name may be an absolute path name similar to "/dir/subdir", or may be a relative path name similar to "../../dir/subdir".
 
 
 ---
@@ -838,7 +807,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBSetDir()`
 
 * **Summary:** Set the current directory within the Silo database.
-
 
 * **C Signature:**
 
@@ -855,11 +823,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `pathname` | Path name of the directory. This can be either an absolute or relative path name.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `pathname` | Path name of the directory. This can be either an absolute or relative path name.
 
 
 * **Returned value:**
@@ -881,7 +848,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Get the name of the current directory.
 
-
 * **C Signature:**
 
   ```
@@ -896,11 +862,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `dirname` | Returned current directory name. The caller must allocate space for the returned name. The maximum space used is `256` characters, including the `NULL` terminator.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `dirname` | Returned current directory name. The caller must allocate space for the returned name. The maximum space used is `256` characters, including the `NULL` terminator.
 
 
 * **Returned value:**
@@ -920,7 +885,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Copy a directory hierarchy from one Silo file to another.
 
-
 * **C Signature:**
 
   ```
@@ -936,13 +900,12 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `srcFile` | Source database file pointer.
-    `srcDir` | Name of the directory within the source database file to copy.
-    `dstFile` | Destination database file pointer.
-    `dstDir` | Name of the top-level directory in the destination file. If an absolute path is given, then all components of the path except the last must already exist. Otherwise, the new directory is created relative to the current working directory in the file.
+  Arg name | Description
+  :---|:---
+  `srcFile` | Source database file pointer.
+  `srcDir` | Name of the directory within the source database file to copy.
+  `dstFile` | Destination database file pointer.
+  `dstDir` | Name of the top-level directory in the destination file. If an absolute path is given, then all components of the path except the last must already exist. Otherwise, the new directory is created relative to the current working directory in the file.
 
 
 * **Returned value:**
@@ -967,7 +930,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Copy lists of objects from one Silo database to another
 
-
 * **C Signature:**
 
   ```
@@ -984,14 +946,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `nobjs` | The number of objects to be copied (e.g. number of strings in srcObjList)
-    `srcDb` | The Silo database to be used as the source of the copies
-    `srcObjList` | An array of nobj strings of the (path) names of objects to be copied. See description for interpretation of relative path names.
-    `dstDB` | The Silo database to be used as the destination of the copies.
-    `dstObjList` | [Optional] An optional array of nobj strings of the (path) names where the objects are to be copied in dstDb. If any entry in `dstObjList` is `NULL` or is a string of zero length, this indicates that object in the dstDb will have the same (path) name as the corresponding object (path) name given in `srcObjList`. If the entire `dstObjList` is NULL, then this is true for all objects. See description for interpretation of relative (path) names.
+  Arg name | Description
+  :---|:---
+  `nobjs` | The number of objects to be copied (e.g. number of strings in srcObjList)
+  `srcDb` | The Silo database to be used as the source of the copies
+  `srcObjList` | An array of nobj strings of the (path) names of objects to be copied. See description for interpretation of relative path names.
+  `dstDB` | The Silo database to be used as the destination of the copies.
+  `dstObjList` | [Optional] An optional array of nobj strings of the (path) names where the objects are to be copied in dstDb. If any entry in `dstObjList` is `NULL` or is a string of zero length, this indicates that object in the dstDb will have the same (path) name as the corresponding object (path) name given in `srcObjList`. If the entire `dstObjList` is NULL, then this is true for all objects. See description for interpretation of relative (path) names.
 
 
 * **Returned value:**
@@ -1022,7 +983,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   If `dstObjList` is non-NULL, but any given entry is either `NULL` or a string of zero length, than that object's destination name will be assumed the same as its equivalent `srcObjList` entry.
   Note, when using NULLs relative paths in `srcObjList` will appear in destination databases relative to the destination database's current working directory.
 
-  If dstObjList[i] ends in a '/' character or identifies a directory that existed in the destination database either before `DBCpListedObjects` was called or that was created on behalf of a preceding object copy within the execution of `DBCpListedObjects`, then the source object will be copied to that directory with its original (source) name.
+  If dstObjList[i] ends in a '/' character or identifies a directory that existed in the destination database either before `DBCpListedObjects` was called or that was created on behalf of a preceding object copy within the execution of DBCpListedObjects, then the source object will be copied to that directory with its original (source) name.
   This is equivalent to the behavior of the filesystem command cp foo /gorfo/bar/ or cp foo /gorfo/bar when bar exists as a directory.
 
   Finally, users should be aware that if there are numeric architecture differences between the host where the source object data was produced and the host where this copy operation is being performed, then in all likelihood the destination copies of any floating point data may not match bit-for-bit with the source data.
@@ -1079,7 +1040,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Obtain the low-level driver file handle
 
-
 * **C Signature:**
 
   ```
@@ -1094,10 +1054,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle.
 
 
 * **Returned value:**
@@ -1112,19 +1071,19 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   This method is used to obtain the low-level driver's `file` handle.
   For example, one can use it to obtain the HDF5 `file` id.
   The caller is responsible for casting the returned pointer to a pointer to the correct type.
-  Use `DBGetDriverType`() to obtain information on the type of driver currently in use.
+  Use `DBGetDriverType()` to obtain information on the type of driver currently in use.
 
   When the low-level driver's `file` handle is grabbed, all Silo-level operations on the `file` are prevented until the `file` is UNgrabbed.
-  For example, after a call to `DBGrabDriver`, calls to functions like `DBPutQuadmesh` or `DBGetCurve` will fail until the driver is UNgrabbed using `DBUngrabDriver`().
+  For example, after a call to DBGrabDriver, calls to functions like `DBPutQuadmesh` or `DBGetCurve` will fail until the driver is UNgrabbed using `DBUngrabDriver()`.
 
   Notes:
 
   As far as the integrity of a Silo `file` goes, grabbing is inherently dangerous.
   If the client is not careful, one can easily wind up corrupting the `file` for the Silo library (though all may be 'normal' for the underlying driver library). Therefore, to minimize the likelihood of corrupting the Silo `file` while it is grabbed, it is recommended that all operations with the low-level driver grabbed be confined to a separate sub-directory in the silo `file`.
   That is, one should not mix writing of Silo objects and low-level driver objects in the same directory.
-  To achieve this, before grabbing, create the desired directory and descend into it using Silo's `DBMkDir`() and `DBSetDir`() functions.
+  To achieve this, before grabbing, create the desired directory and descend into it using Silo's `DBMkDir()` and `DBSetDir()` functions.
   Then, grab the driver and do all the work with the low-level driver that is necessary.
-  Finally, ungrab the driver and immediately ascend out of the directory using Silo's `DBSetDir`("..").
+  Finally, ungrab the driver and immediately ascend out of the directory using Silo's DBSetDir("..").
 
   For reasons described above, if problems occur on files that have been grabbed, users will likely be asked to re-produce the problem on a similar `file` that has **not** been grabbed to rule out the possible corruption from grabbing.
 
@@ -1134,7 +1093,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBUngrabDriver()`
 
 * **Summary:** Ungrab the low-level file driver
-
 
 * **C Signature:**
 
@@ -1150,11 +1108,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle.
-    `drvr_hndl` | The low-level driver handle.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle.
+  `drvr_hndl` | The low-level driver handle.
 
 
 * **Returned value:**
@@ -1174,7 +1131,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Get the type of driver for the specified file
 
-
 * **C Signature:**
 
   ```
@@ -1189,10 +1145,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | A Silo database `file` handle.
+  Arg name | Description
+  :---|:---
+  `file` | A Silo database `file` handle.
 
 
 * **Returned value:**
@@ -1205,7 +1160,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 * **Description:**
 
   This function returns the type of driver used for the specified `file`.
-  If you want to ask this question without actually opening the file, use `DBGetDriverTypeFromPath`
+  If you want to ask this question without actually opening the file, use DBGetDriverTypeFromPath
 
 
 ---
@@ -1213,7 +1168,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBGetDriverTypeFromPath()`
 
 * **Summary:** Guess the driver type used by a file with the given pathname
-
 
 * **C Signature:**
 
@@ -1229,16 +1183,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `path` | Path to a file on the filesystem
+  Arg name | Description
+  :---|:---
+  `path` | Path to a file on the filesystem
 
 
 * **Returned value:**
 
   DB_UNKNOWN on failure to determine type.
-  Otherwise, the driver type such as `DB_PDB`, `DB_HDF5`.
+  Otherwise, the driver type such as DB_PDB, `DB_HDF5`.
 
 
 
@@ -1264,7 +1217,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Inquire if filename is a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -1280,10 +1232,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `filename` | Name of file.
+  Arg name | Description
+  :---|:---
+  `filename` | Name of file.
 
 
 * **Returned value:**
@@ -1318,7 +1269,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Determine if an open file has any Silo objects
 
-
 * **C Signature:**
 
   ```
@@ -1333,10 +1283,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | The Silo database file handle
+  Arg name | Description
+  :---|:---
+  `dbfile` | The Silo database file handle
 
 
 * **Description:**
@@ -1349,7 +1298,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `_silolibinfo()`
 
 * **Summary:** character array written by Silo to root directory indicating the Silo library version number used to generate the file
-
 
 * **C Signature:**
 
@@ -1369,7 +1317,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** character array written by Silo to root directory indicating the HDF5 library version number used to generate the file
 
-
 * **C Signature:**
 
   ```
@@ -1387,7 +1334,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `_was_grabbed()`
 
 * **Summary:** single integer written by Silo to root directory whenever a Silo file has been grabbed.
-
 
 * **C Signature:**
 
@@ -1409,7 +1355,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a curve object into a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -1428,16 +1373,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `curvename` | Name of the curve object
-    `xvals` | Array of length `npoints` containing the x-axis data values. Must be `NULL` when either `DBOPT_XVARNAME` or `DBOPT_REFERENCE` is used.
-    `yvals` | Array of length `npoints` containing the y-axis data values. Must be `NULL` when either `DBOPT_YVARNAME` or `DBOPT_REFERENCE` is used.
-    `datatype` | Data type of the `xvals` and `yvals` arrays. One of the predefined Silo types.
-    `npoints` | The number of points in the curve
-    `optlist` | Pointer to an option list structure containing additional information to be included in the compound array object written into the Silo file. Use `NULL` is there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `curvename` | Name of the curve object
+  `xvals` | Array of length `npoints` containing the x-axis data values. Must be `NULL` when either `DBOPT_XVARNAME` or `DBOPT_REFERENCE` is used.
+  `yvals` | Array of length `npoints` containing the y-axis data values. Must be `NULL` when either `DBOPT_YVARNAME` or `DBOPT_REFERENCE` is used.
+  `datatype` | Data type of the `xvals` and `yvals` arrays. One of the predefined Silo types.
+  `npoints` | The number of points in the curve
+  `optlist` | Pointer to an option list structure containing additional information to be included in the compound array object written into the Silo file. Use `NULL` is there are no options.
 
 
 * **Returned value:**
@@ -1456,9 +1400,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_LABEL|int|Problem cycle value.|0
   DBOPT_XLABEL|char *|Label for the x-axis|NULL
@@ -1469,8 +1413,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   DBOPT_YVARNAME|char *|Name of the domain (y) variable. This is problem variable name, not the code variable name passed into the `yvals` argument.|NULL
   DBOPT_REFERENCE|char *|Name of the real curve object this object references. The name can take the form of '<file:/path-to-curve-object>' just as mesh names in the `DBPutMultiMesh` call. <br><br>Note also that if this option is set, then the caller must pass `NULL` for both `xvals` and `yvals` arguments but must also pass valid information for all other object attributes including not only `npoints` and `datatype` but also any options.|NULL
   DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_COORDSYS|int|Coordinate system. One of: `DB_CARTESIAN` or `DB_SPHERICAL`|DB_CARTESIAN
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is `DB_MISSING_VALUE_NOT_SET`|DB_MISSING_VALUE_NOT_SET
+  DBOPT_COORDSYS|int|Coordinate system. One of: `DB_CARTESIAN` or DB_SPHERICAL|DB_CARTESIAN
+  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
 
 
   
@@ -1486,8 +1430,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetCurve()`
 
-* **Summary:** Read a curve from a Silo database. 
-
+* **Summary:** Read a curve from a Silo database.
 
 * **C Signature:**
 
@@ -1505,11 +1448,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `curvename` | Name of the curve to read.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `curvename` | Name of the curve to read.
 
 
 * **Returned value:**
@@ -1535,7 +1477,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a point mesh object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -1556,16 +1497,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the mesh.
-    `ndims` | Number of dimensions.
-    `coords` | Array of length `ndims` containing pointers to coordinate arrays.
-    `nels` | Number of elements (points) in mesh.
-    `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. Typically, this argument is `NULL`.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the mesh.
+  `ndims` | Number of dimensions.
+  `coords` | Array of length `ndims` containing pointers to coordinate arrays.
+  `nels` | Number of elements (points) in mesh.
+  `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. Typically, this argument is `NULL`.
 
 
 * **Returned value:**
@@ -1586,9 +1526,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Data Type|Option Meaning|Default Value
+  Option Name|Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_TIME|float|Problem time value.|0.0
@@ -1622,7 +1562,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Read a point mesh from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -1631,11 +1570,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `meshname` | Name of the mesh.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `meshname` | Name of the mesh.
 
 
 * **Returned value:**
@@ -1661,7 +1599,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a vector/tensor point variable object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -1676,17 +1613,16 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the variable set.
-    `meshname` | Name of the associated point mesh.
-    `nvars` | Number of variables supplied in `vars` array.
-    `vars` | Array of length `nvars` containing pointers to value arrays.
-    `nels` | Number of elements (points) in variable.
-    `datatype` | Datatype of the value arrays. One of the predefined Silo data types.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the variable set.
+  `meshname` | Name of the associated point mesh.
+  `nvars` | Number of variables supplied in `vars` array.
+  `vars` | Array of length `nvars` containing pointers to value arrays.
+  `nels` | Number of elements (points) in variable.
+  `datatype` | Datatype of the value arrays. One of the predefined Silo data types.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
 
 
 * **Returned value:**
@@ -1715,9 +1651,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_TIME|float|Problem time value.|0.0
@@ -1729,7 +1665,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See "DBOPT_REGION_PNAMES" on page `221`.|NULL
   DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is `DB_MISSING_VALUE_NOT_SET`|DB_MISSING_VALUE_NOT_SET
+  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
 
 
   
@@ -1740,7 +1676,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBPutPointvar1()`
 
 * **Summary:** Write a scalar point variable object into a Silo file.
-
 
 * **C Signature:**
 
@@ -1760,16 +1695,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the variable.
-    `meshname` | Name of the associated point mesh.
-    `var` | Array containing data values for this variable.
-    `nels` | Number of elements (points) in variable.
-    `datatype` | Datatype of the variable. One of the predefined Silo data types.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the variable.
+  `meshname` | Name of the associated point mesh.
+  `var` | Array containing data values for this variable.
+  `nels` | Number of elements (points) in variable.
+  `datatype` | Datatype of the variable. One of the predefined Silo data types.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
 
 
 * **Returned value:**
@@ -1796,7 +1730,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Read a point variable from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -1811,11 +1744,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the variable.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the variable.
 
 
 * **Returned value:**
@@ -1841,7 +1773,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a quad mesh object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -1865,18 +1796,17 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the mesh.
-    `coordnames` | Array of length `ndims` containing pointers to the names to be provided when writing out the coordinate arrays. This parameter is currently ignored and can be set as `NULL`.
-    `coords` | Array of length `ndims` containing pointers to the coordinate arrays.
-    `dims` | Array of length `ndims` describing the dimensionality of the mesh. Each value in the `dims` array indicates the number of nodes contained in the mesh along that dimension. In order to specify a mesh with topological dimension lower than the geometric dimension, `ndims` should be the geometric dimension and the extra entries in the `dims` array provided here should be set to 1.
-    `ndims` | Number of geometric dimensions. Typically geometric and topological dimensions agree. Read the description for dealing with situations where this is not the case.
-    `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
-    `coordtype` | Coordinate array type. One of the predefined types: `DB_COLLINEAR` or `DB_NONCOLLINEAR`. Collinear coordinate arrays are always one-dimensional, regardless of the dimensionality of the mesh; non-collinear arrays have the same dimensionality as the mesh.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. Typically, this argument is `NULL`.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the mesh.
+  `coordnames` | Array of length `ndims` containing pointers to the names to be provided when writing out the coordinate arrays. This parameter is currently ignored and can be set as `NULL`.
+  `coords` | Array of length `ndims` containing pointers to the coordinate arrays.
+  `dims` | Array of length `ndims` describing the dimensionality of the mesh. Each value in the `dims` array indicates the number of nodes contained in the mesh along that dimension. In order to specify a mesh with topological dimension lower than the geometric dimension, `ndims` should be the geometric dimension and the extra entries in the `dims` array provided here should be set to 1.
+  `ndims` | Number of geometric dimensions. Typically geometric and topological dimensions agree. Read the description for dealing with situations where this is not the case.
+  `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
+  `coordtype` | Coordinate array type. One of the predefined types: `DB_COLLINEAR` or `DB_NONCOLLINEAR`. Collinear coordinate arrays are always one-dimensional, regardless of the dimensionality of the mesh; non-collinear arrays have the same dimensionality as the mesh.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. Typically, this argument is `NULL`.
 
 
 * **Returned value:**
@@ -1912,11 +1842,11 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Data Type|Option Meaning|Default Value
+  Option Name|Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
-  DBOPT_COORDSYS|int|Coordinate system. One of: `DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`.|DB_OTHER
+  DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_FACETYPE|int|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`.|DB_RECTILINEAR
   DBOPT_HI_OFFSET|int *|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
@@ -1958,7 +1888,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Read a quadrilateral mesh from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -1973,11 +1902,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `meshname` | Name of the mesh.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `meshname` | Name of the mesh.
 
 
 * **Returned value:**
@@ -2002,7 +1930,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBPutQuadvar()`
 
 * **Summary:** Write a vector/tensor quad variable object into a Silo file.
-
 
 * **C Signature:**
 
@@ -2030,22 +1957,21 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the variable.
-    `meshname` | Name of the mesh associated with this variable (written with `DBPutQuadmesh` or `DBPutUcdmesh`). If no association is to be made, this value should be `NULL`.
-    `nvars` | Number of sub-variables which comprise this variable. For a scalar array, this is one. If writing a vector quantity, however, this would be two for a 2-D vector and three for a 3-D vector.
-    `varnames` | Array of length `nvars` containing pointers to character strings defining the names associated with each sub-variable.
-    `vars` | Array of length `nvars` containing pointers to arrays defining the values associated with each subvariable. For true edge- or face-centering (as opposed to `DB_EDGECENT` `centering` when `ndims` is 1 and `DB_FACECENT` `centering` when `ndims` is 2), each pointer here should point to an array that holds `ndims` sub-arrays, one for each of the i-, j-, k-oriented edges or i-, j-, k-intercepting faces, respectively. Read the description for more details.
-    `dims` | Array of length `ndims` which describes the dimensionality of the data stored in the `vars` arrays. For `DB_NODECENT` centering, this array holds the number of nodes in each dimension. For `DB_ZONECENT` centering, `DB_EDGECENT` `centering` when `ndims` is 1 and `DB_FACECENT` `centering` when `ndims` is 2, this array holds the number of zones in each dimension. Otherwise, for `DB_EDGECENT` and `DB_FACECENT` centering, this array should hold the number of nodes in each dimension.
-    `ndims` | Number of dimensions.
-    `mixvars` | Array of length `nvars` containing pointers to arrays defining the mixed-data values associated with each subvariable. If no mixed values are present, this should be `NULL`.
-    `mixlen` | Length of mixed data arrays, if provided.
-    `datatype` | Datatype of the variable. One of the predefined Silo data types.
-    `centering` | Centering of the subvariables on the associated mesh. One of the predefined types: `DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the variable.
+  `meshname` | Name of the mesh associated with this variable (written with `DBPutQuadmesh` or DBPutUcdmesh). If no association is to be made, this value should be `NULL`.
+  `nvars` | Number of sub-variables which comprise this variable. For a scalar array, this is one. If writing a vector quantity, however, this would be two for a 2-D vector and three for a 3-D vector.
+  `varnames` | Array of length `nvars` containing pointers to character strings defining the names associated with each sub-variable.
+  `vars` | Array of length `nvars` containing pointers to arrays defining the values associated with each subvariable. For true edge- or face-centering (as opposed to `DB_EDGECENT` `centering` when `ndims` is 1 and `DB_FACECENT` `centering` when `ndims` is 2), each pointer here should point to an array that holds `ndims` sub-arrays, one for each of the i-, j-, k-oriented edges or i-, j-, k-intercepting faces, respectively. Read the description for more details.
+  `dims` | Array of length `ndims` which describes the dimensionality of the data stored in the `vars` arrays. For `DB_NODECENT` centering, this array holds the number of nodes in each dimension. For `DB_ZONECENT` centering, `DB_EDGECENT` `centering` when `ndims` is 1 and `DB_FACECENT` `centering` when `ndims` is 2, this array holds the number of zones in each dimension. Otherwise, for `DB_EDGECENT` and `DB_FACECENT` centering, this array should hold the number of nodes in each dimension.
+  `ndims` | Number of dimensions.
+  `mixvars` | Array of length `nvars` containing pointers to arrays defining the mixed-data values associated with each subvariable. If no mixed values are present, this should be `NULL`.
+  `mixlen` | Length of mixed data arrays, if provided.
+  `datatype` | Datatype of the variable. One of the predefined Silo data types.
+  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types: DB_NODECENT, DB_EDGECENT, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
 
 
 * **Returned value:**
@@ -2086,7 +2012,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Likewise, since the zones of a two dimensional mesh are basically faces, the `DB_FACECENT` `centering` for a two dimensional mesh is treated identically to the `DB_ZONECENT` case.
 
   Other information can also be included.
-  This function is useful for writing vector and tensor fields, whereas the companion function, `DBPutQuadvar1`, is appropriate for writing scalar fields.
+  This function is useful for writing vector and tensor fields, whereas the companion function, DBPutQuadvar1, is appropriate for writing scalar fields.
 
   For tensor quantities, the question of ordering of tensor components arises.
   For symmetric tensor's Silo uses the Voigt Notation ordering.
@@ -2099,11 +2025,11 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
-  DBOPT_COORDSYS|int|Coordinate system. One of: `DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`.|DB_OTHER
+  DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_FACETYPE|int|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`.|DB_RECTILINEAR
   DBOPT_LABEL|char *|Character string defining the label associated with this variable. |NULL
@@ -2112,13 +2038,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   DBOPT_TIME|float|Problem time value.|0.0
   DBOPT_DTIME|double|Problem time value.|0.0
   DBOPT_UNITS|char *|Character string defining the units associated with this variable.|NULL
-  DBOPT_USESPECMF|int|Boolean (DB_OFF or `DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
+  DBOPT_USESPECMF|int|Boolean (DB_OFF or DB_ON) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
   DBOPT_ASCII_LABEL|int|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
   DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See "DBOPT_REGION_PNAMES" on page `221`.|NULL
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is `DB_MISSING_VALUE_NOT_SET`|DB_MISSING_VALUE_NOT_SET
+  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
 
 
   
@@ -2128,8 +2054,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutQuadvar1()`
 
-* **Summary:**  Write a scalar quad variable object into a Silo file.
-
+* **Summary:** Write a scalar quad variable object into a Silo file.
 
 * **C Signature:**
 
@@ -2151,20 +2076,19 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the variable.
-    `meshname` | Name of the mesh associated with this variable (written with `DBPutQuadmesh` or `DBPutUcdmesh`.) If no association is to be made, this value should be `NULL`.
-    `var` | Array defining the values associated with this variable. For true edge- or face-centering (as opposed to `DB_EDGECENT` `centering` when `ndims` is 1 and `DB_FACECENT` `centering` when `ndims` is 2), each pointer here should point to an array that holds `ndims` sub-arrays, one for each of the i-, j-, k-oriented edges or i-, j-, k-intercepting faces, respectively. Read the description for `DBPutQuadvar` more details.
-    `dims` | Array of length `ndims` which describes the dimensionality of the data stored in the `var` array. For `DB_NODECENT` centering, this array holds the number of nodes in each dimension. For `DB_ZONECENT` centering, `DB_EDGECENT` `centering` when `ndims` is 1 and `DB_FACECENT` `centering` when `ndims` is 2, this array holds the number of zones in each dimension. Otherwise, for `DB_EDGECENT` and `DB_FACECENT` centering, this array should hold the number of nodes in each dimension.
-    `ndims` | Number of dimensions.
-    `mixvar` | Array defining the mixed-data values associated with this variable. If no mixed values are present, this should be `NULL`.
-    `mixlen` | Length of mixed data arrays, if provided.
-    `datatype` | Datatype of sub-variables. One of the predefined Silo data types.
-    `centering` | Centering of the subvariables on the associated mesh. One of the predefined types: `DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the variable.
+  `meshname` | Name of the mesh associated with this variable (written with `DBPutQuadmesh` or `DBPutUcdmesh`.) If no association is to be made, this value should be `NULL`.
+  `var` | Array defining the values associated with this variable. For true edge- or face-centering (as opposed to `DB_EDGECENT` `centering` when `ndims` is 1 and `DB_FACECENT` `centering` when `ndims` is 2), each pointer here should point to an array that holds `ndims` sub-arrays, one for each of the i-, j-, k-oriented edges or i-, j-, k-intercepting faces, respectively. Read the description for `DBPutQuadvar` more details.
+  `dims` | Array of length `ndims` which describes the dimensionality of the data stored in the `var` array. For `DB_NODECENT` centering, this array holds the number of nodes in each dimension. For `DB_ZONECENT` centering, `DB_EDGECENT` `centering` when `ndims` is 1 and `DB_FACECENT` `centering` when `ndims` is 2, this array holds the number of zones in each dimension. Otherwise, for `DB_EDGECENT` and `DB_FACECENT` centering, this array should hold the number of nodes in each dimension.
+  `ndims` | Number of dimensions.
+  `mixvar` | Array defining the mixed-data values associated with this variable. If no mixed values are present, this should be `NULL`.
+  `mixlen` | Length of mixed data arrays, if provided.
+  `datatype` | Datatype of sub-variables. One of the predefined Silo data types.
+  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types: DB_NODECENT, DB_EDGECENT, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
 
 
 * **Returned value:**
@@ -2178,7 +2102,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBPutQuadvar1` function writes a scalar variable associated with a quad mesh into a Silo file.
   A quad-var object contains the variable values, plus the `name` of the associated quad-mesh.
   Other information can also be included.
-  This function should be used for writing scalar fields, and its companion function, `DBPutQuadvar`, should be used for writing vector and tensor fields.
+  This function should be used for writing scalar fields, and its companion function, DBPutQuadvar, should be used for writing vector and tensor fields.
 
   For edge- and face-centered data, please refer to the description for `DBPutQuadvar` for a more detailed explanation.
 
@@ -2192,7 +2116,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBGetQuadvar()`
 
 * **Summary:** Read a quadrilateral variable from a Silo database.
-
 
 * **C Signature:**
 
@@ -2208,11 +2131,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the variable.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the variable.
 
 
 * **Returned value:**
@@ -2237,7 +2159,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBPutUcdmesh()`
 
 * **Summary:** Write a `UCD` mesh object into a Silo file.
-
 
 * **C Signature:**
 
@@ -2264,20 +2185,19 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the mesh.
-    `ndims` | Number of spatial dimensions represented by this `UCD` mesh.
-    `coordnames` | Array of length `ndims` containing pointers to the names to be provided when writing out the coordinate arrays. This parameter is currently ignored and can be set as `NULL`.
-    `coords` | Array of length `ndims` containing pointers to the coordinate arrays.
-    `nnodes` | Number of nodes in this `UCD` mesh.
-    `nzones` | Number of zones in this `UCD` mesh.
-    `zonel_name` | Name of the zonelist structure associated with this variable [written with `DBPutZonelist`]. If no association is to be made or if the mesh is composed solely of arbitrary, polyhedral elements, this value should be `NULL`. If a polyhedral-zonelist is to be associated with the mesh, do not pass the `name` of the polyhedral-zonelist here. Instead, use the `DBOPT_PHZONELIST` option described below. For more information on arbitrary, polyhedral zonelists, see below and also see the documentation for `DBPutPHZonelist`.
-    `facel_name` | Name of the facelist structure associated with this variable [written with `DBPutFacelist`]. If no association is to be made, this value should be `NULL`.
-    `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the mesh.
+  `ndims` | Number of spatial dimensions represented by this `UCD` mesh.
+  `coordnames` | Array of length `ndims` containing pointers to the names to be provided when writing out the coordinate arrays. This parameter is currently ignored and can be set as `NULL`.
+  `coords` | Array of length `ndims` containing pointers to the coordinate arrays.
+  `nnodes` | Number of nodes in this `UCD` mesh.
+  `nzones` | Number of zones in this `UCD` mesh.
+  `zonel_name` | Name of the zonelist structure associated with this variable [written with DBPutZonelist]. If no association is to be made or if the mesh is composed solely of arbitrary, polyhedral elements, this value should be `NULL`. If a polyhedral-zonelist is to be associated with the mesh, do not pass the `name` of the polyhedral-zonelist here. Instead, use the `DBOPT_PHZONELIST` option described below. For more information on arbitrary, polyhedral zonelists, see below and also see the documentation for `DBPutPHZonelist`.
+  `facel_name` | Name of the facelist structure associated with this variable [written with DBPutFacelist]. If no association is to be made, this value should be `NULL`.
+  `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
 
 * **Returned value:**
@@ -2341,7 +2261,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Then, for each face, specify the number of nodes in the face followed by the nodes that make up the face.
   The nodes should be ordered such that they are numbered in a counter-clockwise fashion when viewed from the outside (e.
   g.
-  right-hand rules yields an outward facing normal). For a fully arbitrarily connected mesh, see `DBPutPHZonelist`(). In addition, for a sequence of consecutive zones of type `DB_ZONETYPE_POLYHEDRON` in a zonelist, the shapesize entry is taken to be the sum of all the associated positions occupied in the nodelist data.
+  right-hand rules yields an outward facing normal). For a fully arbitrarily connected mesh, see `DBPutPHZonelist()`. In addition, for a sequence of consecutive zones of type `DB_ZONETYPE_POLYHEDRON` in a zonelist, the shapesize entry is taken to be the sum of all the associated positions occupied in the nodelist data.
   So, for the example in Figure 0-3 on page 106, the shapesize entry for the `DB_ZONETYPE_POLYEDRON` segment of the zonelist is '53' because for the two arbitrary polyhedral zones in the zonelist, 53 positions in the nodelist array are used.
 
   
@@ -2352,11 +2272,11 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Data Type|Option Meaning|Default Value
+  Option Name|Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
-  DBOPT_COORDSYS|int|Coordinate system. One of: `DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`.|DB_OTHER
+  DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
   DBOPT_NODENUM|void*|An array of length `nnodes` giving a global node number for each node in the mesh. By default, this array is treated as type int.|NULL
   DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
   DBOPT_CYCLE|int|Problem cycle value|0
@@ -2393,7 +2313,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a subset of a parent, ucd mesh, to a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -2410,16 +2329,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle.
-    `name` | The `name` of the ucd submesh object to create.
-    `parentmesh` | The `name` of the parent ucd mesh this submesh is a portion of.
-    `nzones` | The number of zones in this submesh.
-    `zlname` | The `name` of the zonelist object.
-    `fl` | [OPT] The `name` of the facelist object.
-    `opts` | Additional options.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle.
+  `name` | The `name` of the ucd submesh object to create.
+  `parentmesh` | The `name` of the parent ucd mesh this submesh is a portion of.
+  `nzones` | The number of zones in this submesh.
+  `zlname` | The `name` of the zonelist object.
+  `fl` | [OPT] The `name` of the facelist object.
+  `opts` | Additional options.
 
 
 * **Returned value:**
@@ -2443,7 +2361,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Read a `UCD` mesh from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -2458,11 +2375,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `meshname` | Name of the mesh.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `meshname` | Name of the mesh.
 
 
 * **Returned value:**
@@ -2488,7 +2404,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a zonelist object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -2508,19 +2423,18 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the zonelist structure.
-    `nzones` | Number of zones in associated mesh.
-    `ndims` | Number of spatial dimensions represented by associated mesh.
-    `nodelist` | Array of length `lnodelist` containing node indices describing mesh zones.
-    `lnodelist` | Length of `nodelist` array.
-    `origin` | Origin for indices in the `nodelist` array. Should be zero or one.
-    `shapesize` | Array of length `nshapes` containing the number of nodes used by each zone shape.
-    `shapecnt` | Array of length `nshapes` containing the number of zones having each shape.
-    `nshapes` | Number of zone shapes.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the zonelist structure.
+  `nzones` | Number of zones in associated mesh.
+  `ndims` | Number of spatial dimensions represented by associated mesh.
+  `nodelist` | Array of length `lnodelist` containing node indices describing mesh zones.
+  `lnodelist` | Length of `nodelist` array.
+  `origin` | Origin for indices in the `nodelist` array. Should be zero or one.
+  `shapesize` | Array of length `nshapes` containing the number of nodes used by each zone shape.
+  `shapecnt` | Array of length `nshapes` containing the number of zones having each shape.
+  `nshapes` | Number of zone shapes.
 
 
 * **Returned value:**
@@ -2532,7 +2446,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 * **Description:**
 
   Do not use this method.
-  Use `DBPutZonelist2`() instead.
+  Use `DBPutZonelist2()` instead.
 
   The `DBPutZonelist` function writes a zonelist object into a Silo file.
   The `name` assigned to this object can in turn be used as the zonel_name parameter to the `DBPutUcdmesh` function.
@@ -2547,7 +2461,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBPutZonelist2()`
 
 * **Summary:** Write a zonelist object containing ghost zones into a Silo file.
-
 
 * **C Signature:**
 
@@ -2570,23 +2483,22 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the zonelist structure.
-    `nzones` | Number of zones in associated mesh.
-    `ndims` | Number of spatial dimensions represented by associated mesh.
-    `nodelist` | Array of length `lnodelist` containing node indices describing mesh zones.
-    `lnodelist` | Length of `nodelist` array.
-    `origin` | Origin for indices in the `nodelist` array. Should be zero or one.
-    `lo_offset` | The number of ghost zones at the beginning of the `nodelist`.
-    `hi_offset` | The number of ghost zones at the end of the `nodelist`.
-    `shapetype` | Array of length `nshapes` containing the type of each zone shape. See description below.
-    `shapesize` | Array of length `nshapes` containing the number of nodes used by each zone shape.
-    `shapecnt` | Array of length `nshapes` containing the number of zones having each shape.
-    `nshapes` | Number of zone shapes.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the zonelist structure.
+  `nzones` | Number of zones in associated mesh.
+  `ndims` | Number of spatial dimensions represented by associated mesh.
+  `nodelist` | Array of length `lnodelist` containing node indices describing mesh zones.
+  `lnodelist` | Length of `nodelist` array.
+  `origin` | Origin for indices in the `nodelist` array. Should be zero or one.
+  `lo_offset` | The number of ghost zones at the beginning of the `nodelist`.
+  `hi_offset` | The number of ghost zones at the end of the `nodelist`.
+  `shapetype` | Array of length `nshapes` containing the type of each zone shape. See description below.
+  `shapesize` | Array of length `nshapes` containing the number of nodes used by each zone shape.
+  `shapecnt` | Array of length `nshapes` containing the number of zones having each shape.
+  `nshapes` | Number of zone shapes.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
 
 * **Returned value:**
@@ -2602,9 +2514,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The allowed shape types are described in the following table:
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Type|Description
+  Type|Description
     :---|:---
   DB_ZONETYPE_BEAM|A line segment
   DB_ZONETYPE_POLYGON|A polygon where nodes are enumerated to form a polygon
@@ -2623,9 +2535,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Option Name|Data Type|Option Meaning|Default Value
+  Option Name|Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_ZONENUM|void*|Array of global zone numbers, one per zone in this zonelist. By default, this is assumed to be of type int.|NULL
   DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
@@ -2646,7 +2558,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write an arbitrary, polyhedral zonelist object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -2665,23 +2576,22 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the zonelist structure.
-    `nfaces` | Number of faces in the zonelist. Note that faces shared between zones should only be counted once.
-    `nodecnts` | Array of length `nfaces` indicating the number of nodes in each face. That is nodecnts[i] is the number of nodes in face i.
-    `lnodelist` | Length of the succeeding `nodelist` array.
-    `nodelist` | Array of length `lnodelist` listing the nodes of each face. The list of nodes for face i begins at index Sum(nodecnts[j]) for j=0...i-1.
-    `extface` | An optional array of length `nfaces` where extface[i]!=0x0 means that face i is an external face. This argument may be `NULL`.
-    `nzones` | Number of zones in the zonelist.
-    `facecnts` | Array of length `nzones` where facecnts[i] is number of faces for zone i.
-    `lfacelist` | Length of the succeeding `facelist` array.
-    `facelist` | Array of face ids for each zone. The list of faces for zone i begins at index Sum(facecnts[j]) for j=0...i-1. Note, however, that each face is identified by a signed value where the sign is used to indicate which ordering of the nodes of a face is to be used. A face id >= 0 means that the node ordering as it appears in the `nodelist` should be used. Otherwise, the value is negative and it should be 1-complimented to get the face's true id. In addition, the node ordering for such a face is the opposite of how it appears in the `nodelist`. Finally, node orders over a face should be specified such that a right-hand rule yields the outward normal for the face relative to the zone it is being defined for.
-    `origin` | Origin for indices in the `nodelist` array. Should be zero or one.
-    `lo-offset` | Index of first real (e.g. non-ghost) zone in the list. All zones with index less than (<) `lo-offset` are treated as ghost-zones.
-    `hi-offset` | Index of last real (e.g. non-ghost) zone in the list. All zones with index greater than (>) `hi-offset` are treated as ghost zones.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the zonelist structure.
+  `nfaces` | Number of faces in the zonelist. Note that faces shared between zones should only be counted once.
+  `nodecnts` | Array of length `nfaces` indicating the number of nodes in each face. That is nodecnts[i] is the number of nodes in face i.
+  `lnodelist` | Length of the succeeding `nodelist` array.
+  `nodelist` | Array of length `lnodelist` listing the nodes of each face. The list of nodes for face i begins at index Sum(nodecnts[j]) for j=0...i-1.
+  `extface` | An optional array of length `nfaces` where extface[i]!=0x0 means that face i is an external face. This argument may be `NULL`.
+  `nzones` | Number of zones in the zonelist.
+  `facecnts` | Array of length `nzones` where facecnts[i] is number of faces for zone i.
+  `lfacelist` | Length of the succeeding `facelist` array.
+  `facelist` | Array of face ids for each zone. The list of faces for zone i begins at index Sum(facecnts[j]) for j=0...i-1. Note, however, that each face is identified by a signed value where the sign is used to indicate which ordering of the nodes of a face is to be used. A face id >= 0 means that the node ordering as it appears in the `nodelist` should be used. Otherwise, the value is negative and it should be 1-complimented to get the face's true id. In addition, the node ordering for such a face is the opposite of how it appears in the `nodelist`. Finally, node orders over a face should be specified such that a right-hand rule yields the outward normal for the face relative to the zone it is being defined for.
+  `origin` | Origin for indices in the `nodelist` array. Should be zero or one.
+  `lo-offset` | Index of first real (e.g. non-ghost) zone in the list. All zones with index less than (<) `lo-offset` are treated as ghost-zones.
+  `hi-offset` | Index of last real (e.g. non-ghost) zone in the list. All zones with index greater than (>) `hi-offset` are treated as ghost zones.
 
 
 * **Returned value:**
@@ -2692,9 +2602,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Description:**
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * The DBPutPHZonelist function writes a polyhedral-zonelist object into a Silo file. The name assigned to this object can in turn be used as the parameter in the 
+  The DBPutPHZonelist function writes a polyhedral-zonelist object into a Silo file. The name assigned to this object can in turn be used as the parameter in the 
     :---
   DBOPT_PHZONELIST option for the `DBPutUcdmesh` function.
 
@@ -2703,9 +2613,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Option Name|Data Type|Option Meaning|Default Value
+  Option Name|Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_ZONENUM|void*|Array of global zone numbers, one per zone in this zonelist. By default, it is assumed this array is of type int*.|NULL
   DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
@@ -2823,7 +2733,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Read a polyhedral-zonelist from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -2839,11 +2748,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `phzlname` | Name of the polyhedral-zonelist.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `phzlname` | Name of the polyhedral-zonelist.
 
 
 * **Returned value:**
@@ -2869,7 +2777,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a facelist object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -2891,23 +2798,22 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the facelist structure.
-    `nfaces` | Number of external faces in associated mesh.
-    `ndims` | Number of spatial dimensions represented by the associated mesh.
-    `nodelist` | Array of length `lnodelist` containing node indices describing mesh faces.
-    `lnodelist` | Length of `nodelist` array.
-    `origin` | Origin for indices in `nodelist` array. Either zero or one.
-    `zoneno` | Array of length `nfaces` containing the zone number from which each face came. Use a `NULL` for this parameter if zone numbering info is not wanted.
-    `shapesize` | Array of length `nshapes` containing the number of nodes used by each face shape (for 3-D meshes only).
-    `shapecnt` | Array of length `nshapes` containing the number of faces having each shape (for 3-D meshes only).
-    `nshapes` | Number of face shapes (for 3-D meshes only).
-    `types` | Array of length `nfaces` containing information about each face. This argument is ignored if `ntypes` is zero, or if this parameter is `NULL`.
-    `typelist` | Array of length `ntypes` containing the identifiers for each type. This argument is ignored if `ntypes` is zero, or if this parameter is `NULL`.
-    `ntypes` | Number of types, or zero if type information was not provided.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the facelist structure.
+  `nfaces` | Number of external faces in associated mesh.
+  `ndims` | Number of spatial dimensions represented by the associated mesh.
+  `nodelist` | Array of length `lnodelist` containing node indices describing mesh faces.
+  `lnodelist` | Length of `nodelist` array.
+  `origin` | Origin for indices in `nodelist` array. Either zero or one.
+  `zoneno` | Array of length `nfaces` containing the zone number from which each face came. Use a `NULL` for this parameter if zone numbering info is not wanted.
+  `shapesize` | Array of length `nshapes` containing the number of nodes used by each face shape (for 3-D meshes only).
+  `shapecnt` | Array of length `nshapes` containing the number of faces having each shape (for 3-D meshes only).
+  `nshapes` | Number of face shapes (for 3-D meshes only).
+  `types` | Array of length `nfaces` containing information about each face. This argument is ignored if `ntypes` is zero, or if this parameter is `NULL`.
+  `typelist` | Array of length `ntypes` containing the identifiers for each type. This argument is ignored if `ntypes` is zero, or if this parameter is `NULL`.
+  `ntypes` | Number of types, or zero if type information was not provided.
 
 
 * **Returned value:**
@@ -2932,7 +2838,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a vector/tensor `UCD` variable object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -2951,21 +2856,20 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the variable.
-    `meshname` | Name of the mesh associated with this variable (written with `DBPutUcdmesh`).
-    `nvars` | Number of sub-variables which comprise this variable. For a scalar array, this is one. If writing a vector quantity, however, this would be two for a 2-D vector and three for a 3-D vector.
-    `varnames` | Array of length `nvars` containing pointers to character strings defining the names associated with each subvariable.
-    `vars` | Array of length `nvars` containing pointers to arrays defining the values associated with each subvariable.
-    `nels` | Number of elements in this variable.
-    `mixvars` | Array of length `nvars` containing pointers to arrays defining the mixed-data values associated with each subvariable. If no mixed values are present, this should be `NULL`.
-    `mixlen` | Length of mixed data arrays (i.e., mixvars).
-    `datatype` | Datatype of sub-variables. One of the predefined Silo data types.
-    `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types: `DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT`, `DB_ZONECENT` or `DB_BLOCKCENT`. See below for a discussion of `centering` issues.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the variable.
+  `meshname` | Name of the mesh associated with this variable (written with DBPutUcdmesh).
+  `nvars` | Number of sub-variables which comprise this variable. For a scalar array, this is one. If writing a vector quantity, however, this would be two for a 2-D vector and three for a 3-D vector.
+  `varnames` | Array of length `nvars` containing pointers to character strings defining the names associated with each subvariable.
+  `vars` | Array of length `nvars` containing pointers to arrays defining the values associated with each subvariable.
+  `nels` | Number of elements in this variable.
+  `mixvars` | Array of length `nvars` containing pointers to arrays defining the mixed-data values associated with each subvariable. If no mixed values are present, this should be `NULL`.
+  `mixlen` | Length of mixed data arrays (i.e., mixvars).
+  `datatype` | Datatype of sub-variables. One of the predefined Silo data types.
+  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types: DB_NODECENT, DB_EDGECENT, DB_FACECENT, `DB_ZONECENT` or `DB_BLOCKCENT`. See below for a discussion of `centering` issues.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
 
 * **Returned value:**
@@ -2979,7 +2883,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBPutUcdvar` function writes a variable associated with an `UCD` mesh into a Silo file.
   Note that variables can be node-centered, zone-centered, edge-centered or face-centered.
 
-  For node- (or zone-) centered data, the question of which value in the `vars` array goes with which node (or zone) is determined implicitly by a one-to-one correspondence with the list of nodes in the `DBPutUcdmesh` call (or zones in the `DBPutZonelist` or `DBPutZonelist2` call). For example, the 237th value in a zone-centered `vars` array passed here goes with the 237th zone in the zonelist passed in the `DBPutZonelist2` (or `DBPutZonelist`) call.
+  For node- (or zone-) centered data, the question of which value in the `vars` array goes with which node (or zone) is determined implicitly by a one-to-one correspondence with the list of nodes in the `DBPutUcdmesh` call (or zones in the `DBPutZonelist` or `DBPutZonelist2` call). For example, the 237th value in a zone-centered `vars` array passed here goes with the 237th zone in the zonelist passed in the `DBPutZonelist2` (or DBPutZonelist) call.
 
   Edge- and face-centered data require a little more explanation.
   Unlike node- and zone-centered data, there does not exist in Silo an explicit list of edges or faces.
@@ -2994,13 +2898,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   See Figure 0-2 on page `104`.
   Because this traversal will wind up visiting edges multiple times, the first time an edge (or face) is encountered is what determines its position in the implicit edge (or face) list.
 
-  If the zonelist contains arbitrary polyhedra or the zonelist is a polyhedral zonelist (written with `DBPutPHZonelist`), then the traversal algorithm involves visiting each zone, then each face for a zone and finally each edge for a face.
+  If the zonelist contains arbitrary polyhedra or the zonelist is a polyhedral zonelist (written with DBPutPHZonelist), then the traversal algorithm involves visiting each zone, then each face for a zone and finally each edge for a face.
 
-  Note that `DBPutUcdvar`() can also be used to define a block-centered variable on a multi-block mesh by specifying a multi-block mesh `name` for the `meshname` and `DB_BLOCKCENT` for the `centering`.
+  Note that `DBPutUcdvar()` can also be used to define a block-centered variable on a multi-block mesh by specifying a multi-block mesh `name` for the `meshname` and `DB_BLOCKCENT` for the `centering`.
   This is useful in defining, for example, multi-block variable extents.
 
   Other information can also be included.
-  This function is useful for writing vector and tensor fields, whereas the companion function, `DBPutUcdvar1`, is appropriate for writing scalar fields.
+  This function is useful for writing vector and tensor fields, whereas the companion function, DBPutUcdvar1, is appropriate for writing scalar fields.
 
   For tensor quantities, the question of ordering of tensor components arises.
   For symmetric tensor's Silo uses the Voigt Notation ordering.
@@ -3012,24 +2916,24 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
-  DBOPT_COORDSYS|int|Coordinate system. One of: `DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`.|DB_OTHER
+  DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_LABEL|char *|Character strings defining the label associated with this variable. |NULL
   DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
   DBOPT_TIME|float|Problem time value.|0.0
   DBOPT_DTIME|double|Problem time value.|0.0
   DBOPT_UNITS|char *|Character string defining the units associated with this variable.|NULL
-  DBOPT_USESPECMF|int|Boolean (DB_OFF or `DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
+  DBOPT_USESPECMF|int|Boolean (DB_OFF or DB_ON) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
   DBOPT_ASCII_LABEL|int|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
   DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See "DBOPT_REGION_PNAMES" on page `221`.|NULL
   DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the variable data arrays. Default is `DB_MISSING_VALUE_NOT_SET`|DB_MISSING_VALUE_NOT_SET
+  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the variable data arrays. Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
 
 
   
@@ -3040,7 +2944,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBPutUcdvar1()`
 
 * **Summary:** Write a scalar `UCD` variable object into a Silo file.
-
 
 * **C Signature:**
 
@@ -3062,19 +2965,18 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the variable.
-    `meshname` | Name of the mesh associated with this variable (written with either `DBPutUcdmesh`).
-    `var` | Array of length `nels` containing the values associated with this variable.
-    `nels` | Number of elements in this variable.
-    `mixvar` | Array of length `mixlen` containing the mixed-data values associated with this variable. If `mixlen` is zero, this value is ignored.
-    `mixlen` | Length of `mixvar` array. If zero, no mixed data is present.
-    `datatype` | Datatype of variable. One of the predefined Silo data types.
-    `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types: `DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the variable.
+  `meshname` | Name of the mesh associated with this variable (written with either DBPutUcdmesh).
+  `var` | Array of length `nels` containing the values associated with this variable.
+  `nels` | Number of elements in this variable.
+  `mixvar` | Array of length `mixlen` containing the mixed-data values associated with this variable. If `mixlen` is zero, this value is ignored.
+  `mixlen` | Length of `mixvar` array. If zero, no mixed data is present.
+  `datatype` | Datatype of variable. One of the predefined Silo data types.
+  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types: DB_NODECENT, DB_EDGECENT, `DB_FACECENT` or `DB_ZONECENT`.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
 
 * **Returned value:**
@@ -3088,7 +2990,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   DBPutUcdvar1 writes a variable associated with an `UCD` mesh into a Silo file.
   Note that variables will be either node-centered or zone-centered.
   Other information can also be included.
-  This function is useful for writing scalar fields, whereas the companion function, `DBPutUcdvar`, is appropriate for writing vector and tensor fields.
+  This function is useful for writing scalar fields, whereas the companion function, DBPutUcdvar, is appropriate for writing vector and tensor fields.
 
   Notes:
 
@@ -3100,7 +3002,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBGetUcdvar()`
 
 * **Summary:** Read a `UCD` variable from a Silo database.
-
 
 * **C Signature:**
 
@@ -3116,11 +3017,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the variable.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the variable.
 
 
 * **Returned value:**
@@ -3146,7 +3046,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a `CSG` mesh object to a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -3169,21 +3068,20 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `name` | Name to associate with this `DBcsgmesh` object
-    `ndims` | Number of spatial and topological dimensions of the `CSG` mesh object
-    `nbounds` | Number of boundaries in the `CSG` mesh description.
-    `typeflags` | Integer array of length `nbounds` of type information for each boundary. This is used to encode various information about the type of each boundary such as, for example, plane, sphere, cone, general quadric, etc as well as the number of coefficients in the representation of the boundary. For more information, see the description, below.
-    `bndids` | Optional integer array of length `nbounds` which are the explicit integer identifiers for each boundary. It is these identifiers that are used in expressions defining a region of the `CSG` mesh. If the caller passes `NULL` for this argument, a natural numbering of boundaries is assumed. That is, the boundary occurring at position i, starting from zero, in the list of boundaries here is identified by the integer i.
-    `coeffs` | Array of length `lcoeffs` of coefficients used in the representation of each boundary or, if the boundary is a transformed copy of another boundary, the coefficients of the transformation. In the case where a given boundary is a transformation of another boundary, the first entry in the `coeffs` entries for the boundary is the (integer) identifier for the referenced boundary. Consequently, if the `datatype` for `coeffs` is `DB_FLOAT`, there is an upper limit of about 16.7 million (2^24) boundaries that can be referenced in this way.
-    `lcoeffs` | Length of the `coeffs` array.
-    `datatype` | The data type of the data in the `coeffs` array.
-    `zonel_name` | Name of `CSG` zonelist to be associated with this `CSG` mesh object
-    `extents` | Array of length 2*ndims of spatial extents, xy(z)-minimums followed by xy(z)-maximums.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the `CSG` mesh object written into the Silo file. Use `NULL` if there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `name` | Name to associate with this `DBcsgmesh` object
+  `ndims` | Number of spatial and topological dimensions of the `CSG` mesh object
+  `nbounds` | Number of boundaries in the `CSG` mesh description.
+  `typeflags` | Integer array of length `nbounds` of type information for each boundary. This is used to encode various information about the type of each boundary such as, for example, plane, sphere, cone, general quadric, etc as well as the number of coefficients in the representation of the boundary. For more information, see the description, below.
+  `bndids` | Optional integer array of length `nbounds` which are the explicit integer identifiers for each boundary. It is these identifiers that are used in expressions defining a region of the `CSG` mesh. If the caller passes `NULL` for this argument, a natural numbering of boundaries is assumed. That is, the boundary occurring at position i, starting from zero, in the list of boundaries here is identified by the integer i.
+  `coeffs` | Array of length `lcoeffs` of coefficients used in the representation of each boundary or, if the boundary is a transformed copy of another boundary, the coefficients of the transformation. In the case where a given boundary is a transformation of another boundary, the first entry in the `coeffs` entries for the boundary is the (integer) identifier for the referenced boundary. Consequently, if the `datatype` for `coeffs` is DB_FLOAT, there is an upper limit of about 16.7 million (2^24) boundaries that can be referenced in this way.
+  `lcoeffs` | Length of the `coeffs` array.
+  `datatype` | The data type of the data in the `coeffs` array.
+  `zonel_name` | Name of `CSG` zonelist to be associated with this `CSG` mesh object
+  `extents` | Array of length 2*ndims of spatial extents, xy(z)-minimums followed by xy(z)-maximums.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the `CSG` mesh object written into the Silo file. Use `NULL` if there are no options.
 
 
 * **Returned value:**
@@ -3206,9 +3104,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The table below describes how to use the `typeflags` argument to define various kinds of boundaries in 3 dimensions.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * typeflag|num-coeffs|coefficients and equation
+  typeflag|num-coeffs|coefficients and equation
     :---|:---|:---
   DBCSG_QUADRIC_G|10|
   DBCSG_SPHERE_PR|4|
@@ -3236,9 +3134,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The table below defines an analogous set of `typeflags` for creating boundaries in two dimensions.
   .
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * typeflag|num-coeffs|coefficients and equation
+  typeflag|num-coeffs|coefficients and equation
     :---|:---|:---
   DBCSG_QUADRATIC_G|6|
   DBCSG_CIRCLE_PR|3|
@@ -3258,22 +3156,22 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   By replacing the '=' in the equation for a boundary with either a '<' or a '>', whole regions in 2 or 3D space can be defined using these boundaries.
   These regions represent the set of all points that satisfy the inequality.
-  In addition, regions can be combined to form new regions by unions, intersections and differences as well other operations (See `DBPutCSGZonelist`).
+  In addition, regions can be combined to form new regions by unions, intersections and differences as well other operations (See DBPutCSGZonelist).
 
   In this call, only the analytic boundaries used in the expressions to define the regions are written.
   The expressions defining the regions themselves are written in a separate call, `DBPutCSGZonelist`.
 
   If you compare this call to write a `CSG` mesh to a Silo file with a similar call to write a `UCD` mesh, you will notice that the boundary list here plays a role similar to that of the nodal coordinates of a `UCD` mesh.
-  For the `UCD` mesh, the basic geometric primitives are points (nodes) and a separate call, `DBPutZonelist`, is used to write out the information that defines how points (nodes) are combined to form the zones of the mesh.
+  For the `UCD` mesh, the basic geometric primitives are points (nodes) and a separate call, DBPutZonelist, is used to write out the information that defines how points (nodes) are combined to form the zones of the mesh.
 
-  Similarly, here the basic geometric primitives are analytic boundaries and a separate call, `DBPutCSGZonelist`, is used to write out the information that defines how the boundaries are combined to form regions of the mesh.
+  Similarly, here the basic geometric primitives are analytic boundaries and a separate call, DBPutCSGZonelist, is used to write out the information that defines how the boundaries are combined to form regions of the mesh.
 
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of the `DBoptlist` construct.
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Option Name|Data Type|Option Meaning|Default Value
+  Option Name|Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value|0
   DBOPT_TIME|float|Problem time value.|0.0
@@ -3303,7 +3201,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Get a `CSG` mesh object from a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -3318,11 +3215,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `meshname` | Name of the `CSG` mesh object to read
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `meshname` | Name of the `CSG` mesh object to read
 
 
 * **Returned value:**
@@ -3341,7 +3237,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBPutCSGZonelist()`
 
 * **Summary:** Put a `CSG` zonelist object in a Silo file.
-
 
 * **C Signature:**
 
@@ -3365,23 +3260,22 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `name` | Name to associate with the `DBcsgzonelist` object
-    `nregs` | The number of regions in the regionlist.
-    `typeflags` | Integer array of length `nregs` of type information for each region. Each entry in this array is one of either `DB_INNER`, `DB_OUTER`, `DB_ON`, `DB_XFORM`, `DB_SWEEP`, `DB_UNION`, `DB_INTERSECT`, and `DB_DIFF`.
-    `The symbols, DB_INNER, DB_OUTER, DB_ON, DB_XFORM and DB_SWEEP represent unary operators applied to the referenced region (or boundary). The symbols DB_UNION, DB_INTERSECT, and DB_DIFF represent binary operators applied to two referenced regions.` | For the unary operators, `DB_INNER` forms a region from a boundary (See `DBPutCsgmesh`) by replacing the '=' in the equation representing the boundary with '<'. Likewise, `DB_OUTER` forms a region from a boundary by replacing the '=' in the equation representing the boundary with '>'. Finally, `DB_ON` forms a region (of topological dimension one less than the mesh) by leaving the '=' in the equation representing the boundary as an '='. In the case of `DB_INNER`, `DB_OUTER` and `DB_ON`, the corresponding entry in the `leftids` array is a reference to a boundary in the boundary list (See `DBPutCsgmesh`).
-    `For the unary operator, DB_XFORM, the corresponding entry in the leftids array is a reference to a region to be transformed while the corresponding entry in the rightids array is the index into the xform array of the row-by-row coefficients of the affine transform.` | The unary operator `DB_SWEEP` is not yet implemented.
-    `leftids` | Integer array of length `nregs` of references to other regions in the regionlist or boundaries in the boundary list (See `DBPutCsgmesh`). Each referenced region in the `leftids` array forms the left operand of a binary expression (or single operand of a unary expression) involving the referenced region or boundary.
-    `rightids` | Integer array of length `nregs` of references to other regions in the regionlist. Each referenced region in the `rightids` array forms the right operand of a binary expression involving the region or, for regions which are copies of other regions with a transformation applied, the starting index into the `xforms` array of the row-by-row, affine transform coefficients. If for a given region no right reference is appropriate, put a value of '-1' into this array for the given region.
-    `xforms` | Array of length `lxforms` of row-by-row affine transform coefficients for those regions that are copies of other regions except with a transformation applied. In this case, the entry in the `leftids` array indicates the region being copied and transformed and the entry in the `rightids` array is the starting index into this `xforms` array for the transform coefficients. This argument may be `NULL`.
-    `lxforms` | Length of the `xforms` array. This argument may be zero if `xforms` is `NULL`.
-    `datatype` | The data type of the values in the `xforms` array. Ignored if `xforms` is `NULL`.
-    `nzones` | The number of zones in the `CSG` mesh. A zone is really just a completely defined region.
-    `zonelist` | Integer array of length `nzones` of the regions in the regionlist that form the actual zones of the `CSG` mesh.
-    `optlist` | Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use `NULL` if there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `name` | Name to associate with the `DBcsgzonelist` object
+  `nregs` | The number of regions in the regionlist.
+  `typeflags` | Integer array of length `nregs` of type information for each region. Each entry in this array is one of either DB_INNER, DB_OUTER, DB_ON, DB_XFORM, DB_SWEEP, DB_UNION, DB_INTERSECT, and `DB_DIFF`.
+  `The symbols, DB_INNER, DB_OUTER, DB_ON, DB_XFORM and DB_SWEEP represent unary operators applied to the referenced region (or boundary). The symbols DB_UNION, DB_INTERSECT, and DB_DIFF represent binary operators applied to two referenced regions.` | For the unary operators, `DB_INNER` forms a region from a boundary (See DBPutCsgmesh) by replacing the '=' in the equation representing the boundary with '<'. Likewise, `DB_OUTER` forms a region from a boundary by replacing the '=' in the equation representing the boundary with '>'. Finally, `DB_ON` forms a region (of topological dimension one less than the mesh) by leaving the '=' in the equation representing the boundary as an '='. In the case of DB_INNER, `DB_OUTER` and DB_ON, the corresponding entry in the `leftids` array is a reference to a boundary in the boundary list (See DBPutCsgmesh).
+  `For the unary operator, DB_XFORM, the corresponding entry in the leftids array is a reference to a region to be transformed while the corresponding entry in the rightids array is the index into the xform array of the row-by-row coefficients of the affine transform.` | The unary operator `DB_SWEEP` is not yet implemented.
+  `leftids` | Integer array of length `nregs` of references to other regions in the regionlist or boundaries in the boundary list (See DBPutCsgmesh). Each referenced region in the `leftids` array forms the left operand of a binary expression (or single operand of a unary expression) involving the referenced region or boundary.
+  `rightids` | Integer array of length `nregs` of references to other regions in the regionlist. Each referenced region in the `rightids` array forms the right operand of a binary expression involving the region or, for regions which are copies of other regions with a transformation applied, the starting index into the `xforms` array of the row-by-row, affine transform coefficients. If for a given region no right reference is appropriate, put a value of '-1' into this array for the given region.
+  `xforms` | Array of length `lxforms` of row-by-row affine transform coefficients for those regions that are copies of other regions except with a transformation applied. In this case, the entry in the `leftids` array indicates the region being copied and transformed and the entry in the `rightids` array is the starting index into this `xforms` array for the transform coefficients. This argument may be `NULL`.
+  `lxforms` | Length of the `xforms` array. This argument may be zero if `xforms` is `NULL`.
+  `datatype` | The data type of the values in the `xforms` array. Ignored if `xforms` is `NULL`.
+  `nzones` | The number of zones in the `CSG` mesh. A zone is really just a completely defined region.
+  `zonelist` | Integer array of length `nzones` of the regions in the regionlist that form the actual zones of the `CSG` mesh.
+  `optlist` | Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use `NULL` if there are no options.
 
 
 * **Returned value:**
@@ -3399,9 +3293,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   For example, given the boundary for a sphere, we can create a region by taking the inside (DB_INNER) of that boundary or by taking the outside (DB_OUTER). In addition, regions can also be created by boolean operations (union, intersect, diff) on other regions.
   The table below summarizes how to construct regions using the `typeflags` argument.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * op. symbol name|type|meaning
+  op. symbol name|type|meaning
     :---|:---|:---
   DBCSG_INNER|unary|specifies the region created by all points satisfying the equation defining the boundary with '<' replacing '='.<br>left operand indicates the boundary, right operand ignored
   DBCSG_OUTER|unary|specifies the region created by all points satisfying the equation defining the boundary with '>' replacing '='.<br>left operand indicates the boundary, right operand ignored
@@ -3424,9 +3318,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of the `DBoptlist` construct.
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Option Name|Data Type|Option Meaning|Default Value
+  Option Name|Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_REGNAMES|char **|Array of `nregs` character strings defining the names of the individual regions.|NULL
   DBOPT_ZONENAMES|char**|Array of `nzones` character strings defining the names of individual zones.|NULL
@@ -3444,9 +3338,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The table below describes the contents of the boundary list (written in the `DBPutCsgmesh` call)
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * typeflags|id|coefficients|name (optional)
+  typeflags|id|coefficients|name (optional)
     :---|:---|:---|:---
   DBCSG_SPHERE_PR|0|0.0, 0.0, 0.0, 5.0|"housing outer shell"
   DBCSG_PLANE_X|1|-2.5|"housing front"
@@ -3460,9 +3354,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The code below writes this `CSG` mesh to a silo file
 
-  int *typeflags={DBCSG_SPHERE_PR, `DBCSG_PLANE_X`, `DBCSG_PLANE_X`,
+  int *typeflags={DBCSG_SPHERE_PR, DBCSG_PLANE_X, DBCSG_PLANE_X,
 
-  DBCSG_CYLINDER_PPR, `DBCSG_SPHERE_PR`, `DBCSG_SPHERE_PR`};
+  DBCSG_CYLINDER_PPR, DBCSG_SPHERE_PR, DBCSG_SPHERE_PR};
 
   float *coeffs = {0.
   0, 0.
@@ -3500,15 +3394,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   DBPutCsgmesh(dbfile, "csgmesh", 3, typeflags, NULL,
 
-  coeffs, 25, `DB_FLOAT`, "csgzl", NULL);
+  coeffs, 25, DB_FLOAT, "csgzl", NULL);
 
   
 
   The table below describes the contents of the regionlist, written in the `DBPutCSGZonelist` call.
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * typeflags|regid|leftids|rightids|notes
+  typeflags|regid|leftids|rightids|notes
     :---|:---|:---|:---|:---
   DBCSG_INNER|0|0|-1|creates inner sphere region from boundary 0
   DBCSG_INNER|1|1|-1|creates front half-space region from boundary 1
@@ -3533,11 +3427,11 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   int `nregs` = 11;
 
-  int *typeflags={DBCSG_INNER, `DBCSG_INNER`, `DBCSG_OUTER`, `DBCSG_INNER`,
+  int *typeflags={DBCSG_INNER, DBCSG_INNER, DBCSG_OUTER, DBCSG_INNER,
 
-  DBCSG_INTERSECT, `DBCSG_INTERSECT`, `DBCSG_DIFF`,
+  DBCSG_INTERSECT, DBCSG_INTERSECT, DBCSG_DIFF,
 
-  DBCSG_INNER, `DBCSG_INNER`, `DBCSG_INTERSECT`, `DBCSG_INTERSECT`};
+  DBCSG_INNER, DBCSG_INNER, DBCSG_INTERSECT, DBCSG_INTERSECT};
 
   int *leftids={0,1,2,3,0,4,5,4,5,7,9};
 
@@ -3551,7 +3445,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   DBPutCSGZonelist(dbfile, "csgzl", nregs, typeflags,
 
-  leftids, rightids, NULL, 0, `DB_INT`,
+  leftids, rightids, NULL, 0, DB_INT,
 
   nzones, zonelist, NULL);
 
@@ -3563,7 +3457,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBGetCSGZonelist()`
 
 * **Summary:** Read a `CSG` mesh zonelist from a Silo file
-
 
 * **C Signature:**
 
@@ -3580,11 +3473,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `zlname` | Name of the `CSG` mesh zonelist object to read
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `zlname` | Name of the `CSG` mesh zonelist object to read
 
 
 * **Returned value:**
@@ -3603,7 +3495,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBPutCsgvar()`
 
 * **Summary:** Write a `CSG` mesh variable to a Silo file
-
 
 * **C Signature:**
 
@@ -3627,19 +3518,18 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `vname` | The name to be associated with this `DBcsgvar` object
-    `meshname` | The name of the `CSG` mesh this variable is associated with
-    `nvars` | The number of subvariables comprising this `CSG` variable
-    `varnames` | Array of length `nvars` containing the names of the subvariables
-    `vars` | Array of pointers to variable data
-    `nvals` | Number of values in each of the `vars` arrays
-    `datatype` | The type of data in the `vars` arrays (e.g. `DB_FLOAT`, `DB_DOUBLE`)
-    `centering` | The `centering` of the `CSG` variable (DB_ZONECENT or `DB_BNDCENT`)
-    `optlist` | Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use `NULL` if there are no options
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `vname` | The name to be associated with this `DBcsgvar` object
+  `meshname` | The name of the `CSG` mesh this variable is associated with
+  `nvars` | The number of subvariables comprising this `CSG` variable
+  `varnames` | Array of length `nvars` containing the names of the subvariables
+  `vars` | Array of pointers to variable data
+  `nvals` | Number of values in each of the `vars` arrays
+  `datatype` | The type of data in the `vars` arrays (e.g. DB_FLOAT, DB_DOUBLE)
+  `centering` | The `centering` of the `CSG` variable (DB_ZONECENT or DB_BNDCENT)
+  `optlist` | Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use `NULL` if there are no options
 
 
 * **Description:**
@@ -3653,22 +3543,22 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Other information can also be included via the optlist:
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_LABEL|char *|Character strings defining the label associated with this variable. |NULL
   DBOPT_TIME|float|Problem time value.|0.0
   DBOPT_DTIME|double|Problem time value.|0.0
   DBOPT_UNITS|char *|Character string defining the units associated with this variable.|NULL
-  DBOPT_USESPECMF|int|Boolean (DB_OFF or `DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
+  DBOPT_USESPECMF|int|Boolean (DB_OFF or DB_ON) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
   DBOPT_ASCII_LABEL|int|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
   DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
   DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See "DBOPT_REGION_PNAMES" on page `221`.|NULL
   DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is `DB_MISSING_VALUE_NOT_SET`|DB_MISSING_VALUE_NOT_SET
+  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
 
 
   
@@ -3679,7 +3569,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBGetCsgvar()`
 
 * **Summary:** Read a `CSG` mesh variable from a Silo file
-
 
 * **C Signature:**
 
@@ -3695,11 +3584,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `varname` | Name of `CSG` variable object to read
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `varname` | Name of `CSG` variable object to read
 
 
 * **Returned value:**
@@ -3718,7 +3606,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 ### `DBPutMaterial()`
 
 * **Summary:** Write a material data object into a Silo file.
-
 
 * **C Signature:**
 
@@ -3744,24 +3631,23 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the material data object.
-    `meshname` | Name of the mesh associated with this information.
-    `nmat` | Number of materials.
-    `matnos` | Array of length `nmat` containing material numbers.
-    `matlist` | Array whose dimensions are defined by `dims` and `ndims`. It contains the material numbers for each single-material (non-mixed) zone, and indices into the mixed data arrays for each multi-material (mixed) zone. A negative value indicates a mixed zone, and its absolute value is used as an index into the mixed data arrays.
-    `dims` | Array of length `ndims` which defines the dimensionality of the `matlist` array.
-    `ndims` | Number of dimensions in `matlist` array.
-    `mix_next` | Array of length `mixlen` of indices into the mixed data arrays (one-origin).
-    `mix_mat` | Array of length `mixlen` of material numbers for the mixed zones.
-    `mix_zone` | Optional array of length `mixlen` of back pointers to originating zones. The origin is determined by `DBOPT_ORIGIN`. Even if `mixlen` > 0, this argument is optional.
-    `mix_vf` | Array of length `mixlen` of volume fractions for the mixed zones. Note, this can actually be either single- or double-precision. Specify actual type in `datatype`.
-    `mixlen` | Length of mixed data arrays (or zero if no mixed data is present). If `mixlen` > 0, then the "mix_" arguments describing the mixed data arrays must be non-NULL.
-    `datatype` | Volume fraction data type. One of the predefined Silo data types.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the material object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the material data object.
+  `meshname` | Name of the mesh associated with this information.
+  `nmat` | Number of materials.
+  `matnos` | Array of length `nmat` containing material numbers.
+  `matlist` | Array whose dimensions are defined by `dims` and `ndims`. It contains the material numbers for each single-material (non-mixed) zone, and indices into the mixed data arrays for each multi-material (mixed) zone. A negative value indicates a mixed zone, and its absolute value is used as an index into the mixed data arrays.
+  `dims` | Array of length `ndims` which defines the dimensionality of the `matlist` array.
+  `ndims` | Number of dimensions in `matlist` array.
+  `mix_next` | Array of length `mixlen` of indices into the mixed data arrays (one-origin).
+  `mix_mat` | Array of length `mixlen` of material numbers for the mixed zones.
+  `mix_zone` | Optional array of length `mixlen` of back pointers to originating zones. The origin is determined by `DBOPT_ORIGIN`. Even if `mixlen` > 0, this argument is optional.
+  `mix_vf` | Array of length `mixlen` of volume fractions for the mixed zones. Note, this can actually be either single- or double-precision. Specify actual type in `datatype`.
+  `mixlen` | Length of mixed data arrays (or zero if no mixed data is present). If `mixlen` > 0, then the "mix_" arguments describing the mixed data arrays must be non-NULL.
+  `datatype` | Volume fraction data type. One of the predefined Silo data types.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the material object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
 
 * **Returned value:**
@@ -3773,7 +3659,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 * **Description:**
 
   Note that material functionality, even mixing materials, can now be handled, often more conveniently and efficiently, via a Mesh Region Grouping (MRG) tree.
-  Users are encouraged to consider an `MRG` tree as an alternative to `DBPutMaterial`(). See "DBMakeMrgtree" on page `196`.
+  Users are encouraged to consider an `MRG` tree as an alternative to `DBPutMaterial()`. See "DBMakeMrgtree" on page `196`.
 
   The `DBPutMaterial` function writes a material data object into the current open Silo file.
   The minimum required information for a material data object is supplied via the standard arguments to this function.
@@ -3784,9 +3670,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_LABEL|char *|Character string defining the label associated with material data. |NULL
@@ -3840,7 +3726,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Read material data from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -3855,11 +3740,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `mat_name` | Name of the material variable to read.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `mat_name` | Name of the material variable to read.
 
 
 * **Returned value:**
@@ -3885,7 +3769,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a material species data object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -3909,23 +3792,22 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the material species data object.
-    `matname` | Name of the material object with which the material species object is associated.
-    `nmat` | Number of materials in the material object referenced by `matname`.
-    `nmatspec` | Array of length `nmat` containing the number of species associated with each material.
-    `speclist` | Array of dimension defined by `ndims` and `dims` of indices into the `species_mf` array. Each entry corresponds to one zone. If the zone is clean, the entry in this array must be positive or zero. A positive value is a 1-origin index into the `species_mf` array. A zero can be used if the material in this zone contains only one species. If the zone is mixed, this value is negative and is used to index into the `mix_spec` array in a manner analogous to the mix_mat array of the `DBPutMaterial`() call.
-    `dims` | Array of length `ndims` that defines the shape of the `speclist` array. To create an empty matspecies object, set every entry of `dims` to zero. See description below.
-    `ndims` | Number of dimensions in the `speclist` array.
-    `nspecies_mf` | Length of the `species_mf` array. To create a homogeneous matspecies object (which is not quite empty), set `nspecies_mf` to zero. See description below.
-    `species_mf` | Array of length `nspecies_mf` containing mass fractions of the material species. Note, this can actually be either single or double precision. Specify type in `datatype` argument.
-    `mix_spec` | Array of length `mixlen` containing indices into the `species_mf` array. These are used for mixed zones. For every index j in this array, mix_list[j] corresponds to the `DBmaterial` structure's material mix_mat[j] and zone mix_zone[j].
-    `mixlen` | Length of the `mix_spec` array.
-    `datatype` | The `datatype` of the mass fraction data in `species_mf`. One of the predefined Silo data types.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the material species data object.
+  `matname` | Name of the material object with which the material species object is associated.
+  `nmat` | Number of materials in the material object referenced by `matname`.
+  `nmatspec` | Array of length `nmat` containing the number of species associated with each material.
+  `speclist` | Array of dimension defined by `ndims` and `dims` of indices into the `species_mf` array. Each entry corresponds to one zone. If the zone is clean, the entry in this array must be positive or zero. A positive value is a 1-origin index into the `species_mf` array. A zero can be used if the material in this zone contains only one species. If the zone is mixed, this value is negative and is used to index into the `mix_spec` array in a manner analogous to the mix_mat array of the `DBPutMaterial()` call.
+  `dims` | Array of length `ndims` that defines the shape of the `speclist` array. To create an empty matspecies object, set every entry of `dims` to zero. See description below.
+  `ndims` | Number of dimensions in the `speclist` array.
+  `nspecies_mf` | Length of the `species_mf` array. To create a homogeneous matspecies object (which is not quite empty), set `nspecies_mf` to zero. See description below.
+  `species_mf` | Array of length `nspecies_mf` containing mass fractions of the material species. Note, this can actually be either single or double precision. Specify type in `datatype` argument.
+  `mix_spec` | Array of length `mixlen` containing indices into the `species_mf` array. These are used for mixed zones. For every index j in this array, mix_list[j] corresponds to the `DBmaterial` structure's material mix_mat[j] and zone mix_zone[j].
+  `mixlen` | Length of the `mix_spec` array.
+  `datatype` | The `datatype` of the mass fraction data in `species_mf`. One of the predefined Silo data types.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
 
 
 * **Returned value:**
@@ -3967,9 +3849,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The material species object would be defined such that nmat=3 and nmatspec={2,5,6}. If the composition of Brass, T-1 Steel and O-1 Steel is constant over the whole mesh, the `species_mf` array would contain just 2 + 5 + 6 = 13 entries...
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * species_mf|Brass (2 values)|.35
+  species_mf|Brass (2 values)|.35
     :---|:---|:---
   element|.65|Zn
   1-origin index|Cu|2
@@ -3978,9 +3860,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   T-1 Steel
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * (5 values starting at offset 3)|.007|.18|.04|.001
+  (5 values starting at offset 3)|.007|.18|.04|.001
     :---|:---|:---|:---|:---
   .763|C|W|Cr|V
   Fe|4|5|6|7
@@ -3989,9 +3871,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   O-1 Steel
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * (6 values starting at offset 8)|.009|.014|.005|.005|.005
+  (6 values starting at offset 8)|.009|.014|.005|.005|.005
     :---|:---|:---|:---|:---|:---
   .962|C|Mn|Cr|Ni|W
   Fe|9|10|11|12|13
@@ -4018,10 +3900,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Finally, when zones contain mixing materials the `speclist` array needs to specify the `species_mf` entries for each of the materials in the zone.
   In this case, negative values are assigned to the `speclist` entries for these zones and the linked-list like structure of the associated material (e.
   g.
-  mix_next, mix_mat, mix_vf, mix_zone args of the `DBPutMaterial`() call) is used to traverse them.
+  mix_next, mix_mat, mix_vf, mix_zone args of the `DBPutMaterial()` call) is used to traverse them.
 
   To create a completely empty matspecies object, the caller needs to pass a `dims` array containing all zeros.
-  In this case, the `speclist` and mix_speclist args are never dereferenced and no data for these are written to the file or returned by a subsequent `DBGetMatspecies`() call.
+  In this case, the `speclist` and mix_speclist args are never dereferenced and no data for these are written to the file or returned by a subsequent `DBGetMatspecies()` call.
   Alternatively, the caller may have what amounts to an empty species object due to nspecies_mf==0.
   However, in that situation, the caller is unfortunately still required to pass fully populated `speclist` and, if mixing is involved, mix_speclist arrays.
   Worse, the only valid values in these arrays are zeros.
@@ -4031,9 +3913,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_MAJORORDER|int|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
   DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
@@ -4051,7 +3933,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Read material species data from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -4067,11 +3948,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `ms_name` | Name of the material species data to read.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `ms_name` | Name of the material species data to read.
 
 
 * **Returned value:**
@@ -4097,7 +3977,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Write a derived variable definition(s) object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -4119,16 +3998,15 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the derived variable definition(s) object.
-    `ndefs` | number of derived variable definitions.
-    `names` | Array of length `ndefs` of derived variable names
-    `types` | Array of length `ndefs` of derived variable `types` such as `DB_VARTYPE_SCALAR`, `DB_VARTYPE_VECTOR`, `DB_VARTYPE_TENSOR`, `DB_VARTYPE_SYMTENSOR`, `DB_VARTYPE_ARRAY`, `DB_VARTYPE_MATERIAL`, `DB_VARTYPE_SPECIES`, `DB_VARTYPE_LABEL`
-    `defns` | Array of length `ndefs` of derived variable definitions.
-    `optlist` | Array of length `ndefs` pointers to option list structures containing additional information to be included with each derived variable. The options available are the same as those available for the respective variables.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the derived variable definition(s) object.
+  `ndefs` | number of derived variable definitions.
+  `names` | Array of length `ndefs` of derived variable names
+  `types` | Array of length `ndefs` of derived variable `types` such as DB_VARTYPE_SCALAR, DB_VARTYPE_VECTOR, DB_VARTYPE_TENSOR, DB_VARTYPE_SYMTENSOR, DB_VARTYPE_ARRAY, DB_VARTYPE_MATERIAL, DB_VARTYPE_SPECIES, DB_VARTYPE_LABEL
+  `defns` | Array of length `ndefs` of derived variable definitions.
+  `optlist` | Array of length `ndefs` pointers to option list structures containing additional information to be included with each derived variable. The options available are the same as those available for the respective variables.
 
 
 * **Returned value:**
@@ -4153,9 +4031,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The table below illustrates examples of the contents of the various array arguments to `DBPutDefvars` for a case that defines 6 derived variables.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * 0|names|types|defns
+  0|names|types|defns
     :---|:---|:---|:---
   1|"totaltemp"|DB_VARTYPE_SCALAR|"nodet+zonetemp"
   2|"<stress/sz>"|DB_VARTYPE_SCALAR|"-<stress/sx>-<stress/sy>"
@@ -4183,7 +4061,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Get a derived variables definition object from a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -4198,11 +4075,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | The `name` of the `DBdefvars` object to read
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | The `name` of the `DBdefvars` object to read
 
 
 * **Returned value:**
@@ -4228,7 +4104,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Inquire the mesh name associated with a variable.
 
-
 * **C Signature:**
 
   ```
@@ -4244,12 +4119,11 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Variable name.
-    `meshname` | Returned mesh name. The caller must allocate space for the returned name. The maximum space used is `256` characters, including the `NULL` terminator.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Variable name.
+  `meshname` | Returned mesh name. The caller must allocate space for the returned name. The maximum space used is `256` characters, including the `NULL` terminator.
 
 
 * **Returned value:**
@@ -4270,7 +4144,6 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Summary:** Inquire the mesh type of a mesh.
 
-
 * **C Signature:**
 
   ```
@@ -4285,11 +4158,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `meshname` | Mesh name.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `meshname` | Mesh name.
 
 
 * **Returned value:**
@@ -4303,9 +4175,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBInqMeshtype` function returns the type of the given mesh.
   The value returned is described in the following table:
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Mesh Type|Returned Value
+  Mesh Type|Returned Value
     :---|:---
   Multi-Block|DB_MULTIMESH
   UCD|DB_UCDMESH

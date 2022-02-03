@@ -2,11 +2,11 @@
 
 Poor-Man's Parallel I/O
 
-Individual pieces of mesh created with a number of `DBPutXxxmesh`() calls can be assembled together into larger, multi-block objects.
+Individual pieces of mesh created with a number of `DBPutXxxmesh()` calls can be assembled together into larger, multi-block objects.
 Likewise for variables and materials defined on these meshes.
 
 In Silo, multi-block objects are really just lists of all the individual pieces of a larger, coherent object.
-For example, a multi-mesh object is really just a long list of object names, each name being the string passed as the name argument to a `DBPutXxxmesh`() call.
+For example, a multi-mesh object is really just a long list of object names, each name being the string passed as the name argument to a `DBPutXxxmesh()` call.
 
 A key feature of multi-block object is that references to the individual pieces include the option of specifying the name of the Silo file in which a piece is stored.
 This option is invoked when the colon operator (':') appears in the name of an individual piece.
@@ -29,7 +29,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Write a multi-block mesh object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -49,15 +48,14 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the multi-block mesh object.
-    `nmesh` | Number of meshes pieces (blocks) in this multi-block object.
-    `meshnames` | Array of length `nmesh` containing pointers to the names of each of the mesh blocks written with a `DBPut`<whatever>mesh() call. See below for description of how to populate `meshnames` when the pieces are in different files as well as `DBOPT_MB_FILE`/BLOCK_NS options to use a printf-style namescheme for large `nmesh`  in lieu of explicitly enumerating them here.
-    `meshtypes` | Array of length `nmesh` containing the type of each mesh block such as `DB_QUAD_RECT`, `DB_QUAD_CURV`, `DB_UCDMESH`, `DB_POINTMESH`, and `DB_CSGMESH`. Be sure to see description, below, for `DBOPT_MB_BLOCK_TYPE` option to use single, constant value when all pieces are the same type.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the multi-block mesh object.
+  `nmesh` | Number of meshes pieces (blocks) in this multi-block object.
+  `meshnames` | Array of length `nmesh` containing pointers to the names of each of the mesh blocks written with a DBPut<whatever>mesh() call. See below for description of how to populate `meshnames` when the pieces are in different files as well as DBOPT_MB_FILE/BLOCK_NS options to use a printf-style namescheme for large `nmesh`  in lieu of explicitly enumerating them here.
+  `meshtypes` | Array of length `nmesh` containing the type of each mesh block such as DB_QUAD_RECT, DB_QUAD_CURV, DB_UCDMESH, DB_POINTMESH, and `DB_CSGMESH`. Be sure to see description, below, for `DBOPT_MB_BLOCK_TYPE` option to use single, constant value when all pieces are the same type.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
 
 
 * **Returned value:**
@@ -104,7 +102,7 @@ The functions described in this section of the manual include...
   This is particularly important for meshes consisting of O(105) or more blocks because it saves substantial memory and I/O time.
   See documentation on "DBMakeNamescheme" on page 2-209 for how to specify nameschemes.
 
-  Note, however, that with the `DBOPT_MB_FILE`/BLOCK_NS options, you are specifying only the string that a reader will later use in a call to `DBMakeNamescheme`() to create a namescheme object suitable for generating the `meshnames` and not the namescheme object itself.
+  Note, however, that with the DBOPT_MB_FILE/BLOCK_NS options, you are specifying only the string that a reader will later use in a call to `DBMakeNamescheme()` to create a namescheme object suitable for generating the `meshnames` and not the namescheme object itself.
 
   For convenience, two namescheme options are supported.
   One namescheme maps block numbers to filenames.
@@ -112,9 +110,9 @@ The functions described in this section of the manual include...
   A reader is required to then combine both to generate the complete block `name` for each mesh block.
   Optionally and where appropriate, one can specify a block namescheme only.
   External array references may be used in the nameschemes.
-  Any such array names found in the namescheme are assumed to be the names of simple, 1D, integer arrays written with a `DBWrite`() call and existing in the same directory as the multi-block object . Finally, keep in mind that in the nameschemes, blocks are numbered starting from zero.
+  Any such array names found in the namescheme are assumed to be the names of simple, 1D, integer arrays written with a `DBWrite()` call and existing in the same directory as the multi-block object . Finally, keep in mind that in the nameschemes, blocks are numbered starting from zero.
 
-  If you are using the namescheme options and have `EMPTY` blocks, since the `meshnames` argument is NULL, you can use the `DBOPT_MB_EMPTY_COUNT`/LIST options to explicitly enumerate any empty blocks instead of having to incroporate them into your nameschemes.
+  If you are using the namescheme options and have `EMPTY` blocks, since the `meshnames` argument is NULL, you can use the DBOPT_MB_EMPTY_COUNT/LIST options to explicitly enumerate any empty blocks instead of having to incroporate them into your nameschemes.
 
   Similarly, when the mesh consists of blocks of all the same type, you may pass `NULL` for the `meshtypes` argumnt and instead use the `DBOPT_MB_BLOCK_TYPE` option to specify a single, constant block type for all blocks.
   This option can result in important savings for large numbers of blocks.
@@ -127,9 +125,9 @@ The functions described in this section of the manual include...
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_BLOCKORIGIN|int|The origin of the block numbers.|1
   DBOPT_CYCLE|int|Problem cycle value.|0
@@ -148,7 +146,7 @@ The functions described in this section of the manual include...
   DBOPT_MB_FILE_NS|char*|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|NULL
   DBOPT_MB_BLOCK_NS|char*|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|NULL
   DBOPT_MB_EMPTY_LIST|int*|When namescheme options are used, there is no `meshnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|NULL
-  DBOPT_MB_EMPTY_COUNT|int|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
+  DBOPT_MB_EMPTY_COUNT|int|Number of entries in the argument to DBOPT_MB_EMPTY_LIST|0
   The options specified below have been deprecated. Use Mesh Region Group (MRG) trees instead.|||
   DBOPT_GROUPORIGIN|int|The origin of the group numbers.|1
   DBOPT_NGROUPS|int|The total number of groups in this multimesh object.|0
@@ -160,9 +158,9 @@ The functions described in this section of the manual include...
 
   
 
-  There is a class of options for `DBMulti`- objects that is `VERY` IMPORTANT in helping to accelerate performance in down-stream post-processing tools.
+  There is a class of options for DBMulti- objects that is `VERY` IMPORTANT in helping to accelerate performance in down-stream post-processing tools.
   We call these Down-stream Performance Options.
-  In order of utility, these options are `DBOPT_EXTENTS`, `DBOPT_MIXLENS` and `DBOPT_MATLISTS` and `DBOPT_ZONECOUNTS`.
+  In order of utility, these options are DBOPT_EXTENTS, `DBOPT_MIXLENS` and `DBOPT_MATLISTS` and `DBOPT_ZONECOUNTS`.
   Although these options are creating redundant data in the Silo database, the data is stored in a manner that is far more convenient to down-stream applications that read Silo databases.
   Therefore, the user is strongly encouraged to make use of these options.
 
@@ -180,7 +178,7 @@ The functions described in this section of the manual include...
   However, it is not ok for a block that has external zones to be flagged as though it does not.
   In this case, down-stream post-processing tools will skip boundary computation when it should have been computed.
 
-  Three options, `DBOPT_GROUPINGS_SIZE`, `DBOPT_GROUPINGS` are deprecated.
+  Three options, DBOPT_GROUPINGS_SIZE, `DBOPT_GROUPINGS` are deprecated.
   Instead, use `MRG` trees to handle grouping.
   Also, see notes regarding _visit_domain_groups variable convention.
 
@@ -190,7 +188,6 @@ The functions described in this section of the manual include...
 ### `DBGetMultimesh()`
 
 * **Summary:** Read a multi-block mesh from a Silo database.
-
 
 * **C Signature:**
 
@@ -206,11 +203,10 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `meshname` | Name of the multi-block mesh.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `meshname` | Name of the multi-block mesh.
 
 
 * **Returned value:**
@@ -236,7 +232,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Write some or all of a multi-mesh adjacency object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -256,27 +251,26 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the multi-mesh adjacency object.
-    `nmesh` | The number of mesh pieces in the corresponding multi-mesh object. This value must be identical in repeated calls to `DBPutMultimeshadj`.
-    `mesh_types` | Integer array of length `nmesh` indicating the type of each mesh in the corresponding multi-mesh object. This array must be identical to that which is passed in the `DBPutMultimesh` call and in repeated calls to `DBPutMultimeshadj`.
-    `nneighbors` | Integer array of length `nmesh` indicating the number of `neighbors` for each mesh piece. This array must be identical in repeated calls to `DBPutMultimeshadj`.  In the argument descriptions to follow, let . That is, let  be the sum of the first k entries in the `nneighbors` array.
-    `neighbors` | Array of  integers enumerating for each mesh piece all other mesh pieces that neighbor it. Entries from index  to index  enumerate the `neighbors` of mesh piece k. This array must be identical in repeated calls to `DBPutMultimeshadj`.
-    `back` | Array of  integers enumerating for each mesh piece, the local index of that mesh piece in each of its `neighbors` lists of `neighbors`. Entries from index  to index  enumerate the local indices of mesh piece k in each of the `neighbors` of mesh piece k. This argument may be `NULL`. In any case, this array must be identical in repeated calls to `DBPutMultimeshadj`.
-    `nnodes` | Array of  integers indicating for each mesh piece, the number of nodes that it shares with each of its `neighbors`. Entries from index  to index  indicate the number of nodes that mesh piece k shares with each of its `neighbors`. This array must be identical in repeated calls to `DBPutMultimeshadj`. This argument may be `NULL`.
-    `nodelists` | Array of  pointers to arrays of integers. Entries from index  to index  enumerate the nodes that mesh piece k shares with each of its `neighbors`. The contents of a specific nodelist array depend on the types of meshes that are neighboring each other (See description below). nodelists[m] may be `NULL` even if nnodes[m] is non-zero. See below for a description of repeated calls to `DBPutMultimeshadj`. This argument must be `NULL` if `nnodes` is `NULL`.
-    `nzones` | Array of  integers indicating for each mesh piece, the number of zones that are adjacent with each of its `neighbors`. Entries from index  to index  indicate the number of zones that mesh piece k has adjacent to each of its `neighbors`. This array must be identical in repeated calls to `DBPutMultimeshadj`. This argument may be `NULL`.
-    `zonelists` | Array of  pointers to arrays of integers. Entries from index  to index  enumerate the zones that mesh piece k has adjacent with each of its `neighbors`. The contents of a specific zonelist array depend on the types of meshes that are neighboring each other (See description below). zonelists[m] may be `NULL` even if nzones[m] is non-zero. See below for a description of repeated calls to `DBPutMultimeshadj`. This argument must be `NULL` if `nzones` is `NULL`.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the multi-mesh adjacency object.
+  `nmesh` | The number of mesh pieces in the corresponding multi-mesh object. This value must be identical in repeated calls to `DBPutMultimeshadj`.
+  `mesh_types` | Integer array of length `nmesh` indicating the type of each mesh in the corresponding multi-mesh object. This array must be identical to that which is passed in the `DBPutMultimesh` call and in repeated calls to `DBPutMultimeshadj`.
+  `nneighbors` | Integer array of length `nmesh` indicating the number of `neighbors` for each mesh piece. This array must be identical in repeated calls to `DBPutMultimeshadj`.  In the argument descriptions to follow, let . That is, let  be the sum of the first k entries in the `nneighbors` array.
+  `neighbors` | Array of  integers enumerating for each mesh piece all other mesh pieces that neighbor it. Entries from index  to index  enumerate the `neighbors` of mesh piece k. This array must be identical in repeated calls to `DBPutMultimeshadj`.
+  `back` | Array of  integers enumerating for each mesh piece, the local index of that mesh piece in each of its `neighbors` lists of `neighbors`. Entries from index  to index  enumerate the local indices of mesh piece k in each of the `neighbors` of mesh piece k. This argument may be `NULL`. In any case, this array must be identical in repeated calls to `DBPutMultimeshadj`.
+  `nnodes` | Array of  integers indicating for each mesh piece, the number of nodes that it shares with each of its `neighbors`. Entries from index  to index  indicate the number of nodes that mesh piece k shares with each of its `neighbors`. This array must be identical in repeated calls to `DBPutMultimeshadj`. This argument may be `NULL`.
+  `nodelists` | Array of  pointers to arrays of integers. Entries from index  to index  enumerate the nodes that mesh piece k shares with each of its `neighbors`. The contents of a specific nodelist array depend on the types of meshes that are neighboring each other (See description below). nodelists[m] may be `NULL` even if nnodes[m] is non-zero. See below for a description of repeated calls to `DBPutMultimeshadj`. This argument must be `NULL` if `nnodes` is `NULL`.
+  `nzones` | Array of  integers indicating for each mesh piece, the number of zones that are adjacent with each of its `neighbors`. Entries from index  to index  indicate the number of zones that mesh piece k has adjacent to each of its `neighbors`. This array must be identical in repeated calls to `DBPutMultimeshadj`. This argument may be `NULL`.
+  `zonelists` | Array of  pointers to arrays of integers. Entries from index  to index  enumerate the zones that mesh piece k has adjacent with each of its `neighbors`. The contents of a specific zonelist array depend on the types of meshes that are neighboring each other (See description below). zonelists[m] may be `NULL` even if nzones[m] is non-zero. See below for a description of repeated calls to `DBPutMultimeshadj`. This argument must be `NULL` if `nzones` is `NULL`.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
 
 
 * **Description:**
 
   Note that the functionality this object provides is now more efficiently and conveniently handled via a Mesh Region Grouping (MRG) tree.
-  Users are encouraged to use `MRG` trees as an alternative to `DBPutMultimeshadj`(). See "DBMakeMrgtree" on page `196`.
+  Users are encouraged to use `MRG` trees as an alternative to `DBPutMultimeshadj()`. See "DBMakeMrgtree" on page `196`.
 
   DBPutMultimeshadj is another Down-stream Performance Option (See "DBPutMultimesh" on page 2-159). It is an alternative to including ghost-zones (See "DBPutMultimesh" on page 2-159) in the mesh and can therefore help to reduce file size, particularly for unstructured meshes.
 
@@ -286,7 +280,7 @@ The functions described in this section of the manual include...
   DBPutMultimeshadj is used to indicate how various mesh pieces in a multi-mesh object abut by specifying for each mesh piece, the nodes it shares with other mesh pieces and/or the zones is has adjacent to other mesh pieces.
   Note the important distinction in how nodes and zones are classified here.
   Nodes are shared between mesh pieces while zones are merely adjacent between mesh pieces.
-  In a call to `DBPutMultimeshadj`, a caller may write information for either shared nodes or adjacent zones, or both.
+  In a call to DBPutMultimeshadj, a caller may write information for either shared nodes or adjacent zones, or both.
 
   In practice, applications tend to use the same mesh type for every mesh piece.
   Thus, for ucd and point meshes, the nodelist (or zonelist) arrays will consists of pairs of integers where the first of the pair identifies a node (or zone) in the given mesh while the second identifies the shared node (or adjacent zone) in a neighbor.
@@ -298,11 +292,11 @@ The functions described in this section of the manual include...
   The specific contents of a given nodelist array depend on the types of meshes between which it enumerates shared nodes.
   The table below describes the contents of nodelist array m given the different mesh types that it may enumerate shared nodes for.
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Given mesh type|DB_POINT or DB_UCD|Neighbor mesh type
+  Given mesh type|DB_POINT or DB_UCD|Neighbor mesh type
     :---|:---|:---
-  |DB_QUAD|DB_POINT or `DB_UCD`
+  |DB_QUAD|DB_POINT or DB_UCD
   ||nnodes[m] pairs of integers
   ||6+nnodes[m] integers.
 
@@ -311,18 +305,18 @@ The functions described in this section of the manual include...
 
   The last nnodes[m] integers identify the nodes in the neighbor point or ucd mesh.
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * DB_QUAD
+  DB_QUAD
     :---
   nnodes[m]+6 integers.
 
 
   The first nnodes[m] integers identify the nodes in the given point or ucd mesh.
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * The next 6 integers identify ijk bounds of the corresponding nodes in the quad mesh neighbor.
+  The next 6 integers identify ijk bounds of the corresponding nodes in the quad mesh neighbor.
     :---
   15 integers
 
@@ -348,7 +342,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Get some or all of a multi-mesh nodal adjacency object
 
-
 * **C Signature:**
 
   ```
@@ -365,13 +358,12 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `name` | Name of the multi-mesh nodal adjacency object
-    `nmesh` | Number of mesh pieces for which nodal adjacency information is being obtained. Pass zero if you want to obtain all nodal adjacency information in a single call.
-    `mesh_pieces` | Integer array of length `nmesh` indicating which mesh pieces nodal adjacency information is desired for. May pass `NULL` if `nmesh` is zero.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `name` | Name of the multi-mesh nodal adjacency object
+  `nmesh` | Number of mesh pieces for which nodal adjacency information is being obtained. Pass zero if you want to obtain all nodal adjacency information in a single call.
+  `mesh_pieces` | Integer array of length `nmesh` indicating which mesh pieces nodal adjacency information is desired for. May pass `NULL` if `nmesh` is zero.
 
 
 * **Returned value:**
@@ -398,7 +390,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Write a multi-block variable object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -418,15 +409,14 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the multi-block variable.
-    `nvar` | Number of variables associated with the multi-block variable.
-    `varnames` | Array of length `nvar` containing pointers to the names of the variables written with `DBPut`<whatever>var() call. See "DBPutMultimesh" on page 2-159 for description of how to populate `varnames` when the pieces are in different files as well as `DBOPT_MB_BLOCK`/FILE_NS options to use a printf-style namescheme for large `nvar` in lieu of explicitly enumerating them here.
-    `vartypes` | Array of length `nvar` containing the types of the variables such as `DB_POINTVAR`, `DB_QUADVAR`, or `DB_UCDVAR`.  See "DBPutMultimesh" on page 2-159, for `DBOPT_MB_BLOCK_TYPE` option to use single, constant value when all pieces are the same type.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the multi-block variable.
+  `nvar` | Number of variables associated with the multi-block variable.
+  `varnames` | Array of length `nvar` containing pointers to the names of the variables written with DBPut<whatever>var() call. See "DBPutMultimesh" on page 2-159 for description of how to populate `varnames` when the pieces are in different files as well as DBOPT_MB_BLOCK/FILE_NS options to use a printf-style namescheme for large `nvar` in lieu of explicitly enumerating them here.
+  `vartypes` | Array of length `nvar` containing the types of the variables such as DB_POINTVAR, DB_QUADVAR, or `DB_UCDVAR`.  See "DBPutMultimesh" on page 2-159, for `DBOPT_MB_BLOCK_TYPE` option to use single, constant value when all pieces are the same type.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
 
 
 * **Returned value:**
@@ -443,9 +433,9 @@ The functions described in this section of the manual include...
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_BLOCKORIGIN|int|The origin of the block numbers.|1
   DBOPT_CYCLE|int|Problem cycle value.|0
@@ -455,7 +445,7 @@ The functions described in this section of the manual include...
   DBOPT_EXTENTS_SIZE|int|Number of values in each extent tuple|0
   DBOPT_EXTENTSa|double*|Pointer to an array of length `nvar` * `DBOPT_EXTENTS_SIZE` doubles where each group of `DBOPT_EXTENTS_SIZE` doubles is an extent tuple (see below). `DBOPT_EXTENTS_SIZE` must be set for this option to work correctly.|NULL
   DBOPT_MMESH_NAME|char *|Name of the multimesh this variable is associated with. Note, this option is very important as down-stream post processing tools are otherwise required to guess as to the mesh a given variable is associated with. Sometimes, the tools can guess wrong.|NULL
-  DBOPT_TENSOR_RANK|int|Specify the variable type; one of either `DB_VARTYPE_SCALAR`, `DB_VARTYPE_VECTOR` DB_VARTYPE_TENSOR, `DB_VARTYPE_SYMTENSOR`,<br>DB_VARTYPE_ARRAY<br>DB_VARTYPE_LABEL|DB_VARTYPE_SCALAR
+  DBOPT_TENSOR_RANK|int|Specify the variable type; one of either DB_VARTYPE_SCALAR, `DB_VARTYPE_VECTOR` DB_VARTYPE_TENSOR, DB_VARTYPE_SYMTENSOR,<br>DB_VARTYPE_ARRAY<br>DB_VARTYPE_LABEL|DB_VARTYPE_SCALAR
   DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names.See "DBOPT_REGION_PNAMES" on page `221`.|NULL
   DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
@@ -463,8 +453,8 @@ The functions described in this section of the manual include...
   DBOPT_MB_FILE_NS|char*|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|NULL
   DBOPT_MB_BLOCK_NS|char*|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|NULL
   DBOPT_MB_EMPTY_LIST|int*|When namescheme options are used, there is no `varnames` argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|NULL
-  DBOPT_MB_EMPTY_COUNT|int|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is `DB_MISSING_VALUE_NOT_SET`|DB_MISSING_VALUE_NOT_SET
+  DBOPT_MB_EMPTY_COUNT|int|Number of entries in the argument to DBOPT_MB_EMPTY_LIST|0
+  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
   The options below have been deprecated. Use `MRG` trees instead.|||
   DBOPT_GROUPORIGIN|int|The origin of the group numbers.|1
   DBOPT_NGROUPS|int|The total number of groups in this multimesh object.|0
@@ -475,7 +465,7 @@ The functions described in this section of the manual include...
   Regarding the `DBOPT_EXTENTS` option, an extent tuple is a tuple of the variable's minimum value(s) followed by the variable's maximum value(s). If the variable is a single, scalar variable, each extent tuple will be 2 values of the form {min,max}. Thus, `DBOPT_EXTENTS_SIZE` will be 2.
   If the variable consists of nvars subvariables (e.
   g.
-  the nvars argument in any of `DBPutPointvar`, `DBPutQuadvar`, `DBPutUcdvar` is greater than 1), then each extent tuple is 2*nvars values of each subvariable's minimum value followed by each subvariable's maximum value.
+  the nvars argument in any of DBPutPointvar, DBPutQuadvar, `DBPutUcdvar` is greater than 1), then each extent tuple is 2*nvars values of each subvariable's minimum value followed by each subvariable's maximum value.
   In this case, `DBOPT_EXTENTS_SIZE` will be 2*nvars.
 
   For example, if we have a multi-var object of a 3D velocity vector on 2 blocks, then `DBOPT_EXTENTS_SIZE` will be 2*3=6 and the `DBOPT_EXTENTS` array will be an array of 2*6 doubles organized as follows...
@@ -494,7 +484,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Read a multi-block variable definition from a Silo database.
 
-
 * **C Signature:**
 
   ```
@@ -509,11 +498,10 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `varname` | Name of the multi-block variable.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `varname` | Name of the multi-block variable.
 
 
 * **Returned value:**
@@ -539,7 +527,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Write a multi-block material object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -557,14 +544,13 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the multi-material object.
-    `nmat` | Number of material blocks provided.
-    `matnames` | Array of length `nmat` containing pointers to the names of the material block objects, written with `DBPutMaterial`(). See "DBPutMultimesh" on page 2-159 for description of how to populate `matnames` when the pieces are in different files as well as `DBOPT_MB_BLOCK`/FILE_NS options to use a printf-style namescheme for large `nmat` in lieu of explicitly enumerating them here.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the multi-material object.
+  `nmat` | Number of material blocks provided.
+  `matnames` | Array of length `nmat` containing pointers to the names of the material block objects, written with `DBPutMaterial()`. See "DBPutMultimesh" on page 2-159 for description of how to populate `matnames` when the pieces are in different files as well as DBOPT_MB_BLOCK/FILE_NS options to use a printf-style namescheme for large `nmat` in lieu of explicitly enumerating them here.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options
 
 
 * **Returned value:**
@@ -581,9 +567,9 @@ The functions described in this section of the manual include...
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_BLOCKORIGIN|int|The origin of the block numbers.|1
   DBOPT_NMATNOS|int|Number of material numbers stored in the `DBOPT_MATNOS` option.|0
@@ -602,7 +588,7 @@ The functions described in this section of the manual include...
   DBOPT_MB_FILE_NS|char*|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|NULL
   DBOPT_MB_BLOCK_NS|char*|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|NULL
   DBOPT_MB_EMPTY_LIST|int*|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|NULL
-  DBOPT_MB_EMPTY_COUNT|int|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
+  DBOPT_MB_EMPTY_COUNT|int|Number of entries in the argument to DBOPT_MB_EMPTY_LIST|0
   The options below have been deprecated. Use `MRG` trees instead.|||
   DBOPT_GROUPORIGIN|int|The origin of the group numbers.|1
   DBOPT_NGROUPS|int|The total number of groups in this multimesh object.|0
@@ -622,7 +608,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Read a multi-block material object from a Silo database
 
-
 * **C Signature:**
 
   ```
@@ -637,11 +622,10 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer
-    `name` | Name of the multi-block material object
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer
+  `name` | Name of the multi-block material object
 
 
 * **Returned value:**
@@ -667,7 +651,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Write a multi-block species object into a Silo file.
 
-
 * **C Signature:**
 
   ```
@@ -684,14 +667,13 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the multi-block species structure.
-    `nspec` | Number of species objects provided.
-    `specnames` | Array of length `nspec` containing pointers to the names of each of the species. See "DBPutMultimesh" on page 2-159 for description of how to populate `specnames` when the pieces are in different files as well as `DBOPT_MB_BLOCK`/FILE_NS options to use a printf-style namescheme for large `nspec` in lieu of explicitly enumerating them here.
-    `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the multi-block species structure.
+  `nspec` | Number of species objects provided.
+  `specnames` | Array of length `nspec` containing pointers to the names of each of the species. See "DBPutMultimesh" on page 2-159 for description of how to populate `specnames` when the pieces are in different files as well as DBOPT_MB_BLOCK/FILE_NS options to use a printf-style namescheme for large `nspec` in lieu of explicitly enumerating them here.
+  `optlist` | Pointer to an option list structure containing additional information to be included in the object written into the Silo file. Use a `NULL` if there are no options.
 
 
 * **Returned value:**
@@ -709,9 +691,9 @@ The functions described in this section of the manual include...
 
   The following table describes the options accepted by this function:
 
-  * **&nbsp;:**
+  **Optlist options:**
 
-  * Option Name|Value Data Type|Option Meaning|Default Value
+  Option Name|Value Data Type|Option Meaning|Default Value
     :---|:---|:---|:---
   DBOPT_BLOCKORIGIN|int|The origin of the block numbers.|1
   DBOPT_MATNAME|char *|Character string defining the `name` of the multi-block material with which this object is associated.|NULL
@@ -726,7 +708,7 @@ The functions described in this section of the manual include...
   DBOPT_MB_FILE_NS|char*|Multi-block file namescheme. This is a namescheme, indexed by block number, to generate filename in which each block is stored.|NULL
   DBOPT_MB_BLOCK_NS|char*|Multi-block block namescheme. This is a namescheme, indexed by block number, used to generate names of each block object apart from the file in which it may reside.|NULL
   DBOPT_MB_EMPTY_LIST|int*|When namescheme options are used, there is no varnames argument in which to use the keyword 'EMPTY' for empty blocks. Instead, the empty blocks can be enumerated here, indexed from zero.|NULL
-  DBOPT_MB_EMPTY_COUNT|int|Number of entries in the argument to `DBOPT_MB_EMPTY_LIST`|0
+  DBOPT_MB_EMPTY_COUNT|int|Number of entries in the argument to DBOPT_MB_EMPTY_LIST|0
   The options below have been deprecated. Use `MRG` trees instead.|||
   DBOPT_GROUPORIGIN|int|The origin of the group numbers.|1
   DBOPT_NGROUPS|int|The total number of groups in this multimesh object.|0
@@ -740,7 +722,6 @@ The functions described in this section of the manual include...
 ### `DBGetMultimatspecies()`
 
 * **Summary:** Read a multi-block species from a Silo database.
-
 
 * **C Signature:**
 
@@ -757,11 +738,10 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `dbfile` | Database file pointer.
-    `name` | Name of the multi-block material species.
+  Arg name | Description
+  :---|:---
+  `dbfile` | Database file pointer.
+  `name` | Name of the multi-block material species.
 
 
 * **Returned value:**
@@ -789,7 +769,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Specialized, read-only open method for parallel applications needing all processors to read all (or most of) a given Silo file
 
-
 * **C Signature:**
 
   ```
@@ -805,12 +784,11 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `filename` | name of the Silo file to open
-    `comm` | MPI communicator to use for the broadcast operation
-    `rank_of_root` | MPI rank of the processor in the communicator `comm` that shall serve as the root of the broadcast (typically 0).
+  Arg name | Description
+  :---|:---
+  `filename` | name of the Silo file to open
+  `comm` | MPI communicator to use for the broadcast operation
+  `rank_of_root` | MPI rank of the processor in the communicator `comm` that shall serve as the root of the broadcast (typically 0).
 
 
 * **Returned value:**
@@ -835,7 +813,7 @@ The functions described in this section of the manual include...
   Next, the entire Silo file is loaded into a buffer in memory and the broadcast in its entirety to all other processors.
   If only some processors need only some of the data from the file, then there is potentially a lot of memory and communication wasted for parts of the file not used on various processors.
 
-  When the file is closed with `DBClose`() all memory used by the file is released.
+  When the file is closed with `DBClose()` all memory used by the file is released.
 
   This method is not compiled into libsilo[h5].a.
   Instead, you are required to obtain the bcastopen.
@@ -857,7 +835,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Initialize a Poor Man's Parallel I/O interaction with the Silo library
 
-
 * **C Signature:**
 
   ```
@@ -877,17 +854,16 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `numFiles` | The number of individual Silo files to generate. Note, this is the number of parallel I/O streams that will be running simultaneously during I/O. A value of 1 cause `PMPIO` to behave serially. A value equal to the number of processors causes `PMPIO` to create a file-per-processor. Both values are unwise. For most parallel `HPC` platforms, values between 8 and 64 are appropriate.
-    `ioMode` | Choose one of either `PMPIO_READ` or `PMPIO_WRITE`. Note, you can not use `PMPIO` to handle both read and write in the same interaction.
-    `mpiComm` | The `MPI` communicator you would like `PMPIO` to use when passing the tiny baton messages it needs to coordinate access to the underlying Silo files. See documentation on `MPI` for a description of `MPI` communicators.
-    `mpiTag` | The `MPI` message tag you would like `PMPIO` to use when passing the tiny baton messages it needs to coordinate access to the underlying Silo files.
-    `createCb` | The file creation callback function. This is a function you implement that `PMPIO` will call when the first processor in each group needs to create the Silo file for the group. It is needed only for `PMPIO_WRITE` operations. If default behavior is acceptable, pass PMPIO_DefaultCreate here.
-    `openCb` | The file open callback function. This is a function you implement that `PMPIO` will call when the second and subsequent processors in each group need to open a Silo file. It is needed for both `PMPIO_READ` and `PMPIO_WRITE` operations. If default behavior is acceptable, pass PMPIO_DefaultOpen here.
-    `closeCb` | The file close callback function. This is a function you implement that `PMPIO` will call when a processor in a group needs to close a Silo file. If default behavior is acceptable, pass PMPIO_DefaultClose here.
-    `userData` | [OPT] Arbitrary user data that will be passed back to the various callback functions. Pass NULL(0) if this is not needed.
+  Arg name | Description
+  :---|:---
+  `numFiles` | The number of individual Silo files to generate. Note, this is the number of parallel I/O streams that will be running simultaneously during I/O. A value of 1 cause `PMPIO` to behave serially. A value equal to the number of processors causes `PMPIO` to create a file-per-processor. Both values are unwise. For most parallel `HPC` platforms, values between 8 and 64 are appropriate.
+  `ioMode` | Choose one of either `PMPIO_READ` or `PMPIO_WRITE`. Note, you can not use `PMPIO` to handle both read and write in the same interaction.
+  `mpiComm` | The `MPI` communicator you would like `PMPIO` to use when passing the tiny baton messages it needs to coordinate access to the underlying Silo files. See documentation on `MPI` for a description of `MPI` communicators.
+  `mpiTag` | The `MPI` message tag you would like `PMPIO` to use when passing the tiny baton messages it needs to coordinate access to the underlying Silo files.
+  `createCb` | The file creation callback function. This is a function you implement that `PMPIO` will call when the first processor in each group needs to create the Silo file for the group. It is needed only for `PMPIO_WRITE` operations. If default behavior is acceptable, pass PMPIO_DefaultCreate here.
+  `openCb` | The file open callback function. This is a function you implement that `PMPIO` will call when the second and subsequent processors in each group need to open a Silo file. It is needed for both `PMPIO_READ` and `PMPIO_WRITE` operations. If default behavior is acceptable, pass PMPIO_DefaultOpen here.
+  `closeCb` | The file close callback function. This is a function you implement that `PMPIO` will call when a processor in a group needs to close a Silo file. If default behavior is acceptable, pass PMPIO_DefaultClose here.
+  `userData` | [OPT] Arbitrary user data that will be passed back to the various callback functions. Pass NULL(0) if this is not needed.
 
 
 * **Returned value:**
@@ -972,7 +948,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** The `PMPIO` file creation callback
 
-
 * **C Signature:**
 
   ```
@@ -988,12 +963,11 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `fname` | The name of the Silo file to create.
-    `dname` | The name of the directory within the Silo file to create.
-    `udata` | A pointer to any additional user data. This is the pointer passed as the userData argument to PMPIO_Init().
+  Arg name | Description
+  :---|:---
+  `fname` | The name of the Silo file to create.
+  `dname` | The name of the directory within the Silo file to create.
+  `udata` | A pointer to any additional user data. This is the pointer passed as the userData argument to PMPIO_Init().
 
 
 * **Returned value:**
@@ -1008,7 +982,7 @@ The functions described in this section of the manual include...
 
   Your implementation of this file creation callback should minimally do the following things.
 
-  For `PMPIO_WRITE` operation, your implementation should `DBCreate`() a Silo file of name fname, `DBMkDir`() a directory of name `dname` for the first processor of a group to write to and `DBSetDir`() to that directory.
+  For `PMPIO_WRITE` operation, your implementation should `DBCreate()` a Silo file of name fname, `DBMkDir()` a directory of name `dname` for the first processor of a group to write to and `DBSetDir()` to that directory.
 
   For `PMPIO_READ` operations, your implementation of this callback is never called.
 
@@ -1020,7 +994,6 @@ The functions described in this section of the manual include...
 ### `PMPIO_OpenFileCallBack()`
 
 * **Summary:** The `PMPIO` file open callback
-
 
 * **C Signature:**
 
@@ -1037,13 +1010,12 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `fname` | The name of the Silo file to open.
-    `dname` | The name of the directory within the Silo file to work in.
-    `iomode` | The `iomode` of this `PMPIO` interaction. This is the value passed as ioMode argument to PMPIO_Init().
-    `udate` | A pointer to any additional user data. This is the pointer passed as the userData argument to PMPIO_Init().
+  Arg name | Description
+  :---|:---
+  `fname` | The name of the Silo file to open.
+  `dname` | The name of the directory within the Silo file to work in.
+  `iomode` | The `iomode` of this `PMPIO` interaction. This is the value passed as ioMode argument to PMPIO_Init().
+  `udate` | A pointer to any additional user data. This is the pointer passed as the userData argument to PMPIO_Init().
 
 
 * **Returned value:**
@@ -1058,9 +1030,9 @@ The functions described in this section of the manual include...
 
   Your implementation of this open file callback should minimally do the following things.
 
-  For `PMPIO_WRITE` operations, it should `DBOpen`() the Silo file named fname, `DBMkDir`() a directory named `dname` and `DBSetDir`() to directory `dname`.
+  For `PMPIO_WRITE` operations, it should `DBOpen()` the Silo file named fname, `DBMkDir()` a directory named `dname` and `DBSetDir()` to directory `dname`.
 
-  For `PMPIO_READ` operations, it should `DBOpen`() the Silo file named `fname` and then `DBSetDir`() to the directory named `dname`.
+  For `PMPIO_READ` operations, it should `DBOpen()` the Silo file named `fname` and then `DBSetDir()` to the directory named `dname`.
 
   The PMPIO_DefaultOpen function does only the minimal work, returning a void pointer to the opened `DBfile` Silo handle.
 
@@ -1070,7 +1042,6 @@ The functions described in this section of the manual include...
 ### `PMPIO_CloseFileCallBack()`
 
 * **Summary:** The `PMPIO` file close callback
-
 
 * **C Signature:**
 
@@ -1086,11 +1057,10 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | void pointer to the `file` handle (DBfile pointer).
-    `udata` | A pointer to any additional user data. This is the pointer passed as the userData argument to PMPIO_Init().
+  Arg name | Description
+  :---|:---
+  `file` | void pointer to the `file` handle (DBfile pointer).
+  `udata` | A pointer to any additional user data. This is the pointer passed as the userData argument to PMPIO_Init().
 
 
 * **Returned value:**
@@ -1113,7 +1083,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Wait for exclusive access to a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -1129,12 +1098,11 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
-    `filename` | The name of the Silo file this processor will create or open.
-    `dirname` | The name of the directory within the Silo file this processor will work in.
+  Arg name | Description
+  :---|:---
+  `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
+  `filename` | The name of the Silo file this processor will create or open.
+  `dirname` | The name of the directory within the Silo file this processor will work in.
 
 
 * **Returned value:**
@@ -1166,7 +1134,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Give up all access to a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -1182,11 +1149,10 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
-    `file` | A void pointer to the Silo `DBfile` object.
+  Arg name | Description
+  :---|:---
+  `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
+  `file` | A void pointer to the Silo `DBfile` object.
 
 
 * **Returned value:**
@@ -1205,7 +1171,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Finish a Poor Man's Parallel I/O interaction with the Silo library
 
-
 * **C Signature:**
 
   ```
@@ -1220,10 +1185,9 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
+  Arg name | Description
+  :---|:---
+  `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
 
 
 * **Returned value:**
@@ -1241,7 +1205,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Obtain 'group rank' of a processor
 
-
 * **C Signature:**
 
   ```
@@ -1256,11 +1219,10 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
-    `rankInComm` | Rank of processor in the `MPI` communicator passed in PMPIO_Init() for which group rank is to be queried.
+  Arg name | Description
+  :---|:---
+  `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
+  `rankInComm` | Rank of processor in the `MPI` communicator passed in PMPIO_Init() for which group rank is to be queried.
 
 
 * **Returned value:**
@@ -1281,7 +1243,6 @@ The functions described in this section of the manual include...
 
 * **Summary:** Obtain the rank of a processor within its `PMPIO` group
 
-
 * **C Signature:**
 
   ```
@@ -1296,11 +1257,10 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
-    `rankInComm` | Rank of the processor in the `MPI` communicator used in PMPIO_Init() to be queried.
+  Arg name | Description
+  :---|:---
+  `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
+  `rankInComm` | Rank of the processor in the `MPI` communicator used in PMPIO_Init() to be queried.
 
 
 * **Returned value:**

@@ -9,10 +9,10 @@ MRG trees and groupel maps work hand-in-hand in efficiently (and scalably) chara
 
 MRG trees are associated with (e.
 g.
-bound to) the mesh they describe using the `DBOPT_MRGTREE_NAME` optlist option in the `DBPutXxxmesh`() calls.
+bound to) the mesh they describe using the `DBOPT_MRGTREE_NAME` optlist option in the `DBPutXxxmesh()` calls.
 MRG trees are used both to describe a multi-mesh object and then again, to describe individual pieces of the multi-mesh.
 
-In addition, once an `MRG` tree has been defined for a mesh, variables to be associated with the mesh can be defined on only specific subsets of the mesh using the `DBOPT_REGION_PNAMES` optlist option in the `DBPutXxxvar`() calls.
+In addition, once an `MRG` tree has been defined for a mesh, variables to be associated with the mesh can be defined on only specific subsets of the mesh using the `DBOPT_REGION_PNAMES` optlist option in the `DBPutXxxvar()` calls.
 
 Because `MRG` trees can be used to represent a wide variety of subsetting functionality and because applications have still to gain experience using `MRG` trees to describe their subsetting applications, the methods defined here are design to be as free-form as possible with few or no limitations on, for example, naming conventions of the various types of subsets.
 It is simply impossible to know a priori all the different ways in which applications may wish to apply `MRG` trees to construct subsetting information.
@@ -26,7 +26,6 @@ The functions described in this section of the `API` manual are...
 ### `DBMakeMrgtree()`
 
 * **Summary:** Create and initialize an empty mesh region grouping tree
-
 
 * **C Signature:**
 
@@ -46,13 +45,12 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `mesh_type` | The type of mesh object the `MRG` tree will be associated with. An example would be `DB_MULTIMESH`, `DB_QUADMESH`, `DB_UCDMESH`.
-    `info_bits` | UNUSED
-    `max_children` | Maximum number of immediate children of the root.
-    `opts` | Additional options
+  Arg name | Description
+  :---|:---
+  `mesh_type` | The type of mesh object the `MRG` tree will be associated with. An example would be DB_MULTIMESH, DB_QUADMESH, `DB_UCDMESH`.
+  `info_bits` | UNUSED
+  `max_children` | Maximum number of immediate children of the root.
+  `opts` | Additional options
 
 
 * **Returned value:**
@@ -79,17 +77,17 @@ The functions described in this section of the `API` manual are...
 
   The paragraphs below describe how to utilize an `MRG` tree to describe various common kinds of decompositions and subsets.
 
-  Multi-Block Grouping (obsoletes `DBOPT_GROUPING` options for `DBPutMultimesh`,
+  Multi-Block Grouping (obsoletes `DBOPT_GROUPING` options for DBPutMultimesh,
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * _visit_domain_groups convention)
+  _visit_domain_groups convention)
     :---
 
 
   A multi-block grouping is the assignment of the blocks of a multi-block mesh (e.
   g.
-  the mesh objects created with `DBPutXxxmesh`() calls and enumerated by name in a `DBPutMultimesh`() call) to one of several groups.
+  the mesh objects created with `DBPutXxxmesh()` calls and enumerated by name in a `DBPutMultimesh()` call) to one of several groups.
   Each group in the grouping represents several blocks of the multi-block mesh.
   Historically, support for such a grouping in Silo has been limited in a couple of ways.
   First, only a single grouping could be defined for a multi-block mesh.
@@ -106,15 +104,15 @@ The functions described in this section of the `API` manual are...
   Figure 0-9: Examples of `MRG` trees for single and multiple groupings.
 
   In the diagram above, for the multiple grouping case, two groupel map objects are defined; one for each grouping.
-  For the 'A' grouping, the groupel map consists of 4 segments (all of which are of groupel type `DB_BLOCKCENT`) one for each grouping in 'side', 'top', 'bottom' and 'front.
+  For the 'A' grouping, the groupel map consists of 4 segments (all of which are of groupel type DB_BLOCKCENT) one for each grouping in 'side', 'top', 'bottom' and 'front.
   ' Each segment identifies the blocks of the multi-mesh (at the root of the `MRG` tree) that are in each of the 4 groups.
-  For the 'B' grouping, the groupel map consists of 2 segments (both of type `DB_BLOCKCENT`), for each grouping in 'skinny' and 'fat'. Each segment identifies the blocks of the multi-mesh that are in each group.
+  For the 'B' grouping, the groupel map consists of 2 segments (both of type DB_BLOCKCENT), for each grouping in 'skinny' and 'fat'. Each segment identifies the blocks of the multi-mesh that are in each group.
 
   If, in addition to defining which blocks are in which groups, an application wishes to specify specific nodes and/or zones of the group that comprise each block, additional groupel maps of type `DB_NODECENT` or `DB_ZONECENT` are required.
   However, because such groupel maps are specified in terms of nodes and/or zones, these groupel maps need to be defined on an `MRG` tree that is associated with an individual mesh block.
   Nonetheless, the manner of representation is analogous.
 
-  Multi-Block Neighbor Connectivity (obsoletes `DBPutMultimeshadj`):
+  Multi-Block Neighbor Connectivity (obsoletes DBPutMultimeshadj):
 
   Multi-block neighbor connectivity information describes the details of how different blocks of a multi-block mesh abut with shared nodes and/or adjacent zones.
   For a given block, multi-block neighbor connectivity information lists the blocks that share nodes (or have adjacent zones) with the given block and then, for each neighboring block, also lists the specific shared nodes (or adjacent zones).
@@ -124,7 +122,7 @@ The functions described in this section of the `API` manual are...
   DBPutQuadmesh() calls were used to create the individual mesh blocks), multi-block neighbor connectivity information can be scalably represented entirely at the multi-block level in an `MRG` tree.
   Otherwise, it cannot and it must be represented at the individual block level in the `MRG` tree.
   This section will describe both scenarios.
-  Note that these scenarios were previously handled with the now deprecated `DBPutMultimeshadj`() call.
+  Note that these scenarios were previously handled with the now deprecated `DBPutMultimeshadj()` call.
   That call, however, did not have favorable scalaing behavior for the unstructured case.
 
   The first step in defining multi-block connectivity information is to define a top-level `MRG` tree node named "neighbors.
@@ -142,12 +140,12 @@ The functions described in this section of the `API` manual are...
   However, the process is otherwise the same.
 
   In the `MRG` tree to be associated with a given mesh block, create a child of the root named "neighbors.
-  " For each neighboring block of the given mesh block, define a groupel map of type `DB_NODECENT`, enumerating the nodes in the current block that are shared with another block (or of type `DB_ZONECENT` enumerating the nodes in the current block that abut another block). Underneath this node in the `MRG` tree, create a region representing each neighboring block of the given mesh block and associate the appropriate groupel map with each region.
+  " For each neighboring block of the given mesh block, define a groupel map of type DB_NODECENT, enumerating the nodes in the current block that are shared with another block (or of type `DB_ZONECENT` enumerating the nodes in the current block that abut another block). Underneath this node in the `MRG` tree, create a region representing each neighboring block of the given mesh block and associate the appropriate groupel map with each region.
 
   Multi-Block, Structured Adaptive Mesh Refinement:
 
-  In a structured `AMR` setting, each `AMR` block (typically called a "patch" by the `AMR` community), is written by a `DBPutQuadmesh`() call.
-  A `DBPutMultimesh`() call groups all these blocks together, defining all the individual blocks of mesh that comprise the complete `AMR` mesh.
+  In a structured `AMR` setting, each `AMR` block (typically called a "patch" by the `AMR` community), is written by a `DBPutQuadmesh()` call.
+  A `DBPutMultimesh()` call groups all these blocks together, defining all the individual blocks of mesh that comprise the complete `AMR` mesh.
 
   An `MRG` tree, or portion thereof, is used to define which blocks of the multi-block mesh comprise which levels in the `AMR` hierarchy as well as which blocks are refinements of other blocks.
 
@@ -170,7 +168,6 @@ The functions described in this section of the `API` manual are...
 
 * **Summary:** Add a region to an `MRG` tree
 
-
 * **C Signature:**
 
   ```
@@ -191,19 +188,18 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `tree` | The `MRG` `tree` object to add a region to.
-    `reg_name` | The name of the new region.
-    `info_bits` | UNUSED
-    `max_children` | Maximum number of immediate children this region will have.
-    `maps_name` | [OPT] Name of the groupel map object to associate with this region. Pass `NULL` if none.
-    `nsegs` | [OPT] Number of segments in the groupel map object specified by the `maps_name` argument that are to be associated with this region. Pass zero if none.
-    `seg_ids` | [OPT] Integer array of length `nsegs` of groupel map segment ids. Pass `NULL` (0) if none.
-    `seg_lens` | [OPT] Integer array of length `nsegs` of groupel map segment lengths. Pass `NULL` (0) if none.
-    `seg_types` | [OPT] Integer array of length `nsegs` of groupel map segment element types. Pass `NULL` (0) if none. These types are the same as the centering options for variables; `DB_ZONECENT`, `DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT` and `DB_BLOCKCENT` (for the blocks of a multimesh)
-    `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
+  Arg name | Description
+  :---|:---
+  `tree` | The `MRG` `tree` object to add a region to.
+  `reg_name` | The name of the new region.
+  `info_bits` | UNUSED
+  `max_children` | Maximum number of immediate children this region will have.
+  `maps_name` | [OPT] Name of the groupel map object to associate with this region. Pass `NULL` if none.
+  `nsegs` | [OPT] Number of segments in the groupel map object specified by the `maps_name` argument that are to be associated with this region. Pass zero if none.
+  `seg_ids` | [OPT] Integer array of length `nsegs` of groupel map segment ids. Pass `NULL` (0) if none.
+  `seg_lens` | [OPT] Integer array of length `nsegs` of groupel map segment lengths. Pass `NULL` (0) if none.
+  `seg_types` | [OPT] Integer array of length `nsegs` of groupel map segment element types. Pass `NULL` (0) if none. These types are the same as the centering options for variables; DB_ZONECENT, DB_NODECENT, DB_EDGECENT, `DB_FACECENT` and `DB_BLOCKCENT` (for the blocks of a multimesh)
+  `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
 
 
 * **Returned value:**
@@ -217,7 +213,7 @@ The functions described in this section of the `API` manual are...
   Adds a single region node to an `MRG` `tree` below the current working region (See "DBSetCwr" on page `204`.
   ).
 
-  If you need to add a large number of similarly purposed region nodes to an `MRG` tree, consider using the more efficient `DBAddRegionArray`() function although it does have some limitations with respect to the kinds of groupel maps it can reference.
+  If you need to add a large number of similarly purposed region nodes to an `MRG` tree, consider using the more efficient `DBAddRegionArray()` function although it does have some limitations with respect to the kinds of groupel maps it can reference.
 
   A region node in an `MRG` `tree` can represent either a specific region, a group of regions or both all of which are determined by actual use by the application.
 
@@ -229,9 +225,9 @@ The functions described in this section of the `API` manual are...
   Because `MRG` trees are a new feature in Silo, their use in applications is not fully defined and the implementation here is designed to be as free-form as possible, to permit the widest flexibility in representing regions of a mesh.
   At the same time, in order to convey the semantic meaning of certain kinds of information in an `MRG` tree, a set of pre-defined region names is described below.
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Region Naming Convention|Meaning
+  Region Naming Convention|Meaning
     :---|:---
   "materials"|Top-level region below which material decomposition information is defined. There can be multiple material decompositions, if so desired. Each such decomposition would be rooted at a region named "material_<name>" underneath the "materials" region node.
   "groupings"|Top-level region below which multi-block grouping information is defined. There can be multiple groupings, if so desired. Each such grouping would be rooted at a region named "grouping_<name>" underneath the "groupings" region node.
@@ -250,7 +246,6 @@ The functions described in this section of the `API` manual are...
 ### `DBAddRegionArray()`
 
 * **Summary:** Efficiently add multiple, like-kind regions to an `MRG` tree
-
 
 * **C Signature:**
 
@@ -273,19 +268,18 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `tree` | The `MRG` `tree` object to add the regions to.
-    `nregn` | The number of regions to add.
-    `regn_names` | This is either an array of `nregn` pointers to character string names for each region or it is an array of 1 pointer to a character string specifying a printf-style naming scheme for the regions. The existence of a percent character ('%') (used to introduce conversion specifications) anywhere in regn_names[0] will indicate the latter mode.The latter mode is almost always preferable, especially if nergn is large (say more than 100). See below for the format of the printf-style naming string.
-    `info_bits` | UNUSED
-    `maps_name` | [OPT] Name of the groupel maps object to be associated with these regions. Pass `NULL` (0) if none.
-    `nsegs` | [OPT] The number of groupel map segments to be associated with each region. Note, this is a per-region value. Pass 0 if none.
-    `seg_ids` | [OPT] Integer array of length nsegs*nregn groupel map segment ids. The first `nsegs` ids are associated with the first region. The second `nsegs` ids are associated with the second region and so fourth. In cases where some regions will have fewer than `nsegs` groupel map segments associated with them, pass -1 for the corresponding segment ids. Pass `NULL` (0) if none.
-    `seg_lens` | [OPT] Integer array of length nsegs*nregn indicating the lengths of each of the groupel maps. In cases where some regions will have fewer than `nsegs` groupel map segments associated with them, pass 0 for the corresponding segment lengths. Pass `NULL` (0) if none.
-    `seg_types` | [OPT] Integer array of length nsegs*nregn specifying the groupel types of each segment. In cases where some regions will have fewer than `nsegs` groupel map segments associated with them, pass 0 for the corresponding segment lengths. Pass `NULL` (0) if none.
-    `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
+  Arg name | Description
+  :---|:---
+  `tree` | The `MRG` `tree` object to add the regions to.
+  `nregn` | The number of regions to add.
+  `regn_names` | This is either an array of `nregn` pointers to character string names for each region or it is an array of 1 pointer to a character string specifying a printf-style naming scheme for the regions. The existence of a percent character ('%') (used to introduce conversion specifications) anywhere in regn_names[0] will indicate the latter mode.The latter mode is almost always preferable, especially if nergn is large (say more than 100). See below for the format of the printf-style naming string.
+  `info_bits` | UNUSED
+  `maps_name` | [OPT] Name of the groupel maps object to be associated with these regions. Pass `NULL` (0) if none.
+  `nsegs` | [OPT] The number of groupel map segments to be associated with each region. Note, this is a per-region value. Pass 0 if none.
+  `seg_ids` | [OPT] Integer array of length nsegs*nregn groupel map segment ids. The first `nsegs` ids are associated with the first region. The second `nsegs` ids are associated with the second region and so fourth. In cases where some regions will have fewer than `nsegs` groupel map segments associated with them, pass -1 for the corresponding segment ids. Pass `NULL` (0) if none.
+  `seg_lens` | [OPT] Integer array of length nsegs*nregn indicating the lengths of each of the groupel maps. In cases where some regions will have fewer than `nsegs` groupel map segments associated with them, pass 0 for the corresponding segment lengths. Pass `NULL` (0) if none.
+  `seg_types` | [OPT] Integer array of length nsegs*nregn specifying the groupel types of each segment. In cases where some regions will have fewer than `nsegs` groupel map segments associated with them, pass 0 for the corresponding segment lengths. Pass `NULL` (0) if none.
+  `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
 
 
 * **Returned value:**
@@ -296,14 +290,14 @@ The functions described in this section of the `API` manual are...
 
 * **Description:**
 
-  Use this function instead of `DBAddRegion`() when you have a large number of similarly purposed regions to add to an `MRG` `tree` `AND` you can deal with the limitations of the groupel maps associated with these regions.
+  Use this function instead of `DBAddRegion()` when you have a large number of similarly purposed regions to add to an `MRG` `tree` `AND` you can deal with the limitations of the groupel maps associated with these regions.
 
-  The key limitation of the groupel map associated with a region created with `DBAddRegionArray`() array and a groupel map associated with a region created with `DBAddRegion`() is that every region in the region array must reference nseg map segments (some of which can of course be of zero length).
+  The key limitation of the groupel map associated with a region created with `DBAddRegionArray()` array and a groupel map associated with a region created with `DBAddRegion()` is that every region in the region array must reference nseg map segments (some of which can of course be of zero length).
 
   Adding a region array is a substantially more efficient way to add regions to an `MRG` `tree` than adding them one at a time especially when a printf-style naming convention is used to specify the region names.
 
   The existence of a percent character ('%') anywhere in regn_names[0] indicates that a printf-style namescheme is to be used.
-  The format of a printf-style namescheme to specify region names is described in the documentation of `DBMakeNamescheme`() (See "DBMakeNamescheme" on page `209`.
+  The format of a printf-style namescheme to specify region names is described in the documentation of `DBMakeNamescheme()` (See "DBMakeNamescheme" on page `209`.
   )
 
   Note that the names of regions within an `MRG` `tree` are not required to obey the same variable naming conventions as ordinary Silo objects (See "DBVariableNameValid" on page 14.
@@ -315,7 +309,6 @@ The functions described in this section of the `API` manual are...
 ### `DBSetCwr()`
 
 * **Summary:** Set the current working region for an `MRG` tree
-
 
 * **C Signature:**
 
@@ -332,11 +325,10 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `tree` | The `MRG` `tree` object.
-    `path` | The `path` to set.
+  Arg name | Description
+  :---|:---
+  `tree` | The `MRG` `tree` object.
+  `path` | The `path` to set.
 
 
 * **Returned value:**
@@ -362,7 +354,6 @@ The functions described in this section of the `API` manual are...
 
 * **Summary:** Get the current working region of an `MRG` tree
 
-
 * **C Signature:**
 
   ```
@@ -371,10 +362,9 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `tree` | The `MRG` `tree`.
+  Arg name | Description
+  :---|:---
+  `tree` | The `MRG` `tree`.
 
 
 * **Returned value:**
@@ -388,7 +378,6 @@ The functions described in this section of the `API` manual are...
 ### `DBPutMrgtree()`
 
 * **Summary:** Write a completed `MRG` tree object to a Silo file
-
 
 * **C Signature:**
 
@@ -408,14 +397,13 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo `file` handle
-    `name` | The `name` of the `MRG` `tree` object in the `file`.
-    `mesh_name` | The `name` of the mesh the `MRG` `tree` object is associated with.
-    `tree` | The `MRG` `tree` object to write.
-    `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo `file` handle
+  `name` | The `name` of the `MRG` `tree` object in the `file`.
+  `mesh_name` | The `name` of the mesh the `MRG` `tree` object is associated with.
+  `tree` | The `MRG` `tree` object to write.
+  `opts` | [OPT] Additional options. Pass `NULL` (0) if none.
 
 
 * **Returned value:**
@@ -426,7 +414,7 @@ The functions described in this section of the `API` manual are...
 
 * **Description:**
 
-  After using `DBPutMrgtree` to write the `MRG` `tree` to a Silo file, the `MRG` `tree` object itself must be freed using `DBFreeMrgtree`().
+  After using `DBPutMrgtree` to write the `MRG` `tree` to a Silo file, the `MRG` `tree` object itself must be freed using `DBFreeMrgtree()`.
 
 
 ---
@@ -434,7 +422,6 @@ The functions described in this section of the `API` manual are...
 ### `DBGetMrgtree()`
 
 * **Summary:** Read an `MRG` tree object from a Silo file
-
 
 * **C Signature:**
 
@@ -450,11 +437,10 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle
-    `name` | The `name` of the `MRG` tree object in the `file`.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle
+  `name` | The `name` of the `MRG` tree object in the `file`.
 
 
 * **Returned value:**
@@ -477,7 +463,6 @@ The functions described in this section of the `API` manual are...
 
 * **Summary:** Free the memory associated by an `MRG` tree object
 
-
 * **C Signature:**
 
   ```
@@ -493,10 +478,9 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `tree` | The `MRG` `tree` object to free.
+  Arg name | Description
+  :---|:---
+  `tree` | The `MRG` `tree` object to free.
 
 
 * **Returned value:**
@@ -514,7 +498,6 @@ The functions described in this section of the `API` manual are...
 
 * **Summary:** Create a `DBnamescheme` object for on-demand name generation
 
-
 * **C Signature:**
 
   ```
@@ -529,11 +512,10 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `ns_str` | The namescheme string as described below.
-    `...` | The remaining arguments take `...` of three forms depending on `...` the caller wants external array references, if `...` are present in `...` format substring of `ns_str` to be handled. `...` the first form, `...` format substring of `ns_str` involves no externally referenced arrays `...` so there `...` no additional arguments other than `...` `ns_str` string itself. `...` the second form, `...` caller `...` all externally referenced arrays needed in `...` format substring of `ns_str` already in memory `...` simply passes their pointers here as `...` remaining arguments in `...` same order in which they appear in `...` format substring of `ns_str`. `...` arrays `...` bound to `...` returned namescheme object `...` should `...` be freed until after `...` caller is done using `...` returned namescheme object. In this case, `DBFreeNamescheme`() does `...` free these arrays `...` the caller is required to explicitly free them. `...` the third form, `...` caller makes a request `...` the Silo library to find in a given file, read `...` bind to `...` returned namescheme object `...` externally referenced arrays in `...` format substring of `ns_str`. To achieve this, `...` caller passes a 3-tuple of `...` form...  "(void*) 0, (DBfile*) file, (char*) mbobjpath" as `...` remaining arguments. `...` initial (void*)0 is required. `...` (DBfile*)file is `...` database handle of `...` Silo file in which `...` externally referenced arrays exist. `...` third (char*)mbobjpath, which `...` be 0/NULL, is `...` path within `...` file, either relative to `...` file's current working directory, or absolute, at which `...` multi-block object holding `...` `ns_str` `...` found in `...` file. `...` necessary externally referenced arrays must exist within `...` specified file using either relative paths from multi-block object's home directory or `...` file's current working directory or absolute paths. In this case `DBFreeNamescheme`() also frees memory associated with these arrays.
+  Arg name | Description
+  :---|:---
+  `ns_str` | The namescheme string as described below.
+  `...` | The remaining arguments take `...` of three forms depending on `...` the caller wants external array references, if `...` are present in `...` format substring of `ns_str` to be handled. `...` the first form, `...` format substring of `ns_str` involves no externally referenced arrays `...` so there `...` no additional arguments other than `...` `ns_str` string itself. `...` the second form, `...` caller `...` all externally referenced arrays needed in `...` format substring of `ns_str` already in memory `...` simply passes their pointers here as `...` remaining arguments in `...` same order in which they appear in `...` format substring of `ns_str`. `...` arrays `...` bound to `...` returned namescheme object `...` should `...` be freed until after `...` caller is done using `...` returned namescheme object. In this case, `DBFreeNamescheme()` does `...` free these arrays `...` the caller is required to explicitly free them. `...` the third form, `...` caller makes a request `...` the Silo library to find in a given file, read `...` bind to `...` returned namescheme object `...` externally referenced arrays in `...` format substring of `ns_str`. To achieve this, `...` caller passes a 3-tuple of `...` form...  "(void*) 0, (DBfile*) file, (char*) mbobjpath" as `...` remaining arguments. `...` initial (void*)0 is required. `...` (DBfile*)file is `...` database handle of `...` Silo file in which `...` externally referenced arrays exist. `...` third (char*)mbobjpath, which `...` be 0/NULL, is `...` path within `...` file, either relative to `...` file's current working directory, or absolute, at which `...` multi-block object holding `...` `ns_str` `...` found in `...` file. `...` necessary externally referenced arrays must exist within `...` specified file using either relative paths from multi-block object's home directory or `...` file's current working directory or absolute paths. In this case `DBFreeNamescheme()` also frees memory associated with these arrays.
 
 
 * **Description:**
@@ -566,9 +548,9 @@ The functions described in this section of the `API` manual are...
   Except `...` singly quoted strings which evaluate to a literal string suitable `...` output `...` a %s type conversion specifier, `...` $-type external array references which evaluate to an external string, `...` other expressions `...` treated as evaluating to integer values suitable `...` any of `...` integer conversion specifiers (%[ouxXdi]) which `...` be used in `...` format substring.
   .
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * fmt|Interpretation
+  fmt|Interpretation
     :---|:---
   "|slide_%s|(n%2)?'master':'slave':"|The delimiter character is `...`. `...` format substring is "slide_%s". `...` expression substring `...` the argument to `...` first (and only in this case) conversion specifier (%s) is "(n%2)?'master':'slave':" When this expression is evaluated `...` a given region, `...` region's natural number will be inserted `...` 'n'. `...` modulo operation with 2 will be applied. If that result is non-zero, `...` ?:: expression will evaluate to 'master'. Otherwise, it will evaluate to 'slave'. Note `...` terminating colon `...` the `...` operator. This naming scheme might be useful `...` an array of regions representing, alternately, master `...` slave sides of slide surfaces.<br>Note also `...` the `...` operator, `...` caller `...` assume that only `...` sub-expression corresponding to `...` whichever half of `...` operator is satisfied is actually evaluated.
   "Hblock_%02dx%02dHn/16Hn%16"|The delimiter character is `...`. `...` format substring is 'block_%02dx%02d". `...` expression substring `...` the argument to `...` first conversion specifier (%02d) is "n/256". `...` expression substring `...` the argument to `...` second conversion specifier (also %02d) is "n%16". When this expression is evaluated, `...` region's natural number will be inserted `...` 'n' `...` the `...` and `...` operators will be evaluated. This naming scheme might be useful `...` a region array of `...` regions to be named as a 2D array of regions with names like "block_09x11"
@@ -590,7 +572,7 @@ The functions described in this section of the `API` manual are...
 
   
 
-  Use `DBFreeNamescheme`() to free up `...` space associated with a namescheme.
+  Use `DBFreeNamescheme()` to free up `...` space associated with a namescheme.
 
   Also note that there `...` numerous examples of nameschemes in "tests/nameschemes.
   c" in `...` Silo source release tarball.
@@ -601,7 +583,6 @@ The functions described in this section of the `API` manual are...
 ### `DBGetName()`
 
 * **Summary:** Generate a name from a `DBnamescheme` object
-
 
 * **C Signature:**
 
@@ -617,10 +598,9 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `natnum` | Natural number of the entry in a namescheme to be generated. Must be greater than or equal to zero.
+  Arg name | Description
+  :---|:---
+  `natnum` | Natural number of the entry in a namescheme to be generated. Must be greater than or equal to zero.
 
 
 * **Returned value:**
@@ -634,11 +614,11 @@ The functions described in this section of the `API` manual are...
 
 * **Description:**
 
-  Once a namescheme has been created via `DBMakeNamescheme`, this function can be used to generate names at will from the namescheme.
+  Once a namescheme has been created via DBMakeNamescheme, this function can be used to generate names at will from the namescheme.
   The caller must **not** free the returned string.
 
   Silo maintains a tiny circular buffer of (32) names constructed and returned by this function so that multiple evaluations in the same expression do not wind up overwriting each other.
-  A call to `DBGetName`(0,0) will free up all memory associated with this tiny circular buffer.
+  A call to DBGetName(0,0) will free up all memory associated with this tiny circular buffer.
 
 
 ---
@@ -646,7 +626,6 @@ The functions described in this section of the `API` manual are...
 ### `DBPutMrgvar()`
 
 * **Summary:** Write variable data to be associated with (some) regions in an `MRG` tree
-
 
 * **C Signature:**
 
@@ -673,18 +652,17 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | Silo database `file` handle.
-    `name` | Name of this mrgvar object.
-    `tname` | name of the mrg tree this variable is associated with.
-    `ncomps` | An integer specifying the number of variable components.
-    `compnames` | [OPT] Array of `ncomps` pointers to character strings representing the names of the individual components. Pass NULL(0) if no component names are to be specified.
-    `nregns` | The number of regions this variable is being written for.
-    `reg_pnames` | Array of `nregns` pointers to strings representing the pathnames of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==NULL, it is assumed that reg_pnames[i]=NULL for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the `MRG` tree that is the parent of all the regions for which attributes are being written.
-    `data` | Array of `ncomps` pointers to variable `data`. The pointer, data[i] points to an array of `nregns` values of type datatype.
-    `opts` | Additional options.
+  Arg name | Description
+  :---|:---
+  `file` | Silo database `file` handle.
+  `name` | Name of this mrgvar object.
+  `tname` | name of the mrg tree this variable is associated with.
+  `ncomps` | An integer specifying the number of variable components.
+  `compnames` | [OPT] Array of `ncomps` pointers to character strings representing the names of the individual components. Pass NULL(0) if no component names are to be specified.
+  `nregns` | The number of regions this variable is being written for.
+  `reg_pnames` | Array of `nregns` pointers to strings representing the pathnames of the regions for which the variable is being written. If nregns>1 and reg_pnames[1]==NULL, it is assumed that reg_pnames[i]=NULL for all i>0 and reg_pnames[0] contains either a printf-style naming convention for all the regions to be named or, if reg_pnames[0] is found to contain no printf-style conversion specifications, it is treated as the pathname of a single region in the `MRG` tree that is the parent of all the regions for which attributes are being written.
+  `data` | Array of `ncomps` pointers to variable `data`. The pointer, data[i] points to an array of `nregns` values of type datatype.
+  `opts` | Additional options.
 
 
 * **Returned value:**
@@ -703,7 +681,7 @@ The functions described in this section of the `API` manual are...
   In this case, reg_pnames[0] is the `name` of the parent region and reg_pnames[i] is set to `NULL` for all i>0.
 
   Alternatively, variable `data` can be associated with a bunch of regions whose names conform to a common, printf-style naming scheme.
-  This is typical of regions created with the `DBPutRegionArray`() call.
+  This is typical of regions created with the `DBPutRegionArray()` call.
   In this case, reg_pnames[0] is the `name` of the parent region and reg_pnames[i] is set to `NULL` for all i>0 and, in addition, reg_pnames[0] is a specially formatted, printf-style string, for naming the regions.
   See "DBAddRegionArray" on page `202`.
   for a discussion of the regn_names argument format.
@@ -714,18 +692,18 @@ The functions described in this section of the `API` manual are...
   Because `MRG` trees are a new feature in Silo, their use in applications is not fully defined and the implementation here is designed to be as free-form as possible, to permit the widest flexibility in representing regions of a mesh.
   At the same time, in order to convey the semantic meaning of certain kinds of information in an `MRG` tree, a set of pre-defined `MRG` variables is descirbed below.
 
-  * **&nbsp;:**
+  **&nbsp;**
 
-  * Variable Naming Convention|Meaning
+  Variable Naming Convention|Meaning
     :---|:---
   "amr-ratios"|An integer variable of 3 components defining the refinement ratios (rx, ry, rz) for an `AMR` mesh. Typically, the refinement ratios can be specified on a level-by-level basis. In this case, this variable should be defined for nregns=<# of levels> on the level regions underneath the "amr-levels" grouping. However, if refinment ratios need to be defined on an individual patch basis instead, this variable should be defined on the individual patch regions under the "amr-refinements" groupings.
   "ijk-orientations"|An integer variable of 3 components defined on the individual blocks of a multi-block mesh defining the orientations of the individual blocks in a large, ijk indexing space (Ares convention)
-  "<var>-extents"|A double precision variable defining the block-by-block extents of a multi-block variable. If <var>=="coords", then it defines the spatial extents of the mesh itself. Note, this convention obsoletes the `DBOPT_XXX_EXTENTS` options on `DBPutMultivar`/DBPutMultimesh calls.
+  "<var>-extents"|A double precision variable defining the block-by-block extents of a multi-block variable. If <var>=="coords", then it defines the spatial extents of the mesh itself. Note, this convention obsoletes the `DBOPT_XXX_EXTENTS` options on DBPutMultivar/DBPutMultimesh calls.
 
 
   
 
-  Don't forget to associate the resulting region variable object(s) with the `MRG` tree by using the `DBOPT_MRGV_ONAMES` and `DBOPT_MRGV_RNAMES` options in the `DBPutMrgtree`() call.
+  Don't forget to associate the resulting region variable object(s) with the `MRG` tree by using the `DBOPT_MRGV_ONAMES` and `DBOPT_MRGV_RNAMES` options in the `DBPutMrgtree()` call.
 
 
 ---
@@ -733,7 +711,6 @@ The functions described in this section of the `API` manual are...
 ### `DBGetMrgvar()`
 
 * **Summary:** Retrieve an `MRG` variable object from a silo file
-
 
 * **C Signature:**
 
@@ -749,11 +726,10 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | Silo database `file` handle.
-    `name` | The `name` of the region variable object to retrieve.
+  Arg name | Description
+  :---|:---
+  `file` | Silo database `file` handle.
+  `name` | The `name` of the region variable object to retrieve.
 
 
 * **Returned value:**
@@ -772,7 +748,6 @@ The functions described in this section of the `API` manual are...
 ### `DBPutGroupelmap()`
 
 * **Summary:** Write a groupel map object to a Silo file
-
 
 * **C Signature:**
 
@@ -797,19 +772,18 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle.
-    `name` | The `name` of the groupel map object in the `file`.
-    `nsegs` | The number of segments in the map.
-    `seg_types` | Integer array of length `nsegs` indicating the groupel type associated with each segment of the map; one of `DB_BLOCKCENT`, `DB_NODECENT`, `DB_ZONECENT`, `DB_EDGECENT`, `DB_FACECENT`.
-    `seg_lens` | Integer array of length `nsegs` indicating the length of each segment
-    `seg_ids` | [OPT] Integer array of length `nsegs` indicating the identifier to associate with each segment. By default, segment identifiers are 0...negs-1. If default identifiers are sufficient, pass `NULL` (0) here. Otherwise, pass an explicit list of integer identifiers.
-    `seg_data` | The groupel map data, itself. An array of `nsegs` pointers to arrays of integers where array seg_data[i] is of length seg_lens[i].
-    `seg_fracs` | [OPT] Array of `nsegs` pointers to floating point values indicating fractional inclusion for the associated groupels. Pass `NULL` (0) if fractional inclusions are not required. If, however, fractional inclusions are required but on only some of the segments, pass an array of pointers such that if segment i has no fractional inclusions, seg_fracs[i]=NULL(0). Fractional inclusions are useful for, among other things, defining groupel maps involving mixing materials.
-    `fracs_type` | [OPT] data type of the fractional parts of the segments. Ignored if `seg_fracs` is `NULL` (0).
-    `opts` | Additional options
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle.
+  `name` | The `name` of the groupel map object in the `file`.
+  `nsegs` | The number of segments in the map.
+  `seg_types` | Integer array of length `nsegs` indicating the groupel type associated with each segment of the map; one of DB_BLOCKCENT, DB_NODECENT, DB_ZONECENT, DB_EDGECENT, `DB_FACECENT`.
+  `seg_lens` | Integer array of length `nsegs` indicating the length of each segment
+  `seg_ids` | [OPT] Integer array of length `nsegs` indicating the identifier to associate with each segment. By default, segment identifiers are 0...negs-1. If default identifiers are sufficient, pass `NULL` (0) here. Otherwise, pass an explicit list of integer identifiers.
+  `seg_data` | The groupel map data, itself. An array of `nsegs` pointers to arrays of integers where array seg_data[i] is of length seg_lens[i].
+  `seg_fracs` | [OPT] Array of `nsegs` pointers to floating point values indicating fractional inclusion for the associated groupels. Pass `NULL` (0) if fractional inclusions are not required. If, however, fractional inclusions are required but on only some of the segments, pass an array of pointers such that if segment i has no fractional inclusions, seg_fracs[i]=NULL(0). Fractional inclusions are useful for, among other things, defining groupel maps involving mixing materials.
+  `fracs_type` | [OPT] data type of the fractional parts of the segments. Ignored if `seg_fracs` is `NULL` (0).
+  `opts` | Additional options
 
 
 * **Returned value:**
@@ -847,7 +821,6 @@ The functions described in this section of the `API` manual are...
 
 * **Summary:** Read a groupel map object from a Silo file
 
-
 * **C Signature:**
 
   ```
@@ -862,11 +835,10 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `file` | The Silo database `file` handle.
-    `name` | The `name` of the groupel map object to read.
+  Arg name | Description
+  :---|:---
+  `file` | The Silo database `file` handle.
+  `name` | The `name` of the groupel map object to read.
 
 
 * **Returned value:**
@@ -887,7 +859,6 @@ The functions described in this section of the `API` manual are...
 
 * **Summary:** Free memory associated with a groupel map object
 
-
 * **C Signature:**
 
   ```
@@ -902,10 +873,9 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `map` | Pointer to a `DBgroupel` `map` object.
+  Arg name | Description
+  :---|:---
+  `map` | Pointer to a `DBgroupel` `map` object.
 
 
 * **Returned value:**
@@ -917,7 +887,6 @@ The functions described in this section of the `API` manual are...
 ### `DBOPT_REGION_PNAMES()`
 
 * **Summary:** option for defining variables on specific regions of a mesh
-
 
 * **C Signature:**
 
@@ -946,7 +915,6 @@ The functions described in this section of the `API` manual are...
 ### `DBAlloc…()`
 
 * **Summary:** Allocate and initialize a Silo structure.
-
 
 * **C Signature:**
 
@@ -994,7 +962,7 @@ The functions described in this section of the `API` manual are...
 * **Description:**
 
   The allocation functions allocate a new structure of the requested type, and initialize all values to `NULL` or zero.
-  There are counterpart functions for freeing structures of a given type (see `DBFree`….
+  There are counterpart functions for freeing structures of a given type (see DBFree….
 
 
 ---
@@ -1002,7 +970,6 @@ The functions described in this section of the `API` manual are...
 ### `DBFree…()`
 
 * **Summary:** Release memory associated with a Silo structure.
-
 
 * **C Signature:**
 
@@ -1038,11 +1005,10 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
-    `Fortran Equivalent:` | None
+  Arg name | Description
+  :---|:---
+  `x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
+  `Fortran Equivalent:` | None
 
 
 * **Returned value:**
@@ -1055,7 +1021,7 @@ The functions described in this section of the `API` manual are...
 
   The free functions release the given structure as well as all memory pointed to by these structures.
   This is the preferred method for releasing these structures.
-  There are counterpart functions for allocating structures of a given type (see `DBAlloc`…). The functions will not fail if a `NULL` pointer is passed to them.
+  There are counterpart functions for allocating structures of a given type (see DBAlloc…). The functions will not fail if a `NULL` pointer is passed to them.
 
 
 ---
@@ -1063,7 +1029,6 @@ The functions described in this section of the `API` manual are...
 ### `DBIsEmpty()`
 
 * **Summary:** Query a object returned from Silo for "emptiness"
-
 
 * **C Signature:**
 
@@ -1088,16 +1053,15 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  * &nbsp;
-  * Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;
-    :---|:---
-    `x` | Pointer to a silo object structure to be queried
+  Arg name | Description
+  :---|:---
+  `x` | Pointer to a silo object structure to be queried
 
 
 * **Description:**
 
   These functions return non-zero if the object is indeed empty and zero otherwise.
-  When `DBSetAllowEmptyObjects`() is enabled by a writer, it can produce objects in the file which contain useful metadata but no "problems-sized" data.
+  When `DBSetAllowEmptyObjects()` is enabled by a writer, it can produce objects in the file which contain useful metadata but no "problems-sized" data.
   These methods can be used by a reader to determine if an object read from a file is empty.
 
 
