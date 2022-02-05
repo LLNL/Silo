@@ -173,21 +173,21 @@ Quadmesh
 
 Quadvar
 : A variable associated with a quadrilateral mesh.
-: At a minimum, this must include the variable’s data, centering information (node-centered vs. zone centered), and the name of the quad mesh with which this variable is associated.
+  At a minimum, this must include the variable’s data, centering information (node-centered vs. zone centered), and the name of the quad mesh with which this variable is associated.
   Additional information, such as time, cycle, units, label, and index ranges can also be included.
 
 Ucdmesh
 : An unstructured mesh.
-: At a minimum, this must include the dimension, connectivity, and coordinate data, but typically also includes the mesh’s coordinate system, labelling and unit information, minimum and maximum extents, and a list of face indices.
+  At a minimum, this must include the dimension, connectivity, and coordinate data, but typically also includes the mesh’s coordinate system, labelling and unit information, minimum and maximum extents, and a list of face indices.
 
 Ucdvar
 : A variable associated with a UCD mesh.
-: This at a minimum must include the variable’s data, centering information (node-centered vs.  zone-centered), and the name of the UCD mesh with which this variable is associated.
+  This at a minimum must include the variable’s data, centering information (node-centered vs.  zone-centered), and the name of the UCD mesh with which this variable is associated.
 : Additional information, such as time, cycle, units, and label can also be included.
 
 Pointmesh
 : A point mesh.
-: At a minimum, this must include dimension and coordinate data.
+  At a minimum, this must include dimension and coordinate data.
 
 Csgmesh
 : A constructive solid geometry (CSG) mesh.
@@ -200,62 +200,63 @@ Defvar
 
 Material
 : An object defining all the materials used in a given mesh.
+  This includes the number of materials present, a list of valid material identifiers, and a zonal-length array which contains the material identifiers for each zone.
+
+Zonelist
 
 Material species
 : Extra material information.
-: A material species is a type of a material.
-: They are used when a given material (i.e. air) may be made up of other materials (i.e. oxygen, nitrogen) in differing amounts.
+  A material species is a type of a material.
+  They are used when a given material (i.e. air) may be made up of other materials (i.e. oxygen, nitrogen) in differing amounts.
 
 Mesh Region Grouping (MRG) tree
 : Generalized mechanism used to define arbitray subsets of a mesh.
-: MRG trees define how zones in the mesh may be grouped into parts, materials, boundary conditions, nodesets or facesets, etc.
+  MRG trees define how zones in the mesh may be grouped into parts, materials, boundary conditions, nodesets or facesets, etc.
 
 Groupel Map
 : A *grouping element* map.
-: Used in concert with an MRG tree to hold problem-sized data defining subsetted regions of meshes.
+  Used in concert with an MRG tree to hold problem-sized data defining subsetted regions of meshes.
 
 Multiblock
 : A way of specifying how a mesh is decomposed into pieces for I/O and computation
 
 Multimesh
 : A set of mesh pieces (usually parallel decomposition) comprising a larger aggregate mesh object.
-: This object contains the names of and types of the meshes in the set.
+  This object contains the names of and types of the meshes in the set.
 
 Multivar
 : A set of variable pieces comprising a larger aggregate variable object.
-: Mesh variable data associated with a multimesh.
+  Mesh variable data associated with a multimesh.
 
 Multimat
 : A set of material pieces.
-: This object contains the names of the materials in the set.
+  This object contains the names of the materials in the set.
 
 Multimatspecies
 : A set of material species.
-: This object contains the names of the material species in the set.
-
-Material information. This includes the number of materials present, a list of valid material identifiers, and a zonal-length array which contains the material identifiers for each zone.
+  This object contains the names of the material species in the set.
 
 Zonelist
 : Zone-oriented connectivity information for a UCD mesh.
-: This object contains a sequential list of nodes which identifies the zones in the mesh, and arrays which describe the shape(s) of the zones in the mesh.
+  This object contains a sequential list of nodes which identifies the zones in the mesh, and arrays which describe the shape(s) of the zones in the mesh.
 
 PHZonelist
 : Arbitrary, polyhedral extension of a zonelist.
 
 Facelist
 : Face-oriented connectivity information for a UCD mesh.
-: This object contains a sequential list of nodes which identifies the *external* faces of a mesh, and arrays which describe the shape(s) of the faces in the mesh.
-: It may optionally include arrays which provide type information for each face.
+  This object contains a sequential list of nodes which identifies the *external* faces of a mesh, and arrays which describe the shape(s) of the faces in the mesh.
+  It may optionally include arrays which provide type information for each face.
 
 Curve
 : X versus Y data.
-: This object must contain at least the domain and range values, along with the number of points in the curve.
-: In addition, a title, variable names, labels, and units may be provided.
+  This object must contain at least the domain and range values, along with the number of points in the curve.
+  In addition, a title, variable names, labels, and units may be provided.
 
 Variable
 : Miscelaneous Array data.
-: This object contains, in addition to the data, the dimensions and data type of the array.
-: This object is not required to be associated with a mesh.
+  This object contains, in addition to the data, the dimensions and data type of the array.
+  This object is not required to be associated with a mesh.
 
 ### Other Silo Objects
 
@@ -265,8 +266,8 @@ Some of the more useful ones are briefly summarized here.
 
 Compound Array
 : A compound array is an abstraction of a Fortran common block.
-: It is also somewhat like a C struct.
-: It is a list of similarly typed by differently named and sized (usually small in size) items that one often treats as a 
+  It is also somewhat like a C struct.
+  It is a list of similarly typed by differently named and sized (usually small in size) items that one often treats as a 
 group (particularly for I/O purposes).
 
 Directory
@@ -322,100 +323,71 @@ integer function dbaddregiona(tree_id, nregn, regn_names, lregn_names,
     type_info_bits, maps_name, lmaps_name, nsegs, seg_ids, seg_lens, seg_types, 
     optlist_id, status)
 
-integer tree_id, nregn, lregn_names, type_info_bits, lmaps_name
-
-integer nsegs, optlist_id, status
-
-integer lregn_names(), seg_ids(), seg_lens(), seg_types()
-
-character* maps_name
-
-character*N regn_names
-
-l<strname>
+    integer tree_id, nregn, lregn_names, type_info_bits, lmaps_name
+    integer nsegs, optlist_id, status
+    integer lregn_names(), seg_ids(), seg_lens(), seg_types()
+    character* maps_name
+    character*N regn_names
 ```
 
+#### About Fortran's `l<strname>` arguments
+
 Wherever the C interface accepts a `char*`, the fortran interface accepts two arguments; the `character*` argument followed by an integer argument indicating the string’s length.
-In the function specifications, it will always be identified with an ell (‘l’) in front of the name of the `character*` argument that comes before it.
+In the function specifications, it will always be identified with an ell (`l`) in front of the name of the `character*` argument that comes before it.
 In the example above, this rule is evident in the `maps_name` and `lmaps_name` arguments.
 
-l<strname>s
+#### About Fortran's `l<strname>s` arguments
 
-Wherever the C interface accepts an array of char* (e.g. char**), the 
-Fortran interface accepts a character*N followed by an array of lengths 
-of the strings. In the above example, this rule is evident by the 
-regn_names and lregn_names arguments. By default, N=32, but 
-the value for N can be changed, as needed by the dbset2dstrlen() 
-method.
+Wherever the C interface accepts an array of `char*` (e.g. `char**`), the Fortran interface accepts a `character*N` followed by an array of lengths of the strings.
+In the above example, this rule is evident by the `regn_names` and `lregn_names` arguments.
+By default, N=32, but the value for N can be changed, as needed by the `dbset2dstrlen()` method.
 
-<object>_id
+#### About Fortran's `<object>_id` arguments
 
-Wherever the C interface accepts a pointer to an abstract Silo object, 
-like the Silo database file handle (DBfile *) or, as in the example above, 
-a DBmrgtree*, the Fortran interface accepts an equivalent pointer_id. A 
-pointer_id is really an integer index into an internally maintained table 
-of pointers to Silo’s objects. In the above example, this rule is evident in 
-the tree_id aand optlist_id arguments.
+Wherever the C interface accepts a pointer to an abstract Silo object, like the Silo database file handle (`DBfile *`) or, as in the example above, a `DBmrgtree*`, the Fortran interface accepts an equivalent *pointer id*.
+A *pointer id* really an integer index into an internally maintained table of pointers to Silo’s objects.
+In the above example, this rule is evident in the `tree_id` aand `optlist_id` arguments.
 
-data_ids
+#### About Fortran's `data_ids` arguments
 
-Wherever the C interface accepts an array of void* (e.g. a void** argu-
-ment), the Fortran interface accepts an array of integer pointer_ids. The 
-Fortran application may use the dbmkptr() function to a create the 
-pointer ids to populate this array. The above example does not demon-
-strate this rule.
+Wherever the C interface accepts an array of `void*` (e.g. a `void**` argument), the Fortran interface accepts an array of integer *pointer ids*.
+The Fortran application may use the `dbmkptr()` function to a create the pointer ids to populate this array.
+The above example does not demonstrate this rule.
 
-status
+#### ABout Fortran's `status` arguments
 
-Wherever the C interface returns integer error information in the return 
-value of the function, the Fortran interface accepts an extra integer 
-argument named status as the last argument in the list. The above exam-
-ple demonstrates this rule.
+Wherever the C interface returns integer error information in the return value of the function, the Fortran interface accepts an extra integer argument named `status` as the last argument in the list.
+The above example demonstrates this rule.
 
-Finally, there are a few function in Silo’s API that are unique to the Fortran 
-interface. Those functions are described in the section of the API manual 
-having to do with Fortran.
+Finally, there are a few function in Silo’s API that are unique to the Fortran interface.
+Those functions are described in the section of the API manual having to do with Fortran.
 
-	1.9.	Using Silo in Parallel
+### Using Silo in Parallel
 
-Silo is a serial library. Nevertheless, it (as well as the tools that use it like 
-VisIt) has several features that enable its effective use in parallel with excel-
-lent scaling behavior. However, using Silo effectively in parallel does 
-require an application to store its data to multiple Silo files; typically 
-between 8 and 64 depending on the number of concurrent I/O channels the 
-application has available.
+Silo is a serial library.
+Nevertheless, it (as well as the tools that use it like VisIt) has several features that enable its effective use in parallel with excellent scaling behavior.
+However, using Silo effectively in parallel does require an application to store its data to multiple Silo files; typically between 8 and 64 depending on the number of concurrent I/O channels the application has available.
 
-The two features that enable Silo to be used effectively in parallel are its 
-ability to create separate namespaces (directories) within a single file and 
-the fact that a multi-block object can span multiple Silo files. With these fea-
-tures, aparallel application can easily divide its processors into N groups 
-and write a separate Silo file for each group.
+The two features that enable Silo to be used effectively in parallel are its ability to create separate namespaces (directories) within a single file and the fact that a multi-block object can span multiple Silo files.
+With these features, aparallel application can easily divide its processors into N groups and write a separate Silo file for each group.
 
-Within a group, each processor in the group writes to its own directory 
-within the Silo file. One and only one processor has write access to the 
-group’s Silo file at any one time. So, I/O is serial within a group. However, 
-because each group has a separate Silo file to write to, each group has one 
-processor writing concurrently with other processors from other groups. So, 
-I/O is parallel across groups.
+Within a group, each processor in the group writes to its own directory within the Silo file.
+One and only one processor has write access to the group’s Silo file at any one time.
+So, I/O is serial within a group.
+However, because each group has a separate Silo file to write to, each group has one processor writing concurrently with other processors from other groups.
+So, I/O is parallel across groups.
 
-After all processors have created all their individual objects in various 
-directories within the each group’s Silo file, one processor is designated to 
-write multi-block objects. The multi-block objects serve as an assembly of 
-the names of all the individual objects written from various processors.
+After all processors have created all their individual objects in various directories within the each group’s Silo file, one processor is designated to write multi-block objects.
+The multi-block objects serve as an assembly of the names of all the individual objects written from various processors.
 
-When N, the number of processor groups, is equal to one, I/O is effectively 
-serial. All the processors write their data to a single Silo file. When N is 
-equal to the number of processors, each processor writes its data to its own, 
-unique Silo file. Both of these extremes are bad for effective and scalable 
-parallel I/O. A good choice for N is the number of concurrent I/O channels 
-available to the application when it is actually running. For many parallel, 
-HPC platforms, this number is typically between 8 and 64.
+When N, the number of processor groups, is equal to one, I/O is effectively serial.
+All the processors write their data to a single Silo file.
+When N is equal to the number of processors, each processor writes its data to its own, unique Silo file.
+Both of these extremes are bad for effective and scalable parallel I/O.
+A good choice for N is the number of concurrent I/O channels available to the application when it is actually running.
+For many parallel, HPC platforms, this number is typically between 8 and 64.
 
-This technique for using a serial I/O library effectively in parallel while 
-being able to tune the number of files concurrently being written to is affec-
-tionately called Poor Man’s Parallel I/O (PMPIO).
+This technique for using a serial I/O library effectively in parallel while being able to tune the number of files concurrently being written to is [*Multiple Independent File (MIF)*](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O. 
 
-There is a separate header file, pmpio.h, with a set of convenience methods 
-to support PMPIO-based parallel I/O with Silo. See “Multi-Block Objects, 
-Parallelism and Poor-Man’s Parallel I/O” on page 154 and See 
-“PMPIO_Init” on page 181 for more information.
+There is a separate header file, pmpio.h, with a set of convenience methods to support PMPIO-based parallel I/O with Silo.
+See “Multi-Block Objects, Parallelism and Poor-Man’s Parallel I/O” on page 154 and See “PMPIO_Init” on page 181 for more information.
