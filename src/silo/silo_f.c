@@ -569,7 +569,7 @@ DBFREEOPTION_FC (int *optlist_id, int *option, int *nval)
         for (i = 0; i < optlist->numopts; i++) {
             if (optlist->options[i] == *option) {
                 cval = optlist->values[i];
-                for (int j = 0; j < *nval; j++)
+                for (j = 0; j < *nval; j++)
                     FREE(cval[j]);
                 FREE(cval);
                 API_RETURN(0);
