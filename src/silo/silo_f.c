@@ -532,7 +532,7 @@ DBADDCAOPT_FC (int *optlist_id, int *option,
 }
 
 /*-------------------------------------------------------------------------
- * Routine                                                  DBFREEOPTION_FC
+ * Routine                                                   DBFREECAOPT_FC
  * 
  * Purpose
  *     Free a character array option to the given option list.
@@ -553,7 +553,7 @@ DBADDCAOPT_FC (int *optlist_id, int *option,
  *
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
-DBFREEOPTION_FC (int *optlist_id, int *option, int *nval)
+DBFREECAOPT_FC (int *optlist_id, int *option, int *nval)
 {
     char          **cval = NULL;
     DBoptlist     *optlist = NULL;
