@@ -80,7 +80,8 @@ def StartNewSection(i, s, lines):
     while i < len(lines) and not IsMethodHeader(i+1, lines):
         OutputLineWithFormatting(mdfile, lines[i])
         i += 1
-    mdfile.write("\n\n")
+    mdfile.write("---\n")
+    mdfile.write('<br>'*40)
 
     return i, s, mdfile
 
