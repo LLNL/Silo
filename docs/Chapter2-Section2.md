@@ -89,8 +89,7 @@ The functions described in this section of the manual include...
   The individual mesh names referenced here `CANNOT` be the names of other multi-block meshes.
   In other words, it is not valid to create a multi-mesh that references other multi-meshes.
 
-  For example, in the case where the are 6 blocks to be assembled into a larger mesh named 'multi-mesh' in the file 'foo.
-  silo' and the blocks are stored in three files as in the figure below,
+  For example, in the case where the are 6 blocks to be assembled into a larger mesh named 'multi-mesh' in the file 'foo.silo' and the blocks are stored in three files as in the figure below,
 
   Figure 0-7: Strings for multi-block objects.
 
@@ -117,9 +116,7 @@ The functions described in this section of the manual include...
   Similarly, when the mesh consists of blocks of all the same type, you may pass `NULL` for the `meshtypes` argumnt and instead use the `DBOPT_MB_BLOCK_TYPE` option to specify a single, constant block type for all blocks.
   This option can result in important savings for large numbers of blocks.
 
-  Finally, note that what is described here for the mulitmesh object in the way of `name` for the individual blocks applies to all multi-block objects (e.
-  g.
-  DBPutMulti<whatever>).
+  Finally, note that what is described here for the mulitmesh object in the way of `name` for the individual blocks applies to all multi-block objects (e.g. DBPutMulti<whatever>).
 
   Notes:
 
@@ -222,8 +219,7 @@ The functions described in this section of the manual include...
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -270,9 +266,11 @@ The functions described in this section of the manual include...
 * **Description:**
 
   Note that the functionality this object provides is now more efficiently and conveniently handled via a Mesh Region Grouping (MRG) tree.
-  Users are encouraged to use `MRG` trees as an alternative to `DBPutMultimeshadj()`. See "DBMakeMrgtree" on page `196`.
+  Users are encouraged to use `MRG` trees as an alternative to `DBPutMultimeshadj()`.
+  See "DBMakeMrgtree" on page `196`.
 
-  DBPutMultimeshadj is another Down-stream Performance Option (See "DBPutMultimesh" on page 2-159). It is an alternative to including ghost-zones (See "DBPutMultimesh" on page 2-159) in the mesh and can therefore help to reduce file size, particularly for unstructured meshes.
+  DBPutMultimeshadj is another Down-stream Performance Option (See "DBPutMultimesh" on page 2-159).
+  It is an alternative to including ghost-zones (See "DBPutMultimesh" on page 2-159) in the mesh and can therefore help to reduce file size, particularly for unstructured meshes.
 
   A multi-mesh adjacency object informs down-stream, post-processing tools such as VisIt how nodes and/or zones, should be shared between neighboring mesh pieces to eliminate post-processing discontinuity artifacts along the boundaries between the pieces.
   If neither this information is provided nor ghost zones are stored in the file, post-processing tools must then infer this information from global node or zone ids (if they exist) or, worse, by matching coordinates which is a time-consuming process.
@@ -380,8 +378,7 @@ The functions described in this section of the manual include...
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -462,10 +459,9 @@ The functions described in this section of the manual include...
 
   
 
-  Regarding the `DBOPT_EXTENTS` option, an extent tuple is a tuple of the variable's minimum value(s) followed by the variable's maximum value(s). If the variable is a single, scalar variable, each extent tuple will be 2 values of the form {min,max}. Thus, `DBOPT_EXTENTS_SIZE` will be 2.
-  If the variable consists of nvars subvariables (e.
-  g.
-  the nvars argument in any of DBPutPointvar, DBPutQuadvar, `DBPutUcdvar` is greater than 1), then each extent tuple is 2*nvars values of each subvariable's minimum value followed by each subvariable's maximum value.
+  Regarding the `DBOPT_EXTENTS` option, an extent tuple is a tuple of the variable's minimum value(s) followed by the variable's maximum value(s).
+  If the variable is a single, scalar variable, each extent tuple will be 2 values of the form {min,max}. Thus, `DBOPT_EXTENTS_SIZE` will be 2.
+  If the variable consists of nvars subvariables (e.g. the nvars argument in any of DBPutPointvar, DBPutQuadvar, `DBPutUcdvar` is greater than 1), then each extent tuple is 2*nvars values of each subvariable's minimum value followed by each subvariable's maximum value.
   In this case, `DBOPT_EXTENTS_SIZE` will be 2*nvars.
 
   For example, if we have a multi-var object of a 3D velocity vector on 2 blocks, then `DBOPT_EXTENTS_SIZE` will be 2*3=6 and the `DBOPT_EXTENTS` array will be an array of 2*6 doubles organized as follows...
@@ -517,8 +513,7 @@ The functions described in this section of the manual include...
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -641,8 +636,7 @@ The functions described in this section of the manual include...
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -757,8 +751,7 @@ The functions described in this section of the manual include...
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
   
 
@@ -816,8 +809,7 @@ The functions described in this section of the manual include...
   When the file is closed with `DBClose()` all memory used by the file is released.
 
   This method is not compiled into libsilo[h5].a.
-  Instead, you are required to obtain the bcastopen.
-  c source file (which is installed to the include dir of the Silo install point) and compile it into your application and then include a line of this form...
+  Instead, you are required to obtain the bcastopen.c source file (which is installed to the include dir of the Silo install point) and compile it into your application and then include a line of this form...
 
   extern `DBfile` *DBOpenByBcast(char const *, MPI_Comm, int);
 
@@ -825,8 +817,7 @@ The functions described in this section of the manual include...
 
   in your application.
 
-  Note that you can find an example of its use in the Silo source release "tests" directory in the source file "bcastopen_test.
-  c"
+  Note that you can find an example of its use in the Silo source release "tests" directory in the source file "bcastopen_test.c"
 
 
 ---
@@ -876,9 +867,7 @@ The functions described in this section of the manual include...
 * **Description:**
 
   The `PMPIO` interface was designed to be separate from the Silo library.
-  To use it, you must include the `PMPIO` header file, pmpio.
-  h, after the `MPI` header file, mpi.
-  h, in your application.
+  To use it, you must include the `PMPIO` header file, pmpio.h, after the `MPI` header file, mpi.h, in your application.
   This interface was designed to work with any serial library and not Silo specifically.
   For example, these same routines can be used with raw HDF5 or PDB files if so desired.
 
@@ -906,9 +895,7 @@ The functions described in this section of the manual include...
 
   
 
-  /* local work (e.
-  g.
-  DBPutXXX() calls) for this processor */
+  /* local work (e.g. `DBPutXXX()` calls) for this processor */
 
   .
 
@@ -936,9 +923,8 @@ The functions described in this section of the manual include...
 
   Poor Man's Parallel I/O is a simple and effective I/O strategy that has been used by codes like Ale3d and `SAMRAI` for many years and has shown excellent scaling behavior.
   A drawback of this approach is, of course, that multiple files are generated.
-  However, when used appropriately, this number of files is typically small (e.
-  g.
-  8 to 64). In addition, our experience has been that concurrent, parallel I/O to a single file which also supports sufficient variation in size, shape and pattern of I/O requests from processor to processor is a daunting challenge to perform scalably.
+  However, when used appropriately, this number of files is typically small (e.g. 8 to 64).
+  In addition, our experience has been that concurrent, parallel I/O to a single file which also supports sufficient variation in size, shape and pattern of I/O requests from processor to processor is a daunting challenge to perform scalably.
   So, while Poor Man's Parallel I/O is not truly concurrent, parallel I/O, it has demonstrated that it is not only highly flexible and highly scalable but also very easy to implement and for these reasons, often a superior choice to true, concurrent, parallel I/O.
 
 
@@ -1117,15 +1103,13 @@ The functions described in this section of the manual include...
 
   All processors should call this function as the next `PMPIO` function to call following a call to PMPIO_Init().
 
-  For all processors that are the first processors in their groups, this function will return immediately after having called the file creation callback specified in PMPIO_Init(). Typically, this callback will have created a file with the name `filename` and a directory in the file with the name `dirname` as well as having set the current working directory to `dirname`.
+  For all processors that are the first processors in their groups, this function will return immediately after having called the file creation callback specified in PMPIO_Init().
+  Typically, this callback will have created a file with the name `filename` and a directory in the file with the name `dirname` as well as having set the current working directory to `dirname`.
 
   For all processors that are not the first in their groups, this call will block, waiting for the processor preceding it to finish its work on the Silo file for the group and pass the baton to the next processor.
 
-  A typical naming convention for `filename` is something like "my_file_%03d.
-  silo" where the "%03d" is replaced with the group rank (See "PMPIO_GroupRank" on page `193`.
-  ) of the processor.
-  Likewise, a typical naming convention for `dirname` is something like "domain_%03d" where the "%03d" is replaced with the rank-in-group (See "PMPIO_RankInGroup" on page `194`.
-  ) of the processor.
+  A typical naming convention for `filename` is something like "my_file_%03d.silo" where the "%03d" is replaced with the group rank (See "PMPIO_GroupRank" on page `193`.) of the processor.
+  Likewise, a typical naming convention for `dirname` is something like "domain_%03d" where the "%03d" is replaced with the rank-in-group (See "PMPIO_RankInGroup" on page `194`.) of the processor.
 
 
 ---

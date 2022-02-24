@@ -7,9 +7,7 @@ MRG trees describe the decomposition of a mesh into various regions such as part
 Groupel maps describe the, problem sized, details of the subsetted regions.
 MRG trees and groupel maps work hand-in-hand in efficiently (and scalably) characterizing the various subsets of a mesh.
 
-MRG trees are associated with (e.
-g.
-bound to) the mesh they describe using the `DBOPT_MRGTREE_NAME` optlist option in the `DBPutXxxmesh()` calls.
+MRG trees are associated with (e.g. bound to) the mesh they describe using the `DBOPT_MRGTREE_NAME` optlist option in the `DBPutXxxmesh()` calls.
 MRG trees are used both to describe a multi-mesh object and then again, to describe individual pieces of the multi-mesh.
 
 In addition, once an `MRG` tree has been defined for a mesh, variables to be associated with the mesh can be defined on only specific subsets of the mesh using the `DBOPT_REGION_PNAMES` optlist option in the `DBPutXxxvar()` calls.
@@ -85,17 +83,14 @@ The functions described in this section of the `API` manual are...
   :---
 
 
-  A multi-block grouping is the assignment of the blocks of a multi-block mesh (e.
-  g.
-  the mesh objects created with `DBPutXxxmesh()` calls and enumerated by name in a `DBPutMultimesh()` call) to one of several groups.
+  A multi-block grouping is the assignment of the blocks of a multi-block mesh (e.g. the mesh objects created with `DBPutXxxmesh()` calls and enumerated by name in a `DBPutMultimesh()` call) to one of several groups.
   Each group in the grouping represents several blocks of the multi-block mesh.
   Historically, support for such a grouping in Silo has been limited in a couple of ways.
   First, only a single grouping could be defined for a multi-block mesh.
   Second, the grouping could not be hierarchically defined.
   MRG trees, however, support both multiple groupings and hierarchical groupings.
 
-  In the `MRG` tree, define a child node of the root named "groupings.
-  " All desired groupings shall be placed under this node in the tree.
+  In the `MRG` tree, define a child node of the root named "groupings." All desired groupings shall be placed under this node in the tree.
 
   For each desired grouping, define a groupel map where the number of segments of the map is equal to the number of desired groups.
   Map segment i will be of groupel type `DB_BLOCKCENT` and will enumerate the blocks to be assigned to group i.
@@ -104,8 +99,7 @@ The functions described in this section of the `API` manual are...
   Figure 0-9: Examples of `MRG` trees for single and multiple groupings.
 
   In the diagram above, for the multiple grouping case, two groupel map objects are defined; one for each grouping.
-  For the 'A' grouping, the groupel map consists of 4 segments (all of which are of groupel type DB_BLOCKCENT) one for each grouping in 'side', 'top', 'bottom' and 'front.
-  ' Each segment identifies the blocks of the multi-mesh (at the root of the `MRG` tree) that are in each of the 4 groups.
+  For the 'A' grouping, the groupel map consists of 4 segments (all of which are of groupel type DB_BLOCKCENT) one for each grouping in 'side', 'top', 'bottom' and 'front.' Each segment identifies the blocks of the multi-mesh (at the root of the `MRG` tree) that are in each of the 4 groups.
   For the 'B' grouping, the groupel map consists of 2 segments (both of type DB_BLOCKCENT), for each grouping in 'skinny' and 'fat'. Each segment identifies the blocks of the multi-mesh that are in each group.
 
   If, in addition to defining which blocks are in which groups, an application wishes to specify specific nodes and/or zones of the group that comprise each block, additional groupel maps of type `DB_NODECENT` or `DB_ZONECENT` are required.
@@ -117,16 +111,13 @@ The functions described in this section of the `API` manual are...
   Multi-block neighbor connectivity information describes the details of how different blocks of a multi-block mesh abut with shared nodes and/or adjacent zones.
   For a given block, multi-block neighbor connectivity information lists the blocks that share nodes (or have adjacent zones) with the given block and then, for each neighboring block, also lists the specific shared nodes (or adjacent zones).
 
-  If the underlying mesh type is structured (e.
-  g.
-  DBPutQuadmesh() calls were used to create the individual mesh blocks), multi-block neighbor connectivity information can be scalably represented entirely at the multi-block level in an `MRG` tree.
+  If the underlying mesh type is structured (e.g. `DBPutQuadmesh()` calls were used to create the individual mesh blocks), multi-block neighbor connectivity information can be scalably represented entirely at the multi-block level in an `MRG` tree.
   Otherwise, it cannot and it must be represented at the individual block level in the `MRG` tree.
   This section will describe both scenarios.
   Note that these scenarios were previously handled with the now deprecated `DBPutMultimeshadj()` call.
   That call, however, did not have favorable scalaing behavior for the unstructured case.
 
-  The first step in defining multi-block connectivity information is to define a top-level `MRG` tree node named "neighbors.
-  " Underneath this point in the `MRG` tree, all the information identifying multi-block connectivity will be added.
+  The first step in defining multi-block connectivity information is to define a top-level `MRG` tree node named "neighbors." Underneath this point in the `MRG` tree, all the information identifying multi-block connectivity will be added.
 
   Next, create a groupel map with number of segments equal to the number of blocks.
   Segment i of the map will by of type `DB_BLOCKCENT` and will enumerate the neighboring blocks of block i.
@@ -139,8 +130,8 @@ The functions described in this section of the `API` manual are...
   For the unstructured case, it is necessary to store groupel maps that enumerate shared nodes between shared blocks on `MRG` trees that are associated with the individual blocks and **not** the multi-block mesh itself.
   However, the process is otherwise the same.
 
-  In the `MRG` tree to be associated with a given mesh block, create a child of the root named "neighbors.
-  " For each neighboring block of the given mesh block, define a groupel map of type DB_NODECENT, enumerating the nodes in the current block that are shared with another block (or of type `DB_ZONECENT` enumerating the nodes in the current block that abut another block). Underneath this node in the `MRG` tree, create a region representing each neighboring block of the given mesh block and associate the appropriate groupel map with each region.
+  In the `MRG` tree to be associated with a given mesh block, create a child of the root named "neighbors." For each neighboring block of the given mesh block, define a groupel map of type DB_NODECENT, enumerating the nodes in the current block that are shared with another block (or of type `DB_ZONECENT` enumerating the nodes in the current block that abut another block).
+  Underneath this node in the `MRG` tree, create a region representing each neighboring block of the given mesh block and associate the appropriate groupel map with each region.
 
   Multi-Block, Structured Adaptive Mesh Refinement:
 
@@ -150,8 +141,7 @@ The functions described in this section of the `API` manual are...
   An `MRG` tree, or portion thereof, is used to define which blocks of the multi-block mesh comprise which levels in the `AMR` hierarchy as well as which blocks are refinements of other blocks.
 
   First, the grouping of blocks into levels is identical to multi-block grouping, described previously.
-  For the specific purpose of grouping blocks into levels, a different top-level node in the `MRG` needs to be defined named "amr-levels.
-  " Below this node in the `MRG` tree, there should be a set of regions, each region representing a separate refinement level.
+  For the specific purpose of grouping blocks into levels, a different top-level node in the `MRG` needs to be defined named "amr-levels." Below this node in the `MRG` tree, there should be a set of regions, each region representing a separate refinement level.
   A groupel map of type `DB_BLOCKCENT` with number of segments equal to number of levels needs to be defined and associated with each of the regions defined under the "amr-levels' region.
   The ith segment of the map will enumerate those blocks that belong to the region representing level i.
   In addition, an `MRG` variable defining the refinement ratios for each level named "amr-ratios" must be defined on the regions defining the levels of the `AMR` mesh.
@@ -210,8 +200,7 @@ The functions described in this section of the `API` manual are...
 
 * **Description:**
 
-  Adds a single region node to an `MRG` `tree` below the current working region (See "DBSetCwr" on page `204`.
-  ).
+  Adds a single region node to an `MRG` `tree` below the current working region (See "DBSetCwr" on page `204`.).
 
   If you need to add a large number of similarly purposed region nodes to an `MRG` tree, consider using the more efficient `DBAddRegionArray()` function although it does have some limitations with respect to the kinds of groupel maps it can reference.
 
@@ -297,11 +286,9 @@ The functions described in this section of the `API` manual are...
   Adding a region array is a substantially more efficient way to add regions to an `MRG` `tree` than adding them one at a time especially when a printf-style naming convention is used to specify the region names.
 
   The existence of a percent character ('%') anywhere in regn_names[0] indicates that a printf-style namescheme is to be used.
-  The format of a printf-style namescheme to specify region names is described in the documentation of `DBMakeNamescheme()` (See "DBMakeNamescheme" on page `209`.
-  )
+  The format of a printf-style namescheme to specify region names is described in the documentation of `DBMakeNamescheme()` (See "DBMakeNamescheme" on page `209`.)
 
-  Note that the names of regions within an `MRG` `tree` are not required to obey the same variable naming conventions as ordinary Silo objects (See "DBVariableNameValid" on page 14.
-  ) except that `MRG` region names can in no circumstance contain either a semi-colon character (';') or a new-line character ('\n').
+  Note that the names of regions within an `MRG` `tree` are not required to obey the same variable naming conventions as ordinary Silo objects (See "DBVariableNameValid" on page 14.) except that `MRG` region names can in no circumstance contain either a semi-colon character (';') or a new-line character ('\n').
 
 
 ---
@@ -453,8 +440,7 @@ The functions described in this section of the `API` manual are...
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -520,9 +506,7 @@ The functions described in this section of the `API` manual are...
 
 * **Description:**
 
-  A namescheme defines a mapping between `...` non-negative integers (e.
-  g.
-  the natural numbers) `...` a sequence of strings such that each string to be associated with a given integer `...` can be generated from printf-style formatting involving simple expressions.
+  A namescheme defines a mapping between `...` non-negative integers (e.g. `...` natural numbers) `...` a sequence of strings such that each string to be associated with a given integer `...` can be generated from printf-style formatting involving simple expressions.
   Nameschemes `...` most often used to define names of regions in region arrays or to define names of multi-block objects.
 
   The format of a printf-style namescheme is as follows.
@@ -543,10 +527,10 @@ The functions described in this section of the `API` manual are...
 
   It supports references to external, integer valued arrays introduced `...` a `...` character appearing before an array's name `...` external, string valued arrays introduced `...` a `...` character appearing before an array's name.
 
-  Finally, `...` special operator `...` appearing in an expression represents a natural number within `...` sequence of names (zero-origin index). `...` below `...` some examples.
+  Finally, `...` special operator `...` appearing in an expression represents a natural number within `...` sequence of names (zero-origin index).
+  See below `...` some examples.
 
-  Except `...` singly quoted strings which evaluate to a literal string suitable `...` output `...` a %s type conversion specifier, `...` $-type external array references which evaluate to an external string, `...` other expressions `...` treated as evaluating to integer values suitable `...` any of `...` integer conversion specifiers (%[ouxXdi]) which `...` be used in `...` format substring.
-  .
+  Except `...` singly quoted strings which evaluate to a literal string suitable `...` output `...` a %s type conversion specifier, `...` $-type external array references which evaluate to an external string, `...` other expressions `...` treated as evaluating to integer values suitable `...` any of `...` integer conversion specifiers (%[ouxXdi]) which `...` be used in `...` format substring..
 
   **&nbsp;**
 
@@ -574,8 +558,7 @@ The functions described in this section of the `API` manual are...
 
   Use `DBFreeNamescheme()` to free up `...` space associated with a namescheme.
 
-  Also note that there `...` numerous examples of nameschemes in "tests/nameschemes.
-  c" in `...` Silo source release tarball.
+  Also note that there `...` numerous examples of nameschemes in "tests/nameschemes.c" in `...` Silo source release tarball.
 
 
 ---
@@ -606,9 +589,7 @@ The functions described in this section of the `API` manual are...
 * **Returned value:**
 
   A string representing the generated name.
-  If there are problems with the namescheme, the string could be of length zero (e.
-  g.
-  the first character is a null terminator).
+  If there are problems with the namescheme, the string could be of length zero (e.g. the first character is a null terminator).
 
 
 
@@ -738,8 +719,7 @@ The functions described in this section of the `API` manual are...
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 
@@ -848,8 +828,7 @@ The functions described in this section of the `API` manual are...
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 
@@ -1021,7 +1000,8 @@ The functions described in this section of the `API` manual are...
 
   The free functions release the given structure as well as all memory pointed to by these structures.
   This is the preferred method for releasing these structures.
-  There are counterpart functions for allocating structures of a given type (see DBAlloc…). The functions will not fail if a `NULL` pointer is passed to them.
+  There are counterpart functions for allocating structures of a given type (see DBAlloc…).
+  The functions will not fail if a `NULL` pointer is passed to them.
 
 
 ---

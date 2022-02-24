@@ -6,52 +6,34 @@ Here, we briefly describe Silo's Python interface.
 
 In order for an installation of Silo to have the Python interface, Silo must have been configured with --enable-pythonmodule and **not** with --disable-shared Autoconf configuration switches.
 
-The Python interface will be in the lib dir of the Silo installation, named Silo.
-so.
+The Python interface will be in the lib dir of the Silo installation, named Silo.so.
 To use it, Python needs to be told where to find it.
-You can do this a couple of ways; through the `PYTHONPATH` environment variable or by explicitly adding the Silo installation lib dir to Python's path using sys.
-path.
-append(). For example, if Silo is installed to /foo/bar, this works...
+You can do this a couple of ways; through the `PYTHONPATH` environment variable or by explicitly adding the Silo installation lib dir to Python's path using sys.path.append().
+For example, if Silo is installed to /foo/bar, this works...
 
 % env PYTHONPATH=/foo/bar/lib python
 
-Python 2.
-7.
-10 (default, Oct 23 2015, 19:19:21)
+Python 2.7.10 (default, Oct 23 2015, 19:19:21)
 
-[GCC 4.
-2.
-1 Compatible Apple `LLVM` 7.
-0.
-0] on darwin
+[GCC 4.2.1 Compatible Apple `LLVM` 7.0.0] on darwin
 
 Type "help", "copyright", "credits" or "license" for more info.
 
 >>> import Silo
 
-Or, if you prefer to use sys.
-path.
-append...
+Or, if you prefer to use sys.path.append...
 
 python
 
-Python 2.
-7.
-10 (default, Oct 23 2015, 19:19:21)
+Python 2.7.10 (default, Oct 23 2015, 19:19:21)
 
-[GCC 4.
-2.
-1 Compatible Apple `LLVM` 7.
-0.
-0] on darwin
+[GCC 4.2.1 Compatible Apple `LLVM` 7.0.0] on darwin
 
 Type "help", "copyright", "credits" or "license" for more info.
 
 >>> import sys
 
->>> sys.
-path.
-append("/foo/bar/lib")
+>>> sys.path.append("/foo/bar/lib")
 
 
 
@@ -143,9 +125,8 @@ append("/foo/bar/lib")
 
 * **Description:**
 
-  Returns a Python dictionary object for a Silo high level object (e.
-  g.
-  not a primitive array). This method cannot be used to read the contents of a primitive array.
+  Returns a Python dictionary object for a Silo high level object (e.g. not a primitive array).
+  This method cannot be used to read the contents of a primitive array.
   It can be used for any object the Silo C interface's `DBGetObject()` would also be used.
   If object bulk data is not also read, then the dictionary members for those sub-objects will contain a string holding the path of either a sub-object or a primitive array.
   Note that on the HDF5 driver, if friendly HDF5 names were not used to create the file, then the string paths for these sub-objects are often cryptic references to primitive arrays in the hidden /.silo directory.
@@ -240,10 +221,7 @@ append("/foo/bar/lib")
 
   This method will write any Python dictionary object to a Silo file as a Silo object.
   Here's the rub.
-  Readers employing Silo's high level interface (e.
-  g.
-  DBGetUcdmesh, DBGetQuadvar, etc.
-  ) will be able recognize an object so written if and only if the dict object's structure matches a known high-level Silo object.
+  Readers employing Silo's high level interface (e.g. DBGetUcdmesh, DBGetQuadvar, etc.) will be able recognize an object so written if and only if the dict object's structure matches a known high-level Silo object.
 
   So, you can use this method to write objects that can be read later via Silo's high-level object methods such `DBGetUcdmesh` and DBGetMaterial, etc.
   as long as the Python dictionary's members match what Silo expects.
@@ -282,9 +260,7 @@ append("/foo/bar/lib")
 
   This method will write a primitve array to a Silo file.
   However, it presently handles only one dimensional tuples.
-  Furthermore, the tuples must be consistent in type (e.
-  g.
-  all floats or all ints).
+  Furthermore, the tuples must be consistent in type (e.g. all floats or all ints).
 
 
 ---

@@ -9,10 +9,8 @@ In addition, applications using Silo's `JSON` interface will have to link with t
 (-I<silo-install>/json/include -L<silo-install>/json/lib -ljson).
 
 JSON stands for JavaScript Object Notation.
-You can learn more about `JSON` at json.
-org.
-You can learn more about the json-c library at https://github.
-com/json-c/json-c/wiki.
+You can learn more about `JSON` at json.org.
+You can learn more about the json-c library at https://github.com/json-c/json-c/wiki.
 
 Silo's `JSON` interface consists of two parts.
 The first part is just the json-c library interface which includes methods such as json_object_new_int() which creates a new integer valued `JSON` object and json_object_to_json_string() which returns an ascii string representation of a `JSON` object as well as many other methods.
@@ -38,8 +36,7 @@ Another extension of `JSON` we have defined for Silo is a binary format for seri
 Although `JSON` implementations other than json-c also define a binary format (see for example, BSON) we have defined one here as an extension to json-c.
 Silo's binary format can be used, for example, by a parallel application to conveniently send Silo objects between processors by serializing to a binary buffer at the sender and then unserializing at the receiver.
 
-Any application wishing to use the `JSON` Silo interface must include the silo_json.
-h header file.
+Any application wishing to use the `JSON` Silo interface must include the silo_json.h header file.
 
 
 

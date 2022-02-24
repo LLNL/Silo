@@ -45,10 +45,8 @@ This section of the manual describes only the functions to create and manage opt
   The `DBMakeOptlist` function allocates memory for an option list and initializes it.
   Use the function `DBAddOption` to populate the option list structure, and `DBFreeOptlist` to free it.
 
-  In releases of Silo prior to 4.
-  10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
-  However, in version 4.
-  10, the library will silently just re-allocate the optlist to accommodate more options.
+  In releases of Silo prior to 4.10, if the caller accidentally added more options to an optlist than it was originally created for, an error would be generated.
+  However, in version 4.10, the library will silently just re-allocate the optlist to accommodate more options.
 
 
 ---
@@ -100,10 +98,8 @@ This section of the manual describes only the functions to create and manage opt
   The `DBAddOption` function adds an option/value pair to an `option` list.
   Several of the output functions accept `option` lists to provide information of an optional nature.
 
-  In releases of Silo prior to 4.
-  10, if the caller accidentally added more options to an `optlist` than it was originally created for, an error would be generated.
-  However, in version 4.
-  10, the library will silently just re-allocate the `optlist` to accommodate more options.
+  In releases of Silo prior to 4.10, if the caller accidentally added more options to an `optlist` than it was originally created for, an error would be generated.
+  However, in version 4.10, the library will silently just re-allocate the `optlist` to accommodate more options.
 
 
 ---

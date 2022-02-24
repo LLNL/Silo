@@ -300,8 +300,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
   For example, if you have a DBfile* `pointer` for a Silo database file and wish to pass this object to some Fortran function(s), the coding pattern would look like the following...
 
-  DBfile *db = DBOpen("foo.
-  silo", DB_UNKNOWN, DB_APPEND);
+  DBfile *db = DBOpen("foo.silo", DB_UNKNOWN, DB_APPEND);
 
   .
 

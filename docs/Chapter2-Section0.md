@@ -129,7 +129,8 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  DBShowErrors returns nothing (void). It cannot fail.
+  DBShowErrors returns nothing (void).
+  It cannot fail.
 
 
 
@@ -201,7 +202,8 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Description:**
 
-  Returns the function pointer of the current error function set in the most recent previous call to `DBShowErrors()`. Testing whether we can type into this page and save it.
+  Returns the function pointer of the current error function set in the most recent previous call to `DBShowErrors()`.
+  Testing whether we can type into this page and save it.
 
 
 ---
@@ -239,11 +241,8 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   This is a convenience function for Silo applications to check whether a given variable name they wish to use will be considered valid by Silo.
 
-  The only valid characters that can appear in a Silo variable name are all alphanumerics (e.
-  g.
-  [a-zA-Z0-9]) and the underscore (e.
-  g.
-  '_'). If a candidate variable name contains any characters other than these, that variable name is considered invalid.
+  The only valid characters that can appear in a Silo variable name are all alphanumerics (e.g. [a-zA-Z0-9]) and the underscore (e.g. '_').
+  If a candidate variable name contains any characters other than these, that variable name is considered invalid.
   If that variable name is ever used in a call to create an object in a Silo file, the call will fail with error `E_INVALIDNAME`.
 
 
@@ -307,8 +306,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  Returns 0 on success, -1 on failure.
-  .
+  Returns 0 on success, -1 on failure..
 
 
 
@@ -465,8 +463,7 @@ These include such things as error handling, requiring Silo to do extra work to 
   For example, a point mesh with no points or a ucd variable with no variable arrays.
   This requirement has been driven by the need to scale to larger problems and the use of nameschemes (see "DBMakeNamescheme" on page 209) in combination with meshes and variables with missing blocks.
 
-  Historically, such an operation has been considered an error by the Silo library and prevented.
-  But, that has been largely an overly cautious restriction in Silo to avert anticipated and not necessarily any real problems.
+  Historically, such an operation has been considered an error by the Silo library and prevented.But, that has been largely an overly cautious restriction in Silo to avert anticipated and not necessarily any real problems.
   DBSetAllowEmptyObjects with a non-zero argument enables the Silo library to by-pass these checks.
 
 
@@ -542,8 +539,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   This function's original intention may have been to convert `ONLY` double precision arrays to single precision.
   However, the PDB driver was apparently never designed that way and the PDB driver's behavior sort of established the defacto meaning of `DBForceSingle`.
-  Consequently, as of Silo version 4.
-  8 the HDF5 driver obeys these same semantics as well.
+  Consequently, as of Silo version 4.8 the HDF5 driver obeys these same semantics as well.
   Though, in fact the HDF5 driver was written to support the original intention of `DBForceSingle` and it worked in this (buggy) fashion for many years before real problems with it were encountered.
 
   This method is typically used by downstream, post-processing tools to reduce memory requirements.
@@ -761,14 +757,14 @@ These include such things as error handling, requiring Silo to do extra work to 
 * **Description:**
 
   If checksums are enabled, whenever Silo writes data, it will compute checksums on the data in memory and store these checksums with the data in the file.
-  Note that during a write call, in no circumstance will Silo re-read data written to confirm it was written correctly (e.
-  g.
-  it gets back what it wrote). In other words, Silo will not detect checksum errors on writes.
+  Note that during a write call, in no circumstance will Silo re-read data written to confirm it was written correctly (e.g. it gets back what it wrote).
+  In other words, Silo will not detect checksum errors on writes.
   It will detect checksum errors only on reads, only if checksums were actually computed and stored with the data when it was written and only when checksums are indeed enabled.
 
   If checksums are enabled, whenever Silo reads data `AND` the data it is reading has checksums stored in the file, it will compute and compare checksums.
   If the checksums computed on read do not agree with the checksums stored in the file, the Silo call resulting in the data read will fail.
-  The error, E_CHECKSUM, will be set (See "DBShowErrors" on page 2-11). Note that because checksums are not checked on write, there is no foolproof way to detect whether a read has failed because the data was corrupted when it was originally written or because the read itself has failed.
+  The error, E_CHECKSUM, will be set (See "DBShowErrors" on page 2-11).
+  Note that because checksums are not checked on write, there is no foolproof way to detect whether a read has failed because the data was corrupted when it was originally written or because the read itself has failed.
 
   Checksum checks are supported `ONLY` on the HDF5 driver.
   The PDB driver `DOES` NOT support checksum checks.
@@ -869,9 +865,7 @@ These include such things as error handling, requiring Silo to do extra work to 
   Including "ERRMODE=FAIL" in the compression `options` string tells Silo to fail the write and return `E_COMPRESSION` error for the operation.
 
   The second is the minimum compression ratio to be achieved by compressing the data.
-  It is specified as "MINRATIO=<float>". For example, including "MINRATIO=2.
-  5" in the compression `options` string tells Silo that all data must be compressed by at least a factor of 2.
-  5:1.
+  It is specified as "MINRATIO=<float>". For example, including "MINRATIO=2.5" in the compression `options` string tells Silo that all data must be compressed by at least a factor of 2.5:1.
   If it is unable the compress by at least this amount, Silo will either fallback or fail the write depending on the `ERRMODE` setting.
 
   The remaining paragraphs describe compression algorithm specific `options`.
@@ -880,7 +874,8 @@ These include such things as error handling, requiring Silo to do extra work to 
   GZIP recognizes the LEVEL=<int>, compression parameter.
   The compression level is an integer from 0 to 9, where 0 results in the fastest compression performance but at the expense of lower compression ratios.
   Likewise, a level of 9 results in the slowest compression performance but with possibly better compression ratios.
-  If the "LEVEL=<int>" keyword does not appear in the `options` string or specifies invalid values, the default is level one (1). The `GZIP` method of compression is applied independently to float and integer data for all types of meshes and variables.
+  If the "LEVEL=<int>" keyword does not appear in the `options` string or specifies invalid values, the default is level one (1).
+  The `GZIP` method of compression is applied independently to float and integer data for all types of meshes and variables.
   It is also guaranteed to be available to all Silo clients.
 
   SZIP compression: is enabled using "METHOD=SZIP" in the `options` string.
@@ -888,26 +883,20 @@ These include such things as error handling, requiring Silo to do extra work to 
   SZIP recognizes the BLOCK=<int>, and MASK={EC|NN} parameters.
   The BLOCK=<int>, takes an integer value from 0 to 32, which is a blocking size and must be even and not greater than 32, with typical values being 8, 10, 16, or 32.
   This parameter affects the compression ratio; the more values vary, the smaller this number should be to achieve better performance.
-  The MASK=EC, selects entropy coding method, this is best suited for data that has been processed, working best for small numbers.
-  MASK=NN, selects the nearest neighbor coding method, preprocesses the data then applies the EC method as above.
-  The default parameters for `SZIP` compression are "METHOD=SZIP BLOCK=4 MASK=NN". If in a subsequent write operation (DBPutXXX, DBWrite, etc.
-  ) the value for `BLOCK` is bigger than the total number of elements in a dataset, the write will fail.
+  The MASK=EC, selects entropy coding method, this is best suited for data that has been processed, working best for small numbers.MASK=NN, selects the nearest neighbor coding method, preprocesses the data then applies the EC method as above.
+  The default parameters for `SZIP` compression are "METHOD=SZIP BLOCK=4 MASK=NN". If in a subsequent write operation (DBPutXXX, DBWrite, etc.) the value for `BLOCK` is bigger than the total number of elements in a dataset, the write will fail.
   This means that you should take care not to have compression turned on when doing small writes.
   To achieve optimal performance for `SZIP` compression, it is recommended that one select a value for `BLOCK` that is an integral divisor of the dataset's fastest-changing dimension.
-  Note that the `SZIP` compression encoder is licensed for non-commercial use only while the decoder (e.
-  g.
-  decompression) is unlimited.
-  Read more about `SZIP` licensing at http://www.
-  hdfgroup.
-  org/doc_resource/SZIP/index.
-  html.
+  Note that the `SZIP` compression encoder is licensed for non-commercial use only while the decoder (e.g. decompression) is unlimited.
+  Read more about `SZIP` licensing at http://www.hdfgroup.org/doc_resource/SZIP/index.html.
   Note that `SZIP` decompression is **not** guaranteed to be available to all Silo clients; only those for which the Silo library was configured with `SZIP` compression capability enabled.
   Like GZIP, `SZIP` compression is applied to float and integer data independently of the types of meshes and variables.
 
   FPZIP compression: is enabled using "METHOD=FPZIP" in the `options` string.
   The `FPZIP` compression algorithm was developed by Peter Lindstrom at `LLNL` and is also designed for high speed compression of regular arrays of data.
   FPZIP recognizes the "LOSS=0|1|2|3" parameter which specifies the amount of loss that is tolerable in the result in terms of quarters of full precision.
-  For example, "LOSS=3" indicates that a loss of 3/4 of full precision is tolerable (resulting in 8 bit floats or 16 bit doubles). Note that for data being written from a double precision writer for down stream visualization purposes, visualization tools such as VisIt often enforce single precision data.
+  For example, "LOSS=3" indicates that a loss of 3/4 of full precision is tolerable (resulting in 8 bit floats or 16 bit doubles).
+  Note that for data being written from a double precision writer for down stream visualization purposes, visualization tools such as VisIt often enforce single precision data.
   Therefore, specifying a loss of 32 bits here for double precision data could have a dramatic impact on compression and I/O performance with negligible effect in down stream visualization.
   If the `LOSS` parameter is not specified, the default is "LOSS=0". It is possible to build the Silo library without `FPZIP` compression support.
   So, it is not always guaranteed to exist.
@@ -993,8 +982,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Description:**
 
-  In versions of Silo prior to 4.
-  8, the default behavior of the HDF5 driver was that it used HDF5 in a way that made the data somewhat UNnatural to the user when viewed with HDF5 tools such as h5ls, h5dump and hdfview as well as other tools that interact with the data via the HDF5 API.
+  In versions of Silo prior to 4.8, the default behavior of the HDF5 driver was that it used HDF5 in a way that made the data somewhat UNnatural to the user when viewed with HDF5 tools such as h5ls, h5dump and hdfview as well as other tools that interact with the data via the HDF5 API.
   This was not a problem for Silo but was a problem for these and other HDF5 tools.
 
   DBSetFriendlyHDF5Names() was introduced as a way to address this issue so that the data in an HDF5 file written by Silo looked more "natural". Calling `DBSetFriendlyHDF5Names()` with a value of one ('1') will result in additional HDF5 metadata being added to the file (in the form of soft links) with better names (and locations) for Silo objects' datasets.
@@ -1002,12 +990,10 @@ These include such things as error handling, requiring Silo to do extra work to 
   This affect is less significant for larger files.
   It is also likely to have some negative but as yet to be investigated effect on I/O performance
 
-  Calling `DBSetFriendlyHDF5Names()` with a value of two ('2') will foregoe the creation of soft links and instead write the actual dataset data where those links would have been created (e.
-  g.
-  the current working directory of the Silo file). This may be important for files consisting of a large number of objects as it eliminates the creation of the /.silo group and subsequent very large number of dataset objects in that one group.
+  Calling `DBSetFriendlyHDF5Names()` with a value of two ('2') will foregoe the creation of soft links and instead write the actual dataset data where those links would have been created (e.g. the current working directory of the Silo file).
+  This may be important for files consisting of a large number of objects as it eliminates the creation of the /.silo group and subsequent very large number of dataset objects in that one group.
 
-  In versions of Silo 4.
-  8 and newer, the default behavior of the Silo library is to use mode '2', that is to create the datasets themselves there the links would have otherwise been created.
+  In versions of Silo 4.8 and newer, the default behavior of the Silo library is to use mode '2', that is to create the datasets themselves there the links would have otherwise been created.
 
   Notes:
 
@@ -1152,9 +1138,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  True (non-zero) if the combination of major, minor and patch digits results in a version number of the Silo library that is greater (e.
-  g.
-  newer) than or equal to the version of the Silo library being compiled against.
+  True (non-zero) if the combination of major, minor and patch digits results in a version number of the Silo library that is greater (e.g. newer) than or equal to the version of the Silo library being compiled against.
   False (zero), otherwise.
 
 
@@ -1162,12 +1146,9 @@ These include such things as error handling, requiring Silo to do extra work to 
 * **Description:**
 
   This macro is useful for writing version-specific code that interacts with the Silo library.
-  Note, however, that this macro appeared in version 4.
-  6.
-  1 of the Silo library and is not available in earlier versions of the library.
+  Note, however, that this macro appeared in version 4.6.1 of the Silo library and is not available in earlier versions of the library.
 
-  As an example of use, the function `DBSetDeprecateWarnings()` was introduced in Silo version 4.
-  6 and not available in earlier versions.
+  As an example of use, the function `DBSetDeprecateWarnings()` was introduced in Silo version 4.6 and not available in earlier versions.
   You could use this macro like so...
 
   #if DB_VERSION_GE(4,6,0)

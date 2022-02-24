@@ -47,8 +47,11 @@ def FormatText(s, kwnames=[]):
 #
 def OutputLineWithFormatting(mdfile, line, kwnames=[], indent=""):
 
-    sentences = re.sub(r'([a-zA-Z0-9_]\.\.\.|[a-zA-Z0-9_]\.|[a-zA-Z0-9_]\?|[a-zA-Z0-9_]!)\s*',r'\1\n',line).strip()
-    sentences = sentences.split('\n')
+    # Break text ending at elipsis, dot, question mark, exclamation point followed by
+    line = re.sub(r'\(e\.g\. ',r'@e@g@@',line)
+    line = re.sub(r'([a-zA-Z0-9_)]\.\.\.|[a-zA-Z0-9_)]\.|[a-zA-Z0-9_)]\?|[a-zA-Z0-9_)]!)\s+',r'\1\n',line).strip()
+    line = re.sub(r'@e@g@@',r'(e.g. ',line)
+    sentences = line.split('\n')
 
     for s in sentences:
 

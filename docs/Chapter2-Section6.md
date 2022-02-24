@@ -360,8 +360,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -522,7 +521,8 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   Notes:
 
-  This only works for simple Silo variables (those written using `DBWrite` or DBWriteSlice). To query the type of other variables, use `DBInqVarType` instead.
+  This only works for simple Silo variables (those written using `DBWrite` or DBWriteSlice).
+  To query the type of other variables, use `DBInqVarType` instead.
 
   
 
@@ -673,8 +673,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -715,10 +714,8 @@ The functions described here allow users to read and write arbitrary arrays of r
 
   The `DBMakeObject` function allocates space for an object of `maxcomps` components.
 
-  In releases of the Silo library prior to 4.
-  10, if a `DBobject` ever had more components added to it than the `maxcomps` it was created with, an error would be generated and the operation to add a component would fail.
-  However, starting in version 4.
-  10, the `maxcomps` argument is used only for the initial object creation.
+  In releases of the Silo library prior to 4.10, if a `DBobject` ever had more components added to it than the `maxcomps` it was created with, an error would be generated and the operation to add a component would fail.
+  However, starting in version 4.10, the `maxcomps` argument is used only for the initial object creation.
   If a caller attempts to add more than this number of components to an object, Silo will simply re-allocate the object to accomodate the additional components.
 
 
@@ -1155,17 +1152,14 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Description:**
 
-  Each of the object Silo supports has corresponding methods to both write them to a Silo database `file` (DBPut...
-  ) and get them from a `file` (DBGet...
-  ).
+  Each of the object Silo supports has corresponding methods to both write them to a Silo database `file` (DBPut...) and get them from a `file` (DBGet...).
 
   However, Silo objects can also be accessed as generic objects through the generic object interface.
   This is recommended only for objects that were written with `DBWriteObject()` method.
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---

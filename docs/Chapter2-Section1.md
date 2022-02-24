@@ -13,8 +13,8 @@ These directory hierarchies are analogous to the Unix filesystem.
 Directories serve to divide the name space of a Silo file so the user can organize content within a Silo file in a way that is natural to the application.
 
 Note that the organization of objects into directories within a Silo file may have direct implications for how these collections of objects are presented to users by post-processing tools.
-For example, except for directories used to store multi-block objects (See "Multi-Block Objects, Parallelism and Poor-Man's Parallel I/O" on page `157`.
-), VisIt will use directories in a Silo file to create submenus within its Graphical User Interface (GUI). For example, if VisIt opens a Silo file with two directories called "foo" and "bar" and there are various meshes and variables in each of these directories, then many of VisIt's `GUI` menus will contain submenus named "foo" and "bar" where the objects found in those directories will be placed in the `GUI`.
+For example, except for directories used to store multi-block objects (See "Multi-Block Objects, Parallelism and Poor-Man's Parallel I/O" on page `157`.), VisIt will use directories in a Silo file to create submenus within its Graphical User Interface (GUI).
+For example, if VisIt opens a Silo file with two directories called "foo" and "bar" and there are various meshes and variables in each of these directories, then many of VisIt's `GUI` menus will contain submenus named "foo" and "bar" where the objects found in those directories will be placed in the `GUI`.
 
 
 
@@ -73,10 +73,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Other options effect the behavior of the HDF5 library as a whole, regardless of which underlying `VFD` is used.
   This difference is notated in the scope column.
 
-  All of the options described here relate to options documented in the HDF5 library's file access property lists, http://www.
-  hdfgroup.
-  org/HDF5/doc/RM/RM_H5P.
-  html.
+  All of the options described here relate to options documented in the HDF5 library's file access property lists, http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html.
   Therefore, rather than duplicate a lot of the HDF5-specific documentation here, in most cases, we simply refer the reader to the relevant sections of the HDF5 reference manual.
 
   Note that all option names listed in left-most column of the table below have had their prefix "DBOPT_H5_" removed to save space in the table.
@@ -302,24 +299,16 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Silo supports two underlying drivers for storing named arrays and objects of machine independent data.
   One is called the Portable DataBase Library (PDBLib or just PDB),
 
-  https://wci.
-  llnl.
-  gov/codes/pact/pdb.
-  html and the other is Hierarchical Data Format, Version 5 (HDF5), http://www.
-  hdfgroup.
-  org/HDF5.
+  https://wci.llnl.gov/codes/pact/pdb.html and the other is Hierarchical Data Format, Version 5 (HDF5), http://www.hdfgroup.org/HDF5.
 
-  When Silo is configured with the --with-pdb-proper=<path-to-PACT> option, the Silo library supports both the PDB driver that is built-in to Silo (which is actually an ancient version of PACT's PDB referred to internally as 'PDB Lite') identified with a `filetype` of `DB_PDB` and a second variant of the PDB driver using a `PACT` installation (specified when Silo was configured) with a `filetype` of `DB_PDBP` (Note the trailing 'P' for 'PDB Proper'). PDB Proper is known to give far superior performance than PDB Lite on BG/P and BG/L class systems and so is recommended when using PDB driver on such systems.
+  When Silo is configured with the --with-pdb-proper=<path-to-PACT> option, the Silo library supports both the PDB driver that is built-in to Silo (which is actually an ancient version of PACT's PDB referred to internally as 'PDB Lite') identified with a `filetype` of `DB_PDB` and a second variant of the PDB driver using a `PACT` installation (specified when Silo was configured) with a `filetype` of `DB_PDBP` (Note the trailing 'P' for 'PDB Proper').
+  PDB Proper is known to give far superior performance than PDB Lite on BG/P and BG/L class systems and so is recommended when using PDB driver on such systems.
 
-  For the HDF5 library, there are many more available options for fine tuned control of the underlying I/O through the use of HDF5's Virtual File Drivers (VFDs). For example, HDF5's sec2 `VFD` uses Unix Manual Section 2 I/O routines (e.
-  g.
-  create/open/read/write/close) while the stdio `VFD` uses Standard I/O routines (e.
-  g.
-  fcreate/fopen/fread/fwrite/fclose).
+  For the HDF5 library, there are many more available options for fine tuned control of the underlying I/O through the use of HDF5's Virtual File Drivers (VFDs).
+  For example, HDF5's sec2 `VFD` uses Unix Manual Section 2 I/O routines (e.g. create/open/read/write/close) while the stdio `VFD` uses Standard I/O routines (e.g. fcreate/fopen/fread/fwrite/fclose).
 
   Depending on the circumstances, the choice of `VFD` can have a profound impact on actual I/O performance.
-  For example, on BlueGene systems the customized Silo `VFD` (introduced to the Silo library in Version 4.
-  8) has demonstrated excellent performance compared to the default HDF5 VFD; sec2.
+  For example, on BlueGene systems the customized Silo `VFD` (introduced to the Silo library in Version 4.8) has demonstrated excellent performance compared to the default HDF5 VFD; sec2.
   The remaining paragraphs describe each of the available Virtual File Drivers as well as parameters that govern their behavior.
 
   DB_HDF5: From among the several VFDs that come pre-packaged with the HDF5 library, this driver type uses whatever the HDF5 library defines as the default `VFD`.
@@ -342,7 +331,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Unfortunately, the metric for what constitutes a "small" or "large" request is system dependent.
   So, it helps to experiment with the different VFDs for the HDF5 driver by running some typically sized use cases.
   Some results on the Luster file system for tiny I/O requests (100's of bytes) showed that the stdio `VFD` can perform 100x or more better than the section 2.
-  So, it pays to spend some time experimenting with this [Note: In future, it should be possible to manipulate the buffer used for a given Silo file opened via the stdio `VFD` as one would ordinarily do via such stdio calls as setvbuf(). However, due to limitations in the current implementation, that is not yet possible.
+  So, it pays to spend some time experimenting with this [Note: In future, it should be possible to manipulate the buffer used for a given Silo file opened via the stdio `VFD` as one would ordinarily do via such stdio calls as setvbuf().
+  However, due to limitations in the current implementation, that is not yet possible.
   When and if that becomes possible, to use something other than non-default stdio buffering, the Silo client will have to create and register an appropriate file options set (see "DBRegisterFileOptionsSet" on page 2-40).]
 
   DB_HDF5_CORE: Uses a memory buffer for the file with the option of either writing the resultant buffer to disk or not.
@@ -351,9 +341,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   I/O performance is optimal in the sense that only a single I/O request for the entire file is issued to the underlying filesystem.
   However, this optimality comes at the expense of memory.
   The entire file must be capable of residing in memory.
-  In addition, releases of HDF5 library prior to 1.
-  8.
-  2 support the core `VFD` only when creating a new file and not when open an existing file.
+  In addition, releases of HDF5 library prior to 1.8.2 support the core `VFD` only when creating a new file and not when open an existing file.
   Two parameters that govern behavior of the core `VFD`.
   The allocation increment specifies the amount of memory the core `VFD` allocates, each time it needs to increase the buffer size to accomodate the (possibly growing) file.
   The backing store indicates whether the buffer should be saved to disk (if it has been changed) upon close.
@@ -361,9 +349,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set (see "DBRegisterFileOptionsSet" on page 2-40).
 
   DB_HDF5_SPLIT: Splits HDF5 I/O operations across two VFDs.
-  One `VFD` is used for all raw data while the other `VFD` is used for everything else (e.
-  g.
-  meta data). For example, in Silo's `DBPutPointvar()` call, the data the caller passes in the vars argument is raw data.
+  One `VFD` is used for all raw data while the other `VFD` is used for everything else (e.g. meta data).
+  For example, in Silo's `DBPutPointvar()` call, the data the caller passes in the vars argument is raw data.
   Everything else including the object's name, number of points, datatype, optlist options, etc.
   including all underlying HDF5 metadata gets treated as meta data.
   This is a `VFD` that comes pre-packaged with the HDF5 library.
@@ -389,9 +376,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   However, the logging `VFD` is a different code base than any other `VFD` that comes pre-packaged with HDF5.
   So, while the logging information it produces is representative of the `VFD` calls made by HDF5 library to the `VFD` interface, it is **not** representative of the actual I/O requests made by the sec2 or stdio or other VFDs.
   Behavior of the logging `VFD` is governed by 3 parameters; the name of the file to which log information is written, a set of flags which are or'd together to specify the types of operations and information logged and, optionally, a buffer (which must be at least as large as the actual file being written) which serves to map the kind of HDF5 data (there are about 8 different kinds) stores at each byte in the file.
-  By default, using `DB_HDF5_LOG` as the driver type results in Silo using a logfile name of "silo_hdf5_log.
-  out", flags of H5FD_LOG_LOC_IO|H5FD_LOG_NUM_IO|H5FD_LOG_TIME_IO|H5FD_LOG_ALLOC and a `NULL` buffer for the mapping information.
-  To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set (see "DBRegisterFileOptionsSet" on page 2-40). Users interested in this `VFD` should consult HDF5's reference manual for the meaning of the flags as well as how to interepret logging `VFD` output.
+  By default, using `DB_HDF5_LOG` as the driver type results in Silo using a logfile name of "silo_hdf5_log.out", flags of H5FD_LOG_LOC_IO|H5FD_LOG_NUM_IO|H5FD_LOG_TIME_IO|H5FD_LOG_ALLOC and a `NULL` buffer for the mapping information.
+  To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set (see "DBRegisterFileOptionsSet" on page 2-40).
+  Users interested in this `VFD` should consult HDF5's reference manual for the meaning of the flags as well as how to interepret logging `VFD` output.
 
   DB_HDF5_DIRECT: On systems that support the 'O_DIRECT' flag in section 2 create/open calls, this `VFD` will use direct I/O.
   This `VFD` comes pre-packaged with the HDF5 library.
@@ -420,9 +407,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   By default, the silo `VFD` uses a block size of 16 Kilobytes (1<<14) and a block count also of 16.
   To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set (see "DBRegisterFileOptionsSet" on page 2-40).
 
-  DB_HDF5_MPIO and DB_HDF5_MPIOP: These have been removed from Silo as of version 4.
-  10.
-  3.
+  DB_HDF5_MPIO and DB_HDF5_MPIOP: These have been removed from Silo as of version 4.10.3.
 
   Finally, both PDB and HDF5 support the concept of targeting output files.
   That is, a Sun `IEEE` file can be created on the Cray, and vice versa.
@@ -573,8 +558,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -611,9 +595,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Description:**
 
-  Note, that this is distinct from (e.
-  g.
-  can be the same or different from) the version of the Silo library returned by the `DBVersion()` function.
+  Note, that this is distinct from (e.g. can be the same or different from) the version of the Silo library returned by the `DBVersion()` function.
 
   DBFileVersion, here, returns the version of the Silo library that was used when `DBCreate()` was called on the specified file.
   DBVersion() returns the version of the Silo library the executable is currently linked with.
@@ -752,8 +734,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 * **Returned value:**
 
   0 on succes; -1 on failure.
-  The only possible reason for failure is if the HDF5 driver is being used to read the file and Silo is not compiled with HDF5 version 1.
-  8 or later.
+  The only possible reason for failure is if the HDF5 driver is being used to read the file and Silo is not compiled with HDF5 version 1.8 or later.
 
 
 
@@ -799,7 +780,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Description:**
 
-  The `DBMkDir` function creates a new directory in the Silo file as a child of the current directory (see DBSetDir). The directory name may be an absolute path name similar to "/dir/subdir", or may be a relative path name similar to "../../dir/subdir".
+  The `DBMkDir` function creates a new directory in the Silo file as a child of the current directory (see DBSetDir).
+  The directory name may be an absolute path name similar to "/dir/subdir", or may be a relative path name similar to "../../dir/subdir".
 
 
 ---
@@ -918,10 +900,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   DBCpDir copies an entire directory hierarchy from one Silo file to another.
 
-  Note that this function is available only on the HDF5 driver and only if the Silo library has been compiled with HDF5 version 1.
-  8 or later.
-  This is because the implementation exploits functionality available only in versions of HDF5 1.
-  8 and later.
+  Note that this function is available only on the HDF5 driver and only if the Silo library has been compiled with HDF5 version 1.8 or later.
+  This is because the implementation exploits functionality available only in versions of HDF5 1.8 and later.
 
 
 ---
@@ -963,10 +943,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Description:**
 
-  Note that this function is available only if both Silo databases are from the HDF5 driver and only if the Silo library has been compiled with HDF5 version 1.
-  8 or later.
-  This is because the implementation exploits functionality available only in versions of HDF5 1.
-  8 and later.
+  Note that this function is available only if both Silo databases are from the HDF5 driver and only if the Silo library has been compiled with HDF5 version 1.8 or later.
+  This is because the implementation exploits functionality available only in versions of HDF5 1.8 and later.
 
   Directories required in the destination database to satisfy the path names given in the
 
@@ -994,8 +972,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Suppose we have two databases...
 
   1.
-  dbfile ("dir.
-  silo")
+  dbfile ("dir.silo")
 
   /ucd_dir/ucdmesh (ucd mesh object)
 
@@ -1004,8 +981,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   /quad_dir/quadmesh (quad mesh object)
 
   2.
-  dbfile2 (dir2.
-  silo")
+  dbfile2 (dir2.silo")
 
   /tmp <-- current working directory
 
@@ -1026,9 +1002,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Copies ../ucd_dir/ucdmesh of dbfile to /foogar in dbfile2
 
   3.
-  Copies /quad_dir/quadmesh to cwg (e.
-  g.
-  /tmp) /tmp/quadmesh in dbfile2
+  Copies /quad_dir/quadmesh to cwg (e.g. /tmp) /tmp/quadmesh in dbfile2
 
   4.
   Copies trimesh in cwg of dbfile to cwg/foo (/tmp/foo/trimesh in dbfile2
@@ -1079,7 +1053,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Notes:
 
   As far as the integrity of a Silo `file` goes, grabbing is inherently dangerous.
-  If the client is not careful, one can easily wind up corrupting the `file` for the Silo library (though all may be 'normal' for the underlying driver library). Therefore, to minimize the likelihood of corrupting the Silo `file` while it is grabbed, it is recommended that all operations with the low-level driver grabbed be confined to a separate sub-directory in the silo `file`.
+  If the client is not careful, one can easily wind up corrupting the `file` for the Silo library (though all may be 'normal' for the underlying driver library).
+  Therefore, to minimize the likelihood of corrupting the Silo `file` while it is grabbed, it is recommended that all operations with the low-level driver grabbed be confined to a separate sub-directory in the silo `file`.
   That is, one should not mix writing of Silo objects and low-level driver objects in the same directory.
   To achieve this, before grabbing, create the desired directory and descend into it using Silo's `DBMkDir()` and `DBSetDir()` functions.
   Then, grab the driver and do all the work with the low-level driver that is necessary.
@@ -1247,14 +1222,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The `DBInqFile` function is mainly used for its return value, as seen above.
 
-  Prior to version 4.
-  7.
-  1 of the Silo library, this function could return false positives when the `filename` referred to a PDB file that was **not** created by Silo.
+  Prior to version 4.7.1 of the Silo library, this function could return false positives when the `filename` referred to a PDB file that was **not** created by Silo.
   The reason for this is that all this function really did was check whether or not `DBOpen` would succeed on the file.
 
-  Starting in version 4.
-  7.
-  1 of the Silo library, this function will attempt to count the number of Silo objects (not including directories) in the first non-empty directory it finds.
+  Starting in version 4.7.1 of the Silo library, this function will attempt to count the number of Silo objects (not including directories) in the first non-empty directory it finds.
   If it cannot find any Silo objects in the file, it will return zero (0) indicating the file is **not** a Silo file.
 
   Because very early versions of the Silo library did not store anything to a Silo file to distinguish it from a PDB file, it is conceivable that this function will return false negatives for very old, empty Silo files.
@@ -1467,8 +1438,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -1589,8 +1559,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -1763,8 +1732,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -1820,14 +1788,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBPutQuadmesh` function accepts pointers to the coordinate arrays and is responsible for writing the mesh into a quad-mesh object in the Silo file.
 
   A Silo quad-mesh object contains all necessary information for describing a mesh.
-  This includes the coordinate arrays, the rank of the mesh (1,2,3,...) and the type (collinear or non-collinear). In addition, other information is useful and is therefore optionally included (row-major indicator, time and cycle of mesh, offsets to 'real' zones, plus coordinate system type.
-  )
+  This includes the coordinate arrays, the rank of the mesh (1,2,3,...) and the type (collinear or non-collinear).
+  In addition, other information is useful and is therefore optionally included (row-major indicator, time and cycle of mesh, offsets to 'real' zones, plus coordinate system type.)
 
-  Typically, the number of geometric dimensions (e.
-  g.
-  size of coordinate tuple) and topological dimensions (e.
-  g.
-  dimension of elements shapes the mesh) agree.
+  Typically, the number of geometric dimensions (e.g. size of coordinate tuple) and topological dimensions (e.g. dimension of elements shapes the mesh) agree.
   For example, this function is typically used to define a 3D arrangement of hexahedra or a 2D arrangement of quadrilaterals.
   However, this function can also be used to define a surface of quadrilaterals embedded in 3-space or a path of line segments embedded in 2- or 3-space.
   In these less common cases, the topological dimension is lower than the geometric dimension.
@@ -1876,10 +1840,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   
 
-  The options `DB_LO_OFFSET` and `DB_HI_OFFSET` should be used if the mesh being described uses the notion of "phoney" zones (i.
-  e.
-  , some zones should be ignored.
-  ) For example, if a 2-D mesh had designated the first column and row, and the last two columns and rows as "phoney", then we would use: lo_off = {1,1} and hi_off = {2,2}.
+  The options `DB_LO_OFFSET` and `DB_HI_OFFSET` should be used if the mesh being described uses the notion of "phoney" zones (i.e., some zones should be ignored.) For example, if a 2-D mesh had designated the first column and row, and the last two columns and rows as "phoney", then we would use: lo_off = {1,1} and hi_off = {2,2}.
 
 
 ---
@@ -1921,8 +1882,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -1995,7 +1955,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   (Nx-1)NyNz i-oriented edges, Nx(Ny-1)Nz, j-oriented edges and NxNy(Nz-1) k-oriented edges.
   Each group of edges is almost the same size as a normal node-centered variable.
   So, for conceptual convenience we in fact treat them that way and treat the extra slots in them as phony data.
-  So, in the case of edge-centered data, each of the pointers in the `vars` argument to `DBPutQuadvar` is interpreted to point to an array that is `ndims` times the product of nodal sizes (NxNyNz). The first part of the array (of size NxNy nodes for 2D or NxNyNz nodes for 3D) holds the i-oriented edge data, the next part the j-oriented edge data, etc.
+  So, in the case of edge-centered data, each of the pointers in the `vars` argument to `DBPutQuadvar` is interpreted to point to an array that is `ndims` times the product of nodal sizes (NxNyNz).
+  The first part of the array (of size NxNy nodes for 2D or NxNyNz nodes for 3D) holds the i-oriented edge data, the next part the j-oriented edge data, etc.
 
   A similar approach is used for face centered data.
   In a 3D mesh of Nx by Ny by Nz nodes, there are Nx(Ny-1)(Nz-1) i-intercepting faces, (Nx-1)Ny(Nz-1) j-intercepting faces and (Nx-1)(Ny-1)Nz k-intercepting faces.
@@ -2150,8 +2111,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -2211,8 +2171,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBPutUcdmesh` function accepts pointers to the coordinate arrays and is responsible for writing the mesh into a `UCD` mesh object in the Silo file.
 
   A Silo `UCD` mesh object contains all necessary information for describing a mesh.
-  This includes the coordinate arrays, the rank of the mesh (1,2,3,...) and the type (collinear or non-collinear.
-  ) In addition, other information is useful and is therefore included (time and cycle of mesh, plus coordinate system type).
+  This includes the coordinate arrays, the rank of the mesh (1,2,3,...) and the type (collinear or non-collinear.) In addition, other information is useful and is therefore included (time and cycle of mesh, plus coordinate system type).
 
   A Silo `UCD` mesh may be composed of either zoo-type elements or arbitrary, polyhedral elements or a mixture of both zoo-type and arbitrary, polyhedral elements.
   The zonelist (connectivity) information for zoo-type elements is written with a call to `DBPutZonelist`.
@@ -2241,7 +2200,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Given the node ordering in the left-most column, there is indeed an algorithm for determining the other orderings for each cell type.
 
-  For edges, each edge is identified by a pair of integer indices; the first being the "tail" of an arrow oriented along the edge and the second being the "head" with the smaller node index always placed first (at the tail). Next, the ordering of edges is akin to a lexicographic ordering of these pairs of integers.
+  For edges, each edge is identified by a pair of integer indices; the first being the "tail" of an arrow oriented along the edge and the second being the "head" with the smaller node index always placed first (at the tail).
+  Next, the ordering of edges is akin to a lexicographic ordering of these pairs of integers.
   This means that we start with the lowest node number of a cell shape, zero, and find all edges with node zero as one of the points on the edge.
   Each such edge will have zero as its tail.
   Since they all start with node 0 as the tail, we order these edges from smallest to largest "head" node.
@@ -2252,16 +2212,17 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   For faces, a similar algorithm is used.
   Starting with the lowest numbered node on a face, we enumerate the nodes over a face using the right hand rule for the normal to the face pointing away from the innards of the cell.
   When one places the thumb of the right hand in the direction of this normal, the direction of the fingers curling around it identify the direction we go to identify the nodes of the face.
-  Just as for edges, we start identifying faces for the lowest numbered node of the cell (0). We find all faces that share this node.
+  Just as for edges, we start identifying faces for the lowest numbered node of the cell (0).
+  We find all faces that share this node.
   Of these, the face that enumerates the next lowest node number as we traverse the nodes using the right hand rule, is placed first in the ordering.
   Then, the face that has the next lowest node number and so on.
 
   An example using arbitrary polyhedrons for some zones is illustrated in Figure 0-3 on page `106`.
   The nodes of a `DB_ZONETYPE_POLYHEDRON` are specified in the following fashion: First specify the number of faces in the polyhedron.
   Then, for each face, specify the number of nodes in the face followed by the nodes that make up the face.
-  The nodes should be ordered such that they are numbered in a counter-clockwise fashion when viewed from the outside (e.
-  g.
-  right-hand rules yields an outward facing normal). For a fully arbitrarily connected mesh, see `DBPutPHZonelist()`. In addition, for a sequence of consecutive zones of type `DB_ZONETYPE_POLYHEDRON` in a zonelist, the shapesize entry is taken to be the sum of all the associated positions occupied in the nodelist data.
+  The nodes should be ordered such that they are numbered in a counter-clockwise fashion when viewed from the outside (e.g. right-hand rules yields an outward facing normal).
+  For a fully arbitrarily connected mesh, see `DBPutPHZonelist()`.
+  In addition, for a sequence of consecutive zones of type `DB_ZONETYPE_POLYHEDRON` in a zonelist, the shapesize entry is taken to be the sum of all the associated positions occupied in the nodelist data.
   So, for the example in Figure 0-3 on page 106, the shapesize entry for the `DB_ZONETYPE_POLYEDRON` segment of the zonelist is '53' because for the two arbitrary polyhedral zones in the zonelist, 53 positions in the nodelist array are used.
 
   
@@ -2394,8 +2355,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -2646,47 +2606,11 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   /* coordinate arrays */
 
-  float x[NNODES] = {0.
-  0, 1.
-  0, 2.
-  0, 0.
-  0, 1.
-  0, 2.
-  0, 0.
-  0, 1.
-  0, 2.
-  0, 0.
-  0, 1.
-  0, 2.
-  0};
+  float x[NNODES] = {0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0};
 
-  float y[NNODES] = {0.
-  0, 0.
-  0, 0.
-  0, 0.
-  0, 0.
-  0, 0.
-  0, 1.
-  0, 1.
-  0, 1.
-  0, 1.
-  0, 1.
-  0, 1.
-  0};
+  float y[NNODES] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
-  float z[NNODES] = {0.
-  0, 0.
-  0, 0.
-  0, 1.
-  0, 1.
-  0, 1.
-  0, 0.
-  0, 0.
-  0, 0.
-  0, 1.
-  0, 1.
-  0, 1.
-  0};
+  float z[NNODES] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
 
   
 
@@ -2767,8 +2691,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -2883,7 +2806,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBPutUcdvar` function writes a variable associated with an `UCD` mesh into a Silo file.
   Note that variables can be node-centered, zone-centered, edge-centered or face-centered.
 
-  For node- (or zone-) centered data, the question of which value in the `vars` array goes with which node (or zone) is determined implicitly by a one-to-one correspondence with the list of nodes in the `DBPutUcdmesh` call (or zones in the `DBPutZonelist` or `DBPutZonelist2` call). For example, the 237th value in a zone-centered `vars` array passed here goes with the 237th zone in the zonelist passed in the `DBPutZonelist2` (or DBPutZonelist) call.
+  For node- (or zone-) centered data, the question of which value in the `vars` array goes with which node (or zone) is determined implicitly by a one-to-one correspondence with the list of nodes in the `DBPutUcdmesh` call (or zones in the `DBPutZonelist` or `DBPutZonelist2` call).
+  For example, the 237th value in a zone-centered `vars` array passed here goes with the 237th zone in the zonelist passed in the `DBPutZonelist2` (or DBPutZonelist) call.
 
   Edge- and face-centered data require a little more explanation.
   Unlike node- and zone-centered data, there does not exist in Silo an explicit list of edges or faces.
@@ -3036,8 +2960,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -3131,8 +3054,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   
 
-  The table below defines an analogous set of `typeflags` for creating boundaries in two dimensions.
-  .
+  The table below defines an analogous set of `typeflags` for creating boundaries in two dimensions..
 
   **&nbsp;**
 
@@ -3227,8 +3149,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 
@@ -3290,7 +3211,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   These are analytic expressions of the boundaries of objects that can be expressed by quadratic equations in x, y and z.
 
   The `zonelist` for a `CSG` mesh is constructed by first defining regions from the mesh boundaries.
-  For example, given the boundary for a sphere, we can create a region by taking the inside (DB_INNER) of that boundary or by taking the outside (DB_OUTER). In addition, regions can also be created by boolean operations (union, intersect, diff) on other regions.
+  For example, given the boundary for a sphere, we can create a region by taking the inside (DB_INNER) of that boundary or by taking the outside (DB_OUTER).
+  In addition, regions can also be created by boolean operations (union, intersect, diff) on other regions.
   The table below summarizes how to construct regions using the `typeflags` argument.
 
   **Optlist options:**
@@ -3334,7 +3256,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Figure 0-5: A relatively simple object to represent as a `CSG` mesh.
   It models an A/C vent outlet for a `1994` Toyota Tercel.
   It consists of two zones.
-  One is a partially-spherical shaped ring housing (darker area). The other is a lens-shaped fin used to direct airflow (lighter area).
+  One is a partially-spherical shaped ring housing (darker area).
+  The other is a lens-shaped fin used to direct airflow (lighter area).
 
   The table below describes the contents of the boundary list (written in the `DBPutCsgmesh` call)
 
@@ -3358,37 +3281,12 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   DBCSG_CYLINDER_PPR, DBCSG_SPHERE_PR, DBCSG_SPHERE_PR};
 
-  float *coeffs = {0.
-  0, 0.
-  0, 0.
-  0, 5.
-  0, 1.
-  0, 0.
-  0, 0.
-  0, -2.
-  5,
+  float *coeffs = {0.0, 0.0, 0.0, 5.0, 1.0, 0.0, 0.0, -2.5,
 
-  1.
-  0, 0.
-  0, 0.
-  0, 2.
-  5, 1.
-  0, 0.
-  0, 0.
-  0, 0.
-  0, 3.
-  0,
+  1.0, 0.0, 0.0, 2.5, 1.0, 0.0, 0.0, 0.0, 3.0,
 
-  0.
-  0, 0.
-  0, 49.
-  5, 50.
-  0, 0.
-  0.
-  0.
-  0, -49.
-  5, 50.
-  0};
+  0.0, 0.0, 49.5, 50.0, 0.0.
+  0.0, -49.5, 50.0};
 
   
 
@@ -3485,8 +3383,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 
@@ -3596,8 +3493,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 
@@ -3659,7 +3555,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 * **Description:**
 
   Note that material functionality, even mixing materials, can now be handled, often more conveniently and efficiently, via a Mesh Region Grouping (MRG) tree.
-  Users are encouraged to consider an `MRG` tree as an alternative to `DBPutMaterial()`. See "DBMakeMrgtree" on page `196`.
+  Users are encouraged to consider an `MRG` tree as an alternative to `DBPutMaterial()`.
+  See "DBMakeMrgtree" on page `196`.
 
   The `DBPutMaterial` function writes a material data object into the current open Silo file.
   The minimum required information for a material data object is supplied via the standard arguments to this function.
@@ -3759,8 +3656,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -3831,21 +3727,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   They are instead alloys of other (pure) metals.
   For example, common yellow brass is, nominally, a mixture of Copper (Cu) and Zinc (Zn) while tool steel is composed primarily of Iron (Fe) but mixed with some Carbon (C) and a variety of other elements.
 
-  For this example, lets suppose we are dealing with Brass (65% Cu, 35% Zn), T-1 Steel (76.
-  3% Fe, 0.
-  7% C, 18% W, 4% Cr,1% V) and O-1 Steel (96.
-  2% Fe, 0.
-  90% C,1.
-  4% Mn, 0.
-  50% Cr, 0.
-  50% Ni, 0.
-  50% W). Since T-1 Steel and O-1 Steel are composed of different elements, we wind up having to represent each type of steel as a different material in the material object.
+  For this example, lets suppose we are dealing with Brass (65% Cu, 35% Zn), T-1 Steel (76.3% Fe, 0.7% C, 18% W, 4% Cr,1% V) and O-1 Steel (96.2% Fe, 0.90% C,1.4% Mn, 0.50% Cr, 0.50% Ni, 0.50% W).
+  Since T-1 Steel and O-1 Steel are composed of different elements, we wind up having to represent each type of steel as a different material in the material object.
   So, the material object would have 3 materials; Brass, T-1 Steel and O-1 Steel.
 
   Brass is composed of 2 species, T-1 Steel, 5 species and O-1 Steel, 6.
   (Alternatively, one could opt to characterize both T-1 Steel and O-1 Steel has having 7 species, Fe, C, Mn, Cr, Ni, W, V where for T-1 Steel, the Mn and Ni components are always zero and for O-1 Steel the V component is always zero.
-  In that case, you would need only 2 materials in the associated material object.
-  )
+  In that case, you would need only 2 materials in the associated material object.)
 
   The material species object would be defined such that nmat=3 and nmatspec={2,5,6}. If the composition of Brass, T-1 Steel and O-1 Steel is constant over the whole mesh, the `species_mf` array would contain just 2 + 5 + 6 = 13 entries...
 
@@ -3882,12 +3770,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   
 
-  If all of the zones in the mesh are clean (e.
-  g.
-  not mixing in material) and have the same composition of species, the `speclist` array would contain a '1' for every Brass zone (1-origin indexing would mean it would index species_mf[0]), a '3' for every T-1 Steel zone and a '8' for every O-1 Steel zone.
-  However, if some cells had a Brass mixture with an extra 1% Cu, then you could create another two entries at positions 14 and 15 in the `species_mf` array with the values 0.
-  66 and 0.
-  34, respectively, and the `speclist` array for those cells would point to '14' instead of '1'.
+  If all of the zones in the mesh are clean (e.g. not mixing in material) and have the same composition of species, the `speclist` array would contain a '1' for every Brass zone (1-origin indexing would mean it would index species_mf[0]), a '3' for every T-1 Steel zone and a '8' for every O-1 Steel zone.
+  However, if some cells had a Brass mixture with an extra 1% Cu, then you could create another two entries at positions 14 and 15 in the `species_mf` array with the values 0.66 and 0.34, respectively, and the `speclist` array for those cells would point to '14' instead of '1'.
 
   The `speclist` entries indicate only where to start reading species mass fractions from the `species_mf` array for a given zone.
   How do we know how many values to read?
@@ -3898,9 +3782,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   In this case, the `species_mf` array would grow to accommodate all the variations of combinations of mass fraction for each material and the entries in the `speclist` array would vary so that each zone would index the correct position in the `species_mf` array.
 
   Finally, when zones contain mixing materials the `speclist` array needs to specify the `species_mf` entries for each of the materials in the zone.
-  In this case, negative values are assigned to the `speclist` entries for these zones and the linked-list like structure of the associated material (e.
-  g.
-  mix_next, mix_mat, mix_vf, mix_zone args of the `DBPutMaterial()` call) is used to traverse them.
+  In this case, negative values are assigned to the `speclist` entries for these zones and the linked-list like structure of the associated material (e.g. mix_next, mix_mat, mix_vf, mix_zone args of the `DBPutMaterial()` call) is used to traverse them.
 
   To create a completely empty matspecies object, the caller needs to pass a `dims` array containing all zeros.
   In this case, the `speclist` and mix_speclist args are never dereferenced and no data for these are written to the file or returned by a subsequent `DBGetMatspecies()` call.
@@ -3967,8 +3849,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
@@ -4044,13 +3925,16 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   
 
-  The first entry (0) defines a derived scalar variable named "totaltemp" which is the sum of variables whose `names` are "nodet" and "zonetemp". The next entry (1) defines a derived scalar variable named "sz" in a group of variables named "stress" (the slash character ('/') is used to group variable `names` much the way file pathnames are grouped in Linux). Note also that the definition of "sz" uses the special bracketing characters ('<') and ('>') for the variable references due to the fact that these variable references have a slash character ('/') in them.
+  The first entry (0) defines a derived scalar variable named "totaltemp" which is the sum of variables whose `names` are "nodet" and "zonetemp". The next entry (1) defines a derived scalar variable named "sz" in a group of variables named "stress" (the slash character ('/') is used to group variable `names` much the way file pathnames are grouped in Linux).
+  Note also that the definition of "sz" uses the special bracketing characters ('<') and ('>') for the variable references due to the fact that these variable references have a slash character ('/') in them.
 
   The third entry (2) defines a derived vector variable named "vel" from three scalar variables named "Vx", "Vy", and "Vz" while the fourth entry (3) defines a scalar variable, "speed" to be the magnitude of the vector variable named "vel". The last entry (4) defines a deviatoric stress tensor.
   These last two cases demonstrate that derived variable definitions may reference other derived variables.
 
-  The last few examples demonstrate the use of two operators, {}, and magnitude(). We call these expression operators.
-  In VisIt, there are numerous expression operators to help define derived variables including such things as sqrt(), round(), abs(), cos(), sin(), dot(), cross() as well as comparison operators, gt(), ge(), lt(), le(), eq(), and the conditional if(). Furthermore, the list of expression operators in VisIt grows regularly.
+  The last few examples demonstrate the use of two operators, {}, and magnitude().
+  We call these expression operators.
+  In VisIt, there are numerous expression operators to help define derived variables including such things as sqrt(), round(), abs(), cos(), sin(), dot(), cross() as well as comparison operators, gt(), ge(), lt(), le(), eq(), and the conditional if().
+  Furthermore, the list of expression operators in VisIt grows regularly.
   Only a few examples are illustrated here.
   For a more complete list of the available expression operators and their syntax, the reader is referred to the Expressions portion of the VisIt user's manual.
 
@@ -4094,8 +3978,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Notes:
 
-  For the details of the data structured returned by this function, see the Silo library header file, silo.
-  h, also attached to the end of this manual.
+  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
 
 
 ---
