@@ -69,7 +69,7 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `filename` | Name of the Silo file to open
   `flags` | Pass either Silo.DB_READ if you will only read objects from the file or Silo.DB_APPEND if you need to also write data to the file.
@@ -94,7 +94,7 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `filename` | [required string] name of the file to create
   `info` | [required string] comment to be stored in the file
@@ -135,7 +135,7 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `name` | [required string] `name` of object to read
   `flag` | [optional int] `flag` to indicate if object bulk/raw data should be included. Pass 0 to **not** also read object bulk/raw data. Pass non-zero to also read object bulk/raw data. Default is 0.
@@ -168,7 +168,7 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `name` | [required string] `name` of primitive array to read
 
@@ -192,7 +192,7 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `name` | [required string] `name` of directory to set
 
@@ -230,7 +230,7 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `name` | [required string] `name` of the new object to write
   `obj_dict` | [required dict] Python dictionary containing object data
@@ -272,7 +272,7 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `name` | [required string] `name` of the primitive array
   `data` | [required tuple] the `data` to write
@@ -301,7 +301,7 @@ append("/foo/bar/lib")
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `name` | [required string] `name` of the directory to create
 

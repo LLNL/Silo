@@ -45,7 +45,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `mesh_type` | The type of mesh object the `MRG` tree will be associated with. An example would be DB_MULTIMESH, DB_QUADMESH, `DB_UCDMESH`.
   `info_bits` | UNUSED
@@ -82,7 +82,7 @@ The functions described in this section of the `API` manual are...
   **&nbsp;**
 
   _visit_domain_groups convention)
-    :---
+  :---
 
 
   A multi-block grouping is the assignment of the blocks of a multi-block mesh (e.
@@ -188,7 +188,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `tree` | The `MRG` `tree` object to add a region to.
   `reg_name` | The name of the new region.
@@ -228,7 +228,7 @@ The functions described in this section of the `API` manual are...
   **&nbsp;**
 
   Region Naming Convention|Meaning
-    :---|:---
+  :---|:---
   "materials"|Top-level region below which material decomposition information is defined. There can be multiple material decompositions, if so desired. Each such decomposition would be rooted at a region named "material_<name>" underneath the "materials" region node.
   "groupings"|Top-level region below which multi-block grouping information is defined. There can be multiple groupings, if so desired. Each such grouping would be rooted at a region named "grouping_<name>" underneath the "groupings" region node.
   "amr-levels"|Top-level region below which Adaptive Mesh Refinement level groupings are defined.
@@ -268,7 +268,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `tree` | The `MRG` `tree` object to add the regions to.
   `nregn` | The number of regions to add.
@@ -325,7 +325,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `tree` | The `MRG` `tree` object.
   `path` | The `path` to set.
@@ -362,7 +362,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `tree` | The `MRG` `tree`.
 
@@ -397,7 +397,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo `file` handle
   `name` | The `name` of the `MRG` `tree` object in the `file`.
@@ -437,7 +437,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle
   `name` | The `name` of the `MRG` tree object in the `file`.
@@ -478,7 +478,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `tree` | The `MRG` `tree` object to free.
 
@@ -512,7 +512,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `ns_str` | The namescheme string as described below.
   `...` | The remaining arguments take `...` of three forms depending on `...` the caller wants external array references, if `...` are present in `...` format substring of `ns_str` to be handled. `...` the first form, `...` format substring of `ns_str` involves no externally referenced arrays `...` so there `...` no additional arguments other than `...` `ns_str` string itself. `...` the second form, `...` caller `...` all externally referenced arrays needed in `...` format substring of `ns_str` already in memory `...` simply passes their pointers here as `...` remaining arguments in `...` same order in which they appear in `...` format substring of `ns_str`. `...` arrays `...` bound to `...` returned namescheme object `...` should `...` be freed until after `...` caller is done using `...` returned namescheme object. In this case, `DBFreeNamescheme()` does `...` free these arrays `...` the caller is required to explicitly free them. `...` the third form, `...` caller makes a request `...` the Silo library to find in a given file, read `...` bind to `...` returned namescheme object `...` externally referenced arrays in `...` format substring of `ns_str`. To achieve this, `...` caller passes a 3-tuple of `...` form...  "(void*) 0, (DBfile*) file, (char*) mbobjpath" as `...` remaining arguments. `...` initial (void*)0 is required. `...` (DBfile*)file is `...` database handle of `...` Silo file in which `...` externally referenced arrays exist. `...` third (char*)mbobjpath, which `...` be 0/NULL, is `...` path within `...` file, either relative to `...` file's current working directory, or absolute, at which `...` multi-block object holding `...` `ns_str` `...` found in `...` file. `...` necessary externally referenced arrays must exist within `...` specified file using either relative paths from multi-block object's home directory or `...` file's current working directory or absolute paths. In this case `DBFreeNamescheme()` also frees memory associated with these arrays.
@@ -551,7 +551,7 @@ The functions described in this section of the `API` manual are...
   **&nbsp;**
 
   fmt|Interpretation
-    :---|:---
+  :---|:---
   "|slide_%s|(n%2)?'master':'slave':"|The delimiter character is `...`. `...` format substring is "slide_%s". `...` expression substring `...` the argument to `...` first (and only in this case) conversion specifier (%s) is "(n%2)?'master':'slave':" When this expression is evaluated `...` a given region, `...` region's natural number will be inserted `...` 'n'. `...` modulo operation with 2 will be applied. If that result is non-zero, `...` ?:: expression will evaluate to 'master'. Otherwise, it will evaluate to 'slave'. Note `...` terminating colon `...` the `...` operator. This naming scheme might be useful `...` an array of regions representing, alternately, master `...` slave sides of slide surfaces.<br>Note also `...` the `...` operator, `...` caller `...` assume that only `...` sub-expression corresponding to `...` whichever half of `...` operator is satisfied is actually evaluated.
   "Hblock_%02dx%02dHn/16Hn%16"|The delimiter character is `...`. `...` format substring is 'block_%02dx%02d". `...` expression substring `...` the argument to `...` first conversion specifier (%02d) is "n/256". `...` expression substring `...` the argument to `...` second conversion specifier (also %02d) is "n%16". When this expression is evaluated, `...` region's natural number will be inserted `...` 'n' `...` the `...` and `...` operators will be evaluated. This naming scheme might be useful `...` a region array of `...` regions to be named as a 2D array of regions with names like "block_09x11"
   "@domain_%03d@n"|The delimiter character is `...`. `...` format substring is "domain_%03d". `...` expression substring `...` the argument to `...` one `...` only conversion specifier is `...`. When this expression is evaluated, `...` region's natural number is inserted `...` 'n'. This results in names like "domain_000", "domain_001", `...`.
@@ -598,7 +598,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `natnum` | Natural number of the entry in a namescheme to be generated. Must be greater than or equal to zero.
 
@@ -652,7 +652,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | Silo database `file` handle.
   `name` | Name of this mrgvar object.
@@ -695,7 +695,7 @@ The functions described in this section of the `API` manual are...
   **&nbsp;**
 
   Variable Naming Convention|Meaning
-    :---|:---
+  :---|:---
   "amr-ratios"|An integer variable of 3 components defining the refinement ratios (rx, ry, rz) for an `AMR` mesh. Typically, the refinement ratios can be specified on a level-by-level basis. In this case, this variable should be defined for nregns=<# of levels> on the level regions underneath the "amr-levels" grouping. However, if refinment ratios need to be defined on an individual patch basis instead, this variable should be defined on the individual patch regions under the "amr-refinements" groupings.
   "ijk-orientations"|An integer variable of 3 components defined on the individual blocks of a multi-block mesh defining the orientations of the individual blocks in a large, ijk indexing space (Ares convention)
   "<var>-extents"|A double precision variable defining the block-by-block extents of a multi-block variable. If <var>=="coords", then it defines the spatial extents of the mesh itself. Note, this convention obsoletes the `DBOPT_XXX_EXTENTS` options on DBPutMultivar/DBPutMultimesh calls.
@@ -726,7 +726,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | Silo database `file` handle.
   `name` | The `name` of the region variable object to retrieve.
@@ -772,7 +772,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `name` | The `name` of the groupel map object in the `file`.
@@ -835,7 +835,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `name` | The `name` of the groupel map object to read.
@@ -873,7 +873,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `map` | Pointer to a `DBgroupel` `map` object.
 
@@ -1005,7 +1005,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `x` | A pointer to a structure which is to be freed. Its type must correspond to the type in the function name.
   `Fortran Equivalent:` | None
@@ -1053,7 +1053,7 @@ The functions described in this section of the `API` manual are...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `x` | Pointer to a silo object structure to be queried
 

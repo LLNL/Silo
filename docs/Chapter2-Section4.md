@@ -28,7 +28,7 @@ This section of the `API` manual describes functions that can be used to compute
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `nodelist` | Array of node indices describing mesh zones.
   `nnodes` | Number of nodes in associated mesh.
@@ -54,7 +54,7 @@ This section of the `API` manual describes functions that can be used to compute
   **&nbsp;**
 
   bnd_method|Meaning
-    :---|:---
+  :---|:---
   0|Do not use material boundaries when computing external faces. The `matlist` parameter can be replaced with `NULL`.
   1|In addition to true external faces, include faces on material boundaries between zones. Faces get generated for both zones sharing a common face. This setting should not be used with meshes that contain mixed material zones. If this setting is used with meshes with mixed material zones, all faces which border a mixed material zone will be include. The `matlist` parameter must be provided.
 
@@ -87,7 +87,7 @@ This section of the `API` manual describes functions that can be used to compute
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `nodelist` | Array of node indices describing mesh zones.
   `nnodes` | Number of nodes in associated mesh.
@@ -116,7 +116,7 @@ This section of the `API` manual describes functions that can be used to compute
   **&nbsp;**
 
   bnd_method|Meaning
-    :---|:---
+  :---|:---
   0|Do not use material boundaries when computing external faces. The `matlist` parameter can be replaced with `NULL`.
   1|In addition to true external faces, include faces on material boundaries between zones. Faces get generated for both zones sharing a common face. This setting should not be used with meshes that contain mixed material zones. If this setting is used with meshes with mixed material zones, all faces which border a mixed material zone will be included. The `matlist` parameter must be provided.
 
@@ -128,7 +128,7 @@ This section of the `API` manual describes functions that can be used to compute
   **&nbsp;**
 
   Type|Description
-    :---|:---
+  :---|:---
   DB_ZONETYPE_BEAM|A line segment
   DB_ZONETYPE_POLYGON|A polygon where nodes are enumerated to form a polygon
   DB_ZONETYPE_TRIANGLE|A triangle
@@ -166,7 +166,7 @@ This section of the `API` manual describes functions that can be used to compute
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `strArray` | Array of strings to catenate together. Note that it can be ok if some entries in `strArray` are the empty string, "" or `NULL` (0).
   `n` | The number of entries in `strArray`. Passing -1 here indicates that the function should count entries in `strArray` until reaching the first `NULL` entry. In this case, embedded NULLs (0s) in `strArray` are, of course, not allowed.
@@ -206,7 +206,7 @@ This section of the `API` manual describes functions that can be used to compute
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `strList` | A semi-colon separated, single string. Note that this string is modified by the call. If the caller doesn't want this, it will have to make a copy before calling.
   `n` | The expected number of individual strings in `strList`. Pass -1 here if you have no aprior knowledge of this number. Knowing the number saves an additional pass over `strList`.

@@ -40,7 +40,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `opts` | an options list object obtained from a `DBMakeOptlist()` call
 
@@ -85,7 +85,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   Option Name, DBOPT_H5_...|Scope|Type|Option Meaning|Default Value
-    :---|:---|:---|:---|:---
+  :---|:---|:---|:---|:---
   VFD|VFD|int|Specifies which Virtual File Driver (VFD) the HDF5 library should use.<br>Set the integer value for this option to one of the following values.<br>DB_H5VFD_DEFAULT, (use HDF5 default driver)<br>DB_H5VFD_SEC2 (use HDF5 sec2 driver)<br>DB_H5VFD_STDIO, (use HDF5 stdio driver)<br>DB_H5VFD_CORE, (use HDF5 core driver)<br>DB_H5VFD_LOG, (use HDF5 log river)<br>DB_H5VFD_SPLIT, (use HDF5 split driver)<br>DB_H5VFD_DIRECT, (use HDF5 direct i/o driver)<br>DB_H5VFD_FAMILY, (use HDF5 family driver)<br>DB_H5VFD_MPIO, (use HDF5 mpi-io driver)<br>DB_H5VFD_MPIP, (use HDF5 mpi posix driver)<br>DB_H5VFD_SILO, (use `SILO` BG/Q driver)<br>DB_H5VFD_FIC (use `SILO` file in core driver)<br>Many of the reamining options described in this table apply to only certain of the above VFDs.|DB_H5VFD_DEFAULT
   RAW_FILE_OPTS|VFD|int|Applies only for the split `VFD`. Specifies a file options set to use for the raw data file. May be any value returned from a call to<br>DBRegisterFileOptionsSet() or can be any one of the following pre-defined file options sets...<br>DB_FILE_OPTS_H5_DEFAULT_...<br>DEFAULT, SEC2, STDIO, CORE, LOG, SPLIT, DIRECT, FAMILY, MPIO, MPIP, `SILO`.<br>See HDF5 reference manual for H5Pset_fapl_split|DB_FILE_OPTS_H5_DEFAULT_DEFAULT
   RAW_EXTENSION|VFD|char*|Applies only for the split `VFD`. Specifies the file extension/naming convention for raw data file. If the string contains a '%s' printf-like conversion specifier, that will be replaced with the name of the file passed in the DBCreate/DBOpen call. If the string does **not** contain a '%s' printf-like conversion specifier, it is treated as an 'extension' which is appended to the name of the file passed in DBCreate/DBopen call.<br>See HDF5 reference manual for H5Pset_fapl_split|"-raw"
@@ -142,7 +142,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `opts_set_id` | The identifer (obtained from a previous call to DBRegisterFileOptionsSet()) of a file options set to unregister.
 
@@ -209,7 +209,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `driver_ids` | A -1 terminated list of driver ids such as DB_HDF5, DB_PDB, DB_HDF5_CORE, or any driver id constructed with the `DB_HDF5_OPTS()` macro.
 
@@ -276,7 +276,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `pathname` | Path name of file to create. This can be either an absolute or relative path.
   `mode` | Creation `mode`. One of the predefined Silo modes: `DB_CLOBBER` or `DB_NOCLOBBER`.
@@ -460,7 +460,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `name` | Name of the file to open. Can be either an absolute or relative path.
   `type` | The `type` of file to open. One of the predefined types, typically DB_UNKNOWN, DB_PDB, or `DB_HDF5`. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
@@ -518,7 +518,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
 
@@ -554,7 +554,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
 
@@ -597,7 +597,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file handle
 
@@ -638,7 +638,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Silo database file handle
   `maj` | Pointer to returned major version digit
@@ -674,7 +674,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file handle
   `Maj` | Integer major version number
@@ -709,7 +709,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Silo database file handle obtained with a call to DBOpen
 
@@ -742,7 +742,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `DBfile` | Database file pointer.
   `nobjs` | Number of object names in obj_names.
@@ -785,7 +785,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `dirname` | Name of the directory to create.
@@ -823,7 +823,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `pathname` | Path name of the directory. This can be either an absolute or relative path name.
@@ -862,7 +862,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `dirname` | Returned current directory name. The caller must allocate space for the returned name. The maximum space used is `256` characters, including the `NULL` terminator.
@@ -900,7 +900,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `srcFile` | Source database file pointer.
   `srcDir` | Name of the directory within the source database file to copy.
@@ -946,7 +946,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `nobjs` | The number of objects to be copied (e.g. number of strings in srcObjList)
   `srcDb` | The Silo database to be used as the source of the copies
@@ -1054,7 +1054,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle.
 
@@ -1108,7 +1108,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `drvr_hndl` | The low-level driver handle.
@@ -1145,7 +1145,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | A Silo database `file` handle.
 
@@ -1183,7 +1183,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `path` | Path to a file on the filesystem
 
@@ -1232,7 +1232,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `filename` | Name of file.
 
@@ -1283,7 +1283,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | The Silo database file handle
 
@@ -1373,7 +1373,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `curvename` | Name of the curve object
@@ -1403,7 +1403,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_LABEL|int|Problem cycle value.|0
   DBOPT_XLABEL|char *|Label for the x-axis|NULL
   DBOPT_YLABEL|char *|Label for the y-axis|NULL
@@ -1448,7 +1448,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `curvename` | Name of the curve to read.
@@ -1497,7 +1497,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the mesh.
@@ -1529,7 +1529,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_TIME|float|Problem time value.|0.0
   DBOPT_DTIME|double|Problem time value.|0.0
@@ -1570,7 +1570,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Name of the mesh.
@@ -1613,7 +1613,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable set.
@@ -1654,7 +1654,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_TIME|float|Problem time value.|0.0
   DBOPT_DTIME|double|Problem time value.|0.0
@@ -1695,7 +1695,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -1744,7 +1744,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the variable.
@@ -1796,7 +1796,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the mesh.
@@ -1845,7 +1845,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_FACETYPE|int|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`.|DB_RECTILINEAR
@@ -1902,7 +1902,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Name of the mesh.
@@ -1957,7 +1957,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -2028,7 +2028,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_FACETYPE|int|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`.|DB_RECTILINEAR
@@ -2076,7 +2076,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -2131,7 +2131,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the variable.
@@ -2185,7 +2185,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the mesh.
@@ -2275,7 +2275,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
   DBOPT_NODENUM|void*|An array of length `nnodes` giving a global node number for each node in the mesh. By default, this array is treated as type int.|NULL
   DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
@@ -2329,7 +2329,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `name` | The `name` of the ucd submesh object to create.
@@ -2375,7 +2375,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Name of the mesh.
@@ -2423,7 +2423,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the zonelist structure.
@@ -2483,7 +2483,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the zonelist structure.
@@ -2517,7 +2517,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Type|Description
-    :---|:---
+  :---|:---
   DB_ZONETYPE_BEAM|A line segment
   DB_ZONETYPE_POLYGON|A polygon where nodes are enumerated to form a polygon
   DB_ZONETYPE_TRIANGLE|A triangle
@@ -2538,7 +2538,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   Option Name|Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_ZONENUM|void*|Array of global zone numbers, one per zone in this zonelist. By default, this is assumed to be of type int.|NULL
   DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
   DBOPT_GHOST_ZONE_LABELS|char *|Optional array of char values indicating the ghost labeling (DB_GHOSTTYPE_NOGHOST or<br>DB_GHOSTTYPE_INTDUP) of each zone|NULL
@@ -2576,7 +2576,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the zonelist structure.
@@ -2605,7 +2605,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   The DBPutPHZonelist function writes a polyhedral-zonelist object into a Silo file. The name assigned to this object can in turn be used as the parameter in the 
-    :---
+  :---
   DBOPT_PHZONELIST option for the `DBPutUcdmesh` function.
 
 
@@ -2616,7 +2616,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   Option Name|Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_ZONENUM|void*|Array of global zone numbers, one per zone in this zonelist. By default, it is assumed this array is of type int*.|NULL
   DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
   DBOPT_GHOST_ZONE_LABELS|char *|Optional array of char values indicating the ghost labeling (DB_GHOSTTYPE_NOGHOST or<br>DB_GHOSTTYPE_INTDUP) of each zone|NULL
@@ -2748,7 +2748,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `phzlname` | Name of the polyhedral-zonelist.
@@ -2798,7 +2798,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the facelist structure.
@@ -2856,7 +2856,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -2919,7 +2919,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_LABEL|char *|Character strings defining the label associated with this variable. |NULL
@@ -2965,7 +2965,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the variable.
@@ -3017,7 +3017,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the variable.
@@ -3068,7 +3068,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name to associate with this `DBcsgmesh` object
@@ -3107,7 +3107,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   typeflag|num-coeffs|coefficients and equation
-    :---|:---|:---
+  :---|:---|:---
   DBCSG_QUADRIC_G|10|
   DBCSG_SPHERE_PR|4|
   DBCSG_ELLIPSOID_PRRR|6|
@@ -3137,7 +3137,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   typeflag|num-coeffs|coefficients and equation
-    :---|:---|:---
+  :---|:---|:---
   DBCSG_QUADRATIC_G|6|
   DBCSG_CIRCLE_PR|3|
   DBCSG_ELLIPSE_PRR|4|
@@ -3172,7 +3172,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   Option Name|Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value|0
   DBOPT_TIME|float|Problem time value.|0.0
   DBOPT_DTIME|double|Problem time value.|0.0
@@ -3215,7 +3215,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `meshname` | Name of the `CSG` mesh object to read
@@ -3260,7 +3260,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name to associate with the `DBcsgzonelist` object
@@ -3296,7 +3296,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   op. symbol name|type|meaning
-    :---|:---|:---
+  :---|:---|:---
   DBCSG_INNER|unary|specifies the region created by all points satisfying the equation defining the boundary with '<' replacing '='.<br>left operand indicates the boundary, right operand ignored
   DBCSG_OUTER|unary|specifies the region created by all points satisfying the equation defining the boundary with '>' replacing '='.<br>left operand indicates the boundary, right operand ignored
   DBCSG_ON|unary|specifies the region created by all points satisfying the equation defining the boundary.<br>left operand indicates the boundary, right operand ignored
@@ -3321,7 +3321,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   Option Name|Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_REGNAMES|char **|Array of `nregs` character strings defining the names of the individual regions.|NULL
   DBOPT_ZONENAMES|char**|Array of `nzones` character strings defining the names of individual zones.|NULL
   DBOPT_ALT_ZONENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for zones.|NULL
@@ -3341,7 +3341,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   typeflags|id|coefficients|name (optional)
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBCSG_SPHERE_PR|0|0.0, 0.0, 0.0, 5.0|"housing outer shell"
   DBCSG_PLANE_X|1|-2.5|"housing front"
   DBCSG_PLANE_X|2|2.5|"housing back"
@@ -3403,7 +3403,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   typeflags|regid|leftids|rightids|notes
-    :---|:---|:---|:---|:---
+  :---|:---|:---|:---|:---
   DBCSG_INNER|0|0|-1|creates inner sphere region from boundary 0
   DBCSG_INNER|1|1|-1|creates front half-space region from boundary 1
   DBCSG_OUTER|2|2|-1|creates back half-space region from boundary 2
@@ -3473,7 +3473,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `zlname` | Name of the `CSG` mesh zonelist object to read
@@ -3518,7 +3518,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `vname` | The name to be associated with this `DBcsgvar` object
@@ -3546,7 +3546,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_LABEL|char *|Character strings defining the label associated with this variable. |NULL
   DBOPT_TIME|float|Problem time value.|0.0
@@ -3584,7 +3584,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `varname` | Name of `CSG` variable object to read
@@ -3631,7 +3631,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the material data object.
@@ -3673,7 +3673,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_LABEL|char *|Character string defining the label associated with material data. |NULL
   DBOPT_MAJORORDER|int|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
@@ -3740,7 +3740,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `mat_name` | Name of the material variable to read.
@@ -3792,7 +3792,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the material species data object.
@@ -3852,7 +3852,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   species_mf|Brass (2 values)|.35
-    :---|:---|:---
+  :---|:---|:---
   element|.65|Zn
   1-origin index|Cu|2
   |1|
@@ -3863,7 +3863,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   (5 values starting at offset 3)|.007|.18|.04|.001
-    :---|:---|:---|:---|:---
+  :---|:---|:---|:---|:---
   .763|C|W|Cr|V
   Fe|4|5|6|7
   3||||
@@ -3874,7 +3874,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   (6 values starting at offset 8)|.009|.014|.005|.005|.005
-    :---|:---|:---|:---|:---|:---
+  :---|:---|:---|:---|:---|:---
   .962|C|Mn|Cr|Ni|W
   Fe|9|10|11|12|13
   8|||||
@@ -3916,7 +3916,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_MAJORORDER|int|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
   DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
   DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
@@ -3948,7 +3948,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `ms_name` | Name of the material species data to read.
@@ -3998,7 +3998,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the derived variable definition(s) object.
@@ -4034,7 +4034,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **Optlist options:**
 
   0|names|types|defns
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   1|"totaltemp"|DB_VARTYPE_SCALAR|"nodet+zonetemp"
   2|"<stress/sz>"|DB_VARTYPE_SCALAR|"-<stress/sx>-<stress/sy>"
   3|"vel"|DB_VARTYPE_VECTOR|"{Vx, Vy, Vz}"
@@ -4075,7 +4075,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | The `name` of the `DBdefvars` object to read
@@ -4119,7 +4119,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Variable name.
@@ -4158,7 +4158,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Mesh name.
@@ -4178,7 +4178,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   **&nbsp;**
 
   Mesh Type|Returned Value
-    :---|:---
+  :---|:---
   Multi-Block|DB_MULTIMESH
   UCD|DB_UCDMESH
   Pointmesh|DB_POINTMESH

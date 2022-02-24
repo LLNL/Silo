@@ -29,7 +29,7 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `maxopts` | Initial maximum number of options expected in the optlist. If this maximum is exceeded, the library will silently re-allocate more space using the golden-rule.
 
@@ -82,7 +82,7 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `optlist` | Pointer to an `option` list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
   `option` | Option definition. One of the predefined values described in the table in the notes section of each command which accepts an `option` list.
@@ -126,7 +126,7 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `optlist` | The option list object for which you wish to remove an option
   `optid` | The option id of the option you would like to remove
@@ -169,7 +169,7 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `optlist` | The `optlist` to query
   `optid` | The option id to query the value for
@@ -209,7 +209,7 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
 
@@ -250,7 +250,7 @@ This section of the manual describes only the functions to create and manage opt
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `optlist` | Pointer to an option list structure containing option/value pairs. This structure is created with the `DBMakeOptlist` function.
 

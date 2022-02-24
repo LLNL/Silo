@@ -157,7 +157,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `p` | pointer for which a pointer-id is needed
 
@@ -193,7 +193,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `ptr_id` | the pointer-id to remove
 
@@ -220,7 +220,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `len` | The length to set
 
@@ -275,7 +275,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `pointer` | A `pointer` to a Silo object for which a Fortran identifier is needed
 
@@ -340,7 +340,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `value` | The `value` returned by a Silo Fortran function, referencing a Silo object.
 
@@ -374,7 +374,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `value` | An integer returned by DBFortranAllocPointer
 
@@ -410,7 +410,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbid` | The identifier for the Silo database to write the object to.
   `name` | The `name` to be assigned to the object in the file.

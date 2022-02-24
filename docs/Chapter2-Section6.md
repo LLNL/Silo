@@ -25,7 +25,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the simple variable.
@@ -71,7 +71,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the simple variable.
@@ -127,7 +127,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the simple variable.
@@ -173,7 +173,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the simple variable.
@@ -222,7 +222,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the variable
@@ -265,7 +265,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Object `name`.
@@ -305,7 +305,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Object `name`.
@@ -325,7 +325,7 @@ The functions described here allow users to read and write arbitrary arrays of r
   **&nbsp;**
 
   Object Type|Returned Value
-    :---|:---
+  :---|:---
   Invalid object or the object was not found in the file.|DB_INVALID_OBJECT
   Quadmesh|DB_QUADMESH
   Quadvar|DB_QUADVAR
@@ -384,7 +384,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Variable name.
@@ -424,7 +424,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `name` | The `name` of the Silo object to obtain dimension information for.
@@ -465,7 +465,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Variable name.
@@ -503,7 +503,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Variable name.
@@ -554,7 +554,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name of the compound array structure.
@@ -608,7 +608,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the compound array.
@@ -654,7 +654,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `arrayname` | Name of the compound array.
@@ -698,7 +698,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `objname` | Name of the object.
   `objtype` | Type of object. One of the predefined types: DB_QUADMESH, DB_QUAD_RECT, DB_QUAD_CURV, DB_DEFVARS, DB_QUADVAR, DB_UCDMESH, DB_UCDVAR, DB_POINTMESH, DB_POINTVAR, DB_CSGMESH, DB_CSGVAR, DB_MULTIMESH, DB_MULTIVAR, DB_MULTIADJ, DB_MATERIAL, DB_MATSPECIES, DB_FACELIST, DB_ZONELIST, DB_PHZONELIST, DB_EDGELIST, DB_CURVE, DB_ARRAY, or `DB_USERDEF`.
@@ -742,7 +742,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `object` | Pointer to the `object` to be freed. This `object` is created with the `DBMakeObject` function.
 
@@ -781,7 +781,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `obj` | The new `DBobject` object (which knows its name) to write to the `file`.
@@ -818,7 +818,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `object` | Pointer to the `object` to be cleared. This `object` is created with the `DBMakeObject` function.
 
@@ -856,7 +856,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | The component name.
@@ -895,7 +895,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | The component name.
@@ -934,7 +934,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `object` | Pointer to an `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | The component name.
@@ -973,7 +973,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `object` | Pointer to the `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | The component name.
@@ -1012,7 +1012,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `object` | Pointer to the `object`. This `object` is created with the `DBMakeObject` function.
   `compname` | Component name.
@@ -1056,7 +1056,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `object` | Pointer to the `object`.
@@ -1100,7 +1100,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `object` | Object created with `DBMakeObject` and populated with DBAddFltComponent, DBAddIntComponent, DBAddStrComponent, and `DBAddVarComponent`.
@@ -1140,7 +1140,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `objname` | The name of the object to get.
@@ -1189,7 +1189,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `objname` | Object name.
@@ -1230,7 +1230,7 @@ The functions described here allow users to read and write arbitrary arrays of r
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `objname` | Object name.

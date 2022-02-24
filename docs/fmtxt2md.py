@@ -157,8 +157,7 @@ def ProcessArgumentListBlock(mdfile, i, lines):
         print("***ARGS PROBLEM***\n")
         print(args)
     # use non-breaking spaces to enforce min table width for args column
-    #mdfile.write("  Arg name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description<br>&nbsp;\n")
-    mdfile.write("  Arg name | Description\n")
+    mdfile.write("  Arg&nbsp;name | Description\n")
     mdfile.write("  :---|:---\n")
     argnames = [args[2*j].strip() for j in range(int(len(args)/2))]
     j = 0
@@ -210,7 +209,7 @@ def OutputGatheredColumnsAsTable(mdfile, cols, argnames=[], tabtitle=""):
     mdfile.write("  **%s**\n\n"%(tabtitle+":" if tabtitle else "&nbsp;"))
     mdfile.write('  ' + '|'.join(cols[0]))
     mdfile.write("\n")
-    mdfile.write('    ' + ":---|"*(len(cols[0])-1))
+    mdfile.write('  ' + ":---|"*(len(cols[0])-1))
     mdfile.write(":---\n")
 
     for c in cols[1:]:

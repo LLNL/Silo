@@ -48,7 +48,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the multi-block mesh object.
@@ -128,7 +128,7 @@ The functions described in this section of the manual include...
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_BLOCKORIGIN|int|The origin of the block numbers.|1
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_TIME|float|Problem time value.|0.0
@@ -203,7 +203,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `meshname` | Name of the multi-block mesh.
@@ -251,7 +251,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the multi-mesh adjacency object.
@@ -295,7 +295,7 @@ The functions described in this section of the manual include...
   **Optlist options:**
 
   Given mesh type|DB_POINT or DB_UCD|Neighbor mesh type
-    :---|:---|:---
+  :---|:---|:---
   |DB_QUAD|DB_POINT or DB_UCD
   ||nnodes[m] pairs of integers
   ||6+nnodes[m] integers.
@@ -308,7 +308,7 @@ The functions described in this section of the manual include...
   **&nbsp;**
 
   DB_QUAD
-    :---
+  :---
   nnodes[m]+6 integers.
 
 
@@ -317,7 +317,7 @@ The functions described in this section of the manual include...
   **&nbsp;**
 
   The next 6 integers identify ijk bounds of the corresponding nodes in the quad mesh neighbor.
-    :---
+  :---
   15 integers
 
 
@@ -358,7 +358,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name of the multi-mesh nodal adjacency object
@@ -409,7 +409,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the multi-block variable.
@@ -436,7 +436,7 @@ The functions described in this section of the manual include...
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_BLOCKORIGIN|int|The origin of the block numbers.|1
   DBOPT_CYCLE|int|Problem cycle value.|0
   DBOPT_TIME|float|Problem time value.|0.0
@@ -498,7 +498,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `varname` | Name of the multi-block variable.
@@ -544,7 +544,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the multi-material object.
@@ -570,7 +570,7 @@ The functions described in this section of the manual include...
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_BLOCKORIGIN|int|The origin of the block numbers.|1
   DBOPT_NMATNOS|int|Number of material numbers stored in the `DBOPT_MATNOS` option.|0
   DBOPT_MATNOS|int *|Pointer to an array of length `DBOPT_NMATNOS` containing a complete list of the material numbers used in the Multimat object. `DBOPT_NMATNOS` must be set for this to work correctly.|NULL
@@ -622,7 +622,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name of the multi-block material object
@@ -667,7 +667,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the multi-block species structure.
@@ -694,7 +694,7 @@ The functions described in this section of the manual include...
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
-    :---|:---|:---|:---
+  :---|:---|:---|:---
   DBOPT_BLOCKORIGIN|int|The origin of the block numbers.|1
   DBOPT_MATNAME|char *|Character string defining the `name` of the multi-block material with which this object is associated.|NULL
   DBOPT_NMAT|int|The number of materials in the associated material object.|0
@@ -738,7 +738,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the multi-block material species.
@@ -784,7 +784,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `filename` | name of the Silo file to open
   `comm` | MPI communicator to use for the broadcast operation
@@ -854,7 +854,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `numFiles` | The number of individual Silo files to generate. Note, this is the number of parallel I/O streams that will be running simultaneously during I/O. A value of 1 cause `PMPIO` to behave serially. A value equal to the number of processors causes `PMPIO` to create a file-per-processor. Both values are unwise. For most parallel `HPC` platforms, values between 8 and 64 are appropriate.
   `ioMode` | Choose one of either `PMPIO_READ` or `PMPIO_WRITE`. Note, you can not use `PMPIO` to handle both read and write in the same interaction.
@@ -963,7 +963,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `fname` | The name of the Silo file to create.
   `dname` | The name of the directory within the Silo file to create.
@@ -1010,7 +1010,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `fname` | The name of the Silo file to open.
   `dname` | The name of the directory within the Silo file to work in.
@@ -1057,7 +1057,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `file` | void pointer to the `file` handle (DBfile pointer).
   `udata` | A pointer to any additional user data. This is the pointer passed as the userData argument to PMPIO_Init().
@@ -1098,7 +1098,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
   `filename` | The name of the Silo file this processor will create or open.
@@ -1149,7 +1149,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
   `file` | A void pointer to the Silo `DBfile` object.
@@ -1185,7 +1185,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
 
@@ -1219,7 +1219,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
   `rankInComm` | Rank of processor in the `MPI` communicator passed in PMPIO_Init() for which group rank is to be queried.
@@ -1257,7 +1257,7 @@ The functions described in this section of the manual include...
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `bat` | The `PMPIO` baton handle obtained via a call to PMPIO_Init().
   `rankInComm` | Rank of the processor in the `MPI` communicator used in PMPIO_Init() to be queried.

@@ -119,7 +119,7 @@ The functions in this part of the library are
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `db` | Silo database file handle
   `jobj` | JSON object pointer
@@ -160,7 +160,7 @@ The functions in this part of the library are
 
 * **Arguments:**
 
-  Arg name | Description
+  Arg&nbsp;name | Description
   :---|:---
   `db` | Silo database file handle
   `name` | Name of object to read
