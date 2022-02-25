@@ -8,10 +8,10 @@ This section of the `API` manual simply tries to enumerate all these conventions
 In a few cases, a long-standing use convention has been subsumed by the recent introduction of formalized Silo objects or options to implement the convention.
 These cases are documented and the user is encouraged to use the formal Silo approach.
 
-
-
 Since everything documented in this section of the Silo `API` is a convention on the use of Silo, where one would ordinarily see a function call prototype, instead example call(s) to the Silo that implement the convention are described.
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `_visit_defvars()`
 
 * **Summary:** convention for derived variable definitions

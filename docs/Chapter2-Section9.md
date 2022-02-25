@@ -35,10 +35,10 @@ Type "help", "copyright", "credits" or "license" for more info.
 
 >>> sys.path.append("/foo/bar/lib")
 
-
-
 >>> import Silo
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `Silo.Open()`
 
 * **Summary:** Open a Silo file (See DBOpen)

@@ -1,10 +1,10 @@
 ## Error Handling and Other Global Library Behavior
 
-
-
 The functions described in this section of the Silo Application Programming Interface (API) manual, are those that effect behavior of the library, globally, for any file(s) that are or will be open.
 These include such things as error handling, requiring Silo to do extra work to warn of and avoid overwrites, to compute and warn of checksum errors and to compress data before writing it to disk.
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBErrfuncname()`
 
 * **Summary:** Get name of error-generating function

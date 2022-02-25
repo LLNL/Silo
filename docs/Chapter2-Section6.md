@@ -3,11 +3,11 @@
 If you want to create data that other applications (not written by you or someone working closely with you) can read and understand, these are **not** the right functions to use.
 That is because the data that these functions create is not self-describing and inherently non-shareable.
 
-
-
 However, if you need to write data that only you (or someone working closely with you) will read such as for restart purposes, the functions described here may be helpful.
 The functions described here allow users to read and write arbitrary arrays of raw data as well as user-defined Silo objects.
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBWrite()`
 
 * **Summary:** Write a simple variable.

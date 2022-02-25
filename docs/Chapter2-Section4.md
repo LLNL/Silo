@@ -1,9 +1,9 @@
 ## Calculational and Utility
 
-
-
 This section of the `API` manual describes functions that can be used to compute things such as Facelists as well as utility functions to, for example, catentate an array of strings into a single string for simple output with `DBWrite()`.
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBCalcExternalFacelist()`
 
 * **Summary:** Calculate an external facelist for a `UCD` mesh.

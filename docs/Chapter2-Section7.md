@@ -38,11 +38,11 @@ Silo's binary format can be used, for example, by a parallel application to conv
 
 Any application wishing to use the `JSON` Silo interface must include the silo_json.h header file.
 
-
-
 In this section we describe only those methods we have defined beyond those that come with the json-c library.
 The functions in this part of the library are
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `json-c extensions()`
 
 * **Summary:** Extensions to json-c library to support Silo

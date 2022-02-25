@@ -17,10 +17,10 @@ It is simply impossible to know a priori all the different ways in which applica
 
 For this reason, where a specific application of `MRG` trees is desired (to represent materials for example), we document the naming convention an application must use to affect the representation.
 
-
-
 The functions described in this section of the `API` manual are...
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBMakeMrgtree()`
 
 * **Summary:** Create and initialize an empty mesh region grouping tree

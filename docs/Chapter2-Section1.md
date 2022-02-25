@@ -16,11 +16,11 @@ Note that the organization of objects into directories within a Silo file may ha
 For example, except for directories used to store multi-block objects (See "Multi-Block Objects, Parallelism and Poor-Man's Parallel I/O" on page `157`.), VisIt will use directories in a Silo file to create submenus within its Graphical User Interface (GUI).
 For example, if VisIt opens a Silo file with two directories called "foo" and "bar" and there are various meshes and variables in each of these directories, then many of VisIt's `GUI` menus will contain submenus named "foo" and "bar" where the objects found in those directories will be placed in the `GUI`.
 
-
-
 Silo also supports the concept of grabbing the low-level driver.
 For example, if Silo is using the HDF5 driver, an application can obtain the actual HDF5 file id and then use the native HDF5 API with that file id.
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBRegisterFileOptionsSet()`
 
 * **Summary:** Register a set of options for advanced control of the low-level I/O driver

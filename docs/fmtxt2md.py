@@ -45,7 +45,7 @@ def FormatText(s, kwnames=[]):
 #
 # Handle various issues with typesetting an output line
 #
-def OutputLineWithFormatting(mdfile, line, kwnames=[], indent=""):
+def OutputLineWithFormatting(mdfile_lines, line, kwnames=[], indent=""):
 
     # Break text ending at elipsis, dot, question mark, exclamation point followed by
     line = re.sub(r'\(e\.g\. ',r'@e@g@@',line)
@@ -57,62 +57,64 @@ def OutputLineWithFormatting(mdfile, line, kwnames=[], indent=""):
 
         s = FormatText(s, kwnames)
 
-        mdfile.write(indent + s.strip())
-        mdfile.write("\n")
+        mdfile_lines.append(indent + s.strip())
+        mdfile_lines.append("\n")
 
-    mdfile.write("\n")
+    mdfile_lines.append("\n")
 
 #
 # Begin a new API section (new md file)
 #
 def StartNewSection(i, s, lines):
-    mdfile = open("Chapter2-Section%d.md"%s,"wt")
+    mdfile_lines = []
     hs = re.search(r'^[0-9]*\s*API Section\s*(.*)',lines[i])
     if len(hs.groups()) > 0:
-        mdfile.write("## %s"%FormatText(hs.groups()[0]).strip())
-        mdfile.write("\n")
+        hdr = "%s"%FormatText(hs.groups()[0]).strip()
     else:
-        mdfile.write("## Section %d\n"%s)
+        hdr = "Section %d"%s
     s += 1
-    mdfile.write("\n")
+    mdfile_lines.append("## %s\n"%hdr)
+    mdfile_lines.append("\n")
     i += 1
 
-    while i < len(lines) and not IsMethodHeader(i+1, lines):
-        OutputLineWithFormatting(mdfile, lines[i])
+    while i < len(lines) and not IsMethodHeader(i, lines):
+        OutputLineWithFormatting(mdfile_lines, lines[i])
         i += 1
-    mdfile.write("---\n")
-    mdfile.write('<br>'*40)
 
-    return i, s, mdfile
+    mdfile_lines.append("---\n")
+    mdfile_lines.append('<br>'*40)
+    mdfile_lines.append("\n")
 
-def ProcessSynopsis(mdfile, i, lines):
+    return i, s, hdr, mdfile_lines
+
+def ProcessSynopsis(mdfile_lines, i, lines):
     i += 1
-    mdfile.write("* **C Signature:**\n\n") # FIXME REMOVE THIS
-    mdfile.write("  ```\n")
-    mdfile.write('  ' + lines[i].strip())
-    mdfile.write("\n")
+    mdfile_lines.append("* **C Signature:**\n\n") # FIXME REMOVE THIS
+    mdfile_lines.append("  ```\n")
+    mdfile_lines.append('  ' + lines[i].strip())
+    mdfile_lines.append("\n")
     i += 1
     while i < len(lines) and not \
         (IsMethodHeader(i, lines) or \
          re.search(r'^Fortran Equivalent:$', lines[i]) or \
          re.search(r'^Returns:$', lines[i]) or \
          re.search(r'^Arguments:$', lines[i])):
-        mdfile.write('      ' + lines[i].strip())
-        mdfile.write("\n")
+        mdfile_lines.append('      ' + lines[i].strip())
+        mdfile_lines.append("\n")
         i += 1
-    mdfile.write("  ```\n")
+    mdfile_lines.append("  ```\n")
     if re.search(r'^Fortran Equivalent:$', lines[i]):
-        mdfile.write("\n")
+        mdfile_lines.append("\n")
         i += 1
         if re.search(r'^None$', lines[i]):
-            mdfile.write("* **Fortran Signature:**\n\n")
-            mdfile.write("  ```\n")
-            mdfile.write("  None\n")
-            mdfile.write("  ```\n")
+            mdfile_lines.append("* **Fortran Signature:**\n\n")
+            mdfile_lines.append("  ```\n")
+            mdfile_lines.append("  None\n")
+            mdfile_lines.append("  ```\n")
             i += 1
         else:
-            mdfile.write("* **Fortran Signature:**\n\n")
-            mdfile.write("  ```\n")
+            mdfile_lines.append("* **Fortran Signature:**\n\n")
+            mdfile_lines.append("  ```\n")
             fort_args = []
             fort_args_done = False
             while i < len(lines) and not \
@@ -124,24 +126,24 @@ def ProcessSynopsis(mdfile, i, lines):
                     n = 4
                     ident = "  "
                     while len(fort_args):
-                        mdfile.write(ident + ', '.join(fort_args[:n]))
+                        mdfile_lines.append(ident + ', '.join(fort_args[:n]))
                         if fort_args[:n][-1][-1] != ')':
-                            mdfile.write(",")
-                        mdfile.write("\n")
+                            mdfile_lines.append(",")
+                        mdfile_lines.append("\n")
                         fort_args = fort_args[n:]
                         n = 6
                         ident = "     "
                     fort_args = []
                     fort_args_done = True
-                    mdfile.write("  ```\n\n")
+                    mdfile_lines.append("  ```\n\n")
                 elif fort_args_done:
-                    mdfile.write('  ' + FormatText(lines[i].strip(' \n')))
-                    mdfile.write("\n")
+                    mdfile_lines.append('  ' + FormatText(lines[i].strip(' \n')))
+                    mdfile_lines.append("\n")
                 i += 1
-    mdfile.write("\n")
+    mdfile_lines.append("\n")
     return i
 
-def ProcessArgumentListBlock(mdfile, i, lines):
+def ProcessArgumentListBlock(mdfile_lines, i, lines):
     i += 1
     args = []
     while i < len(lines) and not \
@@ -153,28 +155,28 @@ def ProcessArgumentListBlock(mdfile, i, lines):
             args += [lines[i]]
         i += 1
     if len(args) < 2:
-        mdfile.write("* **Arguments:**\n\n")
-        mdfile.write("  `None`\n")
+        mdfile_lines.append("* **Arguments:**\n\n")
+        mdfile_lines.append("  `None`\n")
         return i, []
-    mdfile.write("* **Arguments:**\n\n")
+    mdfile_lines.append("* **Arguments:**\n\n")
     if len(args) % 2 != 0:
         print("***ARGS PROBLEM***\n")
         print(args)
     # use non-breaking spaces to enforce min table width for args column
-    mdfile.write("  Arg&nbsp;name | Description\n")
-    mdfile.write("  :---|:---\n")
+    mdfile_lines.append("  Arg&nbsp;name | Description\n")
+    mdfile_lines.append("  :---|:---\n")
     argnames = [args[2*j].strip() for j in range(int(len(args)/2))]
     j = 0
     while j < len(args):
-        mdfile.write("  `%s` | %s\n"%(args[j].strip(), FormatText(args[j+1].strip(),argnames) if j+1<len(args) else "ARGS PROBLEM"))
+        mdfile_lines.append("  `%s` | %s\n"%(args[j].strip(), FormatText(args[j+1].strip(),argnames) if j+1<len(args) else "ARGS PROBLEM"))
         j += 2
-    mdfile.write("\n\n")
+    mdfile_lines.append("\n\n")
     return i, argnames
 
 #https://github.com/LLNL/Silo/blob/mcm86-27jan22-convert-docs-fm2md/src/silo/silo.h.in#L802
 #https://github.com/LLNL/Silo/blob/main/src/silo/silo.h.in#L802
 
-def ProcessReturnBlock(mdfile, i, lines):
+def ProcessReturnBlock(mdfile_lines, i, lines):
     i += 1
     retlines = []
     while i < len(lines) and not \
@@ -184,15 +186,15 @@ def ProcessReturnBlock(mdfile, i, lines):
         if lines[i].strip() != '' and lines[i].strip().lower()[:4] != 'none':
             retlines += [lines[i]]
         i += 1
-    mdfile.write("* **Returned value:**\n\n")
+    mdfile_lines.append("* **Returned value:**\n\n")
     if len(retlines):
         j = 0
         while j < len(retlines):
-            OutputLineWithFormatting(mdfile,retlines[j],[],"  ")
+            OutputLineWithFormatting(mdfile_lines,retlines[j],[],"  ")
             j += 1
     else:
-        mdfile.write("  void");
-    mdfile.write("\n\n")
+        mdfile_lines.append("  void");
+    mdfile_lines.append("\n\n")
     return i
 
 def ReadLinesInTabBlock(target_ntabs, i, desclines):
@@ -207,23 +209,23 @@ def ReadLinesInTabBlock(target_ntabs, i, desclines):
     complete_line = re.sub("\n","<br>", complete_line)
     return i, [complete_line.split('\t')]
 
-def OutputGatheredColumnsAsTable(mdfile, cols, argnames=[], tabtitle=""):
+def OutputGatheredColumnsAsTable(mdfile_lines, cols, argnames=[], tabtitle=""):
 
     cols = list(map(list, itertools.zip_longest(*cols, fillvalue=None)))
-    mdfile.write("  **%s**\n\n"%(tabtitle+":" if tabtitle else "&nbsp;"))
-    mdfile.write('  ' + '|'.join(cols[0]))
-    mdfile.write("\n")
-    mdfile.write('  ' + ":---|"*(len(cols[0])-1))
-    mdfile.write(":---\n")
+    mdfile_lines.append("  **%s**\n\n"%(tabtitle+":" if tabtitle else "&nbsp;"))
+    mdfile_lines.append('  ' + '|'.join(cols[0]))
+    mdfile_lines.append("\n")
+    mdfile_lines.append('  ' + ":---|"*(len(cols[0])-1))
+    mdfile_lines.append(":---\n")
 
     for c in cols[1:]:
         c = [x if x else '' for x in c]
-        mdfile.write('  ' + FormatText('|'.join(c),argnames)) # FIXME
-        mdfile.write("\n")
+        mdfile_lines.append('  ' + FormatText('|'.join(c),argnames)) # FIXME
+        mdfile_lines.append("\n")
 
-    mdfile.write("\n\n")
+    mdfile_lines.append("\n\n")
 
-def ProcessDescription(mdfile, i, lines, argnames=[]):
+def ProcessDescription(mdfile_lines, i, lines, argnames=[]):
 
     i += 1
     desclines = []
@@ -236,7 +238,7 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
     if not desclines:
         return i
 
-    mdfile.write("* **Description:**\n\n")
+    mdfile_lines.append("* **Description:**\n\n")
 
     j = 0
     target_ntabs = 0
@@ -250,7 +252,7 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
 
                 # Output a normal "line" (which may be multiple sentences)
                 # in description
-                OutputLineWithFormatting(mdfile, desclines[j], argnames, "  ")
+                OutputLineWithFormatting(mdfile_lines, desclines[j], argnames, "  ")
                 j += 1
 
             else:
@@ -269,7 +271,7 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
                 tabtitle = ""
                 if first_table and argnames[-1] == 'optlist':
                     tabtitle = "Optlist options"
-                OutputGatheredColumnsAsTable(mdfile, tabcols, argnames, tabtitle)
+                OutputGatheredColumnsAsTable(mdfile_lines, tabcols, argnames, tabtitle)
                 first_table = False
                 tabcols = []
 
@@ -277,7 +279,7 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
                 target_ntabs = 0
 
                 # Now, output the current line
-                OutputLineWithFormatting(mdfile, desclines[j], argnames, "  ")
+                OutputLineWithFormatting(mdfile_lines, desclines[j], argnames, "  ")
                 j += 1
 
             else:
@@ -291,16 +293,15 @@ def ProcessDescription(mdfile, i, lines, argnames=[]):
         tabtitle = ""
         if first_table and argnames[-1] == 'optlist':
             tabtitle = "Optlist options"
-        OutputGatheredColumnsAsTable(mdfile, tabcols, argnames, tabtitle)
+        OutputGatheredColumnsAsTable(mdfile_lines, tabcols, argnames, tabtitle)
 
-    mdfile.write("\n")
+    mdfile_lines.append("\n")
 
     return i
 
-def ProcessMethod(mdfile, i, lines):
-    mdfile.write("### `%s()`\n\n"%lines[i][:-1])
-    #mdfile.write("> %s\n"%lines[i+1][1:])
-    mdfile.write("* **Summary:** %s\n\n"%FormatText(lines[i+1][1:].strip()))
+def ProcessMethod(mdfile_lines, i, lines):
+    mdfile_lines.append("### `%s()`\n\n"%lines[i][:-1])
+    mdfile_lines.append("* **Summary:** %s\n\n"%FormatText(lines[i+1][1:].strip()))
     i += 2
     while i < len(lines) and \
         not IsMethodHeader(i, lines) and \
@@ -308,23 +309,23 @@ def ProcessMethod(mdfile, i, lines):
         argnames = []
         handled_line = False
         if re.search(r'^Synopsis:$', lines[i]):
-            i = ProcessSynopsis(mdfile, i, lines)
+            i = ProcessSynopsis(mdfile_lines, i, lines)
             handled_line = True
         if re.search(r'^Arguments:$', lines[i]):
-            i, argnames = ProcessArgumentListBlock(mdfile, i, lines)
+            i, argnames = ProcessArgumentListBlock(mdfile_lines, i, lines)
             handled_line = True
         if re.search(r'^Returns:$', lines[i]):
-            i = ProcessReturnBlock(mdfile, i, lines)
+            i = ProcessReturnBlock(mdfile_lines, i, lines)
             handled_line = True
         if re.search(r'^Description:$', lines[i]):
-            i = ProcessDescription(mdfile, i, lines, argnames)
+            i = ProcessDescription(mdfile_lines, i, lines, argnames)
             handled_line = True
         if not handled_line:
-            OutputLineWithFormatting(mdfile, lines[i], argnames, "  ")
+            OutputLineWithFormatting(mdfile_lines, lines[i], argnames, "  ")
             i += 1
-    mdfile.write("---\n")
-    mdfile.write('<br>'*40)
-    mdfile.write("\n")
+    mdfile_lines.append("---\n")
+    mdfile_lines.append('<br>'*40)
+    mdfile_lines.append("\n")
     return i
 
 #
@@ -334,14 +335,22 @@ lines = GetFileLines("Chapter2-man_pages2.txt")
 
 i = 0
 s = 0
+mdfiles = {}
 while i < len(lines):
     handled_line = False
     if IsAPISectionHeader(lines[i]):
-        i, s, mdfile = StartNewSection(i, s, lines)
+        i, s, hs, mdfile_lines = StartNewSection(i, s, lines)
+        mdfiles[hs] = mdfile_lines
         handled_line = True
     if IsMethodHeader(i, lines):
-        i = ProcessMethod(mdfile, i, lines)
+        i = ProcessMethod(mdfile_lines, i, lines)
         handled_line = True
     if not handled_line:
-        OutputLineWithFormatting(mdfile, lines[i])
+        OutputLineWithFormatting(mdfile_lines, lines[i])
         i += 1
+
+s = 0
+for f in mdfiles:
+    with open("Chapter2-Section%d.md"%s,"wt") as mdfile:
+        mdfile.writelines(mdfiles[f])
+    s += 1

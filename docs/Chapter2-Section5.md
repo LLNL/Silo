@@ -5,10 +5,10 @@ This is intended to permit the Silo `API` to grow and evolve as necessary withou
 
 In the documentation associated with each function, the list of available options and their meaning is described.
 
-
-
 This section of the manual describes only the functions to create and manage options lists.
 
+---
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBMakeOptlist()`
 
 * **Summary:** Allocate an option list.
