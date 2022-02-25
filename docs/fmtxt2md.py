@@ -65,27 +65,29 @@ def OutputLineWithFormatting(mdfile_lines, line, kwnames=[], indent=""):
 #
 # Begin a new API section (new md file)
 #
-def StartNewSection(i, s, lines):
+def StartNewSection(i, s, lines, mdfiles):
     mdfile_lines = []
     hs = re.search(r'^[0-9]*\s*API Section\s*(.*)',lines[i])
     if len(hs.groups()) > 0:
         hdr = "%s"%FormatText(hs.groups()[0]).strip()
     else:
         hdr = "Section %d"%s
+    sec = "API Section"
+    mdfiles[hdr] = {sec:[]}
     s += 1
-    mdfile_lines.append("## %s\n"%hdr)
-    mdfile_lines.append("\n")
+    mdfiles[hdr][sec].append("## %s\n"%hdr)
+    mdfiles[hdr][sec].append("\n")
     i += 1
 
     while i < len(lines) and not IsMethodHeader(i, lines):
-        OutputLineWithFormatting(mdfile_lines, lines[i])
+        OutputLineWithFormatting(mdfiles[hdr][sec], lines[i])
         i += 1
 
-    mdfile_lines.append("---\n")
-    mdfile_lines.append('<br>'*40)
-    mdfile_lines.append("\n")
+    mdfiles[hdr][sec].append("---\n")
+    mdfiles[hdr][sec].append('<br>'*40)
+    mdfiles[hdr][sec].append("\n")
 
-    return i, s, hdr, mdfile_lines
+    return i, s, hdr
 
 def ProcessSynopsis(mdfile_lines, i, lines):
     i += 1
@@ -299,9 +301,11 @@ def ProcessDescription(mdfile_lines, i, lines, argnames=[]):
 
     return i
 
-def ProcessMethod(mdfile_lines, i, lines):
-    mdfile_lines.append("### `%s()`\n\n"%lines[i][:-1])
-    mdfile_lines.append("* **Summary:** %s\n\n"%FormatText(lines[i+1][1:].strip()))
+def ProcessMethod(i, lines, sec):
+    meth = lines[i][:-1]
+    sec[meth] = []
+    sec[meth].append("### `%s()`\n\n"%meth)
+    sec[meth].append("* **Summary:** %s\n\n"%FormatText(lines[i+1][1:].strip()))
     i += 2
     while i < len(lines) and \
         not IsMethodHeader(i, lines) and \
@@ -309,24 +313,24 @@ def ProcessMethod(mdfile_lines, i, lines):
         argnames = []
         handled_line = False
         if re.search(r'^Synopsis:$', lines[i]):
-            i = ProcessSynopsis(mdfile_lines, i, lines)
+            i = ProcessSynopsis(sec[meth], i, lines)
             handled_line = True
         if re.search(r'^Arguments:$', lines[i]):
-            i, argnames = ProcessArgumentListBlock(mdfile_lines, i, lines)
+            i, argnames = ProcessArgumentListBlock(sec[meth], i, lines)
             handled_line = True
         if re.search(r'^Returns:$', lines[i]):
-            i = ProcessReturnBlock(mdfile_lines, i, lines)
+            i = ProcessReturnBlock(sec[meth], i, lines)
             handled_line = True
         if re.search(r'^Description:$', lines[i]):
-            i = ProcessDescription(mdfile_lines, i, lines, argnames)
+            i = ProcessDescription(sec[meth], i, lines, argnames)
             handled_line = True
         if not handled_line:
-            OutputLineWithFormatting(mdfile_lines, lines[i], argnames, "  ")
+            OutputLineWithFormatting(sec[meth], lines[i], argnames, "  ")
             i += 1
-    mdfile_lines.append("---\n")
-    mdfile_lines.append('<br>'*40)
-    mdfile_lines.append("\n")
-    return i
+    sec[meth].append("---\n")
+    sec[meth].append('<br>'*40)
+    sec[meth].append("\n")
+    return i, meth
 
 #
 # main program
@@ -339,18 +343,31 @@ mdfiles = {}
 while i < len(lines):
     handled_line = False
     if IsAPISectionHeader(lines[i]):
-        i, s, hs, mdfile_lines = StartNewSection(i, s, lines)
-        mdfiles[hs] = mdfile_lines
+        i, s, sec = StartNewSection(i, s, lines, mdfiles)
         handled_line = True
     if IsMethodHeader(i, lines):
-        i = ProcessMethod(mdfile_lines, i, lines)
+        i, m = ProcessMethod(i, lines, mdfiles[sec])
         handled_line = True
     if not handled_line:
-        OutputLineWithFormatting(mdfile_lines, lines[i])
+        OutputLineWithFormatting(lines[i], mdfiles[sec][m])
         i += 1
 
+#
+# Make a pass resolving links of the form 'See blahblah...'
+#
+for sec in mdfiles:
+    for meth in mdfiles[sec]:
+        for line in mdfiles[sec][meth]:
+            if 'See' in line:
+                print(line)
+
+
+#
+# Output the files
+#
 s = 0
-for f in mdfiles:
+for sec in mdfiles:
     with open("Chapter2-Section%d.md"%s,"wt") as mdfile:
-        mdfile.writelines(mdfiles[f])
+        for meth in mdfiles[sec]:
+            mdfile.writelines(mdfiles[sec][meth])
     s += 1
