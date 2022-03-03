@@ -1,4 +1,6 @@
-## Part Assemblies, AMR, Slide Surfaces, Nodesets and Other Arbitrary Mesh Subsets
+## Part Assemblies, AMR, Slide Surfaces,
+
+Nodesets and Other Arbitrary Mesh Subsets
 
 This section of the `API` manual describes Mesh Region Grouping (MRG) trees and Groupel Maps.
 MRG trees describe the decomposition of a mesh into various regions such as parts in an assembly, materials (even mixing materials), element blocks, processor pieces, nodesets, slide surfaces, boundary conditions, etc.
@@ -637,8 +639,8 @@ The functions described in this section of the `API` manual are...
      lreg_names, datatype, data_ids, optlist_id, status)
   ```
 
-  character*N compnames (See [`dbset2dstrlen`](./conventions.md#dbset2dstrlen)`288`.)
-  character*N reg_names (See [`dbset2dstrlen`](./conventions.md#dbset2dstrlen)`288`.)
+  character*N compnames (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
+  character*N reg_names (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
   int* data_ids (use dbmkptr to get id for each pointer)
 
 * **Arguments:**

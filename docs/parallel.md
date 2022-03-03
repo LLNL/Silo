@@ -1,4 +1,6 @@
-## Multi-Block Objects, Parallelism and Multiple Independent File Parallel I/O
+## Multi-Block Objects, Parallelism and
+
+Poor-Man's Parallel I/O
 
 Individual pieces of mesh created with a number of `DBPutXxxmesh()` calls can be assembled together into larger, multi-block objects.
 Likewise for variables and materials defined on these meshes.
@@ -54,7 +56,7 @@ The functions described in this section of the manual include...
      meshnames, lmeshnames, meshtypes, optlist_id, status)
   ```
 
-  character*N meshnames (See [`dbset2dstrlen`](./conventions.md#dbset2dstrlen)`288`.)
+  character*N meshnames (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
 
 * **Arguments:**
 
@@ -412,7 +414,7 @@ The functions described in this section of the manual include...
      varnames, lvarnames, vartypes, optlist_id, status)
   ```
 
-  character*N varnames (See [`dbset2dstrlen`](./conventions.md#dbset2dstrlen)`288`.)
+  character*N varnames (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
 
 * **Arguments:**
 

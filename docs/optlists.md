@@ -84,7 +84,7 @@ This section of the manual describes only the functions to create and manage opt
   integer ivalue, optlist_id, option, lcvalue, nval
   double precision dvalue
   real rvalue
-  character*N cvalue (See [`dbset2dstrlen`](./conventions.md#dbset2dstrlen)`288`.)
+  character*N cvalue (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
 
 * **Arguments:**
 

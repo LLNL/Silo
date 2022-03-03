@@ -108,9 +108,14 @@ Type "help", "copyright", "credits" or "license" for more info.
 
   ```
   DBtoc <DBfile>.GetToc()
-      Description:
-      Returns a DBToc object as a Python object. This probably should really be a Python dictionary object but it is not presently. There are no methods defined for a DBToc object but if you print it, you can get the list of objects in the current working directory in the file.
   ```
+
+* **Description:**
+
+  Returns a `DBToc` object as a Python object.
+  This probably should really be a Python dictionary object but it is not presently.
+  There are no methods defined for a `DBToc` object but if you print it, you can get the list of objects in the current working directory in the file.
+
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -202,9 +207,12 @@ Type "help", "copyright", "credits" or "license" for more info.
 
   ```
   NoneType <DBfile>.Close()
-      Description:
-      Close the Silo file
   ```
+
+* **Description:**
+
+  Close the Silo file
+
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>

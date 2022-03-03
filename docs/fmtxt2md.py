@@ -6,6 +6,7 @@ import re, itertools
 fileNameFromSec = {
     "Error Handling and Other Global Library Behavior": "globals",
     "Files and File Structure": "files",
+    "Meshes, Variables and Materials": "objects",
     "Multi-Block Objects, Parallelism and": "parallel",
     "Part Assemblies, AMR, Slide Surfaces,": "subsets",
     "Calculational and Utility": "utility",
@@ -13,6 +14,7 @@ fileNameFromSec = {
     "User Defined (Generic) Data and Objects": "generic",
     "JSON Interface to Silo Objects": "json",
     "Previously Undocumented Use Conventions": "conventions",
+    "Fortran Interface": "fortran",
     "Python Interface": "python",
     "Deprecated Functions": "deprecated",
     "Silo Library Header File": "header"
@@ -31,7 +33,7 @@ def IsMethodHeader(i, lines):
     return False
 
 def IsAPISectionHeader(line):
-    if re.search(r'^[0-9]* API Section', line):
+    if re.search(r'^[0-9]*\s*API Section', line):
         return True
     return False
 
@@ -114,6 +116,7 @@ def ProcessSynopsis(mdfile_lines, i, lines):
         (IsMethodHeader(i, lines) or \
          re.search(r'^Fortran Equivalent:$', lines[i]) or \
          re.search(r'^Returns:$', lines[i]) or \
+         re.search(r'^Description:$', lines[i]) or \
          re.search(r'^Arguments:$', lines[i])):
         mdfile_lines.append('      ' + lines[i].strip())
         mdfile_lines.append("\n")
@@ -339,6 +342,7 @@ def ProcessMethod(i, lines, sec):
             i = ProcessDescription(sec[meth], i, lines, argnames)
             handled_line = True
         if not handled_line:
+            print("Didn't classify line...\"",lines[i],"\"")
             OutputLineWithFormatting(sec[meth], lines[i], argnames, "  ")
             i += 1
     sec[meth].append("---\n")
@@ -363,6 +367,7 @@ while i < len(lines):
         i, m = ProcessMethod(i, lines, mdfiles[sec])
         handled_line = True
     if not handled_line:
+        print("Didn't classify line...\"",lines[i],"\"")
         OutputLineWithFormatting(lines[i], mdfiles[sec][m])
         i += 1
 
@@ -445,7 +450,6 @@ def ProcessMethodTable(mdfile, methods):
 #
 s = 0
 for sec in mdfiles:
-    print(sec)
 #    with open("Chapter2-Section%d.md"%s,"wt") as mdfile:
     with open("%s.md"%fileNameFromSec[sec],"wt") as mdfile:
         for meth in mdfiles[sec]:
