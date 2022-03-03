@@ -1,5 +1,23 @@
 import re, itertools
 
+#
+# Map section headings to markdown file names
+#
+fileNameFromSec = {
+    "Error Handling and Other Global Library Behavior": "globals",
+    "Files and File Structure": "files",
+    "Multi-Block Objects, Parallelism and": "parallel",
+    "Part Assemblies, AMR, Slide Surfaces,": "subsets",
+    "Calculational and Utility": "utility",
+    "Optlists": "optlists",
+    "User Defined (Generic) Data and Objects": "generic",
+    "JSON Interface to Silo Objects": "json",
+    "Previously Undocumented Use Conventions": "conventions",
+    "Python Interface": "python",
+    "Deprecated Functions": "deprecated",
+    "Silo Library Header File": "header"
+}
+
 # 
 # Get all documentation lines from text file
 #
@@ -82,10 +100,6 @@ def StartNewSection(i, s, lines, mdfiles):
     while i < len(lines) and not IsMethodHeader(i, lines):
         OutputLineWithFormatting(mdfiles[hdr][sec], lines[i])
         i += 1
-
-    mdfiles[hdr][sec].append("---\n")
-    mdfiles[hdr][sec].append('<br>'*40)
-    mdfiles[hdr][sec].append("\n")
 
     return i, s, hdr
 
@@ -353,21 +367,89 @@ while i < len(lines):
         i += 1
 
 #
-# Make a pass resolving links of the form 'See blahblah...'
+# Make a pass creating links from text of the form...
+#    (See DBOpen)
+#    See "DBSet...
+#    See `DBReadVar` 
+#    See “DBMakeMrgtree” on page 196
+#    See below
+#    See description
+#    See documentation
+#    See HDF5 reference manual
 #
+usingSec=""
+def fixlinks(match):
+
+    func = match.groups()[2]+match.groups()[3]
+    lfunc = func.lower()
+
+    for sec in mdfiles:
+        if lfunc in [meth.lower() for meth in mdfiles[sec].keys()]:
+            if sec == usingSec:
+                return "See [`"+func+"`](#"+lfunc+")"
+            else:
+                return "See [`"+func+"`](./"+fileNameFromSec[sec]+".md#"+lfunc+")"
+
+    return "See [`"+func+"`](UNKNOWN)"
+
 for sec in mdfiles:
     for meth in mdfiles[sec]:
-        for line in mdfiles[sec][meth]:
-            if 'See' in line:
-                print(line)
+        for i in range(len(mdfiles[sec][meth])):
+
+            #
+            # skip lines that don't have 'See' indicating a ref
+            #
+            if 'See' not in mdfiles[sec][meth][i]:
+                continue 
+
+            #
+            # Handle links to HDF5 docs
+            #
+            mdfiles[sec][meth][i] = re.sub(r'See HDF5 reference manual',
+                r'See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/)',mdfiles[sec][meth][i])
+
+            #
+            # Handle internal links
+            #
+            usingSec = sec
+            mdfiles[sec][meth][i] = re.sub(r'See (the description of |the write-up of |the documentation for |the documentation on |documentation on )?(["`]?)(DB|db)([a-zA-Z0-9_]*)(["`]?)( on page ([0-9-]*))?',
+                fixlinks, mdfiles[sec][meth][i])
 
 
+def ProcessMethodTable(mdfile, methods):
+
+    mdfile.write("### Methods and symbols in this section\n")
+    mdfile.write("\n")
+    mdfile.write("&nbsp;|&nbsp;|&nbsp;\n")
+    mdfile.write(":---|:---|:---\n")
+
+    i = 1
+    for m in methods:
+        if m == "API Section":
+            continue
+        mdfile.write("[`"+m+"`](#"+m.lower()+")")
+        if i%3 == 0:
+            mdfile.write("\n")
+        else:
+            mdfile.write("|")
+        i += 1
+    mdfile.write("\n")
+    mdfile.write("\n")
+
+    mdfile.write("---\n")
+    mdfile.write('<br>'*40)
+    mdfile.write("\n")
+    
 #
 # Output the files
 #
 s = 0
 for sec in mdfiles:
-    with open("Chapter2-Section%d.md"%s,"wt") as mdfile:
+    print(sec)
+#    with open("Chapter2-Section%d.md"%s,"wt") as mdfile:
+    with open("%s.md"%fileNameFromSec[sec],"wt") as mdfile:
         for meth in mdfiles[sec]:
             mdfile.writelines(mdfiles[sec][meth])
+            if meth == "API Section":
+                ProcessMethodTable(mdfile, sorted(mdfiles[sec].keys()))
     s += 1
