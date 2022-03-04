@@ -1,5 +1,6 @@
-## [Introduction](./Chapter1.md)
+## Silo Manual Sections
 
+* [Introduction](./intro.md)
 * [Error Handling & Global Library Behavior](./globals.md)
 * [Files & File Structure](./files.md)
 * [Meshes, Variables & Material Objects](./objects.md)
