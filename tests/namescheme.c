@@ -165,10 +165,10 @@ int main(int argc, char **argv)
     DBFreeNamescheme(ns);
 
     /* Test embedded string value results */
-    ns = DBMakeNamescheme("@foo_%s@(n-5)?'master':'slave':");
-    TEST_GET_NAME(ns, 4, "foo_master");
-    TEST_GET_NAME(ns, 5, "foo_slave");
-    TEST_GET_NAME(ns, 6, "foo_master");
+    ns = DBMakeNamescheme("@foo_%s@(n-5)?'sideA':'sideB':");
+    TEST_GET_NAME(ns, 4, "foo_sideA");
+    TEST_GET_NAME(ns, 5, "foo_sideB");
+    TEST_GET_NAME(ns, 6, "foo_sideA");
     DBFreeNamescheme(ns);
 
     /* Test array-based references to int valued arrays and whose
@@ -431,8 +431,8 @@ int main(int argc, char **argv)
 #if 0
     snprintf(teststr, sizeof(teststr), "%s, %s",
         DBSPrintf("block_%d,level_%04d", 505, 17),
-        DBSPrintf("side_%s_%cx%g", "master",'z',1.0/3));
-    TEST_STR(teststr, "block_505,level_0017, side_master_zx0.333333")
+        DBSPrintf("side_%s_%cx%g", "driver",'z',1.0/3));
+    TEST_STR(teststr, "block_505,level_0017, side_driver_zx0.333333")
 #endif
     
     /* Test case where fewer expressions that conversion specs */
