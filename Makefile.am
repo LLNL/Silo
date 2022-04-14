@@ -72,7 +72,7 @@ ACLOCAL_AMFLAGS = -I config
 
 nodist_noinst_HEADERS = config.h
 
-EXTRA_DIST = COPYRIGHT FAQ VERSION BSD_LICENSE_README
+EXTRA_DIST = COPYRIGHT VERSION BSD_LICENSE_README
 
 MAINTAINERCLEANFILES = Makefile.in\
  aclocal.m4\
@@ -81,7 +81,7 @@ MAINTAINERCLEANFILES = Makefile.in\
 ## We need `.' in SUBDIRS because we want `check' to build `.' first.
 SUBDIRS = . src tools tests
 DIST_SUBDIRS = . config config-site \
-  svn_bin docs src tests tools SiloWindows
+  svn_bin docs src tests tools
 
 help: config/make.help
 	cat $(srcdir)/config/make.help
