@@ -11819,7 +11819,7 @@ db_hdf5_PutFacelist(
             db_hdf5_compwr(dbfile, DB_INT, 1, &lnodelist, nodelist,
                 m.nodelist/*out*/, friendly_name(_dbfile,name, "_nodelist", 0));
         }
-        if (3==ndims) {
+        if (2==ndims || 3==ndims) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapecnt,
                 m.shapecnt/*out*/, friendly_name(_dbfile,name, "_shapecnt", 0));
             db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapesize,

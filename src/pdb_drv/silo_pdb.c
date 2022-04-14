@@ -8117,7 +8117,7 @@ db_pdb_PutFacelist(
    DBWriteComponent(dbfile, obj, "nodelist", name, "integer",
                     nodelist, 1, count);
 
-   if (ndims == 3) {
+   if (ndims == 2 || ndims == 3) {
       count[0] = nshapes;
 
       DBWriteComponent(dbfile, obj, "shapecnt", name, "integer",
