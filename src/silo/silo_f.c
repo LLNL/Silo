@@ -518,17 +518,62 @@ DBADDCAOPT_FC (int *optlist_id, int *option,
         optlist->values[optlist->numopts] = cval;
         optlist->numopts++;
 
-/*** Can't free this memory without removing the data! ***/
-/***
-        for (i = 0; i < *nval; i++)
-            FREE(cval[i]);
-        FREE(cval);
- ***/
-
+	/* memory allocated above must be freed with
+	   dbfreecaopt */
     }
     API_END;
 
     return(0);
+}
+
+/*-------------------------------------------------------------------------
+ * Routine                                                   DBFREECAOPT_FC
+ * 
+ * Purpose
+ *     Free a character array option to the given option list.
+ *     Should be called before DBFREEOPTLIST to avoid memory leaks
+ *     since DBADDCAOPT makes a copy of the Fortran array.
+ *     
+ * Notes
+ *     This function was built to be called from Fortran.
+ *
+ * Returns
+ *     Returns 0 on success, -1 on failure.
+ *
+ * Programmer
+ *     Olivier G. Cessenat
+ *     Thu Feb 11 8:34:01 MET 2022
+ *
+ * Modifications
+ *
+ *-------------------------------------------------------------------------*/
+SILO_API FORTRAN
+DBFREECAOPT_FC (int *optlist_id, int *option, int *nval)
+{
+    char          **cval = NULL;
+    DBoptlist     *optlist = NULL;
+    int           i, j;
+
+    API_BEGIN("dbfreecaopt", int, -1) {
+        optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
+        if (!optlist)
+            API_ERROR("optlist_id", E_BADARGS);
+
+        if (*nval <= 0)
+            API_ERROR("nval", E_BADARGS);
+        for (i = 0; i < optlist->numopts; i++) {
+            if (optlist->options[i] == *option) {
+                cval = optlist->values[i];
+                for (j = 0; j < *nval; j++)
+                    FREE(cval[j]);
+                FREE(cval);
+                API_RETURN(0);
+            }
+        }
+    }
+
+    API_END;
+    return(-1);
 }
 
 /*-------------------------------------------------------------------------
