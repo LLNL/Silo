@@ -894,7 +894,7 @@ DBCALCFL_FC (int *znodelist, int *nnodes, int *origin, int *zshapesize,
 }
 
 /*-------------------------------------------------------------------------
- * Routinex                                                      DBCLOSE_FC
+ * Routine                                                       DBCLOSE_FC
  *
  * Purpose
  *     Close a database.
