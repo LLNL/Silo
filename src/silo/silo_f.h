@@ -67,7 +67,7 @@ be used for advertising or product endorsement purposes.
 #define FCD_DB char*
 #endif
 
-#define FPTR(X,T)   ((!(X)||DB_F77NULL==(X))?(T)NULL:(T)(X))
+#define FPTR(X) ((DB_F77NULL==(*X))?NULL:(X))
 
 #define DBADDIOPT_FC     FC_FUNC (dbaddiopt,DBADDIOPT)
 #define DBADDROPT_FC     FC_FUNC (dbaddropt,DBADDROPT)

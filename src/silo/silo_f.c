@@ -776,7 +776,7 @@ DBPUTMAT_FC (int *dbid, FCD_DB name,
        *  that a DB_F77NULL indicates a null array.
        *--------------------------------------------*/
 
-        mixz = (mix_zone[0] == DB_F77NULL) ? NULL : mix_zone;
+        mixz = FPTR(mix_zone);
 
         *status = DBPutMaterial(dbfile, nm, mnm, *nmat, matnos, matlist,
                            dims, *ndims, mix_next, mix_mat, mixz, mix_vf,
@@ -929,8 +929,7 @@ DBCALCFL_FC (int *znodelist, int *nnodes, int *origin, int *zshapesize,
 
     API_BEGIN("dbcalcfl", int, -1) {
         fl = DBCalcExternalFacelist(znodelist, *nnodes, *origin, zshapesize,
-                                    zshapecnt, *nzshapes,
-                               (*matlist == DB_F77NULL) ? NULL : matlist,
+                                    zshapecnt, *nzshapes, FPTR(matlist),
                                     *bnd_method);
         *object_id = DBFortranAllocPointer(fl);
 
@@ -940,7 +939,7 @@ DBCALCFL_FC (int *znodelist, int *nnodes, int *origin, int *zshapesize,
 }
 
 /*-------------------------------------------------------------------------
- * Routinex                                                      DBCLOSE_FC
+ * Routine                                                       DBCLOSE_FC
  *
  * Purpose
  *     Close a database.
@@ -1378,6 +1377,8 @@ DBOPEN_FC (FCD_DB pathname, int *lpathname, int *type, int *mode, int *dbid)
  *     Kathleen Bonnell, Wed Sep 2 15:31:26 PDT 2009
  *     Added SILO_API so symbols are correctly exported on windows.
  *
+ *     Mark C. Miller, Wed Apr 13 18:14:27 PDT 2022
+ *     
  *-------------------------------------------------------------------------*/
 SILO_API FORTRAN
 DBPUTFL_FC (int *dbid, FCD_DB name, int *lname, int *nfaces, int *ndims,
@@ -1415,7 +1416,8 @@ DBPUTFL_FC (int *dbid, FCD_DB name, int *lname, int *nfaces, int *ndims,
          *--------------------------------------------*/
 
         *status = DBPutFacelist(dbfile, nm, *nfaces, *ndims,
-                                nodelist, *lnodelist, *origin, zoneno,
+                                nodelist, *lnodelist, *origin,
+                                FPTR(zoneno),
                                 shapesize, shapecnt, *nshapes,
                                 types, typelist, *ntypes);
 
@@ -5334,7 +5336,7 @@ DBPUTCSGM_FC (int *dbid, FCD_DB name, int *lname, int *ndims, int *nbounds,
 #endif
 
         *status = DBPutCsgmesh(dbfile, nm, *ndims, *nbounds, typeflags,
-            *bndids == DB_F77NULL?0:bndids, coeffs, *lcoeffs, *datatype,
+            FPTR(bndids), coeffs, *lcoeffs, *datatype,
             extents, zl_nm, optlist);
 
         FREE(nm);
