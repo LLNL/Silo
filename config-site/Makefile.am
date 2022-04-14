@@ -77,5 +77,5 @@ dist-hook:
             -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
         for file in $$dist_files; do \
 	    rm -f $(distdir)/$$file; \
-            cp -pd $(srcdir)/$$file $(distdir)/$$file ;\
+            cp -pL $(srcdir)/$$file $(distdir)/$$file ;\
         done
