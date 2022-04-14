@@ -518,13 +518,8 @@ DBADDCAOPT_FC (int *optlist_id, int *option,
         optlist->values[optlist->numopts] = cval;
         optlist->numopts++;
 
-/*** Can't free this memory without removing the data! ***/
-/***
-        for (i = 0; i < *nval; i++)
-            FREE(cval[i]);
-        FREE(cval);
- ***/
-
+	/* memory allocated above must be freed with
+	   dbfreecaopt */
     }
     API_END;
 
@@ -559,7 +554,7 @@ DBFREECAOPT_FC (int *optlist_id, int *option, int *nval)
     DBoptlist     *optlist = NULL;
     int           i, j;
 
-    API_BEGIN("dbfreeoption", int, -1) {
+    API_BEGIN("dbfreecaopt", int, -1) {
         optlist = (DBoptlist *) DBFortranAccessPointer(*optlist_id);
         if (!optlist)
             API_ERROR("optlist_id", E_BADARGS);
