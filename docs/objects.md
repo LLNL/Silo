@@ -11,6 +11,10 @@ Silo also supports the decomposition of these meshes into materials (and materia
 Finally, Silo also supports the specification of expressions representing derived variables.
 
 ### Methods and symbols in this section
+{:.no_toc}
+
+*
+{:toc}
 
 &nbsp;|&nbsp;|&nbsp;
 :---|:---|:---
