@@ -1,4 +1,2 @@
 theme: jekyll-theme-leap-day
 markdown: kramdown
-kramdown:
-  toc_levels: 3..4
