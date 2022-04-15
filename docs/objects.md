@@ -13,7 +13,7 @@ Finally, Silo also supports the specification of expressions representing derive
 ### Methods and symbols in this section
 {:.no_toc}
 
-*
+1. Table of Contents
 {:toc}
 
 &nbsp;|&nbsp;|&nbsp;
