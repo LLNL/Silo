@@ -550,6 +550,12 @@ typedef struct H5FD_class_t {
 #endif
 
 static const H5FD_class_t H5FD_silo_g = {
+#if HDF5_VERSION_GE(1,13,2) && defined(H5FD_CLASS_VERSION)
+    H5FD_CLASS_VERSION,                         /*version               */
+#endif
+#if HDF5_VERSION_GE(1,13,0)
+    512,                                        /*value                 */
+#endif
     "silo",				        /*name			*/
     MAXADDR,				        /*maxaddr		*/
     H5F_CLOSE_WEAK,				/* fc_degree		*/
@@ -589,6 +595,10 @@ static const H5FD_class_t H5FD_silo_g = {
     H5FD_silo_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+#if HDF5_VERSION_GE(1,13,0)
+    NULL,                                       /*del                   */
+    NULL,                                       /*ctl                   */
+#endif
     H5FD_FLMAP_SINGLE				/*fl_map		*/
 };
 
