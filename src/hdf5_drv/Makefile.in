@@ -144,7 +144,8 @@ build_triplet = @build@
 host_triplet = @host@
 @HZIP_NEEDED_TRUE@am__append_1 = -I$(srcdir)/../hzip
 @FPZIP_NEEDED_TRUE@am__append_2 = -I$(srcdir)/../fpzip 
-@ZFP_NEEDED_TRUE@am__append_3 = -DH5_HAVE_FILTER_ZFP -DH5Z_ZFP_AS_LIB -DAS_SILO_BUILTIN -I$(srcdir)/../zfp-0.5.5/include
+@ZFP_NEEDED_TRUE@am__append_3 = H5Zzfp.c
+@ZFP_NEEDED_TRUE@am__append_4 = -DH5_HAVE_FILTER_ZFP -DH5Z_ZFP_AS_LIB -DAS_SILO_BUILTIN -I$(srcdir)/../zfp-0.5.5/include
 subdir = src/hdf5_drv
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/ax_check_compiler_flags.m4 \
@@ -166,7 +167,10 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libsilo_hdf5_drv_la_LIBADD =
-am_libsilo_hdf5_drv_la_OBJECTS = silo_hdf5.lo H5FDsilo.lo H5Zzfp.lo
+am__libsilo_hdf5_drv_la_SOURCES_DIST = silo_hdf5.c H5FDsilo.c H5Zzfp.c
+@ZFP_NEEDED_TRUE@am__objects_1 = H5Zzfp.lo
+am_libsilo_hdf5_drv_la_OBJECTS = silo_hdf5.lo H5FDsilo.lo \
+	$(am__objects_1)
 libsilo_hdf5_drv_la_OBJECTS = $(am_libsilo_hdf5_drv_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -207,7 +211,7 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libsilo_hdf5_drv_la_SOURCES)
-DIST_SOURCES = $(libsilo_hdf5_drv_la_SOURCES)
+DIST_SOURCES = $(am__libsilo_hdf5_drv_la_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -415,10 +419,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libsilo_hdf5_drv.la
-libsilo_hdf5_drv_la_SOURCES = silo_hdf5.c H5FDsilo.c H5Zzfp.c
+libsilo_hdf5_drv_la_SOURCES = silo_hdf5.c H5FDsilo.c $(am__append_3)
 #libsilo_H5FDsilo_la_SOURCES = H5FDsilo.c
 AM_CPPFLAGS = -I$(builddir)/../silo -I$(srcdir)/../silo \
-	$(am__append_1) $(am__append_2) $(am__append_3)
+	$(am__append_1) $(am__append_2) $(am__append_4)
 noinst_HEADERS = \
  silo_hdf5_private.h \
  hdf5_version_ge.h \
