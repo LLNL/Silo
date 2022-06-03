@@ -577,7 +577,7 @@ if(UNIX)
     target_link_libraries(silo m)
 endif()
 
-target_link_libraries(silo "${CMAKE_DL_LIBS}")
+target_link_libraries(silo ${CMAKE_DL_LIBS})
 target_compile_definitions(silo PRIVATE ${SILO_COMPILE_DEFINES})
 add_dependencies(silo pdb_detect)
 target_include_directories(silo PRIVATE ${silo_library_include_dirs})
@@ -658,7 +658,7 @@ if(SILO_ENABLE_SILOCK AND NOT WIN32)
     add_dependencies(silock silo)
     target_link_libraries(silock $<TARGET_LINKER_FILE:silo>)
     if(UNIX)
-        target_link_libraries(silock m dl)
+        target_link_libraries(silock m ${CMAKE_DL_LIBS})
     endif()
     target_include_directories(silock PRIVATE
         ${silo_build_include_dir}
