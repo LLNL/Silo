@@ -95,6 +95,8 @@ if(UNIX)
     target_link_libraries(browser m)
 endif()
 
+target_link_libraries(browser ${CMAKE_DL_LIBS})
+
 if(SILO_ENABLE_HDF5 AND HDF5_FOUND)
     target_link_libraries(browser ${HDF5_C_LIBRARIES})
 endif()

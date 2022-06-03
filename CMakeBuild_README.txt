@@ -10,6 +10,7 @@ the build dir. Modify CMAKE_INSTALL_PREFIX if you wish to change this.
 Silo CMake vars that control aspects of the build:
 
 SILO_ENABLE_SHARED          Build silo shared library.               DEFAULT : ON
+SILO_ENABLE_SILOCK          Enable building of silock                DEFAULT : ON
 SILO_ENABLE_SILEX           Enable building of silex (requires Qt5)  DEFAULT : OFF
 SILO_ENABLE_BROWSER         Enable building of browser               DEFAULT : ON
 SILO_ENABLE_FORTRAN         Enable Fortran interface to Silo         DEFAULT : ON
