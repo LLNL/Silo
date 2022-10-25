@@ -15106,11 +15106,26 @@ _db_safe_strdup(const char *s)
  *
  * Mark C. Miller, Tue Feb  7 15:18:38 PST 2012
  * Made reltol_eps diff mutually exclusive with abstol || reltol diff.
+ *
+ * Mark C. Miller, Mon Oct 24, 23:00:00 PDT 2022
+ * Handle nans properly
  *-------------------------------------------------------------------------
  */
 int DBIsDifferentDouble(double a, double b, double abstol, double reltol, double reltol_eps)
 {
    double       num, den;
+
+   /* handle possible NaNs first */
+   if (isnan(a))
+   {
+       if isnan(b) return 0;
+       return 1;
+   }
+   else if (isnan(b))
+   {
+       if isnan(a) return 0;
+       return 1;
+   }
 
    /*
     * First, see if we should use the alternate diff.
