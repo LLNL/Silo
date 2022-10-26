@@ -15118,7 +15118,7 @@ int DBIsDifferentDouble(double a, double b, double abstol, double reltol, double
    /* handle possible NaNs first */
    if (isnan(a))
    {
-       if isnan(b) return 0;
+       if (isnan(b)) return 0;
        return 1;
    }
    else if (isnan(b))
