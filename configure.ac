@@ -196,6 +196,19 @@ dnl This allows multiple src-dir builds within one host.
 AC_PREFIX_DEFAULT("SILO_TOP_SRC_DIR")
 
 dnl
+dnl macOS has deprecated the use of the stat64 structure defined in sys/stat.h.
+dnl Thus, we check whether stat64 is present before considering to use it.
+dnl On macOS, the stat structure may refer to the 32 or 64 bit version of the
+dnl structure.
+dnl
+
+AC_CHECK_MEMBER([struct stat64.st_dev], [AC_DEFINE(HAVE_STAT64)], [], [[#include <sys/stat.h>]])
+AC_CHECK_MEMBER([struct stat.st_dev],   [AC_DEFINE(HAVE_STAT)],   [], [[#include <sys/stat.h>]])
+
+AC_DEFINE([HAVE_STAT64], [], [Whether struct stat64 is present in sys/stat.h])
+AC_DEFINE([HAVE_STAT],   [], [Whether struct stat   is present in sys/stat.h])
+
+dnl
 dnl Handle the python module right away to determine if we need shared libs.
 dnl Ordinarily, we default to static libs
 dnl
@@ -618,10 +631,10 @@ dnl
 # it is an argument to the -D argument. So, I think this is
 # just totally bogus!
 # Default to large file support
-AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE";)
-AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE",CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE";)
-AX_CHECK_COMPILER_FLAGS("-D_FILE_OFFSET_BITS=64",CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64";)
-AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement",CFLAGS="$CFLAGS -Wdeclaration-after-statement";)
+AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE_SOURCE", [CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE"])
+AX_CHECK_COMPILER_FLAGS("-D_LARGEFILE64_SOURCE", [CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"])
+AX_CHECK_COMPILER_FLAGS("-D_FILE_OFFSET_BITS=64", [CFLAGS="$CFLAGS -D_FILE_OFFSET_BITS=64"])
+AX_CHECK_COMPILER_FLAGS("-Wdeclaration-after-statement", [CFLAGS="$CFLAGS -Wdeclaration-after-statement"])
 
 #
 # Note: regardless of what the stuff above regarding large file support
