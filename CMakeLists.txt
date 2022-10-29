@@ -591,7 +591,8 @@ set(silo_headers
     ${silo_build_include_dir}/silo.h
     ${Silo_SOURCE_DIR}/src/silo/silo.inc
     ${Silo_SOURCE_DIR}/src/silo/silo_f9x.inc
-    ${Silo_SOURCE_DIR}/src/silo/silo_exports.h)
+    ${Silo_SOURCE_DIR}/src/silo/silo_exports.h
+    ${Silo_SOURCE_DIR}/src/silo/pmpio.h)
 
 if(WIN32)
     list(APPEND silo_headers ${Silo_SOURCE_DIR}/src/silo/silo_win32_compatibility.h)
