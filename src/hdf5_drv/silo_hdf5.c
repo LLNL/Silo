@@ -7265,8 +7265,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 msize = ALIGN(msize, sizeof(double)) + nvals * sizeof(double);
                 fsize += (nvals * H5Tget_size(dbfile->T_double));
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
-                msize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' */
-                fsize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' */
+                msize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
+                fsize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
             } else if (obj->pdb_names[i][0]=='\'') {
                 /* variable has invalid name or we don't handle type */
                 db_perror(obj->pdb_names[i], E_INVALIDNAME, me);
@@ -7401,7 +7401,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 moffset += sizeof(double);
                 foffset += H5Tget_size(dbfile->T_double);
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
-                size_t len = strlen(obj->pdb_names[i]+4)-1;
+                size_t len = strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
 #ifndef _WIN32
 #warning COMPATABILITY ISSUE
 #endif
@@ -7422,7 +7422,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 }
                 H5Tclose(str_type);
                 strncpy((char*)(object+moffset), obj->pdb_names[i]+4, len);
-                object[moffset+len-1] = '\0'; /*overwrite quote*/
+                object[moffset+len-1] = '\0'; /*overwrite trailing ' as '\0' */
                 moffset += len;
                 foffset += len;
             } else {
