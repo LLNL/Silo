@@ -6497,18 +6497,32 @@ db_pdb_InqMeshtype (DBfile *_dbfile, char const *mname)
  *      Sean Ahern, Wed Apr 12 11:14:38 PDT 2000
  *      Removed the last two parameters to PJ_inquire_entry because they
  *      weren't being used.
+ *
+ *      Mark C. Miller, Wed Dec  7 16:37:11 PST 2022
+ *      Adjusted to behave similarly to InqVarType and, in particular,
+ *      work also for names of directories.
  *--------------------------------------------------------------------*/
 SILO_CALLBACK int
 db_pdb_InqVarExists (DBfile *_dbfile, char const *varname)
 {
+   char          *newname;
    DBfile_pdb    *dbfile = (DBfile_pdb *) _dbfile;
    syment        *ep;
 
-   ep = PJ_inquire_entry(dbfile->pdb, varname);
-   if (!ep)
-      return (0);
-   else
-      return (1);
+    /* First, check to see if it exists */
+    ep = lite_PD_inquire_entry(dbfile->pdb, (char *)varname, TRUE, NULL);
+    if (ep) return 1;
+
+    /* This could be a directory.  Add a "/" to the end and try again. */
+    newname = (char*)malloc(strlen(varname)+2);
+    sprintf(newname,"%s/",varname);
+    ep = lite_PD_inquire_entry(dbfile->pdb, newname, TRUE, NULL);
+    free(newname);
+
+    /* If it's NULL now, we really cannot find the object. */
+    if (ep) return 1;
+
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
