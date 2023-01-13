@@ -283,7 +283,16 @@ check_function_exists(strerror HAVE_STRERROR)
 check_symbol_exists(isnan "math.h" HAVE_ISNAN)
 check_symbol_exists(memmove "memory.h" HAVE_MEMMOVE)
 check_symbol_exists(add_history "readline.h" HAVE_READLINE_HISTORY)
+check_symbol_exists(stat64 "sys/stat.h" HAVE_STAT64)
+check_symbol_exists(stat "sys/stat.h" HAVE_STAT)
 
+if (HAVE_STAT64)
+    add_definitions(-DHAVE_STAT64)
+endif()
+
+if (HAVE_STAT)
+    add_definitions(-DHAVE_STAT)
+endif()
 
 ###-----------------------------------------------------------------------------
 # Set flags & options from config-site files after everything is set up since

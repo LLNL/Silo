@@ -101,7 +101,10 @@ be used for advertising or product endorsement purposes.
 #include <sys/types.h>
 #endif
 #if HAVE_SYS_STAT_H
-#include <sys/stat.h>
+    #if SIZEOF_OFF64_T > 4 && defined(__APPLE__)
+        #define _DARWIN_USE_64_BIT_INODE
+    #endif
+    #include <sys/stat.h>
 #endif
 #include <ctype.h>          /* For isalnum */
 #if HAVE_SYS_FCNTL_H
@@ -239,7 +242,7 @@ typedef struct db_silo_stat_t {
 #ifndef SIZEOF_OFF64_T
 #error missing definition for SIZEOF_OFF64_T in silo_private.h
 #else
-#if SIZEOF_OFF64_T > 4
+#if SIZEOF_OFF64_T > 4 && (defined(HAVE_STAT64) || !defined(HAVE_STAT))
     struct stat64 s;
 #else
     struct stat s;
@@ -2122,7 +2125,7 @@ db_silo_stat_one_file(const char *name, db_silo_stat_t *statbuf)
     errno = 0;
     memset(&(statbuf->s), 0, sizeof(statbuf->s));
 
-#if SIZEOF_OFF64_T > 4
+#if SIZEOF_OFF64_T > 4 && (defined(HAVE_STAT64) || !defined(HAVE_STAT))
     retval = stat64(name, &(statbuf->s));
 #else
     retval = stat(name, &(statbuf->s));
@@ -4137,7 +4140,7 @@ DBOpenReal(const char *name, int type, int mode)
                 /********************************/
                 /* System level error occured.  */
                 /********************************/
-#if SIZEOF_OFF64_T > 4
+#if SIZEOF_OFF64_T > 4 && (defined(HAVE_STAT64) || !defined(HAVE_STAT))
                 printf("stat64() failed with error: ");
 #else
                 printf("stat() failed with error: ");
