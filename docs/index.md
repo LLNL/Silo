@@ -17,7 +17,7 @@ Silo supports multiple I/O drivers, the two most common of which are the HDF5 (H
 
 [Manual](./manual.md)
 
-[PDF Manual](./silo_manual_from_md.pdf)
+[Most recently released manual (4.10)](https://wci.llnl.gov/sites/wci/files/2020-08/LLNL-SM-654357.pdf)
 
 #### Contacts
 
