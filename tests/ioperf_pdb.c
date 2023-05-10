@@ -52,7 +52,9 @@ product endorsement purposes.
 #include <stdlib.h>
 #include <string.h>
 #define HAVE_MEMMOVE
+#ifdef PDB_LITE
 #include <lite_pdb.h> /* below we are using lite_ functions */
+#endif
 #include <ioperf.h>
 
 /*
