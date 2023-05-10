@@ -1570,7 +1570,8 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
              *  Invoke the C function to do the work.
              *---------------------------------------*/
             *status = DBPutMultimesh(dbfile, nm, *nmesh,
-                                     (char const * const *) meshnms, meshtypes, optlist);
+                                     (char const * const *) meshnms,
+                      (*(int *)meshtypes) != DB_F77NULL ? meshtypes : NULL, optlist);
             
             for (i = 0; i < *nmesh; i++)
                 FREE(meshnms[i]);
@@ -1826,7 +1827,7 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
 
             /* Invoke the C function to do the work. */
             *status = DBPutMultivar(dbfile, nm, *nvar, (char const * const *) varnms,
-                                    vartypes, optlist);
+                      (*(int *)vartypes) != DB_F77NULL ? vartypes: NULL, optlist);
 
             for(i=0;i<*nvar;i++)
                 FREE(varnms[i]);
