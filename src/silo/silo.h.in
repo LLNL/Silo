@@ -677,6 +677,8 @@ typedef enum {
 /* Miscellaneous constants */
 #define     DB_F77NULL  (-99)   /*Fortran NULL pointer      */
 #define     DB_F77NULLSTRING  "NULLSTRING"  /* FORTRAN STRING */
+#define     DB_FNULL DB_F77NULL
+#define     DB_FNULLSTRING DB_F77NULLSTRING
 
 /* Mode constants for partial I/O operations */
 #define DB_PARTIO_POINTS 0x1
