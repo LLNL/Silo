@@ -67,13 +67,14 @@ be used for advertising or product endorsement purposes.
 #define FCD_DB char*
 #endif
 
-#define FPTR(X,T)   ((!(X)||DB_F77NULL==(X))?(T)NULL:(T)(X))
+#define FPTR(X) ((DB_F77NULL==(*X))?NULL:(X))
 
 #define DBADDIOPT_FC     FC_FUNC (dbaddiopt,DBADDIOPT)
 #define DBADDROPT_FC     FC_FUNC (dbaddropt,DBADDROPT)
 #define DBADDDOPT_FC     FC_FUNC (dbadddopt,DBADDDOPT)
 #define DBADDCOPT_FC     FC_FUNC (dbaddcopt,DBADDCOPT)
-#define DBADDCAOPT_FC     FC_FUNC (dbaddcaopt,DBADDCAOPT)
+#define DBADDCAOPT_FC    FC_FUNC (dbaddcaopt,DBADDCAOPT)
+#define DBFREECAOPT_FC   FC_FUNC (dbfreecaopt,DBFREECAOPT)
 #define DBADDIAOPT_FC    FC_FUNC (dbaddiaopt,DBADDIAOPT)
 #define DBMKOPTLIST_FC   FC_FUNC (dbmkoptlist,DBMKOPTLIST)
 #define DBFREEOPTLIST_FC FC_FUNC (dbfreeoptlist,DBFREEOPTLIST)

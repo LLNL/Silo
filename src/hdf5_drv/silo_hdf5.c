@@ -1809,7 +1809,7 @@ db_hdf5_cwg(DBfile *_dbfile)
              *dscount = m.MEMCNT;                                \
         *dsnames = (char **) calloc(*dscount, sizeof(char**));   \
         for (i = 0; i < *dscount; i++)                           \
-            (*dsnames)[i] = strdup(m.MEMNAME[i]);                \
+            (*dsnames)[i] = strdup(m.MEMNAME);                   \
         break;                                                   \
     }
 
@@ -1857,15 +1857,15 @@ db_hdf5_get_obj_dsnames(DBfile *_dbfile, char const *name, int *dscount, char **
 
         switch(_objtype)
         {
-            DB_OBJ_CASE(DB_QUADVAR, DBquadvar_mt, nvals, value)
-            /*DB_OBJ_CASE(DB_QUAD_RECT, DBquadmesh_mt, nspace, coord) wont work for rect case */
-            DB_OBJ_CASE(DB_QUAD_CURV, DBquadmesh_mt, nspace, coord)
-            DB_OBJ_CASE(DB_QUADMESH, DBquadmesh_mt, nspace, coord)
-            DB_OBJ_CASE(DB_UCDVAR, DBucdvar_mt, nvals, value)
-            DB_OBJ_CASE(DB_UCDMESH, DBucdmesh_mt, ndims, coord)
-            DB_OBJ_CASE(DB_POINTVAR, DBpointvar_mt, nvals, data)
-            DB_OBJ_CASE(DB_POINTMESH, DBpointmesh_mt, ndims, coord)
-            DB_OBJ_CASE(DB_CSGVAR, DBcsgvar_mt, nvals, vals)
+            DB_OBJ_CASE(DB_QUADVAR, DBquadvar_mt, nvals, value[i])
+            /*DB_OBJ_CASE(DB_QUAD_RECT, DBquadmesh_mt, nspace, coord[i]) wont work for rect case */
+            DB_OBJ_CASE(DB_QUAD_CURV, DBquadmesh_mt, nspace, coord[i])
+            DB_OBJ_CASE(DB_QUADMESH, DBquadmesh_mt, nspace, coord[i])
+            DB_OBJ_CASE(DB_UCDVAR, DBucdvar_mt, nvals, value[i])
+            DB_OBJ_CASE(DB_UCDMESH, DBucdmesh_mt, ndims, coord[i])
+            DB_OBJ_CASE(DB_POINTVAR, DBpointvar_mt, nvals, data[i])
+            DB_OBJ_CASE(DB_POINTMESH, DBpointmesh_mt, ndims, coord[i])
+            DB_OBJ_CASE(DB_CSGVAR, DBcsgvar_mt, nvals, vals[i])
             DB_OBJ_CASE(DB_CURVE, DBcurve_mt, npts?1:1, yvarname)
         }
         H5Tclose(o);
@@ -7265,8 +7265,8 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 msize = ALIGN(msize, sizeof(double)) + nvals * sizeof(double);
                 fsize += (nvals * H5Tget_size(dbfile->T_double));
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
-                msize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' */
-                fsize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' */
+                msize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
+                fsize += strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
             } else if (obj->pdb_names[i][0]=='\'') {
                 /* variable has invalid name or we don't handle type */
                 db_perror(obj->pdb_names[i], E_INVALIDNAME, me);
@@ -7401,7 +7401,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 moffset += sizeof(double);
                 foffset += H5Tget_size(dbfile->T_double);
             } else if (!strncmp(obj->pdb_names[i], "'<s>", 4)) {
-                size_t len = strlen(obj->pdb_names[i]+4)-1;
+                size_t len = strlen(obj->pdb_names[i]+4); /* inc. trailing ' for '\0' */
 #ifndef _WIN32
 #warning COMPATABILITY ISSUE
 #endif
@@ -7422,7 +7422,7 @@ db_hdf5_WriteObject(DBfile *_dbfile,    /*File to write into */
                 }
                 H5Tclose(str_type);
                 strncpy((char*)(object+moffset), obj->pdb_names[i]+4, len);
-                object[moffset+len-1] = '\0'; /*overwrite quote*/
+                object[moffset+len-1] = '\0'; /*overwrite trailing ' as '\0' */
                 moffset += len;
                 foffset += len;
             } else {
@@ -11819,7 +11819,7 @@ db_hdf5_PutFacelist(
             db_hdf5_compwr(dbfile, DB_INT, 1, &lnodelist, nodelist,
                 m.nodelist/*out*/, friendly_name(_dbfile,name, "_nodelist", 0));
         }
-        if (3==ndims) {
+        if (2==ndims || 3==ndims) {
             db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapecnt,
                 m.shapecnt/*out*/, friendly_name(_dbfile,name, "_shapecnt", 0));
             db_hdf5_compwr(dbfile, DB_INT, 1, &nshapes, shapesize,

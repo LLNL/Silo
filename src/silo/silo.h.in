@@ -1835,7 +1835,8 @@ SILO_API extern int SILO_VERS_TAG;
 #define SiloCheckVersion SILO_VERS_TAG = 1
 
 /* define versions of Silo this version is backward ABI compatible with */
-SILO_API extern int Silo_version_4_10;
+SILO_API extern int Silo_version_4_10; /* really??? */
+SILO_API extern int Silo_version_4_11;
 
 /*
  * SILO API FUNCTIONS 
