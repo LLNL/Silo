@@ -1609,8 +1609,8 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
             /*----------------------------------------
              *  Invoke the C function to do the work.
              *---------------------------------------*/
-            *status = DBPutMultimesh(dbfile, nm, *nmesh, (char const * const *) meshnms,
-                         FPTR(meshtypes), optlist);
+            *status = DBPutMultimesh(dbfile, nm, *nmesh, (char const * const *) FPTR(meshnames),
+                         (int const *) FPTR(meshtypes), optlist);
             
             for (i = 0; i < *nmesh; i++)
                 FREE(meshnms[i]);
@@ -1865,8 +1865,8 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
             }
 
             /* Invoke the C function to do the work. */
-            *status = DBPutMultivar(dbfile, nm, *nvar, (char const * const *) varnms,
-                      FPTR(vartypes), optlist);
+            *status = DBPutMultivar(dbfile, nm, *nvar, (char const * const *) FPTR(varnms),
+                      (int const *) FPTR(vartypes), optlist);
 
             for(i=0;i<*nvar;i++)
                 FREE(varnms[i]);
@@ -1980,7 +1980,7 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
             /*----------------------------------------
              *  Invoke the C function to do the work.
              *---------------------------------------*/
-            *status = DBPutMultimat(dbfile, nm, *nmat, FPTR((char const * const *) matnms), optlist);
+            *status = DBPutMultimat(dbfile, nm, *nmat, (char const * const *) FPTR(matnms), optlist);
             
             for (i = 0; i < *nmat; i++)
                 FREE(matnms[i]);
@@ -2083,7 +2083,7 @@ DBPUTMMATSPECIES_FC (int *dbid, FCD_DB name, int *lname, int *nspec, FCD_DB spec
             /*----------------------------------------
              *  Invoke the C function to do the work.
              *---------------------------------------*/
-            *status = DBPutMultimatspecies(dbfile, nm, *nspec, FPTR((char const * const *) specnms), optlist);
+            *status = DBPutMultimatspecies(dbfile, nm, *nspec, (char const * const *) FPTR(specnms), optlist);
             
             for (i = 0; i < *nspec; i++)
                 FREE(specnms[i]);
