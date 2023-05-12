@@ -92,6 +92,7 @@ running into problems with this test, you can always re-configure to
 #ifdef PDB_LITE
 
 #include <lite_pdb.h>
+#include <config.h>
 
 #include <assert.h>
 #ifndef _WIN32
