@@ -19,6 +19,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 [`DBSetDeprecateWarnings`](#dbsetdeprecatewarnings)|[`DBSetEnableChecksums`](#dbsetenablechecksums)|[`DBSetFriendlyHDF5Names`](#dbsetfriendlyhdf5names)
 [`DBShowErrors`](#dbshowerrors)|[`DBVariableNameValid`](#dbvariablenamevalid)|[`DBVersion`](#dbversion)
 [`DBVersionDigits`](#dbversiondigits)|[`DBVersionGE`](#dbversionge)|[`DB_VERSION_GE`](#db_version_ge)
+
 </details>
 
 ---
