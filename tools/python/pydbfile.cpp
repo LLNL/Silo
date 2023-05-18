@@ -792,7 +792,7 @@ static PyObject *DBfile_DBClose(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    if(!PyArg_ParseTuple(args, ""))
+    if(args && !PyArg_ParseTuple(args, ""))
         return NULL;
 
     if (DBClose(db))
@@ -880,6 +880,7 @@ static struct PyMethodDef DBfile_methods[] = {
 // ****************************************************************************
 static void DBfile_dealloc(PyObject *self)
 {
+    DBfile_DBClose(self, 0);
     PyObject_Del(self);
 }
 
