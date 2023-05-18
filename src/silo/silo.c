@@ -3999,7 +3999,7 @@ db_InitFileGlobals(DBfile *dbfile)
 #endif
     dbfile->pub.file_scope_globals->compressionErrmode      = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->compatabilityMode       = DB_INTBOOL_NOT_SET;
-    dbfile->pub.file_scope_globals->compressionParams       = DB_CHAR_PTR_NOT_SET;
+    dbfile->pub.file_scope_globals->compressionParams       = (char*) DB_CHAR_PTR_NOT_SET;
     dbfile->pub.file_scope_globals->_db_err_level           = DB_INTBOOL_NOT_SET;
     dbfile->pub.file_scope_globals->_db_err_func            = DB_VOID_PTR_NOT_SET;
     dbfile->pub.file_scope_globals->_db_err_level_drvr      = DB_INTBOOL_NOT_SET;
@@ -6501,7 +6501,7 @@ DBCp(char const *opts, DBfile *srcFile, DBfile *dstFile, ...)
         }
         else if (dstType == DB_DIR)
         {
-            char const *srcDirBaseName = db_basename(srcObjAbsName);
+            char *srcDirBaseName = db_basename(srcObjAbsName);
             DBMkDir(dstFile, srcDirBaseName);
             DBSetDir(dstFile, srcDirBaseName);
             free(srcDirBaseName);
@@ -6522,6 +6522,8 @@ endLoop:
 
     DBSetDir(srcFile, srcStartCwg);
     DBSetDir(dstFile, dstStartCwg);
+
+    return 0;
 }
 
 #if 1
@@ -6700,6 +6702,8 @@ DBGetPartialObject(DBfile *dbfile, char const *name, int nvals, int ndims,
     /* If dense, do partial I/O on the datasets */
     /* Else... do object specific partial I/O */
     /* Handle mixed values on variables */
+
+    return 0;
 }
 
 PUBLIC DBmaterial *
