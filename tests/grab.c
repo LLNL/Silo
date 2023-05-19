@@ -63,7 +63,7 @@ be used for advertising or product endorsement purposes.
 #include <stdlib.h>
 #include "silo.h"
 
-#include "config.h"
+#include <config.h>
 #ifdef HAVE_HDF5_H
 /* Define this symbol BEFORE including hdf5.h to indicate the HDF5 code
    in this file uses version 1.6 of the HDF5 API. This is harmless for
