@@ -243,14 +243,6 @@ static const char *flavors(H5F_mem_t m)
     return tmp;
 }
 
-
-/* Set semicolon termination for H5Epush_ret */
-#if HDF5_VERSION_GE(1,10,8)
-#define H5EPR_SEMICOLON ;
-#else
-#define H5EPR_SEMICOLON
-#endif
-
 #ifdef H5_HAVE_SNPRINTF
 #define H5E_PUSH_HELPER(Func,Cls,Maj,Min,Msg,Ret,Errno)			\
 {									\
@@ -259,13 +251,13 @@ static const char *flavors(H5F_mem_t m)
         snprintf(msg, sizeof(msg), Msg "(errno=%d, \"%s\")",	        \
             Errno, strerror(Errno));					\
     ret_value = Ret;							\
-    H5Epush_ret(Func, Cls, Maj, Min, msg, Ret) H5EPR_SEMICOLON		\
+    H5Epush_ret(Func, Cls, Maj, Min, msg, Ret) ;                        \
 }
 #else
 #define H5E_PUSH_HELPER(Func,Cls,Maj,Min,Msg,Ret,Errno)			\
 {									\
     ret_value = Ret;							\
-    H5Epush_ret(Func, Cls, Maj, Min, Msg, Ret) H5EPR_SEMICOLON		\
+    H5Epush_ret(Func, Cls, Maj, Min, Msg, Ret) ;		        \
 }
 #endif
 
@@ -492,7 +484,7 @@ static int H5FD_silo_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_silo_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_silo_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_silo_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-#if HDF5_VERSION_GE(1,10,0)
+#if HDF5_VERSION_GE(1,10,4)
 static haddr_t H5FD_silo_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 #else
 static haddr_t H5FD_silo_get_eof(const H5FD_t *_file);
@@ -559,7 +551,7 @@ static const H5FD_class_t H5FD_silo_g = {
     "silo",				        /*name			*/
     MAXADDR,				        /*maxaddr		*/
     H5F_CLOSE_WEAK,				/* fc_degree		*/
-#if HDF5_VERSION_GE(1,10,0)
+#if HDF5_VERSION_GE(1,10,4)
     0,                                          /* terminate            */
 #endif
     H5FD_silo_sb_size,                          /*sb_size               */
@@ -1380,7 +1372,9 @@ H5FD_silo_sb_encode(H5FD_t *_file, char *name/*out*/,
     assert(sizeof(hsize_t)<=8);
     memcpy(p, &file->block_size, sizeof(hsize_t));
     if (H5Tconvert(H5T_NATIVE_HSIZE, H5T_STD_U64LE, 1, buf+8, NULL, H5P_DEFAULT)<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1) H5EPR_SEMICOLON
+    {
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1) ;
+    }
 
     return 0;
 }
@@ -1408,14 +1402,18 @@ H5FD_silo_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Make sure the name/version number is correct */
     if (strcmp(name, "LLNLsilo"))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid silo superblock", -1) H5EPR_SEMICOLON
+    {
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid silo superblock", -1) ;
+    }
 
     buf += 8;
     /* Decode block size */
     assert(sizeof(hsize_t)<=8);
     memcpy(x, buf, 8);
     if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HSIZE, 1, x, NULL, H5P_DEFAULT)<0)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1) H5EPR_SEMICOLON
+    {
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1) ;
+    }
     ap = (hsize_t*)x;
     /*file->block_size = *ap; ignore stored value for now */
 
@@ -1997,7 +1995,7 @@ H5FD_silo_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-#if HDF5_VERSION_GE(1,10,0)
+#if HDF5_VERSION_GE(1,10,4)
 H5FD_silo_get_eof(const H5FD_t *_file, H5FD_mem_t type)
 #else
 H5FD_silo_get_eof(const H5FD_t *_file)
