@@ -1148,7 +1148,7 @@ if test -n "$PYTHONMODULE"; then
    AC_MSG_CHECKING([for Python include path])
    if test -z "$PYTHON_CPPFLAGS"; then
       python_path=`$PYTHON -c "import distutils.sysconfig; \
-         print distutils.sysconfig.get_python_inc();"`
+         print(distutils.sysconfig.get_python_inc());"`
       if test -n "${python_path}"; then
          python_path="-I$python_path"
       fi
