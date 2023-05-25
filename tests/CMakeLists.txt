@@ -266,7 +266,7 @@ add_custom_target(check
           -DWD=${silo_test_output_dir}
           -DHDF5=${SILO_ENABLE_HDF5}
           -DPY=${Python_EXECUTABLE}
-          -DPYPATH=$<TARGET_FILE_DIR:Silo>
+          -DPYPATH=$<TARGET_FILE_DIR:silo>
           -DADD_FORT=${SILO_ENABLE_FORTRAN}
           -P ${SILO_TESTS_SOURCE_DIR}/CMake/SiloMakeCheckRunner.cmake
         WORKING_DIRECTORY ${silo_test_output_dir}
