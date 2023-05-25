@@ -4432,6 +4432,7 @@ DBClose(DBfile *dbfile)
 {
     int            id;
     int            retval;
+    SILO_Globals_t *tmp_file_scope_globals;
 
     API_BEGIN2("DBClose", int, -1, api_dummy) {
         if (!dbfile)
@@ -4449,8 +4450,9 @@ DBClose(DBfile *dbfile)
             free(dbfile->pub.file_lib_version);
         db_unregister_file(dbfile);
 
+	tmp_file_scope_globals = dbfile->pub.file_scope_globals; 
         retval = (dbfile->pub.close) (dbfile);
-        free(dbfile->pub.file_scope_globals);
+        free(tmp_file_scope_globals);
         API_RETURN(retval);
     }
     API_END_NOPOP; /*BEWARE: If API_RETURN above is removed use API_END */
