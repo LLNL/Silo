@@ -1597,6 +1597,7 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
             meshnms = ALLOC_N(char *, *nmesh);
             
             for (indx = 0, i = 0; i < *nmesh; i++) {
+                printf("indx = %lld\n", indx);
                 if (lmeshnames[i] < 0)
                     API_ERROR("lmeshnames", E_BADARGS);
                 meshnms[i] = (char *) SW_strndup(&realmeshnames[indx], lmeshnames[i]);
@@ -1609,7 +1610,7 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
             /*----------------------------------------
              *  Invoke the C function to do the work.
              *---------------------------------------*/
-            *status = DBPutMultimesh(dbfile, nm, *nmesh, (char const * const *) FPTR(meshnames),
+            *status = DBPutMultimesh(dbfile, nm, *nmesh, (char const * const *) meshnms,
                          (int const *) FPTR(meshtypes), optlist);
             
             for (i = 0; i < *nmesh; i++)
@@ -1865,7 +1866,7 @@ DBPUTMVAR_FC (int *dbid, FCD_DB name, int *lname, int *nvar, FCD_DB varnames,
             }
 
             /* Invoke the C function to do the work. */
-            *status = DBPutMultivar(dbfile, nm, *nvar, (char const * const *) FPTR(varnms),
+            *status = DBPutMultivar(dbfile, nm, *nvar, (char const * const *) varnms,
                       (int const *) FPTR(vartypes), optlist);
 
             for(i=0;i<*nvar;i++)
@@ -1980,7 +1981,7 @@ DBPUTMMAT_FC (int *dbid, FCD_DB name, int *lname, int *nmat, FCD_DB matnames,
             /*----------------------------------------
              *  Invoke the C function to do the work.
              *---------------------------------------*/
-            *status = DBPutMultimat(dbfile, nm, *nmat, (char const * const *) FPTR(matnms), optlist);
+            *status = DBPutMultimat(dbfile, nm, *nmat, (char const * const *) matnms, optlist);
             
             for (i = 0; i < *nmat; i++)
                 FREE(matnms[i]);
@@ -2083,7 +2084,7 @@ DBPUTMMATSPECIES_FC (int *dbid, FCD_DB name, int *lname, int *nspec, FCD_DB spec
             /*----------------------------------------
              *  Invoke the C function to do the work.
              *---------------------------------------*/
-            *status = DBPutMultimatspecies(dbfile, nm, *nspec, (char const * const *) FPTR(specnms), optlist);
+            *status = DBPutMultimatspecies(dbfile, nm, *nspec, (char const * const *) specnms, optlist);
             
             for (i = 0; i < *nspec; i++)
                 FREE(specnms[i]);
