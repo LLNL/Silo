@@ -125,6 +125,7 @@ C...Include SILO definitions.
       integer  mix_zone(MAXMIX)
       real     mix_vf(MAXMIX)
       character*1024 meshnms(3)
+      character*1024 meshnms2
       integer  dims(2), err, optlist, lmeshnms(3)
       integer  meshtypes(3)
 
@@ -150,6 +151,20 @@ C...Include SILO definitions.
       data znodelist
      .         /0,1,5,4,4,5,9,8,1,2,6,5,5,6,10,9,2,3,7,6,6,7,11,10/
 
+C...Here is an example of a Fortran allocatable array of strings.
+C...However, I don't know how the Silo interface would currently
+C...accept it. I am keeping this code here for future ref but the 
+C...type it is creating is currently not used anywhere.
+      type :: varl
+         character(len=:), allocatable :: name
+      end type varl
+      type(varl), dimension(3) :: meshnms4(3)
+      allocate(character(len=11) :: meshnms4(1)%name)
+      meshnms4(1)%name = "Mandalorian"
+      allocate(character(len=8) :: meshnms4(2)%name)
+      meshnms4(2)%name = "BobaFett"
+      allocate(character(len=4) :: meshnms4(3)%name)
+      meshnms4(3)%name = "Cara"
 
       ttime = 2.345
 Cc      idatatype = 20       ! double
@@ -243,12 +258,23 @@ C...particularly with strings larger than 32 chars
       err = dbputmmesh (dbid, "multimesh", 9, 3,
      .                  meshnms, lmeshnms, meshtypes,
      .                  DB_F77NULL, id)
+
       btype = DB_UCDMESH
       err = dbmkoptlist (5, ol)
       err = dbaddiopt   (ol, DBOPT_MB_BLOCK_TYPE, btype)  ! integer
       err = dbputmmesh (dbid, "multimesh2", 10, 3,
      .                  meshnms, lmeshnms, DB_F77NULL,
      .                  ol, id)
+
+C...Test a compacted array of strings. Note setting 2dstrlen to zero.
+      meshnms2 = "sandymarkabigail"
+      lmeshnms(1) = 5
+      lmeshnms(2) = 4
+      lmeshnms(3) = 7
+      err = dbset2dstrlen(0)
+      err = dbputmmesh (dbid, "multimesh3", 10, 3,
+     .                  meshnms2, lmeshnms, meshtypes,
+     .                  DB_F77NULL, id)
 
 C...Test out multi mesh. (Special case, since nmesh == 1.) Ordinarily
 C...you would have to provide arrays for the 'ids', 'types' and 'dirs'.
