@@ -1597,7 +1597,6 @@ DBPUTMMESH_FC (int *dbid, FCD_DB name, int *lname, int *nmesh, FCD_DB meshnames,
             meshnms = ALLOC_N(char *, *nmesh);
             
             for (indx = 0, i = 0; i < *nmesh; i++) {
-                printf("indx = %lld\n", indx);
                 if (lmeshnames[i] < 0)
                     API_ERROR("lmeshnames", E_BADARGS);
                 meshnms[i] = (char *) SW_strndup(&realmeshnames[indx], lmeshnames[i]);
