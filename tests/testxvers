@@ -108,9 +108,7 @@ fi
 #
 # Uncompress and untar data files from specific versions of HDF5
 #
-which bunzip2 1>/dev/null 2>&1
-test $? -eq 0 || exit 1
-bunzip2 < $topDir/xvers_data.tar.bz2 | tar xf -
+tar xvf xvers_data.tar.xz
 
 #
 # Now, run browser and make sure we don't get any errors in the diff

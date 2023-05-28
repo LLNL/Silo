@@ -110,7 +110,7 @@ check_SCRIPTS= \
  testdtypes
 
 check_DATA= \
- xvers_data.tar.bz2 \
+ xvers_data.tar.xz \
  pion0244.silo \
  zeros.dat
 
