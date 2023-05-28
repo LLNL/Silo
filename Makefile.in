@@ -972,7 +972,7 @@ dist-xz-bsd: dist-xz
 	    exit 1 ;\
 	fi
 	rm -f $(PACKAGE)-$(VERSION)-bsd.tar.xz $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.xz
-        tar xf $(PACKAGE)-$(VERSION).tar.xz
+	tar xf $(PACKAGE)-$(VERSION).tar.xz
 	cp -R $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)-bsd
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/hzip
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/fpzip
