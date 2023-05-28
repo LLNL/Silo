@@ -126,6 +126,7 @@ C...Include SILO definitions.
       real     mix_vf(MAXMIX)
       character*1024 meshnms(3)
       character*1024 meshnms2
+      character(len=17), allocatable :: meshnms3(:)
       integer  dims(2), err, optlist, lmeshnms(3)
       integer  meshtypes(3)
 
@@ -274,6 +275,15 @@ C...Test a compacted array of strings. Note setting 2dstrlen to zero.
       err = dbset2dstrlen(0)
       err = dbputmmesh (dbid, "multimesh3", 10, 3,
      .                  meshnms2, lmeshnms, meshtypes,
+     .                  DB_F77NULL, id)
+
+      allocate(meshnms3(3))
+      meshnms3(1) = "sandy"
+      meshnms3(2) = "mark"
+      meshnms3(3) = "abigail"
+      err = dbset2dstrlen(17)
+      err = dbputmmesh (dbid, "multimesh4", 10, 3,
+     .                  meshnms3, lmeshnms, meshtypes,
      .                  DB_F77NULL, id)
 
 C...Test out multi mesh. (Special case, since nmesh == 1.) Ordinarily
