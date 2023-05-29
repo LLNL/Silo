@@ -155,17 +155,19 @@ C...Include SILO definitions.
 C...Here is an example of a Fortran allocatable array of strings.
 C...However, I don't know how the Silo interface would currently
 C...accept it. I am keeping this code here for future ref but the 
-C...type it is creating is currently not used anywhere.
-      type :: varl
-         character(len=:), allocatable :: name
-      end type varl
-      type(varl), dimension(3) :: meshnms4(3)
-      allocate(character(len=11) :: meshnms4(1)%name)
-      meshnms4(1)%name = "Mandalorian"
-      allocate(character(len=8) :: meshnms4(2)%name)
-      meshnms4(2)%name = "BobaFett"
-      allocate(character(len=4) :: meshnms4(3)%name)
-      meshnms4(3)%name = "Cara"
+C...type it is creating is currently not used anywhere. I think the
+C...issue is the two-level type involved. I don't think that 
+C...translates 1:1 with anything in Silo's Fortran interface.
+C     type :: varl
+C        character(len=:), allocatable :: name
+C     end type varl
+C     type(varl), dimension(3) :: meshnms4(3)
+C     allocate(character(len=11) :: meshnms4(1)%name)
+C     meshnms4(1)%name = "Mandalorian"
+C     allocate(character(len=8) :: meshnms4(2)%name)
+C     meshnms4(2)%name = "BobaFett"
+C     allocate(character(len=4) :: meshnms4(3)%name)
+C     meshnms4(3)%name = "Cara"
 
       ttime = 2.345
 Cc      idatatype = 20       ! double
@@ -246,13 +248,14 @@ C...Test material conversion functions, and write results.
      .                idatatype, DB_ZONECENT, optlist, id)
 
 C...This is a bugus multi-mesh but it tests the interface,
-C...particularly with strings larger than 32 chars
-      meshnms(3)  = "foobargorfo"
-      lmeshnms(3) = 11
+C...particularly with strings larger than the old default
+C...of 32 chars.
       meshnms(1)  = "mesh1"
       lmeshnms(1) = 5
       meshnms(2)  = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       lmeshnms(2) = 40
+      meshnms(3)  = "foobargorfo"
+      lmeshnms(3) = 11
       meshtypes(1) = DB_UCDMESH
       meshtypes(2) = DB_UCDMESH
       meshtypes(3) = DB_UCDMESH
@@ -260,6 +263,8 @@ C...particularly with strings larger than 32 chars
      .                  meshnms, lmeshnms, meshtypes,
      .                  DB_F77NULL, id)
 
+C...This is really a sloppy call because its testing only half of
+C...the namescheme-way of doing business.
       btype = DB_UCDMESH
       err = dbmkoptlist (5, ol)
       err = dbaddiopt   (ol, DBOPT_MB_BLOCK_TYPE, btype)  ! integer
@@ -277,6 +282,7 @@ C...Test a compacted array of strings. Note setting 2dstrlen to zero.
      .                  meshnms2, lmeshnms, meshtypes,
      .                  DB_F77NULL, id)
 
+C...Test an allocated array of strings.
       allocate(meshnms3(3))
       meshnms3(1) = "sandy"
       meshnms3(2) = "mark"
