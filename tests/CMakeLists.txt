@@ -211,7 +211,7 @@ silo_add_test(NAME twohex SRC twohex.c)
 silo_add_test(NAME ucd SRC ucd.c)
 silo_add_test(NAME ucd1d SRC ucd1d.c)
 silo_add_test(NAME ucdsamp3 SRC ucdsamp3.c)
-silo_add_test(NAME version SRC version.c)
+silo_add_test(NAME dbversion SRC dbversion.c)
 silo_add_test(NAME wave SRC wave.c)
 
 # these currently don't compile on Windows
