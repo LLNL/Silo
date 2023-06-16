@@ -160,7 +160,7 @@ PROGS=array dir extface multi_test partial_io point quad simple ucd \
       ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
       TestReadMask twohex multispec misc sami newsami specmix spec \
       cpz1plt group_test listtypes alltypes wave multi_file polyzl csg \
-      rocket mmadjacency largefile version namescheme efcentering \
+      rocket mmadjacency largefile dbversion namescheme efcentering \
       mk_nasf_pdb ioperf arbpoly2d readstuff mat3d_3across merge_block \
       test_mat_compression bcastopen memfile_simple \
       empty majorder realloc_obj_and_opts $(PDBTESTS) $(JSONTESTS)
@@ -242,7 +242,7 @@ check_PROGRAMS = \
  largefile \
  dir \
  quad \
- version \
+ dbversion \
  namescheme \
  efcentering \
  mk_nasf_pdb \
@@ -309,7 +309,7 @@ if CXX_LINK_NEEDED
  nodist_EXTRA_largefile_SOURCES = dummy.cxx
  nodist_EXTRA_dir_SOURCES = dummy.cxx
  nodist_EXTRA_quad_SOURCES = dummy.cxx
- nodist_EXTRA_version_SOURCES = dummy.cxx
+ nodist_EXTRA_dbversion_SOURCES = dummy.cxx
  nodist_EXTRA_namescheme_SOURCES = dummy.cxx
  nodist_EXTRA_arrayf77_SOURCES = dummy.cxx
  nodist_EXTRA_arrayf90_SOURCES = dummy.cxx

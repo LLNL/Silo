@@ -60,7 +60,7 @@ in part under Contract W-7405-Eng-48 and
 in part under Contract DE-AC52-07NA27344.])
 
 AT_BANNER(Non-driver-specific)
-AT_SETUP(version)
+AT_SETUP(dbversion)
 AT_DATA(expout,
 This version of the Silo library is greater than or equal to 4
 This version of the Silo library is NOT greater than or equal to 9
@@ -83,7 +83,7 @@ On old silo file handle returned from DBOpen...
     DBFileVersionGE(4,6,0) returns 0
     DBFileVersionGE(90,5,2) returns 0
 )
-AT_CHECK($VALGRIND version $STARGS,,expout,ignore)
+AT_CHECK($VALGRIND dbversion $STARGS,,expout,ignore)
 AT_CLEANUP
 AT_SETUP(namescheme)
 AT_CHECK($VALGRIND namescheme,,ignore)
