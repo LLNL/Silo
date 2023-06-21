@@ -138,6 +138,8 @@ C...Include SILO definitions.
       data matnos  /1, 2/
       data ttime   /1.23/
       data tcycle  /200/
+      character*1024 matnms(2)
+      integer  lmatnms(2)
 
       data x /0., 0., 0., 0.,1.5,1.5,1.5,1.5, 3., 3., 3., 3./
       data y /3., 2., 1., 0., 3., 2., 1., 0., 3., 2., 1., 0./
