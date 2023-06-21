@@ -196,7 +196,7 @@ AT_SETUP(csg)
 AT_CHECK($VALGRIND csg $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(rocket)
-AT_CHECK($VALGRIND rocket $STARGS,,ignore)
+AT_CHECK(test ! \( -e ./rocket_silo.so -o -e ../../rocket_silo.so -o -e ./.libs/rocket_silo.so -o -e ../../.libs/rocket_silo.so \) && exit 77 || $VALGRIND rocket $STARGS,,ignore)
 AT_CLEANUP
 AT_SETUP(mmadjacency)
 AT_CHECK($VALGRIND mmadjacency $STARGS,,ignore)
