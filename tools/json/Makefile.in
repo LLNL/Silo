@@ -359,7 +359,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = json-c-0.10.tar.gz jsonify_silo_example.c
+EXTRA_DIST = json-c-0.10.tar.xz jsonify_silo_example.c
 all: all-am
 
 .SUFFIXES:

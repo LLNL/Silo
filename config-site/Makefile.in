@@ -556,7 +556,7 @@ uninstall-am:
 
 
 #
-# By default, the dist-gzip target (as well as other distribution
+# By default, the dist target (as well as other distribution
 # targets) winds up creating copies of files that are really links
 # instead of preserving the links. I did not find any ways to control
 # the flags Automake uses to do the copy to, for example, ensure a

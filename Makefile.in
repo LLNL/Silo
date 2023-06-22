@@ -960,7 +960,7 @@ uninstall-am:
 help: config/make.help
 	cat $(srcdir)/config/make.help
 
-dist-gzip-bsd: dist-gzip
+dist-xz-bsd: dist-xz
 	@if test -e $(PACKAGE)-$(VERSION); then \
 	    echo "A directory or file named $(PACKAGE)-$(VERSION) already exists" ;\
 	    echo "Please remove before proceeding" ;\
@@ -971,16 +971,16 @@ dist-gzip-bsd: dist-gzip
 	    echo "Please remove before proceeding" ;\
 	    exit 1 ;\
 	fi
-	rm -f $(PACKAGE)-$(VERSION)-bsd.tar.gz $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.gz
-	gunzip < $(PACKAGE)-$(VERSION).tar.gz | tar xf -
+	rm -f $(PACKAGE)-$(VERSION)-bsd.tar.xz $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.xz
+	tar xf $(PACKAGE)-$(VERSION).tar.xz
 	cp -R $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)-bsd
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/hzip
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/fpzip
-	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd.tar.gz
-	rm -rf $(PACKAGE)-$(VERSION)-bsd/tests/{amr3d.silo,pion0244.silo,amr2d.silo,xvers_data.tar.bz2}
-	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.gz
+	tar cf - $(PACKAGE)-$(VERSION)-bsd | | xz -T0 -e -9 -z > $(PACKAGE)-$(VERSION)-bsd.tar.xz
+	rm -rf $(PACKAGE)-$(VERSION)-bsd/tests/{amr3d.silo,pion0244.silo,amr2d.silo,xvers_data.tar.xz}
+	tar cf - $(PACKAGE)-$(VERSION)-bsd | | xz -T0 -e -9 -z > $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.xz
 	rm -rf $(PACKAGE)-$(VERSION)-bsd
-	tar cf - $(PACKAGE)-$(VERSION) | gzip --best > $(PACKAGE)-$(VERSION).tar.gz
+	tar cf - $(PACKAGE)-$(VERSION) | | xz -T0 -e -9 -z > $(PACKAGE)-$(VERSION).tar.xz
 	rm -rf $(PACKAGE)-$(VERSION)
 
 .PHONY: help

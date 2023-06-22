@@ -582,7 +582,7 @@ AC_ARG_ENABLE(json,
                 fi
                 pushd tools/json 1>/dev/null 2>&1
                 rm -rf json-c-0.10
-                gunzip < ${ac_abs_confdir}/tools/json/json-c-0.10.tar.gz | tar xf -
+                tar xf json-c-0.10.tar.xz
                 cd json-c-0.10
                 if test ! "${prefix}" = "NONE"; then
                     ./configure --prefix=${prefix}/json
