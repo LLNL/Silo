@@ -574,7 +574,7 @@ AC_ARG_ENABLE(json,
         [enable experimental JSON features@<:@default=no@:>@]),
     if test "$enable_json" = "yes"; then
         AC_MSG_CHECKING(Enabling json...)
-        if test -e ${ac_abs_confdir}/tools/json/json-c-0.10.tar.gz; then
+        if test -e ${ac_abs_confdir}/tools/json/json-c-0.10.tar.xz; then
             if test -z "$(find tools/json/json-c-0.10 -name libjson.so -o -name libjson.a -o -name libjson.dylib)"; then
                 if test ! -e ./tools/json; then
                     mkdir tools 1>/dev/null 2>&1
