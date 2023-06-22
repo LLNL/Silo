@@ -596,7 +596,7 @@ at_tested=''
 # numerical order.
 at_format='??'
 # Description of all the test groups.
-at_help_all="1;testsuite.at:63;version;;
+at_help_all="1;testsuite.at:63;dbversion;;
 2;testsuite.at:88;namescheme;;
 3;testsuite.at:91;realloc_obj_and_opts;;
 4;testsuite.at:94;point;;
@@ -2100,7 +2100,7 @@ exit 0
 ## ------------- ##
 #AT_START_1
 at_fn_group_banner 1 'testsuite.at:63' \
-  "version" "                                        " 1
+  "dbversion" "                                      " 1
 at_xfail=no
 (
   $as_echo "1. $at_setup_line: testing $at_desc ..."
@@ -2130,9 +2130,9 @@ On old silo file handle returned from DBOpen...
 _ATEOF
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:86: \$VALGRIND version \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND version $STARGS" "testsuite.at:86"
-( $at_check_trace; $VALGRIND version $STARGS
+$as_echo "$at_srcdir/testsuite.at:86: \$VALGRIND dbversion \$STARGS"
+at_fn_check_prepare_dynamic "$VALGRIND dbversion $STARGS" "testsuite.at:86"
+( $at_check_trace; $VALGRIND dbversion $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
@@ -3131,9 +3131,9 @@ at_xfail=no
   $at_traceon
 
 { set +x
-$as_echo "$at_srcdir/testsuite.at:199: \$VALGRIND rocket \$STARGS"
-at_fn_check_prepare_dynamic "$VALGRIND rocket $STARGS" "testsuite.at:199"
-( $at_check_trace; $VALGRIND rocket $STARGS
+$as_echo "$at_srcdir/testsuite.at:199: test ! \\( -e ./rocket_silo.so -o -e ../../rocket_silo.so -o -e ./.libs/rocket_silo.so -o -e ../../.libs/rocket_silo.so \\) && exit 77 || \$VALGRIND rocket \$STARGS"
+at_fn_check_prepare_dynamic "test ! \\( -e ./rocket_silo.so -o -e ../../rocket_silo.so -o -e ./.libs/rocket_silo.so -o -e ../../.libs/rocket_silo.so \\) && exit 77 || $VALGRIND rocket $STARGS" "testsuite.at:199"
+( $at_check_trace; test ! \( -e ./rocket_silo.so -o -e ../../rocket_silo.so -o -e ./.libs/rocket_silo.so -o -e ../../.libs/rocket_silo.so \) && exit 77 || $VALGRIND rocket $STARGS
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter

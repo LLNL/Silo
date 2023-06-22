@@ -100,6 +100,8 @@ elif test $vmin -eq 10; then
     vtest=10
 elif test $vmin -eq 12; then
     vtest=12
+elif test $vmin -eq 14; then
+    vtest=14
 else
     echo "Did not find expected hdf5 minor version number"
     exit 1

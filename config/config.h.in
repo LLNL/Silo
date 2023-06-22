@@ -122,6 +122,12 @@
 /* System provides setvbuf prototypes */
 #undef HAVE_SETVBUF_POINTER
 
+/* Whether struct stat is present in sys/stat.h */
+#undef HAVE_STAT
+
+/* Whether struct stat64 is present in sys/stat.h */
+#undef HAVE_STAT64
+
 /* Define to 1 if you have the <stdarg.h> header file. */
 #undef HAVE_STDARG_H
 

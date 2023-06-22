@@ -102,13 +102,10 @@ dist-gzip-bsd: dist-gzip
 	cp -R $(PACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)-bsd
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/hzip
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/src/fpzip
-	rm -rf $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC2012
-	mv $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC2012-BSD $(PACKAGE)-$(VERSION)-bsd/SiloWindows/MSVC2012
 	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd.tar.gz
 	rm -rf $(PACKAGE)-$(VERSION)-bsd/tests/{amr3d.silo,pion0244.silo,amr2d.silo,xvers_data.tar.bz2}
 	tar cf - $(PACKAGE)-$(VERSION)-bsd | gzip --best > $(PACKAGE)-$(VERSION)-bsd-smalltest.tar.gz
 	rm -rf $(PACKAGE)-$(VERSION)-bsd
-	rm -rf $(PACKAGE)-$(VERSION)/SiloWindows/MSVC2012-BSD
 	tar cf - $(PACKAGE)-$(VERSION) | gzip --best > $(PACKAGE)-$(VERSION).tar.gz
 	rm -rf $(PACKAGE)-$(VERSION)
 
