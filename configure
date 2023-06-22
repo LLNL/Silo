@@ -25066,7 +25066,7 @@ if test "${enable_json+set}" = set; then :
   enableval=$enable_json; if test "$enable_json" = "yes"; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking Enabling json..." >&5
 $as_echo_n "checking Enabling json...... " >&6; }
-        if test -e ${ac_abs_confdir}/tools/json/json-c-0.10.tar.gz; then
+        if test -e ${ac_abs_confdir}/tools/json/json-c-0.10.tar.xz; then
             if test -z "$(find tools/json/json-c-0.10 -name libjson.so -o -name libjson.a -o -name libjson.dylib)"; then
                 if test ! -e ./tools/json; then
                     mkdir tools 1>/dev/null 2>&1
