@@ -586,7 +586,7 @@ dist-hook:
             -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
         for file in $$dist_files; do \
 	    rm -f $(distdir)/$$file; \
-            cp -pL $(srcdir)/$$file $(distdir)/$$file ;\
+            cp -pd $(srcdir)/$$file $(distdir)/$$file ;\
         done
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
