@@ -168,7 +168,7 @@ check_PROGRAMS = arbpoly$(EXEEXT) arbpoly2d$(EXEEXT) array$(EXEEXT) \
 	ucd1d$(EXEEXT) wave$(EXEEXT) multi_file$(EXEEXT) \
 	polyzl$(EXEEXT) csg$(EXEEXT) rocket$(EXEEXT) \
 	mmadjacency$(EXEEXT) largefile$(EXEEXT) dir$(EXEEXT) \
-	quad$(EXEEXT) version$(EXEEXT) namescheme$(EXEEXT) \
+	quad$(EXEEXT) dbversion$(EXEEXT) namescheme$(EXEEXT) \
 	efcentering$(EXEEXT) mk_nasf_pdb$(EXEEXT) ioperf$(EXEEXT) \
 	readstuff$(EXEEXT) testfs$(EXEEXT) empty$(EXEEXT) \
 	majorder$(EXEEXT) realloc_obj_and_opts$(EXEEXT) \
@@ -340,6 +340,13 @@ am__curvef77_SOURCES_DIST = curvef77.f
 curvef77_OBJECTS = $(am_curvef77_OBJECTS)
 @FORTRAN_NEEDED_TRUE@curvef77_DEPENDENCIES = $(LDADD) \
 @FORTRAN_NEEDED_TRUE@	$(am__DEPENDENCIES_1)
+dbversion_SOURCES = dbversion.c
+dbversion_OBJECTS = dbversion.$(OBJEXT)
+dbversion_LDADD = $(LDADD)
+@HDF5_DRV_NEEDED_FALSE@dbversion_DEPENDENCIES = ../src/libsilo.la \
+@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
+@HDF5_DRV_NEEDED_TRUE@dbversion_DEPENDENCIES = ../src/libsiloh5.la \
+@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 am_dir_OBJECTS = dir.$(OBJEXT) testlib.$(OBJEXT)
 dir_OBJECTS = $(am_dir_OBJECTS)
 dir_LDADD = $(LDADD)
@@ -718,13 +725,6 @@ ucdsamp3_LDADD = $(LDADD)
 @HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
 @HDF5_DRV_NEEDED_TRUE@ucdsamp3_DEPENDENCIES = ../src/libsiloh5.la \
 @HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
-version_SOURCES = version.c
-version_OBJECTS = version.$(OBJEXT)
-version_LDADD = $(LDADD)
-@HDF5_DRV_NEEDED_FALSE@version_DEPENDENCIES = ../src/libsilo.la \
-@HDF5_DRV_NEEDED_FALSE@	$(am__append_1)
-@HDF5_DRV_NEEDED_TRUE@version_DEPENDENCIES = ../src/libsiloh5.la \
-@HDF5_DRV_NEEDED_TRUE@	$(am__append_1)
 wave_SOURCES = wave.c
 wave_OBJECTS = wave.$(OBJEXT)
 wave_LDADD = $(LDADD)
@@ -828,7 +828,8 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_cpz1plt_SOURCES) cpz1plt.c \
 	$(nodist_EXTRA_csg_SOURCES) csg.c $(csgmesh_SOURCES) \
 	$(nodist_EXTRA_csgmesh_SOURCES) $(curvef77_SOURCES) \
-	$(nodist_EXTRA_curvef77_SOURCES) $(dir_SOURCES) \
+	$(nodist_EXTRA_curvef77_SOURCES) \
+	$(nodist_EXTRA_dbversion_SOURCES) dbversion.c $(dir_SOURCES) \
 	$(nodist_EXTRA_dir_SOURCES) \
 	$(nodist_EXTRA_efcentering_SOURCES) efcentering.c \
 	$(nodist_EXTRA_empty_SOURCES) empty.c \
@@ -885,7 +886,6 @@ SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(nodist_EXTRA_ucd1d_SOURCES) ucd1d.c $(ucdf77_SOURCES) \
 	$(nodist_EXTRA_ucdf77_SOURCES) \
 	$(nodist_EXTRA_ucdsamp3_SOURCES) ucdsamp3.c \
-	$(nodist_EXTRA_version_SOURCES) version.c \
 	$(nodist_EXTRA_wave_SOURCES) wave.c
 DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	ioperf_stdio.c $(rocket_silo_la_SOURCES) TestReadMask.c \
@@ -893,7 +893,7 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	$(am__arrayf77_SOURCES_DIST) $(am__arrayf90_SOURCES_DIST) \
 	$(bcastopen_SOURCES) $(am__compression_SOURCES_DIST) cpz1plt.c \
 	csg.c $(am__csgmesh_SOURCES_DIST) $(am__curvef77_SOURCES_DIST) \
-	$(dir_SOURCES) efcentering.c empty.c extface.c \
+	dbversion.c $(dir_SOURCES) efcentering.c empty.c extface.c \
 	$(am__grab_SOURCES_DIST) group_test.c ioperf.c json.c \
 	largefile.c $(listtypes_SOURCES) majorder.c mat3d_3across.c \
 	$(am__matf77_SOURCES_DIST) memfile_simple.c merge_block.c \
@@ -908,7 +908,7 @@ DIST_SOURCES = ioperf_hdf5.c ioperf_pdb.c ioperf_sec2.c ioperf_silo.c \
 	test_mat_compression.c testall.c \
 	$(am__testallf77_SOURCES_DIST) testfs.c \
 	$(am__testhdf5_SOURCES_DIST) testpdb.c twohex.c ucd.c ucd1d.c \
-	$(am__ucdf77_SOURCES_DIST) ucdsamp3.c version.c wave.c
+	$(am__ucdf77_SOURCES_DIST) ucdsamp3.c wave.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -1232,7 +1232,7 @@ PROGS = array dir extface multi_test partial_io point quad simple ucd \
 	ucdsamp3 testall obj onehex oneprism onepyramid onetet subhex \
 	TestReadMask twohex multispec misc sami newsami specmix spec \
 	cpz1plt group_test listtypes alltypes wave multi_file polyzl \
-	csg rocket mmadjacency largefile version namescheme \
+	csg rocket mmadjacency largefile dbversion namescheme \
 	efcentering mk_nasf_pdb ioperf arbpoly2d readstuff \
 	mat3d_3across merge_block test_mat_compression bcastopen \
 	memfile_simple empty majorder realloc_obj_and_opts $(PDBTESTS) \
@@ -1315,7 +1315,7 @@ ioperf_stdio_la_LDFLAGS = -module -avoid-version -rpath /nowhere
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_largefile_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_dir_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_quad_SOURCES = dummy.cxx
-@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_version_SOURCES = dummy.cxx
+@CXX_LINK_NEEDED_TRUE@nodist_EXTRA_dbversion_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_namescheme_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arrayf77_SOURCES = dummy.cxx
 @CXX_LINK_NEEDED_TRUE@nodist_EXTRA_arrayf90_SOURCES = dummy.cxx
@@ -1493,6 +1493,10 @@ csgmesh$(EXEEXT): $(csgmesh_OBJECTS) $(csgmesh_DEPENDENCIES) $(EXTRA_csgmesh_DEP
 curvef77$(EXEEXT): $(curvef77_OBJECTS) $(curvef77_DEPENDENCIES) $(EXTRA_curvef77_DEPENDENCIES) 
 	@rm -f curvef77$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(curvef77_OBJECTS) $(curvef77_LDADD) $(LIBS)
+
+dbversion$(EXEEXT): $(dbversion_OBJECTS) $(dbversion_DEPENDENCIES) $(EXTRA_dbversion_DEPENDENCIES) 
+	@rm -f dbversion$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(dbversion_OBJECTS) $(dbversion_LDADD) $(LIBS)
 
 dir$(EXEEXT): $(dir_OBJECTS) $(dir_DEPENDENCIES) $(EXTRA_dir_DEPENDENCIES) 
 	@rm -f dir$(EXEEXT)
@@ -1718,10 +1722,6 @@ ucdsamp3$(EXEEXT): $(ucdsamp3_OBJECTS) $(ucdsamp3_DEPENDENCIES) $(EXTRA_ucdsamp3
 	@rm -f ucdsamp3$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(ucdsamp3_OBJECTS) $(ucdsamp3_LDADD) $(LIBS)
 
-version$(EXEEXT): $(version_OBJECTS) $(version_DEPENDENCIES) $(EXTRA_version_DEPENDENCIES) 
-	@rm -f version$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(version_OBJECTS) $(version_LDADD) $(LIBS)
-
 wave$(EXEEXT): $(wave_OBJECTS) $(wave_DEPENDENCIES) $(EXTRA_wave_DEPENDENCIES) 
 	@rm -f wave$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(wave_OBJECTS) $(wave_LDADD) $(LIBS)
@@ -1742,6 +1742,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpz1plt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbversion.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efcentering.Po@am__quote@
@@ -1805,7 +1806,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucd1d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ucdsamp3.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wave.Po@am__quote@
 
 .c.o:

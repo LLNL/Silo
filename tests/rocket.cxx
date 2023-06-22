@@ -780,7 +780,7 @@ WriteAllFormats(int argc, char **argv)
         while ((dent = readdir(cwdir)))
         {
             string dname = string(dent->d_name);
-    
+
             if (dname.find("rocket_") == string::npos)
                 continue;
             if (dname.rfind(".so") == string::npos)
@@ -788,7 +788,7 @@ WriteAllFormats(int argc, char **argv)
     
             string fmtname = dname.substr(7,dname.size()-10);
             string pname = string(dirs[d])+"/"+dname;
-    
+
             void *dlhandle = dlopen(pname.c_str(), RTLD_LAZY);
             if (!dlhandle)
             {
@@ -806,9 +806,8 @@ WriteAllFormats(int argc, char **argv)
                 continue;
             }
     
-            if (!foundOne)
-                cout << "Using \"" << dirs[d] << "\" as plugin dir." << endl;
             foundOne = 1;
+            cout << "Using \"" << dirs[d] << "\" as plugin dir." << endl;
             formatMap[fmtname].func = writeFunc;
             formatMap[fmtname].dlhandle = dlhandle;
         }
