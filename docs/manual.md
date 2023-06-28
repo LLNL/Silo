@@ -1,4 +1,11 @@
-## Silo Manual Sections
+# Silo Manual Sections
+
+```{toctree}
+:maxdepth: 2
+./intro.md
+./globals.md
+./files.md
+```
 
 * [Introduction](./intro.md)
 * [Error Handling & Global Library Behavior](./globals.md)

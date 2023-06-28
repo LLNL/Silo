@@ -34,3 +34,10 @@
 .wy-table-responsive table td {
     white-space: normal;
 }
+.wy-table-responsive table td, .wy-table-responsive table th {
+    white-space: normal;
+}
+
+.wy-table-responsive {
+    max-width:90%;
+}

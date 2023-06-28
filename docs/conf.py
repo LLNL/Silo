@@ -5,7 +5,7 @@ extensions = ['sphinx.ext.mathjax']
 if os.environ.get('READTHEDOCS'):
     from subprocess import call
     call(['pip', 'install', 'myst_parser'])
-    extensions.append('myst_parser')
+extensions.append('myst_parser')
 
 # Attempt add_css_file only if the version of Sphinx actually supports it
 def setup(app):
@@ -13,3 +13,15 @@ def setup(app):
         app.add_css_file('custom.css')
     elif hasattr(app, 'add_stylesheet'):
         app.add_stylesheet('custom.css')
+
+#source_suffix = {
+#    '.rst': 'restructuredtext',
+#    '.md': 'markdown',
+#}
+
+html_static_path = ['_static']
+html_theme = "sphinx_rtd_theme"
+html_theme_options = {
+    # Toc options
+    'navigation_depth': 4
+}

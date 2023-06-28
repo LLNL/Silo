@@ -1,4 +1,4 @@
-## About Silo...
+# About Silo...
 
 Silo is a library for reading and writing a wide variety of scientific data to binary, disk files.
 The files Silo produces and the data within them can be easily shared and exchanged between wholly independently developed applications running on disparate computing platforms.
@@ -13,9 +13,24 @@ Although the Silo library is a serial library, it has some key features which en
 Architecturally, the library is divided into two main pieces; an upper-level application programming interface (API) and a lower-level I/O implementation called a driver.
 Silo supports multiple I/O drivers, the two most common of which are the HDF5 (Hierarchical Data Format 5) and PDB (Portable Data Base) drivers.
 
-[Read more](./history.md) about Silo.
-
-[Manual](./manual.md)
+```{toctree}
+:maxdepth: 2
+./history.md
+./intro.md
+./globals.md
+./files.md
+./objects.md
+./parallel.md
+./subsets.md
+./utility.md
+./optlists.md
+./generic.md
+./json.md
+./conventions.md
+./fortran.md
+./python.md
+./deprecated.md
+```
 
 [Most recently released manual (4.10)](https://wci.llnl.gov/sites/wci/files/2020-08/LLNL-SM-654357.pdf)
 
