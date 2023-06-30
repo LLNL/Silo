@@ -4,10 +4,10 @@ import re, itertools
 # Map section headings to markdown file names
 #
 fileNameFromSec = {
-    "Error Handling and Other Global Library Behavior": "globals",
+    "Error Handling and Global Library Behavior": "globals",
     "Files and File Structure": "files",
     "Meshes, Variables and Materials": "objects",
-    "Multi-Block Objects, Parallelism and": "parallel",
+    "Multi-Block Objects and Parallel I/O": "parallel",
     "Part Assemblies, AMR, Slide Surfaces,": "subsets",
     "Calculational and Utility": "utility",
     "Optlists": "optlists",

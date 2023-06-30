@@ -19,6 +19,14 @@ def setup(app):
 #    '.md': 'markdown',
 #}
 
+# MYST specific extensions
+myst_enable_extensions = [
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "substitution"
+]
+
 html_static_path = ['_static']
 html_theme = "sphinx_rtd_theme"
 html_theme_options = {

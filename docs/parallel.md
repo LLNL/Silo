@@ -1,6 +1,4 @@
-## Multi-Block Objects, Parallelism and
-
-Poor-Man's Parallel I/O
+# Multi-Block Objects and Parallel I/O
 
 Individual pieces of mesh created with a number of `DBPutXxxmesh()` calls can be assembled together into larger, multi-block objects.
 Likewise for variables and materials defined on these meshes.
@@ -23,19 +21,6 @@ The `PMPIO` interface is described at the end of this section.
 
 The functions described in this section of the manual include...
 
-### Methods and symbols in this section
-
-&nbsp;|&nbsp;|&nbsp;
-:---|:---|:---
-[`DBGetMultimat`](#dbgetmultimat)|[`DBGetMultimatspecies`](#dbgetmultimatspecies)|[`DBGetMultimesh`](#dbgetmultimesh)
-[`DBGetMultimeshadj`](#dbgetmultimeshadj)|[`DBGetMultivar`](#dbgetmultivar)|[`DBOpenByBcast`](#dbopenbybcast)
-[`DBPutMultimat`](#dbputmultimat)|[`DBPutMultimatspecies`](#dbputmultimatspecies)|[`DBPutMultimesh`](#dbputmultimesh)
-[`DBPutMultimeshadj`](#dbputmultimeshadj)|[`DBPutMultivar`](#dbputmultivar)|[`PMPIO_CloseFileCallBack`](#pmpio_closefilecallback)
-[`PMPIO_CreateFileCallBack`](#pmpio_createfilecallback)|[`PMPIO_Finish`](#pmpio_finish)|[`PMPIO_GroupRank`](#pmpio_grouprank)
-[`PMPIO_HandOffBaton`](#pmpio_handoffbaton)|[`PMPIO_Init`](#pmpio_init)|[`PMPIO_OpenFileCallBack`](#pmpio_openfilecallback)
-[`PMPIO_RankInGroup`](#pmpio_rankingroup)|[`PMPIO_WaitForBaton`](#pmpio_waitforbaton)|
-
----
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutMultimesh()`
 

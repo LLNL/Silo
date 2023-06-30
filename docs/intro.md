@@ -1,58 +1,58 @@
-﻿## Introduction to Silo
+﻿# Introduction to Silo
 
-### Overview
+## Overview
 
-Silo is a library which implements an application programing interface (API) designed for reading and writing a wide variety of scientific data to binary, disk files.
+Silo is a library which implements an application programing interface (API) designed for reading and writing a wide variety of scientific data to binary, files.
 The files Silo produces and the data within them can be easily shared and exchanged between wholly independently developed applications running on disparate computing platforms.
 
 Consequently, the Silo API facilitates the development of general purpose tools for processing scientific data.
-One of the more popular tools that process Silo data files is the VisIt visualization tool.
+One of the more popular tools that process Silo data files is the [VisIt](https://visit.llnl.gov) visualization tool.
 
-Silo supports gridless (point) meshes, structured meshes, unstructured-zoo and unstructured-arbitrary-polyhedral meshes, block structured AMR meshes, constructive solid geometry (CSG) meshes as well as piecewise-constant (e.g. zone-centered) and piecewise-linear (e.g. node-centered) variables defined on these meshes.
-In addition, Silo supports a wide array of other useful objects to address various scientific computing applications’ needs.
+Silo supports gridless (point) meshes, structured meshes, unstructured-zoo and unstructured-arbitrary-polyhedral meshes, block structured AMR meshes, constructive solid geometry (CSG) meshes as well as piecewise-constant (e.g. zone-centered) and piecewise-linear (e.g. node-centered) variables defined on the node, edge, face or volume elements of meshes as well as the decomposition of meshes into arbitrary subset hierarchies including materials and mixing materials.
+In addition, Silo supports a wide variety of other useful objects and metadata to address various scientific computing application needs.
+Although the Silo library is a serial library, key features enable it to be applied effectively in scalable, parallel applications using the [Multiple Independent File (MIF)](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O paradigm.
 
-Although the Silo library is a serial library, it has key features which enable it to be applied quite effectively and scalably in parallel.
-
-Architecturally, the library is divided into two main pieces; an upper-level application programming interface (API) and a lower-level I/O implementation called a driver.
-Silo supports multiple I/O drivers, the two most common of which are the HDF5 (Hierarchical Data Format 5) and PDB (Portable Data Base, a binary database file format developed at LLNL by Stewart Brown) drivers.
-However, the reader should take care not to infer from this that Silo can read any HDF5 file.
+Architecturally, the library is divided into two main pieces; an upper-level application programming interface (API) and a lower-level I/O implementation called a *driver*.
+Silo supports multiple I/O drivers, the two most common of which are the HDF5 (Hierarchical Data Format 5) and [PDB](https://code.google.com/archive/p/pactnew/source/default/source?page=50) (Portable DataBase, an API and binary database file format developed at LLNL by Stewart Brown and not to be confused with Protien Database also abbreviated as PDB) drivers.
+However, the reader should take care not to infer from this that Silo can read *any* HDF5 or PDB file.
 It cannot.
 For the most part, Silo is able to read only files that it has also written.
 
-### Where to Find Example Code
+## Where to Find Example Code
 
-In the ‘tests’ directory within the Silo source release tarball, there are numerous example C codes that demonstrate the use of Silo for writing various types of data.
+In the `[tests](https://github.com/LLNL/Silo/tree/main/tests)` directory within the Silo source tree, there are numerous example C codes that demonstrate the use of Silo for writing various types of data.
 There are not as many examples of reading the data there.
 
 If you are interested in point meshes, for example, you would search for `DBPutPointMesh`.
 Or, if you are interested in how to use some option like `DBOPT_CONSERVED`, search for it within the C files in the tests directory.
 
-### Brief History and Background
+## Brief History and Background
 
 Development of the Silo library began in the early 1990’s at Lawrence Livermore National Laboratory to address a range of issues related to the storage and exchange of data among a wide variety of scientific computing applications and platforms.
 
-In the early days of scientific computing, roughly 1950 - 1980, simulation software development at many labs, like Livermore, invariably took the form of a number of software “stovepipes”.
-Each big code effort included sub-efforts to develop supporting tools for visualization, data differencing, browsing and management.
+In the early days of scientific computing, roughly 1950 - 1980, simulation software development at many labs, like Livermore, invariably took the form of a number of software *stovepipes*.
+Each big code effort included sub-efforts to develop supporting tools for data browsing and differencing, visualization, and management.
 
 Developers working in a particular stovepipe designed every piece of software they wrote, simulation code and tools alike, to conform to a common representation for the data.
-In a sense, all software in a particular stovepipe was really just one big, monolithic application, typically held together by a common, binary or ASCII file format.
+In a sense, all software in a particular stovepipe was really just one big, monolithic application, held together by a common, binary or ASCII file format.
 
 Data exchanges across stovepipes were laborious and often achieved only by employing one or more computer scientists whose sole task in life was to write a conversion tool called a *linker*.
 Worse, each linker needed to be kept it up to date as changes were made to one or the other codes that it linked.
 In short, there was nothing but brute force data sharing and exchange.
-Furthermore, there was duplication of effort in the development of support tools for each code.
+Furthermore, there was duplication of effort in the development of data analysis and management tools for each code.
 
-Between 1980 and 2000, an important innovation emerged, the general purpose I\O library.
+Between 1980 and 2000, an important innovation emerged, the general purpose I/O library.
 In fact, two variants emerged each working at a different level of abstraction.
-One focused on the *objects* of computer science.
-That is arrays, structs and linked lists (e.g. data structures).
-The other focused on the *objects* of computational science.
-That is structured and unstructured meshes with piecewise-constant and piecewise-linear fields.
-Examples of the former are CDF, HDF (HDF4 and HDF5) and PDBLib.
-Together with libraries like Exodus and Mili, Silo is an example of the latter type of I/O library.
-At the same time, Silo makes use of the former.
+One focused on lower level abstractions...the *objects* of computer science.
+That is data structures such as arrays, structs and linked lists.
+The other focused on higher level abstractions...the *objects* of computational science.
+That is meshes and fields defined thereon.
+Examples of the former are [netCDF](https://github.com/Unidata/netcdf-c), HDF (HDF4 and [HDF5](https://github.com/HDFGroup/hdf5)) and [PDB](https://code.google.com/archive/p/pactnew/source/default/source?page=50).
+Examples of the latter are [ExodusII](https://github.com/sandialabs/exodusii), [Mili](https://github.com/mdg-graphics/mili) and Silo.
+At the same time, the higher level libraries can also make make use of the lower level libraries.
+For example, Silo uses HDF5 and PDB and ExodusII uses netCDF.
 
-### Silo Architecture
+## Silo Architecture
 
 Silo has several drivers.
 Some are read-only and some are read-write.
@@ -60,15 +60,15 @@ These are illustrated in the figure below...
 
 ![](./architecture.gif)
 
-Silo supports both read and write on the PDB (Portable Database) and HDF5 drivers.
+Silo supports both read and write on the PDB (Portable DataBase) and HDF5 drivers.
 In addition, Silo supports two different *flavors* of PDB drivers.
 One known within Silo as *PDBLite* and is just called *PDB* which is a very old version of PDB that was frozen into the Silo library in 1999.
 That is the default driver.
-The other flavor of PDB is known within Silo as *PDB Proper* and can use a current release of the PDB library.
+The other flavor of PDB is known within Silo as *PDB Proper* and can use a more recent release of the PDB library.
 
 Although Silo can write and read PDB and HDF5 files, it cannot read just any PDB or HDF5 file.
 It can read only PDB or HDF5 files that were also written with Silo.
-Silo supports only read on the taurus and netcdf drivers. 
+Silo supports only read on the Taurus and netCDF drivers. 
 The particular driver used to write data is chosen by an application when a Silo file is created.
 It can be automatically determined by the Silo library when a Silo file is opened.
 
@@ -88,32 +88,55 @@ In the Fortran interface, the data is passed via individual arguments.
 
 Here is a short summary of some of the terms used throughout the Silo interface and documentation. These terms are common to most computer simulation environments.
 
-Block
-: This is the fundamental building block of a computational mesh.
-  It defines the nodal coordinates of one contiguous section of a mesh (also known as a mesh-block).
-
 Mesh
-: A computational mesh, composed of one or more mesh-blocks.
-  A mesh can be composed of mesh-blocks of different types (quad, UCD) as well as of different shapes.
-
-Variable
-: Data which are associated in some way with a computational mesh. 
-  Variables usually represent values of some physics quantity (e.g., pressure).
-  Values are usually located either at the mesh nodes or at zone centers.
-
-Material
-:  A physical material being modeled in a computer simulation.
-   A Silo *material object* is a single object that describes *all* the materials used in a given mesh.
+: A discretization of a computational *domain* over which variables (fields) are defined.
+  A mesh is a collection of *points* (aka *nodes*) optionally knitted together to form a network of higher dimensional primitive shapes (aka *elements*) via enumeration (explicit or implicit) of nodal *connectivities*.
+  Practically speaking, a mesh consists of a list of nodes with coordinates and, optionally, one or more list(s) of elements, where each element is defined either directly in terms of the nodes or indirectly in terms of other elements which are ultimately defined in terms of the nodes.
+  A mesh supports two notions of *dimension*.
+  One is its *geometric* (or spatial) dimension and the other is its *parametric* (or topological) dimension.
+  For example, the path of a rocket going into orbit around the Earth has three geometric dimensions (e.g. latitude, longitude and elevation).
+  However, in *parametric* terms, that path is really just a one dimensional *curve*.
 
 Node
 : A mathematical point.
-  The fundamental building-block of a mesh or zone.
+  The fundamental building-block of the elements of a mesh.
+  Other names for node are *point* or *vertex*.
+  The topological dimension of a *node* is always zero.
+  A point has no extent in any dimension or coordinate space.
 
 Zone
-: An area or volume of which meshes are comprised.
-  Zones are polygons or polyhedra with nodes as vertices (see “UCD 2-D and 3-D Cell Shapes” on page 1-6.)
+: An element of a mesh.
+  An element defines a region of support over which a variable (aka *field*, see below) may be interpolated.
+  Zones are typically polygons or polyhedra with nodes as their vertices.
+  Other names for zone are *cell* or *element*.
 
-### Computational Meshes Supported by Silo
+Variable
+: A field defined on a computational mesh or portion thereof.
+  Variables usually represent some physical quantity (e.g., pressure or velocity) but that is not a requirement.
+  Variables typically account for the overwhelming majority of stored data in a Silo database.
+  The set of *numbers* stored for a variable are in general not the field's *values* but instead the field's *degrees of freedom* used in a given numerical scheme to *interpolate* the field over the *elements* of a mesh.
+  However, for piecewise-constant and piecewise-linear interpolation schemes over the standard zoo of element shapes and types, the numbers stored are indeed also the field's values.
+  The terms *zone-centered* (or *cell-centered* or *element-centered* and *node-centered* (or *vertex-centered*) are synonyms for piecewise-constant and piecewise-linear interpolation schemes, respectively.
+
+Material
+: A decomposition of a mesh into distinct regions having different properties of some kind.
+  Typically, different groups of elements of the mesh represent different materials.
+  In the case of *mixing* materials, a single element may represent the contributions of more than one material.
+  In this case, the *fractions* of the element covered by each material are also part of the material description.
+  A Silo *material object* is a single object that represents *all* the materials in a given mesh.
+
+Material Species
+: A decomposition of a material into different concentrations of pure, atomic table elements.
+  For example, the material *common yellow brass* is, nominally, a mixture of Copper (Cu) and Zinc (Zn) while *tool steel* is composed primarily of Iron (Fe) but mixed with some Carbon (C) and a variety of other elements.
+  In certain computational science scenarios, detailed knowledge of the concentration of the constutient atomic elements comprising each material is required.
+
+Block
+: A *block* is a piece (or fragment) of a domain decomposed computational mesh.
+  It defines one coherent, contiguous piece (or fragment) of a larger, domain decomposed mesh.
+  A mesh that is decomposed into blocks is called a *multi-block* mesh.
+  To go along with multi-block meshes, there are multi-block variables, multi-block materials and multi-block species.
+
+## Computational Meshes Supported by Silo
 
 Silo supports several classes, or types, of meshes. These are quadrilateral, unstructured-zoo, unstructured-arbitrary, point, constructive solid geometry (CSG), and adaptive refinement meshes.
 
@@ -169,40 +192,58 @@ The objects are generalized representations for data commonly found in physics s
 These objects include:
 
 Quadmesh
-: A quadrilateral mesh. At a minimum, this must include the dimension and coordinate data, but typically also includes the mesh’s coordinate system, labelling and unit information, minimum and maximum extents, and valid index ranges.
+: A mesh where the elements are implicitly defined by a *logical* cross product of the parametric dimensions.
+  In one dimension, the elements are edges.
+  In two dimensions, they are quadrilaterals
+  In three dimensions, cubes.
+  The geometric dimensions may also be implicitly defined by a cross product (e.g. rectilinear mesh) or they may be explicit (e.g. deformed mesh).
 
 Quadvar
 : A variable associated with a quadrilateral mesh.
-  At a minimum, this must include the variable’s data, centering information (node-centered vs. zone centered), and the name of the quad mesh with which this variable is associated.
+  This includes the variable’s data, centering information (node-centered vs. zone centered), and the name of the quad mesh with which this variable is associated.
   Additional information, such as time, cycle, units, label, and index ranges can also be included.
 
 Ucdmesh
-: An unstructured mesh.
-  At a minimum, this must include the dimension, connectivity, and coordinate data, but typically also includes the mesh’s coordinate system, labelling and unit information, minimum and maximum extents, and a list of face indices.
+: An unstructured cell data mesh.
+  This is a mesh where the elements are explicitly defined via enumeration of nodal connectivities.
+  This includes the dimension, connectivity, and coordinate data, but typically also includes the mesh’s coordinate system, labelling and unit information, minimum and maximum extents, and a list of face indices.
+
+  Any quad mesh can be respresented as a UCD mesh.
+  However, the reverse is not true.
+  A quad mesh offers certain storage efficiencies over UCD meshes.
+
+  When
+  When the number of variables associated with a quad mesh are small, those efficiencies can be significant.
+  However, when the number of variables grows, the efficiencies afforded by quad mesh representation are washed out.
 
 Ucdvar
 : A variable associated with a UCD mesh.
-  This at a minimum must include the variable’s data, centering information (node-centered vs.  zone-centered), and the name of the UCD mesh with which this variable is associated.
-: Additional information, such as time, cycle, units, and label can also be included.
+  This includes the variable’s data, centering information (node-centered vs.  zone-centered), and the name of the UCD mesh with which this variable is associated.
+  Additional information, such as time, cycle, units, and label can also be included.
 
 Pointmesh
-: A point mesh.
-  At a minimum, this must include dimension and coordinate data.
+: A mesh consisting entirely of points as the mesh elements.
+  A pointmesh has a parametric (topological) dimension of zero.
+  However, a pointmesh can have a geometric dimension of 1, 2 or 3 (or more).
 
 Csgmesh
 : A constructive solid geometry (CSG) mesh.
+  This is a mesh where the elements are defined by set expressions (e.g. unions, intersections and differences) involving a handful of primitive shapes (e.g. sphers, cylinders, cones, etc.)
 
 Csgvar
 : A variable defined on a CSG mesh (always zone centered).
 
 Defvar
 : Defined variable representing an arithmetic expression involving other variables.
+  The arithmetic expression may involve the names of functions (e.g. `log()`, `cos()`, etc.).
+  The functions may be specific to a given post-processing tool (e.g. the function `revolved_volume()` is known only to VisIt).
 
 Material
 : An object defining all the materials used in a given mesh.
-  This includes the number of materials present, a list of valid material identifiers, and a zonal-length array which contains the material identifiers for each zone.
+  This includes the number of materials present, a list of valid material identifiers, a zonal-length array which contains the material identifiers for each zone and, optionally, the material fractions associated with *mixing* materials.
 
 Zonelist
+: An object enumerating the nodal connectivities of elements comprising a mesh.
 
 Material species
 : Extra material information.
@@ -236,12 +277,9 @@ Multimatspecies
 : A set of material species.
   This object contains the names of the material species in the set.
 
-Zonelist
-: Zone-oriented connectivity information for a UCD mesh.
-  This object contains a sequential list of nodes which identifies the zones in the mesh, and arrays which describe the shape(s) of the zones in the mesh.
-
 PHZonelist
-: Arbitrary, polyhedral extension of a zonelist.
+: An extension of a zonelist to support arbitrary polyhedra.
+  In a PHZonelist, elements are enumerated in terms of their faces and the faces are enumerated in terms of their nodes.
 
 Facelist
 : Face-oriented connectivity information for a UCD mesh.
@@ -253,11 +291,6 @@ Curve
   This object must contain at least the domain and range values, along with the number of points in the curve.
   In addition, a title, variable names, labels, and units may be provided.
 
-Variable
-: Miscelaneous Array data.
-  This object contains, in addition to the data, the dimensions and data type of the array.
-  This object is not required to be associated with a mesh.
-
 ### Other Silo Objects
 
 In addition to the objects listed in the previous section which are tailored to the job of representing computational data from scientific computing applications.
@@ -265,24 +298,27 @@ Silo supports a number of other objects useful to scientific comput-ing applicat
 Some of the more useful ones are briefly summarized here.
 
 Compound Array
-: A compound array is an abstraction of a Fortran common block.
-  It is also somewhat like a C struct.
-  It is a list of similarly typed by differently named and sized (usually small in size) items that one often treats as a 
-group (particularly for I/O purposes).
+: A struct-like object which contains a list of similarly typed but differently named and sized (usually small) items that one often treats as a 
+  group (particularly for I/O purposes).
 
 Directory
 : A silo file can be organized into directories in much the same way as a Unix filesystem.
 
 Optlist
-: An “options list” object used to pass additional options to various Silo API functions.
+: An options list object used to pass additional options to various Silo API functions.
 
 Simple Variable
 : A simple variable is just a named, multi-dimensional array of arbitrary data.
+  This object contains, in addition to the data, the dimensions and data type of the array.
+  This object is not required to be associated with any mesh.
 
 User Defined Object
-: A generic, user-defined object or arbitrary nature.
+: A generic, user-defined object of arbitrary composition.
 
-### Silo’s Fortran Interface
+Extended Silo Object
+: A Silo object which includes any number of user-defined additional members.
+
+## Silo’s Fortran Interface
 
 The Silo library is implemented in C.
 Nonetheless, a set of Fortran callable wrappers have been written to make a majority of Silo’s functionality available to Fortran applications.
@@ -362,7 +398,7 @@ The above example demonstrates this rule.
 Finally, there are a few function in Silo’s API that are unique to the Fortran interface.
 Those functions are described in the section of the API manual having to do with Fortran.
 
-### Using Silo in Parallel
+## Using Silo in Parallel
 
 Silo is a serial library.
 Nevertheless, it (as well as the tools that use it like VisIt) has several features that enable its effective use in parallel with excellent scaling behavior.

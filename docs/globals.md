@@ -1,58 +1,36 @@
-## Error Handling and Other Global Library Behavior
+## Error Handling and Global Library Behavior
 
-The functions described in this section of the Silo Application Programming Interface (API) manual, are those that effect behavior of the library, globally, for any file(s) that are or will be open.
+The functions described in this section of the Silo manual, are those that effect behavior of the library, globally, for any file(s) that are or will be created or opened.
 These include such things as error handling, requiring Silo to do extra work to warn of and avoid overwrites, to compute and warn of checksum errors and to compress data before writing it to disk.
-
-
-<details markdown=1><summary markdown="span"><b>Click for table of methods in this section</b></summary>
-  
-### Methods and symbols in this section
-
-&nbsp;|&nbsp;|&nbsp;
-:---|:---|:---
-[`DBErrString`](#dberrstring)|[`DBErrfunc`](#dberrfunc)|[`DBErrfuncname`](#dberrfuncname)
-[`DBErrlvl`](#dberrlvl)|[`DBErrno`](#dberrno)|[`DBForceSingle`](#dbforcesingle)
-[`DBGetAllowEmptyObjects`](#dbgetallowemptyobjects)|[`DBGetAllowOverwrites`](#dbgetallowoverwrites)|[`DBGetCompression`](#dbgetcompression)
-[`DBGetDataReadMask2`](#dbgetdatareadmask2)|[`DBGetDatatypeString`](#dbgetdatatypestring)|[`DBGetDeprecateWarnings`](#dbgetdeprecatewarnings)
-[`DBGetEnableChecksums`](#dbgetenablechecksums)|[`DBGetFriendlyHDF5Names`](#dbgetfriendlyhdf5names)|[`DBSetAllowEmptyObjects`](#dbsetallowemptyobjects)
-[`DBSetAllowOverwrites`](#dbsetallowoverwrites)|[`DBSetCompression`](#dbsetcompression)|[`DBSetDataReadMask2`](#dbsetdatareadmask2)
-[`DBSetDeprecateWarnings`](#dbsetdeprecatewarnings)|[`DBSetEnableChecksums`](#dbsetenablechecksums)|[`DBSetFriendlyHDF5Names`](#dbsetfriendlyhdf5names)
-[`DBShowErrors`](#dbshowerrors)|[`DBVariableNameValid`](#dbvariablenamevalid)|[`DBVersion`](#dbversion)
-[`DBVersionDigits`](#dbversiondigits)|[`DBVersionGE`](#dbversionge)|[`DB_VERSION_GE`](#db_version_ge)
-
-</details>
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBErrfuncname()`
 
-* **Summary:** Get name of error-generating function
+#### **Summary:** Get name of error-generating function
 
-* **C Signature:**
+#### **C Signature:**
 
   ```
   char const *DBErrfuncname (void)
   ```
 
-* **Fortran Signature:**
+#### **Fortran Signature:**
 
   ```
   None
   ```
 
-* **Returned value:**
+#### **Returned value:**
 
-  DBErrfuncname returns a char const * containing the name of the function that generated the last error.
+  `DBErrfuncname` returns a `char const *` containing the name of the function that generated the last error.
   It cannot fail.
 
-
-
-* **Description:**
+#### **Description:**
 
   The `DBErrfuncname` function is used to find the name of the function that generated the last Silo error.
   It is implemented as a macro.
   The returned pointer points into Silo private space and must not be modified or freed.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -75,7 +53,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  DBErrno returns the internal error number of the last error.
+  `DBErrno` returns the internal error number of the last error.
   It cannot fail.
 
 
@@ -107,7 +85,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  DBErrString returns a char const * containing the last error message.
+  `DBErrString` returns a `char const *` containing the last error message.
   It cannot fail.
 
 
@@ -148,7 +126,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  DBShowErrors returns nothing (void).
+  `DBShowErrors` returns nothing (void).
   It cannot fail.
 
 
@@ -158,8 +136,8 @@ These include such things as error handling, requiring Silo to do extra work to 
   The `DBShowErrors` function sets the `level` of error reporting done by Silo when it encounters an error.
   The following table describes the action taken upon error for different values of `level`.
 
-  Ordinarily, error reporting from the HDF5 library is disabled.
-  However, `DBShowErrors` also influences the behavior of error reporting from the HDF5 library.
+  Ordinarily, error reporting from the driver (e.g. HDF5 or PDB) library is disabled.
+  However, `DBShowErrors` can also control the behavior of error reporting from the driver library.
 
   **&nbsp;**
 
@@ -285,7 +263,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  DBVersion returns the version as a character string.
+  `DBVersion` returns the version as a character string.
 
 
 
@@ -475,7 +453,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Description:**
 
-  For a long time, the "EMPTY" keyword convention (see "DBPutMultimesh" on page 159) was sufficient for dealing with cases where callers needed to create multiple, related multi-block objects with missing blocks.
+  For a long time, the `"EMPTY"` keyword convention (see "DBPutMultimesh" on page 159) was sufficient for dealing with cases where callers needed to create multiple, related multi-block objects with missing blocks.
   In fact, in many cases this convention was sufficient for combining variables which by and large existed on different collections of blocks on a common multi-block mesh.
 
   More recently, the need has arisen for the Silo library to permit callers to instantiate within Silo files "empty" objects; that is Silo objects with no problem-sized data associated with them.
