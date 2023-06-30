@@ -121,7 +121,7 @@ Variable (or *Field*)
   However, for piecewise-constant and piecewise-linear interpolation schemes over the standard zoo of element shapes and types, the numbers stored are indeed also the field's values.
   This is due to the fact that the associated interpolation schemes are indeed *interpolating* as opposed to *approximating*.
 
-  The terms *zone-centered* (or *cell-centered* or *element-centered* and *node-centered* (or *vertex-centered*) are synonyms for piecewise-constant and piecewise-linear interpolation schemes, respectively.
+  The terms *zone-centered* (or *cell-centered* or *element-centered*) and *node-centered* (or *vertex-centered*) are synonyms for piecewise-constant and piecewise-linear interpolation schemes, respectively
 
 Coordinate Field
 : The coordinates of a mesh are a field like any other field.
