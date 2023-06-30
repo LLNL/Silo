@@ -112,10 +112,10 @@ Zone
   Zones are typically polygons or polyhedra with nodes as their vertices.
   Other names for zone are *cell* or *element*.
 
-Variable
+Variable (or *Field*)
 : A field defined on a computational mesh or portion thereof.
   Variables usually represent some physical quantity (e.g., pressure or velocity) but that is not a requirement.
-  Variables typically account for the overwhelming majority of stored data in a Silo database.
+  Variables typically account for the overwhelming majority of data stored in a Silo database.
 
   The set of *numbers* stored for a variable are in general not the field's *values* but instead the field's *degrees of freedom* used in a given numerical scheme to *interpolate* the field over the *elements* of a mesh.
   However, for piecewise-constant and piecewise-linear interpolation schemes over the standard zoo of element shapes and types, the numbers stored are indeed also the field's values.
@@ -123,22 +123,37 @@ Variable
 
   The terms *zone-centered* (or *cell-centered* or *element-centered* and *node-centered* (or *vertex-centered*) are synonyms for piecewise-constant and piecewise-linear interpolation schemes, respectively.
 
+Coordinate Field
+: The coordinates of a mesh are a field like any other field.
+  The coordinates are a *special* field and must obey certain mathematical properties to serve as *coordinates*.
+  However, it is important to understand that the coordinates of a mesh are also just a field.
+
+  In Silo, coordinate fields are written as part of the `DBPutXxxmesh()` methods whereas other fields on the mesh are written with `DBPutXxxvar()` methods.
+  The coordinates are always node-centered (e.g. piecewise-linear interpolating).
+  It may be possible to support higher order interpolation schemes in the coordinate fields by adopting certain use conventions which downstream post-processing tools will also need to be made aware of.
+
 Material
 : A decomposition of a mesh into distinct regions having different properties of some kind.
   Typically, different groups of elements of the mesh represent different physical materials such as brass or steel.
+
   In the case of *mixing* materials, a single element may include contributions from more than one constituent material.
-  In this case, the *fractions* of each material contained in the is also part of the material description.
+  In this case, the *fractions* of each material contained in the element is also part of the material description.
 
 Material Species
 : A decomposition of a material into different concentrations of pure, atomic table elements.
-  For example, the material *common yellow brass* is, nominally, a mixture of Copper (Cu) and Zinc (Zn) while *tool steel* is composed primarily of Iron (Fe) but mixed with some Carbon (C) and a variety of other elements.
+  For example, *common yellow brass* is, nominally, a mixture of Copper (Cu) and Zinc (Zn) while *tool steel* is composed primarily of Iron (Fe) but mixed with some Carbon (C) and a variety of other elements.
   In certain computational science scenarios, detailed knowledge of the concentration of the constutient atomic elements comprising each material is needed.
 
 Block
-: A *block* defines one coherent, contiguous piece (or fragment) of a larger, domain decomposed mesh.
+: A *block* defines one coherent, contiguous piece (or fragment) of a larger mesh that has been decomposed into pieces typically for parallel processing but also potentially for other purposes such as streaming analysis, etc.
+  The coordinates, connectivities and associated mesh variables of a block are all enumerated *relative* to the block and independently from any other block.
+  In some sense, block's represent the fundamental storage *quanta* of a mesh that is too large to process as single, monolithic whole.
+
   A mesh that is decomposed into blocks is called a *multi-block* mesh.
   To go along with multi-block meshes, there are multi-block variables, multi-block materials and multi-block species.
   Different blocks of a larger mesh may be stored in different Silo files.
+
+  Frequently, blocks are also called *domains*.
 
 ## Computational Meshes Supported by Silo
 
@@ -217,7 +232,7 @@ Ucdmesh
 
   A quad mesh offers certain storage efficiencies (for the coordinate data) over UCD meshes.
   When the number of variables associated with a quad mesh is small, those efficiencies can be significant.
-  However, as the number of variables grows, these efficiencies are quickly washed out.
+  However, as the number of variables grows, they are quickly washed out.
 
   When considering all the data stored in a Silo *file*, the storage efficiency is often not significant.
   However, when considering all the data needed in memory at any one time to perform a specific data analysis task (e.g. produce a Pseudocolor plot), the storage efficiency is indeed significant.
