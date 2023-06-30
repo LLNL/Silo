@@ -36,31 +36,28 @@ These include such things as error handling, requiring Silo to do extra work to 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBErrno()`
 
-* **Summary:** Get internal error number.
+Summary
+: Get internal error number.
 
-* **C Signature:**
-
-  ```
+C Signature
+: ```
   int DBErrno (void)
   ```
 
-* **Fortran Signature:**
-
-  ```
+Fortran Signature
+: ```
   integer function dberrno()
   ```
 
 
-* **Returned value:**
-
-  `DBErrno` returns the internal error number of the last error.
+Returned value
+: `DBErrno` returns the internal error number of the last error.
   It cannot fail.
 
 
 
-* **Description:**
-
-  The `DBErrno` function is used to find the number of the last Silo error message.
+Description
+: The `DBErrno` function is used to find the number of the last Silo error message.
   It is implemented as a macro.
   The error numbers are not guaranteed to remain the same between different release versions of Silo.
 

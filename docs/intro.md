@@ -91,11 +91,13 @@ Here is a short summary of some of the terms used throughout the Silo interface 
 Mesh
 : A discretization of a computational *domain* over which variables (fields) are defined.
   A mesh is a collection of *points* (aka *nodes*) optionally knitted together to form a network of higher dimensional primitive shapes (aka *elements*) via enumeration (explicit or implicit) of nodal *connectivities*.
+
   Practically speaking, a mesh consists of a list of nodes with coordinates and, optionally, one or more list(s) of elements, where each element is defined either directly in terms of the nodes or indirectly in terms of other elements which are ultimately defined in terms of the nodes.
+
   A mesh supports two notions of *dimension*.
   One is its *geometric* (or spatial) dimension and the other is its *parametric* (or topological) dimension.
   For example, the path of a rocket going into orbit around the Earth has three geometric dimensions (e.g. latitude, longitude and elevation).
-  However, in *parametric* terms, that path is really just a one dimensional *curve*.
+  However, in *parametric* terms, that path is really just a one dimensional mesh (e.g. a curve).
 
 Node
 : A mathematical point.
@@ -114,27 +116,29 @@ Variable
 : A field defined on a computational mesh or portion thereof.
   Variables usually represent some physical quantity (e.g., pressure or velocity) but that is not a requirement.
   Variables typically account for the overwhelming majority of stored data in a Silo database.
+
   The set of *numbers* stored for a variable are in general not the field's *values* but instead the field's *degrees of freedom* used in a given numerical scheme to *interpolate* the field over the *elements* of a mesh.
   However, for piecewise-constant and piecewise-linear interpolation schemes over the standard zoo of element shapes and types, the numbers stored are indeed also the field's values.
+  This is due to the fact that the associated interpolation schemes are indeed *interpolating* as opposed to *approximating*.
+
   The terms *zone-centered* (or *cell-centered* or *element-centered* and *node-centered* (or *vertex-centered*) are synonyms for piecewise-constant and piecewise-linear interpolation schemes, respectively.
 
 Material
 : A decomposition of a mesh into distinct regions having different properties of some kind.
-  Typically, different groups of elements of the mesh represent different materials.
-  In the case of *mixing* materials, a single element may represent the contributions of more than one material.
-  In this case, the *fractions* of the element covered by each material are also part of the material description.
-  A Silo *material object* is a single object that represents *all* the materials in a given mesh.
+  Typically, different groups of elements of the mesh represent different physical materials such as brass or steel.
+  In the case of *mixing* materials, a single element may include contributions from more than one constituent material.
+  In this case, the *fractions* of each material contained in the is also part of the material description.
 
 Material Species
 : A decomposition of a material into different concentrations of pure, atomic table elements.
   For example, the material *common yellow brass* is, nominally, a mixture of Copper (Cu) and Zinc (Zn) while *tool steel* is composed primarily of Iron (Fe) but mixed with some Carbon (C) and a variety of other elements.
-  In certain computational science scenarios, detailed knowledge of the concentration of the constutient atomic elements comprising each material is required.
+  In certain computational science scenarios, detailed knowledge of the concentration of the constutient atomic elements comprising each material is needed.
 
 Block
-: A *block* is a piece (or fragment) of a domain decomposed computational mesh.
-  It defines one coherent, contiguous piece (or fragment) of a larger, domain decomposed mesh.
+: A *block* defines one coherent, contiguous piece (or fragment) of a larger, domain decomposed mesh.
   A mesh that is decomposed into blocks is called a *multi-block* mesh.
   To go along with multi-block meshes, there are multi-block variables, multi-block materials and multi-block species.
+  Different blocks of a larger mesh may be stored in different Silo files.
 
 ## Computational Meshes Supported by Silo
 
@@ -196,25 +200,27 @@ Quadmesh
   In one dimension, the elements are edges.
   In two dimensions, they are quadrilaterals
   In three dimensions, cubes.
-  The geometric dimensions may also be implicitly defined by a cross product (e.g. rectilinear mesh) or they may be explicit (e.g. deformed mesh).
+  The geometric dimensions may also be implicitly defined by a cross product (e.g. rectilinear mesh) or they may be explicit (e.g. curvilinear mesh).
 
 Quadvar
-: A variable associated with a quadrilateral mesh.
+: A variable associated with a quad mesh.
   This includes the variable’s data, centering information (node-centered vs. zone centered), and the name of the quad mesh with which this variable is associated.
   Additional information, such as time, cycle, units, label, and index ranges can also be included.
 
 Ucdmesh
-: An unstructured cell data mesh.
-  This is a mesh where the elements are explicitly defined via enumeration of nodal connectivities.
+: An unstructured cell data (UCD) mesh.
+  This is a mesh where the elements are only ever explicitly defined via enumeration of nodal connectivities.
   This includes the dimension, connectivity, and coordinate data, but typically also includes the mesh’s coordinate system, labelling and unit information, minimum and maximum extents, and a list of face indices.
 
   Any quad mesh can be respresented as a UCD mesh.
   However, the reverse is not true.
-  A quad mesh offers certain storage efficiencies over UCD meshes.
 
-  When
-  When the number of variables associated with a quad mesh are small, those efficiencies can be significant.
-  However, when the number of variables grows, the efficiencies afforded by quad mesh representation are washed out.
+  A quad mesh offers certain storage efficiencies (for the coordinate data) over UCD meshes.
+  When the number of variables associated with a quad mesh is small, those efficiencies can be significant.
+  However, as the number of variables grows, these efficiencies are quickly washed out.
+
+  When considering all the data stored in a Silo *file*, the storage efficiency is often not significant.
+  However, when considering all the data needed in memory at any one time to perform a specific data analysis task (e.g. produce a Pseudocolor plot), the storage efficiency is indeed significant.
 
 Ucdvar
 : A variable associated with a UCD mesh.
@@ -231,19 +237,31 @@ Csgmesh
   This is a mesh where the elements are defined by set expressions (e.g. unions, intersections and differences) involving a handful of primitive shapes (e.g. sphers, cylinders, cones, etc.)
 
 Csgvar
-: A variable defined on a CSG mesh (always zone centered).
+: A variable defined on a CSG mesh (always piecewise-constant or zone centered).
 
 Defvar
 : Defined variable representing an arithmetic expression involving other variables.
   The arithmetic expression may involve the names of functions (e.g. `log()`, `cos()`, etc.).
-  The functions may be specific to a given post-processing tool (e.g. the function `revolved_volume()` is known only to VisIt).
+  The named functions may be specific to a given post-processing tool (e.g. the function `revolved_volume()` is known only to VisIt).
 
 Material
-: An object defining all the materials used in a given mesh.
-  This includes the number of materials present, a list of valid material identifiers, a zonal-length array which contains the material identifiers for each zone and, optionally, the material fractions associated with *mixing* materials.
+: An object defining all the materials present in a given mesh.
+  This includes the number of materials present, a list of valid material identifiers, a zonal-length array which contains the material identifiers for each zone and, optionally, the material fractions associated with materials *mixing* in one or more zones.
+
+  Silo's mixed material data structure can trace its roots to Fortran codes developed at Livermore Labs in the early 1960s.
+  It is a complicated data structure for software developers to deal with.
 
 Zonelist
 : An object enumerating the nodal connectivities of elements comprising a mesh.
+
+PHZonelist
+: An extension of a zonelist to support arbitrary polyhedra.
+  In a PHZonelist, elements are enumerated in terms of their faces and the faces are enumerated in terms of their nodes.
+
+Facelist
+: Face-oriented connectivity information for a UCD mesh.
+  This object contains a sequential list of nodes which identifies the *external* faces of a mesh, and arrays which describe the shape(s) of the faces in the mesh.
+  It may optionally include arrays which provide type information for each face.
 
 Material species
 : Extra material information.
@@ -277,15 +295,6 @@ Multimatspecies
 : A set of material species.
   This object contains the names of the material species in the set.
 
-PHZonelist
-: An extension of a zonelist to support arbitrary polyhedra.
-  In a PHZonelist, elements are enumerated in terms of their faces and the faces are enumerated in terms of their nodes.
-
-Facelist
-: Face-oriented connectivity information for a UCD mesh.
-  This object contains a sequential list of nodes which identifies the *external* faces of a mesh, and arrays which describe the shape(s) of the faces in the mesh.
-  It may optionally include arrays which provide type information for each face.
-
 Curve
 : X versus Y data.
   This object must contain at least the domain and range values, along with the number of points in the curve.
@@ -302,7 +311,7 @@ Compound Array
   group (particularly for I/O purposes).
 
 Directory
-: A silo file can be organized into directories in much the same way as a Unix filesystem.
+: A silo file can be organized into directories (or folders) in much the same way as a Unix filesystem.
 
 Optlist
 : An options list object used to pass additional options to various Silo API functions.
@@ -316,7 +325,7 @@ User Defined Object
 : A generic, user-defined object of arbitrary composition.
 
 Extended Silo Object
-: A Silo object which includes any number of user-defined additional members.
+: A Silo object which includes any number of user-defined additional data members.
 
 ## Silo’s Fortran Interface
 
@@ -402,7 +411,7 @@ Those functions are described in the section of the API manual having to do with
 
 Silo is a serial library.
 Nevertheless, it (as well as the tools that use it like VisIt) has several features that enable its effective use in parallel with excellent scaling behavior.
-However, using Silo effectively in parallel does require an application to store its data to multiple Silo files; typically between 8 and 64 depending on the number of concurrent I/O channels the application has available.
+However, using Silo effectively in parallel does require an application to store its data to multiple Silo files typically depending on the number of concurrent I/O channels the application has available at the time of Silo file creation.
 
 The two features that enable Silo to be used effectively in parallel are its ability to create separate namespaces (directories) within a single file and the fact that a multi-block object can span multiple Silo files.
 With these features, aparallel application can easily divide its processors into N groups and write a separate Silo file for each group.
@@ -421,9 +430,7 @@ All the processors write their data to a single Silo file.
 When N is equal to the number of processors, each processor writes its data to its own, unique Silo file.
 Both of these extremes are bad for effective and scalable parallel I/O.
 A good choice for N is the number of concurrent I/O channels available to the application when it is actually running.
-For many parallel, HPC platforms, this number is typically between 8 and 64.
 
 This technique for using a serial I/O library effectively in parallel while being able to tune the number of files concurrently being written to is [*Multiple Independent File (MIF)*](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/) parallel I/O. 
 
-There is a separate header file, pmpio.h, with a set of convenience methods to support PMPIO-based parallel I/O with Silo.
-See “Multi-Block Objects, Parallelism and Poor-Man’s Parallel I/O” on page 154 and See “PMPIO_Init” on page 181 for more information.
+There is a separate header file, `pmpio.h`, with a set of convenience CPP macros and methods to facilitate PMPIO-based parallel I/O with Silo.
