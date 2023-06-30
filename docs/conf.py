@@ -26,6 +26,7 @@ myst_enable_extensions = [
     "fieldlist",
     "substitution"
 ]
+myst_heading_anchors = 3
 
 html_static_path = ['_static']
 html_theme = "sphinx_rtd_theme"
