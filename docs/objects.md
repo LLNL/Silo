@@ -1,36 +1,14 @@
 ## Meshes, Variables and Materials
 
-If you are interested in learning how to deal with these objects in parallel, See "Multi-Block Objects, Parallelism and Poor-Man's Parallel I/O" on page `157`.
+If you are interested in learning how to deal with these objects in parallel, See [Multi-Block Objects and Parallel I/O](#multi-block-objects-and-parallel-i-o).
 
-This section of the Silo `API` manual describes all the high-level Silo objects that are sufficiently self-describing as to be easily shared between a variety of applications.
+This section of the Silo API manual describes all the high-level Silo objects that are sufficiently self-describing as to be easily shared between a variety of applications.
 
-Silo supports a variety of mesh types including simple 1D curves, structured meshes including block-structured Adaptive Mesh Refinement (AMR) meshes, point (or gridless) meshes consisting entirely of points, unstructured meshes consisting of the standard zoo of element types, fully arbitrary polyhedral meshes and Constructive Solid Geometry "meshes" described by boolean operations of primitive quadric surfaces.
+Silo supports a variety of mesh types including simple 1D curves, structured meshes including block-structured Adaptive Mesh Refinement (AMR) meshes, point (or gridless) meshes consisting entirely of points, unstructured meshes consisting of the standard zoo of element types, fully arbitrary polyhedral meshes and Constructive Solid Geometry meshes described by boolean operations of primitive quadric surfaces.
 
 In addition, Silo supports both piecewise constant (e.g. zone-centered) and piecewise-linear (e.g. node-centered) variables (e.g. fields) defined on these meshes.
 Silo also supports the decomposition of these meshes into materials (and material species) including cases where multiple materials are mixing within a single mesh element.
 Finally, Silo also supports the specification of expressions representing derived variables.
-
-### Methods and symbols in this section
-{:.no_toc}
-
-1. Table of Contents
-{:toc}
-
-&nbsp;|&nbsp;|&nbsp;
-:---|:---|:---
-[`DBGetCSGZonelist`](#dbgetcsgzonelist)|[`DBGetCsgmesh`](#dbgetcsgmesh)|[`DBGetCsgvar`](#dbgetcsgvar)
-[`DBGetCurve`](#dbgetcurve)|[`DBGetDefvars`](#dbgetdefvars)|[`DBGetMaterial`](#dbgetmaterial)
-[`DBGetMatspecies`](#dbgetmatspecies)|[`DBGetPHZonelist`](#dbgetphzonelist)|[`DBGetPointmesh`](#dbgetpointmesh)
-[`DBGetPointvar`](#dbgetpointvar)|[`DBGetQuadmesh`](#dbgetquadmesh)|[`DBGetQuadvar`](#dbgetquadvar)
-[`DBGetUcdmesh`](#dbgetucdmesh)|[`DBGetUcdvar`](#dbgetucdvar)|[`DBInqMeshname`](#dbinqmeshname)
-[`DBInqMeshtype`](#dbinqmeshtype)|[`DBPutCSGZonelist`](#dbputcsgzonelist)|[`DBPutCsgmesh`](#dbputcsgmesh)
-[`DBPutCsgvar`](#dbputcsgvar)|[`DBPutCurve`](#dbputcurve)|[`DBPutDefvars`](#dbputdefvars)
-[`DBPutFacelist`](#dbputfacelist)|[`DBPutMaterial`](#dbputmaterial)|[`DBPutMatspecies`](#dbputmatspecies)
-[`DBPutPHZonelist`](#dbputphzonelist)|[`DBPutPointmesh`](#dbputpointmesh)|[`DBPutPointvar`](#dbputpointvar)
-[`DBPutPointvar1`](#dbputpointvar1)|[`DBPutQuadmesh`](#dbputquadmesh)|[`DBPutQuadvar`](#dbputquadvar)
-[`DBPutQuadvar1`](#dbputquadvar1)|[`DBPutUcdmesh`](#dbputucdmesh)|[`DBPutUcdsubmesh`](#dbputucdsubmesh)
-[`DBPutUcdvar`](#dbputucdvar)|[`DBPutUcdvar1`](#dbputucdvar1)|[`DBPutZonelist`](#dbputzonelist)
-[`DBPutZonelist2`](#dbputzonelist2)|
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -53,7 +31,6 @@ Finally, Silo also supports the specification of expressions representing derive
      yvals, datatype, npoints, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
@@ -66,12 +43,9 @@ Finally, Silo also supports the specification of expressions representing derive
   `npoints` | The number of points in the curve
   `optlist` | Pointer to an option list structure containing additional information to be included in the compound array object written into the Silo file. Use `NULL` is there are no options.
 
-
 * **Returned value:**
 
-  DBPutCurve returns zero on success and -1 on failure.
-
-
+  `DBPutCurve` returns zero on success and -1 on failure.
 
 * **Description:**
 
@@ -87,27 +61,23 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_LABEL|int|Problem cycle value.|0
-  DBOPT_XLABEL|char *|Label for the x-axis|NULL
-  DBOPT_YLABEL|char *|Label for the y-axis|NULL
-  DBOPT_XUNITS|char *|Character string defining the units for the x-axis.|NULL
-  DBOPT_YUNITS|char *|Character string defining the units for the y-axis|NULL
-  DBOPT_XVARNAME|char *|Name of the domain (x) variable. This is the problem variable name, not the code variable name passed into the `xvals` argument.|NULL
-  DBOPT_YVARNAME|char *|Name of the domain (y) variable. This is problem variable name, not the code variable name passed into the `yvals` argument.|NULL
-  DBOPT_REFERENCE|char *|Name of the real curve object this object references. The name can take the form of '<file:/path-to-curve-object>' just as mesh names in the `DBPutMultiMesh` call. <br><br>Note also that if this option is set, then the caller must pass `NULL` for both `xvals` and `yvals` arguments but must also pass valid information for all other object attributes including not only `npoints` and `datatype` but also any options.|NULL
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_COORDSYS|int|Coordinate system. One of: `DB_CARTESIAN` or DB_SPHERICAL|DB_CARTESIAN
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
-
-
-  
+  `DBOPT_LABEL`|`int`|Problem cycle value|`0`
+  `DBOPT_XLABEL`|`char *`|Label for the x-axis|`NULL`
+  `DBOPT_YLABEL`|`char *`|Label for the y-axis|`NULL`
+  `DBOPT_XUNITS`|`char *`|Character string defining the units for the x-axis|`NULL`
+  `DBOPT_YUNITS`|`char *`|Character string defining the units for the y-axis|`NULL`
+  `DBOPT_XVARNAME`|`char *`|Name of the domain (x) variable. This is the problem variable name, not the code variable name passed into the `xvals` argument.|`NULL`
+  `DBOPT_YVARNAME`|`char *`|Name of the domain (y) variable. This is problem variable name, not the code variable name passed into the `yvals` argument.|`NULL`
+  `DBOPT_REFERENCE`|`char *`|Name of the real curve object this object references. The name can take the form of `"<file:/path-to-curve-object>"` just as mesh names in the `DBPutMultiMesh` call. Note also that if this option is set, then the caller must pass `NULL` for both `xvals` and `yvals` arguments but must also pass valid information for all other object attributes including not only `npoints` and `datatype` but also any options.|`NULL`
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|`0`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of: `DB_CARTESIAN` or `DB_SPHERICAL`|`DB_CARTESIAN`
+  `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays|`DB_MISSING_VALUE_NOT_SET`
 
   In some cases, particularly when writing multi-part silo files from parallel clients, it is convenient to write curve data to something other than the "master" or "root" file.
   However, for a visualization tool to become aware of such objects, the tool is then required to traverse all objects in all the files of a multi-part file to find such objects.
   The `DBOPT_REFERENCE` option helps address this issue by permitting the writer to create knowledge of a curve object in the "master" or "root" file but put the actual curve object (the referenced object) wherever is most convenient.
   This output option would be useful for other Silo objects, meshes and variables, as well.
   However, it is currently only available for curve objects.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -127,31 +97,20 @@ Finally, Silo also supports the specification of expressions representing derive
   integer function dbgetcurve(dbid, curvename, lcurvename, maxpts,
      xvals, yvals, datatype, npts)
   ```
-
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `curvename` | Name of the curve to read.
-
-
 * **Returned value:**
 
-  DBCurve returns a pointer to a `DBcurve` structure on success and `NULL` on failure.
-
-
+  `DBCurve` returns a pointer to a `DBcurve` structure on success and `NULL` on failure.
 
 * **Description:**
 
   The `DBGetCurve` function allocates a `DBcurve` data structure, reads a curve from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>

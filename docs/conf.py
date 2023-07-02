@@ -15,8 +15,8 @@ def setup(app):
         app.add_stylesheet('custom.css')
 
 #source_suffix = {
-#    '.rst': 'restructuredtext',
 #    '.md': 'markdown',
+#    '.in': 'markdown',
 #}
 
 # MYST specific extensions
