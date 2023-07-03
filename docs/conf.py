@@ -24,7 +24,9 @@ myst_enable_extensions = [
     "deflist",
     "dollarmath",
     "fieldlist",
-    "substitution"
+    "substitution",
+    "attrs_block",
+    "attrs_inline"
 ]
 myst_heading_anchors = 3
 
