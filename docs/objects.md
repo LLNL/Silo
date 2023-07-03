@@ -105,11 +105,11 @@ Finally, Silo also supports the specification of expressions representing derive
   `curvename` | Name of the curve to read.
 * **Returned value:**
 
-  `DBCurve` returns a pointer to a `DBcurve` structure on success and `NULL` on failure.
+  Returns a pointer to a [`DBcurve`](./header.md#dbcurve) structure on success and `NULL` on failure.
 
 * **Description:**
 
-  The `DBGetCurve` function allocates a `DBcurve` data structure, reads a curve from the Silo database, and returns a pointer to that structure.
+  The `DBGetCurve` function allocates a [`DBcurve`](./header.md#dbcurve) data structure, reads a curve from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
 ---
@@ -132,9 +132,9 @@ Finally, Silo also supports the specification of expressions representing derive
   integer function dbputpm(dbid, name, lname, ndims,
      x, y, z, nels, datatype, optlist_id,
      status)
-  ```
 
   void* x, y, z (if ndims<3, z=0 ok, if ndims<2, y=0 ok)
+  ```
 
 * **Arguments:**
 
@@ -148,54 +148,45 @@ Finally, Silo also supports the specification of expressions representing derive
   `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
   `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. Typically, this argument is `NULL`.
 
-
 * **Returned value:**
 
-  DBPutPointmesh returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
   The `DBPutPointmesh` function accepts pointers to the coordinate arrays and is responsible for writing the mesh into a point-mesh object in the Silo file.
 
-  A Silo point-mesh object contains all necessary information for describing a mesh.
+  A Silo point-mesh object contains all necessary information for describing a *point* mesh.
   This includes the coordinate arrays, the number of dimensions (1,2,3,...) and the number of points.
 
-  Notes:
-
   The following table describes the options accepted by this function.
-  See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
+  See the section about [Options Lists](./optlists.md) for details on the use of the `DBoptlist` construct.
 
   **Optlist options:**
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_CYCLE|int|Problem cycle value.|0
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_XLABEL|char *|Character string defining the label associated with the X dimension. |NULL
-  DBOPT_YLABEL|char *|Character string defining the label associated with the Y dimension. |NULL
-  DBOPT_ZLABEL|char *|Character string defining the label associated with the Z dimension. |NULL
-  DBOPT_NSPACE|int|Number of spatial dimensions used by this mesh.|ndims
-  DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
-  DBOPT_XUNITS|char *|Character string defining the units associated with the X dimension.|NULL
-  DBOPT_YUNITS|char *|Character string defining the units associated with the Y dimension.|NULL
-  DBOPT_ZUNITS|char *|Character string defining the units associated with the Z dimension.|NULL
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_MRGTREE_NAME|char *|Name of the mesh region grouping tree to be associated with this mesh.|NULL
-  DBOPT_NODENUM|void*|An array of length nnodes giving a global node number for each node in the mesh. By default, this array is treated as type int.|NULL
-  DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
-  DBOPT_LO_OFFSET|int|Zero-origin index of first non-ghost node. All points in the mesh before this one are considered ghost. |0
-  DBOPT_HI_OFFSET|int|Zero-origin index of last non-ghost node. All points in the mesh after this one are considered ghost.|nels-1
-  DBOPT_GHOST_NODE_LABELS|char *|Optional array of char values indicating the ghost labeling (DB_GHOSTTYPE_NOGHOST or<br>DB_GHOSTTYPE_INTDUP) of each point|NULL
-  DBOPT_ALT_NODENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBpointvar` objects indicating (multiple) alternative numbering(s) for nodes.|NULL
-  The following `optlist` options have been deprecated. Instead use `MRG` trees|||
-  DBOPT_GROUPNUM|int|The group number to which this pointmesh belongs.|-1 (not in a group)
-
-
-  
-
+  `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension. |`NULL`
+  `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension. |`NULL`
+  `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension. |`NULL`
+  `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
+  `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+  `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension.|`NULL`
+  `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension.|`NULL`
+  `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension.|`NULL`
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh.|`NULL`
+  `DBOPT_NODENUM`|`void*`|An array of length nnodes giving a global node number for each node in the mesh. By default, this array is treated as type int.|`NULL`
+  `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
+  `DBOPT_LO_OFFSET`|`int`|Zero-origin index of first non-ghost node. All points in the mesh before this one are considered ghost. |0
+  `DBOPT_HI_OFFSET`|`int`|Zero-origin index of last non-ghost node. All points in the mesh after this one are considered ghost.|nels-1
+  `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling (`DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each point|`NULL`
+  `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBpointvar` objects indicating (multiple) alternative numbering(s) for nodes.|`NULL`
+  <td colspan=4>The following `optlist` options have been deprecated. Instead use MRG trees
+  `DBOPT_GROUPNUM`|`int`|The group number to which this pointmesh belongs.|-1 (not in a group)
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -216,28 +207,20 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer.
   `meshname` | Name of the mesh.
 
-
 * **Returned value:**
 
-  DBGetPointmesh returns a pointer to a `DBpointmesh` structure on success and `NULL` on failure.
-
-
+  Returns a pointer to a [`DBpointmesh`](./header.md#dbpointmesh) structure on success and `NULL` on failure.
 
 * **Description:**
 
-  The `DBGetPointmesh` function allocates a `DBpointmesh` data structure, reads a point mesh from the Silo database, and returns a pointer to that structure.
+  The `DBGetPointmesh` function allocates a [`DBpointmesh`](./header.md#dbpointmesh) data structure, reads a point mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutPointvar()`
 
-* **Summary:** Write a vector/tensor point variable object into a Silo file.
+* **Summary:** Write a scalar/vector/tensor point variable object into a Silo file.
 
 * **C Signature:**
 
@@ -249,6 +232,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Fortran Signature:**
 
+  ```
+  None
   ```
 
 * **Arguments:**
@@ -264,12 +249,9 @@ Finally, Silo also supports the specification of expressions representing derive
   `datatype` | Datatype of the value arrays. One of the predefined Silo data types.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
 
-
 * **Returned value:**
 
-  DBPutPointvar returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
@@ -282,34 +264,28 @@ Finally, Silo also supports the specification of expressions representing derive
 
   For tensor quantities, the question of ordering of tensor components arises.
   For symmetric tensor's Silo uses the Voigt Notation ordering.
-  In 2D, this is T11, T22, `T12`.
-  In 3D, this is T11, T22, T33, T23, T13, `T12`.
+  In 2D, this is `T11`, `T22`, `T12`.
+  In 3D, this is `T11`, `T22`, `T33`, `T23`, `T13`, `T12`.
   For full tensor quantities, ordering is row by row starting with the top row.
 
-  Notes:
-
   The following table describes the options accepted by this function.
-  See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
+  See the section about [Options Lists](./optlists.md) for details on the use of the `DBoptlist` construct.
 
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_CYCLE|int|Problem cycle value.|0
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_NSPACE|int|Number of spatial dimensions used by this mesh.|ndims
-  DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
-  DBOPT_ASCII_LABEL|int|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)`221`.|NULL
-  DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
-  DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
-
-
-  
-
+  `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
+  `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+  `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)`221`.`NULL`
+  `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
+  `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
+  `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is `DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -332,7 +308,6 @@ Finally, Silo also supports the specification of expressions representing derive
      lmeshname, var, nels, datatype, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
@@ -345,12 +320,9 @@ Finally, Silo also supports the specification of expressions representing derive
   `datatype` | Datatype of the variable. One of the predefined Silo data types.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
 
-
 * **Returned value:**
 
-  DBPutPointvar1 returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
@@ -362,7 +334,6 @@ Finally, Silo also supports the specification of expressions representing derive
   To write vector or tensor quantities, one must use `DBPutPointvar`.
 
   See [`DBPutPointvar`](#dbputpointvar) to a description of the options accepted by this function.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -392,19 +363,12 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Returned value:**
 
-  DBGetPointvar returns a pointer to a `DBmeshvar` structure on success and `NULL` on failure.
-
-
+  Returns a pointer to a [`DBmeshvar`](./header.md#dbmeshvar) structure on success and `NULL` on failure.
 
 * **Description:**
 
   The `DBGetPointvar` function allocates a `DBmeshvar` data structure, reads a variable associated with a point mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -428,10 +392,10 @@ Finally, Silo also supports the specification of expressions representing derive
      lxname, yname, lyname, zname, lzname, x,
      y, z, dims, ndims, datatype, coordtype,
      optlist_id, status)
-  ```
 
   void* x, y, z (if ndims<3, z=0 ok, if ndims<2, y=0 ok)
   character* xname, yname, zname (if ndims<3, zname=0 ok, etc.)
+  ```
 
 * **Arguments:**
 
@@ -447,12 +411,9 @@ Finally, Silo also supports the specification of expressions representing derive
   `coordtype` | Coordinate array type. One of the predefined types: `DB_COLLINEAR` or `DB_NONCOLLINEAR`. Collinear coordinate arrays are always one-dimensional, regardless of the dimensionality of the mesh; non-collinear arrays have the same dimensionality as the mesh.
   `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. Typically, this argument is `NULL`.
 
-
 * **Returned value:**
 
-  DBPutQuadmesh returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
@@ -460,7 +421,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
   A Silo quad-mesh object contains all necessary information for describing a mesh.
   This includes the coordinate arrays, the rank of the mesh (1,2,3,...) and the type (collinear or non-collinear).
-  In addition, other information is useful and is therefore optionally included (row-major indicator, time and cycle of mesh, offsets to 'real' zones, plus coordinate system type.)
+  In addition, other information is useful and is therefore optionally included (row-major indicator, time and cycle of mesh, offsets to *real* zones, plus coordinate system type.)
 
   Typically, the number of geometric dimensions (e.g. size of coordinate tuple) and topological dimensions (e.g. dimension of elements shapes the mesh) agree.
   For example, this function is typically used to define a 3D arrangement of hexahedra or a 2D arrangement of quadrilaterals.
@@ -472,53 +433,47 @@ Finally, Silo also supports the specification of expressions representing derive
   In fact, this works in general.
   For N geometric dimensions and N-k topological dimensions, set ndims=N and dims[N-1-k]...dims[N-1] to 1.
 
-  Notes:
-
   The following table describes the options accepted by this function.
-  See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
+  See the section about [Options Lists](./optlists.md) for details on the use of the `DBoptlist` construct.
 
   **Optlist options:**
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
-  DBOPT_CYCLE|int|Problem cycle value.|0
-  DBOPT_FACETYPE|int|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`.|DB_RECTILINEAR
-  DBOPT_HI_OFFSET|int *|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
-  DBOPT_LO_OFFSET|int *|Array of `ndims` which defines zero-origin offsets from the first node for the starting index along each dimension. |{0,0,...}
-  DBOPT_XLABEL|char *|Character string defining the label associated with the X dimension. |NULL
-  DBOPT_YLABEL|char *|Character string defining the label associated with the Y dimension. |NULL
-  DBOPT_ZLABEL|char *|Character string defining the label associated with the Z dimension. |NULL
-  DBOPT_MAJORORDER|int|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
-  DBOPT_NSPACE|int|Number of spatial dimensions used by this mesh.|ndims
-  DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
-  DBOPT_PLANAR|int|Planar value. One of: `DB_AREA` or `DB_VOLUME`.|DB_OTHER
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_XUNITS|char *|Character string defining the units associated with the X dimension.|NULL
-  DBOPT_YUNITS|char *|Character string defining the units associated with the Y dimension.|NULL
-  DBOPT_ZUNITS|char *|Character string defining the units associated with the Z dimension.|NULL
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_BASEINDEX|int[3]|Indicate the indices of the mesh within its group.|0,0,0
-  DBOPT_MRGTREE_NAME|char *|Name of the mesh region grouping tree to be associated with this mesh.|NULL
-  DBOPT_GHOST_NODE_LABELS|char *|Optional array of char values indicating the ghost labeling (DB_GHOSTTYPE_NOGHOST or<br>DB_GHOSTTYPE_INTDUP) of each node|NULL
-  DBOPT_GHOST_ZONE_LABELS|char *|Optional array of char values indicating the ghost labeling (DB_GHOSTTYPE_NOGHOST or<br>DB_GHOSTTYPE_INTDUP) of each zone|NULL
-  DBOPT_ALT_NODENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBquadvar` objects indicating (multiple) alternative numbering(s) for nodes.|NULL
-  DBOPT_ALT_ZONENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBquadvar` objects indicating (multiple) alternative numbering(s) for zones.|NULL
-  The following options have been deprecated. Use `MRG` trees instead|||
-  DBOPT_GROUPNUM|int|The group number to which this quadmesh belongs.|-1 (not in a group)
-
-
-  
+ `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+ `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+ `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
+ `DBOPT_HI_OFFSET`|int *|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
+ `DBOPT_LO_OFFSET`|int *|Array of `ndims` which defines zero-origin offsets from the first node for the starting index along each dimension. |{0,0,...}
+ `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
+ `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
+ `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
+ `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+ `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
+ `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+ `DBOPT_PLANAR`|`int`|Planar value. One of: `DB_AREA` or `DB_VOLUME`|`DB_OTHER`
+ `DBOPT_TIME`|`float`|Problem time value.|0.0
+ `DBOPT_DTIME`|`double`|Problem time value.|0.0
+ `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
+ `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
+ `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
+ `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+ `DBOPT_BASEINDEX`|int[3]|Indicate the indices of the mesh within its group.|0,0,0
+ `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
+ `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each node`NULL`
+ `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each zone`NULL`
+ `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBquadvar` objects indicating (multiple) alternative numbering(s) for nodes`NULL`
+ `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBquadvar` objects indicating (multiple) alternative numbering(s) for zones`NULL`
+  The following options have been deprecated. Use MRG trees instead|||
+ `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
 
   The options `DB_LO_OFFSET` and `DB_HI_OFFSET` should be used if the mesh being described uses the notion of "phoney" zones (i.e., some zones should be ignored.) For example, if a 2-D mesh had designated the first column and row, and the last two columns and rows as "phoney", then we would use: lo_off = {1,1} and hi_off = {2,2}.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetQuadmesh()`
 
-* **Summary:** Read a quadrilateral mesh from a Silo database.
+* **Summary:** Read a Quad mesh from a Silo database.
 
 * **C Signature:**
 
@@ -542,25 +497,18 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Returned value:**
 
-  DBGetQuadmesh returns a pointer to a `DBquadmesh` structure on success and `NULL` on failure.
-
-
+  Returns a pointer to a `DBquadmesh` structure on success and `NULL` on failure.
 
 * **Description:**
 
-  The `DBGetQuadmesh` function allocates a `DBquadmesh` data structure, reads a quadrilateral mesh from the Silo database, and returns a pointer to that structure.
+  The `DBGetQuadmesh` function allocates a [`DBquadmesh`](./header.md#dbquadmesh) data structure, reads a quadrilateral mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutQuadvar()`
 
-* **Summary:** Write a vector/tensor quad variable object into a Silo file.
+* **Summary:** Write a scalar/vector/tensor quad variable object into a Silo file.
 
 * **C Signature:**
 
@@ -581,10 +529,10 @@ Finally, Silo also supports the specification of expressions representing derive
      ndims, mixvar, mixlen, datatype, centering, optlist_id,
      status)
   ```
-
   
-  varnames contains the names of the variables either in a matrix of characters form (if fortran2DStrLen is non null) or in a vector of characters form (if fortran2DStrLen is null) with the varnames length being found in the lvarnames integer array,
-  var is essentially a matrix of size <nvars> x <var-size> where var-size is determined by dims and ndims. The first "row" of the var matrix is the first component of the quadvar. The second "row" of the var matrix goes out as the second component of the quadvar, etc.
+  `varnames` contains the names of the variables either in a matrix of characters form (if `fortran2DStrLen` is non-zero) or in a vector of characters form (if `fortran2DStrLen` is zero) with the `varnames` length(s) being found in the `lvarnames` integer array,
+  `var` is essentially a matrix of size <nvars> x <var-size> where var-size is determined by `dims` and `ndims`. The first *row* of the var matrix is the first component of the quadvar.
+   The second *row* of the var matrix goes out as the second component of the quadvar, etc.
 
 * **Arguments:**
 
@@ -601,15 +549,12 @@ Finally, Silo also supports the specification of expressions representing derive
   `mixvars` | Array of length `nvars` containing pointers to arrays defining the mixed-data values associated with each subvariable. If no mixed values are present, this should be `NULL`.
   `mixlen` | Length of mixed data arrays, if provided.
   `datatype` | Datatype of the variable. One of the predefined Silo data types.
-  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types: DB_NODECENT, DB_EDGECENT, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
+  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types:`DB_NODECENT`,`DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
-
 
 * **Returned value:**
 
-  DBPutQuadvar returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
@@ -648,39 +593,35 @@ Finally, Silo also supports the specification of expressions representing derive
 
   For tensor quantities, the question of ordering of tensor components arises.
   For symmetric tensor's Silo uses the Voigt Notation ordering.
-  In 2D, this is T11, T22, `T12`.
-  In 3D, this is T11, T22, T33, T23, T13, `T12`.
+  In 2D, this is `T11`, `T22`, `T12`.
+  In 3D, this is `T11`, `T22`, `T33`, `T23`, `T13`, `T12`.
   For full tensor quantities, ordering is row by row starting with the top row.
 
   Notes:
 
   The following table describes the options accepted by this function.
-  See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
+  See the section about [Options Lists](./optlists.md) for details on the use of the `DBoptlist` construct.
 
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
-  DBOPT_CYCLE|int|Problem cycle value.|0
-  DBOPT_FACETYPE|int|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`.|DB_RECTILINEAR
-  DBOPT_LABEL|char *|Character string defining the label associated with this variable. |NULL
-  DBOPT_MAJORORDER|int|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
-  DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_UNITS|char *|Character string defining the units associated with this variable.|NULL
-  DBOPT_USESPECMF|int|Boolean (DB_OFF or DB_ON) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
-  DBOPT_ASCII_LABEL|int|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
-  DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
-  DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)`221`.|NULL
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
-
-
-  
-
+ `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+ `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+ `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
+ `DBOPT_LABEL`|`char*`|Character string defining the label associated with this variable| `NULL`
+ `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+ `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+ `DBOPT_TIME`|`float`|Problem time value.|0.0
+ `DBOPT_DTIME`|`double`|Problem time value.|0.0
+ `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
+ `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFR`
+ `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
+ `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
+ `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
+ `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+ `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+ `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -705,7 +646,6 @@ Finally, Silo also supports the specification of expressions representing derive
      datatype, centering, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
@@ -719,15 +659,12 @@ Finally, Silo also supports the specification of expressions representing derive
   `mixvar` | Array defining the mixed-data values associated with this variable. If no mixed values are present, this should be `NULL`.
   `mixlen` | Length of mixed data arrays, if provided.
   `datatype` | Datatype of sub-variables. One of the predefined Silo data types.
-  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types: DB_NODECENT, DB_EDGECENT, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
+  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types:`DB_NODECENT`,`DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
-
 
 * **Returned value:**
 
-  DBPutQuadvar1 returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
@@ -742,12 +679,11 @@ Finally, Silo also supports the specification of expressions representing derive
 
   See [`DBPutQuadvar`](#dbputquadvar) for a description of options accepted by this function.
 
-
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetQuadvar()`
 
-* **Summary:** Read a quadrilateral variable from a Silo database.
+* **Summary:** Read a Quad mesh variable from a Silo database.
 
 * **C Signature:**
 
@@ -768,28 +704,20 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer.
   `varname` | Name of the variable.
 
-
 * **Returned value:**
 
-  DBGetQuadvar returns a pointer to a `DBquadvar` structure on success and `NULL` on failure.
-
-
+  Returns a pointer to a [`DBquadvar`](./header.md#dbquadvar) structure on success and `NULL` on failure.
 
 * **Description:**
 
-  The `DBGetQuadvar` function allocates a `DBquadvar` data structure, reads a variable associated with a quadrilateral mesh from the Silo database, and returns a pointer to that structure.
+  The `DBGetQuadvar` function allocates a [`DBquadvar`](./header.md#dbquadvar) data structure, reads a variable associated with a quadrilateral mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutUcdmesh()`
 
-* **Summary:** Write a `UCD` mesh object into a Silo file.
+* **Summary:** Write a UCD mesh object into a Silo file.
 
 * **C Signature:**
 
@@ -808,11 +736,10 @@ Finally, Silo also supports the specification of expressions representing derive
      x, y, z, xname, lxname, yname,
      lyname, zname, lzname, datatype, nnodes nzones, zonel_name,
      lzonel_name, facel_name, lfacel_name, optlist_id, status)
-  ```
 
   void *x,y,z (if ndims<3, z=0 ok, if ndims<2, y=0 ok)
   character* xname,yname,zname (same rules)
-  
+  ```
 
 * **Arguments:**
 
@@ -820,31 +747,28 @@ Finally, Silo also supports the specification of expressions representing derive
   :---|:---
   `dbfile` | Database file pointer.
   `name` | Name of the mesh.
-  `ndims` | Number of spatial dimensions represented by this `UCD` mesh.
+  `ndims` | Number of spatial dimensions represented by this UCD mesh.
   `coordnames` | Array of length `ndims` containing pointers to the names to be provided when writing out the coordinate arrays. This parameter is currently ignored and can be set as `NULL`.
   `coords` | Array of length `ndims` containing pointers to the coordinate arrays.
-  `nnodes` | Number of nodes in this `UCD` mesh.
-  `nzones` | Number of zones in this `UCD` mesh.
+  `nnodes` | Number of nodes in this UCD mesh.
+  `nzones` | Number of zones in this UCD mesh.
   `zonel_name` | Name of the zonelist structure associated with this variable [written with DBPutZonelist]. If no association is to be made or if the mesh is composed solely of arbitrary, polyhedral elements, this value should be `NULL`. If a polyhedral-zonelist is to be associated with the mesh, do not pass the `name` of the polyhedral-zonelist here. Instead, use the `DBOPT_PHZONELIST` option described below. For more information on arbitrary, polyhedral zonelists, see below and also see the documentation for `DBPutPHZonelist`.
   `facel_name` | Name of the facelist structure associated with this variable [written with DBPutFacelist]. If no association is to be made, this value should be `NULL`.
   `datatype` | Datatype of the coordinate arrays. One of the predefined Silo data types.
   `optlist` | Pointer to an option list structure containing additional information to be included in the mesh object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
-
 * **Returned value:**
 
-  DBPutUcdmesh returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBPutUcdmesh` function accepts pointers to the coordinate arrays and is responsible for writing the mesh into a `UCD` mesh object in the Silo file.
+  The `DBPutUcdmesh` function accepts pointers to the coordinate arrays and is responsible for writing the mesh into a UCD mesh object in the Silo file.
 
-  A Silo `UCD` mesh object contains all necessary information for describing a mesh.
+  A Silo UCD mesh object contains all necessary information for describing a mesh.
   This includes the coordinate arrays, the rank of the mesh (1,2,3,...) and the type (collinear or non-collinear.) In addition, other information is useful and is therefore included (time and cycle of mesh, plus coordinate system type).
 
-  A Silo `UCD` mesh may be composed of either zoo-type elements or arbitrary, polyhedral elements or a mixture of both zoo-type and arbitrary, polyhedral elements.
+  A Silo UCD mesh may be composed of either zoo-type elements or arbitrary, polyhedral elements or a mixture of both zoo-type and arbitrary, polyhedral elements.
   The zonelist (connectivity) information for zoo-type elements is written with a call to `DBPutZonelist`.
   When there are only zoo-type elements in the mesh, this is the only zonelist information associated with the mesh.
   However, the caller can optionally specify the `name` of an arbitrary, polyhedral zonelist written with a call to `DBPutPHZonelist` using the `DBOPT_PHZONELIST` option.
@@ -860,14 +784,14 @@ Finally, Silo also supports the specification of expressions representing derive
   See [`DBCalcExternalFacelist`](./utility.md#dbcalcexternalfacelist) or "DBCalcExternalFacelist2" on page 2-230 for an automated way of computing the facelist needed for this call.
 
   ![](./ucdmesh.gif)
-  Figure 0-1: Example usage of `UCD` zonelist and external facelist variables.
+  Figure 0-1: Example usage of UCD zonelist and external facelist variables.
 
   The order in which nodes are defined in the zonelist is important, especially for 3D cells.
   Nodes defining a 2D cell should be supplied in either clockwise or counterclockwise order around the cell.
   The node, edge and face ordering and orientations for the predefined 3D cell types are illustrated below.
 
   ![](./ucdzoo.gif)
-  Figure 0-2: Node, edge and face ordering for zoo-type `UCD` zone shapes.
+  Figure 0-2: Node, edge and face ordering for zoo-type UCD zone shapes.
 
   Given the node ordering in the left-most column, there is indeed an algorithm for determining the other orderings for each cell type.
 
@@ -897,7 +821,7 @@ Finally, Silo also supports the specification of expressions representing derive
   So, for the example in Figure 0-3 on page 106, the shapesize entry for the `DB_ZONETYPE_POLYEDRON` segment of the zonelist is '53' because for the two arbitrary polyhedral zones in the zonelist, 53 positions in the nodelist array are used.
 
   ![](./ucdmesh_warbzone.gif)
-  Figure 0-3: Example usage of `UCD` zonelist combining a hex and 2 polyhedra.
+  Figure 0-3: Example usage of UCD zonelist combining a hex and 2 polyhedra.
   This example is intended to illustrate the representation of arbitrary polyhedra.
   So, although the two polyhedra represent a hex and pyramid which would ordinarily be handled just fine by a 'normal' zonelist, they are expressed using arbitrary connectivity here.
 
@@ -907,36 +831,32 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
-  DBOPT_NODENUM|void*|An array of length `nnodes` giving a global node number for each node in the mesh. By default, this array is treated as type int.|NULL
-  DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
-  DBOPT_CYCLE|int|Problem cycle value|0
-  DBOPT_FACETYPE|int|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`.|DB_RECTILINEAR
-  DBOPT_XLABEL|char *|Character string defining the label associated with the X dimension. |NULL
-  DBOPT_YLABEL|char *|Character string defining the label associated with the Y dimension. |NULL
-  DBOPT_ZLABEL|char *|Character string defining the label associated with the Z dimension. |NULL
-  DBOPT_NSPACE|int|Number of spatial dimensions used by this mesh.|ndims
-  DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
-  DBOPT_PLANAR|int|Planar value. One of: `DB_AREA` or `DB_VOLUME`.|DB_NONE
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_XUNITS|char *|Character string defining the units associated with the X dimension.|NULL
-  DBOPT_YUNITS|char *|Character string defining the units associated with the Y dimension.|NULL
-  DBOPT_ZUNITS|char *|Character string defining the units associated with the Z dimension.|NULL
-  DBOPT_PHZONELIST|char *|Character string holding the `name` for a polyhedral zonelist object to be associated with the mesh|NULL
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_MRGTREE_NAME|char *|Name of the mesh region grouping tree to be associated with this mesh.|NULL
-  DBOPT_TOPO_DIM|int|Used to indicate the topological dimension of the mesh apart from its spatial dimension.|-1 (not specified)
-  DBOPT_TV_CONNECTIVTY|int|A non-zero value indicates that the connectivity of the mesh varies with time|0
-  DBOPT_DISJOINT_MODE|int|Indicates if any elements in the mesh are disjoint. There are two possible modes. One is `DB_ABUTTING` indicating that elements abut spatially but actually reference different node ids (but spatially equivalent nodal positions) in the node list. The other is `DB_FLOATING` where elements neither share nodes in the nodelist nor abut spatially.|DB_NONE
-  DBOPT_GHOST_NODE_LABELS|char *|Optional array of char values indicating the ghost labeling (DB_GHOSTTYPE_NOGHOST or<br>DB_GHOSTTYPE_INTDUP) of each point|NULL
-  DBOPT_ALT_NODENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBpointvar` objects indicating (multiple) alternative numbering(s) for nodes.|NULL
-  The following options have been deprecated. Use `MRG` trees instead|||
-  DBOPT_GROUPNUM|int|The group number to which this quadmesh belongs.|-1 (not in a group)
-
-
-  
-
+ `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+ `DBOPT_NODENUM`|`void*`|An array of length `nnodes` giving a global node number for each node in the mesh. By default, this array is treated as type int|`NULL`
+ `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
+ `DBOPT_CYCLE`|`int`|Problem cycle value|0
+ `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
+ `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
+ `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
+ `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
+ `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
+ `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+ `DBOPT_PLANAR`|`int`|Planar value. One of: `DB_AREA` or `DB_VOLUME`|`DB_NONE`
+ `DBOPT_TIME`|`float`|Problem time value.|0.0
+ `DBOPT_DTIME`|`double`|Problem time value.|0.0
+ `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
+ `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
+ `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
+ `DBOPT_PHZONELIST`|`char*`|Character string holding the `name` for a polyhedral zonelist object to be associated with the mesh|`NULL`
+ `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+ `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
+ `DBOPT_TOPO_DIM`|`int`|Used to indicate the topological dimension of the mesh apart from its spatial dimension.|-1 (not specified)
+ `DBOPT_TV_CONNECTIVTY`|`int`|A non-zero value indicates that the connectivity of the mesh varies with time|0
+ `DBOPT_DISJOINT_MODE`|`int`|Indicates if any elements in the mesh are disjoint. There are two possible modes. One is `DB_ABUTTING` indicating that elements abut spatially but actually reference different node ids (but spatially equivalent nodal positions) in the node list. The other is `DB_FLOATING` where elements neither share nodes in the nodelist nor abut spatially|`DB_NONE`
+ `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each point|`NULL`
+ `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBpointvar` objects indicating (multiple) alternative numbering(s) for nodes|`NULL`
+  The following options have been deprecated. Use MRG trees instead|||
+ `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -970,12 +890,9 @@ Finally, Silo also supports the specification of expressions representing derive
   `fl` | [OPT] The `name` of the facelist object.
   `opts` | Additional options.
 
-
 * **Returned value:**
 
   A positive number on success; -1 on failure
-
-
 
 * **Description:**
 
@@ -983,14 +900,13 @@ Finally, Silo also supports the specification of expressions representing derive
 
   It is an extremely limited, inefficient and soon to be retired way of trying to define subsets of a ucd mesh.
   Instead, use a Mesh Region Grouping (MRG) tree.
-  See [`DBMakeMrgtree`](./subsets.md#dbmakemrgtree)`196`.
-
+  See [`DBMakeMrgtree`](./subsets.md#dbmakemrgtree).
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetUcdmesh()`
 
-* **Summary:** Read a `UCD` mesh from a Silo database.
+* **Summary:** Read a UCD mesh from a Silo database.
 
 * **C Signature:**
 
@@ -1011,22 +927,14 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer.
   `meshname` | Name of the mesh.
 
-
 * **Returned value:**
 
-  DBGetUcdmesh returns a pointer to a `DBucdmesh` structure on success and `NULL` on failure.
-
-
+  Rreturns a pointer to a [`DBucdmesh`](./header.md#dbucdmesh) structure on success and `NULL` on failure.
 
 * **Description:**
 
-  The `DBGetUcdmesh` function allocates a `DBucdmesh` data structure, reads a `UCD` mesh from the Silo database, and returns a pointer to that structure.
+  The `DBGetUcdmesh` function allocates a [`DBucdmesh`](./header.md#dbucdmesh) data structure, reads a UCD mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1050,7 +958,6 @@ Finally, Silo also supports the specification of expressions representing derive
      nshapes, status)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
@@ -1066,12 +973,9 @@ Finally, Silo also supports the specification of expressions representing derive
   `shapecnt` | Array of length `nshapes` containing the number of zones having each shape.
   `nshapes` | Number of zone shapes.
 
-
 * **Returned value:**
 
-  DBPutZonelist returns zero on success or -1 on failure.
-
-
+  Returns zero on success or -1 on failure.
 
 * **Description:**
 
@@ -1081,10 +985,7 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBPutZonelist` function writes a zonelist object into a Silo file.
   The `name` assigned to this object can in turn be used as the zonel_name parameter to the `DBPutUcdmesh` function.
 
-  Notes:
-
   See [`DBPutUcdmesh`](#dbputucdmesh) for a full description of the zonelist data structures.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1110,7 +1011,6 @@ Finally, Silo also supports the specification of expressions representing derive
      shapetype, shapesize, shapecnt, nshapes, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
@@ -1130,12 +1030,9 @@ Finally, Silo also supports the specification of expressions representing derive
   `nshapes` | Number of zone shapes.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
-
 * **Returned value:**
 
-  DBPutZonelist2 returns zero on success or -1 on failure.
-
-
+  Returns zero on success or -1 on failure.
 
 * **Description:**
 
@@ -1148,18 +1045,15 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Type|Description
   :---|:---
-  DB_ZONETYPE_BEAM|A line segment
-  DB_ZONETYPE_POLYGON|A polygon where nodes are enumerated to form a polygon
-  DB_ZONETYPE_TRIANGLE|A triangle
-  DB_ZONETYPE_QUAD|A quadrilateral
-  DB_ZONETYPE_POLYHEDRON|A polyhedron with nodes enumerated to form faces and faces are enumerated to form a polyhedron
-  DB_ZONETYPE_TET|A tetrahedron
-  DB_ZONETYPE_PYRAMID|A pyramid
-  DB_ZONETYPE_PRISM|A prism
-  DB_ZONETYPE_HEX|A hexahedron
-
-
-  
+ `DB_ZONETYPE_BEAM`|A line segment
+ `DB_ZONETYPE_POLYGON`|A polygon where nodes are enumerated to form a polygon
+ `DB_ZONETYPE_TRIANGLE`|A triangle
+ `DB_ZONETYPE_QUAD`|A quadrilateral
+ `DB_ZONETYPE_POLYHEDRON`|A polyhedron with nodes enumerated to form faces and faces are enumerated to form a polyhedron
+ `DB_ZONETYPE_TET`|A tetrahedron
+ `DB_ZONETYPE_PYRAMID`|A pyramid
+ `DB_ZONETYPE_PRISM`|A prism
+ `DB_ZONETYPE_HEX`|A hexahedron
 
   Notes:
 
@@ -1169,18 +1063,12 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_ZONENUM|void*|Array of global zone numbers, one per zone in this zonelist. By default, this is assumed to be of type int.|NULL
-  DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
-  DBOPT_GHOST_ZONE_LABELS|char *|Optional array of char values indicating the ghost labeling (DB_GHOSTTYPE_NOGHOST or<br>DB_GHOSTTYPE_INTDUP) of each zone|NULL
-  DBOPT_ALT_ZONENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones.|NULL
+ `DBOPT_ZONENUM`|`void*`|Array of global zone numbers, one per zone in this zonelist. By default, this is assumed to be of type int|`NULL`
+ `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
+ `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
+ `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
-
-  
-
-  
-
-  For a description of how the nodes for the allowed shapes are enumerated, see "DBPutUcdmesh" on page 2-101
-
+  For a description of how the nodes for the allowed shapes are enumerated, see [`DBPutUcdmesh`](#dbputucdmesh).
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1223,23 +1111,16 @@ Finally, Silo also supports the specification of expressions representing derive
   `lo-offset` | Index of first real (e.g. non-ghost) zone in the list. All zones with index less than (<) `lo-offset` are treated as ghost-zones.
   `hi-offset` | Index of last real (e.g. non-ghost) zone in the list. All zones with index greater than (>) `hi-offset` are treated as ghost zones.
 
-
 * **Returned value:**
 
-  DBPutPHZonelist returns zero on success or -1 on failure.
-
-
+  Returns zero on success or -1 on failure.
 
 * **Description:**
 
   **&nbsp;**
 
-  The DBPutPHZonelist function writes a polyhedral-zonelist object into a Silo file. The name assigned to this object can in turn be used as the parameter in the 
-  :---
-  DBOPT_PHZONELIST option for the `DBPutUcdmesh` function.
-
-
-  Notes:
+  The `DBPutPHZonelist` function writes a polyhedral-zonelist object into a Silo file.
+  The name assigned to this object can in turn be used as the parameter in the `DBOPT_PHZONELIST` option for the `DBPutUcdmesh` function.
 
   The following table describes the options accepted by this function:
 
@@ -1247,15 +1128,10 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_ZONENUM|void*|Array of global zone numbers, one per zone in this zonelist. By default, it is assumed this array is of type int*.|NULL
-  DBOPT_LLONGNZNUM|int|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
-  DBOPT_GHOST_ZONE_LABELS|char *|Optional array of char values indicating the ghost labeling (DB_GHOSTTYPE_NOGHOST or<br>DB_GHOSTTYPE_INTDUP) of each zone|NULL
-  DBOPT_ALT_ZONENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones.|NULL
-
-
-  
-
-  
+ `DBOPT_ZONENUM`|`void*`|Array of global zone numbers, one per zone in this zonelist. By default, it is assumed this array is of type int*|`NULL`
+ `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
+ `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
+ `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
   In interpreting the diagram above, numbers correspond to nodes while letters correspond to faces.
   In addition, the letters are drawn such that they will always be in the lower, right hand corner of a face if you were standing outside the object looking towards the given face.
@@ -1266,59 +1142,40 @@ Finally, Silo also supports the specification of expressions representing derive
   The other is to create an explicit list of "edges" and then define each polygon in terms of the edges it comprises.
   Either is appropriate.
 
-  #define `NNODES` 12
-
-  #define `NFACES` 11
-
-  #define `NZONES` 2
-
-  
+  ```
+  #define NNODES 12
+  #define NFACES 11
+  #define NZONES 2
 
   /* coordinate arrays */
-
   float x[NNODES] = {0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0};
-
   float y[NNODES] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-
   float z[NNODES] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
 
-  
-
   /* `facelist` where we enumerate the nodes over each face */
-
   int nodecnts[NFACES] = {4,4,4,4,4,4,4,4,4,4,4};
-
   int `lnodelist` = 4*NFACES;
 
   /*                           a           b           c      */
-
   int nodelist[4*NFACES] = {1,7,6,0,    2,8,7,1     4,1,0,3,
 
   /*                           d           e           f      */
-
   5,2,1,4,    3,9,10,4,   4,10,11,5,
 
   /*                           g           h           i      */
-
   9,6,7,10,   10,7,8,11,  0,6,9,3,
 
   /*                            j          K                  */
-
   1,7,10,4,   5,11,8,2};
 
-  
-
   /* zonelist where we enumerate the faces over each zone */
-
   int facecnts[NZONES] = {6,6};
-
-  int `lfacelist` = 6*NZONES;
-
+  int lfacelist = 6*NZONES;
   int facelist[6*NZONES] = {0,2,4,6,8,-9,   1,3,5,7,9,10};
+  ```
 
   1[](./ucd_hex_outward_normals.gif)
   Figure 0-4: Example of a polyhedral zonelist representation for two hexahedral elements.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1346,22 +1203,16 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer.
   `phzlname` | Name of the polyhedral-zonelist.
 
-
 * **Returned value:**
 
-  DBGetPHZonelist returns a pointer to a `DBphzonelist` structure on success and `NULL` on failure.
+  Returns a pointer to a [`DBphzonelist`](./header.md#dbphzonelist) structure on success and `NULL` on failure.
 
 
 
 * **Description:**
 
-  The `DBGetPHZonelist` function allocates a `DBphzonelist` data structure, reads a polyhedral-zonelist from the Silo database, and returns a pointer to that structure.
+  The `DBGetPHZonelist` function allocates a [`DBphzonelist`](./header.md#dbphzonelist) data structure, reads a polyhedral-zonelist from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1387,7 +1238,6 @@ Finally, Silo also supports the specification of expressions representing derive
      types, typelist, ntypes, status)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
@@ -1407,28 +1257,22 @@ Finally, Silo also supports the specification of expressions representing derive
   `typelist` | Array of length `ntypes` containing the identifiers for each type. This argument is ignored if `ntypes` is zero, or if this parameter is `NULL`.
   `ntypes` | Number of types, or zero if type information was not provided.
 
-
 * **Returned value:**
 
-  DBPutFacelist returns zero on success or -1 on failure.
-
-
+  Returns zero on success or -1 on failure.
 
 * **Description:**
 
   The `DBPutFacelist` function writes a facelist object into a Silo file.
   The `name` given to this object can in turn be used as a parameter to the `DBPutUcdmesh` function.
 
-  Notes:
-
   See [`DBPutUcdmesh`](#dbputucdmesh) for a full description of the facelist data structures.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutUcdvar()`
 
-* **Summary:** Write a vector/tensor `UCD` variable object into a Silo file.
+* **Summary:** Write a scalar/vector/tensor UCD variable object into a Silo file.
 
 * **C Signature:**
 
@@ -1460,19 +1304,16 @@ Finally, Silo also supports the specification of expressions representing derive
   `mixvars` | Array of length `nvars` containing pointers to arrays defining the mixed-data values associated with each subvariable. If no mixed values are present, this should be `NULL`.
   `mixlen` | Length of mixed data arrays (i.e., mixvars).
   `datatype` | Datatype of sub-variables. One of the predefined Silo data types.
-  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types: DB_NODECENT, DB_EDGECENT, DB_FACECENT, `DB_ZONECENT` or `DB_BLOCKCENT`. See below for a discussion of `centering` issues.
+  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types:`DB_NODECENT`,`DB_EDGECENT`,`DB_FACECENT`, `DB_ZONECENT` or `DB_BLOCKCENT`. See below for a discussion of `centering` issues.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
-
 
 * **Returned value:**
 
-  DBPutUcdvar returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
-  The `DBPutUcdvar` function writes a variable associated with an `UCD` mesh into a Silo file.
+  The `DBPutUcdvar` function writes a variable associated with an UCD mesh into a Silo file.
   Note that variables can be node-centered, zone-centered, edge-centered or face-centered.
 
   For node- (or zone-) centered data, the question of which value in the `vars` array goes with which node (or zone) is determined implicitly by a one-to-one correspondence with the list of nodes in the `DBPutUcdmesh` call (or zones in the `DBPutZonelist` or `DBPutZonelist2` call).
@@ -1501,11 +1342,9 @@ Finally, Silo also supports the specification of expressions representing derive
 
   For tensor quantities, the question of ordering of tensor components arises.
   For symmetric tensor's Silo uses the Voigt Notation ordering.
-  In 2D, this is T11, T22, `T12`.
-  In 3D, this is T11, T22, T33, T23, T13, `T12`.
+  In 2D, this is `T11`, `T22`, `T12`.
+  In 3D, this is `T11`, `T22`, `T33`, `T23`, `T13`, `T12`.
   For full tensor quantities, ordering is row by row starting with the top row.
-
-  Notes:
 
   The following table describes the options accepted by this function:
 
@@ -1513,30 +1352,26 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_COORDSYS|int|Coordinate system. One of: DB_CARTESIAN, DB_CYLINDRICAL, DB_SPHERICAL, DB_NUMERICAL, or `DB_OTHER`.|DB_OTHER
-  DBOPT_CYCLE|int|Problem cycle value.|0
-  DBOPT_LABEL|char *|Character strings defining the label associated with this variable. |NULL
-  DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_UNITS|char *|Character string defining the units associated with this variable.|NULL
-  DBOPT_USESPECMF|int|Boolean (DB_OFF or DB_ON) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
-  DBOPT_ASCII_LABEL|int|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)`221`.|NULL
-  DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
-  DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the variable data arrays. Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
-
-
-  
-
+ `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+ `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+ `DBOPT_LABEL`|`char*`|Character strings defining the label associated with this variable| `NULL`
+ `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+ `DBOPT_TIME`|`float`|Problem time value.|0.0
+ `DBOPT_DTIME`|`double`|Problem time value.|0.0
+ `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
+ `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFF`
+ `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
+ `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+ `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+ `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
+ `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
+ `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the variable data arrays. Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutUcdvar1()`
 
-* **Summary:** Write a scalar `UCD` variable object into a Silo file.
+* **Summary:** Write a scalar UCD variable object into a Silo file.
 
 * **C Signature:**
 
@@ -1555,7 +1390,6 @@ Finally, Silo also supports the specification of expressions representing derive
      centering, optlist_id, staus)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
@@ -1568,33 +1402,27 @@ Finally, Silo also supports the specification of expressions representing derive
   `mixvar` | Array of length `mixlen` containing the mixed-data values associated with this variable. If `mixlen` is zero, this value is ignored.
   `mixlen` | Length of `mixvar` array. If zero, no mixed data is present.
   `datatype` | Datatype of variable. One of the predefined Silo data types.
-  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types: DB_NODECENT, DB_EDGECENT, `DB_FACECENT` or `DB_ZONECENT`.
+  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types:`DB_NODECENT`,`DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
-
 
 * **Returned value:**
 
-  DBPutUcdvar1 returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
-  DBPutUcdvar1 writes a variable associated with an `UCD` mesh into a Silo file.
+  DBPutUcdvar1 writes a variable associated with an UCD mesh into a Silo file.
   Note that variables will be either node-centered or zone-centered.
   Other information can also be included.
   This function is useful for writing scalar fields, whereas the companion function, DBPutUcdvar, is appropriate for writing vector and tensor fields.
 
-  Notes:
-
-  See [`DBPutUcdvar`](#dbputucdvar)`121` for a description of options accepted by this function.
-
+  See [`DBPutUcdvar`](#dbputucdvar) for a description of options accepted by this function.
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetUcdvar()`
 
-* **Summary:** Read a `UCD` variable from a Silo database.
+* **Summary:** Read a UCD variable from a Silo database.
 
 * **C Signature:**
 
@@ -1618,25 +1446,20 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Returned value:**
 
-  DBGetUcdvar returns a pointer to a `DBucdvar` structure on success and `NULL` on failure.
+  Returns a pointer to a [`DBucdvar`](./header.md#dbucdvar) structure on success and `NULL` on failure.
 
 
 
 * **Description:**
 
-  The `DBGetUcdvar` function allocates a `DBucdvar` data structure, reads a variable associated with a `UCD` mesh from the Silo database, and returns a pointer to that structure.
+  The `DBGetUcdvar` function allocates a [`DBucdvar`](./header.md#dbucdvar) data structure, reads a variable associated with a UCD mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutCsgmesh()`
 
-* **Summary:** Write a `CSG` mesh object to a Silo file
+* **Summary:** Write a CSG mesh object to a Silo file
 
 * **C Signature:**
 
@@ -1657,42 +1480,38 @@ Finally, Silo also supports the specification of expressions representing derive
      extents, zonel_name, lzonel_name, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
   `name` | Name to associate with this `DBcsgmesh` object
-  `ndims` | Number of spatial and topological dimensions of the `CSG` mesh object
-  `nbounds` | Number of boundaries in the `CSG` mesh description.
+  `ndims` | Number of spatial and topological dimensions of the CSG mesh object
+  `nbounds` | Number of boundaries in the CSG mesh description.
   `typeflags` | Integer array of length `nbounds` of type information for each boundary. This is used to encode various information about the type of each boundary such as, for example, plane, sphere, cone, general quadric, etc as well as the number of coefficients in the representation of the boundary. For more information, see the description, below.
-  `bndids` | Optional integer array of length `nbounds` which are the explicit integer identifiers for each boundary. It is these identifiers that are used in expressions defining a region of the `CSG` mesh. If the caller passes `NULL` for this argument, a natural numbering of boundaries is assumed. That is, the boundary occurring at position i, starting from zero, in the list of boundaries here is identified by the integer i.
-  `coeffs` | Array of length `lcoeffs` of coefficients used in the representation of each boundary or, if the boundary is a transformed copy of another boundary, the coefficients of the transformation. In the case where a given boundary is a transformation of another boundary, the first entry in the `coeffs` entries for the boundary is the (integer) identifier for the referenced boundary. Consequently, if the `datatype` for `coeffs` is DB_FLOAT, there is an upper limit of about 16.7 million (2^24) boundaries that can be referenced in this way.
+  `bndids` | Optional integer array of length `nbounds` which are the explicit integer identifiers for each boundary. It is these identifiers that are used in expressions defining a region of the CSG mesh. If the caller passes `NULL` for this argument, a natural numbering of boundaries is assumed. That is, the boundary occurring at position i, starting from zero, in the list of boundaries here is identified by the integer i.
+  `coeffs` | Array of length `lcoeffs` of coefficients used in the representation of each boundary or, if the boundary is a transformed copy of another boundary, the coefficients of the transformation. In the case where a given boundary is a transformation of another boundary, the first entry in the `coeffs` entries for the boundary is the (integer) identifier for the referenced boundary. Consequently, if the `datatype` for `coeffs` is`DB_FLOAT`, there is an upper limit of about 16.7 million (2^24) boundaries that can be referenced in this way.
   `lcoeffs` | Length of the `coeffs` array.
   `datatype` | The data type of the data in the `coeffs` array.
-  `zonel_name` | Name of `CSG` zonelist to be associated with this `CSG` mesh object
+  `zonel_name` | Name of CSG zonelist to be associated with this CSG mesh object
   `extents` | Array of length 2*ndims of spatial extents, xy(z)-minimums followed by xy(z)-maximums.
-  `optlist` | Pointer to an option list structure containing additional information to be included in the `CSG` mesh object written into the Silo file. Use `NULL` if there are no options.
-
+  `optlist` | Pointer to an option list structure containing additional information to be included in the CSG mesh object written into the Silo file. Use `NULL` if there are no options.
 
 * **Returned value:**
 
-  DBPutCsgMesh returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
-  The word "mesh" in this function `name` is probably somewhat misleading because it suggests a discretization of a domain into a "mesh". In fact, a `CSG` (Constructive Solid Geometry) "mesh" in Silo is a continuous, analytic representation of the geometry of some computational domain.
-  Nonetheless, most of Silo's concepts for meshes, variables, materials, species and multi-block objects apply equally well in the case of a `CSG` "mesh" and so that is what it is called, here.
+  The word *mesh* in this function name is probably somewhat misleading because it suggests a discretization of a domain into a *mesh*. In fact, a CSG (Constructive Solid Geometry) *mesh* in Silo is a continuous, analytic representation of the geometry of some computational domain.
+  Nonetheless, most of Silo's concepts for meshes, variables, materials, species and multi-block objects apply equally well in the case of a CSG *mesh* and so that is what it is called, here.
   Presently, Silo does not have functions to discretize this kind of mesh.
   It has only the functions for storing and retrieving it.
-  Nonetheless, a future version of Silo may include functions to discretize a `CSG` mesh.
+  Nonetheless, a future version of Silo may include functions to discretize a CSG mesh.
 
-  A `CSG` mesh is constructed by starting with a list of analytic boundaries, that is curves in 2D or surfaces in 3D, such as planes, spheres and cones or general quadrics.
+  A CSG mesh is constructed by starting with a list of analytic boundaries, that is curves in 2D or surfaces in 3D, such as planes, spheres and cones or general quadrics.
   Each boundary is defined by an analytic expression (an equation) of the form f(x,y,z)=0 (or, in 2D, f(x,y)=0) in which the highest exponent for x, y or z is 2.
-  That is, all the boundaries are quadratic (or "quadric") at most.
+  That is, all the boundaries are quadratic (or *quadric*) at most.
 
   The table below describes how to use the `typeflags` argument to define various kinds of boundaries in 3 dimensions.
 
@@ -1720,9 +1539,6 @@ Finally, Silo also supports the specification of expressions representing derive
   DBCSG_PYRAMID_5F|30|to be completed
   DBCSG_PRISM_5F|30|to be completed
 
-
-  
-
   The table below defines an analogous set of `typeflags` for creating boundaries in two dimensions..
 
   **&nbsp;**
@@ -1742,9 +1558,6 @@ Finally, Silo also supports the specification of expressions representing derive
   DBCSG_TRI_3P|6|to be completed
   DBCSG_QUAD_4P|8|to be completed
 
-
-  
-
   By replacing the '=' in the equation for a boundary with either a '<' or a '>', whole regions in 2 or 3D space can be defined using these boundaries.
   These regions represent the set of all points that satisfy the inequality.
   In addition, regions can be combined to form new regions by unions, intersections and differences as well other operations (See [`DBPutCSGZonelist`](#dbputcsgzonelist)).
@@ -1752,8 +1565,8 @@ Finally, Silo also supports the specification of expressions representing derive
   In this call, only the analytic boundaries used in the expressions to define the regions are written.
   The expressions defining the regions themselves are written in a separate call, `DBPutCSGZonelist`.
 
-  If you compare this call to write a `CSG` mesh to a Silo file with a similar call to write a `UCD` mesh, you will notice that the boundary list here plays a role similar to that of the nodal coordinates of a `UCD` mesh.
-  For the `UCD` mesh, the basic geometric primitives are points (nodes) and a separate call, DBPutZonelist, is used to write out the information that defines how points (nodes) are combined to form the zones of the mesh.
+  If you compare this call to write a CSG mesh to a Silo file with a similar call to write a UCD mesh, you will notice that the boundary list here plays a role similar to that of the nodal coordinates of a UCD mesh.
+  For the UCD mesh, the basic geometric primitives are points (nodes) and a separate call, DBPutZonelist, is used to write out the information that defines how points (nodes) are combined to form the zones of the mesh.
 
   Similarly, here the basic geometric primitives are analytic boundaries and a separate call, DBPutCSGZonelist, is used to write out the information that defines how the boundaries are combined to form regions of the mesh.
 
@@ -1764,33 +1577,29 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_CYCLE|int|Problem cycle value|0
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_XLABEL|char *|Character string defining the label associated with the X dimension. |NULL
-  DBOPT_YLABEL|char *|Character string defining the label associated with the Y dimension. |NULL
-  DBOPT_ZLABEL|char *|Character string defining the label associated with the Z dimension. |NULL
-  DBOPT_XUNITS|char *|Character string defining the units associated with the X dimension.|NULL
-  DBOPT_YUNITS|char *|Character string defining the units associated with the Y dimension.|NULL
-  DBOPT_ZUNITS|char *|Character string defining the units associated with the Z dimension.|NULL
-  DBOPT_BNDNAMES|char **|Array of nboundaries character strings defining the names of the individual boundaries.|NULL
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_MRGTREE_NAME|char *|Name of the mesh region grouping tree to be associated with this mesh.|NULL
-  DBOPT_TV_CONNECTIVTY|int|A non-zero value indicates that the connectivity of the mesh varies with time|0
-  DBOPT_DISJOINT_MODE|int|Indicates if any elements in the mesh are disjoint. There are two possible modes. One is `DB_ABUTTING` indicating that elements abut spatially but actually reference different node ids (but spatially equivalent nodal positions) in the node list. The other is `DB_FLOATING` where elements neither share nodes in the nodelist nor abut spatially.|DB_NONE
-  DBOPT_ALT_NODENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for boundaries.|NULL
-  The following options have been deprecated. Use `MRG` trees instead|||
-  DBOPT_GROUPNUM|int|The group number to which this quadmesh belongs.|-1 (not in a group)
-
-
-  
-
+ `DBOPT_CYCLE`|`int`|Problem cycle value|0
+ `DBOPT_TIME`|`float`|Problem time value.|0.0
+ `DBOPT_DTIME`|`double`|Problem time value.|0.0
+ `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
+ `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
+ `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
+ `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
+ `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
+ `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
+ `DBOPT_BNDNAMES`|`char**`|Array of nboundaries character strings defining the names of the individual boundaries|`NULL`
+ `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+ `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
+ `DBOPT_TV_CONNECTIVTY`|`int`|A non-zero value indicates that the connectivity of the mesh varies with time|0
+ `DBOPT_DISJOINT_MODE`|`int`|Indicates if any elements in the mesh are disjoint. There are two possible modes. One is `DB_ABUTTING` indicating that elements abut spatially but actually reference different node ids (but spatially equivalent nodal positions) in the node list. The other is `DB_FLOATING` where elements neither share nodes in the nodelist nor abut spatially|`DB_NONE`
+ `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for boundaries|`NULL`
+  The following options have been deprecated. Use MRG trees instead|||
+ `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetCsgmesh()`
 
-* **Summary:** Get a `CSG` mesh object from a Silo file
+* **Summary:** Get a CSG mesh object from a Silo file
 
 * **C Signature:**
 
@@ -1809,24 +1618,17 @@ Finally, Silo also supports the specification of expressions representing derive
   Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
-  `meshname` | Name of the `CSG` mesh object to read
-
+  `meshname` | Name of the CSG mesh object to read
 
 * **Returned value:**
 
-  A pointer to a `DBcsgmesh` structure on success and `NULL` on failure.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
+  A pointer to a [`DBcsgmesh`](./header.md#dbcsgmesh) structure on success and `NULL` on failure.
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutCSGZonelist()`
 
-* **Summary:** Put a `CSG` zonelist object in a Silo file.
+* **Summary:** Put a CSG zonelist object in a Silo file.
 
 * **C Signature:**
 
@@ -1847,7 +1649,6 @@ Finally, Silo also supports the specification of expressions representing derive
      nzones, zonelist, optlist_id, status)
   ```
 
-
 * **Arguments:**
 
   Arg&nbsp;name | Description
@@ -1855,32 +1656,29 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer
   `name` | Name to associate with the `DBcsgzonelist` object
   `nregs` | The number of regions in the regionlist.
-  `typeflags` | Integer array of length `nregs` of type information for each region. Each entry in this array is one of either DB_INNER, DB_OUTER, DB_ON, DB_XFORM, DB_SWEEP, DB_UNION, DB_INTERSECT, and `DB_DIFF`.
-  `The symbols, DB_INNER, DB_OUTER, DB_ON, DB_XFORM and DB_SWEEP represent unary operators applied to the referenced region (or boundary). The symbols DB_UNION, DB_INTERSECT, and DB_DIFF represent binary operators applied to two referenced regions.` | For the unary operators, `DB_INNER` forms a region from a boundary (See [`DBPutCsgmesh`](#dbputcsgmesh)) by replacing the '=' in the equation representing the boundary with '<'. Likewise, `DB_OUTER` forms a region from a boundary by replacing the '=' in the equation representing the boundary with '>'. Finally, `DB_ON` forms a region (of topological dimension one less than the mesh) by leaving the '=' in the equation representing the boundary as an '='. In the case of DB_INNER, `DB_OUTER` and DB_ON, the corresponding entry in the `leftids` array is a reference to a boundary in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)).
-  `For the unary operator, DB_XFORM, the corresponding entry in the leftids array is a reference to a region to be transformed while the corresponding entry in the rightids array is the index into the xform array of the row-by-row coefficients of the affine transform.` | The unary operator `DB_SWEEP` is not yet implemented.
+  `typeflags` | Integer array of length `nregs` of type information for each region. Each entry in this array is one of either`DB_INNER`,`DB_OUTER`,`DB_ON`,`DB_XFORM`,`DB_SWEEP`,`DB_UNION`,`DB_INTERSECT`, and `DB_DIFF`.
+  `The symbols,`DB_INNER`,`DB_OUTER`,`DB_ON`,`DB_XFORM` and`DB_SWEEP` represent unary operators applied to the referenced region (or boundary). The symbols`DB_UNION`,`DB_INTERSECT`, and`DB_DIFF` represent binary operators applied to two referenced regions.` | For the unary operators, `DB_INNER` forms a region from a boundary (See [`DBPutCsgmesh`](#dbputcsgmesh)) by replacing the '=' in the equation representing the boundary with '<'. Likewise, `DB_OUTER` forms a region from a boundary by replacing the '=' in the equation representing the boundary with '>'. Finally, `DB_ON` forms a region (of topological dimension one less than the mesh) by leaving the '=' in the equation representing the boundary as an '='. In the case of`DB_INNER`, `DB_OUTER` and`DB_ON`, the corresponding entry in the `leftids` array is a reference to a boundary in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)).
+  `For the unary operator,`DB_XFORM`, the corresponding entry in the leftids array is a reference to a region to be transformed while the corresponding entry in the rightids array is the index into the xform array of the row-by-row coefficients of the affine transform.` | The unary operator `DB_SWEEP` is not yet implemented.
   `leftids` | Integer array of length `nregs` of references to other regions in the regionlist or boundaries in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)). Each referenced region in the `leftids` array forms the left operand of a binary expression (or single operand of a unary expression) involving the referenced region or boundary.
   `rightids` | Integer array of length `nregs` of references to other regions in the regionlist. Each referenced region in the `rightids` array forms the right operand of a binary expression involving the region or, for regions which are copies of other regions with a transformation applied, the starting index into the `xforms` array of the row-by-row, affine transform coefficients. If for a given region no right reference is appropriate, put a value of '-1' into this array for the given region.
   `xforms` | Array of length `lxforms` of row-by-row affine transform coefficients for those regions that are copies of other regions except with a transformation applied. In this case, the entry in the `leftids` array indicates the region being copied and transformed and the entry in the `rightids` array is the starting index into this `xforms` array for the transform coefficients. This argument may be `NULL`.
   `lxforms` | Length of the `xforms` array. This argument may be zero if `xforms` is `NULL`.
   `datatype` | The data type of the values in the `xforms` array. Ignored if `xforms` is `NULL`.
-  `nzones` | The number of zones in the `CSG` mesh. A zone is really just a completely defined region.
-  `zonelist` | Integer array of length `nzones` of the regions in the regionlist that form the actual zones of the `CSG` mesh.
+  `nzones` | The number of zones in the CSG mesh. A zone is really just a completely defined region.
+  `zonelist` | Integer array of length `nzones` of the regions in the regionlist that form the actual zones of the CSG mesh.
   `optlist` | Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use `NULL` if there are no options.
-
 
 * **Returned value:**
 
-  DBPutCSGZonelist returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
-  A `CSG` mesh is a list of curves in 2D or surfaces in 3D.
+  A CSG mesh is a list of curves in 2D or surfaces in 3D.
   These are analytic expressions of the boundaries of objects that can be expressed by quadratic equations in x, y and z.
 
-  The `zonelist` for a `CSG` mesh is constructed by first defining regions from the mesh boundaries.
-  For example, given the boundary for a sphere, we can create a region by taking the inside (DB_INNER) of that boundary or by taking the outside (DB_OUTER).
+  The `zonelist` for a CSG mesh is constructed by first defining regions from the mesh boundaries.
+  For example, given the boundary for a sphere, we can create a region by taking the inside `DB_INNER`) of that boundary or by taking the outside `DB_OUTER`).
   In addition, regions can also be created by boolean operations (union, intersect, diff) on other regions.
   The table below summarizes how to construct regions using the `typeflags` argument.
 
@@ -1888,23 +1686,20 @@ Finally, Silo also supports the specification of expressions representing derive
 
   op. symbol name|type|meaning
   :---|:---|:---
-  DBCSG_INNER|unary|specifies the region created by all points satisfying the equation defining the boundary with '<' replacing '='.<br>left operand indicates the boundary, right operand ignored
-  DBCSG_OUTER|unary|specifies the region created by all points satisfying the equation defining the boundary with '>' replacing '='.<br>left operand indicates the boundary, right operand ignored
-  DBCSG_ON|unary|specifies the region created by all points satisfying the equation defining the boundary.<br>left operand indicates the boundary, right operand ignored
-  DBCSG_UNION|binary|take the union of left and right operands<br>left and right operands indicate the regions
-  DBCSG_INTERSECT|binary|take the intersection of left and right operands<br>left and right operands indicate the regions
-  DBCSG_DIFF|binary|subtract the right operand from the left<br>left and right operands indicate the regions
-  DBCSG_COMPLIMENT|unary|take the compliment of the left operand,<br>left operand indicates the region, right operand ignored
-  DBCSG_XFORM|unary|to be implemented
-  DBCSG_SWEEP|unary|to be implemented
+  `DBCSG_INNER`|unary|specifies the region created by all points satisfying the equation defining the boundary with `<` replacing `=`, left operand indicates the boundary, right operand ignored
+  `DBCSG_OUTER`|unary|specifies the region created by all points satisfying the equation defining the boundary with `>` replacing `=`, left operand indicates the boundary, right operand ignored
+  `DBCSG_ON`|unary|specifies the region created by all points satisfying the equation defining the boundary left operand indicates the boundary, right operand ignored
+  `DBCSG_UNION`|binary|take the union of left and right operands left and right operands indicate the regions
+  `DBCSG_INTERSECT`|binary|take the intersection of left and right operands left and right operands indicate the regions
+  `DBCSG_DIFF`|binary|subtract the right operand from the left left and right operands indicate the regions
+  `DBCSG_COMPLIMENT`|unary|take the compliment of the left operand, left operand indicates the region, right operand ignored
+  `DBCSG_XFORM`|unary|to be implemented
+  `DBCSG_SWEEP`|unary|to be implemented
 
-
-  
-
-  However, not all regions in a `CSG` `zonelist` form the actual zones of a `CSG` mesh.
+  However, not all regions in a CSG `zonelist` form the actual zones of a CSG mesh.
   Some regions exist only to facilitate the construction of other regions.
   Only certain regions, those that are completely constructed, form the actual zones.
-  Consequently, the `zonelist` for a `CSG` mesh involves both a list of regions (as well as the definition of those regions) and then a list of zones (which are really just completely defined regions).
+  Consequently, the `zonelist` for a CSG mesh involves both a list of regions (as well as the definition of those regions) and then a list of zones (which are really just completely defined regions).
 
   The following table describes the options accepted by this function.
   See the section titled "Using the Silo Option Parameter" for details on the use of the `DBoptlist` construct.
@@ -1913,13 +1708,14 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_REGNAMES|char **|Array of `nregs` character strings defining the names of the individual regions.|NULL
-  DBOPT_ZONENAMES|char**|Array of `nzones` character strings defining the names of individual zones.|NULL
-  DBOPT_ALT_ZONENUM_VARS|char **|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for zones.|NULL
+ `DBOPT_REGNAMES`|`char**`|Array of `nregs` character strings defining the names of the individual regions|`NULL`
+ `DBOPT_ZONENAMES`|`char**`|Array of `nzones` character strings defining the names of individual zones|`NULL`
+ `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
   ![](./csgmesh.gif)
-  Figure 0-5: A relatively simple object to represent as a `CSG` mesh.
-  It models an A/C vent outlet for a `1994` Toyota Tercel.
+
+  Figure 0-5: A relatively simple object to represent as a CSG mesh.
+  It models an A/C vent outlet for a 1994 Toyota Tercel.
   It consists of two zones.
   One is a partially-spherical shaped ring housing (darker area).
   The other is a lens-shaped fin used to direct airflow (lighter area).
@@ -1930,36 +1726,26 @@ Finally, Silo also supports the specification of expressions representing derive
 
   typeflags|id|coefficients|name (optional)
   :---|:---|:---|:---
-  DBCSG_SPHERE_PR|0|0.0, 0.0, 0.0, 5.0|"housing outer shell"
-  DBCSG_PLANE_X|1|-2.5|"housing front"
-  DBCSG_PLANE_X|2|2.5|"housing back"
-  DBCSG_CYLINDER_PPR|3|0.0, 0.0, 0.0, 1.0, 0.0. 0.0, 3.0|"housing cavity"
-  DBCSG_SPHERE_PR|4|0.0, 0.0, 49.5, 50.0|"fin top side"
-  DBCSG_SPHERE_PR|5|0.0. 0.0, -49.5, 50.0|"fin bottom side"
+  `DBCSG_SPHERE_PR`|0|0.0, 0.0, 0.0, 5.0|"housing outer shell"
+  `DBCSG_PLANE_X`|1|-2.5|"housing front"
+  `DBCSG_PLANE_X`|2|2.5|"housing back"
+  `DBCSG_CYLINDER_PPR`|3|0.0, 0.0, 0.0, 1.0, 0.0. 0.0, 3.0|"housing cavity"
+  `DBCSG_SPHERE_PR`|4|0.0, 0.0, 49.5, 50.0|"fin top side"
+  `DBCSG_SPHERE_PR`|5|0.0. 0.0, -49.5, 50.0|"fin bottom side"
 
+  The code below writes this CSG mesh to a silo file
 
-  
-
-  The code below writes this `CSG` mesh to a silo file
-
+  ```
   int *typeflags={DBCSG_SPHERE_PR, DBCSG_PLANE_X, DBCSG_PLANE_X,
-
-  DBCSG_CYLINDER_PPR, DBCSG_SPHERE_PR, DBCSG_SPHERE_PR};
-
+                  DBCSG_CYLINDER_PPR, DBCSG_SPHERE_PR, DBCSG_SPHERE_PR};
   float *coeffs = {0.0, 0.0, 0.0, 5.0, 1.0, 0.0, 0.0, -2.5,
-
-  1.0, 0.0, 0.0, 2.5, 1.0, 0.0, 0.0, 0.0, 3.0,
-
-  0.0, 0.0, 49.5, 50.0, 0.0.
-  0.0, -49.5, 50.0};
-
-  
+                   1.0, 0.0, 0.0, 2.5, 1.0, 0.0, 0.0, 0.0, 3.0,
+                   0.0, 0.0, 49.5, 50.0, 0.0.
+                   0.0, -49.5, 50.0};
 
   DBPutCsgmesh(dbfile, "csgmesh", 3, typeflags, NULL,
-
-  coeffs, 25, DB_FLOAT, "csgzl", NULL);
-
-  
+      coeffs, 25, DB_FLOAT, "csgzl", NULL);
+  ```
 
   The table below describes the contents of the regionlist, written in the `DBPutCSGZonelist` call.
 
@@ -1967,59 +1753,44 @@ Finally, Silo also supports the specification of expressions representing derive
 
   typeflags|regid|leftids|rightids|notes
   :---|:---|:---|:---|:---
-  DBCSG_INNER|0|0|-1|creates inner sphere region from boundary 0
-  DBCSG_INNER|1|1|-1|creates front half-space region from boundary 1
-  DBCSG_OUTER|2|2|-1|creates back half-space region from boundary 2
-  DBCSG_INNER|3|3|-1|creates inner cavity region from boundary 3
-  DBCSG_INTERSECT|4|0|1|cuts front of sphere by intersecting regions 0 &1
-  DBCSG_INTERSECT|5|4|2|cuts back of sphere by intersecting regions 4 & 2
-  DBCSG_DIFF|6|5|3|creates cavity in sphere by removing region 3
-  DBCSG_INNER|7|4|-1|creates large sphere region for fin upper surface from boundary 4
-  DBCSG_INNER|8|5|-1|creates large sphere region for fin lower surface from boundary 5
-  DBCSG_INTERSECT|9|7|8|creates lens-shaped fin with razor edge protruding from sphere housing by intersecting regions 7 & 8
-  DBCSG_INTERSECT|10|9|0|cuts razor edge of lens-shaped fin to sphere housing
+  `DBCSG_INNER`|0|0|-1|creates inner sphere region from boundary 0
+  `DBCSG_INNER`|1|1|-1|creates front half-space region from boundary 1
+  `DBCSG_OUTER`|2|2|-1|creates back half-space region from boundary 2
+  `DBCSG_INNER`|3|3|-1|creates inner cavity region from boundary 3
+  `DBCSG_INTERSECT`|4|0|1|cuts front of sphere by intersecting regions 0 &1
+  `DBCSG_INTERSECT`|5|4|2|cuts back of sphere by intersecting regions 4 & 2
+  `DBCSG_DIFF`|6|5|3|creates cavity in sphere by removing region 3
+  `DBCSG_INNER`|7|4|-1|creates large sphere region for fin upper surface from boundary 4
+  `DBCSG_INNER`|8|5|-1|creates large sphere region for fin lower surface from boundary 5
+  `DBCSG_INTERSECT`|9|7|8|creates lens-shaped fin with razor edge protruding from sphere housing by intersecting regions 7 & 8
+  `DBCSG_INTERSECT`|10|9|0|cuts razor edge of lens-shaped fin to sphere housing
 
-
-  
-
-  The table above creates 11 regions, only 2 of which form the actual zones of the `CSG` mesh.
+  The table above creates 11 regions, only 2 of which form the actual zones of the CSG mesh.
   The 2 complete zones are for the spherical ring housing and the lens-shaped fin that sits inside it.
   They are identified by region ids 6 and 10.
   The other regions exist solely to facilitate the construction.
-  The code to write this `CSG` `zonelist` to a silo file is given below.
+  The code to write this CSG `zonelist` to a silo file is given below.
 
-  int `nregs` = 11;
-
+  ```
+  int nregs = 11;
   int *typeflags={DBCSG_INNER, DBCSG_INNER, DBCSG_OUTER, DBCSG_INNER,
-
-  DBCSG_INTERSECT, DBCSG_INTERSECT, DBCSG_DIFF,
-
-  DBCSG_INNER, DBCSG_INNER, DBCSG_INTERSECT, DBCSG_INTERSECT};
-
+                  DBCSG_INTERSECT, DBCSG_INTERSECT, DBCSG_DIFF,
+                  DBCSG_INNER, DBCSG_INNER, DBCSG_INTERSECT, DBCSG_INTERSECT};
   int *leftids={0,1,2,3,0,4,5,4,5,7,9};
-
   int *rightids={-1,-1,-1,-1,1,2,3,-1,-1,8,0};
-
-  int `nzones` = 2;
-
+  int nzones = 2;
   int *zonelist = {6, 10};
 
-  
-
   DBPutCSGZonelist(dbfile, "csgzl", nregs, typeflags,
-
-  leftids, rightids, NULL, 0, DB_INT,
-
-  nzones, zonelist, NULL);
-
-  
-
+      leftids, rightids, NULL, 0, DB_INT,
+      nzones, zonelist, NULL);
+  ```
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetCSGZonelist()`
 
-* **Summary:** Read a `CSG` mesh zonelist from a Silo file
+* **Summary:** Read a CSG mesh zonelist from a Silo file
 
 * **C Signature:**
 
@@ -2039,24 +1810,17 @@ Finally, Silo also supports the specification of expressions representing derive
   Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
-  `zlname` | Name of the `CSG` mesh zonelist object to read
-
+  `zlname` | Name of the CSG mesh zonelist object to read
 
 * **Returned value:**
 
-  A pointer to a `DBcsgzonelist` structure on success and `NULL` on failure.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
+  A pointer to a [`DBcsgzonelist`](./header.md#dbcsgzonelist) structure on success and `NULL` on failure.
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBPutCsgvar()`
 
-* **Summary:** Write a `CSG` mesh variable to a Silo file
+* **Summary:** Write a CSG mesh variable to a Silo file
 
 * **C Signature:**
 
@@ -2074,9 +1838,9 @@ Finally, Silo also supports the specification of expressions representing derive
   integer function dbputcsgv(dbid, vname, lvname, meshname,
      lmeshname, nvars, var_ids, nvals, datatype, centering,
      optlist_id, status)
-  ```
 
   integer* var_ids (array of "pointer ids" created using dbmkptr)
+  ```
 
 * **Arguments:**
 
@@ -2084,22 +1848,21 @@ Finally, Silo also supports the specification of expressions representing derive
   :---|:---
   `dbfile` | Database file pointer
   `vname` | The name to be associated with this `DBcsgvar` object
-  `meshname` | The name of the `CSG` mesh this variable is associated with
-  `nvars` | The number of subvariables comprising this `CSG` variable
+  `meshname` | The name of the CSG mesh this variable is associated with
+  `nvars` | The number of subvariables comprising this CSG variable
   `varnames` | Array of length `nvars` containing the names of the subvariables
   `vars` | Array of pointers to variable data
   `nvals` | Number of values in each of the `vars` arrays
-  `datatype` | The type of data in the `vars` arrays (e.g. DB_FLOAT, DB_DOUBLE)
-  `centering` | The `centering` of the `CSG` variable (DB_ZONECENT or DB_BNDCENT)
+  `datatype` | The type of data in the `vars` arrays (e.g.`DB_FLOAT`,`DB_DOUBLE`)
+  `centering` | The `centering` of the CSG variable `DB_ZONECENT` or`DB_BNDCENT`)
   `optlist` | Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use `NULL` if there are no options
-
 
 * **Description:**
 
-  The `DBPutCsgvar` function writes a variable associated with a `CSG` mesh into a Silo file.
+  The `DBPutCsgvar` function writes a variable associated with a CSG mesh into a Silo file.
   Note that variables will be either zone-centered or boundary-centered.
 
-  Just as `UCD` variables can be zone-centered or node-centered, `CSG` variables can be zone-centered or boundary-centered.
+  Just as UCD variables can be zone-centered or node-centered, CSG variables can be zone-centered or boundary-centered.
   For a zone-centered variable, the value(s) at index i in the `vars` array(s) are associated with the ith region (zone) in the `DBcsgzonelist` object associated with the mesh.
   For a boundary-centered variable, the value(s) at index i in the `vars` array(s) are associated with the ith boundary in the `DBcsgbnd` list associated with the mesh.
 
@@ -2109,28 +1872,24 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_CYCLE|int|Problem cycle value.|0
-  DBOPT_LABEL|char *|Character strings defining the label associated with this variable. |NULL
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_UNITS|char *|Character string defining the units associated with this variable.|NULL
-  DBOPT_USESPECMF|int|Boolean (DB_OFF or DB_ON) value specifying whether or not to weight the variable by the species mass fraction when using material species data.|DB_OFF
-  DBOPT_ASCII_LABEL|int|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_REGION_PNAMES|char**|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)`221`.|NULL
-  DBOPT_CONSERVED|int|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
-  DBOPT_EXTENSIVE|int|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
-  DBOPT_MISSING_VALUE|double|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is DB_MISSING_VALUE_NOT_SET|DB_MISSING_VALUE_NOT_SET
-
-
-  
-
+ `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+ `DBOPT_LABEL`|`char*`|Character strings defining the label associated with this variable| `NULL`
+ `DBOPT_TIME`|`float`|Problem time value.|0.0
+ `DBOPT_DTIME`|`double`|Problem time value.|0.0
+ `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
+ `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFF`
+ `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
+ `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+ `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+ `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
+ `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
+ `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBGetCsgvar()`
 
-* **Summary:** Read a `CSG` mesh variable from a Silo file
+* **Summary:** Read a CSG mesh variable from a Silo file
 
 * **C Signature:**
 
@@ -2149,18 +1908,12 @@ Finally, Silo also supports the specification of expressions representing derive
   Arg&nbsp;name | Description
   :---|:---
   `dbfile` | Database file pointer
-  `varname` | Name of `CSG` variable object to read
+  `varname` | Name of CSG variable object to read
 
 
 * **Returned value:**
 
-  A pointer to a `DBcsgvar` structure on success and `NULL` on failure.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
-
+  A pointer to a [`DBcsgvar`](./header.md#dbcsgvar) structure on success and `NULL` on failure.
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2186,9 +1939,9 @@ Finally, Silo also supports the specification of expressions representing derive
      lmeshname, nmat, matnos, matlist, dims, ndims,
      mix_next, mix_mat, mix_zone, mix_vf, mixlien, datatype,
      optlist_id, status)
-  ```
 
   void* mix_vf
+  ```
 
 * **Arguments:**
 
@@ -2206,49 +1959,40 @@ Finally, Silo also supports the specification of expressions representing derive
   `mix_mat` | Array of length `mixlen` of material numbers for the mixed zones.
   `mix_zone` | Optional array of length `mixlen` of back pointers to originating zones. The origin is determined by `DBOPT_ORIGIN`. Even if `mixlen` > 0, this argument is optional.
   `mix_vf` | Array of length `mixlen` of volume fractions for the mixed zones. Note, this can actually be either single- or double-precision. Specify actual type in `datatype`.
-  `mixlen` | Length of mixed data arrays (or zero if no mixed data is present). If `mixlen` > 0, then the "mix_" arguments describing the mixed data arrays must be non-NULL.
+  `mixlen` | Length of mixed data arrays (or zero if no mixed data is present). If `mixlen` > 0, then the "mix_" arguments describing the mixed data arrays must be non`NULL`.
   `datatype` | Volume fraction data type. One of the predefined Silo data types.
   `optlist` | Pointer to an option list structure containing additional information to be included in the material object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
-
 * **Returned value:**
 
-  DBPutMaterial returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
   Note that material functionality, even mixing materials, can now be handled, often more conveniently and efficiently, via a Mesh Region Grouping (MRG) tree.
-  Users are encouraged to consider an `MRG` tree as an alternative to `DBPutMaterial()`.
-  See [`DBMakeMrgtree`](./subsets.md#dbmakemrgtree)`196`.
+  Users are encouraged to consider an MRG tree as an alternative to `DBPutMaterial()`.
+  See [`DBMakeMrgtree`](./subsets.md#dbmakemrgtree).
 
   The `DBPutMaterial` function writes a material data object into the current open Silo file.
   The minimum required information for a material data object is supplied via the standard arguments to this function.
   The `optlist` argument must be used for supplying any information not requested through the standard arguments.
 
-  Notes:
-
   The following table describes the options accepted by this function.
-  See the section titled "Using the Silo Option Parameter" for details on the use of this construct.
 
   **Optlist options:**
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_CYCLE|int|Problem cycle value.|0
-  DBOPT_LABEL|char *|Character string defining the label associated with material data. |NULL
-  DBOPT_MAJORORDER|int|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
-  DBOPT_ORIGIN|int|Origin for `mix_zone`. Zero or one.|0
-  DBOPT_TIME|float|Problem time value.|0.0
-  DBOPT_DTIME|double|Problem time value.|0.0
-  DBOPT_MATNAMES|char**|Array of strings defining the names of the individual materials.|NULL
-  DBOPT_MATCOLORS|char**|Array of strings defining the names of colors to be associated with each material. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color.|NULL
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_ALLOWMAT0|int|If set to non-zero, indicates that a zero entry in the `matlist` array is actually not a valid material number but is instead being used to indicate an 'unused' zone.|0
-
-
-  
+ `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+ `DBOPT_LABEL`|`char*`|Character string defining the label associated with material data| `NULL`
+ `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+ `DBOPT_ORIGIN`|`int`|Origin for `mix_zone`. Zero or one.|0
+ `DBOPT_TIME`|`float`|Problem time value.|0.0
+ `DBOPT_DTIME`|`double`|Problem time value.|0.0
+ `DBOPT_MATNAMES`|`char**`|Array of strings defining the names of the individual materials|`NULL`
+ `DBOPT_MATCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each material. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color|`NULL`
+ `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+ `DBOPT_ALLOWMAT0`|`int`|If set to non-zero, indicates that a zero entry in the `matlist` array is actually not a valid material number but is instead being used to indicate an 'unused' zone.|0
 
   The model used for storing material data is the most efficient for VisIt, and works as follows:
 
@@ -2261,27 +2005,20 @@ Finally, Silo also supports the specification of expressions representing derive
   For a given index i, the following information is known about the i'th element:
 
   mix_zone[i]
-
-  The index of the zone which contains this element.
+  : The index of the zone which contains this element.
   The origin is determined by `DBOPT_ORIGIN`.
 
   mix_mat[i]
-
-  The material number of this element
+  : The material number of this element
 
   mix_vf[i]
-
-  The volume fraction of this element
+  : The volume fraction of this element
 
   mix_next[i]
-
-  The 1-origin index of the next material entry for this zone, else 0 if this is the last entry.
-
-  .
+  : The 1-origin index of the next material entry for this zone, else 0 if this is the last entry.
 
   ![](./mixed_mats.gif)
   Figure 0-6: Example using mixed data arrays for representing material information
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2308,22 +2045,14 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer.
   `mat_name` | Name of the material variable to read.
 
-
 * **Returned value:**
 
-  DBGetMaterial returns a pointer to a `DBmaterial` structure on success and `NULL` on failure.
-
-
+  Returns a pointer to a [`DBmaterial`](./header.md#dbmaterial) structure on success and `NULL` on failure.
 
 * **Description:**
 
   The `DBGetMaterial` function allocates a `DBmaterial` data structure, reads material data from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2348,9 +2077,9 @@ Finally, Silo also supports the specification of expressions representing derive
      lmatname, nmat, nmatspec, speclist, dims, ndims,
      species_mf, species_mf, mix_spec, mixlen, datatype, optlist_id,
      status)
-  ```
 
   void *species_mf
+  ```
 
 * **Arguments:**
 
@@ -2375,8 +2104,6 @@ Finally, Silo also supports the specification of expressions representing derive
 * **Returned value:**
 
   DBPutMatspecies returns zero on success and -1 on failure.
-
-
 
 * **Description:**
 
@@ -2433,9 +2160,6 @@ Finally, Silo also supports the specification of expressions representing derive
   Fe|9|10|11|12|13
   8|||||
 
-
-  
-
   If all of the zones in the mesh are clean (e.g. not mixing in material) and have the same composition of species, the `speclist` array would contain a '1' for every Brass zone (1-origin indexing would mean it would index species_mf[0]), a '3' for every T-1 Steel zone and a '8' for every O-1 Steel zone.
   However, if some cells had a Brass mixture with an extra 1% Cu, then you could create another two entries at positions 14 and 15 in the `species_mf` array with the values 0.66 and 0.34, respectively, and the `speclist` array for those cells would point to '14' instead of '1'.
 
@@ -2457,23 +2181,17 @@ Finally, Silo also supports the specification of expressions representing derive
   Worse, the only valid values in these arrays are zeros.
   In this case, the resulting matspecies object isn't so much empty as it is homogeneous in that all materials consist of only a single species.
 
-  Notes:
-
   The following table describes the options accepted by this function:
 
   **&nbsp;**
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  DBOPT_MAJORORDER|int|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
-  DBOPT_ORIGIN|int|Origin for arrays. Zero or one.|0
-  DBOPT_HIDE_FROM_GUI|int|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  DBOPT_SPECNAMES|char**|Array of strings defining the names of the individual species. The length of this array is the sum of the values in the `nmatspec` argument to this function.|NULL
-  DBOPT_SPECCOLORS|char**|Array of strings defining the names of colors to be associated with each species. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. The length of this array is the sum of the values in the `nmatspec` argument to this function.|NULL
-
-
-  
-
+ `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+ `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+ `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+ `DBOPT_SPECNAMES`|`char**`|Array of strings defining the names of the individual species. The length of this array is the sum of the values in the `nmatspec` argument to this function|`NULL`
+ `DBOPT_SPECCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each species. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. The length of this array is the sum of the values in the `nmatspec` argument to this function|`NULL`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2501,22 +2219,14 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer.
   `ms_name` | Name of the material species data to read.
 
-
 * **Returned value:**
 
-  DBGetMatspecies returns a pointer to a `DBmatspecies` structure on success and `NULL` on failure.
-
-
+  Returns a pointer to a [`DBmatspecies`](./header.md#dbmatspecies) structure on success and `NULL` on failure.
 
 * **Description:**
 
-  The `DBGetMatspecies` function allocates a `DBmatspecies` data structure, reads material species data from the Silo database, and returns a pointer to that structure.
+  The `DBGetMatspecies` function allocates a [`DBmatspecies`](./header.md#dbmatspecies) data structure, reads material species data from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2540,8 +2250,8 @@ Finally, Silo also supports the specification of expressions representing derive
      status)
   ```
 
-  character*N names (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
-  character*N defns (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen)`288`.)
+  character*N names (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
+  character*N defns (See [`dbset2dstrlen`](./fortran.md#dbset2dstrlen))
 
 * **Arguments:**
 
@@ -2551,16 +2261,13 @@ Finally, Silo also supports the specification of expressions representing derive
   `name` | Name of the derived variable definition(s) object.
   `ndefs` | number of derived variable definitions.
   `names` | Array of length `ndefs` of derived variable names
-  `types` | Array of length `ndefs` of derived variable `types` such as DB_VARTYPE_SCALAR, DB_VARTYPE_VECTOR, DB_VARTYPE_TENSOR, DB_VARTYPE_SYMTENSOR, DB_VARTYPE_ARRAY, DB_VARTYPE_MATERIAL, DB_VARTYPE_SPECIES, DB_VARTYPE_LABEL
+  `types` | Array of length `ndefs` of derived variable `types` such as`DB_VARTYPE_SCALAR`,`DB_VARTYPE_VECTOR`,`DB_VARTYPE_TENSOR`,`DB_VARTYPE_SYMTENSOR`,`DB_VARTYPE_ARRAY`,`DB_VARTYPE_MATERIAL`,`DB_VARTYPE_SPECIES`,`DB_VARTYPE_LABEL`
   `defns` | Array of length `ndefs` of derived variable definitions.
   `optlist` | Array of length `ndefs` pointers to option list structures containing additional information to be included with each derived variable. The options available are the same as those available for the respective variables.
 
-
 * **Returned value:**
 
-  DBPutDefvars returns zero on success and -1 on failure.
-
-
+  Returns zero on success and -1 on failure.
 
 * **Description:**
 
@@ -2582,14 +2289,11 @@ Finally, Silo also supports the specification of expressions representing derive
 
   0|names|types|defns
   :---|:---|:---|:---
-  1|"totaltemp"|DB_VARTYPE_SCALAR|"nodet+zonetemp"
-  2|"<stress/sz>"|DB_VARTYPE_SCALAR|"-<stress/sx>-<stress/sy>"
-  3|"vel"|DB_VARTYPE_VECTOR|"{Vx, Vy, Vz}"
-  4|"speed"|DB_VARTYPE_SCALAR|"magntidue(vel)"
-  |"dev_stress"|DB_VARTYPE_TENSOR|"{ {<stress/sx>,<stress/txy>,<stress/txz>}, {                 0, <stress/sy>,<stress/tyz>}, {                 0,                 0, <stress/sz>} }"
-
-
-  
+  1|"totaltemp"`DB_VARTYPE_SCALAR`|"nodet+zonetemp"
+  2|"<stress/sz>"`DB_VARTYPE_SCALAR`|"-<stress/sx>-<stress/sy>"
+  3|"vel"`DB_VARTYPE_VECTOR`|"{Vx, Vy, Vz}"
+  4|"speed"`DB_VARTYPE_SCALAR`|"magntidue(vel)"
+  |"dev_stress"`DB_VARTYPE_TENSOR`|"{ {<stress/sx>,<stress/txy>,<stress/txz>}, {                 0, <stress/sy>,<stress/tyz>}, {                 0,                 0, <stress/sz>} }"
 
   The first entry (0) defines a derived scalar variable named "totaltemp" which is the sum of variables whose `names` are "nodet" and "zonetemp". The next entry (1) defines a derived scalar variable named "sz" in a group of variables named "stress" (the slash character ('/') is used to group variable `names` much the way file pathnames are grouped in Linux).
   Note also that the definition of "sz" uses the special bracketing characters ('<') and ('>') for the variable references due to the fact that these variable references have a slash character ('/') in them.
@@ -2603,7 +2307,6 @@ Finally, Silo also supports the specification of expressions representing derive
   Furthermore, the list of expression operators in VisIt grows regularly.
   Only a few examples are illustrated here.
   For a more complete list of the available expression operators and their syntax, the reader is referred to the Expressions portion of the VisIt user's manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2630,22 +2333,14 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer.
   `name` | The `name` of the `DBdefvars` object to read
 
-
 * **Returned value:**
 
-  DBGetDefvars returns a pointer to a `DBdefvars` structure on success and `NULL` on failure.
-
-
+  Returns a pointer to a [`DBdefvars`](./header.md#dbdefvars) structure on success and `NULL` on failure.
 
 * **Description:**
 
-  The `DBGetDefvars` function allocates a `DBdefvars` data structure, reads the object from the Silo database, and returns a pointer to that structure.
+  The `DBGetDefvars` function allocates a [`DBdefvars`](./header.md#dbdefvars) data structure, reads the object from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
-
-  Notes:
-
-  For the details of the data structured returned by this function, see the Silo library header file, silo.h, also attached to the end of this manual.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2674,18 +2369,14 @@ Finally, Silo also supports the specification of expressions representing derive
   `varname` | Variable name.
   `meshname` | Returned mesh name. The caller must allocate space for the returned name. The maximum space used is `256` characters, including the `NULL` terminator.
 
-
 * **Returned value:**
 
-  DBInqMeshname returns zero on success and -1 on failure.
-
-
+  `DBInqMeshname` returns zero on success and -1 on failure.
 
 * **Description:**
 
   The `DBInqMeshname` function returns the name of a mesh associated with a mesh variable.
   Given the name of a variable to access, one must call this function to find the name of the mesh before calling `DBGetQuadmesh` or `DBGetUcdmesh`.
-
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -2712,12 +2403,9 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer.
   `meshname` | Mesh name.
 
-
 * **Returned value:**
 
-  DBInqMeshtype returns the mesh type on success and -1 on failure.
-
-
+  `DBInqMeshtype` returns the mesh type on success and -1 on failure.
 
 * **Description:**
 
@@ -2728,16 +2416,12 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Mesh Type|Returned Value
   :---|:---
-  Multi-Block|DB_MULTIMESH
-  UCD|DB_UCDMESH
-  Pointmesh|DB_POINTMESH
-  Quad (Collinear)|DB_QUAD_RECT
-  Quad (Non-Collinear)|DB_QUAD_CURV
-  CSG|DB_CSGMESH
-
-
-  
-
+  Multi-Block|`DB_MULTIMESH`
+  UCD|`DB_UCDMESH`
+  Pointmesh|`DB_POINTMESHH
+  Quad (Collinear)|`DB_QUAD_RECT`
+  Quad (Non-Collinear)|`DB_QUAD_CURV`
+  CSG|`DB_CSGMESH`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
