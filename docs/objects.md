@@ -185,7 +185,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_HI_OFFSET`|`int`|Zero-origin index of last non-ghost node. All points in the mesh after this one are considered ghost.|nels-1
   `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling (`DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each point|`NULL`
   `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBpointvar` objects indicating (multiple) alternative numbering(s) for nodes.|`NULL`
-  <td colspan=4>The following `optlist` options have been deprecated. Instead use MRG trees
+
+  The following `optlist` options have been deprecated. Instead use MRG trees
   `DBOPT_GROUPNUM`|`int`|The group number to which this pointmesh belongs.|-1 (not in a group)
 
 ---
@@ -282,7 +283,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
   `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
   `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
-  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)`221`.`NULL`
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
   `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
   `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is `DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
@@ -440,32 +441,32 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
- `DBOPT_CYCLE`|`int`|Problem cycle value.|0
- `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
- `DBOPT_HI_OFFSET`|int *|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
- `DBOPT_LO_OFFSET`|int *|Array of `ndims` which defines zero-origin offsets from the first node for the starting index along each dimension. |{0,0,...}
- `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
- `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
- `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
- `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
- `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
- `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
- `DBOPT_PLANAR`|`int`|Planar value. One of: `DB_AREA` or `DB_VOLUME`|`DB_OTHER`
- `DBOPT_TIME`|`float`|Problem time value.|0.0
- `DBOPT_DTIME`|`double`|Problem time value.|0.0
- `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
- `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
- `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
- `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
- `DBOPT_BASEINDEX`|int[3]|Indicate the indices of the mesh within its group.|0,0,0
- `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
- `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each node`NULL`
- `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each zone`NULL`
- `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBquadvar` objects indicating (multiple) alternative numbering(s) for nodes`NULL`
- `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBquadvar` objects indicating (multiple) alternative numbering(s) for zones`NULL`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+  `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+  `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
+  `DBOPT_HI_OFFSET`|int *|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
+  `DBOPT_LO_OFFSET`|int *|Array of `ndims` which defines zero-origin offsets from the first node for the starting index along each dimension. |{0,0,...}
+  `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
+  `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
+  `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
+  `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+  `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
+  `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+  `DBOPT_PLANAR`|`int`|Planar value. One of: `DB_AREA` or `DB_VOLUME`|`DB_OTHER`
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
+  `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
+  `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_BASEINDEX`|int[3]|Indicate the indices of the mesh within its group.|0,0,0
+  `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
+  `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each node`NULL`
+  `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` `DB_GHOSTTYPE_INTDUP`) of each zone`NULL`
+  `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBquadvar` objects indicating (multiple) alternative numbering(s) for nodes`NULL`
+  `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBquadvar` objects indicating (multiple) alternative numbering(s) for zones`NULL`
   The following options have been deprecated. Use MRG trees instead|||
- `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
+  `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
 
   The options `DB_LO_OFFSET` and `DB_HI_OFFSET` should be used if the mesh being described uses the notion of "phoney" zones (i.e., some zones should be ignored.) For example, if a 2-D mesh had designated the first column and row, and the last two columns and rows as "phoney", then we would use: lo_off = {1,1} and hi_off = {2,2}.
 
@@ -606,22 +607,22 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
- `DBOPT_CYCLE`|`int`|Problem cycle value.|0
- `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
- `DBOPT_LABEL`|`char*`|Character string defining the label associated with this variable| `NULL`
- `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
- `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
- `DBOPT_TIME`|`float`|Problem time value.|0.0
- `DBOPT_DTIME`|`double`|Problem time value.|0.0
- `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
- `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFR`
- `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
- `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
- `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
- `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
- `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
- `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+  `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+  `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
+  `DBOPT_LABEL`|`char*`|Character string defining the label associated with this variable| `NULL`
+  `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+  `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
+  `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFR`
+  `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
+  `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
+  `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+  `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -831,32 +832,32 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
- `DBOPT_NODENUM`|`void*`|An array of length `nnodes` giving a global node number for each node in the mesh. By default, this array is treated as type int|`NULL`
- `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
- `DBOPT_CYCLE`|`int`|Problem cycle value|0
- `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
- `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
- `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
- `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
- `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
- `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
- `DBOPT_PLANAR`|`int`|Planar value. One of: `DB_AREA` or `DB_VOLUME`|`DB_NONE`
- `DBOPT_TIME`|`float`|Problem time value.|0.0
- `DBOPT_DTIME`|`double`|Problem time value.|0.0
- `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
- `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
- `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
- `DBOPT_PHZONELIST`|`char*`|Character string holding the `name` for a polyhedral zonelist object to be associated with the mesh|`NULL`
- `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
- `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
- `DBOPT_TOPO_DIM`|`int`|Used to indicate the topological dimension of the mesh apart from its spatial dimension.|-1 (not specified)
- `DBOPT_TV_CONNECTIVTY`|`int`|A non-zero value indicates that the connectivity of the mesh varies with time|0
- `DBOPT_DISJOINT_MODE`|`int`|Indicates if any elements in the mesh are disjoint. There are two possible modes. One is `DB_ABUTTING` indicating that elements abut spatially but actually reference different node ids (but spatially equivalent nodal positions) in the node list. The other is `DB_FLOATING` where elements neither share nodes in the nodelist nor abut spatially|`DB_NONE`
- `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each point|`NULL`
- `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBpointvar` objects indicating (multiple) alternative numbering(s) for nodes|`NULL`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+  `DBOPT_NODENUM`|`void*`|An array of length `nnodes` giving a global node number for each node in the mesh. By default, this array is treated as type int|`NULL`
+  `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
+  `DBOPT_CYCLE`|`int`|Problem cycle value|0
+  `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
+  `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
+  `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
+  `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
+  `DBOPT_NSPACE`|`int`|Number of spatial dimensions used by this mesh.|ndims
+  `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+  `DBOPT_PLANAR`|`int`|Planar value. One of: `DB_AREA` or `DB_VOLUME`|`DB_NONE`
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
+  `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
+  `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
+  `DBOPT_PHZONELIST`|`char*`|Character string holding the `name` for a polyhedral zonelist object to be associated with the mesh|`NULL`
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
+  `DBOPT_TOPO_DIM`|`int`|Used to indicate the topological dimension of the mesh apart from its spatial dimension.|-1 (not specified)
+  `DBOPT_TV_CONNECTIVTY`|`int`|A non-zero value indicates that the connectivity of the mesh varies with time|0
+  `DBOPT_DISJOINT_MODE`|`int`|Indicates if any elements in the mesh are disjoint. There are two possible modes. One is `DB_ABUTTING` indicating that elements abut spatially but actually reference different node ids (but spatially equivalent nodal positions) in the node list. The other is `DB_FLOATING` where elements neither share nodes in the nodelist nor abut spatially|`DB_NONE`
+  `DBOPT_GHOST_NODE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each point|`NULL`
+  `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBpointvar` objects indicating (multiple) alternative numbering(s) for nodes|`NULL`
   The following options have been deprecated. Use MRG trees instead|||
- `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
+  `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1045,15 +1046,15 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Type|Description
   :---|:---
- `DB_ZONETYPE_BEAM`|A line segment
- `DB_ZONETYPE_POLYGON`|A polygon where nodes are enumerated to form a polygon
- `DB_ZONETYPE_TRIANGLE`|A triangle
- `DB_ZONETYPE_QUAD`|A quadrilateral
- `DB_ZONETYPE_POLYHEDRON`|A polyhedron with nodes enumerated to form faces and faces are enumerated to form a polyhedron
- `DB_ZONETYPE_TET`|A tetrahedron
- `DB_ZONETYPE_PYRAMID`|A pyramid
- `DB_ZONETYPE_PRISM`|A prism
- `DB_ZONETYPE_HEX`|A hexahedron
+  `DB_ZONETYPE_BEAM`|A line segment
+  `DB_ZONETYPE_POLYGON`|A polygon where nodes are enumerated to form a polygon
+  `DB_ZONETYPE_TRIANGLE`|A triangle
+  `DB_ZONETYPE_QUAD`|A quadrilateral
+  `DB_ZONETYPE_POLYHEDRON`|A polyhedron with nodes enumerated to form faces and faces are enumerated to form a polyhedron
+  `DB_ZONETYPE_TET`|A tetrahedron
+  `DB_ZONETYPE_PYRAMID`|A pyramid
+  `DB_ZONETYPE_PRISM`|A prism
+  `DB_ZONETYPE_HEX`|A hexahedron
 
   Notes:
 
@@ -1063,10 +1064,10 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_ZONENUM`|`void*`|Array of global zone numbers, one per zone in this zonelist. By default, this is assumed to be of type int|`NULL`
- `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
- `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
- `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
+  `DBOPT_ZONENUM`|`void*`|Array of global zone numbers, one per zone in this zonelist. By default, this is assumed to be of type int|`NULL`
+  `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
+  `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
+  `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
   For a description of how the nodes for the allowed shapes are enumerated, see [`DBPutUcdmesh`](#dbputucdmesh).
 
@@ -1128,10 +1129,10 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_ZONENUM`|`void*`|Array of global zone numbers, one per zone in this zonelist. By default, it is assumed this array is of type int*|`NULL`
- `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
- `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
- `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
+  `DBOPT_ZONENUM`|`void*`|Array of global zone numbers, one per zone in this zonelist. By default, it is assumed this array is of type int*|`NULL`
+  `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_ZONENUM` option is of long long type instead of int.|0
+  `DBOPT_GHOST_ZONE_LABELS`|`char*`|Optional array of char values indicating the ghost labeling `DB_GHOSTTYPE_NOGHOST` or `DB_GHOSTTYPE_INTDUP`) of each zone|`NULL`
+  `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBucdvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
   In interpreting the diagram above, numbers correspond to nodes while letters correspond to faces.
   In addition, the letters are drawn such that they will always be in the lower, right hand corner of a face if you were standing outside the object looking towards the given face.
@@ -1352,20 +1353,20 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
- `DBOPT_CYCLE`|`int`|Problem cycle value.|0
- `DBOPT_LABEL`|`char*`|Character strings defining the label associated with this variable| `NULL`
- `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
- `DBOPT_TIME`|`float`|Problem time value.|0.0
- `DBOPT_DTIME`|`double`|Problem time value.|0.0
- `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
- `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFF`
- `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
- `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
- `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
- `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
- `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
- `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the variable data arrays. Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+  `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+  `DBOPT_LABEL`|`char*`|Character strings defining the label associated with this variable| `NULL`
+  `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
+  `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFF`
+  `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+  `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
+  `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
+  `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the variable data arrays. Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1577,23 +1578,23 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_CYCLE`|`int`|Problem cycle value|0
- `DBOPT_TIME`|`float`|Problem time value.|0.0
- `DBOPT_DTIME`|`double`|Problem time value.|0.0
- `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
- `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
- `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
- `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
- `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
- `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
- `DBOPT_BNDNAMES`|`char**`|Array of nboundaries character strings defining the names of the individual boundaries|`NULL`
- `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
- `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
- `DBOPT_TV_CONNECTIVTY`|`int`|A non-zero value indicates that the connectivity of the mesh varies with time|0
- `DBOPT_DISJOINT_MODE`|`int`|Indicates if any elements in the mesh are disjoint. There are two possible modes. One is `DB_ABUTTING` indicating that elements abut spatially but actually reference different node ids (but spatially equivalent nodal positions) in the node list. The other is `DB_FLOATING` where elements neither share nodes in the nodelist nor abut spatially|`DB_NONE`
- `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for boundaries|`NULL`
+  `DBOPT_CYCLE`|`int`|Problem cycle value|0
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_XLABEL`|`char*`|Character string defining the label associated with the X dimension| `NULL`
+  `DBOPT_YLABEL`|`char*`|Character string defining the label associated with the Y dimension| `NULL`
+  `DBOPT_ZLABEL`|`char*`|Character string defining the label associated with the Z dimension| `NULL`
+  `DBOPT_XUNITS`|`char*`|Character string defining the units associated with the X dimension|`NULL`
+  `DBOPT_YUNITS`|`char*`|Character string defining the units associated with the Y dimension|`NULL`
+  `DBOPT_ZUNITS`|`char*`|Character string defining the units associated with the Z dimension|`NULL`
+  `DBOPT_BNDNAMES`|`char**`|Array of nboundaries character strings defining the names of the individual boundaries|`NULL`
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_MRGTREE_NAME`|`char*`|Name of the mesh region grouping tree to be associated with this mesh|`NULL`
+  `DBOPT_TV_CONNECTIVTY`|`int`|A non-zero value indicates that the connectivity of the mesh varies with time|0
+  `DBOPT_DISJOINT_MODE`|`int`|Indicates if any elements in the mesh are disjoint. There are two possible modes. One is `DB_ABUTTING` indicating that elements abut spatially but actually reference different node ids (but spatially equivalent nodal positions) in the node list. The other is `DB_FLOATING` where elements neither share nodes in the nodelist nor abut spatially|`DB_NONE`
+  `DBOPT_ALT_NODENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for boundaries|`NULL`
   The following options have been deprecated. Use MRG trees instead|||
- `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
+  `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1708,9 +1709,9 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_REGNAMES`|`char**`|Array of `nregs` character strings defining the names of the individual regions|`NULL`
- `DBOPT_ZONENAMES`|`char**`|Array of `nzones` character strings defining the names of individual zones|`NULL`
- `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
+  `DBOPT_REGNAMES`|`char**`|Array of `nregs` character strings defining the names of the individual regions|`NULL`
+  `DBOPT_ZONENAMES`|`char**`|Array of `nzones` character strings defining the names of individual zones|`NULL`
+  `DBOPT_ALT_ZONENUM_VARS`|`char**`|A null terminated list of names of optional array(s) or `DBcsgvar` objects indicating (multiple) alternative numbering(s) for zones|`NULL`
 
   ![](./csgmesh.gif)
 
@@ -1872,18 +1873,18 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_CYCLE`|`int`|Problem cycle value.|0
- `DBOPT_LABEL`|`char*`|Character strings defining the label associated with this variable| `NULL`
- `DBOPT_TIME`|`float`|Problem time value.|0.0
- `DBOPT_DTIME`|`double`|Problem time value.|0.0
- `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
- `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFF`
- `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
- `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
- `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
- `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
- `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
- `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
+  `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+  `DBOPT_LABEL`|`char*`|Character strings defining the label associated with this variable| `NULL`
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_UNITS`|`char*`|Character string defining the units associated with this variable|`NULL`
+  `DBOPT_USESPECMF`|`int`|Boolean `DB_OFF` or`DB_ON`) value specifying whether or not to weight the variable by the species mass fraction when using material species data|`DB_OFF`
+  `DBOPT_ASCII_LABEL`|`int`|Indicate if the variable should be treated as single character, ascii values. A value of 1 indicates yes, 0 no.|0
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
+  `DBOPT_CONSERVED`|`int`|Indicates if the variable represents a physical quantity that must be conserved under various operations such as interpolation.|0
+  `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
+  `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -1983,16 +1984,16 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_CYCLE`|`int`|Problem cycle value.|0
- `DBOPT_LABEL`|`char*`|Character string defining the label associated with material data| `NULL`
- `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
- `DBOPT_ORIGIN`|`int`|Origin for `mix_zone`. Zero or one.|0
- `DBOPT_TIME`|`float`|Problem time value.|0.0
- `DBOPT_DTIME`|`double`|Problem time value.|0.0
- `DBOPT_MATNAMES`|`char**`|Array of strings defining the names of the individual materials|`NULL`
- `DBOPT_MATCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each material. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color|`NULL`
- `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
- `DBOPT_ALLOWMAT0`|`int`|If set to non-zero, indicates that a zero entry in the `matlist` array is actually not a valid material number but is instead being used to indicate an 'unused' zone.|0
+  `DBOPT_CYCLE`|`int`|Problem cycle value.|0
+  `DBOPT_LABEL`|`char*`|Character string defining the label associated with material data| `NULL`
+  `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+  `DBOPT_ORIGIN`|`int`|Origin for `mix_zone`. Zero or one.|0
+  `DBOPT_TIME`|`float`|Problem time value.|0.0
+  `DBOPT_DTIME`|`double`|Problem time value.|0.0
+  `DBOPT_MATNAMES`|`char**`|Array of strings defining the names of the individual materials|`NULL`
+  `DBOPT_MATCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each material. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color|`NULL`
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_ALLOWMAT0`|`int`|If set to non-zero, indicates that a zero entry in the `matlist` array is actually not a valid material number but is instead being used to indicate an 'unused' zone.|0
 
   The model used for storing material data is the most efficient for VisIt, and works as follows:
 
@@ -2187,11 +2188,11 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
- `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
- `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
- `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
- `DBOPT_SPECNAMES`|`char**`|Array of strings defining the names of the individual species. The length of this array is the sum of the values in the `nmatspec` argument to this function|`NULL`
- `DBOPT_SPECCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each species. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. The length of this array is the sum of the values in the `nmatspec` argument to this function|`NULL`
+  `DBOPT_MAJORORDER`|`int`|Indicator for row-major (0) or column-major (1) storage for multidimensional arrays.|0
+  `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
+  `DBOPT_HIDE_FROM_GUI`|`int`|Specify a non-zero value if you do not want this object to appear in menus of downstream tools|0
+  `DBOPT_SPECNAMES`|`char**`|Array of strings defining the names of the individual species. The length of this array is the sum of the values in the `nmatspec` argument to this function|`NULL`
+  `DBOPT_SPECCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each species. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. The length of this array is the sum of the values in the `nmatspec` argument to this function|`NULL`
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
