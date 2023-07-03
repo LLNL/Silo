@@ -1,4 +1,4 @@
-## Optlists
+## Option Lists or Optlists
 
 Many Silo functions take as a last argument a pointer to an Options List or optlist.
 This is intended to permit the Silo `API` to grow and evolve as necessary without requiring substantial changes to the `API` itself.
