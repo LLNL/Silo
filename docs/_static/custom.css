@@ -41,3 +41,9 @@
 .wy-table-responsive {
     max-width:90%;
 }
+
+/* To style links to header objects */
+a[href*="header.html#"] {
+    text-decoration: underline;
+    text-decoration-color: blue;
+}
