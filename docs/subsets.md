@@ -17,20 +17,6 @@ It is simply impossible to know a priori all the different ways in which applica
 
 For this reason, where a specific application of `MRG` trees is desired (to represent materials for example), we document the naming convention an application must use to affect the representation.
 
-The functions described in this section of the `API` manual are...
-
-### Methods and symbols in this section
-
-&nbsp;|&nbsp;|&nbsp;
-:---|:---|:---
-[`DBAddRegion`](#dbaddregion)|[`DBAddRegionArray`](#dbaddregionarray)|[`DBAlloc…`](#dballoc…)
-[`DBFreeGroupelmap`](#dbfreegroupelmap)|[`DBFreeMrgtree`](#dbfreemrgtree)|[`DBFree…`](#dbfree…)
-[`DBGetCwr`](#dbgetcwr)|[`DBGetGroupelmap`](#dbgetgroupelmap)|[`DBGetMrgtree`](#dbgetmrgtree)
-[`DBGetMrgvar`](#dbgetmrgvar)|[`DBGetName`](#dbgetname)|[`DBIsEmpty`](#dbisempty)
-[`DBMakeMrgtree`](#dbmakemrgtree)|[`DBMakeNamescheme`](#dbmakenamescheme)|[`DBOPT_REGION_PNAMES`](#dbopt_region_pnames)
-[`DBPutGroupelmap`](#dbputgroupelmap)|[`DBPutMrgtree`](#dbputmrgtree)|[`DBPutMrgvar`](#dbputmrgvar)
-[`DBSetCwr`](#dbsetcwr)|
-
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 ### `DBMakeMrgtree()`
