@@ -19,8 +19,8 @@ If VisIt opens a Silo file with two directories, "foo" and "bar", and there are 
 Silo also supports the concept of *grabbing* the low-level driver.
 For example, if Silo is using the HDF5 driver, an application can obtain the actual HDF5 file id and then use the native HDF5 API with that file id.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBRegisterFileOptionsSet()`
 
 * **Summary:** Register a set of options for advanced control of the low-level I/O driver
@@ -39,7 +39,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `opts` | an options list object obtained from a `DBMakeOptlist()` call
 
@@ -71,47 +71,47 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   All of the options described here relate to options documented in the HDF5 library's [file access property lists](https://docs.hdfgroup.org/hdf5/develop/group___f_a_p_l.html#title0).
 
-  Note that all option names listed in left-most column of the table below have had their prefix "DBOPT_H5_" removed to save space in the table.
+  Note that all option names listed in left-most column of the table below have had their prefix "`DBOPT_H5_`" removed to save space in the table.
   So, for example, the real name of the `CORE_ALLOC_INC` option is `DBOPT_H5_CORE_ALLOC_INC`.
 
-  Option Name<br>DBOPT_H5_...|Scope|Type|Option Meaning|Default Value
+  Option Name<br>`DBOPT_H5_`...|Scope|Type|Option Meaning|Default Value
   :---|:---|:---|:---|:---
-  VFD|VFD|int|Specifies which Virtual File Driver (VFD) the HDF5 library should use.<br>Set the integer value for this option to one of the following values.<br>DB_H5VFD_DEFAULT, (use HDF5 default driver)<br>DB_H5VFD_SEC2 (use HDF5 sec2 driver)<br>DB_H5VFD_STDIO, (use HDF5 stdio driver)<br>DB_H5VFD_CORE, (use HDF5 core driver)<br>DB_H5VFD_LOG, (use HDF5 log river)<br>DB_H5VFD_SPLIT, (use HDF5 split driver)<br>DB_H5VFD_DIRECT, (use HDF5 direct i/o driver)<br>DB_H5VFD_FAMILY, (use HDF5 family driver)<br>DB_H5VFD_MPIO, (use HDF5 mpi-io driver)<br>DB_H5VFD_MPIP, (use HDF5 mpi posix driver)<br>DB_H5VFD_SILO, (use `SILO` BG/Q driver)<br>DB_H5VFD_FIC (use `SILO` file in core driver)<br>Many of the reamining options described in this table apply to only certain of the above VFDs.|DB_H5VFD_DEFAULT
-  RAW_FILE_OPTS|VFD|int|Applies only for the split VFD. Specifies a file options set to use for the raw data file. May be any value returned from a call to<br>DBRegisterFileOptionsSet() or can be any one of the following pre-defined file options sets...<br>DB_FILE_OPTS_H5_DEFAULT_...<br>DEFAULT, SEC2, STDIO, CORE, LOG, SPLIT, DIRECT, FAMILY, MPIO, MPIP, `SILO`.<br>See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split|DB_FILE_OPTS_H5_DEFAULT_DEFAULT
-  RAW_EXTENSION|VFD|char*|Applies only for the split VFD. Specifies the file extension/naming convention for raw data file. If the string contains a '%s' printf-like conversion specifier, that will be replaced with the name of the file passed in the DBCreate/DBOpen call. If the string does **not** contain a '%s' printf-like conversion specifier, it is treated as an 'extension' which is appended to the name of the file passed in DBCreate/DBopen call.<br>See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split|"-raw"
-  META_FILE_OPTS|VFD|int|Same as DBOPT_H5_RAW_FILE_OPTS, above, except for meta data file. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split.|DB_FILE_OPTS_H5_DEFAULT_CORE
+  VFD|VFD|`int`|Specifies which Virtual File Driver (VFD) the HDF5 library should use.<br>Set the integer value for this option to one of the following values.<br>`DB_H5VFD_DEFAULT`, (use HDF5 default driver)<br>`DB_H5VFD_SEC2` (use HDF5 sec2 driver)<br>`DB_H5VFD_STDIO`, (use HDF5 stdio driver)<br>`DB_H5VFD_CORE`, (use HDF5 core driver)<br>`DB_H5VFD_LOG`, (use HDF5 log river)<br>`DB_H5VFD_SPLIT`, (use HDF5 split driver)<br>`DB_H5VFD_DIRECT`, (use HDF5 direct i/o driver)<br>`DB_H5VFD_FAMILY`, (use HDF5 family driver)<br>`DB_H5VFD_MPIO`, (use HDF5 mpi-io driver)<br>`DB_H5VFD_MPIP`, (use HDF5 mpi posix driver)<br>`DB_H5VFD_SILO`, (use `SILO` BG/Q driver)<br>`DB_H5VFD_FIC` (use `SILO` file in core driver)<br>Many of the reamining options described in this table apply to only certain of the above VFDs.|`DB_H5VFD_DEFAULT`
+  RAW_FILE_OPTS|VFD|`int`|Applies only for the split VFD. Specifies a file options set to use for the raw data file. May be any value returned from a call to<br>DBRegisterFileOptionsSet() or can be any one of the following pre-defined file options sets...<br>`DB_FILE_OPTS_H5_DEFAULT_`...<br>DEFAULT, SEC2, STDIO, CORE, LOG, SPLIT, DIRECT, FAMILY, MPIO, MPIP, `SILO`.<br>See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split|`DB_FILE_OPTS_H5_DEFAULT_DEFAULT`
+  RAW_EXTENSION|VFD|`char*`|Applies only for the split VFD. Specifies the file extension/naming convention for raw data file. If the string contains a '%s' printf-like conversion specifier, that will be replaced with the name of the file passed in the DBCreate/DBOpen call. If the string does **not** contain a '%s' printf-like conversion specifier, it is treated as an 'extension' which is appended to the name of the file passed in DBCreate/DBopen call.<br>See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split|"-raw"
+  META_FILE_OPTS|VFD|`int`|Same as `DBOPT_H5_RAW_FILE_OPTS`, above, except for meta data file. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split.|`DB_FILE_OPTS_H5_DEFAULT_CORE`
   META_EXTENSION|VFD||Same as `DBOPT_H5_RAW_EXTENSION` above, except for meta data file. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_split.|""
-  CORE_ALLOC_INC|VFD|int|Applies only for core VFD. Specifies allocation increment. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_core.|(1<<20)
-  CORE_NO_BACK_STORE|VFD|int|Applies only for core VFD. Specifies whether or not to store the file on close. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_core.|FALSE
-  LOG_NAME|VFD|char *|Applies only for the log VFD. This is primarily a debugging feature. Specifies name of the file to which loggin data shall be stored. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_log.|"silo_hdf5_log.out"
-  LOG_BUF_SIZE|VFD|int|Applies only for the log VFD. This is primarily a debugging feature. Specifies size of the buffer to which byte-for-byte HDF5 data type information is written. See HDF5 refrence manual for H5Pset_fapl_log.|0
-  META_BLOCK_SIZE|GLOBAL|int|Applies the the HDF5 library as a whole (e.g. globally). Specifies the size of memory allocations the library should use when allocating meta data. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_meta_block_size.|0
-  SMALL_RAW_SIZE|GLOBAL|int|Applies to the HDF5 library as a whole (e.g. globally).<br>Specifies a threshold below which allocations for raw data are aggregated into larger blocks within HDF5.<br>This can improve I/O performance by reducing number of small I/O requests.<br>Note, however, that with a block-oriented VFD such as the Silo specific VFD,<br>this parameter must be set to be consistent with block size of the VFD.<br>See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_small_data_block_size.|0
-  ALIGN_MIN|GLOBAL|int|Applies to the HDF5 library as a whole. Specified a size threshold above which all datasets are aligned in the file using the value specified in `ALIGN_VAL`. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_alignment.|0
-  ALIGN_VAL|GLOBAL|int|The alignment to be applied to datasets of size greater than `ALIGN_MIN`. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_alignment.|0
-  DIRECT_MEM_ALIGN|VFD|int|Applies only to the direct VFD. Specifies the alignment option. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_direct.|0
-  DIRECT_BLOCK_SIZE|VFD|int|Applies only to the direct VFD. Specifies the block size the underlying filesystem is using. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_direct.|
+  CORE_ALLOC_INC|VFD|`int`|Applies only for core VFD. Specifies allocation increment. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_core.|(1<<20)
+  CORE_NO_BACK_STORE|VFD|`int`|Applies only for core VFD. Specifies whether or not to store the file on close. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_core.|FALSE
+  LOG_NAME|VFD|`char*`|Applies only for the log VFD. This is primarily a debugging feature. Specifies name of the file to which loggin data shall be stored. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_log.|"silo_hdf5_log.out"
+  LOG_BUF_SIZE|VFD|`int`|Applies only for the log VFD. This is primarily a debugging feature. Specifies size of the buffer to which byte-for-byte HDF5 data type information is written. See HDF5 refrence manual for H5Pset_fapl_log.|0
+  META_BLOCK_SIZE|GLOBAL|`int`|Applies the the HDF5 library as a whole (e.g. globally). Specifies the size of memory allocations the library should use when allocating meta data. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_meta_block_size.|0
+  SMALL_RAW_SIZE|GLOBAL|`int`|Applies to the HDF5 library as a whole (e.g. globally).<br>Specifies a threshold below which allocations for raw data are aggregated into larger blocks within HDF5.<br>This can improve I/O performance by reducing number of small I/O requests.<br>Note, however, that with a block-oriented VFD such as the Silo specific VFD,<br>this parameter must be set to be consistent with block size of the VFD.<br>See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_small_data_block_size.|0
+  ALIGN_MIN|GLOBAL|`int`|Applies to the HDF5 library as a whole. Specified a size threshold above which all datasets are aligned in the file using the value specified in `ALIGN_VAL`. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_alignment.|0
+  ALIGN_VAL|GLOBAL|`int`|The alignment to be applied to datasets of size greater than `ALIGN_MIN`. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_alignment.|0
+  DIRECT_MEM_ALIGN|VFD|`int`|Applies only to the direct VFD. Specifies the alignment option. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_direct.|0
+  DIRECT_BLOCK_SIZE|VFD|`int`|Applies only to the direct VFD. Specifies the block size the underlying filesystem is using. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_direct.|
   DIRECT_BUF_SIZE|||Applies only to the direct VFD. Specifies a copy buffer size. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_direct.|
   MPIO_COMM||||
   MPIO_INFO||||
   MPIP_NO_GPFS_HINTS||||
-  SIEVE_BUF_SIZE|GLOBAL|int|HDF5 sieve buf size. Only relevant if using either compression and/or checksumming. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_sieve_buf_size.|
-  CACHE_NELMTS|GLOBAL|int|HDF5 raw data chunk cache parameters. Only relevant if using either compression and/or checksumming. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_cache.|
+  SIEVE_BUF_SIZE|GLOBAL|`int`|HDF5 sieve buf size. Only relevant if using either compression and/or checksumming. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_sieve_buf_size.|
+  CACHE_NELMTS|GLOBAL|`int`|HDF5 raw data chunk cache parameters. Only relevant if using either compression and/or checksumming. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_cache.|
   CACHE_NBYTES|||HDF5 raw data chunk cache parameters. Only relevant if using either compression and/or checksumming. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_cache.|
   CACHE_POLICY|||HDF5 raw data chunk cache parameters. Only relevant if using either compression and/or checksumming. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_cache.|
-  FAM_SIZE|VFD|int|Size option for family VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_family. The family `VFD` is useful for handling files that would otherwise be larger than 2Gigabytes on filesystems that support a maximum file size of 2Gigabytes.|
-  FAM_FILE_OPTS|VFD|int|VFD options for each file in family VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_family. The family VFD is useful for handling files that would otherwise be larger than 2Gigabytes on filesystems that support a maximum file size of 2Gigabytes.|
-  USER_DRIVER_ID|GLOBAL|int|Specify some user-defined VFD. Permtis application to specify any user-defined VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_driver.|
+  FAM_SIZE|VFD|`int`|Size option for family VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_family. The family `VFD` is useful for handling files that would otherwise be larger than 2Gigabytes on filesystems that support a maximum file size of 2Gigabytes.|
+  FAM_FILE_OPTS|VFD|`int`|VFD options for each file in family VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_fapl_family. The family VFD is useful for handling files that would otherwise be larger than 2Gigabytes on filesystems that support a maximum file size of 2Gigabytes.|
+  USER_DRIVER_ID|GLOBAL|`int`|Specify some user-defined VFD. Permtis application to specify any user-defined VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_driver.|
   USER_DRIVER_INFO|GLOBAL||Specify user-defined VFD information struct. Permtis application to specify any user-defined VFD. See [HDF5 reference manual](https://docs.hdfgroup.org/hdf5/develop/) for H5Pset_driver.|
-  SILO_BLOCK_SIZE|VFD|int|Block size option for Silo VFD. All I/O requests to/from disk will occur in blocks of this size.|(1<<16)
-  SILO_BLOCK_COUNT|VFD|int|Block count option for Silo VFD. This is the maximum number of blocks the Silo VFD will maintain in memory at any one time.|32
-  SILO_LOG_STATS|VFD|int|Flag to indicate if Silo VFD should gather I/O performance statistics. This is primarily for debugging and performance tuning of the Silo VFD.|0
-  SILO_USE_DIRECT|VFD|int|Flag to indicate if Silo VFD should attempt to use direct I/O. Tells the Silo VFD to use direct I/O where it can. Note, if it cannot, this option will be siliently ignored.|0
-  FIC_BUF|VFD|void*|The buffer of bytes to be used as the "file in core" to be opened in a `DBOpen()` call.|none
-  FIC_SIZE|VFD|int|Size of the buffer of bytes to be used as the "file in core" to be opened in a `DBOpen()` call.|none
+  SILO_BLOCK_SIZE|VFD|`int`|Block size option for Silo VFD. All I/O requests to/from disk will occur in blocks of this size.|(1<<16)
+  SILO_BLOCK_COUNT|VFD|`int`|Block count option for Silo VFD. This is the maximum number of blocks the Silo VFD will maintain in memory at any one time.|32
+  SILO_LOG_STATS|VFD|`int`|Flag to indicate if Silo VFD should gather I/O performance statistics. This is primarily for debugging and performance tuning of the Silo VFD.|0
+  SILO_USE_DIRECT|VFD|`int`|Flag to indicate if Silo VFD should attempt to use direct I/O. Tells the Silo VFD to use direct I/O where it can. Note, if it cannot, this option will be siliently ignored.|0
+  FIC_BUF|VFD|`void*`|The buffer of bytes to be used as the "file in core" to be opened in a `DBOpen()` call.|none
+  FIC_SIZE|VFD|`int`|Size of the buffer of bytes to be used as the "file in core" to be opened in a `DBOpen()` call.|none
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBUnregisterFileOptionsSet()`
 
 * **Summary:** Unregister a registered file options set
@@ -130,7 +130,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `opts_set_id` | The identifer (obtained from a previous call to DBRegisterFileOptionsSet()) of a file options set to unregister.
 
@@ -143,8 +143,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Unregister a specific file options set identified by `opts_set_id`.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBUnregisterAllFileOptionsSets()`
 
 * **Summary:** Unregister all file options sets
@@ -172,8 +172,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Unregister all file options sets.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBSetUnknownDriverPriorities()`
 
 * **Summary:** Set driver priorities for opening files with the `DB_UNKNOWN` driver.
@@ -192,9 +192,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
-  `driver_ids` | A `-1` terminated list of driver ids such as DB_HDF5, DB_PDB, DB_HDF5_CORE, or any driver id constructed with the `DB_HDF5_OPTS()` macro.
+  `driver_ids` | A `-1` terminated list of driver ids such as `DB_HDF5`, `DB_PDB`, `DB_HDF5_CORE`, or any driver id constructed with the `DB_HDF5_OPTS()` macro.
 
 * **Returned value:**
 
@@ -209,8 +209,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   If any of the driver ids specified in `driver_ids` is constructed using the `DB_HDF5_OPTS()` macro, then the associated file options set must be registered with the Silo library.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetUnknownDriverPriorities()`
 
 * **Summary:** Return the currently defined ordering of drivers the `DB_UNKNOWN` driver will attempt.
@@ -232,8 +232,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Returns a `-1` terminated list of integer driver ids indicating the prioritzation of drivers used by the `DB_UNKNOWN` driver.
   The caller should **NOT** free the returned value.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBCreate()`
 
 * **Summary:** Create a Silo output file.
@@ -256,7 +256,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `pathname` | Path name of file to create. This can be either an absolute or relative path.
   `mode` | Creation `mode`. One of the predefined Silo modes: `DB_CLOBBER` or `DB_NOCLOBBER`.
@@ -287,12 +287,12 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   For example, on BlueGene systems the customized Silo block-based VFD (introduced to the Silo library in Version 4.8) has demonstrated excellent performance compared to the default HDF5 VFD; sec2.
   The remaining paragraphs describe each of the available Virtual File Drivers as well as parameters that govern their behavior.
 
-  DB_HDF5
+  `DB_HDF5`
   : From among the several VFDs that come pre-packaged with the HDF5 library, this driver type uses whatever the HDF5 library defines as the default VFD.
   On non-Windows platforms, this is the Section 2 (see below) VFD.
   On Windows platforms, it is a Windows specific VFD.
 
-  DB_HDF5_SEC2
+  `DB_HDF5_SEC2`
   : Uses the I/O system interface defined in section 2 of the Unix manual.
   That is `create`, `open`, `read`, `write`, `close`.
   This is a VFD that comes pre-packaged with the HDF5 library.
@@ -300,7 +300,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   For example, two I/O requests that abutt in file address space wind up being issued through the section 2 I/O routines as independent requests.
   This can be disasterous for high latency filesystems such as might be available on BlueGene class systems.
 
-  DB_HDF5_STDIO
+  `DB_HDF5_STDIO`
   : Uses the Standard I/O system interface defined in Section 3 of the Unix manual.
   That is `fcreate`, `fopen`, `fread`, `fwrite`, `fclose`.
   This is a VFD that comes pre-packaged with the HDF5 library.
@@ -314,7 +314,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   However, due to limitations in the current implementation, that is not yet possible.
   When and if that becomes possible, to use something other than non-default stdio buffering, the Silo client will have to create and register an appropriate file options set.
 
-  DB_HDF5_CORE
+  `DB_HDF5_CORE`
   : Uses a memory buffer for the file with the option of either writing the resultant buffer to disk or not.
   Conceptually, this VFD behaves more or less like a ramdisk.
   This is a VFD that comes pre-packaged with the HDF5 library.
@@ -328,7 +328,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   By default, using `DB_HDF5_CORE` as the driver type results in an allocation incriment of 1 Megabyte and a backing store option of TRUE, meaning it will store the file to disk upon close.
   To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set, see [DBRegisterFileOptionsSet](#dbregisterfileoptionsset).
 
-  DB_HDF5_SPLIT
+  `DB_HDF5_SPLIT`
   : Splits HDF5 I/O operations across two VFDs.
   One VFD is used for all raw data while the other VFD is used for everything else (e.g. meta data).
   For example, in Silo's `DBPutPointvar()` call, the data the caller passes in the vars argument is raw data.
@@ -342,7 +342,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   By default, using `DB_HDF5_SPLIT` as the driver type results in Silo using sec2 and `"-raw"` as the VFD and filename extension for raw data and core (default params) and `""` (empty string) as the VFD and extension for meta data.
   To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set, see [DBRegisterFileOptionsSet](#dbregisterfileoptionsset). 
 
-  DB_HDF5_FAMILY
+  `DB_HDF5_FAMILY`
   : Allows for the management of files larger than 2{sup}`32` bytes on 32-bit systems.
   The virtual file is decomposed into real files of size small enough to be managed on 32-bit systems.
   This is a VFD that comes pre-packaged with the HDF5 library.
@@ -351,7 +351,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   By default, using `DB_HDF5_FAMILY` as the driver type results in Silo using a size of 1 Gigabyte (2{sup}`32`) and the default VFD for the individual files.
   To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set, see [DBRegisterFileOptionsSet](#dbregisterfileoptionsset).
 
-  DB_HDF5_LOG
+  `DB_HDF5_LOG`
   : While doing the I/O for HDF5 data, also collects detailed information regarding VFD calls issued by the HDF5 library.
   The logging VFD writes detailed information regarding VFD operations to a logfile.
   This is a VFD that comes pre-packaged with the HDF5 library.
@@ -363,7 +363,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Users interested in this VFD should consult HDF5's reference manual for the meaning of the flags as well as how to interepret logging VFD output.
 
-  DB_HDF5_DIRECT
+  `DB_HDF5_DIRECT`
   : On systems that support the `O_DIRECT` flag in section 2 `create`/`open` calls, this VFD will use direct I/O.
   This VFD comes pre-packaged with the HDF5 library.
   Most systems (both the system interfaces implementations for section 2 I/O as well as underlying filesystems) do a lot of work to buffer and cache data to improve I/O performance.
@@ -375,7 +375,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Few systems support the `O_DIRECT` flag and so this VFD is not often available in practice.
   However, when it is, using `DB_HDF5_DIRECT` as the driver type results in Silo using an alignment of 4 kilobytes (2{sup}`12`), an alignment equal to the block size and a copy buffer size equal to `256` times the blocksize.
 
-  DB_HDF5_SILO
+  `DB_HDF5_SILO`
   : This is a custom VFD designed specifically to address some of the performance shortcommings of VFDs that come pre-packaged with the HDF5 library.
   The silo VFD is a very, very simple, block-based VFD.
   It decomposes the file into blocks, keeps some number of blocks in memory at any one time and issues I/O requests *only* in whole blocks using section 2 I/O routines.
@@ -390,7 +390,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   By default, the silo VFD uses a block size of 16 Kilobytes (2{sup}`14`) and a block count also of 16.
   To specify parameters other than these default values, the Silo client will have to create and register an appropriate file options set, see [DBRegisterFileOptionsSet](#dbregisterfileoptionsset).
 
-  DB_HDF5_MPIO and DB_HDF5_MPIOP
+  `DB_HDF5_MPIO` and `DB_HDF5_MPIOP`
   : These have been removed from Silo as of version 4.10.3.
 
   In Fortran, an integer represent the file's id is returned.
@@ -400,8 +400,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   See notes in the documentation on `DBOpen` regarding use of the `DB_UNKNOWN` driver type.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBOpen()`
 
 * **Summary:** Open an existing Silo file.
@@ -423,10 +423,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `name` | Name of the file to open. Can be either an absolute or relative path.
-  `type` | The `type` of file to open. One of the predefined types, typically DB_UNKNOWN, DB_PDB, or `DB_HDF5`. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
+  `type` | The `type` of file to open. One of the predefined types, typically `DB_UNKNOWN`, `DB_PDB`, or `DB_HDF5`. However, there are other options as well as subtle but important issues in using them. So, read description, below for more details.
   `mode` | The `mode` of the file to open. One of the values `DB_READ` or `DB_APPEND`.
 
 
@@ -441,7 +441,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   This iteration may incur a small performance penalty.
   In addition, use of `DB_UNKNOWN` can have other undesireable behavior described below.
   So, if at all possible, it is best to open using a specific `type`.
-  See [`DBGetDriverTypeFromPath`](#dbgetdrivertypefrompath)()` for a function that uses cheap heuristics to determine the driver `type` given a candiate filename.
+  See [`DBGetDriverTypeFromPath`](#dbgetdrivertypefrompath)() for a function that uses cheap heuristics to determine the driver `type` given a candiate filename.
 
   When writing general purpose code to read Silo files and you cannot know for certain ahead of time what the correct driver to use is, there are a few options.
 
@@ -455,10 +455,10 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Indeed, in order to use a specific VFD (see [`DBCreate`](#dbcreate)) in HDF5, it is necessary to pass the specific `DB_HDF5_XXX` argument in this call or to set the unknown driver priorities such that whatever specific HDF5 VFD(s) are desired are tried first before falling back to other, perhaps less desirable ones.
 
   The `mode` parameter allows a user to append to an existing Silo file.
-  If a file is opened with a `mode` of DB_APPEND, the file will support write operations as well as read operations.
+  If a file is opened with a `mode` of `DB_APPEND`, the file will support write operations as well as read operations.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBClose()`
 
 * **Summary:** Close a Silo database.
@@ -478,7 +478,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
 
@@ -494,8 +494,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   There is logic in Silo to try to detect this if it is happening and then issue a warning or error message.
   However, a caller may not be paying attention to Silo function return values or error messages.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetToc()`
 
 * **Summary:** Get the table of contents of a Silo database.
@@ -514,7 +514,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
 
@@ -529,8 +529,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The returned pointer points into Silo private space and must not be modified or freed.
   Also, calls to `DBSetDir` will free the [`DBtoc`](header.md#dbtoc) structure, invalidating the pointer returned previously by `DBGetToc`.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBFileVersion()`
 
 * **Summary:** Version of the Silo library used to create the specified file
@@ -549,7 +549,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file handle
 
@@ -570,8 +570,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   But, not always.
   Also note that although is possible that a single Silo file may have contents created within it from multiple versions of the Silo library, a call to this function will return *only* the version that was in use when `DBCreate()` was called; that is when the file was first created.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBFileVersionDigits()`
 
 * **Summary:** Return integer digits of file version number
@@ -591,7 +591,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Silo database file handle
   `maj` | Pointer to returned major version digit
@@ -604,8 +604,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Zero on success.
   Negative value on failure.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBFileVersionGE()`
 
 * **Summary:** Greater than or equal comparison for version of the Silo library a given file was created with
@@ -624,7 +624,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file handle
   `Maj` | Integer major version number
@@ -637,8 +637,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   One (1) if the version number of the library used to create the specified file is greater than or equal to the version number specified by Maj, Min, Pat arguments, zero (0) otherwise.
   A negative value is returned if a failure occurs.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBVersionGEFileVersion()`
 
 * **Summary:** Compare library version with file version
@@ -657,7 +657,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Silo database file handle obtained with a call to DBOpen
 
@@ -667,8 +667,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Non-zero if the library version is greater than or equal to the file version.
   Zero otherwise.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBSortObjectsByOffset()`
 
 * **Summary:** Sort list of object names by order of offset in the file
@@ -688,7 +688,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `DBfile` | Database file pointer.
   `nobjs` | Number of object names in obj_names.
@@ -705,8 +705,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   This can have a postive impact on I/O performance, particularly using a block-oriented VFD such as the Silo VFD as it can reduce and/or eliminate unnecessary block pre-emption.
   The degree to which `ordering` reads effects performance is not yet known.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBMkDir()`
 
 * **Summary:** Create a new directory in a Silo file.
@@ -725,7 +725,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `dirname` | Name of the directory to create.
@@ -740,8 +740,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   The `DBMkDir` function creates a new directory in the Silo file as a child of the current directory (see DBSetDir).
   The directory name may be an absolute path name similar to `"/dir/subdir"`, or may be a relative path name similar to `"../../dir/subdir"`.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBSetDir()`
 
 * **Summary:** Set the current directory within the Silo database.
@@ -760,7 +760,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `pathname` | Path name of the directory. This can be either an absolute or relative path name.
@@ -775,8 +775,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Also, calls to `DBSetDir` will free the [`DBtoc`](header.md#dbtoc) structure, invalidating the pointer returned previously by `DBGetToc`.
   `DBGetToc` must be called again in order to obtain a pointer to the new directory's `DBtoc` structure.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetDir()`
 
 * **Summary:** Get the name of the current directory.
@@ -795,7 +795,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | Database file pointer.
   `dirname` | Returned current directory name. The caller must allocate space for the returned name. The maximum space used is `256` characters, including the `NULL` terminator.
@@ -808,8 +808,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   The `DBGetDir` function returns the name of the current directory.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBCpDir()`
 
 * **Summary:** Copy a directory hierarchy from one Silo file to another.
@@ -829,7 +829,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `srcFile` | Source database file pointer.
   `srcDir` | Name of the directory within the source database file to copy.
@@ -848,8 +848,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Note that this function is available only on the HDF5 driver and only if the Silo library has been compiled with HDF5 version 1.8 or later.
   This is because the implementation exploits functionality available only in versions of HDF5 1.8 and later.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBCpListedObjects()`
 
 * **Summary:** Copy lists of objects from one Silo database to another
@@ -870,13 +870,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `nobjs` | The number of objects to be copied (e.g. number of strings in srcObjList)
   `srcDb` | The Silo database to be used as the source of the copies
   `srcObjList` | An array of nobj strings of the (path) names of objects to be copied. See description for interpretation of relative path names.
   `dstDB` | The Silo database to be used as the destination of the copies.
-  `dstObjList` | [Optional] An optional array of nobj strings of the (path) names where the objects are to be copied in dstDb. If any entry in `dstObjList` is `NULL` or is a string of zero length, this indicates that object in the dstDb will have the same (path) name as the corresponding object (path) name given in `srcObjList`. If the entire `dstObjList` is NULL, then this is true for all objects. See description for interpretation of relative (path) names.
+  `dstObjList` | [Optional] An optional array of nobj strings of the (path) names where the objects are to be copied in dstDb. If any entry in `dstObjList` is `NULL` or is a string of zero length, this indicates that object in the dstDb will have the same (path) name as the corresponding object (path) name given in `srcObjList`. If the entire `dstObjList` is `NULL`, then this is true for all objects. See description for interpretation of relative (path) names.
 
 * **Returned value:**
 
@@ -898,9 +898,9 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   If an object specified in the `srcObjList` is itself a directory, then the entire directory tree rooted at that name will be copied to the destination database.
 
-  If `dstObjList` is NULL, then it is assumed that all the objects to be copied will be copied to paths in the destination database that are intended to be the same as those in `srcObjList`.
-  If `dstObjList` is non-NULL, but any given entry is either `NULL` or a string of zero length, than that object's destination name will be assumed the same as its equivalent `srcObjList` entry.
-  Note, when using NULLs relative paths in `srcObjList` will appear in destination databases relative to the destination database's current working directory.
+  If `dstObjList` is `NULL`, then it is assumed that all the objects to be copied will be copied to paths in the destination database that are intended to be the same as those in `srcObjList`.
+  If `dstObjList` is non-`NULL`, but any given entry is either `NULL` or a string of zero length, than that object's destination name will be assumed the same as its equivalent `srcObjList` entry.
+  Note, when using `NULL`s relative paths in `srcObjList` will appear in destination databases relative to the destination database's current working directory.
 
   If dstObjList[i] ends in a '/' character or identifies a directory that existed in the destination database either before `DBCpListedObjects` was called or that was created on behalf of a preceding object copy within the execution of DBCpListedObjects, then the source object will be copied to that directory with its original (source) name.
   This is equivalent to the behavior of the filesystem command cp foo /gorfo/bar/ or cp foo /gorfo/bar when bar exists as a directory.
@@ -949,8 +949,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   Copies trimesh in cwg of dbfile to cwg/foo (/tmp/foo/trimesh in dbfile2
 
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGrabDriver()`
 
 * **Summary:** Obtain the low-level driver file handle
@@ -969,14 +969,14 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle.
 
 * **Returned value:**
 
   A void pointer to the low-level driver's file handle on success.
-  NULL(0) on failure.
+  `NULL`(0) on failure.
 
 * **Description:**
 
@@ -1000,8 +1000,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   For reasons described above, if problems occur on files that have been grabbed, users will likely be asked to re-produce the problem on a similar `file` that has **not** been grabbed to rule out possible corruption from grabbing.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBUngrabDriver()`
 
 * **Summary:** Ungrab the low-level file driver
@@ -1020,7 +1020,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | The Silo database `file` handle.
   `drvr_hndl` | The low-level driver handle.
@@ -1033,8 +1033,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   This function returns the Silo `file` to an ungrabbed state, permitting Silo calls to again proceed as normal.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetDriverType()`
 
 * **Summary:** Get the type of driver for the specified file
@@ -1053,7 +1053,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `file` | A Silo database `file` handle.
 
@@ -1068,8 +1068,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   This function returns the type of driver used for the specified `file`.
   If you want to ask this question without actually opening the file, use `DBGetDriverTypeFromPath`.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetDriverTypeFromPath()`
 
 * **Summary:** Guess the driver type used by a file with the given pathname
@@ -1088,7 +1088,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `path` | Path to a file on the filesystem
 
@@ -1112,8 +1112,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   See [`DBInqFile`](#dbinqfile) for a function that will indicate whether the file is indeed a Silo file.
   Note, however, that `DBInqFile` is a more expensive operation.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBInqFile()`
 
 * **Summary:** Inquire if filename is a Silo file.
@@ -1132,7 +1132,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `filename` | Name of file.
 
@@ -1155,8 +1155,8 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Similar problems do not exist for HDF5 files because Silo's HDF5 driver has always stored information in the HDF5 file which helps to distinguish it as a Silo file.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBInqFileHasObjects()`
 
 * **Summary:** Determine if an open file has any Silo objects
@@ -1175,7 +1175,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Arguments:**
 
-  Arg&nbsp;name | Description
+  Arg name | Description
   :---|:---
   `dbfile` | The Silo database file handle
 
@@ -1184,20 +1184,20 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
   Examine an open file for existence of any Silo objects.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `_silolibinfo`
 
 * **Summary:** A character array written by Silo to root directory indicating the Silo library version number used to generate the file
 
 * **C Signature:**
 
-  ```
-  int n;
+  ```C
+      int n;
       char vers[1024];
-      sprintf(vers, “silo-4.6”);
+      sprintf(vers, "silo-4.6");
       n = strlen(vers);
-      DBWrite(dbfile, “_silolibinfo”, vers, &n, 1, DB_CHAR);
+      DBWrite(dbfile, "_silolibinfo", vers, &n, 1, DB_CHAR);
   ```
 
 * **Description:**
@@ -1205,20 +1205,20 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   This is a simple array variable written at the root directory in a Silo file that contains the Silo library version string.
   It cannot be disabled.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `_hdf5libinfo`
 
 * **Summary:** character array written by Silo to root directory indicating the HDF5 library version number used to generate the file
 
 * **C Signature:**
 
-  ```
-  int n;
+  ```C
+      int n;
       char vers[1024];
-      sprintf(vers, “hdf5-1.6.6”);
+      sprintf(vers, "hdf5-1.6.6");
       n = strlen(vers);
-      DBWrite(dbfile, “_hdf5libinfo”, vers, &n, 1, DB_CHAR);
+      DBWrite(dbfile, "_hdf5libinfo", vers, &n, 1, DB_CHAR);
   ```
 
 * **Description:**
@@ -1227,17 +1227,17 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   It cannot be disabled.
   Of course, it exists, only in files created with the HDF5 driver.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `_was_grabbed`
 
 * **Summary:** single integer written by Silo to root directory whenever a Silo file has been grabbed.
 
 * **C Signature:**
 
-  ```
-  int n=1;
-      DBWrite(dbfile, “_was_grabbed”, &n, &n, 1, DB_INT);
+  ```C
+      int n=1;
+      DBWrite(dbfile, "_was_grabbed", &n, &n, 1, DB_INT);
   ```
 
 * **Description:**
@@ -1245,5 +1245,5 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
   This is a simple array variable written at the root directory in a Silo whenever a Silo file has been grabbed by the `DBGrabDriver()` function.
   It cannot be disabled.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+

@@ -932,7 +932,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Description:**
 
-  In versions of Silo prior to 4.8, the default behavior of the HDF5 driver was that it used HDF5 in a way that made the data somewhat UNnatural to the user when viewed with HDF5 tools such as `h5ls`, `h5dump` and `hdfview` as well as other tools that interact with the data via the HDF5 API.
+  In versions of Silo prior to 4.8, the default behavior of the HDF5 driver was that it used HDF5 in a way that made the data somewhat UNnatural to the user when viewed with HDF5 tools such as [`h5ls`](https://docs.hdfgroup.org/hdf5/develop/_view_tools_view.html#subsecViewToolsViewContent_h5ls), [`h5dump`](https://docs.hdfgroup.org/hdf5/develop/_view_tools_view.html#subsecViewToolsViewContent_h5dump) and [`hdfview`](https://confluence.hdfgroup.org/display/HDFVIEW/HDFView+3.x+User%27s+Guide) as well as other tools that interact with the data via the HDF5 API.
   This was not a problem for Silo but was a problem for these and other HDF5 tools.
 
   `DBSetFriendlyHDF5Names()` was introduced as a way to address this issue so that the data in an HDF5 file written by Silo look more *natural* to HDF5.
@@ -1083,7 +1083,7 @@ These include such things as error handling, requiring Silo to do extra work to 
   As an example of use, the function `DBSetDeprecateWarnings()` was introduced in Silo version 4.6 and not available in earlier versions.
   You could use this macro like so...
 
-  ```
+  ```C
   #if DB_VERSION_GE(4,6,0)
 
   DBSetDeprecateWarnings(0);
