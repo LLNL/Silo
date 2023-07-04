@@ -30,6 +30,10 @@ myst_enable_extensions = [
 ]
 myst_heading_anchors = 3
 
+myst_substitutions = {
+  "EndFunc": "<hr class=\"docutils\" />"+"<br>"*40
+}
+
 html_static_path = ['_static']
 html_theme = "sphinx_rtd_theme"
 html_theme_options = {

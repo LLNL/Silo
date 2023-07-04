@@ -20,11 +20,11 @@ For the most part, Silo is able to read only files that it has also written.
 
 ## Where to Find Example Code
 
-In the `[tests](https://github.com/LLNL/Silo/tree/main/tests)` directory within the Silo source tree, there are numerous example C codes that demonstrate the use of Silo for writing various types of data.
+In the [`tests`](https://github.com/LLNL/Silo/tree/main/tests) directory within the Silo source tree, there are numerous example C codes that demonstrate the use of Silo for writing various types of data.
 There are not as many examples of reading the data there.
 
-If you are interested in point meshes, for example, you would search for `DBPutPointMesh`.
-Or, if you are interested in how to use some option like `DBOPT_CONSERVED`, search for it within the C files in the tests directory.
+If you are interested in point meshes, for example, you would search (e.g. `grep -i pointmesh`) for `DBPutPointMesh`.
+Or, if you are interested in how to use some option like `DBOPT_CONSERVED`, search for it within the C files in the `tests` directory.
 
 ## Brief History and Background
 
@@ -47,10 +47,11 @@ One focused on lower level abstractions...the *objects* of computer science.
 That is data structures such as arrays, structs and linked lists.
 The other focused on higher level abstractions...the *objects* of computational science.
 That is meshes and fields defined thereon.
+
 Examples of the former are [netCDF](https://github.com/Unidata/netcdf-c), HDF (HDF4 and [HDF5](https://github.com/HDFGroup/hdf5)) and [PDB](https://code.google.com/archive/p/pactnew/source/default/source?page=50).
 Examples of the latter are [ExodusII](https://github.com/sandialabs/exodusii), [Mili](https://github.com/mdg-graphics/mili) and Silo.
-At the same time, the higher level libraries can also make make use of the lower level libraries.
-For example, Silo uses HDF5 and PDB and ExodusII uses netCDF.
+At the same time, the higher level libraries are often implemented on top the lower level libraries.
+For example, Silo is implemented on top of either HDF5 or PDB and ExodusII is implemented on top of netCDF.
 
 ## Silo Architecture
 
@@ -147,7 +148,7 @@ Material Species
 Block
 : A *block* defines one coherent, contiguous piece (or fragment) of a larger mesh that has been decomposed into pieces typically for parallel processing but also potentially for other purposes such as streaming analysis, etc.
   The coordinates, connectivities and associated mesh variables of a block are all enumerated *relative* to the block and independently from any other block.
-  In some sense, block's represent the fundamental storage *quanta* of a mesh that is too large to process as single, monolithic whole.
+  In some sense, block's represent the fundamental storage *quanta* of a mesh that is too large to process as a single, monolithic whole.
 
   A mesh that is decomposed into blocks is called a *multi-block* mesh.
   To go along with multi-block meshes, there are multi-block variables, multi-block materials and multi-block species.

@@ -28,6 +28,9 @@
     content: "▼ ";
 }
 
+.rst-content table.docutils thead,.rst-content table.field-list thead,.wy-table thead{color:#000;text-align:left;vertical-align:bottom;white-space:nowrap}
+.wy-table-responsive table td,.wy-table-responsive table th{white-space:nowrap}
+
 /* This is to override RTD's default 'nowrap' on table cells
    which winds up causing tables with a lot of text in a cell
    to horizontal scroll. */
