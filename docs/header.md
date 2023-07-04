@@ -186,3 +186,85 @@ We include the contents of the Silo header file here including a description of 
    :end-at: "} DBobject;"
    ```
 
+### DBdatatype
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Data types */"
+   :end-at: "} DBdatatype;"
+   ```
+
+### DBObjectType
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Objects that can be stored in a data file */"
+   :end-at: "} DBObjectType;"
+   ```
+
+### Open/Create flags
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Flags for DBCreate */"
+   :end-before: "/* Options */"
+   ```
+
+### Optlist options
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Options */"
+   :end-at: "#define DBOPT_LAST"
+   ```
+
+### VFD options
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Options relating to virtual file drivers */"
+   :end-at: "#define DBOPT_H5_LAST"
+   ```
+
+### Error handling options
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Error trapping method */"
+   :end-at: "#define         DB_ALL_AND_DRVR"
+   ```
+
+### Error return codes
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Errors */"
+   :end-at: "#define     E_NERRORS"
+   ```
+### Major order options
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Definitions for MAJOR_ORDER */"
+   :end-at: "#define  DB_COLMAJOR"
+   ```
+
+### Variable centering options
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Definitions for CENTERING */"
+   :end-at: "#define  DB_BLOCKCENT"
+   ```
+### Coordinate system options
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Definitions for COORD_SYSTEM */"
+   :end-at: "#define  DB_OTHER"
+   ```
+
+### Derived variable types 
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Definitions for derived variable types */"
+   :end-at: "#define DB_VARTYPE_LABEL"
+   ```
+
+### CSG options
+
+   ```{literalinclude} ../src/silo/silo.h.in
+   :start-at: "/* Definitions for CSG boundary types"
+   :end-at: "#define DBCSG_SWEEP"
+   ```
+
