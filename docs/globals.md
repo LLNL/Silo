@@ -311,7 +311,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Returned value:**
 
-  One (1) if the library's version number is greater than or equal to the version number specified by Maj, Min, Pat arguments, zero (0) otherwise.
+  One (1) if the version number of the library the calling executable is using is greater than or equal to the version number specified by Maj, Min, Pat arguments, zero (0) otherwise.
 
 * **Description:**
 
@@ -356,7 +356,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Note that there is currently a bug in the HDF5 driver where overwrites wind up orphaning existing data in the file rather than in fact overwriting that data.
   If the same object is overwritten many times, this could lead to unexpectedly large Silo files due to all the orphaned data.
-  An HDF5 tool named `h5repack` maybe useful in reclaiming that wasted space.
+  An HDF5 tool named [`h5repack`](https://docs.hdfgroup.org/hdf5/develop/_view_tools_edit.html) maybe useful in reclaiming that wasted space.
 
 {{ EndFunc }}
 
@@ -591,7 +591,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
   Mask bit|Meaning
   :---|:---
-  DBAll|All data values are read. This value is identical to specifying all of the other `mask` bits or'ed together, setting all of the bit values to 1.
+  `DBAll`|All data values are read. This value is identical to specifying all of the other `mask` bits or'ed together, setting all of the bit values to 1.
   `DBNone`|No data values are read. This value sets all of the bit values to 0.
   `DBCalc`|If data is calculable, calculate it. Otherwise, return `NULL` for that part.
   `DBMatMatnos`|Material numbers (matnos) read by `DBGetMaterial`.
@@ -976,7 +976,7 @@ These include such things as error handling, requiring Silo to do extra work to 
 
 * **Description:**
 
-  See [`DBSetFriendlyHDF5Names`](#dbsetfriendlyhdf5names)()`.
+  See [`DBSetFriendlyHDF5Names()`](#dbsetfriendlyhdf5names).
 
 
 {{ EndFunc }}

@@ -521,17 +521,13 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 
 * **Returned value:**
 
-  `DBGetToc` returns a pointer to a `DBtoc` structure on success and `NULL` on error.
+  `DBGetToc` returns a pointer to a [`DBtoc`](header.md#dbtoc) structure on success and `NULL` on error.
 
 * **Description:**
 
-  The `DBGetToc` function returns a pointer to a `DBtoc` structure, which contains the names of the various Silo object contained in the Silo database.
+  The `DBGetToc` function returns a pointer to a [`DBtoc`](header.md#dbtoc) structure, which contains the names of the various Silo object contained in the Silo database.
   The returned pointer points into Silo private space and must not be modified or freed.
-  Also, calls to `DBSetDir` will free the `DBtoc` structure, invalidating the pointer returned previously by `DBGetToc`.
-
-  Notes:
-
-  For the details of the `DBtoc` data structured returned by this function, see the [Silo library header file](./header.md).
+  Also, calls to `DBSetDir` will free the [`DBtoc`](header.md#dbtoc) structure, invalidating the pointer returned previously by `DBGetToc`.
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -776,7 +772,7 @@ For example, if Silo is using the HDF5 driver, an application can obtain the act
 * **Description:**
 
   The `DBSetDir` function sets the current directory within the given Silo database.
-  Also, calls to `DBSetDir` will free the `DBtoc` structure, invalidating the pointer returned previously by `DBGetToc`.
+  Also, calls to `DBSetDir` will free the [`DBtoc`](header.md#dbtoc) structure, invalidating the pointer returned previously by `DBGetToc`.
   `DBGetToc` must be called again in order to obtain a pointer to the new directory's `DBtoc` structure.
 
 ---

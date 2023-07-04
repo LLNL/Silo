@@ -498,7 +498,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
 * **Returned value:**
 
-  Returns a pointer to a `DBquadmesh` structure on success and `NULL` on failure.
+  Returns a pointer to a [`DBquadmesh`](./header.md#dbquadmesh) structure on success and `NULL` on failure.
 
 * **Description:**
 
