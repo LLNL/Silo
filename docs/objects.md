@@ -10,8 +10,8 @@ In addition, Silo supports both piecewise constant (e.g. zone-centered) and piec
 Silo also supports the decomposition of these meshes into materials (and material species) including cases where multiple materials are mixing within a single mesh element.
 Finally, Silo also supports the specification of expressions representing derived variables.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutCurve()`
 
 * **Summary:** Write a curve object into a Silo file
@@ -79,8 +79,8 @@ Finally, Silo also supports the specification of expressions representing derive
   This output option would be useful for other Silo objects, meshes and variables, as well.
   However, it is currently only available for curve objects.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetCurve()`
 
 * **Summary:** Read a curve from a Silo database.
@@ -112,8 +112,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetCurve` function allocates a [`DBcurve`](./header.md#dbcurve) data structure, reads a curve from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutPointmesh()`
 
 * **Summary:** Write a point mesh object into a Silo file.
@@ -189,8 +189,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The following `optlist` options have been deprecated. Instead use MRG trees
   `DBOPT_GROUPNUM`|`int`|The group number to which this pointmesh belongs.|-1 (not in a group)
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetPointmesh()`
 
 * **Summary:** Read a point mesh from a Silo database.
@@ -217,8 +217,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetPointmesh` function allocates a [`DBpointmesh`](./header.md#dbpointmesh) data structure, reads a point mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutPointvar()`
 
 * **Summary:** Write a scalar/vector/tensor point variable object into a Silo file.
@@ -288,8 +288,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is `DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutPointvar1()`
 
 * **Summary:** Write a scalar point variable object into a Silo file.
@@ -336,8 +336,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   See [`DBPutPointvar`](#dbputpointvar) to a description of the options accepted by this function.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetPointvar()`
 
 * **Summary:** Read a point variable from a Silo database.
@@ -371,8 +371,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetPointvar` function allocates a `DBmeshvar` data structure, reads a variable associated with a point mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutQuadmesh()`
 
 * **Summary:** Write a quad mesh object into a Silo file.
@@ -470,8 +470,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The options `DB_LO_OFFSET` and `DB_HI_OFFSET` should be used if the mesh being described uses the notion of "phoney" zones (i.e., some zones should be ignored.) For example, if a 2-D mesh had designated the first column and row, and the last two columns and rows as "phoney", then we would use: lo_off = {1,1} and hi_off = {2,2}.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetQuadmesh()`
 
 * **Summary:** Read a Quad mesh from a Silo database.
@@ -505,8 +505,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetQuadmesh` function allocates a [`DBquadmesh`](./header.md#dbquadmesh) data structure, reads a quadrilateral mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutQuadvar()`
 
 * **Summary:** Write a scalar/vector/tensor quad variable object into a Silo file.
@@ -624,8 +624,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_REGION_PNAMES`|`char**`|A null-pointer terminated array of pointers to strings specifying the pathnames of regions in the mrg tree for the associated mesh where the variable is defined. If there is no mrg tree associated with the mesh, the names specified here will be assumed to be material names of the material object associated with the mesh. The last pointer in the array must be null and is used to indicate the end of the list of names. See [`DBOPT_REGION_PNAMES`](./subsets.md#dbopt_region_pnames)|`NULL`
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" variable data array(s). Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutQuadvar1()`
 
 * **Summary:** Write a scalar quad variable object into a Silo file.
@@ -680,8 +680,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   See [`DBPutQuadvar`](#dbputquadvar) for a description of options accepted by this function.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetQuadvar()`
 
 * **Summary:** Read a Quad mesh variable from a Silo database.
@@ -714,8 +714,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetQuadvar` function allocates a [`DBquadvar`](./header.md#dbquadvar) data structure, reads a variable associated with a quadrilateral mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutUcdmesh()`
 
 * **Summary:** Write a UCD mesh object into a Silo file.
@@ -859,8 +859,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The following options have been deprecated. Use MRG trees instead|||
   `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutUcdsubmesh()`
 
 * **Summary:** Write a subset of a parent, ucd mesh, to a Silo file
@@ -903,8 +903,8 @@ Finally, Silo also supports the specification of expressions representing derive
   Instead, use a Mesh Region Grouping (MRG) tree.
   See [`DBMakeMrgtree`](./subsets.md#dbmakemrgtree).
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetUcdmesh()`
 
 * **Summary:** Read a UCD mesh from a Silo database.
@@ -937,8 +937,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetUcdmesh` function allocates a [`DBucdmesh`](./header.md#dbucdmesh) data structure, reads a UCD mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutZonelist()`
 
 * **Summary:** Write a zonelist object into a Silo file.
@@ -988,8 +988,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   See [`DBPutUcdmesh`](#dbputucdmesh) for a full description of the zonelist data structures.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutZonelist2()`
 
 * **Summary:** Write a zonelist object containing ghost zones into a Silo file.
@@ -1069,8 +1069,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   For a description of how the nodes for the allowed shapes are enumerated, see [`DBPutUcdmesh`](#dbputucdmesh).
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutPHZonelist()`
 
 * **Summary:** Write an arbitrary, polyhedral zonelist object into a Silo file.
@@ -1147,9 +1147,9 @@ Finally, Silo also supports the specification of expressions representing derive
   float y[NNODES] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   float z[NNODES] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
 
-  /* `facelist` where we enumerate the nodes over each face */
+  /* facelist where we enumerate the nodes over each face */
   int nodecnts[NFACES] = {4,4,4,4,4,4,4,4,4,4,4};
-  int `lnodelist` = 4*NFACES;
+  int lnodelist = 4*NFACES;
 
   /*                           a           b           c      */
   int nodelist[4*NFACES] = {1,7,6,0,    2,8,7,1     4,1,0,3,
@@ -1173,8 +1173,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Figure 0-4: Example of a polyhedral zonelist representation for two hexahedral elements.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetPHZonelist()`
 
 * **Summary:** Read a polyhedral-zonelist from a Silo database.
@@ -1210,8 +1210,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetPHZonelist` function allocates a [`DBphzonelist`](./header.md#dbphzonelist) data structure, reads a polyhedral-zonelist from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutFacelist()`
 
 * **Summary:** Write a facelist object into a Silo file.
@@ -1264,8 +1264,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   See [`DBPutUcdmesh`](#dbputucdmesh) for a full description of the facelist data structures.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutUcdvar()`
 
 * **Summary:** Write a scalar/vector/tensor UCD variable object into a Silo file.
@@ -1363,8 +1363,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the variable data arrays. Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutUcdvar1()`
 
 * **Summary:** Write a scalar UCD variable object into a Silo file.
@@ -1414,8 +1414,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   See [`DBPutUcdvar`](#dbputucdvar) for a description of options accepted by this function.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetUcdvar()`
 
 * **Summary:** Read a UCD variable from a Silo database.
@@ -1451,8 +1451,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetUcdvar` function allocates a [`DBucdvar`](./header.md#dbucdvar) data structure, reads a variable associated with a UCD mesh from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutCsgmesh()`
 
 * **Summary:** Write a CSG mesh object to a Silo file
@@ -1587,8 +1587,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The following options have been deprecated. Use MRG trees instead|||
   `DBOPT_GROUPNUM`|`int`|The group number to which this quadmesh belongs.|-1 (not in a group)
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetCsgmesh()`
 
 * **Summary:** Get a CSG mesh object from a Silo file
@@ -1616,8 +1616,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   A pointer to a [`DBcsgmesh`](./header.md#dbcsgmesh) structure on success and `NULL` on failure.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutCSGZonelist()`
 
 * **Summary:** Put a CSG zonelist object in a Silo file.
@@ -1721,7 +1721,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The code below writes this CSG mesh to a silo file
 
-  ```
+  ```C
   int *typeflags={DBCSG_SPHERE_PR, DBCSG_PLANE_X, DBCSG_PLANE_X,
                   DBCSG_CYLINDER_PPR, DBCSG_SPHERE_PR, DBCSG_SPHERE_PR};
   float *coeffs = {0.0, 0.0, 0.0, 5.0, 1.0, 0.0, 0.0, -2.5,
@@ -1755,7 +1755,7 @@ Finally, Silo also supports the specification of expressions representing derive
   The other regions exist solely to facilitate the construction.
   The code to write this CSG `zonelist` to a silo file is given below.
 
-  ```
+  ```C
   int nregs = 11;
   int *typeflags={DBCSG_INNER, DBCSG_INNER, DBCSG_OUTER, DBCSG_INNER,
                   DBCSG_INTERSECT, DBCSG_INTERSECT, DBCSG_DIFF,
@@ -1770,8 +1770,8 @@ Finally, Silo also supports the specification of expressions representing derive
       nzones, zonelist, NULL);
   ```
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetCSGZonelist()`
 
 * **Summary:** Read a CSG mesh zonelist from a Silo file
@@ -1800,8 +1800,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   A pointer to a [`DBcsgzonelist`](./header.md#dbcsgzonelist) structure on success and `NULL` on failure.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutCsgvar()`
 
 * **Summary:** Write a CSG mesh variable to a Silo file
@@ -1869,8 +1869,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_EXTENSIVE`|`int`|Indicates if the variable represents a physical quantity that is extensive (as opposed to intensive). Note, while it is true that any conserved quantity is extensive, the converse is not true. By default and historically, all Silo variables are treated as intensive.|0
   `DBOPT_MISSING_VALUE`|`double`|Specify a numerical value that is intended to represent "missing values" in the x or y data arrays. Default is`DB_MISSING_VALUE_NOT_SET`|`DB_MISSING_VALUE_NOT_SET`
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetCsgvar()`
 
 * **Summary:** Read a CSG mesh variable from a Silo file
@@ -1899,8 +1899,8 @@ Finally, Silo also supports the specification of expressions representing derive
 
   A pointer to a [`DBcsgvar`](./header.md#dbcsgvar) structure on success and `NULL` on failure.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutMaterial()`
 
 * **Summary:** Write a material data object into a Silo file.
@@ -2004,8 +2004,8 @@ Finally, Silo also supports the specification of expressions representing derive
   ![](./mixed_mats.gif)
   Figure 0-6: Example using mixed data arrays for representing material information
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetMaterial()`
 
 * **Summary:** Read material data from a Silo database.
@@ -2038,8 +2038,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetMaterial` function allocates a `DBmaterial` data structure, reads material data from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutMatspecies()`
 
 * **Summary:** Write a material species data object into a Silo file.
@@ -2114,15 +2114,15 @@ Finally, Silo also supports the specification of expressions representing derive
 
   The material species object would be defined such that nmat=3 and nmatspec={2,5,6}. If the composition of Brass, T-1 Steel and O-1 Steel is constant over the whole mesh, the `species_mf` array would contain just 2 + 5 + 6 = 13 entries...
 
-|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|
-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|&nbsp;|
+|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 | &nbsp; <td colspan=2 style="text-align:center;">**Brass**<td colspan=5 style="text-align:center;">**T1 Steel**<td colspan=6 style="text-align:center;">**O1 Steel**|
 |`species_mf`|.65|.35|.763|.007|.18|.04|.001|.962|.009|.014|.005|.005|.005|
 |element|Cu|Zn|Fe|C|W|Cr|V|Fe|C|Mn|Cr|Ni|W|
-|index|[1]{.lime-background}|2|[3]{.lime-background}|4|5|6|7|[8]{.lime-background}|9|10|11|12|13
+|index|[1]{.lime-background}|2|[3]{.lime-background}|4|5|6|7|[8]{.lime-background}|9|10|11|12|13|
 
-  If all of the zones in the mesh are clean (e.g. not mixing in material) and have the same composition of species, the `speclist` array would contain a '1' for every Brass zone (1-origin indexing would mean it would index species_mf[0]), a '3' for every T-1 Steel zone and a '8' for every O-1 Steel zone.
-  However, if some cells had a Brass mixture with an extra 1% Cu, then you could create another two entries at positions 14 and 15 in the `species_mf` array with the values 0.66 and 0.34, respectively, and the `speclist` array for those cells would point to '14' instead of '1'.
+  If all of the zones in the mesh are clean (e.g. not mixing in material) and have the same composition of species, the `speclist` array would contain a [1]{.lime-background} for every Brass zone (1-origin indexing would mean it would index `species_mf[0]`), a [3]{.lime-background} for every T-1 Steel zone and a [8]{.lime-background} for every O-1 Steel zone.
+  However, if some cells had a Brass mixture with an extra 1% Cu, then you could create another two entries at positions 14 and 15 in the `species_mf` array with the values 0.66 and 0.34, respectively, and the `speclist` array for those cells would point to [14]{.lime-background} instead of [1]{.lime-background}.
 
   The `speclist` entries indicate only where to start reading species mass fractions from the `species_mf` array for a given zone.
   How do we know how many values to read?
@@ -2152,8 +2152,8 @@ Finally, Silo also supports the specification of expressions representing derive
   `DBOPT_SPECNAMES`|`char**`|Array of strings defining the names of the individual species. The length of this array is the sum of the values in the `nmatspec` argument to this function|`NULL`
   `DBOPT_SPECCOLORS`|`char**`|Array of strings defining the names of colors to be associated with each species. The color names are taken from the X windows color database. If a color `name` begins with a'#' symbol, the remaining 6 characters are interpreted as the hexadecimal `RGB` value for the color. The length of this array is the sum of the values in the `nmatspec` argument to this function|`NULL`
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetMatspecies()`
 
 * **Summary:** Read material species data from a Silo database.
@@ -2187,8 +2187,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetMatspecies` function allocates a [`DBmatspecies`](./header.md#dbmatspecies) data structure, reads material species data from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBPutDefvars()`
 
 * **Summary:** Write a derived variable definition(s) object into a Silo file.
@@ -2264,8 +2264,8 @@ Finally, Silo also supports the specification of expressions representing derive
   Only a few examples are illustrated here.
   For a more complete list of the available expression operators and their syntax, the reader is referred to the [Expressions](https://visit-sphinx-github-user-manual.readthedocs.io/en/stable/using_visit/Quantitative/Expressions.html#built-in-expressions) portion of the VisIt user's manual.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBGetDefvars()`
 
 * **Summary:** Get a derived variables definition object from a Silo file.
@@ -2298,8 +2298,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBGetDefvars` function allocates a [`DBdefvars`](./header.md#dbdefvars) data structure, reads the object from the Silo database, and returns a pointer to that structure.
   If an error occurs, `NULL` is returned.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBInqMeshname()`
 
 * **Summary:** Inquire the mesh name associated with a variable.
@@ -2334,8 +2334,8 @@ Finally, Silo also supports the specification of expressions representing derive
   The `DBInqMeshname` function returns the name of a mesh associated with a mesh variable.
   Given the name of a variable to access, one must call this function to find the name of the mesh before calling `DBGetQuadmesh` or `DBGetUcdmesh`.
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
 ### `DBInqMeshtype()`
 
 * **Summary:** Inquire the mesh type of a mesh.
@@ -2377,5 +2377,5 @@ Finally, Silo also supports the specification of expressions representing derive
   Quad (Non-Collinear)|`DB_QUAD_CURV`
   CSG|`DB_CSGMESH`
 
----
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{{ EndFunc }}
+
