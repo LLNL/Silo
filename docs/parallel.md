@@ -1,4 +1,4 @@
-# Multi-Block Objects and Parallel I/O
+## Multi-Block Objects and Parallel I/O
 
 Individual pieces of mesh created with a number of `DBPutXxxmesh()` calls can be assembled together into larger, multi-block objects.
 Likewise for variables and materials defined on these meshes.
@@ -7,15 +7,15 @@ In Silo, multi-block objects are really just lists of all the individual pieces 
 For example, a multi-mesh object is really just a long list of object names, each name being the string passed as the name argument to a `DBPutXxxmesh()` call.
 
 A key feature of multi-block object is that references to the individual pieces include the option of specifying the name of the Silo file in which a piece is stored.
-This option is invoked when the colon operator (':') appears in the name of an individual piece.
-All characters before the colon specify the name of a Silo file.
-All characters after a colon specify the directory path within the file where the object lives.
+This option is invoked when the colon operator (`:`) appears in the name of an individual piece.
+All characters before the colon specify the name of a Silo file in the host file system.
+All characters after a colon specify a directory path within the Silo file where the object lives.
 
 The fact that multi-block objects can reference individual pieces that reside in different Silo files means that Silo, a serial I/O library, can be used very effectively and scalably in parallel without resorting to writing a file per processor.
-The "technique" used to affect parallel I/O in this manner with Silo is affectionately called Poor Man's Parallel I/O (PMPIO).
+The technique used to affect parallel I/O in this manner with Silo is [Multiple Independent File Parallel I/O](https://www.hdfgroup.org/2017/03/mif-parallel-io-with-hdf5/).
 
 A separate convenience interface, PMPIO, is provided for this purpose.
-The `PMPIO` interface provides almost all of the functionality necessary to use Silo in a Poor Man's Parallel way.
+The `PMPIO` interface provides almost all of the functionality necessary to use Silo in the MIF paradigm.
 The application is required to implement a few callback functions.
 The `PMPIO` interface is described at the end of this section.
 

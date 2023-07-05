@@ -441,7 +441,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
   `DBOPT_HI_OFFSET`|int *|Array of length `ndims` which defines zero-origin offsets from the last node for the ending index along each dimension. |{0,0,...}
@@ -550,7 +550,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `mixvars` | Array of length `nvars` containing pointers to arrays defining the mixed-data values associated with each subvariable. If no mixed values are present, this should be `NULL`.
   `mixlen` | Length of mixed data arrays, if provided.
   `datatype` | Datatype of the variable. One of the predefined Silo data types.
-  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types:`DB_NODECENT`,`DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
+  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types:`DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
 
 * **Returned value:**
@@ -607,7 +607,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_FACETYPE`|`int`|Zone face type. One of the predefined types: `DB_RECTILINEAR` or `DB_CURVILINEAR`|`DB_RECTILINEAR`
   `DBOPT_LABEL`|`char*`|Character string defining the label associated with this variable| `NULL`
@@ -660,7 +660,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `mixvar` | Array defining the mixed-data values associated with this variable. If no mixed values are present, this should be `NULL`.
   `mixlen` | Length of mixed data arrays, if provided.
   `datatype` | Datatype of sub-variables. One of the predefined Silo data types.
-  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types:`DB_NODECENT`,`DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
+  `centering` | Centering of the subvariables on the associated mesh. One of the predefined types:`DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`. Note that `DB_EDGECENT` `centering` on a 1D mesh is treated identically to `DB_ZONECENT` `centering`. Likewise for `DB_FACECENT` `centering` on a 2D mesh.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. Typically, this argument is `NULL`.
 
 * **Returned value:**
@@ -832,7 +832,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
   `DBOPT_NODENUM`|`void*`|An array of length `nnodes` giving a global node number for each node in the mesh. By default, this array is treated as type int|`NULL`
   `DBOPT_LLONGNZNUM`|`int`|Indicates that the array passed for `DBOPT_NODENUM` option is of long long type instead of int.|0
   `DBOPT_CYCLE`|`int`|Problem cycle value|0
@@ -1300,7 +1300,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `mixvars` | Array of length `nvars` containing pointers to arrays defining the mixed-data values associated with each subvariable. If no mixed values are present, this should be `NULL`.
   `mixlen` | Length of mixed data arrays (i.e., mixvars).
   `datatype` | Datatype of sub-variables. One of the predefined Silo data types.
-  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types:`DB_NODECENT`,`DB_EDGECENT`,`DB_FACECENT`, `DB_ZONECENT` or `DB_BLOCKCENT`. See below for a discussion of `centering` issues.
+  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types:`DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT`, `DB_ZONECENT` or `DB_BLOCKCENT`. See below for a discussion of `centering` issues.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
 * **Returned value:**
@@ -1348,7 +1348,7 @@ Finally, Silo also supports the specification of expressions representing derive
 
   Option Name|Value Data Type|Option Meaning|Default Value
   :---|:---|:---|:---
-  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`,`DB_CYLINDRICAL`,`DB_SPHERICAL`,`DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
+  `DBOPT_COORDSYS`|`int`|Coordinate system. One of:`DB_CARTESIAN`, `DB_CYLINDRICAL`, `DB_SPHERICAL`, `DB_NUMERICAL`, or `DB_OTHER`|`DB_OTHER`
   `DBOPT_CYCLE`|`int`|Problem cycle value.|0
   `DBOPT_LABEL`|`char*`|Character strings defining the label associated with this variable| `NULL`
   `DBOPT_ORIGIN`|`int`|Origin for arrays. Zero or one.|0
@@ -1398,7 +1398,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `mixvar` | Array of length `mixlen` containing the mixed-data values associated with this variable. If `mixlen` is zero, this value is ignored.
   `mixlen` | Length of `mixvar` array. If zero, no mixed data is present.
   `datatype` | Datatype of variable. One of the predefined Silo data types.
-  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types:`DB_NODECENT`,`DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`.
+  `centering` | Centering of the sub-variables on the associated mesh. One of the predefined types:`DB_NODECENT`, `DB_EDGECENT`, `DB_FACECENT` or `DB_ZONECENT`.
   `optlist` | Pointer to an option list structure containing additional information to be included in the variable object written into the Silo file. See the table below for the valid options for this function. If no options are to be provided, use `NULL` for this argument.
 
 * **Returned value:**
@@ -1648,7 +1648,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `dbfile` | Database file pointer
   `name` | Name to associate with the `DBcsgzonelist` object
   `nregs` | The number of regions in the regionlist.
-  `typeflags` | Integer array of length `nregs` of type information for each region. Each entry in this array is one of either`DB_INNER`,`DB_OUTER`,`DB_ON`,`DB_XFORM`,`DB_SWEEP`,`DB_UNION`,`DB_INTERSECT`, and `DB_DIFF`.<br><br>The symbols,`DB_INNER`,`DB_OUTER`,`DB_ON`,`DB_XFORM` and `DB_SWEEP` represent unary operators applied to the referenced region (or boundary). The symbols `DB_UNION`,`DB_INTERSECT`, and `DB_DIFF` represent binary operators applied to two referenced regions.<br><br>For the unary operators, `DB_INNER` forms a region from a boundary (See [`DBPutCsgmesh`](#dbputcsgmesh)) by replacing the '=' in the equation representing the boundary with '<'. Likewise, `DB_OUTER` forms a region from a boundary by replacing the '=' in the equation representing the boundary with '>'. Finally, `DB_ON` forms a region (of topological dimension one less than the mesh) by leaving the '=' in the equation representing the boundary as an '='. In the case of`DB_INNER`, `DB_OUTER` and `DB_ON`, the corresponding entry in the `leftids` array is a reference to a boundary in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)).<br><br>For the unary operator,`DB_XFORM`, the corresponding entry in the `leftids` array is a reference to a region to be transformed while the corresponding entry in the `rightids` array is the index into the xform array of the row-by-row coefficients of the affine transform. The unary operator `DB_SWEEP` is not yet implemented.
+  `typeflags` | Integer array of length `nregs` of type information for each region. Each entry in this array is one of either `DB_INNER`, `DB_OUTER`, `DB_ON`, `DB_XFORM`, `DB_SWEEP`, `DB_UNION`, `DB_INTERSECT`, and `DB_DIFF`.<br><br>The symbols,`DB_INNER`, `DB_OUTER`, `DB_ON`, `DB_XFORM` and `DB_SWEEP` represent unary operators applied to the referenced region (or boundary). The symbols `DB_UNION`, `DB_INTERSECT`, and `DB_DIFF` represent binary operators applied to two referenced regions.<br><br>For the unary operators, `DB_INNER` forms a region from a boundary (See [`DBPutCsgmesh`](#dbputcsgmesh)) by replacing the '=' in the equation representing the boundary with '<'. Likewise, `DB_OUTER` forms a region from a boundary by replacing the '=' in the equation representing the boundary with '>'. Finally, `DB_ON` forms a region (of topological dimension one less than the mesh) by leaving the '=' in the equation representing the boundary as an '='. In the case of`DB_INNER`, `DB_OUTER` and `DB_ON`, the corresponding entry in the `leftids` array is a reference to a boundary in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)).<br><br>For the unary operator,`DB_XFORM`, the corresponding entry in the `leftids` array is a reference to a region to be transformed while the corresponding entry in the `rightids` array is the index into the xform array of the row-by-row coefficients of the affine transform. The unary operator `DB_SWEEP` is not yet implemented.
   `leftids` | Integer array of length `nregs` of references to other regions in the regionlist or boundaries in the boundary list (See [`DBPutCsgmesh`](#dbputcsgmesh)). Each referenced region in the `leftids` array forms the left operand of a binary expression (or single operand of a unary expression) involving the referenced region or boundary.
   `rightids` | Integer array of length `nregs` of references to other regions in the regionlist. Each referenced region in the `rightids` array forms the right operand of a binary expression involving the region or, for regions which are copies of other regions with a transformation applied, the starting index into the `xforms` array of the row-by-row, affine transform coefficients. If for a given region no right reference is appropriate, put a value of '-1' into this array for the given region.
   `xforms` | Array of length `lxforms` of row-by-row affine transform coefficients for those regions that are copies of other regions except with a transformation applied. In this case, the entry in the `leftids` array indicates the region being copied and transformed and the entry in the `rightids` array is the starting index into this `xforms` array for the transform coefficients. This argument may be `NULL`.
@@ -1837,7 +1837,7 @@ Finally, Silo also supports the specification of expressions representing derive
   `varnames` | Array of length `nvars` containing the names of the subvariables
   `vars` | Array of pointers to variable data
   `nvals` | Number of values in each of the `vars` arrays
-  `datatype` | The type of data in the `vars` arrays (e.g.`DB_FLOAT`,`DB_DOUBLE`)
+  `datatype` | The type of data in the `vars` arrays (e.g.`DB_FLOAT`, `DB_DOUBLE`)
   `centering` | The `centering` of the CSG variable `DB_ZONECENT` or`DB_BNDCENT`)
   `optlist` | Pointer to an option list structure containing additional information to be included in this object when it is written to the Silo file. Use `NULL` if there are no options
 
