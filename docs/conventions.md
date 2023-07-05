@@ -10,17 +10,9 @@ These cases are documented and the user is encouraged to use the formal Silo app
 
 Since everything documented in this section of the Silo `API` is a convention on the use of Silo, where one would ordinarily see a function call prototype, instead example call(s) to the Silo that implement the convention are described.
 
-### Methods and symbols in this section
-
-&nbsp;|&nbsp;|&nbsp;
-:---|:---|:---
-[`AlphabetizeVariables`](#alphabetizevariables)|[`ConnectivityIsTimeVarying`](#connectivityistimevarying)|[`MultivarToMultimeshMap_meshes`](#multivartomultimeshmap_meshes)
-[`MultivarToMultimeshMap_vars`](#multivartomultimeshmap_vars)|[`_visit_defvars`](#_visit_defvars)|[`_visit_domain_groups`](#_visit_domain_groups)
-[`_visit_searchpath`](#_visit_searchpath)|
-
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-### `_visit_defvars()`
+### `_visit_defvars`
 
 * **Summary:** convention for derived variable definitions
 
@@ -55,7 +47,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-### `_visit_searchpath()`
+### `_visit_searchpath`
 
 * **Summary:** directory order to search when opening a Silo file
 
@@ -80,7 +72,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-### `_visit_domain_groups()`
+### `_visit_domain_groups`
 
 * **Summary:** method for grouping blocks in a multi-block mesh
 
@@ -106,7 +98,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-### `AlphabetizeVariables()`
+### `AlphabetizeVariables`
 
 * **Summary:** flag to tell post-processor to alphabetize variable lists
 
@@ -127,7 +119,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-### `ConnectivityIsTimeVarying()`
+### `ConnectivityIsTimeVarying`
 
 * **Summary:** flag telling post-processor if connectivity of meshes in the Silo file is time varying or not
 
@@ -148,7 +140,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-### `MultivarToMultimeshMap_vars()`
+### `MultivarToMultimeshMap_vars`
 
 * **Summary:** list of multivars to be associated with multimeshes
 
@@ -176,7 +168,7 @@ Since everything documented in this section of the Silo `API` is a convention on
 
 ---
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-### `MultivarToMultimeshMap_meshes()`
+### `MultivarToMultimeshMap_meshes`
 
 * **Summary:** list of multimeshes to be associated with multivars
 
